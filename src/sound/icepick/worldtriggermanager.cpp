@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/instancerecord.h"
 #include "vtable.h"
 #include "intersect/bxnash.h"
 #include "sound/ssxaudio.h"
@@ -155,7 +156,7 @@ extern "C" int cWorldTriggerManager_SwapTriggerPlaying(sWorldTrigger70** self, i
 extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* self, unsigned int i);
 extern "C" int cWorldTriggerManager_ObjectHit(cWorldTriggerManager* self, int id);
 extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(cWorldTriggerManager* self, unsigned int i);
-extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* self, void* src, void* state);
+extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* self, void* src, cWorldTriggerInstance* state);
 extern unsigned char D_004A35A8[];
 
 struct sSnd4C38Ch {
@@ -345,7 +346,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
             if (rec[0] == 3 && swapResult != 1)
                 return;
             if (cWorldTriggerManager_SyncToAnimationTrigger(gWorldTriggerManager, instance->fC) != 0) {
-                if (cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, ((sWorldTrigger70*)tt)) == 0) {
+                if (cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, (cWorldTriggerInstance*)(((sWorldTrigger70*)tt))) == 0) {
                     instance->f30 = -9999;
                     return;
                 }
@@ -364,7 +365,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
         cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
         return;
     }
-    if (cWorldTriggerManager_SyncToAnimationTrigger(gWorldTriggerManager, instance->fC) != 0 && cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, ((sWorldTrigger70*)tt)) != 0) {
+    if (cWorldTriggerManager_SyncToAnimationTrigger(gWorldTriggerManager, instance->fC) != 0 && cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, (cWorldTriggerInstance*)(((sWorldTrigger70*)tt))) != 0) {
         if (instance->f30 != -9999)
             cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, instance->f30, 1, 0.1f);
         sfxBegin_4C38((struct sSnd4C38Sys*)cAudioInterface_bxAudio(), instance->f60, instance->f64);
@@ -1461,19 +1462,19 @@ struct sWtmVEntryF {
  * @param state  the world trigger instance holding the last frame
  * @return 1 on the first frame, else 0
  */
-extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* self, void* src, void* state)
+extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* self, void* src, cWorldTriggerInstance* state)
 {
     void* obj = *(void**)((char*)src + 0xC);
     if (obj == 0) {
         return 0;
     }
-    float prev = *(float*)((char*)state + 0x68);
+    float prev = state->m_iLastAnimFrame;
     sWtmVEntryF* vt = *(sWtmVEntryF**)((char*)obj + 0xC);
     float cur = vt[30].fn(vthis(obj, vt[30]));
     int below = cur < prev;
-    int triggered = *(int*)((char*)state + 0x6C) != 0 && !below;
-    *(float*)((char*)state + 0x68) = cur;
-    *(int*)((char*)state + 0x6C) = below;
+    int triggered = state->m_bLastAnimFrameDecrease != 0 && !below;
+    state->m_iLastAnimFrame = cur;
+    state->m_bLastAnimFrameDecrease = below;
     return triggered;
 }
 #endif
@@ -1747,13 +1748,13 @@ extern "C" void cWorldSound_CalcInstAudioBoundingBox(cWorldSound* self, sWtmEnt1
             break;
         }
     }
-    char* obj = *(char**)((char*)entry + 0xC);
-    lo->x += *(float*)(obj + 0x40);
-    lo->y += *(float*)(obj + 0x44);
-    lo->z += *(float*)(obj + 0x48);
-    hi->x += *(float*)(obj + 0x40);
-    hi->y += *(float*)(obj + 0x44);
-    hi->z += *(float*)(obj + 0x48);
+    tInstanceRecord* obj = (tInstanceRecord*)(*(char**)((char*)entry + 0xC));
+    lo->x += obj->m_fmTransform.m[3][0];
+    lo->y += obj->m_fmTransform.m[3][1];
+    lo->z += obj->m_fmTransform.m[3][2];
+    hi->x += obj->m_fmTransform.m[3][0];
+    hi->y += obj->m_fmTransform.m[3][1];
+    hi->z += obj->m_fmTransform.m[3][2];
 }
 #endif
 

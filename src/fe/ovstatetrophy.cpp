@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gamemode.h"
+#include "ui/uiscrollbar.h"
+#include "ui/uitextscroll.h"
+#include "fe/ovstate.h"
 #include "render/2drender.h"
 #include "ai/rider.h"
 #include "fe/hudradar.h"
@@ -791,7 +795,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
     if (*(int*)(course + 8) != 0) {
         int show = 1;
         if ((D_005308D0[0] >> 9) & 1) {
-            if (*(int*)((char*)SSXApp->GameModeMan + 0x88) != 0)
+            if (SSXApp->GameModeMan->bIsTimedEvent != 0)
                 show = 0;
         }
         for (int i = 0; i < *(int*)(course + 8); i++) {
@@ -1223,7 +1227,7 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
     if (*(int*)(course + 8) != 0) {
         int show = 1;
         if ((D_005308D0[0] >> 9) & 1) {
-            if (*(int*)((char*)SSXApp->GameModeMan + 0x88) != 0)
+            if (SSXApp->GameModeMan->bIsTimedEvent != 0)
                 show = 0;
         }
         for (int i = 0; i < *(int*)(course + 8); i++) {
@@ -1639,31 +1643,31 @@ extern sRect_210940 D_004C8D08;
  * slot 11, mSelectedColour D_004C8D08 and the scroll bar as mpScrollBar. Ends with cOVState_onCreateScreen; returns
  * early when the screen cannot be added. "AgreementSlider" is used without a null check.
  */
-extern "C" void func_00210940(void* self)
+extern "C" void func_00210940(cOVState* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_282ReadPrivateMessage_b), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen == 0)
         return;
     cUIScreen_playFrame(screen, 0, 0);
-    cUIObj_210940* fromText = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextFromX_b));
+    cUIObj_210940* fromText = (cUIObj_210940*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextFromX_b));
     if (fromText != 0)
     {
         fromText->setVisible(1);
         cBE_getInterface_Fv(SSXApp->BE, 7);
         cUIText_setAsciiString((cUIText*)fromText, cBENetworkInterface_networkOpt.unk_498);
     }
-    char* scrollBar = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_AgreementSlider_b));
-    *(int*)(scrollBar + 0x14) |= 1;
-    void* upArrow = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatUpArrow_b));
-    void* downArrow = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatDownArrow_b));
-    void* sliderOutline = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_slideroutline2_b));
-    *(void**)(scrollBar + 0x7C) = upArrow;
-    *(void**)(scrollBar + 0x80) = downArrow;
-    *(void**)(scrollBar + 0x84) = sliderOutline;
-    *(int*)(scrollBar + 0x88) = 2;
-    cUIObj_210940* chatScroll = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
+    cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider_b));
+    scrollBar->mAttr |= 1;
+    void* upArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow_b));
+    void* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow_b));
+    void* sliderOutline = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2_b));
+    scrollBar->mpUpArrow = (cUIThing*)upArrow;
+    scrollBar->mpDownArrow = (cUIThing*)downArrow;
+    scrollBar->mpHideOnEmpty = (cUIThing*)sliderOutline;
+    scrollBar->meHideState = 2;
+    cUIObj_210940* chatScroll = (cUIObj_210940*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
     if (chatScroll != 0)
     {
         *(int*)((char*)chatScroll + 0x74) |= 1;
@@ -1672,7 +1676,7 @@ extern "C" void func_00210940(void* self)
         *(int*)((char*)chatScroll + 0x14) |= 0x80;
         chatScroll->setColor(sColor_210940(1.0f, 0.0f, 0.0f, 0.0f));
         *(sRect_210940*)((char*)chatScroll + 0xA8) = D_004C8D08;
-        *(char**)((char*)chatScroll + 0xB8) = scrollBar;
+        *(char**)((char*)chatScroll + 0xB8) = ((char*)scrollBar);
     }
     cOVState_onCreateScreen(self);
 }
@@ -1747,13 +1751,13 @@ struct sBXString_00210BD8 {
  */
 extern "C" void func_00210BD8(void* self, char* name, int ownMessage)
 {
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
-    if (obj == 0) {
+    cUITextScroll* obj = (cUITextScroll*)((char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b)));
+    if (((char*)obj) == 0) {
         return;
     }
-    unsigned short lineCount = *(unsigned short*)(obj + 0xC8);
-    unsigned short selectedIndex = *(unsigned short*)(obj + 0xC4);
-    unsigned short linesOffset = *(unsigned short*)(obj + 0xC6);
+    unsigned short lineCount = obj->mLineSize;
+    unsigned short selectedIndex = obj->mSelectedIndex;
+    unsigned short linesOffset = obj->mLinesOffset;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (ownMessage != 0) {
         sBXString_00210BD8 lineText;
@@ -1791,18 +1795,18 @@ extern "C" void func_00210BD8(void* self, char* name, int a);
  * mPendingDelete. While the screen exists it then reads an incoming chat packet into +0x9C (cGameComm_getQueuedChat, up to 65
  * bytes) and appends it as the opponent's line (func_00210BD8).
  */
-extern "C" void func_00210D20(void* self)
+extern "C" void func_00210D20(cOVState* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            cUIStateStack_popToState(*(char**)((char*)self + 0x10) + 0x18);
-            *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
+            cUIStateStack_popToState((char*)self->mpEngine + 0x18);
+            self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
         }
     }
-    if (*(int*)((char*)self + 0x40) != 0) {
+    if ((int)self->mpScreen != 0) {
         char* name = (char*)self + 0x9C;
         if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
@@ -1854,16 +1858,16 @@ extern "C" int strlen(const char* s);
  * @param item  the widget (not read)
  * @param key  the event id
  */
-extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
+extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
 {
-    if (*(int*)((char*)self + 0x40) == 0) {
+    if ((int)self->mpScreen == 0) {
         return;
     }
     switch (key) {
     case 6:
         if (*(int*)((char*)self + 0xE0) == 0) {
-            cUIStateStack_pop_r(*(char**)((char*)self + 0x10) + 0x18, 1);
-            *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
+            cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+            self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
         }
         break;
     case 5:
@@ -1895,7 +1899,7 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210F40);
 #ifdef SKIP_ASM
-extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_00210FA0(cOVState* self, int a1, int a2, int a3, int a4);
 extern "C" void cKeyboardPopup_setStatic2(void* p, int a);
 extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
@@ -1914,7 +1918,7 @@ extern "C" void cKeyboardPopup_setInputText(void* p, int a);
  */
 extern "C" void func_00210F40(void* self, int textObj, int staticText, int inputText, int password, int miscData, int maxChars)
 {
-    func_00210FA0(self, textObj, password, miscData, maxChars);
+    func_00210FA0((cOVState*)self, textObj, password, miscData, maxChars);
     cKeyboardPopup_setStatic2(*(void**)((char*)self + 0xE0), staticText);
     cKeyboardPopup_setInputText(*(void**)((char*)self + 0xE0), inputText);
 }
@@ -1945,11 +1949,11 @@ extern char str_cKeyboardPopup_b[];
  * @param miscData  the popup's miMiscData
  * @param maxChars  the text length limit
  */
-extern "C" void func_00210FA0(void* self, int textObj, int password, int miscData, int maxChars)
+extern "C" void func_00210FA0(cOVState* self, int textObj, int password, int miscData, int maxChars)
 {
-    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0), *(void**)((char*)self + 0x10), self, password, 0xF);
+    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0), self->mpEngine, self, password, 0xF);
     *(void**)((char*)self + 0xE0) = w;
-    cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, w);
+    cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, w);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = miscData;
     cKeyboardPopup_setMaxCharacters(*(void**)((char*)self + 0xE0), maxChars);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x43C) = 0;

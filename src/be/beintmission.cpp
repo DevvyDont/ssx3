@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beprofilelib.h"
 #include "vtable.h"
 #include "be/beintmission.h"
 #include "replay/frameptr.h"

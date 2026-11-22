@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
 #include "util/locale.h"
 #include "ui/uithing.h"
 #include "fe/debuglobbymenus.h"
@@ -76,7 +77,7 @@ extern "C" void cFEStateNetHelpPopup_onUpdate(cFEStateNetHelpPopup* self)
         }
     }
     if (found == 0) {
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     }
 }
 #endif
@@ -355,7 +356,7 @@ extern "C" void cUIStateStack_pop(void*, int);
 extern "C" void cFEStateNetHelpPopup_onWidgetEvent(cFEStateNetHelpPopup* self, int pWidget, int msg)
 {
     if (msg == 6) {
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     }
 }
 #endif

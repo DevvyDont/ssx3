@@ -207,8 +207,8 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         return;
     switch (event) {
     case 5: {
-        char* factory = *(char**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(factory + 4);
+        cUICustomInterface* factory = (cUICustomInterface*)(*(char**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)factory->mVtbl;
         void* nextState = vt[4].fn(vthis(factory, vt[4]), self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -216,8 +216,8 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         break;
     }
     case 6: {
-        char* factory = *(char**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(factory + 4);
+        cUICustomInterface* factory = (cUICustomInterface*)(*(char**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)factory->mVtbl;
         void* nextState = vt[5].fn(vthis(factory, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -353,10 +353,10 @@ static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angl
  */
 extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
 {
-    char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self_->mUserNum);
+    cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self_->mUserNum);
     int ok = 0;
-    if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
-        ok = *(int*)(rider + 0xCB4) != 0;
+    if (*(unsigned int*)rider < 10 && rider->mDoneLoadingTextures != 0) {
+        ok = rider->mCompiledModel != 0;
     }
     if (ok && self_->mbDraw3D != 0) {
         sQuat_182EC0 pos;
@@ -388,12 +388,12 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
         }
         cFERider_setBoardPose(rider, &xf);
         if (self_->mbIsFirst != 0) {
-            void* anim = *(void**)(rider + 0xC);
+            void* anim = rider->mpRiderAnim;
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 435, 0, -1.0f);
             }
-            *(int*)(rider + 0xCCC) = 0;
+            rider->mAnimateBoard = 0;
             self_->mbIsFirst = 0;
             cFERider_speak(rider);
         }

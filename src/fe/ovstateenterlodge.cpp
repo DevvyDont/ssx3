@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "wscript/wscriptman.h"
 #include "main/game.h"
 #include "sound/ssxaudio.h"
 #include "ui/uistate.h"

@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/bxps2tex.h"
+#include "visualfx/transitionman.h"
+#include "world/instancerecord.h"
 #include "render/2drender.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
@@ -214,10 +217,10 @@ struct sGfxVEntry95 {
  * @param texMat  passed through to slot 95 (texture matrix)
  * @param renderFlags  passed through to slot 95 (render flags)
  */
-extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, void* obj, int animMats, int texMat, int renderFlags)
+extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, tInstanceRecord* obj, int animMats, int texMat, int renderFlags)
 {
     sGfxVEntry95* vt = (sGfxVEntry95*)self->mVtbl;
-    vt[95].fn(vthis(self, vt[95]), obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, animMats, texMat, renderFlags, 1.0f);
+    vt[95].fn(vthis(self, vt[95]), obj, (int)obj->m_MaterialBlock, (char*)&obj->m_fmTransform, animMats, texMat, renderFlags, 1.0f);
 }
 #endif
 
@@ -470,11 +473,12 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_CreateScreenGrabTexture__FPvT0);
  * @param screenGrabHandle  the handle to reset (On Tour screenGrabHandle)
  * @return -1
  */
-int cGraphicsMan_CreateScreenGrabTexture(void* self, void* screenGrabHandle)
+int cGraphicsMan_CreateScreenGrabTexture(void* self, void* vscreenGrabHandle)
 {
+    tScreenGrabHandle* screenGrabHandle = (tScreenGrabHandle*)vscreenGrabHandle;
     int invalidId = -1;
     *(int*)screenGrabHandle = 0;
-    *(int*)((char*)screenGrabHandle + 0x4) = invalidId;
+    screenGrabHandle->mTextureId = invalidId;
     return invalidId;
 }
 #endif
@@ -846,7 +850,7 @@ extern "C" void func_0036AC00(cPS2GraphicsMan* self, int idx, void* pkt2, int* h
     func_0036A428(((char*)self), mat, idx);
     void* dma = D_004A4474;
     char* pkt = func_0038F460(dma, *handle, -1, 0);
-    int slot = func_00366CE0((char*)self->mpTextureMan + 0x1F60, 0x400, 0x7FFFFFFF, 0, 0, 1);
+    int slot = func_00366CE0(self->mpTextureMan->mMainHeap, 0x400, 0x7FFFFFFF, 0, 0, 1);
     int* rec = (int*)(*(char**)((char*)self->mpTextureMan + 0x3F50) + slot * 0x1C);
     // PORT: the packet builder takes the matrix block's address as an int.
     func_0036AA60(((char*)self), (int)mat, *rec >> 8, &pkt);
@@ -861,7 +865,7 @@ extern "C" void func_0036AC00(cPS2GraphicsMan* self, int idx, void* pkt2, int* h
     pkt = func_0038F460(dma, *handle, -1, 0);
     func_0036B158(((char*)self), idx, *rec >> 8, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
-    func_003663D8((char*)self->mpTextureMan + 0x1F60, slot);
+    func_003663D8(self->mpTextureMan->mMainHeap, slot);
     func_00368138((char*)self->mpTextureMan, pkt2);
 }
 #endif
@@ -876,9 +880,10 @@ struct sGmVE_AE20 {
     unsigned int (*fn)(void*);
 };
 
-static inline unsigned int gmCall_AE20(char* self, int slot)
+static inline unsigned int gmCall_AE20(char* vself, int slot)
 {
-    sGmVE_AE20* vt = *(sGmVE_AE20**)(self + 0x10D8);
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    sGmVE_AE20* vt = (sGmVE_AE20*)self->mVtbl;
     return vt[slot].fn(vthis(self, vt[slot]));
 }
 
@@ -2606,33 +2611,33 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
  * @param boundBox  receives the emitter's bounding box
  * @param seed  the random seed; negative picks a random one
  */
-extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* transform, void* particleData, tBoundBox* boundBox, float seed)
+extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* transform, tParticleData* particleData, tBoundBox* boundBox, float seed)
 {
-    tParticleEmitter_setSize(self, *(float*)((char*)particleData + 0x10), *(float*)((char*)particleData + 0xCC), *(float*)((char*)particleData + 0x18));
-    float halfSpread = *(float*)((char*)particleData + 0x1C) * 0.5f;
-    tParticleEmitter_setLife(self, *(float*)((char*)particleData + 0x14) - halfSpread, *(float*)((char*)particleData + 0x14) + halfSpread);
+    tParticleEmitter_setSize(self, particleData->Size, particleData->SizeFinal, particleData->SizeR);
+    float halfSpread = particleData->LifeR * 0.5f;
+    tParticleEmitter_setLife(self, particleData->Life - halfSpread, particleData->Life + halfSpread);
     if (seed < 0.0f) {
         tParticleEmitter_randomize(self);
     } else {
         self->SeedX0 = seed;
     }
     tParticleEmitter_stopMotion(self);
-    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x24), *(float*)((char*)particleData + 0x28), *(float*)((char*)particleData + 0x2C), 1.0f));
-    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x30), *(float*)((char*)particleData + 0x34), *(float*)((char*)particleData + 0x38), 0.0f));
-    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x3C), *(float*)((char*)particleData + 0x40), *(float*)((char*)particleData + 0x44), 0.0f));
+    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058(transform, sGmV4_0058(particleData->OffX, particleData->OffY, particleData->OffZ, 1.0f));
+    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R0X, particleData->R0Y, particleData->R0Z, 0.0f));
+    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R1X, particleData->R1Y, particleData->R1Z, 0.0f));
     vu0SubInGM_0058(*(sGmV4_0058*)&self->X0, vu0Scale_0058(vu0Add_0058(*(sGmV4_0058*)&self->Xr0, *(sGmV4_0058*)&self->Xr1), 1.5f));
-    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x48), *(float*)((char*)particleData + 0x4C), *(float*)((char*)particleData + 0x50), 0.0f)), *(float*)((char*)particleData + 0xC));
-    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x54), *(float*)((char*)particleData + 0x58), *(float*)((char*)particleData + 0x5C), 0.0f)), *(float*)((char*)particleData + 0xC));
-    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x60), *(float*)((char*)particleData + 0x64), *(float*)((char*)particleData + 0x68), 0.0f)), *(float*)((char*)particleData + 0xC));
-    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x6C), *(float*)((char*)particleData + 0x70), *(float*)((char*)particleData + 0x74), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->VelX, particleData->VelY, particleData->VelZ, 0.0f)), particleData->Damp);
+    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R0VX, particleData->R0VY, particleData->R0VZ, 0.0f)), particleData->Damp);
+    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R1VX, particleData->R1VY, particleData->R1VZ, 0.0f)), particleData->Damp);
+    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(particleData->R2VX, particleData->R2VY, particleData->R2VZ, 0.0f)), particleData->Damp);
     vu0SubInGM_0058(*(sGmV4_0058*)&self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)&self->Vr0, *(sGmV4_0058*)&self->Vr1), *(sGmV4_0058*)&self->Vr2), 1.5f));
     tParticleEmitter_setColour_0058(self,
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0x88), *(float*)((char*)particleData + 0x8C), *(float*)((char*)particleData + 0x90), *(float*)((char*)particleData + 0x84)), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0x98), *(float*)((char*)particleData + 0x9C), *(float*)((char*)particleData + 0xA0), *(float*)((char*)particleData + 0x94)), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0xA8), *(float*)((char*)particleData + 0xAC), *(float*)((char*)particleData + 0xB0), *(float*)((char*)particleData + 0xA4)), 128.0f),
-                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0xB8), *(float*)((char*)particleData + 0xBC), *(float*)((char*)particleData + 0xC0), *(float*)((char*)particleData + 0xB4)), 128.0f),
-                       *(float*)((char*)particleData + 0x14) + *(float*)((char*)particleData + 0x1C) * 0.5f);
-    tParticleEmitter_setTime(self, *(float*)((char*)particleData + 0x8) < 0.0f ? *(float*)((char*)particleData + 0x14) + *(float*)((char*)particleData + 0x1C) * 0.5f : 0.0f);
+                       vu0Scale_0058(sGmV4_0058(particleData->StartColR, particleData->StartColG, particleData->StartColB, particleData->StartColA), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(particleData->EndColR, particleData->EndColG, particleData->EndColB, particleData->EndColA), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(particleData->R0R, particleData->R0G, particleData->R0B, particleData->R0A), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(particleData->R1R, particleData->R1G, particleData->R1B, particleData->R1A), 128.0f),
+                       particleData->Life + particleData->LifeR * 0.5f);
+    tParticleEmitter_setTime(self, particleData->Duration < 0.0f ? particleData->Life + particleData->LifeR * 0.5f : 0.0f);
     tParticleEmitter_calcBoundBox(self, boundBox);
 }
 #endif
@@ -2640,7 +2645,7 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_setupEmitter);
 #ifdef SKIP_ASM
-extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, t4Matrix* a1, void* desc, tBoundBox* out, float f);
+extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, t4Matrix* a1, tParticleData* desc, tBoundBox* out, float f);
 
 /**
  * Sets a static emitter up from particle data (On Tour setupEmitter(const t4Matrix& transform, const tParticleData*
@@ -2654,27 +2659,27 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, t4Matrix* a
  * @param transform  the emitter's world transform
  * @param particleData  the tParticleData to read
  */
-extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, t4Matrix* transform, char* particleData)
+extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, t4Matrix* transform, tParticleData* particleData)
 {
-    self->mNumFlipTextures = *(int*)(particleData + 0xD0);
-    self->mFlipTextureRate = *(float*)(particleData + 0xD4);
-    self->TextureId = *(int*)(particleData + 0xC4);
-    self->BlendMode = *(int*)(particleData + 0xC8);
-    float dataDuration = *(float*)(particleData + 0x8);
+    self->mNumFlipTextures = particleData->NumFlipTextures;
+    self->mFlipTextureRate = particleData->FlipTextureRate;
+    self->TextureId = particleData->TextureId;
+    self->BlendMode = particleData->BlendMode;
+    float dataDuration = particleData->Duration;
     float totalDuration;
     if (dataDuration < 0.0f) {
         totalDuration = dataDuration;
     } else {
-        totalDuration = dataDuration + *(float*)(particleData + 0x14) + *(float*)(particleData + 0x1C) * 0.5f;
+        totalDuration = dataDuration + particleData->Life + particleData->LifeR * 0.5f;
     }
     self->Duration = totalDuration;
-    float x = *(float*)(particleData + 0x8) >= 0.0f ? *(float*)(particleData + 0x8) : *(float*)(particleData + 0x14) + *(float*)(particleData + 0x1C) * 0.5f;
+    float x = particleData->Duration >= 0.0f ? particleData->Duration : particleData->Life + particleData->LifeR * 0.5f;
     sGfxVec4 force;
-    force.x = *(float*)(particleData + 0x78);
-    force.y = *(float*)(particleData + 0x7C);
-    force.z = *(float*)(particleData + 0x80);
+    force.x = particleData->ForceX;
+    force.y = particleData->ForceY;
+    force.z = particleData->ForceZ;
     force.w = 0.0f;
-    tParticleEmitter_init((tParticleEmitter*)(&self->Emitter), *(int*)(particleData + 0x0), *(int*)(particleData + 0x4), x, *(float*)(particleData + 0x20), *(float*)(particleData + 0xC), &force);
+    tParticleEmitter_init((tParticleEmitter*)(&self->Emitter), particleData->NumParticles, particleData->NumBlur, x, particleData->BlurStep, particleData->Damp, &force);
     tParticleEmitter_setupEmitter((tParticleEmitter*)(&self->Emitter), transform, particleData, (tBoundBox*)(&self->BoundBox), -1.0f);
 }
 #endif

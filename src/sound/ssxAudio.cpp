@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "sound/bankmanager.h"
 #include "bx/math3d.h"
 #include "bx/appman.h"
 #include "sound/icepick/worldtriggermanager.h"
@@ -650,13 +651,13 @@ static inline float Atan2_5930(float y, float x)
  * @param outAngles  the sound driver's play options (SNDPLAYOPTS) to fill
  * @return the squared distance in square metres
  */
-extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, char* source, SNDPLAYOPTS* outAngles)
+extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, cBankMonitorInstance* source, SNDPLAYOPTS* outAngles)
 {
     if ((int)cAudioInterface_getApp()->Game == 0)
         return 1.0f;
     char* game = (char*)cAudioInterface_getGame();
-    char* obj = (*(sObjList_5930**)(game + 0x84))->items[*(int*)(source + 0x84)];
-    float* src = *(float**)(source + 0x68);
+    char* obj = (*(sObjList_5930**)(game + 0x84))->items[source->mViewport];
+    float* src = (float*)source->mPosition;
     sV3_5930 relPos;
     sV4_5930 tp = vu0MtxApply_5930(obj + 0x40, sV4_5930(src[0], src[1], src[2], 1.0f));
     float cy;
@@ -669,8 +670,8 @@ extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, char* source, SNDPLAYOPTS
         *(short*)&outAngles->azimuth = 0;
         outAngles->elevation = 0;
     } else {
-        if (*(int*)(source + 0xA0) != 0) {
-            if (*(int*)(source + 0xA4) != 0)
+        if (source->mTwoPlayerPan != 0) {
+            if (source->mTwoPlayerSide != 0)
                 *(short*)&outAngles->azimuth = 0x4000;
             else
                 outAngles->azimuth = 0xC000;
@@ -1412,17 +1413,17 @@ extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle
     unsigned int slot = handle >> 8;
     if ((unsigned int)self->mTrackBankLoadedSection[slot] != (handle & 0xFF)) return;
     if (slot == 0) {
-        char* mgr = *(char**)self->MusicSys.mpVStreamSys;
-        char* cfg = *(char**)(mgr + 0xACC);
-        char* bm = mgr + 0x1D8;
+        cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
+        char* cfg = (char*)mgr->mBank;
+        char* bm = (char*)&mgr->BankMonitor;
         int id = saIsOn(cfg, 0x300);
         if (id) id = *(int*)(cfg + 0x304); else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     } else {
         cSSXAudio_StopTone(self, 0.0f);
-        char* mgr = *(char**)self->MusicSys.mpVStreamSys;
-        char* cfg = *(char**)(mgr + 0xACC);
-        char* bm = mgr + 0x1D8;
+        cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
+        char* cfg = (char*)mgr->mBank;
+        char* bm = (char*)&mgr->BankMonitor;
         int id = saIsOn(cfg, 864);
         if (id) id = *(int*)(cfg + 0x364); else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);

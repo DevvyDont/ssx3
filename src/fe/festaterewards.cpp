@@ -479,41 +479,41 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         switch (self->type) {
         case 3:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_poster_icon);
-                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
             w->reward = -1;
             break;
         case 4:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_trading_card_icon);
-                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
             w->reward = -1;
             break;
         case 5:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_art_icon);
-                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
             w->reward = -1;
             break;
         case 6:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_video_icon);
-                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
             w->reward = -1;
             break;
         case 7:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_toys_icon);
-                w->tex = cUITextureBank_getElementByHashname(ui + 0x58, texHash);
+                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
             w->reward = -1;
             break;
@@ -2646,33 +2646,33 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         switch (self->type) {
         case 3:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_poster_icon);
-                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
             w->f78 = -1;
             break;
         case 4:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_trading_card_icon);
-                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
             w->f78 = -1;
             break;
         case 5:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_art_icon);
-                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
             w->f78 = -1;
             break;
         case 7:
             {
-                char* ui = self->ui;
+                cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_toys_icon);
-                w->f7C = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
+                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
             w->f78 = -1;
             break;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/bankmonitor.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "sound/bankmanager.h"
@@ -111,26 +112,26 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_ShareBank);
  * @param dst  the bank that shares
  * @param src  the bank whose memory is shared
  */
-extern "C" void cBankInstance_ShareBank(void *dst, void *src) {
+extern "C" void cBankInstance_ShareBank(void *dst, cBankInstance* src) {
     int flag;
 
-    if (*(void **)((char*)src + 0x18) != 0) {
-        *(void **)((char*)dst + 0x18) = src;
-        *(void **)((char*)dst + 0x1C) = *(void **)((char*)src + 0x1C);
-        *(void **)((char*)src + 0x1C) = dst;
+    if (src->mpNext != 0) {
+        *(void **)((char*)dst + 0x18) = ((void*)src);
+        *(void **)((char*)dst + 0x1C) = (void*)src->mpPrev;
+        src->mpPrev = (cBankInstance*)dst;
         *(void **)((char*)*(void **)((char*)dst + 0x1C) + 0x18) = dst;
     } else {
-        *(void **)((char*)src + 0x18) = dst;
-        *(void **)((char*)src + 0x1C) = dst;
-        *(void **)((char*)dst + 0x18) = src;
-        *(void **)((char*)dst + 0x1C) = src;
+        src->mpNext = (cBankInstance*)dst;
+        src->mpPrev = (cBankInstance*)dst;
+        *(void **)((char*)dst + 0x18) = ((void*)src);
+        *(void **)((char*)dst + 0x1C) = ((void*)src);
     }
-    flag = *(int *)((char*)src + 8);
+    flag = src->mAllocLocation;
     if (flag != 0) {
         *(int *)((char*)dst + 8) = flag;
-        *(int *)((char*)dst + 0x10) = *(int *)((char*)src + 0x10);
-        *(int *)((char*)dst + 0x14) = *(int *)((char*)src + 0x14);
-        *(int *)((char*)dst + 0xC) = *(int *)((char*)src + 0xC);
+        *(int *)((char*)dst + 0x10) = (int)src->mpMainMemData;
+        *(int *)((char*)dst + 0x14) = src->mMainMemDataSize;
+        *(int *)((char*)dst + 0xC) = src->mSoundMemHandle;
     }
 }
 #endif
@@ -660,7 +661,7 @@ extern "C" void cBankManager_BANK_DeallocMem(cBankManager* self, int i)
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_ShareBank);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_ShareBank(void* dst, void* src);
+extern "C" void cBankInstance_ShareBank(void* dst, cBankInstance* src);
 
 /**
  * Makes bank slot @p i share the memory of bank slot @p j: calls cBankInstance_ShareBank with those two 0x60-byte bank instances
@@ -2171,9 +2172,9 @@ struct sLocks_E548 {
  * @param ev  the cMonitorInstance (mData1 = event kind, mData2 = its argument)
  * @return 1
  */
-extern "C" int func_0028E548(cSSXAudio* self, char* ev)
+extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
 {
-    int st = *(int*)(ev + 0x1C);
+    int st = ev->mData1;
     if (st == 0) {
         char* mon = (char*)&self->SpeechSys;
         func_002B11B0(mon, 0);
@@ -2190,7 +2191,7 @@ extern "C" int func_0028E548(cSSXAudio* self, char* ev)
         }
     } else if (st == 1 || st == 2) {
         func_002B11B0(&self->SpeechSys, 0);
-        if (*(int*)(ev + 0x1C) == 2)
+        if (ev->mData1 == 2)
             func_002A26F0(self, 0, 1);
         else
             func_002A26F0(self, 1, 1);
@@ -2198,10 +2199,10 @@ extern "C" int func_0028E548(cSSXAudio* self, char* ev)
         if (func_002A42C8(self) == 0)
             self->unk_574C = 1;
     } else if (st == 3 || st == 5 || st == 4) {
-        if (*(int*)(ev + 0x20) != -1) {
-        if (*(int*)(ev + 0x1C) == 3 || *(int*)(ev + 0x1C) == 4) {
+        if (ev->mData2 != -1) {
+        if (ev->mData1 == 3 || ev->mData1 == 4) {
             func_002B11B0(&self->SpeechSys, 0);
-            if (*(int*)(ev + 0x1C) == 4)
+            if (ev->mData1 == 4)
                 func_002A26F0(self, 0, 0);
             else
                 func_002A26F0(self, 1, 0);
@@ -2220,7 +2221,7 @@ extern "C" int func_0028E548(cSSXAudio* self, char* ev)
             }
         }
         self->unk_5774 = 1;
-        self->unk_5778 = *(int*)(ev + 0x20);
+        self->unk_5778 = ev->mData2;
         }
     } else if (st == 7) {
         char* mon = (char*)&self->SpeechSys;

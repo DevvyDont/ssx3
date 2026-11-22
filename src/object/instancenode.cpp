@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/instancerecord.h"
 #include "vtable.h"
 #include "object/deadnode.h"
 #include "object/instancenode.h"
@@ -55,13 +56,13 @@ extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
     self->mVtbl = (void**)cInstanceNode_vtbl;
     cInstanceNode_clearActiveNode(self, (cInstanceNode*)self->Instance);
-    *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
+    self->Instance->m_iFlags &= 0xFFFF0300;
     {
-        char* instance = (char*)self->Instance;
-        int instFlags = *(int*)(instance + 8);
-        *(int*)(instance + 8) = instFlags | (instFlags >> 16);
+        tInstanceRecord* instance = self->Instance;
+        int instFlags = instance->m_iFlags;
+        instance->m_iFlags = instFlags | (instFlags >> 16);
     }
-    *(int*)((char*)self->Instance + 8) |= 2;
+    self->Instance->m_iFlags |= 2;
     cSortObjNode__cSortObjNode_dtor(self, flags);
 }
 #endif
@@ -174,13 +175,13 @@ extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
     if (runscript != 0) {
         if (cInstanceNode_runExpireScript(self) != 0) return;
     }
-    *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
+    self->Instance->m_iFlags &= 0xFFFF0300;
     {
-        char* instance = (char*)self->Instance;
-        int instFlags = *(int*)(instance + 8);
-        *(int*)(instance + 8) = instFlags | (instFlags >> 16);
+        tInstanceRecord* instance = self->Instance;
+        int instFlags = instance->m_iFlags;
+        instance->m_iFlags = instFlags | (instFlags >> 16);
     }
-    *(int*)((char*)self->Instance + 8) |= 2;
+    self->Instance->m_iFlags |= 2;
     if (((void*)self) != 0) {
         sInstNodeVEntryFD00* vt = (sInstNodeVEntryFD00*)self->mVtbl;
         vt[1].fn(vthis(self, vt[1]), 3);
@@ -205,11 +206,11 @@ struct sInstNodeVEntryFD90 {
  */
 extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
 {
-    int* flagsPtr = (int*)((char*)self->Instance + 0x8);
+    int* flagsPtr = (int*)(&self->Instance->m_iFlags);
     *flagsPtr &= 0xFFFF0000;
-    flagsPtr = (int*)((char*)self->Instance + 0x8);
+    flagsPtr = (int*)(&self->Instance->m_iFlags);
     *flagsPtr |= *flagsPtr >> 16;
-    flagsPtr = (int*)((char*)self->Instance + 0x8);
+    flagsPtr = (int*)(&self->Instance->m_iFlags);
     *flagsPtr |= 2;
     if (((void*)self) != 0) {
         sInstNodeVEntryFD90* vt = (sInstNodeVEntryFD90*)self->mVtbl;
@@ -604,9 +605,9 @@ static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent,
  */
 extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* parent, sInMat44_0288* out)
 {
-    char* instance = (char*)self->Instance;
-    sInSkel_0288* sk = *(sInSkel_0288**)(instance + 0x80);
-    float uniformScale = *(float*)(instance + 0x84);
+    tInstanceRecord* instance = self->Instance;
+    sInSkel_0288* sk = (sInSkel_0288*)instance->m_Model;
+    float uniformScale = instance->m_fScale;
     sInBone_0288* bone = sk->bones;
     sInVec4_0288 scale;
     scale.x = uniformScale;
@@ -689,16 +690,16 @@ static inline float IbSqrt(float v)
 extern "C" void cInstanceNode_getBoundBoxInfo(cInstanceNode* self, sIbVec4* box, float* radius)
 {
     sIbVec4 point;
-    point.x = *(float*)((char*)self->Instance + 0x60);
-    point.y = *(float*)((char*)self->Instance + 0x64);
-    point.z = *(float*)((char*)self->Instance + 0x68);
+    point.x = self->Instance->m_fvMin.m[0];
+    point.y = self->Instance->m_fvMin.m[1];
+    point.z = self->Instance->m_fvMin.m[2];
     point.w = 1.0f;
     box[0] = point;
-    point.x = *(float*)((char*)self->Instance + 0x6C);
-    point.y = *(float*)((char*)self->Instance + 0x70);
-    point.z = *(float*)((char*)self->Instance + 0x74);
+    point.x = self->Instance->m_fvMax.m[0];
+    point.y = self->Instance->m_fvMax.m[1];
+    point.z = self->Instance->m_fvMax.m[2];
     box[1] = point;
-    point = *(sIbVec4*)((char*)self->Instance + 0x40);
+    point = *(sIbVec4*)&self->Instance->m_fmTransform.m[3][0];
     sIbVec4* mx = &box[1];
     sIbVec4* ctr = &point;
     float best = 0.0f;
@@ -743,9 +744,9 @@ struct sInstNodeList {
  *
  * @return 1 if at least one mesh is animated, else 0
  */
-extern "C" int func_00350698(void* self)
+extern "C" int func_00350698(tInstanceRecord* self)
 {
-    sInstNodeList* list = *(sInstNodeList**)((char*)self + 0x80);
+    sInstNodeList* list = (sInstNodeList*)self->m_Model;
     int i;
     int count = list->count;
     sInstNodeEntry* meshEntry = list->entries;
@@ -778,9 +779,9 @@ extern "C" void* cDeadNode_cDeadNode(cDeadNode* self, int pInst)
 {
     cInstanceNode_cInstanceNode1(self, 8, 6, pInst);
     self->mVtbl = (void**)cDeadNode_vtbl;
-    unsigned int* recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
+    unsigned int* recordFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *recordFlags &= 0xFFFFFF9F;
-    recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
+    recordFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *recordFlags = (*recordFlags & 0xFFFFFFFD) | 4;
     return ((void*)self);
 }

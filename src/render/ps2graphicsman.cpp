@@ -397,15 +397,15 @@ extern "C" int func_00367440(cTextureMan* self, int pixelData, void* texName, in
         cTextureMan_NewBindTexID(self, bindId);
         id = bindId;
     }
-    char* tex = (char*)self->m_pTexInfo[id].pTexInfo;
-    strncpy(tex + 4, name, 8);
-    *(int*)(tex + 0x0) = ownsData;
-    *(int*)(tex + 0xC) = fmt;
-    *(int*)(tex + 0x28) = -1;
-    *(int*)(tex + 0x30) = -1;
-    *(int*)(tex + 0x2C) = -1;
-    *(int*)(tex + 0x24) = mip;
-    *(int*)(tex + 0x34) = -1;
+    tTexInfo* tex = self->m_pTexInfo[id].pTexInfo;
+    strncpy(tex->mName, name, 8);
+    tex->mMemAlloc = ownsData;
+    tex->mFormat = fmt;
+    tex->mTexAddr = -1;
+    tex->mTexBlock = -1;
+    tex->mCLUTAddr = -1;
+    tex->mNumMips = mip;
+    tex->mCLUTBlock = -1;
     int psm;
     switch (fmt) {
     case 8:
@@ -428,7 +428,7 @@ extern "C" int func_00367440(cTextureMan* self, int pixelData, void* texName, in
         break;
     }
     int bpp = psmBpp_7440(psm);
-    *(int*)(tex + 0x18) = bpp;
+    tex->mBPP = bpp;
     if (bpp <= 0)
         return -1;
     if (data != 0) {
@@ -443,32 +443,32 @@ extern "C" int func_00367440(cTextureMan* self, int pixelData, void* texName, in
             size += n;
             vram += vramBytes_7440(lw, lh, bpp);
         }
-        *(int*)(tex + 0x14) = vram;
-        *(int*)(tex + 0x10) = size;
-        if (*(int*)(tex + 0x0) != 0) {
+        tex->mVRAMSize = vram;
+        tex->mSize = size;
+        if (tex->mMemAlloc != 0) {
             void* copy = operator_new_7440(size, name, self->TexMemType | 0x05000000, 0);
-            *(void**)(tex + 0x1C) = copy;
+            tex->mpTexels = copy;
             MEM_copy(copy, data, size);
         } else {
-            *(void**)(tex + 0x1C) = data;
+            tex->mpTexels = data;
         }
     } else {
-        *(void**)(tex + 0x1C) = 0;
-        *(int*)(tex + 0x10) = 0;
-        *(int*)(tex + 0x14) = vramBytes_7440(w, height, bpp);
+        tex->mpTexels = 0;
+        tex->mSize = 0;
+        tex->mVRAMSize = vramBytes_7440(w, height, bpp);
     }
     int esz;
     if (clut != 0 && (esz = clutEntryBytes_7440(clutFmt)) != 0) {
-        int entries = (unsigned int)(*(int*)(tex + 0xC) - 11) <= 1 ? 0x10 : 0x100;
-        if (*(int*)(tex + 0x0) != 0) {
+        int entries = (unsigned int)(tex->mFormat - 11) <= 1 ? 0x10 : 0x100;
+        if (tex->mMemAlloc != 0) {
             void* copy = operator_new_7440(0x400, name, self->TexMemType | 0x05000000, 0);
-            *(void**)(tex + 0x20) = copy;
+            tex->mCLUTData = copy;
             MEM_copy(copy, clut, entries * esz);
         } else {
-            *(void**)(tex + 0x20) = clut;
+            tex->mCLUTData = clut;
         }
     } else {
-        *(void**)(tex + 0x20) = 0;
+        tex->mCLUTData = 0;
     }
     int lcm = 0;
     int lodL = 0;
@@ -480,46 +480,46 @@ extern "C" int func_00367440(cTextureMan* self, int pixelData, void* texName, in
         k = 0;
         mmin = 1;
     }
-    ulong* tex0p = (ulong*)(tex + 0x38);
+    ulong* tex0p = (ulong*)(&tex->mTEX0);
     int lw2 = texLog2_7440(w - 1);
     int lh2 = texLog2_7440(height - 1);
     int cpsm = clutPsm_7440(clutFmt);
     *tex0p = (ulong)0 | ((ulong)((w + 63) >> 6) << 14) | ((ulong)psm << 20) | ((ulong)(lw2 + 1) << 26)
         | ((ulong)(lh2 + 1) << 30) | ((ulong)1 << 34) | ((ulong)0 << 35) | ((ulong)0 << 37)
         | ((ulong)cpsm << 51) | ((ulong)0 << 55) | ((ulong)0 << 56) | ((ulong)(bpp <= 8) << 61);
-    *(ulong*)(tex + 0x40) = (ulong)lcm | ((ulong)(unsigned int)mip << 2) | ((ulong)1 << 5)
+    tex->mTEX1 = (ulong)lcm | ((ulong)(unsigned int)mip << 2) | ((ulong)1 << 5)
         | ((ulong)mmin << 6) | ((ulong)lodL << 19) | ((ulong)k << 32);
     if (mip != 0) {
-        *(ulong*)(tex + 0x48) = ((ulong)((w + 0x7F) >> 7) << 14) | ((ulong)((w + 0xFF) >> 8) << 34)
+        tex->mMIPTBP1 = ((ulong)((w + 0x7F) >> 7) << 14) | ((ulong)((w + 0xFF) >> 8) << 34)
             | ((ulong)((w + 0x1FF) >> 9) << 54);
-        *(ulong*)(tex + 0x50) = ((ulong)((w + 0x3FF) >> 10) << 14) | ((ulong)((w + 0x7FF) >> 11) << 34)
+        tex->mMIPTBP2 = ((ulong)((w + 0x3FF) >> 10) << 14) | ((ulong)((w + 0x7FF) >> 11) << 34)
             | ((ulong)((w + 0xFFF) >> 12) << 54);
     }
     if (vramMode == 1) {
-        int node = func_00366CE0(self->mMainHeap, *(int*)(tex + 0x14), id, -1, -1, 1);
+        int node = func_00366CE0(self->mMainHeap, tex->mVRAMSize, id, -1, -1, 1);
         int* nodeFlags = (int*)(*(char**)(((char*)self) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 2;
         *nodeFlags = fl;
-        *(int*)(tex + 0x30) = node;
-        *(int*)(tex + 0x28) = fl >> 8;
+        tex->mTexBlock = node;
+        tex->mTexAddr = fl >> 8;
     } else if (vramMode == 3) {
-        int node = func_00366CE0(self->mMainHeap, *(int*)(tex + 0x14) + 0x2000, id, -1, -1, 1);
+        int node = func_00366CE0(self->mMainHeap, tex->mVRAMSize + 0x2000, id, -1, -1, 1);
         int* nodeFlags = (int*)(*(char**)(((char*)self) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 0x22;
         *nodeFlags = fl;
-        *(int*)(tex + 0x30) = node;
+        tex->mTexBlock = node;
         int vramAddr = fl >> 8;
-        *(int*)(tex + 0x28) = vramAddr + (-vramAddr & 0x1F);
+        tex->mTexAddr = vramAddr + (-vramAddr & 0x1F);
     }
-    if (*(int*)(tex + 0x0) != 0) {
-        if (*(int*)(tex + 0xC) == 9) {
-            if (*(int*)(((char*)self) + 0x6344) < *(int*)(tex + 0x14) && vramMode == 0)
+    if (tex->mMemAlloc != 0) {
+        if (tex->mFormat == 9) {
+            if (*(int*)(((char*)self) + 0x6344) < tex->mVRAMSize && vramMode == 0)
                 func_00366E90(self, tex);
             else
-                *(ulong*)(tex + 0x38) = (*(ulong*)(tex + 0x38) & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
+                tex->mTEX0 = (tex->mTEX0 & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
         }
-    } else if (*(int*)(tex + 0xC) == 9) {
-        *(ulong*)(tex + 0x38) = (*(ulong*)(tex + 0x38) & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
+    } else if (tex->mFormat == 9) {
+        tex->mTEX0 = (tex->mTEX0 & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
     }
     return id;
 }
@@ -539,10 +539,10 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
  */
 extern "C" void func_00367B60(cTextureMan* self, int i)
 {
-    char* obj = (char*)self->m_pTexInfo[i].pTexInfo;
-    if (*(int*)(obj + 0x28) != -1) {
-        char* sub = *(int*)(obj + 0xC) != 9 ? self->mMainHeap : self->mTempHeap;
-        char* node = *(char**)(sub + 0x1FF0) + *(int*)(obj + 0x30) * 0x1C;
+    tTexInfo* obj = self->m_pTexInfo[i].pTexInfo;
+    if (obj->mTexAddr != -1) {
+        char* sub = obj->mFormat != 9 ? self->mMainHeap : self->mTempHeap;
+        char* node = *(char**)(sub + 0x1FF0) + obj->mTexBlock * 0x1C;
         *(int*)node &= ~2;
     }
 }
@@ -594,13 +594,13 @@ static inline void fill7BC0(int* p, int v)
  */
 extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
 {
-    char* selfBytes = (char*)self;
+    cTextureMan* selfBytes = (cTextureMan*)self;
     sGmTex7BC0* tex = self->texs[id];
     if (tex->slotA != -1) {
-        func_003663D8(tex->kind != 9 ? selfBytes + 0x1F60 : selfBytes + 0x4350, tex->idA);
+        func_003663D8(tex->kind != 9 ? selfBytes->mMainHeap : selfBytes->mTempHeap, tex->idA);
     }
     if (tex->slotB != -1) {
-        func_003663D8(selfBytes + 0x1F60, tex->idB);
+        func_003663D8(selfBytes->mMainHeap, tex->idB);
     }
     if (tex->owned != 0) {
         if (tex->bufA != 0) {
@@ -615,8 +615,8 @@ extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
     } else {
         cTextureMan_DeleteNonBindTexID((cTexSlots3671C8*)self, id);
     }
-    fill7BC0((int*)(selfBytes + 0x1F4C), -1);
-    *(int*)(selfBytes + 0x1F54) = -1;
+    fill7BC0((int*)(&selfBytes->mBoundTex[0]), -1);
+    selfBytes->mCLUTTex = -1;
 }
 #endif
 
@@ -670,13 +670,13 @@ extern "C" void func_00369098(cTextureMan* self, int idx);
 extern "C" void func_00367D20(cTextureMan* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
                               int clutFormat, void* clut, int upload)
 {
-    char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
+    tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
     if (upload != 0) {
         if (data != 0) {
-            MEM_copy(*(void**)(tex + 0x1C), data, *(int*)(tex + 0x10));
+            MEM_copy(tex->mpTexels, data, tex->mSize);
         }
         if (clut != 0) {
-            MEM_copy(*(void**)(tex + 0x20), clut, 4 << *(int*)(tex + 0x18));
+            MEM_copy(tex->mCLUTData, clut, 4 << tex->mBPP);
         }
     }
     func_00369098(self, idx);
@@ -1238,20 +1238,23 @@ static inline int vramBytes_8970(int w, int h, int bpp)
 }
 
 // TEX0.TW / TEX0.TH of a texture record
-static inline int texTW_8970(char* t)
+static inline int texTW_8970(char* vt)
 {
-    return (*(ulong*)(t + 0x38) >> 26) & 0xF;
+    tTexInfo* t = (tTexInfo*)vt;
+    return (t->mTEX0 >> 26) & 0xF;
 }
 
-static inline int texTH_8970(char* t)
+static inline int texTH_8970(char* vt)
 {
-    return (*(ulong*)(t + 0x38) >> 30) & 0xF;
+    tTexInfo* t = (tTexInfo*)vt;
+    return (t->mTEX0 >> 30) & 0xF;
 }
 
 // VRAM blocks of mip level lv
-static inline int levelBlocks_8970(char* t, int lv, int shift)
+static inline int levelBlocks_8970(char* vt, int lv, int shift)
 {
-    return vramBytes_8970((1 << texTW_8970(t)) >> lv, (1 << texTH_8970(t)) >> lv, *(int*)(t + 0x18)) >> shift;
+    tTexInfo* t = (tTexInfo*)vt;
+    return vramBytes_8970((1 << texTW_8970(((char*)t))) >> lv, (1 << texTH_8970(((char*)t))) >> lv, t->mBPP) >> shift;
 }
 
 /**
@@ -1274,11 +1277,11 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
 {
     ulong* packet = *dma;
     int off = slot << 2;
-    char* bound = (char*)&self->mBoundTex[0];
-    int* cur = (int*)(bound + off);
+    cTextureMan* bound = (cTextureMan*)((char*)&self->mBoundTex[0]);
+    int* cur = (int*)(((char*)bound) + off);
     if (*cur != idx) {
         *cur = idx;
-        char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
+        tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
         int rTex0, rTex1, rMip1, rMip2;
         if (slot == 0) {
             rTex0 = 6;
@@ -1291,13 +1294,13 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
             rMip1 = 53;
             rMip2 = 55;
         }
-        int shift = *(int*)(tex + 0xC) == 9 ? 6 : 8;
+        int shift = tex->mFormat == 9 ? 6 : 8;
         int n;
-        if (*(int*)(tex + 0x24) >= 4) {
+        if (tex->mNumMips >= 4) {
             n = 4;
         } else {
             n = 2;
-            if (*(int*)(tex + 0x24) >= 1)
+            if (tex->mNumMips >= 1)
                 n = 3;
         }
         packet[0] = (n + 2) | 0x10000000;
@@ -1308,36 +1311,36 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
         packet[4] = (ulong)(n | 0x8000) | ((ulong)1 << 60);
         packet[5] = 0xE;
         packet += 6;
-        if (*(int*)(tex + 0x24) > 0) {
-            int tbp1 = *(int*)(tex + 0x28) + levelBlocks_8970(tex, 0, shift);
-            int tbp2 = tbp1 + levelBlocks_8970(tex, 1, shift);
-            int tbp3 = tbp2 + levelBlocks_8970(tex, 2, shift);
-            packet[0] = *(ulong*)(tex + 0x48) | ((ulong)tbp1 | ((ulong)tbp2 << 20) | ((ulong)tbp3 << 40));
+        if (tex->mNumMips > 0) {
+            int tbp1 = tex->mTexAddr + levelBlocks_8970(((char*)tex), 0, shift);
+            int tbp2 = tbp1 + levelBlocks_8970(((char*)tex), 1, shift);
+            int tbp3 = tbp2 + levelBlocks_8970(((char*)tex), 2, shift);
+            packet[0] = tex->mMIPTBP1 | ((ulong)tbp1 | ((ulong)tbp2 << 20) | ((ulong)tbp3 << 40));
             packet[1] = rMip1;
             packet += 2;
-            if (*(int*)(tex + 0x24) >= 4) {
-                int tbp4 = tbp3 + levelBlocks_8970(tex, 3, shift);
-                int tbp5 = tbp4 + levelBlocks_8970(tex, 4, shift);
-                int tbp6 = tbp5 + levelBlocks_8970(tex, 5, shift);
-                packet[0] = *(ulong*)(tex + 0x50) | ((ulong)tbp4 | ((ulong)tbp5 << 20) | ((ulong)tbp6 << 40));
+            if (tex->mNumMips >= 4) {
+                int tbp4 = tbp3 + levelBlocks_8970(((char*)tex), 3, shift);
+                int tbp5 = tbp4 + levelBlocks_8970(((char*)tex), 4, shift);
+                int tbp6 = tbp5 + levelBlocks_8970(((char*)tex), 5, shift);
+                packet[0] = tex->mMIPTBP2 | ((ulong)tbp4 | ((ulong)tbp5 << 20) | ((ulong)tbp6 << 40));
                 packet[1] = rMip2;
                 packet += 2;
             }
         }
-        packet[0] = *(ulong*)(tex + 0x40);
+        packet[0] = tex->mTEX1;
         packet[1] = rTex1;
-        int caddr = *(int*)(tex + 0x2C);
+        int caddr = tex->mCLUTAddr;
         int cbp = 0;
         if (caddr >= 0) {
             self->mCLUTTex = idx;
             cbp = caddr;
         }
-        packet[2] = *(ulong*)(tex + 0x38) | ((ulong)*(int*)(tex + 0x28) | ((ulong)cbp << 37));
+        packet[2] = tex->mTEX0 | ((ulong)tex->mTexAddr | ((ulong)cbp << 37));
         packet[3] = rTex0;
         packet += 4;
     } else if (self->mCLUTTex != idx) {
-        char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
-        if (*(int*)(tex + 0x2C) >= 0) {
+        tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
+        if (tex->mCLUTAddr >= 0) {
             self->mCLUTTex = idx;
             packet[0] = 0x10000003;
             packet[1] = 0;
@@ -1345,7 +1348,7 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
             packet[3] = (ulong)0x50000002 << 32;
             packet[4] = (ulong)(1 | 0x8000) | ((ulong)1 << 60);
             packet[5] = 0xE;
-            packet[6] = *(ulong*)(tex + 0x38) | ((ulong)*(int*)(tex + 0x2C) << 37);
+            packet[6] = tex->mTEX0 | ((ulong)tex->mCLUTAddr << 37);
             packet[7] = slot == 0 ? 22 : 23;
             packet += 8;
         }
@@ -1370,9 +1373,9 @@ extern "C" void func_00366E30(void* list, int i);
  */
 extern "C" void func_00369098(cTextureMan* self, int idx)
 {
-    char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
-    if (*(int*)(tex + 0x28) != -1) {
-        if (*(int*)(tex + 0xC) != 9) {
+    tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
+    if (tex->mTexAddr != -1) {
+        if (tex->mFormat != 9) {
             func_00366E30(self->mMainHeap, idx);
         } else {
             func_00366E30(self->mTempHeap, idx);

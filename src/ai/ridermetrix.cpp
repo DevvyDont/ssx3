@@ -1483,9 +1483,11 @@ extern "C" int cGameModeMan_riderCheckpointHit(void* mgr, int id, int a2);
 extern "C" void func_002A3CE8(void* snd, void* rider, int a2);
 
 
-static inline bool rmRiderFlags_1194C0(char* r)
+static inline bool rmRiderFlags_1194C0(char* vvr)
 {
-    return *(int*)(r + 0x874) != 0 && *(int*)(r + 0x87C) != 0;
+    cRider* vr = (cRider*)vvr;
+    cRider* r = (cRider*)vr;
+    return r->mIsHuman != 0 && r->mIsLocal != 0;
 }
 
 /**

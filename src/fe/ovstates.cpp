@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/fepopupselectmultiplayermode.h"
 #include "be/beintoption.h"
 #include "input/inputpad.h"
 #include "sound/ssxaudio.h"
@@ -628,13 +629,13 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
         ((void (*)(void*))ivt[1].fn)(vthis(iface, ivt[1]));
         if (item_->mMiscData == 22 && self_->mGoToNextState == 0) {
             self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
-            char* popup = (char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0);
+            cFEPopupSelectMultiplayerMode* popup = (cFEPopupSelectMultiplayerMode*)((char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0));
             cUIState_cUIState1(popup, self_->mpEngine, ((char*)self_));
-            *(void***)(popup + 0x8) = cFEPopupSelectMultiplayerMode_vtbl;
+            popup->mVtbl = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
             bit <<= self_->mSaveCurrentCtrl;
-            *(char*)(popup + 0x15) = bit;
-            *(char*)(popup + 0x48) = 0;
+            *(char*)&popup->mCtrlBits = bit;
+            popup->mMultiMode = 0;
             cUIStateStack_pushPopup(&self_->mpEngine->mStateStack, popup);
             self_->mpSelectMultiModeWidget = (cUIThing*)item_;
             setWidgetHidden_194EB0(((char*)self_), str_hl);

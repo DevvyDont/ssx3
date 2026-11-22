@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ealib/shape.h"
+#include "online/onlineevent.h"
 #include "render/font.h"
 #include "bx/math3d.h"
 #include "fe/debuglobbymenus.h"
@@ -417,7 +419,7 @@ extern "C" void* ContinueMenu_ContinueMenu(ContinueMenu* self)
 INCLUDE_ASM("fe/debugfe", func_0017D260);
 #ifdef SKIP_ASM
 extern void* D_004A4E90;
-extern "C" void func_0017D6F0(cDebugLobbyScreen* self, void* ev);
+extern "C" void func_0017D6F0(cDebugLobbyScreen* self, online_Event* ev);
 extern "C" void func_00259230(void* ev);
 
 /**
@@ -432,7 +434,7 @@ extern "C" void func_00259230(void* ev);
 extern "C" void func_0017D260(void* self, void* ev)
 {
     if (D_004A4E90 != 0)
-        func_0017D6F0((cDebugLobbyScreen*)D_004A4E90, ev);
+        func_0017D6F0((cDebugLobbyScreen*)D_004A4E90, (online_Event*)ev);
     func_00259230(ev);
 }
 #endif
@@ -742,7 +744,7 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  * @param vself  the debug lobby screen
  * @param ev  the lobby event
  */
-extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
+extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
 {
     cDebugLobbyScreen* self = vself;
     switch (*(int*)ev) {
@@ -830,7 +832,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
         break;
     }
     case 239:
-        func_0017DE70((cDebugLobbyScreen*)((char*)self));
+        func_0017DE70((cDebugLobbyScreen*)self);
         self->mState = 0x10;
         break;
     case 236:
@@ -858,10 +860,11 @@ INCLUDE_ASM("fe/debugfe", func_0017DA30);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" void func_0025C610(void* net);
-static inline void SetMode0017DA30(void* self, int mode)
+static inline void SetMode0017DA30(void* vself, int mode)
 {
-    *(int*)((char*)self + 0x4) = mode;
-    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x604);
+    cDebugLobbyScreen* self = (cDebugLobbyScreen*)vself;
+    self->mState = mode;
+    cMenuSys_pushMenu(&self->mMenuSys, &self->mContinueMenu);
 }
 /**
  * Shows the error screen that fits the debug lobby screen's current step after a lobby error event.
@@ -2113,7 +2116,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
         self->objs[i] = 0;
     }
     self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
-    self->objs[1] = cDebugLobbyScreen_cDebugLobbyScreen((cDebugLobbyScreen*)((char*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0)));
+    self->objs[1] = cDebugLobbyScreen_cDebugLobbyScreen((cDebugLobbyScreen*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
     if (SSXApp->unk_74) {
         self->cur = self->objs[1];
     } else {
@@ -3042,8 +3045,8 @@ extern int cUIGroup_vtbl[];
  */
 extern "C" void* func_00180508(cScreenKeyboard* self, int parentState)
 {
-    self->mpNext = (cListNode*)((char*)self);
-    self->mpPrev = (cListNode*)((char*)self);
+    self->mpNext = (cListNode*)self;
+    self->mpPrev = (cListNode*)self;
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
     self->mVtbl = (void**)cUIScreen_vtbl;

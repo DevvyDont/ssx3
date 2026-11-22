@@ -1,4 +1,7 @@
 #include "common.h"
+#include "camera/camera.h"
+#include "util/surfprop.h"
+#include "render/particle.h"
 #include "ui/uithing.h"
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
@@ -2273,30 +2276,30 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     if (st == 1 || st == 2 || st == 4 || cRider_getControlState(self->obj) == 9) {
         self->iB0 = 0;
     } else {
-        char* riderObj = self->obj;
-        if (*(int*)(riderObj + 0xAC4) != 0) {
-            int nisSpray = *(int*)(riderObj + 0xAD0) == 0 && *(int*)(riderObj + 0xAFC) != 0;
-            if (!nisSpray || *(int*)(riderObj + 0xB00) == 0) {
+        cRider* riderObj = (cRider*)self->obj;
+        if (riderObj->mIsInNIS != 0) {
+            int nisSpray = riderObj->unk_AD0 == 0 && riderObj->unk_AFC != 0;
+            if (!nisSpray || riderObj->unk_B00 == 0) {
                 self->iB0 = 0;
             }
         }
     }
-    char* riderObj = self->obj;
-    self->v50 = wakeRowF920(riderObj, 0);
+    cRider* riderObj = (cRider*)self->obj;
+    self->v50 = wakeRowF920(((char*)riderObj), 0);
     float acc = (self->f74 - self->fB8) * 59.999996185302734f;
-    self->v30 = wakeRowF920(riderObj, 1);
-    self->v40 = wakeRowF920(riderObj, 2);
-    self->pos = wakeRowF920(riderObj, 3);
-    self->pD0 = (char*)SSXApp->Game->SurfPropCache + *(int*)(riderObj + 0x438) * 0xB0;
+    self->v30 = wakeRowF920(((char*)riderObj), 1);
+    self->v40 = wakeRowF920(((char*)riderObj), 2);
+    self->pos = wakeRowF920(((char*)riderObj), 3);
+    self->pD0 = (char*)&SSXApp->Game->SurfPropCache->SurfData[riderObj->mSurfaceType];
     int x = 0;
     if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
         x = cRider_getControlState(riderObj) != 9;
     }
     float burstStrength = acc * 0.5f;
-    char* nisRider = self->obj;
+    cRider* nisRider = (cRider*)self->obj;
     int y = 0;
-    if (*(int*)(nisRider + 0xAC4) != 0 && *(int*)(nisRider + 0xAD0) == 0) {
-        y = *(int*)(nisRider + 0xAFC) != 0;
+    if (nisRider->mIsInNIS != 0 && nisRider->unk_AD0 == 0) {
+        y = nisRider->unk_AFC != 0;
     }
     if (y) {
         x = 27.77777862548828f <= acc;
@@ -2467,7 +2470,7 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
         float lim = *(float*)(self->pD0 + 0x6C);
         if (wakeRandE398() < lim) {
         sWakeVecE398 pos = wakeAddFE88(self->pos, wakeScaleFE88(self->dir, 15.0f));
-        func_002DE398((cDynamicSprayFX*)((char*)self), &pos);
+        func_002DE398((cDynamicSprayFX*)self, &pos);
         float k = wakeAbsE398(wakeDotFE88(*(sWakeVecE398*)(self->obj + 0x3B0), self->vC0)) * 1.5f;
         float faceFactor;
         if (k < 1.0f) {
@@ -2588,7 +2591,7 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
     char* em = self->em;
     if (self->iB0 != 0 && wakeLimit0EE8() < self->fBC && *(int*)(self->pD0 + 0x58) != 0 && flag == 0) {
         sWakeVecE398 pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
-        func_002DE398((cDynamicSprayFX*)((char*)self), &pos);
+        func_002DE398((cDynamicSprayFX*)self, &pos);
         char* sub = self->obj + 0x6C0;
         sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
         sWakeVecE398* riderVel = vt[2].fn(sub + vt[2].delta);
@@ -2797,9 +2800,9 @@ static inline float wakeClamp1120(float v, float lo, float hi)
 extern "C" void func_002E1120(sWakeFx1120* self)
 {
     void* em = self->p28 + 0x840;
-    char* obj = self->obj;
-    int k = *(int*)(obj + 0x8A8);
-    sMat1120* mats = *(sMat1120**)(*(char**)(obj + 0x780) + 0x30);
+    cRider* obj = (cRider*)self->obj;
+    int k = obj->mBoneHead;
+    sMat1120* mats = (sMat1120*)obj->mAnimModel->unk_030;
     sMat1120 mat = mats[k];
     float back = -3.0f;
     float up = 4.0f;
@@ -2975,11 +2978,11 @@ static inline sWakeVecE398* wakeVel1598(sWakeFx1598* self)
 // PORT: g++ minimum operator (<?).
 extern "C" void func_002E1598(sWakeFx1598* self)
 {
-    char* cfg = self->pD0;
-    if (27.77777862548828f < self->fE0 && *(int*)(cfg + 0x60) != 0) {
+    tSurfData* cfg = (tSurfData*)self->pD0;
+    if (27.77777862548828f < self->fE0 && cfg->ImpactActive != 0) {
         int emitterIdx = 6;
         int otherIdx = 5;
-        if (*(int*)(cfg + 0x64) != 0 && 277.77777099609375f < self->fE0) {
+        if (cfg->ImpactLarge != 0 && 277.77777099609375f < self->fE0) {
             emitterIdx = 5;
             otherIdx = 6;
         }
@@ -3014,7 +3017,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
             }
         }
         float j = 25.0f;
-        if (*(int*)(cfg + 0x64) != 0 && self->i124 != 0) {
+        if (cfg->ImpactLarge != 0 && self->i124 != 0) {
             j = 60.0f;
         }
         float lo = -j;
@@ -3047,7 +3050,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         if (self->fE0 < 83.33333587646484f) {
             self->fE0 = 0.0f;
         } else {
-            float m = *(float*)(cfg + 0x68);
+            float m = cfg->ImpactMultiplier;
             if (self->i124 == 0) {
                 m *= 0.4000000059604645f;
             }
@@ -3359,7 +3362,7 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
             wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0x818)),
                         wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x81C))),
             wakeScale0EE8(wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x820)), self->fBC));
-        func_002DE398((cDynamicSprayFX*)((char*)self), &pos);
+        func_002DE398((cDynamicSprayFX*)self, &pos);
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, 0.01666666753590107f);
     } else {
         cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
@@ -4041,20 +4044,20 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
 {
     cLightHalo* self = vself;
     float* rect = (float*)vrect;
-    char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     t4Vector pos;
     pos.x = ((sPart_2868*)self->mpHalo)->pos.x;
     pos.y = ((sPart_2868*)self->mpHalo)->pos.y;
     pos.z = ((sPart_2868*)self->mpHalo)->pos.z;
     pos.w = 1.0f;
-    sVEntry<int(void*, t4Vector*)>* vEntry = &(*(sVEntry<int(void*, t4Vector*)>**)(obj + 0x10D8))[91];
+    sVEntry<int(void*, t4Vector*)>* vEntry = &((sVEntry<int (void*, t4Vector*)>*)obj->mVtbl)[91];
     if (vEntry->fn(vthis(obj, *vEntry), &pos)) {
         self->mbOnScreen = 0;
         self->mbRequestZSample = 0;
     } else {
         self->mbOnScreen = 1;
         t4Vector scr;
-        sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
+        sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)obj->mVtbl)[92];
         projectSlot->fn(&scr, vthis(obj, *projectSlot), &pos);
         float depth = scr.z * 5.960465188081798e-08f;
         if (depth <= 0.005f) {
@@ -4094,7 +4097,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
             viewDir.z = rect[14];
             t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(viewDir.x * pullBack, viewDir.y * pullBack, viewDir.z * pullBack), 0.0f));
             t4Vector sc;
-            sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
+            sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)obj->mVtbl)[92];
             projectSlot2->fn(&sc, vthis(obj, *projectSlot2), &lp);
             self->mZDist = sc.z;
             // screen x mapped to -1..1, then to an angle
@@ -4181,8 +4184,8 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
         }
     }
     {
-        char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-        sVEntry<void(void*, void*, void*)>* setPhase2Slot = &(*(sVEntry<void(void*, void*, void*)>**)(obj + 0x10D8))[117];
+        cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+        sVEntry<void(void*, void*, void*)>* setPhase2Slot = &((sVEntry<void (void*, void*, void*)>*)obj->mVtbl)[117];
         setPhase2Slot->fn(vthis(obj, *setPhase2Slot), (void*)cLensFxMan__drawFrameCallBack, self);
     }
     cLensFxMan_mbDrawSun = 1;
@@ -4292,9 +4295,9 @@ void operator_delete(int* p);
  */
 extern "C" void cLensFxMan__cLensFxMan(cLensFxMan* self, int flags)
 {
-    char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     self->mVtbl = cLensFxMan_vtbl;
-    sBWVEntry2* setPhase2Slot = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
+    sBWVEntry2* setPhase2Slot = &((sBWVEntry2*)obj->mVtbl)[117];
     setPhase2Slot->fn(vthis(obj, *setPhase2Slot), 0, 0);
     cLensFxMan_mbDrawSun = 0;
     if (flags & 1) {
@@ -4500,20 +4503,20 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
 extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
 {
     sWkFx3338* self = (sWkFx3338*)vself;
-    char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     sWkRect3338 viewRect;
     {
-        sWkVtR3338* vt = *(sWkVtR3338**)(ctx + 0x10D8);
+        sWkVtR3338* vt = (sWkVtR3338*)ctx->mVtbl;
         vt[28].fn(&viewRect, vthis(ctx, vt[28]));
     }
     self->view = viewRect;
     {
-        sWkVtM3338* vt = *(sWkVtM3338**)(ctx + 0x10D8);
+        sWkVtM3338* vt = (sWkVtM3338*)ctx->mVtbl;
         vu0CopyMatrix3338(&self->mtx, vt[35].fn(vthis(ctx, vt[35])));
     }
     int i = 0;
     {
-        sWkVtP3338* vt = *(sWkVtP3338**)(ctx + 0x10D8);
+        sWkVtP3338* vt = (sWkVtP3338*)ctx->mVtbl;
         vt[30].fn(vthis(ctx, vt[30]), &self->f50, &self->f54, &self->f58);
     }
     sWkEmit3338* em = self->emit;
@@ -5018,9 +5021,9 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
     int vis = 0;
     if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
         if (IsHuman_3AF8(self->rider)) {
-            char* views = (char*)SSXApp->Game->ViewMan;
-            if (*(unsigned int*)(views + 0x10) >= 2) {
-                vis = *(int*)(views + 0x14) != self->rider->mViewIndex;
+            cGameViewMan* views = SSXApp->Game->ViewMan;
+            if (views->m_uiNumView >= 2) {
+                vis = (int)views->m_uiCurrentView != self->rider->mViewIndex;
             }
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -5254,8 +5257,8 @@ extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
     char* scriptObj = (char*)&self->mObjType;
     cTransitionMan_EndTransition(self);
     if (self->mRequestingDelete != 0) {
-        char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-        sBWVEntry1* removeScreenGrab = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
+        cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+        sBWVEntry1* removeScreenGrab = &((sBWVEntry1*)obj->mVtbl)[60];
         removeScreenGrab->fn(vthis(obj, *removeScreenGrab), (char*)&self->mScreenGrabHandle);
         self->mRequestingDelete = 0;
     }
@@ -5319,8 +5322,8 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
         }
         char* ref = (char*)&self->mScreenGrabHandle;
         if (~self->mScreenGrabHandle.mTextureId == 0) {
-            char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-            sBWVEntry4370* vtblEntry = &(*(sBWVEntry4370**)(obj + 0x10D8))[59];
+            cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+            sBWVEntry4370* vtblEntry = &((sBWVEntry4370*)obj->mVtbl)[59];
             vtblEntry->fn(vthis(obj, *vtblEntry), ref, 0x100, 0x100);
             if (~self->mScreenGrabHandle.mTextureId == 0) {
                 if (transitionIn != 0) {
@@ -5457,9 +5460,9 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
         self->mTransitionOut = 0;
         self->mExternalTimePercentage = 0;
         if (~self->mScreenGrabHandle.mTextureId != 0) {
-            char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
+            cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
             self->mRequestingDelete = 1;
-            sVEntry<int(void*)>* entry = &(*(sVEntry<int(void*)>**)(obj + 0x10D8))[114];
+            sVEntry<int(void*)>* entry = &((sVEntry<int (void*)>*)obj->mVtbl)[114];
             self->mRequestDeleteFrame = entry->fn(vthis(obj, *entry));
             self->mRequestingScreenGrab = 0;
             self->mUsingScreenGrab = 0;
@@ -5536,11 +5539,11 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
  */
 extern "C" void cTransitionMan_update(cTransitionMan* self)
 {
-    char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (self->mRequestingDelete != 0) {
-        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(ctx + 0x10D8);
+        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)ctx->mVtbl;
         if (vt[114].fn(vthis(ctx, vt[114])) - self->mRequestDeleteFrame >= 3) {
-            sVEntry<void(void*, void*)>* vt2 = *(sVEntry<void(void*, void*)>**)(ctx + 0x10D8);
+            sVEntry<void(void*, void*)>* vt2 = (sVEntry<void (void*, void*)>*)ctx->mVtbl;
             vt2[60].fn(vthis(ctx, vt2[60]), (char*)&self->mScreenGrabHandle);
             self->mRequestingDelete = 0;
         }
@@ -6556,19 +6559,19 @@ extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
     for (int j = 0; j < 2; j++) {
         ((sVec5920*)&self->mLastCameraPosition[0])[j] = sVec5920(0.0f, 0.0f, 0.0f, 1.0f);
     }
-    ((void**)&self->mSnowBoxes[0])[0] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[1] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[2] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[3] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[4] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    ((void**)&self->mSnowBoxes[0])[5] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    ((void**)&self->mSnowBoxes[0])[0] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[1] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[2] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[3] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[4] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    ((void**)&self->mSnowBoxes[0])[5] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
-        ((void**)&self->mSnowBoxes[0])[6] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[7] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[8] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[9] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[10] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-        ((void**)&self->mSnowBoxes[0])[11] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        ((void**)&self->mSnowBoxes[0])[6] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[7] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[8] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[9] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[10] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        ((void**)&self->mSnowBoxes[0])[11] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     }
     cMemMan_validate();
     return (self);

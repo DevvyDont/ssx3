@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
 #include "ui/uianimation.h"
 #include "ui/uistatestack.h"
 #include "ui/uithing.h"

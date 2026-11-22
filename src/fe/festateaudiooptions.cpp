@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
+#include "ui/uiicon.h"
 #include "sound/ssxaudio.h"
 #include "fe/festateaudiooptions.h"
 #include "fe/festatebigradio.h"
@@ -20,10 +22,11 @@ extern char str_request_line[];
 extern char str_edit_req[];
 extern char str_playlist[];
 
-static inline void SetText_6540(void* w, int text)
+static inline void SetText_6540(void* vw, int text)
 {
-    *(int*)((char*)w + 0x78) = -1;
-    *(int*)((char*)w + 0x7C) = text;
+    cUIIcon* w = (cUIIcon*)vw;
+    w->mTextureID = -1;
+    w->mpTextureElem = (const cTextureElement*)text;
 }
 
 /**
@@ -245,9 +248,9 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             return;
         if (self->f74 == 0 && self->f7C == 0)
             return;
-        char* popup = (char*)cFEStateRequestLine_cFEStateRequestLine((cFEStateRequestLine*)cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
+        cFEStateRequestLine* popup = (cFEStateRequestLine*)cFEStateRequestLine_cFEStateRequestLine((cFEStateRequestLine*)cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
         if (online_AOWE()) {
-            *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
+            popup->mAttrState = (popup->mAttrState & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(self->owner + 0x18, popup, 0, 0);
         } else {
             cUIStateStack_push(self->owner + 0x18, popup);
@@ -518,7 +521,7 @@ extern "C" void cFEStateRequestLine_onCreateScreen(cFEStateRequestLine* self)
     char* name = str_16radio;
     if ((void*)SSXApp->Game != 0) {
         name = str_143radio_pda;
-        void* list = (char*)self->mpEngine + 0x18;
+        void* list = (char*)&self->mpEngine->mStateStack;
         char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud));
         if (obj != 0) {
             sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)(obj + 8);
@@ -549,7 +552,7 @@ extern char str_hud[];
 extern "C" void cFEStateRequestLine_onDestroyScreen(cFEStateRequestLine* self)
 {
     if ((int)SSXApp->Game != 0) {
-        void* obj = cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
+        void* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
         if (obj != 0) {
             sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)((char*)obj + 8))[24];
             vtEntry->fn(vthis(obj, *vtEntry), 4, 0);

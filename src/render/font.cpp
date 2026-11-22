@@ -86,7 +86,7 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
             self->MaxCharHeight = (self->Glyphs)[i].height + (self->Glyphs)[i].yoffset;
         }
     }
-    cFont_downloadTexture((cFont*)((char*)self), (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
+    cFont_downloadTexture((cFont*)self, (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
 }
 #endif
 
@@ -311,9 +311,10 @@ struct sFontPos1CB0 {
     sFontPos1CB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 };
 
-static inline int fontGetTex(void* s)
+static inline int fontGetTex(void* vs)
 {
-    return *(int*)((char*)s + 0x60);
+    cFont* s = (cFont*)vs;
+    return s->TextureID;
 }
 
 /**
@@ -377,9 +378,10 @@ struct sFontPos1E30 {
     sFontPos1E30(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 };
 
-static inline int fontGetTex1E30(void* s)
+static inline int fontGetTex1E30(void* vs)
 {
-    return *(int*)((char*)s + 0x60);
+    cFont* s = (cFont*)vs;
+    return s->TextureID;
 }
 
 /**
@@ -2879,9 +2881,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_DrawStateChanged);
 #ifdef SKIP_ASM
 typedef char* (*sFontGetFn_47D8)(char*);
 
-static inline short* sFontRS_shorts_47D8(char* st)
+static inline short* sFontRS_shorts_47D8(char* vst)
 {
-    return (short*)(st + 0x10);
+    sDrawState* st = (sDrawState*)vst;
+    return (short*)(&st->m_textureState);
 }
 
 /**
@@ -2899,14 +2902,14 @@ extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
     for (i = 0; i < 4; i++) {
         char* obj = (char*)self->mVtbl;
         int* current = (int*)&self->m_pCurrentDrawState->unk_00[i];
-        char* cmp = ((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
-        if (*current != *(int*)(cmp + (i << 2))) return 1;
+        sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
+        if (*current != (int)cmp->unk_00[i]) return 1;
     }
     for (j = 0; j < 2; j++) {
         char* obj = (char*)self->mVtbl;
         short* current = sFontRS_shorts_47D8((char*)self->m_pCurrentDrawState) + j;
-        char* cmp = ((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
-        if (*current != *(short*)(cmp + (j << 1) + 0x10)) return 1;
+        sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
+        if (*current != cmp->m_textureState.m_texid[j]) return 1;
     }
     return 0;
 }
@@ -4751,8 +4754,9 @@ static inline t4Vector Scale_5750(const t4Vector& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy).
-static inline void LoadIdentity_5750(void* self)
+static inline void LoadIdentity_5750(void* vself)
 {
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4765,18 +4769,19 @@ static inline void LoadIdentity_5750(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(t4mat_Identity)
+        : "r"((char*)self->mCurrentView), "r"(t4mat_Identity)
         : "memory");
 }
 
 // Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply).
-static inline void Rotate_5750(void* self, float* axis, float angle)
+static inline void Rotate_5750(void* vself, float* axis, float angle)
 {
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     sMat_5750 r;
     float s;
     float c;
-    char* top = *(char**)((char*)self + 0x13e4);
+    char* top = (char*)self->mCurrentView;
     fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis[0];
@@ -4841,8 +4846,9 @@ static inline void Rotate_5750(void* self, float* axis, float angle)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix-vector product into row 3).
-static inline void Translate_5750(void* self, void* v)
+static inline void Translate_5750(void* vself, void* v)
 {
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2         $vf4, 0x0(%0)\n"
@@ -4857,7 +4863,7 @@ static inline void Translate_5750(void* self, void* v)
         "sqc2         $vf12, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(*(char**)((char*)self + 0x13e4)), "r"(v)
+        : "r"((char*)self->mCurrentView), "r"(v)
         : "memory");
 }
 
@@ -5241,8 +5247,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_projOutCode);
  * @param vec  the point (x, y, z, w)
  * @return the out-code bits
  */
-extern "C" int cPS2GraphicsMan_projOutCode(cPS2GraphicsMan* self, char* vec) {
-    float x = *(float*)(vec + 0);
+extern "C" int cPS2GraphicsMan_projOutCode(cPS2GraphicsMan* self, t4Vector* vec) {
+    float x = vec->x;
     int flags = 0;
     if (x < self->unk_6B70.x) {
         flags = 2;
@@ -5250,17 +5256,17 @@ extern "C" int cPS2GraphicsMan_projOutCode(cPS2GraphicsMan* self, char* vec) {
     if (self->unk_6B80.x < x) {
         flags |= 1;
     }
-    float y = *(float*)(vec + 4);
+    float y = vec->y;
     if (y < self->unk_6B70.y) {
         flags |= 8;
     }
     if (self->unk_6B80.y < y) {
         flags |= 4;
     }
-    if (*(float*)(vec + 0xC) < 0.0f) {
+    if (vec->w < 0.0f) {
         return flags ^ 0x2F;
     }
-    float z = *(float*)(vec + 8);
+    float z = vec->z;
     if (self->unk_6B70.z < z) {
         flags |= 0x20;
     }

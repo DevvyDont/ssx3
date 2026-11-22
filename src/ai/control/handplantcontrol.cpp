@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "util/surfprop.h"
+#include "object/instancenode.h"
+#include "ai/airpredictor.h"
 #include "ui/uithing.h"
 #include "animation/animsequencer.h"
 #include "ai/dangerman.h"
@@ -604,9 +607,9 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
             }
         } else {
             if (landed_91A8((char*)self->mRider->mAirPredictor)) {
-                char* ap = (char*)self->mRider->mAirPredictor;
-                if (0.0f < vu0Dot_91A8(*(sQ_91A8*)(ap + 0x20), *(sQ_91A8*)&self->ExitVel))
-                    cRider_alignRiderAxis((char*)self->mRider, ap + 0x20, ap + 0x10, self->mRider->mTimeScale + self->mRider->mTimeScale,
+                cAirPredictor* ap = self->mRider->mAirPredictor;
+                if (0.0f < vu0Dot_91A8(*(sQ_91A8*)&ap->GuessLandNormal, *(sQ_91A8*)&self->ExitVel))
+                    cRider_alignRiderAxis((char*)self->mRider, &ap->GuessLandNormal, &ap->GuessLandVelocity, self->mRider->mTimeScale + self->mRider->mTimeScale,
                                   self->mRider->mTimeScale * 6.632251739501953f);
             } else {
                 cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel, 0.01666666753590107f);
@@ -1000,22 +1003,22 @@ extern "C" void cAirMotion_step(cAirMotion* self)
         *(sVec4HP*)&rider1->mGroundNormal = up;
     }
     *(sVec4HP*)&self->mRider->GroundVelocity = *(sVec4HP*)t4vect_Zero;
-    int st = *(int*)((char*)self->mRider->mAirPredictor + 0xAC);
+    int st = self->mRider->mAirPredictor->SimState;
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok) {
         cRider* rider2 = self->mRider;
-        char* ap = (char*)rider2->mAirPredictor;
-        int idx = *(int*)(ap + 0x90);
-        char* snow = (char*)SSXApp->Game->SurfPropCache + idx * 0xB0;
+        cAirPredictor* ap = rider2->mAirPredictor;
+        int idx = ap->GuessLandSurface;
+        char* snow = (char*)&SSXApp->Game->SurfPropCache->SurfData[idx];
         int flag = 0;
-        short sf = *(short*)(ap + 0x94);
+        short sf = ap->SurfaceFlags;
         if (sf != -1) {
             int orientableBit = sf & 8;
             flag = orientableBit != 0;
         }
         if (idx != 18 && *(int*)(snow + 0x44) == 0 && flag) {
-            float timeLeft = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
+            float timeLeft = ap->TotalAirTime - ap->CurAirTime;
             float timeScale = rider2->mTimeScale;
             float x;
             if (timeLeft >= 0.01666666753590107f)
@@ -1028,20 +1031,20 @@ extern "C" void cAirMotion_step(cAirMotion* self)
                 int big = 1;
                 if (!(0.0872664749622345f < absf_139A20(rider3->mRiderHandler->SpinControl.AirAdjSpin))) big = 0;
                 if (big) {
-                    cRider_alignRiderAxis(rider3, (char*)rider3->mAirPredictor + 0x20, t4vect_Zero, x, y);
+                    cRider_alignRiderAxis(rider3, &rider3->mAirPredictor->GuessLandNormal, t4vect_Zero, x, y);
                     goto done;
                 }
             }
             cRider* rider4 = self->mRider;
-            char* ap4 = (char*)rider4->mAirPredictor;
-            char* tgt = ap4 + 0x20;
-            if (*(float*)(ap4 + 0x28) < 0.30000001192092896f || *(int*)self != 0) {
-                sVec4HP frontAlign = *(sVec4HP*)(ap4 + 0x10);
+            cAirPredictor* ap4 = rider4->mAirPredictor;
+            char* tgt = (char*)&ap4->GuessLandNormal;
+            if (ap4->GuessLandNormal.z < 0.30000001192092896f || *(int*)self != 0) {
+                sVec4HP frontAlign = *(sVec4HP*)&ap4->GuessLandVelocity;
                 if (vu0Dot_139A20(frontAlign, *(sVec4HP*)&rider4->mMatrix.row[1]) < 0.0f) {
                     vu0ScaleEq_139A20(frontAlign, -1.0f);
                 }
                 cRider* rider5 = self->mRider;
-                cRider_alignRiderAxis(rider5, (char*)rider5->mAirPredictor + 0x20, &frontAlign, x, y);
+                cRider_alignRiderAxis(rider5, &rider5->mAirPredictor->GuessLandNormal, &frontAlign, x, y);
             } else {
                 cRider_alignRiderAxis(rider4, tgt, t4vect_Zero, x, y);
             }
@@ -1305,13 +1308,13 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             cRider_setControlState_9C88(RIDER_139C88, 13);
         }
         cAirPredictor_land_9C88(*(void**)(RIDER_139C88 + 0x788), RIDER_139C88 + 0x110, RIDER_139C88 + 0x1E0);
-        char* surf = (char*)SSXApp->Game->SurfPropCache + hit.surface * 0xB0;
+        tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[hit.surface];
         int fl;
-        if (*(int*)(surf + 0x44) != 0 || (hit.obj54 != 0 && (fl = *(short*)(hit.obj54 + 0xA), (fl & 2) != 0))) {
+        if (surf->IsResetSurface != 0 || (hit.obj54 != 0 && (fl = *(short*)(hit.obj54 + 0xA), (fl & 2) != 0))) {
             cRider_checkForReset(RIDER_139C88, 0, 1);
             return;
         }
-        float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 272)), hit.normal) - *(float*)(surf + 0x18);
+        float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 272)), hit.normal) - surf->PowderDepth3G;
         if (0.0f < pen) {
             sVec4HP push = vu0Scale_139C88(hit.normal, pen);
             cRider_moveFromCollision(RIDER_139C88, &push);
@@ -1328,12 +1331,12 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             *(unsigned int*)(RIDER_139C88 + 0x430) = 0xFFFFFFFF;
         }
         sVec4HP imp = vu0Scale_139C88(V4_139C88(RIDER_139C88, 880), -vn);
-        vu0ScaleEq_139C88(imp, *(float*)(surf + 0x3C));
+        vu0ScaleEq_139C88(imp, surf->LandingHardness);
         vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), imp);
         char* r = RIDER_139C88;
         float vn2 = -vu0Dot_139C88(V4_139C88(r, 0x1E0), V4_139C88(r, 880));
-        if (*(float*)(surf + 0x40) < vn2) {
-            vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), vu0Scale_139C88(V4_139C88(r, 880), vn2 - *(float*)(surf + 0x40)));
+        if (surf->MaxLandingPenetrationVel < vn2) {
+            vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), vu0Scale_139C88(V4_139C88(r, 880), vn2 - surf->MaxLandingPenetrationVel));
         }
         if (hit.obj50 != 0) {
             char* handler = *(char**)(hit.obj50 + 0xC);
@@ -1408,8 +1411,8 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             info.speed = absf_139C88(vn);
             cRider_flagEventWipeout_9C88(RIDER_139C88, anim, 0, *(int*)(RIDER_139C88 + 0x438), &info);
         } else {
-            char* rider5 = RIDER_139C88;
-            cRider_flagEventLand(rider5, *(float*)(rider5 + 0x378) < 0.699999988079071f, 0, *(int*)(rider5 + 0x330), &hit, spd);
+            cRider* rider5 = (cRider*)(RIDER_139C88);
+            cRider_flagEventLand(rider5, rider5->mGroundNormal.z < 0.699999988079071f, 0, rider5->PressMode, &hit, spd);
             cRider_setMotionState_9C88(RIDER_139C88, 0);
             if (cRider_getControlState(RIDER_139C88) != 0xC) {
                 if (cRider_getControlState(RIDER_139C88) == 2) {
@@ -2252,21 +2255,21 @@ extern "C" void cRailslideMotion_step(char* self)
 {
     if (cRider_getControlState(RIDER_AF28) == 0xC)
         *(float*)(self + 0x1C) = 0.0f;
-    char* rider = RIDER_AF28;
-    float len = Len_AF28(*(t4Vector*)(rider + 0x1E0));
-    if (*(float*)(rider + 0x2E4) < len)
-        ScaleEq_AF28(*(t4Vector*)(rider + 0x1E0), *(float*)(rider + 0x2E4) / len);
+    cRider* rider = (cRider*)(RIDER_AF28);
+    float len = Len_AF28(rider->mVelocity);
+    if (rider->unk_2E4 < len)
+        ScaleEq_AF28(rider->mVelocity, rider->unk_2E4 / len);
     float dt = *(float*)(RIDER_AF28 + 0x300) * 0.01666666753590107f;
     *(int*)(self + 0x20) = 1;
     *(int*)(RIDER_AF28 + 0x5AC) = 0;
-    char* rider2 = RIDER_AF28;
-    t4Vector* pt = (t4Vector*)(*(char**)(*(char**)(rider2 + 0x780) + 0x2C) + (*(int*)(rider2 + 0x8A0) << 5));
+    cRider* rider2 = (cRider*)(RIDER_AF28);
+    t4Vector* pt = &rider2->mAnimModel->bones[rider2->mBoneBoardRoot].pos;
     sHit_AF28 hit;
-    if (cOverlapList_splineIntersect(*(void**)(rider2 + 0x860), pt, &hit, 1, 300.0f)) {
+    if (cOverlapList_splineIntersect(rider2->mOverlapList, pt, &hit, 1, 300.0f)) {
         if (hit.obj) {
-            char* handler = *(char**)(hit.obj + 0xC);
-            if (handler) {
-                sVE46_AF28* vt = *(sVE46_AF28**)(handler + 0xC);
+            cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
+            if (((char*)handler)) {
+                sVE46_AF28* vt = (sVE46_AF28*)handler->mVtbl;
                 if (vt[46].fn(vthis(handler, vt[46])))
                     *(int*)(RIDER_AF28 + 0x5AC) = 1;
             }
@@ -2276,20 +2279,20 @@ extern "C" void cRailslideMotion_step(char* self)
         else
             *(unsigned int*)(self + 0x24) = 0xFFFFFFFF;
         if (hit.obj) {
-            char* handler = *(char**)(hit.obj + 0xC);
-            if (handler) {
-                sVE42_AF28* vt = *(sVE42_AF28**)(handler + 0xC);
+            cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
+            if (((char*)handler)) {
+                sVE42_AF28* vt = (sVE42_AF28*)handler->mVtbl;
                 vt[42].fn(vthis(handler, vt[42]), &hit);
             }
         }
         *(int*)(RIDER_AF28 + 0x438) = hit.mat;
         *(t4Vector*)(RIDER_AF28 + 0x460) = hit.pos;
         *(t4Vector*)(RIDER_AF28 + 0x3D0) = hit.v20;
-        char* rider3 = RIDER_AF28;
-        float spd = ScaleAtLeast_AF28(Len_AF28(*(t4Vector*)(rider3 + 0x1E0)), 0.0009000000427477062f, 0.5f);
+        cRider* rider3 = (cRider*)(RIDER_AF28);
+        float spd = ScaleAtLeast_AF28(Len_AF28(rider3->mVelocity), 0.0009000000427477062f, 0.5f);
         float speedSq = spd * spd;
         if (*(float*)(self + 0x14) < 0.6000000238418579f)
-            *(float*)(rider3 + 0x25C) = 2.0f;
+            rider3->mSlewed[9].cur = 2.0f;
         if (cRider_isRailBoardIntersect(RIDER_AF28, &hit.pos, &hit.nrm)) {
             *(int*)(self + 0x20) = 0;
             *(float*)(self + 0x14) += dt;
@@ -2326,9 +2329,9 @@ extern "C" void cRailslideMotion_step(char* self)
             if (boostStrength > 0.0f)
                 AddEq_AF28(acc, Scale_AF28(hit.nrm, boostStrength * (dn > 0.0f ? 2450.0f : -2450.0f)));
             if (hit.obj) {
-                char* handler = *(char**)(hit.obj + 0xC);
-                if (handler) {
-                    sVE43_AF28* vt = *(sVE43_AF28**)(handler + 0xC);
+                cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
+                if (((char*)handler)) {
+                    sVE43_AF28* vt = (sVE43_AF28*)handler->mVtbl;
                     vt[43].fn(vthis(handler, vt[43]), &hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
                 }
             }
@@ -2407,12 +2410,12 @@ extern "C" void cRailslideMotion_step(char* self)
             }
             float vd = Dot_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), dirn);
             if (vd < 0.0f) {
-                char* rider5 = RIDER_AF28;
-                float vl = Len_AF28(*(t4Vector*)(rider5 + 0x1E0));
+                cRider* rider5 = (cRider*)(RIDER_AF28);
+                float vl = Len_AF28(rider5->mVelocity);
                 if (vl < 0.0010000000474974513f) {
                     dirn = hit.nrm;
                 } else {
-                    t4Vector pushDir = Sub_AF28(dirn, Scale_AF28(*(t4Vector*)(rider5 + 0x1E0), vd / vl));
+                    t4Vector pushDir = Sub_AF28(dirn, Scale_AF28(rider5->mVelocity, vd / vl));
                     float pl = Len_AF28(pushDir);
                     if (pl > 0.0010000000474974513f)
                         dirn = Div_AF28(pushDir, pl);
@@ -2655,15 +2658,15 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
 {
     cRider_updateBoundBox_v(RIDER_BFA8, 0);
     if (self->ForceNaturalAir != 0) {
-        char* rider = RIDER_BFA8;
-        *(int*)(rider + 0x234) = 0;
-        *(float*)(rider + 0x230) = 0.03333333507180214f;
+        cRider* rider = (cRider*)(RIDER_BFA8);
+        *(int*)&rider->mSlewed[5].target = 0;
+        rider->mSlewed[5].rate = 0.03333333507180214f;
         cRider_applyJumpPop(RIDER_BFA8, -1.0f);
     }
     sTbl_BFA8 tbl = D_00458230;
     if (cRider_getControlState(RIDER_BFA8) == 0xC) {
-        char* rider = RIDER_BFA8;
-        *(int*)(*(char**)(rider + 0xAA0) + 0x28) = tbl.v[*(int*)(*(char**)(rider + 0x77C) + 0x394)];
+        cRider* rider = (cRider*)(RIDER_BFA8);
+        *(int*)((char*)rider->mSphereTree + 0x28) = tbl.v[rider->mRiderHandler->UberGrindControl.CurrentGrind];
     } else {
         *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 22;
     }
@@ -2676,10 +2679,10 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
         cRider_setMotionState_impl_BFA8(RIDER_BFA8, 1);
         cSSXAudio_Lift((char*)gSSXAudio, RIDER_BFA8);
     }
-    char* rider = RIDER_BFA8;
-    float len = vu0Length_BFA8(*(sVec4_BFA8*)(rider + 0x1E0));
-    if (*(float*)(rider + 0x2E4) < len)
-        vu0ScaleEq_BFA8(*(sVec4_BFA8*)(rider + 0x1E0), *(float*)(rider + 0x2E4) / len);
+    cRider* rider = (cRider*)(RIDER_BFA8);
+    float len = vu0Length_BFA8(*(sVec4_BFA8*)&rider->mVelocity);
+    if (rider->unk_2E4 < len)
+        vu0ScaleEq_BFA8(*(sVec4_BFA8*)&rider->mVelocity, rider->unk_2E4 / len);
 }
 #endif
 
@@ -3080,13 +3083,13 @@ struct sHpCtl_13C7A8 {
 extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
 {
     self->m0 = 0;
-    char* rider = self->mRider;
+    cRider* rider = (cRider*)self->mRider;
     sHpEntry_13C7A8* tbl = (sHpEntry_13C7A8*)SSXApp->Game->SurfPropCache;
-    sHpEntry_13C7A8* snow = &tbl[*(int*)(rider + 0x438)];
-    float k = *(float*)(*(char**)(rider + 0x780) + 0x140);
+    sHpEntry_13C7A8* snow = &tbl[rider->mSurfaceType];
+    float k = rider->mAnimModel->unk_140.x;
     self->m4 = k * snow->m14;
     self->m8 = k * snow->m18;
-    *(sHpVec4_13C7A8*)(rider + 0x390) = *(sHpVec4_13C7A8*)(rider + 0x370);
+    *(sHpVec4_13C7A8*)&rider->DampGroundNormal = *(sHpVec4_13C7A8*)&rider->mGroundNormal;
     self->mC = 0;
     int aiTick = AITick();
     self->m10 = aiTick;
@@ -3241,7 +3244,7 @@ static inline float vu0Length_13C948(const sVec4HP& v)
  */
 // cGroundMotion::getBoostForce(const tSurfData* snow) (SSX On Tour symbols; the retail state check stands in for
 // !cRider::isOnRaceCourse, and the retail code has no getAccelerationAttrib scale).
-extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, char* snow)
+extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, tSurfData* snow)
 {
     float slowTerritoryBoostScalar = 1.0f;
     int inSlowTerritory = *(int*)(RIDER + 0x434) < 17;
@@ -3278,7 +3281,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, char* snow)
         if (0.0f < delta)
             totalBoost += boostWarp * delta * (1052.7747802734375f * (*(float*)(RIDER + 0x3A8) >= 0.0f ? *(float*)(RIDER + 0x3A8) : 0.0f) + 2350.0f);
     }
-    float speed = *(float*)(snow + 0x20) * slowTerritoryBoostScalar * 27.77777862548828f - vu0Length_13C948(*(sVec4HP*)(RIDER + 0x1E0));
+    float speed = snow->AutoBoostSpeed * slowTerritoryBoostScalar * 27.77777862548828f - vu0Length_13C948(*(sVec4HP*)(RIDER + 0x1E0));
     float boostDelta = speed < 1111.111083984375f ? speed : 1111.111083984375f;
     if (0.0f < boostDelta)
     {
@@ -3289,7 +3292,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, char* snow)
             boostDelta *= hpAbs_13C948(*(float*)(RIDER + 0x378));
         totalBoost += (pathFactor >? getGoingFactor * 1.0004451274871826f) * boostDelta;
     }
-    return backwardsInSpokePenalty * (*(float*)(snow + 0x24) * totalBoost * slowTerritoryBoostScalar + *(float*)(RIDER + 0x220) * 56.41297912597656f);
+    return backwardsInSpokePenalty * (snow->AutoBoostFactor * totalBoost * slowTerritoryBoostScalar + *(float*)(RIDER + 0x220) * 56.41297912597656f);
 }
 #undef RIDER
 #endif
@@ -4572,18 +4575,18 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
     if (self->ForceNaturalAir != 0) {
         cRider_applyJumpPop(RIDER_13F178, -1.0f);
     } else {
-        char* rider = RIDER_13F178;
-        int idx = *(int*)(rider + 0x438);
-        char* snow = (char*)SSXApp->Game->SurfPropCache + idx * 0xB0;
+        cRider* rider = (cRider*)(RIDER_13F178);
+        int idx = rider->mSurfaceType;
+        char* snow = (char*)&SSXApp->Game->SurfPropCache->SurfData[idx];
         int fl;
         if (idx == 18) {
             sInfo_13F178 info;
-            info.pos = *(sVec4HP*)(rider + 0x110);
-            info.dir = vu0Normalize_13F178(*(sVec4HP*)(rider + 0x1E0));
+            info.pos = *(sVec4HP*)&rider->mPosition;
+            info.dir = vu0Normalize_13F178(*(sVec4HP*)&rider->mVelocity);
             info.up = *(sVec4HP*)(RIDER_13F178 + 0x370);
             info.f30 = 0;
             cRider_flagEventWipeout(RIDER_13F178, 360, 0, *(int*)(RIDER_13F178 + 0x438), &info);
-        } else if (*(int*)(snow + 0x44) != 0 || (fl = *(short*)(rider + 0x2D4), (fl & 2) != 0)) {
+        } else if (*(int*)(snow + 0x44) != 0 || (fl = *(short*)&rider->SurfaceFlags, (fl & 2) != 0)) {
             cRider_checkForReset(rider, 0, 1);
         }
     }
@@ -4597,12 +4600,12 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
         cRider_setMotionState_impl_13F178(RIDER_13F178, 1);
         cSSXAudio_Lift((char*)gSSXAudio, RIDER_13F178);
     }
-    char* rider = RIDER_13F178;
-    *(sVec4HP*)(rider + 0x390) = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)(rider + 0x370), 0.5f)));
-    char* rider3 = RIDER_13F178;
-    float len = vu0Length_13F178(*(sVec4HP*)(rider3 + 0x1E0));
-    if (*(float*)(rider3 + 0x2E4) < len) {
-        vu0ScaleEq_13F178(*(sVec4HP*)(rider3 + 0x1E0), *(float*)(rider3 + 0x2E4) / len);
+    cRider* rider = (cRider*)(RIDER_13F178);
+    *(sVec4HP*)&rider->DampGroundNormal = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)&rider->mGroundNormal, 0.5f)));
+    cRider* rider3 = (cRider*)(RIDER_13F178);
+    float len = vu0Length_13F178(*(sVec4HP*)&rider3->mVelocity);
+    if (rider3->unk_2E4 < len) {
+        vu0ScaleEq_13F178(*(sVec4HP*)&rider3->mVelocity, rider3->unk_2E4 / len);
     }
     float k = 0.0f;
     float vmax = 3333.33349609375f;
@@ -4613,10 +4616,10 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
         }
     }
     *(float*)(RIDER_13F178 + 0x75C) = k;
-    char* rider4 = RIDER_13F178;
-    *(float*)(rider4 + 0x754) = absf_13F178(*(float*)(rider4 + 0x1F0));
-    char* rider5 = RIDER_13F178;
-    *(float*)(rider5 + 0x750) = absf_13F178(*(float*)(rider5 + 0x214));
+    cRider* rider4 = (cRider*)(RIDER_13F178);
+    rider4->mAudioEdging = absf_13F178(rider4->mSlewed[0].cur);
+    cRider* rider5 = (cRider*)(RIDER_13F178);
+    rider5->mAudioBraking = absf_13F178(rider5->mSlewed[3].cur);
 }
 #endif
 
@@ -4817,14 +4820,14 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     if (cRider_getControlState(RIDER) == 9)
         return;
     if (!riderFlag_13F488(RIDER)) {
-        char* rider = RIDER;
-        if (*(float*)(rider + 0x4C8) < 50.0f && absf_13F488(*(float*)(rider + 0x498) - *(float*)(rider + 0x118)) < 50.0f)
+        cRider* rider = (cRider*)(RIDER);
+        if (rider->PathDistXY < 50.0f && absf_13F488(rider->PathPos.z - rider->mPosition.z) < 50.0f)
             return;
     }
     sHit_13F488 hit;
     sSphere_13F488 sph;
-    char* rider = RIDER;
-    cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_13F488(rider));
+    cRider* rider = (cRider*)(RIDER);
+    cWorldRider_cWorldRider(&sph, rider->mSphereTree, !riderFlag_13F488(((char*)rider)));
     sph.f8 = 1;
     sph.dir = RV(880);
     float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));

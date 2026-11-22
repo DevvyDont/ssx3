@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uimenu.h"
+#include "ui/uiicon.h"
 #include "vtable.h"
 #include "bx/math3d.h"
 #include "fe/ferider.h"
@@ -464,9 +466,9 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
     switch (event) {
     case 5: {
         int on = 1;
-        char* feRider = riderSlot_17E8((self));
-        *(int*)(feRider + 0xC20) = on;
-        *(int*)(feRider + 0xC1C) = 0;
+        cFERider* feRider = (cFERider*)riderSlot_17E8((self));
+        feRider->mSelected = on;
+        feRider->mCustomized = 0;
         int rider = self->mUserNum;
         int player = self->mCurrentCtrl;
         int ch = D_00440F68[widget->id];
@@ -478,16 +480,16 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         refresh_17E8(iface);
         unsigned char mask = on << self->mCurrentCtrl;
         cFECustom_setPlayerCtrlMask(*(void**)(char*)self->mpEngine, self->mUserNum, mask);
-        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onSelect((self), widget->id);
-        if (st != 0)
+        cUIState* st = (cUIState*)(*(cStateFactory_17E8**)(char*)self->mpEngine)->onSelect((self), widget->id);
+        if (((void*)st) != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, st);
         cFERider_setVisible(riderSlot_17E8((self)), 0);
         self->mbDraw3D = 0;
         break;
     }
     case 6: {
-        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack((self), widget->id);
-        if (st != 0) {
+        cUIState* st = (cUIState*)(*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack((self), widget->id);
+        if (((void*)st) != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, st);
             cFERider_setVisible(riderSlot_17E8((self)), 0);
             self->mbDraw3D = 0;
@@ -518,8 +520,8 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
         refresh_17E8(iface);
-        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)self->mpEngine, 1);
-        *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
+        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)self->mpEngine, 1);
+        st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
         cFERider_setVisible(riderSlot_17E8((self)), 0);
         self->mbDraw3D = 0;
@@ -529,7 +531,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
         refresh_17E8(iface);
-        void* st = cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0x100, 0), (char*)self->mpEngine, 2, 1 << self->mCurrentCtrl);
+        cUIState* st = (cUIState*)cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0x100, 0), (char*)self->mpEngine, 2, 1 << self->mCurrentCtrl);
         cUIStateStack_push(&self->mpEngine->mStateStack, st);
         char* top = *(char**)(char*)self->mpEngine;
         if (top != 0)
@@ -716,10 +718,10 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
  */
 extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vself)
 {
-    char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, vself->mUserNum);
+    cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, vself->mUserNum);
     int ok = 0;
-    if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
-        ok = *(int*)(rider + 0xCB4) != 0;
+    if (*(unsigned int*)rider < 10 && rider->mDoneLoadingTextures != 0) {
+        ok = rider->mCompiledModel != 0;
     }
     if (ok && vself->mbDraw3D != 0) {
         sQuat_181EF0 pos;
@@ -745,12 +747,12 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vsel
         (*(sQuat_181EF0*)&xf.Q) = QuatMul_181EF0((*(sQuat_181EF0*)&xf.Q), AxisAngle_181EF0(t4vect_ZAxis, ang));
         cFERider_setPose(rider, &xf);
         if (vself->mbIsFirst != 0) {
-            void* anim = *(void**)(rider + 0xC);
+            void* anim = rider->mpRiderAnim;
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 434, 0, -1.0f);
             }
-            *(int*)(rider + 0xCCC) = 0;
+            rider->mAnimateBoard = 0;
             vself->mbIsFirst = 0;
         }
         {
@@ -1018,7 +1020,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         break;
     }
     case 1: {
-        int sel = menu->mMiscData + *(unsigned char*)((char*)self->mpMenu + 0x98);
+        int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
         sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
         vt[21].fn(vthis(menu, vt[21]), D_004C66B8);
         cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
@@ -1029,7 +1031,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
     case 5: {
-        int sel = menu->mMiscData + *(unsigned char*)((char*)self->mpMenu + 0x98);
+        int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
         if (sel == 0)
             self->mCheatCharID = 0;
         else
@@ -1090,13 +1092,13 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_updateCharWidgets);
 extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelect* self)
 {
     int i;
-    int idx = *(unsigned char*)((char*)self->mpMenu + 0x98);
+    int idx = self->mpMenu->mScrollItemOffset;
     for (i = 0; i < 6; i++) {
-        void* it = ((void**)(&self->mpCharWidget[0]))[i];
-        if (it != 0) {
+        cUIIcon* it = (cUIIcon*)((void**)(&self->mpCharWidget[0]))[i];
+        if (((void*)it) != 0) {
             int textureElem = ((int*)(&self->mpCharElem[0]))[idx + i];
-            *(int*)((char*)it + 0x78) = -1;
-            *(int*)((char*)it + 0x7c) = textureElem;
+            it->mTextureID = -1;
+            it->mpTextureElem = (const cTextureElement*)textureElem;
         }
     }
 }

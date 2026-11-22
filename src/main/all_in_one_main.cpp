@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/lobbyman.h"
 #include "vtable.h"
 #include "render/font.h"
 #include "util/menu.h"
@@ -2489,8 +2490,8 @@ extern int cUIGroup_vtbl[];
  * @return @p self
  */
 extern "C" void *cScreenKeyboard_cScreenKeyboard(cScreenKeyboard* self) {
-    self->mpNext = (cListNode*)((char*)self);
-    self->mpPrev = (cListNode*)((char*)self);
+    self->mpNext = (cListNode*)self;
+    self->mpPrev = (cListNode*)self;
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
     self->mVtbl = (void**)cUIScreen_vtbl;
@@ -5540,12 +5541,12 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateNet_isProcessingEvents);
  * @param netState  the online state (cFEStateNet)
  * @return 1 when both are set, otherwise 0
  */
-extern "C" int cFEStateNet_isProcessingEvents(void *netState) {
+extern "C" int cFEStateNet_isProcessingEvents(cFEStateNet* netState) {
     int var_3;
 
     var_3 = 0;
-    if ((*(int *)((char*)(netState) + (0x40))) != 0) {
-        var_3 = (*(int *)((char*)(netState) + (0x48))) != 0;
+    if (((int)netState->mpScreen) != 0) {
+        var_3 = (netState->unk_048) != 0;
     }
     return var_3;
 }

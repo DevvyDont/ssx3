@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/adfdatasource.h"
 #include "bx/math3d.h"
 #include "vtable.h"
 #include "animation/animsequencer.h"
@@ -543,9 +544,9 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
     int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2)) + 0x8)) + 0x12);
     for (int i = 0; i < n; i++)
     {
-        char* bank = *(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2));
-        char* clip = (char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)(bank + 0x8));
-        unsigned short* keys = *(unsigned short**)(bank + 0x10);
+        cAdfDataSource* bank = (cAdfDataSource*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2)));
+        char* clip = (char*)(((unsigned int)animid >> 8) * 0x14 + (int)bank->Anims);
+        unsigned short* keys = (unsigned short*)bank->Tags;
         cAnimSequence_addTrigger(node, i, keys[(*(unsigned short*)(clip + 0x10) + i) * 2] * 0.03333333507180214f);
     }
     if (seq->NumPlaying == 1)
@@ -813,13 +814,13 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int ani
     if (id == 519)
         return 0.0f;
     unsigned int mapEntry = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((mapEntry & 0xFF) << 2));
-    char* animRec = (char*)((mapEntry >> 8) * 0x14 + *(int*)(clip + 0x8));
+    cAdfDataSource* clip = (cAdfDataSource*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + ((mapEntry & 0xFF) << 2)));
+    tAdfAnimHeader* animRec = (tAdfAnimHeader*)((char*)((mapEntry >> 8) * 0x14 + (int)clip->Anims));
     float frameTime;
-    if (frame < *(unsigned short*)(animRec + 0x12))
+    if (frame < animRec->mNumTags)
     {
-        sAnimKey00312820* keys = *(sAnimKey00312820**)(clip + 0x10);
-        frameTime = keys[*(unsigned short*)(animRec + 0x10) + frame].value * 0.03333333507180214f;
+        sAnimKey00312820* keys = (sAnimKey00312820*)clip->Tags;
+        frameTime = keys[animRec->mTagIndex + frame].value * 0.03333333507180214f;
     }
     else
     {
@@ -937,8 +938,8 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimFramePercent
 extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(cRiderAnimBase* self, int i)
 {
     cAnimSequencer* seqs = self->Sequencer;
-    cAnimSequenceNode* node = cAnimSequencer_getSequence(&seqs[i], 0);
-    return *(float*)((char*)node + 0x8) / *(float*)((char*)node + 0x10);
+    cAnimSequence* node = (cAnimSequence*)cAnimSequencer_getSequence(&seqs[i], 0);
+    return node->SubAnims[0].Time / node->SubAnims[0].TotalTime;
 }
 #endif
 
@@ -982,14 +983,14 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * @param anim  the AI anim to play
  * @return @p anim
  */
-extern "C" int cRiderAnimBase_playInto(cRiderAnimBase* self, cAnimSequencer* seq, char* node, int anim)
+extern "C" int cRiderAnimBase_playInto(cRiderAnimBase* self, cAnimSequencer* seq, cAnimSequence* node, int anim)
 {
-    float currentWeight = *(float*)(node + 0x94);
-    float timeLeft = *(float*)(node + 0x9C);
-    float targetWeight = *(float*)(node + 0x98);
+    float currentWeight = node->CurrentWeight;
+    float timeLeft = node->WeightTimer;
+    float targetWeight = node->TargetWeight;
     cAnimSequencer_expire(seq, node);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
-    cAnimSequence* sequence = (cAnimSequence*)((char*)cAnimSequencer_getSequence(seq, 0));
+    cAnimSequence* sequence = (cAnimSequence*)cAnimSequencer_getSequence(seq, 0);
     sequence->TargetWeight = currentWeight;
     sequence->CurrentWeight = currentWeight;
     if (timeLeft != 0.0f)

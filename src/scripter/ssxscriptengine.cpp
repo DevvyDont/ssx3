@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "scripter/scriptobjtransition.h"
+#include "camera/camera.h"
+#include "world/instancerecord.h"
 #include "ui/uithing.h"
 #include "visualfx/transitionobj.h"
 #include "path/pathsys.h"
@@ -807,8 +810,8 @@ extern "C" int cSSXScriptEngine_TransferNISList(cSSXScriptEngine* self, int dest
     if (destNISList == sourceNISList) {
         return 1;
     }
-    char* base = (char*)self->mpNISLists;
-    return tNISList_TransferFromNISList((tNISList*)(base + destNISList * 0xCC), (tNISList*)(base + sourceNISList * 0xCC));
+    tNISList* base = self->mpNISLists;
+    return tNISList_TransferFromNISList(&base[destNISList], &base[sourceNISList]);
 }
 #endif
 
@@ -1451,10 +1454,10 @@ extern char str_snd[];
 extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char* ext, void* data, int dataSize, int* kind, int* bank)
 {
     if (func_00416B18(str_scr, ext, 3) == 0) {
-        char* bankHeader = (char*)GetSSXScriptHeader1(data);
-        *(int*)(bankHeader + 0x1C) = self->mCurrAttachingBankNum;
+        tSSXScriptHeader* bankHeader = (tSSXScriptHeader*)GetSSXScriptHeader1(data);
+        bankHeader->bankNum = self->mCurrAttachingBankNum;
         *kind = 0;
-        cBXScriptEngine_AttachScript(((char*)self), data, *(int*)(bankHeader + 0x18));
+        cBXScriptEngine_AttachScript(((char*)self), data, bankHeader->scriptIndex);
     } else if (func_00416B18(str_anm, ext, 3) == 0) {
         *kind = 1;
         *bank = self->mCurrAttachingBankNum;
@@ -2759,19 +2762,19 @@ void tSSXScriptBankInfo_Clear(void* slot);
  */
 extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int i, const char* name, int flags, int key, int pMem, int memSize)
 {
-    char* slot = (char*)&self->mScriptDataBanks[i];
-    *(int*)(slot + 0x4) = key;
+    tSSXScriptBankInfo* slot = &self->mScriptDataBanks[i];
+    slot->dataIdentifier = key;
     if (pMem != 0) {
-        *(void**)(slot + 0x8) = ASYNCFILE_loadat(name, pMem, memSize);
-        *(int*)(slot + 0xC) = 0;
+        slot->asyncHandle = ASYNCFILE_loadat(name, pMem, memSize);
+        slot->dynamicMem = 0;
     } else {
-        *(void**)(slot + 0x8) = ASYNCFILE_load(name, flags, memSize);
-        *(int*)(slot + 0xC) = 1;
+        slot->asyncHandle = ASYNCFILE_load(name, flags, memSize);
+        slot->dynamicMem = 1;
     }
-    if (*(void**)(slot + 0x8) != 0) {
+    if (slot->asyncHandle != 0) {
         self->mNumAsyncs += 1;
     }
-    if (*(void**)(slot + 0x8) == 0) {
+    if (slot->asyncHandle == 0) {
         tSSXScriptBankInfo_Clear(slot);
     }
 }
@@ -2793,16 +2796,16 @@ extern "C" void* cDataManager_DetachData(void* self, int key);
  */
 extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int i)
 {
-    char* slot = (char*)&self->mScriptDataBanks[i];
+    tSSXScriptBankInfo* slot = &self->mScriptDataBanks[i];
     int key = *(int*)slot;
     if (key != 0) {
         void* bankData = cDataManager_DetachData((char*)&self->mMaxDataInstances, key);
-        if (*(int*)(slot + 0xC) != 0 && bankData != 0) {
+        if (slot->dynamicMem != 0 && bankData != 0) {
             cMemMan_free(bankData);
         }
-    } else if (*(void**)(slot + 0x8) != 0) {
-        ASYNCFILE_cancel(*(void**)(slot + 0x8));
-        ASYNCFILE_release(*(void**)(slot + 0x8), 0, 0);
+    } else if (slot->asyncHandle != 0) {
+        ASYNCFILE_cancel(slot->asyncHandle);
+        ASYNCFILE_release(slot->asyncHandle, 0, 0);
         self->mNumAsyncs -= 1;
     }
     tSSXScriptBankInfo_Clear(slot);
@@ -2824,10 +2827,10 @@ void tSSXScriptBankInfo_Clear(void* slot);
  */
 extern "C" void cSSXScriptEngine_CancelAsyncLoadScriptBank(cSSXScriptEngine* self, int i, int dataIdentifier)
 {
-    char* slot = (char*)&self->mScriptDataBanks[i];
-    if (*(void**)(slot + 0x8) != 0) {
-        ASYNCFILE_cancel(*(void**)(slot + 0x8));
-        ASYNCFILE_release(*(void**)(slot + 0x8), 0, 0);
+    tSSXScriptBankInfo* slot = &self->mScriptDataBanks[i];
+    if (slot->asyncHandle != 0) {
+        ASYNCFILE_cancel(slot->asyncHandle);
+        ASYNCFILE_release(slot->asyncHandle, 0, 0);
         self->mNumAsyncs -= 1;
         tSSXScriptBankInfo_Clear(slot);
     }
@@ -3267,14 +3270,14 @@ extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXSc
     if (~code == 0)
         return;
     char* model = ((char**)(char*)cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable)[code & 0xFF];
-    char* bone = Bone_27BB08(model, code);
-    *pos = sVec_27BB08(*(float*)(bone + 0x40), *(float*)(bone + 0x44), *(float*)(bone + 0x48), 1.0f);
-    *yaw = Atan2_27BB08(*(float*)(bone + 0x14), *(float*)(bone + 0x10));
-    *pitch = func_0031C128(*(float*)(bone + 0x18));
+    tInstanceRecord* bone = (tInstanceRecord*)Bone_27BB08(model, code);
+    *pos = sVec_27BB08(bone->m_fmTransform.m[3][0], bone->m_fmTransform.m[3][1], bone->m_fmTransform.m[3][2], 1.0f);
+    *yaw = Atan2_27BB08(bone->m_fmTransform.m[0][1], bone->m_fmTransform.m[0][0]);
+    *pitch = func_0031C128(bone->m_fmTransform.m[0][2]);
     *flag = 0;
     if (off) {
         sMat_27BB08 rot;
-        rot = *(sMat_27BB08*)(bone + 0x10);
+        rot = *(sMat_27BB08*)&bone->m_fmTransform;
         sVec_27BB08 rotatedOff = *off;
         rotatedOff.w = 0.0f;
         rotatedOff = MulMat_27BB08(&rot, rotatedOff);
@@ -3297,10 +3300,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AllocScriptSetupInfo__F
 void* cSSXScriptEngine_AllocScriptSetupInfo(void* vself)
 {
     cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
-    void* head = self->mpSetupInfoUnused;
-    self->mpSetupInfoUnused = (tSSXScriptSetupInfoLinked*)(*(void**)((char*)head + 0x10));
-    *(void**)((char*)head + 0x10) = 0;
-    return head;
+    tSSXScriptSetupInfoLinked* head = self->mpSetupInfoUnused;
+    self->mpSetupInfoUnused = (tSSXScriptSetupInfoLinked*)(head->pNext);
+    head->pNext = 0;
+    return ((void*)head);
 }
 #endif
 
@@ -3312,14 +3315,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReleaseScriptSetupInfo_
  *
  * @param setupInfo  the record
  */
-void cSSXScriptEngine_ReleaseScriptSetupInfo(void* vself, void* setupInfo)
+void cSSXScriptEngine_ReleaseScriptSetupInfo(void* vself, void* vsetupInfo)
 {
+    tSSXScriptSetupInfoLinked* setupInfo = (tSSXScriptSetupInfoLinked*)vsetupInfo;
     cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
-    *(void**)((char*)setupInfo + 0x10) = (void*)self->mpSetupInfoUnused;
+    setupInfo->pNext = (tSSXScriptSetupInfoLinked*)((void*)self->mpSetupInfoUnused);
     *(int*)setupInfo = -1;
-    *(int*)((char*)setupInfo + 0x4) = -1;
-    *(int*)((char*)setupInfo + 0x8) = -1;
-    *(int*)((char*)setupInfo + 0xc) = -1;
+    setupInfo->supportChar0AIIndex = -1;
+    setupInfo->supportChar1AIIndex = -1;
+    setupInfo->viewIndex = -1;
     self->mpSetupInfoUnused = (tSSXScriptSetupInfoLinked*)setupInfo;
 }
 #endif
@@ -4983,9 +4987,9 @@ extern "C" void cScriptObjCamera_OnStartObjectUse(cScriptObjCamera* self)
         self->mWeight = 1.0f;
         cScriptObjCamera_CalculateBaseTransform(self, (int)self->mpCameraEntity);
         char* riders = (char*)SSXApp->Game->ViewMan;
-        char* rider = *(char**)(riders + (self->mViewIndex << 2) + 4);
-        cScriptCameraController_addCamera(*(void**)(rider + 0xAC), self);
-        if (*(int*)(*(char**)(rider + 0xAC) + 0x18) != 0) {
+        cCamera* rider = (cCamera*)(*(char**)(riders + (self->mViewIndex << 2) + 4));
+        cScriptCameraController_addCamera(rider->ScriptController, self);
+        if (*(int*)((char*)rider->ScriptController + 0x18) != 0) {
             cCamera_setCurrentController(rider, 3);
         }
     }
@@ -5026,12 +5030,12 @@ extern "C" void cScriptObjCamera_OnEndObjectUse(cScriptObjCamera* self)
     if (app->Game != 0) {
         *(int*)&self->mWeight = 0;
         char* riders = (char*)app->Game->ViewMan;
-        char* rider = *(char**)(riders + (self->mViewIndex << 2) + 4);
-        cScriptCameraController_removeCamera(*(void**)(rider + 0xAC), self);
-        if (*(int*)(*(char**)(rider + 0xAC) + 0x18) == 0) {
+        cCamera* rider = (cCamera*)(*(char**)(riders + (self->mViewIndex << 2) + 4));
+        cScriptCameraController_removeCamera(rider->ScriptController, self);
+        if (*(int*)((char*)rider->ScriptController + 0x18) == 0) {
             cCamera_setCurrentController(rider, 2);
-            cChaseCameraController_switchCamera_Restart(*(void**)(rider + 0xA8));
-            (*(cScrObj_D8D8**)(rider + 0xA0))->snapCurrent();
+            cChaseCameraController_switchCamera_Restart(rider->ChaseController);
+            ((cScrObj_D8D8*)rider->Controller)->snapCurrent();
         }
     }
 }
@@ -5608,17 +5612,17 @@ static inline void Translate_F9F8(void* mat, const sVec_F9F8& v)
 extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
 {
     cScriptObject_OnStartObjectUse(self + 0xC);
-    void* obj = *(void**)(self + 0x8);
+    cScriptPlayerEntity* obj = (cScriptPlayerEntity*)(*(void**)(self + 0x8));
     char* mat = self + 0x30;
     LoadIdentity_F9F8(mat);
     *(int*)(self + 0x70) = 0;
     *(int*)(self + 0x74) = 0;
     *(int*)(self + 0x78) = 0;
-    char* info = (char*)GetSSXActorHeader(obj);
-    *(float*)(self + 0x70) = *(float*)(info + 0x1C) * 0.01745329424738884f;
-    *(float*)(self + 0x74) = *(float*)(info + 0x18) * 0.01745329424738884f;
-    *(float*)(self + 0x78) = *(float*)(info + 0x14) * 0.01745329424738884f;
-    sVec_F9F8 baseOffset(*(float*)(info + 0x8), *(float*)(info + 0xC), *(float*)(info + 0x10), 1.0f);
+    tSSXHeaderActor* info = (tSSXHeaderActor*)GetSSXActorHeader(obj);
+    *(float*)(self + 0x70) = info->baseRotX * 0.01745329424738884f;
+    *(float*)(self + 0x74) = info->baseRotY * 0.01745329424738884f;
+    *(float*)(self + 0x78) = info->baseRotZ * 0.01745329424738884f;
+    sVec_F9F8 baseOffset(info->basePosX, info->basePosY, info->basePosZ, 1.0f);
     sMat_F9F8 m;
     LoadIdentity_F9F8(&m);
     Translate_F9F8(&m, baseOffset);
@@ -5627,7 +5631,7 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     ROTATE_F9F8(&m, t4vect_XAxis, *(float*)(self + 0x70));
     sVec_F9F8 pos;
     float rx, ry, rz;
-    cSSXScriptEngine_GetAnchorOrientation(ScriptEngine, *(signed char*)(info + 1), *(void**)((char*)obj + 0x8), &pos, &rx, &ry, &rz);
+    cSSXScriptEngine_GetAnchorOrientation(ScriptEngine, info->anchorPos, obj->mpOwner, &pos, &rx, &ry, &rz);
     Translate_F9F8(mat, pos);
     ROTATE2_F9F8(mat, t4vect_ZAxis, -rz);
     ROTATE2_F9F8(mat, t4vect_YAxis, ry);
@@ -5636,9 +5640,9 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     *(float*)(self + 0x70) += rx;
     *(float*)(self + 0x74) += ry;
     *(float*)(self + 0x78) += rz;
-    char* info2 = (char*)GetSSXScriptHeader(*(void**)((char*)obj + 0x8));
-    ((sScriptObj_F9F8*)self)->anim0 = cSSXScriptEngine_GetAnimationBankInfo_2(ScriptEngine, *(int*)(info2 + 0x1C));
-    ((sScriptObj_F9F8*)self)->anim1 = cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, *(int*)(info2 + 0x1C));
+    tSSXScriptHeader* info2 = (tSSXScriptHeader*)GetSSXScriptHeader(obj->mpOwner);
+    ((sScriptObj_F9F8*)self)->anim0 = cSSXScriptEngine_GetAnimationBankInfo_2(ScriptEngine, info2->bankNum);
+    ((sScriptObj_F9F8*)self)->anim1 = cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, info2->bankNum);
 }
 #endif
 
@@ -5856,16 +5860,16 @@ extern "C" int func_002B0E28(void* p, int i);
  */
 extern "C" void cScriptObjEvent_Update(cScriptObjEvent* self)
 {
-    char* snd = (char*)cAudioInterface_bxAudio();
+    cSSXAudio* snd = cAudioInterface_bxAudio();
     for (int i = 0; i < 4; i++) {
         tScriptObjEventSound* soundSlot = &((&self->mSounds[0]))[i];
         if (soundSlot->soundHandle >= 0) {
             if (soundSlot->endSound != 0) {
-                cBankMonitor_BANKMONITOR_StopHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->soundHandle, 1, 0.0f);
+                cBankMonitor_BANKMONITOR_StopHandle(**(char***)&snd->MusicSys + 0x1D8, soundSlot->soundHandle, 1, 0.0f);
                 soundSlot->soundID = -1;
                 soundSlot->soundHandle = -1;
                 soundSlot->endSound = 0;
-            } else if (cBankMonitor_BANKMONITOR_GetHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->soundHandle, 1) == 0) {
+            } else if (cBankMonitor_BANKMONITOR_GetHandle(**(char***)&snd->MusicSys + 0x1D8, soundSlot->soundHandle, 1) == 0) {
                 soundSlot->soundID = -1;
                 soundSlot->soundHandle = -1;
                 soundSlot->endSound = 0;
@@ -5874,7 +5878,7 @@ extern "C" void cScriptObjEvent_Update(cScriptObjEvent* self)
     }
     if (self->mCheckForStopOnSpeechEnd != 0) {
         self->mCheckForStopOnSpeechEnd = 0;
-        if (func_002B0E28(snd + 0x5560, 0) != 0) {
+        if (func_002B0E28(&snd->SpeechSys, 0) != 0) {
             cSSXScriptEngine_SkipNISListScripts(ScriptEngine, ScriptEngine->mPlayingNISList, 1, 1);
         }
     }
@@ -6792,9 +6796,9 @@ extern "C" void cScriptObjCameraManager_OnInSeqUpdate(cScriptObjCameraManager* s
     GetSSXCameraManagerFrame(obj, info);
     if (*GetSSXCameraManagerHeader_p(obj) != 0) {
         self->mBeatOccurred = 0;
-        char* soundMan = (char*)cAudioInterface_bxAudio();
-        void* timer = soundMan + 0x118;
-        if (*(int*)(soundMan + 0x530) != 0) {
+        cSSXAudio* soundMan = cAudioInterface_bxAudio();
+        void* timer = (char*)&soundMan->MusicSys;
+        if (soundMan->MusicSys.mSongPlaying != 0) {
             float now = func_002B4920(timer);
             if (self->mLastBeatTimeLeft < now) {
                 self->mBeatOccurred = 1;
@@ -6846,7 +6850,7 @@ extern "C" void cScriptObjCameraManager_OnInSeqUpdate(cScriptObjCameraManager* s
         int camera = cScriptObjCameraManager_GetCameraObjectByTrack(self, n->side);
         int otherCamera = cScriptObjCameraManager_GetCameraObjectByTrack(self, 1 - n->side);
         cScriptObjTransition_Update(self->mpTransitionObject, dt);
-        if (*(int*)((char*)self->mpTransitionObject + 8) <= 0) {
+        if (self->mpTransitionObject->mInUse <= 0) {
             self->mInTransition = 0;
         }
         if (self->mInTransition != 0 && otherCamera != 0 && currFrame < (float)(n->len + n->start)) {
@@ -6862,7 +6866,7 @@ extern "C" void cScriptObjCameraManager_OnInSeqUpdate(cScriptObjCameraManager* s
     }
     case 7:
         cScriptObjTransition_Update(self->mpTransitionObject, dt);
-        if (*(int*)((char*)self->mpTransitionObject + 8) <= 0) {
+        if (self->mpTransitionObject->mInUse <= 0) {
             self->mInTransition = 0;
         }
         break;
@@ -6997,7 +7001,7 @@ extern "C" void cScriptObjCameraManager_SetupCameraObject(cScriptObjCameraManage
         }
     }
     if (anim == 9) {
-        cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)((char*)self->rigs[slot]), 0);
+        cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)self->rigs[slot], 0);
         self->chans[ch] = -1;
         return;
     }
@@ -7009,7 +7013,7 @@ extern "C" void cScriptObjCameraManager_SetupCameraObject(cScriptObjCameraManage
                 return;
             }
             if (cScriptEntity_IsPlaying(cameraEntity) != 0 && cameraEntity->id == anim) {
-                cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)((char*)self->rigs[slot]), cameraEntity);
+                cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)self->rigs[slot], cameraEntity);
                 break;
             }
         }

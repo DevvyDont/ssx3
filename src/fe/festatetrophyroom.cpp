@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "movie/mcoverlaymanager.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festatelogin.h"
@@ -1235,47 +1236,47 @@ extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
     cFEMemCard_mInstance = self_;
     self_->mState = 0;
     self_->mScreenStatus = 0;
-    char* app = (char*)cSSXApp_getMCManager(gapp);
-    *(void**)(app + 0x0) = cFEMemCard_writeStart_a5488;
-    *(void**)(app + 0x18) = cFEMemCard_readStart_a5488;
-    *(void**)(app + 0x8) = cFEMemCard_writeDone_a5488;
-    *(void**)(app + 0x20) = cFEMemCard_readDone_a5488;
-    *(void**)(app + 0x6C) = cFEMemCard_isCancelPressed_a5488;
-    *(void**)(app + 0x68) = cFEMemCard_isDeletePressed_a5488;
-    *(void**)(app + 0x64) = cFEMemCard_isSavePressed_a5488;
-    *(void**)(app + 0x70) = cFEMemCard_isOWPressed_a5488;
-    *(void**)(app + 0x74) = cFEMemCard_isDeviceSelected_a5488;
-    *(void**)(app + 0x78) = cFEMemCard_isLoadPressed_a5488;
-    *(void**)(app + 0x7C) = cFEMemCard_isNextMCPressed_a5488;
-    *(void**)(app + 0x80) = cFEMemCard_isPrevMCPressed_a5488;
-    *(void**)(app + 0x84) = cFEMemCard_callbackIsRetryPressed_a5488;
-    *(void**)(app + 0x4) = cFEMemCard_callbackWriteUpdate_a5488;
-    *(void**)(app + 0x44) = cFEMemCard_callbackConfirmOverwrite_a5488;
-    *(void**)(app + 0x40) = cFEMemCard_callbackFileCorrupt_a5488;
-    *(void**)(app + 0x1C) = cFEMemCard_callbackReadUpdate_a5488;
-    *(void**)(app + 0x88) = cFEMemCard_isFormatPressed_a5488;
-    *(void**)(app + 0x48) = cFEMemCard_callbackConfirmFormat_a5488;
-    *(void**)(app + 0x50) = cFEMemCard_callbackConfirmFormatDone_a5488;
-    *(void**)(app + 0x4C) = cFEMemCard_callbackConfirmFormatFail_a5488;
-    *(void**)(app + 0x54) = cFEMemCard_callbackConfirmDelete_a5488;
-    *(void**)(app + 0x38) = cFEMemCard_callbackFileNotFound_a5488;
-    *(void**)(app + 0x28) = cFEMemCard_callbackReadSuccess_a5488;
-    *(void**)(app + 0x24) = cFEMemCard_callbackConfirmLoadFailed_a5488;
-    *(void**)(app + 0x3C) = cFEMemCard_callbackConfirmNoCards_a5488;
-    *(void**)(app + 0x58) = cFEMemCard_callbackConfirmInvalidCard_a5488;
-    *(void**)(app + 0x10) = cFEMemCard_callbackConfirmSaveFailed_a5488;
-    *(void**)(app + 0xC) = cFEMemCard_callbackSaveSuccess_a5488;
-    *(void**)(app + 0x60) = cFEMemCard_callbackConfirmSaveTooBig_a5488;
-    *(void**)(app + 0x30) = cFEMemCard_callbackDeleteDone_a5488;
-    *(void**)(app + 0x34) = cFEMemCard_callbackDeleteFailed_a5488;
-    *(void**)(app + 0x8C) = cFEMemCard_callbackSaveFileCorrupt_a5488;
-    *(void**)(app + 0x90) = cFEMemCard_callbackCardsChecked_a5488;
-    *(void**)(app + 0x94) = cFEMemCard_callbackFileChecked_a5488;
-    *(void**)(app + 0x98) = cFEMemCard_callbackDisplayNoFiles_a5488;
-    *(void**)(app + 0x9C) = cFEMemCard_callbackDisplayNoCards_a5488;
-    *(void**)(app + 0x5C) = cFEMemCard_callbackConfirmNoFreeBlocks_a5488;
-    *(void**)(app + 0xA0) = cFEMemCard_callbackFileExists_a5488;
-    *(void**)(app + 0xA8) = cFEMemCard_callbackCardChanged_a5488;
+    cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(gapp);
+    app->callbackWriteStart = (void (*)())cFEMemCard_writeStart_a5488;
+    app->callbackReadStart = (void (*)())cFEMemCard_readStart_a5488;
+    app->callbackWriteEnd = (void (*)())cFEMemCard_writeDone_a5488;
+    app->callbackReadEnd = (int (*)())cFEMemCard_readDone_a5488;
+    app->callbackIsCancelPressed = (int (*)())cFEMemCard_isCancelPressed_a5488;
+    app->callbackIsDeletePressed = (int (*)())cFEMemCard_isDeletePressed_a5488;
+    app->callbackIsSavePressed = (int (*)())cFEMemCard_isSavePressed_a5488;
+    app->callbackIsOverwritePressed = (int (*)())cFEMemCard_isOWPressed_a5488;
+    app->callbackIsDeviceSelected = (int (*)())cFEMemCard_isDeviceSelected_a5488;
+    app->callbackIsLoadPressed = (int (*)())cFEMemCard_isLoadPressed_a5488;
+    app->callbackIsNextDevicePressed = (int (*)())cFEMemCard_isNextMCPressed_a5488;
+    app->callbackIsPrevDevicePressed = (int (*)())cFEMemCard_isPrevMCPressed_a5488;
+    app->callbackIsRetryPressed = (int (*)())cFEMemCard_callbackIsRetryPressed_a5488;
+    app->callbackWriteUpdate = (int (*)(int))cFEMemCard_callbackWriteUpdate_a5488;
+    app->callbackConfirmOverwrite = (void (*)())cFEMemCard_callbackConfirmOverwrite_a5488;
+    app->callbackFileCorrupt = (void (*)())cFEMemCard_callbackFileCorrupt_a5488;
+    app->callbackReadUpdate = (int (*)(int))cFEMemCard_callbackReadUpdate_a5488;
+    app->callbackIsFormatPressed = (int (*)())cFEMemCard_isFormatPressed_a5488;
+    app->callbackConfirmFormat = (void (*)())cFEMemCard_callbackConfirmFormat_a5488;
+    app->callbackConfirmFormatDone = (void (*)())cFEMemCard_callbackConfirmFormatDone_a5488;
+    app->callbackConfirmFormatFail = (void (*)())cFEMemCard_callbackConfirmFormatFail_a5488;
+    app->callbackConfirmDelete = (void (*)())cFEMemCard_callbackConfirmDelete_a5488;
+    app->callbackFileNotFound = (void (*)())cFEMemCard_callbackFileNotFound_a5488;
+    app->callbackReadSuccess = (void (*)())cFEMemCard_callbackReadSuccess_a5488;
+    app->callbackConfirmLoadFailed = (void (*)())cFEMemCard_callbackConfirmLoadFailed_a5488;
+    app->callbackConfirmNoCards = (void (*)())cFEMemCard_callbackConfirmNoCards_a5488;
+    app->callbackConfirmInvalidCard = (void (*)())cFEMemCard_callbackConfirmInvalidCard_a5488;
+    app->callbackConfirmSaveFailed = (void (*)())cFEMemCard_callbackConfirmSaveFailed_a5488;
+    app->callbackSaveSuccess = (void (*)())cFEMemCard_callbackSaveSuccess_a5488;
+    app->callbackConfirmSaveTooBig = (void (*)())cFEMemCard_callbackConfirmSaveTooBig_a5488;
+    app->callbackDeleteDone = (int (*)())cFEMemCard_callbackDeleteDone_a5488;
+    app->callbackDeleteFailed = (int (*)())cFEMemCard_callbackDeleteFailed_a5488;
+    app->callbackSaveFileCorrupt = (void (*)())cFEMemCard_callbackSaveFileCorrupt_a5488;
+    app->callbackCardsChecked = (void (*)())cFEMemCard_callbackCardsChecked_a5488;
+    app->callbackFileChecked = (void (*)())cFEMemCard_callbackFileChecked_a5488;
+    app->callbackDisplayNoFiles = (void (*)())cFEMemCard_callbackDisplayNoFiles_a5488;
+    app->callbackDisplayNoCards = (void (*)())cFEMemCard_callbackDisplayNoCards_a5488;
+    app->callbackConfirmNoFreeBlocks = (void (*)())cFEMemCard_callbackConfirmNoFreeBlocks_a5488;
+    app->callbackFileExists = (void (*)())cFEMemCard_callbackFileExists_a5488;
+    app->callbackCardChanged = (void (*)())cFEMemCard_callbackCardChanged_a5488;
     self_->mPopupType = 25;
     self_->mType = mode;
     self_->mIsProcessing = 0;
@@ -1336,7 +1337,7 @@ extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
     char saveType[0x200];
     char productCode[0x200];
     char format[0x200];
-    cMCOverlayManager_getFileName(app, *(int*)(app + 0xB4), saveType, 0x100);
+    cMCOverlayManager_getFileName(app, app->mFileType, saveType, 0x100);
     func_002C2540(format, str_pct_s_pct_s_c);
     func_00241AA0(productCode, 0x100);
     sprintf1(&self_->mFileName[0], format, productCode, saveType);
@@ -1468,9 +1469,9 @@ extern "C" void cFEMemCard_writeStart(void)
         sprintf1_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
         cMCOverlayManager_WriteFile(app2, title, profileData, profileSize);
     }
-    char* fe = (char*)cFEMemCard_mInstance;
-    if (*(int*)(fe + 0x210) == 0 && *(int*)(fe + 0x208) == 0) {
-        *(int*)(fe + 0x19C) = 22;
+    cFEMemCard* fe = cFEMemCard_mInstance;
+    if (fe->mIsStatusPopupOn == 0 && fe->mAutoSaveOn == 0) {
+        fe->mPopupType = 22;
         char* buf = (char*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(app, buf, 800);
         sVE_59A0* vt = (sVE_59A0*)cFEMemCard_mInstance->mVtbl;

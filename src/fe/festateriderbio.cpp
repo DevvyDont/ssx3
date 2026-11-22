@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/festateoptions.h"
+#include "ui/uiengine.h"
+#include "fe/ovstatehud.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/keyboardpopup.h"
@@ -284,7 +287,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
             cKeyboardPopup_setIncludeKey(w, 0x40, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 65, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 66, 0, 2);
-            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, w);
+            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, w);
             cKeyboardPopup_setInputText(w, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum));
             cFEStateCharSetup_show3DCharacter(((char*)self), 0);
         } else if (sub == 6) {
@@ -292,7 +295,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
             if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, cid) > 0) {
                 char* w = (char*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), self->mpEngine, ((char*)self), self->mUserNum, cid);
                 *(unsigned char*)(w + 0x15) = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, self->mUserNum);
-                cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, w);
+                cUIStateStack_pushPopup(&self->mpEngine->mStateStack, w);
                 cFEStateCharSetup_show3DCharacter(((char*)self), 0);
             }
         } else {
@@ -300,7 +303,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
             sVE_3710* vt = *(sVE_3710**)(obj + 4);
             void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), sub);
             if (nextState != 0) {
-                cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+                cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             }
         }
         cFEStateCharSetup_show3DCharacter(((char*)self), 0);
@@ -311,7 +314,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         sVE_3710* vt = *(sVE_3710**)(obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             cFEStateCharSetup_show3DCharacter(((char*)self), 0);
         }
         break;
@@ -319,7 +322,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
     case 7: {
         char* w = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
         ((sBits_3710*)(w + 0x1C))->mode = 1;
-        cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, w, 0, 0);
+        cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, w, 0, 0);
         break;
     }
     }
@@ -507,14 +510,14 @@ public:
  * @param rect  the texture element (cTextureElement), or 0
  * @param scale  size factor on top of 256 per texture-coordinate unit
  */
-extern "C" void func_00183D08(cWidget_00183D08* self, void* rect, float scale)
+extern "C" void func_00183D08(cWidget_00183D08* self, cTextureElement* rect, float scale)
 {
-    if (rect) {
+    if (((void*)rect)) {
         sVec2_00183D08 pos;
         self->getSize(&pos);
         float k = scale * 256.0f;
-        pos.x = (*(float*)((char*)rect + 0x14) - *(float*)((char*)rect + 0x10)) * k;
-        pos.y = (*(float*)((char*)rect + 0x18) - *(float*)((char*)rect + 0xC)) * k;
+        pos.x = (rect->mRight - rect->mLeft) * k;
+        pos.y = (rect->mBottom - rect->mTop) * k;
         self->setSize(&pos);
         self->setVisible(1);
     } else {

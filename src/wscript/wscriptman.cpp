@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
 #include "wscript/wscriptcache.h"
 #include "luno/lunovm.h"
 #include "luno/lunovar.h"
@@ -782,7 +783,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
                 goto done;
             }
         }
-        cWScriptMan_eventCollide(self, *(int*)((char*)self->Inst + 0x78));
+        cWScriptMan_eventCollide(self, (int)self->Inst->m_RID);
     }
     {
         sValue_30A060 scriptFunc;
@@ -816,7 +817,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
         }
     }
     {
-        char* instObj = *(char**)((char*)self->Inst + 0xC);
+        char* instObj = (char*)self->Inst->m_pActiveNode;
         if (instObj != 0) {
             sVEF_30A060* vt = *(sVEF_30A060**)(instObj + 0xC);
             vt[41].fn(vthis(instObj, vt[41]), 0.5f);
@@ -904,12 +905,12 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isFocusInstance);
 // PORT: the helpers take the object as int in this unit.
 extern "C" int cWScriptMan_isFocusInstance(cWScriptMan* self, void* obj)
 {
-    char* inst = (char*)obj;
-    if (*(int*)(inst + 0xC) != 0) {
+    tInstanceRecord* inst = (tInstanceRecord*)obj;
+    if ((int)inst->m_pActiveNode != 0) {
         return 1;
     }
     cWScriptCacheEntry* tab = self->World->m_pWScriptCache->mpCache;
-    bool isType3 = tab[*(unsigned char*)(inst + 0x78)].mState == 3;
+    bool isType3 = tab[*(unsigned char*)&inst->m_RID].mState == 3;
     if (isType3) {
         if (cWScriptMan_hasOnFocusScript(self, (int)obj) || cWScriptMan_hasOnLoseFocusScript(self, (int)obj)) {
             return 1;
@@ -983,16 +984,16 @@ struct cWScriptMan_upFocusScript_sType {
  * @param obj  the instance gaining focus
  */
 // PORT: cWScriptMan_hasOnFocusScript/cWScriptMan_doOnFocusScript take the object pointer as an int id
-extern "C" void cWScriptMan_upFocusScript(cWScriptMan* self, void* obj)
+extern "C" void cWScriptMan_upFocusScript(cWScriptMan* self, tInstanceRecord* obj)
 {
-    cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
+    cWScriptCtl* ctl = (cWScriptCtl*)obj->m_pActiveNode;
     if (ctl != 0) {
         if (ctl->hasFocusCount() != 0) {
-            (*(cWScriptCtl**)((char*)obj + 0xC))->incFocusCount(obj);
+            ((cWScriptCtl*)obj->m_pActiveNode)->incFocusCount(obj);
         }
     } else {
         cWScriptMan_upFocusScript_sType* instTypes = (cWScriptMan_upFocusScript_sType*)self->World->m_pWScriptCache->mpCache;
-        bool isScript = instTypes[*(unsigned char*)((char*)obj + 0x78)].type == 3;
+        bool isScript = instTypes[*(unsigned char*)&obj->m_RID].type == 3;
         if (isScript) {
             if (cWScriptMan_hasOnFocusScript(self, (int)obj) != 0) {
                 cWScriptMan_doOnFocusScript(self, (int)obj);

@@ -200,7 +200,7 @@ extern "C" void cAnimSequence_removeAllTriggers(cAnimSequence* self)
     while ((char*)self->Triggers != 0)
     {
         tTrigger* node = self->Triggers;
-        self->Triggers = (tTrigger*)((char*)node->Next);
+        self->Triggers = (tTrigger*)node->Next;
         operator_delete((int*)node);
     }
 }
@@ -435,26 +435,26 @@ class cAsStream;
  */
 extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* stream)
 {
-    char* self = (char*)node;
+    cAnimSequence* self = (cAnimSequence*)node;
     char* streamPtr = (char*)stream;
-    Ser_313DD0(streamPtr, self + 0x0, 0x4);
-    Ser_313DD0(streamPtr, self + 0x4, 84);
-    Ser_313DD0(streamPtr, self + 0x60, 0x20);
-    Ser_313DD0(streamPtr, self + 0x80, 0x4);
-    Ser_313DD0(streamPtr, self + 0x84, 0x4);
-    Ser_313DD0(streamPtr, self + 0x88, 0x8);
-    Ser_313DD0(streamPtr, self + 0x90, 0x4);
-    Ser_313DD0(streamPtr, self + 0x94, 0x4);
-    Ser_313DD0(streamPtr, self + 0x98, 0x4);
-    Ser_313DD0(streamPtr, self + 0x9C, 0x4);
-    Ser_313DD0(streamPtr, self + 0xA0, 0x4);
-    Ser_313DD0(streamPtr, self + 0xA4, 0x4);
-    Ser_313DD0(streamPtr, self + 0xA8, 0x4);
-    Ser_313DD0(streamPtr, self + 0xB0, 0x10);
-    Ser_313DD0(streamPtr, self + 0xC0, 0x4);
-    Ser_313DD0(streamPtr, self + 0xC4, 0x4);
+    Ser_313DD0(streamPtr, &self->SequenceID, 0x4);
+    Ser_313DD0(streamPtr, &self->SubAnims[0], 84);
+    Ser_313DD0(streamPtr, &self->OrientationOffset, 0x20);
+    Ser_313DD0(streamPtr, &self->IsFlipped, 0x4);
+    Ser_313DD0(streamPtr, &self->Priority, 0x4);
+    Ser_313DD0(streamPtr, &self->Mask, 0x8);
+    Ser_313DD0(streamPtr, &self->TimeScale, 0x4);
+    Ser_313DD0(streamPtr, &self->CurrentWeight, 0x4);
+    Ser_313DD0(streamPtr, &self->TargetWeight, 0x4);
+    Ser_313DD0(streamPtr, &self->WeightTimer, 0x4);
+    Ser_313DD0(streamPtr, &self->IsFadeOutExpire, 0x4);
+    Ser_313DD0(streamPtr, &self->EndFadeTime, 0x4);
+    Ser_313DD0(streamPtr, &self->StartFadeTime, 0x4);
+    Ser_313DD0(streamPtr, &self->Events, 0x10);
+    Ser_313DD0(streamPtr, &self->EndEvent, 0x4);
+    Ser_313DD0(streamPtr, &self->CheckTriggersAtCurrentFrame, 0x4);
     int n = 0;
-    char* trigger = *(char**)(self + 0xAC);
+    char* trigger = (char*)self->Triggers;
     if (trigger != 0) {
         int count = 0;
         do {
@@ -464,7 +464,7 @@ extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* stream)
         n = count;
     }
     Ser_313DD0(streamPtr, &n, 4);
-    for (trigger = *(char**)(self + 0xAC); trigger; trigger = *(char**)(trigger + 0xC)) {
+    for (trigger = (char*)self->Triggers; trigger; trigger = *(char**)(trigger + 0xC)) {
         Ser_313DD0(streamPtr, trigger, 0x10);
     }
 }
@@ -501,34 +501,34 @@ static inline void Read_314050(char* s, void* p, int n)
  */
 extern "C" void cAnimSequence_readFromReplayFrame(void* node, void* stream)
 {
-    char* self = (char*)node;
+    cAnimSequence* self = (cAnimSequence*)node;
     char* streamPtr = (char*)stream;
-    Read_314050(streamPtr, self + 0x0, 0x4);
-    Read_314050(streamPtr, self + 0x4, 84);
-    Read_314050(streamPtr, self + 0x60, 0x20);
-    Read_314050(streamPtr, self + 0x80, 0x4);
-    Read_314050(streamPtr, self + 0x84, 0x4);
-    Read_314050(streamPtr, self + 0x88, 0x8);
-    Read_314050(streamPtr, self + 0x90, 0x4);
-    Read_314050(streamPtr, self + 0x94, 0x4);
-    Read_314050(streamPtr, self + 0x98, 0x4);
-    Read_314050(streamPtr, self + 0x9C, 0x4);
-    Read_314050(streamPtr, self + 0xA0, 0x4);
-    Read_314050(streamPtr, self + 0xA4, 0x4);
-    Read_314050(streamPtr, self + 0xA8, 0x4);
-    Read_314050(streamPtr, self + 0xB0, 0x10);
-    Read_314050(streamPtr, self + 0xC0, 0x4);
-    Read_314050(streamPtr, self + 0xC4, 0x4);
+    Read_314050(streamPtr, &self->SequenceID, 0x4);
+    Read_314050(streamPtr, &self->SubAnims[0], 84);
+    Read_314050(streamPtr, &self->OrientationOffset, 0x20);
+    Read_314050(streamPtr, &self->IsFlipped, 0x4);
+    Read_314050(streamPtr, &self->Priority, 0x4);
+    Read_314050(streamPtr, &self->Mask, 0x8);
+    Read_314050(streamPtr, &self->TimeScale, 0x4);
+    Read_314050(streamPtr, &self->CurrentWeight, 0x4);
+    Read_314050(streamPtr, &self->TargetWeight, 0x4);
+    Read_314050(streamPtr, &self->WeightTimer, 0x4);
+    Read_314050(streamPtr, &self->IsFadeOutExpire, 0x4);
+    Read_314050(streamPtr, &self->EndFadeTime, 0x4);
+    Read_314050(streamPtr, &self->StartFadeTime, 0x4);
+    Read_314050(streamPtr, &self->Events, 0x10);
+    Read_314050(streamPtr, &self->EndEvent, 0x4);
+    Read_314050(streamPtr, &self->CheckTriggersAtCurrentFrame, 0x4);
     int n;
     Read_314050(streamPtr, &n, 4);
-    char* tail = *(char**)(self + 0xAC);
+    char* tail = (char*)self->Triggers;
     for (int i = 0; i < n; i++) {
         char* trigger = (char*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
         Read_314050(streamPtr, trigger, 0x10);
-        if (*(char**)(self + 0xAC) != 0) {
+        if ((char*)self->Triggers != 0) {
             *(char**)(tail + 0xC) = trigger;
         } else {
-            *(char**)(self + 0xAC) = trigger;
+            self->Triggers = (tTrigger*)trigger;
         }
         tail = trigger;
     }
@@ -827,7 +827,7 @@ extern "C" void cAnimSequencer_expire(cAnimSequencer* self, sSeqNode_003145F8* n
             *pp = n->next;
             if (n != 0)
             {
-                cAnimSequence_removeAllTriggers((cAnimSequence*)((char*)n));
+                cAnimSequence_removeAllTriggers((cAnimSequence*)n);
                 operator_delete((int*)n);
             }
             self->NumPlaying--;
@@ -864,7 +864,7 @@ extern "C" void cAnimSequencer_expireAll(cAnimSequencer* self)
         self->PlayList = (cAnimSequence*)n->next;
         if (n != 0)
         {
-            cAnimSequence_removeAllTriggers((cAnimSequence*)((char*)n));
+            cAnimSequence_removeAllTriggers((cAnimSequence*)n);
             operator_delete((int*)n);
         }
         self->NumPlaying--;
@@ -1248,7 +1248,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
  */
 extern "C" int cMdfArchive_findModelPart(cMdfArchive* self, const char* name) {
     int i;
-    for (i = 0; i < *(short*)((char*)self->ArchiveHeader + 4); i++) {
+    for (i = 0; i < self->ArchiveHeader->mNumModels; i++) {
         if (strcasecmp(name, (char*)self->ModelHeaders + i * 0x60) == 0)
             return 1;
     }
@@ -1270,7 +1270,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
  */
 extern "C" char* cMdfArchive_getModelPartPtr(cMdfArchive* self, const char* name) {
     int i;
-    for (i = 0; i < *(short*)((char*)self->ArchiveHeader + 4); i++) {
+    for (i = 0; i < self->ArchiveHeader->mNumModels; i++) {
         if (strcasecmp(name, (char*)self->ModelHeaders + i * 0x60) == 0)
             return (char*)self->ModelHeaders + i * 0x60;
     }

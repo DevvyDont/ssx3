@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/instancerecord.h"
 #include "world/worldcache.h"
 #include "wscript/wscriptmission.h"
 #include "be/beintnewrace.h"
@@ -44,22 +45,22 @@ extern "C" int checkActiveNode(void *node, int type, void *buf) {
         n->v37();
         return 1;
     }
-    char *inst = *(char**)((char*)n + 0x18);
+    tInstanceRecord* inst = (tInstanceRecord*)(*(char**)((char*)n + 0x18));
     switch (type) {
     case 13:
-        *(int*)(inst + 0xC) = 0;
+        inst->m_pActiveNode = 0;
         cParticleNode_cParticleNode1_AE38(cMemMan_alloc(44, D_00489618_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     case 11:
-        *(int*)(inst + 0xC) = 0;
+        inst->m_pActiveNode = 0;
         cMeshAnimNode_cMeshAnimNode1_AE38(cMemMan_alloc(1728, D_00489628_AE38, 0x20000000, 0), 1, inst, buf, *(int*)(D_004A3DD8_AE38 + 0x294), n);
         return -1;
     case 0:
-        *(int*)(inst + 0xC) = 0;
+        inst->m_pActiveNode = 0;
         cDebounceNode_cDebounceNode1_AE38(cMemMan_alloc(52, D_00489638_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     case 22:
-        *(int*)(inst + 0xC) = 0;
+        inst->m_pActiveNode = 0;
         cDeadFadeNode_cDeadFadeNode_AE38(cMemMan_alloc(0x3C, D_00489648_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     }
@@ -949,21 +950,21 @@ static inline void del_obj(char* o) {
  *
  * @param ev  the request block: InstId at +0x0, Type at +0x4
  */
-extern "C" void makeDead(char* self, char* ev) {
+extern "C" void makeDead(tInstanceRecord* self, char* ev) {
     switch (*(int*)(ev + 4)) {
     case 1: {
-        char* curNode = *(char**)(self + 0xC);
+        char* curNode = (char*)self->m_pActiveNode;
         if (curNode) {
             if (*(short*)(curNode + 0x10) == 6)
                 break;
             del_obj(curNode);
         }
-        int maskedFlags = *(int*)(self + 8) & 0xFFFF0300;
-        *(int*)(self + 8) = maskedFlags | (maskedFlags >> 16) | 2;
+        int maskedFlags = self->m_iFlags & 0xFFFF0300;
+        self->m_iFlags = maskedFlags | (maskedFlags >> 16) | 2;
         break;
     }
     case 0: {
-        char* curNode = *(char**)(self + 0xC);
+        char* curNode = (char*)self->m_pActiveNode;
         if (curNode) {
             if (*(short*)(curNode + 0x10) == 6)
                 break;
@@ -973,7 +974,7 @@ extern "C" void makeDead(char* self, char* ev) {
         break;
     }
     case 3: {
-        char* curNode = *(char**)(self + 0xC);
+        char* curNode = (char*)self->m_pActiveNode;
         if (curNode) {
             short ty = *(short*)(curNode + 0x10);
             if (ty == 6 || ty == 19)

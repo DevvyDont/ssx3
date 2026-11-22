@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "sound/bankmonitor.h"
+#include "world/instancerecord.h"
 #include "main/game.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "sound/ps2soundman.h"
@@ -4320,7 +4322,7 @@ static inline int snd7950Commit(void* vself, void* tgt, float f, int pri)
  * @param type  patch number
  * @param id  mesh index to follow, or -1 for the instance's model
  */
-extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int id)
+extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, tInstanceRecord* obj, int type, int id)
 {
     if (type == 0)
         return;
@@ -4330,12 +4332,12 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
     }
     if (self->unk_62A8 >= 0)
         return;
-    if (*(int*)(obj + 0xC) == 0)
+    if ((int)obj->m_pActiveNode == 0)
         return;
     char* sl;
     int i;
     for (i = 0; i < 30; i++) {
-        if (self->AttachedSounds[i].used == 1 && (char*)self->AttachedSounds[i].inst == obj &&
+        if (self->AttachedSounds[i].used == 1 && (char*)self->AttachedSounds[i].inst == ((char*)obj) &&
             self->AttachedSounds[i].patch == type) {
             cBankMonitor_BANKMONITOR_StopHandle((char*)*(char**)(cBankManager**)self->MusicSys.mpVStreamSys + 0x1D8, self->AttachedSounds[i].handle, 1, 0.0f);
             self->AttachedSounds[i].used = 0;
@@ -4351,25 +4353,25 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
     if (i == 30)
         return;
     sl = (char*)self + i * 0x30;
-    *(char**)(sl + 0x5A04) = obj;
+    *(char**)(sl + 0x5A04) = ((char*)obj);
     if (id == -1) {
-        char* inner = *(char**)(obj + 0xC);
+        char* inner = (char*)obj->m_pActiveNode;
         sSndVtVar* vt = *(sSndVtVar**)(inner + 0xC);
         sSndVec4 pos;
         pos = *(sSndVec4*)(vt[24].fn(vthis(inner, vt[24])) + 0x30);
         *(sSndVec4*)(sl + 0x5A10) = pos;
     } else {
-        char* inner = *(char**)(obj + 0xC);
+        char* inner = (char*)obj->m_pActiveNode;
         sSndVtVar* vt = *(sSndVtVar**)(inner + 0xC);
         if (vt[26].fn(vthis(inner, vt[26])) != 0) {
-            char* objNode = *(char**)(obj + 0xC);
+            char* objNode = (char*)obj->m_pActiveNode;
             sSndVtVar* vt2 = *(sSndVtVar**)(objNode + 0xC);
             sSndVec4 pos;
             pos = *(sSndVec4*)(vt2[29].fn(vthis(objNode, vt2[29]), id) + 0x30);
             *(sSndVec4*)(sl + 0x5A10) = pos;
         } else {
             sSndVec4 pos;
-            pos = *(sSndVec4*)(obj + 0x40);
+            pos = *(sSndVec4*)&obj->m_fmTransform.m[3][0];
             *(sSndVec4*)(sl + 0x5A10) = pos;
         }
     }
@@ -6532,7 +6534,7 @@ extern "C" void cSSXAudio_UpdateLandedUber(cSSXAudio* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) return;
     // PORT: cSSXAudio_GetFocusRider returns a rider pointer as int
-    cRider* localRider = (cRider*)((char*)cSSXAudio_GetFocusRider(self, -1));
+    cRider* localRider = (cRider*)cSSXAudio_GetFocusRider(self, -1);
     if (localRider->mViewIndex == self->unk_5820) {
         if (localRider->mUberLevel == 10 && self->unk_581C != localRider->mUberLevel &&
             cAudioInterface_getGame()->mCurrentStateID == 4) {
@@ -7190,16 +7192,16 @@ static inline int snd7B0Add(void* vself, int a, int b)
 extern "C" void cSSXAudio_CountdownGateDrop(void* vself)
 {
     sSnd7B0Sys* self = (sSnd7B0Sys*)vself;
-    char* base = (char*)vself;
-    func_002B3A98_C7B0(base + 0x118);
+    cSSXAudio* base = (cSSXAudio*)vself;
+    func_002B3A98_C7B0(&base->MusicSys);
     func_0028DF08_C7B0(vself);
-    *(int*)(base + 0x582C) = *(int*)((int)cAudioInterface_getGame()->AI + 8);
+    base->mGruntCycle = *(int*)((int)cAudioInterface_getGame()->AI + 8);
     ((sSs7B0Self*)vself)->v01(0, 98);
     if (cSSXAudio_ReplayMode(vself) == 0) {
         snd7B0Add(vself, 0, 94);
     }
-    if (*(int*)(base + 0x627C) != 0) {
-        ((sSs7B0Obj*)(base + 0x118))->v04(0);
+    if (base->unk_627C != 0) {
+        ((sSs7B0Obj*)(&base->MusicSys))->v04(0);
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)vself, 0, 0) == 0) {
@@ -7212,35 +7214,35 @@ extern "C" void cSSXAudio_CountdownGateDrop(void* vself)
             int* gameModeMan = (int*)SSXApp->GameModeMan;
             if (gameModeMan[152 / 4] != 0) {
                 func_002A3400((cSSXAudio*)vself);
-                func_002B1758(base + 0x5560, 0);
+                func_002B1758(&base->SpeechSys, 0);
                 if (func_002A4078(vself) != 0 || func_002A40E8(vself) != 0) {
-                    *(int*)(base + 0x5774) = 1;
-                    *(int*)(base + 0x5778) = func_002B4908(base + 0x118);
+                    base->unk_5774 = 1;
+                    base->unk_5778 = func_002B4908(&base->MusicSys);
                 }
             } else {
                 int heatNum = gameModeMan[0];
                 if (heatNum == 1) {
-                    *(int*)(base + 0x5774) = 1;
-                    *(int*)(base + 0x5778) = func_002B4908(base + 0x118);
+                    base->unk_5774 = 1;
+                    base->unk_5778 = func_002B4908(&base->MusicSys);
                 } else if (heatNum == 2) {
                     if (func_002A4078(vself) != 0 || func_002A40E8(vself) != 0) {
-                        *(int*)(base + 0x5774) = 1;
-                        *(int*)(base + 0x5778) = func_002B4908(base + 0x118);
+                        base->unk_5774 = 1;
+                        base->unk_5778 = func_002B4908(&base->MusicSys);
                     }
                 }
             }
         }
     }
-    if (*(int*)(base + 0x627C) == 0) {
+    if (base->unk_627C == 0) {
         if (cSSXAudio_ReplayMode(vself) == 0) {
-            *(int*)(base + 0x627C) = 1;
-            ((sSs7B0Obj*)(base + 0x118))->v04(37);
-        } else if (*(int*)(base + 0x6298) != 0) {
-            ((sSs7B0Obj*)(base + 0x118))->v04(37);
+            base->unk_627C = 1;
+            ((sSs7B0Obj*)(&base->MusicSys))->v04(37);
+        } else if (base->unk_6298 != 0) {
+            ((sSs7B0Obj*)(&base->MusicSys))->v04(37);
         }
     }
-    cSSXAudio_PlayHistoryUpdateTime((cSSXAudio*)vself, 0, *(volatile int*)(**(char***)(base + 0x118) + 0x260) + 50, 0);
-    *(int*)(base + 0x5824) = *(int*)SSXApp->GameModeMan;
+    cSSXAudio_PlayHistoryUpdateTime((cSSXAudio*)vself, 0, *(volatile int*)(**(char***)&base->MusicSys + 0x260) + 50, 0);
+    base->unk_5824 = *(int*)SSXApp->GameModeMan;
 }
 #endif
 
@@ -13935,14 +13937,14 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
         cCrowdSys* base = gpCrowdSys;
         float rem = timeLeft - dt;
         self->unk_188 = rem;
-        char* crowdData = (char*)&base->mCrowdData[idx];
-        float decayTime = *(float*)(crowdData + 0x4C);
+        tCrowdData* crowdData = &base->mCrowdData[idx];
+        float decayTime = crowdData->mDecay;
         int vol = 0x40;
         if (decayTime < rem) {
-            float bendOffset = *(float*)(crowdData + 0x50) * (*(float*)(crowdData + 0x48) - (rem - decayTime)) / *(float*)(crowdData + 0x48);
+            float bendOffset = crowdData->mMaxBend * (crowdData->mAttack - (rem - decayTime)) / crowdData->mAttack;
             vol = (int)bendOffset + 0x40;
         } else if (rem > 0.0f) {
-            float bendOffset = *(float*)(crowdData + 0x50) * rem / decayTime;
+            float bendOffset = crowdData->mMaxBend * rem / decayTime;
             vol = (int)bendOffset + 0x40;
         }
         SNDSYS_entercritical();
@@ -15619,14 +15621,14 @@ extern "C" int func_002A86B8(char** sys);
  * @param obj  the monitor instance
  * @return 1
  */
-extern "C" int func_002A8B28(cMidiSys* midiSys, char* obj)
+extern "C" int func_002A8B28(cMidiSys* midiSys, cMonitorInstance* obj)
 {
-    func_002A8450((char**)D_004A3744, *(int*)(obj + 0x1C), *(int*)(obj + 0x20));
+    func_002A8450((char**)D_004A3744, obj->mData1, obj->mData2);
     sSnd8450Mgr* ctlMgr = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
-    ctlMgr->sub.p3C[ctlMgr->sub.cur] = *(int*)(obj + 0x18);
+    ctlMgr->sub.p3C[ctlMgr->sub.cur] = (int)obj->mPtr;
     sSnd8450Mgr* volMgr = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
     sSnd8450Sub* s = &volMgr->sub;
-    s->vals[volMgr->sub.cur] = *(int*)(obj + 0x24);
+    s->vals[volMgr->sub.cur] = obj->mData3;
 #define SND_X (s->vals[s->cur])
 #define SND_MIN127 (SND_X < 0x7F ? SND_X : 0x7F)
     s->ch[volMgr->sub.cur].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;

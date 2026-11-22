@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiicon.h"
 #include "ealib/shape.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -331,12 +332,12 @@ extern "C" void cFEStateCharEquip_onCreateScreen(cFEStateCharEquip* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
-    *(int*)(feRider + 0xC2C) = 17;
-    *(int*)(feRider + 0xCCC) = 0;
-    int ok = *(unsigned int*)feRider < 10 && *(int*)(feRider + 0xCB8) != 0 && *(int*)(feRider + 0xCB4) != 0;
+    cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+    feRider->mDrawLayer = 17;
+    feRider->mAnimateBoard = 0;
+    int ok = *(unsigned int*)feRider < 10 && feRider->mDoneLoadingTextures != 0 && feRider->mCompiledModel != 0;
     if (ok) {
-        void* anim = *(void**)(feRider + 0xC);
+        void* anim = feRider->mpRiderAnim;
         if (anim != 0) {
             cRiderAnimBase_reset(anim);
             cRiderAnimBase_play(anim, 434, 0, -1.0f);
@@ -967,9 +968,9 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
             func_0019B180(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
             func_0019B618((cFEStateCharEquip*)self, 1, 1);
         } else {
-            char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->team);
-            *(int*)(feRider + 0xC20) = 0;
-            *(int*)(feRider + 0xC1C) = 1;
+            cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->team);
+            feRider->mSelected = 0;
+            feRider->mCustomized = 1;
             char* obj = *(char**)self->menu;
             sVE_9C28* vt = *(sVE_9C28**)(obj + 4);
             void* x = vt[5].fn(vthis(obj, vt[5]), self, 0);
@@ -1057,8 +1058,8 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
         if (idx == 0 || self->count == 0 || idx < self->count) return 1;
         return 0;
     case 6: {
-        char* selected = self->sel;
-        int selIndex = *(unsigned char*)(selected + 0x95);
+        cUIMenu* selected = (cUIMenu*)self->sel;
+        int selIndex = selected->mScrollItemCurrent;
         if (selIndex < 0) return 272;
         if (selIndex < self->count) {
             sEquipItem_9F20* item = self->items[selIndex];
@@ -1069,7 +1070,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
                 if (cost >= self->fC0) break;
                 return 257;
             } else {
-                if (D_004A18D8 >= self->prices[selIndex - *(unsigned char*)(selected + 0x98)] + self->fC4) break;
+                if (D_004A18D8 >= self->prices[selIndex - selected->mScrollItemOffset] + self->fC4) break;
             }
         }
         return 272;
@@ -1678,9 +1679,9 @@ extern "C" void func_0019AA08(cFEStateCharEquip* self)
                 if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && self->mIconsLoaded != 0) {
                     showK19AA08(iconWidget, 1);
                     int iconId = cFEStateCharEquip_getIconID((cFEStateCharEquip*)self, *(char**)(item + 0x30));
-                    char* iconWidget2 = (char*)self->mpSmallBoltIcon;
-                    *(int*)(iconWidget2 + 0x78) = iconId;
-                    *(int*)(iconWidget2 + 0x7C) = 0;
+                    cUIIcon* iconWidget2 = self->mpSmallBoltIcon;
+                    iconWidget2->mTextureID = iconId;
+                    iconWidget2->mpTextureElem = 0;
                 }
             }
         }
@@ -1728,9 +1729,9 @@ extern "C" void func_0019AB78(cFEStateCharEquip* self)
     if (self->mpLargePreview != 0) {
         showK19AB78(self->mpLargePreview, 0);
         if (item != 0 && self->mPreviewTextureID >= 0) {
-            char* widget = (char*)self->mpLargePreview;
-            *(int*)(widget + 0x78) = self->mPreviewTextureID;
-            *(int*)(widget + 0x7C) = 0;
+            cUIIcon* widget = self->mpLargePreview;
+            widget->mTextureID = self->mPreviewTextureID;
+            widget->mpTextureElem = 0;
             showK19AB78(self->mpLargePreview, 1);
         }
     }
@@ -2494,7 +2495,7 @@ extern "C" void func_0019BA60(cFEStateCharEquip* equipState, int i)
         top = *(unsigned char*)(menu + 0x98);
     char* item = self->items[top + i];
     cUIText* text = self->texts[i];
-    char* icon = self->icons[i];
+    cUIIcon* icon = (cUIIcon*)self->icons[i];
     int tex;
     if (*(int*)(item + 0x34) & 0x20) {
         tex = *(int*)((char*)self + 0xAA0);
@@ -2514,11 +2515,11 @@ extern "C" void func_0019BA60(cFEStateCharEquip* equipState, int i)
             cUIText_setAsciiString(text, *(char**)(item + 0x14));
         showK19BA60(text, 1);
     }
-    if (icon != 0) {
+    if (((char*)icon) != 0) {
         if (tex != 0) {
             showK19BA60(icon, 1);
-            *(int*)(icon + 0x7C) = tex;
-            *(int*)(icon + 0x78) = -1;
+            icon->mpTextureElem = (const cTextureElement*)tex;
+            icon->mTextureID = -1;
         } else {
             showK19BA60(icon, 0);
         }
@@ -2920,10 +2921,10 @@ static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
  */
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* vself)
 {
-    char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, vself->mUserNum);
+    cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, vself->mUserNum);
     int ok = 0;
-    if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
-        ok = *(int*)(rider + 0xCB4) != 0;
+    if (*(unsigned int*)rider < 10 && rider->mDoneLoadingTextures != 0) {
+        ok = rider->mCompiledModel != 0;
     }
     if (ok) {
         sXform_BFE8 xf;
@@ -3021,7 +3022,7 @@ extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* vself)
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, (vself->mBoardRotation + 90.0f) * 0.01745329424738884f));
         cFERider_setBoardPose(rider, &xf);
     }
-    char* cam = (char*)SSXApp->RealFE;
+    cRealFE* cam = (cRealFE*)SSXApp->RealFE;
     sQuat_BFE8 pos;
     sQuat_BFE8 lookAt;
     pos.x = -110.0f;
@@ -3032,8 +3033,8 @@ extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* vself)
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
     lookAt.w = 1.0f;
-    cSimpleCamera_setupCamWithPosAndTarget(cam + 0x10, &pos, &lookAt);
-    *(float*)(cam + 0x10) = 0.4363323450088501f;
+    cSimpleCamera_setupCamWithPosAndTarget(&cam->mCamera, &pos, &lookAt);
+    cam->mCamera.View = 0.4363323450088501f;
 }
 #endif
 

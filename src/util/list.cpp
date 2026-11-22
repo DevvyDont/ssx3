@@ -116,7 +116,7 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void* cList_cList(cList* self)
 {
-    self->mStart.mpNext = (cListNode*)((char*)self);
+    self->mStart.mpNext = (cListNode*)self;
     *(void**)&self->mStart = ((char*)self);
     self->mVtbl = cList_vtbl;
     self->mStart.mVtbl = cListNode_vtbl;

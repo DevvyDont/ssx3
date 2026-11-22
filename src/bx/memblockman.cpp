@@ -1234,18 +1234,18 @@ struct sMbOwner_AB30 {
 // Halt request: on the execution thread checks the halt directly; otherwise forwards it and wakes the worker.
 extern "C" void cPS2ExecutionMan_halt(void* self)
 {
-    char* selfBytes = (char*)self;
-    *(volatile int*)(selfBytes + 0x4038) = 1;
+    cPS2ExecutionMan* man = (cPS2ExecutionMan*)self;
+    *(volatile int*)&man->mTimerHalted = 1;
     int cur = GetThreadId();
-    if (cur != *(int*)(selfBytes + 0x14040)) {
-        SuspendThread(*(int*)(selfBytes + 0x14040));
+    if (cur != man->mLoadThreadId) {
+        SuspendThread(man->mLoadThreadId);
     }
-    if (cur == *(int*)(selfBytes + 0x10)) {
+    if (cur == man->mMainThreadId) {
         cExecutionMan_checkHalt(self, 0);
         return;
     }
-    sMbOwner_AB30* vtable = *(sMbOwner_AB30**)(selfBytes + 0x8);
-    vtable->vt5.fn(vthis(selfBytes, vtable->vt5));
+    sMbOwner_AB30* vtable = (sMbOwner_AB30*)man->mVtbl;
+    vtable->vt5.fn(vthis(man, vtable->vt5));
     cPS2ExecutionMan_waitHalt(self);
 }
 #endif

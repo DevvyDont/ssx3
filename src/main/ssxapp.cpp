@@ -1,4 +1,6 @@
 #include "common.h"
+#include "world/instancerecord.h"
+#include "render/occlusionman.h"
 #include "vtable.h"
 #include "input/inputparse.h"
 #include "bx/math3d.h"
@@ -2567,17 +2569,18 @@ struct sVisOwner_9FC8 {
     void *last;                   // 0x50A4
 };
 
-static inline int visOk_9FC8(sVisOwner_9FC8 *self, char *node)
+static inline int visOk_9FC8(sVisOwner_9FC8 *self, char *vnode)
 {
-    if ((*(int *)(node + 8) & 3) != 3) {
+    tInstanceRecord* node = (tInstanceRecord*)vnode;
+    if ((node->m_iFlags & 3) != 3) {
         return 0;
     }
     sVisTbl_9FC8 *tbl = (sVisTbl_9FC8 *)*self->tblp;
-    if (*(unsigned char *)(node + 0x7D) == 0xFF) {
+    if (node->m_SMap.m_uiSectionID == 0xFF) {
         return 1;
     }
-    if ((tbl->ent[*(unsigned char *)(node + 0x7D)].f4 ^ 6) == 0) {
-        return tbl->rec[*(short *)(node + 0x7E)].f0 == 3;
+    if ((tbl->ent[node->m_SMap.m_uiSectionID].f4 ^ 6) == 0) {
+        return tbl->rec[node->m_SMap.m_iHullID].f0 == 3;
     }
     return 0;
 }
@@ -2602,22 +2605,22 @@ extern "C" void FrustumIntersector_crossinginstance_impl(sVisOwner_9FC8 *self, v
  */
 extern "C" void FrustumIntersector_crossinginstance_impl(sVisOwner_9FC8 *self, void *vnode, int frustum)
 {
-    char *node = (char *)vnode;
+    tInstanceRecord* node = (tInstanceRecord*)vnode;
     unsigned int testResult;
 
-    if (node != 0) {
-        if (!visOk_9FC8(self, node)) {
+    if (((char*)node) != 0) {
+        if (!visOk_9FC8(self, ((char*)node))) {
             return;
         }
         {
             float lo[4] __attribute__((aligned(16)));
             float hi[4] __attribute__((aligned(16)));
-            lo[0] = *(float *)(node + 0x60);
-            lo[1] = *(float *)(node + 0x64);
-            lo[2] = *(float *)(node + 0x68);
-            hi[0] = *(float *)(node + 0x6C);
-            hi[1] = *(float *)(node + 0x70);
-            hi[2] = *(float *)(node + 0x74);
+            lo[0] = node->m_fvMin.m[0];
+            lo[1] = node->m_fvMin.m[1];
+            lo[2] = node->m_fvMin.m[2];
+            hi[0] = node->m_fvMax.m[0];
+            hi[1] = node->m_fvMax.m[1];
+            hi[2] = node->m_fvMax.m[2];
             lo[3] = 1.0f;
             hi[3] = 1.0f;
             __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
@@ -2628,7 +2631,7 @@ extern "C" void FrustumIntersector_crossinginstance_impl(sVisOwner_9FC8 *self, v
                 "ctc2.ni   %3, $vi14\n"
                 "vcallms   0xDB8\n"
                 :
-                : "r"(lo), "r"(hi), "r"(node + 0x50), "r"(frustum));
+                : "r"(lo), "r"(hi), "r"((char*)&node->m_fvBSphere), "r"(frustum));
         }
     } else {
         __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
@@ -2649,7 +2652,7 @@ extern "C" void FrustumIntersector_crossinginstance_impl(sVisOwner_9FC8 *self, v
         }
         break;
     }
-    self->last = node;
+    self->last = ((char*)node);
 }
 #endif
 
@@ -3326,13 +3329,14 @@ static inline float cellScale_A830(int level)
 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
 // version of the microprogram at D_948 (sphere vs frustum plane test).
-static inline int sphereTest_A830(char* inst, int* mask, sQ_A830* sphere)
+static inline int sphereTest_A830(char* vinst, int* mask, sQ_A830* sphere)
 {
+    cOcclusionMan* inst = (cOcclusionMan*)vinst;
     int res = 1;
-    for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
+    for (int i = 0; i < inst->m_iNumActive; i++) {
         int bit = 1 << i;
         if (*mask & bit) {
-            sQ_A830* m = (sQ_A830*)(*(char**)(inst + 8 + i * 8) + 0x50);
+            sQ_A830* m = (sQ_A830*)(&inst->m_InView[i].pVis->m_fvPlaneCoeffs);
             int r;
             __asm__ __volatile__(
                 "lqc2      $vf1, %1\n"

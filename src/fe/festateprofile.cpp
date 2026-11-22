@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/keyboardpopup.h"
+#include "movie/mcoverlaymanager.h"
 #include "fe/festateprofile.h"
 #include "ui/uithing.h"
 #include "fe/festateriderbio.h"
@@ -578,9 +580,9 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
     cState_F2B8* self = (cState_F2B8*)vself;
     unsigned short buf[800];
     char name[0x40];
-    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (self->displayFileOK()) {
-        if (!(*(cMCSub_F2B8**)(mp + 0x434))->IsAvailable1()) {
+        if (!((cMCSub_F2B8*)mp->mpMemCard)->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
             cFEStateProfileLoad_displayOff((cFEStateProfileLoad*)self);
             return;
@@ -590,9 +592,9 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
     }
     if (self->displayFileOK()) {
         int sel = 0;
-        cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
+        cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
         cUIText_setUnicodeStringWrap(getObj_F2B8(self, str_Memory_card_text), buf);
-        *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
+        *(int*)((char*)self + 0x21C) = mp->mSelectedDevice;
         self->setMenuHighlight();
         cUIObj_F2B8* widget = getObj_F2B8(self, str_1percentage);
         widget->setVisible(0);
@@ -600,9 +602,9 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
             sprintf(name, str_playerpct_d, i);
             widget = getObj_F2B8(self, name);
             *(sColor_F2B8*)((char*)widget + 0x88) = gStaticColour;
-            if (!(*(cMCSub_F2B8**)(mp + 0x434))->HasFileName(i - 1) && !(*(cMCSub_F2B8**)(mp + 0x434))->IsFileSlotDisabled(i - 1)
-                && (*(cMCSub_F2B8**)(mp + 0x434))->IsFormatted1()) {
-                (*(cMCSub_F2B8**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x238);
+            if (!((cMCSub_F2B8*)mp->mpMemCard)->HasFileName(i - 1) && !((cMCSub_F2B8*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)
+                && ((cMCSub_F2B8*)mp->mpMemCard)->IsFormatted1()) {
+                ((cMCSub_F2B8*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x238);
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
                 if (cFEStateProfileLoad_mScreenAction != 2 && sel == 0) {
                     sel = 1;
@@ -618,10 +620,10 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
                 sprintf(name, str_timepct_d, i);
                 widget = getObj_F2B8(self, name);
                 widget->setVisible(0);
-            } else if ((*(cMCSub_F2B8**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-                (*(cMCSub_F2B8**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x238);
+            } else if (((cMCSub_F2B8*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
+                ((cMCSub_F2B8*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x238);
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
-                if ((*(cMCSub_F2B8**)(mp + 0x434))->IsFileSlotDisabled(i - 1)) {
+                if (((cMCSub_F2B8*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)) {
                     widget->setStatic(1);
                     widget->setUseStaticColour(1);
                 } else {
@@ -630,16 +632,16 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
                 }
                 sprintf(name, str_datepct_d, i);
                 widget = getObj_F2B8(self, name);
-                (*(cMCSub_F2B8**)(mp + 0x434))->GetFileDate(i - 1, buf);
+                ((cMCSub_F2B8*)mp->mpMemCard)->GetFileDate(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
                 widget->setVisible(1);
                 sprintf(name, str_timepct_d, i);
                 widget = getObj_F2B8(self, name);
-                (*(cMCSub_F2B8**)(mp + 0x434))->GetFileTime(i - 1, buf);
+                ((cMCSub_F2B8*)mp->mpMemCard)->GetFileTime(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
                 widget->setVisible(1);
             } else {
-                (*(cMCSub_F2B8**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x238);
+                ((cMCSub_F2B8*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x238);
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
                 widget->setUseStaticColour(1);
                 widget->setStatic(1);
@@ -651,11 +653,11 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
                 widget->setVisible(0);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 1) == -1)
             getObj_F2B8(self, str_arrw_left)->setVisible(0);
         else
             getObj_F2B8(self, str_arrw_left)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 0) == -1)
             getObj_F2B8(self, str_arrw_right)->setVisible(0);
         else
             getObj_F2B8(self, str_arrw_right)->setVisible(1);
@@ -1103,7 +1105,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
     case 13: {
         char buf[0x70];
         char fmt[0x70];
-        char* name = ((char*)self->mpKeyboard) + 0x74;
+        char* name = self->mpKeyboard->mszEditString;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
@@ -1135,7 +1137,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
                     *(int*)(kb + 0x140) = 55;
                     cKeyboardPopup_setMaxCharacters(((char*)self->mpKeyboard), 8);
                     cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 75, 1, 2);
-                    *(int*)(((char*)self->mpKeyboard) + 0x58) = 1;
+                    self->mpKeyboard->mbDisableForFirst = 1;
                     cKeyboardPopup_setDisableShiftNumbers(((char*)self->mpKeyboard), 1);
                     cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 0xE, 0, 2);
                     cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 39, 0, 2);
@@ -1150,7 +1152,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
                     cKeyboardPopup_setMinCharacters(((char*)self->mpKeyboard), 1);
                 }
                 cKeyboardPopup_setStatic(((char*)self->mpKeyboard), GetText_K18FD90(str_kT_KEYUserName));
-                *(int*)(((char*)self->mpKeyboard) + 0x54) = 1;
+                self->mpKeyboard->mbClearOnFirst = 1;
                 cKeyboardPopup_setInputText(((char*)self->mpKeyboard), cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mPlayerIdx));
                 cUIStateStack_pushPopup(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x18, ((char*)self->mpKeyboard));
                 self->mProcessingKeyboard = 1;

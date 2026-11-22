@@ -120,7 +120,7 @@ extern "C" void cUITemplate_MAP_onCreateScreen(cUITemplate_MAP* tmpl, void* scre
     cUITemplate_MAP_setupEventUnlock((cUITemplate_MAP*)self);
     cUITemplate_MAP_setupLayout((cUITemplate_MAP*)self);
     cUITemplate_MAP_setupMapPic((cUITemplate_MAP*)self);
-    cUITemplate_MAP_setupPopup((cUITemplate_MAP*)((char*)self));
+    cUITemplate_MAP_setupPopup((cUITemplate_MAP*)self);
     if (cUITemplate_MAP_mMapStyle >= 2)
         cUITemplate_MAP_setupPeakInfo((cUITemplate_MAP*)self);
     if (cUITemplate_MAP_mMapStyle < 2) {

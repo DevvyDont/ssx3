@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "sound/ssxaudio.h"
 #include "be/beuserawards.h"
@@ -320,7 +321,7 @@ static inline int Match_6C70(sBEEntry_6C70* e, int type)
  */
 extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int type)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976);
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, characterId);
@@ -330,17 +331,17 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
     {
         if (type == 0 && (*(unsigned char*)((char*)def + 0x35) & 1))
         {
-            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
+            if ((Flag_6C70(((char*)charRecord), def)->flags & 2) == 0)
                 n++;
         }
         else if (type == 1 && (def->flags & 0x200))
         {
-            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
+            if ((Flag_6C70(((char*)charRecord), def)->flags & 2) == 0)
                 n++;
         }
         else if (type == 2 && (def->flags & 0x400))
         {
-            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
+            if ((Flag_6C70(((char*)charRecord), def)->flags & 2) == 0)
                 n++;
         }
     }
@@ -354,10 +355,10 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
             if (type == 0 && (*(unsigned char*)((char*)def + 0x35) & 1))
             {
                 short id = def->id;
-                short flagSlot = (*(short**)(charRecord + 0x288))[id];
+                short flagSlot = (charRecord->mpBoltsMap)[id];
                 sBEFlagEntry_6C70* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = (sBEFlagEntry_6C70*)(charRecord + 0x290) + flagSlot;
+                    flagEntry = (sBEFlagEntry_6C70*)(&charRecord->mBolts[0]) + flagSlot;
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -369,10 +370,10 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
             else if (type == 1 && (def->flags & 0x200))
             {
                 short id = def->id;
-                short flagSlot = (*(short**)(charRecord + 0x288))[id];
+                short flagSlot = (charRecord->mpBoltsMap)[id];
                 sBEFlagEntry_6C70* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = (sBEFlagEntry_6C70*)(charRecord + 0x290) + flagSlot;
+                    flagEntry = (sBEFlagEntry_6C70*)(&charRecord->mBolts[0]) + flagSlot;
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -384,10 +385,10 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
             else if (type == 2 && (def->flags & 0x400))
             {
                 short id = def->id;
-                short flagSlot = (*(short**)(charRecord + 0x288))[id];
+                short flagSlot = (charRecord->mpBoltsMap)[id];
                 sBEFlagEntry_6C70* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = (sBEFlagEntry_6C70*)(charRecord + 0x290) + flagSlot;
+                    flagEntry = (sBEFlagEntry_6C70*)(&charRecord->mBolts[0]) + flagSlot;
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -522,14 +523,14 @@ extern "C" int cBERewardInterface_getRandomLockedRewardIndex(cBERewardInterface*
         return -1;
     }
     unsigned int n = BXrand() % (unsigned int)(total - have);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + characterId * 3976;
+    cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + profile * 0x9B50 + characterId * 3976);
     signed char* bits = 0;
     switch (kind) {
-    case 3: bits = (signed char*)(charRecord + 0xF30); break;
-    case 4: bits = (signed char*)(charRecord + 0xF36); break;
-    case 5: bits = (signed char*)(charRecord + 0xF45); break;
-    case 6: bits = (signed char*)(charRecord + 0xF52); break;
-    case 7: bits = (signed char*)(charRecord + 0xF53); break;
+    case 3: bits = (signed char*)(&charRecord->mRewards[0]); break;
+    case 4: bits = (signed char*)(&charRecord->mRewards[6]); break;
+    case 5: bits = (signed char*)(&charRecord->mRewards[21]); break;
+    case 6: bits = (signed char*)(&charRecord->mRewards[34]); break;
+    case 7: bits = (signed char*)(&charRecord->mRewards[35]); break;
     }
     for (int i = 0; result < 0; i++) {
         for (int k = 0; k < 8; k++) {

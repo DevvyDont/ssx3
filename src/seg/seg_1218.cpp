@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "animation/animsequencer.h"
+#include "animation/gameanimmap.h"
 #include "fe/ferider.h"
 #include "animation/animmodel.h"
 #include "ai/focusbox.h"
@@ -2723,7 +2725,7 @@ extern "C" int cRiderAnim_onUpdateASYNC_CRUISE5(cRiderAnim* self, void* x, int* 
     } else {
         negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1C; posMidAnim = 29; posEndAnim = 0x1E;
     }
-    return cRiderAnim_update5Cycle(self, x, (cRiderAnim*)((char*)anim), negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim, dt, weight);
+    return cRiderAnim_update5Cycle(self, x, (cRiderAnim*)anim, negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim, dt, weight);
 }
 #endif
 
@@ -3047,7 +3049,7 @@ extern "C" int cRiderAnim_onUpdateASYNC_BP_BAL(cRiderAnim* self, void* x, int* a
     } else {
         negAnim = 49; cenAnim = 0x30; posAnim = 50;
     }
-    return cRiderAnim_update3Cycle(self, x, (cRiderAnim*)((char*)anim), negAnim, cenAnim, dt, w, posAnim);
+    return cRiderAnim_update3Cycle(self, x, (cRiderAnim*)anim, negAnim, cenAnim, dt, w, posAnim);
 }
 #endif
 
@@ -3616,7 +3618,7 @@ extern "C" void cAnimSequencer_writeToReplayFrame(void*, cStream_4D68*);
 extern "C" void cRiderAnim_writeToReplayFrame(cRiderAnim* self, cStream_4D68* stream) {
     stream->write(((char*)self), 80);
     for (int i = 0; i < 6; i++) {
-        cAnimSequencer_writeToReplayFrame((char*)self->Sequencer + i * 8, stream);
+        cAnimSequencer_writeToReplayFrame(&self->Sequencer[i], stream);
     }
 }
 #endif
@@ -3643,8 +3645,8 @@ extern "C" void cAnimSequencer_readFromReplayFrame(void*, cStream_4DE0*);
 extern "C" void cRiderAnim_readFromReplayFrame(cRiderAnim* self, cStream_4DE0* stream) {
     stream->Read(((char*)self), 80);
     for (int i = 0; i < 6; i++) {
-        cAnimSequencer_expireAll((char*)self->Sequencer + i * 8);
-        cAnimSequencer_readFromReplayFrame((char*)self->Sequencer + i * 8, stream);
+        cAnimSequencer_expireAll(&self->Sequencer[i]);
+        cAnimSequencer_readFromReplayFrame(&self->Sequencer[i], stream);
     }
 }
 #endif
@@ -4735,7 +4737,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     if (anim != 438)
         cRider_flagEventWipeout(self, anim, 0, id, info);
     else
-        cRider_doBump((cRider*)((char*)self), (char*)info, 1);
+        cRider_doBump((cRider*)self, (char*)info, 1);
 }
 #endif
 
@@ -5567,7 +5569,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
         ScaleEq_6F78(hit.Inorm, -1.0f);
     }
     if (((char*)hit.Inst) != 0) {
-        char* handler = *(char**)(((char*)hit.Inst) + 0xC);
+        char* handler = (char*)hit.Inst->m_pActiveNode;
         if (handler != 0) {
             sVEntry<void(void*, tIntersectInfo*)>* vt = *(sVEntry<void(void*, tIntersectInfo*)>**)(handler + 0xC);
             vt[42].fn(vthis(handler, vt[42]), &hit);
@@ -5598,7 +5600,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
     t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)SSXApp->TimerHz);
     if (((char*)hit.Inst) != 0) {
-        char* handler = *(char**)(((char*)hit.Inst) + 0xC);
+        char* handler = (char*)hit.Inst->m_pActiveNode;
         if (handler != 0) {
             sVEhv_6F78* vt = *(sVEhv_6F78**)(handler + 0xC);
             vt[43].fn(vthis(handler, vt[43]), &hit, &imp);

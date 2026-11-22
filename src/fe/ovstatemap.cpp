@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uitextscroll.h"
+#include "ui/uiicon.h"
 #include "bx/math3d.h"
 #include "sound/ssxaudio.h"
 #include "main/gamestate.h"
@@ -996,13 +998,13 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     int px = (int)(fx * 356.0f);
     float fy = Absf_96A8((pp.y - bounds.minY) / (bounds.maxY - bounds.minY));
     int py = (int)(fy * 266.0f);
-    char* ind = (char*)cMemMan_alloc(136, str_Player_Indicator_Icon, 0x20000000, 0);
+    cUIIcon* ind = (cUIIcon*)cMemMan_alloc(136, str_Player_Indicator_Icon, 0x20000000, 0);
     cUIThing_cUIThing(ind, ((char*)self->mpMapScreen), 0);
-    *(void***)(ind + 0x8) = cUIIcon_vtbl;
-    func_0021CCC8(ind + 0x74);
-    *(int*)(ind + 0x78) = -1;
+    ind->mVtbl = cUIIcon_vtbl;
+    func_0021CCC8(&ind->mAttrIcon);
+    ind->mTextureID = -1;
     (*(cFEObj_96A8**)&self->mpPlayerIcon) = (cFEObj_96A8*)ind;
-    *(int*)(ind + 0x7C) = 0;
+    ind->mpTextureElem = 0;
     {
         sV3_96A8 indicatorPos((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 97) - 5.0f, mapPos.z);
         (*(sV3_96A8*)&((cUIThing*)((cFEObj_96A8*)self->mpPlayerIcon))->mPosition) = indicatorPos;
@@ -1492,10 +1494,10 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 if (helpTexts != 0)
                     show_A4E0(helpTexts, 0);
                 ret = 1;
-                char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
-                unsigned short origNumLines = *(unsigned short*)(obj + 0xC8);
-                unsigned short selectedIndex = *(unsigned short*)(obj + 0xC4);
-                unsigned short linesOffset = *(unsigned short*)(obj + 0xC6);
+                cUITextScroll* obj = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
+                unsigned short origNumLines = obj->mLineSize;
+                unsigned short selectedIndex = obj->mSelectedIndex;
+                unsigned short linesOffset = obj->mLinesOffset;
                 int none = origNumLines == 0;
                 sBXString_A4E0 chatLine;
                 cBXString_cBXString2(&chatLine, ((char*)net) + 0x498);
@@ -1503,7 +1505,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 cBXString_Concat(&chatLine, name);
                 cUITextScroll_addAsciiString(obj, chatLine.str);
                 func_001A83D8(obj, 40, 4, origNumLines, selectedIndex, linesOffset, none, 1);
-                show_A4E0(obj, 1);
+                show_A4E0(((char*)obj), 1);
                 cBXString__cBXString(&chatLine, 2);
             }
         }

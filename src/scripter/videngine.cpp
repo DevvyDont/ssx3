@@ -1,4 +1,5 @@
 #include "common.h"
+#include "movie/movieplayer.h"
 #include "vtable.h"
 #include "scripter/nislist.h"
 #include "sound/ssxaudio.h"
@@ -161,14 +162,14 @@ extern "C" void cMoviePlayer_asyncResume(void* self);
  */
 extern "C" void cVidEngine_RenderVideo(cVidEngine* self)
 {
-    void* videoPlayer = self->mpPlayer;
-    if (videoPlayer != 0 && self->mIsPlaying != 0) {
+    cMoviePlayer* videoPlayer = self->mpPlayer;
+    if (((void*)videoPlayer) != 0 && self->mIsPlaying != 0) {
         if (self->mFrameUpdated != 0) {
-            if (*(int*)((char*)videoPlayer + 0x8) != 0) {
+            if (videoPlayer->mbPaused != 0) {
                 cMoviePlayer_asyncResume(videoPlayer);
             }
         } else {
-            if (*(int*)((char*)videoPlayer + 0x8) == 0) {
+            if (videoPlayer->mbPaused == 0) {
                 cMoviePlayer_asyncPause(videoPlayer);
             }
         }

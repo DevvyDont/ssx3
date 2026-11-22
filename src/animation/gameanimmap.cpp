@@ -461,9 +461,9 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setOrientationOffset);
  * @param offset  the new orientation offset (tPose)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cRiderAnimBase_setOrientationOffset(cRiderAnimBase* riderAnim, void *offset) {
-    (*(long long*)&riderAnim->OrientationOffset) = (long long) (*(long long *)((char*)(offset) + (0)));
-    (*(long long*)&riderAnim->OrientationOffset.Q) = (long long) (*(long long *)((char*)(offset) + (0x10)));
+extern "C" void cRiderAnimBase_setOrientationOffset(cRiderAnimBase* riderAnim, tPose* offset) {
+    (*(long long*)&riderAnim->OrientationOffset) = (long long) (*(long long*)&offset->P);
+    (*(long long*)&riderAnim->OrientationOffset.Q) = (long long) (*(long long*)&offset->Q);
 }
 #endif
 //100%

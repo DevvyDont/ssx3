@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/camera.h"
 #include "vtable.h"
 #include "visualfx/avalanche.h"
 #include "ai/riderhandler.h"

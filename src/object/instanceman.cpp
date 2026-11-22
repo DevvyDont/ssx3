@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldrecords.h"
 #include "bx/math3d.h"
 #include "bx/appman.h"
 #include "object/instanceman.h"
@@ -250,12 +251,12 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_getStartTime);
 extern "C" float cAnimFrame_getStartTime(cAnimFrame* self)
 {
     float startTime = 0.0f;
-    char** channelList = *(char***)((char*)self->AnimRecord + 0x20);
-    char* channel = *channelList;
-    if (channelList != 0 && channel != 0) {
-        char* segments = *(char**)(channel + 0x4);
-        if (segments != 0) {
-            startTime = *(float*)(segments + 0x10);
+    char** channelList = (char**)self->AnimRecord->m_pChannels;
+    tChannelRecord* channel = (tChannelRecord*)(*channelList);
+    if (channelList != 0 && ((char*)channel) != 0) {
+        tSegmentRecord* segments = channel->m_Segments;
+        if (((char*)segments) != 0) {
+            startTime = segments->m_fStart;
         }
     }
     return startTime;
@@ -301,13 +302,13 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 void cAnimFrame_update_impl(char* vself, float time)
 {
     cAnimFrame* self = (cAnimFrame*)vself;
-    sImCurve_351538** curves = *(sImCurve_351538***)((char*)self->AnimRecord + 0x20);
+    sImCurve_351538** curves = (sImCurve_351538**)self->AnimRecord->m_pChannels;
     int* cur = (int*)self;
     unsigned int mask = 1;
     float* out = (float*)(&self->Vals[0]);
     for (int i = 0; i < 16; i++) {
         sImCurve_351538* curve = *curves;
-        if (*(unsigned int*)((char*)self->AnimRecord + 0x18) & mask) {
+        if ((unsigned int)self->AnimRecord->m_ChannelMask & mask) {
             sImSeg_351538* segment = &curve->segs[*cur];
             if (!inRange_351538(segment, time)) {
                 segment = (sImSeg_351538*)cAnimChannel_nextSegment((sImRangeTable*)curve, cur, time);
@@ -364,13 +365,13 @@ static inline bool inRange_351660(sImSeg_351660* e, float x)
 extern "C" void cAnimFrame_getDeriv(cAnimFrame* self, sImV4_351660* vel, sImV4_351660* rotVel, float time)
 {
     float out[16];
-    sImCurve_351660** curves = *(sImCurve_351660***)((char*)self->AnimRecord + 0x20);
+    sImCurve_351660** curves = (sImCurve_351660**)self->AnimRecord->m_pChannels;
     int* cur = (int*)self;
     int mask = 1;
     float* outRate = out;
     for (int i = 0; i < 16; i++, mask <<= 1, outRate++) {
         sImCurve_351660* channel = *curves;
-        if (*(int*)((char*)self->AnimRecord + 0x18) & mask) {
+        if (self->AnimRecord->m_ChannelMask & mask) {
             sImSeg_351660* segment = &channel->segs[*cur];
             if (!inRange_351660(segment, time)) {
                 segment = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)channel, cur, time);
@@ -1088,13 +1089,13 @@ static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
 extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
 {
     cMeshAnimNode* self = debris;
-    char* modelDef = *(char**)(((char*)self->Instance) + 0x80);
-    for (int i = 0; i < *(int*)(modelDef + 4); i++) {
+    tModelRecord* modelDef = (tModelRecord*)self->Instance->m_Model;
+    for (int i = 0; i < modelDef->m_iNumMeshes; i++) {
         self->Angle[i] = self->AngVel * randRange_352230(0.5f, 1.0f);
         ((sV4_352230*)&self->Axis[0])[i] = sV4_352230(randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), 0.0f);
         ((sV4_352230*)&self->Axis[0])[i] = Normalize_352230(((sV4_352230*)&self->Axis[0])[i]);
     }
-    for (int j = 0; j < *(int*)(modelDef + 4); j++) {
+    for (int j = 0; j < modelDef->m_iNumMeshes; j++) {
         float vx = randScale_352230(((float*)&self->Disperse)[0]) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
         if (BXrand() & 1) {
             vx = -vx;
@@ -1217,15 +1218,15 @@ extern "C" void cMeshAnimNode_update(sDebris_352500* self)
         }
     }
     if (self->timer > 0.0f) {
-        char* skel = *(char**)(self->model + 0x80);
-        for (int i = 0; i < *(int*)(skel + 4); i++) {
+        tModelRecord* skel = (tModelRecord*)(*(char**)(self->model + 0x80));
+        for (int i = 0; i < skel->m_iNumMeshes; i++) {
             float sinHalf, cosHalf;
             fSinCos(&sinHalf, &cosHalf, self->spin[i] * 0.5f);
             sV4_352500* quat = &self->rot[i];
             *quat = QMul_352500(*quat, sQ_352500(cosHalf, sinHalf * self->axis[i].x, sinHalf * self->axis[i].y, sinHalf * self->axis[i].z));
             NormalizeEq_352500(*quat);
         }
-        for (int i = 0; i < *(int*)(skel + 4); i++) {
+        for (int i = 0; i < skel->m_iNumMeshes; i++) {
             AddEq_352500(self->pos[i], self->vel[i]);
             AddEq_352500(self->vel[i], sV4_352500(0.0f, 0.0f, self->gravity * -980.0f * cAppMan_TheAppMan->TimerPeriod, 0.0f));
         }
@@ -1280,9 +1281,9 @@ extern "C" void cInstanceNode_makeThisDead(void* self);
 extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
 {
     if (self->Type != 0) {
-        *(int*)((char*)self->Instance + 0x8) &= 0xFFFF0300;
-        *(int*)((char*)self->Instance + 0x8) |= *(int*)((char*)self->Instance + 0x8) >> 16;
-        *(int*)((char*)self->Instance + 0x8) |= 2;
+        self->Instance->m_iFlags &= 0xFFFF0300;
+        self->Instance->m_iFlags |= self->Instance->m_iFlags >> 16;
+        self->Instance->m_iFlags |= 2;
         if (((void*)self) != 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt[1].fn(vthis(self, vt[1]), 3);
@@ -1436,9 +1437,9 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
     if (self->Life <= 0.0f) {
         return;
     }
-    int numMaterials = *(int*)*(char**)(*(char**)((char*)self->Instance + 0x80) + 0xC);
+    int numMaterials = *(int*)(char*)self->Instance->m_Model->m_MaterialBlock;
     for (int i = 0; i < numMaterials; i++) {
-        short* pMaterialRecord = ((short**)(*(char**)((char*)self->Instance + 0x94) + 4))[i];
+        short* pMaterialRecord = ((short**)((char*)self->Instance->m_MaterialBlock + 4))[i];
         tResourceID_352810 resourceId;
         initRID_352810(&resourceId, 0xFF, *pMaterialRecord);
         if (!cacheValid_352810((cWorldCache_352810*)cWorld_m_pTheWorld->m_pWorldCache, 9, resourceId)) {
@@ -1446,8 +1447,8 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
         }
     }
     sMat_352810 animMats[24];
-    char* pModel = *(char**)((char*)self->Instance + 0x80);
-    for (int i = 0; i < *(int*)(pModel + 4); i++) {
+    tModelRecord* pModel = (tModelRecord*)self->Instance->m_Model;
+    for (int i = 0; i < pModel->m_iNumMeshes; i++) {
         QuatToMat_352810(&animMats[i], ((&self->Qrot[0]))[i]);
         setOffset_352810(animMats[i], ((&self->Pos[0]))[i]);
     }
@@ -1456,7 +1457,7 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
         fade = self->Life;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn(vthis(ps2GraphicsMan, ((sVE_352810*)ps2GraphicsMan->mVtbl)[95]), (char*)self->Instance, *(void**)((char*)self->Instance + 0x94), D_004FF1A0_2810, animMats, 0, 1056, fade);
+    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn(vthis(ps2GraphicsMan, ((sVE_352810*)ps2GraphicsMan->mVtbl)[95]), (char*)self->Instance, self->Instance->m_MaterialBlock, D_004FF1A0_2810, animMats, 0, 1056, fade);
 }
 #endif
 

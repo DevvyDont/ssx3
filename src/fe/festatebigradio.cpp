@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uiengine.h"
+#include "fe/screenpopup.h"
+#include "ui/uiinput.h"
 #include "ui/uithing.h"
 #include "fe/festateruleselect.h"
 #include "ui/uistate.h"
@@ -307,7 +310,7 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
 {
     int n = isNet_2DB0() ? 1 : 2;
     int i;
-    void* obj = *(void**)((char*)self->mpEngine + 0xC);
+    cUIInput* obj = (cUIInput*)(self->mpEngine->mpInput);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     for (i = 0; i < n; i++) {
         int panelIdx;
@@ -319,15 +322,15 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
             id = cBENewPlayerInterface_getPlayerCtrlID(iface, i);
             panelIdx = i;
         }
-        sVESet_3338* vt = *(sVESet_3338**)((char*)obj + 8);
+        sVESet_3338* vt = (sVESet_3338*)obj->mVtbl;
         vt[44].fn(vthis(obj, vt[44]), id);
-        sVEGet_3338* vt2 = *(sVEGet_3338**)((char*)obj + 8);
+        sVEGet_3338* vt2 = (sVEGet_3338*)obj->mVtbl;
         if (vt2[40].fn(vthis(obj, vt2[40])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) == 0) {
             void* menu = *(void**)((char*)self + panelIdx * 0x34 + 0x6D0);
             sVEPtr_3338* vt3 = *(sVEPtr_3338**)((char*)menu + 8);
             vt3[15].fn(vthis(menu, vt3[15]), obj);
         } else {
-            sVEGet_3338* vt4 = *(sVEGet_3338**)((char*)obj + 8);
+            sVEGet_3338* vt4 = (sVEGet_3338*)obj->mVtbl;
             if (vt4[6].fn(vthis(obj, vt4[6])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) != 0) {
                 char label[5];  // "11", "21" for the second panel
                 *(struct sStr3_3338*)label = *(struct sStr3_3338*)str_11;
@@ -465,30 +468,30 @@ static inline int Is_193650(int id, char* s) { return id == GetHashValue32(s); }
  */
 extern "C" void cFEStateBraggingRights_onWidgetCreate(cFEStateBraggingRights* self, cUIObj_193650* w)
 {
-    char* wp = (char*)w;
-    if (Is_193650(*(int*)(wp + 0x38), str_1Menu)) {
+    cUIThing* wp = (cUIThing*)w;
+    if (Is_193650(wp->mHashName, str_1Menu)) {
         *(void**)&self->mMenuCtrl[0] = 0;
         w->setFocus(1);
         *(void**)&self->mMenuCtrl[0] = w;
-        *(int*)(wp + 0x14) |= 1;
-        *(int*)(wp + 0x90) |= 1;
-    } else if (Is_193650(*(int*)(wp + 0x38), str_2Menu)) {
+        wp->mAttr |= 1;
+        *(int*)(((char*)wp) + 0x90) |= 1;
+    } else if (Is_193650(wp->mHashName, str_2Menu)) {
         *(void**)&self->mMenuCtrl[1] = 0;
         w->setFocus(1);
         *(void**)&self->mMenuCtrl[1] = w;
-        *(int*)(wp + 0x14) |= 1;
-        *(int*)(wp + 0x90) |= 1;
-    } else if (Is_193650(*(int*)(wp + 0x38), str_Player1_title) || Is_193650(*(int*)(wp + 0x38), str_Player1_name)) {
+        wp->mAttr |= 1;
+        *(int*)(((char*)wp) + 0x90) |= 1;
+    } else if (Is_193650(wp->mHashName, str_Player1_title) || Is_193650(wp->mHashName, str_Player1_name)) {
         void* newPlayer = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
         cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(character, cBENewPlayerInterface_getHumanRider(newPlayer, 0)));
-    } else if (Is_193650(*(int*)(wp + 0x38), str_Player2_title) || Is_193650(*(int*)(wp + 0x38), str_Player2_name)) {
+    } else if (Is_193650(wp->mHashName, str_Player2_title) || Is_193650(wp->mHashName, str_Player2_name)) {
         void* newPlayer = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
         cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(character, cBENewPlayerInterface_getHumanRider(newPlayer, 1)));
-    } else if (Is_193650(*(int*)(wp + 0x38), str_player1_info)) {
+    } else if (Is_193650(wp->mHashName, str_player1_info)) {
         self->mMenuCtrl[0].mpGroup = (cUIGroup*)w;
-    } else if (Is_193650(*(int*)(wp + 0x38), str_player2_info)) {
+    } else if (Is_193650(wp->mHashName, str_player2_info)) {
         self->mMenuCtrl[1].mpGroup = (cUIGroup*)w;
     } else {
         char name[3];
@@ -498,10 +501,10 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(cFEStateBraggingRights* se
             for (int j = 0; j < 8; j++) {
                 name[0] = '1' + i;
                 name[1] = '1' + j;
-                if (*(int*)(wp + 0x38) == GetHashValue32(name)) {
+                if (wp->mHashName == GetHashValue32(name)) {
                     slots[j] = w;
-                    *(int*)(wp + 0x18) = i;
-                    *(int*)(wp + 0x14) &= ~1;
+                    wp->mMiscData = i;
+                    wp->mAttr &= ~1;
                     w->v24(1);
                 }
             }
@@ -597,25 +600,25 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             break;
         void* nextState = vcall_38F8(((char*)self), 4, w);
         if (nextState != 0)
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6:
         if (isOn_38F8()) {
-            char* popup = (char*)func_001A9C50(((char*)self));
-            char* sub = popup + 0xBC;
-            *(int*)(popup + 0xBC) = 2;
-            *(int*)(popup + 0xC4) = GetHashValue32(str_kT_POPUPCMNCancelChallenge);
-            *(int*)(popup + 0xC0) = 3;
+            cScreenPopup* popup = (cScreenPopup*)((char*)func_001A9C50(((char*)self)));
+            char* sub = (char*)&popup->info;
+            popup->info.meType = 2;
+            popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNCancelChallenge);
+            popup->info.mtMessage.eType = 3;
             func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
             func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
-            *(int*)(popup + 0x150) = 2104;
-            *(int*)(popup + 0x168) = 1;
+            popup->info.miMiscData = 2104;
+            popup->info.miDefaultOption = 1;
             func_001A9BC0(((char*)self), popup);
         } else {
             void* nextState = vcall_38F8(((char*)self), 5, w);
             if (nextState != 0)
-                cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+                cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             MEM_fill(cBERules_mRules, 0, 0x20);
         }
         break;
@@ -1083,14 +1086,14 @@ struct sVEntry00194498b {
  *
  * @param self  the widget (not a method: a free function)
  */
-extern "C" void DisableTextWidget(void* self)
+extern "C" void DisableTextWidget(cUIThing* self)
 {
-    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)self + 8);
+    sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)self->mVtbl;
     vt[8].fn(vthis(self, vt[8]), 1);
-    tARGB colour = *(tARGB*)((char*)self + 0x1C);
+    tARGB colour = self->mColour;
     if (colour.A > 0.5f) {
         colour.A = 0.5f;
-        sVEntry00194498b* vt2 = *(sVEntry00194498b**)((char*)self + 8);
+        sVEntry00194498b* vt2 = (sVEntry00194498b*)self->mVtbl;
         vt2[11].fn(vthis(self, vt2[11]), &colour);
     }
 }

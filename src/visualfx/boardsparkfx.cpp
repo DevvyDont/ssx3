@@ -1,4 +1,7 @@
 #include "common.h"
+#include "util/surfprop.h"
+#include "render/particle.h"
+#include "ai/rider.h"
 #include "vtable.h"
 #include "bx/appman.h"
 #include "ai/riderhandler.h"
@@ -520,9 +523,10 @@ static inline sV4_ABC8 BoneRow_ABC8(char* r, int i)
     return ((sV4_ABC8*)(*(char**)(*(char**)(r + 0x780) + 0x34) + (*(int*)(r + 0x8A4) << 6)))[i];
 }
 
-static inline sV4_ABC8 RiderSide_ABC8(char* rider)
+static inline sV4_ABC8 RiderSide_ABC8(char* vrider)
 {
-    return *(sV4_ABC8*)(rider + 0x1A0);
+    cRider* rider = (cRider*)vrider;
+    return *(sV4_ABC8*)&rider->mMatrix;
 }
 
 #define MIN_ABC8(a, b) ((a) < (b) ? (a) : (b))
@@ -539,9 +543,9 @@ static inline sV4_ABC8 RiderSide_ABC8(char* rider)
 // Board spark FX update: emitter direction/colour from the rider's motion, then the glow and spark points.
 extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
 {
-    char* rider = self->rider;
+    cRider* rider = (cRider*)self->rider;
     float dt = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
-    char* surfaceData = (char*)SSXApp->Game->SurfPropCache + *(int*)(rider + 0x438) * 0xB0;
+    tSurfData* surfaceData = &SSXApp->Game->SurfPropCache->SurfData[rider->mSurfaceType];
     tParticleEmitter_stepContinous(self->gfx, dt);
     if (self->active) {
         sEmitter_ABC8* em = self->emitter;
@@ -555,13 +559,13 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
     bool fastEnough = 277.77777099609375f < bspeed;
     bool isRailSlide = cRider_getMotionState(self->rider) == 4;
     if (fastEnough) {
-        if (*(int*)(surfaceData + 0x8C)) {
+        if (surfaceData->GrindingSparks) {
             self->f70 = 1;
             if (isRailSlide) {
                 self->f74 = 1;
             }
         }
-        if ((isRailSlide && *(int*)(surfaceData + 0x88)) || *(int*)(self->rider + 0x438) == 9) {
+        if ((isRailSlide && surfaceData->GrindingParticles) || *(int*)(self->rider + 0x438) == 9) {
             self->f78 = 1;
         }
     }
@@ -596,10 +600,10 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
         cDynamicColourEmitter_update(self->emitter, &particlePosition, 0, 0, 0, 0.01666666753590107f);
     }
     if (self->f70) {
-        char* riderObj = self->rider;
-        const sV4_ABC8& side = BoneRow_ABC8(riderObj, 2);
-        const sV4_ABC8& front = BoneRow_ABC8(riderObj, 0);
-        bool uberState = cPowerUpFXToggles_m_SuperUberStateTest != 0 || cPowerUpFXToggles_m_UberStateTest != 0 || 0.0f < *(float*)(riderObj + 0x2F0);
+        cRider* riderObj = (cRider*)self->rider;
+        const sV4_ABC8& side = BoneRow_ABC8(((char*)riderObj), 2);
+        const sV4_ABC8& front = BoneRow_ABC8(((char*)riderObj), 0);
+        bool uberState = cPowerUpFXToggles_m_SuperUberStateTest != 0 || cPowerUpFXToggles_m_UberStateTest != 0 || 0.0f < riderObj->mUberTimer;
         if (uberState) {
             sV4_ABC8 a, b, c, d;
             a.x = 255.0f; a.y = 0.0f; a.z = 255.0f; a.w = 153.0f;
@@ -701,8 +705,8 @@ static inline void pop_B478(cPS2GraphicsMan* ctx)
  */
 extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
 {
-    char* gfx = (char*)self->mEmitter;
-    if (*(int*)(gfx + 0x1E0) > 0) {
+    cDynamicColourEmitter* gfx = self->mEmitter;
+    if (gfx->m_enabledCount > 0) {
         cDynamicColourEmitter_render(gfx, 7);
     }
     if (self->mRenderSparks != 0) {

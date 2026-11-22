@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "vtable.h"
 #include "fe/festateubertrick.h"
 
@@ -188,14 +189,14 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
         break;
     }
     float gap = 10.0f;
-    char* instBtn0 = getObj_3DE0(screen, str_InstBtn0);
-    setTab_3DE0(instBtn0, ca);
+    cUIThing* instBtn0 = (cUIThing*)getObj_3DE0(screen, str_InstBtn0);
+    setTab_3DE0(((char*)instBtn0), ca);
     char* instBtn1 = getObj_3DE0(screen, str_InstBtn1);
     setTab_3DE0(instBtn1, cb);
-    char* instBtn2 = getObj_3DE0(screen, str_InstBtn2);
-    setTab_3DE0(instBtn2, iconSquare);
+    cUIThing* instBtn2 = (cUIThing*)getObj_3DE0(screen, str_InstBtn2);
+    setTab_3DE0(((char*)instBtn2), iconSquare);
     char* w0 = getObj_3DE0(screen, str_inst0);
-    char* w1 = getObj_3DE0(screen, str_inst1);
+    cUIThing* w1 = (cUIThing*)getObj_3DE0(screen, str_inst1);
     char* w2 = getObj_3DE0(screen, str_inst2);
     func_003A1030(w0, &textSize0);
     textSize0.x += gap;
@@ -204,14 +205,14 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     textSize2.x += gap;
     func_003A0290(w0, &instPos0);
     func_003A0290(w2, &instPos2);
-    btnPos0 = *(sGateVec_3DE0*)(instBtn0 + 0x44);
+    btnPos0 = *(sGateVec_3DE0*)&instBtn0->mPosition;
     btnPos1 = *(sGateVec_3DE0*)(instBtn1 + 0x44);
-    btnPos2 = *(sGateVec_3DE0*)(instBtn2 + 0x44);
-    sUIVtP_3DE0* vt0 = *(sUIVtP_3DE0**)(instBtn0 + 8);
+    btnPos2 = *(sGateVec_3DE0*)&instBtn2->mPosition;
+    sUIVtP_3DE0* vt0 = (sUIVtP_3DE0*)instBtn0->mVtbl;
     vt0[20].fn(vthis(instBtn0, vt0[20]), &btnSize0);
     sUIVtP_3DE0* vt1 = *(sUIVtP_3DE0**)(instBtn1 + 8);
     vt1[20].fn(vthis(instBtn1, vt1[20]), &btnSize1);
-    sUIVtP_3DE0* vt2 = *(sUIVtP_3DE0**)(instBtn2 + 8);
+    sUIVtP_3DE0* vt2 = (sUIVtP_3DE0*)instBtn2->mVtbl;
     vt2[20].fn(vthis(instBtn2, vt2[20]), &btnSize2);
     float x = instPos0.x + textSize0.x;
     btnPos0.x = x;
@@ -223,13 +224,13 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
         btnSize1 = t3vect_Zero;
     }
     btnPos2.x = instPos2.x + textSize2.x;
-    *(sGateVec_3DE0*)(instBtn0 + 0x44) = btnPos0;
+    *(sGateVec_3DE0*)&instBtn0->mPosition = btnPos0;
     *(sGateVec_3DE0*)(instBtn1 + 0x44) = btnPos1;
-    *(sGateVec_3DE0*)(instBtn2 + 0x44) = btnPos2;
+    *(sGateVec_3DE0*)&instBtn2->mPosition = btnPos2;
     instPos0 = *(sGateVec_3DE0*)(w0 + 0x44);
-    instPos1 = *(sGateVec_3DE0*)(w1 + 0x44);
+    instPos1 = *(sGateVec_3DE0*)&w1->mPosition;
     instPos1.x = instPos0.x + textSize0.x + 10.0f + btnSize0.x + btnSize1.x;
-    *(sGateVec_3DE0*)(w1 + 0x44) = instPos1;
+    *(sGateVec_3DE0*)&w1->mPosition = instPos1;
 }
 #endif
 

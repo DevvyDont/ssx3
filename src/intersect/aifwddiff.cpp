@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "intersect/spheretree.h"
 #include "intersect/riderspheretree.h"
 #include "world/worldview.h"
 #include "intersect/bxnash.h"
@@ -236,7 +237,7 @@ extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* no
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_TesselatePatch);
 #ifdef SKIP_ASM
 extern "C" void func_00391418(void* t, void* a);
-extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, void* a);
+extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, tAIFwdDiff* a);
 extern "C" void func_003914F8(void* t);
 extern "C" void func_00391480(void* t, void* a);
 struct sGp2930 { int a, b; };
@@ -257,7 +258,7 @@ extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* patc
 {
     sGp2930* patchEval = &D_004A5A20;
     func_00391418(patchEval, (char*)patch + 0x40);
-    cAIFwdDiffCache_InitializeCache(self, fwdDiff);
+    cAIFwdDiffCache_InitializeCache(self, (tAIFwdDiff*)fwdDiff);
     func_003914F8(patchEval);
     func_00391480(patchEval, (char*)fwdDiff + 0x10);
 }
@@ -274,9 +275,9 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_InitializeCache);
  *
  * @param patch  the cache node (On Tour node; despite the name not a patch)
  */
-extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, void* patch)
+extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, tAIFwdDiff* patch)
 {
-    float* cell = (float*)((char*)patch + 0x650);
+    float* cell = (float*)(&patch->mInfo[0][0]);
     int n = 80;
     do {
         cell[0] = 10000000000.0f;
@@ -284,7 +285,7 @@ extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, void* pat
         cell[8] = 10000000000.0f;
         cell += 16;
     } while (n-- > 0);
-    cell = (float*)((char*)patch + 0x1A90);
+    cell = (float*)(&patch->mLowInfo[0][0]);
     n = 8;
     do {
         cell[0] = 10000000000.0f;
@@ -372,17 +373,17 @@ extern "C" int bxSphereTree_Load(bxSphereTree* self, char* buf, int aTreeID)
     *(char**)((char*)((sBlock_27CC8*)self->treeInfo) + 0x24) = cursor;
     cursor += len1;
     cursor += len0;
-    char* treeInfo = (char*)((sBlock_27CC8*)self->treeInfo);
-    if (*(int*)(treeInfo + 0x8) != 0) {
-        *(char**)(treeInfo + 0x28) = 0;
+    tSphTreeInfo* treeInfo = (tSphTreeInfo*)((char*)((sBlock_27CC8*)self->treeInfo));
+    if (treeInfo->isCompressed != 0) {
+        treeInfo->bitTree = 0;
     } else {
-        *(char**)(treeInfo + 0x28) = *(char**)(treeInfo + 0x24);
+        treeInfo->bitTree = (unsigned char*)((char*)treeInfo->cmpTree);
     }
     sQuad_27CC8 centre;
-    char* infoBlock = (char*)((sBlock_27CC8*)self->treeInfo);
-    centre.x = *(float*)(infoBlock + 0x14);
-    centre.y = *(float*)(infoBlock + 0x18);
-    centre.z = *(float*)(infoBlock + 0x1C);
+    tSphTreeInfo* infoBlock = (tSphTreeInfo*)((char*)((sBlock_27CC8*)self->treeInfo));
+    centre.x = infoBlock->rootCenter[0];
+    centre.y = infoBlock->rootCenter[1];
+    centre.z = infoBlock->rootCenter[2];
     centre.w = 1.0f;
     (*(sQuad_27CC8*)&self->transCenter) = centre;
     return cursor - buf;
@@ -417,8 +418,8 @@ struct sSphere_27F18 {
  */
 extern "C" int bxSphereTree_IsRiderTreeCollision(bxSphereTree* self, cRiderSphereTree* shape, int outPush, int outContact)
 {
-    void* tree = self->treeInfo;
-    if (*(int*)((char*)tree + 8) != 0) {
+    tSphTreeInfo* tree = self->treeInfo;
+    if (tree->isCompressed != 0) {
         self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     if (SphereTree_isSphereCollision(self, ((float*)&shape->boundCen), &self->transCenter, 0, 0, outPush, outContact, shape->boundRad) == 0) {
@@ -539,14 +540,14 @@ extern "C" void bxSphereTree_drawLeaves(void *, int, void *, int, int);
  *
  * @param octree  the sphere tree (this)
  */
-extern "C" void bxSphereTree_Draw(void *octree) {
+extern "C" void bxSphereTree_Draw(bxSphereTree* octree) {
     void *temp_4;
 
-    temp_4 = (*(void **)((char*)(octree) + (0x98)));
+    temp_4 = ((void*)octree->treeInfo);
     if ((*(int *)((char*)(temp_4) + (8))) != 0) {
-        (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0x28))) = SphereTree_AllocBuf(temp_4);
+        (*(int *)((char*)((octree->treeInfo)) + (0x28))) = SphereTree_AllocBuf(temp_4);
     }
-    bxSphereTree_drawLeaves(octree, (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0xC))), (char*)octree + 0x80, 0, 0);
+    bxSphereTree_drawLeaves(octree, (*(int *)((char*)((octree->treeInfo)) + (0xC))), (char*)octree + 0x80, 0, 0);
 }
 #endif
 //100%

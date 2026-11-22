@@ -2208,15 +2208,15 @@ extern "C" int SphereTree_isTreeCollision(SphereTree* self, SphereTree* other, t
  * @param outContact  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int SphereTree_IsTreeCollision(SphereTree* self, void* other, t4Vector* outPush, t4Vector* outContact)
+extern "C" int SphereTree_IsTreeCollision(SphereTree* self, SphereTree* other, t4Vector* outPush, t4Vector* outContact)
 {
     void* tree = self->treeInfo;
     if (*(int*)((char*)tree + 0x8) != 0) {
         self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
-    tree = *(void**)((char*)other + 0x98);
+    tree = (void*)other->treeInfo;
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)other + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
+        other->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     return SphereTree_isTreeCollision(self, (SphereTree*)other, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
 }
@@ -4765,9 +4765,9 @@ extern "C" int gIsBoxSphereInt(void* a, void* b, void* center, void* box, void* 
  * @param box  receives the intersection (On Tour tIntersectInfo* ti; its +0x10 and +0x40 parts are passed too)
  * @return 1 on a hit, otherwise 0
  */
-extern "C" int cWorldSphere_IsBoxInt(cWorldSphere* self, void* bMin, void* bMax, void* box)
+extern "C" int cWorldSphere_IsBoxInt(cWorldSphere* self, void* bMin, void* bMax, tIntersectInfo* box)
 {
-    return gIsBoxSphereInt(bMin, bMax, (char*)&self->cen, box, (char*)box + 0x10, (char*)box + 0x40,
+    return gIsBoxSphereInt(bMin, bMax, (char*)&self->cen, box, &box->Inorm, &box->Iparam,
                          self->rad) != 0;
 }
 #endif

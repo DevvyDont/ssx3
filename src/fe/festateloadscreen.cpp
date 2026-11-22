@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/ai.h"
+#include "ealib/shape.h"
 #include "main/gamemode.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
@@ -72,20 +74,20 @@ static inline char* newScreenA_233438(void* self)
 
 static inline char* newScreenB_233438(void* self)
 {
-    char* p = (char*)cMemMan_alloc(0x4C, D_0047BFE8, 0, 0);
+    cFELoadHintState* p = (cFELoadHintState*)cMemMan_alloc(0x4C, D_0047BFE8, 0, 0);
     cUIState_cUIState(p, *(void**)((char*)self + 0xC));
-    *(int*)(p + 0x48) = 0;
-    *(void***)(p + 8) = cFELoadHintState_vtbl;
-    return p;
+    p->mpParentModule = 0;
+    p->mVtbl = cFELoadHintState_vtbl;
+    return ((char*)p);
 }
 
 static inline char* newScreenC_233438(void* self)
 {
-    char* p = (char*)cMemMan_alloc(0x4C, D_0047C000, 0, 0);
+    cFELoadState* p = (cFELoadState*)cMemMan_alloc(0x4C, D_0047C000, 0, 0);
     cUIState_cUIState(p, *(void**)((char*)self + 0xC));
-    *(int*)(p + 0x48) = 0;
-    *(void***)(p + 8) = cFELoadState_vtbl;
-    return p;
+    p->mpParentModule = 0;
+    p->mVtbl = cFELoadState_vtbl;
+    return ((char*)p);
 }
 
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -806,22 +808,22 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
     switch (state) {
     case 0: {
         cSSXApp* ssxApp = SSXApp;
-        char* x = (char*)ssxApp->GameModeMan;
-        char* gameAI = (char*)ssxApp->Game->AI;
-        int cnt = *(int*)(gameAI + 0x7C);
+        cGameModeMan* x = ssxApp->GameModeMan;
+        cAI* gameAI = ssxApp->Game->AI;
+        int cnt = gameAI->NumberOfPlayersAllocated;
         if (D_005366A8[0] == 0) {
             for (int i = 0; i < cnt; i++) {
                 if (D_004A4F64 == 0) {
                     *(float*)&D_004A4F60 = 277.77777099609375f;
                     D_004A4F64 = 1;
                 }
-                if (D_004A4F60 < vLen_233CD8(*riderPos_233CD8(*(char**)(((char**)(gameAI + 0x40))[i] + 0x18)))) {
+                if (D_004A4F60 < vLen_233CD8(*riderPos_233CD8(*(char**)(((char**)(&gameAI->Players[0]))[i] + 0x18)))) {
                     return;
                 }
             }
         }
         sRace_233CD8* rc = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
-        int skip = !isMode_233CD8(rc, 4) && *(int*)(x + 0x98) != 0 && *(int*)(x + 0x9C) == 0;
+        int skip = !isMode_233CD8(rc, 4) && x->bIsLastHeat != 0 && x->bAreResultsLocked == 0;
         if (skip) {
             return;
         }
@@ -1323,10 +1325,10 @@ extern "C" void cGFEventStartState_loseFocus(cGFEventStartState* self)
         cBEAggressionInterface_regressAggression(cBEAggressionInterface_getThis());
     self->mHasTransitionNIS = 0;
     cGame* game = SSXApp->Game;
-    char* x = (char*)game->ViewMan;
-    if (*(int*)(x + 0x10) == 1) {
+    cGameViewMan* x = game->ViewMan;
+    if ((int)x->m_uiNumView == 1) {
         sTbl_234750* slotTable = *(sTbl_234750**)game->World;
-        slotTable->slot[otherSide_234750(*(char**)(x + 4))].f0 = 0;
+        slotTable->slot[otherSide_234750((char*)x->PlayerCamera[0])].f0 = 0;
     }
 }
 #endif

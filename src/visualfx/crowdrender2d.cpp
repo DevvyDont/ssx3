@@ -1,3 +1,4 @@
+#include "ealib/shape.h"
 #include "vtable.h"
 #include "bx/appman.h"
 #include "visualfx/crowdanim2d.h"
@@ -93,9 +94,9 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
             D_00445D38_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(vthis(cGraphicsMan_TheGraphicsMan, vt[46]), shape, D_00445D38_B6D0[i].names[j], 0, 0, -1);
         }
     }
-    char* first = D_00445D38_B6D0[0].shapes[0];
-    self[1] = *(short*)(first + 4);
-    self[2] = *(short*)(first + 6);
+    SHAPE* first = (SHAPE*)D_00445D38_B6D0[0].shapes[0];
+    self[1] = first->width;
+    self[2] = first->height;
     self[3] = *(unsigned char*)first;
 }
 #endif

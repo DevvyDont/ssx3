@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "fe/ovstaterewardslist.h"
 
 //100%

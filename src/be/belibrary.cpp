@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beprofilelib.h"
 #include "be/beintplayer.h"
 #include "be/beintoption.h"
 

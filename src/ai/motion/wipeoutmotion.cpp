@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/instancenode.h"
+#include "ai/airpredictor.h"
 #include "vtable.h"
 #include "animation/animmodel.h"
 #include "replay/frameptr.h"
@@ -644,7 +646,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
     cWipeoutMotion* self = vself;
     if ((self->mRider)->mUseRootPoseOverride == 0)
         return;
-    cWipeoutMotion_updateBoardSphereTree((cWipeoutMotion*)((char*)self));
+    cWipeoutMotion_updateBoardSphereTree((cWipeoutMotion*)self);
     sHit_137138 hit;
     sSphere_137138 sph;
     cWorldRider_cWorldRider(&sph, ((void*)self->BoardSphereTree), 1);
@@ -670,9 +672,9 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         t4Vector impulse = vu0Scale_137138(hit.normal, v + k);
         vu0AddEq_137138(self->BoardVelocity, impulse);
         if (hit.obj != 0) {
-            char* o = *(char**)(hit.obj + 0xC);
-            if (o != 0) {
-                sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
+            cInstanceNode* o = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
+            if (((char*)o) != 0) {
+                sVEntH_137138* vt = (sVEntH_137138*)o->mVtbl;
                 vt[43].fn(vthis(o, vt[43]), &hit,
                           vu0Scale_137138(impulse, (float)SSXApp->TimerHz * -0.05000000074505806f));
             }
@@ -690,9 +692,9 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         }
     } else {
         if (hit.obj != 0) {
-            char* o = *(char**)(hit.obj + 0xC);
-            if (o != 0) {
-                sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
+            cInstanceNode* o = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
+            if (((char*)o) != 0) {
+                sVEntH_137138* vt = (sVEntH_137138*)o->mVtbl;
                 vt[43].fn(vthis(o, vt[43]), &hit,
                           vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
             }
@@ -846,14 +848,14 @@ extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion* wipeoutMotion)
     cRider* rider = wipeoutMotion->mRider;
     float dt = rider->mTimeScale * 0.01666666753590107f;
     cAirPredictor_updateFlightPath(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, dt);
-    int st = *(int*)((char*)wipeoutMotion->mRider->mAirPredictor + 0xAC);
+    int st = wipeoutMotion->mRider->mAirPredictor->SimState;
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok)
     {
         cRider* airRider = wipeoutMotion->mRider;
-        char* ap = (char*)airRider->mAirPredictor;
-        float timeLeft = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
+        cAirPredictor* ap = airRider->mAirPredictor;
+        float timeLeft = ap->TotalAirTime - ap->CurAirTime;
         float x = airRider->mTimeScale;
         if (timeLeft >= 0.01666666753590107f)
             x /= timeLeft;
@@ -861,7 +863,7 @@ extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion* wipeoutMotion)
             x *= 59.999996185302734f;
         cRider* alignRider = wipeoutMotion->mRider;
         float k = 6.632251739501953f;
-        cRider_alignRiderAxis(alignRider, (char*)alignRider->mAirPredictor + 0x20, (char*)alignRider->mAirPredictor + 0x10, x, alignRider->mTimeScale * k);
+        cRider_alignRiderAxis(alignRider, &alignRider->mAirPredictor->GuessLandNormal, &alignRider->mAirPredictor->GuessLandVelocity, x, alignRider->mTimeScale * k);
     }
     vu0ScaleEqW7(*(sVec4W7*)&wipeoutMotion->RiderAngVelocity, 1.0f - dt * 1.5f);
     cRider_updateOrientationImplicit(wipeoutMotion->mRider);
@@ -892,7 +894,7 @@ struct sVEntH_137860 { short delta; short index; void (*fn)(void*, void*, const 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
-extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, sVec4WG* dir);
 // PORT: the project names these __FPv (one void* param); this caller passes more.
 void cAirPredictor_land_137860(void* ap, void* pos, void* vel) __asm__("cAirPredictor_land__FPv");
 void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -1015,7 +1017,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
     float depth = cOverlapList_terrainIntersect1(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (depth >= 0.0f)
     {
-        float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (char*)&hitB, (sVec4WG*)&hitA.normal);
+        float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hitB), (sVec4WG*)&hitA.normal);
         float vn = 0.0f;
         float height = 0.0f;
         if (groundParam >= 0.4000000059604645f)
@@ -1109,7 +1111,7 @@ struct sMat_137D18 {
 
 struct sVEntH_137D18 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
-extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, sVec4WG* dir);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -1386,7 +1388,7 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
     t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(RIDER), vu0Scale_137D18(RIDER->mVelocity, 0.0036000001709908247f)));
     cRider_alignRiderAxis(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
     sHit_137D18 hit;
-    float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
+    float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hit), (sVec4WG*)&RIDER->mGroundNormal);
     if (0.0f <= groundParam) {
         RIDER->GroundVelocity = hit.v20;
         RIDER->mGroundNormal = hit.normal;
@@ -1706,36 +1708,36 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
  * @param dir  the probe direction (the ground normal)
  * @return the hit distance, negative on a miss
  */
-extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit, sVec4WG* dir)
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, sVec4WG* dir)
 {
     char* rider = (char*)self->mRider;
     char seg[176];
     sVec4WG* pt = (sVec4WG*)(rider + 0x110);
     cWorldLine_cWorldLine(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
-    char* probeRider = (char*)self->mRider;
-    float hitDist = cOverlapList_terrainIntersect1(*(void**)(probeRider + 0x860), seg, hit, *(int*)(probeRider + 0x864));
+    cRider* probeRider = self->mRider;
+    float hitDist = cOverlapList_terrainIntersect1(probeRider->mOverlapList, seg, hit, (int)probeRider->mLineHint);
     if (hitDist >= 0.0f)
     {
-        char* obj = *(char**)(hit + 0x54);
+        char* obj = (char*)hit->Patch;
         if (obj)
         {
             self->mRider->mGroundPolyId = *(int*)(obj + 0x150);
-            self->mRider->unk_AAC = *(float*)(hit + 0x6C);
-            self->mRider->unk_AB0 = *(float*)(hit + 0x70);
-            self->mRider->SurfaceFlags = *(unsigned short*)(*(char**)(hit + 0x54) + 0xA);
+            self->mRider->unk_AAC = hit->u;
+            self->mRider->unk_AB0 = hit->v;
+            self->mRider->SurfaceFlags = *(unsigned short*)((char*)hit->Patch + 0xA);
         }
         else
         {
             self->mRider->mGroundPolyId = 0xFFFFFFFF;
         }
-        char* hitObj = *(char**)(hit + 0x50);
+        char* hitObj = (char*)hit->Inst;
         if (hitObj)
         {
             char* hitOwner = *(char**)(hitObj + 0xC);
             if (hitOwner)
             {
                 sVEntry_138960* vt = *(sVEntry_138960**)(hitOwner + 0xC);
-                vt[42].fn(vthis(hitOwner, vt[42]), hit);
+                vt[42].fn(vthis(hitOwner, vt[42]), ((char*)hit));
             }
         }
     }

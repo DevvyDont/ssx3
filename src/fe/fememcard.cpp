@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/fepopupconfirm.h"
+#include "util/locale.h"
+#include "ui/uitext.h"
+#include "movie/mcoverlaymanager.h"
 #include "fe/festatelegal.h"
 #include "fe/festatememcard.h"
 #include "ui/uistate.h"
@@ -223,10 +227,10 @@ extern "C" void func_00186D60(void)
 {
     sLocal_86D60 loc;
     unsigned short buf[800];
-    void* mp = cSSXApp_getMCManager(SSXApp);
-    cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager_getDeviceNumberString(mp, &loc, mp->mSelectedDevice);
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    char* memCard = *(char**)((char*)mp + 0x434);
+    char* memCard = (char*)mp->mpMemCard;
     sVtI_86D60* vt = *(sVtI_86D60**)memCard;
     memCard += vt[22].delta;
     int need = vt[22].fn(memCard, cBESaveInterface_getSaveProfileSize());
@@ -236,9 +240,9 @@ extern "C" void func_00186D60(void)
     lo += lvt[4].delta;
     unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(str_kT_MEMFENotDetectedStartUpPS2));
     sprintf1(popupText, fmt, &loc, need);
-    char* st = D_004A14B8_86D60;
-    *(int*)(st + 0x19C) = 9;
-    sVtB_86D60* svt = *(sVtB_86D60**)(st + 8);
+    cFEStateMemCard* st = (cFEStateMemCard*)D_004A14B8_86D60;
+    st->mPopupType = 9;
+    sVtB_86D60* svt = (sVtB_86D60*)st->mVtbl;
     svt[36].fn(vthis(st, svt[36]), popupText, 0, 0, 0, 0, 0);
 
     {
@@ -334,24 +338,24 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
     if (*(int*)(D_004A14B8_86F90 + 0x234) != 0) {
         if (cFEStateMemCard_mStage < 4)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        char* memCard = *(char**)(mp + 0x434);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+        char* memCard = (char*)mp->mpMemCard;
         sVtA_86F90* vt = *(sVtA_86F90**)memCard;
-        vt[14].fn(memCard + vt[14].delta, *(int*)(mp + 0xF8), D_004A14B8_86F90 + 0x9C);
+        vt[14].fn(memCard + vt[14].delta, mp->mFileCursor, D_004A14B8_86F90 + 0x9C);
         return;
     }
-    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (cMCOverlayManager_hasCardStatusCriticalError(mp) == 0) {
         int fail = 0;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int extra = 0;
-        int avail = cMCOverlayManager_GetFreeSpace(mp, *(int*)(mp + 0x428));
-        char* st = D_004A14B8_86F90;
-        int flags = *(int*)(st + 0x22C);
-        *(int*)(st + 0x230) = 0;
+        int avail = cMCOverlayManager_GetFreeSpace(mp, mp->mSelectedDevice);
+        cFEStateMemCard* st = (cFEStateMemCard*)D_004A14B8_86F90;
+        int flags = st->mMissingSavedFileTypeFlags;
+        st->mTotalSpaceRequired = 0;
         if (flags & 1) {
             extra = 1;
-            char* memCard = *(char**)(mp + 0x434);
+            char* memCard = (char*)mp->mpMemCard;
             sVtI_86F90* vt = *(sVtI_86F90**)memCard;
             char* thisp = memCard + vt[22].delta;
             int profileSpace = vt[22].fn(thisp, cBESaveInterface_getSaveProfileSize());
@@ -359,13 +363,13 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
         }
         char* memCard;
         if (avail < *(int*)(D_004A14B8_86F90 + 0x230)
-            || ((memCard = *(char**)(mp + 0x434), (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) != -1)
-                && (memCard = *(char**)(mp + 0x434), (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) < extra)))
+            || ((memCard = (char*)mp->mpMemCard, (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) != -1)
+                && (memCard = (char*)mp->mpMemCard, (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) < extra)))
             fail = 1;
         if (fail) {
             *(int*)(D_004A14B8_86F90 + 0x234) = 1;
-            sVtV_86F90* vt = *(sVtV_86F90**)(mp + 0x748);
-            vt[1].fn(mp + vt[1].delta, 23);
+            sVtV_86F90* vt = (sVtV_86F90*)mp->mVtbl;
+            vt[1].fn(((char*)mp) + vt[1].delta, 23);
             return;
         }
     }
@@ -656,13 +660,13 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
 {
     unsigned short buf[800];
     sLocal_00187360 loc;
-    void* mp = cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     cBE_getInterface_Fv(cBE_getBE(), 5);
     *(int*)((char*)cFEStateMemCard_mInstance + 0x19C) = 20;
-    char* sf = *(char**)((char*)mp + 0x434);
+    char* sf = (char*)mp->mpMemCard;
     sVtI_00187360* sfvt = *(sVtI_00187360**)sf;
     int size = sfvt[22].fn(sf + sfvt[22].delta, cBESaveInterface_getSaveProfileSize());
-    cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
+    cMCOverlayManager_getDeviceNumberString(mp, &loc, mp->mSelectedDevice);
     char* locale = (char*)SSXApp->FELocale;
     sVtS_00187360* vt = *(sVtS_00187360**)(locale + 4);
     unsigned short* fmt = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMNoSpaceStartPS2));
@@ -691,11 +695,12 @@ extern "C" void cMCOverlayManager_ReturnToDevSelectScreen(void* mp);
 extern "C" void cFEStateMemCard_startProfileRead(void);
 extern "C" void cFEStateMemCard_exitScreen(cFEStateMemCard* self);
 
-static inline int moviePlaying_K1874E8(void* mp)
+static inline int moviePlaying_K1874E8(void* vmp)
 {
+    cMCOverlayManager* mp = (cMCOverlayManager*)vmp;
     int r = 0;
-    if (*(int*)((char*)mp + 0x440) == 0)
-        r = *(int*)((char*)mp + 0x43C) != 0;
+    if (mp->mCurrDeviceStateAck == 0)
+        r = mp->mCurrDeviceStateLast != 0;
     return r;
 }
 
@@ -826,7 +831,7 @@ extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern "C" void cFEStateMemCard_displayStatus(void)
 {
     void* st = cFEStateMemCard_mInstance;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
+    cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
     void* mp = cSSXApp_getMCManager(SSXApp);
     int managerState = *(int*)((char*)mp + 0x130);
     if (managerState == 0x1F || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 49 || managerState == 50 || managerState == 51
@@ -834,10 +839,10 @@ extern "C" void cFEStateMemCard_displayStatus(void)
         unsigned short buf[800];
         cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
         vt[9].fn(vthis(obj, vt[9]), 1);
     } else {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
         vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }
@@ -895,26 +900,26 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     cFEStateMemCard_mStage = five;
     *(int*)((char*)cFEStateMemCard_mInstance + 0x1C0) = five;
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    void* mp = cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     *(int*)((char*)cFEStateMemCard_mInstance + 0x1BC) = 0;
     cFEStateMemCard_mStage = five;
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveProfileSize());
     cMCOverlayManager_readSetFileType(mp, 1);
-    void* memCardState = cFEStateMemCard_mInstance;
+    cFEStateMemCard* memCardState = (cFEStateMemCard*)cFEStateMemCard_mInstance;
     int profileFile = cFEStateMemCard_mProfileFile;
-    *(int*)((char*)mp + 0xF8) = profileFile;
-    *(int*)((char*)memCardState + 0x1C4) = profileFile;
-    *(int*)((char*)memCardState + 0x1BC) = 0;
-    sVtEnt_001877B0* vt = *(sVtEnt_001877B0**)((char*)mp + 0x748);
+    mp->mFileCursor = profileFile;
+    memCardState->mSlot = profileFile;
+    memCardState->mType = 0;
+    sVtEnt_001877B0* vt = (sVtEnt_001877B0*)mp->mVtbl;
     vt[1].fn(vthis(mp, vt[1]), 53);
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);
     func_00241AA0_r(desc, 0x10);
     sprintf1((unsigned short*)((char*)cFEStateMemCard_mInstance + 0x11C), fmt, desc, name);
     cFEMemCard_SetLoadPressed(cFEStateMemCard_mInstance, 1);
-    void* st = cFEStateMemCard_mInstance;
-    *(int*)((char*)st + 0x1A8) = 1;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));
+    cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance;
+    st->mIsProcessing = 1;
+    void* obj = cUIScreen_getObjectByHashName(st->mpScreen, GetHashValue32(str_exclam));
     if (obj) {
         void* bank = (char*)*(void**)((char*)cFEStateMemCard_mInstance + 0x10) + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
@@ -954,16 +959,16 @@ extern "C" void cFEStateMemCard_startSettingsRead(void)
     *(int*)((char*)cFEStateMemCard_mInstance + 0x1C0) = 5;
     cBE_getInterface_Fv(cBE_getBE(), 5);
     void* mp = cSSXApp_getMCManager(SSXApp);
-    void* memCardState = cFEStateMemCard_mInstance;
-    *(int*)((char*)memCardState + 0x1BC) = two;
-    *(int*)((char*)memCardState + 0x1C4) = 0;
+    cFEStateMemCard* memCardState = (cFEStateMemCard*)cFEStateMemCard_mInstance;
+    memCardState->mType = two;
+    memCardState->mSlot = 0;
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveGameSize_K187920());
     cMCOverlayManager_readSetFileType(mp, 2);
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)mp + 0x748);
     vt[1].fn(vthis(mp, vt[1]), 53);
-    void* st = cFEStateMemCard_mInstance;
-    *(int*)((char*)st + 0x1BC) = two;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));
+    cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance;
+    st->mType = two;
+    void* obj = cUIScreen_getObjectByHashName(st->mpScreen, GetHashValue32(str_exclam));
     if (obj) {
         void* bank = (char*)*(void**)((char*)cFEStateMemCard_mInstance + 0x10) + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
@@ -1017,8 +1022,8 @@ static inline void mpNotify_87A38(char* mp, int msg)
 extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCardState)
 {
     cFEStateMemCard* self = memCardState;
-    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    char* card = *(char**)(mp + 0x434);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+    char* card = (char*)mp->mpMemCard;
     if (cMCOverlayManager_hasCardStatusCriticalError(mp))
         cFEStateMemCard_mStage = 3;
     switch (cFEStateMemCard_mStage) {
@@ -1026,21 +1031,21 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCa
         if (cardCall_87A38(card, 13))
             (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b1 = 0;
         cMCOverlayManager_readSetFileType(mp, 1);
-        mpNotify_87A38(mp, 51);
+        mpNotify_87A38(((char*)mp), 51);
         cFEStateMemCard_mStage++;
         self->mType = 0;
         break;
     case 1:
         if (cardCall_87A38(card, 13))
             (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b0 = 0;
-        if (*(int*)(mp + 0x428) == 0) {
-            int lastSavedFile = cardCall_87A38(*(char**)(mp + 0x434), 17);
+        if (mp->mSelectedDevice == 0) {
+            int lastSavedFile = cardCall_87A38((char*)mp->mpMemCard, 17);
             cFEStateMemCard_mProfileFile = lastSavedFile;
             if (lastSavedFile == -1)
                 cFEStateMemCard_mProfileFile = 0;
         }
         cMCOverlayManager_readSetFileType(mp, 0);
-        mpNotify_87A38(mp, 51);
+        mpNotify_87A38(((char*)mp), 51);
         cFEStateMemCard_mStage++;
         self->mType = 1;
         break;
@@ -1049,7 +1054,7 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCa
             (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b2 = 0;
         cFEStateMemCard_mStage++;
     case 3:
-        if (*(int*)(mp + 0x428) == 0)
+        if (mp->mSelectedDevice == 0)
             *(sMcFlags_87A38*)&self->mCard1MissingSavedFileTypeFlags = *(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags;
         self->mFreespaceCheckDone = 0;
         break;

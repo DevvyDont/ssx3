@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "be/beintplayer.h"
 #include "be/beintstat.h"
@@ -1308,7 +1309,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPlayerCheatCharID);
  */
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(cBENewPlayerInterface* self, int playerId, int value)
 {
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[playerId];
     *(char*)(playerEntry + 0x12) = value;
 }
 #endif
@@ -1324,7 +1325,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCheatCharID);
  */
 extern "C" signed char cBENewPlayerInterface_getPlayerCheatCharID(cBENewPlayerInterface* self, int playerId)
 {
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[playerId];
     return *(signed char*)(playerEntry + 0x12);
 }
 #endif
@@ -1352,7 +1353,7 @@ struct sPlayerCharFlags_0x10 {
 extern "C" int cBENewPlayerInterface_getUseDualShock(cBENewPlayerInterface* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[id];
     return ((sPlayerCharFlags_0x10*)(playerEntry + 0x10))->bit1;
 }
 #endif
@@ -1389,7 +1390,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getHelpDone);
 extern "C" int cBENewPlayerInterface_getHelpDone(cBENewPlayerInterface* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[id];
     return ((sPlayerCharFlags_0x10*)(playerEntry + 0x10))->bit3;
 }
 #endif
@@ -2081,38 +2082,38 @@ extern "C" int cBEStatInterface_getStatFromProfile(cBEStatInterface* self, int p
     switch (stat) {
     case 0: {
         int off = charId * 3976 + profile * 39760;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(charRecord + 0xBDF);
+        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+        return charRecord->statDB.cSpeed;
     }
     case 1: {
         int off = charId * 3976 + profile * 39760;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(charRecord + 0xBE0);
+        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+        return charRecord->statDB.cAccel;
     }
     case 2: {
         int off = charId * 3976 + profile * 39760;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(charRecord + 0xBE1);
+        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+        return charRecord->statDB.cTrick;
     }
     case 3: {
         int off = charId * 3976 + profile * 39760;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(charRecord + 0xBE2);
+        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+        return charRecord->statDB.cEdging;
     }
     case 4: {
         int off = charId * 3976 + profile * 39760;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(charRecord + 0xBE3);
+        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+        return charRecord->statDB.cSpin;
     }
     case 5: {
         int off = charId * 3976 + profile * 39760;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(charRecord + 0xBE4);
+        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+        return charRecord->statDB.cToughness;
     }
     case 6: {
         int off = charId * 3976 + profile * 39760;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(charRecord + 0xBE5);
+        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+        return charRecord->statDB.cStability;
     }
     }
     return -1;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uimenu.h"
 #include "bx/math3d.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
@@ -406,14 +407,14 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
 extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
 {
     if (self->mbModelVisible == 0) {
-        char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+        cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
         int ok = 0;
-        if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
-            ok = *(int*)(rider + 0xCB4) != 0;
+        if (*(unsigned int*)rider < 10 && rider->mDoneLoadingTextures != 0) {
+            ok = rider->mCompiledModel != 0;
         }
         if (ok) {
-            *(int*)(rider + 0xCCC) = 1;
-            void* anim = *(void**)(rider + 0xC);
+            rider->mAnimateBoard = 1;
+            void* anim = rider->mpRiderAnim;
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 436, 0, -1.0f);
@@ -486,8 +487,8 @@ extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState
         if (((cUIStateBuyPopup*)item)->mbAccept != 0) {
             int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
             cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID, ((cUIStateBuyPopup*)item)->mInfo.mCost);
-            int entryIndex = *(signed char*)(*(char**)((char*)self->mpMainMenu + 0xA0) + 0x18);
-            int flagBit = *(signed char*)(*(char**)((char*)self->mpTrickMenu + 0xA0) + 0x18);
+            int entryIndex = *(signed char*)&self->mpMainMenu->mpSelected->mMiscData;
+            int flagBit = *(signed char*)&self->mpTrickMenu->mpSelected->mMiscData;
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
             func_0014FE08(pi, self->mUserNum, entryIndex, flagBit);
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)pi + 0xC);
@@ -744,11 +745,11 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                 cFEStateUberTrick_previewVisible(self, 1);
             }
         } else if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
-            char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
-            char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
-            if (categoryItem != 0 && trickItem != 0) {
-                int ai = *(signed char*)(categoryItem + 0x18);
-                int bi = *(signed char*)(trickItem + 0x18);
+            cUIThing* categoryItem = (cUIThing*)self->mpMainMenu->mpSelected;
+            cUIThing* trickItem = (cUIThing*)self->mpTrickMenu->mpSelected;
+            if (((char*)categoryItem) != 0 && ((char*)trickItem) != 0) {
+                int ai = *(signed char*)&categoryItem->mMiscData;
+                int bi = *(signed char*)&trickItem->mMiscData;
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
@@ -785,7 +786,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             SetActive_185268((char*)self->mpMainMenu, 1);
             SetActive_185268((char*)self->mpTrickMenu, 0);
             {
-                cUIObj_185268* trickSelection = *(cUIObj_185268**)((char*)self->mpTrickMenu + 0xA0);
+                cUIObj_185268* trickSelection = (cUIObj_185268*)self->mpTrickMenu->mpSelected;
                 if (trickSelection != 0)
                     trickSelection->SetColor(sColor_185268(1.0f, 0.0f, 0.0f, 0.0f));
             }
@@ -799,12 +800,12 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
         break;
     case 7:
         if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
-            char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
-            char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
-            if (categoryItem != 0 && trickItem != 0) {
+            cUIThing* categoryItem = (cUIThing*)self->mpMainMenu->mpSelected;
+            cUIThing* trickItem = (cUIThing*)self->mpTrickMenu->mpSelected;
+            if (((char*)categoryItem) != 0 && ((char*)trickItem) != 0) {
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
-                int bi = *(signed char*)(trickItem + 0x18);
-                int ai = *(signed char*)(categoryItem + 0x18);
+                int bi = *(signed char*)&trickItem->mMiscData;
+                int ai = *(signed char*)&categoryItem->mMiscData;
                 int n = 0;
                 sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                 if (self->mbModelVisible != 0) {
@@ -831,11 +832,11 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             }
         } else if ((char*)self->mpTrickMenu != 0 && (char*)item->mpParent == (char*)self->mpTrickMenu) {
             cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
-            char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
-            char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
-            if (categoryItem != 0 && trickItem != 0 && helpText != 0) {
-                int ai = *(signed char*)(categoryItem + 0x18);
-                int bi = *(signed char*)(trickItem + 0x18);
+            cUIThing* categoryItem = (cUIThing*)self->mpMainMenu->mpSelected;
+            cUIThing* trickItem = (cUIThing*)self->mpTrickMenu->mpSelected;
+            if (((char*)categoryItem) != 0 && ((char*)trickItem) != 0 && helpText != 0) {
+                int ai = *(signed char*)&categoryItem->mMiscData;
+                int bi = *(signed char*)&trickItem->mMiscData;
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {

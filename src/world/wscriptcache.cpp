@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ai/ai.h"
+#include "world/instancerecord.h"
 #include "world/chunkresolve.h"
 #include "wscript/wscriptcache.h"
 #include "world/world.h"
@@ -238,22 +240,22 @@ extern "C" void cWScriptCacheEntry_update_impl(void *self_) __asm__("cWScriptCac
  * @param self_  the cWScriptCacheEntry
  */
 extern "C" void cWScriptCacheEntry_update_impl(void *self_) {
-    char *self = (char*)self_;
+    cWScriptCacheEntry* self = (cWScriptCacheEntry*)self_;
     short st = *(short*)self;
-    if (st == 1 && ASYNCFILE_getstatus_CAD0(*(int*)(self + 4)) == st) {
+    if (st == 1 && ASYNCFILE_getstatus_CAD0(self->mAsyncHandle) == st) {
         int data = 0;
         int size = 0;
-        ASYNCFILE_release_CAD0(*(int*)(self + 4), &data, &size);
+        ASYNCFILE_release_CAD0(self->mAsyncHandle, &data, &size);
         if (data != 0) {
             if (size > 0) {
                 int unpackedSize = unpacksizez_CAD0(data);
                 if (unpackedSize > 0) {
                     int buffer = operator_new_CAD0(unpackedSize, str_WScriptFile, 0x20000000, 0);
-                    *(int*)(self + 8) = buffer;
+                    self->mpScriptHeader = (tScriptFileHeader*)buffer;
                     unpack_CAD0(data, buffer);
                 } else {
                     int buffer = operator_new_CAD0(size, str_WScriptFile, 0x20000000, 0);
-                    *(int*)(self + 8) = buffer;
+                    self->mpScriptHeader = (tScriptFileHeader*)buffer;
                     MEM_copy_CAD0(buffer, data, size);
                 }
                 MEM_free_CAD0(data);
@@ -460,11 +462,11 @@ extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, cWorld* world,
             ref.idx = index;
             for (int i = 0; i < *(int*)(WSD_CCD8 + 0x44); i++) {
                 ref.slot = i;
-                char* record = (char*)resolve_CCD8(*wp, ref, 0x1C);
+                tInstanceRecord* record = (tInstanceRecord*)resolve_CCD8(*wp, ref, 0x1C);
                 char* x = (char*)(*(int**)(WSD_CCD8 + 0x50))[*(unsigned short*)(*(char**)(WSD_CCD8 + 0x48) + (i << 1))];
-                *(char**)(record + 0x88) = x;
+                record->m_pCollideRecord = (tCollideRecord*)x;
                 int highBits = *(int*)(x + 0x4) & 0xFFFF0000;
-                *(int*)(record + 0x8) = highBits | (highBits >> 16) | 2;
+                record->m_iFlags = highBits | (highBits >> 16) | 2;
             }
             for (int i = 0; i < *(int*)(WSD_CCD8 + 0x4C); i++) {
                 char* tableEntry = (*(char***)(WSD_CCD8 + 0x50))[i];
@@ -479,11 +481,11 @@ extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, cWorld* world,
             for (int i = 0; i < numSplines; i++) {
                 char* w = *wp;
                 ref.slot = i;
-                char* record = (char*)resolve_CCD8(w, ref, 68);
+                tInstanceRecord* record = (tInstanceRecord*)resolve_CCD8(w, ref, 68);
                 sPair_CCD8 splinePair = (*(sPair_CCD8**)(WSD_CCD8 + 0x58))[i];
-                *(int*)(record + 0x28) = (short)splinePair.b;
+                *(int*)&record->m_fmTransform.m[1][2] = (short)splinePair.b;
                 unsigned int highBits = splinePair.a << 16;
-                *(unsigned int*)(record + 0x1C) = (highBits & 0xFFFF0000) | (highBits >> 16);
+                *(unsigned int*)&record->m_fmTransform.m[0][3] = (highBits & 0xFFFF0000) | (highBits >> 16);
             }
             {
                 sRec40_CCD8* tableEntry = *(sRec40_CCD8**)(WSD_CCD8 + 0x2C);
@@ -595,10 +597,10 @@ extern "C" void cRider_flushActiveLights(void* self);
 extern "C" void func_003AD1A8(void)
 {
     cWorldLightMan_flushOverlapCache(SSXApp->Game->WorldLightMan);
-    char* riders = (char*)SSXApp->Game->AI;
-    if (riders != 0) {
-        for (int i = 0; i < *(int*)(riders + 0x78); i++) {
-            cRider_flushActiveLights(*(void**)(riders + 0x28 + i * 4));
+    cAI* riders = SSXApp->Game->AI;
+    if (((char*)riders) != 0) {
+        for (int i = 0; i < riders->NumberOfRidersAllocated; i++) {
+            cRider_flushActiveLights(*(void**)((char*)&riders->Riders[0] + i * 4));
         }
     }
 }

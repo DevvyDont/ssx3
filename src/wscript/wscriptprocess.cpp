@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "wscript/wscriptcache.h"
 #include "sound/ssxaudio.h"
 #include "be/beintnewrace.h"
 #include "wscript/wscriptprocess.h"
@@ -1437,7 +1438,7 @@ extern "C" void* cWScriptMan_cWScriptMan(cWScriptMan* self)
         collectPool = next;
     }
     cWScriptMan_cWScriptMan_current = ((void*)self);
-    self->World = (cWorld*)((char*)cWorld_m_pTheWorld);
+    self->World = (cWorld*)cWorld_m_pTheWorld;
     MEM_fill((char*)self->GlobalTables, 0, 200);
     cWScriptMan_init(self);
     return ((void*)self);
@@ -1546,7 +1547,7 @@ extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
  */
 extern "C" void cWScriptMan_purgeGlobalTables(cWScriptMan* self)
 {
-    void** objs = (void**)((char*)self->GlobalTables);
+    void** objs = (void**)self->GlobalTables;
     int i;
     for (i = 0; i < 50; i++) {
         if (objs[i] != 0) {
@@ -1585,7 +1586,7 @@ extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self)
     cWScriptMan_purgeGlobalTables(self);
     int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
     for (; i < n; i++) {
-        cWScriptMan_rebuildGlobalTables_sSection* tbl = *(cWScriptMan_rebuildGlobalTables_sSection**)((char*)self->World->m_pWScriptCache + 0x4);
+        cWScriptMan_rebuildGlobalTables_sSection* tbl = (cWScriptMan_rebuildGlobalTables_sSection*)self->World->m_pWScriptCache->mpCache;
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
             cWScriptMan_allocateGlobalTable_impl(self, i);
@@ -1877,7 +1878,7 @@ extern "C" void cWScriptMan_unloadSection(cWScriptMan* self, int i)
 {
     cWScriptMan_purgeSection(self, i);
     cWScriptMan_unloadSection_sEntry* items =
-        *(cWScriptMan_unloadSection_sEntry**)((char*)self->World->m_pWScriptCache + 4);
+        (cWScriptMan_unloadSection_sEntry*)self->World->m_pWScriptCache->mpCache;
     cWScriptCacheEntry_unload(&items[i]);
 }
 #endif
@@ -1917,7 +1918,7 @@ extern "C" void cWScriptMan_initMissions(cWScriptMan* self)
     cWScriptMan_init(self);
     int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
     for (; i < n; i++) {
-        cWScriptMan_initMissions_sSection* tbl = *(cWScriptMan_initMissions_sSection**)((char*)self->World->m_pWScriptCache + 0x4);
+        cWScriptMan_initMissions_sSection* tbl = (cWScriptMan_initMissions_sSection*)self->World->m_pWScriptCache->mpCache;
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
             cWScriptMan_activeSection(self, i);

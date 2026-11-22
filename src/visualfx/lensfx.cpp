@@ -1,4 +1,10 @@
 #include "common.h"
+#include "ui/uiengine.h"
+#include "world/worldcache.h"
+#include "ui/uistate.h"
+#include "ai/rider.h"
+#include "worldpainter/worldpainterquery.h"
+#include "ui/uithing.h"
 #include "vtable.h"
 #include "fe/fereal.h"
 #include "bx/appman.h"
@@ -365,9 +371,9 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     void* lib = func_0014ABE0();
     char* tbl = 0;
     int id = -1;
-    char* rider = self->rider;
-    if (rider != 0) {
-        char* being = rider + 0x6C0;
+    cRider* rider = (cRider*)self->rider;
+    if (((char*)rider) != 0) {
+        char* being = (char*)&rider->mVtbl;
         sVEi_CCB8* vt = *(sVEi_CCB8**)being;
         tbl = (char*)func_0014AD50(lib, vt[7].fn(vthis(being, vt[7])));
         id = cRider_getCheatIdentity(self->rider);
@@ -375,8 +381,8 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
             id = cRider_getIdentity(self->rider);
         }
     } else if (self->charId != 0) {
-        char* st = (char*)cUIStateStack_getCurrentState((char*)SSXApp->RealFE->mpUI + 0x18);
-        tbl = (char*)func_0014AD28(lib, *(signed char*)(st + 0x44), *self->charId);
+        cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&SSXApp->RealFE->mpUI->mStateStack);
+        tbl = (char*)func_0014AD28(lib, st->mUserNum, *self->charId);
         id = *self->charId;
     }
     void* lib2 = func_0014BDB8_noarg();
@@ -473,9 +479,9 @@ extern "C" void cRenderStateMan_purge(void)
         for (i = 0; i < 8; i++) {
             int j;
             for (j = 0; j < 9; j++) {
-                char* queryObj = D_lensRows_CFA0[i].objs[j];
-                if (queryObj != 0) {
-                    sLensVE_CFA0* vt = *(sLensVE_CFA0**)(queryObj + 4);
+                tWorldPainterQuery* queryObj = (tWorldPainterQuery*)D_lensRows_CFA0[i].objs[j];
+                if (((char*)queryObj) != 0) {
+                    sLensVE_CFA0* vt = (sLensVE_CFA0*)queryObj->mVtbl;
                     vt[1].fn(vthis(queryObj, vt[1]), 3);
                 }
             }
@@ -709,11 +715,11 @@ extern sV4_DB20 D_004FAB00;
 
 static inline int IsLoaded_DB20(sLensSrc_DB20* s)
 {
-    char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
+    cWorldCache* wc = cWorld_m_pTheWorld->m_pWorldCache;
     if (s->slot < 0)
         return 0;
-    int ok = *(int*)(wc + (s->page << 3) + 0x24) == 6;
-    return ok ? *(int*)(wc + s->slot * 0x18 + 0x3F0) == 3 : 0;
+    int ok = wc->m_WorldView.mp_SectionState[s->page].state == 6;
+    return ok ? wc->m_HullPages[s->slot].m_State == 3 : 0;
 }
 
 // PORT: g++ `<?` (min) operator, removed in GCC 4.3.
@@ -807,11 +813,11 @@ static inline float clamp_DF00(float f, float lo, float hi)
  *
  * @return the factor, 0..1
  */
-extern "C" float cRenderStateMan_calculateIrradianceBlend(void* self)
+extern "C" float cRenderStateMan_calculateIrradianceBlend(tARGB* self)
 {
-    float lum = *(float*)((char*)self + 0x4) * 0.29899999499320984f
-              + *(float*)((char*)self + 0x8) * 0.5870000123977661f
-              + *(float*)((char*)self + 0xC) * 0.11400000005960464f;
+    float lum = self->R * 0.29899999499320984f
+              + self->G * 0.5870000123977661f
+              + self->B * 0.11400000005960464f;
     if (lum <= 0.10000000149011612f) {
         return 0.0f;
     }
@@ -857,10 +863,10 @@ extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
  * Looks the name up with cIrradianceDataBase_GetIDByName in the irradiance database cIrradianceDataBase_TheDataBase. cRenderStateMan_Irradiance calls it
  * on first use.
  */
-extern "C" void cRenderStateMan_resolveIrradianceName(void* self)
+extern "C" void cRenderStateMan_resolveIrradianceName(tWPNameField* self)
 {
     *(int*)self = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, self);
-    *(int*)((char*)self + 4) = 0x123400;
+    self->m_nameId[1] = 0x123400;
 }
 #endif
 
@@ -881,13 +887,14 @@ extern "C" void* cRenderStateMan_Irradiance_r(void* self) __asm__("cRenderStateM
  *
  * @return the irradiance record
  */
-extern "C" void* cRenderStateMan_Irradiance_r(void* self)
+extern "C" void* cRenderStateMan_Irradiance_r(void* vself)
 {
-    if (*(int*)((char*)self + 4) != 0x123400) {
+    tWPNameField* self = (tWPNameField*)vself;
+    if (self->m_nameId[1] != 0x123400) {
         if (*(signed char*)self == 0) {
             return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, cIrradianceDataBase_mDefaultId);
         }
-        cRenderStateMan_resolveIrradianceName(self);
+        cRenderStateMan_resolveIrradianceName((tWPNameField*)self);
         return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, *(int*)self);
     }
     return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, *(int*)self);

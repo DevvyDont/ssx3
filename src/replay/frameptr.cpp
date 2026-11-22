@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
 #include "replay/frame.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
@@ -421,10 +422,10 @@ extern "C" void cReplayFramePtr_writeReplayInstance1(sFpSerObj* out, void* obj)
         unsigned short type;
     } rec;
     rec.id = 0xFFFFFFFF;
-    void* inst = *(void**)((char*)obj + 0x18);
-    if (inst != 0) {
-        rec.id = *(unsigned int*)((char*)inst + 0x78);
-        rec.type = *(unsigned short*)((char*)inst + 0x8);
+    tInstanceRecord* inst = (tInstanceRecord*)(*(void**)((char*)obj + 0x18));
+    if (((void*)inst) != 0) {
+        rec.id = inst->m_RID;
+        rec.type = *(unsigned short*)&inst->m_iFlags;
     } else {
         rec.type = 0;
     }
@@ -1275,10 +1276,11 @@ static inline bool isActiveFB88(char* s)
     return st != 0 && st < 10;
 }
 
-static inline bool isIdleFB88(char* s)
+static inline bool isIdleFB88(char* vs)
 {
+    cReplay* s = (cReplay*)vs;
     bool r = false;
-    if (isActiveFB88(s)) r = *(int*)(s + 0x484) == *(int*)(s + 0x3CC);
+    if (isActiveFB88(((char*)s))) r = s->PlaybackTick == s->EndRecordTick;
     return r;
 }
 
@@ -1309,49 +1311,49 @@ extern "C" int cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_upd
  */
 extern "C" int cReplay_updateInput_impl(void* self, int debug)
 {
-    char* replay = (char*)self;
+    cReplay* replay = (cReplay*)self;
     cSSXApp* app = SSXApp;
     sFpView_FB88* uiSound = (sFpView_FB88*)&gUISoundNull;
     sFpView_FB88* cur = (sFpView_FB88*)app->Game->UI->mpSound;
     if (cur != 0) uiSound = cur;
-    if (*(int*)(replay + 0x618) != 0) return 0;
+    if (replay->Cmd != 0) return 0;
     int command = 0;
-    void* input = (void*)app->Inputs[*(int*)(replay + 0x28)];
-    if (*(int*)(replay + 0x61C) == 0 && *(int*)(replay + 0x620) == 0) {
+    void* input = (void*)app->Inputs[replay->PadNum];
+    if (replay->AutoReplay == 0 && replay->InstantReplay == 0) {
         if (cInput_getState(input, 106)) {
-            *(int*)(replay + 0x1C) = 10;
-            *(int*)(replay + 0x20) = 0;
-            if (!isStateFB88(replay, 3)) command = 7;
-            else command = isIdleFB88(replay) ? 0 : 5;
+            replay->SkipFrameTicks = 10;
+            replay->SkipFrame = 0;
+            if (!isStateFB88(((char*)replay), 3)) command = 7;
+            else command = isIdleFB88(((char*)replay)) ? 0 : 5;
         } else if (cInput_getState(input, 107)) {
-            if (*(int*)(replay + 0x1C) > 0) *(int*)(replay + 0x1C) -= 1;
-            *(int*)(replay + 0x20) ^= 1;
-            if (*(int*)(replay + 0x1C) <= 0 && *(int*)(replay + 0x20) == 0) {
-                if (!isStateFB88(replay, 3)) command = 7;
-                else command = isIdleFB88(replay) ? 0 : 5;
+            if (replay->SkipFrameTicks > 0) replay->SkipFrameTicks -= 1;
+            replay->SkipFrame ^= 1;
+            if (replay->SkipFrameTicks <= 0 && replay->SkipFrame == 0) {
+                if (!isStateFB88(((char*)replay), 3)) command = 7;
+                else command = isIdleFB88(((char*)replay)) ? 0 : 5;
             }
         } else if (cInput_getState(input, 103)) {
-            if (!isStateFB88(replay, 3)) command = 7;
-            else command = isIdleFB88(replay) ? 0 : 6;
+            if (!isStateFB88(((char*)replay), 3)) command = 7;
+            else command = isIdleFB88(((char*)replay)) ? 0 : 6;
         } else if (cInput_getState(input, 102)) {
             if (debug) {
                 cGame_stopReplay(SSXApp->Game);
-                *(int*)(replay + 0x618) = 8;
-            } else if (!isStateFB88(replay, 3)) {
-                *(int*)(replay + 0x618) = 7;
+                replay->Cmd = 8;
+            } else if (!isStateFB88(((char*)replay), 3)) {
+                replay->Cmd = 7;
             }
             return 0;
         } else if (cInput_getState(input, 104)) {
-            if (!isStateFB88(replay, 3)) command = 7;
-            else if (!isIdleFB88(replay)) {
+            if (!isStateFB88(((char*)replay), 3)) command = 7;
+            else if (!isIdleFB88(((char*)replay))) {
                 uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
                 command = 4;
             } else {
                 uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 4);
             }
         } else if (cInput_getState(input, 105)) {
-            if (isStateFB88(replay, 3)) {
-                if (!isIdleNoCamFB88(replay)) {
+            if (isStateFB88(((char*)replay), 3)) {
+                if (!isIdleNoCamFB88(((char*)replay))) {
                     uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
                     command = 3;
                 } else {
@@ -1365,7 +1367,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
             cReplay_cycleReplayCameraAlgorithm((cReplay*)self);
         }
     }
-    *(int*)(replay + 0x618) = command;
+    replay->Cmd = command;
     return command != 0;
 }
 #endif
@@ -1429,12 +1431,12 @@ extern "C" void cReplay_processInput(cReplay* self)
         break;
     case 3: {
         redraw = 1;
-        char* frame = (char*)cReplay_findFrame_2(((char*)self), self->PlaybackTick);
+        cReplayFrame* frame = (cReplayFrame*)((char*)cReplay_findFrame_2(((char*)self), self->PlaybackTick));
         self->PlaybackFrame = (cReplayFrame*)frame;
-        if (self->PlaybackTick == *(int*)(frame + 0x30)) {
+        if (self->PlaybackTick == frame->FrameStartTick) {
             cReplay_prevFrame(((char*)self));
         } else {
-            char* n = *(char**)(frame + 0x14);
+            char* n = (char*)frame->Next;
             if (n != 0 && *(int*)(n + 0x30) == self->PlaybackTick) {
                 cReplay_prevFrame(((char*)self));
             }

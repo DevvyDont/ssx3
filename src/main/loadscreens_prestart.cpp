@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/loadindicator.h"
+#include "ui/uiengine.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "main/loadscreens.h"
@@ -35,7 +37,7 @@ extern void* cInitLoadScreen_vtbl[];
 extern "C" void cPreStartScreen_update(cPreStartScreen* self)
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
-    float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+    float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
     *fade += 0.0833333358168602f;
     if (*fade > 1.0f) {
         *fade = 1.0f;
@@ -195,13 +197,13 @@ extern "C" void cInitLoadScreen_update(cInitLoadScreen* self)
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
     if (self->ending != 0) {
-        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade -= 0.0833333358168602f;
         if (*fade < 0.0f) {
             *fade = 0.0f;
         }
     } else {
-        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade += 0.0833333358168602f;
         if (*fade > 1.0f) {
             *fade = 1.0f;
@@ -287,7 +289,7 @@ struct sLoadScreen2326D8 {
 extern "C" int cInitLoadScreen_loseFocus(cInitLoadScreen* self)
 {
     self->ending = 1;
-    return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
+    return SSXApp->LoadIndicator->alpha == 0.0f;
 }
 #endif
 
@@ -418,7 +420,7 @@ struct sLoadScreen2327B0 {
 extern "C" int cPreGameLoadScreen_loseFocus(cPreGameLoadScreen* self)
 {
     self->ending = 1;
-    return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
+    return SSXApp->LoadIndicator->alpha == 0.0f;
 }
 #endif
 
@@ -441,7 +443,7 @@ struct sLoadScreen2327E8 {
 extern "C" int cPreFELoadScreen_loseFocus(cPreFELoadScreen* self)
 {
     self->ending = 1;
-    return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
+    return SSXApp->LoadIndicator->alpha == 0.0f;
 }
 #endif
 
@@ -590,13 +592,13 @@ extern "C" void cPreGameLoadScreen_update(cPreGameLoadScreen* self)
     cLoadIndicator_update(SSXApp->LoadIndicator);
     tmp = self->ending != 0;
     if (tmp) {
-        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade -= 0.0833333358168602f;
         if (*fade < 0.0f) {
             *fade = 0.0f;
         }
     } else {
-        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade += 0.0833333358168602f;
         if (*fade > 1.0f) {
             *fade = 1.0f;
@@ -656,13 +658,13 @@ extern "C" void cPreFELoadScreen_update(cPreFELoadScreen* self)
     cLoadIndicator_update(SSXApp->LoadIndicator);
     tmp = self->ending != 0;
     if (tmp) {
-        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade -= 0.0833333358168602f;
         if (*fade < 0.0f) {
             *fade = 0.0f;
         }
     } else {
-        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        float* fade = (float*)(&SSXApp->LoadIndicator->alpha);
         *fade += 0.0833333358168602f;
         if (*fade > 1.0f) {
             *fade = 1.0f;
@@ -823,12 +825,12 @@ extern "C" void cStartScreen_load(cStartScreen* self)
     int mode = self->meStartScreen_type;
     if (mode == 0) {
         void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), self->mpUI);
-        cUIStateStack_push((char*)self->mpUI + 0x18, item);
+        cUIStateStack_push(&self->mpUI->mStateStack, item);
     } else if (mode == 2) {
         void* progressiveState = operator new(72, str_cFEStateProgressive, 0, 0);
         cUIState_cUIState(progressiveState, self->mpUI);
         *(void**)((char*)progressiveState + 8) = D_0047CA18;
-        cUIStateStack_push((char*)self->mpUI + 0x18, progressiveState);
+        cUIStateStack_push(&self->mpUI->mStateStack, progressiveState);
     }
 }
 #endif
@@ -1164,7 +1166,7 @@ other:
         }
     }
 done:
-    cUIStateStack_push((char*)self->mpUI + 0x18, item);
+    cUIStateStack_push(&self->mpUI->mStateStack, item);
 }
 #endif
 

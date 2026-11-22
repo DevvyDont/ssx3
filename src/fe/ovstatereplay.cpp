@@ -1,4 +1,7 @@
 #include "common.h"
+#include "replay/replay.h"
+#include "ui/uiengine.h"
+#include "ui/uimenu.h"
 #include "ui/uithing.h"
 #include "fe/ovstatereplay.h"
 #include "fe/ovstate.h"
@@ -40,7 +43,7 @@ extern "C" void cOVState_REPLAY_onWidgetCreate(cOVState_REPLAY* self, cUIObj_20D
     int id = *(int*)((char*)w + 0x38);
     if (id == GetHashValue32(str_option_savereplay)) {
         *(int*)((char*)w + 0x18) = 0;
-        if (*(int*)((char*)SSXApp->Game->Replay + 0x608) != 0) {
+        if (SSXApp->Game->Replay->Loaded != 0) {
             w->setEnabled(0);
             w->setStatic(1);
             w->setVisible(0);
@@ -178,8 +181,8 @@ static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game +
 extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* pInput)
 {
     cSnd_20DF38* snd = &gUISoundNull;
-    if (*(cSnd_20DF38**)((char*)self->mpEngine + 0x14) != 0)
-        snd = *(cSnd_20DF38**)((char*)self->mpEngine + 0x14);
+    if ((cSnd_20DF38*)self->mpEngine->mpSound != 0)
+        snd = (cSnd_20DF38*)self->mpEngine->mpSound;
     if (pInput->port != *(int*)(replay_20DF38() + 0x28)) {
         return 1;
     }
@@ -204,21 +207,21 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         cPauseState_Flags = D_004428F8[0];
         cPauseState_StackIdx = n;
         self->mShowPopupMenu = 1;
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-        *(int*)(obj + 0x90) &= ~8;
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        *(int*)&obj->mAttrMenu &= ~8;
         return 1;
     }
     if (self->mShowPopupMenu != 0 && pInput->isNext()) {
         snd->play(6);
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-        switch (*(int*)(*(char**)(obj + 0xA0) + 0x18)) {
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        switch (obj->mpSelected->mMiscData) {
         case 0:
             cReplay_stopReplay(replay_20DF38());
             cOVStateManager_triggerOverlay(18);
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             break;
         case 1: {
-            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpScreen, GetHashValue32(str_TransitionOut_b));
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
@@ -244,8 +247,8 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         snd->play(3);
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
         self->mShowPopupMenu = 0;
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-        *(int*)(obj + 0x90) |= 8;
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        *(int*)&obj->mAttrMenu |= 8;
         return 1;
     }
     if (self->mShowPopupMenu == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 204)) {
@@ -263,13 +266,13 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         return 1;
     }
     if (pInput->isUp()) {
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-        if (obj != 0 && self->mLoaded != 0 && *(unsigned char*)(obj + 0x95) == 1) {
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        if (((char*)obj) != 0 && self->mLoaded != 0 && obj->mScrollItemCurrent == 1) {
             return 1;
         }
     } else if (pInput->isDown()) {
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-        if (obj != 0 && self->mLoaded != 0 && *(unsigned char*)(obj + 0x95) == 2) {
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        if (((char*)obj) != 0 && self->mLoaded != 0 && obj->mScrollItemCurrent == 2) {
             return 1;
         }
     }
@@ -394,7 +397,7 @@ extern "C" void cOVState_REPLAY_setupCameraName(cOVState_REPLAY* self)
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_camera));
     if (text == 0)
         return;
-    unsigned int cam = *(unsigned int*)((char*)SSXApp->Game->Replay + 0x630);
+    unsigned int cam = (unsigned int)SSXApp->Game->Replay->CurrentReplayCamIndex;
     switch (cam) {
     case 0: __builtin_memcpy(buf, D_00471C40, 11); break;
     case 1: __builtin_memcpy(buf, D_00471C50, 14); break;

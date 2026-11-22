@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/font.h"
 #include "bx/math3d.h"
 #include "render/2drender.h"
 #include "ui/uithing.h"
@@ -375,10 +376,10 @@ extern "C" tRect cMenuItem_textPreRender_impl(char* item, const char* left, cons
     float zero = 0.0f;
     rect.Y = zero;
     rect.X = zero;
-    char* font = font_2CA4C8(item);
-    float lineHeight = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    float sx = *(float*)(font + 0x38) / *(float*)(font + 0x30);
-    float sy = *(float*)(font + 0x3C) / *(float*)(font + 0x34);
+    cFont* font = (cFont*)font_2CA4C8(item);
+    float lineHeight = (float)font->MaxCharHeight * font->BaseScale[1];
+    float sx = font->Scale[0] / font->BaseScale[0];
+    float sy = font->Scale[1] / font->BaseScale[1];
     sc.x = sx;
     sc.y = sy;
     rect.H = lineHeight * sy;
@@ -453,13 +454,13 @@ extern "C" void cMenuItem_textRender_impl(char* item, tRect* rect, const char* l
         cFont_text(font_2CA768(item), rect->X + 16.0f, rect->Y + 6.0f - 1.0f, left);
     }
     if (center) {
-        char* measureFont = font_2CA768(item);
-        float w = cFont_textExtent(measureFont, center, 0, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+        cFont* measureFont = (cFont*)font_2CA768(item);
+        float w = cFont_textExtent(measureFont, center, 0, 0, measureFont->Scale[0], measureFont->Scale[1]);
         cFont_text(font_2CA768(item), rect->X + (rect->W - w) * 0.5f, rect->Y + 6.0f - 1.0f, center);
     }
     if (right) {
-        char* measureFont = font_2CA768(item);
-        float w = cFont_textExtent(measureFont, right, 0, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+        cFont* measureFont = (cFont*)font_2CA768(item);
+        float w = cFont_textExtent(measureFont, right, 0, 0, measureFont->Scale[0], measureFont->Scale[1]);
         cFont_text(font_2CA768(item), rect->X + (rect->W - w) - 16.0f, rect->Y + 6.0f - 1.0f, right);
     }
     *(sVec2_2CA768*)(font_2CA768(item) + 0x28) = sVec2_2CA768(0.0f, 0.0f);
@@ -2244,9 +2245,9 @@ struct cMenuSys_render_sStack {
 extern "C" void cMenuSys_render(cMenuSys* self)
 {
     cMenuSys_render_sVec2 scale(0.8500000238418579f, 0.8500000238418579f);
-    char* font = (char*)self->Font;
-    *(float*)(font + 0x38) = *(float*)(font + 0x30) * scale.x;
-    *(float*)(font + 0x3C) = *(float*)(font + 0x34) * scale.y;
+    cFont* font = self->Font;
+    font->Scale[0] = font->BaseScale[0] * scale.x;
+    font->Scale[1] = font->BaseScale[1] * scale.y;
     cMenuSys_render_sStack* st = (cMenuSys_render_sStack*)self;
     st->items[st->count - 1]->render();
 }
@@ -6498,9 +6499,9 @@ extern "C" tRect* cGraphMenuItem_preRender(tRect* ret, cGraphMenuItem* item)
         focused = item->IsEditMode != 0;
     }
     int minHeight = focused ? 80 : 20;
-    char* font = font_2D0D48(((char*)item));
-    float lh = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    float w = cFont_textExtent(font, (char*)item->Caption, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    cFont* font = (cFont*)font_2D0D48(((char*)item));
+    float lh = (float)font->MaxCharHeight * font->BaseScale[1];
+    float w = cFont_textExtent(font, (char*)item->Caption, 0, 0, font->Scale[0], font->Scale[1]);
     char* font2 = font_2D0D48(((char*)item));
     float w2 = cFont_textExtent(font2, str_9_999_9_999, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
     if (w < w2) w = w2;

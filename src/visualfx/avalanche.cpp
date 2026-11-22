@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/rider.h"
+#include "object/instancenode.h"
+#include "world/instancerecord.h"
+#include "ai/dangerman.h"
 #include "render/particle.h"
 #include "sound/ssxaudio.h"
 #include "visualfx/avalanche.h"
@@ -405,12 +409,12 @@ static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
  */
 extern "C" sVec4_6290 cAvalanche_getColour(cAvalanche* self)
 {
-    char* node = ((char**)cAvalanche_m_nodeList)[*(unsigned short*)((char*)self + 0x92) >> 8];
-    char* activeNode = *(char**)(node + 0x114);
-    if (activeNode != 0) {
-        return sVec4_6290(*(float*)(activeNode + 0xCC), *(float*)(activeNode + 0xC0), *(float*)(activeNode + 0xC4), *(float*)(activeNode + 0xC8));
+    tAvalancheNode* node = (tAvalancheNode*)((char**)cAvalanche_m_nodeList)[*(unsigned short*)((char*)self + 0x92) >> 8];
+    tActiveAvalancheNode* activeNode = (tActiveAvalancheNode*)node->m_activeNode;
+    if (((char*)activeNode) != 0) {
+        return sVec4_6290(activeNode->m_colour.w, activeNode->m_colour.x, activeNode->m_colour.y, activeNode->m_colour.z);
     }
-    unsigned char* history = *(unsigned char**)(node + 0xFC);
+    unsigned char* history = (unsigned char*)node->m_history;
     if (history != 0) {
         return vScale_6290(sVec4_6290(1.0f, (float)history[3] * 0.0078125f, (float)history[4] * 0.0078125f, (float)history[5] * 0.0078125f), cAvalanche_m_PatchColourScale2);
     }
@@ -773,11 +777,11 @@ extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force)
 {
     tAvalancheNode* avData = self->m_node;
     if (((char*)avData) != 0 && (force != 0 || avData->m_baseType != 2)) {
-        char* inst = (char*)avData->m_instance;
-        if (inst != 0) {
-            char* obj = *(char**)(inst + 0xC);
-            if (obj != 0) {
-                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 0xC);
+        tInstanceRecord* inst = avData->m_instance;
+        if (((char*)inst) != 0) {
+            cInstanceNode* obj = inst->m_pActiveNode;
+            if (((char*)obj) != 0) {
+                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
                 vt[1].fn(vthis(obj, vt[1]), 3);
             }
         }
@@ -997,9 +1001,9 @@ extern "C" void tActiveAvalanche_end(tActiveAvalanche* self)
         }
         *(int*)self = 0;
         cSSXAudio_Avalanche(cAudioInterface_bxAudio(), 0);
-        char* dangerMan = (char*)SSXApp->Game->AI->DangerMan;
-        if (*(int*)(dangerMan + 0x708) != 0) {
-            *(int*)(dangerMan + 0x708) = *(int*)(dangerMan + 0x708) - 1;
+        cDangerMan* dangerMan = SSXApp->Game->AI->DangerMan;
+        if (dangerMan->mNumActiveAvalanche != 0) {
+            dangerMan->mNumActiveAvalanche = dangerMan->mNumActiveAvalanche - 1;
         }
     }
 }
@@ -1723,8 +1727,8 @@ extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
         D_vtx_D8EA8[2 * j].pos = nodePos;
         D_vtx_D8EA8[2 * j].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
-        char* rider = (char*)SSXApp->Game->AI->Riders[0];
-        D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(rider + 0x6C0))->getPos();
+        cRider* rider = SSXApp->Game->AI->Riders[0];
+        D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(&rider->mVtbl))->getPos();
         D_vtx_D8EA8[2 * j + 1].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j + 1].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
     }
@@ -2268,7 +2272,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
             }
             tActiveAvalanche_buildArray((tActiveAvalanche*)slot);
             cSSXAudio_Avalanche(cAudioInterface_bxAudio(), 1);
-            (*(int*)((char*)SSXApp->Game->AI->DangerMan + 0x708))++;
+            (SSXApp->Game->AI->DangerMan->mNumActiveAvalanche)++;
             return slot - D_slots_D97A8;
         }
     }

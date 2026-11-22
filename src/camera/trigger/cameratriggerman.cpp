@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/cameratriggervolumes.h"
 #include "vtable.h"
 #include "intersect/bxnash.h"
 #include "camera/trigger/cameratriggerman.h"
@@ -161,8 +162,9 @@ extern "C" void func_0016CA18_impl(void* vself) __asm__("func_0016CA18");
  *
  * @param vself  the camera trigger manager (this)
  */
-extern "C" void func_0016CA18_impl(void* vself)
+extern "C" void func_0016CA18_impl(void* vvself)
 {
+    cCameraTriggerMan* vself = (cCameraTriggerMan*)vvself;
     sCtMan_CA18* self = (sCtMan_CA18*)vself;
     for (int i = 0; i < self->count; i++) {
         sCtTrig_CA18* trigger = self->trigs[i];
@@ -170,8 +172,8 @@ extern "C" void func_0016CA18_impl(void* vself)
         sCtBox_CA18 box = trigger->shape->bounds();
         remove_CA18(w, trigger->item, &box);
     }
-    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x1C));
-    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x3C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&vself->CameraTriggerStack[0]));
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&vself->CameraTriggerStack[1]));
     cCameraTriggerList_reset(vself);
     cCamera_resetChaseControllerSwitches();
 }
@@ -753,10 +755,11 @@ struct sBox_D320 {
 };
 
 
-static inline void walk_D320(void* node, CameraCollisionCallback* ctx)
+static inline void walk_D320(void* vnode, CameraCollisionCallback* ctx)
 {
+    nash_Cell* node = (nash_Cell*)vnode;
     char* e;
-    for (e = *(char**)((char*)node + 0x28); e != 0; e = *(char**)e) {
+    for (e = *(char**)&node->nodesinside[2]; e != 0; e = *(char**)e) {
         if (*(int*)(e + 8) == 4) {
             char* trig = *(char**)(e + 0xC);
             char* sub = (char*)&ctx->rider->mVtbl;
@@ -775,14 +778,14 @@ static inline void walk_D320(void* node, CameraCollisionCallback* ctx)
             }
         }
     }
-    if (*(void**)((char*)node + 0x0)) descend(*(void**)((char*)node + 0x0), ctx);
-    if (*(void**)((char*)node + 0x4)) descend(*(void**)((char*)node + 0x4), ctx);
-    if (*(void**)((char*)node + 0x8)) descend(*(void**)((char*)node + 0x8), ctx);
-    if (*(void**)((char*)node + 0xC)) descend(*(void**)((char*)node + 0xC), ctx);
-    if (*(void**)((char*)node + 0x10)) descend(*(void**)((char*)node + 0x10), ctx);
-    if (*(void**)((char*)node + 0x14)) descend(*(void**)((char*)node + 0x14), ctx);
-    if (*(void**)((char*)node + 0x18)) descend(*(void**)((char*)node + 0x18), ctx);
-    if (*(void**)((char*)node + 0x1C)) descend(*(void**)((char*)node + 0x1C), ctx);
+    if (node->children[0][0][0]) descend(node->children[0][0][0], ctx);
+    if (node->children[0][0][1]) descend(node->children[0][0][1], ctx);
+    if (node->children[0][1][0]) descend(node->children[0][1][0], ctx);
+    if (node->children[0][1][1]) descend(node->children[0][1][1], ctx);
+    if (node->children[1][0][0]) descend(node->children[1][0][0], ctx);
+    if (node->children[1][0][1]) descend(node->children[1][0][1], ctx);
+    if (node->children[1][1][0]) descend(node->children[1][1][0], ctx);
+    if (node->children[1][1][1]) descend(node->children[1][1][1], ctx);
 }
 
 static inline void collect_D320(nash_Octant* r, char* hits, int k, CameraCollisionCallback* ctx, sBox_D320* box)
@@ -803,9 +806,10 @@ static inline t4Vector* getPos_D320(char* sub)
     return (t4Vector*)vt[5].fn(vthis(sub, vt[5]));
 }
 
-static inline int active_D320(char* rider)
+static inline int active_D320(char* vrider)
 {
-    return *(int*)(rider + 0x874) != 0 && *(int*)(rider + 0x87C) != 0;
+    cRider* rider = (cRider*)vrider;
+    return rider->mIsHuman != 0 && rider->mIsLocal != 0;
 }
 
 /**
@@ -1284,15 +1288,15 @@ static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
  */
 // Pushes *p out to the surface of the trigger's ellipsoid when it lies inside: into trigger space
 // (inverse of cCTBoundObjLine_worldPoint1's transform), normalize, and back to world space.
-extern "C" void cCTBoundObjEllipse_limitPoint(char* src, sCtmV_E560* point)
+extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, sCtmV_E560* point)
 {
     sCtmM_E560 xform(D_004FF1A0_E560);
     float one = 1.0f;
-    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(one / *(float*)(src + 0x18), one / *(float*)(src + 0x1C), one / *(float*)(src + 0x20), one));
-    ctmRotAxis_E560(&xform, D_004FF160_E560, -*(float*)(src + 0xC));
-    ctmRotAxis_E560(&xform, D_004FF150_E560, -*(float*)(src + 0x14));
-    ctmRotAxis_E560(&xform, D_004FF140_E560, -*(float*)(src + 0x10));
-    ctmTransMtx_E560(&xform, sCtmV_E560(-*(sCtmV3_E560*)(src + 0x0), one));
+    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(one / src->Scale.x, one / src->Scale.y, one / src->Scale.z, one));
+    ctmRotAxis_E560(&xform, D_004FF160_E560, -src->Heading);
+    ctmRotAxis_E560(&xform, D_004FF150_E560, -src->Roll);
+    ctmRotAxis_E560(&xform, D_004FF140_E560, -src->Pitch);
+    ctmTransMtx_E560(&xform, sCtmV_E560(-*(sCtmV3_E560*)&src->Pos, one));
     sCtmV_E560 localPt = ctmApplyMtx_E560(&xform, *point);
     localPt.w = 0.0f;
     if (localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z < one) {
@@ -1301,11 +1305,11 @@ extern "C" void cCTBoundObjEllipse_limitPoint(char* src, sCtmV_E560* point)
     localPt = ctmNormalize_E560(localPt);
     localPt.w = one;
     xform = D_004FF1A0_E560;
-    ctmTransMtx_E560(&xform, sCtmV_E560(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis_E560(&xform, D_004FF140_E560, *(float*)(src + 0x10));
-    ctmRotAxis_E560(&xform, D_004FF150_E560, *(float*)(src + 0x14));
-    ctmRotAxis_E560(&xform, D_004FF160_E560, *(float*)(src + 0xC));
-    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    ctmTransMtx_E560(&xform, sCtmV_E560(src->Pos.x, src->Pos.y, src->Pos.z, one));
+    ctmRotAxis_E560(&xform, D_004FF140_E560, src->Pitch);
+    ctmRotAxis_E560(&xform, D_004FF150_E560, src->Roll);
+    ctmRotAxis_E560(&xform, D_004FF160_E560, src->Heading);
+    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(src->Scale.x, src->Scale.y, src->Scale.z, one));
     *point = ctmApplyMtx_E560(&xform, localPt);
     point->w = one;
 }
@@ -1921,19 +1925,19 @@ static inline sCtmV_FBB8 ctmScale_FBB8(const sCtmV_FBB8& v, float s)
  */
 // Projects *p onto the line through the transformed points src+0x2C and src+0x38
 // (transform as in cCTBoundObjLine_worldPoint1).
-extern "C" void cCTBoundObjLine_limitPoint(char* src, sCtmV_FBB8* point)
+extern "C" void cCTBoundObjLine_limitPoint(cCTBoundObjLine* src, sCtmV_FBB8* point)
 {
     sCtmM_FBB8 xform(D_004FF1A0_FBB8);
     float one = 1.0f;
-    ctmTransMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis_FBB8(&xform, D_004FF140_FBB8, *(float*)(src + 0x10));
-    ctmRotAxis_FBB8(&xform, D_004FF150_FBB8, *(float*)(src + 0x14));
-    ctmRotAxis_FBB8(&xform, D_004FF160_FBB8, *(float*)(src + 0xC));
-    xform = ctmScaleMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    ctmTransMtx_FBB8(&xform, sCtmV_FBB8(src->Pos.x, src->Pos.y, src->Pos.z, one));
+    ctmRotAxis_FBB8(&xform, D_004FF140_FBB8, src->Pitch);
+    ctmRotAxis_FBB8(&xform, D_004FF150_FBB8, src->Roll);
+    ctmRotAxis_FBB8(&xform, D_004FF160_FBB8, src->Heading);
+    xform = ctmScaleMtx_FBB8(&xform, sCtmV_FBB8(src->Scale.x, src->Scale.y, src->Scale.z, one));
     sCtmV_FBB8 pts[2];
     float w1 = 1.0f;
-    pts[0] = ctmApplyMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), w1));
-    pts[1] = ctmApplyMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), w1));
+    pts[0] = ctmApplyMtx_FBB8(&xform, sCtmV_FBB8(src->Point[0].x, src->Point[0].y, src->Point[0].z, w1));
+    pts[1] = ctmApplyMtx_FBB8(&xform, sCtmV_FBB8(src->Point[1].x, src->Point[1].y, src->Point[1].z, w1));
     sCtmV_FBB8 lineDir = ctmSub_FBB8(pts[1], pts[0]);
     float lineParam = ctmDot_FBB8(ctmSub_FBB8(*point, pts[0]), lineDir) / ctmDot_FBB8(lineDir, lineDir);
     *point = ctmAdd_FBB8(pts[0], ctmScale_FBB8(lineDir, lineParam));

@@ -1847,7 +1847,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmallopt);
  * @return 1 when accepted, else 0
  */
 extern "C" int cDynamicMemMan_dlmallopt(void** self, int kind, unsigned int val) {
-    char* ms = (char*)*self;
+    malloc_state* ms = (malloc_state*)((char*)*self);
     cDynamicMemMan_malloc_consolidate((cDynamicMemMan*)self, (malloc_state*)ms);
     switch (kind) {
     case 1:
@@ -1869,17 +1869,17 @@ extern "C" int cDynamicMemMan_dlmallopt(void** self, int kind, unsigned int val)
         }
         return 0;
     case -1:
-        *(unsigned int*)(ms + 0x344) = val;
+        ms->trim_threshold = val;
         return 1;
     case -2:
-        *(unsigned int*)(ms + 0x348) = val;
+        ms->top_pad = val;
         return 1;
     case -3:
-        *(unsigned int*)(ms + 0x34C) = val;
+        ms->mmap_threshold = val;
         return 1;
     case -4:
         if (val == 0) {
-            *(int*)(ms + 0x354) = 0;
+            ms->n_mmaps_max = 0;
             return 1;
         }
         return 0;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/ovstate.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
@@ -280,201 +281,201 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     char* result = 0;
     char* mgr = (char*)SSXApp->Game->UI;
     if (type == 0x1) {
-        char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_COMPETE_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC4) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0xC4) = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x2) {
-        char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_BIGCHAL_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC4) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0xC4) = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x3) {
-        char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_FREERIDE_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC4) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0xC4) = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x4) {
-        char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_SPOKE_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC4) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0xC4) = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x5) {
-        char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_QUICKPLAY_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC4) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0xC4) = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x6) {
-        char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_ONLINE_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC4) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0xC4) = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x7) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_OPTIONS_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_OPTIONS_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x8) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_HEAT_PREEVENT_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_HEAT_PREEVENT_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x9) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00472778;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00472778;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 10) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_HEAT_STANDINGS_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_HEAT_STANDINGS_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 11) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_FINAL_STANDINGS_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_FINAL_STANDINGS_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 0xC) {
-        char* overlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(void**)(overlay + 0x8) = cOVState_RACE_FINISHOV_vtbl;
-        *(int*)(overlay + 0xA0) = 0x1;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC) = GetHashValue32(str_finishov);
-        result = overlay;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mVtbl = (void**)cOVState_RACE_FINISHOV_vtbl;
+        *(int*)(((char*)overlay) + 0xA0) = 0x1;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        overlay->mHashName = GetHashValue32(str_finishov);
+        result = ((char*)overlay);
     }
     if (type == 13) {
-        char* overlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(void**)(overlay + 0x8) = cOVState_BASSSP_QUAL_FINISHOV_vtbl;
-        *(int*)(overlay + 0xA0) = 0x1;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0xC) = GetHashValue32(str_finishov);
-        result = overlay;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mVtbl = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
+        *(int*)(((char*)overlay) + 0xA0) = 0x1;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        overlay->mHashName = GetHashValue32(str_finishov);
+        result = ((char*)overlay);
     }
     if (type == 0xE) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00474B80;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00474B80;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 0xF) {
-        char* overlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_TOPTIMES_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_TOPTIMES_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x10) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_REWARDS_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_REWARDS_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 17) {
-        char* overlay = (char*)operator new(184, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_REPLAY_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_REPLAY_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 18) {
         result = (char*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
@@ -483,182 +484,182 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         result = (char*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
     if (type == 20) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_004725C8;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_004725C8;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 21) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_004726A0;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_004726A0;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 22) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00473ED8;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00473ED8;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 23) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_004749D0;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0x9C) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_004749D0;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0x9C) = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x18) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_004748F8;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x9C) = 0x1;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_004748F8;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)overlay) + 0x9C) = 0x1;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 25) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00474820;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x9C) = 0x2;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00474820;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)overlay) + 0x9C) = 0x2;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 26) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00474748;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x9C) = 0x3;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00474748;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)overlay) + 0x9C) = 0x3;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 27) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00474670;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x9C) = 0x4;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00474670;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)overlay) + 0x9C) = 0x4;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x1C) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00474598;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x9C) = 0x5;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00474598;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)overlay) + 0x9C) = 0x5;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 29) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_BIGCHALLENGE_START_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
+        overlay->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_START_getChallengeData(overlay);
-        result = overlay;
+        result = ((char*)overlay);
     }
     if (type == 0x1E) {
-        char* overlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_BIGCHALLENGE_FAIL_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
+        overlay->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_FAIL_getChallengeData(overlay);
-        result = overlay;
+        result = ((char*)overlay);
     }
     if (type == 0x1F) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_ENTERLODGE_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_ENTERLODGE_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 0x20) {
-        char* overlay = (char*)operator new(468, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(468, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(void**)(overlay + 0x8) = cOVState_MAP_vtbl;
-        new (overlay + 0x9C) sDlgSlot_AB50[8];
-        result = overlay;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mVtbl = (void**)cOVState_MAP_vtbl;
+        new (((char*)overlay) + 0x9C) sDlgSlot_AB50[8];
+        result = ((char*)overlay);
     }
     if (type == 33) {
-        char* overlay = (char*)operator new(912, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_TRANSPORT_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        cUITemplate_MAP_init(overlay + 0x9C);
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        cUITemplate_MAP_init(((char*)overlay) + 0x9C);
+        result = ((char*)overlay);
     }
     if (type == 34) {
         result = (char*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
     }
     if (type == 35) {
-        char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00473C50;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_00473C50;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 36) {
         result = (char*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
@@ -667,40 +668,40 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         result = (char*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
     }
     if (type == 38) {
-        char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_004744C0;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0x9C) = 0x6;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)D_004744C0;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)overlay) + 0x9C) = 0x6;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
     if (type == 39) {
-        char* overlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(int*)(overlay + 0xA0) = 0x1;
-        *(int*)(overlay + 0x98) = type;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        *(int*)(overlay + 0x9C) = 0;
-        result = overlay;
+        overlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)overlay) + 0xA0) = 0x1;
+        overlay->mOVID = type;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        *(int*)(((char*)overlay) + 0x9C) = 0;
+        result = ((char*)overlay);
     }
     if (type == 40) {
-        char* overlay = (char*)operator new(228, str_cOVStateOverlay, 0, 0);
+        cOVState* overlay = (cOVState*)((char*)operator new(228, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(int*)(overlay + 0x98) = type;
-        *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(void**)(overlay + 0x8) = D_00473248;
-        *(int*)(overlay + 0x48) = 0;
-        *(int*)(overlay + 0x4C) = 0;
-        *(int*)(overlay + 0x54) = 0;
-        result = overlay;
+        overlay->mOVID = type;
+        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        overlay->mVtbl = (void**)D_00473248;
+        overlay->mDoneTransition = 0;
+        overlay->mAllowPauseMenu = 0;
+        overlay->mRemovePDA = 0;
+        result = ((char*)overlay);
     }
 
     *(int*)(result + 0x1C) = (*(int*)(result + 0x1C) & ~0x3F00) | 0x100;
@@ -794,201 +795,201 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     char* mgr = (char*)SSXApp->Game->UI;
     int cur = (int)cUIStateStack_getCurrentState(mgr + 0x18);
     if (type == 0x1) {
-        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_COMPETE_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC4) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0xC4) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x2) {
-        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_BIGCHAL_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC4) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0xC4) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x3) {
-        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_FREERIDE_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC4) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0xC4) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x4) {
-        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_SPOKE_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC4) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0xC4) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x5) {
-        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_QUICKPLAY_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC4) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0xC4) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x6) {
-        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_ONLINE_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC4) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0xC4) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x7) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_OPTIONS_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_OPTIONS_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x8) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_HEAT_PREEVENT_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_HEAT_PREEVENT_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x9) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00472778;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00472778;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 10) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_HEAT_STANDINGS_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_HEAT_STANDINGS_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 11) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_FINAL_STANDINGS_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_FINAL_STANDINGS_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0xC) {
-        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(void**)(newOverlay + 0x8) = cOVState_RACE_FINISHOV_vtbl;
-        *(int*)(newOverlay + 0xA0) = 0x1;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC) = GetHashValue32(str_finishov);
-        result = newOverlay;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mVtbl = (void**)cOVState_RACE_FINISHOV_vtbl;
+        *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        newOverlay->mHashName = GetHashValue32(str_finishov);
+        result = ((char*)newOverlay);
     }
     if (type == 13) {
-        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(void**)(newOverlay + 0x8) = cOVState_BASSSP_QUAL_FINISHOV_vtbl;
-        *(int*)(newOverlay + 0xA0) = 0x1;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0xC) = GetHashValue32(str_finishov);
-        result = newOverlay;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mVtbl = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
+        *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        newOverlay->mHashName = GetHashValue32(str_finishov);
+        result = ((char*)newOverlay);
     }
     if (type == 0xE) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00474B80;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00474B80;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0xF) {
-        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_TOPTIMES_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_TOPTIMES_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x10) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_REWARDS_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_REWARDS_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 17) {
-        char* newOverlay = (char*)operator new(184, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_REPLAY_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_REPLAY_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 18) {
         result = (char*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
@@ -997,182 +998,182 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         result = (char*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
     if (type == 20) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_004725C8;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_004725C8;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 21) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_004726A0;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_004726A0;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 22) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00473ED8;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00473ED8;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 23) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_004749D0;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0x9C) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_004749D0;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0x9C) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x18) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_004748F8;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x9C) = 0x1;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_004748F8;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)newOverlay) + 0x9C) = 0x1;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 25) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00474820;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x9C) = 0x2;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00474820;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)newOverlay) + 0x9C) = 0x2;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 26) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00474748;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x9C) = 0x3;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00474748;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)newOverlay) + 0x9C) = 0x3;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 27) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00474670;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x9C) = 0x4;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00474670;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)newOverlay) + 0x9C) = 0x4;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x1C) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00474598;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x9C) = 0x5;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00474598;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)newOverlay) + 0x9C) = 0x5;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 29) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_BIGCHALLENGE_START_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
+        newOverlay->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_START_getChallengeData(newOverlay);
-        result = newOverlay;
+        result = ((char*)newOverlay);
     }
     if (type == 0x1E) {
-        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_BIGCHALLENGE_FAIL_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
+        newOverlay->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_FAIL_getChallengeData(newOverlay);
-        result = newOverlay;
+        result = ((char*)newOverlay);
     }
     if (type == 0x1F) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_ENTERLODGE_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_ENTERLODGE_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 0x20) {
-        char* newOverlay = (char*)operator new(468, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(468, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(void**)(newOverlay + 0x8) = cOVState_MAP_vtbl;
-        new (newOverlay + 0x9C) sDlgSlot_BAB8[8];
-        result = newOverlay;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mVtbl = (void**)cOVState_MAP_vtbl;
+        new (((char*)newOverlay) + 0x9C) sDlgSlot_BAB8[8];
+        result = ((char*)newOverlay);
     }
     if (type == 33) {
-        char* newOverlay = (char*)operator new(912, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_TRANSPORT_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        cUITemplate_MAP_init(newOverlay + 0x9C);
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        cUITemplate_MAP_init(((char*)newOverlay) + 0x9C);
+        result = ((char*)newOverlay);
     }
     if (type == 34) {
         result = (char*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
     }
     if (type == 35) {
-        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00473C50;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_00473C50;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 36) {
         result = (char*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
@@ -1181,40 +1182,40 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         result = (char*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
     }
     if (type == 38) {
-        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_004744C0;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0x9C) = 0x6;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)D_004744C0;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)newOverlay) + 0x9C) = 0x6;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 39) {
-        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(int*)(newOverlay + 0xA0) = 0x1;
-        *(int*)(newOverlay + 0x98) = type;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        *(int*)(newOverlay + 0x9C) = 0;
-        result = newOverlay;
+        newOverlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
+        newOverlay->mOVID = type;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        *(int*)(((char*)newOverlay) + 0x9C) = 0;
+        result = ((char*)newOverlay);
     }
     if (type == 40) {
-        char* newOverlay = (char*)operator new(228, str_cOVStateOverlay, 0, 0);
+        cOVState* newOverlay = (cOVState*)((char*)operator new(228, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(int*)(newOverlay + 0x98) = type;
-        *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(void**)(newOverlay + 0x8) = D_00473248;
-        *(int*)(newOverlay + 0x48) = 0;
-        *(int*)(newOverlay + 0x4C) = 0;
-        *(int*)(newOverlay + 0x54) = 0;
-        result = newOverlay;
+        newOverlay->mOVID = type;
+        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        newOverlay->mVtbl = (void**)D_00473248;
+        newOverlay->mDoneTransition = 0;
+        newOverlay->mAllowPauseMenu = 0;
+        newOverlay->mRemovePDA = 0;
+        result = ((char*)newOverlay);
     }
 
     *(int*)(result + 0x20) = cur;
@@ -1570,10 +1571,10 @@ struct sFlag_CFD0 {
  */
 extern "C" void cOVStateManager_update(void)
 {
-    char *mgr = ((char*)((SSXApp)->Game)->UI);
+    cUIEngine* mgr = ((SSXApp)->Game)->UI;
     char *st = 0;
-    if (mgr + 0x18) {
-        st = (char *)cUIStateStack_getCurrentState(mgr + 0x18);
+    if ((char*)&mgr->mStateStack) {
+        st = (char *)cUIStateStack_getCurrentState(&mgr->mStateStack);
     }
     switch (cOVStateManager_mStatus) {
     case 0:
@@ -1589,7 +1590,7 @@ extern "C" void cOVStateManager_update(void)
             if (*(int *)(st + 0x98) == 8) {
                 cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-                    cUIStateStack_purgeNormalStates(mgr + 0x18);
+                    cUIStateStack_purgeNormalStates(&mgr->mStateStack);
                 }
             }
         }

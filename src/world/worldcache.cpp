@@ -135,11 +135,12 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_releaseBlock__FPvT0);
  *
  * @param item  the tWorldMemBlock
  */
-void cWorldBlockAllocator_releaseBlock(void* vself, void* item)
+void cWorldBlockAllocator_releaseBlock(void* vself, void* vitem)
 {
+    tWorldMemBlock* item = (tWorldMemBlock*)vitem;
     cWorldBlockAllocator* self = (cWorldBlockAllocator*)vself;
-    *(int*)((char*)item + 0x10) = 0;
-    *(void**)((char*)item + 0x14) = (void*)self->m_pFreeBlocks;
+    item->bActive = 0;
+    item->pNext = (tWorldMemBlock*)((void*)self->m_pFreeBlocks);
     self->m_pFreeBlocks = (tWorldMemBlock*)item;
     *(int*)&self->m_uiNumFreeBlocks += 1;
 }
@@ -1879,7 +1880,7 @@ INCLUDE_ASM("world/worldcache", cWorldView_update);
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 struct cWorldView_recursiveFlushPages_sNode;
 extern "C" void cWorldView_recursiveFlushPages(void** self, cWorldView_recursiveFlushPages_sNode* node);
-extern "C" void cWorldView_recursiveIsEmptyPages(void** self, void* node, int* ok);
+extern "C" void cWorldView_recursiveIsEmptyPages(void** self, tBxBSPNode* node, int* ok);
 extern "C" void func_003AD1A8();
 extern "C" void cWorldView_refreshStreamFocus(void* self, int i);
 extern char str_ASKY[];
@@ -1970,7 +1971,7 @@ extern "C" void cWorldView_update(cWorldView* worldView)
         case 4:
             if (cWorldCache_isPageEmpty((cWorldCache*)self->cache, self->sections[i].id)) {
                 int ok = 1;
-                cWorldView_recursiveIsEmptyPages((void**)self, self->sections[i].tree, &ok);
+                cWorldView_recursiveIsEmptyPages((void**)self, (tBxBSPNode*)self->sections[i].tree, &ok);
                 if (ok) {
                     self->entries[i].state = 0;
                     cWorldCache_deactivateSectionMem((cWorldCache*)self->cache, i);
@@ -2041,19 +2042,19 @@ extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1);
  * @param node  the tBxBSPNode
  * @param ok  set on entry; cleared when a page is still loaded
  */
-extern "C" void cWorldView_recursiveIsEmptyPages(void** self, void* node, int* ok)
+extern "C" void cWorldView_recursiveIsEmptyPages(void** self, tBxBSPNode* node, int* ok)
 {
     if (*ok != 0) {
-        void* pageRef = *(void**)((char*)node + 0x58);
+        void* pageRef = node->m_pHull;
         if (pageRef != 0 && cWorldCache_isPageEmpty((cWorldCache*)(*self), *(unsigned short*)((char*)pageRef + 2)) == 0) {
             *ok = 0;
             return;
         }
-        if (*(void**)((char*)node + 0x50) != 0) {
-            cWorldView_recursiveIsEmptyPages(self, *(void**)((char*)node + 0x50), ok);
+        if (node->m_pInChild != 0) {
+            cWorldView_recursiveIsEmptyPages(self, (tBxBSPNode*)(node->m_pInChild), ok);
         }
-        if (*(void**)((char*)node + 0x54) != 0 && *ok != 0) {
-            cWorldView_recursiveIsEmptyPages(self, *(void**)((char*)node + 0x54), ok);
+        if (node->m_pOutChild != 0 && *ok != 0) {
+            cWorldView_recursiveIsEmptyPages(self, (tBxBSPNode*)(node->m_pOutChild), ok);
         }
     }
 }

@@ -1694,7 +1694,7 @@ static inline int* Pop_6EE0(PacketQueue_6EE0* q)
 // PORT: the unit declares this as (int, int)
 extern "C" void cGameComm__cGameComm(int self, int flags)
 {
-    cGameComm* gameComm = (cGameComm*)((char*)self);
+    cGameComm* gameComm = (cGameComm*)self;
     int i;
     if (gameComm->mBEBuffer) cMemMan_free_6EE0(gameComm->mBEBuffer);
     if ((int*)gameComm->mPacketCache) cGameComm_freePacket((cGameComm*)gameComm, (int*)gameComm->mPacketCache);
@@ -2263,7 +2263,7 @@ extern "C" void cGameComm_checkActive(cGameComm* gameComm)
                 cSSXApp* appObj = SSXApp;
                 int n = ++gameComm->mStallThreshold;
                 ++gameComm->unk_060;
-                unsigned int st = *(int*)((char*)appObj->Game->AI) - 4;
+                unsigned int st = *(int*)appObj->Game->AI - 4;
                 if (st < 2) {
                     if (n >= 10) gameComm->mStallTimer += 1.0f;
                     if (gameComm->mStallThreshold == 10) ++gameComm->mStallCount;

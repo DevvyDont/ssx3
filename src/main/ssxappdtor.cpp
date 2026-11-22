@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/ai.h"
+#include "world/worldcache.h"
+#include "ui/uistate.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "bx/appman.h"
@@ -1853,8 +1856,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderView);
  * @return the current render view's camera
  */
 extern "C" int cGame_getCurrentRenderView(cGame* self) {
-    char *list = (char*)self->ViewMan;
-    return *(int *)(list + (*(int *)(list + 0x14) << 2) + 4);
+    cGameViewMan* list = self->ViewMan;
+    return (int)list->PlayerCamera[(int)list->m_uiCurrentView];
 }
 #endif
 //100%
@@ -3344,13 +3347,13 @@ extern "C" void func_002451B0(cGame* self) {
     char *vtbl;
 
     i = 0;
-    if (*(int *)((char*)self->AI + 0x78) > 0) {
+    if (self->AI->NumberOfRidersAllocated > 0) {
         do {
-            obj = *(char **)((char*)self->AI + (i << 2) + 0x28);
+            obj = (char*)self->AI->Riders[i];
             i++;
             vtbl = *(char **)(obj + 0x6C0);
             (*(void (**)(void *))(vtbl + 0x9C))(obj + *(short *)(vtbl + 0x98));
-        } while (i < *(int *)((char*)self->AI + 0x78));
+        } while (i < self->AI->NumberOfRidersAllocated);
     }
 }
 #endif
@@ -3392,15 +3395,15 @@ extern char str_Do_you_want_to_display_the_game_in_Progr[];
  * frame, then sets its "Title" text to "Do you want to display the game in Progr..." (the progressive-scan question).
  * Slot +0x24 (onCreateScreen) of D_0047CA18.
  */
-extern "C" void func_00245248(void* self)
+extern "C" void func_00245248(cUIState* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_supopup), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_b));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_b));
     if (text != 0) {
         cUIText_setAsciiString(text, str_Do_you_want_to_display_the_game_in_Progr);
     }
@@ -3462,7 +3465,7 @@ static inline sUIObj_2452D8* newUIObj_2452D8(void* owner, char flag)
  * @param msg  the widget event message (ignored when null)
  * @param type  the event type (only 5 is handled)
  */
-extern "C" void func_002452D8(void* self, char* msg, int type)
+extern "C" void func_002452D8(cUIState* self, char* msg, int type)
 {
     if (msg == 0) {
         return;
@@ -3472,11 +3475,11 @@ extern "C" void func_002452D8(void* self, char* msg, int type)
     }
     if (isHash_2452D8(*(int*)(msg + 0x38), str_yes_c)) {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 0);
-        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, newState);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, newState);
         ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8]), 1);
     } else {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 1);
-        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, newState);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, newState);
     }
 }
 #endif
@@ -3765,11 +3768,11 @@ public:
  * makes "CtrlPS2_default" and "default_text" visible for mapping 0, "CtrlPS2_pro" and "pro_text" otherwise (widget
  * virtual slot 9). Slot +0x24 (onCreateScreen) of D_0047C7A8.
  */
-extern "C" void func_00245730(void* self)
+extern "C" void func_00245730(cUIState* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* scr = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_110ctrl_load), 0);
-    *(void**)((char*)self + 0x40) = scr;
+    self->mpScreen = (cUIScreen*)scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
     }
@@ -3777,19 +3780,19 @@ extern "C" void func_00245730(void* self)
     char* ctrlPro = str_CtrlPS2_pro;
     int controlConfig = cBENewPlayerInterface_getControllerMapping(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     cUIObj_245730* widget;
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ctrlDefault));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ctrlDefault));
     if (widget != 0) {
         widget->setVisible(controlConfig == 0);
     }
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_default_text_b));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_default_text_b));
     if (widget != 0) {
         widget->setVisible(controlConfig == 0);
     }
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ctrlPro));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ctrlPro));
     if (widget != 0) {
         widget->setVisible(controlConfig != 0);
     }
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pro_text_b));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pro_text_b));
     if (widget != 0) {
         widget->setVisible(controlConfig != 0);
     }

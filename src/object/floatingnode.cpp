@@ -24,9 +24,9 @@ void cInstanceNode_getBoundBoxInfo_3(void* self, void* box, void* out) __asm__("
  */
 void cFloatingNode_initInfo(cFloatingNode* self)
 {
-    void* mem = cMemMan_alloc(0x30, str_FloatingBoundBox, 0x20000000, 0);
-    (*(void**)&self->Info) = mem;
-    cInstanceNode_getBoundBoxInfo_3(self, mem, (char*)mem + 0x20);
+    tFloatBoundBoxInfo* mem = (tFloatBoundBoxInfo*)cMemMan_alloc(0x30, str_FloatingBoundBox, 0x20000000, 0);
+    (*(void**)&self->Info) = ((void*)mem);
+    cInstanceNode_getBoundBoxInfo_3(self, mem, &mem->Radius);
 }
 #endif
 
@@ -94,9 +94,10 @@ struct sFlVEntry_34EF40 {
     char* (*fn)(void*);
 };
 
-static inline t4Vector nodePos_34EF40(char* self)
+static inline t4Vector nodePos_34EF40(char* vself)
 {
-    sFlVEntry_34EF40* vt = *(sFlVEntry_34EF40**)(self + 0xC);
+    cFloatingNode* self = (cFloatingNode*)vself;
+    sFlVEntry_34EF40* vt = (sFlVEntry_34EF40*)self->mVtbl;
     return *(t4Vector*)(vt[24].fn(vthis(self, vt[24])) + 0x30);
 }
 

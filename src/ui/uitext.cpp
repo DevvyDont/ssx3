@@ -1,4 +1,8 @@
 #include "common.h"
+#include "ui/uiengine.h"
+#include "ui/uifontinterface.h"
+#include "ui/uiscreen.h"
+#include "ui/uistate.h"
 #include "ui/uidata.h"
 #include "render/font.h"
 #include "ui/uiinput.h"
@@ -81,7 +85,7 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
     if (self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
         ((sVE_05E8*)self->mVtbl)[16].fn(vthis(self, ((sVE_05E8*)self->mVtbl)[16]));
     }
-    int* ov = *(int**)(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x10);
+    int* ov = (int*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (ov != 0 && ((*ov >> 27) & 1)) {
         sFont_05E8* font = (sFont_05E8*)cUIText_getFont(self);
         if (font == 0) {
@@ -681,7 +685,7 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_getFont);
  */
 extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 {
-    void* engine = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
+    void* engine = self->mpScreen->mpState->mpEngine;
     if (engine != 0) {
         return *(int*)((char*)*(void**)((char*)engine + 0x8) + ((*(unsigned int*)&self->mAttrTextScroll >> 1) & 3) * 12 + 0xC);
     }
@@ -748,7 +752,7 @@ extern "C" void cUITextScroll_updateLocale(cUITextScroll* self)
 {
     int id = (int)self->mStringID;
     if (id != 0) {
-        cUITextScroll_updateLocale_cVirtA* strings = *(cUITextScroll_updateLocale_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+        cUITextScroll_updateLocale_cVirtA* strings = (cUITextScroll_updateLocale_cVirtA*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
         if (strings != 0) {
             void* wideStr = strings->getStringByHash(id);
             if (wideStr != 0) {
@@ -1286,7 +1290,7 @@ public:
 extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id)
 {
     self->mStringID = (unsigned int)id;
-    cUITextScroll_addUnicodeStringByID_cVirtA* localeInterface = *(cUITextScroll_addUnicodeStringByID_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+    cUITextScroll_addUnicodeStringByID_cVirtA* localeInterface = (cUITextScroll_addUnicodeStringByID_cVirtA*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (localeInterface != 0) {
         void* unicodeString = localeInterface->getStringByHash(id);
         if (unicodeString != 0) {

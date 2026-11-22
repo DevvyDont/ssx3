@@ -278,20 +278,20 @@ extern "C" void cInSeq_Play(void* cache, void* data, int a2);
  */
 extern "C" int cBXScriptEngine_PlayScript(cBXScriptEngine* self, int id, int value, int loop)
 {
-    char* request = (char*)cBXScriptEngine_GetRequest(self, id);
-    if (request == 0) {
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, id);
+    if (((char*)request) == 0) {
         return 0;
     }
-    int state = *(int*)(request + 0x4);
+    int state = request->state;
     if (state != 2) {
         return state;
     }
-    *(short*)(request + 0x10) = value;
-    if (*(int*)(request + 0x20) == 1) {
-        *(int*)(request + 0x4) = 3;
+    request->purgeAfterPlay = value;
+    if (request->requestType == 1) {
+        request->state = 3;
         cInSeq_Play(self->mpInSeq, **(void***)request, loop);
     }
-    return *(int*)(request + 0x4);
+    return request->state;
 }
 #endif
 
@@ -426,10 +426,10 @@ void cScriptPlayerMain_SetPlaySpeed(void* self, float t);
 extern "C" int cBXScriptEngine_SetScriptPlayRate(float playRate)
 {
     if (playRate < 0.01f) return 0;
-    char* request = (char*)cBXScriptEngine_GetRequest_v();
-    if (request == 0) return 0;
-    if (*(int*)(request + 4) == 1) {
-        *(float*)(request + 0x18) = playRate;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest_v();
+    if (((char*)request) == 0) return 0;
+    if (request->state == 1) {
+        request->playSpeedRequest = playRate;
         return 1;
     }
     cScriptPlayerMain_SetPlaySpeed(*(void**)request, playRate);
@@ -450,9 +450,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetRequestUserData);
  */
 extern "C" int cBXScriptEngine_SetRequestUserData(cBXScriptEngine* self, char* obj, int val)
 {
-    char* request = *(char**)(obj + 0xC);
-    int old = *(int*)(request + 0xC);
-    *(int*)(request + 0xC) = val;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)(*(char**)(obj + 0xC));
+    int old = (int)request->pUserData;
+    request->pUserData = (void*)val;
     return old;
 }
 #endif
@@ -470,9 +470,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetRequestUserData1);
  */
 extern "C" int cBXScriptEngine_SetRequestUserData1(cBXScriptEngine* self, int requestHandle, int val)
 {
-    char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
-    int old = *(int*)(request + 0xC);
-    *(int*)(request + 0xC) = val;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
+    int old = (int)request->pUserData;
+    request->pUserData = (void*)val;
     return old;
 }
 #endif
@@ -658,16 +658,16 @@ extern "C" void cScriptPlayerMain_Resume(void* self);
  */
 extern "C" void cBXScriptEngine_ResumeScript(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)&self->mScriptRequests[requestHandle];
+    tScriptRequestInfo* request = &self->mScriptRequests[requestHandle];
     cScriptPlayerMain_Resume(*(void**)request);
-    if (*(int*)(request + 0x4) == 5) {
-        char* player = *(char**)request;
-        if (*(int*)(player + 0x2C) <= 0) {
-            int playState = *(int*)(player + 0x20);
+    if (request->state == 5) {
+        cScriptPlayerMain* player = (cScriptPlayerMain*)(*(char**)request);
+        if (player->mNumPaused <= 0) {
+            int playState = player->mPlayState;
             if (playState == 3 || playState == 4) {
-                *(int*)(request + 0x4) = 4;
+                request->state = 4;
             } else {
-                *(int*)(request + 0x4) = 3;
+                request->state = 3;
             }
         }
     }
@@ -707,7 +707,7 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self,
  */
 extern "C" int cBXScriptEngine_GetRequestState(cBXScriptEngine* self, int requestHandle)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)((char*)cBXScriptEngine_GetRequest(self, requestHandle));
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
     if (((char*)request) == 0) {
         return 0;
     }
@@ -731,10 +731,10 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestScriptIndex);
  */
 extern "C" int cBXScriptEngine_GetRequestScriptIndex(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
-    if (request == 0) return -1;
-    if (*(int*)(request + 4) == 1) return *(int*)(request + 0x14);
-    return *(int*)(request + 8);
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
+    if (((char*)request) == 0) return -1;
+    if (request->state == 1) return request->loadingScriptIndex;
+    return request->data.animFields.animScriptIndex;
 }
 #endif
 
@@ -755,7 +755,7 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self,
  */
 extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(cBXScriptEngine* self, int requestHandle)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)((char*)cBXScriptEngine_GetRequest(self, requestHandle));
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
     if (((char*)request) == 0) {
         return 0;
     }
@@ -880,10 +880,10 @@ struct sBxsVEntry10 {
  */
 extern "C" void cBXScriptEngine_OnInSeqPlay(cBXScriptEngine* self, cScriptPlayerMain* pPlayer)
 {
-    char* request = (char*)pPlayer->mpUserData;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)pPlayer->mpUserData;
     sBxsVEntry10* vt = (sBxsVEntry10*)self->mVtbl;
-    vt[10].fn(vthis(self, vt[10]), pPlayer, *(int*)(request + 0x8), *(int*)(request + 0xC));
-    *(int*)(request + 0x4) = 4;
+    vt[10].fn(vthis(self, vt[10]), pPlayer, request->data.animFields.animScriptIndex, (int)request->pUserData);
+    request->state = 4;
 }
 #endif
 
@@ -906,12 +906,12 @@ extern "C" void cBXScriptEngine_ReleaseRequest(void* self, int id);
  */
 extern "C" void cBXScriptEngine_OnInSeqStop(cBXScriptEngine* self, cScriptPlayerMain* msg)
 {
-    char* request = (char*)msg->mpUserData;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)msg->mpUserData;
     sVEntry<void(void*, void*, int, int)>* vt = (sVEntry<void(void*, void*, int, int)>*)self->mVtbl;
-    vt[11].fn(vthis(self, vt[11]), msg, *(int*)(request + 0x8), *(int*)(request + 0xC));
-    *(int*)(request + 0x4) = 2;
-    if (*(short*)(request + 0x10) != 0) {
-        cBXScriptEngine_ReleaseRequest(self, *(int*)(request + 0x1C));
+    vt[11].fn(vthis(self, vt[11]), msg, request->data.animFields.animScriptIndex, (int)request->pUserData);
+    request->state = 2;
+    if (request->purgeAfterPlay != 0) {
+        cBXScriptEngine_ReleaseRequest(self, request->requestHandle);
     }
 }
 #endif
@@ -1164,16 +1164,17 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ResetRequest__FPvT0);
  *
  * @param request  the request record
  */
-void cBXScriptEngine_ResetRequest(void* self, void* request)
+void cBXScriptEngine_ResetRequest(void* self, void* vrequest)
 {
-    *(int*)((char*)request + 0x0) = 0;
-    *(int*)((char*)request + 0x4) = 0;
-    *(int*)((char*)request + 0x20) = 0;
-    *(short*)((char*)request + 0x10) = 0;
-    *(short*)((char*)request + 0x12) = 0;
-    *(int*)((char*)request + 0x14) = -1;
-    *(int*)((char*)request + 0x18) = 0;
-    *(int*)((char*)request + 0xc) = 0;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)vrequest;
+    request->pPlayer = 0;
+    request->state = 0;
+    request->requestType = 0;
+    request->purgeAfterPlay = 0;
+    request->loadPending = 0;
+    request->loadingScriptIndex = -1;
+    *(int*)&request->playSpeedRequest = 0;
+    request->pUserData = 0;
 }
 #endif
 

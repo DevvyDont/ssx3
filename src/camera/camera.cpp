@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ai/riderhandler.h"
+#include "ai/airpredictor.h"
 #include "main/gameviewman.h"
 #include "world/worldcache.h"
 #include "camera/cameracontroller.h"
@@ -1651,7 +1653,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantSplineTangent__FPv);
 void* cRiderCameraTarget_getHandplantSplineTangent(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)self->Rider->mRiderHandler + 0x130;
+    return (char*)&self->Rider->mRiderHandler->HandplantMotion.SplineDir;
 }
 #endif
 
@@ -1668,7 +1670,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantTarget__FPv);
 void* cRiderCameraTarget_getHandplantTarget(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)self->Rider->mRiderHandler + 0x140;
+    return (char*)&self->Rider->mRiderHandler->HandplantMotion.SplinePos;
 }
 #endif
 
@@ -1685,7 +1687,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getTotalAirTime__FPv);
 float cRiderCameraTarget_getTotalAirTime(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)((char*)self->Rider->mAirPredictor + 0x98);
+    return self->Rider->mAirPredictor->TotalAirTime;
 }
 #endif
 
@@ -1703,8 +1705,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRemainingAirTime);
 extern "C" float cRiderCameraTarget_getRemainingAirTime(cRiderCameraTarget* self)
 {
     cRider* rider = self->Rider;
-    void* airPredictor = rider->mAirPredictor;
-    return *(float*)((char*)airPredictor + 0x98) - *(float*)((char*)airPredictor + 0xa0);
+    cAirPredictor* airPredictor = rider->mAirPredictor;
+    return airPredictor->TotalAirTime - airPredictor->CurAirTime;
 }
 #endif
 
@@ -1722,8 +1724,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getApexTime);
 extern "C" float cRiderCameraTarget_getApexTime(cRiderCameraTarget* self)
 {
     cRider* rider = self->Rider;
-    void* airPredictor = rider->mAirPredictor;
-    return *(float*)((char*)airPredictor + 0x9c) - *(float*)((char*)airPredictor + 0xa0);
+    cAirPredictor* airPredictor = rider->mAirPredictor;
+    return airPredictor->ApexTime - airPredictor->CurAirTime;
 }
 #endif
 
@@ -1740,7 +1742,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getApexPos__FPv);
 void* cRiderCameraTarget_getApexPos(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)self->Rider->mAirPredictor + 0x40;
+    return (char*)&self->Rider->mAirPredictor->GuessApexPos;
 }
 #endif
 
@@ -1931,9 +1933,9 @@ static inline float Sqrt_15F780(float x)
  */
 extern "C" float cRiderCameraTarget_getLandingAngle(cRiderCameraTarget* self)
 {
-    char* airPredictor = (char*)self->Rider->mAirPredictor;
-    t4Vector landNormal = *(t4Vector*)(airPredictor + 0x20);
-    t4Vector landVelocity = *(t4Vector*)(airPredictor + 0x10);
+    cAirPredictor* airPredictor = self->Rider->mAirPredictor;
+    t4Vector landNormal = airPredictor->GuessLandNormal;
+    t4Vector landVelocity = airPredictor->GuessLandVelocity;
     int ok = 0;
     if (Dot_15F780(landNormal, landNormal) > 0.0f) {
         if (Dot_15F780(landVelocity, landVelocity) > 0.0f)
@@ -1986,7 +1988,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingNormal__FPv);
 void* cRiderCameraTarget_getLandingNormal(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)self->Rider->mAirPredictor + 0x20;
+    return (char*)&self->Rider->mAirPredictor->GuessLandNormal;
 }
 #endif
 
@@ -2003,7 +2005,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingVelocity__FPv);
 void* cRiderCameraTarget_getLandingVelocity(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)self->Rider->mAirPredictor + 0x10;
+    return (char*)&self->Rider->mAirPredictor->GuessLandVelocity;
 }
 #endif
 
@@ -2189,13 +2191,13 @@ static inline void RotAxis_15F9B8(sM_15F9B8* m, const sV_15F9B8& axis, float ang
  * @param src  the algorithm (a cBasicCameraAlgorithm)
  * @return the pose (position and rotation quaternion), through the hidden return slot
  */
-extern "C" sPair_15F9B8 cBasicCameraAlgorithm_getPose(char* src)
+extern "C" sPair_15F9B8 cBasicCameraAlgorithm_getPose(cBasicCameraAlgorithm* src)
 {
     sM_15F9B8 poseMatrix;
     vu0CopyMtx_15F9B8(&poseMatrix, &D_004FF1A0_15F9B8);
-    vu0TransMtx_15F9B8(&poseMatrix, *(sV_15F9B8*)(src + 0x20));
-    RotAxis_15F9B8(&poseMatrix, D_004FF150_15F9B8, -*(float*)(src + 0x30));
-    RotAxis_15F9B8(&poseMatrix, D_004FF160_v15F9B8, *(float*)(src + 0x34));
+    vu0TransMtx_15F9B8(&poseMatrix, *(sV_15F9B8*)&src->Position);
+    RotAxis_15F9B8(&poseMatrix, D_004FF150_15F9B8, -src->Pitch);
+    RotAxis_15F9B8(&poseMatrix, D_004FF160_v15F9B8, src->Heading);
     return tPose_tPose_15F9B8(&poseMatrix);
 }
 #endif
@@ -5063,10 +5065,10 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupHandplantBlend);
  *
  * @param obj  the frame's chase setup (On Tour cChaseSetup& chaseSetup_outArg)
  */
-extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(cLookAtChaseAlgorithm* self, void* obj)
+extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(cLookAtChaseAlgorithm* self, cChaseSetup* obj)
 {
     float handplantBlendOut;
-    if (*(int*)((char*)obj + 0x5C) == 0) {
+    if (obj->Handplanting == 0) {
         if (self->FramesSinceHandplant < 820)
             self->FramesSinceHandplant = self->FramesSinceHandplant + 1;
         int elapsedFrames = self->FramesSinceHandplant;
@@ -5079,7 +5081,7 @@ extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(cLookAtChaseAlgorithm*
         self->FramesSinceHandplant = 0;
         handplantBlendOut = 1.0f;
     }
-    *(float*)((char*)obj + 0x48) = handplantBlendOut;
+    obj->HandplantBlendOut = handplantBlendOut;
 }
 #endif
 
@@ -5146,14 +5148,14 @@ static inline void Normalize_162A20(t4Vector& v)
  *
  * @param trig  the frame's chase setup, not a trigger (On Tour cChaseSetup& setup_outArg)
  */
-extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* self, char* trig)
+extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* self, cChaseSetup* trig)
 {
-    if (*(int*)(trig + 0x60))
+    if (trig->Airborne)
     {
         if (self->AirborneLastFrame == 0)
         {
-            t4Vector dir = *(t4Vector*)(trig + 0x20);
-            if (*(float*)(trig + 0x44) > 0.0f)
+            t4Vector dir = trig->TVel;
+            if (trig->TargetSpeed > 0.0f)
             {
                 Normalize_162A20(dir);
                 if (dir.z > 0.8500000238418579f)
@@ -5185,7 +5187,7 @@ extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* se
         self->DoingHalfPipeCam = 0;
         self->HalfPipeCamInitialized = 0;
     }
-    if (*(int*)(trig + 0x60))
+    if (trig->Airborne)
         self->LastAirFrame = AITick();
 }
 #endif
@@ -5906,11 +5908,11 @@ extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
  * @param fOVBoostScalar  the view multiple at full boost
  * @param smoothness  the smoothing in motion state 0 (MS_Ground)
  */
-extern "C" void cLookAtChaseAlgorithm_updateFOVWithSpeed(cLookAtChaseAlgorithm* self, void* obj, float fOVSpeedScalar, float defaultViewScalar, float fOVBoostScalar, float smoothness)
+extern "C" void cLookAtChaseAlgorithm_updateFOVWithSpeed(cLookAtChaseAlgorithm* self, cChaseSetup* obj, float fOVSpeedScalar, float defaultViewScalar, float fOVBoostScalar, float smoothness)
 {
-    float k = *(float*)((char*)obj + 0x44);
-    float x = fOVSpeedScalar * (k * 1.0000000116860974e-07f) * k + 1.0f + (fOVBoostScalar - 1.0f) * *(float*)((char*)obj + 0x4C);
-    int mode = *(int*)((char*)obj + 0x40);
+    float k = obj->TargetSpeed;
+    float x = fOVSpeedScalar * (k * 1.0000000116860974e-07f) * k + 1.0f + (fOVBoostScalar - 1.0f) * obj->Boost;
+    int mode = obj->MotionState;
     if (mode == 1)
         smoothness = 1.0f;
     else if (mode != 0)
@@ -5996,9 +5998,9 @@ static inline t4Vector Scale_163450(const t4Vector& v, float s)
  * @param riseEnterSmoothness  smoothing of the rise while planted (On Tour riseEnterSmoothness)
  * @param riseExitSmoothness  per-frame decay of the rise after the handplant (On Tour riseExitSmoothness)
  */
-extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* self, char* trig, float distanceAlongTangent, float distanceAboveTangent, float speedToTarget, float exitDelay, float rise, float riseEnterSmoothness, float riseExitSmoothness)
+extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* self, cChaseSetup* trig, float distanceAlongTangent, float distanceAboveTangent, float speedToTarget, float exitDelay, float rise, float riseEnterSmoothness, float riseExitSmoothness)
 {
-    if (*(int*)(trig + 0x5C))
+    if (trig->Handplanting)
     {
         t4Vector t = Sub_163450(*(&self->CamTargetPos), *(&self->Position));
         self->SecondsSinceLastHandplant = 0.0f;
@@ -6019,9 +6021,9 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* sel
             *(&self->Position) = t;
         }
     }
-    *(&self->LastRiderPos) = *(t4Vector*)(trig + 0x10);
+    *(&self->LastRiderPos) = trig->TPos;
     float z;
-    if (*(int*)(trig + 0x5C))
+    if (trig->Handplanting)
         z = riseEnterSmoothness * self->LastHandplantRise + (1.0f - riseEnterSmoothness) * rise;
     else
         z = riseExitSmoothness * self->LastHandplantRise;
@@ -6292,10 +6294,10 @@ static inline float CallF_1635F8(char* self, int slot)
  * @param exitSmoothness  the landing decay factor reached after long airs
  */
 // Builds and evaluates the chase camera's jump/landing curves (splines at +0x304..+0x328).
-extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, void* info, float fullScalar, float blendTime, float amplitude, float exitSmoothness)
+extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float fullScalar, float blendTime, float amplitude, float exitSmoothness)
 {
     float dist = Length_1635F8(Sub_1635F8(*(&self->CamTargetPos), *(&self->Position)));
-    if (*(int*)(I_1635F8 + 0x60) != 0 && self->DoingHalfPipeCam == 0) {
+    if (info->Airborne != 0 && self->DoingHalfPipeCam == 0) {
         float start = 0.0f;
         if (--self->AirCamSetupCountdown > 0 && CallI_1635F8(S_1635F8, 19)) {
             start = (float)(16 - self->AirCamSetupCountdown) * 0.01666666753590107f;
@@ -6429,7 +6431,7 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
         D_004A4DD8 = 0;
         D_004A4DDC = 0;
     }
-    if (*(int*)(I_1635F8 + 0x60) == 0) {
+    if (info->Airborne == 0) {
         if (self->HitGroundSinceStartingAirFunc == 0) {
             self->AirExitSmoothness = Lerp_1635F8(0.93f, exitSmoothness, Ramp_1635F8(self->FullAirCamTimeInAir, 1.2f, 2.2f));
             float landAngle = CallF_1635F8(S_1635F8, 23);
@@ -6787,10 +6789,10 @@ static inline float Length_1643A8(const t4Vector& v)
  * @param blendInTime  seconds to blend in
  * @param blendOutTime  seconds to blend out
  */
-extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float slowSpeed, float blendInTime, float blendOutTime)
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float slowSpeed, float blendInTime, float blendOutTime)
 {
-    int trig = *(float*)(I_1643A8 + 0x44) * 0.035999998450279236f < slowSpeed && *(int*)(I_1643A8 + 0x60) == 0 &&
-               *(int*)(I_1643A8 + 0x5C) == 0;
+    int trig = info->TargetSpeed * 0.035999998450279236f < slowSpeed && info->Airborne == 0 &&
+               info->Handplanting == 0;
     if (self->SlowCamState == 3 && trig) {
         self->SlowCamState = 0;
         self->SlowCamBlend = 0.0f;
@@ -6824,7 +6826,7 @@ extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* 
         float newLookLen = Length_1643A8(newLook);
         ScaleEq_1643A8(newLook, (lookLen * 0.5f + newLookLen * 0.5f) / newLookLen);
         *(&self->CamTargetPos) =
-            Add_1643A8(Scale_1643A8(*(&self->CamTargetPos), 1.0f - smoothFraction), Scale_1643A8(*(t4Vector*)(I_1643A8 + 0x10), smoothFraction));
+            Add_1643A8(Scale_1643A8(*(&self->CamTargetPos), 1.0f - smoothFraction), Scale_1643A8(info->TPos, smoothFraction));
         *(&self->Position) = Sub_1643A8(*(&self->CamTargetPos), newLook);
     }
     cLookAtChaseAlgorithm_verify(self);
@@ -7390,7 +7392,7 @@ static inline sVec_164878* CallV_164878(char* self, int slot)
  * @param blendOut  seconds to blend back after the swing (On Tour blendOutTime)
  */
 // Air swing for drops: swings the eye around the rider while airborne (spline +0x334), then blends back.
-extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, void* info, float blendOut)
+extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float blendOut)
 {
     D_004A128C = 0;
     sVec_164878 off0 = Sub_164878(V_164878(0x20), V_164878(0x40));
@@ -7408,7 +7410,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                 sVec_164878* up = CallV_164878(S_164878, 16);
                 sVec_164878 side = Cross_164878(D_004FF160_v164878, *up);
                 Normalize_164878(side);
-                if (Dot_164878(side, *(sVec_164878*)(I_164878 + 0x20)) < 0.0f) {
+                if (Dot_164878(side, *(sVec_164878*)&info->TVel) < 0.0f) {
                     ScaleEq_164878(side, -1.0f);
                 }
                 ScaleEq_164878(side, dist / Length_164878(side));
@@ -7478,7 +7480,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
             }
             float k = (F_164878(564) / (F_164878(560) * 0.30000001192092896f)) <? 1.0f >? 0.0f;
             k = Smooth_164878(k);
-            V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - k), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), k));
+            V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - k), Scale_164878(*(sVec_164878*)&info->TPos, k));
             V_164878(0x40) = Add_164878(Sub_164878(V_164878(0x20), V_164878(320)), V_164878(352));
         }
     } else if (0.0f < F_164878(572)) {
@@ -7487,9 +7489,9 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
         F_164878(572) = bt;
         fraction = Smooth_164878(fraction);
         sVec_164878 eye = V_164878(0x20);
-        V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - fraction), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), fraction));
+        V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - fraction), Scale_164878(*(sVec_164878*)&info->TPos, fraction));
         V_164878(0x40) = Add_164878(Scale_164878(V_164878(0x40), 1.0f - fraction),
-                                    Scale_164878(Add_164878(Sub_164878(*(sVec_164878*)(I_164878 + 0x10), V_164878(320)), V_164878(352)), fraction));
+                                    Scale_164878(Add_164878(Sub_164878(*(sVec_164878*)&info->TPos, V_164878(320)), V_164878(352)), fraction));
         V_164878(368) = Sub_164878(V_164878(0x20), V_164878(0x40));
         V_164878(0x180) = Sub_164878(V_164878(0x20), eye);
         F_164878(580) = F_164878(576) = F_164878(572);
@@ -8696,75 +8698,75 @@ static inline sVec4 getVec_6C60(char* self, int slot)
  */
 extern "C" void f_6C60_def(void* algorithm, long id)
 {
-    char* self = (char*)algorithm;
-    char* mgr = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
+    cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)algorithm;
+    char* mgr = (char*)&self->Target->Rider->mVtbl;
     sVEntry<void>* mvt = *(sVEntry<void>**)mgr;
     if (id == ((LongFn_6C60)mvt[7].fn)(vthis(mgr, mvt[7]))) {
-        sVec4 front = getVec_6C60(self, 4);
-        sVec4 velocity = getVec_6C60(self, 3);
+        sVec4 front = getVec_6C60(((char*)self), 4);
+        sVec4 velocity = getVec_6C60(((char*)self), 3);
         sVec4 vecCopy;
         sVec4 scratchVec;
         sVec4 directionVel;
-        *(int*)(self + 0x2C0) = 5000;
-        *(float*)(self + 0x1E0) = 10.0f;
-        *(float*)(self + 0x1DC) = 1.0f;
-        *(int*)(self + 0x1E4) = 0;
-        *(int*)(self + 0x2D0) = 0;
-        *(int*)(self + 0x2D8) = 0;
-        *(t4Vector*)(self + 0xC0) = D_004FF120_6C60;
-        *(t4Vector*)(self + 0xD0) = D_004FF120_6C60;
-        *(t4Vector*)(self + 0xE0) = D_004FF120_6C60;
-        *(sVec4*)(self + 0x80) = front;
-        sVEntry<void>* svt1 = *(sVEntry<void>**)(self + 0x10);
-        *(float*)(self + 0x1D4) = ((FloatFn_6C60)svt1[13].fn)(vthis(self, svt1[13]));
-        *(int*)(self + 0x1E8) = 0;
-        *(int*)(self + 0x1EC) = 0;
+        self->FramesSinceHandplant = 5000;
+        self->SecondsSinceLastHandplant = 10.0f;
+        self->LastViewScalar = 1.0f;
+        *(int*)&self->LastHeight = 0;
+        self->DoingHalfPipeCam = 0;
+        self->HalfPipeCamInitialized = 0;
+        self->LastRailMove = D_004FF120_6C60;
+        self->LastHalfPipeMove = D_004FF120_6C60;
+        self->LastHalfPipeDistCorrection = D_004FF120_6C60;
+        *(sVec4*)&self->LastCamDir = front;
+        sVEntry<void>* svt1 = (sVEntry<void>*)self->mVtbl;
+        self->LastDrop = ((FloatFn_6C60)svt1[13].fn)(vthis(self, svt1[13]));
+        *(int*)&self->ExtraBoostDist = 0;
+        *(int*)&self->LastBoostWarp = 0;
         Cross_6C60(scratchVec, (const sVec4&)D_004FF160_6C60, front);
         vecCopy = scratchVec;
-        *(float*)(self + 0x224) = 0.92f;
-        *(sVec4*)(self + 0xF0) = scratchVec;
-        *(int*)(self + 0x2E4) = 1;
-        *(int*)(self + 0x2C4) = -1;
-        *(float*)(self + 0x228) = 1.0f;
-        *(int*)(self + 0x1F0) = 0;
-        *(int*)(self + 0x2C8) = 0;
-        *(int*)(self + 0x2DC) = 0;
-        *(int*)(self + 0x1F8) = 0;
-        *(int*)(self + 0x2E0) = 0;
-        *(int*)(self + 0x204) = 0;
-        *(int*)(self + 0x208) = 0;
-        *(int*)(self + 0x210) = 0;
-        *(int*)(self + 0x20C) = 0;
-        *(int*)(self + 0x220) = 0;
-        *(int*)(self + 0x21C) = 0;
-        *(int*)(self + 0x214) = 0;
-        *(int*)(self + 0x2E8) = 0;
-        *(int*)(self + 0x2CC) = 0;
-        *(int*)(self + 0x23C) = 0;
-        *(t4Vector*)(self + 0x170) = D_004FF120_6C60;
-        *(int*)(self + 0x244) = 0;
-        *(int*)(self + 0x240) = 0;
-        *(sVec4*)(self + 0x190) = velocity;
+        self->AirExitSmoothness = 0.92f;
+        *(sVec4*)&self->LastLookaheadSkew = scratchVec;
+        self->HitGroundSinceStartingAirFunc = 1;
+        self->AirCamSetupCountdown = -1;
+        self->VerticalJumpFactor = 1.0f;
+        *(int*)&self->LastCameraSwing = 0;
+        self->JiggleFrameCount = 0;
+        self->BoostingLastFrame = 0;
+        *(int*)&self->AirSplineScalar = 0;
+        self->ApplyingAirFunc = 0;
+        *(int*)&self->LastCrouchFactor = 0;
+        *(int*)&self->LastTargetCrouchFactor = 0;
+        *(int*)&self->LastAirPositionDelta = 0;
+        *(int*)&self->LastAirTargetDelta = 0;
+        *(int*)&self->LastFullAirPositionDelta = 0;
+        *(int*)&self->LastFullAirTargetDelta = 0;
+        *(int*)&self->ViewCamLastFactor = 0;
+        self->ApplyingFullAirFunc = 0;
+        self->LastAirFrame = 0;
+        *(int*)&self->HalfPipeBlendOutTimeLeft = 0;
+        self->HalfPipeBlendOutLastLook = D_004FF120_6C60;
+        *(int*)&self->HalfPipeCrossBlendFullTime = 0;
+        *(int*)&self->HalfPipeCrossBlendTime = 0;
+        *(sVec4*)&self->LastSlowVelocity = velocity;
         Scale_6C60(scratchVec, front, 250.0f);
-        *(int*)(self + 0x300) = 1;
+        self->SlowCamState = 1;
         vecCopy = scratchVec;
-        *(sVec4*)(self + 0x1A0) = scratchVec;
-        *(float*)(self + 0x248) = 0.5f;
-        *(int*)(self + 0x24C) = 0;
-        *(int*)(self + 0x250) = 0;
+        *(sVec4*)&self->SlowCamEnterLook = scratchVec;
+        self->SlowCamBlend = 0.5f;
+        *(int*)&self->LastHorizontalMoveLen = 0;
+        *(int*)&self->LastEnemyPullback = 0;
         {
-            char* cam = *(char**)(self + 0x30);
+            char* cam = (char*)self->Target;
             sVEntry<void>* cvt = *(sVEntry<void>**)cam;
             ((VecFn2_6C60)cvt[4].fn)(&vecCopy, vthis(cam, cvt[4]));
         }
-        *(int*)(self + 0x2EC) = 0;
-        *(sVec4*)(self + 0x1B0) = vecCopy;
-        *(int*)(self + 0x2B4) = 0;
-        *(int*)(self + 0x2B8) = 0;
-        *(int*)(self + 0x2F0) = 0;
-        *(int*)(self + 0x2BC) = 0;
-        *(int*)(self + 0x37C) = 0;
-        int* pidHistory = (int*)(self + 0x340);
+        self->ShakingLastFrame = 0;
+        *(sVec4*)&self->LastOriginalVel = vecCopy;
+        *(int*)&self->ShakeBlendOutTime = 0;
+        *(int*)&self->LastHandplantRise = 0;
+        self->DoSnap = 0;
+        *(int*)&self->SteerTime = 0;
+        self->TurningPIDFilter.NextFreeIndex = 0;
+        int* pidHistory = (int*)(&self->TurningPIDFilter);
         for (int i = 4; i >= 0; i--) {
             pidHistory[0] = 0;
             pidHistory[5] = 0;
@@ -8772,18 +8774,18 @@ extern "C" void f_6C60_def(void* algorithm, long id)
             pidHistory++;
         }
         {
-            char* cam = *(char**)(self + 0x30);
+            char* cam = (char*)self->Target;
             sVEntry<void>* cvt = *(sVEntry<void>**)cam;
             ((VecFn2_6C60)cvt[4].fn)(&scratchVec, vthis(cam, cvt[4]));
         }
         Scale_6C60(directionVel, scratchVec, 2.0f);
         vecCopy = directionVel;
-        *(sVec4*)(self + 0x1C0) = directionVel;
-        *(sVec4*)(self + 0x100) = velocity;
-        *(int*)(self + 0x108) = 0;
-        sVEntry<void>* svt2 = *(sVEntry<void>**)(self + 0x10);
+        *(sVec4*)&self->LastDirectionVel = directionVel;
+        *(sVec4*)&self->LastHorizontalVel = velocity;
+        *(int*)&self->LastHorizontalVel.z = 0;
+        sVEntry<void>* svt2 = (sVEntry<void>*)self->mVtbl;
         ((VoidFn_6C60)svt2[5].fn)(vthis(self, svt2[5]));
-        sVEntry<void>* svt3 = *(sVEntry<void>**)(self + 0x10);
+        sVEntry<void>* svt3 = (sVEntry<void>*)self->mVtbl;
         ((IntFn_6C60)svt3[8].fn)(vthis(self, svt3[8]), 1);
     }
 }
@@ -10796,7 +10798,7 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_updateFollowDistance(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
 extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate(void* self, void* info, float a, float b, float c, float d, float e);
-extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c);
 extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, void* info, float a, float b);
 
 
@@ -10932,7 +10934,7 @@ extern "C" void cLookBackChaseAlgorithm_update(cLookBackChaseAlgorithm* self)
     cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (char*)&info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (cChaseSetup*)((char*)&info));
     cLookAtChaseAlgorithm_updateCamTarget(((cLookAtChaseAlgorithm*)self), &info);
     cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
     cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 193.1998291015625f, zero, 76.68663024902344f, zero, 1.7668397426605225f,
@@ -11069,13 +11071,13 @@ INCLUDE_ASM("camera/camera", cMidRightChaseAlgorithm_getRaceCamFinalPhaseData);
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cMidRightChaseAlgorithm_getRaceCamFinalPhaseData(cMidRightChaseAlgorithm* self, void* out)
+extern "C" void cMidRightChaseAlgorithm_getRaceCamFinalPhaseData(cMidRightChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 
@@ -11086,11 +11088,11 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_updateFollowDistance(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
 extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate(void* self, void* info, float a, float b, float c, float d, float e);
-extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d);
-extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, void* info, float a);
+extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c, float d);
+extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a);
 extern "C" void cLookAtChaseAlgorithm_updateRailCam(char* self, char* p, float k, float t);
 extern "C" void cLookAtChaseAlgorithm_updateViewCam(char* self, char* p, float a, float b, float c, float d);
-extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c);
 extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, void* info, float a, float b);
 // PORT: cLookAtChaseAlgorithm_updateHandplant is defined with 7 float parameters; this caller passes 8.
 void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
@@ -11113,7 +11115,7 @@ extern "C" void cMidRightChaseAlgorithm_update(cMidRightChaseAlgorithm* self)
     float zero = 0.0f;
     float k = 0.9800000190734863f;
     cLookAtChaseAlgorithm_setupHandplantBlend(((cLookAtChaseAlgorithm*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (char*)&info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (cChaseSetup*)((char*)&info));
     cLookAtChaseAlgorithm_updateCamTarget(((cLookAtChaseAlgorithm*)self), &info);
     cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
     cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,
@@ -11228,13 +11230,13 @@ INCLUDE_ASM("camera/camera", cMidLeftChaseAlgorithm_getRaceCamFinalPhaseData);
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cMidLeftChaseAlgorithm_getRaceCamFinalPhaseData(cMidLeftChaseAlgorithm* self, void* out)
+extern "C" void cMidLeftChaseAlgorithm_getRaceCamFinalPhaseData(cMidLeftChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 
@@ -11245,11 +11247,11 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_updateFollowDistance(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
 extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate(void* self, void* info, float a, float b, float c, float d, float e);
-extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d);
-extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, void* info, float a);
+extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c, float d);
+extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a);
 extern "C" void cLookAtChaseAlgorithm_updateRailCam(char* self, char* p, float k, float t);
 extern "C" void cLookAtChaseAlgorithm_updateViewCam(char* self, char* p, float a, float b, float c, float d);
-extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c);
 extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, void* info, float a, float b);
 // PORT: cLookAtChaseAlgorithm_updateHandplant is defined with 7 float parameters; this caller passes 8.
 void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
@@ -11270,7 +11272,7 @@ extern "C" void cMidLeftChaseAlgorithm_update(cMidLeftChaseAlgorithm* self)
     float zero = 0.0f;
     float k = 0.9800000190734863f;
     cLookAtChaseAlgorithm_setupHandplantBlend(((cLookAtChaseAlgorithm*)self), &info);
-    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (char*)&info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (cChaseSetup*)((char*)&info));
     cLookAtChaseAlgorithm_updateCamTarget(((cLookAtChaseAlgorithm*)self), &info);
     cLookAtChaseAlgorithm_setupCamDirection(((char*)self), &info);
     cLookAtChaseAlgorithm_updateFollowDistance(((char*)self), &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,

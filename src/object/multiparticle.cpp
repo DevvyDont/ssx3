@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldrecords.h"
+#include "ai/rider.h"
+#include "intersect/bxnash.h"
 #include "world/worldview.h"
 #include "world/instancerecord.h"
 #include "object/animframe.h"
@@ -595,12 +598,13 @@ static inline sMpRoot_8780* findRoot_8780(char* w, int x, int y, int z)
     return rz;
 }
 
-static inline void remove_8780(char* w, void* item, const tBoundBox* box)
+static inline void remove_8780(char* vw, void* item, const tBoundBox* box)
 {
-    (*(int*)(w + 0xA0))++;
+    cBXNash* w = (cBXNash*)vw;
+    (*(int*)&w->deletecount)++;
     sMpCell_8780 c;
     nash_Nash_findkey(&c, box);
-    sMpRoot_8780* r = findRoot_8780(w, c.x, c.y, c.z);
+    sMpRoot_8780* r = findRoot_8780(((char*)w), c.x, c.y, c.z);
     nash_Cell_remnode(r->node, 2, item, &c, &r->cell);
     if (r->node->empty()) {
         operator_delete((int*)r->node);
@@ -916,10 +920,10 @@ extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket
     cAnimObjectNode_cAnimObjectNode1_8C80((char*)&self->AnimType, bucket, 3, pInstance, adata);
     self->mVtbl = (void**)cAnimComboNode_vtbl;
     float* rate = &self->FromTime2;
-    char* pModel = pInstance->p80;
+    tModelRecord* pModel = (tModelRecord*)pInstance->p80;
     *rate = (adata->f28 < 0.0f ? adata->f10 : adata->f28) * 0.03333333507180214f;
     uFloat8C80* life = (uFloat8C80*)&self->ToTime2;
-    life->v = adata->f2C < 0.0f ? *(float*)(pModel + 0x14) : adata->f2C * 0.03333333507180214f;
+    life->v = adata->f2C < 0.0f ? pModel->m_fAnimTime : adata->f2C * 0.03333333507180214f;
     int fps = cAppMan_TheAppMan->TimerHz;
     self->AnimSpeed2 = adata->f30 * 0.03333333507180214f / (float)fps;
     self->Stop = adata->f34 != 0;
@@ -1083,11 +1087,11 @@ extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
  *
  * @param out  the intersection info (On Tour tIntersectInfo& intInfo)
  */
-extern "C" void cAnimComboNode_updateIntersectInfo(cAnimComboNode* self, void* out)
+extern "C" void cAnimComboNode_updateIntersectInfo(cAnimComboNode* self, tIntersectInfo* out)
 {
     cMoveNode_updateIntersectInfo(&self->unk_048, out);
-    *(sMpQuad*)((char*)out + 0x20) = t4vect_Zero;
-    *(sMpQuad*)((char*)out + 0x30) = t4vect_Zero;
+    *(sMpQuad*)&out->Ivel = t4vect_Zero;
+    *(sMpQuad*)&out->Iangvel = t4vect_Zero;
 }
 #endif
 
@@ -1476,7 +1480,7 @@ float AIrandf(float lo, float hi);
  * @param desc  the spline data (On Tour const tAddSplineData&)
  * @return @p self
  */
-extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, char* desc)
+extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, tAddSplineData* desc)
 {
     *(void**)self = cSplineModifier_vtbl;
     self->Spline.SplineId = 0xFFFFFFFF;
@@ -1484,25 +1488,25 @@ extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, char* d
     self->Spline.SegIndex = 0;
     *(int*)&self->Spline.Length = 0;
     *(int*)&self->Radius = 0;
-    self->SequenceType = *(int*)(desc + 0x8);
-    self->OrientType = *(int*)(desc + 0xC);
-    self->HeadTweak = *(float*)(desc + 0x14) * 0.01745329424738884f;
-    self->Force = *(float*)(desc + 0x24) * 100.0f;
-    self->ForceTime = *(float*)(desc + 0x28);
-    cSpline_init(&self->Spline, *(int*)(desc + 0x4));
-    cSplineModifier_setSpeed(((char*)self), *(float*)(desc + 0x10));
-    if (*(float*)(desc + 0x10) >= 0.0f) {
+    self->SequenceType = desc->Sequence;
+    self->OrientType = desc->Orient;
+    self->HeadTweak = desc->Heading * 0.01745329424738884f;
+    self->Force = desc->Force * 100.0f;
+    self->ForceTime = desc->ForceTime;
+    cSpline_init(&self->Spline, (int)desc->SplineId);
+    cSplineModifier_setSpeed(((char*)self), desc->Speed);
+    if (desc->Speed >= 0.0f) {
         self->OffsetDistance = 0.0f;
     } else {
         self->OffsetDistance = self->Spline.Length;
     }
     float zeroF = 0.0f;
-    self->Start = *(int*)(desc + 0x20) != 0;
+    self->Start = desc->Start != 0;
     self->Complete = 0;
-    if (*(float*)(desc + 0x18) != zeroF) {
-        self->OffsetDistance = *(float*)(desc + 0x18);
+    if (desc->StartDistance != zeroF) {
+        self->OffsetDistance = desc->StartDistance;
     }
-    self->OffsetDistance += AIrandf(-1.0f, 1.0f) * *(float*)(desc + 0x1C);
+    self->OffsetDistance += AIrandf(-1.0f, 1.0f) * desc->RandomDistance;
     if (self->OffsetDistance < zeroF || self->Spline.Length < self->OffsetDistance) {
         self->OffsetDistance = zeroF;
     }

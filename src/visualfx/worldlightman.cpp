@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ai/rider.h"
+#include "worldpainter/worldpainterquery.h"
+#include "world/instancerecord.h"
 #include "vtable.h"
 #include "render/irradiance.h"
 #include "world/worldcache.h"
@@ -280,9 +283,10 @@ static inline sVec_5400 Trans_5400(const sMat_5400& m)
     return *(const sVec_5400*)&m.row[3];
 }
 
-static inline sVec_5400 ObjPos_5400(char* obj)
+static inline sVec_5400 ObjPos_5400(char* vobj)
 {
-    return *(sVec_5400*)(obj + 0x40);
+    tInstanceRecord* obj = (tInstanceRecord*)vobj;
+    return *(sVec_5400*)&obj->m_fmTransform.m[3][0];
 }
 
 static inline cIrradiance* Resolve_5400(sLightRef_5400* ref)
@@ -307,9 +311,10 @@ static inline void Link_5400(sNode_5400** heads, int slot, sNode_5400* node)
     *p = node;
 }
 
-static inline sLightRef_5400* GetRef_5400(char* o, int slot)
+static inline sLightRef_5400* GetRef_5400(char* vo, int slot)
 {
-    sVEr_5400* vt = *(sVEr_5400**)(o + 4);
+    tWPInGameData* o = (tWPInGameData*)vo;
+    sVEr_5400* vt = (sVEr_5400*)o->mVtbl;
     return vt[slot].fn(vthis(o, vt[slot]));
 }
 
@@ -334,14 +339,14 @@ static inline sLightRef_5400* GetRef_5400(char* o, int slot)
  * @param force  nonzero for a moving instance: re-check its position
  * @return the entry's current light set (+0x10)
  */
-extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* obj, int force)
+extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInstanceRecord* obj, int force)
 {
-    unsigned int key = *(unsigned int*)(obj + 0x78);
+    unsigned int key = obj->m_RID;
     int slot = (key >> 8) & 0x1F;
     int found = 0;
     sNode_5400* node;
     for (node = self->heads[slot]; node != 0; node = node->next) {
-        if (node->id == *(unsigned int*)(obj + 0x78)) {
+        if (node->id == obj->m_RID) {
             found = 1;
             break;
         }
@@ -353,7 +358,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* 
         } else {
             node = cWorldLightMan_evictHashTableEntry_n(self, prio);
         }
-        node->id = *(unsigned int*)(obj + 0x78);
+        node->id = obj->m_RID;
         Link_5400(self->heads, slot, node);
     }
     node->priority = prio;
@@ -363,20 +368,20 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* 
     if (!found) {
         reload = 1;
         moved = 1;
-        if (*(int*)(obj + 0xC) != 0) {
+        if ((int)obj->m_pActiveNode != 0) {
             sMat_5400 meshMat;
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
         } else {
-            pos = ObjPos_5400(obj);
+            pos = ObjPos_5400(((char*)obj));
         }
     } else if (force) {
-        if (*(int*)(obj + 0xC) != 0) {
+        if ((int)obj->m_pActiveNode != 0) {
             sMat_5400 meshMat;
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
         } else {
-            pos = ObjPos_5400(obj);
+            pos = ObjPos_5400(((char*)obj));
         }
         float moveDist = Length_5400(Sub_5400(pos, node->pos));
         if (10.0f < moveDist) moved = 1;
@@ -410,8 +415,8 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* 
             if (cRenderStateMan_m_hasCustomIrradiance != 0) {
                 node->target = *cRenderStateMan_getCustomIrradiance();
             } else {
-                char* world = self->world;
-                sVEf_5400* vt = *(sVEf_5400**)(world + 4);
+                tWorldPainterQuery* world = (tWorldPainterQuery*)self->world;
+                sVEf_5400* vt = (sVEf_5400*)world->mVtbl;
                 vt[2].fn(vthis(world, vt[2]), node->pos.x, node->pos.y, -99999.0f);
                 sLightRef_5400* ref = GetRef_5400(*(char**)self->world, 40);
                 if (*(signed char*)ref != 0) {
@@ -1951,8 +1956,8 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7A70);
  * @param arg0  the object to test
  * @return 1 when +0x4 > 0, else 0
  */
-extern "C" int func_002F7A70(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4))) > 0;
+extern "C" int func_002F7A70(cBoardWakeFX* arg0) {
+    return (arg0->mNumWakeLines) > 0;
 }
 #endif
 //100%
@@ -1969,8 +1974,8 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
  * @return @p out
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_002F7A80(long long *out, void *arg1) {
-    *out = (*(long long *)((char*)((((*(int *)((char*)(arg1) + (0xB4))) * 0x10) + (((*(int *)((char*)(arg1) + (8))) * 0x70) + (*(int *)((char*)(arg1) + (0xC)))))) + (-0x10)));
+extern "C" long long *func_002F7A80(long long *out, cBoardWakeFX* arg1) {
+    *out = (*(long long *)((char*)((((arg1->mWakeLineSegs) * 0x10) + (((arg1->mCurrentWakeLine) * 0x70) + ((int)arg1->mWakeLines)))) + (-0x10)));
     return out;
 }
 #endif

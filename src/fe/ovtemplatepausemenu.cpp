@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "sound/ssxaudio.h"
 #include "fe/ovstatepause.h"
 #include "be/beintnetwork.h"
@@ -337,7 +338,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
     cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
     self->mScreenExiting = 1;
     cOVStateManager_removePDATemplate();
-    cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+    cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
     cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 #endif
@@ -490,8 +491,8 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
     switch (event) {
     case 5: {
         sSnd_PMWE* snd = &gUISoundNull;
-        if (*(sSnd_PMWE**)((char*)self->mpEngine + 0x14) != 0)
-            snd = *(sSnd_PMWE**)((char*)self->mpEngine + 0x14);
+        if ((sSnd_PMWE*)self->mpEngine->mpSound != 0)
+            snd = (sSnd_PMWE*)self->mpEngine->mpSound;
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_Menu_b));
         if (self->mPauseOptionUnlocked[w->idx] == 0) {
             snd->vt[2].fn(vthis(snd, snd->vt[2]), 4);
@@ -506,7 +507,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
         case 1:
             stopReplay_PMWE();
             cOVStateManager_removePDATemplate();
-            cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
             break;
@@ -557,7 +558,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
         stopReplay_PMWE();
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
-        cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
         cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
         break;
     case 1: {

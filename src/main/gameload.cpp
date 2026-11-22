@@ -1,5 +1,10 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldcache.h"
+#include "ai/player.h"
+#include "replay/replay.h"
+#include "visualfx/fog.h"
+#include "wscript/wscriptman.h"
 #include "wscript/wscriptcache.h"
 #include "main/gameviewman.h"
 #include "ui/uiengine.h"
@@ -276,7 +281,7 @@ extern "C" void cGame_load(cGame* self)
         GMsrand(BXrand());
     }
     {
-        cAI* ai = (cAI*)((char*)cAI_cAI(operator new(208, str_AI, 0, 0)));
+        cAI* ai = (cAI*)cAI_cAI(operator new(208, str_AI, 0, 0));
         self->AI = (cAI*)ai;
         sVEntryVoidGL* vt = (sVEntryVoidGL*)ai->mVtbl;
         vt[2].fn(vthis(ai, vt[2]));
@@ -324,7 +329,7 @@ extern "C" void cGame_load(cGame* self)
         void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
         cCamera_switchChaseControllerTargetRider(self->ViewMan->PlayerCamera[0], cam);
     }
-    cMenuSys* hud = (cMenuSys*)((char*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0)));
+    cMenuSys* hud = (cMenuSys*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0));
     self->MenuSys = (cMenuSys*)hud;
     hud->Font = (cFont*)((void*)self->DebugFont);
     self->MenuSys->Input = (cInput*)((void*)SSXApp->Inputs[0]);
@@ -562,11 +567,11 @@ extern "C" void cGame_loadTrack(cGame* self)
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&camBasePath, 2);
     }
-    char* obj = (char*)cMemMan_alloc(12304, str_cPS2FogParticleMan, 0, 0);
+    cPS2FogParticleMan* obj = (cPS2FogParticleMan*)cMemMan_alloc(12304, str_cPS2FogParticleMan, 0, 0);
     cFogParticleMan_cFogParticleMan(obj);
-    *(void***)(obj + 4) = D_004882E0;
-    new (obj + 0x10) sElemFF_F6B0[256];
-    ent = obj;
+    obj->mVtbl = D_004882E0;
+    new ((char*)&obj->mSprites[0]) sElemFF_F6B0[256];
+    ent = ((char*)obj);
     *(void**)&self->LensFxMan = cLensFxMan_construct();
     cRenderStateMan_init();
     cBXString__cBXString(&dir, 2);
@@ -710,7 +715,7 @@ extern "C" void cGame_purge(char* self)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
         int which = cBENetworkInterface_networkOpt.bIsHost;
         int other = which != 0;
-        *(sRec_FA98*)((char*)&cBENetworkInterface_networkOpt + 0x330) = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
+        *(sRec_FA98*)&(&cBENetworkInterface_networkOpt)->MyStats = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
         (*(sRec_FA98*)&cBENetworkInterface_networkOpt.OpponentStats) = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
         vtEntry->fn(vthis(iface, *vtEntry));
@@ -1347,9 +1352,10 @@ static inline int inRace_2306B8(int s)
     return 0;
 }
 
-static inline int hasEvents_2306B8(char* list)
+static inline int hasEvents_2306B8(char* vlist)
 {
-    return *(int*)(list + 0x0) != *(int*)(list + 0x4);
+    tMissionMenuQueue* list = (tMissionMenuQueue*)vlist;
+    return list->Current != list->Next;
 }
 
 static inline int paused_2306B8(void)
@@ -1397,7 +1403,7 @@ static inline int canUpdate_2306B8(cGame* self)
 static inline int updatePause_2306B8(cGame* self)
 {
     if (cGameViewMan_isStreamReady(((char*)self->ViewMan)) == 0 || self->SectionMan->m_bStreamReady == 0) {
-        *(int*)(*((char**)((char*)self->World)) + 0x3D4) = 0;
+        *(int*)(*((char**)self->World) + 0x3D4) = 0;
         cWorld_update(((char*)self->World));
         cGameViewMan_updateAll(((char*)self->ViewMan));
         if (self->SectionMan->m_bStreamReady == 0) {
@@ -1413,12 +1419,12 @@ static inline int updatePause_2306B8(cGame* self)
             sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)ps2GraphicsMan->mVtbl;
             vt[19].fn(vthis(ps2GraphicsMan, vt[19]));
             cGameViewMan_updateStreamFocus(((char*)self->ViewMan));
-            cWorldCache_flushInActivePages(*((void**)((char*)self->World)));
+            cWorldCache_flushInActivePages(*((void**)self->World));
             self->m_bFlushStreamer = 0;
         }
         return 0;
     }
-    *(int*)(*((char**)((char*)self->World)) + 0x3D4) = 1;
+    *(int*)(*((char**)self->World) + 0x3D4) = 1;
     self->IsStreamPaused = 0;
     self->m_bFlushStreamer = 0;
     cWorld_update(((char*)self->World));
@@ -1429,9 +1435,9 @@ static inline int updatePause_2306B8(cGame* self)
 static inline int updateState_2306B8(cGame* self)
 {
     if (cMenuSys_isActive(((char*)self->MenuSys)) == 0) {
-        char* q = ((char*)self->WScriptMan);
-        char* list = q + 0x1C4;
-        if (*(int*)(q + 0x1C4) != *(int*)(q + 0x1C8)) {
+        cWScriptMan* q = self->WScriptMan;
+        char* list = (char*)&q->MissionMenuQueue;
+        if (q->MissionMenuQueue.Current != q->MissionMenuQueue.Next) {
             int* e = tMissionMenuQueue_getEntry(list);
             if (e[1] == 8) {
                 cOVStateManager_triggerOverlay(0x1D);
@@ -1464,13 +1470,13 @@ static inline int updateState_2306B8(cGame* self)
         cMenuSys_input(((char*)self->MenuSys));
         return 0;
     }
-    if (cGame_activatePauseMenu_pi(self, 0) != 0 && !inRace_2306B8(*((int*)((char*)self->Replay)))
+    if (cGame_activatePauseMenu_pi(self, 0) != 0 && !inRace_2306B8(*((int*)self->Replay))
         && notPlaying_2306B8(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
         cPadCache_clearAllVibrations(PadCache);
         func_0020CA10();
         pushState_2306B8(2);
         {
-            sObjC_2306B8* o = ((sObjC_2306B8*)((cUIEngine*)((char*)self->UI))->mpInput);
+            sObjC_2306B8* o = ((sObjC_2306B8*)((cUIEngine*)self->UI)->mpInput);
             sVEntryI_2306B8* vt = o->vtbl;
             vt[44].fn(vthis(o, vt[44]), (*(unsigned char*)&self->PauseOwner));
         }
@@ -2327,10 +2333,10 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
     }
     int mask = 0;
     void* bi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* replay = (char*)self->Replay;
+    cReplay* replay = self->Replay;
     int sel = -1;
-    if (*(int*)(replay + 0x608)) {
-        int ctrlId = *(int*)(replay + 0x28);
+    if (replay->Loaded) {
+        int ctrlId = replay->PadNum;
         void** controller = PlayerObj_1840(ctrlId);
         if (!IsReady_1840(controller)) {
             mask = 1 << ctrlId;
@@ -2342,8 +2348,8 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
     } else {
         int i;
         for (i = 0; i < Count_1840(((char*)self)); i++) {
-            char* rider = At_1840(((char*)self), i);
-            if (*(int*)(*(char**)(rider + 0x18) + 0x87C)) {
+            cPlayer* rider = (cPlayer*)At_1840(((char*)self), i);
+            if (rider->mRider->mIsLocal) {
                 int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
                 void** controller = PlayerObj_1840(ctrlId);
                 if (!IsReady_1840(controller)) {
@@ -2362,8 +2368,8 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
             int i;
             sel = 0;
             for (i = 0; i < Count_1840(((char*)self)); i++) {
-                char* rider = At_1840(((char*)self), i);
-                if (*(int*)(*(char**)(rider + 0x18) + 0x87C)) {
+                cPlayer* rider = (cPlayer*)At_1840(((char*)self), i);
+                if (rider->mRider->mIsLocal) {
                     int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
                     if (IsReady_1840(PlayerObj_1840(ctrlId))) {
                         sel = ctrlId;

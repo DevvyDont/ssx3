@@ -148,18 +148,18 @@ struct sFlexRailElem_348D98 {
  * @param desc  float rail make-data
  * @return self
  */
-extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instRecord, char* desc)
+extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instRecord, tMakeFloatRailData* desc)
 {
     cFlexRailNode_cFlexRailNode(((char*)self), 20, instRecord, desc);
     self->mVtbl = (void**)cFloatRailNode_vtbl;
-    self->LSpring = *(float*)(desc + 0x48);
-    self->LDamp = *(float*)(desc + 0x4C);
-    self->ForceScale = *(float*)(desc + 0x50);
+    self->LSpring = desc->LSpring;
+    self->LDamp = desc->LDamp;
+    self->ForceScale = desc->ForceScale;
     sFlexRailRef_348D98 refs[8];
     int bones[8];
     int n = 0;
-    unsigned int* ids = (unsigned int*)(desc + 4);
-    int* bn = (int*)(desc + 0x24);
+    unsigned int* ids = (unsigned int*)(&desc->InstId1);
+    int* bn = (int*)(&desc->Mesh1);
     for (int i = 0; i < 8; i++, ids++, bn++) {
         unsigned int id = *ids;
         if (id != 0xFFFFFFFF) {
@@ -811,18 +811,18 @@ struct sFlexElem_9B48 {
  * @param desc  spring rail make-data
  * @return self
  */
-extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* instRecord, char* desc)
+extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* instRecord, tMakeSpringRailData* desc)
 {
     cFlexRailNode_cFlexRailNode(((char*)self), 21, instRecord, desc);
     self->mVtbl = (void**)cSpringRailNode_vtbl;
-    self->ASpring = *(float*)(desc + 0x48);
-    self->ADamp = *(float*)(desc + 0x4C);
-    self->TorqueScale = *(float*)(desc + 0x50);
+    self->ASpring = desc->ASpring;
+    self->ADamp = desc->ADamp;
+    self->TorqueScale = desc->TorqueScale;
     sFlexRef_9B48 refs[8];
     int bones[8];
     int n = 0;
-    unsigned int* ids = (unsigned int*)(desc + 4);
-    int* bn = (int*)(desc + 0x24);
+    unsigned int* ids = (unsigned int*)(&desc->InstId1);
+    int* bn = (int*)(&desc->Mesh1);
     for (int i = 0; i < 8; i++, ids++, bn++) {
         unsigned int id = *ids;
         if (id != 0xFFFFFFFF) {
@@ -1876,12 +1876,12 @@ extern "C" int func_00415FC8(const void* a, const void* b, int n);
  * @param ctx  instance record of the new flag
  * @return 1 if the flag can join this set, else 0
  */
-extern "C" int cFlagSet_SameKind(cFlagSet* self, void* data, void* ctx)
+extern "C" int cFlagSet_SameKind(cFlagSet* self, void* data, tInstanceRecord* ctx)
 {
     if (self->mCurrentNumInstances == 0) {
         return 0;
     }
-    if (**(int**)((char*)ctx + 0x80) != self->mModelID) {
+    if (*(int*)ctx->m_Model != self->mModelID) {
         return 0;
     }
     return func_00415FC8(data, self, 88) == 0;
@@ -1915,14 +1915,14 @@ struct sFlagSet_34B038 {
  * @param def  converted flag data
  * @param mesh  instance record of the flag
  */
-extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, sFlagDef_34B038* def, char* mesh)
+extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, sFlagDef_34B038* def, tInstanceRecord* mesh)
 {
     if (self->count == 0) {
         self->def = *def;
-        self->f58 = **(int**)(mesh + 0x80);
+        self->f58 = *(int*)mesh->m_Model;
         cFlagSet_CreateMesh(self, mesh);
     }
-    self->meshes[self->count] = mesh;
+    self->meshes[self->count] = ((char*)mesh);
     self->count++;
 }
 #endif

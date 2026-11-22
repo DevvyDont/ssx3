@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/patchrecord.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
 
@@ -760,9 +761,9 @@ static inline void Render_B370(sBezMan_B370* self)
     int base = cPS2DeferManager_Find_B370(dm, s, Hash8_B370(s->f0 ^ s->f4 ^ s->f8 ^ s->fC) & 0xFF);
     for (int i = 0; i < self->n8; i++) {
         sPatch_B370* e = &self->list8[i];
-        char* obj = e->obj;
+        tPatchRecord* obj = (tPatchRecord*)e->obj;
         if (e->slot < 0) {
-            e->slot = func_003747A0(self->cache, obj, 2, viewIdx, (*(int*)(obj + 0xC) & 0x600000) != 0);
+            e->slot = func_003747A0(self->cache, obj, 2, viewIdx, (obj->m_iFlags & 0x600000) != 0);
             if (e->slot >= 0) {
                 func_0038C788(self, 2, e->slot);
             }
@@ -771,9 +772,9 @@ static inline void Render_B370(sBezMan_B370* self)
     }
     for (int i = 0; i < self->n6; i++) {
         sPatch_B370* e = &self->list6[i];
-        char* obj = e->obj;
+        tPatchRecord* obj = (tPatchRecord*)e->obj;
         if (e->slot < 0) {
-            e->slot = func_003747A0(self->cache, obj, 1, viewIdx, (*(int*)(obj + 0xC) & 0x600000) != 0);
+            e->slot = func_003747A0(self->cache, obj, 1, viewIdx, (obj->m_iFlags & 0x600000) != 0);
             if (e->slot >= 0) {
                 func_0038C788(self, 1, e->slot);
             }
@@ -782,7 +783,7 @@ static inline void Render_B370(sBezMan_B370* self)
     }
     for (int i = 0; i < self->n4; i++) {
         sPatch_B370* e = &self->list4[i];
-        char* obj = e->obj;
+        tPatchRecord* obj = (tPatchRecord*)e->obj;
         if (e->slot < 0) {
             e->slot = func_003747A0(self->cache, obj, 0, viewIdx, 0);
             if (e->slot >= 0) {
@@ -795,9 +796,9 @@ static inline void Render_B370(sBezMan_B370* self)
     gm->top->fC &= 0xC0000000;
     for (int i = 0; i < self->nMix; i++) {
         sMixPatch_B370* e = &self->mix[i];
-        char* obj = e->obj;
+        tPatchRecord* obj = (tPatchRecord*)e->obj;
         if (e->slot < 0) {
-            e->slot = func_003747A0(self->cache, obj, 2, viewIdx, (*(int*)(obj + 0xC) & 0x600000) != 0);
+            e->slot = func_003747A0(self->cache, obj, 2, viewIdx, (obj->m_iFlags & 0x600000) != 0);
             if (e->slot >= 0) {
                 func_0038C788(self, 2, e->slot);
             }
@@ -924,19 +925,19 @@ static inline void setVert_C590(sBezVert_C590* v, const sV3_C590& p, const sUV_C
 extern "C" void func_0038C590(sV3_C590* pts, sUV_C590* uvs, int n)
 {
     sBezVert_C590 verts[64];
-    char* gfx = D_004A5B80_C590;
+    cPS2GraphicsMan* gfx = (cPS2GraphicsMan*)D_004A5B80_C590;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             setVert_C590(&verts[j], pts[i * n + j], uvs[i * n + j]);
         }
-        sGmVE_C590* vt = *(sGmVE_C590**)(gfx + 0x10D8);
+        sGmVE_C590* vt = (sGmVE_C590*)gfx->mVtbl;
         vt[73].fn(vthis(gfx, vt[73]), n, verts, 0);
     }
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             setVert_C590(&verts[j], pts[j * n + i], uvs[j * n + i]);
         }
-        sGmVE_C590* vt = *(sGmVE_C590**)(gfx + 0x10D8);
+        sGmVE_C590* vt = (sGmVE_C590*)gfx->mVtbl;
         vt[73].fn(vthis(gfx, vt[73]), n, verts, 0);
     }
 }
@@ -1061,16 +1062,16 @@ struct sBezVec4_CA08 {
  */
 extern "C" void func_0038CA08(void* self, void* obj)
 {
-    char* objData = (char*)obj;
+    tPatchRecord* objData = (tPatchRecord*)obj;
     sBezVec4_CA08 boxMin;
     sBezVec4_CA08 boxMax;
-    boxMin.x = *(float*)(objData + 0x158);
-    boxMin.y = *(float*)(objData + 0x15C);
-    boxMin.z = *(float*)(objData + 0x160);
+    boxMin.x = objData->m_fvMin.m[0];
+    boxMin.y = objData->m_fvMin.m[1];
+    boxMin.z = objData->m_fvMin.m[2];
     boxMin.w = 1.0f;
-    boxMax.x = *(float*)(objData + 0x164);
-    boxMax.y = *(float*)(objData + 0x168);
-    boxMax.z = *(float*)(objData + 0x16C);
+    boxMax.x = objData->m_fvMax.m[0];
+    boxMax.y = objData->m_fvMax.m[1];
+    boxMax.z = objData->m_fvMax.m[2];
     boxMax.w = 1.0f;
     cPS2GraphicsMan_CheckProjectiveTexturesHits(cGraphicsMan_TheGraphicsMan_bezierman, &boxMin, &boxMax);
 }
@@ -1157,11 +1158,11 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
 {
     int draw = 0;
     int cacheEntry = self->base28[kind] + sub * 12;
-    char* patchCopy = (char*)func_0038F708(patch->obj, 432, 2);
+    tPatchRecord* patchCopy = (tPatchRecord*)func_0038F708(patch->obj, 432, 2);
     sGfx_CA70* gfx = D_004A5B80_CA70;
     unsigned int addr = self->base44C[kind] + (sub << 8);
     unsigned int n = kind * 2 + 4;
-    int doA = (*(int*)(patchCopy + 0xC) & 0x600000) && n;
+    int doA = (patchCopy->m_iFlags & 0x600000) && n;
     if (doA) {
         if (cRenderToggles_m_DisablePatchReflection != 0)
             doA = 0;
@@ -1178,7 +1179,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         else
             draw |= doB;
     }
-    switch (*(int*)(patchCopy + 0xC) & 0x180000) {
+    switch (patchCopy->m_iFlags & 0x180000) {
     case 0x80000:
         draw = 1;
         gfx->top->f0 = (gfx->top->f0 & ~0xC) | 8;
@@ -1196,9 +1197,9 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         break;
     }
     if (draw) {
-        int tex = *(short*)(patchCopy + 0x1A0);
+        int tex = patchCopy->m_sTextures[0];
         gfx->top->tex = tex;
-        int tex2 = *(short*)(patchCopy + 0x1A2);
+        int tex2 = patchCopy->m_sTextures[1];
         gfx->top->tex2 = tex2;
         unsigned int buf = *handle;
         long* packetCursor = (long*)(buf | 0x30000000);
@@ -1231,8 +1232,8 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         if (doB)
             func_0038D448(self, kind, tbl, patch, res, handle);
     } else {
-        self->defer[self->nDefer].tex = *(unsigned short*)(patchCopy + 0x1A0);
-        self->defer[self->nDefer].tex2 = *(unsigned short*)(patchCopy + 0x1A2);
+        self->defer[self->nDefer].tex = *(unsigned short*)&patchCopy->m_sTextures[0];
+        self->defer[self->nDefer].tex2 = *(unsigned short*)&patchCopy->m_sTextures[1];
         self->defer[self->nDefer].kind = kind;
         self->defer[self->nDefer].addr = addr;
         self->defer[self->nDefer].patch = patch;
@@ -1314,10 +1315,10 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
 extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, int* ext, unsigned int* handle)
 {
     int cacheEntry = self->base28[2] + sub * 12;
-    char* patchCopy = (char*)func_0038F708(patch->obj, 432, 2);
+    tPatchRecord* patchCopy = (tPatchRecord*)func_0038F708(patch->obj, 432, 2);
     sGfx_CE20* gfx = D_004A5B80_CE20;
     unsigned int addr = self->base44C[2] + (sub << 8);
-    int doA = (*(int*)(patchCopy + 0xC) & 0x600000) != 0;
+    int doA = (patchCopy->m_iFlags & 0x600000) != 0;
     if (doA) {
         if (cRenderToggles_m_DisablePatchReflection != 0)
             doA = 0;
@@ -1326,11 +1327,11 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
     int doB = res != 0;
     if (cRenderToggles_m_DisablePatchShadow != 0)
         doB = 0;
-    int tex = *(short*)(patchCopy + 0x1A0);
+    int tex = patchCopy->m_sTextures[0];
     gfx->top->tex = tex;
-    int tex2 = *(short*)(patchCopy + 0x1A2);
+    int tex2 = patchCopy->m_sTextures[1];
     gfx->top->tex2 = tex2;
-    switch (*(int*)(patchCopy + 0xC) & 0x180000) {
+    switch (patchCopy->m_iFlags & 0x180000) {
     case 0x80000:
         gfx->top->f0 = (gfx->top->f0 & ~0xC) | 8;
         break;
@@ -1829,20 +1830,20 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
  * @param handle  the packet write cursor, set to the end of the packet plus 0x10
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int.
-extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle)
+extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle)
 {
-    char* manager = (char*)self;
-    char* patchRec = (char*)obj;
-    if ((*(int*)(patchRec + 0xC) & 0x800000) == 0) {
+    cPS2BezierMan* manager = (cPS2BezierMan*)self;
+    tPatchRecord* patchRec = (tPatchRecord*)obj;
+    if ((patchRec->m_iFlags & 0x800000) == 0) {
         return;
     }
     sVec3_D690 boxDiagonal;
-    boxDiagonal.z = *(float*)(patchRec + 0x160) - *(float*)(patchRec + 0x16C);
+    boxDiagonal.z = patchRec->m_fvMin.m[2] - patchRec->m_fvMax.m[2];
     sGfx_D690* gfx = D_004A5B80_D690;
-    boxDiagonal.x = *(float*)(patchRec + 0x158) - *(float*)(patchRec + 0x164);
-    boxDiagonal.y = *(float*)(patchRec + 0x15C) - *(float*)(patchRec + 0x168);
+    boxDiagonal.x = patchRec->m_fvMin.m[0] - patchRec->m_fvMax.m[0];
+    boxDiagonal.y = patchRec->m_fvMin.m[1] - patchRec->m_fvMax.m[1];
     int n = (int)((boxDiagonal.x * boxDiagonal.x + boxDiagonal.y * boxDiagonal.y + boxDiagonal.z * boxDiagonal.z) * (cDetailSystem_m_PS2SparkleCount * 3.3333333249174757e-07f) * gfx->detailScale);
-    if (*(int*)((char*)patch + 8) < 2) {
+    if (patch->mLod < 2) {
         n /= 2;
     }
     if (n <= 0) {
@@ -1854,11 +1855,11 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
     ((long*)packetCursor)[1] = 0;
     ((long*)packetCursor)[2] = 0;
     ((long*)packetCursor)[3] = (long)0x6C168000 << 32;
-    *(int*)(manager + 0x43C) = n;
+    *(int*)(((char*)manager) + 0x43C) = n;
     packetCursor += 0x20;
-    CopyQuads_D690(&packetCursor, (sQuad_D690*)(patchRec + 0x40), 16);
-    CopyQuads_D690(&packetCursor, (sQuad_D690*)(manager + 0x3E0), 4);
-    CopyQuads_D690(&packetCursor, (sQuad_D690*)(manager + 0x420), 2);
+    CopyQuads_D690(&packetCursor, (sQuad_D690*)(&patchRec->m_fBm0[0][0]), 16);
+    CopyQuads_D690(&packetCursor, (sQuad_D690*)(((char*)manager) + 0x3E0), 4);
+    CopyQuads_D690(&packetCursor, (sQuad_D690*)(((char*)manager) + 0x420), 2);
     ((long*)packetCursor)[0] = (long)(((unsigned int)D_1460 >> 3) | 0x14000000) << 32;
     ((long*)packetCursor)[1] = (long)0x11000000 << 32;
     packetCursor += 0x10;
@@ -1927,7 +1928,7 @@ extern int cRenderToggles_m_DisableSparkles;
 extern sCtx_D968* D_004A5B80_D968 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_0037D968(sCtx_D968* ctx);
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
-extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle);
+extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle);
 
 /**
  * Runs the snow-sparkle pass (func_0038D690) over the 8x8 patches and the mixed patches with an LOD-8 edge.
@@ -1965,12 +1966,12 @@ extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* packetHandle)
     ctx->top->flagsB = ctx->top->flagsB & 0xE00003FF;
     for (int i = 0; i < self->n8; i++) {
         sBezPatch_D968* patchEntry = &self->list8[i];
-        func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), patchEntry, packetHandle);
+        func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
     }
     for (int i = 0; i < self->nMix; i++) {
         sBezMixPatch_D968* patchEntry = &self->mix[i];
         if (patchEntry->kind > 0) {
-            func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), patchEntry, packetHandle);
+            func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
         }
     }
     ctx->top--;

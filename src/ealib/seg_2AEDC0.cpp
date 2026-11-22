@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ealib/shape.h"
 #include "ai/player.h"
 #include "ealib/rcmpbase.h"
 #include "ealib/avsubtitle.h"
@@ -2243,22 +2244,22 @@ static inline char* func_003B07F8_data(char* p)
  * @param height  height in pixels
  * @return self
  */
-extern "C" void* func_003B07F8(void* self, unsigned int w, int height)
+extern "C" void* func_003B07F8(RCMP_FRAME* self, unsigned int w, int height)
 {
-    *(int*)((char*)self + 0x0) = 2;
+    self->m_FrameType = 2;
     *(int*)((char*)self + 0x8) = 3;
     *(int*)((char*)self + 0xC) = 3;
     *(int*)((char*)self + 0x10) = 0;
     char* img = (char*)SHAPE_create(w, height, 0x20, 0, 0, D_00509438[0], 0, 0xF0);
-    *(char**)((char*)self + 0x4) = img;
+    self->m_Shp = (SHAPE*)img;
     char* hdr = (char*)func_003B3D40(img);
     hdr[4] = 50;
     hdr[5] = 52;
     hdr[6] = 0x30;
     unsigned int size = ((w >> 4) * height >> 4) << 10;
-    MEM_fill(func_003B07F8_data(*(char**)((char*)self + 0x4)), 0, size);
-    **(char**)((char*)self + 0x4) = 5;
-    return self;
+    MEM_fill(func_003B07F8_data((char*)self->m_Shp), 0, size);
+    *(char*)self->m_Shp = 5;
+    return ((void*)self);
 }
 #endif
 
@@ -2276,11 +2277,11 @@ extern void* (*D_00509434[])(void*);
  *
  * @param flags  bit 0 frees the frame itself
  */
-extern "C" void func_003B08E0(void* self, int flags)
+extern "C" void func_003B08E0(RCMP_FRAME* self, int flags)
 {
-    if (*(void**)((char*)self + 0x4) != 0) {
-        SHAPE_destroy(*(char**)((char*)self + 0x4));
-        *(void**)((char*)self + 0x4) = 0;
+    if (self->m_Shp != 0) {
+        SHAPE_destroy((char*)self->m_Shp);
+        self->m_Shp = 0;
     }
     *(int*)((char*)self + 0x8) = 7;
     *(int*)((char*)self + 0xC) = 7;
@@ -2357,7 +2358,7 @@ static inline void wsUnlink_09A0(sWSNode2* n)
     next->prev = prev;
     n->prev = (sWSNode2*)0xB;
     n->next = (sWSNode2*)0xB;
-    if (obj) func_003B08E0(obj, 3);
+    if (obj) func_003B08E0((RCMP_FRAME*)obj, 3);
 }
 
 /**
@@ -2513,7 +2514,7 @@ extern char str_RCMP_mpegbuff[];
 extern char str_RCMP_chunkbuff[];
 extern "C" void Initialize_Buffer(void* data);
 extern "C" int Get_Hdr(void);
-extern "C" void* func_003B07F8(void* self, unsigned int w, int h);
+extern "C" void* func_003B07F8(RCMP_FRAME* self, unsigned int w, int h);
 extern "C" void sceMpegInit(void);
 extern "C" void sceMpegCreate(void* a, void* b, int size);
 extern "C" void* sceMpegAddCallback(void* a, int n, void* fn, void* arg);
@@ -2588,7 +2589,7 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_
     for (int i = 0; i < n; i++) {
         int cw = self->mWidth;
         int ch = self->mHeight;
-        char* newFrame = (char*)func_003B07F8(D_00509430_B0C58.alloc(D_004953E8, 20, 0, 0, D_00509430_B0C58.flags), cw, ch);
+        char* newFrame = (char*)func_003B07F8((RCMP_FRAME*)D_00509430_B0C58.alloc(D_004953E8, 20, 0, 0, D_00509430_B0C58.flags), cw, ch);
         sWSNode_B0C58* node = newFrame ? (sWSNode_B0C58*)(newFrame + 8) : 0;
         sWSNode_B0C58* head = &(*(sWSNode_B0C58*)&self->mFreeFrames);
         sWSNode_B0C58* old = head->next;

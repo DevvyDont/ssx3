@@ -1,5 +1,10 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/bxps2deferman.h"
+#include "ealib/shape.h"
+#include "visualfx/worldlightman.h"
+#include "world/instancerecord.h"
+#include "visualfx/transitionman.h"
 #include "ui/uithing.h"
 #include "render/2drender.h"
 #include "render/simpletube.h"
@@ -176,22 +181,24 @@ static inline float fceil_00370DC8(float x)
     return t;
 }
 
-static inline float life_00370DC8(char* def)
+static inline float life_00370DC8(char* vdef)
 {
-    float t = *(float*)(def + 0x8);
+    tParticleData* def = (tParticleData*)vdef;
+    float t = def->Duration;
     if (t >= 0.0f) {
         return t;
     }
-    return *(float*)(def + 0x14) + *(float*)(def + 0x1C) * 0.5f;
+    return def->Life + def->LifeR * 0.5f;
 }
 
-static inline float start_00370DC8(char* def)
+static inline float start_00370DC8(char* vdef)
 {
-    float t = *(float*)(def + 0x8);
+    tParticleData* def = (tParticleData*)vdef;
+    float t = def->Duration;
     if (t < 0.0f) {
         return t;
     }
-    return t + *(float*)(def + 0x14) + *(float*)(def + 0x1C) * 0.5f;
+    return t + def->Life + def->LifeR * 0.5f;
 }
 
 /**
@@ -210,22 +217,22 @@ static inline float start_00370DC8(char* def)
  * @param def  the particle data (const tParticleData*)
  * @param seed    the random seed passed on to tParticleEmitter_setupEmitter (-1.0 from the effect modifiers)
  */
-extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, char* def, float seed)
+extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, tParticleData* def, float seed)
 {
-    int n = *(int*)(def + 0xD0);
+    int n = def->NumFlipTextures;
     self->fC = n;
-    self->f14 = *(float*)(def + 0xD4);
+    self->f14 = def->FlipTextureRate;
     if (n >= 2) {
         float fn = (float)n;
         self->f10 = fn * randf_00370DC8();
     } else {
         self->f10 = 0.0f;
     }
-    self->f4 = *(int*)(def + 0xC4);
-    self->f8 = *(int*)(def + 0xC8);
-    self->start = start_00370DC8(def);
+    self->f4 = def->TextureId;
+    self->f8 = def->BlendMode;
+    self->start = start_00370DC8(((char*)def));
     int changed = 0;
-    float frames = life_00370DC8(def) * 60.0f;
+    float frames = life_00370DC8(((char*)def)) * 60.0f;
     if (self->count != (int)fceil_00370DC8(frames)) {
         self->count = (int)fceil_00370DC8(frames);
         changed = 1;
@@ -233,14 +240,14 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
     *(sVec4A*)self->v1B0 = t4vect_Zero;
     *(sVec4A*)self->v1C0 = t4vect_Zero;
     *(sVec4A*)self->v1D0 = t4vect_Zero;
-    float life = life_00370DC8(def);
+    float life = life_00370DC8(((char*)def));
     sVec4A force;
-    force.x = *(float*)(def + 0x78);
-    force.y = *(float*)(def + 0x7C);
-    force.z = *(float*)(def + 0x80);
+    force.x = def->ForceX;
+    force.y = def->ForceY;
+    force.z = def->ForceZ;
     force.w = 0.0f;
-    tParticleEmitter_init(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &force, life,
-                  *(float*)(def + 0x20), *(float*)(def + 0xC));
+    tParticleEmitter_init(self->sys, def->NumParticles * self->count, def->NumBlur, &force, life,
+                  def->BlurStep, def->Damp);
     tParticleEmitter_setupEmitter(self->sys, t4mat_Identity, def, self->f180, seed);
     if (changed) {
         self->purge(0);
@@ -3022,9 +3029,9 @@ public:
  */
 extern "C" void cPlayerShadow_AddShadow(void* self)
 {
-    char* shadow = (char*)self;
-    ((cGfxMan_5890*)cGraphicsMan_TheGraphicsMan_particle)->AddProjectiveTexture(sPtVec4_5890(*(float*)(shadow + 0xC), *(float*)(shadow + 0x10), *(float*)(shadow + 0x14), 1.0f),
-                                     shadow + 0x90, shadow + 0xD0, *(int*)(shadow + 0x170), 1.0f);
+    cPlayerShadow* shadow = (cPlayerShadow*)self;
+    ((cGfxMan_5890*)cGraphicsMan_TheGraphicsMan_particle)->AddProjectiveTexture(sPtVec4_5890(shadow->mProjPos[0], shadow->mProjPos[1], shadow->mProjPos[2], 1.0f),
+                                     &shadow->mCProjMat, &shadow->mUVProjMat, shadow->mLockTexture, 1.0f);
 }
 #endif
 
@@ -3072,8 +3079,8 @@ extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
     int tex = self->mLockTexture;
     if (tex >= 0) {
         func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
-        char* mgr = cGraphicsMan_TheGraphicsMan_particle;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(mgr + 0x10D8);
+        cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)mgr->mVtbl;
         vt[50].fn(vthis(mgr, vt[50]), self->mLockTexture);
         self->mLockTexture = -1;
     }
@@ -3104,11 +3111,11 @@ struct sPtVEntry_5990 {
  */
 extern "C" void func_00375990(void* self)
 {
-    char* shadow = (char*)self;
-    if (*(int*)(shadow + 0x170) < 0) {
-        char* mgr = cGraphicsMan_TheGraphicsMan_particle;
-        sPtVEntry_5990* vt = *(sPtVEntry_5990**)(mgr + 0x10D8);
-        *(int*)(shadow + 0x170) = vt[52].fn(vthis(mgr, vt[52]), *(int*)(shadow + 0x174), *(int*)(shadow + 0x178), 2);
+    cPlayerShadow* shadow = (cPlayerShadow*)self;
+    if (shadow->mLockTexture < 0) {
+        cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
+        sPtVEntry_5990* vt = (sPtVEntry_5990*)mgr->mVtbl;
+        shadow->mLockTexture = vt[52].fn(vthis(mgr, vt[52]), shadow->mShadowTexWidth, shadow->mShadowTexHeight, 2);
     }
 }
 #endif
@@ -3380,7 +3387,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetDisplayModeName);
  */
 extern "C" void* cPS2GraphicsMan_GetDisplayModeName(cPS2GraphicsMan* self, int mode)
 {
-    return (char*)self->DisplayModes + mode * 0xa4;
+    return (char*)&self->DisplayModes[mode];
 }
 #endif
 
@@ -3476,7 +3483,7 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
 {
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
     *(sPtScis65B8*)&viewportStack->mScissor[0] = *(sPtScis65B8*)&self->mScissor[0];
-    viewportStack->mDeferScissorIndex = *(int*)((char*)self->mpDeferMan + 0x69CC4);
+    viewportStack->mDeferScissorIndex = self->mpDeferMan->mActivePortIndex;
     viewportStack->unk_024 = self->unk_590C;
     viewportStack->unk_028 = self->unk_5908;
     vu0CopyMtx65B8((&viewportStack->mScreenMatrix), (&self->mScreenMatrix));
@@ -3572,7 +3579,7 @@ extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
     if (viewportStack->mDeferScissorIndex == -1) {
         func_00364B88((char*)self->mpDeferMan, (sPtScis6768*)&self->mScissor[0]);
     } else {
-        *(int*)((char*)self->mpDeferMan + 0x69CC4) = viewportStack->mDeferScissorIndex;
+        self->mpDeferMan->mActivePortIndex = viewportStack->mDeferScissorIndex;
     }
     self->unk_590C = viewportStack->unk_024;
     self->unk_5908 = viewportStack->unk_028;
@@ -4449,36 +4456,36 @@ inline void cGfx_7A10::ResetViewport()
  */
 void cGfx_7A10::EndFrame_impl()
 {
-    char* gfxBase = (char*)this;
+    cPS2GraphicsMan* gfxBase = (cPS2GraphicsMan*)this;
     ResetViewport();
     DrawClear();
-    unsigned int vif1 = *(unsigned int*)(gfxBase + 0x5A00);
-    unsigned int gif1 = *(unsigned int*)(gfxBase + 0x5A14);
+    unsigned int vif1 = gfxBase->mVifCursor;
+    unsigned int gif1 = gfxBase->mGifCursor;
     int vif2;
     int gif2;
-    func_00363490(*(void**)(gfxBase + 0x18F0), (unsigned int*)(gfxBase + 0x5A00), &vif2, (unsigned int*)(gfxBase + 0x5A14), &gif2);
-    WaitSema(*(int*)(gfxBase + 0x5ACC));
+    func_00363490(gfxBase->mpDeferMan, (unsigned int*)(&gfxBase->mVifCursor), &vif2, (unsigned int*)(&gfxBase->mGifCursor), &gif2);
+    WaitSema(gfxBase->mQueueMutex);
     // bufState[2] (+0x5A90) and queuedIndex (+0x5AA4) are shared with the DMA kick thread
     // (func_00382760) and the VIF1 DMA interrupt: volatile, like func_003826E0's bufState.
-    volatile int* bufState = (volatile int*)(gfxBase + 0x5A90);
-    *(volatile int*)(gfxBase + 0x5AA4) = *(int*)(gfxBase + 0x5A10);
-    volatile int* state = &bufState[*(volatile int*)(gfxBase + 0x5AA4)];
-    *(unsigned int*)(gfxBase + 0x5AA8) = vif1;
-    *(int*)(gfxBase + 0x5AAC) = vif2;
-    *(unsigned int*)(gfxBase + 0x5AB0) = gif1;
-    *(int*)(gfxBase + 0x5AB4) = gif2;
+    volatile int* bufState = (volatile int*)(&gfxBase->mBufState[0]);
+    gfxBase->mQueuedIndex = gfxBase->mBuildIndex;
+    volatile int* state = &bufState[gfxBase->mQueuedIndex];
+    gfxBase->mQueuedVif1 = vif1;
+    gfxBase->mQueuedVif2 = vif2;
+    gfxBase->mQueuedGif1 = gif1;
+    gfxBase->mQueuedGif2 = gif2;
     *state = 2;
-    SignalSema(*(int*)(gfxBase + 0x5ACC));
-    SignalSema(*(int*)(gfxBase + 0x5AC8));
-    *(int*)(gfxBase + 0x5A10) = *(int*)(gfxBase + 0x5A10) == 0;
-    *(int*)(gfxBase + 0x5A24) = *(int*)(gfxBase + 0x5A24) == 0;
-    *(unsigned int*)(gfxBase + 0x5A00) = *(unsigned int*)(gfxBase + 0x5A04) = *(unsigned int*)(gfxBase + 0x5A0C) + *(int*)(gfxBase + 0x5A10) * 0xCCC80;
-    *(unsigned int*)(gfxBase + 0x5A14) = *(unsigned int*)(gfxBase + 0x5A18) = *(unsigned int*)(gfxBase + 0x5A20) + *(int*)(gfxBase + 0x5A24) * 0x26600;
-    InvalidDCache(*(unsigned int*)(gfxBase + 0x5A00), *(unsigned int*)(gfxBase + 0x5A00) + 0xCCC80);
-    InvalidDCache(*(unsigned int*)(gfxBase + 0x5A14), *(unsigned int*)(gfxBase + 0x5A14) + 0x26600);
-    **(sPtRS_7A10**)(gfxBase + 0xE84) = D_00501420_rs7A10;
-    func_00362CC8(*(void**)(gfxBase + 0x18F0));
-    func_003673D0(*(void**)(gfxBase + 0x18F4));
+    SignalSema(gfxBase->mQueueMutex);
+    SignalSema(gfxBase->mKickSema);
+    gfxBase->mBuildIndex = gfxBase->mBuildIndex == 0;
+    gfxBase->mGifBuildIndex = gfxBase->mGifBuildIndex == 0;
+    gfxBase->mVifCursor = gfxBase->mVifHalfStart = gfxBase->mVifBuffBase + gfxBase->mBuildIndex * 0xCCC80;
+    gfxBase->mGifCursor = gfxBase->mGifHalfStart = gfxBase->mGifBuffBase + gfxBase->mGifBuildIndex * 0x26600;
+    InvalidDCache(gfxBase->mVifCursor, gfxBase->mVifCursor + 0xCCC80);
+    InvalidDCache(gfxBase->mGifCursor, gfxBase->mGifCursor + 0x26600);
+    *(sPtRS_7A10*)gfxBase->m_pCurrentDrawState = D_00501420_rs7A10;
+    func_00362CC8(gfxBase->mpDeferMan);
+    func_003673D0(gfxBase->mpTextureMan);
     ResetViewport();
     func_00361F90(D_005059D8);
 }
@@ -7170,10 +7177,10 @@ struct sPartVEntry52 {
  * @param width  the texture width (On Tour width)
  * @param height  the texture height (On Tour height)
  */
-extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, void* out, int width, int height)
+extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, tScreenGrabHandle* out, int width, int height)
 {
     sPartVEntry52* vt = (sPartVEntry52*)self->mVtbl;
-    *(int*)((char*)out + 4) = vt[52].fn(vthis(self, vt[52]), width, height, 0);
+    out->mTextureId = vt[52].fn(vthis(self, vt[52]), width, height, 0);
 }
 #endif
 
@@ -7189,13 +7196,13 @@ extern "C" void func_00367B60(void* mgr, int id);
  *
  * @param item  the tScreenGrabHandle to release
  */
-extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, void* item)
+extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, tScreenGrabHandle* item)
 {
-    if (*(int*)((char*)item + 0x4) != -1) {
-        func_00367B60(self->mpTextureMan, *(int*)((char*)item + 0x4));
+    if (item->mTextureId != -1) {
+        func_00367B60(self->mpTextureMan, item->mTextureId);
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-        vt[50].fn(vthis(self, vt[50]), *(int*)((char*)item + 0x4));
-        *(int*)((char*)item + 0x4) = -1;
+        vt[50].fn(vthis(self, vt[50]), item->mTextureId);
+        item->mTextureId = -1;
     }
 }
 #endif
@@ -8464,14 +8471,14 @@ struct sMdl0380 {
  * @param uv  receives 4 x (u, v)
  * @param col  receives 4 x (a, r, g, b)
  */
-extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, char* obj, int idx, float* pos, float* uv, float* col)
+extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, tInstanceRecord* obj, int idx, float* pos, float* uv, float* col)
 {
-    sMdl0380* mdl = *(sMdl0380**)(obj + 0x80);
+    sMdl0380* mdl = (sMdl0380*)obj->m_Model;
     char* base = *(char**)(*(char**)(*(char**)(mdl->ents[idx].node + 0x20)) + 0x4);
     char* data = *(char**)(base + mdl->dataOff + 0x4);
     short* texCoords = (short*)(data + 0x80);
     short* positions = (short*)(data + 0xA0);
-    sCol0380* colours = (sCol0380*)(*(char**)(base + *(int*)(obj + 0x98) + 0x14) + 0x10);
+    sCol0380* colours = (sCol0380*)(*(char**)(base + *(int*)(((char*)obj) + 0x98) + 0x14) + 0x10);
     sV3_0380 k;
     sV3_0380 modelScale = mdl->scale;
     k.x = modelScale.x * 3.0518509447574615e-05f;
@@ -13999,8 +14006,8 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     prm[7].w = 0.20466558635234833f;
     prm[8].w = 0.0f;
     prm[9].w = 0.0f;
-    char* mgr = D_004A5B80_9CB8;
-    sVEnt_9CB8* vt = *(sVEnt_9CB8**)(mgr + 0x10D8);
+    cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)D_004A5B80_9CB8;
+    sVEnt_9CB8* vt = (sVEnt_9CB8*)mgr->mVtbl;
     sMat_9CB8 cam = *vt[35].fn(vthis(mgr, vt[35]));
     sV_9CB8 eye = Scale_9CB8(GetPos_9CB8(cam), -1.0f);
     MMI_TRANSPOSE4(&cam);
@@ -14063,14 +14070,14 @@ INCLUDE_ASM("render/particle", func_0038A530);
  * @param planeD  receives the cosine against the light's direction
  * @return 1 when the point is within the radius, else 0
  */
-extern "C" int func_0038A530(float* point, float* n, void* forceSrc, float* dist, float* inv, float* planeD)
+extern "C" int func_0038A530(float* point, float* n, tLightRecord* forceSrc, float* dist, float* inv, float* planeD)
 {
     float length;
     float k;
-    float dx = *(float*)((char*)forceSrc + 0x38) - point[0];
-    float dy = *(float*)((char*)forceSrc + 0x3C) - point[1];
-    float radius = *(float*)((char*)forceSrc + 0x1C);
-    float dz = *(float*)((char*)forceSrc + 0x40) - point[2];
+    float dx = forceSrc->m_fvWorldPos[0] - point[0];
+    float dy = forceSrc->m_fvWorldPos[1] - point[1];
+    float radius = forceSrc->m_fMaxDistance;
+    float dz = forceSrc->m_fvWorldPos[2] - point[2];
     float distSq = dx * dx + dy * dy + dz * dz;
     if (radius * radius < distSq) {
         return 0;
@@ -14086,7 +14093,7 @@ extern "C" int func_0038A530(float* point, float* n, void* forceSrc, float* dist
     dx *= k;
     dy *= k;
     dz *= k;
-    *planeD = -(dx * *(float*)((char*)forceSrc + 0x2C) + dy * *(float*)((char*)forceSrc + 0x30) + dz * *(float*)((char*)forceSrc + 0x34));
+    *planeD = -(dx * forceSrc->m_fvDirection[0] + dy * forceSrc->m_fvDirection[1] + dz * forceSrc->m_fvDirection[2]);
     *dist = length;
     *inv = k;
     n[0] = dx;
@@ -14114,12 +14121,12 @@ INCLUDE_ASM("render/particle", func_0038A618);
  * @param inv  receives 1 / distance
  * @return 1 when the point is within the radius, else 0
  */
-extern "C" int func_0038A618(float* point, float* n, void* forceSrc, float* dist, float* inv)
+extern "C" int func_0038A618(float* point, float* n, tLightRecord* forceSrc, float* dist, float* inv)
 {
-    float dx = *(float*)((char*)forceSrc + 0x38) - point[0];
-    float dy = *(float*)((char*)forceSrc + 0x3C) - point[1];
-    float radius = *(float*)((char*)forceSrc + 0x1C);
-    float dz = *(float*)((char*)forceSrc + 0x40) - point[2];
+    float dx = forceSrc->m_fvWorldPos[0] - point[0];
+    float dy = forceSrc->m_fvWorldPos[1] - point[1];
+    float radius = forceSrc->m_fMaxDistance;
+    float dz = forceSrc->m_fvWorldPos[2] - point[2];
     float distSq = dx * dx + dy * dy + dz * dz;
     if (radius * radius < distSq) {
         return 0;
@@ -14259,7 +14266,7 @@ extern "C" void func_0038A6A8(void* self, float* point, sForce_38A6A8* forceSrc)
     case 0:
         break;
     case 1:
-        if (!func_0038A530(point, (float*)&n, forceSrc, &dist, &inv, &planeD))
+        if (!func_0038A530(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv, &planeD))
             return;
         if (!(planeD >= forceSrc->inner))
             return;
@@ -14283,7 +14290,7 @@ extern "C" void func_0038A6A8(void* self, float* point, sForce_38A6A8* forceSrc)
         func_00389520(self, (float*)&n, &out);
         break;
     case 2:
-        if (!func_0038A618(point, (float*)&n, forceSrc, &dist, &inv))
+        if (!func_0038A618(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv))
             return;
         fade = fade_38A6A8(forceSrc, dist);
         k = curve_38A6A8(forceSrc, inv) * forceSrc->strength * fade;

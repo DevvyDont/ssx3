@@ -722,11 +722,11 @@ INCLUDE_ASM("path/pathsys", cPath_getStart);
  * @param src  the path
  * @return @p dst
  */
-extern "C" void* cPath_getStart(void* dst, void* src)
+extern "C" void* cPath_getStart(void* dst, cPath* src)
 {
-    *(float*)((char*)dst + 0x0) = *(float*)((char*)src + 0xC);
-    *(float*)((char*)dst + 0x4) = *(float*)((char*)src + 0x10);
-    *(float*)((char*)dst + 0x8) = *(float*)((char*)src + 0x14);
+    *(float*)((char*)dst + 0x0) = src->Start[0];
+    *(float*)((char*)dst + 0x4) = src->Start[1];
+    *(float*)((char*)dst + 0x8) = src->Start[2];
     *(float*)((char*)dst + 0xC) = 1.0f;
     return dst;
 }

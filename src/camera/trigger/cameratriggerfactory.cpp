@@ -24,9 +24,9 @@
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camaction);
 #ifdef SKIP_ASM
 extern "C" int get_uint(void* reader, void* dst);
-extern "C" int get_cCTActionSwitchCam(void* reader, void* dst);
-extern "C" int get_cCTActionBoundedCam(void* reader, char* obj);
-extern "C" int get_cCTActionSpline(void* reader, void* dst);
+extern "C" int get_cCTActionSwitchCam(void* reader, cCTActionSwitchCam* dst);
+extern "C" int get_cCTActionBoundedCam(void* reader, cCTActionBoundedCam* obj);
+extern "C" int get_cCTActionSpline(void* reader, cCTActionSpline* dst);
 void* get_cCTActionNone(void* unused, int* outType);
 // PORT: the game's tagged allocator, bound as a placement operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -138,21 +138,21 @@ extern "C" int get_camaction(void* reader, void** out)
     switch (type) {
     case 0: {
         sCTActSwitchA* action = new (str_Camera_Switch_Action, 0, 0) sCTActSwitchA;
-        int bytesRead = get_cCTActionSwitchCam(reader, action);
+        int bytesRead = get_cCTActionSwitchCam(reader, (cCTActionSwitchCam*)action);
         *out = action;
         n += bytesRead;
         break;
     }
     case 1: {
         sCTActBoundedA* action = new (str_Camera_Bound_Action, 0, 0) sCTActBoundedA;
-        int bytesRead = get_cCTActionBoundedCam(reader, (char*)action);
+        int bytesRead = get_cCTActionBoundedCam(reader, (cCTActionBoundedCam*)action);
         *out = action;
         n += bytesRead;
         break;
     }
     case 2: {
         sCTActSplineA* action = new (str_Camera_Spline_Action, 0, 0) sCTActSplineA;
-        int bytesRead = get_cCTActionSpline(reader, action);
+        int bytesRead = get_cCTActionSpline(reader, (cCTActionSpline*)action);
         *out = action;
         n += bytesRead;
         break;
@@ -189,18 +189,18 @@ extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
  * @param obj     the bounded-camera action to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTActionBoundedCam(void* reader, char* obj)
+extern "C" int get_cCTActionBoundedCam(void* reader, cCTActionBoundedCam* obj)
 {
     int n;
     *(int*)obj = 1;
-    n = get_float(reader, obj + 0xC);
-    n += get_float(reader, obj + 0x10);
-    n += get_float(reader, obj + 0x14);
-    n += get_float(reader, obj + 0x18);
-    n += get_float(reader, obj + 0x1C);
-    n += get_float(reader, obj + 0x20);
-    n += get_uint(reader, obj + 0x24);
-    n += get_t3Vector_n(reader, obj + 0x28);
+    n = get_float(reader, &obj->BlendTime);
+    n += get_float(reader, &obj->IdealDist);
+    n += get_float(reader, &obj->FieldOfView);
+    n += get_float(reader, &obj->HeightOffset);
+    n += get_float(reader, &obj->PitchOffset);
+    n += get_float(reader, &obj->LeadDistance);
+    n += get_uint(reader, &obj->TargetType);
+    n += get_t3Vector_n(reader, &obj->TargetPoint);
     return n;
 }
 #endif
@@ -221,11 +221,11 @@ extern "C" int get_uint(void* reader, void* dst);
  * @param dst     the switch-camera action to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTActionSwitchCam(void* reader, void* dst)
+extern "C" int get_cCTActionSwitchCam(void* reader, cCTActionSwitchCam* dst)
 {
     *(int*)dst = 0;
-    int n = get_float(reader, (char*)dst + 0xC);
-    return n + get_uint(reader, (char*)dst + 0x8);
+    int n = get_float(reader, &dst->BlendTime);
+    return n + get_uint(reader, &dst->SwitchType);
 }
 #endif
 
@@ -241,14 +241,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionSpline);
  * @param dst     the spline action to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTActionSpline(void* reader, void* dst)
+extern "C" int get_cCTActionSpline(void* reader, cCTActionSpline* dst)
 {
     *(int*)dst = 2;
-    int n = get_float(reader, (char*)dst + 0xC);
-    n += get_float(reader, (char*)dst + 0x10);
-    n += get_float(reader, (char*)dst + 0x14);
-    n += get_float(reader, (char*)dst + 0x18);
-    return n + get_float(reader, (char*)dst + 0x1C);
+    int n = get_float(reader, &dst->BlendTime);
+    n += get_float(reader, &dst->FieldOfView);
+    n += get_float(reader, &dst->LeadDistance);
+    n += get_float(reader, &dst->Time);
+    return n + get_float(reader, &dst->HeightOffset);
 }
 #endif
 
@@ -2231,13 +2231,13 @@ static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float ang
  * @param src  the trigger camera algorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_173E40 cTriggerAlgorithm_getPose(char* src)
+extern "C" sPair_173E40 cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
 {
     sM_173E40 poseMtx;
     vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
-    vu0TransMtx_173E40(&poseMtx, *(sV_173E40*)(src + 0x40));
-    RotAxis_173E40(&poseMtx, t4vect_YAxis, -*(float*)(src + 0x54));
-    RotAxis_173E40(&poseMtx, D_004FF160_v173E40, *(float*)(src + 0x50));
+    vu0TransMtx_173E40(&poseMtx, *(sV_173E40*)&src->Position);
+    RotAxis_173E40(&poseMtx, t4vect_YAxis, -src->Pitch);
+    RotAxis_173E40(&poseMtx, D_004FF160_v173E40, src->Heading);
     return tPose_tPose(&poseMtx);
 }
 #endif
@@ -2733,7 +2733,7 @@ struct sOctNode_4848 {
 
 extern "C" void* cActiveTriggerList_find(void*, void*);
 extern "C" void cActiveTriggerList_add(void*, void*);
-extern "C" void descend(void* node, void* ctx);
+extern "C" void descend(nash_Cell* node, void* ctx);
 
 static inline void WalkList_4848(char* e, void* ctx)
 {
@@ -2761,14 +2761,14 @@ static inline void WalkList_4848(char* e, void* ctx)
 static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
 {
     WalkList_4848(node->list, ctx);
-    if (node->child[0]) descend(node->child[0], ctx);
-    if (node->child[1]) descend(node->child[1], ctx);
-    if (node->child[2]) descend(node->child[2], ctx);
-    if (node->child[3]) descend(node->child[3], ctx);
-    if (node->child[4]) descend(node->child[4], ctx);
-    if (node->child[5]) descend(node->child[5], ctx);
-    if (node->child[6]) descend(node->child[6], ctx);
-    if (node->child[7]) descend(node->child[7], ctx);
+    if (node->child[0]) descend((nash_Cell*)node->child[0], ctx);
+    if (node->child[1]) descend((nash_Cell*)node->child[1], ctx);
+    if (node->child[2]) descend((nash_Cell*)node->child[2], ctx);
+    if (node->child[3]) descend((nash_Cell*)node->child[3], ctx);
+    if (node->child[4]) descend((nash_Cell*)node->child[4], ctx);
+    if (node->child[5]) descend((nash_Cell*)node->child[5], ctx);
+    if (node->child[6]) descend((nash_Cell*)node->child[6], ctx);
+    if (node->child[7]) descend((nash_Cell*)node->child[7], ctx);
 }
 
 /**
@@ -3908,10 +3908,10 @@ extern "C" void cActiveTriggerList_add(void*, void*);
  * @param node  the octree cell (On Tour Cell)
  * @param ctx  the callback: active trigger list at +0x0, rider at +0x4 (On Tour CameraCollisionCallback)
  */
-extern "C" void descend(void* node, void* ctx)
+extern "C" void descend(nash_Cell* node, void* ctx)
 {
     char* entry;
-    for (entry = *(char**)((char*)node + 0x28); entry != 0; entry = *(char**)entry) {
+    for (entry = *(char**)&node->nodesinside[2]; entry != 0; entry = *(char**)entry) {
         if (*(int*)(entry + 8) == 4) {
             char* trig = *(char**)(entry + 0xC);
             char* sub = *(char**)((char*)ctx + 4) + 0x6C0;
@@ -3930,14 +3930,14 @@ extern "C" void descend(void* node, void* ctx)
             }
         }
     }
-    if (*(void**)((char*)node + 0x0)) descend(*(void**)((char*)node + 0x0), ctx);
-    if (*(void**)((char*)node + 0x4)) descend(*(void**)((char*)node + 0x4), ctx);
-    if (*(void**)((char*)node + 0x8)) descend(*(void**)((char*)node + 0x8), ctx);
-    if (*(void**)((char*)node + 0xC)) descend(*(void**)((char*)node + 0xC), ctx);
-    if (*(void**)((char*)node + 0x10)) descend(*(void**)((char*)node + 0x10), ctx);
-    if (*(void**)((char*)node + 0x14)) descend(*(void**)((char*)node + 0x14), ctx);
-    if (*(void**)((char*)node + 0x18)) descend(*(void**)((char*)node + 0x18), ctx);
-    if (*(void**)((char*)node + 0x1C)) descend(*(void**)((char*)node + 0x1C), ctx);
+    if (node->children[0][0][0]) descend((nash_Cell*)(node->children[0][0][0]), ctx);
+    if (node->children[0][0][1]) descend((nash_Cell*)(node->children[0][0][1]), ctx);
+    if (node->children[0][1][0]) descend((nash_Cell*)(node->children[0][1][0]), ctx);
+    if (node->children[0][1][1]) descend((nash_Cell*)(node->children[0][1][1]), ctx);
+    if (node->children[1][0][0]) descend((nash_Cell*)(node->children[1][0][0]), ctx);
+    if (node->children[1][0][1]) descend((nash_Cell*)(node->children[1][0][1]), ctx);
+    if (node->children[1][1][0]) descend((nash_Cell*)(node->children[1][1][0]), ctx);
+    if (node->children[1][1][1]) descend((nash_Cell*)(node->children[1][1][1]), ctx);
 }
 #endif
 
@@ -4048,13 +4048,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_2ChaseAlgorithm* self, void* out)
+extern "C" void cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_2ChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 
@@ -4231,13 +4231,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_3ChaseAlgorithm* self, void* out)
+extern "C" void cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_3ChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 
@@ -4393,13 +4393,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_4ChaseAlgorithm* self, void* out)
+extern "C" void cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_4ChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 
@@ -4610,13 +4610,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cDirectionChaseAlgorithm_getRaceCamFinalPhaseData(cDirectionChaseAlgorithm* self, void* out)
+extern "C" void cDirectionChaseAlgorithm_getRaceCamFinalPhaseData(cDirectionChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 
@@ -4903,13 +4903,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_getRaceC
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData(cSPOKEChaseAlgorithm* self, void* out)
+extern "C" void cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData(cSPOKEChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 
@@ -5526,13 +5526,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_getR
  *
  * @param out  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-extern "C" void cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData(cSUPERPIPEChaseAlgorithm* self, void* out)
+extern "C" void cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData(cSUPERPIPEChaseAlgorithm* self, cRaceCamFinalPhaseData* out)
 {
-    *(float*)((char*)out + 0x4) = 6.654887676239014f;
-    *(float*)((char*)out + 0x0) = 16.140756607055664f;
-    *(float*)((char*)out + 0xC) = 0.8425687551498413f;
-    *(float*)((char*)out + 0x8) = 0.9264262914657593f;
-    *(int*)((char*)out + 0x10) = 1;
+    out->PitchBlendingMaxAngleDown = 6.654887676239014f;
+    out->PitchBlendingMaxAngleUp = 16.140756607055664f;
+    out->PitchBlendingSmoothnessDown = 0.8425687551498413f;
+    out->PitchBlendingSmoothnessUp = 0.9264262914657593f;
+    out->DoPitchBlending = 1;
 }
 #endif
 

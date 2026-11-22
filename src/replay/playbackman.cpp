@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/ai.h"
 #include "vtable.h"
 #include "main/gameviewman.h"
 #include "replay/frame.h"
@@ -465,7 +466,7 @@ void cPlaybackMan_reset(void* vself)
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_saveFrame);
 #ifdef SKIP_ASM
 struct sPbBytes4;
-extern "C" void cReplay_saveFrame1(cReplay* self, void* out, sPbBytes4* src);
+extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* src);
 
 
 /**
@@ -482,7 +483,7 @@ extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self)
         desc.Type = one;
         desc.Highlights = 0;
         desc.Chapter = 0;
-        cReplay_saveFrame1((cReplay*)(self->Game->Replay), (char*)&self->SaveFramePtr,
+        cReplay_saveFrame1((cReplay*)(self->Game->Replay), (cReplayFrame*)((char*)&self->SaveFramePtr),
                       (sPbBytes4*)&desc);
         self->SaveFrame = one;
     }
@@ -542,9 +543,9 @@ extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
         cPlaybackMan_saveFrame(self);
         self->CurrentFrame->Buffer.Index = 0;
         AIsetseed(&self->CurrentFrame->AISeed[0]);
-        *(int*)((char*)self->AI + 0x8) = self->CurrentFrame->AITick;
+        self->AI->AITick = self->CurrentFrame->AITick;
         self->State = 1;
-        char* x = *(char**)((char*)self->AI + 0x70);
+        char* x = (char*)self->AI->MissionRiders[0];
         int targetRider = x ? *(int*)(x + 0x18) : 0;
         cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
     }
@@ -575,7 +576,7 @@ extern "C" void cPlaybackMan_stopPreview(cPlaybackMan* self)
         cReplay_setReplayState(replay, replay->SaveState);
         cPlaybackMan_restoreFrame(self);
         self->State = 0;
-        int targetRider = *(int*)((char*)self->AI + 0x28);
+        int targetRider = (int)self->AI->Riders[0];
         cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
@@ -767,10 +768,10 @@ extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx)
         HUFF_decode((void*)data, 0, (int)self->CurrentFrame);
         return 1;
     }
-    char* buf = (char*)self->CurrentFrame;
+    tPlaybackFrame* buf = self->CurrentFrame;
     MEM_fill(buf, 0, 0x1C22C);
-    *(int*)(buf + 0) = 0xDBAC0101;
-    *(int*)(buf + 4) = 0x1C200;
+    buf->Version = 0xDBAC0101;
+    buf->Buffer.Size = 0x1C200;
     return 0;
 }
 #endif
@@ -1340,12 +1341,12 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  */
 extern "C" void* cReplay_saveReplayFrame(cReplay* self, tReplayFrameType* src)
 {
-    void* out = cReplay_allocReplayFrame(self);
-    *(tReplayFrameType*)((char*)out + 0x1C) = *src;
+    cReplayFrame* out = (cReplayFrame*)cReplay_allocReplayFrame(self);
+    out->FrameType = *src;
     cReplay_saveFrame((cReplay*)self, out);
-    *(int*)((char*)out + 0x30) = self->RecordTick;
+    out->FrameStartTick = self->RecordTick;
     cReplayFramePtr_putFrameBlock_2(out, 0);
-    return out;
+    return ((void*)out);
 }
 #endif
 
@@ -1367,11 +1368,11 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* out);
  * @param out  the replay frame to fill
  * @param src  the 4-byte frame type descriptor
  */
-extern "C" void cReplay_saveFrame1(cReplay* self, void* out, sPbBytes4* src)
+extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* src)
 {
-    *(sPbBytes4*)((char*)out + 0x1C) = *src;
+    *(sPbBytes4*)&out->FrameType = *src;
     cReplay_saveFrame((cReplay*)self, out);
-    *(int*)((char*)out + 0x30) = self->RecordTick;
+    out->FrameStartTick = self->RecordTick;
 }
 #endif
 

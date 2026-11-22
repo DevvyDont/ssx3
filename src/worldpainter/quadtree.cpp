@@ -136,13 +136,13 @@ extern "C" void* cQuadTree_getLeaf(cQuadTree* self, float fx, float fz)
     }
     unsigned short ux = x << 1;
     unsigned short uz = z << 1;
-    char* nodes = (char*)self->m_nodes;
-    unsigned short* node = (unsigned short*)(nodes + self->m_root * 8);
+    tQuadTreeNode* nodes = self->m_nodes;
+    unsigned short* node = &nodes[self->m_root].m_sub.m_children[0];
     while (node[0] & 1) {
         int idx = ((ux >> 15) << 1) | (uz >> 15);
         ux <<= 1;
         uz <<= 1;
-        node = (unsigned short*)(nodes + (*(unsigned short*)((char*)node + (idx << 1)) >> 1) * 8);
+        node = &nodes[*(unsigned short*)((char*)node + (idx << 1)) >> 1].m_sub.m_children[0];
     }
     if (node[0] & 1) {
         return 0;

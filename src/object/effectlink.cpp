@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/instancenode.h"
 #include "world/instancerecord.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
@@ -250,14 +251,14 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
     self->mVtbl = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(&self->Emitter);
     self->ParticleData = (tParticleData*)pdata;
-    char* own = (char*)self->Instance;
-    void* obj = *(void**)(own + 0xC);
+    tInstanceRecord* own = self->Instance;
+    cInstanceNode* obj = (cInstanceNode*)(own->m_pActiveNode);
     void* transform;
-    if (obj != 0) {
-        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)((char*)obj + 0xC);
+    if (((void*)obj) != 0) {
+        sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)obj->mVtbl;
         transform = vu0CopyMatrix003458C0(&self->Transform, vt[24].fn(vthis(obj, vt[24])));
     } else {
-        transform = vu0CopyMatrix003458C0(&self->Transform, own + 0x10);
+        transform = vu0CopyMatrix003458C0(&self->Transform, &own->m_fmTransform);
     }
     cStaticEmitter_setupEmitter(&self->Emitter, transform, (int)self->ParticleData);
     (self)->Complete = 0;

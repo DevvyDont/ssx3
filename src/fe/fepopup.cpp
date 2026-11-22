@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/font.h"
+#include "render/2drender.h"
 #include "bx/math3d.h"
 #include "fe/popupinfo.h"
 #include "ui/uiinput.h"
@@ -799,7 +801,7 @@ public:
 extern sVec3_6D30 D_004FF0D8_6D30 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* info);
 extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
-extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out);
+extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, tRect* out);
 extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out);
 extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 
@@ -826,7 +828,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
             float item[4];
             int* it = info + 5;
             cScreenPopup_setTextString2(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it);
-            cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpStaticBox), size);
+            cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpStaticBox), (tRect*)size);
             cScreenPopup_getStringSize(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it, item);
             w = item[2];
             pos = *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpStaticBox) + 0x44);
@@ -867,7 +869,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
     if (((cUIObj_6D30*)screenPopup->mpEnterBoxBackground) != 0) {
         ((cUIObj_6D30*)screenPopup->mpEnterBoxBackground)->setVisible(0);
     }
-    cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpEnterBox), size);
+    cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpEnterBox), (tRect*)size);
     cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, size);
     return 0;
 }
@@ -1043,7 +1045,7 @@ struct sPopup_7388 {
 extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* info);
 extern "C" int* cPopupInfo_getPopupOptionNames(void* info, int i);
 extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
-extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out);
+extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, tRect* out);
 extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out);
 extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 
@@ -1091,7 +1093,7 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, cPopupInfo* infop)
             float item[4];
             int* it = cPopupInfo_getPopupOptionNames(info, j);
             cScreenPopup_setTextString2(self, (cUIText*)itemObj, it);
-            cScreenPopup_getStringSize3(self, itemObj, size);
+            cScreenPopup_getStringSize3(self, itemObj, (tRect*)size);
             cScreenPopup_getStringSize(self, (cUIText*)itemObj, it, item);
             if (self->mvLargestOption[0] < item[2])
                 self->mvLargestOption[0] = item[2];
@@ -1660,11 +1662,11 @@ struct sVEntry_8320 {
 extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out)
 {
     sVec3_8320 textScale = *(sVec3_8320*)((char*)text + 0x50);
-    char* scaledFont = (char*)cUIText_getFont(text);
-    float sx = *(float*)(scaledFont + 0x30) * textScale.x;
-    float sy = *(float*)(scaledFont + 0x34) * textScale.y;
-    *(float*)(scaledFont + 0x38) = sx;
-    *(float*)(scaledFont + 0x3C) = sy;
+    cFont* scaledFont = (cFont*)cUIText_getFont(text);
+    float sx = scaledFont->BaseScale[0] * textScale.x;
+    float sy = scaledFont->BaseScale[1] * textScale.y;
+    scaledFont->Scale[0] = sx;
+    scaledFont->Scale[1] = sy;
     char* measureFont;
     switch (info[0]) {
     case 1:
@@ -1781,13 +1783,13 @@ struct sVEntry001C8628 {
  * @param obj  the widget
  * @param out  the result rectangle (four floats)
  */
-extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out)
+extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, tRect* out)
 {
     t2Vector widgetSize;
     sVEntry001C8628* vt = *(sVEntry001C8628**)((char*)obj + 8);
     vt[20].fn(vthis(obj, vt[20]), &widgetSize);
-    *(float*)((char*)out + 0x8) = widgetSize.x;
-    *(float*)((char*)out + 0xC) = widgetSize.y;
+    out->W = widgetSize.x;
+    out->H = widgetSize.y;
 }
 #endif
 
@@ -2680,7 +2682,7 @@ struct sSelfK1C9B98 { char pad[0x2D0]; sEntryK1C9B98 entries[4]; };
  */
 extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx)
 {
-    cScreenPopup* popup = (cScreenPopup*)((char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(864, str_Confirmation_Popup, 0x100, 0), self->mpEngine, (cUIState*)self));
+    cScreenPopup* popup = (cScreenPopup*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(864, str_Confirmation_Popup, 0x100, 0), self->mpEngine, (cUIState*)self);
     self->mpConfirmPopup = (cScreenPopup*)popup;
     char* slots = (char*)&popup->info;
     popup->info.meType = 2;
@@ -3181,8 +3183,8 @@ extern char str_dot_dot_dot[];
 
 static inline void measure_A6A0(cUIText* text, const char* s, float* out)
 {
-    char* f = (char*)cUIText_getFont(text);
-    cFont_textExtent(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    cFont* f = (cFont*)cUIText_getFont(text);
+    cFont_textExtent(f, s, out, 0, f->Scale[0], f->Scale[1]);
 }
 
 /**
@@ -3204,11 +3206,11 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
     float dots[4];
     sVEntry_A6A0* vt = *(sVEntry_A6A0**)((char*)text + 8);
     vt[20].fn(vthis(text, vt[20]), &size);
-    char* font = (char*)cUIText_getFont(text);
-    float sx = *(float*)(font + 0x30) * scale.x;
-    float sy = *(float*)(font + 0x34) * scale.y;
-    *(float*)(font + 0x38) = sx;
-    *(float*)(font + 0x3C) = sy;
+    cFont* font = (cFont*)cUIText_getFont(text);
+    float sx = font->BaseScale[0] * scale.x;
+    float sy = font->BaseScale[1] * scale.y;
+    font->Scale[0] = sx;
+    font->Scale[1] = sy;
     char* buf = new (str_checkAndFixTextEntry, 0x100, 0) char[self->miMaxChars + 4];
     int len = strlen(str) - 1;
     strcpy(buf, str);
@@ -6231,11 +6233,11 @@ extern "C" void* cUIText_getFont(void* self);
 extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj)
 {
     sVec3_CE4C8 objScale = *(sVec3_CE4C8*)((char*)obj + 0x50);
-    char* font = (char*)cUIText_getFont(obj);
-    float x = *(float*)(font + 0x30) * objScale.x;
-    float y = *(float*)(font + 0x34) * objScale.y;
-    *(float*)(font + 0x38) = x;
-    *(float*)(font + 0x3C) = y;
+    cFont* font = (cFont*)cUIText_getFont(obj);
+    float x = font->BaseScale[0] * objScale.x;
+    float y = font->BaseScale[1] * objScale.y;
+    font->Scale[0] = x;
+    font->Scale[1] = y;
 }
 #endif
 

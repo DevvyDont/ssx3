@@ -1,4 +1,11 @@
 #include "common.h"
+#include "path/basepath.h"
+#include "path/trackpath.h"
+#include "visualfx/splashfx.h"
+#include "ai/ridermetrix.h"
+#include "main/gamemode.h"
+#include "path/aipath.h"
+#include "ai/rideranim.h"
 #include "ai/focusbox.h"
 #include "path/pathsys.h"
 #include "bx/math3d.h"
@@ -822,11 +829,11 @@ struct sAi_10D410 {
  * @param tgt  the candidate path (On Tour cAIPath* CurrentPath)
  * @return the score: 0 unusable, -1 too far, 100 the rival's path, otherwise the weighted sum
  */
-extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
+extern "C" float cComputer_scorePath(cComputer* self, cAIPath* tgt)
 {
     float sc[7];
     char* ai = (char*)SSXApp->Game->AI;
-    int flags = *(int*)(tgt + 0x38);
+    int flags = tgt->PathAttributes;
     int kind = (flags >> 7) & 7;
     int lvl = (flags >> 4) & 7;
     int solo = flags & 1;
@@ -871,7 +878,7 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     }
     sc[0] = distScore * 0.22727273404598236f;
     cRider* rider2 = self->mRider;
-    if (rider2->mHasRival != 0 && *(char**)(((sAi_10D410*)ai)->riders[rider2->mRivalIndex] + 0xAB8) == tgt) {
+    if (rider2->mHasRival != 0 && *(char**)(((sAi_10D410*)ai)->riders[rider2->mRivalIndex] + 0xAB8) == ((char*)tgt)) {
         return 100.0f;
     }
     float zero = 0.0f;
@@ -880,7 +887,7 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     sc[2] = (float)lvl * (w * 0.3333333432674408f);
     // PORT: the path pointer is passed as cAI_aiRidersOnPath's int team
     int n = cAI_aiRidersOnPath((sAi0010FC30*)ai, (int)tgt);
-    n -= tgt == (char*)self->mRider->AIPath;
+    n -= ((char*)tgt) == (char*)self->mRider->AIPath;
     float occupiedScore;
     if (n <= 0) {
         occupiedScore = 100.0f;
@@ -1134,9 +1141,10 @@ struct sRider_0010DBF0 {
     t4Vector vel;              // 0x1B0
 };
 
-static inline int id_0010DBF0(char* self)
+static inline int id_0010DBF0(char* vself)
 {
-    char* o = *(char**)(self + 0x18) + 0x6C0;
+    cComputer* self = (cComputer*)vself;
+    char* o = (char*)&self->RiderHandler.GroundMotion.mRider->mVtbl;
     sVE_0010DBF0* ve = &(*(sVE_0010DBF0**)o)[7];
     return ve->fn(vthis(o, *ve));
 }
@@ -1615,12 +1623,12 @@ static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMod
 extern "C" void cRider_flagEventPathEvent(cRider* self, int* pathEvent, int isPrev, int isCur)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* gameModeMan = (char*)SSXApp->GameModeMan;
+    cGameModeMan* gameModeMan = SSXApp->GameModeMan;
     int mode = *cBENewRaceInterface_getLocation(iface);
     int shouldTriggerFinishLine = 0;
     if (state_0010E5D8() == 0 || state_0010E5D8() == 1 || state_0010E5D8() == 3 || state_0010E5D8() == 2
-        || (state_0010E5D8() == 5 && *(int*)(gameModeMan + 0x98) != 0)
-        || (state_0010E5D8() == 6 && *(int*)(gameModeMan + 0x98) != 0)
+        || (state_0010E5D8() == 5 && gameModeMan->bIsLastHeat != 0)
+        || (state_0010E5D8() == 6 && gameModeMan->bIsLastHeat != 0)
         || mode == 5 || mode == 6 || mode == 7 || mode == 8 || mode == 9
         || mode == 10 || mode == 11 || mode == 12 || mode == 13 || mode == 1
         || cBENewRaceInterface_newRace.cGamePath != 0)
@@ -1774,18 +1782,18 @@ struct sVEf_0010E910 { short delta; short index; void (*fn)(void*, float); };
  * @param evt  the ground intersection landed on (On Tour tIntersectInfo): position, normal, surface at +0x4C
  * @param speed  the landing speed (On Tour speed)
  */
-extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pressMode, char* evt, float speed)
+extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pressMode, tIntersectInfo* evt, float speed)
 {
-    char* metrix = (char*)self->mMetrix;
-    int prevNumUber = *(int*)(metrix + 0x114);
-    int prevNumCombo = *(int*)(metrix + 0x134);
-    int prevPoints = *(int*)(metrix + 0x198);
+    cRiderMetrix* metrix = self->mMetrix;
+    int prevNumUber = metrix->Totals.NumUberTricks;
+    int prevNumCombo = metrix->Totals.NumComboChainLinks;
+    int prevPoints = metrix->Totals.TotalPoints;
     float powerUp = cRiderMetrix_evLand(metrix, self->IsRidingFakie != self->IsGoofyStance, isPipe, rsm, pressMode);
-    char* metrixAfter = (char*)self->mMetrix;
-    int curNumUber = *(int*)(metrixAfter + 0x114);
-    int curNumCombo = *(int*)(metrixAfter + 0x134);
-    int curPoints = *(int*)(metrixAfter + 0x198);
-    cReplay_eventLand_10E910(SSXApp->Game->Replay, self->mAIIndex, metrixAfter + 0xFC);
+    cRiderMetrix* metrixAfter = self->mMetrix;
+    int curNumUber = metrixAfter->Totals.NumUberTricks;
+    int curNumCombo = metrixAfter->Totals.NumComboChainLinks;
+    int curPoints = metrixAfter->Totals.TotalPoints;
+    cReplay_eventLand_10E910(SSXApp->Game->Replay, self->mAIIndex, &metrixAfter->Totals);
     if (prevNumUber < curNumUber)
     {
         int uberLevel = self->mUberLevel;
@@ -1799,7 +1807,7 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
                 self->mUberTimer = 60.0f;
         }
     }
-    func_00111AA0_impl(self->mRiderHandler, evt, evt + 0x10, *(int*)(evt + 0x4C), speed);
+    func_00111AA0_impl(self->mRiderHandler, evt, &evt->Inorm, evt->Stype, speed);
     char* being = (char*)&self->mVtbl;
     sVE_0010E910* ve = &(*(sVE_0010E910**)being)[8];
     if (ve->fn(vthis(being, *ve)))
@@ -1862,10 +1870,11 @@ static inline sQuat_EB30 AxisAngle_EB30(const sQuat_EB30& axis, float angle)
 static inline t4Vector GetUp_EB30(cRider* rider) { return rider->mMatrix.row[2]; }
 
 // Clears the anim's position offset and sets its heading quaternion to -angle about t4vect_ZAxis.
-static inline void ResetAnimOrientation_EB30(char* ra, float angle)
+static inline void ResetAnimOrientation_EB30(char* vra, float angle)
 {
-    *(sQuat_EB30*)(ra + 0x30) = D_004FF130_EB30;
-    *(sQuat_EB30*)(ra + 0x40) = AxisAngle_EB30(D_004FF160_EB30, -angle);
+    cRiderAnim* ra = (cRiderAnim*)vra;
+    *(sQuat_EB30*)&ra->OrientationOffset = D_004FF130_EB30;
+    *(sQuat_EB30*)&ra->OrientationOffset.Q = AxisAngle_EB30(D_004FF160_EB30, -angle);
 }
 
 struct sVE_EB30 { short delta; short index; void (*fn)(void*, float); };
@@ -2019,16 +2028,16 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
  * @param surf  the surface hit (On Tour eSurfaceType surf), for the impact effect
  * @param evt  the collision (On Tour tCollideInfo): contact point/normal at +0x0/+0x20, strength at +0x30
  */
-extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, int surf, char* evt)
+extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, int surf, tCollideInfo* evt)
 {
     sVE_EB30* vt = *(sVE_EB30**)&rider->mVtbl;
-    vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), *(float*)(evt + 0x30) * 5.0f);
+    vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), evt->Vel * 5.0f);
     float amt = cRiderMetrix_evWipeout(rider->mMetrix, isPunch);
     cRider_flagEventBoostPowerUp(rider, 1, amt);
     cSSXAudio_WipeoutHit(cAudioInterface_bxAudio(), rider);
     cSSXAudio_PlayGrunt(cAudioInterface_bxAudio(), rider, 0, 0);
     cSSXAudio_Wipeout(cAudioInterface_bxAudio(), rider, amt);
-    func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, surf, *(float*)(evt + 0x30));
+    func_00111AA0_impl(rider->mRiderHandler, evt, &evt->Reflect, surf, evt->Vel);
     cRider_setControlState_EB30(rider, 13);
     if (rider->RailslideMode == 3) {
         float ang = 1.5707963705062866f;
@@ -2544,7 +2553,7 @@ extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
             if (rider->mIsActor)
                 keys[i] = -0xFFFF;
             else
-                keys[i] = *(int*)((char*)rider->mMetrix + 0x198);
+                keys[i] = rider->mMetrix->Totals.TotalPoints;
             break;
         }
     }
@@ -3220,10 +3229,10 @@ extern "C" void cRiderHandler_resetRiderFX(cRiderHandler* self)
     int id = self->GroundMotion.mRider->mViewIndex;
     if (id >= 0)
     {
-        char* obj = (char*)cGame_getSplashManager(SSXApp->Game, id);
-        if (obj != 0)
+        cSplashManager* obj = (cSplashManager*)cGame_getSplashManager(SSXApp->Game, id);
+        if (((char*)obj) != 0)
         {
-            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(obj + 0xC);
+            sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
             vt[14].fn(vthis(obj, vt[14]));
         }
     }
@@ -3346,9 +3355,10 @@ void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("f
  * @param surfaceType  the surface type
  * @param x  the impact speed
  */
-void func_00111AA0_impl(void* self, void* pos, void* dir, int surfaceType, float x)
+void func_00111AA0_impl(void* vself, void* pos, void* dir, int surfaceType, float x)
 {
-    func_002E23E0_impl((char*)self + 0xB40, pos, dir, surfaceType, 0, x);
+    cRiderHandler* self = (cRiderHandler*)vself;
+    func_002E23E0_impl(&self->DynamicSprayFX, pos, dir, surfaceType, 0, x);
 }
 #endif
 
@@ -3676,8 +3686,8 @@ extern "C" void cRider_initPath(cRider* self, int flag)
         vu0AddEq_112180(pos, vu0Scale_112180(dir, cRider_getStartGateHorizOffset((char*)self)));
         cRider_putAt_112180(((char*)self), &pos, &dir, 5, 0.0f);
     }
-    *(int*)((char*)self->mAIPathHint + 0x14) = -1;
-    *(int*)((char*)self->mTrackPathHint + 0x14) = -1;
+    self->mAIPathHint->NodeID = -1;
+    self->mTrackPathHint->NodeID = -1;
     self->TrackPath = (cTrackPath*)((void**)startPoint)[8];
     self->AIPath = (cAIPath*)((void**)startPoint)[9];
     t4Vector up;
@@ -3687,7 +3697,7 @@ extern "C" void cRider_initPath(cRider* self, int flag)
     up.w = 1.0f;
     float out;
     float res = cPath_intersectPath1(self->TrackPath, &self->mPosition, &up, &out, self->mTrackPathHint, 1);
-    float trackLen = *(float*)((char*)self->TrackPath + 0x38);
+    float trackLen = self->TrackPath->BaseDistanceLeft;
     if (trackLen < res)
         res = 0.0f;
     self->mDistToFinish = self->MinDistanceLeft = trackLen - res;
@@ -3741,14 +3751,14 @@ extern "C" void cRider_updateTrackPath(cRider* self)
             cRider_checkTrackPathSwitch(self, 1);
         else
         {
-            char* trackPath = (char*)self->TrackPath;
-            sVEntry<int(void*, float, float)>* ve = &(*(sVEntry<int(void*, float, float)>**)(trackPath + 0x34))[2];
+            cTrackPath* trackPath = self->TrackPath;
+            sVEntry<int(void*, float, float)>* ve = &((sVEntry<int (void*, float, float)>*)trackPath->mVtbl)[2];
             if (ve->fn(vthis(trackPath, *ve), self->MinDistanceLeft, self->mDistToFinish))
                 cRider_checkTrackPathSwitch(self, 0);
         }
         if ((void*)self->TrackPath != old)
         {
-            *(int*)((char*)self->mTrackPathHint + 0x14) = -1;
+            self->mTrackPathHint->NodeID = -1;
             cRider_checkTrackPathEvents(self, &pathDistXY, &pathParam, &pathPos);
         }
     }
@@ -3899,8 +3909,8 @@ extern "C" void cRider_updateAIPath(cRider* self)
             cRider_checkAIPathSwitch(self, 1);
         else
         {
-            char* aiPath = (char*)self->AIPath;
-            sVEntry<int(void*, float, float)>* ve = &(*(sVEntry<int(void*, float, float)>**)(aiPath + 0x34))[2];
+            cAIPath* aiPath = self->AIPath;
+            sVEntry<int(void*, float, float)>* ve = &((sVEntry<int (void*, float, float)>*)aiPath->mVtbl)[2];
             if (ve->fn(vthis(aiPath, *ve), self->PrevPathParam, self->PathParam))
                 cRider_checkAIPathSwitch(self, 0);
         }
@@ -4043,7 +4053,7 @@ extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
         float nearParam = cPath_intersectPath(paths[i], &pos, &out, &tOut, 1);
         if (paths[i] == (void*)vself->TrackPath) {
             if (1592.0f < __builtin_fabsf(*(float*)((char*)paths[i] + 0x38) - vself->mDistToFinish - nearParam)) {
-                *(int*)((char*)vself->mTrackPathHint + 0x14) = -1;
+                vself->mTrackPathHint->NodeID = -1;
             }
         }
         nearParam += 796.0f;
@@ -4222,7 +4232,7 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
     }
     if (best != 0) {
         vself->AIPath = (cAIPath*)best;
-        *(int*)((char*)vself->mAIPathHint + 0x14) = -1;
+        vself->mAIPathHint->NodeID = -1;
         float pathParam = cPath_intersectPath1(vself->AIPath, &vself->mPosition, &vself->PathPos, &vself->PathDistXY, vself->mAIPathHint, 1);
         vself->PathParam = pathParam;
         *(&vself->IntersectPos) = cPath_getPathPos_112A50(vself->AIPath, 0, pathParam + 796.0f);
@@ -4322,7 +4332,7 @@ extern "C" void cRider_switchToResetPath(cRider* self)
         return;
     if (best)
         self->AIPath = (cAIPath*)best;
-    *(int*)((char*)self->mAIPathHint + 0x14) = -1;
+    self->mAIPathHint->NodeID = -1;
     self->PathParam = cPath_intersectPath1(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, self->mAIPathHint, 1);
     *(&self->PathPos) = cAIPath_getResetPos_112D58(self->AIPath, (float*)(&self->PathParam));
     float aimParam = self->PathParam + 796.0f;
@@ -4364,9 +4374,9 @@ extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, fl
     cRider* self = (cRider*)vself;
     float trackParam = cPath_intersectPath1_2FB0(self->TrackPath, &self->mPosition, pathPos, pathDistXY, self->mTrackPathHint, 1);
     *pathParam = trackParam;
-    char* track = (char*)self->TrackPath;
+    cTrackPath* track = self->TrackPath;
     float cur = self->MinDistanceLeft;
-    float distLeft = *(float*)(track + 0x38) - trackParam;
+    float distLeft = track->BaseDistanceLeft - trackParam;
     self->mDistToFinish = distLeft;
     if (distLeft < cur)
     {
@@ -4387,7 +4397,7 @@ extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, fl
     }
     else
     {
-        sVEntry_112FB0* vt = *(sVEntry_112FB0**)(track + 0x34);
+        sVEntry_112FB0* vt = (sVEntry_112FB0*)track->mVtbl;
         self->NumPathEventsCur = vt[1].fn(vthis(track, vt[1]), cur, cur, (char*)&self->PathEventsCur[0], 0xC);
     }
 }

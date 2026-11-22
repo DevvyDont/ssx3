@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/fepopupconfirm.h"
+#include "fe/festateprofile.h"
+#include "util/locale.h"
 #include "sound/ssxaudio.h"
 #include "fe/keyboardpopup.h"
 #include "fe/festatecharselect.h"
@@ -179,8 +182,8 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if (w->mMiscData == 0 && self->bToNextState == 0) {
-        char* mgr = (char*)SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
+        cFELocale* mgr = SSXApp->FELocale;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)mgr->mVtbl;
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveProgress));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
@@ -190,8 +193,8 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     }
     int k = w->mMiscData;
     if (k == 6 && self->bToNextState == 0) {
-        char* mgr = (char*)SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
+        cFELocale* mgr = SSXApp->FELocale;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)mgr->mVtbl;
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
@@ -675,8 +678,8 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
             return;
         }
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-        char* obj = *(char**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(char**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -684,8 +687,8 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         break;
     }
     case 6: {
-        char* obj = *(char**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(char**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), 0);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

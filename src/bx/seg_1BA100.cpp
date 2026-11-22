@@ -1832,10 +1832,10 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD30);
  *
  * @param audio  the cSSXAudio
  */
-extern "C" void func_002BAD30(void *audio) {
-    *(int*)((char*)audio + 0x5790) = 0;
-    *(int*)((char*)audio + 0x578C) = 1;
-    *(int*)((char*)audio + 0x6254) = 1;
+extern "C" void func_002BAD30(cSSXAudio* audio) {
+    audio->unk_5790 = 0;
+    audio->unk_578C = 1;
+    audio->unk_6254 = 1;
 }
 #endif
 

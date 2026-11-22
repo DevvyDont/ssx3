@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldrecords.h"
 #include "world/instancerecord.h"
 #include "intersect/worldinttypes.h"
 #include "ai/rider.h"
@@ -1332,7 +1333,7 @@ static inline int isBetter_003342D0(sHit_003342D0* a, sHit_003342D0* b)
  * @param hitCache  passed through to cOverlapList_terrainIntersect (On Tour tIntHint *hint)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cOverlapList_terrainIntersect1(cOverlapList* self, char* query, sHit_003342D0* out, int hitCache)
+extern "C" float cOverlapList_terrainIntersect1(cOverlapList* self, cWorldIntersectType* query, sHit_003342D0* out, int hitCache)
 {
     sHit_003342D0 hits[64];
     int n = cOverlapList_terrainIntersect(self, query, hits, 0x40, hitCache);
@@ -1340,7 +1341,7 @@ extern "C" float cOverlapList_terrainIntersect1(cOverlapList* self, char* query,
         return -1.0f;
     }
     int best = 0;
-    sVEntry<float(void*)>* vt = *(sVEntry<float(void*)>**)(query + 0x50);
+    sVEntry<float(void*)>* vt = (sVEntry<float (void*)>*)query->mVtbl;
     float ref = vt[3].fn(vthis(query, vt[3]));
     float bestDiff = absf_003342D0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
@@ -1423,7 +1424,7 @@ static inline int overlapBox_334458(const cWorldIntersectType* q, const sBox_334
  * @param full  nonzero selects mode 2 instead of 1 (On Tour includeridable)
  * @return the number of hits stored
  */
-extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, cWorldIntersectType* query, char* buf, int cap, int full)
+extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, cWorldIntersectType* query, tIntersectInfo* buf, int cap, int full)
 {
     int mode = 1;
     if (full) mode = 2;
@@ -1433,7 +1434,7 @@ extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, cWorldInte
         int flags = node->m_iFlags;
         if (flags & 0x20) {
             if (overlapNode_334458(query, node)) {
-                n += intersect_instanceIntersect(query, node, buf + n * 0x80, cap - n, mode);
+                n += intersect_instanceIntersect(query, node, &buf[n], cap - n, mode);
             }
         } else if (flags & 0x40) {
             sVEntry<void>* vt = ((sObj_334458*)node->m_pActiveNode)->vt;
@@ -1441,7 +1442,7 @@ extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, cWorldInte
                 sVEntry<void>* vt2 = ((sObj_334458*)node->m_pActiveNode)->vt;
                 sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)((sObj_334458*)node->m_pActiveNode) + vt2[45].delta);
                 if (overlapBox_334458(query, objBox)) {
-                    n += intersect_instanceIntersect(query, node, buf + n * 0x80, cap - n, mode);
+                    n += intersect_instanceIntersect(query, node, &buf[n], cap - n, mode);
                 }
             }
         }
@@ -1514,14 +1515,14 @@ extern "C" int cOverlapList_splineIntersect(cOverlapList* self, sWsVec4* pos, in
     wsSubEq_334680((*(sWsVec4*)&box.MinPoint), ext);
     wsAddEq_334680((*(sWsVec4*)&box.MaxPoint), ext);
     for (unsigned int i = 0; i < self->numtyped; i++) {
-        char* spaceNode = ((char**)(&self->typed[0]))[i];
-        int type = *(int*)(spaceNode + 8);
+        cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)((char**)(&self->typed[0]))[i];
+        int type = spaceNode->type;
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(spaceNode + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
+            cRailModifier_splineIntersect(*(void**)(((char*)spaceNode) + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
         } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(spaceNode + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
+            cFlexRailNode_splineIntersect(*(void**)(((char*)spaceNode) + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
         } else if (type == 1) {
-            if (*(int*)(*(char**)(spaceNode + 0x68) + 0x1C) & mask) {
+            if (*(int*)(*(char**)(((char*)spaceNode) + 0x68) + 0x1C) & mask) {
                 intersect_staticSplineSegmentIntersect(spaceNode, &box, pos, &cnt, &dist, intInfo);
             }
         }
@@ -2727,7 +2728,7 @@ static inline int isBetter_00336850(sHit_00336850* a, sHit_00336850* b)
  * @param hint  passed through to cBXNash_terrainIntersect (On Tour tIntHint *hint; cCamera_avoidGround passes its intersection hint)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cBXNash_terrainIntersect1(cBXNash* self, char* intersectType, sHit_00336850* out, int hint)
+extern "C" float cBXNash_terrainIntersect1(cBXNash* self, cWorldIntersectType* intersectType, sHit_00336850* out, int hint)
 {
     sHit_00336850 hits[64];
     int n = cBXNash_terrainIntersect(self, intersectType, hits, 0x40, hint);
@@ -2735,7 +2736,7 @@ extern "C" float cBXNash_terrainIntersect1(cBXNash* self, char* intersectType, s
         return -1.0f;
     }
     int best = 0;
-    sVEntry<float(void*)>* vt = *(sVEntry<float(void*)>**)(intersectType + 0x50);
+    sVEntry<float(void*)>* vt = (sVEntry<float (void*)>*)intersectType->mVtbl;
     float ref = vt[3].fn(vthis(intersectType, vt[3]));
     float bestDiff = absf_00336850(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
@@ -3161,7 +3162,7 @@ static inline int isBetter_003378C0(sHit_003378C0* a, sHit_003378C0* b)
  * @param full  passed through to cBXNash_staticObjectIntersect (On Tour includeRidable)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cBXNash_staticObjectIntersect1(cBXNash* self, char* query, sHit_003378C0* out, int full)
+extern "C" float cBXNash_staticObjectIntersect1(cBXNash* self, cWorldIntersectType* query, sHit_003378C0* out, int full)
 {
     sHit_003378C0 hits[128];
     int n = cBXNash_staticObjectIntersect(self, query, hits, 0x80, full);
@@ -3169,7 +3170,7 @@ extern "C" float cBXNash_staticObjectIntersect1(cBXNash* self, char* query, sHit
         return -1.0f;
     }
     int best = 0;
-    sVEntry<float(void*)>* vt = *(sVEntry<float(void*)>**)(query + 0x50);
+    sVEntry<float(void*)>* vt = (sVEntry<float (void*)>*)query->mVtbl;
     float ref = vt[3].fn(vthis(query, vt[3]));
     float bestDiff = absf_003378C0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
@@ -5802,11 +5803,12 @@ static inline void setRate_1AA0(sFloat_1AA0* dst, float v, float dflt)
     dst->v = r;
 }
 
-static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
+static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* vinfo)
 {
+    tModelRecord* info = (tModelRecord*)vinfo;
     float r;
     if (v < 0.0f) {
-        r = *(float*)(info + 0x14);
+        r = info->m_fAnimTime;
     } else {
         r = v * 0.03333333507180214f;
     }
@@ -5836,12 +5838,12 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
  * @return @p self
  */
 // Animated float constructor: range and start value (frames -> seconds), optional random start and speed.
-extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, char* obj, sSphFloatDef_1AA0* def)
+extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, tInstanceRecord* obj, sSphFloatDef_1AA0* def)
 {
     cAnimNode_cAnimNode((char*)&self->CurrTime, bucket, nodeType, obj, def->f24 != 0);
     self->mVtbl = cAnimObjectNode_vtbl;
     float frameTime = 0.0f;
-    char* info = *(char**)(obj + 0x80);
+    char* info = (char*)obj->m_Model;
     if (self->AnimFrames != 0) {
         frameTime = cAnimFrame_getStartTime(self->AnimFrames);
     }
@@ -6184,7 +6186,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
         self->AnimSpeed = msgValue / (float)cAppMan_TheAppMan->TimerHz;
     } else if (msg == 103) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = *(float*)((char*)self->Instance->m_Model + 0x14);
+        float lim = self->Instance->m_Model->m_fAnimTime;
         if (lim < msgValue) {
             msgValue = lim;
         }
@@ -6197,7 +6199,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
         }
     } else if (msg == 104) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = *(float*)((char*)self->Instance->m_Model + 0x14);
+        float lim = self->Instance->m_Model->m_fAnimTime;
         if (lim < msgValue) {
             msgValue = lim;
         }
@@ -6285,11 +6287,12 @@ static inline void setRate_003421A0(sFloat_003421A0* dst, float v, float dflt)
     dst->v = r;
 }
 
-static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info)
+static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* vinfo)
 {
+    tModelRecord* info = (tModelRecord*)vinfo;
     float r;
     if (v < 0.0f) {
-        r = *(float*)(info + 0x14);
+        r = info->m_fAnimTime;
     } else {
         r = v * 0.03333333507180214f;
     }
@@ -6315,24 +6318,24 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
  * @param def  the script's teeter data (On Tour tMakeAnimTeeterData)
  * @return @p self
  */
-extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int bucket, char* obj, char* def)
+extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int bucket, tInstanceRecord* obj, tMakeAnimTeeterData* def)
 {
     cAnimNode_cAnimNode(&self->CurrTime, bucket, 4, obj, 0);
     self->mVtbl = cAnimTeeterNode_vtbl;
     float animStart = 0.0f;
-    char* info = *(char**)(obj + 0x80);
+    char* info = (char*)obj->m_Model;
     if (self->AnimFrames != 0) {
         animStart = cAnimFrame_getStartTime(self->AnimFrames);
     }
-    setRate_003421A0((sFloat_003421A0*)&self->FromTime, *(float*)(def + 0x20), animStart);
-    setRateMax_003421A0((sFloat_003421A0*)&self->ToTime, *(float*)(def + 0x24), info);
-    self->BounceFactor = *(float*)(def + 0x8);
-    self->TorqueScale = *(float*)(def + 0x4) * 9.999999974752427e-07f;
-    self->MaxAnimSpeed = *(float*)(def + 0xC) * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
-    self->AnimSign = *(int*)(def + 0x1C);
-    self->PivotTime = *(float*)(def + 0x14) * 0.03333333507180214f;
-    self->Damp = *(float*)(def + 0x18);
-    self->Spring = *(float*)(def + 0x10);
+    setRate_003421A0((sFloat_003421A0*)&self->FromTime, def->FromTime, animStart);
+    setRateMax_003421A0((sFloat_003421A0*)&self->ToTime, def->ToTime, info);
+    self->BounceFactor = def->BounceFactor;
+    self->TorqueScale = def->TorqueScale * 9.999999974752427e-07f;
+    self->MaxAnimSpeed = def->MaxSpeed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
+    self->AnimSign = def->AnimSign;
+    self->PivotTime = def->PivotTime * 0.03333333507180214f;
+    self->Damp = def->Damp;
+    self->Spring = def->Spring;
     self->Flags |= 1;
     *(int*)&self->TorqueSum = 0;
     *(int*)&self->AnimSpeed = 0;
@@ -6655,8 +6658,8 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, sObj_342538* i
     int idx = intInfo->idx;
     if (idx >= 0) {
         sSub_342538* sub = (sSub_342538*)(&self->unk_044);
-        char* ents = sub->inf->tbl->ents;
-        if (*(int*)(ents + idx * 16 + 8) != 0) {
+        tMeshHeirarchyRecord* ents = (tMeshHeirarchyRecord*)sub->inf->tbl->ents;
+        if ((int)ents[idx].m_MeshAnim != 0) {
             sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;
             char* animMat = ((GetMat_342538)vt[29].fn)(vthis(sub, vt[29]), idx);
             char* pivotMat = animMat;

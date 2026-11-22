@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/modifierblock.h"
+#include "world/worldrecords.h"
+#include "intersect/spheretree.h"
+#include "render/ps2bezierman.h"
 #include "ai/rider.h"
 #include "ui/uithing.h"
 #include "bx/appman.h"
@@ -1575,7 +1579,7 @@ static inline void SetBits_DA70(unsigned int* w, unsigned int mask, unsigned int
  * @param ci     the collision (On Tour tCollideInfo*)
  * @return self
  */
-extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rdata, char* ii, char* ci)
+extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRollerData* rdata, tIntersectInfo* ii, char* ci)
 {
     float* timing = (float*)(&self->mKineticEnergy);
     *(void***)self = cTransformModifier_vtbl;
@@ -1583,19 +1587,19 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     *(void***)self = cRollerModifier_vtbl;
     SphereTree_SphereTree(&self->SphTree);
     *(int*)&self->Life = 0;
-    self->m_pInstance = (tInstanceRecord*)(*(int*)(ii + 0x50));
-    bxSphereTree_operatorE(&self->SphTree, *(void**)(ii + 0x48));
-    self->mMass = *(float*)(rdata + 0x4);
-    char* info = (char*)self->SphTree.treeInfo;
-    self->mElast = *(float*)(rdata + 0x8);
+    self->m_pInstance = (tInstanceRecord*)((int)ii->Inst);
+    bxSphereTree_operatorE(&self->SphTree, ii->SphTree);
+    self->mMass = rdata->Mass;
+    tSphTreeInfo* info = self->SphTree.treeInfo;
+    self->mElast = rdata->Elast;
     self->InvM = 1.0f / timing[1];
     sRmVec4 offset;
-    offset.x = *(float*)(info + 0x2C);
-    offset.y = *(float*)(info + 0x30);
-    offset.z = *(float*)(info + 0x34);
+    offset.x = info->centerOfMass[0];
+    offset.y = info->centerOfMass[1];
+    offset.z = info->centerOfMass[2];
     offset.w = 0.0f;
     *(sRmVec4*)&self->COMOffset = offset;
-    *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)(info + 0x5C);
+    *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)&info->invMomentOfInertia[0][0];
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][0] *= 0.5f;
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][1] *= 0.5f;
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][2] *= 0.5f;
@@ -1605,7 +1609,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][0] *= 0.5f;
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][1] *= 0.5f;
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][2] *= 0.5f;
-    tPose x = tPose_tPose((char*)self->m_pInstance + 0x10);
+    tPose x = tPose_tPose(&self->m_pInstance->m_fmTransform);
     {
         sRmVec4 rotated;
         QuatRotTo_DA70(rotated, *(sRmVec4*)&x.Q, *(sRmVec4*)&self->COMOffset);
@@ -1625,9 +1629,9 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     self->ContactFriction = 0.4000000059604645f;
     self->StopContactSpeed = 277.77777099609375f;
     *(int*)&self->ViscousDrag = 0;
-    SetBits_DA70((unsigned int*)((char*)self->m_pInstance + 0x8), 0xFFFFFFDFu, 0x40);
-    SetBits_DA70((unsigned int*)((char*)self->m_pInstance + 0x8), 0xFFFFFFFDu, 0x4);
-    *(unsigned int*)((char*)self->m_pInstance + 0x8) |= 0x1;
+    SetBits_DA70((unsigned int*)(&self->m_pInstance->m_iFlags), 0xFFFFFFDFu, 0x40);
+    SetBits_DA70((unsigned int*)(&self->m_pInstance->m_iFlags), 0xFFFFFFFDu, 0x4);
+    *(unsigned int*)&self->m_pInstance->m_iFlags |= 0x1;
     cRollerModifier_Collision_DA70(((char*)self), ci, ii);
     return ((char*)self);
 }
@@ -2417,19 +2421,19 @@ static inline float ftrunc_0035F0B8(float x)
  */
 extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier* self, void* def, void* owner)
 {
-    char* defData = (char*)def;
+    tAddTexFlipData* defData = (tAddTexFlipData*)def;
     float one = 1.0f;
     self->Instance = (tInstanceRecord*)owner;
     self->TexIndex = 0;
     self->NumMaterials = 0;
     self->NumTexFlipMaterials = 0;
-    self->Type = *(int*)(defData + 0x4);
-    float rate = *(float*)(defData + 0x10) * (one / (float)cAppMan_TheAppMan->TimerHz);
+    self->Type = defData->Type;
+    float rate = defData->Speed * (one / (float)cAppMan_TheAppMan->TimerHz);
     self->Speed = rate;
-    self->Dir = *(int*)(defData + 0xC);
+    self->Dir = defData->Dir;
     self->BaseSpeed = rate;
     *(int*)&self->Time = 0;
-    int n = *(int*)(defData + 0x8);
+    int n = defData->StartId;
     if ((float)n < *(float*)(int*)&self->Time) {
         union { int i; float f; } randBits;
         randBits.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
@@ -2608,11 +2612,11 @@ extern "C" void cTexFlipModifier_setupMaterialRecords(sRailModSelect* self)
 {
     int i;
     for (i = 0; i < self->count; i++) {
-        char* list = *(char**)(self->owner + 0x94);
-        char* item = *(char**)(list + (i << 2) + 4);
-        char* table = *(char**)(item + 0x10);
-        if (table != 0) {
-            self->out[i].value = *(unsigned short*)(table + (self->index << 2) + 4);
+        tMaterialBlockRecord* list = (tMaterialBlockRecord*)(*(char**)(self->owner + 0x94));
+        tMaterialRecord* item = (tMaterialRecord*)(*(char**)(((char*)list) + (i << 2) + 4));
+        tTextureFlipRecord* table = (tTextureFlipRecord*)(*(char**)&item->m_TextureFlip);
+        if (((char*)table) != 0) {
+            self->out[i].value = *(unsigned short*)(((char*)table) + (self->index << 2) + 4);
         }
     }
 }
@@ -3616,9 +3620,9 @@ struct sRailVEntryU800 {
  * @param obj  the other node (On Tour cObjNode*)
  * @return 1 when obj's sort index is greater than or equal to this node's, otherwise 0
  */
-extern "C" int cSortObjNode_compare(cSortObjNode* self, void* obj)
+extern "C" int cSortObjNode_compare(cSortObjNode* self, cObjNode* obj)
 {
-    sRailVEntryU800* vt = *(sRailVEntryU800**)((char*)obj + 0xC);
+    sRailVEntryU800* vt = (sRailVEntryU800*)obj->mVtbl;
     return vt[8].fn(vthis(obj, vt[8])) >= self->SortIndex;
 }
 #endif
@@ -3640,9 +3644,9 @@ struct sRailVEntryU840 {
  * @param obj  the other node (On Tour cObjNode*)
  * @return 1 when the two sort indices are equal, otherwise 0
  */
-extern "C" int cSortObjNode_equal(cSortObjNode* self, void* obj)
+extern "C" int cSortObjNode_equal(cSortObjNode* self, cObjNode* obj)
 {
-    sRailVEntryU840* vt = *(sRailVEntryU840**)((char*)obj + 0xC);
+    sRailVEntryU840* vt = (sRailVEntryU840*)obj->mVtbl;
     return self->SortIndex == vt[8].fn(vthis(obj, vt[8]));
 }
 #endif
@@ -3876,7 +3880,7 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getSectionId__FPv);
 unsigned char cInstanceNode_getSectionId(void* vself)
 {
     cInstanceNode* self = (cInstanceNode*)vself;
-    return *(unsigned char*)((char*)self->Instance + 0x78);
+    return *(unsigned char*)&self->Instance->m_RID;
 }
 #endif
 
@@ -4000,7 +4004,7 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform__FPv);
 void* cInstanceNode_getRootTransform(void* vself)
 {
     cInstanceNode* self = (cInstanceNode*)vself;
-    return (char*)self->Instance + 0x10;
+    return (char*)&self->Instance->m_fmTransform;
 }
 #endif
 
@@ -4017,7 +4021,7 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform1__FPv);
 void* cInstanceNode_getRootTransform1(void* vself)
 {
     cInstanceNode* self = (cInstanceNode*)vself;
-    return (char*)self->Instance + 0x10;
+    return (char*)&self->Instance->m_fmTransform;
 }
 #endif
 
@@ -5301,19 +5305,19 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_getMaterialBlock);
 extern "C" int cMoveNode_getMaterialBlock(cMoveNode* self)
 {
     int cond;
-    char* modBlock = (char*)self->ModifierBlock;
+    tModifierBlock* modBlock = self->ModifierBlock;
     cond = 0;
-    if (modBlock != 0) {
-        cond = *(int*)(modBlock + 8) != 0;
+    if (((char*)modBlock) != 0) {
+        cond = (int)modBlock->TexFlip != 0;
     }
     if (cond != 0) {
-        int matRec = *(int*)(modBlock + 8);
+        int matRec = (int)modBlock->TexFlip;
         if (matRec != 0) {
             return matRec + 36;
         }
         return 0;
     }
-    return *(int*)((char*)self->Instance + 0x94);
+    return (int)self->Instance->m_MaterialBlock;
 }
 #endif
 //100%
@@ -5332,13 +5336,13 @@ void* cUVScrollModifier_getTextureMat_1arg(void*) __asm__("cUVScrollModifier_get
  */
 extern "C" void* cMoveNode_getTextureMat(cMoveNode* self)
 {
-    char* modBlock = (char*)self->ModifierBlock;
+    tModifierBlock* modBlock = self->ModifierBlock;
     int cond = 0;
-    if (modBlock != 0) {
-        cond = *(int*)(modBlock + 4) != 0;
+    if (((char*)modBlock) != 0) {
+        cond = (int)modBlock->UVScroll != 0;
     }
     if (cond != 0) {
-        void* uvScroll = *(void**)(modBlock + 4);
+        void* uvScroll = modBlock->UVScroll;
         if (uvScroll != 0) {
             return cUVScrollModifier_getTextureMat_1arg(uvScroll);
         }
@@ -7246,9 +7250,9 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setBoundBox);
  */
 extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, tBoundBox* boundbox)
 {
-    void* nodes = self->Nodes;
-    *(cQuad128*)((char*)nodes + 0x30) = *(cQuad128*)boundbox;
-    *(cQuad128*)((char*)nodes + 0x40) = *(cQuad128*)&boundbox->MaxPoint;
+    tMultiNode* nodes = self->Nodes;
+    *(cQuad128*)&nodes->BoundBox = *(cQuad128*)boundbox;
+    *(cQuad128*)&nodes->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
 }
 #endif
 
@@ -8890,15 +8894,15 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
     pkt = (ulong*)(*pktAddr | 0x30000000);
     resetState_3490(&self->state);
     func_00364360((cPS2DeferManager*)self, &pkt);
-    func_00364050((cPS2DeferManager*)((char*)self));
+    func_00364050((cPS2DeferManager*)self);
     func_003666F8();
     void* ring = D_004A4474;
     int saved = *(int*)ring;
     func_0038F300(ring, 5);
-    char* gs = cGraphicsMan_TheGraphicsMan_railmodifier;
-    void* obj = *(void**)(gs + 0x18F4);
+    cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
+    cTextureMan* obj = gs->mpTextureMan;
     func_00396128(obj);
-    func_00365F68((char*)obj + 0x1F60);
+    func_00365F68(obj->mMainHeap);
     if (self->nItems != 0) {
         int idx = 0;
         int pass;
@@ -8964,16 +8968,16 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
             }
             switch (split.v[pass]) {
             case 6: {
-                for (int k = 0; k < *(int*)(gs + 0x59C0); k++)
+                for (int k = 0; k < gs->unk_59C0; k++)
                     func_0036AC00(gs, k, &pkt, path);
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
                 func_00364360((cPS2DeferManager*)self, &pkt);
-                int* tc = (int*)((char*)obj + 0x1F4C);
+                int* tc = (int*)(&obj->mBoundTex[0]);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
-                *(int*)((char*)obj + 0x1F54) = -1;
+                obj->mCLUTTex = -1;
                 break;
             }
             case 9: {
@@ -8986,18 +8990,18 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                 *path += 0x10;
                 *out1 = (int)pkt & 0x0FFFFFFF;
                 *out2 = *path;
-                for (int k = 0; k < *(int*)(gs + 0x59C0); k++)
+                for (int k = 0; k < gs->unk_59C0; k++)
                     func_0036C790(gs, k, &pkt, path);
-                for (int k = 0; k < *(int*)(gs + 0x59C0); k++)
+                for (int k = 0; k < gs->unk_59C0; k++)
                     func_003904A0(gs, k, &pkt, path);
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
                 func_00364360((cPS2DeferManager*)self, &pkt);
-                int* tc = (int*)((char*)obj + 0x1F4C);
+                int* tc = (int*)(&obj->mBoundTex[0]);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
-                *(int*)((char*)obj + 0x1F54) = -1;
+                obj->mCLUTTex = -1;
                 break;
             }
             }
@@ -9026,7 +9030,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
     *pktAddr = (int)pkt & 0x0FFFFFFF;
     // PORT: EE `sync` (orders the uncached DMA-tag writes); no C equivalent.
     __asm__ __volatile__("sync");
-    func_00365FA8((char*)obj + 0x1F60);
+    func_00365FA8(obj->mMainHeap);
     func_0038F300(ring, saved);
 }
 #endif
@@ -9134,10 +9138,10 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int nodeL
         }
     }
     if (((State3C20(self)->w1 & 0x400000) >> 22) != ((st->w1 & 0x400000) >> 22)) {
-        char* gs = cGraphicsMan_TheGraphicsMan_railmodifier;
-        func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40),
+        cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
+        func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
                       (st->w1 & 0x400000) >> 22, 0);
-        func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40),
+        func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
                       (st->w1 & 0x400000) >> 22, 1);
     }
     if (Bits3C20(State3C20(self)->w1, 0x1800000) != Bits3C20(st->w1, 0x1800000) ||
@@ -9324,7 +9328,7 @@ struct sRmPkt4360 {
 // PORT: 64-bit DMA/GIF tag writes (ulong).
 extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp)
 {
-    char* gs = cGraphicsMan_TheGraphicsMan_railmodifier;
+    cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
     sRmGsState4360 st;
     sRmPkt4360 pkt;
     st = *(sRmGsState4360*)&sDrawState_s_defaultDrawState;
@@ -9339,11 +9343,11 @@ extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp)
     pkt.cur = *pp + 6;
     func_003625C0((sGifPacket*)&pkt, (st.w0 & 0xC) >> 2, 0);
     func_00362478((sGifPacket*)&pkt, (st.w1 & 0x7C) >> 2, (st.w0 >> 12) & 0xFF, 0);
-    func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40), (st.w1 >> 22) & 1, 0);
+    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat, (st.w1 >> 22) & 1, 0);
     func_003626D8((sRmGsPacket*)&pkt, (st.w1 >> 23) & 3, (st.w1 >> 20) & 3, (st.w1 & 0xFF000) >> 12, 0);
     func_003625C0((sGifPacket*)&pkt, (st.w0 & 0x30) >> 4, 1);
     func_00362478((sGifPacket*)&pkt, (st.w1 & 0xF80) >> 7, (st.w0 >> 20) & 0xFF, 1);
-    func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40), (st.w1 >> 23) & 1, 1);
+    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat, (st.w1 >> 23) & 1, 1);
     func_003626D8((sRmGsPacket*)&pkt, (st.w1 >> 25) & 3, (st.w1 >> 22) & 3, (st.w1 & 0xFF000) >> 12, 1);
     func_003627A8_4360(&pkt, pp, 1);
 }
@@ -10402,13 +10406,13 @@ extern "C" void func_003663D8(void* selfp, int idx)
     sRailNodeMan* self = (sRailNodeMan*)selfp;
     sRailNode* n = &self->nodes[idx];
     if (n->field_0x8 != 0x7FFFFFFF) {
-        char* owner = (*(char***)((char*)self + 0x23E8))[n->field_0x8];
+        tTexInfo* owner = (tTexInfo*)(*(char***)((char*)self + 0x23E8))[n->field_0x8];
         if ((n->field_0x0 >> 2) & 1) {
-            *(int*)(owner + 0x2C) = -1;
-            *(int*)(owner + 0x34) = -1;
+            owner->mCLUTAddr = -1;
+            owner->mCLUTBlock = -1;
         } else {
-            *(int*)(owner + 0x28) = -1;
-            *(int*)(owner + 0x30) = -1;
+            owner->mTexAddr = -1;
+            owner->mTexBlock = -1;
         }
     }
     n->field_0x0 &= ~0x3F;
@@ -10919,12 +10923,12 @@ extern "C" void func_003663D8(void* self, int id);
  */
 extern "C" void func_00366E30(void* self, int i)
 {
-    char* entry = (*(char***)((char*)self + 0x23E8))[i];
-    if (*(int*)(entry + 0x30) >= 0) {
-        func_003663D8(self, *(int*)(entry + 0x30));
+    tTexInfo* entry = (tTexInfo*)(*(char***)((char*)self + 0x23E8))[i];
+    if (entry->mTexBlock >= 0) {
+        func_003663D8(self, entry->mTexBlock);
     }
-    if (*(int*)(entry + 0x34) >= 0) {
-        func_003663D8(self, *(int*)(entry + 0x34));
+    if (entry->mCLUTBlock >= 0) {
+        func_003663D8(self, entry->mCLUTBlock);
     }
 }
 #endif

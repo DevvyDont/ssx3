@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldcache.h"
+#include "render/ps2gridmesh.h"
 #include "world/instancerecord.h"
 #include "ai/rider.h"
 #include "bx/math3d.h"
@@ -1162,11 +1164,11 @@ struct sRow_7B80 {
 
 static inline int IsLoaded_7B80(tInstanceRecord* m)
 {
-    char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
+    cWorldCache* wc = cWorld_m_pTheWorld->m_pWorldCache;
     if (m->m_SMap.m_uiSectionID == 0xFF)
         return 1;
-    int ok = *(int*)(wc + (m->m_SMap.m_uiSectionID << 3) + 0x24) == 6;
-    return ok ? *(int*)(wc + m->m_SMap.m_iHullID * 0x18 + 0x3F0) == 3 : 0;
+    int ok = wc->m_WorldView.mp_SectionState[m->m_SMap.m_uiSectionID].state == 6;
+    return ok ? wc->m_HullPages[m->m_SMap.m_iHullID].m_State == 3 : 0;
 }
 
 struct sPair_7B80 { sRow_7B80 r[4]; };

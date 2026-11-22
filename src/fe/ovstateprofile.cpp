@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/keyboardpopup.h"
+#include "movie/mcoverlaymanager.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
@@ -456,9 +458,9 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
     cState_1380* self = (cState_1380*)profileState;
     unsigned short buf[800];
     char name[0x40];
-    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (self->displayFileOK()) {
-        if (!(*(cMCSub_1380**)(mp + 0x434))->IsAvailable1()) {
+        if (!((cMCSub_1380*)mp->mpMemCard)->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
             cOVState_PROFILE_displayOff((cOVState_PROFILE*)self);
             return;
@@ -467,23 +469,23 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
             self->triggerDisplayState(3);
     }
     if (self->displayFileOK()) {
-        cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
+        cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
         int first = 0;
         cUIText_setUnicodeStringWrap(getObj_1380(self, str_Memory_card_text_b), buf);
-        *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
+        *(int*)((char*)self + 0x21C) = mp->mSelectedDevice;
         self->setMenuHighlight();
         cUIObj_1380* textWidget = getObj_1380(self, str_1percentage_b);
         *(sCol_1380*)((char*)textWidget + 0x88) = D_004C66C8_1380;
-        (*(cMCSub_1380**)(mp + 0x434))->GetStatus1(buf);
+        ((cMCSub_1380*)mp->mpMemCard)->GetStatus1(buf);
         cUIText_setUnicodeString(textWidget, buf);
         textWidget->setVisible(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d_b, i);
             textWidget = getObj_1380(self, name);
-            (*(cMCSub_1380**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x234);
+            ((cMCSub_1380*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x234);
             cUIText_setUnicodeString(textWidget, (unsigned short*)((char*)self + 0x234));
-            if (!(*(cMCSub_1380**)(mp + 0x434))->HasFileName(i - 1) && !(*(cMCSub_1380**)(mp + 0x434))->IsFileSlotDisabled(i - 1)
-                && (*(cMCSub_1380**)(mp + 0x434))->IsFormatted1()) {
+            if (!((cMCSub_1380*)mp->mpMemCard)->HasFileName(i - 1) && !((cMCSub_1380*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)
+                && ((cMCSub_1380*)mp->mpMemCard)->IsFormatted1()) {
                 if (!first) {
                     first = 1;
                     textWidget->setStatic(0);
@@ -491,8 +493,8 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
                     textWidget->setUseStaticColour(1);
                     textWidget->setStatic(1);
                 }
-            } else if ((*(cMCSub_1380**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-                if ((*(cMCSub_1380**)(mp + 0x434))->IsFileSlotDisabled(i - 1)) {
+            } else if (((cMCSub_1380*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
+                if (((cMCSub_1380*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)) {
                     textWidget->setStatic(1);
                     textWidget->setUseStaticColour(1);
                 } else {
@@ -504,11 +506,11 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
                 textWidget->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 1) == -1)
             getObj_1380(self, str_arrowleft_b)->setVisible(0);
         else
             getObj_1380(self, str_arrowleft_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 0) == -1)
             getObj_1380(self, str_arrowright_b)->setVisible(0);
         else
             getObj_1380(self, str_arrowright_b)->setVisible(1);
@@ -882,7 +884,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
     case 13: {
         char buf[0x70];
         char fmt[0x70];
-        char* name = ((char*)self->mpKeyboard) + 0x74;
+        char* name = self->mpKeyboard->mszEditString;
         func_002C2540((char*)cSSXApp_getMCManager(SSXApp) + 0x276, name);
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
@@ -912,7 +914,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
                 *(int*)(kb + 0x140) = 55;
                 cKeyboardPopup_setMaxCharacters(((char*)self->mpKeyboard), 8);
                 cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 75, 1, 2);
-                *(int*)(((char*)self->mpKeyboard) + 0x58) = 1;
+                self->mpKeyboard->mbDisableForFirst = 1;
                 cKeyboardPopup_setDisableShiftNumbers(((char*)self->mpKeyboard), 1);
                 cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 0xE, 0, 2);
                 cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 39, 0, 2);
@@ -927,7 +929,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
                 cKeyboardPopup_setMinCharacters(((char*)self->mpKeyboard), 1);
             }
             cKeyboardPopup_setStatic(((char*)self->mpKeyboard), GetText_K211BC8(str_kT_KEYUserName_b));
-            *(int*)(((char*)self->mpKeyboard) + 0x54) = 1;
+            self->mpKeyboard->mbClearOnFirst = 1;
             cKeyboardPopup_setInputText(((char*)self->mpKeyboard), cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mPlayerIdx));
             cUIStateStack_pushPopup(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x18, ((char*)self->mpKeyboard));
             self->mProcessingKeyboard = 1;

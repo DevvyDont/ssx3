@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/font.h"
 #include "fe/festate.h"
 #include "fe/festateload.h"
 #include "ui/uitextscroll.h"
@@ -221,12 +222,13 @@ struct sRS_185F40 {
     int mode : 5;
 };
 
-static inline void DrawText_185F40(char* font, unsigned short* s, float x, float y, const sV2_185F40& sc)
+static inline void DrawText_185F40(char* vfont, unsigned short* s, float x, float y, const sV2_185F40& sc)
 {
-    *(float*)(font + 0x38) = *(float*)(font + 0x30) * sc.x;
-    *(float*)(font + 0x3C) = *(float*)(font + 0x34) * sc.y;
+    cFont* font = (cFont*)vfont;
+    font->Scale[0] = font->BaseScale[0] * sc.x;
+    font->Scale[1] = font->BaseScale[1] * sc.y;
     cFont_text1(font, x, y, s);
-    *(sV2_185F40*)(font + 0x38) = *(sV2_185F40*)(font + 0x30);
+    *(sV2_185F40*)&font->Scale[0] = *(sV2_185F40*)&font->BaseScale[0];
 }
 
 /**
@@ -246,10 +248,10 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
         t3Vector size = *(&textScroll->mScale);
         tARGB box;
         ((cUIObj185F40*)textScroll)->getSize(&box);
-        char* font = cUITextScroll_getFont(self->mpTextScroll);
-        if (font != 0)
+        cFont* font = (cFont*)cUITextScroll_getFont(self->mpTextScroll);
+        if (((char*)font) != 0)
         {
-            float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
+            float lineH = (float)font->MaxCharHeight * font->BaseScale[1];
             int any = 0;
             tARGB white;
             white.A = 1.0f;
@@ -297,19 +299,19 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                         sz.y = size.y;
                         if (*line == '^')
                         {
-                            *(tARGB*)(font + 0x40) = white;
+                            *(tARGB*)&font->Color[0] = white;
                             line++;
                         }
                         else
                         {
-                            *(tARGB*)(font + 0x40) = save;
+                            *(tARGB*)&font->Color[0] = save;
                             sz.x -= 0.10000000149011612f;
                             sz.y -= 0.10000000149011612f;
                         }
                         sRect_185F40 textRect;
                         cFont_textExtent1(font, line, &textRect, 0, sz.x, sz.y);
                         newPos.x = (640.0f - textRect.x1) * 0.5f;
-                        DrawText_185F40(font, line, newPos.x, newPos.y, sz);
+                        DrawText_185F40(((char*)font), line, newPos.x, newPos.y, sz);
                     }
                 }
                 pos.y += frows;

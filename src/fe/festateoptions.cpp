@@ -1,5 +1,11 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/fepopupoptionreset.h"
+#include "fe/fepopupscreenpos.h"
+#include "fe/fepopupvideocalibration.h"
+#include "ui/uilistbox.h"
+#include "ui/uislider.h"
+#include "movie/mcoverlaymanager.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -516,7 +522,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(cFEStateOptionsGame* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, (self), GetHashValue32(str_19game_opt), 0);
-    self->mpScreen = (cUIScreen*)((char*)screen);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
     sOptionIface_188F28* iface = (sOptionIface_188F28*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1971,15 +1977,15 @@ extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* vself)
         for (i = 0; i < 3; i++) {
             name.s[0] = '1' + i;
             sVE_18C478h* vt = *(sVE_18C478h**)(menu + 8);
-            char* item = vt[14].fn(vthis(menu, vt[14]), GetHashValue32(name.s));
-            if (item != 0) {
-                *(int*)(item + 0x18) = i;
+            cUIThing* item = (cUIThing*)vt[14].fn(vthis(menu, vt[14]), GetHashValue32(name.s));
+            if (((char*)item) != 0) {
+                item->mMiscData = i;
                 if (i == optMode_C478(D_00535610_C478)) {
-                    sVE_18C478v* vt2 = *(sVE_18C478v**)(item + 8);
+                    sVE_18C478v* vt2 = (sVE_18C478v*)item->mVtbl;
                     vt2[9].fn(vthis(item, vt2[9]), 1);
                     cUIMenu_setSelectedByIndex(menu, i);
                 } else {
-                    sVE_18C478v* vt2 = *(sVE_18C478v**)(item + 8);
+                    sVE_18C478v* vt2 = (sVE_18C478v*)item->mVtbl;
                     vt2[9].fn(vthis(item, vt2[9]), 0);
                 }
             }
@@ -3136,14 +3142,14 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  */
 extern "C" int cFEStateOptionsDeviceSelect_onWidgetMenu(cFEStateOptionsDeviceSelect* self, void* widget, unsigned int msg)
 {
-    char* app = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
     case 8:
-        if (self->mIsSaveScreen != 0 && (*(cList0018DDD0**)(app + 0x434))->v54(*(int*)(app + 0x428)) != 0) {
+        if (self->mIsSaveScreen != 0 && ((cList0018DDD0*)app->mpMemCard)->v54(app->mSelectedDevice) != 0) {
             return 257;
         }
     case 6:
-        if ((*(cList0018DDD0**)(app + 0x434))->v54(*(int*)(app + 0x428)) == 0) {
+        if (((cList0018DDD0*)app->mpMemCard)->v54(app->mSelectedDevice) == 0) {
             return 0x100;
         }
         break;
@@ -3275,7 +3281,7 @@ public:
  */
 extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceSelect* self, cUIThing* widget, unsigned int event)
 {
-    char* app = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (event) {
     case 5: {
         if (((char*)widget) == 0)
@@ -3290,7 +3296,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             return;
         int pickedSlot = widget->mMiscData;
         self->mSlot = pickedSlot;
-        *(int*)(app + 0xF8) = pickedSlot;
+        app->mFileCursor = pickedSlot;
         if (self->mType == 2 && self->mIsSaveScreen != 0) {
             cMCOverlayManager_writeSetFileType(app, 2, -1);
             self->mIsSavePressed = 1;
@@ -3298,14 +3304,14 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             self->mState = st;
             ((sVE_18DEA0n*)self->mVtbl)[47].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[47]));
         } else if (self->mType == 1) {
-            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->mSlot)) {
+            if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
                 ((sVE_18DEA0n*)self->mVtbl)[44].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[44]));
             } else {
                 ((sVE_18DEA0n*)self->mVtbl)[47].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[47]));
             }
         } else {
-            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->mSlot)) {
+            if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 2);
                 ((sVE_18DEA0n*)self->mVtbl)[44].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[44]));
             } else {
@@ -3316,7 +3322,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
     }
     case 6: {
         self->mbChoseToSave = 0;
-        char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* mcManager = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (self->mIsProcessing == 1)
             return;
         int currentState = self->mState;
@@ -3324,7 +3330,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             return;
         self->mIsCancelPressed = 1;
         if (currentState == 0 || currentState == 2 || currentState == 1) {
-            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(mcManager + 0x748);
+            sVE_18DEA0v* vt = (sVE_18DEA0v*)mcManager->mVtbl;
             vt[1].fn(vthis(mcManager, vt[1]), 0);
         }
         self->mState = 6;
@@ -3337,20 +3343,20 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             return;
         if (self->mIsSaveScreen == 0)
             return;
-        char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
-        if ((*(cDev_18DEA0**)(mcManager + 0x434))->v54(*(int*)(mcManager + 0x428)) == 0)
+        cMCOverlayManager* mcManager = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+        if (((cDev_18DEA0*)mcManager->mpMemCard)->v54(mcManager->mSelectedDevice) == 0)
             return;
         int pickedSlot = widget->mMiscData;
         self->mSlot = pickedSlot;
-        *(int*)(mcManager + 0xF8) = pickedSlot;
+        mcManager->mFileCursor = pickedSlot;
         int currentState = self->mState;
         if (currentState != 1)
             return;
-        if ((*(cDev_18DEA0**)(mcManager + 0x434))->HasFileName(self->mSlot)) {
+        if (((cDev_18DEA0*)mcManager->mpMemCard)->HasFileName(self->mSlot)) {
             self->mIsProcessing = currentState;
             self->mState = 4;
             cMCOverlayManager_SetAction(mcManager, 0);
-            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(mcManager + 0x748);
+            sVE_18DEA0v* vt = (sVE_18DEA0v*)mcManager->mVtbl;
             vt[1].fn(vthis(mcManager, vt[1]), 0x18);
         }
         break;

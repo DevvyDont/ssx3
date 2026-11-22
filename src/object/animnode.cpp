@@ -1,4 +1,8 @@
 #include "common.h"
+#include "world/instancerecord.h"
+#include "object/movenode.h"
+#include "object/animframe.h"
+#include "world/worldrecords.h"
 #include "vtable.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
@@ -61,7 +65,7 @@ struct sAnimDef_E448 {
  */
 extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
 {
-    sAnimDef_E448* def = *(sAnimDef_E448**)(((char*)self->Instance) + 0x80);
+    sAnimDef_E448* def = (sAnimDef_E448*)self->Instance->m_Model;
     sAnimEntry_E448* entry = def->entries;
     int i;
     self->NumAnimMeshes = 0;
@@ -392,9 +396,10 @@ static inline void vu0AddEq_E798(sVec4_E798& a, const sVec4_E798& b)
         : "memory");
 }
 
-static inline sVec4_E798 boneE798Pos(char* self, int i)
+static inline sVec4_E798 boneE798Pos(char* vself, int i)
 {
-    return *(sVec4_E798*)&((&(*(t4Matrix**)(self + 0x44))[i].row[0]))[3];
+    cAnimNode* self = (cAnimNode*)vself;
+    return *(sVec4_E798*)&((&(self->AnimMats)[i].row[0]))[3];
 }
 
 /**
@@ -411,20 +416,20 @@ static inline sVec4_E798 boneE798Pos(char* self, int i)
  */
 extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
 {
-    char* obj = (char*)&self->unk_014;
+    cMoveNode* obj = (cMoveNode*)((char*)&self->unk_014);
     if (self->Flags & 1) {
         sVE_E798* vt = (sVE_E798*)self->mVtbl;
         ((void (*)(void*))vt[51].fn)(vthis(obj, vt[51]));
     }
-    char* info = *(char**)(*(char**)(obj + 0x18) + 0x80);
+    tModelRecord* info = (tModelRecord*)obj->Instance->m_Model;
     int k = 0;
-    sBone_E798* ent = *(sBone_E798**)(info + 8);
-    for (int i = 0; i < *(int*)(info + 4); i++, ent++) {
+    sBone_E798* ent = (sBone_E798*)info->m_MeshHeirarchy;
+    for (int i = 0; i < info->m_iNumMeshes; i++, ent++) {
         ((sDelta_E798*)(char*)self->MeshVelocity)[i].pos = t4vect_Zero;
         ((sDelta_E798*)(char*)self->MeshVelocity)[i].rot = t4vect_Zero;
         float d2r = 0.01745329424738884f;
         if (ent->active == 0) continue;
-        char* node = (char*)self->AnimFrames + k * 208;
+        cMeshAnimFrame* node = &self->AnimFrames[k];
         k++;
         sVE_E798* vt = (sVE_E798*)self->mVtbl;
         float animSpeed = ((float (*)(void*))vt[53].fn)(vthis(self, vt[53]));
@@ -432,7 +437,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         sVec4_E798 rotv;
         cAnimFrame_getDeriv(node, &pos, &rotv, self->CacheTime);
         sVec4_E798 rot;
-        rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
+        rot = sVec4_E798(-node->Vals[3], -node->Vals[4], -node->Vals[5], 0.0f);
         vu0ScaleEq_E798(pos, animSpeed * (float)cAppMan_TheAppMan->TimerHz);
         vu0ScaleEq_E798(rotv, animSpeed * (float)cAppMan_TheAppMan->TimerHz * d2r);
         t4Matrix eulerMat;
@@ -604,7 +609,7 @@ extern "C" void* cFloatingNode_cFloatingNode(cFloatingNode* self, void* bucket, 
     self->ASpring = info->fC;
     self->ADamp = info->f10;
     self->TorqueScale = info->f18 * 1e-6f;
-    sQ_EC58 rootPos = *(sQ_EC58*)((char*)self->Instance + 0x40);
+    sQ_EC58 rootPos = *(sQ_EC58*)&self->Instance->m_fmTransform.m[3][0];
     *(int*)&self->OX = 0;
     *(int*)&self->WX = 0;
     *(int*)&self->TX = 0;
@@ -618,10 +623,10 @@ extern "C" void* cFloatingNode_cFloatingNode(cFloatingNode* self, void* bucket, 
     self->Z = rootPos.z;
     cFloatingNode_initInfo((cFloatingNode*)self);
     sAnimFrame_EC58** pf = (sAnimFrame_EC58**)(&self->AnimMats);
-    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_EC58[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
+    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_EC58[self->Instance->m_Model->m_iNumMeshes];
     self->Flags |= 1;
-    char* record = (char*)self->Instance;
-    *(unsigned int*)(record + 8) = (*(unsigned int*)(record + 8) & 0xFFFFFFFD) | 4;
+    tInstanceRecord* record = self->Instance;
+    record->m_iFlags = ((unsigned int)record->m_iFlags & 0xFFFFFFFD) | 4;
     return ((void*)self);
 }
 #endif
@@ -675,7 +680,7 @@ extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket,
     sStreamVE_ED88* vt2 = *(sStreamVE_ED88**)stream;
     vt2[2].fn(vthis(stream, vt2[2]), (char*)&self->ZSpring, 72);
     sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(&self->AnimMats);
-    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
+    *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[self->Instance->m_Model->m_iNumMeshes];
     self->Flags |= 1;
     return ((void*)self);
 }

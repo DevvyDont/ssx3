@@ -1,5 +1,13 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/ridermetrix.h"
+#include "animation/animsequencer.h"
+#include "camera/camera.h"
+#include "ai/rideranim.h"
+#include "render/playerlights.h"
+#include "render/occlusionman.h"
+#include "ai/riderhandler.h"
+#include "main/gamemode.h"
 #include "animation/mdfarchive.h"
 #include "world/worldview.h"
 #include "sound/ssxaudio.h"
@@ -698,8 +706,8 @@ void cRider_initAlways_impl(cRider* self)
 {
     if (self->mLoadStep == 7)
     {
-        *(int*)((char*)self->mRiderHandler + 0xDE0) = 3;
-        *(int*)((char*)self->mRiderHandler + 0xDE4) = 13;
+        self->mRiderHandler->MotionState = 3;
+        self->mRiderHandler->ControlState = 13;
         self->mRubberBandBehind = 0;
         self->mRubberBandAhead = 0;
         self->unk_0D8 = -1;
@@ -1090,13 +1098,14 @@ static inline t4Vector QuatMul_D660(const sQuat_D660& a, const t4Vector& b)
     return r;
 }
 
-static inline void ClearCache_D660(char* c)
+static inline void ClearCache_D660(char* vc)
 {
-    *(int*)(c + 0x0) = 0;
-    *(short*)(c + 0x4) = 0;
-    *(short*)(c + 0x6) = 0;
-    *(int*)(c + 0x8) = 0;
-    *(int*)(c + 0xC) = 0;
+    tIntHint* c = (tIntHint*)vc;
+    c->mPatch = 0;
+    *(short*)&c->mU = 0;
+    *(short*)&c->mV = 0;
+    c->mFirstTri = 0;
+    c->mPrecision = 0;
 }
 
 static inline void InitChannel_D660(cRider* self, int i, float v, float z)
@@ -1210,13 +1219,13 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     self->unk_35C = 0.0f;
     self->IsRidingFakie = self->IsGoofyStance;
     cRiderAnimBase_reset(self->mRiderAnim);
-    *(int*)((char*)self->mRiderAnim + 0x18) = self->IsRidingFakie;
+    self->mRiderAnim->IsFlipped = self->IsRidingFakie;
     float yaw = 0.0f;
     if (self->IsRidingFakie != 0)
         yaw = 3.1415927410125732f;
-    char* riderAnim = (char*)self->mRiderAnim;
-    *(t4Vector*)(riderAnim + 0x30) = D_004FF130_D660;
-    *(sQuat_D660*)(riderAnim + 0x40) = AxisAngle_D660(D_004FF160_D660, -yaw);
+    cRiderAnim* riderAnim = self->mRiderAnim;
+    riderAnim->OrientationOffset.P = D_004FF130_D660;
+    *(sQuat_D660*)&riderAnim->OrientationOffset.Q = AxisAngle_D660(D_004FF160_D660, -yaw);
     cRiderAnimBase_play(self->mRiderAnim, anim, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
     cRider_updateAnimation(self, 1.0f);
@@ -1407,7 +1416,7 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
     {
         char* sub = (char*)&self->mVtbl;
         sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
-        char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[0] + 0xA0);
+        char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
         sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
         char* objB = obj + vtB[3].delta;
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
@@ -2027,7 +2036,7 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
     xf.pos = *(sVec4W*)&self->mPosition;
     xf.rot = *(sVec4W*)&self->mRotation;
     if (cRider_getControlState(self) == 5)
-        cSpinControl_applyFlipSpinAngle((char*)self->mRiderHandler + 0x230, &xf);
+        cSpinControl_applyFlipSpinAngle(&self->mRiderHandler->SpinControl, &xf);
     cRider_doLeanPoseAdjust(self, &xf);
     sXf_EB98 ab[2];
     ab[1] = xf;
@@ -2371,12 +2380,13 @@ static inline float deadzone_LP(float v, float k)
     return d;
 }
 
-static inline void LeanAbout_LP(char* self, sXf_LP* xf, float a, float b, float ka, float kb)
+static inline void LeanAbout_LP(char* vself, sXf_LP* xf, float a, float b, float ka, float kb)
 {
-    char* trk = *(char**)(self + 0x780);
-    sVec4XW* n = (sVec4XW*)((*(int*)(self + 0x8A0) << 4) + *(int*)(trk + 0x24));
-    sVec4XW d = SubO_LP(sVec4XW(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
-                            n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C)),
+    cRider* self = (cRider*)vself;
+    cAnimModel* trk = self->mAnimModel;
+    sVec4XW* n = (sVec4XW*)((self->mBoneBoardRoot << 4) + (int)trk->localPos);
+    sVec4XW d = SubO_LP(sVec4XW(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
+                            n->z * trk->unk_140.z, n->w * trk->unk_140.w),
                       t4vect_Origin);
     {
         sVec4XW v = Rot_LP(xf->rot, d);
@@ -2450,7 +2460,7 @@ INCLUDE_ASM("ai/rider", cRider_getMotionState__FPv);
 int cRider_getMotionState(void* vself)
 {
     cRider* self = (cRider*)vself;
-    return *(int*)((char*)self->mRiderHandler + 0xDE0);
+    return self->mRiderHandler->MotionState;
 }
 #endif
 
@@ -2507,7 +2517,7 @@ INCLUDE_ASM("ai/rider", cRider_getControlState__FPv);
 int cRider_getControlState(void* vself)
 {
     cRider* self = (cRider*)vself;
-    return *(int*)((char*)self->mRiderHandler + 0xDE4);
+    return self->mRiderHandler->ControlState;
 }
 #endif
 
@@ -3139,7 +3149,7 @@ extern "C" void cRider_updateSplit1(cRider* self)
     if (frameSlot != self->mAIIndex % 3)
     {
         cGame* game = SSXApp->Game;
-        if (*(int*)((char*)self->mOverlapList + 4) == *(int*)((char*)game->BXNash + 0xA0))
+        if (*(int*)((char*)self->mOverlapList + 4) == (int)game->BXNash->deletecount)
         {
             void* obj = game->PlaybackMan;
             int busy = 0;
@@ -3231,7 +3241,7 @@ extern "C" void cRider_updateSplit3(cRider* self)
         cRider_checkForReset(self, 0, 2);
     }
     else if (cRider_getMotionState(self) == 1 ||
-             (cRider_getMotionState(self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 1))
+             (cRider_getMotionState(self) == 2 && self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1))
     {
         char* obj = (char*)self->mAirPredictor;
         int ok = 0;
@@ -4034,12 +4044,12 @@ typedef int (*TestFn_122278)(void*, void*, void*, sMat_122278*);
 
 static inline int inFrustum_122278(t4Vector* v)
 {
-    char* inst = (char*)SSXApp->Game->OcclusionMan;
-    int mask = *(int*)(inst + 0x110);
-    for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
+    cOcclusionMan* inst = SSXApp->Game->OcclusionMan;
+    int mask = (int)inst->m_uiVisMask;
+    for (int i = 0; i < inst->m_iNumActive; i++) {
         int bit = 1 << i;
         if (mask & bit) {
-            t4Vector* m = (t4Vector*)(*(char**)(inst + 8 + i * 8) + 0x50);
+            t4Vector* m = (t4Vector*)(&inst->m_InView[i].pVis->m_fvPlaneCoeffs);
             int r;
             __asm__ __volatile__(
                 ".set push\n"
@@ -4095,8 +4105,8 @@ extern "C" int cRider_renderClip(cRider* self)
     self->mIsOnScreen = test_122278(&self->mBoundsMin, &self->mBoundsMax) != 1;
     if (self->mUseRootPoseOverride != 0) {
         if (self->mIsOnScreen == 0) {
-            char* handler = (char*)self->mRiderHandler;
-            self->mIsOnScreen = test_122278(handler + 0x80, handler + 0x90) != 1;
+            cRiderHandler* handler = self->mRiderHandler;
+            self->mIsOnScreen = test_122278(&handler->WipeoutMotion.BoardIntersectBox, &handler->WipeoutMotion.BoardIntersectBox.MaxPoint) != 1;
         }
     }
     if (self->mUseRootPoseOverride == 0) {
@@ -4134,12 +4144,12 @@ extern "C" void cRider_renderBody(cRider* self)
     if (self->mIsOnScreen)
     {
         char* handler = (char*)self->mRiderHandler;
-        char* playerLights = handler ? handler + 0xD30 : 0;
+        cPlayerLights* playerLights = (cPlayerLights*)(handler ? handler + 0xD30 : 0);
         int additivePlayer = 0;
-        if (*(int*)(playerLights + 0xA0) || self->mUberLevel >= 11)
+        if (playerLights->mPlayerIsAdditive || self->mUberLevel >= 11)
             additivePlayer = 1;
         int additiveBoard = 0;
-        if (*(int*)(playerLights + 0xA4) || self->mUberLevel >= 11)
+        if (playerLights->mBoardIsAdditive || self->mUberLevel >= 11)
             additiveBoard = 1;
         func_00121F30(self);
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -4712,7 +4722,7 @@ float cRider_getTotalPathDistance(void* self);
  */
 extern "C" int cRider_estimateFinishScore(cRider* self)
 {
-    int n = *(int*)((char*)self->mMetrix + 0x198) + 1;
+    int n = self->mMetrix->Totals.TotalPoints + 1;
     float distCovered = cRider_getTotalPathDistance(self) - self->mDistToFinish;
     if (distCovered < 1.0f)
         distCovered = 1.0f;
@@ -4758,7 +4768,7 @@ extern "C" int cRider_getMissionInt(cRider* self, int query)
     case 2:
         {
             bool ok = false;
-            if (cRider_getMotionState((char*)self) == 1 || (cRider_getMotionState((char*)self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 1)) {
+            if (cRider_getMotionState((char*)self) == 1 || (cRider_getMotionState((char*)self) == 2 && self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
                 ok = true;
             }
             return ok;
@@ -4770,19 +4780,19 @@ extern "C" int cRider_getMissionInt(cRider* self, int query)
     case 5:
         res = 0;
         if (cRider_getControlState((char*)self) == 5) {
-            res = cSpinControl_isGrabHeld((char*)self->mRiderHandler + 0x230) != 0;
+            res = cSpinControl_isGrabHeld(&self->mRiderHandler->SpinControl) != 0;
         }
         return res;
     case 6:
         res = 0;
         if (cRider_getControlState((char*)self) == 5) {
-            res = cSpinControl_isTweakHeld((char*)self->mRiderHandler + 0x230) != 0;
+            res = cSpinControl_isTweakHeld(&self->mRiderHandler->SpinControl) != 0;
         }
         return res;
     case 7:
         res = 0;
         if (cRider_getControlState((char*)self) == 5) {
-            res = cSpinControl_isUberHeld((char*)self->mRiderHandler + 0x230) != 0;
+            res = cSpinControl_isUberHeld(&self->mRiderHandler->SpinControl) != 0;
         }
         return res;
     case 9:
@@ -4792,13 +4802,13 @@ extern "C" int cRider_getMissionInt(cRider* self, int query)
     case 11:
         return self->mBoostStrength != 0.0f;
     case 8:
-        return *(int*)((char*)self->mMetrix + 0x198);
+        return self->mMetrix->Totals.TotalPoints;
     case 15:
-        return *(int*)((char*)self->mMetrix + 0x138);
+        return self->mMetrix->Totals.NumPerfectLandingBonus;
     case 16:
-        return *(int*)((char*)self->mMetrix + 0x13C);
+        return self->mMetrix->Totals.NumLastSecondLandingBonus;
     case 17:
-        return *(int*)((char*)self->mMetrix + 0x19C);
+        return self->mMetrix->Totals.TotalStylePoints;
     case 18:
         res = 0;
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13) {
@@ -4865,7 +4875,7 @@ extern "C" int cRider_isGroundNormalValid(cRider* self)
     int grounded = 0;
 
     if (cRider_getMotionState(self) == 0 ||
-        (cRider_getMotionState(self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 0)) {
+        (cRider_getMotionState(self) == 2 && self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)) {
         grounded = 1;
     }
     return grounded;
@@ -5016,7 +5026,7 @@ extern "C" void cRider_transport_v(cRider* self, char* mat)
     cRider_cancelRiderTransitions(self);
     char* sub = (char*)&self->mVtbl;
     sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
-    char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[0] + 0xA0);
+    char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
     sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
     char* objB = obj + vtB[3].delta;
     vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
@@ -5086,13 +5096,13 @@ extern "C" void cRider_initForMission(cRider* self, t4Matrix* mat)
     cRider_setMotionState_impl(self, 3);
     cRider_setControlState_impl(self, 13);
     cRider_putAt_34D0(self, &pos, &dir, 5, 0.0f);
-    *(int*)((char*)self->mRiderHandler + 0x290) = 2;
+    self->mRiderHandler->GateControl.GateState = 2;
     cRider_setControlState_impl(self, 6);
     cRider_cancelRiderTransitions(self);
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     func_002F1A00(self->mAttachedEmitterFX);
     if ((unsigned int)self->mViewIndex < 2) {
-        char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[self->mViewIndex] + 0xA8);
+        char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[self->mViewIndex]->ChaseController;
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(obj + 0x14);
         vt[4].fn(vthis(obj, vt[4]));
     }
@@ -5115,10 +5125,10 @@ void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionStat
  */
 extern "C" void cRider_resetForMission(cRider* self)
 {
-    *(int*)((char*)self->mRiderHandler + 0x350) = 1;
+    self->mRiderHandler->ResetControl.IsAutoReset = 1;
     cRider_setControlState_impl(self, 9);
     cRider_setMotionState_impl(self, 3);
-    *(int*)((char*)self->mRiderHandler + 0x290) = 0;
+    self->mRiderHandler->GateControl.GateState = 0;
 }
 #endif
 
@@ -6386,11 +6396,11 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
             self->unk_2D8 = isFlipped;
         }
         float start = pCurrMainAnim->start;
-        *(float*)((char*)self->mRiderAnim + 0x1C) = pCurrMainAnim->speed;
+        self->mRiderAnim->FrameRateFactor = pCurrMainAnim->speed;
         cRiderAnimBase_playFromAnimID(self->mRiderAnim, 432, animInfo, start * 0.01666666753590107f);
         cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2), 0, startTime);
         cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
-        *(float*)((char*)self->mRiderAnim + 0x1C) = 1.0f;
+        self->mRiderAnim->FrameRateFactor = 1.0f;
     } else if ((eventBits & 2) && pFrameInfo->active == 0) {
         cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     }
@@ -6597,10 +6607,10 @@ extern "C" int cRider_updateFinishTest(cRider* self)
             if (cBENewRaceInterface_newRace.cGameMode == 4)
                 return self->mFinishTime >= zeroF;
             cSSXApp* app = SSXApp;
-            char* gameModeMan = (char*)app->GameModeMan;
-            if (*(int*)(gameModeMan + 0x88) != 0 && ((D_005308D0[0] >> 9) & 1) == 0) {
+            cGameModeMan* gameModeMan = app->GameModeMan;
+            if (gameModeMan->bIsTimedEvent != 0 && ((D_005308D0[0] >> 9) & 1) == 0) {
                 int eventTicks = app->Game->AI->EventTimerTick;
-                int secs = fptoui((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f);
+                int secs = fptoui((float)gameModeMan->uiTimeLimit * 0.01666666753590107f);
                 if (secs * 60 < eventTicks) {
                     self->mDidNotFinish = 1;
                     cRider_doFinishEvent(self);
@@ -7347,18 +7357,18 @@ static inline bool riderInRange_1278E8(int v)
  */
 extern "C" void cPlayer_vibrationUpdate(void* self)
 {
-    char* player = (char*)self;
-    if (*(int*)(player + 0xDF4) != 0)
+    cPlayer* player = (cPlayer*)self;
+    if ((int)player->Pad != 0)
     {
         int flag = 0;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        char* sub = *(char**)(player + 0x18) + 0x6C0;
+        char* sub = (char*)&player->mRider->mVtbl;
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
         if (cBENewPlayerInterface_getUseDualShock(iface, vt[7].fn(vthis(sub, vt[7]))) != 0)
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);
         }
-        func_00125B18(player + 0xDFC, *(int*)(player + 0xDF4), flag);
+        func_00125B18(&player->unk_DFC, (int)player->Pad, flag);
     }
 }
 #endif

@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/multisplinemodifier.h"
+#include "world/worldrecords.h"
+#include "world/instancerecord.h"
+#include "ai/rider.h"
 #include "world/worldview.h"
 #include "bx/appman.h"
 #include "object/objectnode.h"
@@ -178,7 +182,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
     *(void**)((void*)self->ModifierBlock) = ((void*)mod);
     vtEntry = &((sVEntry<void(void*)>*)self->mVtbl)[48];
     vtEntry->fn(vthis(self, *vtEntry));
-    unsigned int* instFlags = (unsigned int*)((char*)self->Instance + 8);
+    unsigned int* instFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *instFlags = (*instFlags & ~0x20u) | 0x40;
 }
 #endif
@@ -410,10 +414,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_addFade__FPvT0);
  * @param fadeData  add-fade make-data
  * @return the new Fade (left in f0; callers ignore it)
  */
-float cMoveNode_addFade(void* vself, void* fadeData)
+float cMoveNode_addFade(void* vself, void* vfadeData)
 {
+    tAddFadeData* fadeData = (tAddFadeData*)vfadeData;
     cMoveNode* self = (cMoveNode*)vself;
-    float fade = *(float*)((char*)fadeData + 0x4);
+    float fade = fadeData->Fade;
     self->Fade = fade;
     return fade;
 }
@@ -433,10 +438,10 @@ struct sMnVEntryF {
  *
  * @param data  the debounce data (On Tour const tAddDebounceData& data); +0x4 holds the time in seconds
  */
-extern "C" void cMoveNode_addDebounce(cMoveNode* self, void* data)
+extern "C" void cMoveNode_addDebounce(cMoveNode* self, tAddDebounceData* data)
 {
     sMnVEntryF* vt = (sMnVEntryF*)self->mVtbl;
-    vt[41].fn(vthis(self, vt[41]), *(float*)((char*)data + 0x4));
+    vt[41].fn(vthis(self, vt[41]), data->Time);
 }
 #endif
 
@@ -466,7 +471,7 @@ extern "C" void cMoveNode_addPosition(cMoveNode* self, sMoveQuad* pos)
 INCLUDE_ASM("object/movenode", cMoveNode_addPosition1);
 #ifdef SKIP_ASM
 extern char str_PositionModifier[];
-extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* mem, void* desc);
+extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* mem, t4Matrix* desc);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
@@ -479,7 +484,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
  */
 extern "C" void cMoveNode_addPosition1(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, (cTransformModifier*)cPositionModifier_cPositionModifier1((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cPositionModifier_cPositionModifier1((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), (t4Matrix*)desc));
 }
 #endif
 
@@ -532,7 +537,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addAvaSpline);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_badCookie;
 extern char str_AvaSplineModifier[];
-extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self, void* src);
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self, tInstanceRecord* src);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
@@ -682,7 +687,7 @@ extern const char str_DynamicParticleModifier[];
  */
 extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, t4Vector* offset)
 {
-    if (index < 0 || index >= *(int*)(*(char**)((char*)self->Instance + 0x80) + 4)) {
+    if (index < 0 || index >= self->Instance->m_Model->m_iNumMeshes) {
         operator_delete((int*)desc);
         return;
     }
@@ -724,10 +729,10 @@ extern "C" void cMoveNode_addRailModifier(cMoveNode* self, cRailModifier* item);
  *
  * @param desc  the rail description (On Tour const tAddRailData& rdata); its ID is at +4
  */
-extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addRail(cMoveNode* self, tAddRailData* desc)
 {
     void* block = ((void*)self->ModifierBlock);
-    if (block != 0 && tModifierBlock_findRail(block, *(int*)((char*)desc + 0x4)) != 0) {
+    if (block != 0 && tModifierBlock_findRail(block, (int)desc->SplineId) != 0) {
         return;
     }
     cMoveNode_addRailModifier(self, (cRailModifier*)cRailModifier_cRailModifier(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), desc,
@@ -812,17 +817,17 @@ extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* srcv)
     }
     sVEntry<char*(void*)>* vp = (sVEntry<char*(void*)>*)srcv->mVtbl;
     char* transform = vp[24].fn(vthis(srcv, vp[24]));
-    if (transform == (char*)self->Instance + 0x10) {
+    if (transform == (char*)&self->Instance->m_fmTransform) {
         sNodeVEntryD_355F10* vd = (sNodeVEntryD_355F10*)srcv->mVtbl;
         vd[1].fn(vthis(srcv, vd[1]), 3);
         return;
     }
     sMat44_355F10 copy;
     vu0CopyMatrix_355F10(&copy, transform);
-    int keep = *(int*)((char*)self->Instance + 8);
+    int keep = self->Instance->m_iFlags;
     sNodeVEntryD_355F10* vd = (sNodeVEntryD_355F10*)srcv->mVtbl;
     vd[1].fn(vthis(srcv, vd[1]), 3);
-    *(int*)((char*)self->Instance + 8) = keep;
+    self->Instance->m_iFlags = keep;
     cMoveNode_addPosition1(self, &copy);
     self->TransferHack = 1;
     sNodeVEntryV_355F10* vv = (sNodeVEntryV_355F10*)self->mVtbl;
@@ -878,7 +883,7 @@ extern "C" void* cMoveNode_getRootTransform(cMoveNode* self)
     char* transformModifier = modBlock ? *modBlock : 0;
     if (transformModifier != 0)
         return VCall18_6078(transformModifier);
-    return (char*)self->Instance + 0x10;
+    return (char*)&self->Instance->m_fmTransform;
 }
 #endif
 
@@ -949,7 +954,7 @@ extern "C" void* cMoveNode_getRootTransform1(cMoveNode* self)
         if (transform != 0) return transform;
         return VCall_6128(transformModifier, 18);
     }
-    return (char*)self->Instance + 0x10;
+    return (char*)&self->Instance->m_fmTransform;
 }
 #endif
 
@@ -1172,9 +1177,10 @@ static inline void* Mat_6298(void* rot, t4Matrix* m)
     return r;
 }
 
-static inline void* LmSub_6298(char* l)
+static inline void* LmSub_6298(char* vl)
 {
-    return l + 0x24;
+    cTexFlipModifier* l = (cTexFlipModifier*)vl;
+    return l->MaterialBlock;
 }
 
 static inline void* Lm_6298(char* l)
@@ -1401,16 +1407,16 @@ extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* vself)
         return;
     tBoundBox box;
     tBoundBox old = *tModifierBlock_getBoundBox_67E0(vself->ModifierBlock);
-    char* n = (char*)vself->Instance;
+    tInstanceRecord* n = vself->Instance;
     t4Vector corner;
-    corner.x = *(float*)(n + 0x60);
-    corner.y = *(float*)(n + 0x64);
-    corner.z = *(float*)(n + 0x68);
+    corner.x = n->m_fvMin.m[0];
+    corner.y = n->m_fvMin.m[1];
+    corner.z = n->m_fvMin.m[2];
     corner.w = 1.0f;
     box.MinPoint = corner;
-    corner.x = *(float*)(n + 0x6C);
-    corner.y = *(float*)(n + 0x70);
-    corner.z = *(float*)(n + 0x74);
+    corner.x = n->m_fvMax.m[0];
+    corner.y = n->m_fvMax.m[1];
+    corner.z = n->m_fvMax.m[2];
     box.MaxPoint = corner;
     tModifierBlock_setBoundBox_K(vself->ModifierBlock, &box);
     void* obj = vself->Instance;
@@ -1470,9 +1476,10 @@ static inline void vu0Add_68B0(t4Vector& out, const t4Vector& a, const t4Vector&
 }
 
 // World position: translation row of the node's transform (virtual slot 24).
-static inline t4Vector pos_68B0(char* self)
+static inline t4Vector pos_68B0(char* vself)
 {
-    sMnVEntM_68B0* vt = *(sMnVEntM_68B0**)(self + 0xC);
+    cMoveNode* self = (cMoveNode*)vself;
+    sMnVEntM_68B0* vt = (sMnVEntM_68B0*)self->mVtbl;
     return vt[24].fn(vthis(self, vt[24]))[3];
 }
 
@@ -1972,10 +1979,10 @@ extern void* cPositionModifier_vtbl[];
  * @param src  matrix (t4Matrix)
  * @return self
  */
-extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* self, void* src)
+extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* self, t4Matrix* src)
 {
     *(void***)self = cPositionModifier_vtbl;
-    sMoveQuad2 translation = *(sMoveQuad2*)((char*)src + 0x30);
+    sMoveQuad2 translation = *(sMoveQuad2*)&src->row[3];
     *(sMoveQuad2*)&self->Offset = translation;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src -> self+0x50).
     __asm__ __volatile__(
@@ -1990,7 +1997,7 @@ extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* self, v
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)&self->Transform), "r"(src)
+        : "r"((char*)&self->Transform), "r"(((void*)src))
         : "memory");
     self->RootTransformDirty = 1;
     return ((void*)self);
@@ -2194,9 +2201,10 @@ static inline t4Vector vu0Add_357108(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-static inline t4Vector vel_357108(char* self)
+static inline t4Vector vel_357108(char* vself)
 {
-    return *(t4Vector*)(self + 0x80);
+    cParentModifier* self = (cParentModifier*)vself;
+    return self->Transform.row[3];
 }
 
 
@@ -2210,11 +2218,11 @@ static inline t4Vector vel_357108(char* self)
  */
 extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
 {
-    char* parentNode = *(char**)((char*)self->ParentInst + 0xC);
-    if (parentNode != 0) {
-        sVEntry<int(void*)>* vi = *(sVEntry<int(void*)>**)(parentNode + 0xC);
+    cInstanceNode* parentNode = (cInstanceNode*)self->ParentInst->m_pActiveNode;
+    if (((char*)parentNode) != 0) {
+        sVEntry<int(void*)>* vi = (sVEntry<int (void*)>*)parentNode->mVtbl;
         if (vi[26].fn(vthis(parentNode, vi[26])) != 0) {
-            sVEntry<t4Matrix*(void*, int)>* vm = *(sVEntry<t4Matrix*(void*, int)>**)(parentNode + 0xC);
+            sVEntry<t4Matrix*(void*, int)>* vm = (sVEntry<t4Matrix*(void*, int)>*)parentNode->mVtbl;
             vu0CopyMtx_357108(&self->Transform, vm[29].fn(vthis(parentNode, vm[29]), self->Mesh));
         } else {
             cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, ((&self->Transform)));
@@ -2237,21 +2245,21 @@ INCLUDE_ASM("object/movenode", cParentModifier_updateIntersectInfo);
  *
  * @param obj  the intersection record (On Tour tIntersectInfo& intInfo)
  */
-extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, void* obj)
+extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, tIntersectInfo* obj)
 {
-    void* parentInst = self->ParentInst;
-    if (parentInst == 0) {
+    tInstanceRecord* parentInst = self->ParentInst;
+    if (((void*)parentInst) == 0) {
         return;
     }
-    void* parentNode = *(void**)((char*)parentInst + 0xC);
-    if (parentNode == 0) {
+    cInstanceNode* parentNode = parentInst->m_pActiveNode;
+    if (((void*)parentNode) == 0) {
         return;
     }
-    int saved = *(int*)((char*)obj + 0x5C);
-    *(int*)((char*)obj + 0x5C) = self->Mesh;
-    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)parentNode + 0xC);
+    int saved = obj->Mesh;
+    obj->Mesh = self->Mesh;
+    sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)parentNode->mVtbl;
     vt[42].fn(vthis(parentNode, vt[42]), obj);
-    *(int*)((char*)obj + 0x5C) = saved;
+    obj->Mesh = saved;
 }
 #endif
 
@@ -2553,7 +2561,7 @@ extern void* cAvaSplineModifier_vtbl[];
  */
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src+0x10 -> self+0x40); the PC
 // port needs a plain 64-byte copy.
-extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self, void* src)
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self, tInstanceRecord* src)
 {
     *(void***)self = cAvaSplineModifier_vtbl;
     self->Instance = (tInstanceRecord*)src;
@@ -2570,7 +2578,7 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self,
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)&self->Transform), "r"((char*)src + 0x10)
+        : "r"((char*)&self->Transform), "r"((char*)&src->m_fmTransform)
         : "memory");
     return ((void*)self);
 }

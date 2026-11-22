@@ -1,4 +1,6 @@
 #include "common.h"
+#include "animation/animsequencer.h"
+#include "ai/rider.h"
 #include "vtable.h"
 #include "bx/math3d.h"
 #include "render/2drender.h"
@@ -253,10 +255,11 @@ static inline float btLength_86F0(const t4Vector& v)
 }
 
 // Same test as cBoardTrailFX_shouldPlow's boardTrailCanDraw.
-static inline int boardTrailCanDraw_86F0(char* r)
+static inline int boardTrailCanDraw_86F0(char* vr)
 {
+    cRider* r = (cRider*)vr;
     int ok = 0;
-    if (*(int*)(r + 0xAC4) != 0 && *(int*)(r + 0xAD0) == 0) ok = *(int*)(r + 0xAFC) != 0;
+    if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
     return ok;
 }
 
@@ -278,7 +281,7 @@ extern "C" int cBoardTrailFX_shouldSample(cBoardTrailFX* self, float dirDot)
         self->DelaySampling--;
         return 0;
     }
-    t4Vector dist = btSub_86F0(*(t4Vector*)(((char*)self->mRider) + 0x460), (*(&self->LastCen)));
+    t4Vector dist = btSub_86F0(self->mRider->mGroundContactPoint, (*(&self->LastCen)));
     float maxLen = 110.0f;
     float len = btLength_86F0(dist);
     if (boardTrailCanDraw_86F0(((char*)self->mRider))) {
@@ -288,7 +291,7 @@ extern "C" int cBoardTrailFX_shouldSample(cBoardTrailFX* self, float dirDot)
         if (self->State == 1) {
             self->DelaySampling = 2;
         }
-        (*(&self->LastCen)) = *(t4Vector*)(((char*)self->mRider) + 0x460);
+        (*(&self->LastCen)) = self->mRider->mGroundContactPoint;
         return 1;
     }
     return 0;
@@ -308,10 +311,11 @@ extern float cBoardTrail_m_LooseDepthScale;
 extern float cBoardTrail_m_PowderDepthScale;
 extern float cBoardTrail_m_DeepPowderDepthScale;
 
-static inline int boardTrailCanDraw(char* r)
+static inline int boardTrailCanDraw(char* vr)
 {
+    cRider* r = (cRider*)vr;
     int ok = 0;
-    if (*(int*)(r + 0xAC4) != 0 && *(int*)(r + 0xAD0) == 0) ok = *(int*)(r + 0xAFC) != 0;
+    if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
     return ok;
 }
 /**
@@ -670,10 +674,11 @@ static inline sBTV4_8938 btBonePos(char* r, int off)
     return btBone(r, off)->row[3];
 }
 
-static inline int btCanDraw(char* r)
+static inline int btCanDraw(char* vr)
 {
+    cRider* r = (cRider*)vr;
     int ok = 0;
-    if (*(int*)(r + 0xAC4) != 0 && *(int*)(r + 0xAD0) == 0) ok = *(int*)(r + 0xAFC) != 0;
+    if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
     return ok;
 }
 
@@ -753,12 +758,12 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         pts[1] = btSub(right, halfWidthVec);
         pts[3] = btSub(left, halfWidthVec);
     } else {
-        char* riderObj = self->rider;
-        pts[0] = btBonePos(riderObj, 2224);
-        pts[1] = btBonePos(riderObj, 2232);
-        if (*(int*)(riderObj + 0x150) != 0) {
-            pts[2] = btBonePos(riderObj, 2328);
-            pts[3] = btBonePos(riderObj, 2280);
+        cRider* riderObj = (cRider*)self->rider;
+        pts[0] = btBonePos(((char*)riderObj), 2224);
+        pts[1] = btBonePos(((char*)riderObj), 2232);
+        if (riderObj->mUseRootPoseOverride != 0) {
+            pts[2] = btBonePos(((char*)riderObj), 2328);
+            pts[3] = btBonePos(((char*)riderObj), 2280);
         } else {
             sBTV4_8938 left = btSub(pos, halfLengthVec);
             pts[2] = btAdd(left, halfWidthVec);
@@ -1012,11 +1017,11 @@ extern "C" void func_002EA538(char** trails, int n)
     push_A480((sRenderCtx_A480*)GrMan);
     if (n > 0) {
     do {
-        char* trail = *trails;
-        int len = *(int*)(trail + 0x90);
+        cBoardTrailFX* trail = (cBoardTrailFX*)(*trails);
+        int len = trail->BufLen;
         if (len < 2) continue;
         int k = len - 57;
-        int start = *(int*)(trail + 0x8C) - k;
+        int start = trail->BufHead - k;
         int cnt = len - 2;
         int over = len - 50;
         if (over > 0) {
@@ -1027,7 +1032,7 @@ extern "C" void func_002EA538(char** trails, int n)
         int st = start % 54;
         float sc = 1.0f / (float)D_004A45C8;
         if (count < 16) {
-            strips[count].pts = trail + 0x10;
+            strips[count].pts = (char*)&trail->BufVerts[0];
             strips[count].start = st;
             strips[count].count = cnt;
             strips[count].fC = 0;
@@ -1540,12 +1545,12 @@ extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
     if (zeroF < speed)
     {
         cPlayerLights_BoardIsAdditive(*(char**)(self->rider + 0x77C) + 0xD30, 1);
-        char* riderBase = self->rider;
+        cRider* riderBase = (cRider*)self->rider;
         sV3_2EADD0 sz;
         sz.x = 2.0f;
         sz.y = 2.0f;
         sz.z = 2.0f;
-        char* fs = *(char**)(riderBase + 0x77C) + 0xD30;
+        char* fs = (char*)&riderBase->mRiderHandler->PlayerLights;
         sV4_2EADD0 col;
         col.x = zeroF;
         col.y = zeroF;
@@ -1558,10 +1563,10 @@ extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
         self->cur = (self->cur + 2) % 3;
         int n = self->count + 1;
         self->count = n < 4 ? n : 3;
-        char* riderPtr = self->rider;
-        sV4_2EADD0 pos = ((sNode_2EADD0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6)))->pos;
-        sV4_2EADD0 fwd = ((sNode_2EADD0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6)))->fwd;
-        sV4_2EADD0 side = ((sNode_2EADD0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6)))->side;
+        cRider* riderPtr = (cRider*)self->rider;
+        sV4_2EADD0 pos = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->pos;
+        sV4_2EADD0 fwd = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->fwd;
+        sV4_2EADD0 side = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->side;
         self->e0 = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
         self->f0 = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
         self->slots[self->cur].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));

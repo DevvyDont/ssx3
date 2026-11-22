@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ealib/shape.h"
+#include "mem/memstd.h"
 #include "movie/videodriver.h"
 #include "movie/movieplayer.h"
 #include "render/ps2graphicsman.h"
@@ -60,7 +62,7 @@ struct sMemClass_251718 {
  * @param lock   nonzero creates a mutex and marks the class locked
  * @return the size of the initial free block
  */
-extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int sizeAlign, int align, int hdr, int endMarker, int nameBlocks, int lock)
+extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int sizeAlign, int align, int hdr, int endMarker, int nameBlocks, int lock)
 {
     char buf[0x100];
     int flags = id;
@@ -70,15 +72,15 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
     if (nameBlocks) {
         flags |= 0x1000;
     }
-    char* data = mem;
+    char* data = ((char*)mem);
     data += hdr + 0x60;
     data += align + 47;
     data = (char*)((int)data & -align);
-    char* end = mem + size;
+    char* end = ((char*)mem) + size;
     end -= hdr + 0x30;
     sprintf(buf, str_pct_s_LOW, name);
     sMemNode_251718* blk = (sMemNode_251718*)(data - 0x10);
-    sMemClass_251718* cls = (sMemClass_251718*)(mem + 0x10);
+    sMemClass_251718* cls = (sMemClass_251718*)(&mem->freehead);
     MEM_initblock(mem, buf, 80, hdr, flags | 0x8000, 0, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
     sprintf(buf, str_pct_s_HIGH, name);
@@ -86,24 +88,24 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
     D_004D2438[id & 0x3F] = cls;
     MEM_fill(cls, 0, 80);
     strcpy(cls->name, name);
-    *(char**)(mem + 0x1C) = end;
-    *(char**)(mem + 0x18) = mem;
+    mem->freehead.prev = (struct MEMBLOCK*)end;
+    mem->freehead.next = (struct MEMBLOCK*)((char*)mem);
     cls->first->tag = 16979;
     cls->last->tag = 16979;
-    *(unsigned short*)(mem + 0x20) = 16979;
-    *(int*)(mem + 0x24) = 0x7FFFFFFF;
-    *(int*)(mem + 0x38) = sizeAlign;
-    *(int*)(mem + 0x3C) = align;
-    *(int*)(mem + 0x40) = hdr;
-    *(int*)(mem + 0x44) = flags;
-    sMemNode_251718* head = (sMemNode_251718*)(mem + 0x20);
-    *(sMemNode_251718**)(mem + 0x30) = head;
-    *(sMemNode_251718**)(mem + 0x34) = head;
-    *(int*)(mem + 0x48) = 0;
+    *(unsigned short*)&mem->freehead.nextfree = 16979;
+    mem->freehead.prevfree = (struct FREEBLOCK*)0x7FFFFFFF;
+    mem->hasmutex = sizeAlign;
+    mem->mutex.reserved[0] = align;
+    mem->mutex.reserved[1] = hdr;
+    mem->mutex.reserved[2] = flags;
+    sMemNode_251718* head = (sMemNode_251718*)(&mem->freehead.nextfree);
+    mem->infosize = (int)head;
+    mem->flags = (int)head;
+    mem->mutex.reserved[3] = 0;
     sMemNode_251718* nextNode = head;
     sMemNode_251718* prevNode = nextNode;
     int sz = *(char**)(data - 8) - (char*)blk;
-    if (*(char**)(mem + 0x30) + (*(char**)(mem + 0x34) - *(char**)(mem + 0x30)) / 2 < (char*)blk) {
+    if ((char*)mem->infosize + ((char*)mem->flags - (char*)mem->infosize) / 2 < (char*)blk) {
         do
             prevNode = prevNode->prev;
         while (blk < prevNode);
@@ -434,7 +436,7 @@ extern char str_RAM[];
  */
 extern "C" int MEM_initadr(char* mem, int size)
 {
-    return MEMCLASS_create(0, str_RAM, mem, size, 0x40, 0x80, 0, 0, 0, 1);
+    return MEMCLASS_create(0, str_RAM, (MEMCLASS*)mem, size, 0x40, 0x80, 0, 0, 0, 1);
 }
 #endif
 

@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
+#include "movie/mcoverlaymanager.h"
+#include "fe/ovstate.h"
 #include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "ui/uistate.h"
@@ -517,7 +520,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
         }
         break;
     case 6:
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
     case 9:
         if (IsId_A238(obj, str_0lb)) {
@@ -593,7 +596,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(cOVState_PAUSE_OPTIONS* self)
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(self->mpScreen, (unsigned short)frame, 1);
             }
-            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         }
     }
 }
@@ -1076,7 +1079,7 @@ extern int cPauseState_FlagsTable[];
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(cOVState_PAUSE_ONLINE_ERROR* self, void* item, int msg)
 {
-    cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+    cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
     self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
@@ -1497,13 +1500,13 @@ extern "C" void func_001FBD20(void* self)
 {
     unsigned short title[0x38];
     unsigned short line[104];
-    char* overlay = (char*)self;
-    void* eng = *(void**)(overlay + 0x10);
+    cOVState* overlay = (cOVState*)self;
+    void* eng = overlay->mpEngine;
     void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_41freestyle_pre), 0);
-    *(void**)(overlay + 0x40) = scr;
+    overlay->mpScreen = (cUIScreen*)scr;
     if (scr != 0)
         cUIScreen_playFrame_BD20(scr, 0, 0);
-    eng = *(void**)(overlay + 0x10);
+    eng = (void*)overlay->mpEngine;
     scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_OV_darkblue), 0);
     if (scr != 0)
         cUIScreen_playFrame_BD20(scr, 0, 0);
@@ -1824,13 +1827,13 @@ extern "C" void func_001FC878(void* self)
     char rider[0x20];
     unsigned short label[304];
     char num[0x20];
-    char* overlay = (char*)self;
-    void* eng = *(void**)(overlay + 0x10);
+    cOVState* overlay = (cOVState*)self;
+    void* eng = overlay->mpEngine;
     void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_50multifs_pre), 0);
-    *(void**)(overlay + 0x40) = scr;
+    overlay->mpScreen = (cUIScreen*)scr;
     if (scr != 0)
         cUIScreen_playFrame(scr, 0, 0);
-    eng = *(void**)(overlay + 0x10);
+    eng = (void*)overlay->mpEngine;
     scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_OV_darkblue), 0);
     if (scr != 0)
         cUIScreen_playFrame(scr, 0, 0);
@@ -1960,7 +1963,7 @@ struct sVec3_1FCEC0
  * @param msg  nonzero on the transition the layout is applied for (the first-time flag)
  * @return always 0
  */
-extern "C" int func_001FCEC0(void* self, void* msg)
+extern "C" int func_001FCEC0(cOVState* self, void* msg)
 {
     if (msg != 0)
     {
@@ -1968,19 +1971,19 @@ extern "C" int func_001FCEC0(void* self, void* msg)
     int mode = cBENewRaceInterface_newRace.cGameMode;
     if (mode == 2 || mode == 3)
     {
-        char* group = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_screendata));
+        char* group = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_screendata));
         sVec3_1FCEC0 position = *(sVec3_1FCEC0*)(group + 0x44);
         *(sVec3_1FCEC0*)(group + 0x44) = sVec3_1FCEC0(position.x + 130.0f, position.y, position.z);
     }
     else if (mode == 5 || mode == 6)
     {
-        char* group = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_vsGroup));
+        char* group = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vsGroup));
         sVec3_1FCEC0 position = *(sVec3_1FCEC0*)(group + 0x44);
         *(sVec3_1FCEC0*)(group + 0x44) = sVec3_1FCEC0(position.x, position.y + 40.0f, position.z);
-        group = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_objectives));
+        group = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_objectives));
         position = *(sVec3_1FCEC0*)(group + 0x44);
         *(sVec3_1FCEC0*)(group + 0x44) = sVec3_1FCEC0(position.x, position.y + 67.0f, position.z);
-        group = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_topScoreGroup));
+        group = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_topScoreGroup));
         position = *(sVec3_1FCEC0*)(group + 0x44);
         *(sVec3_1FCEC0*)(group + 0x44) = sVec3_1FCEC0(position.x, position.y - 48.0f, position.z);
     }
@@ -2120,15 +2123,15 @@ extern char str_OV_darkblue[];
  * Adds the "68rival_pre" screen (kept in mpScreen) and the "OV_darkblue" backdrop, plays frame 0 of each, runs
  * cOVState_onCreateScreen and plays menu sound 0xE (cSSXAudio_MenuSound). The texts are filled in by func_001FD320.
  */
-extern "C" void func_001FD268(void* self)
+extern "C" void func_001FD268(cOVState* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_68rival_pre), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)((char*)self + 0x10);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -2542,7 +2545,7 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
 extern "C" void cOVState_SAVEREPLAY_updateDone(cOVState_SAVEREPLAY* self)
 {
     if (self->mIsDone == 0) {
-        cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToStateInclusive(&self->mpEngine->mStateStack);
     }
     self->mIsDone = 1;
 }
@@ -2755,9 +2758,9 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
 {
     unsigned short buf[800];
     char name[0x40];
-    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (((cState_DF40*)self)->displayFileOK()) {
-        if (!(*(cMCSub_DF40**)(mp + 0x434))->IsAvailable1()) {
+        if (!((cMCSub_DF40*)mp->mpMemCard)->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
             ((cState_DF40*)self)->triggerDisplayState(3);
@@ -2766,10 +2769,10 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
     if (((cState_DF40*)self)->displayFileOK()) {
         int sel = 0;
         ((cState_DF40*)self)->setMenuHighlight();
-        cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
+        cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
         cUIText_setUnicodeStringWrap(getObj_DF40(((cState_DF40*)self), str_Memory_card_info), buf);
         cUIObj_DF40* widget = getObj_DF40(((cState_DF40*)self), str_1percentage_b);
-        (*(cMCSub_DF40**)(mp + 0x434))->GetStatus1(buf);
+        ((cMCSub_DF40*)mp->mpMemCard)->GetStatus1(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
         char* localeObj = (char*)SSXApp->FELocale;
@@ -2779,10 +2782,10 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
             widget = getObj_DF40(((cState_DF40*)self), name);
-            (*(cMCSub_DF40**)(mp + 0x434))->GetTitleString(i - 1, (char*)&self->mTitle);
+            ((cMCSub_DF40*)mp->mpMemCard)->GetTitleString(i - 1, (char*)&self->mTitle);
             cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
-            if (!(*(cMCSub_DF40**)(mp + 0x434))->HasFileName(i - 1) && !(*(cMCSub_DF40**)(mp + 0x434))->IsFileSlotDisabled(i - 1)
-                && (*(cMCSub_DF40**)(mp + 0x434))->IsFormatted1()) {
+            if (!((cMCSub_DF40*)mp->mpMemCard)->HasFileName(i - 1) && !((cMCSub_DF40*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)
+                && ((cMCSub_DF40*)mp->mpMemCard)->IsFormatted1()) {
                 if (sel == 0) {
                     sel = 1;
                     widget->setUseStaticColour(0);
@@ -2791,8 +2794,8 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
                     widget->setUseStaticColour(1);
                     widget->setStatic(1);
                 }
-            } else if ((*(cMCSub_DF40**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-                if ((*(cMCSub_DF40**)(mp + 0x434))->IsFileSlotDisabled(i - 1)) {
+            } else if (((cMCSub_DF40*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
+                if (((cMCSub_DF40*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)) {
                     widget->setStatic(1);
                     widget->setUseStaticColour(1);
                 } else {
@@ -2804,11 +2807,11 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
                 widget->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, *(int*)(mp + 0x428), 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 1) == -1)
             getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->setVisible(0);
         else
             getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, *(int*)(mp + 0x428), 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 0) == -1)
             getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->setVisible(0);
         else
             getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->setVisible(1);
@@ -3059,13 +3062,13 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, voi
         int one = 1;
         if (self->mState == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         int st = self->mScreenStatus;
         if (st != 3)
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
         self->mSlot = fileSlot;
-        *(int*)(mp + 0xF8) = fileSlot;
+        mp->mFileCursor = fileSlot;
         self->mIsProcessing = one;
         if (self->mIsReplayAlloc == one)
         {
@@ -3080,7 +3083,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, voi
     }
     case 6:
     {
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (self->mIsProcessing == 1)
             return;
         int cardState = self->mState;
@@ -3097,16 +3100,16 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, voi
         int one = 1;
         if (self->mState == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+        if (!((cMovieSub434_1FE6E8*)mp->mpMemCard)->v54(mp->mSelectedDevice))
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
         self->mSlot = fileSlot;
-        *(int*)(mp + 0xF8) = fileSlot;
+        mp->mFileCursor = fileSlot;
         int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->HasFileName(self->mSlot))
+        if (!((cMovieSub434_1FE6E8*)mp->mpMemCard)->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
         self->mState = 4;
@@ -3288,7 +3291,7 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
 extern "C" void cOVState_SAVEOPTIONS_updateDone(cOVState_SAVEOPTIONS* self)
 {
     if (self->mIsDone == 0) {
-        cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToStateInclusive(&self->mpEngine->mStateStack);
     }
     self->mIsDone = 1;
 }
@@ -3496,9 +3499,9 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
 {
     unsigned short buf[800];
     char name[0x40];
-    char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (((cState_ECA0*)self)->displayFileOK()) {
-        if (!(*(cMCSub_ECA0**)(mp + 0x434))->IsAvailable1()) {
+        if (!((cMCSub_ECA0*)mp->mpMemCard)->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
             ((cState_ECA0*)self)->triggerDisplayState(3);
@@ -3506,10 +3509,10 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
     }
     if (((cState_ECA0*)self)->displayFileOK()) {
         ((cState_ECA0*)self)->setMenuHighlight();
-        cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
+        cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
         cUIText_setUnicodeStringWrap(getObj_ECA0(((cState_ECA0*)self), str_Memory_card_info), buf);
         cUIObj_ECA0* widget = getObj_ECA0(((cState_ECA0*)self), str_1percentage_b);
-        (*(cMCSub_ECA0**)(mp + 0x434))->GetStatus1(buf);
+        ((cMCSub_ECA0*)mp->mpMemCard)->GetStatus1(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
         char* localeObj = (char*)SSXApp->FELocale;
@@ -3518,14 +3521,14 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         sprintf(name, str_pct_dmemory_card_b, 1);
         widget = getObj_ECA0(((cState_ECA0*)self), name);
-        (*(cMCSub_ECA0**)(mp + 0x434))->GetTitleString(0, (char*)&self->mTitle);
+        ((cMCSub_ECA0*)mp->mpMemCard)->GetTitleString(0, (char*)&self->mTitle);
         cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
-        if (!(*(cMCSub_ECA0**)(mp + 0x434))->HasFileName(0) && !(*(cMCSub_ECA0**)(mp + 0x434))->IsFileSlotDisabled(0)
-            && (*(cMCSub_ECA0**)(mp + 0x434))->IsFormatted1()) {
+        if (!((cMCSub_ECA0*)mp->mpMemCard)->HasFileName(0) && !((cMCSub_ECA0*)mp->mpMemCard)->IsFileSlotDisabled(0)
+            && ((cMCSub_ECA0*)mp->mpMemCard)->IsFormatted1()) {
             widget->setUseStaticColour(0);
             widget->setStatic(0);
-        } else if ((*(cMCSub_ECA0**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-            if ((*(cMCSub_ECA0**)(mp + 0x434))->IsFileSlotDisabled(0)) {
+        } else if (((cMCSub_ECA0*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
+            if (((cMCSub_ECA0*)mp->mpMemCard)->IsFileSlotDisabled(0)) {
                 widget->setStatic(1);
                 widget->setUseStaticColour(1);
             } else {
@@ -3536,11 +3539,11 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
             widget->setUseStaticColour(1);
             widget->setStatic(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, *(int*)(mp + 0x428), 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 1) == -1)
             getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->setVisible(0);
         else
             getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, *(int*)(mp + 0x428), 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 0) == -1)
             getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->setVisible(0);
         else
             getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->setVisible(1);
@@ -3788,13 +3791,13 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, v
         int one = 1;
         if (self->mState == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         int st = self->mScreenStatus;
         if (st != 3)
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
         self->mSlot = fileSlot;
-        *(int*)(mp + 0xF8) = fileSlot;
+        mp->mFileCursor = fileSlot;
         self->mIsProcessing = one;
         cMCOverlayManager_writeSetFileType(mp, 2, -1);
         self->mIsSavePressed = one;
@@ -3804,7 +3807,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, v
     }
     case 6:
     {
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (self->mIsProcessing == 1)
             return;
         int cardState = self->mState;
@@ -3821,16 +3824,16 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, v
         int one = 1;
         if (self->mState == 6)
             return;
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+        if (!((cMovieSub434_1FF3B0*)mp->mpMemCard)->v54(mp->mSelectedDevice))
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
         self->mSlot = fileSlot;
-        *(int*)(mp + 0xF8) = fileSlot;
+        mp->mFileCursor = fileSlot;
         int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->HasFileName(self->mSlot))
+        if (!((cMovieSub434_1FF3B0*)mp->mpMemCard)->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
         self->mState = 4;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "visualfx/transitionman.h"
 #include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
 #include "scripter/datamanager.h"
@@ -321,15 +322,16 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_AddToEmptyInstanceList__FPvT0);
  *
  * @param node  the instance record (On Tour tDataInstanceInfo*)
  */
-void cDataManager_AddToEmptyInstanceList(void* vself, void* node)
+void cDataManager_AddToEmptyInstanceList(void* vself, void* vnode)
 {
+    tDataInstanceInfo* node = (tDataInstanceInfo*)vnode;
     cDataManager* self = (cDataManager*)vself;
-    *(int*)((char*)node + 0x8) = 0;
-    *(int*)((char*)node + 0xc) = 0;
-    *(int*)((char*)node + 0x10) = 0;
-    *(int*)((char*)node + 0x0) = 0;
-    *(int*)((char*)node + 0x4) = 0;
-    *(void**)((char*)node + 0x14) = (void*)self->mpEmptyDataInstanceList;
+    node->pData = 0;
+    node->dataSize = 0;
+    node->isRoot = 0;
+    node->pUserData1 = 0;
+    node->pUserData2 = 0;
+    node->pNext = (tDataInstanceInfo*)((void*)self->mpEmptyDataInstanceList);
     self->mpEmptyDataInstanceList = (tDataInstanceInfo*)node;
 }
 #endif
@@ -733,15 +735,15 @@ extern "C" int tNISList_ReadyList(tNISList* self, int playOnReady)
         return self->mState;
     }
     tNISList_RemoveFromHead(self, idx);
-    char* entry = (char*)cCircularBuffer_operatorIndex(list, 0);
+    tNISListEntry* entry = (tNISListEntry*)cCircularBuffer_operatorIndex(list, 0);
     if (tNISList_IsVideo(self, entry) == 0) {
-        if (cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(entry + 0xC)) == 1) {
+        if (cBXScriptEngine_GetRequestState(*(void**)self, entry->scriptHandle) == 1) {
             self->mState = 1;
         } else {
             self->mState = 2;
         }
     } else {
-        if (*(int*)(entry + 0xC) < 0) {
+        if (entry->scriptHandle < 0) {
             self->mState = 1;
         } else {
             self->mState = 2;
@@ -1159,13 +1161,13 @@ extern "C" int tNISList_GetScriptIndex(tNISList* self, int i)
     if (i >= cCircularBuffer_GetNumEntries_count(list)) {
         return -1;
     }
-    void* item = cCircularBuffer_operatorIndex(list, i);
+    tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, i);
     if (tNISList_IsVideo(self, item) != 0) {
         return -1;
     }
-    int scriptIndex = *(int*)((char*)item + 0x4);
+    int scriptIndex = item->scriptIndex;
     if (scriptIndex < 0) {
-        int id = *(int*)((char*)item + 0xC);
+        int id = item->scriptHandle;
         scriptIndex = -1;
         if (id >= 0) {
             scriptIndex = cBXScriptEngine_GetRequestScriptIndex(*(void**)self, id);
@@ -1330,7 +1332,7 @@ extern "C" void tNISList_Update(tNISList* self)
         return;
     }
     if (self->mInScriptTransition != 0) {
-        char* item = (char*)cCircularBuffer_operatorIndex(&self->mList, 0);
+        tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList, 0);
         char* obj = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
         if (self->mTransitionWaitFrames != 0) {
             if (--self->mTransitionWaitFrames == 0) {
@@ -1339,7 +1341,7 @@ extern "C" void tNISList_Update(tNISList* self)
                     return;
                 }
                 if (tNISList_IsVideo(self, item) == 0) {
-                    cBXScriptEngine_ResumeScript(*(void**)self, *(int*)(item + 0xC));
+                    cBXScriptEngine_ResumeScript(*(void**)self, item->scriptHandle);
                 } else {
                     cVidEngine_PlayVideo(*(char**)self + 0x500);
                 }
@@ -1352,12 +1354,12 @@ extern "C" void tNISList_Update(tNISList* self)
     }
     if (self->mPausedOnNextScriptLoading != 0) {
         void* list = (char*)&self->mList;
-        char* item = (char*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
+        tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
         int ok;
         if (tNISList_IsVideo(self, item) == 0) {
             ok = cBXScriptEngine_GetRequestState(*(void**)self, *(int*)((char*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex) + 0xC)) == 2;
         } else {
-            ok = *(int*)(item + 0xC) >= 0;
+            ok = item->scriptHandle >= 0;
         }
         if (ok) {
             tNISList_DoPause(((char*)self), 0, 1);
@@ -1377,10 +1379,10 @@ extern "C" void tNISList_Update(tNISList* self)
             return;
         }
     }
-    char* item = (char*)cCircularBuffer_operatorIndex(&self->mList, 0);
+    tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList, 0);
     int done = 0;
     if (tNISList_IsVideo(self, item) == 0) {
-        if (cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(item + 0xC)) == 2 || cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self, *(int*)(item + 0xC)) != 0) {
+        if (cBXScriptEngine_GetRequestState(*(void**)self, item->scriptHandle) == 2 || cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self, item->scriptHandle) != 0) {
             done = 1;
         }
     } else if (cVidEngine_IsVideoOnLastFrame(*(char**)self + 0x500) != 0) {
@@ -1434,11 +1436,11 @@ extern "C" void tNISList_DoSkip(tNISList* self)
     }
     int idx = tNISList_SetupNextScript(self, self->mNextPendingScriptIndex, 1);
     if (idx != self->mNextPendingScriptIndex) {
-        char* pendingEntry = (char*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
+        tNISListEntry* pendingEntry = (tNISListEntry*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
         if (tNISList_IsVideo(self, pendingEntry) == 0) {
-            cBXScriptEngine_ReleaseRequest(*(void**)self, *(int*)(pendingEntry + 0xC));
-            *(int*)(pendingEntry + 0xC) = -1;
-        } else if (*(int*)(pendingEntry + 0xC) >= 0) {
+            cBXScriptEngine_ReleaseRequest(*(void**)self, pendingEntry->scriptHandle);
+            pendingEntry->scriptHandle = -1;
+        } else if (pendingEntry->scriptHandle >= 0) {
             cVidEngine_ResetVideoEngine(*(char**)self + 0x500);
         }
         self->mNextPendingScriptIndex = idx;
@@ -1857,9 +1859,9 @@ extern "C" void tNISList_RemoveFromHead(tNISList* selfp, int n)
                         snd = ent[5];
                     }
                     if (snd >= 0) {
-                        char* soundMan = (char*)cAudioInterface_bxAudio();
-                        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(soundMan + 0x5558);
-                        char* sys = soundMan + 0x118;
+                        cSSXAudio* soundMan = cAudioInterface_bxAudio();
+                        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)soundMan->MusicSys.mVtbl;
+                        char* sys = (char*)&soundMan->MusicSys;
                         vt[4].fn(vthis(sys, vt[4]), snd);
                     }
                 }
@@ -2074,8 +2076,8 @@ int tNISList_DoTransitionToNext_impl(char* vself)
     char* item = (char*)cCircularBuffer_operatorIndex(&self->mList.mBuffer[0], 0);
     if (tNISList_IsVideo((tNISList*)self, item) == 0) {
         tSSXScriptHeader* transitionInfo = (tSSXScriptHeader*)GetSSXScriptHeader(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
-        void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
-        if (*(int*)((char*)snd + 0x44) != 0) {
+        cTransitionMan* snd = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
+        if (snd->mbPlayingTransition != 0) {
             cTransitionMan_EndTransition(snd);
         }
         if (transitionInfo->endFadeToTransitionFrames + transitionInfo->endHoldTransitionFrames + transitionInfo->endFadeFromTransitionFrames > 0) {
@@ -2099,8 +2101,8 @@ int tNISList_DoTransitionToNext_impl(char* vself)
         }
     } else {
         sDmEnt_7980* videoInfo = (sDmEnt_7980*)tNISList_GetVideoDBRecord((tNISList*)self, (int*)item);
-        void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
-        if (*(int*)((char*)snd + 0x44) != 0) {
+        cTransitionMan* snd = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
+        if (snd->mbPlayingTransition != 0) {
             cTransitionMan_EndTransition(snd);
         }
         if (0.0f < videoInfo->t) {
@@ -2197,8 +2199,8 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
         }
         if (self->mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 1);
-            char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
-            if (*(int*)(transitionMan + 0x44)) {
+            cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
+            if (transitionMan->mbPlayingTransition) {
                 cTransitionMan_PauseTransition(transitionMan, 1);
             }
         }
@@ -2213,8 +2215,8 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
         }
         if (self->mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 0);
-            char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
-            if (*(int*)(transitionMan + 0x44)) {
+            cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
+            if (transitionMan->mbPlayingTransition) {
                 cTransitionMan_PauseTransition(transitionMan, 0);
             }
         }

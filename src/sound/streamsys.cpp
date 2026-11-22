@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/bankmanager.h"
 #include "vtable.h"
 #include "sound/controller.h"
 #include "sound/bankmonitor.h"

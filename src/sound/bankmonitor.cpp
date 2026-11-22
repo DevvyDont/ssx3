@@ -146,7 +146,7 @@ extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
     }
     cMonitor__cMonitor((cMonitor*)((sSndPlayerDAC8*)self), 0);
     if (flags & 2) {
-        cSoundSys__cSoundSys((cSoundSys*)((char*)self->mpVSoundSys), 0);
+        cSoundSys__cSoundSys((cSoundSys*)self->mpVSoundSys, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1021,7 +1021,7 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
     }
     cSndPlayOpts__cSndPlayOpts(((sSndPlayerDAC8*)self), 0);
     if (flags & 2) {
-        cSoundSys__cSoundSys((cSoundSys*)((char*)self->mpVSoundSys), 0);
+        cSoundSys__cSoundSys((cSoundSys*)self->mpVSoundSys, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -2953,7 +2953,7 @@ extern "C" int func_002AF8A8_impl(int speechEvent)
     if (D_004A37BC != 0) {
         return -1;
     }
-    return func_002B0F48((cSpeechSys*)((char*)D_004A37B4), speechEvent);
+    return func_002B0F48((cSpeechSys*)D_004A37B4, speechEvent);
 }
 #endif
 
@@ -3043,18 +3043,18 @@ void* func_002AF960_impl(const char* name, int shortName, void* data)
         }
         data = FILE_load(buf, 0);
     }
-    char* obj = (char*)cSpeechBank_cSpeechBank(cMemMan_alloc(76, str_SpeechBank, 0, 0));
-    *(int*)(obj + 0x48) = owned;
-    *(void**)(obj + 0x44) = data;
+    cSpeechBank* obj = (cSpeechBank*)cSpeechBank_cSpeechBank(cMemMan_alloc(76, str_SpeechBank, 0, 0));
+    obj->mOwnsData = owned;
+    obj->mpData = data;
     *(int*)obj = func_003D69F0(data);
-    strcpy(obj + 4, name);
-    char* lastSlash = strrchr(obj + 4, '\\');
+    strcpy(obj->mName, name);
+    char* lastSlash = strrchr(obj->mName, '\\');
     if (lastSlash == 0) {
-        *(char**)(obj + 0x40) = obj + 4;
+        obj->mShortName = obj->mName;
     } else {
-        *(char**)(obj + 0x40) = lastSlash + 1;
+        obj->mShortName = lastSlash + 1;
     }
-    return obj;
+    return ((char*)obj);
 }
 #endif
 
@@ -4322,14 +4322,14 @@ struct sVE1268 { short delta; short index; int (*fn)(void*, int, int, int); };
  * @param msg  the cMonitorInstance
  * @return 1 when re-armed, else func_002B1248's result
  */
-extern "C" int func_002B1268(cSpeechSys* self, void* msg)
+extern "C" int func_002B1268(cSpeechSys* self, cMonitorInstance* msg)
 {
-    char* ent = *(char**)((char*)msg + 0x18);
-    if (cStreamSys_STREAM_GetCurrActiveSampleHandle(*(void**)self, func_002B1220((cSpeechSys*)((char*)D_004A37B4), *(int*)ent)) != *(int*)((char*)msg + 0x1C)) {
-        cMonitor_MONITOR_Create(*((int*)D_004A37B4->mpVStreamSys) + 472, 200, D_004A37E0_2B1268[0].v, *(void**)((char*)msg + 0x18), *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
+    char* ent = (char*)msg->mPtr;
+    if (cStreamSys_STREAM_GetCurrActiveSampleHandle(*(void**)self, func_002B1220((cSpeechSys*)D_004A37B4, *(int*)ent)) != msg->mData1) {
+        cMonitor_MONITOR_Create(*((int*)D_004A37B4->mpVStreamSys) + 472, 200, D_004A37E0_2B1268[0].v, msg->mPtr, msg->mData1, msg->mData2, 0, 0);
         return 1;
     }
-    int slot = *(int*)((char*)msg + 0x20);
+    int slot = msg->mData2;
     if (slot != -1) {
         sVE1268* vt = (sVE1268*)self->mVtbl;
         int speechVolume = vt[3].fn(vthis(self, vt[3]), *(int*)ent, slot, *(int*)(ent + 0x8D0));
@@ -4349,7 +4349,7 @@ struct sPacked8_1348 { long v; } __attribute__((packed));
 extern const sPacked8_1348 D_004A37D8_2B1348[] __asm__("D_004A37D8");
 extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(void* self, int i);
 extern "C" void cMonitor_MONITOR_Create(int a, int b, long t, void* c, int d, int e, int f, int g);
-extern "C" int func_002B1268(cSpeechSys* self, void* msg);
+extern "C" int func_002B1268(cSpeechSys* self, cMonitorInstance* msg);
 
 /**
  * Monitor callback polling a busy speech stream until the queued speech can be handled by func_002B1268.
@@ -4362,16 +4362,16 @@ extern "C" int func_002B1268(cSpeechSys* self, void* msg);
  * @param msg  the cMonitorInstance
  * @return 1 when re-armed, 0 to keep polling, else func_002B1268's result
  */
-extern "C" int func_002B1348(cSpeechSys* self, void* msg)
+extern "C" int func_002B1348(cSpeechSys* self, cMonitorInstance* msg)
 {
-    char* ent = *(char**)((char*)msg + 0x18);
+    char* ent = (char*)msg->mPtr;
     if (cStreamSys_STREAM_Requests(*(void**)self, *(int*)(ent + 4)) - 1 > 0) {
         if (cStreamSys_STREAM_Playing(*(void**)self, *(int*)(ent + 4)) != 0) {
             float remainingMs = cStreamSys_STREAM_TimeRemaining(*(void**)self, *(int*)(ent + 4));
-            cMonitor_MONITOR_Create(*((int*)D_004A37B4->mpVStreamSys) + 472, (int)remainingMs, D_004A37D8_2B1348[0].v, ent, *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
+            cMonitor_MONITOR_Create(*((int*)D_004A37B4->mpVStreamSys) + 472, (int)remainingMs, D_004A37D8_2B1348[0].v, ent, msg->mData1, msg->mData2, 0, 0);
             return 1;
         }
-        if (cStreamSys_STREAM_GetCurrActiveSampleHandle(*(void**)self, func_002B1220((cSpeechSys*)((char*)D_004A37B4), *(int*)ent)) != *(int*)((char*)msg + 0x1C)) {
+        if (cStreamSys_STREAM_GetCurrActiveSampleHandle(*(void**)self, func_002B1220((cSpeechSys*)D_004A37B4, *(int*)ent)) != msg->mData1) {
             return 0;
         }
         return func_002B1268(self, msg);
@@ -7051,20 +7051,21 @@ int func_002B4620_impl(void* self) __asm__("func_002B4620");
  *
  * @return 1 when started or already running, 0 otherwise (also without a song)
  */
-int func_002B4620_impl(void* self)
+int func_002B4620_impl(void* vself)
 {
+    cMusicSys* self = (cMusicSys*)vself;
     int one = 1;
-    if (*(char**)((char*)self + 0x408) == 0) return 0;
-    *(int*)(*(char**)((char*)self + 0x408) + 0x4C) = one;
+    if ((char*)self->mCurrent == 0) return 0;
+    *(int*)((char*)self->mCurrent + 0x4C) = one;
     int ready = 0;
-    char* curSong = *(char**)((char*)self + 0x408);
+    char* curSong = (char*)self->mCurrent;
     int st = *(int*)(curSong + 0x38);
     if (st == one) {
         // PORT: pointer arithmetic through int
         sBmStream4620* bankInst = (sBmStream4620*)(*(int*)(curSong + 0x34) * 0x60 + *(int*)(**(char***)self + 0xACC));
         if (func_002B4620_ready(bankInst)) {
             func_003D2DF8(0x11000002, 0, bankInst->handle);
-            *(int*)(*(char**)((char*)self + 0x408) + 0x38) = 2;
+            *(int*)((char*)self->mCurrent + 0x38) = 2;
             ready = 1;
         }
     } else if (st == 2) {

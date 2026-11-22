@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "camera/camera.h"
+#include "visualfx/transitionman.h"
 #include "ui/uithing.h"
 #include "bx/math3d.h"
 #include "sound/ssxaudio.h"
@@ -237,16 +239,16 @@ extern "C" void cGFRidingState_gainFocus(void)
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 5);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameMode != 4) {
-        char* game = cGameState_mpGame;
-        *(int*)(*(char**)(game + 0xC) + 0x14) = 1;
-        *(int*)(*(char**)(game + 0xC) + 0x8C) = 0;
+        cGame* game = (cGame*)cGameState_mpGame;
+        game->AI->ComputerRidersActive = 1;
+        game->AI->ComputerActorsActive = 0;
     }
     cBE_setState(1);
-    char* gs = cGameState_mpGame;
-    int n = **(int**)(gs + 0x28);
+    cGame* gs = (cGame*)cGameState_mpGame;
+    int n = *(int*)gs->Replay;
     int ok = n != 0 && n < 10;
     if (!ok) {
-        cUIStateStack_purgeNormalStates(*(char**)(gs + 0x48) + 0x18);
+        cUIStateStack_purgeNormalStates((char*)gs->UI + 0x18);
     }
 }
 #endif
@@ -521,8 +523,8 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
         if (cSSXScriptEngine_IsLoadTrackComplete(ScriptEngine) == 0)
             break;
         cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
-        char* sectionMan = D_004A28A8_date->game->f78;
-        int locationId = *(int*)(sectionMan + 0x1BC);
+        cSectionMan* sectionMan = (cSectionMan*)D_004A28A8_date->game->f78;
+        int locationId = sectionMan->mBELocationID;
         int range = locationId >= 14 && locationId <= 16;
         if (self->mPlayFirstTimeBCVideo != 0) {
             if (locationId == 14) {
@@ -537,7 +539,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 17, 3, 0, -1, -1, -1);
             }
             cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
-        } else if (*(int*)(sectionMan + 0x1C8) != 0 && range) {
+        } else if (sectionMan->mWaitTransport != 0 && range) {
             cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
             cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 17, 3, 0, -1, -1, -1);
         }
@@ -846,10 +848,10 @@ extern "C" void cGFTrackStartState_loseFocus(cGFTrackStartState* self)
         cGameModeMan_riderCheckpointHit(SSXApp->GameModeMan, 0, 0);
     }
     cGame* game = SSXApp->Game;
-    char* x = (char*)game->ViewMan;
-    if (*(int*)(x + 0x10) == 1) {
+    cGameViewMan* x = game->ViewMan;
+    if ((int)x->m_uiNumView == 1) {
         sTbl_235868* viewTbl = *(sTbl_235868**)game->World;
-        viewTbl->slot[otherSide_235868(*(char**)(x + 4))].f0 = 0;
+        viewTbl->slot[otherSide_235868((char*)x->PlayerCamera[0])].f0 = 0;
     }
 }
 #endif
@@ -1070,7 +1072,7 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
     cGame* game = SSXApp->Game;
     int state = self->CurrentNextHeatState;
     char** cache = (char**)game->World;
-    int idx = *(int*)((char*)game->ViewMan->PlayerCamera[0] + 0xB0) == 0;
+    int idx = game->ViewMan->PlayerCamera[0]->StreamFocusID == 0;
     switch (state) {
     case 0:
         if (cAI_isReadyToPurgeComputerRiders(game->AI)) {
@@ -1105,12 +1107,12 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
                 break;
             if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1)
                 break;
-            char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
+            cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0)
                 break;
-            if (((cRiderObj_235CC8*)(transitionMan + 0x10))->isBusy() != 0)
+            if (((cRiderObj_235CC8*)(&transitionMan->mObjType))->isBusy() != 0)
                 break;
-            if (*(int*)(transitionMan + 0x44) != 0)
+            if (transitionMan->mbPlayingTransition != 0)
                 break;
             cSSXScriptEngine_EndTransportSequence(ScriptEngine);
         }
@@ -1728,16 +1730,16 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
 {
     cGame* appGame = SSXApp->Game;
-    char* sectionMan = (char*)appGame->SectionMan;
-    if (*(int*)(sectionMan + 0x1C8) == 0) {
+    cSectionMan* sectionMan = appGame->SectionMan;
+    if (sectionMan->mWaitTransport == 0) {
         return;
     }
     int state = self->mSubState;
     char** cache = (char**)appGame->World;
-    int idx = *(int*)((char*)appGame->ViewMan->PlayerCamera[0] + 0xB0) == 0;
+    int idx = appGame->ViewMan->PlayerCamera[0]->StreamFocusID == 0;
     switch (state) {
     case 0:
-        if (cSectionMan_isLoaded(sectionMan, *(int*)(sectionMan + 0x1BC)) != 0) {
+        if (cSectionMan_isLoaded(sectionMan, sectionMan->mBELocationID) != 0) {
             cPlayer* aiPlayer = SSXApp->Game->AI->Players[0];
             t4Vector pos = cRider_GetNISEndPosition(aiPlayer->mRider);
             char* viewEntry = *cache + idx * 80;
@@ -1753,19 +1755,19 @@ extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
         if (dist < 20000.0f) {
             break;
         }
-        char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
-        if (((cRiderObj_236960*)(transitionMan + 0x10))->isBusy() != 0) {
+        cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
+        if (((cRiderObj_236960*)(&transitionMan->mObjType))->isBusy() != 0) {
             break;
         }
-        if (*(int*)(transitionMan + 0x44) != 0) {
+        if (transitionMan->mbPlayingTransition != 0) {
             break;
         }
         if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0) {
             break;
         }
         cSSXScriptEngine_EndTransportSequence(ScriptEngine);
-        *(int*)(sectionMan + 0x1C8) = 0;
-        cSectionMan_activate(sectionMan, *(int*)(sectionMan + 0x1BC), 7);
+        sectionMan->mWaitTransport = 0;
+        cSectionMan_activate(sectionMan, sectionMan->mBELocationID, 7);
         self->mSubState = 2;
         break;
     }
@@ -2551,8 +2553,8 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
         cInputSync_SyncedPad* psp = &((&self->syncedpads[0]))[i];
         cInputSync_SyncedPad& sp = *psp;
         if (((cInputPad_2373B8*)sp.sourcepad) == 0) {
-            char* gc = GameComm();
-            int net = *(int*)(gc + 0x40) != 0 && *(int*)(gc + 4) == 0 && *(int*)(gc + 0) != 0;
+            cGameComm* gc = (cGameComm*)GameComm();
+            int net = gc->mSyncInput != 0 && gc->mError == 0 && gc->mConnected != 0;
             if (net) {
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1) &&
                        cGameComm_readPacket(GameComm(), 0, &compsample, sizeof(compsample))) {

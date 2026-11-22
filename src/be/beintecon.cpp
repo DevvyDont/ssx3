@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "be/beintecon.h"
 
@@ -171,10 +172,10 @@ extern "C" int cBEEconInterface_addMoney(cBEEconInterface* self, int humanIndex,
     int bOff = characterId * 3976;
     int aOff = humanIndex * 39760;
     int off = bOff + aOff;
-    char* charProfile = (char*)cBELibrary_profileLib + off;
-    *(int*)(charProfile + 0xAC4) += amount;
-    *(int*)(charProfile + 0xAC8) += amount;
-    return *(int*)(charProfile + 0xAC4);
+    cBECharProfileDB* charProfile = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
+    charProfile->mMoney += amount;
+    *(int*)&charProfile->mTotalMoneyEarned += amount;
+    return charProfile->mMoney;
 }
 #endif
 

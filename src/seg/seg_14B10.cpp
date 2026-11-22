@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ai/rideranim.h"
+#include "ai/riderhandler.h"
+#include "animation/animsequencer.h"
 #include "bx/math3d.h"
 #include "animation/animmodel.h"
 #include "ai/hudfx.h"
@@ -552,11 +555,12 @@ static inline float vu0Dot_3F88(const t4Vector& a, const t4Vector& b)
 }
 
 // Steering flips when the board points backwards: |dir| within th while tilting back, or dir < -th while tilt < th.
-static inline float flipBackwards_3F88(float b, char *self, float th)
+static inline float flipBackwards_3F88(float b, char *vself, float th)
 {
-    if (Abs_3F88(*(float *)(self + 0x214)) <= th && *(float *)(self + 0x1F0) < 0.0f)
+    cRider* self = (cRider*)vself;
+    if (Abs_3F88(self->mSlewed[3].cur) <= th && self->mSlewed[0].cur < 0.0f)
         return -b;
-    if (*(float *)(self + 0x214) < -th && *(float *)(self + 0x1F0) < th)
+    if (self->mSlewed[3].cur < -th && self->mSlewed[0].cur < th)
         return -b;
     return b;
 }
@@ -630,7 +634,7 @@ extern "C" void cSSXAudio_TurboOff(int mgr, char* rider);
  */
 extern "C" void cRider_setupBoostWarp(cRider* rider, int isHeld, int isPressed)
 {
-    if (isPressed) cCheatFX_setCheatInput((char*)rider->mRiderHandler + 0xD20, 0);
+    if (isPressed) cCheatFX_setCheatInput((char*)&rider->mRiderHandler->CheatFX, 0);
     if (isHeld) {
         if (rider->unk_2F8 > 0.0f) {
             if (rider->mBoostStrength == 0.0f) {
@@ -1092,19 +1096,20 @@ extern "C" int cRider_isChangeFakieGround_i(char* s) __asm__("cRider_isChangeFak
  * @param rider  the rider (this)
  * @return 1 when the rider switched, else 0
  */
-extern "C" int cRider_isChangeFakieGround_i(char* rider)
+extern "C" int cRider_isChangeFakieGround_i(char* vrider)
 {
+    cRider* rider = (cRider*)vrider;
     float k = 111.11111450195312f;
-    if (*(float*)(rider + 0x214) != 0.0f) {
+    if (rider->mSlewed[3].cur != 0.0f) {
         return 0;
     }
-    float fwdSpeed = Dot_4CC0(*(Q_4CC0*)(rider + 0x1E0), *(Q_4CC0*)(rider + 0x3A0));
+    float fwdSpeed = Dot_4CC0(*(Q_4CC0*)&rider->mVelocity, *(Q_4CC0*)&rider->mGroundForward);
     if (-k < fwdSpeed) {
         return 0;
     }
-    *(Q_4CC0*)(rider + 0x120) = QuatMul_4CC0(Make_4CC0(Vec3Of_4CC0(*(Q_4CC0*)(rider + 0x1C0))), *(Q_4CC0*)(rider + 0x120));
+    *(Q_4CC0*)&rider->mRotation = QuatMul_4CC0(Make_4CC0(Vec3Of_4CC0(*(Q_4CC0*)&rider->mMatrix.row[2])), *(Q_4CC0*)&rider->mRotation);
     cRider_updateOrientationImplicit_4CC0(rider);
-    cRider_doChangeFakie_4CC0(rider);
+    cRider_doChangeFakie_4CC0(((char*)rider));
     return 1;
 }
 #endif
@@ -1391,7 +1396,7 @@ extern "C" void cRider_doChangeFakie(cRider* rider)
     } else {
         SetHeading_5168((char*)rider->mRiderAnim, 0.0f);
     }
-    *(int*)((char*)rider->mRiderAnim + 0x18) = rider->IsRidingFakie;
+    rider->mRiderAnim->IsFlipped = rider->IsRidingFakie;
     *(Q_5168*)&rider->mGroundForward = Scale_5168(*(Q_5168*)&rider->mGroundForward, -1.0f);
     *(Q_5168*)&rider->mGroundSide = Scale_5168(*(Q_5168*)&rider->mGroundSide, -1.0f);
     rider->mSlewed[0].cur = -rider->mSlewed[0].cur;
@@ -1737,26 +1742,26 @@ extern "C" void cRider_checkForReaction(cRider* self)
         }
         switch (self->ReactionEventType) {
         case 1:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
+            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
-            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            *(long*)&self->mRiderAnim->GraftMask = -1;
             func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 0);
             break;
         case 2:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
+            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
-            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            *(long*)&self->mRiderAnim->GraftMask = -1;
             func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 1);
             break;
         case 3:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
+            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
-            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            *(long*)&self->mRiderAnim->GraftMask = -1;
             break;
         case 4:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
+            *(long*)&self->mRiderAnim->GraftMask = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 314, 0, -1.0f);
-            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            *(long*)&self->mRiderAnim->GraftMask = -1;
             break;
         case 5:
         case 6:
@@ -1833,7 +1838,7 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
                         if (ad > glance) {
                             self->mRelations[i].unk_20 = AITick();
                             // PORT: 64-bit long
-                            *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
+                            *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
                             if (ad > behind) {
                                 cRiderAnimBase_play(self->mRiderAnim, 319, 0, -1.0f);
                             } else {
@@ -1843,7 +1848,7 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
                                 else
                                     cRiderAnimBase_play(self->mRiderAnim, 320, 0, -1.0f);
                             }
-                            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+                            *(long*)&self->mRiderAnim->GraftMask = -1;
                             return;
                         }
                     }
@@ -1859,13 +1864,13 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
                 float diff = Wrap_5D48(self->mRelations[i].mAngle - heading);
                 if (self->mRelations[i].mDistance < 1000.0f) {
                     if (__builtin_fabsf(diff) > wide) {
-                        *(long*)((char*)self->mRiderAnim + 0x20) = self->mHeadBoneMask;
+                        *(long*)&self->mRiderAnim->GraftMask = self->mHeadBoneMask;
                         int left = diff < 0.0f;
                         if (left == self->IsRidingFakie)
                             cRiderAnimBase_play(self->mRiderAnim, 317, 0, -1.0f);
                         else
                             cRiderAnimBase_play(self->mRiderAnim, 316, 0, -1.0f);
-                        *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+                        *(long*)&self->mRiderAnim->GraftMask = -1;
                         return;
                     }
                 }
@@ -1903,7 +1908,7 @@ extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAut
         *(int*)&self->mPowerUpTrickTimer = 0;
         if (forceAutoReset == 1 || forceAutoReset == 4)
             cRiderMetrix_evAutoResetSurface(self->mMetrix);
-        *(int *)((char*)self->mRiderHandler + 0x350) = (forceAutoReset != 0);
+        self->mRiderHandler->ResetControl.IsAutoReset = (forceAutoReset != 0);
         cRider_setControlState_6120(((char*)self), 9);
         cRider_setMotionState_6120(((char*)self), 3);
         cSSXAudio_PlayerResetEvent(cAudioInterface_bxAudio(), ((char*)self));
@@ -1998,10 +2003,10 @@ extern "C" void cCheatFX_setCheatInput(char *, int);
  */
 extern "C" int cRider_checkForPrewind(cRider* self, int isJumpHeld, int isJumpPressed) {
     if (isJumpPressed != 0)
-        cCheatFX_setCheatInput((char*)self->mRiderHandler + 0xD20, 1);
+        cCheatFX_setCheatInput((char*)&self->mRiderHandler->CheatFX, 1);
     if ((self->JumpHeldSec == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
         if (cRider_getControlState_62C8((char*)self) == 1)
-            cBoardPressControl_forceExit((char*)self->mRiderHandler + 0x1D0);
+            cBoardPressControl_forceExit((char*)&self->mRiderHandler->BoardPressControl);
         cRider_setControlState_62C8(((char*)self), 2);
         return 1;
     }
@@ -2092,17 +2097,17 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
         if (isLeft != 0 && isRight != 0) {
             if (seqDone_163B0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 0.0f;
-                *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
+                *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
                 cRiderAnimBase_play(self->mRiderAnim, 325, 0, -1.0f);
                 float w = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x94);
                 float targWeight = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x98);
                 float weightTimer = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x9C);
-                char* baseSeq = (char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
-                *(float*)(baseSeq + 0x98) = w;
-                *(float*)(baseSeq + 0x94) = w;
+                cAnimSequence* baseSeq = (cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
+                baseSeq->TargetWeight = w;
+                baseSeq->CurrentWeight = w;
                 if (weightTimer != 0.0f)
                     cAnimSequence_fadeWeight((cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0), targWeight, weightTimer);
-                *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+                *(long*)&self->mRiderAnim->GraftMask = -1;
             }
         } else {
             *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 1.0f;
@@ -2115,12 +2120,12 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
         if ((isLeft != 0 && isRight == 0 && match) || (isLeft == 0 && isRight != 0 && !match)) {
             if (seqDone_163B0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 0.0f;
-                *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
+                *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
                 if (id == 323)
                     cRiderAnimBase_play(self->mRiderAnim, 326, 0, -1.0f);
                 else
                     cRiderAnimBase_play(self->mRiderAnim, 327, 0, -1.0f);
-                *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+                *(long*)&self->mRiderAnim->GraftMask = -1;
             }
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 0) == 13) {
                 float blendStep = self->mTimeScale * 0.01111111231148243f;
@@ -2131,8 +2136,8 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
                 else if (cur < 1.0f - blendStep)
                     newBlend = cur + blendStep;
                 self->PunchStrength = newBlend;
-                char* baseSeq = (char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
-                *(float*)(baseSeq + 0x94) = *(float*)(baseSeq + 0x98) = self->PunchStrength;
+                cAnimSequence* baseSeq = (cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
+                baseSeq->CurrentWeight = baseSeq->TargetWeight = self->PunchStrength;
             }
             if (match)
                 self->PunchVect = Scale_163B0(GetSide_163B0(self), -1.0f);
@@ -2149,9 +2154,9 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
             return 1;
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
-        *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
+        *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, 322, 1, -1.0f);
-        *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+        *(long*)&self->mRiderAnim->GraftMask = -1;
         self->PunchStrength = 0.0f;
     } else if (isLeft != 0 || isRight != 0) {
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
@@ -2167,9 +2172,9 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
             self->PunchVect = GetSide_163B0(self);
             anim = self->IsRidingFakie ? 324 : 323;
         }
-        *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
+        *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, anim, 1, -1.0f);
-        *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+        *(long*)&self->mRiderAnim->GraftMask = -1;
         self->PunchStrength = 0.0f;
     }
     return cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 || cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13;

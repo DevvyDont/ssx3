@@ -1,4 +1,7 @@
 #include "common.h"
+#include "main/game.h"
+#include "ai/rider.h"
+#include "bx/math3d.h"
 #include "vtable.h"
 #include "visualfx/visualeffectsman.h"
 #include "visualfx/aivisualeffectsman.h"
@@ -1498,7 +1501,7 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     int glow = 0;
     float alpha = 0.3f;
     float start = 0.0f;
-    if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < *(float*)(((char*)self->mRider) + 0x2EC)) {
+    if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < self->mRider->mPowerUpTrickTimer) {
         glow = 1;
         alpha = 1.0f;
         *(short*)((char*)GrMan_renderstateman->top + 0x10) = rsTex1044_EF950(GrMan_renderstateman);

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "world/worldcache.h"
+#include "world/worldrecords.h"
 #include "vtable.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"

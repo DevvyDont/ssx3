@@ -856,8 +856,8 @@ extern void* cUIThing_vtbl[];
  */
 extern "C" void* cUIThing_cUIThing1(cUIThing* self)
 {
-    self->mpNext = (cListNode*)((char*)self);
-    self->mpPrev = (cListNode*)((char*)self);
+    self->mpNext = (cListNode*)self;
+    self->mpPrev = (cListNode*)self;
     self->mVtbl = cUIThing_vtbl;
     tAttrThing_tAttrThing((sFlags_6548*)(&self->mAttr));
     return ((char*)self);
@@ -2833,8 +2833,8 @@ extern void* cUIState_vtbl[];
  */
 extern "C" void* cUIState_cUIState2(cUIState* self)
 {
-    self->mpNext = (cListNode*)((char*)self);
-    self->mpPrev = (cListNode*)((char*)self);
+    self->mpNext = (cListNode*)self;
+    self->mpPrev = (cListNode*)self;
     self->mVtbl = cUIState_vtbl;
     tAttrState_tAttrState(&self->mAttrState);
     cList_cList(&self->mScreens);
@@ -3566,8 +3566,8 @@ extern void* cUIScreen_vtbl[];
  */
 extern "C" void* cUIScreen_cUIScreen1(cUIScreen* self)
 {
-    self->mpNext = (cListNode*)((char*)self);
-    self->mpPrev = (cListNode*)((char*)self);
+    self->mpNext = (cListNode*)self;
+    self->mpPrev = (cListNode*)self;
     self->mVtbl = cUIScreen_vtbl;
     tAttrScreen_tAttrScreen(&self->mAttrScreen);
     cList_cList(&self->mThreads);
@@ -3598,8 +3598,8 @@ extern void* cUIScreen_vtbl[];
  */
 extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
 {
-    self->mpNext = (cListNode*)((char*)self);
-    self->mpPrev = (cListNode*)((char*)self);
+    self->mpNext = (cListNode*)self;
+    self->mpPrev = (cListNode*)self;
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
     self->mVtbl = cUIScreen_vtbl;

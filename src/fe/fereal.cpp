@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatetransition.h"
+#include "fe/feinput.h"
 #include "vtable.h"
 #include "be/beintoption.h"
 #include "sound/ssxaudio.h"
@@ -46,13 +48,13 @@ extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner)
     self->mpEngine = (cUIEngine*)((void*)owner);
     self->mpTransitionState = 0;
     self->mVtbl = cFECustom_vtbl;
-    char* transition = (char*)cMemMan_alloc(80, str_cFEStateTransition, 0, 0);
+    cFEStateTransition* transition = (cFEStateTransition*)cMemMan_alloc(80, str_cFEStateTransition, 0, 0);
     cUIState_cUIState(transition, self->mpEngine);
-    *(int*)(transition + 0x48) = 0;
-    *(int*)(transition + 0x4C) = 0;
-    *(sVE0720**)(transition + 0x8) = cFEStateTransition_vtbl;
+    transition->mpSnow = 0;
+    transition->mpWhite = 0;
+    transition->mVtbl = (void**)cFEStateTransition_vtbl;
     self->mpTransitionState = (cFEStateTransition*)transition;
-    if (transition != 0) {
+    if (((char*)transition) != 0) {
         cFEStateTransition_vtbl[4].fn(vthis(transition, cFEStateTransition_vtbl[4]));
         cUIStateStack_pushExplicit(&self->mpEngine->mStateStack, self->mpTransitionState);
     }
@@ -293,7 +295,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
         {
             int one = 1;
-            void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
+            cBENewRaceInterface* nr = (cBENewRaceInterface*)cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
             cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
             switch (beRaceDB->cGamePath) {
@@ -309,7 +311,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                     beRaceDB->iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
                     cBENewRaceInterface_bIsBamLocation = one;
                 }
-                sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
+                sVEntry0GNS* vt = (sVEntry0GNS*)nr->mVtbl;
                 vt[1].fn(vthis(nr, vt[1]));
                 D_004A19DC = 1;
                 cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
@@ -435,13 +437,13 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         switch (pData) {
         case 0: {
             cBE_getInterface_Fv(cBE_getBE(), 4);
-            void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
+            cBENewRaceInterface* nr = (cBENewRaceInterface*)cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
             cBENewRaceInterface_setGameMode(nr, 4);
             cBENewRaceInterface_setGameEvent(nr, 12);
             cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
             cBENewRaceInterface_bIsBamLocation = 1;
-            sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
+            sVEntry0GNS* vt = (sVEntry0GNS*)nr->mVtbl;
             vt[1].fn(vthis(nr, vt[1]));
             cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
             break;
@@ -977,15 +979,15 @@ extern "C" void cRealFE_load(cRealFE* self)
     *(sV4_1E80*)&cam->mCamera.Pose.Q = up;
     ((cCamObj_1E80*)(&cam->mCamera))->update();
     progress_1E80(99.0f);
-    char* in = (char*)cMemMan_alloc(0x1C, str_FEUIInput, 0, 0);
+    cFEInput* in = (cFEInput*)cMemMan_alloc(0x1C, str_FEUIInput, 0, 0);
     sUI_1E80* ui2 = ((sUI_1E80*)self->mpUI);
-    in[4] = 0;
-    *(void***)(in + 8) = cFEInput_vtbl;
-    *(int*)(in + 0x18) = 0;
-    *(int*)(in + 0xC) = 0;
-    *(int*)(in + 0x10) = 0;
-    *(int*)(in + 0x14) = 0;
-    ui2->input = in;
+    ((char*)in)[4] = 0;
+    in->mVtbl = cFEInput_vtbl;
+    in->mpInput = 0;
+    in->mbKeyReady = 0;
+    in->miVKey = 0;
+    in->miAsciiKey = 0;
+    ui2->input = ((char*)in);
     ((sUI_1E80*)self->mpUI)->custom = cFECustom_cFECustom((cFECustom*)cMemMan_alloc(20, str_FEUICustom, 0, 0), (cUIEngine*)((sUI_1E80*)self->mpUI));
     ((sUI_1E80*)self->mpUI)->sound = cFESound_cFESound((cFESound*)cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;

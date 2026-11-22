@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/fecustom.h"
+#include "ui/uiengine.h"
 #include "fe/festatememcard.h"
 #include "fe/festateload.h"
 #include "ui/uithing.h"
@@ -168,23 +170,25 @@ public:
     virtual int v24(int a, int b);
 };
 
-static inline void PlayIntro1867A8(void* self)
+static inline void PlayIntro1867A8(void* vself)
 {
-    int f = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut));
+    cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
+    int f = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
     if (f != 0xFFFF) {
-        cUIScreen_playFrame(*(void**)((char*)self + 0x40), f, 1);
+        cUIScreen_playFrame(self->mpScreen, f, 1);
     }
 }
 
-static inline void Opened1867A8(void* self, void* item)
+static inline void Opened1867A8(void* vself, void* item)
 {
+    cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
     if (item != 0) {
-        cFEVObj_1867A8* c = *(cFEVObj_1867A8**)(**(char***)((char*)self + 0x10) + 0x10);
+        cFEVObj_1867A8* c = *(cFEVObj_1867A8**)(*(char**)self->mpEngine + 0x10);
         if (c != 0) {
             c->v24(1, 0);
         }
         PlayIntro1867A8(self);
-        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, item);
+        cUIStateStack_push(&self->mpEngine->mStateStack, item);
     }
 }
 
@@ -207,7 +211,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUI
         if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, 5) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
-                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             } else {
                 cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
                 Opened1867A8(self, feCustom->getNextState(self, obj->mMiscData));
@@ -217,7 +221,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUI
         if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, 6) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
-                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             } else {
                 cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
                 Opened1867A8(self, feCustom->getPrevState(self, obj->mMiscData));

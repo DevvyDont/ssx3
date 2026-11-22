@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "visualfx/lensfx.h"
+#include "world/worldcache.h"
+#include "main/gamerender.h"
 #include "main/gameviewman.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "visualfx/fog.h"
@@ -56,7 +59,7 @@ static inline int curLayer_C078(sRCtx_C078* c)
  *
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  */
-extern "C" void cGame_renderModels(cGame* self, void* world)
+extern "C" void cGame_renderModels(cGame* self, FrustumIntersector* world)
 {
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078((sRCtx_C078*)GrMan);
     cPS2GraphicsMan* ctx = GrMan;
@@ -66,12 +69,12 @@ extern "C" void cGame_renderModels(cGame* self, void* world)
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
         flag = 0x400;
     }
-    int n = *(int*)((char*)world + 0x209C);
+    int n = world->numinstancesinside;
     int* items = (int*)((char*)world + 0x20A0);
     for (int i = 0; i < n; i++) {
         ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)GrMan->mVtbl)[96]), items[i], 0, 0, flag);
     }
-    int secondCount = *(int*)((char*)world + 0x40A0);
+    int secondCount = world->numinstancescrossing;
     items = (int*)((char*)world + 0x40A4);
     for (int i = 0; i < secondCount; i++) {
         ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)GrMan->mVtbl)[96]), items[i], 0, 0, flag | 0x20);
@@ -348,17 +351,17 @@ struct sVEntry0022C620 {
  *
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  */
-extern "C" void cGame_renderPatches(cGame* self, void* world)
+extern "C" void cGame_renderPatches(cGame* self, FrustumIntersector* world)
 {
     char ctx[0x30];
     func_0022C1B0(ctx);
-    int n = *(int*)((char*)world + 0x50A8);
-    int* items = (int*)((char*)world + 0x50AC);
+    int n = world->numpatchesinside;
+    int* items = (int*)(&world->patchesinside[0]);
     for (int i = 0; i < n; i++) {
         func_0022C410(ctx, items[i], 0);
     }
-    n = *(int*)((char*)world + 0x70AC);
-    items = (int*)((char*)world + 0x70B0);
+    n = world->numpatchescrossing;
+    items = (int*)(&world->patchescrossing[0]);
     for (int i = 0; i < n; i++) {
         func_0022C410(ctx, items[i], 1);
     }
@@ -386,17 +389,17 @@ extern "C" void cFogParticleMan_render(void* r);
  *
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  */
-extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
+extern "C" void cGame_renderFogVolumes(cGame* self, FrustumIntersector* world)
 {
-    void* fog = (char*)world + 0x78B8;
-    int n = *(int*)((char*)world + 0x78B4);
+    void* fog = (char*)&world->fogvolumesinside[0];
+    int n = world->numfogvolumesinside;
     if (n != 0) {
         cFogParticleMan* fogMan = self->FogMan;
         sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
         vt[2].fn(vthis(fogMan, vt[2]), fog, n, 0);
     }
-    fog = (char*)world + 0x7AC0;
-    n = *(int*)((char*)world + 0x7ABC);
+    fog = (char*)&world->fogvolumescrossing[0];
+    n = world->numfogvolumescrossing;
     if (n != 0) {
         cFogParticleMan* fogMan = self->FogMan;
         sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
@@ -420,22 +423,22 @@ extern "C" void cLensFxMan_render(void* self, int a1);
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  * @param ViewID  the view being drawn
  */
-extern "C" void cGame_renderLightHalos(cGame* self, void* world, int ViewID)
+extern "C" void cGame_renderLightHalos(cGame* self, FrustumIntersector* world, int ViewID)
 {
-    *(int*)((char*)self->LensFxMan + 0x6494) = 1;
+    self->LensFxMan->mbLocked = 1;
     cLensFxMan_Reset(self->LensFxMan, ViewID);
-    void* halos = (char*)world + 0x7BC4;
-    int n = *(int*)((char*)world + 0x7BC0);
+    void* halos = (char*)&world->lighthalosinside[0];
+    int n = world->numlighthalosinside;
     if (n != 0) {
         cLensFxMan_AddLightHalos(self->LensFxMan, halos, n, 0, ViewID);
     }
-    halos = (char*)world + 0x7FC8;
-    n = *(int*)((char*)world + 0x7FC4);
+    halos = (char*)&world->lighthaloscrossing[0];
+    n = world->numlighthaloscrossing;
     if (n != 0) {
         cLensFxMan_AddLightHalos(self->LensFxMan, halos, n, 2, ViewID);
     }
     cLensFxMan_render(self->LensFxMan, ViewID);
-    *(int*)((char*)self->LensFxMan + 0x6494) = 0;
+    self->LensFxMan->mbLocked = 0;
 }
 #endif
 
@@ -1403,8 +1406,8 @@ extern "C" void cSectionMan_update(cSectionMan* self)
     } else if (self->mbLocationIsActivated == 0) {
         self->mStreamRate = 3;
     } else {
-        char* w = *(char**)(char*)self->mpGame->World;
-        if (*(int*)(w + 0x250) != 0 && *(int*)(w + 0x2A0) != 0) {
+        cWorldCache* w = (cWorldCache*)(*(char**)(char*)self->mpGame->World);
+        if (w->m_WorldView.m_StreamFocus[0].m_bActive != 0 && w->m_WorldView.m_StreamFocus[1].m_bActive != 0) {
             self->mStreamRate = 1;
         } else {
             self->mStreamRate = 0;

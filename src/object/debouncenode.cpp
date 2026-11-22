@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldcache.h"
+#include "world/worldrecords.h"
 #include "bx/math3d.h"
 #include "ai/rider.h"
 #include "bx/appman.h"
@@ -779,11 +781,11 @@ extern char cCounterNode_vtbl[];
  * @param counterData  counter make-data (StartCount at +0x4)
  * @return self
  */
-extern "C" void* cCounterNode_cCounterNode1(cCounterNode* self, void* bucket, void* inst, void* counterData)
+extern "C" void* cCounterNode_cCounterNode1(cCounterNode* self, void* bucket, void* inst, tMakeCounterData* counterData)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 7, inst);
     self->mVtbl = (void**)cCounterNode_vtbl;
-    self->Count = *(short*)((char*)counterData + 0x4);
+    self->Count = counterData->StartCount;
     self->Counted = 0;
     return ((void*)self);
 }
@@ -1447,10 +1449,10 @@ extern "C" void func_003443A8(void* self);
 extern "C" void func_00344368(void* self, int modelId)
 {
     char* owner = (char*)self;
-    char* appMan = (char*)cAppMan_TheAppMan;
+    cAppMan* appMan = cAppMan_TheAppMan;
     *(int*)(owner + 0x4) = modelId;
     *(int*)(owner + 0x1DC) = 0;
-    *(float*)(owner + 0x1E4) = 1.0f / (float)*(int*)(appMan + 0x10);
+    *(float*)(owner + 0x1E4) = 1.0f / (float)appMan->TimerHz;
     func_003443A8(self);
 }
 #endif
@@ -2125,11 +2127,11 @@ static inline sModel_44E18* GetModel_44E18(unsigned int* ref)
 
 static inline int IsLoaded_44E18(sModel_44E18* m)
 {
-    char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
+    cWorldCache* wc = cWorld_m_pTheWorld->m_pWorldCache;
     if (m->page == 0xFF)
         return 1;
-    int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;
-    return ok ? *(int*)(wc + m->slot * 0x18 + 0x3F0) == 3 : 0;
+    int ok = wc->m_WorldView.mp_SectionState[m->page].state == 6;
+    return ok ? wc->m_HullPages[m->slot].m_State == 3 : 0;
 }
 
 struct sVE7_44E18 { short delta; short index; void (*fn)(void*, void*, float, void*, void*, void*, int, int); };
@@ -2589,9 +2591,9 @@ struct sCtl00345430 {
 extern "C" void cSpline_draw(cSpline* self, int lineColour)
 {
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-    char* list = *(char**)((char*)self->Seg + 0x68);
-    int n = *(int*)(list + 0x20);
-    char* node = *(char**)(list + 0x24);
+    tSplineRecord* list = (tSplineRecord*)(*(char**)((char*)self->Seg + 0x68));
+    int n = list->m_iNumSegments;
+    char* node = (char*)list->m_HeaderSeg;
     (((sCtl00345430*)w->m_pCurrentDrawState))->f10 = -1;
     (((sCtl00345430*)w->m_pCurrentDrawState))->mode = 1;
     int i;

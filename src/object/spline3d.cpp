@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldrecords.h"
 #include "vtable.h"
 #include "object/spline3d.h"
 #include "render/ps2graphicsman.h"
@@ -260,11 +261,11 @@ struct sVEnt_5638 {
  */
 extern "C" int func_00345638(void* self)
 {
-    char* nodeBytes = (char*)self;
+    tSplineSegmentRecord* nodeBytes = (tSplineSegmentRecord*)self;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     sVEnt_5638* vt = (sVEnt_5638*)w->mVtbl;
-    return vt[93].fn(vthis(w, vt[93]), sV4_5638(*(float*)(nodeBytes + 0x6C), *(float*)(nodeBytes + 0x70), *(float*)(nodeBytes + 0x74), 1.0f),
-                  sV4_5638(*(float*)(nodeBytes + 0x78), *(float*)(nodeBytes + 0x7C), *(float*)(nodeBytes + 0x80), 1.0f),
+    return vt[93].fn(vthis(w, vt[93]), sV4_5638(nodeBytes->m_fvMin.m[0], nodeBytes->m_fvMin.m[1], nodeBytes->m_fvMin.m[2], 1.0f),
+                  sV4_5638(nodeBytes->m_fvMax.m[0], nodeBytes->m_fvMax.m[1], nodeBytes->m_fvMax.m[2], 1.0f),
                   ((cWorld_5638*)w)->GetNetMatrix()) != 1;
 }
 #endif

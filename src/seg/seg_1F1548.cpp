@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ai/rider.h"
+#include "animation/animmodel.h"
 #include "vtable.h"
 #include "ui/uithing.h"
 #include "main/gameviewman.h"
@@ -2427,11 +2429,12 @@ extern "C" void cSplashManager_AddDrop_37A8(void *arg0, t2Vector *arg1, void *ar
  * @param basePos  the drop position (copied)
  * @param maxSize  the largest drop size
  */
-extern "C" void cSplashManager_AddDrop_37A8(void *splashManager, t2Vector *basePos, void *maxSize) {
-    int n = *(int *)((char*)splashManager + 0x14);
+extern "C" void cSplashManager_AddDrop_37A8(void *vsplashManager, t2Vector *basePos, void *maxSize) {
+    cSplashManager* splashManager = (cSplashManager*)vsplashManager;
+    int n = splashManager->mNumActiveDrops;
     if (n < cSplashToggles_m_NumDrops) {
-        tDrop_init((char*)splashManager + (n * 0x3C + 0x1C), *basePos, maxSize);
-        *(int *)((char*)splashManager + 0x14) = *(int *)((char*)splashManager + 0x14) + 1;
+        tDrop_init(&splashManager->mDropList[n], *basePos, maxSize);
+        splashManager->mNumActiveDrops = splashManager->mNumActiveDrops + 1;
     }
 }
 #endif
@@ -2651,7 +2654,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         self->speed = 0.0f;
     }
     self->prevPos = pos;
-    cSplashManager_AddSplashes((cSplashManager*)((char*)self));
+    cSplashManager_AddSplashes((cSplashManager*)self);
 
     int i = 0;
     while (i < self->nSmoke) {

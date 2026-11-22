@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ai/ridermetrix.h"
+#include "ui/uiicon.h"
+#include "ui/uistate.h"
 #include "bx/appman.h"
 #include "main/loadscreens.h"
 #include "ui/uithing.h"
@@ -58,14 +61,14 @@ extern "C" void cFELoadHintState_onCreateScreen(cFELoadHintState* self)
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(body));
     }
-    char* icon = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000_b));
-    if (icon != 0) {
+    cUIIcon* icon = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000_b));
+    if (((char*)icon) != 0) {
         cFELoadScreen* loadInfo = self->mpParentModule;
         if (((char*)loadInfo) != 0) {
             int textureId = loadInfo->mTexID[0];
             if (textureId != 0) {
-                *(int*)(icon + 0x78) = textureId;
-                *(int*)(icon + 0x7C) = 0;
+                icon->mTextureID = textureId;
+                icon->mpTextureElem = 0;
             }
         }
     }
@@ -465,31 +468,31 @@ struct sVEK245F50 {
  * slot 9, with 0) and made static (setStatic, slot 8, with 1). Starts the 300-frame countdown at +0x4C. The state is
  * pushed by func_002452D8() after the progressive-scan choice.
  */
-extern "C" void func_00245F50(void* self)
+extern "C" void func_00245F50(cUIState* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_supopup), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_b));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_b));
     if (text != 0) {
         if (*(signed char*)((char*)self + 0x48) == 0)
             cUIText_setAsciiString(text, str_The_display_mode_has_been_switched_to_Pr);
         else
             cUIText_setAsciiString(text, str_The_display_mode_has_been_set_to_interla);
     }
-    cUIText* text2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_yes_c));
+    cUIText* text2 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_c));
     if (text2 != 0) {
         cUIText_setUnicodeStringByID(text2, GetHashValue32(str_kT_CMNContinue_c));
     }
-    char* noButton = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_no_c));
-    if (noButton != 0) {
-        sVEK245F50* vt = *(sVEK245F50**)(noButton + 8);
-        vt[9].fn(noButton + vt[9].delta, 0);
-        sVEK245F50* vt2 = *(sVEK245F50**)(noButton + 8);
-        vt2[8].fn(noButton + vt2[8].delta, 1);
+    cUIThing* noButton = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_c));
+    if (((char*)noButton) != 0) {
+        sVEK245F50* vt = (sVEK245F50*)noButton->mVtbl;
+        vt[9].fn(((char*)noButton) + vt[9].delta, 0);
+        sVEK245F50* vt2 = (sVEK245F50*)noButton->mVtbl;
+        vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
     }
     *(int*)((char*)self + 0x4C) = 300;
 }
@@ -525,29 +528,29 @@ struct sVEK246098 {
  * flag to 1, rewrites "Title", "yes" and "no" as func_00245F50() does (so the text now says the mode was set to
  * interlaced) and calls cGraphicsMan_TheGraphicsMan's SetDTV (slot 8) with 0. Always ends with cUIState_onUpdate().
  */
-extern "C" void func_00246098(void* self)
+extern "C" void func_00246098(cUIState* self)
 {
     if (*(int*)((char*)self + 0x4C) != 0) {
         if (--*(int*)((char*)self + 0x4C) == 0) {
             if (*(signed char*)((char*)self + 0x48) == 0) {
                 *(signed char*)((char*)self + 0x48) = 1;
-                cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_b));
+                cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_b));
                 if (text != 0) {
                     if (*(signed char*)((char*)self + 0x48) == 0)
                         cUIText_setAsciiString(text, str_The_display_mode_has_been_switched_to_Pr);
                     else
                         cUIText_setAsciiString(text, str_The_display_mode_has_been_set_to_interla);
                 }
-                cUIText* text2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_yes_c));
+                cUIText* text2 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_c));
                 if (text2 != 0) {
                     cUIText_setUnicodeStringByID(text2, GetHashValue32(str_kT_CMNContinue_c));
                 }
-                char* noButton = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_no_c));
-                if (noButton != 0) {
-                    sVEK246098* vt = *(sVEK246098**)(noButton + 8);
-                    vt[9].fn(noButton + vt[9].delta, 0);
-                    sVEK246098* vt2 = *(sVEK246098**)(noButton + 8);
-                    vt2[8].fn(noButton + vt2[8].delta, 1);
+                cUIThing* noButton = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_c));
+                if (((char*)noButton) != 0) {
+                    sVEK246098* vt = (sVEK246098*)noButton->mVtbl;
+                    vt[9].fn(((char*)noButton) + vt[9].delta, 0);
+                    sVEK246098* vt2 = (sVEK246098*)noButton->mVtbl;
+                    vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
                 }
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
                 sVEK246098* vt3 = (sVEK246098*)ps2GraphicsMan->mVtbl;
@@ -578,14 +581,14 @@ extern char str_cFEStateMemCard[];
  * @param item  the widget (ignored when 0); its hash name is at +0x38
  * @param msg  the widget event
  */
-extern "C" void func_002461E0(void* self, void* item, int msg)
+extern "C" void func_002461E0(cUIState* self, void* item, int msg)
 {
     if (item != 0) {
         if (msg == 5) {
             int hash = *(int*)((char*)item + 0x38);
             if (hash == GetHashValue32(str_yes_c)) {
-                void* state = func_00186A08(cMemMan_alloc(584, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0x10));
-                cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, state);
+                void* state = func_00186A08(cMemMan_alloc(584, str_cFEStateMemCard, 0, 0), self->mpEngine);
+                cUIStateStack_push((char*)self->mpEngine + 0x18, state);
             }
         }
     }
@@ -1112,13 +1115,13 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
                 cUIProgress_setValue(bar, statValue);
             }
         }
-        char* pic = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
+        cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
         sLoadInfo_6CF8* loadScreen = (sLoadInfo_6CF8*)self->mpParentModule;
-        if (loadScreen != 0 && pic != 0) {
+        if (loadScreen != 0 && ((char*)pic) != 0) {
             int portraitTexture = loadScreen->image[player];
             if (portraitTexture != 0) {
-                *(int*)(pic + 0x78) = portraitTexture;
-                *(int*)(pic + 0x7C) = 0;
+                pic->mTextureID = portraitTexture;
+                pic->mpTextureElem = 0;
             }
         }
     }
@@ -1252,7 +1255,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     cGameModeMan_getGM();
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* st = cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
+    tRiderStats* st = (tRiderStats*)cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(rankNumName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
@@ -1300,48 +1303,48 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
     obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(knockdownsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
-        sprintf(buf, fmt, *(int*)(st + 0x2C));
+        sprintf(buf, fmt, st->NumFrags);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
     obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(wipeoutsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
-        sprintf(buf, fmt, *(int*)(st + 0x28));
+        sprintf(buf, fmt, st->NumWipeouts);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
     obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(tricksName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
-        sprintf(buf, fmt, *(int*)(st + 0x14));
+        sprintf(buf, fmt, st->NumTricksLanded);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
     obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(handplantsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
-        sprintf(buf, fmt, *(int*)(st + 0xC));
+        sprintf(buf, fmt, st->NumHandplants);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
     obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ubertricksName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
-        sprintf(buf, fmt, *(int*)(st + 0x18));
+        sprintf(buf, fmt, st->NumUberTricks);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
     obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ubergrindsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
-        sprintf(buf, fmt, *(int*)(st + 0x20));
+        sprintf(buf, fmt, st->NumUberGrindTricks);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
     sName2_72C0 picName = *(sName2_72C0*)D_004A2C18;
     picName.c[0] = side + '0';
-    char* pic = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
+    cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
     sLoadInfo_72C0* loadInfo = (sLoadInfo_72C0*)self->mpParentModule;
-    if (loadInfo != 0 && pic != 0) {
+    if (loadInfo != 0 && ((char*)pic) != 0) {
         int textureId = loadInfo->image[player];
         if (textureId != 0) {
-            *(int*)(pic + 0x78) = textureId;
-            *(int*)(pic + 0x7C) = 0;
+            pic->mTextureID = textureId;
+            pic->mpTextureElem = 0;
         }
     }
 }
@@ -1400,7 +1403,7 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* st = cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, 0));
+    tRiderStats* st = (tRiderStats*)cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, 0));
     unsigned short text[0x18];
     unsigned short fmtw[0x20];
     if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_rider)) {
@@ -1414,26 +1417,26 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_knockdown)) {
         func_002C2540(fmtw, str_pct_d_g);
-        sprintf1(text, fmtw, *(int*)(st + 0x2C));
+        sprintf1(text, fmtw, st->NumFrags);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_wipeouts)) {
         func_002C2540(fmtw, str_pct_d_g);
-        sprintf1(text, fmtw, *(int*)(st + 0x28));
+        sprintf1(text, fmtw, st->NumWipeouts);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ubertricks)) {
         func_002C2540(fmtw, str_pct_d_g);
-        sprintf1(text, fmtw, *(int*)(st + 0x18));
+        sprintf1(text, fmtw, st->NumUberTricks);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ubergrinds)) {
         func_002C2540(fmtw, str_pct_d_g);
-        sprintf1(text, fmtw, *(int*)(st + 0x20));
+        sprintf1(text, fmtw, st->NumUberGrindTricks);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_handplants)) {
         func_002C2540(fmtw, str_pct_d_g);
-        sprintf1(text, fmtw, *(int*)(st + 0xC));
+        sprintf1(text, fmtw, st->NumHandplants);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_grabtime)) {
-        int totalSeconds = (int)*(float*)(st + 0x48);
+        int totalSeconds = (int)st->GrabTime;
         int min = totalSeconds / 60;
         int sec = totalSeconds % 60;
         char fmt[0x20];
@@ -1443,7 +1446,7 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
         cUIText_setAsciiString((cUIText*)widget, buf);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_best_combo)) {
         func_002C2540(fmtw, str_pct_d_g);
-        sprintf1(text, fmtw, *(int*)(st + 0x88));
+        sprintf1(text, fmtw, st->LongestCombo);
         cUIText_setUnicodeString(widget, (char*)text);
     }
 }

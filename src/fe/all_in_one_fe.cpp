@@ -2212,8 +2212,9 @@ extern "C" void cFont_text(void*, float, float, char*);
 
 // Inline copy of func_0021E7E0's body (the original helper was inlined here): colour/position/size by pointer, copied
 // locally.
-static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
+static inline void draw_ED48(char* vself, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
                              float t, float sx, float sy, float amin, float amax) {
+    cOVStateHUD1P* self = (cOVStateHUD1P*)vself;
     Col_E7E0 col = *colp;
     V2_ED48 pos = *posp;
     V2_ED48 size = *sizep;
@@ -2227,18 +2228,18 @@ static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* po
     size.x += dw;
     size.y += dh;
     float* pp = &pos.x;
-    int id = *(int*)(self + 0x474);
+    int id = self->mGlow.mSourceShape;
     GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = id;
     if (size.x > 72.0f) {
         float cap = 36.0f;  // width of each end cap: left cap, stretched middle (size.x - 2 caps), right cap
-        float mid = (*(float*)(self + 0x484) + *(float*)(self + 0x488)) * 0.5f;
-        func_0021EA00_E7E0(self, &col, pp, cap, size.y, *(float*)(self + 0x484), *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        float mid = (self->mGlow.mLeft + self->mGlow.mRight) * 0.5f;
+        func_0021EA00_E7E0(self, &col, pp, cap, size.y, self->mGlow.mLeft, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos.x += cap;
-        func_0021EA00_E7E0(self, &col, pp, size.x - 72.0f, size.y, mid, *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(self, &col, pp, size.x - 72.0f, size.y, mid, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos.x += size.x - 72.0f;
-        func_0021EA00_E7E0(self, &col, pp, cap, size.y, mid, *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(self, &col, pp, cap, size.y, mid, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     } else {
-        func_0021EA00_E7E0(self, &col, pp, size.x, size.y, *(float*)(self + 0x484), *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(self, &col, pp, size.x, size.y, self->mGlow.mLeft, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     }
 }
 
@@ -2269,7 +2270,7 @@ static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* po
  * @param layer  added to the elements' layer bytes
  */
 // PORT: elems is a pointer passed as int
-extern "C" void cOVStateHUD1P_renderUberChar(cOVStateHUD1P* self, int elems, char* rider, int mode, int idx, float* scale, V2_ED48* sc2, int kind, int layer) {
+extern "C" void cOVStateHUD1P_renderUberChar(cOVStateHUD1P* self, int elems, tHUDRiderInfo* rider, int mode, int idx, float* scale, V2_ED48* sc2, int kind, int layer) {
     V2_ED48 one;
     Tab_ED48 tab;
     Str_ED48 str;
@@ -2305,13 +2306,13 @@ extern "C" void cOVStateHUD1P_renderUberChar(cOVStateHUD1P* self, int elems, cha
     int* w = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *w = (*w & ~0x3E0) | (((letterDef[0x22] + layer) << 5) & 0x3E0);
     *(Col_E7E0*)&self->mpHUDFont->Color[0] = col;
-    char* hudFont = (char*)self->mpHUDFont;
-    *(float*)(hudFont + 0x38) = *(float*)(hudFont + 0x30) * scale[0];
-    *(float*)(hudFont + 0x3C) = *(float*)(hudFont + 0x34) * scale[1];
+    cFont* hudFont = self->mpHUDFont;
+    hudFont->Scale[0] = hudFont->BaseScale[0] * scale[0];
+    hudFont->Scale[1] = hudFont->BaseScale[1] * scale[1];
     cFont_text((char*)self->mpHUDFont, drawPos.x, drawPos.y, str.c);
-    char* hudFont2 = (char*)self->mpHUDFont;
-    *(float*)(hudFont2 + 0x38) = *(float*)(hudFont2 + 0x30) * one.x;
-    *(float*)(hudFont2 + 0x3C) = *(float*)(hudFont2 + 0x34) * one.y;
+    cFont* hudFont2 = self->mpHUDFont;
+    hudFont2->Scale[0] = hudFont2->BaseScale[0] * one.x;
+    hudFont2->Scale[1] = hudFont2->BaseScale[1] * one.y;
     if (kind != 0) {
         char* bkgdDef = (char*)(elems + (defIndex + 1) * 0x24);
         tHUDDef_getPos(bkgdDef, &elemPos);
@@ -2324,11 +2325,11 @@ extern "C" void cOVStateHUD1P_renderUberChar(cOVStateHUD1P* self, int elems, cha
         w = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
         *w = (*w & ~0x3E0) | (((bkgdDef[0x22] + layer) << 5) & 0x3E0);
         cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[0], &drawPos, &size, &one, cp);
-        if (kind == 2 && *(float*)(rider + 0x64) >= 0.0f) {
+        if (kind == 2 && rider->uberGlowFrame >= 0.0f) {
             int under = layer - 1;
             w = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
             *w = (*w & ~0x3E0) | (((bkgdDef[0x22] + under) << 5) & 0x3E0);
-            draw_ED48(((char*)self), (Col_E7E0*)(rider + 0x54), &drawPos, &size, *(float*)(rider + 0x64), 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
+            draw_ED48(((char*)self), (Col_E7E0*)(&rider->uberGlowColour), &drawPos, &size, rider->uberGlowFrame, 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
         }
     }
 }

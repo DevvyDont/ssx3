@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldrecords.h"
+#include "world/instancerecord.h"
 #include "replay/frameptr.h"
 #include "object/skybox.h"
 #include "object/flexbridgenode.h"
@@ -1170,13 +1172,13 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     SetBlendM_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 2);
     SetZMode_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0);
     SetAlpha_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 20);
-    char* skyInstance = (char*)self->m_pInstanceSky;
-    if (skyInstance != 0)
+    tInstanceRecord* skyInstance = self->m_pInstanceSky;
+    if (((char*)skyInstance) != 0)
     {
-        *(unsigned int*)(skyInstance + 8) = (*(unsigned int*)(skyInstance + 8) & ~2u) | 4;
-        char* instToDraw = (char*)self->m_pInstanceSky;
+        skyInstance->m_iFlags = ((unsigned int)skyInstance->m_iFlags & ~2u) | 4;
+        tInstanceRecord* instToDraw = self->m_pInstanceSky;
         sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
-        vt[95].fn(vthis(ctx, vt[95]), instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &skyMatrix, 0, 0, 21536);
+        vt[95].fn(vthis(ctx, vt[95]), ((char*)instToDraw), 1.0f, instToDraw->m_Model->m_MaterialBlock, &skyMatrix, 0, 0, 21536);
     }
     sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = topDrawState - 1;

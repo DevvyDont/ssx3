@@ -1,5 +1,11 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
+#include "main/gamemode.h"
+#include "util/locale.h"
+#include "be/beintreward.h"
+#include "be/beintscore.h"
+#include "fe/ovstate.h"
 #include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "fe/ovstateeventresults.h"
@@ -2433,20 +2439,20 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0130);
  * @param mountainRoom  the mountain-room state
  * @return 1 when both are shown, else 0
  */
-extern "C" int func_001E0130(void *mountainRoom) {
+extern "C" int func_001E0130(cFEStateMountainRoom* mountainRoom) {
     int var_2;
     int var_5;
     void *temp_3;
     void *temp_4;
 
-    temp_3 = (*(void **)((char*)(mountainRoom) + (0x48)));
+    temp_3 = ((void*)mountainRoom->mpPassGroup);
     var_5 = 0;
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = ((int) (*(int *)((char*)(temp_3) + (0x14))) >> 6) & 1;
     }
     if (var_2 != 0) {
-        temp_4 = (*(void **)((char*)(mountainRoom) + (0x4C)));
+        temp_4 = ((void*)mountainRoom->mpPassFrontGroup);
         if (temp_4 != 0) {
             var_5 = ((int) (*(int *)((char*)(temp_4) + (0x14))) >> 6) & 1;
         }
@@ -4180,11 +4186,12 @@ struct sAlloc_E0F60 {
 
 // The zeroed triple at 0x6E8 looks like an STL vector; its constructor takes an
 // allocator temporary, which is what leaves the unused stack slot.
-static inline void InitVec_E0F60(void* self, const sAlloc_E0F60& a = sAlloc_E0F60())
+static inline void InitVec_E0F60(void* vself, const sAlloc_E0F60& a = sAlloc_E0F60())
 {
-    *(int*)((char*)self + 0x6E8) = 0;
-    *(int*)((char*)self + 0x6EC) = 0;
-    *(int*)((char*)self + 0x6F0) = 0;
+    cFEStateNetMessenger* self = (cFEStateNetMessenger*)vself;
+    self->mNames.mpStart = 0;
+    self->mNames.mpFinish = 0;
+    self->mNames.mpEndOfStorage = 0;
 }
 
 /**
@@ -8023,15 +8030,15 @@ extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
 {
     unsigned short buf[0x38];
     if (self->mpTotalMessagesLabel != 0) {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry001E4758* vt = *(sVEntry001E4758**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry001E4758* vt = (sVEntry001E4758*)locale->mVtbl;
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNTotalMsg));
         sprintf1(buf, fmt, func_001E33E8_noarg());
         cUIText_setUnicodeString(self->mpTotalMessagesLabel, buf);
     }
     if (self->mpUnreadMessagesLabel != 0) {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry001E4758* vt = *(sVEntry001E4758**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry001E4758* vt = (sVEntry001E4758*)locale->mVtbl;
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNUnread));
         sprintf1(buf, fmt, func_001E3408());
         cUIText_setUnicodeString(self->mpUnreadMessagesLabel, buf);
@@ -8950,14 +8957,14 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
         func_001E3268(id);
     }
     case 5: {
-        char* parentState = (char*)self->mpParentState;
-        sVE5800* vt = *(sVE5800**)(parentState + 8);
+        cUIState* parentState = self->mpParentState;
+        sVE5800* vt = (sVE5800*)parentState->mVtbl;
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
     case 6: {
-        char* parentState = (char*)self->mpParentState;
-        sVE5800* vt = *(sVE5800**)(parentState + 8);
+        cUIState* parentState = self->mpParentState;
+        sVE5800* vt = (sVE5800*)parentState->mVtbl;
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
@@ -8992,8 +8999,8 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
     if (groupEntry->type == 4) {
         int n = func_001E34D8(id);
         if (n == -1) {
-            char* parentState = (char*)self->mpParentState;
-            sVE5800* vt = *(sVE5800**)(parentState + 8);
+            cUIState* parentState = self->mpParentState;
+            sVE5800* vt = (sVE5800*)parentState->mVtbl;
             vt[17].fn(vthis(parentState, vt[17]), self, 20);
             return;
         }
@@ -9008,8 +9015,8 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         self->miNumber = func_001E33E8_noarg() - idx;
         func_001E5428(self);
     } else {
-        char* parentState = (char*)self->mpParentState;
-        sVE5800* vt = *(sVE5800**)(parentState + 8);
+        cUIState* parentState = self->mpParentState;
+        sVE5800* vt = (sVE5800*)parentState->mVtbl;
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
     }
 }
@@ -9202,20 +9209,20 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
     unsigned short* fmt = 0;
     switch (event) {
     case 1: {
-        char* object = (char*)SSXApp->FELocale;
-        sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
+        cFELocale* object = SSXApp->FELocale;
+        sVEntry5B80* vt = (sVEntry5B80*)object->mVtbl;
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnSlopeCaps));
         break;
     }
     case 2: {
-        char* object = (char*)SSXApp->FELocale;
-        sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
+        cFELocale* object = SSXApp->FELocale;
+        sVEntry5B80* vt = (sVEntry5B80*)object->mVtbl;
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnBigAirCaps));
         break;
     }
     case 3: {
-        char* object = (char*)SSXApp->FELocale;
-        sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
+        cFELocale* object = SSXApp->FELocale;
+        sVEntry5B80* vt = (sVEntry5B80*)object->mVtbl;
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnPipeCaps));
         break;
     }
@@ -9309,8 +9316,8 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         }
         if (flag) {
             sprintf(name, str_help_current0pct_d, last);
-            cUIText* object = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-            cUIText_setUnicodeStringByID(object, GetHashValue32(str_kT_CMNHELPEarnedEnoughPoints));
+            cFELocale* object = (cFELocale*)((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name)));
+            cUIText_setUnicodeStringByID(((cUIText*)object), GetHashValue32(str_kT_CMNHELPEarnedEnoughPoints));
         }
     }
     {
@@ -9331,17 +9338,17 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         }
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            cUIObj_5B80* object = (cUIObj_5B80*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-            if (object != 0) {
+            cFELocale* object = (cFELocale*)((cUIObj_5B80*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name)));
+            if (((cUIObj_5B80*)object) != 0) {
                 if (i < 5) {
                     cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(D_00441D10[ids.v[i]]));
                     if (i == 0 && ids.v[0] == 1 && info->f70 == 3) {
                         cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(str_kT_OVRCMNFinalRound));
                     }
-                    *(int*)((char*)object + 0x18) = ids.v[i];
+                    object->mpLocaleFile[4] = (cLocaleFile*)ids.v[i];
                 } else {
-                    object->setVisible(0);
-                    object->setStatic(1);
+                    ((cUIObj_5B80*)object)->setVisible(0);
+                    ((cUIObj_5B80*)object)->setStatic(1);
                 }
             }
         }
@@ -10129,17 +10136,17 @@ extern "C" void cOVStateManager_triggerOverlay(int state);
  * @param input  the input
  * @return 0
  */
-extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* self, void* input)
+extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* self, cUIInput* input)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            cReplay_setReplayPadNum(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
+            cReplay_setReplayPadNum(SSXApp->Game->Replay, input->mPadNum);
         }
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)input + 8);
+        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)input->mVtbl;
         if (vt[27].fn(vthis(input, vt[27])) != 0) {
             cOVStateManager_triggerOverlay(40);
         }
@@ -10270,8 +10277,8 @@ extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* se
     int* modeData = (int*)SSXApp->GameModeMan;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
+    cBEScoreInterface* iface8 = (cBEScoreInterface*)cBE_getInterface_Fv(cBE_getBE(), 8);
+    cBERewardInterface* ifaceD = (cBERewardInterface*)cBE_getInterface_Fv(cBE_getBE(), 13);
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int mode = *modeData;
     int sel = cGameModeMan_iRanking[pl];
@@ -10291,31 +10298,31 @@ extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* se
             screenWidget->setVisible(1);
         }
     }
-    if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         D_004A213C = 1;
         cUIState_showObjSafe(self, str_platinum);
     } else {
         D_004A213C = 0;
         cUIState_hideObjSafe(self, str_platinum);
     }
-    if (*(int*)(ifaceD + 0x14) == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         cUIState_showObjSafe(self, str_gold);
     } else {
         cUIState_hideObjSafe(self, str_gold);
     }
-    if (*(int*)(ifaceD + 0x14) == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         cUIState_showObjSafe(self, str_silver);
     } else {
         cUIState_hideObjSafe(self, str_silver);
     }
-    if (*(int*)(ifaceD + 0x14) == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         cUIState_showObjSafe(self, str_bronze);
     } else {
         cUIState_hideObjSafe(self, str_bronze);
     }
     screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_new_record));
     int vis = 0;
-    if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
+    if (iface8->mNewTrackHighScoreIndex[0] >= 0 || iface8->mNewTrackHighScoreIndex[1] >= 0) {
         vis = 1;
     }
     if (vis) {
@@ -10503,8 +10510,8 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
+    cBEScoreInterface* iface8 = (cBEScoreInterface*)cBE_getInterface_Fv(cBE_getBE(), 8);
+    cBERewardInterface* ifaceD = (cBERewardInterface*)cBE_getInterface_Fv(cBE_getBE(), 13);
     int* modeData = (int*)SSXApp->GameModeMan;
     signed char event = cBENewRaceInterface_newRace.cGameMode;
     cUIState_hideObjSafe(self, str_firstrun);
@@ -10528,24 +10535,24 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
     }
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int sel = cGameModeMan_iRanking[pl];
-    if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         D_004A213C = 1;
         cUIState_showObjSafe(self, str_platinum);
     } else {
         D_004A213C = 0;
         cUIState_hideObjSafe(self, str_platinum);
     }
-    if (*(int*)(ifaceD + 0x14) == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         cUIState_showObjSafe(self, str_gold);
     } else {
         cUIState_hideObjSafe(self, str_gold);
     }
-    if (*(int*)(ifaceD + 0x14) == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         cUIState_showObjSafe(self, str_silver);
     } else {
         cUIState_hideObjSafe(self, str_silver);
     }
-    if (*(int*)(ifaceD + 0x14) == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         cUIState_showObjSafe(self, str_bronze);
     } else {
         cUIState_hideObjSafe(self, str_bronze);
@@ -10572,7 +10579,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
     cUIText_setUnicodeString(screenWidget, text);
     screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_new_record));
     int vis = 0;
-    if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
+    if (iface8->mNewTrackHighScoreIndex[0] >= 0 || iface8->mNewTrackHighScoreIndex[1] >= 0) {
         vis = 1;
     }
     if (vis) {
@@ -10772,15 +10779,15 @@ public:
  * kT_HELPCongratWonChal for places 0-3, else kT_HELPSorryBeatTime or kT_HELPSorryBeatScore, hidden when the player gave
  * up; the first three overlayOpt buttons take option ids from D_0046E9B0 and the rest are hidden.
  */
-extern "C" void func_001E8920(void* self)
+extern "C" void func_001E8920(cOVState* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_70peakchal_results), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)((char*)self + 0x10);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -10788,25 +10795,25 @@ extern "C" void func_001E8920(void* self)
     cOVState_onCreateScreen(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* modeData = (char*)SSXApp->GameModeMan;
+    cGameModeMan* modeData = SSXApp->GameModeMan;
     int trk = cBENewRaceInterface_newRace.cGameEvent;
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
-    cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title1));
+    cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title1));
     cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_TITLERivalChallenge));
-    uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title2));
+    uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title2));
     if (trk < 12) {
         if (trk >= 6) {
             cUIText_setUnicodeString(uiText, func_001FD190(trk));
         }
     }
-    cUIText* targetLabel = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_label_target_timescore));
-    cUIText* targetValue = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_target_timescore));
-    cUIText* resultLabel = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_label_timescore));
-    cUIText* resultValue = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_timescore));
+    cUIText* targetLabel = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_label_target_timescore));
+    cUIText* targetValue = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_target_timescore));
+    cUIText* resultLabel = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_label_timescore));
+    cUIText* resultValue = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_timescore));
     if (trk >= 6 && trk <= 8) {
         cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNTimeToBeatColon));
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_OVRCMNYourTimeColon));
-        cUIText_setAsciiString(targetValue, func_0020A1A8(fptoui(*(unsigned int*)(modeData + 0x78) * 0.01666666753590107f)));
+        cUIText_setAsciiString(targetValue, func_0020A1A8(fptoui(modeData->uiTimeLimit * 0.01666666753590107f)));
         if (D_005366A8[0] != 0) {
             cUIText_setAsciiString(resultValue, str_DNF);
         } else {
@@ -10816,7 +10823,7 @@ extern "C" void func_001E8920(void* self)
         char buf[32];
         cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNScoreToBeatColon));
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_CMNYourScore));
-        sprintf(buf, D_004A2138, *(int*)(modeData + 0x7C));
+        sprintf(buf, D_004A2138, (int)modeData->uiPointTarget);
         cUIText_setAsciiString(targetValue, buf);
         if (D_005366A8[0] != 0) {
             cUIText_setAsciiString(resultValue, str_DNF);
@@ -10825,7 +10832,7 @@ extern "C" void func_001E8920(void* self)
             cUIText_setAsciiString(resultValue, buf);
         }
     }
-    cUIObj_8920* screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
+    cUIObj_8920* screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
     int playerPlace = cGameModeMan_iRanking[pl];
     if (playerPlace == 0) goto yes;
     if (playerPlace == 1) goto yes;
@@ -10850,7 +10857,7 @@ done:
         int i;
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (screenWidget != 0) {
                 if (i < 3) {
                     cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(D_00441D10[ids.v[i]]));

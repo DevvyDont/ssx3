@@ -534,7 +534,7 @@ extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
         cUIMenu_notify(((char*)self), 2, self->mScrollItemOffset);
         cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
     }
-    cUIMenu_setSelected(self, (cUIThing*)((char*)cList_getByIndex_i(&self->mList, idx - self->mScrollItemOffset)), 1);
+    cUIMenu_setSelected(self, (cUIThing*)cList_getByIndex_i(&self->mList, idx - self->mScrollItemOffset), 1);
 }
 #endif
 
