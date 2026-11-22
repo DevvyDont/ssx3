@@ -4552,18 +4552,18 @@ struct sWSSlot8 {
 extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
 {
     sWSVec4 ones;
-    self->unk_038 = 0;
-    self->unk_030 = 0;
-    self->unk_034 = 0;
+    self->InvDefaultMatrices = 0;
+    self->SkelMatrices = 0;
+    self->SkelMatricesScaled = 0;
     ones.x = 1.0f;
     ones.y = 1.0f;
     ones.z = 1.0f;
     ones.w = 1.0f;
-    *(sWSVec4*)&self->unk_140 = ones;
+    *(sWSVec4*)&self->ScaleVect = ones;
     self->bones = 0;
     self->parts = 0;
     self->partIndex = 0;
-    self->unk_03C = 0;
+    self->MorphChannels = 0;
     self->numParts = 0;
     self->NumTextureRefs = 0;
     self->TextureRefs = 0;

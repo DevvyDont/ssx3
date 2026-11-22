@@ -987,7 +987,7 @@ extern "C" void cGame_restart(cGame* self)
     cGameModeMan_restartHeat(SSXApp->GameModeMan);
     int i;
     for (i = 0; i < numRiders_2302A8(self); i++) {
-        *(int*)&rider_2302A8(self, i)->unk_2F8 = 0;
+        *(int*)&rider_2302A8(self, i)->BoostPowerBar = 0;
     }
     cGame_setState(self, 1, 2, 1);
     cSSXAudio_RestartEvent(cAudioInterface_bxAudio());

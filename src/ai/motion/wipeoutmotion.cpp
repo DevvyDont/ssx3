@@ -768,14 +768,14 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
     cRider* rider = self->mRider;
     cAnimModel* model = rider->mAnimModel;
     sAnimModelBone* bone = &(model->bones)[rider->mBoneBoardChild];
-    float modelScale = model->unk_140.x;
+    float modelScale = model->ScaleVect.x;
     sVec4_7550 boardAxis = vu0Scale_7550(xAxis_7550(bone), modelScale);
     pts[0] = vu0Add_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 70.0f));
     pts[1] = vu0Add_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 30.0f));
     pts[2] = vu0Sub_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 30.0f));
     pts[3] = vu0Sub_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 70.0f));
     cRiderSphereTree_Update(self->BoardSphereTree, 4, pts, radii.r, &(*(sVec4_7550*)&bone->pos),
-                  self->mRider->mAnimModel->unk_140.x * 90.0f);
+                  self->mRider->mAnimModel->ScaleVect.x * 90.0f);
 }
 #endif
 
@@ -995,7 +995,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
             RIDER->mGroundNormal = hitB.Inorm;
             RIDER->mSurfaceType = hitB.Stype;
             RIDER->mGroundContactPoint = hitB.Ipos;
-            RIDER->unk_454 = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.Ipos), RIDER->mGroundNormal);
+            RIDER->SnowOffset = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.Ipos), RIDER->mGroundNormal);
             t4Vector impulse = vu0Scale_137860(RIDER->mGroundNormal, -vn);
             vu0AddEq_137860(RIDER->mVelocity, impulse);
             if (((char*)hitB.Inst) != 0)
@@ -1332,8 +1332,8 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
         RIDER->mGroundNormal = hit.Inorm;
         RIDER->mSurfaceType = hit.Stype;
         RIDER->mGroundContactPoint = hit.Ipos;
-        RIDER->unk_454 = vu0Dot_137D18(vu0Sub_137D18(RIDER->mPosition, hit.Ipos), RIDER->mGroundNormal);
-        float lim = RIDER->mAnimModel->unk_140.x * mat->PowderDepth3G;
+        RIDER->SnowOffset = vu0Dot_137D18(vu0Sub_137D18(RIDER->mPosition, hit.Ipos), RIDER->mGroundNormal);
+        float lim = RIDER->mAnimModel->ScaleVect.x * mat->PowderDepth3G;
         float pen = vu0Dot_137D18(vu0Sub_137D18(RIDER->mPosition, hit.Ipos), hit.Inorm);
         if (pen < -lim) {
             float spd = vu0Length_137D18(hit.Ivel);

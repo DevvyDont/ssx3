@@ -261,7 +261,7 @@ static inline int boardTrailCanDraw_86F0(char* vvr)
     cRider* vr = (cRider*)vvr;
     cRider* r = (cRider*)vr;
     int ok = 0;
-    if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
+    if (r->mIsInNIS != 0 && r->mHiddenNIS == 0) ok = r->mNISShowBoardVisualFX != 0;
     return ok;
 }
 
@@ -318,7 +318,7 @@ static inline int boardTrailCanDraw(char* vvr)
     cRider* vr = (cRider*)vvr;
     cRider* r = (cRider*)vr;
     int ok = 0;
-    if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
+    if (r->mIsInNIS != 0 && r->mHiddenNIS == 0) ok = r->mNISShowBoardVisualFX != 0;
     return ok;
 }
 /**
@@ -679,7 +679,7 @@ static inline int btCanDraw(char* vvr)
     cRider* vr = (cRider*)vvr;
     cRider* r = (cRider*)vr;
     int ok = 0;
-    if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
+    if (r->mIsInNIS != 0 && r->mHiddenNIS == 0) ok = r->mNISShowBoardVisualFX != 0;
     return ok;
 }
 
@@ -1538,9 +1538,9 @@ extern "C" void cTrickBoostFX_update(cTrickBoostFX* self)
         int n = self->mNumActiveBlurBuffers + 1;
         self->mNumActiveBlurBuffers = n < 4 ? n : 3;
         cRider* riderPtr = (cRider*)((char*)self->mRider);
-        sV4_2EADD0 pos = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->pos;
-        sV4_2EADD0 fwd = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->fwd;
-        sV4_2EADD0 side = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->side;
+        sV4_2EADD0 pos = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->SkelMatrices + (riderPtr->mBoneBoardChild << 6)))->pos;
+        sV4_2EADD0 fwd = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->SkelMatrices + (riderPtr->mBoneBoardChild << 6)))->fwd;
+        sV4_2EADD0 side = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->SkelMatrices + (riderPtr->mBoneBoardChild << 6)))->side;
         (*(sV4_2EADD0*)&self->mConnectVertLeft) = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
         (*(sV4_2EADD0*)&self->mConnectVertRight) = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
         ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));

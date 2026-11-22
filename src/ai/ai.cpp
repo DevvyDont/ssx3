@@ -890,7 +890,7 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
         nPlayers++;
         cRider_addRiderMetrix(obj->mRider);
         cAI_applyPlayerRulesCustom((cAI*)self, (cPlayer*)obj, i);
-        *(int*)&obj->mRider->unk_2F8 = 0;
+        *(int*)&obj->mRider->BoostPowerBar = 0;
         cRider_initOnce(self->mRiders[i], 0);
         cBENewRaceInterface_assignPlayer(rm, idx, idx);
         idx++;
@@ -2416,7 +2416,7 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
     else if (OptBit_12B498(&cBERules_mRules_12B498, 1))
         cRider_setUbersAllowed(obj->mRider, 1);
     if (cBERules_mRules_12B498.e[i].Flags & 1)
-        obj->mRider->unk_B20 = 2;
+        obj->mRider->mWipeoutRecoveryMode = 2;
     (obj->mRider)->mStartHandicap = cBERules_getPlayerStartDelaySecs(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0)
@@ -3540,7 +3540,7 @@ extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
         self->RecoverPercent = newRecover;
         if (*input & 0x2000) {
             float rate = 17.00261688232422f;
-            switch (self->mRider->unk_B20) {
+            switch (self->mRider->mWipeoutRecoveryMode) {
             case 0:
                 rate = 8.001495361328125f;
                 break;
@@ -4617,8 +4617,8 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self)
     cAnimModel* trk = rd->mAnimModel;
     sQuat_12BE20* n = (sQuat_12BE20*)((rd->mBoneHips << 4) + (int)trk->localPos);
     tPose node;
-    (*(sQuat_12BE20*)&node.P) = sQuat_12BE20(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
-                            n->z * trk->unk_140.z, n->w * trk->unk_140.w);
+    (*(sQuat_12BE20*)&node.P) = sQuat_12BE20(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
+                            n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w);
     (*(sQuat_12BE20*)&node.Q) = *(sQuat_12BE20*)((char*)rd->mAnimModel->localRot + (rd->mBoneHips << 4));
     tPose y = Combine_12E010(node, Invert_12E010(newPose));
     tPose* rx = (tPose*)(&self->mRider->mPosition);
@@ -9233,8 +9233,8 @@ extern "C" void cSpinControl_applyFlipSpinAngle_x(void* vself, sXf* xf)
     sVec4* n = (sVec4*)((rd->mBoneHips << 4) + (int)trk->localPos);
     float spinAngle = -(self->TrickSpin + self->AirAdjSpin);
     float flipAngle = self->TrickFlip + self->AirAdjFlip;
-    sVec4 pivot = SubO_134DD0(sVec4(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
-                                              n->z * trk->unk_140.z, n->w * trk->unk_140.w),
+    sVec4 pivot = SubO_134DD0(sVec4(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
+                                              n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w),
                                  t4vect_Origin_4DD0);
     {
         sVec4 rotPivot = Rot_12E010_4DD0(xf->rot, pivot);

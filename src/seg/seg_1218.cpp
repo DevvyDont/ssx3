@@ -4444,7 +4444,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
         sVEv_57B8* vt3 = *(sVEv_57B8**)sub;
         t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
-        cAirPredictor_startLaunchIntoAir_57B8(rider->mAirPredictor, pos, vel, rider->unk_2E4);
+        cAirPredictor_startLaunchIntoAir_57B8(rider->mAirPredictor, pos, vel, rider->TerminalVelocity);
         return;
     }
     AddEq_57B8(rider->mVelocity, Scale_57B8(hit->n, bounce));
@@ -4606,7 +4606,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
             t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
             sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
             t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
-            cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
+            cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->TerminalVelocity);
         }
         char* h = (char*)self->mRiderHandler;
         *(int*)(h + 0x314) = 1;
@@ -4618,7 +4618,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
         sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
         t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
-        cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
+        cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->TerminalVelocity);
     }
     float sideDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot), info->off);
     float frontDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot.row[1]), info->off);
@@ -6305,7 +6305,7 @@ extern "C" void cRider_doOpponentCollision(cRider* self, cRider* other, t4Vector
         if (cRider_getMotionState((char*)self) == 1 || (cRider_getMotionState((char*)self) == 2 && self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
             cAI_7E70* ai = (cAI_7E70*)(&self->mVtbl);
             t4Vector* pos = ai->GetPos();
-            cAirPredictor_startLaunchIntoAir(self->mAirPredictor, pos, ai->GetDir(), self->unk_2E4);
+            cAirPredictor_startLaunchIntoAir(self->mAirPredictor, pos, ai->GetDir(), self->TerminalVelocity);
             if (Dot_7E70(*n, Get_7E70((char*)&self->mMatrix.row[2])) * clampedSpeed > 0.0f)
                 absSpd = 0.0f;
         }

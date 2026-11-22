@@ -2865,7 +2865,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
         }
     }
     AudioTable landCurve = D_00482D30;
-    int vol = (int)func_00290B58(&landCurve, rider->unk_770);
+    int vol = (int)func_00290B58(&landCurve, rider->LastLandSpeed);
     if (vol > 127) {
         vol = 127;
     }
@@ -3693,7 +3693,7 @@ extern "C" void cSSXAudio_WipeoutHit(cSSXAudio* vself, cRider* obj)
         }
     }
     struct AudioTable curve = D_00482DA0;
-    int vol = (int)func_00290B58(&curve, obj->unk_770);
+    int vol = (int)func_00290B58(&curve, obj->LastLandSpeed);
     int bankNum = 0;
     int patchNum;
     if (vol > 0x7F) {

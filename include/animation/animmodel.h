@@ -71,13 +71,13 @@ struct cAnimModel {
     /* 0x018 */ int unk_018;                // nonzero: draw per-part LOD refs, else one call with lodInfo (cAnimModel_render)
     /* 0x01C */ int* partIndex;             // part number -> index into parts, < 0 = none
     /* 0x020 */ int* boneChannelIndex;      // per-bone first-component index into the channel data (func_0030ECD8: first = arr[k] - arr[firstBone])
-    /* 0x024 */ t4Vector* localPos;         // numBones local bone positions, scaled componentwise by unk_140 (cAnimModel_transform)
+    /* 0x024 */ t4Vector* localPos;         // numBones local bone positions, scaled componentwise by ScaleVect (cAnimModel_transform)
     /* 0x028 */ t4Vector* localRot;         // numBones local bone rotation quaternions (cAnimModel_transform)
     /* 0x02C */ sAnimModelBone* bones;      // numBones of them; streamed as numBones << 5 bytes (cAnimModel_writeToReplayFrame)
-    /* 0x030 */ t4Matrix* unk_030;          // numBones bone matrices, row 3 = position (rider bone lookups); translated with the model
-    /* 0x034 */ t4Matrix* unk_034;          // numBones, translated with the model (cAnimModel_applyOffset)
-    /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (cAnimModel_rendershadow, cAnimModel_render)
-    /* 0x03C */ int unk_03C;
+    /* 0x030 */ t4Matrix* SkelMatrices;          // numBones bone matrices, row 3 = position (rider bone lookups); translated with the model
+    /* 0x034 */ t4Matrix* SkelMatricesScaled;          // numBones, translated with the model (cAnimModel_applyOffset)
+    /* 0x038 */ t4Matrix* InvDefaultMatrices;          // numBones; palette[i] = SkelMatrices[i] or SkelMatricesScaled[i] times this (cAnimModel_rendershadow, cAnimModel_render)
+    /* 0x03C */ int MorphChannels;
     /* 0x040 */ sAnimModelLodInfo lodInfo[4];
     /* 0x060 */ int NumTextureFiles;        // [O] cAnimModel::NumTextureFiles; [R] cAnimModel_init zeroes it (view
                                             //     cAnimModel_init_sPool field_0x60); [U] cAnimModel_addTextureFile appends at
@@ -85,14 +85,14 @@ struct cAnimModel {
     /* 0x064 */ const char* TextureFiles[50]; // [O] cAnimModel::TextureFiles (const char*[50]; 0xC8 bytes end exactly at
                                             //     NumTextureRefs 0x12C, as in On Tour); [U] addTextureFile stores its data
                                             //     argument (view sAnimModelList items) [lstruct L2]
-    /* 0x12C */ int NumTextureRefs;         // [O] cAnimModel::NumTextureRefs (+0x78C there, 0x14 before ScaleVect = unk_140, as here);
+    /* 0x12C */ int NumTextureRefs;         // [O] cAnimModel::NumTextureRefs (+0x78C there, 0x14 before ScaleVect, as here);
                                             //     [R] cAnimModel_cAnimModel clears it between numParts and localPos, the same store
                                             //     order as On Tour's ctor (NumModelParts, NumTextureRefs, TextureRefs, BoneOffset)
     /* 0x130 */ tTextureRef* TextureRefs;   // [O] cAnimModel::TextureRefs (+0x790); [R] cAnimModel_cAnimModel clears it (see NumTextureRefs)
     /* 0x134 */ char unk_134[0xC];
-    /* 0x140 */ t4Vector unk_140;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (cAnimModel_render); .x scales rider lean (ai/rider)
+    /* 0x140 */ t4Vector ScaleVect;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (cAnimModel_render); .x scales rider lean (ai/rider)
     /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (func_0030E9E0, func_0030EB60)
-    /* 0x158 */ unsigned long unk_158;      // another such mask (cAnimModel_addAnimMinPart)
+    /* 0x158 */ unsigned long AnimMinPartsMask;      // another such mask (cAnimModel_addAnimMinPart)
 };
 
 CHECK_OFFSET(sAnimModelPart, mask, 0x10);
@@ -112,17 +112,17 @@ CHECK_OFFSET(cAnimModel, boneChannelIndex, 0x20);
 CHECK_OFFSET(cAnimModel, localPos, 0x24);
 CHECK_OFFSET(cAnimModel, localRot, 0x28);
 CHECK_OFFSET(cAnimModel, bones, 0x2C);
-CHECK_OFFSET(cAnimModel, unk_030, 0x30);
-CHECK_OFFSET(cAnimModel, unk_034, 0x34);
-CHECK_OFFSET(cAnimModel, unk_038, 0x38);
+CHECK_OFFSET(cAnimModel, SkelMatrices, 0x30);
+CHECK_OFFSET(cAnimModel, SkelMatricesScaled, 0x34);
+CHECK_OFFSET(cAnimModel, InvDefaultMatrices, 0x38);
 CHECK_OFFSET(cAnimModel, lodInfo, 0x40);
 CHECK_OFFSET(cAnimModel, NumTextureFiles, 0x60);
 CHECK_OFFSET(cAnimModel, TextureFiles, 0x64);
 CHECK_OFFSET(cAnimModel, NumTextureRefs, 0x12C);
 CHECK_OFFSET(cAnimModel, TextureRefs, 0x130);
-CHECK_OFFSET(cAnimModel, unk_140, 0x140);
+CHECK_OFFSET(cAnimModel, ScaleVect, 0x140);
 CHECK_OFFSET(cAnimModel, mask, 0x150);
-CHECK_OFFSET(cAnimModel, unk_158, 0x158);
+CHECK_OFFSET(cAnimModel, AnimMinPartsMask, 0x158);
 typedef char check_sAnimModelPart_size[(sizeof(sAnimModelPart) == 0x58) ? 1 : -1];
 typedef char check_sAnimModelBone_size[(sizeof(sAnimModelBone) == 0x20) ? 1 : -1];
 typedef char check_sAnimModelLodRef_size[(sizeof(sAnimModelLodRef) == 0x10) ? 1 : -1];

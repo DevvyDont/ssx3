@@ -1044,11 +1044,11 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
     }
     int place = cGameModeMan_iRanking[n];
     if (place == 0)
-        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->unk_2F8 = 0.699999988079071f;
+        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->BoostPowerBar = 0.699999988079071f;
     else if (place == 1)
-        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->unk_2F8 = 0.3499999940395355f;
+        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->BoostPowerBar = 0.3499999940395355f;
     else
-        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->unk_2F8 = 0.0f;
+        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->BoostPowerBar = 0.0f;
 }
 #endif
 
@@ -1947,11 +1947,11 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     }
     int place = cGameModeMan_iRanking[n];
     if (place == 0)
-        GetRace()->players[0]->rider->unk_2F8 = 0.699999988079071f;
+        GetRace()->players[0]->rider->BoostPowerBar = 0.699999988079071f;
     else if (place == 1)
-        GetRace()->players[0]->rider->unk_2F8 = 0.3499999940395355f;
+        GetRace()->players[0]->rider->BoostPowerBar = 0.3499999940395355f;
     else
-        GetRace()->players[0]->rider->unk_2F8 = 0.0f;
+        GetRace()->players[0]->rider->BoostPowerBar = 0.0f;
 }
 #endif
 

@@ -127,41 +127,41 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mBoltOnFX = cBoltOnFXInterface_cBoltOnFXInterface(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
     self->mLineHint = (tIntHint*)cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
     self->mWallHint = (tIntHint*)cMemMan_alloc(0x10, str_Wall_Intersect_Hint, 0, 0);
-    MEM_fill_v(self->unk_794, 0, 0x20);
+    MEM_fill_v(self->ActiveLights, 0, 0x20);
     self->mFocusBox = 0;
-    self->unk_5B0 = 0;
+    self->DangerLevel = 0;
     self->mIsInNIS = 0;
-    self->unk_AC8 = 0;
-    self->unk_AD0 = 0;
-    *(cQuad128*)&self->unk_AE0 = 0;
-    self->unk_AF0 = 0;
-    self->unk_AF4 = 0;
-    self->unk_AF8 = 0;
-    self->unk_AFC = 0;
-    self->unk_B00 = one;
-    self->unk_B04 = 0;
+    self->mHasTriggeredSpeechEvents = 0;
+    self->mHiddenNIS = 0;
+    *(cQuad128*)&self->mScriptCurrPosOffset = 0;
+    self->mScriptCurrRotX = 0;
+    self->mScriptCurrRotY = 0;
+    self->mScriptCurrRotZ = 0;
+    self->mNISShowBoardVisualFX = 0;
+    self->mOnGroundNIS = one;
+    self->mLastSpeed = 0;
     int i;
     for (i = 3; i >= 0; i--) {
-        self->unk_B08[i] = -1;
+        self->mSoundHandles[i] = -1;
     }
     int invalidHandle = -1;
     self->mShadow = cPlayerShadow_cPlayerShadow(cMemMan_alloc(416, str_BoaderShadow, 0, 0));
     self->unk_450 = invalidHandle;
     self->unk_AA4 = 0;
     self->mIsOnScreen = 0;
-    self->unk_B1C = 0;
+    self->mUpdateMinAnimOnly = 0;
     cScriptObject_InitScriptObject(self->unk_6DC);
     self->mWipeoutSlideHandle = invalidHandle;
     self->mWipeoutTumbleHandle = invalidHandle;
     cSSXAudio_RiderCreated_impl(cAudioInterface_bxAudio(), self);
     self->mBoostMeterStart = 0.0f;
     self->mBoostMode = 1;
-    self->unk_B20 = 1;
+    self->mWipeoutRecoveryMode = 1;
     self->mStartHandicap = 0;
     self->mStatsIndex = 0;
     self->mBoostSourceMask = 31;
     self->mUberFlags = 3;
-    self->unk_308 = 1;
+    self->mAllowNaturalAir = 1;
     self->mBoostMaxSpeed = 4000.0f;
     self->mCheatSteerAlign = 0.18000000715255737f;
     self->mCheatSpeedLerp = 0.014999999664723873f;
@@ -742,19 +742,19 @@ void cRider_initAlways_impl(cRider* self)
         self->NumPathEventsCur = 0;
         self->mPowerUpBoostTimer = 0;
         self->mPowerUpTrickTimer = 0;
-        self->unk_5A0 = 0;
+        self->ConsecutiveAirFrames = 0;
         sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)self->mVtbl;
         vt[kRiderVt_vibrationReset].fn(vthis(self, vt[kRiderVt_vibrationReset]));
         cRiderHandler_resetRiderFX(self->mRiderHandler);
-        self->unk_5A4 = 0;
-        self->unk_5A8 = 0;
-        self->unk_5AC = 0;
+        self->VerticalJump = 0;
+        self->DidPop = 0;
+        self->RidingFlexRail = 0;
         self->PissedOff = 0;
         self->LastPunchTick = 0;
         self->PissedAIIndex = -1;
         self->unk_100 = 1;
         cRider_cancelRiderTransitions(self);
-        self->unk_5B0 = 0;
+        self->DangerLevel = 0;
     }
 }
 #endif
@@ -1132,7 +1132,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     self->mVelocity = t4vect_Zero_D660;
     self->mGroundContactPoint = self->mPosition;
     self->mSurfaceType = 0;
-    self->unk_454 = 0.0f;
+    self->SnowOffset = 0.0f;
     self->mImpulse = t4vect_Zero_D660;
     self->mImpactAccum = 0.0f;
     self->mImpactAccum2 = 0.0f;
@@ -1160,7 +1160,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     self->mBoostStrength = 0.0f;
     self->mTimeScale = 1.0f;
     self->LegIK = 1.0f;
-    self->unk_31C = 0.0f;
+    self->ChatterMag = 0.0f;
     self->RailslideMode = 0;
     self->HandplantMode = 0;
     self->PressMode = 0;
@@ -1168,7 +1168,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     self->PunchStrength = 0.0f;
     self->ReactionEventTick = -1;
     self->ReactionEventType = 0;
-    self->unk_35C = 0.0f;
+    self->ProximityActionDelay = 0.0f;
     self->IsRidingFakie = self->IsGoofyStance;
     cRiderAnimBase_reset(self->mRiderAnim);
     self->mRiderAnim->IsFlipped = self->IsRidingFakie;
@@ -1637,7 +1637,7 @@ extern "C" void cRiderAnimBase_expireAnimation(void*);
  */
 extern "C" void cRider_updateAnimation(cRider* self, float value)
 {
-    cRiderAnimBase_updateAnimation(self->mRiderAnim, self->unk_B1C);
+    cRiderAnimBase_updateAnimation(self->mRiderAnim, self->mUpdateMinAnimOnly);
     cRiderAnimBase_expireAnimation(self->mRiderAnim);
 }
 #endif
@@ -2030,12 +2030,12 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
                 tiltRot = AxisAngle_EB98(tiltAxis, (1.5707963705062866f - func_0031C128(sinTilt)) * self->mSlewed[17].cur);
             boardRoot->rot = QuatMul_EB98(tiltRot, boardRoot->rot);
         }
-        if (0.0f < self->unk_31C)
-            AddTo_EB98(boardRoot->pos, Scale_EB98(Scale_EB98(*(sVec4W*)&self->mGroundNormal, self->unk_31C), self->mSlewed[17].cur));
+        if (0.0f < self->ChatterMag)
+            AddTo_EB98(boardRoot->pos, Scale_EB98(Scale_EB98(*(sVec4W*)&self->mGroundNormal, self->ChatterMag), self->mSlewed[17].cur));
         {
             cAnimModel* am = self->mAnimModel;
             sXf_EB98 local;
-            local.pos = sVec4W(am->localPos[self->mBoneBoardChild].x * am->unk_140.x, am->localPos[self->mBoneBoardChild].y * am->unk_140.y, am->localPos[self->mBoneBoardChild].z * am->unk_140.z, am->localPos[self->mBoneBoardChild].w * am->unk_140.w);
+            local.pos = sVec4W(am->localPos[self->mBoneBoardChild].x * am->ScaleVect.x, am->localPos[self->mBoneBoardChild].y * am->ScaleVect.y, am->localPos[self->mBoneBoardChild].z * am->ScaleVect.z, am->localPos[self->mBoneBoardChild].w * am->ScaleVect.w);
             sVec4W* lr = (sVec4W*)&am->localRot[self->mBoneBoardChild];
             local.rot = *lr;
             sXf_EB98* bn = (sXf_EB98*)&am->bones[self->mBoneBoardChild];
@@ -2130,11 +2130,11 @@ extern "C" void cRider_doLegIK_impl(cRider* self, int* chain, sXf_EB98* target, 
     }
     cAnimModel* am = self->mAnimModel;
     sAnimModelBone* bones = am->bones;
-    float upperLen = sVec4W(am->localPos[chain[1]].x * am->unk_140.x, am->localPos[chain[1]].y * am->unk_140.y,
-                     am->localPos[chain[1]].z * am->unk_140.z, am->localPos[chain[1]].w * am->unk_140.w).x;
+    float upperLen = sVec4W(am->localPos[chain[1]].x * am->ScaleVect.x, am->localPos[chain[1]].y * am->ScaleVect.y,
+                     am->localPos[chain[1]].z * am->ScaleVect.z, am->localPos[chain[1]].w * am->ScaleVect.w).x;
     sXf_EB98* mid = (sXf_EB98*)&bones[chain[1]];
-    float lowerLen = sVec4W(am->localPos[chain[2]].x * am->unk_140.x, am->localPos[chain[2]].y * am->unk_140.y,
-                     am->localPos[chain[2]].z * am->unk_140.z, am->localPos[chain[2]].w * am->unk_140.w).x;
+    float lowerLen = sVec4W(am->localPos[chain[2]].x * am->ScaleVect.x, am->localPos[chain[2]].y * am->ScaleVect.y,
+                     am->localPos[chain[2]].z * am->ScaleVect.z, am->localPos[chain[2]].w * am->ScaleVect.w).x;
     sXf_EB98* root = (sXf_EB98*)&bones[chain[0]];
     sVec4W rootToEnd = Sub_EB98(end->pos, root->pos);
     float ang = func_0031C128(Clamp_F3D8((Dot_EB98(rootToEnd, rootToEnd) - upperLen * upperLen - lowerLen * lowerLen) * 0.5f / (upperLen * lowerLen), -1.0f, 1.0f));
@@ -2338,8 +2338,8 @@ static inline void LeanAbout_LP(char* vvself, sXf_LP* xf, float a, float b, floa
     cRider* self = (cRider*)vself;
     cAnimModel* trk = self->mAnimModel;
     sVec4XW* n = (sVec4XW*)((self->mBoneBoardRoot << 4) + (int)trk->localPos);
-    sVec4XW d = SubO_LP(sVec4XW(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
-                            n->z * trk->unk_140.z, n->w * trk->unk_140.w),
+    sVec4XW d = SubO_LP(sVec4XW(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
+                            n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w),
                       t4vect_Origin);
     {
         sVec4XW v = Rot_LP(xf->rot, d);
@@ -2665,7 +2665,7 @@ extern "C" void cRider_updateBoost(cRider* self)
         }
     }
     if (self->mUberLevel == 10) {
-        self->unk_2F8 = 1.0f;
+        self->BoostPowerBar = 1.0f;
         if (self->mUberTimer == 0.0f) {
             self->mUberLevel = 5;
             self->mUberTimer = 20.0f;
@@ -2673,16 +2673,16 @@ extern "C" void cRider_updateBoost(cRider* self)
     } else {
         switch (self->mBoostMode) {
         case 0:
-            self->unk_2F8 = 1.0f;
+            self->BoostPowerBar = 1.0f;
             break;
         case 1:
             if (cRider_getControlState(self) != 6) {
-                self->unk_2F8 = decay_1200D0(self->unk_2F8, step * 0.004999999888241291f);
+                self->BoostPowerBar = decay_1200D0(self->BoostPowerBar, step * 0.004999999888241291f);
             }
             break;
         case 2:
             if (cRider_getControlState(self) != 6) {
-                self->unk_2F8 = decay_1200D0(self->unk_2F8, step * 0.02398611046373844f);
+                self->BoostPowerBar = decay_1200D0(self->BoostPowerBar, step * 0.02398611046373844f);
             }
             break;
         }
@@ -2930,12 +2930,12 @@ INCLUDE_ASM("ai/rider", cRider_initBoost);
  */
 extern "C" void cRider_initBoost(cRider* self)
 {
-    self->unk_2F8 = self->mBoostMeterStart;
+    self->BoostPowerBar = self->mBoostMeterStart;
     int state = self->mBoostMode;
     if (state == 3) {
-        self->unk_2F8 = 0.0f;
+        self->BoostPowerBar = 0.0f;
     } else if (state == 0) {
-        self->unk_2F8 = 1.0f;
+        self->BoostPowerBar = 1.0f;
     }
 }
 #endif
@@ -3113,7 +3113,7 @@ skip:
     if (self->mIsInNIS)
     {
         char* refPos = (char*)&self->mPosition;
-        if (self->unk_AFC)
+        if (self->mNISShowBoardVisualFX)
             refPos = (char*)&self->mAnimModel->bones[self->mBoneBoardRoot];
         cRider_SetNISGroundVectors(self, refPos);
     }
@@ -3885,7 +3885,7 @@ extern "C" void cRider_updateActiveLights(cRider* self)
 {
     cQuad128 hipPos;
     cRider_getHipPosition(&hipPos, self);
-    cWorldLightMan_IntersectLights(SSXApp->Game->WorldLightMan, &hipPos, self->mOverlapList, self->unk_794, 8);
+    cWorldLightMan_IntersectLights(SSXApp->Game->WorldLightMan, &hipPos, self->mOverlapList, self->ActiveLights, 8);
 }
 #endif
 
@@ -3939,7 +3939,7 @@ extern "C" void cRider_SetRiderLights(cRider* self)
         func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))));
     }
     for (int i = 0; i < 8; i++) {
-        void* light = self->unk_794[i];
+        void* light = self->ActiveLights[i];
         if (light != 0)
             func_0038A6A8(self->unk_7C0, &hipPos, light);
     }
@@ -4030,7 +4030,7 @@ static inline int test_122278(void* a, void* b)
  */
 extern "C" int cRider_renderClip(cRider* self)
 {
-    if (self->mRenderFlag == 0 || self->mLoadStep != 7 || self->unk_AD0 != 0) {
+    if (self->mRenderFlag == 0 || self->mLoadStep != 7 || self->mHiddenNIS != 0) {
         self->mIsOnScreen = 0;
         return 0;
     }
@@ -4095,9 +4095,9 @@ extern "C" void cRider_renderBody(cRider* self)
         sVEntry<void(void*, float, void*)>* vt3 = (sVEntry<void(void*, float, void*)>*)grManReset->mVtbl;
         vt3[27].fn(vthis(grManReset, vt3[27]), 0.0f, &t4vect_Zero_v122448);
     }
-    if ((int)SSXApp->Game->ViewMan->m_uiCurrentView == 0 || self->unk_B1C)
+    if ((int)SSXApp->Game->ViewMan->m_uiCurrentView == 0 || self->mUpdateMinAnimOnly)
     {
-        int* lowDetailFlag = &self->unk_B1C;
+        int* lowDetailFlag = &self->mUpdateMinAnimOnly;
         int lowDetail = 0;
         if (self->mIsOnScreen == 0 || self->mLOD == 2)
             lowDetail = 1;
@@ -4188,7 +4188,7 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
  */
 extern "C" void cRider_flushActiveLights(cRider* self)
 {
-    MEM_fill(self->unk_794, 0, sizeof(self->unk_794));
+    MEM_fill(self->ActiveLights, 0, sizeof(self->ActiveLights));
 }
 #endif
 
@@ -4393,7 +4393,7 @@ static inline void Set3_2898(t3Vector& v, float x, float y, float z)
 static inline cAnimModel* Model_2898(cRider* rider) { return rider->mAnimModel; }
 static inline sObj_2898* Shadow_2898(cRider* rider) { return (sObj_2898*)rider->mShadow; }
 // Translation row of bone i's 0x40-byte matrix.
-static inline sV4_2898 BonePos_2898(cRider* rider, int i) { return *(sV4_2898*)((char*)Model_2898(rider)->unk_030 + (i << 6) + 0x30); }
+static inline sV4_2898 BonePos_2898(cRider* rider, int i) { return *(sV4_2898*)((char*)Model_2898(rider)->SkelMatrices + (i << 6) + 0x30); }
 
 static inline void* Tex_2898(sObj_2898* o) { return o->f170; }
 
@@ -4434,7 +4434,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
             objUp.z = upRow.z;
         }
         float k = 0.3f;
-        func_00374D00(Shadow_2898(self), &center, &objUp, &cRider_RenderShadow_lnorm, Model_2898(self)->unk_030, 0);
+        func_00374D00(Shadow_2898(self), &center, &objUp, &cRider_RenderShadow_lnorm, Model_2898(self)->SkelMatrices, 0);
         cPS2GraphicsMan* grManPushView = GrMan;
         top_2898(grManPushView)->f8 = (top_2898(grManPushView)->f8 & ~0x3E0) | 0x20;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFE7FFFFF) | 0x1000000;
@@ -4577,18 +4577,18 @@ float cRiderMetrix_evDangerLevelChange_2(void* self, int state) __asm__("cRiderM
  */
 extern "C" void cRider_updateDangerLevel(cRider* self)
 {
-    int old = self->unk_5B0;
+    int old = self->DangerLevel;
     int dangerLevel = cDangerMan_GetRiderDangerLevel(SSXApp->Game->AI->DangerMan, self->mAIIndex);
-    self->unk_5B0 = dangerLevel;
+    self->DangerLevel = dangerLevel;
     if (dangerLevel == 0)
     {
         if (cRider_isVertZoneApplicable(self) != 0)
         {
             if (cRider_isInVertZone(self))
-                self->unk_5B0 = 1;
+                self->DangerLevel = 1;
         }
     }
-    int cur = self->unk_5B0;
+    int cur = self->DangerLevel;
     if (old != cur)
         cRiderMetrix_evDangerLevelChange_2(self->mMetrix, cur);
 }
@@ -5186,43 +5186,43 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     cRiderAnimBase_reset(self->mRiderAnim);
     cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     self->mIsInNIS = 1;
-    self->unk_2D8 = self->IsRidingFakie;
-    self->unk_AC8 = 0;
+    self->mWasFlipped = self->IsRidingFakie;
+    self->mHasTriggeredSpeechEvents = 0;
     int j;
     for (j = 3; j >= 0; j--)
-        self->unk_B08[j] = -1;
+        self->mSoundHandles[j] = -1;
     float zeroF;
     float one = 1.0f;
     // PORT: GetSSXActorHeader returns a record pointer as int
-    char* rec = (char*)GetSSXActorHeader(self->unk_6D8);
+    char* rec = (char*)GetSSXActorHeader(self->mpEntity);
     zeroF = 0.0f;
-    self->unk_AFC = rec[7] != 0;
-    self->unk_B00 = 1;
-    self->unk_AD0 = rec[4] != 0;
-    GetSSXActorFrame((int)self->unk_6D8, buf);
+    self->mNISShowBoardVisualFX = rec[7] != 0;
+    self->mOnGroundNIS = 1;
+    self->mHiddenNIS = rec[4] != 0;
+    GetSSXActorFrame((int)self->mpEntity, buf);
     float* fb = (float*)buf;
     sV_3640 poseVec;
     poseVec.x = fb[6];
     poseVec.y = fb[7];
     poseVec.z = fb[8];
     poseVec.w = one;
-    self->unk_AF0 = fb[9] * 0.01745329424738884f;
-    self->unk_AF4 = fb[10] * 0.01745329424738884f;
-    self->unk_AF8 = fb[11] * 0.01745329424738884f;
-    *(sV_3640*)&self->unk_AE0 = poseVec;
-    poseVec = MatMulV_3640((char*)&self->mScriptMatrix, *(sV_3640*)&self->unk_AE0);
+    self->mScriptCurrRotX = fb[9] * 0.01745329424738884f;
+    self->mScriptCurrRotY = fb[10] * 0.01745329424738884f;
+    self->mScriptCurrRotZ = fb[11] * 0.01745329424738884f;
+    *(sV_3640*)&self->mScriptCurrPosOffset = poseVec;
+    poseVec = MatMulV_3640((char*)&self->mScriptMatrix, *(sV_3640*)&self->mScriptCurrPosOffset);
     *(sV_3640*)&self->mPosition = poseVec;
-    float ry = self->unk_744;
-    float rz = self->unk_740;
+    float ry = self->mBaseRotY;
+    float rz = self->mBaseRotX;
     cRider_EulerToQuat(self, (tQuaternion*)&poseVec, zeroF,
-                  self->unk_AF4 + ry,
-                  self->unk_AF0 + rz);
-    float rx = self->unk_748;
-    *(sV_3640*)&self->mRotation = AxisAngle_3640(t4vect_ZAxis_3640, self->unk_AF8 + rx - 1.5707963705062866f);
+                  self->mScriptCurrRotY + ry,
+                  self->mScriptCurrRotX + rz);
+    float rx = self->mBaseRotZ;
+    *(sV_3640*)&self->mRotation = AxisAngle_3640(t4vect_ZAxis_3640, self->mScriptCurrRotZ + rx - 1.5707963705062866f);
     *(sV_3640*)&self->mRotation = QuatMul_3640(poseVec, *(sV_3640*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
     *(sV_3640*)&self->mVelocity = t4vect_Zero_3640;
-    self->unk_B04 = zeroF;
+    self->mLastSpeed = zeroF;
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     initTrack_3640(self, 0x1F0, zeroF, zeroF);
     initTrack_3640(self, 0x1FC, zeroF, zeroF);
@@ -5352,15 +5352,15 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
 {
     cScriptObjRider_OnEndObjectUse((char*)&self->mScriptObjRiderVtbl);
     cRider_initAlways(self);
-    if (self->unk_AC8 != 0) {
+    if (self->mHasTriggeredSpeechEvents != 0) {
         func_002A1BD0(cAudioInterface_bxAudio());
     }
-    self->unk_AFC = 0;
-    self->unk_B04 = 0;
+    self->mNISShowBoardVisualFX = 0;
+    self->mLastSpeed = 0;
     self->mIsInNIS = 0;
-    int* ids = self->unk_B08;
-    self->unk_AD0 = 0;
-    self->unk_B00 = 1;
+    int* ids = self->mSoundHandles;
+    self->mHiddenNIS = 0;
+    self->mOnGroundNIS = 1;
     func_0030EA80(self->mAnimModel, 5, 0);
     func_0030EA80(self->mAnimModel, 6, 0);
     func_0030EA80(self->mAnimModel, 8, 0);
@@ -5369,7 +5369,7 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
     func_0030E9E0(self->mAnimModel, 4, 0);
     func_0030E9E0(self->mAnimModel, 7, 0);
     // PORT: GetSSXActorHeader returns a record pointer as int
-    if (*(signed char*)((char*)GetSSXActorHeader(self->unk_6D8) + 6) != 0) {
+    if (*(signed char*)((char*)GetSSXActorHeader(self->mpEntity) + 6) != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_noarg();
         cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
@@ -5471,7 +5471,7 @@ extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, fl
             if (ev < 100)
             {
                 func_002A1B58(cAudioInterface_bxAudio(), ev, (int)self);
-                self->unk_AC8 = 1;
+                self->mHasTriggeredSpeechEvents = 1;
             }
             else
             {
@@ -5480,7 +5480,7 @@ extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, fl
                 // PORT: id is a handle that is also read as a pointer here.
                 int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *((signed char*)event->pCustom), *(int*)(id + 8));
                 func_002A1B88(snd, ev, (int)self, subjectRider);
-                self->unk_AC8 = 1;
+                self->mHasTriggeredSpeechEvents = 1;
             }
         }
     }
@@ -5560,11 +5560,11 @@ static inline void AddTo_3F38(t4Vector& a, const t4Vector& b)
  */
 extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
 {
-    if (self->unk_6E4 <= 0)
+    if (self->mInUse <= 0)
         return *(&self->mPosition);
     float lift = 0.0f;
     // PORT: GetSSXActorHeader returns a record pointer as int
-    tSSXHeaderActor* rec = (tSSXHeaderActor*)((char*)GetSSXActorHeader(self->unk_6D8));
+    tSSXHeaderActor* rec = (tSSXHeaderActor*)((char*)GetSSXActorHeader(self->mpEntity));
     t4Vector pos = *(&self->mPosition);
     switch (rec->scriptEndLocation) {
     case 0:
@@ -5879,7 +5879,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     char* vtObj = (char*)&self->mVtbl;
     sVEntry<t4Vector*(void*)>* ve = &(*(sVEntry<t4Vector*(void*)>**)vtObj)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(vthis(vtObj, *ve)));
-    float sideOffset = self->mAnimModel->unk_140.x * (self->mSlewed[0].cur * 45.0f);
+    float sideOffset = self->mAnimModel->ScaleVect.x * (self->mSlewed[0].cur * 45.0f);
     t4Vector probeBase = Add_42B0(*(t4Vector*)pRiderPos, Scale_42B0(*(&self->mGroundSide), sideOffset));
     t4Vector lo = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), -100.0f));
     t4Vector hi = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), 200.0f));
@@ -5897,7 +5897,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
         *(unsigned int*)&self->mGroundPolyId = 0xFFFFFFFF;
     }
     if (hitDist < 0.0f) {
-        self->unk_B00 = 0;
+        self->mOnGroundNIS = 0;
         *(&self->mGroundNormal) = t4vect_ZAxis_42B0;
         *(&self->GroundVelocity) = t4vect_Zero_42B0;
         *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
@@ -5907,13 +5907,13 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
         self->mAudioEdging = 0.0f;
         self->mAudioPressure = 0.0f;
         self->mAudioSpeed = 0.0f;
-        self->unk_B04 = speed;
+        self->mLastSpeed = speed;
         return;
     }
-    if (self->unk_AFC != 0 && self->unk_B00 == 0) {
+    if (self->mNISShowBoardVisualFX != 0 && self->mOnGroundNIS == 0) {
         func_00111AA0_42B0(self->mRiderHandler, &hit, &hit.Inorm, hit.Stype, Length_42B0(hit.Ivel));
     }
-    self->unk_B00 = 1;
+    self->mOnGroundNIS = 1;
     self->mSurfaceType = hit.Stype;
     if (hit.Stype == -1)
         self->mSurfaceType = 0;
@@ -5922,8 +5922,8 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     *(&self->GroundVelocity) = hit.Ivel;
     *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
     *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
-    self->unk_454 = Dot_42B0(Sub_42B0(probeBase, hit.Ipos), *(&self->mGroundNormal));
-    float speedDrop = self->unk_B04 - speed;
+    self->SnowOffset = Dot_42B0(Sub_42B0(probeBase, hit.Ipos), *(&self->mGroundNormal));
+    float speedDrop = self->mLastSpeed - speed;
     *(int*)&self->mAudioBraking = 0;
     if (speedDrop < self->mAudioBraking) {
         float braking = -speedDrop * 0.0036000001709908247f;
@@ -5935,7 +5935,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     self->mAudioSpeed = speedLevel;
     if (1.0f < speedLevel)
         self->mAudioSpeed = 1.0f;
-    self->unk_B04 = speed;
+    self->mLastSpeed = speed;
     self->mAudioPressure = 0.30000001192092896f;
     self->mAudioEdging = 0.0f;
 }
@@ -6201,8 +6201,8 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
             cAnimModel* trk = self->mAnimModel;
             sQ_124788* n = (sQ_124788*)((self->mBoneHips << 4) + (int)trk->localPos);
             tPose node;
-            (*(sQ_124788*)&node.P) = sQ_124788(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
-                                 n->z * trk->unk_140.z, n->w * trk->unk_140.w);
+            (*(sQ_124788*)&node.P) = sQ_124788(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
+                                 n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w);
             (*(sQ_124788*)&node.Q) = *(sQ_124788*)((char*)self->mAnimModel->localRot + (self->mBoneHips << 4));
             tPose y = Combine_124788(node, Invert_124788(animPose));
             tPose* rx = (tPose*)&self->mPosition;
@@ -6220,13 +6220,13 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
             cRider_updateOrientationImplicit(self);
         }
         int isFlipped = pCurrMainAnimCustom->isFlipped != 0;
-        if (isFlipped != self->unk_2D8) {
+        if (isFlipped != self->mWasFlipped) {
             float headingOffset = 0.0f;
             if (isFlipped) {
                 headingOffset = 3.1415927410125732f;
             }
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, headingOffset);
-            self->unk_2D8 = isFlipped;
+            self->mWasFlipped = isFlipped;
         }
         float start = pCurrMainAnim->data.blendInFrames;
         self->mRiderAnim->FrameRateFactor = pCurrMainAnim->data.playRate;
@@ -6237,27 +6237,27 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
     } else if ((eventBits & 2) && pFrameInfo->numMainAnim == 0) {
         cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     }
-    sQ_124788 oldStart = *(sQ_124788*)&self->unk_AE0;
-    *(sQ_124788*)&self->unk_AE0 = sQ_124788(((float*)&pFrameInfo->posX)[0], ((float*)&pFrameInfo->posX)[1], ((float*)&pFrameInfo->posX)[2], 1.0f);
-    float prevAngX = self->unk_AF0;
-    float prevAngY = self->unk_AF4;
-    float prevAngZ = self->unk_AF8;
+    sQ_124788 oldStart = *(sQ_124788*)&self->mScriptCurrPosOffset;
+    *(sQ_124788*)&self->mScriptCurrPosOffset = sQ_124788(((float*)&pFrameInfo->posX)[0], ((float*)&pFrameInfo->posX)[1], ((float*)&pFrameInfo->posX)[2], 1.0f);
+    float prevAngX = self->mScriptCurrRotX;
+    float prevAngY = self->mScriptCurrRotY;
+    float prevAngZ = self->mScriptCurrRotZ;
     sQ_124788 oldPos = *(sQ_124788*)&self->mPosition;
-    self->unk_AF0 = ((float*)&pFrameInfo->rotX)[0] * 0.01745329424738884f;
-    self->unk_AF4 = ((float*)&pFrameInfo->rotX)[1] * 0.01745329424738884f;
-    self->unk_AF8 = ((float*)&pFrameInfo->rotX)[2] * 0.01745329424738884f;
+    self->mScriptCurrRotX = ((float*)&pFrameInfo->rotX)[0] * 0.01745329424738884f;
+    self->mScriptCurrRotY = ((float*)&pFrameInfo->rotX)[1] * 0.01745329424738884f;
+    self->mScriptCurrRotZ = ((float*)&pFrameInfo->rotX)[2] * 0.01745329424738884f;
     AddEq_124788(*(sQ_124788*)&self->mPosition,
-                 MatMulV_124788((char*)&self->mScriptMatrix, Sub_124788(*(sQ_124788*)&self->unk_AE0, oldStart)));
+                 MatMulV_124788((char*)&self->mScriptMatrix, Sub_124788(*(sQ_124788*)&self->mScriptCurrPosOffset, oldStart)));
     sQ_124788 delta = Sub_124788(*(sQ_124788*)&self->mPosition, oldPos);
     *(sQ_124788*)&self->mVelocity = delta;
-    cRider_EulerToQuat(self, (tQuaternion*)&delta, self->unk_AF8 - prevAngZ, self->unk_AF4 - prevAngY, self->unk_AF0 - prevAngX);
+    cRider_EulerToQuat(self, (tQuaternion*)&delta, self->mScriptCurrRotZ - prevAngZ, self->mScriptCurrRotY - prevAngY, self->mScriptCurrRotX - prevAngX);
     *(sQ_124788*)&self->mRotation = QuatMul_124788(delta, *(sQ_124788*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
     sQ_124788* bone = (sQ_124788*)&self->mAnimModel->bones[self->mBoneBoardRoot].pos;
     sQ_124788 before = *bone;
     cRider_updateAnimation(self, frameDelta);
     cRider_updateSkeleton(self);
-    if (self->unk_AFC != 0) {
+    if (self->mNISShowBoardVisualFX != 0) {
         *(sQ_124788*)&self->mVelocity = Sub_124788(*bone, before);
     }
     if (frameDelta > 0.0f) {
@@ -6576,7 +6576,7 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
 {
     cRider* self = (cRider*)vself;
     char* obj = (char*)vobj;
-    int* ids = self->unk_B08;
+    int* ids = self->mSoundHandles;
     cSSXAudio* snd = cAudioInterface_bxAudio();
     int i;
     for (i = 0; i < 4; i++) {

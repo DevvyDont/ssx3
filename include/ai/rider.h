@@ -322,25 +322,25 @@ struct cRider {
     /* 0x1F0 */ sRiderChannel mSlewed[19]; // [X] [U] 19 channels, init by cRider_OnStartObjectUse; .cur of [0],[2],[3],[8] read as lean input
     /* 0x2D4 */ unsigned short SurfaceFlags; // [O] SurfaceFlags (placed by its neighbours); [U] = hit object +0xA (cRider_SetNISGroundVectors)
     /* 0x2D6 */ char unk_2D6[0x2];
-    /* 0x2D8 */ int unk_2D8; // = 0x320 on reset (cRider_OnStartObjectUse)
+    /* 0x2D8 */ int mWasFlipped; // = 0x320 on reset (cRider_OnStartObjectUse)
     /* 0x2DC */ float mSpinRate; // [X] cleared on transport (cRider_putAt)
     /* 0x2E0 */ float mFlipRate; // [X] cleared on transport (cRider_putAt)
-    /* 0x2E4 */ float unk_2E4; // 4th arg of cAirPredictor_startLaunchIntoAir after a bounce (cRider_doObjectCollision)
+    /* 0x2E4 */ float TerminalVelocity; // 4th arg of cAirPredictor_startLaunchIntoAir after a bounce (cRider_doObjectCollision)
     /* 0x2E8 */ float mPowerUpBoostTimer; // [X] decays each frame (cRider_updateBoost)
     /* 0x2EC */ float mPowerUpTrickTimer; // [X]
     /* 0x2F0 */ float mUberTimer; // [X]
     /* 0x2F4 */ int mUberLevel; // [X] a mode: 5, 10, >= 11 tested
-    /* 0x2F8 */ float unk_2F8;
+    /* 0x2F8 */ float BoostPowerBar;
     /* 0x2FC */ float mBoostStrength; // [X] scales the mass (cRider_getMass)
     /* 0x300 */ float mTimeScale; // [X] decay rate for 0x2E8-0x2F8
     /* 0x304 */ int mBoostMode; // [X] 0..3
-    /* 0x308 */ int unk_308; // = 1 (ctor)
+    /* 0x308 */ int mAllowNaturalAir; // = 1 (ctor)
     /* 0x30C */ float mBoostMaxSpeed; // [X] = 4000.0 (ctor)
     /* 0x310 */ float mCheatSteerAlign; // [X] = 0.18 (ctor)
     /* 0x314 */ float mCheatSpeedLerp; // [X] = 0.015 (ctor)
     /* 0x318 */ float LegIK; // [O] LegIK (+0xF38); [U] the blend cRider_updateSkeleton passes to cRider_doLegIK
-    /* 0x31C */ float unk_31C; // cleared on transport (cRider_putAt); lwc1, compared > 0.0f, scales mGroundNormal (cRider_updateSkeleton)
-    /* 0x320 */ int IsRidingFakie; // copied into unk_2D8 (cRider_OnStartObjectUse)
+    /* 0x31C */ float ChatterMag; // cleared on transport (cRider_putAt); lwc1, compared > 0.0f, scales mGroundNormal (cRider_updateSkeleton)
+    /* 0x320 */ int IsRidingFakie; // copied into mWasFlipped (cRider_OnStartObjectUse)
     /* 0x324 */ int IsGoofyStance; // [X] = cBECharacterInterface_getIsGoofyFoot(interface 2, mAIIndex) (cRider_initAlways)
     /* 0x328 */ int RailslideMode; // [X] landing state 1..4 from the board-vs-ground angle (cRider_checkRailBoardCollisions); 3/4 rotate the rider +-90 deg about mMatrix.row[2] (cRider_flagEventWipeout)
     /* 0x32C */ int HandplantMode; // cleared on transport (cRider_putAt)
@@ -350,8 +350,8 @@ struct cRider {
     /* 0x350 */ float PunchStrength; // [X] shove-strength factor (cRider_checkOpponentCollisions)
     /* 0x354 */ int ReactionEventTick; // [X] = -1 on transport (cRider_putAt)
     /* 0x358 */ int ReactionEventType; // [X] cleared on transport (cRider_putAt)
-    /* 0x35C */ float unk_35C; // cleared on transport (cRider_putAt); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
-    /* 0x360 */ float JumpHeldSec; // [O] cRiderState::JumpHeldSec (+0xF70, after ProximityActionDelay = unk_35C); [U] cRider_checkForPrewind tests it == 0 and sets it to 1.0 as On Tour's checkForPrewind does at +0xF70; the gainFocus of cBoardPressControl / cRailslideControl / cCruiseControl clear it
+    /* 0x35C */ float ProximityActionDelay; // cleared on transport (cRider_putAt); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
+    /* 0x360 */ float JumpHeldSec; // [O] cRiderState::JumpHeldSec (+0xF70, after ProximityActionDelay); [U] cRider_checkForPrewind tests it == 0 and sets it to 1.0 as On Tour's checkForPrewind does at +0xF70; the gainFocus of cBoardPressControl / cRailslideControl / cCruiseControl clear it
     /* 0x364 */ char unk_364[0xC];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
     /* 0x380 */ t4Vector LastGroundNormal; // [O] LastGroundNormal; [U] copy of mGroundNormal taken before the ground probe (cRider_SetNISGroundVectors)
@@ -373,7 +373,7 @@ struct cRider {
     /* 0x438 */ int mSurfaceType; // [X] ground material from the hit, -1 mapped to 0 (cRider_SetNISGroundVectors)
     /* 0x43C */ char unk_43C[0x14];
     /* 0x450 */ int unk_450; // = -1 (ctor)
-    /* 0x454 */ float unk_454; // Dot(probe - hit.pos, normal): height above ground (cRider_SetNISGroundVectors)
+    /* 0x454 */ float SnowOffset; // Dot(probe - hit.pos, normal): height above ground (cRider_SetNISGroundVectors)
     /* 0x458 */ char unk_458[0x8];
     /* 0x460 */ t4Vector mGroundContactPoint; // [X] [U] ground hit position (cRider_SetNISGroundVectors)
     /* 0x470 */ float mFinishTime; // [P] preview 0x440 (+0x30): <0 racing, >=0 seconds past the line (isPastFinishLine)
@@ -395,11 +395,11 @@ struct cRider {
     /* 0x4D8 */ float TotalPathDistance; // [O] (+0x10E8); [R] cRider_getTotalPathDistance / cRider_setTotalPathDistance (On Tour getTotalPathDistance: lwc1 0x10E8)
     /* 0x4DC */ tPathEventNode PathEventsCur[12]; // [O] (+0x10EC, tPathEventNode[12]); [U] cRider_checkTrackPathEvents has the path's getEventsInRange fill up to 0xC entries here and stores the count at 0x59C (NumPathEventsCur = On Tour NumPathEventsCur); cRider_updateTrackPath copies count << 4 bytes
     /* 0x59C */ int NumPathEventsCur; // [O] NumPathEventsCur, PathEventsCur's count (max 12); [U] set by cRider_checkTrackPathEvents, cleared on reset (cRider_initAlways)
-    /* 0x5A0 */ int unk_5A0; // cleared on reset (cRider_initAlways)
-    /* 0x5A4 */ int unk_5A4; // cleared on reset (cRider_initAlways)
-    /* 0x5A8 */ int unk_5A8; // cleared on reset (cRider_initAlways)
-    /* 0x5AC */ int unk_5AC; // cleared on reset (cRider_initAlways)
-    /* 0x5B0 */ int unk_5B0;
+    /* 0x5A0 */ int ConsecutiveAirFrames; // cleared on reset (cRider_initAlways)
+    /* 0x5A4 */ int VerticalJump; // cleared on reset (cRider_initAlways)
+    /* 0x5A8 */ int DidPop; // cleared on reset (cRider_initAlways)
+    /* 0x5AC */ int RidingFlexRail; // cleared on reset (cRider_initAlways)
+    /* 0x5B0 */ int DangerLevel;
     /* 0x5B4 */ float mSmoothedHeading; // [X] smoothed slope angle (cRider_updateSplit12)
     /* 0x5B8 */ unsigned int mVisitedIds; // [X]
     /* 0x5BC */ char unk_5BC[0x104];
@@ -407,15 +407,15 @@ struct cRider {
     /* 0x6C4 */ char unk_6C4[0xC];
     /* 0x6D0 */ void* mScriptObjRiderVtbl; // _vt$6cRider$15cScriptObjRider; start of that base
     /* 0x6D4 */ char unk_6D4[0x4];
-    /* 0x6D8 */ void* unk_6D8;
+    /* 0x6D8 */ void* mpEntity;
     /* 0x6DC */ char unk_6DC[0x8]; // cScriptObject data; its vptr follows
-    /* 0x6E4 */ int unk_6E4; // count or gate in the cScriptObject data: <= 0 makes cRider_GetNISEndPosition return mPosition unchanged
+    /* 0x6E4 */ int mInUse; // count or gate in the cScriptObject data: <= 0 makes cRider_GetNISEndPosition return mPosition unchanged
     /* 0x6E8 */ void* mScriptObjectVtbl; // _vt$6cRider$13cScriptObject
     /* 0x6EC */ char unk_6EC[0x14];
     /* 0x700 */ t4Matrix mScriptMatrix; // [X] start transform used by a VU0 matrix*vector (cRider_OnStartObjectUse)
-    /* 0x740 */ float unk_740; // start-angle offset added to unk_AF0 (cRider_OnStartObjectUse)
-    /* 0x744 */ float unk_744; // start-angle offset added to unk_AF4 (cRider_OnStartObjectUse)
-    /* 0x748 */ float unk_748; // start-angle offset added to unk_AF8 (cRider_OnStartObjectUse)
+    /* 0x740 */ float mBaseRotX; // [O] cScriptObjRider::mBaseRotX (the cScriptObjRider base at 0x6D0); [U] added to mScriptCurrRotX (cRider_OnStartObjectUse)
+    /* 0x744 */ float mBaseRotY; // [O] cScriptObjRider::mBaseRotY; [U] added to mScriptCurrRotY (cRider_OnStartObjectUse)
+    /* 0x748 */ float mBaseRotZ; // [O] cScriptObjRider::mBaseRotZ; [U] added to mScriptCurrRotZ (cRider_OnStartObjectUse)
     /* 0x74C */ char unk_74C[0x4];
     /* 0x750 */ float mAudioBraking; // [P] getAudioBraking_0_to_1 (bracketed +0x40); cRider_SetNISGroundVectors also writes it as int 0
     /* 0x754 */ float mAudioEdging; // [P] getAudioEdging_0_to_1
@@ -425,7 +425,7 @@ struct cRider {
     /* 0x764 */ int unk_764; // written with the same value as 0x760 (cSSXAudio_BeginRiderSound)
     /* 0x768 */ int unk_768; // sound id from cSSXAudio_Surface(self, rider) (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
     /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one cSSXAudio_GetSurfaceProgramType result (cSSXAudio_HandleCarve)
-    /* 0x770 */ float unk_770; // fed to curve D_00482D30 for the sound volume (cSSXAudio_Land)
+    /* 0x770 */ float LastLandSpeed; // fed to curve D_00482D30 for the sound volume (cSSXAudio_Land)
     /* 0x774 */ int mWipeoutSlideHandle; // [P] GetWipeoutSlideHandle (bracketed +0x40)
     /* 0x778 */ int mWipeoutTumbleHandle; // [P] GetWipeoutTumbleHandle
     /* 0x77C */ cRiderHandler* mRiderHandler; // [P] getRiderHandler (bracketed +0x40)
@@ -434,7 +434,7 @@ struct cRider {
     /* 0x788 */ cAirPredictor* mAirPredictor; // [P] getAirPredictor (seen); passed to cAirPredictor_startLaunchIntoAir
     /* 0x78C */ void* mFocusBox; // [P] getFocusBox (seen); set by cRider_addFocusBox
     /* 0x790 */ cRiderMetrix* mMetrix; // [P] getMetrix (seen); set by cRider_addRiderMetrix
-    /* 0x794 */ void* unk_794[8]; // cleared as 0x20 bytes (cRider_flushActiveLights)
+    /* 0x794 */ void* ActiveLights[8]; // cleared as 0x20 bytes (cRider_flushActiveLights)
     /* 0x7B4 */ char unk_7B4[0xC];
     /* 0x7C0 */ char unk_7C0[0xA0] __attribute__((aligned(16))); // copied as one 0xA0-byte block (cRider_SetRiderLights)
     /* 0x860 */ cOverlapList* mOverlapList; // [O] cRider::OverlapList (cOverlapList*); [R] ctor: new ("OverlapList")
@@ -483,21 +483,21 @@ struct cRider {
     /* 0xABC */ tPathIntersectInfo* mAIPathHint; // [O] cRider::AIPathIntersect (tPathIntersectInfo*, after AIPath); [R] ctor: cMemMan_alloc(0x20, "AI path intersect info"); [U] NodeID (+0x14) = -1 before cPath_intersectPath
     /* 0xAC0 */ tPathIntersectInfo* mTrackPathHint; // [O] cRider::TrackPathIntersect (tPathIntersectInfo*); [R] ctor: cMemMan_alloc(0x20, "Track path intersect info"); [U] NodeID (+0x14) = -1
     /* 0xAC4 */ int mIsInNIS; // [P] IsInNIS (seen); most updates are skipped while set
-    /* 0xAC8 */ int unk_AC8; // set when an anim event fires
+    /* 0xAC8 */ int mHasTriggeredSpeechEvents; // set when an anim event fires
     /* 0xACC */ char unk_ACC[0x4];
-    /* 0xAD0 */ int unk_AD0;
+    /* 0xAD0 */ int mHiddenNIS;
     /* 0xAD4 */ char unk_AD4[0xC];
-    /* 0xAE0 */ t4Vector unk_AE0; // start position (w = 1), zeroed in the ctor (cRider_OnStartObjectUse)
-    /* 0xAF0 */ float unk_AF0; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
-    /* 0xAF4 */ float unk_AF4; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
-    /* 0xAF8 */ float unk_AF8; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
-    /* 0xAFC */ int unk_AFC;
-    /* 0xB00 */ int unk_B00;
-    /* 0xB04 */ float unk_B04; // speed (cRider_SetNISGroundVectors), 0.0f (cRider_OnStartObjectUse)
-    /* 0xB08 */ int unk_B08[4]; // sound ids, -1 = none (cRider_OnEndObjectUse)
+    /* 0xAE0 */ t4Vector mScriptCurrPosOffset; // start position (w = 1), zeroed in the ctor (cRider_OnStartObjectUse)
+    /* 0xAF0 */ float mScriptCurrRotX; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
+    /* 0xAF4 */ float mScriptCurrRotY; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
+    /* 0xAF8 */ float mScriptCurrRotZ; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
+    /* 0xAFC */ int mNISShowBoardVisualFX;
+    /* 0xB00 */ int mOnGroundNIS;
+    /* 0xB04 */ float mLastSpeed; // speed (cRider_SetNISGroundVectors), 0.0f (cRider_OnStartObjectUse)
+    /* 0xB08 */ int mSoundHandles[4]; // sound ids, -1 = none (cRider_OnEndObjectUse)
     /* 0xB18 */ int mIsOnScreen; // [P] IsRiderOnScreen, preview 0x9F8 (+0x120 assumed); [U] frustum test result (cRider_renderClip)
-    /* 0xB1C */ int unk_B1C;
-    /* 0xB20 */ int unk_B20; // = 1 (ctor)
+    /* 0xB1C */ int mUpdateMinAnimOnly;
+    /* 0xB20 */ int mWipeoutRecoveryMode; // = 1 (ctor)
     /* 0xB24 */ float mBoostMeterStart; // [X]
     /* 0xB28 */ int mBoostSourceMask; // [X] = 31 (ctor)
     /* 0xB2C */ int mUberFlags; // [X]
@@ -524,24 +524,24 @@ CHECK_OFFSET(cRider, mMatrix, 0x1A0);
 CHECK_OFFSET(cRider, mVelocity, 0x1E0);
 CHECK_OFFSET(cRider, mSlewed, 0x1F0);
 CHECK_OFFSET(cRider, SurfaceFlags, 0x2D4);
-CHECK_OFFSET(cRider, unk_2D8, 0x2D8);
+CHECK_OFFSET(cRider, mWasFlipped, 0x2D8);
 CHECK_OFFSET(cRider, mSpinRate, 0x2DC);
 CHECK_OFFSET(cRider, mFlipRate, 0x2E0);
-CHECK_OFFSET(cRider, unk_2E4, 0x2E4);
+CHECK_OFFSET(cRider, TerminalVelocity, 0x2E4);
 CHECK_OFFSET(cRider, mPowerUpBoostTimer, 0x2E8);
 CHECK_OFFSET(cRider, mPowerUpTrickTimer, 0x2EC);
 CHECK_OFFSET(cRider, mUberTimer, 0x2F0);
 CHECK_OFFSET(cRider, mUberLevel, 0x2F4);
-CHECK_OFFSET(cRider, unk_2F8, 0x2F8);
+CHECK_OFFSET(cRider, BoostPowerBar, 0x2F8);
 CHECK_OFFSET(cRider, mBoostStrength, 0x2FC);
 CHECK_OFFSET(cRider, mTimeScale, 0x300);
 CHECK_OFFSET(cRider, mBoostMode, 0x304);
-CHECK_OFFSET(cRider, unk_308, 0x308);
+CHECK_OFFSET(cRider, mAllowNaturalAir, 0x308);
 CHECK_OFFSET(cRider, mBoostMaxSpeed, 0x30C);
 CHECK_OFFSET(cRider, mCheatSteerAlign, 0x310);
 CHECK_OFFSET(cRider, mCheatSpeedLerp, 0x314);
 CHECK_OFFSET(cRider, LegIK, 0x318);
-CHECK_OFFSET(cRider, unk_31C, 0x31C);
+CHECK_OFFSET(cRider, ChatterMag, 0x31C);
 CHECK_OFFSET(cRider, IsRidingFakie, 0x320);
 CHECK_OFFSET(cRider, IsGoofyStance, 0x324);
 CHECK_OFFSET(cRider, RailslideMode, 0x328);
@@ -551,7 +551,7 @@ CHECK_OFFSET(cRider, PunchVect, 0x340);
 CHECK_OFFSET(cRider, PunchStrength, 0x350);
 CHECK_OFFSET(cRider, ReactionEventTick, 0x354);
 CHECK_OFFSET(cRider, ReactionEventType, 0x358);
-CHECK_OFFSET(cRider, unk_35C, 0x35C);
+CHECK_OFFSET(cRider, ProximityActionDelay, 0x35C);
 CHECK_OFFSET(cRider, JumpHeldSec, 0x360);
 CHECK_OFFSET(cRider, mGroundNormal, 0x370);
 CHECK_OFFSET(cRider, LastGroundNormal, 0x380);
@@ -570,7 +570,7 @@ CHECK_OFFSET(cRider, mGroundPolyId, 0x430);
 CHECK_OFFSET(cRider, mGroundMaterial, 0x434);
 CHECK_OFFSET(cRider, mSurfaceType, 0x438);
 CHECK_OFFSET(cRider, unk_450, 0x450);
-CHECK_OFFSET(cRider, unk_454, 0x454);
+CHECK_OFFSET(cRider, SnowOffset, 0x454);
 CHECK_OFFSET(cRider, mGroundContactPoint, 0x460);
 CHECK_OFFSET(cRider, mFinishTime, 0x470);
 CHECK_OFFSET(cRider, mStartTick, 0x474);
@@ -590,23 +590,23 @@ CHECK_OFFSET(cRider, MinDistanceLeft, 0x4D4);
 CHECK_OFFSET(cRider, TotalPathDistance, 0x4D8);
 CHECK_OFFSET(cRider, PathEventsCur, 0x4DC);
 CHECK_OFFSET(cRider, NumPathEventsCur, 0x59C);
-CHECK_OFFSET(cRider, unk_5A0, 0x5A0);
-CHECK_OFFSET(cRider, unk_5A4, 0x5A4);
-CHECK_OFFSET(cRider, unk_5A8, 0x5A8);
-CHECK_OFFSET(cRider, unk_5AC, 0x5AC);
-CHECK_OFFSET(cRider, unk_5B0, 0x5B0);
+CHECK_OFFSET(cRider, ConsecutiveAirFrames, 0x5A0);
+CHECK_OFFSET(cRider, VerticalJump, 0x5A4);
+CHECK_OFFSET(cRider, DidPop, 0x5A8);
+CHECK_OFFSET(cRider, RidingFlexRail, 0x5AC);
+CHECK_OFFSET(cRider, DangerLevel, 0x5B0);
 CHECK_OFFSET(cRider, mSmoothedHeading, 0x5B4);
 CHECK_OFFSET(cRider, mVisitedIds, 0x5B8);
 CHECK_OFFSET(cRider, mVtbl, 0x6C0);
 CHECK_OFFSET(cRider, mScriptObjRiderVtbl, 0x6D0);
-CHECK_OFFSET(cRider, unk_6D8, 0x6D8);
+CHECK_OFFSET(cRider, mpEntity, 0x6D8);
 CHECK_OFFSET(cRider, unk_6DC, 0x6DC);
-CHECK_OFFSET(cRider, unk_6E4, 0x6E4);
+CHECK_OFFSET(cRider, mInUse, 0x6E4);
 CHECK_OFFSET(cRider, mScriptObjectVtbl, 0x6E8);
 CHECK_OFFSET(cRider, mScriptMatrix, 0x700);
-CHECK_OFFSET(cRider, unk_740, 0x740);
-CHECK_OFFSET(cRider, unk_744, 0x744);
-CHECK_OFFSET(cRider, unk_748, 0x748);
+CHECK_OFFSET(cRider, mBaseRotX, 0x740);
+CHECK_OFFSET(cRider, mBaseRotY, 0x744);
+CHECK_OFFSET(cRider, mBaseRotZ, 0x748);
 CHECK_OFFSET(cRider, mAudioBraking, 0x750);
 CHECK_OFFSET(cRider, mAudioEdging, 0x754);
 CHECK_OFFSET(cRider, mAudioPressure, 0x758);
@@ -615,7 +615,7 @@ CHECK_OFFSET(cRider, unk_760, 0x760);
 CHECK_OFFSET(cRider, unk_764, 0x764);
 CHECK_OFFSET(cRider, unk_768, 0x768);
 CHECK_OFFSET(cRider, unk_76C, 0x76C);
-CHECK_OFFSET(cRider, unk_770, 0x770);
+CHECK_OFFSET(cRider, LastLandSpeed, 0x770);
 CHECK_OFFSET(cRider, mWipeoutSlideHandle, 0x774);
 CHECK_OFFSET(cRider, mWipeoutTumbleHandle, 0x778);
 CHECK_OFFSET(cRider, mRiderHandler, 0x77C);
@@ -624,7 +624,7 @@ CHECK_OFFSET(cRider, mRiderAnim, 0x784);
 CHECK_OFFSET(cRider, mAirPredictor, 0x788);
 CHECK_OFFSET(cRider, mFocusBox, 0x78C);
 CHECK_OFFSET(cRider, mMetrix, 0x790);
-CHECK_OFFSET(cRider, unk_794, 0x794);
+CHECK_OFFSET(cRider, ActiveLights, 0x794);
 CHECK_OFFSET(cRider, unk_7C0, 0x7C0);
 CHECK_OFFSET(cRider, mOverlapList, 0x860);
 CHECK_OFFSET(cRider, mLineHint, 0x864);
@@ -662,19 +662,19 @@ CHECK_OFFSET(cRider, AIPath, 0xAB8);
 CHECK_OFFSET(cRider, mAIPathHint, 0xABC);
 CHECK_OFFSET(cRider, mTrackPathHint, 0xAC0);
 CHECK_OFFSET(cRider, mIsInNIS, 0xAC4);
-CHECK_OFFSET(cRider, unk_AC8, 0xAC8);
-CHECK_OFFSET(cRider, unk_AD0, 0xAD0);
-CHECK_OFFSET(cRider, unk_AE0, 0xAE0);
-CHECK_OFFSET(cRider, unk_AF0, 0xAF0);
-CHECK_OFFSET(cRider, unk_AF4, 0xAF4);
-CHECK_OFFSET(cRider, unk_AF8, 0xAF8);
-CHECK_OFFSET(cRider, unk_AFC, 0xAFC);
-CHECK_OFFSET(cRider, unk_B00, 0xB00);
-CHECK_OFFSET(cRider, unk_B04, 0xB04);
-CHECK_OFFSET(cRider, unk_B08, 0xB08);
+CHECK_OFFSET(cRider, mHasTriggeredSpeechEvents, 0xAC8);
+CHECK_OFFSET(cRider, mHiddenNIS, 0xAD0);
+CHECK_OFFSET(cRider, mScriptCurrPosOffset, 0xAE0);
+CHECK_OFFSET(cRider, mScriptCurrRotX, 0xAF0);
+CHECK_OFFSET(cRider, mScriptCurrRotY, 0xAF4);
+CHECK_OFFSET(cRider, mScriptCurrRotZ, 0xAF8);
+CHECK_OFFSET(cRider, mNISShowBoardVisualFX, 0xAFC);
+CHECK_OFFSET(cRider, mOnGroundNIS, 0xB00);
+CHECK_OFFSET(cRider, mLastSpeed, 0xB04);
+CHECK_OFFSET(cRider, mSoundHandles, 0xB08);
 CHECK_OFFSET(cRider, mIsOnScreen, 0xB18);
-CHECK_OFFSET(cRider, unk_B1C, 0xB1C);
-CHECK_OFFSET(cRider, unk_B20, 0xB20);
+CHECK_OFFSET(cRider, mUpdateMinAnimOnly, 0xB1C);
+CHECK_OFFSET(cRider, mWipeoutRecoveryMode, 0xB20);
 CHECK_OFFSET(cRider, mBoostMeterStart, 0xB24);
 CHECK_OFFSET(cRider, mBoostSourceMask, 0xB28);
 CHECK_OFFSET(cRider, mUberFlags, 0xB2C);

@@ -2235,8 +2235,8 @@ extern "C" void cRailslideMotion_step(char* self)
         *(float*)(self + 0x1C) = 0.0f;
     cRider* rider = (cRider*)(RIDER_AF28);
     float len = Len_AF28(rider->mVelocity);
-    if (rider->unk_2E4 < len)
-        ScaleEq_AF28(rider->mVelocity, rider->unk_2E4 / len);
+    if (rider->TerminalVelocity < len)
+        ScaleEq_AF28(rider->mVelocity, rider->TerminalVelocity / len);
     float dt = *(float*)(RIDER_AF28 + 0x300) * 0.01666666753590107f;
     *(int*)(self + 0x20) = 1;
     *(int*)(RIDER_AF28 + 0x5AC) = 0;
@@ -2659,8 +2659,8 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
     }
     cRider* rider = (cRider*)(RIDER_BFA8);
     float len = vu0Length_BFA8(*(sVec4_BFA8*)&rider->mVelocity);
-    if (rider->unk_2E4 < len)
-        vu0ScaleEq_BFA8(*(sVec4_BFA8*)&rider->mVelocity, rider->unk_2E4 / len);
+    if (rider->TerminalVelocity < len)
+        vu0ScaleEq_BFA8(*(sVec4_BFA8*)&rider->mVelocity, rider->TerminalVelocity / len);
 }
 #endif
 
@@ -2889,7 +2889,7 @@ extern "C" void cRailslideMotion_loseFocus(cRailslideMotion* self)
     cRider* rider2 = self->mRider;
     rider2->mSlewed[9].target = 1.0f;
     rider2->mSlewed[9].rate = 0.03333333507180214f;
-    self->mRider->unk_5AC = 0;
+    self->mRider->RidingFlexRail = 0;
 }
 #endif
 
@@ -2981,7 +2981,7 @@ extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
     }
     self->AITickOnLoseFocus = 0;
     self->AITickOnGainFocus = 0;
-    *(int*)&self->mRider->unk_31C = 0;
+    *(int*)&self->mRider->ChatterMag = 0;
     return ((void*)self);
 }
 #endif
@@ -3032,7 +3032,7 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
     cRider* rider = (cRider*)self->mRider;
     tSurfData* tbl = (tSurfData*)SSXApp->Game->SurfPropCache;
     tSurfData* snow = &tbl[rider->mSurfaceType];
-    float k = rider->mAnimModel->unk_140.x;
+    float k = rider->mAnimModel->ScaleVect.x;
     self->PowderDepth1G = k * snow->PowderDepth1G;
     self->PowderDepth3G = k * snow->PowderDepth3G;
     *(&rider->DampGroundNormal) = *(&rider->mGroundNormal);
@@ -4112,12 +4112,12 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
 {
     cRider_updateWind((char*)self->mRider);
     float spd = vu0Len_13D818(self->mRider->mVelocity);
-    if (self->mRider->unk_2E4 < spd)
-        vu0ScaleEq_13D818(self->mRider->mVelocity, self->mRider->unk_2E4 / spd);
+    if (self->mRider->TerminalVelocity < spd)
+        vu0ScaleEq_13D818(self->mRider->mVelocity, self->mRider->TerminalVelocity / spd);
 
     float dt = self->mRider->mTimeScale * 0.01666666753590107f;
     tSurfData* snow = &((tSurfData*)SSXApp->Game->SurfPropCache)[self->mRider->mSurfaceType];
-    float scale = self->mRider->mAnimModel->unk_140.x;
+    float scale = self->mRider->mAnimModel->ScaleVect.x;
     self->PowderDepth1G = approach_13D818(self->PowderDepth1G, scale * snow->PowderDepth1G, dt * 100.0f);
     self->PowderDepth3G = approach_13D818(self->PowderDepth3G, scale * snow->PowderDepth3G, dt * 100.0f);
 
@@ -4126,7 +4126,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float dF = vu0Dot_13D818(rel, self->mRider->mGroundForward);
     float dS = vu0Dot_13D818(rel, self->mRider->mGroundSide);
     float lean = -self->mRider->mSlewed[0].cur;
-    float push = cGroundMotion_getSnowForce_13D818((self), snow, self->mRider->unk_454, dN, dt);
+    float push = cGroundMotion_getSnowForce_13D818((self), snow, self->mRider->SnowOffset, dN, dt);
     float drag = cGroundMotion_getBoostForce_D818((self), snow);
     float steer = cGroundMotion_getSlipForce_13D818((self), snow, dF, push / snow->Gravity);
     float edge = cGroundMotion_getDigForce(self, (float*)snow, dS, dF, lean);
@@ -4148,13 +4148,13 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         vu0Scale_13D818(self->mRider->mGroundNormal, push), vu0Scale_13D818(up, lift)),
         vu0Scale_13D818(self->mRider->mGroundForward, steer + drag)),
         vu0Scale_13D818(self->mRider->mGroundSide, edge)), grav);
-    if (self->mRider->unk_308 == 0)
+    if (self->mRider->mAllowNaturalAir == 0)
         vu0AddEq_13D818(force, vu0Scale_13D818(self->mRider->mGroundNormal, -1000.0f));
 
-    float pen = (self->PowderDepth3G + self->mRider->unk_454) >? -10.000000953674316f;
+    float pen = (self->PowderDepth3G + self->mRider->SnowOffset) >? -10.000000953674316f;
     if (pen < 0.0f) {
         vu0SubEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mGroundNormal, pen));
-        self->mRider->unk_454 -= pen;
+        self->mRider->SnowOffset -= pen;
         if (dN < 0.0f) {
             vu0SubEq_13D818(rel, vu0Scale_13D818(self->mRider->mGroundNormal, dN));
             self->mRider->mVelocity = vu0Add_13D818(rel, self->mRider->GroundVelocity);
@@ -4163,9 +4163,9 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         if (fn < 0.0f)
             vu0SubEq_13D818(force, vu0Scale_13D818(self->mRider->mGroundNormal, fn));
     }
-    if (self->mRider->unk_308 == 0 && 0.0f <= self->mRider->unk_454) {
-        vu0SubEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mGroundNormal, self->mRider->unk_454));
-        self->mRider->unk_454 = 0.0f;
+    if (self->mRider->mAllowNaturalAir == 0 && 0.0f <= self->mRider->SnowOffset) {
+        vu0SubEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mGroundNormal, self->mRider->SnowOffset));
+        self->mRider->SnowOffset = 0.0f;
     }
 
     float vv = vu0Dot_13D818(rel, rel);
@@ -4291,7 +4291,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     int got = cGroundMotion_setupGroundVectors(self, &hit, &dist);
     int lost = 0;
     if (got == 0) {
-        lost = self->mRider->unk_308 == 0;
+        lost = self->mRider->mAllowNaturalAir == 0;
     } else if (hit.obj != 0) {
         char* handler = *(char**)(hit.obj + 0xC);
         if (handler) {
@@ -4315,8 +4315,8 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     }
 
     float maxH = snow->AirHeight;
-    if (got == 0 || maxH < self->mRider->unk_454) {
-        if (self->mRider->unk_308 != 0 || lost)
+    if (got == 0 || maxH < self->mRider->SnowOffset) {
+        if (self->mRider->mAllowNaturalAir != 0 || lost)
             self->ForceNaturalAir = 1;
     } else {
         if (dist < 5.0f) {
@@ -4361,7 +4361,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         self->ChatterTime += amp * 2.6500000953674316f;
         if (6.283185958862305f <= self->ChatterTime)
             self->ChatterTime -= 6.283185958862305f;
-        self->mRider->unk_31C = amp * (fCos(self->ChatterTime) * 7.5f);
+        self->mRider->ChatterMag = amp * (fCos(self->ChatterTime) * 7.5f);
     }
     cRider_updateOrientationImplicit(self->mRider);
 }
@@ -4528,8 +4528,8 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
     *(sVec4HP*)&rider->DampGroundNormal = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)&rider->mGroundNormal, 0.5f)));
     cRider* rider3 = (cRider*)(RIDER_13F178);
     float len = vu0Length_13F178(*(sVec4HP*)&rider3->mVelocity);
-    if (rider3->unk_2E4 < len) {
-        vu0ScaleEq_13F178(*(sVec4HP*)&rider3->mVelocity, rider3->unk_2E4 / len);
+    if (rider3->TerminalVelocity < len) {
+        vu0ScaleEq_13F178(*(sVec4HP*)&rider3->mVelocity, rider3->TerminalVelocity / len);
     }
     float k = 0.0f;
     float vmax = 3333.33349609375f;
@@ -5642,7 +5642,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getVerticalJump);
  * @return the float at +0x5A4
  */
 extern "C" float cRider_getVerticalJump(cRider* rider) {
-    return *(float*)&rider->unk_5A4;
+    return *(float*)&rider->VerticalJump;
 }
 #endif
 //100%
@@ -5655,7 +5655,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_didPop);
  * @return the word at +0x5A8
  */
 extern "C" int cRider_didPop(cRider* rider) {
-    return (rider->unk_5A8);
+    return (rider->DidPop);
 }
 #endif
 //100%
@@ -5668,7 +5668,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_isRidingFlexRail);
  * @return the word at +0x5AC
  */
 extern "C" int cRider_isRidingFlexRail(cRider* rider) {
-    return (rider->unk_5AC);
+    return (rider->RidingFlexRail);
 }
 #endif
 //100%
@@ -6760,8 +6760,8 @@ extern "C" int cRider_DoForceBoardVisualFXForNIS(cRider* rider) {
     int var_3;
 
     var_3 = 0;
-    if (((rider->mIsInNIS) != 0) && ((rider->unk_AD0) == 0)) {
-        var_3 = (rider->unk_AFC) != 0;
+    if (((rider->mIsInNIS) != 0) && ((rider->mHiddenNIS) == 0)) {
+        var_3 = (rider->mNISShowBoardVisualFX) != 0;
     }
     return var_3;
 }
@@ -6776,7 +6776,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_IsOnGroundInNIS);
  * @return unk_B00
  */
 extern "C" int cRider_IsOnGroundInNIS(cRider* rider) {
-    return (rider->unk_B00);
+    return (rider->mOnGroundNIS);
 }
 #endif
 //100%
@@ -6846,7 +6846,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setWipeoutRecoveryMode);
  * @param value  the new value
  */
 extern "C" void cRider_setWipeoutRecoveryMode(cRider* rider, int value) {
-    (rider->unk_B20) = value;
+    (rider->mWipeoutRecoveryMode) = value;
 }
 #endif
 //100%
@@ -6910,7 +6910,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setNaturalAirMode);
  * On Tour's cRider::setNaturalAirMode.
  */
 extern "C" void cRider_setNaturalAirMode(cRider* rider, int value) {
-    (rider->unk_308) = value;
+    (rider->mAllowNaturalAir) = value;
 }
 #endif
 //100%
@@ -6936,7 +6936,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getWipeoutRecoveryMode);
  * @return unk_B20
  */
 extern "C" int cRider_getWipeoutRecoveryMode(cRider* rider) {
-    return (rider->unk_B20);
+    return (rider->mWipeoutRecoveryMode);
 }
 #endif
 //100%
@@ -6987,7 +6987,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getNaturalAirMode);
  * On Tour's cRider::getNaturalAirMode.
  */
 extern "C" int cRider_getNaturalAirMode(cRider* rider) {
-    return (rider->unk_308);
+    return (rider->mAllowNaturalAir);
 }
 #endif
 

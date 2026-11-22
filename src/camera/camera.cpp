@@ -1814,7 +1814,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getVerticalJump__FPv);
 float cRiderCameraTarget_getVerticalJump(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)&self->Rider->unk_5A4;
+    return *(float*)&self->Rider->VerticalJump;
 }
 #endif
 
@@ -1831,7 +1831,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_didPop__FPv);
 int cRiderCameraTarget_didPop(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return self->Rider->unk_5A8;
+    return self->Rider->DidPop;
 }
 #endif
 
@@ -1937,7 +1937,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_isRidingFlexRail__FPv);
 int cRiderCameraTarget_isRidingFlexRail(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return self->Rider->unk_5AC;
+    return self->Rider->RidingFlexRail;
 }
 #endif
 

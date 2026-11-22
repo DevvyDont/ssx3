@@ -1503,7 +1503,7 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     cRider* rider = self->mRider;
     float uvy = start;
     float invSq = 1.0f / (float)((self->mMaxStreamerSegments - 1) * (self->mMaxStreamerSegments - 1));
-    t4Vector off = rsScale_EF950(rsRow_EF950((char*)rider->mAnimModel->unk_030, rider->mBoneHips, 0x30), 0.7f);
+    t4Vector off = rsScale_EF950(rsRow_EF950((char*)rider->mAnimModel->SkelMatrices, rider->mBoneHips, 0x30), 0.7f);
     float dv = 1.0f / (float)self->StreamBufLen;
     float falloffT = 0.0f;
     int nverts = 0;
@@ -1515,7 +1515,7 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     t4Vector leftPos;
     t4Vector rightPos;
     rider = (cRider*)self->mRider;
-    t4Vector col = rsRow_EF950((char*)rider->mAnimModel->unk_034, rider->mBoneBoardChild, 0x20);
+    t4Vector col = rsRow_EF950((char*)rider->mAnimModel->SkelMatricesScaled, rider->mBoneBoardChild, 0x20);
     float size = 15.0f;
     if (glow) {
         float k = D_004A3B74;

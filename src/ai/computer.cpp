@@ -1389,9 +1389,9 @@ extern "C" void cRider_flagEventBoostPowerUp(cRider* self, int mask, float amt)
         if ((mask & self->mBoostSourceMask) == 0)
             return;
     }
-    cSSXAudio_BoostBar(cAudioInterface_bxAudio(), self, self->unk_2F8, amt);
-    self->unk_2F8 = clamp_10E098(self->unk_2F8 + amt, floatZero, 1.0f);
-    if (self->unk_2F8 == 1.0f && amt > floatZero && self->mUberFlags != 0)
+    cSSXAudio_BoostBar(cAudioInterface_bxAudio(), self, self->BoostPowerBar, amt);
+    self->BoostPowerBar = clamp_10E098(self->BoostPowerBar + amt, floatZero, 1.0f);
+    if (self->BoostPowerBar == 1.0f && amt > floatZero && self->mUberFlags != 0)
     {
         if (self->mUberTimer == floatZero)
             cRider_flagEventReaction(self, 5, floatZero);
@@ -2063,8 +2063,8 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     cAnimModel* trk = rider->mAnimModel;
     sQuat_EB30* n = (sQuat_EB30*)((rider->mBoneHips << 4) + (int)trk->localPos);
     sXf_EB30 node;
-    node.pos = sQuat_EB30(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
-                          n->z * trk->unk_140.z, n->w * trk->unk_140.w);
+    node.pos = sQuat_EB30(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
+                          n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w);
     node.rot = *(sQuat_EB30*)((char*)rider->mAnimModel->localRot + (rider->mBoneHips << 4));
     sXf_EB30 y = Combine_EB30(node, Invert_EB30(animPose));
     *(sXf_EB30*)&rider->mPosition = Combine_EB30(*(sXf_EB30*)&rider->mPosition, y);

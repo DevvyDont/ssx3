@@ -118,7 +118,7 @@ extern "C" void cAnimModel_setScale(cAnimModel* self, float lengthScale, float w
     scale.y = widthScale;
     scale.z = widthScale;
     scale.w = 1.0f;
-    self->unk_140 = scale;
+    self->ScaleVect = scale;
 }
 #endif
 
@@ -316,7 +316,7 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_addAnimMinPart);
 extern "C" void cAnimModel_addAnimMinPart(cAnimModel* self, int i)
 {
     sAnimModelPart* animModelPart = &self->parts[self->partIndex[i]];
-    self->unk_158 |= animModelPart->mask;
+    self->AnimMinPartsMask |= animModelPart->mask;
 }
 #endif
 
@@ -381,7 +381,7 @@ extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone
         "sqc2       $vf12, 0x20(%1)\n"
         ".set pop\n"
         :
-        : "r"(animModelBone), "r"((t4Matrix*)((i << 6) + (int)self->unk_030))
+        : "r"(animModelBone), "r"((t4Matrix*)((i << 6) + (int)self->SkelMatrices))
         : "memory");
     __asm__ __volatile__(
         ".set push\n"
@@ -401,7 +401,7 @@ extern "C" void cAnimModel_setSkelMatrix(cAnimModel* self, int i, sAnimModelBone
         "sqc2       $vf11, 0x30(%1)\n"
         ".set pop\n"
         :
-        : "r"((t4Matrix*)((i << 6) + (int)self->unk_030)), "r"((t4Matrix*)((i << 6) + (int)self->unk_034)), "r"(self)
+        : "r"((t4Matrix*)((i << 6) + (int)self->SkelMatrices)), "r"((t4Matrix*)((i << 6) + (int)self->SkelMatricesScaled)), "r"(self)
         : "memory");
 }
 #endif
@@ -536,7 +536,7 @@ extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
                 parent = &self->bones[parentIndex];
             t4Vector* lp = (t4Vector*)((k << 4) + (int)self->localPos);
             sAnimModelBone local;
-            *(sAmQuat_0200*)&local.pos = sAmQuat_0200(lp->x * self->unk_140.x, lp->y * self->unk_140.y, lp->z * self->unk_140.z, lp->w * self->unk_140.w);
+            *(sAmQuat_0200*)&local.pos = sAmQuat_0200(lp->x * self->ScaleVect.x, lp->y * self->ScaleVect.y, lp->z * self->ScaleVect.z, lp->w * self->ScaleVect.w);
             *(sAmQuat_0200*)&local.rot = *(sAmQuat_0200*)((k << 4) + (int)self->localRot);
             *(sAnimModelBone*)((k << 5) + (int)self->bones) = amCombine_0200(*parent, local);
         }
@@ -614,7 +614,7 @@ extern "C" t4Vector cAnimModel_transformHotSpot(cAnimModel* model, int id, int i
         if (part->id == id)
         {
             tMdfHotSpot* pt = (tMdfHotSpot*)((index << 4) + (int)part->unk_3C);
-            t4Matrix* boneMatrix = (t4Matrix*)(((pt->mBoneId + part->firstBone) << 6) + (int)model->unk_034);
+            t4Matrix* boneMatrix = (t4Matrix*)(((pt->mBoneId + part->firstBone) << 6) + (int)model->SkelMatricesScaled);
             t4Vector localPoint;
             localPoint.x = pt->mOffset[0];
             localPoint.y = pt->mOffset[1];
@@ -673,12 +673,12 @@ extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* offset)
             int k = j + self->parts[i].firstBone;
             amVecAddEq(&self->bones[k].pos, offset);
             {
-                t4Vector shiftedPos = amVecAdd(self->unk_030[k].row[3], offset);
-                self->unk_030[k].row[3] = shiftedPos;
+                t4Vector shiftedPos = amVecAdd(self->SkelMatrices[k].row[3], offset);
+                self->SkelMatrices[k].row[3] = shiftedPos;
             }
             {
-                t4Vector shiftedPos = amVecAdd(self->unk_034[k].row[3], offset);
-                self->unk_034[k].row[3] = shiftedPos;
+                t4Vector shiftedPos = amVecAdd(self->SkelMatricesScaled[k].row[3], offset);
+                self->SkelMatricesScaled[k].row[3] = shiftedPos;
             }
         }
     }
@@ -801,7 +801,7 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
         D_004A5948 = 1;
     }
     for (int i = 0; i < self->numBones; i++) {
-        D_004FC420[i] = mulMat_0640(((sAmMat_0640*)self->unk_034)[i], ((sAmMat_0640*)self->unk_038)[i]);
+        D_004FC420[i] = mulMat_0640(((sAmMat_0640*)self->SkelMatricesScaled)[i], ((sAmMat_0640*)self->InvDefaultMatrices)[i]);
     }
     if (self->unk_018 != 0) {
         for (int j = 0; j < self->numParts; j++) {
@@ -812,7 +812,7 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
                 if (animModelLodRef->part != 0) {
                     ((tSetMats_0640)((sAmVEnt_0640*)ctx->mVtbl)[111].fn)(vthis(ctx, ((sAmVEnt_0640*)ctx->mVtbl)[111]), D_004FC420, 0, animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
                     int additive = self->parts[j].id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)(vthis(ctx, ((sAmVEnt_0640*)ctx->mVtbl)[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->unk_140.y);
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)(vthis(ctx, ((sAmVEnt_0640*)ctx->mVtbl)[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->ScaleVect.y);
                 }
             }
         }
@@ -825,7 +825,7 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
                 sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
                 if (animModelLodRef->part != 0) {
                     int additive = animModelPart->id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)(vthis(ctx, ((sAmVEnt_0640*)ctx->mVtbl)[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->unk_140.y);
+                    ((tDraw_0640)((sAmVEnt_0640*)ctx->mVtbl)[99].fn)(vthis(ctx, ((sAmVEnt_0640*)ctx->mVtbl)[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->ScaleVect.y);
                 }
             }
         }
@@ -949,7 +949,7 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
     }
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     for (int i = 0; i < self->numBones; i++) {
-        D_004FD420[i] = mulMat_0948(((sAmMat_0948*)self->unk_030)[i], ((sAmMat_0948*)self->unk_038)[i]);
+        D_004FD420[i] = mulMat_0948(((sAmMat_0948*)self->SkelMatrices)[i], ((sAmMat_0948*)self->InvDefaultMatrices)[i]);
     }
     if (self->unk_018 != 0) {
         for (int j = 0; j < self->numParts; j++) {

@@ -1059,9 +1059,9 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
     }
     float potentialPct;
     if (slotFree_117FE0(&self->HUDfx[5])) {
-        potentialPct = self->Rider->unk_2F8;
+        potentialPct = self->Rider->BoostPowerBar;
     } else {
-        float actualLevel = self->Rider->unk_2F8;
+        float actualLevel = self->Rider->BoostPowerBar;
         float target;
         if (self->Rider->mBoostMode != 3)
             target = actualLevel + self->CurTrickPower;
@@ -1071,9 +1071,9 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
     }
     float actualPct;
     if (slotFree_117FE0(&self->HUDfx[6]))
-        actualPct = self->Rider->unk_2F8;
+        actualPct = self->Rider->BoostPowerBar;
     else
-        actualPct = approach_117FE0(self->Rider->unk_2F8, self->HUDfx[6].CurDecay / self->HUDfx[6].MaxDecay, 0.01666666753590107f);
+        actualPct = approach_117FE0(self->Rider->BoostPowerBar, self->HUDfx[6].CurDecay / self->HUDfx[6].MaxDecay, 0.01666666753590107f);
     cHUDFX_setAsync_f(&self->HUDfx[5], 5, 0, potentialPct, 0);
     cHUDFX_setAsync_f(&self->HUDfx[6], 6, 0, actualPct, 0);
     if (self->Rider->mUberLevel == 0) {
@@ -1390,8 +1390,8 @@ extern "C" float cRiderMetrix_evReset(cRiderMetrix* self, int isUserReset)
     cRiderMetrix_resetComboChain(self);
     self->Totals.NumResets += 1;
     if (!isUserReset)
-        return self->Rider->unk_2F8 * -0.10000000149011612f;
-    return self->Rider->unk_2F8 * -0.699999988079071f;
+        return self->Rider->BoostPowerBar * -0.10000000149011612f;
+    return self->Rider->BoostPowerBar * -0.699999988079071f;
 }
 #endif
 

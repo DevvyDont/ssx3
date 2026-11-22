@@ -637,16 +637,16 @@ extern "C" void cRider_setupBoostWarp(cRider* rider, int isHeld, int isPressed)
 {
     if (isPressed) cCheatFX_setCheatInput((char*)&rider->mRiderHandler->CheatFX, 0);
     if (isHeld) {
-        if (rider->unk_2F8 > 0.0f) {
+        if (rider->BoostPowerBar > 0.0f) {
             if (rider->mBoostStrength == 0.0f) {
-                float x = rider->unk_2F8;
+                float x = rider->BoostPowerBar;
                 if (x > 0.6666666865348816f) rider->mBoostStrength = 1.0f;
                 else if (x > 0.3333333432674408f) rider->mBoostStrength = 0.625f;
                 else rider->mBoostStrength = 0.25f;
                 cSSXAudio_TurboOn(cAudioInterface_bxAudio(), ((char*)rider), isPressed);
             }
             if (rider->mPowerUpBoostTimer == 0.0f && rider->mBoostMode != 0 && rider->mUberLevel < 10) {
-                rider->unk_2F8 -= 0.00150679936632514f;
+                rider->BoostPowerBar -= 0.00150679936632514f;
             }
             return;
         }
@@ -1320,8 +1320,8 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
     float* hipBone = (float*)((rider->mBoneHips << 4) + (int)animModel->localPos);
     {
         const t4Vector& origin = t4vect_Origin_4DB8;
-        t4Vector off = SubO_4DB8(sV4_4DB8(hipBone[0] * animModel->unk_140.x, hipBone[1] * animModel->unk_140.y,
-                                         hipBone[2] * animModel->unk_140.z, hipBone[3] * animModel->unk_140.w),
+        t4Vector off = SubO_4DB8(sV4_4DB8(hipBone[0] * animModel->ScaleVect.x, hipBone[1] * animModel->ScaleVect.y,
+                                         hipBone[2] * animModel->ScaleVect.z, hipBone[3] * animModel->ScaleVect.w),
                                 origin);
         off.z = 0.0f;
         AddEq_4DB8(rider->mPosition, Rot_4DB8(rider->mRotation, Scale_4DB8(off, 2.0f)));
@@ -1817,11 +1817,11 @@ static inline t4Vector GetFront_5D48(cRider* rider)
 extern "C" void cRider_checkForProximityAction(cRider* self)
 {
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 0) {
-        self->unk_35C = 0.0f;
+        self->ProximityActionDelay = 0.0f;
         return;
     }
-    self->unk_35C += 0.01666666753590107f;
-    if (self->unk_35C < 1.0f)
+    self->ProximityActionDelay += 0.01666666753590107f;
+    if (self->ProximityActionDelay < 1.0f)
         return;
 
     float heading = Atan2_58B8(GetFront_5D48(self).y, GetFront_5D48(self).x);

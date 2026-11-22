@@ -1094,19 +1094,19 @@ extern "C" void cCheatFX_update(cCheatFX* self)
     }
     if ((*(signed char*)&self->m_cheatState) == 1) {
         (self->mRider)->mUberLevel = 11;
-        (self->mRider)->unk_308 = ((*(unsigned char*)&self->m_cheatState.m_misc) >> 1) & 1;
-        (self->mRider)->unk_2F8 = 1.0f;
+        (self->mRider)->mAllowNaturalAir = ((*(unsigned char*)&self->m_cheatState.m_misc) >> 1) & 1;
+        (self->mRider)->BoostPowerBar = 1.0f;
         (self->mRider)->mUberTimer = 60.0f;
         (self->mRider)->mPowerUpTrickTimer = 60.0f;
         (self->mRider)->mPowerUpBoostTimer = 60.0f;
         (self->mRider)->mBoostMode = 0;
     } else {
-        (self->mRider)->unk_308 = 1;
+        (self->mRider)->mAllowNaturalAir = 1;
         if ((self->mRider)->mUberLevel != 11) {
             return;
         }
         (self->mRider)->mUberLevel = 0;
-        (self->mRider)->unk_2F8 = 0.0f;
+        (self->mRider)->BoostPowerBar = 0.0f;
         (self->mRider)->mUberTimer = 0.0f;
         (self->mRider)->mPowerUpTrickTimer = 0.0f;
         (self->mRider)->mPowerUpBoostTimer = 0.0f;

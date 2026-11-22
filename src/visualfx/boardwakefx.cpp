@@ -455,12 +455,12 @@ static inline float wakeClampD0B8(float v, float lo, float hi)
 
 static inline t4Vector wakeRow34D0B8(cRider* rider, int k)
 {
-    return *(t4Vector*)((char*)rider->mAnimModel->unk_034 + (rider->mBoneBoardChild << 6) + k * 16);
+    return *(t4Vector*)((char*)rider->mAnimModel->SkelMatricesScaled + (rider->mBoneBoardChild << 6) + k * 16);
 }
 
 static inline t4Vector wakeRowD0B8(cRider* rider, int k)
 {
-    return *(t4Vector*)((char*)rider->mAnimModel->unk_030 + (rider->mBoneBoardChild << 6) + k * 16);
+    return *(t4Vector*)((char*)rider->mAnimModel->SkelMatrices + (rider->mBoneBoardChild << 6) + k * 16);
 }
 
 static inline float wakeMaxSpeedD0B8()
@@ -2250,8 +2250,8 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     } else {
         cRider* riderObj = (cRider*)self->obj;
         if (riderObj->mIsInNIS != 0) {
-            int nisSpray = riderObj->unk_AD0 == 0 && riderObj->unk_AFC != 0;
-            if (!nisSpray || riderObj->unk_B00 == 0) {
+            int nisSpray = riderObj->mHiddenNIS == 0 && riderObj->mNISShowBoardVisualFX != 0;
+            if (!nisSpray || riderObj->mOnGroundNIS == 0) {
                 self->iB0 = 0;
             }
         }
@@ -2270,8 +2270,8 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     float burstStrength = acc * 0.5f;
     cRider* nisRider = (cRider*)self->obj;
     int y = 0;
-    if (nisRider->mIsInNIS != 0 && nisRider->unk_AD0 == 0) {
-        y = nisRider->unk_AFC != 0;
+    if (nisRider->mIsInNIS != 0 && nisRider->mHiddenNIS == 0) {
+        y = nisRider->mNISShowBoardVisualFX != 0;
     }
     if (y) {
         x = 27.77777862548828f <= acc;
@@ -2774,7 +2774,7 @@ extern "C" void func_002E1120(sWakeFx1120* self)
     void* em = self->p28 + 0x840;
     cRider* obj = (cRider*)self->obj;
     int k = obj->mBoneHead;
-    sMat1120* mats = (sMat1120*)obj->mAnimModel->unk_030;
+    sMat1120* mats = (sMat1120*)obj->mAnimModel->SkelMatrices;
     sMat1120 mat = mats[k];
     float back = -3.0f;
     float up = 4.0f;
@@ -3407,7 +3407,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         dt = 0.01666666753590107f;
         obj = (cRider*)self->obj;
         k = self->p7C[self->i78];
-        boneMats = obj->mAnimModel->unk_030;
+        boneMats = obj->mAnimModel->SkelMatrices;
         pos = ((sWakeVecE398*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
         wakeScaleE398(scaledVel, *(sWakeVecE398*)&obj->mVelocity, *(float*)(self->p2C + 0x900));
         vel = scaledVel;
@@ -3422,7 +3422,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
     } else {
         cRider* obj = (cRider*)self->obj;
         int k = obj->mBoneHips;
-        t4Matrix* boneMats = obj->mAnimModel->unk_030;
+        t4Matrix* boneMats = obj->mAnimModel->SkelMatrices;
         sWakeVecE398 pos = ((sWakeVecE398*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
         cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
     }
@@ -5009,7 +5009,7 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
     Set4_3AF8(side, viewMat[0], viewMat[4], viewMat[8], 0.0f);
     t4Vector up;
     Set4_3AF8(up, viewMat[1], viewMat[5], viewMat[9], 0.0f);
-    t4Vector pos = *(t4Vector*)((char*)self->mRider->mAnimModel->unk_030 + (self->mRider->mBoneHead << 6) + 0x30);
+    t4Vector pos = *(t4Vector*)((char*)self->mRider->mAnimModel->SkelMatrices + (self->mRider->mBoneHead << 6) + 0x30);
     const t4Vector* base = &pos;
     t4Vector beamTip = Add_3AF8(*base, Scale_3AF8(up, 20260.0f));
     t4Vector beamUpper = Add_3AF8(*base, Scale_3AF8(up, 20130.0f));
@@ -7314,7 +7314,7 @@ static inline float wakeDotE6C08(const t4Vector& a, const t4Vector& b)
 
 static inline t4Vector wakeRowE6C08(cRider* rider, int k)
 {
-    return ((t4Vector*)((char*)rider->mAnimModel->unk_030 + (rider->mBoneBoardChild << 6)))[k];
+    return ((t4Vector*)((char*)rider->mAnimModel->SkelMatrices + (rider->mBoneBoardChild << 6)))[k];
 }
 
 // Pull a corner down onto the ground plane, 10 units below.
@@ -7638,7 +7638,7 @@ static inline int texId_7A10(int i)
 // Bone position (row 3 of the rider's bone matrix unk_89C).
 static inline sWakeV4_7A10 bonePos_7A10(cRider* rider)
 {
-    return *(sWakeV4_7A10*)((char*)rider->mAnimModel->unk_030 + (rider->mBoneHips << 6) + 0x30);
+    return *(sWakeV4_7A10*)((char*)rider->mAnimModel->SkelMatrices + (rider->mBoneHips << 6) + 0x30);
 }
 
 // Fills vertex i of a strip: colour (alpha scaled to 0..128), q = 1, position, then st.
