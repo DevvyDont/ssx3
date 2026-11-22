@@ -1197,34 +1197,10 @@ void FILESYS_cancelop(struct H_D148 ophandle) {
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
-struct sFsHd {                      /* 0x110: an open file (gFileDevice.f2C[], reservehandle hands one out) */
-    int f00;                        /* handle, or the archive's FILEBIG_def */
-    int f04;                        /* size */
-    int f08;                        /* offset in the archive */
-    int f0C;
-    char f10[0x100];                /* name */
-};
 struct sFsCmdId {
     unsigned int id : 20;
     unsigned int type : 4;
     unsigned int idx : 8;           /* index in gFileDevice.f28 */
-};
-struct sFsCmd {                     /* 0x30: a command (gFileDevice.f28[], reserveop hands one out) */
-    union {
-        unsigned int w;
-        struct sFsCmdId b;
-    } f00;                          /* the handle */
-    int f04;                        /* aborted */
-    volatile int f08;               /* status */
-    int f0C;                        /* error */
-    int f10;                        /* priority */
-    int f14;                        /* callback argument */
-    int f18;
-    int f1C;
-    int f20;
-    struct sFsHd *f24;
-    void (*f28)(int, int, int);     /* completion callback */
-    struct sFsCmd *f2C;             /* next in the queue */
 };
 struct sAB0 {
     int f00;                        /* number of commands */
@@ -1233,10 +1209,10 @@ struct sAB0 {
     int f0C;                        /* commands queued */
     int f10;               /* callback depth */
     int f14[4];                     /* mutex (also D_00519AC4) */
-    struct sFsCmd *f24;             /* running */
-    struct sFsCmd *f28;             /* commands (also D_00519AD8) */
-    struct sFsHd *f2C;              /* open files */
-    struct sFsCmd *f30;             /* queue */
+    struct FILEOPERATION_def *f24;             /* running */
+    struct FILEOPERATION_def *f28;             /* commands (also D_00519AD8) */
+    struct HANDLE_def *f2C;              /* open files */
+    struct FILEOPERATION_def *f30;             /* queue */
     struct FILEBIG_def *f34;            /* archives (also D_00519AE4) */
     int f38;                        /* (also pFileDeviceMem) */
 };
@@ -1244,10 +1220,10 @@ extern struct sAB0 gFileDevice;
 extern int D_00519AB8;                          /* gFileDevice.f08 */
 struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4) */
     int f00[4];                     /* the mutex */
-    struct sFsCmd *f10;
-    struct sFsCmd *f14;
-    struct sFsHd *f18;
-    struct sFsCmd *f1C;             /* the queue (gFileDevice.f30) */
+    struct FILEOPERATION_def *f10;
+    struct FILEOPERATION_def *f14;
+    struct HANDLE_def *f18;
+    struct FILEOPERATION_def *f1C;             /* the queue (gFileDevice.f30) */
     struct FILEBIG_def *f20;
     int f24;
 };
@@ -1264,7 +1240,7 @@ extern void THREAD_yield(int);
 extern int SYNCTASK_run(int);
 
 static inline int hValid_D1D8(int h) {
-    return h != 0 && ((h & 0xFFFFF) == (gFileDevice.f28[((unsigned char *)&h)[3]].f00.w & 0xFFFFF));
+    return h != 0 && ((h & 0xFFFFF) == (((unsigned int)gFileDevice.f28[((unsigned char *)&h)[3]].op.id) & 0xFFFFF));
 }
 
 /**
@@ -1277,11 +1253,11 @@ static inline int hValid_D1D8(int h) {
  * @return the operation's result, or -3 for an invalid handle
  */
 int FILESYS_waitop(int ophandle) {
-    struct sFsCmd *fop = &gFileDevice.f28[((unsigned char *)&ophandle)[3]];
+    struct FILEOPERATION_def *fop = &gFileDevice.f28[((unsigned char *)&ophandle)[3]];
     if (!hValid_D1D8(ophandle)) {
         return -3;
     }
-    while (fop->f08 == 0) {
+    while (fop->status == 0) {
         if (THREAD_iscurrent(0) != 0) {
             SYNCTASK_run(0);
         } else {
@@ -1291,7 +1267,7 @@ int FILESYS_waitop(int ophandle) {
             return -3;
         }
     }
-    return fop->f08;
+    return fop->status;
 }
 #endif
 
@@ -1482,7 +1458,7 @@ int FILESYS_close_impl(int filehandle, int priority, int userdata) {
     *(int*)((char*)fop + 0x14) = userdata;
     *(int*)((char*)fop + 0x24) = filehandle;
     for (; n != 0; n = n->next) {
-        if ((int)((struct sFsHd*)n->handle) == filehandle) {
+        if ((int)n->handle == filehandle) {
             *(int*)((char*)fop + 0xC) = 3;
             iFILE_perror_D5A0(fop);
             break;
@@ -1668,13 +1644,13 @@ extern char iFILE_addbigreadcallback_D8E8[] __asm__("iFILE_addbigreadcallback");
  */
 void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bigNode) {
     int n, k;
-    struct sFsHd *fileHd;
+    struct HANDLE_def *fileHd;
     struct FILESYSOPTS *fs;
-    struct sFsCmd *fileCmd = &gFileDevice.f28[((unsigned char *)&opHandle)[3]];
-    fileHd = fileCmd->f24;
-    k = fileCmd->f10;
-    (*(struct sFsHd**)&bigNode->handle) = fileHd;
-    ((struct sFsCmd*)bigNode->fop)->f24 = fileHd;
+    struct FILEOPERATION_def *fileCmd = &gFileDevice.f28[((unsigned char *)&opHandle)[3]];
+    fileHd = fileCmd->handle;
+    k = fileCmd->priority;
+    bigNode->handle = fileHd;
+    ((struct FILEOPERATION_def*)bigNode->fop)->handle = fileHd;
     FILESYS_completeop_D8E8(opHandle);
     if (BIG_typeofheader_D8E8(((int)bigNode->header)) == 0) {
         gFileSysOpts.free((void *)((int)bigNode->header));
@@ -1685,12 +1661,12 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bi
         fs->free((void *)((int)bigNode->header));
         bigNode->headersize = n;
         (*(int*)&bigNode->header) = (int)fs->malloc(str_bigfile_buf_D8E8, n, bigNode->memflags);
-        opHandle = FILESYS_read(((struct sFsHd*)bigNode->handle), 0, ((int)bigNode->header), n, k, bigNode);
+        opHandle = FILESYS_read(bigNode->handle, 0, ((int)bigNode->header), n, k, bigNode);
         FILESYS_callbackop(opHandle, iFILE_addbigreadcallback_D8E8);
     } else {
         bigNode->next = gFileDevice.f34;
         gFileDevice.f34 = bigNode;
-        iFILESYS_ExecCommand_D8E8(((struct sFsCmd*)bigNode->fop));
+        iFILESYS_ExecCommand_D8E8(((struct FILEOPERATION_def*)bigNode->fop));
     }
 }
 #endif
@@ -2011,7 +1987,7 @@ extern int BIG_locateentryz_FX(int, char *, int, int *, int *) __asm__("BIG_loca
 extern void freehandle_FX(void *) __asm__("freehandle");
 extern void iFILESYS_CommandCompleteCallback_FX(int) __asm__("iFILESYS_CommandCompleteCallback");
 
-void iFILESYS_ExecCommand_impl(struct sFsCmd *c) __asm__("iFILESYS_ExecCommand");
+void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *c) __asm__("iFILESYS_ExecCommand");
 /**
  * Queues a file-system command and, when the device is idle, starts the next queued command.
  *
@@ -2024,25 +2000,25 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *c) __asm__("iFILESYS_ExecCommand")
  *
  * @param fileOp  command to queue, or 0 just to try starting the next one
  */
-void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
+void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
     char path[256];
     char file[256];
     int off;
     int x;
     struct FILEBIG_def *n;
-    struct sFsHd *hd;
+    struct HANDLE_def *hd;
     int mode;
     int found;
     MUTEX_lock_FX(D_00519AC4.f00);
     if (fileOp != 0) {
-        struct sFsCmd *prev = 0;
-        fileOp->f2C = D_00519AC4.f1C;
-        while (fileOp->f2C != 0 && !(fileOp->f10 < fileOp->f2C->f10)) {
-            prev = fileOp->f2C;
-            fileOp->f2C = prev->f2C;
+        struct FILEOPERATION_def *prev = 0;
+        fileOp->next = D_00519AC4.f1C;
+        while (fileOp->next != 0 && !(fileOp->priority < fileOp->next->priority)) {
+            prev = fileOp->next;
+            fileOp->next = prev->next;
         }
         if (prev != 0) {
-            prev->f2C = fileOp;
+            prev->next = fileOp;
         } else {
             gFileDevice.f30 = fileOp;
         }
@@ -2053,8 +2029,8 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
         return;
     }
     fileOp = gFileDevice.f30;
-    if (fileOp != 0 && fileOp->f10 <= gFileDevice.f08) {
-        gFileDevice.f30 = fileOp->f2C;
+    if (fileOp != 0 && fileOp->priority <= gFileDevice.f08) {
+        gFileDevice.f30 = fileOp->next;
         gFileDevice.f0C--;
     } else {
         fileOp = 0;
@@ -2062,97 +2038,97 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
     gFileDevice.f24 = fileOp;
     MUTEX_unlock_FX(gFileDevice.f14);
     if (fileOp == 0) return;
-    if (fileOp->f04 != 0) {
+    if (fileOp->cancelled != 0) {
         iFILESYS_CommandCompleteCallback_FX(0);
         return;
     }
-    switch ((fileOp->f00.w >> 20) & 0xF) {
+    switch ((((unsigned int)fileOp->op.id) >> 20) & 0xF) {
     case 2:
     case 8:
         file[0] = 0;
-        if (strchr_FX(fileOp->f24->f10, '|')) {
-            if (*fileOp->f24->f10 == '|') {
+        if (strchr_FX(fileOp->handle->name, '|')) {
+            if (*fileOp->handle->name == '|') {
                 mode = 2;
             } else {
                 int len;
-                char *bar = strchr_FX(fileOp->f24->f10, '|');
+                char *bar = strchr_FX(fileOp->handle->name, '|');
                 mode = 4;
-                len = bar - fileOp->f24->f10;
+                len = bar - fileOp->handle->name;
                 path[0] = 0;
-                strncpy(path, fileOp->f24->f10, len);
+                strncpy(path, fileOp->handle->name, len);
                 path[len] = 0;
             }
-            strcpy(file, strchr_FX(fileOp->f24->f10, '|') + 1);
+            strcpy(file, strchr_FX(fileOp->handle->name, '|') + 1);
         } else {
             mode = 1;
-            if (fileOp->f18 & 1) {
+            if (fileOp->value & 1) {
                 mode = 3;
-                strcpy(file, fileOp->f24->f10);
+                strcpy(file, fileOp->handle->name);
             }
         }
         found = 0;
-        if ((mode & 1) && FILEDEV_open_FX(fileOp->f24->f10, fileOp->f18, fileOp->f24)) {
+        if ((mode & 1) && FILEDEV_open_FX(fileOp->handle->name, fileOp->value, fileOp->handle)) {
             found = 1;
-            if (((fileOp->f00.w >> 20) & 0xF) == 8) {
-                FILEDEV_close_FX(fileOp->f24->f00);
+            if (((((unsigned int)fileOp->op.id) >> 20) & 0xF) == 8) {
+                FILEDEV_close_FX(fileOp->handle->info);
             } else {
-                fileOp->f24->f04 = FILEDEV_getsize_FX(fileOp->f24->f00);
-                fileOp->f24->f0C = FILEDEV_getstartsector_FX(fileOp->f24->f00);
+                fileOp->handle->length = FILEDEV_getsize_FX(fileOp->handle->info);
+                fileOp->handle->DVDstartsector = FILEDEV_getstartsector_FX(fileOp->handle->info);
             }
         }
         if (!found && (mode & 6)) {
             for (n = gFileDevice.f34; n != 0 && !found; n = n->next) {
-                if ((mode & 4) && strcmp_FX(((struct sFsHd*)n->handle)->f10, path)) continue;
+                if ((mode & 4) && strcmp_FX(n->handle->name, path)) continue;
                 if (BIG_locateentryz_FX(((int)n->header), file, 0, &x, &off)) {
                     found = 1;
-                    fileOp->f24->f00 = (int)n;
-                    fileOp->f24->f04 = off;
-                    fileOp->f24->f08 = x;
+                    fileOp->handle->info = (int)n;
+                    fileOp->handle->length = off;
+                    fileOp->handle->bigoffset = x;
                 }
             }
         }
-        if (((fileOp->f00.w >> 20) & 0xF) == 8) {
-            freehandle_FX(fileOp->f24);
-            fileOp->f18 = found;
+        if (((((unsigned int)fileOp->op.id) >> 20) & 0xF) == 8) {
+            freehandle_FX(fileOp->handle);
+            fileOp->value = found;
         }
         iFILESYS_CommandCompleteCallback_FX(found);
         break;
     case 3:
-        fileOp->f0C = 1;
-        hd = fileOp->f24;
+        fileOp->error = 1;
+        hd = fileOp->handle;
         if (hd != 0) {
-            if (hd->f08 == 0) {
-                fileOp->f0C = FILEDEV_close_FX(hd->f00);
+            if (hd->bigoffset == 0) {
+                fileOp->error = FILEDEV_close_FX(hd->info);
             } else {
-                fileOp->f0C = 0;
+                fileOp->error = 0;
             }
-            freehandle_FX(fileOp->f24);
-            fileOp->f24 = 0;
+            freehandle_FX(fileOp->handle);
+            fileOp->handle = 0;
         }
-        iFILESYS_CommandCompleteCallback_FX(fileOp->f0C == 0);
+        iFILESYS_CommandCompleteCallback_FX(fileOp->error == 0);
         break;
     case 4:
-        if (fileOp->f1C > 0) {
-            if (fileOp->f24->f08 != 0) {
-                FILEDEV_readreq_FX(((struct sFsHd*)((struct FILEBIG_def *)fileOp->f24->f00)->handle)->f00, fileOp->f20, fileOp->f24->f08 + fileOp->f18, fileOp->f1C);
+        if (fileOp->amount > 0) {
+            if (fileOp->handle->bigoffset != 0) {
+                FILEDEV_readreq_FX(((struct HANDLE_def*)((struct FILEBIG_def *)fileOp->handle->info)->handle)->info, ((int)fileOp->data), fileOp->handle->bigoffset + fileOp->value, fileOp->amount);
             } else {
-                FILEDEV_readreq_FX(fileOp->f24->f00, fileOp->f20, fileOp->f18, fileOp->f1C);
+                FILEDEV_readreq_FX(fileOp->handle->info, ((int)fileOp->data), fileOp->value, fileOp->amount);
             }
         } else {
             iFILESYS_CommandCompleteCallback_FX(1);
         }
         break;
     case 5:
-        FILEDEV_write_FX(fileOp->f24->f00, fileOp->f20, fileOp->f18, fileOp->f1C);
+        FILEDEV_write_FX(fileOp->handle->info, ((int)fileOp->data), fileOp->value, fileOp->amount);
         break;
     case 6:
-        fileOp->f18 = fileOp->f24->f04;
+        fileOp->value = fileOp->handle->length;
         iFILESYS_CommandCompleteCallback_FX(1);
         break;
     case 7:
     case 9:
     case 10:
-        iFILESYS_CommandCompleteCallback_FX(fileOp->f0C == 0);
+        iFILESYS_CommandCompleteCallback_FX(fileOp->error == 0);
         break;
     }
 }
@@ -2288,23 +2264,23 @@ INCLUDE_ASM("ealib/seg_2DCAE8", reserveop);
 extern int D_00450C0C_E670 __asm__("D_00450C0C");
 extern void MUTEX_unlock_E670(void *) __asm__("MUTEX_unlock");
 
-struct sFsCmd *reserveop_impl(void) __asm__("reserveop");
+struct FILEOPERATION_def *reserveop_impl(void) __asm__("reserveop");
 /**
  * Takes a free file operation (gFileDevice +0x28, 0x30 bytes each) under the mutex: marks it in use and stamps its index
  * and a new 20-bit id (D_00450C0C, wrapping to 1). Spins forever when none is free.
  *
  * @return the operation
  */
-struct sFsCmd *reserveop_impl(void) {
+struct FILEOPERATION_def *reserveop_impl(void) {
     int i = 0;
     int nextId;
     MUTEX_lock(gFileDevice.f14);
     for (; i < gFileDevice.f00; i++) {
-        if (gFileDevice.f28[i].f00.b.type == 0) {
-            gFileDevice.f28[i].f00.b.type = 1;
-            gFileDevice.f28[i].f00.b.idx = i;
+        if (((struct sFsCmdId*)&gFileDevice.f28[i].op)->type == 0) {
+            ((struct sFsCmdId*)&gFileDevice.f28[i].op)->type = 1;
+            ((struct sFsCmdId*)&gFileDevice.f28[i].op)->idx = i;
             nextId = D_00450C0C_E670;
-            gFileDevice.f28[i].f00.b.id = nextId;
+            ((struct sFsCmdId*)&gFileDevice.f28[i].op)->id = nextId;
             D_00450C0C_E670 = nextId + 1;
             if (nextId + 1 > 0xFFFFF) {
                 D_00450C0C_E670 = 1;

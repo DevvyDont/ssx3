@@ -19,6 +19,7 @@ typedef struct FILEOPERATION_def FILEOPERATION_def;
 typedef struct HANDLE_def HANDLE_def;
 typedef struct FILESYSOPTS FILESYSOPTS;
 typedef struct FILEBIG_def FILEBIG_def;
+typedef struct FILE_FILEDEVICE FILE_FILEDEVICE;
 #endif
 
 // An open file, retail version (0x110 [R]: FILESYS_initadr / FILESYS_overhead size the handle table as maxopenfiles * 272;
@@ -117,6 +118,38 @@ CHECK_OFFSET(FILESYSOPTS, unk_20, 0x20);
 CHECK_SIZE(FILESYSOPTS, 0x24);
 
 extern FILESYSOPTS gFileSysOpts; // 0x00450C10: the file system's options (FILESYS_getopts / FILESYS_setopts copy it)
+
+// FILE_FILEDEVICE (0x38 [O]; [R] retail gFileDevice 0x00519AB0 runs to pFileDeviceMem at 0x00519AE8): the file
+// system's device state. Retail has On Tour's layout member for member: [U] the roles below (the unit's old view
+// sAB0) and the splat labels inside it (D_00519AB8 minpriority, D_00519AC4 mutex, D_00519AD8 oplist, D_00519AE4
+// bigfilelist).
+struct FILE_FILEDEVICE {
+    int maxfileops;                     // 0x00 [O]; [U] the number of operation records
+    int maxopen;                        // 0x04 [O]; [U] the number of open-file records
+    int minpriority;                    // 0x08 [O]; [U] FILESYS_initadr writes 0xFF, FILESYS_setminpriority stores it
+    int numopsqueued;                   // 0x0C [O]; [U] operations queued
+    int waitlevel;                      // 0x10 [O] (volatile there); [U] the callback depth
+    int mutex[4];                       // 0x14 [O] (MUTEX, ealib/stream.h: 0x10 bytes)
+    FILEOPERATION_def* exec;            // 0x24 [O] (volatile there); [U] the running operation
+    FILEOPERATION_def* oplist;          // 0x28 [O]; [U] the operation records (reserveop hands one out)
+    HANDLE_def* handlelist;             // 0x2C [O]; [U] the open-file records (reservehandle hands one out)
+    FILEOPERATION_def* opqhead;         // 0x30 [O]; [U] the queue of pending operations
+    FILEBIG_def* bigfilelist;           // 0x34 [O]; [U] the mounted BIG archives
+};
+
+CHECK_OFFSET(FILE_FILEDEVICE, maxfileops, 0x00);
+CHECK_OFFSET(FILE_FILEDEVICE, maxopen, 0x04);
+CHECK_OFFSET(FILE_FILEDEVICE, minpriority, 0x08);
+CHECK_OFFSET(FILE_FILEDEVICE, numopsqueued, 0x0C);
+CHECK_OFFSET(FILE_FILEDEVICE, waitlevel, 0x10);
+CHECK_OFFSET(FILE_FILEDEVICE, mutex, 0x14);
+CHECK_OFFSET(FILE_FILEDEVICE, exec, 0x24);
+CHECK_OFFSET(FILE_FILEDEVICE, oplist, 0x28);
+CHECK_OFFSET(FILE_FILEDEVICE, handlelist, 0x2C);
+CHECK_OFFSET(FILE_FILEDEVICE, opqhead, 0x30);
+CHECK_OFFSET(FILE_FILEDEVICE, bigfilelist, 0x34);
+CHECK_SIZE(FILE_FILEDEVICE, 0x38);
+
 
 // A mounted BIG archive, retail version (0x18 [U]: the records iFILE_addbigopencallback / iFILE_addbigreadcallback fill;
 // On Tour 0x1C): [O] struct FILEBIG_def {header, data, headersize, memflags, handle, fop, next}, linked from the file
