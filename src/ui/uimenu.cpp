@@ -90,11 +90,12 @@ struct cUIMenu_onInputChangeItem_sVEntry {
 };
 
 // getScreen()->getParentState()->vcall slot 20 (On Tour: same slot at +0xA0 of the vtable)
-static inline void cUIMenu_onInputChangeItem_notify(char* self, int ev, unsigned char v)
+static inline void cUIMenu_onInputChangeItem_notify(char* vself, int ev, unsigned char v)
 {
-    char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+    cUIMenu* self = (cUIMenu*)vself;
+    char* mgr = (char*)self->mpScreen->mpState;
     cUIMenu_onInputChangeItem_sVEntry* vt = *(cUIMenu_onInputChangeItem_sVEntry**)(mgr + 8);
-    vt[20].fn(mgr + vt[20].delta, self, ev, v);
+    vt[20].fn(mgr + vt[20].delta, ((char*)self), ev, v);
 }
 
 /**
@@ -501,11 +502,12 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
 void* cList_getByIndex_i(void* list, int i) __asm__("cList_getByIndex");
 
-static inline void cUIMenu_notify(char* self, int ev, unsigned char v)
+static inline void cUIMenu_notify(char* vself, int ev, unsigned char v)
 {
-    char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+    cUIMenu* self = (cUIMenu*)vself;
+    char* mgr = (char*)self->mpScreen->mpState;
     cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
-    vt[20].fn(mgr + vt[20].delta, self, ev, v);
+    vt[20].fn(mgr + vt[20].delta, ((char*)self), ev, v);
 }
 
 /**

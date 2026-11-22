@@ -1978,26 +1978,27 @@ extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg) __asm__("
  * @param cfg  the play options (filled from tMoviePlayOptions_SetDefaults's defaults)
  * @return 1 (always)
  */
-extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg)
+extern "C" int cMoviePlayer_init_impl(void* vself, sMemCfg_2534A8* cfg)
 {
+    cMoviePlayer* self = (cMoviePlayer*)vself;
     cMoviePlayer_purge((cMoviePlayer*)self);
     int soundOff = 1;
-    *(sMemCfg_2534A8*)((char*)self + 0x14) = *cfg;
+    *(sMemCfg_2534A8*)&self->m_PlayOp = *cfg;
     int optionSet = 0;
-    if (*(int*)((char*)self + 0x24) != 0) {
+    if (self->m_PlayOp.bPreLoad != 0) {
         optionSet = 1;
     }
-    if (*(int*)((char*)self + 0x1C) != 0) {
+    if (self->m_PlayOp.bSoundOn != 0) {
         soundOff = 0;
     }
-    *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x34);
-    char* name = *(char**)((char*)self + 0x18);
+    self->m_fSpeed = self->m_PlayOp.fPlaySpeed;
+    char* name = (char*)self->m_PlayOp.sAudioFileName;
     if (name != 0 && *name != 0) {
         void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
-        *(void**)((char*)self + 0x38) = func_003ADE08(mem, *(int*)((char*)self + 0x14), 0x60000, *(char**)((char*)self + 0x18), 0x20000, optionSet, soundOff);
+        self->m_pPlayer = func_003ADE08(mem, *(int*)&self->m_PlayOp, 0x60000, (char*)self->m_PlayOp.sAudioFileName, 0x20000, optionSet, soundOff);
     } else {
         void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
-        *(void**)((char*)self + 0x38) = func_003ADDC0(mem, *(int*)((char*)self + 0x14), 0x80000, optionSet, soundOff);
+        self->m_pPlayer = func_003ADDC0(mem, *(int*)&self->m_PlayOp, 0x80000, optionSet, soundOff);
     }
     return 1;
 }

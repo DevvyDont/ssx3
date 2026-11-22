@@ -5222,9 +5222,10 @@ extern "C" void cFEStateNet_onPopupEvent_impl(void* self, int popup, int a2) __a
  * @param popup  the popup state that sent the event
  * @param event  popup event (15 + chosen option, 20 back, 21 keyboard text, 22 the popup is gone)
  */
-extern "C" void cFEStateNet_onPopupEvent_impl(void* self, int popup, int event)
+extern "C" void cFEStateNet_onPopupEvent_impl(void* vself, int popup, int event)
 {
-    if (popup == *(int*)((char*)self + 0x69C)) {
+    cFEStateNet* self = (cFEStateNet*)vself;
+    if (popup == (int)self->mpKeyboard) {
         func_001A94E0((cFEStateNet*)self, popup, event);
         return;
     }

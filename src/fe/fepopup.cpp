@@ -567,131 +567,132 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self) __asm__("cScre
  * frame widgets (+0x74..+0x80) through virtual slot 11 and sets the popup's text and back colours (+0x32C, +0x33C)
  * from gPopupWhite/gPopupBlack.
  */
-extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
+extern "C" void cScreenPopup_setupBackgroundType_impl(char* vself)
 {
-    switch (*(int*)(self + 0x31C)) {
+    cScreenPopup* self = (cScreenPopup*)vself;
+    switch (self->meBackgroundType) {
     case 0:
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x64));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x48));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x4C));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x50));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x54));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x58));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x5C));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x60));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x68));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundGreyFade);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundWhite);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundRed);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundLarge);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundLargeOutline);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundSmall);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundSmallOutline);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundShadow);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundBlack);
         {
-            char* frameWidget = *(char**)(self + 0x74);
+            char* frameWidget = (char*)self->mpMessageText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x78);
+            char* frameWidget = (char*)self->mpPostText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x7C);
+            char* frameWidget = (char*)self->mpTitleText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x80);
+            char* frameWidget = (char*)self->mpEnterBox;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
-        *(sQuad_58E8*)(self + 0x32C) = gPopupWhite;
-        *(sQuad_58E8*)(self + 0x33C) = gPopupBlack;
+        *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupWhite;
+        *(sQuad_58E8*)&self->mtUnhighlightColor[0] = gPopupBlack;
         break;
     case 1:
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x64));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x50));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x54));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x58));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x5C));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x60));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x48));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x4C));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x68));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundGreyFade);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundLarge);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundLargeOutline);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundSmall);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundSmallOutline);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundShadow);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundWhite);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundRed);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundBlack);
         {
-            char* frameWidget = *(char**)(self + 0x74);
+            char* frameWidget = (char*)self->mpMessageText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x78);
+            char* frameWidget = (char*)self->mpPostText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x7C);
+            char* frameWidget = (char*)self->mpTitleText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x80);
+            char* frameWidget = (char*)self->mpEnterBox;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
-        *(sQuad_58E8*)(self + 0x32C) = gPopupWhite;
-        *(sQuad_58E8*)(self + 0x33C) = gPopupBlack;
+        *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupWhite;
+        *(sQuad_58E8*)&self->mtUnhighlightColor[0] = gPopupBlack;
         break;
     case 2:
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x48));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x4C));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x50));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x54));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x58));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x5C));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x60));
-        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x64));
-        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x68));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundWhite);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundRed);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundLarge);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundLargeOutline);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundSmall);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundSmallOutline);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundShadow);
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundGreyFade);
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundBlack);
         {
-            char* frameWidget = *(char**)(self + 0x74);
+            char* frameWidget = (char*)self->mpMessageText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x78);
+            char* frameWidget = (char*)self->mpPostText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x7C);
+            char* frameWidget = (char*)self->mpTitleText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
         {
-            char* frameWidget = *(char**)(self + 0x80);
+            char* frameWidget = (char*)self->mpEnterBox;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
-        *(sQuad_58E8*)(self + 0x32C) = gPopupBlue;
-        *(sQuad_58E8*)(self + 0x33C) = gPopupWhite;
+        *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupBlue;
+        *(sQuad_58E8*)&self->mtUnhighlightColor[0] = gPopupWhite;
         break;
     }
 }

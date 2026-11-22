@@ -1214,10 +1214,11 @@ extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int a, int b) __asm__
  * @param key  the leaf key (the region index)
  * @param data  the leaf data pointer
  */
-extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int key, int data)
+extern "C" void tQuadTreeNode_setLeafNode_impl(void* vself, int key, int data)
 {
-    *(int*)((char*)self + 0x4) = key;
-    *(int*)((char*)self + 0x0) = data;
+    tQuadTreeNode* self = (tQuadTreeNode*)vself;
+    self->m_leaf.m_key = key;
+    *(int*)&self->m_leaf = data;
 }
 #endif
 
@@ -1304,11 +1305,12 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", cQuadTree_resolve__FPv);
  * Points m_nodes and m_freeNodes at the node array stored right after the 0x28-byte tree in streamed world-painter data
  * (this + 0x28). cWorldPainterLayer_resolve calls it.
  */
-void cQuadTree_resolve(void* self)
+void cQuadTree_resolve(void* vself)
 {
+    cQuadTree* self = (cQuadTree*)vself;
     void* nodes = (char*)self + 0x28;
-    *(void**)((char*)self + 0x20) = nodes;
-    *(void**)((char*)self + 0x24) = nodes;
+    self->m_nodes = (tQuadTreeNode*)nodes;
+    self->m_freeNodes = (tQuadTreeNode*)nodes;
 }
 #endif
 

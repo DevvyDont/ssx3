@@ -407,9 +407,10 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onincomingmsg__FPv);
  *
  * @return no meaningful value (func_003E8FD0() returns nothing)
  */
-void* LobbyMan_onincomingmsg(void* self)
+void* LobbyMan_onincomingmsg(void* vself)
 {
-    return func_003E8FD0(*(int*)((char*)self + 0x54));
+    LobbyMan* self = (LobbyMan*)vself;
+    return func_003E8FD0((int)self->mpLobbyApi);
 }
 #endif
 

@@ -4598,18 +4598,19 @@ extern "C" sMovieFlags_1B20 cMCOverlayManager_getDeviceState_s(void* self) __asm
  * @return the device state (bits 1 error, 2 damaged, 4 full, 8 no card, 0x10 unformatted in
  *         mCurrDeviceStateLast)
  */
-extern "C" sMovieFlags_1B20 cMCOverlayManager_getDeviceState_s(void* self)
+extern "C" sMovieFlags_1B20 cMCOverlayManager_getDeviceState_s(void* vself)
 {
-    if (*(int*)((char*)self + 0x42C) != *(int*)((char*)self + 0x428))
-        return *(sMovieFlags_1B20*)((char*)self + 0x43C);
+    cMCOverlayManager* self = (cMCOverlayManager*)vself;
+    if (self->mCurrCheckDevice != self->mSelectedDevice)
+        return *(sMovieFlags_1B20*)&self->mCurrDeviceStateLast;
     sMovieFlags_1B20 state = {0, 0, 0, 0, 0, 0, 0};
-    state.a = (*(cMovieSub434_1B20**)((char*)self + 0x434))->IsInvalid1();
-    int isDamaged = (*(cMovieSub434_1B20**)((char*)self + 0x434))->IsDamaged() || (*(cMovieSub434_1B20**)((char*)self + 0x434))->v59();
+    state.a = ((cMovieSub434_1B20*)self->mpMemCard)->IsInvalid1();
+    int isDamaged = ((cMovieSub434_1B20*)self->mpMemCard)->IsDamaged() || ((cMovieSub434_1B20*)self->mpMemCard)->v59();
     state.b = isDamaged;
-    int isFull = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->GetNumFiles() && (*(cMovieSub434_1B20**)((char*)self + 0x434))->GetFreeSpace() < (*(cMovieSub434_1B20**)((char*)self + 0x434))->SpaceRequired1();
+    int isFull = !((cMovieSub434_1B20*)self->mpMemCard)->GetNumFiles() && ((cMovieSub434_1B20*)self->mpMemCard)->GetFreeSpace() < ((cMovieSub434_1B20*)self->mpMemCard)->SpaceRequired1();
     state.c = isFull;
-    state.d = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->IsAvailable1();
-    int isUnformatted = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->IsFormatted1() || !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v58();
+    state.d = !((cMovieSub434_1B20*)self->mpMemCard)->IsAvailable1();
+    int isUnformatted = !((cMovieSub434_1B20*)self->mpMemCard)->IsFormatted1() || !((cMovieSub434_1B20*)self->mpMemCard)->v58();
     state.e = isUnformatted;
     state.f = 0;
     return state;
@@ -4977,37 +4978,38 @@ extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i) __asm__
  *
  * @param i  device index
  */
-extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i)
+extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* vself, int i)
 {
+    cMCOverlayManager* self = (cMCOverlayManager*)vself;
     sMP_20C8* me = (sMP_20C8*)self;
     me->slots[i].a = 1;
-    char* bb = (char*)self + 0x348;
+    char* bb = (char*)&self->mDevices[0].bFormatted;
     int* pb = (int*)(bb + i * 0xE0);
-    char* bc = (char*)self + 0x34C;
+    char* bc = (char*)&self->mDevices[0].bCorrectEncoding;
     int* pc = (int*)(bc + i * 0xE0);
     *pb = 1;
     *pc = 1;
     char* name = me->slots[i].name;
     me->slots[i].d = 1;
     MEM_fill(name, 0, 200);
-    if ((*(cMovieSub434_20C8**)((char*)self + 0x434))->IsInvalid(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v50(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v60(i))
+    if (((cMovieSub434_20C8*)self->mpMemCard)->IsInvalid(i) || ((cMovieSub434_20C8*)self->mpMemCard)->v50(i) || ((cMovieSub434_20C8*)self->mpMemCard)->v60(i))
     {
         me->slots[i].a = 0;
         return;
     }
-    if (!(*(cMovieSub434_20C8**)((char*)self + 0x434))->IsFormatted(i))
+    if (!((cMovieSub434_20C8*)self->mpMemCard)->IsFormatted(i))
     {
         *pb = 0;
         return;
     }
-    if (!(*(cMovieSub434_20C8**)((char*)self + 0x434))->v57(i))
+    if (!((cMovieSub434_20C8*)self->mpMemCard)->v57(i))
     {
         *pc = 0;
         return;
     }
     if (i == me->cur)
-        me->slots[me->cur].e = (*(cMovieSub434_20C8**)((char*)self + 0x434))->GetFreeSpace();
-    (*(cMovieSub434_20C8**)((char*)self + 0x434))->GetDeviceName(i, name, 100);
+        me->slots[me->cur].e = ((cMovieSub434_20C8*)self->mpMemCard)->GetFreeSpace();
+    ((cMovieSub434_20C8*)self->mpMemCard)->GetDeviceName(i, name, 100);
 }
 #endif
 

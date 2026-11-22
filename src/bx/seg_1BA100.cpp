@@ -2519,17 +2519,18 @@ extern "C" void cWorldPainterSection_load_B4D8(void *self, int arg) __asm__("cWo
  *
  * @param fileName  the file name (a cBXString)
  */
-extern "C" void cWorldPainterSection_load_B4D8(void *self, int fileName) {
+extern "C" void cWorldPainterSection_load_B4D8(void *vself, int fileName) {
+    cWorldPainterSection* self = (cWorldPainterSection*)vself;
     sBXStr_B4D8 swpPath;
     sBXStr_B4D8 basePath;
-    *(short*)((char*)self + 2) = 0;
+    self->m_iStreamed = 0;
     func_003186D0_B4D8(&basePath, str_bar_d, fileName);
     func_00318630_B4D8(&swpPath, &basePath, str_swp);
-    *(int*)((char*)self + 4) = ASYNCFILE_load_B4D8(swpPath.p, 0);
+    self->m_iAsyncHandle = ASYNCFILE_load_B4D8(swpPath.p, 0);
     cBXString_dt_B4D8(&swpPath, 2);
     cBXString_dt_B4D8(&basePath, 2);
-    int n = *(int*)((char*)self + 4);
-    *(short*)((char*)self + 0) = n <= 0 ? 2 : 1;
+    int n = self->m_iAsyncHandle;
+    self->m_iState = n <= 0 ? 2 : 1;
 }
 #endif
 

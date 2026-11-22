@@ -2099,18 +2099,19 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer8_TMemContainer8__FPv);
  *
  * @return @p self
  */
-void* TMemContainer8_TMemContainer8(void* self)
+void* TMemContainer8_TMemContainer8(void* vself)
 {
-    *(void**)((char*)self + 0x800) = self;
+    TMemContainer8* self = (TMemContainer8*)vself;
+    self->m_freeList = (TMemBlock8*)((void*)self);
     char* cursor = (char*)self;
-    char* next = (char*)self + 8;
+    char* next = (char*)&self->m_blockList[1];
     for (unsigned int i = 0; i < 0xFF; i++) {
         *(void**)cursor = next;
         cursor += 8;
         next += 8;
     }
-    *(int*)((char*)self + 0x7F8) = 0;
-    return self;
+    *(int*)&self->m_blockList[255] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2125,18 +2126,19 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer16_TMemContainer16__FPv);
  *
  * @return @p self
  */
-void* TMemContainer16_TMemContainer16(void* self)
+void* TMemContainer16_TMemContainer16(void* vself)
 {
-    *(void**)((char*)self + 0x2000) = self;
+    TMemContainer16* self = (TMemContainer16*)vself;
+    self->m_freeList = (TMemBlock16*)((void*)self);
     char* cursor = (char*)self;
-    char* next = (char*)self + 0x10;
+    char* next = (char*)&self->m_blockList[1];
     for (unsigned int i = 0; i < 0x1FF; i++) {
         *(void**)cursor = next;
         cursor += 0x10;
         next += 0x10;
     }
-    *(int*)((char*)self + 0x1FF0) = 0;
-    return self;
+    *(int*)&self->m_blockList[511] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2151,18 +2153,19 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer32_TMemContainer32__FPv);
  *
  * @return @p self
  */
-void* TMemContainer32_TMemContainer32(void* self)
+void* TMemContainer32_TMemContainer32(void* vself)
 {
-    *(void**)((char*)self + 0x6000) = self;
+    TMemContainer32* self = (TMemContainer32*)vself;
+    self->m_freeList = (TMemBlock32*)((void*)self);
     char* cursor = (char*)self;
-    char* next = (char*)self + 0x20;
+    char* next = (char*)&self->m_blockList[1];
     for (unsigned int i = 0; i < 767; i++) {
         *(void**)cursor = next;
         cursor += 0x20;
         next += 0x20;
     }
-    *(int*)((char*)self + 0x5FE0) = 0;
-    return self;
+    *(int*)&self->m_blockList[767] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2177,19 +2180,20 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer64_TMemContainer64__FPv);
  *
  * @return @p self
  */
-void* TMemContainer64_TMemContainer64(void* self)
+void* TMemContainer64_TMemContainer64(void* vself)
 {
+    TMemContainer64* self = (TMemContainer64*)vself;
     unsigned int i = 0;
-    *(void**)((char*)self + 0x32000) = self;
+    self->m_freeList = (TMemBlock64*)((void*)self);
     char* cursor = (char*)self;
-    char* next = (char*)self + 0x40;
+    char* next = (char*)&self->m_blockList[1];
     for (; i < 3199; i++) {
         *(void**)cursor = next;
         cursor += 0x40;
         next += 0x40;
     }
-    *(int*)((char*)self + 0x31FC0) = 0;
-    return self;
+    *(int*)&self->m_blockList[3199] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2204,19 +2208,20 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer128_TMemContainer128__FPv);
  *
  * @return @p self
  */
-void* TMemContainer128_TMemContainer128(void* self)
+void* TMemContainer128_TMemContainer128(void* vself)
 {
+    TMemContainer128* self = (TMemContainer128*)vself;
     unsigned int i = 0;
-    *(void**)((char*)self + 0x25800) = self;
+    self->m_freeList = (TMemBlock128*)((void*)self);
     char* cursor = (char*)self;
-    char* next = (char*)self + 0x80;
+    char* next = (char*)&self->m_blockList[1];
     for (; i < 1199; i++) {
         *(void**)cursor = next;
         cursor += 0x80;
         next += 0x80;
     }
-    *(int*)((char*)self + 0x25780) = 0;
-    return self;
+    *(int*)&self->m_blockList[1199] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2231,19 +2236,20 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer256_TMemContainer256__FPv);
  *
  * @return @p self
  */
-void* TMemContainer256_TMemContainer256(void* self)
+void* TMemContainer256_TMemContainer256(void* vself)
 {
+    TMemContainer256* self = (TMemContainer256*)vself;
     unsigned int i = 0;
-    *(void**)((char*)self + 0x20000) = self;
+    self->m_freeList = (TMemBlock256*)((void*)self);
     char* cursor = (char*)self;
-    char* next = (char*)self + 0x100;
+    char* next = (char*)&self->m_blockList[1];
     for (; i < 0x1FF; i++) {
         *(void**)cursor = next;
         cursor += 0x100;
         next += 0x100;
     }
-    *(int*)((char*)self + 0x1FF00) = 0;
-    return self;
+    *(int*)&self->m_blockList[511] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2258,19 +2264,20 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer512_TMemContainer512__FPv);
  *
  * @return @p self
  */
-void* TMemContainer512_TMemContainer512(void* self)
+void* TMemContainer512_TMemContainer512(void* vself)
 {
+    TMemContainer512* self = (TMemContainer512*)vself;
     unsigned int i = 0;
-    *(void**)((char*)self + 0x20000) = self;
+    self->m_freeList = (TMemBlock512*)((void*)self);
     char* cursor = (char*)self;
-    char* next = (char*)self + 0x200;
+    char* next = (char*)&self->m_blockList[1];
     for (; i < 0xFF; i++) {
         *(void**)cursor = next;
         cursor += 0x200;
         next += 0x200;
     }
-    *(int*)((char*)self + 0x1FE00) = 0;
-    return self;
+    *(int*)&self->m_blockList[255] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2287,12 +2294,13 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer8_alloc__FPv);
  *
  * @return the block
  */
-void* TMemContainer8_alloc(void* self)
+void* TMemContainer8_alloc(void* vself)
 {
-    void* node = *(void**)((char*)self + 0x800);
+    TMemContainer8* self = (TMemContainer8*)vself;
+    void* node = self->m_freeList;
     if (node != 0) {
         void* next = *(void**)node;
-        *(void**)((char*)self + 0x800) = next;
+        self->m_freeList = (TMemBlock8*)next;
         return node;
     }
     return cMemBlockMan_alloc(0xC);
@@ -2310,12 +2318,13 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer16_alloc__FPv);
  *
  * @return the block
  */
-void* TMemContainer16_alloc(void* self)
+void* TMemContainer16_alloc(void* vself)
 {
-    void* node = *(void**)((char*)self + 0x2000);
+    TMemContainer16* self = (TMemContainer16*)vself;
+    void* node = self->m_freeList;
     if (node != 0) {
         void* next = *(void**)node;
-        *(void**)((char*)self + 0x2000) = next;
+        self->m_freeList = (TMemBlock16*)next;
         return node;
     }
     return cMemBlockMan_alloc(20);
@@ -2333,12 +2342,13 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer32_alloc__FPv);
  *
  * @return the block
  */
-void* TMemContainer32_alloc(void* self)
+void* TMemContainer32_alloc(void* vself)
 {
-    void* node = *(void**)((char*)self + 0x6000);
+    TMemContainer32* self = (TMemContainer32*)vself;
+    void* node = self->m_freeList;
     if (node != 0) {
         void* next = *(void**)node;
-        *(void**)((char*)self + 0x6000) = next;
+        self->m_freeList = (TMemBlock32*)next;
         return node;
     }
     return cMemBlockMan_alloc(36);
@@ -2363,10 +2373,11 @@ static inline void* popFreeNode(void** head)
  *
  * @return the block
  */
-void* TMemContainer64_alloc(void* self)
+void* TMemContainer64_alloc(void* vself)
 {
-    if (*(void**)((char*)self + 0x32000) != 0) {
-        return popFreeNode((void**)((char*)self + 0x32000));
+    TMemContainer64* self = (TMemContainer64*)vself;
+    if (self->m_freeList != 0) {
+        return popFreeNode((void**)(&self->m_freeList));
     }
     return cMemBlockMan_alloc(68);
 }
@@ -2383,10 +2394,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer128_alloc__FPv);
  *
  * @return the block
  */
-void* TMemContainer128_alloc(void* self)
+void* TMemContainer128_alloc(void* vself)
 {
-    if (*(void**)((char*)self + 0x25800) != 0) {
-        return popFreeNode((void**)((char*)self + 0x25800));
+    TMemContainer128* self = (TMemContainer128*)vself;
+    if (self->m_freeList != 0) {
+        return popFreeNode((void**)(&self->m_freeList));
     }
     return cMemBlockMan_alloc(132);
 }
@@ -2480,10 +2492,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer8_free__FPvPPv);
  *
  * @param node  the block to free
  */
-void TMemContainer8_free(void* self, void** node)
+void TMemContainer8_free(void* vself, void** node)
 {
-    *node = *(void**)((char*)self + 0x800);
-    *(void**)((char*)self + 0x800) = node;
+    TMemContainer8* self = (TMemContainer8*)vself;
+    *node = (void*)self->m_freeList;
+    self->m_freeList = (TMemBlock8*)node;
 }
 #endif
 
@@ -2497,10 +2510,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer16_free__FPvPPv);
  *
  * @param node  the block to free
  */
-void TMemContainer16_free(void* self, void** node)
+void TMemContainer16_free(void* vself, void** node)
 {
-    *node = *(void**)((char*)self + 0x2000);
-    *(void**)((char*)self + 0x2000) = node;
+    TMemContainer16* self = (TMemContainer16*)vself;
+    *node = (void*)self->m_freeList;
+    self->m_freeList = (TMemBlock16*)node;
 }
 #endif
 
@@ -2514,10 +2528,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer32_free__FPvPPv);
  *
  * @param node  the block to free
  */
-void TMemContainer32_free(void* self, void** node)
+void TMemContainer32_free(void* vself, void** node)
 {
-    *node = *(void**)((char*)self + 0x6000);
-    *(void**)((char*)self + 0x6000) = node;
+    TMemContainer32* self = (TMemContainer32*)vself;
+    *node = (void*)self->m_freeList;
+    self->m_freeList = (TMemBlock32*)node;
 }
 #endif
 
@@ -2531,10 +2546,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer64_free__FPvPPv);
  *
  * @param node  the block to free
  */
-void TMemContainer64_free(void* self, void** node)
+void TMemContainer64_free(void* vself, void** node)
 {
-    *node = *(void**)((char*)self + 0x32000);
-    *(void**)((char*)self + 0x32000) = node;
+    TMemContainer64* self = (TMemContainer64*)vself;
+    *node = (void*)self->m_freeList;
+    self->m_freeList = (TMemBlock64*)node;
 }
 #endif
 
@@ -2548,10 +2564,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer128_free__FPvPPv);
  *
  * @param node  the block to free
  */
-void TMemContainer128_free(void* self, void** node)
+void TMemContainer128_free(void* vself, void** node)
 {
-    *node = *(void**)((char*)self + 0x25800);
-    *(void**)((char*)self + 0x25800) = node;
+    TMemContainer128* self = (TMemContainer128*)vself;
+    *node = (void*)self->m_freeList;
+    self->m_freeList = (TMemBlock128*)node;
 }
 #endif
 
@@ -2565,10 +2582,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer256_free__FPvPPv);
  *
  * @param node  the block to free
  */
-void TMemContainer256_free(void* self, void** node)
+void TMemContainer256_free(void* vself, void** node)
 {
-    *node = *(void**)((char*)self + 0x20000);
-    *(void**)((char*)self + 0x20000) = node;
+    TMemContainer256* self = (TMemContainer256*)vself;
+    *node = (void*)self->m_freeList;
+    self->m_freeList = (TMemBlock256*)node;
 }
 #endif
 
@@ -2582,10 +2600,11 @@ INCLUDE_ASM("bx/cubicspline", TMemContainer512_free__FPvPPv);
  *
  * @param node  the block to free
  */
-void TMemContainer512_free(void* self, void** node)
+void TMemContainer512_free(void* vself, void** node)
 {
-    *node = *(void**)((char*)self + 0x20000);
-    *(void**)((char*)self + 0x20000) = node;
+    TMemContainer512* self = (TMemContainer512*)vself;
+    *node = (void*)self->m_freeList;
+    self->m_freeList = (TMemBlock512*)node;
 }
 #endif
 

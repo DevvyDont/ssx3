@@ -303,14 +303,15 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_initLaunch__FPcP5sQuadT1);
  * @param launchPos  launch position (On Tour const t4Vector&)
  * @param launchVel  launch velocity (On Tour const t4Vector&)
  */
-void cAirPredictor_initLaunch(char* self, sQuad* launchPos, sQuad* launchVel)
+void cAirPredictor_initLaunch(char* vself, sQuad* launchPos, sQuad* launchVel)
 {
-    *(int*)(self + 0xAC) = 0;
-    *(sQuad*)(self + 0x70) = *launchPos;
-    *(sQuad*)(self + 0x80) = *launchVel;
-    *(sQuad*)(self + 0x50) = *launchPos;
-    *(sQuad*)(self + 0x60) = *launchVel;
-    *(float*)(self + 0x98) = *(float*)(self + 0xA0);
+    cAirPredictor* self = (cAirPredictor*)vself;
+    self->SimState = 0;
+    *(sQuad*)&self->PrevTickPos = *launchPos;
+    *(sQuad*)&self->PrevTickVel = *launchVel;
+    *(sQuad*)&self->CurSimPos = *launchPos;
+    *(sQuad*)&self->CurSimVel = *launchVel;
+    self->TotalAirTime = self->CurAirTime;
 }
 #endif
 

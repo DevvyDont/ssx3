@@ -2393,10 +2393,11 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* self, sSndPlayOpts_
  *
  * @param opts  the cBankMonitor whose play-option stack (mDefault, mInst, mCurrent, ...) is used
  */
-extern "C" void cBankMonitorInstance_RestartSound_impl(void* self, sSndPlayOpts_C220* opts)
+extern "C" void cBankMonitorInstance_RestartSound_impl(void* vself, sSndPlayOpts_C220* opts)
 {
-    *(int*)((char*)self + 0x8) = 1;
-    *(int*)((char*)self + 0x54) = 0;
+    cBankMonitorInstance* self = (cBankMonitorInstance*)vself;
+    self->mActive = 1;
+    self->mFading = 0;
     switch (*(int*)self) {
     case 1:
         opts->depth++;
@@ -2419,11 +2420,11 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* self, sSndPlayOpts_
         opts->f84[opts->depth] = 0;
         opts->f78[opts->depth] = 127;
         opts->f7C[opts->depth] = 1;
-        opts->f3C[opts->depth] = *(int*)((char*)self + 0x60);
+        opts->f3C[opts->depth] = (int)self->mVolControl;
         opts->f38[opts->depth] = 0;
         opts->descs[opts->depth].c[0] = C220_MAX(C220_MIN(opts->f38[opts->depth], 127), 0);
         SNDSYS_entercritical();
-        *(int*)((char*)self + 0x4) = SNDBANK_play(*(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), &opts->descs[opts->depth]);
+        self->mHandle = SNDBANK_play(self->mRestartInfo.bank.mBank, self->mRestartInfo.bank.mPatch, &opts->descs[opts->depth]);
         SNDSYS_leavecritical();
         opts->depth--;
         break;
@@ -2448,11 +2449,11 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* self, sSndPlayOpts_
         opts->f84[opts->depth] = 0;
         opts->f78[opts->depth] = 127;
         opts->f7C[opts->depth] = 1;
-        opts->f3C[opts->depth] = *(int*)((char*)self + 0x60);
+        opts->f3C[opts->depth] = (int)self->mVolControl;
         opts->f38[opts->depth] = 0;
         opts->descs[opts->depth].c[0] = C220_MAX(C220_MIN(opts->f38[opts->depth], 127), 0);
         SNDSYS_entercritical();
-        *(int*)((char*)self + 0x4) = SNDMIDI_play(&opts->descs[opts->depth], *(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), -1);
+        self->mHandle = SNDMIDI_play(&opts->descs[opts->depth], self->mRestartInfo.bank.mBank, self->mRestartInfo.bank.mPatch, -1);
         SNDSYS_leavecritical();
         opts->depth--;
         break;

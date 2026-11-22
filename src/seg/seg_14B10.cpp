@@ -58,48 +58,49 @@ extern "C" void cAI_forceAIState_impl(char* self, int state) __asm__("cAI_forceA
  * @param state  the state (On Tour tAIState)
  */
 // Forces the AI into the given state: state id, its state block and its name.
-extern "C" void cAI_forceAIState_impl(char* self, int state)
+extern "C" void cAI_forceAIState_impl(char* vself, int state)
 {
+    cAI* self = (cAI*)vself;
     switch (state) {
     case 1:
-        *(int*)(self + 0x0) = 1;
-        *(const char**)(self + 0xA0) = str_GameInit;
-        *(void**)(self + 0x98) = self + 0xAC;
+        self->CurrentAIState = 1;
+        self->AIStateName = str_GameInit;
+        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mGameInitHandler);
         break;
     case 2:
-        *(int*)(self + 0x0) = 2;
-        *(const char**)(self + 0xA0) = str_Freeride;
-        *(void**)(self + 0x98) = self + 0xB0;
+        self->CurrentAIState = 2;
+        self->AIStateName = str_Freeride;
+        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mFreerideHandler);
         break;
     case 3:
-        *(int*)(self + 0x0) = 3;
-        *(const char**)(self + 0xA0) = str_PreRace;
-        *(void**)(self + 0x98) = self + 0xB4;
+        self->CurrentAIState = 3;
+        self->AIStateName = str_PreRace;
+        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mPreRaceHandler);
         break;
     case 4:
-        *(int*)(self + 0x0) = 4;
-        *(const char**)(self + 0xA0) = str_Countdown;
-        *(void**)(self + 0x98) = self + 0xBC;
+        self->CurrentAIState = 4;
+        self->AIStateName = str_Countdown;
+        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mCountdownHandler);
         break;
     case 5:
-        *(int*)(self + 0x0) = 5;
-        *(const char**)(self + 0xA0) = str_Race;
-        *(void**)(self + 0x98) = self + 0xC0;
+        self->CurrentAIState = 5;
+        self->AIStateName = str_Race;
+        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mRaceHandler);
         break;
     case 6:
-        *(int*)(self + 0x0) = 6;
-        *(const char**)(self + 0xA0) = str_EndRace;
-        *(void**)(self + 0x98) = self + 0xC4;
+        self->CurrentAIState = 6;
+        self->AIStateName = str_EndRace;
+        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mEndRaceHandler);
         break;
     case 7:
-        *(int*)(self + 0x0) = 7;
-        *(const char**)(self + 0xA0) = str_Shutdown;
-        *(void**)(self + 0x98) = self + 0xC8;
+        self->CurrentAIState = 7;
+        self->AIStateName = str_Shutdown;
+        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mShutdownHandler);
         break;
     default:
-        *(void**)(self + 0x98) = 0;
-        *(const char**)(self + 0xA0) = 0;
-        *(int*)(self + 0x0) = 0;
+        self->CurrentAIStateHandler = 0;
+        self->AIStateName = 0;
+        self->CurrentAIState = 0;
         break;
     }
 }

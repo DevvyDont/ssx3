@@ -283,17 +283,18 @@ extern "C" void cWScriptCacheEntry_load_impl(void *self, int arg) __asm__("cWScr
  *
  * @param fileName  the file name (a cBXString)
  */
-extern "C" void cWScriptCacheEntry_load_impl(void *self, int fileName) {
+extern "C" void cWScriptCacheEntry_load_impl(void *vself, int fileName) {
+    cWScriptCacheEntry* self = (cWScriptCacheEntry*)vself;
     sBXStr_CBB8 fullPath;
     sBXStr_CBB8 prefixed;
-    *(short*)((char*)self + 2) = 0;
+    self->mStreamed = 0;
     func_003186D0_CBB8(&prefixed, str_bar_e, fileName);
     func_00318630_CBB8(&fullPath, &prefixed, str_ssf);
-    *(int*)((char*)self + 4) = ASYNCFILE_load_CBB8(fullPath.p, 0x100);
+    self->mAsyncHandle = ASYNCFILE_load_CBB8(fullPath.p, 0x100);
     cBXString_dt_CBB8(&fullPath, 2);
     cBXString_dt_CBB8(&prefixed, 2);
-    int n = *(int*)((char*)self + 4);
-    *(short*)((char*)self + 0) = n <= 0 ? 2 : 1;
+    int n = self->mAsyncHandle;
+    self->mState = n <= 0 ? 2 : 1;
 }
 #endif
 

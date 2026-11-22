@@ -105,13 +105,14 @@ extern "C" void* cAnimFrame_cAnimFrame_impl(char* self, float* src, float f) __a
  * @param time  time to evaluate at
  * @return self
  */
-extern "C" void* cAnimFrame_cAnimFrame_impl(char* self, float* src, float time)
+extern "C" void* cAnimFrame_cAnimFrame_impl(char* vself, float* src, float time)
 {
-    *(void**)(self + 0x84) = cAnimFrame_vtbl;
+    cAnimFrame* self = (cAnimFrame*)vself;
+    self->mVtbl = (void**)cAnimFrame_vtbl;
     cAnimFrame_init((cAnimFrame*)self);
     cAnimFrame_setAnimRecord((cAnimFrame*)self, src);
-    cAnimFrame_update_impl(self, time);
-    return self;
+    cAnimFrame_update_impl(((char*)self), time);
+    return ((char*)self);
 }
 #endif
 
@@ -297,15 +298,16 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
  *
  * @param time  the time to evaluate at (On Tour time)
  */
-void cAnimFrame_update_impl(char* self, float time)
+void cAnimFrame_update_impl(char* vself, float time)
 {
-    sImCurve_351538** curves = *(sImCurve_351538***)(*(char**)(self + 0x40) + 0x20);
+    cAnimFrame* self = (cAnimFrame*)vself;
+    sImCurve_351538** curves = *(sImCurve_351538***)((char*)self->AnimRecord + 0x20);
     int* cur = (int*)self;
     unsigned int mask = 1;
-    float* out = (float*)(self + 0x44);
+    float* out = (float*)(&self->Vals[0]);
     for (int i = 0; i < 16; i++) {
         sImCurve_351538* curve = *curves;
-        if (*(unsigned int*)(*(char**)(self + 0x40) + 0x18) & mask) {
+        if (*(unsigned int*)((char*)self->AnimRecord + 0x18) & mask) {
             sImSeg_351538* segment = &curve->segs[*cur];
             if (!inRange_351538(segment, time)) {
                 segment = (sImSeg_351538*)cAnimChannel_nextSegment((sImRangeTable*)curve, cur, time);

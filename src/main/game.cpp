@@ -788,8 +788,9 @@ static inline bool IsSection(const int& id)
  * @param idx   the location (On Tour eBELocationID)
  * @param mode  the section manager mode, or 7 for the location's default
  */
-extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
+extern "C" void cSectionMan_load_impl(void* vself, int idx, int mode)
 {
+    cSectionMan* self = (cSectionMan*)vself;
     int resolvedMode;
     if (mode == 7) {
         resolvedMode = D_00442820_CEA8[idx].mode;
@@ -818,13 +819,13 @@ extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
             cSectionMan_unloadSection((cSectionMan*)self, i);
         }
     }
-    *(int*)((char*)self + 0x1BC) = idx;
-    *(int*)((char*)self + 0x1C0) = 0;
+    self->mBELocationID = idx;
+    self->mbLocationIsActivated = 0;
     for (int k = 0; k < D_00442488_CEA8[idx].iNumSection; k++) {
         cSectionMan_loadSection((cSectionMan*)self, D_00442488_CEA8[idx].iBESectionID[k]);
     }
     if (IsSection(skySection)) {
-        *(int*)((char*)self + 0x1A4) = 0;
+        self->m_bTriggerSkySwap = 0;
         cSectionMan_loadSection((cSectionMan*)self, skySection);
     }
     int transportSection = D_00442488_CEA8[idx].iBETransportSectionID;

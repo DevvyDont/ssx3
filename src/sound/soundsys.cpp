@@ -1081,11 +1081,12 @@ extern "C" int cSSXAudio_Surface_impl(void* self, void* rider) __asm__("cSSXAudi
  * @param rider  the rider (On Tour Rider)
  * @return the surface class (0 when the type has none)
  */
-extern "C" int cSSXAudio_Surface_impl(void* self, void* rider)
+extern "C" int cSSXAudio_Surface_impl(void* vself, void* rider)
 {
+    cSSXAudio* self = (cSSXAudio*)vself;
     int x;
     if (cRider_getMotionState(rider) == 4) {
-        x = *(int*)((char*)self + 0x598C);
+        x = self->mRailType;
     } else {
         x = *(int*)((char*)rider + 0x438);
     }
@@ -14748,9 +14749,10 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetChar__FPv);
  *
  * @return the character read
  */
-signed char FileParser_GetChar(void* self)
+signed char FileParser_GetChar(void* vself)
 {
-    return *(*(signed char**)((char*)self + 0x8))++;
+    FileParser* self = (FileParser*)vself;
+    return *(*(signed char**)&self->mPtr)++;
 }
 #endif
 
@@ -14771,11 +14773,12 @@ int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
  *
  * @return 1 when the data ends or the next character is '[' (a section header), else 0
  */
-int FileParser_SkipSpace_r(void* self)
+int FileParser_SkipSpace_r(void* vself)
 {
-    while (**(signed char**)((char*)self + 0x8) != 0) {
+    FileParser* self = (FileParser*)vself;
+    while (*(signed char*)self->mPtr != 0) {
         if (FileParser_SkipComment((FileParser*)self) == 1) return 1;
-        signed char curChar = **(signed char**)((char*)self + 0x8);
+        signed char curChar = *(signed char*)self->mPtr;
         if (curChar != ' ' && curChar != '\t' && curChar != '\n' && curChar != '\r') {
             int atSection = 0;
             if (curChar == '[') atSection = 1;
@@ -14999,18 +15002,19 @@ extern "C" char* FileParser_GetName_t(void* self) __asm__("FileParser_GetName");
  *
  * @return mTempStr holding the token
  */
-extern "C" char* FileParser_GetName_t(void* self)
+extern "C" char* FileParser_GetName_t(void* vself)
 {
+    FileParser* self = (FileParser*)vself;
     int n = 0;
     FileParser_SkipSpace_r(self);
-    while (**(signed char**)((char*)self + 0x8) != 0 && **(signed char**)((char*)self + 0x8) != ' ' &&
-           **(signed char**)((char*)self + 0x8) != '\t' && **(signed char**)((char*)self + 0x8) != '\n' &&
-           **(signed char**)((char*)self + 0x8) != '\r') {
-        char* dst = (char*)self + 0xC;
+    while (*(signed char*)self->mPtr != 0 && *(signed char*)self->mPtr != ' ' &&
+           *(signed char*)self->mPtr != '\t' && *(signed char*)self->mPtr != '\n' &&
+           *(signed char*)self->mPtr != '\r') {
+        char* dst = self->mTempStr;
         dst[n] = FileParser_GetChar(self);
         n++;
     }
-    char* buf = (char*)self + 0xC;
+    char* buf = self->mTempStr;
     buf[n] = 0;
     return buf;
 }

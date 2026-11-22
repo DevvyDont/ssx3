@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/missionrider.h"
 #include "ui/uithing.h"
 #include "visualfx/transitionobj.h"
 #include "vtable.h"
@@ -927,61 +928,62 @@ extern char cPlayer_vtbl[];
 
 // PORT: g++ 2.95 most-derived constructor of a class deriving virtually from cRider (vbase at +0xE10,
 // vbase pointers in every subobject), inlined here; the not-in-charge vtable fix-up is written out by hand.
-static inline char* cMissionRider_ctor(char* self, int inChrg)
+static inline char* cMissionRider_ctor(char* vself, int inChrg)
 {
+    cMissionRider* self = (cMissionRider*)vself;
     if (inChrg)
     {
-        char* vb = self + 0xE10;
-        *(char**)(self + 0xD20) = vb;
-        *(char**)(self + 0xC70) = vb;
-        *(char**)(self + 0xB40) = vb;
-        *(char**)(self + 0xB00) = vb;
-        *(char**)(self + 0xAF0) = vb;
-        *(char**)(self + 0xAD0) = vb;
-        *(char**)(self + 0x9C0) = vb;
-        *(char**)(self + 0x610) = vb;
-        *(char**)(self + 0x520) = vb;
-        *(char**)(self + 0x470) = vb;
-        *(char**)(self + 0x3B0) = vb;
-        *(char**)(self + 0x3A0) = vb;
-        *(char**)(self + 0x398) = vb;
-        *(char**)(self + 0x384) = vb;
-        *(char**)(self + 0x364) = vb;
-        *(char**)(self + 0x358) = vb;
-        *(char**)(self + 0x340) = vb;
-        *(char**)(self + 0x2B8) = vb;
-        *(char**)(self + 0x2A4) = vb;
-        *(char**)(self + 0x288) = vb;
-        *(char**)(self + 0x224) = vb;
-        *(char**)(self + 0x200) = vb;
-        *(char**)(self + 0x1F0) = vb;
-        *(char**)(self + 0x1E4) = vb;
-        *(char**)(self + 0x1C0) = vb;
-        *(char**)(self + 0x1B0) = vb;
-        *(char**)(self + 0x100) = vb;
-        *(char**)(self + 0xA0) = vb;
-        *(char**)(self + 0x70) = vb;
-        *(char**)(self + 0x24) = vb;
-        *(char**)(self + 0x18) = vb;
+        char* vb = (char*)&self->Rider;
+        *(char**)(((char*)self) + 0xD20) = vb;
+        *(char**)(((char*)self) + 0xC70) = vb;
+        *(char**)(((char*)self) + 0xB40) = vb;
+        *(char**)(((char*)self) + 0xB00) = vb;
+        *(char**)(((char*)self) + 0xAF0) = vb;
+        *(char**)(((char*)self) + 0xAD0) = vb;
+        *(char**)(((char*)self) + 0x9C0) = vb;
+        *(char**)(((char*)self) + 0x610) = vb;
+        *(char**)(((char*)self) + 0x520) = vb;
+        *(char**)(((char*)self) + 0x470) = vb;
+        *(char**)(((char*)self) + 0x3B0) = vb;
+        *(char**)(((char*)self) + 0x3A0) = vb;
+        *(char**)(((char*)self) + 0x398) = vb;
+        *(char**)(((char*)self) + 0x384) = vb;
+        *(char**)(((char*)self) + 0x364) = vb;
+        *(char**)(((char*)self) + 0x358) = vb;
+        *(char**)(((char*)self) + 0x340) = vb;
+        *(char**)(((char*)self) + 0x2B8) = vb;
+        *(char**)(((char*)self) + 0x2A4) = vb;
+        *(char**)(((char*)self) + 0x288) = vb;
+        *(char**)(((char*)self) + 0x224) = vb;
+        *(char**)(((char*)self) + 0x200) = vb;
+        *(char**)(((char*)self) + 0x1F0) = vb;
+        *(char**)(((char*)self) + 0x1E4) = vb;
+        *(char**)(((char*)self) + 0x1C0) = vb;
+        *(char**)(((char*)self) + 0x1B0) = vb;
+        *(char**)(((char*)self) + 0x100) = vb;
+        *(char**)(((char*)self) + 0xA0) = vb;
+        *(char**)(((char*)self) + 0x70) = vb;
+        *(char**)(((char*)self) + 0x24) = vb;
+        self->mRider = (cRider*)vb;
         cRider_cRider(vb);
     }
     cPlayer_cPlayer(self, 0);
-    *(const void**)(*(char**)(self + 0x18) + 0x6E8) = &D_00458240;
-    *(void**)(*(char**)(self + 0x18) + 0x6D0) = D_00459B90;
-    *(const void**)(*(char**)(self + 0x18) + 0x6C0) = &D_00458288;
-    *(void**)(self + 0xDE8) = cPlayer_vtbl;
+    self->mRider->mScriptObjectVtbl = (void*)(&D_00458240);
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mVtbl = (void*)(&D_00458288);
+    self->mVtbl = (void**)cPlayer_vtbl;
     if (!inChrg)
     {
         sVtbl9_MR t1 = D_00458240;
-        *(void**)(*(char**)(self + 0x18) + 0x6E8) = &t1;
-        char* base = *(char**)(self + 0x18) - 0xE10;
-        int d = self - base;
+        self->mRider->mScriptObjectVtbl = &t1;
+        char* base = (char*)self->mRider - 0xE10;
+        int d = ((char*)self) - base;
         t1.e[1].delta = D_00458240.e[1].delta + d;
         sVtbl22_MR t2 = D_00458288;
-        *(void**)(*(char**)(self + 0x18) + 0x6C0) = &t2;
+        self->mRider->mVtbl = &t2;
         t2.e[1].delta = D_00458288.e[1].delta + d;
     }
-    return self;
+    return ((char*)self);
 }
 
 struct sRiderMR { char pad[0x86C]; int mIndex; int mCtrl; };
@@ -9237,13 +9239,14 @@ extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf) __asm__("
  *
  * @param xf  the root pose to rotate (On Tour tPose &root): position, then rotation quaternion
  */
-extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf)
+extern "C" void cSpinControl_applyFlipSpinAngle_x(void* vself, sXf* xf)
 {
-    char* rd = *(char**)((char*)self + 0x58);
+    cSpinControl* self = (cSpinControl*)vself;
+    char* rd = (char*)self->mRider;
     char* trk = *(char**)(rd + 0x780);
     sVec4* n = (sVec4*)((*(int*)(rd + 0x89C) << 4) + *(int*)(trk + 0x24));
-    float spinAngle = -(*(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x28));
-    float flipAngle = *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x2C);
+    float spinAngle = -(self->TrickSpin + self->AirAdjSpin);
+    float flipAngle = self->TrickFlip + self->AirAdjFlip;
     sVec4 pivot = SubO_134DD0(sVec4(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
                                               n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C)),
                                  D_004FF130_4DD0);
@@ -9253,7 +9256,7 @@ extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf)
         xf->rot *= AxisAngle2_134DD0(D_004FF160_4DD0, spinAngle);
     }
     float cur = cSpinControl_calcFlipAxisWeight((cSpinControl*)self);
-    float old = *(float*)((char*)self + 0x40);
+    float old = self->FlipAxisWeight;
     float delta = __builtin_fabsf(old - cur) * 0.03333333507180214f;
     float nv;
     if (cur + delta < old)
@@ -9262,9 +9265,9 @@ extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf)
         nv = old + delta;
     else
         nv = cur;
-    *(float*)((char*)self + 0x40) = nv;
+    self->FlipAxisWeight = nv;
     sVec4 ax = Norm_134DD0(Sub_12E010_4DD0(ScaleO_134DD0(t4vect_YAxis, nv),
-                                             ScaleO_134DD0(t4vect_XAxis, 1.0f - *(float*)((char*)self + 0x40))));
+                                             ScaleO_134DD0(t4vect_XAxis, 1.0f - self->FlipAxisWeight)));
     {
         sVec4 flipQuat;
         flipQuat = AxisAngleB_134DD0(ax, flipAngle);

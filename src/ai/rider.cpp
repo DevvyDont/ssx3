@@ -7220,37 +7220,37 @@ int cInput_getState(void*, int);
  *
  * @return the grab index, or -1
  */
-extern "C" int cPlayer_getGrabHeld(char* self)
+extern "C" int cPlayer_getGrabHeld(cPlayer* self)
 {
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x1F))
+    if (cInput_getState(self->Input, 0x1F))
         return 0;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x20))
+    if (cInput_getState(self->Input, 0x20))
         return 1;
-    if (cInput_getState(*(void**)(self + 0xDF0), 33))
+    if (cInput_getState(self->Input, 33))
         return 2;
-    if (cInput_getState(*(void**)(self + 0xDF0), 34))
+    if (cInput_getState(self->Input, 34))
         return 3;
-    if (cInput_getState(*(void**)(self + 0xDF0), 35))
+    if (cInput_getState(self->Input, 35))
         return 4;
-    if (cInput_getState(*(void**)(self + 0xDF0), 36))
+    if (cInput_getState(self->Input, 36))
         return 5;
-    if (cInput_getState(*(void**)(self + 0xDF0), 37))
+    if (cInput_getState(self->Input, 37))
         return 6;
-    if (cInput_getState(*(void**)(self + 0xDF0), 38))
+    if (cInput_getState(self->Input, 38))
         return 7;
-    if (cInput_getState(*(void**)(self + 0xDF0), 39))
+    if (cInput_getState(self->Input, 39))
         return 8;
-    if (cInput_getState(*(void**)(self + 0xDF0), 40))
+    if (cInput_getState(self->Input, 40))
         return 9;
-    if (cInput_getState(*(void**)(self + 0xDF0), 41))
+    if (cInput_getState(self->Input, 41))
         return 10;
-    if (cInput_getState(*(void**)(self + 0xDF0), 42))
+    if (cInput_getState(self->Input, 42))
         return 11;
-    if (cInput_getState(*(void**)(self + 0xDF0), 43))
+    if (cInput_getState(self->Input, 43))
         return 12;
-    if (cInput_getState(*(void**)(self + 0xDF0), 44))
+    if (cInput_getState(self->Input, 44))
         return 13;
-    if (cInput_getState(*(void**)(self + 0xDF0), 45))
+    if (cInput_getState(self->Input, 45))
         return 14;
     return -1;
 }
@@ -7268,15 +7268,15 @@ int cInput_getState(void*, int);
  *
  * @return the grind index, or -1
  */
-extern "C" int cPlayer_getUberGrindHeld(void* self)
+extern "C" int cPlayer_getUberGrindHeld(cPlayer* self)
 {
-    if (cInput_getState(*(void**)((char*)self + 0xDF0), 27))
+    if (cInput_getState(self->Input, 27))
         return 0;
-    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1C))
+    if (cInput_getState(self->Input, 0x1C))
         return 1;
-    if (cInput_getState(*(void**)((char*)self + 0xDF0), 29))
+    if (cInput_getState(self->Input, 29))
         return 2;
-    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1E))
+    if (cInput_getState(self->Input, 0x1E))
         return 3;
     return -1;
 }
@@ -7304,9 +7304,9 @@ INCLUDE_ASM("ai/rider", cPlayer_vibrationBump);
  *
  * @param val  the bump strength
  */
-extern "C" void cPlayer_vibrationBump(void* self, float val)
+extern "C" void cPlayer_vibrationBump(cPlayer* self, float val)
 {
-    *(float*)((char*)self + 0xDFC) = val >? *(float*)((char*)self + 0xDFC);
+    self->unk_DFC = val >? self->unk_DFC;
 }
 #endif
 
@@ -7492,7 +7492,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s7.b14 = cInput_getState(PAD_127998, 18);
         cmd->s7.b15 = cInput_getState(PAD_127998, 19);
         cmd->s7.b16 = cInput_getState(PAD_127998, 20);
-        cmd->s7.v17 = cPlayer_getUberGrindHeld(self);
+        cmd->s7.v17 = cPlayer_getUberGrindHeld((cPlayer*)self);
         cmd->s7.a25 = (int)(cInput_getValue(PAD_127998, 23) * k);
         cmd->s7.w0 = (int)(cInput_getValue(PAD_127998, 13) * k);
         cmd->s7.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
@@ -7502,7 +7502,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s12.b12 = cInput_getState(PAD_127998, 46);
         cmd->s12.b13 = cInput_getState(PAD_127998, 19);
         cmd->s12.b14 = cInput_getState(PAD_127998, 20);
-        cmd->s12.v15 = cPlayer_getUberGrindHeld(self);
+        cmd->s12.v15 = cPlayer_getUberGrindHeld((cPlayer*)self);
         cmd->s12.a23 = (int)(cInput_getValue(PAD_127998, 23) * 31.0f);
         break;
     case 2: {
@@ -7531,7 +7531,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s4.b13 = cInput_getState(PAD_127998, 25);
         cmd->s4.b14 = cInput_getState(PAD_127998, 5);
         cmd->s4.b15 = cInput_getState(PAD_127998, 6);
-        cmd->s4.v16 = cPlayer_getGrabHeld(self);
+        cmd->s4.v16 = cPlayer_getGrabHeld((cPlayer*)self);
         cmd->s4.a24 = (int)(cInput_getValue(PAD_127998, 0) * k);
         cmd->s4.w0 = (int)(cInput_getValue(PAD_127998, 1) * k);
         break;
@@ -7542,7 +7542,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s4.b13 = cInput_getState(PAD_127998, 25);
         cmd->s4.b14 = cInput_getState(PAD_127998, 21);
         cmd->s4.b15 = cInput_getState(PAD_127998, 0xC);
-        cmd->s4.v16 = cPlayer_getGrabHeld(self);
+        cmd->s4.v16 = cPlayer_getGrabHeld((cPlayer*)self);
         cmd->s4.a24 = (int)(cInput_getValue(PAD_127998, 0xE) * k);
         cmd->s4.w0 = (int)(cInput_getValue(PAD_127998, 0xF) * k);
         cmd->s4.w12 = (int)(cInput_getValue(PAD_127998, 11) * k);

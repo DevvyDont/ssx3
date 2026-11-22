@@ -1217,8 +1217,9 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player) __as
  *
  * @param player  screen side, 0 or 1 (On Tour iHuman)
  */
-extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
+extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
 {
+    cFELoadState* self = (cFELoadState*)vself;
     sName19_72C0 rankNumName = *(sName19_72C0*)str_1_Player_rank_numb;
     sName7_72C0 rankName = *(sName7_72C0*)str_1_rank;
     sName7_72C0 timeName = *(sName7_72C0*)str_1_time;
@@ -1252,13 +1253,13 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     cGameModeMan_getGM();
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
     char* st = cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(rankNumName.c));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(rankNumName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, cGameModeMan_iRanking[player] + 1);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(rankName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(rankName.c));
     if (obj != 0) {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         int rank;
@@ -1275,12 +1276,12 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
         sprintf1(text, fmtw, rank);
         cUIText_setUnicodeString(obj, (char*)text);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(timeName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(timeName.c));
     if (obj != 0) {
         if (cBENewRaceInterface_newRace.cGameMode == 0 || cBENewRaceInterface_newRace.cGameMode == 5) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int seconds = fptoui((float)D_00536640[i] * (1.0f / 60.0f));
-            char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Time));
+            char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Time));
             if (o != 0) {
                 Activate_72C0(o);
             }
@@ -1288,7 +1289,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
         } else {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int score = D_00536640[i];
-            char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Score));
+            char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Score));
             if (o != 0) {
                 Activate_72C0(o);
             }
@@ -1296,37 +1297,37 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
         }
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(knockdownsName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(knockdownsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, *(int*)(st + 0x2C));
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(wipeoutsName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(wipeoutsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, *(int*)(st + 0x28));
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(tricksName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(tricksName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, *(int*)(st + 0x14));
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(handplantsName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(handplantsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, *(int*)(st + 0xC));
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ubertricksName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ubertricksName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, *(int*)(st + 0x18));
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ubergrindsName.c));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ubergrindsName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
         sprintf(buf, fmt, *(int*)(st + 0x20));
@@ -1334,8 +1335,8 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     }
     sName2_72C0 picName = *(sName2_72C0*)D_004A2C18;
     picName.c[0] = side + '0';
-    char* pic = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(picName.c));
-    sLoadInfo_72C0* loadInfo = *(sLoadInfo_72C0**)((char*)self + 0x48);
+    char* pic = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
+    sLoadInfo_72C0* loadInfo = (sLoadInfo_72C0*)self->mpParentModule;
     if (loadInfo != 0 && pic != 0) {
         int textureId = loadInfo->image[player];
         if (textureId != 0) {

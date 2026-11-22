@@ -120,14 +120,15 @@ extern "C" void cCommSystem__cCommSystem_59B0(void *self, int flags) __asm__("cC
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cCommSystem__cCommSystem_59B0(void *self, int flags) {
-    MUTEX_destroy_59B0((char*)self + 4);
-    void *blockPool = *(void **)((char*)self + 0x14);
+extern "C" void cCommSystem__cCommSystem_59B0(void *vself, int flags) {
+    cCommSystem* self = (cCommSystem*)vself;
+    MUTEX_destroy_59B0(&self->mCommMsgAllocMutex[0]);
+    void *blockPool = self->mPool;
     if (blockPool != 0) {
         cMemMan_free__FPv_59B0(blockPool);
     }
-    *(int *)((char*)self + 0x14) = 0;
-    *(int *)((char*)self + 0x18) = 0;
+    self->mPool = 0;
+    self->mFree = 0;
     if (flags & 1) {
         operator_delete__FPi_59B0(self);
     }
@@ -2474,22 +2475,23 @@ extern "C" int cGameComm_writePacket_impl(char* self, int type, const void* data
  * @param len  the data size (at most 0xEC)
  * @return 1 when sent or queued, 0 when busy
  */
-extern "C" int cGameComm_writePacket_impl(char* self, int type, const void* data, int len)
+extern "C" int cGameComm_writePacket_impl(char* vself, int type, const void* data, int len)
 {
+    cGameComm* self = (cGameComm*)vself;
     Packet_7E98 pkt;
-    if (*(int*)(self + 4) != 0) return 0;
+    if (self->mError != 0) return 0;
     cGameComm_updateWriteQueue((cGameComm*)self);
     pkt.type = type;
     pkt.size = len + 4;
     pkt.flags = 0;
     MEM_copy_7E98(pkt.data, data, len);
-    if (*(int*)(self + 0x368) == *(int*)(self + 0x364)) {
-        if (cCommSystem_writePacket_7E98((int)cCommSystem_mCommSystem, *(int*)(self + 0x6C), &pkt, pkt.size)) return 1;
+    if (self->mWriteQueue.mTail == self->mWriteQueue.mHead) {
+        if (cCommSystem_writePacket_7E98((int)cCommSystem_mCommSystem, self->unk_06C, &pkt, pkt.size)) return 1;
     }
     {
-        Packet_7E98* queuedPacket = cGameComm_allocPacket_7E98(self);
+        Packet_7E98* queuedPacket = cGameComm_allocPacket_7E98(((char*)self));
         MEM_copy_7E98(queuedPacket, &pkt, pkt.size);
-        ((Conn_7E98*)self)->slots[(*(int*)(self + 0x364))++ % 32] = queuedPacket;
+        ((Conn_7E98*)self)->slots[(self->mWriteQueue.mHead)++ % 32] = queuedPacket;
     }
     return 1;
 }

@@ -150,18 +150,19 @@ extern "C" void DeletePersonaMenu_setpersonas_impl(char *self, char *src) __asm_
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void DeletePersonaMenu_setpersonas_impl(char *self, char *src) {
+extern "C" void DeletePersonaMenu_setpersonas_impl(char *vself, char *src) {
+    DeletePersonaMenu* self = (DeletePersonaMenu*)vself;
     int i = 0;
     int next;
     while (i < *(int*)(src + 0x6C) - 1) {
         next = i + 1;
-        setItemData_B330(self + i * 36, *(int*)(src + next * 4 + 0x70));
-        cMenuItem_activate(self + (i * 36 + 360), 1);
-        *(int*)(self + i * 0x24 + 0x170) = next;
+        setItemData_B330(((char*)self) + i * 36, *(int*)(src + next * 4 + 0x70));
+        cMenuItem_activate(((char*)self) + (i * 36 + 360), 1);
+        *(int*)(((char*)self) + i * 0x24 + 0x170) = next;
         i = next;
     }
     while (i < 4) {
-        cMenuItem_activate(self + i * 36 + 0x168, 0);
+        cMenuItem_activate(((char*)self) + i * 36 + 0x168, 0);
         i++;
     }
 }

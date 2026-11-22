@@ -2198,12 +2198,13 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount) __a
  * @return always 0.0
  */
 // Awards trick/score metrics of the given kind and plays the matching reward popups.
-float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount)
+float cRiderMetrix_evAddCash_impl(char* vself, unsigned int kind, int amount)
 {
+    cRiderMetrix* self = (cRiderMetrix*)vself;
     if (amount != 0 && !IsBusy119EF8()) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        func_001E3760(GetId119EF8(self), amount);
-        cBERewardInterface_awardUserCash(iface, GetId119EF8(self), amount);
+        func_001E3760(GetId119EF8(((char*)self)), amount);
+        cBERewardInterface_awardUserCash(iface, GetId119EF8(((char*)self)), amount);
         cRiderMetrix_addHUDfx1_i(self, 0x18, amount, 0, 0.7f);
         switch (kind) {
         case 3:
@@ -2216,7 +2217,7 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount)
             cRiderMetrix_addHUDfx1_i(self, 47, amount, 0, 2.5f);
             break;
         case 2:
-            cRiderMetrix_addHUDfx1_i(self, 0x30, amount, *(int*)(self + 0x9C), 2.5f);
+            cRiderMetrix_addHUDfx1_i(self, 0x30, amount, self->NumCombos, 2.5f);
             break;
         case 4:
             break;

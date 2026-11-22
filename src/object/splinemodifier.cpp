@@ -70,9 +70,10 @@ extern "C" void cSplineModifier_setSpeed_impl(void* self, float speed) __asm__("
  *
  * @param speed  the new speed, probably in km/h
  */
-extern "C" void cSplineModifier_setSpeed_impl(void* self, float speed)
+extern "C" void cSplineModifier_setSpeed_impl(void* vself, float speed)
 {
-    *(float*)((char*)self + 0x48) = speed * 27.77777862548828f;
+    cSplineModifier* self = (cSplineModifier*)vself;
+    self->Velocity = speed * 27.77777862548828f;
 }
 #endif
 

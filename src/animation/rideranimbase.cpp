@@ -856,10 +856,11 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm
  * @param blend  blend-in time in seconds; negative for the anim's default
  * @return the started AI anim (also stored in CurrentAnimID[slot]), or 0x1B6 when it has no animation
  */
-int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
+int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
 {
-    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(self + 0x58);
-    int id = vt[4].fn(self + vt[4].delta, anim);
+    cRiderAnimBase* self = (cRiderAnimBase*)vself;
+    sVEntry<int(void*, int)>* vt = (sVEntry<int (void*, int)>*)self->mVtbl;
+    int id = vt[4].fn(((char*)self) + vt[4].delta, anim);
     if (id == 519)
         return 438;
     if (blend < 0.0f)
@@ -868,7 +869,7 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
     }
     int animId = *(int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     int slot = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
-    return *(int*)(self + (slot << 2)) = cRiderAnimBase_onInput((cRiderAnimBase*)self, *(char**)(self + 0x50) + (slot << 3), anim, animId, flags, kSequencerPriority[slot], blend);
+    return self->CurrentAnimID[slot] = cRiderAnimBase_onInput((cRiderAnimBase*)self, &self->Sequencer[slot], anim, animId, flags, kSequencerPriority[slot], blend);
 }
 #endif
 

@@ -603,8 +603,9 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
  * @param rider  the user (controller) index
  * @param charID  the character id
  */
-extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rider, signed char charID)
+extern "C" void cFEStateCharSelect_updateWidget_impl(void* vself, signed char rider, signed char charID)
 {
+    cFEStateCharSelect* self = (cFEStateCharSelect*)vself;
     sStr9_181BD0 name = D_0045D6E0;
     char bar[8];
     *(sStr4_181BD0*)bar = *(sStr4_181BD0*)str_0pb;
@@ -623,9 +624,9 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
     int total = 0;
     for (int i = 0; i < 7; i++) {
         name.c[7] = '0' + i;
-        cFEVObj_181BD0* statText = (cFEVObj_181BD0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name.c));
+        cFEVObj_181BD0* statText = (cFEVObj_181BD0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name.c));
         bar[0] = '0' + i;
-        char* statBar = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(bar));
+        char* statBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(bar));
         if (statText != 0 && statBar != 0) {
             int statValue = stats[i];
             // PORT: g++ minimum/maximum operator
@@ -640,10 +641,10 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
     }
     total -= total % 5;
     char* ovr = str_overall;
-    cUIText* avg = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_NumAttrOver));
+    cUIText* avg = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_NumAttrOver));
     sprintf(buf, &str_pct_1f, fptodp((float)total * 0.02857142873108387f));
     cUIText_setAsciiString(avg, buf);
-    char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
+    char* ob = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ovr));
     *(int*)(ob + 0x80) = 55;
     cUIProgress_setValue(ob, total / 7);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, rider, charID, 0);

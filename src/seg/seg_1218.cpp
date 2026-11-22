@@ -264,14 +264,15 @@ extern "C" float cComputer_calcTurn_0348(char* self, sV4_0348* target) __asm__("
  * @param target  the point to steer towards
  * @return the turn amount, -0.98 to 0.98
  */
-extern "C" float cComputer_calcTurn_0348(char* self, sV4_0348* target)
+extern "C" float cComputer_calcTurn_0348(char* vself, sV4_0348* target)
 {
-    sV4_0348 up = *(sV4_0348*)(*(char**)(self + 0x18) + 0x1C0);
+    cComputer* self = (cComputer*)vself;
+    sV4_0348 up = *(sV4_0348*)&self->RiderHandler.GroundMotion.mRider->mMatrix.row[2];
     if (up.z <= 0.0f)
         up = D_004FF160_v0348;
-    sV4_0348 fwd = *Obj_0348(self)->GetDir();
+    sV4_0348 fwd = *Obj_0348(((char*)self))->GetDir();
     sV4_0348 side = Cross_0348(fwd, up);
-    sV4_0348 toTarget = Sub_0348(*target, *Obj_0348(self)->GetPos());
+    sV4_0348 toTarget = Sub_0348(*target, *Obj_0348(((char*)self))->GetPos());
     toTarget.z = 0.0f;
     toTarget = Norm_0348(toTarget);
     toTarget = Norm_0348(Sub_0348(toTarget, Scale_0348(up, Dot_0348(toTarget, up))));
@@ -360,11 +361,12 @@ t4Vector cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calcul
  *
  * @return the target point
  */
-t4Vector cComputer_calculateTargetPos_0610(char* self)
+t4Vector cComputer_calculateTargetPos_0610(char* vself)
 {
-    t4Vector toTarget = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
+    cComputer* self = (cComputer*)vself;
+    t4Vector toTarget = Sub_0610(((sCam_0610*)self->RiderHandler.GroundMotion.mRider)->target, ((sCam_0610*)self->RiderHandler.GroundMotion.mRider)->pos);
     toTarget = Scale_0610(toTarget, 0.1f);
-    return Add_0610((*(sCam_0610**)(self + 0x18))->base, toTarget);
+    return Add_0610(((sCam_0610*)self->RiderHandler.GroundMotion.mRider)->base, toTarget);
 }
 #endif
 
@@ -4768,13 +4770,14 @@ extern "C" void cRider_moveFromCollision_6538(char* self, const t4Vector* d) __a
  *
  * @param offset  the offset
  */
-extern "C" void cRider_moveFromCollision_6538(char* self, const t4Vector* offset)
+extern "C" void cRider_moveFromCollision_6538(char* vself, const t4Vector* offset)
 {
-    AddEq_6538(*(t4Vector*)(self + 0x110), *offset);
-    AddEq_6538(*(t4Vector*)(self + 0x9D0), *offset);
-    cRiderSphereTree_ApplyOffset(*(void**)(self + 0xAA0), offset);
-    AddEq_6538(*(t4Vector*)(self + 0x400), *offset);
-    AddEq_6538(*(t4Vector*)(self + 0x410), *offset);
+    cRider* self = (cRider*)vself;
+    AddEq_6538(self->mPosition, *offset);
+    AddEq_6538(self->mModelOffset, *offset);
+    cRiderSphereTree_ApplyOffset(self->mSphereTree, offset);
+    AddEq_6538(self->mBoundsMin, *offset);
+    AddEq_6538(self->mBoundsMax, *offset);
 }
 #endif
 
@@ -6665,15 +6668,16 @@ extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_8
  * @param dir  the rail direction
  * @return 1 when the board reaches the rail, else 0
  */
-extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir)
+extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, sV4_86B8* tgt, sV4_86B8* dir)
 {
-    sNode_86B8* n = &(*(sPath_86B8**)(self + 0x780))->nodes[*(int*)(self + 0x8A0)];
+    cRider* self = (cRider*)vself;
+    sNode_86B8* n = &((sPath_86B8*)self->mAnimModel)->nodes[self->mBoneBoardRoot];
     const sV4_86B8& fwd = Fwd_86B8(n);
-    sV4_86B8 pos = Add_86B8(n->pos, *(sV4_86B8*)(self + 0x9D0));
-    float blend = *(float*)(self + 0x25C);
+    sV4_86B8 pos = Add_86B8(n->pos, *(sV4_86B8*)&self->mModelOffset);
+    float blend = self->mSlewed[9].cur;
     float nearR = Lerp_86B8(50.0f, 30.0f, blend);
     float farR;
-    if (!*(int*)(self + 0x330))
+    if (!self->PressMode)
         farR = Lerp_86B8(170.0f, 100.0f, blend);
     else
         farR = Lerp_86B8(170.0f, 50.0f, blend);
@@ -6691,7 +6695,7 @@ extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_8
     float along = Dot_86B8(relScaled, Sub_86B8(Scale_86B8(*dir, dd), fwd));
     sV4_86B8 probePos = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(along, lo, hi)));
     sHit_86B8 hit;
-    if (!cOverlapList_splineIntersect_86B8(*(void**)(self + 0x860), &probePos, &hit.pos, 1, 300.0f))
+    if (!cOverlapList_splineIntersect_86B8(self->mOverlapList, &probePos, &hit.pos, 1, 300.0f))
         return 0;
     diff = Sub_86B8(probePos, hit.pos);
     return Len_86B8(diff) <= nearR;
@@ -6967,39 +6971,40 @@ void cComputer_Init_self(char* self) __asm__("cComputer_Init");
  * +0xF38 = 1, clears the three 0x3C-byte tables at +0xE7C, +0xEB8 and +0xEF4 (MEM_fill) and runs
  * cComputer_resetCounters. Called at the end of cComputer_cComputer and by func_00108F88.
  */
-void cComputer_Init_self(char* self)
+void cComputer_Init_self(char* vself)
 {
-    *(int*)(self + 0xE0C) = -1;
-    *(int*)(self + 0xE10) = 0;
-    *(int*)(self + 0xE14) = 0;
-    *(int*)(self + 0xE18) = 0;
-    *(int*)(self + 0xE20) = 0;
-    *(int*)(self + 0xE24) = 0;
-    *(int*)(self + 0xE28) = 0;
-    *(int*)(self + 0xE1C) = 0;
-    *(int*)(self + 0xE2C) = 0;
-    *(int*)(self + 0xE38) = 0;
-    *(int*)(self + 0xE3C) = 0;
-    *(int*)(self + 0xE30) = 0;
-    *(int*)(self + 0xE34) = 0;
-    *(int*)(self + 0xDF0) = 0;
-    *(int*)(self + 0xE74) = 0;
-    *(int*)(self + 0xE78) = 0;
-    *(short*)(self + 0xF38) = 0;
-    *(int*)(self + 0xF30) = 0;
-    *(int*)(self + 0xF34) = 0;
-    *(sQ_8E88*)(self + 0xE50) = D_004FF130_8E88;
-    *(sQ_8E88*)(self + 0xE60) = D_004FF130_8E88;
-    *(int*)(self + 0xE40) = 0;
+    cComputer* self = (cComputer*)vself;
+    self->mGrabID = -1;
+    self->mIsSpinTrick = 0;
+    self->mIsGonnaMessUp = 0;
+    self->mIsNaturalAir = 0;
+    self->mToRail = 0;
+    self->mIsUber = 0;
+    self->mIsTweak = 0;
+    self->mToPipe = 0;
+    *(int*)&self->mHoldToLandTime = 0;
+    *(int*)&self->mSpinAxis = 0;
+    *(int*)&self->mFlipAxis = 0;
+    *(int*)&self->mGrabStartTime = 0;
+    *(int*)&self->mGrabEndTime = 0;
+    *(int*)&self->mDesiredSpeed = 0;
+    self->mWanderTime = 0;
+    self->mBadHeadingTime = 0;
+    self->mCruiseLogicID = 0;
+    *(int*)&self->mBlockTimer = 0;
+    self->mShouldIBlock = 0;
+    *(sQ_8E88*)&self->mStartJumpPos = D_004FF130_8E88;
+    *(sQ_8E88*)&self->mEndJumpPos = D_004FF130_8E88;
+    self->mBoardPressTimer = 0;
     cComputer_initRiderDifficulty(self);
-    *(int*)(self + 0xE70) = -1;
-    *(float*)(self + 0xDF4) = 1.0f;
-    *(Fn_8E88b*)(self + 0xF44) = D_0043CF20_8E88b[1];
-    *(short*)(self + 0xF38) = 1;
+    self->mTargetID = -1;
+    self->mAccuracy = 1.0f;
+    *(Fn_8E88b*)&self->cruiseLogic = D_0043CF20_8E88b[1];
+    self->mCruiseLogicID = 1;
     do {
-        MEM_fill_8E88(self + 0xE7C, 0, 0x3C);
-        MEM_fill_8E88(self + 0xEB8, 0, 0x3C);
-        MEM_fill_8E88(self + 0xEF4, 0, 0x3C);
+        MEM_fill_8E88(&self->GrabHistoryCounter[0], 0, 0x3C);
+        MEM_fill_8E88(&self->UberHistoryCounter[0], 0, 0x3C);
+        MEM_fill_8E88(&self->TweakHistoryCounter[0], 0, 0x3C);
     } while (0);
     cComputer_resetCounters(self);
 }

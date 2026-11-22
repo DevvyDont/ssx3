@@ -48,9 +48,10 @@ INCLUDE_ASM("bx/appman", cAppMan__cAppMan__FPvi);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-void cAppMan__cAppMan(void* self, int flags)
+void cAppMan__cAppMan(void* vself, int flags)
 {
-    *(void**)((char*)self + 0x5C) = cAppMan_vtbl;
+    cAppMan* self = (cAppMan*)vself;
+    self->mVtbl = (void**)cAppMan_vtbl;
     cAppMan_TheAppMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -381,11 +382,11 @@ struct sVEntry00317400 {
 /**
  * Tells the execution manager to purge (slot 3), then to shut down with code 3 (slot 1).
  */
-extern "C" void cAppMan_loadexecpurge(void* self)
+extern "C" void cAppMan_loadexecpurge(cAppMan* self)
 {
-    cExecutionMan* execMan = *(cExecutionMan**)((char*)self + 8);
+    cExecutionMan* execMan = self->ExecutionMan;
     ((void (*)(void*))((sVEntry00317400*)execMan->mVtbl)[3].fn)((char*)execMan + ((sVEntry00317400*)execMan->mVtbl)[3].delta);
-    cExecutionMan* execMan2 = *(cExecutionMan**)((char*)self + 8);
+    cExecutionMan* execMan2 = self->ExecutionMan;
     if (execMan2 != 0)
     {
         ((void (*)(void*, int))((sVEntry00317400*)execMan2->mVtbl)[1].fn)((char*)execMan2 + ((sVEntry00317400*)execMan2->mVtbl)[1].delta, 3);

@@ -495,19 +495,20 @@ extern "C" void cSimpleCamera_updateCamMat_impl(void* self) __asm__("cSimpleCame
  * Rebuilds CamMat from Pose: the axis-flip matrix CamAxisFlip times the rotation of Pose's quaternion, translated by
  * minus Pose's position (w = 1). Direction is not updated.
  */
-extern "C" void cSimpleCamera_updateCamMat_impl(void* self)
+extern "C" void cSimpleCamera_updateCamMat_impl(void* vself)
 {
-    char* view = (char*)self + 0x40;
+    cSimpleCamera* self = (cSimpleCamera*)vself;
+    char* view = (char*)&self->CamMat;
     vu0CopyMtx_D928(view, CamAxisFlip);
     t4Matrix rot;
-    vu0QuatToMtx_D928(&rot, *(t4Vector*)((char*)self + 0x30));
+    vu0QuatToMtx_D928(&rot, self->Pose.Q);
     vu0MulMtx_D928(view, view, &rot);
     t4Vector invTranslation;
     t4Vector neg;
     t4Vector pos;
-    pos.x = *(float*)((char*)self + 0x20);
-    pos.y = *(float*)((char*)self + 0x24);
-    pos.z = *(float*)((char*)self + 0x28);
+    pos.x = self->Pose.P.x;
+    pos.y = self->Pose.P.y;
+    pos.z = self->Pose.P.z;
     neg.x = -pos.x;
     neg.y = -pos.y;
     neg.z = -pos.z;

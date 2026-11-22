@@ -200,9 +200,10 @@ extern "C" char cUIText_getNumTextLines_(void* self) __asm__("cUIText_getNumText
  *
  * @return the number of lines, or 0 when there is no string
  */
-extern "C" char cUIText_getNumTextLines_(void* self)
+extern "C" char cUIText_getNumTextLines_(void* vself)
 {
-    unsigned short* text = *(unsigned short**)((char*)self + 0xB4);
+    cUIText* self = (cUIText*)vself;
+    unsigned short* text = self->mpString;
     if (text == 0) return 0;
     unsigned short* cursor = text;
     int n = 1;

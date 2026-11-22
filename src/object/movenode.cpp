@@ -2012,11 +2012,12 @@ extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stre
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stream)
+extern "C" void* cPositionModifier_cPositionModifier2_ret(void* vself, void* stream)
 {
+    cPositionModifier* self = (cPositionModifier*)vself;
     *(void***)self = cPositionModifier_vtbl;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)self + 0x10, 0x40);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->BoundBox, 0x40);
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2030,10 +2031,10 @@ extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stre
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x50), "r"(t4mat_Identity)
+        : "r"((char*)&self->Transform), "r"(t4mat_Identity)
         : "memory");
-    *(int*)((char*)self + 0x44) = 1;
-    return self;
+    self->RootTransformDirty = 1;
+    return ((void*)self);
 }
 #endif
 

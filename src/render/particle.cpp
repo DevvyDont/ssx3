@@ -287,48 +287,49 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, t4Vector* 
  * @param rnd  non-zero when the sub-emitter is enabled this frame
  * @param dt  the frame time
  */
-extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, t4Vector* pos, t4Vector* vel, int rnd, float dt)
+extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* vself, t4Vector* pos, t4Vector* vel, int rnd, float dt)
 {
-    if (*(int*)(self + 0x174) == 0) {
+    cBaseClass_DynamicEmitter* self = (cBaseClass_DynamicEmitter*)vself;
+    if (self->m_enabled == 0) {
         return;
     }
-    int alive = (*(t4Vector**)(self + 0x1A4))[*(int*)(self + 0x17C)].w > 0.0f;
+    int alive = (self->m_velocities)[self->m_subEmitterId].w > 0.0f;
     if (alive) {
         if (rnd == 0) {
-            *(int*)(self + 0x1E0) = *(int*)(self + 0x1E0) - 1;
+            self->m_enabledCount = self->m_enabledCount - 1;
         }
     } else if (rnd) {
-        *(int*)(self + 0x1E0) = *(int*)(self + 0x1E0) + 1;
+        self->m_enabledCount = self->m_enabledCount + 1;
     }
     if (pos) {
-        *(t4Vector*)(self + 0x1B0) = *pos;
+        self->m_currPosition = *pos;
     } else {
-        pos = (t4Vector*)(self + 0x1B0);
+        pos = (t4Vector*)(&self->m_currPosition);
     }
     if (vel) {
-        *(t4Vector*)(self + 0x1C0) = *vel;
+        self->m_currVelocity = *vel;
     } else {
-        vel = (t4Vector*)(self + 0x1C0);
+        vel = (t4Vector*)(&self->m_currVelocity);
     }
-    (*(t4Vector**)(self + 0x1A0))[*(int*)(self + 0x17C)] = *pos;
-    (*(t4Vector**)(self + 0x1A0))[*(int*)(self + 0x17C)].w = 0.0f;
-    (*(t4Vector**)(self + 0x1A4))[*(int*)(self + 0x17C)] = *vel;
+    (self->m_positions)[self->m_subEmitterId] = *pos;
+    (self->m_positions)[self->m_subEmitterId].w = 0.0f;
+    (self->m_velocities)[self->m_subEmitterId] = *vel;
     // PORT: pointer held in int (index-first addu)
-    t4Vector* velSlot = (t4Vector*)((*(int*)(self + 0x17C) << 4) + *(int*)(self + 0x1A4));
+    t4Vector* velSlot = (t4Vector*)((self->m_subEmitterId << 4) + (int)self->m_velocities);
     if (rnd) {
         velSlot->w = randUnit10D0() + 1.0f;
     } else {
         velSlot->w = 0.0f;
     }
-    int idx = *(int*)(self + 0x17C) - 1;
-    *(int*)(self + 0x17C) = idx;
+    int idx = self->m_subEmitterId - 1;
+    self->m_subEmitterId = idx;
     if (idx < 0) {
-        *(int*)(self + 0x17C) = *(int*)(self + 0x178) - 1;
+        self->m_subEmitterId = self->m_numSubEmitters - 1;
     }
-    float frameTime = *(float*)(self + 0x10) + *(float*)(self + 0x14) * dt;
-    *(float*)(self + 0x10) = frameTime;
-    if ((int)frameTime >= *(int*)(self + 0xC)) {
-        *(float*)(self + 0x10) = 0.0f;
+    float frameTime = self->mCurrentFlipTexture + self->mFlipTextureRate * dt;
+    self->mCurrentFlipTexture = frameTime;
+    if ((int)frameTime >= self->mNumFlipTextures) {
+        self->mCurrentFlipTexture = 0.0f;
     }
 }
 #endif
