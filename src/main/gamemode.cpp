@@ -326,11 +326,6 @@ extern "C" void cBERewardInterface_awardUser(void* self, int a1, int a2, int bit
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 
-struct sVEntry_00238358 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Handles a rider finishing the race: tells the current mode handler, then records the result in the back
@@ -347,7 +342,7 @@ struct sVEntry_00238358 {
 extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderStats)
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
-    sVEntry_00238358* vt = *(sVEntry_00238358**)obj;
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)obj;
     vt[8].fn(vthis(obj, vt[8]), idx);
     if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) < 17) {
         int n = *(int*)SSXApp->Game->Replay;
@@ -642,11 +637,6 @@ struct sGM00238C80 {
     int f98;
 };
 
-struct sVEntry00238C80 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Purges a game-mode handler: resets the game-mode manager to "no event" and clears its tables.
@@ -679,7 +669,7 @@ extern "C" void cGameModeHandler_purge(void* self)
     gm->unk_94 = 0;
     memset(gm->iCharacters, 0, 40);
     memset(cGameModeHandler_pManager->iCheatCharacters, 0, 40);
-    sVEntry00238C80* vtEntry = &(*(sVEntry00238C80**)self)[5];
+    sVEntry<void(void*)>* vtEntry = &(*(sVEntry<void(void*)>**)self)[5];
     vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif
@@ -1321,11 +1311,6 @@ struct sGM_239D88 {
     int f9C;
 };
 
-struct sVEntry_239D88 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Starts the two-player online event of handler 9 (vtable D_0047CE68; online events 1-3).
@@ -1358,7 +1343,7 @@ extern "C" void cGMMPSlopeHandler_init(void* self)
     gm2->bHasPointTarget = 0;
     gm2->uiTimeLimit = heatTimeLimit * 60;
     memset(gm2->iCharacters, -1, 40);
-    sVEntry_239D88* vtEntry = &(*(sVEntry_239D88**)self)[4];
+    sVEntry<void(void*)>* vtEntry = &(*(sVEntry<void(void*)>**)self)[4];
     vtEntry->fn(vthis(self, *vtEntry));
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
@@ -2051,11 +2036,6 @@ struct sGM_23AC88 {
     int f9C;
 };
 
-struct sVEntry_23AC88 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Starts the online race of handler 8 (vtable D_0047CED0; online event 0 and the online default).
@@ -2093,7 +2073,7 @@ extern "C" void cGMMPRaceHandler_init(void* self)
     gm2->uiPointTarget = 0;
     gm2->bHasPointTarget = 0;
     memset((char*)self + 4, 9, 40);
-    sVEntry_23AC88* vtEntry = &(*(sVEntry_23AC88**)self)[5];
+    sVEntry<void(void*)>* vtEntry = &(*(sVEntry<void(void*)>**)self)[5];
     vtEntry->fn(vthis(self, *vtEntry));
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
@@ -2268,11 +2248,6 @@ struct sGM_23B170 {
     int f9C;
 };
 
-struct sVEntry_23B170 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Starts a freeride (handler 2, vtable D_0047CE00; event 12): one last heat, no AI, no time limit, results locked.
@@ -2292,7 +2267,7 @@ extern "C" void cGMFreerideHandler_init(void* self)
     memset(gm->iCharacters, -1, 40);
     int humanRider = cBENewPlayerInterface_getHumanRider(iface, 0);
     cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
-    sVEntry_23B170* vtEntry = &(*(sVEntry_23B170**)self)[4];
+    sVEntry<void(void*)>* vtEntry = &(*(sVEntry<void(void*)>**)self)[4];
     vtEntry->fn(vthis(self, *vtEntry));
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->iNextHeat = one;
@@ -2591,11 +2566,6 @@ struct sGM_23B6C0 {
     int f9C;
 };
 
-struct sVEntry_23B6C0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Starts the head-to-head event of handler 5 (vtable D_0047CD30; event 4): one last heat against one AI rider.
@@ -2626,7 +2596,7 @@ extern "C" void cGMRivalTimeHandler_init(void* self)
     gm->iNextLocation = -1;
     gm->bIsLastHeat = one;
     gm->bAreResultsLocked = 0;
-    sVEntry_23B6C0* vt = *(sVEntry_23B6C0**)self;
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
     vt[5].fn(vthis(self, vt[5]));
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeHandler_pManager->iNumberAI = 0;
@@ -2787,11 +2757,6 @@ struct sGM_23BB98 {
     int f9C;
 };
 
-struct sVEntry_23BB98 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Starts the head-to-head scored event of handler 6 (vtable D_0047CCC8; event 5): one timed last heat against one AI
@@ -2825,7 +2790,7 @@ extern "C" void cGMRivalPointHandler_init(void* self)
     gm2->unk_90 = 0;
     gm2->unk_94 = 0;
     gm2->bIsLastHeat = one;
-    sVEntry_23BB98* vt = *(sVEntry_23BB98**)self;
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
     vt[4].fn(vthis(self, vt[4]));
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeHandler_pManager->iNumberAI = 0;
@@ -3215,11 +3180,6 @@ struct sGM_23C618 {
     int f9C;
 };
 
-struct sVEntry_23C618 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Starts a single-heat event with newRace.iNumberAI AI riders in a random line-up.
@@ -3259,7 +3219,7 @@ extern "C" void cGMDebugHandler_init(void* self)
             cGameModeHandler_pManager->iCharacters[j] = ch;
         }
     }
-    sVEntry_23C618* vtEntry = &(*(sVEntry_23C618**)self)[4];
+    sVEntry<void(void*)>* vtEntry = &(*(sVEntry<void(void*)>**)self)[4];
     vtEntry->fn(vthis(self, *vtEntry));
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->iNextHeat = 1;

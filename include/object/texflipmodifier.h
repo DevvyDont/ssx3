@@ -10,6 +10,7 @@
 // writeToReplayFrame cTexFlipModifier_writeToReplayFrame.
 
 #include "layout.h"
+#include "world/worldrecords.h" /* tMaterialRecord */
 
 struct tInstanceRecord;
 
@@ -34,6 +35,23 @@ CHECK_OFFSET(tAddTexFlipData, Speed, 0x10);
 CHECK_OFFSET(tAddTexFlipData, unk_014, 0x14);
 CHECK_SIZE(tAddTexFlipData, 0x18);
 
+// The modifier's private material block (On Tour struct tTexFlipMaterialBlockRecord : tMaterialBlockRecord, 0x84
+// there; retail 0xC4 because its tMaterialRecord is 0x14). The base's count written out inline. [O]; [U]
+// cTexFlipModifier_setupTexFlip (view sRailSelF218) MEM_fills it, copies the model's material records into
+// MaterialRecords, points Materials[i] at them and stores the count; cMoveNode_getMaterialBlock returns it (+0x24) in
+// place of the model's tMaterialBlockRecord, which it extends.
+struct tTexFlipMaterialBlockRecord {
+    int m_iNumMaterials;            // 0x00 [O] tMaterialBlockRecord::m_iNumMaterials; [U] setupTexFlip
+    tMaterialRecord* Materials[8];  // 0x04 [O]; [U] setupTexFlip: &MaterialRecords[i] (the list
+                                    //      tMaterialBlockRecord::GetMaterialRecordList() reads)
+    tMaterialRecord MaterialRecords[8]; // 0x24 [O]; [U] setupTexFlip copies the model's records here (view sRailOutF218)
+};
+
+CHECK_OFFSET(tTexFlipMaterialBlockRecord, m_iNumMaterials, 0x00);
+CHECK_OFFSET(tTexFlipMaterialBlockRecord, Materials, 0x04);
+CHECK_OFFSET(tTexFlipMaterialBlockRecord, MaterialRecords, 0x24);
+CHECK_SIZE(tTexFlipMaterialBlockRecord, 0xC4);
+
 struct cTexFlipModifier {
     // --- cTexFlipModifierState (0x18; the replay block)
     int Type;                       // 0x00 [O]; [R] ctor; [U] update switches on it
@@ -47,8 +65,8 @@ struct cTexFlipModifier {
                                     //      (model +0x94), writeToReplayFrame
     int NumMaterials;               // 0x1C [O]; [R] ctor zeroes it; [U] setup
     int NumTexFlipMaterials;        // 0x20 [O]; [R] ctor zeroes it; [U] setup, update
-    char MaterialBlock[0xc4];       // 0x24 [O] tTexFlipMaterialBlockRecord (On Tour 0x84; retail 0xC4, not laid out);
-                                    //      [U] setup MEM_fills it and passes +0x24 to cTexFlipModifier_setTexIndex
+    tTexFlipMaterialBlockRecord MaterialBlock; // 0x24 [O] (On Tour 0x84; retail 0xC4); [U] setup MEM_fills and
+                                    //      fills it; passed to cTexFlipModifier_setTexIndex
 };
 
 CHECK_OFFSET(cTexFlipModifier, Type, 0x00);

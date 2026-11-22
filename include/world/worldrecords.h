@@ -29,7 +29,9 @@ struct tAnimRecord;
 struct tSplineRecord;
 struct tInstanceAudio;              // [O] tInstanceRecord / tParticleInstanceRecord::m_pInstanceAudio
 struct bxSphereTree;                // object/rollermodifier.h (0x140)
-struct tPolyModelMesh;              // [O] 0x14 (not laid out)
+struct tPolyModelMesh;              // [O] 0x14 (laid out below)
+struct tPolyBoundBox;               // [O] (not laid out)
+struct t4Vector;                    // bx/math3d.h
 
 // A model's mesh table entry (On Tour tMeshHeirarchyRecord, 0x10; same layout).
 struct tMeshHeirarchyRecord {
@@ -145,14 +147,15 @@ CHECK_SIZE(tModelRecord, 0x28);
 
 // One animation segment (On Tour tSegmentRecord, 0x18; same layout).
 struct tSegmentRecord {
-    char unk_000[0x10];             // 0x00 [O] tf4Vector m_fvInv (no retail read seen)
+    tf4Vector m_fvInv;              // 0x00 [O]; [U] cAnimFrame_update (view sImSeg_351538) evaluates
+                                    //      ((m[0] * t + m[1]) * t + m[2]) * t + m[3]
     float m_fStart;                 // 0x10 [O]; [U] cAnimFrame_getStartTime reads channel->m_Segments->m_fStart
-    float unk_014;                  // 0x14 [O] m_fEnd
+    float m_fEnd;                   // 0x14 [O]; [U] cAnimFrame_update keeps the segment while m_fStart <= t < m_fEnd
 };
 
-CHECK_OFFSET(tSegmentRecord, unk_000, 0x00);
+CHECK_OFFSET(tSegmentRecord, m_fvInv, 0x00);
 CHECK_OFFSET(tSegmentRecord, m_fStart, 0x10);
-CHECK_OFFSET(tSegmentRecord, unk_014, 0x14);
+CHECK_OFFSET(tSegmentRecord, m_fEnd, 0x14);
 CHECK_SIZE(tSegmentRecord, 0x18);
 
 // One animation channel (On Tour tChannelRecord, 8 bytes; same layout).
@@ -197,7 +200,8 @@ struct tSplineSegmentRecord {
     tf3Vector m_fvMin;              // 0x6C [O]; [U] the segment box filed in the nash (box offset 108) and moved by
                                     //      cRailManNode_enable/disableRail, cSplineSegment_isVisible
     tf3Vector m_fvMax;              // 0x78 [O]; [U] ditto
-    float unk_084;                  // 0x84 [O] m_fDistance
+    float m_fDistance;              // 0x84 [O]; [U] cSpline_getPos steps to the next segment while the distance
+                                    //      is past it (view sDebKey5248 t0)
     char unk_088[0x8];              // 0x88 [O] m_PadBytes (tSplineSegmentRecord_PSP); [R] stride 0x90
 };
 
@@ -210,7 +214,7 @@ CHECK_OFFSET(tSplineSegmentRecord, m_NextSeg, 0x64);
 CHECK_OFFSET(tSplineSegmentRecord, m_Parent, 0x68);
 CHECK_OFFSET(tSplineSegmentRecord, m_fvMin, 0x6C);
 CHECK_OFFSET(tSplineSegmentRecord, m_fvMax, 0x78);
-CHECK_OFFSET(tSplineSegmentRecord, unk_084, 0x84);
+CHECK_OFFSET(tSplineSegmentRecord, m_fDistance, 0x84);
 CHECK_OFFSET(tSplineSegmentRecord, unk_088, 0x88);
 CHECK_SIZE(tSplineSegmentRecord, 0x90);
 
@@ -254,15 +258,25 @@ CHECK_SIZE(tParticleModelRecord, 0xC);
 // A placed particle emitter (On Tour tParticleInstanceRecord : _tPSPParticleInstance, 0x88 + pad). The two members
 // retail uses sit at On Tour's offsets.
 struct tParticleInstanceRecord {
-    char unk_000[0x64];             // 0x00 [O] m_iIntersect[3], m_iFlags, m_fmTransform, m_fvBSphere, m_RID
+    char unk_000[0x50];             // 0x00 [O] m_iIntersect[3], m_iFlags, m_fmTransform
+    tf4Vector m_fvBSphere;          // 0x50 [O] (_tPSPParticleInstance 0x50); [U] FrustumIntersector_crossingfogvolume
+                                    //      loads it into VU0 with the box (view sVisObj_A270 sphere) [views2 group A]
+    char unk_060[0x4];              // 0x60 [O] m_RID
     tParticleModelRecord* m_Model;  // 0x64 [O] tParticleModelID; [U] cChunkResolve_resolveParticleInstance resolves it
-    char unk_068[0x1C];             // 0x68 [O] m_fvMin, m_fvMax, m_pActiveNode
+    tf3Vector m_fvMin;              // 0x68 [O] (0x68 there); [U] FrustumIntersector_crossingfogvolume: the box minimum
+                                    //      (view sVisObj_A270 boxMin) [views2 group A]
+    tf3Vector m_fvMax;              // 0x74 [O] (0x74 there); [U] ditto, the box maximum (boxMax) [views2 group A]
+    char unk_080[0x4];              // 0x80 [O] m_pActiveNode
     tInstanceAudio* m_pInstanceAudio; // 0x84 [O]; [U] resolveParticleInstance zeroes it
 };
 
 CHECK_OFFSET(tParticleInstanceRecord, unk_000, 0x00);
+CHECK_OFFSET(tParticleInstanceRecord, m_fvBSphere, 0x50);
+CHECK_OFFSET(tParticleInstanceRecord, unk_060, 0x60);
 CHECK_OFFSET(tParticleInstanceRecord, m_Model, 0x64);
-CHECK_OFFSET(tParticleInstanceRecord, unk_068, 0x68);
+CHECK_OFFSET(tParticleInstanceRecord, m_fvMin, 0x68);
+CHECK_OFFSET(tParticleInstanceRecord, m_fvMax, 0x74);
+CHECK_OFFSET(tParticleInstanceRecord, unk_080, 0x80);
 CHECK_OFFSET(tParticleInstanceRecord, m_pInstanceAudio, 0x84);
 CHECK_SIZE(tParticleInstanceRecord, 0x88);
 
@@ -277,6 +291,27 @@ struct tSphTreeList {
 CHECK_OFFSET(tSphTreeList, MeshTree, 0x0);
 CHECK_OFFSET(tSphTreeList, NumMesh, 0x4);
 CHECK_SIZE(tSphTreeList, 0x8);
+
+// One collision mesh (On Tour struct tPolyModelMesh, 0x14). [O] tPolyModelList::MeshPolyModel /
+// tCollideModelRecord::m_pPolyMesh point at them; [U] cFlexBridgeNode_intersect (src/object/flexbridgenode.cpp, view
+// sFMesh_7268) builds one on the stack from its own grid (faces, boxes, vertices, normals) for
+// cWorldIntersectType_IsMeshInt.
+struct tPolyModelMesh {
+    unsigned short NumFaces;        // 0x00 [O]; [U] the triangle count
+    unsigned short NumVertices;     // 0x02 [O]; [U] the vertex count
+    unsigned char (*Face)[3];       // 0x04 [O] unsigned char[3]*; [U] 3-byte vertex index triples
+    tPolyBoundBox* Boxes;           // 0x08 [O]; [U] the per-face boxes
+    t4Vector* Vertex;               // 0x0C [O]; [U] the vertices
+    t4Vector* Normal;               // 0x10 [O]; [U] the face normals
+};
+
+CHECK_OFFSET(tPolyModelMesh, NumFaces, 0x00);
+CHECK_OFFSET(tPolyModelMesh, NumVertices, 0x02);
+CHECK_OFFSET(tPolyModelMesh, Face, 0x04);
+CHECK_OFFSET(tPolyModelMesh, Boxes, 0x08);
+CHECK_OFFSET(tPolyModelMesh, Vertex, 0x0C);
+CHECK_OFFSET(tPolyModelMesh, Normal, 0x10);
+CHECK_SIZE(tPolyModelMesh, 0x14);
 
 // A collision model's polygon meshes (On Tour tPolyModelList, 8 bytes; method 1). [O] getMeshPolyModel(meshNum) =
 // MeshPolyModel[meshNum] (retail tPolyModelList_getMeshPolyModel: + meshNum * 4).

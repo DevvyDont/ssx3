@@ -1044,11 +1044,6 @@ extern char D_0047C878[];
 extern char D_0047C7A8[];
 extern char D_0047C948[];
 
-struct sVE_2E20 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sNode_2E20 {
     int f0;
@@ -1118,7 +1113,7 @@ struct cLoadItemC_2E20 {
 extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
 {
     cPS2GraphicsMan* w = GrMan;
-    sVE_2E20* vt = (sVE_2E20*)w->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)w->mVtbl;
     vt[44].fn(vthis(w, vt[44]), 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));

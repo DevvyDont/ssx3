@@ -116,4 +116,22 @@ CHECK_OFFSET(FrustumIntersector, lighthaloscrossing, 0x7FC8);
 CHECK_OFFSET(FrustumIntersector, unk_81C8, 0x81C8);
 CHECK_SIZE(FrustumIntersector, 0x81D0);
 
+// The per-cell visitor the ctor runs over the nash cell tree (On Tour struct FrustumCallback, 0x10:
+// FrustumCallback(FrustumIntersector& i, cOcclusionMan& om, unsigned int vm, bool insidefrustum), operator()(const
+// Cell&, const CellKey&)). [R] func_0022A830 is that operator: it tests the cell's sphere against the occlusion man's
+// views, appends the cell to cellsinside / cellscrossing of the intersector and recurses into the children. On Tour's
+// references are pointers here and its bool a word. [Staged by views2 group A.]
+struct FrustumCallback {
+    FrustumIntersector* intersector; // 0x0 [O] FrustumIntersector&; [U] the cell lists it appends to
+    cOcclusionMan* occlusionman;    // 0x4 [O] cOcclusionMan&; [U] the occlusion views the cell sphere is tested against
+    unsigned int vismask_;          // 0x8 [O]; [U] the views still to test (bits)
+    int insidefrustum_;             // 0xC [O] bool (a word); [U] set when the parent cell is wholly inside
+};
+
+CHECK_OFFSET(FrustumCallback, intersector, 0x0);
+CHECK_OFFSET(FrustumCallback, occlusionman, 0x4);
+CHECK_OFFSET(FrustumCallback, vismask_, 0x8);
+CHECK_OFFSET(FrustumCallback, insidefrustum_, 0xC);
+CHECK_SIZE(FrustumCallback, 0x10);
+
 #endif /* MAIN_GAMERENDER_H */

@@ -56,6 +56,19 @@ enum tReplayState {
 // A doubly linked list of cReplayFrames (On Tour cReplayFrameList, 0xC): Tail = oldest, Head = newest.
 // [R] cReplayFrameList_cReplayFrameList constructs it (zeroes the three words); methods cReplayFrameList_reset, cReplayFrameList_addFrame,
 // cReplayFrameList_remFrame, cReplayFrameList_remTail, cReplayFrameList_findFrame.
+// A saved input cache's header (On Tour struct tReplayCacheSave : tReplaySaveType, 0x8; base written out inline).
+// [O] cReplay::WriteCacheSave is a tReplayCacheSave*; [U] cReplay_writeInput (src/replay/replaycache.cpp, view
+// sReplayCache1510 header) builds one in WriteTmp: SaveType 0x11111112, RecordCursor = the cache's first word, then
+// writes its 8 bytes before the cache data.
+struct tReplayCacheSave {
+    int SaveType;                   // 0x0 [O] tReplaySaveType::SaveType; [U] writeInput stores 0x11111112
+    int RecordCursor;               // 0x4 [O]; [U] writeInput: the cReplayCache's record cursor (its word 0)
+};
+
+CHECK_OFFSET(tReplayCacheSave, SaveType, 0x0);
+CHECK_OFFSET(tReplayCacheSave, RecordCursor, 0x4);
+CHECK_SIZE(tReplayCacheSave, 0x8);
+
 struct cReplayFrameList {
     cReplayFrame* Tail;    // 0x000 [O]; [U] the oldest frame: cReplayFrameList_remTail unlinks it, cReplayFrameList_addFrame
                            //       (addFrame) sets it on an empty list

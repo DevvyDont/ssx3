@@ -20,8 +20,10 @@
 #include "world/instancerecord.h" /* tf3Vector */
 
 struct tPatchRecord {
-    char unk_000[0xC];              // 0x000 [O] int m_iIntersect[2], short m_sSurfaceType, short m_sSurfaceFlags; no
-                                    //       retail access checked
+    char unk_000[0x8];              // 0x000 [O] int m_iIntersect[2]; no retail access checked
+    short m_sSurfaceType;           // 0x008 [O]; [U] terrainIntersect (src/intersect/worldsphtree.cpp, view
+                                    //       sTriObj_333EF8 id) copies it into the hit's surface type
+    unsigned short m_sSurfaceFlags; // 0x00A [O] short; [U] terrainIntersect tests & 0x41 (lhu)
     int m_iFlags;                   // 0x00C [O]; [U] bezierman: 0x800000 snow sparkle (func_0038D690), 0x600000 shine
                                     //       (func_0038CA70 / CE20, Render_B370), 0x400000 (func_0038D168), 0x180000
                                     //       pass selection (func_0038CA70)
@@ -49,6 +51,8 @@ struct tPatchRecord {
 };
 
 CHECK_OFFSET(tPatchRecord, unk_000, 0x000);
+CHECK_OFFSET(tPatchRecord, m_sSurfaceType, 0x008);
+CHECK_OFFSET(tPatchRecord, m_sSurfaceFlags, 0x00A);
 CHECK_OFFSET(tPatchRecord, m_iFlags, 0x00C);
 CHECK_OFFSET(tPatchRecord, m_fMapScale, 0x010);
 CHECK_OFFSET(tPatchRecord, m_fUV0, 0x020);

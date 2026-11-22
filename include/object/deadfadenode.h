@@ -52,6 +52,25 @@ CHECK_OFFSET(tMakeDeadData, Type, 0x4);
 CHECK_OFFSET(tMakeDeadData, null, 0x8);
 CHECK_SIZE(tMakeDeadData, 0xC);
 
+// World-script data that makes a dead-fade node (On Tour tMakeDeadFadeData, 0x14; same offsets). [O] On Tour's
+// cDeadFadeNode(cBucketList*, tInstanceRecord*, const tMakeDeadFadeData*, cInstanceNode* pOldNode); [U]
+// cDeadFadeNode_cDeadFadeNode (view sDfDesc_0750) copies the first 12 bytes over Data (as a tMakeDeadData), then
+// FadeRate = update time / FadeTime and DistRate = ZVel * update time.
+struct tMakeDeadFadeData {
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] copied with Type into Data (12-byte copy)
+    int Type;                       // 0x04 [O]; [U] ditto (Data.Type)
+    float FadeTime;                 // 0x08 [O]; [U] FadeRate = update time / FadeTime (its word also lands in Data.null)
+    float ZVel;                     // 0x0C [O]; [U] DistRate = ZVel * update time
+    char unk_010[0x4];              // 0x10 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeDeadFadeData, InstId, 0x00);
+CHECK_OFFSET(tMakeDeadFadeData, Type, 0x04);
+CHECK_OFFSET(tMakeDeadFadeData, FadeTime, 0x08);
+CHECK_OFFSET(tMakeDeadFadeData, ZVel, 0x0C);
+CHECK_OFFSET(tMakeDeadFadeData, unk_010, 0x10);
+CHECK_SIZE(tMakeDeadFadeData, 0x14);
+
 struct cDeadFadeNode {
     // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
     int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)

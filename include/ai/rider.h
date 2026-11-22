@@ -260,6 +260,36 @@ CHECK_OFFSET(tSurfData, GrindingSparks, 0x8C);
 CHECK_OFFSET(tSurfData, SlipFriction, 0x90);
 CHECK_SIZE(tSurfData, 0xB0);
 
+// One file of the rider's model / texture load list (On Tour struct tRiderLoader, 0x20C: origFileName[256],
+// FileName[256], FileOp, DataPtr, processingState). Retail's is 0x108, one name and the two words: [U] func_0011BD60 /
+// func_0011BE88 strcpy the name, store -1 and 0 and qsort the entries with a 264-byte stride; cRider_loadRider polls
+// +0x100 and reads +0x104. [Staged by views2 group A.]
+struct tRiderLoader {
+    char FileName[256];             // 0x000 [O] (On Tour's second name; retail keeps one); [U] the file to load
+    int FileOp;                     // 0x100 [O]; [U] -1 until cRider_loadRider starts the async load
+    void* DataPtr;                  // 0x104 [O]; [U] 0, then the loaded data (cRider_loadRider)
+};
+
+CHECK_OFFSET(tRiderLoader, FileName, 0x000);
+CHECK_OFFSET(tRiderLoader, FileOp, 0x100);
+CHECK_OFFSET(tRiderLoader, DataPtr, 0x104);
+CHECK_SIZE(tRiderLoader, 0x108);
+
+// The rider's load list (On Tour struct tRiderLoadList: tRiderLoader LoadList[40]; int MdlLoadNum; int TexLoadNum).
+// [R] cRider_loadRider: cMemMan_alloc(0x2948, "LoadList") into cRider::mLoadList, zeroes 0x2940 / 0x2944, adds the
+// model files (func_0011BD60, counting MdlLoadNum) and then the texture files after them (func_0011BE88, counting
+// TexLoadNum). [Staged by views2 group A.]
+struct tRiderLoadList {
+    tRiderLoader LoadList[40];      // 0x0000 [O]; [U] models first, then textures
+    int MdlLoadNum;                 // 0x2940 [O]; [R] 0; [U] func_0011BD60 counts the model files
+    int TexLoadNum;                 // 0x2944 [O]; [R] 0; [U] func_0011BE88 counts the texture files (after the models)
+};
+
+CHECK_OFFSET(tRiderLoadList, LoadList, 0x0000);
+CHECK_OFFSET(tRiderLoadList, MdlLoadNum, 0x2940);
+CHECK_OFFSET(tRiderLoadList, TexLoadNum, 0x2944);
+CHECK_SIZE(tRiderLoadList, 0x2948);
+
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (cRider_initAlways)

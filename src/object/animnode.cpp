@@ -279,11 +279,6 @@ struct sDelta_E798 {
 };
 
 
-struct sVE_E798 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 extern sVec4_E798 t4vect_Zero;
 extern "C" void fSinCos(float* s, float* c, float angle);
@@ -407,7 +402,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
 {
     cMoveNode* obj = (cMoveNode*)((char*)&self->unk_014);
     if (self->Flags & 1) {
-        sVE_E798* vt = (sVE_E798*)self->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
         ((void (*)(void*))vt[51].fn)(vthis(obj, vt[51]));
     }
     tModelRecord* info = (tModelRecord*)obj->Instance->m_Model;
@@ -420,7 +415,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         if (((int)ent->m_MeshAnim) == 0) continue;
         cMeshAnimFrame* node = &self->AnimFrames[k];
         k++;
-        sVE_E798* vt = (sVE_E798*)self->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
         float animSpeed = ((float (*)(void*))vt[53].fn)(vthis(self, vt[53]));
         sVec4_E798 pos;
         sVec4_E798 rotv;

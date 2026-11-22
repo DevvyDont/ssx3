@@ -785,16 +785,6 @@ static inline void vu0CopyMatrix_355F10(void* dst, void* src)
         : "memory");
 }
 
-struct sNodeVEntryD_355F10 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-struct sNodeVEntryV_355F10 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Takes over an old instance node's effects and transform, then deletes the old node.
@@ -818,19 +808,19 @@ extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* srcv)
     sVEntry<char*(void*)>* vp = (sVEntry<char*(void*)>*)srcv->mVtbl;
     char* transform = vp[24].fn(vthis(srcv, vp[24]));
     if (transform == (char*)&self->Instance->m_fmTransform) {
-        sNodeVEntryD_355F10* vd = (sNodeVEntryD_355F10*)srcv->mVtbl;
+        sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)srcv->mVtbl;
         vd[1].fn(vthis(srcv, vd[1]), 3);
         return;
     }
     sMat44_355F10 copy;
     vu0CopyMatrix_355F10(&copy, transform);
     int keep = self->Instance->m_iFlags;
-    sNodeVEntryD_355F10* vd = (sNodeVEntryD_355F10*)srcv->mVtbl;
+    sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)srcv->mVtbl;
     vd[1].fn(vthis(srcv, vd[1]), 3);
     self->Instance->m_iFlags = keep;
     cMoveNode_addPosition1(self, &copy);
     self->TransferHack = 1;
-    sNodeVEntryV_355F10* vv = (sNodeVEntryV_355F10*)self->mVtbl;
+    sVEntry<void(void*)>* vv = (sVEntry<void(void*)>*)self->mVtbl;
     vv[50].fn(vthis(self, vv[50]));
 }
 #endif
@@ -965,11 +955,6 @@ int cInstanceNode_runOnLoseFocusScript(void* self);
 extern "C" int tModifierBlock_isComplete(void* block);
 extern "C" void tModifierBlock_clearComplete(void* block);
 
-struct sMnVEntryVi_356198 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Updates a moving node for one tick: debounce, losing focus, its modifiers, and expiry once they complete.
@@ -1001,7 +986,7 @@ extern "C" void cMoveNode_update(cMoveNode* selfv)
         cMoveNode_postUpdateModifierBlock(self);
         if (((void*)self->ModifierBlock) != 0 && tModifierBlock_isComplete(((void*)self->ModifierBlock)) != 0) {
             tModifierBlock_clearComplete(((void*)self->ModifierBlock));
-            sMnVEntryVi_356198* vw = (sMnVEntryVi_356198*)selfv->mVtbl;
+            sVEntry<void(void*, int)>* vw = (sVEntry<void(void*, int)>*)selfv->mVtbl;
             vw[34].fn(vthis(selfv, vw[34]), 1);
         }
     }
@@ -1180,7 +1165,7 @@ static inline void* Mat_6298(void* rot, t4Matrix* m)
 static inline void* LmSub_6298(char* vl)
 {
     cTexFlipModifier* l = (cTexFlipModifier*)vl;
-    return l->MaterialBlock;
+    return &l->MaterialBlock;
 }
 
 static inline void* Lm_6298(char* l)

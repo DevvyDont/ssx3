@@ -78,11 +78,6 @@ struct sDmNode5B98;
 extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, sDmNode5B98* prev);
 extern int REALabortflag[];
 
-struct sDmVEntry5920 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, void*, int, void*, void*);
-};
 
 struct sDmNode5920 {
     int field_0x0;
@@ -118,11 +113,11 @@ extern "C" sDmNode5920* cDataManager_AttachData(cDataManager* self, int pName, v
     int big = BIG_sizeofheader(data);
     REALabortflag[0] = saved;
     if (big != 0) {
-        sDmVEntry5920* vt = (sDmVEntry5920*)self->mVtbl;
+        sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
         vt[4].fn(vthis(self, vt[4]), pName, data, size, n, &n->field_0x4);
         cDataManager_AttachDataFromBigfile(self, (char*)data, (sDmNode5B98*)n);
     } else {
-        sDmVEntry5920* vt = (sDmVEntry5920*)self->mVtbl;
+        sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
         vt[2].fn(vthis(self, vt[2]), pName, data, size, n, &n->field_0x4);
     }
     return n;
@@ -250,11 +245,6 @@ extern "C" int BIG_sizeofheader(void* data);
 extern "C" char* BIG_locateentryz(void* big, int a1, int index, int* offset, int* size);
 extern int REALabortflag[];
 
-struct sDmVEntry5B98 {
-    short delta;
-    short index;
-    void (*fn)(void*, char*, char*, int, void*, void*);
-};
 
 struct sDmNode5B98 {
     int field_0x0;
@@ -302,7 +292,7 @@ extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, c
             n->size = ent[1];
             prev->next = n;
             prev = n;
-            sDmVEntry5B98* vt = (sDmVEntry5B98*)self->mVtbl;
+            sVEntry<void(void*, char*, char*, int, void*, void*)>* vt = (sVEntry<void(void*, char*, char*, int, void*, void*)>*)self->mVtbl;
             vt[2].fn(vthis(self, vt[2]), name, sub, ent[1], prev, &prev->field_0x4);
         }
         name = BIG_locateentryz(big, 0, i++, &ent[0], 0);
@@ -780,11 +770,6 @@ extern "C" void cCutSceneTransitionMan_StartCutScene(void* gm, float t);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* gm);
 extern "C" void* cUIStateStack_findState(void* table, int hash);
 
-struct sDmVEntry_6388 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 struct sDmVEntry2_6388 {
     short delta;
@@ -851,7 +836,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
     char* table = (char*)&SSXApp->Game->UI->mStateStack;
     char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
     if (hudState != 0) {
-        sDmVEntry_6388* vtEntry = &(*(sDmVEntry_6388**)(hudState + 0x8))[24];
+        sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(hudState + 0x8))[24];
         vtEntry->fn(vthis(hudState, *vtEntry), 0, 0);
     }
     if (tNISList_IsVideo((tNISList*)self, item) == 0) {

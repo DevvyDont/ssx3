@@ -201,11 +201,6 @@ void tModifierBlock_setRadius(tModifierBlock* self)
 INCLUDE_ASM("object/modifierblock", tModifierBlock_preUpdate);
 #ifdef SKIP_ASM
 
-struct sMbVEntryI2C70 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 
 extern "C" void cUVScrollModifier_update(cUVScrollModifier* modifier);
@@ -236,7 +231,7 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     if (physicsModifier != 0) {
         ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].fn(vthis(physicsModifier, ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2]));
         physicsModifier = self->Physics;
-        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)((sVEntry<void(void*)>*)physicsModifier->mVtbl);
+        sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)((sVEntry<void(void*)>*)physicsModifier->mVtbl);
         if (vt2[4].fn(vthis(physicsModifier, vt2[4])) == 0) {
             tModifierBlock_remPhysicsModifier(self);
         }
@@ -917,11 +912,6 @@ extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, char* st
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sMbStreamVEntry36D8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 
 struct sMbReplayHdr36D8 {
@@ -984,7 +974,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cReplay
     self->UVScroll = 0;
     self->TexFlip = 0;
     self->Physics = 0;
-    ((sMbStreamVEntry36D8*)stream->mVtbl)[2].fn(vthis(stream, ((sMbStreamVEntry36D8*)stream->mVtbl)[2]), &hdr, 52);
+    ((sVEntry<void(void*, void*, int)>*)stream->mVtbl)[2].fn(vthis(stream, ((sVEntry<void(void*, void*, int)>*)stream->mVtbl)[2]), &hdr, 52);
 
     if (hdr.flags & 1) {
         if (hdr.type == 1) {

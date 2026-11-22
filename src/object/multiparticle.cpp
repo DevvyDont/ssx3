@@ -1339,11 +1339,6 @@ INCLUDE_ASM("object/multiparticle", cAnimDeltaNode_updateNode);
 #ifdef SKIP_ASM
 extern "C" void cAnimObjectNode_updateNode(void* p);
 
-struct sVEntry_3592D0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Updates an anim delta node: the animation runs while Delta is positive and Delta drains by the speed.
@@ -1388,7 +1383,7 @@ extern "C" int cAnimDeltaNode_updateNode(cAnimDeltaNode* self)
             }
             if (self->AnimComplete != 0) {
                 char* obj = (char*)&self->unk_030;
-                sVEntry_3592D0* vtEntry = &((sVEntry_3592D0*)self->mVtbl)[34];
+                sVEntry<void(void*, int)>* vtEntry = &((sVEntry<void(void*, int)>*)self->mVtbl)[34];
                 vtEntry->fn(vthis(obj, *vtEntry), 1);
                 return 0;
             }

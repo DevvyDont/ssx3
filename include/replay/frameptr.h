@@ -26,7 +26,15 @@
 
 #include "layout.h"
 
-struct tFramePtrSave;       // On Tour: 0x4 (int Type); loadBlock's second argument
+// A saved block's header word (On Tour struct tFramePtrSave, 0x4). [O] On Tour's cReplayFramePtr::loadBlock(char** d,
+// const tFramePtrSave* ptrsave); [U] cReplayFramePtr_loadBlock copies its 4 bytes (unused); cReplay_writeFrames
+// writes 0x11111111 into it (tReplayFrameSave::Data, header word 9).
+struct tFramePtrSave {
+    int Type;               // 0x0 [O]; [U] cReplay_writeFrames stores 0x11111111; loadBlock copies it
+};
+
+CHECK_OFFSET(tFramePtrSave, Type, 0x0);
+CHECK_SIZE(tFramePtrSave, 0x4);
 
 // cBxReplayFrame: the replay stream interface every writeToReplayFrame / readFromReplayFrame takes ([P] the preview's
 // linkonce names, e.g. writeToReplayFrame__8cObjNodeP14cBxReplayFrame; [O] On Tour class cBxReplayFrame, size 0x4: a

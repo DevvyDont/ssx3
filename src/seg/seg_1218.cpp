@@ -1760,13 +1760,15 @@ extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** o
 extern "C" void cWScriptMan_downFocusScript(int, tFocusRec*);
 extern "C" void cWScriptMan_upFocusScript(int, tFocusRec*);
 
-struct FocusCallback;
+struct FocusCallbackInline;
 // Retail's out-of-line copy of FocusCallback::operator() (matched in ai/control/handplantcontrol); the
 // recursion inside the inline operator goes to it.
-extern "C" void func_00144368_1B60(const FocusCallback* cb, const sNode_1A28* cell, const sNashKey* key) __asm__("func_00144368");
+extern "C" void func_00144368_1B60(const FocusCallbackInline* cb, const sNode_1A28* cell, const sNashKey* key) __asm__("func_00144368");
 
-// FocusCallback: collects the instances of every cell that touches one of the focus boxes.
-struct FocusCallback {
+// FocusCallback (ai/focusbox.h) as cFocusMan_update inlines it: collects the instances of every cell that touches
+// one of the focus boxes. A local copy because its inline operator() and members use this unit's views of the
+// focus list and cell tree; the header's FocusCallback types the out-of-line copy (ai/control/handplantcontrol).
+struct FocusCallbackInline {
     sFocusList* list;
     sFocusBox* boxes;
     int count;
@@ -1825,7 +1827,7 @@ struct FocusCallback {
 
 // Visit root k of the tree (same shape as intersect/worldsphtree's visit helpers: the root's address is
 // taken before the test).
-static inline void Visit(const FocusCallback& cb, const sNashTree* tree, int k)
+static inline void Visit(const FocusCallbackInline& cb, const sNashTree* tree, int k)
 {
     const sNashRoot* r = &tree->roots[k];
     if (tree->roots[k].cell) {
@@ -1864,7 +1866,7 @@ extern "C" void cFocusMan_update(sFocusBoxes* self)
     }
     if (self->NumFocusInstances != 0) {
         sNashTree* tree = D_004A28A8_1B60->game->nash;
-        FocusCallback cb;
+        FocusCallbackInline cb;
         cb.list = &list;
         cb.boxes = boxes;
         cb.count = self->NumFocusInstances;

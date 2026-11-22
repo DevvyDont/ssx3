@@ -1384,11 +1384,6 @@ extern "C" void cReplay_prevFrame(void* self);
 extern "C" void cReplay_nextFrame(void* self);
 extern "C" void cChaseCameraController_switchCamera_Chapter(void* p);
 
-struct sVE_26FE50 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Applies the pending replay-menu command (Cmd, set by updateInput) and clears it (On Tour processInput).
@@ -1485,7 +1480,7 @@ extern "C" void cReplay_processInput(cReplay* self)
         char* views = (char*)SSXApp->Game->ViewMan;
         char* controller = *(char**)(*(char**)(views + 4) + 0xA8);
         cChaseCameraController_switchCamera_Chapter(controller);
-        sVE_26FE50* vt = *(sVE_26FE50**)(controller + 0x14);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(controller + 0x14);
         vt[4].fn(vthis(controller, vt[4]));
         cGameViewMan_updateAll(views);
     }

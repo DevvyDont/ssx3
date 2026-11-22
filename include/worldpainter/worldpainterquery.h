@@ -58,6 +58,11 @@ struct tWorldPainterRegionType {
     unsigned int m_layer : 8;       // bits 0-7 [O]; [R] the ctor stores the low byte (sb); [U] queryPosition indexes
                                     //       the header's layer slots with it (lbu)
     unsigned int m_id : 24;         // bits 8-31 [O]; [R] the ctor switches on it (>> 8); [U] compared with m_iRegionType
+#ifdef __cplusplus
+    // [O] tWorldPainterRegionType(unsigned int layer, unsigned int id); [R] every unit's static init builds the 14
+    // constants kWPR_MusicTrigger .. kWPR_Danger as (n, n), n = 0..13 (views sFlags_2C0B70, sSlot_18E8, sSlot_3E60).
+    tWorldPainterRegionType(unsigned int layer, unsigned int id) { m_layer = layer; m_id = id; }
+#endif
 };
 
 CHECK_SIZE(tWorldPainterRegionType, 0x4);

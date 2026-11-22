@@ -32,9 +32,13 @@
 //       tScriptObjEventSound 0xC; cScriptEntity; cScriptObject).
 
 #include "layout.h"
+#include "inseq/scriptplayerchannel.h" /* tInSeqObject, tInSeqBlock */
 
 struct cScriptPlayerEntity;
 struct tScriptSoundBankInfo;
+struct tTagCustomWorldScriptEvent;   // [O] (not laid out): its first word is the abort script's hash
+struct tTagCustomSpeechEvent;        // [O] (not laid out)
+struct tTagCustomSound;              // [O] (not laid out): its first byte is read signed
 
 // A world-script function to run when the script ends (On Tour tScriptObjEventWSAbort, 8 bytes).
 struct tScriptObjEventWSAbort {
@@ -62,6 +66,92 @@ CHECK_OFFSET(tScriptObjEventSound, soundHandle, 0x0);
 CHECK_OFFSET(tScriptObjEventSound, endSound, 0x4);
 CHECK_OFFSET(tScriptObjEventSound, soundID, 0x8);
 CHECK_SIZE(tScriptObjEventSound, 0xC);
+
+// A frame's world-script event (On Tour struct tWorldScriptEvent, 0x8). [U] OnInSeqKeyEvent (view sSeLink_08E8) runs
+// eventID with cWScriptMan_runFunc and records the custom record's first word as the abort hash.
+struct tWorldScriptEvent {
+    int eventID;                    // 0x0 [O]; [U] the world-script function run
+    tTagCustomWorldScriptEvent* pCustom; // 0x4 [O]; [U] *(int*)pCustom = the abort hash (tScriptObjEventWSAbort)
+};
+
+CHECK_OFFSET(tWorldScriptEvent, eventID, 0x0);
+CHECK_OFFSET(tWorldScriptEvent, pCustom, 0x4);
+CHECK_SIZE(tWorldScriptEvent, 0x8);
+
+// A frame's music event (On Tour struct tMusicEvent, 0x8). [U] OnInSeqKeyEvent sends eventID (view sSeCmd_08E8).
+struct tMusicEvent {
+    int eventID;                    // 0x0 [O]; [U] the music event sent
+    void* unk_004;                  // 0x4 [O] void* pIgnore
+};
+
+CHECK_OFFSET(tMusicEvent, eventID, 0x0);
+CHECK_OFFSET(tMusicEvent, unk_004, 0x4);
+CHECK_SIZE(tMusicEvent, 0x8);
+
+// A frame's speech event (On Tour struct tSpeechEvent, 0x8). [U] OnInSeqKeyEvent sends eventID (view sSeCmd_08E8).
+struct tSpeechEvent {
+    int eventID;                    // 0x0 [O]; [U] the speech event sent
+    tTagCustomSpeechEvent* pCustom; // 0x4 [O]; [U] OnInSeqKeyEvent reads the subject
+};
+
+CHECK_OFFSET(tSpeechEvent, eventID, 0x0);
+CHECK_OFFSET(tSpeechEvent, pCustom, 0x4);
+CHECK_SIZE(tSpeechEvent, 0x8);
+
+// A frame's script sound, a list node (On Tour struct tSound, 0x24). [U] OnInSeqKeyEvent walks pSoundList (view
+// sSfxEnt_08E8: data.objectID 0x0, data.scriptStartFrame 0x4, data.trackIndex 0xC, the custom record's first byte, pNext).
+struct tSound {
+    tInSeqObject data;              // 0x00 [O]; [U] objectID, scriptStartFrame, trackIndex
+    tTagCustomSound* pCustom;       // 0x1C [O]; [U] its first byte (signed)
+    tSound* pNext;                  // 0x20 [O]; [U] the list walk
+};
+
+CHECK_OFFSET(tSound, data, 0x00);
+CHECK_OFFSET(tSound, pCustom, 0x1C);
+CHECK_OFFSET(tSound, pNext, 0x20);
+CHECK_SIZE(tSound, 0x24);
+
+// A frame's environment state, a list node (On Tour struct tEnviroState, 0x1C). Retail only tests the list head.
+struct tEnviroState {
+    tInSeqBlock data;               // 0x00 [O]
+    void* unk_014;                  // 0x14 [O] void* pIgnore
+    tEnviroState* unk_018;          // 0x18 [O] pNext
+};
+
+CHECK_OFFSET(tEnviroState, data, 0x00);
+CHECK_OFFSET(tEnviroState, unk_014, 0x14);
+CHECK_OFFSET(tEnviroState, unk_018, 0x18);
+CHECK_SIZE(tEnviroState, 0x1C);
+
+// The game events of an NIS frame (On Tour struct tSSXFrameGameEvent, 0x28). [O] On Tour's
+// GetSSXGameEventFrame(cScriptPlayerEntity*, tSSXFrameGameEvent*); [R] retail GetSSXGameEventFrame stores all 10 words;
+// [U] OnInSeqKeyEvent (view sSeInfo_08E8) runs the world-script events, sends the music and speech events, walks the
+// sound list and switches the render-state flag by pEnviroStateList; OnEndObjectUse (view sSeInfo07B0) tests
+// pEnviroStateList.
+struct tSSXFrameGameEvent {
+    int numWorldScriptEvent;        // 0x00 [O]; [R]; [U] OnInSeqKeyEvent's loop bound
+    tWorldScriptEvent* pWorldScriptEventArray; // 0x04 [O]; [R]; [U]
+    int numMusicEvent;              // 0x08 [O]; [R]; [U]
+    tMusicEvent* pMusicEventArray;  // 0x0C [O]; [R]; [U]
+    int numSpeechEvent;             // 0x10 [O]; [R]; [U]
+    tSpeechEvent* pSpeechEventArray; // 0x14 [O]; [R]; [U]
+    int numSound;                   // 0x18 [O]; [R] GetSSXGameEventFrame stores it
+    tSound* pSoundList;             // 0x1C [O]; [R]; [U] the sound list head
+    int numEnviroState;             // 0x20 [O]; [R] GetSSXGameEventFrame stores it
+    tEnviroState* pEnviroStateList; // 0x24 [O]; [R]; [U] nonzero: cRenderStateMan_m_indoor handling
+};
+
+CHECK_OFFSET(tSSXFrameGameEvent, numWorldScriptEvent, 0x00);
+CHECK_OFFSET(tSSXFrameGameEvent, pWorldScriptEventArray, 0x04);
+CHECK_OFFSET(tSSXFrameGameEvent, numMusicEvent, 0x08);
+CHECK_OFFSET(tSSXFrameGameEvent, pMusicEventArray, 0x0C);
+CHECK_OFFSET(tSSXFrameGameEvent, numSpeechEvent, 0x10);
+CHECK_OFFSET(tSSXFrameGameEvent, pSpeechEventArray, 0x14);
+CHECK_OFFSET(tSSXFrameGameEvent, numSound, 0x18);
+CHECK_OFFSET(tSSXFrameGameEvent, pSoundList, 0x1C);
+CHECK_OFFSET(tSSXFrameGameEvent, numEnviroState, 0x20);
+CHECK_OFFSET(tSSXFrameGameEvent, pEnviroStateList, 0x24);
+CHECK_SIZE(tSSXFrameGameEvent, 0x28);
 
 struct cScriptObjEvent {
     // --- cScriptEntity (scripter/scriptentity.h, 0xC; ctor cScriptEntity_cScriptEntity__FPv(self))

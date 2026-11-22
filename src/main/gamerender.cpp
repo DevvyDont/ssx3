@@ -215,11 +215,6 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
 //100%
 INCLUDE_ASM("main/gamerender", cGameViewMan__cGameViewMan);
 #ifdef SKIP_ASM
-struct sVEntry0022E730 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 void operator_delete(int* p);
 
 /**
@@ -236,7 +231,7 @@ extern "C" void cGameViewMan__cGameViewMan(cGameViewMan* self, int flags)
     for (i = 0; i < self->m_uiNumPlayers; i++) {
         cCamera* it = ((cCamera**)&self->PlayerCamera[0])[i];
         if (it != 0) {
-            ((sVEntry0022E730*)it->mVtbl)[1].fn(vthis(it, ((sVEntry0022E730*)it->mVtbl)[1]), 3);
+            ((sVEntry<void(void*, int)>*)it->mVtbl)[1].fn(vthis(it, ((sVEntry<void(void*, int)>*)it->mVtbl)[1]), 3);
         }
     }
     self->m_uiNumView = 0;

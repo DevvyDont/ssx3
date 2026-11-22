@@ -38,7 +38,22 @@ struct cObjNode;
 struct tInstanceRecord;
 struct tModifierBlock;
 struct cMeshAnimFrame;
-struct tMeshVelocity;
+
+// One mesh's velocity (On Tour struct tMeshVelocity, 0x20: t4Vector Vel, AngVel; a user-declared empty constructor
+// tMeshVelocity()). [R] cAnimNode_setAnimMeshCache new[]s m_iNumMeshes of them ("MeshVelocity", element ctor empty:
+// view sMeshRef_E448) into MeshVelocity; [U] cAnimNode_updateMeshVelocity / updateIntersectInfo read [bone].Vel and
+// .AngVel (views sDelta_E698 / sDelta_E798: pos, rot).
+struct tMeshVelocity {
+    t4Vector Vel;                   // 0x00 [O]; [U] the mesh's linear velocity (added to the body's)
+    t4Vector AngVel;                // 0x10 [O]; [U] the angular velocity (crossed with the contact offset)
+#ifdef __cplusplus
+    tMeshVelocity() {}              // [O]; [R] the empty element ctor of setAnimMeshCache's new[]
+#endif
+};
+
+CHECK_OFFSET(tMeshVelocity, Vel, 0x00);
+CHECK_OFFSET(tMeshVelocity, AngVel, 0x10);
+CHECK_SIZE(tMeshVelocity, 0x20);
 
 struct cAnimNode {
     // --- cAnimNodeState (On Tour 0x14; [R] the replay ctor reads these 0x14 bytes, writeToReplayFrame writes them)

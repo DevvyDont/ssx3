@@ -90,6 +90,28 @@ CHECK_OFFSET(tBEStatDB, cSpeed, 0x0);
 CHECK_OFFSET(tBEStatDB, cStability, 0x6);
 CHECK_SIZE(tBEStatDB, 0x7);
 
+// [O] struct tBEStatDefault (0xF): a character's default attributes (On Tour global cBELibrary::statDefault, one per
+// character). [R] retail cBELibrary_statDefault is a table of 15-byte records indexed by character id; the stat
+// interface's struct-returning getters (be/beintplayer func_001482D0 / func_00148328) copy one record out whole, and
+// the braking / edging attribute divides by byte 0xB (cMaxEdging, lb: signed like tBEStatDB). Views group D:
+// sCharStat_001482D0, sCharStat_00148328 (and the unit's other 15-byte views of the same table).
+struct tBEStatDefault {
+    signed char eCharacterID;       // 0x000 [O]
+    tBEStatDB start;                // 0x001 [O] the starting attribute levels
+    signed char cMaxSpeed;          // 0x008 [O]
+    signed char cMaxAccel;          // 0x009 [O]
+    signed char cMaxTrick;          // 0x00A [O]
+    signed char cMaxEdging;         // 0x00B [O]; [U] the braking / edging attribute's divisor
+    signed char cMaxSpin;           // 0x00C [O]
+    signed char cMaxToughness;      // 0x00D [O]
+    signed char cMaxStability;      // 0x00E [O]
+};
+CHECK_OFFSET(tBEStatDefault, start, 0x1);
+CHECK_OFFSET(tBEStatDefault, cMaxSpeed, 0x8);
+CHECK_OFFSET(tBEStatDefault, cMaxEdging, 0xB);
+CHECK_OFFSET(tBEStatDefault, cMaxStability, 0xE);
+CHECK_SIZE(tBEStatDefault, 0xF);
+
 // [O] struct tRiderBest (0x54): a character's best results, the record cBEScoreInterface::getPlayerBestStats(int
 // iProfileIndex, eBECharacters iChar) returns by const reference. [R] cBECharProfileDB::mRiderBest (0xDE4, 0x54 bytes,
 // cleared by init) is what retail's getter cBEScoreInterface_getPlayerBestStats returns; [U] cFEStateCareerStats_setupRidersBest copies

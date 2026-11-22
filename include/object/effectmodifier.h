@@ -142,6 +142,34 @@ CHECK_OFFSET(cDynamicParticleModifier, unk_264, 0x264);
 CHECK_SIZE(cDynamicParticleModifier, 0x270);
 
 
+// World-script data that adds a halo modifier (On Tour tAddHaloData, 0x28; same offsets). [O] On Tour's
+// cHaloModifier(const tAddHaloData&, tInstanceRecord*); [U] cHaloModifier_cHaloModifier (view sEffSrc_6120) copies
+// Type, Mesh, Radius and Speed into the members of the same names and (ColourR, ColourG, ColourB, ColourA) into Color.
+struct tAddHaloData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    int Type;                       // 0x04 [O]; [U] -> Type
+    int Mesh;                       // 0x08 [O]; [U] -> Mesh
+    float ColourA;                  // 0x0C [O]; [U] -> Color.w
+    float ColourR;                  // 0x10 [O]; [U] -> Color.x
+    float ColourG;                  // 0x14 [O]; [U] -> Color.y
+    float ColourB;                  // 0x18 [O]; [U] -> Color.z
+    float Radius;                   // 0x1C [O]; [U] -> Radius
+    int Speed;                      // 0x20 [O]; [U] -> Speed
+    char unk_024[0x4];              // 0x24 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tAddHaloData, unk_000, 0x00);
+CHECK_OFFSET(tAddHaloData, Type, 0x04);
+CHECK_OFFSET(tAddHaloData, Mesh, 0x08);
+CHECK_OFFSET(tAddHaloData, ColourA, 0x0C);
+CHECK_OFFSET(tAddHaloData, ColourR, 0x10);
+CHECK_OFFSET(tAddHaloData, ColourG, 0x14);
+CHECK_OFFSET(tAddHaloData, ColourB, 0x18);
+CHECK_OFFSET(tAddHaloData, Radius, 0x1C);
+CHECK_OFFSET(tAddHaloData, Speed, 0x20);
+CHECK_OFFSET(tAddHaloData, unk_024, 0x24);
+CHECK_SIZE(tAddHaloData, 0x28);
+
 // cHaloModifier: a light halo drawn at one mesh of the instance, spinning by Speed degrees per update
 // (cObjectInterface_renderSimpleLightHalo(P, Color, Type, Radius, Angle) with P = the mesh matrix's translation).
 // Size 0x40: [R] cMoveNode_addHalo allocates cMemMan_alloc(0x40, "HaloModifier"); the replay record is the 0x30-byte

@@ -45,6 +45,30 @@ CHECK_OFFSET(tNISListEntry, aiCharIndexSupport0, 0x14);
 CHECK_OFFSET(tNISListEntry, aiCharIndexSupport1, 0x18);
 CHECK_SIZE(tNISListEntry, 0x1C);
 
+// One video's record in the NIS video database (On Tour struct tVideoDB, 0x1C). [O] On Tour's
+// tNISList::GetVideoDBRecord(tNISListEntry*) returns a const tVideoDB*; [U] tNISList_DoTransitionToNext (view
+// sDmEnt_7980) gets it from tNISList_GetVideoDBRecord and, when transitionOutTime > 0, makes the transition object from
+// transitionOut / transitionColour (cSSXScriptEngine_MakeTransitionObject; transitionOut 7 = a screen grab) and starts
+// it over transitionOutTime. Enums are words.
+struct tVideoDB {
+    const char* unk_000;            // 0x00 [O] pFileName
+    int transitionOut;              // 0x04 [O] eScriptTransition; [U] MakeTransitionObject's type (7: screen grab)
+    int transitionColour;           // 0x08 [O] eScriptTransitionColour; [U] MakeTransitionObject's colour
+    float transitionOutTime;        // 0x0C [O]; [U] > 0: the transition-out time
+    int unk_010;                    // 0x10 [O] musicEventStart
+    int unk_014;                    // 0x14 [O] musicEventSkip
+    int unk_018;                    // 0x18 [O] musicEventEnd
+};
+
+CHECK_OFFSET(tVideoDB, unk_000, 0x00);
+CHECK_OFFSET(tVideoDB, transitionOut, 0x04);
+CHECK_OFFSET(tVideoDB, transitionColour, 0x08);
+CHECK_OFFSET(tVideoDB, transitionOutTime, 0x0C);
+CHECK_OFFSET(tVideoDB, unk_010, 0x10);
+CHECK_OFFSET(tVideoDB, unk_014, 0x14);
+CHECK_OFFSET(tVideoDB, unk_018, 0x18);
+CHECK_SIZE(tVideoDB, 0x1C);
+
 struct tNISList {
     cSSXScriptEngine* mpNISEngine;      // 0x000 [O]; [R] the ctor zeroes it, cSSXScriptEngine_Load stores the engine;
                                         //       [U] read by every method that calls the engine (e.g. DoSkip)

@@ -3503,11 +3503,6 @@ struct sQTVt6128 {
     int (*fn)(void*);
 };
 
-struct sQTVtI6128 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 struct sQTEnt6128 {
     int f0;                     // 0x00 (self + 0x1A4)
@@ -3559,7 +3554,7 @@ extern "C" void cPS2MemCard_GetTitleString(sQT6128* self, int fileSlot, unsigned
         strcpy1(buf, qtLoc6128(str_kT_MEMFileCorruptPS2));
     } else if (self->ents[fileSlot].f8 != 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMNoFreeSpace));
-    } else if (((sQTVtI6128*)self->vt)[67].fn(vthis(self, self->vt[67]), fileSlot) == 0) {
+    } else if (((sVEntry<int(void*, int)>*)self->vt)[67].fn(vthis(self, self->vt[67]), fileSlot) == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
     } else {
         func_002C2540(buf, self->ents[fileSlot].name);

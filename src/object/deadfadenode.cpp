@@ -353,15 +353,10 @@ struct sDfObj_350CB8 {
     void* light;                    // 0x94
 };
 
-struct sDfGfxVt_350CB8 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 struct cDfGfx_350CB8 {
     char pad_0x0[0x10D8];
-    sDfGfxVt_350CB8* vt;            // 0x10D8
+    sVEntry<void>* vt;            // 0x10D8
 };
 
 typedef sDfMat_350CB8 (*DfViewFn_350CB8)(void*);
@@ -421,7 +416,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     {
-        sDfGfxVt_350CB8* vt = (sDfGfxVt_350CB8*)gfx->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
         sDfVec_350CB8 box[2];
         box[0].x = OBJ_350CB8(self)->pos[0];
@@ -432,7 +427,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
         box[1].y = OBJ_350CB8(self)->scl[1];
         box[1].z = OBJ_350CB8(self)->scl[2];
         box[1].w = 1.0f;
-        int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[43].delta));
+        int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_350CB8)((sVEntry<void>*)gfx->mVtbl)[43].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[43].delta));
         if (res == 1) {
             return;
         }
@@ -445,7 +440,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
     offset.z = -self->Dist;
     offset.w = 1.0f;
     xf.r[3] = offset;
-    ((DfDrawFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[95].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[95].delta, OBJ_350CB8(self), OBJ_350CB8(self)->light, &xf,
+    ((DfDrawFn_350CB8)((sVEntry<void>*)gfx->mVtbl)[95].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[95].delta, OBJ_350CB8(self), OBJ_350CB8(self)->light, &xf,
                                       self->Fade, self->AnimMats, 0, 0);
 }
 #endif

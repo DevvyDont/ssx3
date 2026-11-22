@@ -39,6 +39,31 @@ struct tInstanceRecord;
 struct tSpringNode;
 struct cGridMesh;
 
+// A spring's parameters (On Tour struct tSpringData, 0x20; same offsets): the tail of the world script's
+// tMakeFlexBridgeData. [O] On Tour's cSpring::setupSpring(const tSpringData& sdata, float len); [U]
+// cSpring_setupSpring (view sSpringDesc_3E08) copies LSpring .. ForceScale into cSpring's members of the same names,
+// TorqueScale * 1e-6 into TorqueScale, LengthScale into Length and Width into Width.
+struct tSpringData {
+    float LSpring;                  // 0x00 [O]; [U] -> LSpring
+    float LDamp;                    // 0x04 [O]; [U] -> LDamp
+    float ASpring;                  // 0x08 [O]; [U] -> ASpring
+    float ADamp;                    // 0x0C [O]; [U] -> ADamp
+    float ForceScale;               // 0x10 [O]; [U] -> ForceScale
+    float TorqueScale;              // 0x14 [O]; [U] * 1e-6 -> TorqueScale
+    float LengthScale;              // 0x18 [O]; [U] -> Length
+    int Width;                      // 0x1C [O]; [U] -> Width (the node count)
+};
+
+CHECK_OFFSET(tSpringData, LSpring, 0x00);
+CHECK_OFFSET(tSpringData, LDamp, 0x04);
+CHECK_OFFSET(tSpringData, ASpring, 0x08);
+CHECK_OFFSET(tSpringData, ADamp, 0x0C);
+CHECK_OFFSET(tSpringData, ForceScale, 0x10);
+CHECK_OFFSET(tSpringData, TorqueScale, 0x14);
+CHECK_OFFSET(tSpringData, LengthScale, 0x18);
+CHECK_OFFSET(tSpringData, Width, 0x1C);
+CHECK_SIZE(tSpringData, 0x20);
+
 // A chain of damped linear + angular springs (On Tour cSpring = cSpringState 0x24 + Nodes; no vptr). EA's
 // object/spring.cpp (src/object/spring.cpp: cSpring_cSpring__FPv, cSpring_cSpring1 (replay), cSpring__cSpring,
 // cSpring_setupSpring, cSpring_setupNodes, cSpring_update, cSpring_writeToReplayFrame). Move it to object/spring.h

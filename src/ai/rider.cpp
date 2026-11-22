@@ -854,7 +854,6 @@ struct sHit_D660 {
 void cWorldLine_cWorldLine_D660(sRay_D660* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
 extern float cBXNash_terrainIntersect1_D660(void* coll, sRay_D660* ray, sHit_D660* hit, int flags) __asm__("cBXNash_terrainIntersect1");
 
-struct sVE_D660 { short delta; short index; void (*fn)(void*); };
 
 // Quaternion; the ctor stores w, then y, x, z (that order reproduces the retail store schedule).
 struct sQuat_D660
@@ -1236,7 +1235,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     cOverlapList_geteverything(self->mOverlapList, &self->mBoundsMin);
     cRider_updateActiveLights(self);
     func_002105B0(self->mAIIndex);
-    sVE_D660* vt = *(sVE_D660**)&self->mVtbl;
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)&self->mVtbl;
     vt[kRiderVt_vibrationReset].fn(vthis(self, vt[kRiderVt_vibrationReset]));
     if ((unsigned int)self->mViewIndex < 2)
     {
@@ -1244,7 +1243,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         if (views != 0)
         {
             char* viewHandler = *(char**)(*(char**)(views + (self->mViewIndex << 2) + 4) + 0xA8);
-            sVE_D660* hv = *(sVE_D660**)(viewHandler + 0x14);
+            sVEntry<void(void*)>* hv = *(sVEntry<void(void*)>**)(viewHandler + 0x14);
             hv[4].fn(vthis(viewHandler, hv[4]));
         }
     }
@@ -2671,11 +2670,6 @@ INCLUDE_ASM("ai/rider", cRider_updateBoost);
 #ifdef SKIP_ASM
 extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
 
-struct sVt_1200D0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 static inline float decay_1200D0(float v, float step)
 {
@@ -2707,7 +2701,7 @@ extern "C" void cRider_updateBoost(cRider* self)
         self->mPowerUpTrickTimer = decay_1200D0(self->mPowerUpTrickTimer, step);
     }
     char* sub = (char*)&self->mVtbl;
-    sVt_1200D0* vtEntry = &(*(sVt_1200D0**)sub)[kRiderVt_isComputer];
+    sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)sub)[kRiderVt_isComputer];
     vtEntry->fn(vthis(sub, *vtEntry));
     if ((cRider_getMotionState(self) == 1 || cRider_getControlState(self) == 12) && 0.0f < self->mUberTimer && self->mUberTimer <= 0.01666666753590107f) {
         self->mUberTimer = 0.01666666753590107f;
@@ -3430,7 +3424,6 @@ extern "C" void cRider_updateAIPath(void* self);
 extern "C" int cRider_updateFinishTest(cRider* self);
 extern "C" void cRiderMetrix_update(void* metrix);
 
-struct sVEntry00121818 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
 
 /**
  * Runs the rider's object script hook, then its path, finish, metrix and focus updates.
@@ -3448,7 +3441,7 @@ extern "C" void cRider_updateSplit10(cRider* self)
         char* obj = *(char**)(collideInst + 0xC);
         if (obj != 0)
         {
-            sVEntry00121818* vt = *(sVEntry00121818**)(obj + 0xC);
+            sVEntry<void(void*, void*, void*, void*)>* vt = *(sVEntry<void(void*, void*, void*, void*)>**)(obj + 0xC);
             vt[40].fn(vthis(obj, vt[40]), self->unk_A60, self->unk_9E0, (char*)&self->mVtbl);
         }
         else
@@ -3773,8 +3766,6 @@ struct sVec4_121F30
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sVEntryP_121F30 { short delta; short index; void* (*fn)(void*); };
-struct sVEntryF_121F30 { short delta; short index; float (*fn)(void*); };
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
 static inline sVec4_121F30 mtxMulVec_121F30(sVec4_121F30* m, sVec4_121F30* v)
@@ -3809,15 +3800,15 @@ static inline sVec4_121F30 mtxMulVec_121F30(sVec4_121F30* m, sVec4_121F30* v)
 extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntryP_121F30* gvt = (sVEntryP_121F30*)ps2GraphicsMan->mVtbl;
+    sVEntry<void*(void*)>* gvt = (sVEntry<void*(void*)>*)ps2GraphicsMan->mVtbl;
     sVec4_121F30* viewMtx = (sVec4_121F30*)gvt[35].fn(vthis(ps2GraphicsMan, gvt[35]));
     char* obj = (char*)&self->mVtbl;
-    sVEntryP_121F30* vt = *(sVEntryP_121F30**)obj;
+    sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
     sVec4_121F30* pos = (sVec4_121F30*)vt[kRiderVt_getPosition].fn(vthis(obj, vt[kRiderVt_getPosition]));
     sVec4_121F30 viewPos = mtxMulVec_121F30(viewMtx, pos);
     float z = viewPos.z;
     cPS2GraphicsMan* graphicsMan = GrMan;
-    sVEntryF_121F30* gvt2 = (sVEntryF_121F30*)graphicsMan->mVtbl;
+    sVEntry<float(void*)>* gvt2 = (sVEntry<float(void*)>*)graphicsMan->mVtbl;
     float fov = gvt2[29].fn(vthis(graphicsMan, gvt2[29]));
     float sinFov, cosFov;
     fSinCos(&sinFov, &cosFov, fov);
@@ -3952,11 +3943,6 @@ extern "C" void cRider_updateActiveLights(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_SetRiderLights);
 #ifdef SKIP_ASM
-struct sVE_20D8 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 struct sXf_20D8 {
     float m[40];
 } __attribute__((aligned(16)));
@@ -3997,14 +3983,14 @@ extern "C" void cRider_SetRiderLights(cRider* self)
     cIrradiance_Clear(self->unk_7C0);
     {
         char* obj = (char*)&self->mVtbl;
-        sVE_20D8* vt = *(sVE_20D8**)obj;
+        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
         *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])));
     }
     cRider_getHipPosition(&hipPos, self);
     char* lightState = self->unk_7C0;
     {
         char* obj = (char*)&self->mVtbl;
-        sVE_20D8* vt = *(sVE_20D8**)obj;
+        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
         func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))));
     }
     for (int i = 0; i < 8; i++) {
@@ -4128,8 +4114,6 @@ extern "C" void cAnimModel_render(void* model, int lod, int a, int b);
 struct sVec4_122448 { float v[4]; };
 extern sVec4_122448 D_004FF120_v122448 __asm__("t4vect_Zero");
 
-struct sVEntryI_122448 { short delta; short index; void (*fn)(void*, void*, int); };
-struct sVEntryF_122448 { short delta; short index; void (*fn)(void*, float, void*); };
 
 /**
  * Draws the rider's model when it is on screen, then updates the low-detail flag unk_B1C.
@@ -4154,16 +4138,16 @@ extern "C" void cRider_renderBody(cRider* self)
             additiveBoard = 1;
         func_00121F30(self);
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntryI_122448* vt = (sVEntryI_122448*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)ps2GraphicsMan->mVtbl;
         vt[69].fn(vthis(ps2GraphicsMan, vt[69]), self->unk_7C0, 1);
         cPS2GraphicsMan* graphicsMan = GrMan;
         int* rs = (int*)graphicsMan->m_pCurrentDrawState;
         rs[1] = (rs[1] & ~0x7C) | 0x14;
-        sVEntryF_122448* vt2 = (sVEntryF_122448*)graphicsMan->mVtbl;
+        sVEntry<void(void*, float, void*)>* vt2 = (sVEntry<void(void*, float, void*)>*)graphicsMan->mVtbl;
         vt2[27].fn(vthis(graphicsMan, vt2[27]), 0.0f, &self->mPosition);
         cAnimModel_render(self->mAnimModel, self->mLOD, additiveBoard, additivePlayer);
         cPS2GraphicsMan* grManReset = GrMan;
-        sVEntryF_122448* vt3 = (sVEntryF_122448*)grManReset->mVtbl;
+        sVEntry<void(void*, float, void*)>* vt3 = (sVEntry<void(void*, float, void*)>*)grManReset->mVtbl;
         vt3[27].fn(vthis(grManReset, vt3[27]), 0.0f, &D_004FF120_v122448);
     }
     if ((int)SSXApp->Game->ViewMan->m_uiCurrentView == 0 || self->unk_B1C)
@@ -4405,10 +4389,8 @@ struct sObj_2898 {
     void* f170;                     // 0x170
 };
 
-struct sVE0_2898 { short delta; short index; void (*fn)(void*); };
 struct sVEI_2898 { short delta; short index; int (*fn)(void*); };
 struct sVEI3_2898 { short delta; short index; int (*fn)(void*, void*, const sV4_2898&); };
-struct sVE2_2898 { short delta; short index; void (*fn)(void*, void*, int); };
 struct sVE3_2898 { short delta; short index; void (*fn)(void*, void*, void*); };
 struct sVE4_2898 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
 
@@ -4528,10 +4510,10 @@ extern "C" void cRider_RenderShadow(cRider* self)
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFFF00FFF) | 0x14000;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFFBFFFFF) | 0x400000;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & ~0x7C) | 4;
-        sVE0_2898* vt = (sVE0_2898*)grManPushView->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)grManPushView->mVtbl;
         vt[31].fn(vthis(grManPushView, vt[31]));
         cPS2GraphicsMan* grManLockTex = GrMan;
-        sVE2_2898* vt3 = (sVE2_2898*)grManLockTex->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt3 = (sVEntry<void(void*, void*, int)>*)grManLockTex->mVtbl;
         vt3[53].fn(vthis(grManLockTex, vt3[53]), Shadow_2898(self)->f170, 1);
         cPS2GraphicsMan* grManClearTex = GrMan;
         sVEI3_2898* vt4 = (sVEI3_2898*)grManClearTex->mVtbl;
@@ -4561,7 +4543,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         sVEI_2898* vt6 = (sVEI_2898*)grManRestoreLock->mVtbl;
         vt6[54].fn(vthis(grManRestoreLock, vt6[54]));
         cPS2GraphicsMan* grManPopView = GrMan;
-        sVE0_2898* vt7 = (sVE0_2898*)grManPopView->mVtbl;
+        sVEntry<void(void*)>* vt7 = (sVEntry<void(void*)>*)grManPopView->mVtbl;
         vt7[32].fn(vthis(grManPopView, vt7[32]));
         cPS2GraphicsMan* grManPopState = GrMan;
         top_2898(grManPopState)--;
@@ -5843,7 +5825,6 @@ struct sHit_42B0 {
     char pad74[0xC];
 } __attribute__((aligned(16)));
 
-struct sVE_42B0 { short delta; short index; t4Vector* (*fn)(void*); };
 
 extern "C" void cWorldLine_cWorldLine(sRay_42B0* ray, const t4Vector& a, const t4Vector& b, int n, float t);
 extern "C" float cOverlapList_terrainIntersect1(void* coll, sRay_42B0* ray, sHit_42B0* hit, int flags);
@@ -6019,7 +6000,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
 extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
 {
     char* vtObj = (char*)&self->mVtbl;
-    sVE_42B0* ve = &(*(sVE_42B0**)vtObj)[kRiderVt_getVelocity];
+    sVEntry<t4Vector*(void*)>* ve = &(*(sVEntry<t4Vector*(void*)>**)vtObj)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(vthis(vtObj, *ve)));
     float sideOffset = self->mAnimModel->unk_140.x * (self->mSlewed[0].cur * 45.0f);
     t4Vector probeBase = Add_42B0(*(t4Vector*)pRiderPos, Scale_42B0(*(&self->mGroundSide), sideOffset));
@@ -6525,7 +6506,6 @@ extern "C" void cGameModeMan_raceFinish(void* self, int a1, int a2);
 extern "C" void cSSXAudio_OnFinishEvent(void* self, void* rider);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
-struct sVEntry125108 { short delta; short index; int (*fn)(void*); };
 
 static inline void* getC0_125108()
 {
@@ -6555,7 +6535,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
     self->mFinishTick = SSXApp->Game->AI->EventTimerTick + self->mPenaltyTicks;
     if (self->mFinishTime < 0.0f) self->mFinishTime = 0.0f;
     char* obj = (char*)&self->mVtbl;
-    sVEntry125108* vt = *(sVEntry125108**)obj;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     cGameModeMan_raceFinish(getC0_125108(), vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])), (int)self->mMetrix + 0xFC);
     unsigned int k = *(unsigned int*)&self->mViewIndex;
     if (k < 2)
@@ -6572,11 +6552,6 @@ extern "C" void cRider_doFinishEvent(cRider* self)
 INCLUDE_ASM("ai/rider", cRider_updateFinishTest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVE_125228 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_doFinishEvent(cRider* self);
@@ -6598,7 +6573,7 @@ extern int D_005308D0[];
 extern "C" int cRider_updateFinishTest(cRider* self)
 {
     char* obj = (char*)&self->mVtbl;
-    sVE_125228* vt = *(sVE_125228**)obj;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     if (vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]))) {
         float finishTime = self->mFinishTime;
         float zeroF = 0.0f;
@@ -6981,8 +6956,6 @@ INCLUDE_ASM("ai/rider", func_00125B18);
 #ifdef SKIP_ASM
 extern "C" void cPadDevice_clearAllVibrations(void* obj);
 
-struct sVEntryI_125B18 { short delta; short index; int (*fn)(void*); };
-struct sVEntryF_125B18 { short delta; short index; void (*fn)(void*, float, int); };
 
 /**
  * Decays a player's two vibration levels and drives the pad's two motors from them.
@@ -7013,12 +6986,12 @@ extern "C" void func_00125B18(void* vibState, int controller, int on)
         clamped = decayed;
     vibLevels[0] = clamped;
     vibLevels[1] *= 0.9916666746139526f;
-    sVEntryI_125B18* vt = *(sVEntryI_125B18**)obj;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     if (vt[3].fn(vthis(obj, vt[3])) == 2)
     {
-        sVEntryF_125B18* vt2 = *(sVEntryF_125B18**)obj;
+        sVEntry<void(void*, float, int)>* vt2 = *(sVEntry<void(void*, float, int)>**)obj;
         vt2[4].fn(vthis(obj, vt2[4]), ((vibLevels[1] - 0.5f) * 0.009999999776482582f >? (vibLevels[0] - 2.0f) / 972.2222290039062f) >? 0.0f, 0);
-        sVEntryF_125B18* vt3 = *(sVEntryF_125B18**)obj;
+        sVEntry<void(void*, float, int)>* vt3 = *(sVEntry<void(void*, float, int)>**)obj;
         vt3[4].fn(vthis(obj, vt3[4]), ((vibLevels[1] - 70.0f) * 0.0062500000931322575f >? (vibLevels[0] - 100.0f) / 5000.0f) >? 0.0f, 1);
     }
 }

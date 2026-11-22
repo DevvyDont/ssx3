@@ -35,6 +35,40 @@ struct tInstanceRecord;
 struct cFlexRailSpaceNode;
 struct cSimpleTube;
 
+// World-script data of a flexible rail (On Tour tMakeFlexRailData, 0x48; same offsets): the part common to
+// tMakeFloatRailData (object/floatrailnode.h) and the spring rail's data, which start with the same 0x48 bytes.
+// [O] On Tour's cFlexRailNode(cBucketList*, int, tInstanceRecord*, const tMakeFlexRailData*); [U]
+// cFlexRailNode_cFlexRailNode (view sFlexDef_347D90) counts the instance ids that are not -1 into NumNodes and stores
+// Flags as RailFlags.
+struct tMakeFlexRailData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId1;           // 0x04 [O] tResourceID; [U] the rail nodes' instance ids, read as an array of 8
+    unsigned int InstId2;           // 0x08 [O]
+    unsigned int InstId3;           // 0x0C [O]
+    unsigned int InstId4;           // 0x10 [O]
+    unsigned int InstId5;           // 0x14 [O]
+    unsigned int InstId6;           // 0x18 [O]
+    unsigned int InstId7;           // 0x1C [O]
+    unsigned int InstId8;           // 0x20 [O]
+    int Mesh1;                      // 0x24 [O]; [U] read by the derived ctors (tMakeFloatRailData::Mesh1..8, same words)
+    int Mesh2;                      // 0x28 [O]
+    int Mesh3;                      // 0x2C [O]
+    int Mesh4;                      // 0x30 [O]
+    int Mesh5;                      // 0x34 [O]
+    int Mesh6;                      // 0x38 [O]
+    int Mesh7;                      // 0x3C [O]
+    int Mesh8;                      // 0x40 [O]
+    int Flags;                      // 0x44 [O]; [U] -> RailFlags
+};
+
+CHECK_OFFSET(tMakeFlexRailData, unk_000, 0x00);
+CHECK_OFFSET(tMakeFlexRailData, InstId1, 0x04);
+CHECK_OFFSET(tMakeFlexRailData, InstId8, 0x20);
+CHECK_OFFSET(tMakeFlexRailData, Mesh1, 0x24);
+CHECK_OFFSET(tMakeFlexRailData, Mesh8, 0x40);
+CHECK_OFFSET(tMakeFlexRailData, Flags, 0x44);
+CHECK_SIZE(tMakeFlexRailData, 0x48);
+
 struct cFlexRailNode {
     // --- cInstanceNode (object/instancenode.h): cObjNode 0x00-0x10, cTypeObjNode 0x10, cSortObjNode 0x14,
     //       cInstanceNode 0x18

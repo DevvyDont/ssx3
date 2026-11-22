@@ -1866,11 +1866,6 @@ struct sWVRoot_B498 {
     sWVCell_B498 cell;              // 0x00
     sWVNode_B498* node;             // 0x10
 };
-struct sWVEntry_B498 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 static inline sWVRoot_B498* findRoot_B498(char* w, int x, int y, int z)
 {
@@ -1931,13 +1926,13 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     }
     case 9: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
         ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), resourceId >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
         ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), (resourceId >> 8) + self->m_iNumImages);
         break;
     }
@@ -1964,7 +1959,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
         break;
     }
     case 6: {
-        sWVEntry_B498* vt = (sWVEntry_B498*)self->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
         if (((int (*)(void*, void*))vt[22].fn)(vthis(self, vt[22]), data)) {
             *(int*)(data + 0x8) = 6;
             sWVBox_B498 box;

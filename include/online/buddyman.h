@@ -29,6 +29,30 @@ struct BuddyApiRefT;
 struct cPrivateMessage;
 struct cChallenger;
 
+// The g++ 2.95 STL vector whose four words BuddyMan writes out (mMessages*, mChallengers*), for the code that takes the
+// vector itself: the vector<..., BXAllocator<..>> instantiations' out-of-line members, e.g. _M_insert_aux ([P] preview
+// .gnu.linkonce.t._M_insert_aux__t6vector2ZPC15cPrivateMessageZt11BXAllocator1ZP9cBXString... and
+// ...ZPC11cChallengerZt11BXAllocator1ZP11cChallenger...; retail func_00267128 / func_002672C8). [L] gcc-2.95.3
+// libstdc++/stl/stl_vector.h: with an instance allocator, vector<_Tp, _Alloc> derives from _Vector_base -> 
+// _Vector_alloc_base<_Tp, _Alloc, false> {_Alloc _M_data_allocator; _Tp* _M_start; _Tp* _M_finish;
+// _Tp* _M_end_of_storage;}; BXAllocator is one word. Written flat with the element type as the only parameter (the
+// allocator word as an int, as BuddyMan's m*Alloc members); a unit that includes the real <vector> must not include
+// this definition. Use it as (vector<const cChallenger*>*)&buddyMan->mChallengersAlloc.
+template <class _Tp>
+struct vector {
+    int _M_data_allocator;          // 0x0 [L] the BXAllocator (one word; never accessed)
+    _Tp* _M_start;                  // 0x4 [L]; [R] _M_insert_aux reallocates and stores it
+    _Tp* _M_finish;                 // 0x8 [L]; [R] compared with _M_end_of_storage, advanced on insert
+    _Tp* _M_end_of_storage;         // 0xC [L]; [R] start + the doubled capacity after a reallocation
+};
+
+// CHECK_SIZE / CHECK_OFFSET cannot paste a template-id, so the checks are spelled out.
+#ifndef DECOMP_NO_LAYOUT_CHECKS
+typedef char check_vector_cChallenger_size[(sizeof(vector<const cChallenger*>) == 0x10) ? 1 : -1];
+typedef char check_vector_cChallenger_M_finish[(DECOMP_OFFSETOF(vector<const cChallenger*>, _M_finish) == 0x8) ? 1 : -1];
+typedef char check_vector_cChallenger_M_end_of_storage[(DECOMP_OFFSETOF(vector<const cChallenger*>, _M_end_of_storage) == 0xC) ? 1 : -1];
+#endif
+
 struct BuddyMan {
     char mServerName[0x40];             // 0x000 [U] connect (func_00261248) strcpy's its host argument (LobbyMan
                                         //       passes the "BUDDYSERVERNAME" tag); func_00261058 clears byte 0

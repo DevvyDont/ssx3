@@ -39,6 +39,20 @@ struct cBankManager;
 struct cStreamSys;
 struct cSoundSys;
 
+// AudioTable: a 5-point piecewise-linear curve (keys x, values y) for volumes and pitches. [O] On Tour struct
+// AudioTable (0x28, all_in_one_sound.cpp) with TABLE_Scale(AudioTable* table, float input) and TABLE_Scale(int
+// tableIndex, float input) over AudioTable gAudioTables[4]; [R] retail's pair has the same shapes: func_00290B58 walks
+// x[0..4] and interpolates y (TABLE_Scale(AudioTable*, float)), func_00290C10(i, v) = func_00290B58(&gAudioTables[i], v)
+// (gAudioTables = 0x00445898); [U] the cSSXAudio *Program methods pass their curves (D_00482AF8..D_00482DA0) to it.
+struct AudioTable {
+    float x[5];                     // 0x00 [O]; [U] the keys, ascending
+    float y[5];                     // 0x14 [O]; [U] the value at each key
+};
+
+CHECK_OFFSET(AudioTable, x, 0x00);
+CHECK_OFFSET(AudioTable, y, 0x14);
+CHECK_SIZE(AudioTable, 0x28);
+
 // On Tour's tAttachSoundStruct (0x30), a sound attached to a world instance mesh.
 struct tAttachSoundStruct {
     int used;       // 0x00 [O] (On Tour bool); [U] == 1 tests (cSSXAudio_DetachSound)

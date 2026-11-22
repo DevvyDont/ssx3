@@ -45,6 +45,7 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "ealib/snd.h"
 
 struct cSoundSys;
 class cController;
@@ -56,24 +57,8 @@ struct cStreamInstance;
 // cControllerP20cBankMonitorInstancef_v). sound/bankmonitor.cpp and sound/soundsys.cpp call the same type sSndCallback.
 typedef void (cController::*tSndCallback)(cController*, cBankMonitorInstance*, float);
 
-// EA audio library play options (On Tour struct SNDPLAYOPTS, 0x18).
-struct SNDPLAYOPTS {
-    signed char vol;               // 0x00 [O]; [U] BANKMONITOR/MUSIC code seeds mBaseVol[mInst] from it (func_002B35A0)
-    signed char bend;              // 0x01 [O]
-    signed char keynum;            // 0x02 [O]
-    signed char velocity;          // 0x03 [O]
-    signed char drylevel;          // 0x04 [O]
-    signed char fxlevel0;          // 0x05 [O]
-    char pad[2];                   // 0x06 [O]
-    unsigned short azimuth;        // 0x08 [O]
-    short elevation;               // 0x0A [O]
-    unsigned short pitchmult;      // 0x0C [O]
-    unsigned short timemult;       // 0x0E [O]
-    unsigned short tempomult;      // 0x10 [O]
-    unsigned short pad2;           // 0x12 [O]
-    unsigned short lowpasscutoff;  // 0x14 [O]
-    unsigned short highpasscutoff; // 0x16 [O]
-};
+// EA audio library play options: SNDPLAYOPTS (On Tour 0x18) is in ealib/snd.h (shared with the C library unit).
+
 
 // One cSndPlayOpts::mDelay level (On Tour struct cDelayOpts, 0x10); [U] reset to 100 / 0 / 90 / 50 on every push
 // (func_002B35A0).
@@ -344,9 +329,6 @@ struct cBankMonitor {
                                                 //       BANKMONITOR_GetInstance (preview 0x8E0 -> 0x8EC, seen)
 };
 
-CHECK_OFFSET(SNDPLAYOPTS, azimuth, 0x08);
-CHECK_OFFSET(SNDPLAYOPTS, lowpasscutoff, 0x14);
-CHECK_SIZE(SNDPLAYOPTS, 0x18);
 CHECK_SIZE(cDelayOpts, 0x10);
 CHECK_OFFSET(cMonitorInstance, mEnabled, 0x00);
 CHECK_OFFSET(cMonitorInstance, mCountReset, 0x04);

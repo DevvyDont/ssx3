@@ -79,15 +79,10 @@ struct sApp_6900 {
     void* shape;    // 0xA0
 };
 
-struct sVE_6900 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 struct sGfx_6900 {
     char pad_0x0[0x10D8];
-    sVE_6900* vt;   // 0x10D8
+    sVEntry<void>* vt;   // 0x10D8
 };
 
 struct sColor_6900 {
@@ -154,7 +149,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     PadCache = pm;
     char* graphicsMan = (char*)cGraphicsMan_construct();
     GrMan = (cPS2GraphicsMan*)(graphicsMan);
-    sVE_6900* vt = ((sGfx_6900*)graphicsMan)->vt;
+    sVEntry<void>* vt = ((sGfx_6900*)graphicsMan)->vt;
     ((V0Fn_6900)vt[2].fn)(graphicsMan + vt[2].delta);
     cLightMan_construct();
     cBezierMan_construct();
@@ -170,10 +165,10 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     *(int*)&self->RealFE = 0;
     cSSXApp_parseCommandLine(self, argc, argv);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_6900* vt2 = (sVE_6900*)ps2GraphicsMan->mVtbl;
+    sVEntry<void>* vt2 = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
     ((V1Fn_6900)vt2[44].fn)((char*)ps2GraphicsMan + vt2[44].delta, 0x100);
     cPS2GraphicsMan* gfxMan = GrMan;
-    sVE_6900* vt3 = (sVE_6900*)gfxMan->mVtbl;
+    sVEntry<void>* vt3 = (sVEntry<void>*)gfxMan->mVtbl;
     char* gfxThis = (char*)gfxMan + vt3[46].delta;
     void* loadShape = SHAPE_locate(D_0047AB40, str_load);
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(gfxThis, loadShape, str_loadicon, 0, 1, -1);
@@ -1226,11 +1221,6 @@ struct sOptions_228A78 {
 };
 extern sOptions_228A78 D_00535610_228A78 __asm__("cBEOptionInterface_mOption");
 
-struct sVEntry_228A78 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 static inline int optLanguage_228A78(sOptions_228A78 o)
 {
@@ -1250,7 +1240,7 @@ extern "C" void cSSXApp_initLocale(cSSXApp* self)
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
     char* loc = (char*)self->FELocale;
-    sVEntry_228A78* vt = *(sVEntry_228A78**)(loc + 4);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(loc + 4);
     char* thisp = loc + vt[3].delta;
     void (**pfn)(void*, int) = &vt[3].fn;
     (*pfn)(thisp, optLanguage_228A78(D_00535610_228A78));
@@ -1360,11 +1350,6 @@ public:
     virtual void SetTVDisplayFormat(int mode);
 };
 
-struct sVE_228C08 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
 
 
 /**
@@ -1392,7 +1377,7 @@ extern "C" void cSSXApp_activateBEOptions()
         break;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    sVE_228C08* vt = (sVE_228C08*)ps2GraphicsMan->mVtbl;
+    sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)ps2GraphicsMan->mVtbl;
     char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
     void (**pfn)(void*, int, int) = &vt[12].fn;
     (*pfn)(thisp, GetOptions_228C08().b6, GetOptions_228C08().b5);
@@ -3514,11 +3499,6 @@ extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self,
 extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* self, void* list, int n);
 
 
-struct sVEMat_22ADD8 {
-    short delta;
-    short index;
-    t4Matrix (*fn)(void*);
-};
 
 struct sCfg_22ADD8 {
     char pad_0x00[0x10];
@@ -3624,7 +3604,7 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     w->f7AB8 = 0;
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEMat_22ADD8* vt = (sVEMat_22ADD8*)ps2GraphicsMan->mVtbl;
+        sVEntry<t4Matrix(void*)>* vt = (sVEntry<t4Matrix(void*)>*)ps2GraphicsMan->mVtbl;
         t4Matrix gfxMatrix = vt[43].fn(vthis(ps2GraphicsMan, vt[43]));
         MatCopy_22ADD8((t4Matrix*)(self + 0x10), &gfxMatrix);
     }
@@ -3819,11 +3799,6 @@ public:
     virtual void v04();
 };
 
-struct sVELoader_22B008 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 struct sVEView_22B008 {
     short delta;
@@ -3832,7 +3807,7 @@ struct sVEView_22B008 {
 };
 
 struct sLoader_22B008 {
-    sVELoader_22B008* vt;       // 0x0
+    sVEntry<int(void*, int)>* vt;       // 0x0
 };
 
 struct sHud_22B008 {
@@ -4007,7 +3982,7 @@ extern "C" int cGame_render(sGame_22B008* self)
     ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(-1);
     {
         sLoader_22B008* streamPause = self->loader;
-        sVELoader_22B008* vt = streamPause->vt;
+        sVEntry<int(void*, int)>* vt = streamPause->vt;
         char* thisp = (char*)streamPause + vt[2].delta;
         int (**pfn)(void*, int) = &vt[2].fn;
         if ((*pfn)(thisp, IsReady_22B008(self)) == 0) {

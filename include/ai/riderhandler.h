@@ -860,13 +860,24 @@ CHECK_SIZE(cAngerFX, 0x10);
 
 // cPlayerIndicatorFX (cRiderHandler + 0xB00, 0x40 bytes): FX part; ctor cPlayerIndicatorFX_cPlayerIndicatorFX (in charge: cRider at this +
 // 0x40); vtable cPlayerIndicatorFX$6cRider D_00488A10.
+// Members from On Tour's DWARF (class cPlayerIndicatorFX : virtual cRider: PulseAng, MinColor, MaxColor, CurColor);
+// retail's tARGB is only 4-aligned, so the colours sit at 0x08 / 0x18 / 0x28 (On Tour 0x10 / 0x20 / 0x30).
 struct cPlayerIndicatorFX {
     cRider* mRider;     // 0x00 [R] virtual-base pointer to the shared cRider; [R] cPlayerIndicatorFX_cPlayerIndicatorFX
-    char unk_004[0x3C]; // 0x04 not laid out yet (see the unit's local view)
+    float PulseAng;     // 0x04 [O]; [U] cPlayerIndicatorFX_reset zeroes it; cPlayerIndicatorFX_update advances it and
+                        //      blends CurColor between MinColor and MaxColor by it
+    tARGB MinColor;     // 0x08 [O]; [U] reset: (0.5, 1, 0, 0)
+    tARGB MaxColor;     // 0x18 [O]; [U] reset: (0.7, 1, 0.7, 0.7)
+    tARGB CurColor;     // 0x28 [O]; [U] reset copies MinColor; update stores the blend
+    char unk_038[0x8];  // 0x38 no retail access seen (the cRider virtual base starts at 0x40)
 };
 
 CHECK_OFFSET(cPlayerIndicatorFX, mRider, 0x00);
-CHECK_OFFSET(cPlayerIndicatorFX, unk_004, 0x04);
+CHECK_OFFSET(cPlayerIndicatorFX, PulseAng, 0x04);
+CHECK_OFFSET(cPlayerIndicatorFX, MinColor, 0x08);
+CHECK_OFFSET(cPlayerIndicatorFX, MaxColor, 0x18);
+CHECK_OFFSET(cPlayerIndicatorFX, CurColor, 0x28);
+CHECK_OFFSET(cPlayerIndicatorFX, unk_038, 0x38);
 CHECK_SIZE(cPlayerIndicatorFX, 0x40);
 
 // cDynamicSprayFX (cRiderHandler + 0xB40, 0x130 bytes): FX part; ctor cDynamicSprayFX_cDynamicSprayFX (in charge: cRider at this +

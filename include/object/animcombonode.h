@@ -43,6 +43,47 @@ struct tModifierBlock;
 struct cMeshAnimFrame;
 struct tMeshVelocity;
 
+// World-script data that makes an animation combo node (On Tour tMakeAnimComboData, 0x3C; same offsets): On Tour's
+// tMakeAnimObjectData fields (0x00..0x27) followed by the second phase. [O] On Tour's cAnimComboNode(cBucketList*,
+// tInstanceRecord*, const tMakeAnimComboData*); [U] cAnimComboNode_cAnimComboNode1 (view sMPDesc8C80) passes it to
+// cAnimObjectNode_cAnimObjectNode1, which reads Type .. ForceVisible (object/animobject.h), then sets FromTime2 /
+// ToTime2 / AnimSpeed2 / Stop / StopInPlace from the second-phase fields.
+struct tMakeAnimComboData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    int Type;                       // 0x04 [O]; [U] cAnimObjectNode ctor: -> AnimType
+    int Dir;                        // 0x08 [O]; [U] cAnimObjectNode ctor: 1 negates AnimSpeed
+    float FromTime;                 // 0x0C [O]; [U] cAnimObjectNode ctor: / 30 -> FromTime
+    float ToTime;                   // 0x10 [O]; [U] cAnimObjectNode ctor: / 30 -> ToTime; combo ctor: FromTime2's
+                                    //      fallback
+    float Speed;                    // 0x14 [O]; [U] cAnimObjectNode ctor: AnimSpeed
+    float SpeedRange;               // 0x18 [O]; [U] cAnimObjectNode ctor: AnimSpeed's random range
+    float StartTime;                // 0x1C [O]; [U] cAnimObjectNode ctor: CurrTime
+    int RandomStart;                // 0x20 [O]; [U] cAnimObjectNode ctor: CurrTime = AIrandf(From, To)
+    int ForceVisible;               // 0x24 [O]; [U] cAnimObjectNode ctor: passed to cAnimNode_cAnimNode
+    float FromTime2;                // 0x28 [O]; [U] / 30 -> FromTime2 (< 0: ToTime / 30)
+    float ToTime2;                  // 0x2C [O]; [U] / 30 -> ToTime2 (< 0: the model's m_fAnimTime)
+    float Speed2;                   // 0x30 [O]; [U] / 30 / TimerHz -> AnimSpeed2
+    int Stop;                       // 0x34 [O]; [U] != 0 -> Stop, < 0 -> StopInPlace
+    char unk_038[0x4];              // 0x38 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeAnimComboData, unk_000, 0x00);
+CHECK_OFFSET(tMakeAnimComboData, Type, 0x04);
+CHECK_OFFSET(tMakeAnimComboData, Dir, 0x08);
+CHECK_OFFSET(tMakeAnimComboData, FromTime, 0x0C);
+CHECK_OFFSET(tMakeAnimComboData, ToTime, 0x10);
+CHECK_OFFSET(tMakeAnimComboData, Speed, 0x14);
+CHECK_OFFSET(tMakeAnimComboData, SpeedRange, 0x18);
+CHECK_OFFSET(tMakeAnimComboData, StartTime, 0x1C);
+CHECK_OFFSET(tMakeAnimComboData, RandomStart, 0x20);
+CHECK_OFFSET(tMakeAnimComboData, ForceVisible, 0x24);
+CHECK_OFFSET(tMakeAnimComboData, FromTime2, 0x28);
+CHECK_OFFSET(tMakeAnimComboData, ToTime2, 0x2C);
+CHECK_OFFSET(tMakeAnimComboData, Speed2, 0x30);
+CHECK_OFFSET(tMakeAnimComboData, Stop, 0x34);
+CHECK_OFFSET(tMakeAnimComboData, unk_038, 0x38);
+CHECK_SIZE(tMakeAnimComboData, 0x3C);
+
 struct cAnimComboNode {
     // --- cAnimComboNodeState (On Tour 0x18; getNodeState returns +0x0; replay ctor/writeToReplayFrame move these 0x18
     //       bytes)

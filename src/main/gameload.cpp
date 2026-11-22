@@ -911,16 +911,6 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 int GetHashValue32(char* s);
 extern char str_hud_c[];
 
-struct sVEntry_230180a {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-struct sVEntry_230180b {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Restarts the race without reloading: resets playback, missions, buckets, riders (AI slot 5 with 3) and
@@ -939,7 +929,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
     cAI* gameAI = self->AI;
-    sVEntry_230180a* vt = (sVEntry_230180a*)gameAI->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)gameAI->mVtbl;
     vt[5].fn(vthis(gameAI, vt[5]), 3);
     cAvalanche_reset();
     cGameViewMan_snapAll(self->ViewMan);
@@ -953,7 +943,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     void* list = (char*)&self->UI->mStateStack;
     char* hudState = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c));
     if (hudState != 0) {
-        sVEntry_230180b* vt2 = *(sVEntry_230180b**)(hudState + 8);
+        sVEntry<int(void*, int, int)>* vt2 = *(sVEntry<int(void*, int, int)>**)(hudState + 8);
         vt2[24].fn(vthis(hudState, vt2[24]), 7, 0);
     }
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
@@ -1636,11 +1626,6 @@ extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
 void cSSXScriptEngine_DeInit(void* self);
 void cBXLoadIndicator_DeInit(void* self);
 
-struct sVEntry00230E98 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct sVec3_00230E98 {
     float x, y, z;
     sVec3_00230E98(float ax, float ay, float az) { x = ax; y = ay; z = az; }
@@ -1677,7 +1662,7 @@ struct cMgr00230E98 {
 extern "C" int cGame_loseFocus(cGame* self)
 {
     void* obj = self->StreamPause;
-    sVEntry00230E98* vt = *(sVEntry00230E98**)obj;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     if (vt[3].fn(vthis(obj, vt[3])) == 0) {
         return 0;
     }

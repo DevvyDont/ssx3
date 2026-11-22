@@ -889,7 +889,6 @@ struct sSphere_137860 {
 } __attribute__((aligned(16)));
 
 struct sVEntR_137860 { short delta; short index; bool (*fn)(void*); };
-struct sVEntH_137860 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
@@ -1045,7 +1044,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
                 char* hitOwner = *(char**)(hitB.obj + 0xC);
                 if (hitOwner != 0)
                 {
-                    sVEntH_137860* vt = *(sVEntH_137860**)(hitOwner + 0xC);
+                    sVEntry<void(void*, void*, const t4Vector&)>* vt = *(sVEntry<void(void*, void*, const t4Vector&)>**)(hitOwner + 0xC);
                     vt[43].fn(vthis(hitOwner, vt[43]), &hitB,
                               vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
                 }
@@ -1459,7 +1458,6 @@ struct sSphere_138640 {
     char rest[0x320 - 0x20];
 } __attribute__((aligned(16)));
 
-struct sVEntH_138640 { short delta; short index; void (*fn)(void*, void*); };
 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
@@ -1614,7 +1612,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
             if (hit.obj != 0) {
                 char* hitOwner = *(char**)(hit.obj + 0xC);
                 if (hitOwner != 0) {
-                    sVEntH_138640* vt = *(sVEntH_138640**)(hitOwner + 0xC);
+                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(hitOwner + 0xC);
                     vt[42].fn(vthis(hitOwner, vt[42]), &hit);
                 }
             }

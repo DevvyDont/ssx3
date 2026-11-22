@@ -1509,7 +1509,6 @@ static inline sVec4HP vu0Sub_13A7B0(const sVec4HP& a, const sVec4HP& b)
     return r;
 }
 
-struct sVEntry_13A7B0 { short delta; short index; void (*fn)(void*, void*); };
 
 /**
  * Probes for a surface along the rider's up axis through the board, filling a hit record.
@@ -1539,7 +1538,7 @@ extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
             char* handler = *(char**)(hitObject + 0xC);
             if (handler)
             {
-                sVEntry_13A7B0* vt = *(sVEntry_13A7B0**)(handler + 0xC);
+                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(handler + 0xC);
                 vt[42].fn(vthis(handler, vt[42]), hit);
             }
         }

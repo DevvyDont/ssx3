@@ -196,11 +196,6 @@ sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
 INCLUDE_ASM("main/game", func_0022C3B8);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-struct sVEntry_func_0022C3B8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Ends a patch-render context: calls slot 18 of its bezier manager (+0x0), then frees the context when bit 0
@@ -213,7 +208,7 @@ struct sVEntry_func_0022C3B8 {
 extern "C" void func_0022C3B8(void* self, int flags)
 {
     void* obj = *(void**)self;
-    sVEntry_func_0022C3B8* vt = *(sVEntry_func_0022C3B8**)((char*)obj + 0x4);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 0x4);
     vt[18].fn(vthis(obj, vt[18]));
     if (flags & 1) {
         operator_delete((int*)self);
@@ -337,11 +332,6 @@ extern "C" void func_0022C410(void* ctx, int patch, int flag);
 extern "C" void func_0022C3B8(void* self, int flags);
 extern void* cBezierMan_TheBezierMan;
 
-struct sVEntry0022C620 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Draws the visible terrain patches of the frustum query (two lists, passes 0 and 1), then flushes the patch
@@ -367,7 +357,7 @@ extern "C" void cGame_renderPatches(cGame* self, FrustumIntersector* world)
     }
     if ((int)self->ViewMan->m_uiCurrentView == 0) {
         void* obj = cBezierMan_TheBezierMan;
-        sVEntry0022C620* vt = *(sVEntry0022C620**)((char*)obj + 4);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 4);
         vt[5].fn(vthis(obj, vt[5]));
     }
     func_0022C3B8(ctx, 2);

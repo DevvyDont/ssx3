@@ -523,11 +523,6 @@ extern "C" void cAirStreamerFX_render(void*);
 extern "C" void cPunchFX_render(void*);
 void cCheatFX_render(void*);
 
-struct sVEntry_91E0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 struct sHolder_91E0 {
     char pad[0x18];
@@ -577,7 +572,7 @@ extern "C" void cAI_render(sAI_91E0* self)
         cRider* curRider = (cRider*)self->list28[n];
         if (curRider->mRenderFlag == 0 && curRider->mSafeRenderTick == -1) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVEntry_91E0* vt = (sVEntry_91E0*)ps2GraphicsMan->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
             int frameTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
             *(int*)(self->list28[n] + 0x888) = frameTick + 4;
         }
@@ -702,7 +697,6 @@ void* cAI_InitGroupAI(void* self);
 extern "C" void cBEScoreInterface_processRiderStats(int rider, int a);
 extern "C" void cRider_initAlways(void* rider);
 
-struct sVEntry1297C8 { short delta; short index; int (*fn)(void*); };
 
 struct sAiObj1297C8
 {
@@ -746,7 +740,7 @@ extern "C" void* cAI_commonInit(cAI* aiManager, int flag)
     for (int i = 0; i < self->mCount; i++)
     {
         char* obj = self->mRiders[i] + 0x6C0;
-        sVEntry1297C8* vt = *(sVEntry1297C8**)obj;
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
         if (vt[9].fn(vthis(obj, vt[9])) != 0 || flag != 0)
         {
             cBEScoreInterface_processRiderStats(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
@@ -1712,7 +1706,6 @@ INCLUDE_ASM("ai/ai", func_0012A998);
 #ifdef SKIP_ASM
 // self is a cAI (no header yet): +0x48 is a list of rider objects (count at +0x80), each holding
 // its cRider virtual-base pointer at +0x18.
-struct sVEntry0012A998 { short delta; short index; int (*fn)(void*); };
 
 extern "C" int func_0012A1F0(cAI*, int);
 
@@ -1732,7 +1725,7 @@ extern "C" void func_0012A998(cAI* self)
         if (rider->mRenderFlag != 0)
         {
             char* sub = (char*)&rider->mVtbl;
-            sVEntry0012A998* vt = *(sVEntry0012A998**)sub;
+            sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
             if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex]))) != 0)
             {
                 cRider* hiddenRider = *(cRider**)(list[i] + 0x18);
@@ -1740,7 +1733,7 @@ extern "C" void func_0012A998(cAI* self)
                 hiddenRider->mSafeRenderTick = -1;
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 cComputer* obj = (cComputer*)list[i];
-                sVEntry0012A998* gvt = (sVEntry0012A998*)ps2GraphicsMan->mVtbl;
+                sVEntry<int(void*)>* gvt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
                 (obj->RiderHandler.GroundMotion.mRider)->mSafeRenderTick = gvt[114].fn(vthis(ps2GraphicsMan, gvt[114])) + 4;
             }
         }
@@ -1751,11 +1744,6 @@ extern "C" void func_0012A998(cAI* self)
 INCLUDE_ASM("ai/ai", func_0012AA78);
 #ifdef SKIP_ASM
 extern "C" int cRider_isSafeToDelete(void*);
-struct sVE_0012AA78 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct sEnt_0012AA78 {
     char pad[0x18];
     cRider* rider;
@@ -1783,7 +1771,7 @@ extern "C" int func_0012AA78(sOwner_0012AA78* self) {
     for (i = 0; i < self->count; i++) {
         if (cRider_isSafeToDelete(self->ent[i]->rider) == 0) {
             char* obj = (char*)&self->ent[i]->rider->mVtbl;
-            sVE_0012AA78* vt = *(sVE_0012AA78**)obj;
+            sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
             if (func_0012A1F0((cAI*)self, vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))) != 0)
                 ok = 0;
         }
@@ -1804,7 +1792,6 @@ struct sAiObj12AB20
     int mCount;
 };
 
-struct sVEntry0012AB20 { short delta; short index; int (*fn)(void*); };
 
 
 /**
@@ -1827,7 +1814,7 @@ extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
             computerRider->mSafeRenderTick = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             cComputer* rider = (cComputer*)self->mRiders[i];
-            sVEntry0012AB20* vt = (sVEntry0012AB20*)ps2GraphicsMan->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
             rider->RiderHandler.GroundMotion.mRider->mSafeRenderTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114])) + 4;
         }
     }
@@ -1880,7 +1867,6 @@ struct sAiObj12AC48
     int m8C;
 };
 
-struct sVEntry0012AC48 { short delta; short index; int (*fn)(void*); };
 
 
 /**
@@ -1902,7 +1888,7 @@ extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
             actorRider->mSafeRenderTick = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             cComputer* rider = (cComputer*)self->mRiders[i];
-            sVEntry0012AC48* vt = (sVEntry0012AC48*)ps2GraphicsMan->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
             rider->RiderHandler.GroundMotion.mRider->mSafeRenderTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114])) + 4;
         }
     }

@@ -5562,11 +5562,6 @@ int cAnimNode_hasAnimMats(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimMats);
 #ifdef SKIP_ASM
-struct sRailVEntry1098 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Returns the animation matrix array, first refreshing the root transform when it is dirty.
@@ -5580,7 +5575,7 @@ extern "C" int cAnimNode_getAnimMats(cAnimNode* self)
 {
     if (self->Flags & 1) {
         void* sub = (char*)&self->unk_014;
-        sRailVEntry1098* vt = (sRailVEntry1098*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[51].fn(vthis(sub, vt[51]));
     }
     return (int)self->AnimMats;
@@ -5590,11 +5585,6 @@ extern "C" int cAnimNode_getAnimMats(cAnimNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimMat);
 #ifdef SKIP_ASM
-struct sVEntry003610E0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 
 /**
@@ -5610,7 +5600,7 @@ extern "C" t4Matrix* cAnimNode_getAnimMat(cAnimNode* self, int i)
 {
     char* obj = (char*)&self->unk_014;
     if (self->Flags & 1) {
-        sVEntry003610E0* vt = (sVEntry003610E0*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[51].fn(vthis(obj, vt[51]));
     }
     return &(self->AnimMats)[i];

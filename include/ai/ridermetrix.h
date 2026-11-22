@@ -51,7 +51,8 @@ struct tTrickNameDef {
     unsigned int spin : 4;          // w0 bits 12-15 [O]; [U] vs reqSpin
     unsigned int reps : 3;          // w0 bits 16-18 [O]; [U] vs reqReps
     unsigned int flip : 3;          // w0 bits 19-21 [O]; [U] vs reqFlip
-    unsigned int : 6;               // w0 bits 22-27: not placed yet (On Tour's special is 6 bits)
+    unsigned int special : 6;       // w0 bits 22-27 [O] (6 bits, between flip and postSpin as in On Tour); [U]
+                                    //      cRiderMetrix_addToHistory tests it against 1 [views2 group A]
     unsigned int postSpin : 4;      // w0 bits 28-31 [O]; [U] vs reqPostSpin
     unsigned int : 3;               // w1 bits 0-2: not placed yet
     unsigned int grab : 7;          // w1 bits 3-9 [O]; [U] vs reqGrab

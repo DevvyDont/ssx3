@@ -14,11 +14,32 @@ struct cWorld;
 struct tCollideRecord;          // world/worldrecords.h
 struct tWScriptGlobalData;      // [O] 4 bytes (not laid out)
 struct tWScriptMissionData;     // [O] 0x54 (not laid out; resolve's view sRec54_CCD8)
-struct tWScriptProcessData;     // [O] 0x40 (not laid out; resolve's view sRec40_CCD8)
+struct tWScriptProcessData;     // [O] 0x40 (laid out below; resolve's view sRec40_CCD8)
 struct tWScriptTaskData;        // [O] 0x38 (not laid out)
 struct tWScriptScriptHeader;    // [O] 4 bytes (not laid out)
 
 // One instance's event scripts in a section's script file (On Tour tWScriptInstanceData, 0x18).
+// A world-script process's data in the resolved script file (On Tour struct tWScriptProcessData, 0x40; same offsets;
+// the base of tWScriptMissionData, 0x54). [O] On Tour's cWScriptProcess(cWScriptMan*, unsigned int sectionId, const
+// tWScriptProcessData* data); [U] cWScriptProcess_cWScriptProcess (src/wscript/wscriptprocess.cpp, view sDef_307598):
+// ProcessId -> ProcessId, NumTasks -> NumTasks and the Tasks new[] count, the 0x38-byte task records at unk_008 to
+// cWScriptTask_initTask, the script ids through cWScriptMan_getScriptCode.
+struct tWScriptProcessData {
+    unsigned int ProcessId;         // 0x00 [O]; [U] -> cWScriptProcess::ProcessId
+    int NumTasks;                   // 0x04 [O]; [U] -> NumTasks; the new[] count
+    tWScriptTaskData* unk_008;      // 0x08 [O] an anonymous union (member names lost); [U] the NumTasks task records
+                                    //      (0x38 each) handed to cWScriptTask_initTask
+    unsigned int ProcessScriptId[3]; // 0x0C [O] tResourceID[3]; [U] -> ProcessScriptCode[i] (getScriptCode)
+    unsigned int EventScriptId[10]; // 0x18 [O] tResourceID[10]; [U] -> EventScriptCode[j] (getScriptCode)
+};
+
+CHECK_OFFSET(tWScriptProcessData, ProcessId, 0x00);
+CHECK_OFFSET(tWScriptProcessData, NumTasks, 0x04);
+CHECK_OFFSET(tWScriptProcessData, unk_008, 0x08);
+CHECK_OFFSET(tWScriptProcessData, ProcessScriptId, 0x0C);
+CHECK_OFFSET(tWScriptProcessData, EventScriptId, 0x18);
+CHECK_SIZE(tWScriptProcessData, 0x40);
+
 struct tWScriptInstanceData {
     unsigned int EventScriptId[6];  // 0x00 [O] tResourceID[6]; [U] cWScriptCacheEntry_getWScriptHeaderId returns
                                     //      InstanceScriptData[slot].EventScriptId[entry] (0x18 stride)

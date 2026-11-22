@@ -5914,11 +5914,6 @@ extern "C" void cAnimObjectNode_updateOscillate(cAnimObjectNode* s);
 extern "C" void cAnimObjectNode_updateOnce(cAnimObjectNode* s);
 extern "C" int cAnimNode_frameUpdate(void* p);
 
-struct sVEntry_00341D48 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Advances an animated object node by one step and expires it once a play-once animation has reached its end.
@@ -5967,7 +5962,7 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
     if (self->AnimComplete == 0) {
         return 1;
     }
-    sVEntry_00341D48* vt = (sVEntry_00341D48*)self->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
     vt[34].fn(vthis(obj, vt[34]), 1);
     return 0;
 }

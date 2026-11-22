@@ -54,4 +54,21 @@ CHECK_SIZE(cBEBAGTInterface, 0x10);
 
 // The one BAGT interface (On Tour: cBEBAGTInterface::instance), created by cBEBAGTInterface_getThis.
 
+// One uber-trick variant of a grab (On Tour struct tBEUber, 0x8: four unsigned shorts). [O] On Tour's
+// cBEBAGTInterface::getUber* family; [U] func_0014FF90 returns a grab's table of them from kGrabDB (pointer +0x10,
+// count +0xC); cFEStateUberTrick_updateTrickMenuEntry (view sWSMEntry4520) shows the selected entry's cost (lhu +0x6)
+// with getDollarString in "cost_num".
+struct tBEUber {
+    unsigned short unk_000;         // 0x0 [O] anim
+    unsigned short unk_002;         // 0x2 [O] cycleAnim
+    unsigned short unk_004;         // 0x4 [O] id
+    unsigned short cost;            // 0x6 [O]; [U] the trick's price on the uber-trick screen
+};
+
+CHECK_OFFSET(tBEUber, unk_000, 0x0);
+CHECK_OFFSET(tBEUber, unk_002, 0x2);
+CHECK_OFFSET(tBEUber, unk_004, 0x4);
+CHECK_OFFSET(tBEUber, cost, 0x6);
+CHECK_SIZE(tBEUber, 0x8);
+
 #endif /* BE_BEINTBAGT_H */

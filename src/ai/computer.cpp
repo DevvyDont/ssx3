@@ -1758,8 +1758,6 @@ extern "C" int cBEStatInterface_shouldCelebrateTrick(void* self, int rider, int 
 void cReplay_eventLand_10E910(void* self, int key, void* p) __asm__("cReplay_eventLand");
 extern "C" void cSSXAudio_Land(void* mgr, void* rider, float v);
 
-struct sVE_0010E910 { short delta; short index; int (*fn)(void*); };
-struct sVEf_0010E910 { short delta; short index; void (*fn)(void*, float); };
 
 /**
  * Handles the rider landing: scores the trick, updates the uber meter, reacts, boosts and plays the landing sound.
@@ -1809,7 +1807,7 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
     }
     func_00111AA0_impl(self->mRiderHandler, evt, &evt->Inorm, evt->Stype, speed);
     char* being = (char*)&self->mVtbl;
-    sVE_0010E910* ve = &(*(sVE_0010E910**)being)[8];
+    sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)being)[8];
     if (ve->fn(vthis(being, *ve)))
     {
         if (prevNumCombo < curNumCombo)
@@ -1822,7 +1820,7 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
     cRider_flagEventBoostPowerUp_fi(((char*)self), powerUp, 1);
     if (0.0f < powerUp)
         self->mPowerUpTrickTimer = 0.0f;
-    sVEf_0010E910* vf = &((sVEf_0010E910*)self->mVtbl)[17];
+    sVEntry<void(void*, float)>* vf = &((sVEntry<void(void*, float)>*)self->mVtbl)[17];
     vf->fn(vthis(self, *vf), speed * 0.5f);
     cSSXAudio_Land(gSSXAudio, ((char*)self), powerUp);
 }
@@ -2249,7 +2247,6 @@ void* cAI_InitGroupAI(void* self)
 //100%
 INCLUDE_ASM("ai/computer", cAI_RefreshGroupAI);
 #ifdef SKIP_ASM
-struct sVE_0010F3B8 { short delta; short index; int (*fn)(void*); };
 struct sEnt_0010F3B8 { int vis; int val; float dist; int c; int d; int e; int f; int g; int h; };
 struct sRider_0010F3B8 { sEnt_0010F3B8 ent[6]; char pad[0x10]; int fE8; char pad2[0x4D8 - 0xEC]; float f4D8; };
 struct sAI_0010F3B8 { char pad[0x28]; sRider_0010F3B8* riders[20]; int count; };
@@ -2281,7 +2278,7 @@ extern "C" void cAI_RefreshGroupAI_impl(sAI_0010F3B8* self)
             if (j < self->count)
             {
                 char* otherBeing = (char*)self->riders[j] + 0x6C0;
-                sVE_0010F3B8* ve = &(*(sVE_0010F3B8**)otherBeing)[8];
+                sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)otherBeing)[8];
                 self->riders[i]->ent[j].val = ve->fn(vthis(otherBeing, *ve));
             }
             self->riders[i]->ent[j].dist = 10000000000.0f;
@@ -4352,7 +4349,6 @@ extern float cPath_intersectPath1_2FB0(void* track, void* pos, void* iPos, float
 extern char gPaths[];
 
 // cTrackPath's vtable entry (g++ 2.95 layout: this-delta, index, fn).
-struct sVEntry_112FB0 { short delta; short index; int (*fn)(void*, float, float, void*, int); };
 
 /**
  * Measures the rider's progress on its track path, fires the checkpoints it passed and gathers the events in range.
@@ -4391,13 +4387,13 @@ extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, fl
                 cRider_flagEventPathCheckpoint(self, (int*)cp);
         }
         char* curTrack = (char*)self->TrackPath;
-        sVEntry_112FB0* vt = *(sVEntry_112FB0**)(curTrack + 0x34);
+        sVEntry<int(void*, float, float, void*, int)>* vt = *(sVEntry<int(void*, float, float, void*, int)>**)(curTrack + 0x34);
         self->NumPathEventsCur = vt[1].fn(vthis(curTrack, vt[1]), self->MinDistanceLeft, self->mDistToFinish, (char*)&self->PathEventsCur[0], 0xC);
         self->MinDistanceLeft = self->mDistToFinish;
     }
     else
     {
-        sVEntry_112FB0* vt = (sVEntry_112FB0*)track->mVtbl;
+        sVEntry<int(void*, float, float, void*, int)>* vt = (sVEntry<int(void*, float, float, void*, int)>*)track->mVtbl;
         self->NumPathEventsCur = vt[1].fn(vthis(track, vt[1]), cur, cur, (char*)&self->PathEventsCur[0], 0xC);
     }
 }

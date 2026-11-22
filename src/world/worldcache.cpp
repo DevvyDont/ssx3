@@ -1557,11 +1557,6 @@ INCLUDE_ASM("world/worldcache", cWorldCache_removeBxStreamData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sWCVt_8E20 {
-    short delta;
-    short index;
-    void* (*fn)(void*, int, unsigned int, char*);
-};
 
 
 
@@ -1602,10 +1597,10 @@ extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key
     if (chunk != 0) {
         if (chunk == (char*)&cStreamMan_NULLCHUNK) {
             cChunkResolve* callbackObj = (self->mp_ChunkResolve);
-            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn(vthis(callbackObj, ((sWCVt_8E20*)callbackObj->mVtbl)[4]), type, key, 0);
+            chunk = (char*)((sVEntry<void*(void*, int, unsigned int, char*)>*)callbackObj->mVtbl)[4].fn(vthis(callbackObj, ((sVEntry<void*(void*, int, unsigned int, char*)>*)callbackObj->mVtbl)[4]), type, key, 0);
         } else {
             cChunkResolve* callbackObj = (self->mp_ChunkResolve);
-            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn(vthis(callbackObj, ((sWCVt_8E20*)callbackObj->mVtbl)[4]), type, key, chunk);
+            chunk = (char*)((sVEntry<void*(void*, int, unsigned int, char*)>*)callbackObj->mVtbl)[4].fn(vthis(callbackObj, ((sVEntry<void*(void*, int, unsigned int, char*)>*)callbackObj->mVtbl)[4]), type, key, chunk);
         }
         if (chunk != 0 && bank == 0xFF)
             cMemMan_free(chunk);
@@ -1914,11 +1909,6 @@ struct sWCLoader_9258 {
     int f2E4;                   // 0x2E4
 };
 
-struct sVE_9258 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Advances each world section's load state and refreshes the two stream focuses.
@@ -1959,7 +1949,7 @@ extern "C" void cWorldView_update(cWorldView* worldView)
             if (cWorldCache_isPageLoaded((cWorldCache*)self->cache, self->sections[i].id)) {
                 self->entries[i].state = 5;
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-                sVE_9258* vt = (sVE_9258*)ps2GraphicsMan->mVtbl;
+                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
                 vt[102].fn(vthis(ps2GraphicsMan, vt[102]), i);
             }
             break;

@@ -699,11 +699,6 @@ struct sRaceMan_2355C0 {
     int f14;
 };
 
-struct sVE_2355C0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 static inline int inRange_2355C0(int t)
 {
@@ -748,7 +743,7 @@ extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
     if (cBENewRaceInterface_getLocationType(race, cBENewRaceInterface_getLocationID(race)) == 1) {
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setLastHub(player, 0, cBENewRaceInterface_getLocationID(race));
-        sVE_2355C0* vt = *(sVE_2355C0**)(player + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
         vt[1].fn(vthis(player, vt[1]));
     }
     (*(sRaceMan_2355C0**)(cGameState_mpGame + 0xC))->f14 = mode != 4;

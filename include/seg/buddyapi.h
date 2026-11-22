@@ -17,9 +17,15 @@
 // C struct, flat. Evidence tags: [R] the create function func_003F0710; [U] retail use.
 
 #include "layout.h"
+#include "seg/dirtynet.h"            // HostentT (mpHostLookup)
+
+// C units (seg/seg_2F0F40.c, the BuddyApi code) name the type without the struct keyword.
+#ifndef __cplusplus
+typedef struct BuddyApiRefT BuddyApiRefT;
+#endif
 
 struct BuddyApiRefT {
-    void* mpHostLookup;                 // 0x000 [U] func_003F08E8: the pending host lookup (SocketLookup(server name,
+    HostentT* mpHostLookup;             // 0x000 [U] func_003F08E8: the pending host lookup (SocketLookup(server name,
                                         //       ms * 1000)); func_003F17D8 polls it and destroys it (its slot +0xC);
                                         //       func_003F07A0 / func_003F0B50 destroy a pending one
     void* mpSession;                    // 0x004 [R] create: func_003F5478(0x8000) (the packet session); [U]

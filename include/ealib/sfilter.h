@@ -6,7 +6,7 @@
 // filterfn(state, frames, src, dst, requester). Each filter kind has its own state struct after that common header.
 // Retail code: unit ealib/seg_2B4578 (SFILTER_add .. SFILTER_modifyECHO, stretch.c's helpers, the unpackers). EA
 // source: snd/source/library/mix/*.c (SSX On Tour's DWARF: sfhpffir8.c, sflpffir8.c, sfbpffir8.c, sfsplit.c, sfsrc.c,
-// supmutpf.c, stretch.c). Not laid out yet: On Tour's RSFSTATE and FT16STATE (no retail evidence gathered).
+// supmutpf.c, stretch.c). Not laid out yet: On Tour's RSFSTATE (no retail evidence gathered).
 //
 // Names: SSX On Tour's DWARF (the functions' prototypes, e.g. SFILTER_modifyHPFFIR8(HPFSTATE*, int*),
 // SFILTER_modifyLPFFIR8(LPFSTATE*, int*), SFILTER_modifyBPFFIR8(BPFSTATE*, int*), and the struct definitions) with
@@ -50,6 +50,7 @@ typedef struct ECHOSTATE ECHOSTATE;
 typedef struct MIXERSTATE MIXERSTATE;
 typedef struct SNDFILTERDEF SNDFILTERDEF;
 typedef struct SNDMIXVOICE SNDMIXVOICE;
+typedef struct FT16STATE FT16STATE;
 #endif
 
 // SFILTERNODE (0x1C [O]).
@@ -495,6 +496,18 @@ CHECK_OFFSET(RESONSTATE, xn, 0x34);
 CHECK_OFFSET(RESONSTATE, ynminus1, 0x38);
 CHECK_OFFSET(RESONSTATE, ynminus2, 0x3C);
 CHECK_SIZE(RESONSTATE, 0x40);
+
+// FT16STATE (0x1C [O]): the float-to-16-bit output converter (sfft16.c), a bare node. [O] SNDMIXSTATE::ft16s[6]
+// (FT16STATE) and SFILTER_ft16(void* pstate, ...); [R] MIX_create's per-output-channel records in sndmix are 28 bytes
+// apart and each goes through SFILTER_ft16init (filterfn = SFILTER_ft16), then priority (+0x18) and requester (+0x1A) are
+// cleared and it is linked with SFILTER_add; [U] SFILTER_ft16 (view S3CA6A8) pulls its input from sfn.pfnnext with
+// sfn.requester.
+struct FT16STATE {
+    SFILTERNODE sfn;                    // 0x00 [O]; [R] SFILTER_ft16init
+};
+
+CHECK_OFFSET(FT16STATE, sfn, 0x00);
+CHECK_SIZE(FT16STATE, 0x1C);
 
 // AMPLFSTATE (0x20 [O] [R] D_0044E848 AMPLF 0x20): the amplifier. [O] SFILTER_createAMPLF(AMPLFSTATE* pas); [R] create
 // clears the node and gain.

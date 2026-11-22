@@ -2225,11 +2225,6 @@ extern "C" void* cAnimNode_getFrameMat(cAnimNode* self, int i) {
 //100%
 INCLUDE_ASM("object/flagset", cAnimNode_cacheFrame);
 #ifdef SKIP_ASM
-struct sFlagSetVEntry_E348 {
-    short delta;
-    short index;
-    void (*fn)(void*, float);
-};
 
 
 struct sFlagOwner_E348 {
@@ -2257,7 +2252,7 @@ extern "C" void cAnimNode_cacheFrame(cAnimNode* self)
         for (i = 0; i < self->NumAnimMeshes; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
             cMeshAnimFrame* animFrame = (cMeshAnimFrame*)(i * 0xD0 + (int)self->AnimFrames);
-            ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2].fn(vthis(animFrame, ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2]), self->CacheTime);
+            ((sVEntry<void(void*, float)>*)animFrame->mVtbl)[2].fn(vthis(animFrame, ((sVEntry<void(void*, float)>*)animFrame->mVtbl)[2]), self->CacheTime);
         }
     }
     self->MeshVelocityDirty = 1;
@@ -2267,11 +2262,6 @@ extern "C" void cAnimNode_cacheFrame(cAnimNode* self)
 //100%
 INCLUDE_ASM("object/flagset", cAnimNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_0034E3D8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
@@ -2287,9 +2277,9 @@ extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, void* stream)
 {
     int dummy;
     cMoveNode_writeToReplayFrame(&self->unk_014, stream);
-    sSerVEntry_0034E3D8* writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
+    sVEntry<void(void*, void*, int)>* writeFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeFn->fn(vthis(stream, *writeFn), self, 20);
-    writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
+    writeFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeFn->fn(vthis(stream, *writeFn), &dummy, 4);
 }
 #endif

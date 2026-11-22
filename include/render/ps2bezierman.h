@@ -26,6 +26,7 @@
 // patch cache at 0x10 and the tail from 0x5364 (used by DrawPatches) are not laid out yet.
 
 #include "layout.h"
+#include "render/beziercache.h"
 
 // One queued patch (0x10). [U] func_0038B190 stores mpPatch (a1), unk_04 (t0), mLod (0/1/2 for the 4x4/6x6/8x8 lists),
 // and a halfword read from the patch record (+0x1A6/+0x1A8/+0x1AA) at 0xC.
@@ -63,9 +64,11 @@ struct cPS2BezierMan {
     void** mVtbl;                    // 0x0004 [R] cBezierMan_vtbl (cBezierMan ctor/dtor), D_00493760 (ctor, dtor cPS2BezierMan__cPS2BezierMan)
     // --- cPS2BezierMan
     char unk_0008[0x8];              // 0x0008 (no retail access found)
-    char mPatchCache[0x32C];         // 0x0010 [R] func_00372B30 / func_00372B78(this + 0x10, 900, 220, 140, ...) in the
-                                     //        ctor and Init, func_003739D0 in Reset; not laid out (cPS2BezierMan_GetBezST reads
-                                     //        this + 0x1A0, cPS2BezierMan_GetBezdST this + 0x320)
+    cBezierCache mPatchCache;        // 0x0010 [R] func_00372B30 / func_00372B78(this + 0x10, 900, 220, 140, ...) in the
+                                     //        ctor and Init, func_003739D0 in Reset (render/beziercache.h; cPS2BezierMan_GetBezST
+                                     //        reads this + 0x1A0 = mPatchCache.unk_190, cPS2BezierMan_GetBezdST this + 0x320 =
+                                     //        mPatchCache.unk_310)
+    char unk_0330[0xC];              // 0x0330 (no retail access found; the 0x32C-byte span before mNearLODcm ends here)
     float mNearLODcm;                // 0x033C [O]; [R] Init = 3000.0; [U] slots 5 / 7
     float mFarLODcm;                 // 0x0340 [O]; [R] Init = 15000.0; [U] slots 6 / 8
     int mWireModeEnabled;            // 0x0344 [O] bool (a word); [R] Init = 1; [U] slots 10 / 13
@@ -93,6 +96,7 @@ CHECK_OFFSET(cPS2BezierMan, m_currPatchDist, 0x0000);
 CHECK_OFFSET(cPS2BezierMan, mVtbl, 0x0004);
 CHECK_OFFSET(cPS2BezierMan, unk_0008, 0x0008);
 CHECK_OFFSET(cPS2BezierMan, mPatchCache, 0x0010);
+CHECK_OFFSET(cPS2BezierMan, unk_0330, 0x0330);
 CHECK_OFFSET(cPS2BezierMan, mNearLODcm, 0x033C);
 CHECK_OFFSET(cPS2BezierMan, mFarLODcm, 0x0340);
 CHECK_OFFSET(cPS2BezierMan, mWireModeEnabled, 0x0344);

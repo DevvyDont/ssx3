@@ -80,6 +80,21 @@ CHECK_OFFSET(tAvalanchePackedFrameData, m_rz, 0x008);
 CHECK_OFFSET(tAvalanchePackedFrameData, m_rs, 0x009);
 CHECK_SIZE(tAvalanchePackedFrameData, 0x00A);
 
+// One unpacked avalanche animation frame (On Tour struct tAvalancheFrameData, 0x60; On Tour also gives it an empty
+// ctor). [O] members, types and offsets; [R] the retail frame unpack in visualfx/avalanche (its view tFrameData_5778:
+// position at 0x0, colour at 0x10, rotation matrix at 0x20, the same offsets) expands a tAvalanchePackedFrameData
+// into one.
+struct tAvalancheFrameData {
+    t4Vector m_position;            // 0x00 [O]; [R] the unpacked position
+    t4Vector m_colour;              // 0x10 [O]; [R] the unpacked colour
+    t4Matrix m_rotation;            // 0x20 [O]; [R] the unpacked rotation
+};
+
+CHECK_OFFSET(tAvalancheFrameData, m_position, 0x00);
+CHECK_OFFSET(tAvalancheFrameData, m_colour, 0x10);
+CHECK_OFFSET(tAvalancheFrameData, m_rotation, 0x20);
+CHECK_SIZE(tAvalancheFrameData, 0x60);
+
 struct tAvalancheCollision {
     float m_time;                   // 0x000 [O]; [U] resolveDataPointers reads it from the file
     tInstanceRecord* m_inst;        // 0x004 [O]; [U] resolveDataPointers clears it

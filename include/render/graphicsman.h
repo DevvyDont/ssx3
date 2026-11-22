@@ -15,6 +15,8 @@
 #include "layout.h"
 #include "render/ps2graphicsman.h"
 
+struct tBxVertex;
+
 struct cGraphicsMan {
     float m_screenOffset[2];        // 0x000 [O] t2Vector; [P] Get/SetScreenOffset (cGraphicsMan_SetScreenOffset/FD8/FF0)
     int m_AIUpdatesPerRender;       // 0x008 [O]; [R] ctor zeroes it
@@ -72,5 +74,25 @@ CHECK_OFFSET(cGraphicsMan, _EffectTexMap, 0xF50);
 CHECK_OFFSET(cGraphicsMan, mCharSpecTexID, 0x10B0);
 CHECK_OFFSET(cGraphicsMan, mVtbl, 0x10D8);
 CHECK_SIZE(cGraphicsMan, 0x10DC);
+
+// One board trail handed to cGraphicsMan::RenderMultipleBoardTrails (On Tour struct BoardTrailInfoT, 0x14;
+// [O] RenderMultipleBoardTrails(BoardTrailInfoT* pTrails, int nTrails), retail vtable slot 89,
+// cPS2GraphicsMan_RenderMultipleBoardTrails). [R] cPS2GraphicsMan_RenderMultipleBoardTrails reads the array at a 0x14
+// stride (its view sPartStrip_6D10) and cBoardTrailFX's renderer (func_002EA538, view sTrailStripA538) fills one per
+// trail at these offsets.
+struct BoardTrailInfoT {
+    tBxVertex** verts;              // 0x00 [O]; [R] the trail's vertex strips (cBoardTrailFX::BufVerts)
+    int startIndex;                 // 0x04 [O]; [R] the first slice
+    int stripLength;                // 0x08 [O]; [R] the slice count
+    float alphaMultiplier;          // 0x0C [O]
+    float alphaDelta;               // 0x10 [O]
+};
+
+CHECK_OFFSET(BoardTrailInfoT, verts, 0x00);
+CHECK_OFFSET(BoardTrailInfoT, startIndex, 0x04);
+CHECK_OFFSET(BoardTrailInfoT, stripLength, 0x08);
+CHECK_OFFSET(BoardTrailInfoT, alphaMultiplier, 0x0C);
+CHECK_OFFSET(BoardTrailInfoT, alphaDelta, 0x10);
+CHECK_SIZE(BoardTrailInfoT, 0x14);
 
 #endif

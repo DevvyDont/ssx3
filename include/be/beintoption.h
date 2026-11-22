@@ -6,7 +6,7 @@
 // and the online quick-chat messages, with their defaults (defaultSound/Game/HUD/Ctrl). The object holds no options:
 // like every BE interface it is a cBEInterface (three word bools + vptr, 0x10 bytes), and its methods ignore `this` and
 // work on the static cBEOptionInterface::mOption (retail cBEOptionInterface_mOption, D_00535610, a 0x288-byte
-// tBEOptionDB: getOptions / setOptions copy it whole; not modelled here); submit copies it to the saved copy cBELibrary_optionDB
+// tBEOptionDB below: getOptions / setOptions copy it whole); submit copies it to the saved copy cBELibrary_optionDB
 // (On Tour: cBELibrary::optionDB), discard copies it back, revert resets the defaults. One instance, created on demand
 // by cBEOptionInterface_getThis
 // (`cMemMan_alloc(0x10, "BEOptionInt", 0, 0)`, vtable cBEOptionInterface_vtbl, then cBEOptionInterface_revert, then
@@ -53,6 +53,43 @@ CHECK_OFFSET(cBEOptionInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBEOptionInterface, 0x10);
 
 // The one options interface (On Tour: cBEOptionInterface::instance), created by cBEOptionInterface_getThis.
+
+// tBEOptionDB: the option block itself, the static cBEOptionInterface::mOption (retail cBEOptionInterface_mOption,
+// D_00535610) and its saved copy cBELibrary_optionDB. Name and members: [O] On Tour struct tBEOptionDB (0x288: one
+// word of bit-fields, the HUD / camera byte, the two screen offsets, the quick-chat messages); [R] the same 0x288
+// bytes in retail (getOptions / setOptions in be/bedbreward copy 0x288; the save game stores it), and retail's
+// accessors place every bit-field below at On Tour's position (be/bedbreward: setRadioBigVolume bits 0-3 ..
+// setReplayOption bit 29; the FE options screens bits 19-24) except the HUD detail, which retail keeps in bits 30-31 of
+// the first word (cBEOptionInterface_defaultHUD, the pause menu's HUD list box) where On Tour has iAutosave and then a
+// byte-4 field. g++ 2.95 on the EE reads these bit-fields with lw / sw (also the byte-4 one).
+struct tBEOptionDB {
+    unsigned int iRadioBigVolume : 4;   // 0x0 bits 0-3 [O]; [R] defaultSound 10; setRadioBigVolume / get
+    unsigned int iCharVolume : 4;       // 0x0 bits 4-7 [O]; [R] defaultSound 10
+    unsigned int iSFXVolume : 4;        // 0x0 bits 8-11 [O]; [R] defaultSound 10
+    unsigned int iSoundMode : 2;        // 0x0 bits 12-13 [O]; [R] defaultSound 0; the FE sound screens
+    unsigned int iAudioMix : 2;         // 0x0 bits 14-15 [O]; [R] defaultSound 0
+    unsigned int iUseArcadeSFX : 1;     // 0x0 bit 16 [O]; [R] defaultSound 1
+    unsigned int iUseDJSpeech : 1;      // 0x0 bit 17 [O]; [R] defaultSound 1
+    unsigned int iUseVOIP : 1;          // 0x0 bit 18 [O]; [R] defaultSound 1
+    unsigned int iUseMetricUnits : 1;   // 0x0 bit 19 [O]; [R] defaultGame 0
+    unsigned int iUseWidescreen : 2;    // 0x0 bits 20-21 [O]; [R] defaultGame from the console config
+    unsigned int iLanguage : 3;         // 0x0 bits 22-24 [O]; [R] defaultGame 0; [U] func_0029F198 maps it to the
+                                        //     speech language bit
+    unsigned int iBrightness : 4;       // 0x0 bits 25-28 [O]; [R] defaultGame 9
+    unsigned int iReplayOption : 1;     // 0x0 bit 29 [O]; [R] defaultGame 0
+    unsigned int iHUDDetail : 2;        // 0x0 bits 30-31 [R] defaultHUD 0; the pause menu's HUD list (Full / Minimal /
+                                        //     None) (On Tour: iAutosave here, iHUDDetail in byte 4)
+    unsigned char unk_04 : 2;           // 0x4 bits 0-1 [R] defaultSound 1 (On Tour's byte 4 holds iHUDDetail /
+                                        //     iCameraMode)
+    signed char iVtDelta;               // 0x5 [O]; [R] defaultGame 0; bedbreward's vertical-offset setter
+    signed char iHzDelta;               // 0x6 [O]; [R] defaultGame 0; the horizontal-offset setter
+    char szQuickMessage[10][64];        // 0x7 [O]; [R] setQuickKeyMessage / resetQuickKey: 64-byte entries from +7
+};
+
+CHECK_OFFSET(tBEOptionDB, iVtDelta, 0x5);
+CHECK_OFFSET(tBEOptionDB, iHzDelta, 0x6);
+CHECK_OFFSET(tBEOptionDB, szQuickMessage, 0x7);
+CHECK_SIZE(tBEOptionDB, 0x288);
 
 // ---- The race rules block cBERules::mRules (views group D) ----
 //

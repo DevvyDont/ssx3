@@ -1295,11 +1295,6 @@ struct sDebounceElem41A8 {
     char pad_0xc[0x1E8];
 };
 
-struct sDebounceVEntry41A8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the 3D crowd manager to a replay frame.
@@ -1313,7 +1308,7 @@ extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* replaySt
 {
     int i;
     for (i = 0; i < 5; i++) {
-        sDebounceVEntry41A8* writeSlot = &(*(sDebounceVEntry41A8**)replayStream)[1];
+        sVEntry<void(void*, void*, int)>* writeSlot = &(*(sVEntry<void(void*, void*, int)>**)replayStream)[1];
         writeSlot->fn(vthis(replayStream, *writeSlot), &self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
             func_00344FC0(&self[i], replayStream);
@@ -1335,11 +1330,6 @@ struct sDebounceElem4240 {
     char pad_0xc[0x1E8];
 };
 
-struct sDebounceVEntry4240 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the 3D crowd manager back from a replay frame.
@@ -1354,7 +1344,7 @@ extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* replaySt
     int i;
     func_00343BC0((sDebounceBlock*)self);
     for (i = 0; i < 5; i++) {
-        sDebounceVEntry4240* readSlot = &(*(sDebounceVEntry4240**)replayStream)[2];
+        sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)replayStream)[2];
         readSlot->fn(vthis(replayStream, *readSlot), &self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
             func_00344FF8(&self[i], replayStream);

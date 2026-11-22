@@ -27,6 +27,7 @@
 //   [O] SSX On Tour's DWARF (class cReplayFrame, struct tReplayFrameType): names, types and order.
 
 #include "layout.h"
+#include "replay/frameptr.h" /* tFramePtrSave */
 
 // A frame's type (On Tour tReplayFrameType, 4 bytes; passed by value as one word). [R] clearFrame and
 // cReplay_allocReplayFrame build {0, 0, 0} on the stack and store it as a word (the views sPlaybackKey /
@@ -43,6 +44,32 @@ CHECK_OFFSET(tReplayFrameType, Type, 0x0);
 CHECK_OFFSET(tReplayFrameType, Highlights, 0x2);
 CHECK_OFFSET(tReplayFrameType, Chapter, 0x3);
 CHECK_SIZE(tReplayFrameType, 0x4);
+
+// A saved frame's header in the replay save data (On Tour struct tReplayFrameSave : tReplaySaveType, 0x28; same
+// offsets; the base's SaveType written out inline). [O] On Tour's cReplayFrame::loadFrame(char** d); [U]
+// cReplayFrame_loadFrame (view sPbHeader_D678) copies the 0x28 bytes to the stack, restores Size .. HighlightEndTick
+// into the frame and loads the block with &Data; cReplay_writeFrames (src/replay/replaycache.cpp) builds the same
+// 10 words in WriteTmp (SaveType 0x11111113, Data.Type 0x11111111).
+struct tReplayFrameSave {
+    int SaveType;                   // 0x00 [O] tReplaySaveType::SaveType; [U] writeFrames stores 0x11111113
+    int Size;                       // 0x04 [O]; [U] writeFrames: the frame's Size; loadFrame -> Size
+    unsigned int FrameStartTick;    // 0x08 [O]; [U] writeFrames / loadFrame: cReplayFrame::FrameStartTick
+    unsigned int FrameEndTick;      // 0x0C [O]; [U] writeFrames / loadFrame: FrameEndTick
+    tReplayFrameType FrameType;     // 0x10 [O]; [U] loadFrame restores the word
+    int Ranking[2];                 // 0x14 [O]; [U] writeFrames / loadFrame: Ranking[0..1]
+    int HighlightEndTick[2];        // 0x1C [O]; [U] writeFrames / loadFrame: HighlightEndTick[0..1]
+    tFramePtrSave Data;             // 0x24 [O]; [U] loadFrame passes start + 0x24 to cReplayFramePtr_loadBlock
+};
+
+CHECK_OFFSET(tReplayFrameSave, SaveType, 0x00);
+CHECK_OFFSET(tReplayFrameSave, Size, 0x04);
+CHECK_OFFSET(tReplayFrameSave, FrameStartTick, 0x08);
+CHECK_OFFSET(tReplayFrameSave, FrameEndTick, 0x0C);
+CHECK_OFFSET(tReplayFrameSave, FrameType, 0x10);
+CHECK_OFFSET(tReplayFrameSave, Ranking, 0x14);
+CHECK_OFFSET(tReplayFrameSave, HighlightEndTick, 0x1C);
+CHECK_OFFSET(tReplayFrameSave, Data, 0x24);
+CHECK_SIZE(tReplayFrameSave, 0x28);
 
 struct cReplayFrame {
     // --- cReplayFramePtr (replay/frameptr.h); cBxReplayFrame is the vptr

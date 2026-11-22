@@ -27,6 +27,21 @@ typedef union
 
 CHECK_SIZE(ieee_float_shape_type, 0x4);
 
+/* The double-word union (fdlibm.h, __IEEE_LITTLE_ENDIAN branch: lsw first). [L] fdlibm.h; [U] the soft-float double
+   routines in seg/seg_316FB8 (func_0041F3A8: EXTRACT_WORDS reads msw = word 1, lsw = word 0)
+   (views group D: ieee_double_shape_type_0041F3A8). */
+typedef union
+{
+  double value;         // 0x0 [L]
+  struct
+  {
+    unsigned int lsw;   // 0x0 [L] __uint32_t
+    unsigned int msw;   // 0x4 [L] __uint32_t
+  } parts;
+} ieee_double_shape_type;
+
+CHECK_SIZE(ieee_double_shape_type, 0x8);
+
 /* Get a 32 bit int from a float.  [L] */
 #define GET_FLOAT_WORD(i,d)                                     \
 do {                                                            \
@@ -42,5 +57,29 @@ do {                                                            \
   sf_u.word = (i);                                              \
   (d) = sf_u.value;                                             \
 } while (0)
+
+// struct exception: what newlib's libm wrappers (w_log.c log, wf_exp.c expf, ...; SVID error handling) fill and pass
+// to matherr (views group D: E40D610 in log, exception_D758 in expf). [L] newlib-1.9.0 libc/include/math.h
+// (`struct exception` in C, `struct __exception` in C++); the wrappers that use it are SunPro fdlibm code (notice
+// above). On the EE double is 8 bytes and 8-aligned: arg1 at 0x8.
+#ifndef __cplusplus
+struct exception
+#else
+struct __exception
+#endif
+{
+  int type;             // 0x00 [L] DOMAIN 1, SING 2, OVERFLOW 3, UNDERFLOW 4, TLOSS 5, PLOSS 6
+  char *name;           // 0x04 [L] the function's name
+  double arg1;          // 0x08 [L]
+  double arg2;          // 0x10 [L]
+  double retval;        // 0x18 [L]
+  int err;              // 0x20 [L]
+};
+
+// CHECK_SIZE / CHECK_OFFSET need a typedef name; the checks are spelled out.
+#if !defined(__cplusplus) && !defined(DECOMP_NO_LAYOUT_CHECKS)
+typedef char check_exception_size[(sizeof(struct exception) == 0x28) ? 1 : -1];
+typedef char check_exception_retval[(DECOMP_OFFSETOF(struct exception, retval) == 0x18) ? 1 : -1];
+#endif
 
 #endif /* SEG_NEWLIB_FDLIBM_H */

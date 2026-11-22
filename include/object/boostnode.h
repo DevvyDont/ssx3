@@ -35,6 +35,36 @@
 struct cObjNode;
 struct tInstanceRecord;
 
+// World-script data that makes a boost node (On Tour tMakeBoostData, 0x24; same offsets). [O] On Tour's
+// cBoostNode(cBucketList*, int, tInstanceRecord*, const tMakeBoostData*); [U] cBoostNode_cBoostNode1 (view
+// sDef_341388) stores Type, BoostTime seconds * TimerHz, MaxSpeed * 27.78 and Drag, and normalises (BoostX, BoostY,
+// BoostZ) into Boost (all zero: a default direction by Type). cBoostModifier's tAddBoostData (object/boostmodifier.h)
+// has the same layout.
+struct tMakeBoostData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    short Type;                     // 0x04 [O] int Type; [U] the ctor reads its low half (lh) -> Type
+    char unk_006[0x2];              // 0x06 [O] Type's high half (never read)
+    float BoostTime;                // 0x08 [O]; [U] * TimerHz -> BoostTime (frames)
+    float Drag;                     // 0x0C [O]; [U] -> Drag
+    float MaxSpeed;                 // 0x10 [O]; [U] * 27.78 -> MaxSpeed
+    float BoostX;                   // 0x14 [O]; [U] the boost direction, normalised into Boost
+    float BoostY;                   // 0x18 [O]; [U] ditto
+    float BoostZ;                   // 0x1C [O]; [U] ditto
+    char unk_020[0x4];              // 0x20 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeBoostData, unk_000, 0x00);
+CHECK_OFFSET(tMakeBoostData, Type, 0x04);
+CHECK_OFFSET(tMakeBoostData, unk_006, 0x06);
+CHECK_OFFSET(tMakeBoostData, BoostTime, 0x08);
+CHECK_OFFSET(tMakeBoostData, Drag, 0x0C);
+CHECK_OFFSET(tMakeBoostData, MaxSpeed, 0x10);
+CHECK_OFFSET(tMakeBoostData, BoostX, 0x14);
+CHECK_OFFSET(tMakeBoostData, BoostY, 0x18);
+CHECK_OFFSET(tMakeBoostData, BoostZ, 0x1C);
+CHECK_OFFSET(tMakeBoostData, unk_020, 0x20);
+CHECK_SIZE(tMakeBoostData, 0x24);
+
 struct cBoostNode {
     // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
     int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)

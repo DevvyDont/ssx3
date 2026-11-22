@@ -5088,7 +5088,6 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupHalfPipeCam);
 extern "C" int AITick();
 
 
-struct sVEntry_162A20 { short delta; short index; t4Vector (*fn)(void*); };
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Length_162A20(const t4Vector& v)
@@ -5158,7 +5157,7 @@ extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* se
                 if (dir.z > 0.8500000238418579f)
                 {
                     cRiderCameraTarget* obj = self->Target;
-                    sVEntry_162A20* vt = *(sVEntry_162A20**)obj;
+                    sVEntry<t4Vector(void*)>* vt = *(sVEntry<t4Vector(void*)>**)obj;
                     t4Vector groundNormal = vt[9].fn(vthis(obj, vt[9]));
                     if (groundNormal.z < 0.10000000149011612f)
                     {

@@ -31,6 +31,34 @@
 struct cObjNode;
 struct tInstanceRecord;
 
+// World-script data that makes a conveyor (On Tour tMakeConveyorData, 0x34; same offsets). [O] On Tour's
+// cConveyorNode(cBucketList*, tInstanceRecord*, const tMakeConveyorData*); [U] cConveyorNode_cConveyorNode (view
+// sDesc_3010) stores Vel, builds the UV scroll from (UScroll, VScroll) and copies Rotate0..7 (read as an array of 8).
+struct tMakeConveyorData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    float Vel;                      // 0x04 [O]; [U] -> the node's speed (+0x1C)
+    float UScroll;                  // 0x08 [O]; [U] the UV scroll's u
+    float VScroll;                  // 0x0C [O]; [U] the UV scroll's v
+    int Rotate0;                    // 0x10 [O]; [U] the 8 rotate flags, read as an array of 8 into the node
+    int Rotate1;                    // 0x14 [O]
+    int Rotate2;                    // 0x18 [O]
+    int Rotate3;                    // 0x1C [O]
+    int Rotate4;                    // 0x20 [O]
+    int Rotate5;                    // 0x24 [O]
+    int Rotate6;                    // 0x28 [O]
+    int Rotate7;                    // 0x2C [O]
+    char unk_030[0x4];              // 0x30 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeConveyorData, unk_000, 0x00);
+CHECK_OFFSET(tMakeConveyorData, Vel, 0x04);
+CHECK_OFFSET(tMakeConveyorData, UScroll, 0x08);
+CHECK_OFFSET(tMakeConveyorData, VScroll, 0x0C);
+CHECK_OFFSET(tMakeConveyorData, Rotate0, 0x10);
+CHECK_OFFSET(tMakeConveyorData, Rotate7, 0x2C);
+CHECK_OFFSET(tMakeConveyorData, unk_030, 0x30);
+CHECK_SIZE(tMakeConveyorData, 0x34);
+
 struct cConveyorNode {
     // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
     int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)

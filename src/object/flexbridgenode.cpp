@@ -1408,7 +1408,6 @@ struct sMat_3480C8 {
 } __attribute__((aligned(16)));
 
 
-struct sVE_3480C8 { short delta; short index; void* fn; };
 typedef sMat_3480C8 (*tGetMat_3480C8)(void*);
 typedef int (*tCull_3480C8)(void*, void*, void*, const sMat_3480C8&);
 
@@ -1416,7 +1415,7 @@ struct sCtx_3480C8 {
     char pad0[0xE84];
     sDrawState* top;        // 0xE84
     char padE88[0x10D8 - 0xE88];
-    sVE_3480C8* vt;         // 0x10D8
+    sVEntry<void>* vt;         // 0x10D8
 };
 extern int D_004A5980;
 extern float D_004FF6C0[8][4];
@@ -1442,7 +1441,7 @@ struct sFlex_3480C8 {
 extern "C" void cFlexRailNode_render(cFlexRailNode* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    sVE_3480C8* vt = (sVE_3480C8*)ctx->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)ctx->mVtbl;
     if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
                                   ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == 1) return;
     if (D_004A5980 == 0) {
@@ -1676,11 +1675,6 @@ static inline float bracket_8290(float lo, float x, float hi)
     return r;
 }
 
-struct sFbVE_8290 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 // Closest-point result written by cFlexRailNode_splineIntersect.
 struct sFbHit_8290 {
@@ -1835,7 +1829,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
             intInfo->pos = lastp;
             intInfo->dir = fbNormalize_8290(splineSlope_8290(mat, lastt));
             intInfo->obj = (void*)self->Instance;
-            sFbVE_8290* vt = (sFbVE_8290*)self->mVtbl;
+            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
             intInfo->f5C = vt[49].fn(vthis(self, vt[49]), seg);
             intInfo->seg = seg;
             intInfo->f58 = 0;

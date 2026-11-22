@@ -7,7 +7,6 @@
 #include "inseq/scriptplayerentity.h"
 #include "inseq/scriptplayermain.h"
 #include "scripter/bxscriptengine.h"
-#include "scripter/ssxscriptengine.h"
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
@@ -194,11 +193,6 @@ void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
 int cScriptPlayerMain_SetUserData(void* self, int a1);
 void cBXScriptEngine_ResetRequest(void* self, void* v);
 
-struct sBxsVEntry21A0 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 
 struct sBXThread21A0 {
@@ -238,7 +232,7 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int
         request->pending = idx;
         request->state = one;
         request->f12 = one;
-        sBxsVEntry21A0* vtableEntry = &((sBxsVEntry21A0*)self->mVtbl)[7];
+        sVEntry<int(void*, int)>* vtableEntry = &((sVEntry<int(void*, int)>*)self->mVtbl)[7];
         if (vtableEntry->fn(vthis(self, *vtableEntry), idx) == 0) {
             request->state = 7;
             cBXScriptEngine_ResetRequest(self, request);
@@ -1626,6 +1620,11 @@ extern "C" void cScriptEntityCamera_OnInSeqRelease(cScriptEntityCamera* self)
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_IsMatchingEntity);
 #ifdef SKIP_ASM
 // PORT: cSSXScriptEngine_GetScriptSetupInfo is declared (void*) but takes (self, idx).
+// ScriptEngine as scripter/ssxscriptengine.h declares it. The unit does not include that header: it reaches
+// bx/math3d.h, and t2Vector's inline methods there make g++ 2.95 compile cBXScriptEngine_Update differently
+// (a strength-reduced loop without its jump table).
+struct cSSXScriptEngine;
+extern cSSXScriptEngine* ScriptEngine;
 void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
 
 /**

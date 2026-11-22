@@ -37,6 +37,9 @@ struct tAnimID {
     unsigned int AnimID : 24;       // bits 8-31 [O]; [U] addSource stores the clip index; readers: GameAnimMap[gad] >> 8
 #ifdef __cplusplus
     tAnimID() {}
+    // [O] tAnimID(int s, int i); [R] the scripter unit's static init builds kAnimIDInvalid as (-1, -1) (view sSlot_3E60,
+    // D_004A51E0).
+    tAnimID(int s, int i) { SourceID = s; AnimID = i; }
 #endif
 };
 

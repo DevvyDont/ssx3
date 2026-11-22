@@ -1815,17 +1815,7 @@ extern "C" void cTriggerAlgorithm_snap_x(char* vself, long key)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
-struct sVE173678a {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
-struct sVE173678b {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*);
-};
 
 /**
  * Snaps a trigger camera for the rider it currently follows.
@@ -1835,9 +1825,9 @@ struct sVE173678b {
  */
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
-    sVE173678b* vt = (sVE173678b*)self->mVtbl;
+    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
     char* riderIface = (char*)&self->Target->Rider->mVtbl;
-    sVE173678a* vt2 = *(sVE173678a**)riderIface;
+    sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)riderIface;
     return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(riderIface, vt2[7])));
 }
 #endif
@@ -2664,17 +2654,7 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
-struct sVE1747A0a {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
-struct sVE1747A0b {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*);
-};
 
 /**
  * Snaps a bounded trigger camera for the rider it currently follows.
@@ -2684,9 +2664,9 @@ struct sVE1747A0b {
  */
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
-    sVE1747A0b* vt = (sVE1747A0b*)self->mVtbl;
+    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
     char* riderIface = (char*)&self->Target->Rider->mVtbl;
-    sVE1747A0a* vt2 = *(sVE1747A0a**)riderIface;
+    sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)riderIface;
     return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(riderIface, vt2[7])));
 }
 #endif

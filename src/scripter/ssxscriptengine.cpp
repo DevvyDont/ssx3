@@ -286,7 +286,7 @@ extern "C" void cSSXScriptEngine_Update(cSSXScriptEngine* self)
     cBXScriptEngine_Update(self);
     cVidEngine_UpdateVideo(((char*)&self->mpPlayer));
     for (int i = 0; i < 2; i++)
-        cScriptObjCameraManager_Update((cScriptObjCameraManager*)self->mObjectCameraManager[i]);
+        cScriptObjCameraManager_Update(&self->mObjectCameraManager[i]);
     cScriptObjEvent_Update((cScriptObjEvent*)((cScriptObjEvent*)((char*)&self->mObjectEvent)));
     if (self->mPlayingNISList != 2)
     {
@@ -4615,11 +4615,6 @@ extern "C" int cScriptDatabaseObject_RemoveEntity(cScriptDatabaseObject* self, v
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsUsed);
 #ifdef SKIP_ASM
 
-struct sScrVEntryD400b {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 struct sScrOwnerD400 {
@@ -4643,7 +4638,7 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(sScrOwnerD400* self, int*
     tScriptEntityRecord* record = &self->slots[key[1]];
     if (vt[4].fn(vthis(self, vt[4]), record->objID, value) == 0) {
         char* obj = (char*)self->objs[record->objID];
-        sScrVEntryD400b* vt2 = *(sScrVEntryD400b**)(obj + 0xC);
+        sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(obj + 0xC);
         vt2[4].fn(vthis(obj, vt2[4]), value);
     }
     record->playerID = value;

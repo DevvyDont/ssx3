@@ -33,6 +33,8 @@
 #include "scripter/scriptobjgs.h"
 #include "scripter/scanimmgr.h"
 #include "scripter/scriptobjevent.h"
+#include "inseq/scriptplayerchannel.h"   // tInSeqObject (tMainAnim / tSound data)
+#include "scripter/scriptobjcammgr.h"
 
 struct cScriptObject;
 struct cInSeq;
@@ -66,6 +68,18 @@ CHECK_OFFSET(tSSXHiveScriptMaster, hashID, 0x4);
 CHECK_OFFSET(tSSXHiveScriptMaster, debugNamePtr, 0x8);
 CHECK_SIZE(tSSXHiveScriptMaster, 0xC);
 
+// The master script table file (On Tour struct tSSXHiveScriptMasterTableHeader, 0x10): the count, then the
+// tSSXHiveScriptMaster records. [O]; [R] InitOnce loads it into mpMasterTableHeader and points mpMasterTable at
+// &masterTableStart (header + 4); [U] its loops run to numScripts (view sDmEngine8210 hdr).
+struct tSSXHiveScriptMasterTableHeader {
+    int numScripts;                 // 0x0 [O]; [U] the master table's loop bound
+    tSSXHiveScriptMaster masterTableStart; // 0x4 [O]; [R] mpMasterTable = &masterTableStart (the first record)
+};
+
+CHECK_OFFSET(tSSXHiveScriptMasterTableHeader, numScripts, 0x0);
+CHECK_OFFSET(tSSXHiveScriptMasterTableHeader, masterTableStart, 0x4);
+CHECK_SIZE(tSSXHiveScriptMasterTableHeader, 0x10);
+
 // tSSXHiveScriptFilter (0x30): one script of a category with its 21 character filters; tSSXHiveScriptFilterCategory
 // (0x8): a category's count and script list. [U] cSSXScriptEngine_GetScriptFromCategory indexes mpCategoryFilterTable
 // 8 apart and the scripts 0x30 apart (views sCategory_27B0C0, sScript_27B0C0).
@@ -91,6 +105,18 @@ struct tSSXHiveScriptFilterCategory {
 CHECK_OFFSET(tSSXHiveScriptFilterCategory, numScripts, 0x0);
 CHECK_OFFSET(tSSXHiveScriptFilterCategory, scriptFilterPtr, 0x4);
 CHECK_SIZE(tSSXHiveScriptFilterCategory, 0x8);
+
+// The per-track script filter table file (On Tour struct tSSXHiveScriptFilterTableHeader, 0xC): the category count,
+// then the tSSXHiveScriptFilterCategory records. [O]; [U] cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete stores
+// the loaded file in mpFilterTableHeader, loops to numScriptCategories and points mpCategoryFilterTable at header + 4.
+struct tSSXHiveScriptFilterTableHeader {
+    int numScriptCategories;        // 0x0 [O]; [U] the category loop bound
+    tSSXHiveScriptFilterCategory scriptFilterCategoryStart; // 0x4 [O]; [U] mpCategoryFilterTable = header + 4
+};
+
+CHECK_OFFSET(tSSXHiveScriptFilterTableHeader, numScriptCategories, 0x0);
+CHECK_OFFSET(tSSXHiveScriptFilterTableHeader, scriptFilterCategoryStart, 0x4);
+CHECK_SIZE(tSSXHiveScriptFilterTableHeader, 0xC);
 
 // tSSXScriptHeader (0x20): the SSX header at the start of a script's data (GetSSXScriptHeader). [U]
 // tNISList_DoTransitionToNext reads the end transition (+0x10 type, +0x11 colour, +0x12 / +0x14 / +0x16 frames;
@@ -168,13 +194,16 @@ CHECK_SIZE(tSSXScriptSetupInfoLinked, 0x14);
 // tSSXHeaderActor: the SSX header of an actor entity's script data (GetSSXActorHeader; On Tour tSSXHeaderActor, 0x30
 // there). Retail has no 64-bit `character` word at 0x8: its base position and rotation sit 0xC lower than On Tour's
 // (0x8.. here, 0x14.. there); what retail keeps of On Tour's 0x2..0x13 (character, hidden, scriptEndLocation,
-// hideIllegalBoltOn, isRidingBoard) is in 0x2..0x7 and not placed (cSSXScriptEngine_OnStartScript reads a short at
-// 0x2 as a character mask, view sScriptOpt_9A70). Laid out through the last member retail reads.
+// hideIllegalBoltOn, isRidingBoard) is in 0x2..0x7: only the character mask is placed (a short at 0x2; On Tour's is
+// 64-bit at 0x8). Laid out through the last member retail reads.
 struct tSSXHeaderActor {
     signed char role;               // 0x00 [O]; [U] cSSXScriptEngine_OnStartScript maps it to a character slot through
                                     //      D_00482608 (view sScriptOpt_9A70 slot)
     signed char anchorPos;          // 0x01 [O]; [U] cScriptObjRider_OnStartObjectUse passes it to GetAnchorOrientation
-    char unk_002[0x6];              // 0x02 see above
+    short character;                // 0x02 [O] character (the 64-bit character mask at 0x8 there); [U]
+                                    //      cSSXScriptEngine_OnStartScript: 0 or a mask that meets the free
+                                    //      characters' flags picks the variation (view sScriptOpt_9A70 mask)
+    char unk_004[0x4];              // 0x04 see above
     float basePosX;                 // 0x08 [O] (0x14 there); [U] OnStartObjectUse's base offset x
     float basePosY;                 // 0x0C [O]; [U] ... y
     float basePosZ;                 // 0x10 [O]; [U] ... z
@@ -185,7 +214,8 @@ struct tSSXHeaderActor {
 
 CHECK_OFFSET(tSSXHeaderActor, role, 0x00);
 CHECK_OFFSET(tSSXHeaderActor, anchorPos, 0x01);
-CHECK_OFFSET(tSSXHeaderActor, unk_002, 0x02);
+CHECK_OFFSET(tSSXHeaderActor, character, 0x02);
+CHECK_OFFSET(tSSXHeaderActor, unk_004, 0x04);
 CHECK_OFFSET(tSSXHeaderActor, basePosX, 0x08);
 CHECK_OFFSET(tSSXHeaderActor, basePosY, 0x0C);
 CHECK_OFFSET(tSSXHeaderActor, basePosZ, 0x10);
@@ -193,6 +223,94 @@ CHECK_OFFSET(tSSXHeaderActor, baseRotZ, 0x14);
 CHECK_OFFSET(tSSXHeaderActor, baseRotY, 0x18);
 CHECK_OFFSET(tSSXHeaderActor, baseRotX, 0x1C);
 CHECK_SIZE(tSSXHeaderActor, 0x20);
+
+// The per-frame script data of an actor (On Tour tSSXFrameActor and its channel records). GetSSXActorFrame fills a
+// tSSXFrameActor for the current frame; the rider walks its three channels: the main animations
+// (cRider_DoInSeqAnimUpdate), the sounds (cRider_DoInSeqSoundUpdate) and the speech events (cRider_OnInSeqKeyEvent).
+// Same sizes and offsets as On Tour. [Staged by views2 group A.]
+
+// Each channel record starts with a tInSeqObject (inseq/scriptplayerchannel.h, On Tour struct tInSeqObject, 0x1C):
+// objectID (the anim name / script sound id), scriptStartFrame (DoInSeqSoundUpdate plays the sound on it), trackIndex
+// (the sound handle's slot), currObjectFrame, playRate, blendInFrames (DoInSeqAnimUpdate).
+
+// A main animation's custom tag (On Tour struct tTagCustomMainAnim, 0x4).
+struct tTagCustomMainAnim {
+    signed char isFlipped;          // 0x0 [O]; [U] DoInSeqAnimUpdate (lb)
+    signed char alignBody;          // 0x1 [O]; [U] DoInSeqAnimUpdate (lb)
+    signed char applySGOffsets;     // 0x2 [O]; [U] DoInSeqAnimUpdate (lb)
+    signed char padding;            // 0x3 [O]
+};
+
+CHECK_OFFSET(tTagCustomMainAnim, isFlipped, 0x0);
+CHECK_OFFSET(tTagCustomMainAnim, alignBody, 0x1);
+CHECK_OFFSET(tTagCustomMainAnim, applySGOffsets, 0x2);
+CHECK_OFFSET(tTagCustomMainAnim, padding, 0x3);
+CHECK_SIZE(tTagCustomMainAnim, 0x4);
+
+// A sound's custom tag (On Tour struct tTagCustomSound, 0x4).
+struct tTagCustomSound {
+    signed char volume;             // 0x0 [O]; [U] DoInSeqSoundUpdate clamps it to 0..127
+    signed char padding[3];         // 0x1 [O]
+};
+
+CHECK_OFFSET(tTagCustomSound, volume, 0x0);
+CHECK_OFFSET(tTagCustomSound, padding, 0x1);
+CHECK_SIZE(tTagCustomSound, 0x4);
+
+// A speech event's custom tag (On Tour struct tTagCustomSpeechEvent, 0x4).
+struct tTagCustomSpeechEvent {
+    signed char subject;            // 0x0 [O]; [U] OnInSeqKeyEvent: cSSXScriptEngine_GetSubjectRider's subject
+    signed char padding[3];         // 0x1 [O]
+};
+
+CHECK_OFFSET(tTagCustomSpeechEvent, subject, 0x0);
+CHECK_OFFSET(tTagCustomSpeechEvent, padding, 0x1);
+CHECK_SIZE(tTagCustomSpeechEvent, 0x4);
+
+// A main animation of the frame (On Tour struct tMainAnim, 0x24): a list linked through pNext.
+struct tMainAnim {
+    tInSeqObject data;              // 0x00 [O]
+    tTagCustomMainAnim* pCustom;    // 0x1C [O]; [U] DoInSeqAnimUpdate reads its three flags
+    tMainAnim* pNext;               // 0x20 [O]
+};
+
+CHECK_OFFSET(tMainAnim, data, 0x00);
+CHECK_OFFSET(tMainAnim, pCustom, 0x1C);
+CHECK_OFFSET(tMainAnim, pNext, 0x20);
+CHECK_SIZE(tMainAnim, 0x24);
+
+// tSound (0x24) and tSpeechEvent (0x8), the frame's sounds and speech events: scripter/scriptobjevent.h.
+
+// An actor's frame (On Tour struct tSSXFrameActor, 0x30; [O] GetSSXActorFrame(cScriptPlayerEntity*, tSSXFrameActor*)).
+// [R] retail GetSSXActorFrame stores exactly these 12 words.
+struct tSSXFrameActor {
+    int numMainAnim;                // 0x00 [O]; [U] DoInSeqAnimUpdate tests it
+    tMainAnim* pMainAnimList;       // 0x04 [O]; [U] DoInSeqAnimUpdate
+    int numSound;                   // 0x08 [O]
+    tSound* pSoundList;             // 0x0C [O]; [U] DoInSeqSoundUpdate walks it
+    int numSpeechEvent;             // 0x10 [O]; [U] OnInSeqKeyEvent loops to it
+    tSpeechEvent* pSpeechEventArray; // 0x14 [O]; [U] OnInSeqKeyEvent
+    float posX;                     // 0x18 [O]; [U] DoInSeqAnimUpdate
+    float posY;                     // 0x1C [O]
+    float posZ;                     // 0x20 [O]
+    float rotX;                     // 0x24 [O]; [U] DoInSeqAnimUpdate (degrees)
+    float rotY;                     // 0x28 [O]
+    float rotZ;                     // 0x2C [O]
+};
+
+CHECK_OFFSET(tSSXFrameActor, numMainAnim, 0x00);
+CHECK_OFFSET(tSSXFrameActor, pMainAnimList, 0x04);
+CHECK_OFFSET(tSSXFrameActor, numSound, 0x08);
+CHECK_OFFSET(tSSXFrameActor, pSoundList, 0x0C);
+CHECK_OFFSET(tSSXFrameActor, numSpeechEvent, 0x10);
+CHECK_OFFSET(tSSXFrameActor, pSpeechEventArray, 0x14);
+CHECK_OFFSET(tSSXFrameActor, posX, 0x18);
+CHECK_OFFSET(tSSXFrameActor, posY, 0x1C);
+CHECK_OFFSET(tSSXFrameActor, posZ, 0x20);
+CHECK_OFFSET(tSSXFrameActor, rotX, 0x24);
+CHECK_OFFSET(tSSXFrameActor, rotY, 0x28);
+CHECK_OFFSET(tSSXFrameActor, rotZ, 0x2C);
+CHECK_SIZE(tSSXFrameActor, 0x30);
 
 // tSSXHeaderCameraAlgorithmic (0x20): the SSX header of an algorithmic camera entity's script data
 // (GetSSXCameraAlgorithmicHeader; On Tour tSSXHeaderCameraAlgorithmic, same offsets). [U]
@@ -303,7 +421,7 @@ struct cSSXScriptEngine {
                                                  //       [P] IsBankAvailable reads 0x628 / 0x630 for bank i
     char unk_6C8[0x8];                           // 0x6C8 untouched; likely alignment (On Tour has the same gap
                                                  //       before its 16-byte-aligned camera managers)
-    char mObjectCameraManager[2][0x120];         // 0x6D0 [O] cScriptObjCameraManager (4 in On Tour); [R] the ctor
+    cScriptObjCameraManager mObjectCameraManager[2]; // 0x6D0 [O] (4 in On Tour); [R] the ctor
                                                  //       builds 2 x 0x120 (cScriptObjCameraManager_cScriptObjCameraManager); vptr at +0xC (dtor)
     cScriptObjGS mObjectGameState;                 // 0x910 [O] cScriptObjGS; [R] cScriptObjGS_cScriptObjGS(self+0x910);
                                                  //       vptrs at +0x0 and +0x18, cScriptObject part at +0xC (dtor)
