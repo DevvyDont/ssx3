@@ -34,8 +34,8 @@ struct cUIIcon;
 struct cUIScreen;
 struct cUIState;
 
-// One map location / event (On Tour tMapLocation, 0x64; retail 0x6C). The goal tables D_004781D0 [3][4] (race),
-// D_004786E0 [3][5] (freestyle) and D_00478D38 [3][8] (freeride) are arrays of it; onWidgetEvent copies the
+// One map location / event (On Tour tMapLocation, 0x64; retail 0x6C). The goal tables kPeakRaceLocations [3][4] (race),
+// kPeakFreestyleLocations [3][5] (freestyle) and kPeakFreerideLocations [3][8] (freeride) are arrays of it; onWidgetEvent copies the
 // picked entry into cUITemplate_MAP::mSelectedLocation, isMapEventCompleted takes one by value.
 struct tMapLocation {
     int location;                   // 0x00 [O] eBELocationID; [U] the track (isMapEventCompleted: 23 never completes)

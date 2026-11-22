@@ -1435,7 +1435,7 @@ extern int kWPR_Surface[2];
 extern int kWPR_Lighting[2];
 extern int kWPR_Weather[2];
 extern int kWPR_Danger[2];
-extern float D_004A55AC;
+extern float kBeamPulseRate;
 extern int cRenderStateMan_m_customIrradiance;
 extern int D_004A55B4;
 extern float D_004A55B8;
@@ -1488,7 +1488,7 @@ void sti_002F6B88(int init, int prio) __asm__("func_002F6B88");
  *
  * Acts only for @p prio 0xFFFF. Construction fills the colour preset table D_004D57B0..D_004D5B60 (a, r, g, b), sets
  * the region type constants kWPR_MusicTrigger..kWPR_Danger to 0..13, constructs vertlist (2048), collisionvertlist (64)
- * and cAvalanche_m_activeNodes (64, each with a cDynamicColourEmitter at +0xD0), sets D_004A55AC to 2 pi, constructs
+ * and cAvalanche_m_activeNodes (64, each with a cDynamicColourEmitter at +0xD0), sets kBeamPulseRate to 2 pi, constructs
  * the 8 cRenderStateMan_m_state rows, clears the custom irradiance name cRenderStateMan_m_customIrradiance, copies presets into the colours
  * D_004FAAF0..D_004FAC80 and sets D_004A55B8, D_004A55BC to 320, 240. Destruction runs
  * tActiveAvalancheNode__tActiveAvalancheNode on the 64 active avalanche nodes, last first. func_002F8370 and
@@ -1762,7 +1762,7 @@ void sti_002F6B88(int init, int prio)
             new (vertlist) sWlAvElem[2048];
             new (collisionvertlist) sWlAvElem[64];
             new (cAvalanche_m_activeNodes) sWlFx[64];
-            D_004A55AC = 6.283186f;
+            kBeamPulseRate = 6.283186f;
             new (cRenderStateMan_m_state) sWlRsm[8];
             D_004A55B4 = 0;
             cRenderStateMan_m_customIrradiance = 0;

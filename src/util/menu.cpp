@@ -6883,11 +6883,11 @@ extern "C" void* cErrorMenu_cErrorMenu1(cErrorMenu* self, void* nullText, void* 
 //100%
 INCLUDE_ASM("util/menu", noiseValue);
 #ifdef SKIP_ASM
-extern float D_00445AB0[];
+extern float kClintsNoiseFunction[];
 
 /**
  * Returns a smooth 1D noise value: @p phase * 160 split into an index and a fraction, interpolated linearly between entries
- * index % 160 and index % 160 + 1 of the float table D_00445AB0.
+ * index % 160 and index % 160 + 1 of the float table kClintsNoiseFunction.
  *
  * Negative inputs give a negative index (truncation and % keep the sign), so they read before the table.
  *
@@ -6900,7 +6900,7 @@ extern "C" float noiseValue(float phase)
     int i = (int)phase;
     phase = phase - (float)i;
     i = i % 160;
-    return D_00445AB0[i] * (1.0f - phase) + D_00445AB0[i + 1] * phase;
+    return kClintsNoiseFunction[i] * (1.0f - phase) + kClintsNoiseFunction[i + 1] * phase;
 }
 #endif
 

@@ -237,7 +237,7 @@ INCLUDE_ASM("fe/ovstatehud", splitTextPictLine);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
-extern tHUDPictureDB D_004C8980[];
+extern tHUDPictureDB gTextPictDB[];
 
 /**
  * Lays out a HUD text line with inline pictures: splits its 16-bit text into text and picture segments and measures
@@ -247,7 +247,7 @@ extern tHUDPictureDB D_004C8980[];
  * text y offset (+0xC), scale (+0x10, +0x14), segment count (+0x18), six (width, pointer) segments (+0x1C) and the text
  * (+0x4C). First the font's Scale is set to BaseScale times the line scale. Each '@' ends the current text segment (it
  * is overwritten with 0) and starts a picture name that runs to the next space or the end; the name's GetHashValue32 is
- * looked up in the picture table D_004C8980 (0x24-byte records: hash, texture, width +0xC, height +0x10, uvs; On Tour
+ * looked up in the picture table gTextPictDB (0x24-byte records: hash, texture, width +0xC, height +0x10, uvs; On Tour
  * tHUDPictureDB) and the record becomes the next segment, so even segments are text and odd ones pictures. Text
  * segments are measured with cFont_textExtent1, with the end advance before a picture and without it for the last one. It
  * stores the total width, the height max(font MaxCharHeight * BaseScale.y * scale y, tallest picture) and the y offset
@@ -296,7 +296,7 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
             *namePos = 0;
             int h = GetHashValue32(name);
             tHUDPictureDB* picture = 0;
-            for (tHUDPictureDB* candidate = D_004C8980; ((int)candidate->ident) != 0; candidate++) {
+            for (tHUDPictureDB* candidate = gTextPictDB; ((int)candidate->ident) != 0; candidate++) {
                 if (((int)candidate->ident) == h) { picture = candidate; break; }
             }
             // The icon entry is kept in the segment's string slot.
@@ -343,7 +343,7 @@ struct sVec2f { float x, y; };
  * then runs splitTextPictLine. cOVStateHUD1P_onCreateScreen fills three of its message lines this way with the HUD's +0x428
  * font.
  *
- * @param str  the text; "@name" embeds a picture from D_004C8980
+ * @param str  the text; "@name" embeds a picture from gTextPictDB
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
@@ -367,7 +367,7 @@ extern "C" void splitTextPictLine(tTextPictLine* self);
  * Copies @p str into the line's text (+0x4C) with strcpy1, stores @p font (+0x8) and @p scale (+0x10), then runs
  * splitTextPictLine. cOVStateHUD1P_onCreateScreen uses it for a line built with USTR_sprintf.
  *
- * @param str  the 16-bit text; "@name" embeds a picture from D_004C8980
+ * @param str  the 16-bit text; "@name" embeds a picture from gTextPictDB
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
@@ -686,7 +686,7 @@ struct sTok_9AD0 {
     t2Vector uv0;   // 0x14
     t2Vector uv1;   // 0x1C
 };
-extern sTok_9AD0 D_004C8980_9AD0[] __asm__("D_004C8980");
+extern sTok_9AD0 gTextPictDB_9AD0[] __asm__("gTextPictDB");
 
 class cBeing_9AD0 {
 public:
@@ -841,7 +841,7 @@ static inline unsigned short* getLocString_9AD0(char* id)
  * Sets up the single-player HUD: resolves its textures, fonts and elements, resets its timers, and gives each
  * local rider a panel.
  *
- * Names the state "hud" and fills the token table D_004C8980 with texture handles and UVs. Each local rider
+ * Names the state "hud" and fills the token table gTextPictDB with texture handles and UVs. Each local rider
  * (cRider::mIsLocal) gets the next of two panels with its rider and AI index; the panels' display objects are
  * placed from layout D_00477000 (one rider) or D_00477B40 (two, the second mirrored).
  * Looks up "fefont" / "hudfont", the countdown (nm3w, nm2w, nm1w, go) and "switch" elements, the place digits
@@ -856,7 +856,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(cOVStateHUD1P* vself)
 {
     sHUD1P* self = (sHUD1P*)vself;
     self->hash = GetHashValue32(str_hud_b);
-    sTok_9AD0* entry = D_004C8980_9AD0;
+    sTok_9AD0* entry = gTextPictDB_9AD0;
     while (entry->hash != 0) {
         sUIItem_9AD0* it = (sUIItem_9AD0*)cUITextureBank_getElementByHashname(self->engine + 0x58, entry->name);
         entry->tex = it->handle;

@@ -3628,7 +3628,7 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsBoxInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A5978;
-extern sSphereVec4 D_004FF260[];
+extern sSphereVec4 cWorldLine_IsBoxInt_norms[];
 extern sSphereVec4 t4vect_Zero_E690[] __asm__("t4vect_Zero");
 
 
@@ -3660,7 +3660,7 @@ struct sRay_E690 {
  *
  * A slab test over t in [0, 1] (tmin starts at -1, tmax at 2); an axis whose direction is under 1e-10 is skipped
  * entirely, so a segment parallel to a face but outside that slab is not rejected. The face normals come from a
- * table D_004FF260 built on first use (flag D_004A5978). A hit is written for the entry (tmin >= 0) and for the
+ * table cWorldLine_IsBoxInt_norms built on first use (flag D_004A5978). A hit is written for the entry (tmin >= 0) and for the
  * exit (tmax < 1): normal, point and t.
  *
  * @param bmin  the box's minimum corner (On Tour bMin)
@@ -3706,44 +3706,44 @@ extern "C" int cWorldLine_IsBoxInt(cWorldLine* self, float* bmin, float* bmax, t
         }
     }
     if (D_004A5978 == 0) {
-        D_004FF260[0].x = -1.0f;
-        D_004FF260[0].y = 0.0f;
-        D_004FF260[0].z = 0.0f;
-        D_004FF260[0].w = 0.0f;
-        D_004FF260[1].x = 1.0f;
-        D_004FF260[1].y = 0.0f;
-        D_004FF260[1].z = 0.0f;
-        D_004FF260[1].w = 0.0f;
-        D_004FF260[2].x = 0.0f;
-        D_004FF260[2].y = -1.0f;
-        D_004FF260[2].z = 0.0f;
-        D_004FF260[2].w = 0.0f;
-        D_004FF260[3].x = 0.0f;
-        D_004FF260[3].y = 1.0f;
-        D_004FF260[3].z = 0.0f;
-        D_004FF260[3].w = 0.0f;
-        D_004FF260[4].x = 0.0f;
-        D_004FF260[4].y = 0.0f;
-        D_004FF260[4].z = -1.0f;
-        D_004FF260[4].w = 0.0f;
-        D_004FF260[5].x = 0.0f;
-        D_004FF260[5].y = 0.0f;
-        D_004FF260[5].z = 1.0f;
-        D_004FF260[5].w = 0.0f;
+        cWorldLine_IsBoxInt_norms[0].x = -1.0f;
+        cWorldLine_IsBoxInt_norms[0].y = 0.0f;
+        cWorldLine_IsBoxInt_norms[0].z = 0.0f;
+        cWorldLine_IsBoxInt_norms[0].w = 0.0f;
+        cWorldLine_IsBoxInt_norms[1].x = 1.0f;
+        cWorldLine_IsBoxInt_norms[1].y = 0.0f;
+        cWorldLine_IsBoxInt_norms[1].z = 0.0f;
+        cWorldLine_IsBoxInt_norms[1].w = 0.0f;
+        cWorldLine_IsBoxInt_norms[2].x = 0.0f;
+        cWorldLine_IsBoxInt_norms[2].y = -1.0f;
+        cWorldLine_IsBoxInt_norms[2].z = 0.0f;
+        cWorldLine_IsBoxInt_norms[2].w = 0.0f;
+        cWorldLine_IsBoxInt_norms[3].x = 0.0f;
+        cWorldLine_IsBoxInt_norms[3].y = 1.0f;
+        cWorldLine_IsBoxInt_norms[3].z = 0.0f;
+        cWorldLine_IsBoxInt_norms[3].w = 0.0f;
+        cWorldLine_IsBoxInt_norms[4].x = 0.0f;
+        cWorldLine_IsBoxInt_norms[4].y = 0.0f;
+        cWorldLine_IsBoxInt_norms[4].z = -1.0f;
+        cWorldLine_IsBoxInt_norms[4].w = 0.0f;
+        cWorldLine_IsBoxInt_norms[5].x = 0.0f;
+        cWorldLine_IsBoxInt_norms[5].y = 0.0f;
+        cWorldLine_IsBoxInt_norms[5].z = 1.0f;
+        cWorldLine_IsBoxInt_norms[5].w = 0.0f;
         D_004A5978 = 1;
     }
     int n = 0;
     if (0.0f <= tmin) {
         tIntersectInfo* entryHit = &hits[0];
         reset_E690(entryHit);
-        (*(sSphereVec4*)&entryHit->Inorm) = D_004FF260[fmin];
+        (*(sSphereVec4*)&entryHit->Inorm) = cWorldLine_IsBoxInt_norms[fmin];
         (*(sSphereVec4*)&entryHit->Ipos) = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmin));
         entryHit->Iparam = tmin;
         n = 1;
     }
     if (tmax < 1.0f) {
         reset_E690(&hits[n]);
-        (*(sSphereVec4*)&hits[n].Inorm) = D_004FF260[fmax];
+        (*(sSphereVec4*)&hits[n].Inorm) = cWorldLine_IsBoxInt_norms[fmax];
         (*(sSphereVec4*)&hits[n].Ipos) = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmax));
         hits[n].Iparam = tmax;
         n++;

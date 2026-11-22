@@ -702,7 +702,7 @@ extern "C" void cSectionMan_init(cSectionMan* self)
 INCLUDE_ASM("main/game", cSectionMan_load);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// A location's sections (D_00442488; On Tour tLocationMap, field names from it).
+// A location's sections (cSectionMan_mLocationMap; On Tour tLocationMap, field names from it).
 struct sGroup_CEA8 {
     int LocationID;           // 0x0
     int iNumSection;          // 0x4
@@ -714,8 +714,8 @@ struct sMode_CEA8 {
     int f0;
     int mode;       // 0x4
 };
-extern sGroup_CEA8 D_00442488_CEA8[] __asm__("D_00442488");
-extern sMode_CEA8 D_00442820_CEA8[] __asm__("D_00442820");
+extern sGroup_CEA8 cSectionMan_mLocationMap_CEA8[] __asm__("cSectionMan_mLocationMap");
+extern sMode_CEA8 cSectionMan_mLocationModeMap[] __asm__("cSectionMan_mLocationModeMap");
 extern "C" void cSectionMan_unloadSection(cSectionMan* self, int idx);
 extern "C" void cSectionMan_loadSection(cSectionMan* self, int idx);
 extern "C" void cSectionMan_loadMode(cSectionMan* self, int a1);
@@ -732,10 +732,10 @@ static inline bool IsSection(const int& id)
 /**
  * Loads a location: unloads the world sections it does not use and loads the ones it does.
  *
- * Unloads each of the 0x32 sections that is not in the location's list (D_00442488) and not one of the kept
+ * Unloads each of the 0x32 sections that is not in the location's list (cSectionMan_mLocationMap) and not one of the kept
  * sections 0x2B-0x30, stores the location at +0x1BC (clearing +0x1C0), loads the location's sections, its sky
  * section (default 0x31; +0x1A4 cleared first) and its transport section, then the mode with cSectionMan_loadMode.
- * Mode 7 means the location's default mode from D_00442820.
+ * Mode 7 means the location's default mode from cSectionMan_mLocationModeMap.
  *
  * @param idx   the location (On Tour eBELocationID)
  * @param mode  the section manager mode, or 7 for the location's default
@@ -745,18 +745,18 @@ extern "C" void cSectionMan_load_impl(void* vself, int idx, int mode)
     cSectionMan* self = (cSectionMan*)vself;
     int resolvedMode;
     if (mode == 7) {
-        resolvedMode = D_00442820_CEA8[idx].mode;
+        resolvedMode = cSectionMan_mLocationModeMap[idx].mode;
     } else {
         resolvedMode = mode;
     }
     int skySection = 49;
-    if (D_00442488_CEA8[idx].iBESkySectionID >= 0) {
-        skySection = D_00442488_CEA8[idx].iBESkySectionID;
+    if (cSectionMan_mLocationMap_CEA8[idx].iBESkySectionID >= 0) {
+        skySection = cSectionMan_mLocationMap_CEA8[idx].iBESkySectionID;
     }
     for (int i = 0; i < 50; i++) {
         int found = 1;
-        for (int j = 0; j < D_00442488_CEA8[idx].iNumSection; j++) {
-            if (i == D_00442488_CEA8[idx].iBESectionID[j]) {
+        for (int j = 0; j < cSectionMan_mLocationMap_CEA8[idx].iNumSection; j++) {
+            if (i == cSectionMan_mLocationMap_CEA8[idx].iBESectionID[j]) {
                 found = 0;
                 break;
             }
@@ -773,14 +773,14 @@ extern "C" void cSectionMan_load_impl(void* vself, int idx, int mode)
     }
     self->mBELocationID = idx;
     self->mbLocationIsActivated = 0;
-    for (int k = 0; k < D_00442488_CEA8[idx].iNumSection; k++) {
-        cSectionMan_loadSection((cSectionMan*)self, D_00442488_CEA8[idx].iBESectionID[k]);
+    for (int k = 0; k < cSectionMan_mLocationMap_CEA8[idx].iNumSection; k++) {
+        cSectionMan_loadSection((cSectionMan*)self, cSectionMan_mLocationMap_CEA8[idx].iBESectionID[k]);
     }
     if (IsSection(skySection)) {
         self->m_bTriggerSkySwap = 0;
         cSectionMan_loadSection((cSectionMan*)self, skySection);
     }
-    int transportSection = D_00442488_CEA8[idx].iBETransportSectionID;
+    int transportSection = cSectionMan_mLocationMap_CEA8[idx].iBETransportSectionID;
     if (transportSection >= 0) {
         cSectionMan_loadSection((cSectionMan*)self, transportSection);
     }
@@ -794,7 +794,7 @@ INCLUDE_ASM("main/game", cSectionMan_activate);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Shared with cSectionMan_activate: true for a real section id (0x31 = no section).
-// A location's sections (D_00442488; On Tour tLocationMap, field names from it).
+// A location's sections (cSectionMan_mLocationMap; On Tour tLocationMap, field names from it).
 struct sGroup_D088 {
     int LocationID;           // 0x0
     int iNumSection;          // 0x4
@@ -806,8 +806,8 @@ struct sPair_D088 {
     int f0;
     int f4;
 };
-extern sGroup_D088 D_00442488_D088[] __asm__("D_00442488");
-extern sPair_D088 D_00442820_D088[] __asm__("D_00442820");
+extern sGroup_D088 cSectionMan_mLocationMap_D088[] __asm__("cSectionMan_mLocationMap");
+extern sPair_D088 cSectionMan_mLocationModeMap_D088[] __asm__("cSectionMan_mLocationModeMap");
 extern "C" void cSectionMan_activateSection_D088(void* self, int id) __asm__("cSectionMan_activateSection");
 extern "C" void cSectionMan_activateMode_D088(void* self, int v) __asm__("cSectionMan_activateMode");
 extern "C" void cSectionMan_unloadSection_D088(void* self, int idx) __asm__("cSectionMan_unloadSection");
@@ -826,18 +826,18 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
 {
     int sectionMode;
     if (mode == 7) {
-        sectionMode = D_00442820_D088[idx].f4;
+        sectionMode = cSectionMan_mLocationModeMap_D088[idx].f4;
     } else {
         sectionMode = mode;
     }
     int skySection = 49;
-    if (D_00442488_D088[idx].iBESkySectionID >= 0) {
-        skySection = D_00442488_D088[idx].iBESkySectionID;
+    if (cSectionMan_mLocationMap_D088[idx].iBESkySectionID >= 0) {
+        skySection = cSectionMan_mLocationMap_D088[idx].iBESkySectionID;
     }
     for (int i = 0; i < 50; i++) {
         int found = 1;
-        for (int j = 0; j < D_00442488_D088[idx].iNumSection; j++) {
-            if (i == D_00442488_D088[idx].iBESectionID[j]) {
+        for (int j = 0; j < cSectionMan_mLocationMap_D088[idx].iNumSection; j++) {
+            if (i == cSectionMan_mLocationMap_D088[idx].iBESectionID[j]) {
                 found = 0;
                 break;
             }
@@ -854,14 +854,14 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
     }
     self->mbLocationIsActivated = 1;
     self->mBELocationID = idx;
-    for (int k = 0; k < D_00442488_D088[idx].iNumSection; k++) {
-        cSectionMan_activateSection_D088(self, D_00442488_D088[idx].iBESectionID[k]);
+    for (int k = 0; k < cSectionMan_mLocationMap_D088[idx].iNumSection; k++) {
+        cSectionMan_activateSection_D088(self, cSectionMan_mLocationMap_D088[idx].iBESectionID[k]);
     }
     cSectionMan_setSky(self, idx);
     if (IsSection(skySection)) {
         cSectionMan_activateSection_D088(self, skySection);
     }
-    int transportSection = D_00442488_D088[idx].iBETransportSectionID;
+    int transportSection = cSectionMan_mLocationMap_D088[idx].iBETransportSectionID;
     if (transportSection >= 0) {
         cSectionMan_activateSection_D088(self, transportSection);
     }
@@ -879,7 +879,7 @@ struct sGroup_D278 {
     int iBETransportSectionID; // 0xC
     int iBESectionID[6];      // 0x10
 };
-extern sGroup_D278 D_00442488_D278[] __asm__("D_00442488");
+extern sGroup_D278 cSectionMan_mLocationMap_D278[] __asm__("cSectionMan_mLocationMap");
 extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int id);
 
 // PORT: the unit declares cSectionMan_isLoaded(void*) for its callers; the body reads a1, bound by asm label
@@ -888,7 +888,7 @@ int cSectionMan_isLoaded_impl(void* self, int idx) __asm__("cSectionMan_isLoaded
 /**
  * Tells whether all of a location's world sections are loaded.
  *
- * Checks each section in the location's list (D_00442488) and its optional sky and transport sections (when they exist in
+ * Checks each section in the location's list (cSectionMan_mLocationMap) and its optional sky and transport sections (when they exist in
  * cSectionMan_mSectionMap) with cSectionMan_isSectionLoaded.
  *
  * @param idx  the location (On Tour eBELocationID)
@@ -897,19 +897,19 @@ int cSectionMan_isLoaded_impl(void* self, int idx) __asm__("cSectionMan_isLoaded
 int cSectionMan_isLoaded_impl(void* self, int idx)
 {
     int ok = 1;
-    for (int i = 0; i < D_00442488_D278[idx].iNumSection; i++) {
-        if (cSectionMan_isSectionLoaded((cSectionMan*)self, D_00442488_D278[idx].iBESectionID[i]) == 0) {
+    for (int i = 0; i < cSectionMan_mLocationMap_D278[idx].iNumSection; i++) {
+        if (cSectionMan_isSectionLoaded((cSectionMan*)self, cSectionMan_mLocationMap_D278[idx].iBESectionID[i]) == 0) {
             ok = 0;
             break;
         }
     }
-    int skySection = D_00442488_D278[idx].iBESkySectionID;
+    int skySection = cSectionMan_mLocationMap_D278[idx].iBESkySectionID;
     if (skySection >= 0 && cSectionMan_mSectionMap[skySection].iWorldSectionID >= 0) {
         if (cSectionMan_isSectionLoaded((cSectionMan*)self, skySection) == 0) {
             ok = 0;
         }
     }
-    int transportSection = D_00442488_D278[idx].iBETransportSectionID;
+    int transportSection = cSectionMan_mLocationMap_D278[idx].iBETransportSectionID;
     if (transportSection >= 0 && cSectionMan_mSectionMap[transportSection].iWorldSectionID >= 0) {
         if (cSectionMan_isSectionLoaded((cSectionMan*)self, transportSection) == 0) {
             ok = 0;
@@ -1223,7 +1223,7 @@ extern "C" int cWorldView_loadSection(cWorldView* view, int section, float f);
 extern "C" int cWorldView_unloadSection(cWorldView* view, int section);
 extern "C" void cWorldView_activateSection(cWorldView* view, int section);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_00442150[];
+extern int cSectionMan_mStreamBandWidthRates[];
 extern float D_0044C208[];
 extern char str_data_worlds_b[];
 extern char str_data_worlds_c[];
@@ -1395,7 +1395,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
     } else {
         self->m_bStreamReady = 1;
     }
-    cStreamMan_setBandWidthLimit(*(char**)(char*)self->mpGame->World + 0x300, D_00442150[self->mStreamRate]);
+    cStreamMan_setBandWidthLimit(*(char**)(char*)self->mpGame->World + 0x300, cSectionMan_mStreamBandWidthRates[self->mStreamRate]);
 }
 #endif
 
@@ -1568,7 +1568,7 @@ struct sGameEntry2 {
     int field_0x20;
     int field_0x24;
 };
-extern sGameEntry2 D_00442488[];
+extern sGameEntry2 cSectionMan_mLocationMap[];
 
 /**
  * Returns the world section of a location's main section.
@@ -1578,7 +1578,7 @@ extern sGameEntry2 D_00442488[];
  */
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(cSectionMan* self, int LocationID)
 {
-    return cSectionMan_mSectionMap[D_00442488[LocationID].field_0x10].iWorldSectionID;
+    return cSectionMan_mSectionMap[cSectionMan_mLocationMap[LocationID].field_0x10].iWorldSectionID;
 }
 #endif
 

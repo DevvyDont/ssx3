@@ -174,9 +174,9 @@ struct cBoardTrailFX_reset_sTrail {
 
 extern cBoardTrailFX_reset_sVec4 t4vect_Origin;
 extern cBoardTrailFX_reset_sVec4 t4vect_Zero;
-extern float D_004A45B0;
-extern float D_004A45B4;
-extern float D_004A45B8;
+extern float cBoardTrail_m_BaseU;
+extern float cBoardTrail_m_InnerU;
+extern float cBoardTrail_m_OuterU;
 
 /**
  * Resets a board trail's state and the texture data of its six vertex strips.
@@ -202,12 +202,12 @@ extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
     self->fE0 = 0;
     for (int i = 0; i < 54; i++) {
         float vCoord = (float)(i & 1);
-        self->v18[i * 12] = D_004A45B8;
-        self->v10[i * 12] = D_004A45B4;
-        self->v1C[i * 12] = D_004A45B0;
-        self->v20[i * 12] = 1.0f - D_004A45B0;
-        self->v14[i * 12] = 1.0f - D_004A45B4;
-        self->v24[i * 12] = 1.0f - D_004A45B8;
+        self->v18[i * 12] = cBoardTrail_m_OuterU;
+        self->v10[i * 12] = cBoardTrail_m_InnerU;
+        self->v1C[i * 12] = cBoardTrail_m_BaseU;
+        self->v20[i * 12] = 1.0f - cBoardTrail_m_BaseU;
+        self->v14[i * 12] = 1.0f - cBoardTrail_m_InnerU;
+        self->v24[i * 12] = 1.0f - cBoardTrail_m_OuterU;
         self->v18[i * 12 + 1] = self->v10[i * 12 + 1] = self->v1C[i * 12 + 1] = self->v20[i * 12 + 1] = self->v14[i * 12 + 1] = self->v24[i * 12 + 1] = vCoord;
         self->v18[i * 12 + 2] = self->v10[i * 12 + 2] = self->v1C[i * 12 + 2] = self->v20[i * 12 + 2] = self->v14[i * 12 + 2] = self->v24[i * 12 + 2] = 1.0f;
     }
@@ -432,11 +432,11 @@ struct sBTVEnt_8938 {
 
 // cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sBTRSRow_8938 views a row from its +0x28 field
 extern char cRenderStateMan_m_state[];
-extern float D_004A4580;
-extern float D_004A4584;
-extern float D_004A4588;
-extern float D_004A458C;
-extern float D_004A45AC;
+extern float cBoardTrail_m_InnerWidthScale;
+extern float cBoardTrail_m_OuterWidthScale;
+extern float cBoardTrail_m_HeightScale;
+extern float cBoardTrail_m_Depth2HeightScale;
+extern float cBoardTrail_m_InnerPositionJitter;
 extern float D_004A3B28;
 extern float D_004A3B2C;
 extern int D_004A3AFC;
@@ -728,7 +728,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         self->head = (self->head + 3) % kTrailNumSeg;
         prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
     }
-    self->lift = D_004A4588 - self->fade * D_004A458C;
+    self->lift = cBoardTrail_m_HeightScale - self->fade * cBoardTrail_m_Depth2HeightScale;
     t4Vector pts[4];
     const t4Vector& pos = btBoneRow(self->rider, 2212, 3);
     const t4Vector& side = btBoneRow(self->rider, 2212, 2);
@@ -847,8 +847,8 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     t4Vector topEdge = btAdd(mid, btScale(across, st));
     t4Vector botEdge = btAdd(mid, btScale(across, sb));
     t4Vector n = btNormalize(btSub(botEdge, topEdge));
-    t4Vector innerWidth = btScale(n, D_004A4580);
-    t4Vector outerWidth = btScale(btScale(n, D_004A4584), btAbs(*(float*)(self->rider + 0x454) <? 0.0f) + 10.0f);
+    t4Vector innerWidth = btScale(n, cBoardTrail_m_InnerWidthScale);
+    t4Vector outerWidth = btScale(btScale(n, cBoardTrail_m_OuterWidthScale), btAbs(*(float*)(self->rider + 0x454) <? 0.0f) + 10.0f);
     t4Vector w = btScale(*(t4Vector*)(self->rider + 0x370), self->lift);
     t4Vector h = btScale(*(t4Vector*)(self->rider + 0x370), *(float*)(self->rider + 0x454) <? 0.0f);
     self->strip[2][prev].pos = btAdd(btAdd(btSub(topEdge, outerWidth), h), h);
@@ -906,8 +906,8 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     if (cBoardTrailFX_shouldSample_8938(self, btDot(dir, self->lastDir))) {
         int h = self->head;
         self->side = across;
-        self->w1 = btRandScale(D_004A45AC) + 1.0f;
-        self->w2 = btRandScale(D_004A45AC) + 1.0f;
+        self->w1 = btRandScale(cBoardTrail_m_InnerPositionJitter) + 1.0f;
+        self->w2 = btRandScale(cBoardTrail_m_InnerPositionJitter) + 1.0f;
         self->head = (h + 1) % kTrailNumSeg;
         btGrow(self);
         for (int i = 0; i < 6; i++) {
@@ -989,7 +989,7 @@ extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
 #ifdef SKIP_ASM
-extern int D_004A45C8;
+extern int cBoardTrail_m_NumFadeSegments;
 
 struct sRctxVtA538 { short delta; short index; void (*fn)(void*, BoardTrailInfoT*, int); };
 
@@ -998,7 +998,7 @@ struct sRctxVtA538 { short delta; short index; void (*fn)(void*, BoardTrailInfoT
  *
  * Pushes a render state, then for each trail (a cBoardTrailFX, cRiderHandler + 0x520) with at least 2 samples (+0x90)
  * builds a 0x14-byte strip record: the vertex ring (+0x10), the start index in the 54-entry ring derived from the head
- * (+0x8C), the length (samples - 2, at most 48), 0 and 1 / D_004A45C8 (1/16). At most 16 strips are kept. Passes them
+ * (+0x8C), the length (samples - 2, at most 48), 0 and 1 / cBoardTrail_m_NumFadeSegments (1/16). At most 16 strips are kept. Passes them
  * to GrMan's virtual slot 89 (strips, count) and pops the state. cAI_render calls it with every rider's trail.
  *
  * @param trails  array of trail pointers
@@ -1024,7 +1024,7 @@ extern "C" void func_002EA538(char** trails, int n)
         }
         if (cnt < 2) continue;
         int st = start % 54;
-        float sc = 1.0f / (float)D_004A45C8;
+        float sc = 1.0f / (float)cBoardTrail_m_NumFadeSegments;
         if (count < 16) {
             (*(char**)&strips[count].verts) = (char*)&trail->BufVerts[0];
             strips[count].startIndex = st;

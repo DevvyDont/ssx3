@@ -10,8 +10,8 @@
 // EA's source: d:/ssx/code/source/main/sectionman.cpp (preview and retail assert strings).
 //
 // Statics (On Tour names; retail data): mSectionMap[50] = cSectionMan_mSectionMap (tSectionMap 0x10: SectionID, iWorldSectionID,
-// State, Priority; the methods' views call them field_0x0..field_0xc), mLocationMap = D_00442488 (0x28 each),
-// mLocationModeMap = D_00442820, mStreamBandWidthRates[5] = D_00442150 = {256000, 460800, 819200, 819200, 819200}.
+// State, Priority; the methods' views call them field_0x0..field_0xc), mLocationMap = cSectionMan_mLocationMap (0x28 each),
+// mLocationModeMap = D_00442820, mStreamBandWidthRates[5] = cSectionMan_mStreamBandWidthRates = {256000, 460800, 819200, 819200, 819200}.
 //
 // Methods (names from On Tour's cSectionMan, matched by body and call pattern):
 //   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init, cSectionMan_load,

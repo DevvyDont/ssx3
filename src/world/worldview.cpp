@@ -720,14 +720,14 @@ struct cChunkResolve_cChunkResolve_sState {
     cChunkResolve_cChunkResolve_sEntry entries[24];
 };
 
-extern cChunkResolve_cChunkResolve_sState D_00508F50;
+extern cChunkResolve_cChunkResolve_sState cChunkResolve_cChunkResolve_colliderecord;
 
 struct cChunkResolve_cChunkResolve_sView {
     int f00;
     cChunkResolve_cChunkResolve_sState* state;
     void** vt;
 };
-// splat labels D_00508F50+8 separately
+// splat labels cChunkResolve_cChunkResolve_colliderecord+8 separately
 extern unsigned int D_00508F58[];
 extern int D_004A5A68;
 extern void* cChunkResolve_vtbl[];
@@ -738,7 +738,7 @@ cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolv
 /**
  * Constructs the stream chunk resolver and resets its shared state.
  *
- * Sets cChunkResolve_vtbl, clears +0x0, initializes the static state D_00508F50 on first use, points the resolver at it
+ * Sets cChunkResolve_vtbl, clears +0x0, initializes the static state cChunkResolve_cChunkResolve_colliderecord on first use, points the resolver at it
  * and zeroes it with MEM_fill, then sets its ids to -1, each of its 24 entries to (1000.0, 0.5, 0, -1) and its flag
  * bits.
  *
@@ -749,15 +749,15 @@ cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolv
     self->vt = cChunkResolve_vtbl;
     self->f00 = 0;
     if (D_004A5A68 == 0) {
-        D_00508F50.f08 = 0xFFFFFFFF;
+        cChunkResolve_cChunkResolve_colliderecord.f08 = 0xFFFFFFFF;
         D_004A5A68 = 1;
     }
-    cChunkResolve_cChunkResolve_sState* sharedState = &D_00508F50;
+    cChunkResolve_cChunkResolve_sState* sharedState = &cChunkResolve_cChunkResolve_colliderecord;
     self->state = sharedState;
     MEM_fill(sharedState, 0, sizeof(cChunkResolve_cChunkResolve_sState));
     D_00508F58[0] = 0xFFFFFFFF;
     sharedState->f0C = -1;
-    D_00508F50.f00 = 0;
+    cChunkResolve_cChunkResolve_colliderecord.f00 = 0;
     int i;
     for (i = 0; i < 24; i++) {
         sharedState->entries[i].dist = 1000.0f;
@@ -765,7 +765,7 @@ cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolv
         sharedState->entries[i].a = 0;
         sharedState->entries[i].b = -1;
     }
-    D_00508F50.flags = (((D_00508F50.flags | 1) & ~4) | 2) << 16;
+    cChunkResolve_cChunkResolve_colliderecord.flags = (((cChunkResolve_cChunkResolve_colliderecord.flags | 1) & ~4) | 2) << 16;
     return self;
 }
 #endif

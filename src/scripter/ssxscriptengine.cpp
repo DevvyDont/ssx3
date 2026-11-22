@@ -1477,7 +1477,7 @@ void* GetSSXActorHeader1_9A70(void* self, int i) __asm__("GetSSXActorHeader1__FP
 extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_9A70(void* self, int* flags, int p0, int p1, int p2) __asm__("cSSXScriptEngine_BuildCharacterBitRoleArray");
 extern "C" void* cScriptPlayerMain_GetEntity(void* self, int i);
 extern "C" void cScriptPlayerEntity_SetEntityVariation(void* self, int idx);
-extern int D_00482608[];
+extern int kRoleToFilterEnumMappingTable[];
 
 
 
@@ -1517,7 +1517,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, cScriptPl
                 int k;
                 for (k = 0; k < cnt; k++) {
                     tSSXHeaderActor* opt = (tSSXHeaderActor*)GetSSXActorHeader1_9A70(ev, k);
-                    int slot = D_00482608[opt->role];
+                    int slot = kRoleToFilterEnumMappingTable[opt->role];
                     if (slot >= 0) {
                         if (opt->character == 0 || (opt->character & flags[slot]) != 0)
                             cands[numCands++] = k;
@@ -1529,7 +1529,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, cScriptPl
                 if (numCands > 0) {
                     cScriptPlayerEntity_SetEntityVariation(ev, cands[BXrand() % numCands]);
                     tSSXHeaderActor* opt = (tSSXHeaderActor*)GetSSXActorHeader(ev);
-                    int slot = D_00482608[opt->role];
+                    int slot = kRoleToFilterEnumMappingTable[opt->role];
                     if (slot >= 0) {
                         all &= ~flags[slot];
                         flags[slot] = 0;
@@ -2344,8 +2344,8 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int* D_00445488[];
-extern int D_00481E80[];
+extern int* kpFlyInScriptSequenceTable[];
+extern int kTrackStartSequenceMPNet[];
 
 /**
  * Queues the race-start cut-scenes for a start situation in NIS list 0.
@@ -2360,10 +2360,10 @@ extern "C" void cSSXScriptEngine_AppendStartSequence(cSSXScriptEngine* self, int
     switch (state) {
     case 0: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        int* tbl = D_00445488[cBENewRaceInterface_newRace.cGamePath];
+        int* tbl = kpFlyInScriptSequenceTable[cBENewRaceInterface_newRace.cGamePath];
         cBE_getInterface_Fv(SSXApp->BE, 7);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-            tbl = D_00481E80;
+            tbl = kTrackStartSequenceMPNet;
         }
         if (tbl != 0 && tbl[0] >= 0) {
             do {

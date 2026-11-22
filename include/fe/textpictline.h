@@ -60,7 +60,7 @@ CHECK_SIZE(tTextPictLine, 0x14C);
 // tHUDPictureDB (0x24): one picture a text-picture line can embed ("@skip" and the other button icons), looked up by
 // the hash of its name. [O] On Tour struct tHUDPictureDB (0x24: ident, texHashID, texID, t2vect size, uv0, uv1), the
 // element of gTextPictDB[8] that splitTextPictLine searches; [R] retail's splitTextPictLine walks the 0x24-stride table
-// D_004C8980 until a zero ident and compares GetHashValue32(name) with the word at 0x0; [U] split reads the size at
+// gTextPictDB until a zero ident and compares GetHashValue32(name) with the word at 0x0; [U] split reads the size at
 // 0xC / 0x10 (the segment's width, the line height), drawTextPictLine the texture at 0x8 and the UVs at 0x14 .. 0x20
 // (src/fe/ovstatehud.cpp views sIcon_1E92A8 / sHudImg_E95A0). The t2vect members are float[2], as fontScaleBase above.
 struct tHUDPictureDB {

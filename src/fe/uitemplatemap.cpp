@@ -426,11 +426,11 @@ struct sPeakGoal {
     char path[0x17];    // 0x55
 };
 
-extern sPeakGoal D_004781D0_enus[3][4] __asm__("D_004781D0");
+extern sPeakGoal kPeakRaceLocations_enus[3][4] __asm__("kPeakRaceLocations");
 
-extern sPeakGoal D_004786E0_enus[3][5] __asm__("D_004786E0");
+extern sPeakGoal kPeakFreestyleLocations_enus[3][5] __asm__("kPeakFreestyleLocations");
 
-extern sPeakGoal D_00478D38_enus[3][8] __asm__("D_00478D38");
+extern sPeakGoal kPeakFreerideLocations_enus[3][8] __asm__("kPeakFreerideLocations");
 
 extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor_enus(void* self, void* obj, int on) __asm__("cUITemplate_MAP_setWidgetUnHiliteColor");
 extern "C" int cUITemplate_MAP_isMapEventCompleted(void* self, sPeakGoal* loc, int peak);
@@ -551,11 +551,11 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
                 strcpy(fmt, "Peak%dFreerideLoc%d");
             }
             for (int j = 0; j < count; j++) {
-                sPeakGoal goal = D_004781D0_enus[peak][j];
+                sPeakGoal goal = kPeakRaceLocations_enus[peak][j];
                 if (mode == 1)
-                    goal = D_004786E0_enus[peak][j];
+                    goal = kPeakFreestyleLocations_enus[peak][j];
                 if (mode == 2)
-                    goal = D_00478D38_enus[peak][j];
+                    goal = kPeakFreerideLocations_enus[peak][j];
                 if (mode == 0 || mode == 1)
                     self->mbLocationEventCompleted[peak][mode][j] = cUITemplate_MAP_isMapEventCompleted(self, &goal, peak);
                 sprintf(buf, fmt, peak + 1, j);
@@ -1420,9 +1420,9 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 // One 0x6C-byte goal entry of the per-peak goal tables (race: 4 per peak, freestyle: 5 per peak,
 // freeride: 8 per peak).
-extern sPeakGoal D_004781D0_Info[3][4] __asm__("D_004781D0");
+extern sPeakGoal kPeakRaceLocations_Info[3][4] __asm__("kPeakRaceLocations");
 
-extern sPeakGoal D_004786E0_Info[3][5] __asm__("D_004786E0");
+extern sPeakGoal kPeakFreestyleLocations_Info[3][5] __asm__("kPeakFreestyleLocations");
 
 // The text database (SSXApp + 0x8C): localised strings by hash through vtable slot 4 (as in cUITemplate_MAP_getMedalStr).
 struct cTextDB_5098 {
@@ -1609,7 +1609,7 @@ extern "C" void cUITemplate_MAP_setupPeakInfo(cUITemplate_MAP* tmpl)
         if (peak == 2)
             cnt = 3;
         for (int k = 0; k < cnt; k++) {
-            sPeakGoal goal = D_004781D0_Info[peak][k];
+            sPeakGoal goal = kPeakRaceLocations_Info[peak][k];
             if (cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) != -1)
                 found++;
         }
@@ -1623,7 +1623,7 @@ extern "C" void cUITemplate_MAP_setupPeakInfo(cUITemplate_MAP* tmpl)
             cUIState_hideObjSafe(((void*)self->mpUIState), D_00470C20);
         int found2 = 0;
         for (int k = 0; k < 5; k++) {
-            sPeakGoal goal = D_004786E0_Info[peak][k];
+            sPeakGoal goal = kPeakFreestyleLocations_Info[peak][k];
             if (cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) != -1)
                 found2++;
         }
@@ -1666,14 +1666,14 @@ extern "C" void cUITemplate_MAP_setupPeakInfo(cUITemplate_MAP* tmpl)
             if (p == 2)
                 cnt = 3;
             for (int k = 0; k < cnt; k++) {
-                sPeakGoal goal = D_004781D0_Info[p][k];
+                sPeakGoal goal = kPeakRaceLocations_Info[p][k];
                 if (!isKind(goal.kind, 4) && !isKind(goal.kind, 6) && !isKind(goal.kind, 7) && !isKind(goal.kind, 8)) {
                     if ((unsigned)cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) < 2)
                         done++;
                 }
             }
             for (int k = 0; k < 5; k++) {
-                sPeakGoal goal = D_004786E0_Info[p][k];
+                sPeakGoal goal = kPeakFreestyleLocations_Info[p][k];
                 if (!isKind(goal.kind, 5) && !isKind(goal.kind, 9) && !isKind(goal.kind, 10) && !isKind(goal.kind, 11)) {
                     if ((unsigned)cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) < 2)
                         done++;
@@ -1857,9 +1857,9 @@ extern int cUITemplate_MAP_mPeak;
 // One 0x6C-byte goal entry of the per-peak goal tables (race: 4 per peak, freestyle: 5 per peak,
 // freeride: 8 per peak).
 
-extern sPeakGoal D_004781D0_oals[3][4] __asm__("D_004781D0");
+extern sPeakGoal kPeakRaceLocations_oals[3][4] __asm__("kPeakRaceLocations");
 
-extern sPeakGoal D_004786E0_oals[3][5] __asm__("D_004786E0");
+extern sPeakGoal kPeakFreestyleLocations_oals[3][5] __asm__("kPeakFreestyleLocations");
 
 // The text database (SSXApp + 0x8C): localised strings by hash through vtable slot 4 (as in cUITemplate_MAP_getMedalStr_oals).
 
@@ -2026,7 +2026,7 @@ extern "C" void cUITemplate_MAP_setupPeakGoals(cUITemplate_MAP* tmpl)
             char name1[24];
             unsigned short ev[50];
             unsigned short medal[50];
-            sPeakGoal goal = D_004781D0_oals[cUITemplate_MAP_mPeak][k];
+            sPeakGoal goal = kPeakRaceLocations_oals[cUITemplate_MAP_mPeak][k];
             if (goal.useTrackName) {
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else if (strcmp(goal.name, D_004A2560_oals)) {
@@ -2078,7 +2078,7 @@ extern "C" void cUITemplate_MAP_setupPeakGoals(cUITemplate_MAP* tmpl)
         for (int k = 0; k < 5; k++) {
             unsigned short ev[50];
             unsigned short medal[50];
-            sPeakGoal goal = D_004786E0_oals[cUITemplate_MAP_mPeak][k];
+            sPeakGoal goal = kPeakFreestyleLocations_oals[cUITemplate_MAP_mPeak][k];
             if (goal.useTrackName) {
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else if (strcmp(goal.name, D_004A2560_oals)) {
@@ -2560,9 +2560,9 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
 struct sRewardDesc_0388 {
     int w[0x6C / 4];
 };
-extern sRewardDesc_0388 D_004781D0[][4];
-extern sRewardDesc_0388 D_004786E0[][5];
-extern sRewardDesc_0388 D_00478D38[][8];
+extern sRewardDesc_0388 kPeakRaceLocations[][4];
+extern sRewardDesc_0388 kPeakFreestyleLocations[][5];
+extern sRewardDesc_0388 kPeakFreerideLocations[][8];
 
 
 struct sLocVEntry_207430 {
@@ -2629,7 +2629,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self) __asm
  * (cUITemplate_MAP_mMapState) shows "PEAKno" with its front-end or PDA backdrop (cUITemplate_MAP_mMapStyle 0 or not).
  * The selected entry of the "Peak%dRaceLocations", "Peak%dFreestyleLocations" or "Peak%dFreerideLocations" list
  * (cUITemplate_MAP_mSelectedEvent 0, 1 or 2; the list's selection byte +0x95) picks a 0x6C-byte goal entry from
- * D_004781D0, D_004786E0 or D_00478D38; for races (up to 4 entries, 3 on peak 3) and freestyle (5) the "SE_box%d" boxes
+ * kPeakRaceLocations, kPeakFreestyleLocations or kPeakFreerideLocations; for races (up to 4 entries, 3 on peak 3) and freestyle (5) the "SE_box%d" boxes
  * are shown with map styles 2 and up and the "SE_check%d" ticks mirror the completion flags, all other boxes are
  * hidden.
  *
@@ -2674,13 +2674,13 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
             cUIState_showObjSafe(((void*)self->mpUIState), str_pdaPEAKno_back);
     }
     cUIText* title = (cUIText*)getObj_207430(self, str_PEAKno);
-    desc = D_004781D0[0][0];
+    desc = kPeakRaceLocations[0][0];
     int sel = 0;
     switch (cUITemplate_MAP_mSelectedEvent) {
     case 0: {
         sprintf(name, str_Peakpct_dRaceLocations, cUITemplate_MAP_mPeak + 1);
         sel = *(unsigned char*)((char*)getObj_207430(self, name) + 0x95);
-        desc = D_004781D0[cUITemplate_MAP_mPeak][sel];
+        desc = kPeakRaceLocations[cUITemplate_MAP_mPeak][sel];
         int n = 4;
         if (cUITemplate_MAP_mPeak == 2)
             n = 3;
@@ -2705,7 +2705,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
     case 1: {
         sprintf(name, str_Peakpct_dFreestyleLocations, cUITemplate_MAP_mPeak + 1);
         sel = *(unsigned char*)((char*)getObj_207430(self, name) + 0x95);
-        desc = D_004786E0[cUITemplate_MAP_mPeak][sel];
+        desc = kPeakFreestyleLocations[cUITemplate_MAP_mPeak][sel];
         for (int i = 0; i < 8; i++) {
             if (i < 5 && cUITemplate_MAP_mMapStyle >= 2) {
                 sprintf(buf, str_SE_boxpct_d, i);
@@ -2728,7 +2728,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
         char buf2[32];
         sprintf(name, str_Peakpct_dFreerideLocations, cUITemplate_MAP_mPeak + 1);
         sel = *(unsigned char*)((char*)getObj_207430(self, name) + 0x95);
-        desc = D_00478D38[cUITemplate_MAP_mPeak][sel];
+        desc = kPeakFreerideLocations[cUITemplate_MAP_mPeak][sel];
         for (int i = 0; i < 8; i++) {
             sprintf(buf2, str_SE_checkpct_d, i);
             cUIState_hideObjSafe(((void*)self->mpUIState), buf2);

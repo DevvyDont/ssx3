@@ -97,15 +97,15 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
 //100%
 INCLUDE_ASM("fe/ovstaterewardslist", func_00200388);
 #ifdef SKIP_ASM
-extern tMapLocation D_004781D0[][4];
-extern tMapLocation D_004786E0[][5];
-extern tMapLocation D_00478D38[][8];
+extern tMapLocation kPeakRaceLocations[][4];
+extern tMapLocation kPeakFreestyleLocations[][5];
+extern tMapLocation kPeakFreerideLocations[][8];
 
 /**
  * Returns (by value) one 0x6C-byte map goal entry: race, freestyle or freeride, by peak and index.
  *
- * Kind 0 reads D_004781D0[@p peak][@p goalIndex] (4 per peak), 1 D_004786E0 (5 per peak), 2 D_00478D38 (8 per peak); any other
- * kind returns D_004781D0[0][0]. cUITemplate_MAP_onWidgetEvent calls it with cUITemplate_MAP_mPeak, the item's misc
+ * Kind 0 reads kPeakRaceLocations[@p peak][@p goalIndex] (4 per peak), 1 kPeakFreestyleLocations (5 per peak), 2 kPeakFreerideLocations (8 per peak); any other
+ * kind returns kPeakRaceLocations[0][0]. cUITemplate_MAP_onWidgetEvent calls it with cUITemplate_MAP_mPeak, the item's misc
  * data and cUITemplate_MAP_mSelectedEvent.
  *
  * @param peak  the peak, 0-2
@@ -116,13 +116,13 @@ extern tMapLocation D_00478D38[][8];
 extern "C" tMapLocation func_00200388(int peak, int goalIndex, int kind)
 {
     if (kind == 0) {
-        return D_004781D0[peak][goalIndex];
+        return kPeakRaceLocations[peak][goalIndex];
     } else if (kind == 1) {
-        return D_004786E0[peak][goalIndex];
+        return kPeakFreestyleLocations[peak][goalIndex];
     } else if (kind == 2) {
-        return D_00478D38[peak][goalIndex];
+        return kPeakFreerideLocations[peak][goalIndex];
     }
-    return D_004781D0[0][0];
+    return kPeakRaceLocations[0][0];
 }
 #endif
 

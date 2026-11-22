@@ -4719,13 +4719,13 @@ extern "C" void cPlayerIndicatorFX_reset(cPlayerIndicatorFX* self)
 INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_update);
 #ifdef SKIP_ASM
 extern "C" float fCos(float x);
-extern float D_004A55AC;
+extern float kBeamPulseRate;
 
 
 /**
  * Pulses a player indicator's colour between its two colours with a sine wave, while its rider is active.
  *
- * The phase advances by D_004A55AC / 60 each frame and wraps at 2 pi. Nothing happens when the rider's
+ * The phase advances by kBeamPulseRate / 60 each frame and wraps at 2 pi. Nothing happens when the rider's
  * virtual slot 8 (on its +0x6C0 part) returns 0.
  */
 extern "C" void cPlayerIndicatorFX_update(cPlayerIndicatorFX* self)
@@ -4734,7 +4734,7 @@ extern "C" void cPlayerIndicatorFX_update(cPlayerIndicatorFX* self)
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)riderVptr;
     if (vt[8].fn(vthis(riderVptr, vt[8])) == 0) return;
     float half = 0.5f;
-    float newPhase = self->PulseAng + D_004A55AC * 0.01666666753590107f;
+    float newPhase = self->PulseAng + kBeamPulseRate * 0.01666666753590107f;
     float turns = newPhase * 0.15915493667125702f + half;
     float wholeTurns;
     // PORT: FPU-only float->int->float round trip (floor helper); no C cast reproduces it.
@@ -5702,13 +5702,13 @@ struct sWakePoolEntry {
 extern int cTransitionObj_mbBufferUsed[];
 // same object as the unit's later `extern sWakeSlot cTransitionObj_mBuffer[]` (0x64-byte slots)
 extern sWakePoolEntry D_wakePool[] __asm__("cTransitionObj_mBuffer");
-extern sWakePoolEntry* D_004A3B1C;
+extern sWakePoolEntry* cTransitionObj_operator_new_no_warnings;
 
 /**
  * Allocates a transition object from the fixed pool of four buffers.
  *
  * Returns the first buffer of cTransitionObj_mBuffer whose in-use flag in cTransitionObj_mbBufferUsed is clear, marking it used, or the pointer in
- * D_004A3B1C when all four are taken.
+ * cTransitionObj_operator_new_no_warnings when all four are taken.
  *
  * @return the buffer for the new object
  */
@@ -5720,7 +5720,7 @@ extern "C" sWakePoolEntry* cTransitionObj_operator_new(void)
             return &D_wakePool[i];
         }
     }
-    return D_004A3B1C;
+    return cTransitionObj_operator_new_no_warnings;
 }
 #endif
 

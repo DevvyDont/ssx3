@@ -1332,14 +1332,14 @@ extern "C" void* cSimpleTube_cSimpleTube(cSimpleTube* self, void* owner)
 //100%
 INCLUDE_ASM("render/particle", cSimpleTube_updateColours);
 #ifdef SKIP_ASM
-extern float D_004A4230;
-extern float D_004A4234;
-extern float D_004A4238;
+extern float cSimpleTube_updateColours_r;
+extern float cSimpleTube_updateColours_g;
+extern float cSimpleTube_updateColours_b;
 
 /**
  * Refreshes the colour of the 262 shared tube vertices (cSimpleTube_m_vertices) when the tube colour has changed.
  *
- * Compares the cached floats D_004A4230, D_004A4234 and D_004A4238 with the tube colour ints cTube_m_R, cTube_m_G and
+ * Compares the cached floats cSimpleTube_updateColours_r, cSimpleTube_updateColours_g and cSimpleTube_updateColours_b with the tube colour ints cTube_m_R, cTube_m_G and
  * cTube_m_B; if any differs, it writes the three ints into every vertex's r, g and b and caches the new values as
  * floats. @p self is not used. Called by cTube_update.
  *
@@ -1347,7 +1347,7 @@ extern float D_004A4238;
  */
 extern "C" void* cSimpleTube_updateColours(void* self)
 {
-    if (D_004A4230 != (float)cTube_m_R || D_004A4234 != (float)cTube_m_G || D_004A4238 != (float)cTube_m_B) {
+    if (cSimpleTube_updateColours_r != (float)cTube_m_R || cSimpleTube_updateColours_g != (float)cTube_m_G || cSimpleTube_updateColours_b != (float)cTube_m_B) {
         int i;
         for (i = 0; i < 262; i++) {
             tBxVertex* vertex = &cSimpleTube_m_vertices[i];
@@ -1355,9 +1355,9 @@ extern "C" void* cSimpleTube_updateColours(void* self)
             vertex->g = cTube_m_G;
             vertex->b = cTube_m_B;
         }
-        D_004A4230 = (float)cTube_m_R;
-        D_004A4234 = (float)cTube_m_G;
-        D_004A4238 = (float)cTube_m_B;
+        cSimpleTube_updateColours_r = (float)cTube_m_R;
+        cSimpleTube_updateColours_g = (float)cTube_m_G;
+        cSimpleTube_updateColours_b = (float)cTube_m_B;
     }
 }
 #endif
@@ -1575,11 +1575,11 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
 //100%
 INCLUDE_ASM("render/particle", cPathArrow_cPathArrow);
 #ifdef SKIP_ASM
-extern int D_004A423C;
-extern int D_004A4208;
-extern int D_004A420C;
-extern int D_004A4210;
-extern int D_004A4214;
+extern int cPathArrow_m_initialized;
+extern int cPathArrow_m_R;
+extern int cPathArrow_m_G;
+extern int cPathArrow_m_B;
+extern int cPathArrow_m_A;
 extern void* cPathArrow_vtbl[];
 
 struct sPtVert_2AA0 {
@@ -1593,7 +1593,7 @@ struct sPtVert_2AA0 {
     int a;          // 0x1C
     char pad[0x10];
 };
-extern sPtVert_2AA0 D_00504560[];
+extern sPtVert_2AA0 cPathArrow_m_vertices[];
 
 struct sPtObj_2AA0 {
     void** vt;      // 0x0
@@ -1602,8 +1602,8 @@ struct sPtObj_2AA0 {
 /**
  * Constructs the path-arrow visual effect and, the first time, fills its 8 shared vertices.
  *
- * Stores the vtable cPathArrow_vtbl. While the flag D_004A423C is clear it sets each of the 8 vertices of D_00504560 to
- * red/green/blue/alpha D_004A4208, D_004A420C, D_004A4210 and D_004A4214, z 1 and x, y, w 0, then sets the flag.
+ * Stores the vtable cPathArrow_vtbl. While the flag cPathArrow_m_initialized is clear it sets each of the 8 vertices of cPathArrow_m_vertices to
+ * red/green/blue/alpha cPathArrow_m_R, cPathArrow_m_G, cPathArrow_m_B and cPathArrow_m_A, z 1 and x, y, w 0, then sets the flag.
  * cPS2VisualEffectsMan_cPS2VisualEffectsMan allocates it (4 bytes, "PathArrow") as its object 16.
  *
  * @return @p self
@@ -1612,18 +1612,18 @@ extern "C" void* cPathArrow_cPathArrow(sPtObj_2AA0* self)
 {
     int i;
     self->vt = cPathArrow_vtbl;
-    if (D_004A423C == 0) {
+    if (cPathArrow_m_initialized == 0) {
         for (i = 0; i < 8; i++) {
-            D_00504560[i].a = D_004A4214;
-            D_00504560[i].r = D_004A4208;
-            D_00504560[i].g = D_004A420C;
-            D_00504560[i].b = D_004A4210;
-            D_00504560[i].z = 1.0f;
-            D_00504560[i].w = 0;
-            D_00504560[i].x = 0.0f;
-            D_00504560[i].y = 0.0f;
+            cPathArrow_m_vertices[i].a = cPathArrow_m_A;
+            cPathArrow_m_vertices[i].r = cPathArrow_m_R;
+            cPathArrow_m_vertices[i].g = cPathArrow_m_G;
+            cPathArrow_m_vertices[i].b = cPathArrow_m_B;
+            cPathArrow_m_vertices[i].z = 1.0f;
+            cPathArrow_m_vertices[i].w = 0;
+            cPathArrow_m_vertices[i].x = 0.0f;
+            cPathArrow_m_vertices[i].y = 0.0f;
         }
-        D_004A423C = 1;
+        cPathArrow_m_initialized = 1;
     }
     return self;
 }

@@ -1781,7 +1781,7 @@ extern "C" void* tFlagSetState_tFlagSetState(void* self)
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlagSet_cFlagSet);
 #ifdef SKIP_ASM
-extern int D_004A4010;
+extern int cFlagSet_mgFrameToUpdateGridCounter;
 extern void* cFlagSet_vtbl[];
 
 struct sFlexRail_AF38 {
@@ -1799,7 +1799,7 @@ struct sFlexRail_AF38 {
  * Constructs an empty flag set.
  *
  * Runs tFlagSetState_tFlagSetState, nulls mGridMesh (+0x60) and mVerts (+0x74), installs cFlagSet_vtbl (vtable at +0x184), clears the 60
- * mInstances (+0x94) and gives the set the current grid-update parity D_004A4010 (mFrameToUpdateGrid, +0x90), which
+ * mInstances (+0x94) and gives the set the current grid-update parity cFlagSet_mgFrameToUpdateGridCounter (mFrameToUpdateGrid, +0x90), which
  * then alternates 0/1 for the next set.
  *
  * @return self
@@ -1815,11 +1815,11 @@ extern "C" void* cFlagSet_cFlagSet(cFlagSet* self)
     for (i = 0; i < 60; i++) {
         flagSet->slots[i] = 0;
     }
-    int id = D_004A4010;
+    int id = cFlagSet_mgFrameToUpdateGridCounter;
     flagSet->f90 = id;
-    D_004A4010 = id + 1;
-    if (D_004A4010 >= 2) {
-        D_004A4010 = 0;
+    cFlagSet_mgFrameToUpdateGridCounter = id + 1;
+    if (cFlagSet_mgFrameToUpdateGridCounter >= 2) {
+        cFlagSet_mgFrameToUpdateGridCounter = 0;
     }
     return ((void*)self);
 }

@@ -32,7 +32,7 @@ struct cChunkResolve {
     cWorld* mp_World;                       // 0x0 [O]; [R] the ctor zeroes it; [U] cPS2ChunkResolve_init stores it;
                                             //     resolveInstance / resolveMaterialBlocks / resolveParticleInstance
                                             //     read it
-    tCollideRecord* m_pDummyCollideRecord;  // 0x4 [O]; [R] the ctor points it at the static D_00508F50 and
+    tCollideRecord* m_pDummyCollideRecord;  // 0x4 [O]; [R] the ctor points it at the static cChunkResolve_cChunkResolve_colliderecord and
                                             //     initialises that record (0x130 bytes); [U]
                                             //       cPS2ChunkResolve_resolveInstance
                                             //     stores it in each instance record (+0x88)

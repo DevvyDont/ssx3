@@ -824,7 +824,7 @@ struct sLmCtx_EE78 {
     sLmVEntry_EE78* vtable;      // 0x10D8
 };
 
-extern sLmMat_EE78 D_00504D80_EE78[] __asm__("D_00504D80");
+extern sLmMat_EE78 cPlants_m_meshDeformationMatrixList_EE78[] __asm__("cPlants_m_meshDeformationMatrixList");
 extern sLmMat_EE78 t4mat_Identity;
 extern float t4vect_ZAxis[3];
 extern int cPlants_m_SwayFrequency;
@@ -937,7 +937,7 @@ static inline void lmMulIn_EE78(void* m, const void* b)
 }
 
 /**
- * Rebuilds the eight plant sway matrices D_00504D80[0..7] from the cPlants tweak values and the frame count.
+ * Rebuilds the eight plant sway matrices cPlants_m_meshDeformationMatrixList[0..7] from the cPlants tweak values and the frame count.
  *
  * With t = vtable slot 114 (getCurrentFrameCount) and f = i / 8 for matrix i: sway = cPlants_m_SwayAmplitude ("Sway Amplitude") *
  * sin(f + t * cPlants_m_SwayFrequency / 600) + cPlants_m_SwayOffset; branch = cPlants_m_BranchAmplitude * sin(f * cPlants_m_BranchFrequency2 / 600 + sin(f + t * cPlants_m_BranchFrequency /
@@ -996,7 +996,7 @@ extern "C" void cPlants_update(void)
         rotMat.m[2][3] = 0.0f;
         rotMat.m[3][3] = 1.0f;
         lmMulIn_EE78(pm, &rotMat);
-        sLmMat_EE78* cell = &D_00504D80_EE78[i];
+        sLmMat_EE78* cell = &cPlants_m_meshDeformationMatrixList_EE78[i];
         lmCopy_EE78(cell, &t4mat_Identity);
         cell->m[2][0] += fSin(cPlants_m_SwayDirection * 0.017453294f) * amp;
         cell->m[2][1] += fCos(cPlants_m_SwayDirection * 0.017453294f) * amp;
@@ -1017,10 +1017,10 @@ extern float cPlants_m_PositionScale;
 struct sLmCell_F2A8 {
     char data[0x40];
 };
-extern sLmCell_F2A8 D_00504D80[];
+extern sLmCell_F2A8 cPlants_m_meshDeformationMatrixList[];
 
 /**
- * Picks the plant sway matrix for a position: D_00504D80[(int)(cPlants_m_PositionScale * sqrt(x * x + y * y)) % 8].
+ * Picks the plant sway matrix for a position: cPlants_m_meshDeformationMatrixList[(int)(cPlants_m_PositionScale * sqrt(x * x + y * y)) % 8].
  *
  * cPlants_m_PositionScale is the "Position Scale" tweak. Caller: cGraphicsMan_DeformMeshMatrix.
  *
@@ -1034,7 +1034,7 @@ extern "C" sLmCell_F2A8* cPlants_getDeformationMatrix(float* pos)
     // PORT: sqrt.s (sqrtf without errno check)
     __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(distSq));
     int i = (int)(cPlants_m_PositionScale * dist);
-    return &D_00504D80[i % 8];
+    return &cPlants_m_meshDeformationMatrixList[i % 8];
 }
 #endif
 

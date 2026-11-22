@@ -890,7 +890,7 @@ extern char str_arrowright[];
 extern char str_nametext[];
 extern char D_004A1408[];
 extern char* D_00440FA0[];
-extern char D_004C66B8[];
+extern char gBigSize[];
 extern "C" void cUIMenu_setScrollableMenu(void* w, unsigned char n);
 
 struct sCWVt_2460 { short delta; short index; void (*fn)(void*, int); };
@@ -958,7 +958,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(cFEStateCheatCharSelect* 
             w->id18 = i;
             if (i == 0) {
                 sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void(void*, void*)>*)((sCW_2460*)self->mpCharWidget[0])->vt)[21];
-                vtEntry->fn((char*)self->mpCharWidget[0] + vtEntry->delta, D_004C66B8);
+                vtEntry->fn((char*)self->mpCharWidget[0] + vtEntry->delta, gBigSize);
             }
             if (i >= self->mNumCharacters) {
                 vcall_2460(*sp, 9, 0);
@@ -983,8 +983,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* iface, int rider, int id);
 extern "C" void cUIStateStack_pop(void*, int);
-extern char D_004C66A8[];
-extern char D_004C66B8[];
+extern char gSmallSize[];
+extern char gBigSize[];
 
 
 /**
@@ -1004,13 +1004,13 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
     switch (msg) {
     case 2: {
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
-        vt[21].fn(vthis(menu, vt[21]), D_004C66A8);
+        vt[21].fn(vthis(menu, vt[21]), gSmallSize);
         break;
     }
     case 1: {
         int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
-        vt[21].fn(vthis(menu, vt[21]), D_004C66B8);
+        vt[21].fn(vthis(menu, vt[21]), gBigSize);
         cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
         break;
     }

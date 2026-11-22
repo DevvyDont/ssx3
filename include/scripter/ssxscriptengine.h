@@ -198,7 +198,7 @@ CHECK_SIZE(tSSXScriptSetupInfoLinked, 0x14);
 // 64-bit at 0x8). Laid out through the last member retail reads.
 struct tSSXHeaderActor {
     signed char role;               // 0x00 [O]; [U] cSSXScriptEngine_OnStartScript maps it to a character slot through
-                                    //      D_00482608 (view sScriptOpt_9A70 slot)
+                                    //      kRoleToFilterEnumMappingTable (view sScriptOpt_9A70 slot)
     signed char anchorPos;          // 0x01 [O]; [U] cScriptObjRider_OnStartObjectUse passes it to GetAnchorOrientation
     short character;                // 0x02 [O] character (the 64-bit character mask at 0x8 there); [U]
                                     //      cSSXScriptEngine_OnStartScript: 0 or a mask that meets the free

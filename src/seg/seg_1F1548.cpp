@@ -1505,11 +1505,11 @@ extern int D_004A3AFC;
 struct sTun_2598 {
     float v;
 };
-extern sTun_2598 D_004A428C_2598 __asm__("D_004A428C");
-extern sTun_2598 D_004A4290_2598 __asm__("D_004A4290");
+extern sTun_2598 cSplashToggles_m_DropMinLifeSpan_2598 __asm__("cSplashToggles_m_DropMinLifeSpan");
+extern sTun_2598 cSplashToggles_m_DropMaxLifeSpan_2598 __asm__("cSplashToggles_m_DropMaxLifeSpan");
 extern sTun_2598 cSplashToggles_m_DropMinSize_2598 __asm__("cSplashToggles_m_DropMinSize");
-extern sTun_2598 D_004A429C_2598 __asm__("D_004A429C");
-extern sTun_2598 D_004A42CC_2598 __asm__("D_004A42CC");
+extern sTun_2598 cSplashToggles_m_DropMaxWidthHeightDifference_2598 __asm__("cSplashToggles_m_DropMaxWidthHeightDifference");
+extern sTun_2598 cSplashToggles_m_DropMaxRotationChange_2598 __asm__("cSplashToggles_m_DropMaxRotationChange");
 
 struct sV2_2598 {
     float x, y;
@@ -1566,9 +1566,9 @@ extern "C" void tDrop_init_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* ra
  * Starts a screen-splash drop at a position with a random size, life, spin and tint.
  *
  * The width is random between "Drop Min Size" (cSplashToggles_m_DropMinSize) and @p range x; the height is the width plus a random amount
- * within "Drop Max Width Height Difference" (D_004A429C), clamped to the minimum size and @p range y. The life is
- * random between "Drop Min/Max Life Span" (D_004A428C, D_004A4290); the velocity starts at t2vect_Zero, the rotation at
- * a random 0-360 degrees and its change over the life within +/- D_004A42CC (the menu labels this one "Crystal Max
+ * within "Drop Max Width Height Difference" (cSplashToggles_m_DropMaxWidthHeightDifference), clamped to the minimum size and @p range y. The life is
+ * random between "Drop Min/Max Life Span" (cSplashToggles_m_DropMinLifeSpan, cSplashToggles_m_DropMaxLifeSpan); the velocity starts at t2vect_Zero, the rotation at
+ * a random 0-360 degrees and its change over the life within +/- cSplashToggles_m_DropMaxRotationChange (the menu labels this one "Crystal Max
  * Rotation Overall Change"); the tint is a random blend of "Drop Tint Min" (D_005046E0) and "Drop Tint Max"
  * (D_005046F0). Sets the drop active and its age to 0.
  *
@@ -1581,16 +1581,16 @@ extern "C" void tDrop_init_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598*
     float maxY = range->y;
     float maxX = range->x;
     float x = randRange_2598(cSplashToggles_m_DropMinSize_2598.v, maxX);
-    float rawHeight = x + randRange_2598(-D_004A429C_2598.v, D_004A429C_2598.v);
+    float rawHeight = x + randRange_2598(-cSplashToggles_m_DropMaxWidthHeightDifference_2598.v, cSplashToggles_m_DropMaxWidthHeightDifference_2598.v);
     float y = (rawHeight >= cSplashToggles_m_DropMinSize_2598.v) ? (rawHeight <? maxY) : cSplashToggles_m_DropMinSize_2598.v; // PORT: g++ <? operator
     drop->age = 0;
-    drop->life = randRange_2598(D_004A428C_2598.v, D_004A4290_2598.v);
+    drop->life = randRange_2598(cSplashToggles_m_DropMinLifeSpan_2598.v, cSplashToggles_m_DropMaxLifeSpan_2598.v);
     drop->active = 1;
     drop->size = sV2_2598(x, y);
     drop->pos = pos;
     drop->vel = t2vect_Zero[0];
     drop->angle = randf_2598() * 360.0f;
-    drop->spin = randRange_2598(-D_004A42CC_2598.v, D_004A42CC_2598.v);
+    drop->spin = randRange_2598(-cSplashToggles_m_DropMaxRotationChange_2598.v, cSplashToggles_m_DropMaxRotationChange_2598.v);
     float tintMix = randf_2598();
     drop->color = D_005046E0 * (1.0f - tintMix) + D_005046F0 * tintMix;
 }
@@ -1604,18 +1604,18 @@ extern int D_004A3AFC;
 struct sTun_2810 {
     float v;
 };
-extern sTun_2810 D_004A4288_2810 __asm__("D_004A4288");
-extern sTun_2810 D_004A42A0_2810 __asm__("D_004A42A0");
-extern sTun_2810 D_004A42A4_2810 __asm__("D_004A42A4");
-extern sTun_2810 D_004A42A8_2810 __asm__("D_004A42A8");
-extern sTun_2810 D_004A42AC_2810 __asm__("D_004A42AC");
-extern sTun_2810 D_004A42B0_2810 __asm__("D_004A42B0");
-extern sTun_2810 D_004A42B4_2810 __asm__("D_004A42B4");
-extern sTun_2810 D_004A42B8_2810 __asm__("D_004A42B8");
-extern sTun_2810 D_004A42BC_2810 __asm__("D_004A42BC");
-extern sTun_2810 D_004A42C0_2810 __asm__("D_004A42C0");
-extern sTun_2810 D_004A42C4_2810 __asm__("D_004A42C4");
-extern sTun_2810 D_004A42C8_2810 __asm__("D_004A42C8");
+extern sTun_2810 cSplashToggles_m_MinVelocityForPushoff_2810 __asm__("cSplashToggles_m_MinVelocityForPushoff");
+extern sTun_2810 cSplashToggles_m_DropMinVelocityJiggleX_2810 __asm__("cSplashToggles_m_DropMinVelocityJiggleX");
+extern sTun_2810 cSplashToggles_m_DropMaxVelocityJiggleX_2810 __asm__("cSplashToggles_m_DropMaxVelocityJiggleX");
+extern sTun_2810 cSplashToggles_m_DropMinVelocityJiggleY_2810 __asm__("cSplashToggles_m_DropMinVelocityJiggleY");
+extern sTun_2810 cSplashToggles_m_DropMaxVelocityJiggleY_2810 __asm__("cSplashToggles_m_DropMaxVelocityJiggleY");
+extern sTun_2810 cSplashToggles_m_DropMinSizeGrowth_2810 __asm__("cSplashToggles_m_DropMinSizeGrowth");
+extern sTun_2810 cSplashToggles_m_DropMaxSizeGrowth_2810 __asm__("cSplashToggles_m_DropMaxSizeGrowth");
+extern sTun_2810 cSplashToggles_m_DropMinPushOffSpeed_2810 __asm__("cSplashToggles_m_DropMinPushOffSpeed");
+extern sTun_2810 cSplashToggles_m_DropMaxPushOffSpeed_2810 __asm__("cSplashToggles_m_DropMaxPushOffSpeed");
+extern sTun_2810 cSplashToggles_m_DropMaxVelocity_2810 __asm__("cSplashToggles_m_DropMaxVelocity");
+extern sTun_2810 cSplashToggles_m_DropMinVelocityUsage_2810 __asm__("cSplashToggles_m_DropMinVelocityUsage");
+extern sTun_2810 cSplashToggles_m_DropMaxVelocityUsage_2810 __asm__("cSplashToggles_m_DropMaxVelocityUsage");
 extern sTun_2810 D_004A55B8_2810 __asm__("D_004A55B8");
 extern sTun_2810 D_004A55BC_2810 __asm__("D_004A55BC");
 
@@ -1694,9 +1694,9 @@ extern "C" void tDrop_update_2810(sPart_2810* p, float t) __asm__("tDrop_update"
 /**
  * Moves a screen-splash drop one frame and deactivates it when it expires or leaves the 640x480 screen.
  *
- * Ages it by 1/60, jiggles the velocity by random amounts ("Drop Min/Max Velocity Jiggle X/Y", D_004A42A0..AC) and
+ * Ages it by 1/60, jiggles the velocity by random amounts ("Drop Min/Max Velocity Jiggle X/Y", cSplashToggles_m_DropMinVelocityJiggleX..AC) and
  * pushes it away from the screen centre (D_004A55B8, D_004A55BC) by a random "Drop Min/Max Push Off Speed" scaled by
- * how far @p cameraSpeed is above "Min Velocity For Pushoff" (D_004A4288) towards 120 (clamped 0-1). The size grows by a random
+ * how far @p cameraSpeed is above "Min Velocity For Pushoff" (cSplashToggles_m_MinVelocityForPushoff) towards 120 (clamped 0-1). The size grows by a random
  * "Drop Min/Max Size Growth", the speed is capped at "Drop Maximum Velocity" and the position moves by the velocity
  * scaled per axis by a random "Drop Min/Max Velocity Usage" factor.
  *
@@ -1706,25 +1706,25 @@ extern "C" void tDrop_update_2810(sPart_2810* p, float t) __asm__("tDrop_update"
 extern "C" void tDrop_update_2810(sPart_2810* drop, float cameraSpeed)
 {
     drop->age += 0.016666667f;
-    addRand_2810(drop->vel.x, D_004A42A0_2810.v, D_004A42A4_2810.v);
-    addRand_2810(drop->vel.y, D_004A42A8_2810.v, D_004A42AC_2810.v);
+    addRand_2810(drop->vel.x, cSplashToggles_m_DropMinVelocityJiggleX_2810.v, cSplashToggles_m_DropMaxVelocityJiggleX_2810.v);
+    addRand_2810(drop->vel.y, cSplashToggles_m_DropMinVelocityJiggleY_2810.v, cSplashToggles_m_DropMaxVelocityJiggleY_2810.v);
     sV2_2810 dir = Normalize_2810(sV2_2810(drop->pos.x - D_004A55B8_2810.v, drop->pos.y - D_004A55BC_2810.v));
-    float k = clamp_2810((cameraSpeed - D_004A4288_2810.v) / (120.0f - D_004A4288_2810.v), 0.0f, 1.0f);
+    float k = clamp_2810((cameraSpeed - cSplashToggles_m_MinVelocityForPushoff_2810.v) / (120.0f - cSplashToggles_m_MinVelocityForPushoff_2810.v), 0.0f, 1.0f);
     {
-        sV2_2810 push = dir * k * randRange_2810(D_004A42B8_2810.v, D_004A42BC_2810.v);
+        sV2_2810 push = dir * k * randRange_2810(cSplashToggles_m_DropMinPushOffSpeed_2810.v, cSplashToggles_m_DropMaxPushOffSpeed_2810.v);
         drop->vel.x += push.x;
         drop->vel.y += push.y;
     }
     float speed = Length2_2810(drop->vel.x, drop->vel.y);
-    addRand_2810(drop->size.x, D_004A42B0_2810.v, D_004A42B4_2810.v);
-    addRand_2810(drop->size.y, D_004A42B0_2810.v, D_004A42B4_2810.v);
-    float maxSpeed = D_004A42C0_2810.v;
+    addRand_2810(drop->size.x, cSplashToggles_m_DropMinSizeGrowth_2810.v, cSplashToggles_m_DropMaxSizeGrowth_2810.v);
+    addRand_2810(drop->size.y, cSplashToggles_m_DropMinSizeGrowth_2810.v, cSplashToggles_m_DropMaxSizeGrowth_2810.v);
+    float maxSpeed = cSplashToggles_m_DropMaxVelocity_2810.v;
     if (speed > maxSpeed) {
         sV2_2810& velocity = drop->vel;
         velocity = (speed != 0.0f ? sV2_2810(drop->vel.x * (1.0f / speed), drop->vel.y * (1.0f / speed)) : velocity) * maxSpeed;
     }
     {
-        sV2_2810 step = randScale_2810(drop->vel.x, drop->vel.y, D_004A42C4_2810.v, D_004A42C8_2810.v);
+        sV2_2810 step = randScale_2810(drop->vel.x, drop->vel.y, cSplashToggles_m_DropMinVelocityUsage_2810.v, cSplashToggles_m_DropMaxVelocityUsage_2810.v);
         drop->pos.x += step.x;
         drop->pos.y += step.y;
     }
@@ -1914,12 +1914,12 @@ extern int D_004A3AFC;
 struct sTun_2D70 {
     float v;
 };
-extern sTun_2D70 D_004A42D8_2D70 __asm__("D_004A42D8");
-extern sTun_2D70 D_004A42DC_2D70 __asm__("D_004A42DC");
-extern sTun_2D70 D_004A42E0_2D70 __asm__("D_004A42E0");
-extern sTun_2D70 D_004A42E4_2D70 __asm__("D_004A42E4");
-extern sTun_2D70 D_004A42E8_2D70 __asm__("D_004A42E8");
-extern sTun_2D70 D_004A4318_2D70 __asm__("D_004A4318");
+extern sTun_2D70 cSplashToggles_m_CrystalMinLifeSpan_2D70 __asm__("cSplashToggles_m_CrystalMinLifeSpan");
+extern sTun_2D70 cSplashToggles_m_CrystalMaxLifeSpan_2D70 __asm__("cSplashToggles_m_CrystalMaxLifeSpan");
+extern sTun_2D70 cSplashToggles_m_CrystalMinSize_2D70 __asm__("cSplashToggles_m_CrystalMinSize");
+extern sTun_2D70 cSplashToggles_m_CrystalMaxSize_2D70 __asm__("cSplashToggles_m_CrystalMaxSize");
+extern sTun_2D70 cSplashToggles_m_CrystalMaxWidthHeightDifference_2D70 __asm__("cSplashToggles_m_CrystalMaxWidthHeightDifference");
+extern sTun_2D70 cSplashToggles_m_CrystalMaxRotationChange_2D70 __asm__("cSplashToggles_m_CrystalMaxRotationChange");
 
 struct sV2_2D70 {
     float x, y;
@@ -1989,11 +1989,11 @@ extern "C" void tCrystal_init_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __
 /**
  * Starts a screen-splash ice crystal at a position with a random size, life, tint and spin.
  *
- * The width is random between "Crystal Min/Max Size" (D_004A42E0, D_004A42E4); the height is the width plus a random
+ * The width is random between "Crystal Min/Max Size" (cSplashToggles_m_CrystalMinSize, cSplashToggles_m_CrystalMaxSize); the height is the width plus a random
  * amount within "Crystal Max Width Height Difference", clamped to the same range; both shrink by 0.7 per crystal
  * already placed in the group (@p n). The life is random between "Crystal Min/Max Life Span"; the velocity starts at
  * t2vect_Zero, the tint is a random blend of "Crystal Tint Min/Max" (D_00504700, D_00504710), the rotation a random
- * 0-360 degrees and its change within +/- D_004A4318. Clears the jiggle timer and direction (+0x40..+0x48) and +0x0 (On
+ * 0-360 degrees and its change within +/- cSplashToggles_m_CrystalMaxRotationChange. Clears the jiggle timer and direction (+0x40..+0x48) and +0x0 (On
  * Tour mNumSpawned), and sets the crystal active.
  *
  * @param crystal  the crystal
@@ -2002,15 +2002,15 @@ extern "C" void tCrystal_init_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __
  */
 extern "C" void tCrystal_init_2D70(sPart_2D70* crystal, const sV2_2D70& pos, int n)
 {
-    float x = randRange_2D70(D_004A42E0_2D70.v, D_004A42E4_2D70.v);
-    float rawHeight = x + randSym_2D70(D_004A42E8_2D70.v);
-    float y = clamp_2D70(rawHeight, D_004A42E0_2D70.v, D_004A42E4_2D70.v);
+    float x = randRange_2D70(cSplashToggles_m_CrystalMinSize_2D70.v, cSplashToggles_m_CrystalMaxSize_2D70.v);
+    float rawHeight = x + randSym_2D70(cSplashToggles_m_CrystalMaxWidthHeightDifference_2D70.v);
+    float y = clamp_2D70(rawHeight, cSplashToggles_m_CrystalMinSize_2D70.v, cSplashToggles_m_CrystalMaxSize_2D70.v);
     for (int i = 0; i < n; i++) {
         x *= 0.699999988079071f;
         y *= 0.699999988079071f;
     }
     crystal->age = 0;
-    crystal->life = randRange_2D70(D_004A42D8_2D70.v, D_004A42DC_2D70.v);
+    crystal->life = randRange_2D70(cSplashToggles_m_CrystalMinLifeSpan_2D70.v, cSplashToggles_m_CrystalMaxLifeSpan_2D70.v);
     crystal->active = 1;
     crystal->size = sV2_2D70(x, y);
     crystal->pos = pos;
@@ -2018,7 +2018,7 @@ extern "C" void tCrystal_init_2D70(sPart_2D70* crystal, const sV2_2D70& pos, int
     float tintMix = randf_2D70();
     crystal->color = D_00504700 * (1.0f - tintMix) + D_00504710 * tintMix;
     crystal->angle = randf_2D70() * 360.0f;
-    crystal->spin = randSym_2D70(D_004A4318_2D70.v);
+    crystal->spin = randSym_2D70(cSplashToggles_m_CrystalMaxRotationChange_2D70.v);
     crystal->f40 = 0;
     crystal->f44 = 0;
     crystal->f48 = 0;
@@ -2034,18 +2034,18 @@ extern int D_004A3AFC;
 struct sTun_3030 {
     float v;
 };
-extern sTun_3030 D_004A4288_3030 __asm__("D_004A4288");
-extern sTun_3030 D_004A42EC_3030 __asm__("D_004A42EC");
-extern sTun_3030 D_004A42F0_3030 __asm__("D_004A42F0");
-extern sTun_3030 D_004A42F4_3030 __asm__("D_004A42F4");
-extern sTun_3030 D_004A42F8_3030 __asm__("D_004A42F8");
-extern sTun_3030 D_004A42FC_3030 __asm__("D_004A42FC");
-extern sTun_3030 D_004A4300_3030 __asm__("D_004A4300");
-extern sTun_3030 D_004A4304_3030 __asm__("D_004A4304");
-extern sTun_3030 D_004A4308_3030 __asm__("D_004A4308");
-extern sTun_3030 D_004A430C_3030 __asm__("D_004A430C");
-extern sTun_3030 D_004A4310_3030 __asm__("D_004A4310");
-extern sTun_3030 D_004A4314_3030 __asm__("D_004A4314");
+extern sTun_3030 cSplashToggles_m_MinVelocityForPushoff_3030 __asm__("cSplashToggles_m_MinVelocityForPushoff");
+extern sTun_3030 cSplashToggles_m_CrystalMinVelocityJiggleX_3030 __asm__("cSplashToggles_m_CrystalMinVelocityJiggleX");
+extern sTun_3030 cSplashToggles_m_CrystalMaxVelocityJiggleX_3030 __asm__("cSplashToggles_m_CrystalMaxVelocityJiggleX");
+extern sTun_3030 cSplashToggles_m_CrystalMinVelocityJiggleY_3030 __asm__("cSplashToggles_m_CrystalMinVelocityJiggleY");
+extern sTun_3030 cSplashToggles_m_CrystalMaxVelocityJiggleY_3030 __asm__("cSplashToggles_m_CrystalMaxVelocityJiggleY");
+extern sTun_3030 cSplashToggles_m_CrystalMinJiggleTime_3030 __asm__("cSplashToggles_m_CrystalMinJiggleTime");
+extern sTun_3030 cSplashToggles_m_CrystalMaxJiggleTime_3030 __asm__("cSplashToggles_m_CrystalMaxJiggleTime");
+extern sTun_3030 cSplashToggles_m_CrystalMinSizeGrowth_3030 __asm__("cSplashToggles_m_CrystalMinSizeGrowth");
+extern sTun_3030 cSplashToggles_m_CrystalMaxSizeGrowth_3030 __asm__("cSplashToggles_m_CrystalMaxSizeGrowth");
+extern sTun_3030 cSplashToggles_m_CrystalMinPushOffSpeed_3030 __asm__("cSplashToggles_m_CrystalMinPushOffSpeed");
+extern sTun_3030 cSplashToggles_m_CrystalMaxPushOffSpeed_3030 __asm__("cSplashToggles_m_CrystalMaxPushOffSpeed");
+extern sTun_3030 cSplashToggles_m_CrystalMaxVelocity_3030 __asm__("cSplashToggles_m_CrystalMaxVelocity");
 extern sTun_3030 D_004A55B8_3030 __asm__("D_004A55B8");
 extern sTun_3030 D_004A55BC_3030 __asm__("D_004A55BC");
 
@@ -2138,23 +2138,23 @@ extern "C" void tCrystal_update_3030(sPart_3030* crystal, float cameraSpeed)
     crystal->f40 -= 0.016666667f;
     crystal->age += 0.016666667f;
     if (crystal->f40 < 0.0f) {
-        crystal->f40 = randRange_3030(D_004A42FC_3030.v, D_004A4300_3030.v);
-        crystal->f44 = randRange_3030(D_004A42EC_3030.v, D_004A42F0_3030.v);
-        crystal->f48 = randRange_3030(D_004A42F4_3030.v, D_004A42F8_3030.v);
+        crystal->f40 = randRange_3030(cSplashToggles_m_CrystalMinJiggleTime_3030.v, cSplashToggles_m_CrystalMaxJiggleTime_3030.v);
+        crystal->f44 = randRange_3030(cSplashToggles_m_CrystalMinVelocityJiggleX_3030.v, cSplashToggles_m_CrystalMaxVelocityJiggleX_3030.v);
+        crystal->f48 = randRange_3030(cSplashToggles_m_CrystalMinVelocityJiggleY_3030.v, cSplashToggles_m_CrystalMaxVelocityJiggleY_3030.v);
     }
     crystal->vel.x += crystal->f44;
     crystal->vel.y += crystal->f48;
     sV2_3030 dir = Normalize_3030(sV2_3030(crystal->pos.x - D_004A55B8_3030.v, crystal->pos.y - D_004A55BC_3030.v));
-    float k = clamp_3030((cameraSpeed - D_004A4288_3030.v) / (120.0f - D_004A4288_3030.v), 0.0f, 1.0f);
+    float k = clamp_3030((cameraSpeed - cSplashToggles_m_MinVelocityForPushoff_3030.v) / (120.0f - cSplashToggles_m_MinVelocityForPushoff_3030.v), 0.0f, 1.0f);
     {
-        sV2_3030 push = dir * k * randRange_3030(D_004A430C_3030.v, D_004A4310_3030.v);
+        sV2_3030 push = dir * k * randRange_3030(cSplashToggles_m_CrystalMinPushOffSpeed_3030.v, cSplashToggles_m_CrystalMaxPushOffSpeed_3030.v);
         crystal->vel.x += push.x;
         crystal->vel.y += push.y;
     }
     float speed = Length2_3030(crystal->vel.x, crystal->vel.y);
-    addRand_3030(crystal->size.x, D_004A4304_3030.v, D_004A4308_3030.v);
-    addRand_3030(crystal->size.y, D_004A4304_3030.v, D_004A4308_3030.v);
-    float maxSpeed = D_004A4314_3030.v;
+    addRand_3030(crystal->size.x, cSplashToggles_m_CrystalMinSizeGrowth_3030.v, cSplashToggles_m_CrystalMaxSizeGrowth_3030.v);
+    addRand_3030(crystal->size.y, cSplashToggles_m_CrystalMinSizeGrowth_3030.v, cSplashToggles_m_CrystalMaxSizeGrowth_3030.v);
+    float maxSpeed = cSplashToggles_m_CrystalMaxVelocity_3030.v;
     if (speed > maxSpeed) {
         sV2_3030& velocity = crystal->vel;
         velocity = (speed != 0.0f ? sV2_3030(crystal->vel.x * (1.0f / speed), crystal->vel.y * (1.0f / speed)) : velocity) * maxSpeed;
@@ -2371,8 +2371,8 @@ struct sEmit_3640 {
 
 extern int D_004A3AFC;
 extern int cSplashToggles_m_NumIceCrystals;
-extern float D_004A42D0;
-extern float D_004A42D4;
+extern float cSplashToggles_m_CrystalGroupSpacingX;
+extern float cSplashToggles_m_CrystalGroupSpacingY;
 extern "C" void tCrystal_init(tCrystal*, sVec2_3640*, int);
 
 // PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
@@ -2391,7 +2391,7 @@ static inline float randRange_3640(float lo, float hi)
  * Adds a group of @p n ice crystals around a screen position to the splash manager.
  *
  * Each crystal, while fewer than "Max Crystals" (cSplashToggles_m_NumIceCrystals) are active (+0x18), goes to @p basePos plus a random offset
- * within +/- "Crystal Group Spacing X/Y" (D_004A42D0, D_004A42D4) and is started by tCrystal_init with its number in
+ * within +/- "Crystal Group Spacing X/Y" (cSplashToggles_m_CrystalGroupSpacingX, cSplashToggles_m_CrystalGroupSpacingY) and is started by tCrystal_init with its number in
  * the group; the active count then grows.
  *
  * @param basePos  the group position
@@ -2402,8 +2402,8 @@ extern "C" void cSplashManager_AddCrystal(cSplashManager* self, sVec2_3640* base
     for (int i = 0; i < n; i++) {
         if (self->mNumActiveCrystals < cSplashToggles_m_NumIceCrystals) {
             sVec2_3640 off;
-            off.x = randRange_3640(-D_004A42D0, D_004A42D0);
-            off.y = randRange_3640(-D_004A42D4, D_004A42D4);
+            off.x = randRange_3640(-cSplashToggles_m_CrystalGroupSpacingX, cSplashToggles_m_CrystalGroupSpacingX);
+            off.y = randRange_3640(-cSplashToggles_m_CrystalGroupSpacingY, cSplashToggles_m_CrystalGroupSpacingY);
             sVec2_3640 pos;
             pos.x = basePos->x + off.x;
             pos.y = basePos->y + off.y;
@@ -2947,15 +2947,15 @@ static inline float Length_4260(const t4Vector& v)
     return r;
 }
 
-extern float D_004A4270;
-extern float D_004A4274;
-extern float D_004A4278;
-extern float D_004A427C;
+extern float cSplashToggles_m_FarthestImpactDistance;
+extern float cSplashToggles_m_LowestImpactItensity;
+extern float cSplashToggles_m_MinimumSnowfallForImpacts;
+extern float cSplashToggles_m_ImpactMultiplier;
 
 /**
  * Adds screen splashes for a snow impact near the view's camera.
  *
- * Nearness is 1 - (distance from the last camera position (+0x1010) to @p impactPos) / "Farthest Impact Distance" (D_004A4270).
+ * Nearness is 1 - (distance from the last camera position (+0x1010) to @p impactPos) / "Farthest Impact Distance" (cSplashToggles_m_FarthestImpactDistance).
  * When that is positive and the last snowfall intensity (+0x1028) is above "Lowest Snowfall For Impacts", it adds
  * nearness * clamp((@p speed * 0.036 - "Lowest Impact Intensity") / (120 - that), 0, 1) * "Impact Multiplier" to the
  * splash counter (+0x1024).
@@ -2965,12 +2965,12 @@ extern float D_004A427C;
  */
 extern "C" void cSplashManager_ReportImpactLocal(cSplashManager* self, t4Vector* impactPos, float speed)
 {
-    float k = 1.0f - Length_4260(Sub_4260(*(&self->mLastCameraPosition), *impactPos)) / D_004A4270;
-    if (k > 0.0f && self->mLastSnowfallIntensity > D_004A4278) {
-        float lo = D_004A4274;
+    float k = 1.0f - Length_4260(Sub_4260(*(&self->mLastCameraPosition), *impactPos)) / cSplashToggles_m_FarthestImpactDistance;
+    if (k > 0.0f && self->mLastSnowfallIntensity > cSplashToggles_m_MinimumSnowfallForImpacts) {
+        float lo = cSplashToggles_m_LowestImpactItensity;
         float impactRamp = (speed * 0.036f - lo) / (120.0f - lo);
         float impactWeight = (impactRamp >= 0.0f) ? (impactRamp <? 1.0f) : 0.0f;
-        self->mNumSplashesToAdd += k * impactWeight * D_004A427C;
+        self->mNumSplashesToAdd += k * impactWeight * cSplashToggles_m_ImpactMultiplier;
     }
 }
 #endif
@@ -2978,13 +2978,13 @@ extern "C" void cSplashManager_ReportImpactLocal(cSplashManager* self, t4Vector*
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_ReportSnowfall);
 #ifdef SKIP_ASM
-extern float D_004A4280;
-extern float D_004A4284;
+extern float cSplashToggles_m_LowestSnowfallAmount;
+extern float cSplashToggles_m_SnowfallMultiplier;
 
 /**
  * Records the view's snowfall intensity and adds screen splashes for heavy snowfall.
  *
- * Stores @p intensity as the last snowfall intensity (+0x1028). Above "Lowest Snowfall Amount" (D_004A4280) it adds @p intensity
+ * Stores @p intensity as the last snowfall intensity (+0x1028). Above "Lowest Snowfall Amount" (cSplashToggles_m_LowestSnowfallAmount) it adds @p intensity
  * * (last camera speed (+0x1020) + 10) * "Snowfall Multiplier" / 130 to the splash counter (+0x1024). The board-wake
  * code calls it per view with the snow intensity.
  *
@@ -2993,8 +2993,8 @@ extern float D_004A4284;
  */
 extern "C" void cSplashManager_ReportSnowfall(void *splashManager, float intensity) {
     *(float *)((char*)splashManager + 0x1028) = intensity;
-    if (D_004A4280 < intensity) {
-        *(float *)((char*)splashManager + 0x1024) += intensity * (*(float *)((char*)splashManager + 0x1020) + 10.0f) * (D_004A4284 * 0.007692307699471712f);
+    if (cSplashToggles_m_LowestSnowfallAmount < intensity) {
+        *(float *)((char*)splashManager + 0x1024) += intensity * (*(float *)((char*)splashManager + 0x1020) + 10.0f) * (cSplashToggles_m_SnowfallMultiplier * 0.007692307699471712f);
     }
 }
 #endif

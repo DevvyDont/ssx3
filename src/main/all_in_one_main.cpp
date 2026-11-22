@@ -847,8 +847,8 @@ extern float D_004C6668[4];
 extern float D_004C6678[4];
 extern float D_004C6688[4];
 extern float D_004C6698[4];
-extern float D_004C66A8[3];
-extern float D_004C66B8[3];
+extern float gSmallSize[3];
+extern float gBigSize[3];
 extern float gStaticColour[4];
 extern float gDisableColour[4];
 extern float kInvalidColour[4];
@@ -879,7 +879,7 @@ void sti_001DBC98(int init, int prio) __asm__("func_001DBC98");
  *
  * Only acts when @p prio is 0xFFFF. On the construct pass (@p init non-zero) it fills about 80 four-float colour
  * constants (D_004C6328 .. D_004C6838, including gDisableColour = {1, 0.6, 0.6, 0.6}, gPopupWhite = {1, 1, 1, 1} and
- * gPopupBlack = {1, 0, 0, 0}), two three-float vectors (D_004C66A8 = {100, 128, 0}, D_004C66B8 = {130, 166, 0}),
+ * gPopupBlack = {1, 0, 0, 0}), two three-float vectors (gSmallSize = {100, 128, 0}, gBigSize = {130, 166, 0}),
  * fifteen packed id/value pairs D_004A4E08 .. D_004A4E78 (0 to 13, then -1), and zeroes D_004A4E00, D_004A4E04 and the
  * front-end flow state words gFlowState .. D_004A4E8C. On the destroy pass it calls cFEFlowState_purge on gFlowState. The
  * first colour values are the same as the ones func_003AD290 writes in world/wscriptcache, so they come from a shared
@@ -1133,12 +1133,12 @@ void sti_001DBC98(int init, int prio)
             sE_init(&D_004A4E68, 12);
             sE_init(&D_004A4E70, 13);
             sE_init(&D_004A4E78, -1);
-            D_004C66A8[0] = 100.0f;
-            D_004C66A8[1] = 128.0f;
-            D_004C66A8[2] = 0.0f;
-            D_004C66B8[0] = 130.0f;
-            D_004C66B8[1] = 166.0f;
-            D_004C66B8[2] = 0.0f;
+            gSmallSize[0] = 100.0f;
+            gSmallSize[1] = 128.0f;
+            gSmallSize[2] = 0.0f;
+            gBigSize[0] = 130.0f;
+            gBigSize[1] = 166.0f;
+            gBigSize[2] = 0.0f;
             gStaticColour[0] = 0.5f;
             gStaticColour[1] = D_004C6338[3];
             gStaticColour[2] = D_004C6338[3];

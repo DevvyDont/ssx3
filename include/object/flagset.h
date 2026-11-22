@@ -82,7 +82,7 @@ struct cFlagSet {
     float mFlagTime[4];             // 0x078 [O]; [U] CreateMesh randomizes (BXrand), updateGrid
     float mScrollU;                 // 0x088 [O]; [U] CreateMesh zeroes; update advances; render (lwc1)
     float mScrollV;                 // 0x08C [O]; [U] ditto
-    int mFrameToUpdateGrid;         // 0x090 [O]; [R] ctor: the static counter mgFrameToUpdateGridCounter (D_004A4010,
+    int mFrameToUpdateGrid;         // 0x090 [O]; [R] ctor: the static counter mgFrameToUpdateGridCounter (cFlagSet_mgFrameToUpdateGridCounter,
                                     //       cycles 0..1)
     tInstanceRecord* mInstances[60]; // 0x094 [O]; [P] assert "mInstances[i]->m_Model..."; [R] ctor zeroes 60 words
                                     //       (0x180 down to 0x94); [U] AddFlag / RemoveFlag / render / replay

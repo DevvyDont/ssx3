@@ -42,7 +42,7 @@
 
 // cRenderTogglesMenu (0xA48): the "Render Toggles Menu" debug menu: a title, a spacer and 47 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem ShowSurfaceTypesItem, is at 0xA18 and ends at 0xA48; the static
-// instance D_004C98E0 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CA328 (+0xA48); [O] size
+// instance __RenderTogglesMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __VisualEffectsTestMenu (+0xA48); [O] size
 // 0xA48.
 // Base cMenu. Vtable cRenderTogglesMenu_vtbl (0x0047FCE0); destructor cRenderTogglesMenu__cRenderTogglesMenu. EA
 // source: main/visualeffectsmenu.cpp.
@@ -206,7 +206,7 @@ CHECK_SIZE(cRenderTogglesMenu, 0xA48);
 
 // cVisualEffectsTestMenu (0x494): the "Visual Effects Test Menu" debug menu: a title, a spacer and 17 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem LayerIdItem, is at 0x464 and ends at 0x494; the static instance
-// D_004CA328 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CA7C0 (+0x498); [O] size 0x494.
+// __VisualEffectsTestMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __LightGlowMenu (+0x498); [O] size 0x494.
 // Base cMenu. Vtable cVisualEffectsTestMenu_vtbl (0x0047FC88); destructor
 // cVisualEffectsTestMenu__cVisualEffectsTestMenu. EA source: main/visualeffectsmenu.cpp.
 struct cVisualEffectsTestMenu {
@@ -273,7 +273,7 @@ CHECK_SIZE(cVisualEffectsTestMenu, 0x494);
 
 // cPlantsMenu (0x3CC): the "Plants Menu" debug menu: a title, a spacer and 12 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem BranchDirectionItem, is at 0x398 and ends at 0x3CC; the static
-// instance D_004CAEF8 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CB2C8 (+0x3D0); [O] size
+// instance __PlantsMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __DepthFogMenu (+0x3D0); [O] size
 // 0x3CC.
 // Base cMenu. Vtable cPlantsMenu_vtbl (0x0047FC30); destructor cPlantsMenu__cPlantsMenu (the static instance's
 // destruction in __sti__visualeffectsmenu_cpp inlines it). EA source: main/visualeffectsmenu.cpp.
@@ -330,7 +330,7 @@ CHECK_SIZE(cPlantsMenu, 0x3CC);
 
 // cLightGlowMenu (0x734): the "Light Glow Menu" debug menu: a title, a spacer and 29 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem IntensityScaleItem, is at 0x700 and ends at 0x734; the static
-// instance D_004CA7C0 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CAEF8 (+0x738); [O] size
+// instance __LightGlowMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __PlantsMenu (+0x738); [O] size
 // 0x734.
 // Base cMenu. Vtable cLightGlowMenu_vtbl (0x0047FBD8); destructor cLightGlowMenu__cLightGlowMenu. EA source:
 // main/visualeffectsmenu.cpp.
@@ -368,22 +368,22 @@ struct cLightGlowMenu {
     cFloatMenuItem PS2IntensityTex3Item; // 0x394 [O]; [R] ctor (11, "PS2 Blend Texture 3",
                                          //       &cLightGlow_m_PS2IntensityTex3, 0..2)
     cFloatMenuItem PS2JitterTexItem;     // 0x3C8 [O]; [R] ctor (12, "PS2 Texture Jitter", &cLightGlow_m_PS2JitterTex, 0..8)
-    cIntMenuItem PS2ShowTexturesItem;    // 0x3FC [O]; [R] ctor (13, "PS2 Show Textures", &D_004A43FC, 0..1)
-    cFloatMenuItem SizeItem;             // 0x42C [O]; [R] ctor (14, "Size", &D_004A4400, 0..64)
-    cFloatMenuItem CutoffItem;           // 0x460 [O]; [R] ctor (15, "Cutoff", &D_004A4404, 0..1)
-    cFloatMenuItem ColourPowerItem;      // 0x494 [O]; [R] ctor (16, "Colour Power", &D_004A4408, 0..4)
-    cFloatMenuItem ColourScaleItem;      // 0x4C8 [O]; [R] ctor (17, "Colour Scale", &D_004A440C, 0..64)
-    cFloatMenuItem ColourAmbientItem;    // 0x4FC [O]; [R] ctor (18, "Colour Ambient", &D_004A4410, 0..16)
-    cFloatMenuItem SizePowerItem;        // 0x530 [O]; [R] ctor (19, "Size Power", &D_004A4414, 0..4)
-    cFloatMenuItem SizeScaleItem;        // 0x564 [O]; [R] ctor (20, "Size Scale", &D_004A4418, 0..64)
-    cFloatMenuItem SizeAmbientItem;      // 0x598 [O]; [R] ctor (21, "Size Ambient", &D_004A441C, 0..64)
-    cFloatMenuItem FadeRateItem;         // 0x5CC [O]; [R] ctor (22, "Fade Rate", &D_004A4420, 0..1)
-    cIntMenuItem ClearAlphaItem;         // 0x600 [O]; [R] ctor (23, "Background Alpha", &D_004A4424, 0..255)
-    cFloatMenuItem IntensityRItem;       // 0x630 [O]; [R] ctor (24, "Intensity Red", &D_004A4428, 0..1)
-    cFloatMenuItem IntensityGItem;       // 0x664 [O]; [R] ctor (25, "Intensity Green", &D_004A442C, 0..1)
-    cFloatMenuItem IntensityBItem;       // 0x698 [O]; [R] ctor (26, "Intensity Blue", &D_004A4430, 0..1)
-    cFloatMenuItem IntensityAItem;       // 0x6CC [O]; [R] ctor (27, "Intensity Alpha", &D_004A4434, 0..1)
-    cFloatMenuItem IntensityScaleItem;   // 0x700 [O]; [R] ctor (28, "Intensity Scale", &D_004A4438, 0..1)
+    cIntMenuItem PS2ShowTexturesItem;    // 0x3FC [O]; [R] ctor (13, "PS2 Show Textures", &cLightGlow_m_PS2ShowTextures, 0..1)
+    cFloatMenuItem SizeItem;             // 0x42C [O]; [R] ctor (14, "Size", &cLightGlow_m_Size, 0..64)
+    cFloatMenuItem CutoffItem;           // 0x460 [O]; [R] ctor (15, "Cutoff", &cLightGlow_m_Cutoff, 0..1)
+    cFloatMenuItem ColourPowerItem;      // 0x494 [O]; [R] ctor (16, "Colour Power", &cLightGlow_m_ColourPower, 0..4)
+    cFloatMenuItem ColourScaleItem;      // 0x4C8 [O]; [R] ctor (17, "Colour Scale", &cLightGlow_m_ColourScale, 0..64)
+    cFloatMenuItem ColourAmbientItem;    // 0x4FC [O]; [R] ctor (18, "Colour Ambient", &cLightGlow_m_ColourAmbient, 0..16)
+    cFloatMenuItem SizePowerItem;        // 0x530 [O]; [R] ctor (19, "Size Power", &cLightGlow_m_SizePower, 0..4)
+    cFloatMenuItem SizeScaleItem;        // 0x564 [O]; [R] ctor (20, "Size Scale", &cLightGlow_m_SizeScale, 0..64)
+    cFloatMenuItem SizeAmbientItem;      // 0x598 [O]; [R] ctor (21, "Size Ambient", &cLightGlow_m_SizeAmbient, 0..64)
+    cFloatMenuItem FadeRateItem;         // 0x5CC [O]; [R] ctor (22, "Fade Rate", &cLightGlow_m_FadeRate, 0..1)
+    cIntMenuItem ClearAlphaItem;         // 0x600 [O]; [R] ctor (23, "Background Alpha", &cLightGlow_m_ClearAlpha, 0..255)
+    cFloatMenuItem IntensityRItem;       // 0x630 [O]; [R] ctor (24, "Intensity Red", &cLightGlow_m_IntensityR, 0..1)
+    cFloatMenuItem IntensityGItem;       // 0x664 [O]; [R] ctor (25, "Intensity Green", &cLightGlow_m_IntensityG, 0..1)
+    cFloatMenuItem IntensityBItem;       // 0x698 [O]; [R] ctor (26, "Intensity Blue", &cLightGlow_m_IntensityB, 0..1)
+    cFloatMenuItem IntensityAItem;       // 0x6CC [O]; [R] ctor (27, "Intensity Alpha", &cLightGlow_m_IntensityA, 0..1)
+    cFloatMenuItem IntensityScaleItem;   // 0x700 [O]; [R] ctor (28, "Intensity Scale", &cLightGlow_m_IntensityScale, 0..1)
 };
 
 CHECK_OFFSET(cLightGlowMenu, NumItems, 0x000);
@@ -428,7 +428,7 @@ CHECK_SIZE(cLightGlowMenu, 0x734);
 
 // cDepthFogMenu (0x920): the "Depth Fog Menu" debug menu: a title, a spacer and 8 editing rows.
 // Size: [R] the constructor's last row, cARGBMenuItem ColourItem, is at 0x2C4 and ends at 0x920; the static instance
-// D_004CB2C8 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CBBE8 (+0x920); [O] On Tour's class
+// __DepthFogMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __HeightFogMenu (+0x920); [O] On Tour's class
 // is 0x954, with PSPDensityScaleItem that retail does not have.
 // Base cMenu. Vtable cDepthFogMenu_vtbl (0x0047FB80); destructor cDepthFogMenu__cDepthFogMenu. EA source:
 // main/visualeffectsmenu.cpp.
@@ -479,7 +479,7 @@ CHECK_SIZE(cDepthFogMenu, 0x920);
 
 // cHeightFogMenu (0x1FC): the "Height Fog Menu" debug menu: a title, a spacer and 3 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem ThicknessItem, is at 0x1C8 and ends at 0x1FC; the static
-// instance D_004CBBE8 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CBDE8 (+0x200); [O] size
+// instance __HeightFogMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __DetailSystemMenu (+0x200); [O] size
 // 0x1FC.
 // Base cMenu. Vtable cHeightFogMenu_vtbl (0x0047FB28); destructor cHeightFogMenu__cHeightFogMenu (the static instance's
 // destruction in __sti__visualeffectsmenu_cpp inlines it). EA source: main/visualeffectsmenu.cpp.
@@ -496,9 +496,9 @@ struct cHeightFogMenu {
     // cHeightFogMenu's rows (0x130-0x1FB)
     cNullMenuItem TitleItem;         // 0x130 [O]; [R] ctor ("Height Fog Menu")
     cSpaceMenuItem SpaceItem;        // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;         // 0x164 [O]; [R] ctor (0, "Enable", &D_004A43B4, 0..1)
-    cFloatMenuItem StartHeightItem;  // 0x194 [O]; [R] ctor (1, "Start Height", &D_004A43B8, -100000..100000)
-    cFloatMenuItem ThicknessItem;    // 0x1C8 [O]; [R] ctor (2, "Thickness", &D_004A43BC, 0.0001..10000)
+    cIntMenuItem EnableItem;         // 0x164 [O]; [R] ctor (0, "Enable", &cHeightFog_m_Enable, 0..1)
+    cFloatMenuItem StartHeightItem;  // 0x194 [O]; [R] ctor (1, "Start Height", &cHeightFog_m_StartHeight, -100000..100000)
+    cFloatMenuItem ThicknessItem;    // 0x1C8 [O]; [R] ctor (2, "Thickness", &cHeightFog_m_Thickness, 0.0001..10000)
 };
 
 CHECK_OFFSET(cHeightFogMenu, NumItems, 0x000);
@@ -517,7 +517,7 @@ CHECK_SIZE(cHeightFogMenu, 0x1FC);
 
 // cDetailSystemMenu (0x368): the "Detail System Menu" debug menu: a title, a spacer and 10 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem XBoxMaxSizeItem, is at 0x334 and ends at 0x368; the static
-// instance D_004CBDE8 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CC150 (+0x368); [O] On
+// instance __DetailSystemMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __ScreenTintMenu (+0x368); [O] On
 // Tour's class is 0x438, with PSPNumSparklesItem, PSPSizeItem, PSPMinSizeItem, PSPMaxSizeItem that retail does not
 // have.
 // Base cMenu. Vtable cDetailSystemMenu_vtbl (0x0047FAD0); destructor cDetailSystemMenu__cDetailSystemMenu (the static
@@ -619,7 +619,7 @@ CHECK_SIZE(cShellRendererMenu, 0x31C);
 
 // cScreenTintMenu (0x95C): the "Screen Tint Menu" debug menu: a title, a spacer and 40 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem GammaFillBItem, is at 0x928 and ends at 0x95C; the static
-// instance D_004CC150 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CCAB0 (+0x960); [O] size
+// instance __ScreenTintMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __ShadowMenu (+0x960); [O] size
 // 0x95C.
 // Base cMenu. Vtable cScreenTintMenu_vtbl (0x0047FA20); destructor cScreenTintMenu__cScreenTintMenu. EA source:
 // main/visualeffectsmenu.cpp.
@@ -735,7 +735,7 @@ CHECK_SIZE(cScreenTintMenu, 0x95C);
 
 // cShadowMenu (0x330): the "Shadow Menu" debug menu: a title, a spacer and 9 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem EndUVItem, is at 0x2FC and ends at 0x330; the static instance
-// D_004CCAB0 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CCDE0 (+0x330); [O] size 0x330.
+// __ShadowMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __SnowSurfaceMenu (+0x330); [O] size 0x330.
 // Base cMenu. Vtable cShadowMenu_vtbl (0x0047F9C8); destructor cShadowMenu__cShadowMenu (the static instance's
 // destruction in __sti__visualeffectsmenu_cpp inlines it). EA source: main/visualeffectsmenu.cpp.
 struct cShadowMenu {
@@ -751,15 +751,15 @@ struct cShadowMenu {
     // cShadowMenu's rows (0x130-0x32F)
     cNullMenuItem TitleItem;          // 0x130 [O]; [R] ctor ("Shadow Menu")
     cSpaceMenuItem SpaceItem;         // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;          // 0x164 [O]; [R] ctor (0, "Enable", &D_004A41B0, 0..1)
-    cIntMenuItem ShowShadowPolysItem; // 0x194 [O]; [R] ctor (1, "Show Shadow Polys", &D_004A41B4, 0..1)
-    cFloatMenuItem ShadowDirXItem;    // 0x1C4 [O]; [R] ctor (2, "Shadow Dir X", &D_004A41B8, -1..1)
-    cFloatMenuItem ShadowDirYItem;    // 0x1F8 [O]; [R] ctor (3, "Shadow Dir Y", &D_004A41BC, -1..1)
-    cFloatMenuItem ShadowDirZItem;    // 0x22C [O]; [R] ctor (4, "Shadow Dir Z", &D_004A41C0, -1..1)
-    cFloatMenuItem LengthItem;        // 0x260 [O]; [R] ctor (5, "Length", &D_004A41C4, 0.1..100000)
-    cFloatMenuItem IntensityItem;     // 0x294 [O]; [R] ctor (6, "Intensity", &D_004A41C8, 0..1)
-    cFloatMenuItem StartUVItem;       // 0x2C8 [O]; [R] ctor (7, "Start UV", &D_004A41CC, -64..64)
-    cFloatMenuItem EndUVItem;         // 0x2FC [O]; [R] ctor (8, "End UV", &D_004A41D0, -64..64)
+    cIntMenuItem EnableItem;          // 0x164 [O]; [R] ctor (0, "Enable", &cShadow_m_Enable, 0..1)
+    cIntMenuItem ShowShadowPolysItem; // 0x194 [O]; [R] ctor (1, "Show Shadow Polys", &cShadow_m_ShowShadowPolys, 0..1)
+    cFloatMenuItem ShadowDirXItem;    // 0x1C4 [O]; [R] ctor (2, "Shadow Dir X", &cShadow_m_ShadowDirX, -1..1)
+    cFloatMenuItem ShadowDirYItem;    // 0x1F8 [O]; [R] ctor (3, "Shadow Dir Y", &cShadow_m_ShadowDirY, -1..1)
+    cFloatMenuItem ShadowDirZItem;    // 0x22C [O]; [R] ctor (4, "Shadow Dir Z", &cShadow_m_ShadowDirZ, -1..1)
+    cFloatMenuItem LengthItem;        // 0x260 [O]; [R] ctor (5, "Length", &cShadow_m_Length, 0.1..100000)
+    cFloatMenuItem IntensityItem;     // 0x294 [O]; [R] ctor (6, "Intensity", &cShadow_m_Intensity, 0..1)
+    cFloatMenuItem StartUVItem;       // 0x2C8 [O]; [R] ctor (7, "Start UV", &cShadow_m_StartUV, -64..64)
+    cFloatMenuItem EndUVItem;         // 0x2FC [O]; [R] ctor (8, "End UV", &cShadow_m_EndUV, -64..64)
 };
 
 CHECK_OFFSET(cShadowMenu, NumItems, 0x000);
@@ -784,7 +784,7 @@ CHECK_SIZE(cShadowMenu, 0x330);
 
 // cSnowSurfaceMenu (0x2C8): the "Snow Surface Menu" debug menu: a title, a spacer and 7 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem MaxColourScaleItem, is at 0x294 and ends at 0x2C8; the static
-// instance D_004CCDE0 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CD0A8 (+0x2C8); [O] size
+// instance __SnowSurfaceMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __BoardTrailMenu (+0x2C8); [O] size
 // 0x2C8.
 // Base cMenu. Vtable cSnowSurfaceMenu_vtbl (0x0047F970); destructor cSnowSurfaceMenu__cSnowSurfaceMenu (the static
 // instance's destruction in __sti__visualeffectsmenu_cpp inlines it). EA source: main/visualeffectsmenu.cpp.
@@ -801,13 +801,13 @@ struct cSnowSurfaceMenu {
     // cSnowSurfaceMenu's rows (0x130-0x2C7)
     cNullMenuItem TitleItem;             // 0x130 [O]; [R] ctor ("Snow Surface Menu")
     cSpaceMenuItem SpaceItem;            // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;             // 0x164 [O]; [R] ctor (0, "Enable", &D_004A46DC, 0..1)
-    cIntMenuItem EnablePatchReflectItem; // 0x194 [O]; [R] ctor (1, "Enable Patch Reflect", &D_004A46E0, 0..1)
-    cFloatMenuItem BaseItem;             // 0x1C4 [O]; [R] ctor (2, "Base", &D_004A46E4, 0..32)
-    cFloatMenuItem BumpItem;             // 0x1F8 [O]; [R] ctor (3, "Bump", &D_004A46E8, 0..32)
-    cFloatMenuItem NoiseItem;            // 0x22C [O]; [R] ctor (4, "Noise", &D_004A46EC, 0..32)
-    cFloatMenuItem MinColourScaleItem;   // 0x260 [O]; [R] ctor (5, "Min Colour Add", &D_004A46F0, 0..3)
-    cFloatMenuItem MaxColourScaleItem;   // 0x294 [O]; [R] ctor (6, "Max Colour Scale", &D_004A46F4, 0..3)
+    cIntMenuItem EnableItem;             // 0x164 [O]; [R] ctor (0, "Enable", &cSnowSurface_m_Enable, 0..1)
+    cIntMenuItem EnablePatchReflectItem; // 0x194 [O]; [R] ctor (1, "Enable Patch Reflect", &cSnowSurface_m_EnablePatchReflect, 0..1)
+    cFloatMenuItem BaseItem;             // 0x1C4 [O]; [R] ctor (2, "Base", &cSnowSurface_m_Base, 0..32)
+    cFloatMenuItem BumpItem;             // 0x1F8 [O]; [R] ctor (3, "Bump", &cSnowSurface_m_Bump, 0..32)
+    cFloatMenuItem NoiseItem;            // 0x22C [O]; [R] ctor (4, "Noise", &cSnowSurface_m_Noise, 0..32)
+    cFloatMenuItem MinColourScaleItem;   // 0x260 [O]; [R] ctor (5, "Min Colour Add", &cSnowSurface_m_MinColourScale, 0..3)
+    cFloatMenuItem MaxColourScaleItem;   // 0x294 [O]; [R] ctor (6, "Max Colour Scale", &cSnowSurface_m_MaxColourScale, 0..3)
 };
 
 CHECK_OFFSET(cSnowSurfaceMenu, NumItems, 0x000);
@@ -830,7 +830,7 @@ CHECK_SIZE(cSnowSurfaceMenu, 0x2C8);
 
 // cBoardTrailMenu (0x5CC): the "Board Trail Menu" debug menu: a title, a spacer and 22 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem UseSliceCapsItem, is at 0x59C and ends at 0x5CC; the static
-// instance D_004CD0A8 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CD678 (+0x5D0); [O] On
+// instance __BoardTrailMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __FlagsMenu (+0x5D0); [O] On
 // Tour's class is 0x704, with SkiInnerWidthScaleItem, SkiOuterWidthScaleItem, SkiHeightScaleItem,
 // SkiDepth2HeightScaleItem, SkiWidthScaleItem, SkiMinWidthItem that retail does not have.
 // Base cMenu. Vtable cBoardTrailMenu_vtbl (0x0047F918); destructor cBoardTrailMenu__cBoardTrailMenu. EA source:
@@ -849,11 +849,11 @@ struct cBoardTrailMenu {
     // cBoardTrailMenu's rows (0x130-0x5CB)
     cNullMenuItem TitleItem;                 // 0x130 [O]; [R] ctor ("Board Trail Menu")
     cSpaceMenuItem SpaceItem;                // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;                 // 0x164 [O]; [R] ctor (0, "Enable", &D_004A457C, 0..1)
-    cFloatMenuItem InnerWidthScaleItem;      // 0x194 [O]; [R] ctor (1, "Inner Width Scale", &D_004A4580, -100..100)
-    cFloatMenuItem OuterWidthScaleItem;      // 0x1C8 [O]; [R] ctor (2, "Outer Width Scale", &D_004A4584, -1000..1000)
-    cFloatMenuItem HeightScaleItem;          // 0x1FC [O]; [R] ctor (3, "Height Scale", &D_004A4588, -20..20)
-    cFloatMenuItem Depth2HeightScaleItem;    // 0x230 [O]; [R] ctor (4, "Depth to Height Scale", &D_004A458C, 0..1)
+    cIntMenuItem EnableItem;                 // 0x164 [O]; [R] ctor (0, "Enable", &cBoardTrail_m_Enable, 0..1)
+    cFloatMenuItem InnerWidthScaleItem;      // 0x194 [O]; [R] ctor (1, "Inner Width Scale", &cBoardTrail_m_InnerWidthScale, -100..100)
+    cFloatMenuItem OuterWidthScaleItem;      // 0x1C8 [O]; [R] ctor (2, "Outer Width Scale", &cBoardTrail_m_OuterWidthScale, -1000..1000)
+    cFloatMenuItem HeightScaleItem;          // 0x1FC [O]; [R] ctor (3, "Height Scale", &cBoardTrail_m_HeightScale, -20..20)
+    cFloatMenuItem Depth2HeightScaleItem;    // 0x230 [O]; [R] ctor (4, "Depth to Height Scale", &cBoardTrail_m_Depth2HeightScale, 0..1)
     cFloatMenuItem PackedDepthScaleItem;     // 0x264 [O] (On Tour 0x39C; placed by the caption and On Tour's order);
                                              //       [R] ctor (5, "Packed Depth Scale", &cBoardTrail_m_PackedDepthScale, -100..100)
     cFloatMenuItem LooseDepthScaleItem;      // 0x298 [O] (On Tour 0x3D0; placed by the caption and On Tour's order);
@@ -863,31 +863,31 @@ struct cBoardTrailMenu {
     cFloatMenuItem DeepPowderDepthScaleItem; // 0x300 [O] (On Tour 0x438; placed by the caption and On Tour's order);
                                              //       [R] ctor (8, "Deep Powder Depth Scale", &cBoardTrail_m_DeepPowderDepthScale, -1000..1000)
     cFloatMenuItem TopBiasFrontItem;         // 0x334 [O] (On Tour 0x46C; placed by the caption and On Tour's order);
-                                             //       [R] ctor (9, "Top Bias Front", &D_004A45A0, -1000..1000)
+                                             //       [R] ctor (9, "Top Bias Front", &cBoardTrail_m_TopBiasFront, -1000..1000)
     cFloatMenuItem TopBiasBehindItem;        // 0x368 [O] (On Tour 0x4A0; placed by the caption and On Tour's order);
-                                             //       [R] ctor (10, "Top Bias Behind", &D_004A45A4, -1000..1000)
+                                             //       [R] ctor (10, "Top Bias Behind", &cBoardTrail_m_TopBiasBehind, -1000..1000)
     cFloatMenuItem TopBiasClearItem;         // 0x39C [O] (On Tour 0x4D4; placed by the caption and On Tour's order);
-                                             //       [R] ctor (11, "Top Bias Clear", &D_004A45A8, -16777215..16777215)
+                                             //       [R] ctor (11, "Top Bias Clear", &cBoardTrail_m_TopBiasClear, -16777215..16777215)
     cFloatMenuItem InnerPositionJitterItem;  // 0x3D0 [O] (On Tour 0x508; placed by the caption and On Tour's order);
-                                             //       [R] ctor (12, "Inner Position Jitter", &D_004A45AC, -10..10)
+                                             //       [R] ctor (12, "Inner Position Jitter", &cBoardTrail_m_InnerPositionJitter, -10..10)
     cFloatMenuItem BaseUItem;                // 0x404 [O] (On Tour 0x53C; placed by the caption and On Tour's order);
-                                             //       [R] ctor (13, "Base U", &D_004A45B0, 0..1)
+                                             //       [R] ctor (13, "Base U", &cBoardTrail_m_BaseU, 0..1)
     cFloatMenuItem InnerUItem;               // 0x438 [O] (On Tour 0x570; placed by the caption and On Tour's order);
-                                             //       [R] ctor (14, "Inner U", &D_004A45B4, 0..1)
+                                             //       [R] ctor (14, "Inner U", &cBoardTrail_m_InnerU, 0..1)
     cFloatMenuItem OuterUItem;               // 0x46C [O] (On Tour 0x5A4; placed by the caption and On Tour's order);
-                                             //       [R] ctor (15, "Outer U", &D_004A45B8, 0..1)
+                                             //       [R] ctor (15, "Outer U", &cBoardTrail_m_OuterU, 0..1)
     cFloatMenuItem OuterNormalOffsetItem;    // 0x4A0 [O] (On Tour 0x5D8; placed by the caption and On Tour's order);
-                                             //       [R] ctor (16, "Outer Normal Offset", &D_004A45BC, -10..10)
+                                             //       [R] ctor (16, "Outer Normal Offset", &cBoardTrail_m_OuterNormalOffset, -10..10)
     cFloatMenuItem InnerNormalOffsetItem;    // 0x4D4 [O] (On Tour 0x60C; placed by the caption and On Tour's order);
-                                             //       [R] ctor (17, "Inner Normal Offset", &D_004A45C0, -10..10)
+                                             //       [R] ctor (17, "Inner Normal Offset", &cBoardTrail_m_InnerNormalOffset, -10..10)
     cFloatMenuItem BaseNormalOffsetItem;     // 0x508 [O] (On Tour 0x640; placed by the caption and On Tour's order);
-                                             //       [R] ctor (18, "Base Normal Offset", &D_004A45C4, -10..10)
+                                             //       [R] ctor (18, "Base Normal Offset", &cBoardTrail_m_BaseNormalOffset, -10..10)
     cIntMenuItem NumFadeSegmentsItem;        // 0x53C [O] (On Tour 0x674; placed by the caption and On Tour's order);
-                                             //       [R] ctor (19, "Num Fade Segments", &D_004A45C8, 0..64)
+                                             //       [R] ctor (19, "Num Fade Segments", &cBoardTrail_m_NumFadeSegments, 0..64)
     cIntMenuItem DrawFixupLayerItem;         // 0x56C [O] (On Tour 0x6A4; placed by the caption and On Tour's order);
                                              //       [R] ctor (20, "Draw Fixup Layer", &D_004A45CC, 0..1)
     cIntMenuItem UseSliceCapsItem;           // 0x59C [O] (On Tour 0x6D4; placed by the caption and On Tour's order);
-                                             //       [R] ctor (21, "Use Slice Caps", &D_004A45D0, 0..1)
+                                             //       [R] ctor (21, "Use Slice Caps", &cBoardTrail_m_UseSliceCaps, 0..1)
 };
 
 CHECK_OFFSET(cBoardTrailMenu, NumItems, 0x000);
@@ -925,7 +925,7 @@ CHECK_SIZE(cBoardTrailMenu, 0x5CC);
 
 // cFlagsMenu (0x1C4): the "Flags Menu" debug menu: a title, a spacer and 2 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem EnableRenderItem, is at 0x194 and ends at 0x1C4; the static
-// instance D_004CD678 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CD840 (+0x1C8); [O] size
+// instance __FlagsMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CD840 (+0x1C8); [O] size
 // 0x1C4.
 // Base cMenu. Vtable cFlagsMenu_vtbl (0x0047F8C0); destructor cFlagsMenu__cFlagsMenu (the static instance's destruction
 // in __sti__visualeffectsmenu_cpp inlines it). EA source: main/visualeffectsmenu.cpp.
@@ -1047,7 +1047,7 @@ CHECK_SIZE(cPowerUpFXTogglesMenu, 0x448);
 
 // cSnowfallTogglesMenu (0x101C): the "Snowfall Toggles" debug menu: a title, a spacer and 12 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem TestAdditiveItem, is at 0xFEC and ends at 0x101C; the static
-// instance D_004CDC88 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004CECA8 (+0x1020); [O] size
+// instance D_004CDC88 (built by __sti__visualeffectsmenu_cpp) ends at the next object, __SplashTogglesMenu (+0x1020); [O] size
 // 0x101C.
 // Base cMenu. Vtable cSnowfallTogglesMenu_vtbl (0x0047F810); destructor cSnowfallTogglesMenu__cSnowfallTogglesMenu. EA
 // source: main/visualeffectsmenu.cpp.
@@ -1119,7 +1119,7 @@ CHECK_SIZE(cSnowfallTogglesMenu, 0x101C);
 
 // cSplashTogglesMenu (0x2548): the "Camera Splash Menu" debug menu: a title, a spacer and 56 editing rows.
 // Size: [R] the constructor's last row, cARGBMenuItem CrystalTintMaxItem, is at 0x1EEC and ends at 0x2548; the static
-// instance D_004CECA8 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004D11F0 (+0x2548); [O] size
+// instance __SplashTogglesMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __TubeMenu (+0x2548); [O] size
 // 0x2548.
 // Base cMenu. Vtable cSplashTogglesMenu_vtbl (0x0047F7B8); destructor cSplashTogglesMenu__cSplashTogglesMenu. EA
 // source: main/visualeffectsmenu.cpp.
@@ -1155,93 +1155,93 @@ struct cSplashTogglesMenu {
     cIntMenuItem MaxSpawnPerCrystalItem;                // 0x2EC [O]; [R] ctor (8, "Max Spawn Per Crystal", &cSplashToggles_m_MaxSpawnPerCrystal,
                                                         //       1..10)
     cFloatMenuItem FarthestImpactDistanceItem;          // 0x31C [O]; [R] ctor (9, "Farthest Impact Distance",
-                                                        //       &D_004A4270, 0..2000)
+                                                        //       &cSplashToggles_m_FarthestImpactDistance, 0..2000)
     cFloatMenuItem LowestImpactItensityItem;            // 0x350 [O]; [R] ctor (10, "Lowest Impact Intensity",
-                                                        //       &D_004A4274, 0..120)
+                                                        //       &cSplashToggles_m_LowestImpactItensity, 0..120)
     cFloatMenuItem MinimumSnowfallForImpactsItem;       // 0x384 [O]; [R] ctor (11, "Lowest Snowfall For Impacts",
-                                                        //       &D_004A4278, 0..10)
-    cFloatMenuItem ImpactMultiplierItem;                // 0x3B8 [O]; [R] ctor (12, "Impact Multiplier", &D_004A427C,
+                                                        //       &cSplashToggles_m_MinimumSnowfallForImpacts, 0..10)
+    cFloatMenuItem ImpactMultiplierItem;                // 0x3B8 [O]; [R] ctor (12, "Impact Multiplier", &cSplashToggles_m_ImpactMultiplier,
                                                         //       0..10)
     cFloatMenuItem LowestSnowfallAmountItem;            // 0x3EC [O]; [R] ctor (13, "Lowest Snowfall Amount",
-                                                        //       &D_004A4280, 0..10)
-    cFloatMenuItem SnowfallMultiplierItem;              // 0x420 [O]; [R] ctor (14, "Snowfall Multiplier", &D_004A4284,
+                                                        //       &cSplashToggles_m_LowestSnowfallAmount, 0..10)
+    cFloatMenuItem SnowfallMultiplierItem;              // 0x420 [O]; [R] ctor (14, "Snowfall Multiplier", &cSplashToggles_m_SnowfallMultiplier,
                                                         //       0..10)
     cFloatMenuItem MinVelocityForPushoffItem;           // 0x454 [O]; [R] ctor (15, "Min Velocity For Pushoff",
-                                                        //       &D_004A4288, 0..10)
-    cFloatMenuItem DropMinLifeSpanItem;                 // 0x488 [O]; [R] ctor (16, "Drop Min Life Span", &D_004A428C,
+                                                        //       &cSplashToggles_m_MinVelocityForPushoff, 0..10)
+    cFloatMenuItem DropMinLifeSpanItem;                 // 0x488 [O]; [R] ctor (16, "Drop Min Life Span", &cSplashToggles_m_DropMinLifeSpan,
                                                         //       0..100)
-    cFloatMenuItem DropMaxLifeSpanItem;                 // 0x4BC [O]; [R] ctor (17, "Drop Max Life Span", &D_004A4290,
+    cFloatMenuItem DropMaxLifeSpanItem;                 // 0x4BC [O]; [R] ctor (17, "Drop Max Life Span", &cSplashToggles_m_DropMaxLifeSpan,
                                                         //       0..100)
     cFloatMenuItem DropMinSizeItem;                     // 0x4F0 [O]; [R] ctor (18, "Drop Min Size", &cSplashToggles_m_DropMinSize, 0..40)
     cFloatMenuItem DropMaxSizeItem;                     // 0x524 [O]; [R] ctor (19, "Drop Max Size", &cSplashToggles_m_DropMaxSize, 0..40)
     cFloatMenuItem DropMaxWidthHeightDifferenceItem;    // 0x558 [O]; [R] ctor (20, "Drop Max Width Height Difference",
-                                                        //       &D_004A429C, 0..10)
+                                                        //       &cSplashToggles_m_DropMaxWidthHeightDifference, 0..10)
     cFloatMenuItem DropMinVelocityJiggleXItem;          // 0x58C [O]; [R] ctor (21, "Drop Min Velocity Jiggle X",
-                                                        //       &D_004A42A0, -10..10)
+                                                        //       &cSplashToggles_m_DropMinVelocityJiggleX, -10..10)
     cFloatMenuItem DropMaxVelocityJiggleXItem;          // 0x5C0 [O]; [R] ctor (22, "Drop Max Velocity Jiggle X",
-                                                        //       &D_004A42A4, -10..10)
+                                                        //       &cSplashToggles_m_DropMaxVelocityJiggleX, -10..10)
     cFloatMenuItem DropMinVelocityJiggleYItem;          // 0x5F4 [O]; [R] ctor (23, "Drop Min Velocity Jiggle Y",
-                                                        //       &D_004A42A8, -10..10)
+                                                        //       &cSplashToggles_m_DropMinVelocityJiggleY, -10..10)
     cFloatMenuItem DropMaxVelocityJiggleYItem;          // 0x628 [O]; [R] ctor (24, "Drop Max Velocity Jiggle Y",
-                                                        //       &D_004A42AC, -10..10)
-    cFloatMenuItem DropMinSizeGrowthItem;               // 0x65C [O]; [R] ctor (25, "Drop Min Size Growth", &D_004A42B0,
+                                                        //       &cSplashToggles_m_DropMaxVelocityJiggleY, -10..10)
+    cFloatMenuItem DropMinSizeGrowthItem;               // 0x65C [O]; [R] ctor (25, "Drop Min Size Growth", &cSplashToggles_m_DropMinSizeGrowth,
                                                         //       -10..10)
-    cFloatMenuItem DropMaxSizeGrowthItem;               // 0x690 [O]; [R] ctor (26, "Drop Max Size Growth", &D_004A42B4,
+    cFloatMenuItem DropMaxSizeGrowthItem;               // 0x690 [O]; [R] ctor (26, "Drop Max Size Growth", &cSplashToggles_m_DropMaxSizeGrowth,
                                                         //       -10..10)
     cFloatMenuItem DropMinPushOffSpeedItem;             // 0x6C4 [O]; [R] ctor (27, "Drop Min Push Off Speed",
-                                                        //       &D_004A42B8, 0..10)
+                                                        //       &cSplashToggles_m_DropMinPushOffSpeed, 0..10)
     cFloatMenuItem DropMaxPushOffSpeedItem;             // 0x6F8 [O]; [R] ctor (28, "Drop Max Push Off Speed",
-                                                        //       &D_004A42BC, 0..10)
+                                                        //       &cSplashToggles_m_DropMaxPushOffSpeed, 0..10)
     cFloatMenuItem DropMaxVelocityItem;                 // 0x72C [O]; [R] ctor (29, "Drop Maximum Velocity",
-                                                        //       &D_004A42C0, 0..100)
+                                                        //       &cSplashToggles_m_DropMaxVelocity, 0..100)
     cFloatMenuItem DropMinVelocityUsageItem;            // 0x760 [O]; [R] ctor (30, "Drop Min Velocity Usage",
-                                                        //       &D_004A42C4, 0..10)
+                                                        //       &cSplashToggles_m_DropMinVelocityUsage, 0..10)
     cFloatMenuItem DropMaxVelocityUsageItem;            // 0x794 [O]; [R] ctor (31, "Drop Max Velocity Usage",
-                                                        //       &D_004A42C8, 0..10)
+                                                        //       &cSplashToggles_m_DropMaxVelocityUsage, 0..10)
     cFloatMenuItem DropMaxRotationChangeItem;           // 0x7C8 [O]; [R] ctor (32, "Crystal Max Rotation Overall
-                                                        //       Change", &D_004A42CC, 0..720)
+                                                        //       Change", &cSplashToggles_m_DropMaxRotationChange, 0..720)
     cARGBMenuItem DropTintMinItem;                      // 0x7FC [O]; [R] ctor (33, "Drop Tint Min", &D_005046E0); the
                                                         //       dtor tears it down inline
     cARGBMenuItem DropTintMaxItem;                      // 0xE58 [O]; [R] ctor (34, "Drop Tint Max", &D_005046F0); the
                                                         //       dtor tears it down inline
     cFloatMenuItem CrystalGroupSpacingXItem;            // 0x14B4 [O]; [R] ctor (35, "Crystal Group Spacing X",
-                                                        //       &D_004A42D0, 0..100)
+                                                        //       &cSplashToggles_m_CrystalGroupSpacingX, 0..100)
     cFloatMenuItem CrystalGroupSpacingYItem;            // 0x14E8 [O]; [R] ctor (36, "Crystal Group Spacing Y",
-                                                        //       &D_004A42D4, 0..100)
+                                                        //       &cSplashToggles_m_CrystalGroupSpacingY, 0..100)
     cFloatMenuItem CrystalMinLifeSpanItem;              // 0x151C [O]; [R] ctor (37, "Crystal Min Life Span",
-                                                        //       &D_004A42D8, 0..100)
+                                                        //       &cSplashToggles_m_CrystalMinLifeSpan, 0..100)
     cFloatMenuItem CrystalMaxLifeSpanItem;              // 0x1550 [O]; [R] ctor (38, "Crystal Max Life Span",
-                                                        //       &D_004A42DC, 0..100)
-    cFloatMenuItem CrystalMinSizeItem;                  // 0x1584 [O]; [R] ctor (39, "Crystal Min Size", &D_004A42E0,
+                                                        //       &cSplashToggles_m_CrystalMaxLifeSpan, 0..100)
+    cFloatMenuItem CrystalMinSizeItem;                  // 0x1584 [O]; [R] ctor (39, "Crystal Min Size", &cSplashToggles_m_CrystalMinSize,
                                                         //       0..40)
-    cFloatMenuItem CrystalMaxSizeItem;                  // 0x15B8 [O]; [R] ctor (40, "Crystal Max Size", &D_004A42E4,
+    cFloatMenuItem CrystalMaxSizeItem;                  // 0x15B8 [O]; [R] ctor (40, "Crystal Max Size", &cSplashToggles_m_CrystalMaxSize,
                                                         //       0..40)
     cFloatMenuItem CrystalMaxWidthHeightDifferenceItem; // 0x15EC [O]; [R] ctor (41, "Crystal Max Width Height
-                                                        //       Difference", &D_004A42E8, 0..10)
+                                                        //       Difference", &cSplashToggles_m_CrystalMaxWidthHeightDifference, 0..10)
     cFloatMenuItem CrystalMinVelocityJiggleXItem;       // 0x1620 [O]; [R] ctor (42, "Crystal Min Velocity Jiggle X",
-                                                        //       &D_004A42EC, -10..10)
+                                                        //       &cSplashToggles_m_CrystalMinVelocityJiggleX, -10..10)
     cFloatMenuItem CrystalMaxVelocityJiggleXItem;       // 0x1654 [O]; [R] ctor (43, "Crystal Max Velocity Jiggle X",
-                                                        //       &D_004A42F0, -10..10)
+                                                        //       &cSplashToggles_m_CrystalMaxVelocityJiggleX, -10..10)
     cFloatMenuItem CrystalMinVelocityJiggleYItem;       // 0x1688 [O]; [R] ctor (44, "Crystal Min Velocity Jiggle Y",
-                                                        //       &D_004A42F4, -10..10)
+                                                        //       &cSplashToggles_m_CrystalMinVelocityJiggleY, -10..10)
     cFloatMenuItem CrystalMaxVelocityJiggleYItem;       // 0x16BC [O]; [R] ctor (45, "Crystal Max Velocity Jiggle Y",
-                                                        //       &D_004A42F8, -10..10)
+                                                        //       &cSplashToggles_m_CrystalMaxVelocityJiggleY, -10..10)
     cFloatMenuItem CrystalMinJiggleTimeItem;            // 0x16F0 [O]; [R] ctor (46, "Crsytal Min Time In One Jiggle
-                                                        //       Direction", &D_004A42FC, 0..10)
+                                                        //       Direction", &cSplashToggles_m_CrystalMinJiggleTime, 0..10)
     cFloatMenuItem CrystalMaxJiggleTimeItem;            // 0x1724 [O]; [R] ctor (47, "Crsytal Max Time In One Jiggle
-                                                        //       Direction", &D_004A4300, 0..10)
+                                                        //       Direction", &cSplashToggles_m_CrystalMaxJiggleTime, 0..10)
     cFloatMenuItem CrystalMinSizeGrowthItem;            // 0x1758 [O]; [R] ctor (48, "Crystal Min Size Growth",
-                                                        //       &D_004A4304, -10..10)
+                                                        //       &cSplashToggles_m_CrystalMinSizeGrowth, -10..10)
     cFloatMenuItem CrystalMaxSizeGrowthItem;            // 0x178C [O]; [R] ctor (49, "Crystal Max Size Growth",
-                                                        //       &D_004A4308, -10..10)
+                                                        //       &cSplashToggles_m_CrystalMaxSizeGrowth, -10..10)
     cFloatMenuItem CrystalMinPushOffSpeedItem;          // 0x17C0 [O]; [R] ctor (50, "Crystal Min Push Off Speed",
-                                                        //       &D_004A430C, 0..10)
+                                                        //       &cSplashToggles_m_CrystalMinPushOffSpeed, 0..10)
     cFloatMenuItem CrystalMaxPushOffSpeedItem;          // 0x17F4 [O]; [R] ctor (51, "Crystal Max Push Off Speed",
-                                                        //       &D_004A4310, 0..10)
+                                                        //       &cSplashToggles_m_CrystalMaxPushOffSpeed, 0..10)
     cFloatMenuItem CrystalMaxVelocityItem;              // 0x1828 [O]; [R] ctor (52, "Crystal Maximum Velocity",
-                                                        //       &D_004A4314, 0..100)
+                                                        //       &cSplashToggles_m_CrystalMaxVelocity, 0..100)
     cFloatMenuItem CrystalMaxRotationChangeItem;        // 0x185C [O]; [R] ctor (53, "Crystal Max Rotation Overall
-                                                        //       Change", &D_004A4318, 0..720)
+                                                        //       Change", &cSplashToggles_m_CrystalMaxRotationChange, 0..720)
     cARGBMenuItem CrystalTintMinItem;                   // 0x1890 [O]; [R] ctor (54, "Crystal Tint Min", &D_00504700);
                                                         //       the dtor tears it down inline
     cARGBMenuItem CrystalTintMaxItem;                   // 0x1EEC [O]; [R] ctor (55, "Crystal Tint Max", &D_00504710);
@@ -1317,7 +1317,7 @@ CHECK_SIZE(cSplashTogglesMenu, 0x2548);
 
 // cTubeMenu (0x28C): the "Tube Menu" debug menu: a title, a spacer and 6 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem BItem, is at 0x25C and ends at 0x28C; the static instance
-// D_004D11F0 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004D1480 (+0x290); [O] size 0x28C.
+// __TubeMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __PathArrowMenu (+0x290); [O] size 0x28C.
 // Base cMenu. Vtable cTubeMenu_vtbl (0x0047F760); destructor cTubeMenu__cTubeMenu (the static instance's destruction in
 // __sti__visualeffectsmenu_cpp inlines it). EA source: main/visualeffectsmenu.cpp.
 struct cTubeMenu {
@@ -1360,7 +1360,7 @@ CHECK_SIZE(cTubeMenu, 0x28C);
 
 // cPathArrowMenu (0x488): the "PathArrow Menu" debug menu: a title, a spacer and 16 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem MaxTickItem, is at 0x458 and ends at 0x488; the static instance
-// D_004D1480 (built by __sti__visualeffectsmenu_cpp) ends at the next object, __AvalancheMenu (+0x808); [O] size 0x488.
+// __PathArrowMenu (built by __sti__visualeffectsmenu_cpp) ends at the next object, __AvalancheMenu (+0x808); [O] size 0x488.
 // Base cMenu. Vtable cPathArrowMenu_vtbl (0x0047F708); destructor cPathArrowMenu__cPathArrowMenu. EA source:
 // main/visualeffectsmenu.cpp.
 struct cPathArrowMenu {
@@ -1377,21 +1377,21 @@ struct cPathArrowMenu {
     cNullMenuItem TitleItem;              // 0x130 [O]; [R] ctor ("PathArrow Menu")
     cSpaceMenuItem SpaceItem;             // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem EnableItem;              // 0x164 [O]; [R] ctor (0, "Enable", &cPathArrow_m_Enable, 0..1)
-    cFloatMenuItem ScaleForwardWidthItem; // 0x194 [O]; [R] ctor (1, "Forward Width", &D_004A41F0, 0..1000)
-    cFloatMenuItem ScaleMiddleWidthItem;  // 0x1C8 [O]; [R] ctor (2, "Middle Width", &D_004A41F4, 0..1000)
-    cFloatMenuItem ScaleRearWidthItem;    // 0x1FC [O]; [R] ctor (3, "Rear Width", &D_004A41F8, 0..1000)
-    cFloatMenuItem ScaleFowardLengthItem; // 0x230 [O]; [R] ctor (4, "Forward Length", &D_004A41FC, 0..1000)
-    cFloatMenuItem ScaleRearLengthItem;   // 0x264 [O]; [R] ctor (5, "Rear Length", &D_004A4200, 0..1000)
-    cFloatMenuItem ScaleHeightItem;       // 0x298 [O]; [R] ctor (6, "Height", &D_004A4204, 0..1000)
-    cIntMenuItem RItem;                   // 0x2CC [O]; [R] ctor (7, "R", &D_004A4208, 0..255)
-    cIntMenuItem GItem;                   // 0x2FC [O]; [R] ctor (8, "G", &D_004A420C, 0..255)
-    cIntMenuItem BItem;                   // 0x32C [O]; [R] ctor (9, "B", &D_004A4210, 0..255)
-    cIntMenuItem AItem;                   // 0x35C [O]; [R] ctor (10, "A", &D_004A4214, 0..255)
-    cFloatMenuItem MoveSpeedItem;         // 0x38C [O]; [R] ctor (11, "Move Speed", &D_004A4218, 0..1000)
-    cFloatMenuItem DrawSpeedItem;         // 0x3C0 [O]; [R] ctor (12, "Draw Speed", &D_004A421C, 0..1000)
-    cFloatMenuItem DistanceItem;          // 0x3F4 [O]; [R] ctor (13, "Distance", &D_004A4220, 50..1000)
-    cIntMenuItem PathIdItem;              // 0x428 [O]; [R] ctor (14, "Path Id", &D_004A4224, 0..1000)
-    cIntMenuItem MaxTickItem;             // 0x458 [O]; [R] ctor (15, "Max Tick", &D_004A4228, 1..18000)
+    cFloatMenuItem ScaleForwardWidthItem; // 0x194 [O]; [R] ctor (1, "Forward Width", &cPathArrow_m_ScaleForwardWidth, 0..1000)
+    cFloatMenuItem ScaleMiddleWidthItem;  // 0x1C8 [O]; [R] ctor (2, "Middle Width", &cPathArrow_m_ScaleMiddleWidth, 0..1000)
+    cFloatMenuItem ScaleRearWidthItem;    // 0x1FC [O]; [R] ctor (3, "Rear Width", &cPathArrow_m_ScaleRearWidth, 0..1000)
+    cFloatMenuItem ScaleFowardLengthItem; // 0x230 [O]; [R] ctor (4, "Forward Length", &cPathArrow_m_ScaleFowardLength, 0..1000)
+    cFloatMenuItem ScaleRearLengthItem;   // 0x264 [O]; [R] ctor (5, "Rear Length", &cPathArrow_m_ScaleRearLength, 0..1000)
+    cFloatMenuItem ScaleHeightItem;       // 0x298 [O]; [R] ctor (6, "Height", &cPathArrow_m_ScaleHeight, 0..1000)
+    cIntMenuItem RItem;                   // 0x2CC [O]; [R] ctor (7, "R", &cPathArrow_m_R, 0..255)
+    cIntMenuItem GItem;                   // 0x2FC [O]; [R] ctor (8, "G", &cPathArrow_m_G, 0..255)
+    cIntMenuItem BItem;                   // 0x32C [O]; [R] ctor (9, "B", &cPathArrow_m_B, 0..255)
+    cIntMenuItem AItem;                   // 0x35C [O]; [R] ctor (10, "A", &cPathArrow_m_A, 0..255)
+    cFloatMenuItem MoveSpeedItem;         // 0x38C [O]; [R] ctor (11, "Move Speed", &cPathArrow_m_MoveSpeed, 0..1000)
+    cFloatMenuItem DrawSpeedItem;         // 0x3C0 [O]; [R] ctor (12, "Draw Speed", &cPathArrow_m_DrawSpeed, 0..1000)
+    cFloatMenuItem DistanceItem;          // 0x3F4 [O]; [R] ctor (13, "Distance", &cPathArrow_m_Distance, 50..1000)
+    cIntMenuItem PathIdItem;              // 0x428 [O]; [R] ctor (14, "Path Id", &cPathArrow_m_PathId, 0..1000)
+    cIntMenuItem MaxTickItem;             // 0x458 [O]; [R] ctor (15, "Max Tick", &cPathArrow_m_MaxTick, 1..18000)
 };
 
 CHECK_OFFSET(cPathArrowMenu, NumItems, 0x000);
@@ -1441,35 +1441,35 @@ struct cVisualEffectsMainMenu {
     // cVisualEffectsMainMenu's rows (0x130-0x33F)
     cNullMenuItem TitleItem;            // 0x130 [O]; [R] ctor ("Visual Effects Main Menu"); not added to the menu
     cSpaceMenuItem SpaceItem;           // 0x14C [O]; [R] ctor (space 40); not added to the menu
-    cSubMenuItem RenderTogglesItem;     // 0x164 [O]; [R] ctor ("Render Toggles", Sub = &D_004C98E0, the static
+    cSubMenuItem RenderTogglesItem;     // 0x164 [O]; [R] ctor ("Render Toggles", Sub = &__RenderTogglesMenu, the static
                                         //       cRenderTogglesMenu)
-    cSubMenuItem VisualEffectsTestItem; // 0x180 [O]; [R] ctor ("Visual Effects Test", Sub = &D_004CA328, the static
+    cSubMenuItem VisualEffectsTestItem; // 0x180 [O]; [R] ctor ("Visual Effects Test", Sub = &__VisualEffectsTestMenu, the static
                                         //       cVisualEffectsTestMenu)
-    cSubMenuItem LightGlowItem;         // 0x19C [O]; [R] ctor ("Light Glow", Sub = &D_004CA7C0, the static
+    cSubMenuItem LightGlowItem;         // 0x19C [O]; [R] ctor ("Light Glow", Sub = &__LightGlowMenu, the static
                                         //       cLightGlowMenu)
-    cSubMenuItem PlantsItem;            // 0x1B8 [O]; [R] ctor ("Plants", Sub = &D_004CAEF8, the static cPlantsMenu)
-    cSubMenuItem DepthFogItem;          // 0x1D4 [O]; [R] ctor ("Depth Fog", Sub = &D_004CB2C8, the static
+    cSubMenuItem PlantsItem;            // 0x1B8 [O]; [R] ctor ("Plants", Sub = &__PlantsMenu, the static cPlantsMenu)
+    cSubMenuItem DepthFogItem;          // 0x1D4 [O]; [R] ctor ("Depth Fog", Sub = &__DepthFogMenu, the static
                                         //       cDepthFogMenu)
-    cSubMenuItem HeightFogItem;         // 0x1F0 [O]; [R] ctor ("Height Fog", Sub = &D_004CBBE8, the static
+    cSubMenuItem HeightFogItem;         // 0x1F0 [O]; [R] ctor ("Height Fog", Sub = &__HeightFogMenu, the static
                                         //       cHeightFogMenu)
-    cSubMenuItem DetailSystemItem;      // 0x20C [O]; [R] ctor ("Detail System", Sub = &D_004CBDE8, the static
+    cSubMenuItem DetailSystemItem;      // 0x20C [O]; [R] ctor ("Detail System", Sub = &__DetailSystemMenu, the static
                                         //       cDetailSystemMenu)
-    cSubMenuItem ScreenTintItem;        // 0x228 [O]; [R] ctor ("Screen Tint", Sub = &D_004CC150, the static
+    cSubMenuItem ScreenTintItem;        // 0x228 [O]; [R] ctor ("Screen Tint", Sub = &__ScreenTintMenu, the static
                                         //       cScreenTintMenu)
-    cSubMenuItem ShadowItem;            // 0x244 [O]; [R] ctor ("Shadow", Sub = &D_004CCAB0, the static cShadowMenu)
-    cSubMenuItem SnowSurfaceItem;       // 0x260 [O]; [R] ctor ("Snow Surface", Sub = &D_004CCDE0, the static
+    cSubMenuItem ShadowItem;            // 0x244 [O]; [R] ctor ("Shadow", Sub = &__ShadowMenu, the static cShadowMenu)
+    cSubMenuItem SnowSurfaceItem;       // 0x260 [O]; [R] ctor ("Snow Surface", Sub = &__SnowSurfaceMenu, the static
                                         //       cSnowSurfaceMenu)
-    cSubMenuItem BoardTrailItem;        // 0x27C [O]; [R] ctor ("Board Trail", Sub = &D_004CD0A8, the static
+    cSubMenuItem BoardTrailItem;        // 0x27C [O]; [R] ctor ("Board Trail", Sub = &__BoardTrailMenu, the static
                                         //       cBoardTrailMenu)
-    cSubMenuItem FlagsItem;             // 0x298 [O]; [R] ctor ("Flags", Sub = &D_004CD678, the static cFlagsMenu)
+    cSubMenuItem FlagsItem;             // 0x298 [O]; [R] ctor ("Flags", Sub = &__FlagsMenu, the static cFlagsMenu)
     cSubMenuItem PowerUpFXTogglesItem;  // 0x2B4 [O]; [R] ctor ("Power Up Effects Toggles", Sub = &D_004CD840, the
                                         //       static cPowerUpFXTogglesMenu)
     cSubMenuItem SnowfallTogglesItem;   // 0x2D0 [O]; [R] ctor ("Snowfall Test Effects", Sub = &D_004CDC88, the static
                                         //       cSnowfallTogglesMenu)
-    cSubMenuItem SplashTogglesItem;     // 0x2EC [O]; [R] ctor ("Camera Snow Splash Effects", Sub = &D_004CECA8, the
+    cSubMenuItem SplashTogglesItem;     // 0x2EC [O]; [R] ctor ("Camera Snow Splash Effects", Sub = &__SplashTogglesMenu, the
                                         //       static cSplashTogglesMenu)
-    cSubMenuItem TubeItem;              // 0x308 [O]; [R] ctor ("Tube Effects", Sub = &D_004D11F0, the static cTubeMenu)
-    cSubMenuItem PathArrowItem;         // 0x324 [O]; [R] ctor ("Path Arrow Effects", Sub = &D_004D1480, the static
+    cSubMenuItem TubeItem;              // 0x308 [O]; [R] ctor ("Tube Effects", Sub = &__TubeMenu, the static cTubeMenu)
+    cSubMenuItem PathArrowItem;         // 0x324 [O]; [R] ctor ("Path Arrow Effects", Sub = &__PathArrowMenu, the static
                                         //       cPathArrowMenu)
 };
 

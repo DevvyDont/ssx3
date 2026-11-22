@@ -2392,7 +2392,7 @@ extern "C" char* FileParser_GetName(void* self);
 extern "C" int FileParser_IsEOF(void* self);
 extern "C" int FileParser_AssignInt(void* self, const char* key, int* out);
 extern "C" int strcasecmp(const char* a, const char* b);
-extern char* D_004A3560;
+extern char* kpAudioMixFilename;
 extern char str_MUSIC[];
 extern char str_DJ[];
 extern char str_PA[];
@@ -2430,7 +2430,7 @@ extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
     sIniParser7FC8 parser;
     int val;
     self->count = 0;
-    FileParser_FileParser_r(&parser, D_004A3560, 0x100);
+    FileParser_FileParser_r(&parser, kpAudioMixFilename, 0x100);
     parser.cur = parser.start;
     for (int i = 0; i < 25; i++) {
         self->entries[i].musicLevel = 100;
