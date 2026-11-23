@@ -177,7 +177,7 @@ static inline void CallV_F270(char* o, int slot, int a)
 
 static inline void Play_F270(cUISoundInterface* snd, int id)
 {
-    ((sVEntry<void (void*, int)>*)snd->mVtbl)[2].fn(vthis(snd, ((sVEntry<void (void*, int)>*)snd->mVtbl)[2]), id);
+    ((sVEntry<void (void*, int)>*)VPTR_OF(cUISoundInterface, snd))[2].fn(vthis(snd, ((sVEntry<void (void*, int)>*)VPTR_OF(cUISoundInterface, snd))[2]), id);
 }
 
 struct sGallery_F270 {

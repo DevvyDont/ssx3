@@ -100,7 +100,7 @@ extern "C" void cOVStateHiScoreList_onWidgetEvent(cOVStateHiScoreList* self, cUI
         void* nextState = 0;
         if (item->mMiscData == 1) {
             cUICustomInterface* factory = *(cUICustomInterface**)self->mpEngine;
-            nextState = ((sVEntry<void*(void*, void*, int)>*)factory->mVtbl)[4].fn((char*)factory + ((sVEntry<void*(void*, void*, int)>*)factory->mVtbl)[4].delta, self, 1);
+            nextState = ((sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory))[4].fn((char*)factory + ((sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory))[4].delta, self, 1);
         }
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     }

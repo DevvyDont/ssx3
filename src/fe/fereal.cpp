@@ -50,7 +50,7 @@ extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner)
 {
     self->mpEngine = (cUIEngine*)((void*)owner);
     self->mpTransitionState = 0;
-    self->mVtbl = cFECustom_vtbl;
+    VPTR_OF(cUICustomInterface, self) = cFECustom_vtbl;
     cFEStateTransition* transition = (cFEStateTransition*)cMemMan_alloc(80, str_cFEStateTransition, 0, 0);
     cUIState_cUIState(transition, self->mpEngine);
     transition->mpSnow = 0;

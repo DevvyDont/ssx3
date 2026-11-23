@@ -16,7 +16,7 @@
 // 0x0046DD28, 5 slots). Vtable cFECustom_vtbl (0x0046D810, 5 slots: 1 dtor, 2 onUpdate, 3 onScreenEvent, 4
 // getNextState, 5 getPrevState); the destructor stores cUICustomInterface_vtbl back.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// A real subclass of cUICustomInterface (ui/uiengine.h), its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [P] the July 2003 preview (layout_xlate: 0x0 and 0x4 unchanged, from the paired ctor / dtor);
@@ -24,16 +24,14 @@
 //   [O] SSX On Tour's DWARF (class cFECustom, cUICustomInterface): names, types and order.
 
 #include "layout.h"
+#include "ui/uiengine.h"
 
-struct cUIEngine;
 struct cFEStateTransition;
 
-struct cFECustom {
-    // --- cUICustomInterface (On Tour: size 0x8)
-    cUIEngine* mpEngine;            // 0x000 [O] cUICustomInterface::mpEngine; [R] the ctor's engine (the default copy
-                                    //       stores 0); [P]; [U] getNextState / getPrevState build the states on it, the
-                                    //       ctor pushes the transition state on its stack (+0x18)
-    void** mVtbl;                   // 0x004 [R] cFECustom_vtbl (ctors), cUICustomInterface_vtbl (dtor); [P]
+struct cFECustom : public cUICustomInterface {
+    // cUICustomInterface (ui/uiengine.h): mpEngine 0x000 ([R] the ctor's engine; the default copy stores 0;
+    // [U] getNextState / getPrevState build the states on it, the ctor pushes the transition state on its
+    // stack, +0x18), the vptr 0x004 ([R] cFECustom_vtbl in the ctors, cUICustomInterface_vtbl in the dtor; [P])
     // --- cFECustom
     unsigned char mCtrlMask[2];     // 0x008 [O]; [U] setPlayerCtrlMask / getPlayerCtrlMask (sb / lbu at 0x8 + index);
                                     //       state ctors copy it into mCtrlBits
@@ -46,8 +44,6 @@ struct cFECustom {
                                     //       getNextState reads it
 };
 
-CHECK_OFFSET(cFECustom, mpEngine, 0x000);
-CHECK_OFFSET(cFECustom, mVtbl, 0x004);
 CHECK_OFFSET(cFECustom, mCtrlMask, 0x008);
 CHECK_OFFSET(cFECustom, unk_00A, 0x00A);
 CHECK_OFFSET(cFECustom, mProfileLaunchScreen, 0x00C);

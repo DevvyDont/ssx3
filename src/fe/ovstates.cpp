@@ -204,7 +204,7 @@ extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, cUIThing* msg, 
 {
     if (type == 5) {
         cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
-        sVEntry_cFEStateTitle_onWidgetEvent* vt = (sVEntry_cFEStateTitle_onWidgetEvent*)obj->mVtbl;
+        sVEntry_cFEStateTitle_onWidgetEvent* vt = (sVEntry_cFEStateTitle_onWidgetEvent*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[4].fn(vthis(obj, vt[4]), self, msg->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -634,14 +634,14 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             return;
         }
         cUICustomInterface* obj = *(cUICustomInterface**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))((sVEntry<void>*)obj->mVtbl)[4].fn)(vthis(obj, ((sVEntry<void>*)obj->mVtbl)[4]), ((char*)self_), item_->mMiscData);
+        void* nextState = ((void* (*)(void*, void*, int))((sVEntry<void>*)VPTR_OF(cUICustomInterface, obj))[4].fn)(vthis(obj, ((sVEntry<void>*)VPTR_OF(cUICustomInterface, obj))[4]), ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         cUICustomInterface* obj = *(cUICustomInterface**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))((sVEntry<void>*)obj->mVtbl)[5].fn)(vthis(obj, ((sVEntry<void>*)obj->mVtbl)[5]), ((char*)self_), item_->mMiscData);
+        void* nextState = ((void* (*)(void*, void*, int))((sVEntry<void>*)VPTR_OF(cUICustomInterface, obj))[5].fn)(vthis(obj, ((sVEntry<void>*)VPTR_OF(cUICustomInterface, obj))[5]), ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;

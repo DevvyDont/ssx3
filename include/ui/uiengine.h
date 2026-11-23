@@ -20,11 +20,13 @@
 #include "ui/uianimation.h"
 #include "ui/uitexturebank.h"
 
-struct cUICustomInterface;
+class cUICustomInterface;
+struct cUIState;
+struct cUIScreen;
 struct cUIFontInterface;
 struct cUIInput;
 struct cUILocaleInterface;
-struct cUISoundInterface;
+class cUISoundInterface;
 
 struct cUIEngine {
     cUICustomInterface* mpCustom;          // 0x00 [O]; [R] ctor = 0
@@ -59,16 +61,24 @@ CHECK_SIZE(cUIEngine, 0x70);
 // are in the decomp's unit fe/fepopupmisc: cUICustomInterface__cUICustomInterface, _onUpdate, _onScreenEvent,
 // _getNextState, _getPrevState), its destructor stores the table at +0x4 (the vptr follows the one member, as
 // g++ 2.95 places it), and cFECustom's own members start at 0x8. Never allocated on its own; its constructor is
-// inlined into cFECustom's. A FLAT layout. Evidence tags as above.
-struct cUICustomInterface {
+// inlined into cFECustom's. A real polymorphic class (nothing defines a member here, so no vtable is emitted).
+// Evidence tags as above.
+class cUICustomInterface {
+public:
     cUIEngine* mpEngine;             // 0x000 [O]; [R] cFECustom's ctors store the engine argument (fe/fecustom.h); [U]
                                      //       the derived getNextState / getPrevState build their states on it
-    void** mVtbl;                    // 0x004 [R] cUICustomInterface__cUICustomInterface stores cUICustomInterface_vtbl
-                                     //       (0x0046DD28); cFECustom ctors store cFECustom_vtbl
+    // 0x004: the vptr. [R] cUICustomInterface__cUICustomInterface stores cUICustomInterface_vtbl (0x0046DD28), the
+    // cFECustom ctors cFECustom_vtbl. Slots [R] that table, names and return types [O]; parameters from the
+    // cFECustom implementations (fe/fereal), which take and every caller passes an int state argument (On Tour:
+    // void* pData):
+    virtual ~cUICustomInterface();                                      // slot 1
+    virtual void onUpdate();                                            // slot 2
+    virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event); // slot 3
+    virtual cUIState* getNextState(cUIState* pCurrentState, int pData); // slot 4
+    virtual cUIState* getPrevState(cUIState* pCurrentState, int pData); // slot 5
 };
 
 CHECK_OFFSET(cUICustomInterface, mpEngine, 0x000);
-CHECK_OFFSET(cUICustomInterface, mVtbl, 0x004);
 CHECK_SIZE(cUICustomInterface, 0x8);
 
 // cUISoundInterface: the UI engine's sound hook (cUIEngine::mpSound above): the states play their UI sounds through
@@ -76,15 +86,18 @@ CHECK_SIZE(cUICustomInterface, 0x8);
 // gUISoundNull is a bare instance the engine falls back to when no sound interface is set (cUIEngine's listener,
 // cFEStateStore's sound). [O] On Tour's class: size 0x4, no data, virtual ~ / playSound / soundInitialize /
 // soundShutdown; [R] retail vtable cUISoundInterface_vtbl (0x0046DD60, 4 slots: cUISoundInterface__cUISoundInterface,
-// _playSound, _soundInitialize, _soundShutdown), stored back at +0x0 by the cFESound / cOVSound destructors. A FLAT
-// layout. Evidence tags as above.
-struct cUISoundInterface {
-    void** mVtbl;                    // 0x000 [R] cUISoundInterface_vtbl (cUISoundInterface_cUISoundInterface; the cFESound
-                                     //       / cOVSound dtors restore it); cFESound_cFESound stores cFESound_vtbl;
-                                     //       [O] the vptr only (On Tour size 0x4)
+// _playSound, _soundInitialize, _soundShutdown), stored back at +0x0 by the cFESound / cOVSound destructors. A real
+// polymorphic class. Evidence tags as above.
+class cUISoundInterface {
+public:
+    // 0x000: the vptr only ([O] On Tour size 0x4). [R] cUISoundInterface_vtbl (cUISoundInterface_cUISoundInterface;
+    // the cFESound / cOVSound dtors restore it); cFESound_cFESound stores cFESound_vtbl. Slots [R], names [O]:
+    virtual ~cUISoundInterface();      // slot 1
+    virtual void playSound(int e);     // slot 2
+    virtual void soundInitialize();    // slot 3
+    virtual void soundShutdown();      // slot 4
 };
 
-CHECK_OFFSET(cUISoundInterface, mVtbl, 0x000);
 CHECK_SIZE(cUISoundInterface, 0x4);
 
 #endif

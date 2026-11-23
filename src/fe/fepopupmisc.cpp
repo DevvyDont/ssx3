@@ -328,7 +328,7 @@ static inline void sound_F050(cFEPopupScreenPos* s, int msg)
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        ((sVEm_F050*)p->mVtbl)[2].fn(vthis(p, ((sVEm_F050*)p->mVtbl)[2]), msg);
+        ((sVEm_F050*)VPTR_OF(cUISoundInterface, p))[2].fn(vthis(p, ((sVEm_F050*)VPTR_OF(cUISoundInterface, p))[2]), msg);
 }
 
 static inline void playFrame_F050(cFEPopupScreenPos* s, char* name)
@@ -4427,7 +4427,7 @@ extern void* cUICustomInterface_vtbl[];
  */
 extern "C" void cUICustomInterface__cUICustomInterface(cUICustomInterface* self, int flags)
 {
-    self->mVtbl = cUICustomInterface_vtbl;
+    VPTR_OF(cUICustomInterface, self) = cUICustomInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

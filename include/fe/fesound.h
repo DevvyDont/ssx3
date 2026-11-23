@@ -15,36 +15,31 @@
 // EA's source file is not known (On Tour lists them in fe's all_in_one unit); retail code in fe/fereal and
 // fe/fepopupmisc.
 //
-// FLAT layouts. Evidence tags: [R] retail ctor / dtor / allocation; [O] SSX On Tour's DWARF; [P] the preview build.
+// Real subclasses of cUISoundInterface. Evidence tags: [R] retail ctor / dtor / allocation; [O] SSX On Tour's DWARF; [P] the preview build.
 
 #include "layout.h"
+#include "ui/uiengine.h"
 
 
-struct cFESound {
-    // --- cUISoundInterface (On Tour: size 0x4, the vptr only)
-    void** mVtbl;                    // 0x000 [R] cFESound_cFESound stores cFESound_vtbl (0x00469348) after
-                                     //       cUISoundInterface_cUISoundInterface; the dtor stores cUISoundInterface's
-                                     //       table cUISoundInterface_vtbl back; [P] _vt$8cFESound
+struct cFESound : public cUISoundInterface {
+    // cUISoundInterface (ui/uiengine.h): the vptr at 0x000; [R] cFESound_cFESound stores cFESound_vtbl after
+    // cUISoundInterface_cUISoundInterface; the dtor stores cUISoundInterface_vtbl back
     // --- cFESound
     int mDummyVar;                   // 0x004 [O] (0x4 in On Tour too); [R] cFESound_cFESound zeroes it (sw $0, 0x4); no
                                      //       other access
 };
 
-CHECK_OFFSET(cFESound, mVtbl, 0x000);
 CHECK_OFFSET(cFESound, mDummyVar, 0x004);
 CHECK_SIZE(cFESound, 0x8);
 
-struct cOVSound {
-    // --- cUISoundInterface (On Tour: size 0x4, the vptr only)
-    void** mVtbl;                    // 0x000 [R] cOVSound_cOVSound stores cOVSound_vtbl (0x00469318) after
-                                     //       cUISoundInterface_cUISoundInterface; the dtor stores cUISoundInterface's
-                                     //       table cUISoundInterface_vtbl back; [P] _vt$8cOVSound
+struct cOVSound : public cUISoundInterface {
+    // cUISoundInterface (ui/uiengine.h): the vptr at 0x000; [R] cOVSound_cOVSound stores cOVSound_vtbl after
+    // cUISoundInterface_cUISoundInterface; the dtor stores cUISoundInterface_vtbl back
     // --- cOVSound
     int mDummyVar;                   // 0x004 [O] (0x4 in On Tour too); [R] cOVSound_cOVSound zeroes it (sw $0, 0x4); no
                                      //       other access
 };
 
-CHECK_OFFSET(cOVSound, mVtbl, 0x000);
 CHECK_OFFSET(cOVSound, mDummyVar, 0x004);
 CHECK_SIZE(cOVSound, 0x8);
 

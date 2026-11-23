@@ -1759,7 +1759,7 @@ extern void* cFECustom_vtbl_CC60[] __asm__("cFECustom_vtbl");
  */
 extern "C" void *cFECustom_cFECustom1(cFECustom* feCustom) {
     feCustom->mpEngine = 0;
-    feCustom->mVtbl = cFECustom_vtbl_CC60;
+    VPTR_OF(cUICustomInterface, feCustom) = cFECustom_vtbl_CC60;
     return ((void*)feCustom);
 }
 #endif
@@ -1778,7 +1778,7 @@ extern void* cUICustomInterface_vtbl[];
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cFECustom__cFECustom(cFECustom* self, int flags) {
-    self->mVtbl = cUICustomInterface_vtbl;
+    VPTR_OF(cUICustomInterface, self) = cUICustomInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

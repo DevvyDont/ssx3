@@ -3429,7 +3429,7 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
             mode = 2;
         }
         cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, mode);
         if (nextState != 0) {
             cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);

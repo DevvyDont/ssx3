@@ -243,7 +243,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
-                ((sVEntry<void(void*, int)>*)sound->mVtbl)[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)sound->mVtbl)[2]), 4);
+                ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2]), 4);
         }
         break;
     case 6:
@@ -290,7 +290,7 @@ static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        ((sVEntry<void(void*, int)>*)p->mVtbl)[2].fn(vthis(p, ((sVEntry<void(void*, int)>*)p->mVtbl)[2]), msg);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, p))[2].fn(vthis(p, ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, p))[2]), msg);
 }
 
 static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
@@ -787,7 +787,7 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
         break;
     case 6: {
         cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -941,7 +941,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)
-        ((sVEntry<void(void*, int)>*)sound->mVtbl)[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)sound->mVtbl)[2]), msg);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2]), msg);
     return handled;
 }
 #endif
