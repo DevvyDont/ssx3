@@ -6551,8 +6551,7 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_getRootTransform);
 extern "C" void* cPositionModifier_getRootTransform(cPositionModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn(vthis(self, vt[3]));
+        self->updateRootTransform();
     }
     return (char*)&self->Transform;
 }
@@ -6773,8 +6772,7 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_getRootTransform);
 extern "C" void* cMagnetModifier_getRootTransform(cMagnetModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn(vthis(self, vt[3]));
+        self->updateRootTransform();
     }
     return (char*)&self->Transform;
 }
@@ -7026,8 +7024,7 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_getRootTransform);
 extern "C" void* cSplineModifier_getRootTransform(cSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn(vthis(self, vt[3]));
+        self->updateRootTransform();
     }
     return (char*)&self->Transform;
 }
@@ -7140,8 +7137,7 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getRootTransform1);
 extern "C" void* cMultiSplineModifier_getRootTransform1(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn(vthis(self, vt[3]));
+        self->updateRootTransform();
     }
     return *(char**)self->NodeInst + 0x10;
 }

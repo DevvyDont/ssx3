@@ -1000,6 +1000,7 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupOverlapSystem);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 #include "replay/bxreplayframe.h"
+#include "object/transformmodifier.h"
 
 // An axis-aligned bounding box (min and max corners).
 struct sBoundBox { t4Vector min, max; };
@@ -1289,7 +1290,7 @@ static inline void setMax_A918(tInstanceRecord* in, const t4Vector& v)
 extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        ((sVEntry<void(void*)>*)VPTR_AT(self, 0))[3].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_AT(self, 0))[3]));
+        self->updateRootTransform();
     }
     for (int i = 1; i < self->NumModels; i++) {
         tBoundBox old = (self->Nodes)[i].BoundBox;
@@ -1350,12 +1351,6 @@ void* cMultiSplineModifier_decFocusCount(void* vself)
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_getRootTransform);
 #ifdef SKIP_ASM
-struct sSmVEntryV_AAF0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Returns the transform matrix of an instance moved by the multi-spline modifier.
  *
@@ -1369,8 +1364,7 @@ struct sSmVEntryV_AAF0 {
 extern "C" void* cMultiSplineModifier_getRootTransform(cMultiSplineModifier* self, tInstanceRecord* item)
 {
     if (self->RootTransformDirty != 0) {
-        sSmVEntryV_AAF0* vt = *(sSmVEntryV_AAF0**)self;
-        vt[3].fn(vthis(self, vt[3]));
+        self->updateRootTransform();
     }
     if (((void*)item) == (void*)self->Instance) {
         cInstanceNode* obj = item->m_pActiveNode;

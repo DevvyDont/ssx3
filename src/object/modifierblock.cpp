@@ -13,6 +13,7 @@
 #include "render/ps2graphicsman.h"
 #include "object/modifierblock.h"
 #include "replay/bxreplayframe.h"
+#include "object/transformmodifier.h"
 
 struct sBoundBoxTarget {
     char pad_0x00[0x68];
@@ -102,12 +103,6 @@ extern "C" void tModifierBlock__tModifierBlock(tModifierBlock* self, int flags)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_getBoundBox);
 #ifdef SKIP_ASM
-struct sMbVEntryI {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 /**
  * Returns the bounding box of the modifier block's node.
  *
@@ -117,10 +112,9 @@ struct sMbVEntryI {
  */
 extern "C" int tModifierBlock_getBoundBox(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntryI* vt = *(sMbVEntryI**)node;
-        return vt[12].fn(vthis(node, vt[12]));
+        return (int)node->getBoundBox();
     }
     return 0;
 }
@@ -159,12 +153,6 @@ void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_getRadius);
 #ifdef SKIP_ASM
-struct sMbVEntryF {
-    short delta;
-    short index;
-    float (*fn)(void*);
-};
-
 /**
  * Returns the block's bounding radius from its transform modifier (slot 14), or 0 without one.
  *
@@ -172,10 +160,9 @@ struct sMbVEntryF {
  */
 extern "C" float tModifierBlock_getRadius(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntryF* vt = *(sMbVEntryF**)node;
-        return vt[14].fn(vthis(node, vt[14]));
+        return node->getRadius();
     }
     return 0.0f;
 }
@@ -219,10 +206,9 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self);
  */
 extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
-        vt[2].fn(vthis(node, vt[2]));
+        node->update();
     }
     if (self->UVScroll != 0) {
         cUVScrollModifier_update(self->UVScroll);
@@ -274,10 +260,9 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
             link = next;
         } while (link != 0);
     }
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
-        vt[4].fn(vthis(node, vt[4]));
+        node->postUpdate();
     }
 }
 #endif
@@ -307,10 +292,9 @@ extern "C" void tModifierBlock_render(tModifierBlock* self)
             effect = (cEffectLink*)next;
         } while (((void*)effect) != 0);
     }
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntryV2DD0* vt = *(sMbVEntryV2DD0**)node;
-        vt[11].fn(vthis(node, vt[11]));
+        node->render();
     }
 }
 #endif
@@ -325,10 +309,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_isRootTransformDirty);
  */
 extern "C" int tModifierBlock_isRootTransformDirty(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntryI* vt = *(sMbVEntryI**)node;
-        if (vt[17].fn(vthis(node, vt[17])) != 0) {
+        if (node->isRootTransformDirty() != 0) {
             return 1;
         }
     }
@@ -345,10 +328,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_updateRootTransform);
  */
 extern "C" void tModifierBlock_updateRootTransform(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
-        vt[3].fn(vthis(node, vt[3]));
+        node->updateRootTransform();
     }
 }
 #endif
@@ -365,10 +347,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_isComplete);
  */
 extern "C" int tModifierBlock_isComplete(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntryI* vt = *(sMbVEntryI**)node;
-        return vt[6].fn(vthis(node, vt[6]));
+        return node->isComplete();
     }
     return 0;
 }
@@ -377,12 +358,6 @@ extern "C" int tModifierBlock_isComplete(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_clearComplete);
 #ifdef SKIP_ASM
-struct sMbVEntryV {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Clears the modifier block node's complete state.
  *
@@ -390,10 +365,9 @@ struct sMbVEntryV {
  */
 extern "C" void tModifierBlock_clearComplete(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntryV* vt = *(sMbVEntryV**)node;
-        vt[7].fn(vthis(node, vt[7]));
+        node->clearComplete();
     }
 }
 #endif
@@ -418,10 +392,9 @@ extern "C" void cTexFlipModifier_signal(void* self, int id, float v);
  */
 extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sVEntry<void(void*, int, float)>* vt = *(sVEntry<void(void*, int, float)>**)node;
-        vt[5].fn(vthis(node, vt[5]), id, value);
+        node->signal(id, value);
     }
     if (self->UVScroll != 0) {
         cUVScrollModifier_signal(self->UVScroll, id, value);
@@ -461,11 +434,10 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_applyForce);
  */
 extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int force)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     cMoveNode* obj;
     if (node != 0) {
-        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)node;
-        obj = (cMoveNode*)vt[25].fn(vthis(node, vt[25]));
+        obj = node->getParent();
     } else {
         obj = 0;
     }
@@ -500,21 +472,14 @@ extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* i
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_remTransformModifier);
 #ifdef SKIP_ASM
-struct sMbVEntryDel {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Deletes the block's transform modifier through its destructor virtual (slot 1, flags 3) and clears the slot.
  */
 extern "C" void tModifierBlock_remTransformModifier(tModifierBlock* self)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntryDel* vt = *(sMbVEntryDel**)node;
-        vt[1].fn(vthis(node, vt[1]), 3);
+        delete node;
         self->RootTransform = 0;
     }
 }
