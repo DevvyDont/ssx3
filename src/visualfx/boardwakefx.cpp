@@ -5449,12 +5449,6 @@ void cWorldPainterMan_reset_47E8() __asm__("cWorldPainterMan_reset__FPv");
 
 
 
-struct sRsVtV47E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int, float, float, float, float, float, float);
-};
-
 
 struct sFadeVt47E8 {
     short delta;
@@ -5546,8 +5540,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     ctx->PushViewport();
     ctx->PushView();
     ctx->IdentityView();
-    sRsVtV47E8* vv = (sRsVtV47E8*)((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx));
-    vv[26].fn(vthis(ctx, vv[26]), 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
+    ctx->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
     rsSetB47E8(ctx, 0x3E0, 5, 8);
     rsSetA47E8(ctx, 0x400000, 22, 1);
     rsSetA47E8(ctx, 0x1800000, 23, 2);
@@ -6854,6 +6847,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 #include "object/being.h"
+#include "render/graphicsman.h"
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline t4Vector vu0Scale(const t4Vector& v, float s)

@@ -12,6 +12,7 @@
 #include "fe/ferider.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
+#include "render/graphicsman.h"
 
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_initBoneMap);
@@ -514,8 +515,7 @@ extern "C" void cFERider_render(cFERider* selfp)
     func_00389CB8(&worldMatrix, &pos, 1.0f);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVE_EE88* vt = (sVE_EE88*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-        vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &worldMatrix, 1);
+        ps2GraphicsMan->SetIrradiance(*(const tIrradianceInfo*)&worldMatrix, 1);
     }
     int* fl = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
