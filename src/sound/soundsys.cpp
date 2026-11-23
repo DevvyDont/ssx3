@@ -14166,7 +14166,7 @@ extern const char str_MAXBENDpct_d[];
  */
 extern "C" void func_002A7040(cCrowdSys* self, void* parser)
 {
-    sSnd6D78Self* crowdSys = (sSnd6D78Self*)self;
+    cCrowdSys* crowdSys = self;
     char val[0x200];
     char key[0x200];
     while (!FileParser_IsEOF((FileParser*)parser)) {
@@ -14175,34 +14175,34 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
             sprintf(key, str_TRICKpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
-                func_002A4C28((sSndHandleList5*)&crowdSys->ent[i].a, (int)val, 0);
+                func_002A4C28((sSndHandleList5*)&((sSnd6D78Ent*)&crowdSys->mCrowdData[0])[i].a, (int)val, 0);
                 break;
             }
             sprintf(key, str_FALLpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
-                func_002A4C28((sSndHandleList5*)&crowdSys->ent[i].b, (int)val, 0);
+                func_002A4C28((sSndHandleList5*)&((sSnd6D78Ent*)&crowdSys->mCrowdData[0])[i].b, (int)val, 0);
                 break;
             }
             sprintf(key, str_ANTICIPATEpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
-                func_002A4C28((sSndHandleList5*)&crowdSys->ent[i].c, (int)val, 0);
+                func_002A4C28((sSndHandleList5*)&((sSnd6D78Ent*)&crowdSys->mCrowdData[0])[i].c, (int)val, 0);
                 break;
             }
             sprintf(key, str_ATTACKpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
-                FileParser_AssignFloat((FileParser*)parser, name, &crowdSys->ent[i].f48);
+                FileParser_AssignFloat((FileParser*)parser, name, &((sSnd6D78Ent*)&crowdSys->mCrowdData[0])[i].f48);
                 break;
             }
             sprintf(key, str_DECAYpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
-                FileParser_AssignFloat((FileParser*)parser, name, &crowdSys->ent[i].f4C);
+                FileParser_AssignFloat((FileParser*)parser, name, &((sSnd6D78Ent*)&crowdSys->mCrowdData[0])[i].f4C);
                 break;
             }
             sprintf(key, str_MAXBENDpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
-                FileParser_AssignFloat((FileParser*)parser, name, (float*)&crowdSys->ent[i].f50);
+                FileParser_AssignFloat((FileParser*)parser, name, (float*)&((sSnd6D78Ent*)&crowdSys->mCrowdData[0])[i].f50);
                 break;
             }
         }

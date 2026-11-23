@@ -5782,7 +5782,7 @@ extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, 
     sBank28C0* sv = (sBank28C0*)self;
     int i = 0;
     do {
-        int* categoryInts = Row_28C0(((sSpeechMon*)self)->grid, i);
+        int* categoryInts = Row_28C0((self)->mCategory, i);
         for (int j = 4; j >= 0; j--)
             categoryInts[j] = 0;
         i++;
@@ -5837,7 +5837,7 @@ extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, 
             } else if (strcasecmp(key, str_CATEGORY) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_CATEGORY, &musicInf.iB);
                 if (musicInf.iB < 5)
-                    ((sSpeechMon*)self)->grid[((sSpeechMon*)self)->count][musicInf.iB] = 1;
+                    (self)->mCategory[(self)->mNumSongs][musicInf.iB] = 1;
             } else if (strcasecmp(key, str_PATHDATA) == 0) {
                 FileParser_AssignString(musicInf.parser, str_PATHDATA, musicInf.buf);
                 strcpy(sv->ents[self->mNumSongs], musicInf.buf);

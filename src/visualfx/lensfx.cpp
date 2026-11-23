@@ -297,13 +297,13 @@ extern "C" int func_002F2130(int a, int x, int y);
  */
 extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
 {
-    sLensFx* self = (sLensFx*)lensMgr;
+    cBoltOnFXInterface* self = lensMgr;
     int i;
     for (i = 0; i < 15; i++) {
-        if (self->entries[i].id == -1) {
-            self->entries[i].id = func_002F2130(*(int*)((char*)self + 0xC), x, y);
-            self->entries[i].a = y;
-            self->entries[i].b = x;
+        if (((sLensEntry*)&self->mEntries[0])[i].id == -1) {
+            ((sLensEntry*)&self->mEntries[0])[i].id = func_002F2130(*(int*)((char*)self + 0xC), x, y);
+            ((sLensEntry*)&self->mEntries[0])[i].a = y;
+            ((sLensEntry*)&self->mEntries[0])[i].b = x;
             return i;
         }
     }
