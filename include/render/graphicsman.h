@@ -83,6 +83,7 @@ struct SHAPE;
 struct cDynamicColourEmitter;
 struct cDynamicEmitter;
 struct cFont;
+struct tIrradianceInfo;
 struct cGridMesh;
 struct t2Vector;
 struct t3Vector;
@@ -180,7 +181,7 @@ public:
     virtual void SetViewportWindow(float x, float y, float w, float rectHeight) = 0;                     // slot 23: [R] cPS2GraphicsMan_SetViewportWindow
     virtual void SetViewportWindow1(const tRect* rect, int applyScreenOffset) = 0;                       // slot 24: [R] cPS2GraphicsMan_SetViewportWindow1
     virtual void SetViewportPerspective(float fov, float minz, float maxz) = 0;                          // slot 25: [R] cPS2GraphicsMan_SetViewportPerspective
-    virtual void SetViewportOrthographic(float cx, float cy, float fx, float fy, float zNear, float zFar) = 0; // slot 26: [R] cPS2GraphicsMan_SetViewportOrthographic
+    virtual void SetViewportOrthographic(float x, float y, float w, float h, float minz, float maxz, int adjustforsafezone, int scaleForFE) = 0; // slot 26: [R] cPS2GraphicsMan_SetViewportOrthographic (reads the six floats only); every retail caller passes six floats and two ints ((0, 0, 640, 480, 0, 1) for the full screen); [O] On Tour's signature (the two bools)
     virtual void SetViewportZBias(float worldBias, const t4Vector* wpos) = 0;                            // slot 27: [R] cPS2GraphicsMan_SetViewportZBias
     virtual tRect GetViewportWindow() = 0;                                                               // slot 28: [R] cPS2GraphicsMan_GetViewportWindow; returns tRect by value (retail passes a result pointer first)
     virtual float GetViewportFOV() = 0;                                                                  // slot 29: [R] cPS2GraphicsMan_GetViewportFOV
@@ -207,7 +208,7 @@ public:
     virtual void RemoveTexture(int texid) = 0;                                                           // slot 50: [R] cPS2GraphicsMan_RemoveTexture
     virtual bool IsValidTexture(int texid) = 0;                                                          // slot 51: [R] cPS2GraphicsMan_IsValidTexture
     virtual int AddLockedFrameTexture(int width, int height, int texeltype) = 0;                         // slot 52: [R] cPS2GraphicsMan_AddLockedFrameTexture__FPv; parameters [O]
-    virtual bool LockFrameToTexture(int idx) = 0;                                                        // slot 53: [R] cPS2GraphicsMan_LockFrameToTexture
+    virtual bool LockFrameToTexture(int texid, int bSafeZone) = 0;                                       // slot 53: [R] cPS2GraphicsMan_LockFrameToTexture (reads texid only); the retail caller passes (texture, 1); [O] On Tour's signature
     virtual bool RestoreFrameLock() = 0;                                                                 // slot 54: [R] cPS2GraphicsMan_RestoreFrameLock
     virtual void ShadowClearLockTexture(int texid, const tARGB* clearCol) = 0;                           // slot 55: [R] cPS2GraphicsMan_ShadowClearLockTexture
     virtual int GetTextureWidth(int texid) = 0;                                                          // slot 56: [R] cPS2GraphicsMan_GetTextureWidth
@@ -223,7 +224,7 @@ public:
     virtual void ClearProjTextures();                                                                    // slot 66: [R] cPS2GraphicsMan_ClearProjTextures__FPv; parameters [O]
     virtual void AddProjectiveTexture(const t4Vector* pos, const t4Matrix* clipMat, const t4Matrix* projMat, float intensity, int texid); // slot 67: [R] cPS2GraphicsMan_AddProjectiveTexture
     virtual void SetLightMats(void* lmats) = 0;                                                          // slot 68: [R] cPS2GraphicsMan_SetLightMats__FPv; parameters [O]
-    virtual void SetIrradiance(void* src) = 0;                                                           // slot 69: [R] cPS2GraphicsMan_SetIrradiance; R?
+    virtual void SetIrradiance(const tIrradianceInfo& irradiance, int ignored) = 0;                     // slot 69: [R] cPS2GraphicsMan_SetIrradiance (copies the 0xA0 block); [P] SetIrradiance__15cPS2GraphicsManRC15tIrradianceInfob; [O] the same, parameters named irradiance, ignored; retail callers pass (block, 1)
     virtual void* GetIrradiance() = 0;                                                                   // slot 70: [R] cPS2GraphicsMan_GetIrradiance__FPv; parameters [O]
     virtual void RenderTriStrip(int numVerts, tBxVertex* src, int isstatic) = 0;                         // slot 71: [R] cPS2GraphicsMan_RenderTriStrip; isstatic: [R] every caller passes it ($a3), [O] the PSP twin's bool isstatic
     virtual void RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices, const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector* Offset); // slot 72: [R] cPS2GraphicsMan_RenderIndexedTriList
@@ -253,7 +254,7 @@ public:
     virtual void RenderModel(tInstanceRecord* obj, int animMats, int texMat, int renderFlags);           // slot 96: [R] cGraphicsMan_RenderModel
     virtual void GetMeshQuad(const tInstanceRecord* pInstance, int mesh, t3Vector* vert, t2Vector* uv, tARGB* rgb) = 0; // slot 97: [R] cPS2GraphicsMan_GetMeshQuad
     virtual void SetShinyBoarder(int State);                                                             // slot 98: [R] cPS2GraphicsMan_SetShinyBoarder__FPvi; parameters [O]
-    virtual void DrawCharModel(void* mdl, char* base, int shadow) = 0;                                   // slot 99: [R] cPS2GraphicsMan_DrawCharModel; R?/R/R
+    virtual void DrawCharModel(const tMdfModelHeader* mdfheader, const char* data, float scale, int additive, int cheatcharid) = 0; // slot 99: [R] cPS2GraphicsMan_DrawCharModel (header, data, the additive flag); cAnimModel_render passes (part, data, additiveBoard / additivePlayer, 0, scale) after GenerateBlendedMatrices (slot 111); [O] On Tour's signature, which also takes the matrices
     virtual void DrawCharShadowModel(const tMdfModelHeader* model, const char* data, const tARGB* shdwcol); // slot 100: [R] cPS2GraphicsMan_DrawCharShadowModel
     virtual void SetShadowCharMatrices(const t4Matrix* sproj, const t4Vector* sscale, const t4Vector* strans) = 0; // slot 101: [R] cPS2GraphicsMan_SetShadowCharMatrices
     virtual void SectionLoaded(int sectionId);                                                           // slot 102: [R] cGraphicsMan_SectionLoaded__FPv; parameters [O]

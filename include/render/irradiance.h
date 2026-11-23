@@ -27,6 +27,14 @@ struct cIrradiance {
 CHECK_OFFSET(cIrradiance, unk_000, 0x000);
 CHECK_SIZE(cIrradiance, 0xA0);
 
+// tIrradianceInfo: the irradiance block the graphics manager is handed. [P] SetIrradiance__15cPS2GraphicsManRC15
+// tIrradianceInfob takes one; [O] class tIrradianceInfo : cIrradiance adds no members; [R] cPS2GraphicsMan_SetIrradiance
+// copies the 0xA0 block into mIrradianceInfo, and cRider passes its unk_7C0 (one 0xA0 block).
+struct tIrradianceInfo : public cIrradiance {
+};
+
+CHECK_SIZE(tIrradianceInfo, 0xA0);
+
 struct cIrradianceDataBase {
     char* mData;                    // 0x000 [O]
     int mNumItem;                   // 0x004 [O]
