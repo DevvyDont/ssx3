@@ -787,25 +787,21 @@ static inline void vu0CopyMatrix_355F10(void* dst, void* src)
  */
 extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* srcv)
 {
-    if (((char*)srcv) == 0) {
+    if (srcv == 0) {
         return;
     }
-    sVEntry<int(void*)>* vi = (sVEntry<int(void*)>*)VPTR_OF(cObjNode, srcv);
-    if (vi[16].fn(vthis(srcv, vi[16])) != 0) {
+    if (srcv->isMoveNode()) {
         cMoveNode_transferEffectModifier(self, (cMoveNode*)srcv);
     }
-    sVEntry<char*(void*)>* vp = (sVEntry<char*(void*)>*)VPTR_OF(cObjNode, srcv);
-    char* transform = vp[24].fn(vthis(srcv, vp[24]));
+    char* transform = (char*)srcv->getRootTransform();
     if (transform == (char*)&self->Instance->m_fmTransform) {
-        sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, srcv);
-        vd[1].fn(vthis(srcv, vd[1]), 3);
+        delete srcv;
         return;
     }
     t4Matrix copy;
     vu0CopyMatrix_355F10(&copy, transform);
     int keep = self->Instance->m_iFlags;
-    sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, srcv);
-    vd[1].fn(vthis(srcv, vd[1]), 3);
+    delete srcv;
     self->Instance->m_iFlags = keep;
     cMoveNode_addPosition1(self, &copy);
     self->TransferHack = 1;
@@ -2661,10 +2657,7 @@ extern "C" void cParticleNode_update(cParticleNode* self)
     if (mb != 0 && *(int*)&mb->Effect != 0) {
         return;
     }
-    if (((void*)self) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
-        vt[1].fn(vthis(self, vt[1]), 3);
-    }
+    delete self;
 }
 #endif
 

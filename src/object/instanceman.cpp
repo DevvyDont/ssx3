@@ -11,6 +11,7 @@
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "replay/bxreplayframe.h"
+#include "object/instancenode.h"
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
@@ -1244,8 +1245,7 @@ extern "C" void cMeshAnimNode_expire(cMeshAnimNode* self, int check)
         cInstanceNode_makeThisDead(self);
     }
     if (self->Type == 2 && ((void*)self) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
-        vt[1].fn(vthis(self, vt[1]), 3);
+        delete self;
     }
 }
 #endif
@@ -1269,10 +1269,7 @@ extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
         self->Instance->m_iFlags &= 0xFFFF0300;
         self->Instance->m_iFlags |= self->Instance->m_iFlags >> 16;
         self->Instance->m_iFlags |= 2;
-        if (((void*)self) != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
-            vt[1].fn(vthis(self, vt[1]), 3);
-        }
+        delete self;
     } else {
         cInstanceNode_makeThisDead(self);
     }

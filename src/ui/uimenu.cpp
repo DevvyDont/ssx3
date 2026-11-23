@@ -982,12 +982,6 @@ INCLUDE_ASM("ui/uimenu", cUIProgress__cUIProgress);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* cUIProgress_vtbl[];
 
-struct cUIProgress__cUIProgress_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Destroys a progress bar: deletes its two child widgets, then the cUIThing base.
  *
@@ -997,15 +991,9 @@ extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
 {
     VPTR_OF(cListNode, self) = cUIProgress_vtbl;
     cUIThing* background = self->mpObjBackground;
-    if (background != 0) {
-        cUIProgress__cUIProgress_sVEntry* vt = (cUIProgress__cUIProgress_sVEntry*)VPTR_OF(cListNode, background);
-        vt[1].fn(vthis(background, vt[1]), 3);
-    }
+    delete background;
     cUIThing* knob = self->mpObjKnob;
-    if (knob != 0) {
-        cUIProgress__cUIProgress_sVEntry* vt = (cUIProgress__cUIProgress_sVEntry*)VPTR_OF(cListNode, knob);
-        vt[1].fn(vthis(knob, vt[1]), 3);
-    }
+    delete knob;
     cUIThing__cUIThing(self, flags);
 }
 #endif

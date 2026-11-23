@@ -156,12 +156,6 @@ void* cInstanceNode_runOnLoseFocusScript(void* vself)
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_expire);
 #ifdef SKIP_ASM
-struct sInstNodeVEntryFD00 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Expires an instance node: unless an expire script takes over, resets the record's flags and deletes the
  * node.
@@ -184,22 +178,13 @@ extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
         instance->m_iFlags = instFlags | (instFlags >> 16);
     }
     self->Instance->m_iFlags |= 2;
-    if (((void*)self) != 0) {
-        sInstNodeVEntryFD00* vt = (sInstNodeVEntryFD00*)VPTR_OF(cObjNode, self);
-        vt[1].fn(vthis(self, vt[1]), 3);
-    }
+    delete self;
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_loseFocus);
 #ifdef SKIP_ASM
-struct sInstNodeVEntryFD90 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Drops an instance node that has lost focus: resets the record's flags and deletes the node.
  *
@@ -214,10 +199,7 @@ extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
     *flagsPtr |= *flagsPtr >> 16;
     flagsPtr = (int*)(&self->Instance->m_iFlags);
     *flagsPtr |= 2;
-    if (((void*)self) != 0) {
-        sInstNodeVEntryFD90* vt = (sInstNodeVEntryFD90*)VPTR_OF(cObjNode, self);
-        vt[1].fn(vthis(self, vt[1]), 3);
-    }
+    delete self;
 }
 #endif
 
@@ -246,12 +228,6 @@ void* cInstanceNode_runCollideScript(void* self, int collideInfo, int intersectI
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_makeThisDead);
 #ifdef SKIP_ASM
-struct sInstNodeDtorVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_DeadNode_b[];
 extern "C" void* cDeadNode_cDeadNode(cDeadNode* mem, int v);
@@ -266,10 +242,7 @@ extern "C" void* cDeadNode_cDeadNode(cDeadNode* mem, int v);
 extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
 {
     int instance = (int)self->Instance;
-    if (((void*)self) != 0) {
-        sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)VPTR_OF(cObjNode, self);
-        vt[1].fn(vthis(self, vt[1]), 3);
-    }
+    delete self;
     cDeadNode_cDeadNode((cDeadNode*)cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
 }
 #endif

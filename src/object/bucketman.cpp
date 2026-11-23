@@ -151,12 +151,6 @@ extern "C" void* cBucketMan_last(cBucketMan* self, int index);
 extern "C" void* cBucketMan_prev(cBucketMan* self, cObjNode* node, int index);
 extern "C" void* cBucketMan_addnext(cBucketMan* self, cObjNode* node, int index);
 
-struct sSortVE_4C98 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*);
-};
-
 
 
 
@@ -181,18 +175,15 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
         n->Next->Prev = n->Prev;
         cObjNode* other;
         for (other = (cObjNode*)cBucketMan_last(self, index); other; other = (cObjNode*)cBucketMan_prev(self, (cObjNode*)other, index)) {
-            if (((sSortVE_4C98*)VPTR_OF(cObjNode, n))[6].fn(vthis(n, ((sSortVE_4C98*)VPTR_OF(cObjNode, n))[6]), other)) {
-                if (((sSortVE_4C98*)VPTR_OF(cObjNode, n))[7].fn(vthis(n, ((sSortVE_4C98*)VPTR_OF(cObjNode, n))[7]), other)) {
+            if (n->compare(other)) {
+                if (n->equal(other)) {
                     n->Next = other->Next;
                     other->Next->Prev = n;
                     n->Prev = other->Prev;
                     other->Prev->Next = n;
                     other->Next = 0;
                     other->Prev = 0;
-                    if (other) {
-                        sVEntry<void(void*, int)>* dv = (sVEntry<void(void*, int)>*)((sSortVE_4C98*)VPTR_OF(cObjNode, other));
-                        dv[1].fn(vthis(other, dv[1]), 3);
-                    }
+                    delete other;
                 } else {
                     n->Next = other->Next;
                     other->Next->Prev = n;
@@ -439,12 +430,6 @@ extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", cBucketMan_purgeBucket);
 #ifdef SKIP_ASM
-struct sBucketVEntryPurge {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Deletes every node in a bucket through each node's virtual destructor (flags 3).
  *
@@ -455,10 +440,7 @@ extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        if (((void*)node) != 0) {
-            sBucketVEntryPurge* vt = (sBucketVEntryPurge*)VPTR_OF(cObjNode, node);
-            vt[1].fn(vthis(node, vt[1]), 3);
-        }
+        delete node;
         node = (cObjNode*)next;
     }
 }
@@ -488,12 +470,8 @@ extern "C" void cBucketMan_purgeBucket1(cBucketMan* self, int index, int key)
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sVEntry<int(void*)>* sectionIdSlot = &((sVEntry<int (void*)>*)VPTR_OF(cObjNode, node))[11];
-        if (sectionIdSlot->fn(vthis(node, *sectionIdSlot)) == key) {
-            if (((void*)node) != 0) {
-                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cObjNode, node);
-                vt[1].fn(vthis(node, vt[1]), 3);
-            }
+        if (node->getSectionId() == key) {
+            delete node;
         }
         node = (cObjNode*)next;
     }

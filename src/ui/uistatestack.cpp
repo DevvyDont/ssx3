@@ -529,9 +529,6 @@ struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct sUIStVtF8C8 { short delta; short index; void (*fn)(void*, int); };
-struct sUIStVtF8C8a { short delta; short index; void (*fn)(void*); };
-
 static inline void cUIStateStack_destroyStates_purge(cList* list)
 {
     cUIState* n = (cUIState*)cList_first(list);
@@ -539,12 +536,8 @@ static inline void cUIStateStack_destroyStates_purge(cList* list)
         while (!cListNode_isSentinel((cListNode*)n)) {
             char* next = (char*)n->mpNext;
             if (((n->mAttrState >> 6) & 1) == 0) {
-                sUIStVtF8C8a* vt = (sUIStVtF8C8a*)VPTR_OF(cListNode, n);
-                vt[5].fn(vthis(n, vt[5]));
-                if (((char*)n) != 0) {
-                    sUIStVtF8C8* vt2 = (sUIStVtF8C8*)VPTR_OF(cListNode, n);
-                    vt2[1].fn(vthis(n, vt2[1]), 3);
-                }
+                n->onDestroyScreen();
+                delete n;
             }
             n = (cUIState*)next;
         }

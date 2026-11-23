@@ -78,12 +78,6 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cDeadNode_cDeadNode(void* self, void* parent);
 extern const char str_DeadNode_b[];
 
-struct sDebounceVEntry2DD8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Removes a debounce node when its object loses focus, unless its countdown is negative.
  *
@@ -94,16 +88,10 @@ extern "C" void cDebounceNode_loseFocus(cDebounceNode* self)
     if (self->Life >= 0) {
         if (self->Type == 0) {
             void* parent = self->Instance;
-            if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
-                vt[1].fn(vthis(self, vt[1]), 3);
-            }
+            delete self;
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else {
-            if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
-                vt[1].fn(vthis(self, vt[1]), 3);
-            }
+            delete self;
         }
     }
 }
@@ -153,23 +141,14 @@ extern "C" void cDebounceNode_expire(cDebounceNode* self, int check)
         int mode = self->Type;
         if (mode == 0) {
             void* parent = self->Instance;
-            if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
-                vt[1].fn(vthis(self, vt[1]), 3);
-            }
+            delete self;
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else if (mode == 3) {
             void* parent = self->Instance;
-            if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
-                vt[1].fn(vthis(self, vt[1]), 3);
-            }
+            delete self;
             cRestoreNode_cRestoreNode(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
         } else {
-            if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
-                vt[1].fn(vthis(self, vt[1]), 3);
-            }
+            delete self;
         }
     }
 }
