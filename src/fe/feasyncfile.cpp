@@ -917,7 +917,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
     case 1:
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = (int)pWidget->mScreens.mEnd.mVtbl;
+            int id = (int)VPTR_OF(cListNode, &pWidget->mScreens.mEnd);
             if (id == GetHashValue32(buf)) {
                 func_001A6070_4330(((char*)self), i + self->miScrollOffset);
                 func_001A5FB8_4330(((char*)self), i);
@@ -931,7 +931,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
     case 2: {
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = (int)pWidget->mScreens.mEnd.mVtbl;
+            int id = (int)VPTR_OF(cListNode, &pWidget->mScreens.mEnd);
             if (id == GetHashValue32(buf)) {
                 sprintf(buf, str_ps2Xpct_02d, i);
                 cUIState* o = (cUIState*)cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));

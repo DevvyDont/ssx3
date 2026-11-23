@@ -97,17 +97,17 @@ extern void* cListNode_vtbl[];
 extern "C" void cUIStateStack__cUIStateStack(cUIStateStack* self, int flags)
 {
     cUIStateStack_destroyStates(self);
-    self->mExplicitStack.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mExplicitStack) = cList_vtbl;
     cList_destroyList((char*)&self->mExplicitStack);
-    self->mExplicitStack.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mExplicitStack.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mExplicitStack.mEnd);
-    self->mExplicitStack.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mExplicitStack.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((char*)&self->mExplicitStack);
-    self->mStack.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mStack) = cList_vtbl;
     cList_destroyList(self);
-    self->mStack.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mStack.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mStack.mEnd);
-    self->mStack.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mStack.mStart) = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -460,7 +460,7 @@ extern "C" void cUIStateStack_update(cUIStateStack* self)
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
-                sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)n->mVtbl;
+                sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, n);
                 vt[12].fn(vthis(n, vt[12]));
             }
             cUIState_updateScreens(n);

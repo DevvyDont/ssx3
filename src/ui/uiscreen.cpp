@@ -72,20 +72,20 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
     if ((void*)self->mpBuffer != 0 && (self->mAttrScreen & 2)) {
         cMemMan_free__FPv(self->mpBuffer);
     }
-    self->mRootGroup.mList.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mRootGroup.mList) = cList_vtbl;
     self->mRootGroup.mVtbl = cUIGroup_vtbl;
     cList_destroyList_C558(&self->mRootGroup.mList);
     char* rootGroup = (char*)&self->mRootGroup;
-    self->mRootGroup.mList.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mRootGroup.mList.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mRootGroup.mList.mEnd);
-    self->mRootGroup.mList.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mRootGroup.mList.mStart) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mRootGroup.mList);
     cUIThing__cUIThing(rootGroup, 2);
-    self->mThreads.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mThreads) = cList_vtbl;
     cList_destroyList_C558(&self->mThreads);
-    self->mThreads.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mThreads.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mThreads.mEnd);
-    self->mThreads.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mThreads.mStart) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mThreads);
     self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self));
@@ -1749,11 +1749,11 @@ extern "C" void cUIState__cUIState(cUIState* self, int flags)
 {
     self->mVtbl = cUIState_vtbl;
     cList_destroyList_v((char*)&self->mScreens);
-    self->mScreens.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mScreens) = cList_vtbl;
     cList_destroyList_v((char*)&self->mScreens);
-    self->mScreens.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mScreens.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mScreens.mEnd);
-    self->mScreens.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mScreens.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((char*)&self->mScreens);
     self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(self);

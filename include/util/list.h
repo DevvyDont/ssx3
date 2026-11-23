@@ -20,36 +20,46 @@
 // lw 0x4) returns mStart.mpNext, last (cList_last, lw 0xC) returns mEnd.mpPrev, and clear() (cList_clear) stores
 // mStart.mpPrev = &mStart, mStart.mpNext = &mEnd, mEnd.mpPrev = &mStart, mEnd.mpNext = &mEnd.
 //
-// FLAT layouts, like main/game.h (no C++ inheritance or virtuals; vptrs are `void** mVtbl` fields).
+// cListNode and cList are real polymorphic classes (their vptrs follow their own data, as ee-gcc 2.95.3 places
+// them; nothing here defines a member, so no vtable is emitted). The cListOperator family stays FLAT (`void**
+// mVtbl` fields): code builds operators on the stack by hand.
 
 #include "layout.h"
 
 struct cUIInput;
+struct cListOperator;
 
-struct cListNode {
+class cListNode {
+public:
     cListNode* mpPrev;          // 0x0 [O]; [R] ctor cListNode_cListNode self-links it; [U] cListNode_removeFromList, clear()
                                 //     cList_clear; cListNode_prev prev() (lw 0x0), cListNode_setPrev setPrev() (sw 0x0)
     cListNode* mpNext;          // 0x4 [O]; [R] self-linked; [U] cListNode_next next() (lw 0x4), cListNode_setNext setNext()
                                 //     (sw 0x4); cList_first reads mStart.mpNext
-    void** mVtbl;               // 0x8 [R] _vt$9cListNode cListNode_vtbl (ctor cListNode_cListNode, dtor cListNode__cListNode)
+    // 0x8: the vptr. [R] _vt$9cListNode cListNode_vtbl (ctor cListNode_cListNode, dtor cListNode__cListNode); slots
+    // [R] that table, names and types [O]:
+    virtual ~cListNode();                                        // 1 cListNode__cListNode
+    virtual void* traverseFlat(cListOperator* pOperator);        // 2 cListNode_traverseFlat
+    virtual void* traverseRecurse(cListOperator* pOperator);     // 3 cListNode_traverseRecurse
 };
 
 CHECK_OFFSET(cListNode, mpPrev, 0x0);
 CHECK_OFFSET(cListNode, mpNext, 0x4);
-CHECK_OFFSET(cListNode, mVtbl, 0x8);
 CHECK_SIZE(cListNode, 0xC);
 
-struct cList {
+class cList {
+public:
     cListNode mStart;           // 0x00 [O] start sentinel; [R] ctor cList_cList / clear() cList_clear;
                                 //      [U] cList_first (lw 0x4), cList_addToFront (lw/sw 0x4), cList_size, traverse*
     cListNode mEnd;             // 0x0C [O] end sentinel; [R] ditto; [U] cList_last last() (lw 0xC),
                                 //      cList_addToEnd (lw/sw 0xC)
-    void** mVtbl;               // 0x18 [R] cList_vtbl D_00494C98 (ctor cList_cList, dtor cList__cList)
+    // 0x18: the vptr. [R] cList_vtbl D_00494C98 (ctor cList_cList, dtor cList__cList); slots [R], names [O]:
+    virtual ~cList();                                            // 1 cList__cList
+    virtual void* traverseFlat(cListOperator* pOperator);        // 2 cList_traverseFlat
+    virtual void* traverseRecurse(cListOperator* pOperator);     // 3 cList_traverseRecurse
 };
 
 CHECK_OFFSET(cList, mStart, 0x00);
 CHECK_OFFSET(cList, mEnd, 0x0C);
-CHECK_OFFSET(cList, mVtbl, 0x18);
 CHECK_SIZE(cList, 0x1C);
 
 struct cListOperator {

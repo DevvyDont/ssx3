@@ -704,7 +704,7 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void *cListNode_cListNode(cListNode* self) {
     ((void*)self->mpNext) = ((void*)self);
-    ((int*)self->mVtbl) = (int*)&cListNode_vtbl;
+    ((int*)VPTR_OF(cListNode, self)) = (int*)&cListNode_vtbl;
     ((void*)self->mpPrev) = ((void*)self);
     return ((void*)self);
 }
@@ -726,7 +726,7 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void cListNode__cListNode(cListNode* self, int flags)
 {
-    self->mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, self) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
         operator_delete(((int*)self));
@@ -816,11 +816,11 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void cList__cList(cList* self, int flags)
 {
-    self->mVtbl = cList_vtbl;
+    VPTR_OF(cList, self) = cList_vtbl;
     cList_destroyList(self);
-    self->mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mEnd) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)&self->mEnd);
-    self->mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mStart) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1506,7 +1506,7 @@ INCLUDE_ASM("ui/uivector", cListOpOnInput_onListNode);
  */
 extern "C" void* cListOpOnInput_onListNode(cList* self, cListNode* obj)
 {
-    sVEntry<int(void*, void*)>* vt = (sVEntry<int(void*, void*)>*)obj->mVtbl;
+    sVEntry<int(void*, void*)>* vt = (sVEntry<int(void*, void*)>*)VPTR_OF(cListNode, obj);
     if (vt[15].fn(vthis(obj, vt[15]), self->mStart.mpNext) == 0) {
         return 0;
     }
@@ -1977,11 +1977,11 @@ extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cU
 extern "C" void cUIGroup__cUIGroup(cUIGroup* self, int flag)
 {
     self->mVtbl = cUIGroup_vtbl;
-    self->mList.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v(&self->mList);
-    self->mList.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
-    self->mList.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mList.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(&self->mList));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
@@ -2191,11 +2191,11 @@ extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cU
 extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
 {
     self->mVtbl = cUIGroup_vtbl;
-    self->mList.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v(&self->mList);
-    self->mList.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
-    self->mList.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mList.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(&self->mList));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
@@ -4484,11 +4484,11 @@ extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
 {
     self->mVtbl = cUITextScroll_vtbl;
     cUITextScroll_clearBuffer(self);
-    self->mList.mVtbl = cList_vtbl;
+    VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v((char*)&self->mList);
-    self->mList.mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
-    self->mList.mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mList.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)&self->mList);
     cUIThing__cUIThing_dtor(self, flags);
 }

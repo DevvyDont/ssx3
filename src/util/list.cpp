@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 
 #include "util/list.h"
 
@@ -118,10 +119,10 @@ extern "C" void* cList_cList(cList* self)
 {
     self->mStart.mpNext = (cListNode*)self;
     *(void**)&self->mStart = ((char*)self);
-    self->mVtbl = cList_vtbl;
-    self->mStart.mVtbl = cListNode_vtbl;
+    VPTR_OF(cList, self) = cList_vtbl;
+    VPTR_OF(cListNode, &self->mStart) = cListNode_vtbl;
     self->mEnd.mpNext = (cListNode*)(&self->mEnd);
-    self->mEnd.mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, &self->mEnd) = cListNode_vtbl;
     *(void**)&self->mEnd = (char*)&self->mEnd;
     cList_clear(((char*)self));
     return ((void*)self);
