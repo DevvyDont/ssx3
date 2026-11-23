@@ -318,7 +318,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
         pos[1] = self->mPosition.y + y;
         pos[2] = 0.0f;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->RenderIndexedTriList(((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpTriangles, self->mpVertexPositionRender, (const t2Vector*)(0), self->mpVertexColour, *(const t3Vector*)pos);
+        ps2GraphicsMan->RenderIndexedTriList(((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour, *(const t3Vector*)pos);
         return;
     }
     if ((sVtx_3A39F8*)self->mpVertices == 0)

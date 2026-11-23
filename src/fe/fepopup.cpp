@@ -310,7 +310,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
         cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
-        self->onGainFocus((cUIState*)(0));
+        self->onGainFocus(0);
     }
 }
 #endif
@@ -5913,7 +5913,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
             sound = 6;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             cUIState* o = self->mpParentState;
-            o->onWidgetEvent((cUIThing*)(0), 0xE);
+            o->onWidgetEvent(0, 0xE);
         } else if (InputK1CDB98(((char*)ev), 25)) {
             changed = 1;
             self->mbCapsOn ^= 1;

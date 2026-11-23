@@ -4235,7 +4235,7 @@ extern "C" void cLensFxMan__cLensFxMan(cLensFxMan* self, int flags)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     self->mVtbl = cLensFxMan_vtbl;
-    obj->SetLensFXCallBack((void*)(0), (void*)(0));
+    obj->SetLensFXCallBack(0, (void*)(0));
     cLensFxMan_mbDrawSun = 0;
     if (flags & 1) {
         operator_delete((int*)self);

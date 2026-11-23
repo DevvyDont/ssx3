@@ -1048,7 +1048,7 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     {
         skyInstance->m_iFlags = ((unsigned int)skyInstance->m_iFlags & ~2u) | 4;
         tInstanceRecord* instToDraw = self->m_pInstanceSky;
-        ctx->RenderModel(instToDraw, instToDraw->m_Model->m_MaterialBlock, skyMatrix, 1.0f, (const t4Matrix*)(0), (const t4Matrix*)(0), 21536);
+        ctx->RenderModel(instToDraw, instToDraw->m_Model->m_MaterialBlock, skyMatrix, 1.0f, 0, (const t4Matrix*)(0), 21536);
     }
     sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = topDrawState - 1;
