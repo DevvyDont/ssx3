@@ -930,8 +930,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SunPitchOffset(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[27].fn(vthis(obj, obj->vt[27]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->SunPitchOffset();
 }
 #endif
 
@@ -952,8 +952,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SunYawOffset(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[28].fn(vthis(obj, obj->vt[28]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->SunYawOffset();
 }
 #endif
 
@@ -974,8 +974,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SunColorR(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[29].fn(vthis(obj, obj->vt[29]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->SunColorR();
 }
 #endif
 
@@ -996,8 +996,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SunColorG(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[30].fn(vthis(obj, obj->vt[30]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->SunColorG();
 }
 #endif
 
@@ -1018,8 +1018,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SunColorB(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[31].fn(vthis(obj, obj->vt[31]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->SunColorB();
 }
 #endif
 
@@ -1040,8 +1040,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SunIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[32].fn(vthis(obj, obj->vt[32]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->SunIntensity();
 }
 #endif
 
@@ -1063,8 +1063,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" int cRenderStateMan_SunType(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *(int*)obj->vt[33].fn(vthis(obj, obj->vt[33]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return *(int*)((sLensFxVEntry*)VPTR_OF(tWPInGameData, obj))[33].fn(vthis(obj, ((sLensFxVEntry*)VPTR_OF(tWPInGameData, obj))[33]));
 }
 #endif
 
@@ -1085,8 +1085,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LensIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[34].fn(vthis(obj, obj->vt[34]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->LensIntensity();
 }
 #endif
 
@@ -1107,8 +1107,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SunRadius(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
-    return *obj->vt[35].fn(vthis(obj, obj->vt[35]));
+    tWPInGameData* obj = renderState->m_query[5]->m_data;
+    return obj->SunRadius();
 }
 #endif
 
@@ -1240,8 +1240,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_DrawDistance(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[0]);
-    return *obj->vt[6].fn(vthis(obj, obj->vt[6]));
+    tWPInGameData* obj = renderState->m_query[0]->m_data;
+    return obj->DrawDistance();
 }
 #endif
 
@@ -1263,8 +1263,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SkyBoxRotation(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[4]);
-    return *obj->vt[26].fn(vthis(obj, obj->vt[26]));
+    tWPInGameData* obj = renderState->m_query[4]->m_data;
+    return obj->SkyBoxRotation();
 }
 #endif
 
@@ -1287,8 +1287,8 @@ extern "C" float cRenderStateMan_SnowIntensity(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-        return *obj->vt[43].fn(vthis(obj, obj->vt[43])) * (1.0f - renderState->m_inTunnel);
+        tWPInGameData* obj = renderState->m_query[8]->m_data;
+        return obj->SnowIntensity() * (1.0f - renderState->m_inTunnel);
     }
     return 0.0f;
 }
@@ -1311,8 +1311,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_FlakeSize(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[44].fn(vthis(obj, obj->vt[44]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->FlakeSize();
 }
 #endif
 
@@ -1334,8 +1334,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_WindIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[45].fn(vthis(obj, obj->vt[45])) * (1.0f - renderState->m_inTunnel);
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->WindIntensity() * (1.0f - renderState->m_inTunnel);
 }
 #endif
 
@@ -1357,8 +1357,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_WindRotation(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[46].fn(vthis(obj, obj->vt[46]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->WindRotation();
 }
 #endif
 
@@ -1380,8 +1380,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFlurries(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[49].fn(vthis(obj, obj->vt[49]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->SnowFlurries();
 }
 #endif
 
@@ -1404,8 +1404,8 @@ extern "C" float cRenderStateMan_SnowFluffItensity(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-        return *obj->vt[51].fn(vthis(obj, obj->vt[51]));
+        tWPInGameData* obj = renderState->m_query[8]->m_data;
+        return obj->SnowFluffItensity();
     }
     return 0.0f;
 }
@@ -1429,8 +1429,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFluffWindIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[52].fn(vthis(obj, obj->vt[52]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->SnowFluffWindIntensity();
 }
 #endif
 
@@ -1452,8 +1452,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowGravityMultiplier(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[50].fn(vthis(obj, obj->vt[50]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->SnowGravityMultiplier();
 }
 #endif
 
@@ -1475,8 +1475,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_Temperature(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[48].fn(vthis(obj, obj->vt[48]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->Temperature();
 }
 #endif
 
@@ -1498,8 +1498,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightningChance(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[53].fn(vthis(obj, obj->vt[53]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->LightningChance();
 }
 #endif
 
@@ -1521,8 +1521,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFlakeColourA(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[54].fn(vthis(obj, obj->vt[54]));
+    tWPInGameData* obj = renderState->m_query[8]->m_data;
+    return obj->SnowFlakeColourA();
 }
 #endif
 

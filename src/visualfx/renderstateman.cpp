@@ -1,4 +1,5 @@
 #include "common.h"
+#include "worldpainter/worldpainterquery.h"
 #include "visualfx/renderstateman.h"
 #include "render/2drender.h"
 #include "main/game.h"
@@ -40,9 +41,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
 {
     tRenderState* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* stateObj = *((sRSMObj**)entry->m_query[8]);
-    sRSMVEntry* vt = stateObj->vt;
-    return *vt[55].fn(vthis(stateObj, vt[55]));
+    tWPInGameData* stateObj = entry->m_query[8]->m_data;
+    return stateObj->SnowFlakeColourR();
 }
 #endif
 
@@ -63,9 +63,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
 {
     tRenderState* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* stateObj = *((sRSMObj**)entry->m_query[8]);
-    sRSMVEntry* vt = stateObj->vt;
-    return *vt[56].fn(vthis(stateObj, vt[56]));
+    tWPInGameData* stateObj = entry->m_query[8]->m_data;
+    return stateObj->SnowFlakeColourG();
 }
 #endif
 
@@ -86,9 +85,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 {
     tRenderState* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* stateObj = *((sRSMObj**)entry->m_query[8]);
-    sRSMVEntry* vt = stateObj->vt;
-    return *vt[57].fn(vthis(stateObj, vt[57]));
+    tWPInGameData* stateObj = entry->m_query[8]->m_data;
+    return stateObj->SnowFlakeColourB();
 }
 #endif
 
@@ -109,9 +107,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFluffColourA(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[58].fn(vthis(stateQuery, vt[58]));
+    tWPInGameData* stateQuery = renderState->m_query[8]->m_data;
+    return stateQuery->SnowFluffColourA();
 }
 #endif
 
@@ -132,9 +129,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFluffColourR(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[59].fn(vthis(stateQuery, vt[59]));
+    tWPInGameData* stateQuery = renderState->m_query[8]->m_data;
+    return stateQuery->SnowFluffColourR();
 }
 #endif
 
@@ -155,9 +151,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFluffColourG(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[60].fn(vthis(stateQuery, vt[60]));
+    tWPInGameData* stateQuery = renderState->m_query[8]->m_data;
+    return stateQuery->SnowFluffColourG();
 }
 #endif
 
@@ -178,9 +173,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowFluffColourB(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[61].fn(vthis(stateQuery, vt[61]));
+    tWPInGameData* stateQuery = renderState->m_query[8]->m_data;
+    return stateQuery->SnowFluffColourB();
 }
 #endif
 
@@ -202,9 +196,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_FogDensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[7].fn(vthis(stateQuery, vt[7]));
+    tWPInGameData* stateQuery = renderState->m_query[1]->m_data;
+    return stateQuery->FogDensity();
 }
 #endif
 
@@ -226,9 +219,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_FogNear(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[8].fn(vthis(stateQuery, vt[8]));
+    tWPInGameData* stateQuery = renderState->m_query[1]->m_data;
+    return stateQuery->FogNear();
 }
 #endif
 
@@ -250,9 +242,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_FogFar(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[9].fn(vthis(stateQuery, vt[9]));
+    tWPInGameData* stateQuery = renderState->m_query[1]->m_data;
+    return stateQuery->FogFar();
 }
 #endif
 
@@ -274,9 +265,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_FogColourR(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[10].fn(vthis(stateQuery, vt[10]));
+    tWPInGameData* stateQuery = renderState->m_query[1]->m_data;
+    return stateQuery->FogColourR();
 }
 #endif
 
@@ -298,9 +288,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_FogColourG(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[11].fn(vthis(stateQuery, vt[11]));
+    tWPInGameData* stateQuery = renderState->m_query[1]->m_data;
+    return stateQuery->FogColourG();
 }
 #endif
 
@@ -322,9 +311,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_FogColourB(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[12].fn(vthis(stateQuery, vt[12]));
+    tWPInGameData* stateQuery = renderState->m_query[1]->m_data;
+    return stateQuery->FogColourB();
 }
 #endif
 
@@ -348,9 +336,8 @@ extern "C" float cRenderStateMan_ScreenTintScaleR(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
-        sRSMVEntry* vt = stateQuery->vt;
-        return *vt[20].fn(vthis(stateQuery, vt[20]));
+        tWPInGameData* stateQuery = renderState->m_query[3]->m_data;
+        return stateQuery->ScreenTintScaleR();
     }
     return 1.0f;
 }
@@ -376,9 +363,8 @@ extern "C" float cRenderStateMan_ScreenTintScaleG(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
-        sRSMVEntry* vt = stateQuery->vt;
-        return *vt[21].fn(vthis(stateQuery, vt[21]));
+        tWPInGameData* stateQuery = renderState->m_query[3]->m_data;
+        return stateQuery->ScreenTintScaleG();
     }
     return 1.0f;
 }
@@ -404,9 +390,8 @@ extern "C" float cRenderStateMan_ScreenTintScaleB(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
-        sRSMVEntry* vt = stateQuery->vt;
-        return *vt[22].fn(vthis(stateQuery, vt[22]));
+        tWPInGameData* stateQuery = renderState->m_query[3]->m_data;
+        return stateQuery->ScreenTintScaleB();
     }
     return 1.0f;
 }
@@ -432,9 +417,8 @@ extern "C" float cRenderStateMan_ScreenTintOffsetR(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
-        sRSMVEntry* vt = stateQuery->vt;
-        return *vt[23].fn(vthis(stateQuery, vt[23]));
+        tWPInGameData* stateQuery = renderState->m_query[3]->m_data;
+        return stateQuery->ScreenTintOffsetR();
     }
     return 0.0f;
 }
@@ -460,9 +444,8 @@ extern "C" float cRenderStateMan_ScreenTintOffsetG(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
-        sRSMVEntry* vt = stateQuery->vt;
-        return *vt[24].fn(vthis(stateQuery, vt[24]));
+        tWPInGameData* stateQuery = renderState->m_query[3]->m_data;
+        return stateQuery->ScreenTintOffsetG();
     }
     return 0.0f;
 }
@@ -488,9 +471,8 @@ extern "C" float cRenderStateMan_ScreenTintOffsetB(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
-        sRSMVEntry* vt = stateQuery->vt;
-        return *vt[25].fn(vthis(stateQuery, vt[25]));
+        tWPInGameData* stateQuery = renderState->m_query[3]->m_data;
+        return stateQuery->ScreenTintOffsetB();
     }
     return 0.0f;
 }
@@ -514,9 +496,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightGlowCutoff(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[13].fn(vthis(stateQuery, vt[13]));
+    tWPInGameData* stateQuery = renderState->m_query[2]->m_data;
+    return stateQuery->LightGlowCutoff();
 }
 #endif
 
@@ -538,9 +519,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightGlowCutoffScale(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[14].fn(vthis(stateQuery, vt[14]));
+    tWPInGameData* stateQuery = renderState->m_query[2]->m_data;
+    return stateQuery->LightGlowCutoffScale();
 }
 #endif
 
@@ -562,9 +542,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightGlowCopyIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[15].fn(vthis(stateQuery, vt[15]));
+    tWPInGameData* stateQuery = renderState->m_query[2]->m_data;
+    return stateQuery->LightGlowCopyIntensity();
 }
 #endif
 
@@ -586,9 +565,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightGlowSourceIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[16].fn(vthis(stateQuery, vt[16]));
+    tWPInGameData* stateQuery = renderState->m_query[2]->m_data;
+    return stateQuery->LightGlowSourceIntensity();
 }
 #endif
 
@@ -610,9 +588,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[17].fn(vthis(stateQuery, vt[17]));
+    tWPInGameData* stateQuery = renderState->m_query[2]->m_data;
+    return stateQuery->LightGlowFrameIntensity();
 }
 #endif
 
@@ -634,9 +611,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightGlowBlend2(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[18].fn(vthis(stateQuery, vt[18]));
+    tWPInGameData* stateQuery = renderState->m_query[2]->m_data;
+    return stateQuery->LightGlowBlend2();
 }
 #endif
 
@@ -658,9 +634,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_LightGlowBlend3(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[19].fn(vthis(stateQuery, vt[19]));
+    tWPInGameData* stateQuery = renderState->m_query[2]->m_data;
+    return stateQuery->LightGlowBlend3();
 }
 #endif
 
@@ -682,9 +657,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_RimLightIntensityOffset(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[42].fn(vthis(stateQuery, vt[42]));
+    tWPInGameData* stateQuery = renderState->m_query[7]->m_data;
+    return stateQuery->RimLightIntensityOffset();
 }
 #endif
 
@@ -705,9 +679,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_AmbientLightIntensityOffset(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[41].fn(vthis(stateQuery, vt[41]));
+    tWPInGameData* stateQuery = renderState->m_query[7]->m_data;
+    return stateQuery->AmbientLightIntensityOffset();
 }
 #endif
 
@@ -729,9 +702,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowSparkleDensity(int i)
 {
     tRenderState* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* object = *(sRSMObj**)entry->m_query[6];
-    sRSMVEntry* vt = object->vt;
-    return *vt[36].fn(vthis(object, vt[36])) * (1.0f - entry->m_inTunnel);
+    tWPInGameData* object = entry->m_query[6]->m_data;
+    return object->SnowSparkleDensity() * (1.0f - entry->m_inTunnel);
 }
 #endif
 
@@ -752,9 +724,8 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_PlayerWindIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
-    sRSMVEntry* vt = stateQuery->vt;
-    return *vt[47].fn(vthis(stateQuery, vt[47]));
+    tWPInGameData* stateQuery = renderState->m_query[8]->m_data;
+    return stateQuery->PlayerWindIntensity();
 }
 #endif
 
@@ -781,8 +752,8 @@ extern "C" void* cRenderStateMan_LightIrradianceName(int i)
     }
     {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
-        sRSMVEntry* vt = stateQuery->vt;
+        tWPInGameData* stateQuery = renderState->m_query[7]->m_data;
+        sRSMVEntry* vt = (sRSMVEntry*)VPTR_OF(tWPInGameData, stateQuery);
         return vt[37].fn(vthis(stateQuery, vt[37]));
     }
 }
@@ -811,8 +782,8 @@ extern "C" void* cRenderStateMan_ShadowIrradianceName(int i)
     }
     {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
-        sRSMVEntry* vt = stateQuery->vt;
+        tWPInGameData* stateQuery = renderState->m_query[7]->m_data;
+        sRSMVEntry* vt = (sRSMVEntry*)VPTR_OF(tWPInGameData, stateQuery);
         return vt[38].fn(vthis(stateQuery, vt[38]));
     }
 }
@@ -841,8 +812,8 @@ extern "C" void* cRenderStateMan_TunnelIrradianceName(int i)
     }
     {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
-        sRSMVEntry* vt = stateQuery->vt;
+        tWPInGameData* stateQuery = renderState->m_query[7]->m_data;
+        sRSMVEntry* vt = (sRSMVEntry*)VPTR_OF(tWPInGameData, stateQuery);
         return vt[39].fn(vthis(stateQuery, vt[39]));
     }
 }
@@ -871,8 +842,8 @@ extern "C" void* cRenderStateMan_ObjectIrradianceName(int i)
     }
     {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
-        sRSMVEntry* vt = stateQuery->vt;
+        tWPInGameData* stateQuery = renderState->m_query[7]->m_data;
+        sRSMVEntry* vt = (sRSMVEntry*)VPTR_OF(tWPInGameData, stateQuery);
         return vt[40].fn(vthis(stateQuery, vt[40]));
     }
 }
@@ -964,8 +935,8 @@ extern "C" void cRenderStateMan_writeToReplayFrame(void* frame)
     int i;
     for (i = 0; i < 6; i++) {
         tRenderState* stateEntry = &cRenderStateMan_m_state[i];
-        ((cRSMObjWF*)*((sRSMObj**)stateEntry->m_query[8]))->v64(frame);
-        ((cRSMObjWF*)*((sRSMObj**)stateEntry->m_query[8]))->v64(frame);
+        ((cRSMObjWF*)stateEntry->m_query[8]->m_data)->v64(frame);
+        ((cRSMObjWF*)stateEntry->m_query[8]->m_data)->v64(frame);
     }
 }
 #endif
@@ -1057,8 +1028,8 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
     int i;
     for (i = 0; i < 6; i++) {
         tRenderState* entry = &cRenderStateMan_m_state[i];
-        ((cRSMObjRF*)*((sRSMObj**)entry->m_query[8]))->v65(frame);
-        ((cRSMObjRF*)*((sRSMObj**)entry->m_query[8]))->v65(frame);
+        ((cRSMObjRF*)entry->m_query[8]->m_data)->v65(frame);
+        ((cRSMObjRF*)entry->m_query[8]->m_data)->v65(frame);
     }
 }
 #endif
