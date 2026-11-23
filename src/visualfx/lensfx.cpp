@@ -481,8 +481,7 @@ extern "C" void cRenderStateMan_purge(void)
             for (j = 0; j < 9; j++) {
                 tWorldPainterQuery* queryObj = (tWorldPainterQuery*)D_lensRows_CFA0[i].objs[j];
                 if (((char*)queryObj) != 0) {
-                    sLensVE_CFA0* vt = (sLensVE_CFA0*)VPTR_OF(tWorldPainterQuery, queryObj);
-                    vt[1].fn(vthis(queryObj, vt[1]), 3);
+                    delete queryObj;
                 }
             }
         }
