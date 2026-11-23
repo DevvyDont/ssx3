@@ -38,6 +38,7 @@ CHECK_SIZE(tBEProfileCollectBits, 0xC);
 struct tBEProfileBolt {
     short id;                       // 0x000 [R] the ctor: -1 (empty); [U] func_00151A88 copies the item definition's id
     unsigned short flags;           // 0x002 [R] the ctor: 0; [U] 2, 4, 0x10 owned, 0x20 (func_00151C48 / C90 / BD0)
+    tBEProfileBolt() : id(-1), flags(0) {}
 };
 CHECK_OFFSET(tBEProfileBolt, id, 0x0);
 CHECK_OFFSET(tBEProfileBolt, flags, 0x2);

@@ -73,16 +73,6 @@ extern "C" int func_0019CCE8(void* self, int a1, int a2);
 extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern void* D_004A1968;
 
-struct sItemE7F0 {
-    short id;
-    unsigned short flags;
-};
-struct sItemListE7F0 {
-    char pad_0x0[0x288];
-    short* map;             // 0x288
-    int count;              // 0x28C
-    sItemE7F0 items[1];     // 0x290
-};
 struct sBoneEntE7F0 {
     char f0;
     char f1;
@@ -92,10 +82,10 @@ struct sBoneEntE7F0 {
     char pad_0x6[0x38 - 0x6];
 };
 
-static inline sItemE7F0* getItemK19E7F0(sItemListE7F0* list, int i)
+static inline tBEProfileBolt* getItemK19E7F0(cBECharProfileDB* list, int i)
 {
     if (i >= 0)
-        return &list->items[i];
+        return &list->mBolts[i];
     return 0;
 }
 
@@ -112,14 +102,14 @@ extern "C" void cFERider_queueLoadExtraTextures(cFERider* self)
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
-    sItemListE7F0* list = (sItemListE7F0*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
     sBoneEntE7F0* partEntry = (sBoneEntE7F0*)func_0014D998(db, self->mCharID);
     int n = func_0014D988(db, self->mCharID);
     self->mDoneLoadingTextures = 0;
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         if (partEntry->type == 6) {
-            sItemE7F0* it = getItemK19E7F0(list, list->map[partEntry->slot]);
+            tBEProfileBolt* it = getItemK19E7F0(list, list->mpBoltsMap[partEntry->slot]);
             if (func_0019CCE8(D_004A1968, self->mProfileIndex, it->id) < 0) {
                 char buf[0x100];
                 if (func_0014B988(iface, self->mProfileIndex, self->mCharID, partEntry, buf)) {
@@ -288,15 +278,6 @@ extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern void* D_004A1968;
 
-struct sItemEC68 {
-    short id;
-    short pad;
-};
-struct sItemListEC68 {
-    char pad_0x0[0x28C];
-    int count;              // 0x28C
-    sItemEC68 items[1];     // 0x290
-};
 
 /**
  * Cancels every file the front-end rider has queued for its items.
@@ -316,19 +297,19 @@ extern "C" void cFERider_cancelAllFiles(cFERider* rider)
         return;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    sItemListEC68* list = (sItemListEC68*)func_0014AD28(iface, self[1], self[0]);
-    int n = list->count;
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self[1], self[0]);
+    int n = list->mNumBolts;
     int i;
     for (i = 0; i < n; i++) {
-        int fileSlot = func_0019CCE8(D_004A1968, self[1], list->items[i].id);
+        int fileSlot = func_0019CCE8(D_004A1968, self[1], list->mBolts[i].id);
         if (fileSlot >= 0) {
             func_0019DC20(mgr, self[0], fileSlot);
-            func_0019CD38(D_004A1968, self[1], list->items[i].id, -1);
+            func_0019CD38(D_004A1968, self[1], list->mBolts[i].id, -1);
         }
-        fileSlot = func_0019CBE0(D_004A1968, self[1], list->items[i].id);
+        fileSlot = func_0019CBE0(D_004A1968, self[1], list->mBolts[i].id);
         if (fileSlot >= 0) {
             func_0019DC20(mgr, self[0], fileSlot);
-            func_0019CC30(D_004A1968, self[1], list->items[i].id, -1);
+            func_0019CC30(D_004A1968, self[1], list->mBolts[i].id, -1);
         }
     }
 }
@@ -1154,16 +1135,6 @@ extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern void* D_004A1968;
 
-struct sItemFA78 {
-    short id;
-    unsigned short flags;
-};
-struct sItemListFA78 {
-    char pad_0x0[0x288];
-    short* map;             // 0x288
-    int count;              // 0x28C
-    sItemFA78 items[1];     // 0x290
-};
 struct sBoneEntFA78 {
     char f0;
     char f1;
@@ -1173,10 +1144,10 @@ struct sBoneEntFA78 {
     char pad_0x6[0x38 - 0x6];
 };
 
-static inline sItemFA78* getItemK19FA78(sItemListFA78* list, int i)
+static inline tBEProfileBolt* getItemK19FA78(cBECharProfileDB* list, int i)
 {
     if (i >= 0)
-        return &list->items[i];
+        return &list->mBolts[i];
     return 0;
 }
 
@@ -1189,7 +1160,7 @@ static inline sItemFA78* getItemK19FA78(sItemListFA78* list, int i)
  *
  * @param list  the character's item list, or null to fetch it (func_0014AD28)
  */
-extern "C" void func_0019FA78(cFERider* self, sItemListFA78* list)
+extern "C" void func_0019FA78(cFERider* self, cBECharProfileDB* list)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
@@ -1199,13 +1170,13 @@ extern "C" void func_0019FA78(cFERider* self, sItemListFA78* list)
     if (self->mCharID < 0)
         return;
     if (list == 0)
-        list = (sItemListFA78*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
+        list = (cBECharProfileDB*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
     int flag = 1;
     int n = func_0014D988(db, self->mCharID);
     sBoneEntFA78* partEntry = (sBoneEntFA78*)func_0014D998(db, self->mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
-        sItemFA78* it = getItemK19FA78(list, list->map[partEntry->slot]);
+        tBEProfileBolt* it = getItemK19FA78(list, list->mpBoltsMap[partEntry->slot]);
         int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
         if (fileSlot >= 0) {
             if (partEntry->type != 6) {
@@ -1235,20 +1206,9 @@ extern "C" int func_0019DA10(void* mgr, int bank, char* buf, int a3, int a4, int
 extern "C" int func_0019CCE8(void* self, int a1, int a2);
 extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019E070(void* mgr, int bank);
-struct sItemListFA78;
-extern "C" void func_0019FA78(cFERider* self, sItemListFA78* list);
+extern "C" void func_0019FA78(cFERider* self, cBECharProfileDB* list);
 extern void* D_004A1968;
 
-struct sItemFBE0 {
-    short id;
-    unsigned short flags;
-};
-struct sItemListFBE0 {
-    char pad_0x0[0x288];
-    short* map;             // 0x288
-    int count;              // 0x28C
-    sItemFBE0 items[1];     // 0x290
-};
 struct sBoneEntFBE0 {
     char f0;
     char f1;
@@ -1258,10 +1218,10 @@ struct sBoneEntFBE0 {
     char pad_0x6[0x38 - 0x6];
 };
 
-static inline sItemFBE0* getItemK19FBE0(sItemListFBE0* list, int i)
+static inline tBEProfileBolt* getItemK19FBE0(cBECharProfileDB* list, int i)
 {
     if (i >= 0)
-        return &list->items[i];
+        return &list->mBolts[i];
     return 0;
 }
 
@@ -1276,19 +1236,19 @@ static inline sItemFBE0* getItemK19FBE0(sItemListFBE0* list, int i)
  * @param ignored    not used
  * @param keepLoaded    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
  */
-extern "C" void cFERider_loadTextures(cFERider* self, sItemListFBE0* list, int ignored, int keepLoaded)
+extern "C" void cFERider_loadTextures(cFERider* self, cBECharProfileDB* list, int ignored, int keepLoaded)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    func_0019FA78(self, (sItemListFA78*)list);
+    func_0019FA78(self, (cBECharProfileDB*)list);
     self->mDoneLoadingTextures = 0;
     self->mDoneUpdatingModelParts = 0;
     int n = func_0014D988(db, self->mCharID);
     sBoneEntFBE0* partEntry = (sBoneEntFBE0*)func_0014D998(db, self->mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
-        sItemFBE0* it = getItemK19FBE0(list, list->map[partEntry->slot]);
+        tBEProfileBolt* it = getItemK19FBE0(list, list->mpBoltsMap[partEntry->slot]);
         if (func_0019CCE8(D_004A1968, self->mProfileIndex, it->id) < 0) {
             if (it->flags & 0x10) {
                 char buf[0x100];
@@ -1318,16 +1278,6 @@ extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* D_004A1968;
 
-struct sItemFD58 {
-    short id;
-    unsigned short flags;
-};
-struct sItemListFD58 {
-    char pad_0x0[0x288];
-    short* map;             // 0x288
-    int count;              // 0x28C
-    sItemFD58 items[1];     // 0x290
-};
 
 /**
  * Finishes the front-end rider's texture loads: reports whether all are done and registers them.
@@ -1344,11 +1294,11 @@ extern "C" int cFERider_isDoneLoadingTextures(cFERider* self)
     }
     int ok = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    sItemListFD58* list = (sItemListFD58*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
-    int n = list->count;
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
+    int n = list->mNumBolts;
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
-        sItemFD58* it = &list->items[i];
+        tBEProfileBolt* it = &list->mBolts[i];
         int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
         if (fileSlot >= 0) {
             if (func_0019E238(mgr, self->mCharID, fileSlot) == 0) {
@@ -1360,7 +1310,7 @@ extern "C" int cFERider_isDoneLoadingTextures(cFERider* self)
         int used[256];
         MEM_fill(used, 0, sizeof(used));
         for (int i = 0; i < n; i++) {
-            sItemFD58* it = &list->items[i];
+            tBEProfileBolt* it = &list->mBolts[i];
             int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
             if (fileSlot >= 0) {
                 if (func_0019E2B0(mgr, self->mCharID, fileSlot) && used[fileSlot] == 0) {
@@ -1391,15 +1341,6 @@ extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0019DF20(void* mgr, int bank);
 extern void* D_004A1968;
 
-struct sItemFF00 {
-    short id;
-    unsigned short flags;
-};
-struct sItemListFF00 {
-    char pad_0x0[0x28C];
-    int count;              // 0x28C
-    sItemFF00 items[1];     // 0x290
-};
 struct sBoneEntFF00 {
     char pad_0x0[0x28];
     char* file;             // 0x28
@@ -1430,13 +1371,13 @@ static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
  * @param force  nonzero to queue every item's part
  * @param keepLoaded     passed to func_0019DA10 as its keep-existing argument
  */
-extern "C" void cFERider_loadModels(cFERider* self, sItemListFF00* list, sItemFF00* prev, int force, int keepLoaded)
+extern "C" void cFERider_loadModels(cFERider* self, cBECharProfileDB* list, tBEProfileBolt* prev, int force, int keepLoaded)
 {
-    int n = list->count;
+    int n = list->mNumBolts;
     sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
-        sItemFF00* it = &list->items[i];
+        tBEProfileBolt* it = &list->mBolts[i];
         if (force == 0 && (it->flags & 0x10) == 0) {
             if (func_0019CBE0(D_004A1968, self->mProfileIndex, it->id) >= 0) {
                 func_0019DC20(mgr, self->mCharID, func_0019CBE0(D_004A1968, self->mProfileIndex, it->id));
@@ -1445,7 +1386,7 @@ extern "C" void cFERider_loadModels(cFERider* self, sItemListFF00* list, sItemFF
         }
     }
     for (int i = 0; i < n; i++) {
-        sItemFF00* it = &list->items[i];
+        tBEProfileBolt* it = &list->mBolts[i];
         if (func_0019CBE0(D_004A1968, self->mProfileIndex, it->id) < 0) {
             if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
                 sBoneEntFF00* partEntry = getEntK19FF00(db, func_0014D448(db, self->mCharID, it->id));
