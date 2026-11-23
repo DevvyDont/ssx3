@@ -739,7 +739,7 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(void* snd, int a1, int 
 extern "C" void cTransitionMan_EndTransition(void* p);
 extern "C" void cCutSceneTransitionMan_StartCutScene(void* gm, float t);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* gm);
-extern "C" void* cUIStateStack_findState(void* table, int hash);
+extern "C" cUIState* cUIStateStack_findState(void* table, int hash);
 
 
 struct sDmVEntry2_6388 {
@@ -799,10 +799,9 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
     tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList.mBuffer[0], 0);
     dm->mState = 3;
     char* table = (char*)&SSXApp->Game->UI->mStateStack;
-    char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
+    cUIState* hudState = cUIStateStack_findState(table, GetHashValue32(str_hud_e));
     if (hudState != 0) {
-        sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(hudState + 0x8))[24];
-        vtEntry->fn(vthis(hudState, *vtEntry), 0, 0);
+        hudState->handleEvent(0, 0);
     }
     if (tNISList_IsVideo((tNISList*)self, item) == 0) {
         cSSXScriptEngine_PlayRequestScript_i(*(void**)self, self->mViewIndex, item->scriptHandle, 0, (item->controlBits >> 3) & 1);
@@ -984,7 +983,7 @@ int GetHashValue32(char* s);
 void* cGame_getTransitionMan(void* self, int a1);
 extern "C" void cTransitionMan_EndTransition(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* p);
-extern "C" void* cUIStateStack_findState(void* table, int hash);
+extern "C" cUIState* cUIStateStack_findState(void* table, int hash);
 extern "C" void tNISList_RemoveFromHead(tNISList* self, int index);
 extern "C" void* tNISList_DoPause(void*, int, int);
 
@@ -1020,10 +1019,9 @@ extern "C" void tNISList_Reset(tNISList* nisList, int resetTransition)
             }
         }
         char* table = (char*)&SSXApp->Game->UI->mStateStack;
-        char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
+        cUIState* hudState = cUIStateStack_findState(table, GetHashValue32(str_hud_e));
         if (hudState != 0) {
-            sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(hudState + 0x8))[24];
-            vtEntry->fn(vthis(hudState, *vtEntry), 1, 0);
+            hudState->handleEvent(1, 0);
         }
     }
     tNISList_RemoveFromHead(nisList, 5);

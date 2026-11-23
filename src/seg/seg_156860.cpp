@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistate.h"
 #include "be/beinterface.h"
 #include "online/commchannel.h"
 #include "vtable.h"
@@ -3338,7 +3339,7 @@ extern "C" void cGameComm_sendChat(cGameComm* gameComm, int message) {
 INCLUDE_ASM("seg/seg_156860", cGameComm_updateMessageDisplay);
 #ifdef SKIP_ASM
 int GetHashValue32(char* s);
-extern "C" void* cUIStateStack_findState(void* mgr, int hash);
+extern "C" cUIState* cUIStateStack_findState(void* mgr, int hash);
 extern "C" void strcpy1(char* dst, const char* src);
 extern char str_hud_d[];
 extern char str_kT_POPUPCMNOtherPauseMenu[];
@@ -3350,24 +3351,11 @@ struct sVEntS_8CB0 {
     const char* (*fn)(void*, int);
 };
 
-struct sVEntM_8CB0 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, char*);
-};
-
 // Whether no NIS cut-scene list is playing: mPlayingNISList is 2 when none is (the engine's constructor sets 2,
 // and IsNISActive tests != 2). An earlier reading of this field as "online: connected" was wrong.
 static inline int gcNoNISPlaying_8CB0()
 {
     return ScriptEngine->mPlayingNISList == 2;
-}
-
-// Sends message `msg` (with text `arg`) to the UI item through its vtable slot 24.
-static inline void gcSend_8CB0(char* item, int msg, char* arg)
-{
-    sVEntM_8CB0* vt = *(sVEntM_8CB0**)(item + 8);
-    vt[24].fn(vthis(item, vt[24]), msg, arg);
 }
 
 // Looks up the string table entry for `name` (vtable slot 4 of the global string table at SSXApp+0x8C).
@@ -3398,7 +3386,7 @@ extern "C" void cGameComm_updateMessageDisplay(cGameComm* self)
     if (ui == 0) {
         return;
     }
-    char* item = (char*)cUIStateStack_findState(ui + 0x18, GetHashValue32(str_hud_d));
+    cUIState* item = cUIStateStack_findState(ui + 0x18, GetHashValue32(str_hud_d));
     if (item == 0) {
         return;
     }
@@ -3413,41 +3401,41 @@ extern "C" void cGameComm_updateMessageDisplay(cGameComm* self)
             if (self->mPauseMenu[1] != 0) {
                 int kind = *(int*)SSXApp->Game->AI;
                 if (kind == 4 || kind == 5 || !gcNoNISPlaying_8CB0()) {
-                    gcSend_8CB0(item, 0xE, buf);
+                    item->handleEvent(0xE, buf);
                     self->mMessageDisplay = 1;
                 }
             } else if (self->mWaitingMessage != 0) {
-                gcSend_8CB0(item, 0xE, buf);
+                item->handleEvent(0xE, buf);
                 self->mMessageDisplay = 2;
             }
         }
         break;
     case 2:
         if (self->mPauseMenu[0] != 0) {
-            gcSend_8CB0(item, 0xF, 0);
+            item->handleEvent(0xF, 0);
             self->mMessageDisplay = 0;
         } else if (self->mPauseMenu[1] != 0) {
-            gcSend_8CB0(item, 0xE, buf);
+            item->handleEvent(0xE, buf);
             self->mMessageDisplay = 1;
         } else if (self->mWaitingMessage == 0) {
-            gcSend_8CB0(item, 0xF, 0);
+            item->handleEvent(0xF, 0);
             self->mMessageDisplay = 0;
         } else if (self->mUnPauseTimer > 0) {
-            gcSend_8CB0(item, 0xF, 0);
+            item->handleEvent(0xF, 0);
             self->mMessageDisplay = 0;
         }
         break;
     case 1:
         if (SSXApp->Game->mCurrentStateID == 2 && gcNoNISPlaying_8CB0()) {
-            gcSend_8CB0(item, 0xF, 0);
+            item->handleEvent(0xF, 0);
             self->mMessageDisplay = 0;
         } else if (self->mPauseMenu[1] == 0 || self->mPauseMenu[0] != 0) {
-            gcSend_8CB0(item, 0xF, 0);
+            item->handleEvent(0xF, 0);
             self->mMessageDisplay = 0;
         }
         break;
     default:
-        gcSend_8CB0(item, 0xF, 0);
+        item->handleEvent(0xF, 0);
         self->mMessageDisplay = 0;
         break;
     }

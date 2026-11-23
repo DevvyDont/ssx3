@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
 #include "be/beinterface.h"
 #include "camera/camera.h"
 #include "visualfx/transitionman.h"
@@ -118,7 +119,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int GetHashValue32(char* str);
 extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cGFGateState_runScript(cGFGateState* self, int a1);
-extern "C" void* cUIStateStack_findState(void* list, int hash);
+extern "C" cUIState* cUIStateStack_findState(void* list, int hash);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_CountdownGateDrop(void* p);
 void func_0028C8C0(void* self, int val);
@@ -159,10 +160,9 @@ extern "C" void cGFGateState_update(cGFGateState* self)
     }
     if (*(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x1C) <= 0) {
         cGFGateState_runScript(self, GetHashValue32(str_StartgateOpen));
-        char* obj = (char*)cUIStateStack_findState(*(char**)(cGameState_mpGame + 0x48) + 0x18, GetHashValue32(str_hud_c));
+        cUIState* obj = cUIStateStack_findState(*(char**)(cGameState_mpGame + 0x48) + 0x18, GetHashValue32(str_hud_c));
         if (obj != 0) {
-            sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
-            vtEntry->fn(vthis(obj, *vtEntry), 6, 0);
+            obj->handleEvent(6, 0);
         }
         cSSXAudio_CountdownGateDrop(cAudioInterface_bxAudio());
         func_0028C8C0(cAudioInterface_bxAudio(), 0x78);

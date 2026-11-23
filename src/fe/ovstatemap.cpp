@@ -1281,7 +1281,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onCreateScreen);
 int GetHashValue32(char* str);
 extern char str_hud_b[];
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self);
-extern "C" void* cUIStateStack_findState(void* list, int hash);
+extern "C" cUIState* cUIStateStack_findState(void* list, int hash);
 
 
 /**
@@ -1305,10 +1305,9 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
             }
         }
     }
-    char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
+    cUIState* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
-        sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
-        vtEntry->fn(vthis(obj, *vtEntry), 3, 0);
+        obj->handleEvent(3, 0);
     }
 }
 #endif
@@ -1319,7 +1318,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onDestroyScreen);
 int GetHashValue32(char* str);
 extern char str_hud_b[];
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self);
-extern "C" void* cUIStateStack_findState(void* list, int hash);
+extern "C" cUIState* cUIStateStack_findState(void* list, int hash);
 extern "C" void cOVStateManager_removePDATemplate();
 void* cUIState_onDestroyScreen(void* self);
 
@@ -1338,10 +1337,9 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self)
             self->mRestoreCutSceneMode = 0;
         }
     }
-    char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
+    cUIState* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
-        sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
-        vtEntry->fn(vthis(obj, *vtEntry), 4, 0);
+        obj->handleEvent(4, 0);
     }
     if (self->mRemovePDA != 0) {
         cOVStateManager_removePDATemplate();
