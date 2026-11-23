@@ -232,7 +232,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
     if (((char*)n) != 0) {
         do {
             if ((n->mAttrState >> 3) & 1) {
-                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)n->mVtbl;
+                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)VPTR_OF(cListNode, n);
                 vt[15].fn(vthis(n, vt[15]));
             }
             n = (cUIState*)n->mpNext;
@@ -242,7 +242,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
     if (((char*)n) != 0) {
         do {
             if ((n->mAttrState >> 3) & 1) {
-                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)n->mVtbl;
+                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)VPTR_OF(cListNode, n);
                 vt[15].fn(vthis(n, vt[15]));
             }
             n = (cUIState*)n->mpNext;

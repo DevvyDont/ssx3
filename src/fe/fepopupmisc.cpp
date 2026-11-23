@@ -3413,7 +3413,7 @@ extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallenge
 {
     self->mVtbl = cFEStateChallengePopup_vtbl;
     cUIState* obj = self->mpParentState;
-    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, obj);
     vt[32].fn(vthis(obj, vt[32]));
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
@@ -3474,7 +3474,7 @@ extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(c
 {
     self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
     cUIState* obj = self->mpParentState;
-    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, obj);
     vt[32].fn(vthis(obj, vt[32]));
     cBXString__cBXString((char*)&self->mszChallenger, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
@@ -6680,7 +6680,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     if (((char*)gameUi) != 0) {
         cUIState* obj = (cUIState*)((char*)cUIStateStack_findState(&gameUi->mStateStack, GetHashValue32(str_hud_b)));
         if (((char*)obj) != 0) {
-            sVEntry<int(void*, int, int)>* vt = (sVEntry<int (void*, int, int)>*)obj->mVtbl;
+            sVEntry<int(void*, int, int)>* vt = (sVEntry<int (void*, int, int)>*)VPTR_OF(cListNode, obj);
             vt[24].fn(vthis(obj, vt[24]), 8, 0);
         }
     }
@@ -8875,13 +8875,13 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
     }
     case 5: {
         cUIState* parentState = self->mpParentState;
-        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, parentState);
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
     case 6: {
         cUIState* parentState = self->mpParentState;
-        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, parentState);
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
@@ -8917,7 +8917,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         int n = func_001E34D8(id);
         if (n == -1) {
             cUIState* parentState = self->mpParentState;
-            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, parentState);
             vt[17].fn(vthis(parentState, vt[17]), self, 20);
             return;
         }
@@ -8933,7 +8933,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         func_001E5428(self);
     } else {
         cUIState* parentState = self->mpParentState;
-        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, parentState);
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
     }
 }

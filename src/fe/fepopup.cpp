@@ -2860,7 +2860,7 @@ struct sPopupVE_1CA298 {
 
 static inline void Notify_1CA298(cUIState* o, int vi, void* self, int v)
 {
-    ((sPopupVE_1CA298*)o->mVtbl)[vi].fn(vthis(o, ((sPopupVE_1CA298*)o->mVtbl)[vi]), self, v);
+    ((sPopupVE_1CA298*)VPTR_OF(cListNode, o))[vi].fn(vthis(o, ((sPopupVE_1CA298*)VPTR_OF(cListNode, o))[vi]), self, v);
 }
 
 /**
@@ -2928,7 +2928,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
     default:
         {
             cUIState* parentState = self->mpParentState;
-            ((void (*)(void*, int, int))((sPopupVE_1CA298*)parentState->mVtbl)[19].fn)(vthis(parentState, ((sPopupVE_1CA298*)parentState->mVtbl)[19]), id, ev);
+            ((void (*)(void*, int, int))((sPopupVE_1CA298*)VPTR_OF(cListNode, parentState))[19].fn)(vthis(parentState, ((sPopupVE_1CA298*)VPTR_OF(cListNode, parentState))[19]), id, ev);
         }
         break;
     }
@@ -3048,7 +3048,7 @@ extern "C" void cScreenPopup_onUpdate(cScreenPopup* self)
 {
     if (self->mbPassUpdate != 0) {
         cUIState* obj = self->mpParentState;
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, obj);
         vt[12].fn(vthis(obj, vt[12]));
     }
     cUIState_onUpdate(self);
@@ -3121,7 +3121,7 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, cUIState* child, i
             self->mpConfirmPopup = 0;
             if (self->miConfimationReturnCode != -1) {
                 cUIState* obj = self->mpParentState;
-                sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)obj->mVtbl;
+                sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, obj);
                 vt[17].fn(vthis(obj, vt[17]), ((char*)self), self->miConfimationReturnCode);
             }
         }
@@ -3803,7 +3803,7 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
     if (self->mbCallParentsUpdate != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, obj);
             vt[12].fn(vthis(obj, vt[12]));
         }
     }
@@ -3902,7 +3902,7 @@ extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, int pPa
     if (self->mbReferEventsToParent != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)obj->mVtbl;
+            sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)VPTR_OF(cListNode, obj);
             return vt[24].fn(vthis(obj, vt[24]), msg, pParam);
         }
     }

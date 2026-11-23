@@ -2824,7 +2824,7 @@ extern "C" void* cUIState_cUIState2(cUIState* self)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
-    self->mVtbl = cUIState_vtbl;
+    VPTR_OF(cListNode, self) = cUIState_vtbl;
     tAttrState_tAttrState(&self->mAttrState);
     cList_cList(&self->mScreens);
     return ((char*)self);

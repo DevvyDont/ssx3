@@ -7,7 +7,7 @@
 // cUIState_cUIState(this, pEngine) or cUIState_cUIState1(this, pEngine, pParentState), store their own vtable at 0x8, and
 // put their own members from 0x48 on (cFEStateCharSelect_cFEStateCharSelect; ovstates allocates a 0x4C-byte popup), so cUIState is 0x48 bytes.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// A real class: cUIState : cListNode (util/list.h; the vptr at 0x8), its own members at their retail offsets.
 // Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$8cUIState (cUIState_vtbl)
 // keeps cListNode's traverseFlat/traverseRecurse (cListNode_traverseFlat/cListNode_traverseRecurse) in slots 2-3.
 //
@@ -29,7 +29,12 @@
 #include "layout.h"
 #include "util/list.h"
 
-struct cListNode;
+struct cUIInput;
+struct cUIGroup;
+struct cUIThing;
+struct cUIMenu;
+struct cUIPair;
+struct cUIListBox;
 struct cUIEngine;
 struct cUIScreen;
 
@@ -52,10 +57,9 @@ struct tAttrState {
     unsigned short mPopFloor : 1;      // bit 15 [O]
 };
 
-struct cUIState {
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
-    void** mVtbl;                    // 0x008 [R] _vt$8cUIState (cUIState_vtbl), stored by cUIState_cUIState/cUIState_cUIState1/cUIState_cUIState2
+struct cUIState : public cListNode {
+    // cListNode (util/list.h): mpPrev 0x000 / mpNext 0x004 ([R] the constructors self-link them), the vptr 0x008:
+    //   [R] _vt$8cUIState (cUIState_vtbl), stored by cUIState_cUIState/cUIState_cUIState1/cUIState_cUIState2
     int mHashName;                   // 0x00C [P] getHashName/setHashName (retail cUIState_getHashName/cUIState_setHashName); [R] = 0
                                      //       (derived states store their state id here, e.g. 9 in cFEStateCharSelect_cFEStateCharSelect)
     cUIEngine* mpEngine;             // 0x010 [P] getEngine (retail cUIState_getEngine); [R] = pEngine; [U] cUIState_onUpdate reads the
@@ -79,13 +83,35 @@ struct cUIState {
     cUIScreen* mpScreen;             // 0x040 [P] getScreen (retail cUIState_getScreen); [R] = 0
     signed char mUserNum;            // 0x044 [P] getUserNum/setUserNum (lb/sb; retail cUIState_getUserNum/cUIState_setUserNum); [R] = -1 (On Tour: char)
     char unk_045[0x3];               // 0x045 padding
+
+    // Virtuals. Slots [R] cUIState_vtbl (2-3 are cListNode's traverseFlat / traverseRecurse), names, order and types
+    // [O] (On Tour class cUIState: the same 21 in the same order); bool parameters are words.
+    virtual ~cUIState();                                                              // 1
+    virtual void onCreateScreen();                                                    // 4
+    virtual void onDestroyScreen();                                                   // 5
+    virtual void onGainFocus(cUIState* pPrevState);                                   // 6
+    virtual bool onGainTransition(int bFirstTime);                                    // 7
+    virtual bool onInputBegin(cUIInput* pInput);                                      // 8
+    virtual void onInputAlways(cUIInput* pInput);                                     // 9
+    virtual bool onLoseTransition();                                                  // 10
+    virtual void onLoseFocus(cUIState* pNextState);                                   // 11
+    virtual void onUpdate();                                                          // 12
+    virtual void onMenuGainFocus(cUIGroup* pRootGroup);                               // 13
+    virtual void onPreRender2D();                                                     // 14
+    virtual void onRender2D();                                                        // 15
+    virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event);               // 16
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event);                  // 17
+    virtual void onWidgetCreate(cUIThing* pWidget);                                   // 18
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event);                // 19
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int index); // 20
+    virtual int onWidgetPair(cUIPair* pPair, unsigned int Event);                     // 21
+    virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int Event);            // 22
+    virtual void* getData(int msg);                                                   // 23
+    virtual int handleEvent(int msg, void* pParam);                                   // 24
 };
 
 CHECK_SIZE(tAttrState, 0x2);
 
-CHECK_OFFSET(cUIState, mpPrev, 0x000);
-CHECK_OFFSET(cUIState, mpNext, 0x004);
-CHECK_OFFSET(cUIState, mVtbl, 0x008);
 CHECK_OFFSET(cUIState, mHashName, 0x00C);
 CHECK_OFFSET(cUIState, mpEngine, 0x010);
 CHECK_OFFSET(cUIState, mCurrentCtrl, 0x014);

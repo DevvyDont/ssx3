@@ -577,7 +577,7 @@ extern "C" void cFEStateNetMessenger__cFEStateNetMessenger(cFEStateNetMessenger*
 {
     self->mVtbl = (void**)cFEStateNetMessenger_vtbl;
     cUIState* child = self->mpParentState;
-    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)child->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, child);
     vt[32].fn(vthis(child, vt[32]));
     func_001A5450(self);
     tFEStringPtrVector* feStringPtrVector = &(*(&self->mNames));
@@ -879,7 +879,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
     switch (msg) {
     case 6: {
         cUIState* o = self->mpParentState;
-        ((sVEntry<void(void*, ...)>*)o->mVtbl)[17].fn(vthis(o, ((sVEntry<void(void*, ...)>*)o->mVtbl)[17]), ((char*)self), 20);
+        ((sVEntry<void(void*, ...)>*)VPTR_OF(cListNode, o))[17].fn(vthis(o, ((sVEntry<void(void*, ...)>*)VPTR_OF(cListNode, o))[17]), ((char*)self), 20);
         break;
     }
     case 8:
@@ -4744,7 +4744,7 @@ extern "C" void func_001A92D8(cFEStateNet* self, int popup, unsigned int kind)
         vt[32].fn(vthis(self, vt[32]));
         if (self->unk_6BC == 0) {
             cUIState* obj = self->mpParentState;
-            sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void (void*, void*, int)>*)obj->mVtbl;
+            sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void (void*, void*, int)>*)VPTR_OF(cListNode, obj);
             vt2[17].fn(vthis(obj, vt2[17]), self, 0xF);
         }
         func_001A93D0_3(self, popup, 22);
@@ -10776,7 +10776,7 @@ extern "C" void func_001B0E10(cFEStateChallengeReceivedPopup* self)
         func_00263018(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
     }
     cUIState* obj = self->mpParentState;
-    sVEntry<void(void*, void*, int)>* vt = (sVEntry<void (void*, void*, int)>*)obj->mVtbl;
+    sVEntry<void(void*, void*, int)>* vt = (sVEntry<void (void*, void*, int)>*)VPTR_OF(cListNode, obj);
     vt[17].fn(vthis(obj, vt[17]), self, 20);
 }
 #endif

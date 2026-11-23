@@ -763,7 +763,7 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
         void* uiObj = self->mppObjectList[i];
         if (uiObj != 0) {
             cUIState* state = self->mpState;
-            sUIVtCED0* vt = (sUIVtCED0*)state->mVtbl;
+            sUIVtCED0* vt = (sUIVtCED0*)VPTR_OF(cListNode, state);
             vt[18].fn(vthis(state, vt[18]), uiObj);
         }
     }
@@ -1548,7 +1548,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
             }
             self->mValue = self->mValue - 1;
             cUIState* mgr = self->mpScreen->mpState;
-            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)mgr->mVtbl;
+            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)VPTR_OF(cListNode, mgr);
             vm[19].fn(vthis(mgr, vm[19]), ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
@@ -1564,7 +1564,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
             }
             self->mValue = self->mValue + 1;
             cUIState* mgr = self->mpScreen->mpState;
-            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)mgr->mVtbl;
+            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)VPTR_OF(cListNode, mgr);
             vm[19].fn(vthis(mgr, vm[19]), ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
@@ -1657,7 +1657,7 @@ extern "C" void* cUIState_cUIState(cUIState* self, int engine)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
-    self->mVtbl = cUIState_vtbl;
+    VPTR_OF(cListNode, self) = cUIState_vtbl;
     self->mHashName = 0;
     self->mpEngine = (cUIEngine*)engine;
     self->mCurrentCtrl = -1;
@@ -1690,7 +1690,7 @@ extern "C" void* cUIState_cUIState1(cUIState* self, int engine, int parentState)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
-    self->mVtbl = cUIState_vtbl;
+    VPTR_OF(cListNode, self) = cUIState_vtbl;
     self->mHashName = 0;
     self->mpEngine = (cUIEngine*)engine;
     self->mCurrentCtrl = -1;
@@ -1724,7 +1724,7 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void cUIState__cUIState(cUIState* self, int flags)
 {
-    self->mVtbl = cUIState_vtbl;
+    VPTR_OF(cListNode, self) = cUIState_vtbl;
     cList_destroyList_v((char*)&self->mScreens);
     VPTR_OF(cList, &self->mScreens) = cList_vtbl;
     cList_destroyList_v((char*)&self->mScreens);
@@ -1732,7 +1732,7 @@ extern "C" void cUIState__cUIState(cUIState* self, int flags)
     cListNode_destroyListNode(&self->mScreens.mEnd);
     VPTR_OF(cListNode, &self->mScreens.mStart) = cListNode_vtbl;
     cListNode_destroyListNode((char*)&self->mScreens);
-    self->mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, self) = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1809,7 +1809,7 @@ extern "C" void cUIState_onGainFocus(cUIState* self)
 {
     cUIScreen* n = (cUIScreen*)cList_first((cList*)&self->mScreens);
     if (((void*)n) != 0) {
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)self->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, self);
         vt[13].fn(vthis(self, vt[13]), (char*)&n->mRootGroup);
     }
 }
@@ -1880,7 +1880,7 @@ extern "C" void cUIState_onUpdate(cUIState* self)
         vc[44].fn(vthis(input, vc[44]), *(unsigned char*)&self->mCurrentCtrl);
         if (cUIState_onUpdate_padTest(((char*)input), 45)) {
             if (cUIState_onUpdate_padTest(((char*)input), 41) || (cUIState_onUpdate_padTest(((char*)input), 40) && (mask & 1))) {
-                cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)self->mVtbl;
+                cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)VPTR_OF(cListNode, self);
                 if (!vs[8].fn(vthis(self, vs[8]), ((char*)input))) {
                     cUIScreen* n = (cUIScreen*)cList_first((cList*)(&self->mScreens));
                     if (((char*)n) != 0) {
@@ -1893,7 +1893,7 @@ extern "C" void cUIState_onUpdate(cUIState* self)
                         } while (!cListNode_isSentinel((cListNode*)n));
                     }
                 }
-                cUIState_onUpdate_sVEntryV* vs2 = (cUIState_onUpdate_sVEntryV*)self->mVtbl;
+                cUIState_onUpdate_sVEntryV* vs2 = (cUIState_onUpdate_sVEntryV*)VPTR_OF(cListNode, self);
                 vs2[9].fn(vthis(self, vs2[9]), ((char*)input));
                 break;
             }
@@ -1952,7 +1952,7 @@ extern "C" void cUIState_onRender2D(cUIState* self)
 {
     cUIScreen* n = (cUIScreen*)cList_first((cList*)&self->mScreens);
     if (((void*)n) != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
         vt[14].fn(vthis(self, vt[14]));
         do {
             char* obj = (char*)&n->mRootGroup;

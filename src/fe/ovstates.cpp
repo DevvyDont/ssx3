@@ -720,7 +720,7 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* 
     if (msg != 22) {
         return;
     }
-    sVEntry<int(void*, int)>* ovt = (sVEntry<int(void*, int)>*)obj->mVtbl;
+    sVEntry<int(void*, int)>* ovt = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, obj);
     if (ovt[23].fn(vthis(obj, ovt[23]), 0) != 0) {
         self->mGoToNextState = 1;
         int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;

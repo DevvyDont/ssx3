@@ -947,7 +947,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     void* list = (char*)&self->UI->mStateStack;
     cUIState* hudState = (cUIState*)((char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c)));
     if (((char*)hudState) != 0) {
-        sVEntry<int(void*, int, int)>* vt2 = (sVEntry<int (void*, int, int)>*)hudState->mVtbl;
+        sVEntry<int(void*, int, int)>* vt2 = (sVEntry<int (void*, int, int)>*)VPTR_OF(cListNode, hudState);
         vt2[24].fn(vthis(hudState, vt2[24]), 7, 0);
     }
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);

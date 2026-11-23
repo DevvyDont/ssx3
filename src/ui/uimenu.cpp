@@ -658,7 +658,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         widgetObj->setFocus(1);
         cUIState* screenState = self->mpScreen->mpState;
-        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)screenState->mVtbl;
+        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)VPTR_OF(cListNode, screenState);
         vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 1);
@@ -671,7 +671,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         widgetObj->setFocus(0);
         cUIState* screenState = self->mpScreen->mpState;
-        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)screenState->mVtbl;
+        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)VPTR_OF(cListNode, screenState);
         vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 2);
     }
 }
