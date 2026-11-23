@@ -1471,8 +1471,6 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void tMissionMenuQueue_init(void* p);
 extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self);
 
-#define WSP308988_I(off) (*(int*)((char*)self + (off)))
-#define WSP308988_U(off) (*(unsigned int*)((char*)self + (off)))
 
 /**
  * Resets the world script manager to its starting state.
@@ -1483,38 +1481,36 @@ extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self);
  */
 extern "C" void cWScriptMan_init(cWScriptMan* self)
 {
-    WSP308988_I(656) = 0;
-    WSP308988_I(0x0) = 0;
-    WSP308988_I(660) = 0;
-    WSP308988_I(664) = 0;
-    WSP308988_I(676) = 0;
-    WSP308988_I(680) = 0;
-    WSP308988_I(668) = 0;
-    WSP308988_I(684) = 0;
-    WSP308988_I(0x4) = 0;
-    WSP308988_I(0x8) = 0;
-    WSP308988_I(0x10) = 0;
-    WSP308988_I(20) = 0;
-    WSP308988_I(0x18) = 0;
-    WSP308988_I(0x1C) = 0;
-    WSP308988_I(0x20) = 0;
-    WSP308988_I(40) = 0;
-    WSP308988_I(0x30) = 0;
-    WSP308988_I(52) = 0;
-    WSP308988_U(672) = 0xFFFFFFFF;
-    WSP308988_U(688) = 0xFFFFFFFF;
-    WSP308988_I(0xC) = -1;
-    WSP308988_I(36) = -1;
-    WSP308988_U(44) = 0xFFFFFFFF;
+    self->Inst = 0;
+    self->Being = 0;
+    self->CollideInfo = 0;
+    self->IntersectInfo = 0;
+    self->CurrentProcess = 0;
+    self->CurrentTask = 0;
+    self->TrickDef = 0;
+    self->LocalMissionCmd = 0;
+    self->MissionPointsEnable = 0;
+    self->MissionPoints = 0;
+    self->MissionCountEnable = 0;
+    self->MissionCount = 0;
+    self->MissionCountMax = 0;
+    self->MissionTicksEnable = 0;
+    self->MissionTicks = 0;
+    self->MissionHeightEnable = 0;
+    self->MissionHeightBeing = 0;
+    self->MissionTrickEnable = 0;
+    self->LocalMissionId = 0xFFFFFFFF;
+    self->LocalMissionCmdId = 0xFFFFFFFF;
+    self->MissionPointsGoal = -1;
+    self->MissionTicksDir = -1;
+    self->MissionHeightInstId = 0xFFFFFFFF;
     MEM_fill((char*)self->MissionTrick, 0, 8);
     tMissionMenuQueue_init(&self->MissionMenuQueue);
-    WSP308988_I(0x40) = 0;
+    (*(int*)((char*)self + 0x40)) = 0;
     MEM_fill(&self->Events[4], 0, 0x180);
     cWScriptMan_rebuildGlobalTables(self);
 }
 
-#undef WSP308988_I
-#undef WSP308988_U
 #endif
 
 //100%

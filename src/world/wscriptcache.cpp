@@ -373,7 +373,6 @@ struct sRec54_CCD8 {
     char pad[0x48];
 };
 
-#define WSD_CCD8 (*(char**)((char*)e + 0x8))
 
 static inline void* toPtr_CCD8(unsigned int v)
 {
@@ -417,51 +416,50 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
  */
 extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* ep, cWorld* world, int index)
 {
-    char* e = (char*)ep;
     char** wp = (char**)world;
-    char* scriptData = WSD_CCD8;
+    char* scriptData = ((char*)ep->mpScriptHeader);
     if (scriptData == 0) {
-        *(short*)e = 3;
+        ep->mState = 3;
         return;
     }
     {
         if (!(*(unsigned short*)scriptData == 0x1000 && *(int*)(scriptData + 0xC) == *(int*)(*(char**)*wp + 0x4))) {
-            if (*(short*)(e + 0x2) == 0) {
+            if (ep->mStreamed == 0) {
                 cMemMan_free(scriptData);
             }
-            WSD_CCD8 = 0;
+            ep->mpScriptHeader = 0;
         }
-        if (WSD_CCD8 != 0) {
-            *(int*)(WSD_CCD8 + 0x14) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x14);
-            *(int*)(WSD_CCD8 + 0x1C) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x1C);
-            *(int*)(WSD_CCD8 + 0x24) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x24);
-            *(int*)(WSD_CCD8 + 0x2C) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x2C);
-            *(int*)(WSD_CCD8 + 0x34) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x34);
-            *(int*)(WSD_CCD8 + 0x3C) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x3C);
-            *(int*)(WSD_CCD8 + 0x40) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x40);
-            *(int*)(WSD_CCD8 + 0x48) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x48);
-            *(int*)(WSD_CCD8 + 0x50) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x50);
-            *(int*)(WSD_CCD8 + 0x58) = (int)WSD_CCD8 + *(int*)(WSD_CCD8 + 0x58);
-            int* t3c = *(int**)(WSD_CCD8 + 0x3C);
-            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x38); i++) {
-                t3c[i] = (int)WSD_CCD8 + t3c[i];
+        if (ep->mpScriptHeader != 0) {
+            ep->mpScriptHeader->GlobalScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->GlobalScriptDataOff;
+            ep->mpScriptHeader->InstanceScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->InstanceScriptDataOff;
+            ep->mpScriptHeader->MissionScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->MissionScriptDataOff;
+            ep->mpScriptHeader->ProcessScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->ProcessScriptDataOff;
+            ep->mpScriptHeader->TaskScriptDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->TaskScriptDataOff;
+            ep->mpScriptHeader->WScriptScriptHeadersOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->WScriptScriptHeadersOff;
+            ep->mpScriptHeader->CollideRecordsOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->CollideRecordsOff;
+            ep->mpScriptHeader->CollideHandleTableOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->CollideHandleTableOff;
+            ep->mpScriptHeader->CollideRecordEntryTableOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->CollideRecordEntryTableOff;
+            ep->mpScriptHeader->SplineDataOff = (int)ep->mpScriptHeader + ep->mpScriptHeader->SplineDataOff;
+            int* t3c = (int*)ep->mpScriptHeader->WScriptScriptHeaders;
+            for (int i = 0; i < ep->mpScriptHeader->NumWScriptScriptHeaders; i++) {
+                t3c[i] = (int)ep->mpScriptHeader + t3c[i];
             }
-            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x4C); i++) {
-                (*(int**)(WSD_CCD8 + 0x50))[i] = *(int*)(WSD_CCD8 + 0x40) + (*(int**)(WSD_CCD8 + 0x50))[i];
+            for (int i = 0; i < ep->mpScriptHeader->NumCollideRecords; i++) {
+                ((int*)ep->mpScriptHeader->CollideRecordEntryTable)[i] = ep->mpScriptHeader->CollideRecordsOff + ((int*)ep->mpScriptHeader->CollideRecordEntryTable)[i];
             }
             sRef_CCD8 ref;
             *(unsigned int*)&ref = 0xFFFFFFFF;
             ref.idx = index;
-            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x44); i++) {
+            for (int i = 0; i < ep->mpScriptHeader->NumCollideHandleTable; i++) {
                 ref.slot = i;
                 tInstanceRecord* record = (tInstanceRecord*)resolve_CCD8(*wp, ref, 0x1C);
-                char* x = (char*)(*(int**)(WSD_CCD8 + 0x50))[*(unsigned short*)(*(char**)(WSD_CCD8 + 0x48) + (i << 1))];
+                char* x = (char*)((int*)ep->mpScriptHeader->CollideRecordEntryTable)[*(unsigned short*)((char*)ep->mpScriptHeader->CollideHandleTable + (i << 1))];
                 record->m_pCollideRecord = (tCollideRecord*)x;
                 int highBits = *(int*)(x + 0x4) & 0xFFFF0000;
                 record->m_iFlags = highBits | (highBits >> 16) | 2;
             }
-            for (int i = 0; i < *(int*)(WSD_CCD8 + 0x4C); i++) {
-                char* tableEntry = (*(char***)(WSD_CCD8 + 0x50))[i];
+            for (int i = 0; i < ep->mpScriptHeader->NumCollideRecords; i++) {
+                char* tableEntry = ((char**)ep->mpScriptHeader->CollideRecordEntryTable)[i];
                 int type = *(int*)tableEntry;
                 if (type == 1 || type == 3) {
                     *(void**)(tableEntry + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(tableEntry + 0xC), 100);
@@ -469,33 +467,33 @@ extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* ep, cWorld* world
                     *(void**)(tableEntry + 0xC) = 0;
                 }
             }
-            int numSplines = *(int*)(WSD_CCD8 + 0x54);
+            int numSplines = ep->mpScriptHeader->NumSplineData;
             for (int i = 0; i < numSplines; i++) {
                 char* w = *wp;
                 ref.slot = i;
                 tInstanceRecord* record = (tInstanceRecord*)resolve_CCD8(w, ref, 68);
-                sPair_CCD8 splinePair = (*(sPair_CCD8**)(WSD_CCD8 + 0x58))[i];
+                sPair_CCD8 splinePair = ((sPair_CCD8*)ep->mpScriptHeader->SplineData)[i];
                 *(int*)&record->m_fmTransform.m[1][2] = (short)splinePair.b;
                 unsigned int highBits = splinePair.a << 16;
                 *(unsigned int*)&record->m_fmTransform.m[0][3] = (highBits & 0xFFFF0000) | (highBits >> 16);
             }
             {
-                sRec40_CCD8* tableEntry = *(sRec40_CCD8**)(WSD_CCD8 + 0x2C);
-                int n = *(int*)(WSD_CCD8 + 0x28);
+                sRec40_CCD8* tableEntry = (sRec40_CCD8*)ep->mpScriptHeader->ProcessScriptData;
+                int n = ep->mpScriptHeader->NumProcessScriptData;
                 for (int i = 0; i < n; i++, tableEntry++) {
-                    tableEntry->f8 = (int)WSD_CCD8 + tableEntry->f8;
+                    tableEntry->f8 = (int)ep->mpScriptHeader + tableEntry->f8;
                 }
             }
             {
-                sRec54_CCD8* tableEntry = *(sRec54_CCD8**)(WSD_CCD8 + 0x24);
-                int n = *(int*)(WSD_CCD8 + 0x20);
+                sRec54_CCD8* tableEntry = (sRec54_CCD8*)ep->mpScriptHeader->MissionScriptData;
+                int n = ep->mpScriptHeader->NumMissionScriptData;
                 for (int i = 0; i < n; i++, tableEntry++) {
-                    tableEntry->f8 = (int)WSD_CCD8 + tableEntry->f8;
+                    tableEntry->f8 = (int)ep->mpScriptHeader + tableEntry->f8;
                 }
             }
         }
     }
-    *(short*)e = 3;
+    ep->mState = 3;
 }
 #endif
 
@@ -508,7 +506,6 @@ struct sRef_D120 {
     unsigned int slot : 24;
 };
 
-#define WSD_D120 (*(char**)((char*)cache + 0x8))
 
 static inline int valid_D120(sRef_D120 r)
 {
@@ -529,14 +526,14 @@ static inline int valid_D120(sRef_D120 r)
 extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(cWScriptCacheEntry* cache, tInstanceRecord* inst, int entry)
 {
     char* data = (char*)inst->m_pCollideRecord;
-    if (data == 0 || WSD_D120 == 0) {
+    if (data == 0 || cache->mpScriptHeader == 0) {
         return 0xFFFFFFFF;
     }
     sRef_D120 id = *(sRef_D120*)(data + 0x8);
     if (!valid_D120(id)) {
         return 0xFFFFFFFF;
     }
-    return *(unsigned int*)(*(char**)(WSD_D120 + 0x1C) + id.slot * 0x18 + entry * 4);
+    return *(unsigned int*)((char*)cache->mpScriptHeader->InstanceScriptData + id.slot * 0x18 + entry * 4);
 }
 #endif
 

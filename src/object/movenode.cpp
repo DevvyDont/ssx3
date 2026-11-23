@@ -1106,8 +1106,6 @@ extern "C" void tModifierBlock_render(void* self);
 extern "C" int cObjectInterface_isSphereOccluded(void* v);
 extern "C" void* cUVScrollModifier_getTextureMat(void* self, void* m);
 
-#define OBJ_6298(s) (*(sMnObj_6298**)((char*)(s) + 0x18))
-#define MOD_6298(s) (*(sMnMod_6298**)((char*)(s) + 0x1C))
 
 static inline int HasRot_6298(sMnMod_6298* m)
 {
@@ -1146,18 +1144,18 @@ static inline void* Lm_6298(char* l)
 
 static inline void* RotOf_6298(cMnNode_6298* n, t4Matrix* m)
 {
-    if (HasRot_6298(MOD_6298(n))) {
-        return Mat_6298(MOD_6298(n)->rot, m);
+    if (HasRot_6298((*(sMnMod_6298**)((char*)(n) + 0x1C)))) {
+        return Mat_6298((*(sMnMod_6298**)((char*)(n) + 0x1C))->rot, m);
     }
     return 0;
 }
 
 static inline void* LightOf_6298(cMnNode_6298* n)
 {
-    if (HasLight_6298(MOD_6298(n))) {
-        return Lm_6298(MOD_6298(n)->light);
+    if (HasLight_6298((*(sMnMod_6298**)((char*)(n) + 0x1C)))) {
+        return Lm_6298((*(sMnMod_6298**)((char*)(n) + 0x1C))->light);
     }
-    return OBJ_6298(n)->light;
+    return (*(sMnObj_6298**)((char*)(n) + 0x18))->light;
 }
 
 static inline bool IsT6_6298(sMnCam_6298* c, int i)
@@ -1185,22 +1183,22 @@ static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
 extern "C" void cMoveNode_render(cMoveNode* self)
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
-    sMnObj_6298* obj = OBJ_6298(self);
+    sMnObj_6298* obj = ((sMnObj_6298*)self->Instance);
     if (!Visible_6298(cam, obj)) {
         return;
     }
     int flags = 0;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-    if (MOD_6298(self)) {
-        tModifierBlock_render(MOD_6298(self));
-        cMnOwner_6298* modOwner = MOD_6298(self)->owner;
+    if (((sMnMod_6298*)self->ModifierBlock)) {
+        tModifierBlock_render(((sMnMod_6298*)self->ModifierBlock));
+        cMnOwner_6298* modOwner = ((sMnMod_6298*)self->ModifierBlock)->owner;
         if (modOwner) {
             if (modOwner->getTransformType() == 7) {
                 flags |= 0x2000;
             }
         }
     }
-    if (!(OBJ_6298(self)->flags & 4)) {
+    if (!(((sMnObj_6298*)self->Instance)->flags & 4)) {
         return;
     }
     if (self->TransferHack) {
@@ -1217,13 +1215,13 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         t4Vector objBounds[2];
-        objBounds[0].x = OBJ_6298(self)->pos[0];
-        objBounds[0].y = OBJ_6298(self)->pos[1];
-        objBounds[0].z = OBJ_6298(self)->pos[2];
+        objBounds[0].x = ((sMnObj_6298*)self->Instance)->pos[0];
+        objBounds[0].y = ((sMnObj_6298*)self->Instance)->pos[1];
+        objBounds[0].z = ((sMnObj_6298*)self->Instance)->pos[2];
         objBounds[0].w = 1.0f;
-        objBounds[1].x = OBJ_6298(self)->scl[0];
-        objBounds[1].y = OBJ_6298(self)->scl[1];
-        objBounds[1].z = OBJ_6298(self)->scl[2];
+        objBounds[1].x = ((sMnObj_6298*)self->Instance)->scl[0];
+        objBounds[1].y = ((sMnObj_6298*)self->Instance)->scl[1];
+        objBounds[1].z = ((sMnObj_6298*)self->Instance)->scl[2];
         objBounds[1].w = 1.0f;
         res = ((MnCullFn_6298)vt[93].fn)(thisp, &objBounds[0], &objBounds[1], ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
     }
@@ -1235,7 +1233,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         flags |= 0x20;
     }
     if (!mat) {
-        if (cObjectInterface_isSphereOccluded(OBJ_6298(self)->box)) {
+        if (cObjectInterface_isSphereOccluded(((sMnObj_6298*)self->Instance)->box)) {
             return;
         }
     }
@@ -1250,13 +1248,13 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         xf = ((cMnNode_6298*)self)->getRootTransform();
     }
     t4Matrix rm;
-    if (HasRot_6298(MOD_6298(self))) {
+    if (HasRot_6298(((sMnMod_6298*)self->ModifierBlock))) {
         rot = RotOf_6298(((cMnNode_6298*)self), &rm);
         flags |= 2;
     }
-    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(((cMnNode_6298*)self)) : OBJ_6298(self)->light;
+    void* light = HasLight_6298(((sMnMod_6298*)self->ModifierBlock)) ? LightOf_6298(((cMnNode_6298*)self)) : ((sMnObj_6298*)self->Instance)->light;
     sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
-    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, self->Fade);
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, ((sMnObj_6298*)self->Instance), light, xf, tex, rot, flags, self->Fade);
 }
 #endif
 
@@ -1277,19 +1275,19 @@ INCLUDE_ASM("object/movenode", cMoveNode_renderModel);
 extern "C" void cMoveNode_renderModel(cMoveNode* self, t4Matrix* tex, int flags)
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
-    sMnObj_6298* obj = OBJ_6298(self);
+    sMnObj_6298* obj = ((sMnObj_6298*)self->Instance);
     if (!Visible_6298(cam, obj)) {
         return;
     }
     void* rot = 0;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     t4Matrix rm;
-    if (HasRot_6298(MOD_6298(self))) {
+    if (HasRot_6298(((sMnMod_6298*)self->ModifierBlock))) {
         rot = RotOf_6298(((cMnNode_6298*)self), &rm);
         flags |= 2;
     }
-    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(((cMnNode_6298*)self)) : OBJ_6298(self)->light;
-    gfx->RenderModel((const tInstanceRecord*)OBJ_6298(self), (const tMaterialBlockRecord*)light, *(const t4Matrix*)t4mat_Identity, self->Fade, tex, (const t4Matrix*)rot, flags);
+    void* light = HasLight_6298(((sMnMod_6298*)self->ModifierBlock)) ? LightOf_6298(((cMnNode_6298*)self)) : ((sMnObj_6298*)self->Instance)->light;
+    gfx->RenderModel((const tInstanceRecord*)((sMnObj_6298*)self->Instance), (const tMaterialBlockRecord*)light, *(const t4Matrix*)t4mat_Identity, self->Fade, tex, (const t4Matrix*)rot, flags);
 }
 #endif
 

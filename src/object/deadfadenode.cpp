@@ -171,12 +171,12 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
         sDfMat_0750* src = (sDfMat_0750*)other->getAnimMats();
         MEM_copy(((sDfMatElem_0750*)self->AnimMats), src, model->count << 6);
     } else {
-        sDfMat_0750* base = &(*(sDfMat_0750*)&(self->Instance)->m_fmTransform);
+        sDfMat_0750* base = &(*(sDfMat_0750*)&self->Instance->m_fmTransform);
         if (other != 0) {
             base = (sDfMat_0750*)other->getRootTransform();
         }
         sDfPart_0750* part = model->parts;
-        float k = (self->Instance)->m_fScale;
+        float k = self->Instance->m_fScale;
         t4Vector scaleVec;
         scaleVec.x = k;
         scaleVec.y = k;
@@ -197,8 +197,8 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
     if (other != 0) {
         delete other;
     }
-    (*(unsigned int*)&(self->Instance)->m_iFlags) &= ~0x60;
-    (self->Instance)->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2) | 4;
+    (*(unsigned int*)&self->Instance->m_iFlags) &= ~0x60;
+    self->Instance->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2) | 4;
     return self;
 }
 #endif
@@ -346,7 +346,6 @@ typedef void (*DfDrawFn_350CB8)(void*, void*, void*, void*, float, void*, void*,
 
 extern sDfMat_350CB8 t4mat_Identity_350CB8 __asm__("t4mat_Identity");
 
-#define OBJ_350CB8(s) (*(sDfObj_350CB8**)((char*)(s) + 0x18))
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void MatCopy_350CB8(sDfMat_350CB8* d, const sDfMat_350CB8* s)
@@ -392,7 +391,7 @@ static inline int Visible_350CB8(sDfCam_350CB8* cam, sDfObj_350CB8* obj)
 extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
 {
     sDfCam_350CB8* cam = (sDfCam_350CB8*)cWorld_m_pTheWorld->m_pWorldCache;
-    if (!Visible_350CB8(cam, OBJ_350CB8(self))) {
+    if (!Visible_350CB8(cam, ((sDfObj_350CB8*)self->Instance))) {
         return;
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
@@ -400,13 +399,13 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
         sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         t4Vector box[2];
-        box[0].x = OBJ_350CB8(self)->pos[0];
-        box[0].y = OBJ_350CB8(self)->pos[1];
-        box[0].z = OBJ_350CB8(self)->pos[2];
+        box[0].x = ((sDfObj_350CB8*)self->Instance)->pos[0];
+        box[0].y = ((sDfObj_350CB8*)self->Instance)->pos[1];
+        box[0].z = ((sDfObj_350CB8*)self->Instance)->pos[2];
         box[0].w = 1.0f;
-        box[1].x = OBJ_350CB8(self)->scl[0];
-        box[1].y = OBJ_350CB8(self)->scl[1];
-        box[1].z = OBJ_350CB8(self)->scl[2];
+        box[1].x = ((sDfObj_350CB8*)self->Instance)->scl[0];
+        box[1].y = ((sDfObj_350CB8*)self->Instance)->scl[1];
+        box[1].z = ((sDfObj_350CB8*)self->Instance)->scl[2];
         box[1].w = 1.0f;
         int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_350CB8)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
         if (res == 1) {
@@ -421,7 +420,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
     offset.z = -self->Dist;
     offset.w = 1.0f;
     xf.r[3] = offset;
-    ((DfDrawFn_350CB8)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[95].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[95].delta, OBJ_350CB8(self), OBJ_350CB8(self)->light, &xf,
+    ((DfDrawFn_350CB8)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[95].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[95].delta, ((sDfObj_350CB8*)self->Instance), ((sDfObj_350CB8*)self->Instance)->light, &xf,
                                       self->Fade, self->AnimMats, 0, 0);
 }
 #endif

@@ -438,8 +438,6 @@ static inline sObj_6260* find_6260(void* self, char* name)
     return (sObj_6260*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
-#define POS_6260(o) (*(t3Vector*)((char*)self + (o)))
-#define OBJ_6260(o) (*(sObj_6260**)((char*)self + (o)))
 
 /**
  * Looks up the popup screen's widgets by name and caches them with their home positions and sizes.
@@ -454,73 +452,73 @@ static inline sObj_6260* find_6260(void* self, char* name)
 extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
 {
     if (sObj_6260* uiObj = find_6260(self, str_whitefg)) {
-        POS_6260(392) = uiObj->pos;
+        *(t3Vector*)&self->mvPosBackWhite[0] = uiObj->pos;
         uiObj->GetRect((char*)&self->mvSizeBackWhite);
-        OBJ_6260(72) = uiObj;
+        self->mpBackGroundWhite = (cUIVector*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_redbg)) {
-        POS_6260(404) = uiObj->pos;
-        OBJ_6260(76) = uiObj;
+        *(t3Vector*)&self->mvPosBackRed[0] = uiObj->pos;
+        self->mpBackGroundRed = (cUIVector*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_grey_background))
-        OBJ_6260(100) = uiObj;
+        self->mpBackGroundGreyFade = (cUIVector*)uiObj;
     if (sObj_6260* uiObj = find_6260(self, str_Big_outline)) {
-        POS_6260(560) = uiObj->pos;
-        OBJ_6260(84) = uiObj;
+        *(t3Vector*)&self->mvPosBackLargeOutline[0] = uiObj->pos;
+        self->mpBackGroundLargeOutline = (cUIVector*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Big_shape)) {
-        POS_6260(548) = uiObj->pos;
-        OBJ_6260(80) = uiObj;
+        *(t3Vector*)&self->mvPosBackLarge[0] = uiObj->pos;
+        self->mpBackGroundLarge = (cUIVector*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Small_outline)) {
-        POS_6260(584) = uiObj->pos;
-        OBJ_6260(92) = uiObj;
+        *(t3Vector*)&self->mvPosBackSmallOutline[0] = uiObj->pos;
+        self->mpBackGroundSmallOutline = (cUIVector*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Small_shape)) {
-        POS_6260(572) = uiObj->pos;
+        *(t3Vector*)&self->mvPosBackSmall[0] = uiObj->pos;
         uiObj->GetRect((char*)&self->mvSizeBackSmall);
-        OBJ_6260(88) = uiObj;
+        self->mpBackGroundSmall = (cUIVector*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Shadow)) {
-        POS_6260(596) = uiObj->pos;
-        OBJ_6260(0x60) = uiObj;
+        *(t3Vector*)&self->mvPosBackShadow[0] = uiObj->pos;
+        self->mpBackGroundShadow = (cUIVector*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_black_bg))
-        OBJ_6260(104) = uiObj;
+        self->mpBackGroundBlack = (cUIVector*)uiObj;
     if (sObj_6260* uiObj = find_6260(self, str_Menu0000)) {
-        POS_6260(416) = uiObj->pos;
-        OBJ_6260(108) = uiObj;
+        *(t3Vector*)&self->mvPosMenu[0] = uiObj->pos;
+        self->mpMenu = (cUIMenu*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_buttons)) {
-        POS_6260(428) = uiObj->pos;
-        OBJ_6260(0x70) = uiObj;
+        *(t3Vector*)&self->mvPosButtons[0] = uiObj->pos;
+        self->mpButtonGroup = (cUIGroup*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_popupText)) {
-        POS_6260(452) = uiObj->pos;
-        OBJ_6260(116) = uiObj;
+        *(t3Vector*)&self->mvPosText[0] = uiObj->pos;
+        self->mpMessageText = (cUIText*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_popupTitle)) {
-        POS_6260(440) = uiObj->pos;
-        OBJ_6260(0x7C) = uiObj;
+        *(t3Vector*)&self->mvPosTitle[0] = uiObj->pos;
+        self->mpTitleText = (cUIText*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_popupPost)) {
-        POS_6260(464) = uiObj->pos;
-        OBJ_6260(0x78) = uiObj;
+        *(t3Vector*)&self->mvPosPost[0] = uiObj->pos;
+        self->mpPostText = (cUIText*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_EnterTextBox)) {
-        POS_6260(476) = uiObj->pos;
-        OBJ_6260(0x80) = uiObj;
+        *(t3Vector*)&self->mvPosEntryText[0] = uiObj->pos;
+        self->mpEnterBox = (cUIText*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_TextBoxPair)) {
-        POS_6260(488) = uiObj->pos;
-        OBJ_6260(136) = uiObj;
+        *(t3Vector*)&self->mvPosTextBoxPair[0] = uiObj->pos;
+        self->mpTextBoxPair = (cUIPair*)uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_StaticTextBoxLabel))
-        OBJ_6260(132) = uiObj;
+        self->mpStaticBox = (cUIText*)uiObj;
     if (sObj_6260* uiObj = find_6260(self, str_EnterBackground)) {
-        POS_6260(0x200) = uiObj->pos;
+        *(t3Vector*)&self->mvPosBackEnterBox[0] = uiObj->pos;
         uiObj->GetRect((char*)&self->mvSizeBackEnterBox);
-        OBJ_6260(140) = uiObj;
+        self->mpEnterBoxBackground = (cUIVector*)uiObj;
     }
     for (int i = 0; i < 5; i++) {
         char name[32];
@@ -530,8 +528,6 @@ extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
             ((sObj_6260**)&self->mpOptions)[i] = uiObj;
     }
 }
-#undef POS_6260
-#undef OBJ_6260
 #endif
 
 //100%
@@ -1910,8 +1906,6 @@ extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, t3Vector* v);
 extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 extern "C" void cScreenPopup_adjustLayer(void* self, int v);
 
-#define OBJ_8A38(off) (*(char**)((char*)self + (off)))
-#define VEC_8A38(p, off) (*(sVec3_8A38*)((char*)(p) + (off)))
 
 /**
  * Puts the popup's widgets back to their unit scale and home positions before a new layout.
@@ -1927,61 +1921,61 @@ extern "C" void cScreenPopup_adjustLayer(void* self, int v);
 // Resets the popup's widgets: unit scale and home positions, then re-anchors the side items.
 extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
 {
-    if (OBJ_8A38(72) != 0) {
-        VEC_8A38(OBJ_8A38(72), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(72), 68) = VEC_8A38(self, 392);
+    if (self->mpBackGroundWhite != 0) {
+        *(sVec3_8A38*)&self->mpBackGroundWhite->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpBackGroundWhite->mPosition = *(sVec3_8A38*)&self->mvPosBackWhite[0];
     }
-    if (OBJ_8A38(76) != 0) {
-        VEC_8A38(OBJ_8A38(76), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(76), 68) = VEC_8A38(self, 404);
+    if (self->mpBackGroundRed != 0) {
+        *(sVec3_8A38*)&self->mpBackGroundRed->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpBackGroundRed->mPosition = *(sVec3_8A38*)&self->mvPosBackRed[0];
     }
-    if (OBJ_8A38(80) != 0) {
-        VEC_8A38(OBJ_8A38(80), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(80), 68) = VEC_8A38(self, 548);
+    if (self->mpBackGroundLarge != 0) {
+        *(sVec3_8A38*)&self->mpBackGroundLarge->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpBackGroundLarge->mPosition = *(sVec3_8A38*)&self->mvPosBackLarge[0];
     }
-    if (OBJ_8A38(84) != 0) {
-        VEC_8A38(OBJ_8A38(84), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(84), 68) = VEC_8A38(self, 560);
+    if (self->mpBackGroundLargeOutline != 0) {
+        *(sVec3_8A38*)&self->mpBackGroundLargeOutline->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpBackGroundLargeOutline->mPosition = *(sVec3_8A38*)&self->mvPosBackLargeOutline[0];
     }
-    if (OBJ_8A38(88) != 0) {
-        VEC_8A38(OBJ_8A38(88), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(88), 68) = VEC_8A38(self, 572);
+    if (self->mpBackGroundSmall != 0) {
+        *(sVec3_8A38*)&self->mpBackGroundSmall->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpBackGroundSmall->mPosition = *(sVec3_8A38*)&self->mvPosBackSmall[0];
     }
-    if (OBJ_8A38(92) != 0) {
-        VEC_8A38(OBJ_8A38(92), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(92), 68) = VEC_8A38(self, 584);
+    if (self->mpBackGroundSmallOutline != 0) {
+        *(sVec3_8A38*)&self->mpBackGroundSmallOutline->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpBackGroundSmallOutline->mPosition = *(sVec3_8A38*)&self->mvPosBackSmallOutline[0];
     }
-    if (OBJ_8A38(0x60) != 0) {
-        VEC_8A38(OBJ_8A38(0x60), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x60), 68) = VEC_8A38(self, 596);
+    if (self->mpBackGroundShadow != 0) {
+        *(sVec3_8A38*)&self->mpBackGroundShadow->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpBackGroundShadow->mPosition = *(sVec3_8A38*)&self->mvPosBackShadow[0];
     }
-    if (OBJ_8A38(140) != 0) {
-        VEC_8A38(OBJ_8A38(140), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(140), 68) = VEC_8A38(self, 0x200);
+    if (self->mpEnterBoxBackground != 0) {
+        *(sVec3_8A38*)&self->mpEnterBoxBackground->mScale = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        *(sVec3_8A38*)&self->mpEnterBoxBackground->mPosition = *(sVec3_8A38*)&self->mvPosBackEnterBox[0];
     }
-    if (OBJ_8A38(108) != 0) {
-        VEC_8A38(OBJ_8A38(108), 68) = VEC_8A38(self, 416);
+    if (self->mpMenu != 0) {
+        *(sVec3_8A38*)&self->mpMenu->mPosition = *(sVec3_8A38*)&self->mvPosMenu[0];
     }
-    if (OBJ_8A38(0x70) != 0) {
-        VEC_8A38(OBJ_8A38(0x70), 68) = VEC_8A38(self, 428);
+    if (self->mpButtonGroup != 0) {
+        *(sVec3_8A38*)&self->mpButtonGroup->mPosition = *(sVec3_8A38*)&self->mvPosButtons[0];
     }
-    if (OBJ_8A38(116) != 0) {
-        VEC_8A38(OBJ_8A38(116), 68) = VEC_8A38(self, 452);
-        cScreenPopup_changePivot(self, OBJ_8A38(116), 9, 0.0f);
+    if (self->mpMessageText != 0) {
+        *(sVec3_8A38*)&self->mpMessageText->mPosition = *(sVec3_8A38*)&self->mvPosText[0];
+        cScreenPopup_changePivot(self, ((char*)self->mpMessageText), 9, 0.0f);
     }
-    if (OBJ_8A38(0x7C) != 0) {
-        VEC_8A38(OBJ_8A38(0x7C), 68) = VEC_8A38(self, 440);
-        cScreenPopup_changePivot(self, OBJ_8A38(116), 9, 0.0f);
+    if (self->mpTitleText != 0) {
+        *(sVec3_8A38*)&self->mpTitleText->mPosition = *(sVec3_8A38*)&self->mvPosTitle[0];
+        cScreenPopup_changePivot(self, ((char*)self->mpMessageText), 9, 0.0f);
     }
-    if (OBJ_8A38(0x78) != 0) {
-        VEC_8A38(OBJ_8A38(0x78), 68) = VEC_8A38(self, 464);
-        cScreenPopup_changePivot(self, OBJ_8A38(116), 9, 0.0f);
+    if (self->mpPostText != 0) {
+        *(sVec3_8A38*)&self->mpPostText->mPosition = *(sVec3_8A38*)&self->mvPosPost[0];
+        cScreenPopup_changePivot(self, ((char*)self->mpMessageText), 9, 0.0f);
     }
-    if (OBJ_8A38(0x80) != 0) {
-        VEC_8A38(OBJ_8A38(0x80), 68) = VEC_8A38(self, 476);
+    if (self->mpEnterBox != 0) {
+        *(sVec3_8A38*)&self->mpEnterBox->mPosition = *(sVec3_8A38*)&self->mvPosEntryText[0];
     }
-    if (OBJ_8A38(136) != 0) {
-        VEC_8A38(OBJ_8A38(136), 68) = VEC_8A38(self, 488);
+    if (self->mpTextBoxPair != 0) {
+        *(sVec3_8A38*)&self->mpTextBoxPair->mPosition = *(sVec3_8A38*)&self->mvPosTextBoxPair[0];
     }
     int i;
     for (i = 0; i < 5; i++) {
@@ -1997,12 +1991,10 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
     one.x = 1.0f;
     one.y = 1.0f;
     one.z = 1.0f;
-    VEC_8A38(self, 632) = one;
+    *(sVec3_8A38*)&self->mvCurrentScale[0] = one;
     cScreenPopup_adjustLayer(self, -self->miLayerOffset);
 }
 
-#undef OBJ_8A38
-#undef VEC_8A38
 #endif
 
 //100%

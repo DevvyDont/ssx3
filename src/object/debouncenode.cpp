@@ -620,7 +620,6 @@ typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
 extern sDfMat_343588 t4mat_Identity_343588 __asm__("t4mat_Identity");
 
-#define OBJ_343588(s) (*(sDfObj_343588**)((char*)(s) + 0x18))
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void MatCopy_343588(sDfMat_343588* d, const sDfMat_343588* s)
@@ -666,7 +665,7 @@ static inline int Visible_343588(sDfCam_343588* cam, sDfObj_343588* obj)
 extern "C" void cConveyorNode_render(cConveyorNode* self)
 {
     sDfCam_343588* cam = (sDfCam_343588*)cWorld_m_pTheWorld->m_pWorldCache;
-    if (!Visible_343588(cam, OBJ_343588(self))) {
+    if (!Visible_343588(cam, ((sDfObj_343588*)self->Instance))) {
         return;
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
@@ -674,13 +673,13 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
         sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         t4Vector cullBox[2];
-        cullBox[0].x = OBJ_343588(self)->pos[0];
-        cullBox[0].y = OBJ_343588(self)->pos[1];
-        cullBox[0].z = OBJ_343588(self)->pos[2];
+        cullBox[0].x = ((sDfObj_343588*)self->Instance)->pos[0];
+        cullBox[0].y = ((sDfObj_343588*)self->Instance)->pos[1];
+        cullBox[0].z = ((sDfObj_343588*)self->Instance)->pos[2];
         cullBox[0].w = 1.0f;
-        cullBox[1].x = OBJ_343588(self)->scl[0];
-        cullBox[1].y = OBJ_343588(self)->scl[1];
-        cullBox[1].z = OBJ_343588(self)->scl[2];
+        cullBox[1].x = ((sDfObj_343588*)self->Instance)->scl[0];
+        cullBox[1].y = ((sDfObj_343588*)self->Instance)->scl[1];
+        cullBox[1].z = ((sDfObj_343588*)self->Instance)->scl[2];
         cullBox[1].w = 1.0f;
         int res = ((DfCullFn_343588)vt[93].fn)(thisp, &cullBox[0], &cullBox[1], ((DfViewFn_343588)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
         if (res == 1) {
@@ -691,7 +690,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
     MatCopy_343588(&xf, &t4mat_Identity_343588);
     xf.r[3].x = self->UV[0];
     xf.r[3].y = self->UV[1];
-    ((DfDrawFn_343588)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[96].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[96].delta, OBJ_343588(self), 0, &xf, 2);
+    ((DfDrawFn_343588)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[96].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[96].delta, ((sDfObj_343588*)self->Instance), 0, &xf, 2);
 }
 #endif
 
@@ -1529,7 +1528,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 {
     tInstanceRecord* animModel = self->model.get();
     int i;
-    self->def = (animModel->m_Model);
+    self->def = animModel->m_Model;
     self->period = self->def->m_fAnimTime;
     sDbPad_43A8*& buf = self->buf;
     buf = new (str_AnimMats, 0x20000000, 0) sDbPad_43A8[self->def->m_iNumMeshes];
