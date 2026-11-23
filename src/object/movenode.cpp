@@ -2317,16 +2317,13 @@ extern char cMagnetModifier_vtbl[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cMagnetModifier_cMagnetModifier1(cMagnetModifier* self, void* stream)
+extern "C" void* cMagnetModifier_cMagnetModifier1(cMagnetModifier* self, cBxReplayFrame* stream)
 {
     char* payload = (char*)&self->Offset;
     *(void**)self = cMagnetModifier_vtbl;
-    sVEntry<void*(void*)>* readInstFn = &(*(sVEntry<void*(void*)>**)stream)[3];
-    self->Instance = (tInstanceRecord*)readInstFn->fn(vthis(stream, *readInstFn));
-    sVEntry<void(void*, void*, int)>* readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readFn->fn(vthis(stream, *readFn), payload, 80);
-    readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readFn->fn(vthis(stream, *readFn), (char*)&self->Transform, 0x40);
+    self->Instance = (tInstanceRecord*)(void*)stream->readReplayInstance();
+    stream->read(payload, 80);
+    stream->read((char*)&self->Transform, 0x40);
     self->RootTransformDirty = 1;
     return ((void*)self);
 }
@@ -2567,14 +2564,12 @@ void* cObjectInterface_getAvaSplineTransform_2(void*, void*) __asm__("cObjectInt
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self, void* stream)
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self, cBxReplayFrame* stream)
 {
     char* payload = (char*)&self->BoundBox;
     *(void***)self = cAvaSplineModifier_vtbl;
-    sVEntry<void*(void*)>* readInstFn = &(*(sVEntry<void*(void*)>**)stream)[3];
-    self->Instance = (tInstanceRecord*)readInstFn->fn(vthis(stream, *readInstFn));
-    sVEntry<void(void*, void*, int)>* readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readFn->fn(vthis(stream, *readFn), payload, 0x30);
+    self->Instance = (tInstanceRecord*)(void*)stream->readReplayInstance();
+    stream->read(payload, 0x30);
     cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)&self->Transform);
     return ((void*)self);
 }

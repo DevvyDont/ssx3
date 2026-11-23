@@ -9,6 +9,7 @@
 #include "replay/replay.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_cPlaybackMan);
@@ -1292,7 +1293,7 @@ INCLUDE_ASM("replay/playbackman", cReplay_saveReplayFrame);
 #ifdef SKIP_ASM
 
 extern "C" void* cReplay_allocReplayFrame(void* self);
-extern "C" void cReplay_saveFrame(cReplay* self, void* out);
+extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* out);
 // PORT: cReplayFramePtr_putFrameBlock is an empty (void*) stub, but this caller passes a second
 // argument; bind the 2-arg form to the symbol.
 void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr_putFrameBlock__FPv");
@@ -1310,7 +1311,7 @@ extern "C" void* cReplay_saveReplayFrame(cReplay* self, tReplayFrameType* src)
 {
     cReplayFrame* out = (cReplayFrame*)cReplay_allocReplayFrame(self);
     out->FrameType = *src;
-    cReplay_saveFrame((cReplay*)self, out);
+    cReplay_saveFrame((cReplay*)self, (cBxReplayFrame*)out);
     out->FrameStartTick = self->RecordTick;
     cReplayFramePtr_putFrameBlock_2(out, 0);
     return ((void*)out);
@@ -1324,7 +1325,7 @@ struct sPbBytes4 {
     char b[4];
 };
 
-extern "C" void cReplay_saveFrame(cReplay* self, void* out);
+extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* out);
 
 /**
  * Saves the replay's current state into frame @p out, tagged with frame type @p src and the current RecordTick.
@@ -1338,7 +1339,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* out);
 extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* src)
 {
     *(sPbBytes4*)&out->FrameType = *src;
-    cReplay_saveFrame((cReplay*)self, out);
+    cReplay_saveFrame((cReplay*)self, (cBxReplayFrame*)out);
     out->FrameStartTick = self->RecordTick;
 }
 #endif
@@ -1347,11 +1348,6 @@ extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* 
 INCLUDE_ASM("replay/playbackman", cReplay_saveFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cPbStream {
-public:
-    virtual void write(void* data, int size);
-};
-
 class cPbObjSys {
 public:
     virtual void v01();
@@ -1361,7 +1357,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void save(cPbStream* s);
+    virtual void save(cBxReplayFrame* s);
 };
 
 class cPbWorld {
@@ -1373,7 +1369,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void save(cPbStream* s);
+    virtual void save(cBxReplayFrame* s);
 };
 
 struct sPbApp {
@@ -1388,15 +1384,15 @@ struct sPbTime {
 int cReplayFramePtr_writeRewind(void* self);
 void* AIgetseed(void* self);
 extern "C" void* cBE_getBE();
-extern "C" void cBE_writeToReplayFrame(void* self, cPbStream* s);
-extern "C" void cAvalanche_writeToReplayFrame(cPbStream* s);
-extern "C" void cWScriptMan_writeToReplayFrame(void* self, cPbStream* s);
-extern "C" void func_00229E20(void* self, cPbStream* s);
-extern "C" void func_003441A8(void* self, cPbStream* s);
-extern "C" void cMultiParticleMan_writeToReplayFrame(void* self, cPbStream* s);
-extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* s, int a);
-extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* s);
-extern "C" void cFocusMan_writeToReplayFrame(void* self, cPbStream* s);
+extern "C" void cBE_writeToReplayFrame(void* self, cBxReplayFrame* s);
+extern "C" void cAvalanche_writeToReplayFrame(cBxReplayFrame* s);
+extern "C" void cWScriptMan_writeToReplayFrame(void* self, cBxReplayFrame* s);
+extern "C" void func_00229E20(void* self, cBxReplayFrame* s);
+extern "C" void func_003441A8(void* self, cBxReplayFrame* s);
+extern "C" void cMultiParticleMan_writeToReplayFrame(void* self, cBxReplayFrame* s);
+extern "C" void cReplay_saveBucket(cReplay* self, cBxReplayFrame* s, int a);
+extern "C" void cReplay_saveDeadBucket(cReplay* self, cBxReplayFrame* s);
+extern "C" void cFocusMan_writeToReplayFrame(void* self, cBxReplayFrame* s);
 
 extern int cSortObjNode_ObjNodeSortIndex;
 extern int cSortObjNode_ObjNodeNoSortIndex;
@@ -1422,18 +1418,18 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
  *
  * @param stream  the frame stream to write (On Tour: cReplayFramePtr*)
  */
-extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
+extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* stream)
 {
-    cPbStream* out = (cPbStream*)stream;
+    cBxReplayFrame* out = stream;
     sPbTime timeStamp;
     int id;
     cReplayFramePtr_writeRewind(out);
     AIgetseed(&timeStamp);
-    out->write(&timeStamp, 0x18);
+    out->write((const char*)&timeStamp, 0x18);
     id = cSortObjNode_ObjNodeSortIndex;
-    out->write(&id, 4);
+    out->write((const char*)&id, 4);
     id = cSortObjNode_ObjNodeNoSortIndex;
-    out->write(&id, 4);
+    out->write((const char*)&id, 4);
     cBE_writeToReplayFrame(cBE_getBE(), out);
     SSXApp_D818->objs->save(out);
     pbWorld(SSXApp_D818->objs)->save(out);
@@ -1474,7 +1470,7 @@ public:
     virtual void v09();
     virtual void v10();
     virtual void v11();
-    virtual void save(cPbStream* s);
+    virtual void save(cBxReplayFrame* s);
 };
 
 /**
@@ -1484,7 +1480,7 @@ public:
  * @param bucket  the bucket
  */
 // Writes the bucket's node count (8-byte header) and then each node's serialised form to the stream.
-extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* data, int bucket)
+extern "C" void cReplay_saveBucket(cReplay* self, cBxReplayFrame* data, int bucket)
 {
     int hdr[2];
     void* node;
@@ -1494,7 +1490,7 @@ extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* data, int bucket)
     for (node = cBucketMan_first(bucketMan_D988(), bucket); node != 0; node = cBucketMan_next(bucketMan_D988(), node, bucket)) {
         hdr[0]++;
     }
-    data->write(hdr, 8);
+    data->write((const char*)hdr, 8);
     if (hdr[0] > 0) {
         for (node = cBucketMan_first(bucketMan_D988(), bucket); node != 0; node = cBucketMan_next(bucketMan_D988(), node, bucket)) {
             ((cPbBucketNodeD988*)node)->save(data);
@@ -1523,7 +1519,7 @@ static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&gBucketMan; }
  *
  * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
  */
-extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* data)
+extern "C" void cReplay_saveDeadBucket(cReplay* self, cBxReplayFrame* data)
 {
     int hdr[2];
     void* node;
@@ -1534,15 +1530,13 @@ extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* data)
         hdr[0]++;
     }
     {
-        sVEntryDA88* vt = *(sVEntryDA88**)data;
-        vt[1].fn(vthis(data, vt[1]), hdr, 8);
+        data->write((const char*)hdr, 8);
     }
     if (hdr[0] > 0) {
         for (node = cBucketMan_first(bucketMan_DA88(), 8); node != 0; node = cBucketMan_next(bucketMan_DA88(), node, 8)) {
             int id[1];
             id[0] = *(int*)(*(char**)((char*)node + 0x18) + 0x78);
-            sVEntryDA88* vt = *(sVEntryDA88**)data;
-            vt[1].fn(vthis(data, vt[1]), id, 4);
+            data->write((const char*)id, 4);
         }
     }
 }

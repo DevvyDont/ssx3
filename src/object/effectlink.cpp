@@ -140,14 +140,13 @@ struct sEffectLinkObj_57C8 {
  * @param obj  replay stream to read from
  * @return effectModifier
  */
-extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifier, void* obj)
+extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifier, cBxReplayFrame* obj)
 {
     sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)effectModifier;
     self->link.next = 0;
     self->link.prev = 0;
     self->vt = cEffectModifier_vtbl;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    self->value = vt[3].fn(vthis(obj, vt[3]));
+    self->value = (int)obj->readReplayInstance();
     cEffectModifier_EffectCount++;
     return ((void*)effectModifier);
 }
@@ -197,10 +196,9 @@ struct sEffVEntry {
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, void* obj)
+extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, cBxReplayFrame* obj)
 {
-    sEffVEntry* vt = *(sEffVEntry**)obj;
-    vt[5].fn(vthis(obj, vt[5]), self->Instance);
+    obj->writeReplayInstance((const tInstanceRecord*)self->Instance);
 }
 #endif
 
@@ -497,20 +495,18 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b
  * @param stream  the replay frame to read from (On Tour data)
  * @return @p self
  */
-extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, void* stream)
+extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cDynamicParticleModifier_vtbl;
     void* data = &self->Mesh;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), data, 80);
+    stream->read((char*)data, 80);
     if (self->Complete == 0) {
         void* particleData = operator_new1(216);
         self->ParticleData = (tParticleData*)((tParticleData*)particleData);
-        sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
-        vt2[2].fn(vthis(stream, vt2[2]), particleData, 216);
+        stream->read((char*)particleData, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
         cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), (sVec4_00345C90*)&self->Pos, (sVec4_00345C90*)&self->Vel, 1, 0.01666666753590107f);
@@ -772,7 +768,7 @@ INCLUDE_ASM("object/effectlink", cHaloModifier_cHaloModifier1);
 #ifdef SKIP_ASM
 extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
-extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, void* obj);
+extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, cBxReplayFrame* obj);
 
 
 /**
@@ -865,7 +861,7 @@ struct sEffectLinkVEntry {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, void* stream);
+extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, cBxReplayFrame* stream);
 
 /**
  * Writes a halo modifier's state to a replay frame.
@@ -990,15 +986,14 @@ extern void* cFlexBridgeNode_vtbl[];
  * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
  * @return self
  */
-extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* bucket, void* stream)
+extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* bucket, cBxReplayFrame* stream)
 {
     void* payload = (char*)&self->BottomLeftOffset;
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = cFlexBridgeNode_vtbl;
     cSpring_cSpring1((char*)&self->Mesh, stream);
     cFlexBridgeNode_setupGrid(self);
-    sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), payload, 0x30);
+    stream->read((char*)payload, 0x30);
     cFlexBridgeNode_updateGrid(self);
     return ((void*)self);
 }

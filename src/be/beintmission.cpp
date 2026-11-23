@@ -4,6 +4,7 @@
 #include "be/beintmission.h"
 #include "replay/frameptr.h"
 #include "main/ssxapp.h"
+#include "replay/bxreplayframe.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEMissionInt[];
@@ -1443,12 +1444,6 @@ void cBEMissionInterface_remStreamData(void* self)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_001547E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 extern char D_004A6CAC[];
 
 /**
@@ -1459,30 +1454,21 @@ extern char D_004A6CAC[];
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEMissionInterface_writeToReplayFrame(cBEMissionInterface* self, cReplayFramePtr* stream)
+extern "C" void cBEMissionInterface_writeToReplayFrame(cBEMissionInterface* self, cBxReplayFrame* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
     int off = characterId * 3976;
-    sSerVEntry_001547E8* writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), base + off, 276);
-    writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
+    stream->write(base + off, 276);
     char* base2 = base + 0x114;
-    writeEntry->fn(vthis(stream, *writeEntry), base2 + off, 352);
-    writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->bIsActive, 4);
+    stream->write(base2 + off, 352);
+    stream->write((const char*)&self->bIsActive, 4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_00154898 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 extern char D_004A6CAC[];
 
 /**
@@ -1493,18 +1479,15 @@ extern char D_004A6CAC[];
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEMissionInterface_readFromReplayFrame(cBEMissionInterface* self, cReplayFramePtr* stream)
+extern "C" void cBEMissionInterface_readFromReplayFrame(cBEMissionInterface* self, cBxReplayFrame* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
     int off = characterId * 3976;
-    sSerVEntry_00154898* readEntry = &(*(sSerVEntry_00154898**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), base + off, 276);
-    readEntry = &(*(sSerVEntry_00154898**)stream)[2];
+    stream->read(base + off, 276);
     char* base2 = base + 0x114;
-    readEntry->fn(vthis(stream, *readEntry), base2 + off, 352);
-    readEntry = &(*(sSerVEntry_00154898**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->bIsActive, 4);
+    stream->read(base2 + off, 352);
+    stream->read((char*)&self->bIsActive, 4);
 }
 #endif
 

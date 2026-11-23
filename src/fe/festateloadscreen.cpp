@@ -435,15 +435,9 @@ extern "C" void cGameState_preloadNextState(void) {
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cGameState_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGameState_writeToReplayFrame {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
-
 // PORT: the unit declares cGameState_writeToReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
 // Bound by asm label.
-void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
+void cGameState_writeToReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("cGameState_writeToReplayFrame");
 
 /**
  * Saves the base game-state data into a replay frame: the state's first word.
@@ -454,25 +448,18 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  * @param obj  the replay frame stream (On Tour cReplayFramePtr)
  * @return the stream write's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void* cGameState_writeToReplayFrame_2(void* self, void* obj)
+void cGameState_writeToReplayFrame_2(void* self, cBxReplayFrame* obj)
 {
-    sVEntry_cGameState_writeToReplayFrame* vt = *(sVEntry_cGameState_writeToReplayFrame**)obj;
-    return vt[1].fn(vthis(obj, vt[1]), self, 4);
+    obj->write((const char*)self, 4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cGameState_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGameState_readFromReplayFrame {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
-
 // PORT: the unit declares cGameState_readFromReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
 // Bound by asm label.
-void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
+void cGameState_readFromReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("cGameState_readFromReplayFrame");
 
 /**
  * Restores the base game-state data from a replay frame: the state's first word.
@@ -483,10 +470,9 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  * @param obj  the replay frame stream (On Tour cReplayFramePtr)
  * @return the stream read's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void* cGameState_readFromReplayFrame_2(void* self, void* obj)
+void cGameState_readFromReplayFrame_2(void* self, cBxReplayFrame* obj)
 {
-    sVEntry_cGameState_readFromReplayFrame* vt = *(sVEntry_cGameState_readFromReplayFrame**)obj;
-    return vt[2].fn(vthis(obj, vt[2]), self, 4);
+    obj->read((char*)self, 4);
 }
 #endif
 
@@ -1327,7 +1313,7 @@ extern "C" void cGFEventStartState_ReadyEvent(cGFEventStartState* self)
 INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_writeToReplayFrame);
 #ifdef SKIP_ASM
 // PORT: the unit declares cGameState_writeToReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
-void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
+void cGameState_writeToReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("cGameState_writeToReplayFrame");
 
 /**
  * Event-start state: saves its replay data.
@@ -1351,7 +1337,7 @@ extern "C" void cGFEventStartState_writeToReplayFrame(cGFEventStartState* self, 
 INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_readFromReplayFrame);
 #ifdef SKIP_ASM
 // PORT: the unit declares cGameState_readFromReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
-void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
+void cGameState_readFromReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("cGameState_readFromReplayFrame");
 
 /**
  * Event-start state: restores its replay data.

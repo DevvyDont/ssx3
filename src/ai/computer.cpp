@@ -2635,6 +2635,7 @@ INCLUDE_ASM("ai/computer", cRiderHandler_cRiderHandler);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/computer_classes.h"
+#include "replay/bxreplayframe.h"
 
 /**
  * Constructs a computer rider's handler, a composite of 31 rider behaviour parts sharing one virtual cRider base.
@@ -3355,11 +3356,6 @@ void func_00111AA0_impl(void* vself, void* pos, void* dir, int surfaceType, floa
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cStream_00111AC0 {
-public:
-    virtual void Write(void* p, int n);
-};
-
 extern char gPaths[];
 extern "C" void cRiderAnim_writeToReplayFrame(void* self, void* s);
 extern "C" void cAnimModel_writeToReplayFrame(void* self, void* s);
@@ -3394,65 +3390,58 @@ extern "C" int cPathSys_getAIPathIndex(void* tree, void* path);
  *
  * @param data  the replay stream (On Tour cReplayFramePtr*), written through its virtual Write
  */
-extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, cReplayFramePtr* data)
+extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, cBxReplayFrame* data)
 {
-    cStream_00111AC0* st = (cStream_00111AC0*)data;
-    st->Write(self->GroundMotion.mRider, 1728);
-    cRiderAnim_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x784), ((char*)data));
-    cAnimModel_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x780), ((char*)data));
-    cAirPredictor_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x788), ((char*)data));
-    cRiderMetrix_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x790), ((char*)data));
+    cBxReplayFrame* st = data;
+    st->write((const char*)self->GroundMotion.mRider, 1728);
+    cRiderAnim_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
+    cAnimModel_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
+    cAirPredictor_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
+    cRiderMetrix_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
     unsigned int id0 = 0xFFFFFFFF;
     char* line = **(char***)((char*)self->GroundMotion.mRider + 0x864);
     if (line != 0) {
         id0 = *(unsigned int*)(line + 0x150);
     }
-    st->Write(&id0, 4);
-    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
+    st->write((const char*)&id0, 4);
+    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
     unsigned int id1 = 0xFFFFFFFF;
     char* wall = **(char***)((char*)self->GroundMotion.mRider + 0x868);
     if (wall != 0) {
         id1 = *(unsigned int*)(wall + 0x150);
     }
-    st->Write(&id1, 4);
-    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
-    st->Write(((char*)self) + 0xDE0, 4);
-    st->Write(((char*)self) + 0xDE4, 4);
-    cGroundMotion_writeToReplayFrame(((char*)self), ((char*)data));
-    cAirMotion_writeToReplayFrame(((char*)self) + 0x20, ((char*)data));
-    cWipeoutMotion_writeToReplayFrame(((char*)self) + 0x30, ((char*)data));
-    cRailslideMotion_writeToReplayFrame(((char*)self) + 0xB0, ((char*)data));
-    cHandplantMotion_writeToReplayFrame(((char*)self) + 0x110, ((char*)data));
-    cBoardPressControl_writeToReplayFrame(((char*)self) + 0x1D0, ((char*)data));
-    cNaturalAirControl_writeToReplayFrame(((char*)self) + 0x210, ((char*)data));
-    cSpinControl_writeToReplayFrame(((char*)self) + 0x230, ((char*)data));
-    cGateControl_writeToReplayFrame(((char*)self) + 0x290, ((char*)data));
-    cRailslideControl_writeToReplayFrame(((char*)self) + 0x2B0, ((char*)data));
-    cWipeoutControl_writeToReplayFrame(((char*)self) + 0x2C0, ((char*)data));
-    cResetControl_writeToReplayFrame(((char*)self) + 0x350, ((char*)data));
-    cFinishLineControl_writeToReplayFrame(((char*)self) + 0x360, ((char*)data));
-    cHandplantControl_writeToReplayFrame(((char*)self) + 0x370, ((char*)data));
-    cUberGrindControl_writeToReplayFrame(((char*)self) + 0x390, ((char*)data));
-    cCheatFX_writeToReplayFrame(((char*)self) + 0xD20, ((char*)data));
-    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
-    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
+    st->write((const char*)&id1, 4);
+    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
+    st->write(((char*)self) + 0xDE0, 4);
+    st->write(((char*)self) + 0xDE4, 4);
+    cGroundMotion_writeToReplayFrame(((char*)self), data);
+    cAirMotion_writeToReplayFrame(((char*)self) + 0x20, data);
+    cWipeoutMotion_writeToReplayFrame(((char*)self) + 0x30, data);
+    cRailslideMotion_writeToReplayFrame(((char*)self) + 0xB0, data);
+    cHandplantMotion_writeToReplayFrame(((char*)self) + 0x110, data);
+    cBoardPressControl_writeToReplayFrame(((char*)self) + 0x1D0, data);
+    cNaturalAirControl_writeToReplayFrame(((char*)self) + 0x210, data);
+    cSpinControl_writeToReplayFrame(((char*)self) + 0x230, data);
+    cGateControl_writeToReplayFrame(((char*)self) + 0x290, data);
+    cRailslideControl_writeToReplayFrame(((char*)self) + 0x2B0, data);
+    cWipeoutControl_writeToReplayFrame(((char*)self) + 0x2C0, data);
+    cResetControl_writeToReplayFrame(((char*)self) + 0x350, data);
+    cFinishLineControl_writeToReplayFrame(((char*)self) + 0x360, data);
+    cHandplantControl_writeToReplayFrame(((char*)self) + 0x370, data);
+    cUberGrindControl_writeToReplayFrame(((char*)self) + 0x390, data);
+    cCheatFX_writeToReplayFrame(((char*)self) + 0xD20, data);
+    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
+    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     int ids[2];
     ids[0] = cPathSys_getTrackPathIndex(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB4));
     ids[1] = cPathSys_getAIPathIndex(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB8));
-    st->Write(ids, 8);
+    st->write((const char*)ids, 8);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cStream_00111D98 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* p, int n);
-    virtual void Read(void* p, int n);
-};
-
 struct sRefSet_00111D98 {
     char pad_0x0[0xC];
     unsigned int* refs;     // 0xC
@@ -3538,44 +3527,44 @@ struct sRef_00111D98 {
  *
  * @param data  the replay stream (On Tour cReplayFramePtr*), read through its virtual Read
  */
-extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, cReplayFramePtr* data)
+extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, cBxReplayFrame* data)
 {
-    cStream_00111D98* st = (cStream_00111D98*)data;
-    st->Read(self->GroundMotion.mRider, 1728);
-    cRiderAnim_readFromReplayFrame(self->GroundMotion.mRider->mRiderAnim, ((char*)data));
-    cAnimModel_readFromReplayFrame(self->GroundMotion.mRider->mAnimModel, ((char*)data));
-    cAirPredictor_readFromReplayFrame(self->GroundMotion.mRider->mAirPredictor, ((char*)data));
-    cRiderMetrix_readFromReplayFrame(self->GroundMotion.mRider->mMetrix, ((char*)data));
+    cBxReplayFrame* st = data;
+    st->read((char*)self->GroundMotion.mRider, 1728);
+    cRiderAnim_readFromReplayFrame(self->GroundMotion.mRider->mRiderAnim, data);
+    cAnimModel_readFromReplayFrame(self->GroundMotion.mRider->mAnimModel, data);
+    cAirPredictor_readFromReplayFrame(self->GroundMotion.mRider->mAirPredictor, data);
+    cRiderMetrix_readFromReplayFrame(self->GroundMotion.mRider->mMetrix, data);
     int ids[2];
     sRef_00111D98 lineId;
-    st->Read(&lineId, 4);
-    st->Read(self->GroundMotion.mRider->mLineHint, 0x10);
+    st->read((char*)&lineId, 4);
+    st->read((char*)self->GroundMotion.mRider->mLineHint, 0x10);
     if (~lineId.id != 0) {
         *(void**)self->GroundMotion.mRider->mLineHint = lineId.get();
     }
     sRef_00111D98 wallId;
-    st->Read(&wallId, 4);
-    st->Read(self->GroundMotion.mRider->mWallHint, 0x10);
+    st->read((char*)&wallId, 4);
+    st->read((char*)self->GroundMotion.mRider->mWallHint, 0x10);
     if (~wallId.id != 0) {
         *(void**)self->GroundMotion.mRider->mWallHint = wallId.get();
     }
-    st->Read(&self->MotionState, 4);
-    st->Read(&self->ControlState, 4);
-    cGroundMotion_readFromReplayFrame(((char*)self), ((char*)data));
-    cAirMotion_readFromReplayFrame(&self->AirMotion, ((char*)data));
-    cWipeoutMotion_readFromReplayFrame(&self->WipeoutMotion, ((char*)data));
-    cRailslideMotion_readFromReplayFrame(&self->RailslideMotion, ((char*)data));
-    cHandplantMotion_readFromReplayFrame(&self->HandplantMotion, ((char*)data));
-    cBoardPressControl_readFromReplayFrame(&self->BoardPressControl, ((char*)data));
-    cNaturalAirControl_readFromReplayFrame(&self->NaturalAirControl, ((char*)data));
-    cSpinControl_readFromReplayFrame(&self->SpinControl, ((char*)data));
-    cGateControl_readFromReplayFrame(&self->GateControl, ((char*)data));
-    cRailslideControl_readFromReplayFrame(&self->RailslideControl, ((char*)data));
-    cWipeoutControl_readFromReplayFrame(&self->WipeoutControl, ((char*)data));
-    cResetControl_readFromReplayFrame(&self->ResetControl, ((char*)data));
-    cFinishLineControl_readFromReplayFrame(&self->FinishLineControl, ((char*)data));
-    cHandplantControl_readFromReplayFrame(&self->HandplantControl, ((char*)data));
-    cUberGrindControl_readFromReplayFrame(&self->UberGrindControl, ((char*)data));
+    st->read((char*)&self->MotionState, 4);
+    st->read((char*)&self->ControlState, 4);
+    cGroundMotion_readFromReplayFrame(((char*)self), data);
+    cAirMotion_readFromReplayFrame(&self->AirMotion, data);
+    cWipeoutMotion_readFromReplayFrame(&self->WipeoutMotion, data);
+    cRailslideMotion_readFromReplayFrame(&self->RailslideMotion, data);
+    cHandplantMotion_readFromReplayFrame(&self->HandplantMotion, data);
+    cBoardPressControl_readFromReplayFrame(&self->BoardPressControl, data);
+    cNaturalAirControl_readFromReplayFrame(&self->NaturalAirControl, data);
+    cSpinControl_readFromReplayFrame(&self->SpinControl, data);
+    cGateControl_readFromReplayFrame(&self->GateControl, data);
+    cRailslideControl_readFromReplayFrame(&self->RailslideControl, data);
+    cWipeoutControl_readFromReplayFrame(&self->WipeoutControl, data);
+    cResetControl_readFromReplayFrame(&self->ResetControl, data);
+    cFinishLineControl_readFromReplayFrame(&self->FinishLineControl, data);
+    cHandplantControl_readFromReplayFrame(&self->HandplantControl, data);
+    cUberGrindControl_readFromReplayFrame(&self->UberGrindControl, data);
     cBoardWakeFX_reset(&self->BoardWakeFX);
     cBoardSparkFX_reset(&self->BoardSparkFX);
     cBoardTrailFX_reset(&self->BoardTrailFX);
@@ -3585,10 +3574,10 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, cReplayFr
     func_002D4BE0(&self->AngerFX);
     cPlayerIndicatorFX_reset(&self->PlayerIndicatorFX);
     cPunchFX_reset(&self->PunchFX);
-    cCheatFX_readFromReplayFrame(&self->CheatFX, ((char*)data));
-    st->Read(self->GroundMotion.mRider->mAIPathHint, 0x20);
-    st->Read(self->GroundMotion.mRider->mTrackPathHint, 0x20);
-    st->Read(ids, 8);
+    cCheatFX_readFromReplayFrame(&self->CheatFX, data);
+    st->read((char*)self->GroundMotion.mRider->mAIPathHint, 0x20);
+    st->read((char*)self->GroundMotion.mRider->mTrackPathHint, 0x20);
+    st->read((char*)ids, 8);
     self->GroundMotion.mRider->TrackPath = (cTrackPath*)cPathSys_getTrackPath(gPaths, ids[0]);
     self->GroundMotion.mRider->AIPath = (cAIPath*)cPathSys_getAIPath(gPaths, ids[1]);
     cFocusBox* focusBox = (cFocusBox*)self->GroundMotion.mRider->mFocusBox;

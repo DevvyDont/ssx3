@@ -17,6 +17,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess);
@@ -2636,8 +2637,8 @@ struct sWSManBB10 {
 };
 
 class cCollectPool_writeToReplayFrame_cObj;
-extern "C" int cCollectPool_writeToReplayFrame(void* a, cCollectPool_writeToReplayFrame_cObj* obj);
-extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cReplayFramePtr* stream);
+extern "C" void cCollectPool_writeToReplayFrame(void* a, cBxReplayFrame* obj);
+extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cBxReplayFrame* stream);
 extern "C" int cWScriptCache_getScriptBase(void* a, int id);
 extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int a2);
 
@@ -2651,18 +2652,17 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int 
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cReplayFramePtr* stream)
+extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cBxReplayFrame* stream)
 {
     int count;
     int j;
     {
-        sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
-        vtEntry->fn(vthis(stream, *vtEntry), self, 652);
+        stream->write((const char*)self, 652);
     }
     {
         int k;
         for (k = 0; k < 1; k++) {
-            cCollectPool_writeToReplayFrame(self->tables[k], (cCollectPool_writeToReplayFrame_cObj*)stream);
+            cCollectPool_writeToReplayFrame(self->tables[k], stream);
         }
     }
     cWScriptMan_writeReplayProcessList((cWScriptMan*)self, &self->list2B8, stream);
@@ -2677,14 +2677,12 @@ extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cReplayFramePtr
         }
     }
     {
-        sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
-        vtEntry->fn(vthis(stream, *vtEntry), &count, 4);
+        stream->write((const char*)&count, 4);
     }
     for (j = 0; j < 50; j++) {
         if (self->objs[j] != 0) {
-            sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
             int scriptBase;
-            vtEntry->fn(vthis(stream, *vtEntry), &j, 4);
+            stream->write((const char*)&j, 4);
             scriptBase = cWScriptCache_getScriptBase(self->world->m_pWScriptCache, j);
             luno_cLunoTable_writeToReplayFrame(self->objs[j], stream, scriptBase);
         }
@@ -2706,16 +2704,14 @@ extern "C" void cWScriptProcess_writeToReplayFrame(void* node, void* stream);
  * @param list  the process list
  * @param stream  the replay frame stream
  */
-extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cReplayFramePtr* stream)
+extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cBxReplayFrame* stream)
 {
     int n = cProcessList_getCount((cWScriptListHead*)list);
-    sVEntry<void(void*, void*, int)>* vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    vtEntry->fn(vthis(stream, *vtEntry), &n, 4);
+    stream->write((const char*)&n, 4);
     cWScriptProcess* node = (cWScriptProcess*)((char*)*list);
     while (((char*)node) != 0) {
         int id = (int)node->ProcessId;
-        vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        vtEntry->fn(vthis(stream, *vtEntry), &id, 4);
+        stream->write((const char*)&id, 4);
         cWScriptProcess_writeToReplayFrame(node, stream);
         node = (cWScriptProcess*)node->Next;
     }
@@ -2725,12 +2721,6 @@ extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** lis
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cStream_30BD20 {
-public:
-    virtual void v01();
-    virtual void Read(void* dst, int size);
-};
-
 struct sWSMan_30BD20 {
     char pad0[0x28C];
     char* world;                // 0x28C
@@ -2746,11 +2736,11 @@ extern "C" void* cProcessList_removeHead(void* self);
 int cProcessList_addProcess(void* self, void* a1);
 extern "C" int cWScriptCache_getScriptBase(void* a, int id);
 class cCollectPool_readFromReplayFrame_cObj;
-extern "C" int cCollectPool_readFromReplayFrame(void* a, cCollectPool_readFromReplayFrame_cObj* obj);
+extern "C" void cCollectPool_readFromReplayFrame(void* a, cBxReplayFrame* obj);
 class cWScriptMan_readReplayProcessList_cStream;
-extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptListHead* list, cWScriptMan_readReplayProcessList_cStream* stream);
+extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptListHead* list, cBxReplayFrame* stream);
 extern "C" void luno_cLunoTable_emptyTable(void* obj);
-extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cStream_30BD20* stream, int a2);
+extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cBxReplayFrame* stream, int a2);
 
 /**
  * Restores the world script manager's state from a replay frame.
@@ -2763,13 +2753,13 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cStream_30BD20* s
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
-extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30BD20* stream)
+extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cBxReplayFrame* stream)
 {
-    stream->Read(self, 652);
+    stream->read((char*)self, 652);
     {
         int k;
         for (k = 0; k < 1; k++) {
-            cCollectPool_readFromReplayFrame(self->tables[k], (cCollectPool_readFromReplayFrame_cObj*)stream);
+            cCollectPool_readFromReplayFrame(self->tables[k], stream);
         }
     }
     void* process;
@@ -2781,8 +2771,8 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30B
         *(int*)process = 0;
         cProcessList_addProcess((char*)self + 0x2B4, process);
     }
-    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cWScriptListHead*)&self->list2B8, (cWScriptMan_readReplayProcessList_cStream*)stream);
-    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cWScriptListHead*)&self->list2BC, (cWScriptMan_readReplayProcessList_cStream*)stream);
+    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cWScriptListHead*)&self->list2B8, stream);
+    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cWScriptListHead*)&self->list2BC, stream);
     {
         int i;
         for (i = 0; i < 50; i++) {
@@ -2792,10 +2782,10 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30B
         }
     }
     int count;
-    stream->Read(&count, 4);
+    stream->read((char*)&count, 4);
     for (int j = 0; j < count; j++) {
         int id;
-        stream->Read(&id, 4);
+        stream->read((char*)&id, 4);
         int scriptBase = cWScriptCache_getScriptBase(*(void**)(self->world + 4), id);
         luno_cLunoTable_readFromReplayFrame(self->objs[id], stream, scriptBase);
     }
@@ -2817,7 +2807,7 @@ public:
     virtual void Read(void* dst, int size);
 };
 
-extern "C" void cWScriptProcess_readFromReplayFrame(void* proc, cWScriptMan_readReplayProcessList_cStream* stream);
+extern "C" void cWScriptProcess_readFromReplayFrame(void* proc, cBxReplayFrame* stream);
 extern "C" void cProcessList_appendProcess(cWScriptListHead* self, cWScriptListNode* node);
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 
@@ -2831,14 +2821,14 @@ extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNo
  * @param list  the process list to fill
  * @param stream  the replay frame stream
  */
-extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptListHead* list, cWScriptMan_readReplayProcessList_cStream* stream)
+extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptListHead* list, cBxReplayFrame* stream)
 {
     int n;
     int id;
     int i = 0;
-    stream->Read(&n, 4);
+    stream->read((char*)&n, 4);
     for (; i < n; i++) {
-        stream->Read(&id, 4);
+        stream->read((char*)&id, 4);
         cWScriptListNode* node = (cWScriptListNode*)cProcessList_findProcess1((char*)&self->IdleList, id);
         cProcessList_removeProcess((cWScriptListHead*)&self->IdleList, node);
         cWScriptProcess_readFromReplayFrame(node, stream);
@@ -3213,9 +3203,9 @@ public:
  * @param obj  the replay stream
  * @return the stream call's result
  */
-extern "C" int cCollectPool_writeToReplayFrame(void* collectPool, cCollectPool_writeToReplayFrame_cObj* obj)
+extern "C" void cCollectPool_writeToReplayFrame(void* collectPool, cBxReplayFrame* obj)
 {
-    return obj->write(collectPool, 268);
+    obj->write((const char*)collectPool, 268);
 }
 #endif
 
@@ -3236,9 +3226,9 @@ public:
  * @param obj  the replay stream
  * @return the stream call's result
  */
-extern "C" int cCollectPool_readFromReplayFrame(void* collectPool, cCollectPool_readFromReplayFrame_cObj* obj)
+extern "C" void cCollectPool_readFromReplayFrame(void* collectPool, cBxReplayFrame* obj)
 {
-    return obj->read(collectPool, 268);
+    obj->read((char*)collectPool, 268);
 }
 #endif
 

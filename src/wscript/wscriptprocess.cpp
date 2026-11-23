@@ -839,7 +839,7 @@ void* cWScriptProcess_getScriptCode(void* vself)
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cWScriptTask_writeToReplayFrame_cObj;
-extern "C" int cWScriptTask_writeToReplayFrame(cWScriptTask* a, cWScriptTask_writeToReplayFrame_cObj* obj);
+extern "C" void cWScriptTask_writeToReplayFrame(cWScriptTask* a, cBxReplayFrame* obj);
 extern "C" int cWScriptCache_getScriptBase(void* map, int id);
 extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int a2);
 
@@ -864,7 +864,7 @@ extern "C" void cWScriptProcess_writeToReplayFrame(cWScriptProcess* self, cBxRep
     }
     int i;
     for (i = 0; i < self->NumTasks; i++) {
-        cWScriptTask_writeToReplayFrame(&self->Tasks[i], (cWScriptTask_writeToReplayFrame_cObj*)stream);
+        cWScriptTask_writeToReplayFrame(&self->Tasks[i], stream);
     }
 }
 #endif
@@ -872,20 +872,13 @@ extern "C" void cWScriptProcess_writeToReplayFrame(cWScriptProcess* self, cBxRep
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cWScriptProcess_readFromReplayFrame_cStream {
-public:
-    // slot N at vtable offset N*8
-    virtual void v01(void* data, int size);
-    virtual void read(void* data, int size);
-};
-
 extern char str_ProcessLocalTable[];
 extern "C" int cWScriptCache_getScriptBase(void* map, int id);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
-extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cWScriptProcess_readFromReplayFrame_cStream* stream, int a2);
+extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cBxReplayFrame* stream, int a2);
 class cWScriptTask_readFromReplayFrame_cObj;
-extern "C" int cWScriptTask_readFromReplayFrame(cWScriptTask* a, cWScriptTask_readFromReplayFrame_cObj* obj);
+extern "C" void cWScriptTask_readFromReplayFrame(cWScriptTask* a, cBxReplayFrame* obj);
 
 /**
  * Reads a script process's state back from a replay frame (the reverse of cWScriptProcess_writeToReplayFrame).
@@ -897,16 +890,16 @@ extern "C" int cWScriptTask_readFromReplayFrame(cWScriptTask* a, cWScriptTask_re
  *
  * @param stream  the replay frame
  */
-extern "C" void cWScriptProcess_readFromReplayFrame(cWScriptProcess* self, cWScriptProcess_readFromReplayFrame_cStream* stream)
+extern "C" void cWScriptProcess_readFromReplayFrame(cWScriptProcess* self, cBxReplayFrame* stream)
 {
-    stream->read(self, 0x10);
+    stream->read((char*)self, 0x10);
     int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, (int)self->SectionId);
     if (self->Local != 0) {
         luno_cLunoTable__cLunoTable(self->Local, 3);
     }
     self->Local = 0;
     int has;
-    stream->read(&has, 4);
+    stream->read((char*)&has, 4);
     if (has) {
         void* localTable = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
         self->Local = (cLunoTable*)localTable;
@@ -914,7 +907,7 @@ extern "C" void cWScriptProcess_readFromReplayFrame(cWScriptProcess* self, cWScr
     }
     int i;
     for (i = 0; i < self->NumTasks; i++) {
-        cWScriptTask_readFromReplayFrame(&self->Tasks[i], (cWScriptTask_readFromReplayFrame_cObj*)stream);
+        cWScriptTask_readFromReplayFrame(&self->Tasks[i], stream);
     }
 }
 #endif
@@ -1351,9 +1344,9 @@ public:
  * @param obj  the replay frame
  * @return the frame call's result
  */
-extern "C" int cWScriptTask_writeToReplayFrame(cWScriptTask* task, cWScriptTask_writeToReplayFrame_cObj* obj)
+extern "C" void cWScriptTask_writeToReplayFrame(cWScriptTask* task, cBxReplayFrame* obj)
 {
-    return obj->write(task, 4);
+    obj->write((const char*)task, 4);
 }
 #endif
 
@@ -1376,9 +1369,9 @@ public:
  * @param obj  the replay frame
  * @return the frame call's result
  */
-extern "C" int cWScriptTask_readFromReplayFrame(cWScriptTask* task, cWScriptTask_readFromReplayFrame_cObj* obj)
+extern "C" void cWScriptTask_readFromReplayFrame(cWScriptTask* task, cBxReplayFrame* obj)
 {
-    return obj->read(task, 4);
+    obj->read((char*)task, 4);
 }
 #endif
 
