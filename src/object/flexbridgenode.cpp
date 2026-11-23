@@ -654,8 +654,6 @@ extern sFV_7268 t4vect_Zero_v7268 __asm__("t4vect_Zero");
 
 
 
-struct sFVE_7268 { short delta; short index; void* fn; };
-
 
 struct sFList_7268 {
     int pad0;
@@ -794,9 +792,9 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectT
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
-    ((SetXformFn_7268)((sFVE_7268*)tester->mVtbl)[1].fn)(vthis(tester, ((sFVE_7268*)tester->mVtbl)[1]), &inv, 1.0f / (self->Instance)->m_fScale);
+    tester->Transform(*(const t4Matrix*)&inv, 1.0f / (self->Instance)->m_fScale);
     int n = cWorldIntersectType_IsMeshInt(tester, &mesh, 1, out, cap);
-    ((VoidFn_7268)((sFVE_7268*)tester->mVtbl)[2].fn)(vthis(tester, ((sFVE_7268*)tester->mVtbl)[2]));
+    tester->UnTransform();
     for (int i = 0; i < n; i++) {
         tIntersectInfo* hit = &out[i];
         Reset_7268(hit);

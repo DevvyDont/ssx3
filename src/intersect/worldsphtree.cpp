@@ -1283,8 +1283,7 @@ extern "C" float cOverlapList_terrainIntersect1(cOverlapList* self, cWorldInters
         return -1.0f;
     }
     int best = 0;
-    sVEntry<float(void*)>* vt = (sVEntry<float (void*)>*)query->mVtbl;
-    float ref = vt[3].fn(vthis(query, vt[3]));
+    float ref = query->GetIdealParam();
     float bestDiff = absf_003342D0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
         float diff = absf_003342D0(hits[i].dist - ref);
@@ -1880,14 +1879,14 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
         InvertOrtho_4888(inv);
         int inum = 0;
         void* tri = 0;
-        ((SetXf_4888)((sWsVtSlot*)intersectType->mVtbl)[1].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[1]), 1.0f / node->m_fScale, &inv);
+        ((SetXf_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[1].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[1]), 1.0f / node->m_fScale, &inv);
         if (type == 2) {
-            inum = ((Tris_4888)((sWsVtSlot*)intersectType->mVtbl)[7].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[7]), bone->mesh, bone->mesh + 0xC, ii, 64);
+            inum = ((Tris_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7]), bone->mesh, bone->mesh + 0xC, ii, 64);
         } else {
-            if (((Hit_4888)((sWsVtSlot*)intersectType->mVtbl)[9].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[9]), bone->mesh, bone->mesh + 0xC)) {
+            if (((Hit_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9]), bone->mesh, bone->mesh + 0xC)) {
                 if (type == 3) {
                     tri = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo_4888(cWorld_m_pTheWorld, node), k);
-                    inum = ((Mesh_4888)((sWsVtSlot*)intersectType->mVtbl)[6].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[6]), tri, ii, 64);
+                    inum = ((Mesh_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[6].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[6]), tri, ii, 64);
                 } else {
                     inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(cWorld_getSphereTreeInfo_4888(cWorld_m_pTheWorld, node), k),
                                              *(int*)(bone->mesh + 0x18) & 1, ii, 64);
@@ -1895,7 +1894,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
             }
             k++;
         }
-        ((Reset_4888)((sWsVtSlot*)intersectType->mVtbl)[2].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[2]));
+        ((Reset_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[2].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[2]));
         for (int j = 0; j < inum; j++) {
             ii[j].nrm = vu0MtxMul_4888(boneMat, ii[j].nrm);
             buf[n] = ii[j];
@@ -2571,8 +2570,7 @@ extern "C" float cBXNash_terrainIntersect1(cBXNash* self, cWorldIntersectType* i
         return -1.0f;
     }
     int best = 0;
-    sVEntry<float(void*)>* vt = (sVEntry<float (void*)>*)intersectType->mVtbl;
-    float ref = vt[3].fn(vthis(intersectType, vt[3]));
+    float ref = intersectType->GetIdealParam();
     float bestDiff = absf_00336850(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
         float paramDiff = absf_00336850(hits[i].dist - ref);
@@ -2978,8 +2976,7 @@ extern "C" float cBXNash_staticObjectIntersect1(cBXNash* self, cWorldIntersectTy
         return -1.0f;
     }
     int best = 0;
-    sVEntry<float(void*)>* vt = (sVEntry<float (void*)>*)query->mVtbl;
-    float ref = vt[3].fn(vthis(query, vt[3]));
+    float ref = query->GetIdealParam();
     float bestDiff = absf_003378C0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
         float diff = absf_003378C0(hits[i].dist - ref);

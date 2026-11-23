@@ -10,11 +10,16 @@
 // worldsphere.h, worldrider.h) put their first member at 0x60 and write this same base out inline.
 // Retail bools are words (useRejectNormal at 0x8, On Tour 0x5); every other offset equals On Tour's.
 //
-// A FLAT layout, like main/game.h. Evidence tags: [O] On Tour's DWARF; [P] the preview; [R] the derived ctors;
+// A real class (the derived query shapes stay flat: cWorldRider is held by value). Evidence tags: [O] On Tour's DWARF; [P] the preview; [R] the derived ctors;
 // [U] how retail code uses the field.
 
 #include "layout.h"
 #include "bx/math3d.h"
+
+struct bxSphereTree;
+struct tIntersectInfo;
+struct tPatchRecord;
+struct t3Vector;
 
 struct cWorldIntersectType {
     int mPrecision;                 // 0x000 [O] tIntPrecision; [R] cWorldSphTree ctor: 0 when isLow, else 1
@@ -27,8 +32,20 @@ struct cWorldIntersectType {
                                     //       sQuery_333EF8 / sQry_336F30 / sQry_335D78 max at 0x20)
     t4Vector boxMin;                // 0x030 [O]; [R] ditto; [U] ditto (min at 0x30)
     t4Vector boxCenter;             // 0x040 [O]; [R] the derived ctors
-    void** mVtbl;                   // 0x050 [R] the derived ctors / dtors store their vtable here
-    char unk_054[0xC];              // 0x054 padding (16-byte aligned class)
+    // 0x050: the vptr (the size rounds up to 0x60, the class's 16-byte alignment). [R] the derived ctors / dtors store
+    //   their vtable here. Slots: [R] cWorldSphTree_vtbl / cWorldSphere_vtbl / cWorldRider_vtbl 1-9 (10 is the derived
+    //   destructor, where there is one); [O] On Tour's cWorldIntersectType: names and order (its pure entries lost
+    //   their parameters: those come from On Tour's cWorldSphTree / cWorldRider).
+    virtual void Transform(const t4Matrix& mat, float scale) = 0;                       // 1 [R] cWorldSphTree_Transform (t4Matrix*, float)
+    virtual void UnTransform() = 0;                                                      // 2
+    virtual float GetIdealParam() const = 0;                                             // 3
+    virtual bool IsTriInt(const t4Vector& a, const t4Vector& b, const t4Vector& c, const t4Vector& n, t4Vector& ipos, t4Vector& inorm, float& param) const = 0; // 4
+    virtual bool Is2SidedTriInt(const t4Vector& a, const t4Vector& b, const t4Vector& c, const t4Vector& n, t4Vector& ipos, t4Vector& inorm, float& param) const = 0; // 5
+    virtual int IsSphTreeInt(bxSphereTree* tree, tIntersectInfo* ti, int num) const = 0;  // 6 [U] callers pass num (64); the
+                                    //   implementations ignore it
+    virtual int IsBoxInt(const t3Vector& bMin, const t3Vector& bMax, tIntersectInfo* ti, int num) const = 0; // 7 ditto
+    virtual void IntersectSubPatch(const tPatchRecord* pPatch, float& s, float& t, t4Vector& ipos, t4Vector& inorm, float& param) const; // 8 cWorldIntersectType_IntersectSubPatch
+    virtual bool IsInBoxTransformed(const t3Vector& bMin, const t3Vector& bMax) const = 0; // 9 ([O] const t3vect&, t3Vector's base there)
 };
 
 CHECK_OFFSET(cWorldIntersectType, mPrecision, 0x000);
@@ -39,8 +56,6 @@ CHECK_OFFSET(cWorldIntersectType, rejectNormal, 0x010);
 CHECK_OFFSET(cWorldIntersectType, boxMax, 0x020);
 CHECK_OFFSET(cWorldIntersectType, boxMin, 0x030);
 CHECK_OFFSET(cWorldIntersectType, boxCenter, 0x040);
-CHECK_OFFSET(cWorldIntersectType, mVtbl, 0x050);
-CHECK_OFFSET(cWorldIntersectType, unk_054, 0x054);
 CHECK_SIZE(cWorldIntersectType, 0x60);
 
 #endif /* INTERSECT_WORLDINTTYPES_H */
