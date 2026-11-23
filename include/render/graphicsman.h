@@ -227,8 +227,8 @@ public:
     virtual void* GetIrradiance() = 0;                                                                   // slot 70: [R] cPS2GraphicsMan_GetIrradiance__FPv; parameters [O]
     virtual void RenderTriStrip(int numVerts, tBxVertex* src, int isstatic) = 0;                         // slot 71: [R] cPS2GraphicsMan_RenderTriStrip; isstatic: [R] every caller passes it ($a3), [O] the PSP twin's bool isstatic
     virtual void RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices, const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector* Offset); // slot 72: [R] cPS2GraphicsMan_RenderIndexedTriList
-    virtual void RenderLineStrip(int n, void* vtx) = 0;                                                  // slot 73: [R] cPS2GraphicsMan_RenderLineStrip; R/R?
-    virtual void RenderLineStrip(int numverts, const tBxVertex* verts, int isstatic);                    // slot 74: [R] cGraphicsMan_RenderLineStrip__FPv; parameters [O]
+    virtual void RenderLineStrip(int numverts, const tBxVertex* verts, int isstatic) = 0;                // slot 73: [R] cPS2GraphicsMan_RenderLineStrip; every caller passes (n, tBxVertex*, 0); [O] the PSP twin's RenderLineStrip(int, const tBxVertex*, bool isstatic), and On Tour lists this pure one first
+    virtual void RenderLineStrip(int numverts, char* packedoffsets, float scale);                         // slot 74: [R] cGraphicsMan_RenderLineStrip__FPv (the base's empty body; cPS2GraphicsMan keeps it); [O] On Tour's cGraphicsMan defines RenderLineStrip(int numverts, char* packedoffsets, float scale) itself
     virtual void RenderSpline(const t4Matrix* BezMat, const tARGB* col, int NumPoints);                  // slot 75: [R] cPS2GraphicsMan_RenderSpline
     virtual cGridMesh* CreateGridMesh(int width, int height, int memtype) = 0;                           // slot 76: [R] cPS2GraphicsMan_CreateGridMesh
     virtual void DeleteGridMesh(cGridMesh* pData);                                                       // slot 77: [R] cGraphicsMan_DeleteGridMesh__FPvi; parameters [O]
