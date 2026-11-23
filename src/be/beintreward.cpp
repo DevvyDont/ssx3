@@ -269,7 +269,7 @@ extern "C" int cBERewardInterface_getVideos(cBERewardInterface* rewardInterface)
 //100%
 INCLUDE_ASM("be/beintreward", func_00156C70);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 struct sBELibTables;
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
@@ -319,7 +319,7 @@ static inline int Match_6C70(sBEEntry_6C70* e, int type)
  */
 extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int type)
 {
-    cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976);
+    cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, characterId);
@@ -404,7 +404,7 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
 //100%
 INCLUDE_ASM("be/beintreward", func_00156EE0);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 struct sBELibTables;
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
@@ -447,7 +447,7 @@ static inline sBEFlagEntry_6EE0* Flag_6EE0(char* p, sBEEntry_6EE0* e)
  */
 extern "C" int func_00156EE0(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, characterId);
@@ -493,7 +493,7 @@ extern "C" int func_00156EE0(void* self, int profileIndex, int characterId)
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getRandomLockedRewardIndex);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 unsigned int BXrand();
 extern "C" int cBERewardInterface_getTotalNumRewards(cBERewardInterface* self, int kind);
 extern "C" int cBERewardInterface_getNumOwnedRewards(cBERewardInterface* self, int a1, int a2, int kind);
@@ -521,7 +521,7 @@ extern "C" int cBERewardInterface_getRandomLockedRewardIndex(cBERewardInterface*
         return -1;
     }
     unsigned int n = BXrand() % (unsigned int)(total - have);
-    cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + profile * 0x9B50 + characterId * 3976);
+    cBECharProfileDB* charRecord = &cBELibrary_profileLib[profile][characterId];
     signed char* bits = 0;
     switch (kind) {
     case 3: bits = (signed char*)(&charRecord->mRewards[0]); break;
@@ -837,7 +837,7 @@ extern "C" int cBERewardInterface_getNumOwnedRewards(cBERewardInterface* self, i
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedPosters);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits);
@@ -854,7 +854,7 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  */
 extern "C" int cBERewardInterface_getNumOwnedPosters(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_countOwnedRewards(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x3C), (signed char*)(charRecord + 0xF30));
 }
 #endif
@@ -862,7 +862,7 @@ extern "C" int cBERewardInterface_getNumOwnedPosters(cBERewardInterface* self, i
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedTradingCards);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits);
@@ -879,7 +879,7 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  */
 extern "C" int cBERewardInterface_getNumOwnedTradingCards(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_countOwnedRewards(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x40), (signed char*)(charRecord + 0xF36));
 }
 #endif
@@ -887,7 +887,7 @@ extern "C" int cBERewardInterface_getNumOwnedTradingCards(cBERewardInterface* se
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedConceptArts);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits);
@@ -904,7 +904,7 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  */
 extern "C" int cBERewardInterface_getNumOwnedConceptArts(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_countOwnedRewards(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x44), (signed char*)(charRecord + 0xF45));
 }
 #endif
@@ -912,7 +912,7 @@ extern "C" int cBERewardInterface_getNumOwnedConceptArts(cBERewardInterface* sel
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedToys);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits);
@@ -929,7 +929,7 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  */
 extern "C" int cBERewardInterface_getNumOwnedToys(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_countOwnedRewards(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x48), (signed char*)(charRecord + 0xF53));
 }
 #endif
@@ -937,7 +937,7 @@ extern "C" int cBERewardInterface_getNumOwnedToys(cBERewardInterface* self, int 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedVideos);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits);
@@ -954,7 +954,7 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  */
 extern "C" int cBERewardInterface_getNumOwnedVideos(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_countOwnedRewards(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x4C), (signed char*)(charRecord + 0xF52));
 }
 #endif
@@ -962,7 +962,7 @@ extern "C" int cBERewardInterface_getNumOwnedVideos(cBERewardInterface* self, in
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedCheatChars);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits);
 
 /**
@@ -977,7 +977,7 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  */
 extern "C" int cBERewardInterface_getNumOwnedCheatChars(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_countOwnedRewards(self, 20, (signed char*)(charRecord + 0xF57));
 }
 #endif
@@ -1156,7 +1156,7 @@ extern "C" int cBERewardInterface_isPeakLocked(cBERewardInterface* self, int rid
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isPeakLocked1);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns whether peak 1 or 2 is still locked for a character.
@@ -1255,7 +1255,7 @@ extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int iP
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isPosterOwned);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bit, char* bits);
 
 /**
@@ -1271,7 +1271,7 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  */
 extern "C" int cBERewardInterface_isPosterOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_isRewardOwned(self, bit, charRecord + 0xF30);
 }
 #endif
@@ -1279,7 +1279,7 @@ extern "C" int cBERewardInterface_isPosterOwned(cBERewardInterface* self, int pr
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isTradingCardOwned);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bit, char* bits);
 
 /**
@@ -1295,7 +1295,7 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  */
 extern "C" int cBERewardInterface_isTradingCardOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_isRewardOwned(self, bit, charRecord + 0xF36);
 }
 #endif
@@ -1303,7 +1303,7 @@ extern "C" int cBERewardInterface_isTradingCardOwned(cBERewardInterface* self, i
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isConceptArtOwned);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bit, char* bits);
 
 /**
@@ -1319,7 +1319,7 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  */
 extern "C" int cBERewardInterface_isConceptArtOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_isRewardOwned(self, bit, charRecord + 0xF45);
 }
 #endif
@@ -1327,7 +1327,7 @@ extern "C" int cBERewardInterface_isConceptArtOwned(cBERewardInterface* self, in
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isToyOwned);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bit, char* bits);
 
 /**
@@ -1343,7 +1343,7 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  */
 extern "C" int cBERewardInterface_isToyOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_isRewardOwned(self, bit, charRecord + 0xF53);
 }
 #endif
@@ -1351,7 +1351,7 @@ extern "C" int cBERewardInterface_isToyOwned(cBERewardInterface* self, int profi
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isVideoOwned);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bit, char* bits);
 
 /**
@@ -1367,7 +1367,7 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  */
 extern "C" int cBERewardInterface_isVideoOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_isRewardOwned(self, bit, charRecord + 0xF52);
 }
 #endif
@@ -1391,7 +1391,7 @@ INCLUDE_ASM("be/beintreward", func_00157EA0);
 // PORT: 64-bit ulong bit test (ld/dsrlv).
 extern "C" int func_00157EA0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return (int)((*(ulong*)(charRecord + 0xF78) >> bit) & 1);
 }
 #endif
@@ -1399,7 +1399,7 @@ extern "C" int func_00157EA0(void* self, int profileIndex, int characterId, int 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isCheatCharOwned);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bit, char* bits);
 
 /**
@@ -1416,7 +1416,7 @@ extern "C" int cBERewardInterface_isRewardOwned(cBERewardInterface* self, int bi
  */
 extern "C" int cBERewardInterface_isCheatCharOwned(cBERewardInterface* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_isRewardOwned(self, bit-10, charRecord + 0xF57);
 }
 #endif
@@ -1474,7 +1474,7 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 extern "C" int cBERewardInterface_getNumOwnedPosters(cBERewardInterface* self, int a1, int a2);
 int cBERewardInterface_getTotalNumPosters(void* self);
 extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int a1, int a2, int a3, int a4);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
@@ -1496,7 +1496,7 @@ void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" void cBERewardInterface_buyPoster(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     cBERewardInterface_markRewardOwned(self, bit, charRecord + 0xF30);
     if (give)
     {
@@ -1525,7 +1525,7 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 extern "C" int cBERewardInterface_getNumOwnedTradingCards(cBERewardInterface* self, int a1, int a2);
 int cBERewardInterface_getTotalNumTradingCards(void* self);
 extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int a1, int a2, int a3, int a4);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
@@ -1547,7 +1547,7 @@ void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" void cBERewardInterface_buyTradingCard(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     cBERewardInterface_markRewardOwned(self, bit, charRecord + 0xF36);
     if (give)
     {
@@ -1576,7 +1576,7 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 extern "C" int cBERewardInterface_getNumOwnedConceptArts(cBERewardInterface* self, int a1, int a2);
 int cBERewardInterface_getTotalNumConceptArts(void* self);
 extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int a1, int a2, int a3, int a4);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
@@ -1598,7 +1598,7 @@ void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" void cBERewardInterface_buyConceptArt(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     cBERewardInterface_markRewardOwned(self, bit, charRecord + 0xF45);
     if (give)
     {
@@ -1627,7 +1627,7 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 extern "C" int cBERewardInterface_getNumOwnedToys(cBERewardInterface* self, int a1, int a2);
 int cBERewardInterface_getTotalNumToys(void* self);
 extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int a1, int a2, int a3, int a4);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
@@ -1649,7 +1649,7 @@ void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" void cBERewardInterface_buyToy(cBERewardInterface* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     cBERewardInterface_markRewardOwned(self, bit, charRecord + 0xF53);
     if (give)
     {
@@ -1674,7 +1674,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" void cBERewardInterface_markRewardOwned(cBERewardInterface* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
@@ -1696,7 +1696,7 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 extern "C" void cBERewardInterface_buyVideo(cBERewardInterface* self, int profile, int characterId, int idx, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profile][characterId];
     cBERewardInterface_markRewardOwned(self, idx, charRecord + 0xF52);
     if (award)
     {
@@ -1715,7 +1715,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buySong);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
 
@@ -1735,7 +1735,7 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 extern "C" void cBERewardInterface_buySong(cBERewardInterface* self, int profile, int characterId, int bit, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profile][characterId];
     *(ulong*)(charRecord + 0xF70) |= (ulong)1 << bit;
     if (award)
     {
@@ -1753,7 +1753,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" void cBERewardInterface_markRewardOwned(cBERewardInterface* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
@@ -1776,7 +1776,7 @@ extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int pr
 {
     idx -= 10;
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profile][characterId];
     cBERewardInterface_markRewardOwned(self, idx, charRecord + 0xF57);
     if (award)
     {
@@ -1792,7 +1792,7 @@ extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int pr
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getRadioMode);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the character's radio mode: the word at +0xF80 of the character record (cBELibrary_profileLib + profile *
@@ -1804,7 +1804,7 @@ extern int cBELibrary_profileLib[];
  */
 extern "C" int cBERewardInterface_getRadioMode(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return *(int*)(charRecord + 0xf80);
 }
 #endif
@@ -1813,7 +1813,7 @@ extern "C" int cBERewardInterface_getRadioMode(cBERewardInterface* self, int pro
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getOwnedSongList);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the character's owned-song list: the 64-bit word at +0xF70 of the character record (cBELibrary_profileLib +
@@ -1825,7 +1825,7 @@ extern int cBELibrary_profileLib[];
  */
 extern "C" long cBERewardInterface_getOwnedSongList(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return *(long*)(charRecord + 0xf70);
 }
 #endif
@@ -1834,7 +1834,7 @@ extern "C" long cBERewardInterface_getOwnedSongList(cBERewardInterface* self, in
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getPlayList);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the character's playlist: the 64-bit word at +0xF78 of the character record (cBELibrary_profileLib + profile
@@ -1846,7 +1846,7 @@ extern int cBELibrary_profileLib[];
  */
 extern "C" long cBERewardInterface_getPlayList(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return *(long*)(charRecord + 0xf78);
 }
 #endif
@@ -1864,7 +1864,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumOwnedSongs);
  */
 extern "C" int cBERewardInterface_getNumOwnedSongs(cBERewardInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     return cBERewardInterface_countOwnedRewards(self, 0x40, (signed char*)(charRecord + 0xF70));
 }
 #endif
@@ -1872,7 +1872,7 @@ extern "C" int cBERewardInterface_getNumOwnedSongs(cBERewardInterface* self, int
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumSongsInPlayList);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, int count, signed char* bits);
 
 /**
@@ -1884,7 +1884,7 @@ extern "C" int cBERewardInterface_countOwnedRewards(cBERewardInterface* self, in
  */
 extern "C" int cBERewardInterface_getNumSongsInPlayList(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
 {
-    char* charProfile = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 3976;
+    char* charProfile = (char*)&cBELibrary_profileLib[iProfileIndex][iCharacterID];
     return cBERewardInterface_countOwnedRewards(self, 0x40, (signed char*)(charProfile + 0xF78));
 }
 #endif
@@ -1892,7 +1892,7 @@ extern "C" int cBERewardInterface_getNumSongsInPlayList(cBERewardInterface* self
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_setRadioMode);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Sets the character's radio mode: the word at +0xF80 of the character record (cBELibrary_profileLib + profile * 0x9B50
@@ -1904,7 +1904,7 @@ extern int cBELibrary_profileLib[];
  */
 extern "C" void cBERewardInterface_setRadioMode(cBERewardInterface* self, int profileIndex, int characterId, int value)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     *(int*)(charRecord + 0xf80) = value;
 }
 #endif
@@ -1913,7 +1913,7 @@ extern "C" void cBERewardInterface_setRadioMode(cBERewardInterface* self, int pr
 INCLUDE_ASM("be/beintreward", cBERewardInterface_setOwnedSongList);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Sets the character's owned-song list: the 64-bit word at +0xF70 of the character record (cBELibrary_profileLib +
@@ -1925,7 +1925,7 @@ extern int cBELibrary_profileLib[];
  */
 extern "C" void cBERewardInterface_setOwnedSongList(cBERewardInterface* self, int profileIndex, int characterId, long value)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     *(long*)(charRecord + 0xf70) = value;
 }
 #endif
@@ -1934,7 +1934,7 @@ extern "C" void cBERewardInterface_setOwnedSongList(cBERewardInterface* self, in
 INCLUDE_ASM("be/beintreward", cBERewardInterface_setPlayList);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Sets the character's playlist: the 64-bit word at +0xF78 of the character record (cBELibrary_profileLib + profile *
@@ -1946,7 +1946,7 @@ extern int cBELibrary_profileLib[];
  */
 extern "C" void cBERewardInterface_setPlayList(cBERewardInterface* self, int profileIndex, int characterId, long value)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     *(long*)(charRecord + 0xf78) = value;
 }
 #endif
@@ -2005,7 +2005,7 @@ int cBERewardInterface_getEarningsTarget(void* self, int peakID)
 #endif
 
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateCollectibleMedal);
@@ -2047,7 +2047,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
  */
 signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int iCharacterID, int eventID, int location)
 {
-    void* result = cBECharProfileDB_getScoreStats(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[iProfileIndex][iCharacterID], location, eventID);
+    void* result = cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[iProfileIndex][iCharacterID], location, eventID);
     if (result == 0) {
         return -1;
     }
@@ -2073,7 +2073,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackHighScore);
  */
 extern "C" int cBERewardInterface_getTrackHighScore(cBERewardInterface* self, int profileIndex, int characterId, int event, int locationId)
 {
-    void* result = cBECharProfileDB_getScoreStats(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profileIndex][characterId], locationId, event);
+    void* result = cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[profileIndex][characterId], locationId, event);
     if (result == 0) {
         return 0;
     }
@@ -2389,7 +2389,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserPeakPass);
 struct sReward_0015A628;
 extern "C" void cBEUserAwards_setAward(sReward_0015A628* self, int row, int col, int value);
 extern void* cBELibrary_userAwards[];
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 // PORT: 64-bit `long` flags word (ld/sd).
 struct sCharRec_158F60 {
@@ -2968,7 +2968,7 @@ extern sSlots2_00159CD0 D_004A1268[];
  */
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profile, int iCharacterID, int bit)
 {
-    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + iCharacterID * 3976;
+    char* rec = (char*)&cBELibrary_profileLib[profile][iCharacterID];
     sReward_0015A628* rewardLog = (sReward_0015A628*)cBELibrary_userAwards;
     sSlots4_00159CD0 slots4 = D_0045AA28;
     sSlots2_00159CD0 slots2 = D_004A1268[0];
@@ -3117,7 +3117,7 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isAwardReceived);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBERewardInterface_isBitSet(cBERewardInterface* self, int bit, unsigned char* bits);
 
 /**
@@ -3132,7 +3132,7 @@ extern "C" int cBERewardInterface_isBitSet(cBERewardInterface* self, int bit, un
  */
 extern "C" int cBERewardInterface_isAwardReceived(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int bit)
 {
-    char* profileRec = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 3976;
+    char* profileRec = (char*)&cBELibrary_profileLib[iProfileIndex][iCharacterID];
     return cBERewardInterface_isBitSet(self, bit, (unsigned char*)(profileRec + 0xF28));
 }
 #endif

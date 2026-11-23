@@ -149,7 +149,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isFirstTimeWC);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns a rider's first-time-in-career flag: the word at +0 of its character record in cBELibrary_profileLib.
@@ -176,7 +176,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setIsFirstTimeWC);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Sets a rider's first-time-in-career flag: the word at +0 of its character record in cBELibrary_profileLib.
@@ -202,7 +202,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isFirstTimeOnTrack);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Tells whether a rider has never been to a location before.
@@ -232,7 +232,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setFirstTimeOnTrack);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" void cBECharProfileDB_setLocationVisited(void* self, int bit, int on);
 
 
@@ -251,7 +251,7 @@ extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(cBENewPlayerInterface*
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int characterId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    cBECharProfileDB_setLocationVisited(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profile][characterId], bit, !flag);
+    cBECharProfileDB_setLocationVisited(&cBELibrary_profileLib[profile][characterId], bit, !flag);
 }
 #endif
 
@@ -260,7 +260,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_hasVisitedPeakWC);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 extern "C" int cBECharProfileDB_hasVisitedPeak(void* self, int kind);
 
 
@@ -279,7 +279,7 @@ extern "C" int cBENewPlayerInterface_hasVisitedPeakWC(cBENewPlayerInterface* sel
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    return cBECharProfileDB_hasVisitedPeak(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profile][charId], kind);
+    return cBECharProfileDB_hasVisitedPeak(&cBELibrary_profileLib[profile][charId], kind);
 }
 #endif
 
@@ -288,7 +288,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_hasPlayedEvent);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 
 
@@ -309,7 +309,7 @@ extern "C" int cBENewPlayerInterface_hasPlayedEvent(cBENewPlayerInterface* self,
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profile][charId], locationId, event);
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[profile][charId], locationId, event);
     return *stats != 0;
 }
 #endif
@@ -317,7 +317,7 @@ extern "C" int cBENewPlayerInterface_hasPlayedEvent(cBENewPlayerInterface* self,
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Tells whether a peak is locked for a character: bit 12 (peak 1) or 13 (peak 2) of the record's flags.
@@ -383,7 +383,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPeakLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 // PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
 struct sProfBits_146070 {
@@ -422,7 +422,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isRivalChallengePlayed);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns whether a rider's character has played a peak's rival challenge.
@@ -479,7 +479,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRivalChallengePlayed);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 // PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
 struct sProfBits6320 {
@@ -538,7 +538,7 @@ extern "C" void cBENewPlayerInterface_setRivalChallengePlayed(cBENewPlayerInterf
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isRivalEventLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns whether a peak's rival event is still locked for a character.
@@ -608,7 +608,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isRivalEventLocked1);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 struct sTrackInfo_1466A0 {
     char pad0[0x54];
     int kind;                   // 0x54
@@ -684,7 +684,7 @@ extern "C" int cBENewPlayerInterface_isRivalEventLocked1(cBENewPlayerInterface* 
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRivalEventLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 // PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
 struct sProfBits_1468B0 {
@@ -748,7 +748,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isEventLocked);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getProfileIndex(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Tells whether an event is still locked for a character.
@@ -859,7 +859,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getLastHub);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the last hub location of a rider's character (+0x27C of its profile record).
@@ -883,7 +883,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setLastHub);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Remembers the hub a rider's character was last at.
@@ -1604,7 +1604,7 @@ INCLUDE_ASM("be/beintplayer", func_00147908);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the message list of a rider's character: +0xE38 of its character record in cBELibrary_profileLib.
@@ -1619,7 +1619,7 @@ extern "C" void* func_00147908(cBENewPlayerInterface* self, int index)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + charId * 3976;
+    char* charRecord = (char*)&cBELibrary_profileLib[profile][charId];
     return charRecord + 0xE38;
 }
 #endif
@@ -1629,7 +1629,7 @@ INCLUDE_ASM("be/beintplayer", func_00147980);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Tests message flag @p bit of a rider's character: bit @p bit of the bit array at +0xF08 of its character record.
@@ -1659,7 +1659,7 @@ INCLUDE_ASM("be/beintplayer", func_00147A30);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Sets or clears message flag @p bit of a rider's character, in the bit array at +0xF08 of its character record.
@@ -1693,7 +1693,7 @@ INCLUDE_ASM("be/beintplayer", func_00147B20);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 struct sPair_func_00147B20 {
     int a;
@@ -1727,7 +1727,7 @@ INCLUDE_ASM("be/beintplayer", func_00147BB0);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 struct sPair_func_00147BB0 {
     int a;
@@ -1760,7 +1760,7 @@ extern "C" int func_00147BB0(cBENewPlayerInterface* self, int index, int slot)
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setDifficultyLevel);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Sets a difficulty level of the first profile's current character and resets its win/loss streak.
@@ -1819,7 +1819,7 @@ extern "C" short cBENewPlayerInterface_getDifficultyLevel(cBENewPlayerInterface*
 INCLUDE_ASM("be/beintplayer", func_00147D20);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 
 /**
@@ -1838,13 +1838,13 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
     short difference, level;
     if (which)
     {
-        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty;
-        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference;
+        level = cBELibrary_profileLib[profile][charId].mDifficulty;
+        difference = cBELibrary_profileLib[profile][charId].mDifference;
     }
     else
     {
-        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284;
-        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286;
+        level = cBELibrary_profileLib[profile][charId].unk_284;
+        difference = cBELibrary_profileLib[profile][charId].unk_286;
     }
     difference++;
     if (difference >= 2)
@@ -1854,13 +1854,13 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
     }
     if (which)
     {
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty = level;
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference = difference;
+        cBELibrary_profileLib[profile][charId].mDifficulty = level;
+        cBELibrary_profileLib[profile][charId].mDifference = difference;
     }
     else
     {
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284 = level;
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286 = difference;
+        cBELibrary_profileLib[profile][charId].unk_284 = level;
+        cBELibrary_profileLib[profile][charId].unk_286 = difference;
     }
 }
 #endif
@@ -1869,7 +1869,7 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
 INCLUDE_ASM("be/beintplayer", func_00147E18);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 
 /**
@@ -1888,13 +1888,13 @@ extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
     short difference, level;
     if (which)
     {
-        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty;
-        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference;
+        level = cBELibrary_profileLib[profile][charId].mDifficulty;
+        difference = cBELibrary_profileLib[profile][charId].mDifference;
     }
     else
     {
-        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284;
-        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286;
+        level = cBELibrary_profileLib[profile][charId].unk_284;
+        difference = cBELibrary_profileLib[profile][charId].unk_286;
     }
     difference--;
     if (difference < -1)
@@ -1904,13 +1904,13 @@ extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
     }
     if (which)
     {
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty = level;
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference = difference;
+        cBELibrary_profileLib[profile][charId].mDifficulty = level;
+        cBELibrary_profileLib[profile][charId].mDifference = difference;
     }
     else
     {
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284 = level;
-        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286 = difference;
+        cBELibrary_profileLib[profile][charId].unk_284 = level;
+        cBELibrary_profileLib[profile][charId].unk_286 = difference;
     }
 }
 #endif
@@ -1919,7 +1919,7 @@ extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getDifficultyDifference);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the win/loss streak beside a difficulty level of the first profile's current character.
@@ -2047,7 +2047,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getStatFromProfile);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getCharacterID(int);
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns one of the seven attribute bytes of a profile's current character, or -1 for an unknown attribute.

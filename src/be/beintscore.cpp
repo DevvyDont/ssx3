@@ -496,7 +496,7 @@ extern "C" void* cBEScoreInterface_getPlayerLastCompletedEventStats(cBEScoreInte
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getPlayerBestStats);
 #ifdef SKIP_ASM
-extern char cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns a character's best-stats block: +0xDE4 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
@@ -510,13 +510,13 @@ extern char cBELibrary_profileLib[];
  */
 extern "C" void* cBEScoreInterface_getPlayerBestStats(cBEScoreInterface* self, int profileIndex, int characterId)
 {
-    char* charRecord = cBELibrary_profileLib + (profileIndex * 39760 + characterId * 3976);
+    char* charRecord = (char*)cBELibrary_profileLib + (profileIndex * 39760 + characterId * 3976);
     return charRecord + 0xde4;
 }
 #endif
 
 signed char cBELibrary_getCharacterID(int index);
-extern char cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighlightLevel__FPvi);
@@ -714,7 +714,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
     if ((unsigned int)profile > 2)
         return;
     int charID = cBELibrary_getCharacterID(rider);
-    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + charID * 3976;
+    char* rec = (char*)&cBELibrary_profileLib[profile][charID];
     int event = cBELibrary_locationDB_r155420[rs->event].id;
     int kind = rs->b48;
     int mode = rs->mode;
@@ -875,7 +875,7 @@ extern "C" int cBEScoreInterface_getNumberOfWinsOnTrack(cBEScoreInterface* self,
     if ((unsigned int)profile >= 3)
         return 0;
     int charID = cBELibrary_getCharacterID(rider);
-    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + charID * 3976, locationID, eventID);
+    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[profile][charID], locationID, eventID);
     if (stats == 0)
         return 0;
     return stats[1];
@@ -889,7 +889,7 @@ int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern signed char D_005305F9[];
-extern char cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the best medal a race rider's character has for an event at a location: byte 1 of its score record.
@@ -910,7 +910,7 @@ extern "C" int cBEScoreInterface_getBestMedalOnTrack(cBEScoreInterface* self, in
     if ((unsigned int)profile >= 3)
         return -1;
     int charID = cBELibrary_getCharacterID(rider);
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + charID * 3976, locationID, eventID);
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[profile][charID], locationID, eventID);
     if (stats == 0)
         return -1;
     return stats[1];
@@ -943,6 +943,6 @@ extern "C" void cBEScoreInterface_setBestMedalOnTrack(cBEScoreInterface* self, i
     if ((unsigned int)profile >= 3)
         return;
     int ch = cBELibrary_getCharacterID(rider);
-    cBECharProfileDB_updateMedalStats(cBELibrary_profileLib + profile * 39760 + ch * 3976, locationID, eventID, medal);
+    cBECharProfileDB_updateMedalStats(&cBELibrary_profileLib[profile][ch], locationID, eventID, medal);
 }
 #endif

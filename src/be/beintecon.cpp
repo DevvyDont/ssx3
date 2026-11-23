@@ -35,7 +35,7 @@ void* cBEEconInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getMoney);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns a character's cash (+0xAC4 of its profile record).
@@ -82,7 +82,7 @@ extern "C" int cBEEconInterface_getMoney1(cBEEconInterface* self, int rider)
 }
 #endif
 
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned__FPvii);
@@ -156,7 +156,7 @@ extern "C" void cBEEconInterface_setMoney(cBEEconInterface* self, int profileInd
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_addMoney);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Adds @p amount to the money (+0xAC4) and the total money earned (+0xAC8) of character @p characterId in profile slot @p humanIndex.
@@ -204,7 +204,7 @@ extern "C" int cBEEconInterface_addMoney1(cBEEconInterface* self, int rider, int
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_reduceMoney);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Subtracts @p amount from the money (+0xAC4) of character @p characterId in profile slot @p profileIndex.
@@ -232,7 +232,7 @@ extern "C" int cBEEconInterface_reduceMoney(cBEEconInterface* self, int profileI
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getPeakPass);
 #ifdef SKIP_ASM
-extern int cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 // PORT: 64-bit unsigned long flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
 struct sPeakBits_0B88 {
@@ -314,25 +314,25 @@ extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIn
         cur = ((cBECharProfileDB*)((humanIndex * 0x9B50 + characterId * 0xF88) + (char*)cBELibrary_profileLib))->mMoney;
         switch (attribute) {
         case 0:
-            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cSpeed;
+            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cSpeed;
             break;
         case 1:
-            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cAccel;
+            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cAccel;
             break;
         case 2:
-            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cTrick;
+            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cTrick;
             break;
         case 3:
-            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cEdging;
+            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cEdging;
             break;
         case 4:
-            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cSpin;
+            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cSpin;
             break;
         case 5:
-            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cToughness;
+            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cToughness;
             break;
         case 6:
-            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cStability;
+            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cStability;
             break;
         }
         cost = cBEEconInterface_getAttribCost(self, *attribLevel / 5 - 1);

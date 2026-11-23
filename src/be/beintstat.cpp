@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "vtable.h"
 #include "be/beintaggression.h"
 #include "be/beintscore.h"
@@ -565,7 +566,7 @@ int GetHashValue32(char*);
 void* cBENewPlayerInterface_getThis();
 void* cBEBAGTInterface_getThis();
 extern char str_kT_MEMPlayerName[];
-extern char cBELibrary_profileLib[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 struct sVEntry_149A88
 {
@@ -604,7 +605,7 @@ extern "C" void cBELibrary_newProfile(void* self, signed char idx)
     sVEntry_149A88* vt = *(sVEntry_149A88**)(locale + 4);
     strcpy2(buf, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMPlayerName)));
     sprintf(playerEntry->strUserName, buf, idx + 1);
-    cBEProfileLib_init(cBELibrary_profileLib + idx * 39760, 1);
+    cBEProfileLib_init(cBELibrary_profileLib[idx], 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());
     vreset_149A88((char*)cBEStatInterface_getThis());
     vreset_149A88((char*)cBEBAGTInterface_getThis());
@@ -704,7 +705,7 @@ extern "C" void cBELibrary_loadData(void)
     }
     memset(cBELibrary_optionDB, 0, 648);
     for (i = 0; i < 3; i++) {
-        cBEProfileLib_init(cBELibrary_profileLib + i * 39760, 1);
+        cBEProfileLib_init(cBELibrary_profileLib[i], 1);
     }
     grabPoints = cBELibrary_grabPointsDB;
     grabPoints[0x0 / 4] = 0;
