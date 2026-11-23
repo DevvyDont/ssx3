@@ -89,8 +89,8 @@ extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
     nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
     nash_Octant* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
     nash_Octant* octant = cellXYZ;
-    nash_Cell_remnode((octant->rootcell), 2, node, &key, octant);
-    if (octEmpty_8C48((octant->rootcell))) {
+    nash_Cell_remnode(octant->rootcell, 2, node, &key, octant);
+    if (octEmpty_8C48(octant->rootcell)) {
         operator_delete((int*)(octant->rootcell));
         (*(nash_Cell**)&octant->rootcell) = 0;
     }
@@ -509,9 +509,9 @@ extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
     int i = 1;
     updateMat_92A8((self->Mats)[0], (*(sFrV4_92A8*)&(self->Nodes)[0].Pos), (*(sFrV4_92A8*)&(self->Nodes)[0].Pos), (*(sFrV4_92A8*)&(self->Nodes)[1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[2].Pos));
     for (; i < self->NumNodes - 2; i++) {
-        updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 2].Pos));
+        updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&self->Nodes[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 2].Pos));
     }
-    updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos));
+    updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&self->Nodes[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos));
 }
 #endif
 
@@ -1235,9 +1235,9 @@ extern "C" void cSpringRailNode_applyForce(cSpringRailNode* self, tIntersectInfo
     for (i = 0; i < node->Seg; i++) {
         float* k = ((float*)&self->ASpring);
         t4Vector scaled = arm;
-        float lv = vu0Len_A568((self->Nodes)[i].V);
+        float lv = vu0Len_A568(self->Nodes[i].V);
         vu0ScaleEq_A568(scaled, lv / vu0Len_A568(scaled));
-        vu0AddEq_A568((self->Nodes)[i].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568((self->Nodes)[i].V) / alen), k[2]));
+        vu0AddEq_A568(self->Nodes[i].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(self->Nodes[i].V) / alen), k[2]));
     }
     float* k = ((float*)&self->ASpring);
     vu0AddEq_A568((self->Nodes)[node->Seg].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node->Ipos, (self->Nodes)[node->Seg].P)) / alen), k[2]));
@@ -1310,8 +1310,8 @@ extern "C" void cSpringRailNode_updateIntersectInfo(cSpringRailNode* self, tInte
         return;
     for (int i = 0; i <= node->Seg; i++) {
         t4Vector cross;
-        t4Vector arm = vu0Sub_A838(node->Ipos, (self->Nodes)[i].P);
-        vu0CrossTo_A838(cross, arm, (self->Nodes)[i].W);
+        t4Vector arm = vu0Sub_A838(node->Ipos, self->Nodes[i].P);
+        vu0CrossTo_A838(cross, arm, self->Nodes[i].W);
         vu0AddEq_A838(node->Ivel, cross);
     }
 }
@@ -1331,23 +1331,7 @@ struct sV4Slot_A8C8 {
 // PORT: the unit declares t4vect_Zero with another vector type; alias it here.
 extern t4Vector t4vect_Zero_A8C8 __asm__("t4vect_Zero");
 
-struct sFrElem_A8C8 {
-    t4Vector pos;               // 0x00
-    t4Vector vel;               // 0x10
-    t4Vector posA;              // 0x20
-    t4Vector posB;              // 0x30
-    t4Vector force;             // 0x40
-    char pad50[0x10];
-};
 
-struct sFrRailA8C8 {
-    char pad0[0x20];
-    int count;                  // 0x20
-    char pad24[0x3C];
-    float k[3];                 // 0x60
-    char pad6C[4];
-    sFrElem_A8C8* elems;        // 0x70
-};
 
 // PORT: PS2-only VU0 inline asm (vector length).
 static inline float vu0Len_A8C8(const t4Vector& v)
@@ -1459,32 +1443,32 @@ static inline void vu0AddEq_A8C8(t4Vector& dst, const t4Vector& b)
  * the chain accumulating O and places P[i + 1] at P[i] + V[i] bent by the accumulated angle (normalised V + V cross
  * angle, scaled back to |V|). T of every node is cleared. dt comes from cObjectInterface_getUpdateTime.
  */
-extern "C" void cSpringRailNode_updateNodes(sFrRailA8C8* self)
+extern "C" void cSpringRailNode_updateNodes(cSpringRailNode* self)
 {
     float dt = cObjectInterface_getUpdateTime();
     sV4Slot_A8C8 segTorque[8];
-    for (int i = 0; i < self->count - 1; i++) {
-        segTorque[i].v = vu0Scale_A8C8(self->elems[i].posA, -self->k[0]);
-        vu0AddEq_A8C8(segTorque[i].v, vu0Scale_A8C8(self->elems[i].posB, -self->k[1]));
+    for (int i = 0; i < self->NumNodes - 1; i++) {
+        segTorque[i].v = vu0Scale_A8C8(self->Nodes[i].O, -self->ASpring);
+        vu0AddEq_A8C8(segTorque[i].v, vu0Scale_A8C8(self->Nodes[i].W, -self->ADamp));
     }
-    for (int i = 0; i < self->count - 1; i++) {
-        vu0AddEq_A8C8(segTorque[i].v, self->elems[i].force);
+    for (int i = 0; i < self->NumNodes - 1; i++) {
+        vu0AddEq_A8C8(segTorque[i].v, self->Nodes[i].T);
     }
-    for (int i = 0; i < self->count - 1; i++) {
+    for (int i = 0; i < self->NumNodes - 1; i++) {
         t4Vector angVelStep;
         angVelStep = vu0Scale_A8C8(segTorque[i].v, dt);
-        vu0AddEq_A8C8(self->elems[i].posA, vu0Scale_A8C8(self->elems[i].posB, dt));
-        vu0AddEq_A8C8(self->elems[i].posB, angVelStep);
+        vu0AddEq_A8C8(self->Nodes[i].O, vu0Scale_A8C8(self->Nodes[i].W, dt));
+        vu0AddEq_A8C8(self->Nodes[i].W, angVelStep);
     }
     t4Vector acc = t4vect_Zero_A8C8;
-    for (int i = 0; i < self->count - 1; i++) {
-        vu0AddEq_A8C8(acc, self->elems[i].posA);
-        float len = vu0Len_A8C8(self->elems[i].vel);
-        t4Vector segVec = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->elems[i].vel, vu0Cross_A8C8(self->elems[i].vel, acc))), len);
-        self->elems[i + 1].pos = vu0Add_A8C8(self->elems[i].pos, segVec);
+    for (int i = 0; i < self->NumNodes - 1; i++) {
+        vu0AddEq_A8C8(acc, self->Nodes[i].O);
+        float len = vu0Len_A8C8(self->Nodes[i].V);
+        t4Vector segVec = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->Nodes[i].V, vu0Cross_A8C8(self->Nodes[i].V, acc))), len);
+        (self->Nodes)[i + 1].P = vu0Add_A8C8(self->Nodes[i].P, segVec);
     }
-    for (int i = 0; i < self->count; i++) {
-        self->elems[i].force = t4vect_Zero_A8C8;
+    for (int i = 0; i < self->NumNodes; i++) {
+        self->Nodes[i].T = t4vect_Zero_A8C8;
     }
 }
 #endif

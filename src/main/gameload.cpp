@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/loadindicator.h"
+#include "bx/bxstring.h"
 #include "be/beinterface.h"
 #include "ui/uistate.h"
 #include "ai/focusbox.h"
@@ -431,11 +433,6 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sBXStr_F6B0 {
-    char* p;
-    sBXStr_F6B0() {}
-    sBXStr_F6B0(const sBXStr_F6B0&);
-};
 
 extern char* cBXString_EmptyString;
 extern int cBENewRaceInterface_bIsBamLocation;
@@ -450,11 +447,11 @@ extern char str_bar_b[];
 extern char str_cam[];
 extern void* D_004882E0[];
 
-extern "C" void* cBXString_cBXString2(sBXStr_F6B0* self, const char* s);
-extern "C" sBXStr_F6B0* func_00318630(sBXStr_F6B0* self, sBXStr_F6B0* a, const char* str);
-extern "C" sBXStr_F6B0* func_003186D0(sBXStr_F6B0* self, const char* str, sBXStr_F6B0* b);
-extern "C" void cBXString__cBXString(sBXStr_F6B0* self, int flags);
-extern "C" sBXStr_F6B0* cBXString_operatorE(sBXStr_F6B0* self, sBXStr_F6B0* o);
+extern "C" void* cBXString_cBXString2(cBXString* self, const char* s);
+extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+extern "C" cBXString* cBXString_operatorE(cBXString* self, cBXString* o);
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cBigFile_open(void* bf, const char* name, int flags);
 extern "C" void cWorld_load(void* a, const char* name, void* b);
@@ -512,44 +509,44 @@ struct sElemFF_F6B0 {
 extern "C" void cGame_loadTrack(cGame* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sBXStr_F6B0 name;
-    name.p = cBXString_EmptyString;
+    cBXString name;
+    name.Str = cBXString_EmptyString;
     if (cBENewRaceInterface_bIsBamLocation != 0) {
-        sBXStr_F6B0 worldPath;
-        sBXStr_F6B0 locName;
+        cBXString worldPath;
+        cBXString locName;
         func_003186D0(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x44), &locName));
         cBXString_operatorE(&name, &worldPath);
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&locName, 2);
     } else {
-        sBXStr_F6B0 worldPath;
-        sBXStr_F6B0 locName;
+        cBXString worldPath;
+        cBXString locName;
         func_003186D0(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
         cBXString_operatorE(&name, &worldPath);
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&locName, 2);
     }
     {
-        sBXStr_F6B0 path;
+        cBXString path;
         func_00318630(&path, &name, str_big_b);
-        cBigFile_open(self->mpTrackBigFile, path.p, 0);
+        cBigFile_open(self->mpTrackBigFile, path.Str, 0);
         cBXString__cBXString(&path, 2);
     }
     sTbl_F6B0*& tbl = (sTbl_F6B0*)self->SurfPropCache;
     char*& ent = (char*)self->FogMan;
-    cWorld_load(self->World, name.p, self->BXNash);
+    cWorld_load(self->World, name.Str, self->BXNash);
     *(void**)&self->SkyBox = cSkyBox_cSkyBox(cMemMan_alloc(0x18, str_SkyBox, 0, 0));
     *(void**)&self->SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(468, str_SectionMan, 0, 0), ((char*)self));
     tbl = new (str_SurfPropCache, 0, 0) sTbl_F6B0;
     func_002C2F18(self->SurfPropCache);
     *(void**)&self->WorldSound = cWorldSound_cWorldSound(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
     cBXNash_initTheAIFwdDiffCache(self->BXNash);
-    sBXStr_F6B0 dir;
-    dir.p = cBXString_EmptyString;
+    cBXString dir;
+    dir.Str = cBXString_EmptyString;
     *(int*)(*(char**)self->World + 0x3D4) = 0;
     {
-        sBXStr_F6B0 worldPath;
-        sBXStr_F6B0 locName;
+        cBXString worldPath;
+        cBXString locName;
         func_003186D0(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
         cBXString_operatorE(&dir, &worldPath);
         cBXString__cBXString(&worldPath, 2);
@@ -565,9 +562,9 @@ extern "C" void cGame_loadTrack(cGame* self)
     }
     *(int*)(*(char**)self->World + 0x3D4) = 1;
     {
-        sBXStr_F6B0 worldPath;
-        sBXStr_F6B0 camBasePath;
-        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(((char*)&gCamTriggerMan), (func_003186D0(&camBasePath, str_bar_b, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
+        cBXString worldPath;
+        cBXString camBasePath;
+        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(((char*)&gCamTriggerMan), (func_003186D0(&camBasePath, str_bar_b, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.Str));
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&camBasePath, 2);
     }
@@ -2716,12 +2713,6 @@ struct sCol_1FC0 {
     float r, g, b, a;
 };
 
-struct sFade_1FC0 {
-    float t;            // 0x0
-    float f4;           // 0x4
-    float f8;           // 0x8
-    sCol_1FC0 col;      // 0xC
-};
 
 struct sGs_1FC0 {
     unsigned int w0;
@@ -2799,7 +2790,7 @@ extern char* SSXApp_1FC0 __asm__("SSXApp");
  * by cLoadIndicator_update); its colour (+0xC) takes the field at +0x4 as its first component. Then ends 2D mode and
  * the scene and pops the draw state. The pre-start load screens call it.
  */
-extern "C" void cLoadIndicator_render(sFade_1FC0* self)
+extern "C" void cLoadIndicator_render(cLoadIndicator* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[0];
@@ -2820,15 +2811,15 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetScreenWidth(), (float)((cGfx_1FC0*)GrMan)->GetScreenHeight(), 1);
     }
     ((cGfx_1FC0*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    float pulse = fCos(self->t * 6.2831854820251465f);
+    float pulse = fCos(self->phase * 6.2831854820251465f);
     sV2_1FC0 size((pulse + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
     int f10v = *(int*)(SSXApp_1FC0 + 0xA0);
     *(short*)((char*)((cGfx_1FC0*)GrMan)->stateTop + 0x10) = f10v;
-    self->col.r = self->f4;
+    (*(sCol_1FC0*)&self->colour).r = self->alpha;
     sV2_1FC0 uv0(0.0f, 0.0f);
     sV2_1FC0 uv1(1.0f, 1.0f);
-    ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, self->col);
+    ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, (*(sCol_1FC0*)&self->colour));
     ((cGfx_1FC0*)GrMan)->PopView();
     ((cGfx_1FC0*)GrMan)->PopViewport();
     ((cGfx_1FC0*)GrMan)->stateTop--;

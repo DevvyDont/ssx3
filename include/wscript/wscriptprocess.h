@@ -30,13 +30,29 @@ struct cWScriptTask {
     char* EventScriptCode[10];         // 0x14 [O] (const char* there); [U] eventOnCollide (0x14) ... eventOnEvent3
                                        //      (0x38)
     cWScriptProcess* Process;          // 0x3C [O]; [R] initTask; [U] the event handlers
-    void** mVtbl;                      // 0x40 [R] ctor = the task vtable; [U] the process destructor's virtual call
+    // 0x40: the vptr (g++ 2.95 puts it after the data). [R] cWScriptTask_vtbl's 16 slots in this order, all
+    // cWScriptTask_* (On Tour's methods of the same names). Defined as extern "C" functions; nothing here is defined.
+    virtual ~cWScriptTask();                                       // 1
+    virtual void update();                                         // 2
+    virtual void dispatchTaskEvent(const struct tWScriptEvent& event); // 3
+    virtual void taskStart();                                      // 4
+    virtual void taskUpdate();                                     // 5
+    virtual void taskEnd();                                        // 6
+    virtual void eventOnCollide();                                 // 7
+    virtual void eventOnJump();                                    // 8
+    virtual void eventOnLand();                                    // 9
+    virtual void eventOnTrick();                                   // 10
+    virtual void eventOnWipeout();                                 // 11
+    virtual void eventOnReset();                                   // 12
+    virtual void eventOnCollect();                                 // 13
+    virtual void eventOnEvent1();                                  // 14
+    virtual void eventOnEvent2();                                  // 15
+    virtual void eventOnEvent3();                                  // 16
 };
 
 CHECK_OFFSET(cWScriptTask, TaskId, 0x04);
 CHECK_OFFSET(cWScriptTask, EventScriptCode, 0x14);
 CHECK_OFFSET(cWScriptTask, Process, 0x3C);
-CHECK_OFFSET(cWScriptTask, mVtbl, 0x40);
 CHECK_SIZE(cWScriptTask, 0x44);
 
 struct cWScriptProcess {

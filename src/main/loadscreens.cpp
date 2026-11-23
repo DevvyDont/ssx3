@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/debugfe.h"
 #include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "sound/ssxaudio.h"
@@ -311,21 +312,6 @@ static inline char* lsEntryName_B1B0(sLSSub_B1B0* s, int i)
     return s->e[i].name;
 }
 
-struct sLS_B1B0 {
-    void* vt;                    // 0x0
-    sLSSub_B1B0 sub;             // 0x4
-    char bg[8];                  // 0x8C10
-    int pad8C18;
-    int f8C1C;
-    int f8C20;
-    int f8C24;
-    int f8C28;
-    int f8C2C;
-    int f8C30;
-    int f8C34;
-    int arr[3];                  // 0x8C38
-    int f8C44;
-};
 
 /**
  * Constructs the debug front-end menu screen and sets up a default single-player race for it.
@@ -339,25 +325,25 @@ struct sLS_B1B0 {
  * @return @p self
  */
 // Load-screen constructor: sets up the race/player interfaces, picks the active entry and the sound entry.
-extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
+extern "C" cDebugMenuScreen* cDebugMenuScreen_cDebugMenuScreen(cDebugMenuScreen* self)
 {
-    self->vt = cDebugMenuScreen_vtbl;
-    cBackgroundMan_cBackgroundMan(self->bg);
-    cTrackFileMan_scanLocations(&self->sub);
-    cBackgroundMan_loadImages((cBackgroundMan*)((cBackgroundMan*)self->bg));
+    (*(void**)&self->mVtbl) = cDebugMenuScreen_vtbl;
+    cBackgroundMan_cBackgroundMan(((char*)&self->BackgroundMan));
+    cTrackFileMan_scanLocations(&(*(sLSSub_B1B0*)&self->TrackFileMan));
+    cBackgroundMan_loadImages((cBackgroundMan*)((cBackgroundMan*)((char*)&self->BackgroundMan)));
     cBEInterface* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
     cBEInterface* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
-    self->f8C24 = 0;
-    *(int*)cBE_getBE() = self->f8C24;
-    self->f8C24 = 0;
+    self->CurrentBoard = 0;
+    *(int*)cBE_getBE() = self->CurrentBoard;
+    self->CurrentBoard = 0;
     cBENewRaceInterface_setNumberHumans(iface0, 1);
     for (int i = 0; i < 3; i++) {
-        self->arr[i] = 4;
+        self->LastGamePathGameMode[i] = 4;
     }
     cBENewRaceInterface_setGamePath(iface0, 0);
     cBENewRaceInterface_setGameMode(iface0, 4);
     cBENewRaceInterface_setGameEvent(iface0, 0xC);
-    self->f8C20 = 0;
+    self->currentLocation = 0;
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     if (EnableOnline != 0) {
         func_00266CD8();
@@ -370,39 +356,39 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
         func_00260F80();
         func_00266CA0();
     }
-    if (lsSubLoaded_B1B0(&self->sub) != 0) {
-        if (self->sub.e[self->f8C20].active == 0) {
-            self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_ls(&self->sub, self->f8C20);
+    if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan)) != 0) {
+        if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].active == 0) {
+            self->currentLocation = cTrackFileMan_getNextWCBAMStartLocation_ls(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation);
         }
     } else {
         cDebugMenuScreen_setGamePath(self, 1);
     }
-    int idx = self->f8C20;
-    int kind = self->sub.e[idx].kind;
+    int idx = self->currentLocation;
+    int kind = (*(sLSSub_B1B0*)&self->TrackFileMan).e[idx].kind;
     cBENewRaceInterface_bIsBamLocation = 1;
     cBENewRaceInterface_newRace.iLocationIdx = kind;
-    if (self->sub.e[self->f8C20].f84 == 0) {
+    if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].f84 == 0) {
         cBENewRaceInterface_bIsBamLocation = 0;
     }
     if (kind == 22) {
-        cBENewRaceInterface_setDebugLocationFile(iface0, lsEntryName_B1B0(&self->sub, self->f8C20));
+        cBENewRaceInterface_setDebugLocationFile(iface0, lsEntryName_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation));
     }
-    self->f8C1C = 4;
+    self->SelectedItem = 4;
     cBENetworkInterface_networkOpt.fLatency = 0.016666668f;
     cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = 0;
     iface7->submit();
-    self->f8C44 = 0;
-    self->f8C34 = 0;
-    self->f8C30 = -1;
+    self->NetworkMode = 0;
+    self->CurrentPlaylist = 0;
+    self->CurrentBack = -1;
     cBEInterface* iface1 = cBE_getInterface_B1B0(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCtrlID(iface1, 0, 0);
     cBENewPlayerInterface_setPlayerCtrlID(iface1, 1, 1);
-    self->f8C28 = 2;
+    self->CurrentChar = 2;
     cBENewPlayerInterface_setPlayerCharID(iface1, 0, 2);
-    self->f8C2C = cBENewPlayerInterface_getControllerMapping(iface1, 0);
+    self->CurrentMap = cBENewPlayerInterface_getControllerMapping(iface1, 0);
     void* snd = cAudioInterface_bxAudio();
-    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->f8C34 * 0x14 + 0x60A4));
+    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->CurrentPlaylist * 0x14 + 0x60A4));
     iface1->submit();
     iface0->submit();
     return self;
@@ -438,8 +424,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* cPreFELoadScreen_cPreFELoadScreen(void* self);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern "C" void func_0017D0A8(sLS_B1B0* self);
-extern "C" int cDebugMenuScreen_getMaxAIRiders(sLS_B1B0* self, int quick, int mode, int event);
+extern "C" void func_0017D0A8(cDebugMenuScreen* self);
+extern "C" int cDebugMenuScreen_getMaxAIRiders(cDebugMenuScreen* self, int quick, int mode, int event);
 extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(sLSSub_B1B0* s, int i);
 extern "C" int cTrackFileMan_legalTrackMode(sLSSub_B1B0* s, int i, int mode);
 extern "C" int cTrackFileMan_getNextLocation(sLSSub_B1B0* s, int i, int mode);
@@ -528,10 +514,10 @@ static inline int numSongs_B4E0()
     return cAudioInterface_bxAudio()->mNumPlayLists;
 }
 
-static inline void playSong_B4E0(sLS_B1B0* self)
+static inline void playSong_B4E0(cDebugMenuScreen* self)
 {
     void* snd = cAudioInterface_bxAudio();
-    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->f8C34 * 0x14 + 0x60A4));
+    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->CurrentPlaylist * 0x14 + 0x60A4));
 }
 
 static inline int bgCount_B4E0(cBackgroundMan* bg)
@@ -553,11 +539,11 @@ static inline int bgCount_B4E0(cBackgroundMan* bg)
  * 0-4 (sets bIsNetworkGame / bIsHost and starts or stops the comm system), 13 (event 6) copies a word of the app's
  * +0x80 object. Mode, event, location and AI count are re-validated after each change.
  */
-extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
+extern "C" void cDebugMenuScreen_update(cDebugMenuScreen* self)
 {
     if (cInput_getState(SSXApp_b4->input, 101)) {
         func_0017D0A8(self);
-        if (self->f8C1C == 14) {
+        if (self->SelectedItem == 14) {
             SSXApp_b4->f60 = 1;
             cAppMan_setNextModule((cAppMan*)SSXApp_b4, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
         } else {
@@ -565,30 +551,30 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         }
     }
     int dir = (int)cInput_getValue(SSXApp_b4->input, 61);
-    if (dir == 0 && self->f8C30 == -1) {
-        self->f8C1C = (self->f8C1C + 15 - 1) % 15;
-        if (self->f8C1C == 13) {
+    if (dir == 0 && self->CurrentBack == -1) {
+        self->SelectedItem = (self->SelectedItem + 15 - 1) % 15;
+        if (self->SelectedItem == 13) {
             if (cCommSystem_mCommSystem == 0) {
-                self->f8C1C = (self->f8C1C + 15 - 2) % 15;
+                self->SelectedItem = (self->SelectedItem + 15 - 2) % 15;
             } else if (cCommSystem_mNumNetConn <= 0) {
-                self->f8C1C = (self->f8C1C + 15 - 1) % 15;
+                self->SelectedItem = (self->SelectedItem + 15 - 1) % 15;
             }
         }
         return;
     }
-    if (dir == 1 && self->f8C30 == -1) {
-        self->f8C1C = (self->f8C1C + 1) % 15;
-        if (self->f8C1C == 12 && cCommSystem_mCommSystem == 0) {
-            self->f8C1C = (self->f8C1C + 15 + 2) % 15;
+    if (dir == 1 && self->CurrentBack == -1) {
+        self->SelectedItem = (self->SelectedItem + 1) % 15;
+        if (self->SelectedItem == 12 && cCommSystem_mCommSystem == 0) {
+            self->SelectedItem = (self->SelectedItem + 15 + 2) % 15;
         }
-        if (self->f8C1C == 13) {
+        if (self->SelectedItem == 13) {
             if (cCommSystem_mCommSystem == 0 || cCommSystem_mNumNetConn <= 0) {
-                self->f8C1C = (self->f8C1C + 15 + 1) % 15;
+                self->SelectedItem = (self->SelectedItem + 15 + 1) % 15;
             }
         }
         return;
     }
-    switch (self->f8C1C) {
+    switch (self->SelectedItem) {
     case 0: {
         void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
@@ -596,11 +582,11 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         if (dir == 3) {
             quick = (quick + 1) % 3;
             if (quick == 0) {
-                if (lsSubLoaded_B1B0(&self->sub) != 0) {
-                    if (self->sub.e[self->f8C20].active == 0) {
-                        self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
+                if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan)) != 0) {
+                    if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].active == 0) {
+                        self->currentLocation = cTrackFileMan_getNextWCBAMStartLocation_b4(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation);
                     }
-                    int kind = self->sub.e[self->f8C20].kind;
+                    int kind = (*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].kind;
                     cBENewRaceInterface_bIsBamLocation = 1;
                     beRaceDB->iLocationIdx = kind;
                 } else {
@@ -611,11 +597,11 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         } else if (dir == 2) {
             quick = (quick + 2) % 3;
             if (quick == 0) {
-                if (lsSubLoaded_B1B0(&self->sub) != 0) {
-                    if (self->sub.e[self->f8C20].active == 0) {
-                        self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
+                if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan)) != 0) {
+                    if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].active == 0) {
+                        self->currentLocation = cTrackFileMan_getNextWCBAMStartLocation_b4(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation);
                     }
-                    int kind = self->sub.e[self->f8C20].kind;
+                    int kind = (*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].kind;
                     cBENewRaceInterface_bIsBamLocation = 1;
                     beRaceDB->iLocationIdx = kind;
                 } else {
@@ -630,20 +616,20 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             while (!cBENewRaceInterface_setGameMode_b4(race, mode)) {
                 mode = (mode + 1) % 7;
             }
-            if (!cTrackFileMan_legalTrackMode(&self->sub, self->f8C20, mode)) {
+            if (!cTrackFileMan_legalTrackMode(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation, mode)) {
                 changed = 1;
-                self->f8C20 = cTrackFileMan_getNextLocation(&self->sub, self->f8C20, mode);
+                self->currentLocation = cTrackFileMan_getNextLocation(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation, mode);
             }
-        } while (self->f8C20 < 0);
+        } while (self->currentLocation < 0);
         if (changed) {
-            int kind = self->sub.e[self->f8C20].kind;
+            int kind = (*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].kind;
             cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = kind;
-            if (self->sub.e[self->f8C20].f84 == 0) {
+            if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].f84 == 0) {
                 cBENewRaceInterface_bIsBamLocation = 0;
             }
             if (kind == 22) {
-                cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
+                cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation));
             }
         }
         update_B4E0(race);
@@ -685,20 +671,20 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                     mode = (mode + 6) % 7;
                 }
             } while (!cBENewRaceInterface_setGameMode_b4(race, mode));
-            if (!cTrackFileMan_legalTrackMode(&self->sub, self->f8C20, mode)) {
+            if (!cTrackFileMan_legalTrackMode(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation, mode)) {
                 changed = 1;
-                self->f8C20 = cTrackFileMan_getNextLocation(&self->sub, self->f8C20, mode);
+                self->currentLocation = cTrackFileMan_getNextLocation(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation, mode);
             }
-        } while (self->f8C20 < 0);
+        } while (self->currentLocation < 0);
         if (changed) {
-            int kind = self->sub.e[self->f8C20].kind;
+            int kind = (*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].kind;
             cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = kind;
-            if (self->sub.e[self->f8C20].f84 == 0) {
+            if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].f84 == 0) {
                 cBENewRaceInterface_bIsBamLocation = 0;
             }
             if (kind == 22) {
-                cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
+                cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation));
             }
         }
         update_B4E0(race);
@@ -771,35 +757,35 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         if (beRaceDB->cGamePath == 0) {
             if (dir == 3) {
-                self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
+                self->currentLocation = cTrackFileMan_getNextWCBAMStartLocation_b4(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation);
             } else if (dir == 2) {
-                self->f8C20 = cTrackFileMan_getPrevWCBAMStartLocation(&self->sub, self->f8C20);
+                self->currentLocation = cTrackFileMan_getPrevWCBAMStartLocation(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation);
             }
         } else {
             int mode = beRaceDB->cGameMode;
             do {
                 if (dir == 3) {
-                    self->f8C20 = cTrackFileMan_getNextLocation(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
+                    self->currentLocation = cTrackFileMan_getNextLocation(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation, cBENewRaceInterface_newRace.cGameMode);
                 } else {
-                    self->f8C20 = cTrackFileMan_getPrevLocation(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
+                    self->currentLocation = cTrackFileMan_getPrevLocation(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation, cBENewRaceInterface_newRace.cGameMode);
                 }
-                if (self->f8C20 < 0) {
+                if (self->currentLocation < 0) {
                     do {
                         mode = (mode + 1) % 7;
                     } while (!cBENewRaceInterface_setGameMode_b4(race, mode));
                 }
-            } while (self->f8C20 < 0);
+            } while (self->currentLocation < 0);
             update_B4E0(race);
         }
-        sLSSub_B1B0* sub = &self->sub;
-        int kind = sub->e[self->f8C20].kind;
+        sLSSub_B1B0* sub = &(*(sLSSub_B1B0*)&self->TrackFileMan);
+        int kind = sub->e[self->currentLocation].kind;
         cBENewRaceInterface_bIsBamLocation = 1;
         cBENewRaceInterface_newRace.iLocationIdx = kind;
-        if (sub->e[self->f8C20].f84 == 0) {
+        if (sub->e[self->currentLocation].f84 == 0) {
             cBENewRaceInterface_bIsBamLocation = 0;
         }
         if (kind == 22) {
-            cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(sub, self->f8C20));
+            cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(sub, self->currentLocation));
         }
         update_B4E0(race);
         break;
@@ -807,29 +793,29 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     case 7:
         // Wraps over a range of one value: both arms fold to 0 (the binary keeps both compares and one store).
         if (dir == 3) {
-            self->f8C24 = (self->f8C24 + 1) % 1;
+            self->CurrentBoard = (self->CurrentBoard + 1) % 1;
         } else if (dir == 2) {
-            self->f8C24 = (self->f8C24 + 1 - 1) % 1;
+            self->CurrentBoard = (self->CurrentBoard + 1 - 1) % 1;
         }
-        *SSXApp_b4->be = self->f8C24;
+        *SSXApp_b4->be = self->CurrentBoard;
         break;
     case 5: {
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
         if (dir == 3) {
-            self->f8C28 = (self->f8C28 + 1) % 10;
+            self->CurrentChar = (self->CurrentChar + 1) % 10;
         } else if (dir == 2) {
-            self->f8C28 = (self->f8C28 + 9) % 10;
+            self->CurrentChar = (self->CurrentChar + 9) % 10;
         }
-        cBENewPlayerInterface_setPlayerCharID(player, 0, self->f8C28);
+        cBENewPlayerInterface_setPlayerCharID(player, 0, self->CurrentChar);
         update_B4E0(player);
         break;
     }
     case 6: {
         if (dir == 2 || dir == 3) {
-            self->f8C2C = !self->f8C2C;
+            self->CurrentMap = !self->CurrentMap;
         }
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
-        cBENewPlayerInterface_setControllerMapping(player, 0, self->f8C2C);
+        cBENewPlayerInterface_setControllerMapping(player, 0, self->CurrentMap);
         update_B4E0(player);
         break;
     }
@@ -858,11 +844,11 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     case 9:
         if (dir == 3) {
-            self->f8C30 = (self->f8C30 + 2) % (bgCount_B4E0((cBackgroundMan*)self->bg) + 1) - 1;
+            self->CurrentBack = (self->CurrentBack + 2) % (bgCount_B4E0((cBackgroundMan*)((char*)&self->BackgroundMan)) + 1) - 1;
         } else if (dir == 2) {
-            self->f8C30 = (self->f8C30 + bgCount_B4E0((cBackgroundMan*)self->bg) + 1) % (bgCount_B4E0((cBackgroundMan*)self->bg) + 1) - 1;
+            self->CurrentBack = (self->CurrentBack + bgCount_B4E0((cBackgroundMan*)((char*)&self->BackgroundMan)) + 1) % (bgCount_B4E0((cBackgroundMan*)((char*)&self->BackgroundMan)) + 1) - 1;
         }
-        cBackgroundMan_setActiveImage(self->bg, self->f8C30);
+        cBackgroundMan_setActiveImage(((char*)&self->BackgroundMan), self->CurrentBack);
         break;
     case 10: {
         if (dir != 2 && dir != 3) {
@@ -875,19 +861,19 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     case 11:
         if (dir == 3) {
-            self->f8C34 = (self->f8C34 + 1) % numSongs_B4E0();
+            self->CurrentPlaylist = (self->CurrentPlaylist + 1) % numSongs_B4E0();
             playSong_B4E0(self);
         } else if (dir == 2) {
-            self->f8C34 = (self->f8C34 + numSongs_B4E0() - 1) % numSongs_B4E0();
+            self->CurrentPlaylist = (self->CurrentPlaylist + numSongs_B4E0() - 1) % numSongs_B4E0();
             playSong_B4E0(self);
         }
         break;
     case 12: {
         if (dir == 6) {
-            if (self->f8C44 == 3) {
+            if (self->NetworkMode == 3) {
                 func_00256088();
             }
-            if (self->f8C44 == 4) {
+            if (self->NetworkMode == 4) {
                 func_002560B0();
             }
         }
@@ -895,28 +881,28 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             return;
         }
         if (dir == 3) {
-            self->f8C44++;
-            if (cCommSystem_mNumNetConn <= 0 && (self->f8C44 == 1 || self->f8C44 == 2)) {
-                self->f8C44 = 3;
+            self->NetworkMode++;
+            if (cCommSystem_mNumNetConn <= 0 && (self->NetworkMode == 1 || self->NetworkMode == 2)) {
+                self->NetworkMode = 3;
             }
         } else if (dir == 2) {
-            self->f8C44--;
-            if (cCommSystem_mNumNetConn <= 0 && (self->f8C44 == 1 || self->f8C44 == 2)) {
-                self->f8C44 = 0;
+            self->NetworkMode--;
+            if (cCommSystem_mNumNetConn <= 0 && (self->NetworkMode == 1 || self->NetworkMode == 2)) {
+                self->NetworkMode = 0;
             }
         }
-        if (self->f8C44 > 4) {
-            self->f8C44 = 0;
+        if (self->NetworkMode > 4) {
+            self->NetworkMode = 0;
         }
-        if (self->f8C44 < 0) {
-            self->f8C44 = 4;
+        if (self->NetworkMode < 0) {
+            self->NetworkMode = 4;
         }
         void* net = cBE_getInterface_B1B0(SSXApp_b4->be, 7);
-        cBENetworkInterface_networkOpt.bIsNetworkGame = netOn_B4E0(self->f8C44);
-        cBENetworkInterface_networkOpt.bIsHost = self->f8C44 == 1;
+        cBENetworkInterface_networkOpt.bIsNetworkGame = netOn_B4E0(self->NetworkMode);
+        cBENetworkInterface_networkOpt.bIsHost = self->NetworkMode == 1;
         update_B4E0(net);
-        if (self->f8C44 != 0) {
-            if (self->f8C44 != 3) {
+        if (self->NetworkMode != 0) {
+            if (self->NetworkMode != 3) {
                 if (commIdle_B4E0(cCommSystem_mCommSystem)) {
                     cCommSystem_netConnConnect(cCommSystem_mCommSystem, 0);
                     while (commBusy_B4E0(cCommSystem_mCommSystem)) {
@@ -949,8 +935,8 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     if (dir == 2 || dir == 3) {
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
-        self->f8C24 = *SSXApp_b4->be;
-        self->f8C28 = cBENewPlayerInterface_getPlayerCharID(player, 0);
+        self->CurrentBoard = *SSXApp_b4->be;
+        self->CurrentChar = cBENewPlayerInterface_getPlayerCharID(player, 0);
     }
 }
 #endif

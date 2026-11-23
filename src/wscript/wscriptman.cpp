@@ -483,7 +483,7 @@ struct cWScriptMan_isFunc_sValue;
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
-extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
 /**
  * Runs a world script by resource ID, discarding its result.
  *
@@ -504,7 +504,7 @@ extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* handle)
     void* table = (void*)self->GlobalTables[*(unsigned char*)handle];
     luno_cLunoVM_cLunoVM(&call);
     luno_cLunoVM_run(&call, &scriptVar, table, &ret);
-    luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((&ret), 2);
 }
 #endif
 
@@ -525,7 +525,7 @@ struct cWScriptMan_runScript1_sCall {
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
-extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
 
 /**
  * Runs a world script by resource ID with @p id as the current instance (+0x290) during the run; the previous current
@@ -548,23 +548,17 @@ extern "C" void cWScriptMan_runScript1(cWScriptMan* self, int* handle, int id)
     luno_cLunoVM_cLunoVM(&call);
     luno_cLunoVM_run(&call, &scriptVar, table, &ret);
     self->Inst = (tInstanceRecord*)saved;
-    luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((luno_cLunoVar*)&ret, 2);
 }
 #endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isFunc);
 #ifdef SKIP_ASM
-// cLunoValue (luno/lunovm): { word0, word1, type }
-struct cWScriptMan_isFunc_sValue {
-    int word0;
-    int word1;
-    int type;
-};
 
 void* luno_cLunoVar_castIndex(void* self);
-extern "C" cWScriptMan_isFunc_sValue* luno_cLunoTable_get1(void* table, cWScriptMan_isFunc_sValue* key);
-extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
+extern "C" luno_cLunoVar* luno_cLunoTable_get1(void* table, luno_cLunoVar* key);
+extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
 
 /**
  * Tells whether a world section's script table defines a given function.
@@ -582,10 +576,10 @@ extern "C" int cWScriptMan_isFunc(cWScriptMan* self, int idx, int value)
     char* base = (char*)self->GlobalTables;
     void** slot = (void**)(base + off);
     if (*slot != 0) {
-        cWScriptMan_isFunc_sValue key;
-        key.type = 3;
+        luno_cLunoVar key;
+        key.Type = 3;
         *(int*)luno_cLunoVar_castIndex(&key) = value;
-        int isFunction = luno_cLunoTable_get1(*slot, &key)->type == 5;
+        int isFunction = luno_cLunoTable_get1(*slot, &key)->Type == 5;
         luno_cLunoVar__cLunoVar(&key, 2);
         return isFunction;
     }
@@ -618,16 +612,16 @@ extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret)
  */
 extern "C" void cWScriptMan_runFunc(cWScriptMan* self, int idx, int value)
 {
-    cWScriptMan_isFunc_sValue key;
-    key.type = 3;
+    luno_cLunoVar key;
+    key.Type = 3;
     *(int*)luno_cLunoVar_castIndex(&key) = value;
     int off = idx << 2;
     char* base = (char*)self->GlobalTables;
     void** slot = (void**)(base + off);
     cWScriptMan_runFunc_sArg scriptFunc = *(cWScriptMan_runFunc_sArg*)luno_cLunoTable_get1(*slot, &key);
-    cWScriptMan_isFunc_sValue ret;
-    ret.type = 0;
-    ret.word0 = 0;
+    luno_cLunoVar ret;
+    ret.Type = 0;
+    ret.Data.Int = 0;
     cWScriptMan_runFunc_sCall call;
     luno_cLunoVM_cLunoVM(&call);
     luno_cLunoVM_run(&call, &scriptFunc, *slot, &ret);
@@ -659,7 +653,7 @@ struct sWSWorld9F18 {
 
 
 struct cWScriptIdTable;
-extern "C" void cCollectPool_init(cWScriptIdTable* self);
+extern "C" void cCollectPool_init(cCollectPool* self);
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* idx);
 extern "C" void cAvalanche_reset(void);
 extern "C" int cWorld_getNumGlobalScripts(void* world, int i);
@@ -685,7 +679,7 @@ extern "C" void cWScriptMan_runGlobalScripts(cWScriptMan* self)
     {
         int k;
         for (k = 0; k < 1; k++) {
-            cCollectPool_init((cWScriptIdTable*)&self->CollectPools[k]);
+            cCollectPool_init((&self->CollectPools[k]));
         }
     }
     saved = self->Being;
@@ -728,7 +722,7 @@ struct sCall_30A060 {
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
-extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -806,7 +800,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
                     if (table != 0)
                         luno_cLunoTable__cLunoTable(table, 3);
                 }
-                luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
+                luno_cLunoVar__cLunoVar((&ret), 2);
             }
         }
     }
@@ -1503,7 +1497,7 @@ struct cWScriptMan_isFunc_sValue;
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
-extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern char str_SetupLocalTable[];
@@ -1552,7 +1546,7 @@ extern "C" void cWScriptMan_runScriptCode(cWScriptMan* self, void* obj, int data
     }
     self->CurrentProcess = (cWScriptProcess*)savedObj;
     self->Inst = (tInstanceRecord*)savedId;
-    luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((luno_cLunoVar*)&ret, 2);
 }
 #endif
 
@@ -1563,7 +1557,7 @@ struct cWScriptMan_isFunc_sValue;
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
-extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern char str_SetupLocalTable[];
@@ -1613,7 +1607,7 @@ extern "C" void cWScriptMan_runScriptCode1(cWScriptMan* self, cWScriptTask* obj,
     }
     self->CurrentTask = (cWScriptTask*)savedObj;
     self->Inst = (tInstanceRecord*)savedId;
-    luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((luno_cLunoVar*)&ret, 2);
 }
 #endif
 
@@ -2458,7 +2452,7 @@ extern "C" int cWScriptMan_isLocalMissionActive(cWScriptMan* self)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_collectPool);
 #ifdef SKIP_ASM
 struct cWScriptIdTable;
-extern "C" void cCollectPool_init(cWScriptIdTable* self);
+extern "C" void cCollectPool_init(cCollectPool* self);
 
 // same layout as cWScriptIdTable (defined later in the unit)
 struct cWScriptMan_collectPool_sSlot {
@@ -2484,7 +2478,7 @@ extern "C" void cWScriptMan_collectPool(cWScriptMan* self, unsigned int id, int 
             return;
         }
         if (pool->id == 0xFFFFFFFF) {
-            cCollectPool_init((cWScriptIdTable*)pool);
+            cCollectPool_init((cCollectPool*)pool);
             pool->id = id;
             pool->arg = size;
             return;
@@ -2500,7 +2494,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cCollectPool_collect_sTable;
-extern "C" void cCollectPool_collect(cCollectPool_collect_sTable* self, int id);
+extern "C" void cCollectPool_collect(cCollectPool* self, int id);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
@@ -2528,7 +2522,7 @@ extern "C" void cWScriptMan_collect(cWScriptMan* self, int rider, int id, int in
     int i;
     for (i = 0; i < 1; i++) {
         if (slots[i].id == id) {
-            cCollectPool_collect((cCollectPool_collect_sTable*)&slots[i], instId);
+            cCollectPool_collect((cCollectPool*)&slots[i], instId);
             cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 5, 0, 1.0f);
             void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -2993,26 +2987,20 @@ extern "C" int cWScriptMan_checkGate(int* who, unsigned int id0, unsigned int id
 //100%
 INCLUDE_ASM("wscript/wscriptman", cCollectPool_init);
 #ifdef SKIP_ASM
-struct cWScriptIdTable {
-    unsigned int id;
-    int a;
-    int b;
-    unsigned int entries[64];
-};
 
 /**
  * Empties a collect pool.
  *
  * Sets the pool id (+0x0) to -1, the words at +0x4 and +0x8 to 0 and all 64 instance ids from +0xC to -1.
  */
-extern "C" void cCollectPool_init(cWScriptIdTable* self)
+extern "C" void cCollectPool_init(cCollectPool* self)
 {
     int i;
-    self->id = 0xFFFFFFFF;
-    self->a = 0;
-    self->b = 0;
+    self->PoolId = 0xFFFFFFFF;
+    self->Size = 0;
+    self->NumInstIds = 0;
     for (i = 0; i < 64; i++) {
-        self->entries[i] = 0xFFFFFFFF;
+        self->InstIds[i] = 0xFFFFFFFF;
     }
 }
 #endif
@@ -3025,12 +3013,6 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void* cBE_getBE();
 extern "C" void cBEMissionInterface_setBit(void* iface, int a1, int index, int value);
 
-struct cCollectPool_collect_sTable {
-    int value;      // 0x0
-    int pad4;       // 0x4
-    int count;      // 0x8
-    int ids[1];     // 0xC
-};
 
 /**
  * Marks an instance of a collect pool as collected: for the pool entry i (count +0x8, IDs from +0xC) equal to @p id,
@@ -3039,12 +3021,12 @@ struct cCollectPool_collect_sTable {
  *
  * @param id  the instance's resource ID
  */
-extern "C" void cCollectPool_collect(cCollectPool_collect_sTable* self, int id)
+extern "C" void cCollectPool_collect(cCollectPool* self, int id)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->ids[i] == id) {
-            cBEMissionInterface_setBit(cBE_getInterface_Fv(cBE_getBE(), 10), 0, i, self->value);
+    for (i = 0; i < self->NumInstIds; i++) {
+        if (self->InstIds[i] == id) {
+            cBEMissionInterface_setBit(cBE_getInterface_Fv(cBE_getBE(), 10), 0, i, ((int)self->PoolId));
             return;
         }
     }
@@ -3769,8 +3751,8 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D238);
  * @param secondWord  value for the word at +0x4
  */
 extern "C" void func_0030D238(void *dest, int firstWord, int secondWord) {
-    (*(int *)((char*)(dest) + (0))) = firstWord;
-    (*(int *)((char*)(dest) + (4))) = secondWord;
+    (*(int *)((char*)(dest) + 0)) = firstWord;
+    (*(int *)((char*)(dest) + 4)) = secondWord;
 }
 #endif
 //100%
@@ -4125,7 +4107,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getGlobalTable);
  * @return the section's cLunoTable, or 0 when none was allocated
  */
 extern "C" int cWScriptMan_getGlobalTable(int wscriptMan, int sectionId) {
-    return (*(int *)(((char*)(wscriptMan) + (sectionId << 2)) + (0x3CC)));
+    return (*(int *)(((char*)(wscriptMan) + (sectionId << 2)) + 0x3CC));
 }
 #endif
 //100%
@@ -4182,7 +4164,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isMenuQueueReady);
  * @return 1 when they differ, else 0
  */
 extern "C" int cWScriptMan_isMenuQueueReady(cWScriptMan* wscriptMan) {
-    return (wscriptMan->MissionMenuQueue.Current) != (wscriptMan->MissionMenuQueue.Next);
+    return (wscriptMan->MissionMenuQueue.Current) != wscriptMan->MissionMenuQueue.Next;
 }
 #endif
 //100%
@@ -4399,7 +4381,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cWScriptTask__cWScriptTask(cWScriptTask* self, int flags)
 {
-    self->mVtbl = cWScriptTask_vtbl;
+    VPTR_OF(cWScriptTask, self) = cWScriptTask_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

@@ -32,10 +32,10 @@ static inline unsigned short getNodeId_17D0(cQuadTree* self, tQuadTreeNode* node
 extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
 {
     unsigned short ret;
-    if ((self->m_freeNodes) == (self->m_nodes)) {
+    if (self->m_freeNodes == self->m_nodes) {
         tQuadTreeNode* newnodelist = new (str_QuadTreeNodeList, 0, 0) tQuadTreeNode[self->m_numNodes + 1024];
-        if ((self->m_nodes) != 0) {
-            func_0041605C(newnodelist, (self->m_nodes), self->m_numNodes * sizeof(tQuadTreeNode));
+        if (self->m_nodes != 0) {
+            func_0041605C(newnodelist, self->m_nodes, self->m_numNodes * sizeof(tQuadTreeNode));
         }
         int i;
         for (i = self->m_numNodes; i < self->m_numNodes + 1023; i++) {
@@ -44,12 +44,12 @@ extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
         newnodelist[self->m_numNodes + 1023].setNext(0);
         (*(tQuadTreeNode**)&self->m_freeNodes) = &newnodelist[self->m_numNodes];
         self->m_numNodes += 1024;
-        if ((self->m_nodes) != 0) {
-            cMemMan_free((self->m_nodes));
+        if (self->m_nodes != 0) {
+            cMemMan_free(self->m_nodes);
         }
         (*(tQuadTreeNode**)&self->m_nodes) = newnodelist;
     }
-    ret = getNodeId_17D0(self, (self->m_freeNodes));
+    ret = getNodeId_17D0(self, self->m_freeNodes);
     (*(tQuadTreeNode**)&self->m_freeNodes) = &(self->m_nodes)[(self->m_freeNodes)->getNext()];
     self->m_numUsedNodes++;
     return ret;
@@ -4662,18 +4662,7 @@ void* cLocaleFile_getStringByIndex(void* vself)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByHash);
 #ifdef SKIP_ASM
-struct cLocaleFile_getStringByHash_sEntry {
-    unsigned int key;
-    int value;
-};
 
-struct cLocaleFile_getStringByHash_sMap {
-    int pad0;
-    int pad4;
-    int last;
-    int count;
-    cLocaleFile_getStringByHash_sEntry* entries;
-};
 
 /**
  * Looks a string up by its hash in the locale file's sorted {hash, string} table (+0x10, +0x8 entries).
@@ -4685,17 +4674,17 @@ struct cLocaleFile_getStringByHash_sMap {
  * @param key  the string's hash (GetHashValue32 of its id)
  * @return the string, or 0
  */
-extern "C" int cLocaleFile_getStringByHash(cLocaleFile_getStringByHash_sMap* self, unsigned int key)
+extern "C" int cLocaleFile_getStringByHash(cLocaleFile* self, unsigned int key)
 {
     int lo = 0;
-    int hi = self->last;
-    if (self->count != 0) {
-        if (self->entries[hi].key < key || key < self->entries[0].key) {
+    int hi = ((int)self->mNumEntries);
+    if (((int)self->mpHashTableHeader) != 0) {
+        if ((self->mpHashTableData)[hi].mHashID < key || key < (self->mpHashTableData)[0].mHashID) {
             return 0;
         }
         int mid = hi >> 1;
-        while (self->entries[mid].key != key) {
-            if (key < self->entries[mid].key) {
+        while ((self->mpHashTableData)[mid].mHashID != key) {
+            if (key < (self->mpHashTableData)[mid].mHashID) {
                 hi = mid;
             } else {
                 lo = mid;
@@ -4706,7 +4695,7 @@ extern "C" int cLocaleFile_getStringByHash(cLocaleFile_getStringByHash_sMap* sel
             }
             mid = next;
         }
-        return self->entries[mid].value;
+        return ((int)(self->mpHashTableData)[mid].mID);
     }
     return 0;
 }
@@ -4730,13 +4719,6 @@ struct cLocaleFile_loadFile_sChunk {
     int id;
     int size;
 };
-struct cLocaleFile_loadFile_sFile {
-    char kind;
-    cLocaleFile_loadFile_sChunk* data;
-    int count;
-    cLocaleFile_loadFile_sChunk* hdr;
-    cLocaleFile_loadFile_sEnt* ents;
-};
 
 /**
  * Loads a locale (.loc) file into this entry.
@@ -4749,23 +4731,23 @@ struct cLocaleFile_loadFile_sFile {
  * @param name  the file path
  * @param kind  the language byte stored at +0x0 (cFELocale_addFile passes the file's D_00441188 entry)
  */
-extern "C" void cLocaleFile_loadFile(cLocaleFile_loadFile_sFile* self, const char* name, char kind)
+extern "C" void cLocaleFile_loadFile(cLocaleFile* self, const char* name, char kind)
 {
     unsigned int i;
     int size;
-    self->kind = kind;
-    self->data = (cLocaleFile_loadFile_sChunk*)FILE_load(name, 0);
-    self->count = LOCALE_getstate(self->data, 2);
-    size = self->data->size;
-    self->hdr = (cLocaleFile_loadFile_sChunk*)((char*)self->data + size);
-    if (strncmp(self->hdr, str_LOCT, 4) != 0) {
-        self->hdr = 0;
+    self->mLanguage = kind;
+    (*(cLocaleFile_loadFile_sChunk**)&self->mpStringTableData) = (cLocaleFile_loadFile_sChunk*)FILE_load(name, 0);
+    self->mNumEntries = LOCALE_getstate(((cLocaleFile_loadFile_sChunk*)self->mpStringTableData), 2);
+    size = ((cLocaleFile_loadFile_sChunk*)self->mpStringTableData)->size;
+    (*(cLocaleFile_loadFile_sChunk**)&self->mpHashTableHeader) = (cLocaleFile_loadFile_sChunk*)((char*)((cLocaleFile_loadFile_sChunk*)self->mpStringTableData) + size);
+    if (strncmp(((cLocaleFile_loadFile_sChunk*)self->mpHashTableHeader), str_LOCT, 4) != 0) {
+        (*(cLocaleFile_loadFile_sChunk**)&self->mpHashTableHeader) = 0;
         return;
     }
-    size = self->hdr->size;
-    self->ents = (cLocaleFile_loadFile_sEnt*)((char*)self->hdr + size);
-    for (i = 0; i < self->count; i++) {
-        self->ents[i].f4 = (int)cLocaleFile_getStringByIndex_2(self, self->ents[i].f4);
+    size = ((cLocaleFile_loadFile_sChunk*)self->mpHashTableHeader)->size;
+    (*(cLocaleFile_loadFile_sEnt**)&self->mpHashTableData) = (cLocaleFile_loadFile_sEnt*)((char*)((cLocaleFile_loadFile_sChunk*)self->mpHashTableHeader) + size);
+    for (i = 0; i < ((int)self->mNumEntries); i++) {
+        ((cLocaleFile_loadFile_sEnt*)self->mpHashTableData)[i].f4 = (int)cLocaleFile_getStringByIndex_2(self, ((cLocaleFile_loadFile_sEnt*)self->mpHashTableData)[i].f4);
     }
 }
 #endif

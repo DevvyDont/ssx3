@@ -251,14 +251,6 @@ struct sWSMPlayer4520 {
     sWSMRider4520* rider;       // 0xA0
 };
 
-struct sWSMission4520 {
-    char pad0[0x24];
-    char list[0x20];            // 0x24 (cList)
-    signed char player;         // 0x44
-    char pad45[0x7];
-    sWSMPlayer4520* p4C;        // 0x4C
-    sWSMPlayer4520* p50;        // 0x50
-};
 
 extern char str_cost_num[];
 extern char str_have_num[];
@@ -286,21 +278,21 @@ extern "C" const char* getDollarString(int id);
  * cFEStateUberTrick_onPopupEvent calls it after a trick is bought, cFEStateUberTrick_onWidgetEvent when a trick is
  * highlighted.
  */
-extern "C" void cFEStateUberTrick_updateTrickMenuEntry(sWSMission4520* self)
+extern "C" void cFEStateUberTrick_updateTrickMenuEntry(cFEStateUberTrick* self)
 {
-    signed char categoryIndex = self->p4C->rider->slot;
-    signed char trickIndex = self->p50->rider->slot;
+    signed char categoryIndex = ((sWSMPlayer4520*)self->mpMainMenu)->rider->slot;
+    signed char trickIndex = ((sWSMPlayer4520*)self->mpTrickMenu)->rider->slot;
     char buf[16];
-    tBEUber* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->player, categoryIndex, buf);
-    void* screen = cList_first((cList*)self->list);
+    tBEUber* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->mUserNum, categoryIndex, buf);
+    void* screen = cList_first((cList*)((char*)&self->mScreens));
     cUIText* costText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costText != 0) {
         cUIText_setAsciiString(costText, getDollarString(tbl[trickIndex].cost));
     }
     cUIText* moneyText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
     if (moneyText != 0) {
-        signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->player);
-        cUIText_setAsciiString(moneyText, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->player, cid)));
+        signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
+        cUIText_setAsciiString(moneyText, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, cid)));
     }
 }
 #endif

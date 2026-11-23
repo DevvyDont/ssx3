@@ -270,7 +270,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE2F8);
  * @param table  the subtitle array (two words: entries, count), or 0 for none
  */
 extern "C" void func_003AE2F8(cPlayer* player, int table) {
-    (*(int *)((char*)(player) + (0x70))) = table;
+    (*(int *)((char*)(player) + 0x70)) = table;
 }
 #endif
 
@@ -2021,11 +2021,6 @@ extern "C" void RCMP_DECODER_ReleaseFrame(RCMP_DECODER* self, int frame)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_GetChunk);
 #ifdef SKIP_ASM
-struct RCMP_DECODER_GetChunk_sReq {
-    int pending;
-    int arg;
-    void (*fn)(RCMP_DECODER_GetChunk_sReq* self, int arg, int* out);
-};
 
 /**
  * Returns the decoder's next CHUNK of input.
@@ -2035,16 +2030,16 @@ struct RCMP_DECODER_GetChunk_sReq {
  *
  * @return the CHUNK, or 0 when there is no more data
  */
-extern "C" int RCMP_DECODER_GetChunk(RCMP_DECODER_GetChunk_sReq* self)
+extern "C" int RCMP_DECODER_GetChunk(RCMP_DECODER* self)
 {
     int chunk;
-    int pendingChunk = self->pending;
+    int pendingChunk = ((int)self->m_FirstChunk);
     if (pendingChunk != 0) {
-        self->pending = 0;
+        (*(int*)&self->m_FirstChunk) = 0;
         chunk = pendingChunk;
         return pendingChunk;
     }
-    self->fn(self, self->arg, &chunk);
+    ((void (*)(RCMP_DECODER*, int, int*))self->m_IData.m_GetDataFunc)(self, (*(int*)&self->m_IData), &chunk);
     return chunk;
 }
 #endif
@@ -2409,7 +2404,7 @@ struct func_003B0B40_sScript {
     char pad00[0x14];
     int count;
     char pad18[0x10];
-    RCMP_DECODER_GetChunk_sReq* req;
+    RCMP_DECODER* req;
     char pad2C[0x4C];
     void* hdr;
     char* buf;

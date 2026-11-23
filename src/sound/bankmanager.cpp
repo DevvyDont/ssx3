@@ -140,16 +140,6 @@ extern "C" void cBankInstance_ShareBank(void *dst, cBankInstance* src) {
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_UnshareBank);
 #ifdef SKIP_ASM
-struct sBankNode {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    int unk10;
-    int unk14;
-    sBankNode* next;
-    sBankNode* prev;
-};
 
 /**
  * Takes the bank out of the ring of banks sharing one block of memory.
@@ -159,22 +149,22 @@ struct sBankNode {
  * ring) the other bank's next and prev are cleared, otherwise the neighbours are joined. Its own next and prev are then
  * cleared. Called by cBankInstance__cBankInstance and, by bank index, by cBankManager_BANK_UnshareBank.
  */
-extern "C" void cBankInstance_UnshareBank(sBankNode* self)
+extern "C" void cBankInstance_UnshareBank(cBankInstance* self)
 {
-    if (self->next != 0) {
-        self->unkC = -1;
-        self->unk10 = 0;
-        self->unk14 = 0;
-        self->unk8 = 0;
-        if (self->next == self->prev) {
-            self->next->next = 0;
-            self->next->prev = 0;
+    if (self->mpNext != 0) {
+        self->mSoundMemHandle = -1;
+        (*(int*)&self->mpMainMemData) = 0;
+        self->mMainMemDataSize = 0;
+        self->mAllocLocation = 0;
+        if (self->mpNext == self->mpPrev) {
+            self->mpNext->mpNext = 0;
+            self->mpNext->mpPrev = 0;
         } else {
-            self->next->prev = self->prev;
-            self->prev->next = self->next;
+            self->mpNext->mpPrev = self->mpPrev;
+            self->mpPrev->mpNext = self->mpNext;
         }
-        self->prev = 0;
-        self->next = 0;
+        self->mpPrev = 0;
+        self->mpNext = 0;
     }
 }
 #endif
@@ -673,7 +663,7 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_UnshareBank);
  */
 extern "C" void cBankManager_BANK_UnshareBank(cBankManager* self, int i)
 {
-    cBankInstance_UnshareBank((sBankNode*)&self->mBank[i]);
+    cBankInstance_UnshareBank((&self->mBank[i]));
 }
 #endif
 

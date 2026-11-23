@@ -1164,14 +1164,6 @@ extern "C" int AITick();
 
 
 
-struct sTrail_EF6D0 {
-    char* rider;                // 0x0
-    tAirStreamerSeg* ring;         // 0x4
-    int head;                   // 0x8
-    int count;                  // 0xC
-    float start;                // 0x10
-    int len;                    // 0x14
-};
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector Scale_EF6D0(const t4Vector& v, float s)
@@ -1254,33 +1246,33 @@ static inline int Approach_EF6D0(int n, int step)
  * the 25-entry ring and the count grows up to the length. Otherwise the count drops by 2 per frame. The
  * texture offset moves by the rider's speed / 6000 and wraps into 0..1.
  */
-extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
+extern "C" void cAirStreamerFX_update(cAirStreamerFX* self)
 {
-    if (cRider_getMotionState(self->rider) == 1) {
-        char* riderPtr = self->rider;
+    if (cRider_getMotionState(((char*)self->mRider)) == 1) {
+        char* riderPtr = ((char*)self->mRider);
         t4Vector bodyOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x89C) << 6) + 0x30);
         t4Vector boardOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
         t4Vector boardDir = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x34) + (*(int*)(riderPtr + 0x8A4) << 6));
         t4Vector streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
-        (*(t4Vector*)&self->ring[self->head].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
-        (*(t4Vector*)&self->ring[self->head].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        (*(t4Vector*)&self->StreamBuf[self->StreamBufHead].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        (*(t4Vector*)&self->StreamBuf[self->StreamBufHead].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
         if ((AITick() & 1) == 0) {
-            int old = self->head;
-            self->head = old + 1;
-            self->head %= 25;
-            if (self->count < self->len)
-                self->count++;
-            self->ring[self->head] = self->ring[old];
+            int old = self->StreamBufHead;
+            self->StreamBufHead = old + 1;
+            self->StreamBufHead %= 25;
+            if (self->StreamBufLen < self->mMaxStreamerSegments)
+                self->StreamBufLen++;
+            self->StreamBuf[self->StreamBufHead] = self->StreamBuf[old];
         }
     } else {
-        int n = self->count;
-        self->count = Approach_EF6D0(n, 2);
+        int n = self->StreamBufLen;
+        self->StreamBufLen = Approach_EF6D0(n, 2);
     }
-    self->start -= Length_EF6D0(*(t4Vector*)(self->rider + 0x1E0)) * 0.00016666666488163173f;
-    if (self->start < 0.0f)
-        self->start += 1.0f;
-    if (self->start > 1.0f)
-        self->start -= 1.0f;
+    self->mVOffset -= Length_EF6D0(self->mRider->mVelocity) * 0.00016666666488163173f;
+    if (self->mVOffset < 0.0f)
+        self->mVOffset += 1.0f;
+    if (self->mVOffset > 1.0f)
+        self->mVOffset -= 1.0f;
 }
 #endif
 

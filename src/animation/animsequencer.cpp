@@ -549,7 +549,7 @@ extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int sequenceID)
 {
     cAnimSequencer* self = seq;
     cAnimSequence* node = (cAnimSequence*)cAnimSequence_cAnimSequence(cMemMan_alloc(208, str_AnimSequence, 0x20000000, 0), sequenceID);
-    node->Next = (self->PlayList);
+    node->Next = self->PlayList;
     *(cAnimSequence**)&self->PlayList = node;
     self->NumPlaying++;
     return node;
@@ -1228,20 +1228,11 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_getModelPart);
 extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" void* cMdfArchive_getModelPartByIndex(void* self, int index);
 
-struct sMdfPart60 {
-    char name[0x60];
-};
-
 struct sMdfHeader {
     int pad0;
     short count; // 0x4
 };
 
-struct sMdfArchive {
-    int pad0;
-    sMdfHeader* header; // 0x4
-    sMdfPart60* parts;  // 0x8
-};
 
 /**
  * Finds a model part in the MDF archive by name.
@@ -1252,11 +1243,11 @@ struct sMdfArchive {
  * @param name  part name to look for
  * @return the model part, or 0 if no part has that name
  */
-extern "C" void* cMdfArchive_getModelPart(sMdfArchive* self, const char* name)
+extern "C" void* cMdfArchive_getModelPart(cMdfArchive* self, const char* name)
 {
-    for (int i = 0; i < self->header->count; i++)
+    for (int i = 0; i < ((sMdfHeader*)self->ArchiveHeader)->count; i++)
     {
-        if (strcasecmp(name, self->parts[i].name) == 0)
+        if (strcasecmp(name, self->ModelHeaders[i].mName) == 0)
             return cMdfArchive_getModelPartByIndex(self, i);
     }
     return 0;

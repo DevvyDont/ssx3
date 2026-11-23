@@ -280,7 +280,7 @@ static inline int fontGetTex(void* vs)
 extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex(self);
+    ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex(self);
     sFontPos1CB0 pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
@@ -338,7 +338,7 @@ static inline int fontGetTex1E30(void* vs)
 extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex1E30(self);
+    ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex1E30(self);
     sFontPos1E30 pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
@@ -371,7 +371,7 @@ static inline tGlyph* sFontRes1FB0_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* glyph = (font->Glyphs) + mid;
+        tGlyph* glyph = font->Glyphs + mid;
         if (c == glyph->code)
             return glyph;
         if (c < glyph->code)
@@ -459,7 +459,7 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* glyph = (font->Glyphs) + mid;
+        tGlyph* glyph = font->Glyphs + mid;
         if (c == glyph->code)
             return glyph;
         if (c < glyph->code)
@@ -551,7 +551,7 @@ static inline tGlyph* sFontRes2430_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* glyph = (font->Glyphs) + mid;
+        tGlyph* glyph = font->Glyphs + mid;
         if (c == glyph->code)
             return glyph;
         if (c < glyph->code)
@@ -661,7 +661,7 @@ static inline tGlyph* sFontRes2680_find(cFont* font, int c)
     int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        tGlyph* glyph = (font->Glyphs) + mid;
+        tGlyph* glyph = font->Glyphs + mid;
         if (c == glyph->code)
             return glyph;
         if (c < glyph->code)
@@ -984,9 +984,9 @@ INCLUDE_ASM("render/font", cPlayerLights_AddAmbient);
  * @param colour  the colour to add (three floats R, G, B)
  */
 extern "C" void cPlayerLights_AddAmbient(cPlayerLights* playerLights, tRGB* colour) {
-    playerLights->mExtraAmbientLight.R = (float) ((playerLights->mExtraAmbientLight.R) + (colour->R));
-    playerLights->mExtraAmbientLight.G = (float) ((playerLights->mExtraAmbientLight.G) + (colour->G));
-    playerLights->mExtraAmbientLight.B = (float) ((playerLights->mExtraAmbientLight.B) + (colour->B));
+    playerLights->mExtraAmbientLight.R = (float) (playerLights->mExtraAmbientLight.R + (colour->R));
+    playerLights->mExtraAmbientLight.G = (float) (playerLights->mExtraAmbientLight.G + (colour->G));
+    playerLights->mExtraAmbientLight.B = (float) (playerLights->mExtraAmbientLight.B + (colour->B));
 }
 #endif
 
@@ -3751,10 +3751,6 @@ extern "C" sGlyphEntry* cPS2DeferManager_Find(sGlyphCache* self, sGlyphKey* key,
 INCLUDE_ASM("render/font", cPS2DeferManager_Find1);
 #ifdef SKIP_ASM
 
-struct sCache5000 {
-    char pad0[0x678A0];
-    tDeferBucket* buckets[256];
-};
 
 /**
  * Looks up the defer manager's draw bucket for a (state, texture key, matrix) triple.
@@ -3769,9 +3765,9 @@ struct sCache5000 {
  * @param matrixIndex  the matrix index
  * @return the bucket, or 0 if none matches
  */
-extern "C" tDeferBucket* cPS2DeferManager_Find1(sCache5000* self, int stateEntry, int texKey, unsigned char hash, int matrixIndex)
+extern "C" tDeferBucket* cPS2DeferManager_Find1(cPS2DeferManager* self, int stateEntry, int texKey, unsigned char hash, int matrixIndex)
 {
-    tDeferBucket** pp = &self->buckets[hash];
+    tDeferBucket** pp = &self->mBucketHash[hash];
     while (*pp != 0) {
         tDeferBucket* node;
         int hit = 0;
@@ -3781,12 +3777,12 @@ extern "C" tDeferBucket* cPS2DeferManager_Find1(sCache5000* self, int stateEntry
         }
         node = *pp;
         if (hit) {
-            if ((*pp) == self->buckets[hash]) {
+            if ((*pp) == self->mBucketHash[hash]) {
                 return node;
             }
             *pp = node->mpNext;
-            node->mpNext = self->buckets[hash];
-            self->buckets[hash] = node;
+            node->mpNext = self->mBucketHash[hash];
+            self->mBucketHash[hash] = node;
             return node;
         }
         pp = &node->mpNext;

@@ -1303,9 +1303,6 @@ public:
     virtual int v02(int a);
 };
 
-struct cSoundSys_SetMode_sHolder {
-    cSoundSys_SetMode_cObj* obj;
-};
 
 /**
  * Passes a sound-mode change on to the sound manager this object wraps.
@@ -1316,9 +1313,9 @@ struct cSoundSys_SetMode_sHolder {
  * @param mode  the new sound mode (On Tour eSOUNDDEF_MODE mode)
  * @return the manager's result (On Tour eSOUNDMANAGER_SETMODE)
  */
-extern "C" int cSoundSys_SetMode(cSoundSys_SetMode_sHolder* self, int mode)
+extern "C" int cSoundSys_SetMode(cSoundSys* self, int mode)
 {
-    return self->obj->v02(mode);
+    return ((cSoundSys_SetMode_cObj*)self->pManager)->v02(mode);
 }
 #endif
 

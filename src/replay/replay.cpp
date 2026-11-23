@@ -686,11 +686,6 @@ INCLUDE_ASM("replay/replay", cReplayHighlight_begin);
 void cReplayFrame_setRanking(void*, int, int);
 
 
-struct sReplayObjE6E0 {
-    int index;                  // 0x0
-    tRiderStats data;       // 0x4
-    void* rider;                // 0xB0
-};
 
 /**
  * Starts marking a highlight for this player on frame @p rider: flags the frame and keeps a copy of the rider stats.
@@ -701,12 +696,12 @@ struct sReplayObjE6E0 {
  * @param rider  the replay frame the highlight starts on
  * @param src  the rider stats at the start of the highlight
  */
-extern "C" void cReplayHighlight_begin(sReplayObjE6E0* self, cReplayFrame* rider, tRiderStats* src)
+extern "C" void cReplayHighlight_begin(cReplayHighlight* self, cReplayFrame* rider, tRiderStats* src)
 {
-    rider->FrameType.Highlights |= 1 << self->index;
-    cReplayFrame_setRanking(rider, self->index, 0);
-    self->rider = ((char*)rider);
-    self->data = *src;
+    rider->FrameType.Highlights |= 1 << self->PlayerId;
+    cReplayFrame_setRanking(rider, self->PlayerId, 0);
+    (*(void**)&self->Frame) = ((char*)rider);
+    self->Stats = *src;
 }
 #endif
 

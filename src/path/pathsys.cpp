@@ -97,22 +97,8 @@ extern "C" int cPathSys_loadAIPaths(cPathSys* self, char* data)
 INCLUDE_ASM("path/pathsys", cPathSys_getTrackPathIndex);
 #ifdef SKIP_ASM
 
-struct sPathEntry40 {
-    char pad_0x0[0x40];
-};
 
-struct sPathEntry3C {
-    char pad_0x0[0x3c];
-};
 
-struct sPathSys {
-    int count28;             // 0x0
-    tPathStartpoint* entries28; // 0x4
-    int count40;             // 0x8
-    sPathEntry40* entries40; // 0xc
-    int count3C;             // 0x10
-    sPathEntry3C* entries3C; // 0x14
-};
 
 /**
  * Returns the index of track path @p entry in the path system's track path array (+0x14, 0x3C bytes each), or -1.
@@ -124,12 +110,12 @@ struct sPathSys {
  * @param entry  the track path to look up
  * @return its index, or -1
  */
-extern "C" int cPathSys_getTrackPathIndex(sPathSys* self, sPathEntry3C* entry)
+extern "C" int cPathSys_getTrackPathIndex(cPathSys* self, cTrackPath* entry)
 {
     int i;
     if (entry != 0) {
-        for (i = 0; i < self->count3C; i++) {
-            if (&self->entries3C[i] == entry) {
+        for (i = 0; i < self->NumTrackPaths; i++) {
+            if (&(self->TrackPaths)[i] == entry) {
                 return i;
             }
         }
@@ -151,12 +137,12 @@ INCLUDE_ASM("path/pathsys", cPathSys_getAIPathIndex);
  * @param entry  the AI path to look up
  * @return its index, or -1
  */
-extern "C" int cPathSys_getAIPathIndex(sPathSys* self, sPathEntry40* entry)
+extern "C" int cPathSys_getAIPathIndex(cPathSys* self, cAIPath* entry)
 {
     int i;
     if (entry != 0) {
-        for (i = 0; i < self->count40; i++) {
-            if (&self->entries40[i] == entry) {
+        for (i = 0; i < self->NumAIPaths; i++) {
+            if (&(self->AIPaths)[i] == entry) {
                 return i;
             }
         }
@@ -178,12 +164,12 @@ INCLUDE_ASM("path/pathsys", cPathSys_isStartpoint);
  * @param startpointId  the startpoint id (a session or rider index)
  * @return 1 if such a startpoint exists, else 0
  */
-extern "C" int cPathSys_isStartpoint(sPathSys* self, int type, int startpointId)
+extern "C" int cPathSys_isStartpoint(cPathSys* self, int type, int startpointId)
 {
     int i;
-    int count = self->count28;
+    int count = self->NumStartpoints;
     for (i = 0; i < count; i++) {
-        if (self->entries28[i].Type == type && self->entries28[i].Arg == startpointId) {
+        if (self->Startpoints[i].Type == type && self->Startpoints[i].Arg == startpointId) {
             return 1;
         }
     }
@@ -247,7 +233,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_getStartpointByIndex);
 extern "C" int cPathSys_getStartpointByIndex(cPathSys* list, int index) {
     int temp_2;
 
-    temp_2 = (list->NumStartpoints);
+    temp_2 = list->NumStartpoints;
     if ((temp_2 <= 0) || (index >= temp_2) || (index < 0)) {
         return 0;
     }
@@ -338,15 +324,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_loadCheckpoints);
 extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" void pathREAD_float(void* dst, void* src);
 
-struct sPathPair_B7D8 {
-    int a;      // 0x0
-    int b;      // 0x4
-};
 
-struct sPathSys_B7D8 {
-    char pad_0x0[0x18];
-    sPathPair_B7D8 pairs[1];    // 0x18
-};
 
 /**
  * Reads the path file's checkpoint table into the path system's checkpoint list (+0x18, 8 bytes each).
@@ -359,16 +337,16 @@ struct sPathSys_B7D8 {
  * @param cursor  the file data at the checkpoint count
  * @return the number of bytes consumed
  */
-extern "C" int cPathSys_loadCheckpoints(sPathSys_B7D8* self, char* cursor)
+extern "C" int cPathSys_loadCheckpoints(cPathSys* self, char* cursor)
 {
     int count;
     char* start = cursor;
     pathREAD_tInt32(&count, cursor);
     cursor += 4;
     for (int i = 0; i < count; i++) {
-        pathREAD_float(&self->pairs[i].b, cursor);
+        pathREAD_float(&(*(int*)&((&self->CheckpointList[0]))[i].DistanceLeft), cursor);
         cursor += 4;
-        pathREAD_tInt32(&self->pairs[i].a, cursor);
+        pathREAD_tInt32(&((&self->CheckpointList[0]))[i].TimeBonusSec, cursor);
         cursor += 4;
     }
     return cursor - start;

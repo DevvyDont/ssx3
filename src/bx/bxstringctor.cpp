@@ -3017,7 +3017,7 @@ INCLUDE_ASM("bx/bxstringctor", cPath_findEvent);
 extern "C" tPathEventNode* cPath_findEvent(cPath* table, int firstKey, int secondKey)
 {
     int i = 0;
-    tPathEventNode* entry = (table->Events);
+    tPathEventNode* entry = table->Events;
     while (i < table->NumEvents) {
         i++;
         if (entry->Type == firstKey && entry->Arg == secondKey)
@@ -3043,7 +3043,7 @@ INCLUDE_ASM("bx/bxstringctor", cPath_findEvent1);
 extern "C" tPathEventNode* cPath_findEvent1(cPath* table, int key)
 {
     int i = 0;
-    tPathEventNode* entry = (table->Events);
+    tPathEventNode* entry = table->Events;
     while (i < table->NumEvents) {
         i++;
         if (entry->Type == key)
@@ -3057,11 +3057,6 @@ extern "C" tPathEventNode* cPath_findEvent1(cPath* table, int key)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_getProximity);
 #ifdef SKIP_ASM
-struct sBXBox {
-    char pad_0x00[0x1C];
-    float min[3]; // 0x1C
-    float max[3]; // 0x28
-};
 
 /**
  * Returns how far a point is outside a path's bounding box: the largest per-axis distance, 0 inside.
@@ -3071,25 +3066,25 @@ struct sBXBox {
  * @param point  the point (x, y, z)
  * @return the largest of the X, Y and Z distances to the box
  */
-extern "C" float cPath_getProximity(sBXBox* self, float* point)
+extern "C" float cPath_getProximity(cPath* self, float* point)
 {
     float dx = 0.0f;
     float dy = 0.0f;
     float dz = 0.0f;
-    if (point[0] < self->min[0]) {
-        dx = self->min[0] - point[0];
-    } else if (self->max[0] < point[0]) {
-        dx = point[0] - self->max[0];
+    if (point[0] < self->MinBound[0]) {
+        dx = self->MinBound[0] - point[0];
+    } else if (self->MaxBound[0] < point[0]) {
+        dx = point[0] - self->MaxBound[0];
     }
-    if (point[1] < self->min[1]) {
-        dy = self->min[1] - point[1];
-    } else if (self->max[1] < point[1]) {
-        dy = point[1] - self->max[1];
+    if (point[1] < self->MinBound[1]) {
+        dy = self->MinBound[1] - point[1];
+    } else if (self->MaxBound[1] < point[1]) {
+        dy = point[1] - self->MaxBound[1];
     }
-    if (point[2] < self->min[2]) {
-        dz = self->min[2] - point[2];
-    } else if (self->max[2] < point[2]) {
-        dz = point[2] - self->max[2];
+    if (point[2] < self->MinBound[2]) {
+        dz = self->MinBound[2] - point[2];
+    } else if (self->MaxBound[2] < point[2]) {
+        dz = point[2] - self->MaxBound[2];
     }
     if (dy < dx) {
         if (dx < dz) {
@@ -3602,7 +3597,7 @@ int cPathSys_getNearAIPaths_impl(void* vself, float* pos, void** pathList, int m
         maxListLen = self->NumAIPaths;
     }
     for (i = 0; i < self->NumAIPaths; i++) {
-        prox[i] = cPath_getProximity((sBXBox*)&self->AIPaths[i], pos);
+        prox[i] = cPath_getProximity((cPath*)&self->AIPaths[i], pos);
         if (onlyResetPaths && self->AIPaths[i].mIsReset == 0) {
             prox[i] = 9.999999933815813e+36f;
         }
@@ -3636,7 +3631,7 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_getNearTrackPaths);
 struct sBXBox;
 
 
-extern "C" float cPath_getProximity(sBXBox* self, float* p);
+extern "C" float cPath_getProximity(cPath* self, float* p);
 
 static inline int minB178(int a, int b)
 {
@@ -3662,7 +3657,7 @@ extern "C" int cPathSys_getNearTrackPaths(cPathSys* self, float* pos, cTrackPath
     int want = minB178(self->NumTrackPaths, max);
     int i;
     for (i = 0; i < self->NumTrackPaths; i++) {
-        dist[i] = cPath_getProximity((sBXBox*)&(self->TrackPaths)[i], pos);
+        dist[i] = cPath_getProximity((cPath*)&(self->TrackPaths)[i], pos);
         if (dist[i] == 0.0f) {
             dist[i] = 1e37f;
             out[n++] = &(self->TrackPaths)[i];

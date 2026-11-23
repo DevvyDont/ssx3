@@ -253,20 +253,7 @@ extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* vself, tWS
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getRunningTaskId);
 #ifdef SKIP_ASM
-struct cWScriptProcEntry {
-    int a;
-    unsigned int id;
-    char pad08[0x3C];
-};
 
-struct cWScriptProcList {
-    int pad00;
-    int count;
-    int cur;
-    int pad0C;
-    int pad10;
-    cWScriptProcEntry* entries;
-};
 
 /**
  * Returns the id of the task the world-script process is running.
@@ -276,11 +263,11 @@ struct cWScriptProcList {
  *
  * @return the task id, or 0xFFFFFFFF when no task is running
  */
-extern "C" unsigned int cWScriptProcess_getRunningTaskId(cWScriptProcList* self)
+extern "C" unsigned int cWScriptProcess_getRunningTaskId(cWScriptProcess* self)
 {
-    int i = self->cur;
-    if (i < self->count) {
-        return self->entries[i].id;
+    int i = self->RunningTask;
+    if (i < self->NumTasks) {
+        return (self->Tasks)[i].TaskId;
     }
     return 0xFFFFFFFF;
 }
@@ -310,7 +297,7 @@ extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcess* self, int eve
 {
     int i = self->RunningTask;
     if (i < self->NumTasks) {
-        ((cWScriptProcess_dispatchTaskEvent_cObj*)(cWScriptProcEntry*)self->Tasks)[i].dispatchTaskEvent(event);
+        ((cWScriptProcess_dispatchTaskEvent_cObj*)self->Tasks)[i].dispatchTaskEvent(event);
     }
 }
 #endif
@@ -518,30 +505,6 @@ extern "C" void cWScriptProcess_eventOnEvent3(cWScriptProcess* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processStart);
 #ifdef SKIP_ASM
-class cWScriptProcess_processStart_cElem {
-public:
-    char pad00[0x40];
-    // vptr at 0x40
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void taskStart();
-};
-
-struct cWScriptProcess_processStart_sProc {
-    int state;
-    int count;
-    int cur;
-    int pad0C;
-    void* man;
-    cWScriptProcess_processStart_cElem* elems;
-    int pad18;
-    void* luno;
-    int pad20;
-    int pad24;
-    void* script;
-};
-
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
@@ -557,20 +520,20 @@ extern char str_ProcessLocalTable[];
  * process onto the manager's running list (cWScriptMan_processStart). If there are tasks, it calls the first
  * task's virtual slot 4, which marks a task active and runs its script at +0x8.
  */
-extern "C" void cWScriptProcess_processStart(cWScriptProcess_processStart_sProc* self)
+extern "C" void cWScriptProcess_processStart(cWScriptProcess* self)
 {
-    if (self->luno != 0) {
-        luno_cLunoTable__cLunoTable(self->luno, 3);
+    if (((void*)self->Local) != 0) {
+        luno_cLunoTable__cLunoTable(((void*)self->Local), 3);
     }
-    self->luno = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
-    self->state = 1;
-    self->cur = 0;
-    if (self->script != 0) {
-        cWScriptMan_runScriptCode(self->man, self, self->script);
+    (*(void**)&self->Local) = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
+    self->State = 1;
+    self->RunningTask = 0;
+    if (((void*)self->ProcessScriptCode[0]) != 0) {
+        cWScriptMan_runScriptCode(((void*)self->Manager), self, ((void*)self->ProcessScriptCode[0]));
     }
-    cWScriptMan_processStart(self->man, self);
-    if (self->cur < self->count) {
-        self->elems[self->cur].taskStart();
+    cWScriptMan_processStart(((void*)self->Manager), self);
+    if (self->RunningTask < self->NumTasks) {
+        self->Tasks[self->RunningTask].taskStart();
     }
 }
 #endif
@@ -720,26 +683,6 @@ extern "C" void cWScriptProcess_endTask(cWScriptProcess_endTask_cProc* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_gotoTask);
 #ifdef SKIP_ASM
-class cWScriptProcess_gotoTask_cState {
-public:
-    int state;          // 0x0
-    int id;             // 0x4
-    char pad8[0x40 - 0x8];
-    // vptr at 0x40; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void taskStart();
-};
-
-struct cWScriptProcess_gotoTask_sProc {
-    int pad0;
-    int count;                          // 0x4
-    int cur;                            // 0x8
-    char padC[0x14 - 0xC];
-    cWScriptProcess_gotoTask_cState* states;       // 0x14
-};
-
 /**
  * Jumps a script process to the task with id @p id: aborts the current task and starts that one.
  *
@@ -749,16 +692,16 @@ struct cWScriptProcess_gotoTask_sProc {
  *
  * @param id  the task id to go to
  */
-extern "C" void cWScriptProcess_gotoTask(cWScriptProcess_gotoTask_sProc* self, int id)
+extern "C" void cWScriptProcess_gotoTask(cWScriptProcess* self, int id)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->states[i].id == id) {
-            if (self->cur < self->count) {
-                self->states[self->cur].state = 3;
+    for (i = 0; i < self->NumTasks; i++) {
+        if (self->Tasks[i].TaskId == id) {
+            if (self->RunningTask < self->NumTasks) {
+                self->Tasks[self->RunningTask].State = 3;
             }
-            self->cur = i;
-            self->states[i].taskStart();
+            self->RunningTask = i;
+            self->Tasks[i].taskStart();
             return;
         }
     }
@@ -768,29 +711,6 @@ extern "C" void cWScriptProcess_gotoTask(cWScriptProcess_gotoTask_sProc* self, i
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_advanceToTask);
 #ifdef SKIP_ASM
-class cWScriptProcess_advanceToTask_cElem {
-public:
-    int f0;
-    int id;
-    char pad08[0x38];
-    // vptr at 0x40
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void taskStart();
-    virtual void v05();
-    virtual void taskEnd();
-};
-
-struct cWScriptProcess_advanceToTask_sProc {
-    int state;
-    int count;
-    int cur;
-    int pad0C;
-    void* man;
-    cWScriptProcess_advanceToTask_cElem* elems;
-};
-
 /**
  * Advances a script process to the task with id @p id: ends the current task and starts that one.
  *
@@ -800,16 +720,16 @@ struct cWScriptProcess_advanceToTask_sProc {
  *
  * @param id  the task id to advance to
  */
-extern "C" void cWScriptProcess_advanceToTask(cWScriptProcess_advanceToTask_sProc* self, int id)
+extern "C" void cWScriptProcess_advanceToTask(cWScriptProcess* self, int id)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->elems[i].id == id) {
-            if (self->cur < self->count) {
-                self->elems[self->cur].taskEnd();
+    for (i = 0; i < self->NumTasks; i++) {
+        if (self->Tasks[i].TaskId == id) {
+            if (self->RunningTask < self->NumTasks) {
+                self->Tasks[self->RunningTask].taskEnd();
             }
-            self->cur = i;
-            self->elems[i].taskStart();
+            self->RunningTask = i;
+            self->Tasks[i].taskStart();
             return;
         }
     }
@@ -929,7 +849,7 @@ extern void* cWScriptTask_vtbl[];
  */
 extern "C" void* cWScriptTask_cWScriptTask(cWScriptTask* self)
 {
-    self->mVtbl = cWScriptTask_vtbl;
+    VPTR_OF(cWScriptTask, self) = cWScriptTask_vtbl;
     MEM_fill((char*)&self->TaskScriptCode, 0, 0xC);
     self->Process = 0;
     self->TaskId = (unsigned int)0;
@@ -2050,7 +1970,7 @@ extern "C" void cWScriptMan_update(cWScriptMan* self)
             if (event->EventId & 0x20000)
                 cWScriptProcess_dispatchProcessEvent((cWScriptProcess*)proc, event);
             if (event->EventId & 0x10000)
-                cWScriptProcess_dispatchTaskEvent((cWScriptProcess*)((cWScriptProcList*)proc), (int)event);
+                cWScriptProcess_dispatchTaskEvent((cWScriptProcess*)(proc), (int)event);
         }
         self->Inst = 0;
         self->CurrentProcess = 0;

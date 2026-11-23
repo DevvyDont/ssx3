@@ -1280,21 +1280,9 @@ struct sBxsVEntry2DD0 {
     void (*fn)(void*, int);
 };
 
-struct sBxsFade2DD0 {
-    char pad_0x0[0xC];
-    sBxsVEntry2DD0* vtable;     // 0xC
-    char pad_0x10[0x4];
-    int id;                     // 0x14
-    int kind;                   // 0x18
-    float rateA;                // 0x1C
-    float rateB;                // 0x20
-    float rateC;                // 0x24
-    int arg;                    // 0x28
-    int time;                   // 0x2C
-};
 
 // PORT: the unit declares cScriptObjTransition_SetTransition1(void*, int, int, int) returning void*; the body also takes four floats and returns nothing.
-extern "C" void cScriptObjTransition_SetTransition1_impl(sBxsFade2DD0* self, int id, int kind, int arg, float t, float c, float a, float b) __asm__("cScriptObjTransition_SetTransition1");
+extern "C" void cScriptObjTransition_SetTransition1_impl(cScriptObjTransition* self, int id, int kind, int arg, float t, float c, float a, float b) __asm__("cScriptObjTransition_SetTransition1");
 /**
  * Ends the running transition and starts a new one, or just ends it.
  *
@@ -1313,29 +1301,29 @@ extern "C" void cScriptObjTransition_SetTransition1_impl(sBxsFade2DD0* self, int
  * @param inFrames  the fade-in length in frames
  * @param holdFrames  the hold length in frames
  */
-extern "C" void cScriptObjTransition_SetTransition1_impl(sBxsFade2DD0* self, int id, int kind, int transitionColour, float currFrame, float outFrames, float inFrames, float holdFrames)
+extern "C" void cScriptObjTransition_SetTransition1_impl(cScriptObjTransition* self, int id, int kind, int transitionColour, float currFrame, float outFrames, float inFrames, float holdFrames)
 {
-    if (self->kind != 9) {
-        sBxsVEntry2DD0* vt = self->vtable;
-        vt[5].fn(vthis(self, vt[5]), self->id);
+    if (self->mInfo.transition != 9) {
+        sBxsVEntry2DD0* vt = ((sBxsVEntry2DD0*)self->mVtbl);
+        vt[5].fn(vthis(self, vt[5]), self->mPlayerID);
     }
     if (kind == 9 || inFrames + holdFrames + outFrames <= currFrame) {
-        self->kind = 9;
-        self->rateA = 0.0f;
-        self->rateB = 0.0f;
-        self->id = -1;
-        self->rateC = 0.0f;
-        self->time = 0;
+        self->mInfo.transition = 9;
+        self->mInfo.inTime = 0.0f;
+        self->mInfo.holdTime = 0.0f;
+        self->mPlayerID = -1;
+        self->mInfo.outTime = 0.0f;
+        (*(int*)&self->mInfo.currTime) = 0;
     } else {
-        self->kind = kind;
-        self->arg = transitionColour;
-        self->time = 0;
-        self->id = id;
-        self->rateA = inFrames * 0.01666666753590107f;
-        self->rateB = holdFrames * 0.01666666753590107f;
-        self->rateC = outFrames * 0.01666666753590107f;
-        sBxsVEntry2DD0* vt = self->vtable;
-        vt[4].fn(vthis(self, vt[4]), self->id);
+        self->mInfo.transition = kind;
+        self->mInfo.transitionColour = transitionColour;
+        (*(int*)&self->mInfo.currTime) = 0;
+        self->mPlayerID = id;
+        self->mInfo.inTime = inFrames * 0.01666666753590107f;
+        self->mInfo.holdTime = holdFrames * 0.01666666753590107f;
+        self->mInfo.outTime = outFrames * 0.01666666753590107f;
+        sBxsVEntry2DD0* vt = ((sBxsVEntry2DD0*)self->mVtbl);
+        vt[4].fn(vthis(self, vt[4]), self->mPlayerID);
     }
 }
 #endif

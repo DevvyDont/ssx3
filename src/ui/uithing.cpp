@@ -237,11 +237,6 @@ extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, 
 INCLUDE_ASM("ui/uithing", cUIThing_getAbsPosition);
 #ifdef SKIP_ASM
 
-struct sUIThingPos {
-    char pad0[0x40];
-    sUIThingPos* parent;    // 0x40
-    t3Vector pos;            // 0x44
-};
 
 /**
  * Writes the UI thing's absolute position, its mPosition plus the mPosition of every ancestor up the mpParent chain, to
@@ -252,11 +247,11 @@ struct sUIThingPos {
  *
  * @param out  receives the summed position (x, y, z)
  */
-extern "C" void cUIThing_getAbsPosition(sUIThingPos* self, t3Vector* out)
+extern "C" void cUIThing_getAbsPosition(cUIThing* self, t3Vector* out)
 {
-    *out = self->pos;
-    for (sUIThingPos* ancestor = self->parent; ancestor != 0; ancestor = ancestor->parent) {
-        t3Vector ancestorPos = ancestor->pos;
+    *out = self->mPosition;
+    for (cUIThing* ancestor = self->mpParent; ancestor != 0; ancestor = ancestor->mpParent) {
+        t3Vector ancestorPos = ancestor->mPosition;
         out->x += ancestorPos.x;
         out->y += ancestorPos.y;
         out->z += ancestorPos.z;

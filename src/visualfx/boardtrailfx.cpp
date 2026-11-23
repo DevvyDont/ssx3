@@ -18,7 +18,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_initialize);
 extern "C" void* cRider_cRider(void* self);
 extern "C" void MEM_fill(void* p, int c, int n);
 struct cBoardTrailFX_reset_sTrail;
-extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self);
+extern "C" void cBoardTrailFX_reset(cBoardTrailFX* self);
 extern char D_00459B90[];
 extern char str_BoardTrailVertices[];
 
@@ -45,15 +45,6 @@ struct sBTTrailVtx {
     sBTTrailVtx() {}
 };
 
-struct sBoardTrailFXView {  // this unit's view of cBoardTrailFX (ai/riderhandler.h, where the FX parts are not yet mapped)
-    char* vbase;                // 0x00
-    int f04;                    // 0x04
-    int f08;                    // 0x08
-    int fC;                     // 0x0C
-    sBTTrailVtx* strip[6];      // 0x10
-    int f28;                    // 0x28
-    short ids[48];              // 0x2C
-};
 
 /**
  * Constructs a board trail effect; despite its name, this is cBoardTrailFX's constructor.
@@ -68,42 +59,42 @@ struct sBoardTrailFXView {  // this unit's view of cBoardTrailFX (ai/riderhandle
  */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xF0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardTrailFX_initialize(sBoardTrailFXView* self, int inChrg)
+extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
 {
     if (inChrg) {
-        self->vbase = (char*)self + 0xF0;
+        (*(char**)&self->mRider) = (char*)self + 0xF0;
         cRider_cRider((char*)self + 0xF0);
     }
-    *(const void**)(self->vbase + 0x6E8) = &D_00488BB8;
-    *(void**)(self->vbase + 0x6D0) = D_00459B90;
-    *(const void**)(self->vbase + 0x6C0) = &D_00488C00;
+    self->mRider->mScriptObjectVtbl = (void*)(&D_00488BB8);
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    *(const void**)(((char*)self->mRider) + 0x6C0) = &D_00488C00;
     if (inChrg == 0) {
         int vc;
         sBTVt9 vtbl1 = D_00488BB8;
-        *(void**)(self->vbase + 0x6E8) = &vtbl1;
+        self->mRider->mScriptObjectVtbl = &vtbl1;
         {
-            char* vbo = self->vbase - 0xF0;
+            char* vbo = ((char*)self->mRider) - 0xF0;
             vc = (char*)self - vbo;
         }
         vtbl1.e[1].delta = D_00488BB8.e[1].delta + vc;
         sBTVt22 vtbl2 = D_00488C00;
-        *(void**)(self->vbase + 0x6C0) = &vtbl2;
+        *(void**)(((char*)self->mRider) + 0x6C0) = &vtbl2;
         vtbl2.e[1].delta = D_00488C00.e[1].delta + vc;
     }
-    self->f28 = 0;
+    self->CurSliceCap = 0;
     short neg = -1;
     int i;
     for (i = 47; i >= 0; i--) {
-        self->ids[i] = neg;
+        self->SliceCaps[i] = neg;
     }
-    sBTTrailVtx** strips = self->strip;
+    sBTTrailVtx** strips = ((sBTTrailVtx**)&self->BufVerts[0]);
     strips[0] = new (str_BoardTrailVertices, 0, 0) sBTTrailVtx[324];
     for (i = 1; i < 6; i++) {
-        strips[i] = self->strip[0] + i * 54;
+        strips[i] = ((sBTTrailVtx*)self->BufVerts[0]) + i * 54;
     }
-    self->fC = 0;
-    MEM_fill(self->strip[0], 0, 15552);
-    cBoardTrailFX_reset((cBoardTrailFX_reset_sTrail*)self);
+    self->BufId = 0;
+    MEM_fill(((sBTTrailVtx*)self->BufVerts[0]), 0, 15552);
+    cBoardTrailFX_reset((cBoardTrailFX*)self);
     return self;
 }
 #endif
@@ -143,31 +134,6 @@ struct cBoardTrailFX_reset_sVtx {
     char pad[0x24];
 };
 
-struct cBoardTrailFX_reset_sTrail {
-    int f0;
-    float f4;
-    float f8;
-    int fC;
-    float* v10;
-    float* v14;
-    float* v18;
-    float* v1C;
-    float* v20;
-    float* v24;
-    char pad28[0x8C - 0x28];
-    int f8C;
-    int f90;
-    int f94;
-    int f98;
-    int f9C;
-    int fA0;
-    int fA4;
-    char padA8[8];
-    t4Vector colB0;
-    t4Vector colC0;
-    t4Vector colD0;
-    int fE0;
-};
 
 extern t4Vector t4vect_Origin;
 extern t4Vector t4vect_Zero;
@@ -182,31 +148,31 @@ extern float cBoardTrail_m_OuterU;
  * scales to 1, and rewrites the first three floats of all 54 vertices in each strip: probably texture
  * coordinates, with u fixed per strip (0.25, 0.75, 0.0, 1.0, 0.375, 0.625), v alternating 0 and 1, and q = 1.
  */
-extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
+extern "C" void cBoardTrailFX_reset(cBoardTrailFX* self)
 {
-    self->f94 = 2;
-    self->f90 = 0;
-    self->f8C = 0;
-    self->f98 = 0;
-    self->f9C = 0;
-    self->fA0 = 0;
-    self->fA4 = 0;
-    self->colB0 = t4vect_Origin;
-    self->colC0 = t4vect_Zero;
-    self->colD0 = t4vect_Zero;
-    self->f4 = 1.0f;
-    self->f8 = 1.0f;
-    self->fE0 = 0;
+    self->State = 2;
+    self->BufLen = 0;
+    self->BufHead = 0;
+    (*(int*)&self->CurAlpha) = 0;
+    (*(int*)&self->CurDepth) = 0;
+    (*(int*)&self->CurHeight) = 0;
+    (*(int*)&self->LightSide) = 0;
+    self->LastCen = t4vect_Origin;
+    self->LastVel = t4vect_Zero;
+    self->LastSide = t4vect_Zero;
+    self->LeftRandWidth = 1.0f;
+    self->RightRandWidth = 1.0f;
+    self->DelaySampling = 0;
     for (int i = 0; i < 54; i++) {
         float vCoord = (float)(i & 1);
-        self->v18[i * 12] = cBoardTrail_m_OuterU;
-        self->v10[i * 12] = cBoardTrail_m_InnerU;
-        self->v1C[i * 12] = cBoardTrail_m_BaseU;
-        self->v20[i * 12] = 1.0f - cBoardTrail_m_BaseU;
-        self->v14[i * 12] = 1.0f - cBoardTrail_m_InnerU;
-        self->v24[i * 12] = 1.0f - cBoardTrail_m_OuterU;
-        self->v18[i * 12 + 1] = self->v10[i * 12 + 1] = self->v1C[i * 12 + 1] = self->v20[i * 12 + 1] = self->v14[i * 12 + 1] = self->v24[i * 12 + 1] = vCoord;
-        self->v18[i * 12 + 2] = self->v10[i * 12 + 2] = self->v1C[i * 12 + 2] = self->v20[i * 12 + 2] = self->v14[i * 12 + 2] = self->v24[i * 12 + 2] = 1.0f;
+        ((float*)self->BufVerts[2])[i * 12] = cBoardTrail_m_OuterU;
+        ((float*)self->BufVerts[0])[i * 12] = cBoardTrail_m_InnerU;
+        ((float*)self->BufVerts[3])[i * 12] = cBoardTrail_m_BaseU;
+        ((float*)self->BufVerts[4])[i * 12] = 1.0f - cBoardTrail_m_BaseU;
+        ((float*)self->BufVerts[1])[i * 12] = 1.0f - cBoardTrail_m_InnerU;
+        ((float*)self->BufVerts[5])[i * 12] = 1.0f - cBoardTrail_m_OuterU;
+        ((float*)self->BufVerts[2])[i * 12 + 1] = ((float*)self->BufVerts[0])[i * 12 + 1] = ((float*)self->BufVerts[3])[i * 12 + 1] = ((float*)self->BufVerts[4])[i * 12 + 1] = ((float*)self->BufVerts[1])[i * 12 + 1] = ((float*)self->BufVerts[5])[i * 12 + 1] = vCoord;
+        ((float*)self->BufVerts[2])[i * 12 + 2] = ((float*)self->BufVerts[0])[i * 12 + 2] = ((float*)self->BufVerts[3])[i * 12 + 2] = ((float*)self->BufVerts[4])[i * 12 + 2] = ((float*)self->BufVerts[1])[i * 12 + 2] = ((float*)self->BufVerts[5])[i * 12 + 2] = 1.0f;
     }
 }
 #endif
