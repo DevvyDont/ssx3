@@ -17,18 +17,13 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "render/graphicsman.h"
 
 extern tSectionMap cSectionMan_mSectionMap[];
 
 //100%
 INCLUDE_ASM("main/game", cGame_renderModels);
 #ifdef SKIP_ASM
-
-struct sRVEntry_C078 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int, int, int);
-};
 
 
 
@@ -59,12 +54,12 @@ extern "C" void cGame_renderModels(cGame* self, FrustumIntersector* world)
     int n = world->numinstancesinside;
     int* items = (int*)((char*)world + 0x20A0);
     for (int i = 0; i < n; i++) {
-        ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[96]), items[i], 0, 0, flag);
+        GrMan->RenderModel((tInstanceRecord*)items[i], 0, 0, flag);
     }
     int secondCount = world->numinstancescrossing;
     items = (int*)((char*)world + 0x40A4);
     for (int i = 0; i < secondCount; i++) {
-        ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[96]), items[i], 0, 0, flag | 0x20);
+        GrMan->RenderModel((tInstanceRecord*)items[i], 0, 0, flag | 0x20);
     }
 }
 #endif

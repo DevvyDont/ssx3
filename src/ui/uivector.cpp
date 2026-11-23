@@ -19,6 +19,7 @@
 #include "render/ps2graphicsman.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
+#include "render/graphicsman.h"
 
 // Flag words at cUIVector + 0x14 and + 0x74. The setters take an int and store it into a
 // bool bitfield: that int->bool conversion is the `sltu` in their asm.
@@ -274,8 +275,6 @@ struct sFlags14_3A39F8 {
 };
 
 
-struct sVE_3A39F8 { short delta; short index; void* fn; };
-
 typedef void (*tDraw_3A39F8)(void*, int, int, void*, void*, int, void*, void*);
 typedef void (*tDraw2_3A39F8)(void*, int, void*, int);
 
@@ -319,9 +318,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
         pos[1] = self->mPosition.y + y;
         pos[2] = 0.0f;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVE_3A39F8* vt = (sVE_3A39F8*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-        ((tDraw_3A39F8)vt[72].fn)(vthis(ps2GraphicsMan, vt[72]), ((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count,
-                                  self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour, pos);
+        ps2GraphicsMan->RenderIndexedTriList(((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpTriangles, self->mpVertexPositionRender, (const t2Vector*)(0), self->mpVertexColour, (const t3Vector*)pos);
         return;
     }
     if ((sVtx_3A39F8*)self->mpVertices == 0)
@@ -345,8 +342,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
         SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 2, (self->mpVertexColour)[i].B);
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_3A39F8* vt = (sVE_3A39F8*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-    ((tDraw2_3A39F8)vt[73].fn)(vthis(ps2GraphicsMan, vt[73]), ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpVertices, 0);
+    ps2GraphicsMan->RenderLineStrip(((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpVertices, 0);
 }
 #endif
 

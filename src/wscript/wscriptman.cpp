@@ -19,6 +19,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "replay/bxreplayframe.h"
+#include "object/instancenode.h"
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess);
@@ -722,12 +723,6 @@ struct sCall_30A060 {
     int pad;
     ~sCall_30A060() {}
 };
-struct sVEF_30A060 {
-    short delta;
-    short index;
-    void (*fn)(void*, float);
-};
-
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
@@ -814,10 +809,9 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
         }
     }
     {
-        char* instObj = (char*)self->Inst->m_pActiveNode;
+        cInstanceNode* instObj = self->Inst->m_pActiveNode;
         if (instObj != 0) {
-            sVEF_30A060* vt = *(sVEF_30A060**)(instObj + 0xC);
-            vt[41].fn(vthis(instObj, vt[41]), 0.5f);
+            instObj->setDebounce(0.5f);
         }
     }
     self->Being = saved;

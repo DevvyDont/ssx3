@@ -491,8 +491,6 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137138);
 #ifdef SKIP_ASM
 
 
-struct sVEntH_137138 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
-
 
 struct sSeg_137138 {
     t4Vector a, b;
@@ -648,9 +646,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         if (((char*)hit.Inst) != 0) {
             cInstanceNode* o = (cInstanceNode*)hit.Inst->m_pActiveNode;
             if (((char*)o) != 0) {
-                sVEntH_137138* vt = (sVEntH_137138*)VPTR_OF(cObjNode, o);
-                vt[43].fn(vthis(o, vt[43]), &hit,
-                          vu0Scale_137138(impulse, (float)SSXApp->TimerHz * -0.05000000074505806f));
+                o->applyForce(hit, vu0Scale_137138(impulse, (float)SSXApp->TimerHz * -0.05000000074505806f));
             }
         }
         vu0ScaleEq_137138(self->BoardAngVelocity, 0.8500000238418579f);
@@ -668,9 +664,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         if (((char*)hit.Inst) != 0) {
             cInstanceNode* o = (cInstanceNode*)hit.Inst->m_pActiveNode;
             if (((char*)o) != 0) {
-                sVEntH_137138* vt = (sVEntH_137138*)VPTR_OF(cObjNode, o);
-                vt[43].fn(vthis(o, vt[43]), &hit,
-                          vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
+                o->applyForce(hit, vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
             }
         }
         self->BoardVelocity = t4vect_Zero_137138;
@@ -1001,9 +995,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
                 cInstanceNode* hitOwner = hitB.Inst->m_pActiveNode;
                 if (((char*)hitOwner) != 0)
                 {
-                    sVEntry<void(void*, void*, const t4Vector&)>* vt = (sVEntry<void (void*, void*, const t4Vector &)>*)VPTR_OF(cObjNode, hitOwner);
-                    vt[43].fn(vthis(hitOwner, vt[43]), &hitB,
-                              vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
+                    hitOwner->applyForce(hitB, vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
                 }
             }
             float pen = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.Ipos), hitB.Inorm);
@@ -1044,8 +1036,6 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_stepGroundMotion);
 // A point of a piecewise-linear curve.
 struct sCurvePt_137D18 { float x, y; };
 
-
-struct sVEntH_137D18 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
 extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, sVec4WG* dir);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
@@ -1352,11 +1342,9 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
             *(int*)(self + 0x4) = 1;
         }
         if (((char*)hit.Inst) != 0) {
-            char* hitOwner = (char*)hit.Inst->m_pActiveNode;
+            cInstanceNode* hitOwner = hit.Inst->m_pActiveNode;
             if (hitOwner != 0) {
-                sVEntH_137D18* vt = *(sVEntH_137D18**)(hitOwner + 0xC);
-                vt[43].fn(vthis(hitOwner, vt[43]), &hit,
-                          vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, RIDER->mVelocity), RIDER->GroundVelocity), dt));
+                hitOwner->applyForce(hit, vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, RIDER->mVelocity), RIDER->GroundVelocity), dt));
             }
         }
         tSurfData* ground = &materials_137D18()[hit.Stype];
@@ -1529,10 +1517,9 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
             if (dot < 0.0f)
                 hit.Inorm = vu0Normalize_138640(vu0Sub_138640(hit.Inorm, vu0Scale_138640(RIDER->mGroundNormal, dot)));
             if (((char*)hit.Inst) != 0) {
-                char* hitOwner = (char*)hit.Inst->m_pActiveNode;
+                cInstanceNode* hitOwner = hit.Inst->m_pActiveNode;
                 if (hitOwner != 0) {
-                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(hitOwner + 0xC);
-                    vt[42].fn(vthis(hitOwner, vt[42]), &hit);
+                    hitOwner->updateIntersectInfo(hit);
                 }
             }
             t4Vector push = vu0Scale_138640(vu0Scale_138640(hit.Inorm, 1.100000023841858f), depth);

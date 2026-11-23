@@ -727,8 +727,7 @@ extern "C" void cGame_purge(char* self)
     cCameraTriggerMan_cleanupOnExit(((char*)&gCamTriggerMan));
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)VPTR_OF(cGraphicsMan, be) + 0x98);
-        vtEntry->fn(vthis(be, *vtEntry));
+        be->FlushRenderer();
     }
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
@@ -775,13 +774,11 @@ extern "C" void cGame_purge(char* self)
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)VPTR_OF(cGraphicsMan, be) + 0x388);
-        vtEntry->fn(vthis(be, *vtEntry));
+        be->PurgeCharModels();
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt1_FA98* vtEntry = (sVEnt1_FA98*)((char*)VPTR_OF(cGraphicsMan, be) + 0x190);
-        vtEntry->fn(vthis(be, *vtEntry), *(void**)(self + 0x220));
+        be->RemoveTexture((int)*(void**)(self + 0x220));
     }
     cGraphicsMan_PurgeTextures(GrMan);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
@@ -2397,6 +2394,7 @@ INCLUDE_ASM("main/gameload", cLoadScreen_drawSplash);
 #ifdef SKIP_ASM
 #include "bx/math3d.h"
 #include "replay/bxreplayframe.h"
+#include "render/graphicsman.h"
 
 struct sQuadVtx {
     sQuadVtx() {}

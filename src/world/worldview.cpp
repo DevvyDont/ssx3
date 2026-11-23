@@ -18,6 +18,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "world/worldview.h"
+#include "render/graphicsman.h"
 
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_getNumSections__FP10cWorldView);
@@ -1651,14 +1652,12 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
         break;
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_OF(cGraphicsMan, w) + 0x170);
-        ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_tex, 0, 0, RID >> 8);
+        (void*)w->AddTexture((const SHAPE*)obj, str_strm_tex, 0, 0, RID >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_OF(cGraphicsMan, w) + 0x170);
-        ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
+        (void*)w->AddTexture((const SHAPE*)obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
         break;
     }
     case 3:
