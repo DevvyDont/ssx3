@@ -44,11 +44,11 @@ struct tFramePos {
                             //     cReplayFramePtr_getReadPos stores ReadData here, cReplayFramePtr_setReadPos loads ReadData from it
 };
 
-struct cReplayFramePtr {
-    // --- cBxReplayFrame (interface: a vptr only)
-    void** mVtbl;           // 0x00 [R] ctor cReplayFramePtr_cReplayFramePtr and dtor cReplayFramePtr__cReplayFramePtr store cReplayFramePtr_vtbl (cReplayFrame's
-                            //      ctor then stores cReplayFrame_vtbl); [U] peekObjNodeType and the readReplayInstance /
-                            //      writeReplayInstance bodies call slots 1/2 (write/read) through it
+struct cReplayFramePtr : public cBxReplayFrame {
+    // cBxReplayFrame (replay/bxreplayframe.h, 0x4): the vptr at 0x00: [R] ctor cReplayFramePtr_cReplayFramePtr and dtor
+    //   cReplayFramePtr__cReplayFramePtr store cReplayFramePtr_vtbl (cReplayFrame's ctor then stores cReplayFrame_vtbl);
+    //   [U] peekObjNodeType and the readReplayInstance / writeReplayInstance bodies call slots 1/2 (write/read) through it
+    virtual ~cReplayFramePtr();                                      // slot 7 [R] cReplayFramePtr_vtbl: cReplayFramePtr__cReplayFramePtr
     // --- cReplayFramePtr
     char* Block;            // 0x04 [O]; [P] getBlock (cReplayFramePtr_getBlock) lw 0x4; assert "Block && ReadData"; [R] ctor 0;
                             //      [U] initBlock stores the new "Frame Block" (operator new), setBlock stores data,
@@ -65,7 +65,6 @@ struct cReplayFramePtr {
 CHECK_OFFSET(tFramePos, Data, 0x0);
 CHECK_SIZE(tFramePos, 0x4);
 
-CHECK_OFFSET(cReplayFramePtr, mVtbl, 0x00);
 CHECK_OFFSET(cReplayFramePtr, Block, 0x04);
 CHECK_OFFSET(cReplayFramePtr, WriteData, 0x08);
 CHECK_OFFSET(cReplayFramePtr, ReadData, 0x0C);

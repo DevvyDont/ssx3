@@ -5692,7 +5692,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_readFromReplayFrame);
 struct VEnt_E518 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_E518(cReplayFramePtr* s, void* p, int n) {
-    VEnt_E518* e = (VEnt_E518*)(((char*)s->mVtbl) + 0x10);
+    VEnt_E518* e = (VEnt_E518*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x10);
     e->fn(vthis(s, *e), p, n);
 }
 
@@ -5726,7 +5726,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_readFromReplayFrame);
 struct VEnt_E698 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_E698(cReplayFramePtr* s, void* p, int n) {
-    VEnt_E698* e = (VEnt_E698*)(((char*)s->mVtbl) + 0x10);
+    VEnt_E698* e = (VEnt_E698*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x10);
     e->fn(vthis(s, *e), p, n);
 }
 
@@ -5762,7 +5762,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_readFromReplayFrame);
 struct VEnt_E850 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_E850(cReplayFramePtr* s, void* p, int n) {
-    VEnt_E850* e = (VEnt_E850*)(((char*)s->mVtbl) + 0x10);
+    VEnt_E850* e = (VEnt_E850*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x10);
     e->fn(vthis(s, *e), p, n);
 }
 
@@ -6122,7 +6122,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_writeToReplayFrame);
 struct VEnt_F580 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_F580(cReplayFramePtr* s, void* p, int n) {
-    VEnt_F580* e = (VEnt_F580*)(((char*)s->mVtbl) + 0x8);
+    VEnt_F580* e = (VEnt_F580*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x8);
     e->fn(vthis(s, *e), p, n);
 }
 
@@ -6156,7 +6156,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_writeToReplayFrame);
 struct VEnt_F700 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_F700(cReplayFramePtr* s, void* p, int n) {
-    VEnt_F700* e = (VEnt_F700*)(((char*)s->mVtbl) + 0x8);
+    VEnt_F700* e = (VEnt_F700*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x8);
     e->fn(vthis(s, *e), p, n);
 }
 
