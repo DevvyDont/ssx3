@@ -47,8 +47,8 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_tModifierBlock__FP14tModifier
  */
 tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self)
 {
-    self->Effect.mVtbl = cEffectLink_vtbl;
-    self->Rail.mVtbl = cRailLink_vtbl;
+    VPTR_OF(cEffectLink, &self->Effect) = cEffectLink_vtbl;
+    VPTR_OF(cRailLink, &self->Rail) = cRailLink_vtbl;
     self->Effect.Next = 0;
     self->Effect.Prev = 0;
     self->Rail.Next = 0;
@@ -90,9 +90,9 @@ extern "C" void tModifierBlock__tModifierBlock(tModifierBlock* self, int flags)
     tModifierBlock_remPhysicsModifier(self);
     tModifierBlock_remEffectModifier(self);
     tModifierBlock_remRailModifier(self, 0xFFFFFFFF);
-    self->Rail.mVtbl = cRailLink_vtbl;
+    VPTR_OF(cRailLink, &self->Rail) = cRailLink_vtbl;
     cRailLink_unlink(&self->Rail);
-    self->Effect.mVtbl = cEffectLink_vtbl;
+    VPTR_OF(cEffectLink, &self->Effect) = cEffectLink_vtbl;
     cEffectLink_unlink(&self->Effect);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -218,9 +218,9 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].fn(vthis(physicsModifier, ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2]));
+        ((sVEntry<void(void*)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[2].fn(vthis(physicsModifier, ((sVEntry<void(void*)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[2]));
         physicsModifier = self->Physics;
-        sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)((sVEntry<void(void*)>*)physicsModifier->mVtbl);
+        sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)((sVEntry<void(void*)>*)VPTR_OF(cPhysicsModifier, physicsModifier));
         if (vt2[4].fn(vthis(physicsModifier, vt2[4])) == 0) {
             tModifierBlock_remPhysicsModifier(self);
         }
@@ -247,7 +247,7 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
         cEffectLink* link = head;
         do {
             cEffectLink* next = link->Next;
-            ((sVEntry<void (void*)>*)link->mVtbl)[5].fn(vthis(link, ((sVEntry<void (void*)>*)link->mVtbl)[5]));
+            ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[5].fn(vthis(link, ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[5]));
             link = next;
         } while (link != 0);
     }
@@ -256,7 +256,7 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
         cEffectLink* link = head;
         do {
             cEffectLink* next = link->Next;
-            ((sVEntry<void (void*)>*)link->mVtbl)[3].fn(vthis(link, ((sVEntry<void (void*)>*)link->mVtbl)[3]));
+            ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[3].fn(vthis(link, ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[3]));
             link = next;
         } while (link != 0);
     }
@@ -287,7 +287,7 @@ extern "C" void tModifierBlock_render(tModifierBlock* self)
         void* next;
         do {
             next = *(void**)effect;
-            sMbVEntryV2DD0* vt = (sMbVEntryV2DD0*)effect->mVtbl;
+            sMbVEntryV2DD0* vt = (sMbVEntryV2DD0*)VPTR_OF(cEffectLink, effect);
             vt[6].fn(vthis(effect, vt[6]));
             effect = (cEffectLink*)next;
         } while (((void*)effect) != 0);
@@ -404,14 +404,14 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3].fn(vthis(physicsModifier, ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3]), id, value);
+        ((sVEntry<void(void*, int, float)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[3].fn(vthis(physicsModifier, ((sVEntry<void(void*, int, float)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[3]), id, value);
     }
     cEffectLink* firstEffect = self->Effect.Next;
     if (firstEffect != 0) {
         cEffectLink* effect = firstEffect;
         do {
             cEffectLink* next = effect->Next;
-            ((sVEntry<void (void*, int, float)>*)effect->mVtbl)[7].fn(vthis(effect, ((sVEntry<void (void*, int, float)>*)effect->mVtbl)[7]), id, value);
+            ((sVEntry<void (void*, int, float)>*)VPTR_OF(cEffectLink, effect))[7].fn(vthis(effect, ((sVEntry<void (void*, int, float)>*)VPTR_OF(cEffectLink, effect))[7]), id, value);
             effect = next;
         } while (effect != 0);
     }
@@ -536,7 +536,7 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
 {
     cPhysicsModifier* obj = self->Physics;
     if (obj != 0) {
-        sMbVEntryDel2* vt = (sMbVEntryDel2*)obj->mVtbl;
+        sMbVEntryDel2* vt = (sMbVEntryDel2*)VPTR_OF(cPhysicsModifier, obj);
         vt[1].fn(vthis(obj, vt[1]), 3);
         self->Physics = 0;
     }
@@ -603,7 +603,7 @@ extern "C" void tModifierBlock_fadeEffectModifier(tModifierBlock* self)
         cEffectLink* link = head;
         do {
             cEffectLink* next = link->Next;
-            ((sModBlockVEntry3228*)link->mVtbl)[3].fn(vthis(link, ((sModBlockVEntry3228*)link->mVtbl)[3]));
+            ((sModBlockVEntry3228*)VPTR_OF(cEffectLink, link))[3].fn(vthis(link, ((sModBlockVEntry3228*)VPTR_OF(cEffectLink, link))[3]));
             link = next;
         } while (link != 0);
     }
@@ -633,9 +633,9 @@ extern "C" void tModifierBlock_remHaloModifier(tModifierBlock* self)
         cEffectLink* link = head;
         do {
             cEffectLink* next = link->Next;
-            if (((int (*)(void*))((sModBlockVEntry3278*)link->mVtbl)[2].fn)(vthis(link, ((sModBlockVEntry3278*)link->mVtbl)[2])) == 3) {
+            if (((int (*)(void*))((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[2].fn)(vthis(link, ((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[2])) == 3) {
                 if (link != 0) {
-                    ((void (*)(void*, int))((sModBlockVEntry3278*)link->mVtbl)[1].fn)(vthis(link, ((sModBlockVEntry3278*)link->mVtbl)[1]), 3);
+                    ((void (*)(void*, int))((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[1].fn)(vthis(link, ((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[1]), 3);
                 }
             }
             link = next;
@@ -671,7 +671,7 @@ extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned in
     loop:
         if (rail == 0) return;
         if (rail->SplineId == id) {
-            ((sModBlockDtorVEntry3300*)rail->mVtbl)[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)rail->mVtbl)[1]), 3);
+            ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1]), 3);
             return;
         }
         rail = ((cRailModifier*)rail->Next);
@@ -680,7 +680,7 @@ extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned in
         do {
             cRailModifier* next = ((cRailModifier*)rail->Next);
             if (rail != 0) {
-                ((sModBlockDtorVEntry3300*)rail->mVtbl)[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)rail->mVtbl)[1]), 3);
+                ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1]), 3);
             }
             rail = next;
         } while (rail != 0);
@@ -707,7 +707,7 @@ extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, cEff
     cEffectLink* effect = (cEffectLink*)(*(void**)list);
     while (((void*)effect) != 0) {
         void* next = *(void**)effect;
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)effect->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cEffectLink, effect);
         vt[3].fn(vthis(effect, vt[3]));
         cEffectLink_append(&self->Effect, effect);
         effect = (cEffectLink*)next;

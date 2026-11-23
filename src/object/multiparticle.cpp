@@ -318,7 +318,7 @@ extern char cPhysicsModifier_vtbl[];
  */
 extern "C" void* cPhysicsModifier_cPhysicsModifier(cPhysicsModifier* self, cBxReplayFrame* obj)
 {
-    self->mVtbl = (void**)cPhysicsModifier_vtbl;
+    VPTR_OF(cPhysicsModifier, self) = (void**)cPhysicsModifier_vtbl;
     obj->read((char*)self, 4);
     return ((void*)self);
 }

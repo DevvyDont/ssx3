@@ -10,15 +10,22 @@
 
 #include "layout.h"
 
+struct cBxReplayFrame;
+
 struct cPhysicsModifier {
     int Active;                     // 0x00 [O] bool (4 bytes); [R] ctor cPhysicsModifier_cPhysicsModifier1 stores 1, the replay ctor
                                     //      cPhysicsModifier_cPhysicsModifier reads 4 bytes here; [U] isActive (lw 0x0)
-    void** mVtbl;                   // 0x04 [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store
-                                    //      cBoostModifier_vtbl (0x00490898)
+    // 0x04: the vptr. [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store cBoostModifier_vtbl
+    //   (0x00490898). Slots:
+    virtual ~cPhysicsModifier();                                // 1  ([R] cPhysicsModifier_vtbl; types [O])
+    virtual void update();                                      // 2
+    virtual void signal(int signal, float arg);                 // 3
+    virtual bool isActive();                                    // 4
+    virtual int getPhysicsType();                               // 5
+    virtual void writeToReplayFrame(cBxReplayFrame* data);      // 6
 };
 
 CHECK_OFFSET(cPhysicsModifier, Active, 0x00);
-CHECK_OFFSET(cPhysicsModifier, mVtbl, 0x04);
 CHECK_SIZE(cPhysicsModifier, 0x8);
 
 #endif /* OBJECT_PHYSICSMODIFIER_H */

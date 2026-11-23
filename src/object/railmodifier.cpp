@@ -4666,7 +4666,7 @@ extern void* cPhysicsModifier_vtbl[];
  * @return physicsModifier
  */
 extern "C" void *cPhysicsModifier_cPhysicsModifier1(cPhysicsModifier* physicsModifier) {
-    ((int*)physicsModifier->mVtbl) = (int*)&cPhysicsModifier_vtbl;
+    ((int*)VPTR_OF(cPhysicsModifier, physicsModifier)) = (int*)&cPhysicsModifier_vtbl;
     physicsModifier->Active = 1;
     return ((void*)physicsModifier);
 }
@@ -4685,7 +4685,7 @@ void operator_delete(int*);
  */
 extern "C" void cPhysicsModifier__cPhysicsModifier(cPhysicsModifier* self, int flags)
 {
-    self->mVtbl = cPhysicsModifier_vtbl;
+    VPTR_OF(cPhysicsModifier, self) = cPhysicsModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4778,7 +4778,7 @@ extern void* cEffectLink_vtbl[];
  */
 extern "C" void cEffectLink__cEffectLink(cEffectLink* self, int flags)
 {
-    self->mVtbl = cEffectLink_vtbl;
+    VPTR_OF(cEffectLink, self) = cEffectLink_vtbl;
     cEffectLink_unlink(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4949,7 +4949,7 @@ extern void* cRailLink_vtbl[];
  */
 extern "C" void cRailLink__cRailLink(cRailLink* self, int flags)
 {
-    self->mVtbl = cRailLink_vtbl;
+    VPTR_OF(cRailLink, self) = cRailLink_vtbl;
     cRailLink_unlink(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -5858,7 +5858,7 @@ void operator_delete(int*);
  */
 extern "C" void cBoostModifier__cBoostModifier(cBoostModifier* self, int flags)
 {
-    self->mVtbl = cPhysicsModifier_vtbl;
+    VPTR_OF(cPhysicsModifier, self) = cPhysicsModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

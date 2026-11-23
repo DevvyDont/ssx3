@@ -25,6 +25,7 @@
 // retail use; [O] SSX On Tour's DWARF (same members, names and offsets; its bools are bytes, retail's words).
 
 #include "layout.h"
+#include "object/effectlink.h"
 #include "bx/math3d.h"
 #include "render/particle.h"
 
@@ -33,39 +34,30 @@ struct tInstanceRecord;
 struct tParticleData;
 
 // cEffectModifier: an effect attached to a placed instance (On Tour class cEffectModifier, 0x10).
-struct cEffectModifier {
-    // --- cEffectLink (object/effectlink.h)
-    cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] ctors zero it; [U] cEffectLink_add, unlink
-                                    //       (cEffectLink_unlink)
-    cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
-    void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
-                                    //       cEffectModifier_vtbl, ...)
+struct cEffectModifier : public cEffectLink {
+    // cEffectLink (object/effectlink.h, 0xC): the vptr at 0x08:
+    //   [R] each ctor/dtor stores its vtable (cEffectLink_vtbl, cEffectModifier_vtbl, ...)
+    // cEffectModifier's notes on cEffectLink's fields:
+    //   Next: [R] ctors zero it; [U] cEffectLink_add, unlink (cEffectLink_unlink)
+    //   Prev: [R] ditto
     // --- cEffectModifier
+    // cEffectModifier's own slots ([R] cEffectModifier_vtbl; types [O] On Tour's class cEffectModifier):
+    virtual void update();                                      // 5
+    virtual void render();                                      // 6
+    virtual void signal(int signal, float arg);                 // 7
     tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
                                     //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
 };
 
-CHECK_OFFSET(cEffectModifier, Next, 0x00);
-CHECK_OFFSET(cEffectModifier, Prev, 0x04);
-CHECK_OFFSET(cEffectModifier, mVtbl, 0x08);
 CHECK_OFFSET(cEffectModifier, Instance, 0x0C);
 CHECK_SIZE(cEffectModifier, 0x10);
 
 // cParticleModifier: a one-shot or looping static emitter at the instance's root transform.
-struct cParticleModifier {
-    // --- cEffectLink (object/effectlink.h)
-    cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] ctors zero it; [U] cEffectLink_add, unlink
-                                    //       (cEffectLink_unlink)
-    cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
-    void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
-                                    //       cEffectModifier_vtbl, ...)
-    // --- cEffectModifier
-    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
-                                    //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
-                                    //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
-                                    //       transform), updatePosition
+struct cParticleModifier : public cEffectModifier {
+    // cEffectModifier (object/effectmodifier.h, 0x10): the vptr at 0x08:
+    //   [R] each ctor/dtor stores its vtable (cEffectLink_vtbl, cEffectModifier_vtbl, ...)
     // --- cParticleModifier
     t4Matrix Transform;             // 0x010 [O]; [R] ctor copies the instance's root transform (VU0 matrix copy), the
                                     //       replay ctor reads 0x40 bytes; [U] setupEmitter's transform,
@@ -79,10 +71,6 @@ struct cParticleModifier {
     char unk_1E8[0x8];              // 0x1E8 padding to the 16-byte size
 };
 
-CHECK_OFFSET(cParticleModifier, Next, 0x00);
-CHECK_OFFSET(cParticleModifier, Prev, 0x04);
-CHECK_OFFSET(cParticleModifier, mVtbl, 0x08);
-CHECK_OFFSET(cParticleModifier, Instance, 0x0C);
 CHECK_OFFSET(cParticleModifier, Transform, 0x10);
 CHECK_OFFSET(cParticleModifier, Emitter, 0x50);
 CHECK_OFFSET(cParticleModifier, ParticleData, 0x1E0);
@@ -91,18 +79,9 @@ CHECK_OFFSET(cParticleModifier, unk_1E8, 0x1E8);
 CHECK_SIZE(cParticleModifier, 0x1F0);
 
 // cDynamicParticleModifier: a dynamic emitter that follows one mesh of the instance.
-struct cDynamicParticleModifier {
-    // --- cEffectLink (object/effectlink.h)
-    cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] ctors zero it; [U] cEffectLink_add, unlink
-                                    //       (cEffectLink_unlink)
-    cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
-    void** mVtbl;                   // 0x008 [R] each ctor/dtor stores its vtable (cEffectLink_vtbl,
-                                    //       cEffectModifier_vtbl, ...)
-    // --- cEffectModifier
-    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
-                                    //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
-                                    //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
-                                    //       transform), updatePosition
+struct cDynamicParticleModifier : public cEffectModifier {
+    // cEffectModifier (object/effectmodifier.h, 0x10): the vptr at 0x08:
+    //   [R] each ctor/dtor stores its vtable (cEffectLink_vtbl, cEffectModifier_vtbl, ...)
     // --- cDynamicParticleModifierState (On Tour second base, 0x50)
     int Mesh;                       // 0x010 [O] cDynamicParticleModifierState::Mesh; [R] ctor stores the mesh index;
                                     //       [U] updatePosition passes it to cInstanceNode_buildMeshMat (the mesh's matrix)
@@ -124,10 +103,6 @@ struct cDynamicParticleModifier {
     char unk_264[0xC];              // 0x264 padding to the 16-byte size
 };
 
-CHECK_OFFSET(cDynamicParticleModifier, Next, 0x00);
-CHECK_OFFSET(cDynamicParticleModifier, Prev, 0x04);
-CHECK_OFFSET(cDynamicParticleModifier, mVtbl, 0x08);
-CHECK_OFFSET(cDynamicParticleModifier, Instance, 0x0C);
 CHECK_OFFSET(cDynamicParticleModifier, Mesh, 0x10);
 CHECK_OFFSET(cDynamicParticleModifier, Fade, 0x14);
 CHECK_OFFSET(cDynamicParticleModifier, Complete, 0x18);
@@ -178,15 +153,9 @@ CHECK_SIZE(tAddHaloData, 0x28);
 // Speed, Angle) at 0x10. The ctor copies the fields from a tAddHaloData (On Tour 0x28: InstId, Type, Mesh, ColourA,
 // ColourR, ColourG, ColourB, Radius, Speed), reordering A,R,G,B into Color = {R, G, B, A}.
 // Tags as above, plus [P] tools/layout_xlate.py (preview == retail at 0x24, 0x28, 0x2C, 0x30: render / update).
-struct cHaloModifier {
-    // --- cEffectLink (object/effectlink.h)
-    cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] the cEffectModifier ctors zero it; [U]
-                                    //       cEffectLink_add, unlink (cEffectLink_unlink)
-    cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cHaloModifier_vtbl (0x00491220) in both ctors and the dtor
-    // --- cEffectModifier
-    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] cEffectModifier_cEffectModifier(inst) /
-                                    //       the replay ctor; [U] render passes it to cInstanceNode_buildMeshMat
+struct cHaloModifier : public cEffectModifier {
+    // cEffectModifier (object/effectmodifier.h, 0x10): the vptr at 0x08:
+    //   [R] cHaloModifier_vtbl (0x00491220) in both ctors and the dtor
     // --- cHaloModifierState (On Tour second base, 0x30)
     t4Vector Color;                 // 0x010 [O] (state); [R] ctor = {ColourR, ColourG, ColourB, ColourA} of the
                                     //       tAddHaloData (one sq); [U] render passes &Color as the halo colour
@@ -202,10 +171,6 @@ struct cHaloModifier {
     char unk_034[0xC];              // 0x034 padding (16-byte aligned: Color is a t4Vector)
 };
 
-CHECK_OFFSET(cHaloModifier, Next, 0x000);
-CHECK_OFFSET(cHaloModifier, Prev, 0x004);
-CHECK_OFFSET(cHaloModifier, mVtbl, 0x008);
-CHECK_OFFSET(cHaloModifier, Instance, 0x00C);
 CHECK_OFFSET(cHaloModifier, Color, 0x010);
 CHECK_OFFSET(cHaloModifier, Radius, 0x020);
 CHECK_OFFSET(cHaloModifier, Type, 0x024);

@@ -2127,7 +2127,7 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, tAddRailData* 
 {
     tBoundBox* box = ((&self->BoundBox));
     self->SplineId = 0xFFFFFFFF;
-    self->mVtbl = (void**)cRailModifier_vtbl;
+    VPTR_OF(cRailLink, self) = (void**)cRailModifier_vtbl;
     self->Next = 0;
     self->Prev = 0;
     self->Instance = (tInstanceRecord*)model;
@@ -2310,7 +2310,7 @@ struct sSmRef_BA88 {
 extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cBxReplayFrame* src)
 {
     self->SplineId = 0xFFFFFFFF;
-    self->mVtbl = (void**)cRailModifier_vtbl;
+    VPTR_OF(cRailLink, self) = (void**)cRailModifier_vtbl;
     self->Next = 0;
     self->Prev = 0;
     src->read((char*)&self->BoundBox, 0x30);
@@ -2469,7 +2469,7 @@ struct sSmRef_BD70 {
  */
 extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
 {
-    self->mVtbl = (void**)cRailModifier_vtbl;
+    VPTR_OF(cRailLink, self) = (void**)cRailModifier_vtbl;
     remove_BD70((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BD70*)(&self->BoundBox));
     operator_delete((int*)self->Node);
     sSmTrack_BD70* spline = ((sSmRef_BD70*)(&self->SplineId))->get();
@@ -2487,7 +2487,7 @@ extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
         insert_BD70((char*)cObjectInterface_getNash(), seg, &segBox);
         seg = seg->next;
     }
-    self->mVtbl = (void**)cRailLink_vtbl;
+    VPTR_OF(cRailLink, self) = (void**)cRailLink_vtbl;
     cRailLink_unlink((sSplineLink*)self);
     if (flags & 1) {
         operator_delete((int*)self);

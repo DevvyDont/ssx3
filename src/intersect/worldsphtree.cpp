@@ -6421,7 +6421,7 @@ extern void* cBoostModifier_vtbl[];
 extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, tAddBoostData* def, int instRecord)
 {
     self->Active = 1;
-    self->mVtbl = cBoostModifier_vtbl;
+    VPTR_OF(cPhysicsModifier, self) = cBoostModifier_vtbl;
     self->Instance = (tInstanceRecord*)instRecord;
     int type = def->Type;
     self->Type = type;
@@ -6461,7 +6461,7 @@ extern void* cBoostModifier_vtbl[];
 extern "C" void* cBoostModifier_cBoostModifier1(cBoostModifier* self, sVEntry<void>** stream)
 {
     self->Active = 1;
-    self->mVtbl = cBoostModifier_vtbl;
+    VPTR_OF(cPhysicsModifier, self) = cBoostModifier_vtbl;
     ((ReadFn00342808)(*stream)[2].fn)(vthis(stream, (*stream)[2]), (char*)&self->Boost, 0x30);
     self->Instance = (tInstanceRecord*)((ReadIntFn00342808)(*stream)[3].fn)(vthis(stream, (*stream)[3]));
     return ((void*)self);
@@ -6499,7 +6499,7 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
             self->Active = 1;
         }
     }
-    sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
     ((Fn0_00342880)vt[9].fn)(vthis(self, vt[9]));
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
@@ -6507,16 +6507,16 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
             if (obj->isIntersecting(self->Instance) != 0) {
                 self->Active = 1;
                 if (self->Drag < 0.0f) {
-                    sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
+                    sVEntry<void>* vtbl = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
                     ((Fn1_00342880)vtbl[8].fn)(vthis(self, vtbl[8]), obj);
                 } else {
-                    sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
+                    sVEntry<void>* vtbl = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
                     ((Fn1_00342880)vtbl[7].fn)(vthis(self, vtbl[7]), obj);
                 }
             }
         }
     }
-    sVEntry<void>* vtbl2 = (sVEntry<void>*)self->mVtbl;
+    sVEntry<void>* vtbl2 = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
     ((Fn0_00342880)vtbl2[10].fn)(vthis(self, vtbl2[10]));
 }
 #endif

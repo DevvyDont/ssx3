@@ -170,9 +170,9 @@ void operator_delete(int*);
 extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags)
 {
     cEffectModifier* effectLink = self;
-    effectLink->mVtbl = cEffectModifier_vtbl;
+    VPTR_OF(cEffectLink, effectLink) = cEffectModifier_vtbl;
     cEffectModifier_EffectCount--;
-    effectLink->mVtbl = cEffectLink_vtbl;
+    VPTR_OF(cEffectLink, effectLink) = cEffectLink_vtbl;
     cEffectLink_unlink((cEffectLink*)(sEffectLinkView*)&effectLink->Next);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -248,7 +248,7 @@ static inline void* vu0CopyMatrix003458C0(void* dst, void* src)
 extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, int pdata, int owner)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
-    self->mVtbl = cParticleModifier_vtbl;
+    VPTR_OF(cEffectLink, self) = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(&self->Emitter);
     self->ParticleData = (tParticleData*)pdata;
     tInstanceRecord* own = self->Instance;
@@ -289,7 +289,7 @@ extern char t4mat_Identity[];
 extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
-    self->mVtbl = cParticleModifier_vtbl;
+    VPTR_OF(cEffectLink, self) = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(&self->Emitter);
     stream->read((char*)&self->Complete, 4);
     if (self->Complete == 0) {
@@ -325,7 +325,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
  */
 extern "C" void cParticleModifier__cParticleModifier(cParticleModifier* self, int flags)
 {
-    self->mVtbl = cParticleModifier_vtbl;
+    VPTR_OF(cEffectLink, self) = cParticleModifier_vtbl;
     int* buf = (int*)self->ParticleData;
     if (buf != 0) {
         operator_delete(buf);
@@ -451,7 +451,7 @@ struct sVec4_00345C90 {
 extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, tParticleData* particleDesc, int owner, int bone, sVec4_00345C90* pos)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
-    self->mVtbl = cDynamicParticleModifier_vtbl;
+    VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
     self->ParticleData = (tParticleData*)particleDesc;
@@ -497,7 +497,7 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b
 extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
-    self->mVtbl = cDynamicParticleModifier_vtbl;
+    VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
     void* data = &self->Mesh;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
@@ -534,7 +534,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
  */
 extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(cDynamicParticleModifier* self, int flags)
 {
-    self->mVtbl = cDynamicParticleModifier_vtbl;
+    VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
     int* buf = (int*)self->ParticleData;
     if (buf != 0) {
         operator_delete(buf);
@@ -782,7 +782,7 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, cBxReplayF
 extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
-    self->mVtbl = cHaloModifier_vtbl;
+    VPTR_OF(cEffectLink, self) = cHaloModifier_vtbl;
     stream->read((char*)&self->Color, 0x30);
     cHaloModifier_HaloCount++;
     return ((void*)self);
@@ -804,7 +804,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
  */
 extern "C" void cHaloModifier__cHaloModifier(cHaloModifier* self, int flags)
 {
-    (self)->mVtbl = cHaloModifier_vtbl;
+    VPTR_OF(cEffectLink, (self)) = cHaloModifier_vtbl;
     cHaloModifier_HaloCount--;
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }

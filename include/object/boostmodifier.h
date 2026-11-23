@@ -12,6 +12,9 @@
 // every On Tour offset equals retail.
 
 #include "layout.h"
+
+struct cBeing;
+#include "object/physicsmodifier.h"
 #include "bx/math3d.h"
 
 struct tInstanceRecord;
@@ -45,12 +48,14 @@ CHECK_OFFSET(tAddBoostData, BoostZ, 0x1C);
 CHECK_OFFSET(tAddBoostData, unk_020, 0x20);
 CHECK_SIZE(tAddBoostData, 0x24);
 
-struct cBoostModifier {
-    // --- cPhysicsModifier (0x8; object/physicsmodifier.h)
-    int Active;                     // 0x00 [O] bool (4 bytes); [R] ctor cPhysicsModifier_cPhysicsModifier1 stores 1, the replay ctor
-                                    //      cPhysicsModifier_cPhysicsModifier reads 4 bytes here; [U] isActive (lw 0x0)
-    void** mVtbl;                   // 0x04 [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store
-                                    //      cBoostModifier_vtbl (0x00490898)
+struct cBoostModifier : public cPhysicsModifier {
+    // cPhysicsModifier (object/physicsmodifier.h, 0x8): the vptr at 0x04:
+    //   [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store cBoostModifier_vtbl (0x00490898)
+    // cBoostModifier's own slots ([R] cBoostModifier_vtbl; types [O] On Tour's class cBoostModifier):
+    virtual void applyBoost(cBeing* pBeing);                    // 7
+    virtual void applyDrag(cBeing* pBeing);                     // 8
+    virtual void boostStart();                                  // 9
+    virtual void boostEnd();                                    // 10
     char unk_08[0x8];               // 0x08 padding (the state is 16-byte aligned)
     // --- cBoostModifierState
     t4Vector Boost;                 // 0x10 [O]; [R] ctor (sq 0x10); [U] cBoostModifier_applyBoost (lqc2 0x10)
@@ -65,8 +70,6 @@ struct cBoostModifier {
     char unk_44[0xc];               // 0x44 padding to the 0x50 allocation
 };
 
-CHECK_OFFSET(cBoostModifier, Active, 0x00);
-CHECK_OFFSET(cBoostModifier, mVtbl, 0x04);
 CHECK_OFFSET(cBoostModifier, unk_08, 0x08);
 CHECK_OFFSET(cBoostModifier, Boost, 0x10);
 CHECK_OFFSET(cBoostModifier, MaxSpeed, 0x20);

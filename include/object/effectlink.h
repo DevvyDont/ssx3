@@ -10,16 +10,21 @@
 
 #include "layout.h"
 
+struct cBxReplayFrame;
+
 struct cEffectLink {
     cEffectLink* Next;              // 0x00 [O]; [U] cEffectLink_add, cEffectLink_append
     cEffectLink* Prev;              // 0x04 [O]; [U] cEffectLink_add
-    void** mVtbl;                   // 0x08 [R] cEffectLink_vtbl (0x00491340): the dtor and tModifierBlock_tModifierBlock
-                                    //      (+0x18) store it
+    // 0x08: the vptr. [R] cEffectLink_vtbl (0x00491340): the dtor and tModifierBlock_tModifierBlock (+0x18) store it
+    //   Slots:
+    virtual ~cEffectLink();                                     // 1  ([R] cEffectLink_vtbl; types [O])
+    virtual int getType();                                      // 2
+    virtual void fadeEffect();                                  // 3
+    virtual void writeToReplayFrame(cBxReplayFrame* data);      // 4
 };
 
 CHECK_OFFSET(cEffectLink, Next, 0x00);
 CHECK_OFFSET(cEffectLink, Prev, 0x04);
-CHECK_OFFSET(cEffectLink, mVtbl, 0x08);
 CHECK_SIZE(cEffectLink, 0xC);
 
 #endif /* OBJECT_EFFECTLINK_H */

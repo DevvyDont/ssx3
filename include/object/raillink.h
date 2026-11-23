@@ -14,17 +14,20 @@
 
 #include "layout.h"
 
+struct cBxReplayFrame;
+
 struct cRailLink {
     cRailLink* Next;                // 0x00 [O]; [U] cRailLink_add/append walk and patch it, unlink (cRailLink_unlink)
                                     //      clears it
     cRailLink* Prev;                // 0x04 [O]; [U] cRailLink_add sets the new node's Prev; unlink patches Next->Prev
-    void** mVtbl;                   // 0x08 [R] cRailLink_vtbl (0x00491200), stored by the destructor and by every
-                                    //      derived dtor before unlinking
+    // 0x08: the vptr. [R] cRailLink_vtbl (0x00491200), stored by the destructor and by every derived dtor before
+    //   unlinking. Slots:
+    virtual ~cRailLink();                                       // 1  ([R] cRailLink_vtbl; types [O])
+    virtual void writeToReplayFrame(cBxReplayFrame* data);      // 2
 };
 
 CHECK_OFFSET(cRailLink, Next, 0x00);
 CHECK_OFFSET(cRailLink, Prev, 0x04);
-CHECK_OFFSET(cRailLink, mVtbl, 0x08);
 CHECK_SIZE(cRailLink, 0xC);
 
 #endif /* OBJECT_RAILLINK_H */

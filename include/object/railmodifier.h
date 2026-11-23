@@ -24,6 +24,7 @@
 // tBoundBox comes from world/worldview.h until it moves to a bx header.
 
 #include "layout.h"
+#include "object/raillink.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 
@@ -31,13 +32,16 @@ struct cRailLink;
 struct cRailSpaceNode;
 struct tInstanceRecord;
 
-struct cRailModifier {
-    // --- cRailLink (On Tour 0xC)
-    cRailLink* Next;              // 0x00 [O]; [R] both ctors zero it; [U] cRailLink_append / cRailLink_unlink (unlink,
-                                  //      called by the destructor) walk it
-    cRailLink* Prev;              // 0x04 [O]; [R] both ctors zero it
-    void** mVtbl;                 // 0x08 [R] ctors store cRailModifier_vtbl; the destructor stores it, then
-                                  //      cRailLink_vtbl before unlinking
+struct cRailModifier : public cRailLink {
+    // cRailLink (object/raillink.h, 0xC): the vptr at 0x08:
+    //   [R] ctors store cRailModifier_vtbl; the destructor stores it, then cRailLink_vtbl before unlinking
+    // cRailModifier's notes on cRailLink's fields:
+    //   Next: [R] both ctors zero it; [U] cRailLink_append / cRailLink_unlink (unlink, called by the destructor) walk
+    //       it
+    //   Prev: [R] both ctors zero it
+    // cRailModifier's own slots ([R] cRailModifier_vtbl; types [O] On Tour's class cRailModifier):
+    virtual void update();                                      // 3
+    virtual void render();                                      // 4
     char unk_0C[0x4];             // 0x0C padding (BoundBox is 16-byte aligned)
     // --- cRailModifierState (On Tour 0x30; [R] cRailModifier_cRailModifier1 reads and cRailModifier_writeToReplayFrame writes these
     //     0x30 bytes from +0x10)
@@ -62,9 +66,6 @@ struct cRailModifier {
                                   //      transposes lwc1/swc1 0x54-0x74); getInvMat copies it (lqc2 0x50-0x80)
 };
 
-CHECK_OFFSET(cRailModifier, Next, 0x00);
-CHECK_OFFSET(cRailModifier, Prev, 0x04);
-CHECK_OFFSET(cRailModifier, mVtbl, 0x08);
 CHECK_OFFSET(cRailModifier, unk_0C, 0x0C);
 CHECK_OFFSET(cRailModifier, BoundBox, 0x10);
 CHECK_OFFSET(cRailModifier, SplineId, 0x30);
