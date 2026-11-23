@@ -360,7 +360,7 @@ public:
     virtual void RenderTriStrip(int n, sVert_EDA0* v, int flags);
 };
 extern sGs_EDA0 sDrawState_s_defaultDrawState_EDA0 __asm__("sDrawState_s_defaultDrawState");
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
 struct t4Vector;
@@ -556,7 +556,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
     ((cGfx_EDA0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_2 = 5;
-    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
+    GrMan->SetView1(t4mat_Identity);
 
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
@@ -932,7 +932,7 @@ public:
     virtual void RenderTriStrip(int n, sVert_FB40* v, int flags);
 };
 extern sGs_FB40 sDrawState_s_defaultDrawState_FB40 __asm__("sDrawState_s_defaultDrawState");
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
 struct t4Vector;
@@ -1080,7 +1080,7 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
     ((cGfx_FB40*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_FB40*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_FB40*)GrMan)->stateTop->f4_2 = 5;
-    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
+    GrMan->SetView1(t4mat_Identity);
 
     sTex_FB40* tex = D_004C8C58_FB40[0].tex;
     float top = self->unk_020.Y;

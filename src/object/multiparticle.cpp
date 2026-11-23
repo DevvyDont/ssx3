@@ -26,7 +26,7 @@ extern "C" void* cStaticEmitter_cStaticEmitter(void* p);
 extern "C" void cStaticEmitter_setupEmitter(void* sys, void* data, int n);
 extern char str_InstIds[];
 extern char str_Emitter[];
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 // PORT: array new bound to the tagged allocator
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -52,7 +52,7 @@ extern "C" void cMultiParticle_setupMultiParticle(cMultiParticle* self)
     for (int i = 0; i < self->MaxInst; i++) {
         ((sMPRef*)self->InstIds)[i].id = 0xFFFFFFFF;
     }
-    cStaticEmitter_setupEmitter(((void*)self->Emitter), t4mat_Identity, ((int)self->Particle));
+    cStaticEmitter_setupEmitter(((void*)self->Emitter), &t4mat_Identity, ((int)self->Particle));
 }
 #endif
 

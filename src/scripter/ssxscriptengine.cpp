@@ -4690,7 +4690,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_cScriptObjCamera);
 #ifdef SKIP_ASM
 void* cScriptObject_cScriptObject(void*, int);
 extern char cScriptObjCamera_vtbl[];
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Constructs a script camera object for one view.
@@ -4725,7 +4725,7 @@ extern "C" void* cScriptObjCamera_cScriptObjCamera(cScriptObjCamera* self, int v
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)&self->mBaseTransform), "r"(t4mat_Identity)
+        : "r"((char*)&self->mBaseTransform), "r"(&t4mat_Identity)
         : "memory");
     self->mViewIndex = viewIndex;
     *(int*)&self->mBaseRotX = 0;
@@ -4753,7 +4753,7 @@ void cScriptObjCamera_SetCameraManager(void* vself, int val)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraEntity);
 #ifdef SKIP_ASM
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 
 /**
@@ -4794,7 +4794,7 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
             "sqc2      $vf4, 0x30(%0)\n"
             ".set reorder\n"
             :
-            : "r"((char*)&self->mBaseTransform), "r"(t4mat_Identity)
+            : "r"((char*)&self->mBaseTransform), "r"(&t4mat_Identity)
             : "memory");
         *(int*)&self->mBaseRotX = 0;
         *(int*)&self->mBaseRotY = 0;
@@ -5166,7 +5166,7 @@ char* GetSSXCameraManualHeader_D970(void* self) __asm__("GetSSXCameraManualHeade
 char* GetSSXCameraTargetHeader_D970(void* self) __asm__("GetSSXCameraTargetHeader__FPv");
 char* GetSSXCameraSubjectHeader_D970(void* self) __asm__("GetSSXCameraSubjectHeader__FPv");
 char* GetSSXCameraAlgorithmicHeader_D970(void* self) __asm__("GetSSXCameraAlgorithmicHeader__FPv");
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern float t4vect_XAxis_D970[] __asm__("t4vect_XAxis");
 extern float t4vect_YAxis_D970[] __asm__("t4vect_YAxis");
 extern float t4vect_ZAxis_D970[] __asm__("t4vect_ZAxis");
@@ -5182,7 +5182,7 @@ extern "C" void cSSXScriptEngine_GetAnchorOrientation_f(void* self, int type, vo
         (SELF)->rz = *(float*)((REC) + 0x14) * 0.01745329424738884f; \
         VSet_SE(&v, *(float*)((REC) + 8), *(float*)((REC) + 0xC), *(float*)((REC) + 0x10), 1.0f); \
         sRotMat_SE* m = &M; \
-        CopyMat_SE(m, t4mat_Identity); \
+        CopyMat_SE(m, &t4mat_Identity); \
         Translate_SE(m, &v); \
         ROTATE_SE(m, t4vect_ZAxis_D970, -(SELF)->rz); \
         ROTATE_SE(m, t4vect_YAxis_D970, (SELF)->ry); \
@@ -5222,7 +5222,7 @@ extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sSc
 extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sScrCam_SE* cam)
 {
     char* owner = cam->owner;
-    CopyMat_SE(&self->mat, t4mat_Identity);
+    CopyMat_SE(&self->mat, &t4mat_Identity);
     self->rx = 0.0f;
     self->ry = 0.0f;
     self->rz = 0.0f;
@@ -5264,7 +5264,7 @@ void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
 extern char cScriptObjRider_vtbl[];
 extern char D_00482018[];
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Constructs a rider's script object: a script entity plus a cScriptObject of type 3 with an identity base transform.
@@ -5298,7 +5298,7 @@ extern "C" void* cScriptObjRider_cScriptObjRider(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x30), "r"(t4mat_Identity)
+        : "r"((char*)self + 0x30), "r"(&t4mat_Identity)
         : "memory");
     *(int*)((char*)self + 0x70) = 0;
     *(int*)((char*)self + 0x74) = 0;
@@ -5318,7 +5318,7 @@ void* cSSXScriptEngine_GetAnimationBankInfo_2(void* engine, int id) __asm__("cSS
 void* cSSXScriptEngine_GetSoundBankInfo_2(void* engine, int id) __asm__("cSSXScriptEngine_GetSoundBankInfo__FPv");
 extern "C" void cSSXScriptEngine_GetAnchorOrientation(void* engine, int id, void* obj, void* pos, float* a, float* b, float* c);
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
 extern float t4vect_ZAxis[4];
@@ -5354,7 +5354,7 @@ static inline void LoadIdentity_F9F8(void* dst)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(dst), "r"(t4mat_Identity)
+        : "r"(dst), "r"(&t4mat_Identity)
         : "memory");
 }
 
@@ -5566,7 +5566,7 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_OnEndObjectUse);
 #ifdef SKIP_ASM
 void cScriptObject_OnEndObjectUse(void*);
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Releases the rider's script object: drops one use and resets its base transform and bank bindings.
@@ -5592,7 +5592,7 @@ extern "C" void cScriptObjRider_OnEndObjectUse(cScriptObjRider* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)&self->mBaseTransform), "r"(t4mat_Identity)
+        : "r"((char*)&self->mBaseTransform), "r"(&t4mat_Identity)
         : "memory");
     *(int*)&self->mBaseRotX = 0;
     *(int*)&self->mBaseRotY = 0;

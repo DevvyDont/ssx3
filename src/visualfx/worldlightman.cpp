@@ -1848,7 +1848,7 @@ void sti_002F6B88(int init, int prio)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A50);
 #ifdef SKIP_ASM
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Returns the identity matrix t4mat_Identity.
@@ -1859,7 +1859,7 @@ extern char t4mat_Identity[];
  */
 extern "C" void* func_002F7A50()
 {
-    return t4mat_Identity;
+    return &t4mat_Identity;
 }
 #endif
 //100%

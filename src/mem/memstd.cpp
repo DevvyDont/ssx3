@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "ealib/shape.h"
 #include "mem/memstd.h"
 #include "movie/videodriver.h"
@@ -2703,7 +2704,7 @@ public:
     virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sMesh_2548D0 {
     int f0;
@@ -2745,7 +2746,7 @@ extern "C" void func_002548D0_impl(void* videoDriver)
     float w = (float)self->world->GetScreenWidth();
     float screenHeight = (float)self->world->GetScreenHeight();
     self->world->SetViewportOrthographic(0, 0, 0.0f, 0.0f, w, screenHeight, 0.0f, 1.0f);
-    self->world->SetView1(t4mat_Identity);
+    self->world->SetView1(&t4mat_Identity);
     sRS_2548D0* rs = self->world->top;
     rs->f8 = (rs->f8 & ~0x3E0) | ((self->f3C << 5) & 0x3E0);
     sVtx_2548D0 quadVerts[4];

@@ -271,7 +271,7 @@ INCLUDE_ASM("object/effectlink", cParticleModifier_cParticleModifier1);
 #ifdef SKIP_ASM
 void* operator_new1(int size);
 extern "C" void cStaticEmitter_readFromReplayFrame(void* self, void* stream);
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 
 /**
@@ -300,7 +300,7 @@ extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, c
         cStaticEmitter_setupEmitter(&self->Emitter, &self->Transform, (int)self->ParticleData);
         cStaticEmitter_readFromReplayFrame(&self->Emitter, stream);
     } else {
-        vu0CopyMatrix003458C0(&self->Transform, t4mat_Identity);
+        vu0CopyMatrix003458C0(&self->Transform, &t4mat_Identity);
         self->ParticleData = 0;
     }
     cParticleModifier_ParticleCount++;

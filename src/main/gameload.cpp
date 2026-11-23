@@ -2553,7 +2553,7 @@ INCLUDE_ASM("main/gameload", cFadeScreen_drawFade);
 #ifdef SKIP_ASM
 extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col, float z);
 extern int G2D;
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sRS231D60 {
     int f0;
@@ -2644,7 +2644,7 @@ extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
     ((cCtx231D60*)ctx)->top++;
     *((cCtx231D60*)GrMan)->top = sDrawState_s_defaultDrawState;
     GrMan->SetViewportOrthographic(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0, 0);
-    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
+    GrMan->SetView1(t4mat_Identity);
     ((cCtx231D60*)GrMan)->top->f8_5 = 31;
     ((cCtx231D60*)GrMan)->top->f4_23 = 2;
     ((cCtx231D60*)GrMan)->top->f4_20 = 0;
@@ -2699,7 +2699,7 @@ INCLUDE_ASM("main/gameload", cLoadIndicator_render);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" float fCos(float);
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sV2_1FC0 {
     float x, y;
@@ -2812,7 +2812,7 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
     ((cGfx_1FC0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_1FC0*)GrMan)->stateTop->f8_5 = 0x1F;
-    ((cGfx_1FC0*)GrMan)->SetView(t4mat_Identity);
+    ((cGfx_1FC0*)GrMan)->SetView(&t4mat_Identity);
     {
         sVE_1FC0* vt = (sVE_1FC0*)VPTR_OF(cGraphicsMan, GrMan);
         char* thisp = (char*)GrMan + vt[23].delta;

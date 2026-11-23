@@ -5644,7 +5644,7 @@ extern "C" void cMeshAnimFrame__cMeshAnimFrame(cMeshAnimFrame* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", cMeshAnimFrame_init);
 #ifdef SKIP_ASM
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Resets a mesh animation frame's FrameMatrix (+0x90) to t4mat_Identity.
@@ -5664,7 +5664,7 @@ extern "C" void cMeshAnimFrame_init(cMeshAnimFrame* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)&self->FrameMatrix), "r"(t4mat_Identity)
+        : "r"((char*)&self->FrameMatrix), "r"(&t4mat_Identity)
         : "memory");
 }
 #endif

@@ -276,7 +276,7 @@ extern char* cGraphicsMan_TheGraphicsMan;
 extern int cFlags_m_EnableRender;
 // PORT: 128-bit integer mode for VU0 asm memory operands
 typedef int cQuad128_34B9B0 __attribute__((mode(TI)));
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sRS_34B9B0 {
     unsigned int f0_0 : 12;
@@ -393,7 +393,7 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
         {
             char* pos = (char*)&instRecord->m_fmTransform;
             sMat_34B9B0 mat;
-            MatCopy_34B9B0(&mat, (sMat_34B9B0*)t4mat_Identity);
+            MatCopy_34B9B0(&mat, (sMat_34B9B0*)&t4mat_Identity);
             mat.r[3].x = flagSet->mScrollU;
             mat.r[3].y = flagSet->mScrollV;
             char* gridMesh = (char*)flagSet->mGridMesh;
@@ -2188,7 +2188,7 @@ extern "C" void cAnimNode_makeAnimMats(cAnimNode* self, t4Matrix* vroot, sFsMtx_
 //100%
 INCLUDE_ASM("object/flagset", cAnimNode_getFrameMat);
 #ifdef SKIP_ASM
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Returns the frame matrix of one animated mesh, or the identity matrix when there are no anim frames.
@@ -2199,7 +2199,7 @@ extern char t4mat_Identity[];
 extern "C" void* cAnimNode_getFrameMat(cAnimNode* self, int i) {
     char* base = (char*)self->AnimFrames;
     if (base == 0) {
-        return t4mat_Identity;
+        return &t4mat_Identity;
     }
     return base + i * 208 + 0x90;
 }

@@ -5741,7 +5741,7 @@ struct sMatD88 {
     t4Vector r[4];
 };
 
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 int BXrand();
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
@@ -5829,7 +5829,7 @@ extern "C" void* cSnowBox_cSnowBox(cSnowBox* self, int viewNum, int snowBoxType,
     self->mRandSeed = BXrand();
     self->mRandSeed2 = BXrand();
     self->mRandSeed3 = BXrand();
-    wakeCopyMatD88((sMatD88*)&self->mBoxMatrix, (sMatD88*)t4mat_Identity);
+    wakeCopyMatD88((sMatD88*)&self->mBoxMatrix, (sMatD88*)&t4mat_Identity);
     {
         sMatD88 scaledCopy;
         t4Vector scale;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "sound/ssxaudio.h"
 #include "fe/backgroundman.h"
@@ -75,7 +76,7 @@ extern "C" int cBackgroundMan_loadImages(cBackgroundMan* self)
 //100%
 INCLUDE_ASM("main/loadscreens", cBackgroundMan_renderImage);
 #ifdef SKIP_ASM
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sRS_AE00 {
     int f0;                     // 0x00
@@ -184,7 +185,7 @@ extern "C" void cBackgroundMan_renderImage(cBackgroundMan* self)
     {
         sCtx_AE00* graphics = ctx_AE00();
         sVEnt_AE00* vtEntry = &graphics->vt[34];
-        ((fnP_AE00)vtEntry->fn)(vthis(graphics, *vtEntry), t4mat_Identity);
+        ((fnP_AE00)vtEntry->fn)(vthis(graphics, *vtEntry), &t4mat_Identity);
     }
     setState_AE00();
     sVert_AE00 verts[4];

@@ -2587,7 +2587,7 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);
 extern int cSplashToggles_m_Enable;
 extern int cSplashToggles_m_Render;
 extern int cRenderStateMan_m_indoor;
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sV2_3E28 {
     float x, y;
@@ -2697,7 +2697,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
     sV2_3E28 scr = screen;
     ((cGfx_3E28*)ps2GraphicsMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
     ((cGfx_3E28*)ps2GraphicsMan)->PushView();
-    ((cGfx_3E28*)ps2GraphicsMan)->SetView(t4mat_Identity);
+    ((cGfx_3E28*)ps2GraphicsMan)->SetView(&t4mat_Identity);
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop[1] = ((cGfx_3E28*)ps2GraphicsMan)->stateTop[0];
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop++;
     *((cGfx_3E28*)ps2GraphicsMan)->stateTop = sDrawState_s_defaultDrawState;
@@ -3136,7 +3136,7 @@ extern "C" float cRenderStateMan_SunIntensity(int);
 extern "C" int cRenderStateMan_SunType(int);
 extern "C" float cRenderStateMan_SunRadius(int);
 extern "C" void cSunHalo_RenderLens_4A08(void*, void*) __asm__("cSunHalo_RenderLens");
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sV2_4A08 {
     float x, y;
@@ -3244,7 +3244,7 @@ extern "C" void cSunHalo_Render(cSunHalo* self, sV4_4A08* vp, int flag)
     ((cGfx_4A08*)gfx)->PushViewport();
     ((cGfx_4A08*)gfx)->SetViewportOrthographic(vp->x, vp->y, vp->z, vp->w, 1, 0, 0.0f, 1.0f);
     ((cGfx_4A08*)gfx)->PushView();
-    ((cGfx_4A08*)gfx)->SetView(t4mat_Identity);
+    ((cGfx_4A08*)gfx)->SetView(&t4mat_Identity);
     ((cGfx_4A08*)gfx)->stateTop->SetF22(1);
     ((cGfx_4A08*)gfx)->stateTop->f4_23 = 2;
     ((cGfx_4A08*)gfx)->stateTop->f4_20 = 0;

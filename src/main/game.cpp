@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "object/skybox.h"
 #include "render/ps2bezierman.h"
@@ -515,7 +516,7 @@ struct sFont_C830 {
 
 
 extern char gBucketMan[4];
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern int cDepthFog_m_Enable;
 extern "C" void cBucketMan_renderBucket(void* self, int index);
 void cSSXScriptEngine_Render(void* p);
@@ -570,7 +571,7 @@ extern "C" void func_0022C830(cGame* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_C830*)GrMan)->GetScreenWidth(), (float)((cGfx_C830*)GrMan)->GetScreenHeight(), 1);
     }
     ((cGfx_C830*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
-    ((cGfx_C830*)GrMan)->SetView(t4mat_Identity);
+    ((cGfx_C830*)GrMan)->SetView(&t4mat_Identity);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 0x18);
     Set1_C830((cGfx_C830*)ps2GraphicsMan, 0x7C, 2, 5);

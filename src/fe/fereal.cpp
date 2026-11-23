@@ -1061,7 +1061,7 @@ extern "C" void cUIEngine_render2D(void* ui);
 extern "C" void cSSXAudio_Update(void* snd, int a1, float t);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern int cRealFE_mMovieList;
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sFeGs {
     int w0;                         // 0x0
@@ -1177,7 +1177,7 @@ extern "C" int cRealFE_render(cRealFE* self)
         }
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            ps2GraphicsMan->SetView1(*(const t4Matrix*)t4mat_Identity);
+            ps2GraphicsMan->SetView1(t4mat_Identity);
         }
         feW()->top->setAlpha(9);
         sFeVert verts[4];

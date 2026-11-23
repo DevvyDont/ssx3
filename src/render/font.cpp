@@ -4614,7 +4614,7 @@ void cPS2GraphicsMan_PopView(void* vself)
 INCLUDE_ASM("render/font", cPS2GraphicsMan_SetView);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
 extern float t4vect_ZAxis[4];
@@ -4658,7 +4658,7 @@ static inline void LoadIdentity_5750(void* vvself)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(t4mat_Identity)
+        : "r"((char*)self->mCurrentView), "r"(&t4mat_Identity)
         : "memory");
 }
 
@@ -4886,7 +4886,7 @@ extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* mat)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_IdentityView);
 #ifdef SKIP_ASM
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Sets the top view matrix (mCurrentView) to t4mat_Identity.
@@ -4906,7 +4906,7 @@ extern "C" void cPS2GraphicsMan_IdentityView(cPS2GraphicsMan* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(t4mat_Identity)
+        : "r"((char*)self->mCurrentView), "r"(&t4mat_Identity)
         : "memory");
     self->mMatricesValid = 0;
 }

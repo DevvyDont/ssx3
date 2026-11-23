@@ -2173,7 +2173,7 @@ extern "C" void cDebugFE_update(cDebugFE* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/debugfe", cDebugFE_render);
 #ifdef SKIP_ASM
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cHeartBeat_draw(cHeartBeat* self, int a1);
 
@@ -2246,7 +2246,7 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         ((FnView_17FBF0)vt2[26].fn)((char*)graphicsMan2 + vt2[26].delta, 0, 0, zeroF, zeroF, 640.0f, 480.0f, -1.0f, one);
         cPS2GraphicsMan* graphicsMan3 = GrMan;
         sVEntry<void>* vt3 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan3);
-        ((FnP_17FBF0)vt3[34].fn)((char*)graphicsMan3 + vt3[34].delta, t4mat_Identity);
+        ((FnP_17FBF0)vt3[34].fn)((char*)graphicsMan3 + vt3[34].delta, &t4mat_Identity);
         cPS2GraphicsMan* graphicsMan4 = GrMan;
         setB23_17FBF0(rs_17FBF0((char*)graphicsMan4), 2);
         setB20_17FBF0(rs_17FBF0((char*)graphicsMan4), 3);

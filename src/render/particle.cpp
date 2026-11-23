@@ -117,7 +117,7 @@ int BXrand();
 
 extern "C" void tParticleEmitter_init(void* sys, int count, int a2, sVec4A* v, float a, float b, float c);
 extern "C" void tParticleEmitter_setupEmitter(void* sys, void* a1, void* def, void* a3, float f);
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 struct sGsState_00370DC8 {
     int w0;
@@ -253,7 +253,7 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
     force.w = 0.0f;
     tParticleEmitter_init(self->sys, def->NumParticles * self->count, def->NumBlur, &force, life,
                   def->BlurStep, def->Damp);
-    tParticleEmitter_setupEmitter(self->sys, t4mat_Identity, def, self->f180, seed);
+    tParticleEmitter_setupEmitter(self->sys, &t4mat_Identity, def, self->f180, seed);
     if (changed) {
         self->purge(0);
         self->Allocate();

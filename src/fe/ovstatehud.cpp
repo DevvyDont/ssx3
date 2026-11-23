@@ -2455,7 +2455,7 @@ struct sGs_31E0 {
 };
 
 extern sGs_31E0 sDrawState_s_defaultDrawState_31E0 __asm__("sDrawState_s_defaultDrawState");
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern int D_004A4EB0;
 extern sV2_31E0 D_004A4EA8;
 extern "C" float cFont_textExtent1(void* obj, const unsigned short* txt, void* a, int b, float x, float y);
@@ -2553,7 +2553,7 @@ extern "C" void cBXLoadIndicator_Render(cBXLoadIndicator* self)
     ((cGfx_31E0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_31E0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_31E0*)GrMan)->stateTop->f4_2 = 5;
-    ((cGfx_31E0*)GrMan)->SetView(t4mat_Identity);
+    ((cGfx_31E0*)GrMan)->SetView(&t4mat_Identity);
     {
         sVEntry<void(void*, float, float, float, float, int)>* vt = (sVEntry<void (void*, float, float, float, float, int)>*)VPTR_OF(cGraphicsMan, GrMan);
         char* thisp = (char*)GrMan + vt[23].delta;

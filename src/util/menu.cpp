@@ -933,7 +933,7 @@ public:
 };
 
 // Typed view of the render context (the unit declares GrMan with another class later).
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 static inline void cMenu_preRender_setF8_5(cMenu_preRender_sRS* rs, int v) { rs->f8_5 = v; }
 static inline void cMenu_preRender_setF4_23(cMenu_preRender_sRS* rs, int v) { rs->f4_23 = v; }
@@ -963,7 +963,7 @@ extern "C" void cMenu_preRender()
     cMenu_preRender_setF4_12(((cMenu_preRender_cCtx*)GrMan)->top, 20);
     cMenu_preRender_setF4_2(((cMenu_preRender_cCtx*)GrMan)->top, 5);
     GrMan->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
-    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
+    GrMan->SetView1(t4mat_Identity);
 }
 #endif
 

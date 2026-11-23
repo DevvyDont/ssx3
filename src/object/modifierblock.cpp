@@ -961,7 +961,7 @@ INCLUDE_ASM("object/modifierblock", cSkyBox_render);
 extern "C" int cObjectInterface_getCurrentCameraNum_i() __asm__("cObjectInterface_getCurrentCameraNum");
 extern "C" void* cObjectInterface_getCameraPosition(int i);
 extern int cRenderToggles_m_DisableSkyBox;
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 
 
@@ -1029,7 +1029,7 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     if (self->m_pInstanceSky == 0)
         return;
     t4Matrix skyMatrix;
-    vu0CopyMatrix_53B10(&skyMatrix, t4mat_Identity);
+    vu0CopyMatrix_53B10(&skyMatrix, &t4mat_Identity);
     t4Vector pos = *(t4Vector*)cObjectInterface_getCameraPosition(cObjectInterface_getCurrentCameraNum_i());
     *(t4Vector*)&((float*)&skyMatrix.row[0])[12] = pos;
     ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = *(sRS_53B10*)&ctx->m_pCurrentDrawState->m_bitGroups[0];

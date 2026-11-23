@@ -310,7 +310,7 @@ public:
 
 // Typed view of the render context (the unit declares GrMan as void* later).
 extern cUICtx_7DF8* GrMan_7df8 __asm__("GrMan");
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern sUIRS_7DF8 sDrawState_s_defaultDrawState_7df8 __asm__("sDrawState_s_defaultDrawState");
 extern "C" void cUIStateStack_render2D(void* p);
 
@@ -337,7 +337,7 @@ extern "C" void cUIEngine_render2D(cUIEngine* self)
     GrMan->PushView();
     GrMan->PushViewport();
     GrMan->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f, 0, 1);
-    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
+    GrMan->SetView1(t4mat_Identity);
     setF4_22_7DF8(GrMan_7df8->top, 1);
     setF4_23_7DF8(GrMan_7df8->top, 2);
     setF4_20_7DF8(GrMan_7df8->top, 0);

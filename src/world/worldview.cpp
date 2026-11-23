@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "visualfx/lensfx.h"
 #include "object/rollermodifier.h"
@@ -825,7 +826,7 @@ public:
 };
 
 
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Fixes up the pointers of a model's mesh hierarchy after it is loaded.
@@ -849,7 +850,7 @@ extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, tModelRe
             ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveMesh((void*)((int)meshHierarchy->m_Mesh), pModel);
         }
         if (((unsigned int)meshHierarchy->m_pMeshMatrix) == 0xFFFFFFFF) {
-            (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) = (unsigned int)t4mat_Identity;
+            (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) = (unsigned int)&t4mat_Identity;
         } else {
             (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) += (int)pModel;
         }
@@ -969,7 +970,7 @@ public:
 };
 
 
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 /**
  * Fixes up the pointers of a particle model's mesh hierarchy.
@@ -993,7 +994,7 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, 
             ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveParticleMesh((void*)((int)meshHierarchy->m_ParticleMesh));
         }
         if (((unsigned int)meshHierarchy->m_pParticleMeshMatrix) == 0xFFFFFFFF) {
-            (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) = (unsigned int)t4mat_Identity;
+            (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) = (unsigned int)&t4mat_Identity;
         } else {
             (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) += (int)pModel;
         }

@@ -4157,7 +4157,7 @@ public:
 
 
 extern sGsState_2680 sDrawState_s_defaultDrawState;
-extern char t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 extern int cRenderToggles_m_DisableHUD;
 // Release build: the assert compiles to nothing (gcc still emits its loop notes).
 #define ASSERT_2680(cond) do { } while (0)
@@ -4192,7 +4192,7 @@ extern "C" void func_00122680(void)
         *((cGraphicsMan_2680*)GrMan)->stateTop = sDrawState_s_defaultDrawState;
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
         GrMan->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
-        GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
+        GrMan->SetView1(t4mat_Identity);
         ((cGraphicsMan_2680*)GrMan)->stateTop->f8_5 = 24;
         ((cGraphicsMan_2680*)GrMan)->stateTop->f4_2 = 5;
         (*(t2Vector*)&debugFont->ShadowOffset[0]) = t2Vector(2.0f, 2.0f);
