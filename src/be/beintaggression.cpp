@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "be/beintnewrace.h"
 #include "be/beintaggression.h"
 #include "replay/frameptr.h"
@@ -62,23 +63,13 @@ int cBELibrary_getCharacterID(int);
 void* cBENewRaceInterface_getThis();
 extern "C" int cBENewRaceInterface_getRival(void* race);
 
-struct sAggrTriple {
-    signed char v[3];
-};
-
-struct sAggrCharProfile {
-    char pad_0x000[0xBC1];
-    sAggrTriple aggression[16]; // 0xBC1
-    char pad_0xBF1[0xF88 - 0xBC1 - 16 * 3];
-};
-
-extern sAggrCharProfile cBELibrary_profileLib[][10];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns how @p rider feels about @p targetRider: the state byte of @p rider's relation record for the target's
  * character, or 2 when the target is the rival of the current peak.
  *
- * The record is cBELibrary_profileLib[profile of @p rider][character of @p rider].aggression[character of
+ * The record is cBELibrary_profileLib[profile of @p rider][character of @p rider].mRelations[character of
  * @p targetRider] (3 bytes: state, level, ticks; see cBEAggressionInterface_applyAggression). The rival comes from
  * cBENewRaceInterface_getRival on the new-race interface.
  *
@@ -93,7 +84,7 @@ extern "C" int cBEAggressionInterface_getState(cBEAggressionInterface* self, int
     int cb = cBELibrary_getCharacterID(rider);
     if (cBENewRaceInterface_getRival(cBENewRaceInterface_getThis()) == ca)
         return 2;
-    return cBELibrary_profileLib[profile][cb].aggression[ca].v[0];
+    return cBELibrary_profileLib[profile][cb].mRelations[ca].aggState;
 }
 #endif
 
@@ -105,7 +96,7 @@ int cBELibrary_getCharacterID(int);
 void* cBENewRaceInterface_getThis();
 extern "C" int cBENewRaceInterface_getRival(void* race);
 
-extern sAggrCharProfile cBELibrary_profileLib[][10];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns how aggressive @p rider is toward @p targetRider: the level byte of @p rider's relation record for the
@@ -125,7 +116,7 @@ extern "C" int cBEAggressionInterface_getAggression(cBEAggressionInterface* self
     int cb = cBELibrary_getCharacterID(rider);
     if (cBENewRaceInterface_getRival(cBENewRaceInterface_getThis()) == ca)
         return 3;
-    return cBELibrary_profileLib[profile][cb].aggression[ca].v[1];
+    return cBELibrary_profileLib[profile][cb].mRelations[ca].aggLevel;
 }
 #endif
 
@@ -140,7 +131,7 @@ extern signed char D_005305F9[];
 /**
  * Raises one rider's aggression toward another after a bump or punch.
  *
- * The record is cBELibrary_profileLib[profile of @p iRider1][character of @p iRider1].aggression[character of @p iRider2]: {state, level,
+ * The record is cBELibrary_profileLib[profile of @p iRider1][character of @p iRider1].mRelations[character of @p iRider2]: {state, level,
  * ticks}. @p event adds 1, 2, 4 or 6 ticks and the level becomes ticks / 5. When the level rises, rider 0 notifies
  * func_001E2A08(other character, ticks) unless D_005305F9 is set, and the state clamps it: state 0 caps at level 2,
  * state 1 drops back to level 2 and moves to state 3 on reaching 4, state 2 stays within 1-3 and state 3 within 1-4
@@ -156,9 +147,9 @@ extern "C" void cBEAggressionInterface_applyAggression(cBEAggressionInterface* s
     int ca = cBELibrary_getCharacterID(iRider1);
     int cb = cBELibrary_getCharacterID(iRider2);
     int add = 0;
-    int oldLvl = cBELibrary_profileLib[profile][ca].aggression[cb].v[1];
-    int pts = cBELibrary_profileLib[profile][ca].aggression[cb].v[2];
-    int st = cBELibrary_profileLib[profile][ca].aggression[cb].v[0];
+    int oldLvl = cBELibrary_profileLib[profile][ca].mRelations[cb].aggLevel;
+    int pts = cBELibrary_profileLib[profile][ca].mRelations[cb].tick;
+    int st = cBELibrary_profileLib[profile][ca].mRelations[cb].aggState;
     switch (event) {
     case 0:
         add = 1;
@@ -214,9 +205,9 @@ extern "C" void cBEAggressionInterface_applyAggression(cBEAggressionInterface* s
             break;
         }
     }
-    cBELibrary_profileLib[profile][ca].aggression[cb].v[2] = pts;
-    cBELibrary_profileLib[profile][ca].aggression[cb].v[1] = lvl;
-    cBELibrary_profileLib[profile][ca].aggression[cb].v[0] = st;
+    cBELibrary_profileLib[profile][ca].mRelations[cb].tick = pts;
+    cBELibrary_profileLib[profile][ca].mRelations[cb].aggLevel = lvl;
+    cBELibrary_profileLib[profile][ca].mRelations[cb].aggState = st;
 }
 #endif
 
@@ -227,7 +218,7 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_regressAggression);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void func_001E2A08(int charID, int level);
-extern sAggrCharProfile cBELibrary_profileLib[][10];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 extern cBERaceDB cBELibrary_raceDB;
 
@@ -247,10 +238,10 @@ extern "C" void cBEAggressionInterface_regressAggression(void)
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++) {
             int ca = cBELibrary_getCharacterID(i);
-            int pts = cBELibrary_profileLib[profile][ca].aggression[j].v[2] - 3;
+            int pts = cBELibrary_profileLib[profile][ca].mRelations[j].tick - 3;
             if (pts < 0)
                 pts = 0;
-            int st = cBELibrary_profileLib[profile][ca].aggression[j].v[0];
+            int st = cBELibrary_profileLib[profile][ca].mRelations[j].aggState;
             int lvl = pts / 5;
             if (cBELibrary_raceDB.cGamePath == 0) {
                 func_001E2A08(j, pts);
@@ -288,9 +279,9 @@ extern "C" void cBEAggressionInterface_regressAggression(void)
                 }
                 break;
             }
-            cBELibrary_profileLib[profile][ca].aggression[j].v[0] = st;
-            cBELibrary_profileLib[profile][ca].aggression[j].v[2] = pts;
-            cBELibrary_profileLib[profile][ca].aggression[j].v[1] = lvl;
+            cBELibrary_profileLib[profile][ca].mRelations[j].aggState = st;
+            cBELibrary_profileLib[profile][ca].mRelations[j].tick = pts;
+            cBELibrary_profileLib[profile][ca].mRelations[j].aggLevel = lvl;
         }
     }
 }
@@ -324,7 +315,7 @@ extern "C" void cBEAggressionInterface_writeToReplayFrame(cBEAggressionInterface
         for (int j = 0; j < 10; j++)
         {
             int characterId = cBELibrary_getCharacterID(i);
-            stream->write((const char*)&cBELibrary_profileLib[profile][characterId].aggression[j], 3);
+            stream->write((const char*)&cBELibrary_profileLib[profile][characterId].mRelations[j], 3);
         }
     }
 }
@@ -355,7 +346,7 @@ extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterfac
         for (int j = 0; j < 10; j++)
         {
             int charId = cBELibrary_getCharacterID(i);
-            stream->read((char*)&cBELibrary_profileLib[profile][charId].aggression[j], 3);
+            stream->read((char*)&cBELibrary_profileLib[profile][charId].mRelations[j], 3);
         }
     }
 }
