@@ -6499,25 +6499,21 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
             self->Active = 1;
         }
     }
-    sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
-    ((Fn0_00342880)vt[9].fn)(vthis(self, vt[9]));
+    self->boostStart();
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
             cBeing* obj = cObjectInterface_getBeing(i);
             if (obj->isIntersecting(self->Instance) != 0) {
                 self->Active = 1;
                 if (self->Drag < 0.0f) {
-                    sVEntry<void>* vtbl = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
-                    ((Fn1_00342880)vtbl[8].fn)(vthis(self, vtbl[8]), obj);
+                    self->applyDrag(obj);
                 } else {
-                    sVEntry<void>* vtbl = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
-                    ((Fn1_00342880)vtbl[7].fn)(vthis(self, vtbl[7]), obj);
+                    self->applyBoost(obj);
                 }
             }
         }
     }
-    sVEntry<void>* vtbl2 = (sVEntry<void>*)VPTR_OF(cPhysicsModifier, self);
-    ((Fn0_00342880)vtbl2[10].fn)(vthis(self, vtbl2[10]));
+    self->boostEnd();
 }
 #endif
 

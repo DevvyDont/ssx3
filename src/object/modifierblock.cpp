@@ -218,10 +218,9 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sVEntry<void(void*)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[2].fn(vthis(physicsModifier, ((sVEntry<void(void*)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[2]));
+        physicsModifier->update();
         physicsModifier = self->Physics;
-        sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)((sVEntry<void(void*)>*)VPTR_OF(cPhysicsModifier, physicsModifier));
-        if (vt2[4].fn(vthis(physicsModifier, vt2[4])) == 0) {
+        if (physicsModifier->isActive() == 0) {
             tModifierBlock_remPhysicsModifier(self);
         }
     }
@@ -404,7 +403,7 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sVEntry<void(void*, int, float)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[3].fn(vthis(physicsModifier, ((sVEntry<void(void*, int, float)>*)VPTR_OF(cPhysicsModifier, physicsModifier))[3]), id, value);
+        physicsModifier->signal(id, value);
     }
     cEffectLink* firstEffect = self->Effect.Next;
     if (firstEffect != 0) {
@@ -522,12 +521,6 @@ extern "C" void tModifierBlock_remTexFlipModifier(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_remPhysicsModifier);
 #ifdef SKIP_ASM
-struct sMbVEntryDel2 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Deletes the block's physics modifier through its destructor virtual (vtable at +0x4, slot 1, flags 3) and clears
  * the slot.
@@ -536,8 +529,7 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
 {
     cPhysicsModifier* obj = self->Physics;
     if (obj != 0) {
-        sMbVEntryDel2* vt = (sMbVEntryDel2*)VPTR_OF(cPhysicsModifier, obj);
-        vt[1].fn(vthis(obj, vt[1]), 3);
+        delete obj;
         self->Physics = 0;
     }
 }
@@ -583,12 +575,6 @@ extern "C" void tModifierBlock_remEffectModifier(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_fadeEffectModifier);
 #ifdef SKIP_ASM
-struct sModBlockVEntry3228 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 
 /**
  * Tells every effect on a modifier block to fade out.
@@ -603,7 +589,7 @@ extern "C" void tModifierBlock_fadeEffectModifier(tModifierBlock* self)
         cEffectLink* link = head;
         do {
             cEffectLink* next = link->Next;
-            ((sModBlockVEntry3228*)VPTR_OF(cEffectLink, link))[3].fn(vthis(link, ((sModBlockVEntry3228*)VPTR_OF(cEffectLink, link))[3]));
+            link->fadeEffect();
             link = next;
         } while (link != 0);
     }
@@ -613,12 +599,6 @@ extern "C" void tModifierBlock_fadeEffectModifier(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_remHaloModifier);
 #ifdef SKIP_ASM
-struct sModBlockVEntry3278 {
-    short delta;
-    short index;
-    void* fn;
-};
-
 
 /**
  * Removes every halo effect from a modifier block.
@@ -633,9 +613,9 @@ extern "C" void tModifierBlock_remHaloModifier(tModifierBlock* self)
         cEffectLink* link = head;
         do {
             cEffectLink* next = link->Next;
-            if (((int (*)(void*))((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[2].fn)(vthis(link, ((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[2])) == 3) {
+            if (link->getType() == 3) {
                 if (link != 0) {
-                    ((void (*)(void*, int))((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[1].fn)(vthis(link, ((sModBlockVEntry3278*)VPTR_OF(cEffectLink, link))[1]), 3);
+                    delete link;
                 }
             }
             link = next;
@@ -647,12 +627,6 @@ extern "C" void tModifierBlock_remHaloModifier(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_remRailModifier);
 #ifdef SKIP_ASM
-struct sModBlockDtorVEntry3300 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 
 /**
  * Removes and deletes one rail modifier of a modifier block, or all of them.
@@ -671,7 +645,7 @@ extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned in
     loop:
         if (rail == 0) return;
         if (rail->SplineId == id) {
-            ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1]), 3);
+            delete rail;
             return;
         }
         rail = ((cRailModifier*)rail->Next);
@@ -680,7 +654,7 @@ extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned in
         do {
             cRailModifier* next = ((cRailModifier*)rail->Next);
             if (rail != 0) {
-                ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)VPTR_OF(cRailLink, rail))[1]), 3);
+                delete rail;
             }
             rail = next;
         } while (rail != 0);
@@ -707,8 +681,7 @@ extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, cEff
     cEffectLink* effect = (cEffectLink*)(*(void**)list);
     while (((void*)effect) != 0) {
         void* next = *(void**)effect;
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cEffectLink, effect);
-        vt[3].fn(vthis(effect, vt[3]));
+        effect->fadeEffect();
         cEffectLink_append(&self->Effect, effect);
         effect = (cEffectLink*)next;
     }
