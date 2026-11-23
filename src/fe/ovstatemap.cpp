@@ -1373,18 +1373,6 @@ struct sBXString_A4E0 {
     sBXString_A4E0(const sBXString_A4E0& o);
 };
 
-struct sVE_A4E0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void show_A4E0(char* o, int on)
-{
-    sVE_A4E0* vt = *(sVE_A4E0**)(o + 8);
-    vt[9].fn(vthis(o, vt[9]), on);
-}
-
 /**
  * Prints an incoming in-race chat message on an in-game state's screen.
  *
@@ -1407,12 +1395,12 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
         if (sess != 0 && sess->mConnected != 0) {
             char* name = self->mszChatBuff;
             if (cGameComm_getQueuedChat((int)sess, name, 65) != 0) {
-                char* helpText = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
+                cUIThing* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
                 if (helpText != 0)
-                    show_A4E0(helpText, 0);
-                char* helpTexts = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
+                    helpText->setVisible(0);
+                cUIThing* helpTexts = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
                 if (helpTexts != 0)
-                    show_A4E0(helpTexts, 0);
+                    helpTexts->setVisible(0);
                 ret = 1;
                 cUITextScroll* obj = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
                 unsigned short origNumLines = obj->mLineSize;
@@ -1425,7 +1413,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 cBXString_Concat(&chatLine, name);
                 cUITextScroll_addAsciiString(obj, chatLine.str);
                 func_001A83D8(obj, 40, 4, origNumLines, selectedIndex, linesOffset, none, 1);
-                show_A4E0(((char*)obj), 1);
+                obj->setVisible(1);
                 cBXString__cBXString(&chatLine, 2);
             }
         }

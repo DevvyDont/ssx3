@@ -1,6 +1,10 @@
 #include "vtable.h"
 #include "common.h"
 #include "ui/uithing.h"
+#include "ui/uigroup.h"
+#include "ui/uipair.h"
+#include "ui/uitext.h"
+#include "ui/uivector.h"
 #include "be/beinterface.h"
 #include "online/usbkeyboard.h"
 #include "util/locale.h"
@@ -314,17 +318,10 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_SetTextObjectsVisibility);
 #ifdef SKIP_ASM
-struct sVEntry_5E58 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void Call9_5E58(char* o, int a)
+static inline void Call9_5E58(cUIThing* o, int a)
 {
     if (o != 0) {
-        sVEntry_5E58* vt = *(sVEntry_5E58**)(o + 8);
-        vt[9].fn(vthis(o, vt[9]), a);
+        o->setVisible(a);
     }
 }
 
@@ -338,11 +335,11 @@ static inline void Call9_5E58(char* o, int a)
  */
 extern "C" void cScreenPopup_SetTextObjectsVisibility(cScreenPopup* self, int visible)
 {
-    Call9_5E58((char*)self->mpButtonGroup, visible);
-    Call9_5E58((char*)self->mpMessageText, visible);
-    Call9_5E58((char*)self->mpPostText, visible);
-    Call9_5E58((char*)self->mpTitleText, visible);
-    Call9_5E58((char*)self->mpTextBoxPair, visible);
+    Call9_5E58(self->mpButtonGroup, visible);
+    Call9_5E58(self->mpMessageText, visible);
+    Call9_5E58(self->mpPostText, visible);
+    Call9_5E58(self->mpTitleText, visible);
+    Call9_5E58(self->mpTextBoxPair, visible);
 }
 #endif
 
@@ -549,11 +546,10 @@ extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, void* obj);
 extern sQuad_58E8 gPopupBlue;
 
 
-static inline void SetColor_C66E8(char* o, sQuad_58E8* c)
+static inline void SetColor_C66E8(cUIThing* o, sQuad_58E8* c)
 {
     if (o != 0) {
-        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(o + 8);
-        vt[11].fn(vthis(o, vt[11]), c);
+        o->setColour((const tARGB*)c);
     }
 }
 
@@ -2784,16 +2780,9 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onWidgetMenu);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" char* cList_getByIndex(void* list, int idx);
 
-struct sVE1CA180 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-
-static inline void SetColour1CA180(char* obj, void* colour)
+static inline void SetColour1CA180(cUIThing* obj, void* colour)
 {
-    sVE1CA180* vt = *(sVE1CA180**)(obj + 8);
-    vt[11].fn(vthis(obj, vt[11]), colour);
+    obj->setColour((const tARGB*)colour);
 }
 
 /**
@@ -2814,9 +2803,9 @@ extern "C" int cScreenPopup_onWidgetMenu(cScreenPopup* self, char* menu, int msg
     case 5: {
         int sel = *(unsigned char*)(menu + 0x95);
         for (int i = 0; i < *(unsigned char*)(menu + 0x96); i++) {
-            char* obj = cList_getByIndex(menu + 0x74, i);
-            if (obj == (char*)self->mpTextBoxPair) {
-                obj = (char*)self->mpStaticBox;
+            cUIThing* obj = (cUIThing*)cList_getByIndex(menu + 0x74, i);
+            if (obj == self->mpTextBoxPair) {
+                obj = self->mpStaticBox;
             }
             if (i == sel) {
                 SetColour1CA180(obj, &self->mtHighlightedColor[0]);
@@ -5505,19 +5494,7 @@ extern char D_004A1408[];
 
 struct sVec3_D348 { float x, y, z; };
 
-struct sVEi_D348 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
-
-
-static inline void SetVis_D348(char* o, int on)
-{
-    sVEi_D348* vt = *(sVEi_D348**)(o + 8);
-    vt[9].fn(vthis(o, vt[9]), on);
-}
 
 /**
  * Prepares the keyboard the first time it is shown: layout, measurements and the initial texts.
@@ -5566,17 +5543,17 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
             sprintf(buf, str_compact);
             break;
         }
-        char* oa = (char*)self->mpBackCompact;
+        cUIThing* oa = self->mpBackCompact;
         if (oa != 0) {
-            SetVis_D348(oa, showCompact);
+            oa->setVisible(showCompact);
         }
-        char* ob = (char*)self->mpBackExpand;
+        cUIThing* ob = self->mpBackExpand;
         if (ob != 0) {
-            SetVis_D348(ob, showExpand);
+            ob->setVisible(showExpand);
         }
-        char* oc = (char*)self->mpBackRegular;
+        cUIThing* oc = self->mpBackRegular;
         if (oc != 0) {
-            SetVis_D348(oc, showRegular);
+            oc->setVisible(showRegular);
         }
         int frameNum = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(buf));
         if (frameNum != 0xFFFF) {
@@ -5602,13 +5579,13 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
             self->mvPosEnter[1] += nameBarPos.y;
             self->mvPosEnter[2] += nameBarPos.z;
         }
-        char* extendCursorLeft = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorLeft));
+        cUIThing* extendCursorLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorLeft));
         if (extendCursorLeft != 0) {
-            SetVis_D348(extendCursorLeft, 0);
+            extendCursorLeft->setVisible(0);
         }
-        char* extendCursorRight = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorRight));
+        cUIThing* extendCursorRight = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ExtendCursorRight));
         if (extendCursorRight != 0) {
-            SetVis_D348(extendCursorRight, 0);
+            extendCursorRight->setVisible(0);
         }
         if (self->mbSetInputText != 0) {
             cKeyboardPopup_setInputText(self, self->mszEditString);

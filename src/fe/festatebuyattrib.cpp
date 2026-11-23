@@ -999,18 +999,6 @@ extern char str_race_platinumdummyMenu[];
 extern char str_fs_platinumdummyMenu[];
 extern char str_ridersbestDummyMenu[];
 
-struct sVE_5BA8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void setFocus_5BA8(char* o, int on)
-{
-    sVE_5BA8* vt = *(sVE_5BA8**)(o + 8);
-    vt[7].fn(vthis(o, vt[7]), on);
-}
-
 /**
  * Switches the career stats to a page: focuses that page's dummy menu and fills its list.
  *
@@ -1025,33 +1013,33 @@ static inline void setFocus_5BA8(char* o, int on)
 extern "C" void cFEStateCareerStats_setupMenuFocus(cFEStateCareerStats* self_, int menu)
 {
     self_->mStatsState = menu;
-    char* menuTab0 = (char*)cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_highlightsMenu));
+    cUIThing* menuTab0 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_highlightsMenu));
     if (menuTab0 != 0)
-        setFocus_5BA8(menuTab0, 0);
-    char* menuTab1 = (char*)cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_race_platinumdummyMenu));
+        menuTab0->setFocus(0);
+    cUIThing* menuTab1 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_race_platinumdummyMenu));
     if (menuTab1 != 0)
-        setFocus_5BA8(menuTab1, 0);
-    char* menuTab2 = (char*)cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_fs_platinumdummyMenu));
+        menuTab1->setFocus(0);
+    cUIThing* menuTab2 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_fs_platinumdummyMenu));
     if (menuTab2 != 0)
-        setFocus_5BA8(menuTab2, 0);
-    char* menuTab3 = (char*)cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_ridersbestDummyMenu));
+        menuTab2->setFocus(0);
+    cUIThing* menuTab3 = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_ridersbestDummyMenu));
     if (menuTab3 != 0)
-        setFocus_5BA8(menuTab3, 0);
+        menuTab3->setFocus(0);
     switch (self_->mStatsState) {
     case 0:
-        setFocus_5BA8(menuTab0, 1);
+        menuTab0->setFocus(1);
         cFEStateCareerStats_setupHighlightsList(self_);
         break;
     case 1:
-        setFocus_5BA8(menuTab1, 1);
+        menuTab1->setFocus(1);
         cFEStateCareerStats_setupRacePlatinumMedalsList(self_);
         break;
     case 2:
-        setFocus_5BA8(menuTab2, 1);
+        menuTab2->setFocus(1);
         cFEStateCareerStats_setupFSPlatinumMedalsList(self_);
         break;
     case 3:
-        setFocus_5BA8(menuTab3, 1);
+        menuTab3->setFocus(1);
         cFEStateCareerStats_setupRidersBest(self_);
         break;
     }

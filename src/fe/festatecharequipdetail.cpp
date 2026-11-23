@@ -14,6 +14,7 @@
 #include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
+#include "ui/uitext.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
@@ -1605,18 +1606,6 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
 extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* name);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
 
-struct sVEK19AA08 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void showK19AA08(char* o, int on)
-{
-    sVEK19AA08* vt = *(sVEK19AA08**)(o + 8);
-    vt[9].fn(vthis(o, vt[9]), on);
-}
-
 /**
  * Refreshes the inventory preview for the selected row.
  *
@@ -1629,15 +1618,15 @@ extern "C" void func_0019AA08(cFEStateCharEquip* self)
 {
     if (self->mpMenu == 0)
         return;
-    char* widget = (char*)self->mpPointsGroup;
+    cUIThing* widget = self->mpPointsGroup;
     if (widget != 0)
-        showK19AA08(widget, 0);
-    widget = (char*)self->mpSmallBoltIcon;
+        widget->setVisible(0);
+    widget = self->mpSmallBoltIcon;
     if (widget != 0)
-        showK19AA08(widget, 0);
-    widget = (char*)self->mpPointsCost;
+        widget->setVisible(0);
+    widget = self->mpPointsCost;
     if (widget != 0)
-        showK19AA08(widget, 0);
+        widget->setVisible(0);
     int idx = self->mpMenu->mScrollItemCurrent;
     int rowValue = 0;
     if (idx < self->mNumItems) {
@@ -1645,12 +1634,12 @@ extern "C" void func_0019AA08(cFEStateCharEquip* self)
         unsigned int flags = *(unsigned int*)(item + 0x34);
         if (flags & 4) {
             if (!(flags & 0x20)) {
-                showK19AA08((char*)self->mpPointsGroup, 1);
+                self->mpPointsGroup->setVisible(1);
                 int topIndex = self->mpMenu->mScrollItemOffset;
-                char* iconWidget = (char*)self->mpSmallBoltIcon;
+                cUIThing* iconWidget = self->mpSmallBoltIcon;
                 rowValue = self->mRowPoints[idx - topIndex];
                 if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && self->mIconsLoaded != 0) {
-                    showK19AA08(iconWidget, 1);
+                    iconWidget->setVisible(1);
                     int iconId = cFEStateCharEquip_getIconID((cFEStateCharEquip*)self, *(char**)(item + 0x30));
                     cUIIcon* iconWidget2 = self->mpSmallBoltIcon;
                     iconWidget2->mTextureID = iconId;
@@ -1671,18 +1660,6 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 // PORT: the unit declares getDollarString(void*), but it formats an int price; bind an int view.
 extern "C" const char* getDollarString_price(int price) __asm__("getDollarString");
 
-struct sVEntryK19AB78 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void showK19AB78(void* o, int on)
-{
-    sVEntryK19AB78* vt = *(sVEntryK19AB78**)((char*)o + 8);
-    vt[9].fn(vthis(o, vt[9]), on);
-}
-
 /**
  * Refreshes the store preview for the selected row.
  *
@@ -1700,22 +1677,22 @@ extern "C" void func_0019AB78(cFEStateCharEquip* self)
     if (sel >= 0 && sel < self->mNumItems)
         item = (char*)self->mpItems[sel];
     if (self->mpLargePreview != 0) {
-        showK19AB78(self->mpLargePreview, 0);
+        self->mpLargePreview->setVisible(0);
         if (item != 0 && self->mPreviewTextureID >= 0) {
             cUIIcon* widget = self->mpLargePreview;
             widget->mTextureID = self->mPreviewTextureID;
             widget->mpTextureElem = 0;
-            showK19AB78(self->mpLargePreview, 1);
+            self->mpLargePreview->setVisible(1);
         }
     }
     if (self->mpCost != 0) {
-        showK19AB78(self->mpCost, 0);
+        self->mpCost->setVisible(0);
         if (item != 0 && !(*(int*)(item + 0x34) & 0x20)) {
             int price = *(short*)(item + 0xE);
             if (price > 0)
                 price *= 10;
             cUIText_setAsciiString(self->mpCost, getDollarString_price(price));
-            showK19AB78(self->mpCost, 1);
+            self->mpCost->setVisible(1);
         }
     }
 }
@@ -2379,18 +2356,6 @@ int GetHashValue32(char* str);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 
-struct sVEntryK19BA60 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void showK19BA60(void* o, int on)
-{
-    sVEntryK19BA60* vt = *(sVEntryK19BA60**)((char*)o + 8);
-    vt[9].fn(vthis(o, vt[9]), on);
-}
-
 struct sCharEquipK19BA60 {
     char pad_0x0[0x5C];
     char* menu;             // 0x5C
@@ -2439,15 +2404,15 @@ extern "C" void func_0019BA60(cFEStateCharEquip* equipState, int i)
             cUIText_setUnicodeStringByID(text, GetHashValue32(*(char**)(item + 0x14)));
         else
             cUIText_setAsciiString(text, *(char**)(item + 0x14));
-        showK19BA60(text, 1);
+        text->setVisible(1);
     }
     if (((char*)icon) != 0) {
         if (tex != 0) {
-            showK19BA60(icon, 1);
+            icon->setVisible(1);
             icon->mpTextureElem = (const cTextureElement*)tex;
             icon->mTextureID = -1;
         } else {
-            showK19BA60(icon, 0);
+            icon->setVisible(0);
         }
     }
 }

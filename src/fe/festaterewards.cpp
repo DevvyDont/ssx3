@@ -8,6 +8,7 @@
 #include "fe/fereal.h"
 #include "fe/uistatebuypopup.h"
 #include "ui/uithing.h"
+#include "ui/uitext.h"
 #include "fe/festatevideoplayer.h"
 #include "ui/uiicon.h"
 #include "ui/uiinput.h"
@@ -1136,18 +1137,6 @@ extern char str_kT_129HELPBuyInCTM[];
 extern char str_kT_129HELPViewItem[];
 extern char str_kT_129HELPSaveCashItem[];
 
-struct sVE_0648v {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void setVis_0648(char* o, int on)
-{
-    sVE_0648v* vt = *(sVE_0648v**)(o + 8);
-    vt[9].fn(vthis(o, vt[9]), on);
-}
-
 static inline void setHelp_0648(char* self, char* key)
 {
     cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x900), GetHashValue32(key));
@@ -1168,17 +1157,17 @@ static inline void setHelp_0648(char* self, char* key)
 // PORT: item pointers passed through int vtable parameters.
 extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBase* self, int idx)
 {
-    char* txt = (char*)self->mpHelpText;
+    cUIThing* txt = self->mpHelpText;
     if (txt == 0)
         return;
-    setVis_0648(txt, 0);
+    txt->setVisible(0);
     sVEntry<char*(void*, int)>* vtp = (sVEntry<char*(void*, int)>*)VPTR_OF(cListNode, self);
     tCheatCharInfo* item = (tCheatCharInfo*)vtp[34].fn(vthis(self, vtp[34]), idx);
     if (((char*)item) == 0)
         return;
     sVEntry<int(void*, int)>* vti = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
     int state = vti[36].fn(vthis(self, vti[36]), (int)item);
-    setVis_0648((char*)self->mpHelpText, 1);
+    self->mpHelpText->setVisible(1);
     if (self->mRewardType == 8) {
         sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
         if (vt[38].fn(vthis(self, vt[38]), idx)) {

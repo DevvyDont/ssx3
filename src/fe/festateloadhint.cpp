@@ -1188,12 +1188,6 @@ extern "C" char* func_0020A1A8(int v);
 extern "C" char* strcpy(char* dst, const char* src);
 
 
-static inline void Activate_72C0(char* obj)
-{
-    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-    vt[9].fn(vthis(obj, vt[9]), 1);
-}
-
 // The player index is a char parameter (the caller in onCreateScreen declares it int); bound by asm label.
 extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player) __asm__("cFELoadState_InitwidgetMultiP");
 
@@ -1273,17 +1267,17 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
         if (cBENewRaceInterface_newRace.cGameMode == 0 || cBENewRaceInterface_newRace.cGameMode == 5) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int seconds = fptoui((float)D_00536640[i] * (1.0f / 60.0f));
-            char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Time));
+            cUIThing* o = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Time));
             if (o != 0) {
-                Activate_72C0(o);
+                o->setVisible(1);
             }
             strcpy(buf, func_0020A1A8(seconds));
         } else {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int score = D_00536640[i];
-            char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Score));
+            cUIThing* o = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Score));
             if (o != 0) {
-                Activate_72C0(o);
+                o->setVisible(1);
             }
             sprintf(buf, str_pct_d_g, score);
         }

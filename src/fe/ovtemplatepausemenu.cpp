@@ -136,10 +136,6 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* gMenuItemIcons[];
 extern char str_pct_s_group[];
 
-struct sVec3_001F8448 {
-    float x, y, z;
-};
-
 /**
  * On its first transition, shows only the PDA icon groups of the menu's options and stacks them 40 units
  * apart.
@@ -153,24 +149,22 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
         self->mMoveIcons = 0;
         for (int i = 0; i < 14; i++) {
             sprintf(buf, str_pct_s_group, gMenuItemIcons[i]);
-            char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
+            cUIThing* obj = cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
             if (obj != 0) {
-                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-                vt[9].fn(vthis(obj, vt[9]), 0);
+                obj->setVisible(0);
             }
         }
         for (int i = 0; i < 8; i++) {
             if (i < self->mPauseMenuNumOptions) {
                 sprintf(buf, str_pct_s_group, gMenuItemIcons[((int*)&self->mPauseMenuOptions)[i]]);
-                char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
+                cUIThing* obj = cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
-                    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-                    vt[9].fn(vthis(obj, vt[9]), 1);
-                    sVec3_001F8448 itemPos;
+                    obj->setVisible(1);
+                    t3Vector itemPos;
                     itemPos.x = 0.0f;
                     itemPos.z = 0.0f;
                     itemPos.y = (float)i * 40.0f;
-                    *(sVec3_001F8448*)(obj + 0x44) = itemPos;
+                    obj->mPosition = itemPos;
                 }
             }
         }
@@ -195,10 +189,9 @@ extern char D_004C8B18[];
 
 struct sVEnt_001F85C0 { short delta; short index; void (*fn)(void*, void*); };
 
-static inline void setColor_001F85C0(char* obj, void* c)
+static inline void setColor_001F85C0(cUIThing* obj, void* c)
 {
-    sVEnt_001F85C0* vt = *(sVEnt_001F85C0**)(obj + 8);
-    vt[11].fn(vthis(obj, vt[11]), c);
+    obj->setColour((const tARGB*)c);
 }
 
 /**
@@ -209,12 +202,12 @@ static inline void setColor_001F85C0(char* obj, void* c)
 extern "C" void cOVTemplate_PauseMenu_onGainFocus(cOVTemplate_PauseMenu* self, int pPrevState)
 {
     char buf[32];
-    char* obj;
+    cUIThing* obj;
     int* sel = (int*)&self->mPauseMenuOptions;
     char* flags = (char*)&self->mPauseOptionUnlocked;
     int i = 0;
     while (i < 8 && (sprintf(buf, D_004A2138, i),
-                     obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf)),
+                     obj = cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf)),
                      i < self->mPauseMenuNumOptions)) {
         if (obj != 0) {
             if (i == cOVTemplate_PauseMenu_mSelectedMenuIndex) {

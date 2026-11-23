@@ -7653,18 +7653,6 @@ extern "C" void func_001A98B8(cFEStateNet* self, const char* str);
 extern char str_EnterAccountName[];
 extern char str_EnterPassword[];
 
-struct sVE1ACDD0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void Show1ACDD0(char* o, int on)
-{
-    sVE1ACDD0* vt = *(sVE1ACDD0**)(o + 0x8);
-    vt[8].fn(vthis(o, vt[8]), on);
-}
-
 /**
  * Takes the text typed in the login keyboard: the account name (keyboard id 6) or the password (id 7).
  *
@@ -7684,9 +7672,9 @@ extern "C" void func_001ACDD0(cFEUseExistingAccount* self)
             cUIText_setAsciiString(text, name);
         }
         if (strlen(name) != 0) {
-            Show1ACDD0((char*)self->mpTextForgotPassword, 0);
+            self->mpTextForgotPassword->setStatic(0);
         } else {
-            Show1ACDD0((char*)self->mpTextForgotPassword, 1);
+            self->mpTextForgotPassword->setStatic(1);
         }
         cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, name);
         break;
@@ -27147,12 +27135,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001C4D28);
 extern char gUISoundNull;
 
 
-static inline void Show1C4D28(char* o, int on)
-{
-    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(o + 0x8);
-    vt[7].fn(vthis(o, vt[7]), on);
-}
-
 /**
  * Moves the high-score screen's focus to the next menu (down), skipping menus that cannot take it.
  *
@@ -27171,19 +27153,19 @@ extern "C" void func_001C4D28(cFEStateStats* self)
         vt[2].fn(vthis(snd, vt[2]), 1);
     }
     if (self->miFocusMenu != 3) {
-        Show1C4D28((char*)self->mpMenus[self->miFocusMenu], 0);
+        self->mpMenus[self->miFocusMenu]->setFocus(0);
     }
     self->miFocusMenu += 1;
     if (self->miFocusMenu >= 4) {
         self->miFocusMenu = 0;
     }
     if (self->miFocusMenu == 3) {
-        Show1C4D28((char*)self->mpMenus[3], 1);
+        self->mpMenus[3]->setFocus(1);
         func_001C4D28(self);
     } else {
         cUIMenu* item = self->mpMenus[self->miFocusMenu];
         if ((item->mAttr >> 6) & 1) {
-            Show1C4D28(((char*)item), 1);
+            item->setFocus(1);
         } else {
             func_001C4D28(self);
         }
@@ -27196,12 +27178,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001C4E40);
 #ifdef SKIP_ASM
 extern char gUISoundNull;
 
-
-static inline void Show1C4E40(char* o, int on)
-{
-    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(o + 0x8);
-    vt[7].fn(vthis(o, vt[7]), on);
-}
 
 /**
  * Moves the high-score screen's focus to the previous menu (up), skipping menus that cannot take it.
@@ -27218,19 +27194,19 @@ extern "C" void func_001C4E40(cFEStateStats* self)
         vt[2].fn(vthis(snd, vt[2]), 1);
     }
     if (self->miFocusMenu != 3) {
-        Show1C4E40((char*)self->mpMenus[self->miFocusMenu], 0);
+        self->mpMenus[self->miFocusMenu]->setFocus(0);
     }
     self->miFocusMenu -= 1;
     if (self->miFocusMenu >= 4) {
         self->miFocusMenu = 3;
     }
     if (self->miFocusMenu == 3) {
-        Show1C4E40((char*)self->mpMenus[3], 1);
+        self->mpMenus[3]->setFocus(1);
         func_001C4E40(self);
     } else {
         cUIMenu* item = self->mpMenus[self->miFocusMenu];
         if ((item->mAttr >> 6) & 1) {
-            Show1C4E40(((char*)item), 1);
+            item->setFocus(1);
         } else {
             func_001C4E40(self);
         }

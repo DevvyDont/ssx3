@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uithing.h"
+#include "ui/uiicon.h"
+#include "ui/uitext.h"
 #include "be/beinterface.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
@@ -589,18 +592,6 @@ extern "C" void cFEStateAudioOptions_onDestroyScreen(cFEStateAudioOptions* self)
 //100%
 INCLUDE_ASM("util/locale", cFEStateAudioOptions_onGainTransition);
 #ifdef SKIP_ASM
-struct cFEStateAudioOptions_onGainTransition_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-static inline void cFEStateAudioOptions_onGainTransition_show(char* o, int on)
-{
-    cFEStateAudioOptions_onGainTransition_sVEntry* vt = *(cFEStateAudioOptions_onGainTransition_sVEntry**)(o + 8);
-    vt[9].fn(vthis(o, vt[9]), on);
-}
-
 /**
  * On the first transition with an empty playlist, hides the options that need songs.
  *
@@ -613,12 +604,12 @@ static inline void cFEStateAudioOptions_onGainTransition_show(char* o, int on)
 extern "C" int cFEStateAudioOptions_onGainTransition(cFEStateAudioOptions* self, int bFirstTime)
 {
     if (bFirstTime != 0 && self->mCreatedRequestList == 0) {
-        cFEStateAudioOptions_onGainTransition_show((char*)self->mpRequestLineOption, 0);
-        cFEStateAudioOptions_onGainTransition_show((char*)self->mpPlaylistOption, 0);
-        cFEStateAudioOptions_onGainTransition_show((char*)self->mpChecks[1], 0);
-        cFEStateAudioOptions_onGainTransition_show((char*)self->mpChecks[3], 0);
+        self->mpRequestLineOption->setVisible(0);
+        self->mpPlaylistOption->setVisible(0);
+        self->mpChecks[1]->setVisible(0);
+        self->mpChecks[3]->setVisible(0);
         if (self->mInStore == 0) {
-            cFEStateAudioOptions_onGainTransition_show((char*)self->mpEditRequestOption, 0);
+            self->mpEditRequestOption->setVisible(0);
         }
     }
     return 0;
