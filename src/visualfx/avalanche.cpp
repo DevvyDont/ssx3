@@ -1780,9 +1780,9 @@ extern "C" void cAvalanche_render(void)
         *((sRCtx_9130*)ctx)->top = sDrawState_s_defaultDrawState;
         setB5_9130((sRCtx_9130*)ctx, 7);
         *(short*)((char*)((sRCtx_9130*)ctx)->top + 0x10) = -1;
-        ((sRCtx_9130*)ctx)->setMatrix(getCam_9130()->mats[getCam_9130()->cur], 1);
-        ((sRCtx_9130*)ctx)->setPos(view[0], view[1], view[2]);
-        ((sRCtx_9130*)ctx)->setRot(view + 0x10);
+        ctx->SetViewportWindow1(*(const tRect*)getCam_9130()->mats[getCam_9130()->cur], 1);
+        ctx->SetViewportPerspective(view[0], view[1], view[2]);
+        ctx->SetView1(*(const t4Matrix*)(view + 0x10));
         if (cAvalanche_m_Enable != 0)
         {
             for (int i = 0; i < 16; i++)

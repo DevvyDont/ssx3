@@ -334,10 +334,10 @@ extern "C" void cUIEngine_render2D(cUIEngine* self)
     ctx->top[1] = ctx->top[0];
     ctx->top++;
     *GrMan_7df8->top = sDrawState_s_defaultDrawState_7df8;
-    GrMan_7df8->PushView();
-    GrMan_7df8->PushViewport();
-    GrMan_7df8->SetViewportOrthographic(0, 1, 0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f);
-    GrMan_7df8->SetView1(t4mat_Identity);
+    GrMan->PushView();
+    GrMan->PushViewport();
+    GrMan->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f, 0, 1);
+    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
     setF4_22_7DF8(GrMan_7df8->top, 1);
     setF4_23_7DF8(GrMan_7df8->top, 2);
     setF4_20_7DF8(GrMan_7df8->top, 0);
@@ -345,8 +345,8 @@ extern "C" void cUIEngine_render2D(cUIEngine* self)
     setF4_2_7DF8(GrMan_7df8->top, 5);
     GrMan_7df8->top->f0_2 = 3;
     cUIStateStack_render2D((char*)&self->mStateStack);
-    GrMan_7df8->PopViewport();
-    GrMan_7df8->PopView();
+    GrMan->PopViewport();
+    GrMan->PopView();
     GrMan_7df8->top--;
 }
 #endif

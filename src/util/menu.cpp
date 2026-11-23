@@ -955,15 +955,15 @@ extern "C" void cMenu_preRender()
     cPS2GraphicsMan* ctx = GrMan;
     ((cMenu_preRender_cCtx*)ctx)->top[1] = ((cMenu_preRender_cCtx*)ctx)->top[0];
     ((cMenu_preRender_cCtx*)ctx)->top++;
-    ((cMenu_preRender_cCtx*)GrMan)->PushViewport();
-    ((cMenu_preRender_cCtx*)GrMan)->PushView();
+    GrMan->PushViewport();
+    GrMan->PushView();
     cMenu_preRender_setF8_5(((cMenu_preRender_cCtx*)GrMan)->top, 17);
     cMenu_preRender_setF4_23(((cMenu_preRender_cCtx*)GrMan)->top, 2);
     cMenu_preRender_setF4_20(((cMenu_preRender_cCtx*)GrMan)->top, 3);
     cMenu_preRender_setF4_12(((cMenu_preRender_cCtx*)GrMan)->top, 20);
     cMenu_preRender_setF4_2(((cMenu_preRender_cCtx*)GrMan)->top, 5);
-    ((cMenu_preRender_cCtx*)GrMan)->SetViewportOrthographic(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
-    ((cMenu_preRender_cCtx*)GrMan)->SetView1(t4mat_Identity);
+    GrMan->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
+    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
 }
 #endif
 

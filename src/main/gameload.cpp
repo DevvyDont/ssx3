@@ -2643,8 +2643,8 @@ extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
     ((cCtx231D60*)ctx)->top[1] = ((cCtx231D60*)ctx)->top[0];
     ((cCtx231D60*)ctx)->top++;
     *((cCtx231D60*)GrMan)->top = sDrawState_s_defaultDrawState;
-    ((cCtx231D60*)GrMan)->SetViewportOrthographic(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
-    ((cCtx231D60*)GrMan)->SetView1(t4mat_Identity);
+    GrMan->SetViewportOrthographic(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0, 0);
+    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
     ((cCtx231D60*)GrMan)->top->f8_5 = 31;
     ((cCtx231D60*)GrMan)->top->f4_23 = 2;
     ((cCtx231D60*)GrMan)->top->f4_20 = 0;

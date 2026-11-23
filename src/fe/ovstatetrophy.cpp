@@ -549,14 +549,14 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
         verts[i].a = 0x80;
         verts[i].q = 1.0f;
     }
-    ((cGfx_EDA0*)GrMan)->PushView();
+    GrMan->PushView();
     ((cGfx_EDA0*)GrMan)->PushState();
     *((cGfx_EDA0*)GrMan)->stateTop = sDrawState_s_defaultDrawState_EDA0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_2 = 5;
-    ((cGfx_EDA0*)GrMan)->SetView(t4mat_Identity);
+    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
 
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
@@ -638,7 +638,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
         verts[3].pos = corner;
         ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
         *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = atex->GetHandle();
-        ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
+        GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
     }
 
     sTex_EDA0* tex = D_004C8C58_EDA0[0].tex;
@@ -679,7 +679,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
     verts[3].pos = corner;
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(9);
     *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = tex->GetHandle();
-    ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
+    GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
 
     float markY = barTop + (barBottom - barTop) * frac;
     corner.x = self->unk_010 - 2.7497661113739014f;
@@ -709,7 +709,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
     }
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
     *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = -1;
-    ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
+    GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
     for (int i = 0; i < 4; i++) {
         verts[i].r = 0x80;
         verts[i].g = 0x80;
@@ -789,7 +789,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
         verts[3].pos = corner;
         ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(prim);
         *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-        ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
+        GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
     }
 
     if (*(int*)(course + 8) != 0) {
@@ -856,11 +856,11 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
             verts[3].pos = corner;
             ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(11);
             *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-            ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
+            GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
         }
     }
     ((cGfx_EDA0*)GrMan)->stateTop--;
-    ((cGfx_EDA0*)GrMan)->PopView();
+    GrMan->PopView();
     self->unk_034 = me;
 }
 #endif
@@ -1073,14 +1073,14 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
     float x = self->unk_020.X;
     if (right == 0)
         x += self->unk_020.W;
-    ((cGfx_FB40*)GrMan)->PushView();
+    GrMan->PushView();
     ((cGfx_FB40*)GrMan)->PushState();
     *((cGfx_FB40*)GrMan)->stateTop = sDrawState_s_defaultDrawState_FB40;
     ((cGfx_FB40*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_FB40*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_FB40*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_FB40*)GrMan)->stateTop->f4_2 = 5;
-    ((cGfx_FB40*)GrMan)->SetView(t4mat_Identity);
+    GrMan->SetView1(*(const t4Matrix*)t4mat_Identity);
 
     sTex_FB40* tex = D_004C8C58_FB40[0].tex;
     float top = self->unk_020.Y;
@@ -1118,7 +1118,7 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
     verts[3].pos = corner;
     ((cGfx_FB40*)GrMan)->stateTop->SetPrim(9);
     *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = tex->GetHandle();
-    ((cGfx_FB40*)GrMan)->RenderTriStrip(4, verts, 0);
+    GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
 
     float topFade = top + 60.0f;
     float bottomFade = bottom - 60.0f;
@@ -1219,7 +1219,7 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
         }
         ((cGfx_FB40*)GrMan)->stateTop->SetPrim(prim);
         *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-        ((cGfx_FB40*)GrMan)->RenderTriStrip(4, verts, 0);
+        GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
     }
 
     for (int i = 0; i < 4; i++)
@@ -1319,11 +1319,11 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
             }
             ((cGfx_FB40*)GrMan)->stateTop->SetPrim(11);
             *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-            ((cGfx_FB40*)GrMan)->RenderTriStrip(4, verts, 0);
+            GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
         }
     }
     ((cGfx_FB40*)GrMan)->stateTop--;
-    ((cGfx_FB40*)GrMan)->PopView();
+    GrMan->PopView();
     self->unk_034 = me;
 }
 #endif
