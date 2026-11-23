@@ -970,43 +970,6 @@ extern "C" void cMenu_preRender()
 //100%
 INCLUDE_ASM("util/menu", cMenu_postRender);
 #ifdef SKIP_ASM
-class cMenu_postRender_cObj {
-public:
-    char data[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void PopViewport();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void PopView();
-};
-
 
 /**
  * Undoes cMenu_preRender: pops the view and the viewport and drops the pushed draw state.
@@ -1016,8 +979,8 @@ public:
  */
 extern "C" void cMenu_postRender()
 {
-    ((cMenu_postRender_cObj*)GrMan)->PopView();
-    ((cMenu_postRender_cObj*)GrMan)->PopViewport();
+    GrMan->PopView();
+    GrMan->PopViewport();
     *(int*)&GrMan->m_pCurrentDrawState = (int)GrMan->m_pCurrentDrawState - 20;
 }
 #endif
@@ -1035,82 +998,6 @@ struct func_002CB350_sVtx {
     float u, v;
     char pad[0x18];
     func_002CB350_sVec4 pos;
-};
-
-class func_002CB350_cCtx {
-public:
-    char pad0[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
 // Typed view of the render context (the unit declares GrMan with another class later).
@@ -1140,7 +1027,7 @@ extern "C" void func_002CB350(func_002CB350_sVtx* quadVerts, float* screenRect, 
     quadVerts[3].pos = func_002CB350_sVec4(screenRect[0] + screenRect[2], screenRect[1] + screenRect[3], 0.0f, 1.0f);
     quadVerts[3].u = texRect[0] + texRect[2];
     quadVerts[3].v = texRect[1] + texRect[3];
-    ((func_002CB350_cCtx*)GrMan)->RenderTriStrip(4, quadVerts, 0);
+    GrMan->RenderTriStrip(4, (tBxVertex*)quadVerts, 0);
 }
 #endif
 
@@ -1435,7 +1322,7 @@ extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
     arrowVerts[4].pos = vertexPos;
     vertexPos.x = right; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
     arrowVerts[5].pos = vertexPos;
-    ((cCtx_2CB8C8*)GrMan)->RenderTriStrip(6, arrowVerts, 0);
+    GrMan->RenderTriStrip(6, (tBxVertex*)arrowVerts, 0);
 }
 #endif
 
@@ -1590,7 +1477,7 @@ extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
     arrowVerts[4].pos = vertexPos;
     vertexPos.x = right; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
     arrowVerts[5].pos = vertexPos;
-    ((cCtx_2CBAC8*)GrMan)->RenderTriStrip(6, arrowVerts, 0);
+    GrMan->RenderTriStrip(6, (tBxVertex*)arrowVerts, 0);
 }
 #endif
 
@@ -4759,7 +4646,7 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
         cursorVerts[3].pos = vertexPos;
         ((cCtx_2CE910*)GrMan)->top->f4_2 = 1;
         *(short*)((char*)((cCtx_2CE910*)GrMan)->top + 0x10) = -1;
-        ((cCtx_2CE910*)GrMan)->RenderTriStrip(4, cursorVerts, 0);
+        GrMan->RenderTriStrip(4, (tBxVertex*)cursorVerts, 0);
     }
     *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(0.0f, 0.0f);
 }
@@ -5149,7 +5036,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
         ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 1;
     }
     *(short*)((char*)((cCtx_2CF1C8*)GrMan)->top + 0x10) = -1;
-    ((cCtx_2CF1C8*)GrMan)->RenderTriStrip(4, verts, 0);
+    GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
 
     float mx = barRect.x + barRect.w * *(float*)((char*)self->Color + (self->Adjust << 2));
     verts[0].r = (int)(textClr.r * 128.0f);
@@ -5167,7 +5054,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     verts[2].b = (int)(textClr.b * 128.0f);
     vertPos.x = mx + 5.0f; vertPos.y = barRect.y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
     verts[2].pos = vertPos;
-    ((cCtx_2CF1C8*)GrMan)->RenderTriStrip(3, verts, 0);
+    GrMan->RenderTriStrip(3, (tBxVertex*)verts, 0);
 }
 #endif
 
@@ -5962,7 +5849,7 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
     }
     *(short*)((char*)((cCtx_2D0008*)GrMan)->top + 0x10) = -1;
-    ((cCtx_2D0008*)GrMan)->RenderTriStrip(4, verts, 0);
+    GrMan->RenderTriStrip(4, verts, 0);
 }
 #endif
 
@@ -6767,7 +6654,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         vertexPos.z = 0.0f;
         vertexPos.w = 1.0f;
         *(sVec4*)quadVerts[1].pos = vertexPos;
-        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->RenderLineStrip(2, quadVerts, 0);
+        cGraphicsMan_TheGraphicsMan->RenderLineStrip(2, (const tBxVertex*)quadVerts, 0);
     }
     SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 2);
     for (i = 0; i < 2; i++) {
@@ -6792,7 +6679,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         vertexPos.z = 0.0f;
         vertexPos.w = 1.0f;
         *(sVec4*)quadVerts[1].pos = vertexPos;
-        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->RenderLineStrip(2, quadVerts, 0);
+        cGraphicsMan_TheGraphicsMan->RenderLineStrip(2, (const tBxVertex*)quadVerts, 0);
     }
     if (self->IsEditMode) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 3);

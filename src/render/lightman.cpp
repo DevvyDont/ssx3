@@ -2189,9 +2189,9 @@ extern "C" void cScreenTint_render()
     if (flag) {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         ((cGfx_0F20*)ps2GraphicsMan)->PushState();
-        ((cGfx_0F20*)ps2GraphicsMan)->PushViewport();
-        ((cGfx_0F20*)ps2GraphicsMan)->PushView();
-        ((cGfx_0F20*)ps2GraphicsMan)->IdentityView();
+        ps2GraphicsMan->PushViewport();
+        ps2GraphicsMan->PushView();
+        ps2GraphicsMan->IdentityView();
         float quadWidth;
         float quadLeft;
         if (((cGfx_0F20*)ps2GraphicsMan)->f270 == 1) {
@@ -2204,7 +2204,7 @@ extern "C" void cScreenTint_render()
                 quadLeft = quadWidth;
             }
         }
-        ((cGfx_0F20*)ps2GraphicsMan)->SetViewportOrthographic(quadLeft, 0.0f, quadWidth, 480.0f, 0.0f, 1.0f, 0, 0);
+        ps2GraphicsMan->SetViewportOrthographic(quadLeft, 0.0f, quadWidth, 480.0f, 0.0f, 1.0f, 0, 0);
         *((cGfx_0F20*)ps2GraphicsMan)->stateTop = sDrawState_s_defaultDrawState_0F20;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f8_5 = 5;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF22(1);
@@ -2245,10 +2245,10 @@ extern "C" void cScreenTint_render()
                 verts[i].a = aa;
                 verts[i].one = 1.0f;
             }
-            ((cGfx_0F20*)ps2GraphicsMan)->RenderTriStrip(4, verts, 0);
+            ps2GraphicsMan->RenderTriStrip(4, verts, 0);
         }
-        ((cGfx_0F20*)ps2GraphicsMan)->PopView();
-        ((cGfx_0F20*)ps2GraphicsMan)->PopViewport();
+        ps2GraphicsMan->PopView();
+        ps2GraphicsMan->PopViewport();
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop--;
     }
 }

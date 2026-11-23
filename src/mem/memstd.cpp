@@ -1859,30 +1859,6 @@ extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
 extern "C" void func_003AE300(void* p, int flags);
 extern int cMoviePlayer_m_isPlaying;
 
-class cWorld002535F8 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void FlushRenderer();
-};
-
 
 
 /**
@@ -1897,7 +1873,7 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
 {
     cMoviePlayer* moviePlayer = self;
     if (((char*)moviePlayer->m_pPlayer) != 0 && moviePlayer->m_pVd != 0) {
-        ((cWorld002535F8*)cGraphicsMan_TheGraphicsMan)->FlushRenderer();
+        cGraphicsMan_TheGraphicsMan->FlushRenderer();
     }
     if (moviePlayer->mbNewFrame != 0 && moviePlayer->mpCurrFrame != 0) {
         RCMP_DECODER_ReleaseFrame(*(void**)(((char*)moviePlayer->m_pPlayer) + 0x64), moviePlayer->mpCurrFrame);
@@ -2825,59 +2801,6 @@ extern "C" void func_002548D0_impl(void* videoDriver)
 INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_Draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cWorld_254C48 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void SetNewTextureData1(int a, char* p, int b, int c, int d, int e, int f, int g, int h);
-};
 extern "C" void* func_002548D0(void* self);
 
 
@@ -2908,7 +2831,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, 
         int off = 0;
         for (int j = 0; j < self->mNumRows; j++) {
             int* tileEntry = ((int*)self->mppTiles[k]);
-            ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->SetNewTextureData1(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
+            cGraphicsMan_TheGraphicsMan->SetNewTextureData1(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
             k++;
             off += ((int*)&self->mRowHeights[0])[j];
         }

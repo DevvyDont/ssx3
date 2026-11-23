@@ -1692,7 +1692,7 @@ extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
     unsigned int w = top->f4;
     top->f4 = (w & 0xFE7FFFFF) | 0x1000000;
     int saved = (w & 0x1800000) >> 23;
-    ((cRCtx_D8EA8*)ctx)->drawLines(((sAvGroup_D8EA8*)slot->m_avalanche)->nPairs, D_vtx_D8EA8, 0);
+    ctx->RenderLineStrip(((sAvGroup_D8EA8*)slot->m_avalanche)->nPairs, (const tBxVertex*)D_vtx_D8EA8, 0);
     ((cRCtx_D8EA8*)ctx)->top->f4 = (((cRCtx_D8EA8*)ctx)->top->f4 & 0xFE7FFFFF) | ((saved << 23) & 0x1800000);
 }
 #endif

@@ -299,51 +299,6 @@ extern int cPauseState_Flags;
 extern int cPauseState_Stack[];
 extern int cPauseState_FlagsTable[];
 
-class cWorld_3818 {
-public:
-    char pad_0x0[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void SetTVDisplayFormat(int a);
-};
-
 
 /**
  * Stops and deletes the video player and undoes the game-state changes made when playback started.
@@ -360,7 +315,7 @@ extern "C" void cVidEngine_ResetVideoEngine(cVidEngine* self)
         if (self->mIsPlaying != 0) {
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());
-            ((cWorld_3818*)GrMan)->SetTVDisplayFormat(self->mSavedDisplayFormat);
+            GrMan->SetTVDisplayFormat(self->mSavedDisplayFormat);
             if (self->mRestoreCutSceneMode != 0) {
                 self->mRestoreCutSceneMode = 0;
                 cCutSceneTransitionMan_ForceToCutSceneMode(SSXApp->Game->CutSceneTransitionMan);

@@ -4957,7 +4957,7 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
         rsSetB_3AF8(renderCtx, 0x3E0, 5, 7);
         *(short*)((char*)renderCtx->top + 0x10) = rsTex_3AF8(renderCtx);
     }
-    float* viewMat = ((sRCtx_3AF8*)GrMan_boardwakefx)->GetView();
+    float* viewMat = (float *)GrMan->GetView();
     t4Vector side;
     Set4_3AF8(side, viewMat[0], viewMat[4], viewMat[8], 0.0f);
     t4Vector up;
@@ -5062,7 +5062,7 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
         verts[7].s = 1.0f;
         verts[7].t = 0.0f;
     }
-    ((sRCtx_3AF8*)GrMan_boardwakefx)->RenderTriStrip(8, verts, 0);
+    GrMan->RenderTriStrip(8, (tBxVertex*)verts, 0);
     *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
 }
 #endif
@@ -7483,82 +7483,6 @@ struct sBoardWake_7A10 {
 };
 
 // The renderer at GrMan; its 71st virtual draws a strip of n vertices.
-class cGfx_7A10 {
-public:
-    char pad[0x10D8];
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void DrawRibbon(int n, tBxVertex* v, int flags);
-};
-
 struct sGfxTex_7A10 {
     char pad[0xF50];
     int tex[1];             // 0xF50
@@ -7651,8 +7575,8 @@ extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
             texV += dv;
         }
         if (n >= 4) {
-            ((cGfx_7A10*)GrMan_boardwakefx)->DrawRibbon(n, left, 0);
-            ((cGfx_7A10*)GrMan_boardwakefx)->DrawRibbon(n, right, 0);
+            GrMan->RenderTriStrip(n, left, 0);
+            GrMan->RenderTriStrip(n, right, 0);
         }
     }
     if (self->nsegs >= 2) {

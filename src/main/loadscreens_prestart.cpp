@@ -713,55 +713,6 @@ extern "C" void* cStartScreen_cStartScreen(cStartScreen* self, int screenType)
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_load);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cWorld_232B28 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void InitTextures(int);
-};
-
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // malloc-like allocation (gcc treats operator new results as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -809,7 +760,7 @@ struct sUI_232B28 {
  */
 extern "C" void cStartScreen_load(cStartScreen* self)
 {
-    ((cWorld_232B28*)GrMan)->InitTextures(0x100);
+    GrMan->InitTextures(0x100);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
     self->mpUI = (cUIEngine*)ui;
     cUIEngine_loadFile(ui, str_data_ui_su);
@@ -922,29 +873,6 @@ extern "C" void cStartScreen_update(cStartScreen* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_purge);
 #ifdef SKIP_ASM
-class cWorld232D50 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void FlushRenderer();
-};
 extern "C" void cUIEngine__cUIEngine(void* obj, int a);
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
 
@@ -956,7 +884,7 @@ extern "C" void cGraphicsMan_PurgeTextures(void* world);
  */
 extern "C" void cStartScreen_purge(cStartScreen* self)
 {
-    ((cWorld232D50*)GrMan)->FlushRenderer();
+    GrMan->FlushRenderer();
     void* uiEngine = self->mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
@@ -969,30 +897,6 @@ extern "C" void cStartScreen_purge(cStartScreen* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_render);
 #ifdef SKIP_ASM
-class cWorld232DA8 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual int IsRenderReady();
-    virtual void v18();
-    virtual void v19();
-    virtual void DrawFrame();
-};
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* obj);
 
@@ -1006,13 +910,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  */
 extern "C" int cStartScreen_render(cStartScreen* self)
 {
-    if (((cWorld232DA8*)GrMan)->IsRenderReady() == 0) {
+    if (GrMan->IsRenderReady() == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
         cUIEngine_render2D(self->mpUI);
     }
-    ((cWorld232DA8*)GrMan)->DrawFrame();
+    GrMan->DrawFrame();
     return 1;
 }
 #endif
@@ -1307,61 +1211,6 @@ extern "C" void cUIEngine__cUIEngine(void* obj, int a);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void func_0028FA98(void* self, float v);
 
-class cWorld002332E8 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void FlushRenderer();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void RemoveTexture(void* obj);
-};
-
 /**
  * Purges the game load screen: flushes the renderer, destroys the UI engine, removes its two textures and purges
  * textures.
@@ -1373,7 +1222,7 @@ public:
  */
 extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
 {
-    ((cWorld002332E8*)GrMan)->FlushRenderer();
+    GrMan->FlushRenderer();
     void* uiEngine = self->mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
@@ -1382,7 +1231,7 @@ extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
     for (i = 0; i < 2; i++) {
         void* textureId = ((void**)&self->mTexID)[i];
         if (textureId != 0) {
-            ((cWorld002332E8*)GrMan)->RemoveTexture(textureId);
+            GrMan->RemoveTexture((int)textureId);
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);
@@ -1393,30 +1242,6 @@ extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_render);
 #ifdef SKIP_ASM
-class cWorld233390 {
-public:
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual int IsRenderReady();
-    virtual void v18();
-    virtual void v19();
-    virtual void DrawFrame();
-};
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* obj);
 
@@ -1431,13 +1256,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  */
 extern "C" int cGameLoadScreen_render(cGameLoadScreen* self)
 {
-    if (((cWorld233390*)GrMan)->IsRenderReady() == 0) {
+    if (GrMan->IsRenderReady() == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
         cUIEngine_render2D(self->mpUI);
     }
-    ((cWorld233390*)GrMan)->DrawFrame();
+    GrMan->DrawFrame();
     return 1;
 }
 #endif

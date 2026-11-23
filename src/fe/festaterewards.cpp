@@ -718,56 +718,6 @@ extern "C" void cFEStateRewardGalleryBase_updateIconsLoad(cFEStateRewardGalleryB
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_allocIcons);
 #ifdef SKIP_ASM
-struct cGame001CFFF8 {
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual int AddTexture(void* name, void* entry, int a, int b, int c);
-};
-
 extern "C" void SHAPE_name(void* data, int i, void* entry);
 struct sDataEnt001CFFF8 {
     int off;
@@ -801,7 +751,7 @@ extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* 
     for (i = 0; i < self->mNumIcons; i++) {
         SHAPE_name(data, i, &((&self->mIcons[0]))[i]);
         ((&self->mIcons[0]))[i].mName[4] = 0;
-        ((&self->mIcons[0]))[i].mID = ((cGame001CFFF8*)GrMan)->AddTexture((char*)data + ((sDataEnt001CFFF8*)&data->tbl[0].offset)[i].off, &((&self->mIcons[0]))[i], 0, 1, -1);
+        ((&self->mIcons[0]))[i].mID = GrMan->AddTexture((const SHAPE*)((char*)data + ((sDataEnt001CFFF8*)&data->tbl[0].offset)[i].off), (const char*)&((&self->mIcons[0]))[i], 0, 1, -1);
     }
 }
 #endif
@@ -809,60 +759,6 @@ extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_purgeIcons);
 #ifdef SKIP_ASM
-struct cGame001D00C0 {
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void RemoveTexture(int id);
-};
-
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sEntry001D00C0 {
     char name[5];
@@ -887,7 +783,7 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(sSelf001D00C0* self)
     int i;
     for (i = 0; i < self->count; i++) {
         if (self->entries[i].handle >= 0) {
-            ((cGame001D00C0*)GrMan)->RemoveTexture(self->entries[i].handle);
+            GrMan->RemoveTexture(self->entries[i].handle);
         }
         self->entries[i].handle = -1;
         self->entries[i].name[0] = 0;
@@ -2764,7 +2660,7 @@ extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* s
     tIconInfo ent;
     SHAPE_name(data, 0, &ent);
     ent.mName[4] = 0;
-    self->mTextureID = ((cGame001CFFF8*)GrMan)->AddTexture(shapeHeader, &ent, 0, 1, -1);
+    self->mTextureID = GrMan->AddTexture((const SHAPE*)shapeHeader, (const char*)&ent, 0, 1, -1);
     func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex);
     self->mTextureFileIndex = -1;
     sSelfK1D2198* previewState = (sSelfK1D2198*)self;

@@ -253,60 +253,6 @@ extern "C" void cFELoadScreen_gainFocus(void)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_purge);
 #ifdef SKIP_ASM
-struct cGame00233930 {
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void FlushRenderer();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void RemoveTexture(int id);
-};
-
 extern "C" void cUIEngine__cUIEngine(void* self, int a1);
 extern "C" void cGraphicsMan_PurgeTextures(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -322,10 +268,10 @@ extern "C" void func_0028FA98(void* self, float f);
  */
 extern "C" void cFELoadScreen_purge(cFELoadScreen* self)
 {
-    ((cGame00233930*)GrMan)->FlushRenderer();
+    GrMan->FlushRenderer();
     int id = self->SplashTexID;
     if (id >= 0) {
-        ((cGame00233930*)GrMan)->RemoveTexture(id);
+        GrMan->RemoveTexture(id);
     }
     void* uiObject = self->mpUI;
     if (uiObject != 0) {
@@ -335,7 +281,7 @@ extern "C" void cFELoadScreen_purge(cFELoadScreen* self)
     for (i = 0; i < 2; i++) {
         int textureId = *(int*)((char*)&self->mTexID[0] + i * 4);
         if (textureId != 0) {
-            ((cGame00233930*)GrMan)->RemoveTexture(textureId);
+            GrMan->RemoveTexture(textureId);
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);

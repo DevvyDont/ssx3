@@ -9249,83 +9249,6 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawSphere);
 
 
 
-struct cRMgr2170 {
-    char pad_0x0[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void PushView();
-    virtual void PopView();
-    virtual void v33();
-    virtual void v34();
-    virtual t4Matrix* GetView();
-    virtual void v36();
-    virtual void IdentityView();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void RenderLineStrip(int n, tBxVertex* v, int f);
-};
-
 extern t4Vector D_004FFBC0[];
 extern int D_004A59A0;
 
@@ -9424,7 +9347,7 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, t4Vector* pos, 
     int i;
     int k;
 
-    CopyMat2170(&viewMat, ((cRMgr2170*)mgr)->GetView());
+    CopyMat2170(&viewMat, (t4Matrix *)mgr->GetView());
     t4Vector viewCenter = MulMat2170(&viewMat, *pos);
     if (3000.0f < viewCenter.z) {
         return;
@@ -9507,8 +9430,8 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, t4Vector* pos, 
     }
     (mgr->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
     (mgr->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(mgr->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
-    ((cRMgr2170*)mgr)->PushView();
-    ((cRMgr2170*)mgr)->IdentityView();
+    mgr->PushView();
+    mgr->IdentityView();
 
     tBxVertex verts[17];
     i = 0;
@@ -9528,9 +9451,9 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, t4Vector* pos, 
     t4Vector circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[0], radius));
     verts[i].p = circlePoint;
     i++;
-    ((cRMgr2170*)mgr)->RenderLineStrip(i, verts, 0);
+    mgr->RenderLineStrip(i, verts, 0);
     (mgr->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(mgr->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
-    ((cRMgr2170*)mgr)->PopView();
+    mgr->PopView();
 }
 #endif
 

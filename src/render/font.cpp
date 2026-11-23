@@ -100,61 +100,6 @@ INCLUDE_ASM("render/font", cFont_purge);
 // From peak3project's fork (github.com/peak3project/ssx3).
 void cMemMan_free(void*);
 
-class sFontGfx_19E8 {
-public:
-    char pad_0x0[0x10D8];
-    virtual void v1(int);
-    virtual void v2(int);
-    virtual void v3(int);
-    virtual void v4(int);
-    virtual void v5(int);
-    virtual void v6(int);
-    virtual void v7(int);
-    virtual void v8(int);
-    virtual void v9(int);
-    virtual void v10(int);
-    virtual void v11(int);
-    virtual void v12(int);
-    virtual void v13(int);
-    virtual void v14(int);
-    virtual void v15(int);
-    virtual void v16(int);
-    virtual void v17(int);
-    virtual void v18(int);
-    virtual void v19(int);
-    virtual void v20(int);
-    virtual void v21(int);
-    virtual void v22(int);
-    virtual void v23(int);
-    virtual void v24(int);
-    virtual void v25(int);
-    virtual void v26(int);
-    virtual void v27(int);
-    virtual void v28(int);
-    virtual void v29(int);
-    virtual void v30(int);
-    virtual void v31(int);
-    virtual void v32(int);
-    virtual void v33(int);
-    virtual void v34(int);
-    virtual void v35(int);
-    virtual void v36(int);
-    virtual void v37(int);
-    virtual void v38(int);
-    virtual void v39(int);
-    virtual void v40(int);
-    virtual void v41(int);
-    virtual void v42(int);
-    virtual void v43(int);
-    virtual void v44(int);
-    virtual void v45(int);
-    virtual void v46(int);
-    virtual void v47(int);
-    virtual void v48(int);
-    virtual void v49(int);
-    virtual void RemoveTexture(int);
-};
-
 
 struct sFont_19E8 {
     int f0;
@@ -175,7 +120,7 @@ extern "C" void cFont_purge(cFont* self)
     self->NumGlyphs = 0;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     if (self->TextureID >= 0) {
-        ((sFontGfx_19E8*)ps2GraphicsMan)->RemoveTexture(self->TextureID);
+        ps2GraphicsMan->RemoveTexture(self->TextureID);
     }
 }
 #endif

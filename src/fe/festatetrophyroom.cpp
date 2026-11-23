@@ -440,56 +440,6 @@ extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern char str_trph[];
 
-struct cGraphicsMan_4A20 {
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual int AddTexture(void* shape, char* name, int lockType, int copyMem, int bindId);  // slot 46
-};
-
 
 /**
  * Turns each finished trophy-room image load into a texture and redraws the big picture.
@@ -510,7 +460,7 @@ extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophy
     for (i = 0; i < 5; i++) {
         if (self->mTextureFileIndex[i] >= 0 && func_0019E238(mgr, self->mCharID, self->mTextureFileIndex[i]) != 0) {
             char* fileData = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex[i]);
-            self->mTextureIDs[i] = ((cGraphicsMan_4A20*)GrMan)->AddTexture(fileData + *(int*)(fileData + 0x14), str_trph, 0, 1, -1);
+            self->mTextureIDs[i] = GrMan->AddTexture((const SHAPE*)(fileData + *(int*)(fileData + 0x14)), str_trph, 0, 1, -1);
             func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex[i]);
             self->mTextureFileIndex[i] = -1;
             self->mNumLoadingFiles--;
@@ -523,60 +473,6 @@ extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophy
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_purgeTextures);
 #ifdef SKIP_ASM
-struct cGraphicsMan001D4B20 {
-    char pad[0x10D8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void RemoveTexture(int id);  // slot 50
-};
-
 extern "C" void func_0019DC20(void* self, int bank, int i);
 struct sSelf001D4B20 {
     char pad[0x50];
@@ -599,7 +495,7 @@ extern "C" void cFEStateTrophyRoom_purgeTextures(cFEStateTrophyRoom* self)
     int i;
     for (i = 0; i < 5; i++) {
         if (self->mTextureIDs[i] >= 0) {
-            ((cGraphicsMan001D4B20*)GrMan)->RemoveTexture(self->mTextureIDs[i]);
+            GrMan->RemoveTexture(self->mTextureIDs[i]);
         }
         self->mTextureIDs[i] = -1;
         if (self->mTextureFileIndex[i] >= 0) {
