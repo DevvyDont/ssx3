@@ -51,9 +51,8 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* o2vt = *(sVEntry<void*(void*, ...)>**)(locale2 + 4);
         unsigned short* str2 = (unsigned short*)o2vt[4].fn(vthis(locale2, o2vt[4]), GetHashValue32(str_kT_CMNContinue));
-        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-        sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-        mvt[26].fn(vthis(popup, mvt[26]), str2, 0);
+        cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+        popup->setButtonText(str2, 0);
     } else {
         fe->exit();
     }
@@ -97,9 +96,8 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* o2vt = *(sVEntry<void*(void*, ...)>**)(locale2 + 4);
         unsigned short* str2 = (unsigned short*)o2vt[4].fn(vthis(locale2, o2vt[4]), GetHashValue32(str_kT_CMNContinue));
-        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-        sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-        mvt[26].fn(vthis(popup, mvt[26]), str2, 0);
+        cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+        popup->setButtonText(str2, 0);
     } else {
         fe->exit();
     }
@@ -179,9 +177,8 @@ extern "C" void cFEMemCard_confirmLoad(void)
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->mPopupType = 2;
     fe->getPopup((unsigned short*)buf, 0, 0, 0, 0, 0);
-    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-    sVEntry<void(void*, ...)>* vt3 = *(sVEntry<void(void*, ...)>**)(popup + 8);
-    vt3[25].fn(vthis(popup, vt3[25]), 1);
+    cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+    popup->setDefaultButton(1);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -343,9 +340,8 @@ extern "C" void cFEMemCard_callbackConfirmNoCards(void)
         cFEMemCard* fe = cFEMemCard_mInstance;
         fe->getPopup(buf, 0, 0, 0, 0, 0);
         SetLine_1D6D88(str_kT_MEMOVRetry, 1);
-        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-        sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-        mvt[25].fn(vthis(popup, mvt[25]), 1);
+        cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+        popup->setDefaultButton(1);
         SetLine_1D6D88(str_kT_BTNCancel, 0);
     } else {
         cFEMemCard* fe = cFEMemCard_mInstance;
@@ -446,9 +442,8 @@ extern "C" void cFEMemCard_callbackSaveFileCorrupt(void)
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMCorruptSavePS2)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->getPopup(buf, 0, 0, 0, 1, 0);
-    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-    sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-    mvt[25].fn(vthis(popup, mvt[25]), 1);
+    cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+    popup->setDefaultButton(1);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -510,9 +505,8 @@ extern "C" void cFEMemCard_callbackConfirmFormat(void)
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->mPopupType = 0xE;
     fe->getPopup(buf, 0, 0, 0, 1, 0);
-    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-    sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-    mvt[25].fn(vthis(popup, mvt[25]), 1);
+    cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+    popup->setDefaultButton(1);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -547,9 +541,8 @@ extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* vt4 = *(sVEntry<void*(void*, ...)>**)(locale2 + 4);
     unsigned short* str = (unsigned short*)vt4[4].fn(vthis(locale2, vt4[4]), GetHashValue32(str_kT_CMNContinue));
-    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-    sVEntry<void(void*, ...)>* vt3 = *(sVEntry<void(void*, ...)>**)(popup + 8);
-    vt3[26].fn(vthis(popup, vt3[26]), str, 0);
+    cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+    popup->setButtonText(str, 0);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -588,9 +581,8 @@ extern "C" void cFEMemCard_callbackConfirmFormatFail(void)
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* o2vt = *(sVEntry<void*(void*, ...)>**)(locale2 + 4);
     unsigned short* str2 = (unsigned short*)o2vt[4].fn(vthis(locale2, o2vt[4]), GetHashValue32(str_kT_CMNContinue));
-    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-    sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-    mvt[26].fn(vthis(popup, mvt[26]), str2, 0);
+    cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+    popup->setButtonText(str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -635,9 +627,8 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
         sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMConfirmDeletePS2)), name);
         cFEMemCard* fe = cFEMemCard_mInstance;
         fe->getPopup(buf, 0, 0, 0, 1, 0);
-        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-        sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-        mvt[25].fn(vthis(popup, mvt[25]), 1);
+        cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+        popup->setDefaultButton(1);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -926,9 +917,8 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* o2vt = *(sVEntry<void*(void*, ...)>**)(locale2 + 4);
         unsigned short* str2 = (unsigned short*)o2vt[4].fn(vthis(locale2, o2vt[4]), GetHashValue32(str_kT_CMNContinue));
-        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-        sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-        mvt[26].fn(vthis(popup, mvt[26]), str2, 0);
+        cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+        popup->setButtonText(str2, 0);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -974,9 +964,8 @@ extern "C" int cFEMemCard_callbackDeleteFailed(void)
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* o2vt = *(sVEntry<void*(void*, ...)>**)(locale2 + 4);
     unsigned short* str2 = (unsigned short*)o2vt[4].fn(vthis(locale2, o2vt[4]), GetHashValue32(str_kT_CMNContinue));
-    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
-    sVEntry<void(void*, ...)>* mvt = *(sVEntry<void(void*, ...)>**)(popup + 8);
-    mvt[26].fn(vthis(popup, mvt[26]), str2, 0);
+    cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
+    popup->setButtonText(str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
     }
