@@ -99,7 +99,7 @@ extern "C" void cMoveNode__cMoveNode(cMoveNode* self, int flags)
 {
     VPTR_OF(cObjNode, self) = (void**)cMoveNode_vtbl;
     cMoveNode_restoreOverlapSystem(self);
-    void* block = self->ModifierBlock;
+    tModifierBlock* block = self->ModifierBlock;
     if (block != 0) {
         tModifierBlock__tModifierBlock(block, 3);
     }
@@ -110,12 +110,6 @@ extern "C" void cMoveNode__cMoveNode(cMoveNode* self, int flags)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_shouldRebound);
 #ifdef SKIP_ASM
-struct sMoveNodeVEntryI {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 /**
  * Tells whether a rider should rebound off this node, asking its transform modifier when it has one.
  *
@@ -124,16 +118,15 @@ struct sMoveNodeVEntryI {
  */
 extern "C" int cMoveNode_shouldRebound(cMoveNode* self)
 {
-    void* block = self->ModifierBlock;
+    tModifierBlock* block = self->ModifierBlock;
     if (block == 0) {
         return 1;
     }
-    void* node = *(void**)block;
+    cTransformModifier* node = block->RootTransform;
     if (node == 0) {
         return 1;
     }
-    sMoveNodeVEntryI* vt = *(sMoveNodeVEntryI**)node;
-    return vt[8].fn(vthis(node, vt[8]));
+    return node->shouldRebound();
 }
 #endif
 
@@ -179,7 +172,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
     } else {
         tModifierBlock_remTransformModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((void*)self->ModifierBlock) = ((void*)mod);
+    *(void**)self->ModifierBlock = ((void*)mod);
     self->setupOverlapSystem();
     unsigned int* instFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *instFlags = (*instFlags & ~0x20u) | 0x40;
@@ -206,7 +199,7 @@ extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, cUVScrollModifier
     } else {
         tModifierBlock_remUVScrollModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0x4) = ((void*)modifier);
+    self->ModifierBlock->UVScroll = (cUVScrollModifier*)((void*)modifier);
 }
 #endif
 
@@ -230,7 +223,7 @@ extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, cTexFlipModifier* 
     } else {
         tModifierBlock_remTexFlipModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0x8) = ((void*)modifier);
+    self->ModifierBlock->TexFlip = (cTexFlipModifier*)((void*)modifier);
 }
 #endif
 
@@ -254,7 +247,7 @@ extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, cPhysicsModifier* 
     } else {
         tModifierBlock_remPhysicsModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0xC) = ((void*)modifier);
+    self->ModifierBlock->Physics = (cPhysicsModifier*)((void*)modifier);
 }
 #endif
 
@@ -275,7 +268,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     }
-    cEffectLink_add((cEffectLink*)((char*)((void*)self->ModifierBlock) + 0x10), (cEffectLink*)effect);
+    cEffectLink_add((cEffectLink*)(&self->ModifierBlock->Effect), (cEffectLink*)effect);
 }
 #endif
 
@@ -294,7 +287,7 @@ extern "C" void cMoveNode_addRailModifier(cMoveNode* self, cRailModifier* item)
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     }
-    cRailLink_add((char*)((void*)self->ModifierBlock) + 0x1C, item);
+    cRailLink_add(&self->ModifierBlock->Rail, item);
 }
 #endif
 
@@ -375,7 +368,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
         cMN_355770_Obj* obj = *modBlock;
         if (obj != 0) {
             obj->collide(tc, ti);
-            char* transformModifier = *(char**)((void*)self->ModifierBlock);
+            char* transformModifier = *(char**)self->ModifierBlock;
             sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)transformModifier;
             if (vt[9].fn(vthis(transformModifier, vt[9]), cObjectInterface_getAIIndex(pBeing)) == 0) {
                 return;
@@ -827,7 +820,7 @@ extern "C" void cMoveNode_transferEffectModifier(cMoveNode* self, cMoveNode* oth
         if (((void*)self->ModifierBlock) == 0) {
             cMoveNode_addModifierBlock(self);
         }
-        tModifierBlock_transferEffectModifier(((void*)self->ModifierBlock), (char*)((void*)other->ModifierBlock) + 0x10);
+        tModifierBlock_transferEffectModifier(((void*)self->ModifierBlock), &other->ModifierBlock->Effect);
     }
 }
 #endif
@@ -1524,12 +1517,6 @@ extern "C" int cMoveNode_getBoundBox(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_hasIntersect);
 #ifdef SKIP_ASM
-struct sMoveNodeVEntryA28 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 /**
  * Tells whether the node can be intersected, asking its transform modifier.
  *
@@ -1538,16 +1525,15 @@ struct sMoveNodeVEntryA28 {
  */
 extern "C" int cMoveNode_hasIntersect(cMoveNode* self)
 {
-    void* block = self->ModifierBlock;
+    tModifierBlock* block = self->ModifierBlock;
     if (block == 0) {
         return 0;
     }
-    void* node = *(void**)block;
+    cTransformModifier* node = block->RootTransform;
     if (node == 0) {
         return 0;
     }
-    sMoveNodeVEntryA28* vt = *(sMoveNodeVEntryA28**)node;
-    return vt[20].fn(vthis(node, vt[20]));
+    return node->hasIntersect();
 }
 #endif
 
@@ -1571,11 +1557,11 @@ struct sMoveNodeVEntryA70 {
  */
 extern "C" int cMoveNode_intersect(cMoveNode* self, int w, int intInfo, int num, int flags)
 {
-    void* block = self->ModifierBlock;
+    tModifierBlock* block = self->ModifierBlock;
     if (block == 0) {
         return 0;
     }
-    void* node = *(void**)block;
+    cTransformModifier* node = block->RootTransform;
     if (node == 0) {
         return 0;
     }
@@ -1666,7 +1652,7 @@ void cMoveNode_writeToReplayFrame_2(void* vself, cBxReplayFrame* stream)
     stream->write((const char*)&self->TransferHack, 4);
     int flag = self->ModifierBlock != 0;
     stream->write((const char*)&flag, 4);
-    void* block = self->ModifierBlock;
+    tModifierBlock* block = self->ModifierBlock;
     if (block != 0) {
         tModifierBlock_writeToReplayFrame(block, stream);
     }
@@ -1726,7 +1712,7 @@ extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
         if (node != 0) {
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)node;
             if (vt[26].fn(vthis(node, vt[26])) == 2) {
-                return cMultiSplineModifier_incFocusCount_2(*(void**)((void*)self->ModifierBlock), pInst);
+                return cMultiSplineModifier_incFocusCount_2(*(void**)self->ModifierBlock, pInst);
             }
         }
         return 0;
@@ -1762,7 +1748,7 @@ extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* pInst)
         if (node != 0) {
             sMnVEntryI6CC8* vt = *(sMnVEntryI6CC8**)node;
             if (vt[26].fn(vthis(node, vt[26])) == 2) {
-                return cMultiSplineModifier_decFocusCount_2(*(void**)((void*)self->ModifierBlock), pInst);
+                return cMultiSplineModifier_decFocusCount_2(*(void**)self->ModifierBlock, pInst);
             }
         }
         return 0;
@@ -1784,16 +1770,15 @@ INCLUDE_ASM("object/movenode", cMoveNode_getFocusCount);
  */
 extern "C" int cMoveNode_getFocusCount(cMoveNode* self)
 {
-    void* block = self->ModifierBlock;
+    tModifierBlock* block = self->ModifierBlock;
     if (block == 0) {
         return 0;
     }
-    void* node = *(void**)block;
+    cTransformModifier* node = block->RootTransform;
     if (node == 0) {
         return 0;
     }
-    sMoveNodeVEntryI* vt = *(sMoveNodeVEntryI**)node;
-    if (vt[26].fn(vthis(node, vt[26])) != 2) {
+    if (node->getTransformType() != 2) {
         return 0;
     }
     return *(int*)((char*)*(void**)self->ModifierBlock + 0x34);
