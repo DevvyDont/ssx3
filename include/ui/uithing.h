@@ -93,7 +93,8 @@ struct cUIThing : public cListNode {
     // Virtuals. Slots [R] cUIThing_vtbl (slots 2-3 are cListNode's traverseFlat / traverseRecurse, not overridden),
     // names and order [O] (On Tour class cUIThing); parameter types from the retail implementations (the bool
     // parameters are words: cUIThing_setActive(cUIThing*, int)), pointers where On Tour passes references. Slot 22 is
-    // a pure virtual On Tour does not name; not declared.
+    // getType: pure here ([R] cUIThing_vtbl[22] = __pure_virtual; On Tour's DWARF drops pure entries), and every
+    // subclass vtable fills it with its own <class>_getType ([O] each subclass declares virtual char getType()).
     virtual ~cUIThing();                                                  // 1  cUIThing__cUIThing
     virtual void setActive(int a);                                        // 4  cUIThing_setActive
     virtual void setCached(int a);                                        // 5  cUIThing_setCached
@@ -113,6 +114,7 @@ struct cUIThing : public cListNode {
     virtual void update(unsigned short FrameNum);                         // 19 cUIThing_update
     virtual void getSize(t3Vector* vec);                                  // 20 cUIThing_getSize
     virtual void setSize(const t3Vector* vec);                            // 21 cUIThing_setSize
+    virtual char getType() = 0;                                           // 22 __pure_virtual
 };
 
 CHECK_SIZE(tAttrThing, 0x4);

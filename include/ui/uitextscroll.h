@@ -39,6 +39,8 @@ struct cUITextScroll : public cUIThing {
     //   [R] cUITextScroll_vtbl (the ctor cUITextScroll_cUITextScroll, cUITextScroll_cUITextScroll1, the dtor
     //       cUITextScroll__cUITextScroll)
     // --- cUITextScroll
+    // cUITextScroll's own slots ([R] cUITextScroll_vtbl; types [O] On Tour's class cUITextScroll):
+    virtual char getType();                                               // 22 cUITextScroll_getType__FPv
     tAttrTextScroll mAttrTextScroll; // 0x074 [O]; [R] ctor cUITextScroll_cUITextScroll clears mMode/mShadow/mUnicode/mStaticColour
                                      //       (lbu/andi 0xC6/sb 0x74), cUITextScroll_cUITextScroll1 calls its ctor tAttrTextScroll_tAttrTextScroll; [U] setUIData
                                      //       cUITextScroll_setUIData (lw/sw), accessors cUITextScroll_setFontIndex..cUITextScroll_setUnicode, cUITextScroll_setChatWindowMode/90

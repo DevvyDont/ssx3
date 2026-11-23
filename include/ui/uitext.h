@@ -53,6 +53,13 @@ struct cUIText : public cUIThing {
     //   mpScreen: [U] cUIText_getFont: mpScreen->mpState->mpEngine's fonts
     //   mSize: [U] cUIText_setUnicodeStringWrap wraps at mSize.x
     // --- cUIText ---
+    // cUIText's own slots ([R] cUIText_vtbl; types [O] On Tour's class cUIText):
+    virtual char getType();                                               // 22 cUIText_getType__FPv
+    virtual void setShadow(int a);                                        // 23 cUIText_setShadow
+    virtual void setUnicode(int a);                                       // 24 cUIText_setUnicode
+    virtual void setUseStaticColour(int a);                               // 25 cUIText_setUseStaticColour
+    virtual void setUseDisabledColour(int a);                             // 26 cUIText_setUseDisabledColour
+    virtual void setEllipses(int a);                                      // 27 cUIText_setEllipses
     int mAttrText;                   // 0x074 [P] tAttrText: setFontIndex (bits 0-1), hasShadow (2), isUnicode (3), getUseStaticColour (4)
                                      //       (preview lw 0x6C; retail cUIText_setFontIndex..cUIText_setEllipses, which in On Tour's order also have
                                      //       get/setUseDisabledColour (5) and isEllipses/setEllipses (6)); [R] ctor sets bit 2, clears 3-6;

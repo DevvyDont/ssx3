@@ -66,6 +66,8 @@ struct cUIMenu : public cUIGroup {
     //   mpScreen: [U] cUIScreen_playFrame(mpScreen, ...) in cUIMenu_setSelected, cUIMenu_setFocus, cUIMenu_onInput
     //   mList: [U] cList_size(&mList) in cUIMenu_setScrollableMenu / setUIData, cList_getByIndex in the menu code
     // --- cUIMenu
+    // cUIMenu's own slots ([R] cUIMenu_vtbl; types [O] On Tour's class cUIMenu):
+    virtual char getType();                                               // 22 cUIMenu_getType__FPv
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;
                                      //       retail cUIMenu_isFlipInput/cUIMenu_setFlipInput); [R] tAttrMenu() tAttrMenu_tAttrMenu clears
                                      //       bits 0-3 (byte); [U] cUIMenu_getNext / onInput / setScrollableMenu (bit 2)

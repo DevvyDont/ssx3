@@ -33,6 +33,8 @@ struct cUIIcon : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUIIcon_vtbl D_00494AA8 (createObjectByStruct, cUIIcon_cUIIcon1, cUIIcon_cUIIcon, the dtor)
     // --- cUIIcon
+    // cUIIcon's own slots ([R] cUIIcon_vtbl; types [O] On Tour's class cUIIcon):
+    virtual char getType();                                               // 22 cUIIcon_getType__FPv
     tAttrIcon mAttrIcon;             // 0x074 [O] tAttrIcon; [R] its ctor func_0021CCC8 (cUIScreen_createObjectByStruct) /
                                      //       tAttrIcon_tAttrIcon clears the low nibble; [U] accessors cUIIcon_isTiled..cUIIcon_setIconRotate
                                      //       (lw/sw 0x74), cUIIcon_setUIData stores the record flags

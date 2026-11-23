@@ -28,6 +28,8 @@ struct cUIPair : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUIPair_vtbl D_00494868 (createObjectByStruct, cUIPair_cUIPair1, cUIPair_cUIPair, the dtor)
     // --- cUIPair
+    // cUIPair's own slots ([R] cUIPair_vtbl; types [O] On Tour's class cUIPair):
+    virtual char getType();                                               // 22 cUIPair_getType__FPv
     tAttrPair mAttrPair;             // 0x074 [O] tAttrPair (2 bytes); [R] its ctor tAttrPair_tAttrPair on this + 0x74
                                      //       (createObjectByStruct, cUIPair_cUIPair1, cUIPair_cUIPair)
     char unk_076[0x2];               // 0x076 padding

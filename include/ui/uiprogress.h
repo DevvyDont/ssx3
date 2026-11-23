@@ -20,6 +20,8 @@ struct cUIProgress : public cUIThing {
     //   [R] cUIProgress_vtbl D_00494408 (createObjectByStruct, cUIProgress_cUIProgress1, cUIProgress_cUIProgress, the
     //       dtor)
     // --- cUIProgress
+    // cUIProgress's own slots ([R] cUIProgress_vtbl; types [O] On Tour's class cUIProgress):
+    virtual char getType();                                               // 22 cUIProgress_getType__FPv
     cUIThing* mpObjBackground;       // 0x074 [O]; [R] = 0, then the record's child (hash rec+0x20); [U] cUIProgress_setBackgroundObject
                                      //       setBackground (sw); the dtor deletes it; render2D, update, cUIProgress_setValue
     cUIThing* mpObjKnob;             // 0x078 [O]; [R] = 0, then the child named at rec+0x24; [U] cUIProgress_setKnobObject setKnob;

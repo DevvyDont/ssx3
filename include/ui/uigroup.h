@@ -24,6 +24,8 @@ struct cUIGroup : public cUIThing {
     //   [R] cUIGroup_vtbl D_004949E8 (createObjectByStruct, cUIGroup_cUIGroup1, cUIGroup_cUIGroup, the dtor; cUIMenu /
     //       cUIScreen dtors restore it)
     // --- cUIGroup
+    // cUIGroup's own slots ([R] cUIGroup_vtbl; types [O] On Tour's class cUIGroup):
+    virtual char getType();                                               // 22 cUIGroup_getType__FPv
     cList mList;                     // 0x074 [O] the children (util/list.h, 0x1C); [R] ctor cList_cList on this + 0x74
                                      //       (createObjectByStruct, cUIGroup_cUIGroup1, cUIGroup_cUIGroup), dtor cUIGroup__cUIGroup
                                      //       (cList_destroyList on this + 0x74, vptrs 0x8C / 0x88 / 0x7C);

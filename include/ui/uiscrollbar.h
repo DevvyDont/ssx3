@@ -23,6 +23,8 @@ struct cUIScrollBar : public cUIThing {
     //   [R] cUIScrollBar_vtbl (createObjectByStruct, cUIScrollBar_cUIScrollBar1, cUIScrollBar_cUIScrollBar, the dtor
     //       cUIScrollBar__cUIScrollBar)
     // --- cUIScrollBar
+    // cUIScrollBar's own slots ([R] cUIScrollBar_vtbl; types [O] On Tour's class cUIScrollBar):
+    virtual char getType();                                               // 22 cUIScrollBar_getType__FPv
     cUIThing* mpObjBackground;       // 0x074 [O]; [R] = 0, then the record's child (hash rec+0x20); [U] cUIScrollBar_setBackgroundObject (sw);
                                      //       the dtor cUIScrollBar__cUIScrollBar deletes it; render2D cUIScrollBar_render2D; cUIScrollBar_setValues
     cUIThing* mpObjKnob;             // 0x078 [O]; [R] = 0, then the child named at rec+0x24; [U] cUIScrollBar_setKnobObject; the dtor
