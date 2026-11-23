@@ -210,7 +210,7 @@ static inline void VCall_003078C0(char* self, int slot)
  * @param vmsg  the event (id halfword at +0x0, data from +0x4)
  */
 // Dispatches a script event to the matching virtual handler (slots 7-16).
-extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* vself, void* vmsg)
+extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* vself, tWScriptEvent* vmsg)
 {
     unsigned short* msg = (unsigned short*)vmsg;
     switch (*msg) {
@@ -1980,7 +1980,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_update);
 class cWScriptProcess_update_cProc;
 struct cWScriptProcList;
 extern "C" void cWScriptProcess_update(cWScriptProcess_update_cProc* self);
-extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* proc, void* cmd);
+extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* proc, tWScriptEvent* cmd);
 extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcess* self, int a1);
 extern "C" void cWScriptMan_processLocalMissionCmd(cWScriptMan* self);
 extern "C" void cWScriptMan_startProcess(void* self, void* p);

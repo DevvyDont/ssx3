@@ -4777,7 +4777,7 @@ extern "C" unsigned short cUITextScroll_getSelectedIndex(cUITextScroll* uiTextSc
 INCLUDE_ASM("ui/uivector", cUIVector_cUIVector1);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
-extern "C" void* tAttrVector_tAttrVector(void* p);
+extern "C" void* tAttrVector_tAttrVector(tAttrVector* p);
 extern void* cUIVector_vtbl[];
 
 /**
@@ -4961,7 +4961,7 @@ struct sCount_6618 {
  * @param attrVector  the tAttrVector (cUIVector + 0x74)
  * @return the same address
  */
-extern "C" void* tAttrVector_tAttrVector(void* attrVector)
+extern "C" void* tAttrVector_tAttrVector(tAttrVector* attrVector)
 {
     sCount_6618* self = (sCount_6618*)attrVector;
     self->flag = 0;

@@ -3970,18 +3970,18 @@ static inline int clampI_2B00(int v, int lo, int hi)
  * Clips the halo record's position (+0x20, +0x1C) with GrMan virtual slot 91: when clipped, clears +0x2C and +0x2E.
  * Otherwise it sets +0x2C and projects the point with slot 92; at a depth (z * 2^-24) of 0.005 or less it stops there.
  * Else it sets +0x2E, the sample rectangle +0x0..+0xC (depth * 800 by depth * 400 pixels, clamped to 16 by 8, centred
- * on the point) and the 16 by 8 rectangle +0x10..+0x1C clamped inside the view rectangle (@p vrect +0x0..+0xC). +0x24
+ * on the point) and the 16 by 8 rectangle +0x10..+0x1C clamped inside the view rectangle (@p viewInfo +0x0..+0xC). +0x24
  * becomes the projected depth of the point moved toward the camera by 100, 80 or 200 units by type (along the view
- * matrix column at @p vrect +0x18, +0x28, +0x38), and +0x28 the angle (screen x mapped to -1..1) * pi/2. cLensFxMan_ProcessLens
+ * matrix column at @p viewInfo +0x18, +0x28, +0x38), and +0x28 the angle (screen x mapped to -1..1) * pi/2. cLensFxMan_ProcessLens
  * calls it for each halo of the view.
  *
  * @param vself  the halo
- * @param vrect  the view information: view rectangle at +0x0, view matrix from +0x10
+ * @param viewInfo  the view information ([O] tViewInfo): view rectangle at +0x0, view matrix from +0x10
  */
-extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
+extern "C" void cLightHalo_Process(cLightHalo* vself, tViewInfo* viewInfo)
 {
     cLightHalo* self = vself;
-    float* rect = (float*)vrect;
+    float* rect = (float*)viewInfo;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     t4Vector pos;
     pos.x = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).x;
@@ -4370,7 +4370,7 @@ extern "C" void cLensFxMan_SampleLens(cLensFxMan* selfp)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_ProcessLens);
 #ifdef SKIP_ASM
-extern "C" void cLightHalo_Process(cLightHalo* part, void* owner);
+extern "C" void cLightHalo_Process(cLightHalo* part, tViewInfo* viewInfo);
 extern "C" void cSunHalo_Process(void* emit, void* owner, int idx);
 
 struct sWkPart3338 { char data[0x30]; };
@@ -4424,7 +4424,7 @@ extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
         sWkPart3338(*pp)[0x100] = ((sWkPart3338 (*)[256])&self->mLightHalo[0][0]);
         sWkPart3338* halo = pp[idx];
         do {
-            cLightHalo_Process((cLightHalo*)halo, self);
+            cLightHalo_Process((cLightHalo*)halo, &self->mViewInfo);
             i++;
             halo++;
         } while (i < self->mNumHalo[idx]);

@@ -895,7 +895,7 @@ extern "C" void* cFEStateBraggingRights_handleEvent(cFEStateBraggingRights* self
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onPopupEvent);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
-extern "C" void func_00194440(cFEStateBraggingRights* self, void* a1, int a2);
+extern "C" void func_00194440(cFEStateBraggingRights* self, cUIState* a1, int a2);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 static inline int isOn00194168()
@@ -1041,7 +1041,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup
  * @param popupEvent  the popup event
  */
-extern "C" void func_00194440(cFEStateBraggingRights* self, void* popup, int popupEvent)
+extern "C" void func_00194440(cFEStateBraggingRights* self, cUIState* popup, int popupEvent)
 {
     if (popupEvent == 0xF) {
         if (cSetupMan_mSetupMan != 0) {

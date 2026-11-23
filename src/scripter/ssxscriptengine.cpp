@@ -4065,7 +4065,7 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  *
  * @param out  receives ten words
  */
-extern "C" void GetSSXGameEventFrame(void* self, void* out)
+extern "C" void GetSSXGameEventFrame(void* self, tSSXFrameGameEvent* out)
 {
     ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->GetValue();
     ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->GetCustom();
@@ -5846,7 +5846,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
-extern "C" void GetSSXGameEventFrame(void* self, void* out);
+extern "C" void GetSSXGameEventFrame(void* self, tSSXFrameGameEvent* out);
 extern void* cWScriptMan_TheWScriptMan;
 extern int cRenderStateMan_m_indoor;
 
@@ -5933,7 +5933,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_OnInSeqKeyEvent);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void GetSSXGameEventFrame(void* self, void* out);
+extern "C" void GetSSXGameEventFrame(void* self, tSSXFrameGameEvent* out);
 int GetSSXScriptHeader(void* self);
 // PORT: the unit declares cSSXScriptEngine_GetTransportWorldSectionID with no parameters; this caller passes the engine
 // in $a0.

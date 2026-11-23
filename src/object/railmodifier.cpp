@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
 #include "object/modifierblock.h"
 #include "world/worldrecords.h"
 #include "intersect/spheretree.h"
@@ -2295,7 +2296,7 @@ static inline float ftrunc_0035F0B8(float x)
  * @param owner  instance record
  * @return self
  */
-extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier* self, void* def, void* owner)
+extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier* self, void* def, tInstanceRecord* owner)
 {
     tAddTexFlipData* defData = (tAddTexFlipData*)def;
     float one = 1.0f;

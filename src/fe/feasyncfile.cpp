@@ -482,7 +482,7 @@ extern void* cBXString_EmptyString_v __asm__("cBXString_EmptyString");
  * @param pParentState  the parent state (mpParentState)
  * @return @p self
  */
-extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* self, void* pEngine, void* pParentState)
+extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* self, cUIEngine* pEngine, cFEStateNet* pParentState)
 {
     // An unused 16-byte local is needed to reproduce the 0x30-byte frame.
     int framePad[4];
@@ -5350,7 +5350,7 @@ extern "C" void func_001A9AB8(cFEStateNet* self, cUIListBox_001A9AB8* box, int v
 INCLUDE_ASM("fe/feasyncfile", func_001A9B58);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* mem, void* engine, void* owner);
+extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* mem, cUIEngine* engine, cFEStateNet* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern const char str_cFEStateNetMessenger[];
 
@@ -6232,10 +6232,10 @@ struct cLocStr_001AAF90 {
  * @param msg  the error event
  * @return the unicode text, or 0 for an unknown code
  */
-extern "C" int func_001AAF90(cFEStateNet* self, void* msg)
+extern "C" int func_001AAF90(cFEStateNet* self, online_NetErrorEvent* msg)
 {
     int textId;
-    switch (*(unsigned int*)((char*)msg + 8)) {
+    switch ((unsigned int)msg->mError) {
     case 0x2D646966:
         textId = GetHashValue32(str_kT_POPUP200DifferentPS2);
         break;
@@ -6411,7 +6411,7 @@ extern "C" void func_001AB288(cFEStateNet* self, int err)
 INCLUDE_ASM("fe/feasyncfile", func_001AB370);
 #ifdef SKIP_ASM
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, int a3);
+extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int a1, int a2, int a3);
 
 /**
  * Opens the user-actions popup for a player (challenge, message, messenger, block) and marks it open (unk_6C4).
@@ -6432,7 +6432,7 @@ extern "C" void func_001AB370(cFEStateNet* self, int playerName, int fiveOptions
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AB3D0);
 #ifdef SKIP_ASM
-extern "C" void func_001AB478(cFEStateNet* self, void* popup, int a1, int a2, int a3);
+extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int a1, int a2, int a3);
 extern "C" int cScreenPopup_getCurrentlySelected(void* popup);
 
 /**
@@ -6543,9 +6543,9 @@ static inline int Text_001AB478(char* name)
  */
 // Fills the popup message for one file: a status header, then one line per check.
 // PORT: a1 carries the name (char*) through an int parameter, as the unit declares the function.
-extern "C" void func_001AB478(cFEStateNet* self, void* popup, int namePtr, int fiveOptions, int selectedOption)
+extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int namePtr, int fiveOptions, int selectedOption)
 {
-    if (popup == 0) {
+    if (((void*)popup) == 0) {
         return;
     }
     const char* name = (const char*)namePtr;
@@ -7407,9 +7407,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_001AC9C0(cFEUseExistingAccount* self, cScreenPopup* a1, int a2);
-extern "C" void func_001ACA88(cFEUseExistingAccount* self, void* a1, int a2);
-extern "C" void func_001ACB48(cFEUseExistingAccount* self, void* a1, int a2);
-extern "C" void func_001ACCD0(cFEUseExistingAccount* self, void* a1, int a2);
+extern "C" void func_001ACA88(cFEUseExistingAccount* self, cUIState* a1, int a2);
+extern "C" void func_001ACB48(cFEUseExistingAccount* self, cUIState* a1, int a2);
+extern "C" void func_001ACCD0(cFEUseExistingAccount* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event on the "use existing account" screen to the handler for that popup's id.
@@ -7522,7 +7522,7 @@ static inline void* GetSession_001ACA88()
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001ACA88(cFEUseExistingAccount* self, void* popup, int event)
+extern "C" void func_001ACA88(cFEUseExistingAccount* self, cUIState* popup, int event)
 {
     if (event == 0xF || event == 20) {
         func_00261408(GetSession_001ACA88());
@@ -7559,7 +7559,7 @@ extern char str_kT_POPUP204SaveAccount[];
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001ACB48(cFEUseExistingAccount* self, void* popup, int kind)
+extern "C" void func_001ACB48(cFEUseExistingAccount* self, cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case 15:
@@ -7617,7 +7617,7 @@ extern const char str_cFEStateSelectPersona[];
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001ACCD0(cFEUseExistingAccount* self, void* popup, int kind)
+extern "C" void func_001ACCD0(cFEUseExistingAccount* self, cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case 15: {
@@ -8489,9 +8489,9 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
-extern "C" void func_001AF728(cFEStateChallengePopup* self, void* iface, void* screen);
+extern "C" void func_001AF728(cFEStateChallengePopup* self, cBENewRaceInterface* iface, cUIScreen* screen);
 extern "C" void func_001AF688(cFEStateChallengePopup* self);
-extern "C" void func_001AF930(void* screen);
+extern "C" void func_001AF930(cUIScreen* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001A9930(cFEStateNet* self);
 // D_004A4E88 is 8 bytes (config/symbol_addrs.txt); its second word was the separate symbol D_004A4E8C.
@@ -9450,7 +9450,7 @@ extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001AF688(cFEStateChallengePopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" void func_001AB108(cFEStateNet* self);
-extern "C" void func_001AFA60(void* screen, online_FindPlayerEvent* msg);
+extern "C" void func_001AFA60(cUIScreen* screen, online_FindPlayerEvent* msg);
 extern "C" void func_001AFD88(cUIScreen* self, online_PingEvent* a1);
 extern const char str_cFEStateOnlineCharacterSelect[];
 
@@ -9630,25 +9630,25 @@ public:
 /**
  * Fills the challenge popup's race texts: peak number, event name and course name.
  *
- * Each is " " when @p track is null. "TextPeak" shows "1".."3" from cBENewRaceInterface_getLocationPeak1 (the course's location record);
+ * Each is " " when @p iface is null. "TextPeak" shows "1".."3" from cBENewRaceInterface_getLocationPeak1 (the course's location record);
  * "TextEvent" shows cBENewRaceInterface_getEventName (the cGameEvent record), and when an event is set it first forces the AI count to 0
  * (setNumberAI, vtable entry 1), selects entry 0 of mpLBCPURiders and makes it static; "TextCourse" shows
  * cBENewRaceInterface_getLocationName1. The three callees ignore their argument and read the new-race interface's globals. The widgets are not
  * null-checked.
  *
- * @param track  the new-race interface (only tested for null)
+ * @param iface  the new-race interface (only tested for null)
  * @param screen  the screen to fill (null: nothing)
  */
-extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* screen)
+extern "C" void func_001AF728(cFEStateChallengePopup* self, cBENewRaceInterface* iface, cUIScreen* screen)
 {
-    if (screen == 0) {
+    if (((void*)screen) == 0) {
         return;
     }
     cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPeak));
-    if (track == 0) {
+    if (((void*)iface) == 0) {
         cUIText_setAsciiString(uiText, str_sp);
     } else {
-        switch (cBENewRaceInterface_getLocationPeak1(track)) {
+        switch (cBENewRaceInterface_getLocationPeak1(iface)) {
         case 0:
             cUIText_setAsciiString(uiText, D_004A14F8);
             break;
@@ -9661,7 +9661,7 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
         }
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextEvent));
-    if (track == 0) {
+    if (((void*)iface) == 0) {
         cUIText_setAsciiString(uiText, str_sp);
     } else {
         if (cBENewRaceInterface_newRace.cGameEvent != 0) {
@@ -9671,13 +9671,13 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
             cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
             ((cFEVObj_001AF728*)self->mpLBCPURiders)->setStatic(1);
         }
-        cUIText_setAsciiString(uiText, cBENewRaceInterface_getEventName(track));
+        cUIText_setAsciiString(uiText, cBENewRaceInterface_getEventName(iface));
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextCourse));
-    if (track == 0) {
+    if (((void*)iface) == 0) {
         cUIText_setAsciiString(uiText, str_sp);
     } else {
-        cUIText_setAsciiString(uiText, cBENewRaceInterface_getLocationName1(track));
+        cUIText_setAsciiString(uiText, cBENewRaceInterface_getLocationName1(iface));
     }
 }
 #endif
@@ -9713,9 +9713,9 @@ static inline void Clear1AF930(void* screen, char* name)
  *
  * @param screen  the screen (null: nothing)
  */
-extern "C" void func_001AF930(void* screen)
+extern "C" void func_001AF930(cUIScreen* screen)
 {
-    if (screen != 0) {
+    if (((void*)screen) != 0) {
         Clear1AF930(screen, str_TextPlayerName);
         Clear1AF930(screen, str_TextPlayerRank);
         Clear1AF930(screen, str_TextNumGames);
@@ -9780,7 +9780,7 @@ static inline int Loc1AFA60(char* name)
  * @param screen  the screen to fill
  * @param msg  the find-player event
  */
-extern "C" void func_001AFA60(void* screen, online_FindPlayerEvent* msg)
+extern "C" void func_001AFA60(cUIScreen* screen, online_FindPlayerEvent* msg)
 {
     cBXString nameStr;
     char buf[0x100];
@@ -9910,9 +9910,9 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" int cBENewRaceInterface_setGameMode_FE68(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" int cBENewRaceInterface_setGameEvent_FE68(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
-extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen);
+extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, cUIScreen* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
-extern "C" void func_001AF930(void* screen);
+extern "C" void func_001AF930(cUIScreen* screen);
 extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_241challenge_received_popup[];
 
@@ -10378,7 +10378,7 @@ public:
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen);
+extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, cUIScreen* screen);
 
 /**
  * Prepares the challenge-received popup as it opens: calls its slot 32 and, the first time, fills the screen.
@@ -10434,7 +10434,7 @@ extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" void func_001AB108(cFEStateNet* self);
-extern "C" void func_001AFA60(void* screen, online_FindPlayerEvent* msg);
+extern "C" void func_001AFA60(cUIScreen* screen, online_FindPlayerEvent* msg);
 extern "C" void func_001AFD88(cUIScreen* self, online_PingEvent* a1);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
@@ -10533,10 +10533,10 @@ extern char str_kT_CMNNo[];
  * @param iface  the new-race interface (only tested for null)
  * @param screen  the screen (null: nothing)
  */
-extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen)
+extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, cUIScreen* screen)
 {
     char buf[16];
-    if (screen == 0) {
+    if (((void*)screen) == 0) {
         return;
     }
     cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextEventResult));
@@ -11608,7 +11608,7 @@ extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, in
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, void* a1, int a2);
+extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event on the rider-select screen to the handler for that popup's id.
@@ -11651,7 +11651,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, void* popup, int event)
+extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, cUIState* popup, int event)
 {
     if (event == 0xF) {
         if (cSetupMan_mSetupMan != 0) {
@@ -12691,7 +12691,7 @@ extern char str_kT_POPUP235SubmittingAbuse[];
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B35B0(cFEStateChatRoom* self, void* popup, int kind)
+extern "C" void func_001B35B0(cFEStateChatRoom* self, cUIState* popup, int kind)
 {
     int messengerErr;
     int blockErr;
@@ -12758,7 +12758,7 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B3760(cFEStateChatRoom* self, void* popup, int event)
+extern "C" void func_001B3760(cFEStateChatRoom* self, cUIState* popup, int event)
 {
     if (event == 0xF) {
         cUIStateStack_popToFloor(&self->mpEngine->mStateStack);
@@ -12788,7 +12788,7 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B37D8(cFEStateChatRoom* self, void* popup, int event)
+extern "C" void func_001B37D8(cFEStateChatRoom* self, cUIState* popup, int event)
 {
     if (event == 0xF) {
         cUIStateStack_popToFloor(&self->mpEngine->mStateStack);
@@ -12803,9 +12803,9 @@ extern "C" void func_001B37D8(cFEStateChatRoom* self, void* popup, int event)
 INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void func_001B35B0(cFEStateChatRoom* self, void* a1, int a2);
-extern "C" void func_001B3760(cFEStateChatRoom* self, void* a1, int a2);
-extern "C" void func_001B37D8(cFEStateChatRoom* self, void* a1, int a2);
+extern "C" void func_001B35B0(cFEStateChatRoom* self, cUIState* a1, int a2);
+extern "C" void func_001B3760(cFEStateChatRoom* self, cUIState* a1, int a2);
+extern "C" void func_001B37D8(cFEStateChatRoom* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event in the chat room to the handler for that popup's id.
@@ -13904,7 +13904,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  * @return the value left by cFEStateNet_onPopupEvent, which returns nothing
  */
-extern "C" int func_001B4C00(cFEStateNetConfig* self, void* popup, int event)
+extern "C" int func_001B4C00(cFEStateNetConfig* self, cUIState* popup, int event)
 {
     int result;
     if (event == 0xF || event == 20) {
@@ -13932,7 +13932,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B4C40(cFEStateNetConfig* self, void* popup, unsigned int event)
+extern "C" void func_001B4C40(cFEStateNetConfig* self, cUIState* popup, unsigned int event)
 {
     switch (event) {
     case 15:
@@ -14410,7 +14410,7 @@ static inline void* GetSession_001B55B0()
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B55B0(cFEStateNetConfig* self, void* popup, unsigned int kind)
+extern "C" void func_001B55B0(cFEStateNetConfig* self, cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case 15:
@@ -14489,7 +14489,7 @@ static inline void* GetSession_001B5740()
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B5740(cFEStateNetConfig* self, void* popup, int event)
+extern "C" void func_001B5740(cFEStateNetConfig* self, cUIState* popup, int event)
 {
     if (event == 0xF || event == 20) {
         func_00261408(GetSession_001B5740());
@@ -14564,7 +14564,7 @@ public:
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B5830(cFEStateNetConfig* self, void* popup, unsigned int kind)
+extern "C" void func_001B5830(cFEStateNetConfig* self, cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case 15:
@@ -14636,7 +14636,7 @@ extern const char str_cFEStateLogin[];
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B5A58(cFEStateNetConfig* self, void* popup, int event)
+extern "C" void func_001B5A58(cFEStateNetConfig* self, cUIState* popup, int event)
 {
     switch (event) {
     case 21:
@@ -14728,7 +14728,7 @@ struct sFlags1B5BD8 {
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B5BD8(cFEStateNetConfig* self, void* popup, unsigned int kind)
+extern "C" void func_001B5BD8(cFEStateNetConfig* self, cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case 15: {
@@ -14781,7 +14781,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B5CF8(cFEStateNetConfig* self, void* popup, int event)
+extern "C" void func_001B5CF8(cFEStateNetConfig* self, cUIState* popup, int event)
 {
     if (event == 22) {
         cFEStateNet_onPopupEvent(self, popup, event);
@@ -14796,7 +14796,7 @@ extern "C" void func_001B5CF8(cFEStateNetConfig* self, void* popup, int event)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onPopupEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_001B5A58(cFEStateNetConfig* self, void* a1, int a2);
+extern "C" void func_001B5A58(cFEStateNetConfig* self, cUIState* a1, int a2);
 /**
  * Hands a popup's event to the handler for that popup's message id, else to the cFEStateNet handler.
  *
@@ -14850,7 +14850,7 @@ extern "C" int USTR_length(void* s);
 void cMemMan_free(void* p);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
-extern "C" int func_001AAF90(cFEStateNet* self, void* msg);
+extern "C" int func_001AAF90(cFEStateNet* self, online_NetErrorEvent* msg);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void strcpy1(void* dst, int src);
 extern "C" void cUIStateStack_pop(void* self, int a1);
@@ -17742,7 +17742,7 @@ extern const char str_cFEStateSelectPersona[];
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B91C8(cFEStateCreateStep1* self, void* popup, int kind)
+extern "C" void func_001B91C8(cFEStateCreateStep1* self, cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case 15: {
@@ -17792,7 +17792,7 @@ extern char str_kT_CMNNo[];
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* popup, int event)
+extern "C" void func_001B92C8(cFEStateCreateStep1* self, cUIState* popup, int event)
 {
     switch (event) {
     case 0xF: case 0x10: case 20:
@@ -17833,8 +17833,8 @@ extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* popup, int event)
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void func_001B91C8(cFEStateCreateStep1* self, void* a1, int a2);
-extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* a1, int a2);
+extern "C" void func_001B91C8(cFEStateCreateStep1* self, cUIState* a1, int a2);
+extern "C" void func_001B92C8(cFEStateCreateStep1* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event on account creation step 1 to the handler for that popup's message id.
@@ -18954,11 +18954,11 @@ extern "C" void func_001BA9F8(cFEStateCreateStep2* self, int connectFirst)
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onPopupEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_001BB158(cFEStateCreateStep2* self, void* a1, unsigned int a2);
+extern "C" void func_001BB158(cFEStateCreateStep2* self, cUIState* a1, unsigned int a2);
 extern "C" void func_001BB0E8(cFEStateCreateStep2* self, cScreenPopup* a1, int a2);
-extern "C" void func_001BB098(cFEStateCreateStep2* self, void* a1, int a2);
-extern "C" void func_001BADE8(cFEStateCreateStep2* self, void* a1, int a2);
-extern "C" void func_001BAED8(cFEStateCreateStep2* self, void* a1, int a2);
+extern "C" void func_001BB098(cFEStateCreateStep2* self, cUIState* a1, int a2);
+extern "C" void func_001BADE8(cFEStateCreateStep2* self, cUIState* a1, int a2);
+extern "C" void func_001BAED8(cFEStateCreateStep2* self, cUIState* a1, int a2);
 /**
  * Hands a popup's event on account creation step 2 to the handler for that popup's message id.
  *
@@ -19160,7 +19160,7 @@ static inline void* GetSession_001BADE8()
  * @param popup  the popup that sent the event
  * @param event  the popup event (0xF + option index, 0x14 back, 0x16 closed)
  */
-extern "C" void func_001BADE8(cFEStateCreateStep2* self, void* popup, int event)
+extern "C" void func_001BADE8(cFEStateCreateStep2* self, cUIState* popup, int event)
 {
     if (event == 0xF || event == 20) {
         cFEStateNet_onPopupEvent_v(((cFEStateNet*)self), popup, event);
@@ -19206,7 +19206,7 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001BAED8(cFEStateCreateStep2* self, void* popup, int event)
+extern "C" void func_001BAED8(cFEStateCreateStep2* self, cUIState* popup, int event)
 {
     switch (event) {
     case 0xF: case 0x10: case 20:
@@ -19266,7 +19266,7 @@ extern "C" void func_001BBAC8(void* self, int state);
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001BB098(cFEStateCreateStep2* self, void* popup, int event)
+extern "C" void func_001BB098(cFEStateCreateStep2* self, cUIState* popup, int event)
 {
     if (event == 22) {
         cFEStateNet_onPopupEvent(self, popup, event);
@@ -19333,7 +19333,7 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void func_001BB158(cFEStateCreateStep2* self, void* popup, unsigned int kind)
+extern "C" void func_001BB158(cFEStateCreateStep2* self, cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case 15: {
@@ -20416,9 +20416,9 @@ extern "C" int func_001BC4F0(cFEStateCreateDuplicate* self, int id, int data)
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateDuplicate_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void func_001BC728(cFEStateCreateDuplicate* self, void* a1, int a2);
-extern "C" void func_001BC818(cFEStateCreateDuplicate* self, void* a1, int a2);
-extern "C" void func_001BC990(cFEStateCreateDuplicate* self, void* a1, int a2);
+extern "C" void func_001BC728(cFEStateCreateDuplicate* self, cUIState* a1, int a2);
+extern "C" void func_001BC818(cFEStateCreateDuplicate* self, cUIState* a1, int a2);
+extern "C" void func_001BC990(cFEStateCreateDuplicate* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event on the duplicate-name screen to the handler for that popup's id.
@@ -20490,7 +20490,7 @@ static inline void* GetSession_001BC728()
  * @param popup  the popup that sent the event
  * @param event  the popup event (0xF + option index, 0x14 back, 0x16 closed)
  */
-extern "C" void func_001BC728(cFEStateCreateDuplicate* self, void* popup, int event)
+extern "C" void func_001BC728(cFEStateCreateDuplicate* self, cUIState* popup, int event)
 {
     if (event == 0xF || event == 20) {
         cFEStateNet_onPopupEvent_v(((cFEStateNet*)self), popup, event);
@@ -20533,7 +20533,7 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void func_001BC818(cFEStateCreateDuplicate* self, void* popup, int kind)
+extern "C" void func_001BC818(cFEStateCreateDuplicate* self, cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case 15: {
@@ -20597,7 +20597,7 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001BC990(cFEStateCreateDuplicate* self, void* popup, int event)
+extern "C" void func_001BC990(cFEStateCreateDuplicate* self, cUIState* popup, int event)
 {
     switch (event) {
     case 0xF: case 0x10: case 20:
@@ -21706,7 +21706,7 @@ extern char D_004A1408[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001BDD60(cFEStateLobbyMenu* self, void* popup, int event)
+extern "C" void func_001BDD60(cFEStateLobbyMenu* self, cUIState* popup, int event)
 {
     if (event == 0xF) {
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, 0xF);
@@ -21724,7 +21724,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_001BDCF8(cFEStateLobbyMenu* self, cFEStateNetCreateRoomPopup* a1, int a2);
-extern "C" void func_001BDD60(cFEStateLobbyMenu* self, void* a1, int a2);
+extern "C" void func_001BDD60(cFEStateLobbyMenu* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event on the lobby screen to the handler for that popup's message id.
@@ -23191,9 +23191,9 @@ extern "C" void func_001BF5A8(cFEStateLogin* self, void* a1, int a2);
  * @param pPopup  the popup state that sent the event (On Tour pPopup)
  * @param Event  the popup event (On Tour Event)
  */
-extern "C" void cFEStateLogin_onPopupEvent(cFEStateLogin* self, void* pPopup, int Event)
+extern "C" void cFEStateLogin_onPopupEvent(cFEStateLogin* self, cUIState* pPopup, int Event)
 {
-    switch (*(unsigned int*)((char*)pPopup + 0x18)) {
+    switch ((unsigned int)pPopup->miMiscData) {
     case 2062:
         ((cFEVObj_001BF6C0*)self)->v33(pPopup, Event);
         break;
@@ -23674,7 +23674,7 @@ static inline void* GetSession_001C0138()
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001C0138(cFEStateNet* self, void* popup, int event)
+extern "C" void func_001C0138(cFEStateNet* self, cUIState* popup, int event)
 {
     if (event == 0xF) {
         cFEStateNet_onPopupEvent_v(self, popup, 0xF);
@@ -23738,7 +23738,7 @@ extern char str_cFEStateNetAccountMem[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001C0240(cFEStateNet* self, void* popup, int event)
+extern "C" void func_001C0240(cFEStateNet* self, cUIState* popup, int event)
 {
     if (event == 0xF) {
         cFEStateNet_onPopupEvent_v(self, popup, 0xF);
@@ -23759,8 +23759,8 @@ extern "C" void func_001C0240(cFEStateNet* self, void* popup, int event)
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineMainMenu_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void func_001C0138(cFEStateNet* self, void* a1, int a2);
-extern "C" void func_001C0240(cFEStateNet* self, void* a1, int a2);
+extern "C" void func_001C0138(cFEStateNet* self, cUIState* a1, int a2);
+extern "C" void func_001C0240(cFEStateNet* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event on the online main menu to the handler for that popup's id.
@@ -24904,7 +24904,7 @@ extern "C" void* func_001C19C8(cFEStateNetQuickPlayPopup* self, int netEvent, in
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickPlayPopup_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, void* a1, int a2);
+extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, cFEStateNetQuickPlayPopup* a1, int a2);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 /**
@@ -24964,7 +24964,7 @@ extern char str_kT_BTNOK[];
  * @param event  the popup event
  * @return cFEStateNet_onPopupEvent's result
  */
-extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, void* popup, int event)
+extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, cFEStateNetQuickPlayPopup* popup, int event)
 {
     int result;
     if (event == 0xF || event == 20) {
@@ -25456,7 +25456,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" char* cBEOptionInterface_getQuickKeyMessage(void* self, int i);
 extern "C" void USTR_strcpyW(char* dst, void* src);
-extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* text, char* str);
+extern "C" void func_001C2578(cFEStateNetQuickMessages* self, cUIText* text, char* str);
 extern char str_Qpct_d[];
 
 
@@ -25490,7 +25490,7 @@ extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int idx)
     } else {
         cBXString_Concat(&label, msg);
     }
-    func_001C2578(self, (void*)self->mpMessage[idx], label.Str);
+    func_001C2578(self, (cUIText*)((void*)self->mpMessage[idx]), label.Str);
     cBXString__cBXString(&label, 2);
 }
 #endif
@@ -25553,7 +25553,7 @@ static inline void Measure1C2578(cUIText* text, const char* s, tRect* out)
  * @param vtext  the cUIText to set
  * @param str  the text to show
  */
-extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* vtext, char* str)
+extern "C" void func_001C2578(cFEStateNetQuickMessages* self, cUIText* vtext, char* str)
 {
     cUIText* text = (cUIText*)vtext;
     int cut = 0;
@@ -25763,8 +25763,8 @@ extern "C" void func_001C2A18(cFEStateNetQuickMessages* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, void* a1, int a2);
-extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, void* a1, int a2);
+extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, cUIState* a1, int a2);
+extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event in the quick-messages editor to the handler for that popup's id.
@@ -25818,7 +25818,7 @@ extern "C" void func_001C2418(cFEStateNetQuickMessages* self);
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, void* popup, int event)
+extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, cUIState* popup, int event)
 {
     if (event == 0xF) {
         cBEVIface_001C2BA8* iface = (cBEVIface_001C2BA8*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -25855,7 +25855,7 @@ extern const char str_cFEStateNetSSXWorld[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, void* popup, int event)
+extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, cUIState* popup, int event)
 {
     switch (event) {
     case 0xF:

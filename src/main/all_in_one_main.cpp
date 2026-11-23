@@ -244,7 +244,7 @@ extern char str_Receiving_Room_List[];
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, void* src)
+extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, LobbyMan* src)
 {
     int i = 0;
     int n = LobbyMan_getnumrooms(src);
@@ -291,7 +291,7 @@ extern char str_No_users_in_room[];
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void RoomMenu_updateusers(RoomMenu* self, void* src)
+extern "C" void RoomMenu_updateusers(RoomMenu* self, LobbyMan* src)
 {
     int i = 0;
     int n = func_0025F1B0(src);

@@ -345,7 +345,7 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks();
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, void* engine)
+extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, cUIEngine* engine)
 {
     cFEMemCard_cFEMemCard2((self), engine, 2);
     int one = 1;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "util/objectinterface.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -102,7 +103,7 @@ extern sDrawState sDrawState_s_defaultDrawState;
  * @param size  sprite width and height (On Tour Radius)
  * @param angle  rotation in degrees, 0 for none (On Tour Angle)
  */
-extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, int kind, float size, float angle)
+extern "C" void cObjectInterface_renderSimpleLightHalo(t4Vector* obj, float* src, int kind, float size, float angle)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     if (((IsHiddenFn_1D10)((sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[91].fn)(vthis(ps2GraphicsMan, ((sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[91]), obj) != 0) {

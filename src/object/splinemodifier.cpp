@@ -687,7 +687,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* self);
  * @param model  the instance to copy along the spline (On Tour tInstanceRecord* inst)
  * @return @p self
  */
-extern "C" void* cMultiSplineModifier_cMultiSplineModifier(cMultiSplineModifier* self, tAddMultiSplineData* desc, char* model)
+extern "C" void* cMultiSplineModifier_cMultiSplineModifier(cMultiSplineModifier* self, tAddMultiSplineData* desc, tInstanceRecord* model)
 {
     self->Instance = (tInstanceRecord*)model;
     *(void***)self = cMultiSplineModifier_vtbl;

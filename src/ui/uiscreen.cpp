@@ -353,7 +353,7 @@ struct sCmdList_C978 {
  *
  * @param thread  the thread (On Tour cUIThread* pThread)
  */
-extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
+extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
 {
     cUIThread_C870 *uiThread = (cUIThread_C870 *)thread;
     sCmdList_C978 *list;
@@ -1097,7 +1097,7 @@ void* cUIScreen_onInput(void* vself)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiscreen", cUIScreen_update);
 #ifdef SKIP_ASM
-extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void* thread);
+extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread);
 extern "C" void cUIGroup_update(void* list, unsigned short frame);
 
 /**

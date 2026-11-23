@@ -5611,7 +5611,7 @@ static inline float Length_163158(const t4Vector& v)
  * @param proportion  the sideways shift as a fraction of the eye distance; the sign picks the side
  * @param targetProportion  the fraction of the shift also applied to the look-at point
  */
-extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self_, void* info, float proportion, float targetProportion)
+extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self_, cChaseSetup* info, float proportion, float targetProportion)
 {
     float zero = 0.0f;
     t4Vector look = Sub_163158(self_->CamTargetPos, self_->Position);
@@ -10514,7 +10514,7 @@ extern "C" void cLookAtChaseAlgorithm_updateFollowDistance(void* self, void* inf
 extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c);
-extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, void* info, float a, float b);
+extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b);
 
 
 // PORT: PS2-only VU0 inline asm (a - b).
@@ -10795,7 +10795,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
 extern "C" void cLookAtChaseAlgorithm_updateRailCam(char* self, char* p, float k, float t);
 extern "C" void cLookAtChaseAlgorithm_updateViewCam(char* self, char* p, float a, float b, float c, float d);
 extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c);
-extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, void* info, float a, float b);
+extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b);
 // PORT: cLookAtChaseAlgorithm_updateHandplant is defined with 7 float parameters; this caller passes 8.
 void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
                      float h) __asm__("cLookAtChaseAlgorithm_updateHandplant");
@@ -10954,7 +10954,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
 extern "C" void cLookAtChaseAlgorithm_updateRailCam(char* self, char* p, float k, float t);
 extern "C" void cLookAtChaseAlgorithm_updateViewCam(char* self, char* p, float a, float b, float c, float d);
 extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b, float c);
-extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, void* info, float a, float b);
+extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self, cChaseSetup* info, float a, float b);
 // PORT: cLookAtChaseAlgorithm_updateHandplant is defined with 7 float parameters; this caller passes 8.
 void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
                      float h) __asm__("cLookAtChaseAlgorithm_updateHandplant");

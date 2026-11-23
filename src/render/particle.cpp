@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/patchrecord.h"
 #include "render/beziercache.h"
 #include "visualfx/snowbox.h"
 #include "render/font.h"
@@ -2632,23 +2633,23 @@ static inline t3Vector* NrmOf_47A0(sPMgr_47A0* self, int idx, int slot)
  * @param normals  nonzero to also cache normals
  * @return the record index (-1 when the cache was full)
  */
-extern "C" int func_003747A0(sPMgr_47A0* self, char* mat, int idx, int bit, int normals)
+extern "C" int func_003747A0(sPMgr_47A0* self, tPatchRecord* mat, int idx, int bit, int normals)
 {
     int slot = PopSlot_47A0(self, idx);
     t3Vector* pos = PosOf_47A0(self, idx, slot);
     t2Vector* uv = UVOf_47A0(self, idx, slot);
     t2Vector* col = ColOf_47A0(self, idx, slot);
-    func_00374180((sPatchSet*)self, mat, (t3Vector*)pos, idx);
-    func_00374298((char*)self, mat, (sV2_4298*)uv, idx);
+    func_00374180((sPatchSet*)self, ((char*)mat), (t3Vector*)pos, idx);
+    func_00374298((char*)self, ((char*)mat), (sV2_4298*)uv, idx);
     func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
     sPEnt_47A0* entry = &self->entries[idx][slot];
-    entry->mat = mat;
-    *(short*)(mat + (idx << 1) + 0x1A6) = slot;
+    entry->mat = ((char*)mat);
+    *(short*)(((char*)mat) + (idx << 1) + 0x1A6) = slot;
     entry->flags |= 0xC | (1 << bit);
     if (normals) {
         int nslot = self->nfreeList[idx][--self->nfreeCount[idx]];
         t3Vector* nrm = NrmOf_47A0(self, idx, nslot);
-        func_00374518_47A0(self, mat, nrm, idx);
+        func_00374518_47A0(self, ((char*)mat), nrm, idx);
         entry->nslot = nslot;
     }
     return slot;

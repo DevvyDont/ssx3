@@ -198,7 +198,7 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param id  statement slot (input state id) to evaluate
  * @return the statement's value
  */
-extern "C" float cInputMap_getValue(cInputMap* self, void* inputPad, int id)
+extern "C" float cInputMap_getValue(cInputMap* self, cInputPad* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
@@ -233,7 +233,7 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param config7  config value 8 (On Tour c7)
  * @return the statement's value
  */
-extern "C" float cInputMap_getValue1(cInputMap* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+extern "C" float cInputMap_getValue1(cInputMap* self, cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     cInputExec parser;
     cInputExec_cInputExec(&parser);
@@ -265,7 +265,7 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param id  statement slot (input state id) to evaluate
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int cInputMap_getState(cInputMap* self, void* inputPad, int id)
+extern "C" int cInputMap_getState(cInputMap* self, cInputPad* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
@@ -300,7 +300,7 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param config7  config value 8 (On Tour c7)
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int cInputMap_getState1(cInputMap* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+extern "C" int cInputMap_getState1(cInputMap* self, cInputPad* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     cInputExec parser;
     cInputExec_cInputExec(&parser);

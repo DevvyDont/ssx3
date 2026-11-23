@@ -418,7 +418,7 @@ struct sWVCam_9D60 {
 };
 
 
-extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self, void* section, int cam, int loaded);
+extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self, tBxBSPNode* section, int cam, int loaded);
 
 /**
  * Recomputes which hull pages stream focus @p cam needs.
@@ -440,7 +440,7 @@ extern "C" void cWorldView_refreshStreamFocus(cWorldView* self, int cam)
         for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
             int st = ((&self->mp_SectionState[0]))[i].state;
             if (st == 5 || st == 6) {
-                cWorldView_recursiveTreeFocus(self, ((void*)(self->mp_Section)[i].m_BSP.unk_0C), cam, st == 6);
+                cWorldView_recursiveTreeFocus(self, (tBxBSPNode*)((void*)(self->mp_Section)[i].m_BSP.unk_0C), cam, st == 6);
             }
         }
         self->m_StreamFocus[cam].m_iFocusTick = frame;
@@ -644,7 +644,7 @@ static inline int overlap_A028(const t4Vector* c, const tBxBSPNode* s)
  * @param cam  the focus index
  * @param loaded  set for an Active section (updates the safe radius)
  */
-extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self_, void* sec_, int cam, int loaded)
+extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self_, tBxBSPNode* sec_, int cam, int loaded)
 {
     if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (tBxBSPNode*)sec_))
         return;
@@ -673,11 +673,11 @@ extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self_, void* sec_, int
     }
     if (((void*)((tBxBSPNode*)sec_)->m_pInChild) != 0) {
         if (Dot_A028((*(t4Vector*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneIn), ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
-            cWorldView_recursiveTreeFocus(self_, ((void*)((tBxBSPNode*)sec_)->m_pInChild), cam, loaded);
+            cWorldView_recursiveTreeFocus(self_, (tBxBSPNode*)((void*)((tBxBSPNode*)sec_)->m_pInChild), cam, loaded);
     }
     if (((void*)((tBxBSPNode*)sec_)->m_pOutChild) != 0) {
         if (Dot_A028((*(t4Vector*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneOut), ((sWV_A028*)self_)->cams[cam].bmax) < 0.0f)
-            cWorldView_recursiveTreeFocus(self_, ((void*)((tBxBSPNode*)sec_)->m_pOutChild), cam, loaded);
+            cWorldView_recursiveTreeFocus(self_, (tBxBSPNode*)((void*)((tBxBSPNode*)sec_)->m_pOutChild), cam, loaded);
     }
 }
 #endif

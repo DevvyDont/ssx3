@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "intersect/bxnash.h"
 #include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "world/instancerecord.h"
@@ -895,7 +896,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isFocusInstance);
  * @return 1 when it can, else 0
  */
 // PORT: the helpers take the object as int in this unit.
-extern "C" int cWScriptMan_isFocusInstance(cWScriptMan* self, void* obj)
+extern "C" int cWScriptMan_isFocusInstance(cWScriptMan* self, nash_Node* obj)
 {
     tInstanceRecord* inst = (tInstanceRecord*)obj;
     if ((int)inst->m_pActiveNode != 0) {
@@ -1587,7 +1588,7 @@ struct cWScriptMan_runScriptCode1_sCall {
  * @param obj  the script task
  * @param scriptCode  the script code
  */
-extern "C" void cWScriptMan_runScriptCode1(cWScriptMan* self, void* obj, int scriptCode)
+extern "C" void cWScriptMan_runScriptCode1(cWScriptMan* self, cWScriptTask* obj, int scriptCode)
 {
     cWScriptMan_runScriptCode1_sValue codeVar;
     cWScriptMan_runScriptCode1_sValue ret;

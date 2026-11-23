@@ -467,7 +467,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
  *
  * @param desc  matrix (t4Matrix) to use
  */
-extern "C" void cMoveNode_addPosition1(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addPosition1(cMoveNode* self, t4Matrix* desc)
 {
     cMoveNode_addTransformModifier(self, (cTransformModifier*)cPositionModifier_cPositionModifier1((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), (t4Matrix*)desc));
 }
@@ -499,7 +499,7 @@ extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mes
 INCLUDE_ASM("object/movenode", cMoveNode_addMagnet);
 #ifdef SKIP_ASM
 extern char str_MagnetModifier[];
-extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
+extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, tInstanceRecord* owner, t4Matrix* a2, float f0, float f1);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
@@ -2229,7 +2229,7 @@ extern char cMagnetModifier_vtbl[];
  * @param speed  pull speed (scaled by 100/3.6)
  * @return self
  */
-extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* inst, void* mat, float radius, float speed)
+extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, tInstanceRecord* inst, t4Matrix* mat, float radius, float speed)
 {
     *(void**)self = cMagnetModifier_vtbl;
     self->Instance = (tInstanceRecord*)inst;
@@ -2251,7 +2251,7 @@ extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* in
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)&self->Transform), "r"(mat)
+        : "r"((char*)&self->Transform), "r"(((void*)mat))
         : "memory");
     self->RootTransformDirty = 1;
     sMoveQuad translation = *(sMoveQuad*)&self->Transform.row[3];

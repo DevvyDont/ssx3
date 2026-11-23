@@ -594,7 +594,7 @@ INCLUDE_ASM("intersect/worldsphtree", cOverlapList_getinstances);
 struct sSphNode_340A40;
 extern "C" void nash_Cell_descend(nash_Cell* node, OverlapInstancesCallback* ctx);
 extern "C" int nash_CellKey_proximitytest(void* cell, void* box);
-extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* box, nash_Cell* tree, void* cell);
 
 
 struct sCell_330BA8 {
@@ -689,7 +689,7 @@ INCLUDE_ASM("intersect/worldsphtree", cOverlapList_gettyped);
 #ifdef SKIP_ASM
 struct sOctCollect;
 extern "C" void nash_Cell_descend1(nash_Cell* self, sOctCollect* out);
-extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* box, nash_Cell* tree, void* cell);
 
 struct sTag_331450 {
 };
@@ -794,7 +794,7 @@ INCLUDE_ASM("intersect/worldsphtree", cOverlapList_getpatchesandinstances);
 #ifdef SKIP_ASM
 struct sTree_340C20;
 extern "C" void nash_Cell_descend2(nash_Cell* tree, OverlapInstancesCallback* ctx);
-extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell);
+extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, tBoundBox* vbox, void* vnode, void* vcell);
 
 struct sObj_331E90 {
     sObj_331E90* next;
@@ -2424,7 +2424,7 @@ struct sTag_335D78 {
 };
 
 extern "C" void nash_Cell_descend4(nash_Cell* self, void* ctx);
-extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, TerrainCallback* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, TerrainCallback* ctx2, tBoundBox* box, nash_Cell* tree, void* cell);
 
 static inline void collect_335D78(nash_Cell* node, TerrainCallback* ctx)
 {
@@ -2478,7 +2478,7 @@ struct sHit_00336850;
  * @param hitCache  passed to cWorldIntersectType_IsPatchInt for each patch (On Tour tIntHint *hint)
  * @return the number of hits stored
  */
-extern "C" int cBXNash_terrainIntersect(cBXNash* vself, void* vq, sHit_00336850* hits, int cap, int hitCache)
+extern "C" int cBXNash_terrainIntersect(cBXNash* vself, cWorldIntersectType* vq, sHit_00336850* hits, int cap, int hitCache)
 {
     sGrid_335D78* grid = (sGrid_335D78*)vself;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
@@ -2520,7 +2520,7 @@ struct sHit_00336850 {
     sHit_00336850() {}
 } __attribute__((aligned(16)));
 
-extern "C" int cBXNash_terrainIntersect(cBXNash* self, void* q, sHit_00336850* hits, int max, int a4);
+extern "C" int cBXNash_terrainIntersect(cBXNash* self, cWorldIntersectType* q, sHit_00336850* hits, int max, int a4);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_00336850(float x)
@@ -2835,7 +2835,7 @@ struct sTag_336F30 {
 };
 
 extern "C" void nash_Cell_descend5(nash_Cell* self, void* ctx);
-extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* ctx, StaticObjectCallback* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* ctx, StaticObjectCallback* ctx2, tBoundBox* box, void* tree, void* cell);
 
 static inline void collect_336F30(sOct_336F30* node, StaticObjectCallback* ctx)
 {
@@ -2886,7 +2886,7 @@ struct sHit_003378C0;
  * @param full  nonzero makes StaticObjectCallback_intersectinstance pass mode 3 instead of 1 (On Tour includeRidable)
  * @return the number of hits stored
  */
-extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, void* vq, sHit_003378C0* hits, int cap, int full)
+extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, cWorldIntersectType* vq, sHit_003378C0* hits, int cap, int full)
 {
     sGrid_336F30* grid = (sGrid_336F30*)vself;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
@@ -2927,7 +2927,7 @@ struct sHit_003378C0 {
     sHit_003378C0() {}
 } __attribute__((aligned(16)));
 
-extern "C" int cBXNash_staticObjectIntersect(cBXNash* self, void* q, sHit_003378C0* hits, int max, int a4);
+extern "C" int cBXNash_staticObjectIntersect(cBXNash* self, cWorldIntersectType* q, sHit_003378C0* hits, int max, int a4);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_003378C0(float x)
@@ -3148,7 +3148,7 @@ INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX1);
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, nash_Cell* vnode, void* vcell)
 {
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
@@ -3283,7 +3283,7 @@ INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX2);
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, nash_Cell* vnode, void* vcell)
 {
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
@@ -3471,7 +3471,7 @@ static inline void collect_33A3D8(nash_Cell* tree, OverlapInstancesCallback* ctx
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, tBoundBox* vbox, void* vnode, void* vcell)
 {
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
@@ -3818,7 +3818,7 @@ INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX5);
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, TerrainCallback* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, TerrainCallback* ctx2, tBoundBox* vbox, nash_Cell* vnode, void* vcell)
 {
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;
@@ -4130,7 +4130,7 @@ static inline void collect_33DFD8(nash_Cell* node, StaticObjectCallback* ctx)
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* ctx, StaticObjectCallback* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* ctx, StaticObjectCallback* ctx2, tBoundBox* vbox, void* vnode, void* vcell)
 {
     tBoundBox* box = (tBoundBox*)vbox;
     nash_Cell* node = (nash_Cell*)vnode;

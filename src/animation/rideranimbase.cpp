@@ -515,7 +515,7 @@ static inline bool rabXformEq_1F00(const tPose& a, const tPose& b)
  */
 // Starts anim (packed clip id h) on sequencer vseq, blending over `blend` seconds. A sequence already
 // playing the same thing (same anim, flags and offset transform) hands over its tracks and weight.
-extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
+extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, cAnimSequencer* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
 {
     cRiderAnimBase* self = vself;
     cAnimSequencer* seq = (cAnimSequencer*)vseq;
@@ -716,7 +716,7 @@ extern "C" void cRiderAnimBase_setupAnimation(cRiderAnimBase* riderAnim, int ani
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimFrame);
 #ifdef SKIP_ASM
-extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, void* seq, int anim, int a3, int a4, int a5, float blend);
+extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, cAnimSequencer* seq, int anim, int a3, int a4, int a5, float blend);
 extern "C" void cAnimSequence_setSubAnimTime(void* node, int i, float t);
 extern char* cGameAnimMap_TheGameAnimMap;
 extern int kAnimIDInvalid;
@@ -829,7 +829,7 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int ani
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 #ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
-extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, void* seq, int anim, int a3, int a4, int a5, float blend);
+extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, cAnimSequencer* seq, int anim, int a3, int a4, int a5, float blend);
 extern int kSequencerPriority[];
 extern char* cGameAnimMap_TheGameAnimMap;
 
@@ -873,7 +873,7 @@ int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_playFromAnimID);
 #ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
-extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, void* seq, int anim, int a3, int a4, int a5, float blend);
+extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, cAnimSequencer* seq, int anim, int a3, int a4, int a5, float blend);
 extern int kSequencerPriority[];
 
 /**

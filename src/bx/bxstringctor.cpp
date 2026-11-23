@@ -2497,7 +2497,7 @@ INCLUDE_ASM("bx/bxstringctor", cPath_initPath);
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_A180(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" void pathREAD_t3Vector(void* p, void* q);
-extern "C" void cPath_populateNode(cPath* self, void* src, void* dst);
+extern "C" void cPath_populateNode(cPath* self, void* src, tPathNode* dst);
 extern "C" void cPath_populateEvent(cPath* self, char* src, int* dst);
 
 
@@ -2579,7 +2579,7 @@ void pathREAD_float_2(void* dst, void* src) __asm__("pathREAD_float");
  * @param src  the node in the serialized data
  * @param dst  the node to fill
  */
-extern "C" void cPath_populateNode(cPath* self, void* src, void* dst)
+extern "C" void cPath_populateNode(cPath* self, void* src, tPathNode* dst)
 {
     pathREAD_t3Vector(dst, src);
     pathREAD_float_2((char*)dst + 0xC, (char*)src + 0xC);

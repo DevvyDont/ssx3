@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/flagnode.h"
 #include "world/worldcache.h"
 #include "object/movenode.h"
 #include "ai/rider.h"
@@ -706,7 +707,7 @@ extern "C" void cFlagSet_AddFlag(void* self, void* data, void* ctx);
  * @param node  instance record of the flag
  * @param desc  converted flag data (tFlagState, 0x58 bytes)
  */
-extern "C" void cFlagManager_AddFlag(cFlagManager* self, void* node, void* desc)
+extern "C" void cFlagManager_AddFlag(cFlagManager* self, cFlagNode* node, void* desc)
 {
     int i;
     cFlagSet* existing;
@@ -744,7 +745,7 @@ extern "C" int cFlagSet_RemoveFlag(void* elem, void* arg);
  *
  * @param instRecord  instance record of the flag
  */
-extern "C" void cFlagManager_RemoveFlag(cFlagManager* self, void* instRecord)
+extern "C" void cFlagManager_RemoveFlag(cFlagManager* self, tInstanceRecord* instRecord)
 {
     int i;
     cFlagSet* elem = ((&self->mFlagSets[0]));
@@ -1781,7 +1782,7 @@ struct sFlagSlot_34D9B0 {
  * @param force  force the instance visible
  * @return self
  */
-extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType, void* instRecord, int force)
+extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType, tInstanceRecord* instRecord, int force)
 {
     cMoveNode* node = (cMoveNode*)((char*)&self->unk_014);
     cMoveNode_cMoveNode1(node, bucket, nodeType, instRecord);

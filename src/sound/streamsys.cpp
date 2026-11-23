@@ -1718,7 +1718,7 @@ struct sStrmTick {
  *
  * @param entry  the monitor instance
  */
-extern "C" void cMonitorInstance_Update(void* entry, void* self)
+extern "C" void cMonitorInstance_Update(void* entry, cController* self)
 {
     sStrmTick* tick = (sStrmTick*)entry;
     if (tick->active) {
@@ -1737,7 +1737,7 @@ extern "C" void cMonitorInstance_Update(void* entry, void* self)
 INCLUDE_ASM("sound/streamsys", cController_MONITOR_Update);
 #ifdef SKIP_ASM
 extern "C" void cMonitor_MONITOR_Update(void* bm);
-extern "C" void cMonitorInstance_Update(void* e, void* self);
+extern "C" void cMonitorInstance_Update(void* e, cController* self);
 
 /**
  * Updates the monitors unless paused: cMonitor_MONITOR_Update and then each of the 48 monitor instances

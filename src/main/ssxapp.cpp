@@ -3454,10 +3454,10 @@ static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
  * @param cameraSlots  the camera-slot table pointer stored at +0x90 (read by FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllPatchesInside)
  * @return @p self
  */
-extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* cfg, void* visSource, void* viewBounds, int cameraSlots)
+extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* cfg, cOcclusionMan* visSource, void* viewBounds, int cameraSlots)
 {
     sWorldInit_22ADD8* w = (sWorldInit_22ADD8*)self;
-    w->f0 = visSource;
+    w->f0 = ((void*)visSource);
     w->f4 = viewBounds;
     w->f90 = cameraSlots;
     w->f94 = 0;
@@ -3900,7 +3900,7 @@ extern "C" int cGame_render(cGame* self)
         Grow_22B008(bounds, corner);
         sWorld_22B008 worldData;
         world = &worldData;
-        FrustumIntersector_FrustumIntersector((char*)world, ((sCfg_22ADD8*)self->BXNash), ((void*)self->OcclusionMan), &box, ((int)self->World));
+        FrustumIntersector_FrustumIntersector((char*)world, ((sCfg_22ADD8*)self->BXNash), (cOcclusionMan*)((void*)self->OcclusionMan), &box, ((int)self->World));
         cGame_renderBuckets(self);
         func_00229BA8((cCrowdMan2d*)((void*)self->CrowdMan2d));
         func_00344138(((void*)self->CrowdMan3d));

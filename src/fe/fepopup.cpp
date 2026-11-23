@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uimenu.h"
 #include "ui/uithing.h"
 #include "ui/uigroup.h"
 #include "ui/uipair.h"
@@ -174,7 +175,7 @@ void* cScreenPopup_onDestroyScreen(void* vself)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float t);
-extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, void* menu, int idx, int max);
+extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, cUIMenu* menu, int idx, int max);
 
 /**
  * Re-activates the popup's menu when the popup gets the focus back.
@@ -957,7 +958,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_setPopupMessage);
 #ifdef SKIP_ASM
 extern t3Vector t3vect_Zero;
 extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, t3Vector* v);
-extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* msg, void* out);
+extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* msg, t3Vector* out);
 extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, void* b, int which, float t);
 extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 
@@ -1094,7 +1095,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  * @param idx   option index; the item selected is @p idx + 1
  * @param max   highest selectable item, or -1 for the range 0..1
  */
-extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, void* menu, int idx, int max)
+extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, cUIMenu* menu, int idx, int max)
 {
     int lo;
     idx = idx + 1;
@@ -1667,9 +1668,9 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
  * @param str   the ascii string
  * @param out   the result rectangle (four floats)
  */
-extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, void* text, const char* str, void* out)
+extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, cUIText* text, const char* str, void* out)
 {
-    t3Vector scale = *(t3Vector*)((char*)text + 0x50);
+    t3Vector scale = text->mScale;
     cFont* font = (cFont*)cUIText_getFont(text);
     float sx = font->BaseScale[0] * scale.x;
     float sy = font->BaseScale[1] * scale.y;
@@ -2138,7 +2139,7 @@ struct cUIText;
 extern "C" int strlen(const char* s);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, void* text, const char* str, void* out);
+extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, cUIText* text, const char* str, void* out);
 extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 
@@ -2215,7 +2216,7 @@ extern char str_String_pct_08x[];
  * @param msg  the message element (On Tour: tPopupElement *ptElement)
  * @param out  receives the width in x (On Tour: t3Vector &vSize)
  */
-extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* msg, void* out)
+extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* msg, t3Vector* out)
 {
     if (self->mpMessageText == 0)
         return;

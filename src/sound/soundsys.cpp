@@ -2616,7 +2616,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_LiftWithAirTime);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cSSXAudio_SetNeedLift(cSSXAudio* self, int i, int v);
-extern "C" void func_0029FCC8(cSSXAudio* self, void* rider);
+extern "C" void func_0029FCC8(cSSXAudio* self, cRider* rider);
 extern "C" void func_002A7408(cCrowdSys* self, int i);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
@@ -2646,7 +2646,7 @@ extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider)
         cSSXAudio_SetNeedLift(self, rider->getAIIndex(), 0);
     }
     float x = rider->mAirPredictor->TotalAirTime;
-    func_0029FCC8(self, ((char*)rider));
+    func_0029FCC8(self, (cRider*)(((char*)rider)));
     if (cSSXAudio_ReplayMode(self) != 0) {
         idx = 0;
     } else {
@@ -2667,7 +2667,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_UpdateLift);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cSSXAudio_SetNeedLift(cSSXAudio* self, int i, int v);
-extern "C" void func_0029FCC8(cSSXAudio* self, void* rider);
+extern "C" void func_0029FCC8(cSSXAudio* self, cRider* rider);
 extern "C" void func_002A7408(cCrowdSys* self, int i);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
@@ -8806,7 +8806,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F378);
  * @param obj  the rider (cRider)
  * @return the character identity for the grunt bank
  */
-extern "C" int func_0029F378(cSSXAudio* self, void* obj)
+extern "C" int func_0029F378(cSSXAudio* self, cRider* obj)
 {
     switch (cRider_getCheatIdentity(obj)) {
     case 0:
@@ -9087,7 +9087,7 @@ struct sSsFCC8Rider : public sSsFCC8RiderA, public cSsFCC8Obj {
  *
  * @param vrider  the rider (cRider)
  */
-extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
+extern "C" void func_0029FCC8(cSSXAudio* self, cRider* vrider)
 {
     sSsFCC8Rider* rider = (sSsFCC8Rider*)vrider;
     if (func_0029F0A0(self) == 0) return;
@@ -11859,7 +11859,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A3FD8(void* self, unsigned int a1);
+extern "C" int func_002A3FD8(cSSXAudio* self, unsigned int a1);
 
 /**
  * Tells whether the current location (cBENewRaceInterface_getLocation) is one of 17..21 (func_002A3FD8).
@@ -11881,7 +11881,7 @@ INCLUDE_ASM("sound/soundsys", func_002A3FD8);
  * @param location  the location id
  * @return 1 or 0
  */
-extern "C" int func_002A3FD8(void* self, unsigned int location)
+extern "C" int func_002A3FD8(cSSXAudio* self, unsigned int location)
 {
     return location - 17 < 5;
 }
@@ -11894,7 +11894,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A4030(void* self, unsigned int a1);
+extern "C" int func_002A4030(cSSXAudio* self, unsigned int a1);
 
 /**
  * Tells whether the current location (cBENewRaceInterface_getLocation) is one of 14..16 (func_002A4030).
@@ -11916,7 +11916,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4030);
  * @param location  the location id
  * @return 1 or 0
  */
-extern "C" int func_002A4030(void* self, unsigned int location)
+extern "C" int func_002A4030(cSSXAudio* self, unsigned int location)
 {
     return location - 0xe < 3;
 }
@@ -11989,7 +11989,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A4158(void* self, unsigned int a1);
+extern "C" int func_002A4158(cSSXAudio* self, unsigned int a1);
 
 /**
  * Tells whether the race is of the second kind: a location in 5..7 (func_002A4158) or game mode 1 or 6.
@@ -12021,7 +12021,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4158);
  * @param location  the location id
  * @return 1 or 0
  */
-extern "C" int func_002A4158(void* self, unsigned int location)
+extern "C" int func_002A4158(cSSXAudio* self, unsigned int location)
 {
     return location - 5 < 3;
 }
@@ -12454,10 +12454,10 @@ extern "C" int func_002A4718(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A4770);
 #ifdef SKIP_ASM
 extern "C" int func_002A40E0(void* self, unsigned int a1);
-extern "C" int func_002A4158(void* self, unsigned int a1);
+extern "C" int func_002A4158(cSSXAudio* self, unsigned int a1);
 extern "C" int func_002A4238(void* self, unsigned int a1);
-extern "C" int func_002A4030(void* self, unsigned int a1);
-extern "C" int func_002A3FD8(void* self, unsigned int a1);
+extern "C" int func_002A4030(cSSXAudio* self, unsigned int a1);
+extern "C" int func_002A3FD8(cSSXAudio* self, unsigned int a1);
 extern "C" void func_002A2E50(cSSXAudio* self, int a);
 // bank-monitor method: returns BXrand()
 extern "C" unsigned int cSoundSys_SndRand(void* mon);

@@ -2247,7 +2247,7 @@ extern "C" void* func_003B07F8(RCMP_FRAME* self, unsigned int w, int height)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B08E0);
 #ifdef SKIP_ASM
-extern "C" void SHAPE_destroy(char* buf);
+extern "C" void SHAPE_destroy(SHAPE* buf);
 
 /**
  * Destroys a video frame and its SHAPE.
@@ -2260,7 +2260,7 @@ extern "C" void SHAPE_destroy(char* buf);
 extern "C" void func_003B08E0(RCMP_FRAME* self, int flags)
 {
     if (self->m_Shp != 0) {
-        SHAPE_destroy((char*)self->m_Shp);
+        SHAPE_destroy((SHAPE*)((char*)self->m_Shp));
         self->m_Shp = 0;
     }
     *(int*)((char*)self + 0x8) = 7;
@@ -4219,10 +4219,10 @@ extern void (*SHAPE_memfree[])(char* buf);
  *
  * @param buf  the SHAPE
  */
-extern "C" void SHAPE_destroy(char* buf)
+extern "C" void SHAPE_destroy(SHAPE* buf)
 {
-    buf[0] = 0;
-    SHAPE_memfree[0](buf);
+    ((char*)buf)[0] = 0;
+    SHAPE_memfree[0](((char*)buf));
 }
 #endif
 

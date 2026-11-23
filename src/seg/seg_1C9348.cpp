@@ -576,7 +576,7 @@ extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("HUFF
 // Locals are reused the way the original does (run doubles as the MTF cursor, last holds the order
 // value, k is also the "coded as delta" flag, d becomes the delta code index); the register
 // allocation depends on that reuse.
-extern "C" void HUFF_pack(void* vs, void* out, int opt)
+extern "C" void HUFF_pack(HuffEncodeContext* vs, HUFFMemStruct* out, int opt)
 {
     HS_9A48* encoder = (HS_9A48*)vs;
     HuffEncodeContext* encoderInfo = (HuffEncodeContext*)vs;
@@ -698,7 +698,7 @@ INCLUDE_ASM("seg/seg_1C9348", HUFF_packfile);
 extern "C" void HUFF_init_9F60(HuffEncodeContext* s) __asm__("HUFF_init");
 extern "C" void HUFF_writebits_9F60(HuffEncodeContext* s, HUFFMemStruct* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
 extern "C" void HUFF_analysis(void* s, int a, int b);
-extern "C" void HUFF_pack(void* s, void* out, int a);
+extern "C" void HUFF_pack(HuffEncodeContext* s, HUFFMemStruct* out, int a);
 
 /**
  * Packs a buffer with a Huffman header: 0x30FB-0x35FB by delta mode, plus the sizes.

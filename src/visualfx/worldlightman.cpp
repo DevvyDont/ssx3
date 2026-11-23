@@ -202,7 +202,7 @@ struct sVEr_5400 {
 // The unit defines cWorldLightMan_evictHashTableEntry later with its own node type.
 extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry_n(sMan_5400* self, int priority) __asm__("cWorldLightMan_evictHashTableEntry");
 extern "C" sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400* self, int priority);
-extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* a1, void* a2, void* a3, int count);
+extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* a1, void* a2, cIrradiance* a3, int count);
 extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, t4Matrix* out);
 extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
 extern "C" cIrradiance* cRenderStateMan_getCustomIrradiance(void);
@@ -542,7 +542,7 @@ extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights1);
 #ifdef SKIP_ASM
-extern "C" void cWorldLightMan_IntersectLights(void* self, void* a1, void* a2, void** out, int count);
+extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* self, void* a1, void* a2, void** out, int count);
 extern "C" void func_0038A6A8(void* a, void* b, void* c);
 
 /**
@@ -557,7 +557,7 @@ extern "C" void func_0038A6A8(void* a, void* b, void* c);
  * @param irradiance  the light set (On Tour cIrradiance&) to add the lights to
  * @param count  the maximum number of lights
  */
-extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* pos, void* overlapList, void* irradiance, int count)
+extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* pos, void* overlapList, cIrradiance* irradiance, int count)
 {
     void* buf[32];
     int i;
@@ -573,7 +573,7 @@ extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* pos,
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights);
 #ifdef SKIP_ASM
-extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, void* light);
+extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, tLightRecord* light);
 
 
 struct sLightMgr_5B68 {
@@ -596,7 +596,7 @@ struct sLightMgr_5B68 {
  * @param outp  receives the lights; @p max entries
  * @param max  how many lights to keep, at most 32
  */
-extern "C" void cWorldLightMan_IntersectLights(void* lightMan, void* point, void* mgrp, void** outp, int max)
+extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* lightMan, void* point, void* mgrp, void** outp, int max)
 {
     sLightMgr_5B68* mgr = (sLightMgr_5B68*)mgrp;
     tLightRecord** out = (tLightRecord**)outp;
@@ -637,7 +637,7 @@ extern "C" void cWorldLightMan_IntersectLights(void* lightMan, void* point, void
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_GetIntensity);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, void* light);
+extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, tLightRecord* light);
 
 struct cWorldLightMan_CalcLightDist_sVec3;
 struct cWorldLightMan_CalcLightDist_sLight;
@@ -723,7 +723,7 @@ static inline float Pow_5D30(float x, int n)
  * @param lp  the light record
  * @return the intensity
  */
-extern "C" float cWorldLightMan_GetIntensity(void* lightMan, t4Vector* point, void* lp)
+extern "C" float cWorldLightMan_GetIntensity(void* lightMan, t4Vector* point, tLightRecord* lp)
 {
     tLightRecord* light = (tLightRecord*)lp;
     float dist;

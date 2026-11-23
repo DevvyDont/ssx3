@@ -526,9 +526,9 @@ static inline int valid_D120(sRef_D120 r)
  * @param entry  the script slot
  * @return the tResourceID, or -1
  */
-extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(cWScriptCacheEntry* cache, void* inst, int entry)
+extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(cWScriptCacheEntry* cache, tInstanceRecord* inst, int entry)
 {
-    char* data = *(char**)((char*)inst + 0x88);
+    char* data = (char*)inst->m_pCollideRecord;
     if (data == 0 || WSD_D120 == 0) {
         return 0xFFFFFFFF;
     }

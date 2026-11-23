@@ -455,7 +455,7 @@ struct sVec4_2F650;
  * @param mnp   out: the box minimum
  * @param mxp   out: the box maximum
  */
-extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, t4Vector* mnp, t4Vector* mxp)
+extern "C" void cRiderSphereTree_GetMaskBoundBox(cRiderSphereTree* tree, t4Vector* mnp, t4Vector* mxp)
 {
     sSphereBox_9DC8* node = (sSphereBox_9DC8*)tree;
     sSphereV4_9DC8* mn = (sSphereV4_9DC8*)mnp;
@@ -1085,7 +1085,7 @@ struct sSphereHit_32FAC0;
  * @param hit  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, tIntersectInfo* hit)
+extern "C" int cRiderSphereTree_IsBoxCollision(cRiderSphereTree* tree, t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, tIntersectInfo* hit)
 {
     sSphereHit_B2B8* self = (sSphereHit_B2B8*)tree;
     t4Vector* outNormal = (t4Vector*)hit;
@@ -4018,7 +4018,7 @@ static inline t4Vector vecScale_2F650(const t4Vector& v, float s)
 
 
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
-extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, t4Vector* mn, t4Vector* mx);
+extern "C" void cRiderSphereTree_GetMaskBoundBox(cRiderSphereTree* tree, t4Vector* mn, t4Vector* mx);
 extern void* cWorldRider_vtbl[];
 
 /**
@@ -4415,7 +4415,7 @@ static inline void sphereDivEq_32FAC0(t4Vector& v, float s)
 }
 
 
-extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vector* a2, t4Vector* dir, tIntersectInfo* hit);
+extern "C" int cRiderSphereTree_IsBoxCollision(cRiderSphereTree* tree, t3Vector* a1, t3Vector* a2, t4Vector* dir, tIntersectInfo* hit);
 
 /**
  * Collides the rider's current sphere tree with an axis-aligned box and normalises the hit's push-out vector.

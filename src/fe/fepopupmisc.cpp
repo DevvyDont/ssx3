@@ -8425,7 +8425,7 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
 INCLUDE_ASM("fe/fepopupmisc", func_001E50C8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, void* a1, void* owner, int a3, int a4);
+extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, cUIEngine* a1, cOVState_MESSAGECENTER* owner, int a3, int a4);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_cOVState_ViewPopup[];
 
@@ -8502,7 +8502,7 @@ extern void* cOVState_ViewPopup_vtbl[];
  * @param number  the number shown for it (miNumber)
  * @return @p self
  */
-extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, void* engine, void* owner, int message, int number)
+extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, cUIEngine* engine, cOVState_MESSAGECENTER* owner, int message, int number)
 {
     cUIState_cUIState1(self, engine, owner);
     self->miMessage = message;
