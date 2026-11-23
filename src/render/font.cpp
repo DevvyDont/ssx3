@@ -255,7 +255,7 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
         palEntry[3] = (i << 7) / 15;
         palEntry += 4;
     }
-    sFontVEntryDL* vt = (sFontVEntryDL*)ps2GraphicsMan->mVtbl;
+    sFontVEntryDL* vt = (sFontVEntryDL*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     self->TextureID = vt[47].fn(vthis(ps2GraphicsMan, vt[47]), pix, self->FontName, img->w, newHeight, 0, 11, 1, pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
@@ -345,14 +345,14 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
+        sFontVEntry1CB0* vt = (sFontVEntry1CB0*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
+    sFontVEntry1CB0* vt = (sFontVEntry1CB0*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->Color[0], pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
@@ -408,14 +408,14 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)ps2GraphicsMan->mVtbl;
+    sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->Color[0], pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
@@ -2892,13 +2892,13 @@ extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        char* obj = (char*)self->mVtbl;
+        char* obj = (char*)VPTR_AT(self, 0x10D8);
         int* current = (int*)&self->m_pCurrentDrawState->m_bitGroups[i];
         sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
         if (*current != (int)cmp->m_bitGroups[i]) return 1;
     }
     for (j = 0; j < 2; j++) {
-        char* obj = (char*)self->mVtbl;
+        char* obj = (char*)VPTR_AT(self, 0x10D8);
         short* current = sFontRS_shorts_47D8((char*)self->m_pCurrentDrawState) + j;
         sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
         if (*current != cmp->m_textureState.m_texid[j]) return 1;
@@ -3968,7 +3968,7 @@ struct sRenderSlot5288 {
 extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
 {
     cGraphicsMan_cGraphicsMan(self);
-    self->mVtbl = cPS2GraphicsMan_vtbl;
+    VPTR_AT(self, 0x10D8) = cPS2GraphicsMan_vtbl;
     new ((char*)&self->mViewStack) sRenderSlot5288[12];
     new ((char*)&self->mViewStack[3]) sRenderSlot5288[8];
     new ((char*)&self->mViewStack[5]) sRenderSlot5288[2];
@@ -4076,7 +4076,7 @@ struct sFontVEntry23 {
  */
 extern "C" void cPS2GraphicsMan_SetViewportWindow1(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
 {
-    sFontVEntry23* vt = (sFontVEntry23*)self->mVtbl;
+    sFontVEntry23* vt = (sFontVEntry23*)VPTR_AT(self, 0x10D8);
     vt[23].fn(vthis(self, vt[23]), applyScreenOffset, rect[0], rect[1], rect[2], rect[3]);
 }
 #endif

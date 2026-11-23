@@ -141,7 +141,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
     int id = self->mFrontTextureID;
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[50].fn(vthis(ps2GraphicsMan, vt[50]), id);
     }
     self->mVtbl = cFEState_vtbl;
@@ -691,7 +691,7 @@ extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vse
     }
     char* fileData = (char*)func_0019E2B0(mgr, vself->mCharID, vself->mTextureFileIndex);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry<int(void*, void*, void*, int, int, int)>* vt = (sVEntry<int(void*, void*, void*, int, int, int)>*)ps2GraphicsMan->mVtbl;
+    sVEntry<int(void*, void*, void*, int, int, int)>* vt = (sVEntry<int(void*, void*, void*, int, int, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     int id = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), fileData + *(int*)(fileData + 0x14), str_pass, 0, 1, -1);
     char* snd = (char*)vself->mpPassIcon;
     vself->mFrontTextureID = id;

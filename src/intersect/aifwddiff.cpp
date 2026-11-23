@@ -585,7 +585,7 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
         }
     } else {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry<void(void*, float, void*, void*, int)>* vt = &((sVEntry<void(void*, float, void*, void*, int)>*)w->mVtbl)[87];
+        sVEntry<void(void*, float, void*, void*, int)>* vt = &((sVEntry<void(void*, float, void*, void*, int)>*)VPTR_AT(w, 0x10D8))[87];
         char* thisp = (char*)w + vt->delta;
         t4Vector color;
         float boxSize = ((self->treeInfo)->levels)[level].radius * self->scale;

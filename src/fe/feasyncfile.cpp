@@ -215,7 +215,7 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(cFEAsyncManager* self, int idx
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     } else if (cFEAsyncManager_GetFileStatus(self, idx) == 3) {
         cPS2GraphicsMan* obj = GrMan;
-        sVEUnload* vt = (sVEUnload*)obj->mVtbl;
+        sVEUnload* vt = (sVEUnload*)VPTR_AT(obj, 0x10D8);
         asyncMan->files[idx].f118 = vt[114].fn(vthis(obj, vt[114])) + 0xE;
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     }
@@ -307,11 +307,11 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
     for (i = 0; i < 5; i++) {
         if (cFEAsyncManager_GetFileStatus(self, i) == 0 || cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)obj->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(obj, 0x10D8);
             if (asyncMan->files[i].f118 < vt[114].fn(vthis(obj, vt[114]))) {
                 if (asyncMan->files[i].data != 0) {
                     cPS2GraphicsMan* obj2 = GrMan;
-                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)obj2->mVtbl;
+                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_AT(obj2, 0x10D8);
                     vt2[50].fn(vthis(obj2, vt2[50]), asyncMan->files[i].id);
                     if (asyncMan->files[i].data != 0) {
                         cMemMan_free(asyncMan->files[i].data);
@@ -324,7 +324,7 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)obj->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(obj, 0x10D8);
             if (asyncMan->files[i].f118 < vt[114].fn(vthis(obj, vt[114]))) {
                 cFEAsyncManager_LoadDataFile(self, i);
             }
@@ -334,7 +334,7 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
                 cFEAsyncManager_SetFileStatus(self, i, 3);
                 ASYNCFILE_release(asyncMan->files[i].handle, 0, 0);
                 cPS2GraphicsMan* obj = GrMan;
-                sVEntry<int(void*, char*, const char*, int, int, int)>* vt = (sVEntry<int(void*, char*, const char*, int, int, int)>*)obj->mVtbl;
+                sVEntry<int(void*, char*, const char*, int, int, int)>* vt = (sVEntry<int(void*, char*, const char*, int, int, int)>*)VPTR_AT(obj, 0x10D8);
                 char* data = asyncMan->files[i].data;
                 asyncMan->files[i].id = vt[46].fn(vthis(obj, vt[46]), data + *(int*)(data + 0x14), str_map, 0, 0, -1);
             }
@@ -399,7 +399,7 @@ extern "C" void cFEAsyncManager_FlushFEAsyncTextures(cFEAsyncManager* self)
     for (i = 0; i < 5; i++) {
         if (asyncMan->files[i].data != 0) {
             cPS2GraphicsMan* obj = GrMan;
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(obj, 0x10D8);
             vt[50].fn(vthis(obj, vt[50]), asyncMan->files[i].id);
             if (asyncMan->files[i].data != 0) {
                 cMemMan_free(asyncMan->files[i].data);
@@ -15152,7 +15152,7 @@ extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS*
     self->miState = 0;
     self->mpustrText = 0;
     cFELocale* locale = SSXApp->FELocale;
-    sVEntry<void*(void* self, int hash)>* vt = (sVEntry<void*(void*, int)>*)vptr_at(locale, 0x4);
+    sVEntry<void*(void* self, int hash)>* vt = (sVEntry<void*(void*, int)>*)VPTR_AT(locale, 0x4);
     int n = USTR_length(vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_205Authenticating)));
     if (self->mpustrText != 0) {
         cMemMan_free(self->mpustrText);

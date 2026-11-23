@@ -6297,7 +6297,7 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
     char* msg = cBEOptionInterface_getQuickKeyMessage(opt, key);
     if (msg == 0) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)vptr_at(locale, 0x4);
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_AT(locale, 0x4);
         void* str = vt[4].fn(vthis(locale, vt[4]), cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
         if (str)
             USTR_strcpyW(buf, str);

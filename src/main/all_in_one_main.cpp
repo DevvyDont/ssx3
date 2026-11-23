@@ -1665,7 +1665,7 @@ extern void* cUILocaleInterface_vtbl[];
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cUILocaleInterface__cUILocaleInterface(cUILocaleInterface* self, int flags) {
-    vptr_at(self, 0x4) = cUILocaleInterface_vtbl;
+    VPTR_AT(self, 0x4) = cUILocaleInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

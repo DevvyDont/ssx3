@@ -573,7 +573,7 @@ extern "C" void cAI_render(sAI_91E0* self)
         cRider* curRider = (cRider*)self->Riders[n];
         if (curRider->mRenderFlag == 0 && curRider->mSafeRenderTick == -1) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             int frameTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
             *(int*)(self->Riders[n] + 0x888) = frameTick + 4;
         }
@@ -1730,7 +1730,7 @@ extern "C" void func_0012A998(cAI* self)
                 hiddenRider->mSafeRenderTick = -1;
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 cComputer* obj = (cComputer*)list[i];
-                sVEntry<int(void*)>* gvt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
+                sVEntry<int(void*)>* gvt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
                 (obj->RiderHandler.GroundMotion.mRider)->mSafeRenderTick = gvt[114].fn(vthis(ps2GraphicsMan, gvt[114])) + 4;
             }
         }
@@ -1811,7 +1811,7 @@ extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
             computerRider->mSafeRenderTick = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             cComputer* rider = (cComputer*)self->mRiders[i];
-            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             rider->RiderHandler.GroundMotion.mRider->mSafeRenderTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114])) + 4;
         }
     }
@@ -1885,7 +1885,7 @@ extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
             actorRider->mSafeRenderTick = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             cComputer* rider = (cComputer*)self->mRiders[i];
-            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             rider->RiderHandler.GroundMotion.mRider->mSafeRenderTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114])) + 4;
         }
     }

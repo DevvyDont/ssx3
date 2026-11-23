@@ -513,7 +513,7 @@ extern "C" void cFERider_render(cFERider* selfp)
     func_00389CB8(&worldMatrix, &pos, 1.0f);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVE_EE88* vt = (sVE_EE88*)ps2GraphicsMan->mVtbl;
+        sVE_EE88* vt = (sVE_EE88*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &worldMatrix, 1);
     }
     int* fl = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
@@ -559,7 +559,7 @@ extern "C" void cFERider_update(cFERider* selfp)
     cFERider* self = selfp;
     if (self->mSafeRenderCount >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         if (self->mSafeRenderCount < vt[114].fn(vthis(ps2GraphicsMan, vt[114]))) {
             self->mSafeRenderCount = -1;
             cFERider_init(self, self->mProfileIndex, self->mNewCharID, self->mNewLoadAll);
@@ -1140,13 +1140,13 @@ extern "C" void cFERider_addTextureFile(cFERider* self, SHAPEFILE* pkg, int repl
         if (id >= 0) {
             if (replace) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVE_F908b* vt = (sVE_F908b*)ps2GraphicsMan->mVtbl;
+                sVE_F908b* vt = (sVE_F908b*)VPTR_AT(ps2GraphicsMan, 0x10D8);
                 vt[48].fn(vthis(ps2GraphicsMan, vt[48]), id, data, 1);
             }
         } else {
             strcpy(((&self->mTextureRefs[0]))[self->mNumTextureRefs].Name, name);
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVE_F908a* vt = (sVE_F908a*)ps2GraphicsMan->mVtbl;
+            sVE_F908a* vt = (sVE_F908a*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             ((&self->mTextureRefs[0]))[self->mNumTextureRefs].TextureID = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data, str_charshp, 0, 1, -1);
             self->mNumTextureRefs++;
         }

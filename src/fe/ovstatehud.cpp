@@ -512,7 +512,7 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
             corner.w = 1.0f;
             (*(&verts[3].p)) = corner;
             *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_E95A0(img);
-            sVEnt_E95A0* vt = (sVEnt_E95A0*)GrMan->mVtbl;
+            sVEnt_E95A0* vt = (sVEnt_E95A0*)VPTR_AT(GrMan, 0x10D8);
             vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
             pos[0] += wh.x;
         }
@@ -984,11 +984,11 @@ extern "C" void cOVStateHUD1P_onCreateScreen(cOVStateHUD1P* vself)
     self->mode = gfx->_EffectTexMap[0];
     self->f490 = 0xDEEDDEED;
     {
-        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)GrMan->mVtbl;
+        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)VPTR_AT(GrMan, 0x10D8);
         self->scrW.set(vt[56].fn(vthis(GrMan, vt[56]), self->mode));
     }
     {
-        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)GrMan->mVtbl;
+        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)VPTR_AT(GrMan, 0x10D8);
         self->scrH.set(vt[57].fn(vthis(GrMan, vt[57]), self->mode));
     }
     self->w444[0] = findElem_9AD0(self->engine, str_nm1w);
@@ -1276,7 +1276,7 @@ extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cTextureElement*
         corner.z = 0.0f;
         corner.w = 1.0f;
         verts[3].p = corner;
-        sVEnt_001F1190* vt = (sVEnt_001F1190*)GrMan->mVtbl;
+        sVEnt_001F1190* vt = (sVEnt_001F1190*)VPTR_AT(GrMan, 0x10D8);
         vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
     }
 }
@@ -1342,7 +1342,7 @@ extern "C" void cOVStateHUD1P_renderQuad(cOVStateHUD1P* self, float* pos, float*
     corner.w = 1.0f;
     verts[3].p = corner;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
-    sVEnt_001F1338* vt = (sVEnt_001F1338*)GrMan->mVtbl;
+    sVEnt_001F1338* vt = (sVEnt_001F1338*)VPTR_AT(GrMan, 0x10D8);
     vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
 }
 #endif
@@ -2561,7 +2561,7 @@ extern "C" void cBXLoadIndicator_Render(cBXLoadIndicator* self)
     ((cGfx_31E0*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_31E0*)GrMan)->SetView(t4mat_Identity);
     {
-        sVEntry<void(void*, float, float, float, float, int)>* vt = (sVEntry<void (void*, float, float, float, float, int)>*)GrMan->mVtbl;
+        sVEntry<void(void*, float, float, float, float, int)>* vt = (sVEntry<void (void*, float, float, float, float, int)>*)VPTR_AT(GrMan, 0x10D8);
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_31E0*)GrMan)->GetScreenWidth(), (float)((cGfx_31E0*)GrMan)->GetScreenHeight(), 1);

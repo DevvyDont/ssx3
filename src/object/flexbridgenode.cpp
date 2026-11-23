@@ -148,7 +148,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     int n = self->count;
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
-    sGridVEntry* vtEntry = &(((sGridVEntry*)world->mVtbl))[76];
+    sGridVEntry* vtEntry = &(((sGridVEntry*)VPTR_AT(world, 0x10D8)))[76];
     self->mesh = (sGridMesh*)vtEntry->fn(vthis(world, *vtEntry), n, 2, 0x20000000);
     sGridV4*& pts0 = self->pts[0];
     pts0 = new (str_BridgeVerts, 0x20000000, 0) sGridV4[nverts];
@@ -160,7 +160,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridCol cols[4];
     sGridV2* uv = new (str_TempBridgeUVs, 0x100, 0) sGridV2[nverts];
     sGridCol* col = new (str_TempBridgeRGBs, 0x100, 0) sGridCol[nverts];
-    sGridVEntryV* gfxVtEntry = &(((sGridVEntryV*)world->mVtbl))[97];
+    sGridVEntryV* gfxVtEntry = &(((sGridVEntryV*)VPTR_AT(world, 0x10D8)))[97];
     gfxVtEntry->fn(vthis(world, *gfxVtEntry), self->def, 0, pos, uvs, cols);
     for (int i = 0; i < n; i++) {
         float floatIndex = (float)i;
@@ -1394,7 +1394,7 @@ struct sFlex_3480C8 {
 extern "C" void cFlexRailNode_render(cFlexRailNode* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    sVEntry<void>* vt = (sVEntry<void>*)ctx->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ctx, 0x10D8);
     if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
                                   ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == 1) return;
     if (D_004A5980 == 0) {

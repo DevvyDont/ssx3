@@ -197,7 +197,7 @@ extern "C" void cDebugMenuScreen_draw(cDebugMenuScreen* self)
     cFont_text(font, 60.0f, y, str_HDTV);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sDbgVEntry* vt = (sDbgVEntry*)ps2GraphicsMan->mVtbl;
+        sDbgVEntry* vt = (sDbgVEntry*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         cFont_righttextf(font, 580.0f, y, str_pct_s, vt[9].fn(vthis(ps2GraphicsMan, vt[9])) ? str_On_480p : str_Off_NTSC);
     }
     y += lineheight;
@@ -2020,7 +2020,7 @@ struct sDebugFE_17F868 {
 extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEnt_17F868* vt = (sVEnt_17F868*)ps2GraphicsMan->mVtbl;
+    sVEnt_17F868* vt = (sVEnt_17F868*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     ((Fn1_17F868)vt[44].fn)(vthis(ps2GraphicsMan, vt[44]), 0);
     self->font = (char*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
     t2Vector sc(1.600000023841858f, 1.600000023841858f);
@@ -2032,14 +2032,14 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
         char* payload = (char*)data + data[5];
         if (payload) {
             cPS2GraphicsMan* theGraphicsMan = cGraphicsMan_TheGraphicsMan;
-            sVEnt_17F868* gvt = (sVEnt_17F868*)theGraphicsMan->mVtbl;
+            sVEnt_17F868* gvt = (sVEnt_17F868*)VPTR_AT(theGraphicsMan, 0x10D8);
             self->snd1C = ((Load_17F868)gvt[46].fn)(vthis(theGraphicsMan, gvt[46]), payload, str_part, 0, 1, -1);
         }
         cMemMan_free(data);
     }
     data = FILE_load(str_data_fonts_menu_ssh, 0x100);
     cPS2GraphicsMan* graphicsMan = GrMan;
-    sVEnt_17F868* vt2 = (sVEnt_17F868*)graphicsMan->mVtbl;
+    sVEnt_17F868* vt2 = (sVEnt_17F868*)VPTR_AT(graphicsMan, 0x10D8);
     self->snd20 = ((Load_17F868)vt2[46].fn)(vthis(graphicsMan, vt2[46]), (char*)data + data[5], str_menu, 0, 1, -1);
     if (data) {
         cMemMan_free(data);
@@ -2142,13 +2142,13 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
     if (self->BoxTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[50].fn(vthis(ps2GraphicsMan, vt[50]), self->BoxTID);
     }
     if (self->ParticleTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[50].fn(vthis(ps2GraphicsMan, vt[50]), self->ParticleTID);
     }
     if (self->Font != 0)
@@ -2237,13 +2237,13 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
 extern "C" int cDebugFE_render(cDebugFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry<void>* vt = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
         return 0;
     }
     if (cFadeScreen_drawFade(((char*)self)) == 0) {
         cPS2GraphicsMan* graphicsMan1 = GrMan;
-        sVEntry<void>* vt1 = (sVEntry<void>*)graphicsMan1->mVtbl;
+        sVEntry<void>* vt1 = (sVEntry<void>*)VPTR_AT(graphicsMan1, 0x10D8);
         char* this1 = (char*)graphicsMan1 + vt1[15].delta;
         sVec4_17FBF0 pos;
         float one = 1.0f;
@@ -2254,10 +2254,10 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         pos.z = zeroF;
         ((FnP_17FBF0)vt1[15].fn)(this1, &pos);
         cPS2GraphicsMan* graphicsMan2 = GrMan;
-        sVEntry<void>* vt2 = (sVEntry<void>*)graphicsMan2->mVtbl;
+        sVEntry<void>* vt2 = (sVEntry<void>*)VPTR_AT(graphicsMan2, 0x10D8);
         ((FnView_17FBF0)vt2[26].fn)((char*)graphicsMan2 + vt2[26].delta, 0, 0, zeroF, zeroF, 640.0f, 480.0f, -1.0f, one);
         cPS2GraphicsMan* graphicsMan3 = GrMan;
-        sVEntry<void>* vt3 = (sVEntry<void>*)graphicsMan3->mVtbl;
+        sVEntry<void>* vt3 = (sVEntry<void>*)VPTR_AT(graphicsMan3, 0x10D8);
         ((FnP_17FBF0)vt3[34].fn)((char*)graphicsMan3 + vt3[34].delta, t4mat_Identity);
         cPS2GraphicsMan* graphicsMan4 = GrMan;
         setB23_17FBF0(rs_17FBF0((char*)graphicsMan4), 2);
@@ -2272,7 +2272,7 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
     }
     cPS2GraphicsMan* graphicsMan5 = GrMan;
-    sVEntry<void>* vt5 = (sVEntry<void>*)graphicsMan5->mVtbl;
+    sVEntry<void>* vt5 = (sVEntry<void>*)VPTR_AT(graphicsMan5, 0x10D8);
     ((FnV_17FBF0)vt5[20].fn)((char*)graphicsMan5 + vt5[20].delta);
     return 1;
 }

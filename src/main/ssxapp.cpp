@@ -150,7 +150,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     PadCache = pm;
     char* graphicsMan = (char*)cGraphicsMan_construct();
     GrMan = (cPS2GraphicsMan*)(graphicsMan);
-    sVEntry<void>* vt = ((sVEntry<void>*)((cPS2GraphicsMan*)graphicsMan)->mVtbl);
+    sVEntry<void>* vt = ((sVEntry<void>*)VPTR_AT(graphicsMan, 0x10D8));
     ((V0Fn_6900)vt[2].fn)(graphicsMan + vt[2].delta);
     cLightMan_construct();
     cBezierMan_construct();
@@ -166,10 +166,10 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     *(int*)&self->RealFE = 0;
     cSSXApp_parseCommandLine(self, argc, argv);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry<void>* vt2 = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
+    sVEntry<void>* vt2 = (sVEntry<void>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     ((V1Fn_6900)vt2[44].fn)((char*)ps2GraphicsMan + vt2[44].delta, 0x100);
     cPS2GraphicsMan* gfxMan = GrMan;
-    sVEntry<void>* vt3 = (sVEntry<void>*)gfxMan->mVtbl;
+    sVEntry<void>* vt3 = (sVEntry<void>*)VPTR_AT(gfxMan, 0x10D8);
     char* gfxThis = (char*)gfxMan + vt3[46].delta;
     void* loadShape = SHAPE_locate(loadicon, str_load);
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(gfxThis, loadShape, str_loadicon, 0, 1, -1);
@@ -924,13 +924,13 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEPurge0* vt = (sVEPurge0*)ps2GraphicsMan->mVtbl;
+        sVEPurge0* vt = (sVEPurge0*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[3].fn(vthis(ps2GraphicsMan, vt[3]));
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         if (ps2GraphicsMan) {
-            sVEPurge* vt = (sVEPurge*)ps2GraphicsMan->mVtbl;
+            sVEPurge* vt = (sVEPurge*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             vt[1].fn(vthis(ps2GraphicsMan, vt[1]), 3);
         }
     }
@@ -1280,7 +1280,7 @@ void cSSXApp_loadexecpurge(void* self)
     WORLDTRIGGERMANAGER_DeInit(self);
     SSXAUDIO_DeInit();
     cAppMan_loadexecpurge(self);
-    sExecPurgeVTable* vt = (sExecPurgeVTable*)cGraphicsMan_TheGraphicsMan->mVtbl;
+    sExecPurgeVTable* vt = (sExecPurgeVTable*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8);
     vt->fn((char*)cGraphicsMan_TheGraphicsMan + vt->field_0x3B8);
 }
 #endif
@@ -1378,7 +1378,7 @@ extern "C" void cSSXApp_activateBEOptions()
         break;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)ps2GraphicsMan->mVtbl;
+    sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
     void (**pfn)(void*, int, int) = &vt[12].fn;
     (*pfn)(thisp, GetOptions_228C08().b6, GetOptions_228C08().b5);
@@ -2183,7 +2183,7 @@ extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910
     sV4_229910 col[4];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sModel_229910* model = HandleToModel_229910(RID);
-    sVEntry_229910* vt = (sVEntry_229910*)ps2GraphicsMan->mVtbl;
+    sVEntry_229910* vt = (sVEntry_229910*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     vt[97].fn(vthis(ps2GraphicsMan, vt[97]), model, 0, pos, uv, col);
     for (int i = 0; i < 4; i++) {
         pts[i] = MulMV_229910(model->mat, sV4_229910(pos[i], 1.0f));
@@ -3521,7 +3521,7 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     w->f7AB8 = 0;
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<t4Matrix(void*)>* vt = (sVEntry<t4Matrix(void*)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<t4Matrix(void*)>* vt = (sVEntry<t4Matrix(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         t4Matrix gfxMatrix = vt[43].fn(vthis(ps2GraphicsMan, vt[43]));
         MatCopy_22ADD8((t4Matrix*)(self + 0x10), &gfxMatrix);
     }
@@ -3967,7 +3967,7 @@ extern "C" int cGame_render(cGame* self)
         cGame_renderPatches(self, world);
     }
     {
-        sVEView_22B008* vt = (sVEView_22B008*)GrMan->mVtbl;
+        sVEView_22B008* vt = (sVEView_22B008*)VPTR_AT(GrMan, 0x10D8);
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_22B008*)GrMan)->GetScreenWidth(), (float)((cGfx_22B008*)GrMan)->GetScreenHeight(), 1);

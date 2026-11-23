@@ -122,10 +122,10 @@ extern "C" void* cFELocale_cFELocale(cFELocale* self)
     *(char*)&self->mDisplayMode = 0;
     *(char*)&self->mLanguage = 0;
     *(char*)&self->mNumLanguages = 0;
-    vptr_at(self, 0x4) = cUILocaleInterface_vtbl;
+    VPTR_AT(self, 0x4) = cUILocaleInterface_vtbl;
     tAttrLocale_tAttrLocale((char*)&self->mAttrLocale);
     *(char*)&self->mModule = 0;
-    vptr_at(self, 0x4) = cFELocale_vtbl;
+    VPTR_AT(self, 0x4) = cFELocale_vtbl;
     *(char*)&self->mNumLanguages = 4;
     memset((char*)&self->mpLocaleFile, 0, 80);
     return ((void*)self);
@@ -150,9 +150,9 @@ void operator_delete(int* p);
  */
 extern "C" void cFELocale__cFELocale(cFELocale* self, int flags)
 {
-    vptr_at(self, 0x4) = cFELocale_vtbl;
+    VPTR_AT(self, 0x4) = cFELocale_vtbl;
     cFELocale_deleteAllFiles(self);
-    vptr_at(self, 0x4) = cUILocaleInterface_vtbl;
+    VPTR_AT(self, 0x4) = cUILocaleInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

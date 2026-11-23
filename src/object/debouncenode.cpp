@@ -691,7 +691,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     {
-        sVEntry<void>* vt = (sVEntry<void>*)gfx->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(gfx, 0x10D8);
         char* thisp = (char*)gfx + vt[93].delta;
         t4Vector cullBox[2];
         cullBox[0].x = OBJ_343588(self)->pos[0];
@@ -702,7 +702,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
         cullBox[1].y = OBJ_343588(self)->scl[1];
         cullBox[1].z = OBJ_343588(self)->scl[2];
         cullBox[1].w = 1.0f;
-        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &cullBox[0], &cullBox[1], ((DfViewFn_343588)((sVEntry<void>*)gfx->mVtbl)[43].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[43].delta));
+        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &cullBox[0], &cullBox[1], ((DfViewFn_343588)((sVEntry<void>*)VPTR_AT(gfx, 0x10D8))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_AT(gfx, 0x10D8))[43].delta));
         if (res == 1) {
             return;
         }
@@ -711,7 +711,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
     MatCopy_343588(&xf, &t4mat_Identity_343588);
     xf.r[3].x = self->UV[0];
     xf.r[3].y = self->UV[1];
-    ((DfDrawFn_343588)((sVEntry<void>*)gfx->mVtbl)[96].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[96].delta, OBJ_343588(self), 0, &xf, 2);
+    ((DfDrawFn_343588)((sVEntry<void>*)VPTR_AT(gfx, 0x10D8))[96].fn)((char*)gfx + ((sVEntry<void>*)VPTR_AT(gfx, 0x10D8))[96].delta, OBJ_343588(self), 0, &xf, 2);
 }
 #endif
 
@@ -2080,12 +2080,12 @@ extern "C" void func_00344E18(void* self)
         if (*(int*)((char*)self + 0x114) >= 2)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
-            sVE7_44E18* vt = (sVE7_44E18*)ps2GraphicsMan->mVtbl;
+            sVE7_44E18* vt = (sVE7_44E18*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             vt[95].fn(vthis(ps2GraphicsMan, vt[95]), model, 1.0f, (char*)self + 0x118, (char*)&model->m_fmTransform, *(void**)((char*)self + 0x1E8), 0, 0);
         }
         else
         {
-            sVE5_44E18* vt = (sVE5_44E18*)ps2GraphicsMan->mVtbl;
+            sVE5_44E18* vt = (sVE5_44E18*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             vt[96].fn(vthis(ps2GraphicsMan, vt[96]), model, *(void**)((char*)self + 0x1E8), 0, 0);
         }
     }
@@ -2389,9 +2389,9 @@ extern "C" int cSpline_isVisible(sTrackRef51C0* self)
     box[1].z = bounds[6];
     box[1].w = 1.0f;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-    sVEntry<void>* vt = (sVEntry<void>*)gfx->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(gfx, 0x10D8);
     char* thisp = (char*)gfx + vt[93].delta;
-    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_343588)((sVEntry<void>*)gfx->mVtbl)[43].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[43].delta));
+    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_343588)((sVEntry<void>*)VPTR_AT(gfx, 0x10D8))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_AT(gfx, 0x10D8))[43].delta));
     return res != 1;
 }
 #endif

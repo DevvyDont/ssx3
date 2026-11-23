@@ -91,7 +91,7 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
 {
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[44].fn(vthis(ps2GraphicsMan, vt[44]), 0x100);
     }
     void* eng = cUIEngine_cUIEngine(cMemMan_alloc(0x70, str_UIEngine_b, 0x100, 0));
@@ -159,7 +159,7 @@ struct sVE_3640 {
 static inline int loadTex_3640(char* data, const char* name)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_3640* vt = (sVE_3640*)ps2GraphicsMan->mVtbl;
+    sVE_3640* vt = (sVE_3640*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     return vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
@@ -251,7 +251,7 @@ extern "C" void cFELoadScreen_gainFocus(void)
     int* fogEnable = &cDepthFog_m_Enable;
     *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_38C8* vt = (sVE_38C8*)ps2GraphicsMan->mVtbl;
+    sVE_38C8* vt = (sVE_38C8*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_38C8(0, 0, 0));
     func_0028F768(cAudioInterface_bxAudio());
 }
@@ -368,7 +368,7 @@ extern "C" void cUIEngine_render2D(void* engine);
 extern "C" int cFELoadScreen_render(cFELoadScreen* self)
 {
     cPS2GraphicsMan* graphicsMan = GrMan;
-    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)graphicsMan->mVtbl;
+    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_AT(graphicsMan, 0x10D8);
     if (vt[17].fn(vthis(graphicsMan, vt[17])) == 0) {
         return 0;
     }
@@ -376,7 +376,7 @@ extern "C" int cFELoadScreen_render(cFELoadScreen* self)
         cUIEngine_render2D(self->mpUI);
     }
     graphicsMan = (cPS2GraphicsMan*)GrMan;
-    sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)graphicsMan->mVtbl;
+    sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)VPTR_AT(graphicsMan, 0x10D8);
     vt2[20].fn(vthis(graphicsMan, vt2[20]));
     return 1;
 }

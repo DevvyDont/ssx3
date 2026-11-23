@@ -100,12 +100,12 @@ extern "C" int cVidEngine_PlayVideo(cVidEngine* self)
     cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
+        sVtEnt* vt = (sVtEnt*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         self->mSavedDisplayFormat = *((int*(*)(void*))vt[42].fn)(vthis(ps2GraphicsMan, vt[42]));
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
+        sVtEnt* vt = (sVtEnt*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         ((void(*)(void*, int))vt[40].fn)(vthis(ps2GraphicsMan, vt[40]), 0);
     }
     cSSXAudio_PauseSFX(cAudioInterface_bxAudio());

@@ -142,7 +142,7 @@ extern "C" void cFEMemCard_callbackConfirmOverwrite(void)
     cMemCard* memCard = mp->mpMemCard;
     memCard->GetTitleString(mp->mFileCursor, (unsigned short*)name);
     cFELocale* locale = SSXApp->FELocale;
-    sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)vptr_at(locale, 0x4);
+    sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_AT(locale, 0x4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVOverWriteFile)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->mPopupType = 1;
@@ -2117,7 +2117,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
             cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
             cMCOverlayManager_getDeviceNumberString(mp, buf, mp->mSelectedDevice);
             cFELocale* locale = SSXApp->FELocale;
-            sVEntry<unsigned short*(void*, int)>* mvt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(locale, 0x4);
+            sVEntry<unsigned short*(void*, int)>* mvt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(locale, 0x4);
             sprintf1(str, mvt[4].fn(vthis(locale, mvt[4]), GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
             sVEntry<void(void*, int)>* tvt = (sVEntry<void (void*, int)>*)text->mVtbl;
@@ -2145,7 +2145,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager_getDeviceNumberString(mp, buf, mp->mSelectedDevice);
             cFELocale* locale = SSXApp->FELocale;
-            sVEntry<unsigned short*(void*, int)>* mvt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(locale, 0x4);
+            sVEntry<unsigned short*(void*, int)>* mvt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(locale, 0x4);
             sprintf1(str, mvt[4].fn(vthis(locale, mvt[4]), GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
             sVEntry<void(void*, int)>* tvt = (sVEntry<void (void*, int)>*)text->mVtbl;

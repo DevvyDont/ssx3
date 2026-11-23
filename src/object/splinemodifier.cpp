@@ -1838,10 +1838,10 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
     cInstanceNode* model = (cInstanceNode*)self->Instance->m_pActiveNode;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     for (int i = 1; i < self->NumModels; i++) {
-        sSmVE93_35B418* vt = (sSmVE93_35B418*)w->mVtbl;
+        sSmVE93_35B418* vt = (sSmVE93_35B418*)VPTR_AT(w, 0x10D8);
         char* thisp = (char*)w + vt[93].delta;
         tMultiNode* box = &(self->Nodes)[i];
-        sSmVE43_35B418* vt2 = (sSmVE43_35B418*)w->mVtbl;
+        sSmVE43_35B418* vt2 = (sSmVE43_35B418*)VPTR_AT(w, 0x10D8);
         int hit = vt[93].fn(thisp, &(*(sSmVec4_35B418*)&box->BoundBox), &(*(sSmVec4_35B418*)&box->BoundBox.MaxPoint), vt2[43].fn((char*)w + vt2[43].delta));
         if (hit != 1) {
             sSmVEModel_35B418* mvt = (sSmVEModel_35B418*)model->mVtbl;

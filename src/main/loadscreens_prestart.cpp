@@ -875,7 +875,7 @@ extern "C" void cStartScreen_gainFocus(cStartScreen* self)
     clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&cLightGlow_m_Enable);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_2C98* vt = (sVE_2C98*)ps2GraphicsMan->mVtbl;
+    sVE_2C98* vt = (sVE_2C98*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_2C98(0, 0, 0));
 }
 #endif
@@ -1113,7 +1113,7 @@ struct cLoadItemC_2E20 {
 extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
 {
     cPS2GraphicsMan* w = GrMan;
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)w->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(w, 0x10D8);
     vt[44].fn(vthis(w, vt[44]), 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
@@ -1199,7 +1199,7 @@ struct sVE_3048 {
 static inline int loadTex_3048(char* data, const char* name)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_3048* vt = (sVE_3048*)ps2GraphicsMan->mVtbl;
+    sVE_3048* vt = (sVE_3048*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     return vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
@@ -1282,7 +1282,7 @@ extern "C" void cGameLoadScreen_gainFocus(void)
     int* fogEnable = &cDepthFog_m_Enable;
     *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_3260* vt = (sVE_3260*)ps2GraphicsMan->mVtbl;
+    sVE_3260* vt = (sVE_3260*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_3260(0, 0, 0));
     func_0028F768(cAudioInterface_bxAudio());
 }

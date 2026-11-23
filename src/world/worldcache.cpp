@@ -1130,7 +1130,7 @@ struct sVE_8668 { short delta; short index; int (*fn)(void*); };
 static inline int Frame_8668()
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    sVE_8668* vt = (sVE_8668*)ps2GraphicsMan->mVtbl;
+    sVE_8668* vt = (sVE_8668*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     return vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
 }
 
@@ -1933,7 +1933,7 @@ extern "C" void cWorldView_update(cWorldView* worldView)
             if (cWorldCache_isPageLoaded((cWorldCache*)self->cache, self->sections[i].id)) {
                 self->entries[i].state = 5;
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
+                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
                 vt[102].fn(vthis(ps2GraphicsMan, vt[102]), i);
             }
             break;

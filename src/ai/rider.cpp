@@ -535,7 +535,7 @@ extern "C" int cRider_isSafeToDelete(cRider* self)
     if (self->mSafeRenderTick != -1)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         return self->mSafeRenderTick < vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
     }
     return 0;
@@ -3744,7 +3744,7 @@ static inline t4Vector mtxMulVec_121F30(t4Vector* m, t4Vector* v)
 extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry<void*(void*)>* gvt = (sVEntry<void*(void*)>*)ps2GraphicsMan->mVtbl;
+    sVEntry<void*(void*)>* gvt = (sVEntry<void*(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     t4Vector* viewMtx = (t4Vector*)gvt[35].fn(vthis(ps2GraphicsMan, gvt[35]));
     char* obj = (char*)&self->mVtbl;
     sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
@@ -3752,7 +3752,7 @@ extern "C" void func_00121F30(cRider* self)
     t4Vector viewPos = mtxMulVec_121F30(viewMtx, pos);
     float z = viewPos.z;
     cPS2GraphicsMan* graphicsMan = GrMan;
-    sVEntry<float(void*)>* gvt2 = (sVEntry<float(void*)>*)graphicsMan->mVtbl;
+    sVEntry<float(void*)>* gvt2 = (sVEntry<float(void*)>*)VPTR_AT(graphicsMan, 0x10D8);
     float fov = gvt2[29].fn(vthis(graphicsMan, gvt2[29]));
     float sinFov, cosFov;
     fSinCos(&sinFov, &cosFov, fov);
@@ -4007,7 +4007,7 @@ static inline int inFrustum_122278(t4Vector* v)
 static inline int test_122278(void* a, void* b)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_122278* vt = (sVE_122278*)ps2GraphicsMan->mVtbl;
+    sVE_122278* vt = (sVE_122278*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     char* obj = (char*)ps2GraphicsMan + vt[93].delta;
     sMat_122278 m = ((GetMatFn_122278)vt[43].fn)((char*)ps2GraphicsMan + vt[43].delta);
     return ((TestFn_122278)vt[93].fn)(obj, a, b, &m);
@@ -4078,16 +4078,16 @@ extern "C" void cRider_renderBody(cRider* self)
             additiveBoard = 1;
         func_00121F30(self);
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[69].fn(vthis(ps2GraphicsMan, vt[69]), self->unk_7C0, 1);
         cPS2GraphicsMan* graphicsMan = GrMan;
         int* rs = (int*)graphicsMan->m_pCurrentDrawState;
         rs[1] = (rs[1] & ~0x7C) | 0x14;
-        sVEntry<void(void*, float, void*)>* vt2 = (sVEntry<void(void*, float, void*)>*)graphicsMan->mVtbl;
+        sVEntry<void(void*, float, void*)>* vt2 = (sVEntry<void(void*, float, void*)>*)VPTR_AT(graphicsMan, 0x10D8);
         vt2[27].fn(vthis(graphicsMan, vt2[27]), 0.0f, &self->mPosition);
         cAnimModel_render(self->mAnimModel, self->mLOD, additiveBoard, additivePlayer);
         cPS2GraphicsMan* grManReset = GrMan;
-        sVEntry<void(void*, float, void*)>* vt3 = (sVEntry<void(void*, float, void*)>*)grManReset->mVtbl;
+        sVEntry<void(void*, float, void*)>* vt3 = (sVEntry<void(void*, float, void*)>*)VPTR_AT(grManReset, 0x10D8);
         vt3[27].fn(vthis(grManReset, vt3[27]), 0.0f, &t4vect_Zero_v122448);
     }
     if ((int)SSXApp->Game->ViewMan->m_uiCurrentView == 0 || self->mUpdateMinAnimOnly)
@@ -4437,13 +4437,13 @@ extern "C" void cRider_RenderShadow(cRider* self)
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFFF00FFF) | 0x14000;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFFBFFFFF) | 0x400000;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & ~0x7C) | 4;
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)grManPushView->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_AT(grManPushView, 0x10D8);
         vt[31].fn(vthis(grManPushView, vt[31]));
         cPS2GraphicsMan* grManLockTex = GrMan;
-        sVEntry<void(void*, void*, int)>* vt3 = (sVEntry<void(void*, void*, int)>*)grManLockTex->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt3 = (sVEntry<void(void*, void*, int)>*)VPTR_AT(grManLockTex, 0x10D8);
         vt3[53].fn(vthis(grManLockTex, vt3[53]), Shadow_2898(self)->f170, 1);
         cPS2GraphicsMan* grManClearTex = GrMan;
-        sVEI3_2898* vt4 = (sVEI3_2898*)grManClearTex->mVtbl;
+        sVEI3_2898* vt4 = (sVEI3_2898*)VPTR_AT(grManClearTex, 0x10D8);
         vt4[55].fn(vthis(grManClearTex, vt4[55]), Tex_2898(Shadow_2898(self)), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
         if (cRider_getMotionState(self) == 0) {
             k = 0.0f;
@@ -4453,7 +4453,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         sV4_2898 tuvScale = Shadow_2898(self)->f150;
         sV4_2898 tuvTrans = Shadow_2898(self)->f160;
         cPS2GraphicsMan* grManTuvBatch = GrMan;
-        sVE4_2898* vt5 = (sVE4_2898*)grManTuvBatch->mVtbl;
+        sVE4_2898* vt5 = (sVE4_2898*)VPTR_AT(grManTuvBatch, 0x10D8);
         vt5[101].fn(vthis(grManTuvBatch, vt5[101]), &mat, &tuvScale, &tuvTrans);
         sV4_2898 boardColour;
         boardColour.x = 1.0f;
@@ -4467,10 +4467,10 @@ extern "C" void cRider_RenderShadow(cRider* self)
         shadowColour.w = 0.3f;
         cAnimModel_rendershadow(Model_2898(self), 3, &boardColour, &shadowColour);
         cPS2GraphicsMan* grManRestoreLock = GrMan;
-        sVEI_2898* vt6 = (sVEI_2898*)grManRestoreLock->mVtbl;
+        sVEI_2898* vt6 = (sVEI_2898*)VPTR_AT(grManRestoreLock, 0x10D8);
         vt6[54].fn(vthis(grManRestoreLock, vt6[54]));
         cPS2GraphicsMan* grManPopView = GrMan;
-        sVEntry<void(void*)>* vt7 = (sVEntry<void(void*)>*)grManPopView->mVtbl;
+        sVEntry<void(void*)>* vt7 = (sVEntry<void(void*)>*)VPTR_AT(grManPopView, 0x10D8);
         vt7[32].fn(vthis(grManPopView, vt7[32]));
         cPS2GraphicsMan* grManPopState = GrMan;
         top_2898(grManPopState)--;

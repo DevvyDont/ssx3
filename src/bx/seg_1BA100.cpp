@@ -2874,7 +2874,7 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree,
         corner.z = cam.z;
         corner.w = 1.0f;
         (*(&verts[4].p)) = corner;
-        sQtVEntry_B928* vt = (sQtVEntry_B928*)ps2GraphicsMan->mVtbl;
+        sQtVEntry_B928* vt = (sQtVEntry_B928*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         vt[73].fn(vthis(ps2GraphicsMan, vt[73]), 5, verts, 0);
     }
 }

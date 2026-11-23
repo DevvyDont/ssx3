@@ -1552,7 +1552,7 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
  */
 extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
 {
-    self->mVtbl = cGraphicsMan_vtbl;
+    VPTR_AT(self, 0x10D8) = cGraphicsMan_vtbl;
     new ((char*)&self->m_pCurrentDrawState) sGfxState_691F8;
     self->mSkipNextPageFlip = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
@@ -1607,7 +1607,7 @@ void operator_delete(int* ptr);
  */
 extern "C" void cGraphicsMan__cGraphicsMan(cGraphicsMan* self, int flags)
 {
-    self->mVtbl = cGraphicsMan_vtbl;
+    VPTR_AT(self, 0x10D8) = cGraphicsMan_vtbl;
     cGraphicsMan_TheGraphicsMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1635,7 +1635,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
     for (j = 0; j < 2; j++) {
         ((short*)(&self->m_activeDrawState.m_textureState))[j] = 0x7FFF;
     }
-    sVEntry<void(void*, int*)>* vt = (sVEntry<void(void*, int*)>*)self->mVtbl;
+    sVEntry<void(void*, int*)>* vt = (sVEntry<void(void*, int*)>*)VPTR_AT(self, 0x10D8);
     vt[62].fn(vthis(self, vt[62]), mask);
 }
 #endif

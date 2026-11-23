@@ -478,7 +478,7 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
     *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
-    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)ctx->mVtbl);
+    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)VPTR_AT(ctx, 0x10D8));
     vt[83].fn(vthis(ctx, vt[83]), (self));
     ctx->m_pCurrentDrawState--;
 }
@@ -646,7 +646,7 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
     *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
-    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)ctx->mVtbl);
+    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)VPTR_AT(ctx, 0x10D8));
     vt[84].fn(vthis(ctx, vt[84]), (self));
     ctx->m_pCurrentDrawState--;
 }
@@ -1561,12 +1561,12 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[1] = *(sPtRS_26C8*)&ctx->m_pCurrentDrawState->m_bitGroups[0];
     (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)++;
     *((sPtRS_26C8*)ctx->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs26C8;
-    sPtVEntry_26C8* vt = ((sPtVEntry_26C8*)ctx->mVtbl);
+    sPtVEntry_26C8* vt = ((sPtVEntry_26C8*)VPTR_AT(ctx, 0x10D8));
     vt[71].fn(vthis(ctx, vt[71]), ((self->m_numSegments + 1) << 2) | 2, cSimpleTube_m_vertices_v26C8, 0);
     for (int i = 0; i < self->m_numSegments + 1; i++) {
         cSimpleTube_m_vertices_v26C8[i].pos = (self->m_positions)[i];
     }
-    vt = ((sPtVEntry_26C8*)ctx->mVtbl);
+    vt = ((sPtVEntry_26C8*)VPTR_AT(ctx, 0x10D8));
     vt[73].fn(vthis(ctx, vt[73]), self->m_numSegments + 1, cSimpleTube_m_vertices_v26C8, 0);
     (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)--;
 }
@@ -3028,7 +3028,7 @@ extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
     if (tex >= 0) {
         func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
         cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)mgr->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_AT(mgr, 0x10D8);
         vt[50].fn(vthis(mgr, vt[50]), self->mLockTexture);
         self->mLockTexture = -1;
     }
@@ -3057,7 +3057,7 @@ extern "C" void cPlayerShadow_LockShadowTexture(void* self)
     cPlayerShadow* shadow = (cPlayerShadow*)self;
     if (shadow->mLockTexture < 0) {
         cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
-        sVEntry<int(void*, int, int, int)>* vt = (sVEntry<int(void*, int, int, int)>*)mgr->mVtbl;
+        sVEntry<int(void*, int, int, int)>* vt = (sVEntry<int(void*, int, int, int)>*)VPTR_AT(mgr, 0x10D8);
         shadow->mLockTexture = vt[52].fn(vthis(mgr, vt[52]), shadow->mShadowTexWidth, shadow->mShadowTexHeight, 2);
     }
 }
@@ -3261,10 +3261,10 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetDisplayMode);
  */
 extern "C" void* cPS2GraphicsMan_SetDisplayMode(cPS2GraphicsMan* self)
 {
-    sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(self, 0x10D8);
     int i = ((int (*)(void*))vt[123].fn)(vthis(self, vt[123]));
     if (i >= 0) {
-        vt = (sVEntry<void>*)self->mVtbl;
+        vt = (sVEntry<void>*)VPTR_AT(self, 0x10D8);
         return ((void* (*)(void*, int))vt[4].fn)(vthis(self, vt[4]), i);
     }
     return 0;
@@ -3338,7 +3338,7 @@ struct sPartVEntry122 {
  */
 extern "C" int cPS2GraphicsMan_SetDTV(cPS2GraphicsMan* self, int enable)
 {
-    sPartVEntry122* vt = (sPartVEntry122*)self->mVtbl;
+    sPartVEntry122* vt = (sPartVEntry122*)VPTR_AT(self, 0x10D8);
     return vt[122].fn(vthis(self, vt[122]), 0x200, 0x1C0, 0x18, 0x20, 0x18, enable);
 }
 #endif
@@ -3546,9 +3546,9 @@ INCLUDE_ASM("render/particle", func_00376938);
 extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y, float w, float rectHeight)
 {
     cPS2GraphicsMan* self = pS2GraphicsMan;
-    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)self->mVtbl)[10];
+    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)VPTR_AT(self, 0x10D8))[10];
     int width = vtEntry->fn(vthis(self, *vtEntry));
-    vtEntry = &((sVEntry<int(void*)>*)self->mVtbl)[11];
+    vtEntry = &((sVEntry<int(void*)>*)VPTR_AT(self, 0x10D8))[11];
     int height = vtEntry->fn(vthis(self, *vtEntry));
     if (x < 0.0f) {
         w += x;
@@ -3607,7 +3607,7 @@ extern "C" void func_00364B88(void* table, void* key);
  */
 extern "C" void cPS2GraphicsMan_SetViewportWindow(cPS2GraphicsMan* self, float x, float y, float w, float rectHeight)
 {
-    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)self->mVtbl)[11];
+    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)VPTR_AT(self, 0x10D8))[11];
     int height = vtEntry->fn(vthis(self, *vtEntry));
     int mode = self->mTVDisplayFormat.mDisplayFormat;
     if (mode < 3) {
@@ -3798,9 +3798,9 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     }
     self->unk_590C = zFar;
     self->unk_5908 = fov;
-    sPtVtU6C58* vtEntry = &((sPtVtU6C58*)self->mVtbl)[11];
+    sPtVtU6C58* vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[11];
     unsigned height = vtEntry->fn(vthis(self, *vtEntry));
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[10];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[10];
     unsigned width = vtEntry->fn(vthis(self, *vtEntry));
     float aspect = (float)height * 1.3333334f / (float)width;
     float sinFov, cosFov;
@@ -3808,9 +3808,9 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     float sx = (w * 0.5f) / (sinFov / cosFov);
     float sy = sx * aspect;
     ClampScale6C58(self, sx, sy);
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[10];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[10];
     float offX = 32768.0f - (float)(vtEntry->fn(vthis(self, *vtEntry)) * 8);
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[11];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[11];
     float offY = 32768.0f - (float)(vtEntry->fn(vthis(self, *vtEntry)) * 8);
     float zA = (-zscale * zNear) / (zFar - zNear);
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][0] = sx * 16.0f;
@@ -3843,10 +3843,10 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     float px = 1.0f / tanf(fov);
     float py = 1.0f / tanf(fov) * aspect2;
     ClampScale6C58(self, px, py);
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[10];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[10];
     float sw = (float)vtEntry->fn(vthis(self, *vtEntry));
     float cx = (w * 0.5f - sw * 0.5f) + x;
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[11];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[11];
     float sh = (float)vtEntry->fn(vthis(self, *vtEntry));
     float cy = (viewHeight * 0.5f - sh * 0.5f) + y;
     float zz = (zFar + zNear) / (zFar - zNear);
@@ -4083,9 +4083,9 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     float viewHeight = *(float*)(viewBase + 0x6D2C);
     float zscale;
     ZScale7458(self, zscale);
-    sPtVtU6C58* vtEntry = &((sPtVtU6C58*)self->mVtbl)[10];
+    sPtVtU6C58* vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[10];
     float offX = 32768.0f - (float)(vtEntry->fn(vthis(self, *vtEntry)) * 8);
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[11];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[11];
     float offY = 32768.0f - (float)(vtEntry->fn(vthis(self, *vtEntry)) * 8);
     float sx = w / fx * 16.0f;
     float sy = viewHeight / fy * 16.0f;
@@ -4127,10 +4127,10 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     }
     float px = 2.0f / fx;
     float py = 2.0f / fy;
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[10];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[10];
     float sw = (float)vtEntry->fn(vthis(self, *vtEntry));
     float ox = (w * 0.5f - sw * 0.5f) + x;
-    vtEntry = &((sPtVtU6C58*)self->mVtbl)[11];
+    vtEntry = &((sPtVtU6C58*)VPTR_AT(self, 0x10D8))[11];
     float sh = (float)vtEntry->fn(vthis(self, *vtEntry));
     float oy = (viewHeight * 0.5f - sh * 0.5f) + y;
     float zz = 2.0f / (zFar - zNear);
@@ -4694,7 +4694,7 @@ static inline void Rot_81A0(sV_81A0* out, const t4Matrix* m, const sV_81A0& v)
 
 static inline sV_81A0 Project_81A0(cPS2GraphicsMan* self, const sV_81A0* v)
 {
-    sVEnt_81A0* vt = ((sVEnt_81A0*)self->mVtbl);
+    sVEnt_81A0* vt = ((sVEnt_81A0*)VPTR_AT(self, 0x10D8));
     return vt[92].fn(vthis(self, vt[92]), v);
 }
 
@@ -5719,7 +5719,7 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
     if (cRenderToggles_m_DisablePlayerStrips == 0) {
         (self->m_pCurrentDrawState)[1] = *(self->m_pCurrentDrawState);
         (*(sDrawState**)&self->m_pCurrentDrawState)++;
-        ((sVEntry<void(void*, float)>*)self->mVtbl)[124].fn(vthis(self, ((sVEntry<void(void*, float)>*)self->mVtbl)[124]), 1.0f);
+        ((sVEntry<void(void*, float)>*)VPTR_AT(self, 0x10D8))[124].fn(vthis(self, ((sVEntry<void(void*, float)>*)VPTR_AT(self, 0x10D8))[124]), 1.0f);
         if (self->mMatricesValid == 0) {
             func_0037D968((cPS2GraphicsMan*)self);
         }
@@ -6637,7 +6637,7 @@ extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
     int i;
     for (i = 0; i < 2000; i++) {
         if (((int*)(&self->unk_18F8[0]))[i] != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(self, 0x10D8);
             vt[50].fn(vthis(self, vt[50]), i);
         }
     }
@@ -6776,7 +6776,7 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* s
     data = (char*)src + 0x10;
     if (flags & 0x1000)
         data = (char*)src + src->f10;
-    sVEntry0037C8C0* vt = (sVEntry0037C8C0*)self->mVtbl;
+    sVEntry0037C8C0* vt = (sVEntry0037C8C0*)VPTR_AT(self, 0x10D8);
     int textureId = vt[47].fn(vthis(self, vt[47]), data, textureName, src->s4, src->s6, flags >> 28, fmt, cls, pal, lockType, copyMem, bindId);
     if ((src->fC & 0xF0000000) != 0 && src->s8 != 0) {
         double lodValue = fptodp(240.0f / ((float)src->s8 * 6.1035156e-05f));
@@ -6935,7 +6935,7 @@ struct sPartVEntry52 {
  */
 extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, tScreenGrabHandle* out, int width, int height)
 {
-    sPartVEntry52* vt = (sPartVEntry52*)self->mVtbl;
+    sPartVEntry52* vt = (sPartVEntry52*)VPTR_AT(self, 0x10D8);
     out->mTextureId = vt[52].fn(vthis(self, vt[52]), width, height, 0);
 }
 #endif
@@ -6956,7 +6956,7 @@ extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, t
 {
     if (item->mTextureId != -1) {
         func_00367B60(self->mTexMan, item->mTextureId);
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(self, 0x10D8);
         vt[50].fn(vthis(self, vt[50]), item->mTextureId);
         item->mTextureId = -1;
     }
@@ -7240,7 +7240,7 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
             data = afterHeader;
         fC = obj->fC;
     }
-    sVE_D0B0* slotEntry = &((sVE_D0B0*)self->mVtbl)[0x188 / 8];
+    sVE_D0B0* slotEntry = &((sVE_D0B0*)VPTR_AT(self, 0x10D8))[0x188 / 8];
     slotEntry->fn(vthis(self, *slotEntry), textureId, data, obj->s4, obj->s6, fC >> 28, mode, flagB, extra, copyMem);
     if (allocated) {
         MEM_free(unpackedCopy);
@@ -12095,7 +12095,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     int tex = self->_EffectTexMap[D_004A45D4.texIndex];
     ((sRS_6E78*)self->m_pCurrentDrawState)->tex = tex;
 
-    sVEntry<int(void*)>* vt = ((sVEntry<int (void*)>*)self->mVtbl);
+    sVEntry<int(void*)>* vt = ((sVEntry<int (void*)>*)VPTR_AT(self, 0x10D8));
     int width = vt[10].fn(vthis(self, vt[10]));
     sPkt_6E78* pkt = (sPkt_6E78*)D_004A5B84;
     unsigned int fbp = ((unsigned int)self->mCurrentFrameBufferPage);
@@ -13542,7 +13542,7 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     prm[8].w = 0.0f;
     prm[9].w = 0.0f;
     cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_9CB8;
-    sVEnt_9CB8* vt = (sVEnt_9CB8*)mgr->mVtbl;
+    sVEnt_9CB8* vt = (sVEnt_9CB8*)VPTR_AT(mgr, 0x10D8);
     sMat_9CB8 cam = *vt[35].fn(vthis(mgr, vt[35]));
     sV_9CB8 eye = Scale_9CB8(GetPos_9CB8(cam), -1.0f);
     MMI_TRANSPOSE4(&cam);

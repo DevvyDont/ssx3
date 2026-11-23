@@ -7250,7 +7250,7 @@ extern "C" void cBackgroundMan__cBackgroundMan(cBackgroundMan* self, int flags)
             if (id >= 0)
             {
                 cPS2GraphicsMan* obj = GrMan;
-                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
+                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(obj, 0x10D8);
                 vt[50].fn(vthis(obj, vt[50]), id);
             }
         }

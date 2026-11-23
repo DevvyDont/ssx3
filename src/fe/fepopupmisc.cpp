@@ -395,7 +395,7 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
         }
         self->mX = clamp_F050(self->mX, -20, 20);
         self->mY = clamp_F050(self->mY, -20, 20);
-        sVEntry<void(void*, int, int)>* rv = (sVEntry<void(void*, int, int)>*)GrMan->mVtbl;
+        sVEntry<void(void*, int, int)>* rv = (sVEntry<void(void*, int, int)>*)VPTR_AT(GrMan, 0x10D8);
         rv[12].fn(vthis(GrMan, rv[12]), self->mX, self->mY);
         return;
     }
@@ -8009,14 +8009,14 @@ extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
     unsigned short buf[0x38];
     if (self->mpTotalMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(locale, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(locale, 0x4);
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNTotalMsg));
         sprintf1(buf, fmt, func_001E33E8_noarg());
         cUIText_setUnicodeString(self->mpTotalMessagesLabel, buf);
     }
     if (self->mpUnreadMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(locale, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(locale, 0x4);
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNUnread));
         sprintf1(buf, fmt, func_001E3408());
         cUIText_setUnicodeString(self->mpUnreadMessagesLabel, buf);
@@ -9132,19 +9132,19 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
     switch (event) {
     case 1: {
         cFELocale* object = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(object, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(object, 0x4);
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnSlopeCaps));
         break;
     }
     case 2: {
         cFELocale* object = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(object, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(object, 0x4);
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnBigAirCaps));
         break;
     }
     case 3: {
         cFELocale* object = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(object, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(object, 0x4);
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnPipeCaps));
         break;
     }

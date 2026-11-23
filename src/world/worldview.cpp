@@ -1650,13 +1650,13 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
         break;
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
+        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_AT(w, 0x10D8) + 0x170);
         ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_tex, 0, 0, RID >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
+        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_AT(w, 0x10D8) + 0x170);
         ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
         break;
     }
@@ -1864,13 +1864,13 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     }
     case 9: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        sVEntry<void>* vt = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), resourceId >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        sVEntry<void>* vt = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), (resourceId >> 8) + self->m_iNumImages);
         break;
     }

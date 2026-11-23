@@ -26,6 +26,7 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "render/graphicsman.h"
 
 struct cPS2DeferManager;
 struct cTextureMan;
@@ -62,53 +63,6 @@ CHECK_OFFSET(tDisplayMode, unk_098, 0x98);
 CHECK_OFFSET(tDisplayMode, unk_09C, 0x9C);
 CHECK_OFFSET(tDisplayMode, unk_0A0, 0xA0);
 CHECK_SIZE(tDisplayMode, 0xA4);
-
-// One weighted matrix of a blended (skinning) matrix (On Tour struct tMdfBlendedMatrixComponent, 0x4).
-// [U] cPS2GraphicsMan_ResolveCharModel rebases m_iMatrixId by the part's bone offset (w[j*4+2] += tbl[w[j*4+3]]);
-// cPS2GraphicsMan_GenerateBlendedMatrices reads the weight (lh +0) and the matrix id (lbu +2) (its view sBlendLink_6BD0);
-// areBlendedMatricesEqual compares the weights (lh) and the two id bytes together (lhu +2, its view sKey_9A78).
-struct tMdfBlendedMatrixComponent {
-    short m_iWeight;                // 0x0 [O]; [U] GenerateBlendedMatrices, areBlendedMatricesEqual (tolerances)
-    unsigned char m_iMatrixId;      // 0x2 [O]; [U] ResolveCharModel rebases it; GenerateBlendedMatrices indexes the
-                                    //     matrix list with it
-    unsigned char m_iPartId;        // 0x3 [O]; [U] ResolveCharModel: index into the part bone offsets
-};
-
-// A blended (skinning) matrix: up to three weighted matrices (On Tour struct tMdfBlendedMatrix, 0xC).
-// [R] cGraphicsMan_AddBlendedMatrix allocates the 512-entry history (0x3000 bytes "BlendedMatrixHistory": 512 x 0xC
-// records, then 512 x 3 components) and points each m_matrixList at its 3 components; [U] areBlendedMatricesEqual
-// (its view sEnt_9A78), AddBlendedMatrix (sBlendMatrix), ResolveCharModel (sBlend_66F0), GenerateBlendedMatrices
-// (sBlendEnt_6BD0).
-struct tMdfBlendedMatrix {
-    int m_iNumMatrices;             // 0x0 [O]; [U] the count compared / copied (1..3)
-    tMdfBlendedMatrixComponent* m_matrixList; // 0x4 [O]; [R] AddBlendedMatrix; [U] every user walks it
-    int m_iMatrixId;                // 0x8 [O]; [U] ResolveCharModel stores the record's index in the blended matrix
-                                    //     list (sBlend_66F0::idx)
-};
-
-// [O] sTextureState: one texture id per GS context (On Tour's PSP build has 1); -1 = none.
-struct sTextureState {
-    short m_texid[2];               // 0x0 [O]; [R] ctor fills -1; [X] texture ids for context 1/2
-};
-
-// [O][P] sDrawState, 0x14 bytes (the preview's SetDrawState copies 16 + 4 bytes). The first 16 bytes are On Tour's
-// anonymous union of packed GS/VU1 state bits (decoded in [X] "RenderState"); the cGraphicsMan_Set* accessors
-// mask them in place.
-struct sDrawState {
-    unsigned int m_bitGroups[4];    // 0x00 [O] anonymous union { int m_bitGroups[3]; m_NamedBitFields } (DWARF union
-                                    //      @1ed6 in ssxd_dvd.prx: PSP has 3 words, retail 4: [P] SetDrawState copies
-                                    //      16 + 4 bytes); [P] SetFixAlpha/SetVifCodeState/...; [U] the cGraphicsMan_Set*
-                                    //      accessors and the particle / font / avalanche views mask words 0..2 in place.
-                                    //      The PSP bit names (mCLAMP, mCULL, ...) are GE state and do not apply here.
-                                    //      [Renamed from unk_00 by lstruct group L2.]
-    sTextureState m_textureState;   // 0x10 [O]
-};
-
-// [O] tTextureRef: a texture loaded by its 4-character name (cGraphicsMan_GetTextureID looks up / caches them).
-struct tTextureRef {
-    int TextureID;                  // 0x0 [O]; [U] cGraphicsMan_GetTextureID returns it
-    char Name[8];                   // 0x4 [O]; [U] strcpy target in cGraphicsMan_GetTextureID
-};
 
 // [O] tTVDisplayFormat (0x14 in On Tour too). [P] GetTVDisplayFormat returns &self->mTVDisplayFormat.
 struct tTVDisplayFormat {
@@ -160,64 +114,9 @@ struct sViewportStack {
     char unk_22C[0x4];              // 0x22C padding to 16
 };
 
-CHECK_OFFSET(tMdfBlendedMatrixComponent, m_iWeight, 0x0);
-CHECK_OFFSET(tMdfBlendedMatrixComponent, m_iMatrixId, 0x2);
-CHECK_OFFSET(tMdfBlendedMatrixComponent, m_iPartId, 0x3);
-CHECK_SIZE(tMdfBlendedMatrixComponent, 0x4);
-
-CHECK_OFFSET(tMdfBlendedMatrix, m_iNumMatrices, 0x0);
-CHECK_OFFSET(tMdfBlendedMatrix, m_matrixList, 0x4);
-CHECK_OFFSET(tMdfBlendedMatrix, m_iMatrixId, 0x8);
-CHECK_SIZE(tMdfBlendedMatrix, 0xC);
-
-struct cPS2GraphicsMan {
-    // --- cGraphicsMan (On Tour: size 0x10D0; retail's ends at 0x10DC with the vptr)
-    float m_screenOffset[2];        // 0x000 [O] t2Vector; [P] Get/SetScreenOffset (cGraphicsMan_SetScreenOffset/FD8/FF0)
-    int m_AIUpdatesPerRender;       // 0x008 [O]; [R] ctor zeroes it
-    int m_SpecularTextureId[8];     // 0x00C [O]; [P] get/setSpecularTextureId (preview: one int); [U] cVisualEffectsMan ctor
-    int m_PatchSpecularTextureId[8]; // 0x02C [O]; [U] cVisualEffectsMan ctor stores [6]
-    int m_SnowSparkleTextureId[8];  // 0x04C [O]; [U] ditto
-    int m_RimTextureId[8];          // 0x06C [O]; [U] ditto
-    int m_isInNIS[8];               // 0x08C [O]; [U] cVisualEffectsMan_commonUpdate stores [i]
-    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] cVisualEffectsMan_commonUpdate stores [i]; func_0038D690 reads [6]
-                                    //       (+0xC4) as the patch subdivision scale
-    float m_DrawDistance[8];        // 0x0CC [O]; [U] ditto
-    float m_FogDensity[8];          // 0x0EC [O]; [U] ditto
-    float m_FogColourR[8];          // 0x10C [O]; [U] ditto
-    float m_FogColourG[8];          // 0x12C [O]; [U] ditto
-    float m_FogColourB[8];          // 0x14C [O]; [U] ditto
-    float m_FogNear[8];             // 0x16C [O]; [U] ditto
-    float m_FogFar[8];              // 0x18C [O]; [U] ditto
-    float m_ScreenTintScaleR[8];    // 0x1AC [O]; [U] ditto
-    float m_ScreenTintScaleG[8];    // 0x1CC [O]; [U] ditto
-    float m_ScreenTintScaleB[8];    // 0x1EC [O]; [U] ditto
-    float m_ScreenTintOffsetR[8];   // 0x20C [O]; [U] ditto
-    float m_ScreenTintOffsetG[8];   // 0x22C [O]; [U] ditto
-    float m_ScreenTintOffsetB[8];   // 0x24C [O]; [U] ditto
-    float mFarPlane;                // 0x26C [O]; [R] ctor stores 0
-    int mNumViews;                  // 0x270 [O]; [R] ctor stores 1; accessors cGraphicsMan_SetNumViews/cGraphicsMan_GetNumViews
-    int mViewIndex;                 // 0x274 [O]; [R] ctor stores 0; accessors cGraphicsMan_SetViewIndex/cGraphicsMan_GetViewIndex
-    int mNumTextureFiles;           // 0x278 [O]; [U] cGraphicsMan_InitTextureFiles / cGraphicsMan_GetTextureID
-    void** mTextureFiles;           // 0x27C [O] const char**; [U] cGraphicsMan_GetTextureID passes each to SHAPE_locatez
-    tTextureRef mTexRefs[256];      // 0x280 [O]; [U] cGraphicsMan_GetTextureID
-    int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (cGraphicsMan_GetNumTexRefs)
-    sDrawState* m_pCurrentDrawState; // 0xE84 [O]; [P] CurrentDrawState; [R] ctor points it at the stack
-    sDrawState m_drawStateStack[4]; // 0xE88 [O]; [R] ctor fills the default state (sDrawState_s_defaultDrawState)
-    sDrawState m_activeDrawState;   // 0xED8 [O]; [P] ActiveDrawState returns its address; [U] cGraphicsMan_ForceActiveDrawState
-    sTextureState* m_pCurrentTextureState; // 0xEEC [O]
-    sTextureState m_textureStateStack[4]; // 0xEF0 [O]; [R] ctor fills -1
-    sTextureState m_activeTextureState; // 0xF00 [O]
-    float m_constantColours[2][4];  // 0xF04 [O] tARGB[2] (4-aligned in retail)
-    float m_lastConstantColours[2][4]; // 0xF24 [O] tARGB[2]
-    int mSkipNextPageFlip;          // 0xF44 [O] bool; [P] SkipNextPageFlip stores 1 (cGraphicsMan_SkipNextPageFlip); [X] forceDisplayFlip
-    tMdfBlendedMatrix* m_blendedMatrixHistory; // 0xF48 [O]; [R] ctor zeroes; [U] cGraphicsMan_AddBlendedMatrix
-    int m_blendedMatrixHistorySize; // 0xF4C [O]; [U] cGraphicsMan_AddBlendedMatrix
-    int _EffectTexMap[86];          // 0xF50 [O]; [R] ctor fills -1 (MEM_fill 0x158); [P] getEffectTexMap(i)
-    int mSpecTexID;                 // 0x10A8 [O]; [P] Get/SetSpecID (cGraphicsMan_GetSpecID/cGraphicsMan_SetSpecID)
-    int mPatchSpecTexID;            // 0x10AC [O]; [P] Get/SetPatchSpecID (cGraphicsMan_GetPatchSpecID/cGraphicsMan_SetPatchSpecID)
-    int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors cGraphicsMan_SetCharSpecID/cGraphicsMan_GetCharSpecID
-    void** mVtbl;                   // 0x10D8 [R] cGraphicsMan cGraphicsMan_vtbl, cPS2GraphicsMan cPS2GraphicsMan_vtbl
-    // --- cPS2GraphicsMan
+class cPS2GraphicsMan : public cGraphicsMan {
+public:
+    // 0x0000-0x10DB: cGraphicsMan (render/graphicsman.h), the vptr at 0x10D8
     int mViewportDepth;             // 0x10DC [U] index into mViewportStack (cPS2GraphicsMan_PushViewport/cPS2GraphicsMan_PopViewport); [X] viewDepth
     t4Matrix mViewStack[12];        // 0x10E0 [R] ctor's first array loop (12); [U] PushView/PopView step 0x40
     int mViewStackIdx;                 // 0x13E0 [P] asserts "mViewStackIdx < kViewMatrixStackSize", "mViewStackIdx > 0"; [U] PushView (cPS2GraphicsMan_PushView) +1, PopView -1; [X] matrixDepth
@@ -336,19 +235,13 @@ struct cPS2GraphicsMan {
     int mShinyBoarder;              // 0x6D14 [P] SetShinyBoarder (cPS2GraphicsMan_SetShinyBoarder) bool
     char unk_6D18[0x8];             // 0x6D18 padding to 16
     sViewportStack mViewportStack[4]; // 0x6D20 [P] sViewportStack; [R] ctor's fifth array loop (4); [U] mViewportDepth
+    // [R] cPS2GraphicsMan_vtbl's slots past cGraphicsMan_vtbl's 121
+    virtual void* SetDisplayMode();                                                                      // slot 122: [R] cPS2GraphicsMan_SetDisplayMode
+    virtual int GetDisplayMode(int width, int height, unsigned int bpp, unsigned int clutBpp, int fmt, int id); // slot 123: [R] cPS2GraphicsMan_GetDisplayMode
+    virtual void InitCharMatrices();                                                                     // slot 124: [R] cPS2GraphicsMan_InitCharMatrices
 };
 
 // --- layout checks
-CHECK_OFFSET(sTextureState, m_texid, 0x0);
-CHECK_SIZE(sTextureState, 0x4);
-
-CHECK_OFFSET(sDrawState, m_bitGroups, 0x00);
-CHECK_OFFSET(sDrawState, m_textureState, 0x10);
-CHECK_SIZE(sDrawState, 0x14);
-
-CHECK_OFFSET(tTextureRef, TextureID, 0x0);
-CHECK_OFFSET(tTextureRef, Name, 0x4);
-CHECK_SIZE(tTextureRef, 0xC);
 
 CHECK_OFFSET(tTVDisplayFormat, mDisplayFormat, 0x00);
 CHECK_OFFSET(tTVDisplayFormat, mfTVYOffset, 0x04);
@@ -392,12 +285,10 @@ CHECK_SIZE(sViewportStack, 0x230);
 
 CHECK_OFFSET(cPS2GraphicsMan, m_screenOffset, 0x000);
 CHECK_OFFSET(cPS2GraphicsMan, m_AIUpdatesPerRender, 0x008);
-CHECK_OFFSET(cPS2GraphicsMan, m_SpecularTextureId, 0x00C);
 CHECK_OFFSET(cPS2GraphicsMan, m_PatchSpecularTextureId, 0x02C);
 CHECK_OFFSET(cPS2GraphicsMan, m_SnowSparkleTextureId, 0x04C);
 CHECK_OFFSET(cPS2GraphicsMan, m_RimTextureId, 0x06C);
 CHECK_OFFSET(cPS2GraphicsMan, m_isInNIS, 0x08C);
-CHECK_OFFSET(cPS2GraphicsMan, m_SnowSparkleDensity, 0x0AC);
 CHECK_OFFSET(cPS2GraphicsMan, m_DrawDistance, 0x0CC);
 CHECK_OFFSET(cPS2GraphicsMan, m_FogDensity, 0x0EC);
 CHECK_OFFSET(cPS2GraphicsMan, m_FogColourR, 0x10C);
@@ -412,14 +303,11 @@ CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintOffsetR, 0x20C);
 CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintOffsetG, 0x22C);
 CHECK_OFFSET(cPS2GraphicsMan, m_ScreenTintOffsetB, 0x24C);
 CHECK_OFFSET(cPS2GraphicsMan, mFarPlane, 0x26C);
-CHECK_OFFSET(cPS2GraphicsMan, mNumViews, 0x270);
 CHECK_OFFSET(cPS2GraphicsMan, mViewIndex, 0x274);
 CHECK_OFFSET(cPS2GraphicsMan, mNumTextureFiles, 0x278);
 CHECK_OFFSET(cPS2GraphicsMan, mTextureFiles, 0x27C);
-CHECK_OFFSET(cPS2GraphicsMan, mTexRefs, 0x280);
 CHECK_OFFSET(cPS2GraphicsMan, mNumTexRefs, 0xE80);
 CHECK_OFFSET(cPS2GraphicsMan, m_pCurrentDrawState, 0xE84);
-CHECK_OFFSET(cPS2GraphicsMan, m_drawStateStack, 0xE88);
 CHECK_OFFSET(cPS2GraphicsMan, m_activeDrawState, 0xED8);
 CHECK_OFFSET(cPS2GraphicsMan, m_pCurrentTextureState, 0xEEC);
 CHECK_OFFSET(cPS2GraphicsMan, m_textureStateStack, 0xEF0);
@@ -429,11 +317,8 @@ CHECK_OFFSET(cPS2GraphicsMan, m_lastConstantColours, 0xF24);
 CHECK_OFFSET(cPS2GraphicsMan, mSkipNextPageFlip, 0xF44);
 CHECK_OFFSET(cPS2GraphicsMan, m_blendedMatrixHistory, 0xF48);
 CHECK_OFFSET(cPS2GraphicsMan, m_blendedMatrixHistorySize, 0xF4C);
-CHECK_OFFSET(cPS2GraphicsMan, _EffectTexMap, 0xF50);
 CHECK_OFFSET(cPS2GraphicsMan, mSpecTexID, 0x10A8);
 CHECK_OFFSET(cPS2GraphicsMan, mPatchSpecTexID, 0x10AC);
-CHECK_OFFSET(cPS2GraphicsMan, mCharSpecTexID, 0x10B0);
-CHECK_OFFSET(cPS2GraphicsMan, mVtbl, 0x10D8);
 CHECK_OFFSET(cPS2GraphicsMan, mViewportDepth, 0x10DC);
 CHECK_OFFSET(cPS2GraphicsMan, mViewStack, 0x10E0);
 CHECK_OFFSET(cPS2GraphicsMan, mViewStackIdx, 0x13E0);

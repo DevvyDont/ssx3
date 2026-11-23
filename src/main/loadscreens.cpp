@@ -59,7 +59,7 @@ extern "C" int cBackgroundMan_loadImages(cBackgroundMan* self)
     for (int i = 0; i < self->miNumImage; i++) {
         char* shape = (char*)file + file->shapes[i].offset;
         void* img = SHAPE_unpack(shape);
-        self->mpiImageTID[i] = ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46].fn(vthis(GrMan, ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46]), img, str_back, 0, 1, -1);
+        self->mpiImageTID[i] = ((sVEntry<int(void*, void*, const char*, int, int, int)>*)VPTR_AT(GrMan, 0x10D8))[46].fn(vthis(GrMan, ((sVEntry<int(void*, void*, const char*, int, int, int)>*)VPTR_AT(GrMan, 0x10D8))[46]), img, str_back, 0, 1, -1);
         if (img != shape && img != 0) {
             cMemMan_free(img);
         }
@@ -878,7 +878,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             return;
         }
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sGfxVE_B4E0* vt = (sGfxVE_B4E0*)ps2GraphicsMan->mVtbl;
+        sGfxVE_B4E0* vt = (sGfxVE_B4E0*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         ((void (*)(void*, int))vt[8].fn)(vthis(ps2GraphicsMan, vt[8]), !((bool (*)(void*))vt[9].fn)(vthis(ps2GraphicsMan, vt[9])));
         break;
     }

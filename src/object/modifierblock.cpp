@@ -1137,7 +1137,7 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     {
         skyInstance->m_iFlags = ((unsigned int)skyInstance->m_iFlags & ~2u) | 4;
         tInstanceRecord* instToDraw = self->m_pInstanceSky;
-        sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
+        sVE_53B10* vt = (sVE_53B10*)VPTR_AT(ctx, 0x10D8);
         vt[95].fn(vthis(ctx, vt[95]), ((char*)instToDraw), 1.0f, instToDraw->m_Model->m_MaterialBlock, &skyMatrix, 0, 0, 21536);
     }
     sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;

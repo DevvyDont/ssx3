@@ -90,7 +90,7 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
         for (j = 0; j < cCrowdRender2D_mAnimTable_B6D0[i].count; j++) {
             char* shape = SHAPE_locate(self[0], cCrowdRender2D_mAnimTable_B6D0[i].names[j]);
             cCrowdRender2D_mAnimTable_B6D0[i].shapes[j] = shape;
-            sVEnt_B6D0* vt = (sVEnt_B6D0*)cGraphicsMan_TheGraphicsMan->mVtbl;
+            sVEnt_B6D0* vt = (sVEnt_B6D0*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8);
             cCrowdRender2D_mAnimTable_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(vthis(cGraphicsMan_TheGraphicsMan, vt[46]), shape, cCrowdRender2D_mAnimTable_B6D0[i].names[j], 0, 0, -1);
         }
     }
@@ -124,7 +124,7 @@ int cCrowdRender2D_purge(int* param_1)
         int j;
         for (j = 0; j < cCrowdRender2D_mAnimTable_B6D0[i].count; j++) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-            sCrowdVEntry2D* vt = (sCrowdVEntry2D*)obj->mVtbl;
+            sCrowdVEntry2D* vt = (sCrowdVEntry2D*)VPTR_AT(obj, 0x10D8);
             vt[50].fn(vthis(obj, vt[50]), cCrowdRender2D_mAnimTable_B6D0[i].handles[j]);
         }
     }

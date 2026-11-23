@@ -68,7 +68,7 @@ void operator_delete(int* p);
 extern "C" void cWorld__cWorld(void** self, int flags)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sWorldVEntry0* vtEntry = &((sWorldVEntry0*)obj->mVtbl)[107];
+    sWorldVEntry0* vtEntry = &((sWorldVEntry0*)VPTR_AT(obj, 0x10D8))[107];
     vtEntry->fn(vthis(obj, *vtEntry));
     if (self[0] != 0) {
         cWorldCache__cWorldCache((int*)self[0], 3);

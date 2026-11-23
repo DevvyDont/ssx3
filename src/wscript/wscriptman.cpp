@@ -4662,7 +4662,7 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
                     if (self->grps[j].s[k].arr[variant].fC != 0) {
                         cMemMan_free(self->grps[j].s[k].arr[variant].fC);
                     }
-                    ((sVEntry<void(void*, int)>*)gfx->mVtbl)[0x380 / 8].fn(vthis(gfx, ((sVEntry<void(void*, int)>*)gfx->mVtbl)[0x380 / 8]), (int)self->grps[j].s[k].arr[variant].f0);
+                    ((sVEntry<void(void*, int)>*)VPTR_AT(gfx, 0x10D8))[0x380 / 8].fn(vthis(gfx, ((sVEntry<void(void*, int)>*)VPTR_AT(gfx, 0x10D8))[0x380 / 8]), (int)self->grps[j].s[k].arr[variant].f0);
                     if (self->grps[j].s[k].arr[variant].f0 != 0) {
                         cMemMan_free(self->grps[j].s[k].arr[variant].f0);
                     }
@@ -4677,7 +4677,7 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
         for (i = 0; i < self->f12C; i++) {
             textureId = self->f130[i].id;
             if (textureId >= 0) {
-                ((sVEntry<void(void*, int)>*)gfx->mVtbl)[0x190 / 8].fn(vthis(gfx, ((sVEntry<void(void*, int)>*)gfx->mVtbl)[0x190 / 8]), textureId);
+                ((sVEntry<void(void*, int)>*)VPTR_AT(gfx, 0x10D8))[0x190 / 8].fn(vthis(gfx, ((sVEntry<void(void*, int)>*)VPTR_AT(gfx, 0x10D8))[0x190 / 8]), textureId);
             }
         }
     }

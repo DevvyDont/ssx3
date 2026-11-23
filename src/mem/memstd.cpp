@@ -1995,7 +1995,7 @@ extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
                 sVEntry<void(void*, void*)>* slotEntry = &((sVEntry<void(void*, void*)>*)videoDriver->mVtbl)[4];
                 slotEntry->fn(vthis(videoDriver, *slotEntry), moviePlayer->mpCurrFrame);
             }
-            sVEntry<void(void*)>* w = &((sVEntry<void(void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[20];
+            sVEntry<void(void*)>* w = &((sVEntry<void(void*)>*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8))[20];
             w->fn(vthis(cGraphicsMan_TheGraphicsMan, *w));
             SYNCTASK_run(0);
             THREAD_yield(0);
@@ -2496,7 +2496,7 @@ struct sTile_4410 {
         w = 16;
         h = height;
         cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-        tex = ((sVE_4410a*)g->mVtbl)[47].fn((char*)g + ((sVE_4410a*)g->mVtbl)[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
+        tex = ((sVE_4410a*)VPTR_AT(g, 0x10D8))[47].fn((char*)g + ((sVE_4410a*)VPTR_AT(g, 0x10D8))[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
         func_0037D090_6(g, tex, 0, 0, 0, 0);
     }
 };
@@ -2606,7 +2606,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(SSX_VD_PS2_
     for (int i = 0; i < self->mNumTiles; i++) {
         int* tileEntry = self->mppTiles[i];
         if (tileEntry != 0) {
-            ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50]), *tileEntry);
+            ((sRVEntry_2547B8*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8))[50].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2547B8*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8))[50]), *tileEntry);
             *tileEntry = -1;
             RCMP_rcmp_sys.FreeMemFunc(tileEntry);
         }
@@ -2957,7 +2957,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw(SSX_VD_PS2_SINGLE_BUFFERD
     sMemStdVEntry* vt;
     do {
         rend = self->m_pGrMan;
-        vt = (sMemStdVEntry*)rend->mVtbl;
+        vt = (sMemStdVEntry*)VPTR_AT(rend, 0x10D8);
     } while (vt[18].fn(vthis(rend, vt[18])) == 0);
     void* resource = self->mpCurrentFrame;
     if (resource != 0) {

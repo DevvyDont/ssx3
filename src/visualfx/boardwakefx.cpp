@@ -3999,14 +3999,14 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
     pos.y = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).y;
     pos.z = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).z;
     pos.w = 1.0f;
-    sVEntry<int(void*, t4Vector*)>* vEntry = &((sVEntry<int (void*, t4Vector*)>*)obj->mVtbl)[91];
+    sVEntry<int(void*, t4Vector*)>* vEntry = &((sVEntry<int (void*, t4Vector*)>*)VPTR_AT(obj, 0x10D8))[91];
     if (vEntry->fn(vthis(obj, *vEntry), &pos)) {
         self->mbOnScreen = 0;
         self->mbRequestZSample = 0;
     } else {
         self->mbOnScreen = 1;
         t4Vector scr;
-        sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)obj->mVtbl)[92];
+        sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)VPTR_AT(obj, 0x10D8))[92];
         projectSlot->fn(&scr, vthis(obj, *projectSlot), &pos);
         float depth = scr.z * 5.960465188081798e-08f;
         if (depth <= 0.005f) {
@@ -4046,7 +4046,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
             viewDir.z = rect[14];
             t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(viewDir.x * pullBack, viewDir.y * pullBack, viewDir.z * pullBack), 0.0f));
             t4Vector sc;
-            sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)obj->mVtbl)[92];
+            sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)VPTR_AT(obj, 0x10D8))[92];
             projectSlot2->fn(&sc, vthis(obj, *projectSlot2), &lp);
             self->mZDist = sc.z;
             // screen x mapped to -1..1, then to an angle
@@ -4134,7 +4134,7 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
     }
     {
         cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
-        sVEntry<void(void*, void*, void*)>* setPhase2Slot = &((sVEntry<void (void*, void*, void*)>*)obj->mVtbl)[117];
+        sVEntry<void(void*, void*, void*)>* setPhase2Slot = &((sVEntry<void (void*, void*, void*)>*)VPTR_AT(obj, 0x10D8))[117];
         setPhase2Slot->fn(vthis(obj, *setPhase2Slot), (void*)cLensFxMan__drawFrameCallBack, self);
     }
     cLensFxMan_mbDrawSun = 1;
@@ -4246,7 +4246,7 @@ extern "C" void cLensFxMan__cLensFxMan(cLensFxMan* self, int flags)
 {
     cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     self->mVtbl = cLensFxMan_vtbl;
-    sBWVEntry2* setPhase2Slot = &((sBWVEntry2*)obj->mVtbl)[117];
+    sBWVEntry2* setPhase2Slot = &((sBWVEntry2*)VPTR_AT(obj, 0x10D8))[117];
     setPhase2Slot->fn(vthis(obj, *setPhase2Slot), 0, 0);
     cLensFxMan_mbDrawSun = 0;
     if (flags & 1) {
@@ -4440,17 +4440,17 @@ extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
     cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     tRect viewRect;
     {
-        sWkVtR3338* vt = (sWkVtR3338*)ctx->mVtbl;
+        sWkVtR3338* vt = (sWkVtR3338*)VPTR_AT(ctx, 0x10D8);
         vt[28].fn(&viewRect, vthis(ctx, vt[28]));
     }
     self->mViewInfo.mViewRect = viewRect;
     {
-        sWkVtM3338* vt = (sWkVtM3338*)ctx->mVtbl;
+        sWkVtM3338* vt = (sWkVtM3338*)VPTR_AT(ctx, 0x10D8);
         vu0CopyMatrix3338(&(*(sWkMtx3338*)&self->mViewInfo.mViewMat), vt[35].fn(vthis(ctx, vt[35])));
     }
     int i = 0;
     {
-        sWkVtP3338* vt = (sWkVtP3338*)ctx->mVtbl;
+        sWkVtP3338* vt = (sWkVtP3338*)VPTR_AT(ctx, 0x10D8);
         vt[30].fn(vthis(ctx, vt[30]), &self->mViewInfo.mFOV, &self->mViewInfo.mZNear, &self->mViewInfo.mZFar);
     }
     sWkEmit3338* em = ((sWkEmit3338*)&self->mSunHalo[0]);
@@ -5170,7 +5170,7 @@ extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
     cTransitionMan_EndTransition(self);
     if (self->mRequestingDelete != 0) {
         cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
-        sBWVEntry1* removeScreenGrab = &((sBWVEntry1*)obj->mVtbl)[60];
+        sBWVEntry1* removeScreenGrab = &((sBWVEntry1*)VPTR_AT(obj, 0x10D8))[60];
         removeScreenGrab->fn(vthis(obj, *removeScreenGrab), (char*)&self->mScreenGrabHandle);
         self->mRequestingDelete = 0;
     }
@@ -5225,7 +5225,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
         char* ref = (char*)&self->mScreenGrabHandle;
         if (~self->mScreenGrabHandle.mTextureId == 0) {
             cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
-            sVEntry<void(void*, void*, int, int)>* vtblEntry = &((sVEntry<void(void*, void*, int, int)>*)obj->mVtbl)[59];
+            sVEntry<void(void*, void*, int, int)>* vtblEntry = &((sVEntry<void(void*, void*, int, int)>*)VPTR_AT(obj, 0x10D8))[59];
             vtblEntry->fn(vthis(obj, *vtblEntry), ref, 0x100, 0x100);
             if (~self->mScreenGrabHandle.mTextureId == 0) {
                 if (transitionIn != 0) {
@@ -5364,7 +5364,7 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
         if (~self->mScreenGrabHandle.mTextureId != 0) {
             cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
             self->mRequestingDelete = 1;
-            sVEntry<int(void*)>* entry = &((sVEntry<int (void*)>*)obj->mVtbl)[114];
+            sVEntry<int(void*)>* entry = &((sVEntry<int (void*)>*)VPTR_AT(obj, 0x10D8))[114];
             self->mRequestDeleteFrame = entry->fn(vthis(obj, *entry));
             self->mRequestingScreenGrab = 0;
             self->mUsingScreenGrab = 0;
@@ -5443,9 +5443,9 @@ extern "C" void cTransitionMan_update(cTransitionMan* self)
 {
     cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (self->mRequestingDelete != 0) {
-        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)ctx->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_AT(ctx, 0x10D8);
         if (vt[114].fn(vthis(ctx, vt[114])) - self->mRequestDeleteFrame >= 3) {
-            sVEntry<void(void*, void*)>* vt2 = (sVEntry<void (void*, void*)>*)ctx->mVtbl;
+            sVEntry<void(void*, void*)>* vt2 = (sVEntry<void (void*, void*)>*)VPTR_AT(ctx, 0x10D8);
             vt2[60].fn(vthis(ctx, vt2[60]), (char*)&self->mScreenGrabHandle);
             self->mRequestingDelete = 0;
         }
@@ -5546,7 +5546,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     float curTime = self->mfCurrentTime;
     if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((sVEntry<void(void*)>*)ctx->mVtbl);
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8));
         vt[61].fn(vthis(ctx, vt[61]), (int*)&self->mScreenGrabHandle);
         self->mRequestingScreenGrab = 0;
     }
@@ -5571,10 +5571,10 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     (ctx->m_pCurrentDrawState)[1] = (ctx->m_pCurrentDrawState)[0];
     (*(sDrawState**)&ctx->m_pCurrentDrawState)++;
-    ((sVEntry<void(void*)>*)ctx->mVtbl)[21].fn(vthis(ctx, ((sVEntry<void(void*)>*)ctx->mVtbl)[21]));
-    ((sVEntry<void(void*)>*)ctx->mVtbl)[31].fn(vthis(ctx, ((sVEntry<void(void*)>*)ctx->mVtbl)[31]));
-    ((sVEntry<void(void*)>*)ctx->mVtbl)[37].fn(vthis(ctx, ((sVEntry<void(void*)>*)ctx->mVtbl)[37]));
-    sRsVtV47E8* vv = (sRsVtV47E8*)((sVEntry<void(void*)>*)ctx->mVtbl);
+    ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[21].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[21]));
+    ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[31].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[31]));
+    ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[37].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[37]));
+    sRsVtV47E8* vv = (sRsVtV47E8*)((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8));
     vv[26].fn(vthis(ctx, vv[26]), 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
     rsSetB47E8(ctx, 0x3E0, 5, 8);
     rsSetA47E8(ctx, 0x400000, 22, 1);
@@ -5594,8 +5594,8 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
         sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
         ov[2].fn(vthis(transition, ov[2]), clamped);
     }
-    ((sVEntry<void(void*)>*)ctx->mVtbl)[32].fn(vthis(ctx, ((sVEntry<void(void*)>*)ctx->mVtbl)[32]));
-    ((sVEntry<void(void*)>*)ctx->mVtbl)[22].fn(vthis(ctx, ((sVEntry<void(void*)>*)ctx->mVtbl)[22]));
+    ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[32].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[32]));
+    ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[22].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_AT(ctx, 0x10D8))[22]));
     (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
 }
 #endif

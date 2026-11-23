@@ -178,7 +178,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if (w->mMiscData == 0 && self->bToNextState == 0) {
         cFELocale* mgr = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(mgr, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(mgr, 0x4);
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveProgress));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
@@ -189,7 +189,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     int k = w->mMiscData;
     if (k == 6 && self->bToNextState == 0) {
         cFELocale* mgr = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)vptr_at(mgr, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(mgr, 0x4);
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);

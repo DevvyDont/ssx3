@@ -319,7 +319,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
         pos[1] = self->mPosition.y + y;
         pos[2] = 0.0f;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVE_3A39F8* vt = (sVE_3A39F8*)ps2GraphicsMan->mVtbl;
+        sVE_3A39F8* vt = (sVE_3A39F8*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         ((tDraw_3A39F8)vt[72].fn)(vthis(ps2GraphicsMan, vt[72]), ((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count,
                                   self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour, pos);
         return;
@@ -345,7 +345,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
         SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 2, (self->mpVertexColour)[i].B);
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_3A39F8* vt = (sVE_3A39F8*)ps2GraphicsMan->mVtbl;
+    sVE_3A39F8* vt = (sVE_3A39F8*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     ((tDraw2_3A39F8)vt[73].fn)(vthis(ps2GraphicsMan, vt[73]), ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpVertices, 0);
 }
 #endif

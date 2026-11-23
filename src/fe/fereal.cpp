@@ -942,7 +942,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     progress_1E80(50.0f);
     {
         cPS2GraphicsMan* g = GrMan;
-        sVEntry<void(void*, ...)>* vt = (sVEntry<void(void*, ...)>*)g->mVtbl;
+        sVEntry<void(void*, ...)>* vt = (sVEntry<void(void*, ...)>*)VPTR_AT(g, 0x10D8);
         vt[44].fn(vthis(g, vt[44]), 0);
     }
     sUI_1E80* ui = ((sUI_1E80*)self->mpUI);
@@ -1058,7 +1058,7 @@ extern "C" void cSSXAudio_FrontEndPurge(void* p);
 extern "C" void cRealFE_purge(cRealFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
+    sVEntry001A2190* vt = (sVEntry001A2190*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     vt[19].fn(vthis(ps2GraphicsMan, vt[19]));
     cRealFE_purgeCharAnimations(self);
     cFERiderManager_purge(&self->mRiderManager);
@@ -1140,14 +1140,14 @@ static inline sFeWorld* feW() { return (sFeWorld*)GrMan; }
 static inline void feCall(int slot)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+    sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     ((void (*)(void*))vt[slot].fn)(vthis(ps2GraphicsMan, vt[slot]));
 }
 
 static inline unsigned int feCallU(int slot)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+    sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
     return ((unsigned int (*)(void*))vt[slot].fn)(vthis(ps2GraphicsMan, vt[slot]));
 }
 
@@ -1194,13 +1194,13 @@ extern "C" int cRealFE_render(cRealFE* self)
         }
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+            sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             ((void (*)(void*, int, int, float, float, float, float, float, float))vt[26].fn)(
                 vthis(ps2GraphicsMan, vt[26]), 0, 0, 0.0f, 0.0f, w, hgt, 0.0f, 1.0f);
         }
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+            sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             ((void (*)(void*, void*))vt[34].fn)(vthis(ps2GraphicsMan, vt[34]), t4mat_Identity);
         }
         feW()->top->setAlpha(9);
@@ -1236,7 +1236,7 @@ extern "C" int cRealFE_render(cRealFE* self)
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+            sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
             ((void (*)(void*, int, sFeVert*, int))vt[71].fn)(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
         }
         feCall(22);
@@ -1249,13 +1249,13 @@ extern "C" int cRealFE_render(cRealFE* self)
     feCall(31);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+        sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         ((void (*)(void*, float, float, float))vt[25].fn)(vthis(ps2GraphicsMan, vt[25]),
             *(float*)((char*)self + 0x10), *(float*)((char*)self + 0x14), *(float*)((char*)self + 0x18));
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
+        sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
         ((void (*)(void*, void*))vt[34].fn)(vthis(ps2GraphicsMan, vt[34]), (char*)self + 0x50);
     }
     {
