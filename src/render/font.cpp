@@ -3798,9 +3798,6 @@ extern "C" tDeferBucket* cPS2DeferManager_Find1(sCache5000* self, int stateEntry
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_sViewportStack_operatorE);
 #ifdef SKIP_ASM
-struct sVec50C0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat50C0 {
     float m[16];
@@ -3833,11 +3830,11 @@ struct sFontState50C0 {
     float f00, f04, f08, f0C, f10, f14, f18, f1C;
     int i20;
     float f24, f28, f2C;
-    sVec50C0 v30, v40, v50;
+    t4Vector v30, v40, v50;
     sMat50C0 m60, mA0, mE0, m120;
-    sVec50C0 v160, v170;
+    t4Vector v160, v170;
     sMat50C0 m180, m1C0;
-    sVec50C0 v200, v210;
+    t4Vector v200, v210;
     sPair50C0 p220;
     int i228;
 };
@@ -6657,9 +6654,6 @@ extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour(cDynam
 //100%
 INCLUDE_ASM("render/font", cDynamicColourEmitter_getSubEmitterPositionVelocityColour1);
 #ifdef SKIP_ASM
-struct sFontQ4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sFontRGBA {
     char r, g, b, a;
@@ -6677,11 +6671,11 @@ struct sFontRGBA {
  * @param out1  receives the velocity
  * @param out2  receives the packed colour
  */
-extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour1(cDynamicColourEmitter* self, int idx, sFontQ4* out0, sFontQ4* out1, sFontRGBA* out2)
+extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour1(cDynamicColourEmitter* self, int idx, t4Vector* out0, t4Vector* out1, sFontRGBA* out2)
 {
     int i = (idx + 1 + self->m_subEmitterId) % self->m_numSubEmitters;
-    *out0 = ((sFontQ4*)self->m_positions)[i];
-    *out1 = ((sFontQ4*)self->m_velocities)[i];
+    *out0 = ((t4Vector*)self->m_positions)[i];
+    *out1 = ((t4Vector*)self->m_velocities)[i];
     *out2 = ((sFontRGBA*)self->m_colours)[i];
 }
 #endif

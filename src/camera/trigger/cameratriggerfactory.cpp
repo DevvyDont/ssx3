@@ -5383,7 +5383,6 @@ extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm);
 #ifdef SKIP_ASM
-struct cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 extern void* cSUPERPIPEChaseAlgorithm_vtbl[];
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
 
@@ -5397,13 +5396,13 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
  * @param point2  the second axis point, copied into Point2
  * @return @p self
  */
-extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(cSUPERPIPEChaseAlgorithm* self, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* point1, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* point2)
+extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(cSUPERPIPEChaseAlgorithm* self, t4Vector* point1, t4Vector* point2)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = 67;
     VPTR_OF(cCameraAlgorithm, self) = cSUPERPIPEChaseAlgorithm_vtbl;
-    *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)&self->Point1 = *point1;
-    *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)&self->Point2 = *point2;
+    *(t4Vector*)&self->Point1 = *point1;
+    *(t4Vector*)&self->Point2 = *point2;
     return ((void*)self);
 }
 #endif

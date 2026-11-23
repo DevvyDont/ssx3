@@ -137,9 +137,6 @@ __asm__("_vt$15cVbDtor002E83F0$13cRiderVbC_btf = D_00488BB8\n"
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_reset);
 #ifdef SKIP_ASM
-struct cBoardTrailFX_reset_sVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct cBoardTrailFX_reset_sVtx {
     float x, y, z;
@@ -166,14 +163,14 @@ struct cBoardTrailFX_reset_sTrail {
     int fA0;
     int fA4;
     char padA8[8];
-    cBoardTrailFX_reset_sVec4 colB0;
-    cBoardTrailFX_reset_sVec4 colC0;
-    cBoardTrailFX_reset_sVec4 colD0;
+    t4Vector colB0;
+    t4Vector colC0;
+    t4Vector colD0;
     int fE0;
 };
 
-extern cBoardTrailFX_reset_sVec4 t4vect_Origin;
-extern cBoardTrailFX_reset_sVec4 t4vect_Zero;
+extern t4Vector t4vect_Origin;
+extern t4Vector t4vect_Zero;
 extern float cBoardTrail_m_BaseU;
 extern float cBoardTrail_m_InnerU;
 extern float cBoardTrail_m_OuterU;
@@ -1895,14 +1892,11 @@ extern "C" void* cCircle_TObj_cCircle_TObj(cCircle_TObj* self, sBtRectBE20 rect)
 INCLUDE_ASM("visualfx/boardtrailfx", InitVertex);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sBTQuad_BF48 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sBTVtx_BF48 {
     float x, y, z;
     int pad;
     int r, g, b, a;
-    sBTQuad_BF48 st;
+    t4Vector st;
 };
 
 /**
@@ -1931,7 +1925,7 @@ extern "C" void InitVertex(sBTVtx_BF48* vertex, float* colour, float x, float y)
         vertex->a = (int)(colour[0] * 128.0f);
     }
     vertex->z = 1.0f;
-    sBTQuad_BF48 texCoord;
+    t4Vector texCoord;
     texCoord.w = 1.0f;
     texCoord.x = x;
     texCoord.y = y;

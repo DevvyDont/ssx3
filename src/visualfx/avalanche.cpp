@@ -658,15 +658,12 @@ extern "C" void tActiveAvalancheNode_calculateScale(tActiveAvalancheNode* self, 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_update);
 #ifdef SKIP_ASM
-struct sAvVec4CA8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sAvMatrixCA8 {
-    sAvVec4CA8 row[4];
+    t4Vector row[4];
 };
 struct sAvFrameCA8 {
-    sAvVec4CA8 pos;             // 0x0
-    sAvVec4CA8 vel;             // 0x10
+    t4Vector pos;             // 0x0
+    t4Vector vel;             // 0x10
     sAvMatrixCA8 rot;           // 0x20
 };
 struct sAvDataCA8 {
@@ -681,12 +678,12 @@ struct sAvDataCA8 {
 struct sAvNodeCA8 {
     sAvFrameCA8 getFrameData(float t) __asm__("tActiveAvalancheNode_getFrameData");
     char pad0[0x60];
-    sAvVec4CA8 pos;             // 0x60
+    t4Vector pos;             // 0x60
     sAvMatrixCA8 rot;           // 0x70
     float scale;                // 0xB0
     float fB4;                  // 0xB4
     char padB8[0xC0 - 0xB8];
-    sAvVec4CA8 vel;             // 0xC0
+    t4Vector vel;             // 0xC0
     char emitter[0x1FC - 0xD0]; // 0xD0
     float f1FC;                 // 0x1FC
     char pad200[0x2E0 - 0x200];
@@ -695,7 +692,7 @@ struct sAvNodeCA8 {
 
 extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force);
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
-extern sAvVec4CA8 t4vect_Zero_7CA8 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_7CA8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrixCA8(sAvMatrixCA8* dst, sAvMatrixCA8* src)
@@ -732,12 +729,12 @@ extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float currTime)
     currTime *= self->data->speed;
     sAvFrameCA8 fd = self->getFrameData(currTime);
     if (currTime * 30.0f < self->data->duration) {
-        sAvVec4CA8* pos = &self->pos;
+        t4Vector* pos = &self->pos;
         self->pos = fd.pos;
         vu0CopyMatrixCA8(&self->rot, &fd.rot);
         self->vel = fd.vel;
         sAvDataCA8* nodeData = self->data;
-        sAvVec4CA8* vel = &self->vel;
+        t4Vector* vel = &self->vel;
         if (nodeData->type != 2 && nodeData->emit != 0) {
             void* org = &t4vect_Zero_7CA8;
             void* em = self->emitter;
@@ -822,17 +819,14 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sAvV4_7EF8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sAvObj_7EF8 {
     char pad_0x00[0xC];
     void* spawned;          // 0xC
     char pad_0x10[0x30];
-    sAvV4_7EF8 pos;         // 0x40
+    t4Vector pos;         // 0x40
     char pad_0x50[0x10];
-    sAvV4_7EF8 sndPos;      // 0x60
+    t4Vector sndPos;      // 0x60
 };
 
 struct sAvEvent_7EF8 {
@@ -890,7 +884,7 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(void* self, int a, int type, v
 extern "C" bool tActiveAvalancheNode_update_7EF8(void* node, float t) __asm__("tActiveAvalancheNode_update");
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void tActiveAvalanche_end_7EF8(void* self) __asm__("tActiveAvalanche_end");
-void cSSXAudio_AvalancheGroundHit_7EF8(void* snd, const sAvV4_7EF8& pos) __asm__("cSSXAudio_AvalancheGroundHit__FPv");
+void cSSXAudio_AvalancheGroundHit_7EF8(void* snd, const t4Vector& pos) __asm__("cSSXAudio_AvalancheGroundHit__FPv");
 
 static inline unsigned short soundFrame_7EF8(const tActiveAvalanche* a)
 {
@@ -902,7 +896,7 @@ static inline float toFrames_7EF8(float t)
     return t * 30.0f;
 }
 
-static inline sAvV4_7EF8 pos_7EF8(const sAvObj_7EF8* o)
+static inline t4Vector pos_7EF8(const sAvObj_7EF8* o)
 {
     return o->pos;
 }
@@ -1284,11 +1278,8 @@ extern "C" void cAvalanche_update(void)
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_renderLines);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sRow_8A00 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sVec4_8A00 : sRow_8A00 {
+struct sVec4_8A00 : t4Vector {
     sVec4_8A00() {}
     sVec4_8A00(float ax, float ay, float az, float aw)
     {
@@ -1334,7 +1325,7 @@ struct sOut_8A00 {
     int g;
     int b;
     int a;
-    sRow_8A00 pos;
+    t4Vector pos;
 };
 
 
@@ -1348,7 +1339,7 @@ struct sVE_8A00 {
 extern int cAvalanche_m_RenderLines;
 extern sOut_8A00 vertlist_8A00[] __asm__("vertlist");
 extern t4Matrix t4mat_Identity_8A00 __asm__("t4mat_Identity");
-extern sRow_8A00 t4vect_Origin_8A00 __asm__("t4vect_Origin");
+extern t4Vector t4vect_Origin_8A00 __asm__("t4vect_Origin");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (matrix copy).
@@ -1369,7 +1360,7 @@ static inline void CopyMat_8A00(t4Matrix* d, const t4Matrix* s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add in place).
-static inline void AddTo_8A00(sRow_8A00& a, const sRow_8A00& b)
+static inline void AddTo_8A00(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -1426,14 +1417,14 @@ static inline t4Matrix operator*=(t4Matrix& a, const t4Matrix& b)
 }
 
 // Rotate m about axis by angle, keeping its translation.
-static inline void Rotate_8A00(t4Matrix& m, const sRow_8A00& axis, float angle)
+static inline void Rotate_8A00(t4Matrix& m, const t4Vector& axis, float angle)
 {
     t4Matrix old;
     float s;
     float c;
     CopyMat_8A00(&old, &m);
-    sRow_8A00 trans = ((sRow_8A00*)&old.row[0])[3];
-    ((sRow_8A00*)&old.row[0])[3] = t4vect_Origin_8A00;
+    t4Vector trans = ((t4Vector*)&old.row[0])[3];
+    ((t4Vector*)&old.row[0])[3] = t4vect_Origin_8A00;
     fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis.x;
@@ -1445,23 +1436,23 @@ static inline void Rotate_8A00(t4Matrix& m, const sRow_8A00& axis, float angle)
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    ((sRow_8A00*)&m.row[0])[3].x = 0.0f;
-    ((sRow_8A00*)&m.row[0])[3].y = 0.0f;
-    ((sRow_8A00*)&m.row[0])[3].z = 0.0f;
-    ((sRow_8A00*)&m.row[0])[3].w = 1.0f;
-    ((sRow_8A00*)&m.row[0])[3] = trans;
-    ((sRow_8A00*)&m.row[0])[0].w = 0.0f;
-    ((sRow_8A00*)&m.row[0])[1].w = 0.0f;
-    ((sRow_8A00*)&m.row[0])[2].w = 0.0f;
-    ((sRow_8A00*)&m.row[0])[0].x = tx * x + c;
-    ((sRow_8A00*)&m.row[0])[1].x = tx * y + sz;
-    ((sRow_8A00*)&m.row[0])[2].x = tx * z - sy;
-    ((sRow_8A00*)&m.row[0])[0].y = ty * x - sz;
-    ((sRow_8A00*)&m.row[0])[1].y = ty * y + c;
-    ((sRow_8A00*)&m.row[0])[2].y = ty * z + sx;
-    ((sRow_8A00*)&m.row[0])[0].z = tz * x + sy;
-    ((sRow_8A00*)&m.row[0])[1].z = tz * y - sx;
-    ((sRow_8A00*)&m.row[0])[2].z = tz * z + c;
+    ((t4Vector*)&m.row[0])[3].x = 0.0f;
+    ((t4Vector*)&m.row[0])[3].y = 0.0f;
+    ((t4Vector*)&m.row[0])[3].z = 0.0f;
+    ((t4Vector*)&m.row[0])[3].w = 1.0f;
+    ((t4Vector*)&m.row[0])[3] = trans;
+    ((t4Vector*)&m.row[0])[0].w = 0.0f;
+    ((t4Vector*)&m.row[0])[1].w = 0.0f;
+    ((t4Vector*)&m.row[0])[2].w = 0.0f;
+    ((t4Vector*)&m.row[0])[0].x = tx * x + c;
+    ((t4Vector*)&m.row[0])[1].x = tx * y + sz;
+    ((t4Vector*)&m.row[0])[2].x = tx * z - sy;
+    ((t4Vector*)&m.row[0])[0].y = ty * x - sz;
+    ((t4Vector*)&m.row[0])[1].y = ty * y + c;
+    ((t4Vector*)&m.row[0])[2].y = ty * z + sx;
+    ((t4Vector*)&m.row[0])[0].z = tz * x + sy;
+    ((t4Vector*)&m.row[0])[1].z = tz * y - sx;
+    ((t4Vector*)&m.row[0])[2].z = tz * z + c;
     m *= old;
 }
 
@@ -1497,7 +1488,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->m_bitGroups[1]), 0x7C, 2, 1);
     if (cAvalanche_m_RenderLines != 0) {
         int i = 0;
-        sRow_8A00 pos = (*(sRow_8A00*)&(node->m_node)->m_start);
+        t4Vector pos = (*(t4Vector*)&(node->m_node)->m_start);
         for (; i < (int)(node->m_node)->m_life; i++) {
             sVec4_8A00 scratchVec(((node->m_node)->m_history)[i].m_x * 2.0f, ((node->m_node)->m_history)[i].m_y * 2.0f, ((node->m_node)->m_history)[i].m_z * 2.0f, 0.0f);
             AddTo_8A00(pos, scratchVec);
@@ -1507,7 +1498,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
             scratchVec.z = n.z;
             scratchVec.w = 0.0f;
             Rotate_8A00(matrix, scratchVec, ((node->m_node)->m_history)[i].m_rs * 0.008213315159082413f);
-            ((sRow_8A00*)&matrix.row[0])[3] = pos;
+            ((t4Vector*)&matrix.row[0])[3] = pos;
             vertlist_8A00[i].r = ((node->m_node)->m_history)[i].m_r;
             vertlist_8A00[i].g = ((node->m_node)->m_history)[i].m_g;
             vertlist_8A00[i].b = ((node->m_node)->m_history)[i].m_b;
@@ -1528,14 +1519,11 @@ extern "C" void cDynamicColourEmitter_render(void* p, int a);
 extern int cAvalanche_m_RenderEmitters;
 extern int cAvalanche_m_RenderLines;
 
-struct sAvVec4_D8EA8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sAvVert_D8EA8 {
-    sAvVec4_D8EA8 uv;           // 0x0
+    t4Vector uv;           // 0x0
     int r, g, b, a;             // 0x10
-    sAvVec4_D8EA8 pos;          // 0x20
+    t4Vector pos;          // 0x20
 };
 extern sAvVert_D8EA8 D_vtx_D8EA8[] __asm__("collisionvertlist");
 
@@ -1648,7 +1636,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sAvVec4_D8EA8* getPos();
+    virtual t4Vector* getPos();
 };
 
 /**
@@ -1679,7 +1667,7 @@ extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
     if (cAvalanche_m_RenderLines == 0)
         return;
     for (int j = 0; j < ((sAvGroup_D8EA8*)slot->m_avalanche)->nPairs; j++) {
-        sAvVec4_D8EA8 nodePos = *(sAvVec4_D8EA8*)(((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].node + 0x40);
+        t4Vector nodePos = *(t4Vector*)(((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].node + 0x40);
         D_vtx_D8EA8[2 * j].pos = nodePos;
         D_vtx_D8EA8[2 * j].r = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v < slot->m_currTime ? 0xFF : 0;
         D_vtx_D8EA8[2 * j].g = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v >= slot->m_currTime ? 0xFF : 0;
@@ -2253,17 +2241,14 @@ extern "C" void cAvalanche_reset(void* self)
 //100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_getTransform);
 #ifdef SKIP_ASM
-struct sAvVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sAvMatrix {
-    sAvVec4 row[4];
+    t4Vector row[4];
 };
 
 struct sAvNode {
     char pad[0x60];
-    sAvVec4 pos;            // 0x60
+    t4Vector pos;            // 0x60
     sAvMatrix rot;          // 0x70
     float scale;            // 0xB0
     char padB4[0x2E0 - 0xB4];

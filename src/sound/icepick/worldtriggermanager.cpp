@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "world/instancerecord.h"
 #include "vtable.h"
 #include "intersect/bxnash.h"
@@ -1507,11 +1508,8 @@ extern "C" void cWorldTriggerManager_TouchAllUsed(cWorldTriggerInstance** self)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound_cWorldSound);
 #ifdef SKIP_ASM
-struct sQuad6AA0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sQuad6AA0 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 
 struct sTriggerSlots {
@@ -1531,7 +1529,7 @@ extern "C" sTriggerSlots* cWorldSound_cWorldSound(cWorldSound* self)
     cAudioOverlapList* overlapList = ((&self->m_OverlapLists[0]));
     for (int i = 1; i != -1; i--, overlapList++) {
         overlapList->numoverlaps = 0;
-        (*(sQuad6AA0*)&overlapList->lastposition) = t4vect_Zero;
+        (*(t4Vector*)&overlapList->lastposition) = t4vect_Zero;
     }
     return ((sTriggerSlots*)self);
 }
@@ -1851,12 +1849,9 @@ extern "C" void cWorldSound_CalcAudioVolumeBox(cWorldSound* self, int* shape, sV
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound_AddInstanceToGrid);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sWtVec4_7318 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sWtBox_7318 {
-    sWtVec4_7318 min;
-    sWtVec4_7318 max;
+    t4Vector min;
+    t4Vector max;
 };
 struct sWtCell_7318 {
     int level;

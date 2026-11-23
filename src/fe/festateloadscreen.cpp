@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "fe/feinput.h"
 #include "ai/ai.h"
@@ -613,12 +614,9 @@ static inline int isMode_233CD8(sRace_233CD8* r, int m)
     return r->mode48 == m;
 }
 
-struct sVec4_233CD8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vLen_233CD8(const sVec4_233CD8& v)
+static inline float vLen_233CD8(const t4Vector& v)
 {
     float r;
     int t;
@@ -641,10 +639,10 @@ static inline float vLen_233CD8(const sVec4_233CD8& v)
 struct sVEntry_233CD8 {
     short delta;
     short index;
-    sVec4_233CD8* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
-static inline sVec4_233CD8* riderPos_233CD8(char* rider)
+static inline t4Vector* riderPos_233CD8(char* rider)
 {
     char* obj = rider + 0x6C0;
     sVEntry_233CD8* vt = *(sVEntry_233CD8**)obj;

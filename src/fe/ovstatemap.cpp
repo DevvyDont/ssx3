@@ -136,9 +136,6 @@ struct sV3_87F0 {
     float x, y, z;
 };
 
-struct sV4_87F0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 
@@ -149,7 +146,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sV4_87F0* getPosition();
+    virtual t4Vector* getPosition();
 };
 
 
@@ -237,7 +234,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
         cGame* game = SSXApp->Game;
         if (((char*)game) != 0) {
             char* rider = (char*)game->AI->Riders[0];
-            sV4_87F0 riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->getPosition();
+            t4Vector riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->getPosition();
             sV3_87F0 riderPos3;
             riderPos3.x = riderPos.x;
             riderPos3.y = riderPos.y;

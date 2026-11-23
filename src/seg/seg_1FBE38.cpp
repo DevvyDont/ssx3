@@ -2653,16 +2653,15 @@ extern "C" void cParticleNode_cParticleNode1_E840(void*, int, void*, void*, int)
 void operator_delete(int*);
 extern char D_00489740_E840[] __asm__("D_00489740");
 extern char D_00489730_E840[] __asm__("D_00489730");
-struct V4_E840 { float x, y, z, w; } __attribute__((aligned(16)));
-struct Sh_E840 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual V4_E840 *v05(); };
+struct Sh_E840 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual t4Vector *v05(); };
 struct Ent_E840x { char pad[0x18]; char *obj; };
 struct Lvl_E840 { char pad[0x40]; Ent_E840x *a1[12]; Ent_E840x *a2[3]; int n1; int pad80[2]; int n2; };
 struct O_E840 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual char *v24(); };
 extern char *SSXApp_E840 __asm__("SSXApp");
 extern "C" void cMoveNode_addParticle_E840(void*, void*) __asm__("cMoveNode_addParticle");
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline V4_E840 vSub_E840(const V4_E840 &a, const V4_E840 &b) {
-    V4_E840 r;
+static inline t4Vector vSub_E840(const t4Vector &a, const t4Vector &b) {
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2673,7 +2672,7 @@ static inline V4_E840 vSub_E840(const V4_E840 &a, const V4_E840 &b) {
     return r;
 }
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vLen_E840(const V4_E840 &v) {
+static inline float vLen_E840(const t4Vector &v) {
     float r;
     int t;
     __asm__(
@@ -2693,19 +2692,19 @@ static inline float vLen_E840(const V4_E840 &v) {
 }
 static inline Lvl_E840 *lvl_E840() { return *(Lvl_E840**)(*(char**)(SSXApp_E840 + 0x84) + 0xC); }
 static inline Sh_E840 *shape_E840(Ent_E840x *e) { return (Sh_E840*)(e->obj + 0x6C0); }
-static inline int nearViewer_E840(const V4_E840 &pos) {
+static inline int nearViewer_E840(const t4Vector &pos) {
     int notEdit = ScriptEngine->mPlayingNISList != 2;
     if (notEdit)
         return 1;
     int n = lvl_E840()->n1;
     for (int i = 0; i < n; i++) {
-        V4_E840 d = vSub_E840(pos, *shape_E840(lvl_E840()->a1[i])->v05());
+        t4Vector d = vSub_E840(pos, *shape_E840(lvl_E840()->a1[i])->v05());
         if (vLen_E840(d) < 30000.0f)
             return 1;
     }
     n = lvl_E840()->n2;
     for (int i = 0; i < n; i++) {
-        V4_E840 d = vSub_E840(pos, *shape_E840(lvl_E840()->a2[i])->v05());
+        t4Vector d = vSub_E840(pos, *shape_E840(lvl_E840()->a2[i])->v05());
         if (vLen_E840(d) < 30000.0f)
             return 1;
     }
@@ -2829,14 +2828,14 @@ extern "C" V3_E840 AddParticleFunc(int n, Ent_E840 *params) {
     O_E840 *activeNode = *(O_E840**)(obj + 0xC);
     if (activeNode) {
         if (activeNode->v16()) {
-            V4_E840 pos = *(V4_E840*)(activeNode->v24() + 0x30);
+            t4Vector pos = *(t4Vector*)(activeNode->v24() + 0x30);
             if (nearViewer_E840(pos)) {
                 cMoveNode_addParticle_E840(activeNode, buf);
                 return luno_gLunoNil_E840;
             }
         }
     } else {
-        V4_E840 pos = *(V4_E840*)(obj + 0x40);
+        t4Vector pos = *(t4Vector*)(obj + 0x40);
         if (nearViewer_E840(pos)) {
             cParticleNode_cParticleNode1_E840(cMemMan_alloc(44, D_00489730_E840, 0x20000000, 0), 1, obj, buf, 0);
             return luno_gLunoNil_E840;
@@ -6237,12 +6236,11 @@ INCLUDE_ASM("seg/seg_1FBE38", RiderDistanceFunc);
 void* luno_cLunoVar_castFloat(void*);
 extern char *cWScriptMan_TheWScriptMan_32C0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_32C0 __asm__("SSXApp");
-struct Vec_32C0 { float x, y, z, w; } __attribute__((aligned(16)));
 struct A_32C0 { char pad[0x6C0]; };
-struct B_32C0 { virtual void v01(); virtual Vec_32C0 *v02(); };
+struct B_32C0 { virtual void v01(); virtual t4Vector *v02(); };
 struct D_32C0 : A_32C0, B_32C0 { };
 struct Tab_32C0 { char pad[0x28]; D_32C0 *arr[1]; };
-static inline float len_32C0(const Vec_32C0 &v) {
+static inline float len_32C0(const t4Vector &v) {
     float r;
     int t;
     __asm__(
@@ -6290,12 +6288,11 @@ INCLUDE_ASM("seg/seg_1FBE38", RiderSpeedFunc);
 void* luno_cLunoVar_castFloat(void*);
 extern char *cWScriptMan_TheWScriptMan_3380 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_3380 __asm__("SSXApp");
-struct Vec_3380 { float x, y, z, w; } __attribute__((aligned(16)));
 struct A_3380 { char pad[0x6C0]; };
-struct B_3380 { virtual void v01(); virtual Vec_3380 *v02(); };
+struct B_3380 { virtual void v01(); virtual t4Vector *v02(); };
 struct D_3380 : A_3380, B_3380 { };
 struct Tab_3380 { char pad[0x28]; D_3380 *arr[1]; };
-static inline float len_3380(const Vec_3380 &v) {
+static inline float len_3380(const t4Vector &v) {
     float r;
     int t;
     __asm__(
@@ -7553,12 +7550,11 @@ extern unsigned D_5828_4C50 __asm__("D_004A5828");
 extern Tag_4C50 D_582C_4C50 __asm__("D_004A582C");
 extern int D_5830_4C50 __asm__("D_004A5830");
 extern int D_3D78_4C50 __asm__("D_004A3D78");
-struct Vec_4C50 { float x, y, z, w; } __attribute__((aligned(16)));
 struct A_4C50 { char pad[0x6C0]; };
-struct B_4C50 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual Vec_4C50 *v05(); };
+struct B_4C50 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual t4Vector *v05(); };
 struct D_4C50 : A_4C50, B_4C50 { };
 struct Tab_4C50 { char pad[0x28]; D_4C50 *arr[1]; };
-static inline Vec_4C50 pos_4C50(char *o) { return *(Vec_4C50*)(o + 0x40); }
+static inline t4Vector pos_4C50(char *o) { return *(t4Vector*)(o + 0x40); }
 /**
  * Script function (gLunoCFunctions[86]): returns how high the script's rider is above a world instance.
  *

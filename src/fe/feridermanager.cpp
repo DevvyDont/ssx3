@@ -408,9 +408,6 @@ extern char str_psymon[];
 extern char str_viggo[];
 extern char str_fe_map[];
 
-struct sVec4_EE88 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMtx_EE88 {
     float m[40];
@@ -419,13 +416,13 @@ struct sMtx_EE88 {
 extern "C" void cIrradiance_Clear(sMtx_EE88* m);
 extern "C" void* cIrradianceDataBase_Get1(char* tbl, char* name);
 extern "C" void func_00389590(sMtx_EE88* m, void* a, char* b, float s);
-extern "C" void func_00389CB8(sMtx_EE88* m, sVec4_EE88* v, float s);
+extern "C" void func_00389CB8(sMtx_EE88* m, t4Vector* v, float s);
 extern "C" void cAnimModel_render(void* model, int a, int b, int c);
 extern "C" void func_002F2088(void* p);
 
 struct sModel_EE88 {
     char pad0[0x2C];
-    sVec4_EE88* bones;  // 0x2C
+    t4Vector* bones;  // 0x2C
 };
 
 
@@ -451,7 +448,7 @@ extern "C" void cFERider_render(cFERider* selfp)
 {
     cFERider* self = selfp;
     sMtx_EE88 worldMatrix;
-    sVec4_EE88 pos;
+    t4Vector pos;
     if (self->mSafeRenderCount >= 0)
         return;
     if (((sModel_EE88*)self->mpAnimModel) == 0)

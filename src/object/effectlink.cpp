@@ -548,21 +548,18 @@ extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(cDynamicParti
 //100%
 INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_updatePosition);
 #ifdef SKIP_ASM
-struct sEffVec4_5EF8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sEffMtx_5EF8 {
-    sEffVec4_5EF8 r[4];
+    t4Vector r[4];
 };
 
 struct sEffMtx_62A0;
 extern "C" void cInstanceNode_buildMeshMat(void* a, int b, t4Matrix* out);
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (matrix * vector).
-static inline sEffVec4_5EF8 effMtxApply5EF8(sEffMtx_5EF8* m, sEffVec4_5EF8* v)
+static inline t4Vector effMtxApply5EF8(sEffMtx_5EF8* m, t4Vector* v)
 {
-    sEffVec4_5EF8 out;
+    t4Vector out;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -588,10 +585,10 @@ struct sEffectLink5EF8 {
     void* model;            // 0xC
     int bone;               // 0x10
     char pad_0x14[0xC];
-    sEffVec4_5EF8 localA;   // 0x20
-    sEffVec4_5EF8 worldA;   // 0x30
-    sEffVec4_5EF8 worldB;   // 0x40
-    sEffVec4_5EF8 localB;   // 0x50
+    t4Vector localA;   // 0x20
+    t4Vector worldA;   // 0x30
+    t4Vector worldB;   // 0x40
+    t4Vector localB;   // 0x50
 };
 
 /**
@@ -604,8 +601,8 @@ extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier
 {
     sEffMtx_5EF8 meshMat;
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, (t4Matrix*)&meshMat);
-    *(sEffVec4_5EF8*)&self->Pos = effMtxApply5EF8(&meshMat, (sEffVec4_5EF8*)&self->Offset);
-    *(sEffVec4_5EF8*)&self->Vel = effMtxApply5EF8(&meshMat, (sEffVec4_5EF8*)&self->InitVel);
+    *(t4Vector*)&self->Pos = effMtxApply5EF8(&meshMat, (t4Vector*)&self->Offset);
+    *(t4Vector*)&self->Vel = effMtxApply5EF8(&meshMat, (t4Vector*)&self->InitVel);
 }
 #endif
 

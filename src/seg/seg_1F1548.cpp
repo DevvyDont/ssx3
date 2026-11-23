@@ -314,24 +314,21 @@ extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int tEventFlags_isSet1(void*, int);
 extern int D_004A3AFC;
 
-struct sVec4_1150 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sCol_1150 {
     float r, g, b, a;
 };
 
 struct sMat_1150 {
-    sVec4_1150 r[4];
+    t4Vector r[4];
 };
 
-extern sVec4_1150 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 struct sFx_1150 {
     char* owner;
     char pad4[0xC];
-    sVec4_1150 pos[4];
+    t4Vector pos[4];
     sCol_1150 col[4];
     float size[4];
     int active;
@@ -355,9 +352,9 @@ static inline void CopyMat_1150(sMat_1150* dst, sMat_1150* src)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline void MulMat_1150(sVec4_1150* out, const sMat_1150* m, const sVec4_1150& v)
+static inline void MulMat_1150(t4Vector* out, const sMat_1150* m, const t4Vector& v)
 {
-    sVec4_1150 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -376,9 +373,9 @@ static inline void MulMat_1150(sVec4_1150* out, const sMat_1150* m, const sVec4_
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline void Add_1150(sVec4_1150* out, const sVec4_1150& a, const sVec4_1150& b)
+static inline void Add_1150(t4Vector* out, const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1150 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -440,14 +437,14 @@ extern "C" void cPunchFX_update(sFx_1150* self)
         self->active = 0;
     }
     if (self->active) {
-        sVec4_1150 base = *(sVec4_1150*)(*(char**)(*(char**)(self->owner + 0x780) + 0x30) + (bone << 6) + 0x30);
+        t4Vector base = *(t4Vector*)(*(char**)(*(char**)(self->owner + 0x780) + 0x30) + (bone << 6) + 0x30);
         sMat_1150 boneMat;
         CopyMat_1150(&boneMat, &(*(sMat_1150**)(*(char**)(self->owner + 0x780) + 0x30))[bone]);
         boneMat.r[3] = t4vect_Zero;
-        sVec4_1150 point;
-        sVec4_1150 rnd;
+        t4Vector point;
+        t4Vector rnd;
         {
-            sVec4_1150 dir;
+            t4Vector dir;
             dir.x = 8.0f;
             dir.y = 0.0f;
             dir.z = 0.0f;
@@ -539,7 +536,7 @@ public:
     virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
     virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75();
     virtual void v76();
-    virtual void DrawSprite(const sVec4_1150&, const sV2_1510&, const sV2_1510&, const sV2_1510&, const sCol_1150&);
+    virtual void DrawSprite(const t4Vector&, const sV2_1510&, const sV2_1510&, const sV2_1510&, const sCol_1150&);
 };
 
 /**
@@ -840,7 +837,7 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1A08);
 struct sObj_22C8;
 extern "C" void func_002F22C8(sObj_22C8* self);
 extern "C" float perlinNoise(int n, float x);
-extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* fx, sVec4_1150* pos, sVec4_1150* vel, int withVel, float dt);
+extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* fx, t4Vector* pos, t4Vector* vel, int withVel, float dt);
 
 // Emitter parameters (an emitter's +0x20C).
 struct sFxParams_1A08 {
@@ -872,7 +869,7 @@ struct sFxEmit_1A08 {
 struct sFxVE_1A08 {
     short delta;
     short index;
-    sVec4_1150* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 // Same object as sObj_22C8 (func_002F22C8 fills ready/h).
@@ -887,7 +884,7 @@ struct sFxMgr_1A08 {
 };
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float len_1A08(const sVec4_1150& v)
+static inline float len_1A08(const t4Vector& v)
 {
     float r;
     int t;
@@ -908,9 +905,9 @@ static inline float len_1A08(const sVec4_1150& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sVec4_1150 scale_1A08(const sVec4_1150& v, float s)
+static inline t4Vector scale_1A08(const t4Vector& v, float s)
 {
-    sVec4_1150 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -925,9 +922,9 @@ static inline sVec4_1150 scale_1A08(const sVec4_1150& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec4_1150 add_1A08(const sVec4_1150& a, const sVec4_1150& b)
+static inline t4Vector add_1A08(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1150 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -940,7 +937,7 @@ static inline sVec4_1150 add_1A08(const sVec4_1150& a, const sVec4_1150& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void addEq_1A08(sVec4_1150& a, const sVec4_1150& b)
+static inline void addEq_1A08(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -953,9 +950,9 @@ static inline void addEq_1A08(sVec4_1150& a, const sVec4_1150& b)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sVec4_1150 mul_1A08(const sMat_1150& m, const sVec4_1150& v)
+static inline t4Vector mul_1A08(const sMat_1150& m, const t4Vector& v)
 {
-    sVec4_1150 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -973,14 +970,14 @@ static inline sVec4_1150 mul_1A08(const sMat_1150& m, const sVec4_1150& v)
     return r;
 }
 
-static inline sVec4_1150 groundNormal_1A08(char* rider)
+static inline t4Vector groundNormal_1A08(char* rider)
 {
-    return *(sVec4_1150*)(rider + 0x370);
+    return *(t4Vector*)(rider + 0x370);
 }
 
-static inline sVec4_1150 bonePos_1A08(char* model, int i)
+static inline t4Vector bonePos_1A08(char* model, int i)
 {
-    return *(sVec4_1150*)(*(char**)(model + 0x30) + (i << 6) + 0x30);
+    return *(t4Vector*)(*(char**)(model + 0x30) + (i << 6) + 0x30);
 }
 
 /**
@@ -1003,9 +1000,9 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
 {
     if (self->ready == 0)
         func_002F22C8((sObj_22C8*)self);
-    sVec4_1150 vel = t4vect_Zero;
+    t4Vector vel = t4vect_Zero;
     self->fA0 = 0;
-    sVec4_1150 nrm;
+    t4Vector nrm;
     nrm.x = 0.0f;
     nrm.y = 0.0f;
     nrm.z = 1.0f;
@@ -1033,12 +1030,12 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
             if (typeData->pulse < (perlinNoise(3, self->fx[i]->phase) + 1.0f) * 0.5f)
                 emit = 0;
         }
-        sVec4_1150 pos = bonePos_1A08(self->model, self->h[self->fx[i]->bone]);
+        t4Vector pos = bonePos_1A08(self->model, self->h[self->fx[i]->bone]);
         {
             float ox = typeData->offX;
             float oy = typeData->offY;
             float oz = typeData->offZ;
-            sVec4_1150 off;
+            t4Vector off;
             off.x = ox;
             off.y = oy;
             off.z = oz;
@@ -1070,7 +1067,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
             }
         }
         if (emit) {
-            sVec4_1150 emitVel = add_1A08(add_1A08(scale_1A08(vel, typeData->velScale), scale_1A08(nrm, typeData->nrmScale)),
+            t4Vector emitVel = add_1A08(add_1A08(scale_1A08(vel, typeData->velScale), scale_1A08(nrm, typeData->nrmScale)),
                                     scale_1A08(scale_1A08(nrm, typeData->nrmSpeedScale), speed));
             if (typeData->dirX != 0.0f || typeData->dirY != 0.0f || typeData->dirZ != 0.0f) {
                 sMat_1150 boneMatrix;
@@ -1079,7 +1076,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
                 float dx = typeData->dirX;
                 float dy = typeData->dirY;
                 float dz = typeData->dirZ;
-                sVec4_1150 dir;
+                t4Vector dir;
                 dir.x = dx;
                 dir.y = dy;
                 dir.z = dz;
@@ -2418,9 +2415,6 @@ struct sTun_39E0 {
 extern sTun_39E0 cSplashToggles_m_DropMinSize_39E0 __asm__("cSplashToggles_m_DropMinSize");
 unsigned int BXrand();
 
-struct sV4_39E0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sV2_39E0 {
     float x, y;
@@ -2462,7 +2456,7 @@ struct sEmitter_39E0 : sVBase_39E0 {
     sSmoke_39E0 smoke[30];
     sPart_39E0 parts[30];
     int hasPrev;
-    sV4_39E0 prevPos;
+    t4Vector prevPos;
     float speed;
 };
 
@@ -2472,9 +2466,9 @@ extern "C" void tCrystal_update_39E0(sPart_39E0*, float) __asm__("tCrystal_updat
 extern "C" void cSplashManager_AddDrop_39E0(void*, sV2_39E0*, sV2_39E0*) __asm__("cSplashManager_AddDrop");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline void Sub_39E0(sV4_39E0* out, const sV4_39E0& a, const sV4_39E0& b)
+static inline void Sub_39E0(t4Vector* out, const t4Vector& a, const t4Vector& b)
 {
-    sV4_39E0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2487,7 +2481,7 @@ static inline void Sub_39E0(sV4_39E0* out, const sV4_39E0& a, const sV4_39E0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
-static inline float Length_39E0(const sV4_39E0& v)
+static inline float Length_39E0(const t4Vector& v)
 {
     float r;
     int t;
@@ -2523,9 +2517,9 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
     char* w = (char*)SSXApp->Game->ViewMan;
     if (self->idx >= *(unsigned int*)(w + 0x10))
         return;
-    sV4_39E0 pos = *(sV4_39E0*)(*(char**)(w + (self->idx << 2) + 4) + 0x20);
+    t4Vector pos = *(t4Vector*)(*(char**)(w + (self->idx << 2) + 4) + 0x20);
     if (self->hasPrev) {
-        sV4_39E0 moved;
+        t4Vector moved;
         Sub_39E0(&moved, pos, self->prevPos);
         self->speed = Length_39E0(moved) * 59.999996185302734f * 0.035999998450279236f;
     } else {

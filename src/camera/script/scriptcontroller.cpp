@@ -261,9 +261,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_cScriptAlgorithm)
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* cCameraAlgorithm_vtbl[];
 extern void* cScriptAlgorithm_vtbl[];
-struct sVec4K9418 { float x, y, z, w; } __attribute__((aligned(16)));
-// Same object as the unit's later `extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;` (that type is defined below this point).
-extern sVec4K9418 t4vect_Origin_K9418 __asm__("t4vect_Origin");
+extern t4Vector t4vect_Origin;
 extern "C" float cCameraAlgorithm_getDefaultView(void* self);
 
 struct sCamCtlK9418 {
@@ -275,7 +273,7 @@ struct sCamCtlK9418 {
     int f14;        // 0x14
     int f18;        // 0x18
     int pad_1C;
-    sVec4K9418 v20; // 0x20
+    t4Vector v20; // 0x20
 };
 
 /**
@@ -304,7 +302,7 @@ extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* object)
     void* chase = cam->ViewMan;
     void* ctrl = *(void**)((char*)chase + 0x4);
     self->f18 = *(int*)((char*)ctrl + 0xAC);
-    self->v20 = t4vect_Origin_K9418;
+    self->v20 = t4vect_Origin;
     return self;
 }
 #endif
@@ -344,10 +342,9 @@ int cScriptAlgorithm_getScriptObj(void* vself)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_cScriptManualAlgorithm);
 #ifdef SKIP_ASM
-struct cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern void* cScriptManualAlgorithm_vtbl[];
-extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -365,7 +362,7 @@ extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(cScriptManualAlgo
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptManualAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    *(t4Vector*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 86;
     *(int*)&self->Heading = 0;
     *(int*)&self->Pitch = 0;
@@ -726,7 +723,7 @@ extern "C" tPose cScriptManualAlgorithm_getPose(cScriptManualAlgorithm* algorith
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_cScriptPointAlgorithm);
 #ifdef SKIP_ASM
 extern void* cScriptPointAlgorithm_vtbl[];
-extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -743,7 +740,7 @@ extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(cScriptPointAlgorit
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptPointAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    *(t4Vector*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 87;
     *(int*)&self->Roll = 0;
     *(int*)&self->Heading = 0;
@@ -1074,7 +1071,7 @@ extern "C" tPose cScriptPointAlgorithm_getPose(cScriptPointAlgorithm* algorithm)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_cScriptTargetAlgorithm);
 #ifdef SKIP_ASM
 extern void* cScriptTargetAlgorithm_vtbl[];
-extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -1091,7 +1088,7 @@ extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(cScriptTargetAlgo
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptTargetAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    *(t4Vector*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 88;
     *(int*)&self->Roll = 0;
     *(int*)&self->Heading = 0;
@@ -1490,7 +1487,7 @@ extern "C" tPose cScriptTargetAlgorithm_getPose(cScriptTargetAlgorithm* algorith
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_cScriptRelativeAlgorithm);
 #ifdef SKIP_ASM
 extern void* cScriptRelativeAlgorithm_vtbl[];
-extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -1507,7 +1504,7 @@ extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cScriptRelati
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptRelativeAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    *(t4Vector*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 89;
     *(int*)&self->Roll = 0;
     *(int*)&self->Heading = 0;
@@ -1996,26 +1993,23 @@ extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algori
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_getPose);
 #ifdef SKIP_ASM
-struct sV_B7B8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sM_B7B8 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
 struct sPair_B7B8 {
-    sV_B7B8 a;
-    sV_B7B8 b;
+    t4Vector a;
+    t4Vector b;
 };
 
 extern sM_B7B8 t4mat_Identity_B7B8 __asm__("t4mat_Identity");
-extern sV_B7B8 t4vect_XAxis_B7B8 __asm__("t4vect_XAxis");
-extern sV_B7B8 t4vect_YAxis_B7B8 __asm__("t4vect_YAxis");
-extern sV_B7B8 t4vect_ZAxis_B7B8 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_XAxis_B7B8 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_YAxis_B7B8 __asm__("t4vect_YAxis");
+extern t4Vector t4vect_ZAxis_B7B8 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" sPair_B7B8 tPose_tPose_B7B8(sM_B7B8* m) __asm__("tPose_tPose");
-extern "C" sV_B7B8 cCameraJitterer_getPositionalJitter_B7B8(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
+extern "C" t4Vector cCameraJitterer_getPositionalJitter_B7B8(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -2077,7 +2071,7 @@ static inline void vu0MulMtx_B7B8(sM_B7B8* dst, const sM_B7B8* a, const sM_B7B8*
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_B7B8(sM_B7B8* m, const sV_B7B8& v)
+static inline void vu0TransMtx_B7B8(sM_B7B8* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2098,9 +2092,9 @@ static inline void vu0TransMtx_B7B8(sM_B7B8* m, const sV_B7B8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV_B7B8 Add_B7B8(const sV_B7B8& a, const sV_B7B8& b)
+static inline t4Vector Add_B7B8(const t4Vector& a, const t4Vector& b)
 {
-    sV_B7B8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2117,7 +2111,7 @@ static inline void SinCos_B7B8(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_B7B8(sM_B7B8* m, const sV_B7B8& axis, float angle)
+static inline void RotAxis_B7B8(sM_B7B8* m, const t4Vector& axis, float angle)
 {
     sM_B7B8 r;
     float s;
@@ -2169,7 +2163,7 @@ extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(cScriptRelativeAlgorithm*
 {
     sM_B7B8 mat;
     vu0CopyMtx_B7B8(&mat, &t4mat_Identity_B7B8);
-    vu0TransMtx_B7B8(&mat, Add_B7B8(*(sV_B7B8*)&algorithm->Position, cCameraJitterer_getPositionalJitter_B7B8((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
+    vu0TransMtx_B7B8(&mat, Add_B7B8(*(t4Vector*)&algorithm->Position, cCameraJitterer_getPositionalJitter_B7B8((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
     RotAxis_B7B8(&mat, t4vect_XAxis_B7B8, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
     RotAxis_B7B8(&mat, t4vect_YAxis_B7B8, -algorithm->Pitch);
     RotAxis_B7B8(&mat, t4vect_ZAxis_B7B8, algorithm->Heading);

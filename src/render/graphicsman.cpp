@@ -530,15 +530,12 @@ extern "C" void cGarbageMan_Purge()
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_DeformMeshMatrix);
 #ifdef SKIP_ASM
-struct sGmVec4_A2C0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sGmMtx_A2C0 {
-    sGmVec4_A2C0 r[4];
+    t4Vector r[4];
 };
 
-extern "C" sGmMtx_A2C0* cPlants_getDeformationMatrix(sGmVec4_A2C0* pos);
+extern "C" sGmMtx_A2C0* cPlants_getDeformationMatrix(t4Vector* pos);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply out = a * b); the PC port needs a plain multiply.
 static inline void gmMtxMul_A2C0(sGmMtx_A2C0* out, sGmMtx_A2C0* a, sGmMtx_A2C0* b)
@@ -608,7 +605,7 @@ extern "C" void cGraphicsMan_DeformMeshMatrix(cGraphicsMan* self, sGmMtx_A2C0* m
 {
     if (self->m_isInNIS[6] != 0) {
         sGmMtx_A2C0 result;
-        sGmVec4_A2C0 pos = mat->r[3];
+        t4Vector pos = mat->r[3];
         sGmMtx_A2C0 product;
         sGmMtx_A2C0* deform = cPlants_getDeformationMatrix(&pos);
         gmMtxMul_A2C0(&product, mat, deform);
@@ -1546,16 +1543,13 @@ extern "C" void func_0036C790(cPS2GraphicsMan* vself, int idx, void* pkt2, int* 
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_init);
 #ifdef SKIP_ASM
-struct sGfxVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 extern cQuad128 t4vect_Zero;
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sGfxVec4 vu0DivGM(const sGfxVec4& v, float s)
+static inline t4Vector vu0DivGM(const t4Vector& v, float s)
 {
-    sGfxVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1585,22 +1579,22 @@ static inline sGfxVec4 vu0DivGM(const sGfxVec4& v, float s)
  * @param damp  the time scale (tParticleData::Damp)
  * @param force  the force vector, divided by damp squared
  */
-extern "C" void tParticleEmitter_init(tParticleEmitter* self, int w, int numblur, float x, float y, float damp, sGfxVec4* force)
+extern "C" void tParticleEmitter_init(tParticleEmitter* self, int w, int numblur, float x, float y, float damp, t4Vector* force)
 {
     self->NumParticles = w;
     self->NumBlur = numblur;
     self->TimeStep = x * damp / (float)w;
-    *(sGfxVec4*)&self->Force = vu0DivGM(vu0DivGM(*force, damp), damp);
+    *(t4Vector*)&self->Force = vu0DivGM(vu0DivGM(*force, damp), damp);
     self->Damp = damp;
     self->BlurAlpha = 1.0f / (float)self->NumBlur;
     self->BlurStep = y * damp;
-    sGfxVec4 one;
+    t4Vector one;
     one.x = 1.0f;
     one.y = 1.0f;
     one.z = 0.0f;
     one.w = 0.0f;
     *(cQuad128*)&self->UpperUV = t4vect_Zero;
-    *(sGfxVec4*)&self->LowerUV = one;
+    *(t4Vector*)&self->LowerUV = one;
 }
 #endif
 
@@ -1711,9 +1705,9 @@ extern "C" void tParticleEmitter_setPoint(tParticleEmitter* particleEmitter, lon
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setLine);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (a - b). Same body as vu0SubGM (defined later in the unit).
-static inline sGfxVec4 vu0Sub_CE80(const sGfxVec4& a, const sGfxVec4& b)
+static inline t4Vector vu0Sub_CE80(const t4Vector& a, const t4Vector& b)
 {
-    sGfxVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1726,9 +1720,9 @@ static inline sGfxVec4 vu0Sub_CE80(const sGfxVec4& a, const sGfxVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v * s). Same body as vu0ScaleGM (defined later in the unit).
-static inline sGfxVec4 vu0Scale_CE80(const sGfxVec4& v, float s)
+static inline t4Vector vu0Scale_CE80(const t4Vector& v, float s)
 {
-    sGfxVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1751,10 +1745,10 @@ static inline sGfxVec4 vu0Scale_CE80(const sGfxVec4& v, float s)
  * @param start  one end of the segment
  * @param end  the other end
  */
-extern "C" void tParticleEmitter_setLine(tParticleEmitter* self, sGfxVec4* start, sGfxVec4* end)
+extern "C" void tParticleEmitter_setLine(tParticleEmitter* self, t4Vector* start, t4Vector* end)
 {
-    *(sGfxVec4*)&self->X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
-    *(sGfxVec4*)&self->Xr0 = vu0Sub_CE80(*end, *start);
+    *(t4Vector*)&self->X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
+    *(t4Vector*)&self->Xr0 = vu0Sub_CE80(*end, *start);
     *(cQuad128*)&self->Xr1 = t4vect_Zero;
 }
 #endif
@@ -1763,9 +1757,9 @@ extern "C" void tParticleEmitter_setLine(tParticleEmitter* self, sGfxVec4* start
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setPlane);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sGfxVec4 vu0AddGM(const sGfxVec4& a, const sGfxVec4& b)
+static inline t4Vector vu0AddGM(const t4Vector& a, const t4Vector& b)
 {
-    sGfxVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1778,9 +1772,9 @@ static inline sGfxVec4 vu0AddGM(const sGfxVec4& a, const sGfxVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sGfxVec4 vu0SubGM(const sGfxVec4& a, const sGfxVec4& b)
+static inline t4Vector vu0SubGM(const t4Vector& a, const t4Vector& b)
 {
-    sGfxVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1793,9 +1787,9 @@ static inline sGfxVec4 vu0SubGM(const sGfxVec4& a, const sGfxVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sGfxVec4 vu0ScaleGM(const sGfxVec4& v, float s)
+static inline t4Vector vu0ScaleGM(const t4Vector& v, float s)
 {
-    sGfxVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1819,11 +1813,11 @@ static inline sGfxVec4 vu0ScaleGM(const sGfxVec4& v, float s)
  * @param axis0  the first half axis
  * @param axis1  the second half axis
  */
-extern "C" void tParticleEmitter_setPlane(tParticleEmitter* self, sGfxVec4* center, sGfxVec4* axis0, sGfxVec4* axis1)
+extern "C" void tParticleEmitter_setPlane(tParticleEmitter* self, t4Vector* center, t4Vector* axis0, t4Vector* axis1)
 {
-    *(sGfxVec4*)&self->X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
-    *(sGfxVec4*)&self->Xr0 = vu0ScaleGM(*axis0, 2.0f);
-    *(sGfxVec4*)&self->Xr1 = vu0ScaleGM(*axis1, 2.0f);
+    *(t4Vector*)&self->X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
+    *(t4Vector*)&self->Xr0 = vu0ScaleGM(*axis0, 2.0f);
+    *(t4Vector*)&self->Xr1 = vu0ScaleGM(*axis1, 2.0f);
 }
 #endif
 
@@ -1841,9 +1835,9 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setMotion);
  * @param delta  the total displacement
  * @param time  the time it takes
  */
-extern "C" void tParticleEmitter_setMotion(tParticleEmitter* self, sGfxVec4* delta, float time)
+extern "C" void tParticleEmitter_setMotion(tParticleEmitter* self, t4Vector* delta, float time)
 {
-    *(sGfxVec4*)&self->Xi = vu0DivGM(vu0ScaleGM(*delta, self->TimeStep), time * self->Damp);
+    *(t4Vector*)&self->Xi = vu0DivGM(vu0ScaleGM(*delta, self->TimeStep), time * self->Damp);
 }
 #endif
 
@@ -2034,24 +2028,21 @@ extern "C" void tParticleEmitter_setVelocity(tParticleEmitter* self, const t4Vec
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setVelocity1);
 #ifdef SKIP_ASM
-struct sGmVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sGmFrustum {
     char pad_0x00[0x4C];
     float scale;        // 0x4C
     char pad_0x50[0x20];
-    sGmVec4 v70;        // 0x70
-    sGmVec4 v80;        // 0x80
-    sGmVec4 v90;        // 0x90
-    sGmVec4 vA0;        // 0xA0
+    t4Vector v70;        // 0x70
+    t4Vector v80;        // 0x80
+    t4Vector v90;        // 0x90
+    t4Vector vA0;        // 0xA0
 };
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sGmVec4 gmDivD1F0(const sGmVec4& v, float s)
+static inline t4Vector gmDivD1F0(const t4Vector& v, float s)
 {
-    sGmVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2068,9 +2059,9 @@ static inline sGmVec4 gmDivD1F0(const sGmVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sGmVec4 gmAddD1F0(const sGmVec4& a, const sGmVec4& b)
+static inline t4Vector gmAddD1F0(const t4Vector& a, const t4Vector& b)
 {
-    sGmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2082,9 +2073,9 @@ static inline sGmVec4 gmAddD1F0(const sGmVec4& a, const sGmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sGmVec4 gmSubD1F0(const sGmVec4& a, const sGmVec4& b)
+static inline t4Vector gmSubD1F0(const t4Vector& a, const t4Vector& b)
 {
-    sGmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2096,9 +2087,9 @@ static inline sGmVec4 gmSubD1F0(const sGmVec4& a, const sGmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
+static inline t4Vector gmScaleD1F0(const t4Vector& v, float s)
 {
-    sGmVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2122,13 +2113,13 @@ static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
  * @param randVel1  random term 1 (vr1)
  * @param randVel2  random term 2 (vr2)
  */
-extern "C" void tParticleEmitter_setVelocity1(tParticleEmitter* self, const sGmVec4* baseVel, const sGmVec4* randVel0,
-                              const sGmVec4* randVel1, const sGmVec4* randVel2)
+extern "C" void tParticleEmitter_setVelocity1(tParticleEmitter* self, const t4Vector* baseVel, const t4Vector* randVel0,
+                              const t4Vector* randVel1, const t4Vector* randVel2)
 {
-    *(sGmVec4*)&self->Vr0 = gmDivD1F0(*randVel0, self->Damp);
-    *(sGmVec4*)&self->Vr1 = gmDivD1F0(*randVel1, self->Damp);
-    *(sGmVec4*)&self->Vr2 = gmDivD1F0(*randVel2, self->Damp);
-    *(sGmVec4*)&self->V0 = gmSubD1F0(gmDivD1F0(*baseVel, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0(*(sGmVec4*)&self->Vr0, *(sGmVec4*)&self->Vr1), *(sGmVec4*)&self->Vr2), 1.5f));
+    *(t4Vector*)&self->Vr0 = gmDivD1F0(*randVel0, self->Damp);
+    *(t4Vector*)&self->Vr1 = gmDivD1F0(*randVel1, self->Damp);
+    *(t4Vector*)&self->Vr2 = gmDivD1F0(*randVel2, self->Damp);
+    *(t4Vector*)&self->V0 = gmSubD1F0(gmDivD1F0(*baseVel, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0(*(t4Vector*)&self->Vr0, *(t4Vector*)&self->Vr1), *(t4Vector*)&self->Vr2), 1.5f));
 }
 #endif
 
@@ -2151,12 +2142,12 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setColour);
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-extern "C" void tParticleEmitter_setColour(tParticleEmitter* self, sGfxVec4* colStart, sGfxVec4* colEnd, sGfxVec4* colRand0, sGfxVec4* colRand1, float time)
+extern "C" void tParticleEmitter_setColour(tParticleEmitter* self, t4Vector* colStart, t4Vector* colEnd, t4Vector* colRand0, t4Vector* colRand1, float time)
 {
-    *(sGfxVec4*)&self->C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
-    *(sGfxVec4*)&self->Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * self->Damp);
-    *(sGfxVec4*)&self->Cr0 = *colRand0;
-    *(sGfxVec4*)&self->Cr1 = *colRand1;
+    *(t4Vector*)&self->C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
+    *(t4Vector*)&self->Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * self->Damp);
+    *(t4Vector*)&self->Cr0 = *colRand0;
+    *(t4Vector*)&self->Cr1 = *colRand1;
 }
 #endif
 
@@ -2285,8 +2276,8 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_calcBoundBox);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sGmBox_D500 {
-    sGfxVec4 min;               // 0x00
-    sGfxVec4 max;               // 0x10
+    t4Vector min;               // 0x00
+    t4Vector max;               // 0x10
 };
 
 struct sGmEmit_D500 {
@@ -2299,18 +2290,18 @@ struct sGmEmit_D500 {
     float f18;                  // 0x18
     float f1C;                  // 0x1C
     char pad_0x20[0x40];
-    sGfxVec4 v60;               // 0x60
-    sGfxVec4 v70;               // 0x70
-    sGfxVec4 v80;               // 0x80
-    sGfxVec4 v90;               // 0x90
-    sGfxVec4 vA0;               // 0xA0
-    sGfxVec4 vB0;               // 0xB0
-    sGfxVec4 vC0;               // 0xC0
-    sGfxVec4 vD0;               // 0xD0
-    sGfxVec4 vE0;               // 0xE0
+    t4Vector v60;               // 0x60
+    t4Vector v70;               // 0x70
+    t4Vector v80;               // 0x80
+    t4Vector v90;               // 0x90
+    t4Vector vA0;               // 0xA0
+    t4Vector vB0;               // 0xB0
+    t4Vector vC0;               // 0xC0
+    t4Vector vD0;               // 0xD0
+    t4Vector vE0;               // 0xE0
 };
 
-static inline void boxAdd_D500(sGmBox_D500& b, const sGfxVec4& p)
+static inline void boxAdd_D500(sGmBox_D500& b, const t4Vector& p)
 {
     if (p.x < b.min.x) b.min.x = p.x;
     if (p.y < b.min.y) b.min.y = p.y;
@@ -2320,7 +2311,7 @@ static inline void boxAdd_D500(sGmBox_D500& b, const sGfxVec4& p)
     if (p.z > b.max.z) b.max.z = p.z;
 }
 
-static inline void boxInit_D500(sGmBox_D500& b, const sGfxVec4& p)
+static inline void boxInit_D500(sGmBox_D500& b, const t4Vector& p)
 {
     b.min = b.max = p;
 }
@@ -2385,8 +2376,8 @@ extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500*
     boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), vu0ScaleGM(e->v90, 2.0f)), vu0ScaleGM(e->vA0, 2.0f)));
     boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), vu0ScaleGM(e->v90, 2.0f)), vu0ScaleGM(e->vA0, 2.0f)));
 
-    sGfxVec4 d1 = vu0SubGM(e->v60, vel.max);
-    sGfxVec4 d2 = vu0SubGM(e->v60, vel.min);
+    t4Vector d1 = vu0SubGM(e->v60, vel.max);
+    t4Vector d2 = vu0SubGM(e->v60, vel.min);
 
     ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, life, life <? DRAG_TMAX_D500);
 
@@ -2633,7 +2624,7 @@ extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, t4Matrix* tran
     }
     self->Duration = totalDuration;
     float x = particleData->Duration >= 0.0f ? particleData->Duration : particleData->Life + particleData->LifeR * 0.5f;
-    sGfxVec4 force;
+    t4Vector force;
     force.x = particleData->ForceX;
     force.y = particleData->ForceY;
     force.z = particleData->ForceZ;

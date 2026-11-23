@@ -70,12 +70,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA18);
 void operator_delete(int*);
 extern "C" void cCameraTriggerList_reset(void* self);
 
-struct sCtVec4_CA18 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sCtBox_CA18 {
-    sCtVec4_CA18 min;
-    sCtVec4_CA18 max;
+    t4Vector min;
+    t4Vector max;
 };
 struct sCtCell_CA18 {
     int level;
@@ -187,12 +184,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_purge);
 void operator_delete(int*);
 extern "C" void cCameraTriggerList_purge(void** self);
 
-struct sCtVec4_P {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sCtBox_P {
-    sCtVec4_P min;
-    sCtVec4_P max;
+    t4Vector min;
+    t4Vector max;
 };
 struct sCtCell_P {
     int level;
@@ -451,12 +445,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setTriggers);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
-struct sCtVec4_CF48 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sCtBox_CF48 {
-    sCtVec4_CF48 min;
-    sCtVec4_CF48 max;
+    t4Vector min;
+    t4Vector max;
 };
 struct sCtCell_CF48 {
     int level;

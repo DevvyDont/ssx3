@@ -109,14 +109,11 @@ struct sCtx_AE00 {
     sVEnt_AE00* vt;             // 0x10D8
 };
 
-struct sPos_AE00 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVert_AE00 {
     float u, v, q, f0C;         // 0x00
     int r, g, b, a;             // 0x10
-    sPos_AE00 pos;              // 0x20
+    t4Vector pos;              // 0x20
     sVert_AE00() {}
 };
 
@@ -196,7 +193,7 @@ extern "C" void cBackgroundMan_renderImage(cBackgroundMan* self)
         verts[i].b = 0x80;
         verts[i].q = 1.0f;
     }
-    sPos_AE00 cornerPos;
+    t4Vector cornerPos;
     cornerPos.x = 0.0f;
     cornerPos.y = 0.0f;
     cornerPos.z = 0.0f;

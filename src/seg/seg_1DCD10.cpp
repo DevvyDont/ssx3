@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "vtable.h"
 #include "visualfx/fog.h"
 #include "render/ps2graphicsman.h"
@@ -353,9 +354,6 @@ struct sV4_C190 {
     sV4_C190(float vx, float vy) : x(vx), y(vy), z(0.0f), w(0.0f) {}
 } __attribute__((aligned(16)));
 
-struct sRow_C190 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_C190;
 
@@ -415,7 +413,7 @@ static inline void copyMat_C190(sMat_C190* d, const sMat_C190* s)
 
 
 struct sMat_C190 {
-    sRow_C190 r[4];
+    t4Vector r[4];
     sMat_C190() {}
     // Product constructor: *this = a * b.
     sMat_C190(const sMat_C190& a, const sMat_C190& b) { mulMat_C190(this, &a, &b); }

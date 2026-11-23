@@ -1162,9 +1162,6 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_update);
 int cRider_getMotionState(void*);
 extern "C" int AITick();
 
-struct sRsVec4_EF6D0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sTrail_EF6D0 {
@@ -1177,9 +1174,9 @@ struct sTrail_EF6D0 {
 };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sRsVec4_EF6D0 Scale_EF6D0(const sRsVec4_EF6D0& v, float s)
+static inline t4Vector Scale_EF6D0(const t4Vector& v, float s)
 {
-    sRsVec4_EF6D0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1194,9 +1191,9 @@ static inline sRsVec4_EF6D0 Scale_EF6D0(const sRsVec4_EF6D0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sRsVec4_EF6D0 Add_EF6D0(const sRsVec4_EF6D0& a, const sRsVec4_EF6D0& b)
+static inline t4Vector Add_EF6D0(const t4Vector& a, const t4Vector& b)
 {
-    sRsVec4_EF6D0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1209,9 +1206,9 @@ static inline sRsVec4_EF6D0 Add_EF6D0(const sRsVec4_EF6D0& a, const sRsVec4_EF6D
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sRsVec4_EF6D0 Sub_EF6D0(const sRsVec4_EF6D0& a, const sRsVec4_EF6D0& b)
+static inline t4Vector Sub_EF6D0(const t4Vector& a, const t4Vector& b)
 {
-    sRsVec4_EF6D0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1224,7 +1221,7 @@ static inline sRsVec4_EF6D0 Sub_EF6D0(const sRsVec4_EF6D0& a, const sRsVec4_EF6D
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_EF6D0(const sRsVec4_EF6D0& v)
+static inline float Length_EF6D0(const t4Vector& v)
 {
     float r;
     int t;
@@ -1261,12 +1258,12 @@ extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
 {
     if (cRider_getMotionState(self->rider) == 1) {
         char* riderPtr = self->rider;
-        sRsVec4_EF6D0 bodyOff = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x89C) << 6) + 0x30);
-        sRsVec4_EF6D0 boardOff = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
-        sRsVec4_EF6D0 boardDir = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x34) + (*(int*)(riderPtr + 0x8A4) << 6));
-        sRsVec4_EF6D0 streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
-        (*(sRsVec4_EF6D0*)&self->ring[self->head].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
-        (*(sRsVec4_EF6D0*)&self->ring[self->head].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        t4Vector bodyOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x89C) << 6) + 0x30);
+        t4Vector boardOff = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
+        t4Vector boardDir = *(t4Vector*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x34) + (*(int*)(riderPtr + 0x8A4) << 6));
+        t4Vector streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
+        (*(t4Vector*)&self->ring[self->head].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        (*(t4Vector*)&self->ring[self->head].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
         if ((AITick() & 1) == 0) {
             int old = self->head;
             self->head = old + 1;
@@ -1279,7 +1276,7 @@ extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
         int n = self->count;
         self->count = Approach_EF6D0(n, 2);
     }
-    self->start -= Length_EF6D0(*(sRsVec4_EF6D0*)(self->rider + 0x1E0)) * 0.00016666666488163173f;
+    self->start -= Length_EF6D0(*(t4Vector*)(self->rider + 0x1E0)) * 0.00016666666488163173f;
     if (self->start < 0.0f)
         self->start += 1.0f;
     if (self->start > 1.0f)

@@ -775,13 +775,10 @@ extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_fillCurrentSeg);
 #ifdef SKIP_ASM
-struct sVecDD30 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sElemDD30 {
-    sVecDD30 pts[5];            // 0x00
-    sVecDD30 dir;               // 0x50
+    t4Vector pts[5];            // 0x00
+    t4Vector dir;               // 0x50
     float width;                // 0x60
     int i64;                    // 0x64
 };
@@ -789,7 +786,7 @@ struct sElemDD30 {
 struct sSegDD30 {
     char pad0[0x1C];            // 0x00
     int f1C;                    // 0x1C
-    sVecDD30 pos;               // 0x20
+    t4Vector pos;               // 0x20
 };
 
 struct sWakeDD30 {
@@ -801,22 +798,22 @@ struct sWakeDD30 {
     char pad24[0x14];           // 0x24
     float phase;                // 0x38
     char pad3C[0x24];           // 0x3C
-    sVecDD30 v60;               // 0x60
-    sVecDD30 v70;               // 0x70
-    sVecDD30 v80;               // 0x80
+    t4Vector v60;               // 0x60
+    t4Vector v70;               // 0x70
+    t4Vector v80;               // 0x80
     float f90;                  // 0x90
     float f94;                  // 0x94
     char pad98[0x1C];           // 0x98
     int n;                      // 0xB4
 };
 
-extern sVecDD30 t4vect_Zero_DD30 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_DD30 __asm__("t4vect_Zero");
 extern "C" float perlinNoise(int n, float x);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sVecDD30 wakeScaleDD30(const sVecDD30& v, float s)
+static inline t4Vector wakeScaleDD30(const t4Vector& v, float s)
 {
-    sVecDD30 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -831,9 +828,9 @@ static inline sVecDD30 wakeScaleDD30(const sVecDD30& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVecDD30 wakeAddDD30(const sVecDD30& a, const sVecDD30& b)
+static inline t4Vector wakeAddDD30(const t4Vector& a, const t4Vector& b)
 {
-    sVecDD30 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -846,9 +843,9 @@ static inline sVecDD30 wakeAddDD30(const sVecDD30& a, const sVecDD30& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sVecDD30 wakeSubDD30(const sVecDD30& a, const sVecDD30& b)
+static inline t4Vector wakeSubDD30(const t4Vector& a, const t4Vector& b)
 {
-    sVecDD30 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -861,7 +858,7 @@ static inline sVecDD30 wakeSubDD30(const sVecDD30& a, const sVecDD30& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float wakeLenDD30(const sVecDD30& v)
+static inline float wakeLenDD30(const t4Vector& v)
 {
     float r;
     int t;
@@ -898,16 +895,16 @@ static inline float wakeLenDD30(const sVecDD30& v)
  * @param pos  the wake position
  * @param width  the value stored at the line's +0x60
  */
-extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, sVecDD30* pos, float width)
+extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, t4Vector* pos, float width)
 {
     float w = self->f90 * (perlinNoise(3, self->phase) * 0.25f + 1.0f);
     sElemDD30* wakeLine = &self->elems[self->head];
     wakeLine->i64 = 0;
     wakeLine->pts[0] = t4vect_Zero_DD30;
-    sVecDD30 dir = wakeScaleDD30(wakeScaleDD30(self->v80, -1.0f), wakeLenDD30(*(sVecDD30*)(self->obj + 0x1E0)));
-    sVecDD30 neg = wakeScaleDD30(*(sVecDD30*)(self->obj + 0x1E0), -1.0f);
+    t4Vector dir = wakeScaleDD30(wakeScaleDD30(self->v80, -1.0f), wakeLenDD30(*(t4Vector*)(self->obj + 0x1E0)));
+    t4Vector neg = wakeScaleDD30(*(t4Vector*)(self->obj + 0x1E0), -1.0f);
     {
-        sVecDD30 x = wakeScaleDD30(wakeSubDD30(dir, neg), 0.85f);
+        t4Vector x = wakeScaleDD30(wakeSubDD30(dir, neg), 0.85f);
         wakeLine->dir = x;
     }
     for (int i = 0; i < self->n; i++) {
@@ -916,13 +913,13 @@ extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, sVecDD30* pos, floa
         if (i == self->n - 1) {
             rowFrac *= 0.9f;
         }
-        sVecDD30 x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(self->v70, rowFracSq), 0.75f), wakeScaleDD30(self->v60, rowFrac)), w);
+        t4Vector x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(self->v70, rowFracSq), 0.75f), wakeScaleDD30(self->v60, rowFrac)), w);
         wakeLine->pts[i] = x;
     }
     {
         sSegDD30* firstRow = self->rings[0];
         sSegDD30* headEntry = (sSegDD30*)(self->head * (int)sizeof(sSegDD30) + (int)firstRow); // PORT: pointer in int
-        sVecDD30 x = wakeSubDD30(*pos, wakeScaleDD30(*(sVecDD30*)(self->obj + 0x370), 5.0f));
+        t4Vector x = wakeSubDD30(*pos, wakeScaleDD30(*(t4Vector*)(self->obj + 0x370), 5.0f));
         headEntry->pos = x;
     }
     self->rings[0][self->head].f1C = (int)(self->f94 * 128.0f);
@@ -1038,11 +1035,8 @@ extern "C" void cBoardWakeFX_createSeg(sWake_E058* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cWakeParams_Clear);
 #ifdef SKIP_ASM
-struct sVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sVec4 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 /**
  * Clears a board wake's parameter block: zeroes its three vectors (+0x0, +0x10, +0x20) and the words at +0x30 and
@@ -1054,9 +1048,9 @@ extern "C" void cWakeParams_Clear(cWakeParams* self)
 {
     *(int*)&self->mAlpha = 0;
     *(int*)&self->mSpeed = 0;
-    *(sVec4*)&self->mUp = t4vect_Zero;
-    *(sVec4*)&self->mForward = t4vect_Zero;
-    *(sVec4*)&self->mSide = t4vect_Zero;
+    *(t4Vector*)&self->mUp = t4vect_Zero;
+    *(t4Vector*)&self->mForward = t4vect_Zero;
+    *(t4Vector*)&self->mSide = t4vect_Zero;
 }
 #endif
 
@@ -1065,9 +1059,6 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DE398);
 #ifdef SKIP_ASM
 extern int D_004A3AFC;
 
-struct sWakeVecE398 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only inline asm (float absolute value).
 static inline float wakeAbsE398(float x)
@@ -1085,7 +1076,7 @@ static inline float wakeRandE398()
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline void wakeScaleE398(sWakeVecE398& r, const sWakeVecE398& v, float s)
+static inline void wakeScaleE398(t4Vector& r, const t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -1100,7 +1091,7 @@ static inline void wakeScaleE398(sWakeVecE398& r, const sWakeVecE398& v, float s
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void wakeAddE398(sWakeVecE398& a, const sWakeVecE398& b)
+static inline void wakeAddE398(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1122,17 +1113,17 @@ static inline void wakeAddE398(sWakeVecE398& a, const sWakeVecE398& b)
  *
  * @param out  the position, changed in place
  */
-extern "C" void func_002DE398(cDynamicSprayFX* self, sWakeVecE398* out)
+extern "C" void func_002DE398(cDynamicSprayFX* self, t4Vector* out)
 {
     float bias = *(float*)(((char*)self) + 0x12C);
     float spread = (1.0f - wakeAbsE398(bias)) * 55.0f;
     float lo = -spread;
-    sWakeVecE398 offset;
-    sWakeVecE398 scaled;
-    wakeScaleE398(scaled, *(sWakeVecE398*)(((char*)self) + 0x50), bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
+    t4Vector offset;
+    t4Vector scaled;
+    wakeScaleE398(scaled, *(t4Vector*)(((char*)self) + 0x50), bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
     offset = scaled;
     wakeAddE398(*out, offset);
-    wakeScaleE398(scaled, *(sWakeVecE398*)(((char*)self) + 0x40), wakeRandE398() * 20.0f + -10.0f);
+    wakeScaleE398(scaled, *(t4Vector*)(((char*)self) + 0x40), wakeRandE398() * 20.0f + -10.0f);
     offset = scaled;
     wakeAddE398(*out, offset);
 }
@@ -1931,14 +1922,14 @@ extern "C" void func_002E2550(cDynamicSprayFX* self);
  */
 extern "C" void func_002DF3B0(cDynamicSprayFX* self)
 {
-    sVec4 white;
+    t4Vector white;
     white.x = 1.0f;
     white.y = 1.0f;
     white.z = 1.0f;
     white.w = 1.0f;
     *(float*)((char*)self + 0x120) = 0.5f;
     *(int*)((char*)self + 0x10) = 0;
-    *(sVec4*)((char*)self + 0x90) = white;
+    *(t4Vector*)((char*)self + 0x90) = white;
     *(int*)((char*)self + 0x74) = 0;
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x1C) = 0;
@@ -2067,22 +2058,22 @@ struct sWakeFxF920 {
     char pad4[0x24];            // 0x04
     char* p28;                  // 0x28
     char pad2C[0x4];            // 0x2C
-    sWakeVecE398 v30;           // 0x30
-    sWakeVecE398 v40;           // 0x40
-    sWakeVecE398 v50;           // 0x50
+    t4Vector v30;           // 0x30
+    t4Vector v40;           // 0x40
+    t4Vector v50;           // 0x50
     int i60;                    // 0x60
     char pad64[0x10];           // 0x64
     float f74;                  // 0x74
     char pad78[0x8];            // 0x78
     int i80;                    // 0x80
     char pad84[0xC];            // 0x84
-    sWakeVecE398 col;           // 0x90
-    sWakeVecE398 pos;           // 0xA0
+    t4Vector col;           // 0x90
+    t4Vector pos;           // 0xA0
     int iB0;                    // 0xB0
     float fB4;                  // 0xB4
     float fB8;                  // 0xB8
     float fBC;                  // 0xBC
-    sWakeVecE398 dir;           // 0xC0
+    t4Vector dir;           // 0xC0
     char* pD0;                  // 0xD0
     int iD4;                    // 0xD4
     char padD8[0x50];           // 0xD8
@@ -2093,7 +2084,7 @@ struct sWakeFxF920 {
 struct sWakeVtF920 {
     short delta;
     short index;
-    sWakeVecE398* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 struct sWakeVtIF920 {
     short delta;
@@ -2101,7 +2092,7 @@ struct sWakeVtIF920 {
     int (*fn)(void*);
 };
 struct sMtxF920 {
-    sWakeVecE398 r0, r1, r2, r3;
+    t4Vector r0, r1, r2, r3;
 };
 
 int cRider_getMotionState(void*);
@@ -2120,7 +2111,7 @@ extern "C" void func_002E2260_F920(void*) __asm__("func_002E2260");
 extern "C" void func_002E1F70_F920(void*) __asm__("func_002E1F70");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float wakeLenF920(const sWakeVecE398& v)
+static inline float wakeLenF920(const t4Vector& v)
 {
     float r;
     int t;
@@ -2141,7 +2132,7 @@ static inline float wakeLenF920(const sWakeVecE398& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void wakeDivEqF920(sWakeVecE398& v, float s)
+static inline void wakeDivEqF920(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -2157,9 +2148,9 @@ static inline void wakeDivEqF920(sWakeVecE398& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sWakeVecE398 wakeScaleF920(const sWakeVecE398& v, float s)
+static inline t4Vector wakeScaleF920(const t4Vector& v, float s)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2174,9 +2165,9 @@ static inline sWakeVecE398 wakeScaleF920(const sWakeVecE398& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sWakeVecE398 wakeAddF920(const sWakeVecE398& a, const sWakeVecE398& b)
+static inline t4Vector wakeAddF920(const t4Vector& a, const t4Vector& b)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2188,9 +2179,9 @@ static inline sWakeVecE398 wakeAddF920(const sWakeVecE398& a, const sWakeVecE398
     return r;
 }
 
-static inline sWakeVecE398 wakeRowF920(char* o, int k)
+static inline t4Vector wakeRowF920(char* o, int k)
 {
-    return ((sWakeVecE398*)(*(char**)(*(char**)(o + 0x780) + 0x30) + (*(int*)(o + 0x8A4) << 6)))[k];
+    return ((t4Vector*)(*(char**)(*(char**)(o + 0x780) + 0x30) + (*(int*)(o + 0x8A4) << 6)))[k];
 }
 
 /**
@@ -2239,7 +2230,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     float sp = wakeLenF920(*vt[2].fn(sub + vt[2].delta));
     self->fB8 = sp;
     self->fBC = wakeAbsE398(sp);
-    self->dir = *(sWakeVecE398*)(self->obj + 0x1E0);
+    self->dir = *(t4Vector*)(self->obj + 0x1E0);
     if (0.0f < sp) {
         wakeDivEqF920(self->dir, wakeLenF920(self->dir));
     }
@@ -2279,7 +2270,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
         burstStrength = acc;
     }
     if (self->iB0 != 0 && x) {
-        sWakeVecE398 burstPos = wakeAddF920(self->pos, wakeScaleF920(*(sWakeVecE398*)(self->obj + 0x370), 10.0f));
+        t4Vector burstPos = wakeAddF920(self->pos, wakeScaleF920(*(t4Vector*)(self->obj + 0x370), 10.0f));
         func_002E23E0_F920(self, &burstPos, self->obj + 0x370, *(int*)(self->obj + 0x438), 1, burstStrength);
     }
     self->f74 = self->fB8;
@@ -2290,7 +2281,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
     int idx = vt2[7].fn(sub2 + vt2[7].delta);
     sEnt_E058* colourRow = &((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[idx];
-    sWakeVecE398 groundColour;
+    t4Vector groundColour;
     groundColour.x = colourRow->col.R;
     groundColour.y = colourRow->col.G;
     groundColour.z = colourRow->col.B;
@@ -2324,30 +2315,30 @@ struct sWakeFxFE88 {
     char pad4[0x24];            // 0x04
     char* p28;                  // 0x28
     char* p2C;                  // 0x2C
-    sWakeVecE398 dir;           // 0x30
+    t4Vector dir;           // 0x30
     char pad40[0x10];           // 0x40
-    sWakeVecE398 v50;           // 0x50
+    t4Vector v50;           // 0x50
     char pad60[0x30];           // 0x60
-    sWakeVecE398 col;           // 0x90
-    sWakeVecE398 pos;           // 0xA0
+    t4Vector col;           // 0x90
+    t4Vector pos;           // 0xA0
     int iB0;                    // 0xB0
     float fB4;                  // 0xB4
     float fB8;                  // 0xB8
     float fBC;                  // 0xBC
-    sWakeVecE398 vC0;           // 0xC0
+    t4Vector vC0;           // 0xC0
     char* pD0;                  // 0xD0
 };
 
 struct sWakeVtFE88 {
     short delta;
     short index;
-    sWakeVecE398* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sWakeVecE398 wakeScaleFE88(const sWakeVecE398& v, float s)
+static inline t4Vector wakeScaleFE88(const t4Vector& v, float s)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2362,9 +2353,9 @@ static inline sWakeVecE398 wakeScaleFE88(const sWakeVecE398& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sWakeVecE398 wakeAddFE88(const sWakeVecE398& a, const sWakeVecE398& b)
+static inline t4Vector wakeAddFE88(const t4Vector& a, const t4Vector& b)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2377,9 +2368,9 @@ static inline sWakeVecE398 wakeAddFE88(const sWakeVecE398& a, const sWakeVecE398
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sWakeVecE398 wakeCrossFE88(const sWakeVecE398& a, const sWakeVecE398& b)
+static inline t4Vector wakeCrossFE88(const t4Vector& a, const t4Vector& b)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -2394,7 +2385,7 @@ static inline sWakeVecE398 wakeCrossFE88(const sWakeVecE398& a, const sWakeVecE3
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float wakeDotFE88(const sWakeVecE398& a, const sWakeVecE398& b)
+static inline float wakeDotFE88(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2442,9 +2433,9 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
     if (self->iB0 != 0) {
         float lim = *(float*)(self->pD0 + 0x6C);
         if (wakeRandE398() < lim) {
-        sWakeVecE398 pos = wakeAddFE88(self->pos, wakeScaleFE88(self->dir, 15.0f));
+        t4Vector pos = wakeAddFE88(self->pos, wakeScaleFE88(self->dir, 15.0f));
         func_002DE398((cDynamicSprayFX*)self, &pos);
-        float k = wakeAbsE398(wakeDotFE88(*(sWakeVecE398*)(self->obj + 0x3B0), self->vC0)) * 1.5f;
+        float k = wakeAbsE398(wakeDotFE88(*(t4Vector*)(self->obj + 0x3B0), self->vC0)) * 1.5f;
         float faceFactor;
         if (k < 1.0f) {
             if (self) {
@@ -2462,19 +2453,19 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
         float dt = 0.01666666753590107f;
         w *= wakeClampFE88((self->fB8 * 0.035999998450279236f - 20.0f) * dt, 0.0f, 1.0f);
         int alive = wakeRandE398() < w;
-        sWakeVecE398 side = wakeCrossFE88(self->v50, *(sWakeVecE398*)(self->obj + 0x370));
+        t4Vector side = wakeCrossFE88(self->v50, *(t4Vector*)(self->obj + 0x370));
         if (self->fB4 < 0.0f) {
-            sWakeVecE398 n = wakeScaleFE88(side, -1.0f);
+            t4Vector n = wakeScaleFE88(side, -1.0f);
             side = n;
         }
         char* sub = self->obj + 0x6C0;
         sWakeVtFE88* vt = *(sWakeVtFE88**)sub;
-        sWakeVecE398* riderVel = vt[2].fn(sub + vt[2].delta);
-        sWakeVecE398 vel = wakeAddFE88(
+        t4Vector* riderVel = vt[2].fn(sub + vt[2].delta);
+        t4Vector vel = wakeAddFE88(
             wakeAddFE88(
                 wakeAddFE88(wakeScaleFE88(*riderVel, *(float*)(self->p2C + 0x390)),
-                            wakeScaleFE88(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0x394))),
-                wakeScaleFE88(wakeScaleFE88(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0x398)), self->fBC)),
+                            wakeScaleFE88(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x394))),
+                wakeScaleFE88(wakeScaleFE88(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x398)), self->fBC)),
             wakeScaleFE88(wakeScaleFE88(side, *(float*)(self->p2C + 0x39C)), self->fBC));
         cDynamicColourEmitter_update(em, &pos, &vel, &self->col, alive, dt);
         return;
@@ -2494,10 +2485,10 @@ struct sWakeFx0EE8 {
     char pad4[0x24];            // 0x04
     char* em;                   // 0x28
     char* p2C;                  // 0x2C
-    sWakeVecE398 dir;           // 0x30
+    t4Vector dir;           // 0x30
     char pad40[0x50];           // 0x40
-    sWakeVecE398 col;           // 0x90
-    sWakeVecE398 pos;           // 0xA0
+    t4Vector col;           // 0x90
+    t4Vector pos;           // 0xA0
     int iB0;                    // 0xB0
     char padB4[0x8];            // 0xB4
     float fBC;                  // 0xBC
@@ -2508,15 +2499,15 @@ struct sWakeFx0EE8 {
 struct sWakeVt0EE8 {
     short delta;
     short index;
-    sWakeVecE398* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sWakeVecE398 wakeScale0EE8(const sWakeVecE398& v, float s)
+static inline t4Vector wakeScale0EE8(const t4Vector& v, float s)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2531,9 +2522,9 @@ static inline sWakeVecE398 wakeScale0EE8(const sWakeVecE398& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sWakeVecE398 wakeAdd0EE8(const sWakeVecE398& a, const sWakeVecE398& b)
+static inline t4Vector wakeAdd0EE8(const t4Vector& a, const t4Vector& b)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2563,15 +2554,15 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
     int flag = *(int*)(*(char**)(self->obj + 0x88C) + 0xA0);
     char* em = self->em;
     if (self->iB0 != 0 && wakeLimit0EE8() < self->fBC && *(int*)(self->pD0 + 0x58) != 0 && flag == 0) {
-        sWakeVecE398 pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
+        t4Vector pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
         func_002DE398((cDynamicSprayFX*)self, &pos);
         char* sub = self->obj + 0x6C0;
         sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
-        sWakeVecE398* riderVel = vt[2].fn(sub + vt[2].delta);
-        sWakeVecE398 vel = wakeAdd0EE8(
+        t4Vector* riderVel = vt[2].fn(sub + vt[2].delta);
+        t4Vector vel = wakeAdd0EE8(
             wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0xD8)),
-                        wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xDC))),
-            wakeScale0EE8(wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xE0)), self->fBC));
+                        wakeScale0EE8(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0xDC))),
+            wakeScale0EE8(wakeScale0EE8(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0xE0)), self->fBC));
         cDynamicColourEmitter_update(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
     } else {
         cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
@@ -2626,12 +2617,9 @@ struct sVec1120 {
     sVec1120(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sRow1120 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat1120 {
-    sRow1120 v[4];
+    t4Vector v[4];
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
     sMat1120(const sMat1120& o)
     {
@@ -2650,7 +2638,7 @@ struct sMat1120 {
     }
 } __attribute__((aligned(16)));
 
-extern sRow1120 t4vect_Origin_1120 __asm__("t4vect_Origin");
+extern t4Vector t4vect_Origin_1120 __asm__("t4vect_Origin");
 
 struct sWakeFx1120 {
     char* obj;                  // 0x00
@@ -2852,16 +2840,16 @@ struct sWakeFx1598 {
     char pad8[0x20];            // 0x08
     char* p28;                  // 0x28
     char pad2C[0x64];           // 0x2C
-    sWakeVecE398 col;           // 0x90
-    sWakeVecE398 pos;           // 0xA0
+    t4Vector col;           // 0x90
+    t4Vector pos;           // 0xA0
     char padB0[0x20];           // 0xB0
     char* pD0;                  // 0xD0
     int iD4;                    // 0xD4
     char padD8[0x8];            // 0xD8
     float fE0;                  // 0xE0
     char padE4[0xC];            // 0xE4
-    sWakeVecE398 vF0;           // 0xF0
-    sWakeVecE398 dir;           // 0x100
+    t4Vector vF0;           // 0xF0
+    t4Vector dir;           // 0x100
     char pad110[0x4];           // 0x110
     int i114;                   // 0x114
     char pad118[0x8];           // 0x118
@@ -2872,7 +2860,7 @@ struct sWakeFx1598 {
 extern "C" void ReportImpact(void*, float);
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float wakeDot1598(const sWakeVecE398& a, const sWakeVecE398& b)
+static inline float wakeDot1598(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2892,9 +2880,9 @@ static inline float wakeDot1598(const sWakeVecE398& a, const sWakeVecE398& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sWakeVecE398 wakeSub1598(const sWakeVecE398& a, const sWakeVecE398& b)
+static inline t4Vector wakeSub1598(const t4Vector& a, const t4Vector& b)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2909,7 +2897,7 @@ static inline sWakeVecE398 wakeSub1598(const sWakeVecE398& a, const sWakeVecE398
 struct sWakeVt1598 {
     short delta;
     short index;
-    sWakeVecE398* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 // PORT: g++ minimum operator (<?).
@@ -2929,7 +2917,7 @@ static inline float wakeMin1598(float a, float b)
     return a <= b ? a : b;
 }
 
-static inline sWakeVecE398* wakeVel1598(sWakeFx1598* self)
+static inline t4Vector* wakeVel1598(sWakeFx1598* self)
 {
     char* sub = self->obj + 0x6C0;
     sWakeVt1598* vt = *(sWakeVt1598**)sub;
@@ -2962,7 +2950,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         if (emitterIdx == 5 && *(int*)(self->obj + 0xAC4) == 0) {
             ReportImpact(&self->vF0, self->fE0);
         }
-        sWakeVecE398 pos = self->vF0;
+        t4Vector pos = self->vF0;
         float k = 1.0f;
         if (emitterIdx == 6) {
             k = 0.5f;
@@ -2995,20 +2983,20 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         }
         float lo = -j;
         {
-            sWakeVecE398 t;
+            t4Vector t;
             t.z = 0.0f;
             t.w = 0.0f;
             t.x = lo + (j - lo) * wakeRandE398();
             t.y = lo + (j - lo) * wakeRandE398();
             wakeAddE398(pos, t);
         }
-        sWakeVecE398* va = wakeVel1598(self);
-        sWakeVecE398* vb = wakeVel1598(self);
-        sWakeVecE398* up = (sWakeVecE398*)(self->obj + 0x370);
-        sWakeVecE398 t = wakeSub1598(*va, wakeScale0EE8(*up, wakeDot1598(*vb, *up) * 0.75f));
+        t4Vector* va = wakeVel1598(self);
+        t4Vector* vb = wakeVel1598(self);
+        t4Vector* up = (t4Vector*)(self->obj + 0x370);
+        t4Vector t = wakeSub1598(*va, wakeScale0EE8(*up, wakeDot1598(*vb, *up) * 0.75f));
         float m = 0.30000001192092896f;
         if (self->i114 == 0) m = 0.4000000059604645f;
-        sWakeVecE398 vel = wakeScale0EE8(t, m);
+        t4Vector vel = wakeScale0EE8(t, m);
         float al = 0.5f;
         if (self->i114 == 0) al = 1.0f;
         if (self->f120 < al) {
@@ -3016,7 +3004,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         } else {
             self->f120 = self->f120 * 0.800000011920929f + al * 0.19999998807907104f;
         }
-        sWakeVecE398 col = self->col;
+        t4Vector col = self->col;
         col.w = self->f120;
         cDynamicColourEmitter_update(self->p28 + emitterIdx * 528, &pos, &vel, &col, 1, 0.01666666753590107f);
         cDynamicColourEmitter_update(self->p28 + otherIdx * 528, &self->vF0, 0, 0, 0, 0.01666666753590107f);
@@ -3257,10 +3245,10 @@ struct sWakeFx1F70 {
     char pad14[0x14];           // 0x14
     char* p28;                  // 0x28
     char* p2C;                  // 0x2C
-    sWakeVecE398 dir;           // 0x30
+    t4Vector dir;           // 0x30
     char pad40[0x50];           // 0x40
-    sWakeVecE398 col;           // 0x90
-    sWakeVecE398 pos;           // 0xA0
+    t4Vector col;           // 0x90
+    t4Vector pos;           // 0xA0
     int iB0;                    // 0xB0
     char padB4[0x8];            // 0xB4
     float fBC;                  // 0xBC
@@ -3271,7 +3259,7 @@ struct sWakeFx1F70 {
 struct sWakeVt1F70 {
     short delta;
     short index;
-    sWakeVecE398* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 // PORT: g++ minimum operator (<?).
@@ -3291,7 +3279,7 @@ static inline float wakeLimit1F70()
     return 277.77777099609375f;
 }
 
-static inline sWakeVecE398* wakeVel1F70(sWakeFx1F70* self)
+static inline t4Vector* wakeVel1F70(sWakeFx1F70* self)
 {
     char* sub = self->obj + 0x6C0;
     sWakeVt1F70* vt = *(sWakeVt1F70**)sub;
@@ -3321,16 +3309,16 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
     if ((self->iB0 == 0 && wakeVel1F70(self)->z < -3333.33349609375f) || self->fBC < wakeLimit1F70()) {
         self->f10 = 0.0f;
     }
-    sWakeVecE398 pos = self->pos;
+    t4Vector pos = self->pos;
     if (!done && 0.0f < self->f10) {
         float alpha = wakeClamp1F70(self->f10 * 1.25f, 0.0f, 1.0f);
         if (wakeVel1F70(self)->z < 0.0f) {
             alpha *= wakeClamp1F70((wakeVel1F70(self)->z + 3333.33349609375f) / 3333.33349609375f, 0.0f, 1.0f);
         }
-        sWakeVecE398 col = self->col;
+        t4Vector col = self->col;
         col.w = alpha;
-        sWakeVecE398* riderVel = wakeVel1F70(self);
-        sWakeVecE398 vel = wakeAdd0EE8(
+        t4Vector* riderVel = wakeVel1F70(self);
+        t4Vector vel = wakeAdd0EE8(
             wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0x818)),
                         wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x81C))),
             wakeScale0EE8(wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x820)), self->fBC));
@@ -3356,7 +3344,7 @@ struct sWakeFx2260 {
     int i78;                    // 0x78
     int* p7C;                   // 0x7C
     char pad80[0x10];           // 0x80
-    sWakeVecE398 col;           // 0x90
+    t4Vector col;           // 0x90
     char padA0[0x18];           // 0xA0
     float fB8;                  // 0xB8
     char padBC[0x18];           // 0xBC
@@ -3395,10 +3383,10 @@ extern "C" void func_002E2260(sWakeFx2260* self)
     if (zero < self->f4 && wakeLimit2260() < self->fB8) {
         float dt;
         float alpha;
-        sWakeVecE398 col;
-        sWakeVecE398 pos;
-        sWakeVecE398 vel;
-        sWakeVecE398 scaledVel;
+        t4Vector col;
+        t4Vector pos;
+        t4Vector vel;
+        t4Vector scaledVel;
         cRider* obj;
         t4Matrix* boneMats;
         int k;
@@ -3409,8 +3397,8 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         obj = (cRider*)self->obj;
         k = self->p7C[self->i78];
         boneMats = obj->mAnimModel->SkelMatrices;
-        pos = ((sWakeVecE398*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
-        wakeScaleE398(scaledVel, *(sWakeVecE398*)&obj->mVelocity, *(float*)(self->p2C + 0x900));
+        pos = ((t4Vector*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
+        wakeScaleE398(scaledVel, *(t4Vector*)&obj->mVelocity, *(float*)(self->p2C + 0x900));
         vel = scaledVel;
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, dt);
         self->i78++;
@@ -3424,7 +3412,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         cRider* obj = (cRider*)self->obj;
         int k = obj->mBoneHips;
         t4Matrix* boneMats = obj->mAnimModel->SkelMatrices;
-        sWakeVecE398 pos = ((sWakeVecE398*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
+        t4Vector pos = ((t4Vector*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
         cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
@@ -4385,8 +4373,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_ProcessLens);
 extern "C" void cLightHalo_Process(cLightHalo* part, void* owner);
 extern "C" void cSunHalo_Process(void* emit, void* owner, int idx);
 
-struct sWkVec3338 { float x, y, z, w; } __attribute__((aligned(16)));
-struct sWkMtx3338 { sWkVec3338 row[4]; };
+struct sWkMtx3338 { t4Vector row[4]; };
 struct sWkPart3338 { char data[0x30]; };
 struct sWkEmit3338 { char data[0x210]; };
 
@@ -5903,11 +5890,11 @@ struct tWorldPainterSnowfallParameters_4F50 {
 };
 
 // t4Vector with EA's 4-float constructor.
-struct t4Vec_4F50 : sWakeVecE398 {
+struct t4Vec_4F50 : t4Vector {
     t4Vec_4F50(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-extern sWakeVecE398 t4vect_ZAxis_4F50 __asm__("t4vect_ZAxis");     // t4vect::ZAxis
+extern t4Vector t4vect_ZAxis_4F50 __asm__("t4vect_ZAxis");     // t4vect::ZAxis
 extern float cSinCosTable_gSinCosTable[];                                      // cSinCosTable::gSinCosTable
 
 static inline float FXRand_4F50(float lo, float hi)
@@ -5939,9 +5926,9 @@ static inline void BringIntoRange_4F50(float& v, float range)
 }
 
 // PORT: PS2-only VU0 inline asm (scalar * vector).
-static inline sWakeVecE398 Scale_4F50(float s, const sWakeVecE398& v)
+static inline t4Vector Scale_4F50(float s, const t4Vector& v)
 {
-    sWakeVecE398 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5998,7 +5985,7 @@ extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfall
     float z;
     self->mCurrentTimeToWindChange -= kTimeDiff;
     if (self->mCurrentTimeToWindChange < 0.0f) {
-        *(sWakeVecE398*)&self->mWindLast = *(sWakeVecE398*)&self->mWindNext;
+        *(t4Vector*)&self->mWindLast = *(t4Vector*)&self->mWindNext;
         float windSin;
         float windCos;
         sincos_4F50(deg2rad_4F50(params->f[5]), windSin, windCos);
@@ -6006,23 +5993,23 @@ extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfall
         t4Vec_4F50 windBaseFlurries(windBaseRotated.x * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale),
                                     windBaseRotated.y * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale),
                                     params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale), 0.0f);
-        *(sWakeVecE398*)&self->mWindNext = windBaseFlurries;
+        *(t4Vector*)&self->mWindNext = windBaseFlurries;
         self->mCurrentTimeToWindChange = self->mTotalTimeToWindChange = FXRand_4F50(1.0f, 5.0f);
         if (self->mResetWind) {
-            *(sWakeVecE398*)&self->mWindLast = *(sWakeVecE398*)&self->mWindNext;
+            *(t4Vector*)&self->mWindLast = *(t4Vector*)&self->mWindNext;
             self->mResetWind = 0;
         }
     }
     windBlend = self->mCurrentTimeToWindChange / self->mTotalTimeToWindChange;
-    wakeAddE398(*(sWakeVecE398*)&self->mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(*(sWakeVecE398*)&self->mWindNext, 1.0f - windBlend), wakeScale0EE8(*(sWakeVecE398*)&self->mWindLast, windBlend)), kTimeDiff));
-    wakeAddE398(*(sWakeVecE398*)&self->mOffset, Scale_4F50(self->mGravity * params->f[7] * kTimeDiff, t4vect_ZAxis_4F50));
-    x = (*(sWakeVecE398*)&self->mOffset).x;
-    y = (*(sWakeVecE398*)&self->mOffset).y;
-    z = (*(sWakeVecE398*)&self->mOffset).z;
+    wakeAddE398(*(t4Vector*)&self->mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(*(t4Vector*)&self->mWindNext, 1.0f - windBlend), wakeScale0EE8(*(t4Vector*)&self->mWindLast, windBlend)), kTimeDiff));
+    wakeAddE398(*(t4Vector*)&self->mOffset, Scale_4F50(self->mGravity * params->f[7] * kTimeDiff, t4vect_ZAxis_4F50));
+    x = (*(t4Vector*)&self->mOffset).x;
+    y = (*(t4Vector*)&self->mOffset).y;
+    z = (*(t4Vector*)&self->mOffset).z;
     BringIntoRange_4F50(x, self->mBoxScale);
     BringIntoRange_4F50(y, self->mBoxScale);
     BringIntoRange_4F50(z, self->mBoxScale);
-    *(sWakeVecE398*)&self->mOffset = t4Vec_4F50(x, y, z, 1.0f);
+    *(t4Vector*)&self->mOffset = t4Vec_4F50(x, y, z, 1.0f);
 }
 #endif
 
@@ -6096,12 +6083,9 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_render);
 struct sMat_6008;
 extern char* GrMan_boardwakefx __asm__("GrMan");
 
-struct sVec55D8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat55D8 {
-    sVec55D8 v[4];
+    t4Vector v[4];
     sMat55D8() {}
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
     sMat55D8(const sMat55D8& o)
@@ -6192,9 +6176,9 @@ static inline sMat55D8 wakeMulMat55D8(const sMat55D8& a, const sMat55D8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sVec55D8 wakeDiv55D8(const sVec55D8& v, float s)
+static inline t4Vector wakeDiv55D8(const t4Vector& v, float s)
 {
-    sVec55D8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6211,7 +6195,7 @@ static inline sVec55D8 wakeDiv55D8(const sVec55D8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void wakeAddEq55D8(sVec55D8& a, const cQuad55D8& b)
+static inline void wakeAddEq55D8(t4Vector& a, const cQuad55D8& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -6224,7 +6208,7 @@ static inline void wakeAddEq55D8(sVec55D8& a, const cQuad55D8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a -= b).
-static inline void wakeSubEq55D8(sVec55D8& a, const cQuad55D8& b)
+static inline void wakeSubEq55D8(t4Vector& a, const cQuad55D8& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -6237,7 +6221,7 @@ static inline void wakeSubEq55D8(sVec55D8& a, const cQuad55D8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a -= b).
-static inline void wakeSubV55D8(sVec55D8& a, const sVec55D8& b)
+static inline void wakeSubV55D8(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -6275,8 +6259,8 @@ extern "C" void cSnowBox_render(int* snowBox, sMat_6008* snowMatrix, float x, fl
     float z1 = z + 1.0f;
     tSnowBoxData info;
     (*(sMat55D8*)&info.mSnowBoxToWorldMatrix) = wakeMulMat55D8(*(sMat55D8*)snowMatrix, (*(sMat55D8*)&self->mBoxMatrix));
-    sVec55D8 tempVec = wakeDiv55D8((*(sVec55D8*)&self->mOffset), self->mBoxScale);
-    (*(sVec55D8*)&info.mParticleOffset) = tempVec;
+    t4Vector tempVec = wakeDiv55D8((*(t4Vector*)&self->mOffset), self->mBoxScale);
+    (*(t4Vector*)&info.mParticleOffset) = tempVec;
     float red = self->mColourR * 128.0f;
     float green = self->mColourG * 128.0f;
     float blue = self->mColourB * 128.0f;
@@ -6286,41 +6270,41 @@ extern "C" void cSnowBox_render(int* snowBox, sMat_6008* snowMatrix, float x, fl
     info.mRandSeed = self->mRandSeed;
     info.mRandSeed2 = self->mRandSeed2;
     info.mRandSeed3 = self->mRandSeed3;
-    (*(sVec55D8*)&info.mMinX).w = self->mFlakeSize;
-    (*(sVec55D8*)&info.mMaxX).w = self->mBoxScale;
+    (*(t4Vector*)&info.mMinX).w = self->mFlakeSize;
+    (*(t4Vector*)&info.mMaxX).w = self->mBoxScale;
     tempVec.x = red;
     tempVec.z = blue;
-    (*(sVec55D8*)&info.mMinX).x = x;
-    (*(sVec55D8*)&info.mMinX).y = y;
-    (*(sVec55D8*)&info.mMinX).z = z;
-    (*(sVec55D8*)&info.mMaxX).x = x1;
-    (*(sVec55D8*)&info.mMaxX).y = y1;
-    (*(sVec55D8*)&info.mMaxX).z = z1;
+    (*(t4Vector*)&info.mMinX).x = x;
+    (*(t4Vector*)&info.mMinX).y = y;
+    (*(t4Vector*)&info.mMinX).z = z;
+    (*(t4Vector*)&info.mMaxX).x = x1;
+    (*(t4Vector*)&info.mMaxX).y = y1;
+    (*(t4Vector*)&info.mMaxX).z = z1;
     tempVec.w = alpha;
-    (*(sVec55D8*)&info.mColour) = tempVec;
-    if ((*(sVec55D8*)&info.mParticleOffset).x < x + -0.5f) {
-        wakeAddEq55D8((*(sVec55D8*)&info.mParticleOffset), t4vect_XAxis);
+    (*(t4Vector*)&info.mColour) = tempVec;
+    if ((*(t4Vector*)&info.mParticleOffset).x < x + -0.5f) {
+        wakeAddEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_XAxis);
     }
-    if (x1 + 0.5f < (*(sVec55D8*)&info.mParticleOffset).x) {
-        wakeSubEq55D8((*(sVec55D8*)&info.mParticleOffset), t4vect_XAxis);
+    if (x1 + 0.5f < (*(t4Vector*)&info.mParticleOffset).x) {
+        wakeSubEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_XAxis);
     }
-    if ((*(sVec55D8*)&info.mParticleOffset).y < y + -0.5f) {
-        wakeAddEq55D8((*(sVec55D8*)&info.mParticleOffset), t4vect_YAxis);
+    if ((*(t4Vector*)&info.mParticleOffset).y < y + -0.5f) {
+        wakeAddEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_YAxis);
     }
-    if (y1 + 0.5f < (*(sVec55D8*)&info.mParticleOffset).y) {
-        wakeSubEq55D8((*(sVec55D8*)&info.mParticleOffset), t4vect_YAxis);
+    if (y1 + 0.5f < (*(t4Vector*)&info.mParticleOffset).y) {
+        wakeSubEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_YAxis);
     }
-    if ((*(sVec55D8*)&info.mParticleOffset).z < z + -0.5f) {
-        wakeAddEq55D8((*(sVec55D8*)&info.mParticleOffset), t4vect_ZAxis);
+    if ((*(t4Vector*)&info.mParticleOffset).z < z + -0.5f) {
+        wakeAddEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_ZAxis);
     }
-    if (z1 + 0.5f < (*(sVec55D8*)&info.mParticleOffset).z) {
-        wakeSubEq55D8((*(sVec55D8*)&info.mParticleOffset), t4vect_ZAxis);
+    if (z1 + 0.5f < (*(t4Vector*)&info.mParticleOffset).z) {
+        wakeSubEq55D8((*(t4Vector*)&info.mParticleOffset), t4vect_ZAxis);
     }
     tempVec.x = 1.5f;
     tempVec.y = 1.5f;
     tempVec.z = 1.5f;
     tempVec.w = 0.0f;
-    wakeSubV55D8((*(sVec55D8*)&info.mParticleOffset), tempVec);
+    wakeSubV55D8((*(t4Vector*)&info.mParticleOffset), tempVec);
     switch (self->mSnowBoxType) {
     case 0: {
         sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
@@ -6524,12 +6508,9 @@ extern "C" void cSnowFall_update(cSnowFall* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_render);
 #ifdef SKIP_ASM
-struct sV4_6008 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_6008 {
-    sV4_6008 v[4];
+    t4Vector v[4];
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
     sMat_6008& operator=(const sMat_6008& o)
     {
@@ -6591,7 +6572,7 @@ extern int cRenderToggles_m_DisableSnowFall;
 extern int cSnowfallToggles_m_TestAdditive[1];
 extern sRsCtx_6008* cGraphicsMan_TheGraphicsMan_6008 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sRsState_6008 sDrawState_s_defaultDrawState_6008[] __asm__("sDrawState_s_defaultDrawState");
-extern sV4_6008 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 extern "C" void cSnowBox_render(int* p, sMat_6008* m, float r, float g, float b);
 
 static inline sRiders_6008* riders_6008()

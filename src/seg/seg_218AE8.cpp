@@ -100,10 +100,9 @@ extern "C" void tSemiSpace_set(t4Vector* out, t4Vector* n, t4Vector* point, t4Ve
 //100%
 INCLUDE_ASM("seg/seg_218AE8", tSemiSpace_isSimilar);
 #ifdef SKIP_ASM
-struct sVec4_7C48 { float x, y, z, w; } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_7C48(sVec4_7C48 a, sVec4_7C48 b)
+static inline float vu0Dot_7C48(t4Vector a, t4Vector b)
 {
     float r;
     int t;
@@ -122,9 +121,9 @@ static inline float vu0Dot_7C48(sVec4_7C48 a, sVec4_7C48 b)
     return r;
 }
 
-static inline sVec4_7C48 mk_7C48(char *p)
+static inline t4Vector mk_7C48(char *p)
 {
-    sVec4_7C48 v = *(sVec4_7C48*)p;
+    t4Vector v = *(t4Vector*)p;
     v.w = 0.0f;
     return v;
 }

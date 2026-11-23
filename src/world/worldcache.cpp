@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "vtable.h"
 #include "world/chunkresolve.h"
 #include "bx/appman.h"
@@ -1784,12 +1785,9 @@ void cWorldView_purge(void* self)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldView_reset);
 #ifdef SKIP_ASM
-struct cWorldView_reset_sVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
-extern cWorldView_reset_sVec4 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 
-extern "C" void cWorldView_setFocus(void* self, unsigned int i, cWorldView_reset_sVec4* v, float f);
+extern "C" void cWorldView_setFocus(void* self, unsigned int i, t4Vector* v, float f);
 
 struct cWorldView_reset_sPair {
     int a;
@@ -1809,8 +1807,8 @@ struct cWorldView_reset_sCache {
     int f10;
     cWorldView_reset_sPair pairs[64];
     char pad214[0x220 - 0x214];
-    cWorldView_reset_sVec4 v220;
-    cWorldView_reset_sVec4 v230;
+    t4Vector v220;
+    t4Vector v230;
     cWorldView_reset_sSlot slots[2];
     int f2E0;
     int f2E4;
@@ -2028,12 +2026,9 @@ extern "C" void cWorldView_recursiveIsEmptyPages(void** self, tBxBSPNode* node, 
 //100%
 INCLUDE_ASM("world/worldcache", cWorldView_setFocus);
 #ifdef SKIP_ASM
-struct sWCVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (in-place vector subtract).
-static inline void vu0SubFromWC(sWCVec4& a, const sWCVec4& b)
+static inline void vu0SubFromWC(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -2046,7 +2041,7 @@ static inline void vu0SubFromWC(sWCVec4& a, const sWCVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector add).
-static inline void vu0AddToWC(sWCVec4& a, const sWCVec4& b)
+static inline void vu0AddToWC(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -2059,9 +2054,9 @@ static inline void vu0AddToWC(sWCVec4& a, const sWCVec4& b)
 }
 
 struct tBoundBox_9658 {
-    sWCVec4 mn;
-    sWCVec4 mx;
-    tBoundBox_9658(const sWCVec4& a, const sWCVec4& b) : mn(a), mx(b) {}
+    t4Vector mn;
+    t4Vector mx;
+    tBoundBox_9658(const t4Vector& a, const t4Vector& b) : mn(a), mx(b) {}
 };
 
 struct tStreamFocusInfo_9658 {
@@ -2069,7 +2064,7 @@ struct tStreamFocusInfo_9658 {
     int m_bActive;              // 0x4
     int m_bFocusUpdate;         // 0x8
     int padC;
-    sWCVec4 m_v4LoadPos;        // 0x10
+    t4Vector m_v4LoadPos;        // 0x10
     tBoundBox_9658 m_FocusBox;  // 0x20
     float m_fLoadRadius;        // 0x40
     float m_fSafeRadius;        // 0x44
@@ -2083,7 +2078,7 @@ struct cWorldView_9658 {
 };
 
 // cWorldView::setFocus
-extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius) __asm__("cWorldView_setFocus");
+extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const t4Vector& pos, float fRadius) __asm__("cWorldView_setFocus");
 /**
  * Points one of the world view's streaming foci at a position.
  *
@@ -2094,13 +2089,13 @@ extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const sW
  * @param pos  the position to stream around
  * @param fRadius  how far around it to load
  */
-extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius)
+extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const t4Vector& pos, float fRadius)
 {
     self->m_StreamFocus[id].m_v4LoadPos = pos;
     self->m_StreamFocus[id].m_fLoadRadius = fRadius >? 0.0f;
     self->m_StreamFocus[id].m_FocusBox = tBoundBox_9658(pos, pos);
     {
-        sWCVec4 ext;
+        t4Vector ext;
         ext.x = fRadius;
         ext.y = fRadius;
         ext.z = fRadius;

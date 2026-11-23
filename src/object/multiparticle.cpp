@@ -169,13 +169,10 @@ extern "C" void cMultiParticle_remInst(cMultiParticle* self, unsigned int key)
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_render);
 #ifdef SKIP_ASM
-struct sMPVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMPBox {
-    sMPVec4 min;
-    sMPVec4 max;
+    t4Vector min;
+    t4Vector max;
 };
 
 struct sMPModelSet {
@@ -189,7 +186,7 @@ struct sMPWorld {
 };
 
 extern "C" sMPWorld** cObjectInterface_getWorld();
-extern "C" void cStaticEmitter_render(void* desc, sMPBox* box, const sMPVec4& center);
+extern "C" void cStaticEmitter_render(void* desc, sMPBox* box, const t4Vector& center);
 
 static inline void* refToPtr58260(unsigned int p)
 {
@@ -220,12 +217,12 @@ struct sMPModelRef {
 
 struct sMPModel {
     char pad_0x0[0x40];
-    sMPVec4 pos;            // 0x40
-    sMPVec4 getPos() { return pos; }
+    t4Vector pos;            // 0x40
+    t4Vector getPos() { return pos; }
 };
 
 // PORT: PS2-only VU0 inline asm (dst += b).
-static inline void vu0AddTo58260(sMPVec4& dst, sMPVec4 b)
+static inline void vu0AddTo58260(t4Vector& dst, t4Vector b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -237,9 +234,9 @@ static inline void vu0AddTo58260(sMPVec4& dst, sMPVec4 b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sMPVec4 vu0Add58260(const sMPVec4& a, const sMPVec4& b)
+static inline t4Vector vu0Add58260(const t4Vector& a, const t4Vector& b)
 {
-    sMPVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -267,7 +264,7 @@ extern "C" void cMultiParticle_render(cMultiParticle* self)
             sMPBox bounds = *(sMPBox*)&self->BoundBox;
             vu0AddTo58260(bounds.min, model->pos);
             vu0AddTo58260(bounds.max, model->pos);
-            cStaticEmitter_render(((void*)self->Emitter), &bounds, vu0Add58260(model->getPos(), *(sMPVec4*)&self->Offset));
+            cStaticEmitter_render(((void*)self->Emitter), &bounds, vu0Add58260(model->getPos(), *(t4Vector*)&self->Offset));
         }
     }
 }

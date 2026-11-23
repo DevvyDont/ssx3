@@ -585,20 +585,17 @@ int cRider_getMotionState(void* self);
 int cRider_getControlState(void* self);
 extern "C" float func_0031C228(float x);
 
-struct sVec_0010D1A0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sRider_0010D1A0 {
     char pad0[0x1B0];
-    sVec_0010D1A0 vel;  // 0x1B0
+    t4Vector vel;  // 0x1B0
     char pad1C0[0x4C8 - 0x1C0];
     float speed;        // 0x4C8
     float heading;      // 0x4CC
     char pad4D0[0x788 - 0x4D0];
     char* board;        // 0x788
 
-    sVec_0010D1A0 getVel() { return vel; }
+    t4Vector getVel() { return vel; }
 };
 
 

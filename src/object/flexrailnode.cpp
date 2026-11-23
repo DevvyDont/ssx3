@@ -114,8 +114,7 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 extern char cFloatRailNode_vtbl[];
 extern char str_FloatRailNodes[];
 
-struct sFrV_8D98 { float x, y, z, w; } __attribute__((aligned(16)));
-extern sFrV_8D98 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 struct sFlexRailRef_348D98 {
     unsigned int id;
@@ -123,10 +122,10 @@ struct sFlexRailRef_348D98 {
 };
 
 struct sFlexRailElem_348D98 {
-    sFrV_8D98 force;            // 0x00
-    sFrV_8D98 vel;              // 0x10
-    sFrV_8D98 posA;             // 0x20
-    sFrV_8D98 posB;             // 0x30
+    t4Vector force;            // 0x00
+    t4Vector vel;              // 0x10
+    t4Vector posA;             // 0x20
+    t4Vector posB;             // 0x30
     sFlexRailRef_348D98 link;   // 0x40
     int bone;                   // 0x44
     char pad48[8];
@@ -264,13 +263,10 @@ extern "C" void cFloatRailNode__cFloatRailNode(cFloatRailNode* self, int flags)
 //100%
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateBoundBox);
 #ifdef SKIP_ASM
-struct sFrBoxVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sFrBoxElem {
     char pad_0x00[0x20];
-    sFrBoxVec4 pos; // 0x20
+    t4Vector pos; // 0x20
     char pad_0x30[0x20];
 };
 
@@ -278,14 +274,14 @@ struct sFrBoxRail {
     char pad_0x00[0x20];
     int count;          // 0x20
     char pad_0x24[0xC];
-    sFrBoxVec4 min;     // 0x30
-    sFrBoxVec4 max;     // 0x40
+    t4Vector min;     // 0x30
+    t4Vector max;     // 0x40
     char pad_0x50[0x20];
     sFrBoxElem* elems;  // 0x70
 };
 
 // PORT: PS2-only VU0 inline asm (vector sub-assign).
-static inline void vu0SubFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
+static inline void vu0SubFRBox(t4Vector& dst, t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -297,7 +293,7 @@ static inline void vu0SubFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
+static inline void vu0AddFRBox(t4Vector& dst, t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -316,9 +312,9 @@ extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self)
 {
     sFrBoxElem* points = (sFrBoxElem*)self->Nodes;
     int n = self->NumNodes;
-    *(sFrBoxVec4*)&self->BoundBox = *(sFrBoxVec4*)&self->BoundBox.MaxPoint = points[0].pos;
+    *(t4Vector*)&self->BoundBox = *(t4Vector*)&self->BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
-        sFrBoxVec4* point = &points[i].pos;
+        t4Vector* point = &points[i].pos;
         if (point->x < self->BoundBox.MinPoint.x) {
             self->BoundBox.MinPoint.x = point->x;
         }
@@ -338,25 +334,22 @@ extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self)
             self->BoundBox.MaxPoint.z = point->z;
         }
     }
-    sFrBoxVec4 margin;
+    t4Vector margin;
     margin.x = 200.0f;
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(*(sFrBoxVec4*)&self->BoundBox, margin);
-    vu0AddFRBox(*(sFrBoxVec4*)&self->BoundBox.MaxPoint, margin);
+    vu0SubFRBox(*(t4Vector*)&self->BoundBox, margin);
+    vu0AddFRBox(*(t4Vector*)&self->BoundBox.MaxPoint, margin);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_getPosition);
 #ifdef SKIP_ASM
-struct sFrNodeVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sFrNodeMtx {
-    sFrNodeVec4 r[4];
+    t4Vector r[4];
 };
 
 struct sFrModelSet9220 {
@@ -406,9 +399,9 @@ extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode*
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat((*(sFrModelRef9220*)&node->InstId).get(), node->Mesh, &boneMat);
-    sFrNodeVec4 bonePos = boneMat.r[3];
-    (*(sFrNodeVec4*)&node->OPos) = bonePos;
-    (*(sFrNodeVec4*)&node->Pos) = bonePos;
+    t4Vector bonePos = boneMat.r[3];
+    (*(t4Vector*)&node->OPos) = bonePos;
+    (*(t4Vector*)&node->Pos) = bonePos;
 }
 #endif
 
@@ -525,20 +518,17 @@ extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
 //100%
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_applyForce);
 #ifdef SKIP_ASM
-struct sFrVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sFrElem {
-    sFrVec4 pos;   // 0x00
-    sFrVec4 vel;   // 0x10
+    t4Vector pos;   // 0x00
+    t4Vector vel;   // 0x10
     char pad[0x30];
 };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sFrVec4 vu0ScaleFR(const sFrVec4& v, float s)
+static inline t4Vector vu0ScaleFR(const t4Vector& v, float s)
 {
-    sFrVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -553,7 +543,7 @@ static inline sFrVec4 vu0ScaleFR(const sFrVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddFR(sFrVec4& dst, sFrVec4 b)
+static inline void vu0AddFR(t4Vector& dst, t4Vector b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -573,7 +563,7 @@ static inline void vu0AddFR(sFrVec4& dst, sFrVec4 b)
  * @param node  intersect info of the hit (segment +0x64, t +0x68)
  * @param offset  force to apply
  */
-extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, cFloatRailNode* node, sFrVec4* offset)
+extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, cFloatRailNode* node, t4Vector* offset)
 {
     if (*(int*)&node->LDamp >= 0) {
         vu0AddFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp].pos,
@@ -602,10 +592,10 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
 extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, cFloatRailNode* node)
 {
     if (*(int*)&node->LDamp >= 0) {
-        vu0AddFR(*(sFrVec4*)&node->NumNodes,
+        vu0AddFR(*(t4Vector*)&node->NumNodes,
                  vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp].vel,
                             node->ForceScale));
-        vu0AddFR(*(sFrVec4*)&node->NumNodes,
+        vu0AddFR(*(t4Vector*)&node->NumNodes,
                  vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp + 1].vel,
                             1.0f - node->ForceScale));
     }
@@ -746,13 +736,12 @@ extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, tSpringRailNo
 extern char cSpringRailNode_vtbl[];
 extern char str_SpringRailNodes[];
 
-struct sFrV_9B48 { float x, y, z, w; } __attribute__((aligned(16)));
-extern sFrV_9B48 t4vect_Zero_9B48 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_9B48 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sFrV_9B48 Sub_9B48(const sFrV_9B48& a, const sFrV_9B48& b)
+static inline t4Vector Sub_9B48(const t4Vector& a, const t4Vector& b)
 {
-    sFrV_9B48 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -769,11 +758,11 @@ struct sFlexRef_9B48 {
 };
 
 struct sFlexElem_9B48 {
-    sFrV_9B48 pos;              // 0x00
-    sFrV_9B48 dir;              // 0x10
-    sFrV_9B48 v20;              // 0x20
-    sFrV_9B48 v30;              // 0x30
-    sFrV_9B48 v40;              // 0x40
+    t4Vector pos;              // 0x00
+    t4Vector dir;              // 0x10
+    t4Vector v20;              // 0x20
+    t4Vector v30;              // 0x30
+    t4Vector v40;              // 0x40
     sFlexRef_9B48 link;         // 0x50
     int bone;                   // 0x54
     char pad58[8];
@@ -910,7 +899,7 @@ extern "C" void cSpringRailNode__cSpringRailNode(cSpringRailNode* self, int flag
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateBoundBox);
 #ifdef SKIP_ASM
 struct sFrBoxElem60 {
-    sFrBoxVec4 pos; // 0x00
+    t4Vector pos; // 0x00
     char pad_0x10[0x50];
 };
 
@@ -918,8 +907,8 @@ struct sFrBoxRail60 {
     char pad_0x00[0x20];
     int count;           // 0x20
     char pad_0x24[0xC];
-    sFrBoxVec4 min;      // 0x30
-    sFrBoxVec4 max;      // 0x40
+    t4Vector min;      // 0x30
+    t4Vector max;      // 0x40
     char pad_0x50[0x20];
     sFrBoxElem60* elems; // 0x70
 };
@@ -934,9 +923,9 @@ extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
 {
     sFrBoxElem60* points = (sFrBoxElem60*)self->Nodes;
     int n = self->NumNodes;
-    *(sFrBoxVec4*)&self->BoundBox = *(sFrBoxVec4*)&self->BoundBox.MaxPoint = points[0].pos;
+    *(t4Vector*)&self->BoundBox = *(t4Vector*)&self->BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
-        sFrBoxVec4* point = &points[i].pos;
+        t4Vector* point = &points[i].pos;
         if (point->x < self->BoundBox.MinPoint.x) {
             self->BoundBox.MinPoint.x = point->x;
         }
@@ -956,13 +945,13 @@ extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
             self->BoundBox.MaxPoint.z = point->z;
         }
     }
-    sFrBoxVec4 margin;
+    t4Vector margin;
     margin.x = 200.0f;
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(*(sFrBoxVec4*)&self->BoundBox, margin);
-    vu0AddFRBox(*(sFrBoxVec4*)&self->BoundBox.MaxPoint, margin);
+    vu0SubFRBox(*(t4Vector*)&self->BoundBox, margin);
+    vu0AddFRBox(*(t4Vector*)&self->BoundBox.MaxPoint, margin);
 }
 #endif
 
@@ -982,8 +971,8 @@ extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, tSpringRailNo
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat((*(sFrModelRef9220*)&node->InstId).get(), node->Mesh, &boneMat);
-    sFrNodeVec4 bonePos = boneMat.r[3];
-    (*(sFrNodeVec4*)&node->P) = bonePos;
+    t4Vector bonePos = boneMat.r[3];
+    (*(t4Vector*)&node->P) = bonePos;
 }
 #endif
 
@@ -991,16 +980,13 @@ extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, tSpringRailNo
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateMats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sFrV4_A0B0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sFrM4_A0B0 {
-    sFrV4_A0B0 r[4];
+    t4Vector r[4];
 };
 
 struct sFrElem_A0B0 {
-    sFrV4_A0B0 pos; // 0x00
+    t4Vector pos; // 0x00
     char pad_0x10[0x50];
 };
 
@@ -1016,7 +1002,7 @@ struct sFrNode_A0B0 {
 extern float CatmullRom[16];
 
 // PORT: PS2-only VU0 inline asm (vector * 4x4 basis matrix, row-vector convention).
-static inline void vu0BasisMul_A0B0(sFrV4_A0B0& dst, const sFrV4_A0B0& g, const float* b)
+static inline void vu0BasisMul_A0B0(t4Vector& dst, const t4Vector& g, const float* b)
 {
     __asm__(
         "lqc2         $vf8, %1\n"
@@ -1063,16 +1049,16 @@ typedef int tMmiQuad __attribute__((mode(TI)));
             : "memory");                                                                                               \
     }
 
-static inline void set4_A0B0(sFrV4_A0B0& r, float x, float y, float z, float w)
+static inline void set4_A0B0(t4Vector& r, float x, float y, float z, float w)
 {
     r.x = x; r.y = y; r.z = z; r.w = w;
 }
 
 // Spline basis matrix for the segment from e[0] to e[1]: control points a, e[0], e[1], e[2].
-static inline void updateMatSeg_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const sFrElem_A0B0* e)
+static inline void updateMatSeg_A0B0(sFrM4_A0B0& out, const t4Vector& a, const sFrElem_A0B0* e)
 {
     sFrM4_A0B0 L;
-    sFrV4_A0B0 v;
+    t4Vector v;
     set4_A0B0(L.r[1], a.x, e[0].pos.x, e[1].pos.x, e[2].pos.x);
     vu0BasisMul_A0B0(L.r[2], L.r[1], CatmullRom);
     L.r[0] = L.r[2];
@@ -1089,10 +1075,10 @@ static inline void updateMatSeg_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
 }
 
 // Last segment: the end point e[1] is repeated as the fourth control point.
-static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const sFrElem_A0B0* e)
+static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const t4Vector& a, const sFrElem_A0B0* e)
 {
     sFrM4_A0B0 L;
-    sFrV4_A0B0 v;
+    t4Vector v;
     set4_A0B0(L.r[1], a.x, e[0].pos.x, e[1].pos.x, e[1].pos.x);
     vu0BasisMul_A0B0(L.r[2], L.r[1], CatmullRom);
     L.r[0] = L.r[2];
@@ -1353,24 +1339,21 @@ INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateNodes);
 #ifdef SKIP_ASM
 extern "C" float cObjectInterface_getUpdateTime();
 
-struct sV4_A8C8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sV4Slot_A8C8 {
-    sV4_A8C8 v;
+    t4Vector v;
     sV4Slot_A8C8() {}
 };
 
 // PORT: the unit declares t4vect_Zero with another vector type; alias it here.
-extern sV4_A8C8 t4vect_Zero_A8C8 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_A8C8 __asm__("t4vect_Zero");
 
 struct sFrElem_A8C8 {
-    sV4_A8C8 pos;               // 0x00
-    sV4_A8C8 vel;               // 0x10
-    sV4_A8C8 posA;              // 0x20
-    sV4_A8C8 posB;              // 0x30
-    sV4_A8C8 force;             // 0x40
+    t4Vector pos;               // 0x00
+    t4Vector vel;               // 0x10
+    t4Vector posA;              // 0x20
+    t4Vector posB;              // 0x30
+    t4Vector force;             // 0x40
     char pad50[0x10];
 };
 
@@ -1384,7 +1367,7 @@ struct sFrRailA8C8 {
 };
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float vu0Len_A8C8(const sV4_A8C8& v)
+static inline float vu0Len_A8C8(const t4Vector& v)
 {
     float r;
     int t;
@@ -1405,9 +1388,9 @@ static inline float vu0Len_A8C8(const sV4_A8C8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize).
-static inline sV4_A8C8 vu0Norm_A8C8(const sV4_A8C8& v)
+static inline t4Vector vu0Norm_A8C8(const t4Vector& v)
 {
-    sV4_A8C8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1426,9 +1409,9 @@ static inline sV4_A8C8 vu0Norm_A8C8(const sV4_A8C8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_A8C8 vu0Scale_A8C8(const sV4_A8C8& v, float s)
+static inline t4Vector vu0Scale_A8C8(const t4Vector& v, float s)
 {
-    sV4_A8C8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1443,9 +1426,9 @@ static inline sV4_A8C8 vu0Scale_A8C8(const sV4_A8C8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV4_A8C8 vu0Add_A8C8(const sV4_A8C8& a, const sV4_A8C8& b)
+static inline t4Vector vu0Add_A8C8(const t4Vector& a, const t4Vector& b)
 {
-    sV4_A8C8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1457,9 +1440,9 @@ static inline sV4_A8C8 vu0Add_A8C8(const sV4_A8C8& a, const sV4_A8C8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product).
-static inline sV4_A8C8 vu0Cross_A8C8(const sV4_A8C8& a, const sV4_A8C8& b)
+static inline t4Vector vu0Cross_A8C8(const t4Vector& a, const t4Vector& b)
 {
-    sV4_A8C8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1474,7 +1457,7 @@ static inline sV4_A8C8 vu0Cross_A8C8(const sV4_A8C8& a, const sV4_A8C8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_A8C8(sV4_A8C8& dst, const sV4_A8C8& b)
+static inline void vu0AddEq_A8C8(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1505,16 +1488,16 @@ extern "C" void cSpringRailNode_updateNodes(sFrRailA8C8* self)
         vu0AddEq_A8C8(segTorque[i].v, self->elems[i].force);
     }
     for (int i = 0; i < self->count - 1; i++) {
-        sV4_A8C8 angVelStep;
+        t4Vector angVelStep;
         angVelStep = vu0Scale_A8C8(segTorque[i].v, dt);
         vu0AddEq_A8C8(self->elems[i].posA, vu0Scale_A8C8(self->elems[i].posB, dt));
         vu0AddEq_A8C8(self->elems[i].posB, angVelStep);
     }
-    sV4_A8C8 acc = t4vect_Zero_A8C8;
+    t4Vector acc = t4vect_Zero_A8C8;
     for (int i = 0; i < self->count - 1; i++) {
         vu0AddEq_A8C8(acc, self->elems[i].posA);
         float len = vu0Len_A8C8(self->elems[i].vel);
-        sV4_A8C8 segVec = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->elems[i].vel, vu0Cross_A8C8(self->elems[i].vel, acc))), len);
+        t4Vector segVec = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->elems[i].vel, vu0Cross_A8C8(self->elems[i].vel, acc))), len);
         self->elems[i + 1].pos = vu0Add_A8C8(self->elems[i].pos, segVec);
     }
     for (int i = 0; i < self->count; i++) {

@@ -282,7 +282,6 @@ __asm__("_vt$15cVbDtor002DA8E8$13cRiderVbC_bsf = D_00488CB0\n"
 INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_reset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sV4_AA78 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sRS_AA78 {
     int f0;
     int flagsA;     // 0x4
@@ -291,7 +290,7 @@ struct sRS_AA78 {
     short tex;      // 0x10
     short pad;
 };
-extern sV4_AA78 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 extern sRS_AA78 sDrawState_s_defaultDrawState_AA78 __asm__("sDrawState_s_defaultDrawState");
 
 // Render-state field setters (mask, shift, value), as the unit's other effects write them.
@@ -300,7 +299,7 @@ extern sRS_AA78 sDrawState_s_defaultDrawState_AA78 __asm__("sDrawState_s_default
 
 struct sSparkFx_AA78 {
     char pad0[0x10];
-    sV4_AA78 pos;           // 0x10
+    t4Vector pos;           // 0x10
     char pad20[0x50];
     int f70, f74, f78;      // 0x70
     sRS_AA78 rsA;           // 0x7C

@@ -170,19 +170,16 @@ extern "C" cRiderSphereTree* cRiderSphereTree_operatorE(cRiderSphereTree* self, 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Update);
 #ifdef SKIP_ASM
-struct sSphereVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sSphereChild {
-    sSphereVec4 pos;
+    t4Vector pos;
     float radius;
     int pad[3];
 };
 
 struct sSphereTreeNode {
     char pad_0x00[0x10];
-    sSphereVec4 center; // 0x10
+    t4Vector center; // 0x10
     float radius;       // 0x20
     int pad_0x24;
     int pad_0x28;
@@ -203,8 +200,8 @@ struct sSphereTreeNode {
  * @param center  the bounding sphere's centre (On Tour boundCenter)
  * @param radius  its radius (On Tour boundRadius)
  */
-extern "C" void cRiderSphereTree_Update(sSphereTreeNode* node, int n, sSphereVec4* pos, float* radii,
-                              sSphereVec4* center, float radius)
+extern "C" void cRiderSphereTree_Update(sSphereTreeNode* node, int n, t4Vector* pos, float* radii,
+                              t4Vector* center, float radius)
 {
     node->count = n;
     for (int i = 0; i < node->count; i++) {
@@ -220,7 +217,7 @@ extern "C" void cRiderSphereTree_Update(sSphereTreeNode* node, int n, sSphereVec
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Update1);
 #ifdef SKIP_ASM
 struct sSphereSrc_9AE0 {
-    sSphereVec4 pos;
+    t4Vector pos;
     int pad[4];
 };
 
@@ -247,7 +244,7 @@ extern "C" void cRiderSphereTree_Update1(sSphereTreeNode* riderTree)
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_ApplyOffset);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
-static inline void sphereVecAdd(sSphereVec4* dst, sSphereVec4* v)
+static inline void sphereVecAdd(t4Vector* dst, t4Vector* v)
 {
     __asm__(
         ".set push\n"
@@ -270,7 +267,7 @@ static inline void sphereVecAdd(sSphereVec4* dst, sSphereVec4* v)
  * @param offset  the offset to add (On Tour offset)
  */
 // self->center += *v, then every child's pos += *v
-extern "C" void cRiderSphereTree_ApplyOffset(sSphereTreeNode* node, sSphereVec4* offset)
+extern "C" void cRiderSphereTree_ApplyOffset(sSphereTreeNode* node, t4Vector* offset)
 {
     sphereVecAdd(&node->center, offset);
     for (int i = 0; i < node->count; i++) {
@@ -284,9 +281,9 @@ INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_ApplyTransform);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-static inline sSphereVec4 mtxMulVec_9B90(sSphereVec4* m, sSphereVec4* v)
+static inline t4Vector mtxMulVec_9B90(t4Vector* m, t4Vector* v)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -312,8 +309,8 @@ struct sScale_9B90 {
     sScale_9B90(float s) { x = s; y = s; z = s; w = 1.0f; }
 };
 
-struct sProd_9B90 : sSphereVec4 {
-    sProd_9B90(const sSphereVec4& a, const sScale_9B90& b)
+struct sProd_9B90 : t4Vector {
+    sProd_9B90(const t4Vector& a, const sScale_9B90& b)
     {
         x = a.x * b.x;
         y = a.y * b.y;
@@ -323,7 +320,7 @@ struct sProd_9B90 : sSphereVec4 {
 };
 
 // PORT: callers declare the matrix as sSphereMtx*.
-extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphereVec4* m, float scale) __asm__("cRiderSphereTree_ApplyTransform");
+extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, t4Vector* m, float scale) __asm__("cRiderSphereTree_ApplyTransform");
 
 /**
  * Moves a sphere tree node and its child spheres by a matrix, then scales their positions and radii.
@@ -332,7 +329,7 @@ extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphere
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  uniform scale applied after the transform
  */
-extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* node, sSphereVec4* mat, float scale)
+extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* node, t4Vector* mat, float scale)
 {
     sScale_9B90 sc(scale);
     node->center = sProd_9B90(mtxMulVec_9B90(mat, &node->center), sc);
@@ -348,8 +345,8 @@ extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* node, sSph
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_GetBoundBox);
 #ifdef SKIP_ASM
 struct sSphereBox_9CE0 {
-    sSphereVec4 mn;
-    sSphereVec4 mx;
+    t4Vector mn;
+    t4Vector mx;
 };
 
 /**
@@ -491,14 +488,14 @@ INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_IsRiderCollision);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sElem_9F98 {
-    sSphereVec4 pos;    // 0x00
+    t4Vector pos;    // 0x00
     float r;            // 0x10
     char pad_0x14[0xC];
 };
 
 struct sNode_9F98 {
     char pad_0x00[0x10];
-    sSphereVec4 pos;    // 0x10
+    t4Vector pos;    // 0x10
     float r;            // 0x20
     char pad_0x24[0x8];
     int count;          // 0x2C
@@ -506,9 +503,9 @@ struct sNode_9F98 {
 };
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sSphereVec4 Sub_9F98(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Sub_9F98(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -521,9 +518,9 @@ static inline sSphereVec4 Sub_9F98(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sSphereVec4 Scale_9F98(const sSphereVec4& v, float s)
+static inline t4Vector Scale_9F98(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -538,7 +535,7 @@ static inline sSphereVec4 Scale_9F98(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_9F98(const sSphereVec4& a, const sSphereVec4& b)
+static inline float Dot_9F98(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -558,9 +555,9 @@ static inline float Dot_9F98(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v / |v|).
-static inline sSphereVec4 Normalize_9F98(const sSphereVec4& v)
+static inline t4Vector Normalize_9F98(const t4Vector& v)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -602,9 +599,9 @@ static inline float Sqrt_9F98(float v)
  * @param outB  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int cRiderSphereTree_IsRiderCollision(sNode_9F98* nodeA, sNode_9F98* nodeB, sSphereVec4* outA, sSphereVec4* outB)
+extern "C" int cRiderSphereTree_IsRiderCollision(sNode_9F98* nodeA, sNode_9F98* nodeB, t4Vector* outA, t4Vector* outB)
 {
-    sSphereVec4 delta;
+    t4Vector delta;
     float sum;
     float ss;
     float dd;
@@ -627,7 +624,7 @@ extern "C" int cRiderSphereTree_IsRiderCollision(sNode_9F98* nodeA, sNode_9F98* 
             ss = sum * sum;
             dd = Dot_9F98(delta, delta);
             if (!(ss < dd)) {
-                sSphereVec4 n = Normalize_9F98(delta);
+                t4Vector n = Normalize_9F98(delta);
                 float overlap = sum - Sqrt_9F98(dd);
                 *outA = Scale_9F98(n, overlap);
                 *outB = Sub_9F98(nodeA->e[i].pos, Scale_9F98(n, nodeA->e[i].r - overlap));
@@ -642,7 +639,7 @@ extern "C" int cRiderSphereTree_IsRiderCollision(sNode_9F98* nodeA, sNode_9F98* 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_IsTriCollision);
 #ifdef SKIP_ASM
-typedef sSphereVec4 sV_A1C0;
+typedef t4Vector sV_A1C0;
 
 struct sKid_A1C0 {
     sV_A1C0 pos;        // 0x00
@@ -661,7 +658,7 @@ struct sNode_A1C0 {
 };
 
 // PORT: the unit declares gIsPointInsideTri with four pointer args; callers also pass a float tolerance in $f12.
-extern "C" int gIsPointInsideTri_eps(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float eps) __asm__("gIsPointInsideTri");
+extern "C" int gIsPointInsideTri_eps(t4Vector* a, t4Vector* b, t4Vector* c, t4Vector* d, float eps) __asm__("gIsPointInsideTri");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sV_A1C0 Sub_A1C0(const sV_A1C0& a, const sV_A1C0& b)
@@ -786,7 +783,7 @@ static inline int Touch_A1C0(const sV_A1C0& c, float r, sV_A1C0* p, sV_A1C0* a, 
     return 0;
 }
 
-// PORT: the unit declares it later as (void*, int, int, int, int, sSphereVec4*, int); defined under its own name bound to the symbol.
+// PORT: the unit declares it later as (void*, int, int, int, int, t4Vector*, int); defined under its own name bound to the symbol.
 extern "C" int cRiderSphereTree_IsTriCollision_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint) __asm__("cRiderSphereTree_IsTriCollision");
 /**
  * Tests the rider's collision spheres against a triangle (one-sided).
@@ -841,7 +838,7 @@ extern "C" int cRiderSphereTree_IsTriCollision_impl(sNode_A1C0* self, sV_A1C0* p
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Is2SidedTriCollision);
 #ifdef SKIP_ASM
-typedef sSphereVec4 sV_AA28;
+typedef t4Vector sV_AA28;
 
 struct sKid_AA28 {
     sV_AA28 pos;        // 0x00
@@ -860,7 +857,7 @@ struct sNode_AA28 {
 };
 
 // PORT: the unit declares gIsPointInsideTri with four pointer args; callers also pass a float tolerance in $f12.
-extern "C" int gIsPointInsideTri_eps(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float eps) __asm__("gIsPointInsideTri");
+extern "C" int gIsPointInsideTri_eps(t4Vector* a, t4Vector* b, t4Vector* c, t4Vector* d, float eps) __asm__("gIsPointInsideTri");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sV_AA28 Sub_AA28(const sV_AA28& a, const sV_AA28& b)
@@ -985,7 +982,7 @@ static inline int Touch_AA28(const sV_AA28& c, float r, sV_AA28* p, sV_AA28* a, 
     return 0;
 }
 
-// PORT: the unit declares it later as (void*, int, int, int, int, sSphereVec4*, int); defined under its own name bound to the symbol.
+// PORT: the unit declares it later as (void*, int, int, int, int, t4Vector*, int); defined under its own name bound to the symbol.
 extern "C" int cRiderSphereTree_Is2SidedTriCollision_impl(sNode_AA28* self, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* np, sV_AA28* outPush, sV_AA28* outPoint) __asm__("cRiderSphereTree_Is2SidedTriCollision");
 /**
  * Tests the rider's collision spheres against a triangle from either side.
@@ -1047,7 +1044,7 @@ extern "C" int gIsBoxSphereInt(void* a, void* b, void* center, void* box, void* 
 
 struct sSphereHit_B2B8 {
     char pad_0x00[0x10];
-    sSphereVec4 center; // 0x10
+    t4Vector center; // 0x10
     float radius;       // 0x20
     int pad_0x24;
     unsigned int mask;  // 0x28
@@ -1055,9 +1052,9 @@ struct sSphereHit_B2B8 {
 };
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sSphereVec4 Scale_B2B8(const sSphereVec4& v, float s)
+static inline t4Vector Scale_B2B8(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1088,12 +1085,12 @@ struct sSphereHit_32FAC0;
  * @param hit  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* boxMin, t3Vector* boxMax, sSphereVec4* outPos, tIntersectInfo* hit)
+extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, tIntersectInfo* hit)
 {
     sSphereHit_B2B8* self = (sSphereHit_B2B8*)tree;
-    sSphereVec4* outNormal = (sSphereVec4*)hit;
-    sSphereVec4 normal;
-    sSphereVec4 dir;
+    t4Vector* outNormal = (t4Vector*)hit;
+    t4Vector normal;
+    t4Vector dir;
     float dist;
     if (gIsBoxSphereInt(boxMin, boxMax, &self->center, &normal, &dir, &dist, self->radius) == 0) {
         return 0;
@@ -1273,7 +1270,7 @@ extern char D_6E0[];
 // returns whether it left a nonzero result in vi2.
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version
 // of the microprogram.
-extern "C" int gIsPointInsideTri(sSphereVec4* corner1, sSphereVec4* corner2, sSphereVec4* corner3, sSphereVec4* testPoint)
+extern "C" int gIsPointInsideTri(t4Vector* corner1, t4Vector* corner2, t4Vector* corner3, t4Vector* testPoint)
 {
     int hit;
     __asm__ __volatile__(
@@ -1300,14 +1297,14 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldIntersectType_IsPatchInt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sCell_B6E0 {
-    sSphereVec4 n[2];   // 0x00 triangle normals (1e10 = not computed, 1e11 = degenerate)
-    sSphereVec4 lo;     // 0x20 bounds (lo.x 1e10 = not computed)
-    sSphereVec4 hi;     // 0x30
+    t4Vector n[2];   // 0x00 triangle normals (1e10 = not computed, 1e11 = degenerate)
+    t4Vector lo;     // 0x20 bounds (lo.x 1e10 = not computed)
+    t4Vector hi;     // 0x30
 };
 
 struct sPatch_B6E0 {
     char pad_0x00[0x10];
-    sSphereVec4 verts[10][10];  // 0x0010
+    t4Vector verts[10][10];  // 0x0010
     sCell_B6E0 fine[9][9];      // 0x0650
     sCell_B6E0 coarse[3][3];    // 0x1A90
 };
@@ -1316,7 +1313,7 @@ struct sVE_B6E0 {
     short delta;
     short pad;
     union {
-        int (*test)(void* self, void* a, void* b, void* c, sSphereVec4* n, void* d, void* e, void* f);
+        int (*test)(void* self, void* a, void* b, void* c, t4Vector* n, void* d, void* e, void* f);
         void (*uv)(void* self, void* obj, float* u, float* v, void* d, void* e, void* f);
     };
 };
@@ -1326,9 +1323,9 @@ struct sQuery_B6E0 {
     int pad_0x04;
     int facing;         // 0x08
     int pad_0x0C;
-    sSphereVec4 dir;    // 0x10
-    sSphereVec4 hi;     // 0x20
-    sSphereVec4 lo;     // 0x30
+    t4Vector dir;    // 0x10
+    t4Vector hi;     // 0x20
+    t4Vector lo;     // 0x30
     char pad_0x40[0x10];
     sVE_B6E0* vt;       // 0x50
 };
@@ -1342,8 +1339,8 @@ struct sHitCache_B6E0 {
 };
 
 // PORT: PS2-only VU0 inline asm (bounds of four points).
-static inline void Bounds_B6E0(sCell_B6E0* c, const sSphereVec4& a, const sSphereVec4& b,
-                               const sSphereVec4& d, const sSphereVec4& e)
+static inline void Bounds_B6E0(sCell_B6E0* c, const t4Vector& a, const t4Vector& b,
+                               const t4Vector& d, const t4Vector& e)
 {
     __asm__(
         "lqc2      $vf2, %2\n"
@@ -1363,8 +1360,8 @@ static inline void Bounds_B6E0(sCell_B6E0* c, const sSphereVec4& a, const sSpher
 }
 
 // PORT: PS2-only VU0 inline asm (unit normal of triangle a b c; returns 1/|n|).
-static inline float TriNormal_B6E0(sSphereVec4& n, const sSphereVec4& a, const sSphereVec4& b,
-                                  const sSphereVec4& c)
+static inline float TriNormal_B6E0(t4Vector& n, const t4Vector& a, const t4Vector& b,
+                                  const t4Vector& c)
 {
     union { int i; float f; } inv;
     __asm__(
@@ -1402,8 +1399,8 @@ static inline int Overlap_B6E0(const sCell_B6E0* c, const sQuery_B6E0* q)
 }
 
 // the cell's k-th triangle normal, built on first use (99999997952 marks a degenerate triangle)
-static inline sSphereVec4& CellNormal_B6E0(sCell_B6E0* cell, int k, const sSphereVec4& a,
-                                           const sSphereVec4& b, const sSphereVec4& c)
+static inline t4Vector& CellNormal_B6E0(sCell_B6E0* cell, int k, const t4Vector& a,
+                                           const t4Vector& b, const t4Vector& c)
 {
     if (cell->n[k].x == 10000000000.0f) {
         if (TriNormal_B6E0(cell->n[k], a, b, c) > 10.0f)
@@ -1474,14 +1471,14 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
             cachedCell = &patch->coarse[cache->u][cache->v];
         else
             cachedCell = &patch->fine[cache->u][cache->v];
-        sSphereVec4* corner00 = &patch->verts[cache->u * rowStep][cache->v * step];
-        sSphereVec4* corner10 = corner00 + step * 10;
-        sSphereVec4* corner01 = corner00 + step;
-        sSphereVec4* corner11 = corner10 + step;
+        t4Vector* corner00 = &patch->verts[cache->u * rowStep][cache->v * step];
+        t4Vector* corner10 = corner00 + step * 10;
+        t4Vector* corner01 = corner00 + step;
+        t4Vector* corner11 = corner10 + step;
         if (cachedCell->lo.x == 10000000000.0f)
             Bounds_B6E0(cachedCell, *corner00, *corner10, *corner01, *corner11);
         if (cache->tri) {
-            sSphereVec4& triNormal0 = CellNormal_B6E0(cachedCell, 0, *corner11, *corner10, *corner01);
+            t4Vector& triNormal0 = CellNormal_B6E0(cachedCell, 0, *corner11, *corner10, *corner01);
             if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
                 sVE_B6E0* vt = query->vt;
                 if (vt[4].test(vthis(query, vt[4]), corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
@@ -1497,7 +1494,7 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
                 }
             }
         } else {
-            sSphereVec4& triNormal1 = CellNormal_B6E0(cachedCell, 1, *corner01, *corner10, *corner00);
+            t4Vector& triNormal1 = CellNormal_B6E0(cachedCell, 1, *corner01, *corner10, *corner00);
             if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
                 sVE_B6E0* vt = query->vt;
                 if (vt[4].test(vthis(query, vt[4]), corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
@@ -1519,16 +1516,16 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
         cache->tri = 0;
         cache->type = 0;
     }
-    sSphereVec4* corner00 = patch->verts[0];
+    t4Vector* corner00 = patch->verts[0];
     for (int cellU = 0; cellU < n; cellU++) {
-        sSphereVec4* corner10 = corner00 + step * 10;
-        sSphereVec4* corner01 = corner00 + step;
-        sSphereVec4* corner11 = corner10 + step;
+        t4Vector* corner10 = corner00 + step * 10;
+        t4Vector* corner01 = corner00 + step;
+        t4Vector* corner11 = corner10 + step;
         for (int cellV = 0; cellV < n; cellV++) {
             if (cell->lo.x == 10000000000.0f)
                 Bounds_B6E0(cell, *corner00, *corner10, *corner01, *corner11);
             if (Overlap_B6E0(cell, query)) {
-                sSphereVec4& triNormal0 = CellNormal_B6E0(cell, 0, *corner11, *corner10, *corner01);
+                t4Vector& triNormal0 = CellNormal_B6E0(cell, 0, *corner11, *corner10, *corner01);
                 if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
                     sVE_B6E0* vt = query->vt;
                     if (vt[4].test(vthis(query, vt[4]), corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
@@ -1550,7 +1547,7 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
                         return 1;
                     }
                 }
-                sSphereVec4& triNormal1 = CellNormal_B6E0(cell, 1, *corner01, *corner10, *corner00);
+                t4Vector& triNormal1 = CellNormal_B6E0(cell, 1, *corner01, *corner10, *corner00);
                 if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
                     sVE_B6E0* vt = query->vt;
                     if (vt[4].test(vthis(query, vt[4]), corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
@@ -1588,14 +1585,11 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldIntersectType_IsMeshInt);
 #ifdef SKIP_ASM
-struct sV4_C0F8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sV4_C0F8 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vDot_C0F8(const sV4_C0F8& a, const sV4_C0F8& b)
+static inline float vDot_C0F8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1624,15 +1618,15 @@ struct sTriMesh_C0F8 {
     short pad2;
     unsigned char* indices;     // 0x4
     sTriBox_C0F8* boxes;        // 0x8
-    sV4_C0F8* verts;            // 0xC
-    sV4_C0F8* normals;          // 0x10
+    t4Vector* verts;            // 0xC
+    t4Vector* normals;          // 0x10
 };
 
 
 struct sVE_C0F8a {
     short delta;
     short index;
-    int (*fn)(void*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, sV4_C0F8*, float*);
+    int (*fn)(void*, t4Vector*, t4Vector*, t4Vector*, t4Vector*, t4Vector*, t4Vector*, float*);
 };
 struct sVE_C0F8b {
     short delta;
@@ -1644,7 +1638,7 @@ struct sTriTester_C0F8 {
     char pad0[0x8];
     int useNormal;          // 0x8
     char padC[0x4];
-    sV4_C0F8 dir;           // 0x10
+    t4Vector dir;           // 0x10
     char pad20[0x30];
     sVE_C0F8a* vt;          // 0x50
 };
@@ -1664,20 +1658,20 @@ struct sTriTester_C0F8 {
  */
 extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int flag, tIntersectInfo* out)
 {
-    sV4_C0F8 pos;
-    sV4_C0F8 hn;
+    t4Vector pos;
+    t4Vector hn;
     float hitParam;
     int n = 0;
     if (mesh->numTris < 11) {
         for (int i = 0; i < mesh->numTris; i++) {
-            sV4_C0F8* nrm = &mesh->normals[i];
+            t4Vector* nrm = &mesh->normals[i];
             if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
                 continue;
             }
-                        sV4_C0F8* vertices = mesh->verts;
-            sV4_C0F8* corner0 = &vertices[mesh->indices[i * 3]];
-            sV4_C0F8* corner1 = &vertices[mesh->indices[i * 3 + 1]];
-            sV4_C0F8* corner2 = &vertices[mesh->indices[i * 3 + 2]];
+                        t4Vector* vertices = mesh->verts;
+            t4Vector* corner0 = &vertices[mesh->indices[i * 3]];
+            t4Vector* corner1 = &vertices[mesh->indices[i * 3 + 1]];
+            t4Vector* corner2 = &vertices[mesh->indices[i * 3 + 2]];
             int isHit;
             if (flag != 0) {
                 isHit = self->vt[5].fn(vthis(self, self->vt[5]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
@@ -1696,13 +1690,13 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
             record->Mesh = -1;
             record->Seg = -1;
             record->Stype = -1;
-            (*(sV4_C0F8*)&record->Ivel) = t4vect_Zero;
-            (*(sV4_C0F8*)&record->Iangvel) = t4vect_Zero;
+            (*(t4Vector*)&record->Ivel) = t4vect_Zero;
+            (*(t4Vector*)&record->Iangvel) = t4vect_Zero;
             (*(int*)&record->T) = 0;
             (*(int*)&record->u) = 0;
             (*(int*)&record->v) = 0;
-            (*(sV4_C0F8*)&record->Ipos) = pos;
-            (*(sV4_C0F8*)&record->Inorm) = hn;
+            (*(t4Vector*)&record->Ipos) = pos;
+            (*(t4Vector*)&record->Inorm) = hn;
             record->Iparam = hitParam;
             record->Face = i;
             (*(int*)&record->Patch) = 0;
@@ -1718,14 +1712,14 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
             }
             int end = (boxIndex + 1) * 10 < mesh->numTris ? (boxIndex + 1) * 10 : mesh->numTris;
             for (int i = boxIndex * 10; i < end; i++) {
-                sV4_C0F8* nrm = &mesh->normals[i];
+                t4Vector* nrm = &mesh->normals[i];
                 if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
                     continue;
                 }
-                                sV4_C0F8* vertices = mesh->verts;
-                sV4_C0F8* corner0 = &vertices[mesh->indices[i * 3]];
-                sV4_C0F8* corner1 = &vertices[mesh->indices[i * 3 + 1]];
-                sV4_C0F8* corner2 = &vertices[mesh->indices[i * 3 + 2]];
+                                t4Vector* vertices = mesh->verts;
+                t4Vector* corner0 = &vertices[mesh->indices[i * 3]];
+                t4Vector* corner1 = &vertices[mesh->indices[i * 3 + 1]];
+                t4Vector* corner2 = &vertices[mesh->indices[i * 3 + 2]];
                 int isHit;
                 if (flag != 0) {
                     isHit = self->vt[5].fn(vthis(self, self->vt[5]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
@@ -1744,13 +1738,13 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
                 record->Mesh = -1;
                 record->Seg = -1;
                 record->Stype = -1;
-                (*(sV4_C0F8*)&record->Ivel) = t4vect_Zero;
-                (*(sV4_C0F8*)&record->Iangvel) = t4vect_Zero;
+                (*(t4Vector*)&record->Ivel) = t4vect_Zero;
+                (*(t4Vector*)&record->Iangvel) = t4vect_Zero;
                 (*(int*)&record->T) = 0;
                 (*(int*)&record->u) = 0;
                 (*(int*)&record->v) = 0;
-                (*(sV4_C0F8*)&record->Ipos) = pos;
-                (*(sV4_C0F8*)&record->Inorm) = hn;
+                (*(t4Vector*)&record->Ipos) = pos;
+                (*(t4Vector*)&record->Inorm) = hn;
                 record->Iparam = hitParam;
                 record->Face = i;
                 (*(int*)&record->Patch) = 0;
@@ -1789,19 +1783,19 @@ extern "C" void* SphereTree_SphereTree(SphereTree* self)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_init);
 #ifdef SKIP_ASM
-extern sSphereVec4 gSphTreeAlignAxis[8];
-extern sSphereVec4 t4vect_Origin;
+extern t4Vector gSphTreeAlignAxis[8];
+extern t4Vector t4vect_Origin;
 
 /**
  * Resets a sphere tree's placement: default axes (gSphTreeAlignAxis), centre at the origin (+0x80) and scale 1 (+0x90).
  */
 extern "C" void SphereTree_init(SphereTree* self)
 {
-    sSphereVec4* dst = (sSphereVec4*)self;
+    t4Vector* dst = (t4Vector*)self;
     for (int i = 0; i < 8; i++) {
         dst[i] = gSphTreeAlignAxis[i];
     }
-    *(sSphereVec4*)&self->transCenter = t4vect_Origin;
+    *(t4Vector*)&self->transCenter = t4vect_Origin;
     self->scale = 1.0f;
 }
 #endif
@@ -1919,9 +1913,9 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_TransformAbs);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-static inline sSphereVec4 mtxMulVec_C648(sSphereVec4* m, const sSphereVec4& v)
+static inline t4Vector mtxMulVec_C648(t4Vector* m, const t4Vector& v)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -1943,9 +1937,9 @@ static inline sSphereVec4 mtxMulVec_C648(sSphereVec4* m, const sSphereVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sSphereVec4 scale_C648(const sSphereVec4& v, float s)
+static inline t4Vector scale_C648(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1963,11 +1957,11 @@ struct sVec3_C648 {
     sVec3_C648(float a, float b, float c) { x = a; y = b; z = c; }
 };
 
-struct sVec4_C648 : sSphereVec4 {
+struct sVec4_C648 : t4Vector {
     sVec4_C648(const sVec3_C648& v, const float& ww) { x = v.x; y = v.y; z = v.z; w = ww; }
 };
 
-extern sSphereVec4 gSphTreeAlignAxis[8];
+extern t4Vector gSphTreeAlignAxis[8];
 
 /**
  * Places the sphere tree with an absolute transform and scale.
@@ -1978,16 +1972,16 @@ extern sSphereVec4 gSphTreeAlignAxis[8];
  * @param transMat      the transform (On Tour transMat)
  * @param scale  the scale
  */
-extern "C" void SphereTree_TransformAbs(SphereTree* self, sSphereVec4* transMat, float scale)
+extern "C" void SphereTree_TransformAbs(SphereTree* self, t4Vector* transMat, float scale)
 {
-    sSphereVec4* pos = (sSphereVec4*)self;
-    sSphereVec4* neg = (sSphereVec4*)(&self->axis[7]);
+    t4Vector* pos = (t4Vector*)self;
+    t4Vector* neg = (t4Vector*)(&self->axis[7]);
     for (int i = 0; i < 4; i++) {
         pos[i] = mtxMulVec_C648(transMat, scale_C648(gSphTreeAlignAxis[i], scale));
         neg[-i] = scale_C648(pos[i], -1.0f);
     }
     float* n = (float*)self->treeInfo;
-    *(sSphereVec4*)&self->transCenter = mtxMulVec_C648(transMat, sVec4_C648(sVec3_C648(n[5] * scale, n[6] * scale, n[7] * scale), 1.0f));
+    *(t4Vector*)&self->transCenter = mtxMulVec_C648(transMat, sVec4_C648(sVec3_C648(n[5] * scale, n[6] * scale, n[7] * scale), 1.0f));
     self->scale = scale;
 }
 #endif
@@ -1997,7 +1991,7 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_TransformRel);
 #ifdef SKIP_ASM
 
 
-extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* m, float scale) __asm__("SphereTree_TransformRel");
+extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* m, float scale) __asm__("SphereTree_TransformRel");
 
 /**
  * Transforms a sphere tree's four axis directions (their opposites follow) and its centre, then scales them
@@ -2006,14 +2000,14 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* m, floa
  * @param mat  the transform (On Tour const t4Matrix& transMat)
  * @param scale  uniform scale (On Tour s)
  */
-extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* mat, float scale)
+extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* mat, float scale)
 {
     for (int i = 0; i < 4; i++) {
-        ((sSphereVec4*)&self->axis[0])[i] = Scale_B2B8(mtxMulVec_9B90(mat, &((sSphereVec4*)&self->axis[0])[i]), scale);
-        ((sSphereVec4*)&self->axis[0])[7 - i] = Scale_B2B8(((sSphereVec4*)&self->axis[0])[i], -1.0f);
+        ((t4Vector*)&self->axis[0])[i] = Scale_B2B8(mtxMulVec_9B90(mat, &((t4Vector*)&self->axis[0])[i]), scale);
+        ((t4Vector*)&self->axis[0])[7 - i] = Scale_B2B8(((t4Vector*)&self->axis[0])[i], -1.0f);
     }
-    sSphereVec4 scaledCenter;
-    sSphereVec4 transformedCenter = mtxMulVec_9B90(mat, (sSphereVec4*)&self->transCenter);
+    t4Vector scaledCenter;
+    t4Vector transformedCenter = mtxMulVec_9B90(mat, (t4Vector*)&self->transCenter);
     t4Vector sc;
     sc.w = 1.0f;
     sc.x = scale;
@@ -2023,7 +2017,7 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* mat, fl
     scaledCenter.y = transformedCenter.y * sc.y;
     scaledCenter.z = transformedCenter.z * sc.z;
     scaledCenter.w = transformedCenter.w * sc.w;
-    *(sSphereVec4*)&self->transCenter = scaledCenter;
+    *(t4Vector*)&self->transCenter = scaledCenter;
     self->scale = self->scale * scale;
 }
 #endif
@@ -2221,7 +2215,7 @@ struct sSphereTreeInfo_CBF8 {
 };
 
 struct sSphereOct_CBF8 {
-    sSphereVec4 dirs[8];            // 0x00
+    t4Vector dirs[8];            // 0x00
     char pad_0x80[0x10];
     float scale;                    // 0x90
     char pad_0x94[4];
@@ -2229,9 +2223,9 @@ struct sSphereOct_CBF8 {
 };
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sSphereVec4 Scale_CBF8(const sSphereVec4& v, float s)
+static inline t4Vector Scale_CBF8(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2246,9 +2240,9 @@ static inline sSphereVec4 Scale_CBF8(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sSphereVec4 Add_CBF8(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Add_CBF8(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2280,7 +2274,7 @@ static inline sSphereVec4 Add_CBF8(const sSphereVec4& a, const sSphereVec4& b)
 extern "C" int SphereTree_isTreeCollision(SphereTree* selfp, SphereTree* other, t4Vector* posp, int depth, int base, t4Vector* outPush, t4Vector* outContact)
 {
     sSphereOct_CBF8* self = (sSphereOct_CBF8*)selfp;
-    sSphereVec4 childPos;
+    t4Vector childPos;
     unsigned char mask = self->tree->masks[base];
     if (depth < self->tree->depth) {
         if (depth >= 4) {
@@ -2290,7 +2284,7 @@ extern "C" int SphereTree_isTreeCollision(SphereTree* selfp, SphereTree* other, 
             float off = self->tree->levels[depth + 1].offset;
             for (int i = 0; i < 8; i++) {
                 if ((mask >> i) & 1) {
-                    childPos = Add_CBF8(*(sSphereVec4*)posp, Scale_CBF8(self->dirs[i], off));
+                    childPos = Add_CBF8(*(t4Vector*)posp, Scale_CBF8(self->dirs[i], off));
                     if (SphereTree_isSphereCollision((SphereTree*)other, (t4Vector*)(&childPos), self->tree->levels[depth].radius * self->scale, (t4Vector*)(&other->transCenter), 0, 0, outPush, outContact) &&
                         SphereTree_isTreeCollision((SphereTree*)self, other, (t4Vector*)(&childPos), depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPush, outContact)) {
                         return 1;
@@ -2323,7 +2317,7 @@ struct sSphereTreeInfo_CDB0 {
 };
 
 struct sSphereOct_CDB0 {
-    sSphereVec4 dirs[8];            // 0x00
+    t4Vector dirs[8];            // 0x00
     char pad_0x80[0x10];
     float scale;                    // 0x90
     char pad_0x94[4];
@@ -2331,9 +2325,9 @@ struct sSphereOct_CDB0 {
 };
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sSphereVec4 Scale_CDB0(const sSphereVec4& v, float s)
+static inline t4Vector Scale_CDB0(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2348,9 +2342,9 @@ static inline sSphereVec4 Scale_CDB0(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sSphereVec4 Add_CDB0(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Add_CDB0(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2363,9 +2357,9 @@ static inline sSphereVec4 Add_CDB0(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sSphereVec4 Sub_CDB0(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Sub_CDB0(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2378,7 +2372,7 @@ static inline sSphereVec4 Sub_CDB0(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_CDB0(const sSphereVec4& a, const sSphereVec4& b)
+static inline float Dot_CDB0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2398,9 +2392,9 @@ static inline float Dot_CDB0(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v / |v|).
-static inline sSphereVec4 Normalize_CDB0(const sSphereVec4& v)
+static inline t4Vector Normalize_CDB0(const t4Vector& v)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -2449,7 +2443,7 @@ extern "C" int SphereTree_isSphereCollision(SphereTree* selfp, t4Vector* sphereP
 {
     sSphereOct_CDB0* self = (sSphereOct_CDB0*)selfp;
     float sum = sphereRadius + self->tree->levels[depth].radius * self->scale;
-    sSphereVec4 delta = Sub_CDB0(*(sSphereVec4*)spherePos, *(sSphereVec4*)pos);
+    t4Vector delta = Sub_CDB0(*(t4Vector*)spherePos, *(t4Vector*)pos);
     float dd = Dot_CDB0(delta, delta);
     if (!(dd < sum * sum))
         return 0;
@@ -2459,17 +2453,17 @@ extern "C" int SphereTree_isSphereCollision(SphereTree* selfp, t4Vector* sphereP
         distance = self->tree->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                sSphereVec4 childPos = Add_CDB0(*(sSphereVec4*)pos, Scale_CDB0(self->dirs[i], distance));
+                t4Vector childPos = Add_CDB0(*(t4Vector*)pos, Scale_CDB0(self->dirs[i], distance));
                 if (SphereTree_isSphereCollision((SphereTree*)self, spherePos, sphereRadius, (t4Vector*)(&childPos), depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outA, outB))
                     return 1;
             }
         }
         return 0;
     }
-    sSphereVec4 n = Normalize_CDB0(delta);
+    t4Vector n = Normalize_CDB0(delta);
     distance = sum - Sqrt_CDB0(dd);
-    *(sSphereVec4*)outA = Scale_CDB0(n, distance);
-    *(sSphereVec4*)outB = Sub_CDB0(*(sSphereVec4*)spherePos, Scale_CDB0(n, sphereRadius - distance));
+    *(t4Vector*)outA = Scale_CDB0(n, distance);
+    *(t4Vector*)outB = Sub_CDB0(*(t4Vector*)spherePos, Scale_CDB0(n, sphereRadius - distance));
     return 1;
 }
 #endif
@@ -2484,9 +2478,9 @@ extern "C" int SphereTree_isBoxCollision(SphereTree* self, t3Vector* a1, t3Vecto
 
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sSphereVec4 Scale_D028(const sSphereVec4& v, float s)
+static inline t4Vector Scale_D028(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2501,9 +2495,9 @@ static inline sSphereVec4 Scale_D028(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sSphereVec4 Add_D028(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Add_D028(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2535,8 +2529,8 @@ static inline sSphereVec4 Add_D028(const sSphereVec4& a, const sSphereVec4& b)
 extern "C" int SphereTree_isBoxCollision(SphereTree* selfp, t3Vector* boxMin, t3Vector* boxMax, t4Vector* pos, int depth, int base, t4Vector* outPos, t4Vector* outNormal)
 {
     SphereTree* self = selfp;
-    sSphereVec4 normal;
-    sSphereVec4 dir;
+    t4Vector normal;
+    t4Vector dir;
     float dist;
     if (gIsBoxSphereInt(boxMin, boxMax, pos, &normal, &dir, &dist, ((self->treeInfo)->levels)[depth].radius * self->scale) == 0) {
         return 0;
@@ -2546,7 +2540,7 @@ extern "C" int SphereTree_isBoxCollision(SphereTree* selfp, t3Vector* boxMin, t3
         float off = ((self->treeInfo)->levels)[depth + 1].cenOffset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                sSphereVec4 childPos = Add_D028(*(sSphereVec4*)pos, Scale_D028(((sSphereVec4*)&self->axis[0])[i], off));
+                t4Vector childPos = Add_D028(*(t4Vector*)pos, Scale_D028(((t4Vector*)&self->axis[0])[i], off));
                 if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * ((self->treeInfo)->levels)[depth].indexOffset + base, outPos, outNormal)) {
                     return 1;
                 }
@@ -2554,8 +2548,8 @@ extern "C" int SphereTree_isBoxCollision(SphereTree* selfp, t3Vector* boxMin, t3
         }
         return 0;
     }
-    *(sSphereVec4*)outNormal = normal;
-    *(sSphereVec4*)outPos = Scale_D028(dir, dist);
+    *(t4Vector*)outNormal = normal;
+    *(t4Vector*)outPos = Scale_D028(dir, dist);
     return 1;
 }
 #endif
@@ -2567,9 +2561,9 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_checkPlaneCollision);
 
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sSphereVec4 Scale_D208(const sSphereVec4& v, float s)
+static inline t4Vector Scale_D208(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2584,9 +2578,9 @@ static inline sSphereVec4 Scale_D208(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sSphereVec4 Add_D208(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Add_D208(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2599,9 +2593,9 @@ static inline sSphereVec4 Add_D208(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sSphereVec4 Sub_D208(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Sub_D208(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2614,7 +2608,7 @@ static inline sSphereVec4 Sub_D208(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_D208(const sSphereVec4& a, const sSphereVec4& b)
+static inline float Dot_D208(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2633,9 +2627,9 @@ static inline float Dot_D208(const sSphereVec4& a, const sSphereVec4& b)
     return r;
 }
 
-static inline sSphereVec4 ZeroW_D208(const sSphereVec4& in)
+static inline t4Vector ZeroW_D208(const t4Vector& in)
 {
-    sSphereVec4 r = in;
+    t4Vector r = in;
     r.w = 0;
     return r;
 }
@@ -2660,7 +2654,7 @@ static inline sSphereVec4 ZeroW_D208(const sSphereVec4& in)
 extern "C" void SphereTree_checkPlaneCollision(SphereTree* selfp, void* plane, t4Vector* pos, int depth, int base, t4Vector* outA, t4Vector* outB)
 {
     SphereTree* self = selfp;
-    float planeDist = Dot_D208(*(sSphereVec4*)plane, *(sSphereVec4*)pos);
+    float planeDist = Dot_D208(*(t4Vector*)plane, *(t4Vector*)pos);
     float nodeRadius = ((self->treeInfo)->levels)[depth].radius * self->scale;
     if (!(planeDist < nodeRadius + self->worstCase))
         return;
@@ -2671,7 +2665,7 @@ extern "C" void SphereTree_checkPlaneCollision(SphereTree* selfp, void* plane, t
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
-                sSphereVec4 childPos = Add_D208(*(sSphereVec4*)pos, Scale_D208(((sSphereVec4*)&self->axis[0])[k], distance));
+                t4Vector childPos = Add_D208(*(t4Vector*)pos, Scale_D208(((t4Vector*)&self->axis[0])[k], distance));
                 SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * ((self->treeInfo)->levels)[depth].indexOffset + base, outA, outB);
             }
         }
@@ -2679,9 +2673,9 @@ extern "C" void SphereTree_checkPlaneCollision(SphereTree* selfp, void* plane, t
     }
     distance = planeDist - nodeRadius;
     if (distance < self->worstCase) {
-        sSphereVec4 n = ZeroW_D208(*(sSphereVec4*)plane);
-        *(sSphereVec4*)outA = Scale_D208(n, distance);
-        *(sSphereVec4*)outB = Sub_D208(*(sSphereVec4*)pos, Scale_D208(n, planeDist));
+        t4Vector n = ZeroW_D208(*(t4Vector*)plane);
+        *(t4Vector*)outA = Scale_D208(n, distance);
+        *(t4Vector*)outB = Sub_D208(*(t4Vector*)pos, Scale_D208(n, planeDist));
         self->worstCase = distance;
     }
 }
@@ -2692,7 +2686,7 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_isSphereInsideTri);
 #ifdef SKIP_ASM
 // PORT: this caller passes a tolerance in $f12 that the unit's 4-arg gIsPointInsideTri never reads;
 // bind the 5-arg form to the same symbol.
-extern "C" int gIsPointInsideTri_tol(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float tol) __asm__("gIsPointInsideTri");
+extern "C" int gIsPointInsideTri_tol(t4Vector* a, t4Vector* b, t4Vector* c, t4Vector* d, float tol) __asm__("gIsPointInsideTri");
 
 /**
  * Tells whether a sphere's centre lies inside a triangle: forwards to gIsPointInsideTri with tolerance 1e-4.
@@ -2705,7 +2699,7 @@ extern "C" int gIsPointInsideTri_tol(sSphereVec4* a, sSphereVec4* b, sSphereVec4
  * @param sphereCenter  the sphere's centre (On Tour center)
  * @return 1 when the centre is inside, else 0
  */
-extern "C" int SphereTree_isSphereInsideTri(SphereTree* self, sSphereVec4* corner1, sSphereVec4* corner2, sSphereVec4* corner3, sSphereVec4* sphereCenter)
+extern "C" int SphereTree_isSphereInsideTri(SphereTree* self, t4Vector* corner1, t4Vector* corner2, t4Vector* corner3, t4Vector* sphereCenter)
 {
     return gIsPointInsideTri_tol(corner1, corner2, corner3, sphereCenter, 9.999999747378752e-05f);
 }
@@ -2731,9 +2725,9 @@ struct sSphereTreeInfo_D470 {
 
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sSphereVec4 Scale_D470(const sSphereVec4& v, float s)
+static inline t4Vector Scale_D470(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2748,9 +2742,9 @@ static inline sSphereVec4 Scale_D470(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sSphereVec4 Add_D470(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Add_D470(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2763,9 +2757,9 @@ static inline sSphereVec4 Add_D470(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sSphereVec4 Sub_D470(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector Sub_D470(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2778,7 +2772,7 @@ static inline sSphereVec4 Sub_D470(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_D470(const sSphereVec4& a, const sSphereVec4& b)
+static inline float Dot_D470(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2798,7 +2792,7 @@ static inline float Dot_D470(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_D470(const sSphereVec4& v)
+static inline float Length_D470(const t4Vector& v)
 {
     float r;
     int t;
@@ -2827,7 +2821,7 @@ static inline float Sqrt_D470(float x)
 }
 
 // Does the segment from the start point (e = center - start) along g pass within sqrt(rr) of the center?
-static inline bool SegHit_D470(const sSphereVec4& e, const sSphereVec4& g, float ee, float rr)
+static inline bool SegHit_D470(const t4Vector& e, const t4Vector& g, float ee, float rr)
 {
     float len = Length_D470(g);
     float proj = Dot_D470(e, g) / len;
@@ -2845,9 +2839,9 @@ static inline bool SegHit_D470(const sSphereVec4& e, const sSphereVec4& g, float
 }
 
 // PORT: the unit's 5-arg SphereTree_isSphereInsideTri also receives the radius in $f12 here.
-extern "C" int SphereTree_isSphereInsideTri_r(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float r) __asm__("SphereTree_isSphereInsideTri");
+extern "C" int SphereTree_isSphereInsideTri_r(void* self, t4Vector* a, t4Vector* b, t4Vector* c, t4Vector* d, float r) __asm__("SphereTree_isSphereInsideTri");
 // PORT: the unit declares SphereTree_checkTriCollision as returning int; it returns nothing.
-extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, sSphereVec4* a3, sSphereVec4* v, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB) __asm__("SphereTree_checkTriCollision");
+extern "C" void SphereTree_checkTriCollision_v(void* selfp, t4Vector* a1, t4Vector* a2, t4Vector* a3, t4Vector* v, t4Vector* pos, int depth, int base, t4Vector* outA, t4Vector* outB) __asm__("SphereTree_checkTriCollision");
 
 /**
  * Recursive step of the sphere tree's triangle test: checks one sphere and descends into its children.
@@ -2875,7 +2869,7 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* a1, sSp
  */
 // Sphere tree against the triangle (a1, a2, a3) moving along v: records the deepest
 // penetration below self->best (*outA = push-out vector, *outB = contact point).
-extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1, sSphereVec4* point2, sSphereVec4* point3, sSphereVec4* uNorm, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB)
+extern "C" void SphereTree_checkTriCollision_v(void* selfp, t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* uNorm, t4Vector* pos, int depth, int base, t4Vector* outA, t4Vector* outB)
 {
     SphereTree* self = (SphereTree*)selfp;
     float planeDist = Dot_D470(*uNorm, Sub_D470(*pos, *point1));
@@ -2891,7 +2885,7 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
     if (!(depth < ((sSphereTreeInfo_D470*)self->treeInfo)->depth && depth < 3 && mask != 0)) {
         leaf = 1;
     }
-    sSphereVec4 planePoint = Sub_D470(*pos, Scale_D470(*uNorm, planeDist));
+    t4Vector planePoint = Sub_D470(*pos, Scale_D470(*uNorm, planeDist));
     if (SphereTree_isSphereInsideTri_r(self, point1, point2, point3, &planePoint, levelRadius) == 0) {
         if (leaf) {
             return;
@@ -2899,19 +2893,19 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
         if (levelRadius < 20.0f) {
             return;
         }
-        sSphereVec4 fromCorner1 = Sub_D470(*pos, *point1);
+        t4Vector fromCorner1 = Sub_D470(*pos, *point1);
         float rr = levelRadius * levelRadius;
         float ee = Dot_D470(fromCorner1, fromCorner1);
         if (rr < ee) {
-            sSphereVec4 edge12 = Sub_D470(*point2, *point1);
+            t4Vector edge12 = Sub_D470(*point2, *point1);
             bool miss = !SegHit_D470(fromCorner1, edge12, ee, rr);
             if (miss) {
-                sSphereVec4 edge13 = Sub_D470(*point3, *point1);
+                t4Vector edge13 = Sub_D470(*point3, *point1);
                 miss = !SegHit_D470(fromCorner1, edge13, ee, rr);
                 if (miss) {
-                    sSphereVec4 fromCorner2 = Sub_D470(*pos, *point2);
+                    t4Vector fromCorner2 = Sub_D470(*pos, *point2);
                     float ee3 = Dot_D470(fromCorner2, fromCorner2);
-                    sSphereVec4 edge23 = Sub_D470(*point3, *point2);
+                    t4Vector edge23 = Sub_D470(*point3, *point2);
                     miss = !SegHit_D470(fromCorner2, edge23, ee3, rr);
                     if (miss) {
                         return;
@@ -2925,7 +2919,7 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
-                sSphereVec4 childPos = Add_D470(*pos, Scale_D470(((sSphereVec4*)&self->axis[0])[k], f));
+                t4Vector childPos = Add_D470(*pos, Scale_D470(((t4Vector*)&self->axis[0])[k], f));
                 SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1, (k + 1) * ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth].stride + base, outA, outB);
             }
         }
@@ -2933,7 +2927,7 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
     }
     float f = planeDist - levelRadius;
     if (f < self->worstCase) {
-        sSphereVec4 n = Scale_D470(*uNorm, -f);
+        t4Vector n = Scale_D470(*uNorm, -f);
         *outA = n;
         *outB = planePoint;
         self->worstCase = f;
@@ -2990,12 +2984,9 @@ extern "C" void BXSORT_shell(int n, int* keys, int* vals)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_populateSortAxis);
 #ifdef SKIP_ASM
-struct sV4_DB40 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_DB40(const sV4_DB40& a, const sV4_DB40& b)
+static inline float vu0Dot_DB40(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -3015,9 +3006,9 @@ static inline float vu0Dot_DB40(const sV4_DB40& a, const sV4_DB40& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_DB40 vu0Scale_DB40(const sV4_DB40& v, float s)
+static inline t4Vector vu0Scale_DB40(const t4Vector& v, float s)
 {
-    sV4_DB40 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3033,7 +3024,7 @@ static inline sV4_DB40 vu0Scale_DB40(const sV4_DB40& v, float s)
 extern "C" void BXSORT_shell(int n, int* keys, int* idx);
 
 struct sBox_DB40 {
-    sV4_DB40 axes[4];   // 0x00
+    t4Vector axes[4];   // 0x00
     char pad40[0x5C];
     int order[8];       // 0x9C
 };
@@ -3050,9 +3041,9 @@ struct sBox_DB40 {
 extern "C" void SphereTree_populateSortAxis(SphereTree* vself, t4Vector* vdir)
 {
     sBox_DB40* self = (sBox_DB40*)vself;
-    sV4_DB40* dir = (sV4_DB40*)vdir;
+    t4Vector* dir = (t4Vector*)vdir;
     int keys[8];
-    sV4_DB40 scaledDir = vu0Scale_DB40(*dir, -1000.0f);
+    t4Vector scaledDir = vu0Scale_DB40(*dir, -1000.0f);
     int i;
     for (i = 0; i < 4; i++) {
         int n = (int)vu0Dot_DB40(self->axes[i], scaledDir);
@@ -3272,9 +3263,9 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_cWorldLine);
 extern char cWorldLine_vtbl[];
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
-static inline sSphereVec4 sphereCapsuleSub(sSphereVec4* a, sSphereVec4* b)
+static inline t4Vector sphereCapsuleSub(t4Vector* a, t4Vector* b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -3290,9 +3281,9 @@ static inline sSphereVec4 sphereCapsuleSub(sSphereVec4* a, sSphereVec4* b)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
-static inline sSphereVec4 sphereCapsuleAdd(sSphereVec4* a, sSphereVec4* b)
+static inline t4Vector sphereCapsuleAdd(t4Vector* a, t4Vector* b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -3308,9 +3299,9 @@ static inline sSphereVec4 sphereCapsuleAdd(sSphereVec4* a, sSphereVec4* b)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v / s).
-static inline sSphereVec4 sphereCapsuleDiv(const sSphereVec4& v, float s)
+static inline t4Vector sphereCapsuleDiv(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         ".set push\n"
@@ -3329,7 +3320,7 @@ static inline sSphereVec4 sphereCapsuleDiv(const sSphereVec4& v, float s)
     return r;
 }
 
-struct sSphereV4_E100 : sSphereVec4 {
+struct sSphereV4_E100 : t4Vector {
     sSphereV4_E100(float ax, float ay, float az, float aw)
     {
         x = ax;
@@ -3354,25 +3345,25 @@ struct sSphereV4_E100 : sSphereVec4 {
  * @param idealParam  the preferred hit parameter (On Tour aIdealParam)
  * @return @p self
  */
-extern "C" cWorldLine* cWorldLine_cWorldLine(cWorldLine* self, sSphereVec4* startPoint, sSphereVec4* endPoint,
+extern "C" cWorldLine* cWorldLine_cWorldLine(cWorldLine* self, t4Vector* startPoint, t4Vector* endPoint,
                                              int state, float idealParam)
 {
     self->mPrecision = state;
     self->mVtbl = (void**)cWorldLine_vtbl;
     self->useRejectNormal = 0;
     self->isTransformed = 0;
-    *(sSphereVec4*)&self->origP0 = *startPoint;
-    *(sSphereVec4*)&self->p0 = *(sSphereVec4*)&self->origP0;
-    *(sSphereVec4*)&self->origDp = sphereCapsuleSub(endPoint, startPoint);
-    *(sSphereVec4*)&self->dp = *(sSphereVec4*)&self->origDp;
+    *(t4Vector*)&self->origP0 = *startPoint;
+    *(t4Vector*)&self->p0 = *(t4Vector*)&self->origP0;
+    *(t4Vector*)&self->origDp = sphereCapsuleSub(endPoint, startPoint);
+    *(t4Vector*)&self->dp = *(t4Vector*)&self->origDp;
     self->idealParam = idealParam;
-    *(sSphereVec4*)&self->boxMax = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
+    *(t4Vector*)&self->boxMax = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y > endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z > endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    *(sSphereVec4*)&self->boxMin = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
+    *(t4Vector*)&self->boxMin = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y < endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z < endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    *(sSphereVec4*)&self->boxCenter = sphereCapsuleDiv(sphereCapsuleAdd((sSphereVec4*)&self->boxMin, (sSphereVec4*)&self->boxMax), 2.0f);
+    *(t4Vector*)&self->boxCenter = sphereCapsuleDiv(sphereCapsuleAdd((t4Vector*)&self->boxMin, (t4Vector*)&self->boxMax), 2.0f);
     return (self);
 }
 #endif
@@ -3391,9 +3382,9 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsInBoxTransformed);
  */
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
 // segment self->p0 .. p0+dir overlaps the box [mn, mx]?
-extern "C" int cWorldLine_IsInBoxTransformed(cWorldLine* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldLine_IsInBoxTransformed(cWorldLine* self, t4Vector* mn, t4Vector* mx)
 {
-    sSphereVec4 endPoint = sphereCapsuleAdd((sSphereVec4*)&self->p0, (sSphereVec4*)&self->dp);
+    t4Vector endPoint = sphereCapsuleAdd((t4Vector*)&self->p0, (t4Vector*)&self->dp);
     if ((self->p0.x < mn->x && endPoint.x < mn->x) || (mx->x < self->p0.x && mx->x < endPoint.x) ||
         (self->p0.y < mn->y && endPoint.y < mn->y) || (mx->y < self->p0.y && mx->y < endPoint.y) ||
         (self->p0.z < mn->z && endPoint.z < mn->z) || (mx->z < self->p0.z && mx->z < endPoint.z)) {
@@ -3408,7 +3399,7 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_Transform);
 #ifdef SKIP_ASM
 // Componentwise product a * b; the base ctor takes the four products as arguments.
 struct sSphereProd_E398 : sSphereV4_E100 {
-    sSphereProd_E398(const sSphereVec4& a, const sSphereVec4& b)
+    sSphereProd_E398(const t4Vector& a, const t4Vector& b)
         : sSphereV4_E100(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w)
     {
     }
@@ -3425,11 +3416,11 @@ struct sSphereProd_E398 : sSphereV4_E100 {
  * @param scale  the uniform scale applied after the matrix
  */
 // Transforms the capsule's base segment (p0b, dirb) by a matrix and a uniform scale (w kept at 1).
-extern "C" void cWorldLine_Transform(cWorldLine* self, sSphereVec4* mat, float scale)
+extern "C" void cWorldLine_Transform(cWorldLine* self, t4Vector* mat, float scale)
 {
     sSphereV4_E100 sc(scale, scale, scale, 1.0f);
-    *(sSphereVec4*)&self->p0 = sSphereProd_E398(mtxMulVec_9B90(mat, (sSphereVec4*)&self->origP0), sc);
-    *(sSphereVec4*)&self->dp = sSphereProd_E398(mtxMulVec_9B90(mat, (sSphereVec4*)&self->origDp), sc);
+    *(t4Vector*)&self->p0 = sSphereProd_E398(mtxMulVec_9B90(mat, (t4Vector*)&self->origP0), sc);
+    *(t4Vector*)&self->dp = sSphereProd_E398(mtxMulVec_9B90(mat, (t4Vector*)&self->origDp), sc);
     self->isTransformed = 1;
 }
 #endif
@@ -3456,10 +3447,10 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsTriInt);
 #ifdef SKIP_ASM
 // PORT: this caller passes a tolerance in $f12 that the unit's 4-arg gIsPointInsideTri never reads;
 // bind the 5-arg form to the same symbol.
-extern "C" int gIsPointInsideTri_tol(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float tol) __asm__("gIsPointInsideTri");
+extern "C" int gIsPointInsideTri_tol(t4Vector* a, t4Vector* b, t4Vector* c, t4Vector* d, float tol) __asm__("gIsPointInsideTri");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_E4D0(const sSphereVec4& a, const sSphereVec4& b)
+static inline float vu0Dot_E4D0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -3479,9 +3470,9 @@ static inline float vu0Dot_E4D0(const sSphereVec4& a, const sSphereVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sSphereVec4 vu0Sub_E4D0(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector vu0Sub_E4D0(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3493,9 +3484,9 @@ static inline sSphereVec4 vu0Sub_E4D0(const sSphereVec4& a, const sSphereVec4& b
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sSphereVec4 vu0Add_E4D0(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector vu0Add_E4D0(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3507,9 +3498,9 @@ static inline sSphereVec4 vu0Add_E4D0(const sSphereVec4& a, const sSphereVec4& b
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sSphereVec4 vu0Scale_E4D0(const sSphereVec4& v, float s)
+static inline t4Vector vu0Scale_E4D0(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3539,18 +3530,18 @@ static inline sSphereVec4 vu0Scale_E4D0(const sSphereVec4& v, float s)
  * @return nonzero when the segment hits inside the triangle, otherwise 0
  */
 // segment origin(0x60)+t*dir(0x70) against the plane through *p with normal *n
-extern "C" int cWorldLine_IsTriInt(cWorldLine* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* n,
-                             sSphereVec4* hit, sSphereVec4* outN, float* outT)
+extern "C" int cWorldLine_IsTriInt(cWorldLine* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* n,
+                             t4Vector* hit, t4Vector* outN, float* outT)
 {
-    sSphereVec4* origin = (sSphereVec4*)(&self->p0);
-    sSphereVec4* dir = (sSphereVec4*)(&self->dp);
+    t4Vector* origin = (t4Vector*)(&self->p0);
+    t4Vector* dir = (t4Vector*)(&self->dp);
     float denom = vu0Dot_E4D0(*dir, *n);
     if (__builtin_fabsf(denom) < 1.000000013351432e-10f) {
         return 0;
     }
     float lineT;
     {
-        sSphereVec4 toVertA = vu0Sub_E4D0(*vertA, *origin);
+        t4Vector toVertA = vu0Sub_E4D0(*vertA, *origin);
         lineT = vu0Dot_E4D0(toVertA, *n) / denom;
     }
     *outT = lineT;
@@ -3570,14 +3561,14 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_Is2SidedTriInt);
 struct sVE_E5E8 {
     short delta;
     short pad;
-    int (*fn)(void* self, void* a, void* b, void* c, sSphereVec4* v, void* d, void* e, void* f);
+    int (*fn)(void* self, void* a, void* b, void* c, t4Vector* v, void* d, void* e, void* f);
 };
 
 struct sCapsuleV_E5E8 {
     char pad_0x00[0x50];
     sVE_E5E8* vt; // 0x50
     char pad_0x54[0x1C];
-    sSphereVec4 dir; // 0x70
+    t4Vector dir; // 0x70
 };
 
 /**
@@ -3594,14 +3585,14 @@ struct sCapsuleV_E5E8 {
  * @param hitParam  receives the line parameter (On Tour param)
  * @return the IsTriInt result
  */
-extern "C" int cWorldLine_Is2SidedTriInt(cWorldLine* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, sSphereVec4* normal, t4Vector* ipos, t4Vector* inorm, void* hitParam)
+extern "C" int cWorldLine_Is2SidedTriInt(cWorldLine* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* normal, t4Vector* ipos, t4Vector* inorm, void* hitParam)
 {
-    float dp = vu0Dot_E4D0(*(sSphereVec4*)&self->dp, *normal);
+    float dp = vu0Dot_E4D0(*(t4Vector*)&self->dp, *normal);
     sVE_E5E8* vt;
     if (dp < 0.0f) {
         vt = (sVE_E5E8*)self->mVtbl;
         char* target = (char*)self + vt[4].delta;
-        sSphereVec4 n = vu0Scale_E4D0(*normal, -1.0f);
+        t4Vector n = vu0Scale_E4D0(*normal, -1.0f);
         return vt[4].fn(target, vertA, vertB, vertC, &n, ipos, inorm, hitParam);
     }
     vt = (sVE_E5E8*)self->mVtbl;
@@ -3628,8 +3619,8 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsBoxInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A5978;
-extern sSphereVec4 cWorldLine_IsBoxInt_norms[];
-extern sSphereVec4 t4vect_Zero_E690[] __asm__("t4vect_Zero");
+extern t4Vector cWorldLine_IsBoxInt_norms[];
+extern t4Vector t4vect_Zero_E690[] __asm__("t4vect_Zero");
 
 
 static inline void reset_E690(tIntersectInfo* h)
@@ -3642,8 +3633,8 @@ static inline void reset_E690(tIntersectInfo* h)
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    (*(sSphereVec4*)&h->Ivel) = *t4vect_Zero_E690;
-    (*(sSphereVec4*)&h->Iangvel) = *t4vect_Zero_E690;
+    (*(t4Vector*)&h->Ivel) = *t4vect_Zero_E690;
+    (*(t4Vector*)&h->Iangvel) = *t4vect_Zero_E690;
     h->T = 0;
     h->u = 0;
     h->v = 0;
@@ -3651,8 +3642,8 @@ static inline void reset_E690(tIntersectInfo* h)
 
 struct sRay_E690 {
     char pad0[0x60];
-    sSphereVec4 origin;     // 0x60
-    sSphereVec4 dir;        // 0x70
+    t4Vector origin;     // 0x60
+    t4Vector dir;        // 0x70
 };
 
 /**
@@ -3736,15 +3727,15 @@ extern "C" int cWorldLine_IsBoxInt(cWorldLine* self, float* bmin, float* bmax, t
     if (0.0f <= tmin) {
         tIntersectInfo* entryHit = &hits[0];
         reset_E690(entryHit);
-        (*(sSphereVec4*)&entryHit->Inorm) = cWorldLine_IsBoxInt_norms[fmin];
-        (*(sSphereVec4*)&entryHit->Ipos) = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmin));
+        (*(t4Vector*)&entryHit->Inorm) = cWorldLine_IsBoxInt_norms[fmin];
+        (*(t4Vector*)&entryHit->Ipos) = vu0Add_E4D0(*(t4Vector*)&self->p0, vu0Scale_E4D0(*(t4Vector*)&self->dp, tmin));
         entryHit->Iparam = tmin;
         n = 1;
     }
     if (tmax < 1.0f) {
         reset_E690(&hits[n]);
-        (*(sSphereVec4*)&hits[n].Inorm) = cWorldLine_IsBoxInt_norms[fmax];
-        (*(sSphereVec4*)&hits[n].Ipos) = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmax));
+        (*(t4Vector*)&hits[n].Inorm) = cWorldLine_IsBoxInt_norms[fmax];
+        (*(t4Vector*)&hits[n].Ipos) = vu0Add_E4D0(*(t4Vector*)&self->p0, vu0Scale_E4D0(*(t4Vector*)&self->dp, tmax));
         hits[n].Iparam = tmax;
         n++;
     }
@@ -3758,17 +3749,17 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IntersectSubPatch);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sLine_E9A0 {
     char pad_0x00[0x60];
-    sSphereVec4 origin; // 0x60
-    sSphereVec4 dir;    // 0x70
+    t4Vector origin; // 0x60
+    t4Vector dir;    // 0x70
 };
 
 // bicubic patch: one 4x4 coefficient matrix per coordinate
 struct sPatch_E9A0 {
     char pad_0x00[0x40];
-    sSphereVec4 m[4][4]; // 0x40
+    t4Vector m[4][4]; // 0x40
 };
 
-struct sVec4_E9A0 : sSphereVec4 {
+struct sVec4_E9A0 : t4Vector {
     sVec4_E9A0(const float& a, const float& b, const float& c, const float& d)
     {
         x = a;
@@ -3786,13 +3777,13 @@ struct sVec4_E9A0 : sSphereVec4 {
     }
 };
 
-static inline float Elem_E9A0(const sSphereVec4& v, int i)
+static inline float Elem_E9A0(const t4Vector& v, int i)
 {
     return (&v.x)[i];
 }
 
 // component k of the four coefficient vectors
-static inline sVec4_E9A0 Column_E9A0(const sSphereVec4* c, int k)
+static inline sVec4_E9A0 Column_E9A0(const t4Vector* c, int k)
 {
     return sVec4_E9A0(Elem_E9A0(c[0], k), Elem_E9A0(c[1], k), Elem_E9A0(c[2], k), Elem_E9A0(c[3], k));
 }
@@ -3800,7 +3791,7 @@ static inline sVec4_E9A0 Column_E9A0(const sSphereVec4* c, int k)
 struct sVec3_E9A0 {
     float x, y, z;
     sVec3_E9A0() {}
-    sVec3_E9A0(const sSphereVec4& v)
+    sVec3_E9A0(const t4Vector& v)
     {
         x = v.x;
         y = v.y;
@@ -3837,9 +3828,9 @@ static inline sVec3_E9A0 operator*(const sMat3_E9A0& a, const sVec3_E9A0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sSphereVec4 vu0Sub_E9A0(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector vu0Sub_E9A0(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3852,9 +3843,9 @@ static inline sSphereVec4 vu0Sub_E9A0(const sSphereVec4& a, const sSphereVec4& b
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sSphereVec4 vu0Cross_E9A0(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector vu0Cross_E9A0(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -3868,9 +3859,9 @@ static inline sSphereVec4 vu0Cross_E9A0(const sSphereVec4& a, const sSphereVec4&
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sSphereVec4 vu0Normalize_E9A0(const sSphereVec4& v)
+static inline t4Vector vu0Normalize_E9A0(const t4Vector& v)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -3903,15 +3894,15 @@ static inline sSphereVec4 vu0Normalize_E9A0(const sSphereVec4& v)
  */
 // Intersect the line with a bicubic patch: four Newton steps from (u, v). Writes the hit point and the
 // surface normal only if (u, v) stays inside the unit square.
-extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patch, float& patchU, float& patchV, sSphereVec4* outPos,
-                              sSphereVec4* outNrm)
+extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patch, float& patchU, float& patchV, t4Vector* outPos,
+                              t4Vector* outNrm)
 {
-    sSphereVec4* mat0 = patch->m[0];
-    sSphereVec4* mat1 = patch->m[1];
-    sSphereVec4* mat2 = patch->m[2];
-    sSphereVec4* mat3 = patch->m[3];
-    sSphereVec4 surfPos;
-    sSphereVec4 rowVecs[4];
+    t4Vector* mat0 = patch->m[0];
+    t4Vector* mat1 = patch->m[1];
+    t4Vector* mat2 = patch->m[2];
+    t4Vector* mat3 = patch->m[3];
+    t4Vector surfPos;
+    t4Vector rowVecs[4];
     float vSquared = patchV * patchV;
     float vCubed = patchV * vSquared;
     float uSquared = patchU * patchU;
@@ -3937,7 +3928,7 @@ extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patc
     float duy = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 1));
     float duz = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 2));
     for (int i = 0; i < 4; i++) {
-        sVec3_E9A0 originDelta(vu0Sub_E9A0(*(sSphereVec4*)&line->p0, surfPos));
+        sVec3_E9A0 originDelta(vu0Sub_E9A0(*(t4Vector*)&line->p0, surfPos));
         // Jacobian [dP/du dP/dv -dir], filled row by row
         sMat3_E9A0 jacobian;
         jacobian.m[0] = dux;
@@ -3996,7 +3987,7 @@ extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patc
     }
     sVec4_E9A0 du(dux, duy, duz);
     sVec4_E9A0 dv(dvx, dvy, dvz);
-    sSphereVec4 n = vu0Normalize_E9A0(vu0Cross_E9A0(dv, du));
+    t4Vector n = vu0Normalize_E9A0(vu0Cross_E9A0(dv, du));
     *outPos = surfPos;
     *outNrm = n;
 }
@@ -4101,9 +4092,9 @@ extern "C" void cWorldRider__cWorldRider(cWorldRider* self, int flags)
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsInBoxTransformed);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
-static inline sSphereVec4 sphereVecSub(sSphereVec4* a, sSphereVec4* b)
+static inline t4Vector sphereVecSub(t4Vector* a, t4Vector* b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -4119,9 +4110,9 @@ static inline sSphereVec4 sphereVecSub(sSphereVec4* a, sSphereVec4* b)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
-static inline sSphereVec4 sphereVecAddR(sSphereVec4* a, sSphereVec4* b)
+static inline t4Vector sphereVecAddR(t4Vector* a, t4Vector* b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -4146,17 +4137,17 @@ static inline sSphereVec4 sphereVecAddR(sSphereVec4* a, sSphereVec4* b)
  * @return 1 when the boxes overlap, otherwise 0
  */
 // sphere (self+0x60) overlaps the box [mn, mx]?
-extern "C" int cWorldRider_IsInBoxTransformed(cWorldRider* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldRider_IsInBoxTransformed(cWorldRider* self, t4Vector* mn, t4Vector* mx)
 {
-    sSphereVec4 rv;
+    t4Vector rv;
     int inside = 0;
     float rad = ((sSphereTreeNode*)self->st)->radius;
     rv.x = rad;
     rv.y = rad;
     rv.z = rad;
     rv.w = 0;
-    sSphereVec4 lo = sphereVecSub(&((sSphereTreeNode*)self->st)->center, &rv);
-    sSphereVec4 hi = sphereVecAddR(&((sSphereTreeNode*)self->st)->center, &rv);
+    t4Vector lo = sphereVecSub(&((sSphereTreeNode*)self->st)->center, &rv);
+    t4Vector hi = sphereVecAddR(&((sSphereTreeNode*)self->st)->center, &rv);
     if (mx->x >= lo.x && mn->x <= hi.x && mx->y >= lo.y && mn->y <= hi.y &&
         lo.z <= mx->z && mn->z <= hi.z) {
         inside = 1;
@@ -4237,7 +4228,7 @@ extern "C" float cWorldRider_GetIdealParam(cWorldRider* self)
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsTriInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float sphereLength_32F8F0(const sSphereVec4& v)
+static inline float sphereLength_32F8F0(const t4Vector& v)
 {
     float r;
     __asm__(
@@ -4255,7 +4246,7 @@ static inline float sphereLength_32F8F0(const sSphereVec4& v)
     return r;
 }
 
-extern "C" int cRiderSphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
+extern "C" int cRiderSphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int a4, t4Vector* out, int a6);
 
 /**
  * Collides the rider's sphere tree with a triangle and returns the push-out direction and depth.
@@ -4272,9 +4263,9 @@ extern "C" int cRiderSphereTree_IsTriCollision(void* tree, int a1, int a2, int a
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldRider_IsTriInt(cWorldRider* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
+extern "C" int cWorldRider_IsTriInt(cWorldRider* self, int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
 {
-    sSphereVec4 overlap;
+    t4Vector overlap;
     int result = cRiderSphereTree_IsTriCollision(self->st, vertA, vertB, vertC, n, &overlap, ipos);
     if (result != 0) {
         float len = sphereLength_32F8F0(overlap);
@@ -4289,7 +4280,7 @@ extern "C" int cWorldRider_IsTriInt(cWorldRider* self, int vertA, int vertB, int
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_Is2SidedTriInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float sphereLength_32F990(const sSphereVec4& v)
+static inline float sphereLength_32F990(const t4Vector& v)
 {
     float r;
     __asm__(
@@ -4307,7 +4298,7 @@ static inline float sphereLength_32F990(const sSphereVec4& v)
     return r;
 }
 
-extern "C" int cRiderSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
+extern "C" int cRiderSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int a3, int a4, t4Vector* out, int a6);
 
 /**
  * Collides the rider's sphere tree with a two-sided triangle and returns the push-out direction and depth.
@@ -4323,9 +4314,9 @@ extern "C" int cRiderSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2,
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldRider_Is2SidedTriInt(cWorldRider* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
+extern "C" int cWorldRider_Is2SidedTriInt(cWorldRider* self, int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
 {
-    sSphereVec4 overlap;
+    t4Vector overlap;
     int result = cRiderSphereTree_Is2SidedTriCollision(self->st, vertA, vertB, vertC, n, &overlap, ipos);
     if (result != 0) {
         float len = sphereLength_32F990(overlap);
@@ -4340,7 +4331,7 @@ extern "C" int cWorldRider_Is2SidedTriInt(cWorldRider* self, int vertA, int vert
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsSphTreeInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float sphereLength_32FA30(const sSphereVec4& v)
+static inline float sphereLength_32FA30(const t4Vector& v)
 {
     float r;
     int t;
@@ -4361,7 +4352,7 @@ static inline float sphereLength_32FA30(const sSphereVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void sphereDivEq_32FA30(sSphereVec4& v, float s)
+static inline void sphereDivEq_32FA30(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -4378,7 +4369,7 @@ static inline void sphereDivEq_32FA30(sSphereVec4& v, float s)
 }
 
 
-extern "C" int bxSphereTree_IsRiderTreeCollision(void* a, void* tree, sSphereVec4* dir, tIntersectInfo* hit);
+extern "C" int bxSphereTree_IsRiderTreeCollision(void* a, void* tree, t4Vector* dir, tIntersectInfo* hit);
 
 /**
  * Collides another sphere tree with the rider's current tree and normalises the hit's push-out vector.
@@ -4391,10 +4382,10 @@ extern "C" int bxSphereTree_IsRiderTreeCollision(void* a, void* tree, sSphereVec
  */
 extern "C" int cWorldRider_IsSphTreeInt(cWorldRider* self, void* tree, tIntersectInfo* hit)
 {
-    if (bxSphereTree_IsRiderTreeCollision(tree, self->st, &(*(sSphereVec4*)&hit->Inorm), hit) != 0) {
-        float len = sphereLength_32FA30((*(sSphereVec4*)&hit->Inorm));
+    if (bxSphereTree_IsRiderTreeCollision(tree, self->st, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
+        float len = sphereLength_32FA30((*(t4Vector*)&hit->Inorm));
         hit->Iparam = len;
-        sphereDivEq_32FA30((*(sSphereVec4*)&hit->Inorm), len);
+        sphereDivEq_32FA30((*(t4Vector*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4405,7 +4396,7 @@ extern "C" int cWorldRider_IsSphTreeInt(cWorldRider* self, void* tree, tIntersec
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsBoxInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float sphereLength_32FAC0(const sSphereVec4& v)
+static inline float sphereLength_32FAC0(const t4Vector& v)
 {
     float r;
     int t;
@@ -4426,7 +4417,7 @@ static inline float sphereLength_32FAC0(const sSphereVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void sphereDivEq_32FAC0(sSphereVec4& v, float s)
+static inline void sphereDivEq_32FAC0(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -4443,7 +4434,7 @@ static inline void sphereDivEq_32FAC0(sSphereVec4& v, float s)
 }
 
 
-extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vector* a2, sSphereVec4* dir, tIntersectInfo* hit);
+extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vector* a2, t4Vector* dir, tIntersectInfo* hit);
 
 /**
  * Collides the rider's current sphere tree with an axis-aligned box and normalises the hit's push-out vector.
@@ -4455,10 +4446,10 @@ extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vecto
  */
 extern "C" int cWorldRider_IsBoxInt(cWorldRider* self, void* bMin, void* bMax, tIntersectInfo* hit)
 {
-    if (cRiderSphereTree_IsBoxCollision(self->st, (t3Vector*)bMin, (t3Vector*)bMax, &(*(sSphereVec4*)&hit->Inorm), hit) != 0) {
-        float len = sphereLength_32FAC0((*(sSphereVec4*)&hit->Inorm));
+    if (cRiderSphereTree_IsBoxCollision(self->st, (t3Vector*)bMin, (t3Vector*)bMax, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
+        float len = sphereLength_32FAC0((*(t4Vector*)&hit->Inorm));
         hit->Iparam = len;
-        sphereDivEq_32FAC0((*(sSphereVec4*)&hit->Inorm), len);
+        sphereDivEq_32FAC0((*(t4Vector*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4475,15 +4466,15 @@ struct sRiderSphere_FB48 {
     int f4;                 // 0x04
     int f8;                 // 0x08
     int pad_0xC[5];
-    sSphereVec4 max;        // 0x20
-    sSphereVec4 min;        // 0x30
-    sSphereVec4 center;     // 0x40
+    t4Vector max;        // 0x20
+    t4Vector min;        // 0x30
+    t4Vector center;     // 0x40
     void* vtbl;             // 0x50
     int pad_0x54[3];
-    sSphereVec4 pos;        // 0x60
+    t4Vector pos;        // 0x60
     float radius;           // 0x70
     int pad_0x74[3];
-    sSphereVec4 pos0;       // 0x80
+    t4Vector pos0;       // 0x80
     float radius0;          // 0x90
 };
 
@@ -4499,9 +4490,9 @@ struct sRiderSphere_FB48 {
  * @param sphereRadius  the radius (On Tour arad)
  * @return @p self
  */
-extern "C" sRiderSphere_FB48* cWorldSphere_cWorldSphere(cWorldSphere* self, sSphereVec4* sphereCenter, int flag, float sphereRadius)
+extern "C" sRiderSphere_FB48* cWorldSphere_cWorldSphere(cWorldSphere* self, t4Vector* sphereCenter, int flag, float sphereRadius)
 {
-    sSphereVec4 boxCorner;
+    t4Vector boxCorner;
     self->mVtbl = (void**)cWorldSphere_vtbl;
     self->useRejectNormal = 0;
     self->isTransformed = 0;
@@ -4510,20 +4501,20 @@ extern "C" sRiderSphere_FB48* cWorldSphere_cWorldSphere(cWorldSphere* self, sSph
     } else {
         self->mPrecision = 1;
     }
-    *(sSphereVec4*)&self->origCen = *sphereCenter;
-    *(sSphereVec4*)&self->cen = *(sSphereVec4*)&self->origCen;
+    *(t4Vector*)&self->origCen = *sphereCenter;
+    *(t4Vector*)&self->cen = *(t4Vector*)&self->origCen;
     self->rad = sphereRadius;
     self->origRad = sphereRadius;
     boxCorner.x = sphereCenter->x + sphereRadius;
     boxCorner.y = sphereCenter->y + sphereRadius;
     boxCorner.z = sphereCenter->z + sphereRadius;
     boxCorner.w = 1.0f;
-    *(sSphereVec4*)&self->boxMax = boxCorner;
+    *(t4Vector*)&self->boxMax = boxCorner;
     boxCorner.x = sphereCenter->x - sphereRadius;
     boxCorner.y = sphereCenter->y - sphereRadius;
     boxCorner.z = sphereCenter->z - sphereRadius;
-    *(sSphereVec4*)&self->boxMin = boxCorner;
-    *(sSphereVec4*)&self->boxCenter = *sphereCenter;
+    *(t4Vector*)&self->boxMin = boxCorner;
+    *(t4Vector*)&self->boxCenter = *sphereCenter;
     return ((sRiderSphere_FB48*)self);
 }
 #endif
@@ -4541,16 +4532,16 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsInBoxTransformed);
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
 // sphere (pos 0x60, radius 0x70) overlaps the box [mn, mx]?
-extern "C" int cWorldSphere_IsInBoxTransformed(cWorldSphere* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldSphere_IsInBoxTransformed(cWorldSphere* self, t4Vector* mn, t4Vector* mx)
 {
-    sSphereVec4 rv;
+    t4Vector rv;
     float rad = self->rad;
     rv.x = rad;
     rv.y = rad;
     rv.z = rad;
     rv.w = 0;
-    sSphereVec4 hi = sphereCapsuleAdd((sSphereVec4*)&self->cen, &rv);
-    sSphereVec4 lo = sphereCapsuleSub((sSphereVec4*)&self->cen, &rv);
+    t4Vector hi = sphereCapsuleAdd((t4Vector*)&self->cen, &rv);
+    t4Vector lo = sphereCapsuleSub((t4Vector*)&self->cen, &rv);
     if ((mn->x > hi.x && lo.x < mn->x) || (mx->x < hi.x && mx->x < lo.x) ||
         (mn->y > hi.y && lo.y < mn->y) || (mx->y < hi.y && mx->y < lo.y) ||
         (mn->z > hi.z && lo.z < mn->z) || (mx->z < hi.z && mx->z < lo.z)) {
@@ -4564,9 +4555,9 @@ extern "C" int cWorldSphere_IsInBoxTransformed(cWorldSphere* self, sSphereVec4* 
 INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_Transform);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-static inline sSphereVec4 sphereMtxMulVec(sSphereVec4* m, sSphereVec4* v)
+static inline t4Vector sphereMtxMulVec(t4Vector* m, t4Vector* v)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -4596,11 +4587,11 @@ static inline sSphereVec4 sphereMtxMulVec(sSphereVec4* m, sSphereVec4* v)
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  the uniform scale for the radius
  */
-extern "C" void cWorldSphere_Transform(cWorldSphere* self, sSphereVec4* mat, float scale)
+extern "C" void cWorldSphere_Transform(cWorldSphere* self, t4Vector* mat, float scale)
 {
-    sSphereVec4 newCenter = sphereMtxMulVec(mat, (sSphereVec4*)&self->origCen);
+    t4Vector newCenter = sphereMtxMulVec(mat, (t4Vector*)&self->origCen);
     self->isTransformed = 1;
-    *(sSphereVec4*)&self->cen = newCenter;
+    *(t4Vector*)&self->cen = newCenter;
     self->rad = scale * self->origRad;
 }
 #endif
@@ -4626,7 +4617,7 @@ extern "C" void cWorldSphere_UnTransform(cWorldSphere* self)
 INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsSphTreeInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float sphereLength_32FDB0(const sSphereVec4& v)
+static inline float sphereLength_32FDB0(const t4Vector& v)
 {
     float r;
     int t;
@@ -4647,7 +4638,7 @@ static inline float sphereLength_32FDB0(const sSphereVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void sphereDivEq_32FDB0(sSphereVec4& v, float s)
+static inline void sphereDivEq_32FDB0(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -4675,10 +4666,10 @@ extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* a1, floa
  */
 extern "C" int cWorldSphere_IsSphTreeInt(cWorldSphere* self, void* tree, tIntersectInfo* hit)
 {
-    if (SphereTree_IsSphereCollision((SphereTree*)tree, (t4Vector*)&self->cen, self->rad, (t4Vector*)(&(*(sSphereVec4*)&hit->Inorm)), (t4Vector*)hit) != 0) {
-        float len = sphereLength_32FDB0((*(sSphereVec4*)&hit->Inorm));
+    if (SphereTree_IsSphereCollision((SphereTree*)tree, (t4Vector*)&self->cen, self->rad, (t4Vector*)(&(*(t4Vector*)&hit->Inorm)), (t4Vector*)hit) != 0) {
+        float len = sphereLength_32FDB0((*(t4Vector*)&hit->Inorm));
         hit->Iparam = len;
-        sphereDivEq_32FDB0((*(sSphereVec4*)&hit->Inorm), len);
+        sphereDivEq_32FDB0((*(t4Vector*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4708,13 +4699,13 @@ extern "C" int cWorldSphere_IsBoxInt(cWorldSphere* self, void* bMin, void* bMax,
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsTriInt);
 #ifdef SKIP_ASM
-extern "C" int cWorldSphere_isIntersectingPlane(cWorldSphere* self, sSphereVec4* plane, sSphereVec4* p, float* out);
-extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c);
+extern "C" int cWorldSphere_isIntersectingPlane(cWorldSphere* self, t4Vector* plane, t4Vector* p, float* out);
+extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, t4Vector* a, t4Vector* b, t4Vector* c);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sSphereVec4 sphereScale_32FE78(const sSphereVec4& v, float s)
+static inline t4Vector sphereScale_32FE78(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4728,9 +4719,9 @@ static inline sSphereVec4 sphereScale_32FE78(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sSphereVec4 sphereSub_32FE78(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector sphereSub_32FE78(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4759,14 +4750,14 @@ static inline sSphereVec4 sphereSub_32FE78(const sSphereVec4& a, const sSphereVe
  */
 // Like cWorldSphere_Is2SidedTriInt without the plane-side flip. The success tail is written out twice (jump2 merges the
 // copies); the extra self reference keeps the target's register order for self and a.
-extern "C" int cWorldSphere_IsTriInt(cWorldSphere* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* plane,
-                             sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
+extern "C" int cWorldSphere_IsTriInt(cWorldSphere* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* plane,
+                             t4Vector* outPos, t4Vector* outDir, float* outDist)
 {
     float dist;
     if (cWorldSphere_isIntersectingPlane(self, plane, vertA, &dist) == 0) {
         return 0;
     }
-    sSphereVec4 hitPos = sphereSub_32FE78(*(sSphereVec4*)&self->cen, sphereScale_32FE78(*plane, dist));
+    t4Vector hitPos = sphereSub_32FE78(*(t4Vector*)&self->cen, sphereScale_32FE78(*plane, dist));
     *outPos = hitPos;
     if (gIsPointInsideTri_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0) {
         *outDir = *plane;
@@ -4784,13 +4775,13 @@ extern "C" int cWorldSphere_IsTriInt(cWorldSphere* self, sSphereVec4* vertA, sSp
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_Is2SidedTriInt);
 #ifdef SKIP_ASM
-extern "C" int cWorldSphere_isIntersectingPlane(cWorldSphere* self, sSphereVec4* plane, sSphereVec4* p, float* out);
-extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c);
+extern "C" int cWorldSphere_isIntersectingPlane(cWorldSphere* self, t4Vector* plane, t4Vector* p, float* out);
+extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, t4Vector* a, t4Vector* b, t4Vector* c);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sSphereVec4 sphereScale_32FFA0(const sSphereVec4& v, float s)
+static inline t4Vector sphereScale_32FFA0(const t4Vector& v, float s)
 {
-    sSphereVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4804,7 +4795,7 @@ static inline sSphereVec4 sphereScale_32FFA0(const sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
-static inline void sphereScaleEq_32FFA0(sSphereVec4& v, float s)
+static inline void sphereScaleEq_32FFA0(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -4818,9 +4809,9 @@ static inline void sphereScaleEq_32FFA0(sSphereVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sSphereVec4 sphereSub_32FFA0(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector sphereSub_32FFA0(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4844,10 +4835,10 @@ static inline sSphereVec4 sphereSub_32FFA0(const sSphereVec4& a, const sSphereVe
  * @param outDist  receives the penetration depth, radius - |t| (On Tour param)
  * @return 1 on a hit, otherwise 0
  */
-extern "C" int cWorldSphere_Is2SidedTriInt(cWorldSphere* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* plane,
-                             sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
+extern "C" int cWorldSphere_Is2SidedTriInt(cWorldSphere* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* plane,
+                             t4Vector* outPos, t4Vector* outDir, float* outDist)
 {
-    sSphereVec4 newNorm = *plane;
+    t4Vector newNorm = *plane;
     float dist;
     if (cWorldSphere_isIntersectingPlane(self, plane, vertA, &dist) == 0) {
         return 0;
@@ -4856,7 +4847,7 @@ extern "C" int cWorldSphere_Is2SidedTriInt(cWorldSphere* self, sSphereVec4* vert
         dist = -dist;
         sphereScaleEq_32FFA0(newNorm, -1.0f);
     }
-    sSphereVec4 hitPos = sphereSub_32FFA0(*(sSphereVec4*)&self->cen, sphereScale_32FFA0(newNorm, dist));
+    t4Vector hitPos = sphereSub_32FFA0(*(t4Vector*)&self->cen, sphereScale_32FFA0(newNorm, dist));
     *outPos = hitPos;
     if (gIsPointInsideTri_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0 || cWorldSphere_edgeSphereCollision(self, vertA, vertB, vertC) != 0) {
         *outDir = newNorm;
@@ -4882,7 +4873,7 @@ INCLUDE_ASM("intersect/riderspheretree", planeDistance);
  */
 // Returns -dot(*a, *b) (4-component dot product on VU0, macro mode).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (-(ax*bx + ay*by + az*bz + aw*bw)).
-extern "C" float planeDistance(sSphereVec4* lhs, sSphereVec4* rhs)
+extern "C" float planeDistance(t4Vector* lhs, t4Vector* rhs)
 {
     float dot;
     __asm__ __volatile__(
@@ -4908,7 +4899,7 @@ INCLUDE_ASM("intersect/riderspheretree", closestPointOnLine);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: callers use this as a by-value struct return (hidden out pointer in $4).
-sSphereVec4 closestPointOnLine_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p) __asm__("closestPointOnLine");
+t4Vector closestPointOnLine_def(t4Vector* a, t4Vector* b, t4Vector* p) __asm__("closestPointOnLine");
 
 /**
  * Returns the point of a line segment closest to a test point.
@@ -4921,11 +4912,11 @@ sSphereVec4 closestPointOnLine_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* 
  * @param testPoint  the test point (On Tour testPoint)
  * @return the closest point
  */
-sSphereVec4 closestPointOnLine_def(sSphereVec4* lineStart, sSphereVec4* lineEnd, sSphereVec4* testPoint)
+t4Vector closestPointOnLine_def(t4Vector* lineStart, t4Vector* lineEnd, t4Vector* testPoint)
 {
-    sSphereVec4 toPoint = Sub_CDB0(*testPoint, *lineStart);
-    sSphereVec4 segment = Sub_CDB0(*lineEnd, *lineStart);
-    sSphereVec4 n = Normalize_CDB0(segment);
+    t4Vector toPoint = Sub_CDB0(*testPoint, *lineStart);
+    t4Vector segment = Sub_CDB0(*lineEnd, *lineStart);
+    t4Vector n = Normalize_CDB0(segment);
     float projLength = Dot_CDB0(n, toPoint);
     float len = sphereLength_32FDB0(segment);
     if (projLength <= 0.0f) {
@@ -4933,7 +4924,7 @@ sSphereVec4 closestPointOnLine_def(sSphereVec4* lineStart, sSphereVec4* lineEnd,
     } else if (len <= projLength) {
         return *lineEnd;
     } else {
-        sSphereVec4 projPoint = Add_CDB0(*lineStart, Scale_CDB0(n, projLength));
+        t4Vector projPoint = Add_CDB0(*lineStart, Scale_CDB0(n, projLength));
         return projPoint;
     }
 }
@@ -4944,12 +4935,12 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_edgeSphereCollision);
 #ifdef SKIP_ASM
 // PORT: closestPointOnLine is defined as (out, a, b, p) returning out; this caller uses it as a by-value
 // struct return (hidden out pointer in $4), so bind that view to the same symbol.
-sSphereVec4 closestPointOnLine_v(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p) __asm__("closestPointOnLine");
+t4Vector closestPointOnLine_v(t4Vector* a, t4Vector* b, t4Vector* p) __asm__("closestPointOnLine");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sSphereVec4 vu0Sub_30250(const sSphereVec4& a, const sSphereVec4& b)
+static inline t4Vector vu0Sub_30250(const t4Vector& a, const t4Vector& b)
 {
-    sSphereVec4 r;
+    t4Vector r;
     __asm__ __volatile__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4961,7 +4952,7 @@ static inline sSphereVec4 vu0Sub_30250(const sSphereVec4& a, const sSphereVec4& 
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_30250(const sSphereVec4& v)
+static inline float vu0Length_30250(const t4Vector& v)
 {
     float r;
     int t;
@@ -4993,16 +4984,16 @@ static inline float vu0Length_30250(const sSphereVec4& v)
  * @return 1 when an edge is within the radius, else 0
  */
 // does the sphere at self+0x60 (radius self+0x70) touch any edge of triangle a,b,c?
-extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, sSphereVec4* vert0, sSphereVec4* vert1, sSphereVec4* vert2)
+extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, t4Vector* vert0, t4Vector* vert1, t4Vector* vert2)
 {
-    sSphereVec4 pt;
-    sSphereVec4 tri[3];
+    t4Vector pt;
+    t4Vector tri[3];
     tri[0] = *vert0;
     tri[1] = *vert1;
     tri[2] = *vert2;
     for (int i = 0; i < 3; i++) {
-        pt = closestPointOnLine_v(&tri[i], &tri[(i + 1) % 3], (sSphereVec4*)&self->cen);
-        float dist = vu0Length_30250(vu0Sub_30250(*(sSphereVec4*)&self->cen, pt));
+        pt = closestPointOnLine_v(&tri[i], &tri[(i + 1) % 3], (t4Vector*)&self->cen);
+        float dist = vu0Length_30250(vu0Sub_30250(*(t4Vector*)&self->cen, pt));
         if (dist < self->rad) {
             return 1;
         }
@@ -5015,7 +5006,7 @@ extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, sSphereVec4*
 INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_isIntersectingPlane);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float sphereDot_330360(const sSphereVec4& a, const sSphereVec4& b)
+static inline float sphereDot_330360(const t4Vector& a, const t4Vector& b)
 {
     float d;
     int t;
@@ -5053,10 +5044,10 @@ static inline float sphereAbs_330360(float x)
  * @param out  out: the centre's signed distance (On Tour dist)
  * @return 1 when the sphere crosses the plane, else 0
  */
-extern "C" int cWorldSphere_isIntersectingPlane(cWorldSphere* self, sSphereVec4* plane, sSphereVec4* point, float* out)
+extern "C" int cWorldSphere_isIntersectingPlane(cWorldSphere* self, t4Vector* plane, t4Vector* point, float* out)
 {
     float planeConst = planeDistance(plane, point);
-    float signedDist = sphereDot_330360(*plane, *(sSphereVec4*)&self->cen) + planeConst;
+    float signedDist = sphereDot_330360(*plane, *(t4Vector*)&self->cen) + planeConst;
     *out = signedDist;
     return sphereAbs_330360(signedDist) < self->rad;
 }

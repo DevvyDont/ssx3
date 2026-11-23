@@ -879,9 +879,6 @@ void* cRigidBody_cRigidBody(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_setW);
 #ifdef SKIP_ASM
-struct sVec4CFF0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat33CFF0 {
     float m[3][3];
@@ -920,16 +917,16 @@ static inline void invertCFF0(sMat33CFF0& a)
     a = scaleCFF0(adj, inv);
 }
 
-static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, cRigidBody* b)
+static inline t4Vector xformCFF0(const sMat33CFF0& m, cRigidBody* b)
 {
-    sVec4CFF0 r;
-    float x = (*(sVec4CFF0*)&b->W).x;
-    float y = (*(sVec4CFF0*)&b->W).y;
-    float z = (*(sVec4CFF0*)&b->W).z;
+    t4Vector r;
+    float x = (*(t4Vector*)&b->W).x;
+    float y = (*(t4Vector*)&b->W).y;
+    float z = (*(t4Vector*)&b->W).z;
     r.x = m.m[0][0] * x + m.m[1][0] * y + m.m[2][0] * z;
     r.y = m.m[0][1] * x + m.m[1][1] * y + m.m[2][1] * z;
     r.z = m.m[0][2] * x + m.m[1][2] * y + m.m[2][2] * z;
-    r.w = (*(sVec4CFF0*)&b->W).w;
+    r.w = (*(t4Vector*)&b->W).w;
     return r;
 }
 
@@ -941,30 +938,27 @@ static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, cRigidBody* b)
  *
  * @param newPos  new angular velocity W
  */
-extern "C" void cRigidBody_setW(cRigidBody* self, const sVec4CFF0* newPos)
+extern "C" void cRigidBody_setW(cRigidBody* self, const t4Vector* newPos)
 {
-    (*(sVec4CFF0*)&self->W) = *newPos;
+    (*(t4Vector*)&self->W) = *newPos;
     sMat33CFF0 invRot = (*(sMat33CFF0*)&self->InvMOI[0][0]);
     invertCFF0(invRot);
-    (*(sVec4CFF0*)&self->L) = xformCFF0(invRot, self);
+    (*(t4Vector*)&self->L) = xformCFF0(invRot, self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_updateImplicit);
 #ifdef SKIP_ASM
-struct sRmVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sRmMat33 {
     float m[3][3];
 };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sRmVec4 vu0ScaleRM(const sRmVec4& v, float s)
+static inline t4Vector vu0ScaleRM(const t4Vector& v, float s)
 {
-    sRmVec4 r;
+    t4Vector r;
     int t;
     __asm__ __volatile__(
         "mfc1      %1, %3\n"
@@ -979,19 +973,19 @@ static inline sRmVec4 vu0ScaleRM(const sRmVec4& v, float s)
 
 struct sRmBody {
     char pad_0x00[0x20];
-    sRmVec4 dir;        // 0x20
-    sRmVec4 pos;        // 0x30
+    t4Vector dir;        // 0x20
+    t4Vector pos;        // 0x30
     float scale;        // 0x40
     char pad_0x44[0xC];
     sRmMat33 rot;       // 0x50
     char pad_0x74[0xC];
-    sRmVec4 outDir;     // 0x80
-    sRmVec4 outPos;     // 0x90
+    t4Vector outDir;     // 0x80
+    t4Vector outPos;     // 0x90
 };
 
-static inline sRmVec4 xformRM(sRmBody* b)
+static inline t4Vector xformRM(sRmBody* b)
 {
-    sRmVec4 r;
+    t4Vector r;
     float x = b->pos.x;
     float y = b->pos.y;
     float z = b->pos.z;
@@ -1135,23 +1129,23 @@ extern "C" void cRigidBody_stepMotion(cRigidBody* body, const t4Vector* force, c
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_rigidImpact);
 #ifdef SKIP_ASM
-extern "C" void func_0035D908(sRmBody* b, const sRmVec4* r, const sRmVec4* imp);
+extern "C" void func_0035D908(sRmBody* b, const t4Vector* r, const t4Vector* imp);
 
 struct sRmRigid_D4A0 {
-    sRmVec4 pos;        // 0x00
+    t4Vector pos;        // 0x00
     char pad_0x10[0x30];
     float invMass;      // 0x40
     char pad_0x44[0xC];
     sRmMat33 invI;      // 0x50
     char pad_0x74[0xC];
-    sRmVec4 vel;        // 0x80
-    sRmVec4 angVel;     // 0x90
+    t4Vector vel;        // 0x80
+    t4Vector angVel;     // 0x90
 };
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sRmVec4 SubD4A0(const sRmVec4& a, const sRmVec4& b)
+static inline t4Vector SubD4A0(const t4Vector& a, const t4Vector& b)
 {
-    sRmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1164,9 +1158,9 @@ static inline sRmVec4 SubD4A0(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sRmVec4 AddD4A0(const sRmVec4& a, const sRmVec4& b)
+static inline t4Vector AddD4A0(const t4Vector& a, const t4Vector& b)
 {
-    sRmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1179,9 +1173,9 @@ static inline sRmVec4 AddD4A0(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sRmVec4 CrossD4A0(const sRmVec4& a, const sRmVec4& b)
+static inline t4Vector CrossD4A0(const t4Vector& a, const t4Vector& b)
 {
-    sRmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1196,7 +1190,7 @@ static inline sRmVec4 CrossD4A0(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (dot product).
-static inline float DotD4A0(const sRmVec4& a, const sRmVec4& b)
+static inline float DotD4A0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1216,7 +1210,7 @@ static inline float DotD4A0(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float LengthD4A0(const sRmVec4& v)
+static inline float LengthD4A0(const t4Vector& v)
 {
     float r;
     int t;
@@ -1237,9 +1231,9 @@ static inline float LengthD4A0(const sRmVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sRmVec4 DivD4A0(const sRmVec4& v, float s)
+static inline t4Vector DivD4A0(const t4Vector& v, float s)
 {
-    sRmVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1256,9 +1250,9 @@ static inline sRmVec4 DivD4A0(const sRmVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sRmVec4 ScaleD4A0(const sRmVec4& v, float s)
+static inline t4Vector ScaleD4A0(const t4Vector& v, float s)
 {
-    sRmVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1272,9 +1266,9 @@ static inline sRmVec4 ScaleD4A0(const sRmVec4& v, float s)
     return r;
 }
 
-static inline sRmVec4 MulID4A0(sRmRigid_D4A0* b, const sRmVec4& v)
+static inline t4Vector MulID4A0(sRmRigid_D4A0* b, const t4Vector& v)
 {
-    sRmVec4 r;
+    t4Vector r;
     float x = v.x;
     float y = v.y;
     float z = v.z;
@@ -1285,7 +1279,7 @@ static inline sRmVec4 MulID4A0(sRmRigid_D4A0* b, const sRmVec4& v)
     return r;
 }
 
-static inline sRmVec4 PointVelD4A0(sRmRigid_D4A0* b, const sRmVec4& p)
+static inline t4Vector PointVelD4A0(sRmRigid_D4A0* b, const t4Vector& p)
 {
     return AddD4A0(b->vel, CrossD4A0(b->angVel, SubD4A0(p, b->pos)));
 }
@@ -1303,18 +1297,18 @@ static inline sRmVec4 PointVelD4A0(sRmRigid_D4A0* b, const sRmVec4& p)
  * @param restitution  elasticity
  * @param mu  friction coefficient
  */
-extern "C" void cRigidBody_rigidImpact(sRmRigid_D4A0* body, sRmVec4* point, sRmVec4* n, float restitution, float mu)
+extern "C" void cRigidBody_rigidImpact(sRmRigid_D4A0* body, t4Vector* point, t4Vector* n, float restitution, float mu)
 {
-    sRmVec4 arm = SubD4A0(*point, body->pos);
-    sRmVec4 vp = PointVelD4A0(body, *point);
+    t4Vector arm = SubD4A0(*point, body->pos);
+    t4Vector vp = PointVelD4A0(body, *point);
     float normalVel = DotD4A0(vp, *n);
     if (mu != 0.0f) {
-        sRmVec4 tangentVel = SubD4A0(vp, ScaleD4A0(*n, normalVel));
+        t4Vector tangentVel = SubD4A0(vp, ScaleD4A0(*n, normalVel));
         float len = LengthD4A0(tangentVel);
         if (len > 0.0010000000474974513f) {
-            sRmVec4 dir = DivD4A0(tangentVel, len);
+            t4Vector dir = DivD4A0(tangentVel, len);
             float j = -mu * len / (body->invMass + DotD4A0(dir, CrossD4A0(MulID4A0(body, CrossD4A0(arm, dir)), arm)));
-            sRmVec4 imp = ScaleD4A0(dir, j);
+            t4Vector imp = ScaleD4A0(dir, j);
             func_0035D908((sRmBody*)body, &arm, &imp);
             vp = PointVelD4A0(body, *point);
             normalVel = DotD4A0(vp, *n);
@@ -1324,7 +1318,7 @@ extern "C" void cRigidBody_rigidImpact(sRmRigid_D4A0* body, sRmVec4* point, sRmV
         }
     }
     float j = -(restitution + 1.0f) * normalVel / (body->invMass + DotD4A0(*n, CrossD4A0(MulID4A0(body, CrossD4A0(arm, *n)), arm)));
-    sRmVec4 imp = ScaleD4A0(*n, j);
+    t4Vector imp = ScaleD4A0(*n, j);
     func_0035D908((sRmBody*)body, &arm, &imp);
 }
 #endif
@@ -1384,9 +1378,9 @@ struct sV4c_DA70 {
 } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
-static inline sRmVec4 QuatRot_DA70(const sRmVec4& q, const sRmVec4& v)
+static inline t4Vector QuatRot_DA70(const t4Vector& q, const t4Vector& v)
 {
-    sRmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1408,7 +1402,7 @@ static inline sRmVec4 QuatRot_DA70(const sRmVec4& q, const sRmVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (dst = v rotated by quaternion q).
-static inline void QuatRotTo_DA70(sRmVec4& dst, const sRmVec4& q, const sRmVec4& v)
+static inline void QuatRotTo_DA70(t4Vector& dst, const t4Vector& q, const t4Vector& v)
 {
     __asm__(
         "lqc2      $vf4, %1\n"
@@ -1430,7 +1424,7 @@ static inline void QuatRotTo_DA70(sRmVec4& dst, const sRmVec4& q, const sRmVec4&
 }
 
 // PORT: PS2-only VU0 inline asm (dst += b).
-static inline void AddTo_DA70(sRmVec4& dst, const sRmVec4& b)
+static inline void AddTo_DA70(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1443,7 +1437,7 @@ static inline void AddTo_DA70(sRmVec4& dst, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (unit quaternion + position -> 4x4 matrix).
-static inline void QuatPosToMtx_DA70(void* m, const sRmVec4& q, const sRmVec4& p)
+static inline void QuatPosToMtx_DA70(void* m, const t4Vector& q, const t4Vector& p)
 {
     __asm__ __volatile__(
         "lqc2       $vf4, %1\n"
@@ -1527,12 +1521,12 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
     tSphTreeInfo* info = self->SphTree.treeInfo;
     self->mElast = rdata->Elast;
     self->InvM = 1.0f / timing[1];
-    sRmVec4 offset;
+    t4Vector offset;
     offset.x = info->centerOfMass[0];
     offset.y = info->centerOfMass[1];
     offset.z = info->centerOfMass[2];
     offset.w = 0.0f;
-    *(sRmVec4*)&self->COMOffset = offset;
+    *(t4Vector*)&self->COMOffset = offset;
     *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)&info->invMomentOfInertia[0][0];
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][0] *= 0.5f;
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][1] *= 0.5f;
@@ -1545,18 +1539,18 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
     ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][2] *= 0.5f;
     tPose x = tPose_tPose(&self->m_pInstance->m_fmTransform);
     {
-        sRmVec4 rotated;
-        QuatRotTo_DA70(rotated, *(sRmVec4*)&x.Q, *(sRmVec4*)&self->COMOffset);
+        t4Vector rotated;
+        QuatRotTo_DA70(rotated, *(t4Vector*)&x.Q, *(t4Vector*)&self->COMOffset);
         offset = rotated;
-        sRmVec4 shift;
-        sRmVec4 rotatedAgain;
-        QuatRotTo_DA70(rotatedAgain, *(sRmVec4*)&x.Q, offset);
+        t4Vector shift;
+        t4Vector rotatedAgain;
+        QuatRotTo_DA70(rotatedAgain, *(t4Vector*)&x.Q, offset);
         shift = rotatedAgain;
-        AddTo_DA70(*(sRmVec4*)&x.P, shift);
+        AddTo_DA70(*(t4Vector*)&x.P, shift);
     }
     *(&self->Pose) = x;
     tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
-    QuatPosToMtx_DA70(&self->Transform, *(sRmVec4*)&y.Q, *(sRmVec4*)&y.P);
+    QuatPosToMtx_DA70(&self->Transform, *(t4Vector*)&y.Q, *(t4Vector*)&y.P);
     cRollerModifier_updateMOI((cRollerModifier*)(((char*)self)));
     cRigidBody_updateImplicit((sRmBody*)(&self->Pose));
     self->ContactElastic = 0.10000000149011612f;
@@ -1574,15 +1568,12 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_Collision);
 #ifdef SKIP_ASM
-struct sRmV4_35DDE8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 // PORT: PS2-only VU0 inline asm (a + b), by value.
-static inline sRmV4_35DDE8 vu0AddR_35DDE8(const sRmV4_35DDE8& a, const sRmV4_35DDE8& b)
+static inline t4Vector vu0AddR_35DDE8(const t4Vector& a, const t4Vector& b)
 {
-    sRmV4_35DDE8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1595,9 +1586,9 @@ static inline sRmV4_35DDE8 vu0AddR_35DDE8(const sRmV4_35DDE8& a, const sRmV4_35D
 }
 
 // PORT: PS2-only VU0 inline asm (v / s), by value.
-static inline sRmV4_35DDE8 vu0DivR_35DDE8(const sRmV4_35DDE8& v, float s)
+static inline t4Vector vu0DivR_35DDE8(const t4Vector& v, float s)
 {
-    sRmV4_35DDE8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1615,9 +1606,9 @@ static inline sRmV4_35DDE8 vu0DivR_35DDE8(const sRmV4_35DDE8& v, float s)
 
 
 // PORT: PS2-only VU0 inline asm (v * s), by value.
-static inline sRmV4_35DDE8 vu0ScaleR_35DDE8(const sRmV4_35DDE8& v, float s)
+static inline t4Vector vu0ScaleR_35DDE8(const t4Vector& v, float s)
 {
-    sRmV4_35DDE8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1631,7 +1622,7 @@ static inline sRmV4_35DDE8 vu0ScaleR_35DDE8(const sRmV4_35DDE8& v, float s)
     return r;
 }
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_35DDE8(const sRmV4_35DDE8& a, const sRmV4_35DDE8& b)
+static inline float vu0Dot_35DDE8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1650,7 +1641,7 @@ static inline float vu0Dot_35DDE8(const sRmV4_35DDE8& a, const sRmV4_35DDE8& b)
     return r;
 }
 
-struct sV4K_35DDE8 : public sRmV4_35DDE8 {
+struct sV4K_35DDE8 : public t4Vector {
     sV4K_35DDE8(float ax, float ay, float az, float aw)
     {
         x = ax;
@@ -1662,14 +1653,14 @@ struct sV4K_35DDE8 : public sRmV4_35DDE8 {
 
 struct cRigidBody_DDE8 {
     char pad_0x00[0x20];
-    sRmV4_35DDE8 P;         // 0x20
-    sRmV4_35DDE8 L;         // 0x30
+    t4Vector P;         // 0x20
+    t4Vector L;         // 0x30
     float InvM;             // 0x40
     char pad_0x44[0x3C];
-    sRmV4_35DDE8 V;         // 0x80
-    sRmV4_35DDE8 W;         // 0x90
+    t4Vector V;         // 0x80
+    t4Vector W;         // 0x90
     float getInvM() const { return InvM; }
-    void setW(const sRmV4_35DDE8& w) __asm__("cRigidBody_setW");
+    void setW(const t4Vector& w) __asm__("cRigidBody_setW");
 };
 
 struct cTransformModifier_DDE8 {
@@ -1693,7 +1684,7 @@ struct cRollerNodeState_DDE8 {
 struct cRollerModifier_DDE8 : public cTransformModifier_DDE8, public cRollerNodeState_DDE8, public cRigidBody_DDE8 {
     // On Tour has this as cRigidBody::setV; in SSX 3 the P/V stores are this-relative while InvM goes
     // through the cRigidBody base pointer, so here it lives in the derived class.
-    void setV(const sRmV4_35DDE8& v)
+    void setV(const t4Vector& v)
     {
         P = vu0DivR_35DDE8(v, getInvM());
         V = v;
@@ -1718,9 +1709,9 @@ void cRollerModifier_DDE8::Collision(const tCollideInfo* tc)
     if (addZ > 600.0f) {
         addZ = 600.0f;
     }
-    setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8((*(sRmV4_35DDE8*)&tc->Direct), tc->Vel), 2.0f),
+    setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8((*(t4Vector*)&tc->Direct), tc->Vel), 2.0f),
                         sV4K_35DDE8(0.0f, 0.0f, addZ, 0.0f)));
-    setW(vu0ScaleR_35DDE8((*(sRmV4_35DDE8*)&tc->Reflect), 10.0f));
+    setW(vu0ScaleR_35DDE8((*(t4Vector*)&tc->Reflect), 10.0f));
     mKineticEnergy = vu0Dot_35DDE8(V, P) + vu0Dot_35DDE8(W, L);
 }
 #endif
@@ -1746,7 +1737,7 @@ struct sRmMat33DF70 {
 };
 
 struct sRmMat44DF70 {
-    sRmVec4 r[4];
+    t4Vector r[4];
 };
 
 struct sRmSrcDF70 {
@@ -1781,12 +1772,12 @@ extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* se
     void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)((int)self->m_pInstance)), 0);
     bxSphereTree_operatorE(((char*)&self->SphTree), meshTree);
     sRmSrcDF70* src = ((sRmSrcDF70*)self->SphTree.treeInfo);
-    sRmVec4 off;
+    t4Vector off;
     off.x = src->x;
     off.y = src->y;
     off.z = src->z;
     off.w = 0.0f;
-    (*(sRmVec4*)&self->COMOffset) = off;
+    (*(t4Vector*)&self->COMOffset) = off;
     (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]) = src->rot;
     (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[0] *= 0.5f;
     (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[1] *= 0.5f;
@@ -1798,7 +1789,7 @@ extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* se
     (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[7] *= 0.5f;
     (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[8] *= 0.5f;
     tPose x = cRollerModifier_getBodyPose_DA70(self);
-    QuatPosToMtx_DA70(&(*(sRmMat44DF70*)&self->Transform), *(sRmVec4*)&x.Q, *(sRmVec4*)&x.P);
+    QuatPosToMtx_DA70(&(*(sRmMat44DF70*)&self->Transform), *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
     SphereTree_TransformAbs(((char*)&self->SphTree), &(*(sRmMat44DF70*)&self->Transform), 1.0f);
     cRollerModifier_updateMOI((cRollerModifier*)self);
     cRigidBody_updateImplicit((sRmBody*)((char*)&self->Pose));
@@ -1831,7 +1822,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_updateMOI);
 #ifdef SKIP_ASM
 
 // PORT: PS2-only VU0 inline asm (unit quaternion -> 4x4 rotation matrix, row 3 = (0,0,0,1)).
-static inline void QuatToMtx_E248(t4Matrix& m, const sRmVec4& q)
+static inline void QuatToMtx_E248(t4Matrix& m, const t4Vector& q)
 {
     __asm__ __volatile__(
         "lqc2       $vf4, %1\n"
@@ -1937,7 +1928,7 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const cRollerModifier* body)
 extern "C" void cRollerModifier_updateMOI(cRollerModifier* self)
 {
     t4Matrix rotMat4;
-    QuatToMtx_E248(rotMat4, *(sRmVec4*)&self->Pose.Q);
+    QuatToMtx_E248(rotMat4, *(t4Vector*)&self->Pose.Q);
     sRmMat33 rot;
     sRmMat33 rotT;
     rotT = Get33_E248(rotMat4);
@@ -1951,12 +1942,12 @@ extern "C" void cRollerModifier_updateMOI(cRollerModifier* self)
 INCLUDE_ASM("object/railmodifier", cRollerModifier_getBodyPose);
 #ifdef SKIP_ASM
 struct sRmXform {
-    sRmVec4 pos;    // 0x00
-    sRmVec4 quat;   // 0x10
+    t4Vector pos;    // 0x00
+    t4Vector quat;   // 0x10
 };
 
 // PORT: PS2-only VU0 inline asm (dst = v * s).
-static inline void vu0ScaleToRM(sRmVec4& dst, const sRmVec4& v, float s)
+static inline void vu0ScaleToRM(t4Vector& dst, const t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -1970,7 +1961,7 @@ static inline void vu0ScaleToRM(sRmVec4& dst, const sRmVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (dst = v rotated by quaternion q).
-static inline void vu0QuatRotToRM(sRmVec4& dst, const sRmVec4& q, const sRmVec4& v)
+static inline void vu0QuatRotToRM(t4Vector& dst, const t4Vector& q, const t4Vector& v)
 {
     __asm__(
         "lqc2      $vf4, %1\n"
@@ -1991,7 +1982,7 @@ static inline void vu0QuatRotToRM(sRmVec4& dst, const sRmVec4& q, const sRmVec4&
 }
 
 // PORT: PS2-only VU0 inline asm (dst += b).
-static inline void vu0AddToRM(sRmVec4& dst, const sRmVec4& b)
+static inline void vu0AddToRM(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -2014,12 +2005,12 @@ static inline void vu0AddToRM(sRmVec4& dst, const sRmVec4& b)
 extern "C" sRmXform cRollerModifier_getBodyPose(cRollerModifier* self)
 {
     sRmXform pose = *(sRmXform*)&self->Pose;
-    sRmVec4 negatedCom;
-    sRmVec4 rotatedCom;
-    sRmVec4 comOffset;
-    sRmVec4 posDelta;
-    sRmVec4 poseOffset;
-    vu0QuatRotToRM(comOffset, *(sRmVec4*)&self->Pose.Q, *(sRmVec4*)&self->COMOffset);
+    t4Vector negatedCom;
+    t4Vector rotatedCom;
+    t4Vector comOffset;
+    t4Vector posDelta;
+    t4Vector poseOffset;
+    vu0QuatRotToRM(comOffset, *(t4Vector*)&self->Pose.Q, *(t4Vector*)&self->COMOffset);
     rotatedCom = comOffset;
     vu0ScaleToRM(comOffset, rotatedCom, -1.0f);
     negatedCom = comOffset;
@@ -2046,10 +2037,10 @@ void cRollerModifier_updateRootTransform(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_translateMe);
 #ifdef SKIP_ASM
-extern "C" void SphereTree_MoveOffset(void* p, const sRmVec4* d);
+extern "C" void SphereTree_MoveOffset(void* p, const t4Vector* d);
 
 // PORT: PS2-only VU0 inline asm (dst += b).
-static inline void vu0AddED90(sRmVec4& dst, const sRmVec4& b)
+static inline void vu0AddED90(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -2071,7 +2062,7 @@ static inline void vu0AddED90(sRmVec4& dst, const sRmVec4& b)
  *
  * @param off  the offset (On Tour off)
  */
-extern "C" void cRollerModifier_translateMe(sRmBody* self, const sRmVec4* off)
+extern "C" void cRollerModifier_translateMe(sRmBody* self, const t4Vector* off)
 {
     vu0AddED90(self->pos, *off);
     SphereTree_MoveOffset((char*)self + 0xE0, off);
@@ -2088,8 +2079,8 @@ extern "C" float SphereTree_GetResolution(void* self);
 extern void cRigidBody_rigidImpact_EDC8(void* self, void* hit, void* normal, float a, float b) __asm__("cRigidBody_rigidImpact");
 
 struct sHitEDC8 {
-    sRmVec4 pos;        // 0x00
-    sRmVec4 normal;     // 0x10
+    t4Vector pos;        // 0x00
+    t4Vector normal;     // 0x10
     float pad20[8];
     float dist;         // 0x40
     int pad44[3];
@@ -2102,9 +2093,9 @@ struct sHitEDC8 {
 extern "C" float cBXNash_terrainIntersect1_EDC8(void* world, void* tree, sHitEDC8* out, void* a3) __asm__("cBXNash_terrainIntersect1");
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sRmVec4 vu0ScaleEDC8(const sRmVec4& v, float s)
+static inline t4Vector vu0ScaleEDC8(const t4Vector& v, float s)
 {
-    sRmVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2119,9 +2110,9 @@ static inline sRmVec4 vu0ScaleEDC8(const sRmVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sRmVec4 vu0DivEDC8(const sRmVec4& v, float s)
+static inline t4Vector vu0DivEDC8(const t4Vector& v, float s)
 {
-    sRmVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2137,9 +2128,9 @@ static inline sRmVec4 vu0DivEDC8(const sRmVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sRmVec4 vu0SubEDC8(const sRmVec4& a, const sRmVec4& b)
+static inline t4Vector vu0SubEDC8(const t4Vector& a, const t4Vector& b)
 {
-    sRmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2151,9 +2142,9 @@ static inline sRmVec4 vu0SubEDC8(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sRmVec4 vu0AddEDC8(const sRmVec4& a, const sRmVec4& b)
+static inline t4Vector vu0AddEDC8(const t4Vector& a, const t4Vector& b)
 {
-    sRmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2165,9 +2156,9 @@ static inline sRmVec4 vu0AddEDC8(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a x b, w = 0).
-static inline sRmVec4 vu0CrossEDC8(const sRmVec4& a, const sRmVec4& b)
+static inline t4Vector vu0CrossEDC8(const t4Vector& a, const t4Vector& b)
 {
-    sRmVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -2181,7 +2172,7 @@ static inline sRmVec4 vu0CrossEDC8(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0DotEDC8(const sRmVec4& a, const sRmVec4& b)
+static inline float vu0DotEDC8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2201,7 +2192,7 @@ static inline float vu0DotEDC8(const sRmVec4& a, const sRmVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0LengthEDC8(const sRmVec4& v)
+static inline float vu0LengthEDC8(const t4Vector& v)
 {
     float r;
     int t;
@@ -2222,14 +2213,14 @@ static inline float vu0LengthEDC8(const sRmVec4& v)
 }
 
 
-static inline sRmVec4 toDirEDC8(sRmBody* b, const sRmVec4& v)
+static inline t4Vector toDirEDC8(sRmBody* b, const t4Vector& v)
 {
     return vu0DivEDC8(v, b->scale);
 }
 
-static inline sRmVec4 xformEDC8(cRollerModifier* rollerModifier)
+static inline t4Vector xformEDC8(cRollerModifier* rollerModifier)
 {
-    sRmVec4 o;
+    t4Vector o;
     float x = (*(sRmBody*)&rollerModifier->Pose).pos.x;
     float y = (*(sRmBody*)&rollerModifier->Pose).pos.y;
     float z = (*(sRmBody*)&rollerModifier->Pose).pos.z;
@@ -2240,13 +2231,13 @@ static inline sRmVec4 xformEDC8(cRollerModifier* rollerModifier)
     return o;
 }
 
-static inline void setPosEDC8(cRollerModifier* rollerModifier, const sRmVec4& v)
+static inline void setPosEDC8(cRollerModifier* rollerModifier, const t4Vector& v)
 {
     (*(sRmBody*)&rollerModifier->Pose).pos = v;
     (*(sRmBody*)&rollerModifier->Pose).outPos = xformEDC8(rollerModifier);
 }
 
-static inline void setOutDirEDC8(cRollerModifier* rollerModifier, const sRmVec4& v)
+static inline void setOutDirEDC8(cRollerModifier* rollerModifier, const t4Vector& v)
 {
     (*(sRmBody*)&rollerModifier->Pose).dir = toDirEDC8((sRmBody*)&rollerModifier->Pose, v);
     (*(sRmBody*)&rollerModifier->Pose).outDir = v;
@@ -2269,15 +2260,15 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
     float overlap = cBXNash_terrainIntersect1_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)&self->RollerHint);
     overlap -= SphereTree_GetResolution((char*)&self->SphTree);
     if (zeroF < overlap) {
-        sRmVec4 push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
+        t4Vector push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
         cRollerModifier_translateMe((sRmBody*)self, &push);
         float k = 0.975f;
-        setPosEDC8((self), vu0ScaleEDC8(*(sRmVec4*)&self->L, k));
-        setOutDirEDC8((self), vu0ScaleEDC8(*(sRmVec4*)&self->V, k));
-        float dp = vu0DotEDC8(vu0AddEDC8(*(sRmVec4*)&self->V, vu0CrossEDC8(*(sRmVec4*)&self->W, vu0SubEDC8(hit.pos, *(sRmVec4*)(sRmBody*)&self->Pose))), hit.normal);
+        setPosEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->L, k));
+        setOutDirEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->V, k));
+        float dp = vu0DotEDC8(vu0AddEDC8(*(t4Vector*)&self->V, vu0CrossEDC8(*(t4Vector*)&self->W, vu0SubEDC8(hit.pos, *(t4Vector*)(sRmBody*)&self->Pose))), hit.normal);
         if (dp < zeroF) {
             float lim = self->StopContactSpeed;
-            float len = vu0LengthEDC8(*(sRmVec4*)&self->V);
+            float len = vu0LengthEDC8(*(t4Vector*)&self->V);
             float elastic = self->ContactElastic;
             float friction = self->ContactFriction;
             if (len < lim)
@@ -9401,9 +9392,6 @@ static inline sMtx_4CD0 operator*(const sMtx_4CD0& a, const sMtx_4CD0& b)
     return r;
 }
 
-struct sVec_4CD0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // One DMA quadword.
 struct sQw_4CD0 {
@@ -9415,12 +9403,12 @@ struct sMtxRec_4CD0 {
     sMtx_4CD0 world;        // 0x000
     float view[16];         // 0x040
     sQw_4CD0 worldView[4];  // 0x080
-    sVec_4CD0 guardScale;   // 0x0C0
-    sVec_4CD0 guardOffset;  // 0x0D0
+    t4Vector guardScale;   // 0x0C0
+    t4Vector guardOffset;  // 0x0D0
     float viewProj[16];     // 0x0E0
     sQw_4CD0 worldClip[4];  // 0x120
-    sVec_4CD0 screenScale;  // 0x160
-    sVec_4CD0 screenOffset; // 0x170
+    t4Vector screenScale;  // 0x160
+    t4Vector screenOffset; // 0x170
 };
 
 
@@ -9623,13 +9611,13 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
             pk.p[5] = 0x6C07000000000000;
             pk.p += 6;
             putQw_4CD0(pk.p, mtxRec->worldView, 4);
-            sVec_4CD0 scaleVec = mtxRec->guardScale;
+            t4Vector scaleVec = mtxRec->guardScale;
             scaleVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &scaleVec, 1);
-            sVec_4CD0 offsetVec = mtxRec->guardOffset;
+            t4Vector offsetVec = mtxRec->guardOffset;
             offsetVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &offsetVec, 1);
-            sVec_4CD0 projScale;
+            t4Vector projScale;
             projScale.x = mtxRec->view[0];
             projScale.y = mtxRec->view[5];
             projScale.z = 0;
@@ -9644,13 +9632,13 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
             pk.p[3] = 0x6C07000000000000;
             pk.p += 4;
             putQw_4CD0(pk.p, mtxRec->worldClip, 4);
-            sVec_4CD0 scaleVec = mtxRec->screenScale;
+            t4Vector scaleVec = mtxRec->screenScale;
             scaleVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &scaleVec, 1);
-            sVec_4CD0 offsetVec = mtxRec->screenOffset;
+            t4Vector offsetVec = mtxRec->screenOffset;
             offsetVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &offsetVec, 1);
-            sVec_4CD0 projScale;
+            t4Vector projScale;
             projScale.x = mtxRec->viewProj[0];
             projScale.y = mtxRec->viewProj[5];
             projScale.z = 0;
@@ -9672,13 +9660,13 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
             pk.p[4] = 0;
             pk.p[5] = 0x6C03000000000000;
             pk.p += 6;
-            sVec_4CD0 scaleVec = mtxRec->screenScale;
+            t4Vector scaleVec = mtxRec->screenScale;
             scaleVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &scaleVec, 1);
-            sVec_4CD0 offsetVec = mtxRec->screenOffset;
+            t4Vector offsetVec = mtxRec->screenOffset;
             offsetVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &offsetVec, 1);
-            sVec_4CD0 projScale;
+            t4Vector projScale;
             projScale.x = mtxRec->viewProj[0];
             projScale.y = mtxRec->viewProj[5];
             projScale.z = 0;
@@ -9692,13 +9680,13 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
             pk.p[2] = 0;
             pk.p[3] = 0x6C03000000000000;
             pk.p += 4;
-            sVec_4CD0 scaleVec = mtxRec->screenScale;
+            t4Vector scaleVec = mtxRec->screenScale;
             scaleVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &scaleVec, 1);
-            sVec_4CD0 offsetVec = mtxRec->screenOffset;
+            t4Vector offsetVec = mtxRec->screenOffset;
             offsetVec.z *= 0.0625f;
             putQw_4CD0(pk.p, &offsetVec, 1);
-            sVec_4CD0 projScale;
+            t4Vector projScale;
             projScale.x = mtxRec->viewProj[0];
             projScale.y = mtxRec->viewProj[5];
             projScale.z = 0;

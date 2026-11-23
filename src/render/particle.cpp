@@ -85,11 +85,8 @@ extern "C" void cBaseClass_DynamicEmitter_purge(cBaseClass_DynamicEmitter* self,
 //100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_reset);
 #ifdef SKIP_ASM
-struct sVec4A {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sVec4A t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 /**
  * Resets a dynamic emitter: zeroes both of its vector arrays and its counters.
@@ -102,8 +99,8 @@ extern "C" void cBaseClass_DynamicEmitter_reset(cBaseClass_DynamicEmitter* self)
     int i;
     self->m_subEmitterId = 0;
     for (i = 0; i < self->m_numSubEmitters; i++) {
-        ((sVec4A*)self->m_positions)[i] = t4vect_Zero;
-        ((sVec4A*)self->m_velocities)[i] = t4vect_Zero;
+        ((t4Vector*)self->m_positions)[i] = t4vect_Zero;
+        ((t4Vector*)self->m_velocities)[i] = t4vect_Zero;
         self->m_subEmitterId = 0;
         self->m_enabledCount = 0;
     }
@@ -115,7 +112,7 @@ INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_setupEmitter);
 #ifdef SKIP_ASM
 int BXrand();
 
-extern "C" void tParticleEmitter_init(void* sys, int count, int a2, sVec4A* v, float a, float b, float c);
+extern "C" void tParticleEmitter_init(void* sys, int count, int a2, t4Vector* v, float a, float b, float c);
 extern "C" void tParticleEmitter_setupEmitter(void* sys, void* a1, void* def, void* a3, float f);
 extern t4Matrix t4mat_Identity;
 
@@ -242,11 +239,11 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
         self->count = (int)fceil_00370DC8(frames);
         changed = 1;
     }
-    *(sVec4A*)self->v1B0 = t4vect_Zero;
-    *(sVec4A*)self->v1C0 = t4vect_Zero;
-    *(sVec4A*)self->v1D0 = t4vect_Zero;
+    *(t4Vector*)self->v1B0 = t4vect_Zero;
+    *(t4Vector*)self->v1C0 = t4vect_Zero;
+    *(t4Vector*)self->v1D0 = t4vect_Zero;
     float life = life_00370DC8(((char*)def));
-    sVec4A force;
+    t4Vector force;
     force.x = def->ForceX;
     force.y = def->ForceY;
     force.z = def->ForceZ;
@@ -2185,9 +2182,6 @@ extern "C" void func_00373EA8(void* self, sPtVec4_3EA8* points, sPtMtx_3EA8* mt,
 //100%
 INCLUDE_ASM("render/particle", func_00374180);
 #ifdef SKIP_ASM
-struct sPatchVec {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sPatchOut {
     float x, y, z;
@@ -2195,7 +2189,7 @@ struct sPatchOut {
 
 struct sPatchSet {
     char pad_0x00[0x190];
-    sPatchVec* basis[3];    // 0x190
+    t4Vector* basis[3];    // 0x190
     int count[3];           // 0x19C
 };
 
@@ -2216,7 +2210,7 @@ struct sPatchSet {
 extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int idx)
 {
     int n = self->count[idx];
-    sPatchVec* basis = self->basis[idx];
+    t4Vector* basis = self->basis[idx];
     int i;
     int j;
     __asm__ __volatile__(
@@ -2260,7 +2254,7 @@ extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int id
             :
             : "r"(&basis[i]));
         for (j = 0; j < n; j++) {
-            sPatchVec point;
+            t4Vector point;
             __asm__(
                 "lqc2      $vf22, 0x0(%1)\n"
                 "vmulax.xyzw ACC, $vf18, $vf22x\n"
@@ -4387,9 +4381,6 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawSprite);
 // PORT: 128-bit GPR quadword (TImode); the PC port needs a 16-byte struct.
 typedef int cQuad_7CF0 __attribute__((mode(TI)));
 
-struct sV_7CF0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_7CF0 {
     float m[4][4];
@@ -4441,9 +4432,9 @@ struct sGfx_7CF0 {
 };
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sV_7CF0 mtxApply_7CF0(sMat_7CF0* m, const sV_7CF0& v)
+static inline t4Vector mtxApply_7CF0(sMat_7CF0* m, const t4Vector& v)
 {
-    sV_7CF0 out;
+    t4Vector out;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -4465,9 +4456,9 @@ static inline sV_7CF0 mtxApply_7CF0(sMat_7CF0* m, const sV_7CF0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV_7CF0 Add_7CF0(const sV_7CF0& a, const sV_7CF0& b)
+static inline t4Vector Add_7CF0(const t4Vector& a, const t4Vector& b)
 {
-    sV_7CF0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4480,9 +4471,9 @@ static inline sV_7CF0 Add_7CF0(const sV_7CF0& a, const sV_7CF0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV_7CF0 Sub_7CF0(const sV_7CF0& a, const sV_7CF0& b)
+static inline t4Vector Sub_7CF0(const t4Vector& a, const t4Vector& b)
 {
-    sV_7CF0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4495,7 +4486,7 @@ static inline sV_7CF0 Sub_7CF0(const sV_7CF0& a, const sV_7CF0& b)
 }
 
 // Guard-band outcode of a projected point (as cPS2GraphicsMan_GetOutCode).
-static inline int ClipCode_7CF0(sGfx_7CF0* self, const sV_7CF0& v)
+static inline int ClipCode_7CF0(sGfx_7CF0* self, const t4Vector& v)
 {
     int code = 0;
     if (v.x < self->minX) {
@@ -4538,12 +4529,12 @@ static inline int ClipCode_7CF0(sGfx_7CF0* self, const sV_7CF0& v)
  */
 // PORT: uncached (0x30000000) pointers held in int.
 // Emits one screen-aligned sprite (GS SPRITE, ST + RGBAQ + two XYZ2) centred on pos.
-extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, sV_7CF0* pos, float* size, int* uv0, int* uv1, float* col)
+extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, t4Vector* pos, float* size, int* uv0, int* uv1, float* col)
 {
     if (self->clipValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sV_7CF0 clipPos = mtxApply_7CF0(&self->clipMtx, *pos);
+    t4Vector clipPos = mtxApply_7CF0(&self->clipMtx, *pos);
     float sw = size[0];
     float sh = size[1];
     float w = 1.0f / clipPos.w;
@@ -4552,13 +4543,13 @@ extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, sV_7CF0* pos, float*
     clipPos.x *= w;
     clipPos.y *= w;
     clipPos.w = w;
-    sV_7CF0 halfSize;
+    t4Vector halfSize;
     halfSize.x = sx * w;
     halfSize.y = sy * w;
     halfSize.z = 0.0f;
     halfSize.w = 0.0f;
-    sV_7CF0 lo = Sub_7CF0(clipPos, halfSize);
-    sV_7CF0 hi = Add_7CF0(clipPos, halfSize);
+    t4Vector lo = Sub_7CF0(clipPos, halfSize);
+    t4Vector hi = Add_7CF0(clipPos, halfSize);
     if (ClipCode_7CF0(self, lo) & ClipCode_7CF0(self, hi)) {
         return;
     }
@@ -7628,9 +7619,6 @@ extern "C" void func_0037D968(cPS2GraphicsMan* selfp)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetOutCode);
 #ifdef SKIP_ASM
-struct sPtVecDBE8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sPtGfxDBE8 {
@@ -7650,9 +7638,9 @@ struct sPtGfxDBE8 {
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sPtVecDBE8 mtxApplyDBE8(t4Matrix* m, const sPtVecDBE8& v)
+static inline t4Vector mtxApplyDBE8(t4Matrix* m, const t4Vector& v)
 {
-    sPtVecDBE8 out;
+    t4Vector out;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -7684,12 +7672,12 @@ static inline sPtVecDBE8 mtxApplyDBE8(t4Matrix* m, const sPtVecDBE8& v)
  * @param point  the world-space point (On Tour point)
  * @return the outcode bits (0 = inside)
  */
-extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const sPtVecDBE8* point)
+extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const t4Vector* point)
 {
     if (self->mMatricesValid == 0) {
         func_0037D968(self);
     }
-    sPtVecDBE8 screenPos = mtxApplyDBE8(&(*(&self->mScreenWorld)), *point);
+    t4Vector screenPos = mtxApplyDBE8(&(*(&self->mScreenWorld)), *point);
     int code = 0;
     float w = 1.0f / screenPos.w;
     screenPos.x *= w;
@@ -7830,9 +7818,6 @@ extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* minp, v
 //100%
 INCLUDE_ASM("render/particle", func_0037DEE0);
 #ifdef SKIP_ASM
-struct sPartQVec {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Projects @p point to the screen: transforms it by mNetMatrix with VU0, divides by w, then multiplies by mScreenScale
@@ -7844,9 +7829,9 @@ struct sPartQVec {
  * @return the projected point
  */
 // PORT: PS2-only VU0 macro-mode asm; the PC port needs a C version.
-extern "C" sPartQVec func_0037DEE0(cPS2GraphicsMan* self, sPartQVec* point)
+extern "C" t4Vector func_0037DEE0(cPS2GraphicsMan* self, t4Vector* point)
 {
-    sPartQVec result;
+    t4Vector result;
     __asm__ __volatile__(
         "lqc2      $vf10, 0x0(%1)\n"
         "lqc2      $vf1, 0x0(%2)\n"
@@ -7867,8 +7852,8 @@ extern "C" sPartQVec func_0037DEE0(cPS2GraphicsMan* self, sPartQVec* point)
         "sqc2      $vf13, %0\n"
         : "=m"(result)
         : "r"(point), "r"((char*)&self->mNetMatrix),
-          "m"(*(sPartQVec*)&self->mScreenScale),
-          "m"(*(sPartQVec*)&self->mScreenOffset));
+          "m"(*(t4Vector*)&self->mScreenScale),
+          "m"(*(t4Vector*)&self->mScreenOffset));
     return result;
 }
 #endif
@@ -7876,9 +7861,6 @@ extern "C" sPartQVec func_0037DEE0(cPS2GraphicsMan* self, sPartQVec* point)
 //100%
 INCLUDE_ASM("render/particle", func_0037DF40);
 #ifdef SKIP_ASM
-struct sPartVec4_DF40 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Transforms @p point by mNetMatrix with VU0 and returns the result, without the divide by w.
@@ -7889,10 +7871,10 @@ struct sPartVec4_DF40 {
  * @return the transformed (homogeneous) point
  */
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-extern "C" sPartVec4_DF40 func_0037DF40(cPS2GraphicsMan* self, sPartVec4_DF40* point)
+extern "C" t4Vector func_0037DF40(cPS2GraphicsMan* self, t4Vector* point)
 {
     char* mat = (char*)&self->mNetMatrix;
-    sPartVec4_DF40 result;
+    t4Vector result;
     __asm__ __volatile__(
         ".set push\n"
         ".set noreorder\n"
@@ -11801,9 +11783,6 @@ struct sQ_6E78 {
     int w[4];
 } __attribute__((aligned(16)));
 
-struct sV_6E78 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sEnt_6E78 {
     sRS_6E78 rs;                    // 0x00
@@ -11906,9 +11885,9 @@ static inline void UnpackBegin_6E78(sPkt_6E78* pkt)
     pkt->flg = 0;
 }
 
-static inline void AddQuad_6E78(sPkt_6E78* pkt, const sV_6E78& q)
+static inline void AddQuad_6E78(sPkt_6E78* pkt, const t4Vector& q)
 {
-    *(sV_6E78*)pkt->cur = q;
+    *(t4Vector*)pkt->cur = q;
     pkt->cur += 2;
 }
 
@@ -11990,8 +11969,8 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardScale));
-    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardOffset));
+    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardScale));
+    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardOffset));
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, self);
     func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
@@ -12018,16 +11997,16 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
     {
-        sV_6E78 flatGuardScale;
-        sV_6E78 flatGuardOffset;
-        flatGuardScale.x = (*(sV_6E78*)&self->mGuardScale).x;
-        flatGuardScale.y = (*(sV_6E78*)&self->mGuardScale).y;
+        t4Vector flatGuardScale;
+        t4Vector flatGuardOffset;
+        flatGuardScale.x = (*(t4Vector*)&self->mGuardScale).x;
+        flatGuardScale.y = (*(t4Vector*)&self->mGuardScale).y;
         flatGuardScale.z = 0.0f;
-        flatGuardScale.w = (*(sV_6E78*)&self->mGuardScale).w;
-        flatGuardOffset.x = (*(sV_6E78*)&self->mGuardOffset).x;
-        flatGuardOffset.y = (*(sV_6E78*)&self->mGuardOffset).y;
+        flatGuardScale.w = (*(t4Vector*)&self->mGuardScale).w;
+        flatGuardOffset.x = (*(t4Vector*)&self->mGuardOffset).x;
+        flatGuardOffset.y = (*(t4Vector*)&self->mGuardOffset).y;
         flatGuardOffset.z = 0.0f;
-        flatGuardOffset.w = (*(sV_6E78*)&self->mGuardOffset).w;
+        flatGuardOffset.w = (*(t4Vector*)&self->mGuardOffset).w;
         AddQuad_6E78(pkt, flatGuardScale);
         AddQuad_6E78(pkt, flatGuardOffset);
     }
@@ -12047,8 +12026,8 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardScale));
-    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardOffset));
+    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardScale));
+    AddQuad_6E78(pkt, (*(t4Vector*)&self->mGuardOffset));
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, self);
     func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)2, 0, (void*)1);
@@ -12648,9 +12627,6 @@ extern "C" void *func_00389160(void *dst, float fparg0, float fparg1, float fpar
 //100%
 INCLUDE_ASM("render/particle", cIrradiance_Clear);
 #ifdef SKIP_ASM
-struct sPartVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Zeroes an irradiance set: all four components of its ten coefficient vectors.
@@ -12660,7 +12636,7 @@ struct sPartVec4 {
  *
  * @param vecs  the ten vectors
  */
-extern "C" void cIrradiance_Clear(sPartVec4* vecs)
+extern "C" void cIrradiance_Clear(t4Vector* vecs)
 {
     for (int i = 0; i < 10; i++) {
         vecs[i].x = vecs[i].y = vecs[i].z = vecs[i].w = 0.0f;
@@ -12756,7 +12732,7 @@ INCLUDE_ASM("render/particle", func_00389590);
  * @param weights  the tint, as a, r, g, b
  * @param scale  overall factor
  */
-extern "C" void func_00389590(sPartVec4* dst, sPartVec4* src, sPartVec4* weights, float scale)
+extern "C" void func_00389590(t4Vector* dst, t4Vector* src, t4Vector* weights, float scale)
 {
     float kx = scale * weights->x;
     float ky = scale * weights->y;
@@ -12850,13 +12826,13 @@ extern "C" void cIrradiance_Scale(t4Vector* vecs, float* weights, float scale)
 INCLUDE_ASM("render/particle", func_00389730);
 #ifdef SKIP_ASM
 struct sPartVec4x10 {
-    sPartVec4 v[10];
+    t4Vector v[10];
 };
 
 // PORT: VU0 macro-mode vector add; the PC port needs plain C.
-static inline sPartVec4 sPartVec4_add(const sPartVec4& a, const sPartVec4& b)
+static inline t4Vector sPartVec4_add(const t4Vector& a, const t4Vector& b)
 {
-    sPartVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2       $vf3, 0x0(%1)\n"
         "lqc2       $vf4, 0x0(%2)\n"
@@ -12890,9 +12866,9 @@ extern "C" sPartVec4x10 func_00389730(sPartVec4x10* lhs, sPartVec4x10* rhs)
 INCLUDE_ASM("render/particle", func_003897A0);
 #ifdef SKIP_ASM
 // PORT: VU0 macro-mode vector scale; the PC port needs plain C.
-static inline sPartVec4 sPartVec4_scale(const sPartVec4& a, float s)
+static inline t4Vector sPartVec4_scale(const t4Vector& a, float s)
 {
-    sPartVec4 r;
+    t4Vector r;
     __asm__(
         "mfc1       $2, %2\n"
         "lqc2       $vf4, 0x0(%1)\n"
@@ -12937,7 +12913,7 @@ INCLUDE_ASM("render/particle", func_00389810);
  * @return @p vecs
  */
 // PORT: VU0 macro-mode vector scale (vec4 *= s); the PC port needs plain C.
-extern "C" sPartVec4* func_00389810(sPartVec4* vecs, float scale)
+extern "C" t4Vector* func_00389810(t4Vector* vecs, float scale)
 {
     for (int i = 0; i < 10; i++) {
         __asm__ __volatile__(
@@ -12961,11 +12937,11 @@ INCLUDE_ASM("render/particle", func_00389C38);
 #ifdef SKIP_ASM
 struct sParticleEntryA0;
 extern "C" sParticleEntryA0* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i);
-extern "C" void func_00389CB8(sPartVec4* self, void* p, float s);
+extern "C" void func_00389CB8(t4Vector* self, void* p, float s);
 extern int cIrradianceDataBase_mDefaultId;
 
 extern cIrradianceDataBase cIrradianceDataBase_TheDataBase;
-extern sPartVec4 cIrradiance_kv4White;
+extern t4Vector cIrradiance_kv4White;
 
 /**
  * Builds the default irradiance set in @p self: clears it, adds the irradiance database's default entry and, when
@@ -12977,12 +12953,12 @@ extern sPartVec4 cIrradiance_kv4White;
  *
  * @param sunPos  the sun position passed to func_00389CB8, or 0 for none
  */
-extern "C" void func_00389C38(sPartVec4* self, void* sunPos)
+extern "C" void func_00389C38(t4Vector* self, void* sunPos)
 {
     cIrradiance_Clear(self);
     cIrradianceDataBase* lib = &cIrradianceDataBase_TheDataBase;
     if (lib->mNumItem > 0) {
-        func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, cIrradianceDataBase_mDefaultId), &cIrradiance_kv4White, 1.0f);
+        func_00389590(self, (t4Vector*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, cIrradianceDataBase_mDefaultId), &cIrradiance_kv4White, 1.0f);
     }
     if (sunPos != 0) {
         func_00389CB8(self, sunPos, 1.0f);
@@ -12993,12 +12969,9 @@ extern "C" void func_00389C38(sPartVec4* self, void* sunPos)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", func_00389CB8);
 #ifdef SKIP_ASM
-struct sV_9CB8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_9CB8 {
-    sV_9CB8 r[4];
+    t4Vector r[4];
     sMat_9CB8() {}
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
     sMat_9CB8(const sMat_9CB8& s)
@@ -13048,28 +13021,28 @@ struct sVEnt_9CB8 {
 extern float D_004A43C0[];
 extern int D_004A59A4;
 extern char* cGraphicsMan_TheGraphicsMan_9CB8 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sV_9CB8 t4vect_Origin;
-extern sV_9CB8 t4vect_XAxis_9CB8 __asm__("t4vect_XAxis");
-extern sV_9CB8 t4vect_YAxis_9CB8 __asm__("t4vect_YAxis");
-extern sV_9CB8 t4vect_ZAxis_9CB8 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_Origin;
+extern t4Vector t4vect_XAxis_9CB8 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_YAxis_9CB8 __asm__("t4vect_YAxis");
+extern t4Vector t4vect_ZAxis_9CB8 __asm__("t4vect_ZAxis");
 extern sMat_9CB8 t4mat_Identity_9CB8 __asm__("t4mat_Identity");
 extern sMat_9CB8 D_00500C60;
 
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C128(float x);
 extern "C" float func_0031C228(float x);
-extern "C" void func_00389840(sV_9CB8* out, sMat3_9CB8* m, int a, int b);
-extern "C" void func_00389620_9CB8(void* dst, sV_9CB8* src, float dt) __asm__("func_00389620");
+extern "C" void func_00389840(t4Vector* out, sMat3_9CB8* m, int a, int b);
+extern "C" void func_00389620_9CB8(void* dst, t4Vector* src, float dt) __asm__("func_00389620");
 
-static inline sV_9CB8 GetPos_9CB8(const sMat_9CB8& m)
+static inline t4Vector GetPos_9CB8(const sMat_9CB8& m)
 {
     return m.r[3];
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV_9CB8 Scale_9CB8(const sV_9CB8& v, float s)
+static inline t4Vector Scale_9CB8(const t4Vector& v, float s)
 {
-    sV_9CB8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -13084,9 +13057,9 @@ static inline sV_9CB8 Scale_9CB8(const sV_9CB8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV_9CB8 Sub_9CB8(const sV_9CB8& a, const sV_9CB8& b)
+static inline t4Vector Sub_9CB8(const t4Vector& a, const t4Vector& b)
 {
-    sV_9CB8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -13099,9 +13072,9 @@ static inline sV_9CB8 Sub_9CB8(const sV_9CB8& a, const sV_9CB8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV_9CB8 Norm_9CB8(const sV_9CB8& v)
+static inline t4Vector Norm_9CB8(const t4Vector& v)
 {
-    sV_9CB8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -13120,7 +13093,7 @@ static inline sV_9CB8 Norm_9CB8(const sV_9CB8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Len_9CB8(const sV_9CB8& v)
+static inline float Len_9CB8(const t4Vector& v)
 {
     float r;
     int t;
@@ -13141,7 +13114,7 @@ static inline float Len_9CB8(const sV_9CB8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_9CB8(const sV_9CB8& a, const sV_9CB8& b)
+static inline float Dot_9CB8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -13161,9 +13134,9 @@ static inline float Dot_9CB8(const sV_9CB8& a, const sV_9CB8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sV_9CB8 MulVec_9CB8(const sMat_9CB8* m, const sV_9CB8& v)
+static inline t4Vector MulVec_9CB8(const sMat_9CB8* m, const t4Vector& v)
 {
-    sV_9CB8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -13303,7 +13276,7 @@ static inline float Sqrt_9CB8(float v)
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 = m * v: translate in the matrix's own frame).
-static inline void Translate_9CB8(sMat_9CB8* m, const sV_9CB8& v)
+static inline void Translate_9CB8(sMat_9CB8* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%0)\n"
@@ -13352,10 +13325,10 @@ static inline float Clamp_9CB8(float v, float lo, float hi)
 }
 
 // Rotates R about axis by angle, keeping its translation: R = Rot(axis, angle, t) * R'.
-static inline void RotateAxis_9CB8(sMat_9CB8* R, const sV_9CB8* axis, float angle)
+static inline void RotateAxis_9CB8(sMat_9CB8* R, const t4Vector* axis, float angle)
 {
     sMat_9CB8 old = *R;
-    sV_9CB8 t = old.r[3];
+    t4Vector t = old.r[3];
     old.r[3] = t4vect_Origin;
     float s;
     float c;
@@ -13397,10 +13370,10 @@ static inline void RotateAxis_9CB8(sMat_9CB8* R, const sV_9CB8* axis, float angl
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm and the
 // g++ `<?` operator (retail's min.s); a port replaces them with a plain C transpose, C vector math and a ternary min.
-extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
+extern "C" void func_00389CB8(t4Vector* out, void* sunp, float scale)
 {
-    sV_9CB8* sun = (sV_9CB8*)sunp;
-    sV_9CB8 prm[10];
+    t4Vector* sun = (t4Vector*)sunp;
+    t4Vector prm[10];
     prm[0].w = 0.49541598558425903f;
     prm[1].w = 0.0f;
     prm[2].w = D_004A43C0[0];
@@ -13413,11 +13386,11 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     prm[9].w = 0.0f;
     cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_9CB8;
     sMat_9CB8 cam = *(sMat_9CB8*)mgr->GetView();
-    sV_9CB8 eye = Scale_9CB8(GetPos_9CB8(cam), -1.0f);
+    t4Vector eye = Scale_9CB8(GetPos_9CB8(cam), -1.0f);
     MMI_TRANSPOSE4(&cam);
     eye = MulVec_9CB8(&cam, eye);
     eye.w = 1.0f;
-    sV_9CB8 sunDir = Norm_9CB8(Sub_9CB8(*sun, eye));
+    t4Vector sunDir = Norm_9CB8(Sub_9CB8(*sun, eye));
     float z = sunDir.z;
     sunDir.z = 0.0f;
     float len = Len_9CB8(sunDir);

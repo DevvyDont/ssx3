@@ -31,11 +31,8 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_initLightCache);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_RTLOverlapList[];
 
-struct sWLCVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sWLCVec4 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 struct sWLCList {
     unsigned int head;
@@ -52,7 +49,7 @@ struct sWLCNode {
     unsigned int id;
     int priority;
     char pad08[0xA8];
-    sWLCVec4 v;
+    t4Vector v;
     int fC0;
     char padC4[0xAC];
     sWLCNode* next;
@@ -157,9 +154,6 @@ struct sVec_5400 {
 } __attribute__((aligned(16)));
 
 // Plain (ctor-less) quadword for matrix rows, so a local matrix needs no construction loop.
-struct sQuad_5400 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sAABox_5400 {
@@ -266,7 +260,7 @@ static inline float Length_5400(const sVec_5400& v)
 
 static inline sVec_5400 Trans_5400(const t4Matrix& m)
 {
-    return *(const sVec_5400*)&((sQuad_5400*)&m.row[0])[3];
+    return *(const sVec_5400*)&((t4Vector*)&m.row[0])[3];
 }
 
 static inline sVec_5400 ObjPos_5400(char* vobj)
@@ -952,10 +946,7 @@ struct sWLCode6910;
 extern "C" void cCheatFX_updateState(sWLCode6910* self);
 extern int cCheatFX_m_resetStates;
 
-struct sVec6518 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
-extern sVec6518 t4vect_Origin;
+extern t4Vector t4vect_Origin;
 
 struct sVE6518 {
     short delta;
@@ -966,7 +957,7 @@ struct sVE6518 {
 
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float len6518(const sVec6518& v)
+static inline float len6518(const t4Vector& v)
 {
     float r;
     int t;
@@ -987,9 +978,9 @@ static inline float len6518(const sVec6518& v)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec6518 norm6518(const sVec6518& v)
+static inline t4Vector norm6518(const t4Vector& v)
 {
-    sVec6518 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1008,9 +999,9 @@ static inline sVec6518 norm6518(const sVec6518& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sVec6518 scale6518(const sVec6518& v, float s)
+static inline t4Vector scale6518(const t4Vector& v, float s)
 {
-    sVec6518 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1025,7 +1016,7 @@ static inline sVec6518 scale6518(const sVec6518& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place v *= s).
-static inline void scaleEq6518(sVec6518& v, float s)
+static inline void scaleEq6518(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -1040,9 +1031,9 @@ static inline void scaleEq6518(sVec6518& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec6518 add6518(const sVec6518& a, const sVec6518& b)
+static inline t4Vector add6518(const t4Vector& a, const t4Vector& b)
 {
-    sVec6518 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1106,27 +1097,27 @@ extern "C" void cCheatFX_update(cCheatFX* self)
     if (!(0.0f < curRider->mBoostStrength)) {
         return;
     }
-    float len = len6518((*(sVec6518*)&curRider->mVelocity));
+    float len = len6518((*(t4Vector*)&curRider->mVelocity));
     if (len < curRider->mBoostMaxSpeed && len != 0.0f) {
-        (*(sVec6518*)&curRider->mVelocity) = norm6518((*(sVec6518*)&curRider->mVelocity));
-        scaleEq6518((*(sVec6518*)&(self->mRider)->mVelocity), (self->mRider)->mBoostMaxSpeed * (self->mRider)->mCheatSpeedLerp + len * (1.0f - (self->mRider)->mCheatSpeedLerp));
-        len = len6518((*(sVec6518*)&(self->mRider)->mVelocity));
+        (*(t4Vector*)&curRider->mVelocity) = norm6518((*(t4Vector*)&curRider->mVelocity));
+        scaleEq6518((*(t4Vector*)&(self->mRider)->mVelocity), (self->mRider)->mBoostMaxSpeed * (self->mRider)->mCheatSpeedLerp + len * (1.0f - (self->mRider)->mCheatSpeedLerp));
+        len = len6518((*(t4Vector*)&(self->mRider)->mVelocity));
     }
     curRider = (self->mRider);
     if (curRider->mCheatSteerAlign == 0.0f) {
         return;
     }
-    if (!(0.0010000000474974513f < len6518((*(sVec6518*)&curRider->mGroundForward)))) {
+    if (!(0.0010000000474974513f < len6518((*(t4Vector*)&curRider->mGroundForward)))) {
         return;
     }
-    if (!(9.999999747378752e-05f < len6518((*(sVec6518*)&curRider->mVelocity)))) {
+    if (!(9.999999747378752e-05f < len6518((*(t4Vector*)&curRider->mVelocity)))) {
         return;
     }
-    (*(sVec6518*)&curRider->mVelocity) = add6518(scale6518(norm6518((*(sVec6518*)&curRider->mGroundForward)), len * (self->mRider)->mCheatSteerAlign),
-                     scale6518(norm6518((*(sVec6518*)&(self->mRider)->mVelocity)), len * (1.0f - (self->mRider)->mCheatSteerAlign)));
+    (*(t4Vector*)&curRider->mVelocity) = add6518(scale6518(norm6518((*(t4Vector*)&curRider->mGroundForward)), len * (self->mRider)->mCheatSteerAlign),
+                     scale6518(norm6518((*(t4Vector*)&(self->mRider)->mVelocity)), len * (1.0f - (self->mRider)->mCheatSteerAlign)));
     curRider = (self->mRider);
-    if ((*(sVec6518*)&curRider->mVelocity).x < 0.0f && (*(sVec6518*)&curRider->mVelocity).x >= 0.0f) {
-        (*(sVec6518*)&curRider->mVelocity) = t4vect_Origin;
+    if ((*(t4Vector*)&curRider->mVelocity).x < 0.0f && (*(t4Vector*)&curRider->mVelocity).x >= 0.0f) {
+        (*(t4Vector*)&curRider->mVelocity) = t4vect_Origin;
     }
 }
 #endif

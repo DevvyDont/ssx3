@@ -22,12 +22,9 @@ struct cRiderSphereTree;
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
 extern char str_BoardSphereTree[];
 
-struct sVec4WG {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0DotWG(const sVec4WG& a, const sVec4WG& b)
+static inline float vu0DotWG(const t4Vector& a, const t4Vector& b)
 {
     float r;
     __asm__ __volatile__(
@@ -45,9 +42,9 @@ static inline float vu0DotWG(const sVec4WG& a, const sVec4WG& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4WG vu0ScaleMemWG(const sVec4WG& v, float s)
+static inline t4Vector vu0ScaleMemWG(const t4Vector& v, float s)
 {
-    sVec4WG r;
+    t4Vector r;
     int t;
     __asm__ __volatile__(
         "mfc1      %1, %3\n"
@@ -62,7 +59,7 @@ static inline sVec4WG vu0ScaleMemWG(const sVec4WG& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline void vu0SubWG(sVec4WG& dst, const sVec4WG& a, const sVec4WG& b)
+static inline void vu0SubWG(t4Vector& dst, const t4Vector& a, const t4Vector& b)
 {
     __asm__ __volatile__(
         "lqc2      $vf3, %1\n"
@@ -91,15 +88,15 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
         self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(688, str_BoardSphereTree, 0, 0));
     }
     cRider* rider = self->mRider;
-    sVec4WG* pos = (sVec4WG*)(&rider->mPosition);
-    *(sVec4WG*)&self->BoardIntersectBox = *pos;
-    *(sVec4WG*)&self->BoardIntersectBox.MaxPoint = *pos;
+    t4Vector* pos = (t4Vector*)(&rider->mPosition);
+    *(t4Vector*)&self->BoardIntersectBox = *pos;
+    *(t4Vector*)&self->BoardIntersectBox.MaxPoint = *pos;
     if (prev == 0)
     {
-        sVec4WG* n = (sVec4WG*)(&rider->mGroundNormal);
-        float normalSpeed = vu0DotWG(*(sVec4WG*)&rider->mVelocity, *n);
-        sVec4WG normalPart = vu0ScaleMemWG(*n, normalSpeed);
-        sVec4WG* velocity = (sVec4WG*)(&self->mRider->mVelocity);
+        t4Vector* n = (t4Vector*)(&rider->mGroundNormal);
+        float normalSpeed = vu0DotWG(*(t4Vector*)&rider->mVelocity, *n);
+        t4Vector normalPart = vu0ScaleMemWG(*n, normalSpeed);
+        t4Vector* velocity = (t4Vector*)(&self->mRider->mVelocity);
         vu0SubWG(*velocity, *velocity, normalPart);
         *(int*)self = 0;
     }
@@ -117,17 +114,14 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_throwItem);
 #ifdef SKIP_ASM
-struct sVec4WM {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVecPairWM {
-    sVec4WM a;
-    sVec4WM b;
+    t4Vector a;
+    t4Vector b;
 };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0DotWM(const sVec4WM& a, const sVec4WM& b)
+static inline float vu0DotWM(const t4Vector& a, const t4Vector& b)
 {
     float r;
     __asm__ __volatile__(
@@ -145,9 +139,9 @@ static inline float vu0DotWM(const sVec4WM& a, const sVec4WM& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4WM vu0ScaleWM(const sVec4WM& v, float s)
+static inline t4Vector vu0ScaleWM(const t4Vector& v, float s)
 {
-    sVec4WM r;
+    t4Vector r;
     int t;
     __asm__ __volatile__(
         "mfc1      %1, %3\n"
@@ -161,7 +155,7 @@ static inline sVec4WM vu0ScaleWM(const sVec4WM& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline void vu0SubWM(sVec4WM& dst, const sVec4WM& a, const sVec4WM& b)
+static inline void vu0SubWM(t4Vector& dst, const t4Vector& a, const t4Vector& b)
 {
     __asm__ __volatile__(
         "lqc2      $vf3, %1\n"
@@ -183,18 +177,18 @@ static inline void vu0SubWM(sVec4WM& dst, const sVec4WM& a, const sVec4WM& b)
  * @param initAngVel  the board's initial angular velocity (On Tour initAngVel)
  * @param itemBoneID  the board's starting pose, position then rotation (On Tour passes an item bone ID instead)
  */
-extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, sVec4WM* initVel, sVec4WM* initAngVel, sVecPairWM* itemBoneID)
+extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, t4Vector* initVel, t4Vector* initAngVel, sVecPairWM* itemBoneID)
 {
     *(sVecPairWM*)&self->mRider->mRootPoseOverridePos = *itemBoneID;
     self->mRider->mUseRootPoseOverride = 1;
-    *(sVec4WM*)&self->BoardAngVelocity = *initAngVel;
-    *(sVec4WM*)&self->BoardVelocity = *initVel;
+    *(t4Vector*)&self->BoardAngVelocity = *initAngVel;
+    *(t4Vector*)&self->BoardVelocity = *initVel;
     if (*(int*)self == 0)
     {
-        sVec4WM* n = (sVec4WM*)(&self->mRider->mGroundNormal);
+        t4Vector* n = (t4Vector*)(&self->mRider->mGroundNormal);
         float normalSpeed = vu0DotWM(*n, *initVel);
-        sVec4WM normalPart = vu0ScaleWM(*n, normalSpeed);
-        vu0SubWM(*(sVec4WM*)&self->BoardVelocity, *(sVec4WM*)&self->BoardVelocity, normalPart);
+        t4Vector normalPart = vu0ScaleWM(*n, normalSpeed);
+        vu0SubWM(*(t4Vector*)&self->BoardVelocity, *(t4Vector*)&self->BoardVelocity, normalPart);
     }
 }
 #endif
@@ -205,9 +199,9 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_throwRider);
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4WM vu0ScaleMemWM_136DE0(const sVec4WM& v, float s)
+static inline t4Vector vu0ScaleMemWM_136DE0(const t4Vector& v, float s)
 {
-    sVec4WM r;
+    t4Vector r;
     int t;
     __asm__ __volatile__(
         "mfc1      %1, %3\n"
@@ -231,16 +225,16 @@ static inline sVec4WM vu0ScaleMemWM_136DE0(const sVec4WM& v, float s)
  * @param initVel  initial velocity (On Tour initVel)
  * @param initAngVel  initial angular velocity (On Tour initAngVel)
  */
-extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* initVel, sVec4WM* initAngVel)
+extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, t4Vector* initVel, t4Vector* initAngVel)
 {
-    *(sVec4WM*)&self->RiderAngVelocity = *initAngVel;
-    *(sVec4WM*)&self->mRider->mVelocity = *initVel;
+    *(t4Vector*)&self->RiderAngVelocity = *initAngVel;
+    *(t4Vector*)&self->mRider->mVelocity = *initVel;
     if (*(int*)self == 0)
     {
-        sVec4WM* n = (sVec4WM*)(&self->mRider->mGroundNormal);
+        t4Vector* n = (t4Vector*)(&self->mRider->mGroundNormal);
         float normalSpeed = vu0DotWM(*n, *initVel);
-        sVec4WM normalPart = vu0ScaleMemWM_136DE0(*n, normalSpeed);
-        sVec4WM* velocity = (sVec4WM*)(&self->mRider->mVelocity);
+        t4Vector normalPart = vu0ScaleMemWM_136DE0(*n, normalSpeed);
+        t4Vector* velocity = (t4Vector*)(&self->mRider->mVelocity);
         vu0SubWM(*velocity, *velocity, normalPart);
     }
     else
@@ -782,12 +776,9 @@ extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 
-struct sVec4W7 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector times-assign scalar).
-static inline void vu0ScaleEqW7(sVec4W7& v, float s)
+static inline void vu0ScaleEqW7(t4Vector& v, float s)
 {
     int t;
     __asm__ __volatile__(
@@ -833,7 +824,7 @@ extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion* wipeoutMotion)
         float k = 6.632251739501953f;
         cRider_alignRiderAxis(alignRider, &alignRider->mAirPredictor->GuessLandNormal, &alignRider->mAirPredictor->GuessLandVelocity, x, alignRider->mTimeScale * k);
     }
-    vu0ScaleEqW7(*(sVec4W7*)&wipeoutMotion->RiderAngVelocity, 1.0f - dt * 1.5f);
+    vu0ScaleEqW7(*(t4Vector*)&wipeoutMotion->RiderAngVelocity, 1.0f - dt * 1.5f);
     cRider_updateOrientationImplicit(wipeoutMotion->mRider);
 }
 #endif
@@ -846,7 +837,7 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolveAirMotion);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
-extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, t4Vector* dir);
 // PORT: the project names these __FPv (one void* param); this caller passes more.
 void cAirPredictor_land_137860(void* ap, void* pos, void* vel) __asm__("cAirPredictor_land__FPv");
 void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -967,7 +958,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
     float depth = cOverlapList_terrainIntersect1(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (depth >= 0.0f)
     {
-        float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hitB), (sVec4WG*)&hitA.Inorm);
+        float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hitB), (t4Vector*)&hitA.Inorm);
         float vn = 0.0f;
         float height = 0.0f;
         if (groundParam >= 0.4000000059604645f)
@@ -1037,7 +1028,7 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_stepGroundMotion);
 struct sCurvePt_137D18 { float x, y; };
 
 
-extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, t4Vector* dir);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -1314,7 +1305,7 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
     t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(RIDER), vu0Scale_137D18(RIDER->mVelocity, 0.0036000001709908247f)));
     cRider_alignRiderAxis(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
     tIntersectInfo hit;
-    float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hit), (sVec4WG*)&RIDER->mGroundNormal);
+    float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hit), (t4Vector*)&RIDER->mGroundNormal);
     if (0.0f <= groundParam) {
         RIDER->GroundVelocity = hit.Ivel;
         RIDER->mGroundNormal = hit.Inorm;
@@ -1550,13 +1541,13 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_intersectGround);
 #ifdef SKIP_ASM
-extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4WG& a, const sVec4WG& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const t4Vector& a, const t4Vector& b, int n, float r);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4WG vu0Scale_138960(const sVec4WG& v, float s)
+static inline t4Vector vu0Scale_138960(const t4Vector& v, float s)
 {
-    sVec4WG r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1571,9 +1562,9 @@ static inline sVec4WG vu0Scale_138960(const sVec4WG& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4WG vu0Sub_138960(const sVec4WG& a, const sVec4WG& b)
+static inline t4Vector vu0Sub_138960(const t4Vector& a, const t4Vector& b)
 {
-    sVec4WG r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1585,9 +1576,9 @@ static inline sVec4WG vu0Sub_138960(const sVec4WG& a, const sVec4WG& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4WG vu0Add_138960(const sVec4WG& a, const sVec4WG& b)
+static inline t4Vector vu0Add_138960(const t4Vector& a, const t4Vector& b)
 {
-    sVec4WG r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1612,11 +1603,11 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
  * @param dir  the probe direction (the ground normal)
  * @return the hit distance, negative on a miss
  */
-extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, sVec4WG* dir)
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, t4Vector* dir)
 {
     char* rider = (char*)self->mRider;
     char seg[176];
-    sVec4WG* pt = (sVec4WG*)(rider + 0x110);
+    t4Vector* pt = (t4Vector*)(rider + 0x110);
     cWorldLine_cWorldLine(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
     cRider* probeRider = self->mRider;
     float hitDist = cOverlapList_terrainIntersect1(probeRider->mOverlapList, seg, hit, (int)probeRider->mLineHint);

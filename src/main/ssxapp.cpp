@@ -3534,12 +3534,9 @@ extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" void cSSXAudio_Update(void* snd, float dt, int a2);
 extern "C" void cWorldTriggerManager_Update(void* p);
 
-struct sV4_22B008 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_22B008 {
-    sV4_22B008 row[4];
+    t4Vector row[4];
 };
 
 struct sRect_22B008 {
@@ -3547,8 +3544,8 @@ struct sRect_22B008 {
 };
 
 struct sBox_22B008 {
-    sV4_22B008 min;
-    sV4_22B008 max;
+    t4Vector min;
+    t4Vector max;
 };
 
 struct sScale_22B008 {
@@ -3720,9 +3717,9 @@ static inline void MatCopy_22B008(sMat_22B008* dst, const sMat_22B008* src)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV4_22B008 operator+(const sV4_22B008& a, const sV4_22B008& b)
+static inline t4Vector operator+(const t4Vector& a, const t4Vector& b)
 {
-    sV4_22B008 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3735,9 +3732,9 @@ static inline sV4_22B008 operator+(const sV4_22B008& a, const sV4_22B008& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_22B008 operator-(const sV4_22B008& a, const sV4_22B008& b)
+static inline t4Vector operator-(const t4Vector& a, const t4Vector& b)
 {
-    sV4_22B008 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3750,9 +3747,9 @@ static inline sV4_22B008 operator-(const sV4_22B008& a, const sV4_22B008& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_22B008 operator*(const sV4_22B008& v, float s)
+static inline t4Vector operator*(const t4Vector& v, float s)
 {
-    sV4_22B008 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3767,7 +3764,7 @@ static inline sV4_22B008 operator*(const sV4_22B008& v, float s)
 }
 
 // Grows the box to contain c.
-static inline void Grow_22B008(sBox_22B008& b, const sV4_22B008& c)
+static inline void Grow_22B008(sBox_22B008& b, const t4Vector& c)
 {
     if (c.x < b.min.x)
         b.min.x = c.x;
@@ -3874,11 +3871,11 @@ extern "C" int cGame_render(cGame* self)
         t4mat_invert(&inv);
         sMat_22B008 invView = inv;
         sBox_22B008& bounds = box;
-        const sV4_22B008& right = invView.row[0];
-        const sV4_22B008& up = invView.row[1];
-        const sV4_22B008& front = invView.row[2];
-        const sV4_22B008& pos = invView.row[3];
-        sV4_22B008 corner;
+        const t4Vector& right = invView.row[0];
+        const t4Vector& up = invView.row[1];
+        const t4Vector& front = invView.row[2];
+        const t4Vector& pos = invView.row[3];
+        t4Vector corner;
         corner = (pos - front + right + up) * nearClip;
         corner.w = 1.0f;
         bounds.min = corner;

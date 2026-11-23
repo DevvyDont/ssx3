@@ -319,14 +319,11 @@ struct sGs_EDA0 {
     void SetPrim(int t) { SetBits(0x3E0, t << 5); }
 };
 
-struct sPos_EDA0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVert_EDA0 {
     float u, v, q, f0C;
     int r, g, b, a;
-    sPos_EDA0 pos;
+    t4Vector pos;
     sVert_EDA0() {}
 };
 
@@ -615,7 +612,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
         verts[2].v = vb;
         verts[3].u = atex->u1;
         verts[3].v = vb;
-        sPos_EDA0 corner;
+        t4Vector corner;
         corner.x = ax - hw;
         corner.y = y;
         corner.z = 0.0f;
@@ -656,7 +653,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
     verts[2].v = tex->v1;
     verts[3].u = tex->u1;
     verts[3].v = tex->v1;
-    sPos_EDA0 corner;
+    t4Vector corner;
     corner.x = self->unk_010 - 5.499532222747803f;
     corner.y = barTop;
     corner.z = 0.0f;

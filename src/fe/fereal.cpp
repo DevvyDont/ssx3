@@ -1103,14 +1103,11 @@ struct sFeWorld {
     sFeVE* vt;                      // 0x10D8
 };
 
-struct sFePos {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sFeVert {
     float u, v, q, f0C;             // 0x00
     int r, g, b, a;                 // 0x10
-    sFePos pos;                     // 0x20
+    t4Vector pos;                     // 0x20
     sFeVert() {}
 };
 
@@ -1188,7 +1185,7 @@ extern "C" int cRealFE_render(cRealFE* self)
             verts[i].b = 0;
             verts[i].q = 1.0f;
         }
-        sFePos corner;
+        t4Vector corner;
         corner.x = 0.0f;
         corner.y = 0.0f;
         corner.z = 0.0f;

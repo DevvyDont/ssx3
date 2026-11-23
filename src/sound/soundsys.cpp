@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "main/gamemode.h"
 #include "ealib/snd.h"
@@ -584,12 +585,9 @@ extern "C" float func_00290C10(int i, float inputValue)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_GetGruntVol);
 #ifdef SKIP_ASM
-struct sSndVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float sndVu0Length(const sSndVec4& v)
+static inline float sndVu0Length(const t4Vector& v)
 {
     float r;
     __asm__(
@@ -620,7 +618,7 @@ extern "C" float func_00290C10(int i, float v);
  */
 extern "C" int cSSXAudio_GetGruntVol(cSSXAudio* self, cRider* src)
 {
-    sSndVec4* velocity = (sSndVec4*)src->getVelocity();
+    t4Vector* velocity = (t4Vector*)src->getVelocity();
     int level = (int)func_00290C10(3, sndVu0Length(*velocity));
     if (level > 127) {
         level = 127;
@@ -3318,7 +3316,7 @@ extern "C" void cSSXAudio_CollisionSound(cSSXAudio* self, cRider* rider, char* e
     if (*(void**)(evt + 0x8C) == 0) return;
     if (cSSXAudio_CameraInRange(self, (int)rider->getPosition(), 100.0f) < 0) return;
     if (cSSXAudio_PlayHistoryExists_p(self, evt, idx) != 0) return;
-    sSndVec4* hitVel = (sSndVec4*)rider->getVelocity();
+    t4Vector* hitVel = (t4Vector*)rider->getVelocity();
     int volume = (int)func_00290C10(0, sndVu0Length(*hitVel));
     if (volume > 127) volume = 127;
     if (volume < 0) volume = 0;
@@ -4102,7 +4100,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
 #define SND_74A0_MAX(a, b) ((a) > (b) ? (a) : (b))
 
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
-extern "C" int cSSXAudio_GetClosestCamera(void* self, sSndVec4* pos);
+extern "C" int cSSXAudio_GetClosestCamera(void* self, t4Vector* pos);
 
 static inline void snd74A0AddVoice(void* vself, int a, int b, int type)
 {
@@ -4165,7 +4163,7 @@ extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, char* evt, int n)
     if (self->unk_62A8 >= 0) return;
     if (cSSXAudio_PlayHistoryExists(self, (int)evt, 0) != 0) return;
     int pri = 80;
-    sSndVec4 pos = *(sSndVec4*)(evt + 0x40);
+    t4Vector pos = *(t4Vector*)(evt + 0x40);
     int type = 2;
     int patch;
     if (n < 100) {
@@ -4314,22 +4312,22 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, tInstanceRecord* obj, int
     if (id == -1) {
         char* inner = (char*)obj->m_pActiveNode;
         sSndVtVar* vt = *(sSndVtVar**)(inner + 0xC);
-        sSndVec4 pos;
-        pos = *(sSndVec4*)(vt[24].fn(vthis(inner, vt[24])) + 0x30);
-        *(sSndVec4*)(sl + 0x5A10) = pos;
+        t4Vector pos;
+        pos = *(t4Vector*)(vt[24].fn(vthis(inner, vt[24])) + 0x30);
+        *(t4Vector*)(sl + 0x5A10) = pos;
     } else {
         char* inner = (char*)obj->m_pActiveNode;
         sSndVtVar* vt = *(sSndVtVar**)(inner + 0xC);
         if (vt[26].fn(vthis(inner, vt[26])) != 0) {
             char* objNode = (char*)obj->m_pActiveNode;
             sSndVtVar* vt2 = *(sSndVtVar**)(objNode + 0xC);
-            sSndVec4 pos;
-            pos = *(sSndVec4*)(vt2[29].fn(vthis(objNode, vt2[29]), id) + 0x30);
-            *(sSndVec4*)(sl + 0x5A10) = pos;
+            t4Vector pos;
+            pos = *(t4Vector*)(vt2[29].fn(vthis(objNode, vt2[29]), id) + 0x30);
+            *(t4Vector*)(sl + 0x5A10) = pos;
         } else {
-            sSndVec4 pos;
-            pos = *(sSndVec4*)&obj->m_fmTransform.m[3][0];
-            *(sSndVec4*)(sl + 0x5A10) = pos;
+            t4Vector pos;
+            pos = *(t4Vector*)&obj->m_fmTransform.m[3][0];
+            *(t4Vector*)(sl + 0x5A10) = pos;
         }
     }
     self->AttachedSounds[i].mesh = id;
@@ -4601,14 +4599,11 @@ extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int 
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" float func_00290C10(int i, float v);
 
-struct sVec4_8488 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component add).
-static inline sVec4_8488 vu0Add_8488(const sVec4_8488& a, const sVec4_8488& b)
+static inline t4Vector vu0Add_8488(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_8488 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4621,7 +4616,7 @@ static inline sVec4_8488 vu0Add_8488(const sVec4_8488& a, const sVec4_8488& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_8488(const sVec4_8488& v)
+static inline float vu0Length_8488(const t4Vector& v)
 {
     float r;
     int t;
@@ -4644,7 +4639,7 @@ static inline float vu0Length_8488(const sVec4_8488& v)
 class cSs8488Obj {
 public:
     virtual void v01();
-    virtual sVec4_8488* getVelocity();
+    virtual t4Vector* getVelocity();
     virtual void v03();
     virtual void v04();
     virtual int getPosition();
@@ -4769,7 +4764,7 @@ void cSSXAudio_RiderCollision_8488(void* vself, sSs8488Rider* rider, sSs8488Ride
         if (!okB) return;
     }
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)self, 7, 0) != 0) return;
-    sVec4_8488 sum = vu0Add_8488(*rider->getVelocity(), *opponent->getVelocity());
+    t4Vector sum = vu0Add_8488(*rider->getVelocity(), *opponent->getVelocity());
     int volume = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
     int handle = snd8488Add(self, rider, 0, 54, volume);
     cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, handle, *(volatile int*)(**(char***)&self->MusicSys + 0x260) + 50, 0, 0);
@@ -9374,12 +9369,9 @@ static inline int sndA30Mode0560(int m)
     return ScriptEngine->mPlayingNISList == m;
 }
 
-struct sVec4_0560 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_0560(const sVec4_0560& a, const sVec4_0560& b)
+static inline float vu0Dot_0560(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -9401,7 +9393,7 @@ static inline float vu0Dot_0560(const sVec4_0560& a, const sVec4_0560& b)
 class cSs0560Obj {
 public:
     virtual void v01();
-    virtual sVec4_0560* getVelocity();
+    virtual t4Vector* getVelocity();
     virtual void v03();
     virtual void v04();
     virtual int getPosition();
@@ -9464,7 +9456,7 @@ void func_002A0560_0560(void* self, sSs0560Rider* passer, sSs0560Rider* passed)
     if (okA != okB) return;
     float headingSin, headingCos;
     fSinCos_0560(passed->f4CC, &headingSin, &headingCos);
-    sVec4_0560 headingDir;
+    t4Vector headingDir;
     headingDir.x = headingCos;
     headingDir.y = headingSin;
     headingDir.z = 0;
@@ -13311,26 +13303,23 @@ INCLUDE_ASM("sound/soundsys", func_002A5D08);
 extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
-struct sVec4_5D08 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sPoolGroup5D08 {
     int key;
     int handle;
     int cnt;
     int pad0C;
-    sVec4_5D08 vec;
+    t4Vector vec;
     char pad20[0x10];
 };
 struct sPoolSlot5D08 {
-    sVec4_5D08* p;
+    t4Vector* p;
     int v4;
     sPoolGroup5D08* grp;
 };
 struct sPool5D08 {
     int f0;
     char pad4[0xC];
-    sVec4_5D08 vec10;
+    t4Vector vec10;
     sPoolSlot5D08 slots[15];
     int count;
     int fD8;
@@ -13356,7 +13345,7 @@ struct sSnd5D08Sub {
     sSnd5D08Ch def;          // 0x04
     volatile int cur;        // 0x1C
     sSnd5D08Ch* ch;          // 0x20
-    sVec4_5D08* tgt[4];      // 0x24
+    t4Vector* tgt[4];      // 0x24
     int* p34;                // 0x34
     int* vals;               // 0x38
     int* p3C;                // 0x3C

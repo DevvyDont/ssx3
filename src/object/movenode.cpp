@@ -971,9 +971,6 @@ INCLUDE_ASM("object/movenode", cMoveNode_render);
 struct sMoveQuad;
 extern sMoveQuad t4mat_Identity[];
 
-struct sMnVec_6298 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sMnSlot_6298 {
@@ -1087,7 +1084,7 @@ public:
     virtual void v42();
     virtual void v43();
     virtual void* hasBoundBox();
-    virtual sMnVec_6298* getBoundBox();
+    virtual t4Vector* getBoundBox();
 };
 
 struct sMnGfxVt_6298 {
@@ -1102,7 +1099,7 @@ struct cMnGfx_6298 {
 };
 
 typedef t4Matrix (*MnViewFn_6298)(void*);
-typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const t4Matrix&);
+typedef int (*MnCullFn_6298)(void*, t4Vector*, t4Vector*, const t4Matrix&);
 typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
 
 extern "C" void tModifierBlock_render(void* self);
@@ -1212,14 +1209,14 @@ extern "C" void cMoveNode_render(cMoveNode* self)
     void* mat = ((cMnNode_6298*)self)->hasBoundBox();
     int res;
     if (mat) {
-        sMnVec_6298* boundBox = ((cMnNode_6298*)self)->getBoundBox();
+        t4Vector* boundBox = ((cMnNode_6298*)self)->getBoundBox();
         sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         res = ((MnCullFn_6298)vt[93].fn)(thisp, boundBox, boundBox + 1, ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
     } else {
         sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
-        sMnVec_6298 objBounds[2];
+        t4Vector objBounds[2];
         objBounds[0].x = OBJ_6298(self)->pos[0];
         objBounds[0].y = OBJ_6298(self)->pos[1];
         objBounds[0].z = OBJ_6298(self)->pos[2];

@@ -314,9 +314,6 @@ INCLUDE_ASM("world/worldview", cWorldView_recursiveIsValid);
 #ifdef SKIP_ASM
 extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
 
-struct sV4_9BB8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sSecInfo_9BB8 {
     short f0;
@@ -327,8 +324,8 @@ struct sSection_9BB8;
 struct sSection_9BB8 {
     float bmin[4];      // 0x00
     float bmax[4];      // 0x10
-    sV4_9BB8 m_v4SplitPlaneIn;        // 0x20
-    sV4_9BB8 m_v4SplitPlaneOut;        // 0x30
+    t4Vector m_v4SplitPlaneIn;        // 0x20
+    t4Vector m_v4SplitPlaneOut;        // 0x30
     char pad40[0x10];
     sSection_9BB8* child0; // 0x50
     sSection_9BB8* child1; // 0x54
@@ -336,7 +333,7 @@ struct sSection_9BB8 {
 };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_9BB8(const sV4_9BB8& a, const sV4_9BB8& b)
+static inline float Dot_9BB8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -355,7 +352,7 @@ static inline float Dot_9BB8(const sV4_9BB8& a, const sV4_9BB8& b)
     return r;
 }
 
-static inline int overlap_9BB8(const sV4_9BB8* c, const sSection_9BB8* s)
+static inline int overlap_9BB8(const t4Vector* c, const sSection_9BB8* s)
 {
     int r = 0;
     if (c[0].x <= s->bmax[0] && c[1].x >= s->bmin[0] &&
@@ -378,7 +375,7 @@ static inline int overlap_9BB8(const sV4_9BB8* c, const sSection_9BB8* s)
  * @param box  the box (minimum and maximum corners)
  * @param ok  set on entry; cleared when a page is missing
  */
-extern "C" void cWorldView_recursiveIsValid(cWorldView* world, sSection_9BB8* sec, sV4_9BB8* box, int* ok)
+extern "C" void cWorldView_recursiveIsValid(cWorldView* world, sSection_9BB8* sec, t4Vector* box, int* ok)
 {
     if (*ok == 0)
         return;
@@ -578,18 +575,15 @@ extern "C" float cWorldView_getDistanceToBox(void* self, void* pos, void* bmin, 
 extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
 extern "C" void cWorldCache_touchPage(void* self, int i, float f);
 
-struct sV4_A028 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sWVCam_A028 {
     int active;         // 0x00
     int f4;
     int frame;          // 0x08
     int fC;
-    sV4_A028 pos;       // 0x10
-    sV4_A028 bmin;      // 0x20
-    sV4_A028 bmax;      // 0x30
+    t4Vector pos;       // 0x10
+    t4Vector bmin;      // 0x20
+    t4Vector bmax;      // 0x30
     float range;        // 0x40
     float near;         // 0x44
     float best;         // 0x48
@@ -605,7 +599,7 @@ struct sWV_A028 {
 
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_A028(const sV4_A028& a, const sV4_A028& b)
+static inline float Dot_A028(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -624,7 +618,7 @@ static inline float Dot_A028(const sV4_A028& a, const sV4_A028& b)
     return r;
 }
 
-static inline int overlap_A028(const sV4_A028* c, const tBxBSPNode* s)
+static inline int overlap_A028(const t4Vector* c, const tBxBSPNode* s)
 {
     int r = 0;
     if (c[0].x <= s->m_v4BoxMax.m[0] && c[1].x >= s->m_v4BoxMin.m[0] &&
@@ -678,11 +672,11 @@ extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, 
         cWorldCache_touchPage(((sWV_A028*)self_)->world, (((tBxBSPNode*)sec_)->m_pHull)->m_uiHullIndex, w);
     }
     if (((void*)((tBxBSPNode*)sec_)->m_pInChild) != 0) {
-        if (Dot_A028((*(sV4_A028*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneIn), ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
+        if (Dot_A028((*(t4Vector*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneIn), ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
             cWorldView_recursiveTreeFocus(self_, ((void*)((tBxBSPNode*)sec_)->m_pInChild), cam, loaded);
     }
     if (((void*)((tBxBSPNode*)sec_)->m_pOutChild) != 0) {
-        if (Dot_A028((*(sV4_A028*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneOut), ((sWV_A028*)self_)->cams[cam].bmax) < 0.0f)
+        if (Dot_A028((*(t4Vector*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneOut), ((sWV_A028*)self_)->cams[cam].bmax) < 0.0f)
             cWorldView_recursiveTreeFocus(self_, ((void*)((tBxBSPNode*)sec_)->m_pOutChild), cam, loaded);
     }
 }
@@ -1775,12 +1769,9 @@ extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* t
 extern "C" void nash_Nash_findkey(void* out, const void* box);
 extern "C" void* getOcclusionMan();
 
-struct sWVVec4_B498 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sWVBox_B498 {
-    sWVVec4_B498 min;
-    sWVVec4_B498 max;
+    t4Vector min;
+    t4Vector max;
 };
 struct sWVCell_B498 {
     int level;

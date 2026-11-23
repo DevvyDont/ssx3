@@ -297,12 +297,9 @@ struct sVec4_34B9B0 {
     sVec4_34B9B0(const float& a, const float& b, const float& c, const float& d) : x(a), y(b), z(c), w(d) {}
 } __attribute__((aligned(16)));
 
-struct sRow_34B9B0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_34B9B0 {
-    sRow_34B9B0 r[4];
+    t4Vector r[4];
 };
 
 
@@ -315,7 +312,7 @@ static inline int IsLoaded_34B9B0(tInstanceRecord* m)
     return ok ? wc->m_HullPages[m->m_SMap.m_iHullID].m_State == 3 : 0;
 }
 
-struct sPair_34B9B0 { sRow_34B9B0 r[4]; };
+struct sPair_34B9B0 { t4Vector r[4]; };
 struct sVE43_34B9B0 { short delta; short index; sPair_34B9B0 (*fn)(void*); };
 struct sPair_34B9B0;
 struct sVE93_34B9B0 { short delta; short index; int (*fn)(void*, sVec4_34B9B0*, sVec4_34B9B0*, sPair_34B9B0*); };
@@ -978,18 +975,15 @@ struct cFenceNode_C8E8 {
     char* PrevInstance;         // 0x108 tInstanceRecord*
 };
 
-struct sVec4_C8E8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_C8E8 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sVec4_C8E8 MulMat_C8E8(const sMat_C8E8* m, const sVec4_C8E8* v)
+static inline t4Vector MulMat_C8E8(const sMat_C8E8* m, const t4Vector* v)
 {
-    sVec4_C8E8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -1008,9 +1002,9 @@ static inline sVec4_C8E8 MulMat_C8E8(const sMat_C8E8* m, const sVec4_C8E8* v)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4_C8E8 Normalize_C8E8(const sVec4_C8E8& v)
+static inline t4Vector Normalize_C8E8(const t4Vector& v)
 {
-    sVec4_C8E8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1029,7 +1023,7 @@ static inline sVec4_C8E8 Normalize_C8E8(const sVec4_C8E8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_C8E8(const sVec4_C8E8& a, const sVec4_C8E8& b)
+static inline float Dot_C8E8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1057,7 +1051,7 @@ static inline float fabs_C8E8(float x)
 }
 
 extern void* cFenceNode_vtbl[];
-extern sVec4_C8E8 t4vect_XAxis;
+extern t4Vector t4vect_XAxis;
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* obj);
 extern "C" void cFenceNode_setupFence(cFenceNode* self);
 extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
@@ -1095,12 +1089,12 @@ extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket,
     self->NextPropTime = 0;
     self->PrevPropTime = 0;
     if (self->GridMesh != 0) {
-        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(&self->Instance->m_fmTransform), &t4vect_XAxis));
+        t4Vector dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(&self->Instance->m_fmTransform), &t4vect_XAxis));
         float speed = fabs_C8E8(info->Vel);
-        force = Dot_C8E8(dir, *(sVec4_C8E8*)&info->Direct);
+        force = Dot_C8E8(dir, *(t4Vector*)&info->Direct);
         force = speed * (force * 0.0010000000474974513f);
     } else {
-        force = Dot_C8E8(*(sVec4_C8E8*)&info->Reflect, *(sVec4_C8E8*)&info->Direct);
+        force = Dot_C8E8(*(t4Vector*)&info->Reflect, *(t4Vector*)&info->Direct);
         force = force * 0.0010000000474974513f * fabs_C8E8(info->Vel);
     }
     cFenceNode_setForce(self, force);

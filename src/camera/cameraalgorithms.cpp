@@ -19,7 +19,6 @@ extern char str_Idle_Chase_Camera_Algorithm[], D_0045B348[], D_0045B370[], D_004
 extern char D_0045B3D0[], D_0045B3F8[], D_0045B420[], D_0045B448[], D_0045B470[], D_0045B498[], D_0045B4C0[], str_Direction_NE_Chase_Camera_Algorithm[];
 extern char D_0045B510[], D_0045B538[], D_0045B558[], D_0045B578[], str_POST_RACE_1_Chase_Camera_Algorithm[];
 
-struct sCamTmp_D0A0 { float x, y, z, w; } __attribute__((aligned(16)));
 
 class cCamAlgo_D0A0 {
 public:
@@ -29,12 +28,12 @@ public:
     virtual void v09(); virtual void v10(); virtual void v11(); virtual void setTarget(void* target);
 };
 
-extern "C" void cCTBoundObjLine_worldPoint1(sCamTmp_D0A0* out, void* target);
-extern "C" void cCTBoundObjLine_worldPoint2(sCamTmp_D0A0* out, void* target);
-extern "C" void cCTSpline_worldPoint(sCamTmp_D0A0* out, void* target, int corner);
-extern "C" cCamAlgo_D0A0* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b);
+extern "C" void cCTBoundObjLine_worldPoint1(t4Vector* out, void* target);
+extern "C" void cCTBoundObjLine_worldPoint2(t4Vector* out, void* target);
+extern "C" void cCTSpline_worldPoint(t4Vector* out, void* target, int corner);
+extern "C" cCamAlgo_D0A0* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(void* mem, t4Vector* a, t4Vector* b);
 extern "C" cCamAlgo_D0A0* cBoundedAlgorithm_cBoundedAlgorithm(void* mem);
-extern "C" cCamAlgo_D0A0* cSplineCamAlgorithm_cSplineCamAlgorithm(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b, sCamTmp_D0A0* c, sCamTmp_D0A0* d,
+extern "C" cCamAlgo_D0A0* cSplineCamAlgorithm_cSplineCamAlgorithm(void* mem, t4Vector* a, t4Vector* b, t4Vector* c, t4Vector* d,
                                float f0, float f1, float f2, float f3);
 extern "C" cCamAlgo_D0A0* cIdleChaseAlgorithm_cIdleChaseAlgorithm(void* mem);
 extern "C" cCamAlgo_D0A0* cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(void* mem);
@@ -82,9 +81,9 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
             char* target = *(char**)(ctx + 8);
             if (*(int*)(target + 0x28) == 2) {
                 void* mem = cMemMan_alloc(944, str_SUPERPIPE_Chase_Camera_Algorithm, 0x20000000, 0);
-                sCamTmp_D0A0 lineStart;
+                t4Vector lineStart;
                 cCTBoundObjLine_worldPoint1(&lineStart, target);
-                sCamTmp_D0A0 lineEnd;
+                t4Vector lineEnd;
                 cCTBoundObjLine_worldPoint2(&lineEnd, target);
                 algo = cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(mem, &lineStart, &lineEnd);
                 break;
@@ -97,13 +96,13 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
     case 92: {
         char* target = *(char**)(ctx + 8);
         void* mem = cMemMan_alloc(976, D_0045B298, 0x20000000, 0);
-        sCamTmp_D0A0 point1;
+        t4Vector point1;
         cCTSpline_worldPoint(&point1, target, 0);
-        sCamTmp_D0A0 point2;
+        t4Vector point2;
         cCTSpline_worldPoint(&point2, target, 1);
-        sCamTmp_D0A0 point3;
+        t4Vector point3;
         cCTSpline_worldPoint(&point3, target, 2);
-        sCamTmp_D0A0 point4;
+        t4Vector point4;
         cCTSpline_worldPoint(&point4, target, 3);
         algo = cSplineCamAlgorithm_cSplineCamAlgorithm(mem, &point1, &point2, &point3, &point4,
                           *(float*)(ctx + 0x18), *(float*)(ctx + 0x14), *(float*)(ctx + 0x1C), *(float*)(ctx + 0x10));
@@ -208,10 +207,9 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
 //100%
 INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_cSimpleCamera);
 #ifdef SKIP_ASM
-struct cSimpleCamera_cSimpleCamera_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern void* cSimpleCamera_vtbl[];
-extern cSimpleCamera_cSimpleCamera_sVec4 t4vect_XAxis;
+extern t4Vector t4vect_XAxis;
 
 /**
  * Constructs the simple camera base: an identity-ish pose looking down the X axis.
@@ -223,16 +221,16 @@ extern cSimpleCamera_cSimpleCamera_sVec4 t4vect_XAxis;
  */
 extern "C" void* cSimpleCamera_cSimpleCamera(cSimpleCamera* self)
 {
-    cSimpleCamera_cSimpleCamera_sVec4 poseVec;
+    t4Vector poseVec;
     self->mVtbl = cSimpleCamera_vtbl;
     poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose = poseVec;
+    *(t4Vector*)&self->Pose = poseVec;
     poseVec.w = 1.0f;
     poseVec.x = 0;
     poseVec.y = 1.0f;
     poseVec.z = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose.Q = poseVec;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Direction = t4vect_XAxis;
+    *(t4Vector*)&self->Pose.Q = poseVec;
+    *(t4Vector*)&self->Direction = t4vect_XAxis;
     return ((void*)self);
 }
 #endif
@@ -255,7 +253,7 @@ extern "C" void* cSimpleCamera_updateCamMat(void* self);
  */
 extern "C" void cSimpleCamera_init(cSimpleCamera* self, float x, float y, float z)
 {
-    cSimpleCamera_cSimpleCamera_sVec4 poseVec;
+    t4Vector poseVec;
     self->MaxView = x;
     self->MinNear = y;
     self->MaxFar = z;
@@ -263,13 +261,13 @@ extern "C" void cSimpleCamera_init(cSimpleCamera* self, float x, float y, float 
     self->Near = y;
     self->Far = z;
     poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose = poseVec;
+    *(t4Vector*)&self->Pose = poseVec;
     poseVec.w = 1.0f;
     poseVec.x = 0;
     poseVec.y = 1.0f;
     poseVec.z = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose.Q = poseVec;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Direction = t4vect_XAxis;
+    *(t4Vector*)&self->Pose.Q = poseVec;
+    *(t4Vector*)&self->Direction = t4vect_XAxis;
     cSimpleCamera_updateCamMat(self);
 }
 #endif
@@ -277,7 +275,6 @@ extern "C" void cSimpleCamera_init(cSimpleCamera* self, float x, float y, float 
 //100%
 INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_getHeading);
 #ifdef SKIP_ASM
-struct cSimpleCamera_getHeading_V { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern "C" float func_0031C228(float);
 
@@ -306,7 +303,7 @@ static inline float atan2_15D780(float y, float x, float zero)
  */
 extern "C" float cSimpleCamera_getHeading(cSimpleCamera* self)
 {
-    cSimpleCamera_getHeading_V look;
+    t4Vector look;
     float x = 2.0f * (self->Pose.Q.y * self->Pose.Q.x - self->Pose.Q.w * self->Pose.Q.z);
     float y = 1.0f - 2.0f * (self->Pose.Q.z * self->Pose.Q.z + self->Pose.Q.x * self->Pose.Q.x);
     float z = 2.0f * (self->Pose.Q.y * self->Pose.Q.z + self->Pose.Q.w * self->Pose.Q.x);
@@ -321,12 +318,11 @@ extern "C" float cSimpleCamera_getHeading(cSimpleCamera* self)
 //100%
 INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_getPitch);
 #ifdef SKIP_ASM
-struct cSimpleCamera_getPitch_V { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern "C" float func_0031C128(float x);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float cSimpleCamera_getPitch_Length(const cSimpleCamera_getPitch_V& v)
+static inline float cSimpleCamera_getPitch_Length(const t4Vector& v)
 {
     float r;
     int t;
@@ -354,7 +350,7 @@ static inline float cSimpleCamera_getPitch_Length(const cSimpleCamera_getPitch_V
  */
 extern "C" float cSimpleCamera_getPitch(cSimpleCamera* self)
 {
-    cSimpleCamera_getPitch_V look;
+    t4Vector look;
     look.x = 2.0f * (self->Pose.Q.y * self->Pose.Q.x - self->Pose.Q.w * self->Pose.Q.z);
     look.y = 1.0f - 2.0f * (self->Pose.Q.z * self->Pose.Q.z + self->Pose.Q.x * self->Pose.Q.x);
     look.z = 2.0f * (self->Pose.Q.y * self->Pose.Q.z + self->Pose.Q.w * self->Pose.Q.x);

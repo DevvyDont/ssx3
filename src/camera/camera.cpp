@@ -1126,33 +1126,30 @@ extern "C" void cCamera_switchChaseControllerTargetRider(cCamera* self, int valu
 //100%
 INCLUDE_ASM("camera/camera", cCamera_avoidGround);
 #ifdef SKIP_ASM
-struct sVec_EE00 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // Probe hit record filled by cBXNash_terrainIntersect1 (0x80 bytes).
 struct sHit_EE00 {
-    sVec_EE00 pos;      // 0x0
-    sVec_EE00 normal;   // 0x10
+    t4Vector pos;      // 0x0
+    t4Vector normal;   // 0x10
     char pad_0x20[0x60];
 } __attribute__((aligned(16)));
 
-extern sVec_EE00 t4vect_ZAxis_vEE00 __asm__("t4vect_ZAxis");
-extern sVec_EE00 t4vect_XAxis_vEE00 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_ZAxis_vEE00 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_XAxis_vEE00 __asm__("t4vect_XAxis");
 // cWorldLine::cWorldLine(const t4Vector&, const t4Vector&, float, tIntPrecision)
-extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec_EE00& a, const sVec_EE00& b, float r, int n);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const t4Vector& a, const t4Vector& b, float r, int n);
 extern "C" float cBXNash_terrainIntersect1(void* world, void* seg, sHit_EE00* out, int a3);
 extern "C" int cChaseCameraController_shouldDoExtraGroundTest(void* self);
 
-static inline const sVec_EE00& Forward_EE00()
+static inline const t4Vector& Forward_EE00()
 {
     return t4vect_XAxis_vEE00;
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec_EE00 Scale_EE00(const sVec_EE00& v, float s)
+static inline t4Vector Scale_EE00(const t4Vector& v, float s)
 {
-    sVec_EE00 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1167,7 +1164,7 @@ static inline sVec_EE00 Scale_EE00(const sVec_EE00& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place v *= s).
-static inline void ScaleEq_EE00(sVec_EE00& v, float s)
+static inline void ScaleEq_EE00(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -1182,9 +1179,9 @@ static inline void ScaleEq_EE00(sVec_EE00& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec_EE00 Add_EE00(const sVec_EE00& a, const sVec_EE00& b)
+static inline t4Vector Add_EE00(const t4Vector& a, const t4Vector& b)
 {
-    sVec_EE00 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1197,7 +1194,7 @@ static inline sVec_EE00 Add_EE00(const sVec_EE00& a, const sVec_EE00& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place v += a).
-static inline void AddEq_EE00(sVec_EE00& v, const sVec_EE00& a)
+static inline void AddEq_EE00(t4Vector& v, const t4Vector& a)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -1210,9 +1207,9 @@ static inline void AddEq_EE00(sVec_EE00& v, const sVec_EE00& a)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec_EE00 Sub_EE00(const sVec_EE00& a, const sVec_EE00& b)
+static inline t4Vector Sub_EE00(const t4Vector& a, const t4Vector& b)
 {
-    sVec_EE00 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1225,9 +1222,9 @@ static inline sVec_EE00 Sub_EE00(const sVec_EE00& a, const sVec_EE00& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sVec_EE00 Cross_EE00(const sVec_EE00& a, const sVec_EE00& b)
+static inline t4Vector Cross_EE00(const t4Vector& a, const t4Vector& b)
 {
-    sVec_EE00 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1242,7 +1239,7 @@ static inline sVec_EE00 Cross_EE00(const sVec_EE00& a, const sVec_EE00& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_EE00(const sVec_EE00& a, const sVec_EE00& b)
+static inline float Dot_EE00(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1262,7 +1259,7 @@ static inline float Dot_EE00(const sVec_EE00& a, const sVec_EE00& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_EE00(const sVec_EE00& v)
+static inline float Length_EE00(const t4Vector& v)
 {
     float r;
     int t;
@@ -1325,24 +1322,24 @@ extern "C" void cCamera_avoidGround_impl(char* vself)
     cCamera* self = (cCamera*)vself;
     sHit_EE00 info;
     void* nash = SSXApp->Game->BXNash;
-    sVec_EE00 correctedPos = Add_EE00(*(sVec_EE00*)&self->ResultAlgorithm.Position, Scale_EE00(t4vect_ZAxis_vEE00, self->LastGroundMove));
-    sVec_EE00 look = Sub_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, correctedPos);
+    t4Vector correctedPos = Add_EE00(*(t4Vector*)&self->ResultAlgorithm.Position, Scale_EE00(t4vect_ZAxis_vEE00, self->LastGroundMove));
+    t4Vector look = Sub_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, correctedPos);
     float lookLen = Length_EE00(look);
-    sVec_EE00 levelLook = look;
+    t4Vector levelLook = look;
     levelLook.z = 0.0f;
     float levelLookLen = Length_EE00(levelLook);
     float sinSlopeRaw = levelLookLen / Sqrt_EE00(levelLookLen * levelLookLen + lookLen * lookLen);
-    float originalLookLen = Length_EE00(Sub_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, *(sVec_EE00*)&self->ResultAlgorithm.Position));
-    sVec_EE00 testRoot = Add_EE00(*(sVec_EE00*)&self->ResultAlgorithm.Position, Scale_EE00(t4vect_ZAxis_vEE00, self->LastGroundMove));
+    float originalLookLen = Length_EE00(Sub_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, *(t4Vector*)&self->ResultAlgorithm.Position));
+    t4Vector testRoot = Add_EE00(*(t4Vector*)&self->ResultAlgorithm.Position, Scale_EE00(t4vect_ZAxis_vEE00, self->LastGroundMove));
     float slopeScalar = 1.0f / (sinSlopeRaw >? 0.05000000074505806f);
     float testLen = slopeScalar * 300.0f;
-    sVec_EE00 whisker = Scale_EE00(t4vect_ZAxis_vEE00, testLen);
+    t4Vector whisker = Scale_EE00(t4vect_ZAxis_vEE00, testLen);
     float avoidDist = slopeScalar * 50.0f;
-    sVec_EE00 testLow = Sub_EE00(testRoot, whisker);
-    sVec_EE00 testHigh = Add_EE00(testRoot, whisker);
-    sVec_EE00 screenLeft = Cross_EE00(look, t4vect_ZAxis_vEE00);
+    t4Vector testLow = Sub_EE00(testRoot, whisker);
+    t4Vector testHigh = Add_EE00(testRoot, whisker);
+    t4Vector screenLeft = Cross_EE00(look, t4vect_ZAxis_vEE00);
     float dir = 1.0f;
-    if (Dot_EE00(*(sVec_EE00*)&self->LastGroundNormal, screenLeft) > 0.0f)
+    if (Dot_EE00(*(t4Vector*)&self->LastGroundNormal, screenLeft) > 0.0f)
         dir = -1.0f;
     ScaleEq_EE00(screenLeft, dir * 50.0f / Length_EE00(screenLeft));
     char line[176];
@@ -1378,34 +1375,34 @@ extern "C" void cCamera_avoidGround_impl(char* vself)
                 self->LastGroundMove -= move;
             }
         }
-        *(sVec_EE00*)&self->LastGroundNormal = info.normal;
+        *(t4Vector*)&self->LastGroundNormal = info.normal;
     }
-    AddEq_EE00(*(sVec_EE00*)&self->ResultAlgorithm.Position, Scale_EE00(t4vect_ZAxis_vEE00, self->LastGroundMove));
-    sVec_EE00 newLook = Sub_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, *(sVec_EE00*)&self->ResultAlgorithm.Position);
+    AddEq_EE00(*(t4Vector*)&self->ResultAlgorithm.Position, Scale_EE00(t4vect_ZAxis_vEE00, self->LastGroundMove));
+    t4Vector newLook = Sub_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, *(t4Vector*)&self->ResultAlgorithm.Position);
     ScaleEq_EE00(newLook, originalLookLen / Length_EE00(newLook));
-    *(sVec_EE00*)&self->ResultAlgorithm.Position = Sub_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, newLook);
+    *(t4Vector*)&self->ResultAlgorithm.Position = Sub_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, newLook);
     self->LastGroundMove = self->LastGroundMove * 0.9700000286102295f;
     if (cChaseCameraController_shouldDoExtraGroundTest(self->ChaseController) != 0) {
-        sVec_EE00 riderPoint = Add_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, Scale_EE00(t4vect_ZAxis_vEE00, 100.0f));
-        sVec_EE00 viewPoint = *(sVec_EE00*)&self->ResultAlgorithm.Position;
+        t4Vector riderPoint = Add_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, Scale_EE00(t4vect_ZAxis_vEE00, 100.0f));
+        t4Vector viewPoint = *(t4Vector*)&self->ResultAlgorithm.Position;
         char line2[176];
         cWorldLine_cWorldLine(line2, riderPoint, viewPoint, 0.5f, 2);
         sHit_EE00 info2;
         if (cBXNash_terrainIntersect1(SSXApp->Game->BXNash, line2, &info2, 0) > 0.0f) {
             if (self->LastSafePositionInvalid != 0)
-                *(sVec_EE00*)&self->ResultAlgorithm.Position = Add_EE00(Add_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, Scale_EE00(t4vect_ZAxis_vEE00, 180.0f)), Scale_EE00(Forward_EE00(), 180.0f));
+                *(t4Vector*)&self->ResultAlgorithm.Position = Add_EE00(Add_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, Scale_EE00(t4vect_ZAxis_vEE00, 180.0f)), Scale_EE00(Forward_EE00(), 180.0f));
             else
-                *(sVec_EE00*)&self->ResultAlgorithm.Position = *(sVec_EE00*)&self->LastSafePosition;
+                *(t4Vector*)&self->ResultAlgorithm.Position = *(t4Vector*)&self->LastSafePosition;
             if (self->UsingSafePositionLastFrame == 0)
-                AddEq_EE00(*(sVec_EE00*)&self->ResultAlgorithm.Position, Scale_EE00(info2.normal, 50.0f));
+                AddEq_EE00(*(t4Vector*)&self->ResultAlgorithm.Position, Scale_EE00(info2.normal, 50.0f));
             self->UsingSafePositionLastFrame = 1;
-            sVec_EE00 look2 = Sub_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, *(sVec_EE00*)&self->ResultAlgorithm.Position);
+            t4Vector look2 = Sub_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, *(t4Vector*)&self->ResultAlgorithm.Position);
             if (Length_EE00(look2) < 2.0f || (Abs_EE00(look2.x) < 1.0f && Abs_EE00(look2.y) < 1.0f))
-                *(sVec_EE00*)&self->ResultAlgorithm.Position = Add_EE00(Add_EE00(*(sVec_EE00*)&self->ResultAlgorithm.CamTargetPos, Scale_EE00(t4vect_ZAxis_vEE00, 150.0f)), Scale_EE00(Forward_EE00(), 100.0f));
+                *(t4Vector*)&self->ResultAlgorithm.Position = Add_EE00(Add_EE00(*(t4Vector*)&self->ResultAlgorithm.CamTargetPos, Scale_EE00(t4vect_ZAxis_vEE00, 150.0f)), Scale_EE00(Forward_EE00(), 100.0f));
         } else {
             self->UsingSafePositionLastFrame = 0;
         }
-        *(sVec_EE00*)&self->LastSafePosition = *(sVec_EE00*)&self->ResultAlgorithm.Position;
+        *(t4Vector*)&self->LastSafePosition = *(t4Vector*)&self->ResultAlgorithm.Position;
     } else {
         self->UsingSafePositionLastFrame = 0;
     }

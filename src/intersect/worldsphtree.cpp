@@ -32,7 +32,6 @@ extern "C" void* SphereTree_SphereTree(void* p);
 extern "C" float SphereTree_GetRadius(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 /**
  * Constructs a world-intersection wrapper around a sphere tree, with a bounding box from its root sphere.
@@ -58,20 +57,20 @@ extern "C" void* cWorldSphTree_cWorldSphTree(cWorldSphTree* self, bxSphereTree* 
     }
     self->origSt = (bxSphereTree*)((void*)ast);
     self->st = (bxSphereTree*)((void*)ast);
-    sSphV4 center = *(sSphV4*)&ast->transCenter;
+    t4Vector center = *(t4Vector*)&ast->transCenter;
     float radius = SphereTree_GetRadius(ast);
-    sSphV4 corner;
-    *(sSphV4*)&self->boxCenter = center;
+    t4Vector corner;
+    *(t4Vector*)&self->boxCenter = center;
     corner.x = center.x + radius;
     corner.y = center.y + radius;
     corner.z = center.z + radius;
     corner.w = 1.0f;
-    *(sSphV4*)&self->boxMax = corner;
+    *(t4Vector*)&self->boxMax = corner;
     corner.x = center.x - radius;
     corner.y = center.y - radius;
     corner.z = center.z - radius;
     corner.w = 1.0f;
-    *(sSphV4*)&self->boxMin = corner;
+    *(t4Vector*)&self->boxMin = corner;
     void* localTree = cMemMan_alloc(320, str_SphereTree, 0, 0);
     SphereTree_SphereTree(localTree);
     self->localTree = (bxSphereTree*)localTree;
@@ -246,12 +245,9 @@ int cWorldSphTree_UnTransform(void* vself)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsTriInt);
 #ifdef SKIP_ASM
-struct sWsVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float wsLength_330788(const sWsVec4& v)
+static inline float wsLength_330788(const t4Vector& v)
 {
     float r;
     __asm__(
@@ -270,9 +266,9 @@ static inline float wsLength_330788(const sWsVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sWsVec4 wsDiv_330788(const sWsVec4& v, float s)
+static inline t4Vector wsDiv_330788(const t4Vector& v, float s)
 {
-    sWsVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         ".set push\n"
@@ -291,7 +287,7 @@ static inline sWsVec4 wsDiv_330788(const sWsVec4& v, float s)
     return r;
 }
 
-extern "C" int SphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
+extern "C" int SphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int a4, t4Vector* out, int a6);
 
 /**
  * Collides the sphere tree with a triangle and returns the push-out direction and depth.
@@ -308,9 +304,9 @@ extern "C" int SphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldSphTree_IsTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
+extern "C" int cWorldSphTree_IsTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
 {
-    sWsVec4 hitDir;
+    t4Vector hitDir;
     int hit = SphereTree_IsTriCollision(self->st, vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330788(hitDir);
@@ -325,7 +321,7 @@ extern "C" int cWorldSphTree_IsTriInt(cWorldSphTree* self, int vertA, int vertB,
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_Is2SidedTriInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float wsLength_330828(const sWsVec4& v)
+static inline float wsLength_330828(const t4Vector& v)
 {
     float r;
     __asm__(
@@ -344,9 +340,9 @@ static inline float wsLength_330828(const sWsVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sWsVec4 wsDiv_330828(const sWsVec4& v, float s)
+static inline t4Vector wsDiv_330828(const t4Vector& v, float s)
 {
-    sWsVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         ".set push\n"
@@ -365,7 +361,7 @@ static inline sWsVec4 wsDiv_330828(const sWsVec4& v, float s)
     return r;
 }
 
-extern "C" int bxSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
+extern "C" int bxSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int a3, int a4, t4Vector* out, int a6);
 
 /**
  * Collides the sphere tree with a two-sided triangle and returns the push-out direction and depth.
@@ -381,9 +377,9 @@ extern "C" int bxSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldSphTree_Is2SidedTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
+extern "C" int cWorldSphTree_Is2SidedTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, t4Vector* outDir, float* outLen)
 {
-    sWsVec4 hitDir;
+    t4Vector hitDir;
     int hit = bxSphereTree_Is2SidedTriCollision(self->st, vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330828(hitDir);
@@ -398,7 +394,7 @@ extern "C" int cWorldSphTree_Is2SidedTriInt(cWorldSphTree* self, int vertA, int 
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsSphTreeInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float wsLength_3308C8(const sWsVec4& v)
+static inline float wsLength_3308C8(const t4Vector& v)
 {
     float r;
     int t;
@@ -419,7 +415,7 @@ static inline float wsLength_3308C8(const sWsVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void wsDivEq_3308C8(sWsVec4& v, float s)
+static inline void wsDivEq_3308C8(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -447,10 +443,10 @@ extern "C" int SphereTree_IsTreeCollision(void* self, void* other, void* a2, voi
  */
 extern "C" int cWorldSphTree_IsSphTreeInt(cWorldSphTree* self, void* tree, tIntersectInfo* hit)
 {
-    if (SphereTree_IsTreeCollision(self->st, tree, &(*(sWsVec4*)&hit->Inorm), hit) != 0) {
-        float len = wsLength_3308C8((*(sWsVec4*)&hit->Inorm));
+    if (SphereTree_IsTreeCollision(self->st, tree, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
+        float len = wsLength_3308C8((*(t4Vector*)&hit->Inorm));
         hit->Iparam = len;
-        wsDivEq_3308C8((*(sWsVec4*)&hit->Inorm), len);
+        wsDivEq_3308C8((*(t4Vector*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -461,7 +457,7 @@ extern "C" int cWorldSphTree_IsSphTreeInt(cWorldSphTree* self, void* tree, tInte
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsBoxInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float wsLength_330950(const sWsVec4& v)
+static inline float wsLength_330950(const t4Vector& v)
 {
     float r;
     int t;
@@ -482,7 +478,7 @@ static inline float wsLength_330950(const sWsVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void wsDivEq_330950(sWsVec4& v, float s)
+static inline void wsDivEq_330950(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -511,10 +507,10 @@ extern "C" int SphereTree_IsBoxCollision(void* self, void* a1, void* a2, void* a
  */
 extern "C" int cWorldSphTree_IsBoxInt(cWorldSphTree* self, void* bMin, void* bMax, tIntersectInfo* hit)
 {
-    if (SphereTree_IsBoxCollision(self->st, bMin, bMax, &(*(sWsVec4*)&hit->Inorm), hit) != 0) {
-        float len = wsLength_330950((*(sWsVec4*)&hit->Inorm));
+    if (SphereTree_IsBoxCollision(self->st, bMin, bMax, &(*(t4Vector*)&hit->Inorm), hit) != 0) {
+        float len = wsLength_330950((*(t4Vector*)&hit->Inorm));
         hit->Iparam = len;
-        wsDivEq_330950((*(sWsVec4*)&hit->Inorm), len);
+        wsDivEq_330950((*(t4Vector*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -1386,12 +1382,12 @@ extern "C" int cOverlapList_staticObjectIntersect(cOverlapList* self, cWorldInte
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cOverlapList_splineIntersect);
 #ifdef SKIP_ASM
-extern "C" void cRailModifier_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
-extern "C" void cFlexRailNode_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
-extern "C" void intersect_staticSplineSegmentIntersect(void* obj, tBoundBox* box, sWsVec4* pos, int* cnt, float* dist, int a5);
+extern "C" void cRailModifier_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, t4Vector* pos, int mask, int* cnt, float* dist, int a7);
+extern "C" void cFlexRailNode_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, t4Vector* pos, int mask, int* cnt, float* dist, int a7);
+extern "C" void intersect_staticSplineSegmentIntersect(void* obj, tBoundBox* box, t4Vector* pos, int* cnt, float* dist, int a5);
 
 // PORT: PS2-only VU0 inline asm (in-place vector subtract).
-static inline void wsSubEq_334680(sWsVec4& a, const sWsVec4& b)
+static inline void wsSubEq_334680(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -1404,7 +1400,7 @@ static inline void wsSubEq_334680(sWsVec4& a, const sWsVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector add).
-static inline void wsAddEq_334680(sWsVec4& a, const sWsVec4& b)
+static inline void wsAddEq_334680(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -1429,23 +1425,23 @@ static inline void wsAddEq_334680(sWsVec4& a, const sWsVec4& b)
  * @param testRadius     the test radius
  * @return the number of hits
  */
-extern "C" int cOverlapList_splineIntersect(cOverlapList* self, sWsVec4* pos, int intInfo, int mask, float testRadius)
+extern "C" int cOverlapList_splineIntersect(cOverlapList* self, t4Vector* pos, int intInfo, int mask, float testRadius)
 {
     tBoundBox box;
-    sWsVec4 ext;
+    t4Vector ext;
     int cnt;
     float dist;
     float zero = 0.0f;
     cnt = 0;
     dist = zero;
-    (*(sWsVec4*)&box.MinPoint) = *pos;
-    (*(sWsVec4*)&box.MaxPoint) = *pos;
+    (*(t4Vector*)&box.MinPoint) = *pos;
+    (*(t4Vector*)&box.MaxPoint) = *pos;
     ext.x = testRadius;
     ext.y = testRadius;
     ext.z = testRadius;
     ext.w = zero;
-    wsSubEq_334680((*(sWsVec4*)&box.MinPoint), ext);
-    wsAddEq_334680((*(sWsVec4*)&box.MaxPoint), ext);
+    wsSubEq_334680((*(t4Vector*)&box.MinPoint), ext);
+    wsAddEq_334680((*(t4Vector*)&box.MaxPoint), ext);
     for (unsigned int i = 0; i < self->numtyped; i++) {
         cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)self->typed[i];
         int type = spaceNode->type;
@@ -2151,9 +2147,9 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(tSplineSegmentRecor
  */
 extern "C" void intersect_staticSplineSegmentIntersect_typed(tSplineSegmentRecord* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, tIntersectInfo* intersectinfo)
 {
-    if ((*(sWsVec4*)&box->MaxPoint).x < pSplineSeg->m_fvMin.m[0] || (*(sWsVec4*)&box->MinPoint).x > pSplineSeg->m_fvMax.m[0] ||
-        (*(sWsVec4*)&box->MaxPoint).y < pSplineSeg->m_fvMin.m[1] || (*(sWsVec4*)&box->MinPoint).y > pSplineSeg->m_fvMax.m[1] ||
-        (*(sWsVec4*)&box->MaxPoint).z < pSplineSeg->m_fvMin.m[2] || (*(sWsVec4*)&box->MinPoint).z > pSplineSeg->m_fvMax.m[2]) {
+    if ((*(t4Vector*)&box->MaxPoint).x < pSplineSeg->m_fvMin.m[0] || (*(t4Vector*)&box->MinPoint).x > pSplineSeg->m_fvMax.m[0] ||
+        (*(t4Vector*)&box->MaxPoint).y < pSplineSeg->m_fvMin.m[1] || (*(t4Vector*)&box->MinPoint).y > pSplineSeg->m_fvMax.m[1] ||
+        (*(t4Vector*)&box->MaxPoint).z < pSplineSeg->m_fvMin.m[2] || (*(t4Vector*)&box->MinPoint).z > pSplineSeg->m_fvMax.m[2]) {
         return;
     }
 
@@ -3028,12 +3024,12 @@ static inline void collect_337A48(sOct_337A48* tree, SplineCallback* q)
     for (char* o = tree->objs; o != 0; o = *(char**)o) {
         int type = *(int*)(o + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
+            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 1) {
             if (*(int*)(*(char**)(o + 0x68) + 0x1C) & ((int)q->splinefiltermask)) {
-                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), q->hit, q->intersectdist, ((int)q->intersectinfo));
+                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), q->hit, q->intersectdist, ((int)q->intersectinfo));
             }
         }
     }
@@ -3080,23 +3076,23 @@ static inline void queryCell_337A48(sGrid_337A48* grid, int i, tBoundBox* box, S
  * @param testRadius  the test radius
  * @return nonzero when a hit was recorded
  */
-extern "C" int cBXNash_splineIntersect(cBXNash* grid, sWsVec4* pos, int intInfo, int mask, float testRadius)
+extern "C" int cBXNash_splineIntersect(cBXNash* grid, t4Vector* pos, int intInfo, int mask, float testRadius)
 {
     tBoundBox box;
-    sWsVec4 ext;
+    t4Vector ext;
     SplineCallback splineQuery;
     int cnt;
     float dist;
-    (*(sWsVec4*)&box.MinPoint) = *pos;
-    (*(sWsVec4*)&box.MaxPoint) = *pos;
+    (*(t4Vector*)&box.MinPoint) = *pos;
+    (*(t4Vector*)&box.MaxPoint) = *pos;
     ext.x = testRadius;
     ext.y = testRadius;
     ext.z = testRadius;
     ext.w = 0.0f;
-    wsSubEq_334680((*(sWsVec4*)&box.MinPoint), ext);
-    wsAddEq_334680((*(sWsVec4*)&box.MaxPoint), ext);
+    wsSubEq_334680((*(t4Vector*)&box.MinPoint), ext);
+    wsAddEq_334680((*(t4Vector*)&box.MaxPoint), ext);
     tBoundBox* pbox = &box;
-    (*(sWsVec4**)&splineQuery.intersectpos) = pos;
+    (*(t4Vector**)&splineQuery.intersectpos) = pos;
     (*(int*)&splineQuery.intersectinfo) = intInfo;
     splineQuery.splinefiltermask = mask;
     splineQuery.hit = &cnt;
@@ -4265,12 +4261,12 @@ static inline void objs_33ED60(char* o, SplineCallback* q)
     for (; o != 0; o = *(char**)o) {
         int type = *(int*)(o + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
+            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 1) {
             if (*(int*)(*(char**)(o + 0x68) + 0x1C) & ((int)q->splinefiltermask)) {
-                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), q->hit, q->intersectdist, ((int)q->intersectinfo));
+                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((t4Vector*)q->intersectpos), q->hit, q->intersectdist, ((int)q->intersectinfo));
             }
         }
     }
@@ -4988,12 +4984,12 @@ extern "C" void nash_Cell_descend6(nash_Cell* tree, SplineCallback* splineQuery)
     for (char* typedNode = *(char**)&tree->nodesinside[2]; typedNode != 0; typedNode = *(char**)typedNode) {
         int type = *(int*)(typedNode + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(typedNode + 0xC), ((tBoundBox*)splineQuery->box), ((tBoundBox*)splineQuery->box), ((sWsVec4*)splineQuery->intersectpos), ((int)splineQuery->splinefiltermask), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
+            cRailModifier_splineIntersect(*(void**)(typedNode + 0xC), ((tBoundBox*)splineQuery->box), ((tBoundBox*)splineQuery->box), ((t4Vector*)splineQuery->intersectpos), ((int)splineQuery->splinefiltermask), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
         } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(typedNode + 0xC), ((tBoundBox*)splineQuery->box), ((tBoundBox*)splineQuery->box), ((sWsVec4*)splineQuery->intersectpos), ((int)splineQuery->splinefiltermask), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
+            cFlexRailNode_splineIntersect(*(void**)(typedNode + 0xC), ((tBoundBox*)splineQuery->box), ((tBoundBox*)splineQuery->box), ((t4Vector*)splineQuery->intersectpos), ((int)splineQuery->splinefiltermask), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
         } else if (type == 1) {
             if (*(int*)(*(char**)(typedNode + 0x68) + 0x1C) & ((int)splineQuery->splinefiltermask)) {
-                intersect_staticSplineSegmentIntersect(typedNode, ((tBoundBox*)splineQuery->box), ((sWsVec4*)splineQuery->intersectpos), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
+                intersect_staticSplineSegmentIntersect(typedNode, ((tBoundBox*)splineQuery->box), ((t4Vector*)splineQuery->intersectpos), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
             }
         }
     }

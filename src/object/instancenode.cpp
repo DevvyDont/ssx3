@@ -277,12 +277,9 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_buildMeshMat);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Prototype asserts: assert(inst); assert((mesh >= -1) && (mesh < pModel->m_iNumMeshes)); assert((int(a) & 15) == 0) (bx/math3d.h).
-struct sInV4_FED8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sInMat_FED8 {
-    sInV4_FED8 r[4];
+    t4Vector r[4];
 };
 
 struct sInPart_FED8 {
@@ -339,12 +336,12 @@ static inline void vu0CopyMat_FED8(sInMat_FED8* d, const sInMat_FED8* s)
         : "memory");
 }
 
-static inline sInV4_FED8 row_FED8(const sInMat_FED8* m, int i)
+static inline t4Vector row_FED8(const sInMat_FED8* m, int i)
 {
     return m->r[i];
 }
 
-static inline void mulv_FED8(sInV4_FED8& r, const sInV4_FED8& a, const sInV4_FED8& b)
+static inline void mulv_FED8(t4Vector& r, const t4Vector& a, const t4Vector& b)
 {
     r.x = a.x * b.x;
     r.y = a.y * b.y;
@@ -400,14 +397,14 @@ static inline void mulLeft_FED8(sInMat_FED8* m, const sInMat_FED8* a)
 }
 
 // dst = (local with its translation row scaled by s) * m.
-static inline void mulScaled_FED8(sInMat_FED8* dst, const sInMat_FED8* local, const sInV4_FED8& s, const sInMat_FED8* m)
+static inline void mulScaled_FED8(sInMat_FED8* dst, const sInMat_FED8* local, const t4Vector& s, const sInMat_FED8* m)
 {
     sInMat_FED8 l;
     l.r[0] = row_FED8(local, 0);
     l.r[1] = row_FED8(local, 1);
     l.r[2] = row_FED8(local, 2);
-    sInV4_FED8 t;
-    sInV4_FED8 r3 = local->r[3];
+    t4Vector t;
+    t4Vector r3 = local->r[3];
     mulv_FED8(t, r3, s);
     l.r[3] = t;
     mul_FED8(dst, &l, m);
@@ -442,15 +439,15 @@ extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_
     sInPart_FED8* parts = pModel->parts;
     if (mesh >= 0) {
         float k = self->scale;
-        sInV4_FED8 scaleVec;
+        t4Vector scaleVec;
         scaleVec.x = k;
         scaleVec.y = k;
         scaleVec.z = k;
         scaleVec.w = 1.0f;
         vu0CopyMat_FED8(out, parts[mesh].mat);
         {
-            sInV4_FED8 scaledPos;
-            sInV4_FED8 translation = out->r[3];
+            t4Vector scaledPos;
+            t4Vector translation = out->r[3];
             mulv_FED8(scaledPos, translation, scaleVec);
             out->r[3] = scaledPos;
         }

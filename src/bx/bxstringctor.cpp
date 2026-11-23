@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "ai/rider.h"
 #include "online/privatemessage.h"
 #include "online/setupman.h"
@@ -2288,12 +2289,8 @@ extern "C" void cAIPath_populateData(cAIPath* self, int data, int id)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cAIPath_getResetPos);
 #ifdef SKIP_ASM
-struct sBXVec4K2 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sBXPath;
-// sBXVec4 (defined later in the unit) has this layout.
-sBXVec4K2 cPath_getPathPos_K2(cPath* self, int* inRange, float t) __asm__("cPath_getPathPos");
+extern "C" t4Vector cPath_getPathPos(cPath* self, int* inRange, float pathParam);
 
 struct sBXRangeK2 {
     int type;   // 0x0
@@ -2320,7 +2317,7 @@ struct sBXRangeListK2 {
  * @return the reset point on the path
  */
 // PORT: >? and <? (g++ min/max operators).
-extern "C" sBXVec4K2 cAIPath_getResetPos(cPath* path, float* pathParam)
+extern "C" t4Vector cAIPath_getResetPos(cPath* path, float* pathParam)
 {
     sBXRangeListK2* list = (sBXRangeListK2*)path;
     float hi = *pathParam + 50.0f;
@@ -2343,7 +2340,7 @@ extern "C" sBXVec4K2 cAIPath_getResetPos(cPath* path, float* pathParam)
         *pathParam = lo;
     else
         *pathParam = hi;
-    return cPath_getPathPos_K2(path, 0, *pathParam);
+    return cPath_getPathPos(path, 0, *pathParam);
 }
 #endif
 
@@ -3169,9 +3166,6 @@ done:
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_getPathPos);
 #ifdef SKIP_ASM
-struct sBXVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sBXPathSeg {
     float x, y, z;   // direction
@@ -3180,14 +3174,14 @@ struct sBXPathSeg {
 
 
 // PORT: PS2-only VU0 inline asm (direction times scalar).
-static inline sBXVec4 bxVu0ScaleDir(const sBXPathSeg& seg, float s)
+static inline t4Vector bxVu0ScaleDir(const sBXPathSeg& seg, float s)
 {
-    sBXVec4 v;
+    t4Vector v;
     v.x = seg.x;
     v.y = seg.y;
     v.z = seg.z;
     v.w = 0.0f;
-    sBXVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3202,7 +3196,7 @@ static inline sBXVec4 bxVu0ScaleDir(const sBXPathSeg& seg, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void bxVu0AddEq(sBXVec4& dst, sBXVec4 b)
+static inline void bxVu0AddEq(t4Vector& dst, t4Vector b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -3214,9 +3208,9 @@ static inline void bxVu0AddEq(sBXVec4& dst, sBXVec4 b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sBXVec4 bxVu0Add(const sBXVec4& a, sBXVec4 b)
+static inline t4Vector bxVu0Add(const t4Vector& a, t4Vector b)
 {
-    sBXVec4 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3238,9 +3232,9 @@ static inline sBXVec4 bxVu0Add(const sBXVec4& a, sBXVec4 b)
  * @param pathParam  the distance along the path (On Tour param)
  * @return the position (w = 1)
  */
-extern "C" sBXVec4 cPath_getPathPos(cPath* self, int* inRange, float pathParam)
+extern "C" t4Vector cPath_getPathPos(cPath* self, int* inRange, float pathParam)
 {
-    sBXVec4 pos;
+    t4Vector pos;
     pos.x = self->Start[0];
     pos.y = self->Start[1];
     pos.z = self->Start[2];

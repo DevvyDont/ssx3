@@ -367,9 +367,6 @@ t4Vector cComputer_calculateTargetPos_0610(char* vself)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", cComputer_followPathCruise);
 #ifdef SKIP_ASM
-struct sV4_0680 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sPad_0680 {
     unsigned int pad0 : 17;
@@ -414,8 +411,8 @@ struct sWorld_0680 {
 
 extern sWorld_0680* SSXApp_0680 __asm__("SSXApp");
 
-extern "C" void cComputer_calculateTargetPos_0680(sV4_0680*, void*) __asm__("cComputer_calculateTargetPos");
-extern "C" float cComputer_calcTurn_0680(void*, sV4_0680*) __asm__("cComputer_calcTurn");
+extern "C" void cComputer_calculateTargetPos_0680(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
+extern "C" float cComputer_calcTurn_0680(void*, t4Vector*) __asm__("cComputer_calcTurn");
 extern "C" int cComputer_checkForSpeedZone_0680(void*, float*, int*) __asm__("cComputer_checkForSpeedZone");
 extern "C" int cComputer_checkForBoardPress_0680(void*, int*) __asm__("cComputer_checkForBoardPress");
 extern "C" void cComputer_setupRecklessCrouch_0680(void*, void*) __asm__("cComputer_setupRecklessCrouch");
@@ -425,7 +422,7 @@ extern "C" int cComputer_checkForTargets_0680(char* self, int* out) __asm__("cCo
 extern "C" void cComputer_followPathCruise_0680(char* self, sPad_0680* pad) __asm__("cComputer_followPathCruise");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Len_0680(const sV4_0680& v)
+static inline float Len_0680(const t4Vector& v)
 {
     float r;
     int t;
@@ -463,7 +460,7 @@ static inline float Len_0680(const sV4_0680& v)
  */
 extern "C" void cComputer_followPathCruise_0680(char* self, sPad_0680* cruiseCmd)
 {
-    sV4_0680 targetPos;
+    t4Vector targetPos;
     int x;
     int y;
     int below, toPipe, toRail, isSpin, isFlip;
@@ -472,7 +469,7 @@ extern "C" void cComputer_followPathCruise_0680(char* self, sPad_0680* cruiseCmd
     cruiseCmd->b20 = (int)(cComputer_calcTurn_0680(self, &targetPos) * 31.0f);
     if (cComputer_checkForSpeedZone_0680(self, (float*)(self + 0xDF0), &x)) {
         float sp = *(float*)(self + 0xDF0);
-        float len = Len_0680(*(sV4_0680*)(*(char**)(self + 0x18) + 0x1E0));
+        float len = Len_0680(*(t4Vector*)(*(char**)(self + 0x18) + 0x1E0));
         if (sp + 138.88890075683594f < len) {
             if (x)
                 cruiseCmd->w0 = 0x1F;
@@ -1098,13 +1095,10 @@ INCLUDE_ASM("seg/seg_1218", cDangerMan_Update);
 #ifdef SKIP_ASM
 // FAKEMATCH: `do { ... } while (0)` around the recs loop (its loop notes weight self's ref, so global-alloc takes self before zoneCheckAIIndex); plain form 99.31%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-struct sVec4_13A8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sXform_13A8 {
     char pad[0x30];
-    sVec4_13A8 pos;
+    t4Vector pos;
 };
 
 class cComp_13A8 {
@@ -1264,7 +1258,7 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
             if (pInstNode == 0 || pInstNode->IsDead()) {
                 pCurrElem->state = 1;
             } else {
-                sVec4_13A8 instPos = pInstNode->GetXform()->pos;
+                t4Vector instPos = pInstNode->GetXform()->pos;
                 pCurrElem->pos[0] = instPos.x;
                 pCurrElem->pos[1] = instPos.y;
                 pCurrElem->pos[2] = instPos.z;
@@ -3638,9 +3632,6 @@ extern "C" void cRiderAnim_readFromReplayFrame(cRiderAnim* self, cStream_4DE0* s
 //100%
 INCLUDE_ASM("seg/seg_1218", cRider_objectIntersect);
 #ifdef SKIP_ASM
-struct sV4_4E70 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sTri_4E70 {
     float a;
@@ -3671,8 +3662,8 @@ struct sOwner_4E70 {
 };
 
 struct sHit_4E70 {
-    sV4_4E70 pos;
-    sV4_4E70 normal;
+    t4Vector pos;
+    t4Vector normal;
     char pad20[0x20];
     float dist;
     char pad44[0xC];
@@ -3739,11 +3730,11 @@ public:
     virtual float Height();
 };
 
-extern sV4_4E70 t4vect_Zero_4E70 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_4E70 __asm__("t4vect_Zero");
 extern "C" int cOverlapList_staticObjectIntersect_4E70(void*, cScope_4E70*, sHit_4E70*, int, int) __asm__("cOverlapList_staticObjectIntersect");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_4E70(const sV4_4E70& a, const sV4_4E70& b)
+static inline float Dot_4E70(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -3763,7 +3754,7 @@ static inline float Dot_4E70(const sV4_4E70& a, const sV4_4E70& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Len_4E70(const sV4_4E70& v)
+static inline float Len_4E70(const t4Vector& v)
 {
     float r;
     int t;
@@ -3784,9 +3775,9 @@ static inline float Len_4E70(const sV4_4E70& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_4E70 Sub_4E70(const sV4_4E70& a, const sV4_4E70& b)
+static inline t4Vector Sub_4E70(const t4Vector& a, const t4Vector& b)
 {
-    sV4_4E70 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3798,7 +3789,7 @@ static inline sV4_4E70 Sub_4E70(const sV4_4E70& a, const sV4_4E70& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void AddEq_4E70(sV4_4E70& a, const sV4_4E70& b)
+static inline void AddEq_4E70(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -3810,9 +3801,9 @@ static inline void AddEq_4E70(sV4_4E70& a, const sV4_4E70& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sV4_4E70 Div_4E70(const sV4_4E70& v, float s)
+static inline t4Vector Div_4E70(const t4Vector& v, float s)
 {
-    sV4_4E70 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3847,7 +3838,7 @@ static inline int IsWall_4E70(const sHit_4E70& h)
 static inline int Facing_4E70(char* self, const sHit_4E70& h)
 {
     int r = 1;
-    if (!(Dot_4E70(Sub_4E70(h.pos, *(sV4_4E70*)(*(char**)(self + 0xAA0) + 0x10)), h.normal) < 0.0f))
+    if (!(Dot_4E70(Sub_4E70(h.pos, *(t4Vector*)(*(char**)(self + 0xAA0) + 0x10)), h.normal) < 0.0f))
         r = 0;
     return r;
 }
@@ -3939,7 +3930,7 @@ extern "C" float cRider_objectIntersect(char* self, cScope_4E70* sc, sHit_4E70* 
     }
     *out = hits[best];
     if (n >= 2) {
-        sV4_4E70 sum = t4vect_Zero_4E70;
+        t4Vector sum = t4vect_Zero_4E70;
         for (int k = 0; k < n; k++) {
             if (IsWall_4E70(hits[k]))
                 AddEq_4E70(sum, hits[k].normal);
@@ -3961,9 +3952,6 @@ INCLUDE_ASM("seg/seg_1218", cRider_checkObjectCollisions);
 // FAKEMATCH: the scope object's address goes through a copy `ps` to one call while the destructor gets `&sc`
 // (an inconsistently used address copy); plain `&sc` scores 99.98%. Landed 2026-10-18 from a saved result before
 // this was noticed; marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only).
-struct sV4_5398 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sTri_5398 {
     int a;
@@ -3997,7 +3985,7 @@ extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern char* gSSXAudio_5398 __asm__("gSSXAudio");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_5398(const sV4_5398& a, const sV4_5398& b)
+static inline float Dot_5398(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4017,7 +4005,7 @@ static inline float Dot_5398(const sV4_5398& a, const sV4_5398& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Len_5398(const sV4_5398& v)
+static inline float Len_5398(const t4Vector& v)
 {
     float r;
     int t;
@@ -4038,9 +4026,9 @@ static inline float Len_5398(const sV4_5398& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_5398 Sub_5398(const sV4_5398& a, const sV4_5398& b)
+static inline t4Vector Sub_5398(const t4Vector& a, const t4Vector& b)
 {
-    sV4_5398 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4052,9 +4040,9 @@ static inline sV4_5398 Sub_5398(const sV4_5398& a, const sV4_5398& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_5398 Scale_5398(const sV4_5398& v, float s)
+static inline t4Vector Scale_5398(const t4Vector& v, float s)
 {
-    sV4_5398 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4068,9 +4056,9 @@ static inline sV4_5398 Scale_5398(const sV4_5398& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sV4_5398 Div_5398(const sV4_5398& v, float s)
+static inline t4Vector Div_5398(const t4Vector& v, float s)
 {
-    sV4_5398 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4086,9 +4074,9 @@ static inline sV4_5398 Div_5398(const sV4_5398& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV4_5398 Norm_5398(const sV4_5398& v)
+static inline t4Vector Norm_5398(const t4Vector& v)
 {
-    sV4_5398 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -4123,7 +4111,7 @@ static inline unsigned short TriFlags_5398(tInstanceRecord* s, int i)
  *
  * @param norm  a ground normal to project the contact normal onto, or 0 (cAirMotion_resolve passes one)
  */
-extern "C" void cRider_checkObjectCollisions(cRider* self, sV4_5398* norm)
+extern "C" void cRider_checkObjectCollisions(cRider* self, t4Vector* norm)
 {
     tIntersectInfo contact;
     tCollideInfo info;
@@ -4136,27 +4124,27 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, sV4_5398* norm)
     float overlap = cRider_objectIntersect_5398(((char*)self), ps, &contact);
     if (overlap >= zero) {
         if (cRider_isGroundNormalValid((char*)self))
-            norm = (sV4_5398*)(&self->mGroundNormal);
+            norm = (t4Vector*)(&self->mGroundNormal);
         if (norm) {
-            sV4_5398 flatNormal = Sub_5398((*(sV4_5398*)&contact.Inorm), Scale_5398(*norm, Dot_5398((*(sV4_5398*)&contact.Inorm), *norm)));
+            t4Vector flatNormal = Sub_5398((*(t4Vector*)&contact.Inorm), Scale_5398(*norm, Dot_5398((*(t4Vector*)&contact.Inorm), *norm)));
             float len = Len_5398(flatNormal);
             if (len < 0.0010000000474974513f)
-                (*(sV4_5398*)&contact.Inorm) = *norm;
+                (*(t4Vector*)&contact.Inorm) = *norm;
             else
-                (*(sV4_5398*)&contact.Inorm) = Div_5398(flatNormal, len);
+                (*(t4Vector*)&contact.Inorm) = Div_5398(flatNormal, len);
         } else if (cRider_getMotionState((char*)self) == 4) {
-            sV4_5398* up = (sV4_5398*)(&self->mRiderHandler->RailslideMotion);
-            if (Dot_5398((*(sV4_5398*)&contact.Inorm), *up) > zero)
-                (*(sV4_5398*)&contact.Inorm) = *up;
+            t4Vector* up = (t4Vector*)(&self->mRiderHandler->RailslideMotion);
+            if (Dot_5398((*(t4Vector*)&contact.Inorm), *up) > zero)
+                (*(t4Vector*)&contact.Inorm) = *up;
             else
-                (*(sV4_5398*)&contact.Inorm) = Scale_5398(*up, -1.0f);
+                (*(t4Vector*)&contact.Inorm) = Scale_5398(*up, -1.0f);
         }
-        float k = Dot_5398(Scale_5398((*(sV4_5398*)&contact.Inorm), -1.0f), Sub_5398(*(sV4_5398*)&self->mVelocity, (*(sV4_5398*)&contact.Ivel))) >= 0.0f
-                      ? Dot_5398(Scale_5398((*(sV4_5398*)&contact.Inorm), -1.0f), Sub_5398(*(sV4_5398*)&self->mVelocity, (*(sV4_5398*)&contact.Ivel)))
+        float k = Dot_5398(Scale_5398((*(t4Vector*)&contact.Inorm), -1.0f), Sub_5398(*(t4Vector*)&self->mVelocity, (*(t4Vector*)&contact.Ivel))) >= 0.0f
+                      ? Dot_5398(Scale_5398((*(t4Vector*)&contact.Inorm), -1.0f), Sub_5398(*(t4Vector*)&self->mVelocity, (*(t4Vector*)&contact.Ivel)))
                       : 0.0f;
-        (*(sV4_5398*)&info.Pos) = (*(sV4_5398*)&contact.Ipos);
-        (*(sV4_5398*)&info.Direct) = Norm_5398(*(sV4_5398*)&self->mVelocity);
-        (*(sV4_5398*)&info.Reflect) = (*(sV4_5398*)&contact.Inorm);
+        (*(t4Vector*)&info.Pos) = (*(t4Vector*)&contact.Ipos);
+        (*(t4Vector*)&info.Direct) = Norm_5398(*(t4Vector*)&self->mVelocity);
+        (*(t4Vector*)&info.Reflect) = (*(t4Vector*)&contact.Inorm);
         info.Vel = k;
         if ((TriFlags_5398((contact.Inst), contact.Mesh) & 2) && !((contact.Inst)->m_iFlags & 0x2000)) {
             *(&self->CollideIntersectInfo) = contact;
@@ -7389,9 +7377,6 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", cComputer_getBoardPressCmd);
 #ifdef SKIP_ASM
-struct sVec4_AD78 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sPad_AD78 {
     unsigned int pad0 : 18;
@@ -7402,8 +7387,8 @@ struct sPad_AD78 {
 };
 
 extern "C" int cComputer_checkForBoardPress(cComputer*, int*);
-extern "C" void cComputer_calculateTargetPos(sVec4_AD78*, void*);
-extern "C" float cComputer_calcTurn(void*, sVec4_AD78*);
+extern "C" void cComputer_calculateTargetPos(t4Vector*, void*);
+extern "C" float cComputer_calcTurn(void*, t4Vector*);
 
 // PORT: PS2 abs.s helper (stands in for fabsf).
 static inline float vAbs_AD78(float x)
@@ -7437,13 +7422,13 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
     if (flag)
         pressDir = -1.0f;
     {
-        sVec4_AD78 targetPos;
+        t4Vector targetPos;
         cComputer_calculateTargetPos(&targetPos, ((char*)self));
         cmd->b18 = (int)(cComputer_calcTurn(((char*)self), &targetPos) * 31.0f);
     }
     if (pressMarkerFound) {
         cmd->w0 = (int)(pressDir * 31.0f);
-        sVec4_AD78 sideAxis = *(sVec4_AD78*)&self->RiderHandler.GroundMotion.mRider->mMatrix;
+        t4Vector sideAxis = *(t4Vector*)&self->RiderHandler.GroundMotion.mRider->mMatrix;
         float z = sideAxis.z + sideAxis.z;
         float y = clamp_AD78(z, -1.0f, 1.0f);
         if (vAbs_AD78(y) > 0.1f)
@@ -7457,9 +7442,6 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_getRailslideCmd);
 #ifdef SKIP_ASM
-struct sVec4_AED8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sPad_AED8 {
     unsigned int pad0 : 25;
@@ -7474,7 +7456,7 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int cComputer_checkForSpeedZone(cComputer*, float*, int*);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vLen_AED8(const sVec4_AED8& v)
+static inline float vLen_AED8(const t4Vector& v)
 {
     float r;
     int t;
@@ -7530,7 +7512,7 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
         cComputer_setupPrewindState_AED8(((char*)self), isSpin, isFlip, toRail, toPipe);
         return;
     }
-    sVec4_AED8 sideAxis = *(sVec4_AED8*)&self->RiderHandler.GroundMotion.mRider->mMatrix;
+    t4Vector sideAxis = *(t4Vector*)&self->RiderHandler.GroundMotion.mRider->mMatrix;
     float z = sideAxis.z + sideAxis.z;
     float y = clamp_AED8(z, -1.0f, 1.0f);
     if (vAbs_AED8(y) > 0.1f)
@@ -7542,7 +7524,7 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
         cmd->w0 = (int)(spinSign * 31.0f);
     }
     int speedMarkerFound = cComputer_checkForSpeedZone(self, (float*)(&self->mDesiredSpeed), &ok);
-    float len = vLen_AED8(*(sVec4_AED8*)&self->RiderHandler.GroundMotion.mRider->mVelocity);
+    float len = vLen_AED8(*(t4Vector*)&self->RiderHandler.GroundMotion.mRider->mVelocity);
     if (speedMarkerFound && ok && len < self->mDesiredSpeed - 138.88890075683594f)
         *(unsigned int*)cmd |= 0x10000;
 }
@@ -7716,9 +7698,6 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
 INCLUDE_ASM("seg/seg_1218", cComputer_getNaturalAirCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVec4_B590 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sPad_B590 {
     unsigned char b0;
@@ -7733,8 +7712,8 @@ struct sPadBits_B590 {
 };
 
 int AIrand();
-extern "C" void cComputer_calculateTargetPos_B590(sVec4_B590*, void*) __asm__("cComputer_calculateTargetPos");
-extern "C" float cComputer_calcTurn_B590(void*, sVec4_B590*) __asm__("cComputer_calcTurn");
+extern "C" void cComputer_calculateTargetPos_B590(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
+extern "C" float cComputer_calcTurn_B590(void*, t4Vector*) __asm__("cComputer_calcTurn");
 
 /**
  * Builds the command for natural (unplanned) air: random spins and flips sized to the air time.
@@ -7780,7 +7759,7 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
         self->mFlipAxis = 0.0f;
     }
     if (airTimeLeft < 0.5f && self->mFlipAxis == 0.0f && self->mSpinAxis == 0.0f) {
-        sVec4_B590 targetPos;
+        t4Vector targetPos;
         cComputer_calculateTargetPos_B590(&targetPos, ((char*)self));
         ((sPadBits_B590*)cmd)->b24 = (int)(-cComputer_calcTurn_B590(((char*)self), &targetPos) * 31.0f);
         self->mGrabID = -1;
@@ -8186,9 +8165,6 @@ extern "C" void cComputer_setupPrewindState(cComputer* self, int isSpin, int isF
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_setupCrouch);
 #ifdef SKIP_ASM
-struct sVec4_C0A8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sPad_C0A8 {
     unsigned int pad0 : 16;
     unsigned int b16 : 1;
@@ -8197,7 +8173,7 @@ struct sPad_C0A8 {
     int w0 : 6;
 };
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vLen_C0A8(const sVec4_C0A8& v)
+static inline float vLen_C0A8(const t4Vector& v)
 {
     float r;
     int t;
@@ -8226,7 +8202,7 @@ static inline float vLen_C0A8(const sVec4_C0A8& v)
 extern "C" void cComputer_setupCrouch(cComputer* self, void* cmd)
 {
     sPad_C0A8* crouchCmd = (sPad_C0A8*)cmd;
-    float len = vLen_C0A8(*(sVec4_C0A8*)&self->RiderHandler.GroundMotion.mRider->mVelocity);
+    float len = vLen_C0A8(*(t4Vector*)&self->RiderHandler.GroundMotion.mRider->mVelocity);
     float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
         pressAmount = 1.0f;

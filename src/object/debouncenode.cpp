@@ -1779,12 +1779,9 @@ INCLUDE_ASM("object/debouncenode", func_00344AA0);
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 
-struct sDbV4_4AA0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sDbMat_4AA0 {
-    sDbV4_4AA0 r[4];
+    t4Vector r[4];
 };
 
 struct sDbPart_4AA0 {
@@ -1910,12 +1907,12 @@ static inline void vu0CopyMat_4AA0(sDbMat_4AA0* d, const sDbMat_4AA0* s)
         : "memory");
 }
 
-static inline sDbV4_4AA0 row_4AA0(const sDbMat_4AA0* m, int i)
+static inline t4Vector row_4AA0(const sDbMat_4AA0* m, int i)
 {
     return m->r[i];
 }
 
-static inline void mulv_4AA0(sDbV4_4AA0& r, const sDbV4_4AA0& a, const sDbV4_4AA0& b)
+static inline void mulv_4AA0(t4Vector& r, const t4Vector& a, const t4Vector& b)
 {
     r.x = a.x * b.x;
     r.y = a.y * b.y;
@@ -1924,14 +1921,14 @@ static inline void mulv_4AA0(sDbV4_4AA0& r, const sDbV4_4AA0& a, const sDbV4_4AA
 }
 
 // Builds a part matrix: dst = parent * (local with its translation row scaled by s).
-static inline void partMat_4AA0(sDbMat_4AA0* dst, const sDbMat_4AA0* parentMat, const sDbMat_4AA0* m, const sDbV4_4AA0& s)
+static inline void partMat_4AA0(sDbMat_4AA0* dst, const sDbMat_4AA0* parentMat, const sDbMat_4AA0* m, const t4Vector& s)
 {
     sDbMat_4AA0 l;
     l.r[0] = row_4AA0(m, 0);
     l.r[1] = row_4AA0(m, 1);
     l.r[2] = row_4AA0(m, 2);
-    sDbV4_4AA0 t;
-    sDbV4_4AA0 r3 = m->r[3];
+    t4Vector t;
+    t4Vector r3 = m->r[3];
     mulv_4AA0(t, r3, s);
     l.r[3] = t;
     sDbMat_4AA0 tt;
@@ -1940,10 +1937,10 @@ static inline void partMat_4AA0(sDbMat_4AA0* dst, const sDbMat_4AA0* parentMat, 
 }
 
 // Scales the translation row of m by s.
-static inline void scaleTrans_4AA0(sDbMat_4AA0* m, const sDbV4_4AA0& s)
+static inline void scaleTrans_4AA0(sDbMat_4AA0* m, const t4Vector& s)
 {
-    sDbV4_4AA0 t;
-    sDbV4_4AA0 r3 = m->r[3];
+    t4Vector t;
+    t4Vector r3 = m->r[3];
     mulv_4AA0(t, r3, s);
     m->r[3] = t;
 }
@@ -1962,7 +1959,7 @@ extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
 {
     sDbPart_4AA0* part = self->info->parts;
     float k = self->model.get()->scale;
-    sDbV4_4AA0 scaleVec;
+    t4Vector scaleVec;
     scaleVec.x = k;
     scaleVec.y = k;
     scaleVec.z = k;
@@ -2105,18 +2102,15 @@ extern "C" void func_00344FF8(void* self, cBxReplayFrame* replayStream)
 //100%
 INCLUDE_ASM("object/debouncenode", cSplineSegment_getPos);
 #ifdef SKIP_ASM
-struct sDebVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sDebMtx {
-    sDebVec4 r[4];
+    t4Vector r[4];
 };
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (matrix * vector).
-static inline sDebVec4 debMtxApply(sDebMtx* m, const sDebVec4& v)
+static inline t4Vector debMtxApply(sDebMtx* m, const t4Vector& v)
 {
-    sDebVec4 out;
+    t4Vector out;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -2138,9 +2132,9 @@ static inline sDebVec4 debMtxApply(sDebMtx* m, const sDebVec4& v)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v * s).
-static inline sDebVec4 debVecScale(const sDebVec4& v, float s)
+static inline t4Vector debVecScale(const t4Vector& v, float s)
 {
-    sDebVec4 out;
+    t4Vector out;
     int t;
     __asm__(
         ".set push\n"
@@ -2179,24 +2173,24 @@ struct sDebCurve {
  * @param acc  receives the direction's derivative with respect to the distance (On Tour dDir)
  */
 // Evaluate the curve at time t: position, velocity and acceleration.
-extern "C" void cSplineSegment_getPos(sDebCurve* self, float dist, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+extern "C" void cSplineSegment_getPos(sDebCurve* self, float dist, t4Vector* pos, t4Vector* vel, t4Vector* acc)
 {
     dist -= self->t0;
     float splineParam = ((self->coef[0] * dist + self->coef[1]) * dist + self->coef[2]) * dist + self->coef[3];
     float du = (self->coef[0] * (dist * 3.0f) + self->coef[1] * 2.0f) * dist + self->coef[2];
-    sDebVec4 secondDeriv;
+    t4Vector secondDeriv;
     secondDeriv.x = splineParam * 6.0f;
     secondDeriv.y = 2.0f;
     secondDeriv.z = 0.0f;
     secondDeriv.w = 0.0f;
     *acc = debVecScale(debMtxApply(&self->basis, secondDeriv), du);
-    sDebVec4 powerBasis;
+    t4Vector powerBasis;
     powerBasis.x = splineParam * splineParam * splineParam;
     powerBasis.y = splineParam * splineParam;
     powerBasis.z = splineParam;
     powerBasis.w = 1.0f;
     *pos = debMtxApply(&self->basis, powerBasis);
-    sDebVec4 firstDeriv;
+    t4Vector firstDeriv;
     firstDeriv.x = splineParam * splineParam * 3.0f;
     firstDeriv.y = splineParam * 2.0f;
     firstDeriv.z = 1.0f;
@@ -2312,7 +2306,7 @@ static inline float ftrunc_00345248(float x)
  * @param vel  receives the direction
  * @param acc  receives the direction's derivative (On Tour dDir)
  */
-extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, t4Vector* pos, t4Vector* vel, t4Vector* acc)
 {
     float len = self->length;
     float laps = distance / len;

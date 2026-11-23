@@ -207,14 +207,11 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_initSpringNodes);
 #ifdef SKIP_ASM
-struct sFlexVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
-static inline sFlexVec4 flexVecSub(const sFlexVec4& a, const sFlexVec4& b)
+static inline t4Vector flexVecSub(const t4Vector& a, const t4Vector& b)
 {
-    sFlexVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -230,9 +227,9 @@ static inline sFlexVec4 flexVecSub(const sFlexVec4& a, const sFlexVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
-static inline sFlexVec4 flexVecAdd(const sFlexVec4& a, const sFlexVec4& b)
+static inline t4Vector flexVecAdd(const t4Vector& a, const t4Vector& b)
 {
-    sFlexVec4 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -248,9 +245,9 @@ static inline sFlexVec4 flexVecAdd(const sFlexVec4& a, const sFlexVec4& b)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v * s).
-static inline sFlexVec4 flexVecScale(const sFlexVec4& v, float s)
+static inline t4Vector flexVecScale(const t4Vector& v, float s)
 {
-    sFlexVec4 r;
+    t4Vector r;
     int t;
     __asm__(
         ".set push\n"
@@ -268,20 +265,20 @@ static inline sFlexVec4 flexVecScale(const sFlexVec4& v, float s)
 }
 
 struct sFlexSeg {
-    sFlexVec4 pos;       // 0x00
+    t4Vector pos;       // 0x00
     char pad_0x10[0x40];
 };
 
 struct sFlexBridge {
     char pad_0x00[0x20];
-    sFlexVec4 end;       // 0x20
-    sFlexVec4 start;     // 0x30
+    t4Vector end;       // 0x20
+    t4Vector start;     // 0x30
     char pad_0x40[0x10];
     int count;           // 0x50
     char pad_0x54[0x20];
     sFlexSeg* segs;      // 0x74
     char pad_0x78[0x4];
-    sFlexVec4* pts;      // 0x7C: 2 * count points
+    t4Vector* pts;      // 0x7C: 2 * count points
 };
 
 /**
@@ -642,12 +639,9 @@ struct sFV_7268 {
     sFV_7268(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sFRow_7268 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sFM_7268 {
-    sFRow_7268 r[4];
+    t4Vector r[4];
 } __attribute__((aligned(16)));
 
 extern sFV_7268 t4vect_Zero_v7268 __asm__("t4vect_Zero");
@@ -1085,9 +1079,6 @@ struct sRS_7B80 {
     int f10;
 };
 
-struct sRow_7B80 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 static inline int IsLoaded_7B80(tInstanceRecord* m)
@@ -1099,7 +1090,7 @@ static inline int IsLoaded_7B80(tInstanceRecord* m)
     return ok ? wc->m_HullPages[m->m_SMap.m_iHullID].m_State == 3 : 0;
 }
 
-struct sPair_7B80 { sRow_7B80 r[4]; };
+struct sPair_7B80 { t4Vector r[4]; };
 struct sVE43_7B80 { short delta; short index; sPair_7B80 (*fn)(void*); };
 struct sVE93_7B80 { short delta; short index; int (*fn)(void*, void*, void*, sPair_7B80*); };
 struct sVE96_7B80 { short delta; short index; void (*fn)(void*, void*, int, int, int); };

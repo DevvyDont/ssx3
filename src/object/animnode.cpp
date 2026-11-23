@@ -521,9 +521,6 @@ struct sAnimFrame_EC58 {
     sAnimFrame_EC58() {}
 };
 
-struct sQ_EC58 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sAnimInfo_EC58 {
     int f0;
@@ -557,7 +554,7 @@ extern "C" void* cFloatingNode_cFloatingNode(cFloatingNode* self, void* bucket, 
     self->ASpring = info->fC;
     self->ADamp = info->f10;
     self->TorqueScale = info->f18 * 1e-6f;
-    sQ_EC58 rootPos = *(sQ_EC58*)&self->Instance->m_fmTransform.m[3][0];
+    t4Vector rootPos = *(t4Vector*)&self->Instance->m_fmTransform.m[3][0];
     *(int*)&self->OX = 0;
     *(int*)&self->WX = 0;
     *(int*)&self->TX = 0;

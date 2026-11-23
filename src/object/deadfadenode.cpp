@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "object/instancenode.h"
 #include "world/instancerecord.h"
 #include "vtable.h"
@@ -21,16 +22,13 @@ extern char str_DeadFadeAnimMats[];
 // PORT: array new bound to the tagged allocator
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
-struct sDfV4_0750 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sDfMat_0750 {
-    sDfV4_0750 r[4];
+    t4Vector r[4];
 };
 
 struct sDfMatElem_0750 {
-    sDfV4_0750 r[4];
+    t4Vector r[4];
     sDfMatElem_0750() {}
 };
 
@@ -108,12 +106,12 @@ static inline void vu0CopyMat_0750(void* d, const void* s)
         : "memory");
 }
 
-static inline sDfV4_0750 row_0750(const sDfMat_0750* m, int i)
+static inline t4Vector row_0750(const sDfMat_0750* m, int i)
 {
     return m->r[i];
 }
 
-static inline void mulv_0750(sDfV4_0750& r, const sDfV4_0750& a, const sDfV4_0750& b)
+static inline void mulv_0750(t4Vector& r, const t4Vector& a, const t4Vector& b)
 {
     r.x = a.x * b.x;
     r.y = a.y * b.y;
@@ -122,14 +120,14 @@ static inline void mulv_0750(sDfV4_0750& r, const sDfV4_0750& a, const sDfV4_075
 }
 
 // Builds a part matrix: dst = parent * (local with its translation row scaled by s).
-static inline void partMat_0750(sDfMat_0750* dst, const void* parentMat, const sDfMat_0750* m, const sDfV4_0750& s)
+static inline void partMat_0750(sDfMat_0750* dst, const void* parentMat, const sDfMat_0750* m, const t4Vector& s)
 {
     sDfMat_0750 l;
     l.r[0] = row_0750(m, 0);
     l.r[1] = row_0750(m, 1);
     l.r[2] = row_0750(m, 2);
-    sDfV4_0750 t;
-    sDfV4_0750 r3 = m->r[3];
+    t4Vector t;
+    t4Vector r3 = m->r[3];
     mulv_0750(t, r3, s);
     l.r[3] = t;
     sDfMat_0750 tt;
@@ -179,7 +177,7 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
         }
         sDfPart_0750* part = model->parts;
         float k = (self->Instance)->m_fScale;
-        sDfV4_0750 scaleVec;
+        t4Vector scaleVec;
         scaleVec.x = k;
         scaleVec.y = k;
         scaleVec.z = k;
@@ -306,12 +304,9 @@ extern "C" void cDeadFadeNode_loseFocus(cDeadFadeNode* self)
 INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sDfVec_350CB8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sDfMat_350CB8 {
-    sDfVec_350CB8 r[4];
+    t4Vector r[4];
 };
 
 struct sDfSlot_350CB8 {
@@ -346,7 +341,7 @@ struct cDfGfx_350CB8 {
 };
 
 typedef sDfMat_350CB8 (*DfViewFn_350CB8)(void*);
-typedef int (*DfCullFn_350CB8)(void*, sDfVec_350CB8*, sDfVec_350CB8*, const sDfMat_350CB8&);
+typedef int (*DfCullFn_350CB8)(void*, t4Vector*, t4Vector*, const sDfMat_350CB8&);
 typedef void (*DfDrawFn_350CB8)(void*, void*, void*, void*, float, void*, void*, int);
 
 extern sDfMat_350CB8 t4mat_Identity_350CB8 __asm__("t4mat_Identity");
@@ -404,7 +399,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
     {
         sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
-        sDfVec_350CB8 box[2];
+        t4Vector box[2];
         box[0].x = OBJ_350CB8(self)->pos[0];
         box[0].y = OBJ_350CB8(self)->pos[1];
         box[0].z = OBJ_350CB8(self)->pos[2];
@@ -420,7 +415,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
     }
     sDfMat_350CB8 xf;
     MatCopy_350CB8(&xf, &t4mat_Identity_350CB8);
-    sDfVec_350CB8 offset;
+    t4Vector offset;
     offset.x = 0.0f;
     offset.y = 0.0f;
     offset.z = -self->Dist;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "world/instancerecord.h"
 #include "wscript/wscriptcache.h"
@@ -2866,12 +2867,9 @@ static inline void* lookup_BFC0(unsigned int id)
     return toObj_BFC0(set->refs[id >> 8] >> 8);
 }
 
-struct sVec4_BFC0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float vu0Length_BFC0(const sVec4_BFC0& v)
+static inline float vu0Length_BFC0(const t4Vector& v)
 {
     float r;
     int t;
@@ -2892,9 +2890,9 @@ static inline float vu0Length_BFC0(const sVec4_BFC0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_BFC0 vu0Sub_BFC0(const sVec4_BFC0& a, const sVec4_BFC0& b)
+static inline t4Vector vu0Sub_BFC0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_BFC0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2905,9 +2903,9 @@ static inline sVec4_BFC0 vu0Sub_BFC0(const sVec4_BFC0& a, const sVec4_BFC0& b)
     return r;
 }
 
-static inline sVec4_BFC0 pos_BFC0(void* p)
+static inline t4Vector pos_BFC0(void* p)
 {
-    return *(sVec4_BFC0*)((char*)p + 0x40);
+    return *(t4Vector*)((char*)p + 0x40);
 }
 
 struct sAi_BFC0 {
@@ -2924,7 +2922,7 @@ struct sVE_BFC0 {
 struct sVEp_BFC0 {
     short delta;
     short index;
-    sVec4_BFC0* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 /**
@@ -2967,7 +2965,7 @@ extern "C" int cWScriptMan_checkGate(int* who, unsigned int id0, unsigned int id
         return 1;
     }
     sVEp_BFC0* vtp = *(sVEp_BFC0**)obj;
-    sVec4_BFC0* pos = vtp[5].fn(vthis(obj, vtp[5]));
+    t4Vector* pos = vtp[5].fn(vthis(obj, vtp[5]));
     float dist;
     float seg;
     if (prevInst != 0) {
@@ -4515,9 +4513,6 @@ void* func_0030D498(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cAnimModel_cAnimModel);
 #ifdef SKIP_ASM
-struct sWSVec4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sWSSlot8 {
     int a;
@@ -4536,7 +4531,7 @@ struct sWSSlot8 {
  */
 extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
 {
-    sWSVec4 ones;
+    t4Vector ones;
     self->InvDefaultMatrices = 0;
     self->SkelMatrices = 0;
     self->SkelMatricesScaled = 0;
@@ -4544,7 +4539,7 @@ extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
     ones.y = 1.0f;
     ones.z = 1.0f;
     ones.w = 1.0f;
-    *(sWSVec4*)&self->ScaleVect = ones;
+    *(t4Vector*)&self->ScaleVect = ones;
     self->bones = 0;
     self->parts = 0;
     self->partIndex = 0;

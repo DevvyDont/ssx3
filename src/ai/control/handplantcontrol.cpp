@@ -25,14 +25,11 @@
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_gainFocus);
 #ifdef SKIP_ASM
-struct sVec4HP {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4HP vu0SubHP(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0SubHP(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__ __volatile__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -44,9 +41,9 @@ static inline sVec4HP vu0SubHP(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sVec4HP vu0DivHP(const sVec4HP& v, float s)
+static inline t4Vector vu0DivHP(const t4Vector& v, float s)
 {
-    sVec4HP r;
+    t4Vector r;
     int t;
     __asm__ __volatile__(
         "mfc1      %1, %3\n"
@@ -70,7 +67,7 @@ static inline sVec4HP vu0DivHP(const sVec4HP& v, float s)
 extern "C" void cHandplantMotion_gainFocus(cHandplantMotion* self)
 {
     cRider* rider = self->mRider;
-    *(sVec4HP*)&rider->mVelocity = vu0DivHP(vu0SubHP(*(sVec4HP*)&self->SplinePos, *(sVec4HP*)&rider->mPosition), self->EnterSec);
+    *(t4Vector*)&rider->mVelocity = vu0DivHP(vu0SubHP(*(t4Vector*)&self->SplinePos, *(t4Vector*)&rider->mPosition), self->EnterSec);
 }
 #endif
 
@@ -931,7 +928,7 @@ int cRider_getControlState(void* rider);
 extern void* t4vect_Zero[];
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
-static inline void vu0ScaleEq_139A20(sVec4HP& v, float s)
+static inline void vu0ScaleEq_139A20(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -945,7 +942,7 @@ static inline void vu0ScaleEq_139A20(sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product, by-value second operand).
-static inline float vu0Dot_139A20(const sVec4HP& a, sVec4HP b)
+static inline float vu0Dot_139A20(const t4Vector& a, t4Vector b)
 {
     float r;
     int t;
@@ -990,10 +987,10 @@ extern "C" void cAirMotion_step(cAirMotion* self)
     cAirPredictor_updateFlightPath(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, rider->mTimeScale * 0.01666666753590107f);
     cRider* rider1 = self->mRider;
     {
-        sVec4HP up = *(sVec4HP*)&rider1->RiderRoot.row[2];
-        *(sVec4HP*)&rider1->mGroundNormal = up;
+        t4Vector up = *(t4Vector*)&rider1->RiderRoot.row[2];
+        *(t4Vector*)&rider1->mGroundNormal = up;
     }
-    *(sVec4HP*)&self->mRider->GroundVelocity = *(sVec4HP*)t4vect_Zero;
+    *(t4Vector*)&self->mRider->GroundVelocity = *(t4Vector*)t4vect_Zero;
     int st = self->mRider->mAirPredictor->SimState;
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
@@ -1030,8 +1027,8 @@ extern "C" void cAirMotion_step(cAirMotion* self)
             cAirPredictor* ap4 = rider4->mAirPredictor;
             char* tgt = (char*)&ap4->GuessLandNormal;
             if (ap4->GuessLandNormal.z < 0.30000001192092896f || *(int*)self != 0) {
-                sVec4HP frontAlign = *(sVec4HP*)&ap4->GuessLandVelocity;
-                if (vu0Dot_139A20(frontAlign, *(sVec4HP*)&rider4->mMatrix.row[1]) < 0.0f) {
+                t4Vector frontAlign = *(t4Vector*)&ap4->GuessLandVelocity;
+                if (vu0Dot_139A20(frontAlign, *(t4Vector*)&rider4->mMatrix.row[1]) < 0.0f) {
                     vu0ScaleEq_139A20(frontAlign, -1.0f);
                 }
                 cRider* rider5 = self->mRider;
@@ -1051,13 +1048,13 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_resolve);
 #ifdef SKIP_ASM
 
 struct sInfo_139C88 {
-    sVec4HP pos;                // 0x00
-    sVec4HP dir;                // 0x10
-    sVec4HP up;                 // 0x20
+    t4Vector pos;                // 0x00
+    t4Vector dir;                // 0x10
+    t4Vector up;                 // 0x20
     float speed;                // 0x30
 } __attribute__((aligned(16)));
 
-struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, tIntersectInfo*, const sVec4HP&); };
+struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, tIntersectInfo*, const t4Vector&); };
 
 extern int kInAirSphereMask;
 extern void* cWScriptMan_TheWScriptMan;
@@ -1091,9 +1088,9 @@ void cAirPredictor_land_9C88(void* ap, void* pos, void* vel) __asm__("cAirPredic
 int AIrand();
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4HP vu0Scale_139C88(const sVec4HP& v, float s)
+static inline t4Vector vu0Scale_139C88(const t4Vector& v, float s)
 {
-    sVec4HP r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1108,7 +1105,7 @@ static inline sVec4HP vu0Scale_139C88(const sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
-static inline void vu0ScaleEq_139C88(sVec4HP& v, float s)
+static inline void vu0ScaleEq_139C88(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -1123,9 +1120,9 @@ static inline void vu0ScaleEq_139C88(sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4HP vu0Sub_139C88(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Sub_139C88(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1138,7 +1135,7 @@ static inline sVec4HP vu0Sub_139C88(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector add).
-static inline void vu0AddEq_139C88(sVec4HP& a, const sVec4HP& b)
+static inline void vu0AddEq_139C88(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1151,7 +1148,7 @@ static inline void vu0AddEq_139C88(sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_139C88(const sVec4HP& a, const sVec4HP& b)
+static inline float vu0Dot_139C88(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1171,7 +1168,7 @@ static inline float vu0Dot_139C88(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Len_139C88(const sVec4HP& v)
+static inline float vu0Len_139C88(const t4Vector& v)
 {
     float r;
     int t;
@@ -1192,9 +1189,9 @@ static inline float vu0Len_139C88(const sVec4HP& v)
 }
 
 // PORT: PS2-only VU0 inline asm (v / |v| via vrsqrt).
-static inline sVec4HP vu0Normalize_139C88(const sVec4HP& v)
+static inline t4Vector vu0Normalize_139C88(const t4Vector& v)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1213,9 +1210,9 @@ static inline sVec4HP vu0Normalize_139C88(const sVec4HP& v)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sVec4HP vu0Cross_139C88(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Cross_139C88(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1250,13 +1247,13 @@ static inline float clamp_139C88(float v, float lo, float hi)
 }
 
 // Row k of the rider's transform (side, front, up), by value.
-static inline sVec4HP row_139C88(char* r, int k)
+static inline t4Vector row_139C88(char* r, int k)
 {
-    return *(sVec4HP*)(r + 0x1A0 + k * 16);
+    return *(t4Vector*)(r + 0x1A0 + k * 16);
 }
 
 #define RIDER_139C88 (*(char**)((char*)self + 0x4))
-#define V4_139C88(p, off) (*(sVec4HP*)((p) + (off)))
+#define V4_139C88(p, off) (*(t4Vector*)((p) + (off)))
 
 /**
  * Resolves the air motion: lands or crashes the rider when the board meets a surface, then checks collisions.
@@ -1278,7 +1275,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
     float intParam = cAirMotion_intersectBoard_9C88(self, &hit);
     float vn = 0.0f;
     if (intParam >= 0.5f) {
-        vn = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x1E0), (*(sVec4HP*)&hit.Ivel)), (*(sVec4HP*)&hit.Inorm));
+        vn = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x1E0), (*(t4Vector*)&hit.Ivel)), (*(t4Vector*)&hit.Inorm));
     }
     if (intParam >= 0.5f && vn < 0.0f) {
         float spd = vu0Len_139C88(V4_139C88(RIDER_139C88, 0x1E0));
@@ -1292,13 +1289,13 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             cRider_checkForReset(RIDER_139C88, 0, 1);
             return;
         }
-        float pen = vu0Dot_139C88(vu0Sub_139C88((*(sVec4HP*)&hit.Ipos), V4_139C88(RIDER_139C88, 272)), (*(sVec4HP*)&hit.Inorm)) - surf->PowderDepth3G;
+        float pen = vu0Dot_139C88(vu0Sub_139C88((*(t4Vector*)&hit.Ipos), V4_139C88(RIDER_139C88, 272)), (*(t4Vector*)&hit.Inorm)) - surf->PowderDepth3G;
         if (0.0f < pen) {
-            sVec4HP push = vu0Scale_139C88((*(sVec4HP*)&hit.Inorm), pen);
+            t4Vector push = vu0Scale_139C88((*(t4Vector*)&hit.Inorm), pen);
             cRider_moveFromCollision(RIDER_139C88, &push);
         }
-        V4_139C88(RIDER_139C88, 880) = (*(sVec4HP*)&hit.Inorm);
-        V4_139C88(RIDER_139C88, 976) = (*(sVec4HP*)&hit.Ivel);
+        V4_139C88(RIDER_139C88, 880) = (*(t4Vector*)&hit.Inorm);
+        V4_139C88(RIDER_139C88, 976) = (*(t4Vector*)&hit.Ivel);
         *(float*)(RIDER_139C88 + 0x770) = -vn;
         V4_139C88(RIDER_139C88, 0x380) = V4_139C88(RIDER_139C88, 880);
         if (((char*)hit.Patch) != 0) {
@@ -1308,7 +1305,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         } else {
             *(unsigned int*)(RIDER_139C88 + 0x430) = 0xFFFFFFFF;
         }
-        sVec4HP imp = vu0Scale_139C88(V4_139C88(RIDER_139C88, 880), -vn);
+        t4Vector imp = vu0Scale_139C88(V4_139C88(RIDER_139C88, 880), -vn);
         vu0ScaleEq_139C88(imp, surf->LandingHardness);
         vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), imp);
         char* r = RIDER_139C88;
@@ -1328,8 +1325,8 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         V4_139C88(r2, 928) = vu0Normalize_139C88(vu0Sub_139C88(row_139C88(r2, 1), vu0Scale_139C88(V4_139C88(r2, 880), vu0Dot_139C88(row_139C88(r2, 1), V4_139C88(r2, 880)))));
         V4_139C88(RIDER_139C88, 944) = vu0Cross_139C88(V4_139C88(RIDER_139C88, 880), V4_139C88(RIDER_139C88, 928));
         *(int*)(RIDER_139C88 + 0x438) = hit.Stype;
-        V4_139C88(RIDER_139C88, 1120) = (*(sVec4HP*)&hit.Ipos);
-        *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 272), (*(sVec4HP*)&hit.Ipos)), V4_139C88(RIDER_139C88, 880));
+        V4_139C88(RIDER_139C88, 1120) = (*(t4Vector*)&hit.Ipos);
+        *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 272), (*(t4Vector*)&hit.Ipos)), V4_139C88(RIDER_139C88, 880));
         if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 20) {
             if (!tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) anim = 361;
         } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 21) {
@@ -1383,9 +1380,9 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         }
         if (anim != 438) {
             sInfo_139C88 info;
-            info.pos = (*(sVec4HP*)&hit.Ipos);
+            info.pos = (*(t4Vector*)&hit.Ipos);
             info.dir = vu0Normalize_139C88(V4_139C88(RIDER_139C88, 0x1E0));
-            info.up = (*(sVec4HP*)&hit.Inorm);
+            info.up = (*(t4Vector*)&hit.Inorm);
             info.speed = absf_139C88(vn);
             cRider_flagEventWipeout_9C88(RIDER_139C88, anim, 0, *(int*)(RIDER_139C88 + 0x438), &info);
         } else {
@@ -1424,7 +1421,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         }
     }
     cRider_updateBoundBox_9C88(RIDER_139C88, 0);
-    sVec4HP out;
+    t4Vector out;
     *(int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = kInAirSphereMask;
     int got = cAirMotion_checkTerrainCollisions(self, (t4Vector*)(&out));
     *(unsigned int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = 0xFFFFFFFF;
@@ -1440,13 +1437,13 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_intersectBoard);
 #ifdef SKIP_ASM
-extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const t4Vector& a, const t4Vector& b, int n, float r);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4HP vu0Scale_13A7B0(const sVec4HP& v, float s)
+static inline t4Vector vu0Scale_13A7B0(const t4Vector& v, float s)
 {
-    sVec4HP r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1460,9 +1457,9 @@ static inline sVec4HP vu0Scale_13A7B0(const sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4HP vu0Add_13A7B0(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Add_13A7B0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1474,9 +1471,9 @@ static inline sVec4HP vu0Add_13A7B0(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4HP vu0Sub_13A7B0(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Sub_13A7B0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1502,8 +1499,8 @@ static inline sVec4HP vu0Sub_13A7B0(const sVec4HP& a, const sVec4HP& b)
 extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
 {
     cRider* rider = self->mRider;
-    sVec4HP* pt = (sVec4HP*)&rider->mAnimModel->bones[rider->mBoneBoardRoot];
-    sVec4HP dir = *(sVec4HP*)&rider->RiderRoot.row[2];
+    t4Vector* pt = (t4Vector*)&rider->mAnimModel->bones[rider->mBoneBoardRoot];
+    t4Vector dir = *(t4Vector*)&rider->RiderRoot.row[2];
     char seg[176];
     cWorldLine_cWorldLine(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
     cRider* rider2 = self->mRider;
@@ -1851,13 +1848,13 @@ extern "C" void cRailslideMotion_gainFocus(cRailslideMotion* self)
 INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_setCrookedAngle);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" sVec4HP cRailslideMotion_getRailUpNorm(void* self, sVec4HP* p);
+extern "C" t4Vector cRailslideMotion_getRailUpNorm(void* self, t4Vector* p);
 extern "C" float func_0031C228(float); // atan
 
 // PORT: PS2-only VU0 inline asm (3D cross product, w = 0).
-static inline sVec4HP vu0Cross_13ADC0(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Cross_13ADC0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1872,7 +1869,7 @@ static inline sVec4HP vu0Cross_13ADC0(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product, by-value first operand).
-static inline float vu0DotV_13ADC0(sVec4HP a, const sVec4HP& b)
+static inline float vu0DotV_13ADC0(t4Vector a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1925,13 +1922,13 @@ static inline float Clamp_13ADC0(float x, float lo, float hi)
  * @param railnorm  the rail direction (On Tour railnorm; the caller passes the rail hit's normal)
  */
 // Signed angle (clamped to +-45 degrees) between the rider's velocity at +0x1B0 and the target direction p.
-extern "C" void cRailslideMotion_setCrookedAngle(cRailslideMotion* self, sVec4HP* railnorm)
+extern "C" void cRailslideMotion_setCrookedAngle(cRailslideMotion* self, t4Vector* railnorm)
 {
-    sVec4HP upNorm = cRailslideMotion_getRailUpNorm(((char*)self), railnorm);
-    sVec4HP sideNorm = vu0Cross_13ADC0(upNorm, *railnorm);
+    t4Vector upNorm = cRailslideMotion_getRailUpNorm(((char*)self), railnorm);
+    t4Vector sideNorm = vu0Cross_13ADC0(upNorm, *railnorm);
     cRider* rider = self->mRider;
-    self->CrookedSlideAngle = Atan2_13ADC0(vu0DotV_13ADC0(*(sVec4HP*)&rider->mMatrix.row[1], sideNorm),
-                                          vu0DotV_13ADC0(*(sVec4HP*)&rider->mMatrix.row[1], *railnorm));
+    self->CrookedSlideAngle = Atan2_13ADC0(vu0DotV_13ADC0(*(t4Vector*)&rider->mMatrix.row[1], sideNorm),
+                                          vu0DotV_13ADC0(*(t4Vector*)&rider->mMatrix.row[1], *railnorm));
     float lim = 0.7853982448577881f;
     self->CrookedSlideAngle = Clamp_13ADC0(self->CrookedSlideAngle, -lim, lim);
 }
@@ -1947,7 +1944,7 @@ extern "C" int cRider_isRailBoardIntersect(void* rider, t4Vector* tgt, t4Vector*
 extern "C" void* cBE_getBE();
 extern "C" cBEInterface* cBE_getInterface__Fv(void* be, int kind);
 extern "C" float cBEStatInterface_getBalanceAttrib(void* self, int rider, int value);
-// PORT: the unit declares cRailslideMotion_getRailUpNorm earlier as returning sVec4HP; same symbol.
+// PORT: the unit declares cRailslideMotion_getRailUpNorm earlier as returning t4Vector; same symbol.
 extern "C" t4Vector cRailslideMotion_getRailUpNorm_AF28(char* p, const t4Vector& n) __asm__("cRailslideMotion_getRailUpNorm");
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
@@ -2524,7 +2521,7 @@ static inline float absf_BD80(float x)
 
 static inline t4Vector up_BD80(char* p) { return *(t4Vector*)(*(char**)(p + 0x50) + 0x1C0); }
 
-// PORT: the unit declares cRailslideMotion_getRailUpNorm earlier as returning sVec4HP; same symbol.
+// PORT: the unit declares cRailslideMotion_getRailUpNorm earlier as returning t4Vector; same symbol.
 extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* p, const t4Vector& n) __asm__("cRailslideMotion_getRailUpNorm");
 /**
  * Returns the up direction to use on a rail with normal @p n, tilted by the rail lean angle.
@@ -2576,12 +2573,9 @@ struct sTbl_BFA8 {
 };
 extern sTbl_BFA8 D_00458230;
 
-struct sVec4_BFA8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_BFA8(const sVec4_BFA8& v)
+static inline float vu0Length_BFA8(const t4Vector& v)
 {
     float r;
     int t;
@@ -2602,7 +2596,7 @@ static inline float vu0Length_BFA8(const sVec4_BFA8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
-static inline void vu0ScaleEq_BFA8(sVec4_BFA8& v, float s)
+static inline void vu0ScaleEq_BFA8(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -2652,9 +2646,9 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
         cSSXAudio_Lift((char*)gSSXAudio, RIDER_BFA8);
     }
     cRider* rider = (cRider*)(RIDER_BFA8);
-    float len = vu0Length_BFA8(*(sVec4_BFA8*)&rider->mVelocity);
+    float len = vu0Length_BFA8(*(t4Vector*)&rider->mVelocity);
     if (rider->TerminalVelocity < len)
-        vu0ScaleEq_BFA8(*(sVec4_BFA8*)&rider->mVelocity, rider->TerminalVelocity / len);
+        vu0ScaleEq_BFA8(*(t4Vector*)&rider->mVelocity, rider->TerminalVelocity / len);
 }
 #endif
 
@@ -2672,18 +2666,18 @@ extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 
 struct sInfo_13C140 {
-    sVec4HP pos;
-    sVec4HP dir;
-    sVec4HP normal;
+    t4Vector pos;
+    t4Vector dir;
+    t4Vector normal;
     float depth;
 } __attribute__((aligned(16)));
 
 struct sVEnt_13C140 { short delta; short index; bool (*fn)(void*); };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4HP vu0Scale_13C140(const sVec4HP& v, float s)
+static inline t4Vector vu0Scale_13C140(const t4Vector& v, float s)
 {
-    sVec4HP r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2698,9 +2692,9 @@ static inline sVec4HP vu0Scale_13C140(const sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4HP vu0Sub_13C140(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Sub_13C140(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2713,7 +2707,7 @@ static inline sVec4HP vu0Sub_13C140(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector add).
-static inline void vu0AddEq_13C140(sVec4HP& a, const sVec4HP& b)
+static inline void vu0AddEq_13C140(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -2725,7 +2719,7 @@ static inline void vu0AddEq_13C140(sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_13C140(const sVec4HP& a, const sVec4HP& b)
+static inline float vu0Dot_13C140(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2746,9 +2740,9 @@ static inline float vu0Dot_13C140(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4HP vu0Normalize_13C140(const sVec4HP& v)
+static inline t4Vector vu0Normalize_13C140(const t4Vector& v)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -2767,7 +2761,7 @@ static inline sVec4HP vu0Normalize_13C140(const sVec4HP& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_13C140(const sVec4HP& v)
+static inline float vu0Length_13C140(const t4Vector& v)
 {
     float r;
     int t;
@@ -2796,8 +2790,8 @@ static inline bool riderFlag_13C140(char* r)
 }
 
 #define RIDER (*(char**)((char*)self + 0x50))
-#define RV(off) (*(sVec4HP*)(RIDER + (off)))
-#define SV(off) (*(sVec4HP*)((char*)self + (off)))
+#define RV(off) (*(t4Vector*)(RIDER + (off)))
+#define SV(off) (*(t4Vector*)((char*)self + (off)))
 
 /**
  * Pushes a rail-sliding rider out of terrain and frees it when it stays stuck against it.
@@ -2820,16 +2814,16 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
     float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
     {
-        float dot = vu0Dot_13C140(RV(880), (*(sVec4HP*)&hit.Inorm));
+        float dot = vu0Dot_13C140(RV(880), (*(t4Vector*)&hit.Inorm));
         if (dot < -0.9998999834060669f) { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            (*(sVec4HP*)&hit.Inorm) = vu0Normalize_13C140(vu0Sub_13C140((*(sVec4HP*)&hit.Inorm), vu0Scale_13C140(RV(880), dot)));
+            (*(t4Vector*)&hit.Inorm) = vu0Normalize_13C140(vu0Sub_13C140((*(t4Vector*)&hit.Inorm), vu0Scale_13C140(RV(880), dot)));
     }
     {
-        sVec4HP push = vu0Scale_13C140(vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), 1.100000023841858f), penetration);
+        t4Vector push = vu0Scale_13C140(vu0Scale_13C140((*(t4Vector*)&hit.Inorm), 1.100000023841858f), penetration);
         cRider_moveFromCollision(RIDER, &push);
         cRider_updateOrientationImplicit(RIDER);
-        sVec4HP posDelta = vu0Sub_13C140(SV(0x30), RV(272));
+        t4Vector posDelta = vu0Sub_13C140(SV(0x30), RV(272));
         float len = vu0Length_13C140(posDelta);
         SV(0x30) = RV(272);
         if (2.0f < len) {
@@ -2837,26 +2831,26 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
         } else {
             self->StuckSec += 0.01666666753590107f;
             if (0.5f < self->StuckSec) {
-                sVec4HP fwd = RV(432);
-                float dd = vu0Dot_13C140(fwd, (*(sVec4HP*)&hit.Inorm));
+                t4Vector fwd = RV(432);
+                float dd = vu0Dot_13C140(fwd, (*(t4Vector*)&hit.Inorm));
                 float spd = 1111.111083984375f;
                 if (dd < -0.9990000128746033f) {
                     RV(0x1E0) = vu0Scale_13C140(fwd, spd);
                 } else {
-                    sVec4HP pushDir = vu0Sub_13C140(fwd, vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), dd));
+                    t4Vector pushDir = vu0Sub_13C140(fwd, vu0Scale_13C140((*(t4Vector*)&hit.Inorm), dd));
                     RV(0x1E0) = vu0Scale_13C140(vu0Normalize_13C140(pushDir), spd);
                 }
             }
         }
-        float dot2 = vu0Dot_13C140(vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), -1.0f), RV(0x1E0));
+        float dot2 = vu0Dot_13C140(vu0Scale_13C140((*(t4Vector*)&hit.Inorm), -1.0f), RV(0x1E0));
         if (dot2 < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
-        sVec4HP n = vu0Normalize_13C140(RV(0x1E0));
+        t4Vector n = vu0Normalize_13C140(RV(0x1E0));
         float newNormVel = dot2 * 0.5f < 27.77777862548828f ? 27.77777862548828f : dot2 * 0.5f;
-        vu0AddEq_13C140(RV(0x1E0), vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), dot2 + newNormVel));
+        vu0AddEq_13C140(RV(0x1E0), vu0Scale_13C140((*(t4Vector*)&hit.Inorm), dot2 + newNormVel));
         sInfo_13C140 info;
-        info.pos = (*(sVec4HP*)&hit.Ipos);
+        info.pos = (*(t4Vector*)&hit.Ipos);
         info.dir = n;
-        info.normal = (*(sVec4HP*)&hit.Inorm);
+        info.normal = (*(t4Vector*)&hit.Inorm);
         info.depth = newNormVel;
         cRider_reactToCollision(RIDER, &info, hit.Stype);
     }
@@ -3140,11 +3134,11 @@ static inline float hpAtan2_13C948(float y, float x)
     return a;
 }
 
-static inline float hpVX_13C948(sVec4HP v) { return v.x; }
-static inline float hpVY_13C948(sVec4HP v) { return v.y; }
+static inline float hpVX_13C948(t4Vector v) { return v.x; }
+static inline float hpVY_13C948(t4Vector v) { return v.y; }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_13C948(const sVec4HP& v)
+static inline float vu0Length_13C948(const t4Vector& v)
 {
     float r;
     int t;
@@ -3201,7 +3195,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, tSurfData* sno
     else
     {
         float kAngleLimit = 1.5707964897155762f;
-        float heading = hpAtan2_13C948(hpVY_13C948(*(sVec4HP*)(RIDER + 0x1B0)), hpVX_13C948(*(sVec4HP*)(RIDER + 0x1B0)));
+        float heading = hpAtan2_13C948(hpVY_13C948(*(t4Vector*)(RIDER + 0x1B0)), hpVX_13C948(*(t4Vector*)(RIDER + 0x1B0)));
         float headingDiff = heading - *(float*)(RIDER + 0x4CC);
         float offPathAngle = hpAbs_13C948(headingDiff - hpFloor_13C948(headingDiff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f);
         if (offPathAngle < kAngleLimit)
@@ -3219,7 +3213,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, tSurfData* sno
         if (0.0f < delta)
             totalBoost += boostWarp * delta * (1052.7747802734375f * (*(float*)(RIDER + 0x3A8) >= 0.0f ? *(float*)(RIDER + 0x3A8) : 0.0f) + 2350.0f);
     }
-    float speed = snow->AutoBoostSpeed * slowTerritoryBoostScalar * 27.77777862548828f - vu0Length_13C948(*(sVec4HP*)(RIDER + 0x1E0));
+    float speed = snow->AutoBoostSpeed * slowTerritoryBoostScalar * 27.77777862548828f - vu0Length_13C948(*(t4Vector*)(RIDER + 0x1E0));
     float boostDelta = speed < 1111.111083984375f ? speed : 1111.111083984375f;
     if (0.0f < boostDelta)
     {
@@ -3430,13 +3424,13 @@ extern "C" float cGroundMotion_getDigForce(cGroundMotion* self, float* snow, flo
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_setupGroundVectors);
 #ifdef SKIP_ASM
-extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const t4Vector& a, const t4Vector& b, int n, float r);
 extern void* t4vect_Zero[];
 
 struct sHit_13D1B8 {
-    sVec4HP pos;            // 0x00
-    sVec4HP normal;         // 0x10
-    sVec4HP v20;            // 0x20
+    t4Vector pos;            // 0x00
+    t4Vector normal;         // 0x10
+    t4Vector v20;            // 0x20
     float pad30[4];         // 0x30
     float dist;             // 0x40
     int pad44[2];           // 0x44
@@ -3451,13 +3445,13 @@ struct sHit_13D1B8 {
 } __attribute__((aligned(16)));
 
 extern "C" int cOverlapList_terrainIntersect(void* world, void* seg, sHit_13D1B8* hits, int max, int flags);
-extern sVec4HP t4vect_ZAxis;
-extern sVec4HP t4vect_Zero_v __asm__("t4vect_Zero");
+extern t4Vector t4vect_ZAxis;
+extern t4Vector t4vect_Zero_v __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4HP vu0Scale_13D1B8(const sVec4HP& v, float s)
+static inline t4Vector vu0Scale_13D1B8(const t4Vector& v, float s)
 {
-    sVec4HP r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3472,9 +3466,9 @@ static inline sVec4HP vu0Scale_13D1B8(const sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4HP vu0Add_13D1B8(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Add_13D1B8(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3487,9 +3481,9 @@ static inline sVec4HP vu0Add_13D1B8(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4HP vu0Sub_13D1B8(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Sub_13D1B8(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3502,7 +3496,7 @@ static inline sVec4HP vu0Sub_13D1B8(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_13D1B8(const sVec4HP& a, const sVec4HP& b)
+static inline float vu0Dot_13D1B8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -3522,7 +3516,7 @@ static inline float vu0Dot_13D1B8(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product, by-value first operand).
-static inline float vu0DotV_13D1B8(sVec4HP a, const sVec4HP& b)
+static inline float vu0DotV_13D1B8(t4Vector a, const t4Vector& b)
 {
     float r;
     int t;
@@ -3542,9 +3536,9 @@ static inline float vu0DotV_13D1B8(sVec4HP a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4HP vu0Normalize_13D1B8(const sVec4HP& v)
+static inline t4Vector vu0Normalize_13D1B8(const t4Vector& v)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -3563,9 +3557,9 @@ static inline sVec4HP vu0Normalize_13D1B8(const sVec4HP& v)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sVec4HP vu0Cross_13D1B8(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Cross_13D1B8(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -3580,7 +3574,7 @@ static inline sVec4HP vu0Cross_13D1B8(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_13D1B8(const sVec4HP& v)
+static inline float vu0Length_13D1B8(const t4Vector& v)
 {
     float r;
     int t;
@@ -3612,13 +3606,13 @@ static inline float absf_13D1B8(float x)
 // Non-POD by-value vector (user copy ctor => passed by invisible reference, no callee copy).
 struct sVec4P_13D1B8 {
     float x, y, z, w;
-    sVec4P_13D1B8(const sVec4HP& v) { *(sVec4HP*)this = v; }
-    sVec4P_13D1B8(const sVec4P_13D1B8& v) { *(sVec4HP*)this = *(const sVec4HP*)&v; }
+    sVec4P_13D1B8(const t4Vector& v) { *(t4Vector*)this = v; }
+    sVec4P_13D1B8(const sVec4P_13D1B8& v) { *(t4Vector*)this = *(const t4Vector*)&v; }
 } __attribute__((aligned(16)));
 
-static inline sVec4HP vu0SubV_13D1B8(sVec4P_13D1B8 a, const sVec4HP& b)
+static inline t4Vector vu0SubV_13D1B8(sVec4P_13D1B8 a, const t4Vector& b)
 {
-    return vu0Sub_13D1B8(*(sVec4HP*)&a, b);
+    return vu0Sub_13D1B8(*(t4Vector*)&a, b);
 }
 
 static inline int isBetter_13D1B8(sHit_13D1B8* a, sHit_13D1B8* b)
@@ -3638,7 +3632,7 @@ static inline int isBetter_13D1B8(sHit_13D1B8* a, sHit_13D1B8* b)
 struct sVEnt_13D1B8 { short delta; short index; void (*fn)(void*, void*); };
 
 #define RIDER (*(char**)((char*)self + 0x18))
-#define RV(off) (*(sVec4HP*)(RIDER + (off)))
+#define RV(off) (*(t4Vector*)(RIDER + (off)))
 
 /**
  * Probes the ground under the rider and rebuilds its ground frame and contact data from the best hit.
@@ -3658,9 +3652,9 @@ struct sVEnt_13D1B8 { short delta; short index; void (*fn)(void*, void*); };
 extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8* out, float* dist)
 {
     RV(0x380) = RV(880);
-    sVec4HP pos = vu0Add_13D1B8(RV(272), vu0Scale_13D1B8(RV(944), *(float*)(*(char**)(RIDER + 0x780) + 0x140) * (*(float*)(RIDER + 0x1F0) * 45.0f)));
-    sVec4HP lineBottom = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), -100.0f));
-    sVec4HP lineTop = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), 200.0f));
+    t4Vector pos = vu0Add_13D1B8(RV(272), vu0Scale_13D1B8(RV(944), *(float*)(*(char**)(RIDER + 0x780) + 0x140) * (*(float*)(RIDER + 0x1F0) * 45.0f)));
+    t4Vector lineBottom = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), -100.0f));
+    t4Vector lineTop = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), 200.0f));
     char seg[176];
     cWorldLine_cWorldLine(seg, lineBottom, lineTop, 2, 0.5f);
     sHit_13D1B8 hits[64];
@@ -3725,7 +3719,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
     RV(976) = out->v20;
     RV(928) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(432), vu0Scale_13D1B8(RV(880), vu0DotV_13D1B8(RV(432), RV(880)))));
     RV(944) = vu0Cross_13D1B8(RV(880), RV(928));
-    sVec4HP delta = vu0Sub_13D1B8(pos, out->pos);
+    t4Vector delta = vu0Sub_13D1B8(pos, out->pos);
     *(float*)(RIDER + 0x454) = vu0Dot_13D1B8(delta, RV(880));
     *dist = vu0Length_13D1B8(vu0Sub_13D1B8(delta, vu0Scale_13D1B8(RV(880), *(float*)(RIDER + 0x454))));
     return 1;
@@ -4379,9 +4373,9 @@ extern int kOnGroundSphereMask;
 extern "C" void cRider_flagEventWipeout(void* rider, int a1, int a2, int a3, tCollideInfo* info);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4HP vu0Scale_13F178(const sVec4HP& v, float s)
+static inline t4Vector vu0Scale_13F178(const t4Vector& v, float s)
 {
-    sVec4HP r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4396,9 +4390,9 @@ static inline sVec4HP vu0Scale_13F178(const sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4HP vu0Add_13F178(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Add_13F178(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4411,9 +4405,9 @@ static inline sVec4HP vu0Add_13F178(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4HP vu0Normalize_13F178(const sVec4HP& v)
+static inline t4Vector vu0Normalize_13F178(const t4Vector& v)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -4432,7 +4426,7 @@ static inline sVec4HP vu0Normalize_13F178(const sVec4HP& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_13F178(const sVec4HP& v)
+static inline float vu0Length_13F178(const t4Vector& v)
 {
     float r;
     int t;
@@ -4453,7 +4447,7 @@ static inline float vu0Length_13F178(const sVec4HP& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
-static inline void vu0ScaleEq_13F178(sVec4HP& v, float s)
+static inline void vu0ScaleEq_13F178(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -4497,9 +4491,9 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
         int fl;
         if (idx == 18) {
             tCollideInfo info;
-            (*(sVec4HP*)&info.Pos) = *(sVec4HP*)&rider->mPosition;
-            (*(sVec4HP*)&info.Direct) = vu0Normalize_13F178(*(sVec4HP*)&rider->mVelocity);
-            (*(sVec4HP*)&info.Reflect) = *(sVec4HP*)(RIDER_13F178 + 0x370);
+            (*(t4Vector*)&info.Pos) = *(t4Vector*)&rider->mPosition;
+            (*(t4Vector*)&info.Direct) = vu0Normalize_13F178(*(t4Vector*)&rider->mVelocity);
+            (*(t4Vector*)&info.Reflect) = *(t4Vector*)(RIDER_13F178 + 0x370);
             (*(int*)&info.Vel) = 0;
             cRider_flagEventWipeout(RIDER_13F178, 360, 0, *(int*)(RIDER_13F178 + 0x438), &info);
         } else if (*(int*)(snow + 0x44) != 0 || (fl = *(short*)&rider->SurfaceFlags, (fl & 2) != 0)) {
@@ -4517,11 +4511,11 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
         cSSXAudio_Lift((char*)gSSXAudio, RIDER_13F178);
     }
     cRider* rider = (cRider*)(RIDER_13F178);
-    *(sVec4HP*)&rider->DampGroundNormal = vu0Normalize_13F178(vu0Add_13F178(*(sVec4HP*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(sVec4HP*)&rider->mGroundNormal, 0.5f)));
+    *(t4Vector*)&rider->DampGroundNormal = vu0Normalize_13F178(vu0Add_13F178(*(t4Vector*)(RIDER_13F178 + 0x390), vu0Scale_13F178(*(t4Vector*)&rider->mGroundNormal, 0.5f)));
     cRider* rider3 = (cRider*)(RIDER_13F178);
-    float len = vu0Length_13F178(*(sVec4HP*)&rider3->mVelocity);
+    float len = vu0Length_13F178(*(t4Vector*)&rider3->mVelocity);
     if (rider3->TerminalVelocity < len) {
-        vu0ScaleEq_13F178(*(sVec4HP*)&rider3->mVelocity, rider3->TerminalVelocity / len);
+        vu0ScaleEq_13F178(*(t4Vector*)&rider3->mVelocity, rider3->TerminalVelocity / len);
     }
     float k = 0.0f;
     float vmax = 3333.33349609375f;
@@ -4586,17 +4580,17 @@ extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 
 struct sInfo_13F488 {
-    sVec4HP pos;
-    sVec4HP dir;
-    sVec4HP normal;
+    t4Vector pos;
+    t4Vector dir;
+    t4Vector normal;
     float depth;
 } __attribute__((aligned(16)));
 
 struct sVEnt_13F488 { short delta; short index; bool (*fn)(void*); };
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4HP vu0Scale_13F488(const sVec4HP& v, float s)
+static inline t4Vector vu0Scale_13F488(const t4Vector& v, float s)
 {
-    sVec4HP r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4611,9 +4605,9 @@ static inline sVec4HP vu0Scale_13F488(const sVec4HP& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4HP vu0Sub_13F488(const sVec4HP& a, const sVec4HP& b)
+static inline t4Vector vu0Sub_13F488(const t4Vector& a, const t4Vector& b)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4626,7 +4620,7 @@ static inline sVec4HP vu0Sub_13F488(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector add).
-static inline void vu0AddEq_13F488(sVec4HP& a, const sVec4HP& b)
+static inline void vu0AddEq_13F488(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -4638,7 +4632,7 @@ static inline void vu0AddEq_13F488(sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_13F488(const sVec4HP& a, const sVec4HP& b)
+static inline float vu0Dot_13F488(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4658,9 +4652,9 @@ static inline float vu0Dot_13F488(const sVec4HP& a, const sVec4HP& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4HP vu0Normalize_13F488(const sVec4HP& v)
+static inline t4Vector vu0Normalize_13F488(const t4Vector& v)
 {
-    sVec4HP r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -4694,7 +4688,7 @@ static inline bool riderFlag_13F488(char* r)
 }
 
 #define RIDER (*(char**)((char*)self + 0x18))
-#define RV(off) (*(sVec4HP*)(RIDER + (off)))
+#define RV(off) (*(t4Vector*)(RIDER + (off)))
 
 /**
  * Pushes the grounded rider out of walls and bounces its velocity off them.
@@ -4720,7 +4714,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     cRider* rider = (cRider*)(RIDER);
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !riderFlag_13F488(((char*)rider)));
     sph.useRejectNormal = 1;
-    (*(sVec4HP*)&sph.rejectNormal) = RV(880);
+    (*(t4Vector*)&sph.rejectNormal) = RV(880);
     float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return; }
@@ -4731,30 +4725,30 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         }
     }
     {
-        float dot = vu0Dot_13F488(RV(880), (*(sVec4HP*)&hit.Inorm));
+        float dot = vu0Dot_13F488(RV(880), (*(t4Vector*)&hit.Inorm));
         if (dot < -0.9998999834060669f)
             { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            (*(sVec4HP*)&hit.Inorm) = vu0Normalize_13F488(vu0Sub_13F488((*(sVec4HP*)&hit.Inorm), vu0Scale_13F488(RV(880), dot)));
+            (*(t4Vector*)&hit.Inorm) = vu0Normalize_13F488(vu0Sub_13F488((*(t4Vector*)&hit.Inorm), vu0Scale_13F488(RV(880), dot)));
     }
     {
-        sVec4HP push = vu0Scale_13F488(vu0Scale_13F488((*(sVec4HP*)&hit.Inorm), 1.100000023841858f), penetration);
+        t4Vector push = vu0Scale_13F488(vu0Scale_13F488((*(t4Vector*)&hit.Inorm), 1.100000023841858f), penetration);
         cRider_moveFromCollision(RIDER, &push);
-        sVec4HP netVelocity = vu0Sub_13F488(RV(0x1E0), (*(sVec4HP*)&hit.Ivel));
-        float dot2 = vu0Dot_13F488(vu0Scale_13F488((*(sVec4HP*)&hit.Inorm), -1.0f), netVelocity);
+        t4Vector netVelocity = vu0Sub_13F488(RV(0x1E0), (*(t4Vector*)&hit.Ivel));
+        float dot2 = vu0Dot_13F488(vu0Scale_13F488((*(t4Vector*)&hit.Inorm), -1.0f), netVelocity);
         if (dot2 < 0.0f)
             { cWorldRider__cWorldRider(&sph, 2); return; }
-        sVec4HP n = vu0Normalize_13F488(netVelocity);
+        t4Vector n = vu0Normalize_13F488(netVelocity);
         float k = dot2 * 0.05000000074505806f;
         if (k < 27.77777862548828f)
             k = 27.77777862548828f;
-        vu0AddEq_13F488(RV(0x1E0), vu0Scale_13F488((*(sVec4HP*)&hit.Inorm), dot2 + k));
+        vu0AddEq_13F488(RV(0x1E0), vu0Scale_13F488((*(t4Vector*)&hit.Inorm), dot2 + k));
         cRider_turnFromCollision(RIDER, &hit);
         cRider_updateOrientationImplicit(RIDER);
         sInfo_13F488 info;
-        info.pos = (*(sVec4HP*)&hit.Ipos);
+        info.pos = (*(t4Vector*)&hit.Ipos);
         info.dir = n;
-        info.normal = (*(sVec4HP*)&hit.Inorm);
+        info.normal = (*(t4Vector*)&hit.Inorm);
         info.depth = dot2;
         cRider_reactToCollision(RIDER, &info, hit.Stype);
         cSSXAudio_WallCollision(cAudioInterface_bxAudio(), RIDER);

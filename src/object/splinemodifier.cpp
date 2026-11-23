@@ -394,16 +394,13 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
 //100%
 INCLUDE_ASM("object/splinemodifier", cSplineModifier_updateIntersectInfo);
 #ifdef SKIP_ASM
-struct sSmVec4_9CF8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sSmBody_9CF8 {
-    sSmVec4_9CF8 pos;       // 0x00
-    sSmVec4_9CF8 f10;       // 0x10
-    sSmVec4_9CF8 vel;       // 0x20
-    sSmVec4_9CF8 rot;       // 0x30
+    t4Vector pos;       // 0x00
+    t4Vector f10;       // 0x10
+    t4Vector vel;       // 0x20
+    t4Vector rot;       // 0x30
 };
 
 struct cSplineModifier_9CF8 {
@@ -414,8 +411,8 @@ struct cSplineModifier_9CF8 {
     int active;             // 0x54
     char pad_0x58[0x8];
     t4Matrix mat;        // 0x60
-    sSmVec4_9CF8 origin;    // 0xA0
-    sSmVec4_9CF8 dir;       // 0xB0
+    t4Vector origin;    // 0xA0
+    t4Vector dir;       // 0xB0
     float fC0;              // 0xC0
     float fC4;              // 0xC4
     float fC8;              // 0xC8
@@ -441,9 +438,9 @@ static inline float Sqrt_9CF8(float x)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize).
-static inline sSmVec4_9CF8 vu0Normalize_9CF8(const sSmVec4_9CF8& v)
+static inline t4Vector vu0Normalize_9CF8(const t4Vector& v)
 {
-    sSmVec4_9CF8 r;
+    t4Vector r;
     __asm__(
         "lqc2       $vf3, %1\n"
         "vaddw.x    $vf6, $vf0, $vf0w\n"
@@ -462,9 +459,9 @@ static inline sSmVec4_9CF8 vu0Normalize_9CF8(const sSmVec4_9CF8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sSmVec4_9CF8 vu0Scale_9CF8(const sSmVec4_9CF8& v, float s)
+static inline t4Vector vu0Scale_9CF8(const t4Vector& v, float s)
 {
-    sSmVec4_9CF8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -479,9 +476,9 @@ static inline sSmVec4_9CF8 vu0Scale_9CF8(const sSmVec4_9CF8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sSmVec4_9CF8 vu0MulMat_9CF8(const t4Matrix* m, const sSmVec4_9CF8& v)
+static inline t4Vector vu0MulMat_9CF8(const t4Matrix* m, const t4Vector& v)
 {
-    sSmVec4_9CF8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -500,9 +497,9 @@ static inline sSmVec4_9CF8 vu0MulMat_9CF8(const t4Matrix* m, const sSmVec4_9CF8&
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sSmVec4_9CF8 vu0Sub_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+static inline t4Vector vu0Sub_9CF8(const t4Vector& a, const t4Vector& b)
 {
-    sSmVec4_9CF8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -515,9 +512,9 @@ static inline sSmVec4_9CF8 vu0Sub_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sSmVec4_9CF8 vu0Add_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+static inline t4Vector vu0Add_9CF8(const t4Vector& a, const t4Vector& b)
 {
-    sSmVec4_9CF8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -530,9 +527,9 @@ static inline sSmVec4_9CF8 vu0Add_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sSmVec4_9CF8 vu0Cross_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+static inline t4Vector vu0Cross_9CF8(const t4Vector& a, const t4Vector& b)
 {
-    sSmVec4_9CF8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -547,7 +544,7 @@ static inline sSmVec4_9CF8 vu0Cross_9CF8(const sSmVec4_9CF8& a, const sSmVec4_9C
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void vu0AddTo_9CF8(sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
+static inline void vu0AddTo_9CF8(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -591,14 +588,14 @@ extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBo
         rateZ *= ddirY / dirX - self->Dir.y * ddirX / selfX2;
         rateY = (1.0f / Sqrt_9CF8(sum)) * (self->DDir.z - self->Dir.z * (ddirX + ddirY) / sum);
     }
-    sSmVec4_9CF8 vel = vu0Scale_9CF8(vu0Normalize_9CF8(*(sSmVec4_9CF8*)&self->Dir), *(float*)(((char*)sub) + 0x38));
-    sSmVec4_9CF8 w;
+    t4Vector vel = vu0Scale_9CF8(vu0Normalize_9CF8(*(t4Vector*)&self->Dir), *(float*)(((char*)sub) + 0x38));
+    t4Vector w;
     w.x = 0.0f;
     w.z = rateZ * self->Velocity;
     w.y = rateY * self->Velocity;
     w.w = 0.0f;
     w = vu0MulMat_9CF8(&(*(&self->Transform)), w);
-    sSmVec4_9CF8 relPos = vu0Sub_9CF8(body->pos, *(sSmVec4_9CF8*)&self->Pos);
+    t4Vector relPos = vu0Sub_9CF8(body->pos, *(t4Vector*)&self->Pos);
     vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
     vu0AddTo_9CF8(body->rot, w);
 }
@@ -1498,14 +1495,11 @@ extern "C" int cMultiSplineModifier_postUpdate(cMultiSplineModifier* self)
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateNodes);
 #ifdef SKIP_ASM
-struct sSmVec4_AC20 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sSmMat_AC20 {
-    sSmVec4_AC20 r[4];
+    t4Vector r[4];
     sSmMat_AC20() {}
-    void setAxisRot(const sSmVec4_AC20& axis, float angle);
+    void setAxisRot(const t4Vector& axis, float angle);
     void setCols(const float& a00, const float& a10, const float& a20, const float& a30,
                  const float& a01, const float& a11, const float& a21, const float& a31,
                  const float& a02, const float& a12, const float& a22, const float& a32,
@@ -1545,8 +1539,8 @@ struct sSmMat_AC20 {
     }
 } __attribute__((aligned(16)));
 
-extern sSmVec4_AC20 t4vect_ZAxis_AC20 __asm__("t4vect_ZAxis");
-extern void cSpline_getPos_AC20(void* out, sSmVec4_AC20* pos, sSmVec4_AC20* dir, sSmVec4_AC20* c, float t) __asm__("cSpline_getPos");
+extern t4Vector t4vect_ZAxis_AC20 __asm__("t4vect_ZAxis");
+extern void cSpline_getPos_AC20(void* out, t4Vector* pos, t4Vector* dir, t4Vector* c, float t) __asm__("cSpline_getPos");
 extern "C" float func_0031C228(float);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
@@ -1559,9 +1553,9 @@ static inline float Sqrt_AC20(float x)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize).
-static inline sSmVec4_AC20 vu0Normalize_AC20(const sSmVec4_AC20& v)
+static inline t4Vector vu0Normalize_AC20(const t4Vector& v)
 {
-    sSmVec4_AC20 r;
+    t4Vector r;
     __asm__(
         "lqc2       $vf3, %1\n"
         "vaddw.x    $vf6, $vf0, $vf0w\n"
@@ -1661,7 +1655,7 @@ inline void sSmMat_AC20::setCols(const float& a00, const float& a10, const float
     r[3].w = a33;
 }
 
-inline void sSmMat_AC20::setAxisRot(const sSmVec4_AC20& axis, float angle)
+inline void sSmMat_AC20::setAxisRot(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle);
@@ -1707,7 +1701,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
     cMultiSplineModifier* self = multiSpline;
     float offsets[256];
     sSmMat_AC20 rot;
-    sSmVec4_AC20 ang;
+    t4Vector ang;
     int i;
     float step = self->Spline.Length / (float)self->NumModels;
     offsets[0] = self->OffsetDistance;
@@ -1730,14 +1724,14 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         float rx = 0.0f;
         float ry = rx;
         float rz = rx;
-        cSpline_getPos_AC20((char*)&self->Spline, &(*(sSmVec4_AC20*)&pt->Pos), &(*(sSmVec4_AC20*)&pt->Dir), &(*(sSmVec4_AC20*)&pt->DDir), offsets[i]);
-        pt->X2 = (*(sSmVec4_AC20*)&pt->Dir).x * (*(sSmVec4_AC20*)&pt->Dir).x;
-        pt->Y2 = (*(sSmVec4_AC20*)&pt->Dir).y * (*(sSmVec4_AC20*)&pt->Dir).y;
+        cSpline_getPos_AC20((char*)&self->Spline, &(*(t4Vector*)&pt->Pos), &(*(t4Vector*)&pt->Dir), &(*(t4Vector*)&pt->DDir), offsets[i]);
+        pt->X2 = (*(t4Vector*)&pt->Dir).x * (*(t4Vector*)&pt->Dir).x;
+        pt->Y2 = (*(t4Vector*)&pt->Dir).y * (*(t4Vector*)&pt->Dir).y;
         if (self->OrientType == 2 || self->OrientType == 3) {
-            rz -= atan2_AC20((*(sSmVec4_AC20*)&pt->Dir).y, (*(sSmVec4_AC20*)&pt->Dir).x);
+            rz -= atan2_AC20((*(t4Vector*)&pt->Dir).y, (*(t4Vector*)&pt->Dir).x);
         }
         if (self->OrientType == 1 || self->OrientType == 3) {
-            ry += atan2_AC20((*(sSmVec4_AC20*)&pt->Dir).z, Sqrt_AC20(pt->X2 + pt->Y2));
+            ry += atan2_AC20((*(t4Vector*)&pt->Dir).z, Sqrt_AC20(pt->X2 + pt->Y2));
         }
         ang.x = rx;
         ang.y = ry;
@@ -1762,9 +1756,9 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         node->mat.r[2].y = cxsz * sy + sx * cz;
         node->mat.r[2].z = cx * cy;
         node->mat.r[2].w = 0.0f;
-        node->mat.r[3].x = (*(sSmVec4_AC20*)&pt->Pos).x;
-        node->mat.r[3].y = (*(sSmVec4_AC20*)&pt->Pos).y;
-        node->mat.r[3].z = (*(sSmVec4_AC20*)&pt->Pos).z;
+        node->mat.r[3].x = (*(t4Vector*)&pt->Pos).x;
+        node->mat.r[3].y = (*(t4Vector*)&pt->Pos).y;
+        node->mat.r[3].z = (*(t4Vector*)&pt->Pos).z;
         node->mat.r[3].w = 1.0f;
         if (self->HeadTweak != 0.0f) {
             *nodeMat = mulMat_AC20(*nodeMat, rot);
@@ -1779,13 +1773,10 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateIntersectInfo);
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_render);
 #ifdef SKIP_ASM
-struct sSmVec4_35B418 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sSmMat_35B418 {
-    sSmVec4_35B418 r[4];
+    t4Vector r[4];
 };
 
 struct sSmVE43_35B418 {
@@ -1796,7 +1787,7 @@ struct sSmVE43_35B418 {
 struct sSmVE93_35B418 {
     short delta;
     short index;
-    int (*fn)(void*, sSmVec4_35B418*, sSmVec4_35B418*, const sSmMat_35B418&);
+    int (*fn)(void*, t4Vector*, t4Vector*, const sSmMat_35B418&);
 };
 struct sSmVEModel_35B418 {
     short delta;
@@ -1829,7 +1820,7 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
         char* thisp = (char*)w + vt[93].delta;
         tMultiNode* box = &(self->Nodes)[i];
         sSmVE43_35B418* vt2 = (sSmVE43_35B418*)VPTR_OF(cGraphicsMan, w);
-        int hit = vt[93].fn(thisp, &(*(sSmVec4_35B418*)&box->BoundBox), &(*(sSmVec4_35B418*)&box->BoundBox.MaxPoint), vt2[43].fn((char*)w + vt2[43].delta));
+        int hit = vt[93].fn(thisp, &(*(t4Vector*)&box->BoundBox), &(*(t4Vector*)&box->BoundBox.MaxPoint), vt2[43].fn((char*)w + vt2[43].delta));
         if (hit != 1) {
             sSmVEModel_35B418* mvt = (sSmVEModel_35B418*)VPTR_OF(cObjNode, model);
             mvt[33].fn(((char*)model) + mvt[33].delta, (char*)&self->NodeInst[i]->m_fmTransform, ((int)self->AnimMats));
@@ -2182,12 +2173,9 @@ INCLUDE_ASM("object/splinemodifier", cRailModifier_cRailModifier1);
 void operator_delete(int*);
 extern "C" void* cObjectInterface_getNash();
 
-struct sSmVec4_BA88 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sSmBox_BA88 {
-    sSmVec4_BA88 min;
-    sSmVec4_BA88 max;
+    t4Vector min;
+    t4Vector max;
 };
 struct sSmCell_BA88 {
     int level;
@@ -2342,12 +2330,9 @@ INCLUDE_ASM("object/splinemodifier", cRailModifier__cRailModifier);
 void operator_delete(int*);
 extern "C" void* cObjectInterface_getNash();
 
-struct sSmVec4_BD70 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sSmBox_BD70 {
-    sSmVec4_BD70 min;
-    sSmVec4_BD70 max;
+    t4Vector min;
+    t4Vector max;
 };
 struct sSmCell_BD70 {
     int level;

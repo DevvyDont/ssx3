@@ -2874,16 +2874,13 @@ extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_CameraInRange);
 #ifdef SKIP_ASM
-struct sAudV4 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 void* cSSXAudio_GetCameraPos(void* self, int a1);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sAudV4 audVu0Sub(const sAudV4& a, const sAudV4& b)
+static inline t4Vector audVu0Sub(const t4Vector& a, const t4Vector& b)
 {
-    sAudV4 r;
+    t4Vector r;
     __asm__ __volatile__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2895,7 +2892,7 @@ static inline sAudV4 audVu0Sub(const sAudV4& a, const sAudV4& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float audVu0Dot(const sAudV4& a, const sAudV4& b)
+static inline float audVu0Dot(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2924,13 +2921,13 @@ static inline float audVu0Dot(const sAudV4& a, const sAudV4& b)
  * @param radius  the distance, in units of 100 (On Tour Dist)
  * @return the view index, or -1 when no camera is in range
  */
-extern "C" int cSSXAudio_CameraInRange(cSSXAudio* self, sAudV4* pos, float radius)
+extern "C" int cSSXAudio_CameraInRange(cSSXAudio* self, t4Vector* pos, float radius)
 {
     float rangeSq = radius * 100.0f;
     rangeSq = rangeSq * rangeSq;
     int i;
     for (i = 0; i < cSSXAudio_GetNumViews_self(self); i++) {
-        sAudV4 toCamera = audVu0Sub(*(sAudV4*)cSSXAudio_GetCameraPos(self, i), *pos);
+        t4Vector toCamera = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(self, i), *pos);
         if (audVu0Dot(toCamera, toCamera) < rangeSq) {
             return i;
         }
@@ -2955,13 +2952,13 @@ void* cSSXAudio_GetCameraPos(void* self, int a1);
  */
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-extern "C" int cSSXAudio_InCameraView(cSSXAudio* self, sAudV4* pos, float radius)
+extern "C" int cSSXAudio_InCameraView(cSSXAudio* self, t4Vector* pos, float radius)
 {
     float radiusSq = radius * 100.0f;
     radiusSq = radiusSq * radiusSq;
     int i;
     for (i = 0; i < cSSXAudio_GetNumViews_self(self); i++) {
-        sAudV4 offset = audVu0Sub(*(sAudV4*)cSSXAudio_GetCameraPos(self, i), *pos);
+        t4Vector offset = audVu0Sub(*(t4Vector*)cSSXAudio_GetCameraPos(self, i), *pos);
         if (audVu0Dot(offset, offset) < radiusSq && 0.0f < offset.z) {
             return 1;
         }

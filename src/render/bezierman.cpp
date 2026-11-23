@@ -308,9 +308,6 @@ struct sGfx_B370 {
 // PORT: Sony's 128-bit quadword (u_long128); used for one aligned 16-byte copy.
 typedef int cQuad_B370 __attribute__((mode(TI)));
 
-struct sV4_B370 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy).
 static inline void Copy_B370(void* dst, const void* src)
@@ -332,7 +329,7 @@ static inline void Copy_B370(void* dst, const void* src)
 }
 
 struct sM4_B370 {
-    sV4_B370 r[4];
+    t4Vector r[4];
     sM4_B370() {}
     sM4_B370(const sM4_B370& o) { Copy_B370(this, &o); }
     sM4_B370& operator=(const sM4_B370& o)
@@ -383,9 +380,9 @@ static inline sM4_B370 operator*(const sM4_B370& a, const sM4_B370& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_B370 Scale_B370(const sV4_B370& v, float s)
+static inline t4Vector Scale_B370(const t4Vector& v, float s)
 {
-    sV4_B370 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -400,9 +397,9 @@ static inline sV4_B370 Scale_B370(const sV4_B370& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix times vector).
-static inline sV4_B370 Xform_B370(const sM4_B370& m, const sV4_B370& v)
+static inline t4Vector Xform_B370(const sM4_B370& m, const t4Vector& v)
 {
-    sV4_B370 r;
+    t4Vector r;
     __asm__(
         "lqc2         $vf8, %2\n"
         "lqc2         $vf4, 0x0(%1)\n"
@@ -420,7 +417,7 @@ static inline sV4_B370 Xform_B370(const sM4_B370& m, const sV4_B370& v)
     return r;
 }
 
-static inline sV4_B370 Row3_B370(const sM4_B370& m)
+static inline t4Vector Row3_B370(const sM4_B370& m)
 {
     return m.r[3];
 }
@@ -439,7 +436,7 @@ static inline void OrthoInverse_B370(sM4_B370& t)
     t.r[1].z = t.r[2].y;
     t.r[2].y = tmp;
     float neg = -1.0f;
-    sV4_B370 p = Scale_B370(Row3_B370(t), neg);
+    t4Vector p = Scale_B370(Row3_B370(t), neg);
     p.w = 0.0f;
     p = Xform_B370(t, p);
     p.w = 1.0f;
@@ -569,7 +566,7 @@ struct sBezMan_B370 {
     sM4_B370 shine;                 // 0x360
     char pad_0x3A0[0x3E0 - 0x3A0];
     sM4_B370 fx;                    // 0x3E0
-    sV4_B370 colour;                // 0x420
+    t4Vector colour;                // 0x420
     float light[3];                 // 0x430
     char pad_0x43C[0x458 - 0x43C];
     int n4;                         // 0x458
@@ -679,7 +676,7 @@ static inline void Render_B370(sBezMan_B370* self)
     int viewIdx = gm->view;
     sM4_B370 t = view;
     OrthoInverse_B370(t);
-    sV4_B370 cam = t.r[3];
+    t4Vector cam = t.r[3];
 
     {
     float s1, c1, s2, c2;
@@ -723,7 +720,7 @@ static inline void Render_B370(sBezMan_B370* self)
         ROTATE_B370(&self->fx, r, t4vect_ZAxis, rz)
     }
 
-    sV4_B370 col;
+    t4Vector col;
     col.x = 128.0f;
     col.y = 128.0f;
     col.z = 128.0f;
