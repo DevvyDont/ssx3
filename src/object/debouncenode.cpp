@@ -35,7 +35,7 @@ extern char cDebounceNode_vtbl[];
 extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cMoveNode_cMoveNode(self, bucket, stream);
-    self->mVtbl = (void**)cDebounceNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cDebounceNode_vtbl;
     stream->read((char*)&self->Life, 4);
     stream->read((char*)&self->Type, 4);
     return ((void*)self);
@@ -61,7 +61,7 @@ extern "C" int cDebounceNode_updateNode(cDebounceNode* self)
         n--;
         self->Life = n;
         if (n == 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
             vt[34].fn(vthis(self, vt[34]), 1);
             return 0;
         }
@@ -94,13 +94,13 @@ extern "C" void cDebounceNode_loseFocus(cDebounceNode* self)
         if (self->Type == 0) {
             void* parent = self->Instance;
             if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
                 vt[1].fn(vthis(self, vt[1]), 3);
             }
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else {
             if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
                 vt[1].fn(vthis(self, vt[1]), 3);
             }
         }
@@ -153,20 +153,20 @@ extern "C" void cDebounceNode_expire(cDebounceNode* self, int check)
         if (mode == 0) {
             void* parent = self->Instance;
             if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
                 vt[1].fn(vthis(self, vt[1]), 3);
             }
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else if (mode == 3) {
             void* parent = self->Instance;
             if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
                 vt[1].fn(vthis(self, vt[1]), 3);
             }
             cRestoreNode_cRestoreNode(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
         } else {
             if (((void*)self) != 0) {
-                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)VPTR_OF(cObjNode, self);
                 vt[1].fn(vthis(self, vt[1]), 3);
             }
         }
@@ -279,7 +279,7 @@ extern char cConveyorNode_vtbl[];
 extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    self->mVtbl = (void**)cConveyorNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cConveyorNode_vtbl;
     stream->read((char*)&self->Vel, 44);
     return ((void*)self);
 }
@@ -761,7 +761,7 @@ extern char cCounterNode_vtbl[];
 extern "C" void* cCounterNode_cCounterNode1(cCounterNode* self, void* bucket, void* inst, tMakeCounterData* counterData)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 7, inst);
-    self->mVtbl = (void**)cCounterNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cCounterNode_vtbl;
     self->Count = counterData->StartCount;
     self->Counted = 0;
     return ((void*)self);
@@ -788,7 +788,7 @@ extern char cCounterNode_vtbl[];
 extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    self->mVtbl = (void**)cCounterNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cCounterNode_vtbl;
     stream->read((char*)&self->Count, 0x8);
     return ((void*)self);
 }
@@ -813,7 +813,7 @@ extern "C" void cCounterNode_update(cCounterNode* self)
 {
     if (self->Count == 0) {
         self->Count = -1;
-        sDebounceVEntry1* vt = (sDebounceVEntry1*)self->mVtbl;
+        sDebounceVEntry1* vt = (sDebounceVEntry1*)VPTR_OF(cObjNode, self);
         vt[34].fn(vthis(self, vt[34]), 1);
     }
 }

@@ -10,12 +10,12 @@
 // Size 0x84: retail cMemMan_alloc(0x84, "cTransitionMan") in cGame_load (src/main/gameload.cpp); On Tour 0x7C (its
 // cObjNode is 4 bytes smaller and its bools are bytes).
 // Bases: cObjNode (0x00-0x10, see object/instancenode.h) and cScriptObjTransition at +0x10 (0x30 bytes: cScriptObject
-// 0x10 = mObjType/mObjID/mInUse + vptr, then cScriptObjTransition's own members); both written out inline.
+// 0x10 = mObjType/mObjID/mInUse + vptr, then cScriptObjTransition's own members); cObjNode a real base, cScriptObjTransition's part written out.
 // Vtables: cTransitionMan_vtbl (0x00488158, 13 cObjNode slots; slot 1 dtor, 2 update, 4 render) at 0x0C and
 // cTransitionMan_cScriptObjTransition_vtbl (the cScriptObjTransition-in-cTransitionMan vtable; slots dtor, OnStartObjectUse, OnEndObjectUse,
 // IsTransitionPending, GetViewIndex carry delta -0x10, so those methods get the whole object) at 0x1C.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
+// Derives from cObjNode; the rest FLAT (every field at its retail offset). Evidence tags:
 //   [R] retail constructor cTransitionMan_cTransitionMan (with cObjNode_cObjNode1 and
 //       cScriptObjTransition_cScriptObjTransition / cScriptObject_cScriptObject__FPvi on +0x10), the destructor
 //       cTransitionMan__cTransitionMan and the 0x84 allocation;
@@ -28,6 +28,7 @@
 //       up to mfOutTime, + 4/+ 8 after the two byte bools.
 
 #include "layout.h"
+#include "object/objnode.h"
 
 struct cObjNode;
 struct cScriptObjCameraManager;
@@ -64,12 +65,9 @@ CHECK_OFFSET(tScreenGrabHandle, mMemory, 0x0);
 CHECK_OFFSET(tScreenGrabHandle, mTextureId, 0x4);
 CHECK_SIZE(tScreenGrabHandle, 0x8);
 
-struct cTransitionMan {
-    // --- cObjNode (retail 0x10; object/instancenode.h)
-    int unk_00;                     // 0x00 never written by any node ctor (see object/instancenode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [R] cObjNode_cObjNode1 links it into the bucket
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev
-    void** mVtbl;                   // 0x0C [R] cTransitionMan_vtbl (ctor and dtor)
+struct cTransitionMan : public cObjNode {
+    // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
+    //   [R] cTransitionMan_vtbl (ctor and dtor)
     // --- cScriptObjTransition at +0x10 (On Tour 0x30): cScriptObject (0x10) first
     int mObjType;                   // 0x10 [O] cScriptObject::mObjType; [R] cScriptObject_cScriptObject__FPvi stores
                                     //       the
@@ -124,10 +122,6 @@ struct cTransitionMan {
                                     //       update releases the grab 3 frames later
 };
 
-CHECK_OFFSET(cTransitionMan, unk_00, 0x00);
-CHECK_OFFSET(cTransitionMan, Next, 0x04);
-CHECK_OFFSET(cTransitionMan, Prev, 0x08);
-CHECK_OFFSET(cTransitionMan, mVtbl, 0x0C);
 CHECK_OFFSET(cTransitionMan, mObjType, 0x10);
 CHECK_OFFSET(cTransitionMan, mObjID, 0x14);
 CHECK_OFFSET(cTransitionMan, mInUse, 0x18);

@@ -1012,7 +1012,7 @@ INCLUDE_ASM("object/modifierblock", cSkyBox_cSkyBox__FPv);
 void* cSkyBox_cSkyBox(void* vself)
 {
     cSkyBox* self = (cSkyBox*)vself;
-    self->mVtbl = cSkyBox_vtbl;
+    VPTR_OF(cObjNode, self) = cSkyBox_vtbl;
     self->m_iSectionID = -1;
     self->Next = 0;
     self->Prev = 0;
@@ -1038,7 +1038,7 @@ INCLUDE_ASM("object/modifierblock", cSkyBox__cSkyBox__FPv);
 void* cSkyBox__cSkyBox(void* vself)
 {
     cSkyBox* self = (cSkyBox*)vself;
-    self->mVtbl = (void**)((int)(void*)cSkyBox_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cSkyBox_vtbl);
     return cObjNode__cObjNode(self);
 }
 #endif

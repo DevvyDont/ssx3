@@ -4139,7 +4139,7 @@ INCLUDE_ASM("object/railmodifier", cDeadNode__cDeadNode__FPv);
 void* cDeadNode__cDeadNode(void* vself)
 {
     cDeadNode* self = (cDeadNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cDeadNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cDeadNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4202,7 +4202,7 @@ INCLUDE_ASM("object/railmodifier", cHideNode__cHideNode__FPv);
 void* cHideNode__cHideNode(void* vself)
 {
     cHideNode* self = (cHideNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cHideNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cHideNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4266,7 +4266,7 @@ INCLUDE_ASM("object/railmodifier", cRestoreNode__cRestoreNode__FPv);
 void* cRestoreNode__cRestoreNode(void* vself)
 {
     cRestoreNode* self = (cRestoreNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cRestoreNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cRestoreNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -5358,7 +5358,7 @@ INCLUDE_ASM("object/railmodifier", cObjectNode__cObjectNode__FPv);
 void* cObjectNode__cObjectNode(void* vself)
 {
     cObjectNode* self = (cObjectNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cObjectNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cObjectNode_vtbl);
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -5931,7 +5931,7 @@ INCLUDE_ASM("object/railmodifier", cDebounceNode__cDebounceNode__FPv);
 void* cDebounceNode__cDebounceNode(void* vself)
 {
     cDebounceNode* self = (cDebounceNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cDebounceNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cDebounceNode_vtbl);
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -5962,7 +5962,7 @@ INCLUDE_ASM("object/railmodifier", cConveyorNode__cConveyorNode__FPv);
 void* cConveyorNode__cConveyorNode(void* vself)
 {
     cConveyorNode* self = (cConveyorNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cConveyorNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cConveyorNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -5999,7 +5999,7 @@ INCLUDE_ASM("object/railmodifier", cCounterNode__cCounterNode__FPv);
 void* cCounterNode__cCounterNode(void* vself)
 {
     cCounterNode* self = (cCounterNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cCounterNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cCounterNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -6364,7 +6364,7 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getAnimMats);
 extern "C" int cFloatingNode_getAnimMats(cFloatingNode* self)
 {
     if (self->Flags & 1) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
         vt[51].fn(vthis(self, vt[51]));
     }
     return (int)self->AnimMats;
@@ -6388,7 +6388,7 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getAnimMat);
 extern "C" t4Matrix* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
 {
     if (self->Flags & 1) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
         vt[51].fn(vthis(self, vt[51]));
     }
     return &(self->AnimMats)[i];
@@ -6424,7 +6424,7 @@ struct sRmVtbl1858 {
  */
 extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 {
-    sRmVtbl1858* vt = (sRmVtbl1858*)self->mVtbl;
+    sRmVtbl1858* vt = (sRmVtbl1858*)VPTR_OF(cObjNode, self);
     void* obj = vthis(self, vt->set);
     void* transform = vt->get.fn(vthis(self, vt->get));
     vt->set.fn(obj, transform, self->AnimMats);
@@ -7395,7 +7395,7 @@ INCLUDE_ASM("object/railmodifier", cParticleNode__cParticleNode__FPv);
 void* cParticleNode__cParticleNode(void* vself)
 {
     cParticleNode* self = (cParticleNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cParticleNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cParticleNode_vtbl);
     return cMoveNode__cMoveNode(self);
 }
 #endif

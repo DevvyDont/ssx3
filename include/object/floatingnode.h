@@ -8,10 +8,11 @@
 // src/replay/replay.cpp); On Tour 0x78 (its cMoveNode is 4 bytes smaller). Destructor cFloatingNode__cFloatingNode;
 // vtable cFloatingNode_vtbl (0x0048F858, 51 slots). Methods: src/object/floatingnode.cpp, ctors/dtor in the
 // object/animnode splat unit, the one-liners in src/object/railmodifier.cpp (methods.txt).
-// A FLAT layout: cMoveNode (0x00-0x2C, object/movenode.h, inline) + cFloatingNodeState (0x2C-0x74; On Tour's 18 floats
+// Derives from cMoveNode (0x00-0x2C, object/movenode.h), then FLAT: cFloatingNodeState (0x2C-0x74; On Tour's 18 floats
 // in order, each On Tour offset + 4) + AnimMats + Info. getNodeState (0x361768) returns +0x2C, the state.
 
 #include "layout.h"
+#include "object/movenode.h"
 #include "world/worldview.h"
 #include "bx/math3d.h"
 
@@ -20,27 +21,9 @@ struct tInstanceRecord;
 struct tModifierBlock;
 struct tFloatBoundBoxInfo;
 
-struct cFloatingNode {
-    // --- cMoveNode (0x2C; object/movenode.h)
-    int unk_00;                     // 0x00 never written by any node ctor (see object/instancenode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [P] cObjNode() zeroes it; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [P]; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] each ctor stores its vtable; [U] every virtual call (cMoveNode_apply,
-                                    //      update, render, ...)
-    short ObjNodeType;              // 0x10 [P] getType (lh 0x10); [O] cTypeObjNodeState
-    unsigned short Flags;           // 0x12 [O]; [P] bit 0 = RootTransformDirty; [R] cMoveNode_cMoveNode sets bit 0; [U]
-                                    //      cMoveNode_updateRootTransform, preUpdateModifierBlock
-    unsigned int SortIndex;         // 0x14 [P] getSortIndex (lw 0x14); [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [P] getInstance (lw 0x18); [O]; [U] the add* builders pass it to the modifier
-                                    //      ctors, render, getRootTransform
-    tModifierBlock* ModifierBlock;  // 0x1C [O]; [R] cMoveNode_addModifierBlock allocates it (cMemMan_alloc(0x28,
-                                    //      "ModifierBlock")); [U] every forwarder (cMoveNode_getParentMesh..cMoveNode_fadeEffectModifier, add*/rem*,
-                                    //      update, render)
-    int Debounce;                   // 0x20 [O] int; [U] setDebounce stores (int)(seconds * fps) (cvt.w.s + swc1),
-                                    //      update/onCollide count it down (lw/sw); [R] replay ctor reads 4 bytes
-    float Fade;                     // 0x24 [O]; [U] addFade cMoveNode_addFade stores data +0x4, render/renderModel read it
-                                    //      (lwc1); [R] replay ctor
-    int TransferHack;               // 0x28 [O] bool (4 bytes); [U] render tests it (lw); [R] replay ctor
+struct cFloatingNode : public cMoveNode {
+    // cMoveNode (object/movenode.h, 0x2C): the vptr at 0x0C:
+    //   [R] each ctor stores its vtable; [U] every virtual call (cMoveNode_apply, update, render, ...)
     // --- cFloatingNodeState (0x48; getNodeState returns +0x2C)
     float ZSpring;                  // 0x2C [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
     float ZDamp;                    // 0x30 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
@@ -67,18 +50,6 @@ struct cFloatingNode {
                                     //      getBoundBox, purgeInfo, update/restoreOverlapSystem
 };
 
-CHECK_OFFSET(cFloatingNode, unk_00, 0x00);
-CHECK_OFFSET(cFloatingNode, Next, 0x04);
-CHECK_OFFSET(cFloatingNode, Prev, 0x08);
-CHECK_OFFSET(cFloatingNode, mVtbl, 0x0C);
-CHECK_OFFSET(cFloatingNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cFloatingNode, Flags, 0x12);
-CHECK_OFFSET(cFloatingNode, SortIndex, 0x14);
-CHECK_OFFSET(cFloatingNode, Instance, 0x18);
-CHECK_OFFSET(cFloatingNode, ModifierBlock, 0x1C);
-CHECK_OFFSET(cFloatingNode, Debounce, 0x20);
-CHECK_OFFSET(cFloatingNode, Fade, 0x24);
-CHECK_OFFSET(cFloatingNode, TransferHack, 0x28);
 CHECK_OFFSET(cFloatingNode, ZSpring, 0x2C);
 CHECK_OFFSET(cFloatingNode, ZDamp, 0x30);
 CHECK_OFFSET(cFloatingNode, ForceScale, 0x34);

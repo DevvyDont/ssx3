@@ -550,7 +550,7 @@ struct sAnimInfo_EC58 {
 extern "C" void* cFloatingNode_cFloatingNode(cFloatingNode* self, void* bucket, void* instRecord, sAnimInfo_EC58* info)
 {
     cMoveNode_cMoveNode1(self, bucket, 0xE, instRecord);
-    self->mVtbl = cFloatingNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFloatingNode_vtbl;
     self->ZSpring = info->f4;
     self->ZDamp = info->f8;
     self->ForceScale = info->f14;
@@ -613,7 +613,7 @@ extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket,
     int hasInfo;
     cMoveNode_cMoveNode(self, bucket, stream);
     self->Info = 0;
-    self->mVtbl = cFloatingNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFloatingNode_vtbl;
     stream->read((char*)&hasInfo, 4);
     if (hasInfo != 0) {
         cFloatingNode_initInfo((cFloatingNode*)self);
@@ -643,7 +643,7 @@ void operator_delete(int*);
  */
 extern "C" void cFloatingNode__cFloatingNode(cFloatingNode* self, int flags)
 {
-    self->mVtbl = cFloatingNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFloatingNode_vtbl;
     cFloatingNode_restoreOverlapSystem(self);
     operator_delete((int*)self->AnimMats);
     cMoveNode__cMoveNode(self, flags);

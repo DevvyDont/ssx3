@@ -12,7 +12,7 @@
 // (dtor/setupGrid lq/sq 0x90 and 0xA0); [O] On Tour 0xB0 with the same member offsets (its smaller cObjNode is absorbed
 // by the 16-byte alignment of cFlexBridgeNodeState); [P] the preview's paired methods use the same offsets (0xC ..
 // 0xA0).
-// Base: cInstanceNode (0x00-0x1C, object/instancenode.h), written out inline: the ctors call
+// Base: cInstanceNode (0x00-0x1C, object/instancenode.h): the ctors call
 // cInstanceNode_cInstanceNode1 (bucket, type 5, record) / cInstanceNode_cInstanceNode directly - no cMoveNode (nothing
 // at 0x1C). The state block cFlexBridgeNodeState (On Tour 0x30) follows at 0x20; its vptr is cInstanceNode's at 0xC.
 // Constructors: cFlexBridgeNode_cFlexBridgeNode (bucket, record, tMakeFlexBridgeData*: RailHeight 100, TextureId 12,
@@ -23,7 +23,8 @@
 // writeToReplayFrame, 19 getNodeState, 38 hasIntersect, 39 intersect, 42 updateIntersectInfo, 43 applyForce, 44
 // hasBoundBox, 45 getBoundBox; the rest are cInstanceNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/effectlink.cpp) and the 0xB0 allocation;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 9 paired methods, preview == retail at 0xC, 0x18, 0x68, 0x74,
 //       0x78, 0x7C, 0x80, 0x84, 0x90, 0xA0 (no accessors);
@@ -31,6 +32,7 @@
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cFlexBridgeNodeState, cFlexBridgeNode, cSpringState, cSpring).
 
 #include "layout.h"
+#include "object/instancenode.h"
 #include "bx/math3d.h"
 #include "world/worldview.h" /* tBoundBox */
 
@@ -118,20 +120,14 @@ CHECK_OFFSET(cSpring, SegLen, 0x20);
 CHECK_OFFSET(cSpring, Nodes, 0x24);
 CHECK_SIZE(cSpring, 0x28);
 
-struct cFlexBridgeNode {
-    // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode 0x00-0x10, cTypeObjNode 0x10, cSortObjNode 0x14
-    int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x004 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x00C [R] cFlexBridgeNode_vtbl (0x00490270) in both ctors and the dtor; [P]; [U]
-                                    //      updateGrid / intersect / applyForce call slot 24 (getRootTransform)
-    short ObjNodeType;              // 0x010 [O] cTypeObjNodeState; [R] node type 5 (cInstanceNode_cInstanceNode1)
-    unsigned short Flags;           // 0x012 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x014 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x018 [O] cInstanceNode::Instance; [P]; [R] the record arg; the ctor sets its
-                                    //      flags (+0x8) and reads its bound box (graphics slot 97); [U] setupGrid /
-                                    //      render read the model, the dtor / setupGrid / updateGrid pass it to the Nash
-                                    //      hash as id
+struct cFlexBridgeNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cFlexBridgeNode_vtbl (0x00490270) in both ctors and the dtor; [P]; [U] updateGrid / intersect / applyForce
+    //       call slot 24 (getRootTransform)
+    // cFlexBridgeNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 5 (cInstanceNode_cInstanceNode1)
+    //   Instance: [R] the record arg; the ctor sets its flags (+0x8) and reads its bound box (graphics slot 97); [U]
+    //       setupGrid / render read the model, the dtor / setupGrid / updateGrid pass it to the Nash hash as id
     // --- cFlexBridgeNodeState (On Tour 0x30, 16-byte aligned; [R] the replay ctor reads 0x30 bytes at +0x20,
     //       writeToReplayFrame writes them)
     char unk_01C[0x4];              // 0x01C alignment gap before the 16-byte-aligned state (never accessed)
@@ -163,14 +159,6 @@ struct cFlexBridgeNode {
                                     //      removes it
 };
 
-CHECK_OFFSET(cFlexBridgeNode, unk_00, 0x000);
-CHECK_OFFSET(cFlexBridgeNode, Next, 0x004);
-CHECK_OFFSET(cFlexBridgeNode, Prev, 0x008);
-CHECK_OFFSET(cFlexBridgeNode, mVtbl, 0x00C);
-CHECK_OFFSET(cFlexBridgeNode, ObjNodeType, 0x010);
-CHECK_OFFSET(cFlexBridgeNode, Flags, 0x012);
-CHECK_OFFSET(cFlexBridgeNode, SortIndex, 0x014);
-CHECK_OFFSET(cFlexBridgeNode, Instance, 0x018);
 CHECK_OFFSET(cFlexBridgeNode, unk_01C, 0x01C);
 CHECK_OFFSET(cFlexBridgeNode, BottomLeftOffset, 0x020);
 CHECK_OFFSET(cFlexBridgeNode, BottomRightOffset, 0x030);

@@ -15,18 +15,19 @@
 // is at 0x58 and the class is 16-byte aligned (tBoundBox). [O] On Tour's cFlexRailNode is 0x60 with Mats / Node /
 // Tube at 0x50 / 0x54 / 0x58 and cFlexRailNodeState (0x30) at 0x20. No allocation of the abstract class itself
 // (its vtable D_004900D0 has the pure-virtual stub func_00411530 in slot 50, updateBoundBox).
-// Base: cInstanceNode (object/instancenode.h, 0x1C), written out inline with the same member names: the constructors
+// Base: cInstanceNode (object/instancenode.h, 0x1C): the constructors
 // call cInstanceNode_cInstanceNode1 (bucket 1) / cInstanceNode_cInstanceNode (replay) directly - there is no cMoveNode
 // (no ModifierBlock at 0x1C). Its vptr at 0xC is the only one (_vt$13cFlexRailNode = cFlexRailNode_vtbl D_004900D0,
 // 50 slots: 1 dtor, 2 update, 4 render, 12 writeToReplayFrame, 42 updateIntersectInfo, 43 applyForce, 46 isFlexRail,
 // 47 updateNodes, 48 updateMats, 49 getMesh, 50 updateBoundBox (pure); the rest are cInstanceNode's).
 //
-// A FLAT layout: every field at its retail offset, no C++ inheritance or virtuals.
+// Derives from cInstanceNode; its own members FLAT, every field at its retail offset.
 // Tags: [R] retail's constructors / destructor; [P] the July 2003 preview (no accessors; tools/layout_xlate.py sees the
 // vptr at 0xC and Mats at 0x50 in the paired destructor / update, preview == retail); [U] how retail code uses the
 // field; [O] SSX On Tour's DWARF (cInstanceNode chain, cFlexRailNodeState, cFlexRailNode).
 
 #include "layout.h"
+#include "object/instancenode.h"
 #include "bx/math3d.h"
 #include "world/worldview.h" /* tBoundBox */
 
@@ -69,21 +70,14 @@ CHECK_OFFSET(tMakeFlexRailData, Mesh8, 0x40);
 CHECK_OFFSET(tMakeFlexRailData, Flags, 0x44);
 CHECK_SIZE(tMakeFlexRailData, 0x48);
 
-struct cFlexRailNode {
-    // --- cInstanceNode (object/instancenode.h): cObjNode 0x00-0x10, cTypeObjNode 0x10, cSortObjNode 0x14,
-    //       cInstanceNode 0x18
-    int unk_00;                  // 0x000 never written by any node ctor (as in cInstanceNode)
-    cObjNode* Next;              // 0x004 [O] cObjNode::Next; [U] the bucket list's forward link
-    cObjNode* Prev;              // 0x008 [O] cObjNode::Prev; [U] the bucket list's back link
-    void** mVtbl;                // 0x00C [R] cFlexRailNode_cFlexRailNode / _cFlexRailNode1 / __cFlexRailNode store
-                                 //       cFlexRailNode_vtbl (D_004900D0); the subclasses then store cFloatRailNode_vtbl
-                                 //       / cSpringRailNode_vtbl; [U] update calls slots 47 and 48, updateSpaceHash slot
-                                 //       50
-    short ObjNodeType;           // 0x010 [O] cTypeObjNodeState::ObjNodeType; [R] the subclasses pass 20 / 21
-    unsigned short Flags;        // 0x012 [O] cTypeObjNodeState::Flags
-    unsigned int SortIndex;      // 0x014 [O] cSortObjNodeState::SortIndex
-    tInstanceRecord* Instance;   // 0x018 [O] cInstanceNode::Instance; [R] cInstanceNode_cInstanceNode1's record
-                                 //       argument; [U] splineIntersect reads it
+struct cFlexRailNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cFlexRailNode_cFlexRailNode / _cFlexRailNode1 / __cFlexRailNode store cFlexRailNode_vtbl (D_004900D0); the
+    //       subclasses then store cFloatRailNode_vtbl / cSpringRailNode_vtbl; [U] update calls slots 47 and 48,
+    //       updateSpaceHash slot 50
+    // cFlexRailNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] the subclasses pass 20 / 21
+    //   Instance: [U] splineIntersect reads it
     // --- cFlexRailNode (cFlexRailNodeState, 0x30, read whole from a replay frame by cFlexRailNode_cFlexRailNode1)
     char unk_01C[0x4];           // 0x01C alignment gap: the state is 16-byte aligned (its tBoundBox); On Tour has it
                                  //       too (its cInstanceNode ends at 0x18, the state still starts at 0x20)
@@ -109,14 +103,6 @@ struct cFlexRailNode {
     char unk_05C[0x4];           // 0x05C tail padding to the 16-byte-aligned size 0x60 (never accessed)
 };
 
-CHECK_OFFSET(cFlexRailNode, unk_00, 0x000);
-CHECK_OFFSET(cFlexRailNode, Next, 0x004);
-CHECK_OFFSET(cFlexRailNode, Prev, 0x008);
-CHECK_OFFSET(cFlexRailNode, mVtbl, 0x00C);
-CHECK_OFFSET(cFlexRailNode, ObjNodeType, 0x010);
-CHECK_OFFSET(cFlexRailNode, Flags, 0x012);
-CHECK_OFFSET(cFlexRailNode, SortIndex, 0x014);
-CHECK_OFFSET(cFlexRailNode, Instance, 0x018);
 CHECK_OFFSET(cFlexRailNode, unk_01C, 0x01C);
 CHECK_OFFSET(cFlexRailNode, NumNodes, 0x020);
 CHECK_OFFSET(cFlexRailNode, RailFlags, 0x024);

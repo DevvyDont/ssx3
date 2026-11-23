@@ -20,13 +20,15 @@
 // (0x004906F0, 51 slots: 1 dtor, 12 writeToReplayFrame, 15 updateNode, 34 expire, 35 loseFocus, 36 signal, 40 onCollide
 // (empty: no hits while debouncing); the rest are cMoveNode's / cInstanceNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/intersect/worldsphtree.cpp, src/object/debouncenode.cpp) and the 0x34 allocation;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 7 paired methods, 0xC and 0x18 equal, Life/Type + 4;
 //   [U] how retail code uses the field (src/object/debouncenode.cpp and the retail asm);
 //   [O] SSX On Tour's DWARF (cMoveNode chain, cDebounceNode, tMakeDebounceData).
 
 #include "layout.h"
+#include "object/movenode.h"
 
 struct cObjNode;
 struct tInstanceRecord;
@@ -52,23 +54,15 @@ CHECK_OFFSET(tMakeDebounceData, Visible, 0x0C);
 CHECK_OFFSET(tMakeDebounceData, unk_010, 0x10);
 CHECK_SIZE(tMakeDebounceData, 0x14);
 
-struct cDebounceNode {
-    // --- cMoveNode (0x2C; object/movenode.h): cObjNode / cTypeObjNode / cSortObjNode / cInstanceNode first
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] cDebounceNode_vtbl (0x004906F0) in both ctors and the dtor; [P]; [U]
-                                    //      updateNode calls slot 34 (expire), expire / loseFocus slot 1 (delete)
-    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState; [R] node type 0 (cMoveNode_cMoveNode1)
-    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [O] cInstanceNode::Instance; [P]; [R] ctor1 sets the record's flags (+0x8)
-                                    //      from the data's Visible word; [U] expire / loseFocus hand it to the
-                                    //      cDeadNode / cRestoreNode that replaces this node
-    tModifierBlock* ModifierBlock;  // 0x1C [O] cMoveNode; [R] taken over from the old node (cMoveNode_transferFromOld)
-    int Debounce;                   // 0x20 [O] cMoveNode
-    float Fade;                     // 0x24 [O] cMoveNode
-    int TransferHack;               // 0x28 [O] cMoveNode (bool, 4 bytes)
+struct cDebounceNode : public cMoveNode {
+    // cMoveNode (object/movenode.h, 0x2C): the vptr at 0x0C:
+    //   [R] cDebounceNode_vtbl (0x004906F0) in both ctors and the dtor; [P]; [U] updateNode calls slot 34 (expire),
+    //       expire / loseFocus slot 1 (delete)
+    // cDebounceNode's notes on cMoveNode's fields:
+    //   ObjNodeType: [R] node type 0 (cMoveNode_cMoveNode1)
+    //   Instance: [R] ctor1 sets the record's flags (+0x8) from the data's Visible word; [U] expire / loseFocus hand
+    //       it to the cDeadNode / cRestoreNode that replaces this node
+    //   ModifierBlock: [R] taken over from the old node (cMoveNode_transferFromOld)
     // --- cDebounceNode (On Tour 0x28 / 0x2C, + 4 here)
     int Life;                       // 0x2C [O]; [P] preview 0x28; [R] ctor1 (int)(data Time * frame rate) (cvt.w.s +
                                     //      swc1: an int through the FPU); the replay ctor reads 4 bytes; [U] updateNode
@@ -79,18 +73,6 @@ struct cDebounceNode {
                                     //      loseFocus: 0 -> cDeadNode, else delete
 };
 
-CHECK_OFFSET(cDebounceNode, unk_00, 0x00);
-CHECK_OFFSET(cDebounceNode, Next, 0x04);
-CHECK_OFFSET(cDebounceNode, Prev, 0x08);
-CHECK_OFFSET(cDebounceNode, mVtbl, 0x0C);
-CHECK_OFFSET(cDebounceNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cDebounceNode, Flags, 0x12);
-CHECK_OFFSET(cDebounceNode, SortIndex, 0x14);
-CHECK_OFFSET(cDebounceNode, Instance, 0x18);
-CHECK_OFFSET(cDebounceNode, ModifierBlock, 0x1C);
-CHECK_OFFSET(cDebounceNode, Debounce, 0x20);
-CHECK_OFFSET(cDebounceNode, Fade, 0x24);
-CHECK_OFFSET(cDebounceNode, TransferHack, 0x28);
 CHECK_OFFSET(cDebounceNode, Life, 0x2C);
 CHECK_OFFSET(cDebounceNode, Type, 0x30);
 CHECK_SIZE(cDebounceNode, 0x34);

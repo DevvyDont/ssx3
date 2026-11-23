@@ -11,7 +11,7 @@
 // in MakeConveyorFunc; the replay ctor reads the 0x2C-byte cConveyorNodeState into +0x1C (writeToReplayFrame writes
 // it; getNodeState returns +0x1C), ending at 0x48; [O] On Tour 0x44 = cInstanceNode 0x18 + cConveyorNodeState 0x2C.
 // Bases: cInstanceNode (0x00-0x1C, object/instancenode.h: cObjNode/cTypeObjNode/cSortObjNode/cInstanceNode), then
-// cConveyorNodeState (On Tour 0x2C) at 0x1C; both written out inline. The vptr is at 0xC.
+// cConveyorNodeState (On Tour 0x2C) at 0x1C (the state written out). The vptr is at 0xC.
 // Constructors: cConveyorNode_cConveyorNode (bucket, record, tMakeConveyorData*: cInstanceNode_cInstanceNode1(this,
 // bucket, 15, record), vtable, Vel, UVScroll = (UScroll, VScroll), UV = 0, Rotate[0..7] = Rotate0..7, record flags)
 // and cConveyorNode_cConveyorNode1 (bucket, cBxReplayFrame*: cInstanceNode_cInstanceNode, vtable, the 0x2C-byte
@@ -19,7 +19,8 @@
 // cConveyorNode_vtbl (0x00490570, 46 slots: 1 dtor, 2 update, 4 render, 12 writeToReplayFrame, 19 getNodeState, 42
 // updateIntersectInfo; the rest are cInstanceNode's / cSortObjNode's / cTypeObjNode's / cObjNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/debouncenode.cpp, src/object/railmodifier.cpp) and the 0x48 allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 5 paired methods, 0xC/0x18/0x38-0x44 (preview == retail);
 //   [U] how retail code uses the field (src/object/debouncenode.cpp and the retail asm);
@@ -27,6 +28,7 @@
 // t2Vector (2 floats) is written as a float array, as in render/font.h.
 
 #include "layout.h"
+#include "object/instancenode.h"
 
 struct cObjNode;
 struct tInstanceRecord;
@@ -59,19 +61,14 @@ CHECK_OFFSET(tMakeConveyorData, Rotate7, 0x2C);
 CHECK_OFFSET(tMakeConveyorData, unk_030, 0x30);
 CHECK_SIZE(tMakeConveyorData, 0x34);
 
-struct cConveyorNode {
-    // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] cConveyorNode_vtbl (0x00490570) in both ctors and the dtor; [P] 0xC;
-                                    //      [U] updateIntersectInfo calls slot 24 (getRootTransform)
-    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState; [R] node type 15 (cInstanceNode_cInstanceNode1)
-    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [O] cInstanceNode::Instance; [P] 0x18 (render); [R] ctor marks the record's
-                                    //      flags (+0x8); [U] updateIntersectInfo walks its model's (+0x80) mesh
-                                    //      hierarchy, render culls / draws it
+struct cConveyorNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cConveyorNode_vtbl (0x00490570) in both ctors and the dtor; [P] 0xC; [U] updateIntersectInfo calls slot 24
+    //       (getRootTransform)
+    // cConveyorNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 15 (cInstanceNode_cInstanceNode1)
+    //   Instance: [R] ctor marks the record's flags (+0x8); [U] updateIntersectInfo walks its model's (+0x80) mesh
+    //       hierarchy, render culls / draws it
     // --- cConveyorNodeState (On Tour 0x2C; [R] the replay ctor reads 0x2C bytes here, writeToReplayFrame writes them,
     //     getNodeState returns its address)
     float Vel;                      // 0x1C [O]; [R] ctor = data Vel (+0x4) (lwc1/swc1); [U] updateIntersectInfo scales
@@ -84,14 +81,6 @@ struct cConveyorNode {
                                     //      wraps it (lwc1/swc1), render puts it in the draw matrix's position row
 };
 
-CHECK_OFFSET(cConveyorNode, unk_00, 0x00);
-CHECK_OFFSET(cConveyorNode, Next, 0x04);
-CHECK_OFFSET(cConveyorNode, Prev, 0x08);
-CHECK_OFFSET(cConveyorNode, mVtbl, 0x0C);
-CHECK_OFFSET(cConveyorNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cConveyorNode, Flags, 0x12);
-CHECK_OFFSET(cConveyorNode, SortIndex, 0x14);
-CHECK_OFFSET(cConveyorNode, Instance, 0x18);
 CHECK_OFFSET(cConveyorNode, Vel, 0x1C);
 CHECK_OFFSET(cConveyorNode, Rotate, 0x20);
 CHECK_OFFSET(cConveyorNode, UVScroll, 0x38);

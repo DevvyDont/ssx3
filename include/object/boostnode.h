@@ -23,13 +23,15 @@
 // 50 slots: 1 dtor, 2 update, 12 writeToReplayFrame, 36 signal; the rest of 1..46 are cInstanceNode's /
 // cSortObjNode's / cTypeObjNode's / cObjNode's; new virtuals 47 applyBoost, 48 applyDrag, 49 boostStart, 50 boostEnd).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/intersect/worldsphtree.cpp) and the 0x50 allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 8 paired methods, 0xC/0x18/0x20/0x34-0x40 (preview == retail);
 //   [U] how retail code uses the field (src/intersect/worldsphtree.cpp and the retail asm);
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cBoostNodeState, tMakeBoostData).
 
 #include "layout.h"
+#include "object/instancenode.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
@@ -65,19 +67,14 @@ CHECK_OFFSET(tMakeBoostData, BoostZ, 0x1C);
 CHECK_OFFSET(tMakeBoostData, unk_020, 0x20);
 CHECK_SIZE(tMakeBoostData, 0x24);
 
-struct cBoostNode {
-    // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] cBoostNode_vtbl (0x004914E0) in both ctors and the dtor; [P] 0xC; [U]
-                                    //      update calls slots 49 / 47 / 48 / 50 / 34
-    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState; [R] the type arg (cInstanceNode_cInstanceNode1)
-    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [O] cInstanceNode::Instance; [P] 0x18 (update); [R] ctor1 transforms a Type
-                                    //      2 Boost by its matrix (+0x10); [U] update passes it to each being's
-                                    //      intersect test (lw)
+struct cBoostNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cBoostNode_vtbl (0x004914E0) in both ctors and the dtor; [P] 0xC; [U] update calls slots 49 / 47 / 48 / 50
+    //       / 34
+    // cBoostNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] the type arg (cInstanceNode_cInstanceNode1)
+    //   Instance: [R] ctor1 transforms a Type 2 Boost by its matrix (+0x10); [U] update passes it to each being's
+    //       intersect test (lw)
     char unk_01C[0x4];              // 0x1C padding before the 16-byte aligned state (no access)
     // --- cBoostNodeState (On Tour 0x30; [R] the replay ctor reads 0x30 bytes here, writeToReplayFrame writes them)
     t4Vector Boost;                 // 0x20 [O]; [P] 0x20; [R] ctor1 (sq); [U] applyBoost reads it (lq)
@@ -94,14 +91,6 @@ struct cBoostNode {
     char unk_044[0xC];              // 0x44 the state's tail padding (On Tour cBoostNodeState is 0x30; no access)
 };
 
-CHECK_OFFSET(cBoostNode, unk_00, 0x00);
-CHECK_OFFSET(cBoostNode, Next, 0x04);
-CHECK_OFFSET(cBoostNode, Prev, 0x08);
-CHECK_OFFSET(cBoostNode, mVtbl, 0x0C);
-CHECK_OFFSET(cBoostNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cBoostNode, Flags, 0x12);
-CHECK_OFFSET(cBoostNode, SortIndex, 0x14);
-CHECK_OFFSET(cBoostNode, Instance, 0x18);
 CHECK_OFFSET(cBoostNode, unk_01C, 0x1C);
 CHECK_OFFSET(cBoostNode, Boost, 0x20);
 CHECK_OFFSET(cBoostNode, MaxSpeed, 0x30);

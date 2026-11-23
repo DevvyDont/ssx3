@@ -148,7 +148,7 @@ struct sFlexRailElem_348D98 {
 extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instRecord, tMakeFloatRailData* desc)
 {
     cFlexRailNode_cFlexRailNode(((char*)self), 20, instRecord, desc);
-    self->mVtbl = (void**)cFloatRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFloatRailNode_vtbl;
     self->LSpring = desc->LSpring;
     self->LDamp = desc->LDamp;
     self->ForceScale = desc->ForceScale;
@@ -221,7 +221,7 @@ struct sFlexRailElem_348FA0 {
 extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
-    self->mVtbl = (void**)cFloatRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFloatRailNode_vtbl;
     stream->read((char*)&self->LSpring, 0xC);
     sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(&self->Nodes);
     *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[self->NumNodes];
@@ -251,7 +251,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
  */
 extern "C" void cFloatRailNode__cFloatRailNode(cFloatRailNode* self, int flags)
 {
-    self->mVtbl = (void**)cFloatRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFloatRailNode_vtbl;
     cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
     void* railNodes = self->Nodes;
     if (railNodes != 0) {
@@ -795,7 +795,7 @@ struct sFlexElem_9B48 {
 extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* instRecord, tMakeSpringRailData* desc)
 {
     cFlexRailNode_cFlexRailNode(((char*)self), 21, instRecord, desc);
-    self->mVtbl = (void**)cSpringRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cSpringRailNode_vtbl;
     self->ASpring = desc->ASpring;
     self->ADamp = desc->ADamp;
     self->TorqueScale = desc->TorqueScale;
@@ -867,7 +867,7 @@ struct sFlexRailElem_349DB0 {
 extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
-    self->mVtbl = (void**)cSpringRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cSpringRailNode_vtbl;
     stream->read((char*)&self->ASpring, 0xC);
     sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(&self->Nodes);
     *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[self->NumNodes];
@@ -896,7 +896,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
  */
 extern "C" void cSpringRailNode__cSpringRailNode(cSpringRailNode* self, int flags)
 {
-    self->mVtbl = (void**)cSpringRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cSpringRailNode_vtbl;
     cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
     void* railNodes = self->Nodes;
     if (railNodes != 0) {
@@ -1670,7 +1670,7 @@ extern "C" void* cFlagNode_cFlagNode1(cFlagNode* self, void* bucket, cFlagNode* 
 {
     sFrRailDesc desc;
     cInstanceNode_cInstanceNode1(self, bucket, 10, node);
-    self->mVtbl = (void**)cFlagNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFlagNode_vtbl;
     node->Prev = (cObjNode*)(((unsigned int)node->Prev & 0xFFFFFFFD) | 4);
     tFlagState_tFlagState(&desc, src);
     cFlagManager_AddFlag(cObjectInterface_getFlagManager(), node, &desc);
@@ -1695,7 +1695,7 @@ extern char cFlagNode_vtbl[];
 extern "C" void* cFlagNode_cFlagNode(cFlagNode* self)
 {
     cInstanceNode_cInstanceNode(self);
-    self->mVtbl = (void**)cFlagNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFlagNode_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1718,7 +1718,7 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
  */
 extern "C" void cFlagNode__cFlagNode(cFlagNode* self, int flags)
 {
-    self->mVtbl = (void**)cFlagNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFlagNode_vtbl;
     cFlagManager_RemoveFlag(cObjectInterface_getFlagManager(), self->Instance);
     cInstanceNode__cInstanceNode(self, flags);
 }

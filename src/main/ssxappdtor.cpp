@@ -1995,7 +1995,7 @@ struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
  */
 extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(cVisualEffectsObjNode* self, int flags)
 {
-    self->mVtbl = cVisualEffectsObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cVisualEffectsObjNode_vtbl;
     cVisualEffectsMan* obj = self->VisualEffectsMan;
     if (((void*)obj) != 0) {
         sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = (sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode*)obj->mVtbl;
@@ -2825,7 +2825,7 @@ struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
  */
 extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(cAIVisualEffectsObjNode* self, int flags)
 {
-    self->mVtbl = cAIVisualEffectsObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cAIVisualEffectsObjNode_vtbl;
     cAIVisualEffectsMan* obj = self->AIVisualEffectsMan;
     if (((void*)obj) != 0) {
         sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = (sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode*)obj->mVtbl;
@@ -2891,7 +2891,7 @@ extern void* cSSXStatsObjNode_vtbl[];
  */
 extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(cSSXStatsObjNode* self, int flags)
 {
-    self->mVtbl = cSSXStatsObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cSSXStatsObjNode_vtbl;
     operator_delete((int*)self->SSXStatsMan);
     cObjNode__cObjNode(self, flags);
 }

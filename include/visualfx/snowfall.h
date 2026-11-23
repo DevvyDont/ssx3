@@ -14,12 +14,12 @@
 // the ctor writes the vptr, the twelve box pointers and both vectors (sq). On Tour: 0x60 as well (its cObjNode is
 // 0xC, but t4Vector's 16-byte alignment puts mLastCameraPosition at 0x40 in both builds; mSnowBoxes is On Tour 0xC,
 // retail 0x10).
-// Base cObjNode (retail 0x10: unk_00, Next, Prev, vptr; see object/instancenode.h and visualfx/transitionman.h),
-// written out inline; the ctor runs cObjNode_cObjNode1(self, bucket) and stores cSnowFall_vtbl (0x00487FD8, 13 cObjNode
+// Base cObjNode (object/objnode.h; retail 0x10: unk_00, Next, Prev, vptr);
+// the ctor runs cObjNode_cObjNode1(self, bucket) and stores cSnowFall_vtbl (0x00487FD8, 13 cObjNode
 // slots: 1 dtor cSnowFall__cSnowFall, 2 update, 4 render, 12 writeToReplayFrame__FPv, 13 readFromReplayFrame; the rest
 // are cObjNode's defaults). cGame's serialize / load call slots 12 / 13 through the vptr at 0xC.
 //
-// A FLAT layout, like main/game.h. Evidence tags:
+// Derives from cObjNode; its own members FLAT, like main/game.h. Evidence tags:
 //   [R] retail ctor cSnowFall_cSnowFall, dtor cSnowFall__cSnowFall and the 0x60 allocation;
 //   [P] tools/layout_xlate.py pairs four preview methods with retail (only the dtor's vptr store at 0xC to measure:
 //       preview == retail); no inline accessors;
@@ -27,17 +27,15 @@
 //   [O] SSX On Tour's DWARF (class cSnowFall 0x60: mSnowBoxes[12] (kMaxNumSnowBoxes), mLastCameraPosition[2]).
 
 #include "layout.h"
+#include "object/objnode.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
 struct cSnowBox;
 
-struct cSnowFall {
-    // --- cObjNode (retail 0x10; object/instancenode.h)
-    int unk_00;                         // 0x00 never written by any node ctor (see object/instancenode.h)
-    cObjNode* Next;                     // 0x04 [O] cObjNode::Next; [R] cObjNode_cObjNode1 links it into the bucket
-    cObjNode* Prev;                     // 0x08 [O] cObjNode::Prev
-    void** mVtbl;                       // 0x0C [R] cSnowFall_vtbl (ctor and dtor)
+struct cSnowFall : public cObjNode {
+    // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
+    //   [R] cSnowFall_vtbl (ctor and dtor)
     // --- cSnowFall
     cSnowBox* mSnowBoxes[12];           // 0x10 [O] (kMaxNumSnowBoxes = 12); [R] the ctor zeroes all twelve, then
                                         //      allocates [0..5] (view 0) and, with two players, [6..11] (view 1) as
@@ -49,10 +47,6 @@ struct cSnowFall {
                                         //      is the boxes' move this frame, then it is overwritten
 };
 
-CHECK_OFFSET(cSnowFall, unk_00, 0x00);
-CHECK_OFFSET(cSnowFall, Next, 0x04);
-CHECK_OFFSET(cSnowFall, Prev, 0x08);
-CHECK_OFFSET(cSnowFall, mVtbl, 0x0C);
 CHECK_OFFSET(cSnowFall, mSnowBoxes, 0x10);
 CHECK_OFFSET(cSnowFall, mLastCameraPosition, 0x40);
 CHECK_SIZE(cSnowFall, 0x60);

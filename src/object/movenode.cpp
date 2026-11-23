@@ -1847,7 +1847,7 @@ extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 extern "C" void* cObjectNode_cObjectNode(cObjectNode* self, void* bucket, void* instRecord, int isSolid, int forceVisible)
 {
     cMoveNode_cMoveNode1(self, bucket, 17, instRecord);
-    self->mVtbl = cObjectNode_vtbl;
+    VPTR_OF(cObjNode, self) = cObjectNode_vtbl;
     if (forceVisible != 0 || (((sMoveFlags_6DB0*)self->Instance)->w & 3) == 3) {
         sMoveFlags_6DB0* recordFlags = (sMoveFlags_6DB0*)self->Instance;
         recordFlags->w = (recordFlags->w & ~2) | 4;
@@ -1874,7 +1874,7 @@ extern void* cObjectNode_vtbl[];
 extern "C" void* cObjectNode_cObjectNode1(cObjectNode* self)
 {
     cMoveNode_cMoveNode(self);
-    self->mVtbl = cObjectNode_vtbl;
+    VPTR_OF(cObjNode, self) = cObjectNode_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2631,7 +2631,7 @@ extern void* cParticleNode_vtbl[];
 extern "C" void* cParticleNode_cParticleNode1(cParticleNode* self, void* bucket, void* instRecord, void* particle, void* oldNode)
 {
     cMoveNode_cMoveNode1(((cMoveNode*)self), bucket, 13, instRecord);
-    self->mVtbl = cParticleNode_vtbl;
+    VPTR_OF(cObjNode, self) = cParticleNode_vtbl;
     cMoveNode_transferFromOld(((cMoveNode*)self), (cInstanceNode*)oldNode);
     cMoveNode_addParticle(((cMoveNode*)self), particle);
     return ((cMoveNode*)self);
@@ -2655,7 +2655,7 @@ extern void* cParticleNode_vtbl[];
 extern "C" void* cParticleNode_cParticleNode(cParticleNode* self)
 {
     cMoveNode_cMoveNode(self);
-    self->mVtbl = cParticleNode_vtbl;
+    VPTR_OF(cObjNode, self) = cParticleNode_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2680,7 +2680,7 @@ extern "C" void cParticleNode_update(cParticleNode* self)
         return;
     }
     if (((void*)self) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
         vt[1].fn(vthis(self, vt[1]), 3);
     }
 }

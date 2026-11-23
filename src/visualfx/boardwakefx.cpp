@@ -5105,7 +5105,7 @@ extern "C" void* cTransitionMan_cTransitionMan(cTransitionMan* self, void* bucke
     self->mRequestingDelete = 0;
     self->mRequestDeleteFrame = 0;
     self->mScriptVtbl = cTransitionMan_cScriptObjTransition_vtbl;
-    self->mVtbl = cTransitionMan_vtbl;
+    VPTR_OF(cObjNode, self) = cTransitionMan_vtbl;
     self->mScreenGrabHandle.mTextureId = -1;
     cTransitionObj_InitializeBuffers();
     cScriptObject_InitScriptObject((char*)&self->mObjType);
@@ -5140,7 +5140,7 @@ extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
 {
     self->mScriptVtbl = cTransitionMan_cScriptObjTransition_vtbl;
-    self->mVtbl = cTransitionMan_vtbl;
+    VPTR_OF(cObjNode, self) = cTransitionMan_vtbl;
     char* scriptObj = (char*)&self->mObjType;
     cTransitionMan_EndTransition(self);
     if (self->mRequestingDelete != 0) {
@@ -6380,7 +6380,7 @@ struct sVec5920 {
 extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
 {
     cObjNode_cObjNode1(self, bucket);
-    self->mVtbl = cSnowFall_vtbl;
+    VPTR_OF(cObjNode, self) = cSnowFall_vtbl;
     new (((sVec5920*)&self->mLastCameraPosition[0])) sVec5920[2];
     cMemMan_validate();
     for (int i = 11; i >= 0; i--) {
@@ -6424,7 +6424,7 @@ extern "C" void cObjNode__cObjNode(void* self, int flags);
  */
 extern "C" void cSnowFall__cSnowFall(cSnowFall* self, int flags)
 {
-    self->mVtbl = cSnowFall_vtbl;
+    VPTR_OF(cObjNode, self) = cSnowFall_vtbl;
     cMemMan_validate();
     int i;
     for (i = 0; i < 12; i++) {

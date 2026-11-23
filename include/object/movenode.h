@@ -75,6 +75,10 @@ struct cMoveNode : public cInstanceNode {
     virtual void restoreOverlapSystem();                            // 49
     virtual void updateOverlapSystem();                             // 50
     virtual void updateRootTransform();                             // 51
+    // cMoveNode's notes on its bases' fields:
+    //   Flags: [R] cMoveNode_cMoveNode1 sets bit 0 (RootTransformDirty); [U] cMoveNode_updateRootTransform,
+    //       preUpdateModifierBlock
+    //   Instance: [U] the add* builders pass it to the modifier ctors, render, getRootTransform
     // --- cMoveNode
     tModifierBlock* ModifierBlock;  // 0x1C [O]; [R] cMoveNode_addModifierBlock allocates it (cMemMan_alloc(0x28,
                                     //      "ModifierBlock")); [U] every forwarder (cMoveNode_getParentMesh..cMoveNode_fadeEffectModifier, add*/rem*,

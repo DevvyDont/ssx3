@@ -14,11 +14,11 @@
 // Size 0x48: [R] cGame_load allocates operator new(72, "cCutSceneTransitionMan") (src/main/gameload.cpp);
 // FindTVParameters / update reach 0x44 (mCutSceneTVFormat.mfYAspectAdjust). On Tour: 0x44 (its cObjNode is 0xC, 4
 // bytes smaller; every member here is On Tour + 4).
-// Base cObjNode (retail 0x10: unk_00, Next, Prev, vptr; see object/instancenode.h and visualfx/transitionman.h),
-// written out inline; the ctor runs cObjNode_cObjNode1(self, bucket) and stores cCutSceneTransitionMan_vtbl
+// Base cObjNode (object/objnode.h; retail 0x10: unk_00, Next, Prev, vptr);
+// the ctor runs cObjNode_cObjNode1(self, bucket) and stores cCutSceneTransitionMan_vtbl
 // (0x00487F30, 13 cObjNode slots: 1 dtor cCutSceneTransitionMan__cCutSceneTransitionMan__FPv, 2 update; 3-13 cObjNode's).
 //
-// A FLAT layout, like main/game.h. Evidence tags:
+// Derives from cObjNode; its own members FLAT, like main/game.h. Evidence tags:
 //   [R] retail ctor cCutSceneTransitionMan_cCutSceneTransitionMan and the 0x48 allocation;
 //   [P] the July 2003 preview's inline GetCurrentState (lw 0x10: tools/layout_xlate.py has no paired offset to
 //       measure a shift, and the retail out-of-line copy reads the same offset);
@@ -28,16 +28,14 @@
 //       render/ps2graphicsman.h).
 
 #include "layout.h"
+#include "object/objnode.h"
 #include "render/ps2graphicsman.h"
 
 struct cObjNode;
 
-struct cCutSceneTransitionMan {
-    // --- cObjNode (retail 0x10; object/instancenode.h)
-    int unk_00;                         // 0x00 never written by any node ctor (see object/instancenode.h)
-    cObjNode* Next;                     // 0x04 [O] cObjNode::Next; [R] cObjNode_cObjNode1 links it into the bucket
-    cObjNode* Prev;                     // 0x08 [O] cObjNode::Prev
-    void** mVtbl;                       // 0x0C [R] cCutSceneTransitionMan_vtbl (ctor)
+struct cCutSceneTransitionMan : public cObjNode {
+    // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
+    //   [R] cCutSceneTransitionMan_vtbl (ctor)
     // --- cCutSceneTransitionMan
     int mCurrentState;                  // 0x10 [O] eCurrentState: 0 regular, 1 cut scene, 2 blending out, 3 blending in;
                                         //      [P] GetCurrentState (lw 0x10); [R] ctor 0; [U] StartCutScene 3,
@@ -57,10 +55,6 @@ struct cCutSceneTransitionMan {
                                         //      its address to slot 41; update lerps to its four floats
 };
 
-CHECK_OFFSET(cCutSceneTransitionMan, unk_00, 0x00);
-CHECK_OFFSET(cCutSceneTransitionMan, Next, 0x04);
-CHECK_OFFSET(cCutSceneTransitionMan, Prev, 0x08);
-CHECK_OFFSET(cCutSceneTransitionMan, mVtbl, 0x0C);
 CHECK_OFFSET(cCutSceneTransitionMan, mCurrentState, 0x10);
 CHECK_OFFSET(cCutSceneTransitionMan, mfCurrentTime, 0x14);
 CHECK_OFFSET(cCutSceneTransitionMan, mfLengthOfTime, 0x18);

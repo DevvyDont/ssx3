@@ -13,20 +13,22 @@
 // fill 128 4-byte slots from 0x18 (writeToReplayFrame / the replay ctor move 0x200 bytes at +0x18); [O] On Tour
 // 0x214 (RailInfo[128] at 0x14; its cObjNode is 4 bytes smaller).
 // Bases: cSortObjNode (0x00-0x18, object/objnode.h: cObjNode 0x00-0x10, cTypeObjNodeState 0x10, cSortObjNodeState
-// 0x14), written out inline; it is not a cInstanceNode (no record). Vptr at 0xC.
+// 0x14); it is not a cInstanceNode (no record). Vptr at 0xC.
 // Constructors: cRailManNode_cRailManNode1 (bucket: cSortObjNode_cSortObjNode1 type 18, vtable, every RailInfo = -1,
 // ActiveNode = this) and cRailManNode_cRailManNode (bucket, cBxReplayFrame*: reads RailInfo and disables every used
 // slot); destructor cRailManNode__cRailManNode (enableRail on every used slot, ActiveNode = 0). Vtable
 // cRailManNode_vtbl (0x0048EDE0, 14 slots: cSortObjNode's with 1 dtor, 11 getSectionId (-1), 12 writeToReplayFrame
 // overridden).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/multiparticle.cpp) and the two 0x218 allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py (no accessors observed for this class);
 //   [U] how retail code uses the field (enableRail / disableRail / cRailManNode_unloadSection / cRailManNode_addRail and the retail asm);
 //   [O] SSX On Tour's DWARF (cObjNode chain, cRailManNode, tRailInfo).
 
 #include "layout.h"
+#include "object/objnode.h"
 
 struct cObjNode;
 
@@ -40,16 +42,12 @@ struct tRailInfo {
 CHECK_OFFSET(tRailInfo, RailRID, 0x0);
 CHECK_SIZE(tRailInfo, 0x4);
 
-struct cRailManNode {
-    // --- cObjNode (0x10; object/objnode.h)
-    int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x004 [O] cObjNode::Next; [U] bucket list (bucket 1 from addRail)
-    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x00C [R] cRailManNode_vtbl (0x0048EDE0) in both ctors and the dtor
-    // --- cTypeObjNode / cSortObjNode (object/objnode.h)
-    short ObjNodeType;              // 0x010 [O] cTypeObjNodeState; [R] cRailManNode1 passes type 18
-    unsigned short Flags;           // 0x012 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x014 [O] cSortObjNodeState; [P] getSortIndex (lw 0x14)
+struct cRailManNode : public cSortObjNode {
+    // cSortObjNode (object/objnode.h, 0x18): the vptr at 0x0C:
+    //   [R] cRailManNode_vtbl (0x0048EDE0) in both ctors and the dtor
+    // cRailManNode's notes on cSortObjNode's fields:
+    //   Next: [U] bucket list (bucket 1 from addRail)
+    //   ObjNodeType: [R] cRailManNode1 passes type 18
     // --- cRailManNode
     tRailInfo RailInfo[128];        // 0x018 [O] tRailInfo RailInfo[128]; [R] ctors: 128 x 0xFFFFFFFF; the replay ctor
                                     //      reads / writeToReplayFrame writes 0x200 bytes here; [U] enableRail /
@@ -57,13 +55,6 @@ struct cRailManNode {
                                     //      cRailManNode_unloadSection scan it (lw 0x18 + 4i, lbu for the section byte)
 };
 
-CHECK_OFFSET(cRailManNode, unk_00, 0x000);
-CHECK_OFFSET(cRailManNode, Next, 0x004);
-CHECK_OFFSET(cRailManNode, Prev, 0x008);
-CHECK_OFFSET(cRailManNode, mVtbl, 0x00C);
-CHECK_OFFSET(cRailManNode, ObjNodeType, 0x010);
-CHECK_OFFSET(cRailManNode, Flags, 0x012);
-CHECK_OFFSET(cRailManNode, SortIndex, 0x014);
 CHECK_OFFSET(cRailManNode, RailInfo, 0x018);
 CHECK_SIZE(cRailManNode, 0x218);
 

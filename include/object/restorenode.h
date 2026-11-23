@@ -18,38 +18,27 @@
 // slots: 1 dtor, 12 writeToReplayFrame, 34 expire, 36 signal; the rest are cInstanceNode's / cSortObjNode's /
 // cTypeObjNode's / cObjNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/deadfadenode.cpp, src/object/railmodifier.cpp) and the 0x1C allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 3 paired methods, only 0xC observed (preview == retail);
 //   [U] how retail code uses the field (the retail asm);
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cRestoreNode: no members).
 
 #include "layout.h"
+#include "object/instancenode.h"
 
 struct cObjNode;
 struct tInstanceRecord;
 
-struct cRestoreNode {
-    // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] cRestoreNode_vtbl (0x00491680) in both ctors and the dtor; [P] 0xC
-    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState; [R] node type 19 (cInstanceNode_cInstanceNode1)
-    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [O] cInstanceNode::Instance; [R] the ctor marks the record's flags (+0x8)
-                                    //      through it (lw 0x18 twice)
+struct cRestoreNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cRestoreNode_vtbl (0x00491680) in both ctors and the dtor; [P] 0xC
+    // cRestoreNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 19 (cInstanceNode_cInstanceNode1)
+    //   Instance: [R] the ctor marks the record's flags (+0x8) through it (lw 0x18 twice)
 };
 
-CHECK_OFFSET(cRestoreNode, unk_00, 0x00);
-CHECK_OFFSET(cRestoreNode, Next, 0x04);
-CHECK_OFFSET(cRestoreNode, Prev, 0x08);
-CHECK_OFFSET(cRestoreNode, mVtbl, 0x0C);
-CHECK_OFFSET(cRestoreNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cRestoreNode, Flags, 0x12);
-CHECK_OFFSET(cRestoreNode, SortIndex, 0x14);
-CHECK_OFFSET(cRestoreNode, Instance, 0x18);
 CHECK_SIZE(cRestoreNode, 0x1C);
 
 #endif /* OBJECT_RESTORENODE_H */

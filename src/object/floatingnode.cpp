@@ -99,7 +99,7 @@ struct sFlVEntry_34EF40 {
 static inline t4Vector nodePos_34EF40(char* vself)
 {
     cFloatingNode* self = (cFloatingNode*)vself;
-    sFlVEntry_34EF40* vt = (sFlVEntry_34EF40*)self->mVtbl;
+    sFlVEntry_34EF40* vt = (sFlVEntry_34EF40*)VPTR_OF(cObjNode, self);
     return *(t4Vector*)(vt[24].fn(vthis(self, vt[24])) + 0x30);
 }
 
@@ -467,7 +467,7 @@ struct sFloat_F600 {
  */
 extern "C" void cFloatingNode_applyForce(cFloatingNode* self, t4Vector* intInfo, t4Vector* force)
 {
-    sFlVE_F600* vt = (sFlVE_F600*)self->mVtbl;
+    sFlVE_F600* vt = (sFlVE_F600*)VPTR_OF(cObjNode, self);
     t4Vector* transform = vt[24].fn(vthis(self, vt[24]));
     t4Vector arm = vu0Sub_F600(intInfo[0], pos_F600(transform));
     t4Vector axisX = vu0MtxMul_F600(transform, &t4vect_XAxis_F600[0]);
@@ -615,7 +615,7 @@ struct sFlVE_F790 {
 extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790* intInfo)
 {
     cMoveNode_updateIntersectInfo((self), intInfo);
-    sFlVE_F790* vt = (sFlVE_F790*)self->mVtbl;
+    sFlVE_F790* vt = (sFlVE_F790*)VPTR_OF(cObjNode, self);
     sV4_F790* transform = vt[24].fn(vthis(self, vt[24]));
     cFloatingNodeState* base = (cFloatingNodeState*)&self->ZSpring;
     sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));

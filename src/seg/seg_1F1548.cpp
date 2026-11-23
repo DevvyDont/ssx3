@@ -2304,7 +2304,7 @@ extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, vo
     cObjNode_cObjNode1(((char*)splashManager), bucket);
     splashManager->mViewIndex = (unsigned int)viewIndex;
     splashManager->mNumActiveDrops = 0;
-    splashManager->mVtbl = (void**)cSplashManager_vtbl;
+    VPTR_OF(cObjNode, splashManager) = (void**)cSplashManager_vtbl;
     splashManager->mNumActiveCrystals = 0;
     {
         char* entry = (char*)&splashManager->mDropList[0];
@@ -2349,7 +2349,7 @@ extern char cSplashManager_vtbl[];
  * cObjNode__cObjNode() receives them and frees the object when bit 0 is set.
  */
 extern "C" void cSplashManager__cSplashManager(cSplashManager* self) {
-    self->mVtbl = (void**)cSplashManager_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cSplashManager_vtbl;
     cObjNode__cObjNode(self);
 }
 #endif

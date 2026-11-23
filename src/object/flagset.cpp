@@ -658,7 +658,7 @@ extern "C" cFlagManager* cFlagManager_cFlagManager(cFlagManager* self, void* buc
     int i;
     cFlagSet* elem = ((&self->mFlagSets[0]));
     cObjNode_cObjNode1((self), bucket);
-    self->mVtbl = cFlagManager_vtbl;
+    VPTR_OF(cObjNode, self) = cFlagManager_vtbl;
     for (i = 14; i != -1; i--, elem++) {
         cFlagSet_cFlagSet(elem);
     }
@@ -701,7 +701,7 @@ struct sFlagSet_C4B8 {
  */
 extern "C" void cFlagManager__cFlagManager(cFlagManager* self, int flags)
 {
-    self->mVtbl = cFlagManager_vtbl;
+    VPTR_OF(cObjNode, self) = cFlagManager_vtbl;
     if (((sFlagSetElem_C4B8*)&self->mFlagSets[0]) != 0) {
         sFlagSetElem_C4B8* flagSet = ((sFlagSetElem_C4B8*)&self->mFlagSets[0]) + 15;
         while (((sFlagSetElem_C4B8*)&self->mFlagSets[0]) != flagSet) {
@@ -1083,7 +1083,7 @@ extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket,
     float force;
     cInstanceNode_cInstanceNode1(((cFenceNode_C8E8*)self), bucket, 9, pInst);
     self->FenceData.InstId = 0xFFFFFFFF;
-    self->mVtbl = cFenceNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
     new (((t3Vector_C8E8*)&self->Verts[0])) t3Vector_C8E8[16];
     *(tMakeFenceData_C8E8*)&self->FenceData = *tdata;
     *(int*)&self->ForceMax = 0;
@@ -1196,7 +1196,7 @@ struct sFlagSetVEntryCB80 {
  */
 extern "C" void cFenceNode__cFenceNode(cFenceNode* self, int flags)
 {
-    self->mVtbl = cFenceNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
     void* gridMesh = self->GridMesh;
     if (gridMesh != 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan;
@@ -1238,7 +1238,7 @@ extern "C" void* cFenceNode_cFenceNode(cFenceNode* self, void* bucket, cBxReplay
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->FenceData.InstId = 0xFFFFFFFF;
-    self->mVtbl = cFenceNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
     new ((char*)&self->GridMesh) sFlagElem_CBE8[16];
     stream->read((char*)&self->FenceData, 36);
     cFenceNode_setupFence(self);
@@ -1406,7 +1406,7 @@ extern "C" void cFenceNode_update(cFenceNode* self)
     tMakeFenceData* osc = &self->FenceData;
     self->Force += self->ForceStep;
     if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(((char*)osc) + 0x10)) < 0.01f) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
         vt[34].fn(vthis(self, vt[34]), 1);
         return;
     }

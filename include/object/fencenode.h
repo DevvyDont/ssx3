@@ -14,7 +14,7 @@
 // cFenceNodeState at +0x1C); all run cInstanceNode's ctor with node type 9 (or the replay one). Destructor
 // cFenceNode__cFenceNode; vtable cFenceNode_vtbl (0x0048FA00, 46 slots: 1 dtor, 2 update, 4 render, 12
 // writeToReplayFrame, 40 onCollide; the rest are cInstanceNode's).
-// A FLAT layout: cInstanceNode (0x00-0x1C, object/instancenode.h, inline) + cFenceNodeState (0x1C-0x40: On Tour's
+// Derives from cInstanceNode (0x00-0x1C, object/instancenode.h), then FLAT: cFenceNodeState (0x1C-0x40: On Tour's
 // members in order, each On Tour offset + 4; tMakeFenceData FenceData first) + cFenceNode's own members (+ 4).
 // Evidence tags:
 //   [R] retail ctors/dtor and the 0x10C allocation;
@@ -23,6 +23,7 @@
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cFenceNodeState, tMakeFenceData, cFenceNode).
 
 #include "layout.h"
+#include "object/instancenode.h"
 #include "ui/uithing.h"
 
 struct cObjNode;
@@ -46,20 +47,13 @@ CHECK_OFFSET(tMakeFenceData, Flexibility, 0x8);
 CHECK_OFFSET(tMakeFenceData, null, 0xC);
 CHECK_SIZE(tMakeFenceData, 0x10);
 
-struct cFenceNode {
-    // --- cObjNode / cTypeObjNode / cSortObjNode / cInstanceNode (0x1C; object/instancenode.h)
-    int unk_00;                     // 0x000 never written by any node ctor (see object/instancenode.h)
-    cObjNode* Next;                 // 0x004 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x00C [R] cFenceNode_vtbl (every ctor and the dtor); [U] update calls slot 34
-                                    //       (expire)
-    short ObjNodeType;              // 0x010 [P] getType (lh 0x10); [O] cTypeObjNodeState; [R] node type 9
-    unsigned short Flags;           // 0x012 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x014 [P] getSortIndex (lw 0x14); [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x018 [P] getInstance (lw 0x18); [O]; [R] cInstanceNode ctor; [U] setupFence
-                                    //       marks the
-                                    //       record (flags +0x8), cFenceNode_cFenceNode1 reads its matrix (+0x10),
-                                    //       render
+struct cFenceNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cFenceNode_vtbl (every ctor and the dtor); [U] update calls slot 34 (expire)
+    // cFenceNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 9
+    //   Instance: [U] setupFence marks the record (flags +0x8), cFenceNode_cFenceNode1 reads its matrix (+0x10),
+    //       render
     // --- cFenceNodeState (On Tour 0x24; [R] the replay ctor reads 0x24 bytes into +0x1C, writeToReplayFrame writes
     //       them)
     tMakeFenceData FenceData;       // 0x01C [O]; [R] ctors copy the make-data, InstId = -1; [U] makeNeighbour passes
@@ -87,14 +81,6 @@ struct cFenceNode {
     tInstanceRecord* PrevInstance;  // 0x108 [O]; [U] as NextInstance
 };
 
-CHECK_OFFSET(cFenceNode, unk_00, 0x000);
-CHECK_OFFSET(cFenceNode, Next, 0x004);
-CHECK_OFFSET(cFenceNode, Prev, 0x008);
-CHECK_OFFSET(cFenceNode, mVtbl, 0x00C);
-CHECK_OFFSET(cFenceNode, ObjNodeType, 0x010);
-CHECK_OFFSET(cFenceNode, Flags, 0x012);
-CHECK_OFFSET(cFenceNode, SortIndex, 0x014);
-CHECK_OFFSET(cFenceNode, Instance, 0x018);
 CHECK_OFFSET(cFenceNode, FenceData, 0x01C);
 CHECK_OFFSET(cFenceNode, Force, 0x02C);
 CHECK_OFFSET(cFenceNode, ForceMax, 0x030);

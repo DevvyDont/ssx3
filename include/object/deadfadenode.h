@@ -24,13 +24,15 @@
 // (0x00491980, 46 slots: 1 dtor, 2 update, 4 render, 12 writeToReplayFrame, 35 loseFocus, 36 signal; the rest are
 // cInstanceNode's / cSortObjNode's / cTypeObjNode's / cObjNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/deadfadenode.cpp) and the 0x3C allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 5 paired methods, 0xC/0x18/0x28-0x38 (preview == retail);
 //   [U] how retail code uses the field (src/object/deadfadenode.cpp and the retail asm);
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cDeadFadeNode, tMakeDeadData, tMakeDeadFadeData).
 
 #include "layout.h"
+#include "object/instancenode.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
@@ -71,18 +73,13 @@ CHECK_OFFSET(tMakeDeadFadeData, ZVel, 0x0C);
 CHECK_OFFSET(tMakeDeadFadeData, unk_010, 0x10);
 CHECK_SIZE(tMakeDeadFadeData, 0x14);
 
-struct cDeadFadeNode {
-    // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] cDeadFadeNode_vtbl (0x00491980) in both ctors and the dtor; [P] 0xC
-    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState; [R] node type 22 (cInstanceNode_cInstanceNode1)
-    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [O] cInstanceNode::Instance; [P] 0x18; [R] ctor reads its model (+0x80),
-                                    //      matrix (+0x10) and scale (+0x84), marks its flags; [U] update / loseFocus
-                                    //      pass it to makeDead, render culls and draws it (lw)
+struct cDeadFadeNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cDeadFadeNode_vtbl (0x00491980) in both ctors and the dtor; [P] 0xC
+    // cDeadFadeNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 22 (cInstanceNode_cInstanceNode1)
+    //   Instance: [R] ctor reads its model (+0x80), matrix (+0x10) and scale (+0x84), marks its flags; [U] update /
+    //       loseFocus pass it to makeDead, render culls and draws it (lw)
     // --- cDeadFadeNode (On Tour 0x18..0x38, + 4 here)
     tMakeDeadData Data;             // 0x1C [O]; [R] both ctors store InstId = -1 (sw 0x1C), ctor copies 12 bytes (sdl/
                                     //      sdr 0x1C, sw 0x24); [U] update / loseFocus pass &Data to makeDead
@@ -98,14 +95,6 @@ struct cDeadFadeNode {
                                     //      render passes it as the mesh matrices
 };
 
-CHECK_OFFSET(cDeadFadeNode, unk_00, 0x00);
-CHECK_OFFSET(cDeadFadeNode, Next, 0x04);
-CHECK_OFFSET(cDeadFadeNode, Prev, 0x08);
-CHECK_OFFSET(cDeadFadeNode, mVtbl, 0x0C);
-CHECK_OFFSET(cDeadFadeNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cDeadFadeNode, Flags, 0x12);
-CHECK_OFFSET(cDeadFadeNode, SortIndex, 0x14);
-CHECK_OFFSET(cDeadFadeNode, Instance, 0x18);
 CHECK_OFFSET(cDeadFadeNode, Data, 0x1C);
 CHECK_OFFSET(cDeadFadeNode, Fade, 0x28);
 CHECK_OFFSET(cDeadFadeNode, FadeRate, 0x2C);

@@ -15,7 +15,7 @@
 // absorbed by the alignment gap before Qrot); [P] preview == retail (0xC, 0x18, 0x1C, 0x24, 0x6B0).
 // Bases: cInstanceNode (0x00-0x1C, object/instancenode.h: cObjNode/cTypeObjNode/cSortObjNode/cInstanceNode), then
 // cMeshAnimNodeState (On Tour 0xC) at 0x1C - after the base: the replay ctor reads the 0xC-byte state into +0x1C and
-// writeToReplayFrame writes it from there; both written out inline. The vptr is at 0xC.
+// writeToReplayFrame writes it from there (the state written out). The vptr is at 0xC.
 // Constructors: cMeshAnimNode_cMeshAnimNode1 (bucket, record, tMakeMeshAnimData*, tCollideInfo*, cInstanceNode* old:
 // cInstanceNode_cInstanceNode1(this, bucket, 11, record), vtable, Type / Life / FadeTime / Drag / AngVel from the data,
 // per-mesh poses, delete old, Disperse, InitVel (+ the collision's velocity * VelScale), record flags, init) and
@@ -25,7 +25,8 @@
 // writeToReplayFrame, 34 expire, 35 loseFocus; the rest are cInstanceNode's / cSortObjNode's / cTypeObjNode's /
 // cObjNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/instanceman.cpp) and the 0x6C0 allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 5 paired methods, preview == retail;
 //   [U] how retail code uses the field (src/object/instanceman.cpp and the retail asm);
@@ -33,24 +34,20 @@
 // tQuaternion is written as t4Vector (bx/math3d.h: x, y, z, w; tPose's Q is the same type).
 
 #include "layout.h"
+#include "object/instancenode.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
 struct tInstanceRecord;
 
-struct cMeshAnimNode {
-    // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
-    int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x004 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x00C [R] cMeshAnimNode_vtbl (0x0048F6D8) in both ctors and the dtor; [P] 0xC;
-                                    //       [U] update calls slot 34 (expire), expire / loseFocus slot 1 (delete)
-    short ObjNodeType;              // 0x010 [O] cTypeObjNodeState; [R] node type 11 (cInstanceNode_cInstanceNode1)
-    unsigned short Flags;           // 0x012 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x014 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x018 [O] cInstanceNode::Instance; [P] 0x18; [R] ctor1 reads its model (+0x80),
-                                    //       matrix (+0x10) and scale (+0x84), marks its flags; [U] init / update /
-                                    //       render read the model's mesh count, loseFocus resets its flags (lw)
+struct cMeshAnimNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cMeshAnimNode_vtbl (0x0048F6D8) in both ctors and the dtor; [P] 0xC; [U] update calls slot 34 (expire),
+    //       expire / loseFocus slot 1 (delete)
+    // cMeshAnimNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 11 (cInstanceNode_cInstanceNode1)
+    //   Instance: [R] ctor1 reads its model (+0x80), matrix (+0x10) and scale (+0x84), marks its flags; [U] init /
+    //       update / render read the model's mesh count, loseFocus resets its flags (lw)
     // --- cMeshAnimNodeState (On Tour 0xC; [R] the replay ctor reads 0xC bytes here, writeToReplayFrame writes them)
     float Life;                     // 0x01C [O]; [P] 0x1C; [R] ctor1 data Life (+0x10) (swc1), replay ctor -1.0; [U]
                                     //       update counts it down by the frame time and expires at <= 0; render
@@ -80,14 +77,6 @@ struct cMeshAnimNode {
     char unk_6B8[0x8];              // 0x6B8 tail padding to the 16-byte alignment (no access)
 };
 
-CHECK_OFFSET(cMeshAnimNode, unk_00, 0x000);
-CHECK_OFFSET(cMeshAnimNode, Next, 0x004);
-CHECK_OFFSET(cMeshAnimNode, Prev, 0x008);
-CHECK_OFFSET(cMeshAnimNode, mVtbl, 0x00C);
-CHECK_OFFSET(cMeshAnimNode, ObjNodeType, 0x010);
-CHECK_OFFSET(cMeshAnimNode, Flags, 0x012);
-CHECK_OFFSET(cMeshAnimNode, SortIndex, 0x014);
-CHECK_OFFSET(cMeshAnimNode, Instance, 0x018);
 CHECK_OFFSET(cMeshAnimNode, Life, 0x01C);
 CHECK_OFFSET(cMeshAnimNode, AngVel, 0x020);
 CHECK_OFFSET(cMeshAnimNode, FadeTime, 0x024);

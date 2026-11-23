@@ -945,7 +945,7 @@ struct sInstElem2168 {
 extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    self->mVtbl = cMeshAnimNode_vtbl;
+    VPTR_OF(cObjNode, self) = cMeshAnimNode_vtbl;
     new ((char*)&self->Qrot[0]) sInstElem2168[24];
     new ((char*)&self->Axis[0]) sInstElem2168[24];
     new ((char*)&self->Angle[0]) sInstElem2168[24];
@@ -974,7 +974,7 @@ INCLUDE_ASM("object/instanceman", cMeshAnimNode__cMeshAnimNode__FPv);
 void* cMeshAnimNode__cMeshAnimNode(void* vself)
 {
     cMeshAnimNode* self = (cMeshAnimNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cMeshAnimNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cMeshAnimNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -1244,7 +1244,7 @@ extern "C" void cMeshAnimNode_expire(cMeshAnimNode* self, int check)
         cInstanceNode_makeThisDead(self);
     }
     if (self->Type == 2 && ((void*)self) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
         vt[1].fn(vthis(self, vt[1]), 3);
     }
 }
@@ -1270,7 +1270,7 @@ extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
         self->Instance->m_iFlags |= self->Instance->m_iFlags >> 16;
         self->Instance->m_iFlags |= 2;
         if (((void*)self) != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
             vt[1].fn(vthis(self, vt[1]), 3);
         }
     } else {

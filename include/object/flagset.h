@@ -20,12 +20,13 @@
 // vptr follows its own data: mVtbl at 0x184 = cFlagSet_vtbl (D_0048FBF8, 1 slot: the dtor).
 // tFlagState (0x58) is also built on the stack by cFlagNode's ctor and copied into a set by AddFlag.
 //
-// A FLAT layout, like main/game.h. Tags: [R] retail ctors (cFlagSet_cFlagSet, tFlagSetState_tFlagSetState,
+// FLAT layouts, like main/game.h (cFlagManager derives from cObjNode). Tags: [R] retail ctors (cFlagSet_cFlagSet, tFlagSetState_tFlagSetState,
 // tFlagState_tFlagState), the dtor, the allocations; [P] member names in the preview's assert strings (above) and the
 // out-of-line inline Empty__8cFlagSet; [U] how retail code uses the field; [O] SSX On Tour's DWARF (tFlagState,
 // tFlagSetState, cFlagSet, cFlagManager: member names, order and the same offsets). t3Vector members are float[3].
 
 #include "layout.h"
+#include "object/objnode.h"
 
 struct cGridMesh;          // render/ps2gridmesh.h (the mesh is a cPS2GridMesh)
 struct tInstanceRecord;
@@ -127,12 +128,9 @@ CHECK_SIZE(cFlagSet, 0x188);
 
 struct cObjNode;
 
-struct cFlagManager {
-    // --- cObjNode (0x10; object/objnode.h)
-    int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (object/objnode.h)
-    cObjNode* Next;                 // 0x004 [O] cObjNode::Next; bucket list forward link
-    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev; bucket list back link
-    void** mVtbl;                   // 0x00C [R] cFlagManager_vtbl (0x0048FB80) in the ctor and the dtor
+struct cFlagManager : public cObjNode {
+    // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
+    //   [R] cFlagManager_vtbl (0x0048FB80) in the ctor and the dtor
     // --- cFlagManager
     float mCurrentWindFactor;       // 0x010 [O]; [P] GetWindFactor (lwc1 0x10); [R] ctor 0 (sw $0); [U] update stores
                                     //       mWindBase + mWindDelta * mWindTime; cFlagManager_GetWindFactor returns it
@@ -146,10 +144,6 @@ struct cFlagManager {
                                     //       write/readFromReplayFrame call the sets' replay methods
 };
 
-CHECK_OFFSET(cFlagManager, unk_00, 0x000);
-CHECK_OFFSET(cFlagManager, Next, 0x004);
-CHECK_OFFSET(cFlagManager, Prev, 0x008);
-CHECK_OFFSET(cFlagManager, mVtbl, 0x00C);
 CHECK_OFFSET(cFlagManager, mCurrentWindFactor, 0x010);
 CHECK_OFFSET(cFlagManager, mWindBase, 0x014);
 CHECK_OFFSET(cFlagManager, mWindDelta, 0x018);

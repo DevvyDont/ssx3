@@ -364,7 +364,7 @@ extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* bucket)
 {
     int i;
     cSortObjNode_cSortObjNode1(self, bucket, 18);
-    self->mVtbl = cRailManNode_vtbl;
+    VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
     unsigned int* railSlot = (unsigned int*)(&self->RailInfo[0]);
     for (i = 0x7F; i != -1; i--, railSlot++) {
         *railSlot = 0xFFFFFFFF;
@@ -402,7 +402,7 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cBx
     int i;
     int j;
     cSortObjNode_cSortObjNode(self, bucket, stream);
-    self->mVtbl = cRailManNode_vtbl;
+    VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
     unsigned int* slot = (unsigned int*)(&self->RailInfo[0]);
     for (j = 0x7F; j != -1; j--, slot++) {
         *slot = 0xFFFFFFFF;
@@ -439,7 +439,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
 extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
 {
     int i;
-    self->mVtbl = cRailManNode_vtbl;
+    VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
         if (((unsigned int*)(&self->RailInfo[0]))[i] != 0xFFFFFFFF) {
             cRailManNode_enableRail(self, i);

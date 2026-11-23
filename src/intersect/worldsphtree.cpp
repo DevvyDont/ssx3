@@ -5133,7 +5133,7 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
 extern "C" cBoostNode* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, int nodeType, void* instance, tMakeBoostData* def)
 {
     cInstanceNode_cInstanceNode1((self), bucket, nodeType, instance);
-    self->mVtbl = cBoostNode_vtbl;
+    VPTR_OF(cObjNode, self) = cBoostNode_vtbl;
     int type = def->Type;
     self->Type = type;
     self->BoostTime = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
@@ -5184,7 +5184,7 @@ struct sVEntry_cBoostNode_cBoostNode {
 extern "C" void* cBoostNode_cBoostNode(cBoostNode* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    self->mVtbl = cBoostNode_vtbl;
+    VPTR_OF(cObjNode, self) = cBoostNode_vtbl;
     sVEntry_cBoostNode_cBoostNode* vt = *(sVEntry_cBoostNode_cBoostNode**)stream;
     vt[2].fn(vthis(stream, vt[2]), (char*)&self->Boost, 0x30);
     return ((void*)self);
@@ -5208,7 +5208,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostNode__cBoostNode__FPv);
 void* cBoostNode__cBoostNode(void* vself)
 {
     cBoostNode* self = (cBoostNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cBoostNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cBoostNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -5259,7 +5259,7 @@ extern "C" void cBoostNode_update(cBoostNode* self)
             hit = 1;
         }
     }
-    sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cObjNode, self);
     ((Fn0_003415D0)vt[49].fn)(vthis(self, vt[49]));
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
@@ -5270,19 +5270,19 @@ extern "C" void cBoostNode_update(cBoostNode* self)
             if (obj->isIntersecting(self->Instance) != 0) {
                 hit = 1;
                 if (self->Drag < 0.0f) {
-                    sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
+                    sVEntry<void>* vtbl = (sVEntry<void>*)VPTR_OF(cObjNode, self);
                     ((Fn1_003415D0)vtbl[48].fn)(vthis(self, vtbl[48]), obj);
                 } else {
-                    sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
+                    sVEntry<void>* vtbl = (sVEntry<void>*)VPTR_OF(cObjNode, self);
                     ((Fn1_003415D0)vtbl[47].fn)(vthis(self, vtbl[47]), obj);
                 }
             }
         }
     }
-    sVEntry<void>* vtbl2 = (sVEntry<void>*)self->mVtbl;
+    sVEntry<void>* vtbl2 = (sVEntry<void>*)VPTR_OF(cObjNode, self);
     ((Fn0_003415D0)vtbl2[50].fn)(vthis(self, vtbl2[50]));
     if (hit == 0) {
-        sVEntry<void>* vtbl3 = (sVEntry<void>*)self->mVtbl;
+        sVEntry<void>* vtbl3 = (sVEntry<void>*)VPTR_OF(cObjNode, self);
         ((FnI_003415D0)vtbl3[34].fn)(vthis(self, vtbl3[34]), 1);
     }
 }
@@ -6737,7 +6737,7 @@ extern void* cDebounceNode_vtbl[];
 extern "C" void* cDebounceNode_cDebounceNode1(cDebounceNode* self, void* bucket, void* instance, tMakeDebounceData* def, void* oldNode)
 {
     cMoveNode_cMoveNode1(self, bucket, 0, instance);
-    self->mVtbl = cDebounceNode_vtbl;
+    VPTR_OF(cObjNode, self) = cDebounceNode_vtbl;
     self->Life = (int)(def->Time * (float)cAppMan_TheAppMan->TimerHz);
     self->Type = def->Type;
     cMoveNode_transferFromOld(self, oldNode);

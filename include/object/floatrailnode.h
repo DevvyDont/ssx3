@@ -23,7 +23,8 @@
 // 47 updateNodes, 48 updateMats, 49 getMesh, 50 updateBoundBox; 2 update, 4 render, 46 isFlexRail are cFlexRailNode's,
 // the rest cInstanceNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/flexrailnode.cpp) and the 0x80 allocation;
 //   [P] the July 2003 preview via tools/layout_xlate.py: preview == retail at 0xC, 0x20, 0x30-0x48, 0x50, 0x70 (no
 //       accessors);
@@ -32,6 +33,7 @@
 //       cFloatRailNode).
 
 #include "layout.h"
+#include "object/instancenode.h"
 #include "bx/math3d.h"
 #include "world/worldview.h" /* tBoundBox */
 
@@ -105,18 +107,11 @@ CHECK_OFFSET(tMakeFloatRailData, ForceScale, 0x50);
 CHECK_OFFSET(tMakeFloatRailData, unk_054, 0x54);
 CHECK_SIZE(tMakeFloatRailData, 0x58);
 
-struct cFloatRailNode {
-    // --- cFlexRailNode (0x60; object/flexrailnode.h): cInstanceNode 0x00-0x1C (object/instancenode.h)
-    int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x004 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x00C [R] cFloatRailNode_vtbl in both ctors and the dtor (after cFlexRailNode's
-                                    //      own); [P]
-    short ObjNodeType;              // 0x010 [O] cTypeObjNodeState; [R] node type 20 (passed to
-                                    //      cFlexRailNode_cFlexRailNode)
-    unsigned short Flags;           // 0x012 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x014 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x018 [O] cInstanceNode::Instance
+struct cFloatRailNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cFloatRailNode_vtbl in both ctors and the dtor (after cFlexRailNode's own); [P]
+    // cFloatRailNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 20 (passed to cFlexRailNode_cFlexRailNode)
     // --- cFlexRailNodeState (On Tour 0x30, 16-byte aligned; read whole by cFlexRailNode_cFlexRailNode1)
     char unk_01C[0x4];              // 0x01C alignment gap before the 16-byte-aligned state (never accessed)
     int NumNodes;                   // 0x020 [O] cFlexRailNodeState::NumNodes; [P]; [U] the ctors size Nodes by it,
@@ -144,14 +139,6 @@ struct cFloatRailNode {
     char unk_074[0xC];              // 0x074 tail padding to the 16-byte-aligned size 0x80 (never accessed)
 };
 
-CHECK_OFFSET(cFloatRailNode, unk_00, 0x000);
-CHECK_OFFSET(cFloatRailNode, Next, 0x004);
-CHECK_OFFSET(cFloatRailNode, Prev, 0x008);
-CHECK_OFFSET(cFloatRailNode, mVtbl, 0x00C);
-CHECK_OFFSET(cFloatRailNode, ObjNodeType, 0x010);
-CHECK_OFFSET(cFloatRailNode, Flags, 0x012);
-CHECK_OFFSET(cFloatRailNode, SortIndex, 0x014);
-CHECK_OFFSET(cFloatRailNode, Instance, 0x018);
 CHECK_OFFSET(cFloatRailNode, unk_01C, 0x01C);
 CHECK_OFFSET(cFloatRailNode, NumNodes, 0x020);
 CHECK_OFFSET(cFloatRailNode, RailFlags, 0x024);

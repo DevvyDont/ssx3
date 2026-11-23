@@ -751,7 +751,7 @@ extern char cDeadNode_vtbl[];
 extern "C" void* cDeadNode_cDeadNode(cDeadNode* self, int pInst)
 {
     cInstanceNode_cInstanceNode1(self, 8, 6, pInst);
-    self->mVtbl = (void**)cDeadNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cDeadNode_vtbl;
     unsigned int* recordFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *recordFlags &= 0xFFFFFF9F;
     recordFlags = (unsigned int*)(&self->Instance->m_iFlags);

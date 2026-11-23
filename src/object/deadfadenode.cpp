@@ -166,7 +166,7 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
 {
     sDfMatElem_0750** pm = (sDfMatElem_0750**)&self->AnimMats;
     cInstanceNode_cInstanceNode1(self, bucket, 22, obj);
-    *(void**)&self->mVtbl = cDeadFadeNode_vtbl;
+    *(void**)&VPTR_OF(cObjNode, self) = cDeadFadeNode_vtbl;
     ((unsigned int*)&(*(&self->Data)).InstId)[0] = 0xFFFFFFFF;
     *(&self->Data) = *(tMakeDeadData*)desc;
     self->FadeRate = cObjectInterface_getUpdateTime() / desc->FadeTime;
@@ -230,7 +230,7 @@ extern char cDeadFadeNode_vtbl[];
 extern "C" void* cDeadFadeNode_cDeadFadeNode1(cDeadFadeNode* self)
 {
     cInstanceNode_ctor_v(self);
-    self->mVtbl = (void**)cDeadFadeNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cDeadFadeNode_vtbl;
     self->Data.InstId = 0xFFFFFFFFU;
     self->AnimMats = 0;
     return ((void*)self);
@@ -251,7 +251,7 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
  */
 extern "C" void cDeadFadeNode__cDeadFadeNode(cDeadFadeNode* self, int flags)
 {
-    self->mVtbl = (void**)cDeadFadeNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cDeadFadeNode_vtbl;
     void* partMats = self->AnimMats;
     if (partMats != 0) {
         cMemMan_free(partMats);
@@ -474,7 +474,7 @@ extern char cHideNode_vtbl[];
 extern "C" void* cHideNode_cHideNode(cHideNode* self, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, 1, 0x10, instRecord);
-    self->mVtbl = (void**)cHideNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cHideNode_vtbl;
     unsigned int* recordFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *recordFlags &= 0xFFFFFF9F;
     recordFlags = (unsigned int*)(&self->Instance->m_iFlags);
@@ -500,7 +500,7 @@ extern char cHideNode_vtbl[];
 extern "C" void* cHideNode_cHideNode1(cHideNode* self)
 {
     cInstanceNode_cInstanceNode(self);
-    self->mVtbl = (void**)cHideNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cHideNode_vtbl;
     return ((void*)self);
 }
 #endif
@@ -540,7 +540,7 @@ extern char cRestoreNode_vtbl[];
 extern "C" void* cRestoreNode_cRestoreNode(cRestoreNode* self, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, 1, 19, instRecord);
-    self->mVtbl = (void**)cRestoreNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cRestoreNode_vtbl;
     unsigned int* recordFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *recordFlags &= 0xFFFFFF9F;
     recordFlags = (unsigned int*)(&self->Instance->m_iFlags);
@@ -566,7 +566,7 @@ extern char cRestoreNode_vtbl[];
 extern "C" void* cRestoreNode_cRestoreNode1(cRestoreNode* self)
 {
     cInstanceNode_cInstanceNode(self);
-    self->mVtbl = (void**)cRestoreNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cRestoreNode_vtbl;
     return ((void*)self);
 }
 #endif

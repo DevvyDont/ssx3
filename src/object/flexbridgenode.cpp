@@ -621,7 +621,7 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, tInte
     if (idx >= 0) {
         int pairIndex = idx / 2;
         tSpringNode* ents = self->Mesh.Nodes;
-        sFlVE_70D0* vt = (sFlVE_70D0*)self->mVtbl;
+        sFlVE_70D0* vt = (sFlVE_70D0*)VPTR_OF(cObjNode, self);
         t4Vector* matrix = vt[24].fn(vthis(self, vt[24]));
         tSpringNode* entry = (tSpringNode*)(pairIndex * 0x50 + (int)ents);
         t4Vector axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&t4vect_XAxis_70D0, entry->W));
@@ -790,7 +790,7 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectT
     (*(void**)&mesh.Face) = ((void*)self->Faces);
     (*(sFV_7268**)&mesh.Vertex) = ((sFV_7268*)self->Verts);
     (*(sFV_7268**)&mesh.Normal) = ((sFV_7268*)self->FaceNorms);
-    sFM_7268* matrix = ((GetMtxFn_7268)((sFVE_7268*)self->mVtbl)[24].fn)(vthis(self, ((sFVE_7268*)self->mVtbl)[24]));
+    sFM_7268* matrix = ((GetMtxFn_7268)((sFVE_7268*)VPTR_OF(cObjNode, self))[24].fn)(vthis(self, ((sFVE_7268*)VPTR_OF(cObjNode, self))[24]));
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
@@ -1049,7 +1049,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
     sV3_75D8 pos[32];
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
-    sMat_75D8* matrix = (sMat_75D8*)((sVE_75D8*)self->mVtbl)[24].fn(vthis(self, ((sVE_75D8*)self->mVtbl)[24]));
+    sMat_75D8* matrix = (sMat_75D8*)((sVE_75D8*)VPTR_OF(cObjNode, self))[24].fn(vthis(self, ((sVE_75D8*)VPTR_OF(cObjNode, self))[24]));
     for (int vertexIndex = 0; vertexIndex < nverts; vertexIndex++) {
         pos[vertexIndex] = ((sV4_75D8*)self->Verts)[vertexIndex];
         sV4_75D8 w = MulMat_75D8(matrix, ((sV4_75D8*)self->Verts)[vertexIndex]);
@@ -1142,7 +1142,7 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
             return;
         }
     }
-    sVE24_7B80* sv = (sVE24_7B80*)self->mVtbl;
+    sVE24_7B80* sv = (sVE24_7B80*)VPTR_OF(cObjNode, self);
     void* mtx = sv[24].fn(vthis(self, sv[24]));
     TOP_7B80(ctx)[1] = TOP_7B80(ctx)[0];
     sRS_7B80* state = TOP_7B80(ctx);
@@ -1218,7 +1218,7 @@ struct sFlexSeg_347D90 {
 extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType, void* instRecord, tMakeFlexRailData* def)
 {
     cInstanceNode_cInstanceNode1(((char*)self), 1, nodeType, instRecord);
-    self->mVtbl = (void**)cFlexRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFlexRailNode_vtbl;
     int len = def->Flags;
     self->NumNodes = 0;
     self->RailFlags = len;
@@ -1255,7 +1255,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket,
 {
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(&self->Mats);
     cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
-    self->mVtbl = (void**)cFlexRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFlexRailNode_vtbl;
     stream->read((char*)&self->NumNodes, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
@@ -1281,7 +1281,7 @@ extern char cFlexRailNode_vtbl[];
  */
 extern "C" void cFlexRailNode__cFlexRailNode(cFlexRailNode* self, int flags)
 {
-    self->mVtbl = (void**)cFlexRailNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cFlexRailNode_vtbl;
     void* buf = self->Mats;
     if (buf != 0) {
         cMemMan_free(buf);
@@ -1309,9 +1309,9 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* self);
  */
 extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 {
-    sVEntry<void(void*)>* vt1 = (sVEntry<void(void*)>*)self->mVtbl;
+    sVEntry<void(void*)>* vt1 = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
     vt1[47].fn(vthis(self, vt1[47]));
-    sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)self->mVtbl;
+    sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
     vt2[48].fn(vthis(self, vt2[48]));
     cFlexRailNode_updateSpaceHash(self);
 }
@@ -1339,7 +1339,7 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
     cFlexRailNode* self = node;
     tBoundBox* box = (&self->BoundBox);
     tBoundBox old = *(&self->BoundBox);
-    ((sVEntry<void(void*)>*)self->mVtbl)[50].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[50]));
+    ((sVEntry<void(void*)>*)VPTR_OF(cObjNode, self))[50].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cObjNode, self))[50]));
     nash_Nash_movenode(cObjectInterface_getNash(), 2, ((int)self->Node), box, &old);
 }
 #endif
@@ -1754,7 +1754,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
             (*(sFbV_8290*)&intInfo->Ipos) = lastp;
             (*(sFbV_8290*)&intInfo->Inorm) = fbNormalize_8290(splineSlope_8290(mat, lastt));
             (*(void**)&intInfo->Inst) = (void*)self->Instance;
-            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
+            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cObjNode, self);
             intInfo->Mesh = vt[49].fn(vthis(self, vt[49]), seg);
             intInfo->Seg = seg;
             (*(int*)&intInfo->Spline) = 0;

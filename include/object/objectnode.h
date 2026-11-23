@@ -18,48 +18,25 @@
 // cObjectNode_vtbl (0x00490E80, 51 slots; own: 1 dtor, 12 writeToReplayFrame; the rest are cMoveNode's /
 // cInstanceNode's / cSortObjNode's / cTypeObjNode's / cObjNode's).
 //
-// A FLAT layout: cMoveNode's fields copied from object/movenode.h (keep them in step); evidence tags as there:
+// Derives from cMoveNode (object/movenode.h); evidence tags as there:
 // [P] preview inline accessors; [R] ctors/dtor/allocation; [U] retail use; [O] On Tour.
 
 #include "layout.h"
+#include "object/movenode.h"
 
 struct cObjNode;
 struct tInstanceRecord;
 struct tModifierBlock;
 
-struct cObjectNode {
-    // --- cObjNode (0x10)
-    int unk_00;                     // 0x00 never written by any node ctor (see object/instancenode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [P] cObjNode() zeroes it; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [P]; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] both ctors and the dtor store cObjectNode_vtbl; [P] the preview's
-                                    //      ~cObjectNode stores it at 0xC too (tools/layout_xlate.py)
-    // --- cTypeObjNode / cSortObjNode / cInstanceNode (object/instancenode.h)
-    short ObjNodeType;              // 0x10 [P] getType (lh 0x10); [O] cTypeObjNodeState; [R] cObjectNode_cObjectNode
-                                    //      passes 17 to cMoveNode_cMoveNode1
-    unsigned short Flags;           // 0x12 [O]; [P] bit 0 = RootTransformDirty; [R] cMoveNode_cMoveNode1 sets bit 0
-    unsigned int SortIndex;         // 0x14 [P] getSortIndex (lw 0x14); [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [P] getInstance (lw 0x18); [O]; [U] cObjectNode_cObjectNode updates the
-                                    //      record's flags word (+0x8) through it (view sMoveFlags_6DB0)
-    // --- cMoveNode (object/movenode.h)
-    tModifierBlock* ModifierBlock;  // 0x1C [O]; [U] cMoveNode's forwarders and update / render
-    int Debounce;                   // 0x20 [O] int; [U] cMoveNode setDebounce/update/onCollide; [R] replay ctor
-    float Fade;                     // 0x24 [O]; [U] cMoveNode addFade, render/renderModel; [R] replay ctor
-    int TransferHack;               // 0x28 [O] bool (4 bytes); [U] cMoveNode render; [R] replay ctor
+struct cObjectNode : public cMoveNode {
+    // cMoveNode (object/movenode.h, 0x2C): the vptr at 0x0C:
+    //   [R] both ctors and the dtor store cObjectNode_vtbl; [P] the preview's ~cObjectNode stores it at 0xC too
+    //       (tools/layout_xlate.py)
+    // cObjectNode's notes on cMoveNode's fields:
+    //   ObjNodeType: [R] cObjectNode_cObjectNode passes 17 to cMoveNode_cMoveNode1
+    //   Instance: [U] cObjectNode_cObjectNode updates the record's flags word (+0x8) through it (view sMoveFlags_6DB0)
 };
 
-CHECK_OFFSET(cObjectNode, unk_00, 0x00);
-CHECK_OFFSET(cObjectNode, Next, 0x04);
-CHECK_OFFSET(cObjectNode, Prev, 0x08);
-CHECK_OFFSET(cObjectNode, mVtbl, 0x0C);
-CHECK_OFFSET(cObjectNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cObjectNode, Flags, 0x12);
-CHECK_OFFSET(cObjectNode, SortIndex, 0x14);
-CHECK_OFFSET(cObjectNode, Instance, 0x18);
-CHECK_OFFSET(cObjectNode, ModifierBlock, 0x1C);
-CHECK_OFFSET(cObjectNode, Debounce, 0x20);
-CHECK_OFFSET(cObjectNode, Fade, 0x24);
-CHECK_OFFSET(cObjectNode, TransferHack, 0x28);
 CHECK_SIZE(cObjectNode, 0x2C);
 
 #endif /* OBJECT_OBJECTNODE_H */

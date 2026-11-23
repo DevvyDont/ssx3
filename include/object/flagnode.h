@@ -18,38 +18,27 @@
 // cFlagManager_RemoveFlag, cInstanceNode__cInstanceNode). Vtable cFlagNode_vtbl (0x0048FC10, 46 slots: 1 dtor, 4
 // render, 12 writeToReplayFrame; the rest are cInstanceNode's / cSortObjNode's / cTypeObjNode's / cObjNode's).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from its scene-node base (object/objnode.h chain); its own members FLAT, every field at its retail
+// offset. Evidence tags:
 //   [R] retail ctors/dtor (src/object/flexrailnode.cpp) and the 0x1C allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py: 3 paired methods, 0xC and 0x18 (preview == retail);
 //   [U] how retail code uses the field (the retail asm);
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cFlagNode: no members).
 
 #include "layout.h"
+#include "object/instancenode.h"
 
 struct cObjNode;
 struct tInstanceRecord;
 
-struct cFlagNode {
-    // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] cFlagNode_vtbl (0x0048FC10) in both ctors and the dtor; [P] 0xC
-    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState; [R] node type 10 (cInstanceNode_cInstanceNode1)
-    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState
-    unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [O] cInstanceNode::Instance; [P] 0x18 (dtor); [R] the dtor passes it to
-                                    //      cFlagManager_RemoveFlag (lw 0x18)
+struct cFlagNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+    //   [R] cFlagNode_vtbl (0x0048FC10) in both ctors and the dtor; [P] 0xC
+    // cFlagNode's notes on cInstanceNode's fields:
+    //   ObjNodeType: [R] node type 10 (cInstanceNode_cInstanceNode1)
+    //   Instance: [R] the dtor passes it to cFlagManager_RemoveFlag (lw 0x18)
 };
 
-CHECK_OFFSET(cFlagNode, unk_00, 0x00);
-CHECK_OFFSET(cFlagNode, Next, 0x04);
-CHECK_OFFSET(cFlagNode, Prev, 0x08);
-CHECK_OFFSET(cFlagNode, mVtbl, 0x0C);
-CHECK_OFFSET(cFlagNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cFlagNode, Flags, 0x12);
-CHECK_OFFSET(cFlagNode, SortIndex, 0x14);
-CHECK_OFFSET(cFlagNode, Instance, 0x18);
 CHECK_SIZE(cFlagNode, 0x1C);
 
 #endif /* OBJECT_FLAGNODE_H */

@@ -13,10 +13,10 @@
 // view); the ctor builds 30 tDrop of 0x3C from +0x1C and 30 tCrystal of 0x4C from +0x724 (= 0x1C + 30 * 0x3C) and
 // zeroes 0x100C..0x1024 (0x724 + 30 * 0x4C = 0x100C). [O] On Tour's is 0x14F0 (16-aligned t4Vector/tARGB in its drops
 // and crystals, a 0xC-byte cObjNode); member order is the same.
-// Base: cObjNode (object/objnode.h, 0x10), written out inline. Its vptr at 0xC is the only one: cSplashManager_vtbl
+// Base: cObjNode (object/objnode.h, 0x10). Its vptr at 0xC is the only one: cSplashManager_vtbl
 // (D_00488230, 14 slots: 1 dtor, 2 update, 4 render, 14 reset; the rest are cObjNode's).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Tags: [R] retail
+// Derives from cObjNode; its own members FLAT, every field at its retail offset. Tags: [R] retail
 // constructors (cSplashManager_cSplashManager, tDrop_tDrop, tCrystal_tCrystal) and the allocation; [U] how retail code
 // uses the field; [O] SSX On Tour's DWARF (cSplashManager, tDrop, tCrystal); [P] layout_xlate.py pairs 4 methods
 // (dtor, update, render, reset): preview == retail at 0xC, 0x10, 0x14, 0x18, 0x100C, 0x1010, 0x1020.
@@ -24,6 +24,7 @@
 // aligned) and several units define their own t2Vector.
 
 #include "layout.h"
+#include "object/objnode.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
@@ -84,13 +85,10 @@ CHECK_OFFSET(tCrystal, mSmallMovementX, 0x044);
 CHECK_OFFSET(tCrystal, mSmallMovementY, 0x048);
 CHECK_SIZE(tCrystal, 0x04C);
 
-struct cSplashManager {
-    // --- cObjNode (object/objnode.h, 0x10)
-    int unk_00;                     // 0x000 never written by a node ctor (as in cObjNode)
-    cObjNode* Next;                 // 0x004 [O] cObjNode::Next (bucket list link)
-    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev
-    void** mVtbl;                   // 0x00C [R] cSplashManager_cSplashManager / __cSplashManager store cSplashManager_vtbl;
-                                    //       [P] 0xC; [U] cSplashManager_CameraSnapped calls slot 14 (reset)
+struct cSplashManager : public cObjNode {
+    // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
+    //   [R] cSplashManager_cSplashManager / __cSplashManager store cSplashManager_vtbl; [P] 0xC; [U]
+    //       cSplashManager_CameraSnapped calls slot 14 (reset)
     // --- cSplashManager
     unsigned int mViewIndex;        // 0x010 [O]; [R] the ctor's viewIndex; [P] 0x10; [U] update / render pick the view
     int mNumActiveDrops;            // 0x014 [O]; [R] zeroed; [P]; [U] AddDrop, reset, update, render
@@ -105,10 +103,6 @@ struct cSplashManager {
     char unk_102C[0x4];             // 0x102C tail padding to the 16-byte-aligned size 0x1030
 };
 
-CHECK_OFFSET(cSplashManager, unk_00, 0x000);
-CHECK_OFFSET(cSplashManager, Next, 0x004);
-CHECK_OFFSET(cSplashManager, Prev, 0x008);
-CHECK_OFFSET(cSplashManager, mVtbl, 0x00C);
 CHECK_OFFSET(cSplashManager, mViewIndex, 0x010);
 CHECK_OFFSET(cSplashManager, mNumActiveDrops, 0x014);
 CHECK_OFFSET(cSplashManager, mNumActiveCrystals, 0x018);

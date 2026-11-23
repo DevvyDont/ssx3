@@ -935,7 +935,7 @@ struct sEffFlags_346350 {
 extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int bucket, int pInst, int tdata)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 5, pInst);
-    self->mVtbl = cFlexBridgeNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFlexBridgeNode_vtbl;
     cSpring_cSpring((char*)&self->Mesh);
     self->TextureId = 12;
     self->RailHeight = 100.0f;
@@ -983,7 +983,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* b
 {
     void* payload = (char*)&self->BottomLeftOffset;
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    self->mVtbl = cFlexBridgeNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFlexBridgeNode_vtbl;
     cSpring_cSpring1((char*)&self->Mesh, stream);
     cFlexBridgeNode_setupGrid(self);
     stream->read((char*)payload, 0x30);
@@ -1022,7 +1022,7 @@ struct sRCtx_346568 {
  */
 extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flags)
 {
-    self->mVtbl = cFlexBridgeNode_vtbl;
+    VPTR_OF(cObjNode, self) = cFlexBridgeNode_vtbl;
     if (self->Faces != 0) {
         cMemMan_free(self->Faces);
     }

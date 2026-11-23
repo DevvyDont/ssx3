@@ -3170,7 +3170,7 @@ extern "C" void cRiderHandler_resetRiderFX(cRiderHandler* self)
         cSplashManager* obj = (cSplashManager*)cGame_getSplashManager(SSXApp->Game, id);
         if (((char*)obj) != 0)
         {
-            sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
+            sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cObjNode, obj);
             vt[14].fn(vthis(obj, vt[14]));
         }
     }

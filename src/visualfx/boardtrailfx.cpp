@@ -1060,7 +1060,7 @@ extern "C" void cCutSceneTransitionMan_FindTVParameters(cCutSceneTransitionMan* 
 extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(cCutSceneTransitionMan* self)
 {
     cObjNode_cObjNode1(self);
-    self->mVtbl = cCutSceneTransitionMan_vtbl;
+    VPTR_OF(cObjNode, self) = cCutSceneTransitionMan_vtbl;
     self->mCurrentState = 0;
     self->mNumPause = 0;
     cCutSceneTransitionMan_FindTVParameters(self);
