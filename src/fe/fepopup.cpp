@@ -5697,16 +5697,9 @@ extern char str_kT_POPUPKeyboardEnter[];
 extern char str_kT_POPUPKeyboardSpace[];
 extern char str_kT_POPUPKeyboardESC[];
 
-struct sTextVE_1CD9B8 {
-    short delta;
-    short index;
-    void* fn;
-};
-
 static inline void SetColor_1CD9B8(cUIText* text, void* col)
 {
-    sTextVE_1CD9B8* vt = *(sTextVE_1CD9B8**)((char*)text + 8);
-    ((int (*)(void*, void*))vt[11].fn)(vthis(text, vt[11]), col);
+    text->setColour((const tARGB*)col);
 }
 
 static inline void SetVisible_1CD9B8(cUIText* text, int on)
