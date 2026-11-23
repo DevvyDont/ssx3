@@ -577,31 +577,27 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* vself)
         cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundShadow);
         cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundBlack);
         {
-            char* frameWidget = (char*)self->mpMessageText;
+            cUIThing* frameWidget = self->mpMessageText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         {
-            char* frameWidget = (char*)self->mpPostText;
+            cUIThing* frameWidget = self->mpPostText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         {
-            char* frameWidget = (char*)self->mpTitleText;
+            cUIThing* frameWidget = self->mpTitleText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         {
-            char* frameWidget = (char*)self->mpEnterBox;
+            cUIThing* frameWidget = self->mpEnterBox;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupWhite;
@@ -618,31 +614,27 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* vself)
         cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundRed);
         cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundBlack);
         {
-            char* frameWidget = (char*)self->mpMessageText;
+            cUIThing* frameWidget = self->mpMessageText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         {
-            char* frameWidget = (char*)self->mpPostText;
+            cUIThing* frameWidget = self->mpPostText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         {
-            char* frameWidget = (char*)self->mpTitleText;
+            cUIThing* frameWidget = self->mpTitleText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         {
-            char* frameWidget = (char*)self->mpEnterBox;
+            cUIThing* frameWidget = self->mpEnterBox;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
+                frameWidget->setColour((const tARGB*)&gPopupBlack);
             }
         }
         *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupWhite;
@@ -659,31 +651,27 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* vself)
         cScreenPopup_hideWidgetSafe((cScreenPopup*)self, self->mpBackGroundGreyFade);
         cScreenPopup_showWidgetSafe((cScreenPopup*)self, self->mpBackGroundBlack);
         {
-            char* frameWidget = (char*)self->mpMessageText;
+            cUIThing* frameWidget = self->mpMessageText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
+                frameWidget->setColour((const tARGB*)&gPopupWhite);
             }
         }
         {
-            char* frameWidget = (char*)self->mpPostText;
+            cUIThing* frameWidget = self->mpPostText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
+                frameWidget->setColour((const tARGB*)&gPopupWhite);
             }
         }
         {
-            char* frameWidget = (char*)self->mpTitleText;
+            cUIThing* frameWidget = self->mpTitleText;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
+                frameWidget->setColour((const tARGB*)&gPopupWhite);
             }
         }
         {
-            char* frameWidget = (char*)self->mpEnterBox;
+            cUIThing* frameWidget = self->mpEnterBox;
             if (frameWidget != 0) {
-                sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(frameWidget + 8);
-                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
+                frameWidget->setColour((const tARGB*)&gPopupWhite);
             }
         }
         *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupBlue;
@@ -1795,9 +1783,8 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
             float item[4];
             cScreenPopup_setTextString2(self, text, info);
             {
-                char* titleText = (char*)self->mpTitleText;
-                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(titleText + 8);
-                vt[9].fn(vthis(titleText, vt[9]), 1);
+                cUIThing* titleText = self->mpTitleText;
+                titleText->setVisible(1);
             }
             cScreenPopup_getStringSize(self, self->mpTitleText, info, item);
             cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, item);
@@ -1806,8 +1793,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
                 cScreenPopup_changePivot(self, self->mpTitleText, 17, 0.0f);
             }
         } else {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)text + 8);
-            vt[9].fn(vthis(text, vt[9]), 0);
+            text->setVisible(0);
         }
     }
 }
@@ -2495,11 +2481,6 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
 struct sVec3_9938 { float x, y, z; };
-struct sVEntry_9938 {
-    short delta;
-    short index;
-    void (*fn)(void*, t2Vector*);
-};
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_charAdvance1(void* font, int c);
 extern "C" int USTR_length(unsigned short* s);
@@ -2538,8 +2519,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* te
     USTR_copy(buf, str);
     sVec3_9938 textScale;
     t2Vector size;
-    sVEntry_9938* vt = *(sVEntry_9938**)((char*)text + 8);
-    vt[20].fn(vthis(text, vt[20]), &size);
+    text->getSize((t3Vector*)&size);
     textScale = *(sVec3_9938*)((char*)text + 0x50);
     while (i < n) {
         if (buf[i] == gUSTRBackSlash1 && buf[i + 1] == gUSTRBackSlash1) {
@@ -3122,11 +3102,6 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_checkAndFixTextEntry);
 struct cUIText;
 struct sVec3_A6A0 { float x, y, z; };
 struct sVec2_A6A0 { float x, y; };
-struct sVEntry_A6A0 {
-    short delta;
-    short index;
-    void (*fn)(void*, sVec2_A6A0*);
-};
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" char* strcat(char* dst, const char* src);
@@ -3161,8 +3136,7 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
     sVec2_A6A0 size;
     float ext[4];
     float dots[4];
-    sVEntry_A6A0* vt = *(sVEntry_A6A0**)((char*)text + 8);
-    vt[20].fn(vthis(text, vt[20]), &size);
+    text->getSize((t3Vector*)&size);
     cFont* font = (cFont*)cUIText_getFont(text);
     float sx = font->BaseScale[0] * scale.x;
     float sy = font->BaseScale[1] * scale.y;
@@ -4840,10 +4814,10 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
     if (redo) {
         char name[32];
         cKeyboardPopup_getObjName((cKeyboardPopup*)self, 70, name, 1);
-        sUIObj_C1E0* keyObj = (sUIObj_C1E0*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        cUIThing* keyObj = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
         if (keyObj != 0) {
             // PORT: takes the address of a temporary (accepted by g++ 2.95); use a named local elsewhere.
-            keyObj->vt[11].fn(vthis(keyObj, keyObj->vt[11]), &sColor_C1E0(0.3f, 0, 0, 0));
+            keyObj->setColour((const tARGB*)&sColor_C1E0(0.3f, 0, 0, 0));
         }
     }
 }
@@ -5673,42 +5647,35 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             if (text != 0) {
                 cUIText_setAsciiString(text, ch);
                 if (cKeyboardPopup_allowSelection(self, i, 0) == 0) {
-                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)text + 8);
-                    vt[11].fn(vthis(text, vt[11]), gtStaticColor);
+                    text->setColour((const tARGB*)gtStaticColor);
                 } else {
-                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)text + 8);
-                    vt[11].fn(vthis(text, vt[11]), gtNotStatic);
+                    text->setColour((const tARGB*)gtNotStatic);
                 }
             }
         }
         cKeyboardPopup_getObjName(self, i, name, 1);
-        char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+        cUIThing* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
         if (uiObj != 0) {
             if (self->meType == 1) {
                 if (i >= 0 && i < 0xE) {
-                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[9].fn(vthis(uiObj, vt[9]), (void*)0);
+                    uiObj->setVisible(0);
                 } else {
-                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[9].fn(vthis(uiObj, vt[9]), (void*)1);
+                    uiObj->setVisible(1);
                 }
             } else {
                 {
-                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[11].fn(vthis(uiObj, vt[11]), gtNonSelectedKey);
+                    uiObj->setColour((const tARGB*)gtNonSelectedKey);
                 }
                 {
-                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[9].fn(vthis(uiObj, vt[9]), (void*)1);
+                    uiObj->setVisible(1);
                 }
             }
         }
     }
     cKeyboardPopup_getObjName(self, self->miCurrentKey, name, 1);
-    char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    cUIThing* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
     if (uiObj != 0) {
-        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-        vt[11].fn(vthis(uiObj, vt[11]), gtSelectedKey);
+        uiObj->setColour((const tARGB*)gtSelectedKey);
     }
 }
 #endif
@@ -5744,8 +5711,7 @@ static inline void SetColor_1CD9B8(cUIText* text, void* col)
 
 static inline void SetVisible_1CD9B8(cUIText* text, int on)
 {
-    sTextVE_1CD9B8* vt = *(sTextVE_1CD9B8**)((char*)text + 8);
-    ((void (*)(void*, int))vt[9].fn)(vthis(text, vt[9]), on);
+    text->setVisible(on);
 }
 
 /**

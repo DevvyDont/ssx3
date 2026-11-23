@@ -7935,13 +7935,11 @@ extern int D_004A20C4;
 extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
 {
     if (self->mScrollOffset == 0) {
-        char* arrowWidget = (char*)self->mpArrowUp;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
-        vt[9].fn(vthis(arrowWidget, vt[9]), 0);
+        cUIThing* arrowWidget = self->mpArrowUp;
+        arrowWidget->setVisible(0);
     } else {
-        char* arrowWidget = (char*)self->mpArrowUp;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
-        vt[9].fn(vthis(arrowWidget, vt[9]), 1);
+        cUIThing* arrowWidget = self->mpArrowUp;
+        arrowWidget->setVisible(1);
     }
     int n;
     if (D_004A20C4 != 0) {
@@ -7952,13 +7950,11 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
         n += func_001E2BB8(4, 0);
     }
     if (self->mScrollOffset + 8 >= n) {
-        char* arrowWidget = (char*)self->mpArrowDown;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
-        vt[9].fn(vthis(arrowWidget, vt[9]), 0);
+        cUIThing* arrowWidget = self->mpArrowDown;
+        arrowWidget->setVisible(0);
     } else {
-        char* arrowWidget = (char*)self->mpArrowDown;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
-        vt[9].fn(vthis(arrowWidget, vt[9]), 1);
+        cUIThing* arrowWidget = self->mpArrowDown;
+        arrowWidget->setVisible(1);
     }
 }
 #endif
@@ -8683,15 +8679,13 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
     sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[self->miMessage];
     sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->groupIndex];
     if (groupEntry->type == 4) {
-        void* buttonWidget = self->mpButtonSquare;
+        cUIThing* buttonWidget = self->mpButtonSquare;
         if (buttonWidget != 0) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)buttonWidget + 8);
-            vt[9].fn(vthis(buttonWidget, vt[9]), 0);
+            buttonWidget->setVisible(0);
         }
-        buttonWidget = (void*)self->mpDeleteMessage;
+        buttonWidget = self->mpDeleteMessage;
         if (buttonWidget != 0) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)buttonWidget + 8);
-            vt[9].fn(vthis(buttonWidget, vt[9]), 0);
+            buttonWidget->setVisible(0);
         }
         if (self->mpKeepMessage != 0) {
             cUIText_setUnicodeStringByID(self->mpKeepMessage, GetHashValue32(str_kT_BTNKeepMsg));
