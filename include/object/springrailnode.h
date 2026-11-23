@@ -12,7 +12,7 @@
 // (Nodes) is at 0x70 and the class is 16-byte aligned (cFlexRailNode's tBoundBox); [O] On Tour 0x70 (Nodes at 0x6C);
 // [P] the preview's paired methods use Nodes at 0x70 too (tools/layout_xlate.py).
 // Bases: cFlexRailNode (0x00-0x60, object/flexrailnode.h: cInstanceNode 0x00-0x1C + cFlexRailNodeState at 0x20 + Mats,
-// Node, Tube), written out inline with that header's member names; then cSpringRailNodeState (On Tour 0xC) at 0x60. Its
+// Node, Tube; a real base), then cSpringRailNodeState (On Tour 0xC) at 0x60. Its
 // vptr is cInstanceNode's at 0xC.
 // Constructors: cSpringRailNode_cSpringRailNode (record, tMakeSpringRailData*: cFlexRailNode_cFlexRailNode(type 21),
 // vtable, the state from data +0x48/+0x4C/+0x50, Nodes = new [NumNodes] ("SpringRailNodes", 0x60 each) with InstId/Mesh
@@ -33,7 +33,7 @@
 //       cSpringRailNode).
 
 #include "layout.h"
-#include "object/instancenode.h"
+#include "object/flexrailnode.h"
 #include "bx/math3d.h"
 #include "world/worldview.h" /* tBoundBox */
 
@@ -109,24 +109,16 @@ CHECK_OFFSET(tMakeSpringRailData, TorqueScale, 0x50);
 CHECK_OFFSET(tMakeSpringRailData, unk_054, 0x54);
 CHECK_SIZE(tMakeSpringRailData, 0x58);
 
-struct cSpringRailNode : public cInstanceNode {
-    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
+struct cSpringRailNode : public cFlexRailNode {
+    // cFlexRailNode (object/flexrailnode.h, 0x60): the vptr at 0x0C:
     //   [R] cSpringRailNode_vtbl in both ctors and the dtor (after cFlexRailNode's own); [P]
     // cSpringRailNode's notes on cInstanceNode's fields:
     //   ObjNodeType: [R] node type 21 (passed to cFlexRailNode_cFlexRailNode)
-    // --- cFlexRailNodeState (On Tour 0x30, 16-byte aligned; read whole by cFlexRailNode_cFlexRailNode1)
-    char unk_01C[0x4];              // 0x01C alignment gap before the 16-byte-aligned state (never accessed)
-    int NumNodes;                   // 0x020 [O] cFlexRailNodeState::NumNodes; [P]; [U] the ctors size Nodes by it,
-                                    //      every update/getMesh/updateBoundBox loop (lw 0x20)
-    int RailFlags;                  // 0x024 [O] cFlexRailNodeState::RailFlags
-    char unk_028[0x8];              // 0x028 alignment gap before BoundBox (never accessed)
-    tBoundBox BoundBox;             // 0x030 [O] cFlexRailNodeState::BoundBox; [P]; [U] updateBoundBox recomputes it
-                                    //      from the node positions (lwc1/swc1 0x30-0x38, 0x40-0x48; lq/sq 0x30/0x40)
-    // --- cFlexRailNode
-    t4Matrix* Mats;                 // 0x050 [O] cFlexRailNode::Mats; [P]; [U] updateMats fills one matrix per segment
-    cFlexRailSpaceNode* Node;       // 0x054 [O] cFlexRailNode::Node (Nash space-hash node; addSpaceHash/remSpaceHash)
-    cSimpleTube* Tube;              // 0x058 [O] cFlexRailNode::Tube
-    char unk_05C[0x4];              // 0x05C cFlexRailNode's tail padding (16-byte-aligned size 0x60; never accessed)
+    // cSpringRailNode's notes on cFlexRailNode's fields:
+    //   NumNodes: [U] the ctors size Nodes by it, every update/getMesh/updateBoundBox loop (lw 0x20)
+    //   BoundBox: [U] updateBoundBox recomputes it from the node positions (lwc1/swc1 0x30-0x38,
+    //       0x40-0x48; lq/sq 0x30/0x40)
+    //   Mats: [U] updateMats fills one matrix per segment
     // --- cSpringRailNodeState (On Tour 0xC; [R] the replay ctor reads / writeToReplayFrame writes 0xC bytes at +0x60)
     float ASpring;                  // 0x060 [O]; [R] ctor: data +0x48 (swc1); [U] updateNodes (lwc1)
     float ADamp;                    // 0x064 [O]; [R] ctor: data +0x4C (swc1); [U] updateNodes (lwc1)
@@ -141,15 +133,6 @@ struct cSpringRailNode : public cInstanceNode {
     char unk_074[0xC];              // 0x074 tail padding to the 16-byte-aligned size 0x80 (never accessed)
 };
 
-CHECK_OFFSET(cSpringRailNode, unk_01C, 0x01C);
-CHECK_OFFSET(cSpringRailNode, NumNodes, 0x020);
-CHECK_OFFSET(cSpringRailNode, RailFlags, 0x024);
-CHECK_OFFSET(cSpringRailNode, unk_028, 0x028);
-CHECK_OFFSET(cSpringRailNode, BoundBox, 0x030);
-CHECK_OFFSET(cSpringRailNode, Mats, 0x050);
-CHECK_OFFSET(cSpringRailNode, Node, 0x054);
-CHECK_OFFSET(cSpringRailNode, Tube, 0x058);
-CHECK_OFFSET(cSpringRailNode, unk_05C, 0x05C);
 CHECK_OFFSET(cSpringRailNode, ASpring, 0x060);
 CHECK_OFFSET(cSpringRailNode, ADamp, 0x064);
 CHECK_OFFSET(cSpringRailNode, TorqueScale, 0x068);

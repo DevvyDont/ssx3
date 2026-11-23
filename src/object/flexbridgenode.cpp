@@ -1300,10 +1300,8 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* self);
  */
 extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 {
-    sVEntry<void(void*)>* vt1 = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
-    vt1[47].fn(vthis(self, vt1[47]));
-    sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
-    vt2[48].fn(vthis(self, vt2[48]));
+    self->updateNodes();
+    self->updateMats();
     cFlexRailNode_updateSpaceHash(self);
 }
 #endif
@@ -1330,7 +1328,7 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
     cFlexRailNode* self = node;
     tBoundBox* box = (&self->BoundBox);
     tBoundBox old = *(&self->BoundBox);
-    ((sVEntry<void(void*)>*)VPTR_OF(cObjNode, self))[50].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cObjNode, self))[50]));
+    self->updateBoundBox();
     nash_Nash_movenode(cObjectInterface_getNash(), 2, ((int)self->Node), box, &old);
 }
 #endif
@@ -1745,8 +1743,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
             (*(sFbV_8290*)&intInfo->Ipos) = lastp;
             (*(sFbV_8290*)&intInfo->Inorm) = fbNormalize_8290(splineSlope_8290(mat, lastt));
             (*(void**)&intInfo->Inst) = (void*)self->Instance;
-            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cObjNode, self);
-            intInfo->Mesh = vt[49].fn(vthis(self, vt[49]), seg);
+            intInfo->Mesh = self->getMesh(seg);
             intInfo->Seg = seg;
             (*(int*)&intInfo->Spline) = 0;
             intInfo->T = lastt;
