@@ -11,6 +11,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "replay/bxreplayframe.h"
+#include "object/being.h"
 
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_gainFocus);
@@ -848,8 +849,6 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolveAirMotion);
 #ifdef SKIP_ASM
 
 
-struct sVEntR_137860 { short delta; short index; bool (*fn)(void*); };
-
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
@@ -940,9 +939,7 @@ static inline void vu0SubEq_137860(t4Vector& a, const t4Vector& b)
 
 static inline bool isHuman_137860(cRider* rider)
 {
-    char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
-    sVEntR_137860* vt = *(sVEntR_137860**)sub;
-    return vt[kRiderVt_isHuman].fn(vthis(sub, vt[kRiderVt_isHuman]));
+    return rider->isHuman();
 }
 
 #define RIDER (*(cRider**)(self + 0x40))

@@ -2828,11 +2828,6 @@ INCLUDE_ASM("camera/camera", cManualChaseAlgorithm_snap);
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(cLookAtChaseAlgorithm* self, float a, float b);
 
-struct sCamVEntryIntA {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct sCamVEntryVoidA {
     short delta;
     short index;
@@ -2849,9 +2844,7 @@ struct sCamVEntryVoidA {
  */
 extern "C" void cManualChaseAlgorithm_snap(cManualChaseAlgorithm* self, int id)
 {
-    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
-    if (id == vt[7].fn(vthis(obj, vt[7])))
+    if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(((cLookAtChaseAlgorithm*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 100.0f, 100.0f);
@@ -3126,9 +3119,7 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(cLookAtChaseAlgorithm* 
  */
 extern "C" void cMatrixChaseAlgorithm_snap(cMatrixChaseAlgorithm* self, int id)
 {
-    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
-    if (id == vt[7].fn(vthis(obj, vt[7])))
+    if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
@@ -3303,9 +3294,7 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(cLookAtChaseAlgorithm* 
  */
 extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int id)
 {
-    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
-    if (id == vt[7].fn(vthis(obj, vt[7])))
+    if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
@@ -3642,11 +3631,6 @@ INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_snap);
 #ifdef SKIP_ASM
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 
-struct sCamVEntryInt {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct sCamVEntryVoid {
     short delta;
     short index;
@@ -3663,9 +3647,7 @@ struct sCamVEntryVoid {
  */
 extern "C" void cSplineCamAlgorithm_snap(cSplineCamAlgorithm* self, int id)
 {
-    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sCamVEntryInt* vt = *(sCamVEntryInt**)obj;
-    if (id == vt[7].fn(vthis(obj, vt[7])))
+    if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
         sCamVEntryVoid* vt2 = (sCamVEntryVoid*)self->mVtbl;
@@ -3951,9 +3933,7 @@ extern "C" void cIdleChaseAlgorithm_snap_v(char* self, int id) __asm__("cIdleCha
 extern "C" void cIdleChaseAlgorithm_snap_v(char* vself, int id)
 {
     cIdleChaseAlgorithm* self = (cIdleChaseAlgorithm*)vself;
-    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    if (id == vt[7].fn(vthis(obj, vt[7])))
+    if (id == self->Target->Rider->getAIIndex())
     {
         self->Position = cmAddP_1848(cmAdd_001607E0_1848(cmGet_001607E0_1848(((char*)self), 1), cmScaleP_1848b(&t4vect_ZAxis_1848, 100.05000305175781f)), &t4vect_XAxis);
         cLookAtChaseAlgorithm_snap(self, id);
@@ -8584,9 +8564,7 @@ static inline sVec4 getVec_6C60(char* self, int slot)
 extern "C" void f_6C60_def(void* algorithm, long id)
 {
     cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)algorithm;
-    char* mgr = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sVEntry<void>* mvt = *(sVEntry<void>**)mgr;
-    if (id == ((LongFn_6C60)mvt[7].fn)(vthis(mgr, mvt[7]))) {
+    if (id == self->Target->Rider->getAIIndex()) {
         sVec4 front = getVec_6C60(((char*)self), 4);
         sVec4 velocity = getVec_6C60(((char*)self), 3);
         sVec4 vecCopy;
@@ -8691,9 +8669,7 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_snapCurrent);
 extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
 {
     sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
-    char* targetMgr = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)targetMgr;
-    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(targetMgr, vt2[7])));
+    return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
 }
 #endif
 
@@ -10504,6 +10480,7 @@ INCLUDE_ASM("camera/camera", cLazyChaseAlgorithm_snap);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
+#include "object/being.h"
 
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
@@ -10574,9 +10551,7 @@ extern "C" void cLazyChaseAlgorithm_snap_v(char* self, long id) __asm__("cLazyCh
 extern "C" void cLazyChaseAlgorithm_snap_v(char* vself, long id)
 {
     cLazyChaseAlgorithm* self = (cLazyChaseAlgorithm*)vself;
-    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    if (id == vt[7].fn(vthis(obj, vt[7])))
+    if (id == self->Target->Rider->getAIIndex())
     {
         t4Vector nv = cmSub_168150(cmAdd_001607E0_8508(cmGet_001607E0_8508(((char*)self), 1), cmScaleP_1848(&t4vect_ZAxis_8508, 100.0f)), cmScale_001607E0_8508(cmGet_001607E0_8508(((char*)self), 4), 200.0f));
         self->Position = nv;

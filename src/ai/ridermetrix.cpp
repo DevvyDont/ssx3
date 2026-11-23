@@ -10,6 +10,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "replay/bxreplayframe.h"
+#include "object/being.h"
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
@@ -809,12 +810,6 @@ extern char str_LATE_FLIP[];
 
 
 
-struct sVE_117FE0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 
 
 static inline bool slotFree_117FE0(const cHUDFX* s)
@@ -1158,9 +1153,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
         cHUDFX_setAsync_f(s2, 2, val, 0.0f, x);
     }
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* obj = (char*)&VPTR_AT(self->Rider, sizeof(cRiderState));
-    sVE_117FE0* vt = *(sVE_117FE0**)obj;
-    int moneyTotal = cBEEconInterface_getMoney1(stats, vt[7].fn(vthis(obj, vt[7])));
+    int moneyTotal = cBEEconInterface_getMoney1(stats, self->Rider->getAIIndex());
     cHUDFX_setAsync_f(&self->HUDfx[25], 25, moneyTotal, 0.0f, 0);
     if (!slotFree_117FE0(&self->HUDfx[4])) {
         int have = self->HUDfx[4].DisplayInt;
@@ -1491,14 +1484,10 @@ static inline bool rmRiderFlags_1194C0(char* vvr)
  */
 extern "C" float cRiderMetrix_evCheckpoint(cRiderMetrix* self, int timeBonusSec)
 {
-    char* sub = (char*)&VPTR_AT(self->Rider, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-    if (vt[8].fn(vthis(sub, vt[8])) != 0)
+    if (self->Rider->isHuman() != 0)
     {
         void* mgr = SSXApp->GameModeMan;
-        char* sub2 = (char*)&VPTR_AT(self->Rider, sizeof(cRiderState));
-        sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)sub2;
-        if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(vthis(sub2, vt2[7])), timeBonusSec) != 0)
+        if (cGameModeMan_riderCheckpointHit(mgr, self->Rider->getAIIndex(), timeBonusSec) != 0)
         {
             cRiderMetrix_addHUDfx1(((char*)self), 41, timeBonusSec, 0, 2.5f);
             if (rmRiderFlags_1194C0((char*)self->Rider))

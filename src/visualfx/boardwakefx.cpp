@@ -4731,9 +4731,7 @@ extern float kBeamPulseRate;
  */
 extern "C" void cPlayerIndicatorFX_update(cPlayerIndicatorFX* self)
 {
-    char* riderVptr = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)riderVptr;
-    if (vt[8].fn(vthis(riderVptr, vt[8])) == 0) return;
+    if (self->mRider->isHuman() == 0) return;
     float half = 0.5f;
     float newPhase = self->PulseAng + kBeamPulseRate * 0.01666666753590107f;
     float turns = newPhase * 0.15915493667125702f + half;
@@ -4924,9 +4922,7 @@ static inline int rsTex_3AF8(sRCtx_3AF8* ctx)
 
 static inline int IsHuman_3AF8(cRider* rider)
 {
-    char* obj = (char*)&VPTR_AT(rider, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    return vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]));
+    return rider->isHuman();
 }
 
 static inline int ShouldDraw_3AF8(cPlayerIndicatorFX* self)
@@ -6882,6 +6878,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
+#include "object/being.h"
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline t4Vector vu0Scale(const t4Vector& v, float s)
@@ -7327,9 +7324,7 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
                 self->mSpeedBoostTrailNumSegs++;
             }
             self->mSpeedBoostTrailCurrentSeg = (self->mSpeedBoostTrailCurrentSeg + 29) % 30;
-            char* sub = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
-            sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)sub;
-            t4Vector pos = *vt[5].fn(vthis(sub, vt[5]));
+            t4Vector pos = *self->mRider->getPosition();
             t4Vector boardPos = wakeRowE6C08(self->mRider, 3);
             t4Vector boardSide = wakeRowE6C08(self->mRider, 2);
             t4Vector boardFwd = wakeRowE6C08(self->mRider, 0);

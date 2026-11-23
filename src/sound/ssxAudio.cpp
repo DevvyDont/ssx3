@@ -2727,6 +2727,7 @@ extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetClosestCamera);
 #ifdef SKIP_ASM
 #include "fakematch.h"
+#include "object/being.h"
 
 extern "C" int cSSXAudio_GetNumViews();
 void* cSSXAudio_GetCameraPos(void* self, int a1);
@@ -2798,8 +2799,6 @@ extern "C" int cSSXAudio_GetClosestCamera(cSSXAudio* self, int id);
 // PORT: callers pass self, but cSSXAudio_GetNumViews's body takes no arguments (the unit declares it ()).
 int cSSXAudio_GetNumViews_self(void* self) __asm__("cSSXAudio_GetNumViews");
 
-struct sAudVtEnt { short delta; short index; int (*fn)(void*); };
-
 /**
  * Returns the view a rider's sounds play on: its own view for a local human, else the view nearer its position.
  *
@@ -2820,9 +2819,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, cRider* obj)
     if (cSSXAudio_GetNumViews_self(self) == 1) {
         return 0;
     }
-    char* being = (char*)&VPTR_AT(obj, sizeof(cRiderState));
-    sAudVtEnt* entry = &(*(sAudVtEnt**)being)[5];
-    return cSSXAudio_GetClosestCamera(self, entry->fn(vthis(being, *entry)));
+    return cSSXAudio_GetClosestCamera(self, (int)obj->getPosition());
 }
 #endif
 
@@ -3548,9 +3545,7 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider
     if (idx >= 2) return;
     t4Vector pos;
     {
-        char* being = (char*)&VPTR_AT(rider, sizeof(cRiderState));
-        sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)being;
-        pos = *vt[5].fn(vthis(being, vt[5]));
+        pos = *rider->getPosition();
     }
     if (func_0028D960(self) != 0) {
         float k = -99999.0f;
@@ -3741,12 +3736,6 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 
-struct sSsxAudioVEntryI {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 /**
  * Returns a rider's character level from its stat level: below 4 gives 0, below 8 gives 1, else 2.
  *
@@ -3759,9 +3748,7 @@ struct sSsxAudioVEntryI {
 extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, cRider* src)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    char* obj = (char*)&VPTR_AT(src, sizeof(cRiderState));
-    sSsxAudioVEntryI* vt = *(sSsxAudioVEntryI**)obj;
-    int n = cBEStatInterface_getStatLevel(iface, vt[7].fn(vthis(obj, vt[7])));
+    int n = cBEStatInterface_getStatLevel(iface, src->getAIIndex());
     if (n < 4) {
         return 0;
     }

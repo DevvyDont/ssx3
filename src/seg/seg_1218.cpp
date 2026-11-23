@@ -4206,8 +4206,6 @@ struct sHit_57B8 {
 
 struct sVE_57B8 { short delta; short index; int (*fn)(void*); };
 struct sVEf_57B8 { short delta; short index; void (*fn)(void*, float); };
-struct sVEv_57B8 { short delta; short index; t4Vector* (*fn)(void*); };
-
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_57B8(const t4Vector& a, const t4Vector& b)
 {
@@ -4432,11 +4430,8 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
             cRider_setControlState_57B8(rider, 5);
             cRiderAnimBase_play(rider->mRiderAnim, 268, 1, -1.0f);
         }
-        char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
-        sVEv_57B8* vt2 = *(sVEv_57B8**)sub;
-        t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
-        sVEv_57B8* vt3 = *(sVEv_57B8**)sub;
-        t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
+        t4Vector* pos = rider->getPosition();
+        t4Vector* vel = rider->getVelocity();
         cAirPredictor_startLaunchIntoAir_57B8(rider->mAirPredictor, pos, vel, rider->TerminalVelocity);
         return;
     }
@@ -7003,6 +6998,7 @@ INCLUDE_ASM("seg/seg_1218", cComputer__cComputer);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1218_classes.h"
 #include "replay/bxreplayframe.h"
+#include "object/being.h"
 
 /**
  * Destroys a computer rider (compiler-generated destructor).

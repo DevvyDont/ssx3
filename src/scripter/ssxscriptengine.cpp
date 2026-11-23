@@ -2976,9 +2976,7 @@ static inline float Atan2_27B750(float y, float x)
  */
 extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEngine* self, cRider* obj, sVec4_27B750* pos, int* roll, float* pitch, float* yaw)
 {
-    char* sub = (char*)&VPTR_AT(obj, sizeof(cRiderState));
-    sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)sub)[7];
-    tPathStartpoint* startPoint = (tPathStartpoint*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(vthis(sub, *vtEntry)));
+    tPathStartpoint* startPoint = (tPathStartpoint*)cPathSys_getStartpoint(gPaths, 1, obj->getAIIndex());
     *pos = sVec4_27B750(startPoint->Pos.x, startPoint->Pos.y, startPoint->Pos.z, 1.0f);
     *yaw = Atan2_27B750(startPoint->Dir.y, startPoint->Dir.x);
     float z = startPoint->Dir.z;
@@ -3048,9 +3046,7 @@ static inline float Atan2_27B948(float y, float x)
  */
 extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, cRider* obj, t4Vector* pos, int* roll, float* pitch, float* yaw)
 {
-    char* sub = (char*)&VPTR_AT(obj, sizeof(cRiderState));
-    sVEntry<t4Vector*(void*)>* vtEntry = &(*(sVEntry<t4Vector*(void*)>**)sub)[5];
-    *pos = *vtEntry->fn(vthis(sub, *vtEntry));
+    *pos = *obj->getPosition();
     t4Vector dir = *(&obj->mMatrix.row[1]);
     *yaw = Atan2_27B948(dir.y, dir.x);
     sVec2_27B948 horiz(dir.x, dir.y);
@@ -6228,6 +6224,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_cScriptObjCamera
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "scripter/ssxscriptengine_classes.h"
+#include "object/being.h"
 
 /**
  * Constructs a script camera manager: a cScriptObject of type 0 plus a script entity with nine entity slots.

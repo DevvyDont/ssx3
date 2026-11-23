@@ -893,6 +893,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX__cCheatFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/worldlightman_classes.h"
+#include "object/being.h"
 
 /**
  * Destroys a rider's cheat-code tracker: restores its vtables, then destroys the virtual cRider base when in
@@ -1066,9 +1067,7 @@ static inline sVec6518 add6518(const sVec6518& a, const sVec6518& b)
  */
 extern "C" void cCheatFX_update(cCheatFX* self)
 {
-    char* sub = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-    if (vt[9].fn(vthis(sub, vt[9])) != 0) {
+    if (self->mRider->isComputer() != 0) {
         return;
     }
     if (cCheatFX_m_resetStates >= 2) {

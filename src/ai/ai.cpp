@@ -1717,9 +1717,7 @@ extern "C" void func_0012A998(cAI* self)
         cRider* rider = *(cRider**)(list[i] + 0x18);
         if (rider->mRenderFlag != 0)
         {
-            char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
-            sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-            if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex]))) != 0)
+            if (func_0012A1F0(self, rider->getAIIndex()) != 0)
             {
                 cRider* hiddenRider = *(cRider**)(list[i] + 0x18);
                 hiddenRider->mRenderFlag = 0;
@@ -4727,9 +4725,7 @@ extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
 {
     if ((AITick() & 1) == 0)
     {
-        char* sub = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
-        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-        if (vt[8].fn(vthis(sub, vt[8])))
+        if (self->mRider->isHuman())
         {
             cRider_flagEventReaction(self->mRider, 4, 0.0f);
         }
@@ -10158,6 +10154,7 @@ INCLUDE_ASM("ai/ai", cWipeoutMotion__cWipeoutMotion);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/ai_classes.h"
 #include "replay/bxreplayframe.h"
+#include "object/being.h"
 
 /**
  * Destroys the wipeout motion part: deletes its board sphere tree and, as the flags ask, the cRider and self.

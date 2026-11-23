@@ -3436,9 +3436,7 @@ extern "C" void cRider_updateSplit11(cRider* self)
 {
     if (~self->mGroundPolyId != 0)
         self->mGroundMaterial = cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, (unsigned char)self->mGroundPolyId);
-    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
-    sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
-    cRenderStateMan_update(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
+    cRenderStateMan_update((void*)self->getAIIndex(), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
     char* handler = (char*)self->mRiderHandler;
     cPlayerLights_Clear(handler ? handler + 0xD30 : 0);
 }
@@ -3745,9 +3743,7 @@ extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     t4Vector* viewMtx = (t4Vector*)ps2GraphicsMan->GetView();
-    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
-    sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
-    t4Vector* pos = (t4Vector*)vt[kRiderVt_getPosition].fn(vthis(obj, vt[kRiderVt_getPosition]));
+    t4Vector* pos = self->getPosition();
     t4Vector viewPos = mtxMulVec_121F30(viewMtx, pos);
     float z = viewPos.z;
     cPS2GraphicsMan* graphicsMan = GrMan;
@@ -3920,16 +3916,12 @@ extern "C" void cRider_SetRiderLights(cRider* self)
     t4Vector hipPos;
     cIrradiance_Clear(self->unk_7C0);
     {
-        char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
-        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
-        *(cIrradiance*)&self->unk_7C0[0] = *(cIrradiance*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])));
+        *(cIrradiance*)&self->unk_7C0[0] = *(cIrradiance*)cRenderStateMan_getIrradiance((void*)self->getAIIndex());
     }
     cRider_getHipPosition(&hipPos, self);
     char* lightState = self->unk_7C0;
     {
-        char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
-        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
-        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))));
+        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset((void*)self->getAIIndex()));
     }
     for (int i = 0; i < 8; i++) {
         void* light = self->ActiveLights[i];
@@ -4603,14 +4595,11 @@ float cRider_getTotalPathDistance(void* self);
  */
 extern "C" int cRider_estimateFinishTick(cRider* self)
 {
-    char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
     int n = SSXApp->Game->AI->EventTimerTick;
     float rate = (cRider_getTotalPathDistance(self) - self->mDistToFinish) / (float)n;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-    if (rate < 30.0f - (float)vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex])))
+    if (rate < 30.0f - (float)self->getAIIndex())
     {
-        sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)sub;
-        rate = 30.0f - (float)vt2[kRiderVt_getAIIndex].fn(vthis(sub, vt2[kRiderVt_getAIIndex]));
+        rate = 30.0f - (float)self->getAIIndex();
     }
     return n + (int)(self->mDistToFinish / rate);
 }
@@ -6378,9 +6367,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
     cRiderMetrix_evFinishRace(self->mMetrix);
     self->mFinishTick = SSXApp->Game->AI->EventTimerTick + self->mPenaltyTicks;
     if (self->mFinishTime < 0.0f) self->mFinishTime = 0.0f;
-    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    cGameModeMan_raceFinish(getC0_125108(), vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])), (int)self->mMetrix + 0xFC);
+    cGameModeMan_raceFinish(getC0_125108(), self->getAIIndex(), (int)self->mMetrix + 0xFC);
     unsigned int k = *(unsigned int*)&self->mViewIndex;
     if (k < 2)
     {
@@ -6416,9 +6403,7 @@ extern int D_005308D0[];
  */
 extern "C" int cRider_updateFinishTest(cRider* self)
 {
-    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    if (vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]))) {
+    if (self->isHuman()) {
         float finishTime = self->mFinishTime;
         float zeroF = 0.0f;
         int done = finishTime >= zeroF;
@@ -6470,9 +6455,7 @@ extern "C" void cRider_quitEvent(cRider* self)
     if (!finished)
     {
         self->mDidNotFinish = 1;
-        char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
-        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-        cGameModeMan_bGiveUp[vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex]))] = 1;
+        cGameModeMan_bGiveUp[self->getAIIndex()] = 1;
     }
 }
 #endif
@@ -6741,9 +6724,7 @@ extern "C" void cRider_updateWind(cRider* self)
         if (speedDeficit > dir.z)
         {
             t4Vector imp = Scale_125970(Scale_125970(dir, speedDeficit), 0.015000000596046448f);
-            char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
-            sVEntry<void(void*, t4Vector*)>* vt = *(sVEntry<void(void*, t4Vector*)>**)obj;
-            vt[kRiderVt_applyBoost].fn(vthis(obj, vt[kRiderVt_applyBoost]), &imp);
+            self->applyBoost(&imp);
         }
     }
 }
@@ -6940,6 +6921,7 @@ INCLUDE_ASM("ai/rider", cPlayer__cPlayer);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/rider_classes.h"
+#include "object/being.h"
 
 /**
  * Destroys a player rider: its replay cache, its effect and wipeout-motion members, then the cRider base.
@@ -7164,9 +7146,7 @@ extern "C" void cPlayer_vibrationUpdate(void* self)
     {
         int flag = 0;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        char* sub = (char*)&VPTR_AT(player->mRider, sizeof(cRiderState));
-        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-        if (cBENewPlayerInterface_getUseDualShock(iface, vt[7].fn(vthis(sub, vt[7]))) != 0)
+        if (cBENewPlayerInterface_getUseDualShock(iface, player->mRider->getAIIndex()) != 0)
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);
         }

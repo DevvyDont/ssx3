@@ -1826,9 +1826,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
     sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
-    char* riderIface = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)riderIface;
-    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(riderIface, vt2[7])));
+    return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
 }
 #endif
 
@@ -2658,9 +2656,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
     sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
-    char* riderIface = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)riderIface;
-    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(riderIface, vt2[7])));
+    return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
 }
 #endif
 
@@ -4882,12 +4878,6 @@ extern "C" void cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData(cSPOKEChaseAlgorit
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_getRiderPosition);
 #ifdef SKIP_ASM
 
-struct sVEa_00177EF8 {
-    short delta;
-    short index;
-    t4Vector* (*fn)(void*);
-};
-
 struct sVEb_00177EF8 {
     short delta;
     short index;
@@ -4943,9 +4933,7 @@ static inline t4Vector ctGetB_00177EF8(void* self)
  */
 extern "C" t4Vector cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
 {
-    char* riderIface = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sVEa_00177EF8* posEntry = &(*(sVEa_00177EF8**)riderIface)[5];
-    t4Vector* riderPos = posEntry->fn(vthis(riderIface, *posEntry));
+    t4Vector* riderPos = self->Target->Rider->getPosition();
     return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
 }
 #endif
@@ -5676,6 +5664,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_upda
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
+#include "object/being.h"
 
 extern t4Vector t4vect_XAxis;
 
@@ -6224,11 +6213,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_sn
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, float b);
 
-struct sCamVEntryIntA {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct sCamVEntryVoidA {
     short delta;
     short index;
@@ -6245,9 +6229,7 @@ struct sCamVEntryVoidA {
  */
 extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self, int id)
 {
-    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
-    sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
-    if (id == vt[7].fn(vthis(obj, vt[7])))
+    if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir(self, 100.0f, 100.0f);
