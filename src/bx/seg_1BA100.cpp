@@ -5582,9 +5582,9 @@ struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     frame->read((char*)&self->m_Type, 4);
-    frame->read((char*)self, 4);
+    frame->read((char*)&self->m_wpTravelDistance, 4);
     frame->read((char*)&self->m_Value, 4);
-    frame->read((char*)self, 4);
+    frame->read((char*)&self->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5978,9 +5978,9 @@ struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     frame->read((char*)&self->m_Level, 4);
-    frame->read((char*)self, 4);
+    frame->read((char*)&self->m_wpTravelDistance, 4);
     frame->read((char*)&self->m_PointRate, 4);
-    frame->read((char*)self, 4);
+    frame->read((char*)&self->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5997,9 +5997,9 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_writeToReplayFrame);
  */
 extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     frame->write((const char*)&self->m_Type, 4);
-    frame->write((const char*)self, 4);
+    frame->write((const char*)&self->m_wpTravelDistance, 4);
     frame->write((const char*)&self->m_Value, 4);
-    frame->write((const char*)self, 4);
+    frame->write((const char*)&self->m_wpTravelDistance, 4);
 }
 #endif
 
@@ -6393,8 +6393,8 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_writeToReplayFrame);
  */
 extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     frame->write((const char*)&self->m_Level, 4);
-    frame->write((const char*)self, 4);
+    frame->write((const char*)&self->m_wpTravelDistance, 4);
     frame->write((const char*)&self->m_PointRate, 4);
-    frame->write((const char*)self, 4);
+    frame->write((const char*)&self->m_wpTravelDistance, 4);
 }
 #endif
