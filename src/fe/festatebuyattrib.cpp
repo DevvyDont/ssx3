@@ -568,12 +568,6 @@ extern const int D_004780B0[];
 
 
 
-struct sVE0_5300 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 
 
 /**
@@ -599,13 +593,12 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
     cUIMenu* attribMenu = (self->pAttribMenu);
     ((sVEntry<void(void*, int)>*)attribMenu->mVtbl)[7].fn(vthis(attribMenu, ((sVEntry<void(void*, int)>*)attribMenu->mVtbl)[7]), 1);
     cBEEconInterface* iface = (cBEEconInterface*)cBE_getInterface_Fv(cBE_getBE(), 11);
-    int* bought = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < self->mPotentialExperience[i]; j++) {
             cBEEconInterface_buyAttribute(iface, 0, cBELibrary_getCharacterID(0), D_004780B0[i]);
         }
     }
-    ((sVE0_5300*)VPTR_OF(cBEInterface, iface))[1].fn(vthis(iface, ((sVE0_5300*)VPTR_OF(cBEInterface, iface))[1]));
+    iface->submit();
     int* max = self->mExperience;
     int* added = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {

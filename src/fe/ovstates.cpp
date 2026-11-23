@@ -292,10 +292,9 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     func_0025B688();
     cGameComm_destroy();
     cCommSystem_destroy();
-    void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
+    cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
-    sVEntry<void(void*)>* vt0 = *(sVEntry<void(void*)>**)((char*)iface + 0xC);
-    vt0[1].fn(vthis(iface, vt0[1]));
+    iface->submit();
     func_0028F140(cAudioInterface_bxAudio(), 1);
     char* obj = *(char**)&self->mpEngine->mpInput;
     *(unsigned char*)&self->mNumOfCtrl = 0;
@@ -589,7 +588,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
     switch (type) {
     case 5: {
         func_001A86E8(0);
-        char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+        cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (item_->mMiscData) {
         case 11:
             cBENewRaceInterface_setGamePath(iface, 0);
@@ -616,8 +615,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             self_->mGoToNextState = 1;
             break;
         }
-        sVEntry<void>* ivt = *(sVEntry<void>**)(iface + 0xC);
-        ((void (*)(void*))ivt[1].fn)(vthis(iface, ivt[1]));
+        iface->submit();
         if (item_->mMiscData == 22 && self_->mGoToNextState == 0) {
             self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
             cFEPopupSelectMultiplayerMode* popup = (cFEPopupSelectMultiplayerMode*)((char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0));

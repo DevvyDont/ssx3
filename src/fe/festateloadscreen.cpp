@@ -975,8 +975,8 @@ static inline int isMode4_2341D0()
 extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
 {
     int i = 0;
-    char* race = (char*)cBE_getInterface_41D0(cBE_getBE(), 0);
-    char* player = (char*)cBE_getInterface_41D0(cBE_getBE(), 1);
+    cBEInterface* race = cBE_getInterface_41D0(cBE_getBE(), 0);
+    cBEInterface* player = cBE_getInterface_41D0(cBE_getBE(), 1);
     cAI_setAIState(*(void**)((char*)cGameState_mpGame + 0xC), 3);
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     cBE_setState(0);
@@ -986,16 +986,14 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
     int base = *(int*)(*(char**)((char*)cGameState_mpGame + 0xC) + 0x7C);
     cBENewRaceInterface_setNumberAI(race, n);
     {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
-        vt[1].fn(vthis(race, vt[1]));
+        race->submit();
     }
     for (; i < n; i++) {
         cBENewPlayerInterface_setRiderCharID(player, i + base, gm->iCharacters[base + i]);
         cBENewPlayerInterface_setRiderCheatCharID(player, i + base, gm->iCheatCharacters[base + i]);
     }
     {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
-        vt[1].fn(vthis(player, vt[1]));
+        player->submit();
     }
     switch (mode) {
     case 0:

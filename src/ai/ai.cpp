@@ -1139,8 +1139,6 @@ void cRider_addRiderMetrix(cRider* rider);
 extern char str_ComputerActorRider[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sVEntryCA { short delta; short index; void (*fn)(void*); };
-
 struct sAiObj129FF8
 {
     char pad0[0x20];
@@ -1180,8 +1178,7 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
         cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
         cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
         cBENewPlayerInterface_setRiderCheatCharID(iface, idx, 0);
-        sVEntryCA* vt = (sVEntryCA*)VPTR_OF(cBEInterface, iface);
-        vt[1].fn(vthis(iface, vt[1]));
+        iface->submit();
         cRider* slotRider = self->mRiders[idx];
         int noController = -1;
         slotRider->mViewIndex = noController;
@@ -1190,8 +1187,7 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
         self->mNumActors++;
         idx++;
     }
-    sVEntryCA* vt = (sVEntryCA*)VPTR_OF(cBEInterface, iface);
-    vt[1].fn(vthis(iface, vt[1]));
+    iface->submit();
     self->mCount = idx;
 }
 #endif

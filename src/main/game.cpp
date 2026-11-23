@@ -1149,7 +1149,7 @@ static inline bool Is_22D6C8(int m, int v)
  */
 extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
 {
-    char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int skip = cBENewRaceInterface_newRace.cGamePath != 0 || !Is_22D6C8(cBENewRaceInterface_newRace.cGameMode, 4) || (unsigned int)(self->mBELocationID - 14) < 3 || mode == 1;
     if (skip) {
         return;
@@ -1191,8 +1191,7 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
             break;
         }
     }
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
-    vt[1].fn(vthis(race, vt[1]));
+    race->submit();
     cGameModeMan_initGameMode(SSXApp->GameModeMan, cBENewRaceInterface_newRace.cGameEvent);
     cGame_setState(self->mpGame, 1, 1, 0);
 }

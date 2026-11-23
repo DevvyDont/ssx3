@@ -8965,17 +8965,6 @@ extern float D_004A2F14;
 extern int cBEOptionInterface_mOption[];
 extern char str_pct_d_pct_d_pct_d_pct_d_b[];
 
-struct sVE_002639E0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
-struct sIf_002639E0 {
-    char pad[0xC];
-    sVE_002639E0* vt;
-};
-
 struct sNetCfg_002639E0 {
     int active;     // 0x0
     int f4;         // 0x4
@@ -9007,20 +8996,20 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int isHost, int ctrlId
     char buf[256];
     int one = 1;
     self[3] = cancel;
-    sIf_002639E0* playerInterface = (sIf_002639E0*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    sIf_002639E0* raceInterface = (sIf_002639E0*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    cBEInterface* playerInterface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* raceInterface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_setNumberHumans(raceInterface, 2);
-    raceInterface->vt[1].fn(vthis(raceInterface, raceInterface->vt[1]));
+    raceInterface->submit();
     cBENewPlayerInterface_setPlayerCtrlID(playerInterface, 0, ctrlId);
     cBENewPlayerInterface_setPlayerCtrlID(playerInterface, 1, 0);
-    playerInterface->vt[1].fn(vthis(playerInterface, playerInterface->vt[1]));
-    sIf_002639E0* networkInterface = (sIf_002639E0*)cBE_getInterface_Fv(SSXApp->BE, 7);
+    playerInterface->submit();
+    cBEInterface* networkInterface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = one;
     cBENetworkInterface_networkOpt.fLatency = 0.01666666753590107f;
     cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = isHost;
-    networkInterface->vt[1].fn(vthis(networkInterface, networkInterface->vt[1]));
-    networkInterface->vt[1].fn(vthis(networkInterface, networkInterface->vt[1]));
+    networkInterface->submit();
+    networkInterface->submit();
     self[2] = isHost;
     sprintf(buf, str_pct_d_pct_d_pct_d_pct_d_b, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, isHost);
@@ -9154,8 +9143,6 @@ extern void* cSetupMan_mSetupMan;
 extern int cRealFE_mStartState;
 extern char str_cPreGameLoadScreen_c[];
 
-struct sVEntry_263CF0 { short delta; short index; void (*fn)(void*); };
-
 static inline bool tsTimedOut_263CF0(int* self)
 {
     return *(float*)(self + 4) < 0.0f;
@@ -9248,10 +9235,9 @@ extern "C" void func_00263CF0(int* self)
             cRealFE_mStartState = 52;
             func_00262768((BuddyMan*)Mgr_263CF0(), 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
             void* bi7 = cBE_getInterface_Fv(SSXApp->BE, 7);
-            char* bi1 = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
+            cBEInterface* bi1 = cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setRiderCharID(bi1, 0, cBENetworkInterface_networkOpt.MyCharacterID);
-            sVEntry_263CF0* vt = *(sVEntry_263CF0**)(bi1 + 0xC);
-            vt[1].fn(vthis(bi1, vt[1]));
+            bi1->submit();
             cBENetworkInterface_backupCharProfile(bi7, 0);
             if (cGameComm_mGameComm != 0)
                 cGameComm_destroy();
@@ -9893,17 +9879,6 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID);
 
-struct sVE264CF0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
-struct sIf264CF0 {
-    char pad[0xC];
-    sVE264CF0* vt;
-};
-
 /**
  * Applies this player's character choice: player 0's character in the player interface and MyCharacterID.
  *
@@ -9914,12 +9889,12 @@ struct sIf264CF0 {
  */
 extern "C" void func_00264CF0(cSetupMan* self, int charID)
 {
-    sIf264CF0* playerInterface = (sIf264CF0*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* playerInterface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCharID(playerInterface, 0, charID);
-    playerInterface->vt[1].fn(vthis(playerInterface, playerInterface->vt[1]));
-    sIf264CF0* networkInterface = (sIf264CF0*)cBE_getInterface_Fv(SSXApp->BE, 7);
+    playerInterface->submit();
+    cBEInterface* networkInterface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.MyCharacterID = charID;
-    networkInterface->vt[1].fn(vthis(networkInterface, networkInterface->vt[1]));
+    networkInterface->submit();
 }
 #endif
 
@@ -9930,17 +9905,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264D80);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID);
-
-struct sVE_00264D80 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
-struct sIf_00264D80 {
-    char pad[0xC];
-    sVE_00264D80* vt;
-};
 
 struct sName7_00264D80 {
     char c[7];
@@ -9966,14 +9930,14 @@ struct sNetState_00264D80 {
  */
 extern "C" void func_00264D80(cSetupMan* self, int charID, sName7_00264D80* name)
 {
-    sIf_00264D80* playerIface = (sIf_00264D80*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* playerIface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCharID(playerIface, 1, charID);
-    playerIface->vt[1].fn(vthis(playerIface, playerIface->vt[1]));
-    sIf_00264D80* networkIface = (sIf_00264D80*)cBE_getInterface_Fv(SSXApp->BE, 7);
+    playerIface->submit();
+    cBEInterface* networkIface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.OpponentCharacterID = charID;
     if (name != 0)
         *(sName7_00264D80*)((char*)&cBENetworkInterface_networkOpt + 0x4A8) = *name;
-    networkIface->vt[1].fn(vthis(networkIface, networkIface->vt[1]));
+    networkIface->submit();
 }
 #endif
 

@@ -140,8 +140,7 @@ extern "C" void cBENewPlayerInterface_defaultCtrl(cBENewPlayerInterface* self)
         entry[i].cControlMap = 0;
         entry[i].iUseDualShock = 1;
     }
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cBEInterface, self);
-    vt[2].fn(vthis(self, vt[2]));
+    self->discard();
 }
 #endif
 

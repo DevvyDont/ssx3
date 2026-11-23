@@ -352,8 +352,8 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     cBackgroundMan_cBackgroundMan(self->bg);
     cTrackFileMan_scanLocations(&self->sub);
     cBackgroundMan_loadImages((cBackgroundMan*)((cBackgroundMan*)self->bg));
-    void* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
-    void* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
+    cBEInterface* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
+    cBEInterface* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
     self->f8C24 = 0;
     *(int*)cBE_getBE() = self->f8C24;
     self->f8C24 = 0;
@@ -398,12 +398,11 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     cBENetworkInterface_networkOpt.fLatency = 0.016666668f;
     cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = 0;
-    sVE_B1B0* vt7 = *(sVE_B1B0**)((char*)iface7 + 0xC);
-    vt7[1].fn(vthis(iface7, vt7[1]));
+    iface7->submit();
     self->f8C44 = 0;
     self->f8C34 = 0;
     self->f8C30 = -1;
-    void* iface1 = cBE_getInterface_B1B0(cBE_getBE(), 1);
+    cBEInterface* iface1 = cBE_getInterface_B1B0(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCtrlID(iface1, 0, 0);
     cBENewPlayerInterface_setPlayerCtrlID(iface1, 1, 1);
     self->f8C28 = 2;
@@ -411,10 +410,8 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     self->f8C2C = cBENewPlayerInterface_getControllerMapping(iface1, 0);
     void* snd = cAudioInterface_bxAudio();
     func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->f8C34 * 0x14 + 0x60A4));
-    sVE_B1B0* vt1 = *(sVE_B1B0**)((char*)iface1 + 0xC);
-    vt1[1].fn(vthis(iface1, vt1[1]));
-    sVE_B1B0* vt0 = *(sVE_B1B0**)((char*)iface0 + 0xC);
-    vt0[1].fn(vthis(iface0, vt0[1]));
+    iface1->submit();
+    iface0->submit();
     return self;
 }
 #endif

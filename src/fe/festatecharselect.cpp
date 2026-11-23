@@ -1027,8 +1027,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
             self->mCheatCharID = self->mCharIDs[sel];
         cBENewPlayerInterface* pl = (cBENewPlayerInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 1));
         cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cBEInterface, pl);
-        vt[1].fn(vthis(pl, vt[1]));
+        pl->submit();
         self->mDone = 1;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;

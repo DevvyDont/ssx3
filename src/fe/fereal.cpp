@@ -220,12 +220,6 @@ struct sFEStateGNS {
     signed char x44;
 };
 
-struct sVEntry0GNS {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Creates the front-end state to go to from a state, given the state's id and the choice made in it.
  *
@@ -314,8 +308,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                     beRaceDB->iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
                     cBENewRaceInterface_bIsBamLocation = one;
                 }
-                sVEntry0GNS* vt = (sVEntry0GNS*)VPTR_OF(cBEInterface, nr);
-                vt[1].fn(vthis(nr, vt[1]));
+                nr->submit();
                 D_004A19DC = 1;
                 cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
                 break;
@@ -446,8 +439,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             cBENewRaceInterface_setGameEvent(nr, 12);
             cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
             cBENewRaceInterface_bIsBamLocation = 1;
-            sVEntry0GNS* vt = (sVEntry0GNS*)VPTR_OF(cBEInterface, nr);
-            vt[1].fn(vthis(nr, vt[1]));
+            nr->submit();
             cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
             break;
         }

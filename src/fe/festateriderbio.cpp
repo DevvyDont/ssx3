@@ -196,22 +196,20 @@ static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s);
  */
 extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIState* item, int msg)
 {
-    void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == 22) {
         if (Is_001835F8(item->mHashName, str_131cheat_char)) {
             int cheatCharId = ((cFEStateCheatCharSelect*)item)->mCheatCharID;
             if (((cFEStateCheatCharSelect*)item)->mDone != 0) {
-                void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
+                cBEInterface* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
                 cBENewPlayerInterface_setPlayerCheatCharID(pi2, self->mUserNum, cheatCharId);
-                sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi2 + 0xC);
-                vt[1].fn(vthis(pi2, vt[1]));
+                pi2->submit();
             }
         } else if (item->mHashName == 0) {
             char* name = ((cKeyboardPopup*)item)->mszEditString;
             if (((cKeyboardPopup*)item)->mbAcceptText != 0 && strlen(name) != 0) {
                 cBENewPlayerInterface_setPlayerName(pi, self->mUserNum, name);
-                sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi + 0xC);
-                vt[1].fn(vthis(pi, vt[1]));
+                pi->submit();
             }
         }
         cFEStateCharSetup_show3DCharacter(self, 1);

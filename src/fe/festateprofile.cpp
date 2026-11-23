@@ -884,15 +884,14 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
             if (nextState != 0)
                 cUIStateStack_pushCheck((char*)self->mpEngine + 0x18, nextState);
         } else if (sel == 1) {
-            char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+            cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
             cBENewRaceInterface_setGameMode(race, 4);
             cBENewRaceInterface_setGameEvent(race, 0xC);
             int x = cBENewPlayerInterface_getLastHub(pl, 0);
             cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = x;
-            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
-            vt[1].fn(vthis(race, vt[1]));
+            race->submit();
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         } else if (sel == 2) {
             gInLodge = 0;

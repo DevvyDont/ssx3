@@ -11074,10 +11074,9 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             return;
         }
         if (self->miCharID != cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect)) {
-            char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
+            cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setPlayerCheatCharID(iface, 0, 0);
-            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-            vt[1].fn(vthis(iface, vt[1]));
+            iface->submit();
         }
         {
             void* mgr = cSetupMan_mSetupMan;
@@ -24719,10 +24718,9 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
                 cFEStateNetQuickPlayPopup* feStateNetQuickPlayPopup = self;
                 int* ids = feStateNetQuickPlayPopup->miSearchOptions;
                 func_001C13E0(self, 0);
-                char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
+                cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
                 cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
-                sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-                vt[1].fn(vthis(iface, vt[1]));
+                iface->submit();
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
                 feStateNetQuickPlayPopup->miSearchOptions[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked);
                 feStateNetQuickPlayPopup->miSearchOptions[1] = cUIListBox_getCurrentEntryData(self->mpLBRace);

@@ -1318,7 +1318,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
 {
     if (((char*)widget) == 0)
         return;
-    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
     case 5: // empty case; needed for the original compare-tree shape
         break;
@@ -1332,8 +1332,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
     }
     case 6: {
         {
-            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-            vt[1].fn(vthis(iface, vt[1]));
+            iface->submit();
         }
         func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
         cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
@@ -1824,7 +1823,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
     if (((char*)widget) == 0) {
         return;
     }
-    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
@@ -1835,8 +1834,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         break;
     }
     case 6: {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-        vt[1].fn(vthis(iface, vt[1]));
+        iface->submit();
         char* obj = *(char**)self->mpEngine;
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
         void* nextState = vt2[5].fn(vthis(obj, vt2[5]), ((char*)self), widget->mMiscData);
@@ -2177,7 +2175,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
     if (((char*)widget) == 0) {
         return;
     }
-    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (event) {
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
@@ -2188,8 +2186,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
         break;
     }
     case 6: {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-        vt[1].fn(vthis(iface, vt[1]));
+        iface->submit();
         char* obj = *(char**)self->mpEngine;
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
         void* nextState = vt2[5].fn(vthis(obj, vt2[5]), ((char*)self), widget->mMiscData);
@@ -2689,10 +2686,9 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
         if (sel < 0) {
             sel = 0;
         }
-        char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerName(iface, sel, D_004A1408);
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-        vt[1].fn(vthis(iface, vt[1]));
+        iface->submit();
         cBE_newProfile(cBE_getBE(), sel);
         void* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, 0);
         cFERider_purge(feRider);

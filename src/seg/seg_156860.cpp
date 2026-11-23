@@ -2912,12 +2912,6 @@ unsigned int AIrand();
 void AIgetseed_8448(void* self) __asm__("AIgetseed__FPv");
 void* AIsetseed(void* self);
 
-struct sVEnt_8448 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 extern char str_bebuffer[];
 extern char str_NA_R_F004[];
 
@@ -2955,10 +2949,9 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
         self->unk_100 = cCommSystem_mCommSystem->mBroadBand;
         cBENetworkInterface_getSyncData_8448(iface, 1, self->mBEBuffer);
         cBENetworkInterface_setSyncData_8448(iface, 1, self->mBEBuffer);
-        void* ui = cBE_getInterface_Fv(cBE_getBE(), 1);
+        cBEInterface* ui = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(ui, 1, cBENewPlayerInterface_getPlayerCtrlID(ui, 0));
-        sVEnt_8448* vt = *(sVEnt_8448**)((char*)ui + 0xC);
-        vt[1].fn(vthis(ui, vt[1]));
+        ui->submit();
     }
     AIgetseed_8448(&self->mServerSettings);
     while (!ggSynced_8448(((char*)self)) && ggDropped_8448(((char*)self)) == 0) {

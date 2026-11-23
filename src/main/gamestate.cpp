@@ -561,8 +561,8 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
             break;
         if (cAI_isReadyToPurgeComputerActors(cGameState_mpGame_date->race) == 0)
             break;
-        char* newRace = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-        char* newPlayer = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        cBEInterface* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
+        cBEInterface* newPlayer = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         cGameModeMan* gm = SSXApp_date->gm;
         int mode = beRaceDB->cGameEvent;
@@ -573,16 +573,14 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
         int i = 0;
         cBENewRaceInterface_setNumberAI(newRace, numAI);
         {
-            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(newRace + 0xC);
-            vt[1].fn(vthis(newRace, vt[1]));
+            newRace->submit();
         }
         for (; i < numAI; i++) {
             cBENewPlayerInterface_setRiderCharID(newPlayer, i + base, gm->iCharacters[base + i]);
             cBENewPlayerInterface_setRiderCheatCharID(newPlayer, i + base, gm->iCheatCharacters[base + i]);
         }
         {
-            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(newPlayer + 0xC);
-            vt[1].fn(vthis(newPlayer, vt[1]));
+            newPlayer->submit();
         }
         cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
         int quick = 0;
@@ -739,10 +737,9 @@ extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
     cWScriptMan_initMissions(cWScriptMan_TheWScriptMan);
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     if (cBENewRaceInterface_getLocationType(race, cBENewRaceInterface_getLocationID(race)) == 1) {
-        char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setLastHub(player, 0, cBENewRaceInterface_getLocationID(race));
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
-        vt[1].fn(vthis(player, vt[1]));
+        player->submit();
     }
     (*(sRaceMan_2355C0**)(cGameState_mpGame + 0xC))->f14 = mode != 4;
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
@@ -932,8 +929,8 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
 {
     cBE_setState(0);
     cWScriptMan_failActiveLocalMission(cWScriptMan_TheWScriptMan);
-    char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     cGameModeMan* gm = SSXApp->GameModeMan;
     cGameModeMan_restartHeat(gm);
     cGame_partialRestart(SSXApp->Game);
@@ -953,16 +950,14 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
     int i = 0;
     cBENewRaceInterface_setNumberAI(race, n);
     {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
-        vt[1].fn(vthis(race, vt[1]));
+        race->submit();
     }
     for (; i < n; i++) {
         cBENewPlayerInterface_setRiderCharID(player, i + base, gm->iCharacters[base + i]);
         cBENewPlayerInterface_setRiderCheatCharID(player, i + base, gm->iCheatCharacters[base + i]);
     }
     {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
-        vt[1].fn(vthis(player, vt[1]));
+        player->submit();
     }
     cAI_prepareToPurgeComputerRiders(SSXApp->Game->AI);
     if (n >= 2)
