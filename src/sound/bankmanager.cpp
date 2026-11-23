@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "sound/bankmonitor.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
@@ -814,7 +815,7 @@ extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(cBankManager* self, int i, 
 INCLUDE_ASM("sound/bankmanager", func_0028BF78);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cAudioInterface_isInGame(void);
 extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
@@ -1794,7 +1795,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028D8A0);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4318(void* self);
 extern "C" int func_002A4368(void* self);
@@ -2000,7 +2001,7 @@ extern "C" int func_0028E088(cSSXAudio* self, char *event) {
 INCLUDE_ASM("sound/bankmanager", func_0028E100);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" void* cAudioInterface_getBE();
@@ -2130,7 +2131,7 @@ extern "C" int func_0028E510(cSSXAudio* self, char* ev)
 INCLUDE_ASM("sound/bankmanager", func_0028E548);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int func_002A1E20(void* self, int id);
@@ -2801,7 +2802,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028F558);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void func_0028EF90(cSSXAudio* self);
 

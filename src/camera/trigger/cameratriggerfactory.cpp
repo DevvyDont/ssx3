@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "bx/bigfile.h"
 #include "worldpainter/worldpainterquery.h"
 #include "world/worldview.h"
@@ -6650,7 +6651,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_testWCBAMStartL
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
 /**
@@ -6741,7 +6742,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_legalTrackMode)
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_A158(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_A158(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
 // PORT: the unit also declares this with a pointer third argument; defined under an asm label with its real type
@@ -6963,7 +6964,7 @@ struct sCamName {
 extern "C" void* MEM_fill(void* dst, int v, int n);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_17A638(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_17A638(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int id);
 extern "C" int cTrackFileMan_checkLocation1_A638(void* self, int n, void* names, char* tag) __asm__("cTrackFileMan_checkLocation1");
 extern "C" int cTrackFileMan_testWCBAMStartLocation_A638(void* self, int id) __asm__("cTrackFileMan_testWCBAMStartLocation");

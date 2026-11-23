@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ai/ridermetrix.h"
 #include "ai/player.h"
 #include "be/beintnewrace.h"
@@ -182,7 +183,7 @@ INCLUDE_ASM("main/gamemode", cGameModeMan_initGameMode);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGameModeMan_restartHeat(cGameModeMan* self);
 
 struct sVE_initGameMode { short delta; short index; void (*fn)(void*); };
@@ -316,7 +317,7 @@ extern void* cGameModeMan_aHandler[];
 extern unsigned int D_00536640[];
 extern int cGameModeMan_iRanking[];
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cBEScoreInterface_processEventRiderStats(void* self, int idx, int a2, unsigned int v);
@@ -731,7 +732,7 @@ extern "C" void cGameModeHandler_cleanRiderRanksTime(void)
 INCLUDE_ASM("main/gamemode", cGMBigAirHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
 extern "C" void cGameModeMan_sortScores(void* self, int n);
@@ -911,7 +912,7 @@ extern "C" void cGMBigAirHandler_init(sScore_238E20* self)
 INCLUDE_ASM("main/gamemode", cGMBigAirHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cRider_estimateFinishScore(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
@@ -1087,7 +1088,7 @@ extern "C" int cGMBigAirHandler_riderCheckpointHit(void* self, int player, int s
 INCLUDE_ASM("main/gamemode", func_00239938);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -1148,7 +1149,7 @@ extern "C" void func_00239938(void)
 INCLUDE_ASM("main/gamemode", cGMBigAirHandler_fillScoreTable);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" short cBENewPlayerInterface_getDifficultyLevel(void* self, int which);
 extern "C" int cBENewRaceInterface_getSimThreshold(void* self, int kind, int place, int mode);
@@ -1275,7 +1276,7 @@ extern "C" void cGMBigAirHandler_readFromReplayFrame(void* self, cBxReplayFrame*
 INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
 extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
@@ -1430,7 +1431,7 @@ extern "C" int cGMMPSlopeHandler_riderCheckpointHit(char* self, int player, int 
 INCLUDE_ASM("main/gamemode", cGMRaceHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -1645,7 +1646,7 @@ extern "C" void cGMRaceHandler_init(sMode_23A108* self)
 INCLUDE_ASM("main/gamemode", func_0023A4F0);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -1725,7 +1726,7 @@ struct cGMRaceHandler : public cGameModeHandler {
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
@@ -1834,7 +1835,7 @@ static inline int Finished(cRider* rider)
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern int cGameModeMan_iRanking[];
 
@@ -2000,7 +2001,7 @@ extern "C" void cGMRaceHandler_readFromReplayFrame(void* self, cBxReplayFrame* s
 INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getPlayerCheatCharID(void* iface, int player);
@@ -2213,7 +2214,7 @@ INCLUDE_ASM("main/gamemode", func_0023B0A8);
 INCLUDE_ASM("main/gamemode", cGMFreerideHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -2284,7 +2285,7 @@ extern "C" void cGMFreerideHandler_init(void* self)
 INCLUDE_ASM("main/gamemode", cGMTimeHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -2399,7 +2400,7 @@ extern "C" void cGMTimeHandler_init(void* self)
 INCLUDE_ASM("main/gamemode", cGMTimeHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
 extern int cGameModeMan_iRanking[];
@@ -2486,7 +2487,7 @@ INCLUDE_ASM("main/gamemode", cGMTimeHandler_riderCheckpointHit);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitTime(void* self, int value);
@@ -2528,7 +2529,7 @@ extern "C" int cGMTimeHandler_riderCheckpointHit(void* self)
 INCLUDE_ASM("main/gamemode", cGMRivalTimeHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -2615,7 +2616,7 @@ extern "C" void cGMRivalTimeHandler_init(void* self)
 INCLUDE_ASM("main/gamemode", cGMRivalTimeHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cRider_estimateFinishTick(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
@@ -2718,7 +2719,7 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
 INCLUDE_ASM("main/gamemode", cGMRivalPointHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -2809,7 +2810,7 @@ extern "C" void cGMRivalPointHandler_init(void* self)
 INCLUDE_ASM("main/gamemode", cGMRivalPointHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cRider_estimateFinishScore(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
@@ -2896,7 +2897,7 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
 INCLUDE_ASM("main/gamemode", cGMPointHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -3007,7 +3008,7 @@ extern "C" void cGMPointHandler_init(void* self)
 INCLUDE_ASM("main/gamemode", cGMPointHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
 extern unsigned int D_00536640[];
@@ -3097,7 +3098,7 @@ INCLUDE_ASM("main/gamemode", cGMPointHandler_riderCheckpointHit);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitPoints(void* self, int value);
@@ -3139,7 +3140,7 @@ extern "C" int cGMPointHandler_riderCheckpointHit(void* self)
 INCLUDE_ASM("main/gamemode", cGMDebugHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "object/skybox.h"
 #include "render/ps2bezierman.h"
 #include "camera/camera.h"
@@ -645,7 +646,7 @@ INCLUDE_ASM("main/game", cSectionMan_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 struct cWorldView;
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cWorldView_getNumSections(cWorldView* view);
 extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i);
 extern "C" int strcmp(const void* a, const void* b);
@@ -1203,7 +1204,7 @@ INCLUDE_ASM("main/game", cSectionMan_update);
 extern "C" void* cBE_getBE();
 struct cWorldView;
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 unsigned int cWorldView_getNumSections_u(cWorldView* view) __asm__("cWorldView_getNumSections__FP10cWorldView");
 int cWorldView_isSectionLoaded(cWorldView* view, int section);
 extern "C" void* cBENewRaceInterface_getSectionFile(void* iface, int i);
@@ -1466,7 +1467,7 @@ public:
 };
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGame_setState(void* gm, int state, int a, int b);
 void cGame_setPreloadState(void* gm, int state);
 extern int cBENewRaceInterface_bIsBamLocation;
@@ -1517,7 +1518,7 @@ public:
 };
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cSectionMan_setSky(void* self, int sky);
 extern "C" void cGame_setState(void* gm, int state, int a, int b);
@@ -1623,7 +1624,7 @@ extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(cSectionMan* self, i
 INCLUDE_ASM("main/game", cSectionMan_gotoLocation);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSectionMan_activate(cSectionMan* self, int a1, int a2);
 
 /**

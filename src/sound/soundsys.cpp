@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "main/gamemode.h"
 #include "ealib/snd.h"
 #include "sound/bankmonitor.h"
@@ -1138,7 +1139,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
 
 struct sSnd17D0Ch {
@@ -1286,7 +1287,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
 
 struct sSnd1C88Ch {
@@ -1472,7 +1473,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
 
 struct sSnd2508Ch {
@@ -2491,7 +2492,7 @@ extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 extern "C" int cSSXAudio_Surface(void* self, int id);
 void cSSXAudio_LiftWithAirTime_4170(void* self, char* obj) __asm__("cSSXAudio_LiftWithAirTime");
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void SNDSYS_entercritical();
 extern "C" int SNDover(int id);
 extern "C" void SNDSYS_leavecritical();
@@ -4179,7 +4180,7 @@ static inline void snd74A0AddVoice(void* vself, int a, int b, int type)
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int t, int a, int idx);
@@ -5630,7 +5631,7 @@ static inline int snd9E28AddVoice(void* vself, int a, int b, int type)
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_002A4290(void* self);
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cAudioInterface_getAI();
@@ -6059,7 +6060,7 @@ extern "C" int cReplay_isPauseAI(void* p);
 // PORT: cMonitor_MONITOR_Create returns int; the unit declares it void elsewhere.
 extern "C" int cMonitor_MONITOR_Create_AB40(void*, int, long, int, int, int, int, int) __asm__("cMonitor_MONITOR_Create");
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern int cPauseState_Flags;
 
 struct sSndKey8_AB40 {
@@ -7031,7 +7032,7 @@ extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 void func_002B3A98_C7B0(void* p) __asm__("func_002B3A98");
 void func_0028DF08_C7B0(void* p) __asm__("func_0028DF08__FPv");
@@ -7673,7 +7674,7 @@ extern "C" int func_002B49E0(void*);
 // cBE interface lookup: cBE_getInterface__Fv takes (be, kind) despite its mangled name.
 extern "C" void* cBE_getBE();
 
-extern "C" void* cBE_getInterface__Fv(void* be, int kind);
+extern "C" cBEInterface* cBE_getInterface__Fv(void* be, int kind);
 
 extern "C" void cMonitor_MONITOR_DestroyAll1_D6E0(void* bank, sSndCallback key) __asm__("cMonitor_MONITOR_DestroyAll1");
 
@@ -8775,7 +8776,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F198);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 struct sSsOpts9F198 {
     unsigned int w0;
@@ -10012,7 +10013,7 @@ INCLUDE_ASM("sound/soundsys", func_002A16B0);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_0029F0A0(void* self);
 extern "C" int func_002B0E28(void* self, int i);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
@@ -10545,7 +10546,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10580,7 +10581,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10617,7 +10618,7 @@ extern "C" void* cAudioInterface_getAI();
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10652,7 +10653,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10685,7 +10686,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10718,7 +10719,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10792,7 +10793,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10828,7 +10829,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10976,7 +10977,7 @@ extern "C" void* cAudioInterface_getAI();
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -11011,7 +11012,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getRival(void*);
 // func_002A1DA0 returns a value (the unit declares it void).
 int func_002A1DA0_r(void* self, int a, int b) __asm__("func_002A1DA0");
@@ -11046,7 +11047,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -11111,7 +11112,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -11350,7 +11351,7 @@ extern "C" int func_0029F128(void* self);
 extern "C" int func_002A4040(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
@@ -11456,7 +11457,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -11708,7 +11709,7 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -11949,7 +11950,7 @@ INCLUDE_ASM("sound/soundsys", func_002A3F90);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A3FD8(void* self, unsigned int a1);
 
@@ -11984,7 +11985,7 @@ INCLUDE_ASM("sound/soundsys", func_002A3FE8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4030(void* self, unsigned int a1);
 
@@ -12019,7 +12020,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4040);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Tells whether the race's game mode (cBENewRaceInterface_newRace.cGameMode) is 4.
@@ -12038,7 +12039,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4078);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A40E0(void* self, unsigned int a1);
 
@@ -12079,7 +12080,7 @@ INCLUDE_ASM("sound/soundsys", func_002A40E8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4158(void* self, unsigned int a1);
 
@@ -12124,7 +12125,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4168);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A41C8(void* self, unsigned int a1);
 
@@ -12162,7 +12163,7 @@ INCLUDE_ASM("sound/soundsys", func_002A41D8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4238(void* self, unsigned int a1);
 
@@ -12200,7 +12201,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4248);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Tells whether the race's game event (cBENewRaceInterface_newRace.cGameEvent) is 4 or 5.
@@ -12229,7 +12230,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4290);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Tells whether the race's game event (newRace.cGameEvent) is 4; cSSXAudio_ChangePosition uses it outside game mode 0.
@@ -12248,7 +12249,7 @@ INCLUDE_ASM("sound/soundsys", func_002A42C8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Tells whether the race's game event (newRace.cGameEvent) is one of 6..11 (func_002A4318 and func_002A4368 split them).
@@ -12274,7 +12275,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4318);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Tells whether the race's game event (newRace.cGameEvent) is one of 6..8; func_0028D8A0 uses it.
@@ -12298,7 +12299,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4368);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Tells whether the race's game event (newRace.cGameEvent) is one of 9..11; func_0028D8A0 uses it.
@@ -12485,7 +12486,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4660);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 
 /**
@@ -12521,7 +12522,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4718);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 
 /**

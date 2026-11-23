@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintplayer.h"
 #include "be/berewarddb.h"
 #include "sound/ssxaudio.h"
@@ -26,7 +27,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 
@@ -856,7 +857,7 @@ extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern void* cFEStatePeakRoom_vtbl[];
 
@@ -941,7 +942,7 @@ struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
@@ -1112,7 +1113,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" void cFEStatePeakRoom_updateHelpText(cFEStatePeakRoom* self, int id);
 extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* self, int id);
@@ -1174,7 +1175,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" void* cList_getByIndex(void* list, int id);
 
@@ -1214,7 +1215,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_updateHelpText);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -1260,7 +1261,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_updateMedalsList);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv_3F80(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv_3F80(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_001CE6F0(int mountain);
 extern "C" int getChallengeMedal(int player, int charId, int mountain, int peak, int i);
 extern "C" void setChallengeName(void* text, int mountain, int peak, int i);
@@ -1365,7 +1366,7 @@ extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFEStateTrophyRoom_loadTextures(void* self);
 extern void* cFEStateTrophyRoom_vtbl[];
@@ -1400,10 +1401,9 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
     cFEStateTrophyRoom* trophyRoom = self;
     *(int*)&trophyRoom->mpBigIcon = 0;
-    cBENewPlayerInterface* pi = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     trophyRoom->mCharID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
-    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)pi->mVtbl;
-    vt[2].fn(vthis(pi, vt[2]));
+    pi->discard();
     trophyRoom->mPeakNum = peakNum;
     trophyRoom->mTrophyType = trophyType;
     trophyRoom->mNumLoadingFiles = 0;

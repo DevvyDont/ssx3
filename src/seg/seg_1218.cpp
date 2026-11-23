@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "intersect/bxnash.h"
 #include "animation/rideranimbase.h"
 #include "world/instancerecord.h"
@@ -5930,7 +5931,7 @@ static inline float Len_7888(const t4Vector& v)
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int AITick();
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_moveFromCollision_m2537(void* rider, const t4Vector& v) __asm__("cRider_moveFromCollision");
 // The race (seg/seg_1FBE38 layout): riders by being index at 0x28.
 struct cRider_1218;
@@ -8307,7 +8308,7 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderUber);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 /**
  * Rolls whether this computer rider tries an uber trick; needs uber enabled and never at location 14.

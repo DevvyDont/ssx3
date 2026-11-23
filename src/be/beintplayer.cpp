@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "be/beintplayer.h"
@@ -139,7 +140,7 @@ extern "C" void cBENewPlayerInterface_defaultCtrl(cBENewPlayerInterface* self)
         entry[i].cControlMap = 0;
         entry[i].iUseDualShock = 1;
     }
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cBEInterface, self);
     vt[2].fn(vthis(self, vt[2]));
 }
 #endif
@@ -967,7 +968,7 @@ extern "C" void func_00146F40(cBENewPlayerInterface* self, int index, const char
 INCLUDE_ASM("be/beintplayer", func_00146F88);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -1991,7 +1992,7 @@ extern "C" void* cBEStatInterface_getThis(void)
         sVTablePlayer_00147F78* vt = &cBEStatInterface_vtbl;
         short thisAdjust = vt->delta;
         void (*fn)(void*) = vt->fn;
-        (*(void**)&mem->mVtbl) = vt;
+        (*(void**)&VPTR_OF(cBEInterface, mem)) = vt;
         mem->bIsActive = 0;
         fn((char*)mem + thisAdjust);
     }

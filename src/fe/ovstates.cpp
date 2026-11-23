@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/fepopupselectmultiplayermode.h"
 #include "be/beintoption.h"
 #include "input/inputpad.h"
@@ -257,7 +258,7 @@ extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(cFEStateMainMenu* self)
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void MEM_fill(void* p, int v, int n);
 extern "C" void func_00266CD8();
 extern "C" void func_00261008();

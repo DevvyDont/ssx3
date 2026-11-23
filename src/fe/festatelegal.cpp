@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uiengine.h"
 #include "fe/festatelegal.h"
 #include "fe/festateoptions.h"
@@ -59,7 +60,7 @@ INCLUDE_ASM("fe/festatelegal", func_00187D38);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_002C2868(char* s);
 extern "C" int cBERewardInterface_buyCheatChar(void* iface, int a, int i, int item, int b);

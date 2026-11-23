@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uiengine.h"
 #include "sound/ssxaudio.h"
 #include "fe/uitemplatemap.h"
@@ -165,7 +166,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 int GetHashValue32(char* str);
@@ -287,7 +288,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_isMapEventCompleted);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 int cBERewardInterface_getTrackMedal(void* self, int player, int charID, int mode, int track);
 // PORT: the unit declares cBENewPlayerInterface_isEventLocked as returning int; its result is negated as a bool here.
@@ -341,7 +342,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_isMapEventLocked);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* iface, int player, int charID, int x, int flag);
 extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int player, int charID, int x);
@@ -407,7 +408,7 @@ extern unsigned int cUITemplate_MAP_mMapStyle;
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -634,7 +635,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakUnlock);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
@@ -788,7 +789,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
@@ -1414,7 +1415,7 @@ extern int cUITemplate_MAP_mMapState;
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -1848,7 +1849,7 @@ extern int cUITemplate_MAP_mMapState;
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -2538,7 +2539,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupLocationInfo);
 #ifdef SKIP_ASM
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cUIText_setAsciiString(cUIText* text, const char* str);
 int cBERewardInterface_getTrackMedal(void* iface, int player, int charID, int type, int event);
 extern "C" int sprintf(char* buf, const char* fmt, ...);

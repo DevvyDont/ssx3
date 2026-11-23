@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintplayer.h"
 #include "ui/uithing.h"
 #include "ui/uiengine.h"
@@ -13,7 +14,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
@@ -50,10 +51,9 @@ extern "C" void cFEStateRiderBio_onCreateScreen(cFEStateRiderBio* self)
         cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading3), 0);
         cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading4), 0);
     }
-    cBENewPlayerInterface* iface = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
-    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)iface->mVtbl;
-    vt[2].fn(vthis(iface, vt[2]));
+    iface->discard();
     self->mScreen = 0;
     cFEStateRiderBio_setupBioScreen(self);
     cFEStateRiderBio_setupCharPics(self);
@@ -291,7 +291,7 @@ INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillBioInfo);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" void cUITextScroll_clearBuffer(void* self);

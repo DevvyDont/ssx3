@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/fepopupoptionreset.h"
 #include "fe/fepopupscreenpos.h"
 #include "fe/fepopupvideocalibration.h"
@@ -420,7 +421,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -604,7 +605,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultGame(void* iface);
 extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -747,7 +748,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cSSXApp_activateBEOptions(void* p);
@@ -906,7 +907,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_updateWidget);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
@@ -1093,7 +1094,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultSound(void* iface);
 extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -1241,7 +1242,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
@@ -1388,7 +1389,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_updateWidget);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
 extern "C" void cUIListBox_deleteAllEntries(void* box);
@@ -1708,7 +1709,7 @@ extern char str_111resetopts[];
 extern int D_004A14D8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultHUD(void* self);
 extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* self);
 
@@ -1772,7 +1773,7 @@ extern "C" int cFEStateOptionsHUD_onWidgetMenu(cFEStateOptionsHUD* self, int men
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
@@ -1867,7 +1868,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_updateWidget);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern char str_Menu[];
 
@@ -2048,7 +2049,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onPopupEvent);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self);
 extern "C" void cFEStateOptionsController_updateWidget(cFEStateOptionsController* self);
 extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y);
@@ -2126,7 +2127,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onWidgetEvent);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
@@ -2234,7 +2235,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onWidgetMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* player, int which);
 // cFEStateOptionsController_displayPadConfig returns void; declaring it int ($v0 set by the call) reproduces the original argument scheduling.
 extern "C" int cFEStateOptionsController_displayPadConfig_CCE0(void* self, int on) __asm__("cFEStateOptionsController_displayPadConfig");
@@ -2301,7 +2302,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int a1);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
@@ -2640,7 +2641,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onPopupEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int a1, const char* name);

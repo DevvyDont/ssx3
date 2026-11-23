@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uiinput.h"
 #include "util/locale.h"
 #include "render/2drender.h"
@@ -139,7 +140,7 @@ extern char str_pct_spct_spct_s[];
 extern char str_bar[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id);
 
 /**
@@ -8444,7 +8445,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_cFEStateChallengePopup);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cFEStateNet_cFEStateNet_DDD0(void* self, void* engine, void* owner) __asm__("cFEStateNet_cFEStateNet");
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_setGameMode_DDD0(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" int cBENewRaceInterface_setGameEvent_DDD0(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern int D_004A4E88;
@@ -8501,7 +8502,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void func_001AF728(cFEStateChallengePopup* self, void* iface, void* screen);
 extern "C" void func_001AF688(cFEStateChallengePopup* self);
@@ -8535,7 +8536,7 @@ extern "C" void cFEStateChallengePopup_onCreateScreen(cFEStateChallengePopup* se
         cUIScreen_playFrame(screen, 0, 0);
         cBENewRaceInterface* iface = (cBENewRaceInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 0));
         cBENewRaceInterface_setNumberAI(iface, D_004A4E88_w[1]);
-        sVEntry<int(void*)>* ivt = (sVEntry<int (void*)>*)iface->mVtbl;
+        sVEntry<int(void*)>* ivt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, iface);
         ivt[1].fn(vthis(iface, ivt[1]));
         func_001AF728(self, iface, self->mpScreen);
         func_001AF688(self);
@@ -8611,7 +8612,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onGainFocus);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int a1);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void func_001AF098(cFEStateChallengePopup* self, int a1);
@@ -8869,7 +8870,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001AE680);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
 
@@ -9099,7 +9100,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001AEC60);
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char str_PairRankedGame[];
 extern char str_PairNumCPURiders[];
 extern char str_PairPowerUps[];
@@ -9605,7 +9606,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int cBENewRaceInterface_getLocationPeak1(void* track);
 extern "C" const char* cBENewRaceInterface_getEventName(void* track);
@@ -9911,7 +9912,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv_FE68(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv_FE68(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_00260F80();
@@ -10079,7 +10080,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern int D_005308D0[];
 extern char str_pct_d_b[];
 extern char str_True[];
@@ -10392,7 +10393,7 @@ public:
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen);
 
 /**
@@ -10520,7 +10521,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" const char* cBENewRaceInterface_getEventName(void* track);
 extern "C" const char* cBENewRaceInterface_getLocationName1(void* track);
 extern int D_005308D0[];
@@ -10883,7 +10884,7 @@ void* cFEStateOnlineCharacterSelect_onUpdate(void* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_onGainTransition);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern "C" void func_001B1B10(cFEStateOnlineCharacterSelect* self, int sel, int flag);
 extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int index);
@@ -11008,7 +11009,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* iface, int a1, int a2);
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
@@ -11191,7 +11192,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B15D8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct sFEObj_001B1F88;
 extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom* mem, int a1);
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
@@ -11281,7 +11282,7 @@ public:
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -11505,7 +11506,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEStatInterface_getHumanAccel(void* iface, int a1, int idx);
 extern "C" int cBEStatInterface_getHumanEdging(void* iface, int a1, int idx);
 extern "C" int cBEStatInterface_getHumanSpeed(void* iface, int a1, int idx);
@@ -15200,7 +15201,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -24648,7 +24649,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show);
@@ -25469,7 +25470,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C2468);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int i);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -25613,7 +25614,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_onWidgetEvent);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int i);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" char* cBEOptionInterface_getQuickKeyMessage(void* self, int i);
@@ -25731,7 +25732,7 @@ extern "C" int strlen(const char* s);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
 void func_001C57C0(void* self, int a1, int a2);
@@ -25773,7 +25774,7 @@ extern "C" void func_001C2A18(cFEStateNetQuickMessages* self)
             strcpy(D_00535617 + (idx << 6), src);
         }
         self->mbChanged = 1;
-        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)iface->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, iface);
         vt[1].fn(vthis(iface, vt[1]));
         func_001C2468(self, idx);
     }
@@ -25824,7 +25825,7 @@ public:
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_resetAllQuickKeys(void* self);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_001C2418(cFEStateNetQuickMessages* self);
@@ -26880,7 +26881,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
@@ -26963,7 +26964,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);

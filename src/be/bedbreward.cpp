@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "ai/ridermetrix.h"
 #include "fe/fereal.h"
 #include "be/bestate.h"
@@ -531,7 +532,7 @@ extern char cBENewRaceInterface_vtbl[];
  */
 extern "C" void* cBENewRaceInterface_cBENewRaceInterface(cBENewRaceInterface* self)
 {
-    self->mVtbl = (void**)cBENewRaceInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = (void**)cBENewRaceInterface_vtbl;
     return ((void*)self);
 }
 #endif
@@ -655,7 +656,7 @@ extern char cBEMissionInterface_vtbl[];
  */
 extern "C" void* cBEMissionInterface_cBEMissionInterface(cBEMissionInterface* self)
 {
-    self->mVtbl = (void**)cBEMissionInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = (void**)cBEMissionInterface_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1134,7 +1135,7 @@ extern char cBEOptionInterface_vtbl[];
  */
 extern "C" void* cBEOptionInterface_cBEOptionInterface(cBEOptionInterface* self)
 {
-    self->mVtbl = (void**)cBEOptionInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = (void**)cBEOptionInterface_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1640,7 +1641,7 @@ extern char cBENetworkInterface_vtbl[];
  */
 extern "C" void* cBENetworkInterface_cBENetworkInterface(cBENetworkInterface* self)
 {
-    self->mVtbl = (void**)cBENetworkInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = (void**)cBENetworkInterface_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1683,7 +1684,7 @@ extern char cBEStatInterface_vtbl[];
  */
 extern "C" void* cBEStatInterface_cBEStatInterface(cBEStatInterface* self)
 {
-    self->mVtbl = (void**)cBEStatInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = (void**)cBEStatInterface_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1774,7 +1775,7 @@ extern char cBEBAGTInterface_vtbl[];
  */
 extern "C" void* cBEBAGTInterface_cBEBAGTInterface(cBEBAGTInterface* self)
 {
-    self->mVtbl = (void**)cBEBAGTInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = (void**)cBEBAGTInterface_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1924,7 +1925,7 @@ extern char cBEAggressionInterface_vtbl[];
  */
 extern "C" void* cBEAggressionInterface_cBEAggressionInterface(cBEAggressionInterface* self)
 {
-    self->mVtbl = (void**)cBEAggressionInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = (void**)cBEAggressionInterface_vtbl;
     return ((void*)self);
 }
 #endif

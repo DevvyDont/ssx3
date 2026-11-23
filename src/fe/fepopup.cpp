@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "online/usbkeyboard.h"
 #include "util/locale.h"
 #include "render/font.h"
@@ -6271,7 +6272,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleQuickKeyPress);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBEOptionInterface_getQuickKeyMessage(void* self, int i);
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value);
 extern "C" void USTR_strcpyW(char* dst, void* src);

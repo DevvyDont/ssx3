@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uipair.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
@@ -202,7 +203,7 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onCreateScreen);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);

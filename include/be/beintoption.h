@@ -16,7 +16,7 @@
 //
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's cBEOptionInterface
 // has no data members of its own (size 0x8 = its cBEInterface), and neither does retail's.
-// Base cBEInterface, written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies: vtable
+// Base cBEInterface, written out inline (the class itself: be/beinterface.h, whose virtuals give the slots): vtable
 // cBEOptionInterface_vtbl (0x45ADC8), slot 1 submit = cBEOptionInterface_submit, slot 2 discard =
 // cBEOptionInterface_discard, slots 3/4 cBEInterface_writeToReplayFrame / cBEInterface_readFromReplayFrame.
 //
@@ -29,27 +29,19 @@
 //       are 1 byte, retail's are words).
 
 #include "layout.h"
+#include "be/beinterface.h"
 
-struct cBEOptionInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U]
-                                     //       cBEOptionInterface_setOptionActive (static: instance->bIsActive = arg);
-                                     //       cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit,
-                                     //       cBERaceState_onEnter/onExit set 0/1
-    void** mVtbl;                    // 0x00C [R] getThis and cBEOptionInterface_cBEOptionInterface store
-                                     //       cBEOptionInterface_vtbl; [P] __18cBEOptionInterface; [U]
-                                     //       defaultSound/defaultGame/defaultHUD/defaultCtrl and func_001C2BA8 call
-                                     //       slot 1 (submit) through it, cBESaveInterface_loadSaveGame slot 2 (discard)
+struct cBEOptionInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [U] cBEOptionInterface_setOptionActive (static: instance->bIsActive = arg);
+    //       cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit, cBERaceState_onEnter/onExit set 0/1
+    //   the vptr (0x0C): [R] getThis and cBEOptionInterface_cBEOptionInterface store cBEOptionInterface_vtbl; [P]
+    //       __18cBEOptionInterface; [U] defaultSound/defaultGame/defaultHUD/defaultCtrl and func_001C2BA8 call slot 1
+    //       (submit) through it, cBESaveInterface_loadSaveGame slot 2 (discard)
 };
 
 extern cBEOptionInterface* cBEOptionInterface_instance;
 
-CHECK_OFFSET(cBEOptionInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBEOptionInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBEOptionInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBEOptionInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBEOptionInterface, 0x10);
 
 // The one options interface (On Tour: cBEOptionInterface::instance), created by cBEOptionInterface_getThis.

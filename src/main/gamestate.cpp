@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "camera/camera.h"
 #include "visualfx/transitionman.h"
 #include "ui/uithing.h"
@@ -27,7 +28,7 @@ INCLUDE_ASM("main/gamestate", cGFGateState_gainFocus);
 extern "C" void cAI_setAIState(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBE_setState(int state);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGameState_gotoNextState(void* self);
@@ -82,7 +83,7 @@ INCLUDE_ASM("main/gamestate", cGFGateState_runScript);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* world, int id);
 extern "C" int cWScriptMan_isFunc(void* mgr, int id, int a);
@@ -113,7 +114,7 @@ INCLUDE_ASM("main/gamestate", cGFGateState_update);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int GetHashValue32(char* str);
 extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cGFGateState_runScript(cGFGateState* self, int a1);
@@ -219,7 +220,7 @@ INCLUDE_ASM("main/gamestate", cGFRidingState_gainFocus);
 extern "C" void cAI_setAIState(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBE_setState(int state);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern char* cGameState_mpGame;
@@ -321,7 +322,7 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadInit);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cReplay_reset(void* p);
 extern "C" void cSSXScriptEngine_PurgeTrack(void* a);
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
@@ -459,7 +460,7 @@ extern sApp* SSXApp_date __asm__("SSXApp");
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 
@@ -671,7 +672,7 @@ extern "C" int cGFTrackStartState_isPreloadComplete(cGFTrackStartState* self)
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_gainFocus);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBE_setState(int state);
 extern "C" void cAI_setAIState(void*, int);
@@ -898,7 +899,7 @@ extern "C" void cGFTrackStartState_readFromReplayFrame(cGFTrackStartState* self,
 INCLUDE_ASM("main/gamestate", cGFNextHeatState_gainFocus);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBE_setState(int state);
 extern "C" void cWScriptMan_failActiveLocalMission(void* self);
@@ -986,7 +987,7 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
 INCLUDE_ASM("main/gamestate", cGFNextHeatState_update);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 struct sVec4_236960;
 
@@ -1284,7 +1285,7 @@ extern "C" void* cGFUserSelectState_cGFUserSelectState(cGFUserSelectState* self)
 INCLUDE_ASM("main/gamestate", cGFUserSelectState_gainFocus);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cAI_setAIState(void*, int);
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
@@ -1351,7 +1352,7 @@ extern "C" void cGFUserSelectState_gainFocus(cGFUserSelectState* self, int mode)
 INCLUDE_ASM("main/gamestate", cGFUserSelectState_update);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cBXLoadIndicator_Show(void* a, int b);
@@ -1586,7 +1587,7 @@ INCLUDE_ASM("main/gamestate", cGFSectionLoadState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBE_setState(int state);
 extern "C" void cReplay_reset(void* p);
 extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(void* iface, int i, int a);
@@ -1917,7 +1918,7 @@ public:
 };
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_ResetAudioVariables(void* mgr);
@@ -1985,7 +1986,7 @@ INCLUDE_ASM("main/gamestate", cGFPostEventState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(void* iface, int i, int a);
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
 extern "C" void cOVStateManager_gotoOverlay(int a);

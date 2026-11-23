@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/fepopupconfirm.h"
 #include "util/locale.h"
 #include "ui/uitext.h"
@@ -190,7 +191,7 @@ INCLUDE_ASM("fe/fememcard", func_00186D60);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern char str_kT_MEMFENotDetectedStartUpPS2[];
 extern char str_kT_CMNYes[];
@@ -295,7 +296,7 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackLoadReady);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
 struct sFEMemCardK187270;
 extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self);
@@ -603,7 +604,7 @@ extern char str_kT_MEMNoSpaceStartPS2[];
 extern char str_kT_MEMOVRetry[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
@@ -841,7 +842,7 @@ extern char str_pct_s_pct_s_c[];
 extern char str_at_loadanim[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_readSetSize(void* mp, int a);
@@ -911,7 +912,7 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_startSettingsRead);
 #ifdef SKIP_ASM
 extern char str_at_loadanim[];
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
 int cBESaveInterface_getSaveGameSize_K187920() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 extern "C" void cMCOverlayManager_readSetSize(void* mp, int a);

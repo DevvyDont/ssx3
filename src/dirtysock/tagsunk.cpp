@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "online/privatemessage.h"
 #include "util/bxps2memcard.h"
 #include "seg/buddyapi.h"
@@ -834,7 +835,7 @@ extern "C" void func_00263BA8(cGameConnMan* p, int arg);
 extern "C" void func_00259098(void* p, int a, int b);
 extern "C" unsigned int strlen(const char*);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int ev);
 extern "C" void cBENewRaceInterface_setNumberAI(void* self, int n);
@@ -5086,7 +5087,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F4C0);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern int cCommSystem_getSignature_F4C0(void* comm) __asm__("cCommSystem_getSignature");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
@@ -5658,7 +5659,7 @@ extern void* online_Event_vtbl[];
 extern char str_NetEvent[];
 
 
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" void* cBE_getBE();
 
@@ -6093,7 +6094,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onresultsreportresponse);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
@@ -8953,7 +8954,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002639E0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cBENewRaceInterface_setNumberHumans(void* self, int n);
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, unsigned short port, int a3);
@@ -9130,7 +9131,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00263CF0);
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
 extern "C" void cGameComm_construct(int a, int b);
 extern "C" void cBENetworkInterface_backupCharProfile(void* self, int a);
@@ -9421,7 +9422,7 @@ extern "C" void func_002613C8(BuddyMan* p);
 extern "C" void func_0025B800(LobbyMan* self);
 extern "C" int func_00263128(BuddyMan* self, char* name);
 extern "C" void func_00263018(BuddyMan* self, void* name);
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int i);
 // PORT: func_00265190 takes an sName7_00264D80* (defined later in the unit).
 extern "C" void func_00265190_p(void* self, int rider, void* name) __asm__("func_00265190");
@@ -9889,7 +9890,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264CF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID);
 
 struct sVE264CF0 {
@@ -9927,7 +9928,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264D80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID);
 
 struct sVE_00264D80 {
@@ -9981,7 +9982,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264E50);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00264BE8(void* self, void* msg, int size);
 extern "C" int cBEStatInterface_getHumanAccel(void* iface, int a, int rider);
 extern "C" int cBEStatInterface_getHumanEdging(void* iface, int a, int rider);
@@ -12592,7 +12593,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266D58);
 extern int D_004A33F8;
 extern int cBEOptionInterface_mOption[];
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_003F6AB8(void* a0, int a1, int a2);
 extern "C" void func_003F6C10(int a0, int a1);
 extern "C" void func_00266E88(cVoipMan* self);

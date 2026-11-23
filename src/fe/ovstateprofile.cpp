@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/keyboardpopup.h"
 #include "movie/mcoverlaymanager.h"
 #include "ui/uiengine.h"
@@ -795,7 +796,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -1239,7 +1240,7 @@ extern char str_cPreGameLoadScreen_b[];
 struct cAppMan;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* mgr);
@@ -1278,7 +1279,7 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
         cBENewRaceInterface_setGameEvent(race, 0xC);
         cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(player, 0);
         cBENewRaceInterface_bIsBamLocation = 1;
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)race->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cBEInterface, race);
         vt[1].fn(vthis(race, vt[1]));
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen_b, 0x100, 0)));
     }

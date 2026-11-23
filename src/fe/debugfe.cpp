@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/backgroundman.h"
 #include "ealib/shape.h"
 #include "online/onlineevent.h"
@@ -57,7 +58,7 @@ extern char str_press_start_to_play[];
 extern char str_Anims_pct_d[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" char* cBENewRaceInterface_getEventName(void* iface);
 extern "C" char* cBENewRaceInterface_getPathName(void* iface);
@@ -239,7 +240,7 @@ extern "C" void cDebugMenuScreen_draw(cDebugMenuScreen* self)
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_setGamePath);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct sDbgRaceSel17D008 {
     char pad_0x00[0x48];
     signed char mode;  // 0x48
@@ -276,7 +277,7 @@ extern "C" void cDebugMenuScreen_setGamePath(cDebugMenuScreen* self, int idx)
 INCLUDE_ASM("fe/debugfe", func_0017D0A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
 extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* info);
 extern "C" int cCommSystem_isChannelConnected(void* comm, int ch);
@@ -1084,7 +1085,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
 INCLUDE_ASM("fe/debugfe", func_0017DE70);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBENewRaceInterface_setGamePath(void* iface, int idx);
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);

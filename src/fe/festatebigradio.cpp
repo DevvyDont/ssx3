@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/festatenethelppopup.h"
 #include "ui/uimenu.h"
 #include "ui/uiengine.h"
@@ -17,7 +18,7 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onCreateScreen);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -257,7 +258,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -398,7 +399,7 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetCreate);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* s);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);

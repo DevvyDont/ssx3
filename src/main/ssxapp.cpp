@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "util/consoleconfig.h"
 #include "intersect/bxnash.h"
 #include "main/game.h"
@@ -1034,7 +1035,7 @@ extern "C" void cUIFontInterface_addFontEntry(void* self, unsigned int index, vo
 extern "C" void cUIFontInterface_loadFonts(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cSSXApp_activateBEOptions receives self here; the unit defines it later with no parameters.
 extern "C" void cSSXApp_activateBEOptions_self(void* self) __asm__("cSSXApp_activateBEOptions");
 extern "C" void cSSXApp_initLocale(cSSXApp* self);
@@ -1209,7 +1210,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_initLocale);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cFELocale_cFELocale(void* self);
 extern "C" void cFELocale_loadCommon(void* self);
 extern char str_FELocale[];

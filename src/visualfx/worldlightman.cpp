@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "visualfx/attachedemitterfx.h"
 #include "ai/rider.h"
 #include "worldpainter/worldpainterquery.h"
@@ -943,7 +944,7 @@ void* cCheatFX_resetStates(void* vself)
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_update);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: called for effect only; bound by asm label so the call has no value
 void cCheatFX_resetStates_v(void* self) __asm__("cCheatFX_resetStates__FPv");
 struct sWLCode6910;

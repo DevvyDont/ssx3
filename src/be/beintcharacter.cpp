@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintcharacter.h"
 #include "be/beintnewrace.h"
 
@@ -67,7 +68,7 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getScale);
 signed char cBELibrary_getCharacterID(int index);
 extern "C" int cBELibrary_getCheatCharacterID(int riderIndex);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_EFA8(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_EFA8(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_isMissionMan(int riderIndex);
 
 struct sCharScaleEntry_EFA8 {

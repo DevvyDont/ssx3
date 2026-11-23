@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uitext.h"
 #include "be/beintecon.h"
 #include "be/bedbprofile.h"
@@ -22,7 +23,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
 extern "C" void cFEStateBuyAttrib_updateTotalCost(cFEStateBuyAttrib* self);
@@ -412,7 +413,7 @@ extern "C" const char* getDollarString(int value);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEEconInterface_getAttribCost(void* iface, int level);
 extern char str_costpct_d[];
 struct sVE4FC0 {
@@ -553,7 +554,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_buyExperience);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 extern "C" void cFEStateBuyAttrib_updateTotalCost(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_updateLevels(cFEStateBuyAttrib* self);
@@ -604,7 +605,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
             cBEEconInterface_buyAttribute(iface, 0, cBELibrary_getCharacterID(0), D_004780B0[i]);
         }
     }
-    ((sVE0_5300*)iface->mVtbl)[1].fn(vthis(iface, ((sVE0_5300*)iface->mVtbl)[1]));
+    ((sVE0_5300*)VPTR_OF(cBEInterface, iface))[1].fn(vthis(iface, ((sVE0_5300*)VPTR_OF(cBEInterface, iface))[1]));
     int* max = self->mExperience;
     int* added = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {
@@ -1086,7 +1087,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupHighlightsList);
 #ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 int cBEScoreInterface_getCurrentHighlightLevel(void* score, int idx);
@@ -1204,7 +1205,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRacePlatinumMedalsLi
 #ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1313,7 +1314,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupFSPlatinumMedalsList
 #ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1446,7 +1447,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRidersBest);
 #ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 int cBELibrary_getCharacterID(int);

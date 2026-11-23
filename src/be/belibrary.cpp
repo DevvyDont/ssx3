@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintreward.h"
 #include "be/beprofilelib.h"
 #include "be/beintplayer.h"
@@ -321,7 +322,7 @@ extern "C" void* cBEBoltInterface_getThis(void)
     if (cBEBoltInterface_instance == 0) {
         cBEInterface* mem = (cBEInterface*)cMemMan_alloc(0x10, str_BEBoltInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&mem->mVtbl) = cBEInterface_vtbl;
+        VPTR_OF(cBEInterface, mem) = (void**)cBEInterface_vtbl;
         cBEBoltInterface_instance = mem;
     }
     return cBEBoltInterface_instance;
@@ -969,7 +970,7 @@ INCLUDE_ASM("be/belibrary", func_0014B560);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: func_0014BDB8__FPv ignores its argument; callers pass none.
 void* func_0014BDB8_0() __asm__("func_0014BDB8__FPv");
 struct sBEGroupTable;
@@ -1164,7 +1165,7 @@ INCLUDE_ASM("be/belibrary", func_0014B988);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" char* strchr(const char* s, int c);
 

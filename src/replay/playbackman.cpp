@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "ai/missionrider.h"
 #include "ai/ai.h"
 #include "vtable.h"
@@ -160,7 +161,7 @@ extern "C" void cPlaybackMan_update(cPlaybackMan* self)
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_initLocation);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_C6E8(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_C6E8(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);

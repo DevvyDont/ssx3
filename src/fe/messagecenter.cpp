@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "util/locale.h"
 #include "sound/ssxaudio.h"
 #include "fe/uistatebuypopup.h"
@@ -223,7 +224,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
 extern "C" void cFEStateRequestLine_updateHelpText(cFEStateRequestLine* self, int idx);
 extern "C" void cFEStateRequestLine_updateButtonsText(cFEStateRequestLine* self, int idx);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_setPlayList(void* iface, int a, int b, unsigned long m);
 extern "C" void cBERewardInterface_setOwnedSongList(void* iface, int a, int b, unsigned long m);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -853,7 +854,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateHelpText);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 int cFEStateRequestLine_getSongCost(void* self);
@@ -1190,7 +1191,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_buySong);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_buySong(void* iface, int rider, int a, int idx, int full);
 
 
@@ -1320,7 +1321,7 @@ INCLUDE_ASM("fe/messagecenter", getDollarString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
 extern char getDollarString_FinalString[];

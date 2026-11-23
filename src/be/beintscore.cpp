@@ -1,4 +1,6 @@
 #include "common.h"
+#include "vtable.h"
+#include "be/beinterface.h"
 #include "be/beintscore.h"
 #include "be/beintnewrace.h"
 
@@ -58,7 +60,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
 void* cBEScoreInterface_cBEScoreInterface_impl(void* vself)
 {
     cBEScoreInterface* self = (cBEScoreInterface*)vself;
-    self->mVtbl = cBEScoreInterface_vtbl;
+    VPTR_OF(cBEInterface, self) = cBEScoreInterface_vtbl;
     cBEScoreInterface_discard((cBEScoreInterface*)self);
     return ((void*)self);
 }
@@ -155,7 +157,7 @@ int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" bool cBEScoreInterface_isEligibleForHighScore(cBEScoreInterface* self, int rider);
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -284,7 +286,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_processRiderRanking);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 extern "C" int cBEScoreInterface_convertRankToMedal(cBEScoreInterface* self, int a);
@@ -399,7 +401,7 @@ INCLUDE_ASM("be/beintscore", func_00155130);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern int D_005305F0[];
 
 /**
@@ -822,7 +824,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_isEligibleForHighScore);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" bool cBERules_hasModifiedRules(int i);
 
 /**

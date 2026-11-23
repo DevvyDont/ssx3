@@ -18,7 +18,7 @@
 //
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's
 // cBEAggressionInterface (size 0x38) adds mAggression[4][4] at 0x8; retail's has no data members of its own.
-// Base cBEInterface, written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies: vtable
+// Base cBEInterface, written out inline (the class itself: be/beinterface.h, whose virtuals give the slots): vtable
 // cBEAggressionInterface_vtbl (0x45AC48), slot 1 submit = cBEAggressionInterface_submit, slot 2 discard =
 // cBEAggressionInterface_discard, slots 3/4 its own cBEAggressionInterface_writeToReplayFrame /
 // cBEAggressionInterface_readFromReplayFrame.
@@ -33,23 +33,17 @@
 //       are 1 byte, retail's are words).
 
 #include "layout.h"
+#include "be/beinterface.h"
 
-struct cBEAggressionInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [P] setAggressionActive;
-                                     //       [U] cBEAggressionInterface_setAggressionActive (static: instance->bIsActive
-                                     //       = arg); cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit,
-                                     //       cBERaceState_onEnter/onExit set 0/1
-    void** mVtbl;                    // 0x00C [R] getThis and cBEAggressionInterface_cBEAggressionInterface store
-                                     //       cBEAggressionInterface_vtbl; [P] __22cBEAggressionInterface
+struct cBEAggressionInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [P] setAggressionActive; [U] cBEAggressionInterface_setAggressionActive
+    //       (static: instance->bIsActive = arg); cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit,
+    //       cBERaceState_onEnter/onExit set 0/1
+    //   the vptr (0x0C): [R] getThis and cBEAggressionInterface_cBEAggressionInterface store
+    //       cBEAggressionInterface_vtbl; [P] __22cBEAggressionInterface
 };
 
-CHECK_OFFSET(cBEAggressionInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBEAggressionInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBEAggressionInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBEAggressionInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBEAggressionInterface, 0x10);
 
 // The one aggression interface (On Tour: cBEAggressionInterface::instance), created by cBEAggressionInterface_getThis.

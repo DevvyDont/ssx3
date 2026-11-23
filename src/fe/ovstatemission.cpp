@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uithing.h"
 #include "fe/feasyncmanager.h"
 #include "ui/uiengine.h"
@@ -184,7 +185,7 @@ INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_getTopUnlockedPeakNum);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void*, int, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void*, int);
 
 /**

@@ -10,7 +10,7 @@
 // d:/ssx/code/source/be/beintnetwork.cpp (the preview build's assert string).
 //
 // Size 0x10 [R] (the allocation above; the preview's getThis allocates 0x10 too). Base cBEInterface, written out
-// inline exactly as in be/beintreward.h (whose kBEInterfaceVt_* slot enum applies here: slot 1 submit = cBENetworkInterface_submit
+// inline exactly as in be/beintreward.h (whose virtual slots (be/beinterface.h) applies here: slot 1 submit = cBENetworkInterface_submit
 // copies networkOpt into cBELibrary::networkDB, slot 2 discard = cBENetworkInterface_discard copies it back, slots 3/4 are
 // cBEInterface's replay-frame hooks).
 //
@@ -37,6 +37,7 @@
 // Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "be/beinterface.h"
 #include "ai/ridermetrix.h"             // tRiderStats (0xAC)
 
 // tBENetworkDB: the network-game options (cBENetworkInterface::networkOpt / cBELibrary::networkDB), 0x4B0 bytes
@@ -82,16 +83,14 @@ struct tBENetworkDB {
     char unk_4AF[0x1];               // 0x4AF padding
 };
 
-struct cBENetworkInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U] setNetworkActive
-                                     //       (cBENetworkInterface_setNetworkActive, static: instance->bIsActive = arg); set 0/1 with every BE
-                                     //       interface (cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
-    void** mVtbl;                    // 0x00C [R] cBENetworkInterface_vtbl (getThis, ctor cBENetworkInterface_cBENetworkInterface); [P] the preview ctor
-                                     //       __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC;
-                                     //       [U] func_00259098 calls slot 1 (submit) through it
+struct cBENetworkInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [U] setNetworkActive (cBENetworkInterface_setNetworkActive, static:
+    //       instance->bIsActive = arg); set 0/1 with every BE interface
+    //       (cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
+    //   the vptr (0x0C): [R] cBENetworkInterface_vtbl (getThis, ctor cBENetworkInterface_cBENetworkInterface); [P] the
+    //       preview ctor __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC; [U] func_00259098 calls slot
+    //       1 (submit) through it
 };
 
 CHECK_OFFSET(tBENetworkDB, bIsNetworkGame, 0x000);
@@ -116,10 +115,6 @@ CHECK_OFFSET(tBENetworkDB, oppCharacterAttributes, 0x4A8);
 CHECK_OFFSET(tBENetworkDB, unk_4AF, 0x4AF);
 CHECK_SIZE(tBENetworkDB, 0x4B0);
 
-CHECK_OFFSET(cBENetworkInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBENetworkInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBENetworkInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBENetworkInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBENetworkInterface, 0x10);
 
 // The one network interface (On Tour: cBENetworkInterface::instance), created by cBENetworkInterface_getThis,

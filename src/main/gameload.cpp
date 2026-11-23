@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uistate.h"
 #include "ai/focusbox.h"
 #include "object/bucketman.h"
@@ -39,7 +40,7 @@ INCLUDE_ASM("main/gameload", cGame_load);
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -427,7 +428,7 @@ INCLUDE_ASM("main/gameload", cGame_loadTrack);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 struct sBXStr_F6B0 {
@@ -1681,7 +1682,7 @@ INCLUDE_ASM("main/gameload", cGame_updateState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGameViewMan_updateViewState(void* self);
 extern int cPauseState_Flags;
 
@@ -2260,7 +2261,7 @@ INCLUDE_ASM("main/gameload", cGame_activatePauseMenu);
 extern int cMoviePlayer_m_isPlaying;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getRiderCtrlID(void* iface, int i);
 extern "C" int cGame_canUserActivatePauseMenu(cGame* self);
 int cInput_getState(void* obj, int a1);

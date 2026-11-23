@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintsavefile.h"
 #include "be/beintplayer.h"
 #include "main/ssxapp.h"
@@ -26,7 +27,7 @@ void* cBESaveInterface_getThis()
     if (cBESaveInterface_instance == 0) {
         cBESaveInterface* mem = (cBESaveInterface*)cMemMan_alloc(0x10, str_BESaveInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&mem->mVtbl) = cBESaveInterface_vtbl;
+        (*(void**)&VPTR_OF(cBEInterface, mem)) = cBESaveInterface_vtbl;
         cBESaveInterface_instance = (cBESaveInterface*)(mem);
         cBESaveInterface_bDoReplay = 0;
     }

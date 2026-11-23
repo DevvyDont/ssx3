@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintmission.h"
 #include "main/gamestate.h"
 #include "ui/uitext.h"
@@ -104,7 +105,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_gotoOverlay);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 int cBERewardInterface_getTotalNumUserAwards(void* self);
 extern "C" void cReplay_startAutoReplay(void* p);
@@ -1225,7 +1226,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_triggerPauseMenu);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cGameComm_sendUnplugCmd(void* net);
 extern "C" void cGameComm_sendPauseCmd(void* net, int a1);
@@ -1397,7 +1398,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_triggerFinishOverlay);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern int cOVStateManager_mStatus;
 

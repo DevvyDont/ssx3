@@ -12,7 +12,7 @@
 // cBE_getInterface(cBE_getBE(), 10). EA's source: d:/ssx/code/source/be/beintmission.cpp (preview assert string).
 //
 // Size 0x14 [R] (the allocation; the July 2003 preview's getThis allocates 0x14 too).
-// Base cBEInterface (0x00-0x0F), written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies:
+// Base cBEInterface (0x00-0x0F), written out inline (the class itself: be/beinterface.h, whose virtuals give the slots):
 // vtable cBEMissionInterface_vtbl (0x45ADF8), slot 1 submit = cBEMissionInterface_submit (empty), slot 2 discard =
 // cBEMissionInterface_discard (empty), slots 3/4 its own cBEMissionInterface_writeToReplayFrame /
 // cBEMissionInterface_readFromReplayFrame (they save / restore the current character's collect and mission records and
@@ -32,19 +32,16 @@
 //   [O] SSX On Tour's DWARF (class cBEInterface / cBEMissionInterface; On Tour's bools are 1 byte, retail's are words).
 
 #include "layout.h"
+#include "be/beinterface.h"
 
-struct cBEMissionInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [P] setMissionActive; [U]
-                                     //       cBEMissionInterface_setMissionActive (static: instance->bIsActive = arg);
-                                     //       cBERaceState_onEnter/onExit set 0/1; write/readFromReplayFrame save and
-                                     //       restore the 4 bytes at its address
-    void** mVtbl;                    // 0x00C [R] getThis and cBEMissionInterface_cBEMissionInterface store
-                                     //       cBEMissionInterface_vtbl; [P] __19cBEMissionInterface; [U]
-                                     //       cBELibrary_readFromData and cBESaveInterface_generateSaveProfile call slot
-                                     //       2 (discard) through it
+struct cBEMissionInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [P] setMissionActive; [U] cBEMissionInterface_setMissionActive (static:
+    //       instance->bIsActive = arg); cBERaceState_onEnter/onExit set 0/1; write/readFromReplayFrame save and
+    //       restore the 4 bytes at its address
+    //   the vptr (0x0C): [R] getThis and cBEMissionInterface_cBEMissionInterface store cBEMissionInterface_vtbl; [P]
+    //       __19cBEMissionInterface; [U] cBELibrary_readFromData and cBESaveInterface_generateSaveProfile call slot 2
+    //       (discard) through it
     // cBEMissionInterface
     unsigned int nextSessionID;      // 0x010 [O] (On Tour 0x010, after m_bMissionSetFromFE and m_missionSet, which
                                      //       retail lacks); [P] get/setNextSessionID (lw / sw 0x10, unsigned int); [R]
@@ -59,10 +56,6 @@ struct cBEMissionInterface {
 
 extern cBEMissionInterface* cBEMissionInterface_instance;
 
-CHECK_OFFSET(cBEMissionInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBEMissionInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBEMissionInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBEMissionInterface, mVtbl, 0x0C);
 CHECK_OFFSET(cBEMissionInterface, nextSessionID, 0x10);
 CHECK_SIZE(cBEMissionInterface, 0x14);
 

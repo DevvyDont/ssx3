@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintbagt.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -32,7 +33,7 @@ void* cBEBAGTInterface_getThis()
         sVTableBAGT* vt = &cBEBAGTInterface_vtbl;
         short delta = vt->field_0x10;
         void (*fn)(void*) = vt->fn;
-        (*(void**)&mem->mVtbl) = vt;
+        (*(void**)&VPTR_OF(cBEInterface, mem)) = vt;
         fn((char*)mem + delta);
         cBEBAGTInterface_instance->bIsActive = 0;
     }

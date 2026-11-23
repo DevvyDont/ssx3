@@ -24,7 +24,7 @@ void* cBEOptionInterface_getThis()
 {
     if (cBEOptionInterface_instance == 0) {
         cBEOptionInterface* mem = (cBEOptionInterface*)cMemMan_alloc(0x10, str_BEOptionInt, 0, 0);
-        (*(void**)&mem->mVtbl) = cBEOptionInterface_vtbl;
+        (*(void**)&VPTR_OF(cBEInterface, mem)) = cBEOptionInterface_vtbl;
         cBEOptionInterface_instance = (cBEOptionInterface*)(mem);
         mem->bIsActive = 0;
         cBEOptionInterface_revert(mem);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "fe/festateaudiooptions.h"
@@ -407,7 +408,7 @@ extern "C" int cBERewardInterface_getRadioMode(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int a2);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int GetHashValue32(char*);
 extern void* cFEStateAudioOptions_vtbl[];

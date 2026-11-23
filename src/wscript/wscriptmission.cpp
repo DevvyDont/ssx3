@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintbagt.h"
 #include "ui/uithing.h"
 #include "vtable.h"
@@ -12,7 +13,7 @@ struct cUIText;
 struct sWSMEntry4520;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void* cList_first(cList* list);
 int GetHashValue32(char*);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -265,7 +266,7 @@ extern char str_cost_num[];
 extern char str_have_num[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 void* cList_first(cList* list);
 int GetHashValue32(char*);

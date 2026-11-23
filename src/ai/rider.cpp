@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "camera/race/racecontroller.h"
 #include "ui/uithing.h"
 #include "render/irradiance.h"
@@ -315,7 +316,7 @@ INCLUDE_ASM("ai/rider", func_0011BBE8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 extern "C" int cBELibrary_getCheatCharacterID(int);
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
@@ -443,7 +444,7 @@ INCLUDE_ASM("ai/rider", func_0011BE88);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
@@ -626,7 +627,7 @@ INCLUDE_ASM("ai/rider", cRider_initAlways);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_11D390(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_11D390(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // cRiderMetrix_reset (cRiderMetrix reset) takes only the metrix; its $5 is left over from the store above.
 extern "C" void cRiderMetrix_reset(void* metrix);
 extern "C" void cRiderAnimBase_reset(void* anim);
@@ -2532,7 +2533,7 @@ extern "C" void* cRider_getHipPosition(void* dst, cRider* self)
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBECharacterInterface_getWeight(void* iface, int character);
 extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character, int stat);
 
@@ -4734,7 +4735,7 @@ INCLUDE_ASM("ai/rider", cRider_getIdentity);
 #ifdef SKIP_ASM
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Returns the rider's character id from the BE player interface (cBENewPlayerInterface_getRiderCharID).
@@ -4752,7 +4753,7 @@ INCLUDE_ASM("ai/rider", cRider_getCheatIdentity);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int riderIndex);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Returns the cheat character chosen for this rider's player.
@@ -6396,7 +6397,7 @@ INCLUDE_ASM("ai/rider", cRider_updateFinishTest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_doFinishEvent(cRider* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A3C00(void* a, void* self, int n);
@@ -7140,7 +7141,7 @@ void cPlayer_vibrationRumble(void* vself, float val)
 INCLUDE_ASM("ai/rider", cPlayer_vibrationUpdate);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int id);
 extern "C" void func_00125B18(void* p, int a, int b);
 

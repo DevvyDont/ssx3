@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "intersect/bxnash.h"
 #include "world/worldview.h"
 #include "ai/focusbox.h"
@@ -1082,7 +1083,7 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, t4Vector* out
 extern "C" void cWScriptMan_eventLand(void* p);
 extern "C" void* cBE_getBE();
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cRider_getControlState(void* rider);
 void cRider_setControlState_9C88(void* rider, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_9C88(void* rider, int v) __asm__("cRider_setMotionState__FPv");
@@ -1944,7 +1945,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_step);
 extern "C" int cOverlapList_splineIntersect(void* world, t4Vector* from, void* hit, int flags, float radius);
 extern "C" int cRider_isRailBoardIntersect(void* rider, t4Vector* tgt, t4Vector* dir);
 extern "C" void* cBE_getBE();
-extern "C" void* cBE_getInterface__Fv(void* be, int kind);
+extern "C" cBEInterface* cBE_getInterface__Fv(void* be, int kind);
 extern "C" float cBEStatInterface_getBalanceAttrib(void* self, int rider, int value);
 // PORT: the unit declares cRailslideMotion_getRailUpNorm earlier as returning sVec4HP; same symbol.
 extern "C" t4Vector cRailslideMotion_getRailUpNorm_AF28(char* p, const t4Vector& n) __asm__("cRailslideMotion_getRailUpNorm");
@@ -3091,7 +3092,7 @@ extern "C" float cGroundMotion_getSnowForce(cGroundMotion* self, float* snow, fl
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_getBoostForce);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" float cBEStatInterface_getAccelerationAttrib(void* self, int rider, int value);
 extern "C" float func_0031C228(float x);
@@ -3241,7 +3242,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, tSurfData* sno
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_getSlipForce);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" float cBEStatInterface_getSpeedAttrib(void* self, int rider, int value);
 extern "C" float cBEStatInterface_getAccelerationAttrib(void* self, int rider, int value);
@@ -3351,7 +3352,7 @@ extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, tSurfData* cfg,
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_getDigForce);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBEStatInterface_getEdgingAttrib(void* iface, int rider, int b);
 

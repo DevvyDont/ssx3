@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "scripter/scriptentity.h"
 #include "scripter/scriptobjtransition.h"
 #include "camera/camera.h"
@@ -454,7 +455,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AsyncLoadTrack);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
 
 // Minimal view of cBXString; the members are bound to the game's (unmangled) symbols.
@@ -2343,7 +2344,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AppendStartSequence);
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* self, int i, int a, int b, int c, int d, int f, int g);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern int* kpFlyInScriptSequenceTable[];
 extern int kTrackStartSequenceMPNet[];
 
@@ -5935,7 +5936,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void GetSSXGameEventFrame(void* self, void* out);
 int GetSSXScriptHeader(void* self);
 // PORT: the unit declares cSSXScriptEngine_GetTransportWorldSectionID with no parameters; this caller passes the engine

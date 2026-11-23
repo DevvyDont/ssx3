@@ -24,25 +24,16 @@
 // cBERewardInterface_instance or the cBE_getInterface(.., 13) pointer.
 
 #include "layout.h"
+#include "be/beinterface.h"
 
-// Virtual slots of cBEInterface's vtable (retail cBEInterface_vtbl: entry 0 is the empty RTTI entry, then
-// 0x15BB00, 0x15BB08, cBEInterface_writeToReplayFrame, cBEInterface_readFromReplayFrame). Names and order from the
-// preview's out-of-line cBEInterface methods and On Tour's cBEInterface function list.
-enum {
-    kBEInterfaceVt_submit = 1,              // cBEInterface_submit (empty)
-    kBEInterfaceVt_discard = 2,             // cBEInterface_discard (empty)
-    kBEInterfaceVt_writeToReplayFrame = 3,  // cBEInterface_writeToReplayFrame (empty)
-    kBEInterfaceVt_readFromReplayFrame = 4  // cBEInterface_readFromReplayFrame (empty)
-};
-
-struct cBERewardInterface {
-    // cBEInterface (0x00-0x0F)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit (On Tour: a bool at 0x0); no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged (On Tour: a bool at 0x1); no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive (On Tour: a bool at 0x2); [R] getThis sets 0;
-                                     //       [U] set 0/1 on every BE interface together (cBERaceState_onExit/cBERaceState_onEnter,
-                                     //       cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
-    void** mVtbl;                    // 0x00C [R] getThis stores cBEInterface_vtbl (cBEInterface's vtable, shared with BEBoltInt)
+struct cBERewardInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bCanSubmit: (On Tour: a bool at 0x0); no retail access seen
+    //   bDataChanged: (On Tour: a bool at 0x1); no retail access seen
+    //   bIsActive: (On Tour: a bool at 0x2); [R] getThis sets 0; [U] set 0/1 on every BE interface together
+    //       (cBERaceState_onExit/cBERaceState_onEnter,
+    //       cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
+    //   the vptr (0x0C): [R] getThis stores cBEInterface_vtbl (cBEInterface's vtable, shared with BEBoltInt)
     // cBERewardInterface
     unsigned int mLastEventCashReward; // 0x010 [O] (On Tour 0x008, first own member); [U] cBERewardInterface_calculateUserTrackMedalRewards stores the cash
                                      //       from cBEEconInterface_getCashReward (halved when the medal isn't better); clearUserAwards
@@ -53,32 +44,11 @@ struct cBERewardInterface {
                                      //       cOVState_REWARDS_checkRewardList (asm)
 };
 
-CHECK_OFFSET(cBERewardInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBERewardInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBERewardInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBERewardInterface, mVtbl, 0x0C);
 CHECK_OFFSET(cBERewardInterface, mLastEventCashReward, 0x10);
 CHECK_OFFSET(cBERewardInterface, mLastEventMedal, 0x14);
 CHECK_SIZE(cBERewardInterface, 0x18);
 
 // The one instance (On Tour: cBERewardInterface::instance), created by cBERewardInterface_getThis.
 extern cBERewardInterface* cBERewardInterface_instance;
-
-// cBEInterface: the base every BE interface writes out inline (views group D), for code that calls an interface's
-// virtuals without knowing its class (cBEState::getInterface's result; the view sBEIface0014EA90). [O] On Tour class
-// cBEInterface: bCanSubmit, bDataChanged, bIsActive (bools; words in retail), then the vptr; [R] every BE interface
-// getThis allocates 0x10 and stores its vtable at 0xC; slots in the enum above.
-struct cBEInterface {
-    int bCanSubmit;                  // 0x000 [O] (On Tour bool at 0x0)
-    int bDataChanged;                // 0x004 [O] (On Tour bool at 0x1)
-    int bIsActive;                   // 0x008 [O] (On Tour bool at 0x2); [R] the getThis functions set 0
-    void** mVtbl;                    // 0x00C [R] the interface's vtable (kBEInterfaceVt_* slots)
-};
-
-CHECK_OFFSET(cBEInterface, bCanSubmit, 0x000);
-CHECK_OFFSET(cBEInterface, bDataChanged, 0x004);
-CHECK_OFFSET(cBEInterface, bIsActive, 0x008);
-CHECK_OFFSET(cBEInterface, mVtbl, 0x00C);
-CHECK_SIZE(cBEInterface, 0x10);
 
 #endif /* BE_BEINTREWARD_H */

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "main/gamemode.h"
 #include "world/world.h"
 #include "sound/streamsys.h"
@@ -436,7 +437,7 @@ extern "C" int cSSXAudio_SetMode(cSSXAudio* self, int value)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_PlayPositional);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBankMonitor_BANKMONITOR_Create(void* sub, int id, int vol, int a3);
 extern "C" int cSSXAudio_GetClosestCamera(cSSXAudio* self, int id);
 extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
@@ -1162,7 +1163,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InGameInit);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cAudioInterface_getAI();
 extern "C" void* cRider_getIdentity(void*);
 extern "C" int cBERewardInterface_getPlayList(void* self, int a1, int a2);
@@ -1451,7 +1452,7 @@ extern "C" void cSSXAudio_BeginAllRiderSound(void* self);
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002A39E0(void* self);
 
 /**
@@ -1483,7 +1484,7 @@ extern "C" void cSSXAudio_StartEvent(cSSXAudio* self)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_OnFinishEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
 extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
 extern "C" void func_002A73A8(void* p, int a1, int id);
@@ -1667,7 +1668,7 @@ extern "C" void cSSXAudio_ResetAudioVariables(cSSXAudio* self)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_StartEventWithNoStartGate);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0028D488(void* self);
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_002A26F0(void* self, int a1, int a2);
@@ -3737,7 +3738,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCharacterLevel);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 
 struct sSsxAudioVEntryI {

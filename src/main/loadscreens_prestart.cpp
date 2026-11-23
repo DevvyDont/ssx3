@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "main/loadindicator.h"
 #include "ui/uiengine.h"
 #include "vtable.h"
@@ -1020,7 +1021,7 @@ extern "C" int cStartScreen_render(cStartScreen* self)
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_load);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // malloc-like allocation (gcc treats operator new results as unaliased)
@@ -1168,7 +1169,7 @@ done:
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_loadTexture);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
 #include "bx/bigfile.h"

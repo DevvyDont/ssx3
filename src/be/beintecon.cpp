@@ -1,4 +1,6 @@
 #include "common.h"
+#include "vtable.h"
+#include "be/beinterface.h"
 #include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "be/beintecon.h"
@@ -23,7 +25,7 @@ void* cBEEconInterface_getThis()
     if (cBEEconInterface_instance == 0) {
         cBEEconInterface* mem = (cBEEconInterface*)cMemMan_alloc(0x10, str_BEEconInt, 0, 0);
         mem->bIsActive = 0;
-        *(void**)&mem->mVtbl = cBEEconInterface_vtbl;
+        *(void**)&VPTR_OF(cBEInterface, mem) = cBEEconInterface_vtbl;
         cBEEconInterface_instance = (cBEEconInterface*)(mem);
     }
     return cBEEconInterface_instance;
@@ -423,7 +425,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getCashReward);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getPeakRewardAmount(void* race, int place, int kind);
 
 struct sEconPrize_151040

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uistate.h"
 #include "scripter/scriptobjcammgr.h"
 #include "visualfx/transitionman.h"
@@ -2178,7 +2179,7 @@ INCLUDE_ASM("scripter/datamanager", tNISList_GetVideoDBRecord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 struct sDmCfg7DE8 {
     unsigned int flags;

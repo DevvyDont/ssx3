@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "movie/movieplayer.h"
 #include "bx/math3d.h"
 #include "fe/festatetransition.h"
@@ -105,7 +106,7 @@ INCLUDE_ASM("fe/fereal", cFECustom_getNextState);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* self, void* owner);
 extern "C" void* cFEStateCharSelect_cFEStateCharSelect(void* self, void* owner, int a);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* owner, int a, int b);
@@ -313,7 +314,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                     beRaceDB->iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
                     cBENewRaceInterface_bIsBamLocation = one;
                 }
-                sVEntry0GNS* vt = (sVEntry0GNS*)nr->mVtbl;
+                sVEntry0GNS* vt = (sVEntry0GNS*)VPTR_OF(cBEInterface, nr);
                 vt[1].fn(vthis(nr, vt[1]));
                 D_004A19DC = 1;
                 cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
@@ -445,7 +446,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             cBENewRaceInterface_setGameEvent(nr, 12);
             cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
             cBENewRaceInterface_bIsBamLocation = 1;
-            sVEntry0GNS* vt = (sVEntry0GNS*)nr->mVtbl;
+            sVEntry0GNS* vt = (sVEntry0GNS*)VPTR_OF(cBEInterface, nr);
             vt[1].fn(vthis(nr, vt[1]));
             cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
             break;
@@ -513,7 +514,7 @@ INCLUDE_ASM("fe/fereal", cFECustom_getPrevState);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cAppMan_setNextModule(struct cAppMan* app, unsigned int module);
 unsigned int cPreGameLoadScreen_cPreGameLoadScreen(void* mem);
 extern "C" void* cFEStateCharSelect_cFEStateCharSelect(void* mem, void* owner, int a2);
@@ -868,7 +869,7 @@ extern "C" void cRealFE_gainFocus(cRealFE* self)
 INCLUDE_ASM("fe/fereal", cRealFE_load);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cLoadTimer_startload(void* self, float t);
 void cLoadTimer_setnextpercent(void* self, float t);
 void func_0014BD78(void* iface);
@@ -1279,7 +1280,7 @@ INCLUDE_ASM("fe/fereal", cRealFE_update);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cFadeScreen_update(void* self);
 extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
@@ -1512,7 +1513,7 @@ extern "C" void cBENetworkInterface_restoreCharProfile(void* a, int b);
 extern "C" void cBE_newProfile(void* be, int b);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char str_cFEStateBackground[];
 extern char str_cFEStateTitle[];
 extern char str_cFEStateLodge[];

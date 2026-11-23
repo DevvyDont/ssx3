@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uithing.h"
 #include "bx/math3d.h"
 #include "render/font.h"
@@ -1633,7 +1634,7 @@ extern "C" void cOVStateHUD1P_calcElemPos(void*, void*, void*, void*, void*, int
 
 extern "C" void* cBE_getBE();
 
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 void tHUDDef_getColour(void*, void*);
 
@@ -1840,7 +1841,7 @@ extern "C" void cOVStateHUD1P_calcElemPos(void*, void*, void*, void*, void*, int
 
 extern "C" void* cBE_getBE();
 
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 void tHUDDef_getColour(void*, void*);
 
@@ -2430,7 +2431,7 @@ extern char str_pct_02d_pct_02d_pct_02d_b[];
 extern char D_004A2138[];
 extern tARGB D_004C8808;
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void tHUDDef_getPos(void*, void*);
 extern "C" void tHUDDef_getSize(void*, void*, int);
 void tHUDDef_getScale(void*, void*);
@@ -2537,7 +2538,7 @@ extern float cSinCosTable_gSinCosTable[];
 extern V4_F9B0 D_004C8648;
 extern char str_pct_d_pct_d_b[];
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void tHUDDef_getPos(void*, void*);
 extern "C" void tHUDDef_getSize(void*, void*, int);
 void tHUDDef_getScale(void*, void*);
@@ -2777,7 +2778,7 @@ void tHUDDef_getScale(void*, void*);
 
 extern "C" void* cBE_getBE();
 
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 void tHUDDef_getColour(void*, void*);
 
@@ -2929,7 +2930,7 @@ struct Big_0AD0 { unsigned int pad0 : 20; unsigned int mode : 2; unsigned int pa
 struct Bits_0AD0 { int a, b; unsigned int lo : 5; int v : 5; unsigned int hi : 22; };
 extern Big_0AD0 cBEOptionInterface_mOption;
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void tHUDDef_getPos(void*, void*);
 void tHUDDef_getScale(void*, void*);
 void tHUDDef_getColour(void*, void*);

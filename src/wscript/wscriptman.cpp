@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "world/instancerecord.h"
 #include "wscript/wscriptcache.h"
 #include "luno/lunovm.h"
@@ -1274,7 +1275,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doMissionCmd);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int kind);
 // PORT: the unit defines tMissionMenuQueue_addEntry later as (cWSQueue*, int, int, int)
 extern "C" void tMissionMenuQueue_addEntry_a(void* queue, unsigned int id, int kind, int ctx) __asm__("tMissionMenuQueue_addEntry");
@@ -2504,7 +2505,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_collect);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cCollectPool_collect_sTable;
 extern "C" void cCollectPool_collect(cCollectPool_collect_sTable* self, int id);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -3030,7 +3031,7 @@ extern "C" void cCollectPool_init(cWScriptIdTable* self)
 INCLUDE_ASM("wscript/wscriptman", cCollectPool_collect);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBEMissionInterface_setBit(void* iface, int a1, int index, int value);
 
@@ -3064,7 +3065,7 @@ extern "C" void cCollectPool_collect(cCollectPool_collect_sTable* self, int id)
 INCLUDE_ASM("wscript/wscriptman", cCollectPool_collectCount);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cBEMissionInterface_getCurrentCollectByType(void* iface, int a1, int id);
 
@@ -3085,7 +3086,7 @@ extern "C" int cCollectPool_collectCount(void* entry)
 INCLUDE_ASM("wscript/wscriptman", cCollectPool_collectInst);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_C4A8(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_C4A8(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int cBEMissionInterface_isBitSet(void* iface, int a, int b, int c);

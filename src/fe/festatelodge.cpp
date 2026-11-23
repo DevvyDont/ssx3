@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/fepopupconfirm.h"
 #include "fe/festateprofile.h"
 #include "util/locale.h"
@@ -24,7 +25,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getPlayerCheatCharID(void* iface, int player);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
@@ -60,7 +61,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetCreate);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -134,7 +135,7 @@ extern "C" void cFEStateLodge_onWidgetCreate(cFEStateLodge* self, cUIThing* w)
 INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
@@ -392,7 +393,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
 extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int a2);
 
@@ -424,7 +425,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onPopupEvent);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int a1, const char* name);
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* self, int a1, int a2);
 extern "C" int strlen(const char* s);
@@ -488,7 +489,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetCreate);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
@@ -594,7 +595,7 @@ extern "C" int cFEStateLodgeRiderDetail_onWidgetMenu(cFEStateLodgeRiderDetail* s
 INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, unsigned char a4);
@@ -700,7 +701,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateBuyAttrib_cFEStateBuyAttrib);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState_cUIState_4728(void* self, int a1) __asm__("cUIState_cUIState");
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char cFECustom_getPlayerCtrlMask_4728(void* p, int a1) __asm__("cFECustom_getPlayerCtrlMask");
 extern "C" int cBEStatInterface_getStatFromProfile_4728(void* iface, int a1, int stat) __asm__("cBEStatInterface_getStatFromProfile");
 extern "C" void MEM_fill(void* dst, int c, int n);

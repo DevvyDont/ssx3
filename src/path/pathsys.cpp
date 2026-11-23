@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "main/sectionman.h"
 #include "path/trackpath.h"
 #include "path/aipath.h"
@@ -282,7 +283,7 @@ struct sPathNearList {
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_isSessionPoint(void* self, int value, int id);
 
 // PORT: sqrt.s helper

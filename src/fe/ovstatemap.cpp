@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uistate.h"
 #include "ui/uimenu.h"
 #include "util/locale.h"
@@ -158,7 +159,7 @@ typedef void* (*VGetFn_87F0)(void*, int);
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
@@ -490,7 +491,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupMapPic);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void cFEAsyncManager_LoadLocationPic(void* mgr, int a1, int file, int a3);
@@ -523,7 +524,7 @@ typedef void* (*VGetFn_9010)(void*, int);
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
@@ -1241,7 +1242,7 @@ extern "C" void cOVState_MAP_cleanupIndicators(cOVState_MAP* mapOverlay)
 INCLUDE_ASM("fe/ovstatemap", func_0020A1A8);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: SN soft-float float->double conversion (the source passed floats to sprintf).
 extern "C" double fptodp(float f);
@@ -1368,7 +1369,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onUpdate_HandleIncomingChat);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);

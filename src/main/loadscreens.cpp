@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "sound/ssxaudio.h"
 #include "fe/backgroundman.h"
 #include "render/ps2graphicsman.h"
@@ -246,7 +247,7 @@ extern char str_mc0[];
 extern int EnableOnline;
 extern int cBENewRaceInterface_bIsBamLocation;
 extern float D_0049D5D0;
-void* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cBackgroundMan_cBackgroundMan(void*) __asm__("cBackgroundMan_cBackgroundMan__FPv");
 extern "C" void cTrackFileMan_scanLocations(void*);
@@ -425,7 +426,7 @@ INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int cBENewRaceInterface_bIsBamLocation;
 
-void* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" void* cBE_getBE();
 

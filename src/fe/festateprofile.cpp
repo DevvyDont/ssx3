@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/keyboardpopup.h"
 #include "movie/mcoverlaymanager.h"
 #include "fe/festateprofile.h"
@@ -104,7 +105,7 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_cFEStateProfileLoad);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1);
 extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern void* cFEStateProfileLoad_vtbl[];
@@ -844,7 +845,7 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_updateDone);
 struct cAppMan;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* iface, int ev);
 extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
@@ -1013,7 +1014,7 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);

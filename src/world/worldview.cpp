@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "visualfx/lensfx.h"
 #include "object/rollermodifier.h"
 #include "world/instancerecord.h"
@@ -1595,7 +1596,7 @@ extern "C" void cGame_loadWScriptManSection(void* self, int a);
 void gCamTriggerMan_resolve(void* a, int b);
 extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* obj);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cBEMissionInterface_addStreamData_AE68(void* self, int a, void* p, int v) __asm__("cBEMissionInterface_addStreamData__FPv");
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_AttachAudioBank(void* self, unsigned int arg, void* obj);
@@ -1755,7 +1756,7 @@ INCLUDE_ASM("world/worldview", cPS2ChunkResolve_unresolve);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void operator_delete(int*);
 extern "C" void cAI_removeInjectedFile(void* p, unsigned char id);
 // PORT: cBEMissionInterface_remStreamData__FPv is called with a second (byte) argument here.

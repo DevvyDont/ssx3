@@ -32,6 +32,7 @@
 // struct copy stops at 0x4C, so those are separate statics in retail.
 
 #include "layout.h"
+#include "be/beinterface.h"
 
 struct cBERaceDB {
     int playerID[6];            // 0x00 [O] (On Tour [4]); [R] assignPlayer: playerID[gate] = player;
@@ -83,32 +84,24 @@ extern cBERaceDB cBENewRaceInterface_newRace;
 //
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's
 // cBENewRaceInterface has no data members of its own (size 0x8 = its cBEInterface), and neither does retail's.
-// Base cBEInterface, written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies: vtable
+// Base cBEInterface, written out inline (the class itself: be/beinterface.h, whose virtuals give the slots): vtable
 // cBENewRaceInterface_vtbl (0x45AE58), slot 1 submit = cBENewRaceInterface_submit (newRace -> cBELibrary_raceDB),
 // slot 2 discard = cBENewRaceInterface_discard (back), slots 3/4 cBEInterface_writeToReplayFrame /
 // cBEInterface_readFromReplayFrame.
 // Evidence tags as above, plus [R] retail's getThis (allocation, bIsActive, vptr) and constructor
 // cBENewRaceInterface_cBENewRaceInterface (vptr), [U] how retail code uses the field, [O] On Tour's cBEInterface
 // (bCanSubmit, bDataChanged, bIsActive, then the vptr; On Tour's bools are 1 byte, retail's are words).
-struct cBENewRaceInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U]
-                                     //       cBENewRaceInterface_setNewRaceActive (static: instance->bIsActive = arg);
-                                     //       cBEPreRaceState_onEnter/onExit set 0/1, cBERaceState_onExit clears it
-    void** mVtbl;                    // 0x00C [R] getThis and cBENewRaceInterface_cBENewRaceInterface store
-                                     //       cBENewRaceInterface_vtbl; [P] the preview's __19cBENewRaceInterface stores
-                                     //       its vtable at 0xC; [U] slot 1 (submit) is called through it by ~18
-                                     //       functions (cAI_initComputerRiders, cGFTrackStartState_preloadUpdate,
-                                     //       cSectionMan_preLoadMode, cOVTemplate_Dialog_onWidgetEvent, ...), slot 2
-                                     //       (discard) by cBELibrary_readFromData and cBENetworkInterface_setSyncData
+struct cBENewRaceInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [U] cBENewRaceInterface_setNewRaceActive (static: instance->bIsActive = arg);
+    //       cBEPreRaceState_onEnter/onExit set 0/1, cBERaceState_onExit clears it
+    //   the vptr (0x0C): [R] getThis and cBENewRaceInterface_cBENewRaceInterface store cBENewRaceInterface_vtbl; [P]
+    //       the preview's __19cBENewRaceInterface stores its vtable at 0xC; [U] slot 1 (submit) is called through it
+    //       by ~18 functions (cAI_initComputerRiders, cGFTrackStartState_preloadUpdate, cSectionMan_preLoadMode,
+    //       cOVTemplate_Dialog_onWidgetEvent, ...), slot 2 (discard) by cBELibrary_readFromData and
+    //       cBENetworkInterface_setSyncData
 };
 
-CHECK_OFFSET(cBENewRaceInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBENewRaceInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBENewRaceInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBENewRaceInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBENewRaceInterface, 0x10);
 
 // The one new-race interface (On Tour: cBENewRaceInterface::instance), created by cBENewRaceInterface_getThis.

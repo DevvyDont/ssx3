@@ -13,7 +13,7 @@
 //
 // Size 0x230 [R] (the allocation). The July 2003 preview's object is 0x19A0 bytes with a different layout (its
 // isNewHighScore / isNewTrackHighScore read 0x1990/0x1994 and 0x1998/0x199C), so the preview gives no offsets here.
-// Base cBEInterface (0x00-0x0F), written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies:
+// Base cBEInterface (0x00-0x0F), written out inline (the class itself: be/beinterface.h, whose virtuals give the slots):
 // vtable cBEScoreInterface_vtbl (0x45ACA8), slot 1 submit = cBEScoreInterface_submit (empty), slot 2 discard =
 // cBEScoreInterface_discard, slots 3/4 its own cBEScoreInterface_writeToReplayFrame / readFromReplayFrame (empty).
 // [O] On Tour's cBEScoreInterface (size 0x2E8): bNewHighScore[2], mNewTrackHighScoreIndex[2], m_iBestScoreInEvent,
@@ -30,6 +30,7 @@
 //       retail's are words).
 
 #include "layout.h"
+#include "be/beinterface.h"
 #include "ai/ridermetrix.h"
 
 // A profile's last finished event: its rider stats and finishing rank (On Tour tLastEventRiderStats, 0xB4 there).
@@ -63,17 +64,13 @@ CHECK_OFFSET(tBEHighScore, cCharacter, 0x04);
 CHECK_OFFSET(tBEHighScore, strUserName, 0x08);
 CHECK_SIZE(tBEHighScore, 0x14);
 
-struct cBEScoreInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [P] setScoreActive;
-                                     //       [U] cBEScoreInterface_setScoreActive (static: instance->bIsActive = arg);
-                                     //       cBERaceState_onEnter/onExit set 0/1
-    void** mVtbl;                    // 0x00C [R] cBEScoreInterface_cBEScoreInterface stores cBEScoreInterface_vtbl; [P]
-                                     //       __17cBEScoreInterface; [U] cBELibrary_readFromData,
-                                     //       cBESaveInterface_generateSaveProfile and loadSaveGame call slot 2
-                                     //       (discard)
+struct cBEScoreInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [P] setScoreActive; [U] cBEScoreInterface_setScoreActive (static:
+    //       instance->bIsActive = arg); cBERaceState_onEnter/onExit set 0/1
+    //   the vptr (0x0C): [R] cBEScoreInterface_cBEScoreInterface stores cBEScoreInterface_vtbl; [P]
+    //       __17cBEScoreInterface; [U] cBELibrary_readFromData, cBESaveInterface_generateSaveProfile and loadSaveGame
+    //       call slot 2 (discard)
     // cBEScoreInterface
     int bNewHighScore[2];            // 0x010 [O] bool[2] (On Tour 0x008); [R] getThis / discard set 0;
                                      //       [U] processEventRiderStats clears [profile], then stores
@@ -95,10 +92,6 @@ struct cBEScoreInterface {
                                      //       retail access to [2] (0x180-0x22F) seen
 };
 
-CHECK_OFFSET(cBEScoreInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBEScoreInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBEScoreInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBEScoreInterface, mVtbl, 0x0C);
 CHECK_OFFSET(cBEScoreInterface, bNewHighScore, 0x10);
 CHECK_OFFSET(cBEScoreInterface, mNewTrackHighScoreIndex, 0x18);
 CHECK_OFFSET(cBEScoreInterface, LastEventStats, 0x20);

@@ -25,7 +25,7 @@ void* cBEAggressionInterface_getThis()
     if (cBEAggressionInterface_instance == 0) {
         cBEAggressionInterface* mem = (cBEAggressionInterface*)cMemMan_alloc(0x10, str_BEAggressionInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&mem->mVtbl) = cBEAggressionInterface_vtbl;
+        (*(void**)&VPTR_OF(cBEInterface, mem)) = cBEAggressionInterface_vtbl;
         cBEAggressionInterface_instance = (cBEAggressionInterface*)(mem);
     }
     return cBEAggressionInterface_instance;

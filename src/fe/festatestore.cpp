@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintbagt.h"
 #include "ui/uimenu.h"
 #include "bx/math3d.h"
@@ -174,7 +175,7 @@ extern "C" void cFEStateUberTrick_trickVisible(cFEStateUberTrick* self, int on)
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
@@ -213,11 +214,10 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
-    char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
     {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
-        vt[2].fn(vthis(player, vt[2]));
+        player->discard();
     }
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
@@ -444,7 +444,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
@@ -482,7 +482,7 @@ extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState
             int flagBit = *(signed char*)&self->mpTrickMenu->mpSelected->mMiscData;
             cBEBAGTInterface* pi = (cBEBAGTInterface*)cBE_getInterface_Fv(cBE_getBE(), 6);
             func_0014FE08(pi, self->mUserNum, entryIndex, flagBit);
-            sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)pi->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, pi);
             vt[1].fn(vthis(pi, vt[1]));
             void* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
             if (helpText != 0) {
@@ -586,7 +586,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "vtable.h"
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
@@ -9,7 +10,7 @@ INCLUDE_ASM("seg/seg_CF758", setChallengeName);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_CE758(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_CE758(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" const char* cBENewRaceInterface_getLocationName(void* iface, int track);
@@ -232,7 +233,7 @@ INCLUDE_ASM("seg/seg_CF758", getChallengeMedal);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_ED90(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_ED90(void* be, int kind) __asm__("cBE_getInterface__Fv");
 signed char cBERewardInterface_getTrackMedal(void* self, int a, int b, int track, int kind);
 extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int kind);
 extern "C" int cBERewardInterface_getCollectiblesMedal(void* self, int a, int b, int kind);
@@ -295,12 +296,6 @@ int cBELibrary_getRiderIndex(int flag);
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern char cFEStateRewardGalleryBase_vtbl[];
-
-struct sVEntry_1CEEA0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sChallenge_1CEEA0 {
     char pad0[0x8];
@@ -391,7 +386,7 @@ extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBas
             self->b[i][j] = 0;
         }
     }
-    cBENewPlayerInterface* iface = (cBENewPlayerInterface*)((char*)cBE_getInterface_ED90(cBE_getBE(), 1));
+    cBEInterface* iface = cBE_getInterface_ED90(cBE_getBE(), 1);
     self->charId = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
     if (rank != 0) {
         switch (cBENewPlayerInterface_getLastHub(iface, cBELibrary_getRiderIndex(self->player))) {
@@ -405,8 +400,7 @@ extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBas
     } else {
         self->f8F0 = -1;
     }
-    sVEntry_1CEEA0* vt = (sVEntry_1CEEA0*)((cBENewPlayerInterface*)iface)->mVtbl;
-    vt[2].fn(vthis(iface, vt[2]));
+    iface->discard();
     self->f54 = cBEEconInterface_getMoney(cBE_getInterface_ED90(cBE_getBE(), 11), self->player, self->charId);
     return self;
 }

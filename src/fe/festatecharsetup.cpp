@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "bx/math3d.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
@@ -22,7 +23,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int v);
@@ -84,10 +85,9 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFEStateCharSetup_updateWidget(self);
-    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-    vt[2].fn(vthis(iface, vt[2]));
+    iface->discard();
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charId, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
@@ -243,7 +243,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);

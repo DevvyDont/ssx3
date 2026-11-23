@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "render/2drender.h"
 #include "camera/camera.h"
 #include "util/surfprop.h"
@@ -4755,7 +4756,7 @@ extern "C" void cPlayerIndicatorFX_update(cPlayerIndicatorFX* self)
 INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_render);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 struct sVtx_3AF8 {
     float s, t, q, pad;

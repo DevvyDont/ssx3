@@ -43,7 +43,7 @@ void* cBENewRaceInterface_getThis()
     if (cBENewRaceInterface_instance == 0) {
         cBENewRaceInterface* mem = (cBENewRaceInterface*)cMemMan_alloc(0x10, str_BENewRaceInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&mem->mVtbl) = cBENewRaceInterface_vtbl;
+        (*(void**)&VPTR_OF(cBEInterface, mem)) = cBENewRaceInterface_vtbl;
         cBENewRaceInterface_instance = (cBENewRaceInterface*)(mem);
     }
     return cBENewRaceInterface_instance;

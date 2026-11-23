@@ -13,7 +13,7 @@
 //
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's cBEEconInterface
 // has no data members of its own (size 0x8 = its cBEInterface), and neither does retail's.
-// Base cBEInterface, written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies: vtable
+// Base cBEInterface, written out inline (the class itself: be/beinterface.h, whose virtuals give the slots): vtable
 // cBEEconInterface_vtbl (0x45AC78, unnamed in symbol_addrs), slot 1 submit = cBEEconInterface_submit (empty), slot 2 discard =
 // cBEEconInterface_discard (empty), slots 3/4 cBEInterface_writeToReplayFrame / cBEInterface_readFromReplayFrame.
 //
@@ -26,24 +26,18 @@
 //       are 1 byte, retail's are words).
 
 #include "layout.h"
+#include "be/beinterface.h"
 
-struct cBEEconInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U]
-                                     //       cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit,
-                                     //       cBERaceState_onEnter/onExit set 0/1
-    void** mVtbl;                    // 0x00C [R] getThis stores cBEEconInterface_vtbl; [U] cFEStateBuyAttrib_buyExperience calls
-                                     //       slot 1 (submit) through it
+struct cBEEconInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [U] cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit,
+    //       cBERaceState_onEnter/onExit set 0/1
+    //   the vptr (0x0C): [R] getThis stores cBEEconInterface_vtbl; [U] cFEStateBuyAttrib_buyExperience calls slot 1
+    //       (submit) through it
 };
 
 extern cBEEconInterface* cBEEconInterface_instance;
 
-CHECK_OFFSET(cBEEconInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBEEconInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBEEconInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBEEconInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBEEconInterface, 0x10);
 
 // The one economy interface (On Tour: cBEEconInterface::instance), created by cBEEconInterface_getThis.

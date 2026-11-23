@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/feinput.h"
 #include "ai/ai.h"
 #include "ealib/shape.h"
@@ -22,7 +23,7 @@
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_load);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_3438(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_3438(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIEngine_cUIEngine(void* mem);
@@ -636,7 +637,7 @@ INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_update);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_regressAggression(void* p);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
@@ -937,7 +938,7 @@ extern "C" void* cGFEventStartState_cGFEventStartState(cGFEventStartState* self)
 INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_gainFocus);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_41D0(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_41D0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBE_setState(int state);
 extern "C" void cAI_setAIState(void*, int);
@@ -1022,7 +1023,7 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_update);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBXLoadIndicator_Show(void* self, int bit);
 extern "C" void cBXLoadIndicator_Hide(void* self, int bit);
 extern "C" int cSSXScriptEngine_GetNISListPlayState(void* snd, int a1);
@@ -1175,7 +1176,7 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
 INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_loseFocus);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_4750(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_4750(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBE_setState(int state);
 extern "C" void cAI_setAIState(void*, int);

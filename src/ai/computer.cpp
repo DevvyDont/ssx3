@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "path/basepath.h"
 #include "path/trackpath.h"
 #include "visualfx/splashfx.h"
@@ -202,7 +203,7 @@ struct sCompSkill {
 
 extern int D_005308D0[];
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" short cComputer_updateRiderPathDifficulty(void* self, int level, int mode);
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int cBENewPlayerInterface_getDifficultyLevel(void* iface, int flag);
@@ -284,7 +285,7 @@ INCLUDE_ASM("ai/computer", cComputer_setAttributeLevels);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
 extern "C" void cBEStatInterface_setStatLevel(void* iface, int a1, int a2);
 
@@ -384,7 +385,7 @@ INCLUDE_ASM("ai/computer", cComputer_chooseRandomGrab);
 unsigned int AIrand();
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned short cBEBAGTInterface_getGrabAnim(void* self, int a1, int a2);
 extern "C" float cRider_getGrabAnimSpeedScale(void* self);
 extern "C" float cRiderAnimBase_getAIAnimEventTime(char* self, int a1, int frame);
@@ -439,7 +440,7 @@ INCLUDE_ASM("ai/computer", cComputer_chooseRandomTweakGrab);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned short cBEBAGTInterface_getGrabAnim(void* self, int a1, int a2);
 extern "C" int cBEBAGTInterface_getTweakAnim(void* self, int a1, int a2);
 extern "C" int cBEBAGTInterface_getUberAnim(void* self, int a1, int a2, int a3);
@@ -514,7 +515,7 @@ INCLUDE_ASM("ai/computer", cComputer_chooseRandomUberGrab);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned short cBEBAGTInterface_getGrabAnim(void* self, int a1, int a2);
 extern "C" int cBEBAGTInterface_getUberAnim(void* self, int a1, int a2, int a3);
 extern "C" float cRider_getGrabAnimSpeedScale(void* self);
@@ -1263,7 +1264,7 @@ INCLUDE_ASM("ai/computer", cComputer_setupWarp);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 float cRider_getDistanceLeft(void* self);
 
 /**
@@ -1349,7 +1350,7 @@ extern "C" void cRider_flagEventReaction(cRider* self, int mode, float forceDela
 INCLUDE_ASM("ai/computer", cRider_flagEventBoostPowerUp);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBEStatInterface_getTrickAttrib(void* iface, int rider, int b);
@@ -1560,7 +1561,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventPathCheckpoint);
 extern int D_005308D0[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_evCheckpoint(void*, int);
 
 /**
@@ -1592,7 +1593,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventPathEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cRider_doFinishEvent(void* self);
 extern "C" void cReplay_eventChapter(void* a, int b, int c);
@@ -1743,7 +1744,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventLand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_flagEventReaction(cRider* self, int mode, float t);
 void cRider_flagEventBoostPowerUp_fi(void*, float, int) __asm__("cRider_flagEventBoostPowerUp");
 void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -2174,7 +2175,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventMissionSuccess);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_evMissionSuccess(int, int);
 extern "C" void cBERewardInterface_awardUserBigChallenge(void*, int, int);
 
@@ -2200,7 +2201,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventAddCollectible);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_evAddCash(int, int);
 extern "C" void cBERewardInterface_awardUserCollectible(void*, int, int);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "ai/riderhandler.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
@@ -326,7 +327,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnComboChain);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // Same function as cRiderMetrix_addHUDfx1(self, type, value, arg, duration): the float travels in $f12 either way,
 // but the original prototype lists it before arg, which decides the argument evaluation order.
 extern "C" void cRiderMetrix_addHUDfx1_f(void* self, int type, int value, float duration, int arg) __asm__("cRiderMetrix_addHUDfx1");
@@ -1555,7 +1556,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAddPoints);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 
@@ -1606,7 +1607,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evGrabHold);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEBAGTInterface_getGrabPoints(void* iface, int id);
 int cBEBAGTInterface_getGrabPointsPerSec(void* iface, int id);
 
@@ -2147,7 +2148,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAddCash);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001E3760(int id, int amount);
 extern "C" void cBERewardInterface_awardUserCash(void* iface, int id, int amount);
 int cRiderMetrix_addHUDfx1_i(void* self, int type, int value, int arg, float duration) __asm__("cRiderMetrix_addHUDfx1");
@@ -2378,7 +2379,7 @@ extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 extern "C" void cRiderMetrix_delayComboChainReset(cRiderMetrix* self, float seconds);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int abs(int);
 
 // g++ max operator: the target uses max.s, which only `>?` produces

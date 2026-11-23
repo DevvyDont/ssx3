@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintnewrace.h"
 #include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
@@ -28,7 +29,7 @@ void* cBERewardInterface_getThis()
     if (cBERewardInterface_instance == 0) {
         cBERewardInterface* mem = (cBERewardInterface*)cMemMan_alloc(0x18, str_BERewardInt, 0, 0);
         mem->bIsActive = 0;
-        mem->mVtbl = cBEInterface_vtbl;
+        VPTR_OF(cBEInterface, mem) = cBEInterface_vtbl;
         cBERewardInterface_instance = mem;
     }
     return cBERewardInterface_instance;
@@ -986,7 +987,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isMountainConquered);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEScoreInterface_getCurrentHighlightLevel(void* self, int i);
 extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int a, int b, int i);
 
@@ -1466,7 +1467,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buyPoster);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_markRewardOwned(cBERewardInterface* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
@@ -1517,7 +1518,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buyTradingCard);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_markRewardOwned(cBERewardInterface* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
@@ -1568,7 +1569,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buyConceptArt);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_markRewardOwned(cBERewardInterface* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
@@ -1619,7 +1620,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buyToy);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_markRewardOwned(cBERewardInterface* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
@@ -1670,7 +1671,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buyVideo);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern int cBELibrary_profileLib[];
@@ -1713,7 +1714,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buySong);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern int cBELibrary_profileLib[];
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
@@ -1749,7 +1750,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_buyCheatChar);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern int cBELibrary_profileLib[];
@@ -2085,7 +2086,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectiblesMedal);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, int a, int b, int c);
 
 /**
@@ -2116,7 +2117,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getBigChallengesMedal);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* iface, int a, int b, int c);
 
 /**
@@ -2147,7 +2148,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsMedal);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
 
 /**
@@ -2527,7 +2528,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateUserTrackMedalRewards)
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 signed char cBERewardInterface_getTrackMedal(void* self, int b, int c, int d, int e);
 int cBERewardInterface_isBetterMedal(void* self, int a, int b);
 extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
@@ -2761,7 +2762,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserCash1);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
 extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
 extern "C" void cBEEconInterface_addMoney(void* econ, int a, int b, int amount);
@@ -2814,7 +2815,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserCollectible);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -2864,7 +2865,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserBigChallenge);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, int owner);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);

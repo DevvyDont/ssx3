@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "wscript/wscriptcache.h"
 #include "sound/ssxaudio.h"
 #include "be/beintnewrace.h"
@@ -1667,7 +1668,7 @@ struct sWSPDef8C60 {
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cPlaybackMan_purgeLocation(void* pb);
 extern "C" int cWorld_getNumMissionScripts(void* world, int i);
 extern "C" void* cWorld_getMissionScripts(void* world, int i);

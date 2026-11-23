@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "vtable.h"
 #include "be/bedbprofile.h"
 #include "fe/feboltfilemanager.h"
@@ -23,7 +24,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cFEStateCharEquip);
 extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int cBELibrary_getRiderIndex(int index);
 int GetHashValue32(char* str);
@@ -845,7 +846,7 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
 extern "C" int func_0014B478(void* self, int a1, int a2);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern int D_004A11E0;
 extern int D_004A18D8;
@@ -1337,7 +1338,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_startLargePreviewLoad
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* func_0014B700(void* iface, int rider);
 extern "C" char* strrchr(const char* s, int c);
 extern "C" char* strncpy(char* dst, const char* src, int n);
@@ -1496,7 +1497,7 @@ struct sEquipItem_A798 {
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern int D_004A18D8;
 extern char str_kT_HELPNoItemsCTM[];
@@ -1733,7 +1734,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateCharacterModel)
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" void cFERider_loadTextures(void* rider, void* item, int a2, int a3);
 
@@ -2629,7 +2630,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019BE80);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014B560(void* iface, int a1, int a2, int a3, int a4);
 
 /**
@@ -2652,7 +2653,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019BEE8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" int func_0014AFB0(void* self, int a1, int a2, int id, int locked);
 extern "C" void func_0014AEA8(void* self, int a1, int a2);

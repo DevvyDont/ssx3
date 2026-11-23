@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintoption.h"
 #include "ai/ubergrindanim.h"
 #include "camera/camera.h"
@@ -233,7 +234,7 @@ INCLUDE_ASM("ai/ai", cAI_initAIActors);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cAI_initComputerActors(cAI*);
 
 /**
@@ -1128,7 +1129,7 @@ extern "C" void cAI_initComputerRiders(cAI* aiManager)
 INCLUDE_ASM("ai/ai", cAI_initComputerActors);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cComputer_cComputer(void* mem, int a, int b);
 extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* iface, int rider, int ctrl);
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
@@ -1179,7 +1180,7 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
         cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
         cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
         cBENewPlayerInterface_setRiderCheatCharID(iface, idx, 0);
-        sVEntryCA* vt = (sVEntryCA*)iface->mVtbl;
+        sVEntryCA* vt = (sVEntryCA*)VPTR_OF(cBEInterface, iface);
         vt[1].fn(vthis(iface, vt[1]));
         cRider* slotRider = self->mRiders[idx];
         int noController = -1;
@@ -1189,7 +1190,7 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
         self->mNumActors++;
         idx++;
     }
-    sVEntryCA* vt = (sVEntryCA*)iface->mVtbl;
+    sVEntryCA* vt = (sVEntryCA*)VPTR_OF(cBEInterface, iface);
     vt[1].fn(vthis(iface, vt[1]));
     self->mCount = idx;
 }
@@ -1330,7 +1331,7 @@ extern "C" void cAI_swaploadPathFile(cAI* self, int filename) {
 INCLUDE_ASM("ai/ai", cAI_swaploadInjectedPathFile);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self);
 extern char gPaths[];
 extern "C" void cPathSys_purgePaths(void* self);
@@ -8116,7 +8117,7 @@ INCLUDE_ASM("ai/ai", cSpinControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float cSpinControl_calcFlipAxisWeight(cSpinControl* self);
@@ -8214,7 +8215,7 @@ extern "C" float cRiderMetrix_evLateSpin(void* self, int v);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
 extern "C" float func_0031C228(float x);
 extern "C" float cRiderMetrix_evSpin(void* self, float x);
@@ -9568,7 +9569,7 @@ INCLUDE_ASM("ai/ai", cSpinControl_predictSpinSec);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
@@ -9612,7 +9613,7 @@ INCLUDE_ASM("ai/ai", cSpinControl_predictFlipSec);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.

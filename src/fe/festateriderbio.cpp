@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintplayer.h"
 #include "fe/festateoptions.h"
 #include "ui/uiengine.h"
@@ -23,7 +24,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateCharSetup_updateWidget(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
@@ -51,7 +52,7 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
     cFEStateCharSetup_updateWidget(self);
     cBENewPlayerInterface* pi = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
-    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)pi->mVtbl;
+    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, pi);
     vt[2].fn(vthis(pi, vt[2]));
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
@@ -173,7 +174,7 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onPopupEvent);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int a1, const char* name);
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* self, int a1, int a2);
 extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
@@ -223,7 +224,7 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);

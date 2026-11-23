@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "util/locale.h"
 #include "ai/ridermetrix.h"
 #include "ui/uiicon.h"
@@ -145,7 +146,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFELoadState_InitwidgetMultiP(void* self, int idx);
@@ -215,7 +216,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget);
 
 /**
@@ -960,7 +961,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -1140,7 +1141,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern unsigned int D_00536640[];
 
@@ -1344,7 +1345,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_widgetCreateQP);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintplayer.h"
 #include "ui/uimenu.h"
 #include "ui/uiicon.h"
@@ -68,7 +69,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
@@ -95,7 +96,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed char charID);
 
@@ -124,7 +125,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onGainFocus);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
@@ -290,7 +291,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onWidgetCreate);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -381,7 +382,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onWidgetEvent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
@@ -552,7 +553,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int cBEStatInterface_getHumanSpeed(void* iface, int a, int b);
@@ -776,7 +777,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_cFEStateCheatCharSel
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" int cBERewardInterface_isCheatCharOwned(void* iface, int a1, int a2, int a3);
 extern "C" cBERewardDB* cBERewardInterface_getDB();
@@ -980,7 +981,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* iface, int rider, int id);
 extern "C" void cUIStateStack_pop(void*, int);
 extern char gSmallSize[];
@@ -1026,7 +1027,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
             self->mCheatCharID = self->mCharIDs[sel];
         cBENewPlayerInterface* pl = (cBENewPlayerInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 1));
         cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)pl->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cBEInterface, pl);
         vt[1].fn(vthis(pl, vt[1]));
         self->mDone = 1;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);

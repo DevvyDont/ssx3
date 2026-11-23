@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "replay/bxreplayframe.h"
 
 //100%
@@ -93,12 +94,12 @@ class cBEInterfaceV_getInterface
 {
 public:
     char pad_0x00[0x4];
-    virtual void* getInterface(int kind);
+    virtual cBEInterface* getInterface(int kind);
 };
 
 // PORT: callers pass (be, kind); the mangled name __Fv is a guess. The kind is forwarded
 // to the current state's virtual getInterface.
-void* cBE_getInterface_impl(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_impl(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Returns one of the back end's interfaces, as provided by the current game-flow state.
@@ -107,7 +108,7 @@ void* cBE_getInterface_impl(void* be, int kind) __asm__("cBE_getInterface__Fv");
  * @param kind  which interface to return (14 kinds, 0-13)
  * @return the current state's getInterface(kind) result (cBE_readFromReplayFrame() treats 0 as absent)
  */
-void* cBE_getInterface_impl(void* be, int kind)
+cBEInterface* cBE_getInterface_impl(void* be, int kind)
 {
     return ((cBEInterfaceV_getInterface*)cBE_aBEState[cBE_currentState])->getInterface(kind);
 }

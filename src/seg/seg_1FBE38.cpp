@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "wscript/wscriptman.h"
 #include "world/instancerecord.h"
 #include "world/worldcache.h"
@@ -5378,7 +5379,7 @@ extern char* SSXApp_2210 __asm__("SSXApp");
 struct V3_2210 { float x, y, z; };
 extern V3_2210 luno_gLunoNil_2210 __asm__("luno_gLunoNil");
 extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
-extern "C" void* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" cBEInterface* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationIDFromScript_2210(void* iface, int id) __asm__("cBENewRaceInterface_getLocationIDFromScript");
 extern "C" void cSectionMan_load_2210(void* self, int hash, char* name) __asm__("cSectionMan_load");
 extern "C" void cSectionMan_activate_2210(void* self, int hash, char* name) __asm__("cSectionMan_activate");
@@ -6821,7 +6822,7 @@ INCLUDE_ASM("seg/seg_1FBE38", isGamePath);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3D90(void) __asm__("cBE_getBE");
-void* cBE_getInterface_Fv_3D90(int be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv_3D90(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_004465E8_3D90[] __asm__("D_004465E8");
 /**
  * Returns whether script game path @p i is the current game path.
@@ -6846,7 +6847,7 @@ INCLUDE_ASM("seg/seg_1FBE38", isGameMode);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3DF8(void) __asm__("cBE_getBE");
-void* cBE_getInterface_Fv_3DF8(int be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv_3DF8(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_004465F8_3DF8[] __asm__("D_004465F8");
 /**
  * Returns whether script game mode @p i is the current game mode.
@@ -6871,7 +6872,7 @@ INCLUDE_ASM("seg/seg_1FBE38", isGameEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3E60(void) __asm__("cBE_getBE");
-void* cBE_getInterface_Fv_3E60(int be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv_3E60(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_00446618_3E60[] __asm__("D_00446618");
 /**
  * Returns whether script game event @p i is the current game event.
@@ -9553,7 +9554,7 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionPass);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char* SSXApp_7308 __asm__("SSXApp");
 extern "C" int cBEMissionInterface_isMissionCompleted(void* missions, int id);
 extern "C" void cBEMissionInterface_setIsCompleted(void* missions, int id, int done);

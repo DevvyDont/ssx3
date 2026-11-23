@@ -24,7 +24,7 @@ void* cBEMissionInterface_getThis()
     if (cBEMissionInterface_instance == 0) {
         cBEMissionInterface* mem = (cBEMissionInterface*)cMemMan_alloc(20, str_BEMissionInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&mem->mVtbl) = cBEMissionInterface_vtbl;
+        (*(void**)&VPTR_OF(cBEInterface, mem)) = cBEMissionInterface_vtbl;
         cBEMissionInterface_instance = (cBEMissionInterface*)(mem);
     }
     return cBEMissionInterface_instance;

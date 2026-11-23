@@ -5,6 +5,7 @@
 #include "be/beintreward.h"
 #include "be/beintcharacter.h"
 #include "be/beintnetwork.h"
+#include "be/beinterface.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BENetworkInt[];
@@ -25,7 +26,7 @@ void* cBENetworkInterface_getThis()
     if (cBENetworkInterface_instance == 0) {
         cBENetworkInterface* mem = (cBENetworkInterface*)cMemMan_alloc(0x10, str_BENetworkInt, 0, 0);
         mem->bIsActive = 0;
-        mem->mVtbl = cBENetworkInterface_vtbl;
+        VPTR_OF(cBEInterface, mem) = cBENetworkInterface_vtbl;
         cBENetworkInterface_instance = mem;
     }
     return cBENetworkInterface_instance;
@@ -178,7 +179,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setSyncData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
 extern "C" void func_00156810(void* self);
 
@@ -299,16 +300,10 @@ extern "C" void cBENetworkInterface_preInitBE(cBENetworkInterface* self)
 //100%
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_postInitBE);
 #ifdef SKIP_ASM
-struct sVEntry0014EA90 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: func_0014EB08 is defined (void) in this unit but called with self here.
 void func_0014EB08_self(void* self) __asm__("func_0014EB08");
 
@@ -321,9 +316,9 @@ void func_0014EB08_self(void* self) __asm__("func_0014EB08");
 extern "C" void cBENetworkInterface_postInitBE(cBENetworkInterface* self)
 {
     cBEInterface* statInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 3);
-    ((sVEntry0014EA90*)statInterface->mVtbl)[2].fn(vthis(statInterface, ((sVEntry0014EA90*)statInterface->mVtbl)[2]));
+    statInterface->discard();
     cBEInterface* aggressionInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
-    ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2].fn(vthis(aggressionInterface, ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2]));
+    aggressionInterface->discard();
     func_0014EB08_self(self);
 }
 #endif
@@ -453,9 +448,9 @@ extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self
         cBELibrary_playerDB[i] = cBENetworkInterface_BackupPlayerDB[i];
     }
     cBEInterface* playerInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    ((sVEntry0014EA90*)playerInterface->mVtbl)[2].fn(vthis(playerInterface, ((sVEntry0014EA90*)playerInterface->mVtbl)[2]));
+    playerInterface->discard();
     cBEInterface* grabTable = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 6);
-    ((sVEntry0014EA90*)grabTable->mVtbl)[2].fn(vthis(grabTable, ((sVEntry0014EA90*)grabTable->mVtbl)[2]));
+    grabTable->discard();
 }
 #endif
 
@@ -478,7 +473,7 @@ extern "C" void* cBECharacterInterface_getThis(void)
     if (cBECharacterInterface_instance == 0) {
         cBECharacterInterface* mem = (cBECharacterInterface*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
         mem->bIsActive = 0;
-        mem->mVtbl = cBECharacterInterface_vtbl;
+        VPTR_OF(cBEInterface, mem) = cBECharacterInterface_vtbl;
         cBECharacterInterface_instance = (cBECharacterInterface*)(mem);
     }
     return cBECharacterInterface_instance;

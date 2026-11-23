@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uiengine.h"
 #include "sound/ssxaudio.h"
 #include "fe/ovstatepause.h"
@@ -57,7 +58,7 @@ extern "C" void* memset(void* dst, int c, int n);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
 extern "C" void cSSXAudio_PauseAudio(void* audio);
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char str_cOVTemplate_PauseMenu[];
 extern char str_31paus_freeride[];
 extern char* str_H_J[];

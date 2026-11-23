@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "fe/uitemplatemap.h"
 #include "be/beintnewrace.h"
 #include "fe/ovstaterewardslist.h"
@@ -131,7 +132,7 @@ INCLUDE_ASM("fe/ovstaterewardslist", cUITemplate_MAP_init);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBENewRaceInterface_getLocation(void* iface);
 extern unsigned int cUITemplate_MAP_mMapStyle;
 extern int cUITemplate_MAP_mPeak;

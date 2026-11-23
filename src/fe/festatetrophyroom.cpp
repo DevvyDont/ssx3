@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "ui/uistate.h"
 #include "movie/mcoverlaymanager.h"
 #include "sound/ssxaudio.h"
@@ -61,7 +62,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetCreate);
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
@@ -279,7 +280,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateBigArt);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int getChallengeMedal(int rider, int a, int b, int c, int index);
 
@@ -392,7 +393,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_loadTextures);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" char* cBERewardInterface_getMedal(void* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
@@ -617,7 +618,7 @@ extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern void* cFEStateRewardsRoom_vtbl[];
 
@@ -805,7 +806,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_setRewardsWidgetText);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -909,7 +910,7 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5138);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_001BF228(void* self, int msg);
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* mem, int a1);
@@ -1152,7 +1153,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_initFEMemCard);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
 int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
@@ -1350,7 +1351,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cMemMan_free(void* p);
 extern "C" void cBESaveInterface_releaseBuffer(void* iface);
 extern "C" void cBESaveInterface_releaseReplayBuffer(void* iface);
@@ -1401,7 +1402,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_writeStart);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cMCOverlayManager_SettingsWriteStart(void* app);
 extern "C" void cReplay_initSave(void* p);
 extern "C" int cBE_getDataSize(void* be);
@@ -1486,7 +1487,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_callbackReadUpdate);
 extern int gWeHaveToClearTheBackEnd;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBESaveInterface_releaseReplayBuffer(void* iface);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int cBE_getDataSize(void* be);
@@ -1594,7 +1595,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_readStart);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int cBE_getDataSize(void* be);
 // PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.

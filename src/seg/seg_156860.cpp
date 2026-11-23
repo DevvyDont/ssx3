@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "online/commchannel.h"
 #include "vtable.h"
 #include "online/dnasman.h"
@@ -1445,7 +1446,7 @@ extern "C" void cGameComm_destroy(void) {
 //100%
 INCLUDE_ASM("seg/seg_156860", cGameComm_cGameComm);
 #ifdef SKIP_ASM
-void* cBE_getInterface_6C78(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_6C78(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENetworkInterface_getSyncDataSize(void* iface);
 extern "C" void cGameComm_setState_6C78(void* self, int mode) __asm__("cGameComm_setState");
 extern "C" void MEM_fill_6C78(void* p, int c, int n) __asm__("MEM_fill");
@@ -1758,7 +1759,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_update);
 #ifdef SKIP_ASM
 // PORT: several callees are defined later in the unit with their own parameter types; bind local views by asm label
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENetworkInterface_getSyncData_70D8(void* iface, int a1, int a2) __asm__("cBENetworkInterface_getSyncData");
 extern "C" void cBENetworkInterface_setSyncData_70D8(void* iface, int a1, int a2) __asm__("cBENetworkInterface_setSyncData");
 extern "C" float cCommSystem_getLatency_70D8(int arg0, int arg1) __asm__("cCommSystem_getLatency");
@@ -3528,7 +3529,7 @@ INCLUDE_ASM("seg/seg_156860", func_00259098);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_9098(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_9098(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void*, int);
 extern "C" void func_0014EBB8(void* iface, int v);
 extern "C" void func_0014EBD8(void* iface, int v);

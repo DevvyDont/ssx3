@@ -17,7 +17,7 @@
 //
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's cBESaveInterface
 // has no data members of its own (size 0x8 = its cBEInterface), and neither does retail's.
-// Base cBEInterface, written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies: vtable
+// Base cBEInterface, written out inline (the class itself: be/beinterface.h, whose virtuals give the slots): vtable
 // cBESaveInterface_vtbl (0x0045AD08, named 2026-11-20), slot 1 submit = cBESaveInterface_submit, slot 2 discard =
 // cBESaveInterface_discard, slots 3/4 cBEInterface_writeToReplayFrame / cBEInterface_readFromReplayFrame.
 //
@@ -30,22 +30,16 @@
 //       are 1 byte, retail's are words).
 
 #include "layout.h"
+#include "be/beinterface.h"
 
-struct cBESaveInterface {
-    // cBEInterface (0x00-0x0F; see be/beintreward.h)
-    int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
-    int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
-    int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [P] the preview's getThis;
-                                     //       [U] cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit,
-                                     //       cBERaceState_onEnter/onExit set 0/1 (retail has no setSaveActive)
-    void** mVtbl;                    // 0x00C [R] getThis stores cBESaveInterface_vtbl; [P] the preview's getThis stores
-                                     //       _vt$16cBESaveInterface
+struct cBESaveInterface : public cBEInterface {
+    // cBEInterface (0x00-0x0F, be/beinterface.h):
+    //   bIsActive: [R] getThis sets 0; [P] the preview's getThis; [U] cBEPreRaceState_onEnter/onExit,
+    //       cBEPostRaceState_onEnter/onExit, cBERaceState_onEnter/onExit set 0/1 (retail has no setSaveActive)
+    //   the vptr (0x0C): [R] getThis stores cBESaveInterface_vtbl; [P] the preview's getThis stores
+    //       _vt$16cBESaveInterface
 };
 
-CHECK_OFFSET(cBESaveInterface, bCanSubmit, 0x00);
-CHECK_OFFSET(cBESaveInterface, bDataChanged, 0x04);
-CHECK_OFFSET(cBESaveInterface, bIsActive, 0x08);
-CHECK_OFFSET(cBESaveInterface, mVtbl, 0x0C);
 CHECK_SIZE(cBESaveInterface, 0x10);
 
 // The one save interface (On Tour: cBESaveInterface::instance), created by cBESaveInterface_getThis.

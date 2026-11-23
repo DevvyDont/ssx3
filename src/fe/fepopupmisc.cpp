@@ -220,7 +220,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char str_24screen_position[];
 
 struct sOptions_EE10 {
@@ -5383,7 +5383,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1550);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
@@ -5563,7 +5563,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1C10);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
@@ -6072,7 +6072,7 @@ extern "C" void func_001E25D8(int key, void* locationId, int raceResult)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2648);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
@@ -6173,7 +6173,7 @@ extern "C" void func_001E2648_impl(int which, int flag)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2828);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
@@ -6275,7 +6275,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2A08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E2B38(int charID);
@@ -6983,7 +6983,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3510);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setHelpDone(void* iface, int a1, int a2);
 extern int D_004A20CC;
 
@@ -7009,7 +7009,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3570);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHelpDone(void* iface, int a1);
 
 /**
@@ -7141,7 +7141,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3760);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
 int cBERewardInterface_getEarningsTarget(void* self, int a1);
@@ -7186,7 +7186,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E38B8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
@@ -7231,7 +7231,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E39F8);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_00147908(void* iface, int a1);
 
 /**
@@ -7253,7 +7253,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3A30);
 #ifdef SKIP_ASM
 extern "C" int func_00147980(void* iface, int a1, void* a2);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Reports whether the human rider's message flag number @p self is set (func_00147980 on the player interface).
@@ -7273,7 +7273,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3A78);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00147A30(void* iface, int a1, int a2, int a3);
 
 /**
@@ -9303,7 +9303,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -9459,7 +9459,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
@@ -9853,7 +9853,7 @@ int GetHashValue32(char* str);
 extern char str_overlayMenu[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
 /**
@@ -9884,7 +9884,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -10118,7 +10118,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
@@ -10623,7 +10623,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* cBE_getBE();
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);

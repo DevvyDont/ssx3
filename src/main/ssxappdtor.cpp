@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beinterface.h"
 #include "visualfx/aivisualeffectsman.h"
 #include "visualfx/visualeffectsman.h"
 #include "ui/uiengine.h"
@@ -3514,7 +3515,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadState_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void func_00246CF8(void* self, int a1);
@@ -3590,7 +3591,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadState_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGameLoadState_widgetCreateQP(void* self, int a1);
 extern "C" void cGameLoadState_widgetCreateMultiP(void* self, int a1);
 
@@ -3723,7 +3724,7 @@ extern "C" void* func_00245708(cGameLoadStateConquer* self)
 INCLUDE_ASM("main/ssxappdtor", func_00245730);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
-void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern char str_110ctrl_load[];
