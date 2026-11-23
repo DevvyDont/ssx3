@@ -482,8 +482,7 @@ extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState
             int flagBit = *(signed char*)&self->mpTrickMenu->mpSelected->mMiscData;
             cBEBAGTInterface* pi = (cBEBAGTInterface*)cBE_getInterface_Fv(cBE_getBE(), 6);
             func_0014FE08(pi, self->mUserNum, entryIndex, flagBit);
-            sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, pi);
-            vt[1].fn(vthis(pi, vt[1]));
+            pi->submit();
             void* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
             if (helpText != 0) {
                 cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(str_kT_66HELPCustomUber));

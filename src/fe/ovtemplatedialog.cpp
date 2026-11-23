@@ -1997,16 +1997,15 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                     } else if (kind == 8 || kind == 11) {
                         mode = 0x10;
                     }
-                    char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 0);
+                    cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 0);
                     void* gm = SSXApp->GameModeMan;
                     cBE_setState(0);
                     cBENewRaceInterface_setGameMode(iface, cBENewRaceInterface_newRace.cGameMode);
                     cBENewRaceInterface_setGameEvent(iface, kind);
                     cBENewRaceInterface_mNextLocation = mode;
                     cBENewRaceInterface_newRace.iLocationIdx = mode;
-                    sVV_D5A8* vt = *(sVV_D5A8**)(iface + 0xC);
                     cBENewRaceInterface_bIsBamLocation = 1;
-                    vt[1].fn(vthis(iface, vt[1]));
+                    iface->submit();
                     cGameModeMan_initGameMode(gm, cBENewRaceInterface_newRace.cGameEvent);
                     cGame_exit(SSXApp->Game, 1);
                 } else if (cOVStateManager_mIsPauseDialog) {
@@ -2060,13 +2059,12 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
             case 4: {
                 cReplay_stopAutoReplay(SSXApp->Game->Replay);
                 cOVStateManager_mStatus = 3;
-                char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+                cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
                 char* missionIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 10);
                 cBE_setState(0);
                 cBENewRaceInterface_setGameEvent(iface, 0xC);
                 cBENewRaceInterface_setGameMode(iface, 4);
-                sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(iface + 0xC);
-                vt[1].fn(vthis(iface, vt[1]));
+                iface->submit();
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
                 cAI_initFreeride(SSXApp->Game->AI);
                 ((cBEMissionInterface*)missionIface)->nextSessionID = 1;

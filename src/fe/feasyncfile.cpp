@@ -25755,8 +25755,7 @@ extern "C" void func_001C2A18(cFEStateNetQuickMessages* self)
             strcpy(D_00535617 + (idx << 6), src);
         }
         self->mbChanged = 1;
-        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, iface);
-        vt[1].fn(vthis(iface, vt[1]));
+        iface->submit();
         func_001C2468(self, idx);
     }
 }
