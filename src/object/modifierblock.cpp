@@ -1,6 +1,7 @@
 #include "vtable.h"
 #include "common.h"
 #include "object/railmodifier.h"
+#include "object/effectmodifier.h"
 #include "bx/math3d.h"
 #include "object/movenode.h"
 #include "world/worldrecords.h"
@@ -241,21 +242,21 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_postUpdate);
  */
 extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
 {
-    cEffectLink* head = self->Effect.Next;
+    void* head = self->Effect.Next;  // one local for both list heads (the effect list, then the rail list)
     if (head != 0) {
-        cEffectLink* link = head;
+        cEffectModifier* link = (cEffectModifier*)head;
         do {
-            cEffectLink* next = link->Next;
-            ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[5].fn(vthis(link, ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[5]));
+            cEffectModifier* next = (cEffectModifier*)link->Next;
+            link->update();
             link = next;
         } while (link != 0);
     }
-    head = (cEffectLink*)self->Rail.Next;
+    head = self->Rail.Next;
     if (head != 0) {
-        cEffectLink* link = head;
+        cRailModifier* link = (cRailModifier*)head;
         do {
-            cEffectLink* next = link->Next;
-            ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[3].fn(vthis(link, ((sVEntry<void (void*)>*)VPTR_OF(cEffectLink, link))[3]));
+            cRailModifier* next = (cRailModifier*)link->Next;
+            link->update();
             link = next;
         } while (link != 0);
     }
@@ -269,12 +270,6 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_render);
 #ifdef SKIP_ASM
-struct sMbVEntryV2DD0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 
 /**
  * Renders a modifier block: slot 6 of each effect link in the list at +0x10, then slot 11 of the transform modifier.
@@ -282,14 +277,13 @@ struct sMbVEntryV2DD0 {
 extern "C" void tModifierBlock_render(tModifierBlock* self)
 {
     if (self->Effect.Next != 0) {
-        cEffectLink* effect = self->Effect.Next;
-        void* next;
+        cEffectModifier* effect = (cEffectModifier*)self->Effect.Next;
+        cEffectModifier* next;
         do {
-            next = *(void**)effect;
-            sMbVEntryV2DD0* vt = (sMbVEntryV2DD0*)VPTR_OF(cEffectLink, effect);
-            vt[6].fn(vthis(effect, vt[6]));
-            effect = (cEffectLink*)next;
-        } while (((void*)effect) != 0);
+            next = (cEffectModifier*)effect->Next;
+            effect->render();
+            effect = next;
+        } while (effect != 0);
     }
     cTransformModifier* node = self->RootTransform;
     if (node != 0) {
@@ -407,10 +401,10 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     }
     cEffectLink* firstEffect = self->Effect.Next;
     if (firstEffect != 0) {
-        cEffectLink* effect = firstEffect;
+        cEffectModifier* effect = (cEffectModifier*)firstEffect;
         do {
-            cEffectLink* next = effect->Next;
-            ((sVEntry<void (void*, int, float)>*)VPTR_OF(cEffectLink, effect))[7].fn(vthis(effect, ((sVEntry<void (void*, int, float)>*)VPTR_OF(cEffectLink, effect))[7]), id, value);
+            cEffectModifier* next = (cEffectModifier*)effect->Next;
+            effect->signal(id, value);
             effect = next;
         } while (effect != 0);
     }
@@ -538,18 +532,6 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_remEffectModifier);
 #ifdef SKIP_ASM
-struct sModBlockDtorVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-struct sModBlockLink {
-    sModBlockLink* next;          // 0x0
-    int field_0x4;
-    sModBlockDtorVEntry* vt;      // 0x8
-};
-
 /**
  * Removes and deletes all of a modifier block's effect modifiers.
  *
@@ -558,14 +540,12 @@ struct sModBlockLink {
  */
 extern "C" void tModifierBlock_remEffectModifier(tModifierBlock* self)
 {
-    sModBlockLink* head = *(sModBlockLink**)&self->Effect;
+    cEffectLink* head = self->Effect.Next;
     if (head != 0) {
-        sModBlockLink* effect = head;
+        cEffectLink* effect = head;
         do {
-            sModBlockLink* next = effect->next;
-            if (effect != 0) {
-                effect->vt[1].fn(vthis(effect, effect->vt[1]), 3);
-            }
+            cEffectLink* next = effect->Next;
+            delete effect;
             effect = next;
         } while (effect != 0);
     }
