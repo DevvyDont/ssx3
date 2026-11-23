@@ -195,12 +195,6 @@ extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_RenderModel);
 #ifdef SKIP_ASM
-struct sGfxVEntry95 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int, void*, int, int, int, float);
-};
-
 /**
  * Draws a model instance through vtable slot 95 (cPS2GraphicsMan_RenderModel) with a scale of 1.0.
  *
@@ -214,8 +208,7 @@ struct sGfxVEntry95 {
  */
 extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, tInstanceRecord* obj, int animMats, int texMat, int renderFlags)
 {
-    sGfxVEntry95* vt = (sGfxVEntry95*)VPTR_OF(cGraphicsMan, self);
-    vt[95].fn(vthis(self, vt[95]), obj, (int)obj->m_MaterialBlock, (char*)&obj->m_fmTransform, animMats, texMat, renderFlags, 1.0f);
+    self->RenderModel(obj, obj->m_MaterialBlock, *(const t4Matrix*)&obj->m_fmTransform, 1.0f, (const t4Matrix*)animMats, (const t4Matrix*)texMat, renderFlags);
 }
 #endif
 

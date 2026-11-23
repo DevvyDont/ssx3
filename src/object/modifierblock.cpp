@@ -15,6 +15,7 @@
 #include "object/modifierblock.h"
 #include "replay/bxreplayframe.h"
 #include "object/transformmodifier.h"
+#include "render/graphicsman.h"
 
 struct sBoundBoxTarget {
     char pad_0x00[0x68];
@@ -1047,8 +1048,7 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     {
         skyInstance->m_iFlags = ((unsigned int)skyInstance->m_iFlags & ~2u) | 4;
         tInstanceRecord* instToDraw = self->m_pInstanceSky;
-        sVE_53B10* vt = (sVE_53B10*)VPTR_OF(cGraphicsMan, ctx);
-        vt[95].fn(vthis(ctx, vt[95]), ((char*)instToDraw), 1.0f, instToDraw->m_Model->m_MaterialBlock, &skyMatrix, 0, 0, 21536);
+        ctx->RenderModel(instToDraw, instToDraw->m_Model->m_MaterialBlock, skyMatrix, 1.0f, (const t4Matrix*)(0), (const t4Matrix*)(0), 21536);
     }
     sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = topDrawState - 1;
