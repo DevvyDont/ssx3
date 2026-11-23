@@ -317,8 +317,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     unsigned char idx = ((cUIMenu*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)))->mScrollItemCurrent;
     if (self->mBuyPrompt == 0) {
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cUIInput, w);
-        if (vt[19].fn(vthis(w, vt[19])) != 0) {
+        if (w->isLeft() != 0) {
             int* bought = self->mPotentialExperience;
             int* cnt = &bought[idx];
             changed = 1;
@@ -331,8 +330,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
                 defaultMsg_4C30((self), 4);
             }
         } else {
-            sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)VPTR_OF(cUIInput, w);
-            if (vt2[20].fn(vthis(w, vt2[20])) != 0) {
+            if (w->isRight() != 0) {
                 int* level = self->mExperienceLevel;
                 int* lvl = &level[idx];
                 changed = 1;

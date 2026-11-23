@@ -362,15 +362,13 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onInputBegin);
  */
 extern "C" int cFEStateCredits_onInputBegin(cFEStateCredits* self, cUIInput* pInput)
 {
-    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)VPTR_OF(cUIInput, pInput))[17];
-    if (vtEntry->fn(vthis(pInput, *vtEntry))) {
+    if (pInput->isUp()) {
         if (self->mPixelDelta >= -7) {
             self->mPixelDelta -= 1;
         }
         return 1;
     }
-    vtEntry = &((sVEntry<int(void*)>*)VPTR_OF(cUIInput, pInput))[18];
-    if (vtEntry->fn(vthis(pInput, *vtEntry))) {
+    if (pInput->isDown()) {
         if (self->mPixelDelta < 8) {
             self->mPixelDelta += 1;
         }

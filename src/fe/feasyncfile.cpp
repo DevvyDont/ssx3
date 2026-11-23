@@ -708,8 +708,7 @@ extern "C" void func_001A6C40(cFEStateNetMessenger* self, int a1);
 extern "C" int cFEStateNetMessenger_onInputBegin(cFEStateNetMessenger* self, cUIInput* obj)
 {
     int handled;
-    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cUIInput, obj);
-    if (vt[27].fn(vthis(obj, vt[27])) == 0) {
+    if (obj->isLShift1() == 0) {
         handled = 0;
     } else {
         func_001A6C40(self, self->miSelectedIndex);
@@ -12856,8 +12855,7 @@ extern char D_004A1408[];
  */
 extern "C" int cFEStateChatRoom_onInputBegin(cFEStateChatRoom* self, cUIInput* obj)
 {
-    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cUIInput, obj);
-    if (vt[27].fn(vthis(obj, vt[27])) != 0) {
+    if (obj->isLShift1() != 0) {
         // PORT: string pointer passed through an int parameter (func_001A9150's a3)
         func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP235Chat), (int)D_004A1408, 0, 4, 0x3F);
         self->mpKeyboard->meType = 0;

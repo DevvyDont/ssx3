@@ -1505,11 +1505,6 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void* cUIThing_getEngine(void* self);
 extern char gUISoundNull;
 
-struct cUISlider_onInput_sVEntryI {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct cUISlider_onInput_sVEntryS {
     short delta;
     short index;
@@ -1531,8 +1526,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
     char* customSnd = (char*)((cUIEngine*)cUIThing_getEngine(((char*)self)))->mpSound;
     char* snd = &gUISoundNull;
     if (customSnd) snd = customSnd;
-    cUISlider_onInput_sVEntryI* vi = (cUISlider_onInput_sVEntryI*)VPTR_OF(cUIInput, input);
-    if (vi[19].fn(vthis(input, vi[19]))) {
+    if (input->isLeft()) {
         if (self->mValue > 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
             if (ev != 0xFFFF) {
@@ -1546,8 +1540,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
         }
         return 1;
     }
-    cUISlider_onInput_sVEntryI* vi2 = (cUISlider_onInput_sVEntryI*)VPTR_OF(cUIInput, input);
-    if (vi2[20].fn(vthis(input, vi2[20]))) {
+    if (input->isRight()) {
         if (self->mValue + 1 < self->mNumValues) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
             if (ev != 0xFFFF) {
@@ -1824,11 +1817,6 @@ struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct cUIState_onUpdate_sVEntryC {
-    short delta;
-    short index;
-    void (*fn)(void*, unsigned char);
-};
 struct cUIState_onUpdate_sVEntryI {
     short delta;
     short index;
@@ -1866,8 +1854,7 @@ extern "C" void cUIState_onUpdate(cUIState* self)
     cUIInput* input = (cUIInput*)(*(char**)&self->mpEngine->mpInput);
     self->mCurrentCtrl = 0;
     do {
-        cUIState_onUpdate_sVEntryC* vc = (cUIState_onUpdate_sVEntryC*)VPTR_OF(cUIInput, input);
-        vc[44].fn(vthis(input, vc[44]), *(unsigned char*)&self->mCurrentCtrl);
+        input->setPadNum(*(unsigned char*)&self->mCurrentCtrl);
         if (cUIState_onUpdate_padTest(((char*)input), 45)) {
             if (cUIState_onUpdate_padTest(((char*)input), 41) || (cUIState_onUpdate_padTest(((char*)input), 40) && (mask & 1))) {
                 cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)VPTR_OF(cListNode, self);
