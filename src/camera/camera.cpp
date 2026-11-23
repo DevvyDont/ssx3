@@ -2829,12 +2829,6 @@ INCLUDE_ASM("camera/camera", cManualChaseAlgorithm_snap);
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(cLookAtChaseAlgorithm* self, float a, float b);
 
-struct sCamVEntryVoidA {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Snaps the manual chase camera when @p id is the followed rider's subject id.
  *
@@ -2849,8 +2843,7 @@ extern "C" void cManualChaseAlgorithm_snap(cManualChaseAlgorithm* self, int id)
     {
         cLookAtChaseAlgorithm_snap(((cLookAtChaseAlgorithm*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 100.0f, 100.0f);
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
-        vt2[5].fn(vthis(self, vt2[5]));
+        self->update();
     }
 }
 #endif
@@ -3124,8 +3117,7 @@ extern "C" void cMatrixChaseAlgorithm_snap(cMatrixChaseAlgorithm* self, int id)
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
-        vt2[5].fn(vthis(self, vt2[5]));
+        self->update();
     }
 }
 #endif
@@ -3300,8 +3292,7 @@ extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int 
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
         self->Initialized = 0;
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
-        vt2[5].fn(vthis(self, vt2[5]));
+        self->update();
     }
 }
 #endif
@@ -3632,12 +3623,6 @@ INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_snap);
 #ifdef SKIP_ASM
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 
-struct sCamVEntryVoid {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Snaps the spline camera when @p id is the target rider's subject id.
  *
@@ -3651,8 +3636,7 @@ extern "C" void cSplineCamAlgorithm_snap(cSplineCamAlgorithm* self, int id)
     if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
-        sCamVEntryVoid* vt2 = (sCamVEntryVoid*)VPTR_OF(cCameraAlgorithm, self);
-        vt2[5].fn(vthis(self, vt2[5]));
+        self->update();
     }
 }
 #endif
@@ -3925,8 +3909,7 @@ extern "C" void cIdleChaseAlgorithm_snap_v(char* vself, int id)
         self->Position = cmAddP_1848(cmAdd_001607E0_1848(self->Target->getPosition(), cmScaleP_1848b(&t4vect_ZAxis_1848, 100.05000305175781f)), &t4vect_XAxis);
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 559.7440185546875f, 300.0f);
-        sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)VPTR_OF(cCameraAlgorithm, self);
-        vt2[5].fn(vthis(self, vt2[5]));
+        self->update();
     }
 }
 #endif
@@ -4712,13 +4695,10 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateAlgorithm);
 extern "C" void cLookAtChaseAlgorithm_updateAlgorithm(cLookAtChaseAlgorithm* self, int ignoreCollisions)
 {
     if (self->DoSnap != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cCameraAlgorithm, self);
-        vt[4].fn(vthis(self, vt[4]));
+        self->snapCurrent();
     }
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cCameraAlgorithm, self);
-    vt[5].fn(vthis(self, vt[5]));
-    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cCameraAlgorithm, self);
-    vt2[8].fn(vthis(self, vt2[8]), ignoreCollisions);
+    self->update();
+    self->doRaceCamFinalPhase(ignoreCollisions);
 }
 #endif
 
@@ -7774,12 +7754,6 @@ extern "C" void cLookAtChaseAlgorithm_updateCameraShake(cLookAtChaseAlgorithm* s
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_doRaceCamFinalPhase);
 #ifdef SKIP_ASM
 
-struct sCamVE166228 {
-    short delta;
-    short index;
-    void (*fn)(void*, cRaceCamFinalPhaseData*);
-};
-
 extern "C" void cLookAtChaseAlgorithm_calcPitchHeading(void* self, int a1);
 extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm* self, float x, float y, float z, float w);
 void* cLookAtChaseAlgorithm_updateDebugCam(void* self);
@@ -7796,8 +7770,7 @@ extern "C" void cLookAtChaseAlgorithm_calcPose(void* self);
 extern "C" void cLookAtChaseAlgorithm_doRaceCamFinalPhase(cLookAtChaseAlgorithm* self)
 {
     cRaceCamFinalPhaseData finalPhaseData;
-    sCamVE166228* vt = (sCamVE166228*)VPTR_OF(cCameraAlgorithm, self);
-    vt[7].fn(vthis(self, vt[7]), &finalPhaseData);
+    self->getRaceCamFinalPhaseData(&finalPhaseData);
     cLookAtChaseAlgorithm_calcPitchHeading(self, 0);
     if (finalPhaseData.DoPitchBlending != 0)
         cLookAtChaseAlgorithm_updatePitchBlending(self, finalPhaseData.PitchBlendingMaxAngleUp, finalPhaseData.PitchBlendingMaxAngleDown, finalPhaseData.PitchBlendingSmoothnessUp, finalPhaseData.PitchBlendingSmoothnessDown);
@@ -8512,8 +8485,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         self->LastHalfPipeMove = t4vect_Zero_6C60;
         self->LastHalfPipeDistCorrection = t4vect_Zero_6C60;
         *(sVec4*)&self->LastCamDir = front;
-        sVEntry<void>* svt1 = (sVEntry<void>*)VPTR_OF(cCameraAlgorithm, self);
-        self->LastDrop = ((FloatFn_6C60)svt1[13].fn)(vthis(self, svt1[13]));
+        self->LastDrop = self->getRestDrop();
         *(int*)&self->ExtraBoostDist = 0;
         *(int*)&self->LastBoostWarp = 0;
         Cross_6C60(scratchVec, (const sVec4&)t4vect_ZAxis_6C60, front);
@@ -8578,10 +8550,8 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(sVec4*)&self->LastDirectionVel = directionVel;
         *(sVec4*)&self->LastHorizontalVel = velocity;
         *(int*)&self->LastHorizontalVel.z = 0;
-        sVEntry<void>* svt2 = (sVEntry<void>*)VPTR_OF(cCameraAlgorithm, self);
-        ((VoidFn_6C60)svt2[5].fn)(vthis(self, svt2[5]));
-        sVEntry<void>* svt3 = (sVEntry<void>*)VPTR_OF(cCameraAlgorithm, self);
-        ((IntFn_6C60)svt3[8].fn)(vthis(self, svt3[8]), 1);
+        self->update();
+        self->doRaceCamFinalPhase(1);
     }
 }
 #endif
@@ -10482,8 +10452,7 @@ extern "C" void cLazyChaseAlgorithm_snap_v(char* vself, long id)
         self->Position = nv;
         f_6C60_8508(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
-        sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)VPTR_OF(cCameraAlgorithm, self);
-        vt2[5].fn(vthis(self, vt2[5]));
+        self->update();
     }
 }
 #endif

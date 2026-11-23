@@ -1805,8 +1805,7 @@ extern "C" void cTriggerAlgorithm_snap_x(char* vself, long key)
     dir.z = -sinPitch;
     dir.w = 0.0f;
     self->Position = Sub_1732E8(focusPos, Scale_1732E8(dir, self->IdealDist));
-    sVEntry<void(void*)>* updateSlot = &((sVEntry<void (void*)>*)VPTR_OF(cCameraAlgorithm, self))[5];
-    updateSlot->fn(vthis(self, *updateSlot));
+    self->update();
 }
 #endif
 
@@ -6209,12 +6208,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_sn
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, float b);
 
-struct sCamVEntryVoidA {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Snaps the post-race chase camera when @p id is the followed rider's subject id.
  *
@@ -6229,8 +6222,7 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir(self, 100.0f, 100.0f);
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
-        vt2[5].fn(vthis(self, vt2[5]));
+        self->update();
     }
 }
 #endif
