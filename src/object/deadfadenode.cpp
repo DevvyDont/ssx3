@@ -175,13 +175,13 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
     self->Fade = 1.0f;
     sDfModel_0750* model = ((sDfModel_0750*)(self->Instance)->m_Model);
     *pm = new (str_DeadFadeAnimMats, 0x20000000, 0) sDfMatElem_0750[model->count];
-    if (other != 0 && ((DfBoolFn_0750)((sDfVE_0750*)other->mVtbl)[26].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[26]))) {
-        sDfMat_0750* src = ((DfMatFn_0750)((sDfVE_0750*)other->mVtbl)[27].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[27]));
+    if (other != 0 && ((DfBoolFn_0750)((sDfVE_0750*)VPTR_OF(cObjNode, other))[26].fn)(vthis(other, ((sDfVE_0750*)VPTR_OF(cObjNode, other))[26]))) {
+        sDfMat_0750* src = ((DfMatFn_0750)((sDfVE_0750*)VPTR_OF(cObjNode, other))[27].fn)(vthis(other, ((sDfVE_0750*)VPTR_OF(cObjNode, other))[27]));
         MEM_copy(((sDfMatElem_0750*)self->AnimMats), src, model->count << 6);
     } else {
         sDfMat_0750* base = &(*(sDfMat_0750*)&(self->Instance)->m_fmTransform);
         if (other != 0) {
-            base = ((DfMatFn_0750)((sDfVE_0750*)other->mVtbl)[24].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[24]));
+            base = ((DfMatFn_0750)((sDfVE_0750*)VPTR_OF(cObjNode, other))[24].fn)(vthis(other, ((sDfVE_0750*)VPTR_OF(cObjNode, other))[24]));
         }
         sDfPart_0750* part = model->parts;
         float k = (self->Instance)->m_fScale;
@@ -203,7 +203,7 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
         }
     }
     if (other != 0) {
-        ((DfSetFn_0750)((sDfVE_0750*)other->mVtbl)[1].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[1]), 3);
+        ((DfSetFn_0750)((sDfVE_0750*)VPTR_OF(cObjNode, other))[1].fn)(vthis(other, ((sDfVE_0750*)VPTR_OF(cObjNode, other))[1]), 3);
     }
     (*(unsigned int*)&(self->Instance)->m_iFlags) &= ~0x60;
     (self->Instance)->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2) | 4;

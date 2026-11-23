@@ -181,8 +181,8 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
         n->Next->Prev = n->Prev;
         cObjNode* other;
         for (other = (cObjNode*)cBucketMan_last(self, index); other; other = (cObjNode*)cBucketMan_prev(self, (cObjNode*)other, index)) {
-            if (((sSortVE_4C98*)n->mVtbl)[6].fn(vthis(n, ((sSortVE_4C98*)n->mVtbl)[6]), other)) {
-                if (((sSortVE_4C98*)n->mVtbl)[7].fn(vthis(n, ((sSortVE_4C98*)n->mVtbl)[7]), other)) {
+            if (((sSortVE_4C98*)VPTR_OF(cObjNode, n))[6].fn(vthis(n, ((sSortVE_4C98*)VPTR_OF(cObjNode, n))[6]), other)) {
+                if (((sSortVE_4C98*)VPTR_OF(cObjNode, n))[7].fn(vthis(n, ((sSortVE_4C98*)VPTR_OF(cObjNode, n))[7]), other)) {
                     n->Next = other->Next;
                     other->Next->Prev = n;
                     n->Prev = other->Prev;
@@ -190,7 +190,7 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
                     other->Next = 0;
                     other->Prev = 0;
                     if (other) {
-                        sVEntry<void(void*, int)>* dv = (sVEntry<void(void*, int)>*)((sSortVE_4C98*)other->mVtbl);
+                        sVEntry<void(void*, int)>* dv = (sVEntry<void(void*, int)>*)((sSortVE_4C98*)VPTR_OF(cObjNode, other));
                         dv[1].fn(vthis(other, dv[1]), 3);
                     }
                 } else {
@@ -391,7 +391,7 @@ extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)node->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cObjNode, node);
         vt[2].fn(vthis(node, vt[2]));
         node = (cObjNode*)next;
     }
@@ -412,7 +412,7 @@ extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 {
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)node->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cObjNode, node);
         vt[3].fn(vthis(node, vt[3]));
         node = (cObjNode*)cBucketMan_next(self, node, index);
     }
@@ -432,7 +432,7 @@ extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
 {
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)node->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cObjNode, node);
         vt[4].fn(vthis(node, vt[4]));
         node = (cObjNode*)cBucketMan_next(self, node, index);
     }
@@ -459,7 +459,7 @@ extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
     while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
         if (((void*)node) != 0) {
-            sBucketVEntryPurge* vt = (sBucketVEntryPurge*)node->mVtbl;
+            sBucketVEntryPurge* vt = (sBucketVEntryPurge*)VPTR_OF(cObjNode, node);
             vt[1].fn(vthis(node, vt[1]), 3);
         }
         node = (cObjNode*)next;
@@ -491,10 +491,10 @@ extern "C" void cBucketMan_purgeBucket1(cBucketMan* self, int index, int key)
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sVEntry<int(void*)>* sectionIdSlot = &((sVEntry<int (void*)>*)node->mVtbl)[11];
+        sVEntry<int(void*)>* sectionIdSlot = &((sVEntry<int (void*)>*)VPTR_OF(cObjNode, node))[11];
         if (sectionIdSlot->fn(vthis(node, *sectionIdSlot)) == key) {
             if (((void*)node) != 0) {
-                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)node->mVtbl;
+                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cObjNode, node);
                 vt[1].fn(vthis(node, vt[1]), 3);
             }
         }
@@ -543,7 +543,7 @@ extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, vo
 extern "C" void* cMoveNode_cMoveNode1(cMoveNode* self, void* bucket, int type, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, bucket, type, instRecord);
-    self->mVtbl = cMoveNode_vtbl;
+    VPTR_OF(cObjNode, self) = cMoveNode_vtbl;
     self->Fade = 1.0f;
     self->Flags |= 1;
     self->ModifierBlock = 0;

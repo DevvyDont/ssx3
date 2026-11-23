@@ -283,7 +283,7 @@ extern char gBucketMan;
  */
 extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* bucket)
 {
-    (*(void**)&self->mVtbl) = cObjNode_vtbl;
+    (*(void**)&VPTR_OF(cObjNode, self)) = cObjNode_vtbl;
     cBucketMan_add(&gBucketMan, self, bucket);
     return self;
 }

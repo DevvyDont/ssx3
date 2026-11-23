@@ -2244,7 +2244,7 @@ extern "C" void cRailslideMotion_step(char* self)
         if (hit.obj) {
             cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
             if (handler) {
-                sVE46_AF28* vt = (sVE46_AF28*)handler->mVtbl;
+                sVE46_AF28* vt = (sVE46_AF28*)VPTR_OF(cObjNode, handler);
                 if (vt[46].fn(vthis(handler, vt[46])))
                     *(int*)(RIDER_AF28 + 0x5AC) = 1;
             }
@@ -2256,7 +2256,7 @@ extern "C" void cRailslideMotion_step(char* self)
         if (hit.obj) {
             cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
             if (handler) {
-                sVE42_AF28* vt = (sVE42_AF28*)handler->mVtbl;
+                sVE42_AF28* vt = (sVE42_AF28*)VPTR_OF(cObjNode, handler);
                 vt[42].fn(vthis(handler, vt[42]), &hit);
             }
         }
@@ -2306,7 +2306,7 @@ extern "C" void cRailslideMotion_step(char* self)
             if (hit.obj) {
                 cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
                 if (handler) {
-                    sVE43_AF28* vt = (sVE43_AF28*)handler->mVtbl;
+                    sVE43_AF28* vt = (sVE43_AF28*)VPTR_OF(cObjNode, handler);
                     vt[43].fn(vthis(handler, vt[43]), &hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
                 }
             }

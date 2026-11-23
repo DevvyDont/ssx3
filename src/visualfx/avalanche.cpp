@@ -776,7 +776,7 @@ extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force)
         if (((char*)inst) != 0) {
             cInstanceNode* obj = inst->m_pActiveNode;
             if (((char*)obj) != 0) {
-                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
+                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cObjNode, obj);
                 vt[1].fn(vthis(obj, vt[1]), 3);
             }
         }

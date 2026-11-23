@@ -155,7 +155,7 @@ extern "C" void cReplay_applyBucket(cReplay* self, int bucket)
     cObjNode* node = (cObjNode*)cBucketMan_first((cBucketMan*)&gBucketMan, bucket);
     cBucketMan* bm = (cBucketMan*)&gBucketMan;
     while (((void*)node) != 0) {
-        sBucketVEntryDE58* vt = (sBucketVEntryDE58*)node->mVtbl;
+        sBucketVEntryDE58* vt = (sBucketVEntryDE58*)VPTR_OF(cObjNode, node);
         vt[3].fn(vthis(node, vt[3]));
         node = (cObjNode*)cBucketMan_next(bm, node, bucket);
     }

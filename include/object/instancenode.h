@@ -7,7 +7,7 @@
 // cFlagNode, cCounterNode, cConveyorNode, cBoostNode, cDeadFadeNode and cMeshAnimNode (object/*node.h).
 // Methods: src/object/instancenode.cpp, plus the one-line virtuals in src/object/railmodifier.cpp.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. The real chain is
+// Derives from cSortObjNode (object/objnode.h); its own member FLAT. The chain is
 //   cObjNode (0x00-0x10: links + vptr) -> cTypeObjNode (0x10-0x14) -> cSortObjNode (0x14-0x18) -> cInstanceNode
 // (retail ctors chain cObjNode_cObjNode__FP8cObjNodePv -> cTypeObjNode_cTypeObjNode1 -> cSortObjNode_cSortObjNode1 -> cInstanceNode_cInstanceNode1, each
 // storing its own vtable at 0xC: cObjNode_vtbl, cTypeObjNode_vtbl, cSortObjNode_vtbl, cInstanceNode_vtbl = _vt$13cInstanceNode).
@@ -20,39 +20,60 @@
 // On Tour's chain is 4 bytes smaller (cObjNode 0xC: Next 0, Prev 4, vptr 8); retail has an extra leading word.
 
 #include "layout.h"
+#include "object/objnode.h"
 
 struct cObjNode;
 struct tInstanceRecord;
+struct t4Vector;
+struct t4Matrix;
+struct cWorldIntersectType;
+struct tIntersectInfo;
+struct tCollideInfo;
+struct cBeing;
+struct tBoundBox;
 
-struct cInstanceNode {
-    // --- cObjNode (retail 0x10 bytes: bucket-list sentinels are 0x10 apart, cBucketMan_init / cBucketMan_purge) ---
-    int unk_00;                  // 0x000 never written by any node ctor (retail or preview cObjNode()); no On Tour twin
-    cObjNode* Next;              // 0x004 [O] cObjNode::Next; [P] cObjNode() zeroes it; [U] forward link:
-                                 //       cBucketMan_first/cBucketMan_next walk +0x4 from the head sentinel
-    cObjNode* Prev;              // 0x008 [O] cObjNode::Prev; [P] cObjNode() zeroes it; [U] back link (cBucketMan_add,
-                                 //       cBucketMan_prev walk +0x8 towards the head)
-    void** mVtbl;                // 0x00C [R] each ctor's vtable (cInstanceNode_vtbl in cInstanceNode_cInstanceNode1/cInstanceNode_cInstanceNode)
-    // --- cTypeObjNode (cTypeObjNodeState) ---
-    short ObjNodeType;           // 0x010 [P] getType/isType (lh 0x10); [O] cTypeObjNodeState::ObjNodeType; [R] cTypeObjNode_cTypeObjNode1
-                                 //       stores the tObjNodeType arg and counts it in cTypeObjNode_ObjNodeCount (cTypeObjNode::ObjNodeCount)
-    unsigned short Flags;        // 0x012 [O] cTypeObjNodeState::Flags; [P] RootTransformDirty = bit 0 (lhu/sh);
-                                 //       [R] cTypeObjNode_cTypeObjNode1 zeroes it; [U] cMoveNode_cMoveNode sets bit 0
-    // --- cSortObjNode (cSortObjNodeState) ---
-    unsigned int SortIndex;      // 0x014 [P] getSortIndex (lw 0x14); [O] cSortObjNodeState::SortIndex; [R] cSortObjNode_cSortObjNode1
-                                 //       takes it from ObjNodeSortIndex/ObjNodeNoSortIndex (cSortObjNode_ObjNodeSortIndex/7C); [U] unsigned
-                                 //       compare in cSortObjNode_compare
+struct cInstanceNode : public cSortObjNode {
+    // cSortObjNode (object/objnode.h, 0x18): the vptr at 0x0C holds [R] cInstanceNode_vtbl (_vt$13cInstanceNode) in
+    // cInstanceNode_cInstanceNode1 / cInstanceNode_cInstanceNode. Its new slots ([R] cInstanceNode_vtbl, 46 in all:
+    // names from its entries cInstanceNode_*; types [O] On Tour's cInstanceNode / cMoveNode definitions):
+    virtual bool updateNode();                                                      // 15
+    virtual bool isMoveNode();                                                      // 16
+    virtual bool isComplete();                                                      // 17
+    virtual void throwMe(const t4Vector& vel);                                      // 18
+    virtual void* getNodeState();                                                   // 19
+    virtual bool hasFocusCount() const;                                             // 20
+    virtual int incFocusCount(tInstanceRecord* pInst);                              // 21
+    virtual int decFocusCount(tInstanceRecord* pInst);                              // 22
+    virtual int getFocusCount() const;                                              // 23
+    virtual const t4Matrix* getRootTransform();                                     // 24
+    virtual const t4Matrix* getRootTransform1(tInstanceRecord* inst);               // 25 On Tour's second
+                                                                                    //    getRootTransform overload
+    virtual bool hasAnimMats() const;                                               // 26
+    virtual const t4Matrix* getAnimMats();                                          // 27
+    virtual const t4Matrix* getInstAnimMats(tInstanceRecord* inst);                 // 28
+    virtual const t4Matrix* getAnimMat(int animmat);                                // 29
+    virtual float getAnimFrame() const;                                             // 30
+    virtual int getAnimDir() const;                                                 // 31
+    virtual int frameUpdateEvent(float frame);                                      // 32
+    virtual void makeAnimMats(const t4Matrix* root, t4Matrix* animMats);            // 33
+    virtual void expire(int runscript);                                             // 34 On Tour bool
+    virtual void loseFocus();                                                       // 35
+    virtual void signal(int signal, float arg);                                     // 36
+    virtual void makeActive();                                                      // 37
+    virtual bool hasIntersect() const;                                              // 38
+    virtual int intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags); // 39
+    virtual void onCollide(const tCollideInfo* tc, const tIntersectInfo* ti, cBeing* pBeing); // 40
+    virtual void setDebounce(float seconds);                                        // 41
+    virtual void updateIntersectInfo(tIntersectInfo& info);                         // 42
+    virtual void applyForce(const tIntersectInfo& intInfo, const t4Vector& force);  // 43
+    virtual bool hasBoundBox();                                                     // 44
+    virtual const tBoundBox* getBoundBox() const;                                   // 45
+    virtual bool isFlexRail() const;                                                // 46
     // --- cInstanceNode ---
     tInstanceRecord* Instance;   // 0x018 [P] getInstance (lw 0x18); [O] cInstanceNode::Instance; [R] cInstanceNode_cInstanceNode1 stores
                                  //       its record arg; [U] record flags at +0x8, root transform at +0x10, model at +0x80
 };
 
-CHECK_OFFSET(cInstanceNode, unk_00, 0x00);
-CHECK_OFFSET(cInstanceNode, Next, 0x04);
-CHECK_OFFSET(cInstanceNode, Prev, 0x08);
-CHECK_OFFSET(cInstanceNode, mVtbl, 0x0C);
-CHECK_OFFSET(cInstanceNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cInstanceNode, Flags, 0x12);
-CHECK_OFFSET(cInstanceNode, SortIndex, 0x14);
 CHECK_OFFSET(cInstanceNode, Instance, 0x18);
 // [R] cDeadNode (adds no fields: its ctor cDeadNode_cDeadNode writes only 0xC and the record) is allocated with
 // cMemMan_alloc(0x1C, "DeadNode") in cInstanceNode_makeThisDead, debouncenode.cpp and wscriptman.cpp; [U] cMoveNode's first own

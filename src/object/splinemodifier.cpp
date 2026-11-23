@@ -1380,7 +1380,7 @@ extern "C" void* cMultiSplineModifier_getRootTransform(cMultiSplineModifier* sel
     }
     if (((void*)item) == (void*)self->Instance) {
         cInstanceNode* obj = item->m_pActiveNode;
-        sSmVEntryP_AAF0* vt2 = (sSmVEntryP_AAF0*)obj->mVtbl;
+        sSmVEntryP_AAF0* vt2 = (sSmVEntryP_AAF0*)VPTR_OF(cObjNode, obj);
         return vt2[24].fn(vthis(obj, vt2[24]));
     }
     return (char*)&item->m_fmTransform;
@@ -1417,16 +1417,16 @@ extern "C" int cMultiSplineModifier_getAnimMats(cMultiSplineModifier* self, tIns
     tInstanceRecord* cur = self->Instance;
     if (((void*)item) == ((void*)cur)) {
         cInstanceNode* obj = item->m_pActiveNode;
-        sSmVEntryI_AB60* vtEntry = &((sSmVEntryI_AB60*)obj->mVtbl)[26];
+        sSmVEntryI_AB60* vtEntry = &((sSmVEntryI_AB60*)VPTR_OF(cObjNode, obj))[26];
         if (vtEntry->fn(vthis(obj, *vtEntry)) != 0) {
             obj = (cInstanceNode*)((void*)self->Instance->m_pActiveNode);
-            vtEntry = &((sSmVEntryI_AB60*)obj->mVtbl)[27];
+            vtEntry = &((sSmVEntryI_AB60*)VPTR_OF(cObjNode, obj))[27];
             return vtEntry->fn(vthis(obj, *vtEntry));
         }
         return 0;
     }
     cInstanceNode* obj = cur->m_pActiveNode;
-    sSmVEntryV_AB60* vt = (sSmVEntryV_AB60*)obj->mVtbl;
+    sSmVEntryV_AB60* vt = (sSmVEntryV_AB60*)VPTR_OF(cObjNode, obj);
     vt[33].fn(vthis(obj, vt[33]), (char*)&item->m_fmTransform, (int)self->AnimMats);
     return (int)self->AnimMats;
 }
@@ -1844,13 +1844,13 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
         sSmVE43_35B418* vt2 = (sSmVE43_35B418*)VPTR_OF(cGraphicsMan, w);
         int hit = vt[93].fn(thisp, &(*(sSmVec4_35B418*)&box->BoundBox), &(*(sSmVec4_35B418*)&box->BoundBox.MaxPoint), vt2[43].fn((char*)w + vt2[43].delta));
         if (hit != 1) {
-            sSmVEModel_35B418* mvt = (sSmVEModel_35B418*)model->mVtbl;
+            sSmVEModel_35B418* mvt = (sSmVEModel_35B418*)VPTR_OF(cObjNode, model);
             mvt[33].fn(((char*)model) + mvt[33].delta, (char*)&self->NodeInst[i]->m_fmTransform, ((int)self->AnimMats));
             if (hit != 0) {
-                sSmVEModel_35B418* mvt2 = (sSmVEModel_35B418*)model->mVtbl;
+                sSmVEModel_35B418* mvt2 = (sSmVEModel_35B418*)VPTR_OF(cObjNode, model);
                 mvt2[5].fn(((char*)model) + mvt2[5].delta, (void*)((int)self->AnimMats), 1056);
             } else {
-                sSmVEModel_35B418* mvt2 = (sSmVEModel_35B418*)model->mVtbl;
+                sSmVEModel_35B418* mvt2 = (sSmVEModel_35B418*)VPTR_OF(cObjNode, model);
                 mvt2[5].fn(((char*)model) + mvt2[5].delta, (void*)((int)self->AnimMats), 0x400);
             }
         }
@@ -2153,7 +2153,7 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, tAddRailData* 
     self->SplineId = desc->SplineId;
     self->Mesh = desc->Mesh;
     cInstanceNode* modelObj = (model->m_pActiveNode);
-    if (((sSmVEntry_B708*)modelObj->mVtbl)[44].fn(vthis(modelObj, ((sSmVEntry_B708*)modelObj->mVtbl)[44])) == 0) {
+    if (((sSmVEntry_B708*)VPTR_OF(cObjNode, modelObj))[44].fn(vthis(modelObj, ((sSmVEntry_B708*)VPTR_OF(cObjNode, modelObj))[44])) == 0) {
         tInstanceRecord* instModel = self->Instance;
         tBoundBox bounds;
         (*(&bounds.MinPoint)).x = instModel->m_fvMin.m[0];
@@ -2582,9 +2582,9 @@ static inline void vecAddEq_C040(t4Vector& a, const t4Vector& b)
 extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
 {
     cInstanceNode* ownerObj = ((self->Instance)->m_pActiveNode);
-    if (((sSmVtbl_C040*)ownerObj->mVtbl)->v44.fn(vthis(ownerObj, ((sSmVtbl_C040*)ownerObj->mVtbl)->v44)) != 0) {
+    if (((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v44.fn(vthis(ownerObj, ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v44)) != 0) {
         ownerObj = ((self->Instance)->m_pActiveNode);
-        tBoundBox* bounds = ((sSmVtbl_C040*)ownerObj->mVtbl)->v45.fn(vthis(ownerObj, ((sSmVtbl_C040*)ownerObj->mVtbl)->v45));
+        tBoundBox* bounds = ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v45.fn(vthis(ownerObj, ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v45));
         (*(&self->BoundBox)) = *bounds;
         t4Vector margin;
         margin.x = 100.0f;

@@ -13,19 +13,23 @@
 // +0x24, +0x34, each given cObjNode_vtbl at its +0xC (cBucketMan_purge runs cObjNode__cObjNode on the same four);
 // [U] the first derived member sits at 0x10 (cTypeObjNode_cTypeObjNode1 sh 0x10; cTransitionMan's cScriptObject).
 // On Tour's cObjNode is 0xC (Next 0, Prev 4, vptr 8): retail has one extra leading word that no ctor writes.
-// Base classes: none. It declares the first virtuals, so the vptr follows its data (g++ 2.95): mVtbl at 0xC.
+// Base classes: none. It declares the first virtuals, so the vptr follows its data (g++ 2.95): the vptr at 0xC.
 // Constructors: cObjNode_cObjNode1 (bucket: stores cObjNode_vtbl, cBucketMan_add(&gBucketMan, this, bucket)),
 // cObjNode_cObjNode__FP8cObjNodePv (bucket, cBxReplayFrame*: the same, the frame unused), cObjNode_cObjNode2
 // (cObjNode(): Next = Prev = 0 and the vtable, no bucket; an unreferenced inline copy). Destructor cObjNode__cObjNode
 // (cBucketMan_remove). Vtable cObjNode_vtbl (0x00491F00, 13 slots; slot 1 dtor .. 13 readFromReplayFrame).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// A real polymorphic class (its data FLAT, every field at its retail offset), like cTypeObjNode and cSortObjNode
+// below, which derive from it. Evidence tags:
 //   [R] retail ctors/dtor (above) and cBucketMan_init / cBucketMan_purge (src/object/bucketman.cpp);
 //   [P] the July 2003 preview: cObjNode() zeroes 0x4/0x8; tools/layout_xlate.py pairs 9 methods, vptr 0xC == 0xC;
 //   [U] how retail code uses the field (bucketman: cBucketMan_add/remove/unlink/first/next/prev/last);
 //   [O] SSX On Tour's DWARF (cObjNode: Next, Prev).
 
 #include "layout.h"
+
+struct t4Matrix;
+struct cBxReplayFrame;
 
 struct cObjNode {
     int unk_00;                     // 0x00 no ctor writes it (retail cObjNode_cObjNode1/2, the replay ctor, the
@@ -35,15 +39,27 @@ struct cObjNode {
                                     //      Tail sentinel (+0x14); cBucketMan_unlink zeroes it
     cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [R] cObjNode_cObjNode2 zeroes it (sw $0 0x8); [P]; [U]
                                     //      the back link: cBucketMan_last/prev read +0x8, cBucketMan_add links it
-    void** mVtbl;                   // 0x0C [R] cObjNode_vtbl (0x00491F00) in every ctor and the dtor; each derived ctor
-                                    //      stores its own; [P] 0xC; [U] cSortObjNode_compare/equal call slot 8 (lw 0xC,
-                                    //      then 0x40/0x44 of the table)
+    // 0x0C: the vptr. [R] cObjNode_vtbl (0x00491F00) in every ctor and the dtor; each derived ctor stores its own;
+    // [P] 0xC; [U] cSortObjNode_compare/equal call slot 8 (lw 0xC, then 0x40/0x44 of the table). Slots [R]
+    // cObjNode_vtbl (13; names from its entries cObjNode_*), types [O] (On Tour's cObjNode definitions):
+    virtual ~cObjNode();                                            // 1
+    virtual void update();                                          // 2
+    virtual void apply();                                           // 3
+    virtual void render();                                          // 4
+    virtual void renderModel(const t4Matrix* mat, int flags);       // 5
+    virtual bool compare(const cObjNode* p);                        // 6
+    virtual bool equal(const cObjNode* p);                          // 7
+    virtual unsigned int getSortIndex() const;                      // 8
+    virtual bool hasParent() const;                                 // 9
+    virtual bool isType(int type);                                  // 10
+    virtual unsigned int getSectionId();                            // 11
+    virtual void writeToReplayFrame(cBxReplayFrame* data);          // 12
+    virtual void readFromReplayFrame(cBxReplayFrame* data);         // 13
 };
 
 CHECK_OFFSET(cObjNode, unk_00, 0x00);
 CHECK_OFFSET(cObjNode, Next, 0x04);
 CHECK_OFFSET(cObjNode, Prev, 0x08);
-CHECK_OFFSET(cObjNode, mVtbl, 0x0C);
 CHECK_SIZE(cObjNode, 0x10);
 
 // ---- cTypeObjNode ----
@@ -57,13 +73,13 @@ CHECK_SIZE(cObjNode, 0x10);
 // Size 0x14: [R] the replay ctor cTypeObjNode_cTypeObjNode reads exactly 4 bytes (cTypeObjNodeState) into +0x10 and
 // writeToReplayFrame writes the same 4; cSortObjNode_cSortObjNode1 stores the next member at 0x14; [O] On Tour 0x10
 // (its cObjNode is 4 bytes smaller). No allocation of the class itself.
-// Bases: cObjNode (0x00-0x10, object/objnode.h, written out inline), then cTypeObjNodeState (On Tour, 4 bytes) at 0x10.
+// Bases: cObjNode (0x00-0x10, above), then cTypeObjNodeState (On Tour, 4 bytes) at 0x10 (its two fields written out).
 // Constructors: cTypeObjNode_cTypeObjNode1 (bucket, type: cObjNode_cObjNode1, stores the type, Flags = 0,
 // ObjNodeCount[type]++), cTypeObjNode_cTypeObjNode (bucket, cBxReplayFrame*); destructor cTypeObjNode__cTypeObjNode
 // (ObjNodeCount[type]--). Vtable cTypeObjNode_vtbl (0x00491E80, 14 slots: cObjNode's 13 with 1 dtor, 2 update,
 // 4 render, 10 isType, 12 writeToReplayFrame overridden, and the new slot 14 shouldRebound).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from cObjNode (above); its own members FLAT. Evidence tags:
 //   [R] retail ctors/dtor (src/object/objnode.cpp);
 //   [P] the July 2003 preview's inline accessors via tools/layout_xlate.py (preview == retail): getType lh 0x10, and
 //       is/set/resetRootTransformDirty lhu/sh 0x12 bit 0 (retail keeps them out of line in object/railmodifier);
@@ -73,12 +89,10 @@ CHECK_SIZE(cObjNode, 0x10);
 
 struct cObjNode;
 
-struct cTypeObjNode {
-    // --- cObjNode (0x10; object/objnode.h)
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see cObjNode above)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list forward link
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list back link
-    void** mVtbl;                   // 0x0C [R] cTypeObjNode_vtbl (0x00491E80) in both ctors and the dtor
+struct cTypeObjNode : public cObjNode {
+    // cObjNode (above, 0x10): the vptr at 0x0C holds [R] cTypeObjNode_vtbl (0x00491E80) in both ctors and the dtor.
+    // Its one new slot ([R] cTypeObjNode_vtbl, [O] cTypeObjNode::shouldRebound):
+    virtual bool shouldRebound();                                   // 14
     // --- cTypeObjNodeState (On Tour 4 bytes; [R] the replay ctor / writeToReplayFrame move these 4 bytes)
     short ObjNodeType;              // 0x10 [O] cTypeObjNodeState::ObjNodeType (tObjNodeType); [R] cTypeObjNode1 sh the
                                     //      type arg, then lh it to index ObjNodeCount; the dtor lh it to decrement;
@@ -88,10 +102,6 @@ struct cTypeObjNode {
                                     //      | 1, & 1, & 0xFFFE)
 };
 
-CHECK_OFFSET(cTypeObjNode, unk_00, 0x00);
-CHECK_OFFSET(cTypeObjNode, Next, 0x04);
-CHECK_OFFSET(cTypeObjNode, Prev, 0x08);
-CHECK_OFFSET(cTypeObjNode, mVtbl, 0x0C);
 CHECK_OFFSET(cTypeObjNode, ObjNodeType, 0x10);
 CHECK_OFFSET(cTypeObjNode, Flags, 0x12);
 CHECK_SIZE(cTypeObjNode, 0x14);
@@ -109,13 +119,13 @@ CHECK_SIZE(cTypeObjNode, 0x14);
 // the cTypeObjNode part; cInstanceNode_cInstanceNode1 stores its own first member (Instance) at 0x18; cRailManNode's
 // state starts at 0x18; [O] On Tour 0x14 (its cObjNode is 4 bytes smaller). No allocation of the class itself.
 // Bases: cTypeObjNode (0x00-0x14, above; itself cObjNode 0x00-0x10 + cTypeObjNodeState), then
-// cSortObjNodeState (On Tour, 4 bytes) at 0x14; all written out inline.
+// cSortObjNodeState (On Tour, 4 bytes) at 0x14 (its field written out).
 // Constructors: cSortObjNode_cSortObjNode1 (bucket, type: SortIndex = ObjNodeNoSortIndex++ for type 6, else
 // ObjNodeSortIndex++), cSortObjNode_cSortObjNode (bucket, cBxReplayFrame*); destructor cSortObjNode__cSortObjNode__FPv.
 // Vtable cSortObjNode_vtbl (0x00491E00, 14 slots: cTypeObjNode's with 1 dtor, 6 compare, 7 equal, 8 getSortIndex,
 // 12 writeToReplayFrame overridden).
 //
-// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from cTypeObjNode (above); its own members FLAT. Evidence tags:
 //   [R] retail ctors/dtor (src/object/objnode.cpp);
 //   [P] the July 2003 preview's inline accessor getSortIndex (lw 0x14) via tools/layout_xlate.py (preview == retail);
 //   [U] how retail code uses the field (cSortObjNode_compare / equal / getSortIndex);
@@ -124,29 +134,16 @@ CHECK_SIZE(cTypeObjNode, 0x14);
 
 struct cObjNode;
 
-struct cSortObjNode {
-    // --- cObjNode (0x10; object/objnode.h)
-    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see cObjNode above)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list forward link
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list back link
-    void** mVtbl;                   // 0x0C [R] cSortObjNode_vtbl (0x00491E00) in both ctors and the dtor; [U] compare /
-                                    //      equal call the other node's slot 8 (getSortIndex)
-    // --- cTypeObjNode: cTypeObjNodeState (above)
-    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState::ObjNodeType; [R] cTypeObjNode1 (type passed through;
-                                    //      cSortObjNode1 also tests type == 6)
-    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState::Flags; [P] bit 0 = RootTransformDirty
+struct cSortObjNode : public cTypeObjNode {
+    // cTypeObjNode (above, 0x14): the vptr at 0x0C holds [R] cSortObjNode_vtbl (0x00491E00) in both ctors and the
+    // dtor (no new slots: it overrides compare, equal, getSortIndex and writeToReplayFrame); [U] compare / equal call
+    // the other node's getSortIndex().
     // --- cSortObjNodeState (On Tour 4 bytes; [R] the replay ctor / writeToReplayFrame move these 4 bytes)
     unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState::SortIndex; [R] cSortObjNode1 sw the counter's old
                                     //      value; [P] getSortIndex (lw 0x14); [U] compare: other.getSortIndex() >=
                                     //      SortIndex (sltu: unsigned), equal: ==
 };
 
-CHECK_OFFSET(cSortObjNode, unk_00, 0x00);
-CHECK_OFFSET(cSortObjNode, Next, 0x04);
-CHECK_OFFSET(cSortObjNode, Prev, 0x08);
-CHECK_OFFSET(cSortObjNode, mVtbl, 0x0C);
-CHECK_OFFSET(cSortObjNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cSortObjNode, Flags, 0x12);
 CHECK_OFFSET(cSortObjNode, SortIndex, 0x14);
 CHECK_SIZE(cSortObjNode, 0x18);
 

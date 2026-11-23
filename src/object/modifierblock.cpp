@@ -470,7 +470,7 @@ extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int
         obj = 0;
     }
     if (((void*)obj) != 0) {
-        sVEntry<void(void*, int, int)>* vt2 = (sVEntry<void (void*, int, int)>*)obj->mVtbl;
+        sVEntry<void(void*, int, int)>* vt2 = (sVEntry<void (void*, int, int)>*)VPTR_OF(cObjNode, obj);
         vt2[43].fn(vthis(obj, vt2[43]), intInfo, force);
     }
 }

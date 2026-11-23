@@ -13,11 +13,12 @@
 // tModifierBlock_readFromReplayFrame);
 // destructor cMoveNode__cMoveNode; vtable cMoveNode_vtbl. Methods: src/object/movenode.cpp and the one-liners in
 // src/object/railmodifier.cpp (methods.txt).
-// A FLAT layout: cInstanceNode (0x00-0x1C, object/instancenode.h, copied inline) + cMoveNode's own fields, which are
-// On Tour's members in On Tour's order, each 4 bytes later (TransferHack is a 4-byte bool).
+// Derives from cInstanceNode (0x00-0x1C, object/instancenode.h); its own fields FLAT: On Tour's members in On Tour's
+// order, each 4 bytes later (TransferHack is a 4-byte bool).
 // Evidence tags: [P] preview inline accessors (via instancenode.h); [R] ctors/dtor/allocation; [U] retail use; [O] On Tour.
 
 #include "layout.h"
+#include "object/instancenode.h"
 
 struct cObjNode;
 struct tInstanceRecord;
@@ -65,20 +66,15 @@ CHECK_OFFSET(tAddRailData, Mesh, 0x8);
 CHECK_OFFSET(tAddRailData, unk_00C, 0xC);
 CHECK_SIZE(tAddRailData, 0x10);
 
-struct cMoveNode {
-    // --- cObjNode (0x10)
-    int unk_00;                     // 0x00 never written by any node ctor (see object/instancenode.h)
-    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [P] cObjNode() zeroes it; [U] bucket list
-    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [P]; [U] bucket list
-    void** mVtbl;                   // 0x0C [R] each ctor stores its vtable; [U] every virtual call (cMoveNode_apply,
-                                    //      update, render, ...)
-    // --- cTypeObjNode / cSortObjNode / cInstanceNode (object/instancenode.h)
-    short ObjNodeType;              // 0x10 [P] getType (lh 0x10); [O] cTypeObjNodeState
-    unsigned short Flags;           // 0x12 [O]; [P] bit 0 = RootTransformDirty; [R] cMoveNode_cMoveNode sets bit 0; [U]
-                                    //      cMoveNode_updateRootTransform, preUpdateModifierBlock
-    unsigned int SortIndex;         // 0x14 [P] getSortIndex (lw 0x14); [O] cSortObjNodeState
-    tInstanceRecord* Instance;      // 0x18 [P] getInstance (lw 0x18); [O]; [U] the add* builders pass it to the modifier
-                                    //      ctors, render, getRootTransform
+struct cMoveNode : public cInstanceNode {
+    // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C holds [R] cMoveNode_vtbl (0x00491028) or a
+    // subclass's (each ctor stores its own); [U] every virtual call (cMoveNode_apply, update, render, ...). Its new
+    // slots ([R] cMoveNode_vtbl, 51 in all; names from its entries, types [O] On Tour's cMoveNode definitions):
+    virtual void updateAnimState();                                 // 47
+    virtual void setupOverlapSystem();                              // 48
+    virtual void restoreOverlapSystem();                            // 49
+    virtual void updateOverlapSystem();                             // 50
+    virtual void updateRootTransform();                             // 51
     // --- cMoveNode
     tModifierBlock* ModifierBlock;  // 0x1C [O]; [R] cMoveNode_addModifierBlock allocates it (cMemMan_alloc(0x28,
                                     //      "ModifierBlock")); [U] every forwarder (cMoveNode_getParentMesh..cMoveNode_fadeEffectModifier, add*/rem*,
@@ -90,14 +86,6 @@ struct cMoveNode {
     int TransferHack;               // 0x28 [O] bool (4 bytes); [U] render tests it (lw); [R] replay ctor
 };
 
-CHECK_OFFSET(cMoveNode, unk_00, 0x00);
-CHECK_OFFSET(cMoveNode, Next, 0x04);
-CHECK_OFFSET(cMoveNode, Prev, 0x08);
-CHECK_OFFSET(cMoveNode, mVtbl, 0x0C);
-CHECK_OFFSET(cMoveNode, ObjNodeType, 0x10);
-CHECK_OFFSET(cMoveNode, Flags, 0x12);
-CHECK_OFFSET(cMoveNode, SortIndex, 0x14);
-CHECK_OFFSET(cMoveNode, Instance, 0x18);
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);
 CHECK_OFFSET(cMoveNode, Debounce, 0x20);
 CHECK_OFFSET(cMoveNode, Fade, 0x24);

@@ -31,7 +31,7 @@ extern char cInstanceNode_vtbl[];
 extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cSortObjNode_cSortObjNode(self, bucket, stream);
-    self->mVtbl = (void**)cInstanceNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
     self->Instance = (tInstanceRecord*)(int)stream->readReplayInstance((cInstanceNode*)self);
     return ((void*)self);
 }
@@ -56,7 +56,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
  */
 extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
-    self->mVtbl = (void**)cInstanceNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
     cInstanceNode_clearActiveNode(self, (cInstanceNode*)self->Instance);
     self->Instance->m_iFlags &= 0xFFFF0300;
     {
@@ -80,7 +80,7 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_setActiveNode);
  */
 extern "C" void cInstanceNode_setActiveNode(int node, cInstanceNode* inst)
 {
-    inst->mVtbl = (void**)node;
+    VPTR_OF(cObjNode, inst) = (void**)node;
 }
 #endif
 
@@ -95,8 +95,8 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_clearActiveNode);
 extern "C" void cInstanceNode_clearActiveNode(void* self, cInstanceNode* inst)
 {
     if (((void*)inst) != 0) {
-        if ((int)inst->mVtbl == (int)self) {
-            inst->mVtbl = 0;
+        if ((int)VPTR_OF(cObjNode, inst) == (int)self) {
+            VPTR_OF(cObjNode, inst) = 0;
         }
     }
 }
@@ -185,7 +185,7 @@ extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
     }
     self->Instance->m_iFlags |= 2;
     if (((void*)self) != 0) {
-        sInstNodeVEntryFD00* vt = (sInstNodeVEntryFD00*)self->mVtbl;
+        sInstNodeVEntryFD00* vt = (sInstNodeVEntryFD00*)VPTR_OF(cObjNode, self);
         vt[1].fn(vthis(self, vt[1]), 3);
     }
 }
@@ -215,7 +215,7 @@ extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
     flagsPtr = (int*)(&self->Instance->m_iFlags);
     *flagsPtr |= 2;
     if (((void*)self) != 0) {
-        sInstNodeVEntryFD90* vt = (sInstNodeVEntryFD90*)self->mVtbl;
+        sInstNodeVEntryFD90* vt = (sInstNodeVEntryFD90*)VPTR_OF(cObjNode, self);
         vt[1].fn(vthis(self, vt[1]), 3);
     }
 }
@@ -267,7 +267,7 @@ extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
 {
     int instance = (int)self->Instance;
     if (((void*)self) != 0) {
-        sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)self->mVtbl;
+        sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)VPTR_OF(cObjNode, self);
         vt[1].fn(vthis(self, vt[1]), 3);
     }
     cDeadNode_cDeadNode((cDeadNode*)cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);

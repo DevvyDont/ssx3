@@ -60,7 +60,7 @@ void* cMoveNode_cMoveNode_3(void* vself, void* bucket, void* stream)
     int flag;
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->ModifierBlock = 0;
-    self->mVtbl = (void**)cMoveNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cMoveNode_vtbl;
     sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn(vthis(stream, *readEntry), (char*)&self->Debounce, 4);
     readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
@@ -97,7 +97,7 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
  */
 extern "C" void cMoveNode__cMoveNode(cMoveNode* self, int flags)
 {
-    self->mVtbl = (void**)cMoveNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cMoveNode_vtbl;
     cMoveNode_restoreOverlapSystem(self);
     void* block = self->ModifierBlock;
     if (block != 0) {
@@ -173,7 +173,7 @@ extern "C" void tModifierBlock_remTransformModifier(void* block);
  */
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod)
 {
-    sVEntry<void(void*)>* vtEntry = &((sVEntry<void(void*)>*)self->mVtbl)[49];
+    sVEntry<void(void*)>* vtEntry = &((sVEntry<void(void*)>*)VPTR_OF(cObjNode, self))[49];
     vtEntry->fn(vthis(self, *vtEntry));
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
@@ -181,7 +181,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
         tModifierBlock_remTransformModifier(((void*)self->ModifierBlock));
     }
     *(void**)((void*)self->ModifierBlock) = ((void*)mod);
-    vtEntry = &((sVEntry<void(void*)>*)self->mVtbl)[48];
+    vtEntry = &((sVEntry<void(void*)>*)VPTR_OF(cObjNode, self))[48];
     vtEntry->fn(vthis(self, *vtEntry));
     unsigned int* instFlags = (unsigned int*)(&self->Instance->m_iFlags);
     *instFlags = (*instFlags & ~0x20u) | 0x40;
@@ -441,7 +441,7 @@ struct sMnVEntryF {
  */
 extern "C" void cMoveNode_addDebounce(cMoveNode* self, tAddDebounceData* data)
 {
-    sMnVEntryF* vt = (sMnVEntryF*)self->mVtbl;
+    sMnVEntryF* vt = (sMnVEntryF*)VPTR_OF(cObjNode, self);
     vt[41].fn(vthis(self, vt[41]), data->Time);
 }
 #endif
@@ -799,26 +799,26 @@ extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* srcv)
     if (((char*)srcv) == 0) {
         return;
     }
-    sVEntry<int(void*)>* vi = (sVEntry<int(void*)>*)srcv->mVtbl;
+    sVEntry<int(void*)>* vi = (sVEntry<int(void*)>*)VPTR_OF(cObjNode, srcv);
     if (vi[16].fn(vthis(srcv, vi[16])) != 0) {
         cMoveNode_transferEffectModifier(self, (cMoveNode*)srcv);
     }
-    sVEntry<char*(void*)>* vp = (sVEntry<char*(void*)>*)srcv->mVtbl;
+    sVEntry<char*(void*)>* vp = (sVEntry<char*(void*)>*)VPTR_OF(cObjNode, srcv);
     char* transform = vp[24].fn(vthis(srcv, vp[24]));
     if (transform == (char*)&self->Instance->m_fmTransform) {
-        sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)srcv->mVtbl;
+        sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, srcv);
         vd[1].fn(vthis(srcv, vd[1]), 3);
         return;
     }
     t4Matrix copy;
     vu0CopyMatrix_355F10(&copy, transform);
     int keep = self->Instance->m_iFlags;
-    sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)srcv->mVtbl;
+    sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, srcv);
     vd[1].fn(vthis(srcv, vd[1]), 3);
     self->Instance->m_iFlags = keep;
     cMoveNode_addPosition1(self, &copy);
     self->TransferHack = 1;
-    sVEntry<void(void*)>* vv = (sVEntry<void(void*)>*)self->mVtbl;
+    sVEntry<void(void*)>* vv = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
     vv[50].fn(vthis(self, vv[50]));
 }
 #endif
@@ -905,7 +905,7 @@ extern "C" int cMoveNode_getInstAnimMats(cMoveNode* self, int inst)
         int animMats = VCall23_60C0(transformModifier, inst);
         if (animMats != 0) return animMats;
     }
-    sVEntry<int(void*)>* vs = (sVEntry<int(void*)>*)self->mVtbl;
+    sVEntry<int(void*)>* vs = (sVEntry<int(void*)>*)VPTR_OF(cObjNode, self);
     return vs[27].fn(vthis(self, vs[27]));
 }
 #endif
@@ -969,22 +969,22 @@ extern "C" void cMoveNode_update(cMoveNode* selfv)
     if (selfv->Debounce > 0) {
         selfv->Debounce -= 1;
     }
-    sVEntry<int(void*)>* vi = (sVEntry<int(void*)>*)selfv->mVtbl;
+    sVEntry<int(void*)>* vi = (sVEntry<int(void*)>*)VPTR_OF(cObjNode, selfv);
     if (vi[20].fn(vthis(selfv, vi[20])) != 0) {
-        sVEntry<int(void*)>* vi2 = (sVEntry<int(void*)>*)selfv->mVtbl;
+        sVEntry<int(void*)>* vi2 = (sVEntry<int(void*)>*)VPTR_OF(cObjNode, selfv);
         if (vi2[23].fn(vthis(selfv, vi2[23])) <= 0 && cInstanceNode_runOnLoseFocusScript(self) == 0) {
-            sVEntry<void(void*)>* vv = (sVEntry<void(void*)>*)selfv->mVtbl;
+            sVEntry<void(void*)>* vv = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, selfv);
             vv[35].fn(vthis(selfv, vv[35]));
             return;
         }
     }
     cMoveNode_preUpdateModifierBlock(self);
-    sVEntry<int(void*)>* vi3 = (sVEntry<int(void*)>*)selfv->mVtbl;
+    sVEntry<int(void*)>* vi3 = (sVEntry<int(void*)>*)VPTR_OF(cObjNode, selfv);
     if (vi3[15].fn(vthis(selfv, vi3[15])) != 0) {
         cMoveNode_postUpdateModifierBlock(self);
         if (((void*)self->ModifierBlock) != 0 && tModifierBlock_isComplete(((void*)self->ModifierBlock)) != 0) {
             tModifierBlock_clearComplete(((void*)self->ModifierBlock));
-            sVEntry<void(void*, int)>* vw = (sVEntry<void(void*, int)>*)selfv->mVtbl;
+            sVEntry<void(void*, int)>* vw = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, selfv);
             vw[34].fn(vthis(selfv, vw[34]), 1);
         }
     }
@@ -1462,7 +1462,7 @@ static inline void vu0Add_68B0(t4Vector& out, const t4Vector& a, const t4Vector&
 static inline t4Vector pos_68B0(char* vself)
 {
     cMoveNode* self = (cMoveNode*)vself;
-    sMnVEntM_68B0* vt = (sMnVEntM_68B0*)self->mVtbl;
+    sMnVEntM_68B0* vt = (sMnVEntM_68B0*)VPTR_OF(cObjNode, self);
     return vt[24].fn(vthis(self, vt[24]))[3];
 }
 
@@ -2190,9 +2190,9 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
 {
     cInstanceNode* parentNode = (cInstanceNode*)self->ParentInst->m_pActiveNode;
     if (((char*)parentNode) != 0) {
-        sVEntry<int(void*)>* vi = (sVEntry<int (void*)>*)parentNode->mVtbl;
+        sVEntry<int(void*)>* vi = (sVEntry<int (void*)>*)VPTR_OF(cObjNode, parentNode);
         if (vi[26].fn(vthis(parentNode, vi[26])) != 0) {
-            sVEntry<t4Matrix*(void*, int)>* vm = (sVEntry<t4Matrix*(void*, int)>*)parentNode->mVtbl;
+            sVEntry<t4Matrix*(void*, int)>* vm = (sVEntry<t4Matrix*(void*, int)>*)VPTR_OF(cObjNode, parentNode);
             vu0CopyMtx_357108(&self->Transform, vm[29].fn(vthis(parentNode, vm[29]), self->Mesh));
         } else {
             cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, ((&self->Transform)));
@@ -2227,7 +2227,7 @@ extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, tInte
     }
     int saved = obj->Mesh;
     obj->Mesh = self->Mesh;
-    sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)parentNode->mVtbl;
+    sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)VPTR_OF(cObjNode, parentNode);
     vt[42].fn(vthis(parentNode, vt[42]), obj);
     obj->Mesh = saved;
 }

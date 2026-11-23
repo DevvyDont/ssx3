@@ -743,7 +743,7 @@ extern "C" void* cInstanceNode_cInstanceNode1(cInstanceNode* self, void* bucket,
 {
     cSortObjNode_cSortObjNode1(self, bucket, type);
     self->Instance = (tInstanceRecord*)node;
-    self->mVtbl = (void**)cInstanceNode_vtbl;
+    VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
     cInstanceNode_setActiveNode(self, node);
     if (((int)node->Prev & 0x100) == 0) {
         if (type != 6 && type != 0x10 && type != 22) {

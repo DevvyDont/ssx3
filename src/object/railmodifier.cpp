@@ -3189,7 +3189,7 @@ extern void* cObjNode_vtbl[];
 extern "C" void* cObjNode_cObjNode2(cObjNode* self)
 {
     self->Next = 0;
-    self->mVtbl = (void**)((int)(void*)cObjNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cObjNode_vtbl);
     self->Prev = 0;
     return ((void*)self);
 }
@@ -3485,7 +3485,7 @@ struct sRailVEntryU800 {
  */
 extern "C" int cSortObjNode_compare(cSortObjNode* self, cObjNode* obj)
 {
-    sRailVEntryU800* vt = (sRailVEntryU800*)obj->mVtbl;
+    sRailVEntryU800* vt = (sRailVEntryU800*)VPTR_OF(cObjNode, obj);
     return vt[8].fn(vthis(obj, vt[8])) >= self->SortIndex;
 }
 #endif
@@ -3509,7 +3509,7 @@ struct sRailVEntryU840 {
  */
 extern "C" int cSortObjNode_equal(cSortObjNode* self, cObjNode* obj)
 {
-    sRailVEntryU840* vt = (sRailVEntryU840*)obj->mVtbl;
+    sRailVEntryU840* vt = (sRailVEntryU840*)VPTR_OF(cObjNode, obj);
     return self->SortIndex == vt[8].fn(vthis(obj, vt[8]));
 }
 #endif

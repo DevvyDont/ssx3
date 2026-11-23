@@ -20,7 +20,7 @@ INCLUDE_ASM("object/objnode", cObjNode_cObjNode__FP8cObjNodePv);
  */
 cObjNode* cObjNode_cObjNode(cObjNode* self, void* bucket)
 {
-    (*(void**)&self->mVtbl) = cObjNode_vtbl;
+    (*(void**)&VPTR_OF(cObjNode, self)) = cObjNode_vtbl;
     cBucketMan_add(&gBucketMan, self, bucket);
     return self;
 }
@@ -41,7 +41,7 @@ void operator_delete(int*);
  */
 extern "C" void cObjNode__cObjNode(cObjNode* self, int flags)
 {
-    self->mVtbl = cObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cObjNode_vtbl;
     cBucketMan_remove(&gBucketMan, self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -69,7 +69,7 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" void* cTypeObjNode_cTypeObjNode1(cTypeObjNode* self, void* bucket, int type)
 {
     cObjNode_cObjNode1(self, bucket);
-    self->mVtbl = cTypeObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cTypeObjNode_vtbl;
     self->ObjNodeType = type;
     *(short*)&self->Flags = 0;
     cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
@@ -96,7 +96,7 @@ cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm_
 extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cObjNode_cObjNode_3((cObjNode*)self, bucket, stream);
-    self->mVtbl = cTypeObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cTypeObjNode_vtbl;
     stream->read((char*)&self->ObjNodeType, 4);
     cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
     return ((void*)self);
@@ -122,7 +122,7 @@ void cTypeObjNode__cTypeObjNode_impl(void* self, int flags) __asm__("cTypeObjNod
 void cTypeObjNode__cTypeObjNode_impl(void* vself, int flags)
 {
     cTypeObjNode* self = (cTypeObjNode*)vself;
-    self->mVtbl = cTypeObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cTypeObjNode_vtbl;
     cTypeObjNode_ObjNodeCount[self->ObjNodeType]--;
     cObjNode__cObjNode((cObjNode*)self, flags);
 }
@@ -154,7 +154,7 @@ extern "C" void* cSortObjNode_cSortObjNode1(cSortObjNode* self, void* bucket, in
 {
     int id;
     cTypeObjNode_cTypeObjNode1((cTypeObjNode*)self, bucket, type);
-    self->mVtbl = cSortObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cSortObjNode_vtbl;
     if (type == 6) {
         id = objNextId_4850(&cSortObjNode_ObjNodeNoSortIndex);
     } else {
@@ -187,7 +187,7 @@ extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* a, cBxRepla
 extern "C" void* cSortObjNode_cSortObjNode(cSortObjNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cTypeObjNode_cTypeObjNode((cTypeObjNode*)self, bucket, stream);
-    self->mVtbl = cSortObjNode_vtbl;
+    VPTR_OF(cObjNode, self) = cSortObjNode_vtbl;
     stream->read((char*)&self->SortIndex, 4);
     return ((void*)self);
 }
@@ -209,7 +209,7 @@ INCLUDE_ASM("object/objnode", cSortObjNode__cSortObjNode__FPv);
 void* cSortObjNode__cSortObjNode(void* vself)
 {
     cSortObjNode* self = (cSortObjNode*)vself;
-    self->mVtbl = (void**)((int)(void*)cSortObjNode_vtbl);
+    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cSortObjNode_vtbl);
     return cTypeObjNode__cTypeObjNode(self);
 }
 #endif

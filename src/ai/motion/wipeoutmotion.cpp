@@ -648,7 +648,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         if (((char*)hit.Inst) != 0) {
             cInstanceNode* o = (cInstanceNode*)hit.Inst->m_pActiveNode;
             if (((char*)o) != 0) {
-                sVEntH_137138* vt = (sVEntH_137138*)o->mVtbl;
+                sVEntH_137138* vt = (sVEntH_137138*)VPTR_OF(cObjNode, o);
                 vt[43].fn(vthis(o, vt[43]), &hit,
                           vu0Scale_137138(impulse, (float)SSXApp->TimerHz * -0.05000000074505806f));
             }
@@ -668,7 +668,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         if (((char*)hit.Inst) != 0) {
             cInstanceNode* o = (cInstanceNode*)hit.Inst->m_pActiveNode;
             if (((char*)o) != 0) {
-                sVEntH_137138* vt = (sVEntH_137138*)o->mVtbl;
+                sVEntH_137138* vt = (sVEntH_137138*)VPTR_OF(cObjNode, o);
                 vt[43].fn(vthis(o, vt[43]), &hit,
                           vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
             }
@@ -1001,7 +1001,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
                 cInstanceNode* hitOwner = hitB.Inst->m_pActiveNode;
                 if (((char*)hitOwner) != 0)
                 {
-                    sVEntry<void(void*, void*, const t4Vector&)>* vt = (sVEntry<void (void*, void*, const t4Vector &)>*)hitOwner->mVtbl;
+                    sVEntry<void(void*, void*, const t4Vector&)>* vt = (sVEntry<void (void*, void*, const t4Vector &)>*)VPTR_OF(cObjNode, hitOwner);
                     vt[43].fn(vthis(hitOwner, vt[43]), &hitB,
                               vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
                 }
