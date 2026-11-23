@@ -11,7 +11,7 @@
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -184,7 +184,7 @@ extern "C" void cFEStateRiderBio_setupCharPics(cFEStateRiderBio* self)
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillDNAInfo);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -219,7 +219,7 @@ extern "C" void cFEStateRiderBio_fillDNAInfo(cFEStateRiderBio* self)
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillFavesInfo);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -254,7 +254,7 @@ extern "C" void cFEStateRiderBio_fillFavesInfo(cFEStateRiderBio* self)
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_fillQnAInfo);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -292,7 +292,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" void cUITextScroll_clearBuffer(void* self);
 extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);

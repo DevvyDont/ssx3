@@ -16,7 +16,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void* cList_first(cList* list);
 int GetHashValue32(char*);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" tBEUber* func_0014FF90(void* iface, int player, int slot, void* out);
 extern "C" int cBEBAGTInterface_chooseUberVar(void* iface, int player, int slot, int a3);
@@ -270,7 +270,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 void* cList_first(cList* list);
 int GetHashValue32(char*);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" tBEUber* func_0014FF90(void* iface, int player, int slot, void* out);
 extern "C" int cBEEconInterface_getMoney(void* iface, int player, int charID);

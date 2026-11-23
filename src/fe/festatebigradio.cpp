@@ -21,7 +21,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 // PORT: several callees are declared with other parameter types elsewhere; bind local views by asm label
 extern "C" void cBraggingRightsMenu_setConfirmed_2DB0(void* panel, int on) __asm__("cBraggingRightsMenu_setConfirmed");

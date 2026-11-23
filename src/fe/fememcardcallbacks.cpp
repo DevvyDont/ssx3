@@ -1071,7 +1071,7 @@ extern "C" void cFEMemCard_callbackCardsChecked(void)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDisplayNoCards);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern char str_text_box_message[];
 extern char str_kT_MEMNoCardsPS2[];
@@ -1145,7 +1145,7 @@ void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* strcpy1(void* dst, void* src);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern char str_Temp_String[];
 extern char str_text_box_message[];
@@ -1685,7 +1685,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onUpdate);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
 extern "C" void cOVState_onUpdate(void);
@@ -1874,7 +1874,7 @@ extern "C" void cFEMemCard_onUpdate(cMemCardK1D8DE0* card)
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_setMenuHighlight);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_onmenu[];
 extern "C" unsigned char cUIMenu_findFirstHighlightable(void* menu, unsigned char start);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
@@ -2031,7 +2031,7 @@ extern "C" int cFEMemCard_onLoseTransition(cFEMemCard* self)
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerArrowPulse);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int c);
 
@@ -2064,7 +2064,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerDisplayState);
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 void cUIScreen_jumpToFrame(void* self, unsigned short frame);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
@@ -2207,7 +2207,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onGainFocus);
 
 extern "C" void* cUIState_onGainFocus(void* self);
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_text_box_message[];
 
 /**

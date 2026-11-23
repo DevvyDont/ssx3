@@ -320,7 +320,7 @@ extern "C" int cFEStateProfileLoad_onWidgetMenu(cFEStateProfileLoad* self, void*
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_hideActionButtons);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x[];
 extern int cFEStateProfileLoad_mScreenAction;
 extern char str_btext3[];
@@ -372,7 +372,7 @@ extern "C" void cFEStateProfileLoad_hideActionButtons(cFEStateProfileLoad* self,
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_hideDeleteButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_btext5[];
 extern char str_ps2sq[];
 extern int cFEStateProfileLoad_mScreenAction;
@@ -414,7 +414,7 @@ extern "C" void cFEStateProfileLoad_hideDeleteButton(cFEStateProfileLoad* self, 
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_hideMainButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_btext3[];
 extern char str_btext3a[];
 extern char str_ps2x[];
@@ -488,7 +488,7 @@ extern "C" void cFEStateProfileLoad_displayStatus(cFEStateProfileLoad* self)
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_displayOn);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEStateProfileLoad_displayOff(cFEStateProfileLoad* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -669,7 +669,7 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_displayOff);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -1200,7 +1200,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_Title_SaveProfile[];
 extern char str_Title_LoadProfile[];
 extern char str_helptext_save[];
@@ -1275,7 +1275,7 @@ extern "C" void cFEStateProfileLoad_initGeneral(cFEStateProfileLoad* selfp)
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_initCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern char str_Title_SaveProfile[];
@@ -1324,7 +1324,7 @@ extern "C" void cFEStateProfileLoad_initCreateScreen(cFEStateProfileLoad* self)
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_initLoadScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern char str_Title_LoadProfile[];
 extern char str_helptext_load[];
@@ -1368,7 +1368,7 @@ extern "C" void cFEStateProfileLoad_initLoadScreen(cFEStateProfileLoad* self)
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_initSaveScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_Title_SaveProfile[];
 extern char str_helptext_save[];
 extern char str_btext3[];

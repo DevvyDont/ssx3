@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beinterface.h"
 #include "fe/fepopupconfirm.h"
 #include "util/locale.h"
@@ -18,7 +19,7 @@ extern char str_06cAutoload[];
 extern char str_mc_messages[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cSSXApp_getMCManager(void* p);
 
 class cUIObjK186B50 {
@@ -852,7 +853,7 @@ extern "C" void func_002C2540(void*, void*);
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
 extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern "C" void* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int c);
 extern "C" void cFEMemCard_SetLoadPressed(void*, int);

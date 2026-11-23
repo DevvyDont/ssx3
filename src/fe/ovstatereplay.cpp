@@ -95,7 +95,7 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onInputBegin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -287,7 +287,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onUpdate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onUpdate(cOVState* self);
@@ -356,7 +356,7 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupCameraName);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onUpdate(cOVState* self);
@@ -420,7 +420,7 @@ extern "C" void cOVState_REPLAY_setupCameraName(cOVState_REPLAY* self)
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupTicker);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_percentcomplete[];
 
 /**

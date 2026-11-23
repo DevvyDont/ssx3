@@ -71,7 +71,7 @@ extern "C" void cOVState_PROFILE_displayStatus(cOVState_PROFILE* self)
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_displayOff);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -407,7 +407,7 @@ public:
 };
 
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cFEMemCard_callbackDisplayNoCards();
 extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* self);
@@ -536,7 +536,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 extern char str_delete_text[];
@@ -593,7 +593,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_delete_text[];
 extern char str_ps2sq_b[];
 
@@ -631,7 +631,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
@@ -1125,7 +1125,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayStatus);
 
 
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_AUTOSAVE_displayOn(cOVState_AUTOSAVE* self);
 extern char str_autosave_text[];
 

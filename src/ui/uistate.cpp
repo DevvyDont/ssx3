@@ -12,7 +12,7 @@ struct cListNode;
 cListNode* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 int GetHashValue32(char*);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 
 /**
@@ -48,7 +48,7 @@ struct cListNode;
 cListNode* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 int GetHashValue32(char*);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 
 /**

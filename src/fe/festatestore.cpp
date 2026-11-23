@@ -22,7 +22,7 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_costVisible);
 struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_cost_num[];
 extern char str_have_num[];
 extern char str_cost_text[];
@@ -96,7 +96,7 @@ public:
     virtual void setVisible(int a);
 };
 
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 /**
  * Shows or hides the uber-trick screen's "btext5" and "ps2sq" objects.
@@ -441,7 +441,7 @@ extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -583,7 +583,7 @@ extern "C" void cFEStateUberTrick_onWidgetCreate(cFEStateUberTrick* self, cUIThi
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");

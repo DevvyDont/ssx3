@@ -68,7 +68,7 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
 INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onGainFocus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 extern char str_Option_1[];
 extern char str_Option_2[];
@@ -112,7 +112,7 @@ extern "C" void cFEStateRiderDetail_onGainFocus(cFEStateRiderDetail* self, int p
 INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
 extern char str_Option_2[];
 
@@ -360,7 +360,7 @@ extern "C" void* cFEStateUberTrick_cFEStateUberTrick(cFEStateUberTrick* self, in
 INCLUDE_ASM("fe/festateriderbio", cFEStateUberTrick_activateMainMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_hilite_right[];
 extern char str_hilite_left[];
 extern char str_helptext_choose[];
@@ -412,7 +412,7 @@ extern "C" void cFEStateUberTrick_activateMainMenu(cFEStateUberTrick* self)
 INCLUDE_ASM("fe/festateriderbio", cFEStateUberTrick_activateTrickMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_hilite_right[];
 extern char str_hilite_left[];
 extern char str_helptext_choose[];

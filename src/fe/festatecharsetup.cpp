@@ -19,7 +19,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -243,7 +243,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, t4Vector* a, t4Vector* b);

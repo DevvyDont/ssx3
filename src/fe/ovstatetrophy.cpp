@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beinterface.h"
 #include "render/font.h"
 #include "ui/uiengine.h"
@@ -1614,7 +1615,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 void cUIText_setAsciiString(cUIText* text, const char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
@@ -1716,7 +1717,7 @@ extern "C" int func_00210B58(void* self, int ok)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210BD8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);

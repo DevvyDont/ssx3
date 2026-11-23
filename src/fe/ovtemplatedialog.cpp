@@ -24,7 +24,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cPDATemplate_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...)
 extern "C" void sprintf1_v(void* dst, int fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(void* text, char* str);
@@ -1659,7 +1659,7 @@ extern "C" void cOVStateManager_removePDATemplate(void)
 INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" void cOVState_onCreateScreen(void* self);
@@ -2157,7 +2157,7 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cOVState_REPLAY_setupCameraName(void* self);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
 extern char str_64replay[];
 extern char str_ReplayMenuPopup[];

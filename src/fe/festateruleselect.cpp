@@ -19,7 +19,7 @@ struct cUIScreen;
 struct cUIText;
 int GetHashValue32(char* str);
 int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUIListBox_deleteAllEntries(void* self);
@@ -206,7 +206,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self, signed char a1);
@@ -457,7 +457,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self, signed char idx);
 int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_arrw_left[];
@@ -717,7 +717,7 @@ extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, cUI
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateMenuColor);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 struct sVE_2488 {
     short delta;
@@ -945,7 +945,7 @@ void cBraggingRightsMenu_setEnableFlag(void* vself, int val)
 INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setEnableItem);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 struct sName11_00192970 { char c[11]; };
 struct sName12_00192970 { char c[12]; };

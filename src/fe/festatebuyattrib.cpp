@@ -273,7 +273,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onInputAlways);
 #ifdef SKIP_ASM
 // PORT: cUIState_onInputAlways__FPv is called with (self, widget) here; bind the 2-arg form to that symbol.
 void cUIState_onInputAlways_2(void* self, void* w) __asm__("cUIState_onInputAlways__FPv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 int cBEEconInterface_getAttribCost(void* iface, int level);
 extern "C" void cFEStateBuyAttrib_updateTotalCost(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* self);
@@ -365,7 +365,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateLevels);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_lvlpct_d[];
@@ -406,7 +406,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateCostPerLevel);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" const char* getDollarString(int value);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -451,7 +451,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self)
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateExperienceDisplay);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_Vectorpct_d[];
 extern char str_underpct_d[];
@@ -509,7 +509,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateTotalCost);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" const char* getDollarString(int value);
 extern char str_AttributeCost[];
@@ -531,7 +531,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_updateBank);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" const char* getDollarString(int value);
 extern char str_CurrentMoney[];
@@ -948,7 +948,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupLayout);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern char str_highlights[];
@@ -1004,7 +1004,7 @@ extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self)
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupMenuFocus);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEStateCareerStats_setupHighlightsList(cFEStateCareerStats* self);
 extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* self);
 extern "C" void cFEStateCareerStats_setupRacePlatinumMedalsList(cFEStateCareerStats* self);
@@ -1082,7 +1082,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 int cBEScoreInterface_getCurrentHighlightLevel(void* score, int idx);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -1199,7 +1199,7 @@ struct cUIText;
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -1308,7 +1308,7 @@ struct cUIText;
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -1415,7 +1415,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setTextSafe);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
 /**
@@ -1442,7 +1442,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void* cBE_getBE();
 int GetHashValue32(char* str);
 int cBELibrary_getCharacterID(int);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* race, int track);

@@ -20,7 +20,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -84,7 +84,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onGainTransition);
 int GetHashValue32(char* str);
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
@@ -188,7 +188,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onGainTransition);
 int GetHashValue32(char* str);
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
@@ -297,7 +297,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onGainTransition);
 int GetHashValue32(char* str);
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
@@ -443,7 +443,7 @@ INCLUDE_ASM("fe/festateloadhint", func_00245F50);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -500,7 +500,7 @@ extern "C" void func_00245F50(cUIState* self)
 INCLUDE_ASM("fe/festateloadhint", func_00246098);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -952,7 +952,7 @@ template <class F> struct sVEntry_6CF8 {
 
 int GetHashValue32(char* str);
 
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -1132,7 +1132,7 @@ struct cUIText;
 
 int GetHashValue32(char* str);
 
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 

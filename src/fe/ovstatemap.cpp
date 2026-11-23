@@ -27,7 +27,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct sSelf0020A380;
 extern "C" void cOVState_onCreateScreen(cOVState* self);
 extern "C" int cFEAsyncManager_GetFreeAsyncFile(void* mgr);
@@ -271,7 +271,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainFocus);
 
 
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern char str_ConfirmMenu[];
 
@@ -1065,7 +1065,7 @@ extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* selfp)
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_showIndicators);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_SessionViewPoints[];
 
 class cUIObj_9E78 {

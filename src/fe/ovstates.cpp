@@ -47,7 +47,7 @@ extern "C" void cFEStateTitle_onCreateScreen(cFEStateTitle* self)
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_Menu0000[];
 extern char str_tReal[];
 extern int gTitleScreenDelay;
@@ -307,7 +307,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
 extern int EnableOnline;
 extern char str_3multi_play[];
@@ -424,7 +424,7 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(cFEStateMainMenu* self, cUIThing
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void cUIState_onUpdate(void* self);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
 extern char str_Menu[];
 
@@ -685,7 +685,7 @@ extern "C" int cFEStateMainMenu_onWidgetMenu(cFEStateMainMenu* self, int pMenu, 
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int cUIThing_playKeyframerEvent(void* self, int x);
 extern char str_hl[];
 extern char str_3_help_multi[];

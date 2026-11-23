@@ -287,7 +287,7 @@ extern "C" int cFEStateOptions_onWidgetMenu(cFEStateOptions* self, cUIMenu* menu
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_reset_text[];
@@ -424,7 +424,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
@@ -908,7 +908,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_updateWidget);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cSSXApp_activateBEOptions(void* p);
@@ -1034,7 +1034,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* self);
 extern char str_141advsettings[];
@@ -1389,7 +1389,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_updateWidget);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
 extern "C" void cUIListBox_deleteAllEntries(void* box);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
@@ -2282,7 +2282,7 @@ extern "C" int cFEStateOptionsController_onWidgetPair(cFEStateOptionsController*
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_updateWidget);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2339,7 +2339,7 @@ extern "C" void cFEStateOptionsController_updateWidget(cFEStateOptionsController
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_displayPadConfig);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char* D_004A15BC;
 extern char* D_004A15C0;
 extern char str_default_text[];
@@ -2566,7 +2566,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(cFEStateOptionsSaveLoad* 
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
 extern int gInLodge;
 extern char str_3loadreplay[];
@@ -2811,7 +2811,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -3259,7 +3259,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_hideActionButtons);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x[];
 extern char str_btext3[];
 extern char str_btext3a[];
@@ -3297,7 +3297,7 @@ extern "C" void cFEStateOptionsDeviceSelect_hideActionButtons(cFEStateOptionsDev
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_hideDeleteButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_btext5[];
 extern char str_ps2sq[];
 struct cUIObj_E2C0 {
@@ -3337,7 +3337,7 @@ extern "C" void cFEStateOptionsDeviceSelect_hideDeleteButton(cFEStateOptionsDevi
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_hideMainButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_btext3[];
 extern char str_btext3a[];
 extern char str_ps2x[];
@@ -3425,7 +3425,7 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_displayStatus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mgr, int dev, unsigned short* buf, int n);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);

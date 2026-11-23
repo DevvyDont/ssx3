@@ -253,7 +253,7 @@ extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_pushCheck(void* list, void* item);
 extern "C" void cUIStateStack_pushSpecial(void* list, void* item, int a2, int a3);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern char str_option_0[];
@@ -539,7 +539,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(cFEStateLodgeRiderDetail
 INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
 extern char str_Option_3_b[];
 

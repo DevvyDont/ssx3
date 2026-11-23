@@ -493,7 +493,7 @@ extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, void
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseObjectAnim);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(cUIScreen* self, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 // PORT: callers pass a 5th arg (0) that cUIThing_playAnimation never reads
 extern "C" void cUIThing_playAnimation(void* self, void* anim, unsigned char mode, unsigned short v, int x);
@@ -524,7 +524,7 @@ extern "C" void cUIScreen_parseObjectAnim(cUIScreen* self, tUIFrameHeader* pFram
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseObjectSetPos);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(cUIScreen* self, int hash);
 extern "C" void cUIThing_deleteAnimation(void* self);
 
 class cUIScreen_parseObjectSetPos_cVirt {
@@ -1150,14 +1150,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getObjectByHashName);
  * @param hash  the name's hash (On Tour hashname)
  * @return the widget, or 0
  */
-extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
+extern "C" cUIThing* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
 {
     void** objs = (void**)self->mppObjectList;
     if (objs != 0) {
         for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
             cUIThing* uiObj = (cUIThing*)objs[i];
             if (((void*)uiObj) != 0 && uiObj->mHashName == hash) {
-                return ((void*)uiObj);
+                return uiObj;
             }
         }
     }

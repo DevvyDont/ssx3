@@ -684,7 +684,7 @@ struct cList;
 struct sEquipTable;
 int GetHashValue32(char* str);
 void* cList_first(cList* list);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onUpdate(void* self);
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(cFEStateCharEquip* self);

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beinterface.h"
 #include "visualfx/aivisualeffectsman.h"
 #include "visualfx/visualeffectsman.h"
@@ -3370,7 +3371,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern char str_supopup[];
 extern char str_Title_b[];

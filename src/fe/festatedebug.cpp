@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/screenkeyboard.h"
 #include "ui/uiscreen.h"
 #include "ui/uiengine.h"
@@ -8,7 +9,7 @@
 INCLUDE_ASM("fe/festatedebug", cScreenKeyboard_initScreenKeyboard);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* s);
 extern "C" void cScreenKeyboard_setInputText(void* self, char* s);
@@ -123,7 +124,7 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(cScreenKeyboard* self, cUIScr
 INCLUDE_ASM("fe/festatedebug", cScreenKeyboard_onInput);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cScreenKeyboard_getCursorObjName(void* self, int id, char* buf);
 extern "C" void cScreenKeyboard_kbMoveLeft(void* self);
 extern "C" void cScreenKeyboard_kbMoveRight(void* self);

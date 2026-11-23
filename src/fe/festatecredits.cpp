@@ -20,7 +20,7 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_26credits[];
 extern char str_Menu0000[];
 extern char str_Bitmap0000[];
@@ -63,7 +63,7 @@ extern "C" void cFEStateCredits_onCreateScreen(cFEStateCredits* self)
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onGainFocus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);
 extern "C" void cFEState_onGainFocus(cFEState* self, cUIState* a1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -438,7 +438,7 @@ struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
 extern char str_Menu[];
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" signed char cFEFlowState_getValue(void* self, int a1);
 extern "C" void cUIState_onGainFocus(void* self, void* a1);
@@ -477,7 +477,7 @@ struct cList;
 void* cList_first(cList* list);
 int GetHashValue32(char* str);
 extern char str_Menu[];
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
 extern sFlowState_865A8 gFlowState;

@@ -1359,7 +1359,7 @@ extern "C" void cFEStateRewardGalleryBase_updateList(cFEStateRewardGalleryBase* 
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updatePageNumber);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
@@ -2452,7 +2452,7 @@ extern char str_130rewardposter[];
 extern char str_Menu[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 /**
  * Creates the reward preview screen ("130rewardposter") and sets flag 8 on its "Menu" object.

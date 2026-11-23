@@ -11,7 +11,7 @@ INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 // PORT: cFEStateMPCircuit_initCircuitList__FPv is called with (self, obj) here; bind the 2-arg form to that symbol.
 void cFEStateMPCircuit_initCircuitList_2(void* self, void* obj) __asm__("cFEStateMPCircuit_initCircuitList__FPv");
@@ -56,7 +56,7 @@ INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onGainFocus);
 struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);

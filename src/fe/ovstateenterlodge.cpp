@@ -48,7 +48,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onGainFocus);
 int GetHashValue32(char* str);
 extern char str_yes_b[];
 extern char str_no_b[];
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onGainFocus(void* self, void* a1);
 
 /**
@@ -200,7 +200,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBEMissionInterface_getMissionName(void* iface, int id);
 extern "C" void* cBEMissionInterface_getMissionLongDesc(void* iface, int id);
 extern "C" void cUIText_setUnicodeString(void* text, void* str);
@@ -535,7 +535,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);

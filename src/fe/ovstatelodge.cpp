@@ -155,7 +155,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();

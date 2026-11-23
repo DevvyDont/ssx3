@@ -127,7 +127,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
@@ -554,7 +554,7 @@ struct cUIText;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int cBEStatInterface_getHumanSpeed(void* iface, int a, int b);
 extern "C" int cBEStatInterface_getHumanAccel(void* iface, int a, int b);
