@@ -6,10 +6,9 @@
 // source file is not known (preview linkonce: __19cOVState_ENTERLODGEP9cUIEngine12tOVStateEnum). No members of
 // its own: cMemMan_alloc(0x9C, "cOVStateOverlay") for overlay id 31; On Tour size 0x90 (= its cOVState). Vtable
 // cOVState_ENTERLODGE_vtbl (0x473760); constructor cOVState_ENTERLODGE_cOVState_ENTERLODGE, destructor
-// cOVState_ENTERLODGE__cOVState_ENTERLODGE. Base cOVState (fe/ovstate.h, 0x9C), written out flat below with the
-// same member names.
+// cOVState_ENTERLODGE__cOVState_ENTERLODGE. Derives from cOVState (fe/ovstate.h, 0x9C).
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
+// Its own members are at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -20,34 +19,25 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVState_ENTERLODGE : public cUIState {
+struct cOVState_ENTERLODGE : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_ENTERLODGE_vtbl, stored after cOVState_vtbl by the constructor
     // cOVState_ENTERLODGE's notes on cUIState's fields:
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the screen; onGainFocus looks widgets up through it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen; onDestroyScreen clears it before
-                                    //       cOVState_onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed; [U] onWidgetEvent sets it on No / Triangle
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (31)
+    // cOVState (fe/ovstate.h, 0x9C)
+    // cOVState_ENTERLODGE's notes on cOVState's fields:
+    //   mRestoreCutSceneMode: [U] cOVState_onCreateScreen; onDestroyScreen clears it before cOVState_onDestroyScreen
+    //   mRemovePDA: [U] onWidgetEvent sets it on No / Triangle
 };
 
-CHECK_OFFSET(cOVState_ENTERLODGE, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_ENTERLODGE, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_ENTERLODGE, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_ENTERLODGE, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_ENTERLODGE, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_ENTERLODGE, mOVID, 0x98);
 CHECK_SIZE(cOVState_ENTERLODGE, 0x9C);
 
 #endif /* FE_OVSTATEENTERLODGE_H */

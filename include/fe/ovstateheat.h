@@ -10,10 +10,9 @@
 // Constructor cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT, destructor cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT. On Tour's other heat
 // overlay, cOVState_HEAT_STANDINGS, has no retail counterpart identified (the overlays next to this one in the
 // unit, ids 9 / 21 / 20: func_001FBD20 "41freestyle_pre", func_001FC878 "50multifs_pre", func_001FD268
-// "68rival_pre", are other pre-event screens without names). Base cOVState (fe/ovstate.h, 0x9C), written out
-// flat below with the same member names.
+// "68rival_pre", are other pre-event screens without names). Derives from cOVState (fe/ovstate.h, 0x9C).
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
+// Its own members are at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -24,34 +23,23 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVState_HEAT_PREEVENT : public cUIState {
+struct cOVState_HEAT_PREEVENT : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_HEAT_PREEVENT_vtbl, stored after cOVState_vtbl by the constructor
     // cOVState_HEAT_PREEVENT's notes on cUIState's fields:
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the screen; widget lookups go through it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (8)
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVTemplate_Simple (vtable 0x474D30; On Tour 0x90): no members
 };
 
-CHECK_OFFSET(cOVState_HEAT_PREEVENT, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_HEAT_PREEVENT, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_HEAT_PREEVENT, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_HEAT_PREEVENT, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_HEAT_PREEVENT, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_HEAT_PREEVENT, mOVID, 0x98);
 CHECK_SIZE(cOVState_HEAT_PREEVENT, 0x9C);
 
 #endif /* FE_OVSTATEHEAT_H */

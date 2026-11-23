@@ -19,7 +19,7 @@
 // 4 onCreateScreen, 6 onGainFocus__FPv, 12 onUpdate, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu), mUserNum
 // and mCtrlBits; the destructor purges the textures, stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [P] the July 2003 preview (layout_xlate: 0x50 -> 0x54, 0x98 -> 0x9C, from onWidgetEvent);
@@ -28,6 +28,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -36,7 +37,7 @@ struct cUIScreen;
 struct cUIIcon;
 struct cUIText;
 
-struct cFEStateTrophyRoom : public cUIState {
+struct cFEStateTrophyRoom : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateTrophyRoom_vtbl (ctors, dtor first), cFEState_vtbl (dtor)
     // cFEStateTrophyRoom's notes on cUIState's fields:
@@ -45,7 +46,7 @@ struct cFEStateTrophyRoom : public cUIState {
     //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum)
     //   mpScreen: [U] onCreateScreen stores the screen
     //   mUserNum: [U] the reward / challenge queries
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateTrophyRoom
     cUIIcon* mpBigIcon;             // 0x048 [O]; [R] ctor 0; [U] onWidgetCreate binds "bitmap"; updateBigArt sets its
                                     //       texture or hides it

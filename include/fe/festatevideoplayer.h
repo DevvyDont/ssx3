@@ -20,7 +20,7 @@
 // dtor, 4 onCreateScreen, 5 onDestroyScreen, 7 onGainTransition__FPv, 8 onInputBegin, 10 onLoseTransition__FPv, 12
 // onUpdate, 15 onRender2D); the destructor deletes the movie player, stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
 // 4 bytes).
 // Evidence tags:
 //   [R] retail's constructor / destructor and allocation size;
@@ -31,6 +31,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 #include "movie/movieplayer.h"
 
 struct cListNode;
@@ -39,12 +40,12 @@ struct cUIState;
 struct cUIScreen;
 struct cMoviePlayer;
 
-struct cFEStateVideoPlayer : public cUIState {
+struct cFEStateVideoPlayer : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateVideoPlayer_vtbl (ctor; dtor first), cFEState_vtbl (dtor); [P] preview slot-1 dtor
     // cFEStateVideoPlayer's notes on cUIState's fields:
     //   mpEngine: [U] Stop pops the state through it
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateVideoPlayer
     char mVideoFileName[256];       // 0x048 [O]; [R] the ctor empties it and points mOptions.sVideoFileName at it;
                                     //       [U] setVideoSourceFiles copies the video file into it

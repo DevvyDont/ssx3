@@ -8,11 +8,10 @@
 // Size 0xB8: cMemMan_alloc(0xB8, "cOVStateOverlay") for overlay id 17; On Tour 0xA8 = 0x90 + its 7 members with
 // 1-byte bools, i.e. 7 words here. Vtable cOVState_REPLAY_vtbl (0x474AA8); constructor
 // cOVState_REPLAY_cOVState_REPLAY (out of line, no callers; triggerOverlay inlines it), destructor
-// cOVState_REPLAY__cOVState_REPLAY. Base cOVState (fe/ovstate.h, 0x9C), written out flat below with the same
-// member names. On Tour's onCreateScreen stores the same constants (mBottom_y = mMinBottom_y = 245,
-// mMaxBottom_y = 480, mBottom_ydiff = 0) in the same member order.
+// cOVState_REPLAY__cOVState_REPLAY. Derives from cOVState (fe/ovstate.h, 0x9C). On Tour's onCreateScreen stores the
+// same constants (mBottom_y = mMinBottom_y = 245, mMaxBottom_y = 480, mBottom_ydiff = 0) in the same member order.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
+// Its own members are at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -23,26 +22,21 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVState_REPLAY : public cUIState {
+struct cOVState_REPLAY : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_REPLAY_vtbl, stored after cOVState_vtbl by the constructor
     // cOVState_REPLAY's notes on cUIState's fields:
     //   mHashName: [U] onCreateScreen stores GetHashValue32("64replay")
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the "64replay" screen; widget lookups go through it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (17)
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_REPLAY (On Tour: size 0xA8)
     int mShowPopupMenu;             // 0x09C [O] bool; [U] onCreateScreen clears it; onInputBegin sets it when Start
                                     //       opens the replay menu and clears it on close; onUpdate / onWidgetMenu
@@ -61,12 +55,6 @@ struct cOVState_REPLAY : public cUIState {
                                     //       onInputBegin's Save / Exit test it
 };
 
-CHECK_OFFSET(cOVState_REPLAY, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_REPLAY, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_REPLAY, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_REPLAY, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_REPLAY, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_REPLAY, mOVID, 0x98);
 CHECK_OFFSET(cOVState_REPLAY, mShowPopupMenu, 0x9C);
 CHECK_OFFSET(cOVState_REPLAY, mTimeLineHidden, 0xA0);
 CHECK_OFFSET(cOVState_REPLAY, mBottom_y, 0xA4);

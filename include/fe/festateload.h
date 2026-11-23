@@ -21,7 +21,7 @@
 // onUpdate, 13 onMenuGainFocus, 18 onWidgetCreate__FPv, 19 onWidgetEvent, 20 onWidgetMenu), then cUITemplate_MAP_init
 // on &mMap. The destructor stores cFEState_vtbl and runs cUIState__cUIState (the template has no destructor).
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [U] how retail code uses the field;
@@ -30,6 +30,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 #include "fe/uitemplatemap.h"
 
 struct cListNode;
@@ -37,14 +38,14 @@ struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cFEStateEventSelect : public cUIState {
+struct cFEStateEventSelect : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateEventSelect_vtbl (both ctors), cFEState_vtbl (dtor)
     // cFEStateEventSelect's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "Map" / "femap_template"; onWidgetEvent reaches the FE custom object and the
     //       state stack (+0x18) through it
     //   mpScreen: [U] onCreateScreen keeps the "Map" screen here; onWidgetEvent plays its "TransitionOut" frame
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateEventSelect
     cUITemplate_MAP mMap;           // 0x048 [O]; [R] the ctors run cUITemplate_MAP_init on it; [U] every method passes
                                     //       &mMap (addiu 0x48) to the same-named cUITemplate_MAP_* method

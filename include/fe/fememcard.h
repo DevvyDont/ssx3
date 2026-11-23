@@ -24,7 +24,7 @@
 // cFEMemCard_initFEMemCard; the static callbacks (cFEMemCard_callback*, confirmLoad, exitDelete, readStart, readDone,
 // writeStart, callbackRead/WriteUpdate, is*Pressed) work through it instead of `this`.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
+// Derives from cOVState (fe/ovstate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors and cFEMemCard_initFEMemCard (which sets every own word: 0x19C = 25, 0x1BC = iType,
 //       the rest 0; the short at 0x9C = 0; the file-name pattern into 0x11C);
@@ -34,6 +34,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -42,7 +43,7 @@ struct cUIScreen;
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cFEMemCard : public cUIState {
+struct cFEMemCard : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEMemCard_vtbl (_vt$10cFEMemCard), stored over cOVState_vtbl by the ctors; [U] the screen's virtual calls
     //       (getPopup, cancel, triggerDisplayState ...)
@@ -52,13 +53,9 @@ struct cFEMemCard : public cUIState {
     //   mpScreen: [U] cUIScreen_getObjectByHashName(mpScreen, "onmenu" ...) (onGainFocus, setMenuHighlight,
     //       triggerDisplayState, triggerArrowPulse, onUpdate)
     //   mUserNum: [U] cFEStateProfileLoad's ctor sets it from mPlayerIdx
-    // --- cOVState (fe/ovstate.h; its ctor is inlined into the cFEMemCard ctors)
-    int mDoneTransition;            // 0x048 [O] (bool); [R] the ctors zero it
-    int mAllowPauseMenu;            // 0x04C [O] (bool); [R] the ctors zero it
-    int mRestoreCutSceneMode;       // 0x050 [O] (bool)
-    int mRemovePDA;                 // 0x054 [O] (bool); [R] the ctors zero it
-    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " into it (one sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] 0, or cFEMemCard_cFEMemCard's eOVState argument
+    // cOVState (fe/ovstate.h, 0x9C)
+    // cFEMemCard's notes on cOVState's fields:
+    //   mOVID: [O] tOVStateEnum; [R] 0, or cFEMemCard_cFEMemCard's eOVState argument
     // --- cFEMemCard
     unsigned short mLastLoadFileName[64]; // 0x09C [O] ([32] in On Tour); [R] initFEMemCard clears the first char (sh);
                                     //       [U] cFEMemCard_SetLoadPressed(1) has the card (manager +0x434, slot 14)
@@ -140,12 +137,6 @@ struct cFEMemCard : public cUIState {
                                     //       (readStart), 0 = none
 };
 
-CHECK_OFFSET(cFEMemCard, mDoneTransition, 0x48);
-CHECK_OFFSET(cFEMemCard, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cFEMemCard, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cFEMemCard, mRemovePDA, 0x54);
-CHECK_OFFSET(cFEMemCard, mszChatBuff, 0x58);
-CHECK_OFFSET(cFEMemCard, mOVID, 0x98);
 CHECK_OFFSET(cFEMemCard, mLastLoadFileName, 0x9C);
 CHECK_OFFSET(cFEMemCard, mFileName, 0x11C);
 CHECK_OFFSET(cFEMemCard, mPopupType, 0x19C);

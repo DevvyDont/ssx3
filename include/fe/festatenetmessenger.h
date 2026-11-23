@@ -10,9 +10,8 @@
 // Constructor cFEStateNetMessenger_cFEStateNetMessenger (cFEStateNet ctor cFEStateNet_cFEStateNet, then vtable cFEStateNetMessenger_vtbl, mHashName 0x46 and its members),
 // destructor cFEStateNetMessenger__cFEStateNetMessenger. Methods: fe/feasyncfile 0x1A3DC8-0x1A7390 (43 functions) and the slots of cFEStateNetMessenger_vtbl.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
-// inline (copied from fe/festatenet.h; keep the two in step). No EA member names exist for this class (no On Tour
-// DWARF, no preview accessors): the own fields are named from their retail use.
+// Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. No EA member names exist for
+// this class (no On Tour DWARF, no preview accessors): the own fields are named from their retail use.
 // Evidence tags:
 //   [R] retail's constructor cFEStateNetMessenger_cFEStateNetMessenger / destructor cFEStateNetMessenger__cFEStateNetMessenger (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (see fe/festatenet.h);
@@ -41,7 +40,7 @@ CHECK_OFFSET(tFEStringPtrVector, mpFinish, 0x8);
 CHECK_OFFSET(tFEStringPtrVector, mpEndOfStorage, 0xC);
 CHECK_SIZE(tFEStringPtrVector, 0x10);
 
-struct cFEStateNetMessenger : public cUIState {
+struct cFEStateNetMessenger : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateNetMessenger_vtbl (vtables.tsv; 35 slots), stored by cFEStateNetMessenger_cFEStateNetMessenger
     //       after the cFEStateNet ctor and by the destructor cFEStateNetMessenger__cFEStateNetMessenger
@@ -53,58 +52,7 @@ struct cFEStateNetMessenger : public cUIState {
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    // --- cFEStateNet (fe/festatenet.h)
-    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
-                                    //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
-                                    //       isProcessingEvents tested only the screen)
-    unsigned int mLastPollFrame;    // 0x04C [R] 0; [U] func_001AAB68 (slot 26) polls the session for new messages /
-                                    //       challenges at most once per 60 frames and stores the frame here
-    unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
-                                    //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
-                                    //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
-    unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
-                                    //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
-    int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
-                                    //       cFEStateNet_onInputBegin (slot 7, the onInputBegin override) returns it
-    char mszMaskedText[0x40];       // 0x05C [U] func_001A98B8 writes one '*' per character of its string (at most 0x3F;
-                                    //       " " when empty) and a NUL; cUIText_setAsciiString(.., mszMaskedText) in
-                                    //       func_001ACDD0, func_001B9610, func_001B9678, func_001B9820 (password boxes)
-    unsigned short mustrMessage[0x200]; // 0x09C [U] sprintf1 (EA's unicode sprintf) target that becomes the popup's
-                                    //       message (func_001A4E28); extent: up to the next used offset
-    unsigned short unk_49C[0x80];   // 0x49C [U] func_001AB478: sprintf1 of a status line, then setPopupConfirmation
-                                    //       (func_001C5838, unicode) with it
-    unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
-    cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
-                                    //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       cFEStateNet_onPopupEvent compares the closing popup with it
-    cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
-                                    //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
-                                    //       shows it; func_001A93D0 clears it when that popup closes (event 22)
-    cUIText* mpKeyboardText;        // 0x6A4 [R] 0; [U] func_001A91B0 stores its a1 (the text box the
-                                    //       keyboard edits); cUIText_setAsciiString(mpKeyboardText, mszMaskedText)
-    int unk_6A8;                    // 0x6A8 [R] 1; 0 in the ctors of cFEUseExistingAccount, cFEStateNetConfig,
-                                    //       cFEStateAuthDNAS, cFEStateCreateStep1/2, cFEStateCreateDuplicate, cFEStateLogin;
-                                    //       [U] while set, func_001A89B0 (slot 25) drops net messages other than kinds
-                                    //       0x31/0x33/0x4D/0x4E and opens the disconnect popup (func_001A9930)
-    int unk_6AC;                    // 0x6AC [R] 0; [U] func_001A9930 sets it when it opens the "kT_POPUPCMNNetInterrupted"/
-                                    //       "kT_POPUPCMNDisconnected" popup (only when clear); func_001A9668/func_001A9710
-                                    //       clear it, func_001A5010 tests it
-    int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
-                                    //       func_001C0138; no read seen
-    int unk_6B4;                    // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event (0xC8..0x116)
-                                    //       waits for slot 30 to accept it, 0 once delivered
-    void* unk_6B8;                  // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
-                                    //       points the popup's message at it; the destructor frees it
-    int unk_6BC;                    // 0x6BC [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on event 15;
-                                    //       on event 22 it tells the parent state (slot 17, event 0xF) when 0
-    char* unk_6C0;                  // 0x6C0 [R] cBXString built from str_sp (cBXString_cBXString2), destroyed by the
-                                    //       dtor; [U] func_001A9890 assigns it (cBXString_operatorE1), func_001A98B0
-                                    //       returns the text: the user name passed to the session calls (func_00262690);
-                                    //       the messenger sets it to the selected buddy (func_001A4928)
-    int unk_6C4;                    // 0x6C4 [R] 0; [U] func_001DE8A0 (inline setter) and func_001AB370 set it,
-                                    //       func_001ABB30 opens the status popup only when it and mpPopup are set
-    tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
+    // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateNetMessenger
     char* mszFoundName;             // 0x6D0 [R] cBXString: cFEStateNetMessenger_cFEStateNetMessenger stores the empty-string rep cBXString_EmptyString, the dtor
                                     //       destroys it; [U] func_001A4CE8 copies a find result's name (result + 0x8) into
@@ -129,27 +77,6 @@ struct cFEStateNetMessenger : public cUIState {
                                     //       name (func_001A5800) or -1; cFEStateNetMessenger_onInputBegin passes it to func_001A6C40
 };
 
-CHECK_OFFSET(cFEStateNetMessenger, unk_048, 0x048);
-CHECK_OFFSET(cFEStateNetMessenger, mLastPollFrame, 0x04C);
-CHECK_OFFSET(cFEStateNetMessenger, mMessageHintFrame, 0x050);
-CHECK_OFFSET(cFEStateNetMessenger, mChallengeHintFrame, 0x054);
-CHECK_OFFSET(cFEStateNetMessenger, unk_058, 0x058);
-CHECK_OFFSET(cFEStateNetMessenger, mszMaskedText, 0x05C);
-CHECK_OFFSET(cFEStateNetMessenger, mustrMessage, 0x09C);
-CHECK_OFFSET(cFEStateNetMessenger, unk_49C, 0x49C);
-CHECK_OFFSET(cFEStateNetMessenger, unk_59C, 0x59C);
-CHECK_OFFSET(cFEStateNetMessenger, mpKeyboard, 0x69C);
-CHECK_OFFSET(cFEStateNetMessenger, mpPopup, 0x6A0);
-CHECK_OFFSET(cFEStateNetMessenger, mpKeyboardText, 0x6A4);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6A8, 0x6A8);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6AC, 0x6AC);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6B0, 0x6B0);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6B4, 0x6B4);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6B8, 0x6B8);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6BC, 0x6BC);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6C0, 0x6C0);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6C4, 0x6C4);
-CHECK_OFFSET(cFEStateNetMessenger, mMsgList, 0x6C8);
 CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);
 CHECK_OFFSET(cFEStateNetMessenger, mszSearchName, 0x6D4);
 CHECK_OFFSET(cFEStateNetMessenger, unk_6D8, 0x6D8);

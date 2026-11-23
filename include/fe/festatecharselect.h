@@ -10,6 +10,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -67,7 +68,7 @@ struct cUIIcon;
 struct cUIMenu;
 struct cTextureElement;
 
-struct cFEStateCheatCharSelect : public cUIState {
+struct cFEStateCheatCharSelect : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateCheatCharSelect_vtbl (ctor), cFEState_vtbl (dtor)
     // cFEStateCheatCharSelect's notes on cUIState's fields:
@@ -77,7 +78,7 @@ struct cFEStateCheatCharSelect : public cUIState {
     //   mpParentState: [U] the ctor looks the pictures up in its texture bank (+0x58)
     //   mpScreen: [U] onCreateScreen stores the screen
     //   mUserNum: [U] onWidgetEvent sets that player's cheat character
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateCheatCharSelect
     cUIThing* mpArrowPrev;          // 0x048 [O][P] (preview 0x44); [U] widget "arrowleft" (shown from 7 entries)
     cUIThing* mpArrowNext;          // 0x04C [O][P]; [U] widget "arrowright"

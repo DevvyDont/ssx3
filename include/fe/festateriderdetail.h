@@ -24,7 +24,7 @@
 // rest cUIState_* / cListNode_* / cFEState_onLoseFocus), mUserNum, mCtrlBits and mbDraw3D 0 again; the destructor
 // stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
 // 4 bytes).
 // Evidence tags:
 //   [R] retail's constructor / destructor and allocation size;
@@ -35,13 +35,14 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cFEStateRiderDetail : public cUIState {
+struct cFEStateRiderDetail : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateRiderDetail_vtbl (ctor), cFEState_vtbl (dtor)
     // cFEStateRiderDetail's notes on cUIState's fields:
@@ -50,7 +51,7 @@ struct cFEStateRiderDetail : public cUIState {
     //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum)
     //   mpScreen: [U] onCreateScreen stores the screen; onGainFocus / onPreRender2D find the Option_N objects on it
     //   mUserNum: [U] the player-interface calls (character, name, cheat character) and the user's front-end rider
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateCharSetup (fe/festatecharsetup.h, 0x50)
     int mbIsFirst;                  // 0x048 [O] (bool); [U] cFEStateCharSetup_updateWidget / show3DCharacter set it,
                                     //       updateCharacter3DPos clears it (both called on this class)

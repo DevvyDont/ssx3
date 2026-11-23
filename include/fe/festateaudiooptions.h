@@ -21,7 +21,7 @@
 // cFEState_onLoseFocus, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu; the rest cUIState_* / cListNode_*); the
 // destructor stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
 // 4 bytes).
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
@@ -32,6 +32,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -41,7 +42,7 @@ struct cUIText;
 struct cUIIcon;
 struct cTextureElement;
 
-struct cFEStateAudioOptions : public cUIState {
+struct cFEStateAudioOptions : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateAudioOptions_vtbl (both ctors), cFEState_vtbl (dtor)
     // cFEStateAudioOptions's notes on cUIState's fields:
@@ -49,7 +50,7 @@ struct cFEStateAudioOptions : public cUIState {
     //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum)
     //   mpScreen: [U] onCreateScreen stores the screen; onWidgetEvent looks objects up on it
     //   mUserNum: [U] the BE calls take it (lb)
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateAudioOptions
     cUIText* mpHelpText;            // 0x048 [O]; [R] 0
     cUIIcon* mpChecks[4];           // 0x04C [O]; [R] all 0 (loop from 3 down); [U] onWidgetCreate stores the four mode

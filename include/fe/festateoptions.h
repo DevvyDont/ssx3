@@ -20,7 +20,7 @@
 // onWidgetEvent, 20 onWidgetMenu, 21 onWidgetPair; vtables.tsv stops at slot 10), mHashName 0x1F and mVibrateOn 0;
 // the destructor stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [P] the July 2003 preview (layout_xlate: 0x44 -> 0x48, 0x4C -> 0x50, from onUpdate and the ctor);
@@ -29,20 +29,23 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/fememcard.h"
+#include "fe/festate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cFEStateOptionsController : public cUIState {
+struct cFEStateOptionsController : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateOptionsController_vtbl (ctors), cFEState_vtbl (dtor); [P]
     // cFEStateOptionsController's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "22control" through it
     //   mpScreen: [U] onCreateScreen stores the screen; updateWidget / displayPadConfig look the lists and pictures up
     //       on it
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateOptionsController
     int mTimer[2];                  // 0x048 [O][P] (preview 0x44); [U] onCreateScreen zeroes both; onWidgetEvent sets
                                     //       pad i's to 60 when its test buzz starts, onUpdate counts it down
@@ -75,16 +78,15 @@ CHECK_SIZE(cFEStateOptionsController, 0x54);
 // ctor runs cFEMemCard_cFEMemCard2(this, pEngine, cardMode), then stores cFEStateOptionsDeviceSelect_vtbl (0x0046C228,
 // 47 slots: 1 dtor, 4 onCreateScreen, 19 onWidgetEvent, 20 onWidgetMenu, 26 displayStatus, 33 updateDone, 37
 // hideActionButtons, 38 hideDeleteButton, 39 hideMainButton; the rest cFEMemCard's / cOVState's / cUIState's) and
-// mHashName 33. The cListNode / cUIState / cOVState / cFEMemCard parts are written out inline with fe/fememcard.h's
-// member names (see that header for the inherited fields' full evidence; only this class's own uses are added).
-// Evidence tags: [R] retail's constructors / allocation size; [U] how retail code uses the field (this class's
+// mHashName 33. fe/fememcard.h has the inherited fields' evidence; only this class's own uses are noted here. Evidence
+// tags: [R] retail's constructors / allocation size; [U] how retail code uses the field (this class's
 // methods, asm and C in src/fe/festateoptions.cpp); [O] SSX On Tour's DWARF (class cFEStateOptionsDeviceSelect /
 // cFEMemCard). (No preview evidence: layout_xlate finds no paired cFEStateOptionsDeviceSelect methods.)
 
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cFEStateOptionsDeviceSelect : public cUIState {
+struct cFEStateOptionsDeviceSelect : public cFEMemCard {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateOptionsDeviceSelect_vtbl (both ctors, and the dtor first); [U] onWidgetEvent / displayStatus call
     //       slots 44 (confirmLoad), 47 (displayStatusPopup)
@@ -92,55 +94,23 @@ struct cFEStateOptionsDeviceSelect : public cUIState {
     //   mpEngine: [U] onCreateScreen adds the screen; updateDone asks its cFECustom for the next state and pushes it
     //       on its stack (+0x18)
     //   mpScreen: [U] onCreateScreen / displayStatus / the hide* functions look widgets up
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
-    int mAllowPauseMenu;            // 0x04C [O] (bool); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O] (bool)
-    int mRemovePDA;                 // 0x054 [O] (bool); [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " into it (one sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] 0 (cFEMemCard_cFEMemCard2)
-    // --- cFEMemCard (fe/fememcard.h, 0x22C)
-    unsigned short mLastLoadFileName[64]; // 0x09C [O] ([32] in On Tour); [R] initFEMemCard clears the first char
-    unsigned short mFileName[64];   // 0x11C [O] ([32] in On Tour); [R] initFEMemCard writes the "%s-%s*" file pattern
-    int mPopupType;                 // 0x19C [O]
-    int mProcessingKeyboard;        // 0x1A0 [O] (bool)
-    cKeyboardPopup* mpKeyboard;     // 0x1A4 [O]
-    int mIsProcessing;              // 0x1A8 [O] (bool); [U] onWidgetEvent tests it (busy) and sets it with a save /
-                                    //       delete
-    int mIsDone;                    // 0x1AC [O] (bool); [U] updateDone tests it
-    int mIsLoadWait;                // 0x1B0 [O] (bool)
-    int mIsLoadDoneOK;              // 0x1B4 [O] (bool); [U] updateDone tests it
-    int mIsInvalidConfirmed;        // 0x1B8 [O] (bool)
-    int mType;                      // 0x1BC [O]; [R] the ctor's cardMode (cFEMemCard_cFEMemCard2); [U] onCreateScreen /
-                                    //       onWidgetEvent / displayStatus / updateDone test 1 / 2
-    int mState;                     // 0x1C0 [O]; [U] onWidgetEvent sets 3 (saving), 4 (deleting), 6 (done)
-    int mSlot;                      // 0x1C4 [O]; [U] onWidgetEvent stores the widget's slot (also the manager's
-                                    //       mFileCursor)
-    int mIsReplayAlloc;             // 0x1C8 [O] (bool)
-    int mPlayerIdx;                 // 0x1CC [O]
-    char* mpReadBuffer;             // 0x1D0 [O]
-    char* mpStartReadBuffer;        // 0x1D4 [O]
-    int mIsManagerStarted;          // 0x1D8 [O] (bool)
-    int mIsSavePressed;             // 0x1DC [O] (bool); [U] onWidgetEvent sets it with a save
-    int mIsDeletePressed;           // 0x1E0 [O] (bool)
-    int mIsCancelPressed;           // 0x1E4 [O] (bool); [U] onWidgetEvent sets it (back); updateDone tests it
-    int mIsFormatPressed;           // 0x1E8 [O] (bool)
-    int mIsRetryPressed;            // 0x1EC [O] (bool)
-    int mIsOverwriteOK;             // 0x1F0 [O] (bool)
-    int mIsLoadPressed;             // 0x1F4 [O] (bool)
-    int mDoNextMemCard;             // 0x1F8 [O] (bool)
-    int mDoPrevMemCard;             // 0x1FC [O] (bool)
-    int mLoadBEData;                // 0x200 [O] (bool)
-    int mAutoLoadOn;                // 0x204 [O] (bool)
-    int mAutoSaveOn;                // 0x208 [O] (bool)
-    int mFirstCheck;                // 0x20C [O] (bool)
-    int mIsStatusPopupOn;           // 0x210 [O] (bool)
-    int mScreenStatus;              // 0x214 [O]; [U] onWidgetEvent acts only in display state 3; displayStatus tests it
-    cFEPopupConfirm* mStatusPopup;  // 0x218 [O]
-    int mLastSelectedDevice;        // 0x21C [O]; [U] displayStatus stores the device it shows
-    int mDeleteButtonActive;        // 0x220 [O] (bool); [U] hideDeleteButton stores it
-    int mMainButtonActive;          // 0x224 [O] (bool); [U] hideMainButton stores it; onWidgetEvent tests it
-    int mBufferState;               // 0x228 [O] eBufferState
+    // cOVState (fe/ovstate.h, 0x9C)
+    // cFEStateOptionsDeviceSelect's notes on cOVState's fields:
+    //   mOVID: [O] tOVStateEnum; [R] 0 (cFEMemCard_cFEMemCard2)
+    // cFEMemCard (fe/fememcard.h, 0x22C)
+    // cFEStateOptionsDeviceSelect's notes on cFEMemCard's fields:
+    //   mIsProcessing: [U] onWidgetEvent tests it (busy) and sets it with a save / delete
+    //   mIsDone: [U] updateDone tests it
+    //   mIsLoadDoneOK: [U] updateDone tests it
+    //   mType: [U] onCreateScreen / onWidgetEvent / displayStatus / updateDone test 1 / 2
+    //   mState: [U] onWidgetEvent sets 3 (saving), 4 (deleting), 6 (done)
+    //   mSlot: [U] onWidgetEvent stores the widget's slot (also the manager's mFileCursor)
+    //   mIsSavePressed: [U] onWidgetEvent sets it with a save
+    //   mIsCancelPressed: [U] onWidgetEvent sets it (back); updateDone tests it
+    //   mScreenStatus: [U] onWidgetEvent acts only in display state 3; displayStatus tests it
+    //   mLastSelectedDevice: [U] displayStatus stores the device it shows
+    //   mDeleteButtonActive: [U] hideDeleteButton stores it
+    //   mMainButtonActive: [U] hideMainButton stores it; onWidgetEvent tests it
     // --- cFEStateOptionsDeviceSelect
     int mIsSaveScreen;              // 0x22C [O] (bool); [R] the ctor's isSave; [U] onCreateScreen / onWidgetEvent /
                                     //       onWidgetMenu / displayStatus / the hide* functions pick save or load by it
@@ -151,50 +121,6 @@ struct cFEStateOptionsDeviceSelect : public cUIState {
                                     //       clears it on back (event 6)
 };
 
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mDoneTransition, 0x048);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mRemovePDA, 0x054);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mszChatBuff, 0x058);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mOVID, 0x098);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mLastLoadFileName, 0x09C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mFileName, 0x11C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mPopupType, 0x19C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mProcessingKeyboard, 0x1A0);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpKeyboard, 0x1A4);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsProcessing, 0x1A8);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsDone, 0x1AC);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsLoadWait, 0x1B0);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsLoadDoneOK, 0x1B4);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsInvalidConfirmed, 0x1B8);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mType, 0x1BC);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mState, 0x1C0);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mSlot, 0x1C4);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsReplayAlloc, 0x1C8);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mPlayerIdx, 0x1CC);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpReadBuffer, 0x1D0);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpStartReadBuffer, 0x1D4);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsManagerStarted, 0x1D8);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsSavePressed, 0x1DC);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsDeletePressed, 0x1E0);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsCancelPressed, 0x1E4);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsFormatPressed, 0x1E8);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsRetryPressed, 0x1EC);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsOverwriteOK, 0x1F0);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsLoadPressed, 0x1F4);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mDoNextMemCard, 0x1F8);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mDoPrevMemCard, 0x1FC);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mLoadBEData, 0x200);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mAutoLoadOn, 0x204);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mAutoSaveOn, 0x208);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mFirstCheck, 0x20C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsStatusPopupOn, 0x210);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mScreenStatus, 0x214);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mStatusPopup, 0x218);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mLastSelectedDevice, 0x21C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mDeleteButtonActive, 0x220);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mMainButtonActive, 0x224);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mBufferState, 0x228);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsSaveScreen, 0x22C);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mbOnline, 0x230);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsHidden, 0x234);
@@ -223,7 +149,7 @@ CHECK_SIZE(cFEStateOptionsDeviceSelect, 0x23C);
 // bodies in src/fe/festateoptions.cpp and the asm); [O] SSX On Tour's DWARF (class cFEStateOptions, cUIState): names,
 // types and order. (No preview evidence: layout_xlate pairs only the dtor, which touches the vptr.)
 
-struct cFEStateOptions : public cUIState {
+struct cFEStateOptions : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateOptions_vtbl (both ctors), cFEState_vtbl (dtor); [U] onPopupEvent calls slot 19 (onWidgetEvent)
     //       with entry "8"
@@ -234,7 +160,7 @@ struct cFEStateOptions : public cUIState {
     //   mAttrState: [U] onWidgetEvent ORs in 0x80 (pending delete) when the menu is left
     //   mpScreen: [U] onCreateScreen stores the screen; onWidgetEvent plays its "TransitionOut", onPopupEvent looks
     //       entry "8" up on it
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateOptions
     int mbToSaveOptionScreen;       // 0x048 [O] (On Tour: bool at 0x48; a word in retail); [U] onCreateScreen 0;
                                     //       onPopupEvent stores the save-options answer (1 yes, 0 no); onWidgetEvent
@@ -270,7 +196,7 @@ CHECK_SIZE(cFEStateOptions, 0x54);
 // clears the byte at 0x48; the dtor stores cFEState_vtbl and runs cUIState__cUIState.
 // Evidence tags as for cFEStateOptions (no preview evidence: layout_xlate pairs only the ctor's vptr store).
 
-struct cFEStateOptionsSaveLoad : public cUIState {
+struct cFEStateOptionsSaveLoad : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateOptionsSaveLoad_vtbl (both ctors), cFEState_vtbl (dtor)
     // cFEStateOptionsSaveLoad's notes on cUIState's fields:
@@ -280,7 +206,7 @@ struct cFEStateOptionsSaveLoad : public cUIState {
     //   mpScreen: [U] onCreateScreen stores the screen; onPreRender2D looks entries up on it; onPopupEvent plays its
     //       "TransitionOut"
     //   mUserNum: [U] onPopupEvent: the profile to reset (lb; at least 0)
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateOptionsSaveLoad
     signed char mSaveLoadCurrentCtrl; // 0x048 [O] cFEStateOptionsSaveLoad::mCurrentCtrl (char; renamed here because
                                     //       the flat struct already has cUIState::mCurrentCtrl at 0x14); [R] ctor

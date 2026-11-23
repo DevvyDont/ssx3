@@ -25,9 +25,8 @@
 // 26 displayStatus, 33 updateDone, 37 cFEStateMemCard_hideActionButtons (hideActionButtons, empty); the rest cFEMemCard's / cOVState's /
 // cUIState's); the dtor stores it, clears mInstance and runs cFEMemCard__cFEMemCard.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The base classes cOVState / cFEMemCard
-// are written out inline with fe/fememcard.h's member names (see that header for the full evidence of the inherited
-// fields; only this class's own uses are added here).
+// Derives from cFEMemCard (fe/fememcard.h); its own members at their retail offsets. fe/fememcard.h has the inherited
+// fields' evidence; only this class's own uses are noted here.
 // Evidence tags:
 //   [R] retail's constructor func_00186A08 / destructor and allocation size;
 //   [U] how retail code uses the field (this class's methods and static callbacks, asm and C);
@@ -37,6 +36,8 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/fememcard.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -45,7 +46,7 @@ struct cUIScreen;
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cFEStateMemCard : public cUIState {
+struct cFEStateMemCard : public cFEMemCard {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateMemCard_vtbl, stored over cFEMemCard_vtbl by both ctors; the dtor stores it first; [U] the
     //       callbacks call getPopup (slot 36) / cancel (41)
@@ -53,58 +54,22 @@ struct cFEStateMemCard : public cUIState {
     //   mpEngine: [U] onCreateScreen adds "06cAutoload"; startProfileRead / startSettingsRead
     //   mpScreen: [U] onCreateScreen stores it; onUpdate / displayStatus / startProfileRead look "mc messages" and "!"
     //       up on it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
-    int mAllowPauseMenu;            // 0x04C [O] (bool); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O] (bool)
-    int mRemovePDA;                 // 0x054 [O] (bool); [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " into it (one sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] 0 (cFEMemCard_cFEMemCard2)
-    // --- cFEMemCard (fe/fememcard.h, 0x22C)
-    unsigned short mLastLoadFileName[64]; // 0x09C [O] ([32] in On Tour); [U] callbackLoadReady has the card write the
-                                    //       title of the file at the cursor here
-    unsigned short mFileName[64];   // 0x11C [O] ([32] in On Tour); [U] startProfileRead passes it to the manager
-    int mPopupType;                 // 0x19C [O]; [R] func_00186A08 sets 26; [U] the callbacks set 4 / 9 / 20 / 21 before
-                                    //       getPopup; onPopupEvent switches on it
-    int mProcessingKeyboard;        // 0x1A0 [O] (bool)
-    cKeyboardPopup* mpKeyboard;     // 0x1A4 [O]
-    int mIsProcessing;              // 0x1A8 [O] (bool); [U] startProfileRead / startSettingsRead set it
-    int mIsDone;                    // 0x1AC [O] (bool); [U] updateDone / exitScreen test and set it
-    int mIsLoadWait;                // 0x1B0 [O] (bool)
-    int mIsLoadDoneOK;              // 0x1B4 [O] (bool)
-    int mIsInvalidConfirmed;        // 0x1B8 [O] (bool)
-    int mType;                      // 0x1BC [O]; [R] 2 (settings: cFEMemCard_cFEMemCard2(self, pEngine, 2)); [U]
-                                    //       startProfileRead sets 0, startSettingsRead 2; updateFreeSpaceCheckState and
-                                    //       callbackCardsChecked read it
-    int mState;                     // 0x1C0 [O]; [U] the reads set 5 (loading); callbackFileNotFound / exitScreen set 6
-                                    //       (done); onUpdate tests 6
-    int mSlot;                      // 0x1C4 [O]; [U] startProfileRead / startSettingsRead store the file slot
-    int mIsReplayAlloc;             // 0x1C8 [O] (bool)
-    int mPlayerIdx;                 // 0x1CC [O]
-    char* mpReadBuffer;             // 0x1D0 [O]
-    char* mpStartReadBuffer;        // 0x1D4 [O]
-    int mIsManagerStarted;          // 0x1D8 [O] (bool)
-    int mIsSavePressed;             // 0x1DC [O] (bool)
-    int mIsDeletePressed;           // 0x1E0 [O] (bool)
-    int mIsCancelPressed;           // 0x1E4 [O] (bool)
-    int mIsFormatPressed;           // 0x1E8 [O] (bool)
-    int mIsRetryPressed;            // 0x1EC [O] (bool); [U] onPopupEvent sets it (popup 20, cancel)
-    int mIsOverwriteOK;             // 0x1F0 [O] (bool)
-    int mIsLoadPressed;             // 0x1F4 [O] (bool)
-    int mDoNextMemCard;             // 0x1F8 [O] (bool)
-    int mDoPrevMemCard;             // 0x1FC [O] (bool)
-    int mLoadBEData;                // 0x200 [O] (bool)
-    int mAutoLoadOn;                // 0x204 [O] (bool); [R] func_00186A08 sets 1
-    int mAutoSaveOn;                // 0x208 [O] (bool)
-    int mFirstCheck;                // 0x20C [O] (bool)
-    int mIsStatusPopupOn;           // 0x210 [O] (bool)
-    int mScreenStatus;              // 0x214 [O]
-    cFEPopupConfirm* mStatusPopup;  // 0x218 [O]; [U] func_00186D60 / callbackConfirmNoFreeBlocks label its buttons
-                                    //       (slots 25 / 26)
-    int mLastSelectedDevice;        // 0x21C [O]
-    int mDeleteButtonActive;        // 0x220 [O] (bool)
-    int mMainButtonActive;          // 0x224 [O] (bool)
-    int mBufferState;               // 0x228 [O] eBufferState
+    // cOVState (fe/ovstate.h, 0x9C)
+    // cFEStateMemCard's notes on cOVState's fields:
+    //   mOVID: [O] tOVStateEnum; [R] 0 (cFEMemCard_cFEMemCard2)
+    // cFEMemCard (fe/fememcard.h, 0x22C)
+    // cFEStateMemCard's notes on cFEMemCard's fields:
+    //   mLastLoadFileName: [U] callbackLoadReady has the card write the title of the file at the cursor here
+    //   mFileName: [U] startProfileRead passes it to the manager
+    //   mPopupType: [U] the callbacks set 4 / 9 / 20 / 21 before getPopup; onPopupEvent switches on it
+    //   mIsProcessing: [U] startProfileRead / startSettingsRead set it
+    //   mIsDone: [U] updateDone / exitScreen test and set it
+    //   mType: [U] startProfileRead sets 0, startSettingsRead 2; updateFreeSpaceCheckState and callbackCardsChecked
+    //       read it
+    //   mState: [U] the reads set 5 (loading); callbackFileNotFound / exitScreen set 6 (done); onUpdate tests 6
+    //   mSlot: [U] startProfileRead / startSettingsRead store the file slot
+    //   mIsRetryPressed: [U] onPopupEvent sets it (popup 20, cancel)
+    //   mStatusPopup: [U] func_00186D60 / callbackConfirmNoFreeBlocks label its buttons (slots 25 / 26)
     // --- cFEStateMemCard
     int mMissingSavedFileTypeFlags; // 0x22C [O]; [R] -1; [U] callbackCardsChecked / callbackSysRecheckFile store the
                                     //       card's missing-file bits, callbackLoadReady tests bit 0 (profile),
@@ -120,50 +85,6 @@ struct cFEStateMemCard : public cUIState {
     int mCard1Error;                // 0x244 [O] (bool); [R] 0 (no other retail access)
 };
 
-CHECK_OFFSET(cFEStateMemCard, mDoneTransition, 0x048);
-CHECK_OFFSET(cFEStateMemCard, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cFEStateMemCard, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cFEStateMemCard, mRemovePDA, 0x054);
-CHECK_OFFSET(cFEStateMemCard, mszChatBuff, 0x058);
-CHECK_OFFSET(cFEStateMemCard, mOVID, 0x098);
-CHECK_OFFSET(cFEStateMemCard, mLastLoadFileName, 0x09C);
-CHECK_OFFSET(cFEStateMemCard, mFileName, 0x11C);
-CHECK_OFFSET(cFEStateMemCard, mPopupType, 0x19C);
-CHECK_OFFSET(cFEStateMemCard, mProcessingKeyboard, 0x1A0);
-CHECK_OFFSET(cFEStateMemCard, mpKeyboard, 0x1A4);
-CHECK_OFFSET(cFEStateMemCard, mIsProcessing, 0x1A8);
-CHECK_OFFSET(cFEStateMemCard, mIsDone, 0x1AC);
-CHECK_OFFSET(cFEStateMemCard, mIsLoadWait, 0x1B0);
-CHECK_OFFSET(cFEStateMemCard, mIsLoadDoneOK, 0x1B4);
-CHECK_OFFSET(cFEStateMemCard, mIsInvalidConfirmed, 0x1B8);
-CHECK_OFFSET(cFEStateMemCard, mType, 0x1BC);
-CHECK_OFFSET(cFEStateMemCard, mState, 0x1C0);
-CHECK_OFFSET(cFEStateMemCard, mSlot, 0x1C4);
-CHECK_OFFSET(cFEStateMemCard, mIsReplayAlloc, 0x1C8);
-CHECK_OFFSET(cFEStateMemCard, mPlayerIdx, 0x1CC);
-CHECK_OFFSET(cFEStateMemCard, mpReadBuffer, 0x1D0);
-CHECK_OFFSET(cFEStateMemCard, mpStartReadBuffer, 0x1D4);
-CHECK_OFFSET(cFEStateMemCard, mIsManagerStarted, 0x1D8);
-CHECK_OFFSET(cFEStateMemCard, mIsSavePressed, 0x1DC);
-CHECK_OFFSET(cFEStateMemCard, mIsDeletePressed, 0x1E0);
-CHECK_OFFSET(cFEStateMemCard, mIsCancelPressed, 0x1E4);
-CHECK_OFFSET(cFEStateMemCard, mIsFormatPressed, 0x1E8);
-CHECK_OFFSET(cFEStateMemCard, mIsRetryPressed, 0x1EC);
-CHECK_OFFSET(cFEStateMemCard, mIsOverwriteOK, 0x1F0);
-CHECK_OFFSET(cFEStateMemCard, mIsLoadPressed, 0x1F4);
-CHECK_OFFSET(cFEStateMemCard, mDoNextMemCard, 0x1F8);
-CHECK_OFFSET(cFEStateMemCard, mDoPrevMemCard, 0x1FC);
-CHECK_OFFSET(cFEStateMemCard, mLoadBEData, 0x200);
-CHECK_OFFSET(cFEStateMemCard, mAutoLoadOn, 0x204);
-CHECK_OFFSET(cFEStateMemCard, mAutoSaveOn, 0x208);
-CHECK_OFFSET(cFEStateMemCard, mFirstCheck, 0x20C);
-CHECK_OFFSET(cFEStateMemCard, mIsStatusPopupOn, 0x210);
-CHECK_OFFSET(cFEStateMemCard, mScreenStatus, 0x214);
-CHECK_OFFSET(cFEStateMemCard, mStatusPopup, 0x218);
-CHECK_OFFSET(cFEStateMemCard, mLastSelectedDevice, 0x21C);
-CHECK_OFFSET(cFEStateMemCard, mDeleteButtonActive, 0x220);
-CHECK_OFFSET(cFEStateMemCard, mMainButtonActive, 0x224);
-CHECK_OFFSET(cFEStateMemCard, mBufferState, 0x228);
 CHECK_OFFSET(cFEStateMemCard, mMissingSavedFileTypeFlags, 0x22C);
 CHECK_OFFSET(cFEStateMemCard, mTotalSpaceRequired, 0x230);
 CHECK_OFFSET(cFEStateMemCard, mFreespaceCheckDone, 0x234);

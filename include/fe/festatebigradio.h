@@ -22,7 +22,7 @@
 // cFEStateRequestLine_cFEStateRequestLine1; destructor cFEStateRequestLine__cFEStateRequestLine__FPv (cFEState_vtbl,
 // cUIState__cUIState).
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Note that ee-gcc's `long` is 64-bit:
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. Note that ee-gcc's `long` is 64-bit:
 // the two song masks are `unsigned long` here, as in the C bodies (`long long` is 16
 // bytes in ee-gcc).
 // Evidence tags:
@@ -33,6 +33,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -43,7 +44,7 @@ struct cUIIcon;
 struct cUIMenu;
 struct cTextureElement;
 
-struct cFEStateRequestLine : public cUIState {
+struct cFEStateRequestLine : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateRequestLine_vtbl (both ctors), cFEState_vtbl (dtor)
     // cFEStateRequestLine's notes on cUIState's fields:
@@ -51,7 +52,7 @@ struct cFEStateRequestLine : public cUIState {
     //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum) when there is a cFECustom
     //   mAttrState: [U] onPopupEvent's flag word
     //   mUserNum: [U] the BE interfaces' user index
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateRequestLine
     int mCharID;                    // 0x048 [O]; [R] cBENewPlayerInterface_getPlayerCharID(.., mUserNum)
     int mSongOrder[64];             // 0x04C [O]; [R] MEM_fill(this + 0x4C, 0, 0x100); [U] generatePlayList fills it,

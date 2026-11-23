@@ -18,7 +18,7 @@
 // onCreateScreen, 5 onDestroyScreen, 12 onUpdate, 19 onWidgetEvent, 20 onWidgetMenu), mUserNum, mCtrlBits and
 // mbDraw3D 0; the destructor stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
 // 4 bytes).
 // Evidence tags:
 //   [R] retail's constructor / destructor and allocation size;
@@ -28,13 +28,14 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cFEStateCharSetup : public cUIState {
+struct cFEStateCharSetup : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateCharSetup_vtbl (ctor), cFEState_vtbl (dtor)
     // cFEStateCharSetup's notes on cUIState's fields:
@@ -42,7 +43,7 @@ struct cFEStateCharSetup : public cUIState {
     //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum)
     //   mpScreen: [U] onCreateScreen stores the screen; the option widgets are found on it
     //   mUserNum: [U] picks the user's front-end rider and character
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateCharSetup
     int mbIsFirst;                  // 0x048 [O] (bool); [U] updateWidget / show3DCharacter set it,
                                     //       updateCharacter3DPos plays the intro animation once and clears it

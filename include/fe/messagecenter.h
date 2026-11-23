@@ -8,17 +8,18 @@
 // columns, unread-mail and FAQ icons, a scrollable "MenuFroms" menu). EA's name from the preview's linkonce sections
 // (__22cOVState_MESSAGECENTERP9cUIEngine12tOVStateEnum, _$_22cOVState_MESSAGECENTER). Size 0x180: the overlay
 // factory (cOVStateManager_triggerOverlay, fe/ovtemplatedialog.cpp) does operator new(0x180, "cOVStateOverlay") and
-// calls the out-of-line constructor cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(this, pEngine, 0x22). Base cOVState (fe/ovstate.h, 0x9C), written
-// out flat below. Retail vtable cOVState_MESSAGECENTER_vtbl (stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER after cOVState's cOVState_vtbl; destructor
+// calls the out-of-line constructor cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(this, pEngine, 0x22). Derives from
+// cOVState (fe/ovstate.h, 0x9C). Retail vtable cOVState_MESSAGECENTER_vtbl (stored by
+// cOVState_MESSAGECENTER_cOVState_MESSAGECENTER after cOVState's cOVState_vtbl; destructor
 // cOVState_MESSAGECENTER__cOVState_MESSAGECENTER in fe/all_in_one_fe).
 //
 // cOVState_ViewPopup: the popup that shows one message (screen "113ViewMessage"), pushed by
 // cOVState_MESSAGECENTER (func_001E50C8: cMemMan_alloc(0x70, "cOVState_ViewPopup") + constructor cOVState_ViewPopup_cOVState_ViewPopup(this,
-// pEngine, pParent, message, number)). Size 0x70. Base cUIState (ui/uistate.h, 0x48), written out flat (it is not a
-// cOVState: the constructor is cUIState(cUIEngine*, cUIState*) cUIState_cUIState1 and nothing stores 0x48..0x9C as
-// cOVState does). Retail vtable cOVState_ViewPopup_vtbl (destructor cOVState_ViewPopup__cOVState_ViewPopup in fe/all_in_one_fe).
+// pEngine, pParent, message, number)). Size 0x70. Base cUIState (ui/uistate.h, 0x48) (it is not a cOVState: the
+// constructor is cUIState(cUIEngine*, cUIState*) cUIState_cUIState1 and nothing stores 0x48..0x9C as cOVState does).
+// Retail vtable cOVState_ViewPopup_vtbl (destructor cOVState_ViewPopup__cOVState_ViewPopup in fe/all_in_one_fe).
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. There is no SSX On Tour DWARF for
+// Derives from cOVState (fe/ovstate.h); its own members at their retail offsets. There is no SSX On Tour DWARF for
 // these classes and the preview keeps no accessors, so the own members carry [R]/[U]
 // evidence only; widget pointers are named after the UI object onWidgetCreate binds to them (names read from the
 // retail ELF). Evidence tags:
@@ -31,6 +32,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -40,7 +42,7 @@ struct cUIThing;
 struct cUIText;
 struct cUIMenu;
 
-struct cOVState_MESSAGECENTER : public cUIState {
+struct cOVState_MESSAGECENTER : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_MESSAGECENTER_vtbl, stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER (after cOVState's
     //       cOVState_vtbl)
@@ -50,13 +52,7 @@ struct cOVState_MESSAGECENTER : public cUIState {
     //       ctor
     //   miMiscData: [U] here the opening mode: the ctor stores 0/1 (hint 7 not yet / already seen, func_001E3A30(7))
     //       or 2 (D_004A20CC set); onCreateScreen/onDestroyScreen/onGainFocus switch on it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] cOVState_MESSAGECENTER_cOVState_MESSAGECENTER zeroes it (inlined cOVState ctor)
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] cOVState_MESSAGECENTER_cOVState_MESSAGECENTER stores its third argument (0x22)
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_MESSAGECENTER
     cUIThing* mpUnreadMail[8];      // 0x09C [R] ctor zeroes 8; [U] onWidgetCreate (cOVState_MESSAGECENTER_onWidgetCreate): widgets "UnreadMail%d";
                                     //       func_001E48B0/func_001E4C78 show/hide row i's
@@ -98,12 +94,6 @@ struct cOVState_MESSAGECENTER : public cUIState {
                                     //       plays its "TransitionOut" frame
 };
 
-CHECK_OFFSET(cOVState_MESSAGECENTER, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mOVID, 0x98);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpUnreadMail, 0x9C);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpFAQIcon, 0xBC);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpFrom, 0xDC);

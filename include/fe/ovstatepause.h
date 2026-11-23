@@ -25,9 +25,9 @@
 // Cancel and a ping status). Allocated 0xA4; vtable cOVState_PAUSE_ONLINE_ERROR_vtbl (0x472AB0); constructors
 // cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR (stores 0xA0 = 1, 0x9C = 0) and func_00221C80.
 //
-// All three derive from cOVState (fe/ovstate.h, 0x9C), written out flat below with the same member names.
+// All three derive from cOVState (fe/ovstate.h, 0x9C).
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
+// Derives from cOVState (fe/ovstate.h); its own members at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -38,6 +38,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -45,7 +46,7 @@ struct cUIState;
 struct cUIScreen;
 struct cUIThread;
 
-struct cOVTemplate_PauseMenu : public cUIState {
+struct cOVTemplate_PauseMenu : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVTemplate_PauseMenu_vtbl (or a subclass's), stored after cOVState_vtbl by the constructors
     // cOVTemplate_PauseMenu's notes on cUIState's fields:
@@ -53,13 +54,7 @@ struct cOVTemplate_PauseMenu : public cUIState {
     //       GetHashValue32("cOVTemplate_PauseMenu")
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] unused by the template (it keeps its own mpPauseScreen at 0xC0)
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (1-6)
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVTemplate_PauseMenu (On Tour: size 0xD8)
     int mPauseMenuOptions[8];       // 0x09C [O]; [U] the subclasses' onCreateScreen copy the option ids here;
                                     //       onCreateScreen / onGainTransition / onGainFocus index row i
@@ -87,12 +82,6 @@ struct cOVTemplate_PauseMenu : public cUIState {
                                     //       id (1-6); onUpdate pulses the mail icon for 1, 2 and 4
 };
 
-CHECK_OFFSET(cOVTemplate_PauseMenu, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVTemplate_PauseMenu, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVTemplate_PauseMenu, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVTemplate_PauseMenu, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVTemplate_PauseMenu, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVTemplate_PauseMenu, mOVID, 0x98);
 CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuOptions, 0x9C);
 CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuNumOptions, 0xBC);
 CHECK_OFFSET(cOVTemplate_PauseMenu, mpPauseScreen, 0xC0);
@@ -106,42 +95,24 @@ CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuType, 0x110);
 CHECK_SIZE(cOVTemplate_PauseMenu, 0x114);
 
 // cOVState_PAUSE_OPTIONS: cOVState with no members of its own.
-struct cOVState_PAUSE_OPTIONS : public cUIState {
+struct cOVState_PAUSE_OPTIONS : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_PAUSE_OPTIONS_vtbl, stored after cOVState_vtbl by cOVState_PAUSE_OPTIONS_cOVState_PAUSE_OPTIONS
     // cOVState_PAUSE_OPTIONS's notes on cUIState's fields:
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the options screen; every widget lookup goes through it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (7)
+    // cOVState (fe/ovstate.h, 0x9C)
 };
 
-CHECK_OFFSET(cOVState_PAUSE_OPTIONS, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_PAUSE_OPTIONS, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_PAUSE_OPTIONS, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_PAUSE_OPTIONS, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_PAUSE_OPTIONS, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_PAUSE_OPTIONS, mOVID, 0x98);
 CHECK_SIZE(cOVState_PAUSE_OPTIONS, 0x9C);
 
-struct cOVState_PAUSE_ONLINE_ERROR : public cUIState {
+struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_PAUSE_ONLINE_ERROR_vtbl, stored after cOVState_vtbl by the constructors
     // cOVState_PAUSE_ONLINE_ERROR's notes on cUIState's fields:
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the screen; every widget lookup goes through it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (39)
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_PAUSE_ONLINE_ERROR (On Tour: size 0x98)
     unsigned int miStartPingTick;   // 0x09C [O]; [R] the constructor zeroes it; [U] onCreateScreen stores the app
                                     //       tick (cAppMan_TheAppMan + 0x18) when it pings the server; onUpdate tests
@@ -151,12 +122,6 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cUIState {
                                     //       displayPingReceived test it
 };
 
-CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mOVID, 0x98);
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, miStartPingTick, 0x9C);
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mbShouldDisplayAuxInfo, 0xA0);
 CHECK_SIZE(cOVState_PAUSE_ONLINE_ERROR, 0xA4);

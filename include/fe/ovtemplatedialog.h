@@ -17,9 +17,8 @@
 // D_00474748 kind 3, id 27 D_00474670 kind 4, id 28 D_00474598 kind 5, id 38 D_004744C0 kind 6 (On Tour's
 // QUITCHALLENGE / QUITCOMPETITION / RESTART / RESTARTCHALLENGE / GIVEUP / SAVEPROMPT are all 0x94 = the
 // template's size). So cOVState_QUIT_onUpdate and the template's methods take a cOVTemplate_Dialog*.
-// Base cOVState (fe/ovstate.h, 0x9C), written out flat below with the same member names.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
+// Derives from cOVState (fe/ovstate.h, 0x9C); its own members at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -30,36 +29,27 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVTemplate_Dialog : public cUIState {
+struct cOVTemplate_Dialog : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] D_00474C58 or a dialog overlay's vtable, stored after cOVState_vtbl by the constructors
     // cOVTemplate_Dialog's notes on cUIState's fields:
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the dialog screen; widget lookups go through it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O]; [R] zeroed; [U] onWidgetEvent sets it
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (23-28, 38)
+    // cOVState (fe/ovstate.h, 0x9C)
+    // cOVTemplate_Dialog's notes on cOVState's fields:
+    //   mRemovePDA: [U] onWidgetEvent sets it
     // --- cOVTemplate_Dialog (On Tour: size 0x94)
     int mDialogType;                // 0x09C [O]; [R] the factory and cOVState_QUIT_cOVState_QUIT store the dialog kind (0-6, see
                                     //       above); [U] onCreateScreen / onWidgetCreate / onWidgetEvent switch on it
 };
 
-CHECK_OFFSET(cOVTemplate_Dialog, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVTemplate_Dialog, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVTemplate_Dialog, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVTemplate_Dialog, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVTemplate_Dialog, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVTemplate_Dialog, mOVID, 0x98);
 CHECK_OFFSET(cOVTemplate_Dialog, mDialogType, 0x9C);
 CHECK_SIZE(cOVTemplate_Dialog, 0xA0);
 
@@ -107,31 +97,18 @@ CHECK_SIZE(cPDATemplate, 0x48);
 // inlined cOVState ctor (mOVID, the three bools, cOVState_vtbl, mszChatBuff = " "), then stores cOVTemplate_Simple_vtbl
 // (D_00474D30, 25 slots: 1 dtor, 4 onCreateScreen, 19 onWidgetEvent, 20 onWidgetMenu, 25 cOVState_allowPauseMenu); the
 // dtor stores cOVState_vtbl and runs cUIState__cUIState.
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The cOVState part is written out with
-// fe/ovstate.h's names (see there for the inherited fields' full evidence).
-// Evidence tags: [R] retail's ctors / dtor; [P] the July 2003 preview (fe/ovstate.h); [U] how retail code uses the
-// field; [O] SSX On Tour's DWARF (builds/x/ontour_kor/dwarf/types.h): names, types and order.
+// Derives from cOVState (fe/ovstate.h); its own members at their retail offsets. fe/ovstate.h has the inherited fields'
+// full evidence. Evidence tags: [R] retail's ctors / dtor; [P] the July 2003 preview (fe/ovstate.h); [U] how retail
+// code uses the field; [O] SSX On Tour's DWARF (builds/x/ontour_kor/dwarf/types.h): names, types and order.
 
-struct cOVTemplate_Simple : public cUIState {
+struct cOVTemplate_Simple : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVTemplate_Simple_vtbl D_00474D30 (ctor), cOVState_vtbl (dtor)
     // cOVTemplate_Simple's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen looks "overlayMenu" and "overlayOpt0" ... "overlayOpt4" up on it
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O] (On Tour: bool at 0x48); [R] the ctors zero it
-    int mAllowPauseMenu;            // 0x04C [O][P] (fe/ovstate.h); [R] the ctors zero it
-    int mRestoreCutSceneMode;       // 0x050 [O] (bool); [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O] (bool); [R] the ctors zero it
-    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " into it (one sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's id
+    // cOVState (fe/ovstate.h, 0x9C)
 };
 
-CHECK_OFFSET(cOVTemplate_Simple, mDoneTransition, 0x048);
-CHECK_OFFSET(cOVTemplate_Simple, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cOVTemplate_Simple, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cOVTemplate_Simple, mRemovePDA, 0x054);
-CHECK_OFFSET(cOVTemplate_Simple, mszChatBuff, 0x058);
-CHECK_OFFSET(cOVTemplate_Simple, mOVID, 0x098);
 CHECK_SIZE(cOVTemplate_Simple, 0x9C);
 
 #endif /* FE_OVTEMPLATEDIALOG_H */

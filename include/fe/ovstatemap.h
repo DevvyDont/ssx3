@@ -14,10 +14,10 @@
 //   [O] On Tour 0x1B0 = cOVState 0x90 + 0x120 of own members; with retail's 4-byte bools (mbSessionUnlocked[8] alone
 //       grows by 0x18) On Tour's 20 members in On Tour's order fill retail's 0x9C ... 0x1D4 exactly, and every one but
 //       mHighlightAlpha / mHighlightDiff is confirmed by retail use.
-// Base: cOVState (fe/ovstate.h, 0x9C) : cUIState : cListNode (vptr at 0x8), written out flat (the retail ctors run
-// cUIState_cUIState and inline cOVState's).
+// Base: cOVState (fe/ovstate.h, 0x9C) : cUIState : cListNode (vptr at 0x8); the retail ctors run cUIState_cUIState and
+// inline cOVState's.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
+// Derives from cOVState (fe/ovstate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors and allocation size;
 //   [P] the July 2003 preview's inline accessors (inherited fields only);
@@ -27,6 +27,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 #include "ui/uithing.h"
 
 struct cListNode;
@@ -35,22 +36,16 @@ struct cUIState;
 struct cUIScreen;
 struct cUIIcon;
 
-struct cOVState_MAP : public cUIState {
+struct cOVState_MAP : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_MAP_vtbl (0x00473320, 25 slots), stored by cOVState_MAP_cOVState_MAP / func_002212C8 / the
     //       inlined ctor in cOVStateManager_triggerOverlay after cOVState_vtbl
     // cOVState_MAP's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "38session" to it; onWidgetEvent pops its state stack
     //   mAttrState: [U] onWidgetEvent sets mode 7 + the pending-delete bit (lw/sw the word)
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O] (bool); [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O] (bool); [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " (str_sp_b) into it
-                                    //       (one sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's id (32 from
-                                    //       cOVStateManager_triggerOverlay)
+    // cOVState (fe/ovstate.h, 0x9C)
+    // cOVState_MAP's notes on cOVState's fields:
+    //   mOVID: [O] tOVStateEnum; [R] the ctor's id (32 from cOVStateManager_triggerOverlay)
     // --- cOVState_MAP
     int mbSessionUnlocked[8];       // 0x09C [O] (bool[8]); [U] onGainTransition stores one flag per session point (a
                                     //       view int flags[8] at 0x9C)
@@ -90,12 +85,6 @@ struct cOVState_MAP : public cUIState {
     float mIndicatorSizeDiff;       // 0x1D0 [O]; [U] onCreateScreen sets 0.16; onUpdate flips its sign at the limits
 };
 
-CHECK_OFFSET(cOVState_MAP, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_MAP, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_MAP, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_MAP, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_MAP, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_MAP, mOVID, 0x98);
 CHECK_OFFSET(cOVState_MAP, mbSessionUnlocked, 0x9C);
 CHECK_OFFSET(cOVState_MAP, mSessionPopupActive, 0xBC);
 CHECK_OFFSET(cOVState_MAP, mSessionPointsOnPic, 0xC0);

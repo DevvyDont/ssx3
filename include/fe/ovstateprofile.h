@@ -17,9 +17,8 @@
 // The ctor cOVState_PROFILE(cUIEngine*, unsigned char ucActiveControl, tOVStateEnum ov) runs
 // cFEMemCard_cFEMemCard(this, pEngine, 0).
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The base classes cOVState / cFEMemCard
-// are written out inline with fe/fememcard.h's member names (see that header for the full evidence of the inherited
-// fields; only this class's own uses are added here).
+// Derives from cFEMemCard (fe/fememcard.h); its own members at their retail offsets. fe/fememcard.h has the inherited
+// fields' evidence; only this class's own uses are noted here.
 // Evidence tags:
 //   [R] retail's constructors and allocation sizes;
 //   [P] the July 2003 preview's inline accessors (inherited fields only);
@@ -29,6 +28,8 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/fememcard.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -37,7 +38,7 @@ struct cUIScreen;
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cOVState_PROFILE : public cUIState {
+struct cOVState_PROFILE : public cFEMemCard {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_PROFILE_vtbl (0x00472928, 47 slots), stored by cOVState_PROFILE_cOVState_PROFILE over
     //       cFEMemCard_vtbl
@@ -47,57 +48,26 @@ struct cOVState_PROFILE : public cUIState {
     //   mAttrState: tAttrState (EA: 2 bytes; lw/sw the word); [U] cOVState_PAUSE_OPTIONS_onWidgetEvent sets mode 1
     //       (bits 8-13) after constructing it
     //   mpScreen: [U] onCreateScreen keeps the "121Profilesave_pda" screen here; every widget lookup
-    // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
-    int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
-    int mRestoreCutSceneMode;       // 0x050 [O] (bool); [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                 // 0x054 [O] (bool); [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " (str_sp_b) into it
-                                    //       (one sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] 0 (cFEMemCard_cFEMemCard)
-    // --- cFEMemCard (fe/fememcard.h, 0x22C)
-    unsigned short mLastLoadFileName[64]; // 0x09C [O] ([32] in On Tour); [R] initFEMemCard clears the first char
-    unsigned short mFileName[64];   // 0x11C [O] ([32] in On Tour); [R] initFEMemCard writes the "%s-%s*" file pattern
-    int mPopupType;                 // 0x19C [O]; [U] onWidgetEvent clears it when it opens the name keyboard
-    int mProcessingKeyboard;        // 0x1A0 [O] (bool); [U] onWidgetEvent sets it when it pushes the name keyboard
-    cKeyboardPopup* mpKeyboard;     // 0x1A4 [O]; [U] onWidgetEvent creates the "Keyboard" cKeyboardPopup (1092 bytes)
-                                    //       once and reads its text (+0x74); onDestroyScreen clears it
-    int mIsProcessing;              // 0x1A8 [O] (bool); [U] onWidgetEvent tests / sets it
-    int mIsDone;                    // 0x1AC [O] (bool); [U] updateDone tests and sets it
-    int mIsLoadWait;                // 0x1B0 [O] (bool); [U] cFEMemCard_readStart / onUpdate
-    int mIsLoadDoneOK;              // 0x1B4 [O] (bool); [U] cFEMemCard_readStart / callbackReadSuccess
-    int mIsInvalidConfirmed;        // 0x1B8 [O] (bool); [R] initFEMemCard clears it
-    int mType;                      // 0x1BC [O]; [R] 0 (profile): the ctor runs cFEMemCard_cFEMemCard(self, pEngine,
-                                    //       0)
-    int mState;                     // 0x1C0 [O]; [U] onWidgetEvent / displayStatus test it
-    int mSlot;                      // 0x1C4 [O]; [U] onWidgetEvent stores the picked item's misc data
-    int mIsReplayAlloc;             // 0x1C8 [O] (bool); [U] cFEMemCard_writeStart sets it for a replay save
-    int mPlayerIdx;                 // 0x1CC [O]; [R] the ctor clears it, then stores the player (0/1) using the
-                                    //       opening controller; [U] onWidgetEvent names that profile
-    char* mpReadBuffer;             // 0x1D0 [O]; [U] cFEMemCard_createReadBuffer / callbackReadUpdate
-    char* mpStartReadBuffer;        // 0x1D4 [O]; [U] cFEMemCard_createReadBuffer / readDone / onDestroyScreen
-    int mIsManagerStarted;          // 0x1D8 [O] (bool); [U] cFEMemCard_onUpdate
-    int mIsSavePressed;             // 0x1DC [O] (bool); [U] onWidgetEvent sets it with the save
-    int mIsDeletePressed;           // 0x1E0 [O] (bool); [U] returned by cFEMemCard_isDeletePressed
-    int mIsCancelPressed;           // 0x1E4 [O] (bool); [U] onWidgetEvent sets it (back)
-    int mIsFormatPressed;           // 0x1E8 [O] (bool); [U] returned by cFEMemCard_isFormatPressed
-    int mIsRetryPressed;            // 0x1EC [O] (bool); [U] cFEMemCard_callbackIsRetryPressed
-    int mIsOverwriteOK;             // 0x1F0 [O] (bool); [U] returned by cFEMemCard_isOWPressed
-    int mIsLoadPressed;             // 0x1F4 [O] (bool); [U] returned by cFEMemCard_isLoadPressed
-    int mDoNextMemCard;             // 0x1F8 [O] (bool); [U] cFEMemCard_isNextMCPressed / onInputBegin
-    int mDoPrevMemCard;             // 0x1FC [O] (bool); [U] cFEMemCard_isPrevMCPressed / onInputBegin
-    int mLoadBEData;                // 0x200 [O] (bool); [U] cFEMemCard_readStart / callbackReadUpdate
-    int mAutoLoadOn;                // 0x204 [O] (bool); [U] cFEMemCard_callbackReadSuccess / onPopupEvent
-    int mAutoSaveOn;                // 0x208 [O] (bool); [U] cFEMemCard_callbackSaveSuccess exits without a popup when
-                                    //       set
-    int mFirstCheck;                // 0x20C [O] (bool); [R] initFEMemCard clears it
-    int mIsStatusPopupOn;           // 0x210 [O] (bool); [U] cFEMemCard_displayStatusPopup / getPopup
-    int mScreenStatus;              // 0x214 [O]; [U] displayStatus / displayOn test 3; onWidgetEvent tests it
-    cFEPopupConfirm* mStatusPopup;  // 0x218 [O]; [U] cFEMemCard_getPopup allocates it
-    int mLastSelectedDevice;        // 0x21C [O]; [R] initFEMemCard clears it; [U] displayOn stores the device it shows
-    int mDeleteButtonActive;        // 0x220 [O] (bool); [U] hideDeleteButton stores !hide
-    int mMainButtonActive;          // 0x224 [O] (bool); [U] hideMainButton stores !hide
-    int mBufferState;               // 0x228 [O] eBufferState; [U] cFEMemCard_createReadBuffer / readStart / readDone
+    // cOVState (fe/ovstate.h, 0x9C)
+    // cOVState_PROFILE's notes on cOVState's fields:
+    //   mOVID: [O] tOVStateEnum; [R] 0 (cFEMemCard_cFEMemCard)
+    // cFEMemCard (fe/fememcard.h, 0x22C)
+    // cOVState_PROFILE's notes on cFEMemCard's fields:
+    //   mPopupType: [U] onWidgetEvent clears it when it opens the name keyboard
+    //   mProcessingKeyboard: [U] onWidgetEvent sets it when it pushes the name keyboard
+    //   mpKeyboard: [U] onWidgetEvent creates the "Keyboard" cKeyboardPopup (1092 bytes) once and reads its text
+    //       (+0x74); onDestroyScreen clears it
+    //   mIsProcessing: [U] onWidgetEvent tests / sets it
+    //   mIsDone: [U] updateDone tests and sets it
+    //   mState: [U] onWidgetEvent / displayStatus test it
+    //   mSlot: [U] onWidgetEvent stores the picked item's misc data
+    //   mPlayerIdx: [U] onWidgetEvent names that profile
+    //   mIsSavePressed: [U] onWidgetEvent sets it with the save
+    //   mIsCancelPressed: [U] onWidgetEvent sets it (back)
+    //   mScreenStatus: [U] displayStatus / displayOn test 3; onWidgetEvent tests it
+    //   mLastSelectedDevice: [U] displayOn stores the device it shows
+    //   mDeleteButtonActive: [U] hideDeleteButton stores !hide
+    //   mMainButtonActive: [U] hideMainButton stores !hide
     // --- cOVState_PROFILE
     int mIsOn;                      // 0x22C [O] (bool); [R] the ctor clears it; [U] displayStatus sets it once the
                                     //       card state is nonzero; hideActionButtons keeps the buttons hidden while it
@@ -113,50 +83,6 @@ struct cOVState_PROFILE : public cUIState {
                                     //       0x18 from cOVTemplate_Dialog_onWidgetEvent); [U] updateDone tests 0x18
 };
 
-CHECK_OFFSET(cOVState_PROFILE, mDoneTransition, 0x48);
-CHECK_OFFSET(cOVState_PROFILE, mAllowPauseMenu, 0x4C);
-CHECK_OFFSET(cOVState_PROFILE, mRestoreCutSceneMode, 0x50);
-CHECK_OFFSET(cOVState_PROFILE, mRemovePDA, 0x54);
-CHECK_OFFSET(cOVState_PROFILE, mszChatBuff, 0x58);
-CHECK_OFFSET(cOVState_PROFILE, mOVID, 0x98);
-CHECK_OFFSET(cOVState_PROFILE, mLastLoadFileName, 0x9C);
-CHECK_OFFSET(cOVState_PROFILE, mFileName, 0x11C);
-CHECK_OFFSET(cOVState_PROFILE, mPopupType, 0x19C);
-CHECK_OFFSET(cOVState_PROFILE, mProcessingKeyboard, 0x1A0);
-CHECK_OFFSET(cOVState_PROFILE, mpKeyboard, 0x1A4);
-CHECK_OFFSET(cOVState_PROFILE, mIsProcessing, 0x1A8);
-CHECK_OFFSET(cOVState_PROFILE, mIsDone, 0x1AC);
-CHECK_OFFSET(cOVState_PROFILE, mIsLoadWait, 0x1B0);
-CHECK_OFFSET(cOVState_PROFILE, mIsLoadDoneOK, 0x1B4);
-CHECK_OFFSET(cOVState_PROFILE, mIsInvalidConfirmed, 0x1B8);
-CHECK_OFFSET(cOVState_PROFILE, mType, 0x1BC);
-CHECK_OFFSET(cOVState_PROFILE, mState, 0x1C0);
-CHECK_OFFSET(cOVState_PROFILE, mSlot, 0x1C4);
-CHECK_OFFSET(cOVState_PROFILE, mIsReplayAlloc, 0x1C8);
-CHECK_OFFSET(cOVState_PROFILE, mPlayerIdx, 0x1CC);
-CHECK_OFFSET(cOVState_PROFILE, mpReadBuffer, 0x1D0);
-CHECK_OFFSET(cOVState_PROFILE, mpStartReadBuffer, 0x1D4);
-CHECK_OFFSET(cOVState_PROFILE, mIsManagerStarted, 0x1D8);
-CHECK_OFFSET(cOVState_PROFILE, mIsSavePressed, 0x1DC);
-CHECK_OFFSET(cOVState_PROFILE, mIsDeletePressed, 0x1E0);
-CHECK_OFFSET(cOVState_PROFILE, mIsCancelPressed, 0x1E4);
-CHECK_OFFSET(cOVState_PROFILE, mIsFormatPressed, 0x1E8);
-CHECK_OFFSET(cOVState_PROFILE, mIsRetryPressed, 0x1EC);
-CHECK_OFFSET(cOVState_PROFILE, mIsOverwriteOK, 0x1F0);
-CHECK_OFFSET(cOVState_PROFILE, mIsLoadPressed, 0x1F4);
-CHECK_OFFSET(cOVState_PROFILE, mDoNextMemCard, 0x1F8);
-CHECK_OFFSET(cOVState_PROFILE, mDoPrevMemCard, 0x1FC);
-CHECK_OFFSET(cOVState_PROFILE, mLoadBEData, 0x200);
-CHECK_OFFSET(cOVState_PROFILE, mAutoLoadOn, 0x204);
-CHECK_OFFSET(cOVState_PROFILE, mAutoSaveOn, 0x208);
-CHECK_OFFSET(cOVState_PROFILE, mFirstCheck, 0x20C);
-CHECK_OFFSET(cOVState_PROFILE, mIsStatusPopupOn, 0x210);
-CHECK_OFFSET(cOVState_PROFILE, mScreenStatus, 0x214);
-CHECK_OFFSET(cOVState_PROFILE, mStatusPopup, 0x218);
-CHECK_OFFSET(cOVState_PROFILE, mLastSelectedDevice, 0x21C);
-CHECK_OFFSET(cOVState_PROFILE, mDeleteButtonActive, 0x220);
-CHECK_OFFSET(cOVState_PROFILE, mMainButtonActive, 0x224);
-CHECK_OFFSET(cOVState_PROFILE, mBufferState, 0x228);
 CHECK_OFFSET(cOVState_PROFILE, mIsOn, 0x22C);
 CHECK_OFFSET(cOVState_PROFILE, mIsHidden, 0x230);
 CHECK_OFFSET(cOVState_PROFILE, mTitle, 0x234);

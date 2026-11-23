@@ -22,13 +22,14 @@
 // match retail. (builds/x/v2/name_map_v2.tsv pairs 0x00473FB0 with TOURNAMENT_STANDINGS by position only; the screen
 // and override set put TOURNAMENT_STANDINGS at 0x00473C50.)
 //
-// Derives from cUIState (ui/uistate.h); its cOVState part (0x9C) is written out with fe/ovstate.h's member names.
+// Derives from cOVState (fe/ovstate.h); its cOVState part (0x9C) is written out with fe/ovstate.h's member names.
 // Evidence tags: [R] retail constructors / destructors and the "cOVStateOverlay" allocation sizes; [P] the preview
 // build; [U] retail usage (C in src/fe/fepopupmisc.cpp and the asm); [O] SSX On Tour's DWARF (its cOVState is
 // 0x90 and its bools are 1 byte, so only member names and order are used).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/ovstate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -39,26 +40,14 @@ struct cUIScreen;
 // onCreateScreen cOVState_HEAT_STANDINGS_onCreateScreen, 6 onGainFocus cOVState_HEAT_STANDINGS_onGainFocus, 8 onInputBegin cOVState_HEAT_STANDINGS_onInputBegin, 12 onUpdate cOVState_HEAT_STANDINGS_onUpdate,
 // 19 onWidgetEvent cOVState_HEAT_STANDINGS_onWidgetEvent, 20 onWidgetMenu cOVState_HEAT_STANDINGS_onWidgetMenu.
 
-struct cOVState_HEAT_STANDINGS : public cUIState {
+struct cOVState_HEAT_STANDINGS : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS stores cOVState_HEAT_STANDINGS_vtbl after cOVState_vtbl
     // cOVState_HEAT_STANDINGS's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
-    // --- cOVState (fe/ovstate.h, 0x9C; same member names)
-    int mDoneTransition;             // 0x048 [O]; [R] ctor zeroes it
-    int mAllowPauseMenu;             // 0x04C [P] allowPauseMenu; [R] ctor zeroes it
-    int mRestoreCutSceneMode;        // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                  // 0x054 [O]; [R] ctor zeroes it
-    char mszChatBuff[0x40];          // 0x058 [O]; [R] ctor copies " " into it (sh)
-    int mOVID;                       // 0x098 [O] tOVStateEnum; [R] ctor stores its id argument
+    // cOVState (fe/ovstate.h, 0x9C)
 };
 
-CHECK_OFFSET(cOVState_HEAT_STANDINGS, mDoneTransition, 0x048);
-CHECK_OFFSET(cOVState_HEAT_STANDINGS, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cOVState_HEAT_STANDINGS, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cOVState_HEAT_STANDINGS, mRemovePDA, 0x054);
-CHECK_OFFSET(cOVState_HEAT_STANDINGS, mszChatBuff, 0x058);
-CHECK_OFFSET(cOVState_HEAT_STANDINGS, mOVID, 0x098);
 CHECK_SIZE(cOVState_HEAT_STANDINGS, 0x9C);
 
 // cOVState_FINAL_STANDINGS (0xA0: cMemMan size for type 11). Slots: 4 onCreateScreen cOVState_FINAL_STANDINGS_onCreateScreen, 6 onGainFocus
@@ -66,30 +55,18 @@ CHECK_SIZE(cOVState_HEAT_STANDINGS, 0x9C);
 // onUpdate
 // cOVState_FINAL_STANDINGS_onUpdate, 18 onWidgetCreate cOVState_FINAL_STANDINGS_onWidgetCreate, 19 onWidgetEvent cOVState_FINAL_STANDINGS_onWidgetEvent, 20 onWidgetMenu cOVState_FINAL_STANDINGS_onWidgetMenu.
 
-struct cOVState_FINAL_STANDINGS : public cUIState {
+struct cOVState_FINAL_STANDINGS : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS stores cOVState_FINAL_STANDINGS_vtbl after cOVState_vtbl
     // cOVState_FINAL_STANDINGS's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
-    // --- cOVState (fe/ovstate.h, 0x9C; same member names)
-    int mDoneTransition;             // 0x048 [O]; [R] ctor zeroes it
-    int mAllowPauseMenu;             // 0x04C [P] allowPauseMenu; [R] ctor zeroes it
-    int mRestoreCutSceneMode;        // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                  // 0x054 [O]; [R] ctor zeroes it
-    char mszChatBuff[0x40];          // 0x058 [O]; [R] ctor copies " " into it (sh)
-    int mOVID;                       // 0x098 [O] tOVStateEnum; [R] ctor stores its id argument
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_FINAL_STANDINGS
     int doInit;                      // 0x09C [O] bool doInit (On Tour 0x90, its only member); [U] onCreateScreen
                                      //       cOVState_FINAL_STANDINGS_onCreateScreen sets it, onGainTransition cOVState_FINAL_STANDINGS_onGainTransition tests and clears it
                                      //       (lw/sw: a word, as retail bools are)
 };
 
-CHECK_OFFSET(cOVState_FINAL_STANDINGS, mDoneTransition, 0x048);
-CHECK_OFFSET(cOVState_FINAL_STANDINGS, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cOVState_FINAL_STANDINGS, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cOVState_FINAL_STANDINGS, mRemovePDA, 0x054);
-CHECK_OFFSET(cOVState_FINAL_STANDINGS, mszChatBuff, 0x058);
-CHECK_OFFSET(cOVState_FINAL_STANDINGS, mOVID, 0x098);
 CHECK_OFFSET(cOVState_FINAL_STANDINGS, doInit, 0x09C);
 CHECK_SIZE(cOVState_FINAL_STANDINGS, 0xA0);
 
@@ -98,18 +75,12 @@ CHECK_SIZE(cOVState_FINAL_STANDINGS, 0xA0);
 // cOVState_RACE_FINISHOV_onWidgetMenu, 24 handleEvent cOVState_RACE_FINISHOV_handleEvent. Preview: _vt$22cOVState_RACE_FINISHOV (overrides 4 / 13 / 19 / 22 in
 // its 23-slot layout = retail 4 / 12 / 19 / 24).
 
-struct cOVState_RACE_FINISHOV : public cUIState {
+struct cOVState_RACE_FINISHOV : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV stores cOVState_RACE_FINISHOV_vtbl after cOVState_vtbl
     // cOVState_RACE_FINISHOV's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
-    // --- cOVState (fe/ovstate.h, 0x9C; same member names)
-    int mDoneTransition;             // 0x048 [O]; [R] ctor zeroes it
-    int mAllowPauseMenu;             // 0x04C [P] allowPauseMenu; [R] ctor zeroes it
-    int mRestoreCutSceneMode;        // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                  // 0x054 [O]; [R] ctor zeroes it
-    char mszChatBuff[0x40];          // 0x058 [O]; [R] ctor copies " " into it (sh)
-    int mOVID;                       // 0x098 [O] tOVStateEnum; [R] ctor stores its id argument
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_RACE_FINISHOV
     float unk_09C;                   // 0x09C [U] onUpdate (slot 12) advances it by 1/60 per frame (lwc1/swc1);
                                      //       onCreateScreen zeroes it
@@ -118,12 +89,6 @@ struct cOVState_RACE_FINISHOV : public cUIState {
                                      //       it. Preview: the same store of 1 in its ctor and the same handleEvent
 };
 
-CHECK_OFFSET(cOVState_RACE_FINISHOV, mDoneTransition, 0x048);
-CHECK_OFFSET(cOVState_RACE_FINISHOV, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cOVState_RACE_FINISHOV, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cOVState_RACE_FINISHOV, mRemovePDA, 0x054);
-CHECK_OFFSET(cOVState_RACE_FINISHOV, mszChatBuff, 0x058);
-CHECK_OFFSET(cOVState_RACE_FINISHOV, mOVID, 0x098);
 CHECK_OFFSET(cOVState_RACE_FINISHOV, unk_09C, 0x09C);
 CHECK_OFFSET(cOVState_RACE_FINISHOV, unk_0A0, 0x0A0);
 CHECK_SIZE(cOVState_RACE_FINISHOV, 0xA4);
@@ -133,19 +98,13 @@ CHECK_SIZE(cOVState_RACE_FINISHOV, 0xA4);
 // 20 onWidgetMenu cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu, 24 handleEvent cOVState_BASSSP_QUAL_FINISHOV_handleEvent. Preview: _vt$29cOVState_BASSSP_QUAL_FINISHOV (same
 // override set as RACE_FINISHOV; its onCreateScreen labels the runs by heat).
 
-struct cOVState_BASSSP_QUAL_FINISHOV : public cUIState {
+struct cOVState_BASSSP_QUAL_FINISHOV : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV stores cOVState_BASSSP_QUAL_FINISHOV_vtbl
     //       after cOVState_vtbl
     // cOVState_BASSSP_QUAL_FINISHOV's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
-    // --- cOVState (fe/ovstate.h, 0x9C; same member names)
-    int mDoneTransition;             // 0x048 [O]; [R] ctor zeroes it
-    int mAllowPauseMenu;             // 0x04C [P] allowPauseMenu; [R] ctor zeroes it
-    int mRestoreCutSceneMode;        // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                  // 0x054 [O]; [R] ctor zeroes it
-    char mszChatBuff[0x40];          // 0x058 [O]; [R] ctor copies " " into it (sh)
-    int mOVID;                       // 0x098 [O] tOVStateEnum; [R] ctor stores its id argument
+    // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_BASSSP_QUAL_FINISHOV
     float unk_09C;                   // 0x09C [U] onUpdate (slot 12) advances it by 1/60 per frame (lwc1/swc1);
                                      //       onCreateScreen zeroes it
@@ -154,12 +113,6 @@ struct cOVState_BASSSP_QUAL_FINISHOV : public cUIState {
                                      //       it. Preview: the same store of 1 in its ctor and the same handleEvent
 };
 
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mDoneTransition, 0x048);
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mRemovePDA, 0x054);
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mszChatBuff, 0x058);
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mOVID, 0x098);
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, unk_09C, 0x09C);
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, unk_0A0, 0x0A0);
 CHECK_SIZE(cOVState_BASSSP_QUAL_FINISHOV, 0xA4);
@@ -168,26 +121,14 @@ CHECK_SIZE(cOVState_BASSSP_QUAL_FINISHOV, 0xA4);
 // cOVState_TOURNAMENT_STANDINGS_onWidgetEvent. Preview: _vt$29cOVState_TOURNAMENT_STANDINGS overrides the same two slots, screen
 // "109MultiplayerStandings".
 
-struct cOVState_TOURNAMENT_STANDINGS : public cUIState {
+struct cOVState_TOURNAMENT_STANDINGS : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS stores D_00473C50 after cOVState_vtbl
     // cOVState_TOURNAMENT_STANDINGS's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
-    // --- cOVState (fe/ovstate.h, 0x9C; same member names)
-    int mDoneTransition;             // 0x048 [O]; [R] ctor zeroes it
-    int mAllowPauseMenu;             // 0x04C [P] allowPauseMenu; [R] ctor zeroes it
-    int mRestoreCutSceneMode;        // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
-    int mRemovePDA;                  // 0x054 [O]; [R] ctor zeroes it
-    char mszChatBuff[0x40];          // 0x058 [O]; [R] ctor copies " " into it (sh)
-    int mOVID;                       // 0x098 [O] tOVStateEnum; [R] ctor stores its id argument
+    // cOVState (fe/ovstate.h, 0x9C)
 };
 
-CHECK_OFFSET(cOVState_TOURNAMENT_STANDINGS, mDoneTransition, 0x048);
-CHECK_OFFSET(cOVState_TOURNAMENT_STANDINGS, mAllowPauseMenu, 0x04C);
-CHECK_OFFSET(cOVState_TOURNAMENT_STANDINGS, mRestoreCutSceneMode, 0x050);
-CHECK_OFFSET(cOVState_TOURNAMENT_STANDINGS, mRemovePDA, 0x054);
-CHECK_OFFSET(cOVState_TOURNAMENT_STANDINGS, mszChatBuff, 0x058);
-CHECK_OFFSET(cOVState_TOURNAMENT_STANDINGS, mOVID, 0x098);
 CHECK_SIZE(cOVState_TOURNAMENT_STANDINGS, 0x9C);
 
 #endif /* FE_OVSTATEEVENTRESULTS_H */

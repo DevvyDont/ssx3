@@ -21,7 +21,7 @@
 // onPopupEvent, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu); the destructor puts cFEState_vtbl back and
 // calls cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
 // 4 bytes; the C bodies' `*(bool*)` reads compile to lw).
 // Evidence tags:
 //   [R] retail's constructor cFEStateCharEquip_cFEStateCharEquip / destructor cFEStateCharEquip__cFEStateCharEquip;
@@ -31,6 +31,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 #include "util/list.h"
 #include "bx/math3d.h"
 
@@ -44,7 +45,7 @@ struct cUIIcon;
 struct cUIMenu;
 struct cTextureElement;
 
-struct cFEStateCharEquip : public cUIState {
+struct cFEStateCharEquip : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateCharEquip_vtbl (ctor; dtor first), cFEState_vtbl (dtor)
     // cFEStateCharEquip's notes on cUIState's fields:
@@ -53,7 +54,7 @@ struct cFEStateCharEquip : public cUIState {
     //   mAttrState: [U] onPopupEvent clears / sets bit 3 (mVisible) while its buy popup is up (lw/sw)
     //   mScreens: [U] onUpdate: cList_first(&mScreens)
     //   mUserNum: [U] passed to the BE player / economy / shop interfaces and cFERiderManager everywhere
-    // --- cFEState (On Tour: size 0x48, no data)
+    // cFEState (fe/festate.h, 0x48)
     // --- cFEStateCharEquip
     cUIText* mpTitleText;           // 0x048 [O]; [R] 0; [U] onWidgetCreate "title_equip_character" (kT_CMNBuyGear /
                                     //       kT_CMNEquipGear)
