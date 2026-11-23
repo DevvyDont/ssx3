@@ -208,8 +208,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
     switch (event) {
     case 5: {
         cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory);
-        void* nextState = vt[4].fn(vthis(factory, vt[4]), self, item->mMiscData);
+        void* nextState = factory->getNextState((cUIState*)self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         cFEStateCharSetup_show3DCharacter(self, 0);
@@ -217,8 +216,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
     }
     case 6: {
         cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory);
-        void* nextState = vt[5].fn(vthis(factory, vt[5]), self, item->mMiscData);
+        void* nextState = factory->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             cFEStateCharSetup_show3DCharacter(self, 0);

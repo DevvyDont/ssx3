@@ -206,9 +206,8 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
         return;
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-    char* obj = (char*)self->mpEngine->mpCustom;
-    sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-    void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
+    cUICustomInterface* obj = self->mpEngine->mpCustom;
+    void* nextState = obj->getNextState((cUIState*)self, w->mMiscData);
     if (nextState != 0) {
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     }
@@ -305,9 +304,8 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         case 17: {
             self->bToNextState = 1;
             cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-            char* obj = (char*)self->mpEngine->mpCustom;
-            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-            void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), 6);
+            cUICustomInterface* obj = self->mpEngine->mpCustom;
+            void* nextState = obj->getNextState((cUIState*)self, 6);
             if (nextState != 0) {
                 cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
             }
@@ -675,8 +673,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         }
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
         cUICustomInterface* obj = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
-        void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
+        void* nextState = obj->getNextState((cUIState*)self, w->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -684,8 +681,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
     }
     case 6: {
         cUICustomInterface* obj = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), 0);
+        void* nextState = obj->getPrevState((cUIState*)self, 0);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }

@@ -149,11 +149,6 @@ struct sVEii_F270 {
     short index;
     int (*fn)(void*, int);
 };
-struct sVEr_F270 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 // $gp-relative default sound player (the unit declares it later as sDefObj_1FF0).
 extern cUISoundInterface gUISoundNull_F270 __asm__("gUISoundNull");
 
@@ -177,7 +172,7 @@ static inline void CallV_F270(char* o, int slot, int a)
 
 static inline void Play_F270(cUISoundInterface* snd, int id)
 {
-    ((sVEntry<void (void*, int)>*)VPTR_OF(cUISoundInterface, snd))[2].fn(vthis(snd, ((sVEntry<void (void*, int)>*)VPTR_OF(cUISoundInterface, snd))[2]), id);
+    snd->playSound(id);
 }
 
 struct sGallery_F270 {
@@ -231,9 +226,8 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
             }
         }
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
-        char* mgr = (char*)self->mpEngine->mpCustom;
-        sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
-        void* backState = vt[5].fn(vthis(mgr, vt[5]), ((char*)self), self->mStoreNum >= 0);
+        cUICustomInterface* mgr = self->mpEngine->mpCustom;
+        void* backState = mgr->getPrevState((cUIState*)self, self->mStoreNum >= 0);
         cUIStateStack_push(&self->mpEngine->mStateStack, backState);
         return 1;
     }

@@ -343,9 +343,8 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
     }
     switch (msg) {
     case 6: {
-        void* obj = (void*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }

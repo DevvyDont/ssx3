@@ -79,18 +79,16 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(cFEStateSelectMultip
     }
     switch (msg) {
     case 5: {
-        void* obj = (void*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[4].fn(vthis(obj, vt[4]), self, item->mMiscData);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getNextState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
     case 6: {
-        void* obj = (void*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }

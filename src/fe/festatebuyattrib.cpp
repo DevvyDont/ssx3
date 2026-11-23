@@ -243,7 +243,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
-                ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2]), 4);
+                sound->playSound(4);
         }
         break;
     case 6:
@@ -254,9 +254,8 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)o->mVtbl;
             vt[7].fn(vthis(o, vt[7]), 1);
         } else {
-            char* mgr = (char*)self->mpEngine->mpCustom;
-            sVEntry<void*(void*, void*, void*)>* vt = *(sVEntry<void*(void*, void*, void*)>**)(mgr + 4);
-            void* nextState = vt[5].fn(vthis(mgr, vt[5]), ((char*)self), *(void**)(obj + 0x18));
+            cUICustomInterface* mgr = self->mpEngine->mpCustom;
+            void* nextState = mgr->getPrevState((cUIState*)self, (int)*(void**)(obj + 0x18));
             if (nextState != 0) {
                 int frame = cUIScreen_getFrameByLabel(self->mpAttribScreen, GetHashValue32(str_TransitionOut_b));
                 if (frame != 0xFFFF)
@@ -290,7 +289,7 @@ static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, p))[2].fn(vthis(p, ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, p))[2]), msg);
+        p->playSound(msg);
 }
 
 static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
@@ -787,8 +786,7 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
         break;
     case 6: {
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
+        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -941,7 +939,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)
-        ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)VPTR_OF(cUISoundInterface, sound))[2]), msg);
+        sound->playSound(msg);
     return handled;
 }
 #endif

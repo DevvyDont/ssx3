@@ -1796,12 +1796,6 @@ struct sVE_18C2A0 {
 };
 
 
-struct sVE_18C2A0p {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
-
 static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s); }
 
 /**
@@ -1835,9 +1829,8 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
     }
     case 6: {
         iface->submit();
-        char* obj = (char*)self->mpEngine->mpCustom;
-        sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
-        void* nextState = vt2[5].fn(vthis(obj, vt2[5]), ((char*)self), widget->mMiscData);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -2146,12 +2139,6 @@ extern char str_4lb[];
 extern int D_004A14DC;
 
 
-struct sVE_18CA10p {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
-
 static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s); }
 
 /**
@@ -2187,9 +2174,8 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
     }
     case 6: {
         iface->submit();
-        char* obj = (char*)self->mpEngine->mpCustom;
-        sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
-        void* nextState = vt2[5].fn(vthis(obj, vt2[5]), ((char*)self), widget->mMiscData);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -2696,9 +2682,8 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
         feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, 1);
         cFERider_purge(feRider);
         cFERider_init(feRider, 1, 0, 0);
-        char* obj = (char*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt2 = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-        void* x = vt2[4].fn(vthis(obj, vt2[4]), ((char*)self), (1 << self->mSaveLoadCurrentCtrl) | 0x100);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* x = obj->getNextState((cUIState*)self, (1 << self->mSaveLoadCurrentCtrl) | 0x100);
         if (x != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, x);
         }
@@ -2763,9 +2748,8 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
             if (widgetId > 3) {
                 widgetId |= 1 << self->mCurrentCtrl;
             }
-            char* obj = (char*)self->mpEngine->mpCustom;
-            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-            void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), widgetId);
+            cUICustomInterface* obj = self->mpEngine->mpCustom;
+            void* nextState = obj->getNextState((cUIState*)self, widgetId);
             if (nextState != 0) {
                 cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             }
@@ -2773,9 +2757,8 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
         break;
     }
     case 6: {
-        char* obj = (char*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), widget->mMiscData);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -3429,8 +3412,7 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
             mode = 2;
         }
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, mode);
+        void* nextState = obj->getPrevState((cUIState*)self, mode);
         if (nextState != 0) {
             cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
         }

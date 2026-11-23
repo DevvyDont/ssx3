@@ -422,9 +422,8 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* item, int msg)
 {
     if (((void*)item) != 0 && msg == 6) {
-        void* obj = (void*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, 36);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, 36);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }

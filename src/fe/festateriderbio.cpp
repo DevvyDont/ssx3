@@ -294,9 +294,8 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
                 cFEStateCharSetup_show3DCharacter(((char*)self), 0);
             }
         } else {
-            char* obj = (char*)self->mpEngine->mpCustom;
-            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-            void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), sub);
+            cUICustomInterface* obj = self->mpEngine->mpCustom;
+            void* nextState = obj->getNextState((cUIState*)self, sub);
             if (nextState != 0) {
                 cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             }
@@ -305,9 +304,8 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         break;
     }
     case 6: {
-        char* obj = (char*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), item->mMiscData);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             cFEStateCharSetup_show3DCharacter(((char*)self), 0);

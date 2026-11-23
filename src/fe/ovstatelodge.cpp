@@ -1140,9 +1140,8 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
     case 5:
         if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
                           self->mCharID, self->mPeakNum, item->mMiscData) != 0) {
-            void* obj = (void*)self->mpEngine->mpCustom;
-            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-            void* nextState = vt[4].fn(vthis(obj, vt[4]), self, (self->mPeakNum << 16) | item->mMiscData);
+            cUICustomInterface* obj = self->mpEngine->mpCustom;
+            void* nextState = obj->getNextState((cUIState*)self, (self->mPeakNum << 16) | item->mMiscData);
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
@@ -1154,9 +1153,8 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
                 ((sVEntry<void(void*, int)>*)listItem->mVtbl)[9].fn(vthis(listItem, ((sVEntry<void(void*, int)>*)listItem->mVtbl)[9]), 0);
             }
         }
-        void* obj = (void*)self->mpEngine->mpCustom;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, id);
+        cUICustomInterface* obj = self->mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)self, id);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }

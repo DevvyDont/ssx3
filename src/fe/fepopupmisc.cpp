@@ -299,12 +299,6 @@ extern char str_hl_up[];
 extern char str_hl_down[];
 extern char str_hl_right[];
 
-struct sVEm_F050 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 extern cUISoundInterface gUISoundNull;
 
 struct sVEi_F050 {
@@ -328,7 +322,7 @@ static inline void sound_F050(cFEPopupScreenPos* s, int msg)
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        ((sVEm_F050*)VPTR_OF(cUISoundInterface, p))[2].fn(vthis(p, ((sVEm_F050*)VPTR_OF(cUISoundInterface, p))[2]), msg);
+        p->playSound(msg);
 }
 
 static inline void playFrame_F050(cFEPopupScreenPos* s, char* name)
