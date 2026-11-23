@@ -2570,7 +2570,7 @@ void pathREAD_float_2(void* dst, void* src) __asm__("pathREAD_float");
 extern "C" void cPath_populateNode(cPath* self, void* src, tPathNode* dst)
 {
     pathREAD_t3Vector(dst, src);
-    pathREAD_float_2((char*)dst + 0xC, (char*)src + 0xC);
+    pathREAD_float_2(&dst->Len, (char*)src + 0xC);
 }
 #endif
 

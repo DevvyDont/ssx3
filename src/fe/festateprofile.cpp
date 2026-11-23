@@ -77,14 +77,14 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
         cUICustomInterface* custom = self->mpEngine->mpCustom;
         void* nextState = custom->getNextState((cUIState*)self, menu->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         cUICustomInterface* custom = self->mpEngine->mpCustom;
         void* nextState = custom->getPrevState((cUIState*)self, menu->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 1: {
@@ -880,7 +880,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
             cUICustomInterface* frontEnd = self->mpEngine->mpCustom;
             void* nextState = frontEnd->getPrevState((cUIState*)self, self->mType);
             if (nextState != 0)
-                cUIStateStack_pushCheck((char*)self->mpEngine + 0x18, nextState);
+                cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
         } else if (sel == 1) {
             cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -894,7 +894,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
         } else if (sel == 2) {
             gInLodge = 0;
             void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), self->mpEngine);
-            cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+            cUIStateStack_push(&self->mpEngine->mStateStack, st);
         }
     }
     self->mIsDone = 1;

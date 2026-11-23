@@ -3689,20 +3689,20 @@ extern int D_004A3940;
 extern "C" void cPS2MemCard_CleanUp(cPS2MemCard* pS2MemCard)
 {
     cPS2MemCard* self = pS2MemCard;
-    if (*(int*)((char*)self + 0x40) != 0) {
+    if (self->unk_040 != 0) {
         D_004A3940 = 0;
         sceMcSync(0, 0, &D_004A3940);
         if (D_004A3940 == -1) {
             self->unk_17C[self->mDevice].unk_10 = 1;
         }
     }
-    *(int*)((char*)self + 0x40) = 0;
+    self->unk_040 = 0;
     self->mDevice = 0;
-    *(int*)((char*)self + 0x17C) = 0;
-    *(int*)((char*)self + 0x180) = 0;
-    *(int*)((char*)self + 0x184) = 0;
-    *(int*)((char*)self + 0x188) = 0;
-    *(int*)((char*)self + 0x3C) = 0;
+    self->unk_17C[0].unk_00 = 0;
+    self->unk_17C[0].unk_04 = 0;
+    self->unk_17C[0].unk_08 = 0;
+    self->unk_17C[0].unk_0C = 0;
+    self->unk_03C = 0;
     func_002C5278((cPS2MemCard*)self);
 }
 #endif

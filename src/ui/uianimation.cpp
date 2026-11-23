@@ -157,7 +157,7 @@ extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data)
     self->mLastFrameEval = -1;
     self->mFrameNum = 0;
     self->mScreenStartFrame = 0xFFFF;
-    int** slot = (int**)((char*)self + 0x4);
+    int** slot = (int**)(&self->mpAnimChannels);
     unsigned int n = *(unsigned int*)((char*)data + 4);
     if (n != 0) {
         int* block = (int*)operator_new_tag(n * 4 + 0x10, str_UIAnimChan, 0x100, 0);

@@ -99,7 +99,7 @@ static inline void setTab_3DE0(char* t, int c)
  */
 extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
 {
-    void* screen = cList_first((cList*)(((char*)vself) + 0x24));
+    void* screen = cList_first((cList*)(&vself->mScreens));
     char* labels[9];
     char* marks[9];
     for (int i = 0; i < 9; i++) {

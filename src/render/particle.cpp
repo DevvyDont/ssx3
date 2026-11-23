@@ -1657,12 +1657,12 @@ struct sPtElem2B30 {
  */
 extern "C" void* func_00372B30(cBezierCache* self)
 {
-    new ((char*)self + 0x20) sPtElem2B30[4];
-    new ((char*)self + 0x60) sPtElem2B30[6];
-    new ((char*)self + 0xC0) sPtElem2B30[8];
-    new ((char*)self + 0x140) sPtElem2B30[4];
-    new ((char*)self + 0x180) sPtElem2B30[6];
-    new ((char*)self + 0x1E0) sPtElem2B30[8];
+    new ((char*)&self->unk_018[2]) sPtElem2B30[4];
+    new ((char*)&self->unk_060[0]) sPtElem2B30[6];
+    new ((char*)&self->unk_0B0[1]) sPtElem2B30[8];
+    new ((char*)&self->unk_110[3]) sPtElem2B30[4];
+    new ((char*)&self->unk_110[7]) sPtElem2B30[6];
+    new ((char*)&self->mFreeNrmListSP[2]) sPtElem2B30[8];
     self->m4x4CacheRecord = 0;
     self->m6x6CacheRecord = 0;
     self->m8x8CacheRecord = 0;

@@ -301,7 +301,7 @@ extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
     int i;
     for (i = 0; i < 15; i++) {
         if (((sLensEntry*)&self->mEntries[0])[i].id == -1) {
-            ((sLensEntry*)&self->mEntries[0])[i].id = func_002F2130(*(int*)((char*)self + 0xC), x, y);
+            ((sLensEntry*)&self->mEntries[0])[i].id = func_002F2130((int)self->mAttachedEmitterFX, x, y);
             ((sLensEntry*)&self->mEntries[0])[i].a = y;
             ((sLensEntry*)&self->mEntries[0])[i].b = x;
             return i;

@@ -2052,7 +2052,7 @@ static inline void vu0AddED90(t4Vector& dst, const t4Vector& b)
 extern "C" void cRollerModifier_translateMe(cRollerModifier* self, const t4Vector* off)
 {
     vu0AddED90(self->Pose.P, *off);
-    SphereTree_MoveOffset((char*)self + 0xE0, off);
+    SphereTree_MoveOffset(&self->SphTree, off);
 }
 #endif
 

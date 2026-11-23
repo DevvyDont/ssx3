@@ -94,7 +94,7 @@ static inline t4Vector vu0Add_34EF40(const t4Vector& a, const t4Vector& b)
 static inline t4Vector nodePos_34EF40(char* vself)
 {
     cFloatingNode* self = (cFloatingNode*)vself;
-    return *(t4Vector*)((char*)self->getRootTransform() + 0x30);
+    return self->getRootTransform()->row[3];
 }
 
 /**

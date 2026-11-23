@@ -80,7 +80,7 @@ static inline void showObj_001833D0(void* self, char* name, int id)
     cUIThing* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (obj != 0) {
         obj->setVisible(1);
-        *(int*)((char*)obj + 0x18) = id;
+        obj->mMiscData = id;
     }
 }
 

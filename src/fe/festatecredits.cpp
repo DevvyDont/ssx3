@@ -421,7 +421,7 @@ extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* i
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, 36);
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
     }
 }

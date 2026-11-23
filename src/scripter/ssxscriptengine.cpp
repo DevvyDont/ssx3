@@ -4067,16 +4067,16 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  */
 extern "C" void GetSSXGameEventFrame(void* self, tSSXFrameGameEvent* out)
 {
-    ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->GetValue();
-    ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->GetCustom();
-    ((int*)out)[2] = *cScriptPlayerEntity_GetChannel(self, 1)->GetValue();
-    ((int*)out)[3] = cScriptPlayerEntity_GetChannel(self, 1)->GetCustom();
-    ((int*)out)[4] = *cScriptPlayerEntity_GetChannel(self, 2)->GetValue();
-    ((int*)out)[5] = cScriptPlayerEntity_GetChannel(self, 2)->GetCustom();
-    ((int*)out)[6] = *cScriptPlayerEntity_GetChannel(self, 3)->GetValue();
-    ((int*)out)[7] = cScriptPlayerEntity_GetChannel(self, 3)->GetCustom();
-    ((int*)out)[8] = *cScriptPlayerEntity_GetChannel(self, 4)->GetValue();
-    ((int*)out)[9] = cScriptPlayerEntity_GetChannel(self, 4)->GetCustom();
+    out->numWorldScriptEvent = *cScriptPlayerEntity_GetChannel(self, 0)->GetValue();
+    out->pWorldScriptEventArray = (tWorldScriptEvent*)cScriptPlayerEntity_GetChannel(self, 0)->GetCustom();
+    out->numMusicEvent = *cScriptPlayerEntity_GetChannel(self, 1)->GetValue();
+    out->pMusicEventArray = (tMusicEvent*)cScriptPlayerEntity_GetChannel(self, 1)->GetCustom();
+    out->numSpeechEvent = *cScriptPlayerEntity_GetChannel(self, 2)->GetValue();
+    out->pSpeechEventArray = (tSpeechEvent*)cScriptPlayerEntity_GetChannel(self, 2)->GetCustom();
+    out->numSound = *cScriptPlayerEntity_GetChannel(self, 3)->GetValue();
+    out->pSoundList = (tSound*)cScriptPlayerEntity_GetChannel(self, 3)->GetCustom();
+    out->numEnviroState = *cScriptPlayerEntity_GetChannel(self, 4)->GetValue();
+    out->pEnviroStateList = (tEnviroState*)cScriptPlayerEntity_GetChannel(self, 4)->GetCustom();
 }
 #endif
 

@@ -13718,7 +13718,7 @@ extern "C" void func_001B45E8(cFEStateNetConfig* self)
     if (((cFEVObj_001B45E8*)D_004A1B78)->IsAvailable1() == 0) {
         self->miState = 0;
         func_001B5068((cFEStateNetConfig*)self, -1);
-        char* buf = (char*)self + 0x71C;
+        char* buf = (char*)&self->mustrPopupText[0];
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
         int name = Loc1B45E8(str_kT_POPUPCMNYourNetwork);
         sprintf1_1B45E8(buf, Loc1B45E8(str_kT_MEMFENotDetectedFile), D_004A1B80 + 1, name);

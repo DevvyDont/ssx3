@@ -1233,7 +1233,7 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_writeToReplayFrame);
  */
 extern "C" void cGMBigAirHandler_writeToReplayFrame(cGMBigAirHandler* self, cBxReplayFrame* stream)
 {
-    stream->write((char*)self + 0x4, 160);
+    stream->write((char*)&self->uiScore[0][0], 160);
 }
 #endif
 
@@ -1251,7 +1251,7 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_readFromReplayFrame);
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 extern "C" void cGMBigAirHandler_readFromReplayFrame(cGMBigAirHandler* self, cBxReplayFrame* stream)
 {
-    stream->read((char*)self + 0x4, 160);
+    stream->read((char*)&self->uiScore[0][0], 160);
 }
 #endif
 
@@ -1327,8 +1327,8 @@ extern "C" void cGMMPSlopeHandler_init(cGMMPSlopeHandler* self)
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
     cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getPlayerCheatCharID(player, 0);
     cGameModeHandler_pManager->iCheatCharacters[1] = cBENewPlayerInterface_getPlayerCheatCharID(player, 1);
-    *(short*)((char*)self + 0x4) = 0;
-    *(short*)((char*)self + 0x6) = 0;
+    self->LastCheckpointHit[0] = 0;
+    self->LastCheckpointHit[1] = 0;
 }
 #endif
 
@@ -1386,7 +1386,7 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_riderCheckpointHit);
  */
 extern "C" int cGMMPSlopeHandler_riderCheckpointHit(cGMMPSlopeHandler* self, int player, int secs)
 {
-    short* score = (short*)(((char*)self) + 4);
+    short* score = (short*)(&self->LastCheckpointHit[0]);
     short* mine = (short*)((char*)score + (player << 1));
     short newScore = ++*mine;
     int other = 0;
@@ -2003,7 +2003,7 @@ extern "C" void cGMMPRaceHandler_init(cGMMPRaceHandler* self)
     gm2->uiTimeLimit = 0;
     gm2->uiPointTarget = 0;
     gm2->bHasPointTarget = 0;
-    memset((char*)self + 4, 9, 40);
+    memset(&self->uiTime[0], 9, 40);
     self->cleanRiderRanksTime();
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
@@ -2299,18 +2299,18 @@ extern "C" void cGMTimeHandler_init(cGMTimeHandler* self)
         break;
     }
     int medalResult = cBEScoreInterface_getBestMedalOnTrack(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
-    *(short*)((char*)self + 0xA) = 0;
+    self->mCurrentDifficulty = 0;
     if (medalResult == 1 || medalResult == 2) {
-        *(short*)((char*)self + 0xA) = 2;
+        self->mCurrentDifficulty = 2;
     } else if (medalResult == 3) {
-        *(short*)((char*)self + 0xA) = 1;
+        self->mCurrentDifficulty = 1;
     }
-    int tierTime = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA));
+    int tierTime = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, self->mCurrentDifficulty);
     cGameModeMan* gm2 = cGameModeHandler_pManager;
-    *(int*)((char*)self + 4) = tierTime * 60;
+    self->uiTimeToBeat = tierTime * 60;
     gm2->bIsTimedEvent = 1;
-    gm2->uiTimeLimit = *(int*)((char*)self + 4);
-    gm2->uiPointTarget = *(int*)((char*)self + 4);
+    gm2->uiTimeLimit = (int)self->uiTimeToBeat;
+    gm2->uiPointTarget = (int)self->uiTimeToBeat;
     gm2->iNextHeat = 2;
     gm2->iRestoreHeat = 2;
     self->cleanRiderRanksTime();
@@ -2324,7 +2324,7 @@ extern "C" void cGMTimeHandler_init(cGMTimeHandler* self)
     gm3->unk_94 = 0;
     gm3->bIsLastHeat = 0;
     gm3->bAreResultsLocked = 0;
-    *(short*)((char*)self + 8) = 0;
+    *(short*)&self->uiTrackProgress = 0;
 }
 #endif
 
@@ -2895,17 +2895,17 @@ extern "C" void cGMPointHandler_init(cGMPointHandler* self)
         break;
     }
     unsigned int medalResult = (unsigned int)cBEScoreInterface_getBestMedalOnTrack(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
-    *(short*)((char*)self + 0xA) = 0;
+    self->mCurrentDifficulty = 0;
     if (medalResult < 3) {
-        *(short*)((char*)self + 0xA) = 2;
+        self->mCurrentDifficulty = 2;
     } else if (medalResult == 3) {
-        *(short*)((char*)self + 0xA) = 1;
+        self->mCurrentDifficulty = 1;
     }
-    int pointTarget = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA)) * 100;
+    int pointTarget = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, self->mCurrentDifficulty) * 100;
     cGameModeMan* gm2 = cGameModeHandler_pManager;
-    *(int*)((char*)self + 4) = pointTarget;
+    self->uiScoreToBeat = pointTarget;
     gm2->uiPointTarget = pointTarget;
-    int heatTimeLimit = cBENewRaceInterface_getPeakTimeLimit(race, gm2->iCurrentGameEvent, *(short*)((char*)self + 0xA));
+    int heatTimeLimit = cBENewRaceInterface_getPeakTimeLimit(race, gm2->iCurrentGameEvent, self->mCurrentDifficulty);
     cGameModeMan* gm3 = cGameModeHandler_pManager;
     gm3->iNextHeat = 2;
     gm3->iRestoreHeat = 2;
@@ -2923,7 +2923,7 @@ extern "C" void cGMPointHandler_init(cGMPointHandler* self)
     gm4->unk_94 = 0;
     gm4->bIsLastHeat = 0;
     gm4->bAreResultsLocked = 0;
-    *(short*)((char*)self + 8) = 0;
+    *(short*)&self->uiTrackProgress = 0;
 }
 #endif
 

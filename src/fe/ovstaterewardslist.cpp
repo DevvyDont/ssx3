@@ -79,14 +79,14 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
             cUICustomInterface* obj = self->mpEngine->mpCustom;
             nextState = obj->getNextState((cUIState*)self, 1);
         }
-        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }

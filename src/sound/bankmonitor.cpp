@@ -5788,7 +5788,7 @@ extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, 
         i++;
     } while (i < 0x40);
     {
-        int* categoryInts = (int*)(((char*)self) + 0x920);
+        int* categoryInts = (int*)(&self->mCategoryCount[0]);
         for (int j = 4; j >= 0; j--)
             categoryInts[j] = 0;
     }
@@ -5803,7 +5803,7 @@ extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, 
     if (FileParser_FindSection(musicInf.parser, str_GLOBAL) != 0) {
         while (FileParser_IsEOF(musicInf.parser) == 0) {
             FileParser_GetName(musicInf.parser);
-            FileParser_AssignString(musicInf.parser, str_BASEPATH, ((char*)self) + 0x104);
+            FileParser_AssignString(musicInf.parser, str_BASEPATH, self->mBasePath);
         }
     }
     *(int*)(musicInf.parser + 8) = *(int*)(musicInf.parser + 4);

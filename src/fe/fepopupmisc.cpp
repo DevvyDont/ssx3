@@ -9544,12 +9544,12 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         if ((track != 0 && players == 2) || (track == 5 || track == 6)) {
             cUIThing* dataPanel = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_screenData));
             dataPanel->setVisible(1);
-            t3Vector pos = *(t3Vector*)((char*)dataPanel + 0x44);
+            t3Vector pos = dataPanel->mPosition;
             t3Vector raisedPos;
             raisedPos.x = pos.x;
             raisedPos.y = 200.0f;
             raisedPos.z = pos.z;
-            *(t3Vector*)((char*)dataPanel + 0x44) = raisedPos;
+            dataPanel->mPosition = raisedPos;
         }
         cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_event));
         unsigned short name[0x38];
@@ -9781,7 +9781,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                     if (i < 1) {
                         cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(D_00441D10[netIds[i]]));
-                        *(int*)((char*)button + 0x18) = netIds[i];
+                        button->mMiscData = netIds[i];
                     } else {
                         button->setVisible(0);
                         button->setStatic(1);
@@ -9792,7 +9792,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                         if (i == 0 && ids.v[0] == 1 && raceSetup->iNextHeat == 3) {
                             cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(str_kT_OVRCMNFinalRound));
                         }
-                        *(int*)((char*)button + 0x18) = ids.v[i];
+                        button->mMiscData = ids.v[i];
                     } else {
                         button->setVisible(0);
                         button->setStatic(1);

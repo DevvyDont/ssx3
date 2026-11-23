@@ -883,18 +883,18 @@ extern sSndKey8_10E0 D_004A3680[];
 extern "C" void cSSXAudio_BeginWind(cSSXAudio* vself)
 {
     cSSXAudio* self = vself;
-    if (*(int*)((char*)self + 0x5834) != 0) {
+    if (self->mWindPlaying != 0) {
         return;
     }
     snd10E0Init(self, 0, 0x20);
-    (*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.p3C[(*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.cur] = (int)((char*)self + 0x5830);
+    (*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.p3C[(*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.cur] = (int)(&self->mWindVolume);
     (*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.p7C[(*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.cur] = 0;
     sSnd10E0Mgr* bankManager = *(*(sSnd10E0Mgr***)&self->MusicSys);
     sSndKey8_10E0 k = D_004A3680[0];
     sSnd10E0Sub* playOpts = &bankManager->sub;
     *(sSndKey8_10E0*)((char*)playOpts + (bankManager->sub.cur << 3) + 0x40) = k;
     cBankSys_SFX_End((cBankSys*)self);
-    *(int*)((char*)self + 0x5834) = 1;
+    self->mWindPlaying = 1;
 }
 #endif
 
@@ -2831,10 +2831,10 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
         patchNum = cSSXAudio_Surface_p(self, rider) * 8 + 5;
     }
     SNDSYS_entercritical();
-    int soundFinished = SNDover(*(int*)((char*)self + 0x5FB8)) != 0;
+    int soundFinished = SNDover(self->mCharLandHandle) != 0;
     SNDSYS_leavecritical();
     if (!soundFinished) {
-        cBankMonitor_BANKMONITOR_StopHandle(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, *(int*)((char*)self + 0x5FB8), 1, 0.0f);
+        cBankMonitor_BANKMONITOR_StopHandle(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, self->mCharLandHandle, 1, 0.0f);
     }
     int flag = 0;
     int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
@@ -2890,7 +2890,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
         (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p80[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = 1;
         (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p84[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = rider->mViewIndex;
     }
-    *(int*)((char*)self + 0x5FB8) = cBankSys_SFX_End((cBankSys*)self);
+    self->mCharLandHandle = cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -8952,10 +8952,10 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
         } else if (length == 0) {
             prio = (cSoundSys_SndRand(*(void**)((char*)*(*(sSnd17D0Mgr***)&self->MusicSys) + 0x1D8)) & 0x7FFF) * 3 / 0x7FFF + 3;
         } else {
-            prio = *(int*)((char*)self + 0x5734);
-            *(int*)((char*)self + 0x5734) = prio + 1;
+            prio = self->unk_5734;
+            self->unk_5734 = prio + 1;
             if (prio + 1 >= 6) {
-                *(int*)((char*)self + 0x5734) = 0;
+                self->unk_5734 = 0;
             }
         }
     } else if (length == 1) {
@@ -9026,7 +9026,7 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
         (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p84[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = rider->mViewIndex;
     }
     int sfxHandle = cBankSys_SFX_End((cBankSys*)self);
-    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)3, sfxHandle, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)3, sfxHandle, *(volatile int*)(**(char***)&self->MusicSys + 0x260) + 50, 0, 0);
 }
 #endif
 
