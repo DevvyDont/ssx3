@@ -962,7 +962,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     cFEInput* in = (cFEInput*)cMemMan_alloc(0x1C, str_FEUIInput, 0, 0);
     sUI_1E80* ui2 = ((sUI_1E80*)self->mpUI);
     in->mPadNum = 0;
-    in->mVtbl = cFEInput_vtbl;
+    VPTR_OF(cUIInput, in) = cFEInput_vtbl;
     in->mpInput = 0;
     in->mbKeyReady = 0;
     in->miVKey = 0;

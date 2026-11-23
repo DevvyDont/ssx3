@@ -100,9 +100,9 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
     ((sEngine_233438*)self->mpUI)->f8 = (int)SSXApp->Fonts;
     ((sEngine_233438*)self->mpUI)->f10 = (int)SSXApp->FELocale;
     {
-        cFEInput* feInput = new (str_FLUIInput, 0x100, 0) cFEInput;
+        cFEInput* feInput = (cFEInput*)operator new(sizeof(cFEInput), str_FLUIInput, 0x100, 0);
         feInput->mPadNum = 0;
-        feInput->mVtbl = cFEInput_vtbl;
+        VPTR_OF(cUIInput, feInput) = cFEInput_vtbl;
         (*(int*)&feInput->mpInput) = 0;
         feInput->mbKeyReady = 0;
         feInput->miVKey = 0;

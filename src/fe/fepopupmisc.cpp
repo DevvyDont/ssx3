@@ -158,7 +158,7 @@ struct sPopup_EC68 {
  */
 extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* self, cUIInput* in)
 {
-    sVEi_EC68* vt = (sVEi_EC68*)in->mVtbl;
+    sVEi_EC68* vt = (sVEi_EC68*)VPTR_OF(cUIInput, in);
     if (vt[5].fn(vthis(in, vt[5])) != 0) {
         if (*(signed char*)&self->mImage == 0) {
             cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
@@ -357,7 +357,7 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
 {
     cUIInput* in = (cUIInput*)(*(char**)&self->mpEngine->mpInput);
     for (int i = 0; i < 2; i++) {
-        sVEntry<void(void*, unsigned char)>* vt = (sVEntry<void (void*, unsigned char)>*)in->mVtbl;
+        sVEntry<void(void*, unsigned char)>* vt = (sVEntry<void (void*, unsigned char)>*)VPTR_OF(cUIInput, in);
         vt[44].fn(vthis(in, vt[44]), i);
         if (padCall_F050(((char*)in), 40) == 0) {
             continue;
@@ -4479,7 +4479,7 @@ extern void* cUIInput_vtbl[];
  */
 extern "C" void cUIInput__cUIInput(cUIInput* self, int flags)
 {
-    self->mVtbl = cUIInput_vtbl;
+    VPTR_OF(cUIInput, self) = cUIInput_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -10019,7 +10019,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* s
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)input->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cUIInput, input);
         if (vt[27].fn(vthis(input, vt[27])) != 0) {
             cOVStateManager_triggerOverlay(40);
         }

@@ -2632,7 +2632,7 @@ extern sDefObj_1FF0 gUISoundNull;
  */
 extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, cUIInput* obj)
 {
-    sVE_1FF0a* vt = (sVE_1FF0a*)obj->mVtbl;
+    sVE_1FF0a* vt = (sVE_1FF0a*)VPTR_OF(cUIInput, obj);
     if (vt[6].fn(vthis(obj, vt[6])) != 0) {
     sDefObj_1FF0* sound = *(sDefObj_1FF0**)&self->mpEngine->mpSound;
     if (sound == 0) {

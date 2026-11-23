@@ -382,7 +382,7 @@ extern "C" void cUIStateStack_update(void*);
 extern "C" void cUIEngine_update(cUIEngine* self)
 {
     cUIInput* obj = self->mpInput;
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cUIInput, obj);
     vt[46].fn(vthis(obj, vt[46]));
     cUIStateStack_update((char*)&self->mStateStack);
 }

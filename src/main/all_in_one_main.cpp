@@ -2333,7 +2333,7 @@ extern void* cFEInput_vtbl_D508[] __asm__("cFEInput_vtbl");
  */
 extern "C" void *cFEInput_cFEInput(cFEInput* self) {
     (*(signed char*)&self->mPadNum) = 0;
-    self->mVtbl = cFEInput_vtbl_D508;
+    VPTR_OF(cUIInput, self) = cFEInput_vtbl_D508;
     self->mpInput = 0;
     self->mbKeyReady = 0;
     self->miVKey = 0;
@@ -2354,7 +2354,7 @@ extern void* cUIInput_vtbl[];
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cFEInput__cFEInput(cFEInput* self, int flags) {
-    self->mVtbl = cUIInput_vtbl;
+    VPTR_OF(cUIInput, self) = cUIInput_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

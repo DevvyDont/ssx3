@@ -1531,7 +1531,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
     char* customSnd = (char*)((cUIEngine*)cUIThing_getEngine(((char*)self)))->mpSound;
     char* snd = &gUISoundNull;
     if (customSnd) snd = customSnd;
-    cUISlider_onInput_sVEntryI* vi = (cUISlider_onInput_sVEntryI*)input->mVtbl;
+    cUISlider_onInput_sVEntryI* vi = (cUISlider_onInput_sVEntryI*)VPTR_OF(cUIInput, input);
     if (vi[19].fn(vthis(input, vi[19]))) {
         if (self->mValue > 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
@@ -1546,7 +1546,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
         }
         return 1;
     }
-    cUISlider_onInput_sVEntryI* vi2 = (cUISlider_onInput_sVEntryI*)input->mVtbl;
+    cUISlider_onInput_sVEntryI* vi2 = (cUISlider_onInput_sVEntryI*)VPTR_OF(cUIInput, input);
     if (vi2[20].fn(vthis(input, vi2[20]))) {
         if (self->mValue + 1 < self->mNumValues) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
@@ -1866,7 +1866,7 @@ extern "C" void cUIState_onUpdate(cUIState* self)
     cUIInput* input = (cUIInput*)(*(char**)&self->mpEngine->mpInput);
     self->mCurrentCtrl = 0;
     do {
-        cUIState_onUpdate_sVEntryC* vc = (cUIState_onUpdate_sVEntryC*)input->mVtbl;
+        cUIState_onUpdate_sVEntryC* vc = (cUIState_onUpdate_sVEntryC*)VPTR_OF(cUIInput, input);
         vc[44].fn(vthis(input, vc[44]), *(unsigned char*)&self->mCurrentCtrl);
         if (cUIState_onUpdate_padTest(((char*)input), 45)) {
             if (cUIState_onUpdate_padTest(((char*)input), 41) || (cUIState_onUpdate_padTest(((char*)input), 40) && (mask & 1))) {

@@ -309,15 +309,15 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
             id = cBENewPlayerInterface_getPlayerCtrlID(iface, i);
             panelIdx = i;
         }
-        sVESet_3338* vt = (sVESet_3338*)obj->mVtbl;
+        sVESet_3338* vt = (sVESet_3338*)VPTR_OF(cUIInput, obj);
         vt[44].fn(vthis(obj, vt[44]), id);
-        sVEGet_3338* vt2 = (sVEGet_3338*)obj->mVtbl;
+        sVEGet_3338* vt2 = (sVEGet_3338*)VPTR_OF(cUIInput, obj);
         if (vt2[40].fn(vthis(obj, vt2[40])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) == 0) {
             void* menu = *(void**)((char*)self + panelIdx * 0x34 + 0x6D0);
             sVEPtr_3338* vt3 = *(sVEPtr_3338**)((char*)menu + 8);
             vt3[15].fn(vthis(menu, vt3[15]), obj);
         } else {
-            sVEGet_3338* vt4 = (sVEGet_3338*)obj->mVtbl;
+            sVEGet_3338* vt4 = (sVEGet_3338*)VPTR_OF(cUIInput, obj);
             if (vt4[6].fn(vthis(obj, vt4[6])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) != 0) {
                 char label[5];  // "11", "21" for the second panel
                 *(struct sStr3_3338*)label = *(struct sStr3_3338*)str_11;

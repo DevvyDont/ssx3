@@ -1590,7 +1590,7 @@ extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
     int handled = 0;
     if (self->mIsProcessing == 1)
         return 0;
-    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)input->mVtbl;
+    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cUIInput, input);
     if (vt[19].fn(vthis(input, vt[19]))) {
         handled = 1;
         self->mDoPrevMemCard = handled;
@@ -1600,7 +1600,7 @@ extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     } else {
-        sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)input->mVtbl;
+        sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)VPTR_OF(cUIInput, input);
         if (vt2[20].fn(vthis(input, vt2[20]))) {
             handled = 1;
             self->mDoNextMemCard = handled;

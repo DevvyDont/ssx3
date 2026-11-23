@@ -11,15 +11,15 @@
 // cFEInput_cFEInput; [U] how retail code uses the field.
 
 #include "layout.h"
+#include "ui/uiinput.h"
 
 struct cInput;
 
-struct cFEInput {
-    // --- cUIInput
-    int mKey;                       // 0x00 [O]
-    unsigned char mPadNum;          // 0x04 [O]; [R] ctor = 0; [U] setPadNum
-    char unk_05[0x3];               // 0x05 padding
-    void** mVtbl;                   // 0x08 [R] ctor = cFEInput_vtbl
+struct cFEInput : public cUIInput {
+    // cUIInput (ui/uiinput.h, 0xC): the vptr at 0x08:
+    //   [R] ctor = cFEInput_vtbl
+    // cFEInput's notes on cUIInput's fields:
+    //   mPadNum: [R] ctor = 0; [U] setPadNum
     // --- cFEInput
     int mbKeyReady;                 // 0x0C [O] (bool there); [R] ctor = 0; [U] getKeyReady, update
     int miVKey;                     // 0x10 [O]; [R] ctor = 0; [U] getVKey, update
@@ -27,7 +27,6 @@ struct cFEInput {
     cInput* mpInput;                // 0x18 [O]; [R] ctor = 0; [U] update, the camera queries
 };
 
-CHECK_OFFSET(cFEInput, mVtbl, 0x08);
 CHECK_OFFSET(cFEInput, mbKeyReady, 0x0C);
 CHECK_OFFSET(cFEInput, mpInput, 0x18);
 CHECK_SIZE(cFEInput, 0x1C);

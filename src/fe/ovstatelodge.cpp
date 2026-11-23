@@ -454,7 +454,7 @@ static inline int IsShown1D2EA0(char* self)
 extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUIInput* widget)
 {
     if (IsShown1D2EA0(((char*)self))) {
-    sVEntry<int(void*)>* wvt = (sVEntry<int(void*)>*)widget->mVtbl;
+    sVEntry<int(void*)>* wvt = (sVEntry<int(void*)>*)VPTR_OF(cUIInput, widget);
     if (wvt[6].fn(vthis(widget, wvt[6]))) {
         char* snd = *(char**)&self->mpEngine->mpSound;
         if (snd == 0) {
