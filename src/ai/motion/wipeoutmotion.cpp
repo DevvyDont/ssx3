@@ -250,7 +250,7 @@ extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, t4Vector* initVe
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_step);
 #ifdef SKIP_ASM
 extern "C" void func_00136F30();
-extern "C" void cWipeoutMotion_stepGroundMotion(void*);
+extern "C" void cWipeoutMotion_stepGroundMotion(cWipeoutMotion*);
 extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion*);
 
 /**
@@ -260,16 +260,16 @@ extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion*);
  * cWipeoutMotion_stepAirMotion (air predictor) for WMS_Air. func_00136F30 is declared without arguments here but still
  * receives self.
  */
-extern "C" void cWipeoutMotion_step(int* self)
+extern "C" void cWipeoutMotion_step(cWipeoutMotion* self)
 {
     func_00136F30();
-    if (*self == 0)
+    if (self->WipeoutMotionState == 0)
     {
         cWipeoutMotion_stepGroundMotion(self);
     }
     else
     {
-        cWipeoutMotion_stepAirMotion((cWipeoutMotion*)self);
+        cWipeoutMotion_stepAirMotion(self);
     }
 }
 #endif
@@ -278,8 +278,8 @@ extern "C" void cWipeoutMotion_step(int* self)
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolve);
 #ifdef SKIP_ASM
 extern "C" void func_00137138();
-extern "C" void cWipeoutMotion_resolveGroundMotion(void*);
-extern "C" void cWipeoutMotion_resolveAirMotion(void*);
+extern "C" void cWipeoutMotion_resolveGroundMotion(cWipeoutMotion*);
+extern "C" void cWipeoutMotion_resolveAirMotion(cWipeoutMotion*);
 
 /**
  * Resolves the wipeout's collisions for this tick: the thrown board, then the rider on the ground or in the
@@ -288,10 +288,10 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void*);
  * Calls func_00137138 (the board against the world), then cWipeoutMotion_resolveGroundMotion for WMS_Ground or cWipeoutMotion_resolveAirMotion for
  * WMS_Air. func_00137138 is declared without arguments here but still receives self.
  */
-extern "C" void cWipeoutMotion_resolve(int* self)
+extern "C" void cWipeoutMotion_resolve(cWipeoutMotion* self)
 {
     func_00137138();
-    if (*self == 0)
+    if (self->WipeoutMotionState == 0)
     {
         cWipeoutMotion_resolveGroundMotion(self);
     }
@@ -610,7 +610,7 @@ struct sVec4c_137138 : t4Vector {
 extern "C" void func_00137138(cWipeoutMotion* vself)
 {
     cWipeoutMotion* self = vself;
-    if ((self->mRider)->mUseRootPoseOverride == 0)
+    if (self->mRider->mUseRootPoseOverride == 0)
         return;
     cWipeoutMotion_updateBoardSphereTree((cWipeoutMotion*)self);
     tIntersectInfo hit;
@@ -624,7 +624,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         return;
     }
     t4Vector push = vu0Scale_137138(vu0Scale_137138(hit.Inorm, 1.100000023841858f), d);
-    vu0AddEq_137138((self->mRider)->mRootPoseOverridePos, push);
+    vu0AddEq_137138(self->mRider->mRootPoseOverridePos, push);
     cRiderSphereTree_ApplyOffset_137138(((void*)self->BoardSphereTree), &push);
     // The binary copies the segment back into the local before moving it (the copy is never read).
     seg = (*(sSeg_137138*)&self->BoardIntersectBox);
@@ -927,7 +927,6 @@ static inline bool isHuman_137860(cRider* rider)
     return rider->isHuman();
 }
 
-#define RIDER (*(cRider**)(self + 0x40))
 
 /**
  * Resolves a wiping-out rider in the air against the world: lands it on usable ground, otherwise pushes it out and
@@ -945,42 +944,41 @@ static inline bool isHuman_137860(cRider* rider)
  * is not ground-like (normals differ by more than ~25 degrees), and cAirPredictor_startLaunchIntoAir relaunches it with
  * gravity 3333.33. Always ends with the bound box, object and opponent collision checks.
  *
- * @param vself  the wipeout motion (this); its rider is reached through the motion's rider pointer
+ * @param self  the wipeout motion (this); its rider is reached through the motion's rider pointer
  */
-extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
+extern "C" void cWipeoutMotion_resolveAirMotion(cWipeoutMotion* self)
 {
-    char* self = (char*)vself;
     tIntersectInfo hitA;
     cWorldRider sph;
     tIntersectInfo hitB;
-    cRider* rider = RIDER;
+    cRider* rider = self->mRider;
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !isHuman_137860(rider));
-    float depth = cOverlapList_terrainIntersect1(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
+    float depth = cOverlapList_terrainIntersect1(self->mRider->mOverlapList, &sph, &hitA, (int)self->mRider->mWallHint);
     if (depth >= 0.0f)
     {
-        float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hitB), (t4Vector*)&hitA.Inorm);
+        float groundParam = cWipeoutMotion_intersectGround(self, (tIntersectInfo*)((char*)&hitB), (t4Vector*)&hitA.Inorm);
         float vn = 0.0f;
         float height = 0.0f;
         if (groundParam >= 0.4000000059604645f)
         {
-            vn = vu0Dot_137860(RIDER->mVelocity, hitB.Inorm);
-            height = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.Ipos), hitB.Inorm);
+            vn = vu0Dot_137860(self->mRider->mVelocity, hitB.Inorm);
+            height = vu0Dot_137860(vu0Sub_137860(self->mRider->mPosition, hitB.Ipos), hitB.Inorm);
         }
         if (groundParam >= 0.4000000059604645f && vn <= 0.0f && height <= 10.0f)
         {
-            cAirPredictor_land_137860(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity);
-            func_00111AA0_137860(RIDER->mRiderHandler, &hitB, &hitB.Inorm, hitB.Stype, vn);
-            cRider* landedRider = RIDER;
+            cAirPredictor_land_137860(self->mRider->mAirPredictor, &self->mRider->mPosition, &self->mRider->mVelocity);
+            func_00111AA0_137860(self->mRider->mRiderHandler, &hitB, &hitB.Inorm, hitB.Stype, vn);
+            cRider* landedRider = self->mRider;
             cRiderHandler* hd = landedRider->mRiderHandler;
             hd->WipeoutControl.IsNewImpact = 1;
             hd->WipeoutControl.LatestImpact = landedRider->mVelocity;
-            RIDER->GroundVelocity = hitB.Ivel;
-            RIDER->mGroundNormal = hitB.Inorm;
-            RIDER->mSurfaceType = hitB.Stype;
-            RIDER->mGroundContactPoint = hitB.Ipos;
-            RIDER->SnowOffset = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.Ipos), RIDER->mGroundNormal);
-            t4Vector impulse = vu0Scale_137860(RIDER->mGroundNormal, -vn);
-            vu0AddEq_137860(RIDER->mVelocity, impulse);
+            self->mRider->GroundVelocity = hitB.Ivel;
+            self->mRider->mGroundNormal = hitB.Inorm;
+            self->mRider->mSurfaceType = hitB.Stype;
+            self->mRider->mGroundContactPoint = hitB.Ipos;
+            self->mRider->SnowOffset = vu0Dot_137860(vu0Sub_137860(self->mRider->mPosition, hitB.Ipos), self->mRider->mGroundNormal);
+            t4Vector impulse = vu0Scale_137860(self->mRider->mGroundNormal, -vn);
+            vu0AddEq_137860(self->mRider->mVelocity, impulse);
             if (((char*)hitB.Inst) != 0)
             {
                 cInstanceNode* hitOwner = hitB.Inst->m_pActiveNode;
@@ -989,35 +987,34 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
                     hitOwner->applyForce(hitB, vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
                 }
             }
-            float pen = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.Ipos), hitB.Inorm);
+            float pen = vu0Dot_137860(vu0Sub_137860(self->mRider->mPosition, hitB.Ipos), hitB.Inorm);
             if (pen < 0.0f)
             {
-                cRider_moveFromCollision(RIDER, vu0Scale_137860(hitB.Inorm, -pen));
+                cRider_moveFromCollision(self->mRider, vu0Scale_137860(hitB.Inorm, -pen));
             }
             *(int*)self = 0;
         }
         else
         {
             t4Vector push = vu0Scale_137860(vu0Scale_137860(hitA.Inorm, 1.100000023841858f), depth);
-            cRider_moveFromCollision(RIDER, push);
+            cRider_moveFromCollision(self->mRider, push);
             if (groundParam < 0.0f || vu0Dot_137860(hitB.Inorm, hitA.Inorm) < 0.8999999761581421f)
             {
-                float normSpeed = vu0Dot_137860(hitA.Inorm, RIDER->mVelocity);
+                float normSpeed = vu0Dot_137860(hitA.Inorm, self->mRider->mVelocity);
                 if (normSpeed < 0.0f)
                 {
-                    vu0SubEq_137860(RIDER->mVelocity, vu0Scale_137860(hitA.Inorm, normSpeed));
+                    vu0SubEq_137860(self->mRider->mVelocity, vu0Scale_137860(hitA.Inorm, normSpeed));
                 }
             }
-            cAirPredictor_startLaunchIntoAir(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity, 3333.33349609375f);
+            cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &self->mRider->mPosition, &self->mRider->mVelocity, 3333.33349609375f);
         }
     }
-    cRider_updateBoundBox(RIDER, 0);
-    cRider_checkObjectCollisions(RIDER, 0);
-    cRider_checkOpponentCollisions(RIDER);
+    cRider_updateBoundBox(self->mRider, 0);
+    cRider_checkObjectCollisions(self->mRider, 0);
+    cRider_checkOpponentCollisions(self->mRider);
     cWorldRider__cWorldRider(&sph, 2);
 }
 
-#undef RIDER
 #endif
 
 //100%
@@ -1247,7 +1244,6 @@ static inline t4Vector getFront_137D18(cRider* rider)
     return rider->mMatrix.row[1];
 }
 
-#define RIDER (*(cRider**)(self + 0x40))
 
 /**
  * Moves the wiped-out rider along the ground one tick: sliding friction, gravity, landing on and leaving the surface.
@@ -1264,91 +1260,89 @@ static inline t4Vector getFront_137D18(cRider* rider)
  * The hit object's owner (virtual slot 43) gets the velocity change, and a material with +0x44 set or a triangle with
  * flag 2 forces a reset (cRider_checkForReset with 0, 1).
  *
- * @param vself  the cWipeoutMotion
+ * @param self  the cWipeoutMotion
  */
 // Wipeout tumble: damps the spin, slides along the ground with surface friction, then re-probes the ground.
-extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
+extern "C" void cWipeoutMotion_stepGroundMotion(cWipeoutMotion* self)
 {
-    char* self = (char*)vself;
-    float len = vu0Length_137D18(*(t4Vector*)(self + 0x30));
-    float vl = vu0Length_137D18(RIDER->mVelocity) * 0.012500000186264515f;
-    float dt = RIDER->mTimeScale * 0.01666666753590107f;
+    float len = vu0Length_137D18(self->RiderAngVelocity);
+    float vl = vu0Length_137D18(self->mRider->mVelocity) * 0.012500000186264515f;
+    float dt = self->mRider->mTimeScale * 0.01666666753590107f;
     float nl = len + (vl - len) * 5.0f * dt;
     if (0.0010000000474974513f < len)
-        vu0ScaleEq_137D18(*(t4Vector*)(self + 0x30), nl / len);
-    tSurfData* mat = &materials_137D18()[RIDER->mSurfaceType];
-    t4Vector netVelocity = vu0Sub_137D18(RIDER->mVelocity, RIDER->GroundVelocity);
-    float vn = vu0Dot_137D18(netVelocity, RIDER->mGroundNormal);
-    t4Vector n = vu0Scale_137D18(RIDER->mGroundNormal, vn);
+        vu0ScaleEq_137D18(self->RiderAngVelocity, nl / len);
+    tSurfData* mat = &materials_137D18()[self->mRider->mSurfaceType];
+    t4Vector netVelocity = vu0Sub_137D18(self->mRider->mVelocity, self->mRider->GroundVelocity);
+    float vn = vu0Dot_137D18(netVelocity, self->mRider->mGroundNormal);
+    t4Vector n = vu0Scale_137D18(self->mRider->mGroundNormal, vn);
     t4Vector tang = vu0Sub_137D18(netVelocity, n);
     float tl = vu0Length_137D18(tang);
     float fric = curve_137D18(mat, tl * 0.035999998450279236f) * 3.0f + 1.5f;
     if (tl < 1111.111083984375f
-        && (RIDER->mUseRootPoseOverride != 0 || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 29
-            || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 25)) {
+        && (self->mRider->mUseRootPoseOverride != 0 || cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 29
+            || cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)) {
         float slowBlend = 1.0f - tl * 0.0009000000427477062f;
         slowBlend *= slowBlend;
         slowBlend *= slowBlend;
         fric = slowBlend * 40.0f + (1.0f - slowBlend) * fric;
     }
-    fric *= clamp_137D18(RIDER->mGroundNormal.z + 0.30000001192092896f, 0.0f, 1.0f);
+    fric *= clamp_137D18(self->mRider->mGroundNormal.z + 0.30000001192092896f, 0.0f, 1.0f);
     if (1.0f / dt < fric)
         fric = 1.0f / dt;
     t4Vector grav = vu0Scale_137D18(t4vect_ZAxis, -1800.0f);
     t4Vector drag = vu0Scale_137D18(tang, -fric);
     t4Vector acc = vu0Add_137D18(grav, drag);
-    vu0AddEq_137D18(RIDER->mPosition, vu0Scale_137D18(RIDER->mVelocity, dt));
-    vu0AddEq_137D18(RIDER->mVelocity, vu0Scale_137D18(acc, dt));
-    float sp = vu0Length_137D18(RIDER->mVelocity);
+    vu0AddEq_137D18(self->mRider->mPosition, vu0Scale_137D18(self->mRider->mVelocity, dt));
+    vu0AddEq_137D18(self->mRider->mVelocity, vu0Scale_137D18(acc, dt));
+    float sp = vu0Length_137D18(self->mRider->mVelocity);
     if (3333.33349609375f < sp)
-        vu0ScaleEq_137D18(RIDER->mVelocity, 3333.33349609375f / sp);
-    t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(RIDER), vu0Scale_137D18(RIDER->mVelocity, 0.0036000001709908247f)));
-    cRider_alignRiderAxis(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
+        vu0ScaleEq_137D18(self->mRider->mVelocity, 3333.33349609375f / sp);
+    t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(self->mRider), vu0Scale_137D18(self->mRider->mVelocity, 0.0036000001709908247f)));
+    cRider_alignRiderAxis(self->mRider, &self->mRider->mGroundNormal, &dir, self->mRider->mTimeScale * 2.0f, self->mRider->mTimeScale * 6.632251739501953f);
     tIntersectInfo hit;
-    float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (tIntersectInfo*)((char*)&hit), (t4Vector*)&RIDER->mGroundNormal);
+    float groundParam = cWipeoutMotion_intersectGround(self, (tIntersectInfo*)((char*)&hit), (t4Vector*)&self->mRider->mGroundNormal);
     if (0.0f <= groundParam) {
-        RIDER->GroundVelocity = hit.Ivel;
-        RIDER->mGroundNormal = hit.Inorm;
-        RIDER->mSurfaceType = hit.Stype;
-        RIDER->mGroundContactPoint = hit.Ipos;
-        RIDER->SnowOffset = vu0Dot_137D18(vu0Sub_137D18(RIDER->mPosition, hit.Ipos), RIDER->mGroundNormal);
-        float lim = RIDER->mAnimModel->ScaleVect.x * mat->PowderDepth3G;
-        float pen = vu0Dot_137D18(vu0Sub_137D18(RIDER->mPosition, hit.Ipos), hit.Inorm);
+        self->mRider->GroundVelocity = hit.Ivel;
+        self->mRider->mGroundNormal = hit.Inorm;
+        self->mRider->mSurfaceType = hit.Stype;
+        self->mRider->mGroundContactPoint = hit.Ipos;
+        self->mRider->SnowOffset = vu0Dot_137D18(vu0Sub_137D18(self->mRider->mPosition, hit.Ipos), self->mRider->mGroundNormal);
+        float lim = self->mRider->mAnimModel->ScaleVect.x * mat->PowderDepth3G;
+        float pen = vu0Dot_137D18(vu0Sub_137D18(self->mRider->mPosition, hit.Ipos), hit.Inorm);
         if (pen < -lim) {
             float spd = vu0Length_137D18(hit.Ivel);
-            float vn2 = vu0Dot_137D18(RIDER->mVelocity, hit.Inorm);
+            float vn2 = vu0Dot_137D18(self->mRider->mVelocity, hit.Inorm);
             if (vn2 < 0.0f)
-                vu0SubEq_137D18(RIDER->mVelocity, vu0Scale_137D18(hit.Inorm, vn2));
-            vu0SubEq_137D18(RIDER->mPosition, vu0Scale_137D18(hit.Inorm, pen + lim));
-            func_00111AA0_137D18(RIDER->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
+                vu0SubEq_137D18(self->mRider->mVelocity, vu0Scale_137D18(hit.Inorm, vn2));
+            vu0SubEq_137D18(self->mRider->mPosition, vu0Scale_137D18(hit.Inorm, pen + lim));
+            func_00111AA0_137D18(self->mRider->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
         } else if (pen < 0.0f) {
-            float spd = vu0Length_137D18(RIDER->mVelocity);
-            vu0AddEq_137D18(RIDER->mVelocity, vu0Scale_137D18(RIDER->mGroundNormal, dt * (pen * -2700.0f / lim - vu0Dot_137D18(RIDER->mVelocity, RIDER->mGroundNormal))));
-            func_00111AA0_137D18(RIDER->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
+            float spd = vu0Length_137D18(self->mRider->mVelocity);
+            vu0AddEq_137D18(self->mRider->mVelocity, vu0Scale_137D18(self->mRider->mGroundNormal, dt * (pen * -2700.0f / lim - vu0Dot_137D18(self->mRider->mVelocity, self->mRider->mGroundNormal))));
+            func_00111AA0_137D18(self->mRider->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
         } else if (10.0f < pen) {
-            float vn3 = vu0Dot_137D18(RIDER->mVelocity, RIDER->mGroundNormal);
+            float vn3 = vu0Dot_137D18(self->mRider->mVelocity, self->mRider->mGroundNormal);
             if (vn3 < 0.0f)
-                vu0SubEq_137D18(RIDER->mVelocity, vu0Scale_137D18(RIDER->mGroundNormal, vn3));
-            cAirPredictor_startLaunchIntoAir(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity, 3333.33349609375f);
-            *(int*)(self + 0x4) = 1;
+                vu0SubEq_137D18(self->mRider->mVelocity, vu0Scale_137D18(self->mRider->mGroundNormal, vn3));
+            cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &self->mRider->mPosition, &self->mRider->mVelocity, 3333.33349609375f);
+            self->ForceNaturalAir = 1;
         }
         if (((char*)hit.Inst) != 0) {
             cInstanceNode* hitOwner = hit.Inst->m_pActiveNode;
             if (hitOwner != 0) {
-                hitOwner->applyForce(hit, vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, RIDER->mVelocity), RIDER->GroundVelocity), dt));
+                hitOwner->applyForce(hit, vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, self->mRider->mVelocity), self->mRider->GroundVelocity), dt));
             }
         }
         tSurfData* ground = &materials_137D18()[hit.Stype];
         if (ground->IsResetSurface != 0 || (((char*)hit.Patch) != 0 && (triFlags_137D18(((char*)hit.Patch)) & 2)))
-            cRider_checkForReset(RIDER, 0, 1);
+            cRider_checkForReset(self->mRider, 0, 1);
     } else {
-        cAirPredictor_startLaunchIntoAir(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity, 3333.33349609375f);
-        *(int*)(self + 0x4) = 1;
+        cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &self->mRider->mPosition, &self->mRider->mVelocity, 3333.33349609375f);
+        self->ForceNaturalAir = 1;
     }
-    cRider_updateOrientationImplicit(RIDER);
+    cRider_updateOrientationImplicit(self->mRider);
 }
 
-#undef RIDER
 #endif
 
 //100%
@@ -1477,7 +1471,6 @@ static inline float clamp_138640(float v, float lo, float hi)
     return lo <= v ? v <? hi : lo;
 }
 
-#define RIDER (*(cRider**)(self + 0x40))
 
 /**
  * Resolves a wiping-out rider sliding on the ground against walls and objects.
@@ -1491,22 +1484,21 @@ static inline float clamp_138640(float v, float lo, float hi)
  * After the bound box, object and opponent collision checks, a pending flag (+0x4) switches the motion to state 1
  * (air), and a speed under 50 stops the rider.
  *
- * @param vself  the wipeout motion (this)
+ * @param self  the wipeout motion (this)
  */
-extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
+extern "C" void cWipeoutMotion_resolveGroundMotion(cWipeoutMotion* self)
 {
-    char* self = (char*)vself;
     tIntersectInfo hit;
     cWorldRider sph;
-    cWorldRider_cWorldRider(&sph, RIDER->mSphereTree, 1);
+    cWorldRider_cWorldRider(&sph, self->mRider->mSphereTree, 1);
     sph.useRejectNormal = 1;
-    sph.rejectNormal = RIDER->mGroundNormal;
-    float depth = cOverlapList_terrainIntersect1(RIDER->mOverlapList, &sph, &hit, (int)RIDER->mWallHint);
+    sph.rejectNormal = self->mRider->mGroundNormal;
+    float depth = cOverlapList_terrainIntersect1(self->mRider->mOverlapList, &sph, &hit, (int)self->mRider->mWallHint);
     if (0.0f <= depth) {
-        float dot = vu0Dot_138640(RIDER->mGroundNormal, hit.Inorm);
+        float dot = vu0Dot_138640(self->mRider->mGroundNormal, hit.Inorm);
         if (-0.9998999834060669f < dot) {
             if (dot < 0.0f)
-                hit.Inorm = vu0Normalize_138640(vu0Sub_138640(hit.Inorm, vu0Scale_138640(RIDER->mGroundNormal, dot)));
+                hit.Inorm = vu0Normalize_138640(vu0Sub_138640(hit.Inorm, vu0Scale_138640(self->mRider->mGroundNormal, dot)));
             if (((char*)hit.Inst) != 0) {
                 cInstanceNode* hitOwner = hit.Inst->m_pActiveNode;
                 if (hitOwner != 0) {
@@ -1514,28 +1506,27 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
                 }
             }
             t4Vector push = vu0Scale_138640(vu0Scale_138640(hit.Inorm, 1.100000023841858f), depth);
-            cRider_moveFromCollision(RIDER, push);
-            t4Vector netVelocity = vu0Sub_138640(RIDER->mVelocity, hit.Ivel);
+            cRider_moveFromCollision(self->mRider, push);
+            t4Vector netVelocity = vu0Sub_138640(self->mRider->mVelocity, hit.Ivel);
             float dot2 = vu0Dot_138640(vu0Scale_138640(hit.Inorm, -1.0f), netVelocity);
             if (0.0f <= dot2) {
                 float k = clamp_138640(dot2 * 0.5f, 27.77777862548828f, 555.5555419921875f);
-                vu0AddEq_138640(RIDER->mVelocity, vu0Scale_138640(hit.Inorm, dot2 + k));
+                vu0AddEq_138640(self->mRider->mVelocity, vu0Scale_138640(hit.Inorm, dot2 + k));
             }
         }
     }
-    cRider_updateBoundBox(RIDER, 0);
-    cRider_checkObjectCollisions(RIDER, 0);
-    cRider_checkOpponentCollisions(RIDER);
-    if (*(int*)(self + 0x4) != 0) {
-        *(int*)(self + 0x4) = 0;
+    cRider_updateBoundBox(self->mRider, 0);
+    cRider_checkObjectCollisions(self->mRider, 0);
+    cRider_checkOpponentCollisions(self->mRider);
+    if (self->ForceNaturalAir != 0) {
+        self->ForceNaturalAir = 0;
         *(int*)self = 1;
     }
-    if (vu0Length_138640(RIDER->mVelocity) < 50.0f)
-        RIDER->mVelocity = t4vect_Zero_138640;
+    if (vu0Length_138640(self->mRider->mVelocity) < 50.0f)
+        self->mRider->mVelocity = t4vect_Zero_138640;
     cWorldRider__cWorldRider(&sph, 2);
 }
 
-#undef RIDER
 #endif
 
 //100%
