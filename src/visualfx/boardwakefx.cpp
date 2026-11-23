@@ -4000,12 +4000,12 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
     pos.y = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).y;
     pos.z = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).z;
     pos.w = 1.0f;
-    if (obj->GetOutCode(&pos)) {
+    if (obj->GetOutCode(pos)) {
         self->mbOnScreen = 0;
         self->mbRequestZSample = 0;
     } else {
         self->mbOnScreen = 1;
-        t4Vector scr = obj->GetScreenCoord(&pos);
+        t4Vector scr = obj->GetScreenCoord(pos);
         float depth = scr.z * 5.960465188081798e-08f;
         if (depth <= 0.005f) {
             return;
@@ -4043,7 +4043,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
             viewDir.y = rect[10];
             viewDir.z = rect[14];
             t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(viewDir.x * pullBack, viewDir.y * pullBack, viewDir.z * pullBack), 0.0f));
-            t4Vector sc = obj->GetScreenCoord(&lp);
+            t4Vector sc = obj->GetScreenCoord(lp);
             self->mZDist = sc.z;
             // screen x mapped to -1..1, then to an angle
             float screenFrac = scr.x - rect[0];
@@ -4430,7 +4430,7 @@ extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
     }
     int i = 0;
     {
-        ctx->GetViewportPerspective(&self->mViewInfo.mFOV, &self->mViewInfo.mZNear, &self->mViewInfo.mZFar);
+        ctx->GetViewportPerspective(self->mViewInfo.mFOV, self->mViewInfo.mZNear, self->mViewInfo.mZFar);
     }
     sWkEmit3338* em = ((sWkEmit3338*)&self->mSunHalo[0]);
     cSunHalo_Process(&em[idx], self, idx);
@@ -5200,7 +5200,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
         char* ref = (char*)&self->mScreenGrabHandle;
         if (~self->mScreenGrabHandle.mTextureId == 0) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-            obj->CreateScreenGrabTexture((tScreenGrabHandle*)ref, 0x100, 0x100);
+            obj->CreateScreenGrabTexture(*(tScreenGrabHandle*)ref, 0x100, 0x100);
             if (~self->mScreenGrabHandle.mTextureId == 0) {
                 if (transitionIn != 0) {
                     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)transitionIn;
@@ -5513,7 +5513,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     float curTime = self->mfCurrentTime;
     if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
-        ctx->TakeScreenGrab(&self->mScreenGrabHandle);
+        ctx->TakeScreenGrab(self->mScreenGrabHandle);
         self->mRequestingScreenGrab = 0;
     }
     char* transition;

@@ -1177,7 +1177,7 @@ extern "C" int cRealFE_render(cRealFE* self)
         }
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            ps2GraphicsMan->SetView1((const t4Matrix*)t4mat_Identity);
+            ps2GraphicsMan->SetView1(*(const t4Matrix*)t4mat_Identity);
         }
         feW()->top->setAlpha(9);
         sFeVert verts[4];
@@ -1228,7 +1228,7 @@ extern "C" int cRealFE_render(cRealFE* self)
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->SetView1((const t4Matrix*)((char*)self + 0x50));
+        ps2GraphicsMan->SetView1(*(const t4Matrix*)((char*)self + 0x50));
     }
     {
         sFeWorld* w = feW();

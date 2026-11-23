@@ -1635,7 +1635,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
     for (j = 0; j < 2; j++) {
         ((short*)(&self->m_activeDrawState.m_textureState))[j] = 0x7FFF;
     }
-    self->SetActiveDrawState((const sDrawState*)mask);
+    self->SetActiveDrawState(*(const sDrawState*)mask);
 }
 #endif
 

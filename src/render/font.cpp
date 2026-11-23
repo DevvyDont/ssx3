@@ -344,11 +344,11 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        ps2GraphicsMan->DrawString3D(self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->ShadowColor[0], pos.z);
+        ps2GraphicsMan->DrawString3D(*self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->ShadowColor[0], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    ps2GraphicsMan->DrawString3D(self, pos.x, pos.y, (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->Color[0], pos.z);
+    ps2GraphicsMan->DrawString3D(*self, pos.x, pos.y, (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->Color[0], pos.z);
 }
 #endif
 
@@ -402,11 +402,11 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        ps2GraphicsMan->DrawString3D1(self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->ShadowColor[0], pos.z);
+        ps2GraphicsMan->DrawString3D1(*self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->ShadowColor[0], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    ps2GraphicsMan->DrawString3D1(self, pos.x, pos.y, (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->Color[0], pos.z);
+    ps2GraphicsMan->DrawString3D1(*self, pos.x, pos.y, (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->Color[0], pos.z);
 }
 #endif
 

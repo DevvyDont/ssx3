@@ -963,7 +963,7 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
                     ctx->GenerateBlendedMatrices((const t4Matrix*)D_004FD420, (int*)(0), (const tMdfBlendedMatrix*)animModelLodRef->unk_0C, animModelLodRef->unk_08, (t4Matrix*)(0));
                     int ok = (unsigned)(self->parts[j].id - 1) < 2;
                     int colour = ok ? x : y;
-                    ctx->DrawCharShadowModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data, (const tARGB*)colour);
+                    ctx->DrawCharShadowModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data, *(const tARGB*)colour);
                 }
             }
         }
@@ -977,7 +977,7 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
                 if (animModelLodRef->part != 0) {
                     int ok = (unsigned)(animModelPart->id - 1) < 2;
                     int colour = ok ? x : y;
-                    ctx->DrawCharShadowModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data, (const tARGB*)colour);
+                    ctx->DrawCharShadowModel((const tMdfModelHeader*)animModelLodRef->part, animModelLodRef->data, *(const tARGB*)colour);
                 }
             }
         }

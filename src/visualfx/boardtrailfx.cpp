@@ -1291,7 +1291,7 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
     ((float*)&col.mfTVYOffset)[0] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[0] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[0] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[0]) * k;
     ((float*)&col.mfTVYOffset)[1] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[1] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[1] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[1]) * k;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ps2GraphicsMan->SetTVDisplayFormat1(&col);
+    ps2GraphicsMan->SetTVDisplayFormat1(col);
 }
 #endif
 

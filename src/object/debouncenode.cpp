@@ -2050,7 +2050,7 @@ extern "C" void func_00344E18(void* self)
         if (*(int*)((char*)self + 0x114) >= 2)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
-            ps2GraphicsMan->RenderModel(model, (const tMaterialBlockRecord*)((char*)self + 0x118), (const t4Matrix*)&model->m_fmTransform, 1.0f, (const t4Matrix*)*(void**)((char*)self + 0x1E8), (const t4Matrix*)(0), 0);
+            ps2GraphicsMan->RenderModel(model, (const tMaterialBlockRecord*)((char*)self + 0x118), *(const t4Matrix*)&model->m_fmTransform, 1.0f, (const t4Matrix*)*(void**)((char*)self + 0x1E8), (const t4Matrix*)(0), 0);
         }
         else
         {

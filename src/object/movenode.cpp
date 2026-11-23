@@ -1292,7 +1292,7 @@ extern "C" void cMoveNode_renderModel(cMoveNode* self, t4Matrix* tex, int flags)
         flags |= 2;
     }
     void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(((cMnNode_6298*)self)) : OBJ_6298(self)->light;
-    gfx->RenderModel((const tInstanceRecord*)OBJ_6298(self), (const tMaterialBlockRecord*)light, (const t4Matrix*)t4mat_Identity, self->Fade, tex, (const t4Matrix*)rot, flags);
+    gfx->RenderModel((const tInstanceRecord*)OBJ_6298(self), (const tMaterialBlockRecord*)light, *(const t4Matrix*)t4mat_Identity, self->Fade, tex, (const t4Matrix*)rot, flags);
 }
 #endif
 

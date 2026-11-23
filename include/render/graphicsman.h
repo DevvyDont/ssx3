@@ -170,7 +170,7 @@ public:
     virtual void SetScreenOffset(int xoffset, int yoffset);                                              // slot 12: [R] cGraphicsMan_SetScreenOffset
     virtual int GetScreenXOffset();                                                                      // slot 13: [R] cGraphicsMan_GetScreenXOffset
     virtual int GetScreenYOffset();                                                                      // slot 14: [R] cGraphicsMan_GetScreenYOffset
-    virtual void SetScreenClearColour(const tRGB* col) = 0;                                              // slot 15: [R] cPS2GraphicsMan_SetScreenClearColour
+    virtual void SetScreenClearColour(const tRGB& col) = 0;                                              // slot 15: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetScreenClearColour
     virtual void SetAIUpdatesPerRender(int aiupdatesperrender);                                          // slot 16: [R] cGraphicsMan_SetAIUpdatesPerRender__FPv; parameters [O]
     virtual bool IsRenderReady();                                                                        // slot 17: [R] cPS2GraphicsMan_IsRenderReady__FPv; parameters [O]
     virtual bool IsRenderIdle();                                                                         // slot 18: [R] cPS2GraphicsMan_IsRenderIdle__FPv; parameters [O]
@@ -179,24 +179,24 @@ public:
     virtual void PushViewport() = 0;                                                                     // slot 21: [R] cPS2GraphicsMan_PushViewport
     virtual void PopViewport() = 0;                                                                      // slot 22: [R] cPS2GraphicsMan_PopViewport
     virtual void SetViewportWindow(float x, float y, float w, float rectHeight) = 0;                     // slot 23: [R] cPS2GraphicsMan_SetViewportWindow
-    virtual void SetViewportWindow1(const tRect* rect, int applyScreenOffset) = 0;                       // slot 24: [R] cPS2GraphicsMan_SetViewportWindow1
+    virtual void SetViewportWindow1(const tRect& rect, int applyScreenOffset) = 0;                       // slot 24: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetViewportWindow1
     virtual void SetViewportPerspective(float fov, float minz, float maxz) = 0;                          // slot 25: [R] cPS2GraphicsMan_SetViewportPerspective
     virtual void SetViewportOrthographic(float x, float y, float w, float h, float minz, float maxz, int adjustforsafezone, int scaleForFE) = 0; // slot 26: [R] cPS2GraphicsMan_SetViewportOrthographic (reads the six floats only); every retail caller passes six floats and two ints ((0, 0, 640, 480, 0, 1) for the full screen); [O] On Tour's signature (the two bools)
-    virtual void SetViewportZBias(float worldBias, const t4Vector* wpos) = 0;                            // slot 27: [R] cPS2GraphicsMan_SetViewportZBias
+    virtual void SetViewportZBias(float worldBias, const t4Vector& wpos) = 0;                            // slot 27: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetViewportZBias
     virtual tRect GetViewportWindow() = 0;                                                               // slot 28: [R] cPS2GraphicsMan_GetViewportWindow; returns tRect by value (retail passes a result pointer first)
     virtual float GetViewportFOV() = 0;                                                                  // slot 29: [R] cPS2GraphicsMan_GetViewportFOV
-    virtual void GetViewportPerspective(float* fov, float* minz, float* maxz) = 0;                       // slot 30: [R] cPS2GraphicsMan_GetViewportPerspective
+    virtual void GetViewportPerspective(float& fov, float& minz, float& maxz) = 0;                       // slot 30: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_GetViewportPerspective
     virtual void PushView() = 0;                                                                         // slot 31: [R] cPS2GraphicsMan_PushView
     virtual void PopView() = 0;                                                                          // slot 32: [R] cPS2GraphicsMan_PopView__FPv; parameters [O]
-    virtual void SetView(float pitch, float heading, float roll, const t4Vector* pos) = 0;               // slot 33: [R] cPS2GraphicsMan_SetView
-    virtual void SetView1(const t4Matrix* m) = 0;                                                        // slot 34: [R] cPS2GraphicsMan_SetView1
+    virtual void SetView(float pitch, float heading, float roll, const t4Vector& pos) = 0;               // slot 33: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetView
+    virtual void SetView1(const t4Matrix& m) = 0;                                                        // slot 34: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetView1
     virtual const t4Matrix* GetView() = 0;                                                               // slot 35: [R] cPS2GraphicsMan_GetView__FPv; parameters [O]
-    virtual void AppendView(const t4Matrix* m) = 0;                                                      // slot 36: [R] cPS2GraphicsMan_AppendView
+    virtual void AppendView(const t4Matrix& m) = 0;                                                      // slot 36: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_AppendView
     virtual void IdentityView() = 0;                                                                     // slot 37: [R] cPS2GraphicsMan_IdentityView
-    virtual void TranslateView(const t4Vector* pos) = 0;                                                 // slot 38: [R] cPS2GraphicsMan_TranslateView
-    virtual void RotateView(float deg, const t4Vector* axis) = 0;                                        // slot 39: [R] cPS2GraphicsMan_RotateView
+    virtual void TranslateView(const t4Vector& pos) = 0;                                                 // slot 38: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_TranslateView
+    virtual void RotateView(float deg, const t4Vector& axis) = 0;                                        // slot 39: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RotateView
     virtual void SetTVDisplayFormat(int df) = 0;                                                         // slot 40: [R] cPS2GraphicsMan_SetTVDisplayFormat
-    virtual void SetTVDisplayFormat1(const tTVDisplayFormat* tvdf) = 0;                                  // slot 41: [R] cPS2GraphicsMan_SetTVDisplayFormat1
+    virtual void SetTVDisplayFormat1(const tTVDisplayFormat& tvdf) = 0;                                  // slot 41: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetTVDisplayFormat1
     virtual const tTVDisplayFormat* GetTVDisplayFormat() = 0;                                            // slot 42: [R] cPS2GraphicsMan_GetTVDisplayFormat__FPv; parameters [O]
     virtual t4Matrix GetNetMatrix() = 0;                                                                 // slot 43: [R] cPS2GraphicsMan_GetNetMatrix; returns t4Matrix by value (retail passes a result pointer first)
     virtual void InitTextures(int memtype) = 0;                                                          // slot 44: [R] cPS2GraphicsMan_InitTextures
@@ -210,53 +210,53 @@ public:
     virtual int AddLockedFrameTexture(int width, int height, int texeltype) = 0;                         // slot 52: [R] cPS2GraphicsMan_AddLockedFrameTexture__FPv; parameters [O]
     virtual bool LockFrameToTexture(int texid, int bSafeZone) = 0;                                       // slot 53: [R] cPS2GraphicsMan_LockFrameToTexture (reads texid only); the retail caller passes (texture, 1); [O] On Tour's signature
     virtual bool RestoreFrameLock() = 0;                                                                 // slot 54: [R] cPS2GraphicsMan_RestoreFrameLock
-    virtual void ShadowClearLockTexture(int texid, const tARGB* clearCol) = 0;                           // slot 55: [R] cPS2GraphicsMan_ShadowClearLockTexture
+    virtual void ShadowClearLockTexture(int texid, const tARGB& clearCol) = 0;                           // slot 55: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_ShadowClearLockTexture
     virtual int GetTextureWidth(int texid) = 0;                                                          // slot 56: [R] cPS2GraphicsMan_GetTextureWidth
     virtual int GetTextureHeight(int texid) = 0;                                                         // slot 57: [R] cPS2GraphicsMan_GetTextureHeight
     virtual int GetTexel(unsigned int textureId, float u, float v, int filter);                          // slot 58: [R] cPS2GraphicsMan_GetTexel; O/O/O/O?
-    virtual void CreateScreenGrabTexture(tScreenGrabHandle* screenGrabHandle, unsigned int width, unsigned int height); // slot 59: [R] cPS2GraphicsMan_CreateScreenGrabTexture
-    virtual void RemoveScreenGrabTexture(tScreenGrabHandle* screenGrabHandle);                           // slot 60: [R] cPS2GraphicsMan_RemoveScreenGrabTexture
-    virtual void TakeScreenGrab(const tScreenGrabHandle* screenGrabHandle);                              // slot 61: [R] cPS2GraphicsMan_TakeScreenGrab
-    virtual void SetActiveDrawState(const sDrawState* drawstate);                                        // slot 62: [R] cGraphicsMan_SetActiveDrawState__FPv; parameters [O]
-    virtual void ForceActiveDrawState(const sDrawState* drawstate);                                      // slot 63: [R] cGraphicsMan_ForceActiveDrawState
+    virtual void CreateScreenGrabTexture(tScreenGrabHandle& screenGrabHandle, unsigned int width, unsigned int height); // slot 59: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_CreateScreenGrabTexture
+    virtual void RemoveScreenGrabTexture(tScreenGrabHandle& screenGrabHandle);                           // slot 60: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RemoveScreenGrabTexture
+    virtual void TakeScreenGrab(const tScreenGrabHandle& screenGrabHandle);                              // slot 61: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_TakeScreenGrab
+    virtual void SetActiveDrawState(const sDrawState& drawstate);                                        // slot 62: [O] reference parameters as On Tour; [R] cGraphicsMan_SetActiveDrawState__FPv; parameters [O]
+    virtual void ForceActiveDrawState(const sDrawState& drawstate);                                      // slot 63: [O] reference parameters as On Tour; [R] cGraphicsMan_ForceActiveDrawState
     virtual const sDrawState* ActiveDrawState();                                                         // slot 64: [R] cGraphicsMan_ActiveDrawState__FPv; parameters [O]
     virtual void SetActiveTexture(int texid, unsigned int contextID);                                    // slot 65: [R] cGraphicsMan_SetActiveTexture__FPv; parameters [O]
     virtual void ClearProjTextures();                                                                    // slot 66: [R] cPS2GraphicsMan_ClearProjTextures__FPv; parameters [O]
-    virtual void AddProjectiveTexture(const t4Vector* pos, const t4Matrix* clipMat, const t4Matrix* projMat, float intensity, int texid); // slot 67: [R] cPS2GraphicsMan_AddProjectiveTexture
+    virtual void AddProjectiveTexture(const t4Vector& pos, const t4Matrix& clipMat, const t4Matrix& projMat, float intensity, int texid); // slot 67: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_AddProjectiveTexture
     virtual void SetLightMats(void* lmats) = 0;                                                          // slot 68: [R] cPS2GraphicsMan_SetLightMats__FPv; parameters [O]
     virtual void SetIrradiance(const tIrradianceInfo& irradiance, int ignored) = 0;                     // slot 69: [R] cPS2GraphicsMan_SetIrradiance (copies the 0xA0 block); [P] SetIrradiance__15cPS2GraphicsManRC15tIrradianceInfob; [O] the same, parameters named irradiance, ignored; retail callers pass (block, 1)
     virtual void* GetIrradiance() = 0;                                                                   // slot 70: [R] cPS2GraphicsMan_GetIrradiance__FPv; parameters [O]
     virtual void RenderTriStrip(int numVerts, tBxVertex* src, int isstatic) = 0;                         // slot 71: [R] cPS2GraphicsMan_RenderTriStrip; isstatic: [R] every caller passes it ($a3), [O] the PSP twin's bool isstatic
-    virtual void RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices, const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector* Offset); // slot 72: [R] cPS2GraphicsMan_RenderIndexedTriList
+    virtual void RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices, const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector& Offset); // slot 72: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderIndexedTriList
     virtual void RenderLineStrip(int numverts, const tBxVertex* verts, int isstatic) = 0;                // slot 73: [R] cPS2GraphicsMan_RenderLineStrip; every caller passes (n, tBxVertex*, 0); [O] the PSP twin's RenderLineStrip(int, const tBxVertex*, bool isstatic), and On Tour lists this pure one first
     virtual void RenderLineStrip(int numverts, char* packedoffsets, float scale);                         // slot 74: [R] cGraphicsMan_RenderLineStrip__FPv (the base's empty body; cPS2GraphicsMan keeps it); [O] On Tour's cGraphicsMan defines RenderLineStrip(int numverts, char* packedoffsets, float scale) itself
-    virtual void RenderSpline(const t4Matrix* BezMat, const tARGB* col, int NumPoints);                  // slot 75: [R] cPS2GraphicsMan_RenderSpline
+    virtual void RenderSpline(const t4Matrix& BezMat, const tARGB& col, int NumPoints);                  // slot 75: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderSpline
     virtual cGridMesh* CreateGridMesh(int width, int height, int memtype) = 0;                           // slot 76: [R] cPS2GraphicsMan_CreateGridMesh
     virtual void DeleteGridMesh(cGridMesh* pData);                                                       // slot 77: [R] cGraphicsMan_DeleteGridMesh__FPvi; parameters [O]
-    virtual void DrawSprite(const t4Vector* pos, const t2Vector* halfSize, const t2Vector* uv0, const t2Vector* uv1, const tARGB* colour) = 0; // slot 78: [R] cPS2GraphicsMan_DrawSprite
-    virtual void DrawRotatedSprite(const t4Vector* pos, const t2Vector* halfSize, const t2Vector* uv0, const t2Vector* uv1, const tARGB* colour, float rotationRads, int numPass) = 0; // slot 79: [R] cPS2GraphicsMan_DrawRotatedSprite
-    virtual void DrawString3D(cFont* font, float x, float y, const char* str, float xscale, float yscale, float iwidth, float iheight, const tARGB* colour, float depth) = 0; // slot 80: [R] cPS2GraphicsMan_DrawString3D
-    virtual void DrawString3D1(cFont* font, float x, float y, const unsigned short* str, float xscale, float yscale, float iwidth, float iheight, const tARGB* colour, float depth) = 0; // slot 81: [R] cPS2GraphicsMan_DrawString3D1
-    virtual void RenderParticleEmitter(const tParticleEmitter* emitter) = 0;                             // slot 82: [R] cPS2GraphicsMan_RenderParticleEmitter
+    virtual void DrawSprite(const t4Vector& pos, const t2Vector& halfSize, const t2Vector& uv0, const t2Vector& uv1, const tARGB& colour) = 0; // slot 78: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawSprite
+    virtual void DrawRotatedSprite(const t4Vector& pos, const t2Vector& halfSize, const t2Vector& uv0, const t2Vector& uv1, const tARGB& colour, float rotationRads, int numPass) = 0; // slot 79: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawRotatedSprite
+    virtual void DrawString3D(cFont& font, float x, float y, const char* str, float xscale, float yscale, float iwidth, float iheight, const tARGB& colour, float depth) = 0; // slot 80: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawString3D
+    virtual void DrawString3D1(cFont& font, float x, float y, const unsigned short* str, float xscale, float yscale, float iwidth, float iheight, const tARGB& colour, float depth) = 0; // slot 81: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawString3D1
+    virtual void RenderParticleEmitter(const tParticleEmitter& emitter) = 0;                             // slot 82: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderParticleEmitter
     virtual void RenderDynamicParticleEmitter(const cDynamicEmitter* emitter) = 0;                       // slot 83: [R] cPS2GraphicsMan_RenderDynamicParticleEmitter
     virtual void RenderDynamicParticleEmitter1(const cDynamicColourEmitter* emitter) = 0;                // slot 84: [R] cPS2GraphicsMan_RenderDynamicParticleEmitter1
-    virtual void RenderSnowBoxFlakes(const tSnowBoxData* snowBoxData) = 0;                               // slot 85: [R] cPS2GraphicsMan_RenderSnowBoxFlakes
-    virtual void RenderSnowBoxFluffs(const tSnowBoxData* snowBoxData) = 0;                               // slot 86: [R] cPS2GraphicsMan_RenderSnowBoxFluffs
+    virtual void RenderSnowBoxFlakes(const tSnowBoxData& snowBoxData) = 0;                               // slot 85: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderSnowBoxFlakes
+    virtual void RenderSnowBoxFluffs(const tSnowBoxData& snowBoxData) = 0;                               // slot 86: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderSnowBoxFluffs
     virtual void DrawSphere(t4Vector* pos, float* col, float radius, int segs) = 0;                      // slot 87: [R] cPS2GraphicsMan_DrawSphere
-    virtual void RenderBoardTrail(const t3Vector* L2WOffset, void* verts, unsigned short* topindices, int numtopindices, unsigned short* troughindices, int numtroughindices, unsigned short* sliceindices, int numsliceindices); // slot 88: [R] cGraphicsMan_RenderBoardTrail__FPv; parameters [O]
+    virtual void RenderBoardTrail(const t3Vector& L2WOffset, void* verts, unsigned short* topindices, int numtopindices, unsigned short* troughindices, int numtroughindices, unsigned short* sliceindices, int numsliceindices); // slot 88: [O] reference parameters as On Tour; [R] cGraphicsMan_RenderBoardTrail__FPv; parameters [O]
     virtual void RenderMultipleBoardTrails(BoardTrailInfoT* pTrails, int nTrails);                       // slot 89: [R] cPS2GraphicsMan_RenderMultipleBoardTrails
     virtual void RenderBoardWake(tBoardWakeVertex** verts, int numSegmentsWide, int startIndex, int numIndices, int stripLength, float alphaMultiplier, float alphaDelta); // slot 90: [R] cPS2GraphicsMan_RenderBoardWake
-    virtual int GetOutCode(const t4Vector* point) = 0;                                                   // slot 91: [R] cPS2GraphicsMan_GetOutCode
-    virtual t4Vector GetScreenCoord(const t4Vector* point) = 0;                                          // slot 92: [R] cPS2GraphicsMan_GetScreenCoord; returns t4Vector by value
-    virtual int ClipBoundBox(const t4Vector* iMinp, const t4Vector* iMaxp, const t4Matrix* iMat) = 0;    // slot 93: [R] cPS2GraphicsMan_ClipBoundBox
-    virtual void DeformMeshMatrix(t4Matrix* mat);                                                        // slot 94: [R] cGraphicsMan_DeformMeshMatrix
-    virtual void RenderModel(const tInstanceRecord* pInstance, const tMaterialBlockRecord* material, const t4Matrix* BMat, float opacity, const t4Matrix* animmats, const t4Matrix* TexMat, int flags) = 0; // slot 95: [R] cPS2GraphicsMan_RenderModel
+    virtual int GetOutCode(const t4Vector& point) = 0;                                                   // slot 91: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_GetOutCode
+    virtual t4Vector GetScreenCoord(const t4Vector& point) = 0;                                          // slot 92: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_GetScreenCoord; returns t4Vector by value
+    virtual int ClipBoundBox(const t4Vector& iMinp, const t4Vector& iMaxp, const t4Matrix& iMat) = 0;    // slot 93: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_ClipBoundBox
+    virtual void DeformMeshMatrix(t4Matrix& mat);                                                        // slot 94: [O] reference parameters as On Tour; [R] cGraphicsMan_DeformMeshMatrix
+    virtual void RenderModel(const tInstanceRecord* pInstance, const tMaterialBlockRecord* material, const t4Matrix& BMat, float opacity, const t4Matrix* animmats, const t4Matrix* TexMat, int flags) = 0; // slot 95: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderModel
     virtual void RenderModel(tInstanceRecord* obj, int animMats, int texMat, int renderFlags);           // slot 96: [R] cGraphicsMan_RenderModel
     virtual void GetMeshQuad(const tInstanceRecord* pInstance, int mesh, t3Vector* vert, t2Vector* uv, tARGB* rgb) = 0; // slot 97: [R] cPS2GraphicsMan_GetMeshQuad
     virtual void SetShinyBoarder(int State);                                                             // slot 98: [R] cPS2GraphicsMan_SetShinyBoarder__FPvi; parameters [O]
     virtual void DrawCharModel(const tMdfModelHeader* mdfheader, const char* data, float scale, int additive, int cheatcharid) = 0; // slot 99: [R] cPS2GraphicsMan_DrawCharModel (header, data, the additive flag); cAnimModel_render passes (part, data, additiveBoard / additivePlayer, 0, scale) after GenerateBlendedMatrices (slot 111); [O] On Tour's signature, which also takes the matrices
-    virtual void DrawCharShadowModel(const tMdfModelHeader* model, const char* data, const tARGB* shdwcol); // slot 100: [R] cPS2GraphicsMan_DrawCharShadowModel
-    virtual void SetShadowCharMatrices(const t4Matrix* sproj, const t4Vector* sscale, const t4Vector* strans) = 0; // slot 101: [R] cPS2GraphicsMan_SetShadowCharMatrices
+    virtual void DrawCharShadowModel(const tMdfModelHeader* model, const char* data, const tARGB& shdwcol); // slot 100: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawCharShadowModel
+    virtual void SetShadowCharMatrices(const t4Matrix& sproj, const t4Vector& sscale, const t4Vector& strans) = 0; // slot 101: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetShadowCharMatrices
     virtual void SectionLoaded(int sectionId);                                                           // slot 102: [R] cGraphicsMan_SectionLoaded__FPv; parameters [O]
     virtual void InitGlobalBuffer(void* pGlobalBuffer, const tResourceID* rid);                          // slot 103: [R] cGraphicsMan_InitGlobalBuffer__FPv; parameters [O]
     virtual void PurgeGlobalBuffer(const tResourceID* rid);                                              // slot 104: [R] cGraphicsMan_PurgeGlobalBuffer__FPv; parameters [O]
@@ -264,7 +264,7 @@ public:
     virtual void PurgeGlobalRGBBuffer(const tResourceID* rid);                                           // slot 106: [R] cGraphicsMan_PurgeGlobalRGBBuffer__FPv; parameters [O]
     virtual void PurgeMeshData();                                                                        // slot 107: [R] cGraphicsMan_PurgeMeshData__FPv; parameters [O]
     virtual void RemapModelMaterialId(tMdfModelHeader* model, char* modeldata, char* name, int id);      // slot 108: [R] cGraphicsMan_RemapModelMaterialId__FPv; parameters [O]
-    virtual void ResolveCharModel(tMdfModelHeader* inModel, char* modeldata, int* partBoneOffset, int* numBlendedMats, tMdfBlendedMatrix* blendedMats, float* morphWeights); // slot 109: [R] cPS2GraphicsMan_ResolveCharModel
+    virtual void ResolveCharModel(tMdfModelHeader* inModel, char* modeldata, int* partBoneOffset, int& numBlendedMats, tMdfBlendedMatrix* blendedMats, float* morphWeights); // slot 109: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_ResolveCharModel
     virtual void InitCharModelPart(tMdfModelHeader* mdfheader, int nummats, tMdfBlendedMatrix* blendmats, const t4Matrix* mats); // slot 110: [R] cPS2GraphicsMan_InitCharModelPart__FPv; parameters [O]
     virtual void GenerateBlendedMatrices(const t4Matrix* matlist, int* partBoneOffsets, const tMdfBlendedMatrix* blendedMatrixTranslationTable, int numMatrices, t4Matrix* blendedmatlist); // slot 111: [R] cPS2GraphicsMan_GenerateBlendedMatrices
     virtual void PurgeCharModel(tMdfModelHeader* model);                                                 // slot 112: [R] cGraphicsMan_PurgeCharModel__FPv; parameters [O]
