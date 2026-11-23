@@ -27,37 +27,49 @@
 // [6] cGMRivalPointHandler 4, [7] cGMPointHandler 0xC, [8] cGMMPRaceHandler 0x2C, [9] cGMMPSlopeHandler 8 ([3]
 // cGMDebugHandler is not created in retail).
 //
-// FLAT layouts, like main/game.h. Evidence tags: [R] getGM's allocations, the subclass destructors, the init methods;
+// The subclasses derive from cGameModeHandler (a real class with the 11 virtuals); their own members are FLAT.
+// Evidence tags: [R] getGM's allocations, the subclass destructors, the init methods;
 // [U] how retail code uses the field (src/main/gamemode.cpp); [O] SSX On Tour's DWARF (classes cGMTimeHandler,
 // cGMPointHandler, cGMMPSlopeHandler, cGMMPRaceHandler, cGMRaceHandler: names, types and order).
 
 #include "layout.h"
 
+struct cReplayFramePtr;
+
 // cGameModeHandler: the base, vptr only in retail (On Tour's 0x2F4 sHeatResults lastHeatResults is not there: every
 // subclass appends from 0x4). Used through a base pointer only: cGameModeMan_aHandler[i] (main/gamemode.h), which
 // cGameModeMan dispatches through the 11 slots above and cGameModeMan_purgeGM deletes through slot 1.
-struct cGameModeHandler {
-    void** mVtbl;                   // 0x00 [R] _vt$16cGameModeHandler (0x0047D008, 11 slots: cGameModeHandler__cGameModeHandler,
-                                    //      cGameModeHandler_init ...), stored back by every subclass dtor; [P] the
-                                    //      preview's _vt$16cGameModeHandler; [O] class cGameModeHandler (virtual ~, init,
-                                    //      riderCheckpointHit, riderGateHit, raceFinish, getHeatScore ...)
+class cGameModeHandler {
+public:
+    // 0x00: the vptr. [R] _vt$16cGameModeHandler (0x0047D008), stored back by every subclass dtor; [P] the preview's
+    // _vt$16cGameModeHandler. Slots [R] that table (11, names from its retail entries cGameModeHandler_*); types [O]
+    // (class cGameModeHandler) where On Tour has the method (purge and the two cleanRiderRanks* are retail's only).
+    virtual ~cGameModeHandler();                                          // 1
+    virtual void init();                                                  // 2
+    virtual void purge();                                                 // 3
+    virtual void cleanRiderRanksPoints();                                 // 4
+    virtual void cleanRiderRanksTime();                                   // 5
+    virtual bool riderCheckpointHit(int iRider, int iSecsAdded);          // 6
+    virtual void riderGateHit(int iRider, int iGateID);                   // 7
+    virtual void raceFinish(int iRider);                                  // 8
+    virtual unsigned int getHeatScore(int iRider, int iHeat);             // 9
+    virtual void writeToReplayFrame(cReplayFramePtr* data);               // 10
+    virtual void readFromReplayFrame(cReplayFramePtr* data);              // 11
 };
 
-CHECK_OFFSET(cGameModeHandler, mVtbl, 0x00);
 CHECK_SIZE(cGameModeHandler, 0x4);
 
 // cGMBigAirHandler: the scored event (big air; heats scored by points). Vtable 0x0047CFA0 (cGMBigAirHandler_vtbl): init
 // cGMBigAirHandler_init, riderCheckpointHit cGMBigAirHandler_riderCheckpointHit, raceFinish cGMBigAirHandler_raceFinish, getHeatScore cGMBigAirHandler_getHeatScore,
 // writeToReplayFrame cGMBigAirHandler_writeToReplayFrame, readFromReplayFrame cGMBigAirHandler_readFromReplayFrame. No On Tour class (On Tour's
 // cGMFreestyleHandler has a uiScore[62][3] in the same role).
-struct cGMBigAirHandler {
-    void** mVtbl;                   // 0x00 [R] cGMBigAirHandler_vtbl (getGM), the dtor cGMBigAirHandler__cGMBigAirHandler stores the base's
+struct cGMBigAirHandler : public cGameModeHandler {
+    // 0x00: the vptr: [R] cGMBigAirHandler_vtbl (getGM), the dtor cGMBigAirHandler__cGMBigAirHandler stores the base's
     unsigned int uiScore[3][10];    // 0x04 [R] init clears 0x78 bytes; [U] getHeatScore returns uiScore[heat][rider]
                                     //      (row stride 0x28), raceFinish / cGMBigAirHandler_fillScoreTable fill it. Quirk: the replay
                                     //      slots 10 / 11 write and read 0xA0 bytes from 0x04, 0x28 past the object
 };
 
-CHECK_OFFSET(cGMBigAirHandler, mVtbl, 0x00);
 CHECK_OFFSET(cGMBigAirHandler, uiScore, 0x04);
 CHECK_SIZE(cGMBigAirHandler, 0x7C);
 
@@ -65,8 +77,8 @@ CHECK_SIZE(cGMBigAirHandler, 0x7C);
 // riderGateHit cGMRaceHandler_riderGateHit, raceFinish cGMRaceHandler_raceFinish, writeToReplayFrame cGMRaceHandler_writeToReplayFrame /
 // readFromReplayFrame cGMRaceHandler_readFromReplayFrame (the whole 0xD0 bytes); non-virtual helpers func_0023A4F0 (build the heat
 // line-ups), func_0023A668 (apply a line-up).
-struct cGMRaceHandler {
-    void** mVtbl;                   // 0x00 [R] cGMRaceHandler_vtbl; the dtor cGMRaceHandler__cGMRaceHandler stores the base's
+struct cGMRaceHandler : public cGameModeHandler {
+    // 0x00: the vptr: [R] cGMRaceHandler_vtbl; the dtor cGMRaceHandler__cGMRaceHandler stores the base's
     int unk_04;                     // 0x04 no access seen (inside the replay copy only)
     int mHeat2Ready;                // 0x08 [U] init: heat 2's set-up runs only while it is 0, then sets it; heat 1
                                     //      clears it; raceFinish sets it (and mHeat3Ready) when the heat is repeated
@@ -79,7 +91,6 @@ struct cGMRaceHandler {
                                     //      init fills rows with 9s, raceFinish stores tbl[heat][rider] (360000 = DNF)
 };
 
-CHECK_OFFSET(cGMRaceHandler, mVtbl, 0x00);
 CHECK_OFFSET(cGMRaceHandler, unk_04, 0x04);
 CHECK_OFFSET(cGMRaceHandler, mHeat2Ready, 0x08);
 CHECK_OFFSET(cGMRaceHandler, mHeat3Ready, 0x0C);
@@ -90,13 +101,12 @@ CHECK_SIZE(cGMRaceHandler, 0xD0);
 // cGMMPRaceHandler: the multiplayer race. Vtable 0x0047CED0 (D_0047CED0): init cGMMPRaceHandler_init, raceFinish
 // cGMMPRaceHandler_raceFinish, writeToReplayFrame cGMMPRaceHandler_writeToReplayFrame / readFromReplayFrame cGMMPRaceHandler_readFromReplayFrame (the whole 0x2C bytes);
 // dtor cGMMPRaceHandler__cGMMPRaceHandler.
-struct cGMMPRaceHandler {
-    void** mVtbl;                   // 0x00 [R] D_0047CED0
+struct cGMMPRaceHandler : public cGameModeHandler {
+    // 0x00: the vptr: [R] D_0047CED0
     unsigned int uiTime[10];        // 0x04 [O] uiTime (On Tour [62]); [U] init fills 9s (40 bytes), raceFinish stores
                                     //      each rider's finish tick (360000 = DNF) and copies it to D_00536640
 };
 
-CHECK_OFFSET(cGMMPRaceHandler, mVtbl, 0x00);
 CHECK_OFFSET(cGMMPRaceHandler, uiTime, 0x04);
 CHECK_SIZE(cGMMPRaceHandler, 0x2C);
 
@@ -104,21 +114,20 @@ CHECK_SIZE(cGMMPRaceHandler, 0x2C);
 // 0x0047CE68 (D_0047CE68): init cGMMPSlopeHandler_init, riderCheckpointHit cGMMPSlopeHandler_riderCheckpointHit, raceFinish cGMMPSlopeHandler_raceFinish,
 // writeToReplayFrame cGMMPSlopeHandler_writeToReplayFrame / readFromReplayFrame cGMMPSlopeHandler_readFromReplayFrame (empty); dtor cGMMPSlopeHandler__cGMMPSlopeHandler. On Tour's class
 // overrides exactly these five.
-struct cGMMPSlopeHandler {
-    void** mVtbl;                   // 0x00 [R] D_0047CE68
+struct cGMMPSlopeHandler : public cGameModeHandler {
+    // 0x00: the vptr: [R] D_0047CE68
     short LastCheckpointHit[2];     // 0x04 [O] short LastCheckpointHit[2]; [R] init clears both (sh 0x4 / 0x6);
                                     //      [U] riderCheckpointHit counts per player and compares with the other
 };
 
-CHECK_OFFSET(cGMMPSlopeHandler, mVtbl, 0x00);
 CHECK_OFFSET(cGMMPSlopeHandler, LastCheckpointHit, 0x04);
 CHECK_SIZE(cGMMPSlopeHandler, 0x8);
 
 // cGMTimeHandler: the timed peak challenge (events 6-8). Vtable 0x0047CD98 (cGMTimeHandler_vtbl): init cGMTimeHandler_init,
 // riderCheckpointHit cGMTimeHandler_riderCheckpointHit, raceFinish cGMTimeHandler_raceFinish; dtor cGMTimeHandler__cGMTimeHandler. On Tour's class overrides exactly
 // these three (the preview's does not override riderCheckpointHit yet).
-struct cGMTimeHandler {
-    void** mVtbl;                   // 0x00 [R] cGMTimeHandler_vtbl
+struct cGMTimeHandler : public cGameModeHandler {
+    // 0x00: the vptr: [R] cGMTimeHandler_vtbl
     unsigned int uiTimeToBeat;      // 0x04 [O]; [R] init: cBENewRaceInterface_getPeakGoal(..) * 60, also stored in
                                     //      cGameModeMan's uiTimeLimit / uiPointTarget; [U] raceFinish compares the time
     unsigned short uiTrackProgress; // 0x08 [O]; [R] init 0; [U] riderCheckpointHit passes it to
@@ -127,7 +136,6 @@ struct cGMTimeHandler {
                                     //      [U] riderCheckpointHit
 };
 
-CHECK_OFFSET(cGMTimeHandler, mVtbl, 0x00);
 CHECK_OFFSET(cGMTimeHandler, uiTimeToBeat, 0x04);
 CHECK_OFFSET(cGMTimeHandler, uiTrackProgress, 0x08);
 CHECK_OFFSET(cGMTimeHandler, mCurrentDifficulty, 0x0A);
@@ -136,15 +144,14 @@ CHECK_SIZE(cGMTimeHandler, 0xC);
 // cGMPointHandler: the points peak challenge (events 9-11). Vtable 0x0047CC60 (D_0047CC60): init cGMPointHandler_init,
 // riderCheckpointHit cGMPointHandler_riderCheckpointHit, raceFinish cGMPointHandler_raceFinish; dtor cGMPointHandler__cGMPointHandler. On Tour's class overrides exactly
 // these three.
-struct cGMPointHandler {
-    void** mVtbl;                   // 0x00 [R] D_0047CC60
+struct cGMPointHandler : public cGameModeHandler {
+    // 0x00: the vptr: [R] D_0047CC60
     int uiScoreToBeat;              // 0x04 [O] (int in On Tour); [R] init: cBENewRaceInterface_getPeakGoal(..) * 100,
                                     //      also cGameModeMan's uiPointTarget
     unsigned short uiTrackProgress; // 0x08 [O]; [R] init 0; [U] riderCheckpointHit passes it on and increments it
     short mCurrentDifficulty;       // 0x0A [O]; [R] init: the goal tier from the best medal; [U] riderCheckpointHit
 };
 
-CHECK_OFFSET(cGMPointHandler, mVtbl, 0x00);
 CHECK_OFFSET(cGMPointHandler, uiScoreToBeat, 0x04);
 CHECK_OFFSET(cGMPointHandler, uiTrackProgress, 0x08);
 CHECK_OFFSET(cGMPointHandler, mCurrentDifficulty, 0x0A);
