@@ -13,13 +13,14 @@
 // Evidence tags: [R] ctors/dtor/allocation; [U] retail use; [O] On Tour (every offset equals retail; bools are 4 bytes).
 
 #include "layout.h"
+#include "object/transformmodifier.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 
-struct cPositionModifier {
-    // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl);
-                                    //      dtor cPositionModifier__cPositionModifier
+struct cPositionModifier : public cTransformModifier {
+    // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
+    //   [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl); dtor
+    //       cPositionModifier__cPositionModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cPositionModifierState
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox cPositionModifier_getBoundBox returns +0x10, setBoundBox cPositionModifier_setBoundBox
@@ -35,7 +36,6 @@ struct cPositionModifier {
                                     //      row 3 (sq 0x80); [U] getRootTransform returns +0x50
 };
 
-CHECK_OFFSET(cPositionModifier, mVtbl, 0x00);
 CHECK_OFFSET(cPositionModifier, unk_04, 0x04);
 CHECK_OFFSET(cPositionModifier, BoundBox, 0x10);
 CHECK_OFFSET(cPositionModifier, Offset, 0x30);

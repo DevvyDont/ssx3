@@ -13,26 +13,16 @@
 // A FLAT layout: cPositionModifier (0x00-0x90, object/positionmodifier.h) + cParentModifierState (Mesh) + ParentInst.
 
 #include "layout.h"
+#include "object/positionmodifier.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 
 struct tInstanceRecord;
 
-struct cParentModifier {
-    // --- cPositionModifier (0x90; object/positionmodifier.h)
-    void** mVtbl;                   // 0x00 [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl);
-                                    //      dtor cPositionModifier__cPositionModifier
-    char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
-    tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox cPositionModifier_getBoundBox returns +0x10, setBoundBox cPositionModifier_setBoundBox
-                                    //      (sq 0x10/0x20)
-    t4Vector Offset;                // 0x30 [O]; [R] ctor (t4Vector) stores the offset, ctor (t4Matrix) row 3; [U]
-                                    //      updateRootTransform cPositionModifier_updateRootTransform (lq 0x30)
-    float Radius;                   // 0x40 [O]; [U] getRadius/setRadius cPositionModifier_getRadius/cPositionModifier_setRadius (lwc1/swc1 0x40)
-    int RootTransformDirty;         // 0x44 [O] bool (4 bytes); [R] ctors store 1; [U] cPositionModifier_isRootTransformDirty
-                                    //      (isRootTransformDirty), getRootTransform cPositionModifier_getRootTransform, updateRootTransform
-    char unk_48[0x8];               // 0x48 padding (Transform is 16-byte aligned)
-    t4Matrix Transform;             // 0x50 [O]; [R] ctors copy t4mat_Identity (or the matrix) here, then the offset into
-                                    //      row 3 (sq 0x80); [U] getRootTransform returns +0x50
+struct cParentModifier : public cPositionModifier {
+    // cPositionModifier (object/positionmodifier.h, 0x90): the vptr at 0x00:
+    //   [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl); dtor
+    //       cPositionModifier__cPositionModifier
     // --- cParentModifierState / cParentModifier
     int Mesh;                       // 0x90 [O] cParentModifierState::Mesh; [R] ctor stores the mesh arg, replay ctor
                                     //      reads 4 bytes here; [U] getMesh cParentModifier_getMesh, updateRootTransform
@@ -42,14 +32,6 @@ struct cParentModifier {
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
 };
 
-CHECK_OFFSET(cParentModifier, mVtbl, 0x00);
-CHECK_OFFSET(cParentModifier, unk_04, 0x04);
-CHECK_OFFSET(cParentModifier, BoundBox, 0x10);
-CHECK_OFFSET(cParentModifier, Offset, 0x30);
-CHECK_OFFSET(cParentModifier, Radius, 0x40);
-CHECK_OFFSET(cParentModifier, RootTransformDirty, 0x44);
-CHECK_OFFSET(cParentModifier, unk_48, 0x48);
-CHECK_OFFSET(cParentModifier, Transform, 0x50);
 CHECK_OFFSET(cParentModifier, Mesh, 0x90);
 CHECK_OFFSET(cParentModifier, unk_94, 0x94);
 CHECK_OFFSET(cParentModifier, ParentInst, 0xA0);

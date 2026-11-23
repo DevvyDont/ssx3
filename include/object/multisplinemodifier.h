@@ -15,6 +15,7 @@
 // Evidence tags: [R] ctors/dtor/allocation; [U] retail use (asm of every method in methods.txt); [O] On Tour.
 
 #include "layout.h"
+#include "object/transformmodifier.h"
 #include "world/worldview.h"
 #include "ui/uithing.h"
 #include "bx/math3d.h"
@@ -78,9 +79,9 @@ CHECK_OFFSET(tAddMultiSplineData, NumModels, 0x2C);
 CHECK_OFFSET(tAddMultiSplineData, unk_030, 0x30);
 CHECK_SIZE(tAddMultiSplineData, 0x34);
 
-struct cMultiSplineModifier {
-    // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store the 0x0048F168 vtable; the dtor stores it, then cTransformModifier_vtbl
+struct cMultiSplineModifier : public cTransformModifier {
+    // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
+    //   [R] ctors store the 0x0048F168 vtable; the dtor stores it, then cTransformModifier_vtbl
     // --- cMultiSplineModifierState (0x34 bytes; [R] the replay ctor reads 0x34 bytes here)
     int NumModels;                  // 0x04 [O]; [R] ctor; [U] every per-car loop (allocNodes, setupNodes, render,
                                     //      writeToReplayFrame, dtor)
@@ -110,7 +111,6 @@ struct cMultiSplineModifier {
                                     //      it
 };
 
-CHECK_OFFSET(cMultiSplineModifier, mVtbl, 0x00);
 CHECK_OFFSET(cMultiSplineModifier, NumModels, 0x04);
 CHECK_OFFSET(cMultiSplineModifier, OrientType, 0x08);
 CHECK_OFFSET(cMultiSplineModifier, HeadTweak, 0x0C);

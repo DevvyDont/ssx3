@@ -44,7 +44,7 @@ extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream)
  */
 extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* self, cStream003595D8* stream)
 {
-    self->mVtbl = cSplineModifier_vtbl;
+    VPTR_AT(self, 0) = cSplineModifier_vtbl;
     cSpline* follower = &(*(&self->Spline));
     self->Spline.SplineId = 0xFFFFFFFF;
     self->Spline.Seg = 0;
@@ -768,7 +768,7 @@ extern "C" void* cInstanceMan_allocInstance(void* man, unsigned int id);
  */
 extern "C" cMultiSplineModifier* cMultiSplineModifier_cMultiSplineModifier1(cMultiSplineModifier* self, cStream0035A118* stream)
 {
-    self->mVtbl = cMultiSplineModifier_vtbl;
+    VPTR_AT(self, 0) = cMultiSplineModifier_vtbl;
     cSpline* follower = &(*(&self->Spline));
     self->Spline.SplineId = 0xFFFFFFFF;
     self->Spline.Seg = 0;
@@ -823,7 +823,7 @@ struct cMultiSplineModifier_A250 {
  */
 extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier* self, int flags)
 {
-    self->mVtbl = cMultiSplineModifier_vtbl;
+    VPTR_AT(self, 0) = cMultiSplineModifier_vtbl;
     cMultiSplineModifier_restoreOverlapSystem(self);
     if (self->AnimMats != 0) {
         cMemMan_free(self->AnimMats);
@@ -837,7 +837,7 @@ extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier*
     if ((void**)self->NodeInst != 0) {
         cMemMan_free((void**)self->NodeInst);
     }
-    self->mVtbl = cTransformModifier_vtbl;
+    VPTR_AT(self, 0) = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1289,7 +1289,7 @@ static inline void setMax_A918(tInstanceRecord* in, const t4Vector& v)
 extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        ((sVEntry<void(void*)>*)self->mVtbl)[3].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[3]));
+        ((sVEntry<void(void*)>*)VPTR_AT(self, 0))[3].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_AT(self, 0))[3]));
     }
     for (int i = 1; i < self->NumModels; i++) {
         tBoundBox old = (self->Nodes)[i].BoundBox;
@@ -1826,7 +1826,7 @@ extern "C" void cSpline_draw(void* a, void* b);
 extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        ((sVEntry<void(void*)>*)self->mVtbl)[3].fn((char*)self + ((sVEntry<void(void*)>*)self->mVtbl)[3].delta);
+        ((sVEntry<void(void*)>*)VPTR_AT(self, 0))[3].fn((char*)self + ((sVEntry<void(void*)>*)VPTR_AT(self, 0))[3].delta);
     }
     cInstanceNode* model = (cInstanceNode*)self->Instance->m_pActiveNode;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;

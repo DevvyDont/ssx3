@@ -9,14 +9,15 @@
 // A FLAT layout: cTransformModifier (0x0: vptr) + cAvaSplineModifierState (0x10-0x40) + own fields (On Tour offsets).
 
 #include "layout.h"
+#include "object/transformmodifier.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 
 struct tInstanceRecord;
 
-struct cAvaSplineModifier {
-    // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store cAvaSplineModifier_vtbl; dtor cAvaSplineModifier__cAvaSplineModifier
+struct cAvaSplineModifier : public cTransformModifier {
+    // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
+    //   [R] ctors store cAvaSplineModifier_vtbl; dtor cAvaSplineModifier__cAvaSplineModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cAvaSplineModifierState
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox cAvaSplineModifier_getBoundBox returns +0x10, setBoundBox cAvaSplineModifier_setBoundBox
@@ -32,7 +33,6 @@ struct cAvaSplineModifier {
     char unk_84[0xc];               // 0x84 padding to the 0x90 allocation
 };
 
-CHECK_OFFSET(cAvaSplineModifier, mVtbl, 0x00);
 CHECK_OFFSET(cAvaSplineModifier, unk_04, 0x04);
 CHECK_OFFSET(cAvaSplineModifier, BoundBox, 0x10);
 CHECK_OFFSET(cAvaSplineModifier, Radius, 0x30);

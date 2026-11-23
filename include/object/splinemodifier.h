@@ -14,6 +14,7 @@
 // Evidence tags: [R] ctors/dtor/allocation; [U] retail use (asm of every method listed in methods.txt); [O] On Tour.
 
 #include "layout.h"
+#include "object/transformmodifier.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 #include "object/spline3d.h"
@@ -50,10 +51,9 @@ CHECK_OFFSET(tAddSplineData, ForceTime, 0x28);
 CHECK_OFFSET(tAddSplineData, unk_02C, 0x2C);
 CHECK_SIZE(tAddSplineData, 0x30);
 
-struct cSplineModifier {
-    // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store cSplineModifier_vtbl; the dtor stores it, then the base
-                                    //      cTransformModifier_vtbl
+struct cSplineModifier : public cTransformModifier {
+    // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
+    //   [R] ctors store cSplineModifier_vtbl; the dtor stores it, then the base cTransformModifier_vtbl
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cSplineModifierState (0x50 bytes; [R] the replay ctor reads 0x50 bytes here)
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox returns +0x10, setBoundBox (sq 0x10/0x20)
@@ -83,7 +83,6 @@ struct cSplineModifier {
     char unk_E8[0x8];               // 0xE8 padding to the 0xF0 allocation
 };
 
-CHECK_OFFSET(cSplineModifier, mVtbl, 0x00);
 CHECK_OFFSET(cSplineModifier, unk_04, 0x04);
 CHECK_OFFSET(cSplineModifier, BoundBox, 0x10);
 CHECK_OFFSET(cSplineModifier, SequenceType, 0x30);

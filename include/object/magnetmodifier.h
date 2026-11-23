@@ -10,14 +10,15 @@
 // with 4-byte bools (RootTransformDirty 0x50, AllowCollide 0x54 instead of 0x50/0x51).
 
 #include "layout.h"
+#include "object/transformmodifier.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 
 struct tInstanceRecord;
 
-struct cMagnetModifier {
-    // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store cMagnetModifier_vtbl; dtor cMagnetModifier__cMagnetModifier
+struct cMagnetModifier : public cTransformModifier {
+    // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
+    //   [R] ctors store cMagnetModifier_vtbl; dtor cMagnetModifier__cMagnetModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cMagnetModifierState
     t4Vector Offset;                // 0x10 [O]; [R] ctor copies Transform row 3 here; [U] update cMagnetModifier_update,
@@ -40,7 +41,6 @@ struct cMagnetModifier {
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
 };
 
-CHECK_OFFSET(cMagnetModifier, mVtbl, 0x00);
 CHECK_OFFSET(cMagnetModifier, unk_04, 0x04);
 CHECK_OFFSET(cMagnetModifier, Offset, 0x10);
 CHECK_OFFSET(cMagnetModifier, BoundBox, 0x20);

@@ -1771,9 +1771,9 @@ struct sRmSrcDF70 {
  */
 extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* self, cBxReplayFrame* stream)
 {
-    self->mVtbl = cTransformModifier_vtbl;
+    VPTR_AT(self, 0) = cTransformModifier_vtbl;
     cRigidBody_cRigidBody(((char*)&self->Pose));
-    self->mVtbl = cRollerModifier_vtbl;
+    VPTR_AT(self, 0) = cRollerModifier_vtbl;
     SphereTree_SphereTree(((char*)&self->SphTree));
     cRigidBody_readFromReplayFrame(((char*)&self->Pose), stream);
     stream->read((char*)&self->mKineticEnergy, 40);

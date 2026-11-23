@@ -26,6 +26,7 @@
 // from world/worldview.h until both move to a bx header.
 
 #include "layout.h"
+#include "object/transformmodifier.h"
 #include "intersect/spheretree.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
@@ -78,10 +79,10 @@ CHECK_OFFSET(tAddRollerData, unk_00C, 0x0C);
 CHECK_OFFSET(tAddRollerData, unk_010, 0x10);
 CHECK_SIZE(tAddRollerData, 0x14);
 
-struct cRollerModifier {
-    // --- cTransformModifier (On Tour 0x4: the vptr)
-    void** mVtbl;                 // 0x000 [R] ctors store cTransformModifier_vtbl (cTransformModifier) then cRollerModifier_vtbl;
-                                  //       the destructor stores cTransformModifier_vtbl back
+struct cRollerModifier : public cTransformModifier {
+    // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
+    //   [R] ctors store cTransformModifier_vtbl (cTransformModifier) then cRollerModifier_vtbl; the destructor stores
+    //       cTransformModifier_vtbl back
     // --- cRollerNodeState (On Tour 0x28; [R] cRollerModifier_writeToReplayFrame writes these 0x28 bytes to the replay frame)
     float mKineticEnergy;         // 0x004 [O]; [U] cRollerModifier_Collision stores V.P + W.L; update reads/writes it
     float mMass;                  // 0x008 [O]; [R] ctor: rdata + 0x4, InvM = 1 / mMass; [U] Collision: 5000 / mMass
@@ -125,7 +126,6 @@ struct cRollerModifier {
                                   //       the world intersect query (cBXNash_terrainIntersect1)
 };
 
-CHECK_OFFSET(cRollerModifier, mVtbl, 0x000);
 CHECK_OFFSET(cRollerModifier, mKineticEnergy, 0x004);
 CHECK_OFFSET(cRollerModifier, mMass, 0x008);
 CHECK_OFFSET(cRollerModifier, mElast, 0x00C);

@@ -2054,7 +2054,7 @@ extern char cParentModifier_vtbl[];
 extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, void* parentInstance, void* meshIndex, sMoveQuad* pos)
 {
     cPositionModifier_cPositionModifier((cPositionModifier*)self, pos);
-    self->mVtbl = (void**)cParentModifier_vtbl;
+    VPTR_AT(self, 0) = (void**)cParentModifier_vtbl;
     self->ParentInst = (tInstanceRecord*)parentInstance;
     self->Mesh = (int)meshIndex;
     return ((void*)self);
@@ -2081,7 +2081,7 @@ extern char cParentModifier_vtbl[];
 extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, cBxReplayFrame* stream)
 {
     cPositionModifier_cPositionModifier2(self, stream);
-    self->mVtbl = (void**)cParentModifier_vtbl;
+    VPTR_AT(self, 0) = (void**)cParentModifier_vtbl;
     stream->read((char*)&self->Mesh, 4);
     self->ParentInst = (tInstanceRecord*)(void*)stream->readReplayInstance();
     return ((void*)self);
