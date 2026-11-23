@@ -1468,8 +1468,7 @@ extern "C" void cFEMemCard_writeStart(void)
         fe->mPopupType = 22;
         char* buf = (char*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(app, buf, 800);
-        sVEntry<void(void*, char*, int, int, int, int, int)>* vt = (sVEntry<void(void*, char*, int, int, int, int, int)>*)VPTR_OF(cListNode, cFEMemCard_mInstance);
-        vt[36].fn(vthis(cFEMemCard_mInstance, vt[36]), buf, 1, 1, 0, 0, 1);
+        cFEMemCard_mInstance->getPopup((unsigned short*)buf, 1, 1, 0, 0, 1);
         cFEMemCard_mInstance->mIsStatusPopupOn = 1;
         if (buf != 0) {
             cMemMan_free(buf);

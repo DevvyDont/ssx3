@@ -11,6 +11,7 @@
 #include "fe/festatememcard.h"
 #include "ui/uistate.h"
 #include "main/ssxapp.h"
+#include "fe/fememcard.h"
 
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onCreateScreen);
@@ -203,7 +204,6 @@ extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 // Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
 extern char* cFEStateMemCard_mInstance_86D60 __asm__("cFEStateMemCard_mInstance");
 
-struct sVtB_86D60 { short delta; short index; void (*fn)(void*, void*, int, int, int, int, int); };
 struct sVtW_86D60 { short delta; short index; void (*fn)(void*, unsigned short*, int); };
 struct sVtV_86D60 { short delta; short index; void (*fn)(void*, int); };
 struct sLocal_86D60 { int v[8]; };
@@ -238,8 +238,7 @@ extern "C" void func_00186D60(void)
     sprintf1(popupText, fmt, &loc, need);
     cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance_86D60;
     st->mPopupType = 9;
-    sVtB_86D60* svt = (sVtB_86D60*)VPTR_OF(cListNode, st);
-    svt[36].fn(vthis(st, svt[36]), popupText, 0, 0, 0, 0, 0);
+    st->getPopup(popupText, 0, 0, 0, 0, 0);
 
     {
         char* w = *(char**)(cFEStateMemCard_mInstance_86D60 + 0x218);
@@ -777,8 +776,7 @@ extern "C" void cFEStateMemCard_onPopupEvent(cFEStateMemCard* self, cUIState* po
     int cancel = key == 0x10;
     if (!cancel)
     {
-      sVEntry<void(void *)> *vt = (sVEntry<void(void *)>*)VPTR_OF(cListNode, self);
-      vt[41].fn(vthis(self, vt[41]));
+      self->cancel();
       cMCOverlayManager_update(cSSXApp_getMCManager(SSXApp));
       cFEStateMemCard_terminateFreeSpaceCheck(self);
     }
