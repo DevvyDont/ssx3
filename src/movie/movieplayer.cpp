@@ -6,6 +6,7 @@
 #include "render/ps2graphicsman.h"
 #include "movie/mcoverlaymanager.h"
 #include "main/ssxapp.h"
+#include "util/bxmemcard.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self);
@@ -182,23 +183,20 @@ extern "C" void cMCOverlayManager_readSetFileType(cMCOverlayManager* self, int m
     int fileType = self->mFileType;
     if (fileType == 0) {
         self->mMaxFiles = 4;
-        char* memCard = (char*)self->mpMemCard;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(vthis(memCard, vt[19]), 0x80000);
+        cMemCard* memCard = self->mpMemCard;
+        memCard->SetDataSize(0x80000);
     } else if (fileType == 1) {
         self->mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
-        char* memCard = (char*)self->mpMemCard;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(vthis(memCard, vt[19]), fileSize);
+        cMemCard* memCard = self->mpMemCard;
+        memCard->SetDataSize(fileSize);
     } else {
         self->mMaxFiles = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveGameSize_r();
-        char* memCard = (char*)self->mpMemCard;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(vthis(memCard, vt[19]), fileSize);
+        cMemCard* memCard = self->mpMemCard;
+        memCard->SetDataSize(fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
@@ -210,12 +208,6 @@ extern "C" void cMCOverlayManager_readSetFileType(cMCOverlayManager* self, int m
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_readFile);
 #ifdef SKIP_ASM
-struct sMovieVEntryCA28 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int, int);
-};
-
 /**
  * Starts reading a save file from the memory card.
  *
@@ -227,9 +219,8 @@ struct sMovieVEntryCA28 {
  */
 extern "C" void cMCOverlayManager_readFile(cMCOverlayManager* self, int file, int data, int size)
 {
-    void* obj = self->mpMemCard;
-    sMovieVEntryCA28* vt = *(sMovieVEntryCA28**)obj;
-    vt[29].fn(vthis(obj, vt[29]), file, data, size);
+    cMemCard* obj = self->mpMemCard;
+    obj->StartFileSlotRead(file, data, size);
     self->mLoadedSize = size;
 }
 #endif
@@ -237,33 +228,20 @@ extern "C" void cMCOverlayManager_readFile(cMCOverlayManager* self, int file, in
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_readClose);
 #ifdef SKIP_ASM
-struct sMovieVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Closes the current card read: calls mpMemCard's vtable slot 32 (On Tour's cMemCard::SetReadClose by declaration
  * order).
  */
 extern "C" void cMCOverlayManager_readClose(cMCOverlayManager* self)
 {
-    void* obj = self->mpMemCard;
-    sMovieVEntry* vt = *(sMovieVEntry**)obj;
-    vt[32].fn(vthis(obj, vt[32]));
+    cMemCard* obj = self->mpMemCard;
+    obj->SetReadClose();
 }
 #endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_readSetSize);
 #ifdef SKIP_ASM
-struct sMovieVEntryCAA0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 // PORT: the unit declares cMCOverlayManager_readSetSize(void* self), but the body takes a
 // second argument (callers pass it in $5); the real body is bound by asm label.
 void cMCOverlayManager_readSetSize_impl(void* self, int a) __asm__("cMCOverlayManager_readSetSize");
@@ -277,9 +255,8 @@ void cMCOverlayManager_readSetSize_impl(void* self, int a) __asm__("cMCOverlayMa
 void cMCOverlayManager_readSetSize_impl(void* vself, int size)
 {
     cMCOverlayManager* self = (cMCOverlayManager*)vself;
-    void* obj = self->mpMemCard;
-    sMovieVEntryCAA0* vt = *(sMovieVEntryCAA0**)obj;
-    vt[19].fn(vthis(obj, vt[19]), size);
+    cMemCard* obj = self->mpMemCard;
+    obj->SetDataSize(size);
     self->mSize = size;
 }
 #endif
@@ -323,23 +300,20 @@ extern "C" void cMCOverlayManager_writeSetFileType(cMCOverlayManager* self, int 
     int fileType = self->mFileType;
     if (fileType == 0) {
         self->mMaxFiles = 4;
-        char* memCard = (char*)self->mpMemCard;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(vthis(memCard, vt[19]), 0x80000);
+        cMemCard* memCard = self->mpMemCard;
+        memCard->SetDataSize(0x80000);
     } else if (fileType == 1) {
         self->mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
-        char* memCard = (char*)self->mpMemCard;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(vthis(memCard, vt[19]), fileSize);
+        cMemCard* memCard = self->mpMemCard;
+        memCard->SetDataSize(fileSize);
     } else {
         self->mMaxFiles = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveGameSize_r();
-        char* memCard = (char*)self->mpMemCard;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(vthis(memCard, vt[19]), fileSize);
+        cMemCard* memCard = self->mpMemCard;
+        memCard->SetDataSize(fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
@@ -358,9 +332,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_writeClose);
 extern "C" void cMCOverlayManager_writeClose(cMCOverlayManager* self)
 {
     if (self->mWriteInProgress != 0) {
-        void* obj = self->mpMemCard;
-        sMovieVEntry* vt = *(sMovieVEntry**)obj;
-        vt[43].fn(vthis(obj, vt[43]));
+        cMemCard* obj = self->mpMemCard;
+        obj->SetWriteClose();
     }
 }
 #endif
@@ -616,13 +589,11 @@ static inline bool isState_23D660(char* s, int k)
  */
 extern "C" void cMCOverlayManager_managerDeviceSelectUpdate(cMCOverlayManager* self)
 {
-    char* memCard = (char*)self->mpMemCard;
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)memCard;
-    vt[3].fn(vthis(memCard, vt[3]));
+    cMemCard* memCard = self->mpMemCard;
+    memCard->Update();
     if (self->mCheckCard != 0) {
-        memCard = (char*)self->mpMemCard;
-        sVEntry<int(void*)>* ivt = *(sVEntry<int(void*)>**)memCard;
-        if (ivt[11].fn(vthis(memCard, ivt[11])) != 0) {
+        memCard = self->mpMemCard;
+        if (memCard->IsBusy() != 0) {
             return;
         }
         self->mCheckCard = 0;
@@ -630,9 +601,8 @@ extern "C" void cMCOverlayManager_managerDeviceSelectUpdate(cMCOverlayManager* s
     if (self->mMaxDevices == -1) {
         self->mMaxDevices = cMCOverlayManager_getMaxDevicesSupported((cMCOverlayManager*)self);
     }
-    memCard = (char*)self->mpMemCard;
-    sVEntry<int(void*)>* ivt = *(sVEntry<int(void*)>**)memCard;
-    if (ivt[11].fn(vthis(memCard, ivt[11])) == 0) {
+    memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         cMCOverlayManager_SetAction((cMCOverlayManager*)self, 0);
         int ok = !(isState_23D660(((char*)self), 49) || isState_23D660(((char*)self), 50) || isState_23D660(((char*)self), 51) || isState_23D660(((char*)self), 52) || isState_23D660(((char*)self), 54));
         if (ok) {
@@ -1083,9 +1053,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitCardsCheck);
  */
 extern "C" void cMCOverlayManager_UpdateInitCardsCheck(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt2[1].fn(vthis(self, vt2[1]), 50);
     }
@@ -1106,12 +1075,6 @@ void cMCOverlayManager_UpdateInitCardsCheckDone(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFileCheckWait);
 #ifdef SKIP_ASM
-struct sMovieVEntryE2C8a {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 struct sMovieVEntryE2C8b {
     short delta;
     short index;
@@ -1123,9 +1086,8 @@ struct sMovieVEntryE2C8b {
  */
 extern "C" void cMCOverlayManager_UpdateInitFileCheckWait(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sMovieVEntryE2C8a* vt = *(sMovieVEntryE2C8a**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         sMovieVEntryE2C8b* vt2 = (sMovieVEntryE2C8b*)self->mVtbl;
         vt2[1].fn(vthis(self, vt2[1]), 51);
     }
@@ -1153,12 +1115,10 @@ extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateInitFileCheckDevice(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
-        void* card = self->mpMemCard;
-        sVEntry<int(void*, int)>* vtb = *(sVEntry<int(void*, int)>**)card;
-        if (vtb[52].fn(vthis(card, vtb[52]), self->mSelectedDevice) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
+        cMemCard* card = self->mpMemCard;
+        if (card->IsAvailable(self->mSelectedDevice) == 0) {
             sMovieVEntryE320c* vt2 = (sMovieVEntryE320c*)self->mVtbl;
             vt2[1].fn(vthis(self, vt2[1]), 2);
             (self->callbackDisplayNoCards)();
@@ -1173,12 +1133,6 @@ extern "C" void cMCOverlayManager_UpdateInitFileCheckDevice(cMCOverlayManager* s
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateFileExists);
 #ifdef SKIP_ASM
-struct sMovieVEntryE3C0a {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 struct sMovieVEntryE3C0b {
     short delta;
     short index;
@@ -1190,9 +1144,8 @@ struct sMovieVEntryE3C0b {
  */
 extern "C" void cMCOverlayManager_UpdateFileExists(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sMovieVEntryE3C0a* vt = *(sMovieVEntryE3C0a**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             sMovieVEntryE3C0b* vt2 = (sMovieVEntryE3C0b*)self->mVtbl;
             vt2[1].fn(vthis(self, vt2[1]), 3);
@@ -1216,9 +1169,8 @@ extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateCardChanged(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             cMCOverlayManager_CancelCardOp(self, 0);
             self->mCardChanged = 0;
@@ -1238,9 +1190,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFileCheck);
  */
 extern "C" void cMCOverlayManager_UpdateInitFileCheck(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt2[1].fn(vthis(self, vt2[1]), 52);
     }
@@ -1404,9 +1355,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateNoCardsError(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             cMCOverlayManager_CancelCardOp(self, 0);
         } else if ((self->callbackIsRetryPressed)() != 0) {
@@ -1534,12 +1484,6 @@ struct sMovieVEntryEA90 {
     short index;
     void (*fn)(void*, int);
 };
-struct sMovieVEntryEA90b {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Retries the operation that failed: a save restarts from CheckCardsWait, anything else rechecks the card.
  *
@@ -1555,9 +1499,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self)
         int playing = self->mWriteInProgress;
         cMCOverlayManager_mSaveInProgress = 0;
         if (playing != 0) {
-            void* memCard = self->mpMemCard;
-            sMovieVEntryEA90b* vt2 = *(sMovieVEntryEA90b**)memCard;
-            vt2[44].fn(vthis(memCard, vt2[44]));
+            cMemCard* memCard = self->mpMemCard;
+            memCard->SetWriteFailed();
         }
         sMovieVEntryEA90* vt = (sMovieVEntryEA90*)self->mVtbl;
         vt[1].fn(vthis(self, vt[1]), 2);
@@ -1599,12 +1542,6 @@ extern "C" void cMCOverlayManager_TriggerPollNoCardError(cMCOverlayManager* self
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCardInvalid);
 #ifdef SKIP_ASM
-struct sMovieVEntryEB80 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
@@ -1614,9 +1551,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateCardInvalid(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sMovieVEntryEB80* vt = *(sMovieVEntryEB80**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             cMCOverlayManager_CancelCardOp(self, 1);
         } else if ((self->callbackIsRetryPressed)() != 0) {
@@ -1923,9 +1859,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateSaveFailed(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             cMCOverlayManager_CancelCardOp(self, 0);
         } else if ((self->callbackIsRetryPressed)() != 0) {
@@ -1940,12 +1875,6 @@ extern "C" void cMCOverlayManager_UpdateSaveFailed(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateSaveTooBig);
 #ifdef SKIP_ASM
-struct sMovieVEntryF1D8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
@@ -1955,9 +1884,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateSaveTooBig(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sMovieVEntryF1D8* vt = *(sMovieVEntryF1D8**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             cMCOverlayManager_CancelCardOp(self, 0);
         } else if ((self->callbackIsRetryPressed)() != 0) {
@@ -1979,9 +1907,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateNoFreeBlocks(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsRetryPressed)() != 0) {
             cMCOverlayManager_RetryCardOp(self);
         } else if ((self->callbackIsCancelPressed)() != 0) {
@@ -2017,13 +1944,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdatePreSaveFile);
  */
 extern "C" void cMCOverlayManager_UpdatePreSaveFile(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)memCard;
-    void* card;
+    cMemCard* memCard = self->mpMemCard;
+    cMemCard* card;
     sVEntry<int(void*, int)>* vtb;
-    if (vt[67].fn(vthis(memCard, vt[67]), self->mFileCursor) != 0
-        || (card = (void*)self->mpMemCard, vtb = *(sVEntry<int(void*, int)>**)card,
-            vtb[65].fn(vthis(card, vtb[65]), self->mFileCursor) != 0)) {
+    if (memCard->HasFileName(self->mFileCursor) != 0
+        || (card = self->mpMemCard, vtb = *(sVEntry<int(void*, int)>**)card,
+            card->IsFileSlotBroken(self->mFileCursor) != 0)) {
         sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt2[1].fn(vthis(self, vt2[1]), 0xE);
     } else {
@@ -2036,12 +1962,6 @@ extern "C" void cMCOverlayManager_UpdatePreSaveFile(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdatePreSaveFileDelete);
 #ifdef SKIP_ASM
-struct sMovieVEntryF3A0a {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 struct sMovieVEntryF3A0b {
     short delta;
     short index;
@@ -2054,12 +1974,10 @@ struct sMovieVEntryF3A0b {
  */
 extern "C" void cMCOverlayManager_UpdatePreSaveFileDelete(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sMovieVEntryF3A0a* vt = *(sMovieVEntryF3A0a**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
-        void* card = self->mpMemCard;
-        sMovieVEntryF3A0a* vtb = *(sMovieVEntryF3A0a**)card;
-        if (vtb[73].fn(vthis(card, vtb[73])) != 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
+        cMemCard* card = self->mpMemCard;
+        if (card->DidErrorOccur() != 0) {
             sMovieVEntryF3A0b* vt2 = (sMovieVEntryF3A0b*)self->mVtbl;
             vt2[1].fn(vthis(self, vt2[1]), 20);
         } else {
@@ -2098,12 +2016,6 @@ extern "C" void cMCOverlayManager_UpdateCreateFile(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateSaveFile);
 #ifdef SKIP_ASM
-struct sMovieVEntryF4F8a {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 struct sMovieVEntryF4F8b {
     short delta;
     short index;
@@ -2118,12 +2030,10 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int a1);
  */
 extern "C" void cMCOverlayManager_UpdateSaveFile(cMCOverlayManager* self)
 {
-    void* memCard;
-    sMovieVEntryF4F8a* vt;
+    cMemCard* memCard;
     self->mProgress = (float)self->mSavedSize / (float)self->mSize;
-    memCard = (void*)self->mpMemCard;
-    vt = *(sMovieVEntryF4F8a**)memCard;
-    if (vt[73].fn(vthis(memCard, vt[73])) != 0) {
+    memCard = self->mpMemCard;
+    if (memCard->DidErrorOccur() != 0) {
         cMCOverlayManager_WriteFailed(self, 1);
     } else {
         sMovieVEntryF4F8b* vt2 = (sMovieVEntryF4F8b*)self->mVtbl;
@@ -2456,9 +2366,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_checkDevice);
 extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int iSlot)
 {
     self->mCurrCheckDevice = iSlot;
-    void* obj = self->mpMemCard;
-    sMovieVEntry2* vt = *(sMovieVEntry2**)obj;
-    vt[5].fn(vthis(obj, vt[5]), iSlot);
+    cMemCard* obj = self->mpMemCard;
+    obj->CheckDevice(iSlot);
 }
 #endif
 
@@ -2522,12 +2431,6 @@ extern "C" void cMCOverlayManager_UpdateSaveClosing(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadFailed);
 #ifdef SKIP_ASM
-struct sMovieVEntryFC70a {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 struct sMovieVEntryFC70b {
     short delta;
     short index;
@@ -2540,9 +2443,8 @@ struct sMovieVEntryFC70b {
  */
 extern "C" void cMCOverlayManager_UpdateLoadFailed(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sMovieVEntryFC70a* vt = *(sMovieVEntryFC70a**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             sMovieVEntryFC70b* vt2 = (sMovieVEntryFC70b*)self->mVtbl;
             vt2[1].fn(vthis(self, vt2[1]), 3);
@@ -2684,12 +2586,6 @@ extern "C" void cMCOverlayManager_UpdateSaveCorrupt(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadCorrupt);
 #ifdef SKIP_ASM
-struct sMovieVEntryFE70 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
@@ -2700,9 +2596,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateLoadCorrupt(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sMovieVEntryFE70* vt = *(sMovieVEntryFE70**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             cMCOverlayManager_CancelCardOp(self, 1);
         } else if ((self->callbackIsRetryPressed)() != 0) {
@@ -2794,9 +2689,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadStart);
  */
 extern "C" void cMCOverlayManager_UpdateLoadStart(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[73].fn(vthis(memCard, vt[73])) != 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->DidErrorOccur() != 0) {
         sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt2[1].fn(vthis(self, vt2[1]), 36);
         (self->callbackReadFailed)();
@@ -3139,12 +3033,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateDeleteProgress);
  */
 extern "C" void cMCOverlayManager_UpdateDeleteProgress(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
-        void* card = self->mpMemCard;
-        sVEntry<int(void*)>* vtb = *(sVEntry<int(void*)>**)card;
-        if (vtb[73].fn(vthis(card, vtb[73])) != 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
+        cMemCard* card = self->mpMemCard;
+        if (card->DidErrorOccur() != 0) {
             sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt2[1].fn(vthis(self, vt2[1]), 0x1C);
         } else {
@@ -3166,9 +3058,8 @@ extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
  */
 extern "C" void cMCOverlayManager_UpdateDeleteFailed(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsCancelPressed)() != 0) {
             cMCOverlayManager_CancelCardOp(self, 0);
         }
@@ -3309,9 +3200,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateDeleteDone);
  */
 extern "C" void cMCOverlayManager_UpdateDeleteDone(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackDeleteDone)() != 0) {
             sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt2[1].fn(vthis(self, vt2[1]), 6);
@@ -3657,9 +3547,8 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
  */
 extern "C" void cMCOverlayManager_UpdateCardDamaged(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    cMemCard* memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         if ((self->callbackIsRetryPressed)() != 0) {
             cMCOverlayManager_RetryCardOp(self);
         } else if ((self->callbackIsCancelPressed)() != 0) {
@@ -3751,9 +3640,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_cleanUp);
  */
 extern "C" void cMCOverlayManager_cleanUp(cMCOverlayManager* self)
 {
-    void* obj = self->mpMemCard;
-    sMovieVEntry* vt = *(sMovieVEntry**)obj;
-    vt[12].fn(vthis(obj, vt[12]));
+    cMemCard* obj = self->mpMemCard;
+    obj->CleanUp();
 }
 #endif
 
@@ -3769,14 +3657,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetMaxFiles);
  */
 extern "C" int cMCOverlayManager_GetMaxFiles(cMCOverlayManager* self)
 {
-    char* memCard = (char*)self->mpMemCard;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (self->mMaxFiles < vt[68].fn(vthis(memCard, vt[68]))) {
+    cMemCard* memCard = self->mpMemCard;
+    if (self->mMaxFiles < memCard->GetMaxFiles()) {
         return self->mMaxFiles;
     }
-    char* memCardAgain = (char*)self->mpMemCard;
-    sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)memCardAgain;
-    return vt2[68].fn(vthis(memCardAgain, vt2[68]));
+    cMemCard* memCardAgain = self->mpMemCard;
+    return memCardAgain->GetMaxFiles();
 }
 #endif
 
@@ -3795,12 +3681,11 @@ extern int cMCOverlayManager_mSaveInProgress;
  */
 extern "C" void cMCOverlayManager_WriteData(cMCOverlayManager* self, int data, int size)
 {
-    void* memCard = self->mpMemCard;
+    cMemCard* memCard = self->mpMemCard;
     int one = 1;
     self->mSavedSize += size;
     cMCOverlayManager_mSaveInProgress = one;
-    sVEntry<void(void*, int, int)>* vt = *(sVEntry<void(void*, int, int)>**)memCard;
-    vt[41].fn(vthis(memCard, vt[41]), data, size);
+    memCard->WriteData(data, size);
 }
 #endif
 
@@ -3826,9 +3711,8 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int showW
     int on = self->mWriteInProgress;
     cMCOverlayManager_mSaveInProgress = 0;
     if (on != 0) {
-        void* memCard = self->mpMemCard;
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)memCard;
-        vt[44].fn(vthis(memCard, vt[44]));
+        cMemCard* memCard = self->mpMemCard;
+        memCard->SetWriteFailed();
     }
     if (showWriteFailPopup != 0) {
         cMCOverlayManager_SetAction_v(self, 0);
@@ -3841,12 +3725,6 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int showW
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ReadData);
 #ifdef SKIP_ASM
-struct sMovieVEntry3 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
-
 /**
  * Reads the next chunk of the file being loaded.
  *
@@ -3858,9 +3736,8 @@ struct sMovieVEntry3 {
 extern "C" void cMCOverlayManager_ReadData(cMCOverlayManager* self, int data, int n)
 {
     self->mLoadedSize += n;
-    void* obj = self->mpMemCard;
-    sMovieVEntry3* vt = *(sMovieVEntry3**)obj;
-    vt[30].fn(vthis(obj, vt[30]), data, n);
+    cMemCard* obj = self->mpMemCard;
+    obj->ReadData(data, n);
 }
 #endif
 
@@ -3875,9 +3752,8 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ReadFailed);
  */
 extern "C" void cMCOverlayManager_ReadFailed(cMCOverlayManager* self)
 {
-    void* memCard = self->mpMemCard;
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)memCard;
-    vt[33].fn(vthis(memCard, vt[33]));
+    cMemCard* memCard = self->mpMemCard;
+    memCard->SetReadFailed();
     sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
     vt2[1].fn(vthis(self, vt2[1]), 36);
     (self->callbackReadFailed)();
@@ -3938,8 +3814,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerStart);
 extern "C" void cMCOverlayManager_ManagerStart(cMCOverlayManager* self)
 {
     int one = 1;
-    void* memCard;
-    sVEntry<void(void*)>* vt;
+    cMemCard* memCard;
     self->mCheckAllowed = one;
     self->mSaved = 0;
     self->mCurrCheckDevice = 0;
@@ -3951,9 +3826,8 @@ extern "C" void cMCOverlayManager_ManagerStart(cMCOverlayManager* self)
     cMCOverlayManager_setSelectedDevice((cMCOverlayManager*)self);
     self->mCheckCard = one;
     self->mState = 2;
-    memCard = (void*)self->mpMemCard;
-    vt = *(sVEntry<void(void*)>**)memCard;
-    vt[3].fn(vthis(memCard, vt[3]));
+    memCard = self->mpMemCard;
+    memCard->Update();
 }
 #endif
 
@@ -4470,12 +4344,6 @@ extern "C" void cMCOverlayManager_getProductCode(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getMaxDevicesSupported);
 #ifdef SKIP_ASM
-struct sMovieVEntry1AC0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 /**
  * Returns how many memory-card devices the manager uses, asking the card once and caching the answer.
  *
@@ -4486,9 +4354,8 @@ struct sMovieVEntry1AC0 {
 extern "C" int cMCOverlayManager_getMaxDevicesSupported(cMCOverlayManager* self)
 {
     if (self->mMaxDevices < 0) {
-        void* memCard = self->mpMemCard;
-        sMovieVEntry1AC0* vt = *(sMovieVEntry1AC0**)memCard;
-        int n = vt[69].fn(vthis(memCard, vt[69]));
+        cMemCard* memCard = self->mpMemCard;
+        int n = memCard->GetMaxDevices();
         self->mMaxDevices = n;
         if (n >= 2) {
             self->mMaxDevices = 1;
@@ -4796,12 +4663,6 @@ void* cMCOverlayManager_GatherDeviceInfo(void* vself)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_InitiateFileCheck);
 #ifdef SKIP_ASM
-struct sMovieVEntry1FD0a {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 struct sMovieVEntry1FD0b {
     short delta;
     short index;
@@ -4816,12 +4677,10 @@ struct sMovieVEntry1FD0b {
  */
 extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self)
 {
-    void* memCard;
-    sMovieVEntry1FD0a* vt;
+    cMemCard* memCard;
     (self->callbackSysRecheckFile)();
-    memCard = (void*)self->mpMemCard;
-    vt = *(sMovieVEntry1FD0a**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         sMovieVEntry1FD0b* vt2 = (sMovieVEntry1FD0b*)self->mVtbl;
         vt2[1].fn(vthis(self, vt2[1]), 51);
     } else {
@@ -4842,12 +4701,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_RecheckCard);
  */
 extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self)
 {
-    void* memCard;
-    sVEntry<int(void*)>* vt;
+    cMemCard* memCard;
     self->mCheckCard = 0;
-    memCard = (void*)self->mpMemCard;
-    vt = *(sVEntry<int(void*)>**)memCard;
-    if (vt[11].fn(vthis(memCard, vt[11])) == 0) {
+    memCard = self->mpMemCard;
+    if (memCard->IsBusy() == 0) {
         sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt2[1].fn(vthis(self, vt2[1]), 2);
     } else {

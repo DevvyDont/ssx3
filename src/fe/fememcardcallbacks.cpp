@@ -13,6 +13,7 @@
 #include "ui/uiengine.h"
 #include "fe/fememcard.h"
 #include "main/ssxapp.h"
+#include "util/bxmemcard.h"
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveSuccess);
@@ -138,9 +139,8 @@ extern "C" void cFEMemCard_callbackConfirmOverwrite(void)
     unsigned short name[40];
     unsigned short* buf = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    char* memCard = (char*)mp->mpMemCard;
-    sVEntry<void(void*, ...)>* svt = *(sVEntry<void(void*, ...)>**)memCard;
-    svt[14].fn(vthis(memCard, svt[14]), mp->mFileCursor, name);
+    cMemCard* memCard = mp->mpMemCard;
+    memCard->GetTitleString(mp->mFileCursor, (unsigned short*)name);
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)locale->mVtbl;
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVOverWriteFile)), name);
@@ -638,14 +638,12 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
 {
     unsigned short name[0x100];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    char* sf = (char*)mp->mpMemCard;
-    sVEntry<int(void*, ...)>* sfvt = *(sVEntry<int(void*, ...)>**)sf;
-    if (sfvt[13].fn(vthis(sf, sfvt[13])) > 0) {
+    cMemCard* sf = mp->mpMemCard;
+    if (sf->GetNumFiles() > 0) {
         unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
         cFEMemCard_mInstance->mPopupType = 3;
-        char* sf2 = (char*)mp->mpMemCard;
-        sVEntry<void(void*, ...)>* sfvt2 = *(sVEntry<void(void*, ...)>**)sf2;
-        sfvt2[14].fn(vthis(sf2, sfvt2[14]), mp->mFileCursor, name);
+        cMemCard* sf2 = mp->mpMemCard;
+        sf2->GetTitleString(mp->mFileCursor, (unsigned short*)name);
         char* locale = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* ovt = *(sVEntry<void*(void*, ...)>**)(locale + 4);
         sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMConfirmDeletePS2)), name);
@@ -1180,9 +1178,8 @@ extern "C" void cFEMemCard_callbackFileChecked(void)
     cFEMemCard_mInstance->mState = 1;
     sVEntry<void(void*, ...)>* mvt = (sVEntry<void (void*, ...)>*)mp->mVtbl;
     mvt[1].fn(vthis(mp, mvt[1]), 2);
-    char* sf = (char*)mp->mpMemCard;
-    sVEntry<int(void*, ...)>* sfvt = *(sVEntry<int(void*, ...)>**)sf;
-    int busy = sfvt[53].fn(vthis(sf, sfvt[53]));
+    cMemCard* sf = mp->mpMemCard;
+    int busy = sf->IsAvailable1();
     if (busy) {
         SetMode_001D83A8((char*)cFEMemCard_mInstance, 3);
     } else {
@@ -1928,9 +1925,8 @@ extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard* self, int on)
     self->mIsLoadPressed = on;
     if (on) {
         cMCOverlayManager* mcManager = (cMCOverlayManager*)((char*)cSSXApp_getMCManager(SSXApp));
-        char* obj = (char*)mcManager->mpMemCard;
-        sVEntry<void(void*, void*, void*)>* vt = *(sVEntry<void(void*, void*, void*)>**)obj;
-        vt[14].fn(vthis(obj, vt[14]), (void*)mcManager->mFileCursor, (char*)&self->mLastLoadFileName);
+        cMemCard* obj = mcManager->mpMemCard;
+        obj->GetTitleString(mcManager->mFileCursor, (unsigned short*)&self->mLastLoadFileName);
     } else {
         *(short*)&self->mLastLoadFileName[0] = 0;
     }
