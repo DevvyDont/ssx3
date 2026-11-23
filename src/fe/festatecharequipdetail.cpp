@@ -369,9 +369,9 @@ void* cUIState_onDestroyScreen(void* self);
  */
 extern "C" void cFEStateCharEquip_onDestroyScreen(cFEStateCharEquip* self)
 {
-    char* mgr = (char*)SSXApp->RealFE;
-    if (mgr != 0) {
-        char* feRider = (char*)cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum);
+    cFE* mgr = SSXApp->RealFE;
+    if (((char*)mgr) != 0) {
+        char* feRider = (char*)cFERiderManager_getHuman1(&mgr->mRiderManager, self->mUserNum);
         *(unsigned int*)(feRider + 0xC2C) = 0xFFFFFFFF;
     }
     cUIState_onDestroyScreen(self);
@@ -715,14 +715,14 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
     void* screen = cList_first((cList*)(&self->mScreens));
     cUIThing* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
-        char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+        cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
         int on = 0;
         int mode1 = self->mEquipMode == 1;
         if (mode1) {
             if (self->mPreviewTextureFileIndex >= 0 || self->mLargePreviewDelay > 0)
                 on = 1;
         } else {
-            on = *(int*)(feRider + 0xCC8);
+            on = feRider->mVisible;
             on ^= 1;
         }
         obj->setVisible(on);
@@ -1453,9 +1453,9 @@ extern "C" void func_0019FA78(void* a0, int a1);
  */
 extern "C" void cFEStateCharEquip_cancelPreviewLoad(cFEStateCharEquip* self)
 {
-    char* mgr = (char*)SSXApp->RealFE;
-    if (mgr != 0) {
-        func_0019FA78(cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum), 0);
+    cFE* mgr = SSXApp->RealFE;
+    if (((char*)mgr) != 0) {
+        func_0019FA78(cFERiderManager_getHuman1(&mgr->mRiderManager, self->mUserNum), 0);
     }
 }
 #endif
@@ -1536,7 +1536,7 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self)
     if ((cUIObj_A798*)self->mpHelpText == 0)
         return;
     ((cUIObj_A798*)self->mpHelpText)->setVisible(0);
-    int sel = (self->mpMenu)->mScrollItemCurrent;
+    int sel = self->mpMenu->mScrollItemCurrent;
     if (sel < 0 || sel >= self->mNumItems) {
         ((cUIObj_A798*)self->mpHelpText)->setVisible(1);
         if (!isMode1_A798(self)) {
@@ -2212,8 +2212,8 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
         ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setVisible(1);
         ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setColor(kColourEnabled);
         cUIText_setUnicodeStringByID(self->mpBoltNameWidgets[0], GetHashValue32(str_kT_FEEmpty));
-        (self->mpMenu)->mScrollItemNum = 1;
-        (self->mpMenu)->mScrollItemOffset = 0;
+        self->mpMenu->mScrollItemNum = 1;
+        self->mpMenu->mScrollItemOffset = 0;
         visibleRow = 0;
         n = 1;
     } else {

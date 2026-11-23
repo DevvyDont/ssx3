@@ -49,8 +49,8 @@ extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPl
     cReplayFrame_cReplayFrame((cReplayFrame*)&self->SaveFramePtr);
     cGame* world = SSXApp->Game;
     *(char**)&self->Game = ((char*)world);
-    char* level = (char*)world->AI;
-    *(char**)&self->AI = level;
+    cAI* level = world->AI;
+    *(char**)&self->AI = ((char*)level);
     self->AsyncFileNum = -1;
     self->MaxPlaybackFiles = maxPlaybackFiles;
     self->AsyncHandle = -1;
@@ -60,7 +60,7 @@ extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPl
     self->NumPlaybackFiles = 0;
     *(int*)&self->PlaybackFiles = 0;
     self->State = 0;
-    int* info = *(int**)(*(char**)(level + 0x40) + 0xDF0);
+    int* info = *(int**)((char*)level->Players[0] + 0xDF0);
     int n = info[1];
     *(int*)&self->RealInputPad = info[0];
     *(int**)&self->InputPad = (int*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
@@ -247,7 +247,7 @@ extern "C" void cPlaybackMan_purgeLocation(cPlaybackMan* playbackMan)
         ASYNCFILE_cancel(self->AsyncHandle);
         self->AsyncHandle = -1;
     }
-    if ((self->PlaybackFiles) != 0) {
+    if (self->PlaybackFiles != 0) {
         for (int i = 0; i < self->NumPlaybackFiles; i++) {
             if (((void*)(self->PlaybackFiles)[i].PackData) != 0) {
                 cMemMan_free(((void*)(self->PlaybackFiles)[i].PackData));
@@ -255,8 +255,8 @@ extern "C" void cPlaybackMan_purgeLocation(cPlaybackMan* playbackMan)
             }
             (self->PlaybackFiles)[i].Size = 0;
         }
-        if ((self->PlaybackFiles) != 0) {
-            cMemMan_free((self->PlaybackFiles));
+        if (self->PlaybackFiles != 0) {
+            cMemMan_free(self->PlaybackFiles);
         }
         *(tPlaybackFile**)&self->PlaybackFiles = 0;
     }
@@ -527,7 +527,7 @@ extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
         self->AI->AITick = self->CurrentFrame->AITick;
         self->State = 1;
         cMissionRider* x = self->AI->MissionRiders[0];
-        int targetRider = ((char*)x) ? (int)x->mRider : 0;
+        int targetRider = x ? (int)x->mRider : 0;
         cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
@@ -666,7 +666,7 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
             int n = *cursor++;
             for (int i = 0; i < n; i++)
                 vals[i] = *cursor++ * 0.003921568859368563f;
-            (self->CurrentFrame)->Buffer.Index += 1 + n;
+            self->CurrentFrame->Buffer.Index += 1 + n;
             cInputPad_update(self->InputPad, n, vals);
             return 0;
         } else {
@@ -688,8 +688,8 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
                 *cursor = (int)(axisValue * 255.0f);
                 vals[i] = *cursor++ * 0.003921568859368563f;
             }
-            (self->CurrentFrame)->Buffer.Index += 1 + n;
-            (self->CurrentFrame)->Buffer.IndexMax += 1 + n;
+            self->CurrentFrame->Buffer.Index += 1 + n;
+            self->CurrentFrame->Buffer.IndexMax += 1 + n;
             cInputPad_update(self->InputPad, n, vals);
             return 0;
         } else {

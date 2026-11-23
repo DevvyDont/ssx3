@@ -486,7 +486,7 @@ extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, tIntersectInfo
     t4Vector n = vu0MulMat_6E38(transform, (data->FaceNorms)[intInfo->Face]);
     float yoffset = vu0Dot_6E38(relPos, y);
     int seg = intInfo->Face / 2;
-    tSpringNode* pNode = (data->Mesh.Nodes);
+    tSpringNode* pNode = data->Mesh.Nodes;
     vu0AddEq_6E38(pNode[seg].F, vu0Scale_6E38(data->Mesh.ForceScale, ToLocal_6E38(transform, *force)));
     pNode[seg].T += Torque_6E38(data->Mesh.TorqueScale, n, *force) * yoffset;
 }
@@ -792,12 +792,12 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectT
     for (int i = 0; i < n; i++) {
         tIntersectInfo* hit = &out[i];
         Reset_7268(hit);
-        float dataScale = (self->Instance)->m_fScale;
+        float dataScale = self->Instance->m_fScale;
         float one = 1.0f;
         (*(sFV_7268*)&hit->Ipos) = MulVec_7268(matrix, Mul_7268((*(sFV_7268*)&hit->Ipos), sFV_7268(dataScale, dataScale, dataScale, one)));
         (*(sFV_7268*)&hit->Inorm) = MulVec_7268(matrix, (*(sFV_7268*)&hit->Inorm));
         hit->HitType = 1;
-        (*(void**)&hit->Inst) = (self->Instance);
+        (*(void**)&hit->Inst) = self->Instance;
         int k = ((sFList_7268*)(self->Instance)->m_Model)->count - 1;
         (*(int*)&hit->SphTree) = 0;
         hit->Mesh = k;
@@ -1015,7 +1015,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
     sV4_75D8 sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(*(sV4_75D8*)&self->BottomLeftOffset));
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
-    tSpringNode* node = (self->Mesh.Nodes);
+    tSpringNode* node = self->Mesh.Nodes;
     int i;
     for (i = 0; i < n; i++) {
         float sinAngle, cosAngle;
@@ -1128,10 +1128,10 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
     sRS_7B80* state = TOP_7B80(ctx);
     TOP_7B80(ctx) = state + 1;
     state[1].f4_2 = 5;
-    char* renderer = (char*)self->GridMesh;
-    if (renderer != 0) {
-        sVE7_7B80* hv = *(sVE7_7B80**)(renderer + 4);
-        hv[7].fn(renderer + hv[7].delta, mtx, (self->Instance)->m_MaterialBlock, 0);
+    cGridMesh* renderer = self->GridMesh;
+    if (((char*)renderer) != 0) {
+        sVE7_7B80* hv = (sVE7_7B80*)renderer->mVtbl;
+        hv[7].fn(((char*)renderer) + hv[7].delta, mtx, self->Instance->m_MaterialBlock, 0);
     } else {
         sVE96_7B80* ctxVtbl = *(sVE96_7B80**)(ctx + 0x10D8);
         ctxVtbl[96].fn(ctx + ctxVtbl[96].delta, self->Instance, 0, 0, 0);
@@ -1402,8 +1402,8 @@ extern "C" void cFlexRailNode_render(cFlexRailNode* self)
         D_004FF6C0[7][3] = 1.0f;
         D_004A5980 = 1;
     }
-    (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
-    (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
+    ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = -1;
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
     int n = self->NumNodes - 1;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < 8; j++) {

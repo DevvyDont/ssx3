@@ -806,8 +806,8 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
  * @param model  the cAnimModel the emitters follow
  */
 extern "C" void func_002F19F0(void *emitterFx, int model) {
-    (*(int *)((char*)(emitterFx) + (0x94))) = model;
-    (*(int *)((char*)(emitterFx) + (0))) = 0;
+    (*(int *)((char*)(emitterFx) + 0x94)) = model;
+    (*(int *)((char*)(emitterFx) + 0)) = 0;
 }
 #endif
 
@@ -823,7 +823,7 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1A00);
  * @param emitterFx  the attached-emitter FX object
  */
 extern "C" void func_002F1A00(void *emitterFx) {
-    (*(int *)((char*)(emitterFx) + (0xA0))) = 0;
+    (*(int *)((char*)(emitterFx) + 0xA0)) = 0;
 }
 #endif
 
@@ -2511,10 +2511,10 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
 {
     if (cSplashToggles_m_Enable == 0)
         return;
-    char* w = (char*)SSXApp->Game->ViewMan;
-    if (self->idx >= *(unsigned int*)(w + 0x10))
+    cGameViewMan* w = SSXApp->Game->ViewMan;
+    if (self->idx >= w->m_uiNumView)
         return;
-    t4Vector pos = *(t4Vector*)(*(char**)(w + (self->idx << 2) + 4) + 0x20);
+    t4Vector pos = *(t4Vector*)(*(char**)(((char*)w) + (self->idx << 2) + 4) + 0x20);
     if (self->hasPrev) {
         t4Vector moved;
         Sub_39E0(&moved, pos, self->prevPos);

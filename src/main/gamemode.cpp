@@ -3048,8 +3048,8 @@ extern "C" int cGMPointHandler_riderCheckpointHit(cGMPointHandler* self)
     }
     if (ok) {
         int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent, self->mCurrentDifficulty, self->uiTrackProgress) * 100;
-        void* riderMetrix = SSXApp->Game->AI->Riders[0]->mMetrix;
-        int curScore = *(int*)((char*)riderMetrix + 0x198);
+        cRiderMetrix* riderMetrix = SSXApp->Game->AI->Riders[0]->mMetrix;
+        int curScore = riderMetrix->Totals.TotalPoints;
         if (bonusPoints != 0) {
             cRiderMetrix_evSplitPoints(riderMetrix, curScore - bonusPoints);
         }

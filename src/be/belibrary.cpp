@@ -396,8 +396,8 @@ extern "C" void* MEM_copy(void* dst, void* src, int n);
  */
 extern "C" void func_0014ACB0(void* self, int profileIndex, int characterId, void* src)
 {
-    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
-    MEM_copy(charRecord + 0x290, src, 2100);
+    cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
+    MEM_copy(&charRecord->mBolts[0], src, 2100);
 }
 #endif
 
@@ -581,9 +581,9 @@ struct sBEFlagEntry {
  */
 extern "C" void func_0014AEA8(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
-    int count = *(int*)(charRecord + 0x28C);
-    sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
+    cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
+    int count = charRecord->mNumBolts;
+    sBEFlagEntry* flagEntry = (sBEFlagEntry*)(&charRecord->mBolts[0]);
     int i;
     for (i = 0; i < count; i++, flagEntry++) {
         if (flagEntry->flags & 0x10) {
@@ -611,9 +611,9 @@ extern "C" void func_0014AF10(void)
     int characterId;
     for (profileIndex = 0; profileIndex < 3; profileIndex++) {
         for (characterId = 0; characterId < 10; characterId++) {
-            char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
-            int count = *(int*)(charRecord + 0x28C);
-            sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
+            cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
+            int count = charRecord->mNumBolts;
+            sBEFlagEntry* flagEntry = (sBEFlagEntry*)(&charRecord->mBolts[0]);
             int i;
             for (i = 0; i < count; i++, flagEntry++) {
                 if (flagEntry->flags & 4) {
@@ -932,16 +932,16 @@ struct sBEEntry38B {
  */
 extern "C" int func_0014B478(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
+    cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int sum = 0;
     int count = func_0014D988(D_004A6750, characterId);
     sBEEntry38B* boltDef = (sBEEntry38B*)func_0014D998((sBELibTables*)D_004A6750, characterId);
     int i;
     for (i = 0; i < count; i++, boltDef++) {
-        short entryIndex = (*(short**)(charRecord + 0x288))[boltDef->field_0x4];
+        short entryIndex = (charRecord->mpBoltsMap)[boltDef->field_0x4];
         sBEFlagEntryB* flagEntry;
         if (entryIndex >= 0)
-            flagEntry = (sBEFlagEntryB*)(charRecord + 0x290) + entryIndex;
+            flagEntry = (sBEFlagEntryB*)(&charRecord->mBolts[0]) + entryIndex;
         else
             flagEntry = 0;
         if (flagEntry->flags & 0x10)
@@ -1878,9 +1878,9 @@ extern "C" void* func_0014C6A0(void* self)
             int characterId;
             for (profileIndex = 0; profileIndex < 3; profileIndex++) {
                 for (characterId = 0; characterId < 10; characterId++) {
-                    char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
-                    int count = *(int*)(charRecord + 0x28C);
-                    sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
+                    cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
+                    int count = charRecord->mNumBolts;
+                    sBEFlagEntry* flagEntry = (sBEFlagEntry*)(&charRecord->mBolts[0]);
                     int i;
                     for (i = 0; i < count; i++, flagEntry++) {
                         if (flagEntry->flags & 4) {
@@ -2412,7 +2412,7 @@ INCLUDE_ASM("be/belibrary", func_0014DA08);
  * @return the index
  */
 extern "C" int func_0014DA08(int tables, int groupId) {
-    return (*(int *)(((char*)(tables) + (groupId << 2)) + (0xA4)));
+    return (*(int *)(((char*)(tables) + (groupId << 2)) + 0xA4));
 }
 #endif
 //100%
@@ -2429,7 +2429,7 @@ INCLUDE_ASM("be/belibrary", func_0014DA18);
  * @return the count
  */
 extern "C" int func_0014DA18(int tables, int groupId) {
-    return (*(int *)(((char*)(tables) + (groupId << 2)) + (0x20C)));
+    return (*(int *)(((char*)(tables) + (groupId << 2)) + 0x20C));
 }
 #endif
 //100%

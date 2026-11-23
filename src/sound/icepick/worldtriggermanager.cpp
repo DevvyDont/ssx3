@@ -1067,8 +1067,8 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, i
         *patch = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].obj->f14;
     } else if (triggerType == 2) {
         *bank = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].obj->f10;
-        void* audio = cAudioInterface_bxAudio();
-        int rnd = cSoundSys_SndRand(*(int*)(*(char**)*(void**)((char*)audio + 0x118) + 0x1D8));
+        cSSXAudio* audio = cAudioInterface_bxAudio();
+        int rnd = cSoundSys_SndRand(*(int*)(*(char**)*(void**)&audio->MusicSys + 0x1D8));
         sWTMObj* randomData = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].obj;
         int pick = (unsigned)((rnd & 0x7FFF) * randomData->f34) / 0x7FFF;
         if (pick < randomData->f24) *patch = randomData->f14;
@@ -1960,7 +1960,7 @@ extern "C" void cWorldSound_RemoveInstanceFromGrid(cWorldSound* self, sWtmEnt18*
     sVec3_2B6CF8 lo;
     sVec3_2B6CF8 hi;
     cWorldSound_CalcInstAudioBoundingBox(self, instAudio, &lo, &hi);
-    char* base = (char*)cAudioInterface_getGame()->BXNash;
+    cBXNash* base = cAudioInterface_getGame()->BXNash;
     sBox_2B7410 box;
     box.x0 = lo.x;
     box.y0 = lo.y;
@@ -1970,10 +1970,10 @@ extern "C" void cWorldSound_RemoveInstanceFromGrid(cWorldSound* self, sWtmEnt18*
     box.y1 = hi.y;
     box.z1 = hi.z;
     box.w1 = 1.0f;
-    (*(int*)(base + 0xA0))++;
+    (*(int*)&base->deletecount)++;
     sCell_2B7410 cell;
     GetCell_2B7410(&cell, &box);
-    sQNode_2B7410* n = (sQNode_2B7410*)Child_2B7410(Child_2B7410(Child_2B7410(base, cell.ix, 80), cell.iy, 40), cell.iz, 20);
+    sQNode_2B7410* n = (sQNode_2B7410*)Child_2B7410(Child_2B7410(Child_2B7410(((char*)base), cell.ix, 80), cell.iy, 40), cell.iz, 20);
     Remove_2B7410(n, instAudio, &cell);
     if (QEmpty_2B7410(n->items)) {
         operator_delete(n->items);

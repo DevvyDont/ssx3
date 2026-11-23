@@ -656,8 +656,8 @@ extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, cBankMonitorInstance* sou
 {
     if ((int)cAudioInterface_getApp()->Game == 0)
         return 1.0f;
-    char* game = (char*)cAudioInterface_getGame();
-    char* obj = (*(sObjList_5930**)(game + 0x84))->items[source->mViewport];
+    cGame* game = cAudioInterface_getGame();
+    char* obj = ((sObjList_5930*)game->ViewMan)->items[source->mViewport];
     float* src = (float*)source->mPosition;
     t3Vector relPos;
     sV4_5930 tp = vu0MtxApply_5930(obj + 0x40, sV4_5930(src[0], src[1], src[2], 1.0f));
@@ -1410,18 +1410,18 @@ extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle
     if ((unsigned int)self->mTrackBankLoadedSection[slot] != (handle & 0xFF)) return;
     if (slot == 0) {
         cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
-        char* cfg = (char*)mgr->mBank;
+        cBankInstance* cfg = mgr->mBank;
         char* bm = (char*)&mgr->BankMonitor;
-        int id = saIsOn(cfg, 0x300);
-        if (id) id = *(int*)(cfg + 0x304); else id = -1;
+        int id = saIsOn(((char*)cfg), 0x300);
+        if (id) id = *(int*)(((char*)cfg) + 0x304); else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     } else {
         cSSXAudio_StopTone(self, 0.0f);
         cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
-        char* cfg = (char*)mgr->mBank;
+        cBankInstance* cfg = mgr->mBank;
         char* bm = (char*)&mgr->BankMonitor;
-        int id = saIsOn(cfg, 864);
-        if (id) id = *(int*)(cfg + 0x364); else id = -1;
+        int id = saIsOn(((char*)cfg), 864);
+        if (id) id = *(int*)(((char*)cfg) + 0x364); else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     }
     int off = slot << 2;

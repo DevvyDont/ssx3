@@ -433,11 +433,11 @@ extern "C" void cOVState_REPLAY_setupTicker(cOVState_REPLAY* self)
     char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_percentcomplete));
     if (obj != 0) {
         t3Vector pos = *(t3Vector*)(obj + 0x44);
-        char* replay = (char*)SSXApp->Game->Replay;
-        int total = *(int*)(replay + 0x3CC);
+        cReplay* replay = SSXApp->Game->Replay;
+        int total = replay->EndRecordTick;
         float frac;
         if (total > 0) {
-            frac = (float)*(int*)(replay + 0x484) / (float)total;
+            frac = (float)replay->PlaybackTick / (float)total;
         } else {
             frac = 0.0f;
         }

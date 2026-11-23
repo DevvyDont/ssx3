@@ -110,12 +110,12 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
         feInput->miAsciiKey = 0;
         ((sEngine_233438*)self->mpUI)->fC = feInput;
     }
-    char* gm = (char*)SSXApp->GameModeMan;
+    cGameModeMan* gm = SSXApp->GameModeMan;
     cBE_getInterface_3438(cBE_getBE(), 0);
     char* screen;
     if (cRealFE_mStartState == 39) {
         screen = newScreenA_233438(self);
-    } else if (*(int*)(gm + 0x9C) == 0 || cBENewRaceInterface_newRace.cGamePath == 0) {
+    } else if (gm->bAreResultsLocked == 0 || cBENewRaceInterface_newRace.cGamePath == 0) {
         screen = newScreenB_233438(self);
         *(void**)(screen + 0x48) = ((void*)self);
         cFELoadScreen_loadTexture(self, 1);

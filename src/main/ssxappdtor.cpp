@@ -2531,8 +2531,8 @@ extern "C" int cMCOverlayManager_isCardStatusErrorUnacknowledged(cMCOverlayManag
     int var_3;
 
     var_3 = 0;
-    if ((overlayManager->mCurrDeviceStateAck) == 0) {
-        var_3 = (overlayManager->mCurrDeviceStateLast) != 0;
+    if (overlayManager->mCurrDeviceStateAck == 0) {
+        var_3 = overlayManager->mCurrDeviceStateLast != 0;
     }
     return var_3;
 }
@@ -3106,11 +3106,11 @@ extern "C" bool cGame_updateUI(cGame* self)
             }
             if (msg->Cmd == 9) {
                 cWScriptMan_doMissionCmd(((sScript_4B48*)self->WScriptMan), ((int)msg->MissionId), 5, msg->Being);
-                if (cUIStateStack_findState(&(*(sStateStack_4B48*)&(self->UI)->mStateStack), GetHashValue32(str_90bc_fail_b)) == 0) {
+                if (cUIStateStack_findState(&(*(sStateStack_4B48*)&self->UI->mStateStack), GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     cPauseState_Stack[++cPauseState_StackIdx] = 3;
                     cPauseState_Flags = D_004428FC[0];
-                    cUIEngine_update((self->UI));
+                    cUIEngine_update(self->UI);
                 } else {
                     ((sScript_4B48*)cWScriptMan_TheWScriptMan)->popMessage();
                 }
@@ -3127,7 +3127,7 @@ extern "C" bool cGame_updateUI(cGame* self)
         return false;
     }
     if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
-        cUIEngine_update((self->UI));
+        cUIEngine_update(self->UI);
         cMenuSys_input(((void*)self->MenuSys));
         return false;
     }
@@ -3143,7 +3143,7 @@ extern "C" bool cGame_updateUI(cGame* self)
         return false;
     }
     int wasPaused = cPauseState_Flags & 1;
-    cUIEngine_update((self->UI));
+    cUIEngine_update(self->UI);
     if (cOVStateManager_pauseOverlayActive() != 0) {
         return false;
     }
@@ -3233,8 +3233,8 @@ extern "C" void cGame_updateAI(cGame* self)
         if ((cPauseState_Flags & 2) == 0)
             cBucketMan_applyBucket(obj, 1);
         {
-            char* aiMan = (char*)self->AI;
-            sVEntry<void>* vt = *(sVEntry<void>**)(aiMan + 0xCC);
+            cAI* aiMan = self->AI;
+            sVEntry<void>* vt = (sVEntry<void>*)aiMan->mVtbl;
             ((void (*)(void*))vt[3].fn)(vthis(aiMan, vt[3]));
         }
         if ((cPauseState_Flags & 0x10) == 0)

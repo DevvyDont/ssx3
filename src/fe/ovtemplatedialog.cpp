@@ -277,7 +277,7 @@ extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int 
 extern "C" void cOVStateManager_triggerOverlay(int type)
 {
     char* result = 0;
-    char* mgr = (char*)SSXApp->Game->UI;
+    cUIEngine* mgr = SSXApp->Game->UI;
     if (type == 0x1) {
         cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
@@ -703,7 +703,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     }
 
     *(int*)(result + 0x1C) = (*(int*)(result + 0x1C) & ~0x3F00) | 0x100;
-    cUIStateStack_pushSpecial(mgr + 0x18, result, 0, 0);
+    cUIStateStack_pushSpecial(&mgr->mStateStack, result, 0, 0);
 }
 #endif
 
@@ -790,8 +790,8 @@ extern char D_00474B80[];
 extern "C" void cOVStateManager_triggerPopup(int type)
 {
     char* result = 0;
-    char* mgr = (char*)SSXApp->Game->UI;
-    int cur = (int)cUIStateStack_getCurrentState(mgr + 0x18);
+    cUIEngine* mgr = SSXApp->Game->UI;
+    int cur = (int)cUIStateStack_getCurrentState(&mgr->mStateStack);
     if (type == 0x1) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
@@ -1217,7 +1217,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     }
 
     *(int*)(result + 0x20) = cur;
-    cUIStateStack_pushPopup(mgr + 0x18, result);
+    cUIStateStack_pushPopup(&mgr->mStateStack, result);
 }
 #endif
 
@@ -1378,9 +1378,9 @@ extern "C" int cOVStateManager_pauseOverlayActive(void);
  */
 extern "C" int cOVStateManager_allowPauseMenu(void)
 {
-    char* mgr = (char*)SSXApp->Game->UI;
+    cUIEngine* mgr = SSXApp->Game->UI;
     if (cOVStateManager_pauseOverlayActive() == 0) {
-        cUIState20CBE8* topState = (cUIState20CBE8*)cUIStateStack_getCurrentState(mgr + 0x18);
+        cUIState20CBE8* topState = (cUIState20CBE8*)cUIStateStack_getCurrentState(&mgr->mStateStack);
         if (topState != 0) {
             if (*(int*)((char*)topState + 0x1C) & 1) {
                 return 0;
@@ -1618,12 +1618,12 @@ extern char cPDATemplate_vtbl[];
 extern "C" void cOVStateManager_addPDATemplate(void)
 {
     if (cOVStateManager_mpPDATemplate == 0) {
-        char* mgr = (char*)SSXApp->Game->UI;
+        cUIEngine* mgr = SSXApp->Game->UI;
         void* pdaTemplate = cMemMan_alloc(72, str_PDATemplate, 0x100, 0);
         cUIState_cUIState(pdaTemplate, mgr);
         *(void**)((char*)pdaTemplate + 8) = cPDATemplate_vtbl;
         cOVStateManager_mpPDATemplate = pdaTemplate;
-        cUIStateStack_pushExplicit(mgr + 0x18, pdaTemplate);
+        cUIStateStack_pushExplicit(&mgr->mStateStack, pdaTemplate);
     }
 }
 #endif
@@ -2035,10 +2035,10 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 } else
                 chk:
                 if (any) {
-                    char* ui = (char*)SSXApp->Game->UI;
+                    cUIEngine* ui = SSXApp->Game->UI;
                     sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(cMemMan_alloc(564, str_Save_Profile, 0x100, 0), self->mpEngine, 1);
                     st->mode = 1;
-                    cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
+                    cUIStateStack_pushSpecial(&ui->mStateStack, st, 0, 0);
                 } else {
                     cOVStateManager_triggerOverlay(38);
                     cOVStateManager_addPDATemplate();
@@ -2080,10 +2080,10 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 break;
             case 6: {
                 (self)->mRemovePDA = 0;
-                char* ui = (char*)SSXApp->Game->UI;
+                cUIEngine* ui = SSXApp->Game->UI;
                 sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), self->mpEngine, *(unsigned char*)&self->mCurrentCtrl, 0x18);
                 st->mode = 1;
-                cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
+                cUIStateStack_pushSpecial(&ui->mStateStack, st, 0, 0);
                 break;
             }
             }

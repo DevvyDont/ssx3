@@ -1420,8 +1420,8 @@ extern "C" void cReplay_processInput(cReplay* self)
         if (self->PlaybackTick == frame->FrameStartTick) {
             cReplay_prevFrame(((char*)self));
         } else {
-            char* n = (char*)frame->Next;
-            if (n != 0 && *(int*)(n + 0x30) == self->PlaybackTick) {
+            cReplayFrame* n = frame->Next;
+            if (((char*)n) != 0 && n->FrameStartTick == self->PlaybackTick) {
                 cReplay_prevFrame(((char*)self));
             }
         }
@@ -1466,8 +1466,8 @@ extern "C" void cReplay_processInput(cReplay* self)
     }
     self->Cmd = 0;
     if (redraw) {
-        char* views = (char*)SSXApp->Game->ViewMan;
-        char* controller = *(char**)(*(char**)(views + 4) + 0xA8);
+        cGameViewMan* views = SSXApp->Game->ViewMan;
+        char* controller = (char*)views->PlayerCamera[0]->ChaseController;
         cChaseCameraController_switchCamera_Chapter(controller);
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(controller + 0x14);
         vt[4].fn(vthis(controller, vt[4]));

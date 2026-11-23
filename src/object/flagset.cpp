@@ -222,7 +222,7 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
     if (self->mCurrentNumInstances == 0) {
         return;
     }
-    if ((self->mGridMesh) == 0) {
+    if (self->mGridMesh == 0) {
         return;
     }
     cFlagManager* wind = (cFlagManager*)cObjectInterface_getFlagManager();
@@ -238,7 +238,7 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
     if (cObjectInterface_getAITick() % 2 == self->mFrameToUpdateGrid) {
         sFlagVert_B818 verts[50];
         cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
-        cGridMesh* gridMesh = (self->mGridMesh);
+        cGridMesh* gridMesh = self->mGridMesh;
         sVEntry<void(void*, void*)>* setVertsSlot = &((sVEntry<void (void*, void*)>*)gridMesh->mVtbl)[3];
         setVertsSlot->fn(vthis(gridMesh, *setVertsSlot), verts);
     }
@@ -379,10 +379,10 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
             MatCopy_34B9B0(&mat, (sMat_34B9B0*)&t4mat_Identity);
             mat.r[3].x = flagSet->mScrollU;
             mat.r[3].y = flagSet->mScrollV;
-            char* gridMesh = (char*)flagSet->mGridMesh;
-            if (gridMesh != 0) {
-                sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
-                hv[7].fn(gridMesh + hv[7].delta, pos, instRecord->m_MaterialBlock, &mat);
+            cGridMesh* gridMesh = flagSet->mGridMesh;
+            if (((char*)gridMesh) != 0) {
+                sVE7_34B9B0* hv = (sVE7_34B9B0*)gridMesh->mVtbl;
+                hv[7].fn(((char*)gridMesh) + hv[7].delta, pos, instRecord->m_MaterialBlock, &mat);
             } else {
                 sVE96_34B9B0* drawSlot = *(sVE96_34B9B0**)(ctx + 0x10D8);
                 drawSlot[96].fn(ctx + drawSlot[96].delta, instRecord, 0, 0, 0);
@@ -1718,10 +1718,10 @@ extern "C" void cFenceNode_render(cFenceNode* self)
     ((int*)renderState)[6] = (((int*)renderState)[6] & ~0x7C) | 0x14;
     tInstanceRecord* model = self->Instance;
     char* pos = (char*)&model->m_fmTransform;
-    char* gridMesh = (char*)self->GridMesh;
-    if (gridMesh != 0) {
-        sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
-        hv[7].fn(gridMesh + hv[7].delta, pos, model->m_MaterialBlock, 0);
+    cGridMesh* gridMesh = self->GridMesh;
+    if (((char*)gridMesh) != 0) {
+        sVE7_34B9B0* hv = (sVE7_34B9B0*)gridMesh->mVtbl;
+        hv[7].fn(((char*)gridMesh) + hv[7].delta, pos, model->m_MaterialBlock, 0);
     } else {
         sVE96_34B9B0* vt96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
         vt96[96].fn(ctx + vt96[96].delta, model, 0, 0, 0);

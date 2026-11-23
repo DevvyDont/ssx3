@@ -417,13 +417,13 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
 extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* ep, cWorld* world, int index)
 {
     char** wp = (char**)world;
-    char* scriptData = ((char*)ep->mpScriptHeader);
-    if (scriptData == 0) {
+    tScriptFileHeader* scriptData = ep->mpScriptHeader;
+    if (((char*)scriptData) == 0) {
         ep->mState = 3;
         return;
     }
     {
-        if (!(*(unsigned short*)scriptData == 0x1000 && *(int*)(scriptData + 0xC) == *(int*)(*(char**)*wp + 0x4))) {
+        if (!(*(unsigned short*)scriptData == 0x1000 && scriptData->WorldCheckSum == *(int*)(*(char**)*wp + 0x4))) {
             if (ep->mStreamed == 0) {
                 cMemMan_free(scriptData);
             }

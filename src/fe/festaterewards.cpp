@@ -1151,13 +1151,13 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* s
                 int rewardItem = (int)self->getReward(idx);
                 void* icon;
                 if (self->mStoreNum >= 0 && self->getRewardStoreNum((const void*)rewardItem) == self->mStoreNum) {
-                    char* ui = ((char*)self->mpEngine);
+                    cUIEngine* ui = self->mpEngine;
                     int iconHash = GetHashValue32(str_dollar_sign);
-                    icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
+                    icon = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
                 } else {
-                    char* ui = ((char*)self->mpEngine);
+                    cUIEngine* ui = self->mpEngine;
                     int iconHash = GetHashValue32(str_questmark);
-                    icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
+                    icon = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
                 }
                 cUIIcon* cell = self->mpIcons[row][col];
                 (*(void**)&cell->mpTextureElem) = icon;

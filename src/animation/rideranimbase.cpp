@@ -779,8 +779,8 @@ extern "C" float cRiderAnimBase_getAIAnimDuration(cRiderAnimBase* self, int aid)
     if (id == 519)
         return 0.0f;
     unsigned int animId = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    char* clip = (char*)cAnimDataBase_TheAnimDataBase->DataSources[animId & 0xFF];
-    char* clipEntry = (char*)((animId >> 8) * 0x14 + *(int*)(clip + 0x8));
+    cAdfDataSource* clip = cAnimDataBase_TheAnimDataBase->DataSources[animId & 0xFF];
+    char* clipEntry = (char*)((animId >> 8) * 0x14 + (int)clip->Anims);
     return (*(unsigned short*)(clipEntry + 0xC) - 1) * 0.03333333507180214f;
 }
 #endif
@@ -1568,7 +1568,7 @@ extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, flo
         return;
     }
     int forward = from <= to;
-    for (tTrigger* event = (self->Triggers); event != 0; event = event->Next)
+    for (tTrigger* event = self->Triggers; event != 0; event = event->Next)
     {
         if (event->IsEndTrigger == 0)
         {
@@ -1607,7 +1607,7 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_checkTriggersAtTime);
 // PORT: ulong is 64-bit here
 extern "C" void cAnimSequence_checkTriggersAtTime(cAnimSequence* self, float time)
 {
-    for (tTrigger* event = (self->Triggers); event != 0; event = event->Next)
+    for (tTrigger* event = self->Triggers; event != 0; event = event->Next)
     {
         if (event->IsEndTrigger == 0 && event->TriggerTime == time)
         {
@@ -1632,7 +1632,7 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_setEndTriggers);
 extern "C" void cAnimSequence_setEndTriggers(cAnimSequence* self)
 {
     self->EndEvent = 1;
-    for (tTrigger* event = (self->Triggers); event != 0; event = event->Next)
+    for (tTrigger* event = self->Triggers; event != 0; event = event->Next)
     {
         if (event->IsEndTrigger != 0)
         {

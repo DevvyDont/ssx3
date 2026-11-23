@@ -360,9 +360,9 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_isChannelConnected);
  * @return the channel's answer
  */
 extern "C" int cCommSystem_isChannelConnected(cCommSystem* commSystem, int channelIndex) {
-    char *obj = (char*)commSystem->mChannels[channelIndex];
-    char *vt = *(char **)(obj + 8);
-    return (*(int (**)(void *))(vt + 0x24))(obj + *(short *)(vt + 0x20));
+    cCommChannel* obj = commSystem->mChannels[channelIndex];
+    char *vt = (char*)obj->mVtbl;
+    return (*(int (**)(void *))(vt + 0x24))(((char*)obj) + *(short *)(vt + 0x20));
 }
 #endif
 
@@ -400,9 +400,9 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_readPacket);
  * @return the channel's result: nonzero when a packet was read
  */
 extern "C" int cCommSystem_readPacket(cCommSystem* commSystem, int channelIndex, int data, int maxSize) {
-    char *obj = (char*)commSystem->mChannels[channelIndex];
-    char *vt = *(char **)(obj + 8);
-    return (*(int (**)(void *, int, int))(vt + 0x3C))(obj + *(short *)(vt + 0x38), data, maxSize);
+    cCommChannel* obj = commSystem->mChannels[channelIndex];
+    char *vt = (char*)obj->mVtbl;
+    return (*(int (**)(void *, int, int))(vt + 0x3C))(((char*)obj) + *(short *)(vt + 0x38), data, maxSize);
 }
 #endif
 
@@ -421,9 +421,9 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_writePacket);
  * @return the channel's result: nonzero when the packet was taken
  */
 extern "C" int cCommSystem_writePacket(cCommSystem* commSystem, int channelIndex, int data, int size) {
-    char *obj = (char*)commSystem->mChannels[channelIndex];
-    char *vt = *(char **)(obj + 8);
-    return (*(int (**)(void *, int, int))(vt + 0x44))(obj + *(short *)(vt + 0x40), data, size);
+    cCommChannel* obj = commSystem->mChannels[channelIndex];
+    char *vt = (char*)obj->mVtbl;
+    return (*(int (**)(void *, int, int))(vt + 0x44))(((char*)obj) + *(short *)(vt + 0x40), data, size);
 }
 #endif
 
@@ -440,7 +440,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_getError);
  * @return nonzero on an error
  */
 extern "C" int cCommSystem_getError(cCommSystem* commSystem, int channelIndex) {
-    if ((commSystem->mNetConnError) != 0) {
+    if (commSystem->mNetConnError != 0) {
         return 1;
     }
     return commSystem->mChannels[channelIndex]->mError;
@@ -563,7 +563,7 @@ extern "C" void NetConnDisconnect();
  * @param commSystem  the connection manager
  */
 extern "C" void cCommSystem_netConnDisconnect(cCommSystem* commSystem) {
-    if ((commSystem->mActiveNetConn) >= 0) {
+    if (commSystem->mActiveNetConn >= 0) {
         commSystem->mActiveNetConn = -1;
         NetConnDisconnect();
     }
@@ -588,7 +588,7 @@ extern "C" void NetConnDisconnect();
  * @param errorCode  the error ('time' or a status starting with '-')
  */
 extern "C" void cCommSystem_netConnFailed(cCommSystem* commSystem, int errorCode) {
-    if ((commSystem->mActiveNetConn) >= 0) {
+    if (commSystem->mActiveNetConn >= 0) {
         commSystem->mActiveNetConn = -1;
         NetConnDisconnect();
     }
@@ -753,13 +753,13 @@ INCLUDE_ASM("seg/seg_156860", func_00256228);
  * @param arg0  the object
  */
 extern "C" void func_00256228(void *arg0) {
-    (*(int *)((char*)(arg0) + (4))) = 0;
-    (*(int *)((char*)(arg0) + (8))) = 0;
-    (*(int *)((char*)(arg0) + (0xC))) = 0;
-    (*(int *)((char*)(arg0) + (0x10))) = 0;
-    (*(int *)((char*)(arg0) + (0x14))) = 0;
-    (*(int *)((char*)(arg0) + (0x18))) = -1;
-    (*(int *)((char*)(arg0) + (0))) = 0;
+    (*(int *)((char*)(arg0) + 4)) = 0;
+    (*(int *)((char*)(arg0) + 8)) = 0;
+    (*(int *)((char*)(arg0) + 0xC)) = 0;
+    (*(int *)((char*)(arg0) + 0x10)) = 0;
+    (*(int *)((char*)(arg0) + 0x14)) = 0;
+    (*(int *)((char*)(arg0) + 0x18)) = -1;
+    (*(int *)((char*)(arg0) + 0)) = 0;
 }
 #endif
 
@@ -851,15 +851,15 @@ extern "C" void func_002563A8(void *dnasMan) {
     int temp_4;
     int temp_4_2;
 
-    temp_4 = (*(int *)((char*)(dnasMan) + (0xC)));
+    temp_4 = (*(int *)((char*)(dnasMan) + 0xC));
     if (temp_4 != 0) {
         cMemMan_free__FPv_63A8(temp_4);
-        (*(int *)((char*)(dnasMan) + (0xC))) = 0;
+        (*(int *)((char*)(dnasMan) + 0xC)) = 0;
     }
-    temp_4_2 = (*(int *)((char*)(dnasMan) + (4)));
+    temp_4_2 = (*(int *)((char*)(dnasMan) + 4));
     if (temp_4_2 != 0) {
         cMemMan_free__FPv_63A8(temp_4_2);
-        (*(int *)((char*)(dnasMan) + (4))) = 0;
+        (*(int *)((char*)(dnasMan) + 4)) = 0;
     }
 }
 #endif
@@ -1225,7 +1225,7 @@ extern "C" void cDSockChannel_disconnect(cDSockChannel* channel) {
     int temp_4;
     int temp_4_2;
 
-    if ((channel->mState) != 0) {
+    if (channel->mState != 0) {
         cCommChannel_channelClose();
         temp_4 = ((int)channel->mGameLink);
         if (temp_4 != 0) {
@@ -2023,12 +2023,12 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_localDisconnected);
  * @param force      non-zero to stamp the end time even after an error or the end of the race
  */
 extern "C" void cGameComm_localDisconnected(cGameComm* gameComm, int force) {
-    if (((force != 0) || (((gameComm->mError) == 0) && ((gameComm->mState) < 0xF))) && ((gameComm->unk_038) == 0)) {
+    if (((force != 0) || ((gameComm->mError == 0) && (gameComm->mState < 0xF))) && (gameComm->unk_038 == 0)) {
         gameComm->unk_038 = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
     gameComm->mConnected = 0;
     gameComm->mRaceInProgress = 0;
-    (gameComm->mPauseMenu[1]) = 0;
+    gameComm->mPauseMenu[1] = 0;
     gameComm->mLocalDisconnected = 1;
 }
 #endif
@@ -2843,7 +2843,7 @@ extern "C" float cCommSystem_getLatency(int, int);
  * @return the latency
  */
 extern "C" float cGameComm_getLatency(cGameComm* gameComm) {
-    return cCommSystem_getLatency((int)cCommSystem_mCommSystem, (gameComm->unk_06C)) + ((float) (gameComm->mNumSamples) * (SSXApp->TimerPeriod));
+    return cCommSystem_getLatency((int)cCommSystem_mCommSystem, gameComm->unk_06C) + ((float) (gameComm->mNumSamples) * (SSXApp->TimerPeriod));
 }
 #endif
 
@@ -3080,7 +3080,7 @@ INCLUDE_ASM("seg/seg_156860", func_00258870);
  * @param forceArm  nonzero to store it in any case
  */
 extern "C" void func_00258870(cGameComm* gameComm, int timeoutFrames, int forceArm) {
-    if ((forceArm != 0) || (((gameComm->mPauseMenu[1]) == 0) && ((gameComm->mPauseMenu[0]) == 0)) || ((gameComm->mGameStartGate) != 0)) {
+    if ((forceArm != 0) || ((gameComm->mPauseMenu[1] == 0) && (gameComm->mPauseMenu[0] == 0)) || (gameComm->mGameStartGate != 0)) {
         gameComm->unk_094 = timeoutFrames;
     }
 }
@@ -3127,7 +3127,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setFinishRaceAlone);
 extern "C" void cGameComm_setFinishRaceAlone(cGameComm* gameComm) {
     gameComm->mWaitingMessage = 0;
     gameComm->mAlone = 1;
-    (gameComm->mPauseMenu[1]) = 0;
+    gameComm->mPauseMenu[1] = 0;
 }
 #endif
 
@@ -3143,7 +3143,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartGate);
  * @param gameComm  the game link (this)
  */
 extern "C" void cGameComm_gameStartGate(cGameComm* gameComm) {
-    if ((gameComm->mState) < 0xF) {
+    if (gameComm->mState < 0xF) {
         gameComm->unk_094 = 0;
         gameComm->mGameStartGate = 1;
     }
@@ -3207,13 +3207,13 @@ extern "C" void cGameComm_setState_8A48(void *, int) __asm__("cGameComm_setState
 extern "C" void cGameComm_gameEnded(cGameComm* gameComm) {
     gameComm->mRaceInProgress = 0;
     gameComm->mSyncInput = 0;
-    if ((gameComm->mState) < 0xF) {
+    if (gameComm->mState < 0xF) {
         cGameComm_setState_8A48(gameComm, 0xF);
     }
-    if ((gameComm->unk_038) == 0) {
+    if (gameComm->unk_038 == 0) {
         gameComm->unk_038 = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
-    if ((gameComm->unk_03C) == 0) {
+    if (gameComm->unk_03C == 0) {
         gameComm->unk_03C = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
 }
@@ -3281,7 +3281,7 @@ extern "C" void cGameComm_writePacket_8BC8(void *, int, void *, int) __asm__("cG
  * @param gameComm  the game link
  */
 extern "C" void cGameComm_sendExitGame(cGameComm* gameComm) {
-    if ((gameComm->mError) == 0) {
+    if (gameComm->mError == 0) {
         char buf[12];
         buf[0] = 5;
         cGameComm_writePacket_8BC8(gameComm, 3, buf, 0xC);
@@ -3329,7 +3329,7 @@ extern "C" int strlen(int);
  * @param message  the text
  */
 extern "C" void cGameComm_sendChat(cGameComm* gameComm, int message) {
-    if (((gameComm->mError) == 0) && ((gameComm->mConnected) != 0)) {
+    if ((gameComm->mError == 0) && (gameComm->mConnected != 0)) {
         cGameComm_writePacket(gameComm, 1, message, strlen(message) + 1);
     }
 }

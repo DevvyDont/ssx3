@@ -498,10 +498,10 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
             cOVStateManager_triggerOverlay(7);
             break;
         case 4: {
-            char* owner = (char*)SSXApp->Game->UI;
+            cUIEngine* owner = SSXApp->Game->UI;
             char* popup = (char*)cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions_b, 0, 0), owner, 0, 0);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
-            cUIStateStack_pushSpecial(owner + 0x18, popup, 0, 0);
+            cUIStateStack_pushSpecial(&owner->mStateStack, popup, 0, 0);
             break;
         }
         case 5:

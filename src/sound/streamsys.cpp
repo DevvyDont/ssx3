@@ -554,7 +554,7 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Pause);
  */
 extern "C" void cStreamInstance_Pause(cStreamInstance* stream) {
     SNDSYS_entercritical();
-    SNDSTRM_pitchmult((stream->mHandle), 0);
+    SNDSTRM_pitchmult(stream->mHandle, 0);
     SNDSYS_leavecritical();
 }
 #endif
@@ -568,7 +568,7 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Resume);
  */
 extern "C" void cStreamInstance_Resume(cStreamInstance* stream) {
     SNDSYS_entercritical();
-    SNDSTRM_pitchmult((stream->mHandle), 0x1000);
+    SNDSTRM_pitchmult(stream->mHandle, 0x1000);
     SNDSYS_leavecritical();
 }
 #endif
@@ -677,7 +677,7 @@ extern "C" int cStreamInstance_TimeMult(cStreamInstance* stream, int multAmount)
     int result;
 
     SNDSYS_entercritical();
-    result = SNDSTRM_timemult((stream->mHandle), multAmount);
+    result = SNDSTRM_timemult(stream->mHandle, multAmount);
     SNDSYS_leavecritical();
     return result;
 }
@@ -1335,9 +1335,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetVolControl);
  */
 extern "C" void cStreamSys_STREAM_SetVolControl(cStreamSys* self, int i, int val)
 {
-    void* stream = self->mStreamInstance[i];
-    if (stream != 0) {
-        *(int*)((char*)stream + 0x10) = val;
+    cStreamInstance* stream = self->mStreamInstance[i];
+    if (((void*)stream) != 0) {
+        stream->mVolControl = (float*)val;
     }
 }
 #endif

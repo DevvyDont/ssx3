@@ -531,8 +531,8 @@ INCLUDE_ASM("camera/cameraalgorithms", cCamera_invalidateSafePosition);
 extern "C" void cCamera_invalidateSafePosition(void)
 {
     cGame* cam = SSXApp->Game;
-    void* chase = cam->ViewMan;
-    void* ctrl = *(void**)((char*)chase + 0x4);
+    cGameViewMan* chase = cam->ViewMan;
+    void* ctrl = chase->PlayerCamera[0];
     *(int*)((char*)ctrl + 0x4A4) = 1;
 }
 #endif
@@ -553,12 +553,12 @@ extern "C" void cCamera_snapChaseControllers(void)
     cGame* cam = SSXApp->Game;
     cGameViewMan* ctx = cam->ViewMan;
     int count = *(int*)ctx;
-    char* firstController = (char*)ctx->PlayerCamera[0]->ChaseController;
-    cCamera_snapChaseControllers_VE* firstSlot = &(*(cCamera_snapChaseControllers_VE**)(firstController + 0x14))[4];
+    cChaseCameraController* firstController = ctx->PlayerCamera[0]->ChaseController;
+    cCamera_snapChaseControllers_VE* firstSlot = &((cCamera_snapChaseControllers_VE*)firstController->mVtbl)[4];
     firstSlot->fn(vthis(firstController, *firstSlot));
     if (count >= 2) {
-        char* secondController = (char*)ctx->PlayerCamera[1]->ChaseController;
-        cCamera_snapChaseControllers_VE* secondSlot = &(*(cCamera_snapChaseControllers_VE**)(secondController + 0x14))[4];
+        cChaseCameraController* secondController = ctx->PlayerCamera[1]->ChaseController;
+        cCamera_snapChaseControllers_VE* secondSlot = &((cCamera_snapChaseControllers_VE*)secondController->mVtbl)[4];
         secondSlot->fn(vthis(secondController, *secondSlot));
     }
 }
@@ -587,16 +587,16 @@ extern "C" void cCamera_onRestart(void)
     cGameViewMan* riders = SSXApp->Game->ViewMan;
     int n = *(int*)riders;
     cChaseCameraController_switchCamera_Restart(riders->PlayerCamera[0]->ChaseController);
-    char* cam = (char*)riders->PlayerCamera[0]->ChaseController;
-    sVEntry<void(void*)>* snapEntry = &(*(sVEntry<void(void*)>**)(cam + 0x14))[4];
+    cChaseCameraController* cam = riders->PlayerCamera[0]->ChaseController;
+    sVEntry<void(void*)>* snapEntry = &((sVEntry<void (void*)>*)cam->mVtbl)[4];
     snapEntry->fn(vthis(cam, *snapEntry));
     *(int*)&riders->PlayerCamera[0]->LastGroundMove = 0;
     riders->PlayerCamera[0]->LastSafePositionInvalid = 1;
     if (n >= 2)
     {
         cChaseCameraController_switchCamera_Restart(riders->PlayerCamera[1]->ChaseController);
-        char* cam2 = (char*)riders->PlayerCamera[1]->ChaseController;
-        sVEntry<void(void*)>* snapEntry2 = &(*(sVEntry<void(void*)>**)(cam2 + 0x14))[4];
+        cChaseCameraController* cam2 = riders->PlayerCamera[1]->ChaseController;
+        sVEntry<void(void*)>* snapEntry2 = &((sVEntry<void (void*)>*)cam2->mVtbl)[4];
         snapEntry2->fn(vthis(cam2, *snapEntry2));
         *(int*)&riders->PlayerCamera[1]->LastGroundMove = 0;
     }

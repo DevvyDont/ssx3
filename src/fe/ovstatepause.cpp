@@ -516,11 +516,11 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
     switch (msg) {
     case 5:
         if (IsId_A238(obj, str_save)) {
-            char* stack = (char*)SSXApp->Game->UI;
+            cUIEngine* stack = SSXApp->Game->UI;
             char* st = (char*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), self->mpEngine,
                                             *(unsigned char*)&self->mCurrentCtrl, 42);
             *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
-            cUIStateStack_pushSpecial(stack + 0x18, st, 0, 0);
+            cUIStateStack_pushSpecial(&stack->mStateStack, st, 0, 0);
         }
         break;
     case 6:

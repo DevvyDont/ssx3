@@ -160,7 +160,7 @@ extern "C" void* MEMCLASS_purge(int id)
 {
     MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
     void* freeResult = (void*)1;
-    for (MEMBLOCK* n = (cls->bottomblock); n != 0 && freeResult != 0; n = n->next) {
+    for (MEMBLOCK* n = cls->bottomblock; n != 0 && freeResult != 0; n = n->next) {
         if (!(n->type & 0xC000)) {
             freeResult = MEM_free((char*)n + 0x10);
         }
@@ -281,7 +281,7 @@ extern "C" void* MEM_findcontaining(unsigned int addr)
     for (i = 0; i < 0x40; i++) {
         MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
         if (cls != 0) {
-            MEMBLOCK* n = (cls->bottomblock);
+            MEMBLOCK* n = cls->bottomblock;
             unsigned int data;
             while (1) {
                 n = n->next;
@@ -320,7 +320,7 @@ extern "C" void* MEM_find(int name)
     for (i = 0; i < 0x40; i++) {
         MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
         if (cls != 0) {
-            MEMBLOCK* n = (cls->bottomblock);
+            MEMBLOCK* n = cls->bottomblock;
             void* data = (char*)n + 0x10;
             do {
                 int blockName = MEM_name(data);
@@ -429,9 +429,9 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     end -= hdr + 0x30;
     int flags = cls->flags;
     FREEBLOCK* blk = (FREEBLOCK*)(data - 0x10);
-    char* last = ((char*)cls->topblock);
+    MEMBLOCK* last = cls->topblock;
     sprintf(buf, str_pct_s_LINK, cls);
-    MEM_initblock(last, buf, 0, hdr, flags | 0x8000, *(void**)(last + 0xC), mem);
+    MEM_initblock(last, buf, 0, hdr, flags | 0x8000, last->prev, mem);
     MEM_initblock(mem, buf, 0, hdr, flags | 0x8000, last, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
     sprintf(buf, str_pct_s_HIGH, cls);
@@ -573,7 +573,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
         cb(str_Not_initialized);
         return;
     }
-    for (MEMBLOCK* blk = (cls->bottomblock); blk != 0; blk = (MEMBLOCK*)blk->next) {
+    for (MEMBLOCK* blk = cls->bottomblock; blk != 0; blk = (MEMBLOCK*)blk->next) {
         char* data = (char*)blk + 0x10;
         char* blockName = (char*)MEM_name(data);
         if (blockName == 0)
@@ -1873,7 +1873,7 @@ extern int cMoviePlayer_m_isPlaying;
 extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
 {
     cMoviePlayer* moviePlayer = self;
-    if (((char*)moviePlayer->m_pPlayer) != 0 && moviePlayer->m_pVd != 0) {
+    if (moviePlayer->m_pPlayer != 0 && moviePlayer->m_pVd != 0) {
         cGraphicsMan_TheGraphicsMan->FlushRenderer();
     }
     if (moviePlayer->mbNewFrame != 0 && moviePlayer->mpCurrFrame != 0) {
@@ -1960,7 +1960,7 @@ struct sWorld_253748 {
 extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
 {
     cMoviePlayer* moviePlayer = self;
-    if (((char*)moviePlayer->m_pPlayer) != 0) {
+    if (moviePlayer->m_pPlayer != 0) {
         cMoviePlayer_startPlay((cMoviePlayer*)moviePlayer);
         do {
             if (moviePlayer->mbReDraw != 0) {

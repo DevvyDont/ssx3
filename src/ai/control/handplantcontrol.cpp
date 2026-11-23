@@ -1283,7 +1283,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         cAirPredictor_land_9C88(self->mRider->mAirPredictor, &self->mRider->mPosition, &self->mRider->mVelocity);
         tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[hit.Stype];
         int fl;
-        if (surf->IsResetSurface != 0 || (((char*)hit.Patch) != 0 && (fl = *(short*)(((char*)hit.Patch) + 0xA), (fl & 2) != 0))) {
+        if (surf->IsResetSurface != 0 || (hit.Patch != 0 && (fl = *(short*)(((char*)hit.Patch) + 0xA), (fl & 2) != 0))) {
             cRider_checkForReset(((char*)self->mRider), 0, 1);
             return;
         }
@@ -1296,7 +1296,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         self->mRider->GroundVelocity = (*(t4Vector*)&hit.Ivel);
         self->mRider->LastLandSpeed = -vn;
         self->mRider->LastGroundNormal = self->mRider->mGroundNormal;
-        if (((char*)hit.Patch) != 0) {
+        if (hit.Patch != 0) {
             self->mRider->mGroundPolyId = *(int*)(((char*)hit.Patch) + 0x150);
             self->mRider->PatchUV.x = hit.u;
             self->mRider->PatchUV.y = hit.v;
@@ -1311,7 +1311,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         if (surf->MaxLandingPenetrationVel < vn2) {
             vu0AddEq_139C88(self->mRider->mVelocity, vu0Scale_139C88(r->mGroundNormal, vn2 - surf->MaxLandingPenetrationVel));
         }
-        if (((char*)hit.Inst) != 0) {
+        if (hit.Inst != 0) {
             char* handler = (char*)hit.Inst->m_pActiveNode;
             if (handler != 0) {
                 sVEnt_139C88* vt = *(sVEnt_139C88**)(handler + 0xC);
@@ -4467,7 +4467,7 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
     } else {
         cRider* rider = (cRider*)(((char*)self->mRider));
         int idx = rider->mSurfaceType;
-        char* snow = (char*)&SSXApp->Game->SurfPropCache->SurfData[idx];
+        tSurfData* snow = &SSXApp->Game->SurfPropCache->SurfData[idx];
         int fl;
         if (idx == 18) {
             tCollideInfo info;
@@ -4476,7 +4476,7 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
             (*(t4Vector*)&info.Reflect) = self->mRider->mGroundNormal;
             (*(int*)&info.Vel) = 0;
             cRider_flagEventWipeout(((char*)self->mRider), 360, 0, self->mRider->mSurfaceType, &info);
-        } else if (*(int*)(snow + 0x44) != 0 || (fl = *(short*)&rider->SurfaceFlags, (fl & 2) != 0)) {
+        } else if (snow->IsResetSurface != 0 || (fl = *(short*)&rider->SurfaceFlags, (fl & 2) != 0)) {
             cRider_checkForReset(rider, 0, 1);
         }
     }
@@ -4696,7 +4696,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     float penetration = cOverlapList_terrainIntersect1(self->mRider->mOverlapList, &sph, &hit, (int)self->mRider->mWallHint);
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return; }
-    if (((char*)hit.Inst) != 0) {
+    if (hit.Inst != 0) {
         cInstanceNode* handler = hit.Inst->m_pActiveNode;
         if (handler) {
             handler->updateIntersectInfo(hit);
@@ -6436,8 +6436,8 @@ extern "C" int cRider_isLocalHuman(cRider* rider) {
     int var_3;
 
     var_3 = 0;
-    if ((rider->mIsHuman) != 0) {
-        var_3 = (rider->mIsLocal) != 0;
+    if (rider->mIsHuman != 0) {
+        var_3 = rider->mIsLocal != 0;
     }
     return var_3;
 }
@@ -6709,8 +6709,8 @@ extern "C" int cRider_DoForceBoardVisualFXForNIS(cRider* rider) {
     int var_3;
 
     var_3 = 0;
-    if (((rider->mIsInNIS) != 0) && (rider->mHiddenNIS == 0)) {
-        var_3 = (rider->mNISShowBoardVisualFX) != 0;
+    if ((rider->mIsInNIS != 0) && (rider->mHiddenNIS == 0)) {
+        var_3 = rider->mNISShowBoardVisualFX != 0;
     }
     return var_3;
 }
@@ -7779,7 +7779,7 @@ extern "C" int cComputer_isAboutToRail(cComputer* computer, float fparg0) {
     int var_3;
 
     var_3 = 0;
-    if (((computer->mToRail) != 0) && (fparg0 < 1.0f)) {
+    if ((computer->mToRail != 0) && (fparg0 < 1.0f)) {
         var_3 = 1;
     }
     return var_3;

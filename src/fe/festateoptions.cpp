@@ -1620,9 +1620,9 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
         cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), djSpeech);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), arcadeSfx);
         cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());
-        char* snd = (char*)cAudioInterface_bxAudio();
-        sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(snd + 0x5558);
-        char* sub = snd + 0x118;
+        cSSXAudio* snd = cAudioInterface_bxAudio();
+        sVEntry<void(void*, int)>* vt2 = (sVEntry<void (void*, int)>*)snd->MusicSys.mVtbl;
+        char* sub = (char*)&snd->MusicSys;
         vt2[4].fn(vthis(sub, vt2[4]), saved534);
     }
 }

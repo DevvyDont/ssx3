@@ -657,9 +657,9 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_getFont);
  */
 extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 {
-    void* engine = self->mpScreen->mpState->mpEngine;
-    if (engine != 0) {
-        return *(int*)((char*)*(void**)((char*)engine + 0x8) + ((*(unsigned int*)&self->mAttrTextScroll >> 1) & 3) * 12 + 0xC);
+    cUIEngine* engine = self->mpScreen->mpState->mpEngine;
+    if (((void*)engine) != 0) {
+        return *(int*)((char*)engine->mpFontInterface + ((*(unsigned int*)&self->mAttrTextScroll >> 1) & 3) * 12 + 0xC);
     }
     return 0;
 }
@@ -1309,7 +1309,7 @@ extern "C" void cTextureElement_render(cTextureElement* element, tRect rect, tAR
     if (tex < 0) {
         return;
     }
-    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
+    GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
     float topV = element->mTop;
     float bottomV = element->mBottom;
     float leftU = element->mLeft;
@@ -1375,7 +1375,7 @@ extern "C" void cTextureElement_render2(cTextureElement* element, tRect rect, tA
 {
     float k = 1.0f - fillFraction;
     int tex = element->mSourceShape;
-    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
+    GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
     float topV = element->mTop;
     float bottomV = element->mBottom;
     float leftU = element->mLeft;
@@ -1448,7 +1448,7 @@ extern "C" void c2DRender_drawRotRect2(int ctx, tBxVertex* v, sRect_23B8* dst, s
 extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8 destRect, tARGB colour, int flags, float tx, float ty)
 {
     int tex = element->mSourceShape;
-    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
+    GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
     float x0 = destRect.x;
     float y0 = destRect.y;
     float topV = element->mTop;
@@ -1590,7 +1590,7 @@ extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, tRect* r, t3Ma
 extern "C" void cTextureElement_renderRot(cTextureElement* element, tRect destRect, t3Matrix transform, tARGB colour, int flags)
 {
     int tex = element->mSourceShape;
-    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
+    GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
     float topV = element->mTop;
     float bottomV = element->mBottom;
     float leftU = element->mLeft;
@@ -1688,7 +1688,7 @@ extern "C" void cTextureElement_renderRotTiled(sSprite_2BC8* element, sRect_2BC8
     int j;
     float x;
     int tex = element->tex;
-    (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
+    GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
     float x0 = destRect.x;
     float y0 = destRect.y;
     float topV = element->v0;

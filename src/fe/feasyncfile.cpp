@@ -15491,12 +15491,12 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
         }
         break;
     case 3: {
-        char* auth = (char*)self->mpAuth;
-        if (*(int*)(auth + 0x1C) != 0) {
+        DNASMan* auth = self->mpAuth;
+        if (auth->unk_01C != 0) {
             char* parentState = (char*)self->mpParentState;
-            char* errorText1 = auth + 0x450;
-            char* errorText2 = auth + 0x650;
-            char* errorText3 = auth + 0x850;
+            char* errorText1 = (char*)&auth->unk_450[0];
+            char* errorText2 = (char*)&auth->unk_650[0];
+            char* errorText3 = (char*)&auth->unk_850[0];
             if (*(void**)(parentState + 0x710) != 0) {
                 cMemMan_free(*(void**)(parentState + 0x710));
                 *(void**)(parentState + 0x710) = 0;

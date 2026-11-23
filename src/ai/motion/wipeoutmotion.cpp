@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/instancerecord.h"
 #include "intersect/worldrider.h"
 #include "bx/math3d.h"
 #include "object/instancenode.h"
@@ -637,7 +638,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
             k = 27.77777862548828f;
         t4Vector impulse = vu0Scale_137138(hit.Inorm, v + k);
         vu0AddEq_137138(self->BoardVelocity, impulse);
-        if (((char*)hit.Inst) != 0) {
+        if (hit.Inst != 0) {
             cInstanceNode* o = (cInstanceNode*)hit.Inst->m_pActiveNode;
             if (((char*)o) != 0) {
                 o->applyForce(hit, vu0Scale_137138(impulse, (float)SSXApp->TimerHz * -0.05000000074505806f));
@@ -655,7 +656,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
                             vu0Scale_137138(sVec4c_137138(cp * sy, cp * cy, sp, 0.0f), deg * 0.01745329424738884f));
         }
     } else {
-        if (((char*)hit.Inst) != 0) {
+        if (hit.Inst != 0) {
             cInstanceNode* o = (cInstanceNode*)hit.Inst->m_pActiveNode;
             if (((char*)o) != 0) {
                 o->applyForce(hit, vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
@@ -979,7 +980,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(cWipeoutMotion* self)
             self->mRider->SnowOffset = vu0Dot_137860(vu0Sub_137860(self->mRider->mPosition, hitB.Ipos), self->mRider->mGroundNormal);
             t4Vector impulse = vu0Scale_137860(self->mRider->mGroundNormal, -vn);
             vu0AddEq_137860(self->mRider->mVelocity, impulse);
-            if (((char*)hitB.Inst) != 0)
+            if (hitB.Inst != 0)
             {
                 cInstanceNode* hitOwner = hitB.Inst->m_pActiveNode;
                 if (((char*)hitOwner) != 0)
@@ -1327,14 +1328,14 @@ extern "C" void cWipeoutMotion_stepGroundMotion(cWipeoutMotion* self)
             cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &self->mRider->mPosition, &self->mRider->mVelocity, 3333.33349609375f);
             self->ForceNaturalAir = 1;
         }
-        if (((char*)hit.Inst) != 0) {
+        if (hit.Inst != 0) {
             cInstanceNode* hitOwner = hit.Inst->m_pActiveNode;
             if (hitOwner != 0) {
                 hitOwner->applyForce(hit, vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, self->mRider->mVelocity), self->mRider->GroundVelocity), dt));
             }
         }
         tSurfData* ground = &materials_137D18()[hit.Stype];
-        if (ground->IsResetSurface != 0 || (((char*)hit.Patch) != 0 && (triFlags_137D18(((char*)hit.Patch)) & 2)))
+        if (ground->IsResetSurface != 0 || (hit.Patch != 0 && (triFlags_137D18(((char*)hit.Patch)) & 2)))
             cRider_checkForReset(self->mRider, 0, 1);
     } else {
         cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &self->mRider->mPosition, &self->mRider->mVelocity, 3333.33349609375f);
@@ -1499,7 +1500,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(cWipeoutMotion* self)
         if (-0.9998999834060669f < dot) {
             if (dot < 0.0f)
                 hit.Inorm = vu0Normalize_138640(vu0Sub_138640(hit.Inorm, vu0Scale_138640(self->mRider->mGroundNormal, dot)));
-            if (((char*)hit.Inst) != 0) {
+            if (hit.Inst != 0) {
                 cInstanceNode* hitOwner = hit.Inst->m_pActiveNode;
                 if (hitOwner != 0) {
                     hitOwner->updateIntersectInfo(hit);
@@ -1616,10 +1617,10 @@ extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersect
         {
             self->mRider->mGroundPolyId = 0xFFFFFFFF;
         }
-        char* hitObj = (char*)hit->Inst;
+        tInstanceRecord* hitObj = hit->Inst;
         if (hitObj)
         {
-            char* hitOwner = *(char**)(hitObj + 0xC);
+            char* hitOwner = (char*)hitObj->m_pActiveNode;
             if (hitOwner)
             {
                 sVEntry_138960* vt = *(sVEntry_138960**)(hitOwner + 0xC);

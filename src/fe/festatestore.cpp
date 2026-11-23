@@ -221,7 +221,7 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     }
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
-    char* realFe = (char*)SSXApp->RealFE;
+    cFE* realFe = SSXApp->RealFE;
     t4Vector camPos;
     t4Vector lookAt;
     float z = 80.0f;
@@ -235,8 +235,8 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     lookAt.y = 0.0f;
     lookAt.z = z;
     lookAt.w = w;
-    cSimpleCamera_setupCamWithPosAndTarget(realFe + 0x10, &camPos, &lookAt);
-    *(float*)(realFe + 0x10) = 0.4363323450088501f;
+    cSimpleCamera_setupCamWithPosAndTarget(&realFe->mCamera, &camPos, &lookAt);
+    realFe->mCamera.View = 0.4363323450088501f;
     {
         cUIEngine* uiEngine = self->mpEngine;
         int iconHash = GetHashValue32(str_empty_box);
@@ -272,9 +272,9 @@ void* cUIState_onDestroyScreen(void* self);
  */
 extern "C" void cFEStateUberTrick_onDestroyScreen(cFEStateUberTrick* self)
 {
-    char* mgr = (char*)SSXApp->RealFE;
-    if (mgr != 0) {
-        cFERiderManager_setHumanVisible(mgr + 0xB0, self->mUserNum, 0);
+    cFE* mgr = SSXApp->RealFE;
+    if (((char*)mgr) != 0) {
+        cFERiderManager_setHumanVisible(&mgr->mRiderManager, self->mUserNum, 0);
     }
     cUIState_onDestroyScreen(self);
 }
@@ -794,8 +794,8 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                 int n = 0;
                 sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                 if (self->mbModelVisible != 0) {
-                    char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
-                    cRiderAnimBase_play(*(void**)(feRider + 0xC), tbl[bi].anim, 0, -1.0f);
+                    cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+                    cRiderAnimBase_play(feRider->mpRiderAnim, tbl[bi].anim, 0, -1.0f);
                 }
             }
         }

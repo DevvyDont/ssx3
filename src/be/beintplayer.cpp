@@ -1619,8 +1619,8 @@ extern "C" void* func_00147908(cBENewPlayerInterface* self, int index)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    char* charRecord = (char*)&cBELibrary_profileLib[profile][charId];
-    return charRecord + 0xE38;
+    cBECharProfileDB* charRecord = &cBELibrary_profileLib[profile][charId];
+    return (char*)&charRecord->unk_E38[0][0];
 }
 #endif
 

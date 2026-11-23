@@ -417,9 +417,9 @@ extern "C" void cFERider_setVisible(void* self, int a1);
  */
 extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int on)
 {
-    char* mgr = (char*)SSXApp->RealFE;
-    if (mgr != 0) {
-        void* rider = cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum);
+    cFE* mgr = SSXApp->RealFE;
+    if (((char*)mgr) != 0) {
+        void* rider = cFERiderManager_getHuman1(&mgr->mRiderManager, self->mUserNum);
         if (on == 0) {
             cFERider_setVisible(rider, 0);
         }

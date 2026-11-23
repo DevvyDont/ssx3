@@ -4565,9 +4565,9 @@ int SNDautovol(int soundHandle, int n, int targetVol) {
         setChan = -1;
         targetVol <<= 16;
         while (iSNDpatchkey_8530(chanIndex, &setChan)) {
-            char *channel = (char*)&sndgs.chan[setChan];
-            *(int *)(channel + 0x34) = targetVol;
-            *(int *)(channel + 0x30) = (targetVol - *(int *)(channel + 0x38)) / n;
+            CHANPUB* channel = &sndgs.chan[setChan];
+            channel->fadeTargetVol = targetVol;
+            channel->fadePer100Hz = (targetVol - channel->programmedVol) / n;
         }
     }
     return chanIndex;
@@ -8260,61 +8260,61 @@ void func_003BD9C0(void) {
     void *var_6;
 
     var_7 = 0;
-    var_6 = (*(int *)((char*)(D_0050AC68) + (8))) + 141;
-    if ((*(unsigned char *)((char*)(D_0050AC68) + (1))) != 0) {
+    var_6 = (*(int *)((char*)(D_0050AC68) + 8)) + 141;
+    if ((*(unsigned char *)((char*)(D_0050AC68) + 1)) != 0) {
         var_8 = 4;
         do {
             temp_3 = var_7 * 4;
             var_7 += 2;
-            temp_4 = (*(void **)((char*)((D_0050AC68 + temp_3)) + (0x84)));
+            temp_4 = (*(void **)((char*)((D_0050AC68 + temp_3)) + 0x84));
             temp_5 = temp_4 + 4;
-            (*(signed char *)((char*)(var_6) + (-1))) = (signed char) (((*(unsigned char *)((char*)(temp_4) + (4))) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (1))) >> 6));
-            (*(signed char *)((char*)(var_6) + (2))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (1))) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (2))) >> 5));
-            (*(signed char *)((char*)(var_6) + (1))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (2))) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (3))) >> 4));
-            (*(signed char *)((char*)(var_6) + (4))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (3))) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (4))) >> 3));
-            (*(signed char *)((char*)(var_6) + (3))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (4))) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (5))) >> 2));
-            (*(signed char *)((char*)(var_6) + (6))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (5))) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (6))) >> 1));
-            (*(signed char *)((char*)(var_6) + (5))) = (signed char) ((*(unsigned char *)((char*)(temp_5) + (7))) | ((*(unsigned char *)((char*)(temp_5) + (6))) << 7));
-            (*(signed char *)((char*)(var_6) + (8))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (8))) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (9))) >> 6));
-            (*(signed char *)((char*)(var_6) + (7))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (9))) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0xA))) >> 5));
-            (*(signed char *)((char*)(var_6) + (0xA))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0xA))) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0xB))) >> 4));
-            (*(signed char *)((char*)(var_6) + (9))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0xB))) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0xC))) >> 3));
-            (*(signed char *)((char*)(var_6) + (0xC))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0xC))) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0xD))) >> 2));
-            (*(signed char *)((char*)(var_6) + (0xB))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0xD))) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0xE))) >> 1));
-            (*(signed char *)((char*)(var_6) + (0xE))) = (signed char) ((*(unsigned char *)((char*)(temp_5) + (0xF))) | ((*(unsigned char *)((char*)(temp_5) + (0xE))) << 7));
-            (*(signed char *)((char*)(var_6) + (0xD))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0x10))) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0x11))) >> 6));
-            (*(signed char *)((char*)(var_6) + (0x10))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0x11))) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0x12))) >> 5));
-            (*(signed char *)((char*)(var_6) + (0xF))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0x12))) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0x13))) >> 4));
-            (*(signed char *)((char*)(var_6) + (0x12))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0x13))) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0x14))) >> 3));
-            (*(signed char *)((char*)(var_6) + (0x11))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0x14))) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0x15))) >> 2));
-            (*(signed char *)((char*)(var_6) + (0x14))) = (signed char) (((*(unsigned char *)((char*)(temp_5) + (0x15))) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + (0x16))) >> 1));
-            (*(signed char *)((char*)(var_6) + (0x13))) = (signed char) ((*(unsigned char *)((char*)(temp_5) + (0x17))) | ((*(unsigned char *)((char*)(temp_5) + (0x16))) << 7));
-            temp_4_2 = (*(void **)((char*)((D_0050AC68 + var_8)) + (0x84)));
+            (*(signed char *)((char*)(var_6) + (-1))) = (signed char) (((*(unsigned char *)((char*)(temp_4) + 4)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 1)) >> 6));
+            (*(signed char *)((char*)(var_6) + 2)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 1)) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 2)) >> 5));
+            (*(signed char *)((char*)(var_6) + 1)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 2)) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 3)) >> 4));
+            (*(signed char *)((char*)(var_6) + 4)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 3)) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 4)) >> 3));
+            (*(signed char *)((char*)(var_6) + 3)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 4)) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 5)) >> 2));
+            (*(signed char *)((char*)(var_6) + 6)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 5)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 6)) >> 1));
+            (*(signed char *)((char*)(var_6) + 5)) = (signed char) ((*(unsigned char *)((char*)(temp_5) + 7)) | ((*(unsigned char *)((char*)(temp_5) + 6)) << 7));
+            (*(signed char *)((char*)(var_6) + 8)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 8)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 9)) >> 6));
+            (*(signed char *)((char*)(var_6) + 7)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 9)) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0xA)) >> 5));
+            (*(signed char *)((char*)(var_6) + 0xA)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0xA)) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0xB)) >> 4));
+            (*(signed char *)((char*)(var_6) + 9)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0xB)) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0xC)) >> 3));
+            (*(signed char *)((char*)(var_6) + 0xC)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0xC)) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0xD)) >> 2));
+            (*(signed char *)((char*)(var_6) + 0xB)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0xD)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0xE)) >> 1));
+            (*(signed char *)((char*)(var_6) + 0xE)) = (signed char) ((*(unsigned char *)((char*)(temp_5) + 0xF)) | ((*(unsigned char *)((char*)(temp_5) + 0xE)) << 7));
+            (*(signed char *)((char*)(var_6) + 0xD)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x10)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x11)) >> 6));
+            (*(signed char *)((char*)(var_6) + 0x10)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x11)) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x12)) >> 5));
+            (*(signed char *)((char*)(var_6) + 0xF)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x12)) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x13)) >> 4));
+            (*(signed char *)((char*)(var_6) + 0x12)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x13)) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x14)) >> 3));
+            (*(signed char *)((char*)(var_6) + 0x11)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x14)) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x15)) >> 2));
+            (*(signed char *)((char*)(var_6) + 0x14)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x15)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x16)) >> 1));
+            (*(signed char *)((char*)(var_6) + 0x13)) = (signed char) ((*(unsigned char *)((char*)(temp_5) + 0x17)) | ((*(unsigned char *)((char*)(temp_5) + 0x16)) << 7));
+            temp_4_2 = (*(void **)((char*)((D_0050AC68 + var_8)) + 0x84));
             var_8 += 8;
             temp_5_2 = temp_4_2 + 4;
-            (*(signed char *)((char*)(var_6) + (0x16))) = (signed char) (((*(unsigned char *)((char*)(temp_4_2) + (4))) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (1))) >> 6));
-            (*(signed char *)((char*)(var_6) + (0x15))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (1))) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (2))) >> 5));
-            (*(signed char *)((char*)(var_6) + (0x18))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (2))) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (3))) >> 4));
-            (*(signed char *)((char*)(var_6) + (0x17))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (3))) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (4))) >> 3));
-            (*(signed char *)((char*)(var_6) + (0x1A))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (4))) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (5))) >> 2));
-            (*(signed char *)((char*)(var_6) + (0x19))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (5))) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (6))) >> 1));
-            (*(signed char *)((char*)(var_6) + (0x1C))) = (signed char) ((*(unsigned char *)((char*)(temp_5_2) + (7))) | ((*(unsigned char *)((char*)(temp_5_2) + (6))) << 7));
-            (*(signed char *)((char*)(var_6) + (0x1B))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (8))) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (9))) >> 6));
-            (*(signed char *)((char*)(var_6) + (0x1E))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (9))) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0xA))) >> 5));
-            (*(signed char *)((char*)(var_6) + (0x1D))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0xA))) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0xB))) >> 4));
-            (*(signed char *)((char*)(var_6) + (0x20))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0xB))) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0xC))) >> 3));
-            (*(signed char *)((char*)(var_6) + (0x1F))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0xC))) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0xD))) >> 2));
-            (*(signed char *)((char*)(var_6) + (0x22))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0xD))) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0xE))) >> 1));
-            (*(signed char *)((char*)(var_6) + (0x21))) = (signed char) ((*(unsigned char *)((char*)(temp_5_2) + (0xF))) | ((*(unsigned char *)((char*)(temp_5_2) + (0xE))) << 7));
-            (*(signed char *)((char*)(var_6) + (0x24))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0x10))) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0x11))) >> 6));
-            (*(signed char *)((char*)(var_6) + (0x23))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0x11))) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0x12))) >> 5));
-            (*(signed char *)((char*)(var_6) + (0x26))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0x12))) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0x13))) >> 4));
-            (*(signed char *)((char*)(var_6) + (0x25))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0x13))) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0x14))) >> 3));
-            (*(signed char *)((char*)(var_6) + (0x28))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0x14))) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0x15))) >> 2));
-            (*(signed char *)((char*)(var_6) + (0x27))) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + (0x15))) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + (0x16))) >> 1));
-            (*(signed char *)((char*)(var_6) + (0x2A))) = (signed char) ((*(unsigned char *)((char*)(temp_5_2) + (0x17))) | ((*(unsigned char *)((char*)(temp_5_2) + (0x16))) << 7));
+            (*(signed char *)((char*)(var_6) + 0x16)) = (signed char) (((*(unsigned char *)((char*)(temp_4_2) + 4)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 1)) >> 6));
+            (*(signed char *)((char*)(var_6) + 0x15)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 1)) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 2)) >> 5));
+            (*(signed char *)((char*)(var_6) + 0x18)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 2)) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 3)) >> 4));
+            (*(signed char *)((char*)(var_6) + 0x17)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 3)) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 4)) >> 3));
+            (*(signed char *)((char*)(var_6) + 0x1A)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 4)) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 5)) >> 2));
+            (*(signed char *)((char*)(var_6) + 0x19)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 5)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 6)) >> 1));
+            (*(signed char *)((char*)(var_6) + 0x1C)) = (signed char) ((*(unsigned char *)((char*)(temp_5_2) + 7)) | ((*(unsigned char *)((char*)(temp_5_2) + 6)) << 7));
+            (*(signed char *)((char*)(var_6) + 0x1B)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 8)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 9)) >> 6));
+            (*(signed char *)((char*)(var_6) + 0x1E)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 9)) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0xA)) >> 5));
+            (*(signed char *)((char*)(var_6) + 0x1D)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0xA)) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0xB)) >> 4));
+            (*(signed char *)((char*)(var_6) + 0x20)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0xB)) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0xC)) >> 3));
+            (*(signed char *)((char*)(var_6) + 0x1F)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0xC)) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0xD)) >> 2));
+            (*(signed char *)((char*)(var_6) + 0x22)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0xD)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0xE)) >> 1));
+            (*(signed char *)((char*)(var_6) + 0x21)) = (signed char) ((*(unsigned char *)((char*)(temp_5_2) + 0xF)) | ((*(unsigned char *)((char*)(temp_5_2) + 0xE)) << 7));
+            (*(signed char *)((char*)(var_6) + 0x24)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0x10)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0x11)) >> 6));
+            (*(signed char *)((char*)(var_6) + 0x23)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0x11)) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0x12)) >> 5));
+            (*(signed char *)((char*)(var_6) + 0x26)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0x12)) * 8) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0x13)) >> 4));
+            (*(signed char *)((char*)(var_6) + 0x25)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0x13)) * 0x10) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0x14)) >> 3));
+            (*(signed char *)((char*)(var_6) + 0x28)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0x14)) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0x15)) >> 2));
+            (*(signed char *)((char*)(var_6) + 0x27)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0x15)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0x16)) >> 1));
+            (*(signed char *)((char*)(var_6) + 0x2A)) = (signed char) ((*(unsigned char *)((char*)(temp_5_2) + 0x17)) | ((*(unsigned char *)((char*)(temp_5_2) + 0x16)) << 7));
             var_6 += 0x2A;
-        } while (var_7 < (int) (*(unsigned char *)((char*)(D_0050AC68) + (1))));
+        } while (var_7 < (int) (*(unsigned char *)((char*)(D_0050AC68) + 1)));
     }
 }
 #endif
@@ -11462,15 +11462,15 @@ void SNDPLATFORM_getvoicerange(int renderMode, int *minVoice, int *maxVoice) {
         return;
     }
     if (renderMode & 0x100) {
-        char *driverState = ((char*)&sndgs);
-        *minVoice = *(unsigned char *)(driverState + 0x30);
-        *maxVoice = *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
+        SNDGLOBALSTATE* driverState = &sndgs;
+        *minVoice = driverState->sso.set.voicesspu;
+        *maxVoice = driverState->sso.set.voicesspu + driverState->sso.set.voicesiopcpu;
         return;
     }
     if (renderMode & 4) {
-        char *driverState = ((char*)&sndgs);
-        *minVoice = *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
-        *maxVoice = *(short *)(driverState + 0x17E);
+        SNDGLOBALSTATE* driverState = &sndgs;
+        *minVoice = driverState->sso.set.voicesspu + driverState->sso.set.voicesiopcpu;
+        *maxVoice = driverState->voicestotal;
     }
 }
 #endif
@@ -12987,19 +12987,19 @@ extern void func_003C8D00_3178(int, float) __asm__("func_003C8D00");
  * @param cutoff  the cutoff frequency in Hz
  */
 void SNDPLATFORM_lowpass(int idx, int cutoff) {
-    char *channel = (char*)&((struct CHANPUB*)sndgs.chan)[idx];
+    CHANPUB* channel = &((struct CHANPUB*)sndgs.chan)[idx];
     int i;
     short *voiceList;
     float normCutoff;
 
-    if (*(unsigned short *)(channel + 0x24) & 4) {
+    if (channel->rendermode & 4) {
         normCutoff = (float)cutoff * (1.0f / ((float)sndgs.sso.set.outputrate * 0.5f));
         i = 0;
-        if (i < *(unsigned char *)(channel + 0x23)) {
-            voiceList = (short *)(channel + 4);
+        if (i < channel->numchan) {
+            voiceList = (short *)(&channel->voices[0]);
             do {
                 func_003C8D00_3178(*voiceList++ - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), normCutoff);
-            } while (++i < *(unsigned char *)(channel + 0x23));
+            } while (++i < channel->numchan);
         }
     }
 }
@@ -13538,9 +13538,9 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_asyncresolvetimbre);
  */
 int SNDPLATFORM_asyncresolvetimbre(void *patchHeader, int sampleData, int *firstOffset) {
     if (*firstOffset == 0) {
-        *firstOffset = (*(int *)((char*)(patchHeader) + (0x68)));
+        *firstOffset = (*(int *)((char*)(patchHeader) + 0x68));
     }
-    *(*(int **)((char*)(patchHeader) + (0x64))) = sampleData + ((*(int *)((char*)(patchHeader) + (0x68))) - *firstOffset);
+    *(*(int **)((char*)(patchHeader) + 0x64)) = sampleData + ((*(int *)((char*)(patchHeader) + 0x68)) - *firstOffset);
     return 0;
 }
 #endif
@@ -15816,8 +15816,8 @@ int SNDMEM_gethighwater_6240(void) __asm__("SNDMEM_gethighwater");
 int SNDMEM_gethighwater_6240(void) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)((char*)sndgs.mm) + (8)));
-    return (int) ((temp_3 - (*(int *)((char*)((char*)sndgs.mm) + (0x10)))) * 100) / temp_3;
+    temp_3 = (*(int *)((char*)sndgs.mm + 8));
+    return (int) ((temp_3 - (*(int *)((char*)sndgs.mm + 0x10))) * 100) / temp_3;
 }
 #endif
 
@@ -15851,16 +15851,16 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_push);
 void SNDLINKI_push(SNDLINKLIST* list, void *node) {
     void *temp_2;
 
-    (*(void **)((char*)(node) + (0))) = (void *) (list->phead);
-    (*(int *)((char*)(node) + (4))) = 0;
+    (*(void **)((char*)(node) + 0)) = (void *) (list->phead);
+    (*(int *)((char*)(node) + 4)) = 0;
     temp_2 = ((void*)list->phead);
     if (temp_2 != 0) {
-        (*(void **)((char*)(temp_2) + (4))) = node;
+        (*(void **)((char*)(temp_2) + 4)) = node;
     } else {
         ((void*)list->ptail) = node;
     }
     ((void*)list->phead) = node;
-    list->items = (int) ((list->items) + 1);
+    list->items = (int) (list->items + 1);
 }
 #endif
 
@@ -15887,7 +15887,7 @@ void SNDLINKI_pushtail(SNDLINKLIST* list, SNDLINKNODE* node) {
         list->phead = node;
     }
     list->ptail = node;
-    list->items = (int) ((list->items) + 1);
+    list->items = (int) (list->items + 1);
 }
 #endif
 
@@ -15916,7 +15916,7 @@ void *SNDLINKI_pop(SNDLINKLIST* list) {
         } else {
             temp_2->pprev = 0;
         }
-        list->items = (int) ((list->items) - 1);
+        list->items = (int) (list->items - 1);
     }
     return temp_3;
 }
@@ -15951,7 +15951,7 @@ void SNDLINKI_remove(SNDLINKLIST* list, SNDLINKNODE* node) {
     if (temp_3_2 != 0) {
         temp_3_2->pprev = node->pprev;
     }
-    list->items = (int) ((list->items) - 1);
+    list->items = (int) (list->items - 1);
 }
 #endif
 
@@ -17002,22 +17002,22 @@ INCLUDE_ASM("ealib/seg_2B4578", MIXI_interpolateto0);
  * @param buckets  the 16 float samples
  */
 void MIXI_interpolateto0(float *amount, void *buckets) {
-    (*(float *)((char*)(buckets) + (0))) = (float) ((*(float *)((char*)(buckets) + (0))) + (*amount * 0.9411765f));
-    (*(float *)((char*)(buckets) + (4))) = (float) ((*(float *)((char*)(buckets) + (4))) + (*amount * 0.88235295f));
-    (*(float *)((char*)(buckets) + (8))) = (float) ((*(float *)((char*)(buckets) + (8))) + (*amount * 0.8235294f));
-    (*(float *)((char*)(buckets) + (0xC))) = (float) ((*(float *)((char*)(buckets) + (0xC))) + (*amount * 0.7647059f));
-    (*(float *)((char*)(buckets) + (0x10))) = (float) ((*(float *)((char*)(buckets) + (0x10))) + (*amount * 0.7058824f));
-    (*(float *)((char*)(buckets) + (0x14))) = (float) ((*(float *)((char*)(buckets) + (0x14))) + (*amount * 0.64705884f));
-    (*(float *)((char*)(buckets) + (0x18))) = (float) ((*(float *)((char*)(buckets) + (0x18))) + (*amount * 0.5882353f));
-    (*(float *)((char*)(buckets) + (0x1C))) = (float) ((*(float *)((char*)(buckets) + (0x1C))) + (*amount * 0.5294118f));
-    (*(float *)((char*)(buckets) + (0x20))) = (float) ((*(float *)((char*)(buckets) + (0x20))) + (*amount * 0.47058824f));
-    (*(float *)((char*)(buckets) + (0x24))) = (float) ((*(float *)((char*)(buckets) + (0x24))) + (*amount * 0.4117647f));
-    (*(float *)((char*)(buckets) + (0x28))) = (float) ((*(float *)((char*)(buckets) + (0x28))) + (*amount * 0.3529412f));
-    (*(float *)((char*)(buckets) + (0x2C))) = (float) ((*(float *)((char*)(buckets) + (0x2C))) + (*amount * 0.29411766f));
-    (*(float *)((char*)(buckets) + (0x30))) = (float) ((*(float *)((char*)(buckets) + (0x30))) + (*amount * 0.23529412f));
-    (*(float *)((char*)(buckets) + (0x34))) = (float) ((*(float *)((char*)(buckets) + (0x34))) + (*amount * 0.1764706f));
-    (*(float *)((char*)(buckets) + (0x38))) = (float) ((*(float *)((char*)(buckets) + (0x38))) + (*amount * 0.11764706f));
-    (*(float *)((char*)(buckets) + (0x3C))) = (float) ((*(float *)((char*)(buckets) + (0x3C))) + (*amount * 0.05882353f));
+    (*(float *)((char*)(buckets) + 0)) = (float) ((*(float *)((char*)(buckets) + 0)) + (*amount * 0.9411765f));
+    (*(float *)((char*)(buckets) + 4)) = (float) ((*(float *)((char*)(buckets) + 4)) + (*amount * 0.88235295f));
+    (*(float *)((char*)(buckets) + 8)) = (float) ((*(float *)((char*)(buckets) + 8)) + (*amount * 0.8235294f));
+    (*(float *)((char*)(buckets) + 0xC)) = (float) ((*(float *)((char*)(buckets) + 0xC)) + (*amount * 0.7647059f));
+    (*(float *)((char*)(buckets) + 0x10)) = (float) ((*(float *)((char*)(buckets) + 0x10)) + (*amount * 0.7058824f));
+    (*(float *)((char*)(buckets) + 0x14)) = (float) ((*(float *)((char*)(buckets) + 0x14)) + (*amount * 0.64705884f));
+    (*(float *)((char*)(buckets) + 0x18)) = (float) ((*(float *)((char*)(buckets) + 0x18)) + (*amount * 0.5882353f));
+    (*(float *)((char*)(buckets) + 0x1C)) = (float) ((*(float *)((char*)(buckets) + 0x1C)) + (*amount * 0.5294118f));
+    (*(float *)((char*)(buckets) + 0x20)) = (float) ((*(float *)((char*)(buckets) + 0x20)) + (*amount * 0.47058824f));
+    (*(float *)((char*)(buckets) + 0x24)) = (float) ((*(float *)((char*)(buckets) + 0x24)) + (*amount * 0.4117647f));
+    (*(float *)((char*)(buckets) + 0x28)) = (float) ((*(float *)((char*)(buckets) + 0x28)) + (*amount * 0.3529412f));
+    (*(float *)((char*)(buckets) + 0x2C)) = (float) ((*(float *)((char*)(buckets) + 0x2C)) + (*amount * 0.29411766f));
+    (*(float *)((char*)(buckets) + 0x30)) = (float) ((*(float *)((char*)(buckets) + 0x30)) + (*amount * 0.23529412f));
+    (*(float *)((char*)(buckets) + 0x34)) = (float) ((*(float *)((char*)(buckets) + 0x34)) + (*amount * 0.1764706f));
+    (*(float *)((char*)(buckets) + 0x38)) = (float) ((*(float *)((char*)(buckets) + 0x38)) + (*amount * 0.11764706f));
+    (*(float *)((char*)(buckets) + 0x3C)) = (float) ((*(float *)((char*)(buckets) + 0x3C)) + (*amount * 0.05882353f));
     *amount = 0.0f;
 }
 #endif
@@ -17040,22 +17040,22 @@ void MIXI_interpolatemix(void *input, void *accum, float fparg0, float fparg1) {
     float temp_f13;
 
     temp_f13 = (fparg1 - fparg0) * 0.05882353f;
-    (*(float *)((char*)(accum) + (0))) = (float) ((*(float *)((char*)(accum) + (0))) + ((*(float *)((char*)(input) + (0))) * (fparg0 + temp_f13)));
-    (*(float *)((char*)(accum) + (4))) = (float) ((*(float *)((char*)(accum) + (4))) + ((*(float *)((char*)(input) + (4))) * (fparg0 + (2.0f * temp_f13))));
-    (*(float *)((char*)(accum) + (8))) = (float) ((*(float *)((char*)(accum) + (8))) + ((*(float *)((char*)(input) + (8))) * (fparg0 + (temp_f13 * 3.0f))));
-    (*(float *)((char*)(accum) + (0xC))) = (float) ((*(float *)((char*)(accum) + (0xC))) + ((*(float *)((char*)(input) + (0xC))) * (fparg0 + (temp_f13 * 4.0f))));
-    (*(float *)((char*)(accum) + (0x10))) = (float) ((*(float *)((char*)(accum) + (0x10))) + ((*(float *)((char*)(input) + (0x10))) * (fparg0 + (temp_f13 * 5.0f))));
-    (*(float *)((char*)(accum) + (0x14))) = (float) ((*(float *)((char*)(accum) + (0x14))) + ((*(float *)((char*)(input) + (0x14))) * (fparg0 + (temp_f13 * 6.0f))));
-    (*(float *)((char*)(accum) + (0x18))) = (float) ((*(float *)((char*)(accum) + (0x18))) + ((*(float *)((char*)(input) + (0x18))) * (fparg0 + (temp_f13 * 7.0f))));
-    (*(float *)((char*)(accum) + (0x1C))) = (float) ((*(float *)((char*)(accum) + (0x1C))) + ((*(float *)((char*)(input) + (0x1C))) * (fparg0 + (temp_f13 * 8.0f))));
-    (*(float *)((char*)(accum) + (0x20))) = (float) ((*(float *)((char*)(accum) + (0x20))) + ((*(float *)((char*)(input) + (0x20))) * (fparg0 + (temp_f13 * 9.0f))));
-    (*(float *)((char*)(accum) + (0x24))) = (float) ((*(float *)((char*)(accum) + (0x24))) + ((*(float *)((char*)(input) + (0x24))) * (fparg0 + (temp_f13 * 10.0f))));
-    (*(float *)((char*)(accum) + (0x28))) = (float) ((*(float *)((char*)(accum) + (0x28))) + ((*(float *)((char*)(input) + (0x28))) * (fparg0 + (temp_f13 * 11.0f))));
-    (*(float *)((char*)(accum) + (0x2C))) = (float) ((*(float *)((char*)(accum) + (0x2C))) + ((*(float *)((char*)(input) + (0x2C))) * (fparg0 + (temp_f13 * 12.0f))));
-    (*(float *)((char*)(accum) + (0x30))) = (float) ((*(float *)((char*)(accum) + (0x30))) + ((*(float *)((char*)(input) + (0x30))) * (fparg0 + (temp_f13 * 13.0f))));
-    (*(float *)((char*)(accum) + (0x34))) = (float) ((*(float *)((char*)(accum) + (0x34))) + ((*(float *)((char*)(input) + (0x34))) * (fparg0 + (temp_f13 * 14.0f))));
-    (*(float *)((char*)(accum) + (0x38))) = (float) ((*(float *)((char*)(accum) + (0x38))) + ((*(float *)((char*)(input) + (0x38))) * (fparg0 + (temp_f13 * 15.0f))));
-    (*(float *)((char*)(accum) + (0x3C))) = (float) ((*(float *)((char*)(accum) + (0x3C))) + ((*(float *)((char*)(input) + (0x3C))) * (fparg0 + (temp_f13 * 16.0f))));
+    (*(float *)((char*)(accum) + 0)) = (float) ((*(float *)((char*)(accum) + 0)) + ((*(float *)((char*)(input) + 0)) * (fparg0 + temp_f13)));
+    (*(float *)((char*)(accum) + 4)) = (float) ((*(float *)((char*)(accum) + 4)) + ((*(float *)((char*)(input) + 4)) * (fparg0 + (2.0f * temp_f13))));
+    (*(float *)((char*)(accum) + 8)) = (float) ((*(float *)((char*)(accum) + 8)) + ((*(float *)((char*)(input) + 8)) * (fparg0 + (temp_f13 * 3.0f))));
+    (*(float *)((char*)(accum) + 0xC)) = (float) ((*(float *)((char*)(accum) + 0xC)) + ((*(float *)((char*)(input) + 0xC)) * (fparg0 + (temp_f13 * 4.0f))));
+    (*(float *)((char*)(accum) + 0x10)) = (float) ((*(float *)((char*)(accum) + 0x10)) + ((*(float *)((char*)(input) + 0x10)) * (fparg0 + (temp_f13 * 5.0f))));
+    (*(float *)((char*)(accum) + 0x14)) = (float) ((*(float *)((char*)(accum) + 0x14)) + ((*(float *)((char*)(input) + 0x14)) * (fparg0 + (temp_f13 * 6.0f))));
+    (*(float *)((char*)(accum) + 0x18)) = (float) ((*(float *)((char*)(accum) + 0x18)) + ((*(float *)((char*)(input) + 0x18)) * (fparg0 + (temp_f13 * 7.0f))));
+    (*(float *)((char*)(accum) + 0x1C)) = (float) ((*(float *)((char*)(accum) + 0x1C)) + ((*(float *)((char*)(input) + 0x1C)) * (fparg0 + (temp_f13 * 8.0f))));
+    (*(float *)((char*)(accum) + 0x20)) = (float) ((*(float *)((char*)(accum) + 0x20)) + ((*(float *)((char*)(input) + 0x20)) * (fparg0 + (temp_f13 * 9.0f))));
+    (*(float *)((char*)(accum) + 0x24)) = (float) ((*(float *)((char*)(accum) + 0x24)) + ((*(float *)((char*)(input) + 0x24)) * (fparg0 + (temp_f13 * 10.0f))));
+    (*(float *)((char*)(accum) + 0x28)) = (float) ((*(float *)((char*)(accum) + 0x28)) + ((*(float *)((char*)(input) + 0x28)) * (fparg0 + (temp_f13 * 11.0f))));
+    (*(float *)((char*)(accum) + 0x2C)) = (float) ((*(float *)((char*)(accum) + 0x2C)) + ((*(float *)((char*)(input) + 0x2C)) * (fparg0 + (temp_f13 * 12.0f))));
+    (*(float *)((char*)(accum) + 0x30)) = (float) ((*(float *)((char*)(accum) + 0x30)) + ((*(float *)((char*)(input) + 0x30)) * (fparg0 + (temp_f13 * 13.0f))));
+    (*(float *)((char*)(accum) + 0x34)) = (float) ((*(float *)((char*)(accum) + 0x34)) + ((*(float *)((char*)(input) + 0x34)) * (fparg0 + (temp_f13 * 14.0f))));
+    (*(float *)((char*)(accum) + 0x38)) = (float) ((*(float *)((char*)(accum) + 0x38)) + ((*(float *)((char*)(input) + 0x38)) * (fparg0 + (temp_f13 * 15.0f))));
+    (*(float *)((char*)(accum) + 0x3C)) = (float) ((*(float *)((char*)(accum) + 0x3C)) + ((*(float *)((char*)(input) + 0x3C)) * (fparg0 + (temp_f13 * 16.0f))));
 }
 #endif
 
@@ -17761,10 +17761,10 @@ INCLUDE_ASM("ealib/seg_2B4578", MIX_getframe);
  * @return the frame, or -1 when the voice has no decoder
  */
 int MIX_getframe(int idx) {
-    char *voiceState = (char*)&sndmix.smv[idx];
-    int (*fn)(int) = *(int (**)(int))(voiceState + 0x44);
+    SNDMIXVOICE* voiceState = &sndmix.smv[idx];
+    int (*fn)(int) = (int (*)(int))voiceState->unpackgetframe;
     if (fn != 0) {
-        return fn(*(int *)(voiceState + 0x48));
+        return fn((int)voiceState->pups);
     }
     return -1;
 }
@@ -18010,8 +18010,8 @@ void MIX_filteradd(int voice, int channelIndex, SNDFILTERDEF* filterDesc) {
 
     temp_7 = voice * 0x60;
     voiceState = (int)sndmix.smv + temp_7;
-    temp_2 = (SFILTERNODE*)SNDMEMI_alloc_8E28((filterDesc->statesize));
-    ((int (*)(void*, int, int))filterDesc->filterinit)(temp_2, (filterDesc->id), channelIndex);
+    temp_2 = (SFILTERNODE*)SNDMEMI_alloc_8E28(filterDesc->statesize);
+    ((int (*)(void*, int, int))filterDesc->filterinit)(temp_2, filterDesc->id, channelIndex);
     temp_2->priority = (unsigned short) (*(unsigned short*)&filterDesc->priority);
     ((int)temp_2->filterfn) = (int) ((int)filterDesc->filter);
     ((int)temp_2->restorefn) = (int) ((int)filterDesc->filterrestore);
@@ -18037,8 +18037,8 @@ extern void SNDMEMI_free_8EC0(char *) __asm__("SNDMEMI_free");
  * @param filterOrder  the filter's order (+0x18 of the node)
  */
 void MIX_filterremove(int voice, int filterOrder) {
-    char *rec = (char*)&sndmix.smv[voice];
-    SFILTERNODE* node = (SFILTERNODE*)(*(char **)(rec + 0x40));
+    SNDMIXVOICE* rec = &sndmix.smv[voice];
+    SFILTERNODE* node = (SFILTERNODE*)((char*)rec->filterhead);
     void (*fn)(char *);
     do {
         if (node->priority == filterOrder) {
@@ -18046,7 +18046,7 @@ void MIX_filterremove(int voice, int filterOrder) {
             if (fn != 0) {
                 fn(((char*)node));
             }
-            SFILTER_remove_8EC0(rec + 0x40, ((char*)node));
+            SFILTER_remove_8EC0((char*)&rec->filterhead, ((char*)node));
             SNDMEMI_free_8EC0(((char*)node));
             return;
         }
@@ -18165,11 +18165,11 @@ void SFILTER_cleanup(SFILTERNODE* node) {
     void *temp_4_2;
 
     temp_4 = ((void*)node->pfnnext);
-    if ((temp_4 != 0) && ((*(unsigned char *)((char*)(temp_4) + (0x1B))) == 0)) {
+    if ((temp_4 != 0) && ((*(unsigned char *)((char*)(temp_4) + 0x1B)) == 0)) {
         SFILTER_cleanup((SFILTERNODE*)temp_4);
     }
     temp_4_2 = ((void*)node->pfnnext2);
-    if ((temp_4_2 != 0) && ((*(unsigned char *)((char*)(temp_4_2) + (0x1B))) == 0)) {
+    if ((temp_4_2 != 0) && ((*(unsigned char *)((char*)(temp_4_2) + 0x1B)) == 0)) {
         SFILTER_cleanup((SFILTERNODE*)temp_4_2);
     }
     temp_2 = ((int (*)(void*))node->restorefn);
@@ -18408,7 +18408,7 @@ int SFILTER_unpackmtf(UNPACKMTFSTATE* node, int count, int srcBuffer, int *buffe
         return -1;
     }
     temp_2 = CMTBLKDecf_Decode_9360(((int)node->pDecoder), &cursor, count);
-    node->curframe = (unsigned int) ((node->curframe) + temp_2);
+    node->curframe = (unsigned int) (node->curframe + temp_2);
     cursor = cursor + temp_2;
     if (temp_2 < count) {
         memset_9360(cursor, 0, (count -= temp_2) * 4);
@@ -18745,12 +18745,12 @@ extern int CMTBLKDecf_CMTBLKDecf_9960(int) __asm__("CMTBLKDecf_CMTBLKDecf");
  */
 void SFILTER_unpackmtpfinit(UNPACKMTPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = SFILTER_unpackmtpf_9960;
-    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_9960(SNDDRV_getmastervoice_9960((source->voice)));
-    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_9960((source->voice));
+    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_9960(SNDDRV_getmastervoice_9960(source->voice));
+    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_9960(source->voice);
     ((int)node->psample) = 0;
     (*(short*)&node->curframe) = 0;
-    node->platformver = (source->platformver);
-    node->totalframes = (source->totalframes);
+    node->platformver = source->platformver;
+    node->totalframes = source->totalframes;
     ((int*)node->sfn.restorefn) = SFILTER_unpackmtpfrestore_9960;
     ((int)node->pDecoder) = CMTBLKDecf_CMTBLKDecf_9960(CMTBLKDecf_operator_new_9960(3432));
     ((int)node->prevframesunpacked) = 0;
@@ -18992,8 +18992,8 @@ extern void SFILTER_unpackpf(void);
  */
 void SFILTER_unpackpfinit(UNPACKPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = (int*)&SFILTER_unpackpf;
-    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice((source->voice)));
-    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan((source->voice));
+    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice(source->voice));
+    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan(source->voice);
     node->totalframes = -1;
     ((int)node->psample) = 0;
     node->curframe = 0;
@@ -19520,8 +19520,8 @@ extern int SFILTER_unpackxapfrestore_A610[] __asm__("SFILTER_unpackxapfrestore")
 void SFILTER_unpackxapfinit(UNPACKXAPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = SFILTER_unpackxapf_A610;
     ((int*)node->sfn.restorefn) = SFILTER_unpackxapfrestore_A610;
-    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_A610(SNDDRV_getmastervoice_A610((source->voice)));
-    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_A610((source->voice));
+    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_A610(SNDDRV_getmastervoice_A610(source->voice));
+    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_A610(source->voice);
     node->platformver = (int) (source->platformver);
     ((int)node->psample) = 0;
     node->totalframes = (int) (source->totalframes);
@@ -19700,12 +19700,12 @@ void SFILTER_modifyLPFRC(LPFRCSTATE* node, void *params) {
     float temp_f1;
     float temp_f2;
 
-    temp_f1 = (2.0f * (float) (*(int *)((char*)(params) + (0)))) / (float) (*(int *)((char*)(params) + (4)));
+    temp_f1 = (2.0f * (float) (*(int *)((char*)(params) + 0))) / (float) (*(int *)((char*)(params) + 4));
     temp_f2 = 1.0f - temp_f1;
     node->lpf.inverse = temp_f1;
     node->lpf.leakage = temp_f2;
-    node->lpf.inverse = (float) (temp_f1 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
-    node->lpf.leakage = (float) (temp_f2 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
+    node->lpf.inverse = (float) (temp_f1 * ((float) (*(int *)((char*)(params) + 8)) * 0.00390625f));
+    node->lpf.leakage = (float) (temp_f2 * ((float) (*(int *)((char*)(params) + 8)) * 0.00390625f));
 }
 #endif
 
@@ -19959,14 +19959,14 @@ int transferframes(TIMESTRETCHSTATE* stretcher, int *remaining, int *outCursor) 
     int byteCount;
     int temp_3;
 
-    temp_16_2 = (stretcher->outputsamples);
+    temp_16_2 = stretcher->outputsamples;
     temp_3 = *remaining;
     copied = temp_16_2;
     if (temp_16_2 >= temp_3) copied = temp_3;
     byteCount = copied * 4;
     Util_MemCpy_ADF0(*outCursor, &stretcher->output[stretcher->outputstart], byteCount);
-    stretcher->outputstart = (int) ((stretcher->outputstart) + copied);
-    stretcher->outputsamples = (int) ((stretcher->outputsamples) - copied);
+    stretcher->outputstart = (int) (stretcher->outputstart + copied);
+    stretcher->outputsamples = (int) (stretcher->outputsamples - copied);
     *remaining -= copied;
     *outCursor += byteCount;
     return copied;
@@ -20171,7 +20171,7 @@ int SFILTER_timestretchinit(TIMESTRETCHSTATE* node, void *header, int voice) {
     ((int)node->psideband) = (int) (header + 6);
     node->stretchratio = 1.0f;
     (*(int*)&node->sampleerror) = 0;
-    node->windowsize = (int) ((*(unsigned char *)((char*)(header) + (1))) * 2);
+    node->windowsize = (int) ((*(unsigned char *)((char*)(header) + 1)) * 2);
     node->framesleft = SNDI_getb(header + 2, 4);
     node->inputsamples = 0;
     node->outputsamples = 0;
@@ -21338,7 +21338,7 @@ int CEAXABLKDecf_Feed(CEAXABLKDecf* decoder, int data, int byteSize, int sampleC
     if (data == 0) {
         return -1;
     }
-    if ((decoder->xav.numsamples) != 0) {
+    if (decoder->xav.numsamples != 0) {
         return -1;
     }
     decoder->xav.numsamples = sampleCount;
@@ -21463,8 +21463,8 @@ INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_SetState);
  * @param history  the two history values
  */
 void CEAXABLKDecf_SetState(void *decoder, void *history) {
-    (*(float *)((char*)(decoder) + (0x98))) = (float) (*(float *)((char*)(history) + (0)));
-    (*(float *)((char*)(decoder) + (0x9C))) = (float) (*(float *)((char*)(history) + (4)));
+    (*(float *)((char*)(decoder) + 0x98)) = (float) (*(float *)((char*)(history) + 0));
+    (*(float *)((char*)(decoder) + 0x9C)) = (float) (*(float *)((char*)(history) + 4));
 }
 #endif
 
@@ -21659,7 +21659,7 @@ void interpolate(void *samples) {
     var_2 = 106;
     do {
         var_2 -= 2;
-        (*(float *)((char*)(var_4) + (0))) = (float) ((((*(float *)((char*)(var_4) + (-4))) + (*(float *)((char*)(var_4) + (4)))) * 0.59738594f) + (((*(float *)((char*)(var_4) + (-0xC))) + (*(float *)((char*)(var_4) + (0xC)))) * -0.11459156f) + (((*(float *)((char*)(var_4) + (-0x14))) + (*(float *)((char*)(var_4) + (0x14)))) * 0.01803268f));
+        (*(float *)((char*)(var_4) + 0)) = (float) ((((*(float *)((char*)(var_4) + (-4))) + (*(float *)((char*)(var_4) + 4))) * 0.59738594f) + (((*(float *)((char*)(var_4) + (-0xC))) + (*(float *)((char*)(var_4) + 0xC))) * -0.11459156f) + (((*(float *)((char*)(var_4) + (-0x14))) + (*(float *)((char*)(var_4) + 0x14))) * 0.01803268f));
         var_4 += 8;
     } while (var_2 >= 0);
 }
@@ -22098,12 +22098,12 @@ typedef struct { R_E0E0 arr[100]; } W_E0E0;
  * @return the channel index of the master voice (biased by the two reserved counts)
  */
 int SNDDRV_getmastervoice(int voice) {
-    char *driverState = ((char*)&sndgs);
+    SNDGLOBALSTATE* driverState = &sndgs;
     int temp_2;
     int temp_4;
 
-    temp_4 = voice + *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
-    temp_2 = (*(W_E0E0 **)(driverState + 0x1F0))->arr[temp_4].f;
+    temp_4 = voice + driverState->sso.set.voicesspu + driverState->sso.set.voicesiopcpu;
+    temp_2 = ((W_E0E0*)driverState->chan)->arr[temp_4].f;
     return (temp_2 == -1) ? temp_4 : temp_2;
 }
 #endif
@@ -22131,14 +22131,14 @@ int SNDDRV_getsamplechan_impl(int voice) {
     int temp_2;
     int temp_4;
     int var_5;
-    char *driverState = ((char*)&sndgs);
+    SNDGLOBALSTATE* driverState = &sndgs;
 
-    temp_4 = voice + *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
-    temp_2 = ((struct R_E118 *)*(char **)(driverState + 0x1F0))->e[temp_4].masterchan;
+    temp_4 = voice + driverState->sso.set.voicesspu + driverState->sso.set.voicesiopcpu;
+    temp_2 = ((struct R_E118 *)(char*)driverState->chan)->e[temp_4].masterchan;
     if (temp_2 == -1) {
         return 0;
     }
-    var_3 = (short *)(temp_2 * 0x8C + *(int *)(driverState + 0x1F0) + 6);
+    var_3 = (short *)(temp_2 * 0x8C + (int)driverState->chan + 6);
     for (var_5 = 1; var_5 < 6; var_5++, var_3++) {
         if (*var_3 == temp_4) {
             return var_5;
@@ -22655,26 +22655,26 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_fir8init);
  * @param firState  the FIR state
  */
 void SNDI_fir8init(SNDFIRSTATE* firState) {
-    (*(int *)((char*)(firState) + (0xC0))) = 0;
-    (*(int *)((char*)(firState) + (0xC4))) = 0;
-    (*(int *)((char*)(firState) + (0xC8))) = 0;
-    (*(int *)((char*)(firState) + (0xCC))) = 0;
-    (*(int *)((char*)(firState) + (0xD0))) = 0;
-    (*(int *)((char*)(firState) + (0xD4))) = 0;
-    (*(int *)((char*)(firState) + (0xD8))) = 0;
-    (*(int *)((char*)(firState) + (0xDC))) = 0;
-    (*(int *)((char*)(firState) + (4))) = 0;
-    (*(int *)((char*)(firState) + (8))) = 0;
-    (*(int *)((char*)(firState) + (0xC))) = 0;
-    (*(int *)((char*)(firState) + (0x18))) = 0;
-    (*(int *)((char*)(firState) + (0x1C))) = 0;
-    (*(int *)((char*)(firState) + (0x2C))) = 0;
-    (*(int *)((char*)(firState) + (0x90))) = 0;
-    (*(int *)((char*)(firState) + (0xA0))) = 0;
-    (*(int *)((char*)(firState) + (0xA4))) = 0;
-    (*(int *)((char*)(firState) + (0xB0))) = 0;
-    (*(int *)((char*)(firState) + (0xB4))) = 0;
-    (*(int *)((char*)(firState) + (0xB8))) = 0;
+    (*(int *)((char*)(firState) + 0xC0)) = 0;
+    (*(int *)((char*)(firState) + 0xC4)) = 0;
+    (*(int *)((char*)(firState) + 0xC8)) = 0;
+    (*(int *)((char*)(firState) + 0xCC)) = 0;
+    (*(int *)((char*)(firState) + 0xD0)) = 0;
+    (*(int *)((char*)(firState) + 0xD4)) = 0;
+    (*(int *)((char*)(firState) + 0xD8)) = 0;
+    (*(int *)((char*)(firState) + 0xDC)) = 0;
+    (*(int *)((char*)(firState) + 4)) = 0;
+    (*(int *)((char*)(firState) + 8)) = 0;
+    (*(int *)((char*)(firState) + 0xC)) = 0;
+    (*(int *)((char*)(firState) + 0x18)) = 0;
+    (*(int *)((char*)(firState) + 0x1C)) = 0;
+    (*(int *)((char*)(firState) + 0x2C)) = 0;
+    (*(int *)((char*)(firState) + 0x90)) = 0;
+    (*(int *)((char*)(firState) + 0xA0)) = 0;
+    (*(int *)((char*)(firState) + 0xA4)) = 0;
+    (*(int *)((char*)(firState) + 0xB0)) = 0;
+    (*(int *)((char*)(firState) + 0xB4)) = 0;
+    (*(int *)((char*)(firState) + 0xB8)) = 0;
 }
 #endif
 
@@ -23739,9 +23739,9 @@ void SFILTER_modifyECHO(ECHOSTATE* effect, void *params) {
     char *temp_2_2;
     int temp_3;
 
-    gain = (*(int *)((char*)(params) + (0))) >> 1;
-    rate = (*(int *)((char*)(params) + (4))) >> 8;
-    delayMs = (*(int *)((char*)(params) + (8))) >> 8;
+    gain = (*(int *)((char*)(params) + 0)) >> 1;
+    rate = (*(int *)((char*)(params) + 4)) >> 8;
+    delayMs = (*(int *)((char*)(params) + 8)) >> 8;
     f_F958_F9D8();
     temp_f0 = (float) gain * 0.007874016f;
     effect->fblevels = temp_f0;
@@ -23968,7 +23968,7 @@ void func_003D0C78(int base, unsigned int limit) {
 
     temp_4 = base + 0x10;
     if (limit >= temp_4) {
-        (*(int *)((char*)(temp_4) + (8))) = (int) ((*(int *)((char*)(temp_4) + (8))) | 0x04000000);
+        (*(int *)((char*)(temp_4) + 8)) = (int) ((*(int *)((char*)(temp_4) + 8)) | 0x04000000);
     }
 }
 #endif
@@ -25569,7 +25569,7 @@ void func_003D30A8(int pathId, int memBuffer, int memLimit) {
         temp_2 = func_003D5290_30A8(pathId);
         var_4 = -8;
         if (temp_2 != 0) {
-            var_4 = (*(int *)((char*)(temp_2) + (0x54)));
+            var_4 = (*(int *)((char*)(temp_2) + 0x54));
         }
         func_002AE768_30A8(var_4, memBuffer, memLimit);
         D_0044F430_30A8[0] = 0;
@@ -27402,9 +27402,9 @@ extern void func_002AF6C0(int, int);
  * @param volume  the level, 0..100
  */
 void func_003D62C8(void *channel, signed char volume) {
-    (*(signed char *)((char*)(channel) + (4))) = volume;
-    if ((*(signed char *)((char*)(channel) + (0xE))) < 0) {
-        func_002AF6C0((*(int *)((char*)(channel) + (0x54))), (int) ((*(signed char *)((char*)(channel) + (0x34))) * volume) / 100);
+    (*(signed char *)((char*)(channel) + 4)) = volume;
+    if ((*(signed char *)((char*)(channel) + 0xE)) < 0) {
+        func_002AF6C0((*(int *)((char*)(channel) + 0x54)), (int) ((*(signed char *)((char*)(channel) + 0x34)) * volume) / 100);
     }
 }
 #endif

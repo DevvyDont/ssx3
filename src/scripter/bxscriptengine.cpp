@@ -613,10 +613,10 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
  */
 extern "C" void cBXScriptEngine_PauseScript(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)&self->mScriptRequests[requestHandle];
+    tScriptRequestInfo* request = &self->mScriptRequests[requestHandle];
     cScriptPlayerMain_Pause(*(void**)request);
     if (*(int*)(*(char**)request + 0x2C) > 0) {
-        *(int*)(request + 0x4) = 5;
+        request->state = 5;
     }
 }
 #endif

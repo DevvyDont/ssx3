@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "be/beinterface.h"
 #include "intersect/bxnash.h"
 #include "animation/rideranimbase.h"
@@ -358,9 +359,9 @@ t4Vector cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calcul
 t4Vector cComputer_calculateTargetPos_0610(char* vself)
 {
     cComputer* self = (cComputer*)vself;
-    t4Vector toTarget = Sub_0610((self->RiderHandler.GroundMotion.mRider)->PathPos, (self->RiderHandler.GroundMotion.mRider)->mPosition);
+    t4Vector toTarget = Sub_0610(self->RiderHandler.GroundMotion.mRider->PathPos, self->RiderHandler.GroundMotion.mRider->mPosition);
     toTarget = Scale_0610(toTarget, 0.1f);
-    return Add_0610((self->RiderHandler.GroundMotion.mRider)->AimTargetPos, toTarget);
+    return Add_0610(self->RiderHandler.GroundMotion.mRider->AimTargetPos, toTarget);
 }
 #endif
 
@@ -1940,15 +1941,15 @@ extern "C" void cFocusMan_addfocusinstance(S_32C0 *focusMan, void *instance) {
     int var_2;
     int n;
 
-    temp_3 = (*(int *)((char*)(instance) + (8)));
+    temp_3 = (*(int *)((char*)(instance) + 8));
     temp_6 = temp_3 | 0x100;
-    (*(int *)((char*)(instance) + (8))) = temp_6;
+    (*(int *)((char*)(instance) + 8)) = temp_6;
     if (focusMan->flag != 0) {
         var_2 = temp_6 & 0xFFFFFDFF;
     } else {
         var_2 = temp_3 | 0x300;
     }
-    (*(int *)((char*)(instance) + (8))) = var_2;
+    (*(int *)((char*)(instance) + 8)) = var_2;
     n = focusMan->n;
     focusMan->arr[n] = instance;
     focusMan->n = n + 1;
@@ -1974,8 +1975,8 @@ extern "C" void cFocusMan_purgesection(cFocusMan* focusMan, int sectionId) {
     int i;
 
     for (i = 0; i < focusMan->NumFocusInstances; i++) {
-        void *instance = focusMan->FocusInstances[i];
-        if (*(unsigned char *)((char*)instance + 0x78) != sectionId) {
+        tInstanceRecord* instance = focusMan->FocusInstances[i];
+        if (*(unsigned char*)&instance->m_RID != sectionId) {
             focusMan->FocusInstances[n] = (tInstanceRecord*)instance;
             n++;
         }
@@ -2026,7 +2027,7 @@ extern "C" void cFocusMan_addbox(cFocusMan* focusMan, cFocusBox *focusBox) {
     focusMan->Boxes[focusMan->NumBoxes].Box = focusBox;
     boxCopy = focusBox->Position;
     focusMan->Boxes[focusMan->NumBoxes].LastUpdatePos = boxCopy;
-    focusMan->NumBoxes = (int) ((focusMan->NumBoxes) + 1);
+    focusMan->NumBoxes = (int) (focusMan->NumBoxes + 1);
 }
 #endif
 
@@ -2810,15 +2811,15 @@ extern "C" int cRiderAnim_updatePosNegSlider_42E0(void *, void *, int *, int, in
 extern "C" int cRiderAnim_onUpdateASYNC_UBERGRIND(cRiderAnim* riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int x = *sequence;
     if (x == 218) {
-        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 362, 363, deltaTime, (riderAnim->Rider->mSlewed[6].cur));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 362, 363, deltaTime, riderAnim->Rider->mSlewed[6].cur);
     }
     if (x == 226) {
-        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 371, 372, deltaTime, (riderAnim->Rider->mSlewed[6].cur));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 371, 372, deltaTime, riderAnim->Rider->mSlewed[6].cur);
     }
     if (x == 234) {
-        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 380, 381, deltaTime, (riderAnim->Rider->mSlewed[6].cur));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 380, 381, deltaTime, riderAnim->Rider->mSlewed[6].cur);
     }
-    return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 389, 390, deltaTime, (riderAnim->Rider->mSlewed[6].cur));
+    return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 389, 390, deltaTime, riderAnim->Rider->mSlewed[6].cur);
 }
 #endif
 
@@ -2985,7 +2986,7 @@ extern "C" int cRiderAnim_updatePosNegSlider_4660(void *, void *, int *, int, in
  * @return cRiderAnim_updatePosNegSlider's result: 1 when the sequence was expired
  */
 extern "C" int cRiderAnim_onUpdateASYNC_HANDPLANT(cRiderAnim* riderAnim, void *sequencer, int *sequence, float deltaTime) {
-    float w = (riderAnim->Rider->mSlewed[7].cur);
+    float w = riderAnim->Rider->mSlewed[7].cur;
 
     if (*sequence == 45) {
         return cRiderAnim_updatePosNegSlider_4660(riderAnim, sequencer, sequence, 353, 352, deltaTime, w);
@@ -3378,7 +3379,7 @@ extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("c
  * @return cRiderAnimBase_playBlendIn's result
  */
 extern "C" int cRiderAnim_onExpireINTO_PRESS(cRiderAnim* riderAnim, int sequencer, int sequence) {
-    if ((riderAnim->Rider->PressMode) == 1) {
+    if (riderAnim->Rider->PressMode == 1) {
         return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 0x1C);
     }
     return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 36);
@@ -3528,11 +3529,11 @@ extern "C" void cRiderAnim_mapAIDToGAD(cRiderAnim* riderAnim, int aid) {
     temp_2 = ((void*)riderAnim->FERider);
     var_6 = 0;
     if (temp_2 != 0) {
-        var_6 = (*(int *)((char*)(temp_2) + (0xCD8)));
+        var_6 = (*(int *)((char*)(temp_2) + 0xCD8));
     } else {
         temp_4 = ((void*)riderAnim->Rider);
         if (temp_4 != 0) {
-            var_6 = (*(int *)((char*)(temp_4) + (0x364)));
+            var_6 = (*(int *)((char*)(temp_4) + 0x364));
         }
     }
     cAIAnimEventMap_mapAIDToGAD_4CF8(cRiderAnimBase_AIAnimEventMap, aid, var_6);
@@ -4146,14 +4147,14 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, t4Vector* norm)
         (*(t4Vector*)&info.Direct) = Norm_5398(*(t4Vector*)&self->mVelocity);
         (*(t4Vector*)&info.Reflect) = (*(t4Vector*)&contact.Inorm);
         info.Vel = k;
-        if ((TriFlags_5398((contact.Inst), contact.Mesh) & 2) && !((contact.Inst)->m_iFlags & 0x2000)) {
+        if ((TriFlags_5398(contact.Inst, contact.Mesh) & 2) && !(contact.Inst->m_iFlags & 0x2000)) {
             *(&self->CollideIntersectInfo) = contact;
             *(&self->CollideInfo) = info;
         }
-        if (TriFlags_5398((contact.Inst), contact.Mesh) & 1)
-            cRider_doObjectCollision_5398(((char*)self), (contact.Inst), &info, &contact, overlap);
-        if (!((contact.Inst)->m_iFlags & 0x2000))
-            cSSXAudio_CollisionSound_5398(gSSXAudio_5398, ((char*)self), (contact.Inst), contact.Mesh);
+        if (TriFlags_5398(contact.Inst, contact.Mesh) & 1)
+            cRider_doObjectCollision_5398(((char*)self), contact.Inst, &info, &contact, overlap);
+        if (!(contact.Inst->m_iFlags & 0x2000))
+            cSSXAudio_CollisionSound_5398(gSSXAudio_5398, ((char*)self), contact.Inst, contact.Mesh);
     }
     cCameraTriggerMan_checkCollisions(((char*)&gCamTriggerMan), ((char*)self));
     cWorldRider__cWorldRider(&sc, 2);
@@ -4584,9 +4585,9 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
             t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
             cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->TerminalVelocity);
         }
-        char* h = (char*)self->mRiderHandler;
-        *(int*)(h + 0x314) = 1;
-        *(t4Vector*)(h + 0x320) = self->mVelocity;
+        cRiderHandler* h = self->mRiderHandler;
+        h->WipeoutControl.IsNewImpact = 1;
+        h->WipeoutControl.LatestImpact = self->mVelocity;
         return;
     }
     if (cRider_getMotionState(self) == 1) {
@@ -5529,7 +5530,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
         vn = -vn;
         ScaleEq_6F78(hit.Inorm, -1.0f);
     }
-    if (((char*)hit.Inst) != 0) {
+    if (hit.Inst != 0) {
         char* handler = (char*)hit.Inst->m_pActiveNode;
         if (handler != 0) {
             sVEntry<void(void*, tIntersectInfo*)>* vt = *(sVEntry<void(void*, tIntersectInfo*)>**)(handler + 0xC);
@@ -5560,7 +5561,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     float push = (Dot_6F78(off, Sub_6F78(hit.Ivel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
     AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
     t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)SSXApp->TimerHz);
-    if (((char*)hit.Inst) != 0) {
+    if (hit.Inst != 0) {
         char* handler = (char*)hit.Inst->m_pActiveNode;
         if (handler != 0) {
             sVEhv_6F78* vt = *(sVEhv_6F78**)(handler + 0xC);
@@ -6626,7 +6627,7 @@ extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_8
 extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, sV4_86B8* tgt, sV4_86B8* dir)
 {
     cRider* self = (cRider*)vself;
-    sAnimModelBone* n = &((self->mAnimModel)->bones)[self->mBoneBoardRoot];
+    sAnimModelBone* n = &(self->mAnimModel->bones)[self->mBoneBoardRoot];
     const sV4_86B8& fwd = Fwd_86B8(n);
     sV4_86B8 pos = Add_86B8((*(sV4_86B8*)&n->pos), *(sV4_86B8*)&self->mModelOffset);
     float blend = self->mSlewed[9].cur;
@@ -6756,7 +6757,7 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, t4Vector* tgt)
 {
     if (cRider_getMotionState((char*)self) != 0 && cRider_getMotionState((char*)self) != 1)
         return 0;
-    t4Vector boardCenter = vAdd_8A48(*(t4Vector*)((char*)((self->mAnimModel)->bones) + (self->mBoneBoardRoot << 5)),
+    t4Vector boardCenter = vAdd_8A48(*(t4Vector*)((char*)(self->mAnimModel->bones) + (self->mBoneBoardRoot << 5)),
                              *(&self->mModelOffset));
     if (!cOverlapList_splineIntersect(self->mOverlapList, &boardCenter, tgt, 1, 300.0f))
         return 0;
@@ -6877,24 +6878,24 @@ extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
         cRider_cRider(vb);
     }
     cRiderHandler_cRiderHandler(((char*)self), 0);
-    (self->RiderHandler.GroundMotion.mRider)->mScriptObjectVtbl = (void*)&D_00458618;
-    (self->RiderHandler.GroundMotion.mRider)->mScriptObjRiderVtbl = D_00459B90;
-    VPTR_AT((self->RiderHandler.GroundMotion.mRider), sizeof(cRiderState)) = (void**)&D_00458660;
+    self->RiderHandler.GroundMotion.mRider->mScriptObjectVtbl = (void*)&D_00458618;
+    self->RiderHandler.GroundMotion.mRider->mScriptObjRiderVtbl = D_00459B90;
+    VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState)) = (void**)&D_00458660;
     if (!inChrg)
     {
         sVtbl9_108C80 ctorVtbl9 = D_00458618;
-        (self->RiderHandler.GroundMotion.mRider)->mScriptObjectVtbl = &ctorVtbl9;
+        self->RiderHandler.GroundMotion.mRider->mScriptObjectVtbl = &ctorVtbl9;
         char* base = (char*)self->RiderHandler.GroundMotion.mRider - 0xF50;
         int vbOffset = ((char*)self) - base;
         ctorVtbl9.e[1].delta = D_00458618.e[1].delta + vbOffset;
         sVtbl22_108C80 ctorVtbl22 = D_00458660;
-        VPTR_AT((self->RiderHandler.GroundMotion.mRider), sizeof(cRiderState)) = (void**)&ctorVtbl22;
+        VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState)) = (void**)&ctorVtbl22;
         ctorVtbl22.e[1].delta = D_00458660.e[1].delta + vbOffset;
         ctorVtbl22.e[20].delta = D_00458660.e[20].delta + vbOffset;
     }
     self->RiderHandler.mVtbl = (void**)cComputer_vtbl;
     if (actor)
-        (self->RiderHandler.GroundMotion.mRider)->mIsActor = 1;
+        self->RiderHandler.GroundMotion.mRider->mIsActor = 1;
     cComputer_Init_self((char*)self);
     return ((char*)self);
 }

@@ -325,9 +325,9 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         cBERewardInterface_setOwnedSongList(iface, self->player, self->mCharID, self->sel);
         func_0028C2D0(cAudioInterface_bxAudio(), self->done);
         if (self->mInStore != 0) {
-            char* pl = (char*)cAudioInterface_bxAudio();
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(pl + 0x5558);
-            char* obj = pl + 0x118;
+            cSSXAudio* pl = cAudioInterface_bxAudio();
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)pl->MusicSys.mVtbl;
+            char* obj = (char*)&pl->MusicSys;
             vt[3].fn(vthis(obj, vt[3]), 10);
         }
         if ((int)SSXApp->Game != 0) {

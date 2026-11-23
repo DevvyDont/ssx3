@@ -83,9 +83,9 @@ void* cUIState_onDestroyScreen(void* self);
 extern "C" void cFEStateCharSelect_onDestroyScreen(cFEStateCharSelect* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* mgr = (char*)SSXApp->RealFE;
-    if (mgr != 0 && cBENewRaceInterface_newRace.cGamePath != 0) {
-        cFERider_setVisible(cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum), 0);
+    cFE* mgr = SSXApp->RealFE;
+    if (((char*)mgr) != 0 && cBENewRaceInterface_newRace.cGamePath != 0) {
+        cFERider_setVisible(cFERiderManager_getHuman1(&mgr->mRiderManager, self->mUserNum), 0);
     }
     cUIState_onDestroyScreen(self);
 }

@@ -7163,19 +7163,19 @@ extern "C" void cSSXAudio_UpdateTimedEvent(cSSXAudio* self)
     if (cSSXAudio_ReplayMode(((char*)self)) != 0) {
         return;
     }
-    char* gameModeMan = (char*)SSXApp->GameModeMan;
-    if (gameModeMan == 0) {
+    cGameModeMan* gameModeMan = SSXApp->GameModeMan;
+    if (((char*)gameModeMan) == 0) {
         return;
     }
     int ok = 0;
-    if (*(int*)(gameModeMan + 0x88) != 0) {
+    if (gameModeMan->bIsTimedEvent != 0) {
         ok = ((D_005308D0[0] >> 9) & 1) ^ 1;
     }
     if (!ok) {
         return;
     }
     int elapsedSec = (int)((float)((cAI*)cAudioInterface_getAI())->EventTimerTick * 0.01666666753590107f);
-    int secsLeft = (fptoui((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f) - elapsedSec) % 3600;
+    int secsLeft = (fptoui((float)gameModeMan->uiTimeLimit * 0.01666666753590107f) - elapsedSec) % 3600;
     if (secsLeft <= 0) {
         return;
     }

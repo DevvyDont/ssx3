@@ -329,8 +329,8 @@ extern "C" void cGame_load(cGame* self)
     else
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, str_GameViewMan, 0x20000000, 0), cBENewRaceInterface_newRace.iNumberHumans);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsHost == 0) {
-        char* secondPlayer = (char*)self->AI->Players[1];
-        void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
+        cPlayer* secondPlayer = self->AI->Players[1];
+        void* cam = ((char*)secondPlayer) != 0 ? (void*)secondPlayer->mRider : 0;
         cCamera_switchChaseControllerTargetRider(self->ViewMan->PlayerCamera[0], cam);
     }
     cMenuSys* hud = (cMenuSys*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0));

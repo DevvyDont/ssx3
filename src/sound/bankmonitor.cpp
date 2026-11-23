@@ -2592,8 +2592,8 @@ extern "C" int func_002AF3B8(int slotIndex) {
     void *temp_4;
 
     temp_4 = D_004D3E98[slotIndex];
-    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + (0x64))) != 0)) {
-        return (*(int *)((char*)(temp_4) + (0)));
+    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + 0x64)) != 0)) {
+        return (*(int *)((char*)(temp_4) + 0));
     }
     return -1;
 }
@@ -2611,8 +2611,8 @@ extern "C" int func_002AF3F0(int slotIndex) {
     void *temp_4;
 
     temp_4 = D_004D3E98[slotIndex];
-    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + (0x64))) == 0)) {
-        return (*(int *)((char*)(temp_4) + (0)));
+    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + 0x64)) == 0)) {
+        return (*(int *)((char*)(temp_4) + 0));
     }
     return -1;
 }
@@ -5965,9 +5965,9 @@ extern "C" void func_002B3398(cMusicSys* self, int flags)
         bankManagerVtbl.e[1].delta = D_00483948.e[1].delta + bankManagerDelta;
     }
     for (int i = 0; i < self->mNumSongs; i++) {
-        char* songConfig = ((char*)self->mSongConfig[i]);
-        if (songConfig != 0) {
-            sBmonVcall3398* dtorSlot = &(*(sBmonVcall3398**)(songConfig + 0xA8))[1];
+        cSongConfiguration* songConfig = self->mSongConfig[i];
+        if (((char*)songConfig) != 0) {
+            sBmonVcall3398* dtorSlot = &((sBmonVcall3398*)songConfig->mVtbl)[1];
             dtorSlot->fn(vthis(songConfig, *dtorSlot), 3);
         }
     }
@@ -6352,7 +6352,7 @@ extern void func_002B2140_3C60(int) __asm__("func_002B2140");
 extern "C" void func_002B3C60(cMusicSys* musicSys) {
     int temp_4;
 
-    if ((musicSys->mSongPlaying) != 0) {
+    if (musicSys->mSongPlaying != 0) {
         temp_4 = ((int)musicSys->mSongInstance);
         if (temp_4 != 0) {
             func_002B2140_3C60(temp_4);
@@ -7022,11 +7022,11 @@ int func_002B4620_impl(void* vself)
     if ((char*)self->mSongInstance == 0) return 0;
     self->mSongInstance->unk_4C = one;
     int ready = 0;
-    char* curSong = (char*)self->mSongInstance;
-    int st = *(int*)(curSong + 0x38);
+    cSongInstance* curSong = self->mSongInstance;
+    int st = curSong->unk_38;
     if (st == one) {
         // PORT: pointer arithmetic through int
-        sBmStream4620* bankInst = (sBmStream4620*)(*(int*)(curSong + 0x34) * 0x60 + *(int*)(**(char***)self + 0xACC));
+        sBmStream4620* bankInst = (sBmStream4620*)(curSong->unk_34 * 0x60 + *(int*)(**(char***)self + 0xACC));
         if (func_002B4620_ready(bankInst)) {
             func_003D2DF8(0x11000002, 0, bankInst->handle);
             self->mSongInstance->unk_38 = 2;
@@ -7118,9 +7118,9 @@ extern "C" void func_002B4568(cMusicSys* self, void* ent);
  */
 extern "C" int func_002B4740(cMusicSys* self)
 {
-    void* ent = self->mSongInstance;
+    cSongInstance* ent = self->mSongInstance;
     char* table = *(char**)((char*)**(void***)self + 0xACC);
-    int state = *(int*)(table + *(int*)((char*)ent + 0x34) * 0x60);
+    int state = *(int*)(table + ent->unk_34 * 0x60);
     switch (state) {
     case 0:
         return 1;
@@ -7245,8 +7245,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4908__FPv);
 int func_002B4908(void* vself)
 {
     cMusicSys* self = (cMusicSys*)vself;
-    void* config = (void*)self->mSongConfig[self->mCurrentSongNum];
-    return *(int*)((char*)config + 0x98);
+    cSongConfiguration* config = self->mSongConfig[self->mCurrentSongNum];
+    return config->mSedValue;
 }
 #endif
 

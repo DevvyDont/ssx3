@@ -714,13 +714,13 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
     if ((unsigned int)profile > 2)
         return;
     int charID = cBELibrary_getCharacterID(rider);
-    char* rec = (char*)&cBELibrary_profileLib[profile][charID];
+    cBECharProfileDB* rec = &cBELibrary_profileLib[profile][charID];
     int event = cBELibrary_locationDB_r155420[rs->event].id;
     int kind = rs->b48;
     int mode = rs->mode;
     if (event == 22)
         event = 0;
-    sRecord_155420* best = (sRecord_155420*)(rec + 0xDE4);
+    sRecord_155420* best = (sRecord_155420*)(&rec->mRiderBest);
     int start = 0;
     if (stats == 0 || mode == 12)
         start = 8;

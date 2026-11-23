@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
 #include "be/beinterface.h"
 #include "camera/race/racecontroller.h"
 #include "ui/uithing.h"
@@ -3388,10 +3389,10 @@ extern "C" void cRiderMetrix_update(void* metrix);
  */
 extern "C" void cRider_updateSplit10(cRider* self)
 {
-    char* collideInst = (char*)self->CollideIntersectInfo.Inst;
-    if (collideInst != 0)
+    tInstanceRecord* collideInst = self->CollideIntersectInfo.Inst;
+    if (((char*)collideInst) != 0)
     {
-        char* obj = *(char**)(collideInst + 0xC);
+        char* obj = (char*)collideInst->m_pActiveNode;
         if (obj != 0)
         {
             sVEntry<void(void*, void*, void*, void*)>* vt = *(sVEntry<void(void*, void*, void*, void*)>**)(obj + 0xC);
@@ -3437,8 +3438,8 @@ extern "C" void cRider_updateSplit11(cRider* self)
     if (~self->mGroundPolyId != 0)
         self->mGroundMaterial = cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, (unsigned char)self->mGroundPolyId);
     cRenderStateMan_update((void*)self->getAIIndex(), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
-    char* handler = (char*)self->mRiderHandler;
-    cPlayerLights_Clear(handler ? handler + 0xD30 : 0);
+    cRiderHandler* handler = self->mRiderHandler;
+    cPlayerLights_Clear(handler ? (char*)&handler->PlayerLights : 0);
 }
 #endif
 
@@ -3853,8 +3854,8 @@ extern "C" void cRider_SetRiderLights(cRider* self)
         if (light != 0)
             func_0038A6A8(self->unk_7C0, &hipPos, light);
     }
-    char* x = (char*)self->mRiderHandler;
-    sPath_20D8* playerLights = x ? (sPath_20D8*)(x + 0xD30) : 0;
+    cRiderHandler* x = self->mRiderHandler;
+    sPath_20D8* playerLights = x ? (sPath_20D8*)(&x->PlayerLights) : 0;
     if (playerLights != 0) {
         {
             sV3_20D8 lightColour(playerLights->x, playerLights->y, playerLights->z);
@@ -3983,8 +3984,8 @@ extern "C" void cRider_renderBody(cRider* self)
 {
     if (self->mIsOnScreen)
     {
-        char* handler = (char*)self->mRiderHandler;
-        cPlayerLights* playerLights = (cPlayerLights*)(handler ? handler + 0xD30 : 0);
+        cRiderHandler* handler = self->mRiderHandler;
+        cPlayerLights* playerLights = (cPlayerLights*)(handler ? (char*)&handler->PlayerLights : 0);
         int additivePlayer = 0;
         if (playerLights->mPlayerIsAdditive || self->mUberLevel >= 11)
             additivePlayer = 1;
@@ -5795,7 +5796,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     cWorldLine_cWorldLine(&ray, lo, hi, 2, 0.5f);
     float hitDist = cOverlapList_terrainIntersect1(self->mOverlapList, &ray, &hit, 0);
     *(&self->LastGroundNormal) = *(&self->mGroundNormal);
-    if (hitDist > 0.0f && ((char*)hit.Patch) != 0) {
+    if (hitDist > 0.0f && hit.Patch != 0) {
         self->mGroundPolyId = *(int*)(((char*)hit.Patch) + 0x150);
         self->PatchUV.x = hit.u;
         self->PatchUV.y = hit.v;
@@ -6090,8 +6091,8 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
         if (pFrameInfo->numMainAnim == 0) {
             return;
         }
-        tMainAnim* pCurrMainAnim = (pFrameInfo->pMainAnimList);
-        tTagCustomMainAnim* pCurrMainAnimCustom = (pCurrMainAnim->pCustom);
+        tMainAnim* pCurrMainAnim = pFrameInfo->pMainAnimList;
+        tTagCustomMainAnim* pCurrMainAnimCustom = pCurrMainAnim->pCustom;
         if ((float)pCurrMainAnim->data.scriptStartFrame != currFrame) {
             return;
         }

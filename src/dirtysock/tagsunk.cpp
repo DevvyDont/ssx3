@@ -978,8 +978,8 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
         cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
         if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
         {
-            char* cfg = ((char*)&cBERules_mRules);
-            *(int*)(cfg + 0x18) |= 0x1C0;
+            tBERuleOptionDB* cfg = &cBERules_mRules;
+            *(int*)&cfg->MyRules |= 0x1C0;
             cBENewRaceInterface_setNumberAI(ri, 0);
             sVEntryA1D0* vt = *(sVEntryA1D0**)(ri + 0xC);
             vt[1].fn(vthis(ri, vt[1]));

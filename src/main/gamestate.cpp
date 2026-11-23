@@ -374,10 +374,10 @@ extern "C" void cGFTrackStartState_preloadInit(cGFTrackStartState* self)
             char* sub = *(char**)(*(char**)(*(char**)(cGameState_mpGame + 0xC) + 0x40) + 0x18) + 0x6C0;
             sVEntry_234F40* vt = *(sVEntry_234F40**)sub;
             if (cBENewPlayerInterface_isFirstTimeOnTrack(iface, vt[7].fn(vthis(sub, vt[7])), locationId) != 0) {
-                char* audio = (char*)cAudioInterface_bxAudio();
-                *(int*)(audio + 0x5790) = 0;
-                *(int*)(audio + 0x578C) = 1;
-                *(int*)(audio + 0x6254) = 1;
+                cSSXAudio* audio = cAudioInterface_bxAudio();
+                audio->unk_5790 = 0;
+                audio->unk_578C = 1;
+                audio->unk_6254 = 1;
                 self->mPlayFirstTimeBCVideo = 1;
             }
         }
@@ -2333,7 +2333,7 @@ extern "C" void* cInputSync_createlocalinput(cInputSync* self, int* realinput)
 {
     cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
     *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill((syncedPad->samples), 0, self->latency * 100);
+    MEM_fill(syncedPad->samples, 0, self->latency * 100);
     for (int i = 0; i < self->latency; i++) {
         (syncedPad->samples)[i].NumButtons = 0x18;
     }
@@ -2392,7 +2392,7 @@ extern "C" void* cInputSync_createremoteinput(cInputSync* self, int realinputmap
 {
     cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
     *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill((syncedPad->samples), 0, self->latency * 100);
+    MEM_fill(syncedPad->samples, 0, self->latency * 100);
     for (int i = 0; i < self->latency; i++) {
         (syncedPad->samples)[i].NumButtons = 0x18;
     }

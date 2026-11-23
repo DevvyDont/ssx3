@@ -245,8 +245,8 @@ extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumView; i++) {
-        void* camera = self->PlayerCamera[i];
-        void* controller = *(void**)((char*)camera + 0xA0);
+        cCamera* camera = self->PlayerCamera[i];
+        void* controller = camera->Controller;
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)controller + 0x14);
         vt[4].fn(vthis(controller, vt[4]));
     }
@@ -266,8 +266,8 @@ extern "C" void cGameViewMan_updateAll(cGameViewMan* self)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumView; i++) {
-        void* camera = self->PlayerCamera[i];
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)camera + 0x90);
+        cCamera* camera = self->PlayerCamera[i];
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)camera->mVtbl;
         vt[3].fn(vthis(camera, vt[3]));
     }
 }

@@ -83,10 +83,10 @@ void cCubicSplineInterpolant_initAsClamped(void* vself, float start, float end)
     cCubicSplineInterpolant* self = (cCubicSplineInterpolant*)vself;
     cCubicSplineInterpolant_initCommon(self);
     unsigned int flags = *(unsigned int*)self;
-    void* ptr = self->CubicSplines;
+    cCSICubicSpline* ptr = self->CubicSplines;
     flags |= 1;
     *(unsigned int*)self = flags;
-    *(float*)((char*)ptr + 0x10) = start;
+    ptr->X0 = start;
     self->MaxX = end;
 }
 #endif
@@ -504,7 +504,7 @@ extern "C" void* cDynamicMemMan_sYSMALLOc(cDynamicMemMan* ms, unsigned int nb, m
         return cDynamicMemMan_dlmalloc(ms, nb - 15);
     }
 
-    old_top = (av->top);
+    old_top = av->top;
     old_size = old_top->size & ~3U;
     old_end = (char*)old_top + old_size;
 
@@ -566,7 +566,7 @@ extern "C" void* cDynamicMemMan_sYSMALLOc(cDynamicMemMan* ms, unsigned int nb, m
 
             if (snd_brk != (char*)0xFFFFFFFF) {
                 (*(malloc_chunk**)&av->top) = (malloc_chunk*)aligned_brk;
-                (av->top)->size = (snd_brk - aligned_brk + correction) | 1;
+                av->top->size = (snd_brk - aligned_brk + correction) | 1;
                 av->sbrked_mem += correction;
 
                 if (old_size != 0) {
@@ -591,7 +591,7 @@ extern "C" void* cDynamicMemMan_sYSMALLOc(cDynamicMemMan* ms, unsigned int nb, m
         if (sum > av->max_total_mem)
             av->max_total_mem = sum;
 
-        chunk = (av->top);
+        chunk = av->top;
         size = chunk->size & ~3U;
         if ((unsigned int)size >= (unsigned int)(nb + 16)) {
             remainder_size = size - nb;
@@ -641,7 +641,7 @@ extern "C" int cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int topPad, m
     unsigned int pagesz;
 
     pagesz = av->pagesize;
-    top_size = (av->top)->size & ~3;
+    top_size = av->top->size & ~3;
     extra = __muldi3(__divdi3(top_size - topPad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
     if (extra > 0) {
         current_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
@@ -652,7 +652,7 @@ extern "C" int cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int topPad, m
                 released = current_brk - new_brk;
                 if (released != 0) {
                     av->sbrked_mem -= released;
-                    (av->top)->size = (top_size - released) | 1;
+                    av->top->size = (top_size - released) | 1;
                     return 1;
                 }
             }
@@ -931,7 +931,7 @@ extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem) __asm_
  */
 extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem)
 {
-    malloc_state* av = (ms->MallocState);
+    malloc_state* av = ms->MallocState;
     malloc_chunk* freedChunk;
     malloc_chunk* nextchunk;
     unsigned int size;
@@ -969,7 +969,7 @@ extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem)
                 fwd->bk = bck;
                 bck->fd = fwd;
             }
-            if (nextchunk != (av->top))
+            if (nextchunk != av->top)
             {
                 nextinuse = ((malloc_chunk*)((char*)nextchunk + nextsize))->size & 1;
                 nextchunk->size = nextsize;
@@ -999,7 +999,7 @@ extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem)
             {
                 if (av->max_fast & 2)
                     cDynamicMemMan_malloc_consolidate((cDynamicMemMan*)ms, (malloc_state*)av);
-                if (((av->top)->size & ~3U) >= av->trim_threshold)
+                if ((av->top->size & ~3U) >= av->trim_threshold)
                     cDynamicMemMan_sYSTRIm((cDynamicMemMan*)ms, av->top_pad, (malloc_state*)av);
             }
         }
@@ -1062,7 +1062,7 @@ extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_sta
                         fwd->bk = bck;
                         bck->fd = fwd;
                     }
-                    if (nextchunk != (av->top)) {
+                    if (nextchunk != av->top) {
                         nextinuse = ((malloc_chunk*)((char*)nextchunk + nextsize))->size & 1;
                         nextchunk->size = nextsize;
                         if (!nextinuse) {
@@ -1738,11 +1738,11 @@ extern "C" mallinfo cDynamicMemMan_dlmallinfo(cDynamicMemMan* ms)
     int nblocks;
     int nfastblocks;
 
-    if ((av->top) == 0) {
+    if (av->top == 0) {
         cDynamicMemMan_malloc_consolidate(ms, (malloc_state*)av);
     }
 
-    avail = (av->top)->size & ~3U;
+    avail = av->top->size & ~3U;
     nblocks = 1;
 
     nfastblocks = 0;
@@ -1776,7 +1776,7 @@ extern "C" mallinfo cDynamicMemMan_dlmallinfo(cDynamicMemMan* ms)
     mi.hblks = av->n_mmaps;
     mi.hblkhd = av->mmapped_mem;
     mi.fsmblks = fastavail;
-    mi.keepcost = (av->top)->size & ~3U;
+    mi.keepcost = av->top->size & ~3U;
     mi.usmblks = av->max_total_mem;
     return mi;
 }
@@ -2393,7 +2393,7 @@ void* TMemContainer256_alloc(TMemContainer256* self, unsigned int align) __asm__
  */
 void* TMemContainer256_alloc(TMemContainer256* self, unsigned int align)
 {
-    if ((self->m_freeList) != 0) {
+    if (self->m_freeList != 0) {
         return reserveBlock_0408(&(*(TMemBlock256**)&self->m_freeList));
     }
     return cMemBlockMan_alloc_0408(260, align);
@@ -2427,7 +2427,7 @@ void* TMemContainer512_alloc(TMemContainer512* self, unsigned int align) __asm__
  */
 void* TMemContainer512_alloc(TMemContainer512* self, unsigned int align)
 {
-    if ((self->m_freeList) != 0) {
+    if (self->m_freeList != 0) {
         return reserveBlock_0448(&(*(TMemBlock512**)&self->m_freeList));
     }
     return cMemBlockMan_alloc_0448(516, align);

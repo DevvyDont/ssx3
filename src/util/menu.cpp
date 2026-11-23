@@ -3633,15 +3633,15 @@ extern "C" void cIntMenuItem_setMinMax(cIntMenuItem* item, int minValue, int max
     int *temp_3_2;
     int temp_4;
 
-    temp_3 = (item->Value);
+    temp_3 = item->Value;
     item->Max = maxValue;
     item->Min = minValue;
     if (temp_3 != 0) {
         if (*temp_3 < minValue) {
             *temp_3 = minValue;
         }
-        temp_3_2 = (item->Value);
-        temp_4 = (item->Max);
+        temp_3_2 = item->Value;
+        temp_4 = item->Max;
         if (temp_4 < *temp_3_2) {
             *temp_3_2 = temp_4;
         }
@@ -6559,8 +6559,8 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
 {
     int focused = self == cMenu_getFocusItem((cMenu*)((void*)self->Menu));
     {
-        char* menu = (char*)((void*)self->Menu);
-        sVEntry<void(void*, float*, int)>* vt = *(sVEntry<void(void*, float*, int)>**)(menu + 0x12C);
+        cMenu* menu = self->Menu;
+        sVEntry<void(void*, float*, int)>* vt = (sVEntry<void (void*, float*, int)>*)menu->mVtbl;
         vt[9].fn(vthis(menu, vt[9]), rect, focused);
     }
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
