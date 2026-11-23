@@ -247,12 +247,6 @@ struct sGmUV_369CF8 {
 
 
 
-struct sGmVE_369CF8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, tBxVertex*, int);
-};
-
 /**
  * Draws an indexed triangle list one triangle at a time through virtual slot 71 (three vertices per call).
  *
@@ -288,8 +282,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 (*(t4Vector*)&verts[j].u).y = UV[Index].y();
             }
             Indices += 3;
-            sGmVE_369CF8* vt = (sGmVE_369CF8*)VPTR_OF(cGraphicsMan, self);
-            vt[71].fn(vthis(self, vt[71]), 3, verts, 0);
+            self->RenderTriStrip(3, verts, 0);
         }
     } else {
         for (int i = 0; i < NumTris; i++) {
@@ -305,8 +298,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 (*(t4Vector*)&verts[j].u).y = 0.0f;
             }
             Indices += 3;
-            sGmVE_369CF8* vt = (sGmVE_369CF8*)VPTR_OF(cGraphicsMan, self);
-            vt[71].fn(vthis(self, vt[71]), 3, verts, 0);
+            self->RenderTriStrip(3, verts, 0);
         }
     }
 }

@@ -20,6 +20,7 @@
 #include "bx/bxstring.h"
 #include "main/ssxapp.h"
 #include "replay/bxreplayframe.h"
+#include "render/graphicsman.h"
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
@@ -925,14 +926,12 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEPurge0* vt = (sVEPurge0*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-        vt[3].fn(vthis(ps2GraphicsMan, vt[3]));
+        ps2GraphicsMan->Purge();
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         if (ps2GraphicsMan) {
-            sVEPurge* vt = (sVEPurge*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-            vt[1].fn(vthis(ps2GraphicsMan, vt[1]), 3);
+            delete ps2GraphicsMan;
         }
     }
     GrMan = 0;

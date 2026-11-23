@@ -15,6 +15,7 @@
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "render/graphicsman.h"
 
 
 //100%
@@ -1209,8 +1210,6 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderBitmap);
 
 static inline int texOf_001F1190(cTextureElement* e) { return e->mSourceShape; }
 
-struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, tBxVertex*, int); };
-
 /**
  * Draws a texture element as a coloured quad.
  *
@@ -1275,8 +1274,7 @@ extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cTextureElement*
         corner.z = 0.0f;
         corner.w = 1.0f;
         verts[3].p = corner;
-        sVEnt_001F1190* vt = (sVEnt_001F1190*)VPTR_OF(cGraphicsMan, GrMan);
-        vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
+        GrMan->RenderTriStrip(4, verts, 0);
     }
 }
 #endif
@@ -1285,8 +1283,6 @@ extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cTextureElement*
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderQuad);
 #ifdef SKIP_ASM
 
-
-struct sVEnt_001F1338 { short delta; short index; void (*fn)(void*, int, tBxVertex*, int); };
 
 /**
  * Draws an untextured coloured quad.
@@ -1341,8 +1337,7 @@ extern "C" void cOVStateHUD1P_renderQuad(cOVStateHUD1P* self, float* pos, float*
     corner.w = 1.0f;
     verts[3].p = corner;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
-    sVEnt_001F1338* vt = (sVEnt_001F1338*)VPTR_OF(cGraphicsMan, GrMan);
-    vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
+    GrMan->RenderTriStrip(4, verts, 0);
 }
 #endif
 

@@ -1654,8 +1654,7 @@ extern "C" void cTrickBoostFX_render(cTrickBoostFX* self)
     }
     for (int k = 0; k < 4; k++) {
         cPS2GraphicsMan* ctx = GrMan;
-        sRctxVE_B198* vt = (sRctxVE_B198*)VPTR_OF(cGraphicsMan, ctx);
-        vt[71].fn(vthis(ctx, vt[71]), counts[k], verts[k], 0);
+        ctx->RenderTriStrip(counts[k], verts[k], 0);
     }
     (*(sRS_B198**)&GrMan->m_pCurrentDrawState)--;
 }
@@ -1975,12 +1974,6 @@ extern "C" void InitVertex_C060(float* out, float* col, float x, float y) __asm_
 extern float cSinCosTable_gSinCosTable[];
 
 
-struct sBTVEntryDraw {
-    short delta;
-    short index;
-    void (*fn)(void*, int, tBxVertex*, int);
-};
-
 static inline float clampBT(float v, float lo, float hi)
 {
     float r;
@@ -2060,11 +2053,9 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
     }
 
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sBTVEntryDraw* drawEntry = &((sBTVEntryDraw*)VPTR_OF(cGraphicsMan, obj))[71];
-    drawEntry->fn(vthis(obj, *drawEntry), 80, top, 0);
+    obj->RenderTriStrip(80, top, 0);
     obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan;
-    drawEntry = &((sBTVEntryDraw*)VPTR_OF(cGraphicsMan, obj))[71];
-    drawEntry->fn(vthis(obj, *drawEntry), 80, bot, 0);
+    obj->RenderTriStrip(80, bot, 0);
 }
 #endif
 
