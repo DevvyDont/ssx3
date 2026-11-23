@@ -23,6 +23,7 @@
 #include "ai/ai.h"
 #include "ai/player.h"
 #include "render/graphicsman.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", bxLogPrint);
@@ -5580,14 +5581,10 @@ struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
-    VE_E2D8 *readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_Type, 4);
-    readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
-    readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_Value, 4);
-    readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
+    frame->read((char*)&self->m_Type, 4);
+    frame->read((char*)self, 4);
+    frame->read((char*)&self->m_Value, 4);
+    frame->read((char*)self, 4);
 }
 #endif
 
@@ -5689,11 +5686,8 @@ extern "C" void tWPInGameData_Camera_readFromReplayFrame(int camera, void **fram
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_E518 { short delta; short idx; void (*fn)(void*, void*, int); };
-
 static inline void Wr_E518(cReplayFramePtr* s, void* p, int n) {
-    VEnt_E518* e = (VEnt_E518*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x10);
-    e->fn(vthis(s, *e), p, n);
+    s->read((char*)p, n);
 }
 
 /**
@@ -5723,11 +5717,8 @@ extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, c
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_E698 { short delta; short idx; void (*fn)(void*, void*, int); };
-
 static inline void Wr_E698(cReplayFramePtr* s, void* p, int n) {
-    VEnt_E698* e = (VEnt_E698*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x10);
-    e->fn(vthis(s, *e), p, n);
+    s->read((char*)p, n);
 }
 
 /**
@@ -5759,11 +5750,8 @@ extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightG
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_E850 { short delta; short idx; void (*fn)(void*, void*, int); };
-
 static inline void Wr_E850(cReplayFramePtr* s, void* p, int n) {
-    VEnt_E850* e = (VEnt_E850*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x10);
-    e->fn(vthis(s, *e), p, n);
+    s->read((char*)p, n);
 }
 
 /**
@@ -5989,21 +5977,16 @@ struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
-    VE_F2A0 *readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_Level, 4);
-    readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
-    readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_PointRate, 4);
-    readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
+    frame->read((char*)&self->m_Level, 4);
+    frame->read((char*)self, 4);
+    frame->read((char*)&self->m_PointRate, 4);
+    frame->read((char*)self, 4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
 /**
  * Saves the music-trigger values to a replay frame.
  *
@@ -6013,14 +5996,10 @@ struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
-    VE_F340 *writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_Type, 4);
-    writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
-    writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_Value, 4);
-    writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
+    frame->write((const char*)&self->m_Type, 4);
+    frame->write((const char*)self, 4);
+    frame->write((const char*)&self->m_Value, 4);
+    frame->write((const char*)self, 4);
 }
 #endif
 
@@ -6119,11 +6098,8 @@ extern "C" void tWPInGameData_Camera_writeToReplayFrame(int camera, void **frame
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_F580 { short delta; short idx; void (*fn)(void*, void*, int); };
-
 static inline void Wr_F580(cReplayFramePtr* s, void* p, int n) {
-    VEnt_F580* e = (VEnt_F580*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x8);
-    e->fn(vthis(s, *e), p, n);
+    s->write((const char*)p, n);
 }
 
 /**
@@ -6153,11 +6129,8 @@ extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, cR
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_F700 { short delta; short idx; void (*fn)(void*, void*, int); };
-
 static inline void Wr_F700(cReplayFramePtr* s, void* p, int n) {
-    VEnt_F700* e = (VEnt_F700*)(((char*)VPTR_OF(cBxReplayFrame, s)) + 0x8);
-    e->fn(vthis(s, *e), p, n);
+    s->write((const char*)p, n);
 }
 
 /**
@@ -6410,7 +6383,6 @@ extern "C" void tWPInGameData_Weather_writeToReplayFrame(tWPInGameData_Weather* 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
 /**
  * Saves the danger values to a replay frame.
  *
@@ -6420,13 +6392,9 @@ struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
-    VE_0308 *writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_Level, 4);
-    writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
-    writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_PointRate, 4);
-    writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
+    frame->write((const char*)&self->m_Level, 4);
+    frame->write((const char*)self, 4);
+    frame->write((const char*)&self->m_PointRate, 4);
+    frame->write((const char*)self, 4);
 }
 #endif
