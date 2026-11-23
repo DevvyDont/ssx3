@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uistate.h"
 #include "main/gamemode.h"
 #include "util/locale.h"
@@ -60,7 +61,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupVideoCalibration_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_156thx[];
@@ -2367,22 +2368,6 @@ extern "C" int cFEStateMountainRoom_isPeakPassLoaded(cFEStateMountainRoom* mount
 INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_hidePass);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
-// _vt$8cUIThing (as in fe/feasyncfile).
-class cUIThing {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void setEnabled(int on);
-    virtual void setFocus(int on);
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
-
 /**
  * Hides the mountain room's peak-pass group (the widget at +0x48).
  *
@@ -9337,7 +9322,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onInputBegin);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_overlayMenu[];
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cReplay_setReplayPadNum(void* self, int val);
 
 /**
@@ -9441,14 +9426,12 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onGainTransition);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-// A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
-// _vt$8cUIThing (as in fe/feasyncfile).
 // Declarations shared by the functions of this unit.
 struct cUIText;
 
 int GetHashValue32(char* str);
 
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 extern "C" void* cBE_getBE();
 
@@ -9540,11 +9523,6 @@ extern char str_overlayOptpct_d[];
 extern char str_kT_OVRCMNFinalRound[];
 
 // EA's 3-float vector (prototype name, as in fe/fepopup).
-struct t3Vector {
-    float x, y, z;
-};
-
-
 static inline unsigned short* Loc1E6718(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
@@ -9882,7 +9860,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUITextScroll_setInputMap(void* self, int a1);
 extern int cGameModeMan_iRanking[];
@@ -10109,7 +10087,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -10614,7 +10592,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");

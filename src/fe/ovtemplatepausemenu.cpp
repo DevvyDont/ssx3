@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beinterface.h"
 #include "ui/uiengine.h"
 #include "sound/ssxaudio.h"
@@ -15,28 +16,12 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onCreateScreen);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
 
-// A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
-// _vt$8cUIThing (as in fe/feasyncfile); the other slots are known only by position.
-class cUIThing {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void setEnabled(int on);
-    virtual void setFocus(int on);
-    virtual void setStatic(int);
-    virtual void setVisible(int);
-};
-
 // Declarations shared by the functions of this unit.
 struct cUIText;
 
 int GetHashValue32(char* str);
 
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -146,7 +131,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* gMenuItemIcons[];
 extern char str_pct_s_group[];
@@ -198,7 +183,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onGainFocus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern unsigned char cOVTemplate_PauseMenu_mSelectedMenuIndex;
@@ -269,7 +254,7 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onUpdate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 class cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -396,7 +381,7 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetEvent);
 struct cUIText;
 class cUIScreen;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);

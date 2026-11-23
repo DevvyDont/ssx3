@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beinterface.h"
 #include "main/gamestate.h"
 #include "ui/uiengine.h"
@@ -31,7 +32,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int idx);
 extern "C" int cUIListBox_getEntryByData(void* box, int key, unsigned char* out);
@@ -351,7 +352,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
 extern char D_004A24E0[];
 extern char str_camera_2_select[];
@@ -681,7 +682,7 @@ struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible);
@@ -846,7 +847,7 @@ int cOVState_PAUSE_ONLINE_ERROR_onGainTransition(void* self)
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onUpdate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_ONLINE_ERROR* self);
@@ -907,7 +908,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(cOVState_PAUSE_ONLINE_ERROR
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_enableCancelButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_Text_CancelGame[];
 extern char str_Menu_b[];
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
@@ -999,7 +1000,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_TextInfo[];
 extern char str_kT_PauseErrorServerCheckTimedOut[];
@@ -1028,7 +1029,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_displayPingReceived);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible);
 extern char str_TextInfo[];
@@ -1147,7 +1148,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PA
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_Text_ContinueGame[];
 extern char str_Continueps2X[];
 extern char str_ContinueButtonBack[];
@@ -1200,7 +1201,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(cOVState_PAUSE_
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_Text_CancelGame[];
 extern char str_Cancelps2X[];
 extern char str_CancelButtonBack[];
@@ -1343,38 +1344,6 @@ struct sColour {
     sColour(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 
-// A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
-// _vt$8cUIThing (as in fe/feasyncfile); the other slots are known only by position.
-class cUIThing {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void setEnabled(int on);
-    virtual void setFocus(int v);
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-    virtual void v10();
-    virtual int v11(const sColour& c);
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25(int);
-};
-
 int GetHashValue32(char* str);
 
 extern "C" void* cBE_getBE();
@@ -1382,7 +1351,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 
 
@@ -1733,7 +1702,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onCreateScreen(void* self);
@@ -1942,7 +1911,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_screendata[];
 extern char str_vsGroup[];
 extern char str_objectives[];
@@ -2419,7 +2388,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIEngine_addScreenByHashName_DC30(void* engine, void* owner, int hash, int a3) __asm__("cUIEngine_addScreenByHashName");
 extern "C" void* cUIScreen_playFrame_DC30(void* self, unsigned short frame, int flag) __asm__("cUIScreen_playFrame");
-extern "C" void* cUIScreen_getObjectByHashName_DC30(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
+extern "C" cUIThing* cUIScreen_getObjectByHashName_DC30(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
 extern "C" void cOVState_onCreateScreen_DC30(void* self) __asm__("cOVState_onCreateScreen");
 extern int cPauseState_Flags;
 extern int cPauseState_StackIdx;
@@ -2842,7 +2811,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 extern char str_o_delete[];
@@ -2886,7 +2855,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_o_delete[];
 extern char str_ps2sq_b[];
 
@@ -2923,7 +2892,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
@@ -3178,7 +3147,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* s);
@@ -3572,7 +3541,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 extern char str_o_delete[];
@@ -3616,7 +3585,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_o_delete[];
 extern char str_ps2sq_b[];
 
@@ -3653,7 +3622,7 @@ public:
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
@@ -3849,7 +3818,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVState_REWARDS_checkRewardList(void* self, int a1, int a2);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
@@ -4096,7 +4065,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);

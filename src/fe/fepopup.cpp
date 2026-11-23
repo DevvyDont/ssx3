@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beinterface.h"
 #include "online/usbkeyboard.h"
 #include "util/locale.h"
@@ -350,7 +351,7 @@ extern "C" void cScreenPopup_SetTextObjectsVisibility(cScreenPopup* self, int vi
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_SetTextObjectsAlpha);
 #ifdef SKIP_ASM
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct sColor_5F20 { float a, r, g, b; };
 struct sVEntry_5F20 {
     short delta;
@@ -400,7 +401,7 @@ extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float fAlph
 INCLUDE_ASM("fe/fepopup", cScreenPopup_FillObjectPointers);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_Menu0000[];
 extern char str_grey_background[];
@@ -1143,11 +1144,6 @@ extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, void* m
 INCLUDE_ASM("fe/fepopup", cScreenPopup_determineAndSetScaling);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// EA's 3-float vector (name from the July 2003 prototype, e.g. setOffset__10cPopupInfoG8t3Vector).
-struct t3Vector {
-    float x, y, z;
-};
-
 extern "C" double fptodp(float f);
 
 extern "C" float dptofp(double d);
@@ -4665,7 +4661,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern "C" void memset(void* dst, int c, int n);
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int v, int mode);
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self);
 extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int key, char* out, int a3);
@@ -4989,7 +4985,7 @@ extern "C" void cKeyboardPopup_AddCharacterEdit(cKeyboardPopup* self)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateEdit);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 struct sPwd_CCE98;
@@ -5246,7 +5242,7 @@ int GetHashValue32(char* str);
 extern char str_StaticValue[];
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 
 /**
@@ -5275,7 +5271,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setStatic);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
 void cMemMan_free(void* ptr);
 extern "C" int USTR_length(unsigned short* s);
@@ -5318,7 +5314,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setStatic1);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_StaticValue[];
 
@@ -5491,7 +5487,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onGainTransition);
 struct cUIScreen;
 int GetHashValue32(char* str);
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self);
 extern "C" void cKeyboardPopup_setStatic(cKeyboardPopup* self, unsigned short* str);
@@ -5860,7 +5856,7 @@ int GetHashValue32(char* str);
 extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int key, char* out, int a3);
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int a1);
