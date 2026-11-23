@@ -943,7 +943,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 // PORT: called for effect only; bound by asm label so the call has no value
 void cCheatFX_resetStates_v(void* self) __asm__("cCheatFX_resetStates__FPv");
 struct sWLCode6910;
-extern "C" void cCheatFX_updateState(sWLCode6910* self);
+extern "C" void cCheatFX_updateState(cCheatFX* self);
 extern int cCheatFX_m_resetStates;
 
 extern t4Vector t4vect_Origin;
@@ -1065,7 +1065,7 @@ extern "C" void cCheatFX_update(cCheatFX* self)
         cCheatFX_resetStates_v(self);
         cCheatFX_m_resetStates--;
     }
-    cCheatFX_updateState((sWLCode6910*)self);
+    cCheatFX_updateState(self);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         (*(signed char*)&self->m_cheatState) = 0;
@@ -1136,13 +1136,6 @@ void cCheatFX_render(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_updateState);
 #ifdef SKIP_ASM
-struct sWLCode6910 {
-    char pad0[4];
-    signed char state;          // 0x4
-    unsigned char step;         // 0x5
-    signed char count;          // 0x6
-    unsigned char flags;        // 0x7
-};
 
 extern signed char cCheatFX_m_cheatStateEnterCounts[];
 extern int cCheatFX_m_resetStates;
@@ -1159,41 +1152,41 @@ extern "C" int cCheatFX_getInput(cCheatFX* self);
  * back to -1. State 1: exactly 0x60 sets cCheatFX_m_resetStates to 8; otherwise 0x40 toggles bit 1 of m_misc. cCheatFX_update calls
  * it.
  */
-extern "C" void cCheatFX_updateState(sWLCode6910* self)
+extern "C" void cCheatFX_updateState(cCheatFX* self)
 {
     int cheatInput = cCheatFX_getInput((cCheatFX*)self);
     cCheatFX_clearInput((cCheatFX*)self);
     if (cheatInput == 0) {
-        self->flags &= ~1;
+        (*(unsigned char*)&self->m_cheatState.m_misc) &= ~1;
         return;
     }
-    if (self->flags & 1) {
+    if ((*(unsigned char*)&self->m_cheatState.m_misc) & 1) {
         return;
     }
-    self->flags |= 1;
-    switch (self->state) {
+    (*(unsigned char*)&self->m_cheatState.m_misc) |= 1;
+    switch ((*(signed char*)&self->m_cheatState)) {
     case -1:
         if (cheatInput & 0x40) {
-            self->state = 0;
-            self->count = 0;
-            self->step = 0;
-            self->flags = 0;
+            (*(signed char*)&self->m_cheatState) = 0;
+            self->m_cheatState.m_count = 0;
+            self->m_cheatState.m_index = 0;
+            self->m_cheatState.m_misc = 0;
         }
         break;
     case 0:
         if (cheatInput & 0x10) {
-            self->count++;
+            (*(signed char*)&self->m_cheatState.m_count)++;
         } else if (cheatInput & 0x20) {
-            if (self->count == cCheatFX_m_cheatStateEnterCounts[(signed char)self->step]) {
-                self->count = 0;
-                self->step++;
-                if (self->step == 9) {
-                    self->step = 0;
-                    self->count = 0;
-                    self->state = 1;
+            if ((*(signed char*)&self->m_cheatState.m_count) == cCheatFX_m_cheatStateEnterCounts[(signed char)(*(unsigned char*)&self->m_cheatState.m_index)]) {
+                self->m_cheatState.m_count = 0;
+                (*(unsigned char*)&self->m_cheatState.m_index)++;
+                if ((*(unsigned char*)&self->m_cheatState.m_index) == 9) {
+                    self->m_cheatState.m_index = 0;
+                    self->m_cheatState.m_count = 0;
+                    (*(signed char*)&self->m_cheatState) = 1;
                 }
             } else {
-                self->state = -1;
+                (*(signed char*)&self->m_cheatState) = -1;
             }
         }
         break;
@@ -1201,7 +1194,7 @@ extern "C" void cCheatFX_updateState(sWLCode6910* self)
         if (cheatInput == 0x60) {
             cCheatFX_m_resetStates = 8;
         } else if (cheatInput & 0x40) {
-            self->flags ^= 2;
+            (*(unsigned char*)&self->m_cheatState.m_misc) ^= 2;
         }
         break;
     }

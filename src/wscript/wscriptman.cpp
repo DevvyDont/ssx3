@@ -307,7 +307,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_processStart);
 #ifdef SKIP_ASM
 struct cWScriptListHead;
 struct cWScriptListNode;
-extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cProcessList* self, cWScriptListNode* node);
 int cProcessList_addProcess(void* self, void* a1);
 
 /**
@@ -317,7 +317,7 @@ int cProcessList_addProcess(void* self, void* a1);
  */
 extern "C" void cWScriptMan_processStart(cWScriptMan* self, cWScriptListNode* node)
 {
-    cProcessList_removeProcess((cWScriptListHead*)&self->IdleList, node);
+    cProcessList_removeProcess((&self->IdleList), node);
     cProcessList_addProcess((char*)&self->ActiveList, node);
 }
 #endif
@@ -327,8 +327,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_processEnd);
 #ifdef SKIP_ASM
 struct cWScriptListHead;
 struct cWScriptListNode;
-extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
-extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cProcessList* self, cWScriptListNode* node);
+extern "C" int cProcessList_findProcess(cProcessList* self, cWScriptListNode* node);
 int cProcessList_addProcess(void* self, void* a1);
 
 /**
@@ -340,7 +340,7 @@ int cProcessList_addProcess(void* self, void* a1);
  */
 extern "C" void cWScriptMan_processEnd(cWScriptMan* self, cWScriptListNode* node)
 {
-    cWScriptListHead* list = (cWScriptListHead*)&self->ActiveList;
+    cProcessList* list = (&self->ActiveList);
     if (cProcessList_findProcess(list, node) != 0) {
         cProcessList_removeProcess(list, node);
         cProcessList_addProcess((char*)&self->IdleList, node);
@@ -352,8 +352,8 @@ extern "C" void cWScriptMan_processEnd(cWScriptMan* self, cWScriptListNode* node
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_processPass);
 #ifdef SKIP_ASM
 int cProcessList_addProcess(void* self, void* a1);
-extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
-extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cProcessList* self, cWScriptListNode* node);
+extern "C" int cProcessList_findProcess(cProcessList* self, cWScriptListNode* node);
 
 /**
  * Retires a world script process whose mission was passed.
@@ -365,7 +365,7 @@ extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode
  */
 extern "C" void cWScriptMan_processPass(cWScriptMan* self, cWScriptListNode* node)
 {
-    cWScriptListHead* list = (cWScriptListHead*)&self->ActiveList;
+    cProcessList* list = (&self->ActiveList);
     if (cProcessList_findProcess(list, node) != 0) {
         cProcessList_removeProcess(list, node);
         cProcessList_addProcess((char*)&self->IdleList, node);
@@ -1701,9 +1701,6 @@ struct cWScriptListNode {
     void* next;
 };
 
-struct cWScriptListHead {
-    void* head;
-};
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", cProcessList_cProcessList__FPv);
@@ -1715,7 +1712,7 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_cProcessList__FPv);
  */
 void* cProcessList_cProcessList(void* self)
 {
-    ((cWScriptListHead*)self)->head = 0;
+    (*(void**)&((cProcessList*)self)->List) = 0;
     return self;
 }
 #endif
@@ -1864,9 +1861,9 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_removeHead);
  */
 extern "C" void* cProcessList_removeHead(cProcessList* self)
 {
-    cWScriptListNode* process = (cWScriptListNode*)((cWScriptListHead*)self)->head;
+    cWScriptListNode* process = (cWScriptListNode*)((void*)(self)->List);
     if (process != 0) {
-        ((cWScriptListHead*)self)->head = process->next;
+        (*(void**)&(self)->List) = process->next;
     }
     return process;
 }
@@ -1882,10 +1879,10 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_getCount);
  *
  * @return the number of processes
  */
-extern "C" int cProcessList_getCount(cWScriptListHead* self)
+extern "C" int cProcessList_getCount(cProcessList* self)
 {
     int n = 0;
-    cWScriptListNode* node = (cWScriptListNode*)self->head;
+    cWScriptListNode* node = (cWScriptListNode*)((void*)self->List);
     while (node != 0) {
         node = (cWScriptListNode*)node->next;
         n++;
@@ -1905,9 +1902,9 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess__FPvT0);
  */
 int cProcessList_addProcess(void* self, void* node)
 {
-    int oldHead = (int)((cWScriptListHead*)self)->head;
+    int oldHead = (int)((void*)((cProcessList*)self)->List);
     ((cWScriptListNode*)node)->next = (void*)oldHead;
-    ((cWScriptListHead*)self)->head = node;
+    (*(void**)&((cProcessList*)self)->List) = node;
     return oldHead;
 }
 #endif
@@ -1922,17 +1919,17 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_appendProcess);
  *
  * @param node  the process to add (On Tour cWScriptProcess* process)
  */
-extern "C" void cProcessList_appendProcess(cWScriptListHead* self, cWScriptListNode* node)
+extern "C" void cProcessList_appendProcess(cProcessList* self, cWScriptListNode* node)
 {
     node->next = 0;
-    cWScriptListNode* tail = (cWScriptListNode*)self->head;
+    cWScriptListNode* tail = (cWScriptListNode*)((void*)self->List);
     if (tail != 0) {
         while (tail->next != 0) {
             tail = (cWScriptListNode*)tail->next;
         }
         tail->next = node;
     } else {
-        self->head = node;
+        (*(void**)&self->List) = node;
     }
 }
 #endif
@@ -1948,9 +1945,9 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess1__FPvT0);
  */
 int cProcessList_addProcess1(void* self, void* node)
 {
-    int oldHead = (int)((cWScriptListHead*)self)->head;
+    int oldHead = (int)((void*)((cProcessList*)self)->List);
     ((cWScriptListNode*)node)->next = (void*)oldHead;
-    ((cWScriptListHead*)self)->head = node;
+    (*(void**)&((cProcessList*)self)->List) = node;
     return oldHead;
 }
 #endif
@@ -1964,13 +1961,13 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_removeProcess);
  * @param node  the process to remove
  * @return 1 when the process was found and removed, otherwise 0
  */
-extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node)
+extern "C" int cProcessList_removeProcess(cProcessList* self, cWScriptListNode* node)
 {
-    if (node == self->head) {
-        self->head = node->next;
+    if (node == ((void*)self->List)) {
+        (*(void**)&self->List) = node->next;
         return 1;
     }
-    cWScriptListNode* current = (cWScriptListNode*)self->head;
+    cWScriptListNode* current = (cWScriptListNode*)((void*)self->List);
     if (current != 0) {
         cWScriptListNode* prev = current;
         do {
@@ -2085,10 +2082,10 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess);
  * @param node  the process to look for
  * @return 1 when the process is on the list, otherwise 0
  */
-extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node)
+extern "C" int cProcessList_findProcess(cProcessList* self, cWScriptListNode* node)
 {
     cWScriptListNode* process;
-    for (process = (cWScriptListNode*)self->head; process != 0; process = (cWScriptListNode*)process->next) {
+    for (process = (cWScriptListNode*)((void*)self->List); process != 0; process = (cWScriptListNode*)process->next) {
         if (process == node) {
             return 1;
         }
@@ -2689,7 +2686,7 @@ extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cBxReplayFrame*
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_writeReplayProcessList);
 #ifdef SKIP_ASM
-extern "C" int cProcessList_getCount(cWScriptListHead* self);
+extern "C" int cProcessList_getCount(cProcessList* self);
 extern "C" void cWScriptProcess_writeToReplayFrame(void* node, void* stream);
 
 
@@ -2702,7 +2699,7 @@ extern "C" void cWScriptProcess_writeToReplayFrame(void* node, void* stream);
  */
 extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cBxReplayFrame* stream)
 {
-    int n = cProcessList_getCount((cWScriptListHead*)list);
+    int n = cProcessList_getCount((cProcessList*)list);
     stream->write((const char*)&n, 4);
     cWScriptProcess* node = (cWScriptProcess*)((char*)*list);
     while (((char*)node) != 0) {
@@ -2734,7 +2731,7 @@ extern "C" int cWScriptCache_getScriptBase(void* a, int id);
 class cCollectPool_readFromReplayFrame_cObj;
 extern "C" void cCollectPool_readFromReplayFrame(void* a, cBxReplayFrame* obj);
 class cWScriptMan_readReplayProcessList_cStream;
-extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptListHead* list, cBxReplayFrame* stream);
+extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cProcessList* list, cBxReplayFrame* stream);
 extern "C" void luno_cLunoTable_emptyTable(void* obj);
 extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cBxReplayFrame* stream, int a2);
 
@@ -2767,8 +2764,8 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cBxReplayFr
         *(int*)process = 0;
         cProcessList_addProcess((char*)self + 0x2B4, process);
     }
-    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cWScriptListHead*)&self->list2B8, stream);
-    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cWScriptListHead*)&self->list2BC, stream);
+    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cProcessList*)&self->list2B8, stream);
+    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cProcessList*)&self->list2BC, stream);
     {
         int i;
         for (i = 0; i < 50; i++) {
@@ -2804,8 +2801,8 @@ public:
 };
 
 extern "C" void cWScriptProcess_readFromReplayFrame(void* proc, cBxReplayFrame* stream);
-extern "C" void cProcessList_appendProcess(cWScriptListHead* self, cWScriptListNode* node);
-extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" void cProcessList_appendProcess(cProcessList* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cProcessList* self, cWScriptListNode* node);
 
 /**
  * Restores a process list from a replay frame: reads a count, then per entry a process ID; that process is taken out of
@@ -2817,7 +2814,7 @@ extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNo
  * @param list  the process list to fill
  * @param stream  the replay frame stream
  */
-extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptListHead* list, cBxReplayFrame* stream)
+extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cProcessList* list, cBxReplayFrame* stream)
 {
     int n;
     int id;
@@ -2826,7 +2823,7 @@ extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptLis
     for (; i < n; i++) {
         stream->read((char*)&id, 4);
         cWScriptListNode* node = (cWScriptListNode*)cProcessList_findProcess1((cProcessList*)((char*)&self->IdleList), id);
-        cProcessList_removeProcess((cWScriptListHead*)&self->IdleList, node);
+        cProcessList_removeProcess((&self->IdleList), node);
         cWScriptProcess_readFromReplayFrame(node, stream);
         cProcessList_appendProcess(list, node);
     }

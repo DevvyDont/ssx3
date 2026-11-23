@@ -1735,12 +1735,6 @@ extern "C" void cPS2MemCard_CheckDevice(cPS2MemCard* self, int device)
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_ClearCardChanged);
 #ifdef SKIP_ASM
 
-struct sQTState {
-    char pad000[0xC];
-    int level;
-    char pad010[0x16C];
-    tPS2MemCardDevice levels[1];
-};
 
 /**
  * Clears the current port's card-changed flag (unk_10 of unk_17C[mDevice]) and turns a last libmc result (unk_08) of -1
@@ -2592,7 +2586,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetLastError);
 #ifdef SKIP_ASM
 // PORT: the unit declares this as `extern "C" void* cPS2MemCard_GetLastError(void*, int)`
 // for its callers; the body returns an int code, bound with an asm label.
-extern "C" int cPS2MemCard_GetLastError_impl(sQTState* self, int i) __asm__("cPS2MemCard_GetLastError");
+extern "C" int cPS2MemCard_GetLastError_impl(cPS2MemCard* self, int i) __asm__("cPS2MemCard_GetLastError");
 
 /**
  * Returns the last libmc result of a port (unk_08 of device record unk_17C[@p i]) when it is one of the codes the
@@ -2604,9 +2598,9 @@ extern "C" int cPS2MemCard_GetLastError_impl(sQTState* self, int i) __asm__("cPS
  * @param i  the memory-card port (0 or 1)
  * @return the result code, or -10
  */
-extern "C" int cPS2MemCard_GetLastError_impl(sQTState* self, int i)
+extern "C" int cPS2MemCard_GetLastError_impl(cPS2MemCard* self, int i)
 {
-    switch (self->levels[i].unk_08) {
+    switch (self->unk_17C[i].unk_08) {
     case -10002:
     case -10001:
     case -7:
@@ -2617,7 +2611,7 @@ extern "C" int cPS2MemCard_GetLastError_impl(sQTState* self, int i)
     case -2:
     case -1:
     case 0:
-        return self->levels[i].unk_08;
+        return self->unk_17C[i].unk_08;
     case -10:
     case -9:
     case -8:
@@ -3483,7 +3477,7 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
         break;
     }
     if (cPS2MemCard_GetLastError_i(self, self->port) == -10 || cPS2MemCard_GetLastError_i(self, self->port) == -1) {
-        func_002C5250((cPS2MemCard*)((sQTState*)self));
+        func_002C5250((cPS2MemCard*)((cPS2MemCard*)self));
     }
     if (cPS2MemCard_GetLastError_i(self, self->port) == -10 || cPS2MemCard_GetLastError_i(self, self->port) == -2) {
         func_002C5278((cPS2MemCard*)self);
@@ -3694,16 +3688,16 @@ extern int D_004A3940;
  */
 extern "C" void cPS2MemCard_CleanUp(cPS2MemCard* pS2MemCard)
 {
-    sQTState* self = (sQTState*)pS2MemCard;
+    cPS2MemCard* self = pS2MemCard;
     if (*(int*)((char*)self + 0x40) != 0) {
         D_004A3940 = 0;
         sceMcSync(0, 0, &D_004A3940);
         if (D_004A3940 == -1) {
-            self->levels[self->level].unk_10 = 1;
+            self->unk_17C[self->mDevice].unk_10 = 1;
         }
     }
     *(int*)((char*)self + 0x40) = 0;
-    self->level = 0;
+    self->mDevice = 0;
     *(int*)((char*)self + 0x17C) = 0;
     *(int*)((char*)self + 0x180) = 0;
     *(int*)((char*)self + 0x184) = 0;

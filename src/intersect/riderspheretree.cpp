@@ -2214,13 +2214,6 @@ struct sSphereTreeInfo_CBF8 {
     unsigned char* masks;           // 0x28
 };
 
-struct sSphereOct_CBF8 {
-    t4Vector dirs[8];            // 0x00
-    char pad_0x80[0x10];
-    float scale;                    // 0x90
-    char pad_0x94[4];
-    sSphereTreeInfo_CBF8* tree;     // 0x98
-};
 
 // PORT: PS2-only VU0 inline asm (v * s).
 static inline t4Vector Scale_CBF8(const t4Vector& v, float s)
@@ -2273,20 +2266,20 @@ static inline t4Vector Add_CBF8(const t4Vector& a, const t4Vector& b)
  */
 extern "C" int SphereTree_isTreeCollision(SphereTree* selfp, SphereTree* other, t4Vector* posp, int depth, int base, t4Vector* outPush, t4Vector* outContact)
 {
-    sSphereOct_CBF8* self = (sSphereOct_CBF8*)selfp;
+    SphereTree* self = selfp;
     t4Vector childPos;
-    unsigned char mask = self->tree->masks[base];
-    if (depth < self->tree->depth) {
+    unsigned char mask = ((sSphereTreeInfo_CBF8*)self->treeInfo)->masks[base];
+    if (depth < ((sSphereTreeInfo_CBF8*)self->treeInfo)->depth) {
         if (depth >= 4) {
             return 1;
         }
         if (mask != 0) {
-            float off = self->tree->levels[depth + 1].offset;
+            float off = ((sSphereTreeInfo_CBF8*)self->treeInfo)->levels[depth + 1].offset;
             for (int i = 0; i < 8; i++) {
                 if ((mask >> i) & 1) {
-                    childPos = Add_CBF8(*(t4Vector*)posp, Scale_CBF8(self->dirs[i], off));
-                    if (SphereTree_isSphereCollision((SphereTree*)other, (t4Vector*)(&childPos), self->tree->levels[depth].radius * self->scale, (t4Vector*)(&other->transCenter), 0, 0, outPush, outContact) &&
-                        SphereTree_isTreeCollision((SphereTree*)self, other, (t4Vector*)(&childPos), depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPush, outContact)) {
+                    childPos = Add_CBF8(*(t4Vector*)posp, Scale_CBF8(self->axis[i], off));
+                    if (SphereTree_isSphereCollision((SphereTree*)other, (t4Vector*)(&childPos), ((sSphereTreeInfo_CBF8*)self->treeInfo)->levels[depth].radius * self->scale, (t4Vector*)(&other->transCenter), 0, 0, outPush, outContact) &&
+                        SphereTree_isTreeCollision((SphereTree*)self, other, (t4Vector*)(&childPos), depth + 1, (i + 1) * ((sSphereTreeInfo_CBF8*)self->treeInfo)->levels[depth].stride + base, outPush, outContact)) {
                         return 1;
                     }
                 }
@@ -2316,13 +2309,6 @@ struct sSphereTreeInfo_CDB0 {
     unsigned char* masks;           // 0x28
 };
 
-struct sSphereOct_CDB0 {
-    t4Vector dirs[8];            // 0x00
-    char pad_0x80[0x10];
-    float scale;                    // 0x90
-    char pad_0x94[4];
-    sSphereTreeInfo_CDB0* tree;     // 0x98
-};
 
 // PORT: PS2-only VU0 inline asm (v * s).
 static inline t4Vector Scale_CDB0(const t4Vector& v, float s)
@@ -2441,20 +2427,20 @@ static inline float Sqrt_CDB0(float v)
  */
 extern "C" int SphereTree_isSphereCollision(SphereTree* selfp, t4Vector* spherePos, float sphereRadius, t4Vector* pos, int depth, int base, t4Vector* outA, t4Vector* outB)
 {
-    sSphereOct_CDB0* self = (sSphereOct_CDB0*)selfp;
-    float sum = sphereRadius + self->tree->levels[depth].radius * self->scale;
+    SphereTree* self = selfp;
+    float sum = sphereRadius + ((sSphereTreeInfo_CDB0*)self->treeInfo)->levels[depth].radius * self->scale;
     t4Vector delta = Sub_CDB0(*(t4Vector*)spherePos, *(t4Vector*)pos);
     float dd = Dot_CDB0(delta, delta);
     if (!(dd < sum * sum))
         return 0;
     float distance;
-    unsigned char mask = self->tree->masks[base];
-    if (depth < self->tree->depth && mask != 0) {
-        distance = self->tree->levels[depth + 1].offset;
+    unsigned char mask = ((sSphereTreeInfo_CDB0*)self->treeInfo)->masks[base];
+    if (depth < ((sSphereTreeInfo_CDB0*)self->treeInfo)->depth && mask != 0) {
+        distance = ((sSphereTreeInfo_CDB0*)self->treeInfo)->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                t4Vector childPos = Add_CDB0(*(t4Vector*)pos, Scale_CDB0(self->dirs[i], distance));
-                if (SphereTree_isSphereCollision((SphereTree*)self, spherePos, sphereRadius, (t4Vector*)(&childPos), depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outA, outB))
+                t4Vector childPos = Add_CDB0(*(t4Vector*)pos, Scale_CDB0(self->axis[i], distance));
+                if (SphereTree_isSphereCollision((SphereTree*)self, spherePos, sphereRadius, (t4Vector*)(&childPos), depth + 1, (i + 1) * ((sSphereTreeInfo_CDB0*)self->treeInfo)->levels[depth].stride + base, outA, outB))
                     return 1;
             }
         }
@@ -3023,11 +3009,6 @@ static inline t4Vector vu0Scale_DB40(const t4Vector& v, float s)
 
 extern "C" void BXSORT_shell(int n, int* keys, int* idx);
 
-struct sBox_DB40 {
-    t4Vector axes[4];   // 0x00
-    char pad40[0x5C];
-    int order[8];       // 0x9C
-};
 
 /**
  * Orders the tree's eight child axes by how far they point against a direction, most opposed first.
@@ -3040,19 +3021,19 @@ struct sBox_DB40 {
  */
 extern "C" void SphereTree_populateSortAxis(SphereTree* vself, t4Vector* vdir)
 {
-    sBox_DB40* self = (sBox_DB40*)vself;
+    SphereTree* self = vself;
     t4Vector* dir = (t4Vector*)vdir;
     int keys[8];
     t4Vector scaledDir = vu0Scale_DB40(*dir, -1000.0f);
     int i;
     for (i = 0; i < 4; i++) {
-        int n = (int)vu0Dot_DB40(self->axes[i], scaledDir);
+        int n = (int)vu0Dot_DB40(self->axis[i], scaledDir);
         keys[i] = n;
         keys[7 - i] = -n;
-        self->order[i] = i;
-        self->order[7 - i] = 7 - i;
+        self->sortAxis[i] = i;
+        self->sortAxis[7 - i] = 7 - i;
     }
-    BXSORT_shell(8, keys, self->order);
+    BXSORT_shell(8, keys, self->sortAxis);
 }
 #endif
 
@@ -4461,22 +4442,6 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_cWorldSphere);
 #ifdef SKIP_ASM
 extern char cWorldSphere_vtbl[];
 
-struct sRiderSphere_FB48 {
-    int state;              // 0x00
-    int f4;                 // 0x04
-    int f8;                 // 0x08
-    int pad_0xC[5];
-    t4Vector max;        // 0x20
-    t4Vector min;        // 0x30
-    t4Vector center;     // 0x40
-    void* vtbl;             // 0x50
-    int pad_0x54[3];
-    t4Vector pos;        // 0x60
-    float radius;           // 0x70
-    int pad_0x74[3];
-    t4Vector pos0;       // 0x80
-    float radius0;          // 0x90
-};
 
 /**
  * Constructs a world sphere query.
@@ -4490,7 +4455,7 @@ struct sRiderSphere_FB48 {
  * @param sphereRadius  the radius (On Tour arad)
  * @return @p self
  */
-extern "C" sRiderSphere_FB48* cWorldSphere_cWorldSphere(cWorldSphere* self, t4Vector* sphereCenter, int flag, float sphereRadius)
+extern "C" cWorldSphere* cWorldSphere_cWorldSphere(cWorldSphere* self, t4Vector* sphereCenter, int flag, float sphereRadius)
 {
     t4Vector boxCorner;
     self->mVtbl = (void**)cWorldSphere_vtbl;
@@ -4515,7 +4480,7 @@ extern "C" sRiderSphere_FB48* cWorldSphere_cWorldSphere(cWorldSphere* self, t4Ve
     boxCorner.z = sphereCenter->z - sphereRadius;
     *(t4Vector*)&self->boxMin = boxCorner;
     *(t4Vector*)&self->boxCenter = *sphereCenter;
-    return ((sRiderSphere_FB48*)self);
+    return (self);
 }
 #endif
 

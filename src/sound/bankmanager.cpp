@@ -486,16 +486,6 @@ struct sBmVtblBB10 {
 extern const sBmVtblBB10 D_00483AB8_BB10 __asm__("D_00483AB8");
 
 
-struct sBankManagerBB10 {
-    char pad_0x0[0x1D4];
-    void** vtbl;                // 0x1D4
-    char* monitor;              // 0x1D8
-    char pad_0x1DC[0xAB0 - 0x1DC];
-    void** vtbl2;               // 0xAB0
-    char pad_0xAB4[0xAC8 - 0xAB4];
-    int count;                  // 0xAC8
-    cBankInstance* banks;         // 0xACC
-};
 
 /**
  * Destroys the bank manager: frees its bank instances, tears down its monitor and async-loader parts and clears
@@ -532,7 +522,7 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
         cMemMan_free((char*)self->mBank - 0x10);
     }
     cBankMonitor__cBankMonitor((char**)&self->BankMonitor, 0);
-    cAsyncSys__cAsyncSys(((sBankManagerBB10*)self), 0);
+    cAsyncSys__cAsyncSys((self), 0);
     if (flags & 2) {
         cSoundSys__cSoundSys(*(char**)&self->BankMonitor, 0);
     }

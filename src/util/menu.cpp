@@ -3587,17 +3587,6 @@ INCLUDE_ASM("util/menu", cIntMenuItem_cIntMenuItem);
 #ifdef SKIP_ASM
 extern void* cIntMenuItem_vtbl[];
 
-struct cIntMenuItem_sItem {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    int field_0x14;
-    int field_0x18;
-    int field_0x1C;
-    int field_0x20;
-    int field_0x24;
-    int field_0x28;
-    int field_0x2C;
-};
 
 /**
  * Constructs a menu item that edits an integer variable within a range.
@@ -3613,7 +3602,7 @@ struct cIntMenuItem_sItem {
  * @param cap    the item's label text
  * @return @p self
  */
-extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem* self, void* text, int value, int mini, int maxi, int cap)
+extern "C" cIntMenuItem* cIntMenuItem_cIntMenuItem(cIntMenuItem* self, void* text, int value, int mini, int maxi, int cap)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     self->Caption = (const char*)cap;
@@ -3624,7 +3613,7 @@ extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem* self, voi
     self->AccelDir = 0;
     self->AccelCount = 0;
     *(int*)&self->Fraction = 0;
-    return ((cIntMenuItem_sItem*)self);
+    return (self);
 }
 #endif
 
@@ -3856,18 +3845,6 @@ INCLUDE_ASM("util/menu", cFloatMenuItem_cFloatMenuItem);
 #ifdef SKIP_ASM
 extern void* cFloatMenuItem_vtbl[];
 
-struct cFloatMenuItem_sItem {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    int field_0x14;
-    int field_0x18;
-    float field_0x1C;
-    float field_0x20;
-    float field_0x24;
-    int field_0x28;
-    int field_0x2C;
-    int field_0x30;
-};
 
 /**
  * Constructs a menu item that edits a float variable within a range.
@@ -3883,7 +3860,7 @@ struct cFloatMenuItem_sItem {
  * @param cap    largest allowed value
  * @return @p self
  */
-extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem* self, void* text, int value, int minf, float maxf, float cap)
+extern "C" cFloatMenuItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem* self, void* text, int value, int minf, float maxf, float cap)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     self->Caption = (const char*)minf;
@@ -3895,7 +3872,7 @@ extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem* s
     self->AccelDir = 0;
     self->AccelCount = 0;
     *(int*)&self->ValueOffset = 0;
-    return ((cFloatMenuItem_sItem*)self);
+    return (self);
 }
 #endif
 

@@ -971,28 +971,17 @@ static inline t4Vector vu0ScaleRM(const t4Vector& v, float s)
     return r;
 }
 
-struct sRmBody {
-    char pad_0x00[0x20];
-    t4Vector dir;        // 0x20
-    t4Vector pos;        // 0x30
-    float scale;        // 0x40
-    char pad_0x44[0xC];
-    sRmMat33 rot;       // 0x50
-    char pad_0x74[0xC];
-    t4Vector outDir;     // 0x80
-    t4Vector outPos;     // 0x90
-};
 
-static inline t4Vector xformRM(sRmBody* b)
+static inline t4Vector xformRM(cRollerModifier* b)
 {
     t4Vector r;
-    float x = b->pos.x;
-    float y = b->pos.y;
-    float z = b->pos.z;
-    r.x = b->rot.m[0][0] * x + b->rot.m[1][0] * y + b->rot.m[2][0] * z;
-    r.y = b->rot.m[0][1] * x + b->rot.m[1][1] * y + b->rot.m[2][1] * z;
-    r.z = b->rot.m[0][2] * x + b->rot.m[1][2] * y + b->rot.m[2][2] * z;
-    r.w = b->pos.w;
+    float x = b->Pose.P.x;
+    float y = b->Pose.P.y;
+    float z = b->Pose.P.z;
+    r.x = (*(sRmMat33*)&b->P).m[0][0] * x + (*(sRmMat33*)&b->P).m[1][0] * y + (*(sRmMat33*)&b->P).m[2][0] * z;
+    r.y = (*(sRmMat33*)&b->P).m[0][1] * x + (*(sRmMat33*)&b->P).m[1][1] * y + (*(sRmMat33*)&b->P).m[2][1] * z;
+    r.z = (*(sRmMat33*)&b->P).m[0][2] * x + (*(sRmMat33*)&b->P).m[1][2] * y + (*(sRmMat33*)&b->P).m[2][2] * z;
+    r.w = b->Pose.P.w;
     return r;
 }
 
@@ -1003,10 +992,10 @@ static inline t4Vector xformRM(sRmBody* b)
  * (InvMOI, 3x3 at +0x50) applied to the angular momentum (+0x30), keeping its w. Called after the inertia changes
  * (cRollerModifier_updateMOI) and after each simulation step.
  */
-extern "C" void cRigidBody_updateImplicit(sRmBody* self)
+extern "C" void cRigidBody_updateImplicit(cRollerModifier* self)
 {
-    self->outDir = vu0ScaleRM(self->dir, self->scale);
-    self->outPos = xformRM(self);
+    (*(t4Vector*)&self->InvMOI[0][0]) = vu0ScaleRM((*(t4Vector*)&self->Life), self->Pose.Q.x);
+    (*(t4Vector*)&self->InvMOI[1][1]) = xformRM(self);
 }
 #endif
 
@@ -1129,7 +1118,7 @@ extern "C" void cRigidBody_stepMotion(cRigidBody* body, const t4Vector* force, c
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_rigidImpact);
 #ifdef SKIP_ASM
-extern "C" void func_0035D908(sRmBody* b, const t4Vector* r, const t4Vector* imp);
+extern "C" void func_0035D908(cRollerModifier* b, const t4Vector* r, const t4Vector* imp);
 
 struct sRmRigid_D4A0 {
     t4Vector pos;        // 0x00
@@ -1309,7 +1298,7 @@ extern "C" void cRigidBody_rigidImpact(sRmRigid_D4A0* body, t4Vector* point, t4V
             t4Vector dir = DivD4A0(tangentVel, len);
             float j = -mu * len / (body->invMass + DotD4A0(dir, CrossD4A0(MulID4A0(body, CrossD4A0(arm, dir)), arm)));
             t4Vector imp = ScaleD4A0(dir, j);
-            func_0035D908((sRmBody*)body, &arm, &imp);
+            func_0035D908((cRollerModifier*)body, &arm, &imp);
             vp = PointVelD4A0(body, *point);
             normalVel = DotD4A0(vp, *n);
             if (normalVel > 0.0f) {
@@ -1319,7 +1308,7 @@ extern "C" void cRigidBody_rigidImpact(sRmRigid_D4A0* body, t4Vector* point, t4V
     }
     float j = -(restitution + 1.0f) * normalVel / (body->invMass + DotD4A0(*n, CrossD4A0(MulID4A0(body, CrossD4A0(arm, *n)), arm)));
     t4Vector imp = ScaleD4A0(*n, j);
-    func_0035D908((sRmBody*)body, &arm, &imp);
+    func_0035D908((cRollerModifier*)body, &arm, &imp);
 }
 #endif
 
@@ -1552,7 +1541,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
     tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
     QuatPosToMtx_DA70(&self->Transform, *(t4Vector*)&y.Q, *(t4Vector*)&y.P);
     cRollerModifier_updateMOI((cRollerModifier*)(((char*)self)));
-    cRigidBody_updateImplicit((sRmBody*)(&self->Pose));
+    cRigidBody_updateImplicit((cRollerModifier*)(&self->Pose));
     self->ContactElastic = 0.10000000149011612f;
     self->ContactFriction = 0.4000000059604645f;
     self->StopContactSpeed = 277.77777099609375f;
@@ -1789,7 +1778,7 @@ extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* se
     QuatPosToMtx_DA70(&(*(sRmMat44DF70*)&self->Transform), *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
     SphereTree_TransformAbs(((char*)&self->SphTree), &(*(sRmMat44DF70*)&self->Transform), 1.0f);
     cRollerModifier_updateMOI((cRollerModifier*)self);
-    cRigidBody_updateImplicit((sRmBody*)((char*)&self->Pose));
+    cRigidBody_updateImplicit((cRollerModifier*)((char*)&self->Pose));
     return self;
 }
 #endif
@@ -2059,9 +2048,9 @@ static inline void vu0AddED90(t4Vector& dst, const t4Vector& b)
  *
  * @param off  the offset (On Tour off)
  */
-extern "C" void cRollerModifier_translateMe(sRmBody* self, const t4Vector* off)
+extern "C" void cRollerModifier_translateMe(cRollerModifier* self, const t4Vector* off)
 {
-    vu0AddED90(self->pos, *off);
+    vu0AddED90(self->Pose.P, *off);
     SphereTree_MoveOffset((char*)self + 0xE0, off);
 }
 #endif
@@ -2210,34 +2199,34 @@ static inline float vu0LengthEDC8(const t4Vector& v)
 }
 
 
-static inline t4Vector toDirEDC8(sRmBody* b, const t4Vector& v)
+static inline t4Vector toDirEDC8(cRollerModifier* b, const t4Vector& v)
 {
-    return vu0DivEDC8(v, b->scale);
+    return vu0DivEDC8(v, b->Pose.Q.x);
 }
 
 static inline t4Vector xformEDC8(cRollerModifier* rollerModifier)
 {
     t4Vector o;
-    float x = (*(sRmBody*)&rollerModifier->Pose).pos.x;
-    float y = (*(sRmBody*)&rollerModifier->Pose).pos.y;
-    float z = (*(sRmBody*)&rollerModifier->Pose).pos.z;
-    o.x = (*(sRmBody*)&rollerModifier->Pose).rot.m[0][0] * x + (*(sRmBody*)&rollerModifier->Pose).rot.m[1][0] * y + (*(sRmBody*)&rollerModifier->Pose).rot.m[2][0] * z;
-    o.y = (*(sRmBody*)&rollerModifier->Pose).rot.m[0][1] * x + (*(sRmBody*)&rollerModifier->Pose).rot.m[1][1] * y + (*(sRmBody*)&rollerModifier->Pose).rot.m[2][1] * z;
-    o.z = (*(sRmBody*)&rollerModifier->Pose).rot.m[0][2] * x + (*(sRmBody*)&rollerModifier->Pose).rot.m[1][2] * y + (*(sRmBody*)&rollerModifier->Pose).rot.m[2][2] * z;
-    o.w = (*(sRmBody*)&rollerModifier->Pose).pos.w;
+    float x = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.x;
+    float y = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.y;
+    float z = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.z;
+    o.x = (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[0][0] * x + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[1][0] * y + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[2][0] * z;
+    o.y = (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[0][1] * x + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[1][1] * y + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[2][1] * z;
+    o.z = (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[0][2] * x + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[1][2] * y + (*(sRmMat33*)&(*(cRollerModifier*)&rollerModifier->Pose).P).m[2][2] * z;
+    o.w = (*(cRollerModifier*)&rollerModifier->Pose).Pose.P.w;
     return o;
 }
 
 static inline void setPosEDC8(cRollerModifier* rollerModifier, const t4Vector& v)
 {
-    (*(sRmBody*)&rollerModifier->Pose).pos = v;
-    (*(sRmBody*)&rollerModifier->Pose).outPos = xformEDC8(rollerModifier);
+    (*(cRollerModifier*)&rollerModifier->Pose).Pose.P = v;
+    (*(t4Vector*)&(*(cRollerModifier*)&rollerModifier->Pose).InvMOI[1][1]) = xformEDC8(rollerModifier);
 }
 
 static inline void setOutDirEDC8(cRollerModifier* rollerModifier, const t4Vector& v)
 {
-    (*(sRmBody*)&rollerModifier->Pose).dir = toDirEDC8((sRmBody*)&rollerModifier->Pose, v);
-    (*(sRmBody*)&rollerModifier->Pose).outDir = v;
+    (*(t4Vector*)&(*(cRollerModifier*)&rollerModifier->Pose).Life) = toDirEDC8((cRollerModifier*)&rollerModifier->Pose, v);
+    (*(t4Vector*)&(*(cRollerModifier*)&rollerModifier->Pose).InvMOI[0][0]) = v;
 }
 
 /**
@@ -2258,11 +2247,11 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
     overlap -= SphereTree_GetResolution((char*)&self->SphTree);
     if (zeroF < overlap) {
         t4Vector push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
-        cRollerModifier_translateMe((sRmBody*)self, &push);
+        cRollerModifier_translateMe(self, &push);
         float k = 0.975f;
         setPosEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->L, k));
         setOutDirEDC8((self), vu0ScaleEDC8(*(t4Vector*)&self->V, k));
-        float dp = vu0DotEDC8(vu0AddEDC8(*(t4Vector*)&self->V, vu0CrossEDC8(*(t4Vector*)&self->W, vu0SubEDC8(hit.pos, *(t4Vector*)(sRmBody*)&self->Pose))), hit.normal);
+        float dp = vu0DotEDC8(vu0AddEDC8(*(t4Vector*)&self->V, vu0CrossEDC8(*(t4Vector*)&self->W, vu0SubEDC8(hit.pos, *(t4Vector*)(cRollerModifier*)&self->Pose))), hit.normal);
         if (dp < zeroF) {
             float lim = self->StopContactSpeed;
             float len = vu0LengthEDC8(*(t4Vector*)&self->V);
@@ -2270,7 +2259,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
             float friction = self->ContactFriction;
             if (len < lim)
                 elastic = zeroF;
-            cRigidBody_rigidImpact_EDC8((sRmBody*)&self->Pose, &hit, &hit.normal, elastic, friction);
+            cRigidBody_rigidImpact_EDC8((cRollerModifier*)&self->Pose, &hit, &hit.normal, elastic, friction);
             self->HitFrequency += 0.016666668f;
             if (5.0f < self->Life)
                 self->Life = 10.0f;

@@ -235,10 +235,6 @@ struct sCtTrig_P {
     sCtTrig_P* reg;                 // 0x20
 };
 
-struct sCtMan_P {
-    sCtTrig_P** trigs;              // 0x0
-    int count;                      // 0x4
-};
 
 static inline void remove_P(char* w, void* item, const sCtBox_P* box)
 {
@@ -271,9 +267,9 @@ static inline void remove_P(char* w, void* item, const sCtBox_P* box)
 // Takes every registered trigger out of the world's space hash and clears the trigger stacks and active lists.
 extern "C" void cCameraTriggerMan_purge(cCameraTriggerMan* vself)
 {
-    sCtMan_P* self = (sCtMan_P*)vself;
-    for (int i = 0; i < self->count; i++) {
-        sCtTrig_P* trigger = self->trigs[i];
+    cCameraTriggerMan* self = vself;
+    for (int i = 0; i < self->TriggerList.NumTriggers; i++) {
+        sCtTrig_P* trigger = (*(sCtTrig_P***)&self->TriggerList)[i];
         if (trigger->reg != 0) {
             char* w = (char*)SSXApp->Game->BXNash;
             sCtBox_P box = trigger->shape->bounds();

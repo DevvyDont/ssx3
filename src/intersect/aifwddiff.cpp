@@ -53,9 +53,9 @@ struct sFwdDiffList;
 struct sFwdDiffLink;
 struct sFwdDiffTable;
 struct sFwdDiffNode;
-extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(sFwdDiffList* list, sFwdDiffLink* n);
+extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(cAIFwdDiffCache* list, sFwdDiffLink* n);
 extern "C" void cAIFwdDiffCache_RemoveFromHash(void* self, void* node);
-extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* node);
+extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, sFwdDiffNode* node);
 extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* src, cAIFwdDiffCache* node);
 
 
@@ -79,7 +79,7 @@ extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, tAI
     tAIFwdDiff* n = ((tAIFwdDiff**)self->mPatchHash)[key % self->mHashSize];
     while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->mKey)) {
         if (n->mKey == key) {
-            cAIFwdDiffCache_MoveToAgeQueueTail((sFwdDiffList*)self, (sFwdDiffLink*)n);
+            cAIFwdDiffCache_MoveToAgeQueueTail(self, (sFwdDiffLink*)n);
             *out = n;
             return;
         }
@@ -88,7 +88,7 @@ extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, tAI
     n = (self->mAgeQueue);
     cAIFwdDiffCache_RemoveFromHash(self, n);
     n->mKey = key;
-    cAIFwdDiffCache_AddToHash((sFwdDiffTable*)self, (sFwdDiffNode*)n);
+    cAIFwdDiffCache_AddToHash(self, (sFwdDiffNode*)n);
     *(tAIFwdDiff**)&self->mAgeQueue = n->mNext;
     cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, (cAIFwdDiffCache*)n);
     *out = n;
@@ -104,10 +104,6 @@ struct sFwdDiffLink {
     sFwdDiffLink* prev;   // 0x8
 };
 
-struct sFwdDiffList {
-    int pad0;
-    sFwdDiffLink* head;   // 0x4
-};
 
 /**
  * Moves an AI forward-difference cache node to the tail of the age queue, making it the most recently used.
@@ -118,21 +114,21 @@ struct sFwdDiffList {
  * @param list  the cache (this)
  * @param n  the node (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(sFwdDiffList* list, sFwdDiffLink* n)
+extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(cAIFwdDiffCache* list, sFwdDiffLink* n)
 {
-    if (list->head == n) {
-        list->head = n->next;
+    if (((sFwdDiffLink*)list->mAgeQueue) == n) {
+        (*(sFwdDiffLink**)&list->mAgeQueue) = n->next;
         return;
     }
-    if (list->head->prev == n) {
+    if (((sFwdDiffLink*)list->mAgeQueue)->prev == n) {
         return;
     }
     n->prev->next = n->next;
     n->next->prev = n->prev;
-    n->prev = list->head->prev;
-    n->next = list->head;
-    list->head->prev->next = n;
-    list->head->prev = n;
+    n->prev = ((sFwdDiffLink*)list->mAgeQueue)->prev;
+    n->next = ((sFwdDiffLink*)list->mAgeQueue);
+    ((sFwdDiffLink*)list->mAgeQueue)->prev->next = n;
+    ((sFwdDiffLink*)list->mAgeQueue)->prev = n;
 }
 #endif
 
@@ -182,12 +178,6 @@ struct sFwdDiffNode {
     sFwdDiffNode* next;
 };
 
-struct sFwdDiffTable {
-    int pad0;
-    int pad4;
-    sFwdDiffNode** buckets;
-    unsigned int count;
-};
 
 /**
  * Adds an AI forward-difference cache node to the patch hash table, keeping its bucket sorted by key.
@@ -197,10 +187,10 @@ struct sFwdDiffTable {
  * @param table  the cache (this)
  * @param node  the node (On Tour anode)
  */
-extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* node)
+extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, sFwdDiffNode* node)
 {
     unsigned int key = node->key;
-    sFwdDiffNode** link = &table->buckets[key % table->count];
+    sFwdDiffNode** link = &((sFwdDiffNode**)table->mPatchHash)[key % table->mHashSize];
     for (;;) {
         sFwdDiffNode* cur = *link;
         if (cur == 0 || key < cur->key) {

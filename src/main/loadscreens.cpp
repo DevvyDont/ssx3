@@ -118,11 +118,6 @@ struct sVert_AE00 {
 };
 
 
-struct sBgMan_AE00 {
-    int* images;                // 0x0
-    int count;                  // 0x4
-    int cur;                    // 0x8
-};
 
 typedef void (*fnV_AE00)(void*);
 typedef void (*fnRect_AE00)(void*, int, int, float, float, float, float, float, float);
@@ -142,7 +137,7 @@ static inline void setBlend_AE00(sRS_AE00* rs, int v) { rs->blend = v; }
 static inline void setTest_AE00(sRS_AE00* rs, int v) { rs->test = v; }
 static inline void setFunc_AE00(sRS_AE00* rs, int v) { rs->func = v; }
 static inline void setMode_AE00(sRS_AE00* rs, int v) { rs->mode = v; }
-static inline int imageOf_AE00(sBgMan_AE00* m) { return m->images[m->cur]; }
+static inline int imageOf_AE00(cBackgroundMan* m) { return m->mpiImageTID[m->miActiveImage]; }
 
 static inline void setState_AE00()
 {
@@ -223,7 +218,7 @@ extern "C" void cBackgroundMan_renderImage(cBackgroundMan* self)
     verts[3].u = 1.0f;
     verts[3].v = 1.0f;
     setAlpha_AE00(ctx_AE00()->top, 0x18);
-    *(short*)((char*)ctx_AE00()->top + 0x10) = imageOf_AE00(((sBgMan_AE00*)self));
+    *(short*)((char*)ctx_AE00()->top + 0x10) = imageOf_AE00((self));
     {
         sCtx_AE00* graphics = ctx_AE00();
         sVEnt_AE00* vtEntry = &graphics->vt[71];

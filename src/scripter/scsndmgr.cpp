@@ -78,8 +78,8 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_LinkBank);
 #ifdef SKIP_ASM
 struct sSndEntry;
 struct sSndList;
-extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id);
-extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(sSndList* self);
+extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id);
+extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(cScriptSoundBankManager* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int b);
 
@@ -97,9 +97,9 @@ extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int
  */
 extern "C" int cScriptSoundBankManager_LinkBank(cScriptSoundBankManager* self, int id, void* data, int dataSize)
 {
-    tScriptSoundBankInfo* bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetBankInfo(((sSndList*)self), id));
+    tScriptSoundBankInfo* bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetBankInfo((self), id));
     if (((char*)bankInfo) == 0) {
-        bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetEmptyBankInfo(((sSndList*)self)));
+        bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetEmptyBankInfo((self)));
         bankInfo->userID = id;
         bankInfo->pData = (char*)data;
         cBankManager_BANK_Attach(**(void***)&cAudioInterface_bxAudio()->MusicSys, bankInfo->bankNum, data, dataSize);
@@ -119,7 +119,7 @@ struct sScSndVEntry {
 
 struct sSndEntry;
 struct sSndList;
-extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id);
+extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id);
 
 /**
  * Unlinks the sound bank with user ID @p id, if linked.
@@ -131,7 +131,7 @@ extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id
  */
 extern "C" void cScriptSoundBankManager_UnlinkBank1(cScriptSoundBankManager* self, int id)
 {
-    sSndEntry* bankInfo = cScriptSoundBankManager_GetBankInfo(((sSndList*)self), id);
+    sSndEntry* bankInfo = cScriptSoundBankManager_GetBankInfo((self), id);
     if (bankInfo != 0) {
         sScSndVEntry* vt = (sScSndVEntry*)self->mVtbl;
         vt[2].fn(vthis(self, vt[2]), bankInfo);
@@ -174,11 +174,6 @@ struct sSndEntry {
     void* data;
 };
 
-struct sSndList {
-    int unk0;
-    int count;
-    sSndEntry* entries;
-};
 
 /**
  * Returns the linked sound bank record (user ID, bank number, data) with user ID @p id.
@@ -188,11 +183,11 @@ struct sSndList {
  * @param id  the bank's user ID
  * @return the record, or 0
  */
-extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id)
+extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id)
 {
-    for (int i = 0; i < self->count; i++) {
-        if (self->entries[i].data != 0 && self->entries[i].id == id) {
-            return &self->entries[i];
+    for (int i = 0; i < self->mMaxBanks; i++) {
+        if (((sSndEntry*)self->mpBankInfo)[i].data != 0 && ((sSndEntry*)self->mpBankInfo)[i].id == id) {
+            return &((sSndEntry*)self->mpBankInfo)[i];
         }
     }
     return 0;
@@ -230,11 +225,11 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_GetEmptyBankInfo);
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(sSndList* self)
+extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(cScriptSoundBankManager* self)
 {
-    for (int i = 0; i < self->count; i++) {
-        if (self->entries[i].data == 0) {
-            return &self->entries[i];
+    for (int i = 0; i < self->mMaxBanks; i++) {
+        if (((sSndEntry*)self->mpBankInfo)[i].data == 0) {
+            return &((sSndEntry*)self->mpBankInfo)[i];
         }
     }
     return 0;

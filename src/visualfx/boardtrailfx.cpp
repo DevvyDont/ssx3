@@ -1725,12 +1725,6 @@ struct cWipe_TObj_cWipe_TObj_sVec4 {
     float x, y, z, w;
 };
 
-struct cWipe_TObj_cWipe_TObj_sObj {
-    void** vtable;               // 0x0
-    cWipe_TObj_cWipe_TObj_sVec4 v;       // 0x4
-    int a;                       // 0x14
-    int b;                       // 0x18
-};
 
 /**
  * Constructs a wipe transition object with a colour and a horizontal and vertical direction.
@@ -1744,7 +1738,7 @@ struct cWipe_TObj_cWipe_TObj_sObj {
  * @param verticalDir  vertical direction: -1, 0 or 1
  * @return @p self
  */
-extern "C" cWipe_TObj_cWipe_TObj_sObj* cWipe_TObj_cWipe_TObj(cWipe_TObj* self, const cWipe_TObj_cWipe_TObj_sVec4& colour, int horizontalDir, int verticalDir)
+extern "C" cWipe_TObj* cWipe_TObj_cWipe_TObj(cWipe_TObj* self, const cWipe_TObj_cWipe_TObj_sVec4& colour, int horizontalDir, int verticalDir)
 {
     cWipe_TObj_cWipe_TObj_sVec4 vecCopy = colour;
     cTransitionObj_cTransitionObj(self);
@@ -1752,7 +1746,7 @@ extern "C" cWipe_TObj_cWipe_TObj_sObj* cWipe_TObj_cWipe_TObj(cWipe_TObj* self, c
     (*(cWipe_TObj_cWipe_TObj_sVec4*)&self->mColour) = vecCopy;
     self->mHDir = horizontalDir;
     self->mVDir = verticalDir;
-    return ((cWipe_TObj_cWipe_TObj_sObj*)self);
+    return (self);
 }
 #endif
 

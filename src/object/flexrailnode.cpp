@@ -990,14 +990,6 @@ struct sFrElem_A0B0 {
     char pad_0x10[0x50];
 };
 
-struct sFrNode_A0B0 {
-    char pad_0x00[0x20];
-    int count;              // 0x20
-    char pad_0x24[0x2C];
-    sFrM4_A0B0* mats;       // 0x50
-    char pad_0x54[0x1C];
-    sFrElem_A0B0* elems;    // 0x70
-};
 
 extern float CatmullRom[16];
 
@@ -1107,13 +1099,13 @@ static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const t4Vector& a, const s
 // plain C transpose and a C vector-matrix product.
 extern "C" void cSpringRailNode_updateMats(cSpringRailNode* selfv)
 {
-    sFrNode_A0B0* self = (sFrNode_A0B0*)selfv;
+    cSpringRailNode* self = selfv;
     int i = 1;
-    updateMatSeg_A0B0(self->mats[0], self->elems[0].pos, &self->elems[0]);
-    for (; i < self->count - 2; i++) {
-        updateMatSeg_A0B0(self->mats[i], self->elems[i - 1].pos, &self->elems[i]);
+    updateMatSeg_A0B0(((sFrM4_A0B0*)self->Mats)[0], ((sFrElem_A0B0*)self->Nodes)[0].pos, &((sFrElem_A0B0*)self->Nodes)[0]);
+    for (; i < self->NumNodes - 2; i++) {
+        updateMatSeg_A0B0(((sFrM4_A0B0*)self->Mats)[i], ((sFrElem_A0B0*)self->Nodes)[i - 1].pos, &((sFrElem_A0B0*)self->Nodes)[i]);
     }
-    updateMatEnd_A0B0(self->mats[i], self->elems[i - 1].pos, &self->elems[i]);
+    updateMatEnd_A0B0(((sFrM4_A0B0*)self->Mats)[i], ((sFrElem_A0B0*)self->Nodes)[i - 1].pos, &((sFrElem_A0B0*)self->Nodes)[i]);
 }
 #endif
 
@@ -1760,16 +1752,6 @@ INCLUDE_ASM("object/flexrailnode", cFlagSet_cFlagSet);
 extern int cFlagSet_mgFrameToUpdateGridCounter;
 extern void* cFlagSet_vtbl[];
 
-struct sFlexRail_AF38 {
-    char pad_0x0[0x60];
-    int f60;            // 0x60
-    char pad_0x64[0x10];
-    int f74;            // 0x74
-    char pad_0x78[0x18];
-    int f90;            // 0x90
-    int slots[60];      // 0x94
-    void** vt;          // 0x184
-};
 
 /**
  * Constructs an empty flag set.
@@ -1782,17 +1764,17 @@ struct sFlexRail_AF38 {
  */
 extern "C" void* cFlagSet_cFlagSet(cFlagSet* self)
 {
-    sFlexRail_AF38* flagSet = (sFlexRail_AF38*)self;
+    cFlagSet* flagSet = self;
     int i;
     tFlagSetState_tFlagSetState(self);
-    flagSet->f60 = 0;
-    flagSet->f74 = 0;
-    flagSet->vt = cFlagSet_vtbl;
+    (*(int*)&flagSet->mGridMesh) = 0;
+    (*(int*)&flagSet->mVerts) = 0;
+    flagSet->mVtbl = cFlagSet_vtbl;
     for (i = 0; i < 60; i++) {
-        flagSet->slots[i] = 0;
+        ((int*)&flagSet->mInstances[0])[i] = 0;
     }
     int id = cFlagSet_mgFrameToUpdateGridCounter;
-    flagSet->f90 = id;
+    flagSet->mFrameToUpdateGrid = id;
     cFlagSet_mgFrameToUpdateGridCounter = id + 1;
     if (cFlagSet_mgFrameToUpdateGridCounter >= 2) {
         cFlagSet_mgFrameToUpdateGridCounter = 0;

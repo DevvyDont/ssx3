@@ -6896,12 +6896,6 @@ extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* f
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_scanLocations);
 #ifdef SKIP_ASM
 
-struct sCamMgr {
-    int count;                  // 0x0000
-    tLocationInfo entries[0x100];   // 0x0004
-    int numActive;              // 0x8C04
-    int numValid;               // 0x8C08
-};
 
 // One name looked up in the bigfile by isValidMap (found flag written back).
 struct sCamName {
@@ -6938,7 +6932,7 @@ extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
     void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
     for (i = 0; i < 22; i++)
         names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
-    if (cTrackFileMan_checkLocation1_A638(((sCamMgr*)self), 22, names, (char*)str_BAM_b)) {
+    if (cTrackFileMan_checkLocation1_A638((self), 22, names, (char*)str_BAM_b)) {
         int j;
         for (j = 0; j < 22 && self->NumLocations < 0x100; j++) {
             if (names[j].ok) {
@@ -6949,7 +6943,7 @@ extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
                 ip[self->NumLocations * 35] = j;
                 ap[self->NumLocations * 35] = 1;
                 self->NumBAMLocations++;
-                if (cTrackFileMan_testWCBAMStartLocation_A638(((sCamMgr*)self), ip[self->NumLocations * 35])) {
+                if (cTrackFileMan_testWCBAMStartLocation_A638((self), ip[self->NumLocations * 35])) {
                     *(int*)((char*)&self->LocationInfo[0].bIsWCBAMStart + self->NumLocations * 0x8C) = 1;
                     self->NumWCBAMStartLocations++;
                 }

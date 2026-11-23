@@ -5433,22 +5433,6 @@ struct sFadeVt47E8 {
     void (*fn)(void*, float);
 };
 
-struct sFade47E8 {
-    char pad0[0x44];
-    int active;                 // 0x44
-    float time;                 // 0x48
-    char* o1;                   // 0x4C
-    char* o2;                   // 0x50
-    float fadeIn;               // 0x54
-    float hold;                 // 0x58
-    float fadeOut;              // 0x5C
-    int useTex;                 // 0x60
-    int pending;                // 0x64
-    int ref;                    // 0x68
-    int tex;                    // 0x6C
-    int i70;                    // 0x70
-    int rider;                  // 0x74
-};
 
 static inline void rsSetA47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
@@ -5465,9 +5449,9 @@ static inline void rsSet047E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
     (ctx->m_pCurrentDrawState)->m_bitGroups[0] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[0]) & ~mask) | ((v << shift) & mask);
 }
 
-static inline int fadeTex47E8(sFade47E8* self)
+static inline int fadeTex47E8(cTransitionMan* self)
 {
-    return self->tex;
+    return self->mScreenGrabHandle.mTextureId;
 }
 
 /**
@@ -5528,7 +5512,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     rsSetA47E8(ctx, 0x3, 0, 2);
     rsSetB47E8(ctx, 0x1FFFFC00, 10, 0);
     if (self->mUsingScreenGrab != 0) {
-        (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = fadeTex47E8(((sFade47E8*)self));
+        (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = fadeTex47E8((self));
     } else {
         (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
     }

@@ -359,16 +359,6 @@ extern "C" void cFEStateNetHelpPopup_onWidgetEvent(cFEStateNetHelpPopup* self, i
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_clear);
 #ifdef SKIP_ASM
-struct sNetHelpPopup_DA4A8 {
-    char pad_0x0[0x48];
-    int state;      // 0x48
-    char pad_0x4C[0x8];
-    int muiScreenName;        // 0x54
-    int c[3];       // 0x58
-    int muiBottomText;        // 0x64
-    int a[7];       // 0x68
-    int b[7];       // 0x84
-};
 
 /**
  * Clears the help popup's contents: no options, no descriptions, every option's text 0 and icon -1.
@@ -379,17 +369,17 @@ struct sNetHelpPopup_DA4A8 {
  */
 extern "C" void cFEStateNetHelpPopup_clear(cFEStateNetHelpPopup* self)
 {
-    sNetHelpPopup_DA4A8* helpPopup = (sNetHelpPopup_DA4A8*)self;
+    cFEStateNetHelpPopup* helpPopup = self;
     int i;
-    helpPopup->state = 0;
+    helpPopup->miNumOptions = 0;
     helpPopup->muiScreenName = 0;
     for (i = 2; i >= 0; i--) {
-        helpPopup->c[i] = 0;
+        ((int*)&helpPopup->muiDescription[0])[i] = 0;
     }
     helpPopup->muiBottomText = 0;
     for (i = 0; i < 7; i++) {
-        helpPopup->a[i] = 0;
-        helpPopup->b[i] = -1;
+        ((int*)&helpPopup->muiOptions[0])[i] = 0;
+        helpPopup->meObject[i] = -1;
     }
 }
 #endif

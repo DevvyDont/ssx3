@@ -2299,10 +2299,6 @@ struct sBXRangeK2 {
     float hi;   // 0xC
 };
 
-struct sBXRangeListK2 {
-    int count;            // 0x0
-    sBXRangeK2* entries;  // 0x4
-};
 
 /**
  * Finds where on an AI path a rider should be reset to, near a path position, and returns that point.
@@ -2319,12 +2315,12 @@ struct sBXRangeListK2 {
 // PORT: >? and <? (g++ min/max operators).
 extern "C" t4Vector cAIPath_getResetPos(cPath* path, float* pathParam)
 {
-    sBXRangeListK2* list = (sBXRangeListK2*)path;
+    cPath* list = path;
     float hi = *pathParam + 50.0f;
     float lo = hi;
     int i;
-    for (i = 0; i < list->count; i++) {
-        sBXRangeK2* pathEvent = &list->entries[i];
+    for (i = 0; i < list->NumEvents; i++) {
+        sBXRangeK2* pathEvent = &((sBXRangeK2*)list->Events)[i];
         if (*pathParam < pathEvent->lo)
             continue;
         if (pathEvent->hi < *pathParam)
@@ -2416,14 +2412,8 @@ struct sBXRange {
     float max; // 0xC
 };
 
-struct sBXRangeList {
-    int count;          // 0x0
-    sBXRange* items;    // 0x4
-    char pad_0x08[0x30];
-    float field_0x38;   // 0x38
-};
 
-extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi);
+extern "C" int cPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOut, float lo, float hi);
 
 /**
  * Collects the track path's events between two distances from the finish.
@@ -2440,7 +2430,7 @@ extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int max
 extern "C" int cTrackPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOut, float ldist, float hdist)
 {
     float base = self->BaseDistanceLeft;
-    return cPath_getEventsInRange(((sBXRangeList*)self), out, maxOut, base - ldist, base - hdist);
+    return cPath_getEventsInRange((self), out, maxOut, base - ldist, base - hdist);
 }
 #endif
 
@@ -2448,7 +2438,7 @@ extern "C" int cTrackPath_getEventsInRange(cTrackPath* self, sBXRange* out, int 
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_isForkInPath);
 #ifdef SKIP_ASM
 extern "C" float cPath_getLength(cPath* self);
-extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi);
+extern "C" int cPath_isForkInPath(cTrackPath* self, float lo, float hi);
 
 /**
  * Tells whether the track path forks between two distances from the finish.
@@ -2472,7 +2462,7 @@ extern "C" int cTrackPath_isForkInPath(cTrackPath* self, float ldist, float hdis
         hi = cPath_getLength((cPath*)self);
     else
         hi = self->BaseDistanceLeft - hdist;
-    return cPath_isForkInPath(((sBXRangeList*)self), lo, hi);
+    return cPath_isForkInPath((self), lo, hi);
 }
 #endif
 
@@ -3141,7 +3131,7 @@ INCLUDE_ASM("bx/bxstringctor", cPath_getEventsInRange);
  * @param hi  the end of the stretch (On Tour h)
  * @return the number of events written
  */
-extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi)
+extern "C" int cPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOut, float lo, float hi)
 {
     int n;
     int i;
@@ -3149,9 +3139,9 @@ extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int max
         return 0;
     }
     n = 0;
-    for (i = 0; i < self->count; i++) {
-        if (!(hi < self->items[i].min) && !(self->items[i].max < lo)) {
-            *out++ = self->items[i];
+    for (i = 0; i < self->NumEvents; i++) {
+        if (!(hi < ((sBXRange*)self->Events)[i].min) && !(((sBXRange*)self->Events)[i].max < lo)) {
+            *out++ = ((sBXRange*)self->Events)[i];
             n++;
             if (n == maxOut) {
                 goto done;
@@ -3297,12 +3287,12 @@ INCLUDE_ASM("bx/bxstringctor", cPath_isForkInPath);
  * @param hi  the end of the stretch (On Tour h)
  * @return 1 when a fork is found
  */
-extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi)
+extern "C" int cPath_isForkInPath(cTrackPath* self, float lo, float hi)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (!(hi < self->items[i].min) && !(self->items[i].max < lo)) {
-            if (self->items[i].field_0x0 == 20 || self->items[i].field_0x0 == 18) {
+    for (i = 0; i < self->NumEvents; i++) {
+        if (!(hi < ((sBXRange*)self->Events)[i].min) && !(((sBXRange*)self->Events)[i].max < lo)) {
+            if (((sBXRange*)self->Events)[i].field_0x0 == 20 || ((sBXRange*)self->Events)[i].field_0x0 == 18) {
                 return 1;
             }
         }

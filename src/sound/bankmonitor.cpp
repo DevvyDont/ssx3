@@ -142,7 +142,7 @@ extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
         }
         cMemMan_free((char*)self->mBankMonitorInstance - 0x10);
     }
-    cMonitor__cMonitor((cMonitor*)((sSndPlayerDAC8*)self), 0);
+    cMonitor__cMonitor((cMonitor*)(self), 0);
     if (flags & 2) {
         cSoundSys__cSoundSys((cSoundSys*)self->mpVSoundSys, 0);
     }
@@ -973,12 +973,6 @@ struct sBmVtblDAC8 {
 extern const sBmVtblDAC8 D_00483BC0_DAC8 __asm__("D_00483BC0");
 
 
-struct sSndPlayerDAC8 {
-    char* vbase;                // 0x0
-    char pad_0x4[0x98 - 0x4];
-    cMonitorInstance slots[48];      // 0x98
-    void** vtbl;                // 0x8D8
-};
 
 /**
  * Destroys the sound monitor: removes its timer callback (func_002AD998), clears gMonitor and destroys its 48
@@ -1011,7 +1005,7 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
             cMonitorInstance__cMonitorInstance((int*)monitorInstance, 0);
         }
     }
-    cSndPlayOpts__cSndPlayOpts(((sSndPlayerDAC8*)self), 0);
+    cSndPlayOpts__cSndPlayOpts(((cBankMonitor*)self), 0);
     if (flags & 2) {
         cSoundSys__cSoundSys((cSoundSys*)self->mpVSoundSys, 0);
     }
@@ -6588,16 +6582,6 @@ extern "C" void func_002B3EE8(cMusicSys* self, const char* name)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3FE8);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-struct sBankMonUse {
-    char pad0[0x3E8];
-    int count;                  // 0x3E8
-    char pad3EC[0x3F8 - 0x3EC];
-    ulong mask;                 // 0x3F8
-    char pad400[0x420 - 0x400];
-    int grid[64][5];            // 0x420
-    int totals[5];              // 0x920
-};
 
 /**
  * Adds song idx to the active set: sets its mActiveMap bit, counts it and its categories (at most 64).
@@ -6666,7 +6650,7 @@ extern "C" void func_002B4070(cMusicSys* self, ulong mask)
     for (int i = 0; i < self->mNumFESongs; i++) {
         int bit = (mask >> i) & 1;
         if (bit) {
-            func_002B3FE8((cMusicSys*)((sBankMonUse*)self), i);
+            func_002B3FE8((cMusicSys*)(self), i);
         }
     }
     func_002B4060(self);

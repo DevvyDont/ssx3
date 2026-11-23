@@ -114,7 +114,7 @@ struct sScBank {
 };
 
 struct sAnimList;
-extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id);
+extern "C" void* cScriptAnimBankManager_GetBankInfo(cScriptAnimBankManager* self, int id);
 extern "C" void* cScriptAnimBankManager_GetEmptyBankInfo_v(void* self) __asm__("cScriptAnimBankManager_GetEmptyBankInfo");
 
 /**
@@ -131,7 +131,7 @@ extern "C" void* cScriptAnimBankManager_GetEmptyBankInfo_v(void* self) __asm__("
  */
 extern "C" int cScriptAnimBankManager_LinkBank(cScriptAnimBankManager* self, int id, void* data)
 {
-    sScLinkEntry* bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetBankInfo((sAnimList*)self, id);
+    sScLinkEntry* bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetBankInfo(self, id);
     if (bankInfo == 0) {
         bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetEmptyBankInfo_v(self);
         bankInfo->id = id;
@@ -171,7 +171,7 @@ struct sScAnimVEntry {
 };
 
 struct sAnimList;
-extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id);
+extern "C" void* cScriptAnimBankManager_GetBankInfo(cScriptAnimBankManager* self, int id);
 
 /**
  * Unlinks the animation bank with user ID @p id, if linked.
@@ -183,7 +183,7 @@ extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id);
  */
 extern "C" void cScriptAnimBankManager_UnlinkBank(cScriptAnimBankManager* self, int id)
 {
-    void* bankInfo = cScriptAnimBankManager_GetBankInfo(((sAnimList*)self), id);
+    void* bankInfo = cScriptAnimBankManager_GetBankInfo((self), id);
     if (bankInfo != 0) {
         sScAnimVEntry* vt = (sScAnimVEntry*)self->mVtbl;
         vt[2].fn(vthis(self, vt[2]), bankInfo);
@@ -222,11 +222,6 @@ extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* se
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetBankInfo);
 #ifdef SKIP_ASM
 
-struct sAnimList {
-    int unk0;
-    int count;
-    tScriptAnimBankInfo* entries;
-};
 
 /**
  * Returns the linked bank record (0x14 bytes: user ID, bank number, data, anim count, anim ID table) with user ID
@@ -237,11 +232,11 @@ struct sAnimList {
  * @param id  the bank's user ID
  * @return the record, or 0
  */
-extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id)
+extern "C" void* cScriptAnimBankManager_GetBankInfo(cScriptAnimBankManager* self, int id)
 {
-    for (int i = 0; i < self->count; i++) {
-        if (((void*)self->entries[i].pData) != 0 && self->entries[i].userID == id) {
-            return &self->entries[i];
+    for (int i = 0; i < self->mMaxBanks; i++) {
+        if (((void*)self->mpBankInfo[i].pData) != 0 && self->mpBankInfo[i].userID == id) {
+            return &self->mpBankInfo[i];
         }
     }
     return 0;
@@ -294,11 +289,11 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetEmptyBankInfo);
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" tScriptAnimBankInfo* cScriptAnimBankManager_GetEmptyBankInfo(sAnimList* self)
+extern "C" tScriptAnimBankInfo* cScriptAnimBankManager_GetEmptyBankInfo(cScriptAnimBankManager* self)
 {
-    for (int i = 0; i < self->count; i++) {
-        if (((void*)self->entries[i].pData) == 0) {
-            return &self->entries[i];
+    for (int i = 0; i < self->mMaxBanks; i++) {
+        if (((void*)self->mpBankInfo[i].pData) == 0) {
+            return &self->mpBankInfo[i];
         }
     }
     return 0;

@@ -341,13 +341,6 @@ struct sLensItem_CCB8 {
     char pad14[0x38 - 0x14];
 };
 
-struct sLensMgr_CCB8 {
-    int active;                 // 0x0
-    char* rider;                // 0x4
-    int* charId;                // 0x8
-    int fxSys;                  // 0xC
-    sLensEntry entries[15];     // 0x10
-};
 
 /**
  * Rebuilds a bolt-on effect set from the character's equipment: makes sure every needed emitter exists and releases the
@@ -365,7 +358,7 @@ struct sLensMgr_CCB8 {
  */
 extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
 {
-    sLensMgr_CCB8* self = (sLensMgr_CCB8*)vself;
+    cBoltOnFXInterface* self = vself;
     int used[15];
     for (int z = 14; z >= 0; z--) {
         used[z] = 0;
@@ -373,21 +366,21 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     void* lib = cBEBoltInterface_getThis();
     cBECharProfileDB* tbl = 0;
     int id = -1;
-    cRider* rider = (cRider*)self->rider;
+    cRider* rider = (cRider*)((char*)self->mpRider);
     if (((char*)rider) != 0) {
         tbl = (cBECharProfileDB*)((char*)func_0014AD50(lib, rider->getAIIndex()));
-        id = cRider_getCheatIdentity(self->rider);
+        id = cRider_getCheatIdentity(((char*)self->mpRider));
         if (id < 10) {
-            id = cRider_getIdentity(self->rider);
+            id = cRider_getIdentity(((char*)self->mpRider));
         }
-    } else if (self->charId != 0) {
+    } else if (self->mpCharId != 0) {
         cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&SSXApp->RealFE->mpUI->mStateStack);
-        tbl = (cBECharProfileDB*)func_0014AD28(lib, st->mUserNum, *self->charId);
-        id = *self->charId;
+        tbl = (cBECharProfileDB*)func_0014AD28(lib, st->mUserNum, *self->mpCharId);
+        id = *self->mpCharId;
     }
     void* lib2 = func_0014BDB8_noarg();
     int n;
-    sLensEntry* ents = self->entries;
+    sLensEntry* ents = ((sLensEntry*)&self->mEntries[0]);
     n = func_0014D988(lib2, id);
     sLensItem_CCB8* item = (sLensItem_CCB8*)func_0014D998(lib2, id);
     for (int i = 0; i < n; i++, item++) {
@@ -420,11 +413,11 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     }
     for (int entryIdx = 0; entryIdx < 15; entryIdx++) {
         if (ents[entryIdx].id != -1 && used[entryIdx] == 0) {
-            func_002F2218(self->fxSys, ents[entryIdx].id);
+            func_002F2218(((int)self->mAttachedEmitterFX), ents[entryIdx].id);
             ents[entryIdx].id = -1;
         }
     }
-    self->active = 0;
+    self->mDirty = 0;
 }
 #endif
 

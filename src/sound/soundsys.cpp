@@ -833,18 +833,11 @@ struct sSnd10E0Mgr {
     char pad0[0x1D8];
     sSnd10E0Sub sub;         // 0x1D8
 };
-struct sSnd10E0Sys {
-    sSnd10E0Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSnd10E0Mgr** p118;      // 0x118
-};
 
 static inline void snd10E0Init(void* vself, int a, int b)
 {
-    sSnd10E0Sys* self = (sSnd10E0Sys*)vself;
-    sSnd10E0Mgr* m = self->mgr;
+    cSSXAudio* self = (cSSXAudio*)vself;
+    sSnd10E0Mgr* m = ((sSnd10E0Mgr*)self->mpVBankManager);
     sSnd10E0Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -866,8 +859,8 @@ static inline void snd10E0Init(void* vself, int a, int b)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
+    self->mBank[((sSnd10E0Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSnd10E0Mgr*)self->mpVBankManager)->sub.cur] = b;
 }
 
 
@@ -889,14 +882,14 @@ extern sSndKey8_10E0 D_004A3680[];
 // PORT: 64-bit long sound key; voice target stored as int
 extern "C" void cSSXAudio_BeginWind(cSSXAudio* vself)
 {
-    sSnd10E0Sys* self = (sSnd10E0Sys*)vself;
+    cSSXAudio* self = vself;
     if (*(int*)((char*)self + 0x5834) != 0) {
         return;
     }
     snd10E0Init(self, 0, 0x20);
-    (*self->p118)->sub.p3C[(*self->p118)->sub.cur] = (int)((char*)self + 0x5830);
-    (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
-    sSnd10E0Mgr* bankManager = *self->p118;
+    (*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.p3C[(*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.cur] = (int)((char*)self + 0x5830);
+    (*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.p7C[(*(*(sSnd10E0Mgr***)&self->MusicSys))->sub.cur] = 0;
+    sSnd10E0Mgr* bankManager = *(*(sSnd10E0Mgr***)&self->MusicSys);
     sSndKey8_10E0 k = D_004A3680[0];
     sSnd10E0Sub* playOpts = &bankManager->sub;
     *(sSndKey8_10E0*)((char*)playOpts + (bankManager->sub.cur << 3) + 0x40) = k;
@@ -1167,13 +1160,6 @@ struct sSnd17D0Mgr {
     char pad0[0x1D8];
     sSnd17D0Sub sub;         // 0x1D8
 };
-struct sSnd17D0Sys {
-    sSnd17D0Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSnd17D0Mgr** p118;      // 0x118
-};
 struct sSndKey8_17D0 {
     long v;
 } __attribute__((packed));
@@ -1196,7 +1182,7 @@ void cSSXAudio_BeginChatter_17D0(void* vself, void* obj) __asm__("cSSXAudio_Begi
  */
 void cSSXAudio_BeginChatter_17D0(void* vself, void* obj)
 {
-    sSnd17D0Sys* self = (sSnd17D0Sys*)vself;
+    cSSXAudio* self = (cSSXAudio*)vself;
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (!ok) {
         return;
@@ -1207,7 +1193,7 @@ void cSSXAudio_BeginChatter_17D0(void* vself, void* obj)
         flag = cSSXAudio_ReplayMode(self) == 0;
     }
     int boardBank = cSSXAudio_GetBoardBank((cSSXAudio*)self, 0);
-    sSnd17D0Mgr* bankManager = self->mgr;
+    sSnd17D0Mgr* bankManager = ((sSnd17D0Mgr*)self->mpVBankManager);
     sSnd17D0Sub* playOpts = &bankManager->sub;
     bankManager->sub.cur++;
     playOpts->ch[bankManager->sub.cur] = bankManager->sub.def;
@@ -1229,39 +1215,39 @@ void cSSXAudio_BeginChatter_17D0(void* vself, void* obj)
     playOpts->p84[bankManager->sub.cur] = 0;
     playOpts->p78[bankManager->sub.cur] = 0x7F;
     playOpts->p7C[bankManager->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = boardBank;
-    self->a8[self->mgr->sub.cur] = 0;
-    sSnd17D0Mgr* volumeManager = *self->p118;
+    self->mBank[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = boardBank;
+    self->mPatch[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = 0;
+    sSnd17D0Mgr* volumeManager = *(*(sSnd17D0Mgr***)&self->MusicSys);
     sSnd17D0Sub* volumeOpts = &volumeManager->sub;
     volumeOpts->vals[volumeManager->sub.cur] = 0;
     volumeOpts->ch[volumeManager->sub.cur].vol = (volumeOpts->vals[volumeOpts->cur] < 0x7F && volumeOpts->vals[volumeOpts->cur] < 0) ? 0 : (volumeOpts->vals[volumeOpts->cur] < 0x7F ? (unsigned char)volumeOpts->vals[volumeOpts->cur] : 0x7F);
-    sSnd17D0Mgr** pp = self->p118;
+    sSnd17D0Mgr** pp = (*(sSnd17D0Mgr***)&self->MusicSys);
     int volumeControl = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 6, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
     {
-        sSnd17D0Mgr* optsManager = *self->p118;
+        sSnd17D0Mgr* optsManager = *(*(sSnd17D0Mgr***)&self->MusicSys);
         optsManager->sub.tgt[optsManager->sub.cur] = (char*)obj + 0x110;
     }
     {
-        sSnd17D0Mgr* optsManager = *self->p118;
+        sSnd17D0Mgr* optsManager = *(*(sSnd17D0Mgr***)&self->MusicSys);
         sSndKey8_17D0 k = D_004A3688_17D0[0];
         sSnd17D0Sub* callbackOpts = &optsManager->sub;
         *(sSndKey8_17D0*)((char*)callbackOpts + (optsManager->sub.cur << 3) + 0x40) = k;
     }
     {
-        sSnd17D0Mgr* optsManager = *self->p118;
+        sSnd17D0Mgr* optsManager = *(*(sSnd17D0Mgr***)&self->MusicSys);
         optsManager->sub.p60[optsManager->sub.cur] = (int)obj;
     }
     {
-        sSnd17D0Mgr** pq = self->p118;
+        sSnd17D0Mgr** pq = (*(sSnd17D0Mgr***)&self->MusicSys);
         int listenerView = cSSXAudio_GetClosestCamera1(self, obj);
         (*pq)->sub.p64[(*pq)->sub.cur] = listenerView;
     }
-    cSndPlayOpts_OPTS_Radius(&(*self->p118)->sub, 100.0f, -1.0f);
-    (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
+    cSndPlayOpts_OPTS_Radius(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, 100.0f, -1.0f);
+    (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p7C[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = 0;
     if (flag) {
-        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
-        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)((char*)obj + 0x870);
+        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p80[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = 1;
+        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p84[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = *(int*)((char*)obj + 0x870);
     }
     cBankSys_SFX_End((cBankSys*)self);
 }
@@ -2803,7 +2789,7 @@ extern const AudioTable D_00482D30;
  */
 extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGained)
 {
-    sSnd17D0Sys* self = (sSnd17D0Sys*)vself;
+    cSSXAudio* self = vself;
     int idx = -1;
     if (cSSXAudio_ReplayMode(self) != 0) {
         idx = 0;
@@ -2848,7 +2834,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
     int soundFinished = SNDover(*(int*)((char*)self + 0x5FB8)) != 0;
     SNDSYS_leavecritical();
     if (!soundFinished) {
-        cBankMonitor_BANKMONITOR_StopHandle(&(*self->p118)->sub, *(int*)((char*)self + 0x5FB8), 1, 0.0f);
+        cBankMonitor_BANKMONITOR_StopHandle(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, *(int*)((char*)self + 0x5FB8), 1, 0.0f);
     }
     int flag = 0;
     int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
@@ -2859,7 +2845,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
         }
     }
     int bank = 10;
-    sSnd17D0Mgr* bankMgr = self->mgr;
+    sSnd17D0Mgr* bankMgr = ((sSnd17D0Mgr*)self->mpVBankManager);
     sSnd17D0Sub* monitor = &bankMgr->sub;
     bankMgr->sub.cur++;
     monitor->ch[bankMgr->sub.cur] = bankMgr->sub.def;
@@ -2881,28 +2867,28 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
     monitor->p84[bankMgr->sub.cur] = 0;
     monitor->p78[bankMgr->sub.cur] = 0x7F;
     monitor->p7C[bankMgr->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = bank;
-    self->a8[self->mgr->sub.cur] = patchNum;
-    sSnd17D0Mgr* bankMgrVol = *self->p118;
+    self->mBank[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = bank;
+    self->mPatch[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = patchNum;
+    sSnd17D0Mgr* bankMgrVol = *(*(sSnd17D0Mgr***)&self->MusicSys);
     sSnd17D0Sub* volMonitor = &bankMgrVol->sub;
     volMonitor->vals[bankMgrVol->sub.cur] = vol;
     volMonitor->ch[bankMgrVol->sub.cur].vol = (volMonitor->vals[volMonitor->cur] < 0x7F && volMonitor->vals[volMonitor->cur] < 0) ? 0 : (volMonitor->vals[volMonitor->cur] < 0x7F ? (unsigned char)volMonitor->vals[volMonitor->cur] : 0x7F);
-    sSnd17D0Mgr** pp = self->p118;
+    sSnd17D0Mgr** pp = (*(sSnd17D0Mgr***)&self->MusicSys);
     int volumePtr = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 6, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
-    cSndPlayOpts_OPTS_Radius(&(*self->p118)->sub, 30.0f, -1.0f);
+    cSndPlayOpts_OPTS_Radius(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, 30.0f, -1.0f);
     {
-        sSnd17D0Mgr* bankMgrPos = *self->p118;
+        sSnd17D0Mgr* bankMgrPos = *(*(sSnd17D0Mgr***)&self->MusicSys);
         bankMgrPos->sub.tgt[bankMgrPos->sub.cur] = &rider->mPosition;
     }
     {
-        sSnd17D0Mgr** pq = self->p118;
+        sSnd17D0Mgr** pq = (*(sSnd17D0Mgr***)&self->MusicSys);
         int viewport = cSSXAudio_GetClosestCamera1(self, rider);
         (*pq)->sub.p64[(*pq)->sub.cur] = viewport;
     }
     if (flag) {
-        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
-        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
+        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p80[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = 1;
+        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p84[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = rider->mViewIndex;
     }
     *(int*)((char*)self + 0x5FB8) = cBankSys_SFX_End((cBankSys*)self);
 }
@@ -4086,13 +4072,6 @@ struct sSnd74A0Mgr {
     char pad0[0x1D8];
     sSnd74A0Sub sub;         // 0x1D8
 };
-struct sSnd74A0Sys {
-    sSnd74A0Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSnd74A0Mgr** p118;      // 0x118
-};
 
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
 
@@ -4104,8 +4083,8 @@ extern "C" int cSSXAudio_GetClosestCamera(void* self, t4Vector* pos);
 
 static inline void snd74A0AddVoice(void* vself, int a, int b, int type)
 {
-    sSnd74A0Sys* self = (sSnd74A0Sys*)vself;
-    sSnd74A0Mgr* m = self->mgr;
+    cSSXAudio* self = (cSSXAudio*)vself;
+    sSnd74A0Mgr* m = ((sSnd74A0Mgr*)self->mpVBankManager);
     sSnd74A0Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -4127,13 +4106,13 @@ static inline void snd74A0AddVoice(void* vself, int a, int b, int type)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
-    sSnd74A0Mgr* m2 = *self->p118;
+    self->mBank[((sSnd74A0Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSnd74A0Mgr*)self->mpVBankManager)->sub.cur] = b;
+    sSnd74A0Mgr* m2 = *(*(sSnd74A0Mgr***)&self->MusicSys);
     sSnd74A0Sub* s2 = &m2->sub;
     s2->vals[m2->sub.cur] = 0x7F;
     s2->ch[m2->sub.cur].vol = SND_74A0_MAX(0, SND_74A0_MIN(s2->vals[s2->cur], 0x7F));
-    sSnd74A0Mgr** pp = self->p118;
+    sSnd74A0Mgr** pp = (*(sSnd74A0Mgr***)&self->MusicSys);
     int r = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
 }
@@ -4181,16 +4160,16 @@ extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, char* evt, int n)
     snd74A0AddVoice(self, type, patch, 5);
     sSnd74A0Mgr** pp;
     int closestCamera;
-    sSnd74A0Sys* sys = (sSnd74A0Sys*)self;
-    sSnd74A0Mgr* voiceMgr = *sys->p118;
+    cSSXAudio* sys = self;
+    sSnd74A0Mgr* voiceMgr = *(*(sSnd74A0Mgr***)&sys->MusicSys);
     voiceMgr->sub.tgt[voiceMgr->sub.cur] = &pos;
-    sSnd74A0Mgr* voiceMgr2 = *sys->p118;
+    sSnd74A0Mgr* voiceMgr2 = *(*(sSnd74A0Mgr***)&sys->MusicSys);
     voiceMgr2->sub.p34[voiceMgr2->sub.cur] = 1;
-    cSndPlayOpts_OPTS_Radius(&(*sys->p118)->sub, 300.0f, -1.0f);
-    pp = sys->p118;
+    cSndPlayOpts_OPTS_Radius(&(*(*(sSnd74A0Mgr***)&sys->MusicSys))->sub, 300.0f, -1.0f);
+    pp = (*(sSnd74A0Mgr***)&sys->MusicSys);
     closestCamera = cSSXAudio_GetClosestCamera(sys, &pos);
     (*pp)->sub.p64[(*pp)->sub.cur] = closestCamera;
-    sSnd74A0Mgr* voiceMgr3 = *sys->p118;
+    sSnd74A0Mgr* voiceMgr3 = *(*(sSnd74A0Mgr***)&sys->MusicSys);
     voiceMgr3->sub.p78[voiceMgr3->sub.cur] = pri;
     int sfxHandle = cBankSys_SFX_End((cBankSys*)self);
     cSSXAudio_PlayHistoryAdd(self, evt, sfxHandle, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 50, 0, 0);
@@ -7037,13 +7016,6 @@ struct sSnd7B0Mgr {
     char pad0[0x1D8];
     sSnd7B0Sub sub;         // 0x1D8
 };
-struct sSnd7B0Sys {
-    sSnd7B0Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSnd7B0Mgr** p118;      // 0x118
-};
 struct sSs7B0PreC { char pad[0xC]; };
 class sSs7B0Self : public sSs7B0PreC {
 public:
@@ -7060,8 +7032,8 @@ public:
 
 static inline int snd7B0Add(void* vself, int a, int b)
 {
-    sSnd7B0Sys* self = (sSnd7B0Sys*)vself;
-        sSnd7B0Mgr* m = self->mgr;
+    cSSXAudio* self = (cSSXAudio*)vself;
+        sSnd7B0Mgr* m = ((sSnd7B0Mgr*)self->mpVBankManager);
         sSnd7B0Sub* s = &m->sub;
         m->sub.cur++;
         s->ch[m->sub.cur] = m->sub.def;
@@ -7083,13 +7055,13 @@ static inline int snd7B0Add(void* vself, int a, int b)
         s->p84[m->sub.cur] = 0;
         s->p78[m->sub.cur] = 0x7F;
         s->p7C[m->sub.cur] = 1;
-        self->a4[self->mgr->sub.cur] = a;
-        self->a8[self->mgr->sub.cur] = b;
-        sSnd7B0Mgr* m3 = *self->p118;
+        self->mBank[((sSnd7B0Mgr*)self->mpVBankManager)->sub.cur] = a;
+        self->mPatch[((sSnd7B0Mgr*)self->mpVBankManager)->sub.cur] = b;
+        sSnd7B0Mgr* m3 = *(*(sSnd7B0Mgr***)&self->MusicSys);
         sSnd7B0Sub* s3 = &m3->sub;
         s3->vals[m3->sub.cur] = 0x7F;
         s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
-        sSnd7B0Mgr** pp = self->p118;
+        sSnd7B0Mgr** pp = (*(sSnd7B0Mgr***)&self->MusicSys);
         int r = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
         (*pp)->sub.p3C[(*pp)->sub.cur] = r;
         return cBankSys_SFX_End((cBankSys*)self);
@@ -7112,7 +7084,7 @@ static inline int snd7B0Add(void* vself, int a, int b)
  */
 extern "C" void cSSXAudio_CountdownGateDrop(cSSXAudio* vself)
 {
-    sSnd7B0Sys* self = (sSnd7B0Sys*)vself;
+    cSSXAudio* self = vself;
     cSSXAudio* base = (cSSXAudio*)vself;
     func_002B3A98_C7B0(&base->MusicSys);
     func_0028DF08_C7B0(vself);
@@ -8960,7 +8932,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
  */
 extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length, int allowAI)
 {
-    sSnd17D0Sys* self = (sSnd17D0Sys*)vself;
+    cSSXAudio* self = vself;
     cRider* rider = (cRider*)vrider;
     if (func_0029F0A0(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
@@ -8976,9 +8948,9 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
     int prio;
     if (kind == 0xE) {
         if (length == 1) {
-            prio = (cSoundSys_SndRand(*(void**)((char*)*self->p118 + 0x1D8)) & 0x7FFF) * 3 / 0x7FFF;
+            prio = (cSoundSys_SndRand(*(void**)((char*)*(*(sSnd17D0Mgr***)&self->MusicSys) + 0x1D8)) & 0x7FFF) * 3 / 0x7FFF;
         } else if (length == 0) {
-            prio = (cSoundSys_SndRand(*(void**)((char*)*self->p118 + 0x1D8)) & 0x7FFF) * 3 / 0x7FFF + 3;
+            prio = (cSoundSys_SndRand(*(void**)((char*)*(*(sSnd17D0Mgr***)&self->MusicSys) + 0x1D8)) & 0x7FFF) * 3 / 0x7FFF + 3;
         } else {
             prio = *(int*)((char*)self + 0x5734);
             *(int*)((char*)self + 0x5734) = prio + 1;
@@ -9000,7 +8972,7 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
         }
     }
     int vol = cSSXAudio_GetGruntVol((cSSXAudio*)self, rider);
-    sSnd17D0Mgr* voiceMgr = self->mgr;
+    sSnd17D0Mgr* voiceMgr = ((sSnd17D0Mgr*)self->mpVBankManager);
     sSnd17D0Sub* voiceSub = &voiceMgr->sub;
     voiceMgr->sub.cur++;
     voiceSub->ch[voiceMgr->sub.cur] = voiceMgr->sub.def;
@@ -9022,36 +8994,36 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
     voiceSub->p84[voiceMgr->sub.cur] = 0;
     voiceSub->p78[voiceMgr->sub.cur] = 0x7F;
     voiceSub->p7C[voiceMgr->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = kind;
-    self->a8[self->mgr->sub.cur] = prio;
-    sSnd17D0Mgr* curVoiceMgr = *self->p118;
+    self->mBank[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = kind;
+    self->mPatch[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = prio;
+    sSnd17D0Mgr* curVoiceMgr = *(*(sSnd17D0Mgr***)&self->MusicSys);
     sSnd17D0Sub* curVoiceSub = &curVoiceMgr->sub;
     curVoiceSub->vals[curVoiceMgr->sub.cur] = vol;
     curVoiceSub->ch[curVoiceMgr->sub.cur].vol = (curVoiceSub->vals[curVoiceSub->cur] < 0x7F && curVoiceSub->vals[curVoiceSub->cur] < 0) ? 0 : (curVoiceSub->vals[curVoiceSub->cur] < 0x7F ? (unsigned char)curVoiceSub->vals[curVoiceSub->cur] : 0x7F);
     {
-        sSnd17D0Mgr** pq = self->p118;
+        sSnd17D0Mgr** pq = (*(sSnd17D0Mgr***)&self->MusicSys);
         int closestCamera = cSSXAudio_GetClosestCamera1(self, rider);
         (*pq)->sub.p64[(*pq)->sub.cur] = closestCamera;
     }
     {
-        sSnd17D0Mgr** pp = self->p118;
+        sSnd17D0Mgr** pp = (*(sSnd17D0Mgr***)&self->MusicSys);
         int volumePtr = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 4, cRider_getIdentity(rider));
         (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
     }
     int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (ok3) {
-        cSndPlayOpts_OPTS_Radius(&(*self->p118)->sub, 29.997713088989258f, -1.0f);
+        cSndPlayOpts_OPTS_Radius(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, 29.997713088989258f, -1.0f);
     } else {
-        cSndPlayOpts_OPTS_Radius(&(*self->p118)->sub, 100.0f, -1.0f);
+        cSndPlayOpts_OPTS_Radius(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, 100.0f, -1.0f);
     }
     {
-        sSnd17D0Mgr** pt = self->p118;
+        sSnd17D0Mgr** pt = (*(sSnd17D0Mgr***)&self->MusicSys);
         void* pos = rider->getPosition();
         (*pt)->sub.tgt[(*pt)->sub.cur] = pos;
     }
     if (flag) {
-        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
-        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
+        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p80[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = 1;
+        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p84[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = rider->mViewIndex;
     }
     int sfxHandle = cBankSys_SFX_End((cBankSys*)self);
     cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)3, sfxHandle, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
@@ -14038,7 +14010,7 @@ INCLUDE_ASM("sound/soundsys", func_002A6D78);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_002A4CF8(tCrowdEventData*);
 struct sSndFileBuf;
-extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name, int flags);
+extern "C" FileParser* FileParser_FileParser(FileParser* self, const char* name, int flags);
 extern "C" int FileParser_FindSection(FileParser* self, const char* name);
 extern "C" void func_002A7040(cCrowdSys* self, void* parser);
 extern "C" void FileParser__FileParser(FileParser* self, int flags);
@@ -14102,7 +14074,7 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
         self->voices[i].fD8 = cheerBank;
     }
     sSnd6D78Parser infParser;
-    FileParser_FileParser((FileParser*)((sSndFileBuf*)&infParser), name, 0x100);
+    FileParser_FileParser((FileParser*)((FileParser*)&infParser), name, 0x100);
     infParser.cur = infParser.data;
     if (FileParser_FindSection((FileParser*)(&infParser), str_GLOBAL)) func_002A7040((cCrowdSys*)self, &infParser);
     infParser.cur = infParser.data;
@@ -14584,11 +14556,6 @@ extern "C" int FILE_loadat(const char* name, void* buf, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
-struct sSndFileBuf {
-    int size;
-    char* data;
-    char* cur;
-};
 
 /**
  * Loads a whole file into memory for parsing, with a terminating 0 after it.
@@ -14600,7 +14567,7 @@ struct sSndFileBuf {
  * @param flags  the allocation flags (On Tour int MemType)
  * @return @p self
  */
-extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name, int flags)
+extern "C" FileParser* FileParser_FileParser(FileParser* self, const char* name, int flags)
 {
     self->mBasePtr = 0;
     self->mPtr = 0;
@@ -14611,7 +14578,7 @@ extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name
         self->mPtr = self->mBasePtr;
         self->mBasePtr[self->mFileSize] = 0;
     }
-    return ((sSndFileBuf*)self);
+    return (self);
 }
 #endif
 

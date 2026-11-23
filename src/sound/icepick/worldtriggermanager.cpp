@@ -1511,9 +1511,6 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound_cWorldSound);
 extern t4Vector t4vect_Zero;
 
 
-struct sTriggerSlots {
-    cAudioOverlapList slots[2];
-};
 
 /**
  * Constructs a cWorldSound: empties its two viewport overlap lists (count 0, last position zero).
@@ -1523,14 +1520,14 @@ struct sTriggerSlots {
  *
  * @return self
  */
-extern "C" sTriggerSlots* cWorldSound_cWorldSound(cWorldSound* self)
+extern "C" cWorldSound* cWorldSound_cWorldSound(cWorldSound* self)
 {
     cAudioOverlapList* overlapList = ((&self->m_OverlapLists[0]));
     for (int i = 1; i != -1; i--, overlapList++) {
         overlapList->numoverlaps = 0;
         (*(t4Vector*)&overlapList->lastposition) = t4vect_Zero;
     }
-    return ((sTriggerSlots*)self);
+    return (self);
 }
 #endif
 

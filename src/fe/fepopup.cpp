@@ -4915,7 +4915,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 struct sPwd_CCE98;
-extern "C" void cKeyboardPopup_setPasswordText(sPwd_CCE98* self, char* str);
+extern "C" void cKeyboardPopup_setPasswordText(cKeyboardPopup* self, char* str);
 extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
 extern char str_EnterValue[];
@@ -4931,7 +4931,7 @@ extern "C" void cKeyboardPopup_updateEdit(cKeyboardPopup* self, int bDropFromRig
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     if (text != 0) {
         if (self->mbPassword != 0) {
-            cKeyboardPopup_setPasswordText((sPwd_CCE98*)self, (char*)&self->mszViewableString);
+            cKeyboardPopup_setPasswordText(self, (char*)&self->mszViewableString);
             cUIText_setAsciiString(text, (char*)&self->mszPasswordString);
         } else {
             cUIText_setAsciiString(text, (char*)&self->mszViewableString);
@@ -5116,7 +5116,7 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     vt[21].fn(vthis(uiObj, vt[21]), &pos);
     char buf[0x40];
     if (self->mbPassword != 0) {
-        cKeyboardPopup_setPasswordText((sPwd_CCE98*)self, self->mszViewableString);
+        cKeyboardPopup_setPasswordText(self, self->mszViewableString);
         strncpy(buf, self->mszPasswordString, self->miCursorPos - self->miViewableStartIndex);
     } else {
         strncpy(buf, self->mszViewableString, self->miCursorPos - self->miViewableStartIndex);
@@ -5137,10 +5137,6 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setPasswordText);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
-struct sPwd_CCE98 {
-    char pad[0xF4];
-    char buf[1];
-};
 
 /**
  * Fills the popup's text buffer with one '*' per character of the given password.
@@ -5149,14 +5145,14 @@ struct sPwd_CCE98 {
  *
  * @param str  password whose length sets the number of asterisks
  */
-extern "C" void cKeyboardPopup_setPasswordText(sPwd_CCE98* self, char* str)
+extern "C" void cKeyboardPopup_setPasswordText(cKeyboardPopup* self, char* str)
 {
     int n = strlen(str);
     int i;
     for (i = 0; i < n; i++) {
-        self->buf[i] = '*';
+        self->mszPasswordString[i] = '*';
     }
-    self->buf[n] = 0;
+    self->mszPasswordString[n] = 0;
 }
 #endif
 

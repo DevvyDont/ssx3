@@ -824,23 +824,6 @@ union uFloat8C80 { float v; };
 
 
 
-struct sMP8C80 {
-    float f0;               // 0x0
-    int f4;                 // 0x4
-    float f8;               // 0x8
-    float fC;               // 0xC
-    char pad_0x10[0x4];
-    char b14;               // 0x14
-    char b15;               // 0x15
-    char b16;               // 0x16
-    char b17;               // 0x17
-    char pad_0x18[0x3C];
-    void* vt54;             // 0x54
-    char pad_0x58[0x1C];
-    int n74;                // 0x74
-    char pad_0x78[0xC];
-    sMPElem8C80* elems84;   // 0x84
-};
 
 /**
  * Constructs an anim combo node: an animated object that can switch to a second time range on a signal.
@@ -881,7 +864,7 @@ extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket
     self->AnimActive2 = 0;
     self->AnimComplete2 = 0;
     *(int*)&self->CurrTime2 = 0;
-    return ((sMP8C80*)self);
+    return (self);
 }
 #endif
 

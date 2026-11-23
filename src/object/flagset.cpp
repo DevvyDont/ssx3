@@ -83,21 +83,6 @@ struct sFsMesh_CM {
     sFsMeshVE_CM* vt;   // 0x4
 };
 
-struct sFlagElem_CM {
-    char pad0[0x1C];
-    float windX;            // 0x1C
-    float windY;            // 0x20
-    char pad24[0x3C];
-    sFsMesh_CM* mesh;       // 0x60
-    int cols;               // 0x64
-    int rows;               // 0x68
-    float colScale;         // 0x6C
-    float rowScale;         // 0x70
-    sFsV3_CM* verts;        // 0x74
-    float phase[4];         // 0x78
-    float u;                // 0x88
-    float v;                // 0x8C
-};
 
 /**
  * Builds a flag set's cloth grid mesh from a flag instance's quad, then computes its first frame.
@@ -111,44 +96,44 @@ struct sFlagElem_CM {
  */
 extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, void* item)
 {
-    sFlagElem_CM* self = (sFlagElem_CM*)flagSet;
+    cFlagSet* self = flagSet;
     int i;
     for (i = 0; i < 4; i++) {
-        self->phase[i] = randf_CM();
+        self->mFlagTime[i] = randf_CM();
     }
-    self->u = 0.0f;
-    self->v = 0.0f;
+    self->mScrollU = 0.0f;
+    self->mScrollV = 0.0f;
     char* mgr = cGraphicsMan_TheGraphicsMan;
     sFsV2_CM quv[4];
     sFsCol_CM qcol[4];
     sFsV3_CM pos[4];
     sFsQuadVE_CM* vt = *(sFsQuadVE_CM**)(mgr + 0x10D8);
     vt[97].fn(vthis(mgr, vt[97]), item, 0, pos, quv, qcol);
-    if (self->windX < 0.01f && self->windY < 0.01f) {
-        self->cols = 8;
-        self->rows = 2;
+    if (self->mFlagData.mMagnitude[2] < 0.01f && self->mFlagData.mMagnitude[3] < 0.01f) {
+        self->mFlagVertsHorizontal = 8;
+        self->mFlagVertsVertical = 2;
     } else {
-        self->cols = 8;
-        self->rows = 5;
+        self->mFlagVertsHorizontal = 8;
+        self->mFlagVertsVertical = 5;
     }
-    self->colScale = (float)(self->cols - 1);
-    self->rowScale = (float)(self->rows - 1);
+    self->mfFlagVertsHorizontalMinusOne = (float)(self->mFlagVertsHorizontal - 1);
+    self->mfFlagVertsVerticalMinusOne = (float)(self->mFlagVertsVertical - 1);
     sFsVE_CM* vtEntry = &(*(sFsVE_CM**)(mgr + 0x10D8))[76];
-    self->mesh = (sFsMesh_CM*)vtEntry->fn(vthis(mgr, *vtEntry), self->cols, self->rows, 0x60000000u);
-    if (self->mesh == 0) {
+    (*(sFsMesh_CM**)&self->mGridMesh) = (sFsMesh_CM*)vtEntry->fn(vthis(mgr, *vtEntry), self->mFlagVertsHorizontal, self->mFlagVertsVertical, 0x60000000u);
+    if (((sFsMesh_CM*)self->mGridMesh) == 0) {
         return;
     }
-    int n = self->cols * self->rows;
-    sFsV3_CM** pv = &self->verts;
+    int n = self->mFlagVertsHorizontal * self->mFlagVertsVertical;
+    sFsV3_CM** pv = &(*(sFsV3_CM**)&self->mVerts);
     *pv = new (str_Flag_Verts, 0x20000000, 0) sFsV3_CM[n];
     sFsV2_CM uv[50];
     sFsCol_CM col[50];
     int idx = 0;
-    for (int row = 0; row < self->rows; row++) {
-        for (int column = 0; column < self->cols; column++) {
-            float fc = (float)column / self->colScale;
-            float fr = (float)row / self->rowScale;
-            self->verts[idx] = (pos[0] * (1.0f - fc) + pos[1] * fc) * (1.0f - fr) + (pos[2] * (1.0f - fc) + pos[3] * fc) * fr;
+    for (int row = 0; row < self->mFlagVertsVertical; row++) {
+        for (int column = 0; column < self->mFlagVertsHorizontal; column++) {
+            float fc = (float)column / self->mfFlagVertsHorizontalMinusOne;
+            float fr = (float)row / self->mfFlagVertsVerticalMinusOne;
+            ((sFsV3_CM*)self->mVerts)[idx] = (pos[0] * (1.0f - fc) + pos[1] * fc) * (1.0f - fr) + (pos[2] * (1.0f - fc) + pos[3] * fc) * fr;
             uv[idx] = (quv[0] * (1.0f - fc) + quv[1] * fc) * (1.0f - fr) + (quv[2] * (1.0f - fc) + quv[3] * fc) * fr;
             col[idx].a = 1.0f;
             col[idx].r = (qcol[0].r * (1.0f - fc) + qcol[1].r * fc) * (1.0f - fr) + (qcol[2].r * (1.0f - fc) + qcol[3].r * fc) * fr;
@@ -159,7 +144,7 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, void* item)
     }
     sFsV3_CM verts[50];
     cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
-    sFsMesh_CM* flagMesh = self->mesh;
+    sFsMesh_CM* flagMesh = ((sFsMesh_CM*)self->mGridMesh);
     flagMesh->vt[6].fn(vthis(flagMesh, flagMesh->vt[6]), verts, col, uv);
 }
 #endif
@@ -578,12 +563,6 @@ struct sFlagSetVEntryC2E0b {
     void (*fn)(void*, void*);
 };
 
-struct sFlagSet_C2E0 {
-    char pad0[0x5C];
-    int count;          // 0x5C
-    char pad60[0x34];
-    void* items[1];     // 0x94
-};
 
 /**
  * Writes a flag set to a replay frame.
@@ -597,10 +576,10 @@ struct sFlagSet_C2E0 {
 extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, cBxReplayFrame* stream)
 {
     int i;
-    sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
+    cFlagSet* self = elem;
     stream->write((const char*)self, 0x60);
-    for (i = 0; i < self->count; i++) {
-        stream->writeReplayInstance((const tInstanceRecord*)self->items[i]);
+    for (i = 0; i < self->mCurrentNumInstances; i++) {
+        stream->writeReplayInstance((const tInstanceRecord*)((void**)&self->mInstances[0])[i]);
     }
 }
 #endif
@@ -625,13 +604,13 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* self, void* item);
 extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, cBxReplayFrame* stream)
 {
     int i;
-    sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
+    cFlagSet* self = elem;
     stream->read((char*)self, 0x60);
-    for (i = 0; i < self->count; i++) {
-        self->items[i] = (void*)stream->readReplayInstance();
+    for (i = 0; i < self->mCurrentNumInstances; i++) {
+        ((void**)&self->mInstances[0])[i] = (void*)stream->readReplayInstance();
     }
-    if (self->count > 0) {
-        cFlagSet_CreateMesh((cFlagSet*)self, self->items[0]);
+    if (self->mCurrentNumInstances > 0) {
+        cFlagSet_CreateMesh((cFlagSet*)self, ((void**)&self->mInstances[0])[0]);
     }
 }
 #endif
@@ -685,12 +664,6 @@ struct sFlagSetElem_C4B8 {
     sFlagSetVEntry_C4B8* vt;        // 0x184
 };
 
-struct sFlagSet_C4B8 {
-    char pad0[0xC];
-    void** vtable;                  // 0xC
-    char pad10[0x10];
-    sFlagSetElem_C4B8 elems[15];    // 0x20
-};
 
 /**
  * Destroys the flag manager: destroys its 15 flag sets, then the cObjNode base.
@@ -707,7 +680,7 @@ extern "C" void cFlagManager__cFlagManager(cFlagManager* self, int flags)
             flagSet->vt[1].fn(vthis(flagSet, flagSet->vt[1]), 0);
         }
     }
-    cObjNode__cObjNode(((sFlagSet_C4B8*)self), flags);
+    cObjNode__cObjNode((self), flags);
 }
 #endif
 
@@ -958,22 +931,6 @@ struct t3Vector_C8E8 {
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
-struct cFenceNode_C8E8 {
-    char pad0[0xC];
-    void** vtable;              // 0xC
-    char pad10[0x8];
-    char* Instance;             // 0x18 tInstanceRecord* (matrix at +0x10)
-    tMakeFenceData_C8E8 State;  // 0x1C cFenceNodeState (tResourceID first)
-    int field_0x2c;             // 0x2C
-    int field_0x30;             // 0x30
-    int field_0x34;             // 0x34
-    int field_0x38;             // 0x38
-    int field_0x3c;             // 0x3C
-    void* GridMesh;             // 0x40 cGridMesh*
-    t3Vector_C8E8 Verts[16];    // 0x44
-    char* NextInstance;         // 0x104 tInstanceRecord*
-    char* PrevInstance;         // 0x108 tInstanceRecord*
-};
 
 
 struct sMat_C8E8 {
@@ -1073,10 +1030,10 @@ extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, tInstanceRecord* obj,
  * @param info  intersect info of the hit
  * @return self
  */
-extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, tCollideInfo* info)
+extern "C" cFenceNode* cFenceNode_cFenceNode1(cFenceNode* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, tCollideInfo* info)
 {
     float force;
-    cInstanceNode_cInstanceNode1(((cFenceNode_C8E8*)self), bucket, 9, pInst);
+    cInstanceNode_cInstanceNode1((self), bucket, 9, pInst);
     self->FenceData.InstId = 0xFFFFFFFF;
     VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
     new (((t3Vector_C8E8*)&self->Verts[0])) t3Vector_C8E8[16];
@@ -1102,7 +1059,7 @@ extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket,
         cFenceNode_makeNeighbour(self, (tInstanceRecord*)self->NextInstance, 1);
     if ((char*)self->PrevInstance != 0)
         cFenceNode_makeNeighbour(self, (tInstanceRecord*)self->PrevInstance, 0);
-    return ((cFenceNode_C8E8*)self);
+    return (self);
 }
 #endif
 
@@ -1489,17 +1446,6 @@ struct sFlagMesh_CF98 {
     sFlagVEntry_CF98* vt;   // 0x4
 };
 
-struct sFlagSet_CF98 {
-    char pad0[0x20];
-    int mode;               // 0x20
-    float scale;            // 0x24
-    char pad28[0x4];
-    float wind;             // 0x2C
-    char pad30[0x10];
-    sFlagMesh_CF98* mesh;   // 0x40
-    sFsVec3_CF98 top[8];    // 0x44
-    sFsVec3_CF98 bottom[8]; // 0xA4
-};
 
 /**
  * Bends a fence's grid mesh by its current force.
@@ -1513,11 +1459,11 @@ struct sFlagSet_CF98 {
  */
 extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
 {
-    sFlagSet_CF98* self = (sFlagSet_CF98*)fenceNode;
-    if (self->mesh == 0) {
+    cFenceNode* self = fenceNode;
+    if (((sFlagMesh_CF98*)self->GridMesh) == 0) {
         return;
     }
-    float swing = self->wind * self->scale;
+    float swing = self->Force * self->FenceData.Flexibility;
     sFsVec4_CF98 dir(200.0f, 0.0f, 0.0f, 0.0f);
     fsScaleIn_CF98(dir, swing);
     sFsVec4_CF98 offs[8];
@@ -1526,18 +1472,18 @@ extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
         *offsetIter++ = fsScale_CF98(dir, cFenceNode_updateGrid_bendtable[i]);
     }
     sFsVec3_CF98 pts[16];
-    if (self->mode == 1) {
+    if (self->FenceData.Type == 1) {
         for (int i = 0; i < 8; i++) {
-            pts[i] = fsAdd_CF98(self->top[i], offs[i]);
-            pts[i + 8] = fsAdd_CF98(self->bottom[i], offs[i]);
+            pts[i] = fsAdd_CF98(((sFsVec3_CF98*)&self->Verts[0])[i], offs[i]);
+            pts[i + 8] = fsAdd_CF98(((sFsVec3_CF98*)&self->Verts[8])[i], offs[i]);
         }
     } else {
         for (int i = 0; i < 8; i++) {
-            pts[i] = fsAdd_CF98(self->top[i], offs[i]);
-            pts[i + 8] = self->bottom[i];
+            pts[i] = fsAdd_CF98(((sFsVec3_CF98*)&self->Verts[0])[i], offs[i]);
+            pts[i + 8] = ((sFsVec3_CF98*)&self->Verts[8])[i];
         }
     }
-    sFlagMesh_CF98* gridMesh = self->mesh;
+    sFlagMesh_CF98* gridMesh = ((sFlagMesh_CF98*)self->GridMesh);
     sFlagVEntry_CF98* setVertsSlot = &gridMesh->vt[3];
     setVertsSlot->fn(vthis(gridMesh, *setVertsSlot), pts);
 }
@@ -1601,16 +1547,6 @@ struct sFsNode_D1E8 {
     unsigned int flags;   // 0x8
 };
 
-struct sFlagSet_D1E8 {
-    char pad0[0x18];
-    sFsNode_D1E8* node;     // 0x18
-    char pad1C[0x24];
-    sFsMesh_D1E8* mesh;     // 0x40
-    sFsV3_D1E8 top[8];      // 0x44
-    sFsV3_D1E8 bottom[8];   // 0xA4
-    void* obj104;           // 0x104
-    void* obj108;           // 0x108
-};
 
 /**
  * Builds a fence's flexible grid mesh from its instance's quad: 8 columns of top and bottom vertices.
@@ -1625,24 +1561,24 @@ struct sFlagSet_D1E8 {
  */
 extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
 {
-    sFlagSet_D1E8* self = (sFlagSet_D1E8*)fenceNode;
-    self->obj104 = 0;
-    self->obj108 = 0;
-    self->node->flags = (self->node->flags & ~2u) | 4;
+    cFenceNode* self = fenceNode;
+    (*(void**)&self->NextInstance) = 0;
+    (*(void**)&self->PrevInstance) = 0;
+    ((sFsNode_D1E8*)self->Instance)->flags = (((sFsNode_D1E8*)self->Instance)->flags & ~2u) | 4;
     char* mgr = cGraphicsMan_TheGraphicsMan;
     sFsVE_D1E8* createSlot = &(*(sFsVE_D1E8**)(mgr + 0x10D8))[76];
-    self->mesh = (sFsMesh_D1E8*)createSlot->fn(vthis(mgr, *createSlot), 8, 2, 0x60000000u);
+    (*(sFsMesh_D1E8**)&self->GridMesh) = (sFsMesh_D1E8*)createSlot->fn(vthis(mgr, *createSlot), 8, 2, 0x60000000u);
     sFsV3_D1E8 pos[4];
     sFsV2_D1E8 quv[4];
     sFsCol_D1E8 qcol[4];
     sFsQuadVE_D1E8* vt = *(sFsQuadVE_D1E8**)(mgr + 0x10D8);
-    vt[97].fn(vthis(mgr, vt[97]), self->node, 0, pos, quv, qcol);
+    vt[97].fn(vthis(mgr, vt[97]), ((sFsNode_D1E8*)self->Instance), 0, pos, quv, qcol);
     sFsV2_D1E8 uv[16];
     sFsCol_D1E8 col[16];
     for (int i = 0; i < 8; i++) {
         float column = (float)i;
-        self->top[i] = pos[0] + (pos[1] - pos[0]) * column * 0.1428571492433548f;
-        self->bottom[i] = pos[2] + (pos[3] - pos[2]) * column * 0.1428571492433548f;
+        ((sFsV3_D1E8*)&self->Verts[0])[i] = pos[0] + (pos[1] - pos[0]) * column * 0.1428571492433548f;
+        ((sFsV3_D1E8*)&self->Verts[8])[i] = pos[2] + (pos[3] - pos[2]) * column * 0.1428571492433548f;
         uv[i] = quv[0] + (quv[1] - quv[0]) * column * 0.1428571492433548f;
         uv[i + 8] = quv[2] + (quv[3] - quv[2]) * column * 0.1428571492433548f;
         col[i].a = 1.0f;
@@ -1654,7 +1590,7 @@ extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
         col[i + 8].g = qcol[2].g + (qcol[3].g - qcol[2].g) * column * 0.1428571492433548f;
         col[i + 8].b = qcol[2].b + (qcol[3].b - qcol[2].b) * column * 0.1428571492433548f;
     }
-    sFsMesh_D1E8* gridMesh = self->mesh;
+    sFsMesh_D1E8* gridMesh = ((sFsMesh_D1E8*)self->GridMesh);
     gridMesh->vt[6].fn(vthis(gridMesh, gridMesh->vt[6]), pos, col, uv);
     cFenceNode_updateGrid((cFenceNode*)self);
 }
