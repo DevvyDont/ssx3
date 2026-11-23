@@ -1356,12 +1356,6 @@ struct sSmVEntryV_AAF0 {
     void (*fn)(void*);
 };
 
-struct sSmVEntryP_AAF0 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
-
 /**
  * Returns the transform matrix of an instance moved by the multi-spline modifier.
  *
@@ -1380,8 +1374,7 @@ extern "C" void* cMultiSplineModifier_getRootTransform(cMultiSplineModifier* sel
     }
     if (((void*)item) == (void*)self->Instance) {
         cInstanceNode* obj = item->m_pActiveNode;
-        sSmVEntryP_AAF0* vt2 = (sSmVEntryP_AAF0*)VPTR_OF(cObjNode, obj);
-        return vt2[24].fn(vthis(obj, vt2[24]));
+        return (void*)obj->getRootTransform();
     }
     return (char*)&item->m_fmTransform;
 }
@@ -2013,12 +2006,6 @@ struct sSmWorld_B708 {
     char pad0[0x8];
     sSmSet_B708** sets;             // 0x8
 };
-struct sSmVEntry_B708 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 static inline sSmRoot_B708* findRoot_B708(char* w, int x, int y, int z)
 {
     sSmRoot_B708* r = (sSmRoot_B708*)w;
@@ -2153,7 +2140,7 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, tAddRailData* 
     self->SplineId = desc->SplineId;
     self->Mesh = desc->Mesh;
     cInstanceNode* modelObj = (model->m_pActiveNode);
-    if (((sSmVEntry_B708*)VPTR_OF(cObjNode, modelObj))[44].fn(vthis(modelObj, ((sSmVEntry_B708*)VPTR_OF(cObjNode, modelObj))[44])) == 0) {
+    if (modelObj->hasBoundBox() == 0) {
         tInstanceRecord* instModel = self->Instance;
         tBoundBox bounds;
         (*(&bounds.MinPoint)).x = instModel->m_fvMin.m[0];

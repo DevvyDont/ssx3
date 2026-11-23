@@ -255,8 +255,7 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
     cInstanceNode* obj = (cInstanceNode*)(own->m_pActiveNode);
     void* transform;
     if (((void*)obj) != 0) {
-        sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)VPTR_OF(cObjNode, obj);
-        transform = vu0CopyMatrix003458C0(&self->Transform, vt[24].fn(vthis(obj, vt[24])));
+        transform = vu0CopyMatrix003458C0(&self->Transform, (void*)obj->getRootTransform());
     } else {
         transform = vu0CopyMatrix003458C0(&self->Transform, &own->m_fmTransform);
     }

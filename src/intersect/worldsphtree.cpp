@@ -529,11 +529,6 @@ typedef int (*Test_3309D8)(void*);
 
 struct sBox_3309D8;
 typedef tBoundBox* (*GetBox_3309D8)(void*);
-struct sObj_3309D8 {
-    int pad00[3];
-    sVEntry<void>* vt;
-};
-
 
 
 static inline int overlapNode_3309D8(const tBoundBox* b, const tInstanceRecord* n)
@@ -583,10 +578,8 @@ extern "C" void OverlapInstancesCallback_operatorCall(OverlapInstancesCallback* 
                 *cnt = n + 1;
             }
         } else if (flags & 0x40) {
-            sVEntry<void>* vt = ((sObj_3309D8*)node->m_pActiveNode)->vt;
-            if (((Test_3309D8)vt[44].fn)(vthis(((sObj_3309D8*)node->m_pActiveNode), vt[44]))) {
-                sVEntry<void>* vt2 = ((sObj_3309D8*)node->m_pActiveNode)->vt;
-                tBoundBox* objBox = ((GetBox_3309D8)vt2[45].fn)(vthis(((sObj_3309D8*)node->m_pActiveNode), vt2[45]));
+            if (node->m_pActiveNode->hasBoundBox()) {
+                tBoundBox* objBox = (tBoundBox*)node->m_pActiveNode->getBoundBox();
                 if (overlapBox_3309D8(((tBoundBox*)ctx->box), objBox)) {
                     int* cnt = ((int*)ctx->number);
                     int n = *cnt;
@@ -1078,7 +1071,6 @@ extern t4Vector t4vect_Zero_333EF8[] __asm__("t4vect_Zero");
 
 
 
-struct sVEnt_333EF8 { short delta; short index; void* fn; };
 struct sBox_333EF8;
 typedef int (*Test_333EF8)(void*);
 typedef sBox_333EF8* (*GetBox_333EF8)(void*);
@@ -1219,10 +1211,8 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
             if ((node->m_pActiveNode) == 0) {
                 continue;
             }
-            sVEnt_333EF8* vt = ((sVEnt_333EF8*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
-            if (((Test_333EF8)vt[44].fn)(vthis((node->m_pActiveNode), vt[44]))) {
-                sVEnt_333EF8* vt2 = ((sVEnt_333EF8*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
-                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)(vthis((node->m_pActiveNode), vt2[45]));
+            if (node->m_pActiveNode->hasBoundBox()) {
+                sBox_333EF8* objBox = (sBox_333EF8*)node->m_pActiveNode->getBoundBox();
                 if (overlapBox_333EF8(query, objBox)) {
                     n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
                 }

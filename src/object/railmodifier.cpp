@@ -3469,12 +3469,6 @@ extern "C" int cTypeObjNode_getObjNodeCount(int idx)
 //100%
 INCLUDE_ASM("object/railmodifier", cSortObjNode_compare);
 #ifdef SKIP_ASM
-struct sRailVEntryU800 {
-    short delta;
-    short index;
-    unsigned int (*fn)(void*);
-};
-
 /**
  * Orders two sort nodes: tells whether @p obj sorts at or after this node.
  *
@@ -3485,20 +3479,13 @@ struct sRailVEntryU800 {
  */
 extern "C" int cSortObjNode_compare(cSortObjNode* self, cObjNode* obj)
 {
-    sRailVEntryU800* vt = (sRailVEntryU800*)VPTR_OF(cObjNode, obj);
-    return vt[8].fn(vthis(obj, vt[8])) >= self->SortIndex;
+    return obj->getSortIndex() >= self->SortIndex;
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cSortObjNode_equal);
 #ifdef SKIP_ASM
-struct sRailVEntryU840 {
-    short delta;
-    short index;
-    unsigned int (*fn)(void*);
-};
-
 /**
  * Tells whether another node has the same sort index as this one.
  *
@@ -3509,8 +3496,7 @@ struct sRailVEntryU840 {
  */
 extern "C" int cSortObjNode_equal(cSortObjNode* self, cObjNode* obj)
 {
-    sRailVEntryU840* vt = (sRailVEntryU840*)VPTR_OF(cObjNode, obj);
-    return self->SortIndex == vt[8].fn(vthis(obj, vt[8]));
+    return self->SortIndex == obj->getSortIndex();
 }
 #endif
 
@@ -6364,8 +6350,7 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getAnimMats);
 extern "C" int cFloatingNode_getAnimMats(cFloatingNode* self)
 {
     if (self->Flags & 1) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
-        vt[51].fn(vthis(self, vt[51]));
+        self->updateRootTransform();
     }
     return (int)self->AnimMats;
 }
@@ -6388,8 +6373,7 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getAnimMat);
 extern "C" t4Matrix* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
 {
     if (self->Flags & 1) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
-        vt[51].fn(vthis(self, vt[51]));
+        self->updateRootTransform();
     }
     return &(self->AnimMats)[i];
 }

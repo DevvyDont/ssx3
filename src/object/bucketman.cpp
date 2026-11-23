@@ -391,8 +391,7 @@ extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cObjNode, node);
-        vt[2].fn(vthis(node, vt[2]));
+        node->update();
         node = (cObjNode*)next;
     }
     cBucketMan_first(self, index);
@@ -412,8 +411,7 @@ extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 {
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cObjNode, node);
-        vt[3].fn(vthis(node, vt[3]));
+        node->apply();
         node = (cObjNode*)cBucketMan_next(self, node, index);
     }
 }
@@ -432,8 +430,7 @@ extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
 {
     cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
     while (((void*)node) != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cObjNode, node);
-        vt[4].fn(vthis(node, vt[4]));
+        node->render();
         node = (cObjNode*)cBucketMan_next(self, node, index);
     }
 }

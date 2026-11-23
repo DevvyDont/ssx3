@@ -13,6 +13,7 @@
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "replay/bxreplayframe.h"
+#include "object/instancenode.h"
 
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_setupGrid);
@@ -621,8 +622,7 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, tInte
     if (idx >= 0) {
         int pairIndex = idx / 2;
         tSpringNode* ents = self->Mesh.Nodes;
-        sFlVE_70D0* vt = (sFlVE_70D0*)VPTR_OF(cObjNode, self);
-        t4Vector* matrix = vt[24].fn(vthis(self, vt[24]));
+        t4Vector* matrix = (t4Vector*)self->getRootTransform();
         tSpringNode* entry = (tSpringNode*)(pairIndex * 0x50 + (int)ents);
         t4Vector axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&t4vect_XAxis_70D0, entry->W));
         t4Vector arm = vu0Sub_70D0(((&intInfo->Ipos))[0], vu0MtxMul_70D0(matrix, (*(&entry->P))));
@@ -790,7 +790,7 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectT
     (*(void**)&mesh.Face) = ((void*)self->Faces);
     (*(sFV_7268**)&mesh.Vertex) = ((sFV_7268*)self->Verts);
     (*(sFV_7268**)&mesh.Normal) = ((sFV_7268*)self->FaceNorms);
-    sFM_7268* matrix = ((GetMtxFn_7268)((sFVE_7268*)VPTR_OF(cObjNode, self))[24].fn)(vthis(self, ((sFVE_7268*)VPTR_OF(cObjNode, self))[24]));
+    sFM_7268* matrix = (sFM_7268*)self->getRootTransform();
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
@@ -866,12 +866,6 @@ struct sMat_75D8 {
     sV4_75D8 row[4];
 };
 
-
-struct sVE_75D8 {
-    short delta;
-    short index;
-    void* (*fn)(...);
-};
 
 
 struct sVEV_75D8 {
@@ -1049,7 +1043,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
     sV3_75D8 pos[32];
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
-    sMat_75D8* matrix = (sMat_75D8*)((sVE_75D8*)VPTR_OF(cObjNode, self))[24].fn(vthis(self, ((sVE_75D8*)VPTR_OF(cObjNode, self))[24]));
+    sMat_75D8* matrix = (sMat_75D8*)self->getRootTransform();
     for (int vertexIndex = 0; vertexIndex < nverts; vertexIndex++) {
         pos[vertexIndex] = ((sV4_75D8*)self->Verts)[vertexIndex];
         sV4_75D8 w = MulMat_75D8(matrix, ((sV4_75D8*)self->Verts)[vertexIndex]);
@@ -1112,8 +1106,6 @@ struct sVE43_7B80 { short delta; short index; sPair_7B80 (*fn)(void*); };
 struct sVE93_7B80 { short delta; short index; int (*fn)(void*, void*, void*, sPair_7B80*); };
 struct sVE96_7B80 { short delta; short index; void (*fn)(void*, void*, int, int, int); };
 struct sVE7_7B80 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
-struct sVE24_7B80 { short delta; short index; void* (*fn)(void*); };
-
 #define TOP_7B80(c) (*(sRS_7B80**)((c) + 0xE84))
 
 /**
@@ -1142,8 +1134,7 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
             return;
         }
     }
-    sVE24_7B80* sv = (sVE24_7B80*)VPTR_OF(cObjNode, self);
-    void* mtx = sv[24].fn(vthis(self, sv[24]));
+    void* mtx = (void*)self->getRootTransform();
     TOP_7B80(ctx)[1] = TOP_7B80(ctx)[0];
     sRS_7B80* state = TOP_7B80(ctx);
     TOP_7B80(ctx) = state + 1;

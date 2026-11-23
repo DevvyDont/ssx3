@@ -138,12 +138,6 @@ INCLUDE_ASM("replay/replay", cReplay_applyBucket);
 struct cBucketMan;
 void* cBucketMan_first(cBucketMan* self, int index);
 void* cBucketMan_next(cBucketMan* self, void* node, int index);
-struct sBucketVEntryDE58 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Calls slot 3 (cMoveNode_apply for move nodes) on every node in one bucket of the global bucket manager.
  *
@@ -155,8 +149,7 @@ extern "C" void cReplay_applyBucket(cReplay* self, int bucket)
     cObjNode* node = (cObjNode*)cBucketMan_first((cBucketMan*)&gBucketMan, bucket);
     cBucketMan* bm = (cBucketMan*)&gBucketMan;
     while (((void*)node) != 0) {
-        sBucketVEntryDE58* vt = (sBucketVEntryDE58*)VPTR_OF(cObjNode, node);
-        vt[3].fn(vthis(node, vt[3]));
+        node->apply();
         node = (cObjNode*)cBucketMan_next(bm, node, bucket);
     }
 }

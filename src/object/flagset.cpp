@@ -14,6 +14,7 @@
 #include "bx/math3d.h"
 #include "world/world.h"
 #include "replay/bxreplayframe.h"
+#include "object/instancenode.h"
 
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
@@ -1406,8 +1407,7 @@ extern "C" void cFenceNode_update(cFenceNode* self)
     tMakeFenceData* osc = &self->FenceData;
     self->Force += self->ForceStep;
     if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(((char*)osc) + 0x10)) < 0.01f) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
-        vt[34].fn(vthis(self, vt[34]), 1);
+        self->expire(1);
         return;
     }
     if (0.0f <= self->ForceStep) {

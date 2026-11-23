@@ -8,6 +8,7 @@
 #include "object/floatingnode.h"
 #include "object/instancenode.h"
 #include "replay/bxreplayframe.h"
+#include "object/movenode.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cInstanceNode_getBoundBoxInfo(void* self, void* out);
@@ -90,17 +91,10 @@ static inline t4Vector vu0Add_34EF40(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-struct sFlVEntry_34EF40 {
-    short delta;
-    short index;
-    char* (*fn)(void*);
-};
-
 static inline t4Vector nodePos_34EF40(char* vself)
 {
     cFloatingNode* self = (cFloatingNode*)vself;
-    sFlVEntry_34EF40* vt = (sFlVEntry_34EF40*)VPTR_OF(cObjNode, self);
-    return *(t4Vector*)(vt[24].fn(vthis(self, vt[24])) + 0x30);
+    return *(t4Vector*)((char*)self->getRootTransform() + 0x30);
 }
 
 /**
@@ -467,8 +461,7 @@ struct sFloat_F600 {
  */
 extern "C" void cFloatingNode_applyForce(cFloatingNode* self, t4Vector* intInfo, t4Vector* force)
 {
-    sFlVE_F600* vt = (sFlVE_F600*)VPTR_OF(cObjNode, self);
-    t4Vector* transform = vt[24].fn(vthis(self, vt[24]));
+    t4Vector* transform = (t4Vector*)self->getRootTransform();
     t4Vector arm = vu0Sub_F600(intInfo[0], pos_F600(transform));
     t4Vector axisX = vu0MtxMul_F600(transform, &t4vect_XAxis_F600[0]);
     t4Vector axisY = vu0MtxMul_F600(transform, &t4vect_YAxis_F600[0]);
@@ -596,12 +589,6 @@ static inline sV4_F790 vu0Cross_F790(const sV4_F790& a, const sV4_F790& b)
     return r;
 }
 
-struct sFlVE_F790 {
-    short delta;
-    short index;
-    sV4_F790* (*fn)(void*);
-};
-
 
 
 /**
@@ -615,8 +602,7 @@ struct sFlVE_F790 {
 extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790* intInfo)
 {
     cMoveNode_updateIntersectInfo((self), intInfo);
-    sFlVE_F790* vt = (sFlVE_F790*)VPTR_OF(cObjNode, self);
-    sV4_F790* transform = vt[24].fn(vthis(self, vt[24]));
+    sV4_F790* transform = (sV4_F790*)self->getRootTransform();
     cFloatingNodeState* base = (cFloatingNodeState*)&self->ZSpring;
     sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));
     sV4_F790 axisX = vu0MtxMul_F790(transform, &t4vect_XAxis_F790[0]);

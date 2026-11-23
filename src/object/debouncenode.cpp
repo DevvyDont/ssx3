@@ -14,6 +14,8 @@
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "replay/bxreplayframe.h"
+#include "object/movenode.h"
+#include "object/instancenode.h"
 
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
@@ -61,8 +63,7 @@ extern "C" int cDebounceNode_updateNode(cDebounceNode* self)
         n--;
         self->Life = n;
         if (n == 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
-            vt[34].fn(vthis(self, vt[34]), 1);
+            self->expire(1);
             return 0;
         }
     }
@@ -797,12 +798,6 @@ extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, cBx
 //100%
 INCLUDE_ASM("object/debouncenode", cCounterNode_update);
 #ifdef SKIP_ASM
-struct sDebounceVEntry1 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Expires the counter node once its count has reached zero.
  *
@@ -813,8 +808,7 @@ extern "C" void cCounterNode_update(cCounterNode* self)
 {
     if (self->Count == 0) {
         self->Count = -1;
-        sDebounceVEntry1* vt = (sDebounceVEntry1*)VPTR_OF(cObjNode, self);
-        vt[34].fn(vthis(self, vt[34]), 1);
+        self->expire(1);
     }
 }
 #endif
