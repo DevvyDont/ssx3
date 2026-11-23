@@ -2495,7 +2495,7 @@ struct sTile_4410 {
         w = 16;
         h = height;
         cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-        tex = ((sVE_4410a*)VPTR_AT(g, 0x10D8))[47].fn((char*)g + ((sVE_4410a*)VPTR_AT(g, 0x10D8))[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
+        tex = ((sVE_4410a*)VPTR_OF(cGraphicsMan, g))[47].fn((char*)g + ((sVE_4410a*)VPTR_OF(cGraphicsMan, g))[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
         func_0037D090_6(g, tex, 0, 0, 0, 0);
     }
 };

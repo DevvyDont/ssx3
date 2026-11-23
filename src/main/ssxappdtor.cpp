@@ -2975,7 +2975,7 @@ extern "C" int cGame_updateStreamLoading(cGame* self) {
         }
         self->IsStreamPaused = 1;
         if (self->m_bFlushStreamer != 0) {
-            vtbl = (void*)VPTR_AT(GrMan, 0x10D8);
+            vtbl = (void*)VPTR_OF(cGraphicsMan, GrMan);
             (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)GrMan + *(short *)((char*)vtbl + 0x98));
             cGameViewMan_updateStreamFocus((int)self->ViewMan);
             cWorldCache_flushInActivePages(*(void**)self->World);
@@ -3463,7 +3463,7 @@ extern "C" void func_002452D8(cUIState* self, char* msg, int type)
     if (isHash_2452D8(*(int*)(msg + 0x38), str_yes_c)) {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 0);
         cUIStateStack_push(&self->mpEngine->mStateStack, newState);
-        ((sRVEntry_2452D8*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8))[8].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2452D8*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8))[8]), 1);
+        ((sRVEntry_2452D8*)VPTR_OF(cGraphicsMan, cGraphicsMan_TheGraphicsMan))[8].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2452D8*)VPTR_OF(cGraphicsMan, cGraphicsMan_TheGraphicsMan))[8]), 1);
     } else {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 1);
         cUIStateStack_push(&self->mpEngine->mStateStack, newState);

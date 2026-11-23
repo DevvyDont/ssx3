@@ -736,7 +736,7 @@ static inline float Lerp_DB20(float a, float b, float t)
 
 static inline sV4_DB20 Sample_DB20(float u, float v, short tex)
 {
-    sVE57_DB20* vt = (sVE57_DB20*)VPTR_AT(GrMan, 0x10D8);
+    sVE57_DB20* vt = (sVE57_DB20*)VPTR_OF(cGraphicsMan, GrMan);
     return vt[58].fn(vthis(GrMan, vt[58]), u, v, tex, 1);
 }
 

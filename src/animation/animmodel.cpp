@@ -811,14 +811,14 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
             if (animModelPart->lods[lod].used != 0) {
                 sAnimModelLodRef* animModelLodRef = &animModelPart->lods[lod].refs[animModelPart->refIndex];
                 if (animModelLodRef->part != 0) {
-                    ((tSetMats_0640)((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[111].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[111]), D_004FC420, 0, animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
+                    ((tSetMats_0640)((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[111].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[111]), D_004FC420, 0, animModelLodRef->unk_0C, animModelLodRef->unk_08, 0);
                     int additive = self->parts[j].id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[99].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->ScaleVect.y);
+                    ((tDraw_0640)((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[99].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->ScaleVect.y);
                 }
             }
         }
     } else {
-        ((tSetMats_0640)((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[111].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[111]), D_004FC420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
+        ((tSetMats_0640)((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[111].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[111]), D_004FC420, 0, self->lodInfo[lod].unk_04, self->lodInfo[lod].unk_00, 0);
         for (int j = 0; j < self->numParts; j++) {
             // PORT: pointer arithmetic through int (offset-first addu).
             sAnimModelPart* animModelPart = (sAnimModelPart*)(j * (int)sizeof(sAnimModelPart) + (int)self->parts);
@@ -826,7 +826,7 @@ extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
                 sAnimModelLodRef* animModelLodRef = animModelPart->lods[lod].refs;
                 if (animModelLodRef->part != 0) {
                     int additive = animModelPart->id == 2 ? x : y;
-                    ((tDraw_0640)((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[99].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_AT(ctx, 0x10D8))[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->ScaleVect.y);
+                    ((tDraw_0640)((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[99].fn)(vthis(ctx, ((sAmVEnt_0640*)VPTR_OF(cGraphicsMan, ctx))[99]), animModelLodRef->part, animModelLodRef->data, additive, 0, self->ScaleVect.y);
                 }
             }
         }

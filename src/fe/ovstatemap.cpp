@@ -209,7 +209,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             if (i < n) {
                 (selfp)->mbSessionUnlocked[i] = 1;
                 cFELocale* locale = SSXApp->FELocale;
-                sVEntry<void>* vt = ((sVEntry<void>*)VPTR_AT(locale, 0x4));
+                sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cUILocaleInterface, locale));
                 void* str = ((VGetFn_87F0)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
                 if (str == 0) {
                     continue;
@@ -585,7 +585,7 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
             ((VIntFn_9010)((sVEntry<void>*)menu->mVtbl)[9].fn)(vthis(menu, ((sVEntry<void>*)menu->mVtbl)[9]), 1);
         }
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<void>* vt = ((sVEntry<void>*)VPTR_AT(locale, 0x4));
+        sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cUILocaleInterface, locale));
         void* str = ((VGetFn_9010)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
         if (str != 0) {
             sprintf2(text, str_pct_s_pct_d_d, str, n + 1);

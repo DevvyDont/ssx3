@@ -916,14 +916,14 @@ extern "C" void func_0038C590(t3Vector* pts, t2Vector* uvs, int n)
         for (int j = 0; j < n; j++) {
             setVert_C590(&verts[j], pts[i * n + j], uvs[i * n + j]);
         }
-        sGmVE_C590* vt = (sGmVE_C590*)VPTR_AT(gfx, 0x10D8);
+        sGmVE_C590* vt = (sGmVE_C590*)VPTR_OF(cGraphicsMan, gfx);
         vt[73].fn(vthis(gfx, vt[73]), n, verts, 0);
     }
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             setVert_C590(&verts[j], pts[j * n + i], uvs[j * n + i]);
         }
-        sGmVE_C590* vt = (sGmVE_C590*)VPTR_AT(gfx, 0x10D8);
+        sGmVE_C590* vt = (sGmVE_C590*)VPTR_OF(cGraphicsMan, gfx);
         vt[73].fn(vthis(gfx, vt[73]), n, verts, 0);
     }
 }

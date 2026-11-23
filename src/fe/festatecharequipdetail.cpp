@@ -272,7 +272,7 @@ static inline void releaseK199148(int id)
 {
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntryK199148* vt = (sVEntryK199148*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+        sVEntryK199148* vt = (sVEntryK199148*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
 }

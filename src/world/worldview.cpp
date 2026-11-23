@@ -1650,13 +1650,13 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
         break;
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_AT(w, 0x10D8) + 0x170);
+        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_OF(cGraphicsMan, w) + 0x170);
         ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_tex, 0, 0, RID >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_AT(w, 0x10D8) + 0x170);
+        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)VPTR_OF(cGraphicsMan, w) + 0x170);
         ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
         break;
     }

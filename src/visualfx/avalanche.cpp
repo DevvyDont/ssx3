@@ -1515,7 +1515,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
             vertlist_8A00[i].b = ((node->m_node)->m_history)[i].m_b;
             vertlist_8A00[i].pos = pos;
         }
-        ((sVE_8A00*)VPTR_AT(GrMan, 0x10D8))[0x248 / 8].fn(vthis(GrMan, ((sVE_8A00*)VPTR_AT(GrMan, 0x10D8))[0x248 / 8]), (int)(node->m_node)->m_life, vertlist_8A00, 0);
+        ((sVE_8A00*)VPTR_OF(cGraphicsMan, GrMan))[0x248 / 8].fn(vthis(GrMan, ((sVE_8A00*)VPTR_OF(cGraphicsMan, GrMan))[0x248 / 8]), (int)(node->m_node)->m_life, vertlist_8A00, 0);
     }
     (*(sDrawState**)&GrMan->m_pCurrentDrawState)--;
 }

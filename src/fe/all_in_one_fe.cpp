@@ -1362,7 +1362,7 @@ static inline void setPos(sHudVertex* v, float x0, float y0, float x1, float y1)
 static inline void drawQuad(sHudVertex* v)
 {
     cPS2GraphicsMan* ctx = GrMan;
-    sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_AT(ctx, 0x10D8);
+    sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_OF(cGraphicsMan, ctx);
     vt[71].fn(vthis(ctx, vt[71]), 4, v, 0);
 }
 
@@ -1619,7 +1619,7 @@ static inline void setUVFlip(sHudVertex* v, sHudSprite* s)
 static inline void drawQuad_D9A0(sHudVertex* v)
 {
     cPS2GraphicsMan* ctx = GrMan;
-    sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_AT(ctx, 0x10D8);
+    sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_OF(cGraphicsMan, ctx);
     vt[71].fn(vthis(ctx, vt[71]), 4, v, 0);
 }
 
@@ -2159,7 +2159,7 @@ extern "C" void cOVStateHUD1P_renderGlowStrip(cOVStateHUD1P* self, sColour* col,
         vtx[6].pos = sVtxPos(pos[0], pos[1] + height, 0.0f, 1.0f);
         vtx[7].pos = sVtxPos(pos[0] + w, pos[1] + height, 0.0f, 1.0f);
         cPS2GraphicsMan* ctx = GrMan;
-        sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_AT(ctx, 0x10D8);
+        sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_OF(cGraphicsMan, ctx);
         vt[71].fn(vthis(ctx, vt[71]), 8, vtx, 0);
     } else {
         sHudVertex vtx[4];
@@ -2187,7 +2187,7 @@ extern "C" void cOVStateHUD1P_renderGlowStrip(cOVStateHUD1P* self, sColour* col,
         vtx[2].pos = sVtxPos(pos[0], pos[1] + height, 0.0f, 1.0f);
         vtx[3].pos = sVtxPos(pos[0] + w, pos[1] + height, 0.0f, 1.0f);
         cPS2GraphicsMan* ctx = GrMan;
-        sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_AT(ctx, 0x10D8);
+        sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)VPTR_OF(cGraphicsMan, ctx);
         vt[71].fn(vthis(ctx, vt[71]), 4, vtx, 0);
     }
 }

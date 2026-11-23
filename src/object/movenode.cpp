@@ -1239,11 +1239,11 @@ extern "C" void cMoveNode_render(cMoveNode* self)
     int res;
     if (mat) {
         sMnVec_6298* boundBox = ((cMnNode_6298*)self)->getBoundBox();
-        sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_AT(gfx, 0x10D8);
+        sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
-        res = ((MnCullFn_6298)vt[93].fn)(thisp, boundBox, boundBox + 1, ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_AT(gfx, 0x10D8))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_AT(gfx, 0x10D8))[43].delta));
+        res = ((MnCullFn_6298)vt[93].fn)(thisp, boundBox, boundBox + 1, ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
     } else {
-        sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_AT(gfx, 0x10D8);
+        sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
         char* thisp = (char*)gfx + vt[93].delta;
         sMnVec_6298 objBounds[2];
         objBounds[0].x = OBJ_6298(self)->pos[0];
@@ -1254,7 +1254,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         objBounds[1].y = OBJ_6298(self)->scl[1];
         objBounds[1].z = OBJ_6298(self)->scl[2];
         objBounds[1].w = 1.0f;
-        res = ((MnCullFn_6298)vt[93].fn)(thisp, &objBounds[0], &objBounds[1], ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_AT(gfx, 0x10D8))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_AT(gfx, 0x10D8))[43].delta));
+        res = ((MnCullFn_6298)vt[93].fn)(thisp, &objBounds[0], &objBounds[1], ((MnViewFn_6298)((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
     }
     if (res == 1) {
         return;
@@ -1284,7 +1284,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         flags |= 2;
     }
     void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(((cMnNode_6298*)self)) : OBJ_6298(self)->light;
-    sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_AT(gfx, 0x10D8);
+    sMnGfxVt_6298* vt = (sMnGfxVt_6298*)VPTR_OF(cGraphicsMan, gfx);
     ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, self->Fade);
 }
 #endif

@@ -214,7 +214,7 @@ struct sGfxVEntry95 {
  */
 extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, tInstanceRecord* obj, int animMats, int texMat, int renderFlags)
 {
-    sGfxVEntry95* vt = (sGfxVEntry95*)VPTR_AT(self, 0x10D8);
+    sGfxVEntry95* vt = (sGfxVEntry95*)VPTR_OF(cGraphicsMan, self);
     vt[95].fn(vthis(self, vt[95]), obj, (int)obj->m_MaterialBlock, (char*)&obj->m_fmTransform, animMats, texMat, renderFlags, 1.0f);
 }
 #endif
@@ -288,7 +288,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 (*(t4Vector*)&verts[j].u).y = UV[Index].y();
             }
             Indices += 3;
-            sGmVE_369CF8* vt = (sGmVE_369CF8*)VPTR_AT(self, 0x10D8);
+            sGmVE_369CF8* vt = (sGmVE_369CF8*)VPTR_OF(cGraphicsMan, self);
             vt[71].fn(vthis(self, vt[71]), 3, verts, 0);
         }
     } else {
@@ -305,7 +305,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 (*(t4Vector*)&verts[j].u).y = 0.0f;
             }
             Indices += 3;
-            sGmVE_369CF8* vt = (sGmVE_369CF8*)VPTR_AT(self, 0x10D8);
+            sGmVE_369CF8* vt = (sGmVE_369CF8*)VPTR_OF(cGraphicsMan, self);
             vt[71].fn(vthis(self, vt[71]), 3, verts, 0);
         }
     }
@@ -333,7 +333,7 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_UploadTextures);
  */
 extern "C" void cGraphicsMan_UploadTextures(cGraphicsMan* self)
 {
-    char* vt = (char*)VPTR_AT(self, 0x10D8);
+    char* vt = (char*)VPTR_OF(cGraphicsMan, self);
     ((void (*)(void*))*(void**)(vt + 0x3CC))((char*)self + *(short*)(vt + 0x3C8));
 }
 #endif
@@ -346,7 +346,7 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_PurgeTextures);
  */
 extern "C" void cGraphicsMan_PurgeTextures(cGraphicsMan* self)
 {
-    char* vt = (char*)VPTR_AT(self, 0x10D8);
+    char* vt = (char*)VPTR_OF(cGraphicsMan, self);
     ((void (*)(void*))*(void**)(vt + 0x3C4))((char*)self + *(short*)(vt + 0x3C0));
 }
 #endif
@@ -428,7 +428,7 @@ extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, sV4_A048* BezMat, 
         verts[i].pos = pos;
         curveParam += step;
     }
-    sGmVE_A048* vt = (sGmVE_A048*)VPTR_AT(self, 0x10D8);
+    sGmVE_A048* vt = (sGmVE_A048*)VPTR_OF(cGraphicsMan, self);
     vt[73].fn(vthis(self, vt[73]), n, verts, 0);
 }
 #endif
@@ -868,7 +868,7 @@ static inline unsigned int gmCall_AE20(char* vvself, int slot)
 {
     cPS2GraphicsMan* vself = (cPS2GraphicsMan*)vvself;
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    sGmVE_AE20* vt = (sGmVE_AE20*)VPTR_AT(self, 0x10D8);
+    sGmVE_AE20* vt = (sGmVE_AE20*)VPTR_OF(cGraphicsMan, self);
     return vt[slot].fn(vthis(self, vt[slot]));
 }
 

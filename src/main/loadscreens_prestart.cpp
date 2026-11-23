@@ -875,7 +875,7 @@ extern "C" void cStartScreen_gainFocus(cStartScreen* self)
     clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&cLightGlow_m_Enable);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_2C98* vt = (sVE_2C98*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+    sVE_2C98* vt = (sVE_2C98*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_2C98(0, 0, 0));
 }
 #endif
@@ -1274,7 +1274,7 @@ extern "C" void cGameLoadScreen_gainFocus(void)
     int* fogEnable = &cDepthFog_m_Enable;
     *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_3260* vt = (sVE_3260*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+    sVE_3260* vt = (sVE_3260*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_3260(0, 0, 0));
     func_0028F768(cAudioInterface_bxAudio());
 }

@@ -2881,13 +2881,13 @@ extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        char* obj = (char*)VPTR_AT(self, 0x10D8);
+        char* obj = (char*)VPTR_OF(cGraphicsMan, self);
         int* current = (int*)&self->m_pCurrentDrawState->m_bitGroups[i];
         sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
         if (*current != (int)cmp->m_bitGroups[i]) return 1;
     }
     for (j = 0; j < 2; j++) {
-        char* obj = (char*)VPTR_AT(self, 0x10D8);
+        char* obj = (char*)VPTR_OF(cGraphicsMan, self);
         short* current = sFontRS_shorts_47D8((char*)self->m_pCurrentDrawState) + j;
         sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
         if (*current != cmp->m_textureState.m_texid[j]) return 1;
@@ -3957,7 +3957,7 @@ struct sRenderSlot5288 {
 extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
 {
     cGraphicsMan_cGraphicsMan(self);
-    VPTR_AT(self, 0x10D8) = cPS2GraphicsMan_vtbl;
+    VPTR_OF(cGraphicsMan, self) = cPS2GraphicsMan_vtbl;
     new ((char*)&self->mViewStack) sRenderSlot5288[12];
     new ((char*)&self->mViewStack[3]) sRenderSlot5288[8];
     new ((char*)&self->mViewStack[5]) sRenderSlot5288[2];
@@ -4065,7 +4065,7 @@ struct sFontVEntry23 {
  */
 extern "C" void cPS2GraphicsMan_SetViewportWindow1(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
 {
-    sFontVEntry23* vt = (sFontVEntry23*)VPTR_AT(self, 0x10D8);
+    sFontVEntry23* vt = (sFontVEntry23*)VPTR_OF(cGraphicsMan, self);
     vt[23].fn(vthis(self, vt[23]), applyScreenOffset, rect[0], rect[1], rect[2], rect[3]);
 }
 #endif

@@ -243,7 +243,7 @@ extern "C" void cFELoadScreen_gainFocus(void)
     int* fogEnable = &cDepthFog_m_Enable;
     *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_38C8* vt = (sVE_38C8*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+    sVE_38C8* vt = (sVE_38C8*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_38C8(0, 0, 0));
     func_0028F768(cAudioInterface_bxAudio());
 }

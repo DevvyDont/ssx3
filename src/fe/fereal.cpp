@@ -1132,14 +1132,14 @@ static inline sFeWorld* feW() { return (sFeWorld*)GrMan; }
 static inline void feCall(int slot)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+    sFeVE* vt = (sFeVE*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     ((void (*)(void*))vt[slot].fn)(vthis(ps2GraphicsMan, vt[slot]));
 }
 
 static inline unsigned int feCallU(int slot)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+    sFeVE* vt = (sFeVE*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     return ((unsigned int (*)(void*))vt[slot].fn)(vthis(ps2GraphicsMan, vt[slot]));
 }
 
@@ -1186,13 +1186,13 @@ extern "C" int cRealFE_render(cRealFE* self)
         }
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+            sFeVE* vt = (sFeVE*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
             ((void (*)(void*, int, int, float, float, float, float, float, float))vt[26].fn)(
                 vthis(ps2GraphicsMan, vt[26]), 0, 0, 0.0f, 0.0f, w, hgt, 0.0f, 1.0f);
         }
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+            sFeVE* vt = (sFeVE*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
             ((void (*)(void*, void*))vt[34].fn)(vthis(ps2GraphicsMan, vt[34]), t4mat_Identity);
         }
         feW()->top->setAlpha(9);
@@ -1228,7 +1228,7 @@ extern "C" int cRealFE_render(cRealFE* self)
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+            sFeVE* vt = (sFeVE*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
             ((void (*)(void*, int, sFeVert*, int))vt[71].fn)(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
         }
         feCall(22);
@@ -1241,13 +1241,13 @@ extern "C" int cRealFE_render(cRealFE* self)
     feCall(31);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+        sFeVE* vt = (sFeVE*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         ((void (*)(void*, float, float, float))vt[25].fn)(vthis(ps2GraphicsMan, vt[25]),
             *(float*)((char*)self + 0x10), *(float*)((char*)self + 0x14), *(float*)((char*)self + 0x18));
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sFeVE* vt = (sFeVE*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+        sFeVE* vt = (sFeVE*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         ((void (*)(void*, void*))vt[34].fn)(vthis(ps2GraphicsMan, vt[34]), (char*)self + 0x50);
     }
     {

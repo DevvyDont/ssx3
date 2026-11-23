@@ -1068,7 +1068,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(cBENewPlayerInterface* self
     {
         unsigned short buf[104];
         cFELocale* db = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_AT(db, 0x4);
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
         sprintf1(buf, vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_MEMPlayerName)), idx + 1);
         strcpy2(name, buf);
     }

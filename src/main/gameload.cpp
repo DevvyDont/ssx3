@@ -242,7 +242,7 @@ extern "C" void cGame_load(cGame* self)
     cFELocale_loadOV(SSXApp->FELocale);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntryVoidGL* vt = (sVEntryVoidGL*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+        sVEntryVoidGL* vt = (sVEntryVoidGL*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         vt[44].fn(vthis(ps2GraphicsMan, vt[44]), 0);
     }
     self->IsStreamPaused = 0;
@@ -339,7 +339,7 @@ extern "C" void cGame_load(cGame* self)
     char* file = FILE_load(str_data_fonts_menu_ssh_b, 0x100);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntryGL* vt = (sVEntryGL*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+        sVEntryGL* vt = (sVEntryGL*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         int result = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), file + *(int*)(file + 0x14), str_menu_b, 0, 1, -1);
         self->mBoxTextureID = result;
         self->MenuSys->BoxTexture = result;
@@ -726,7 +726,7 @@ extern "C" void cGame_purge(char* self)
     cCameraTriggerMan_cleanupOnExit(((char*)&gCamTriggerMan));
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)VPTR_AT(be, 0x10D8) + 0x98);
+        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)VPTR_OF(cGraphicsMan, be) + 0x98);
         vtEntry->fn(vthis(be, *vtEntry));
     }
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
@@ -774,12 +774,12 @@ extern "C" void cGame_purge(char* self)
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)VPTR_AT(be, 0x10D8) + 0x388);
+        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)VPTR_OF(cGraphicsMan, be) + 0x388);
         vtEntry->fn(vthis(be, *vtEntry));
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt1_FA98* vtEntry = (sVEnt1_FA98*)((char*)VPTR_AT(be, 0x10D8) + 0x190);
+        sVEnt1_FA98* vtEntry = (sVEnt1_FA98*)((char*)VPTR_OF(cGraphicsMan, be) + 0x190);
         vtEntry->fn(vthis(be, *vtEntry), *(void**)(self + 0x220));
     }
     cGraphicsMan_PurgeTextures(GrMan);
@@ -2440,7 +2440,7 @@ extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
     verts[2].u = 0.0f; verts[2].v = 1.0f;
     verts[3].u = 1.0f; verts[3].v = 1.0f;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = value;
-    obj = (char*)VPTR_AT(GrMan, 0x10D8);
+    obj = (char*)VPTR_OF(cGraphicsMan, GrMan);
     (*(void (**)(void*, int, void*, int))(obj + 0x23C))((char*)GrMan + *(short*)(obj + 0x238), 4, verts, 0);
 }
 #endif
@@ -2816,7 +2816,7 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
     ((cGfx_1FC0*)GrMan)->stateTop->f8_5 = 0x1F;
     ((cGfx_1FC0*)GrMan)->SetView(t4mat_Identity);
     {
-        sVE_1FC0* vt = (sVE_1FC0*)VPTR_AT(GrMan, 0x10D8);
+        sVE_1FC0* vt = (sVE_1FC0*)VPTR_OF(cGraphicsMan, GrMan);
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetScreenWidth(), (float)((cGfx_1FC0*)GrMan)->GetScreenHeight(), 1);

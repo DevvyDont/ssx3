@@ -2224,13 +2224,13 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
 extern "C" int cDebugFE_render(cDebugFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
         return 0;
     }
     if (cFadeScreen_drawFade(((char*)self)) == 0) {
         cPS2GraphicsMan* graphicsMan1 = GrMan;
-        sVEntry<void>* vt1 = (sVEntry<void>*)VPTR_AT(graphicsMan1, 0x10D8);
+        sVEntry<void>* vt1 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan1);
         char* this1 = (char*)graphicsMan1 + vt1[15].delta;
         sVec4_17FBF0 pos;
         float one = 1.0f;
@@ -2241,10 +2241,10 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         pos.z = zeroF;
         ((FnP_17FBF0)vt1[15].fn)(this1, &pos);
         cPS2GraphicsMan* graphicsMan2 = GrMan;
-        sVEntry<void>* vt2 = (sVEntry<void>*)VPTR_AT(graphicsMan2, 0x10D8);
+        sVEntry<void>* vt2 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan2);
         ((FnView_17FBF0)vt2[26].fn)((char*)graphicsMan2 + vt2[26].delta, 0, 0, zeroF, zeroF, 640.0f, 480.0f, -1.0f, one);
         cPS2GraphicsMan* graphicsMan3 = GrMan;
-        sVEntry<void>* vt3 = (sVEntry<void>*)VPTR_AT(graphicsMan3, 0x10D8);
+        sVEntry<void>* vt3 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan3);
         ((FnP_17FBF0)vt3[34].fn)((char*)graphicsMan3 + vt3[34].delta, t4mat_Identity);
         cPS2GraphicsMan* graphicsMan4 = GrMan;
         setB23_17FBF0(rs_17FBF0((char*)graphicsMan4), 2);
@@ -2259,7 +2259,7 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
     }
     cPS2GraphicsMan* graphicsMan5 = GrMan;
-    sVEntry<void>* vt5 = (sVEntry<void>*)VPTR_AT(graphicsMan5, 0x10D8);
+    sVEntry<void>* vt5 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan5);
     ((FnV_17FBF0)vt5[20].fn)((char*)graphicsMan5 + vt5[20].delta);
     return 1;
 }

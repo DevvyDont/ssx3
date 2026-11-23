@@ -693,7 +693,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         push_B478(GrMan);
         *GrMan->m_pCurrentDrawState = self->mSparkDrawState;
         cPS2GraphicsMan* ctx = GrMan;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ctx, 0x10D8);
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cGraphicsMan, ctx);
         vt[82].fn(vthis(ctx, vt[82]), (int)self->mSparkEmitter);
         pop_B478(GrMan);
     }
@@ -722,7 +722,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         for (int i = 0; i < 3; i++) {
             t2Vector size(((float*)(((char*)self) + 0x60))[i], ((float*)(((char*)self) + 0x60))[i]);
             cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-            sVE_B478b* vt = (sVE_B478b*)VPTR_AT(ctx, 0x10D8);
+            sVE_B478b* vt = (sVE_B478b*)VPTR_OF(cGraphicsMan, ctx);
             vt[78].fn(vthis(ctx, vt[78]), ((char*)self) + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
         }
         pop_B478(GrMan);

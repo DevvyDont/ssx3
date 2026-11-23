@@ -25,7 +25,7 @@
 // `SSXApp->FELocale->getStringByHash(hash)`. The vptr lands at 0x4 by g++ 2.95's own rule (after the own data of the
 // first class in the hierarchy that declares a virtual: cUILocaleInterface's four chars). Nothing here is defined as
 // a C++ member (the methods are the extern "C" functions named above), so no vtable or type_info is emitted; the
-// hand-written ctor / dtors store the vptr with VPTR_AT(self, 0x4) (include/vtable.h).
+// hand-written ctor / dtors store the vptr with VPTR_OF(cUILocaleInterface, self) (include/vtable.h).
 // Evidence tags:
 //   [R] retail's constructor cFELocale_cFELocale / destructor cFELocale__cFELocale and the allocation size;
 //   [P] the July 2003 preview (layout_xlate: the vptr at 0x4 in ~cUILocaleInterface);

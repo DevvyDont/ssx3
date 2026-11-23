@@ -878,7 +878,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             return;
         }
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sGfxVE_B4E0* vt = (sGfxVE_B4E0*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+        sGfxVE_B4E0* vt = (sGfxVE_B4E0*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         ((void (*)(void*, int))vt[8].fn)(vthis(ps2GraphicsMan, vt[8]), !((bool (*)(void*))vt[9].fn)(vthis(ps2GraphicsMan, vt[9])));
         break;
     }

@@ -90,7 +90,7 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
         for (j = 0; j < cCrowdRender2D_mAnimTable_B6D0[i].count; j++) {
             char* shape = SHAPE_locate(self[0], cCrowdRender2D_mAnimTable_B6D0[i].names[j]);
             cCrowdRender2D_mAnimTable_B6D0[i].shapes[j] = shape;
-            sVEnt_B6D0* vt = (sVEnt_B6D0*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8);
+            sVEnt_B6D0* vt = (sVEnt_B6D0*)VPTR_OF(cGraphicsMan, cGraphicsMan_TheGraphicsMan);
             cCrowdRender2D_mAnimTable_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(vthis(cGraphicsMan_TheGraphicsMan, vt[46]), shape, cCrowdRender2D_mAnimTable_B6D0[i].names[j], 0, 0, -1);
         }
     }

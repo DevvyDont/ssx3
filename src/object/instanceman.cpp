@@ -1429,7 +1429,7 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
         fade = self->Life;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ((sVE_352810*)VPTR_AT(ps2GraphicsMan, 0x10D8))[95].fn(vthis(ps2GraphicsMan, ((sVE_352810*)VPTR_AT(ps2GraphicsMan, 0x10D8))[95]), (char*)self->Instance, self->Instance->m_MaterialBlock, t4mat_Identity_2810, animMats, 0, 1056, fade);
+    ((sVE_352810*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[95].fn(vthis(ps2GraphicsMan, ((sVE_352810*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[95]), (char*)self->Instance, self->Instance->m_MaterialBlock, t4mat_Identity_2810, animMats, 0, 1056, fade);
 }
 #endif
 

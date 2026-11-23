@@ -687,7 +687,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
                 gameOptions->f5 = vtOffset;
             } else {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+                sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
                 char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
                 void (**pf)(void*, int, int) = &vt[12].fn;
                 (*pf)(thisp, Cfg_189610().f6, Cfg_189610().f5);
@@ -992,7 +992,7 @@ extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self_)
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseWidescreen);
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_189D60c* vt = (sVE_189D60c*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+    sVE_189D60c* vt = (sVE_189D60c*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
     void (**pf)(void*, int, int) = &vt[12].fn;
     (*pf)(thisp, iface->getOptions().f6, iface->getOptions().f5);

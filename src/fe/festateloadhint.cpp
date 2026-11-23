@@ -550,7 +550,7 @@ extern "C" void func_00246098(cUIState* self)
                     vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
                 }
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-                sVEK246098* vt3 = (sVEK246098*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+                sVEK246098* vt3 = (sVEK246098*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
                 vt3[8].fn((char*)ps2GraphicsMan + vt3[8].delta, 0);
             }
         }
@@ -1399,7 +1399,7 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ranking)) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEnt_7AB0* vt = (sVEnt_7AB0*)VPTR_AT(locale, 0x4);
+        sVEnt_7AB0* vt = (sVEnt_7AB0*)VPTR_OF(cUILocaleInterface, locale);
         strcpy1(fmtw, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNLevelNum)));
         sprintf1(text, fmtw, cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);

@@ -512,7 +512,7 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
             corner.w = 1.0f;
             (*(&verts[3].p)) = corner;
             *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_E95A0(img);
-            sVEnt_E95A0* vt = (sVEnt_E95A0*)VPTR_AT(GrMan, 0x10D8);
+            sVEnt_E95A0* vt = (sVEnt_E95A0*)VPTR_OF(cGraphicsMan, GrMan);
             vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
             pos[0] += wh.x;
         }
@@ -1274,7 +1274,7 @@ extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cTextureElement*
         corner.z = 0.0f;
         corner.w = 1.0f;
         verts[3].p = corner;
-        sVEnt_001F1190* vt = (sVEnt_001F1190*)VPTR_AT(GrMan, 0x10D8);
+        sVEnt_001F1190* vt = (sVEnt_001F1190*)VPTR_OF(cGraphicsMan, GrMan);
         vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
     }
 }
@@ -1340,7 +1340,7 @@ extern "C" void cOVStateHUD1P_renderQuad(cOVStateHUD1P* self, float* pos, float*
     corner.w = 1.0f;
     verts[3].p = corner;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
-    sVEnt_001F1338* vt = (sVEnt_001F1338*)VPTR_AT(GrMan, 0x10D8);
+    sVEnt_001F1338* vt = (sVEnt_001F1338*)VPTR_OF(cGraphicsMan, GrMan);
     vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
 }
 #endif
@@ -2559,7 +2559,7 @@ extern "C" void cBXLoadIndicator_Render(cBXLoadIndicator* self)
     ((cGfx_31E0*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_31E0*)GrMan)->SetView(t4mat_Identity);
     {
-        sVEntry<void(void*, float, float, float, float, int)>* vt = (sVEntry<void (void*, float, float, float, float, int)>*)VPTR_AT(GrMan, 0x10D8);
+        sVEntry<void(void*, float, float, float, float, int)>* vt = (sVEntry<void (void*, float, float, float, float, int)>*)VPTR_OF(cGraphicsMan, GrMan);
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_31E0*)GrMan)->GetScreenWidth(), (float)((cGfx_31E0*)GrMan)->GetScreenHeight(), 1);

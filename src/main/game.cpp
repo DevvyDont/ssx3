@@ -58,12 +58,12 @@ extern "C" void cGame_renderModels(cGame* self, FrustumIntersector* world)
     int n = world->numinstancesinside;
     int* items = (int*)((char*)world + 0x20A0);
     for (int i = 0; i < n; i++) {
-        ((sRVEntry_C078*)VPTR_AT(GrMan, 0x10D8))[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)VPTR_AT(GrMan, 0x10D8))[96]), items[i], 0, 0, flag);
+        ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[96]), items[i], 0, 0, flag);
     }
     int secondCount = world->numinstancescrossing;
     items = (int*)((char*)world + 0x40A4);
     for (int i = 0; i < secondCount; i++) {
-        ((sRVEntry_C078*)VPTR_AT(GrMan, 0x10D8))[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)VPTR_AT(GrMan, 0x10D8))[96]), items[i], 0, 0, flag | 0x20);
+        ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)VPTR_OF(cGraphicsMan, GrMan))[96]), items[i], 0, 0, flag | 0x20);
     }
 }
 #endif
@@ -568,7 +568,7 @@ extern "C" void func_0022C830(cGame* self)
     } while (i < ((sViews_C830*)self->ViewMan)->count);
     }
     {
-        sVE_C830* vt = (sVE_C830*)VPTR_AT(GrMan, 0x10D8);
+        sVE_C830* vt = (sVE_C830*)VPTR_OF(cGraphicsMan, GrMan);
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_C830*)GrMan)->GetScreenWidth(), (float)((cGfx_C830*)GrMan)->GetScreenHeight(), 1);

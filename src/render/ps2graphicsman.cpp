@@ -1552,7 +1552,7 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
  */
 extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
 {
-    VPTR_AT(self, 0x10D8) = cGraphicsMan_vtbl;
+    VPTR_OF(cGraphicsMan, self) = cGraphicsMan_vtbl;
     new ((char*)&self->m_pCurrentDrawState) sGfxState_691F8;
     self->mSkipNextPageFlip = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
@@ -1607,7 +1607,7 @@ void operator_delete(int* ptr);
  */
 extern "C" void cGraphicsMan__cGraphicsMan(cGraphicsMan* self, int flags)
 {
-    VPTR_AT(self, 0x10D8) = cGraphicsMan_vtbl;
+    VPTR_OF(cGraphicsMan, self) = cGraphicsMan_vtbl;
     cGraphicsMan_TheGraphicsMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);

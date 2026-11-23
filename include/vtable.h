@@ -23,7 +23,7 @@ template <class V> inline void* vthis(void* obj, const V& slot)
 
 // The vptr of a real polymorphic class at byte offset off, for the constructors and destructors the matching code
 // writes by hand as extern "C" functions (a C++ constructor stores it itself), and for the hand-made virtual calls
-// that still read it:  VPTR_AT(self, 0x4) = cFELocale_vtbl;  vt = (sVEntry<...>*)VPTR_AT(gm, 0x10D8);
+// that still read it (VPTR_OF below names the class instead of the offset).
 // g++ 2.95 puts it after the own data of the first class in the hierarchy that declares a virtual.
 // A macro reading through a one-member struct, so the access is what the flat headers' `mVtbl` member was: an inline
 // function returning a reference leaves copies in the RTL that keep the scheduler from moving the load (cSSXApp_init
@@ -32,6 +32,9 @@ struct sVptr {
     void** vptr;
 };
 #define VPTR_AT(obj, off) (((sVptr*)((char*)(obj) + (off)))->vptr)
+// The same by class: Root is the class that introduces the vptr, whose last word it is (it follows Root's own data):
+//     VPTR_OF(cUILocaleInterface, self) = cFELocale_vtbl;   vt = (sVEntry<...>*)VPTR_OF(cGraphicsMan, gm);
+#define VPTR_OF(Root, obj) VPTR_AT(obj, sizeof(Root) - sizeof(void**))
 // A whole vtable held as a value: N raw slots, 8-byte aligned. [L] gcc-2.95.3 cp/search.c expand_upcast_fixups: a
 // constructor that is not in charge of its virtual bases copies the class's vtable into a local (aligned for doubles)
 // and patches the virtual-base deltas there before storing its address (cGroundMotion_cGroundMotion,

@@ -1386,7 +1386,7 @@ struct sFlex_3480C8 {
 extern "C" void cFlexRailNode_render(cFlexRailNode* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ctx, 0x10D8);
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx);
     if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
                                   ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == 1) return;
     if (D_004A5980 == 0) {

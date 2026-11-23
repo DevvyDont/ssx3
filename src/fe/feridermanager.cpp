@@ -513,7 +513,7 @@ extern "C" void cFERider_render(cFERider* selfp)
     func_00389CB8(&worldMatrix, &pos, 1.0f);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVE_EE88* vt = (sVE_EE88*)VPTR_AT(ps2GraphicsMan, 0x10D8);
+        sVE_EE88* vt = (sVE_EE88*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &worldMatrix, 1);
     }
     int* fl = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);

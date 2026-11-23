@@ -15146,7 +15146,7 @@ extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS*
     self->miState = 0;
     self->mpustrText = 0;
     cFELocale* locale = SSXApp->FELocale;
-    sVEntry<void*(void* self, int hash)>* vt = (sVEntry<void*(void*, int)>*)VPTR_AT(locale, 0x4);
+    sVEntry<void*(void* self, int hash)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
     int n = USTR_length(vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_205Authenticating)));
     if (self->mpustrText != 0) {
         cMemMan_free(self->mpustrText);

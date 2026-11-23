@@ -1179,7 +1179,7 @@ extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan
     if (self->mCurrentState != 0) {
         self->mCurrentState = 0;
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-        sBTVEntry* vtblEntry = &(((sBTVEntry*)VPTR_AT(obj, 0x10D8)))[41];
+        sBTVEntry* vtblEntry = &(((sBTVEntry*)VPTR_OF(cGraphicsMan, obj)))[41];
         vtblEntry->fn(vthis(obj, *vtblEntry), (char*)&self->mRegularTVFormat);
     }
 }
@@ -1202,7 +1202,7 @@ extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMa
     }
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     self->mCurrentState = 1;
-    sBTVEntry* vtblEntry = &(((sBTVEntry*)VPTR_AT(obj, 0x10D8)))[41];
+    sBTVEntry* vtblEntry = &(((sBTVEntry*)VPTR_OF(cGraphicsMan, obj)))[41];
     vtblEntry->fn(vthis(obj, *vtblEntry), (char*)&self->mCutSceneTVFormat);
 }
 #endif
@@ -1654,7 +1654,7 @@ extern "C" void cTrickBoostFX_render(cTrickBoostFX* self)
     }
     for (int k = 0; k < 4; k++) {
         cPS2GraphicsMan* ctx = GrMan;
-        sRctxVE_B198* vt = (sRctxVE_B198*)VPTR_AT(ctx, 0x10D8);
+        sRctxVE_B198* vt = (sRctxVE_B198*)VPTR_OF(cGraphicsMan, ctx);
         vt[71].fn(vthis(ctx, vt[71]), counts[k], verts[k], 0);
     }
     (*(sRS_B198**)&GrMan->m_pCurrentDrawState)--;
@@ -2060,10 +2060,10 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
     }
 
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sBTVEntryDraw* drawEntry = &((sBTVEntryDraw*)VPTR_AT(obj, 0x10D8))[71];
+    sBTVEntryDraw* drawEntry = &((sBTVEntryDraw*)VPTR_OF(cGraphicsMan, obj))[71];
     drawEntry->fn(vthis(obj, *drawEntry), 80, top, 0);
     obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan;
-    drawEntry = &((sBTVEntryDraw*)VPTR_AT(obj, 0x10D8))[71];
+    drawEntry = &((sBTVEntryDraw*)VPTR_OF(cGraphicsMan, obj))[71];
     drawEntry->fn(vthis(obj, *drawEntry), 80, bot, 0);
 }
 #endif

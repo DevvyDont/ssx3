@@ -247,7 +247,7 @@ extern "C" int cSplineSegment_isVisible(void* self)
 {
     tSplineSegmentRecord* nodeBytes = (tSplineSegmentRecord*)self;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-    sVEnt_5638* vt = (sVEnt_5638*)VPTR_AT(w, 0x10D8);
+    sVEnt_5638* vt = (sVEnt_5638*)VPTR_OF(cGraphicsMan, w);
     return vt[93].fn(vthis(w, vt[93]), sV4_5638(nodeBytes->m_fvMin.m[0], nodeBytes->m_fvMin.m[1], nodeBytes->m_fvMin.m[2], 1.0f),
                   sV4_5638(nodeBytes->m_fvMax.m[0], nodeBytes->m_fvMax.m[1], nodeBytes->m_fvMax.m[2], 1.0f),
                   ((cWorld_5638*)w)->GetNetMatrix()) != 1;

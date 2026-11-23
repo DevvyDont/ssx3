@@ -5252,7 +5252,7 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, tBoundBox* bb)
     if (self->enabled == 0)
         return;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    t4Matrix mtx = ((tCamMtx_25C0)((sCamVt_25C0*)VPTR_AT(ps2GraphicsMan, 0x10D8))[0x2B].fn)(vthis(ps2GraphicsMan, ((sCamVt_25C0*)VPTR_AT(ps2GraphicsMan, 0x10D8))[43]));
+    t4Matrix mtx = ((tCamMtx_25C0)((sCamVt_25C0*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[0x2B].fn)(vthis(ps2GraphicsMan, ((sCamVt_25C0*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[43]));
     sVec4_25C0 eye = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
     eye = mulT_25C0(camMtx_25C0(), eye);
     self->count = 0;
@@ -5275,7 +5275,7 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, tBoundBox* bb)
               && bb->MinPoint.z <= box.max.z && box.min.z <= bb->MaxPoint.z;
         if (ov) {
             cPS2GraphicsMan* graphics = GrMan;
-            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)VPTR_AT(graphics, 0x10D8))[0x5D].fn)(vthis(graphics, ((sCamVt_25C0*)VPTR_AT(graphics, 0x10D8))[93]), &box.min, &box.max, &mtx);
+            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)VPTR_OF(cGraphicsMan, graphics))[0x5D].fn)(vthis(graphics, ((sCamVt_25C0*)VPTR_OF(cGraphicsMan, graphics))[93]), &box.min, &box.max, &mtx);
             if (vis) {
                 if (!(0.0f < vu0Dot_25C0(eye, candidate->normal))) {
                     float distSq = vu0DistSq_25C0(eye, candidate->pos);
