@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "bx/math3d.h"
 #include "camera/camera.h"
 #include "vtable.h"
@@ -112,7 +113,7 @@ struct sAngerSlot_2D4C08 {
 };
 
 struct sAnger_2D4C08 {
-    char* rider;                    // 0x0
+    cRider* rider;                  // 0x0
     sAngerSlot_2D4C08* slots;       // 0x4
 };
 
@@ -121,19 +122,6 @@ struct sPlayers_2D4C08 {
     char* p[3];             // 0x4
     unsigned int count;     // 0x10
 };
-
-struct sVE_2D4C08 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
-static inline int riderV_2D4C08(char* rider, int n)
-{
-    char* obj = rider + 0x6C0;
-    sVE_2D4C08* vt = *(sVE_2D4C08**)obj;
-    return vt[n].fn(vthis(obj, vt[n]));
-}
 
 static inline float approach_2D4C08(float x, float target, float step)
 {
@@ -172,7 +160,7 @@ static inline sPlayers_2D4C08* players_2D4C08()
  */
 extern "C" void func_002D4C08(sAnger_2D4C08* self)
 {
-    if (riderV_2D4C08(self->rider, 8) != 0) {
+    if (self->rider->isHuman() != 0) {
         return;
     }
     for (unsigned int i = 0; i < players_2D4C08()->count; i++) {
@@ -182,7 +170,7 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
             continue;
         }
         sAngerSlot_2D4C08* st = &self->slots[i];
-        if (*(int*)(self->rider + 0xAC4) != 0) {
+        if (self->rider->mIsInNIS != 0) {
             st->level = 0;
             return;
         }
@@ -193,8 +181,8 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
             return;
         }
         void* aggr = cBEAggressionInterface_getThis();
-        int riderAIIndex = riderV_2D4C08(self->rider, 7);
-        int lvl = cBEAggressionInterface_getAggression(aggr, riderAIIndex, riderV_2D4C08(other, 7));
+        int riderAIIndex = self->rider->getAIIndex();
+        int lvl = cBEAggressionInterface_getAggression(aggr, riderAIIndex, ((cRider*)other)->getAIIndex());
         int old = st->anger;
         st->anger = lvl;
         if (lvl >= 4) {
@@ -256,11 +244,6 @@ struct sVtx_2D5048 {
     sV4_2D5048 pos;         // 0x20
     sVtx_2D5048() {}
     void SetC(int r, int g, int b, int a) { c[0] = r; c[1] = g; c[2] = b; c[3] = a; }
-};
-
-struct sBones_2D5048 {
-    char pad[0x30];
-    t4Matrix* mats;       // 0x30
 };
 
 struct sRState_2D5048 {
@@ -400,7 +383,7 @@ static inline void rsSetB_2D5048(sGfx_2D5048* g, int mask, int shift, int v)
  */
 extern "C" void func_002D5048(sAnger_2D4C08* self)
 {
-    if (riderV_2D4C08(self->rider, 8) != 0) {
+    if (self->rider->isHuman() != 0) {
         return;
     }
     float fade = 1.0f;
@@ -410,7 +393,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     }
     sGfx_2D5048* graphics = (sGfx_2D5048*)GrMan_angerfx;
     t4Matrix* viewMatrix = ((t4Matrix* (*)(void*))graphics->vtable[35].fn)(vthis(graphics, graphics->vtable[35]));
-    t4Matrix* bm = &(*(sBones_2D5048**)(self->rider + 0x780))->mats[*(int*)(self->rider + 0x8A8)];
+    t4Matrix* bm = &self->rider->mAnimModel->SkelMatrices[self->rider->mBoneHead];
     sV4_2D5048 headPos = ((sV4_2D5048*)&bm->row[0])[3];
     sV4_2D5048 viewPos = MatVec_2D5048(viewMatrix, headPos);
     float z = viewPos.z;
