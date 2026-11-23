@@ -225,7 +225,7 @@ public:
     virtual void SetLightMats(void* lmats) = 0;                                                          // slot 68: [R] cPS2GraphicsMan_SetLightMats__FPv; parameters [O]
     virtual void SetIrradiance(void* src) = 0;                                                           // slot 69: [R] cPS2GraphicsMan_SetIrradiance; R?
     virtual void* GetIrradiance() = 0;                                                                   // slot 70: [R] cPS2GraphicsMan_GetIrradiance__FPv; parameters [O]
-    virtual void RenderTriStrip(int numVerts, tBxVertex* src) = 0;                                       // slot 71: [R] cPS2GraphicsMan_RenderTriStrip
+    virtual void RenderTriStrip(int numVerts, tBxVertex* src, int isstatic) = 0;                         // slot 71: [R] cPS2GraphicsMan_RenderTriStrip; isstatic: [R] every caller passes it ($a3), [O] the PSP twin's bool isstatic
     virtual void RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices, const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector* Offset); // slot 72: [R] cPS2GraphicsMan_RenderIndexedTriList
     virtual void RenderLineStrip(int n, void* vtx) = 0;                                                  // slot 73: [R] cPS2GraphicsMan_RenderLineStrip; R/R?
     virtual void RenderLineStrip(int numverts, const tBxVertex* verts, int isstatic);                    // slot 74: [R] cGraphicsMan_RenderLineStrip__FPv; parameters [O]
