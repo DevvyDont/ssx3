@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
 #include "render/2drender.h"
 #include "ui/uimenu.h"
 #include "bx/math3d.h"
@@ -421,7 +422,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* item, int msg)
 {
     if (((void*)item) != 0 && msg == 6) {
-        void* obj = *(void**)self->mpEngine;
+        void* obj = (void*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, 36);
         if (nextState != 0) {

@@ -289,12 +289,12 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
             int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
             if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, cid) > 0) {
                 char* w = (char*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), self->mpEngine, ((char*)self), self->mUserNum, cid);
-                *(unsigned char*)(w + 0x15) = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, self->mUserNum);
+                *(unsigned char*)(w + 0x15) = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, self->mUserNum);
                 cUIStateStack_pushPopup(&self->mpEngine->mStateStack, w);
                 cFEStateCharSetup_show3DCharacter(((char*)self), 0);
             }
         } else {
-            char* obj = *(char**)self->mpEngine;
+            char* obj = (char*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
             void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), sub);
             if (nextState != 0) {
@@ -305,7 +305,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         break;
     }
     case 6: {
-        char* obj = *(char**)self->mpEngine;
+        char* obj = (char*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), item->mMiscData);
         if (nextState != 0) {
@@ -350,7 +350,7 @@ extern "C" void* cFEStateUberTrick_cFEStateUberTrick(cFEStateUberTrick* self, in
     self->mVtbl = cFEStateUberTrick_vtbl;
     self->mHashName = 18;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mpMainMenu = 0;
     self->mpTrickMenu = 0;
     self->mbModelVisible = 0;

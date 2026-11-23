@@ -231,7 +231,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
             }
         }
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
-        char* mgr = *(char**)self->mpEngine;
+        char* mgr = (char*)self->mpEngine->mpCustom;
         sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
         void* backState = vt[5].fn(vthis(mgr, vt[5]), ((char*)self), self->mStoreNum >= 0);
         cUIStateStack_push(&self->mpEngine->mStateStack, backState);
@@ -2400,7 +2400,7 @@ extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewRewa
     self->mHashName = 0x30;
     self->mVtbl = cFEStatePreviewReward_vtbl;
     self->mUserNum = idx;
-    self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     for (i = 0; i < 3; i++) {
         ((sRewardState_1AA0*)self)->a[i] = 0;
         ((sRewardState_1AA0*)self)->b[i] = 0;

@@ -251,7 +251,7 @@ extern "C" void* cFEStateCharSelect_cFEStateCharSelect(cFEStateCharSelect* self,
     self->mUserNum = n;
     self->mpSelectedCharWidget = 0;
     self->mCheatCharID = 0;
-    void* mgr = *(void**)self->mpEngine;
+    void* mgr = (void*)self->mpEngine->mpCustom;
     for (; i < n; i++) {
         mask &= ~cFECustom_getPlayerCtrlMask(mgr, i);
     }

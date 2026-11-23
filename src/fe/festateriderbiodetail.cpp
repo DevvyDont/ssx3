@@ -343,7 +343,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
     }
     switch (msg) {
     case 6: {
-        void* obj = *(void**)self->mpEngine;
+        void* obj = (void*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
@@ -382,7 +382,7 @@ extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(cFEStateRuleSelect* self)
     self->mVtbl = cFEStateRuleSelect_vtbl;
     self->mpGameEventMapping = 0;
     *(char*)&self->mUserNum = 0;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, 0);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
     self->mHashName = 20;
     return ((void*)self);
 }

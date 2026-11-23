@@ -398,7 +398,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
     switch (type) {
     case 5:
         if (msg->info[6] == 0) {
-            char* custom = *(char**)self->mpEngine;
+            char* custom = (char*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 0x4);
             void* st = vt[4].fn(vthis(custom, vt[4]), ((char*)self), msg->id);
             if (st) {
@@ -407,7 +407,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
         }
         break;
     case 6: {
-        char* custom = *(char**)self->mpEngine;
+        char* custom = (char*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 0x4);
         void* st = vt[5].fn(vthis(custom, vt[5]), ((char*)self), msg->id);
         if (st) {

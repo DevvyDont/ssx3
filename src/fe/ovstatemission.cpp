@@ -110,7 +110,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
     }
     switch (msg) {
     case 5: {
-        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[4].fn(vthis(obj, vt[4]), self, item->mMiscData);
         if (nextState != 0) {
@@ -119,7 +119,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
         break;
     }
     case 6: {
-        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {

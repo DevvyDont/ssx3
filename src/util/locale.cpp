@@ -434,7 +434,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(cFEStateAudioOptions*
     self->mHashName = 0x10;
     self->mVtbl = cFEStateAudioOptions_vtbl;
     self->mUserNum = idx;
-    void* feCustom = *(void**)self->mpEngine;
+    void* feCustom = (void*)self->mpEngine->mpCustom;
     if (feCustom != 0) {
         self->mCtrlBits = cFECustom_getPlayerCtrlMask(feCustom, idx);
     }

@@ -207,7 +207,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         return;
     switch (event) {
     case 5: {
-        cUICustomInterface* factory = (cUICustomInterface*)(*(char**)self->mpEngine);
+        cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory);
         void* nextState = vt[4].fn(vthis(factory, vt[4]), self, item->mMiscData);
         if (nextState != 0)
@@ -216,7 +216,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         break;
     }
     case 6: {
-        cUICustomInterface* factory = (cUICustomInterface*)(*(char**)self->mpEngine);
+        cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory);
         void* nextState = vt[5].fn(vthis(factory, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
@@ -456,7 +456,7 @@ extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(cFEStateRiderDetail* se
     self->mHashName = 13;
     self->mVtbl = cFEStateRiderDetail_vtbl;
     self->mUserNum = idx;
-    self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mbDraw3D = 0;
     return ((void*)self);
 }

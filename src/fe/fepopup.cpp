@@ -3421,7 +3421,7 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, cUIEn
     cBuyPopupInfo_clear((cBuyPopupInfo*)&self->mInfo);
     self->mUserNum = idx;
     self->mHashName = 7;
-    void* custom = *(void**)self->mpEngine;
+    void* custom = (void*)self->mpEngine->mpCustom;
     if (custom != 0) {
         *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(custom, idx);
     }

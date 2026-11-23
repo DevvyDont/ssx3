@@ -203,7 +203,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, cUIThing* msg, int type)
 {
     if (type == 5) {
-        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         sVEntry_cFEStateTitle_onWidgetEvent* vt = (sVEntry_cFEStateTitle_onWidgetEvent*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[4].fn(vthis(obj, vt[4]), self, msg->mMiscData);
         if (nextState != 0) {

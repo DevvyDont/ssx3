@@ -2655,7 +2655,7 @@ extern "C" void* cFEStateLodge_cFEStateLodge(cFEStateLodge* self)
     self->mVtbl = cFEStateLodge_vtbl;
     int idx = cBENewPlayerInterface_getPlayerCtrlID(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     self->mUserNum = 0;
-    void* factory = *(void**)self->mpEngine;
+    void* factory = (void*)self->mpEngine->mpCustom;
     if (factory != 0) {
         unsigned char mask = 1 << idx;
         cFECustom_setPlayerCtrlMask(factory, 0, mask);

@@ -67,7 +67,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     self->mVtbl = cFEStateMountainRoom_vtbl;
     cFEStateMountainRoom* room = self;
     room->mUserNum = pl;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, pl);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, pl);
     (*(int*)&room->mpPassGroup) = 0;
     (*(int*)&room->mpPassIcon) = 0;
     (*(int*)&room->mpHelpText) = 0;
@@ -892,7 +892,7 @@ extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(cFEStatePeakRoom* self, int e
     self->mHashName = 44;
     self->mVtbl = cFEStatePeakRoom_vtbl;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     sLodge_3780* peakRoom = (sLodge_3780*)self;
     peakRoom->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     peakRoom->fE0 = peakNum;
@@ -1140,7 +1140,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
     case 5:
         if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
                           self->mCharID, self->mPeakNum, item->mMiscData) != 0) {
-            void* obj = *(void**)self->mpEngine;
+            void* obj = (void*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
             void* nextState = vt[4].fn(vthis(obj, vt[4]), self, (self->mPeakNum << 16) | item->mMiscData);
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -1154,7 +1154,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
                 ((sVEntry<void(void*, int)>*)listItem->mVtbl)[9].fn(vthis(listItem, ((sVEntry<void(void*, int)>*)listItem->mVtbl)[9]), 0);
             }
         }
-        void* obj = *(void**)self->mpEngine;
+        void* obj = (void*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, id);
         if (nextState != 0) {
@@ -1398,7 +1398,7 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     self->mHashName = 45;
     self->mVtbl = cFEStateTrophyRoom_vtbl;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     cFEStateTrophyRoom* trophyRoom = self;
     *(int*)&trophyRoom->mpBigIcon = 0;
     cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 1);

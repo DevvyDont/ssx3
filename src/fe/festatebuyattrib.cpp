@@ -254,7 +254,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)o->mVtbl;
             vt[7].fn(vthis(o, vt[7]), 1);
         } else {
-            char* mgr = *(char**)self->mpEngine;
+            char* mgr = (char*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, void*)>* vt = *(sVEntry<void*(void*, void*, void*)>**)(mgr + 4);
             void* nextState = vt[5].fn(vthis(mgr, vt[5]), ((char*)self), *(void**)(obj + 0x18));
             if (nextState != 0) {
@@ -645,7 +645,7 @@ extern "C" void* cFEStateCareerStats_cFEStateCareerStats(cFEStateCareerStats* se
     self->mVtbl = cFEStateCareerStats_vtbl;
     self->mHashName = 42;
     *(char*)&self->mUserNum = 0;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, 0);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
     return ((void*)self);
 }
 #endif
@@ -786,7 +786,7 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
     case 5:
         break;
     case 6: {
-        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {

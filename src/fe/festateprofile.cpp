@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
 #include "be/beinterface.h"
 #include "fe/keyboardpopup.h"
 #include "movie/mcoverlaymanager.h"
@@ -73,7 +74,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
     switch (msg) {
     case 5: {
         ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
-        char* custom = *(char**)self->mpEngine;
+        char* custom = (char*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 4);
         void* nextState = vt[4].fn(vthis(custom, vt[4]), self, menu->mMiscData);
         if (nextState != 0)
@@ -81,7 +82,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
         break;
     }
     case 6: {
-        char* custom = *(char**)self->mpEngine;
+        char* custom = (char*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 4);
         void* nextState = vt[5].fn(vthis(custom, vt[5]), self, menu->mMiscData);
         if (nextState != 0)
@@ -878,7 +879,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
     if (self->mIsDone == 0) {
         int sel = self->mTypeOfQuit;
         if (sel == 0) {
-            char* frontEnd = *(char**)self->mpEngine;
+            char* frontEnd = (char*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(frontEnd + 4);
             void* nextState = vt[5].fn(vthis(frontEnd, vt[5]), self, self->mType);
             if (nextState != 0)
@@ -1431,7 +1432,7 @@ extern "C" void* cFEStateRiderBio_cFEStateRiderBio(cFEStateRiderBio* self, int e
     self->mVtbl = cFEStateRiderBio_vtbl;
     self->mHashName = 0xF;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     return ((void*)self);
 }
 #endif

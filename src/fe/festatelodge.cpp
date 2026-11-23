@@ -199,14 +199,14 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
         return;
     }
     if (k == 8) {
-        *(int*)(*(char**)self->mpEngine + 0xC) = 39;
+        *(int*)((char*)self->mpEngine->mpCustom + 0xC) = 39;
         void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0, 0);
         void* newState = cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, 1 << self->mCurrentCtrl);
         cUIStateStack_push(&self->mpEngine->mStateStack, newState);
         return;
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-    char* obj = *(char**)self->mpEngine;
+    char* obj = (char*)self->mpEngine->mpCustom;
     sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
     void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
     if (nextState != 0) {
@@ -305,7 +305,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         case 17: {
             self->bToNextState = 1;
             cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-            char* obj = *(char**)self->mpEngine;
+            char* obj = (char*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
             void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), 6);
             if (nextState != 0) {
@@ -379,7 +379,7 @@ extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cFEStateLodge
     self->mVtbl = cFEStateLodgeRiderDetail_vtbl;
     self->mHashName = 40;
     *(char*)&self->mUserNum = 0;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, 0);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
     return ((void*)self);
 }
 #endif
@@ -674,7 +674,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
             return;
         }
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-        cUICustomInterface* obj = (cUICustomInterface*)(*(char**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
         if (nextState != 0) {
@@ -683,7 +683,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         break;
     }
     case 6: {
-        cUICustomInterface* obj = (cUICustomInterface*)(*(char**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), 0);
         if (nextState != 0) {
@@ -729,7 +729,7 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMem
     stateMemory->mHashName = 41;
     stateMemory->mVtbl = cFEStateBuyAttrib_vtbl;
     stateMemory->mUserNum = 0;
-    stateMemory->mCtrlBits = cFECustom_getPlayerCtrlMask_4728(*(void**)stateMemory->mpEngine, 0);
+    stateMemory->mCtrlBits = cFECustom_getPlayerCtrlMask_4728((void*)stateMemory->mpEngine->mpCustom, 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     MEM_fill(&stateMemory->mPotentialExperience[0], 0, 0x1C);
     for (int i = 0; i < 7; i++) {

@@ -1115,7 +1115,7 @@ extern "C" void* cFEStateCharSetup_cFEStateCharSetup(cFEStateCharSetup* self, cU
     self->mHashName = 0xC;
     self->mVtbl = cFEStateCharSetup_vtbl;
     self->mUserNum = idx;
-    self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mbDraw3D = 0;
     return ((void*)self);
 }

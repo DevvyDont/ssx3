@@ -236,7 +236,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
         if (w != 0) {
             w->show(0);
         }
-        void* obj = *(void**)self->mpEngine;
+        void* obj = (void*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, self->mPeakNum);
         if (nextState != 0) {
@@ -641,7 +641,7 @@ extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(cFEStateRewardsRoom* se
     self->mHashName = 46;
     self->mVtbl = cFEStateRewardsRoom_vtbl;
     self->mUserNum = idx;
-    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mInStore = inStore;
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     return ((void*)self);
@@ -754,14 +754,14 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
     case 0:
         break;
     case 5: {
-        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[4].fn(vthis(obj, vt[4]), self, item->mMiscData);
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
-        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {

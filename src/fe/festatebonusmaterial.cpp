@@ -130,7 +130,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
         break;
     }
     case 6: {
-        cUICustomInterface* factory = (cUICustomInterface*)(*(char**)self->mpEngine);
+        cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory);
         void* nextState = vt[5].fn(vthis(factory, vt[5]), self, item->mMiscData);
         if (nextState != 0)

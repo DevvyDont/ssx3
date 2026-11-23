@@ -1835,7 +1835,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
     }
     case 6: {
         iface->submit();
-        char* obj = *(char**)self->mpEngine;
+        char* obj = (char*)self->mpEngine->mpCustom;
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
         void* nextState = vt2[5].fn(vthis(obj, vt2[5]), ((char*)self), widget->mMiscData);
         if (nextState != 0) {
@@ -2187,7 +2187,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
     }
     case 6: {
         iface->submit();
-        char* obj = *(char**)self->mpEngine;
+        char* obj = (char*)self->mpEngine->mpCustom;
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
         void* nextState = vt2[5].fn(vthis(obj, vt2[5]), ((char*)self), widget->mMiscData);
         if (nextState != 0) {
@@ -2696,7 +2696,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
         feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, 1);
         cFERider_purge(feRider);
         cFERider_init(feRider, 1, 0, 0);
-        char* obj = *(char**)self->mpEngine;
+        char* obj = (char*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt2 = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* x = vt2[4].fn(vthis(obj, vt2[4]), ((char*)self), (1 << self->mSaveLoadCurrentCtrl) | 0x100);
         if (x != 0) {
@@ -2763,7 +2763,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
             if (widgetId > 3) {
                 widgetId |= 1 << self->mCurrentCtrl;
             }
-            char* obj = *(char**)self->mpEngine;
+            char* obj = (char*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
             void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), widgetId);
             if (nextState != 0) {
@@ -2773,7 +2773,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
         break;
     }
     case 6: {
-        char* obj = *(char**)self->mpEngine;
+        char* obj = (char*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), widget->mMiscData);
         if (nextState != 0) {
@@ -3428,7 +3428,7 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
         if (self->mbOnline != 0) {
             mode = 2;
         }
-        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, obj);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, mode);
         if (nextState != 0) {

@@ -90,7 +90,7 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
         item->setColor(sColor_20E9A0(1.0f, 1.0f, 0.0f, 0.0f));
         void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
-            void* obj = *(void**)self->mpEngine;
+            void* obj = (void*)self->mpEngine->mpCustom;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
             nextState = vt[4].fn(vthis(obj, vt[4]), self, 1);
         }
@@ -98,7 +98,7 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
         break;
     }
     case 6: {
-        void* obj = *(void**)self->mpEngine;
+        void* obj = (void*)self->mpEngine->mpCustom;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {

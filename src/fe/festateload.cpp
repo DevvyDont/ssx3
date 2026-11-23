@@ -184,7 +184,7 @@ static inline void Opened1867A8(void* vself, void* item)
 {
     cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
     if (item != 0) {
-        cFEVObj_1867A8* c = *(cFEVObj_1867A8**)(*(char**)self->mpEngine + 0x10);
+        cFEVObj_1867A8* c = *(cFEVObj_1867A8**)((char*)self->mpEngine->mpCustom + 0x10);
         if (c != 0) {
             c->v24(1, 0);
         }
