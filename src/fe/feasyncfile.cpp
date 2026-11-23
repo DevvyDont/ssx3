@@ -6481,7 +6481,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cPopupInfo_clearPopupConfirmation(cPopupInfo* self, int a1);
-extern "C" void func_001C5838(void* self, int a1, int a2, int a3);
+extern "C" void func_001C5838(cPopupInfo* self, int a1, int a2, int a3);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
@@ -9451,7 +9451,7 @@ extern "C" void func_001AF688(cFEStateChallengePopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" void func_001AB108(cFEStateNet* self);
 extern "C" void func_001AFA60(void* screen, online_FindPlayerEvent* msg);
-extern "C" void func_001AFD88(void* self, online_PingEvent* a1);
+extern "C" void func_001AFD88(cUIScreen* self, online_PingEvent* a1);
 extern const char str_cFEStateOnlineCharacterSelect[];
 
 /**
@@ -9847,7 +9847,7 @@ extern char str_kT_CMNConnection[];
  *
  * @param msg  the ping event
  */
-extern "C" void func_001AFD88(void* self, online_PingEvent* msg)
+extern "C" void func_001AFD88(cUIScreen* self, online_PingEvent* msg)
 {
     cUIText* text = cUIScreen_getObjectByHashName(self, GetHashValue32(str_TextPlayerConQuality));
     if (text != 0) {
@@ -10435,7 +10435,7 @@ extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
 extern "C" void func_001AB108(cFEStateNet* self);
 extern "C" void func_001AFA60(void* screen, online_FindPlayerEvent* msg);
-extern "C" void func_001AFD88(void* self, online_PingEvent* a1);
+extern "C" void func_001AFD88(cUIScreen* self, online_PingEvent* a1);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -13353,7 +13353,7 @@ extern "C" void func_001B4888(cFEStateNetConfig* self, int a1, int a2, int a3);
 extern "C" void func_001B5068(cFEStateNetConfig* self, int a1);
 extern "C" void func_001B43A8(cFEStateNetConfig* self);
 extern "C" void func_001B4470(cFEStateNetConfig* self);
-extern "C" void func_001B45E8(void* self);
+extern "C" void func_001B45E8(cFEStateNetConfig* self);
 extern "C" int cUIStateStack_popToState(void* p);
 void func_002C67E8(void* self, int a1);
 extern char* D_004A1B78_p __asm__("D_004A1B78");
@@ -13713,10 +13713,10 @@ public:
  * (id 2062), starts the connection with configuration miSelectedSetting (func_002636A8 on func_002591B8()) and sets
  * miState 0.
  */
-extern "C" void func_001B45E8(void* self)
+extern "C" void func_001B45E8(cFEStateNetConfig* self)
 {
     if (((cFEVObj_001B45E8*)D_004A1B78)->IsAvailable1() == 0) {
-        *(int*)((char*)self + 0x708) = 0;
+        self->miState = 0;
         func_001B5068((cFEStateNetConfig*)self, -1);
         char* buf = (char*)self + 0x71C;
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
@@ -13738,8 +13738,8 @@ extern "C" void func_001B45E8(void* self)
         popup->info.miMiscData = 2062;
         func_001C57C0(sub, 0, GetHashValue32(str_kT_BTNCancel));
         func_001A9BC0((cFEStateNet*)self, popup);
-        func_002636A8(func_002591B8(), *(void**)((char*)self + 0x6D0));
-        *(int*)((char*)self + 0x708) = 0;
+        func_002636A8(func_002591B8(), (void*)self->miSelectedSetting);
+        self->miState = 0;
     }
 }
 #endif
@@ -27853,7 +27853,7 @@ struct cFEAsyncReqs {
  * @param value  the unicode prompt, passed as an int
  * @param extra  the confirmation popup's default option (iDefaultOption)
  */
-extern "C" void func_001C5838(void* self, int index, int value, int extra)
+extern "C" void func_001C5838(cPopupInfo* self, int index, int value, int extra)
 {
     cFEAsyncReqs* reqs = (cFEAsyncReqs*)self;
     reqs->mReqs[index].mValue = value;

@@ -617,7 +617,7 @@ extern "C" int MEMSYS_validaddress(void* p, int size, int flags);
  *
  * @return 1 when the link is valid, else 0
  */
-extern "C" int checkfree(void* self)
+extern "C" int checkfree(FREEBLOCK* self)
 {
     int ok = 0;
     if (MEMSYS_validaddress(self, 0x18, 0) != 0) {
@@ -666,9 +666,9 @@ extern "C" int checksentinel(FREEBLOCK* blk)
         }
     } else if (tag == 16966) {
         if (blk->type & 0x4000) {
-            ok = checkfree(((void*)blk->nextfree));
+            ok = checkfree((FREEBLOCK*)((void*)blk->nextfree));
             if (ok) {
-                ok = checkfree(((void*)blk->prevfree));
+                ok = checkfree((FREEBLOCK*)((void*)blk->prevfree));
             }
         }
     } else if (tag == 16973) {

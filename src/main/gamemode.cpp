@@ -1419,7 +1419,7 @@ int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" void* memset(void* dst, int c, int n);
-extern "C" void func_0023A4F0(void* self);
+extern "C" void func_0023A4F0(cGMRaceHandler* self);
 extern "C" void func_0023A668(void* self);
 extern unsigned int D_00536640[];
 extern int cGameModeMan_iRanking[];
@@ -1615,7 +1615,7 @@ extern "C" void func_0023C770(int* arr, unsigned int n);
  * other than the player's and the rival's (cBENewRaceInterface_getRival), shuffles all ten with func_0023C770 and stores the player's
  * character and the shuffled values in the line-up rows at +0x10 .. +0x54.
  */
-extern "C" void func_0023A4F0(void* self)
+extern "C" void func_0023A4F0(cGMRaceHandler* self)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1639,17 +1639,17 @@ extern "C" void func_0023A4F0(void* self)
         }
     }
     func_0023C770(arr, 10);
-    *(int*)((char*)self + 0x10) = charA;
-    *(int*)((char*)self + 0x14) = arr[0];
-    *(int*)((char*)self + 0x18) = arr[1];
-    *(int*)((char*)self + 0x1C) = arr[2];
-    *(int*)((char*)self + 0x20) = arr[3];
-    *(int*)((char*)self + 0x24) = arr[4];
-    *(int*)((char*)self + 0x34) = arr[5];
-    *(int*)((char*)self + 0x38) = arr[6];
-    *(int*)((char*)self + 0x3C) = arr[7];
-    *(int*)((char*)self + 0x50) = arr[8];
-    *(int*)((char*)self + 0x54) = arr[9];
+    self->mLineup[0][0] = charA;
+    self->mLineup[0][1] = arr[0];
+    self->mLineup[0][2] = arr[1];
+    self->mLineup[0][3] = arr[2];
+    self->mLineup[0][4] = arr[3];
+    self->mLineup[0][5] = arr[4];
+    self->mLineup[1][3] = arr[5];
+    self->mLineup[1][4] = arr[6];
+    self->mLineup[1][5] = arr[7];
+    self->mLineup[2][4] = arr[8];
+    self->mLineup[2][5] = arr[9];
 }
 #endif
 

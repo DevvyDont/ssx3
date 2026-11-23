@@ -1867,7 +1867,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @return the setting
  */
-extern "C" int func_00287670(void* self)
+extern "C" int func_00287670(cSSXAudio* self)
 {
     return (int)(cSSXAudio_GetCurrSetVolume((cSSXAudio*)self, 1) * 11.0f);
 }
@@ -1899,7 +1899,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @return the setting
  */
-extern "C" int func_002876D0(void* self)
+extern "C" int func_002876D0(cSSXAudio* self)
 {
     return (int)(cSSXAudio_GetCurrSetVolume((cSSXAudio*)self, 4) * 11.0f);
 }

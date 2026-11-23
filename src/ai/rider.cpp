@@ -348,7 +348,7 @@ struct sBEEntry_11BBE8
  * @param list  receives the entry pointers
  * @return the number of entries written
  */
-extern "C" int func_0011BBE8(void* vself, char** list)
+extern "C" int func_0011BBE8(cRider* vself, char** list)
 {
     cRider* self = (cRider*)vself;
     int n = 0;
@@ -549,7 +549,7 @@ void* cMdfArchive_cMdfArchive(void* self);
 void cMdfArchive_attachArchive(void* self, int a1);
 extern "C" void cMdfArchive__cMdfArchive(int* self, int flags);
 extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
-extern "C" int func_0011BBE8(void* self, char** list);
+extern "C" int func_0011BBE8(cRider* self, char** list);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
 
 

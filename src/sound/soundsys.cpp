@@ -5569,7 +5569,7 @@ static inline int snd9E28AddVoice(void* vself, int a, int b, int type)
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_002A4290(void* self);
+extern "C" int func_002A4290(cSSXAudio* self);
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cAudioInterface_getAI();
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
@@ -6978,7 +6978,7 @@ int func_002B4908(void* self);
 extern "C" void func_002A3170(cSSXAudio* self);
 extern "C" void func_002A3400(cSSXAudio* self);
 extern "C" int func_002A4078(void* self);
-extern "C" int func_002A40E8(void* self);
+extern "C" int func_002A40E8(cSSXAudio* self);
 extern "C" void cSSXAudio_PlayHistoryUpdateTime(cSSXAudio* self, int a, int b, int c);
 
 struct sSnd7B0Ch {
@@ -8453,7 +8453,7 @@ extern "C" void func_0029ED18(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029ED90);
 #ifdef SKIP_ASM
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int BXFILE_exists(const char* name);
 extern "C" void SPCH_Init(void* self);
@@ -8488,7 +8488,7 @@ static inline void sndStreamLoad(const char* name, void** h)
  */
 extern "C" void func_0029ED90(cSSXAudio* self, int restart)
 {
-    int mode = func_0029F198(((char*)self));
+    int mode = func_0029F198((cSSXAudio*)(((char*)self)));
     if (mode == self->unk_572C) {
         return;
     }
@@ -8642,7 +8642,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
  *
  * @return 1 when allowed, else 0
  */
-extern "C" int func_0029F0D8(void* self)
+extern "C" int func_0029F0D8(cSSXAudio* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return 0;
@@ -8666,7 +8666,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
  *
  * @return 1 when the PA volume (cSSXAudio_GetCurrSetVolume(self, 3)) is nonzero, else 0
  */
-extern "C" int func_0029F128(void* self)
+extern "C" int func_0029F128(cSSXAudio* self)
 {
     if (cSSXAudio_GetCurrSetVolume(self, 3) == 0.0f) {
         return 0;
@@ -8687,7 +8687,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
  *
  * @return 1 when the ArcadeSpeech volume (cSSXAudio_GetCurrSetVolume(self, 10)) is nonzero, else 0
  */
-extern "C" int func_0029F160(void* self)
+extern "C" int func_0029F160(cSSXAudio* self)
 {
     if (cSSXAudio_GetCurrSetVolume(self, 10) == 0.0f) {
         return 0;
@@ -8717,7 +8717,7 @@ extern sSsOpts9F198 cBEOptionInterface_mOption_ss9F198 __asm__("cBEOptionInterfa
  *
  * @return the language bit
  */
-extern "C" int func_0029F198(void* self)
+extern "C" int func_0029F198(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     sSsOpts9F198 optionCopy = cBEOptionInterface_mOption_ss9F198;
@@ -8806,7 +8806,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F378);
  * @param obj  the rider (cRider)
  * @return the character identity for the grunt bank
  */
-extern "C" int func_0029F378(void* self, void* obj)
+extern "C" int func_0029F378(cSSXAudio* self, void* obj)
 {
     switch (cRider_getCheatIdentity(obj)) {
     case 0:
@@ -8852,7 +8852,7 @@ extern char str_GRNT_AI_bnk[];
 extern "C" void func_0029F3F8(cSSXAudio* self)
 {
     char buf[64];
-    switch (func_0029F378(((char*)self), ((cAI*)cAudioInterface_getAI())->Riders[0])) {
+    switch (func_0029F378((cSSXAudio*)(((char*)self)), ((cAI*)cAudioInterface_getAI())->Riders[0])) {
     case 6: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_eli_bnk); break;
     case 3: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mac_bnk); break;
     case 0: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mob_bnk); break;
@@ -8897,7 +8897,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F620);
  * @param obj  the rider (cRider)
  * @return 14 or 15
  */
-extern "C" int func_0029F620(void* self, cRider* obj)
+extern "C" int func_0029F620(cSSXAudio* self, cRider* obj)
 {
     if (obj->getAIIndex() == 0) {
         return 0xE;
@@ -9033,8 +9033,8 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029FCC8);
 #ifdef SKIP_ASM
-extern "C" int func_002A3FE8(void* self);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A3FE8(cSSXAudio* self);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
@@ -9129,7 +9129,7 @@ INCLUDE_ASM("sound/soundsys", func_0029FF80);
 #ifdef SKIP_ASM
 extern "C" int func_0029F0A0(void* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
@@ -9225,9 +9225,9 @@ extern "C" void func_0029FF80(cSSXAudio* self, sSsFF80Rider* rider, int alt)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A02D8);
 #ifdef SKIP_ASM
-extern "C" int func_002A3F90(void* self);
-extern "C" int func_002A4040(void* self);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A3F90(cSSXAudio* self);
+extern "C" int func_002A4040(cSSXAudio* self);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
@@ -9507,7 +9507,7 @@ struct sSs0A30Rider : public sSs0A30RiderA, public cSs0A30Obj {
     int f87C;
 };
 struct sSs1820Rider;
-extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b);
+extern "C" int func_002A1820(cSSXAudio* self, sSs1820Rider* a, sSs1820Rider* b);
 
 /**
  * Plays the victim's grunt for a rider-on-rider hit and, for a plain punch, the attacker's and victim's speech.
@@ -10028,7 +10028,7 @@ struct sSs1820Rider : public sSs1820RiderA, public cSs1820Obj {
  * @param secondRider  the second rider
  * @return 0, 1 or 2
  */
-extern "C" int func_002A1820(void* self, sSs1820Rider* firstRider, sSs1820Rider* secondRider)
+extern "C" int func_002A1820(cSSXAudio* self, sSs1820Rider* firstRider, sSs1820Rider* secondRider)
 {
     if (((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated == 2) return 2;
     int oka = firstRider->f874 != 0 && firstRider->f87C != 0;
@@ -10195,7 +10195,7 @@ INCLUDE_ASM("sound/soundsys", func_002A1BD8);
  * @return the bit, or 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002A1BD8(void* self, int location, int subLocation)
+extern "C" int func_002A1BD8(cSSXAudio* self, int location, int subLocation)
 {
     switch (location) {
     case 0: return 0x1;
@@ -10310,7 +10310,7 @@ INCLUDE_ASM("sound/soundsys", func_002A1E20);
  * @return 1, 2, 4 or 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002A1E20(void* self, unsigned int x)
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int x)
 {
     switch (x) {
     case 0: case 1: case 5: case 8: case 11: case 14: case 17: case 18:
@@ -10447,14 +10447,14 @@ extern "C" int func_002A1FA0(void *self, void *obj)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2018);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -10482,14 +10482,14 @@ extern "C" void func_002A2018(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A20D0);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -10516,9 +10516,9 @@ extern "C" void func_002A20D0(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2188);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
 // func_002A1D48 returns its tail call's value (the unit defines it as void).
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
@@ -10526,7 +10526,7 @@ extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -10554,14 +10554,14 @@ extern "C" void func_002A2188(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2260);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -10587,14 +10587,14 @@ extern "C" void func_002A2260(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2318);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -10620,14 +10620,14 @@ extern "C" void func_002A2318(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A23D0);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -10662,10 +10662,10 @@ extern "C" void func_002A23D0(cSSXAudio* self, int mode)
 INCLUDE_ASM("sound/soundsys", func_002A24B0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
-extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -10694,14 +10694,14 @@ extern "C" void func_002A24B0(cSSXAudio* self, int location)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A2568);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -10730,14 +10730,14 @@ extern "C" void func_002A2568(cSSXAudio* self, int subLocation)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2638);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -10765,10 +10765,10 @@ extern "C" void func_002A2638(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A26F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" void func_002B11B0(void*, int);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -10807,9 +10807,9 @@ extern "C" void func_002A26F0(cSSXAudio* self, int firstChoice, int secondChoice
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A27D8);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
@@ -10834,9 +10834,9 @@ extern "C" void func_002A27D8(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A2860);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 6-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C");
@@ -10875,9 +10875,9 @@ extern "C" void func_002A2860(cSSXAudio* self, int n)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2938);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
 // func_002A1D48 returns its tail call's value (the unit defines it as void).
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
@@ -10885,7 +10885,7 @@ extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -10913,9 +10913,9 @@ extern "C" void func_002A2938(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2A10);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -10948,14 +10948,14 @@ extern "C" void func_002A2A10(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A2AD0);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -10983,9 +10983,9 @@ extern "C" void func_002A2AD0(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A2B88);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -11013,14 +11013,14 @@ extern "C" void func_002A2B88(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A2C30);
 #ifdef SKIP_ASM
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -11048,10 +11048,10 @@ extern "C" void func_002A2C30(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A2CF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
-extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -11081,10 +11081,10 @@ extern "C" void func_002A2CF0(cSSXAudio* self, int location)
 INCLUDE_ASM("sound/soundsys", func_002A2DA0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F0D8(void* self);
+extern "C" int func_0029F0D8(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
-extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -11123,7 +11123,7 @@ extern "C" void func_002A2B88(cSSXAudio* self);
 extern "C" void func_002A2260(cSSXAudio* self);
 extern "C" void func_002A2318(cSSXAudio* self);
 extern "C" void func_002A20D0(cSSXAudio* self);
-extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" unsigned int cSoundSys_SndRand(void* rng);
@@ -11176,7 +11176,7 @@ extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
                 int track = 0xE;
                 void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
                 signed char ch = cBENewPlayerInterface_getRiderCharID_i(players, cBENewPlayerInterface_getHumanRider(players, 0));
-                int sel = func_002A1E20(((char*)vself), *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+                int sel = func_002A1E20((cSSXAudio*)(((char*)vself)), *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
                 if (sel != 1) {
                     track = sel == 2 ? 0xF : 0x10;
                 }
@@ -11253,14 +11253,14 @@ extern "C" void func_002A3170(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A31C0);
 #ifdef SKIP_ASM
-extern "C" int func_0029F128(void* self);
-extern "C" int func_002A4040(void* self);
+extern "C" int func_0029F128(cSSXAudio* self);
+extern "C" int func_002A4040(cSSXAudio* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -11292,9 +11292,9 @@ extern "C" void func_002A31C0(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A32B0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F128(void* self);
+extern "C" int func_0029F128(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
 // func_002A1D48 returns its tail call's value (the unit defines it as void).
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
@@ -11325,9 +11325,9 @@ extern "C" void func_002A32B0(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A3358);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F128(void* self);
+extern "C" int func_0029F128(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
 // func_002A1D48 returns its tail call's value (the unit defines it as void).
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
@@ -11357,15 +11357,15 @@ extern "C" void func_002A3358(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A3400);
 #ifdef SKIP_ASM
-extern "C" int func_0029F128(void* self);
+extern "C" int func_0029F128(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -11427,7 +11427,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
     int riderBit;
     int placeBit;
 
-    if (func_0029F128(((char*)vself)) == 0) {
+    if (func_0029F128((cSSXAudio*)(((char*)vself))) == 0) {
         return 1;
     }
     if (cSSXAudio_ReplayMode(((char*)vself)) != 0) {
@@ -11455,7 +11455,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
         if (func_002A4078(((char*)vself)) == 0) {
             return 1;
         }
-        if (func_002A4040(((char*)vself)) != 0) {
+        if (func_002A4040((cSSXAudio*)(((char*)vself))) != 0) {
             return 1;
         }
         sel = 0;
@@ -11467,7 +11467,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
     if (func_002B1458_f(&vself->SpeechSys, 0, 8388, 0, 11, 0.0f, 0, 0) == 0) {
         return 1;
     }
-    languageBit = func_0029F198(((char*)vself));
+    languageBit = func_0029F198((cSSXAudio*)(((char*)vself)));
     riderBit = func_002A1D48_i(((char*)vself), rider);
     if (sel != 0) {
         placeBit = func_002A1E68(((char*)vself), rider);
@@ -11504,9 +11504,9 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A3708);
 #ifdef SKIP_ASM
-extern "C" int func_0029F128(void* self);
+extern "C" int func_0029F128(cSSXAudio* self);
 extern "C" int cRider_getCheatIdentity(void*);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" int func_002A1E68(void* self, cRider* rider);
 // PORT: callers pass self to func_002A4248 (the unit's later definition takes no args).
 int func_002A4248_s(void* self) __asm__("func_002A4248");
@@ -11552,8 +11552,8 @@ INCLUDE_ASM("sound/soundsys", func_002A3860);
 #ifdef SKIP_ASM
 #include "fakematch.h"
 #include "object/being.h"
-extern "C" int func_0029F128(void* self);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F128(cSSXAudio* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 // PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern int cGameModeMan_iRanking[];
@@ -11611,14 +11611,14 @@ extern "C" void func_002A3860(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A39E0);
 #ifdef SKIP_ASM
-extern "C" int func_0029F128(void* self);
+extern "C" int func_0029F128(cSSXAudio* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(void* self);
+extern "C" int func_0029F198(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(void* self, int a, int b);
+extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -11678,7 +11678,7 @@ extern "C" int func_002A3AA0(void* self, cMonitorInstance* monitorInst) {
 INCLUDE_ASM("sound/soundsys", func_002A3B18);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F160(void* self);
+extern "C" int func_0029F160(cSSXAudio* self);
 // cSSXAudio_GetFocusRider returns an object pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" int cSSXAudio_ReplayMode(void* self);
@@ -11714,7 +11714,7 @@ extern "C" void func_002A3B18(cSSXAudio* self, cRider* obj, int eventValue)
 INCLUDE_ASM("sound/soundsys", func_002A3C00);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0029F160(void* self);
+extern "C" int func_0029F160(cSSXAudio* self);
 // cSSXAudio_GetFocusRider returns an object pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" int cSSXAudio_ReplayMode(void* self);
@@ -11790,7 +11790,7 @@ extern "C" void func_002A3CE8(cSSXAudio* self, cRider* rider, int n)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A3DE0);
 #ifdef SKIP_ASM
-extern "C" int func_0029F160(void* self);
+extern "C" int func_0029F160(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -11823,7 +11823,7 @@ extern "C" void func_002A3DE0(cSSXAudio* self, cRider* obj, int ev)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A3EB8);
 #ifdef SKIP_ASM
-extern "C" int func_0029F160(void* self);
+extern "C" int func_0029F160(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -11866,7 +11866,7 @@ extern "C" int func_002A3FD8(void* self, unsigned int a1);
  *
  * @return 1 or 0
  */
-extern "C" int func_002A3F90(void* self)
+extern "C" int func_002A3F90(cSSXAudio* self)
 {
     return func_002A3FD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
 }
@@ -11901,7 +11901,7 @@ extern "C" int func_002A4030(void* self, unsigned int a1);
  *
  * @return 1 or 0
  */
-extern "C" int func_002A3FE8(void* self)
+extern "C" int func_002A3FE8(cSSXAudio* self)
 {
     return func_002A4030(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
 }
@@ -11934,7 +11934,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
  *
  * @return 1 or 0
  */
-extern "C" int func_002A4040(void* self)
+extern "C" int func_002A4040(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     return cBENewRaceInterface_newRace.cGameMode == 4;
@@ -11996,7 +11996,7 @@ extern "C" int func_002A4158(void* self, unsigned int a1);
  *
  * @return 1 or 0
  */
-extern "C" int func_002A40E8(void* self)
+extern "C" int func_002A40E8(cSSXAudio* self)
 {
     if (func_002A4158(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
@@ -12144,7 +12144,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
  *
  * @return 1 or 0
  */
-extern "C" int func_002A4290(void* self)
+extern "C" int func_002A4290(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     return cBENewRaceInterface_newRace.cGameEvent == 4;

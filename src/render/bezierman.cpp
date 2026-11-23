@@ -1744,7 +1744,7 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
  * @param handle  the packet write cursor, set to the end of the packet plus 0x10
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int.
-extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle)
+extern "C" void func_0038D690(cPS2BezierMan* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle)
 {
     cPS2BezierMan* manager = (cPS2BezierMan*)self;
     tPatchRecord* patchRec = (tPatchRecord*)obj;
@@ -1810,7 +1810,7 @@ extern int cRenderToggles_m_DisableSparkles;
 extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_D968 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_0037D968(cPS2GraphicsMan* ctx);
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
-extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle);
+extern "C" void func_0038D690(cPS2BezierMan* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle);
 
 /**
  * Runs the snow-sparkle pass (func_0038D690) over the 8x8 patches and the mixed patches with an LOD-8 edge.

@@ -1546,7 +1546,7 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
 INCLUDE_ASM("sound/bankmanager", func_0028D488);
 #ifdef SKIP_ASM
 extern "C" unsigned int cSoundSys_SndRand(void* rng);
-extern "C" int func_0028D8A0(void* self);
+extern "C" int func_0028D8A0(cSSXAudio* self);
 extern "C" void func_002B42B8(void* q, int a, int b);
 
 /**
@@ -1566,10 +1566,10 @@ extern "C" void func_0028D488(cSSXAudio* vself)
     int n = ((cSoundSys_SndRand(vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF) * 10) / 0x7FFF + 1;
     int i;
     for (i = 0; i < n; i++)
-        func_002B42B8(&vself->MusicSys, 1, func_0028D8A0(((char*)vself)));
+        func_002B42B8(&vself->MusicSys, 1, func_0028D8A0((cSSXAudio*)(((char*)vself))));
     char* monitor = (char*)&vself->MusicSys;
     if (prev == vself->MusicSys.mCurrentSongNum) {
-        func_002B42B8(monitor, 1, func_0028D8A0(((char*)vself)));
+        func_002B42B8(monitor, 1, func_0028D8A0((cSSXAudio*)(((char*)vself))));
         if (prev == vself->MusicSys.mCurrentSongNum)
             func_002B42B8(monitor, 0, 0);
     }
@@ -1803,7 +1803,7 @@ extern "C" int func_002A4238(void* self, int id);
  *
  * @return the category index
  */
-extern "C" int func_0028D8A0(void* self)
+extern "C" int func_0028D8A0(cSSXAudio* self)
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     int result;

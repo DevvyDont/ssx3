@@ -317,7 +317,7 @@ static inline int Match_6C70(sBEEntry_6C70* e, int type)
  * @param type  item type, 0 to 2 (flags 0x100, 0x200, 0x400)
  * @return the chosen item id, or -1 when there is none
  */
-extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int type)
+extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int characterId, int type)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;
@@ -445,7 +445,7 @@ static inline sBEFlagEntry_6EE0* Flag_6EE0(char* p, sBEEntry_6EE0* e)
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the chosen item id, or -1 when there is none
  */
-extern "C" int func_00156EE0(void* self, int profileIndex, int characterId)
+extern "C" int func_00156EE0(cBERewardInterface* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;

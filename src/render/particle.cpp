@@ -1654,7 +1654,7 @@ struct sPtElem2B30 {
  *
  * @return @p self
  */
-extern "C" void* func_00372B30(void* self)
+extern "C" void* func_00372B30(cBezierCache* self)
 {
     new ((char*)self + 0x20) sPtElem2B30[4];
     new ((char*)self + 0x60) sPtElem2B30[6];
@@ -1662,10 +1662,10 @@ extern "C" void* func_00372B30(void* self)
     new ((char*)self + 0x140) sPtElem2B30[4];
     new ((char*)self + 0x180) sPtElem2B30[6];
     new ((char*)self + 0x1E0) sPtElem2B30[8];
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    return self;
+    self->m4x4CacheRecord = 0;
+    self->m6x6CacheRecord = 0;
+    self->m8x8CacheRecord = 0;
+    return ((void*)self);
 }
 #endif
 

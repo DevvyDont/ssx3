@@ -877,7 +877,7 @@ extern "C" void func_002565E0(DNASMan* self);
  *
  * State 1 runs func_00256460, 2 runs func_00256510, 4 runs func_002565E0; states 0, 3 and 5 wait.
  */
-extern "C" void func_002563F8(char* self)
+extern "C" void func_002563F8(DNASMan* self)
 {
     switch (*(int*)self) {
     case 1:

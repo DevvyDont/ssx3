@@ -418,7 +418,7 @@ extern "C" void func_00259230(void* ev);
  *
  * @param ev  the event (its type at +0x0)
  */
-extern "C" void func_0017D260(void* self, void* ev)
+extern "C" void func_0017D260(LobbyMan* self, void* ev)
 {
     if (D_004A4E90 != 0)
         func_0017D6F0((cDebugLobbyScreen*)D_004A4E90, (online_Event*)ev);

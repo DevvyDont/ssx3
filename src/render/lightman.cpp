@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/bxps2tex.h"
 #include "visualfx/worldlightman.h"
 #include "render/ps2scratchpad.h"
 #include "bx/math3d.h"
@@ -1754,7 +1755,7 @@ extern "C" void* memset(void* dst, int c, int n);
  * @param dst  the output
  * @return 0, or -1 when a side is not a power of two up to 1024
  */
-extern "C" int func_00390198(void* self, int w, int height, unsigned char* src, unsigned char* dst)
+extern "C" int func_00390198(cTextureMan* self, int w, int height, unsigned char* src, unsigned char* dst)
 {
     unsigned char bufA[0x2000];
     unsigned char bufB[0x2000];
