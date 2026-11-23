@@ -879,12 +879,6 @@ struct sV4_C590 {
 
 
 
-struct sGmVE_C590 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, tBxVertex*, int);
-};
-
 extern char* cGraphicsMan_TheGraphicsMan_C590 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline void setVert_C590(tBxVertex* v, const t3Vector& p, const t2Vector& uv)
@@ -916,15 +910,13 @@ extern "C" void func_0038C590(t3Vector* pts, t2Vector* uvs, int n)
         for (int j = 0; j < n; j++) {
             setVert_C590(&verts[j], pts[i * n + j], uvs[i * n + j]);
         }
-        sGmVE_C590* vt = (sGmVE_C590*)VPTR_OF(cGraphicsMan, gfx);
-        vt[73].fn(vthis(gfx, vt[73]), n, verts, 0);
+        gfx->RenderLineStrip(n, verts, 0);
     }
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             setVert_C590(&verts[j], pts[j * n + i], uvs[j * n + i]);
         }
-        sGmVE_C590* vt = (sGmVE_C590*)VPTR_OF(cGraphicsMan, gfx);
-        vt[73].fn(vthis(gfx, vt[73]), n, verts, 0);
+        gfx->RenderLineStrip(n, verts, 0);
     }
 }
 #endif
@@ -1379,6 +1371,7 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
 INCLUDE_ASM("render/bezierman", func_0038D168);
 #ifdef SKIP_ASM
 #include "fakematch.h"
+#include "render/graphicsman.h"
 struct sEnt_D168 {
     sDrawState rs;                    // 0x00
     unsigned int buf;               // 0x14

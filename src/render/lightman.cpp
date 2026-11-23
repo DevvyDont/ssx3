@@ -788,8 +788,7 @@ extern "C" void c2DRender_drawLine(c2DRender* self, sLmQuadVec4_E118* start, sLm
     ((int*)&verts[0].r)[2] = blue;
     ((int*)&verts[0].r)[3] = alpha;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)VPTR_OF(cGraphicsMan, ctx);
-    vt[73].fn(vthis(ctx, vt[73]), 2, verts, 0);
+    ctx->RenderLineStrip(2, verts, 0);
 }
 #endif
 

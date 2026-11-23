@@ -1408,12 +1408,6 @@ struct sPtRS_26C8 {
     short pad;
 };
 
-struct sPtVEntry_26C8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, sPtVtx_26C8*, int);
-};
-
 
 
 extern int cTube_m_Enable;
@@ -1559,13 +1553,11 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[1] = *(sPtRS_26C8*)&ctx->m_pCurrentDrawState->m_bitGroups[0];
     (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)++;
     *((sPtRS_26C8*)ctx->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs26C8;
-    sPtVEntry_26C8* vt = ((sPtVEntry_26C8*)VPTR_OF(cGraphicsMan, ctx));
-    vt[71].fn(vthis(ctx, vt[71]), ((self->m_numSegments + 1) << 2) | 2, cSimpleTube_m_vertices_v26C8, 0);
+    ctx->RenderTriStrip(((self->m_numSegments + 1) << 2) | 2, (tBxVertex*)cSimpleTube_m_vertices_v26C8, 0);
     for (int i = 0; i < self->m_numSegments + 1; i++) {
         cSimpleTube_m_vertices_v26C8[i].pos = (self->m_positions)[i];
     }
-    vt = ((sPtVEntry_26C8*)VPTR_OF(cGraphicsMan, ctx));
-    vt[73].fn(vthis(ctx, vt[73]), self->m_numSegments + 1, cSimpleTube_m_vertices_v26C8, 0);
+    ctx->RenderLineStrip(self->m_numSegments + 1, (const tBxVertex*)cSimpleTube_m_vertices_v26C8, 0);
     (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)--;
 }
 #endif

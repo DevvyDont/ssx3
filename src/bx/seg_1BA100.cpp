@@ -22,6 +22,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "ai/player.h"
+#include "render/graphicsman.h"
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", bxLogPrint);
@@ -2874,8 +2875,7 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree,
         corner.z = cam.z;
         corner.w = 1.0f;
         (*(&verts[4].p)) = corner;
-        sQtVEntry_B928* vt = (sQtVEntry_B928*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-        vt[73].fn(vthis(ps2GraphicsMan, vt[73]), 5, verts, 0);
+        ps2GraphicsMan->RenderLineStrip(5, verts, 0);
     }
 }
 #endif

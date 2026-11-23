@@ -359,12 +359,6 @@ struct sBezVert_A048 {
     sV4_A048 pos;                   // 0x20
 };
 
-struct sGmVE_A048 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, sBezVert_A048*, int);
-};
-
 // PORT: PS2-only VU0 inline asm (4x4 matrix times vector).
 static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
 {
@@ -420,8 +414,7 @@ extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, sV4_A048* BezMat, 
         verts[i].pos = pos;
         curveParam += step;
     }
-    sGmVE_A048* vt = (sGmVE_A048*)VPTR_OF(cGraphicsMan, self);
-    vt[73].fn(vthis(self, vt[73]), n, verts, 0);
+    self->RenderLineStrip(n, (const tBxVertex*)verts, 0);
 }
 #endif
 
