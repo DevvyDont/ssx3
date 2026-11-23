@@ -991,8 +991,6 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
 #ifdef SKIP_ASM
 extern int cBoardTrail_m_NumFadeSegments;
 
-struct sRctxVtA538 { short delta; short index; void (*fn)(void*, BoardTrailInfoT*, int); };
-
 /**
  * Draws the board trails of several riders in one batch through the graphics manager.
  *
@@ -1037,8 +1035,7 @@ extern "C" void func_002EA538(char** trails, int n)
     }
     {
         cPS2GraphicsMan* ctx = GrMan;
-        sRctxVtA538* vt = (sRctxVtA538*)VPTR_AT(ctx, 0x10D8);
-        vt[89].fn(vthis(ctx, vt[89]), strips, count);
+        ctx->RenderMultipleBoardTrails((BoardTrailInfoT*)strips, count);
     }
     pop_A480((sRenderCtx_A480*)GrMan);
 }
@@ -1247,8 +1244,6 @@ extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMan* self);
 
 
-struct sVE_A900 { short delta; short index; void (*fn)(void*, tTVDisplayFormat*); };
-
 struct sFade_A900 {
     char pad0[0x10];
     int mode;           // 0x10
@@ -1296,8 +1291,7 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
     ((float*)&col.mfTVYOffset)[0] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[0] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[0] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[0]) * k;
     ((float*)&col.mfTVYOffset)[1] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[1] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[1] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[1]) * k;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    sVE_A900* vt = (sVE_A900*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    vt[41].fn(vthis(ps2GraphicsMan, vt[41]), &col);
+    ps2GraphicsMan->SetTVDisplayFormat1(&col);
 }
 #endif
 
@@ -1313,12 +1307,6 @@ struct sBTState {
 };
 
 
-struct sBTVEntryGet {
-    short delta;
-    short index;
-    sBTState* (*fn)(void*);
-};
-
 
 /**
  * Saves the current TV display format and derives the cut-scene format from it.
@@ -1331,8 +1319,7 @@ extern "C" void cCutSceneTransitionMan_FindTVParameters(cCutSceneTransitionMan* 
 {
     cCutSceneTransitionMan* transMan = self;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sBTVEntryGet* vtEntry = &(((sBTVEntryGet*)VPTR_AT(obj, 0x10D8)))[42];
-    (*(sBTState*)&transMan->mRegularTVFormat) = *vtEntry->fn(vthis(obj, *vtEntry));
+    (*(sBTState*)&transMan->mRegularTVFormat) = *(sBTState*)obj->GetTVDisplayFormat();
     float xAspectAngle = 0.75f;
     float yAspectAngle = 0.6299999952316284f;
     if ((*(sBTState*)&transMan->mRegularTVFormat).mode == 2) {
@@ -1677,12 +1664,6 @@ extern "C" void cTrickBoostFX_render(cTrickBoostFX* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", FigureOutTransitionUVs);
 #ifdef SKIP_ASM
-struct sBTVEntryR {
-    short delta;
-    short index;
-    float* (*fn)(void*);
-};
-
 extern float gVStart;
 extern float gVEnd;
 extern float gVHeight;
@@ -1697,8 +1678,7 @@ extern float gVHeight;
 extern "C" void FigureOutTransitionUVs(void)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sBTVEntryR* vtEntry = &(((sBTVEntryR*)VPTR_AT(obj, 0x10D8)))[42];
-    float* screenRect = vtEntry->fn(vthis(obj, *vtEntry));
+    float* screenRect = (float*)obj->GetTVDisplayFormat();
     float top = screenRect[1];
     float w = screenRect[2];
     gVStart = top;

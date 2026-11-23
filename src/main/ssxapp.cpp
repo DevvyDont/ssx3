@@ -2183,8 +2183,7 @@ extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910
     sV4_229910 col[4];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sModel_229910* model = HandleToModel_229910(RID);
-    sVEntry_229910* vt = (sVEntry_229910*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    vt[97].fn(vthis(ps2GraphicsMan, vt[97]), model, 0, pos, uv, col);
+    ps2GraphicsMan->GetMeshQuad((const tInstanceRecord*)model, 0, (t3Vector*)pos, (t2Vector*)uv, (tARGB*)col);
     for (int i = 0; i < 4; i++) {
         pts[i] = MulMV_229910(model->mat, sV4_229910(pos[i], 1.0f));
     }
@@ -3521,8 +3520,7 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     w->f7AB8 = 0;
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<t4Matrix(void*)>* vt = (sVEntry<t4Matrix(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        t4Matrix gfxMatrix = vt[43].fn(vthis(ps2GraphicsMan, vt[43]));
+        t4Matrix gfxMatrix = ps2GraphicsMan->GetNetMatrix();
         MatCopy_22ADD8((t4Matrix*)(self + 0x10), &gfxMatrix);
     }
     MatCopy_22ADD8((t4Matrix*)(self + 0x50), ((&GrMan->mGuardBandMatrix)));

@@ -5228,7 +5228,7 @@ static inline sVec4_25C0 mulT_25C0(const t4Matrix* m, const sVec4_25C0& v)
 static inline t4Matrix* camMtx_25C0()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    return ((tCamMtxP_25C0)((sCamVt_25C0*)VPTR_AT(ps2GraphicsMan, 0x10D8))[0x23].fn)(vthis(ps2GraphicsMan, ((sCamVt_25C0*)VPTR_AT(ps2GraphicsMan, 0x10D8))[35]));
+    return (t4Matrix*)ps2GraphicsMan->GetView();
 }
 
 /**

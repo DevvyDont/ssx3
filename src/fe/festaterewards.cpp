@@ -2436,8 +2436,7 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(cFEStatePreviewRewa
     int id = self->mTextureID;
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        vt[50].fn(vthis(ps2GraphicsMan, vt[50]), id);
+        ps2GraphicsMan->RemoveTexture(id);
     }
     int slot = self->mTextureFileIndex;
     if (slot >= 0) {

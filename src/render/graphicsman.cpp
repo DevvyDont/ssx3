@@ -183,8 +183,7 @@ public:
 extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
 {
     for (;;) {
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(self, 0x10D8);
-        if (vt[18].fn(vthis(self, vt[18])) != 0) break;
+        if (self->IsRenderIdle() != 0) break;
         ((cGmApp_9C28*)cAppMan_TheAppMan->ExecutionMan)->prepause();
         SYNCTASK_run(0);
         THREAD_yield(0);
@@ -802,12 +801,6 @@ struct sGmOwner_AC00 {
     sGmEntry_AC00 entries[1];
 };
 
-struct sGmVEntry_AC00 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
 /**
  * Queues the depth-fog full-screen pass for view @p idx on the scratchpad DMA ring.
  *
@@ -850,8 +843,7 @@ extern "C" void func_0036AC00(cPS2GraphicsMan* self, int idx, void* pkt2, int* h
     pkt = func_0038F460(dma, *handle, -1, 0);
     int zBufPage = self->mCurrentZBufferPage;
     int frameBufPage = self->mCurrentFrameBufferPage;
-    sGmVEntry_AC00* vt = (sGmVEntry_AC00*)VPTR_AT(self, 0x10D8);
-    int n = vt[11].fn(vthis(self, vt[11]));
+    int n = self->GetScreenHeight();
     func_0036AE20(self, idx, zBufPage, frameBufPage, n * 2, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
     pkt = func_0038F460(dma, *handle, -1, 0);

@@ -255,8 +255,7 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
         palEntry[3] = (i << 7) / 15;
         palEntry += 4;
     }
-    sFontVEntryDL* vt = (sFontVEntryDL*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    self->TextureID = vt[47].fn(vthis(ps2GraphicsMan, vt[47]), pix, self->FontName, img->w, newHeight, 0, 11, 1, pal, 0, 1, -1);
+    self->TextureID = ps2GraphicsMan->AddTexture1((const char*)pix, (const char*)self->FontName, img->w, newHeight, 0, 11, 1, (const char*)pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
     if (pal != 0)
@@ -345,16 +344,11 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        sFontVEntry1CB0* vt = (sFontVEntry1CB0*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->ShadowColor[0],
-                  pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
-                  self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
+        ps2GraphicsMan->DrawString3D(self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->ShadowColor[0], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    sFontVEntry1CB0* vt = (sFontVEntry1CB0*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->Color[0], pos.x, pos.y,
-              self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
+    ps2GraphicsMan->DrawString3D(self, pos.x, pos.y, (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->Color[0], pos.z);
 }
 #endif
 
@@ -408,16 +402,11 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->ShadowColor[0],
-                  pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
-                  self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
+        ps2GraphicsMan->DrawString3D1(self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->ShadowColor[0], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->Color[0], pos.x, pos.y,
-              self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
+    ps2GraphicsMan->DrawString3D1(self, pos.x, pos.y, (const unsigned short*)unicodeStr, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], (const tARGB*)&self->Color[0], pos.z);
 }
 #endif
 

@@ -395,8 +395,7 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
         }
         self->mX = clamp_F050(self->mX, -20, 20);
         self->mY = clamp_F050(self->mY, -20, 20);
-        sVEntry<void(void*, int, int)>* rv = (sVEntry<void(void*, int, int)>*)VPTR_AT(GrMan, 0x10D8);
-        rv[12].fn(vthis(GrMan, rv[12]), self->mX, self->mY);
+        GrMan->SetScreenOffset(self->mX, self->mY);
         return;
     }
 }

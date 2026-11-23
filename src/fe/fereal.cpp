@@ -942,8 +942,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     progress_1E80(50.0f);
     {
         cPS2GraphicsMan* g = GrMan;
-        sVEntry<void(void*, ...)>* vt = (sVEntry<void(void*, ...)>*)VPTR_AT(g, 0x10D8);
-        vt[44].fn(vthis(g, vt[44]), 0);
+        g->InitTextures(0);
     }
     sUI_1E80* ui = ((sUI_1E80*)self->mpUI);
     // Looks like a macro expansion: a local copy of the path plus the load call.
@@ -1033,12 +1032,6 @@ extern "C" int cRealFE_loseFocus(cRealFE* self)
 //100%
 INCLUDE_ASM("fe/fereal", cRealFE_purge);
 #ifdef SKIP_ASM
-struct sVEntry001A2190 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 extern char cIrradianceDataBase_TheDataBase[];
 extern "C" void cRealFE_purgeCharAnimations(cRealFE* self);
 extern "C" void cFERiderManager_purge(void* p);
@@ -1058,8 +1051,7 @@ extern "C" void cSSXAudio_FrontEndPurge(void* p);
 extern "C" void cRealFE_purge(cRealFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry001A2190* vt = (sVEntry001A2190*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    vt[19].fn(vthis(ps2GraphicsMan, vt[19]));
+    ps2GraphicsMan->FlushRenderer();
     cRealFE_purgeCharAnimations(self);
     cFERiderManager_purge(&self->mRiderManager);
     func_0019CF40(self->mBoltFileManager);

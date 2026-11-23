@@ -2054,9 +2054,6 @@ static inline int IsLoaded_44E18(tInstanceRecord* m)
     return ok ? wc->m_HullPages[m->m_SMap.m_iHullID].m_State == 3 : 0;
 }
 
-struct sVE7_44E18 { short delta; short index; void (*fn)(void*, void*, float, void*, void*, void*, int, int); };
-struct sVE5_44E18 { short delta; short index; void (*fn)(void*, void*, void*, int, int); };
-
 /**
  * Draws every member of a crowd block.
  *
@@ -2080,13 +2077,11 @@ extern "C" void func_00344E18(void* self)
         if (*(int*)((char*)self + 0x114) >= 2)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
-            sVE7_44E18* vt = (sVE7_44E18*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-            vt[95].fn(vthis(ps2GraphicsMan, vt[95]), model, 1.0f, (char*)self + 0x118, (char*)&model->m_fmTransform, *(void**)((char*)self + 0x1E8), 0, 0);
+            ps2GraphicsMan->RenderModel(model, (const tMaterialBlockRecord*)((char*)self + 0x118), (const t4Matrix*)&model->m_fmTransform, 1.0f, (const t4Matrix*)*(void**)((char*)self + 0x1E8), (const t4Matrix*)(0), 0);
         }
         else
         {
-            sVE5_44E18* vt = (sVE5_44E18*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-            vt[96].fn(vthis(ps2GraphicsMan, vt[96]), model, *(void**)((char*)self + 0x1E8), 0, 0);
+            ps2GraphicsMan->RenderModel(model, (int)*(void**)((char*)self + 0x1E8), 0, 0);
         }
     }
 }

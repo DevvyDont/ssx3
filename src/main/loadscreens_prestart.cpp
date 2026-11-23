@@ -1113,8 +1113,7 @@ struct cLoadItemC_2E20 {
 extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
 {
     cPS2GraphicsMan* w = GrMan;
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(w, 0x10D8);
-    vt[44].fn(vthis(w, vt[44]), 0x100);
+    w->InitTextures(0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
     self->mpUI = (cUIEngine*)ui;
@@ -1190,17 +1189,10 @@ extern char* D_00442928[];
 extern char* str_at_plus_J[];
 extern int D_004A2B3C;
 
-struct sVE_3048 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, const char*, int, int, int);
-};
-
 static inline int loadTex_3048(char* data, const char* name)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_3048* vt = (sVE_3048*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    return vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data + *(int*)(data + 0x14), name, 0, 1, -1);
+    return ps2GraphicsMan->AddTexture((const SHAPE*)(data + *(int*)(data + 0x14)), name, 0, 1, -1);
 }
 
 /**

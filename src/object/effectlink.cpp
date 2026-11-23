@@ -894,12 +894,6 @@ struct sEffV4_346350 {
     sEffV4_346350() {}
 };
 
-struct sEffVE_346350 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int, sEffV3_346350*, sEffV2_346350*, sEffV4_346350*);
-};
-
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int a2, int a3);
 void cSpring_cSpring(void* self);
 extern "C" void cSpring_setupSpring(void* self, int a1, float len);
@@ -948,8 +942,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int buck
     sEffV3_346350 pts[4];
     sEffV2_346350 uv[4];
     sEffV4_346350 col[4];
-    sEffVE_346350* vt = (sEffVE_346350*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8);
-    vt[97].fn(vthis(cGraphicsMan_TheGraphicsMan, vt[97]), self->Instance, 0, pts, uv, col);
+    cGraphicsMan_TheGraphicsMan->GetMeshQuad(self->Instance, 0, (t3Vector*)pts, (t2Vector*)uv, (tARGB*)col);
     sEffV3_346350 span;
     span.x = pts[1].x - pts[0].x;
     span.y = pts[1].y - pts[0].y;
@@ -1040,7 +1033,7 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
         cMemMan_free(self->Verts);
     }
     tBoundBox* box = ((&self->BoundBox));
-    ((sVEntry<void(void*, void*)>*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8))[77].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sVEntry<void(void*, void*)>*)VPTR_AT(cGraphicsMan_TheGraphicsMan, 0x10D8))[77]), self->GridMesh);
+    cGraphicsMan_TheGraphicsMan->DeleteGridMesh(self->GridMesh);
     tBoundBox old = *(&self->BoundBox);
     tInstanceRecord* inst = self->Instance;
     t4Vector corner;

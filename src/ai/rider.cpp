@@ -535,8 +535,7 @@ extern "C" int cRider_isSafeToDelete(cRider* self)
     if (self->mSafeRenderTick != -1)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        return self->mSafeRenderTick < vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
+        return self->mSafeRenderTick < ps2GraphicsMan->getCurrentFrameCount();
     }
     return 0;
 }
@@ -3744,16 +3743,14 @@ static inline t4Vector mtxMulVec_121F30(t4Vector* m, t4Vector* v)
 extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry<void*(void*)>* gvt = (sVEntry<void*(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    t4Vector* viewMtx = (t4Vector*)gvt[35].fn(vthis(ps2GraphicsMan, gvt[35]));
+    t4Vector* viewMtx = (t4Vector*)ps2GraphicsMan->GetView();
     char* obj = (char*)&self->mVtbl;
     sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
     t4Vector* pos = (t4Vector*)vt[kRiderVt_getPosition].fn(vthis(obj, vt[kRiderVt_getPosition]));
     t4Vector viewPos = mtxMulVec_121F30(viewMtx, pos);
     float z = viewPos.z;
     cPS2GraphicsMan* graphicsMan = GrMan;
-    sVEntry<float(void*)>* gvt2 = (sVEntry<float(void*)>*)VPTR_AT(graphicsMan, 0x10D8);
-    float fov = gvt2[29].fn(vthis(graphicsMan, gvt2[29]));
+    float fov = graphicsMan->GetViewportFOV();
     float sinFov, cosFov;
     fSinCos(&sinFov, &cosFov, fov);
     z = z * (sinFov / cosFov);

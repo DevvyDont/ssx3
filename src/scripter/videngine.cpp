@@ -68,8 +68,6 @@ struct sVidObj { char pad0[0x10]; int state; };
 struct sVidOwner { char pad0[0x64]; sVidObj* obj; };
 
 struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
-struct sVtEnt { short delta; short index; void* fn; };
-
 /**
  * Starts the readied video: pauses the game for it, saves part of the render state and pauses the sound effects.
  *
@@ -100,13 +98,11 @@ extern "C" int cVidEngine_PlayVideo(cVidEngine* self)
     cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVtEnt* vt = (sVtEnt*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        self->mSavedDisplayFormat = *((int*(*)(void*))vt[42].fn)(vthis(ps2GraphicsMan, vt[42]));
+        self->mSavedDisplayFormat = *(int*)ps2GraphicsMan->GetTVDisplayFormat();
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVtEnt* vt = (sVtEnt*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        ((void(*)(void*, int))vt[40].fn)(vthis(ps2GraphicsMan, vt[40]), 0);
+        ps2GraphicsMan->SetTVDisplayFormat(0);
     }
     cSSXAudio_PauseSFX(cAudioInterface_bxAudio());
     return 1;

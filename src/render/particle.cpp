@@ -478,8 +478,7 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
     *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
-    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)VPTR_AT(ctx, 0x10D8));
-    vt[83].fn(vthis(ctx, vt[83]), (self));
+    ctx->RenderDynamicParticleEmitter((self));
     ctx->m_pCurrentDrawState--;
 }
 #endif
@@ -646,8 +645,7 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
     ctx->m_pCurrentDrawState++;
     *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
-    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)VPTR_AT(ctx, 0x10D8));
-    vt[84].fn(vthis(ctx, vt[84]), (self));
+    ctx->RenderDynamicParticleEmitter1((self));
     ctx->m_pCurrentDrawState--;
 }
 #endif
@@ -3028,8 +3026,7 @@ extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
     if (tex >= 0) {
         func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
         cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_AT(mgr, 0x10D8);
-        vt[50].fn(vthis(mgr, vt[50]), self->mLockTexture);
+        mgr->RemoveTexture(self->mLockTexture);
         self->mLockTexture = -1;
     }
     if (flags & 1) {
@@ -3057,8 +3054,7 @@ extern "C" void cPlayerShadow_LockShadowTexture(void* self)
     cPlayerShadow* shadow = (cPlayerShadow*)self;
     if (shadow->mLockTexture < 0) {
         cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
-        sVEntry<int(void*, int, int, int)>* vt = (sVEntry<int(void*, int, int, int)>*)VPTR_AT(mgr, 0x10D8);
-        shadow->mLockTexture = vt[52].fn(vthis(mgr, vt[52]), shadow->mShadowTexWidth, shadow->mShadowTexHeight, 2);
+        shadow->mLockTexture = mgr->AddLockedFrameTexture(shadow->mShadowTexWidth, shadow->mShadowTexHeight, 2);
     }
 }
 #endif
@@ -3546,10 +3542,8 @@ INCLUDE_ASM("render/particle", func_00376938);
 extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y, float w, float rectHeight)
 {
     cPS2GraphicsMan* self = pS2GraphicsMan;
-    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)VPTR_AT(self, 0x10D8))[10];
-    int width = vtEntry->fn(vthis(self, *vtEntry));
-    vtEntry = &((sVEntry<int(void*)>*)VPTR_AT(self, 0x10D8))[11];
-    int height = vtEntry->fn(vthis(self, *vtEntry));
+    int width = self->GetScreenWidth();
+    int height = self->GetScreenHeight();
     if (x < 0.0f) {
         w += x;
         x = 0.0f;
@@ -3607,8 +3601,7 @@ extern "C" void func_00364B88(void* table, void* key);
  */
 extern "C" void cPS2GraphicsMan_SetViewportWindow(cPS2GraphicsMan* self, float x, float y, float w, float rectHeight)
 {
-    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)VPTR_AT(self, 0x10D8))[11];
-    int height = vtEntry->fn(vthis(self, *vtEntry));
+    int height = self->GetScreenHeight();
     int mode = self->mTVDisplayFormat.mDisplayFormat;
     if (mode < 3) {
         if (mode >= 0) {
@@ -5356,27 +5349,6 @@ struct sPtMatrix_A260 {
 } __attribute__((aligned(16)));
 
 // 4x4 float matrix with an empty ctor and a VU0 copy ctor (copies go through vf1..vf4).
-struct sPtMatrixV_A260 {
-    float m[4][4];
-    sPtMatrixV_A260() {}
-    // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
-    sPtMatrixV_A260(const sPtMatrixV_A260& s)
-    {
-        __asm__ __volatile__(
-            "lqc2      $vf1, 0x0(%1)\n"
-            "lqc2      $vf2, 0x10(%1)\n"
-            "lqc2      $vf3, 0x20(%1)\n"
-            "lqc2      $vf4, 0x30(%1)\n"
-            "sqc2      $vf1, 0x0(%0)\n"
-            "sqc2      $vf2, 0x10(%0)\n"
-            "sqc2      $vf3, 0x20(%0)\n"
-            "sqc2      $vf4, 0x30(%0)\n"
-            :
-            : "r"(this), "r"(&s)
-            : "memory");
-    }
-} __attribute__((aligned(16)));
-
 // g++ 2.95 vtable entry for a method taking (self, pointer).
 struct sPtVtVP_A260 {
     short delta;
@@ -6637,8 +6609,7 @@ extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
     int i;
     for (i = 0; i < 2000; i++) {
         if (((int*)(&self->unk_18F8[0]))[i] != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(self, 0x10D8);
-            vt[50].fn(vthis(self, vt[50]), i);
+            self->RemoveTexture(i);
         }
     }
 }
@@ -6676,12 +6647,6 @@ struct sTexHdr_C8C0 {
     char pad_0xA[2];
     unsigned int fC;                // 0xC
     int f10;                        // 0x10
-};
-
-struct sVEntry0037C8C0 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, int, int, int, int, int, int, void*, int, int, int);
 };
 
 extern "C" double fptodp(float f);
@@ -6776,8 +6741,7 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* s
     data = (char*)src + 0x10;
     if (flags & 0x1000)
         data = (char*)src + src->f10;
-    sVEntry0037C8C0* vt = (sVEntry0037C8C0*)VPTR_AT(self, 0x10D8);
-    int textureId = vt[47].fn(vthis(self, vt[47]), data, textureName, src->s4, src->s6, flags >> 28, fmt, cls, pal, lockType, copyMem, bindId);
+    int textureId = self->AddTexture1((const char*)data, (const char*)textureName, src->s4, src->s6, flags >> 28, fmt, cls, (const char*)pal, lockType, copyMem, bindId);
     if ((src->fC & 0xF0000000) != 0 && src->s8 != 0) {
         double lodValue = fptodp(240.0f / ((float)src->s8 * 6.1035156e-05f));
         lodValue = dlog_C8C0(lodValue);
@@ -6919,12 +6883,6 @@ void* func_0037CBC8(void* vself)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_CreateScreenGrabTexture);
 #ifdef SKIP_ASM
-struct sPartVEntry52 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int, int);
-};
-
 /**
  * Creates a screen-grab texture: stores the texture id returned by virtual slot 52 (@p width, @p height, 0) in the handle's
  * second word.
@@ -6935,8 +6893,7 @@ struct sPartVEntry52 {
  */
 extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, tScreenGrabHandle* out, int width, int height)
 {
-    sPartVEntry52* vt = (sPartVEntry52*)VPTR_AT(self, 0x10D8);
-    out->mTextureId = vt[52].fn(vthis(self, vt[52]), width, height, 0);
+    out->mTextureId = self->AddLockedFrameTexture(width, height, 0);
 }
 #endif
 
@@ -6956,8 +6913,7 @@ extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, t
 {
     if (item->mTextureId != -1) {
         func_00367B60(self->mTexMan, item->mTextureId);
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(self, 0x10D8);
-        vt[50].fn(vthis(self, vt[50]), item->mTextureId);
+        self->RemoveTexture(item->mTextureId);
         item->mTextureId = -1;
     }
 }
@@ -12095,8 +12051,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
     int tex = self->_EffectTexMap[D_004A45D4.texIndex];
     ((sRS_6E78*)self->m_pCurrentDrawState)->tex = tex;
 
-    sVEntry<int(void*)>* vt = ((sVEntry<int (void*)>*)VPTR_AT(self, 0x10D8));
-    int width = vt[10].fn(vthis(self, vt[10]));
+    int width = self->GetScreenWidth();
     sPkt_6E78* pkt = (sPkt_6E78*)D_004A5B84;
     unsigned int fbp = ((unsigned int)self->mCurrentFrameBufferPage);
     unsigned int zbp = ((unsigned int)self->mCurrentZBufferPage);
@@ -13542,8 +13497,7 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     prm[8].w = 0.0f;
     prm[9].w = 0.0f;
     cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_9CB8;
-    sVEnt_9CB8* vt = (sVEnt_9CB8*)VPTR_AT(mgr, 0x10D8);
-    sMat_9CB8 cam = *vt[35].fn(vthis(mgr, vt[35]));
+    sMat_9CB8 cam = *(sMat_9CB8*)mgr->GetView();
     sV_9CB8 eye = Scale_9CB8(GetPos_9CB8(cam), -1.0f);
     MMI_TRANSPOSE4(&cam);
     eye = MulVec_9CB8(&cam, eye);

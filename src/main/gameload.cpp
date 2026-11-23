@@ -1396,8 +1396,7 @@ static inline int updatePause_2306B8(cGame* self)
         self->IsStreamPaused = 1;
         if (self->m_bFlushStreamer != 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-            vt[19].fn(vthis(ps2GraphicsMan, vt[19]));
+            ps2GraphicsMan->FlushRenderer();
             cGameViewMan_updateStreamFocus(((char*)self->ViewMan));
             cWorldCache_flushInActivePages(*((void**)self->World));
             self->m_bFlushStreamer = 0;

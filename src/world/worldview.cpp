@@ -1864,14 +1864,12 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     }
     case 9: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), resourceId >> 8);
+        ps2GraphicsMan->RemoveTexture(resourceId >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        sVEntry<void>* vt = (sVEntry<void>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), (resourceId >> 8) + self->m_iNumImages);
+        ps2GraphicsMan->RemoveTexture((resourceId >> 8) + self->m_iNumImages);
         break;
     }
     case 3: {

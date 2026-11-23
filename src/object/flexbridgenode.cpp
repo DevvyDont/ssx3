@@ -96,12 +96,6 @@ static inline void gridVecAdd(sGridV4& d, const sGridV4& a, const sGridV4& b)
         : "memory");
 }
 
-struct sGridVEntry {
-    short delta;
-    short index;
-    void* (*fn)(...);
-};
-
 struct sGridVEntryV {
     short delta;
     short index;
@@ -148,8 +142,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     int n = self->count;
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
-    sGridVEntry* vtEntry = &(((sGridVEntry*)VPTR_AT(world, 0x10D8)))[76];
-    self->mesh = (sGridMesh*)vtEntry->fn(vthis(world, *vtEntry), n, 2, 0x20000000);
+    self->mesh = (sGridMesh*)world->CreateGridMesh(n, 2, 0x20000000);
     sGridV4*& pts0 = self->pts[0];
     pts0 = new (str_BridgeVerts, 0x20000000, 0) sGridV4[nverts];
     sGridV4*& pts1 = self->pts[1];
@@ -160,8 +153,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridCol cols[4];
     sGridV2* uv = new (str_TempBridgeUVs, 0x100, 0) sGridV2[nverts];
     sGridCol* col = new (str_TempBridgeRGBs, 0x100, 0) sGridCol[nverts];
-    sGridVEntryV* gfxVtEntry = &(((sGridVEntryV*)VPTR_AT(world, 0x10D8)))[97];
-    gfxVtEntry->fn(vthis(world, *gfxVtEntry), self->def, 0, pos, uvs, cols);
+    world->GetMeshQuad((const tInstanceRecord*)self->def, 0, (t3Vector*)pos, (t2Vector*)uvs, (tARGB*)cols);
     for (int i = 0; i < n; i++) {
         float floatIndex = (float)i;
         float inv = 1.0f / (float)(n - 1);

@@ -1111,17 +1111,6 @@ struct sPkgEntK19A098 {
     int off;
     int f4;
 };
-struct sVEK19A098a {
-    short delta;
-    short index;
-    int (*fn)(void*, char*, char*, int, int, int);
-};
-struct sVEK19A098b {
-    short delta;
-    short index;
-    void (*fn)(void*, int, char*, int);
-};
-
 /**
  * Finds an icon in the character's loaded icon package and returns its texture.
  *
@@ -1153,12 +1142,10 @@ extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* 
             int id = self->mIconTextureID;
             if (id == -1) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVEK19A098a* vt = (sVEK19A098a*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-                self->mIconTextureID = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data, str_icon, 0, 1, -1);
+                self->mIconTextureID = ps2GraphicsMan->AddTexture((const SHAPE*)data, str_icon, 0, 1, -1);
             } else {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVEK19A098b* vt = (sVEK19A098b*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-                vt[48].fn(vthis(ps2GraphicsMan, vt[48]), id, data, 1);
+                ps2GraphicsMan->SetNewTextureData(id, (const SHAPE*)data, 1);
             }
             return self->mIconTextureID;
         }
@@ -1447,8 +1434,7 @@ extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
             char* entry = (char*)func_0019E2B0((sEquipTable*)tbl, self->mCharID, self->mPreviewTextureFileIndex);
             if (entry != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVEntry<int(void*, void*, char*, int, int, int)>* vt = (sVEntry<int(void*, void*, char*, int, int, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-                self->mPreviewTextureID = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), entry + *(int*)(entry + 0x14), str_preview, 0, 1, -1);
+                self->mPreviewTextureID = ps2GraphicsMan->AddTexture((const SHAPE*)(entry + *(int*)(entry + 0x14)), str_preview, 0, 1, -1);
             } else {
                 self->mPreviewTextureID = -1;
             }
@@ -4628,8 +4614,7 @@ extern "C" void cFERider__cFERider(cFERider* self, int flags)
     for (i = 0xFF; i >= 0; i--, slot++) {
         if (slot->TextureID >= 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-            vt[50].fn(vthis(ps2GraphicsMan, vt[50]), slot->TextureID);
+            ps2GraphicsMan->RemoveTexture(slot->TextureID);
         }
         slot->TextureID = none;
         slot->Name[0] = 0;
@@ -4728,8 +4713,7 @@ extern "C" void cFERider_setCharID(cFERider* self, unsigned int item, int flag)
     }
     if (self->mSafeRenderCount < 0) {
         cPS2GraphicsMan* w = GrMan;
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(w, 0x10D8);
-        self->mSafeRenderCount = vt[114].fn(vthis(w, vt[114])) + 4;
+        self->mSafeRenderCount = w->getCurrentFrameCount() + 4;
         self->mSetVisible = self->mVisible;
         self->mVisible = 0;
     }

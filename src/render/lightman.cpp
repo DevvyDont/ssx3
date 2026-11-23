@@ -954,8 +954,7 @@ extern "C" void cPlants_update(void)
     float sinAngle;
     float cosAngle;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    sLmVEntry_EE78* vt = (sLmVEntry_EE78*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-    float frameClock = (float)vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
+    float frameClock = (float)ps2GraphicsMan->getCurrentFrameCount();
     int i;
     for (i = 0; i < 8; i++) {
         t4Matrix* pm = &branchMat;
@@ -1930,8 +1929,7 @@ extern int cRenderToggles_m_ResetStats;
 extern "C" void cRenderToggles_update()
 {
     cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_AT(mgr, 0x10D8);
-    vt[16].fn(vthis(mgr, vt[16]), cRenderToggles_m_AIUpdatesPerRender);
+    mgr->SetAIUpdatesPerRender(cRenderToggles_m_AIUpdatesPerRender);
     if (cRenderToggles_m_ResetStats != 0) {
         cRenderToggles_m_ResetStats = 0;
     }

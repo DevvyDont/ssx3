@@ -559,8 +559,7 @@ extern "C" void cFERider_update(cFERider* selfp)
     cFERider* self = selfp;
     if (self->mSafeRenderCount >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-        if (self->mSafeRenderCount < vt[114].fn(vthis(ps2GraphicsMan, vt[114]))) {
+        if (self->mSafeRenderCount < ps2GraphicsMan->getCurrentFrameCount()) {
             self->mSafeRenderCount = -1;
             cFERider_init(self, self->mProfileIndex, self->mNewCharID, self->mNewLoadAll);
         }
@@ -1104,17 +1103,6 @@ struct sPkgEnt_F908 {
     int f4;
 };
 struct sName2_F908 { char c[2]; };
-struct sVE_F908a {
-    short delta;
-    short index;
-    int (*fn)(void*, char*, char*, int, int, int);
-};
-struct sVE_F908b {
-    short delta;
-    short index;
-    void (*fn)(void*, int, char*, int);
-};
-
 /**
  * Registers the textures of a loaded shape package in the front-end rider's texture table.
  *
@@ -1140,14 +1128,12 @@ extern "C" void cFERider_addTextureFile(cFERider* self, SHAPEFILE* pkg, int repl
         if (id >= 0) {
             if (replace) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVE_F908b* vt = (sVE_F908b*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-                vt[48].fn(vthis(ps2GraphicsMan, vt[48]), id, data, 1);
+                ps2GraphicsMan->SetNewTextureData(id, (const SHAPE*)data, 1);
             }
         } else {
             strcpy(((&self->mTextureRefs[0]))[self->mNumTextureRefs].Name, name);
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVE_F908a* vt = (sVE_F908a*)VPTR_AT(ps2GraphicsMan, 0x10D8);
-            ((&self->mTextureRefs[0]))[self->mNumTextureRefs].TextureID = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data, str_charshp, 0, 1, -1);
+            ((&self->mTextureRefs[0]))[self->mNumTextureRefs].TextureID = ps2GraphicsMan->AddTexture((const SHAPE*)data, str_charshp, 0, 1, -1);
             self->mNumTextureRefs++;
         }
     }

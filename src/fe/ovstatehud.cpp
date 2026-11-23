@@ -984,12 +984,10 @@ extern "C" void cOVStateHUD1P_onCreateScreen(cOVStateHUD1P* vself)
     self->mode = gfx->_EffectTexMap[0];
     self->f490 = 0xDEEDDEED;
     {
-        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)VPTR_AT(GrMan, 0x10D8);
-        self->scrW.set(vt[56].fn(vthis(GrMan, vt[56]), self->mode));
+        self->scrW.set(GrMan->GetTextureWidth(self->mode));
     }
     {
-        sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)VPTR_AT(GrMan, 0x10D8);
-        self->scrH.set(vt[57].fn(vthis(GrMan, vt[57]), self->mode));
+        self->scrH.set(GrMan->GetTextureHeight(self->mode));
     }
     self->w444[0] = findElem_9AD0(self->engine, str_nm1w);
     self->w444[1] = findElem_9AD0(self->engine, str_nm2w);

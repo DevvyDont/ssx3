@@ -1635,8 +1635,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
     for (j = 0; j < 2; j++) {
         ((short*)(&self->m_activeDrawState.m_textureState))[j] = 0x7FFF;
     }
-    sVEntry<void(void*, int*)>* vt = (sVEntry<void(void*, int*)>*)VPTR_AT(self, 0x10D8);
-    vt[62].fn(vthis(self, vt[62]), mask);
+    self->SetActiveDrawState((const sDrawState*)mask);
 }
 #endif
 

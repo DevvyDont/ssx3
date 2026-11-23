@@ -104,12 +104,6 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
 //100%
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_purge__FPi);
 #ifdef SKIP_ASM
-struct sCrowdVEntry2D {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Releases the 2D crowd textures: unregisters every animation frame (graphics slot 50) and frees the loaded
  * file.
@@ -124,8 +118,7 @@ int cCrowdRender2D_purge(int* param_1)
         int j;
         for (j = 0; j < cCrowdRender2D_mAnimTable_B6D0[i].count; j++) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-            sCrowdVEntry2D* vt = (sCrowdVEntry2D*)VPTR_AT(obj, 0x10D8);
-            vt[50].fn(vthis(obj, vt[50]), cCrowdRender2D_mAnimTable_B6D0[i].handles[j]);
+            obj->RemoveTexture(cCrowdRender2D_mAnimTable_B6D0[i].handles[j]);
         }
     }
     return MEM_free(*param_1);

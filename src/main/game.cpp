@@ -135,7 +135,7 @@ static inline sVec_C1B0 MulVec_C1B0(const sMat_C1B0* m, const sVec_C1B0& v)
 static inline sMat_C1B0* viewMat_C1B0()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    return ((sVEm_C1B0*)VPTR_AT(ps2GraphicsMan, 0x10D8))[35].fn(vthis(ps2GraphicsMan, ((sVEm_C1B0*)VPTR_AT(ps2GraphicsMan, 0x10D8))[35]));
+    return (sMat_C1B0*)ps2GraphicsMan->GetView();
 }
 
 // PORT: the unit declares func_0022C1B0 as void(void*); the body returns self, bound by asm label.

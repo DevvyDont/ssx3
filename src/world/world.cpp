@@ -46,12 +46,6 @@ extern "C" void* cWorld_cWorld(void** self)
 //100%
 INCLUDE_ASM("world/world", cWorld__cWorld);
 #ifdef SKIP_ASM
-struct sWorldVEntry0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 extern "C" void cWorldCache__cWorldCache(int* self, int flags);
 extern "C" void cWScriptCache__cWScriptCache(void* self, int flags);
 extern "C" void cWorldPainterMan__cWorldPainterMan(void* self, int flags);
@@ -68,8 +62,7 @@ void operator_delete(int* p);
 extern "C" void cWorld__cWorld(void** self, int flags)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sWorldVEntry0* vtEntry = &((sWorldVEntry0*)VPTR_AT(obj, 0x10D8))[107];
-    vtEntry->fn(vthis(obj, *vtEntry));
+    obj->PurgeMeshData();
     if (self[0] != 0) {
         cWorldCache__cWorldCache((int*)self[0], 3);
     }
