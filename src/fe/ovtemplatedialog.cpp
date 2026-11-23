@@ -15,6 +15,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "ai/player.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", cPDATemplate_onCreateScreen);
@@ -30,17 +31,10 @@ extern char str_PDATemplate[];
 extern char str_bganim1[];
 extern char str_temperature[];
 
-struct sVEntry_PDA {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
-
 static inline int Loc_PDA(int hash)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_PDA* vt = *(sVEntry_PDA**)(obj + 4);
-    return vt[4].fn(vthis(obj, vt[4]), hash);
+    cFELocale* obj = SSXApp->FELocale;
+    return (int)obj->getStringByHash(hash);
 }
 
 static inline int div_PDA(int a, int b)

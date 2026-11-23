@@ -21,7 +21,11 @@
 // cFELocale_vtbl (0x0046BF98, 5 slots: 1 dtor, 2 cUILocaleInterface_setDisplayMode, 3 setLanguage, 4 getStringByHash,
 // 5 getStringByIndex). No cUIState: this is not a screen.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// Real classes: cFELocale derives from cUILocaleInterface and both declare their virtuals, so callers write
+// `SSXApp->FELocale->getStringByHash(hash)`. The vptr lands at 0x4 by g++ 2.95's own rule (after the own data of the
+// first class in the hierarchy that declares a virtual: cUILocaleInterface's four chars). Nothing here is defined as
+// a C++ member (the methods are the extern "C" functions named above), so no vtable or type_info is emitted; the
+// hand-written ctor / dtors store the vptr with vptr_at(self, 0x4) (include/vtable.h).
 // Evidence tags:
 //   [R] retail's constructor cFELocale_cFELocale / destructor cFELocale__cFELocale and the allocation size;
 //   [P] the July 2003 preview (layout_xlate: the vptr at 0x4 in ~cUILocaleInterface);
@@ -43,8 +47,8 @@ struct tAttrLocale {
     unsigned char mTextRefresh : 1; // bit 4 [O]
 };
 
-struct cFELocale {
-    // --- cUILocaleInterface (On Tour: size 0x8)
+class cUILocaleInterface {
+public:
     signed char mDisplayMode;       // 0x000 [O] char; [R] 0; [U] cUILocaleInterface_setDisplayMode stores it;
                                     //       getStringByHash returns the blank buffer unless it is 0
     signed char mLanguage;          // 0x001 [O] char; [R] 0; [U] setLanguage compares and stores it; loadCommon /
@@ -54,9 +58,21 @@ struct cFELocale {
                                     //       mTextNumChar:1 mTextRefresh:1); [R] tAttrLocale_tAttrLocale clears the low
                                     //       5 bits; [U] setLanguage / unloadFE / unloadOV keep the files while bit 0
                                     //       (mLocaleTest) is set
-    void** mVtbl;                   // 0x004 [R] cUILocaleInterface_vtbl, then cFELocale_vtbl (ctor); the dtor stores
-                                    //       them in reverse; [P] preview ~cUILocaleInterface
-    // --- cFELocale
+    // 0x004: the vptr. [R] cUILocaleInterface_vtbl (0x0046D848), then cFELocale_vtbl (ctor); the dtor stores them in
+    //        reverse; [P] preview ~cUILocaleInterface. Slots [R] cUILocaleInterface_vtbl, names [O]:
+    virtual ~cUILocaleInterface();                                   // slot 1 cUILocaleInterface__cUILocaleInterface
+    virtual void setDisplayMode(signed char mode);                   // slot 2 cUILocaleInterface_setDisplayMode
+    virtual void setLanguage(signed char language);                  // slot 3 cUILocaleInterface_setLanguage
+    virtual unsigned short* getStringByHash(unsigned int StringID);  // slot 4 cUILocaleInterface_getStringByHash
+};
+CHECK_OFFSET(cUILocaleInterface, mDisplayMode, 0x000);
+CHECK_OFFSET(cUILocaleInterface, mLanguage, 0x001);
+CHECK_OFFSET(cUILocaleInterface, mNumLanguages, 0x002);
+CHECK_OFFSET(cUILocaleInterface, mAttrLocale, 0x003);
+CHECK_SIZE(cUILocaleInterface, 0x8);
+
+class cFELocale : public cUILocaleInterface {
+public:
     cLocaleFile* mpLocaleFile[20];  // 0x008 [O] ([6] in On Tour); [R] the ctor clears 80 bytes; [U] addFile creates
                                     //       entries 0-3 (cLocaleFile_loadFile into a 0x14-byte "LocaleFile"),
                                     //       loadFE / loadOV add 4-19, deleteFile / deleteAllFiles free them,
@@ -67,15 +83,15 @@ struct cFELocale {
     unsigned short TempString[50];  // 0x05A [O]; [U] getStringByHash's fallback: sprintf2 writes " " here and returns
                                     //       it
     char unk_0BE[0x2];              // 0x0BE tail padding
+    // cFELocale_vtbl (0x0046BF98) [R]; slot 2 stays cUILocaleInterface_setDisplayMode
+    virtual ~cFELocale();                                            // slot 1 cFELocale__cFELocale
+    virtual void setLanguage(signed char language);                  // slot 3 cFELocale_setLanguage
+    virtual unsigned short* getStringByHash(unsigned int StringID);  // slot 4 cFELocale_getStringByHash
+    virtual unsigned short* getStringByIndex(unsigned int index);    // slot 5 cFELocale_getStringByIndex
 };
 
 CHECK_SIZE(tAttrLocale, 0x1);
 
-CHECK_OFFSET(cFELocale, mDisplayMode, 0x000);
-CHECK_OFFSET(cFELocale, mLanguage, 0x001);
-CHECK_OFFSET(cFELocale, mNumLanguages, 0x002);
-CHECK_OFFSET(cFELocale, mAttrLocale, 0x003);
-CHECK_OFFSET(cFELocale, mVtbl, 0x004);
 CHECK_OFFSET(cFELocale, mpLocaleFile, 0x008);
 CHECK_OFFSET(cFELocale, mModule, 0x058);
 CHECK_OFFSET(cFELocale, unk_059, 0x059);

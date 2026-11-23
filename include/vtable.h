@@ -21,6 +21,13 @@ template <class V> inline void* vthis(void* obj, const V& slot)
     return (char*)obj + slot.delta;
 }
 
+// The vptr of a real polymorphic class at byte offset off, for the constructors and destructors the matching code
+// writes by hand as extern "C" functions (a C++ constructor stores it itself):  vptr_at(self, 0x4) = cFELocale_vtbl;
+// g++ 2.95 puts it after the own data of the first class in the hierarchy that declares a virtual.
+inline void**& vptr_at(void* obj, int off)
+{
+    return *(void***)((char*)obj + off);
+}
 // A whole vtable held as a value: N raw slots, 8-byte aligned. [L] gcc-2.95.3 cp/search.c expand_upcast_fixups: a
 // constructor that is not in charge of its virtual bases copies the class's vtable into a local (aligned for doubles)
 // and patches the virtual-base deltas there before storing its address (cGroundMotion_cGroundMotion,

@@ -1554,8 +1554,7 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
         break;
     case 3: {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)locale->mVtbl;
-        unsigned short* str = vt[4].fn(vthis(locale, vt[4]), info[1]);
+        unsigned short* str = locale->getStringByHash(info[1]);
         if (str) {
             char* buf = (char*)operator_new_tag(USTR_length(str) + 1, str_setTextString, 0x100, 0);
             strcpy2(buf, str);
@@ -1633,12 +1632,6 @@ extern "C" float cFont_textExtent1(void* self, const char* str, void* out, int n
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
 
-struct sVEntry_8320 {
-    short delta;
-    short index;
-    char* (*fn)(void*, int);
-};
-
 /**
  * Measures a popup string element as a text widget would draw it.
  *
@@ -1670,9 +1663,8 @@ extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, in
         cFont_textExtent(measureFont, (const char*)info[1], out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         break;
     case 3: {
-        char* feLocale = (char*)SSXApp->FELocale;
-        sVEntry_8320* vt = *(sVEntry_8320**)(feLocale + 4);
-        char* str = vt[4].fn(vthis(feLocale, vt[4]), info[1]);
+        cFELocale* feLocale = SSXApp->FELocale;
+        char* str = (char*)feLocale->getStringByHash(info[1]);
         if (str) {
             measureFont = (char*)cUIText_getFont(text);
             cFont_textExtent1(measureFont, str, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
@@ -2063,12 +2055,6 @@ extern "C" void cScreenPopup_getTextBoxSize2_s(void* self, void* text, const cha
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
 
-struct sVEntry_8EF0 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
-
 /**
  * Grows a text-box size to fit a popup string element, plus a gap.
  *
@@ -2103,8 +2089,7 @@ extern "C" void cScreenPopup_getTextBoxSize(cScreenPopup* vself, int* item, floa
         goto add;
     case 3: {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry_8EF0* vt = (sVEntry_8EF0*)locale->mVtbl;
-        unsigned short* str = vt[4].fn(vthis(locale, vt[4]), item[1]);
+        unsigned short* str = locale->getStringByHash(item[1]);
         if (str) {
             cScreenPopup_getTextBoxSize1(vself, text, str, size);
             goto add;
@@ -2287,8 +2272,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
         break;
     case 3: {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)locale->mVtbl;
-        void* str = vt[4].fn(vthis(locale, vt[4]), msg[1]);
+        void* str = locale->getStringByHash(msg[1]);
         if (str) {
             cScreenPopup_getMessageLineWrapSize2(self, self->mpMessageText, str, out);
         } else {
@@ -2495,8 +2479,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
         break;
     case 3: {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)locale->mVtbl;
-        void* str = vt[4].fn(vthis(locale, vt[4]), info[1]);
+        void* str = locale->getStringByHash(info[1]);
         if (str) {
             cScreenPopup_getTextBoxWrapSize1(self, text, str, out);
         } else {
@@ -6314,7 +6297,7 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
     char* msg = cBEOptionInterface_getQuickKeyMessage(opt, key);
     if (msg == 0) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)locale->mVtbl;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)vptr_at(locale, 0x4);
         void* str = vt[4].fn(vthis(locale, vt[4]), cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
         if (str)
             USTR_strcpyW(buf, str);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "fe/fereal.h"
 #include "util/locale.h"
 #include "render/ps2graphicsman.h"
@@ -121,10 +122,10 @@ extern "C" void* cFELocale_cFELocale(cFELocale* self)
     *(char*)&self->mDisplayMode = 0;
     *(char*)&self->mLanguage = 0;
     *(char*)&self->mNumLanguages = 0;
-    self->mVtbl = cUILocaleInterface_vtbl;
+    vptr_at(self, 0x4) = cUILocaleInterface_vtbl;
     tAttrLocale_tAttrLocale((char*)&self->mAttrLocale);
     *(char*)&self->mModule = 0;
-    self->mVtbl = cFELocale_vtbl;
+    vptr_at(self, 0x4) = cFELocale_vtbl;
     *(char*)&self->mNumLanguages = 4;
     memset((char*)&self->mpLocaleFile, 0, 80);
     return ((void*)self);
@@ -149,9 +150,9 @@ void operator_delete(int* p);
  */
 extern "C" void cFELocale__cFELocale(cFELocale* self, int flags)
 {
-    self->mVtbl = cFELocale_vtbl;
+    vptr_at(self, 0x4) = cFELocale_vtbl;
     cFELocale_deleteAllFiles(self);
-    self->mVtbl = cUILocaleInterface_vtbl;
+    vptr_at(self, 0x4) = cUILocaleInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

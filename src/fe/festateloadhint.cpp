@@ -1399,7 +1399,7 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ranking)) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEnt_7AB0* vt = (sVEnt_7AB0*)locale->mVtbl;
+        sVEnt_7AB0* vt = (sVEnt_7AB0*)vptr_at(locale, 0x4);
         strcpy1(fmtw, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNLevelNum)));
         sprintf1(text, fmtw, cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
