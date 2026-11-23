@@ -406,8 +406,7 @@ extern "C" void cUITextureBank__cUITextureBank(cUITextureBank* self, int flags)
     int i;
     for (i = 0; i < self->mNumTextureIDs; i++) {
         cPS2GraphicsMan* obj = (cPS2GraphicsMan*)((char*)GrMan_uiengine);
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cGraphicsMan, obj);
-        vt[50].fn(vthis(obj, vt[50]), (self->mpTexturesIDs)[i]);
+        obj->RemoveTexture((self->mpTexturesIDs)[i]);
     }
     if (self->mpTexturesIDs != 0) {
         cMemMan_free(self->mpTexturesIDs);
