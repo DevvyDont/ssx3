@@ -42,13 +42,48 @@ struct cRider;
 // the chase controller (cChaseCameraController_setTarget) and the result algorithm (cChaseAlgorithm_setTarget).
 // NOTE: its t4Vector-returning slots (cRiderCameraTarget_getPosition .. cRiderCameraTarget_getLastGroundNormal, except cRiderCameraTarget_getLean) take the hidden return
 // slot in a0 and `this` in a1.
-struct cRiderCameraTarget {
-    void** mVtbl;               // 0x0 [R] cRiderCameraTarget_vtbl (cCamera_init); cCameraTarget declares the virtuals
+// cCameraTarget (On Tour: 0x4, only the vptr): the interface. Its 26 virtuals, slots [R] cRiderCameraTarget_vtbl
+// (no destructor: getPosition is slot 1), names, order and types [O] (On Tour class cRiderCameraTarget, whose
+// cCameraTarget base declares them); eSurfaceType is an int here. Nothing builds a cCameraTarget in C++ (cCamera_init
+// allocates with operator new and stores the vtable), so no vtable is emitted.
+class cCameraTarget {
+public:
+    virtual t4Vector getPosition() const;                          // 1
+    virtual tQuaternion getRotation() const;                       // 2
+    virtual t4Vector getVelocity() const;                          // 3
+    virtual t4Vector getFront() const;                             // 4
+    virtual t4Vector getSide() const;                              // 5
+    virtual t4Vector getUp() const;                                // 6
+    virtual float getLean() const;                                 // 7
+    virtual t4Vector getNormal() const;                            // 8
+    virtual t4Vector getLastGroundNormal() const;                  // 9
+    virtual const t4Vector& getHandplantSplineTangent() const;     // 10
+    virtual const t4Vector& getHandplantTarget() const;            // 11
+    virtual float getTotalAirTime() const;                         // 12
+    virtual float getRemainingAirTime() const;                     // 13
+    virtual const t4Vector& getApexPos() const;                    // 14
+    virtual float getApexTime() const;                             // 15
+    virtual const t4Vector& getHalfPipeNormal() const;             // 16
+    virtual float getBoostWarp() const;                            // 17
+    virtual float getCrouch() const;                               // 18
+    virtual bool isAirPredictorDone() const;                       // 19
+    virtual int getSurfaceType() const;                            // 20 (eSurfaceType)
+    virtual float getVerticalJump() const;                         // 21
+    virtual bool didPop() const;                                   // 22
+    virtual float getLandingAngle() const;                         // 23
+    virtual bool isRidingFlexRail() const;                         // 24
+    virtual const t4Vector& getLandingNormal() const;              // 25
+    virtual const t4Vector& getLandingVelocity() const;            // 26
+};
+
+CHECK_SIZE(cCameraTarget, 0x4);
+
+struct cRiderCameraTarget : public cCameraTarget {
+    // 0x0: the vptr: [R] cRiderCameraTarget_vtbl (cCamera_init)
     cRider* Rider;              // 0x4 [O]; [P] getRider (lw) / setRider (sw); [R] cCamera_init stores the view's rider;
                                 //     [U] all 26 slots lw 0x4; cRiderCameraTarget_setRider setRider, cRiderCameraTarget_getRider getRider
 };
 
-CHECK_OFFSET(cRiderCameraTarget, mVtbl, 0x0);
 CHECK_OFFSET(cRiderCameraTarget, Rider, 0x4);
 CHECK_SIZE(cRiderCameraTarget, 0x8);
 

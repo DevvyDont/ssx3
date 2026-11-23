@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ai/riderhandler.h"
 #include "ai/airpredictor.h"
@@ -222,7 +223,7 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int riderIndex, float view, f
     cManualCameraController_setCurrentAlgorithmType(self->manual, 81);
     self->chase->viewport = ((sApp_15DE60*)SSXApp)->viewports[riderIndex];
     cRiderCameraTarget* riderRef = (cRiderCameraTarget*)operator new(8, str_RiderCameraTarget, 0, 0);
-    riderRef->mVtbl = cRiderCameraTarget_vtbl;
+    VPTR_AT(riderRef, 0) = cRiderCameraTarget_vtbl;
     (*(int*)&riderRef->Rider) = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (riderIndex << 2) + 0x28);
     cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);
     cChaseCameraController_switchCamera_Volume((cChaseCameraController*)((sCam162060*)self->chase), 76, 0, 1.0f);
@@ -622,7 +623,6 @@ INCLUDE_ASM("camera/camera", cCamera_applyCameraShake);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-#include "vtable.h"
 
 // The camera base matrix (set up by func_001673F8), followed by the camera-shake tuning
 // table: one entry per shake type, reset by func_0015E2A8, plus each type's selector in kCamShakeDependsOnDistance.
