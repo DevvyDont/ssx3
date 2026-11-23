@@ -308,12 +308,6 @@ extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, cBxRepla
 INCLUDE_ASM("object/multiparticle", cPhysicsModifier_cPhysicsModifier);
 #ifdef SKIP_ASM
 // Same stream-like class as cPhysicsModifier_writeToReplayFrame_cObj; v01 sits at vtable offset 8, v02 at 0x10.
-class cPhysicsModifier_cPhysicsModifier_cObj {
-public:
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 extern char cPhysicsModifier_vtbl[];
 
 /**
@@ -322,10 +316,10 @@ extern char cPhysicsModifier_vtbl[];
  * @param obj  replay stream (its read slot, vtable entry 2)
  * @return self
  */
-extern "C" void* cPhysicsModifier_cPhysicsModifier(cPhysicsModifier* self, cPhysicsModifier_cPhysicsModifier_cObj* obj)
+extern "C" void* cPhysicsModifier_cPhysicsModifier(cPhysicsModifier* self, cBxReplayFrame* obj)
 {
     self->mVtbl = (void**)cPhysicsModifier_vtbl;
-    obj->read(self, 4);
+    obj->read((char*)self, 4);
     return ((void*)self);
 }
 #endif
@@ -391,12 +385,6 @@ extern void* cRailManNode_vtbl[];
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
 extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx);
 
-class cRailManNode_cRailManNode_cStream {
-public:
-    virtual void v01();
-    virtual void read(void* buf, int size);
-};
-
 /**
  * Rebuilds the rail manager node from a replay frame and disables again every rail it had disabled.
  *
@@ -409,7 +397,7 @@ public:
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cRailManNode_cRailManNode_cStream* stream)
+extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cBxReplayFrame* stream)
 {
     int i;
     int j;
@@ -420,7 +408,7 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cRa
         *slot = 0xFFFFFFFF;
     }
     cRailManNode_ActiveNode = ((void*)self);
-    stream->read(&self->RailInfo[0], 0x200);
+    stream->read((char*)&self->RailInfo[0], 0x200);
     for (i = 0; i < 0x80; i++) {
         if (((unsigned int*)(&self->RailInfo[0]))[i] != 0xFFFFFFFF) {
             cRailManNode_disableRail(self, i);
@@ -908,12 +896,6 @@ extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* self);
 extern char cAnimComboNode_vtbl[];
 extern char str_ComboXform[];
 
-struct sStreamVE_8DB0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // Element type with an empty constructor; the array new leaves only its loop counters.
 struct sParticle_8DB0 {
     char data[0x40];
@@ -932,13 +914,12 @@ struct sParticle_8DB0 {
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cAnimComboNode_cAnimComboNode(cAnimComboNode* self, void* bucket, void* stream)
+extern "C" void* cAnimComboNode_cAnimComboNode(cAnimComboNode* self, void* bucket, cBxReplayFrame* stream)
 {
     sParticle_8DB0** pp = (sParticle_8DB0**)(&self->ComboXform);
     cAnimObjectNode_cAnimObjectNode(&self->AnimType, bucket, stream);
     self->mVtbl = (void**)cAnimComboNode_vtbl;
-    sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
-    vt[2].fn(vthis(stream, vt[2]), self, 0x18);
+    stream->read((char*)self, 0x18);
     *pp = new (str_ComboXform, 0x20000000, 0) sParticle_8DB0[self->NumAnimMeshes];
     cAnimComboNode_setComboXform(self);
     return ((void*)self);
@@ -1293,12 +1274,11 @@ extern void* cAnimDeltaNode_vtbl[];
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cAnimDeltaNode_cAnimDeltaNode(cAnimDeltaNode* self, void* bucket, void* stream)
+extern "C" void* cAnimDeltaNode_cAnimDeltaNode(cAnimDeltaNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
     self->mVtbl = cAnimDeltaNode_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Delta, 4);
+    stream->read((char*)&self->Delta, 4);
     return ((void*)self);
 }
 #endif

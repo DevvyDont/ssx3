@@ -28,12 +28,11 @@ extern char cInstanceNode_vtbl[];
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, void* stream)
+extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cSortObjNode_cSortObjNode(self, bucket, stream);
     self->mVtbl = (void**)cInstanceNode_vtbl;
-    sInstNodeCtorVEntry* vt = *(sInstNodeCtorVEntry**)stream;
-    self->Instance = (tInstanceRecord*)vt[4].fn(vthis(stream, vt[4]), self);
+    self->Instance = (tInstanceRecord*)(int)stream->readReplayInstance((cInstanceNode*)self);
     return ((void*)self);
 }
 #endif

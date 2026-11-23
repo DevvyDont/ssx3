@@ -940,7 +940,7 @@ extern const char str_RailModifier[];
  *
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  */
-extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cReplayFramePtr* stream)
+extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cBxReplayFrame* stream)
 {
     sMbReplayHdr36D8 hdr;
     int i;
@@ -949,49 +949,49 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cReplay
     self->UVScroll = 0;
     self->TexFlip = 0;
     self->Physics = 0;
-    ((sVEntry<void(void*, void*, int)>*)stream->mVtbl)[2].fn(vthis(stream, ((sVEntry<void(void*, void*, int)>*)stream->mVtbl)[2]), &hdr, 52);
+    stream->read((char*)&hdr, 52);
 
     if (hdr.flags & 1) {
         if (hdr.type == 1) {
-            self->RootTransform = (cTransformModifier*)cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), stream);
+            self->RootTransform = (cTransformModifier*)cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 2) {
-            self->RootTransform = (cTransformModifier*)cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(88, str_SplineModifier, 0x20000000, 0), stream);
+            self->RootTransform = (cTransformModifier*)cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(88, str_SplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 4) {
-            self->RootTransform = (cTransformModifier*)cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), stream);
+            self->RootTransform = (cTransformModifier*)cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 3) {
-            self->RootTransform = (cTransformModifier*)cPositionModifier_cPositionModifier2(cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), stream);
+            self->RootTransform = (cTransformModifier*)cPositionModifier_cPositionModifier2(cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 5) {
-            self->RootTransform = (cTransformModifier*)cRollerModifier_cRollerModifier1(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), stream);
+            self->RootTransform = (cTransformModifier*)cRollerModifier_cRollerModifier1(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 6) {
-            self->RootTransform = (cTransformModifier*)cMagnetModifier_cMagnetModifier1(cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0), stream);
+            self->RootTransform = (cTransformModifier*)cMagnetModifier_cMagnetModifier1(cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.type == 7) {
-            self->RootTransform = (cTransformModifier*)cAvaSplineModifier_cAvaSplineModifier1(cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), stream);
+            self->RootTransform = (cTransformModifier*)cAvaSplineModifier_cAvaSplineModifier1(cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         }
     }
     if (hdr.flags & 2) {
-        self->UVScroll = (cUVScrollModifier*)cUVScrollModifier_cUVScrollModifier1(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), stream);
+        self->UVScroll = (cUVScrollModifier*)cUVScrollModifier_cUVScrollModifier1(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
     }
     if (hdr.flags & 4) {
-        self->TexFlip = (cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier1(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), stream);
+        self->TexFlip = (cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier1(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
     }
     if ((hdr.flags & 8) && hdr.kind == 1) {
-        self->Physics = (cPhysicsModifier*)cBoostModifier_cBoostModifier1(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), stream);
+        self->Physics = (cPhysicsModifier*)cBoostModifier_cBoostModifier1(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
     }
     for (i = 0; i < hdr.numA; i++) {
         void* effect;
         if (hdr.typesA[i] == 1) {
-            effect = cParticleModifier_cParticleModifier1(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), stream);
+            effect = cParticleModifier_cParticleModifier1(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.typesA[i] == 2) {
-            effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), stream);
+            effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else if (hdr.typesA[i] == 3) {
-            effect = cHaloModifier_cHaloModifier1(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), stream);
+            effect = cHaloModifier_cHaloModifier1(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), (cReplayFramePtr*)stream);
         } else {
             effect = 0;
         }
         cEffectLink_append(&self->Effect, effect);
     }
     for (i = 0; i < hdr.numB; i++) {
-        cRailLink_append((char*)&self->Rail, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), stream));
+        cRailLink_append((char*)&self->Rail, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), (cReplayFramePtr*)stream));
     }
 }
 #endif
@@ -1334,13 +1334,11 @@ extern "C" void cSpring_setupNodes(void* self);
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cSpring_cSpring1(cSpring* self, void* stream)
+extern "C" void* cSpring_cSpring1(cSpring* self, cBxReplayFrame* stream)
 {
-    sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), self, 36);
+    stream->read((char*)self, 36);
     cSpring_setupNodes(self);
-    readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), self->Nodes, *(int*)self * 80);
+    stream->read((char*)self->Nodes, *(int*)self * 80);
     return ((void*)self);
 }
 #endif

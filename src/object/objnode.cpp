@@ -185,12 +185,11 @@ extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* a, void* st
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cSortObjNode_cSortObjNode(cSortObjNode* self, void* bucket, void* stream)
+extern "C" void* cSortObjNode_cSortObjNode(cSortObjNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cTypeObjNode_cTypeObjNode((cTypeObjNode*)self, bucket, stream);
     self->mVtbl = cSortObjNode_vtbl;
-    sVEntryCSortObjNode* vt = *(sVEntryCSortObjNode**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->SortIndex, 4);
+    stream->read((char*)&self->SortIndex, 4);
     return ((void*)self);
 }
 #endif

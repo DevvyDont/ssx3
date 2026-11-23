@@ -1259,13 +1259,12 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket, void* stream)
+extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket, cBxReplayFrame* stream)
 {
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(&self->Mats);
     cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
     self->mVtbl = (void**)cFlexRailNode_vtbl;
-    sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->NumNodes, 0x30);
+    stream->read((char*)&self->NumNodes, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
     return ((char*)self);

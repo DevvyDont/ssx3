@@ -18,6 +18,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "bx/bxstring.h"
 #include "main/ssxapp.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
@@ -2341,12 +2342,6 @@ extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
 INCLUDE_ASM("main/ssxapp", func_00229E20);
 #ifdef SKIP_ASM
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-class cSSXAppStream {
-public:
-    virtual void write(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 /**
  * Saves the 2D crowd manager into a replay frame: writes its 128 resource ids (0x200 bytes at +0x8) with the stream's
  * first virtual.
@@ -2355,9 +2350,9 @@ public:
  *
  * @param stream  the replay stream
  */
-extern "C" void func_00229E20(cCrowdMan2d* self, cSSXAppStream* stream)
+extern "C" void func_00229E20(cCrowdMan2d* self, cBxReplayFrame* stream)
 {
-    stream->write(&self->mQuadId[0], 0x200);
+    stream->write((const char*)&self->mQuadId[0], 0x200);
 }
 #endif
 
@@ -2369,12 +2364,6 @@ extern "C" void func_002292E0(cCrowdMan2d* self);
 extern "C" void func_00229910(void* self, int slot, int a1);
 
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-class cSSXAppStream_229E58 {
-public:
-    virtual void write(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 struct sCrowdId_229E58 {
     unsigned int id;
     sCrowdId_229E58() : id(0xFFFFFFFF) {}
@@ -2388,12 +2377,12 @@ struct sCrowdId_229E58 {
  *
  * @param stream  the replay stream
  */
-extern "C" void func_00229E58(cCrowdMan2d* self, cSSXAppStream_229E58* stream)
+extern "C" void func_00229E58(cCrowdMan2d* self, cBxReplayFrame* stream)
 {
     func_00229398(self);
     func_002292E0(self);
     sCrowdId_229E58 ids[128];
-    stream->read(ids, 0x200);
+    stream->read((char*)ids, 0x200);
     int i;
     for (i = 0; i < 128; i++) {
         if (ids[i].id != 0xFFFFFFFF) {

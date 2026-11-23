@@ -289,20 +289,17 @@ extern char t4mat_Identity[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, void* stream)
+extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(&self->Emitter);
-    sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->Complete, 4);
+    stream->read((char*)&self->Complete, 4);
     if (self->Complete == 0) {
         void* buf = operator_new1(216);
         self->ParticleData = (tParticleData*)buf;
-        readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-        readSlot->fn(vthis(stream, *readSlot), buf, 216);
-        readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-        readSlot->fn(vthis(stream, *readSlot), (char*)&self->Transform, 0x40);
+        stream->read((char*)buf, 216);
+        stream->read((char*)&self->Transform, 0x40);
         cStaticEmitter_setupEmitter(&self->Emitter, &self->Transform, (int)self->ParticleData);
         cStaticEmitter_readFromReplayFrame(&self->Emitter, stream);
     } else {
@@ -787,12 +784,11 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, void* obj)
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, void* stream)
+extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cHaloModifier_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Color, 0x30);
+    stream->read((char*)&self->Color, 0x30);
     cHaloModifier_HaloCount++;
     return ((void*)self);
 }

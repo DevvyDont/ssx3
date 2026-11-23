@@ -218,16 +218,14 @@ struct sFlexRailElem_348FA0 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* bucket, void* stream)
+extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     self->mVtbl = (void**)cFloatRailNode_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->LSpring, 0xC);
+    stream->read((char*)&self->LSpring, 0xC);
     sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(&self->Nodes);
     *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[self->NumNodes];
-    sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt2[2].fn(vthis(stream, vt2[2]), self->Nodes, self->NumNodes * 80);
+    stream->read((char*)self->Nodes, self->NumNodes * 80);
     cFloatRailNode_updateMats(self);
     cFloatRailNode_updateBoundBox(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
@@ -866,16 +864,14 @@ struct sFlexRailElem_349DB0 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* bucket, void* stream)
+extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     self->mVtbl = (void**)cSpringRailNode_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->ASpring, 0xC);
+    stream->read((char*)&self->ASpring, 0xC);
     sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(&self->Nodes);
     *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[self->NumNodes];
-    sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt2[2].fn(vthis(stream, vt2[2]), self->Nodes, self->NumNodes * 0x60);
+    stream->read((char*)self->Nodes, self->NumNodes * 0x60);
     cSpringRailNode_updateMats(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
     return ((char*)self);

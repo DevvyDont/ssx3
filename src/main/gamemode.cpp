@@ -470,31 +470,31 @@ extern int cGameModeMan_iCharRank[];
  *
  * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
  */
-extern "C" void cGameModeMan_writeToReplayFrame(cGameModeMan* self, cGmStream_385D0* data)
+extern "C" void cGameModeMan_writeToReplayFrame(cGameModeMan* self, cBxReplayFrame* data)
 {
-    data->write(&self->iCurrModeHandler, 4);
-    data->write(((char*)self), 4);
-    data->write(&self->iCurrentGameEvent, 4);
-    data->write(&self->iNumberAI, 4);
-    data->write(&self->iSimAI, 4);
-    data->write(&self->iCharacters[0], 40);
-    data->write(&self->iLocation, 4);
-    data->write(&self->iNextLocation, 4);
-    data->write(&self->iNextHeat, 4);
-    data->write(cGameModeMan_iRanking, 40);
-    data->write(cGameModeMan_iCharRank, 40);
-    data->write(&self->uiTimeLimit, 4);
-    data->write(&self->uiPointTarget, 4);
-    data->write(&self->unk_80, 4);
-    data->write(D_00536640, 40);
-    data->write(&self->bIsEventDone, 4);
-    data->write(&self->bIsTimedEvent, 4);
-    data->write(&self->bHasPointTarget, 4);
-    data->write(&self->unk_90, 4);
-    data->write(&self->unk_94, 4);
-    data->write(&self->bIsLastHeat, 4);
-    data->write(&self->bAreResultsLocked, 4);
-    ((cGameModeObj_2385D0*)cGameModeMan_aHandler[self->iCurrModeHandler])->save(data);
+    data->write((const char*)&self->iCurrModeHandler, 4);
+    data->write((const char*)self, 4);
+    data->write((const char*)&self->iCurrentGameEvent, 4);
+    data->write((const char*)&self->iNumberAI, 4);
+    data->write((const char*)&self->iSimAI, 4);
+    data->write((const char*)&self->iCharacters[0], 40);
+    data->write((const char*)&self->iLocation, 4);
+    data->write((const char*)&self->iNextLocation, 4);
+    data->write((const char*)&self->iNextHeat, 4);
+    data->write((const char*)cGameModeMan_iRanking, 40);
+    data->write((const char*)cGameModeMan_iCharRank, 40);
+    data->write((const char*)&self->uiTimeLimit, 4);
+    data->write((const char*)&self->uiPointTarget, 4);
+    data->write((const char*)&self->unk_80, 4);
+    data->write((const char*)D_00536640, 40);
+    data->write((const char*)&self->bIsEventDone, 4);
+    data->write((const char*)&self->bIsTimedEvent, 4);
+    data->write((const char*)&self->bHasPointTarget, 4);
+    data->write((const char*)&self->unk_90, 4);
+    data->write((const char*)&self->unk_94, 4);
+    data->write((const char*)&self->bIsLastHeat, 4);
+    data->write((const char*)&self->bAreResultsLocked, 4);
+    ((cGameModeObj_2385D0*)cGameModeMan_aHandler[self->iCurrModeHandler])->save((cGmStream_385D0*)data);
 }
 #endif
 //100%
@@ -523,31 +523,31 @@ public:
  *
  * @param data  the replay frame read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cGmStream_385D0* data)
+extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cBxReplayFrame* data)
 {
-    data->read(&self->iCurrModeHandler, 4);
-    data->read(((char*)self), 4);
-    data->read(&self->iCurrentGameEvent, 4);
-    data->read(&self->iNumberAI, 4);
-    data->read(&self->iSimAI, 4);
-    data->read(&self->iCharacters[0], 40);
-    data->read(&self->iLocation, 4);
-    data->read(&self->iNextLocation, 4);
-    data->read(&self->iNextHeat, 4);
-    data->read(cGameModeMan_iRanking, 40);
-    data->read(cGameModeMan_iCharRank, 40);
-    data->read(&self->uiTimeLimit, 4);
-    data->read(&self->uiPointTarget, 4);
-    data->read(&self->unk_80, 4);
-    data->read(D_00536640, 40);
-    data->read(&self->bIsEventDone, 4);
-    data->read(&self->bIsTimedEvent, 4);
-    data->read(&self->bHasPointTarget, 4);
-    data->read(&self->unk_90, 4);
-    data->read(&self->unk_94, 4);
-    data->read(&self->bIsLastHeat, 4);
-    data->read(&self->bAreResultsLocked, 4);
-    ((cGameModeObj_2388A0*)cGameModeMan_aHandler[self->iCurrModeHandler])->load(data);
+    data->read((char*)&self->iCurrModeHandler, 4);
+    data->read((char*)self, 4);
+    data->read((char*)&self->iCurrentGameEvent, 4);
+    data->read((char*)&self->iNumberAI, 4);
+    data->read((char*)&self->iSimAI, 4);
+    data->read((char*)&self->iCharacters[0], 40);
+    data->read((char*)&self->iLocation, 4);
+    data->read((char*)&self->iNextLocation, 4);
+    data->read((char*)&self->iNextHeat, 4);
+    data->read((char*)cGameModeMan_iRanking, 40);
+    data->read((char*)cGameModeMan_iCharRank, 40);
+    data->read((char*)&self->uiTimeLimit, 4);
+    data->read((char*)&self->uiPointTarget, 4);
+    data->read((char*)&self->unk_80, 4);
+    data->read((char*)D_00536640, 40);
+    data->read((char*)&self->bIsEventDone, 4);
+    data->read((char*)&self->bIsTimedEvent, 4);
+    data->read((char*)&self->bHasPointTarget, 4);
+    data->read((char*)&self->unk_90, 4);
+    data->read((char*)&self->unk_94, 4);
+    data->read((char*)&self->bIsLastHeat, 4);
+    data->read((char*)&self->bAreResultsLocked, 4);
+    ((cGameModeObj_2388A0*)cGameModeMan_aHandler[self->iCurrModeHandler])->load((cGmStream_385D0*)data);
 }
 #endif
 

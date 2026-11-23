@@ -942,7 +942,7 @@ struct sInstElem2168 {
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, void* stream)
+extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = cMeshAnimNode_vtbl;
@@ -950,8 +950,7 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, 
     new ((char*)&self->Axis[0]) sInstElem2168[24];
     new ((char*)&self->Angle[0]) sInstElem2168[24];
     new ((char*)&self->Pos[16]) sInstElem2168[24];
-    sVEntry<void(void*, void*, int)>* vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    vtEntry->fn(vthis(stream, *vtEntry), (char*)&self->Life, 0xC);
+    stream->read((char*)&self->Life, 0xC);
     self->Life = -1.0f;
     return ((void*)self);
 }

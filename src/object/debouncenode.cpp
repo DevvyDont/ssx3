@@ -32,14 +32,12 @@ extern char cDebounceNode_vtbl[];
  * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
  * @return self
  */
-extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, void* stream)
+extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cMoveNode_cMoveNode(self, bucket, stream);
     self->mVtbl = (void**)cDebounceNode_vtbl;
-    sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->Life, 4);
-    readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->Type, 4);
+    stream->read((char*)&self->Life, 4);
+    stream->read((char*)&self->Type, 4);
     return ((void*)self);
 }
 #endif
@@ -278,12 +276,11 @@ extern char cConveyorNode_vtbl[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket, void* stream)
+extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cConveyorNode_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Vel, 44);
+    stream->read((char*)&self->Vel, 44);
     return ((void*)self);
 }
 #endif
@@ -788,12 +785,11 @@ extern char cCounterNode_vtbl[];
  * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
  * @return self
  */
-extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, void* stream)
+extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cCounterNode_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Count, 0x8);
+    stream->read((char*)&self->Count, 0x8);
     return ((void*)self);
 }
 #endif

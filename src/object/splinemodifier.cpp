@@ -2259,13 +2259,6 @@ extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void*
 extern char cRailModifier_vtbl[];
 extern "C" void cRailModifier_buildXform(void* self);
 
-class cSmStream_BA88 {
-public:
-    virtual void v01();
-    virtual void read(void* p, int n);
-    virtual int readReplayInstance();
-};
-
 static inline sSmRoot_BA88* findRoot_BA88(char* w, const sSmCell_BA88& c)
 {
     sSmRoot_BA88* r = (sSmRoot_BA88*)w;
@@ -2333,14 +2326,14 @@ struct sSmRef_BA88 {
  * @param src  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cSmStream_BA88* src)
+extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cBxReplayFrame* src)
 {
     self->SplineId = 0xFFFFFFFF;
     self->mVtbl = (void**)cRailModifier_vtbl;
     self->Next = 0;
     self->Prev = 0;
-    src->read(&self->BoundBox, 0x30);
-    self->Instance = (tInstanceRecord*)src->readReplayInstance();
+    src->read((char*)&self->BoundBox, 0x30);
+    self->Instance = (tInstanceRecord*)(int)src->readReplayInstance();
     cRailModifier_buildXform(((char*)self));
     insert_BA88((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BA88*)(&self->BoundBox));
     sSmTrack_BA88* track = ((sSmRef_BA88*)(&self->SplineId))->get();

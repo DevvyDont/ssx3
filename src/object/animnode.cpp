@@ -9,6 +9,7 @@
 #include "bx/math3d.h"
 #include "object/animnode.h"
 #include "object/floatingnode.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
@@ -587,12 +588,6 @@ void cFloatingNode_initInfo(cFloatingNode* self);
 extern void* cFloatingNode_vtbl[];
 extern char str_FloatingMats[];
 
-struct sStreamVE_ED88 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // Element type with an empty constructor; the array new leaves only its loop counters.
 struct sAnimFrame_ED88 {
     char data[0x40];
@@ -613,19 +608,17 @@ struct sAnimFrame_ED88 {
  * @param stream  the replay frame to read from
  * @return @p self
  */
-extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket, void* stream)
+extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket, cBxReplayFrame* stream)
 {
     int hasInfo;
     cMoveNode_cMoveNode(self, bucket, stream);
     self->Info = 0;
     self->mVtbl = cFloatingNode_vtbl;
-    sStreamVE_ED88* vt = *(sStreamVE_ED88**)stream;
-    vt[2].fn(vthis(stream, vt[2]), &hasInfo, 4);
+    stream->read((char*)&hasInfo, 4);
     if (hasInfo != 0) {
         cFloatingNode_initInfo((cFloatingNode*)self);
     }
-    sStreamVE_ED88* vt2 = *(sStreamVE_ED88**)stream;
-    vt2[2].fn(vthis(stream, vt2[2]), (char*)&self->ZSpring, 72);
+    stream->read((char*)&self->ZSpring, 72);
     sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(&self->AnimMats);
     *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[self->Instance->m_Model->m_iNumMeshes];
     self->Flags |= 1;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("be/be", cBE_getBE);
@@ -245,13 +246,13 @@ cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterfac
  *
  * @param stream  the replay output stream
  */
-extern "C" void cBE_writeToReplayFrame(void* self, cBEReplayStream* stream)
+extern "C" void cBE_writeToReplayFrame(void* self, cBxReplayFrame* stream)
 {
-    stream->write(&cBE_currentState, 4);
+    stream->write((const char*)&cBE_currentState, 4);
     for (int i = 0; i < 14; i++)
     {
         if (cBE_getInterface_Fv(self, i))
-            cBE_getInterface_Fv(self, i)->writeToReplayFrame(stream);
+            cBE_getInterface_Fv(self, i)->writeToReplayFrame((cBEReplayStream*)stream);
     }
 }
 #endif
@@ -270,13 +271,13 @@ cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterfac
  *
  * @param data  the replay stream to read from
  */
-extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* data)
+extern "C" void cBE_readFromReplayFrame(void* self, cBxReplayFrame* data)
 {
-    data->read(&cBE_currentState, 4);
+    data->read((char*)&cBE_currentState, 4);
     for (int i = 0; i < 14; i++)
     {
         if (cBE_getInterface_Fv(self, i))
-            cBE_getInterface_Fv(self, i)->readFromReplayFrame(data);
+            cBE_getInterface_Fv(self, i)->readFromReplayFrame((cBEReplayStream*)data);
     }
 }
 #endif

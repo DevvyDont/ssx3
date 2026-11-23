@@ -2116,15 +2116,15 @@ public:
  * @param stream  the replay frame to read from (On Tour cReplayFramePtr*)
  */
 // Game load state machine: restores the state ids and every state from a save stream.
-extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
+extern "C" void cGame_readFromReplayFrame(cGame* self_, cBxReplayFrame* stream)
 {
     cGame* self = self_;
-    ((cLoadable_14D0*)self->FlagManager)->load(stream);
-    ((cLoadable_14D0*)self->SnowFall)->load(stream);
-    stream->read(&self->mCurrentStateID, 4);
-    stream->read(&self->mPrevStateID, 4);
-    stream->read(&self->mPendingStateID, 4);
-    stream->read(&self->mPendingStateStartupFlag, 4);
+    ((cLoadable_14D0*)self->FlagManager)->load((cStream_14D0*)stream);
+    ((cLoadable_14D0*)self->SnowFall)->load((cStream_14D0*)stream);
+    stream->read((char*)&self->mCurrentStateID, 4);
+    stream->read((char*)&self->mPrevStateID, 4);
+    stream->read((char*)&self->mPendingStateID, 4);
+    stream->read((char*)&self->mPendingStateStartupFlag, 4);
     cGFEventStartState_readFromReplayFrame((char*)&self->mEventStartState, stream);
     cGFPreEventState_readFromReplayFrame_14D0((char*)&self->mPreEventState, stream);
     cGFGateState_readFromReplayFrame_14D0((char*)&self->mGateState, stream);

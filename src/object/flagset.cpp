@@ -913,7 +913,7 @@ extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* arg);
  *
  * @param stream  the replay frame
  */
-extern "C" void cFlagManager_writeToReplayFrame(cFlagManager* self, void* stream)
+extern "C" void cFlagManager_writeToReplayFrame(cFlagManager* self, cBxReplayFrame* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
@@ -940,7 +940,7 @@ extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* arg);
  *
  * @param stream  the replay frame
  */
-extern "C" void cFlagManager_readFromReplayFrame(cFlagManager* self, void* stream)
+extern "C" void cFlagManager_readFromReplayFrame(cFlagManager* self, cBxReplayFrame* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
@@ -1238,14 +1238,13 @@ struct sFlagElem_CBE8 {
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cFenceNode_cFenceNode(cFenceNode* self, void* bucket, void* stream)
+extern "C" void* cFenceNode_cFenceNode(cFenceNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->FenceData.InstId = 0xFFFFFFFF;
     self->mVtbl = cFenceNode_vtbl;
     new ((char*)&self->GridMesh) sFlagElem_CBE8[16];
-    sFlagSetVEntry_CBE8* vtEntry = &(*(sFlagSetVEntry_CBE8**)stream)[2];
-    vtEntry->fn(vthis(stream, *vtEntry), (char*)&self->FenceData, 36);
+    stream->read((char*)&self->FenceData, 36);
     cFenceNode_setupFence(self);
     return ((void*)self);
 }
@@ -1889,12 +1888,6 @@ INCLUDE_ASM("object/flagset", cAnimNode_cAnimNode1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMoveNode_cMoveNode_3(void* self, void* a1, void* stream) __asm__("cMoveNode_cMoveNode");
 
-struct sStreamVE_DAC8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // Element type with an empty constructor; the array new leaves only its loop counters.
 struct sFlagSlot_34DAC8 {
     int v[16];
@@ -1912,7 +1905,7 @@ struct sFlagSlot_34DAC8 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, void* stream)
+extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, cBxReplayFrame* stream)
 {
     int skippedWord;
     char* node = (char*)&self->unk_014;
@@ -1921,10 +1914,8 @@ extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, void* strea
     self->mVtbl = cAnimNode_vtbl;
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(((char*)self));
-    sStreamVE_DAC8* vt = *(sStreamVE_DAC8**)stream;
-    vt[2].fn(vthis(stream, vt[2]), ((char*)self), 20);
-    sStreamVE_DAC8* vt2 = *(sStreamVE_DAC8**)stream;
-    vt2[2].fn(vthis(stream, vt2[2]), &skippedWord, 4);
+    stream->read((char*)self, 20);
+    stream->read((char*)&skippedWord, 4);
     cAnimNode_cacheFrame(self);
     return ((char*)self);
 }

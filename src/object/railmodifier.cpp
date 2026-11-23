@@ -1021,6 +1021,7 @@ INCLUDE_ASM("object/railmodifier", cRigidBody_stepMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
+#include "replay/bxreplayframe.h"
 
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
@@ -1333,33 +1334,20 @@ INCLUDE_ASM("object/railmodifier", func_0035D908);
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cRigidBody_writeToReplayFrame_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-};
-
 /**
  * Writes a rigid body's state (its first 0x50 bytes: pose, momentum, inverse mass) to a replay frame.
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame*)
  */
-extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cRigidBody_writeToReplayFrame_cObj* obj)
+extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cBxReplayFrame* obj)
 {
-    obj->write(self, 80);
+    obj->write((const char*)self, 80);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cRigidBody_readFromReplayFrame_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 /**
  * Restores a rigid body's state from a replay frame.
  *
@@ -1368,9 +1356,9 @@ public:
  *
  * @param obj  the replay frame to read from (On Tour data)
  */
-extern "C" void cRigidBody_readFromReplayFrame(void* self, cRigidBody_readFromReplayFrame_cObj* obj)
+extern "C" void cRigidBody_readFromReplayFrame(void* self, cBxReplayFrame* obj)
 {
-    obj->read(self, 80);
+    obj->read((char*)self, 80);
 }
 #endif
 
@@ -1753,13 +1741,6 @@ extern "C" void cRollerModifier_updateMOI(cRollerModifier* self);
 
 
 
-class cStreamDF70 {
-public:
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-    virtual int readReplayInstance();
-};
-
 struct sRmMat33DF70 {
     float m[9];
 };
@@ -1788,15 +1769,15 @@ struct sRmSrcDF70 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* self, cStreamDF70* stream)
+extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* self, cBxReplayFrame* stream)
 {
     self->mVtbl = cTransformModifier_vtbl;
     cRigidBody_cRigidBody(((char*)&self->Pose));
     self->mVtbl = cRollerModifier_vtbl;
     SphereTree_SphereTree(((char*)&self->SphTree));
-    cRigidBody_readFromReplayFrame(((char*)&self->Pose), (cRigidBody_readFromReplayFrame_cObj*)stream);
-    stream->read(((char*)&self->mKineticEnergy), 40);
-    (*(int*)&self->m_pInstance) = stream->readReplayInstance();
+    cRigidBody_readFromReplayFrame(((char*)&self->Pose), stream);
+    stream->read((char*)&self->mKineticEnergy, 40);
+    (*(int*)&self->m_pInstance) = (int)stream->readReplayInstance();
     void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)((int)self->m_pInstance)), 0);
     bxSphereTree_operatorE(((char*)&self->SphTree), meshTree);
     sRmSrcDF70* src = ((sRmSrcDF70*)self->SphTree.treeInfo);
@@ -1828,16 +1809,6 @@ extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* se
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", cRollerModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cRollerModifier_writeToReplayFrame_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-    virtual void v02(void* buf, int size);
-    virtual void v03();
-    virtual void v04();
-    virtual void writeReplayInstance(void* ptr);
-};
-
 /**
  * Writes the roller modifier to a replay frame: its rigid body (+0x30), the 0x28-byte cRollerNodeState (+0x4) and
  * Instance (+0xD0).
@@ -1847,11 +1818,11 @@ public:
  *
  * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cRollerModifier_writeToReplayFrame(cRollerModifier* self, cRollerModifier_writeToReplayFrame_cObj* obj)
+extern "C" void cRollerModifier_writeToReplayFrame(cRollerModifier* self, cBxReplayFrame* obj)
 {
-    cRigidBody_writeToReplayFrame((cRigidBody*)(&self->Pose), (cRigidBody_writeToReplayFrame_cObj*)obj);
-    obj->write(&self->mKineticEnergy, 40);
-    obj->writeReplayInstance(self->m_pInstance);
+    cRigidBody_writeToReplayFrame((cRigidBody*)(&self->Pose), obj);
+    obj->write((const char*)&self->mKineticEnergy, 40);
+    obj->writeReplayInstance((const tInstanceRecord*)self->m_pInstance);
 }
 #endif
 
@@ -2382,14 +2353,6 @@ extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier*
 //100%
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_cTexFlipModifier1);
 #ifdef SKIP_ASM
-class cTexFlipModifier_cTexFlipModifier1_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-    virtual void* readReplayInstance();
-};
-
 extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
 
 /**
@@ -2399,10 +2362,10 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
  * @param obj  replay stream to read from
  * @return self
  */
-extern "C" void* cTexFlipModifier_cTexFlipModifier1(cTexFlipModifier* self, cTexFlipModifier_cTexFlipModifier1_cObj* obj)
+extern "C" void* cTexFlipModifier_cTexFlipModifier1(cTexFlipModifier* self, cBxReplayFrame* obj)
 {
-    obj->read(self, 0x18);
-    self->Instance = (tInstanceRecord*)obj->readReplayInstance();
+    obj->read((char*)self, 0x18);
+    self->Instance = (tInstanceRecord*)(void*)obj->readReplayInstance();
     cTexFlipModifier_setupTexFlip(self);
     return ((void*)self);
 }
@@ -2659,26 +2622,16 @@ extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float va
 //100%
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cStream0035F688 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-    virtual void v02(void* buf, int size);
-    virtual void v03(void* buf, int size);
-    virtual void v04(void* buf, int size);
-    virtual void writeReplayInstance(void* p);
-};
-
 /**
  * Writes the tex-flip modifier to a replay frame: the 0x18-byte cTexFlipModifierState (Type .. TexIndex) with slot
  * 1, then Instance with slot 5.
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStream0035F688* stream)
+extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cBxReplayFrame* stream)
 {
-    stream->write((char*)&self->Type, 0x18);
-    stream->writeReplayInstance(self->Instance);
+    stream->write((const char*)&self->Type, 0x18);
+    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
 }
 #endif
 
@@ -2765,10 +2718,9 @@ struct sRailSerVEntry {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cUVScrollModifier_cUVScrollModifier1(cUVScrollModifier* self, void* stream)
+extern "C" void* cUVScrollModifier_cUVScrollModifier1(cUVScrollModifier* self, cBxReplayFrame* stream)
 {
-    sRailSerVEntry* vt = *(sRailSerVEntry**)stream;
-    vt[2].fn(vthis(stream, vt[2]), self, 80);
+    stream->read((char*)self, 80);
     return ((void*)self);
 }
 #endif
@@ -3012,21 +2964,15 @@ extern "C" t4Matrix* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, t4
 //100%
 INCLUDE_ASM("object/railmodifier", cUVScrollModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cUVScrollModifier_writeToReplayFrame_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-};
-
 /**
  * Writes the whole UV-scroll modifier (0x50 bytes, all cUVScrollModifierState) through the replay frame's write
  * virtual (slot 1).
  *
  * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cUVScrollModifier_writeToReplayFrame_cObj* obj)
+extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cBxReplayFrame* obj)
 {
-    obj->write(self, 80);
+    obj->write((const char*)self, 80);
 }
 #endif
 
