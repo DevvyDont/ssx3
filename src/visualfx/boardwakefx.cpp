@@ -3994,7 +3994,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
 {
     cLightHalo* self = vself;
     float* rect = (float*)vrect;
-    cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     t4Vector pos;
     pos.x = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).x;
     pos.y = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).y;
@@ -4005,9 +4005,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
         self->mbRequestZSample = 0;
     } else {
         self->mbOnScreen = 1;
-        t4Vector scr;
-        sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)VPTR_OF(cGraphicsMan, obj))[92];
-        projectSlot->fn(&scr, vthis(obj, *projectSlot), &pos);
+        t4Vector scr = obj->GetScreenCoord(&pos);
         float depth = scr.z * 5.960465188081798e-08f;
         if (depth <= 0.005f) {
             return;
@@ -4045,9 +4043,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
             viewDir.y = rect[10];
             viewDir.z = rect[14];
             t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(viewDir.x * pullBack, viewDir.y * pullBack, viewDir.z * pullBack), 0.0f));
-            t4Vector sc;
-            sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &((sVEntry<void (t4Vector*, void*, t4Vector*)>*)VPTR_OF(cGraphicsMan, obj))[92];
-            projectSlot2->fn(&sc, vthis(obj, *projectSlot2), &lp);
+            t4Vector sc = obj->GetScreenCoord(&lp);
             self->mZDist = sc.z;
             // screen x mapped to -1..1, then to an angle
             float screenFrac = scr.x - rect[0];
@@ -4133,7 +4129,7 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
         }
     }
     {
-        cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+        cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
         obj->SetLensFXCallBack((void*)cLensFxMan__drawFrameCallBack, (void*)self);
     }
     cLensFxMan_mbDrawSun = 1;
@@ -4237,7 +4233,7 @@ void operator_delete(int* p);
  */
 extern "C" void cLensFxMan__cLensFxMan(cLensFxMan* self, int flags)
 {
-    cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     self->mVtbl = cLensFxMan_vtbl;
     obj->SetLensFXCallBack((void*)(0), (void*)(0));
     cLensFxMan_mbDrawSun = 0;
@@ -4426,12 +4422,8 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
 extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
 {
     cLensFxMan* self = vself;
-    cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
-    tRect viewRect;
-    {
-        sWkVtR3338* vt = (sWkVtR3338*)VPTR_OF(cGraphicsMan, ctx);
-        vt[28].fn(&viewRect, vthis(ctx, vt[28]));
-    }
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
+    tRect viewRect = ctx->GetViewportWindow();
     self->mViewInfo.mViewRect = viewRect;
     {
         vu0CopyMatrix3338(&(*(sWkMtx3338*)&self->mViewInfo.mViewMat), (sWkMtx3338*)ctx->GetView());
@@ -5152,7 +5144,7 @@ extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
     char* scriptObj = (char*)&self->mObjType;
     cTransitionMan_EndTransition(self);
     if (self->mRequestingDelete != 0) {
-        cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+        cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
         sBWVEntry1* removeScreenGrab = &((sBWVEntry1*)VPTR_OF(cGraphicsMan, obj))[60];
         removeScreenGrab->fn(vthis(obj, *removeScreenGrab), (char*)&self->mScreenGrabHandle);
         self->mRequestingDelete = 0;
@@ -5207,7 +5199,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
         }
         char* ref = (char*)&self->mScreenGrabHandle;
         if (~self->mScreenGrabHandle.mTextureId == 0) {
-            cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+            cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
             obj->CreateScreenGrabTexture((tScreenGrabHandle*)ref, 0x100, 0x100);
             if (~self->mScreenGrabHandle.mTextureId == 0) {
                 if (transitionIn != 0) {
@@ -5344,7 +5336,7 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
         self->mTransitionOut = 0;
         self->mExternalTimePercentage = 0;
         if (~self->mScreenGrabHandle.mTextureId != 0) {
-            cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+            cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
             self->mRequestingDelete = 1;
             self->mRequestDeleteFrame = obj->getCurrentFrameCount();
             self->mRequestingScreenGrab = 0;
@@ -5422,7 +5414,7 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
  */
 extern "C" void cTransitionMan_update(cTransitionMan* self)
 {
-    cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (self->mRequestingDelete != 0) {
         sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cGraphicsMan, ctx);
         if (vt[114].fn(vthis(ctx, vt[114])) - self->mRequestDeleteFrame >= 3) {
@@ -5521,14 +5513,13 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
         return;
     }
     FigureOutTransitionUVs();
-    cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (self->mbPlayingTransition == 0) {
         return;
     }
     float curTime = self->mfCurrentTime;
     if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx));
-        vt[61].fn(vthis(ctx, vt[61]), (int*)&self->mScreenGrabHandle);
+        ctx->TakeScreenGrab(&self->mScreenGrabHandle);
         self->mRequestingScreenGrab = 0;
     }
     char* transition;
@@ -5552,9 +5543,9 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     (ctx->m_pCurrentDrawState)[1] = (ctx->m_pCurrentDrawState)[0];
     (*(sDrawState**)&ctx->m_pCurrentDrawState)++;
-    ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[21].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[21]));
-    ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[31].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[31]));
-    ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[37].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[37]));
+    ctx->PushViewport();
+    ctx->PushView();
+    ctx->IdentityView();
     sRsVtV47E8* vv = (sRsVtV47E8*)((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx));
     vv[26].fn(vthis(ctx, vv[26]), 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
     rsSetB47E8(ctx, 0x3E0, 5, 8);
@@ -5575,8 +5566,8 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
         sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
         ov[2].fn(vthis(transition, ov[2]), clamped);
     }
-    ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[32].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[32]));
-    ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[22].fn(vthis(ctx, ((sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, ctx))[22]));
+    ctx->PopView();
+    ctx->PopViewport();
     (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
