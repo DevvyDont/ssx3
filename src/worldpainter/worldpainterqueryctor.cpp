@@ -66,7 +66,7 @@ extern "C" cWorldPainterQuery* cWorldPainterQuery_cWorldPainterQuery(cWorldPaint
 {
     (*(sWPQueryType*)&self->m_regionType).flags = type;
     (*(sWPQueryType*)&self->m_regionType).kind = type >> 8;
-    self->mVtbl = (void**)cWorldPainterQuery_vtbl;
+    VPTR_OF(tWorldPainterQuery, self) = (void**)cWorldPainterQuery_vtbl;
     self->m_x = 4286578688.0f;
     self->m_y = 4286578688.0f;
     switch ((*(sWPQueryType*)&self->m_regionType).kind) {
@@ -140,7 +140,7 @@ extern cWorldPainterQuery* cWorldPainterQuery_m_queryListStart;
  */
 extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self, int flags)
 {
-    self->mVtbl = (void**)cWorldPainterQuery_vtbl;
+    VPTR_OF(tWorldPainterQuery, self) = (void**)cWorldPainterQuery_vtbl;
     operator_delete((int*)self->m_data);
     cWorldPainterQuery* query = cWorldPainterQuery_m_queryListStart;
     if (query == (self)) {
@@ -153,7 +153,7 @@ extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self,
             query->m_next = self->m_next;
         }
     }
-    self->mVtbl = (void**)tWorldPainterQuery_vtbl;
+    VPTR_OF(tWorldPainterQuery, self) = (void**)tWorldPainterQuery_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -207,12 +207,12 @@ static inline int valid_0778(cWorldPainterSection* e)
 
 static inline void end_0778(tWPInGameData* o)
 {
-    ((tEnd_0778)((sOutVt_0778*)o->mVtbl)[69].fn)(vthis(o, ((sOutVt_0778*)o->mVtbl)[69]));
+    ((tEnd_0778)((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[69].fn)(vthis(o, ((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[69]));
 }
 
 static inline void set_0778(tWPInGameData* o, float* d, float v)
 {
-    ((tSet_0778)((sOutVt_0778*)o->mVtbl)[66].fn)(vthis(o, ((sOutVt_0778*)o->mVtbl)[66]), d, v);
+    ((tSet_0778)((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[66].fn)(vthis(o, ((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[66]), d, v);
 }
 
 /**
@@ -262,7 +262,7 @@ extern "C" tWPInGameData* cWorldPainterQuery_queryPosition(cWorldPainterQuery* s
         if (hit->key != ((*(unsigned int*)&self->m_regionType) >> 8)) {
             return (self->m_data);
         }
-        if (((tTest_0778)((sOutVt_0778*)(self->m_data)->mVtbl)[68].fn)((char*)(self->m_data) + ((sOutVt_0778*)(self->m_data)->mVtbl)[68].delta, hit->data)) {
+        if (((tTest_0778)((sOutVt_0778*)VPTR_OF(tWPInGameData, (self->m_data)))[68].fn)((char*)(self->m_data) + ((sOutVt_0778*)VPTR_OF(tWPInGameData, (self->m_data)))[68].delta, hit->data)) {
             (self->m_data)->m_wpTravelDistance = 0.0f;
         }
         if (first) {

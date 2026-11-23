@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "worldpainter/quadtree.h"
 #include "worldpainter/worldpainterquery.h"
 
@@ -288,7 +289,7 @@ void operator_delete(int* ptr);
  */
 extern "C" void tWorldPainterQuery__tWorldPainterQuery(tWorldPainterQuery* self, int flags)
 {
-    self->mVtbl = tWorldPainterQuery_vtbl;
+    VPTR_OF(tWorldPainterQuery, self) = tWorldPainterQuery_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

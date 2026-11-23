@@ -3604,7 +3604,7 @@ extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider,
 {
     if (((void*)rider) != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (((void*)obj) == 0) return;
-    sVEntry<int*(void*)>* vt = (sVEntry<int*(void*)>*)obj->mVtbl;
+    sVEntry<int*(void*)>* vt = (sVEntry<int*(void*)>*)VPTR_OF(tWPInGameData, obj);
     int id = *vt[4].fn(vthis(obj, vt[4]));
     if (id == -1) return;
     if (id == 0x1F) {
@@ -3783,7 +3783,7 @@ struct sSsxAudioVEntryP {
 extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameData* obj)
 {
     if (id == cSSXAudio_GetFocusRider(self, -1) && ((void*)obj) != 0) {
-        sSsxAudioVEntryP* vt = (sSsxAudioVEntryP*)obj->mVtbl;
+        sSsxAudioVEntryP* vt = (sSsxAudioVEntryP*)VPTR_OF(tWPInGameData, obj);
         cSSXAudio_MixVolume(self, *vt[3].fn(vthis(obj, vt[3])));
     }
 }

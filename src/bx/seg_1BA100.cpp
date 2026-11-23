@@ -3963,7 +3963,7 @@ extern char tWPInGameData_MusicTrigger_vtbl[];
  * @return @p musicTrigger
  */
 extern "C" void *tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger(tWPInGameData_MusicTrigger* musicTrigger) {
-    musicTrigger->mVtbl = (void**)tWPInGameData_MusicTrigger_vtbl;
+    VPTR_OF(tWPInGameData, musicTrigger) = (void**)tWPInGameData_MusicTrigger_vtbl;
     musicTrigger->m_wpTravelDistance = -99999.0f;
     musicTrigger->m_lastType = -1;
     musicTrigger->m_Type = -1;
@@ -3985,7 +3985,7 @@ extern char tWPInGameData_Mix_vtbl[];
  * @return @p mix
  */
 extern "C" void *tWPInGameData_Mix_tWPInGameData_Mix(tWPInGameData_Mix* mix) {
-    mix->mVtbl = (void**)tWPInGameData_Mix_vtbl;
+    VPTR_OF(tWPInGameData, mix) = (void**)tWPInGameData_Mix_vtbl;
     mix->m_wpTravelDistance = -99999.0f;
     mix->m_lastMixPreset = -1;
     mix->m_MixPreset = -1;
@@ -4005,7 +4005,7 @@ extern char tWPInGameData_Ambience_vtbl[];
  * @return @p ambience
  */
 extern "C" void *tWPInGameData_Ambience_tWPInGameData_Ambience(tWPInGameData_Ambience* ambience) {
-    ambience->mVtbl = (void**)tWPInGameData_Ambience_vtbl;
+    VPTR_OF(tWPInGameData, ambience) = (void**)tWPInGameData_Ambience_vtbl;
     ambience->m_wpTravelDistance = -99999.0f;
     ambience->m_lastBankID = -1;
     ambience->m_BankID = -1;
@@ -4025,7 +4025,7 @@ extern char tWPInGameData_Speech_vtbl[];
  * @return @p speech
  */
 extern "C" void *tWPInGameData_Speech_tWPInGameData_Speech(tWPInGameData_Speech* speech) {
-    speech->mVtbl = (void**)tWPInGameData_Speech_vtbl;
+    VPTR_OF(tWPInGameData, speech) = (void**)tWPInGameData_Speech_vtbl;
     speech->m_wpTravelDistance = -99999.0f;
     speech->m_lastSpeechID = -1;
     speech->m_SpeechID = -1;
@@ -4045,7 +4045,7 @@ extern char tWPInGameData_Camera_vtbl[];
  * @return @p camera
  */
 extern "C" void *tWPInGameData_Camera_tWPInGameData_Camera(tWPInGameData_Camera* camera) {
-    camera->mVtbl = (void**)tWPInGameData_Camera_vtbl;
+    VPTR_OF(tWPInGameData, camera) = (void**)tWPInGameData_Camera_vtbl;
     camera->m_lastDrawDistance = 30000.0f;
     camera->m_wpTravelDistance = -99999.0f;
     camera->m_DrawDistance = 30000.0f;
@@ -4068,7 +4068,7 @@ extern char tWPInGameData_Fog_vtbl[];
 extern "C" void *tWPInGameData_Fog_tWPInGameData_Fog(tWPInGameData_Fog* fog) {
     float zero = 0.0f;
     float fogNear = 3000.0f, fogFar = 30000.0f, fogRed = 0.43f, fogGreen = 0.55f, fogBlue = 0.71f;
-    fog->mVtbl = (void**)((int*)tWPInGameData_Fog_vtbl);
+    VPTR_OF(tWPInGameData, fog) = (void**)((int*)tWPInGameData_Fog_vtbl);
     fog->m_wpTravelDistance = -99999.0f;
     fog->m_lastFogDensity = zero;
     fog->m_lastFogNear = fogNear;
@@ -4102,7 +4102,7 @@ extern "C" void *tWPInGameData_LightGlow_tWPInGameData_LightGlow(tWPInGameData_L
     float one = 1.0f, zeroF = 0.0f;
     float *floats = (float*)self;
     floats[0] = -99999.0f;
-    self->mVtbl = (void**)tWPInGameData_LightGlow_vtbl;
+    VPTR_OF(tWPInGameData, self) = (void**)tWPInGameData_LightGlow_vtbl;
     floats[3] = one;
     floats[2] = one;
     floats[5] = one;
@@ -4136,7 +4136,7 @@ extern "C" void *tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(tWPInGameData
     float one = 1.0f, zeroF = 0.0f;
     float *floats = (float*)self;
     floats[0] = -99999.0f;
-    self->mVtbl = (void**)tWPInGameData_ScreenTint_vtbl;
+    VPTR_OF(tWPInGameData, self) = (void**)tWPInGameData_ScreenTint_vtbl;
     floats[3] = one;
     floats[2] = one;
     floats[5] = one;
@@ -4166,7 +4166,7 @@ extern char tWPInGameData_SkyBox_vtbl[];
  */
 extern "C" void *tWPInGameData_SkyBox_tWPInGameData_SkyBox(tWPInGameData_SkyBox* skyBox) {
     float zero = 0.0f;
-    skyBox->mVtbl = (void**)tWPInGameData_SkyBox_vtbl;
+    VPTR_OF(tWPInGameData, skyBox) = (void**)tWPInGameData_SkyBox_vtbl;
     skyBox->m_lastSkyBoxRotation = zero;
     skyBox->m_wpTravelDistance = -99999.0f;
     skyBox->m_SkyBoxRotation = zero;
@@ -4190,7 +4190,7 @@ extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
     float one = 1.0f, zeroF = 0.0f;
     float *floats = (float*)self;
     floats[0] = -99999.0f;
-    self->mVtbl = (void**)tWPInGameData_Sun_vtbl;
+    VPTR_OF(tWPInGameData, self) = (void**)tWPInGameData_Sun_vtbl;
     floats[3] = zeroF;
     floats[2] = zeroF;
     floats[5] = zeroF;
@@ -4226,7 +4226,7 @@ extern char tWPInGameData_Surface_vtbl[];
  */
 extern "C" void *tWPInGameData_Surface_tWPInGameData_Surface(tWPInGameData_Surface* surface) {
     float one = 1.0f;
-    surface->mVtbl = (void**)tWPInGameData_Surface_vtbl;
+    VPTR_OF(tWPInGameData, surface) = (void**)tWPInGameData_Surface_vtbl;
     surface->m_lastSnowSparkleDensity = one;
     surface->m_wpTravelDistance = -99999.0f;
     surface->m_SnowSparkleDensity = one;
@@ -4250,7 +4250,7 @@ extern char tWPInGameData_Lighting_vtbl[];
  */
 extern "C" void* tWPInGameData_Lighting_tWPInGameData_Lighting(tWPInGameData_Lighting* lighting)
 {
-    lighting->mVtbl = (void**)tWPInGameData_Lighting_vtbl;
+    VPTR_OF(tWPInGameData, lighting) = (void**)tWPInGameData_Lighting_vtbl;
     lighting->m_wpTravelDistance = -99999.0f;
     ((&lighting->m_LightIrradianceName))[0].m_nameId[0] = ((&lighting->m_LightIrradianceName))[0].m_nameId[1] = 0;
     ((&lighting->m_LightIrradianceName))[1].m_nameId[0] = ((&lighting->m_LightIrradianceName))[1].m_nameId[1] = 0;
@@ -4287,7 +4287,7 @@ extern char tWPInGameData_Weather_vtbl[];
  * @return @p self (0xA0 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Weather")
  */
 extern "C" void* tWPInGameData_Weather_tWPInGameData_Weather(tWPInGameData_Weather* self) {
-    self->mVtbl = (void**)tWPInGameData_Weather_vtbl;
+    VPTR_OF(tWPInGameData, self) = (void**)tWPInGameData_Weather_vtbl;
     self->m_wpTravelDistance = -99999.0f;
     self->m_SnowIntensity = self->m_lastSnowIntensity = 0.0f;
     self->m_FlakeSize = self->m_lastFlakeSize = 6.0f;
@@ -4326,7 +4326,7 @@ extern char tWPInGameData_Danger_vtbl[];
  */
 extern "C" void *tWPInGameData_Danger_tWPInGameData_Danger(tWPInGameData_Danger* danger) {
     float zero = 0.0f;
-    danger->mVtbl = (void**)tWPInGameData_Danger_vtbl;
+    VPTR_OF(tWPInGameData, danger) = (void**)tWPInGameData_Danger_vtbl;
     danger->m_lastLevel = 0;
     danger->m_Level = 0;
     danger->m_wpTravelDistance = -99999.0f;
@@ -4474,7 +4474,7 @@ struct Src_CF38 { int pad0; float v[6]; };
 extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* src, float blendFactor) {
     VEnt_CF38* vtEntry;
     float inv;
-    vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
+    vtEntry = (VEnt_CF38*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
     vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
@@ -4490,7 +4490,7 @@ extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* sr
     ((Pair_CF38*)&self->m_FogDensity)[4].tgt = ((float*)&src->m_FogDensity)[4];
     ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * ((float*)&src->m_FogDensity)[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
     ((Pair_CF38*)&self->m_FogDensity)[5].tgt = ((float*)&src->m_FogDensity)[5];
-    vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
+    vtEntry = (VEnt_CF38*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
     vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif
@@ -4517,7 +4517,7 @@ struct Src_D068 { int pad0; float v[7]; };
 extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWPData_LightGlow* src, float blendFactor) {
     VEnt_D068* vtEntry;
     float inv;
-    vtEntry = (VEnt_D068*)((char*)self->mVtbl + 0x218);
+    vtEntry = (VEnt_D068*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
     vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
@@ -4536,7 +4536,7 @@ extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWP
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = ((float*)&src->m_LightGlowCutoff)[6];
     {
-        VEntV_D068* vtEntryV = (VEntV_D068*)((char*)self->mVtbl + 0x218);
+        VEntV_D068* vtEntryV = (VEntV_D068*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
         vtEntryV->fn(vthis(self, *vtEntryV));
     }
 }
@@ -4562,7 +4562,7 @@ struct Src_D1B8 { int pad0; float v[6]; };
 extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, tWPData_ScreenTint* src, float blendFactor) {
     VEnt_D1B8* vtEntry;
     float inv;
-    vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
+    vtEntry = (VEnt_D1B8*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
     vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
@@ -4578,7 +4578,7 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, t
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = ((float*)&src->m_ScreenTintScaleR)[4];
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = ((float*)&src->m_ScreenTintScaleR)[5];
-    vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
+    vtEntry = (VEnt_D1B8*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
     vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif
@@ -4627,7 +4627,7 @@ struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
 extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* src, float blendFactor) {
     VEnt_D378* vtEntry;
     float inv;
-    vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
+    vtEntry = (VEnt_D378*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
     vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
@@ -4649,7 +4649,7 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* sr
     ((Pair_D378*)&self->m_LensIntensity)[0].tgt = ((float*)&src->m_LensIntensity)[0];
     ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * ((float*)&src->m_LensIntensity)[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
     ((Pair_D378*)&self->m_LensIntensity)[1].tgt = ((float*)&src->m_LensIntensity)[1];
-    vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
+    vtEntry = (VEnt_D378*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
     vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif

@@ -300,7 +300,7 @@ static inline void Link_5400(tLightCacheEntry** heads, int slot, tLightCacheEntr
 static inline sLightRef_5400* GetRef_5400(char* vo, int slot)
 {
     tWPInGameData* o = (tWPInGameData*)vo;
-    sVEr_5400* vt = (sVEr_5400*)o->mVtbl;
+    sVEr_5400* vt = (sVEr_5400*)VPTR_OF(tWPInGameData, o);
     return vt[slot].fn(vthis(o, vt[slot]));
 }
 
@@ -402,7 +402,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
                 node->ObjIrradiance = *cRenderStateMan_getCustomIrradiance();
             } else {
                 tWorldPainterQuery* world = (tWorldPainterQuery*)self->world;
-                sVEf_5400* vt = (sVEf_5400*)world->mVtbl;
+                sVEf_5400* vt = (sVEf_5400*)VPTR_OF(tWorldPainterQuery, world);
                 vt[2].fn(vthis(world, vt[2]), (*(sVec_5400*)&node->pos).x, (*(sVec_5400*)&node->pos).y, -99999.0f);
                 sLightRef_5400* ref = GetRef_5400(*(char**)self->world, 40);
                 if (*(signed char*)ref != 0) {
