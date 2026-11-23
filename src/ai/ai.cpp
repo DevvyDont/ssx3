@@ -7442,7 +7442,6 @@ static inline sQuat_2060 AxisAngle_2060(const sQuat_2060& axis, float angle)
     return sQuat_2060(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-#define RIDER_2060 (*(char**)((char*)self + 8))
 
 static inline void setRot_2060(char* vanim, float a)
 {
@@ -7451,12 +7450,12 @@ static inline void setRot_2060(char* vanim, float a)
     *(sQuat_2060*)&anim->OrientationOffset.Q = AxisAngle_2060(t4vect_ZAxis_2060, -a);
 }
 
-static inline void flip_2060(void* self, int f)
+static inline void flip_2060(cRailslideControl* self, int f)
 {
-    *(int*)(RIDER_2060 + 0x320) = f;
-    *(int*)(*(char**)(RIDER_2060 + 0x784) + 0x18) = f;
-    *(float*)(RIDER_2060 + 0x238) = -*(float*)(RIDER_2060 + 0x238);
-    *(float*)(RIDER_2060 + 0x240) = -*(float*)(RIDER_2060 + 0x240);
+    self->mRider->IsRidingFakie = f;
+    self->mRider->mRiderAnim->IsFlipped = f;
+    self->mRider->mSlewed[6].cur = -self->mRider->mSlewed[6].cur;
+    self->mRider->mSlewed[6].target = -self->mRider->mSlewed[6].target;
 }
 /**
  * Turns the rider a quarter turn on the rail, switching the rail stance (RailslideMode) and playing its anim.
@@ -7471,61 +7470,60 @@ extern "C" void cRailslideControl_chooseRailSpin(cRailslideControl* self, int di
 {
     if (dir != 0) {
         *(float*)self -= 1.5707964897155762f;
-        switch (*(int*)(RIDER_2060 + 0x328)) {
+        switch (self->mRider->RailslideMode) {
     case 1:
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), -1.5707963705062866f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 49, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 3;
+        setRot_2060((char*)self->mRider->mRiderAnim, -1.5707963705062866f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 49, 0, -1.0f);
+        self->mRider->RailslideMode = 3;
         break;
     case 2:
         flip_2060(self, 0);
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), 1.5707963705062866f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 53, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 4;
+        setRot_2060((char*)self->mRider->mRiderAnim, 1.5707963705062866f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 53, 0, -1.0f);
+        self->mRider->RailslideMode = 4;
         break;
     case 3:
         flip_2060(self, 1);
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), 3.1415927410125732f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 51, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 2;
+        setRot_2060((char*)self->mRider->mRiderAnim, 3.1415927410125732f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 51, 0, -1.0f);
+        self->mRider->RailslideMode = 2;
         break;
     case 4:
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), 0.0f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 54, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 1;
+        setRot_2060((char*)self->mRider->mRiderAnim, 0.0f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 54, 0, -1.0f);
+        self->mRider->RailslideMode = 1;
         break;
         }
     } else {
         *(float*)self += 1.5707964897155762f;
-        switch (*(int*)(RIDER_2060 + 0x328)) {
+        switch (self->mRider->RailslideMode) {
     case 1:
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), 1.5707963705062866f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 50, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 4;
+        setRot_2060((char*)self->mRider->mRiderAnim, 1.5707963705062866f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 50, 0, -1.0f);
+        self->mRider->RailslideMode = 4;
         break;
     case 2:
         flip_2060(self, 0);
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), -1.5707963705062866f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 52, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 3;
+        setRot_2060((char*)self->mRider->mRiderAnim, -1.5707963705062866f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 52, 0, -1.0f);
+        self->mRider->RailslideMode = 3;
         break;
     case 3:
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), 0.0f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 51, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 1;
+        setRot_2060((char*)self->mRider->mRiderAnim, 0.0f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 51, 0, -1.0f);
+        self->mRider->RailslideMode = 1;
         break;
     case 4:
         flip_2060(self, 1);
-        setRot_2060(*(char**)(RIDER_2060 + 0x784), 3.1415927410125732f);
-        cRiderAnimBase_play_2060(*(void**)(RIDER_2060 + 0x784), 54, 0, -1.0f);
-        *(int*)(RIDER_2060 + 0x328) = 2;
+        setRot_2060((char*)self->mRider->mRiderAnim, 3.1415927410125732f);
+        cRiderAnimBase_play_2060(self->mRider->mRiderAnim, 54, 0, -1.0f);
+        self->mRider->RailslideMode = 2;
         break;
         }
     }
-    cRider_flagEventBoostPowerUp(RIDER_2060, 1, cRiderMetrix_evRailSpin_2060(*(void**)(RIDER_2060 + 0x790), *(int*)(RIDER_2060 + 0x328), *(float*)self));
-    cRider_verifyRailslideModeDEBUG(RIDER_2060);
+    cRider_flagEventBoostPowerUp(((char*)self->mRider), 1, cRiderMetrix_evRailSpin_2060(self->mRider->mMetrix, self->mRider->RailslideMode, *(float*)self));
+    cRider_verifyRailslideModeDEBUG(((char*)self->mRider));
 }
-#undef RIDER_2060
 #endif
 
 //100%
