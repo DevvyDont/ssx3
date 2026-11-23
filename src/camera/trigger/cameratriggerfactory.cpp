@@ -3635,9 +3635,9 @@ struct sCTBoundK_6468 : sCTBoundObjG {
  *
  * @return @p self
  */
-extern "C" void* cCTVolume_cCTVolume(void* self)
+extern "C" void* cCTVolume_cCTVolume(cCTVolume* self)
 {
-    return new (self) sCTBoundK_6468;
+    return new (((void*)self)) sCTBoundK_6468;
 }
 #endif
 //100%
@@ -3701,9 +3701,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjEllipse_cCTBoundOb
  *
  * @return @p self
  */
-extern "C" void* cCTBoundObjEllipse_cCTBoundObjEllipse(void* self)
+extern "C" void* cCTBoundObjEllipse_cCTBoundObjEllipse(cCTBoundObjEllipse* self)
 {
-    return new (self) sCTBoundEllG;
+    return new (((void*)self)) sCTBoundEllG;
 }
 #endif
 //100%
@@ -6611,7 +6611,7 @@ extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
  * @param id  the location (On Tour eBELocationID)
  * @return 1 for a WC BAM start location, otherwise 0
  */
-extern "C" int cTrackFileMan_testWCBAMStartLocation(void* self, int id)
+extern "C" int cTrackFileMan_testWCBAMStartLocation(cTrackFileMan* self, int id)
 {
     if (cBENewRaceInterface_getLocationType(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
         return 1;

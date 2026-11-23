@@ -3462,7 +3462,7 @@ extern char cPadDevice_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPadDevice__cPadDevice(void* self, int flags)
+extern "C" void cPadDevice__cPadDevice(cPadDevice* self, int flags)
 {
     *(void**)self = cPadDevice_vtbl;
     if (flags & 1) {

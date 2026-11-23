@@ -5746,16 +5746,16 @@ static inline int* Row_28C0(int (*g)[5], int i)
  */
 // The music system's constructor (sound/musicsys.cpp in the July 2003 prototype): reads the song list.
 // PORT: g++ 2.95 constructor of a class with virtual bases (stack vtable this-adjust fix-ups written out by hand).
-extern "C" char* cMusicSys_cMusicSys(char* self, int inchrg, int maxBanks, int maxStreams, int heap)
+extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, int maxStreams, int heap)
 {
     if (inchrg) {
-        char* vb = self + 0x5448;
-        char* vb2 = self + 0x5F20;
-        *(char**)(self + 0x5F20) = self + 0x5450;
+        char* vb = ((char*)self) + 0x5448;
+        char* vb2 = ((char*)self) + 0x5F20;
+        *(char**)(((char*)self) + 0x5F20) = ((char*)self) + 0x5450;
         *(char**)self = vb2;
-        *(char**)(self + 0x5628) = vb;
+        *(char**)(((char*)self) + 0x5628) = vb;
         cSoundSys_cSoundSys((cSoundSys*)vb, heap);
-        cBankManager_cBankManager(*(void**)(self + 0x5F20), 0, maxBanks, heap);
+        cBankManager_cBankManager(*(void**)(((char*)self) + 0x5F20), 0, maxBanks, heap);
         cStreamSys_cStreamSys(*(void**)self, 0, maxBanks, maxStreams, heap);
     }
     *(const sSndVtbl4**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_00483928_v;
@@ -5765,26 +5765,26 @@ extern "C" char* cMusicSys_cMusicSys(char* self, int inchrg, int maxBanks, int m
         sSndVtbl4 soundSysVtbl = D_00483928_v;
         *(sSndVtbl4**)(*(char**)(**(char***)self + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x5448;
-        int soundSysDelta = self - base1;
+        int soundSysDelta = ((char*)self) - base1;
         soundSysVtbl.e[1].delta = D_00483928_v.e[1].delta + soundSysDelta;
         sSndVtbl7 bankManagerVtbl = D_00483948_v;
         *(sSndVtbl7**)(**(char***)self + 0x1D4) = &bankManagerVtbl;
         char* base2 = **(char***)self - 0x5450;
-        int bankManagerDelta = self - base2;
+        int bankManagerDelta = ((char*)self) - base2;
         bankManagerVtbl.e[1].delta = D_00483948_v.e[1].delta + bankManagerDelta;
     }
-    *(int*)(self + 0x3E4) = 0;
-    *(int*)(self + 0x3E8) = 0;
-    *(void***)(self + 0x5440) = cMusicSys_vtbl;
-    *(int*)(self + 0x3EC) = 0;
-    *(int*)(self + 0x3F0) = 0;
-    *(long*)(self + 0x3F8) = 0;
-    *(int*)(self + 0x408) = 0;
-    *(int*)(self + 0x418) = 0;
-    *(int*)(self + 0x5438) = 0;
-    *(int*)(self + 0x543C) = 0;
+    self->mNumSongs = 0;
+    self->mNumActiveSongs = 0;
+    self->mVtbl = cMusicSys_vtbl;
+    self->mNumFESongs = 0;
+    self->mCurrentSongNum = 0;
+    *(long*)&self->mActiveMap = 0;
+    self->mSongInstance = 0;
+    self->mSongPlaying = 0;
+    self->unk_5438 = 0;
+    self->mShortcut = 0;
     gMusicSys = (cMusicSys*)((void***)self);
-    *(char**)(self + 0x5434) = new (str_MPF_data_file, 0, 0) char[25600];
+    self->mMPFFile = new (str_MPF_data_file, 0, 0) char[25600];
     sBank28C0* sv = (sBank28C0*)self;
     int i = 0;
     do {
@@ -5794,14 +5794,14 @@ extern "C" char* cMusicSys_cMusicSys(char* self, int inchrg, int maxBanks, int m
         i++;
     } while (i < 0x40);
     {
-        int* categoryInts = (int*)(self + 0x920);
+        int* categoryInts = (int*)(((char*)self) + 0x920);
         for (int j = 4; j >= 0; j--)
             categoryInts[j] = 0;
     }
     for (int textOffset = 0; textOffset < 6400; textOffset += 100) {
-        self[textOffset + 2356] = D_004A35A8[0];
-        self[textOffset + 8756] = D_004A35A8[0];
-        self[textOffset + 15156] = D_004A35A8[0];
+        ((char*)self)[textOffset + 2356] = D_004A35A8[0];
+        ((char*)self)[textOffset + 8756] = D_004A35A8[0];
+        ((char*)self)[textOffset + 15156] = D_004A35A8[0];
     }
     sLoc28C0 musicInf;
     FileParser_FileParser_p(musicInf.parser, D_004A37E8, 0x100);
@@ -5809,13 +5809,13 @@ extern "C" char* cMusicSys_cMusicSys(char* self, int inchrg, int maxBanks, int m
     if (FileParser_FindSection(musicInf.parser, str_GLOBAL) != 0) {
         while (FileParser_IsEOF(musicInf.parser) == 0) {
             FileParser_GetName(musicInf.parser);
-            FileParser_AssignString(musicInf.parser, str_BASEPATH, self + 0x104);
+            FileParser_AssignString(musicInf.parser, str_BASEPATH, ((char*)self) + 0x104);
         }
     }
     *(int*)(musicInf.parser + 8) = *(int*)(musicInf.parser + 4);
-    *(int*)(self + 0x3E4) = 0;
-    *(int*)(self + 0x3EC) = 0;
-    while (*(int*)(self + 0x3E4) < 0x40) {
+    self->mNumSongs = 0;
+    self->mNumFESongs = 0;
+    while (self->mNumSongs < 0x40) {
         char* tok = FileParser_FindNextSection(musicInf.parser);
         if (tok == 0)
             break;
@@ -5824,93 +5824,93 @@ extern "C" char* cMusicSys_cMusicSys(char* self, int inchrg, int maxBanks, int m
         // The song's bit is built in a variable: the target keeps its li 1 in the loop while the
         // other constants (100) are hoisted.
         long bit = 1;
-        bit <<= *(int*)(self + 0x3E4);
-        *(long*)(self + 0x3F8) |= bit;
-        strcpy(self + (*(int*)(self + 0x3E4) * 11 + 292), tok);
-        sv->ents[*(int*)(self + 0x3E4)] = (char*)cSongConfiguration_cSongConfiguration((cSongConfiguration*)cMemMan_alloc(172, str_cSongConfiguration, 0, 0));
+        bit <<= self->mNumSongs;
+        *(long*)&self->mActiveMap |= bit;
+        strcpy(((char*)self) + (self->mNumSongs * 11 + 292), tok);
+        sv->ents[self->mNumSongs] = (char*)cSongConfiguration_cSongConfiguration((cSongConfiguration*)cMemMan_alloc(172, str_cSongConfiguration, 0, 0));
         while (FileParser_IsEOF(musicInf.parser) == 0) {
             char* key = FileParser_GetName(musicInf.parser);
             if (strcasecmp(key, str_TITLE) == 0) {
-                FileParser_AssignString(musicInf.parser, str_TITLE, self + (*(int*)(self + 0x3E4) * 100 + 2356));
+                FileParser_AssignString(musicInf.parser, str_TITLE, ((char*)self) + (self->mNumSongs * 100 + 2356));
             } else if (strcasecmp(key, str_ARTIST) == 0) {
-                FileParser_AssignString(musicInf.parser, str_ARTIST, self + (*(int*)(self + 0x3E4) * 100 + 8756));
+                FileParser_AssignString(musicInf.parser, str_ARTIST, ((char*)self) + (self->mNumSongs * 100 + 8756));
             } else if (strcasecmp(key, str_ALBUM) == 0) {
-                FileParser_AssignString(musicInf.parser, str_ALBUM, self + (*(int*)(self + 0x3E4) * 100 + 15156));
+                FileParser_AssignString(musicInf.parser, str_ALBUM, ((char*)self) + (self->mNumSongs * 100 + 15156));
             } else if (strcasecmp(key, str_ADDTOFE) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_ADDTOFE, &musicInf.iA);
                 if (musicInf.iA == 1)
-                    *(int*)(self + 0x3EC) += 1;
+                    self->mNumFESongs += 1;
             } else if (strcasecmp(key, str_CATEGORY) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_CATEGORY, &musicInf.iB);
                 if (musicInf.iB < 5)
                     ((sSpeechMon*)self)->grid[((sSpeechMon*)self)->count][musicInf.iB] = 1;
             } else if (strcasecmp(key, str_PATHDATA) == 0) {
                 FileParser_AssignString(musicInf.parser, str_PATHDATA, musicInf.buf);
-                strcpy(sv->ents[*(int*)(self + 0x3E4)], musicInf.buf);
+                strcpy(sv->ents[self->mNumSongs], musicInf.buf);
             } else if (strcasecmp(key, str_MUSDATA) == 0) {
                 FileParser_AssignString(musicInf.parser, str_MUSDATA, musicInf.buf);
-                strcpy(sv->ents[*(int*)(self + 0x3E4)] + 0x20, musicInf.buf);
+                strcpy(sv->ents[self->mNumSongs] + 0x20, musicInf.buf);
             } else if (strcasecmp(key, str_LOOPDATA) == 0) {
                 FileParser_AssignString(musicInf.parser, str_LOOPDATA, musicInf.buf);
-                strcpy(((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->bankData[((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData], musicInf.buf);
-                ((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData++;
+                strcpy(((sSongCfg28C0*)sv->ents[self->mNumSongs])->bankData[((sSongCfg28C0*)sv->ents[self->mNumSongs])->numBankData], musicInf.buf);
+                ((sSongCfg28C0*)sv->ents[self->mNumSongs])->numBankData++;
             } else if (strcasecmp(key, str_BeatsPerMeasure) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_BeatsPerMeasure, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x64) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x64) = musicInf.iC;
             } else if (strcasecmp(key, str_MeasuresPerBar) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_MeasuresPerBar, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x68) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x68) = musicInf.iC;
             } else if (strcasecmp(key, str_PhrasesPerBank) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_PhrasesPerBank, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x6C) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x6C) = musicInf.iC;
             } else if (strcasecmp(key, str_BeatsPerPhrase) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_BeatsPerPhrase, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x70) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x70) = musicInf.iC;
             } else if (strcasecmp(key, str_PhraseAlign) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_PhraseAlign, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x74) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x74) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayCount) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_DelayCount, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x78) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x78) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayFeedback) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_DelayFeedback, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x7C) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x7C) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayTime) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_DelayTime, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x80) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x80) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayLevel) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_DelayLevel, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x84) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x84) = musicInf.iC;
             } else if (strcasecmp(key, str_Pathlevel) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_Pathlevel, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x88) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x88) = musicInf.iC;
             } else if (strcasecmp(key, str_Asynclevel) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_Asynclevel, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x8C) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x8C) = musicInf.iC;
             } else if (strcasecmp(key, str_BPM) == 0) {
                 FileParser_AssignFloat(musicInf.parser, str_BPM, &musicInf.fD);
-                *(float*)(sv->ents[*(int*)(self + 0x3E4)] + 0x90) = musicInf.fD;
+                *(float*)(sv->ents[self->mNumSongs] + 0x90) = musicInf.fD;
             } else if (strcasecmp(key, str_SEDVALUE) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_SEDVALUE, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x98) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x98) = musicInf.iC;
             } else if (strcasecmp(key, str_LOWPASS) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_LOWPASS, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x9C) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x9C) = musicInf.iC;
             } else if (strcasecmp(key, str_DUCKTOLOOPS) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_DUCKTOLOOPS, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x94) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0x94) = musicInf.iC;
             } else if (strcasecmp(key, str_PREVIEW) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_PREVIEW, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA0) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0xA0) = musicInf.iC;
             } else if (strcasecmp(key, str_SONGBIG) == 0) {
                 FileParser_AssignInt(musicInf.parser, str_SONGBIG, &musicInf.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA4) = musicInf.iC;
+                *(int*)(sv->ents[self->mNumSongs] + 0xA4) = musicInf.iC;
             }
         }
-        *(int*)(self + 0x3E4) += 1;
+        self->mNumSongs += 1;
     }
     FileParser__FileParser(musicInf.parser, 2);
-    return self;
+    return ((char*)self);
 }
 #endif
 

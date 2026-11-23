@@ -1355,7 +1355,7 @@ static inline void notifyK1D8700(char* vself, char* mp)
  * @param popup  the popup state that sent the event (unused)
  * @param button  the popup event: 0xF / 0x10 / 0x11 for buttons 0-2, 22 when the popup closes
  */
-extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
+extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button)
 {
     cFEMemCard* self = (cFEMemCard*)self_;
     if (button >= 0xF && button <= 17) {

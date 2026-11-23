@@ -72,7 +72,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cRiderSphereTree__cRiderSphereTree(void* self, int flags)
+extern "C" void cRiderSphereTree__cRiderSphereTree(cRiderSphereTree* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4068,7 +4068,7 @@ extern "C" cWorldRider* cWorldRider_cWorldRider(cWorldRider* self, cRiderSphereT
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider__cWorldRider);
 #ifdef SKIP_ASM
-extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
+extern "C" void cRiderSphereTree__cRiderSphereTree(cRiderSphereTree* p, int flags);
 void operator_delete(int* ptr);
 extern void* cWorldRider_vtbl[];
 

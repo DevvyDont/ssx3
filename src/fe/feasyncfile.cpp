@@ -21638,7 +21638,7 @@ struct sState_BDCA0 {
 // FM_BARRIER() after it (the wrapper keeps loop.c from moving the found arm out of the loop, so jump2 cross-jumps the
 // msg==1 return into it); plain form 42.05%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" int cFEStateLobbyMenu_onWidgetPair(void* self_, int id, int msg)
+extern "C" int cFEStateLobbyMenu_onWidgetPair(cFEStateLobbyMenu* self_, int id, int msg)
 {
     sState_BDCA0* self = (sState_BDCA0*)self_;
     do {

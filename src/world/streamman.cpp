@@ -247,7 +247,7 @@ INCLUDE_ASM("world/streamman", cStreamMan_update);
 #ifdef SKIP_ASM
 
 void* cStreamMan_decompressChunk(void* self, int a1, int a2, int a3);
-extern "C" int cStreamMan_processChunk(void* self, void* a, void* b);
+extern "C" int cStreamMan_processChunk(cStreamMan* self, void* a, void* b);
 extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
 extern "C" unsigned char* STREAM_get(void* cache);
 extern "C" void STREAM_release(void* cache, void* p);
@@ -379,7 +379,7 @@ struct sStreamMan7238 {
  * @return 1 when the buffer was used up, 0 when the cache had no room and the call must be repeated
  */
 // PORT: header fields are packed in a 64-bit long; data pointers pass through int parameters.
-extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
+extern "C" int cStreamMan_processChunk(cStreamMan* self_, void* pcount_, void* pdata_)
 {
     sStreamMan7238* self = (sStreamMan7238*)self_;
     int* pcount = (int*)pcount_;

@@ -181,7 +181,7 @@ extern "C" void cSectionBlockAllocator_releaseBlocks(cSectionBlockAllocator* sel
  *
  * @param flags  bit 0 set to delete the object
  */
-extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(void* self, int flags)
+extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(cSectionBlockAllocator* self, int flags)
 {
     cSectionBlockAllocator_releaseBlocks((cSectionBlockAllocator*)self);
     if (flags & 1) {
@@ -394,7 +394,7 @@ extern "C" void cWorldMemoryMan_activateSectionMem(cWorldMemoryMan* self, int in
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldMemoryMan_deactivateSectionMem);
 #ifdef SKIP_ASM
-extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(void* self, int flags);
+extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(cSectionBlockAllocator* self, int flags);
 
 /**
  * Destroys the arena of section @p i (cSectionBlockAllocator__cSectionBlockAllocator with 3) and clears its m_pSectionAllocator slot.
@@ -406,7 +406,7 @@ extern "C" void cWorldMemoryMan_deactivateSectionMem(cWorldMemoryMan* self, int 
     char* base = (char*)&self->m_pSectionAllocator[0];
     void** slot = (void**)(base + (i << 2));
     if (*slot != 0) {
-        cSectionBlockAllocator__cSectionBlockAllocator(*slot, 3);
+        cSectionBlockAllocator__cSectionBlockAllocator((cSectionBlockAllocator*)(*slot), 3);
     }
     *slot = 0;
 }

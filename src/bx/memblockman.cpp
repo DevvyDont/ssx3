@@ -1232,7 +1232,7 @@ struct sMbOwner_AB30 {
  * the main thread if it is waiting in cPS2ExecutionMan_wait) and then waits on the halt semaphore (cPS2ExecutionMan_waitHalt).
  */
 // Halt request: on the execution thread checks the halt directly; otherwise forwards it and wakes the worker.
-extern "C" void cPS2ExecutionMan_halt(void* self)
+extern "C" void cPS2ExecutionMan_halt(cPS2ExecutionMan* self)
 {
     cPS2ExecutionMan* man = (cPS2ExecutionMan*)self;
     *(volatile int*)&man->mTimerHalted = 1;

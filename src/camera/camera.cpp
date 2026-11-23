@@ -9171,10 +9171,10 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_getTargetPos);
  *
  * @return @p self, the hidden return slot, holding t4vect_Zero
  */
-extern "C" void* cCameraAlgorithm_getTargetPos(void* self)
+extern "C" void* cCameraAlgorithm_getTargetPos(cCameraAlgorithm* self)
 {
     *(cQuad128*)self = t4vect_Zero;
-    return self;
+    return ((void*)self);
 }
 #endif
 

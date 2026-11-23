@@ -8,7 +8,7 @@
 INCLUDE_ASM("ui/uianimation", cUIAnimationBank_getAnimationByHashName);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data);
+extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data);
 extern const char str_UIAnim[];
 
 struct sUIAnimEntry {
@@ -33,7 +33,7 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, in
     sUIAnimEntry* entry = (sUIAnimEntry*)(*self + 1);
     for (unsigned int i = 0; i < **self; i++) {
         if (entry->hash == hash) {
-            return cUIAnimation_cUIAnimation(cMemMan_alloc(20, str_UIAnim, 0x100, 0), entry);
+            return cUIAnimation_cUIAnimation((cUIAnimation*)cMemMan_alloc(20, str_UIAnim, 0x100, 0), entry);
         }
         entry = (sUIAnimEntry*)((char*)entry + entry->size);
     }
@@ -149,14 +149,14 @@ extern void* cUIAnimation_vtbl[];
  * @param data  the animation record from the bank (On Tour pAnimHeader)
  * @return @p self
  */
-extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
+extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data)
 {
-    *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
+    self->mVtbl = cUIAnimation_vtbl;
     *(void**)self = data;
-    *(int*)((char*)self + 0x4) = 0;
-    *(short*)((char*)self + 0x8) = -1;
-    *(short*)((char*)self + 0xA) = 0;
-    *(unsigned short*)((char*)self + 0xC) = 0xFFFF;
+    self->mpAnimChannels = 0;
+    self->mLastFrameEval = -1;
+    self->mFrameNum = 0;
+    self->mScreenStartFrame = 0xFFFF;
     int** slot = (int**)((char*)self + 0x4);
     unsigned int n = *(unsigned int*)((char*)data + 4);
     if (n != 0) {
@@ -171,11 +171,11 @@ extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
         char* chanData = *(char**)self + 0x10;
         for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 4); i++) {
             // PORT: the entry pointer is passed as int
-            cUIAnimationChannel_setAnimChanData(*(char**)((char*)self + 0x4) + (i << 2), (int)chanData);
+            cUIAnimationChannel_setAnimChanData((char*)self->mpAnimChannels + (i << 2), (int)chanData);
             chanData += *(unsigned short*)(chanData + 4);
         }
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 

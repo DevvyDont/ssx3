@@ -1211,7 +1211,7 @@ extern "C" void cWScriptMan_advanceToTask(cWScriptMan* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doProcessCmd);
 #ifdef SKIP_ASM
-extern "C" void* cProcessList_findProcess1(void* self, int id);
+extern "C" void* cProcessList_findProcess1(cProcessList* self, int id);
 extern "C" void cWScriptProcess_end(void* obj);
 extern "C" void cWScriptProcess_endTask(void* obj);
 
@@ -1231,7 +1231,7 @@ extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int
     switch (kind) {
     case 1:
         if (id != 0xFFFFFFFF) {
-            obj = cProcessList_findProcess1((char*)&self->IdleList, id);
+            obj = cProcessList_findProcess1((cProcessList*)((char*)&self->IdleList), id);
         }
         if (obj != 0) {
             cWScriptMan_startProcess(self, (cWScriptProcess*)obj);
@@ -1239,7 +1239,7 @@ extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int
         break;
     case 0:
         if (id != 0xFFFFFFFF) {
-            obj = cProcessList_findProcess1((char*)&self->ActiveList, id);
+            obj = cProcessList_findProcess1((cProcessList*)((char*)&self->ActiveList), id);
         }
         if (obj != 0) {
             cWScriptMan_stopProcess(self, (cWScriptProcess*)obj);
@@ -1247,7 +1247,7 @@ extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int
         break;
     case 2:
         if (id != 0xFFFFFFFF) {
-            obj = cProcessList_findProcess1((char*)&self->ActiveList, id);
+            obj = cProcessList_findProcess1((cProcessList*)((char*)&self->ActiveList), id);
         }
         if (obj != 0) {
             cWScriptProcess_endTask(obj);
@@ -1255,7 +1255,7 @@ extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int
         break;
     case 18:
         if (id != 0xFFFFFFFF) {
-            obj = cProcessList_findProcess1((char*)&self->ActiveList, id);
+            obj = cProcessList_findProcess1((cProcessList*)((char*)&self->ActiveList), id);
         }
         if (obj != 0) {
             cWScriptProcess_end(obj);
@@ -1838,14 +1838,14 @@ public:
     virtual ~cProcessList_deleteAll_cObj(); // vptr at 0x5C
 };
 
-extern "C" void* cProcessList_removeHead(void* self);
+extern "C" void* cProcessList_removeHead(cProcessList* self);
 
 /**
  * Deletes every process in a script process list.
  *
  * Repeatedly takes the head with cProcessList_removeHead and deletes it through its virtual destructor until none is left.
  */
-extern "C" void cProcessList_deleteAll(void* self)
+extern "C" void cProcessList_deleteAll(cProcessList* self)
 {
     cProcessList_deleteAll_cObj* process;
     while ((process = (cProcessList_deleteAll_cObj*)cProcessList_removeHead(self)) != 0) {
@@ -1862,7 +1862,7 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_removeHead);
  *
  * @return the old head, or 0 when the list is empty; the head becomes its next process
  */
-extern "C" void* cProcessList_removeHead(void* self)
+extern "C" void* cProcessList_removeHead(cProcessList* self)
 {
     cWScriptListNode* process = (cWScriptListNode*)((cWScriptListHead*)self)->head;
     if (process != 0) {
@@ -1995,7 +1995,7 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess1);
  * @param id  the process ID
  * @return the process, or 0
  */
-extern "C" void* cProcessList_findProcess1(void* self, int id)
+extern "C" void* cProcessList_findProcess1(cProcessList* self, int id)
 {
     cWScriptProcess* process = (cWScriptProcess*)(*(void**)self);
     while (((void*)process) != 0) {
@@ -2021,7 +2021,7 @@ extern "C" int GetHashValue32__FPc(int);
  * @param name  the process name
  */
 extern "C" void cProcessList_findProcess2(void *list, int name) {
-    cProcessList_findProcess1(list, GetHashValue32__FPc(name));
+    cProcessList_findProcess1((cProcessList*)list, GetHashValue32__FPc(name));
 }
 #endif
 
@@ -2037,7 +2037,7 @@ public:
     virtual int isMission(); // 0x18
 };
 
-extern "C" void* cProcessList_findProcess1(void*, int);
+extern "C" void* cProcessList_findProcess1(cProcessList*, int);
 
 /**
  * Returns the mission with ID @p id in a process list: the process found by cProcessList_findProcess1 when its virtual slot 3 (the
@@ -2046,7 +2046,7 @@ extern "C" void* cProcessList_findProcess1(void*, int);
  * @param id  the mission ID, or -1
  * @return the mission, or 0 (also for -1)
  */
-extern "C" cProcessList_findMission_cObj* cProcessList_findMission(void* self, unsigned int id)
+extern "C" cProcessList_findMission_cObj* cProcessList_findMission(cProcessList* self, unsigned int id)
 {
     cProcessList_findMission_cObj* result = 0;
     if (id != 0xFFFFFFFF) {
@@ -2070,7 +2070,7 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_findMission1);
  *
  * @param name  the mission name
  */
-extern "C" void cProcessList_findMission1(void* self, int name)
+extern "C" void cProcessList_findMission1(cProcessList* self, int name)
 {
     cProcessList_findMission(self, GetHashValue32__FPc(name));
 }
@@ -2389,7 +2389,7 @@ extern "C" void cWScriptMan_failActiveLocalMission(cWScriptMan* self)
 {
     unsigned int id = self->LocalMissionId;
     if (id != 0xFFFFFFFF) {
-        cProcessList_findMission_cObj* obj = cProcessList_findMission((char*)&self->ActiveList, id);
+        cProcessList_findMission_cObj* obj = cProcessList_findMission((cProcessList*)((char*)&self->ActiveList), id);
         if (obj != 0) {
             cWScriptProcess_end(obj);
         }
@@ -2398,7 +2398,7 @@ extern "C" void cWScriptMan_failActiveLocalMission(cWScriptMan* self)
         self->LocalMissionId = 0xFFFFFFFF;
     }
     void* process;
-    while ((process = cProcessList_removeHead((char*)&self->ActiveList)) != 0) {
+    while ((process = cProcessList_removeHead((cProcessList*)((char*)&self->ActiveList))) != 0) {
         *(int*)process = 0;
         cProcessList_addProcess((char*)&self->IdleList, process);
     }
@@ -2406,7 +2406,7 @@ extern "C" void cWScriptMan_failActiveLocalMission(cWScriptMan* self)
 }
 #endif
 
-extern "C" void* cProcessList_findProcess1(void*, int);
+extern "C" void* cProcessList_findProcess1(cProcessList*, int);
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isProcessActive__FPvT0);
@@ -2728,7 +2728,7 @@ struct sWSMan_30BD20 {
 };
 
 struct cWScriptListHead;
-extern "C" void* cProcessList_removeHead(void* self);
+extern "C" void* cProcessList_removeHead(cProcessList* self);
 int cProcessList_addProcess(void* self, void* a1);
 extern "C" int cWScriptCache_getScriptBase(void* a, int id);
 class cCollectPool_readFromReplayFrame_cObj;
@@ -2759,11 +2759,11 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cBxReplayFr
         }
     }
     void* process;
-    while ((process = cProcessList_removeHead(&self->list2B8)) != 0) {
+    while ((process = cProcessList_removeHead((cProcessList*)(&self->list2B8))) != 0) {
         *(int*)process = 0;
         cProcessList_addProcess((char*)self + 0x2B4, process);
     }
-    while ((process = cProcessList_removeHead(&self->list2BC)) != 0) {
+    while ((process = cProcessList_removeHead((cProcessList*)(&self->list2BC))) != 0) {
         *(int*)process = 0;
         cProcessList_addProcess((char*)self + 0x2B4, process);
     }
@@ -2825,7 +2825,7 @@ extern "C" void cWScriptMan_readReplayProcessList(cWScriptMan* self, cWScriptLis
     stream->read((char*)&n, 4);
     for (; i < n; i++) {
         stream->read((char*)&id, 4);
-        cWScriptListNode* node = (cWScriptListNode*)cProcessList_findProcess1((char*)&self->IdleList, id);
+        cWScriptListNode* node = (cWScriptListNode*)cProcessList_findProcess1((cProcessList*)((char*)&self->IdleList), id);
         cProcessList_removeProcess((cWScriptListHead*)&self->IdleList, node);
         cWScriptProcess_readFromReplayFrame(node, stream);
         cProcessList_appendProcess(list, node);

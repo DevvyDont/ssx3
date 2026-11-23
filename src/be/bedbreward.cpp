@@ -498,10 +498,10 @@ extern "C" void cBXString_cBXString1(void*, int*);
  *
  * @return @p self, the returned cBXString
  */
-extern "C" void* cBENewRaceInterface_getCmdLineTrack(void* self)
+extern "C" void* cBENewRaceInterface_getCmdLineTrack(cBENewRaceInterface* self)
 {
     cBXString_cBXString1(self, &cBENewRaceInterface_commandLineTrack);
-    return self;
+    return ((void*)self);
 }
 #endif
 //100%

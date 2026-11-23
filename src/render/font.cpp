@@ -3672,10 +3672,10 @@ inline void* operator new(unsigned int, void* p) { return p; }
  *
  * @return @p self
  */
-extern "C" void* cPS2DeferManager_cPS2DeferManager(void* self)
+extern "C" void* cPS2DeferManager_cPS2DeferManager(cPS2DeferManager* self)
 {
-    new (self) sFontCache;
-    return self;
+    new (((void*)self)) sFontCache;
+    return ((void*)self);
 }
 #endif
 

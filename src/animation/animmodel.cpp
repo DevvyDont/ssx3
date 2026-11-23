@@ -1167,12 +1167,12 @@ void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCa
  *
  * @return @p self
  */
-extern "C" void* cAnimDataBase_cAnimDataBase(void* self)
+extern "C" void* cAnimDataBase_cAnimDataBase(cAnimDataBase* self)
 {
     cAnimDataBase_TheAnimDataBase = (cAnimDataBase*)(self);
     memset(self, 0, 0x3FC);
     cAnimDataBase_initChanCache_1(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1192,7 +1192,7 @@ extern "C" void cAnimDataBase_purgeChanCache_self(void* self) __asm__("cAnimData
  *
  * @param flags  bit 0: delete the object itself
  */
-extern "C" void cAnimDataBase__cAnimDataBase(void* self, int flags)
+extern "C" void cAnimDataBase__cAnimDataBase(cAnimDataBase* self, int flags)
 {
     cAnimDataBase_TheAnimDataBase = 0;
     cAnimDataBase_purgeChanCache_self(self);
@@ -1294,11 +1294,11 @@ extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, cAdfDataSo
  * @param data  the animation file data
  * @return @p self
  */
-extern "C" void* cAdfDataSource_cAdfDataSource1(void* self, char* data)
+extern "C" void* cAdfDataSource_cAdfDataSource1(cAdfDataSource* self, char* data)
 {
     *(int*)self = 0;
     cAdfDataSource_populateFromData((cAdfDataSource*)self, (cAdfDataSource*)data);
-    return self;
+    return ((void*)self);
 }
 #endif
 

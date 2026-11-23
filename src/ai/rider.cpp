@@ -7064,7 +7064,7 @@ static inline bool riderInRange_1278E8(int v)
  * Only with a Pad. Vibration stays on when the option interface (cBE_getInterface kind 1, cBENewPlayerInterface_getUseDualShock) allows it for
  * the rider's AI index and the replay's first word is not 1-9; then func_00125B18 decays the levels and drives the pad.
  */
-extern "C" void cPlayer_vibrationUpdate(void* self)
+extern "C" void cPlayer_vibrationUpdate(cPlayer* self)
 {
     cPlayer* player = (cPlayer*)self;
     if ((int)player->Pad != 0)

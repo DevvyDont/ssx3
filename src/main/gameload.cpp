@@ -712,7 +712,7 @@ struct sObj20_FA98 {
  * audio de-initialised and purged, the script engine purged, and cPauseState_StackIdx and the word at cAppMan_TheAppMan + 0x34
  * cleared.
  */
-extern "C" void cGame_purge(char* self)
+extern "C" void cGame_purge(cGame* self)
 {
     cBE_setState(0);
     char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -731,42 +731,42 @@ extern "C" void cGame_purge(char* self)
     }
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
-    if (*(void**)(self + 0x48) != 0) cUIEngine__cUIEngine(*(void**)(self + 0x48), 3);
-    if (*(void**)(self + 0x7C) != 0) cInputSync__cInputSync(*(void**)(self + 0x7C), 3);
-    cCutSceneTransitionMan_ForceToRegularMode(*(void**)(self + 0x64));
-    cSurfPropCache_purge(*(void**)(self + 0x44));
-    operator_delete(*(int**)(self + 0x44));
-    VDelete_FA98(*(char**)(self + 0x14), 0xC, 8);
-    VDelete_FA98(*(char**)(self + 0x18), 0x4, 8);
-    VDelete_FA98(*(char**)(self + 0x1C), 25756, 8);
+    if (self->UI != 0) cUIEngine__cUIEngine(self->UI, 3);
+    if (self->InputSync != 0) cInputSync__cInputSync(self->InputSync, 3);
+    cCutSceneTransitionMan_ForceToRegularMode(self->CutSceneTransitionMan);
+    cSurfPropCache_purge(self->SurfPropCache);
+    operator_delete((int*)self->SurfPropCache);
+    VDelete_FA98((char*)self->SkyBox, 0xC, 8);
+    VDelete_FA98((char*)self->FogMan, 0x4, 8);
+    VDelete_FA98((char*)self->LensFxMan, 25756, 8);
     cPathSys_purgePaths(gPaths);
-    cBXNash_purgeTheAIFwdDiffCache(*(void**)(self + 0x20));
-    if (*(void**)(self + 0xA4) != 0) cMenuSys__cMenuSys(*(void**)(self + 0xA4), 3);
+    cBXNash_purgeTheAIFwdDiffCache(self->BXNash);
+    if (self->MenuSys != 0) cMenuSys__cMenuSys(self->MenuSys, 3);
     void* bm = &gBucketMan_gl;
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purge(bm);
-    VDelete_FA98(*(char**)(self + 0x30), 1172, 8);
-    if (*(void**)(self + 0x38) != 0) cCrowdMan2d__cCrowdMan2d(*(void**)(self + 0x38), 3);
-    if (*(void**)(self + 0x3C) != 0) cCrowdMan3d__cCrowdMan3d(*(void**)(self + 0x3C), 3);
-    if (*(void**)(self + 0x40) != 0) cMultiParticleMan__cMultiParticleMan(*(void**)(self + 0x40), 3);
-    if (*(void**)(self + 0x34) != 0) cPlaybackMan__cPlaybackMan(*(void**)(self + 0x34), 3);
-    if (*(void**)(self + 0x88) != 0) cInstanceMan__cInstanceMan(*(void**)(self + 0x88), 3);
+    VDelete_FA98((char*)self->WScriptMan, 1172, 8);
+    if (self->CrowdMan2d != 0) cCrowdMan2d__cCrowdMan2d(self->CrowdMan2d, 3);
+    if (self->CrowdMan3d != 0) cCrowdMan3d__cCrowdMan3d(self->CrowdMan3d, 3);
+    if (self->MultiParticleMan != 0) cMultiParticleMan__cMultiParticleMan(self->MultiParticleMan, 3);
+    if (self->PlaybackMan != 0) cPlaybackMan__cPlaybackMan(self->PlaybackMan, 3);
+    if (self->InstanceMan != 0) cInstanceMan__cInstanceMan(self->InstanceMan, 3);
     cCameraTriggerMan_purge(((char*)&gCamTriggerMan));
     cRenderStateMan_purge();
-    if (*(void**)(self + 0x84) != 0) cGameViewMan__cGameViewMan(*(void**)(self + 0x84), 3);
-    VDelete_FA98(*(char**)(self + 0xC), 204, 8);
-    if (*(void**)(self + 0x28) != 0) cReplay__cReplay(*(void**)(self + 0x28), 3);
-    VDelete_FA98(*(char**)(self + 0x98), 0x0, 8);
-    if (*(void**)(self + 0x78) != 0) cSectionMan__cSectionMan(*(void**)(self + 0x78), 3);
-    if (*(void**)(self + 0x2C) != 0) cFXLoader__cFXLoader(*(void**)(self + 0x2C), 3);
-    if (*(void**)(self + 0x90) != 0) cWorldLightMan__cWorldLightMan(*(void**)(self + 0x90), 3);
-    if (*(void**)(self + 0x10) != 0) cWorld__cWorld(*(void**)(self + 0x10), 3);
-    if (*(void**)(self + 0x8C) != 0) cOcclusionMan__cOcclusionMan(*(void**)(self + 0x8C), 3);
-    if (*(cBigFile**)(self + 0xA8) != 0) cBigFile__cBigFile(*(cBigFile**)(self + 0xA8), 3);
-    operator_delete(*(int**)(self + 0x94));
-    if (*(void**)(self + 0x24) != 0) cFont__cFont(*(void**)(self + 0x24), 3);
+    if (self->ViewMan != 0) cGameViewMan__cGameViewMan(self->ViewMan, 3);
+    VDelete_FA98((char*)self->AI, 204, 8);
+    if (self->Replay != 0) cReplay__cReplay(self->Replay, 3);
+    VDelete_FA98((char*)self->StreamPause, 0x0, 8);
+    if (self->SectionMan != 0) cSectionMan__cSectionMan(self->SectionMan, 3);
+    if (self->FXLoader != 0) cFXLoader__cFXLoader(self->FXLoader, 3);
+    if (self->WorldLightMan != 0) cWorldLightMan__cWorldLightMan(self->WorldLightMan, 3);
+    if (self->World != 0) cWorld__cWorld(self->World, 3);
+    if (self->OcclusionMan != 0) cOcclusionMan__cOcclusionMan(self->OcclusionMan, 3);
+    if (self->mpTrackBigFile != 0) cBigFile__cBigFile(self->mpTrackBigFile, 3);
+    operator_delete((int*)self->LoadIndicator);
+    if (self->DebugFont != 0) cFont__cFont(self->DebugFont, 3);
     {
-        sObj20_FA98* nash = *(sObj20_FA98**)(self + 0x20);
+        sObj20_FA98* nash = (sObj20_FA98*)self->BXNash;
         if (nash != 0) {
             nash->~sObj20_FA98();
             operator_delete((int*)nash);
@@ -778,12 +778,12 @@ extern "C" void cGame_purge(char* self)
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        be->RemoveTexture((int)*(void**)(self + 0x220));
+        be->RemoveTexture((int)(void*)self->mBoxTextureID);
     }
     cGraphicsMan_PurgeTextures(GrMan);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
     *(void**)&SSXApp->Game = 0;
-    if (*(void**)(self + 0x4C) != 0) cWorldSound__cWorldSound(*(void**)(self + 0x4C), 3);
+    if (self->WorldSound != 0) cWorldSound__cWorldSound(self->WorldSound, 3);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
     cSSXAudio_InGameDeInit(gSSXAudio);
     cSSXAudio_InGamePurge(gSSXAudio);

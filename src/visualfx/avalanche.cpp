@@ -434,7 +434,7 @@ struct cAvalanche__cAvalanche_sElem {
     char pad[0x2F0];
 };
 extern cAvalanche__cAvalanche_sElem D_004EE840[];
-extern "C" void cAvalanche_reset(void* self);
+extern "C" void cAvalanche_reset(cAvalanche* self);
 extern "C" void cDynamicColourEmitter_purge(void* p, int flags);
 void operator_delete(int* ptr);
 
@@ -447,7 +447,7 @@ void operator_delete(int* ptr);
 extern "C" void cAvalanche__cAvalanche(int* self, int flags)
 {
     *(void***)self = cAvalanche_vtbl;
-    cAvalanche_reset(self);
+    cAvalanche_reset((cAvalanche*)self);
     int i;
     for (i = 0; i < 64; i++) {
         cDynamicColourEmitter_purge(&D_004EE840[i], 1);
@@ -2208,7 +2208,7 @@ extern int cAvalanche_m_resolved;
  *
  * Also clears the node table and its count and the resolved flag. self is unused (On Tour: a static method).
  */
-extern "C" void cAvalanche_reset(void* self)
+extern "C" void cAvalanche_reset(cAvalanche* self)
 {
     cAvalanche_end();
     char* avalanche = (char*)cAvalanche_m_avalancheList;
@@ -2482,7 +2482,7 @@ extern int cAvalanche_m_badCookie;
  */
 extern "C" void cAvalanche_resolve(void* data)
 {
-    cAvalanche_reset(data);
+    cAvalanche_reset((cAvalanche*)data);
     if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {
         cMemMan_free(cAvalanche_m_filedata);
     }

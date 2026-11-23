@@ -1350,7 +1350,7 @@ INCLUDE_ASM("object/railmodifier", cRigidBody_readFromReplayFrame);
  *
  * @param obj  the replay frame to read from (On Tour data)
  */
-extern "C" void cRigidBody_readFromReplayFrame(void* self, cBxReplayFrame* obj)
+extern "C" void cRigidBody_readFromReplayFrame(cRigidBody* self, cBxReplayFrame* obj)
 {
     obj->read((char*)self, 80);
 }
@@ -1763,7 +1763,7 @@ extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* se
     cRigidBody_cRigidBody(((char*)&self->Pose));
     VPTR_AT(self, 0) = cRollerModifier_vtbl;
     SphereTree_SphereTree(((char*)&self->SphTree));
-    cRigidBody_readFromReplayFrame(((char*)&self->Pose), stream);
+    cRigidBody_readFromReplayFrame((cRigidBody*)(((char*)&self->Pose)), stream);
     stream->read((char*)&self->mKineticEnergy, 40);
     (*(int*)&self->m_pInstance) = (int)stream->readReplayInstance();
     void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)((int)self->m_pInstance)), 0);

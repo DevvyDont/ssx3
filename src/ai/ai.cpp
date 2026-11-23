@@ -8200,7 +8200,7 @@ extern "C" int cRider_checkRailBoardCollisions(void*);
 extern "C" int cSpinControl_isGrabPlaying(cSpinControl* self, int c, int flag);
 extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
-extern "C" int cSpinControl_checkChangeFakieAir(void* self);
+extern "C" int cSpinControl_checkChangeFakieAir(cSpinControl* self);
 extern "C" void cRider_snapAxisIncrement(void* rider, void* a, void* b, float c, float d);
 extern "C" void cSpinControl_initDesSpin(cSpinControl* self, float a, float b);
 extern "C" float cRiderMetrix_evLateSpin(void* self, int v);
@@ -8463,7 +8463,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     }
     else if (state0 == 3)
     {
-        if (cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2) != 288 && !cSpinControl_checkChangeFakieAir(self) &&
+        if (cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2) != 288 && !cSpinControl_checkChangeFakieAir((cSpinControl*)self) &&
             (spin != 0.0f || flip != 0.0f))
         {
             cRider_snapAxisIncrement(self->rider, &flip, &spin, 0.7853982448577881f, 0.0f);
@@ -8605,7 +8605,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         }
         else if (!busy && cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2) != 288)
         {
-            cSpinControl_checkChangeFakieAir(self);
+            cSpinControl_checkChangeFakieAir((cSpinControl*)self);
         }
         else if (self->desFlip != self->curFlip)
         {
@@ -9539,7 +9539,7 @@ static inline float aiWrap_135BE0(float x)
  *
  * @return 1 when the rider changed to fakie, else 0
  */
-extern "C" int cSpinControl_checkChangeFakieAir(void* self)
+extern "C" int cSpinControl_checkChangeFakieAir(cSpinControl* self)
 {
     cSpinControl* spinCtl = (cSpinControl*)self;
     if (cRider_isChangeFakieAir(spinCtl->mRider) != 0)

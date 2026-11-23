@@ -1294,7 +1294,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_CheckForCard);
  *
  * @param flag  nonzero to go to state 6 (reading the card) when the card is good
  */
-extern "C" void cMCOverlayManager_CheckForCard(void* self, int flag)
+extern "C" void cMCOverlayManager_CheckForCard(cMCOverlayManager* self, int flag)
 {
     cMCOverlayManager* manager = (cMCOverlayManager*)((char*)self);
 
@@ -4006,7 +4006,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getProductCode);
  *
  * Callers pass a buffer size as well, which is ignored.
  */
-extern "C" void cMCOverlayManager_getProductCode(void* self)
+extern "C" void cMCOverlayManager_getProductCode(cMCOverlayManager* self)
 {
     func_002C2540(self, &D_0047C3A8);
 }

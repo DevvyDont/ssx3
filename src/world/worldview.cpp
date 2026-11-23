@@ -418,7 +418,7 @@ struct sWVCam_9D60 {
 };
 
 
-extern "C" void cWorldView_recursiveTreeFocus(void* self, void* section, int cam, int loaded);
+extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self, void* section, int cam, int loaded);
 
 /**
  * Recomputes which hull pages stream focus @p cam needs.
@@ -644,7 +644,7 @@ static inline int overlap_A028(const t4Vector* c, const tBxBSPNode* s)
  * @param cam  the focus index
  * @param loaded  set for an Active section (updates the safe radius)
  */
-extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, int loaded)
+extern "C" void cWorldView_recursiveTreeFocus(cWorldView* self_, void* sec_, int cam, int loaded)
 {
     if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (tBxBSPNode*)sec_))
         return;

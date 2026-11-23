@@ -1358,7 +1358,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureDBRecord);
  * @param id  the location (On Tour eBELocationID locID)
  * @return the record (by value)
  */
-extern "C" sMissionEntry cBEMissionInterface_getPictureDBRecord(void* self, int id)
+extern "C" sMissionEntry cBEMissionInterface_getPictureDBRecord(cBEMissionInterface* self, int id)
 {
     for (int i = 0; i < 22; i++)
     {

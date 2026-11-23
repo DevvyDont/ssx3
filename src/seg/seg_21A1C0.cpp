@@ -30,7 +30,7 @@ extern "C" void cBXString_releaseBuffer(cBXString* self, int len);
  */
 // vsprintf into a cBXString: estimates the formatted length first (the MFC CString::FormatV
 // scheme), reserves it, then formats in place.
-extern "C" void cBXString_vprintf(void* self_, const char* fmt, char* args)
+extern "C" void cBXString_vprintf(cBXString* self_, const char* fmt, char* args)
 {
     cBXString* self = (cBXString*)self_;
     char* ap = args;
@@ -142,7 +142,7 @@ extern "C" void cBXString_vprintf(void* self_, const char* fmt, char* args)
 INCLUDE_ASM("seg/seg_21A1C0", cBXString_printf);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cBXString_vprintf(void* str, const char* fmt, char* ap);
+extern "C" void cBXString_vprintf(cBXString* str, const char* fmt, char* ap);
 
 /**
  * Formats text into a string, printf style (sprintf into a cBXString).
@@ -158,7 +158,7 @@ extern "C" void cBXString_printf(void* str, const char* fmt, ...)
 {
     char* ap;
     ap = (char*)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    cBXString_vprintf(str, fmt, ap);
+    cBXString_vprintf((cBXString*)str, fmt, ap);
 }
 #endif
 

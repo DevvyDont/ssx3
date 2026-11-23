@@ -1212,7 +1212,7 @@ extern "C" void cSpring_setupNodes(void* self);
  * @param sdata    the spring data (On Tour tSpringData* sdata)
  * @param len  the spring's length (On Tour length)
  */
-extern "C" void cSpring_setupSpring(void* self, tSpringData* sdata, float len)
+extern "C" void cSpring_setupSpring(cSpring* self, tSpringData* sdata, float len)
 {
     cSpring* spring = (cSpring*)self;
     int n = sdata->Width;

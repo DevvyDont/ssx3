@@ -2677,10 +2677,10 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the sub-menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cSubMenuItem_preRender(void* self, cSubMenuItem* item)
+extern "C" void* cSubMenuItem_preRender(cSubMenuItem* self, cSubMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2770,10 +2770,10 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cPopMenuItem_preRender(void* self, cPopMenuItem* item)
+extern "C" void* cPopMenuItem_preRender(cPopMenuItem* self, cPopMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2940,7 +2940,7 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the command item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cCommandMenuItem_preRender(void* self, void* item)
+extern "C" void* cCommandMenuItem_preRender(cCommandMenuItem* self, void* item)
 {
     void* rightText = *(void**)((char*)item + 0x18);
     if (rightText != 0) {
@@ -2948,7 +2948,7 @@ extern "C" void* cCommandMenuItem_preRender(void* self, void* item)
     } else {
         cMenuItem_textPreRender(self, item, 0, *(int*)((char*)item + 0x14), 0);
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3074,10 +3074,10 @@ extern void* D_004866C8[];
  * @param item  the callback item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cCallbackMenuItem_preRender(void* self, cCallbackMenuItem* item)
+extern "C" void* cCallbackMenuItem_preRender(cCallbackMenuItem* self, cCallbackMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866C8);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3160,10 +3160,10 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the text-only item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cNullMenuItem_preRender(void* self, cNullMenuItem* item)
+extern "C" void* cNullMenuItem_preRender(cNullMenuItem* self, cNullMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3500,10 +3500,10 @@ extern void* D_004866E0[];
  * @param item  the item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cCharMenuItem_preRender(void* self, cCharMenuItem* item)
+extern "C" void* cCharMenuItem_preRender(cCharMenuItem* self, cCharMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866E0);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3791,10 +3791,10 @@ extern void* D_004866E0[];
  * @param item  the int menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cIntMenuItem_preRender(void* self, cIntMenuItem* item)
+extern "C" void* cIntMenuItem_preRender(cIntMenuItem* self, cIntMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866E0);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -4028,10 +4028,10 @@ extern void* D_004866F0[];
  * @param item  the float menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cFloatMenuItem_preRender(void* self, cFloatMenuItem* item)
+extern "C" void* cFloatMenuItem_preRender(cFloatMenuItem* self, cFloatMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866F0);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -4246,10 +4246,10 @@ extern void* D_004866F0[];
  * @param item  the angle menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cAngleMenuItem_preRender(void* self, cAngleMenuItem* item)
+extern "C" void* cAngleMenuItem_preRender(cAngleMenuItem* self, cAngleMenuItem* item)
 {
     cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866F0);
-    return self;
+    return ((void*)self);
 }
 #endif
 

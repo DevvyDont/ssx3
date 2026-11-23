@@ -41,7 +41,7 @@ extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, 
 INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cInstanceNode_clearActiveNode(void* self, cInstanceNode* a1);
+extern "C" void cInstanceNode_clearActiveNode(cInstanceNode* self, cInstanceNode* a1);
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
 /**
@@ -92,7 +92,7 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_clearActiveNode);
  *
  * @param inst  instance record (may be 0)
  */
-extern "C" void cInstanceNode_clearActiveNode(void* self, cInstanceNode* inst)
+extern "C" void cInstanceNode_clearActiveNode(cInstanceNode* self, cInstanceNode* inst)
 {
     if (((void*)inst) != 0) {
         if ((int)VPTR_OF(cObjNode, inst) == (int)self) {

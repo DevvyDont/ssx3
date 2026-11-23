@@ -202,7 +202,7 @@ struct sVEr_5400 {
 // The unit defines cWorldLightMan_evictHashTableEntry later with its own node type.
 extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry_n(sMan_5400* self, int priority) __asm__("cWorldLightMan_evictHashTableEntry");
 extern "C" sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400* self, int priority);
-extern "C" void cWorldLightMan_IntersectLights1(void* self, void* a1, void* a2, void* a3, int count);
+extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* a1, void* a2, void* a3, int count);
 extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, t4Matrix* out);
 extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
 extern "C" cIrradiance* cRenderStateMan_getCustomIrradiance(void);
@@ -412,7 +412,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
             }
         }
         node->RTlightInfo = node->ObjIrradiance;
-        cWorldLightMan_IntersectLights1(self, &(*(sVec_5400*)&node->pos), ((sBox_5400*)node->pOverlapNode)->cell, &node->RTlightInfo, 4);
+        cWorldLightMan_IntersectLights1((cWorldLightMan*)self, &(*(sVec_5400*)&node->pos), ((sBox_5400*)node->pOverlapNode)->cell, &node->RTlightInfo, 4);
     }
     return &node->RTlightInfo;
 }
@@ -557,7 +557,7 @@ extern "C" void func_0038A6A8(void* a, void* b, void* c);
  * @param irradiance  the light set (On Tour cIrradiance&) to add the lights to
  * @param count  the maximum number of lights
  */
-extern "C" void cWorldLightMan_IntersectLights1(void* self, void* pos, void* overlapList, void* irradiance, int count)
+extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* pos, void* overlapList, void* irradiance, int count)
 {
     void* buf[32];
     int i;

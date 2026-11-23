@@ -148,9 +148,9 @@ extern "C" int func_002A7678(void* sys, int a);
 extern "C" void func_002A7340(void* sys, int idx, int v);
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(void* sub, int idx, int a2);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
-extern "C" int cWorldTriggerInstance_CrowdTrigger(void* self, int idx);
-extern "C" int cWorldTriggerInstance_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
-extern "C" int cWorldTriggerInstance_SwapTriggerToString(void* self, int idx, char* dst);
+extern "C" int cWorldTriggerInstance_CrowdTrigger(cWorldTriggerInstance* self, int idx);
+extern "C" int cWorldTriggerInstance_TriggerToPatch(cWorldTriggerInstance* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerInstance_SwapTriggerToString(cWorldTriggerInstance* self, int idx, char* dst);
 extern "C" void cWorldTriggerInstance_Reset(cWorldTriggerInstance* self);
 extern "C" int cWorldTriggerManager_PlayingTriggerInstance(cWorldTriggerInstance** self, int a1, int a2, cWorldTriggerInstance* except);
 extern "C" int cWorldTriggerManager_SwapTriggerPlaying(cWorldTriggerInstance** self, int id);
@@ -301,7 +301,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
     int rec[3];
     int swapResult;
     if (instance->f30 == -1) {
-        if (cWorldTriggerInstance_CrowdTrigger(instance, instance->fC) != 0)
+        if (cWorldTriggerInstance_CrowdTrigger((cWorldTriggerInstance*)instance, instance->fC) != 0)
             instance->f38 = 1;
         else
             instance->f38 = 0;
@@ -312,7 +312,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
             }
         }
         {
-            int ok = cWorldTriggerInstance_TriggerToPatch(instance, instance->fC, &rec[0], &rec[1], &rec[2], instance->f3C, 0);
+            int ok = cWorldTriggerInstance_TriggerToPatch((cWorldTriggerInstance*)instance, instance->fC, &rec[0], &rec[1], &rec[2], instance->f3C, 0);
             instance->f60 = rec[0];
             instance->f64 = rec[1];
             if (!ok) {
@@ -336,7 +336,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
                 return;
             }
             if (strcmp(instance->f40, D_004A35A8) == 0) {
-                if (cWorldTriggerInstance_SwapTriggerToString(instance, instance->fC, instance->f40) == 0) {
+                if (cWorldTriggerInstance_SwapTriggerToString((cWorldTriggerInstance*)instance, instance->fC, instance->f40) == 0) {
                     cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                     return;
                 }
@@ -447,7 +447,7 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, i
  * @param check  the lookup kind (0 general, 1 crowd, 2 swap)
  * @return cWorldTriggerManager_TriggerToPatch's result
  */
-extern "C" int cWorldTriggerInstance_TriggerToPatch(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
+extern "C" int cWorldTriggerInstance_TriggerToPatch(cWorldTriggerInstance* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
 {
     return cWorldTriggerManager_TriggerToPatch(gWorldTriggerManager, trigger, bank, patch, noAudio, viewPort, check);
 }
@@ -467,7 +467,7 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, i
  * @param trigger  the trigger number
  * @return 1 for a crowd trigger, else 0
  */
-extern "C" int cWorldTriggerInstance_CrowdTrigger(void* self, int trigger)
+extern "C" int cWorldTriggerInstance_CrowdTrigger(cWorldTriggerInstance* self, int trigger)
 {
     int bank;
     int patch;
@@ -489,7 +489,7 @@ extern "C" int cWorldTriggerManager_SwapTriggerToString(cWorldTriggerManager* se
  * @param dst  receives the string
  * @return cWorldTriggerManager_SwapTriggerToString's result (1 when copied)
  */
-extern "C" int cWorldTriggerInstance_SwapTriggerToString(void* self, int idx, char* dst)
+extern "C" int cWorldTriggerInstance_SwapTriggerToString(cWorldTriggerInstance* self, int idx, char* dst)
 {
     return cWorldTriggerManager_SwapTriggerToString(gWorldTriggerManager, idx, dst);
 }

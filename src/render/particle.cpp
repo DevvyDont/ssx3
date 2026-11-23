@@ -920,7 +920,7 @@ extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags)
 }
 #endif
 
-extern "C" void* cSimpleTube_updateColours(void* self);
+extern "C" void* cSimpleTube_updateColours(cSimpleTube* self);
 
 //100%
 INCLUDE_ASM("render/particle", func_00371EA0);
@@ -1269,7 +1269,7 @@ INCLUDE_ASM("render/particle", cTube_update__FPv);
  */
 void* cTube_update(void* self)
 {
-    return cSimpleTube_updateColours(self);
+    return cSimpleTube_updateColours((cSimpleTube*)self);
 }
 #endif
 
@@ -1340,7 +1340,7 @@ extern float cSimpleTube_updateColours_b;
  *
  * @return nothing meaningful: declared as returning void* but falls off the end without a return value
  */
-extern "C" void* cSimpleTube_updateColours(void* self)
+extern "C" void* cSimpleTube_updateColours(cSimpleTube* self)
 {
     if (cSimpleTube_updateColours_r != (float)cTube_m_R || cSimpleTube_updateColours_g != (float)cTube_m_G || cSimpleTube_updateColours_b != (float)cTube_m_B) {
         int i;
@@ -2956,7 +2956,7 @@ public:
  * +0x10, +0x14, w = 1; On Tour's cPlayerShadow mProjPos), the matrices at +0x90 and +0xD0 (On Tour mCProjMat and
  * mUVProjMat), intensity 1.0 and the texture id at +0x170 (On Tour mLockTexture). cRider_RenderShadow calls it.
  */
-extern "C" void cPlayerShadow_AddShadow(void* self)
+extern "C" void cPlayerShadow_AddShadow(cPlayerShadow* self)
 {
     cPlayerShadow* shadow = (cPlayerShadow*)self;
     ((cGfxMan_5890*)cGraphicsMan_TheGraphicsMan_particle)->AddProjectiveTexture(sPtVec4_5890(shadow->mProjPos[0], shadow->mProjPos[1], shadow->mProjPos[2], 1.0f),
@@ -3032,7 +3032,7 @@ extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraph
  * AddLockedFrameTexture(width, height, texeltype)) for a texture of the size at +0x174 and +0x178 (mShadowTexWidth,
  * mShadowTexHeight) in texel format 2 and stores the id. cRider_loadRider calls it.
  */
-extern "C" void cPlayerShadow_LockShadowTexture(void* self)
+extern "C" void cPlayerShadow_LockShadowTexture(cPlayerShadow* self)
 {
     cPlayerShadow* shadow = (cPlayerShadow*)self;
     if (shadow->mLockTexture < 0) {
