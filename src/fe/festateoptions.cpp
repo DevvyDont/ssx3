@@ -3058,12 +3058,6 @@ struct sVE_18DEA0i {
     int (*fn)(void*, int);
 };
 
-struct sVE_18DEA0v {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 
 class cDev_18DEA0 {
 public:
@@ -3208,8 +3202,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             return;
         self->mIsCancelPressed = 1;
         if (currentState == 0 || currentState == 2 || currentState == 1) {
-            sVE_18DEA0v* vt = (sVE_18DEA0v*)mcManager->mVtbl;
-            vt[1].fn(vthis(mcManager, vt[1]), 0);
+            mcManager->SetState(0);
         }
         self->mState = 6;
         break;
@@ -3234,8 +3227,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             self->mIsProcessing = currentState;
             self->mState = 4;
             cMCOverlayManager_SetAction(mcManager, 0);
-            sVE_18DEA0v* vt = (sVE_18DEA0v*)mcManager->mVtbl;
-            vt[1].fn(vthis(mcManager, vt[1]), 0x18);
+            mcManager->SetState(0x18);
         }
         break;
     }

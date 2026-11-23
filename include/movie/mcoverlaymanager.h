@@ -8,8 +8,8 @@
 // object a "decoder"). The front end (cFEMemCard, fe/festatetrophyroom.cpp cFEMemCard_initFEMemCard) plugs its handlers into
 // the 45 callback slots at 0x000-0x0B0.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset. The class has no base; g++ 2.95 puts its vptr
-// after the data, at 0x748 (On Tour: after mFileListCache, at 0x4CC of 0x4D0).
+// A real polymorphic class with no base, its data members FLAT (every field at its retail offset); g++ 2.95 puts
+// its vptr after the data, at 0x748 (On Tour: after mFileListCache, at 0x4CC of 0x4D0).
 // Statics (not in the object): cMCOverlayManager_mSaveInProgress (gp-relative int), the instance cMCOverlayManager_instance.
 // Evidence tags:
 //   [R] retail's constructor cMCOverlayManager_cMCOverlayManager (word stores, the default callback stubs,
@@ -180,8 +180,10 @@ struct cMCOverlayManager {
     int mLastMountedDevice;     // 0x444 [O]; [R] ctor -1; [U] cMCOverlayManager_setSelectedDevice compares it with mSelectedDevice, then copies
     char unk_448[0x300];        // 0x448 no access in retail; On Tour's mFileListCache[32][6] (ushort, 0x180) sits here,
                                 //       retail's region is twice that
-    void** mVtbl;               // 0x748 [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (slot 1 cMCOverlayManager_SetState the state
-                                //       handler, slot 2 the dtor cMCOverlayManager__cMCOverlayManager); preview 0x638
+    // 0x748: the vptr. [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (0x0047CBD8, two slots; preview 0x638):
+    virtual void SetState(int state);                       // 1 cMCOverlayManager_SetState: stores mState, runs the
+                                                            //   state's set-up (callers: every state change)
+    virtual ~cMCOverlayManager();                           // 2 cMCOverlayManager__cMCOverlayManager
 };
 
 CHECK_OFFSET(cMCOverlayManager, callbackWriteStart, 0x0);
@@ -280,7 +282,6 @@ CHECK_OFFSET(cMCOverlayManager, mCurrDeviceStateLast, 0x43C);
 CHECK_OFFSET(cMCOverlayManager, mCurrDeviceStateAck, 0x440);
 CHECK_OFFSET(cMCOverlayManager, mLastMountedDevice, 0x444);
 CHECK_OFFSET(cMCOverlayManager, unk_448, 0x448);
-CHECK_OFFSET(cMCOverlayManager, mVtbl, 0x748);
 CHECK_SIZE(cMCOverlayManager, 0x74C);
 
 #endif /* MOVIE_MCOVERLAYMANAGER_H */

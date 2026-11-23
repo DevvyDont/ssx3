@@ -6,6 +6,7 @@
 #include "util/locale.h"
 #include "ui/uitext.h"
 #include "movie/mcoverlaymanager.h"
+#include "util/bxmemcard.h"
 #include "fe/festatelegal.h"
 #include "fe/festatememcard.h"
 #include "ui/uistate.h"
@@ -308,8 +309,6 @@ extern "C" int cMCOverlayManager_GetFreeSpace(void* mp, int card);
 extern char* cFEStateMemCard_mInstance_86F90 __asm__("cFEStateMemCard_mInstance");
 extern int cFEStateMemCard_mStage;
 
-struct sVtV_86F90 { short delta; short index; void (*fn)(void*, int); };
-struct sVt0_86F90 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Checks that the selected card has room for the missing profile, or ends the free-space check and starts the reads.
@@ -354,15 +353,12 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
             int profileSpace = vt[22].fn(thisp, cBESaveInterface_getSaveProfileSize());
             *(int*)(cFEStateMemCard_mInstance_86F90 + 0x230) += profileSpace;
         }
-        char* memCard;
         if (avail < *(int*)(cFEStateMemCard_mInstance_86F90 + 0x230)
-            || ((memCard = (char*)mp->mpMemCard, (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) != -1)
-                && (memCard = (char*)mp->mpMemCard, (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) < extra)))
+            || (mp->mpMemCard->GetFreeDirEntries() != -1 && mp->mpMemCard->GetFreeDirEntries() < extra))
             fail = 1;
         if (fail) {
             *(int*)(cFEStateMemCard_mInstance_86F90 + 0x234) = 1;
-            sVtV_86F90* vt = (sVtV_86F90*)mp->mVtbl;
-            vt[1].fn(((char*)mp) + vt[1].delta, 23);
+            mp->SetState(23);
             return;
         }
     }
@@ -887,8 +883,7 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     mp->mFileCursor = profileFile;
     memCardState->mSlot = profileFile;
     memCardState->mType = 0;
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mp->mVtbl;
-    vt[1].fn(vthis(mp, vt[1]), 53);
+    mp->SetState(53);
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);
     cMCOverlayManager_getProductCode_r(desc, 0x10);

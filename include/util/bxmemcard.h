@@ -51,8 +51,11 @@ public:
     virtual int SpaceRequired1() = 0;                                         // slot 23
     virtual int GetBlockSize() = 0;                                           // slot 24
     virtual int GetFreeDirEntries() = 0;                                      // slot 25
-    virtual bool IsDeviceChanged();                                           // slot 26
-    virtual void ClearDeviceChanges();                                        // slot 27
+    virtual bool IsDeviceChanged(int device);                                 // slot 26
+    virtual void ClearDeviceChanges(int device);                              // slot 27
+    // 26 / 27 take the device: [R] cMCOverlayManager's card poll passes it (IsDeviceChanged(i) in its device loop,
+    // ClearDeviceChanges(mCurrCheckDevice)); cMemCard's own stubs ignore it and cPS2MemCard keeps them; On Tour's
+    // DWARF lists no parameters for any of cMemCard's declarations (its pure ones lose theirs too).
     virtual void SetAllDevicesChanged();                                      // slot 28
     virtual void StartFileSlotRead(int fileSlot, int buffer, int transferSize) = 0;// slot 29
     virtual void ReadData(int buffer, int transferSize) = 0;                  // slot 30

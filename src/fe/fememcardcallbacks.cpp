@@ -1175,8 +1175,7 @@ extern "C" void cFEMemCard_callbackFileChecked(void)
 {
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     cFEMemCard_mInstance->mState = 1;
-    sVEntry<void(void*, ...)>* mvt = (sVEntry<void (void*, ...)>*)mp->mVtbl;
-    mvt[1].fn(vthis(mp, mvt[1]), 2);
+    mp->SetState(2);
     cMemCard* sf = mp->mpMemCard;
     int busy = sf->IsAvailable1();
     if (busy) {
