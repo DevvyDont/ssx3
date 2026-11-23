@@ -391,8 +391,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     if (st->level == 0.0f) {
         return;
     }
-    sGfx_2D5048* graphics = (sGfx_2D5048*)GrMan_angerfx;
-    t4Matrix* viewMatrix = ((t4Matrix* (*)(void*))graphics->vtable[35].fn)(vthis(graphics, graphics->vtable[35]));
+    t4Matrix* viewMatrix = (t4Matrix*)GrMan->GetView();
     t4Matrix* bm = &self->rider->mAnimModel->SkelMatrices[self->rider->mBoneHead];
     sV4_2D5048 headPos = ((sV4_2D5048*)&bm->row[0])[3];
     sV4_2D5048 viewPos = MatVec_2D5048(viewMatrix, headPos);
@@ -458,8 +457,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
         vtx[3].u = 1.0f;
         vtx[3].v = 0.0f;
     }
-    sGfx_2D5048* gd = (sGfx_2D5048*)GrMan_angerfx;
-    ((void (*)(void*, int, sVtx_2D5048*, int))gd->vtable[71].fn)(vthis(gd, gd->vtable[71]), 4, vtx, 0);
+    GrMan->RenderTriStrip(4, (tBxVertex*)vtx, 0);
     ((sGfx_2D5048*)GrMan_angerfx)->top--;
 }
 #endif
