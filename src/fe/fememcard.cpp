@@ -237,7 +237,7 @@ extern "C" void func_00186D60(void)
     sprintf1(popupText, fmt, &loc, need);
     cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance_86D60;
     st->mPopupType = 9;
-    sVtB_86D60* svt = (sVtB_86D60*)st->mVtbl;
+    sVtB_86D60* svt = (sVtB_86D60*)VPTR_OF(cListNode, st);
     svt[36].fn(vthis(st, svt[36]), popupText, 0, 0, 0, 0, 0);
 
     {
@@ -781,7 +781,7 @@ extern "C" void cFEStateMemCard_onPopupEvent(cFEStateMemCard* self, cUIState* po
     int cancel = key == 0x10;
     if (!cancel)
     {
-      sVEntry<void(void *)> *vt = (sVEntry<void(void *)>*)self->mVtbl;
+      sVEntry<void(void *)> *vt = (sVEntry<void(void *)>*)VPTR_OF(cListNode, self);
       vt[41].fn(vthis(self, vt[41]));
       cMCOverlayManager_update(cSSXApp_getMCManager(SSXApp));
       cFEStateMemCard_terminateFreeSpaceCheck(self);
@@ -1074,7 +1074,7 @@ extern "C" void* func_00187C18(cFEStateLegal* self)
 {
     cUIState_cUIState1(self);
     self->mDisplayTicks = 0;
-    self->mVtbl = (void**)cFEStateLegal_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEStateLegal_vtbl;
     return ((void*)self);
 }
 #endif

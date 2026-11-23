@@ -638,7 +638,7 @@ extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(cFEStateRewardsRoom* se
 {
     cUIState_cUIState(self);
     self->mHashName = 46;
-    self->mVtbl = cFEStateRewardsRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardsRoom_vtbl;
     self->mUserNum = idx;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mInStore = inStore;
@@ -849,7 +849,7 @@ extern void* cFEStateRelogin_vtbl[];
 extern "C" void* cFEStateRelogin_cFEStateRelogin(cFEStateLogin* self)
 {
     cFEStateLogin_cFEStateLogin(self);
-    self->mVtbl = cFEStateRelogin_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRelogin_vtbl;
     self->mHashName = 52;
     return ((void*)self);
 }
@@ -1047,12 +1047,12 @@ extern "C" void* cFEMemCard_cFEMemCard(cFEMemCard* self, int engine, int memCard
 {
     cUIState_cUIState(self);
     self->mOVID = overlayId;
-    self->mVtbl = cOVState_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_vtbl;
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
     *(unsigned short*)((char*)self + 0x58) = str_sp[0];
-    self->mVtbl = cFEMemCard_vtbl;
+    VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, memCardType);
     return ((void*)self);
 }
@@ -1082,12 +1082,12 @@ extern "C" void* cFEMemCard_cFEMemCard2(cFEMemCard* self, int pEngine, int iType
 {
     cUIState_cUIState(self);
     self->mOVID = 0;
-    self->mVtbl = cOVState_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_vtbl;
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
     *(unsigned short*)((char*)self + 0x58) = str_sp[0];
-    self->mVtbl = cFEMemCard_vtbl;
+    VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, iType);
     return ((void*)self);
 }
@@ -1111,9 +1111,9 @@ extern "C" void cUIState__cUIState(void* self, int flags);
  */
 extern "C" void cFEMemCard__cFEMemCard(cFEMemCard* self, int flags)
 {
-    self->mVtbl = cFEMemCard_vtbl;
+    VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
     cFEMemCard_mInstance = 0;
-    self->mVtbl = cOVState_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -1468,7 +1468,7 @@ extern "C" void cFEMemCard_writeStart(void)
         fe->mPopupType = 22;
         char* buf = (char*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(app, buf, 800);
-        sVEntry<void(void*, char*, int, int, int, int, int)>* vt = (sVEntry<void(void*, char*, int, int, int, int, int)>*)cFEMemCard_mInstance->mVtbl;
+        sVEntry<void(void*, char*, int, int, int, int, int)>* vt = (sVEntry<void(void*, char*, int, int, int, int, int)>*)VPTR_OF(cListNode, cFEMemCard_mInstance);
         vt[36].fn(vthis(cFEMemCard_mInstance, vt[36]), buf, 1, 1, 0, 0, 1);
         cFEMemCard_mInstance->mIsStatusPopupOn = 1;
         if (buf != 0) {

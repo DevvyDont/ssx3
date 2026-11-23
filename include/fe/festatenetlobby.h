@@ -17,10 +17,10 @@
 // 0x1BCB58-0x1BE720. tools/layout_xlate.py: preview 0xAC..0x128 = retail 0x6D0..0x74C (+0x624), preview 0x12C =
 // retail 0x760.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). No On Tour DWARF exists for
-// this class and the preview keeps no accessors for it: widget pointers are named after the UI object
-// onWidgetCreate (cFEStateLobbyMenu_onWidgetCreate) binds to them, the rest from retail use. Channel arrays are indexed by the
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep them in step). No On Tour DWARF exists for this class and the preview keeps
+// no accessors for it: widget pointers are named after the UI object onWidgetCreate (cFEStateLobbyMenu_onWidgetCreate)
+// binds to them, the rest from retail use. Channel arrays are indexed by the
 // channel (0 beginner, 1 voice, 2 advanced, 3 expert/elite: the RoomMenus row). Evidence tags:
 //   [R] retail's constructors cFEStateLobbyMenu_cFEStateLobbyMenu / cFEStateLobbyMenu_cFEStateLobbyMenu1 and destructor cFEStateLobbyMenu__cFEStateLobbyMenu (and cFEStateNet's);
 //   [P] the July 2003 preview (see fe/festatenet.h);
@@ -28,35 +28,26 @@
 //   [O] SSX On Tour's DWARF for the cListNode/cUIState base only.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h"
 
 struct cUIThing;
 struct cUIMenu;
 struct cUIListBox;
 
-struct cFEStateLobbyMenu {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateLobbyMenu_vtbl (32 slots), stored by cFEStateLobbyMenu_cFEStateLobbyMenu / cFEStateLobbyMenu_cFEStateLobbyMenu1 after the cFEStateNet ctor and
-                                    //       by the destructor cFEStateLobbyMenu__cFEStateLobbyMenu
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateLobbyMenu_cFEStateLobbyMenu stores 0x3C
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateLobbyMenu : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateLobbyMenu_vtbl (32 slots), stored by cFEStateLobbyMenu_cFEStateLobbyMenu /
+    //       cFEStateLobbyMenu_cFEStateLobbyMenu1 after the cFEStateNet ctor and by the destructor
+    //       cFEStateLobbyMenu__cFEStateLobbyMenu
+    // cFEStateLobbyMenu's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateLobbyMenu_cFEStateLobbyMenu stores 0x3C
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -152,21 +143,6 @@ struct cFEStateLobbyMenu {
                                     //       func_001BD540 assign the room being entered; func_001BD428 passes it to func_001BD540
 };
 
-CHECK_OFFSET(cFEStateLobbyMenu, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateLobbyMenu, mpNext, 0x004);
-CHECK_OFFSET(cFEStateLobbyMenu, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateLobbyMenu, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateLobbyMenu, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateLobbyMenu, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateLobbyMenu, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateLobbyMenu, unk_016, 0x016);
-CHECK_OFFSET(cFEStateLobbyMenu, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateLobbyMenu, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateLobbyMenu, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateLobbyMenu, mScreens, 0x024);
-CHECK_OFFSET(cFEStateLobbyMenu, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateLobbyMenu, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateLobbyMenu, unk_045, 0x045);
 CHECK_OFFSET(cFEStateLobbyMenu, unk_048, 0x048);
 CHECK_OFFSET(cFEStateLobbyMenu, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateLobbyMenu, mMessageHintFrame, 0x050);

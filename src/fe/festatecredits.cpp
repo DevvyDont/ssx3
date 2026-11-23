@@ -520,7 +520,7 @@ extern "C" void* cFEStateEventSelect_cFEStateEventSelect1(cFEStateEventSelect* s
 {
     cUIState_cUIState(self);
     self->mHashName = 19;
-    self->mVtbl = cFEStateEventSelect_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateEventSelect_vtbl;
     cUITemplate_MAP_init((char*)&self->mMap);
     return ((void*)self);
 }

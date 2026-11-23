@@ -30,9 +30,9 @@
 // cFEStateNet's cFEStateNet_onUpdate, 18 onWidgetCreate cFEStateAuthDNASError_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNASError_onWidgetEvent, 20 cFEStateAuthDNASError_onWidgetMenu, 24
 // handleEvent cFEStateAuthDNASError_handleEvent, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for
-// these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for these classes (On Tour has no
+// online FE), so the own fields are named from their retail use unless noted.
 // Evidence tags:
 //   [R] retail's constructors / destructors named above (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (its default constructors, destructors and inline accessors, see fe/festatenet.h);
@@ -43,36 +43,26 @@
 // creator.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct DNASMan;
 #include "fe/festatenet.h"
 
 struct cUIThing;
 
-struct cFEStateAuthDNAS {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNAS_vtbl (vtables.tsv), stored by cFEStateAuthDNAS_cFEStateAuthDNAS / cFEStateAuthDNAS_cFEStateAuthDNAS1
-                                    //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNAS__cFEStateAuthDNAS
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNAS_cFEStateAuthDNAS stores
-                                    //       0x44
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateAuthDNAS : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateAuthDNAS_vtbl (vtables.tsv), stored by cFEStateAuthDNAS_cFEStateAuthDNAS /
+    //       cFEStateAuthDNAS_cFEStateAuthDNAS1 after the cFEStateNet ctor and by the destructor
+    //       cFEStateAuthDNAS__cFEStateAuthDNAS
+    // cFEStateAuthDNAS's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNAS_cFEStateAuthDNAS stores 0x44
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -151,21 +141,6 @@ struct cFEStateAuthDNAS {
                                     //       access seen
 };
 
-CHECK_OFFSET(cFEStateAuthDNAS, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateAuthDNAS, mpNext, 0x004);
-CHECK_OFFSET(cFEStateAuthDNAS, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateAuthDNAS, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateAuthDNAS, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateAuthDNAS, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateAuthDNAS, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateAuthDNAS, unk_016, 0x016);
-CHECK_OFFSET(cFEStateAuthDNAS, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateAuthDNAS, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateAuthDNAS, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateAuthDNAS, mScreens, 0x024);
-CHECK_OFFSET(cFEStateAuthDNAS, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateAuthDNAS, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateAuthDNAS, unk_045, 0x045);
 CHECK_OFFSET(cFEStateAuthDNAS, unk_048, 0x048);
 CHECK_OFFSET(cFEStateAuthDNAS, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateAuthDNAS, mMessageHintFrame, 0x050);
@@ -199,30 +174,20 @@ CHECK_OFFSET(cFEStateAuthDNAS, unk_6F8, 0x6F8);
 CHECK_OFFSET(cFEStateAuthDNAS, mpustrText, 0x6FC);
 CHECK_SIZE(cFEStateAuthDNAS, 0x700);
 
-struct cFEStateAuthDNASError {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNASError_vtbl (vtables.tsv), stored by cFEStateAuthDNASError_cFEStateAuthDNASError / cFEStateAuthDNASError_cFEStateAuthDNASError1
-                                    //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNASError__cFEStateAuthDNASError
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNASError_cFEStateAuthDNASError stores
-                                    //       0x45
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateAuthDNASError : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateAuthDNASError_vtbl (vtables.tsv), stored by cFEStateAuthDNASError_cFEStateAuthDNASError /
+    //       cFEStateAuthDNASError_cFEStateAuthDNASError1 after the cFEStateNet ctor and by the destructor
+    //       cFEStateAuthDNASError__cFEStateAuthDNASError
+    // cFEStateAuthDNASError's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNASError_cFEStateAuthDNASError stores
+    //       0x45
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -289,21 +254,6 @@ struct cFEStateAuthDNASError {
     cUIText* mpTitle;               // 0x6E4 [U] onWidgetCreate: widget "Title"
 };
 
-CHECK_OFFSET(cFEStateAuthDNASError, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateAuthDNASError, mpNext, 0x004);
-CHECK_OFFSET(cFEStateAuthDNASError, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateAuthDNASError, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateAuthDNASError, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateAuthDNASError, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateAuthDNASError, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateAuthDNASError, unk_016, 0x016);
-CHECK_OFFSET(cFEStateAuthDNASError, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateAuthDNASError, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateAuthDNASError, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateAuthDNASError, mScreens, 0x024);
-CHECK_OFFSET(cFEStateAuthDNASError, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateAuthDNASError, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateAuthDNASError, unk_045, 0x045);
 CHECK_OFFSET(cFEStateAuthDNASError, unk_048, 0x048);
 CHECK_OFFSET(cFEStateAuthDNASError, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateAuthDNASError, mMessageHintFrame, 0x050);

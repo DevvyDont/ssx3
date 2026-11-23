@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "movie/mcoverlaymanager.h"
 #include "fe/fecustom.h"
 #include "ui/uiengine.h"
@@ -348,7 +349,7 @@ extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, void* engine)
 {
     cFEMemCard_cFEMemCard2((self), engine, 2);
     int one = 1;
-    self->mVtbl = cFEStateMemCard_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMemCard_vtbl;
     cFEStateMemCard_mInstance_K186A08 = (self);
     cFEStateMemCard_mProfileFile = 0;
     cFEStateMemCard_mStage = 0;
@@ -395,7 +396,7 @@ extern "C" void cFEMemCard__cFEMemCard(void* self, int flags);
  */
 extern "C" void cFEStateMemCard__cFEStateMemCard(cFEStateMemCard* self, int flags)
 {
-    self->mVtbl = cFEStateMemCard_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMemCard_vtbl;
     cFEStateMemCard_mInstance = 0;
     cFEMemCard__cFEMemCard(self, flags);
 }

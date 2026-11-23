@@ -19,7 +19,7 @@
 // 4 onCreateScreen, 6 onGainFocus__FPv, 12 onUpdate, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu), mUserNum
 // and mCtrlBits; the destructor purges the textures, stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [P] the July 2003 preview (layout_xlate: 0x50 -> 0x54, 0x98 -> 0x9C, from onWidgetEvent);
@@ -27,6 +27,7 @@
 //   [O] SSX On Tour's DWARF (class cFEStateTrophyRoom, cUIState, cListNode): names, types and order.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -35,25 +36,15 @@ struct cUIScreen;
 struct cUIIcon;
 struct cUIText;
 
-struct cFEStateTrophyRoom {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateTrophyRoom_vtbl (ctors, dtor first), cFEState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 45
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; [U] onCreateScreen adds "127trophyroom";
-                                    //       onWidgetEvent asks the engine's cFECustom for the previous state
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cFECustom_getPlayerCtrlMask(.., userNum)
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O][P] (preview 0x38); [U] onCreateScreen stores the screen
-    signed char mUserNum;           // 0x044 [O]; [R] the ctor's userNum; [U] the reward / challenge queries
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateTrophyRoom : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateTrophyRoom_vtbl (ctors, dtor first), cFEState_vtbl (dtor)
+    // cFEStateTrophyRoom's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "127trophyroom"; onWidgetEvent asks the engine's cFECustom for the previous
+    //       state
+    //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum)
+    //   mpScreen: [U] onCreateScreen stores the screen
+    //   mUserNum: [U] the reward / challenge queries
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateTrophyRoom
     cUIIcon* mpBigIcon;             // 0x048 [O]; [R] ctor 0; [U] onWidgetCreate binds "bitmap"; updateBigArt sets its
@@ -75,21 +66,6 @@ struct cFEStateTrophyRoom {
                                     //       row's misc data; updateTexturesLoad redraws it
 };
 
-CHECK_OFFSET(cFEStateTrophyRoom, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateTrophyRoom, mpNext, 0x004);
-CHECK_OFFSET(cFEStateTrophyRoom, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateTrophyRoom, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateTrophyRoom, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateTrophyRoom, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateTrophyRoom, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateTrophyRoom, unk_016, 0x016);
-CHECK_OFFSET(cFEStateTrophyRoom, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateTrophyRoom, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateTrophyRoom, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateTrophyRoom, mScreens, 0x024);
-CHECK_OFFSET(cFEStateTrophyRoom, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateTrophyRoom, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateTrophyRoom, unk_045, 0x045);
 CHECK_OFFSET(cFEStateTrophyRoom, mpBigIcon, 0x048);
 CHECK_OFFSET(cFEStateTrophyRoom, mpStats, 0x04C);
 CHECK_OFFSET(cFEStateTrophyRoom, mCharID, 0x050);

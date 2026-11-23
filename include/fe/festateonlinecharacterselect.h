@@ -17,9 +17,9 @@
 // events)). Methods: fe/feasyncfile 0x1B0F60-0x1B1F18. The online game object cSetupMan_mSetupMan (func_00264F88 /
 // func_00265018 / func_00265140) receives the picks.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for
-// these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for these classes (On Tour has no
+// online FE), so the own fields are named from their retail use unless noted.
 // Evidence tags:
 //   [R] retail's constructors / destructors named above (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (its default constructors, destructors and inline accessors, see fe/festatenet.h);
@@ -30,35 +30,26 @@
 // creator.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h"
 
 struct cUIListBox;
 
-struct cFEStateOnlineCharacterSelect {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateOnlineCharacterSelect_vtbl (vtables.tsv; 32 slots), stored by cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect /
-                                    //       cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1 after the cFEStateNet ctor and by the destructor
-                                    //       cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect stores
-                                    //       0x41
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateOnlineCharacterSelect : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateOnlineCharacterSelect_vtbl (vtables.tsv; 32 slots), stored by
+    //       cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect /
+    //       cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1 after the cFEStateNet ctor and by the
+    //       destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect
+    // cFEStateOnlineCharacterSelect's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R]
+    //       cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect stores 0x41
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -128,21 +119,6 @@ struct cFEStateOnlineCharacterSelect {
                                     //       resets the player interface (cBENewPlayerInterface_setPlayerCheatCharID) when the pick differs from it
 };
 
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpNext, 0x004);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, unk_016, 0x016);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mScreens, 0x024);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateOnlineCharacterSelect, unk_045, 0x045);
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, unk_048, 0x048);
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, mMessageHintFrame, 0x050);

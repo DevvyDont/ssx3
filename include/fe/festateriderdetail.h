@@ -24,8 +24,8 @@
 // rest cUIState_* / cListNode_* / cFEState_onLoseFocus), mUserNum, mCtrlBits and mbDraw3D 0 again; the destructor
 // stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. bools are
-// ints (ee-gcc 2.95's bool is 4 bytes).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// 4 bytes).
 // Evidence tags:
 //   [R] retail's constructor / destructor and allocation size;
 //   [U] how retail code uses the field (the C bodies in src/fe/festateriderbio.cpp, fe/festatecharsetup.cpp, asm);
@@ -34,34 +34,22 @@
 // (No preview evidence: layout_xlate finds no paired cFEStateRiderDetail methods.)
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cFEStateRiderDetail {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState (through the base ctor)
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateRiderDetail_vtbl (ctor), cFEState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 13 (over cFEStateCharSetup's 0xC)
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor reads its cFECustom (*mpEngine); [U] onCreateScreen adds
-                                    //       "154rider_details" through it; onWidgetEvent pushes popups / states on its
-                                    //       stack (+0x18) and asks its cFECustom for the next / previous state
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cFECustom_getPlayerCtrlMask(.., userNum)
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onGainFocus / onPreRender2D find
-                                    //       the Option_N objects on it
-    signed char mUserNum;           // 0x044 [O]; [R] the ctor's userNum; [U] the player-interface calls (character,
-                                    //       name, cheat character) and the user's front-end rider
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRiderDetail : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRiderDetail_vtbl (ctor), cFEState_vtbl (dtor)
+    // cFEStateRiderDetail's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "154rider_details" through it; onWidgetEvent pushes popups / states on its
+    //       stack (+0x18) and asks its cFECustom for the next / previous state
+    //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum)
+    //   mpScreen: [U] onCreateScreen stores the screen; onGainFocus / onPreRender2D find the Option_N objects on it
+    //   mUserNum: [U] the player-interface calls (character, name, cheat character) and the user's front-end rider
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateCharSetup (fe/festatecharsetup.h, 0x50)
     int mbIsFirst;                  // 0x048 [O] (bool); [U] cFEStateCharSetup_updateWidget / show3DCharacter set it,
@@ -75,21 +63,6 @@ struct cFEStateRiderDetail {
                                     //       not set by the ctor
 };
 
-CHECK_OFFSET(cFEStateRiderDetail, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRiderDetail, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRiderDetail, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRiderDetail, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRiderDetail, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRiderDetail, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRiderDetail, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRiderDetail, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRiderDetail, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRiderDetail, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRiderDetail, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRiderDetail, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRiderDetail, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRiderDetail, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRiderDetail, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRiderDetail, mbIsFirst, 0x048);
 CHECK_OFFSET(cFEStateRiderDetail, mbDraw3D, 0x04C);
 CHECK_OFFSET(cFEStateRiderDetail, mbCheatCharEnable, 0x050);

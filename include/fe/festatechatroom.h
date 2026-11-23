@@ -17,9 +17,9 @@
 // cFEStateChatRoom_onWidgetCreate, 19 onWidgetEvent cFEStateChatRoom_onWidgetEvent, 20 onWidgetMenu cFEStateChatRoom_onWidgetMenu, 25 func_001B2DA0 (help), 31
 // func_001B3A30 (net events), 32 func_001B22A0). Methods: fe/feasyncfile 0x1B1F88-0x1B3D20.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for
-// these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for these classes (On Tour has no
+// online FE), so the own fields are named from their retail use unless noted.
 // Evidence tags:
 //   [R] retail's constructors / destructors named above (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (its default constructors, destructors and inline accessors, see fe/festatenet.h);
@@ -30,6 +30,7 @@
 // creator.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h"
 #include "ui/uithing.h"
 #include "ui/uiscrollbar.h"   // cUIScrollBar (mpSlider1 / mpSlider2)
@@ -38,31 +39,19 @@ struct cUIThing;
 struct cUIMenu;
 struct cUITextScroll;
 
-struct cFEStateChatRoom {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateChatRoom_vtbl (vtables.tsv; 32 slots), stored by cFEStateChatRoom_cFEStateChatRoom /
-                                    //       cFEStateChatRoom_cFEStateChatRoom1 after the cFEStateNet ctor and by the destructor
-                                    //       cFEStateChatRoom__cFEStateChatRoom
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChatRoom_cFEStateChatRoom stores
-                                    //       0x3D
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateChatRoom : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateChatRoom_vtbl (vtables.tsv; 32 slots), stored by cFEStateChatRoom_cFEStateChatRoom /
+    //       cFEStateChatRoom_cFEStateChatRoom1 after the cFEStateNet ctor and by the destructor
+    //       cFEStateChatRoom__cFEStateChatRoom
+    // cFEStateChatRoom's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChatRoom_cFEStateChatRoom stores 0x3D
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -152,21 +141,6 @@ struct cFEStateChatRoom {
                                     //       onCreateScreen copies it to mpTextScrollChat + 0xA8 (ldl/ldr)
 };
 
-CHECK_OFFSET(cFEStateChatRoom, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateChatRoom, mpNext, 0x004);
-CHECK_OFFSET(cFEStateChatRoom, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateChatRoom, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateChatRoom, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateChatRoom, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateChatRoom, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateChatRoom, unk_016, 0x016);
-CHECK_OFFSET(cFEStateChatRoom, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateChatRoom, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateChatRoom, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateChatRoom, mScreens, 0x024);
-CHECK_OFFSET(cFEStateChatRoom, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateChatRoom, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateChatRoom, unk_045, 0x045);
 CHECK_OFFSET(cFEStateChatRoom, unk_048, 0x048);
 CHECK_OFFSET(cFEStateChatRoom, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateChatRoom, mMessageHintFrame, 0x050);

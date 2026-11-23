@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beinterface.h"
 #include "ui/uiengine.h"
 #include "fe/festatelegal.h"
@@ -297,7 +298,7 @@ extern "C" void* func_001887A0(cFEStateOptions* self, int engine, int reset)
 {
     cUIState_cUIState(self);
     self->mHashName = 0x18;
-    self->mVtbl = cFEStateOptions_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOptions_vtbl;
     if (reset != 0) {
         cFEFlowState_setValue(&gFlowState, 0x18, 0);
     }

@@ -378,7 +378,7 @@ extern void* cFEStateRuleSelect_vtbl[];
 extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(cFEStateRuleSelect* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateRuleSelect_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRuleSelect_vtbl;
     self->mpGameEventMapping = 0;
     *(char*)&self->mUserNum = 0;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);

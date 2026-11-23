@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "ui/uithing.h"
 #include "fe/screenkeyboard.h"
 #include "ui/uiscreen.h"
@@ -246,7 +247,7 @@ extern "C" void* cFEStateCharSelect_cFEStateCharSelect(cFEStateCharSelect* self,
     int i = 0;
     unsigned char mask = 0xFF;
     cUIState_cUIState(self, owner);
-    self->mVtbl = cFEStateCharSelect_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCharSelect_vtbl;
     self->mHashName = 9;
     self->mbIsFirst = 1;
     self->mUserNum = n;

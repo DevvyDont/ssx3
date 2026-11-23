@@ -6,13 +6,14 @@
 // Subclasses add their reward lists from 0xA24: cFEStateRewardGalleryPosters, TradingCards, ConceptArts, Toys,
 // Videos and CheatChars (cFEReal creates them: cMemMan_alloc(2772, "cFEStateRewardGalleryPosters"), ...).
 //
-// Size 0xA24 (the subclasses' first own field; On Tour 0xA24). A FLAT layout, like main/game.h: every field at its
-// retail offset, no C++ inheritance yet. Member names are EA's, from SSX On Tour's PSP DWARF (cListNode, cUIState,
+// Size 0xA24 (the subclasses' first own field; On Tour 0xA24). Derives from cUIState (ui/uistate.h); its own members at
+// their retail offsets. Member names are EA's, from SSX On Tour's PSP DWARF (cListNode, cUIState,
 // cFEStateRewardGalleryBase); every retail use falls where On Tour's order puts it (the cUIState part as in
 // fe/keyboardpopup.h: retail's bools are words, which keeps the same offsets there). Evidence tags:
 //   [O] On Tour's member order; [U] how retail code uses the field.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -29,24 +30,13 @@ struct tIconInfo {
     int mID;                        // 0x8 [O]
 };
 
-struct cFEStateRewardGalleryBase {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 [U] the subclasses' constructors install their vtables
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [U] the state stack and screens
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] the gallery screen
-    signed char mUserNum;           // 0x044 [O]; [U] the controlling player
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRewardGalleryBase : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [U] the subclasses' constructors install their vtables
+    // cFEStateRewardGalleryBase's notes on cUIState's fields:
+    //   mpEngine: [U] the state stack and screens
+    //   mpScreen: [U] the gallery screen
+    //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
@@ -81,21 +71,6 @@ struct cFEStateRewardGalleryBase {
     cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
 };
 
-CHECK_OFFSET(cFEStateRewardGalleryBase, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRewardGalleryBase, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRewardGalleryBase, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRewardGalleryBase, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRewardGalleryBase, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRewardGalleryBase, mLoadingState, 0x048);
 CHECK_OFFSET(cFEStateRewardGalleryBase, mRewardType, 0x04C);
 CHECK_OFFSET(cFEStateRewardGalleryBase, mCharID, 0x050);
@@ -160,24 +135,13 @@ struct tToyInfo;
 struct tCheatCharInfo;
 
 // cFEStateRewardGalleryPosters: size 0xAD4 (see above).
-struct cFEStateRewardGalleryPosters {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 [R] cFEStateRewardGalleryPosters_vtbl (0x0046A248), stored by both ctors and the dtor
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [U] the state stack and screens
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] the gallery screen
-    signed char mUserNum;           // 0x044 [O]; [U] the controlling player
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRewardGalleryPosters : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRewardGalleryPosters_vtbl (0x0046A248), stored by both ctors and the dtor
+    // cFEStateRewardGalleryPosters's notes on cUIState's fields:
+    //   mpEngine: [U] the state stack and screens
+    //   mpScreen: [U] the gallery screen
+    //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase (written out from the struct above)
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
@@ -217,21 +181,6 @@ struct cFEStateRewardGalleryPosters {
                                     //       returns one, getIconID reads its icon name
 };
 
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRewardGalleryPosters, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mLoadingState, 0x048);
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mRewardType, 0x04C);
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mCharID, 0x050);
@@ -267,24 +216,13 @@ CHECK_OFFSET(cFEStateRewardGalleryPosters, mpPosters, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryPosters, 0xAD4);
 
 // cFEStateRewardGalleryTradingCards: size 0xBF8 (see above).
-struct cFEStateRewardGalleryTradingCards {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 [R] cFEStateRewardGalleryTradingCards_vtbl (0x0046A0C8), stored by both ctors and the dtor
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [U] the state stack and screens
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] the gallery screen
-    signed char mUserNum;           // 0x044 [O]; [U] the controlling player
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRewardGalleryTradingCards : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRewardGalleryTradingCards_vtbl (0x0046A0C8), stored by both ctors and the dtor
+    // cFEStateRewardGalleryTradingCards's notes on cUIState's fields:
+    //   mpEngine: [U] the state stack and screens
+    //   mpScreen: [U] the gallery screen
+    //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase (written out from the struct above)
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
@@ -324,21 +262,6 @@ struct cFEStateRewardGalleryTradingCards {
                                     //       returns one, getIconID reads its icon name
 };
 
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRewardGalleryTradingCards, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mLoadingState, 0x048);
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mRewardType, 0x04C);
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mCharID, 0x050);
@@ -374,24 +297,13 @@ CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpTradingCards, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryTradingCards, 0xBF8);
 
 // cFEStateRewardGalleryConceptArts: size 0xBB8 (see above).
-struct cFEStateRewardGalleryConceptArts {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 [R] cFEStateRewardGalleryConceptArts_vtbl (0x00469F48), stored by both ctors and the dtor
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [U] the state stack and screens
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] the gallery screen
-    signed char mUserNum;           // 0x044 [O]; [U] the controlling player
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRewardGalleryConceptArts : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRewardGalleryConceptArts_vtbl (0x00469F48), stored by both ctors and the dtor
+    // cFEStateRewardGalleryConceptArts's notes on cUIState's fields:
+    //   mpEngine: [U] the state stack and screens
+    //   mpScreen: [U] the gallery screen
+    //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase (written out from the struct above)
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
@@ -431,21 +343,6 @@ struct cFEStateRewardGalleryConceptArts {
                                     //       returns one, getIconID reads its icon name
 };
 
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRewardGalleryConceptArts, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mLoadingState, 0x048);
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mRewardType, 0x04C);
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mCharID, 0x050);
@@ -481,24 +378,13 @@ CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpConceptArts, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryConceptArts, 0xBB8);
 
 // cFEStateRewardGalleryVideos: size 0xA30 (see above).
-struct cFEStateRewardGalleryVideos {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 [R] cFEStateRewardGalleryVideos_vtbl (0x00469DC8), stored by both ctors and the dtor
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [U] the state stack and screens
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] the gallery screen
-    signed char mUserNum;           // 0x044 [O]; [U] the controlling player
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRewardGalleryVideos : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRewardGalleryVideos_vtbl (0x00469DC8), stored by both ctors and the dtor
+    // cFEStateRewardGalleryVideos's notes on cUIState's fields:
+    //   mpEngine: [U] the state stack and screens
+    //   mpScreen: [U] the gallery screen
+    //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase (written out from the struct above)
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
@@ -538,21 +424,6 @@ struct cFEStateRewardGalleryVideos {
                                     //       returns one, getIconID reads its icon name
 };
 
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRewardGalleryVideos, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mLoadingState, 0x048);
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mRewardType, 0x04C);
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mCharID, 0x050);
@@ -588,24 +459,13 @@ CHECK_OFFSET(cFEStateRewardGalleryVideos, mpVideos, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryVideos, 0xA30);
 
 // cFEStateRewardGalleryToys: size 0xA98 (see above).
-struct cFEStateRewardGalleryToys {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 [R] cFEStateRewardGalleryToys_vtbl (0x00469C48), stored by both ctors and the dtor
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [U] the state stack and screens
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] the gallery screen
-    signed char mUserNum;           // 0x044 [O]; [U] the controlling player
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRewardGalleryToys : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRewardGalleryToys_vtbl (0x00469C48), stored by both ctors and the dtor
+    // cFEStateRewardGalleryToys's notes on cUIState's fields:
+    //   mpEngine: [U] the state stack and screens
+    //   mpScreen: [U] the gallery screen
+    //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase (written out from the struct above)
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
@@ -645,21 +505,6 @@ struct cFEStateRewardGalleryToys {
                                     //       returns one, getIconID reads its icon name
 };
 
-CHECK_OFFSET(cFEStateRewardGalleryToys, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRewardGalleryToys, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRewardGalleryToys, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRewardGalleryToys, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRewardGalleryToys, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRewardGalleryToys, mLoadingState, 0x048);
 CHECK_OFFSET(cFEStateRewardGalleryToys, mRewardType, 0x04C);
 CHECK_OFFSET(cFEStateRewardGalleryToys, mCharID, 0x050);
@@ -695,24 +540,13 @@ CHECK_OFFSET(cFEStateRewardGalleryToys, mpToys, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryToys, 0xA98);
 
 // cFEStateRewardGalleryCheatChars: size 0xA98 (see above).
-struct cFEStateRewardGalleryCheatChars {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 [R] cFEStateRewardGalleryCheatChars_vtbl (0x00469AC8), stored by both ctors and the dtor
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [U] the state stack and screens
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] the gallery screen
-    signed char mUserNum;           // 0x044 [O]; [U] the controlling player
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRewardGalleryCheatChars : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRewardGalleryCheatChars_vtbl (0x00469AC8), stored by both ctors and the dtor
+    // cFEStateRewardGalleryCheatChars's notes on cUIState's fields:
+    //   mpEngine: [U] the state stack and screens
+    //   mpScreen: [U] the gallery screen
+    //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase (written out from the struct above)
     int mLoadingState;              // 0x048 [O]
     int mRewardType;                // 0x04C [O]
@@ -752,21 +586,6 @@ struct cFEStateRewardGalleryCheatChars {
                                     //       returns one; getTextureElement looks up its texture
 };
 
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRewardGalleryCheatChars, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mLoadingState, 0x048);
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mRewardType, 0x04C);
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mCharID, 0x050);

@@ -20,7 +20,7 @@
 // onWidgetEvent, 20 onWidgetMenu, 21 onWidgetPair; vtables.tsv stops at slot 10), mHashName 0x1F and mVibrateOn 0;
 // the destructor stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [P] the July 2003 preview (layout_xlate: 0x44 -> 0x48, 0x4C -> 0x50, from onUpdate and the ctor);
@@ -28,32 +28,20 @@
 //   [O] SSX On Tour's DWARF (class cFEStateOptionsController, cUIState, cListNode): names, types and order.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cFEStateOptionsController {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateOptionsController_vtbl (ctors), cFEState_vtbl (dtor); [P]
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] func_0018C658 stores 0x1F
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; [U] onCreateScreen adds "22control" through
-                                    //       it
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; updateWidget /
-                                    //       displayPadConfig look the lists and pictures up on it
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateOptionsController : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateOptionsController_vtbl (ctors), cFEState_vtbl (dtor); [P]
+    // cFEStateOptionsController's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "22control" through it
+    //   mpScreen: [U] onCreateScreen stores the screen; updateWidget / displayPadConfig look the lists and pictures up
+    //       on it
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateOptionsController
     int mTimer[2];                  // 0x048 [O][P] (preview 0x44); [U] onCreateScreen zeroes both; onWidgetEvent sets
@@ -64,21 +52,6 @@ struct cFEStateOptionsController {
     char unk_051[0x3];              // 0x051 padding
 };
 
-CHECK_OFFSET(cFEStateOptionsController, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateOptionsController, mpNext, 0x004);
-CHECK_OFFSET(cFEStateOptionsController, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateOptionsController, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateOptionsController, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateOptionsController, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateOptionsController, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateOptionsController, unk_016, 0x016);
-CHECK_OFFSET(cFEStateOptionsController, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateOptionsController, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateOptionsController, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateOptionsController, mScreens, 0x024);
-CHECK_OFFSET(cFEStateOptionsController, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateOptionsController, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateOptionsController, unk_045, 0x045);
 CHECK_OFFSET(cFEStateOptionsController, mTimer, 0x048);
 CHECK_OFFSET(cFEStateOptionsController, mVibrateOn, 0x050);
 CHECK_OFFSET(cFEStateOptionsController, unk_051, 0x051);
@@ -111,27 +84,14 @@ CHECK_SIZE(cFEStateOptionsController, 0x54);
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cFEStateOptionsDeviceSelect {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateOptionsDeviceSelect_vtbl (both ctors, and the dtor first); [U]
-                                    //       onWidgetEvent / displayStatus call slots 44 (confirmLoad), 47
-                                    //       (displayStatusPopup)
-    // --- cUIState (ui/uistate.h; same offsets as On Tour)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 33
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's pEngine; [U] onCreateScreen adds the screen; updateDone
-                                    //       asks its cFECustom for the next state and pushes it on its stack (+0x18)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; lw/sw the word)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen / displayStatus / the hide* functions look widgets up
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateOptionsDeviceSelect : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateOptionsDeviceSelect_vtbl (both ctors, and the dtor first); [U] onWidgetEvent / displayStatus call
+    //       slots 44 (confirmLoad), 47 (displayStatusPopup)
+    // cFEStateOptionsDeviceSelect's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds the screen; updateDone asks its cFECustom for the next state and pushes it
+    //       on its stack (+0x18)
+    //   mpScreen: [U] onCreateScreen / displayStatus / the hide* functions look widgets up
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
     int mAllowPauseMenu;            // 0x04C [O] (bool); [R] zeroed
@@ -191,21 +151,6 @@ struct cFEStateOptionsDeviceSelect {
                                     //       clears it on back (event 6)
 };
 
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpNext, 0x004);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, unk_016, 0x016);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mScreens, 0x024);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateOptionsDeviceSelect, unk_045, 0x045);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mDoneTransition, 0x048);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mAllowPauseMenu, 0x04C);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mRestoreCutSceneMode, 0x050);
@@ -278,28 +223,17 @@ CHECK_SIZE(cFEStateOptionsDeviceSelect, 0x23C);
 // bodies in src/fe/festateoptions.cpp and the asm); [O] SSX On Tour's DWARF (class cFEStateOptions, cUIState): names,
 // types and order. (No preview evidence: layout_xlate pairs only the dtor, which touches the vptr.)
 
-struct cFEStateOptions {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateOptions_vtbl (both ctors), cFEState_vtbl (dtor); [U]
-                                    //       onPopupEvent calls slot 19 (onWidgetEvent) with entry "8"
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] func_001887A0 stores 0x18
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; [U] onCreateScreen adds "18options" through
-                                    //       it; onWidgetEvent / saveOptionPrompt push states on its stack (+0x18)
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]; [U] onWidgetEvent passes it (lbu) to the cKeyboardPopup ctor
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h); [U] onWidgetEvent ORs in 0x80
-                                    //       (pending delete) when the menu is left
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onWidgetEvent plays its
-                                    //       "TransitionOut", onPopupEvent looks entry "8" up on it
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateOptions : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateOptions_vtbl (both ctors), cFEState_vtbl (dtor); [U] onPopupEvent calls slot 19 (onWidgetEvent)
+    //       with entry "8"
+    // cFEStateOptions's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "18options" through it; onWidgetEvent / saveOptionPrompt push states on its
+    //       stack (+0x18)
+    //   mCtrlBits: [U] onWidgetEvent passes it (lbu) to the cKeyboardPopup ctor
+    //   mAttrState: [U] onWidgetEvent ORs in 0x80 (pending delete) when the menu is left
+    //   mpScreen: [U] onCreateScreen stores the screen; onWidgetEvent plays its "TransitionOut", onPopupEvent looks
+    //       entry "8" up on it
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateOptions
     int mbToSaveOptionScreen;       // 0x048 [O] (On Tour: bool at 0x48; a word in retail); [U] onCreateScreen 0;
@@ -313,21 +247,6 @@ struct cFEStateOptions {
                                     //       event 13 (keyboard done) reads its text (+0x74) and clears it
 };
 
-CHECK_OFFSET(cFEStateOptions, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateOptions, mpNext, 0x004);
-CHECK_OFFSET(cFEStateOptions, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateOptions, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateOptions, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateOptions, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateOptions, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateOptions, unk_016, 0x016);
-CHECK_OFFSET(cFEStateOptions, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateOptions, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateOptions, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateOptions, mScreens, 0x024);
-CHECK_OFFSET(cFEStateOptions, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateOptions, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateOptions, unk_045, 0x045);
 CHECK_OFFSET(cFEStateOptions, mbToSaveOptionScreen, 0x048);
 CHECK_OFFSET(cFEStateOptions, mbLetFrameGo, 0x04C);
 CHECK_OFFSET(cFEStateOptions, mpKeyboard, 0x050);
@@ -351,28 +270,16 @@ CHECK_SIZE(cFEStateOptions, 0x54);
 // clears the byte at 0x48; the dtor stores cFEState_vtbl and runs cUIState__cUIState.
 // Evidence tags as for cFEStateOptions (no preview evidence: layout_xlate pairs only the ctor's vptr store).
 
-struct cFEStateOptionsSaveLoad {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateOptionsSaveLoad_vtbl (both ctors), cFEState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 0x20
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; [U] onCreateScreen adds "25saveload";
-                                    //       onWidgetEvent / onPopupEvent push states and popups on its stack (+0x18)
-                                    //       and call its custom interface (+0x0) slots 4 / 5
-    signed char mCurrentCtrl;       // 0x014 [O]; [U] onWidgetEvent copies it into mSaveLoadCurrentCtrl and adds
-                                    //       (1 << it) to the next-state id
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onPreRender2D looks entries up
-                                    //       on it; onPopupEvent plays its "TransitionOut"
-    signed char mUserNum;           // 0x044 [O]; [U] onPopupEvent: the profile to reset (lb; at least 0)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateOptionsSaveLoad : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateOptionsSaveLoad_vtbl (both ctors), cFEState_vtbl (dtor)
+    // cFEStateOptionsSaveLoad's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "25saveload"; onWidgetEvent / onPopupEvent push states and popups on its
+    //       stack (+0x18) and call its custom interface (+0x0) slots 4 / 5
+    //   mCurrentCtrl: [U] onWidgetEvent copies it into mSaveLoadCurrentCtrl and adds (1 << it) to the next-state id
+    //   mpScreen: [U] onCreateScreen stores the screen; onPreRender2D looks entries up on it; onPopupEvent plays its
+    //       "TransitionOut"
+    //   mUserNum: [U] onPopupEvent: the profile to reset (lb; at least 0)
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateOptionsSaveLoad
     signed char mSaveLoadCurrentCtrl; // 0x048 [O] cFEStateOptionsSaveLoad::mCurrentCtrl (char; renamed here because
@@ -382,21 +289,6 @@ struct cFEStateOptionsSaveLoad {
     char unk_049[0x3];              // 0x049 padding
 };
 
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mpNext, 0x004);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, unk_016, 0x016);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mScreens, 0x024);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateOptionsSaveLoad, unk_045, 0x045);
 CHECK_OFFSET(cFEStateOptionsSaveLoad, mSaveLoadCurrentCtrl, 0x048);
 CHECK_OFFSET(cFEStateOptionsSaveLoad, unk_049, 0x049);
 CHECK_SIZE(cFEStateOptionsSaveLoad, 0x4C);

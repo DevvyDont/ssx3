@@ -1111,7 +1111,7 @@ extern "C" void* cFEStateCharSetup_cFEStateCharSetup(cFEStateCharSetup* self, cU
 {
     cUIState_cUIState(self, engine);
     self->mHashName = 0xC;
-    self->mVtbl = cFEStateCharSetup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCharSetup_vtbl;
     self->mUserNum = idx;
     self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mbDraw3D = 0;

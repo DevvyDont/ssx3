@@ -211,7 +211,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos__cFEPopupScreenPos__FPv);
 void* cFEPopupScreenPos__cFEPopupScreenPos(void* vself)
 {
     cFEPopupScreenPos* self = (cFEPopupScreenPos*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEPopupScreenPos_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEPopupScreenPos_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -432,7 +432,7 @@ extern void* cFEStateRiderBio_vtbl[];
 extern "C" void* cFEStateRiderBio_cFEStateRiderBio1(cFEStateRiderBio* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRiderBio_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRiderBio_vtbl;
     return ((void*)self);
 }
 #endif
@@ -452,7 +452,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio__cFEStateRiderBio__FPv);
 void* cFEStateRiderBio__cFEStateRiderBio(void* vself)
 {
     cFEStateRiderBio* self = (cFEStateRiderBio*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -476,7 +476,7 @@ extern void* cFEStateRuleSelect_vtbl[];
 extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect1(cFEStateRuleSelect* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRuleSelect_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRuleSelect_vtbl;
     return ((void*)self);
 }
 #endif
@@ -496,7 +496,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect__cFEStateRuleSelect__FPv);
 void* cFEStateRuleSelect__cFEStateRuleSelect(void* vself)
 {
     cFEStateRuleSelect* self = (cFEStateRuleSelect*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -551,7 +551,7 @@ struct sElem_F470 {
 extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights1(cFEStateBraggingRights* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateBraggingRights_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateBraggingRights_vtbl;
     new ((char*)&self->mMenuCtrl[0]) sElem_F470[2];
     return ((void*)self);
 }
@@ -575,7 +575,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
  */
 extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(cFEStateBraggingRights* self, int flags)
 {
-    self->mVtbl = cFEStateBraggingRights_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateBraggingRights_vtbl;
     if ((char*)&self->mMenuCtrl[0] != 0) {
         char* panel = (char*)&self->mMenuCtrl[0] + 0x68;
         while ((char*)&self->mMenuCtrl[0] != panel) {
@@ -652,7 +652,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateOnlineMainMenu_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOnlineMainMenu_vtbl;
     return ((void*)self);
 }
 #endif
@@ -671,7 +671,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu__FP
 void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* vself)
 {
     cFEStateNet* self = (cFEStateNet*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateOnlineMainMenu_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateOnlineMainMenu_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -707,7 +707,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern "C" void *cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1(cFEStateNetQuickPlayPopup* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     self->mbSearching = 0;
-    self->mVtbl = cFEStateNetQuickPlayPopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetQuickPlayPopup_vtbl;
     return ((void*)self);
 }
 #endif
@@ -726,7 +726,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPop
 void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* vself)
 {
     cFEStateNetQuickPlayPopup* self = (cFEStateNetQuickPlayPopup*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateNetQuickPlayPopup_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetQuickPlayPopup_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -761,7 +761,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateNetSSXWorld_cFEStateNetSSXWorld1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateNetSSXWorld_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetSSXWorld_vtbl;
     return ((void*)self);
 }
 #endif
@@ -780,7 +780,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld__cFEStateNetSSXWorld__FPv);
 void* cFEStateNetSSXWorld__cFEStateNetSSXWorld(void* vself)
 {
     cFEStateNet* self = (cFEStateNet*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateNetSSXWorld_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetSSXWorld_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -801,7 +801,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateNetQuickMessages_cFEStateNetQuickMessages1(cFEStateNetQuickMessages* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateNetQuickMessages_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetQuickMessages_vtbl;
     return ((void*)self);
 }
 #endif
@@ -820,7 +820,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages__cFEStateNetQuickMessages
 void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* vself)
 {
     cFEStateNetQuickMessages* self = (cFEStateNetQuickMessages*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateNetQuickMessages_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetQuickMessages_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -858,7 +858,7 @@ extern "C" void* cFEStateLobbyMenu_cFEStateLobbyMenu1(cFEStateLobbyMenu* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    self->mVtbl = cFEStateLobbyMenu_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateLobbyMenu_vtbl;
     self->mszChannelName = (char*)emptyStr;
     self->mszRoomName = (char*)emptyStr;
     return ((void*)self);
@@ -883,7 +883,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
  */
 extern "C" void cFEStateLobbyMenu__cFEStateLobbyMenu(cFEStateLobbyMenu* self, int flags)
 {
-    self->mVtbl = cFEStateLobbyMenu_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateLobbyMenu_vtbl;
     cBXString__cBXString((char*)&self->mszRoomName, 2);
     cBXString__cBXString((char*)&self->mszChannelName, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
@@ -907,7 +907,7 @@ extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1(cFEState
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetCreateRoomPopup_vtbl;
     self->mszRoomName = (char*)emptyStr;
     self->mszChannelName = (char*)emptyStr;
     self->mszPassword = (char*)emptyStr;
@@ -931,7 +931,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
  */
 extern "C" void cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self, int flags)
 {
-    self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetCreateRoomPopup_vtbl;
     cBXString__cBXString((char*)&self->mszPassword, 2);
     cBXString__cBXString((char*)&self->mszChannelName, 2);
     cBXString__cBXString((char*)&self->mszRoomName, 2);
@@ -1019,7 +1019,7 @@ struct sSlot_F900 {
 extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(cFEStateNetHelpPopup* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateNetHelpPopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetHelpPopup_vtbl;
     new ((char*)&self->mpParentState) sSlot_F900[7];
     return ((void*)self);
 }
@@ -1039,7 +1039,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup__cFEStateNetHelpPopup__FPv);
 void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* vself)
 {
     cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateNetHelpPopup_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetHelpPopup_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -1201,7 +1201,7 @@ extern void* cFEStateRewardGalleryBase_vtbl[];
 extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1(cFEStateRewardGalleryBase* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1227,10 +1227,10 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateRewardGalleryBase__cFEStateRewardGalleryBase(cFEStateRewardGalleryBase* self, int flags)
 {
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1449,7 +1449,7 @@ extern void* cFEStateRewardGalleryPosters_vtbl[];
 extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1(cFEStateRewardGalleryPosters* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardGalleryPosters_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryPosters_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1475,10 +1475,10 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters(cFEStateRewardGalleryPosters* self, int flags)
 {
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1571,7 +1571,7 @@ extern void* cFEStateRewardGalleryTradingCards_vtbl[];
 extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1(cFEStateRewardGalleryTradingCards* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardGalleryTradingCards_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryTradingCards_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1597,10 +1597,10 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards(cFEStateRewardGalleryTradingCards* self, int flags)
 {
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1693,7 +1693,7 @@ extern void* cFEStateRewardGalleryConceptArts_vtbl[];
 extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1(cFEStateRewardGalleryConceptArts* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardGalleryConceptArts_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryConceptArts_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1719,10 +1719,10 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts(cFEStateRewardGalleryConceptArts* self, int flags)
 {
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1815,7 +1815,7 @@ extern void* cFEStateRewardGalleryVideos_vtbl[];
 extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1(cFEStateRewardGalleryVideos* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardGalleryVideos_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryVideos_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1841,10 +1841,10 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos(cFEStateRewardGalleryVideos* self, int flags)
 {
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1937,7 +1937,7 @@ extern void* cFEStateRewardGalleryToys_vtbl[];
 extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1(cFEStateRewardGalleryToys* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardGalleryToys_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryToys_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1963,10 +1963,10 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateRewardGalleryToys__cFEStateRewardGalleryToys(cFEStateRewardGalleryToys* self, int flags)
 {
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -2059,7 +2059,7 @@ extern void* cFEStateRewardGalleryCheatChars_vtbl[];
 extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1(cFEStateRewardGalleryCheatChars* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardGalleryCheatChars_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryCheatChars_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2085,10 +2085,10 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars(cFEStateRewardGalleryCheatChars* self, int flags)
 {
-    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -2181,7 +2181,7 @@ extern void* cFEStatePreviewReward_vtbl[];
 extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward1(cFEStatePreviewReward* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStatePreviewReward_vtbl;
+    VPTR_OF(cListNode, self) = cFEStatePreviewReward_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2344,7 +2344,7 @@ extern void* cFEStateMountainRoom_vtbl[];
 extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom1(cFEStateMountainRoom* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateMountainRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMountainRoom_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2451,7 +2451,7 @@ extern void* cFEStatePeakRoom_vtbl[];
 extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom1(cFEStatePeakRoom* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStatePeakRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStatePeakRoom_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2471,7 +2471,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom__cFEStatePeakRoom__FPv);
 void* cFEStatePeakRoom__cFEStatePeakRoom(void* vself)
 {
     cFEStatePeakRoom* self = (cFEStatePeakRoom*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2492,7 +2492,7 @@ extern void* cFEStateTrophyRoom_vtbl[];
 extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom1(cFEStateTrophyRoom* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateTrophyRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateTrophyRoom_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2514,9 +2514,9 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  */
 extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(cFEStateTrophyRoom* self, int flags)
 {
-    self->mVtbl = cFEStateTrophyRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateTrophyRoom_vtbl;
     cFEStateTrophyRoom_purgeTextures(self);
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -2538,7 +2538,7 @@ extern void* cFEStateRewardsRoom_vtbl[];
 extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom1(cFEStateRewardsRoom* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRewardsRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRewardsRoom_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2558,7 +2558,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom__cFEStateRewardsRoom__FPv);
 void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* vself)
 {
     cFEStateRewardsRoom* self = (cFEStateRewardsRoom*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2596,7 +2596,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode__cFEPopupSelectMulti
 void* cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode(void* vself)
 {
     cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEPopupSelectMultiplayerMode_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEPopupSelectMultiplayerMode_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2798,7 +2798,7 @@ extern void* cFEStateAudioOptions_vtbl[];
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions1(cFEStateAudioOptions* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateAudioOptions_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateAudioOptions_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2818,7 +2818,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
 void* cFEStateAudioOptions__cFEStateAudioOptions(void* vself)
 {
     cFEStateAudioOptions* self = (cFEStateAudioOptions*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2854,7 +2854,7 @@ extern void* cFEStateRequestLine_vtbl[];
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine1(cFEStateRequestLine* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateRequestLine_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRequestLine_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2874,7 +2874,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
 void* cFEStateRequestLine__cFEStateRequestLine(void* vself)
 {
     cFEStateRequestLine* self = (cFEStateRequestLine*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -3190,7 +3190,7 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
 extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1(cFEStateSelectMultiplayerMode* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateSelectMultiplayerMode_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateSelectMultiplayerMode_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3210,7 +3210,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode__cFEStateSelectMulti
 void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* vself)
 {
     cFEStateSelectMultiplayerMode* self = (cFEStateSelectMultiplayerMode*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -3231,7 +3231,7 @@ extern void* cFEStateMPCircuit_vtbl[];
 extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit1(cFEStateMPCircuit* self)
 {
     cUIState_cUIState(self, 0);
-    self->mVtbl = cFEStateMPCircuit_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMPCircuit_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3251,7 +3251,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit__cFEStateMPCircuit__FPv);
 void* cFEStateMPCircuit__cFEStateMPCircuit(void* vself)
 {
     cFEStateMPCircuit* self = (cFEStateMPCircuit*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -3274,7 +3274,7 @@ extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount1(cFEUseExistingAcco
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyString = cBXString_EmptyString;
-    self->mVtbl = cFEUseExistingAccount_vtbl;
+    VPTR_OF(cListNode, self) = cFEUseExistingAccount_vtbl;
     self->mszEmail = (char*)emptyString;
     self->unk_6D0 = 0;
     self->mpTextForgotPassword = 0;
@@ -3315,7 +3315,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateSelectPersona_cFEStateSelectPersona1(cFEStateSelectPersona* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateSelectPersona_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateSelectPersona_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3334,7 +3334,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona__cFEStateSelectPersona__FPv)
 void* cFEStateSelectPersona__cFEStateSelectPersona(void* vself)
 {
     cFEStateSelectPersona* self = (cFEStateSelectPersona*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateSelectPersona_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateSelectPersona_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3386,7 +3386,7 @@ extern int D_00441268[];
 extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup1(cFEStateChallengePopup* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateChallengePopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateChallengePopup_vtbl;
     self->mpEventOptions = D_00441268;
     self->mbChallengeSent = 0;
     return ((void*)self);
@@ -3411,7 +3411,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
  */
 extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallengePopup* self, int flags)
 {
-    self->mVtbl = cFEStateChallengePopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateChallengePopup_vtbl;
     cUIState* obj = self->mpParentState;
     sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, obj);
     vt[32].fn(vthis(obj, vt[32]));
@@ -3450,7 +3450,7 @@ extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1(
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateChallengeReceivedPopup_vtbl;
     self->mszChallenger = (char*)emptyStr;
     return ((void*)self);
 }
@@ -3472,7 +3472,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
  */
 extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self, int flags)
 {
-    self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateChallengeReceivedPopup_vtbl;
     cUIState* obj = self->mpParentState;
     sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, obj);
     vt[32].fn(vthis(obj, vt[32]));
@@ -3512,7 +3512,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern "C" void *cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1(cFEStateOnlineCharacterSelect* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     self->mbConfirmed = 0;
-    self->mVtbl = cFEStateOnlineCharacterSelect_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOnlineCharacterSelect_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3532,7 +3532,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect__cFEStateOnlineChara
 void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* vself)
 {
     cFEStateOnlineCharacterSelect* self = (cFEStateOnlineCharacterSelect*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateOnlineCharacterSelect_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateOnlineCharacterSelect_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3555,7 +3555,7 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig1(cFEStateNetConfig* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     self->miSelectedSetting = 0;
-    self->mVtbl = cFEStateNetConfig_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetConfig_vtbl;
     self->miNumSettings = 0;
     self->unk_6D8 = 0;
     self->unk_6DC = 0;
@@ -3620,7 +3620,7 @@ extern void* cFEStateAuthDNAS_vtbl[];
 extern "C" void* cFEStateAuthDNAS_cFEStateAuthDNAS1(cFEStateAuthDNAS* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateAuthDNAS_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateAuthDNAS_vtbl;
     self->mpAuth = 0;
     self->mpTextAuth = 0;
     self->miState = 0;
@@ -3705,7 +3705,7 @@ extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError1(cFEStateAuthDNASEr
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     self->mpustrBody = 0;
-    self->mVtbl = cFEStateAuthDNASError_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateAuthDNASError_vtbl;
     self->mpustrFooter = 0;
     self->mpustrTitle = 0;
     return ((void*)self);
@@ -3803,7 +3803,7 @@ extern "C" void* cFEStateCreateStep1_cFEStateCreateStep11(cFEStateCreateStep1* s
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    self->mVtbl = cFEStateCreateStep1_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCreateStep1_vtbl;
     self->mszSavedPassword = (char*)emptyStr;
     self->mszSavedConfirm = (char*)emptyStr;
     self->mszSavedMail = (char*)emptyStr;
@@ -3832,7 +3832,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
  */
 extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* self, int flags)
 {
-    self->mVtbl = cFEStateCreateStep1_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCreateStep1_vtbl;
     cBXString__cBXString((char*)&self->mszSavedMail, 2);
     cBXString__cBXString((char*)&self->mszSavedConfirm, 2);
     cBXString__cBXString((char*)&self->mszSavedPassword, 2);
@@ -3873,7 +3873,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateCreateStep2_cFEStateCreateStep21(cFEStateCreateStep2* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateCreateStep2_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCreateStep2_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3892,7 +3892,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2__cFEStateCreateStep2__FPv);
 void* cFEStateCreateStep2__cFEStateCreateStep2(void* vself)
 {
     cFEStateCreateStep2* self = (cFEStateCreateStep2*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateCreateStep2_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateCreateStep2_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3929,7 +3929,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateCreateDuplicate_cFEStateCreateDuplicate1(cFEStateCreateDuplicate* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    self->mVtbl = cFEStateCreateDuplicate_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCreateDuplicate_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3948,7 +3948,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate__cFEStateCreateDuplicate__
 void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* vself)
 {
     cFEStateCreateDuplicate* self = (cFEStateCreateDuplicate*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateCreateDuplicate_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateCreateDuplicate_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3985,7 +3985,7 @@ extern "C" void* cFEStateLogin_cFEStateLogin1(cFEStateLogin* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     self->mpustrDisconnect = 0;
-    self->mVtbl = cFEStateLogin_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateLogin_vtbl;
     return ((void*)self);
 }
 #endif
@@ -4037,7 +4037,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
 void* cFEStateStats__cFEStateStats(void* vself)
 {
     cFEStateStats* self = (cFEStateStats*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateStats_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateStats_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -4072,7 +4072,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews__cFEStateNetNews__FPv);
 void* cFEStateNetNews__cFEStateNetNews(void* vself)
 {
     cFEStateNet* self = (cFEStateNet*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateNetNews_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateNetNews_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -4109,7 +4109,7 @@ extern void* cFEStateRelogin_vtbl[];
 extern "C" void* cFEStateRelogin_cFEStateRelogin1(cFEStateLogin* self)
 {
     cFEStateLogin_cFEStateLogin(self, 0);
-    self->mVtbl = cFEStateRelogin_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRelogin_vtbl;
     return ((void*)self);
 }
 #endif
@@ -4126,7 +4126,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin__cFEStateRelogin__FPv);
 void* cFEStateRelogin__cFEStateRelogin(void* vself)
 {
     cFEStateLogin* self = (cFEStateLogin*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEStateRelogin_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEStateRelogin_vtbl);
     return cFEStateLogin__cFEStateLogin(self);
 }
 #endif
@@ -4181,7 +4181,7 @@ extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyString = cBXString_EmptyString;
-    self->mVtbl = cFEStateNetMessenger_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateNetMessenger_vtbl;
     self->mszFoundName = (char*)emptyString;
     self->mszSearchName = (char*)emptyString;
     self->unk_6E0 = (char*)emptyString;
@@ -7363,12 +7363,12 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     sObj_3C00* stateView = (sObj_3C00*)self;
     cUIState_cUIState(self, engine);
     self->mOVID = id;
-    self->mVtbl = cOVState_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_vtbl;
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
     *(unsigned short*)((char*)self + 0x58) = str_sp_b[0];
-    self->mVtbl = cOVState_MESSAGECENTER_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_MESSAGECENTER_vtbl;
     int i;
     for (i = 0; i < 8; i++) {
         stateView->a[i] = 0;
@@ -8513,7 +8513,7 @@ extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self,
     cUIState_cUIState1(self, engine, owner);
     self->miMessage = message;
     self->miNumber = number;
-    self->mVtbl = cOVState_ViewPopup_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_ViewPopup_vtbl;
     self->mpNumberLabel = 0;
     self->mpNumber = 0;
     self->mpFrom = 0;

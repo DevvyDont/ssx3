@@ -18,8 +18,8 @@
 // cOVState: the constructor is cUIState(cUIEngine*, cUIState*) cUIState_cUIState1 and nothing stores 0x48..0x9C as
 // cOVState does). Retail vtable cOVState_ViewPopup_vtbl (destructor cOVState_ViewPopup__cOVState_ViewPopup in fe/all_in_one_fe).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. There is no
-// SSX On Tour DWARF for these classes and the preview keeps no accessors, so the own members carry [R]/[U]
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. There is no SSX On Tour DWARF for
+// these classes and the preview keeps no accessors, so the own members carry [R]/[U]
 // evidence only; widget pointers are named after the UI object onWidgetCreate binds to them (names read from the
 // retail ELF). Evidence tags:
 //   [R] retail's constructors: cUIState(cUIEngine*) cUIState_cUIState / cUIState(cUIEngine*, cUIState*) cUIState_cUIState1,
@@ -30,6 +30,7 @@
 //   [O] SSX On Tour's DWARF for the inherited cListNode / cUIState / cOVState members (see fe/ovstate.h).
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -39,27 +40,16 @@ struct cUIThing;
 struct cUIText;
 struct cUIMenu;
 
-struct cOVState_MESSAGECENTER {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_MESSAGECENTER_vtbl, stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER (after cOVState's cOVState_vtbl)
-    // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName
-                                    //       (cOVState_MESSAGECENTER_onCreateScreen), cUITextureBank_getElementByHashname(mpEngine + 0x58, hash) in the ctor
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData; [U] here the opening mode: the ctor stores
-                                    //       0/1 (hint 7 not yet / already seen, func_001E3A30(7)) or 2 (D_004A20CC set);
-                                    //       onCreateScreen/onDestroyScreen/onGainFocus switch on it
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] 0 (1-argument cUIState ctor)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVState_MESSAGECENTER : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVState_MESSAGECENTER_vtbl, stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER (after cOVState's
+    //       cOVState_vtbl)
+    // cOVState_MESSAGECENTER's notes on cUIState's fields:
+    //   mpEngine: [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName
+    //       (cOVState_MESSAGECENTER_onCreateScreen), cUITextureBank_getElementByHashname(mpEngine + 0x58, hash) in the
+    //       ctor
+    //   miMiscData: [U] here the opening mode: the ctor stores 0/1 (hint 7 not yet / already seen, func_001E3A30(7))
+    //       or 2 (D_004A20CC set); onCreateScreen/onDestroyScreen/onGainFocus switch on it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O]; [R] cOVState_MESSAGECENTER_cOVState_MESSAGECENTER zeroes it (inlined cOVState ctor)
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
@@ -108,21 +98,6 @@ struct cOVState_MESSAGECENTER {
                                     //       plays its "TransitionOut" frame
 };
 
-CHECK_OFFSET(cOVState_MESSAGECENTER, mpPrev, 0x0);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mpNext, 0x4);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mVtbl, 0x8);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mHashName, 0xC);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mpEngine, 0x10);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVState_MESSAGECENTER, unk_016, 0x16);
-CHECK_OFFSET(cOVState_MESSAGECENTER, miMiscData, 0x18);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mAttrState, 0x1C);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mpParentState, 0x20);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mScreens, 0x24);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mpScreen, 0x40);
-CHECK_OFFSET(cOVState_MESSAGECENTER, mUserNum, 0x44);
-CHECK_OFFSET(cOVState_MESSAGECENTER, unk_045, 0x45);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mDoneTransition, 0x48);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mAllowPauseMenu, 0x4C);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mRestoreCutSceneMode, 0x50);
@@ -153,26 +128,16 @@ CHECK_OFFSET(cOVState_MESSAGECENTER, unk_178, 0x178);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpMessageScreen, 0x17C);
 CHECK_SIZE(cOVState_MESSAGECENTER, 0x180);
 
-struct cOVState_ViewPopup {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_ViewPopup_vtbl, stored by cOVState_ViewPopup_cOVState_ViewPopup and the destructor cOVState_ViewPopup__cOVState_ViewPopup
-    // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument (the message center's mpEngine);
-                                    //       [U] cUIEngine_addScreenByHashName (cOVState_ViewPopup_onCreateScreen)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's parent argument (the cOVState_MESSAGECENTER);
-                                    //       [U] cOVState_ViewPopup_onWidgetEvent / func_001E58E0 send it onPopupEvent(this, 0x14)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen (cOVState_ViewPopup_onCreateScreen) stores the "113ViewMessage" screen
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVState_ViewPopup : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVState_ViewPopup_vtbl, stored by cOVState_ViewPopup_cOVState_ViewPopup and the destructor
+    //       cOVState_ViewPopup__cOVState_ViewPopup
+    // cOVState_ViewPopup's notes on cUIState's fields:
+    //   mpEngine: [R] the ctor's engine argument (the message center's mpEngine); [U] cUIEngine_addScreenByHashName
+    //       (cOVState_ViewPopup_onCreateScreen)
+    //   mpParentState: [R] the ctor's parent argument (the cOVState_MESSAGECENTER); [U]
+    //       cOVState_ViewPopup_onWidgetEvent / func_001E58E0 send it onPopupEvent(this, 0x14)
+    //   mpScreen: [U] onCreateScreen (cOVState_ViewPopup_onCreateScreen) stores the "113ViewMessage" screen
     // --- cOVState_ViewPopup
     cUIText* mpNumberLabel;         // 0x048 [R] cOVState_ViewPopup_cOVState_ViewPopup zeroes it; [U] onWidgetCreate (cOVState_ViewPopup_onWidgetCreate): widget "NumberLabel"
     cUIText* mpNumber;              // 0x04C [R] zeroed; [U] widget "Number"; func_001E5428 prints the message number
@@ -188,21 +153,6 @@ struct cOVState_ViewPopup {
                                     //       (D_004A2138); func_001E58E0 increments / recomputes it
 };
 
-CHECK_OFFSET(cOVState_ViewPopup, mpPrev, 0x0);
-CHECK_OFFSET(cOVState_ViewPopup, mpNext, 0x4);
-CHECK_OFFSET(cOVState_ViewPopup, mVtbl, 0x8);
-CHECK_OFFSET(cOVState_ViewPopup, mHashName, 0xC);
-CHECK_OFFSET(cOVState_ViewPopup, mpEngine, 0x10);
-CHECK_OFFSET(cOVState_ViewPopup, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVState_ViewPopup, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVState_ViewPopup, unk_016, 0x16);
-CHECK_OFFSET(cOVState_ViewPopup, miMiscData, 0x18);
-CHECK_OFFSET(cOVState_ViewPopup, mAttrState, 0x1C);
-CHECK_OFFSET(cOVState_ViewPopup, mpParentState, 0x20);
-CHECK_OFFSET(cOVState_ViewPopup, mScreens, 0x24);
-CHECK_OFFSET(cOVState_ViewPopup, mpScreen, 0x40);
-CHECK_OFFSET(cOVState_ViewPopup, mUserNum, 0x44);
-CHECK_OFFSET(cOVState_ViewPopup, unk_045, 0x45);
 CHECK_OFFSET(cOVState_ViewPopup, mpNumberLabel, 0x48);
 CHECK_OFFSET(cOVState_ViewPopup, mpNumber, 0x4C);
 CHECK_OFFSET(cOVState_ViewPopup, mpFrom, 0x50);

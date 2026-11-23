@@ -1012,7 +1012,7 @@ extern void* cOVState_AUTOSAVE_vtbl[];
 extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(cOVState_AUTOSAVE* self, cUIEngine* pEngine, int iParent)
 {
     cFEMemCard_cFEMemCard2(self, pEngine, 0);
-    self->mVtbl = cOVState_AUTOSAVE_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_AUTOSAVE_vtbl;
     self->mHashName = 37;
     self->mAutoSaveOn = 1;
     self->mParentScreen = iParent;

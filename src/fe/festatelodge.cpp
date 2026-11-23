@@ -295,7 +295,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         switch (self->mPathToSaveProfile) {
         case 0x10: {
             self->bToNextState = 1;
-            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)self->mVtbl;
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
             vt[19].fn(vthis(self, vt[19]), cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_0)), 5);
             break;
         }
@@ -372,7 +372,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cFEStateLodgeRiderDetail* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateLodgeRiderDetail_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateLodgeRiderDetail_vtbl;
     self->mHashName = 40;
     *(char*)&self->mUserNum = 0;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);
@@ -721,7 +721,7 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMem
     cFEStateBuyAttrib* self = stateMemory;
     cUIState_cUIState_4728(self, engine);
     stateMemory->mHashName = 41;
-    stateMemory->mVtbl = cFEStateBuyAttrib_vtbl;
+    VPTR_OF(cListNode, stateMemory) = cFEStateBuyAttrib_vtbl;
     stateMemory->mUserNum = 0;
     stateMemory->mCtrlBits = cFECustom_getPlayerCtrlMask_4728((void*)stateMemory->mpEngine->mpCustom, 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);

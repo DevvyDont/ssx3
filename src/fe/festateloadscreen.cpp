@@ -65,7 +65,7 @@ static inline char* newScreenB_233438(void* self)
     cFELoadHintState* p = (cFELoadHintState*)cMemMan_alloc(0x4C, D_0047BFE8, 0, 0);
     cUIState_cUIState(p, *(void**)((char*)self + 0xC));
     p->mpParentModule = 0;
-    p->mVtbl = cFELoadHintState_vtbl;
+    VPTR_OF(cListNode, p) = cFELoadHintState_vtbl;
     return ((char*)p);
 }
 
@@ -74,7 +74,7 @@ static inline char* newScreenC_233438(void* self)
     cFELoadState* p = (cFELoadState*)cMemMan_alloc(0x4C, D_0047C000, 0, 0);
     cUIState_cUIState(p, *(void**)((char*)self + 0xC));
     p->mpParentModule = 0;
-    p->mVtbl = cFELoadState_vtbl;
+    VPTR_OF(cListNode, p) = cFELoadState_vtbl;
     return ((char*)p);
 }
 

@@ -17,9 +17,9 @@
 // The ctor cOVState_PROFILE(cUIEngine*, unsigned char ucActiveControl, tOVStateEnum ov) runs
 // cFEMemCard_cFEMemCard(this, pEngine, 0).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. The base classes
-// cListNode / cUIState / cOVState / cFEMemCard are written out inline with fe/fememcard.h's member names (see that
-// header for the full evidence of the inherited fields; only this class's own uses are added here).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The base classes cOVState / cFEMemCard
+// are written out inline with fe/fememcard.h's member names (see that header for the full evidence of the inherited
+// fields; only this class's own uses are added here).
 // Evidence tags:
 //   [R] retail's constructors and allocation sizes;
 //   [P] the July 2003 preview's inline accessors (inherited fields only);
@@ -28,6 +28,7 @@
 //       (retail: words), its cOVState is 0x90 (retail 0x9C) and its cFEMemCard 0x164 (retail 0x22C).
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -36,30 +37,16 @@ struct cUIScreen;
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cOVState_PROFILE {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_PROFILE_vtbl (0x00472928, 47 slots), stored by
-                                    //       cOVState_PROFILE_cOVState_PROFILE over cFEMemCard_vtbl
-    // --- cUIState (ui/uistate.h; same offsets as On Tour)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 36 (0x24)
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's pEngine; [U] onCreateScreen adds "121Profilesave_pda";
-                                    //       onWidgetEvent builds the cKeyboardPopup for it
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF; [U] onWidgetEvent passes it to the
-                                    //       cKeyboardPopup ctor
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; lw/sw the word); [U]
-                                    //       cOVState_PAUSE_OPTIONS_onWidgetEvent sets mode 1 (bits 8-13) after
-                                    //       constructing it
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen keeps the "121Profilesave_pda" screen here; every
-                                    //       widget lookup
-    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVState_PROFILE : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVState_PROFILE_vtbl (0x00472928, 47 slots), stored by cOVState_PROFILE_cOVState_PROFILE over
+    //       cFEMemCard_vtbl
+    // cOVState_PROFILE's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "121Profilesave_pda"; onWidgetEvent builds the cKeyboardPopup for it
+    //   mCtrlBits: [U] onWidgetEvent passes it to the cKeyboardPopup ctor
+    //   mAttrState: tAttrState (EA: 2 bytes; lw/sw the word); [U] cOVState_PAUSE_OPTIONS_onWidgetEvent sets mode 1
+    //       (bits 8-13) after constructing it
+    //   mpScreen: [U] onCreateScreen keeps the "121Profilesave_pda" screen here; every widget lookup
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
@@ -126,21 +113,6 @@ struct cOVState_PROFILE {
                                     //       0x18 from cOVTemplate_Dialog_onWidgetEvent); [U] updateDone tests 0x18
 };
 
-CHECK_OFFSET(cOVState_PROFILE, mpPrev, 0x0);
-CHECK_OFFSET(cOVState_PROFILE, mpNext, 0x4);
-CHECK_OFFSET(cOVState_PROFILE, mVtbl, 0x8);
-CHECK_OFFSET(cOVState_PROFILE, mHashName, 0xC);
-CHECK_OFFSET(cOVState_PROFILE, mpEngine, 0x10);
-CHECK_OFFSET(cOVState_PROFILE, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVState_PROFILE, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVState_PROFILE, unk_016, 0x16);
-CHECK_OFFSET(cOVState_PROFILE, miMiscData, 0x18);
-CHECK_OFFSET(cOVState_PROFILE, mAttrState, 0x1C);
-CHECK_OFFSET(cOVState_PROFILE, mpParentState, 0x20);
-CHECK_OFFSET(cOVState_PROFILE, mScreens, 0x24);
-CHECK_OFFSET(cOVState_PROFILE, mpScreen, 0x40);
-CHECK_OFFSET(cOVState_PROFILE, mUserNum, 0x44);
-CHECK_OFFSET(cOVState_PROFILE, unk_045, 0x45);
 CHECK_OFFSET(cOVState_PROFILE, mDoneTransition, 0x48);
 CHECK_OFFSET(cOVState_PROFILE, mAllowPauseMenu, 0x4C);
 CHECK_OFFSET(cOVState_PROFILE, mRestoreCutSceneMode, 0x50);

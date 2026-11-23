@@ -7,7 +7,7 @@
 // cKeyboardPopup(cUIEngine*, cUIState* parent, bool Password, unsigned char CtrlBits) = cKeyboardPopup_cKeyboardPopup; destroyed by
 // cKeyboardPopup__cKeyboardPopup.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
 //   [R] retail's constructors: cUIState(cUIEngine*, cUIState*) = cUIState_cUIState1 (ui/uiscreen.cpp), cKeyboardPopup_cKeyboardPopup,
 //       the destructor, and the allocation size (0x444 at every site: fepopup, feasyncfile, festateriderbio, ...);
 //   [P] the July 2003 preview's inline accessors, carried to retail by tools/layout_xlate.py;
@@ -20,6 +20,7 @@
 // t3Vector.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -27,26 +28,14 @@ struct cUIState;
 struct cUIScreen;
 struct cUIVector;
 
-struct cKeyboardPopup {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] _vt$14cKeyboardPopup cKeyboardPopup_vtbl (cKeyboardPopup_cKeyboardPopup, destructor)
-    // --- cUIState (On Tour: size 0x48, same offsets)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] state stack at mpEngine + 0x18
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cKeyboardPopup_cKeyboardPopup stores its CtrlBits argument (sb)
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word (ui/uistate.h); [R] ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's parent argument; [U] receives onWidgetEvent (slot 19),
-                                    //       handleEvent (slot 24) and onUpdate (slot 12) calls
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C);
-                                    //       [R] constructed by cList_cList(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] cKeyboardPopup_onCreateScreen stores "Fullkeyboard"
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cKeyboardPopup : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] _vt$14cKeyboardPopup cKeyboardPopup_vtbl (cKeyboardPopup_cKeyboardPopup, destructor)
+    // cKeyboardPopup's notes on cUIState's fields:
+    //   mpEngine: [U] state stack at mpEngine + 0x18
+    //   mCtrlBits: [R] cKeyboardPopup_cKeyboardPopup stores its CtrlBits argument (sb)
+    //   mpParentState: [U] receives onWidgetEvent (slot 19), handleEvent (slot 24) and onUpdate (slot 12) calls
+    //   mpScreen: [R] ctor zeroes it; [U] cKeyboardPopup_onCreateScreen stores "Fullkeyboard"
     // --- cKeyboardPopup
     cUIVector* mpBackCompact;       // 0x048 [O]; [R] ctor zeroes; [U] widget "back_com", shown for keyboard type 1 ("compact")
     cUIVector* mpBackRegular;       // 0x04C [O]; [R] ctor zeroes; [U] widget "back_reg", shown for type 0 ("regular")
@@ -97,21 +86,6 @@ struct cKeyboardPopup {
     int mbCallParentsUpdate;        // 0x440 [O]; [R] ctor zeroes; [U] onUpdate (cKeyboardPopup_onUpdate) calls the parent's onUpdate
 };
 
-CHECK_OFFSET(cKeyboardPopup, mpPrev, 0x0);
-CHECK_OFFSET(cKeyboardPopup, mpNext, 0x4);
-CHECK_OFFSET(cKeyboardPopup, mVtbl, 0x8);
-CHECK_OFFSET(cKeyboardPopup, mHashName, 0xC);
-CHECK_OFFSET(cKeyboardPopup, mpEngine, 0x10);
-CHECK_OFFSET(cKeyboardPopup, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cKeyboardPopup, mCtrlBits, 0x15);
-CHECK_OFFSET(cKeyboardPopup, unk_016, 0x16);
-CHECK_OFFSET(cKeyboardPopup, miMiscData, 0x18);
-CHECK_OFFSET(cKeyboardPopup, mAttrState, 0x1C);
-CHECK_OFFSET(cKeyboardPopup, mpParentState, 0x20);
-CHECK_OFFSET(cKeyboardPopup, mScreens, 0x24);
-CHECK_OFFSET(cKeyboardPopup, mpScreen, 0x40);
-CHECK_OFFSET(cKeyboardPopup, mUserNum, 0x44);
-CHECK_OFFSET(cKeyboardPopup, unk_045, 0x45);
 CHECK_OFFSET(cKeyboardPopup, mpBackCompact, 0x48);
 CHECK_OFFSET(cKeyboardPopup, mpBackRegular, 0x4C);
 CHECK_OFFSET(cKeyboardPopup, mpBackExpand, 0x50);

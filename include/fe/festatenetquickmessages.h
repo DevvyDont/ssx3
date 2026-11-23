@@ -14,9 +14,9 @@
 // onPopupEvent cFEStateNetQuickMessages_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate, 19 onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent, 25 func_001C21C0
 // (help), 31 cFEStateNet's func_001A8E40). Methods: fe/feasyncfile 0x1C20F8-0x1C2C50.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for
-// these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for these classes (On Tour has no
+// online FE), so the own fields are named from their retail use unless noted.
 // Evidence tags:
 //   [R] retail's constructors / destructors named above (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (its default constructors, destructors and inline accessors, see fe/festatenet.h);
@@ -27,33 +27,23 @@
 // creator.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h"
 
-struct cFEStateNetQuickMessages {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateNetQuickMessages_vtbl (vtables.tsv; 32 slots), stored by cFEStateNetQuickMessages_cFEStateNetQuickMessages /
-                                    //       cFEStateNetQuickMessages_cFEStateNetQuickMessages1 after the cFEStateNet ctor and by the destructor
-                                    //       cFEStateNetQuickMessages__cFEStateNetQuickMessages
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetQuickMessages_cFEStateNetQuickMessages stores
-                                    //       0x4B
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateNetQuickMessages : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateNetQuickMessages_vtbl (vtables.tsv; 32 slots), stored by
+    //       cFEStateNetQuickMessages_cFEStateNetQuickMessages / cFEStateNetQuickMessages_cFEStateNetQuickMessages1
+    //       after the cFEStateNet ctor and by the destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages
+    // cFEStateNetQuickMessages's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetQuickMessages_cFEStateNetQuickMessages
+    //       stores 0x4B
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -117,21 +107,6 @@ struct cFEStateNetQuickMessages {
                                     //       mpMessage[i] (func_001C2578)
 };
 
-CHECK_OFFSET(cFEStateNetQuickMessages, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateNetQuickMessages, mpNext, 0x004);
-CHECK_OFFSET(cFEStateNetQuickMessages, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateNetQuickMessages, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateNetQuickMessages, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateNetQuickMessages, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateNetQuickMessages, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateNetQuickMessages, unk_016, 0x016);
-CHECK_OFFSET(cFEStateNetQuickMessages, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateNetQuickMessages, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateNetQuickMessages, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateNetQuickMessages, mScreens, 0x024);
-CHECK_OFFSET(cFEStateNetQuickMessages, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateNetQuickMessages, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateNetQuickMessages, unk_045, 0x045);
 CHECK_OFFSET(cFEStateNetQuickMessages, unk_048, 0x048);
 CHECK_OFFSET(cFEStateNetQuickMessages, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateNetQuickMessages, mMessageHintFrame, 0x050);

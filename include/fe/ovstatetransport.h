@@ -16,7 +16,7 @@
 //       mScreenExiting).
 // Base: cOVState (fe/ovstate.h, 0x9C) : cUIState : cListNode (vptr at 0x8), written out flat.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets.
 // Evidence tags:
 //   [R] retail's constructors and allocation size;
 //   [P] the July 2003 preview's inline accessors (inherited fields only);
@@ -24,6 +24,7 @@
 //   [O] SSX On Tour's DWARF (class cOVState_TRANSPORT / cUITemplate_MAP).
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/uitemplatemap.h"
 
 struct cListNode;
@@ -31,30 +32,16 @@ struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVState_TRANSPORT {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_TRANSPORT_vtbl (no symbol yet; vtables.tsv: cOVState_TRANSPORT, slot 0
-                                    //       cOVState_TRANSPORT__cOVState_TRANSPORT), stored after cOVState_vtbl by
-                                    //       cOVState_TRANSPORT_cOVState_TRANSPORT_2 / cOVState_TRANSPORT_cOVState_TRANSPORT / the inlined ctor in
-                                    //       cOVStateManager_triggerOverlay
-    // --- cUIState (ui/uistate.h; same offsets as On Tour)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine; [U] onCreateScreen adds "Map" to it;
-                                    //       onWidgetEvent pops its state stack (+0x18)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [U] onWidgetEvent sets mode 7 + the
-                                    //       pending-delete bit (lw/sw the word)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen keeps the "Map" screen here and hands it to
-                                    //       cUITemplate_MAP_onCreateScreen
-    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVState_TRANSPORT : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVState_TRANSPORT_vtbl (no symbol yet; vtables.tsv: cOVState_TRANSPORT, slot 0
+    //       cOVState_TRANSPORT__cOVState_TRANSPORT), stored after cOVState_vtbl by
+    //       cOVState_TRANSPORT_cOVState_TRANSPORT_2 / cOVState_TRANSPORT_cOVState_TRANSPORT / the inlined ctor in
+    //       cOVStateManager_triggerOverlay
+    // cOVState_TRANSPORT's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "Map" to it; onWidgetEvent pops its state stack (+0x18)
+    //   mAttrState: [U] onWidgetEvent sets mode 7 + the pending-delete bit (lw/sw the word)
+    //   mpScreen: [U] onCreateScreen keeps the "Map" screen here and hands it to cUITemplate_MAP_onCreateScreen
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
@@ -71,21 +58,6 @@ struct cOVState_TRANSPORT {
                                     //       method
 };
 
-CHECK_OFFSET(cOVState_TRANSPORT, mpPrev, 0x0);
-CHECK_OFFSET(cOVState_TRANSPORT, mpNext, 0x4);
-CHECK_OFFSET(cOVState_TRANSPORT, mVtbl, 0x8);
-CHECK_OFFSET(cOVState_TRANSPORT, mHashName, 0xC);
-CHECK_OFFSET(cOVState_TRANSPORT, mpEngine, 0x10);
-CHECK_OFFSET(cOVState_TRANSPORT, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVState_TRANSPORT, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVState_TRANSPORT, unk_016, 0x16);
-CHECK_OFFSET(cOVState_TRANSPORT, miMiscData, 0x18);
-CHECK_OFFSET(cOVState_TRANSPORT, mAttrState, 0x1C);
-CHECK_OFFSET(cOVState_TRANSPORT, mpParentState, 0x20);
-CHECK_OFFSET(cOVState_TRANSPORT, mScreens, 0x24);
-CHECK_OFFSET(cOVState_TRANSPORT, mpScreen, 0x40);
-CHECK_OFFSET(cOVState_TRANSPORT, mUserNum, 0x44);
-CHECK_OFFSET(cOVState_TRANSPORT, unk_045, 0x45);
 CHECK_OFFSET(cOVState_TRANSPORT, mDoneTransition, 0x48);
 CHECK_OFFSET(cOVState_TRANSPORT, mAllowPauseMenu, 0x4C);
 CHECK_OFFSET(cOVState_TRANSPORT, mRestoreCutSceneMode, 0x50);

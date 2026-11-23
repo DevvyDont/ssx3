@@ -2,12 +2,13 @@
 #define FE_FESTATERULESELECT_H
 
 // cFEStateRuleSelect: the rule select screen (a cUIState); cFEReal creates it with cMemMan_alloc(156, "cFEStateRuleSelect").
-// Size 0x9C [R] (the retail allocation; On Tour's is the same). A FLAT layout, like main/game.h: member names,
+// Size 0x9C [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h" // tFEStateNetMsgList (cFEStateBraggingRights's cFEStateNet base)
 
 struct cListNode;
@@ -16,24 +17,8 @@ struct cUIPair;
 struct cUIScreen;
 struct cUIState;
 
-struct cFEStateRuleSelect {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 the vtable
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRuleSelect : public cUIState {
+    // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateRuleSelect
     char* mpGameEventMapping;        // 0x048 [O]
     int mCurrentMenuEnableState;     // 0x04C [O]
@@ -106,31 +91,17 @@ CHECK_SIZE(cBraggingRightsMenu, 0x34);
 // src/fe/festatebigradio.cpp, src/fe/festateruleselect.cpp, src/fe/fepopupmisc.cpp, and the asm); [O] SSX On Tour's
 // DWARF (class cFEStateBraggingRights, cBraggingRightsMenu): names, types and order.
 
-struct cFEStateBraggingRights {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/cFEStateNet_cFEStateNet1;
-                                    //       subclasses store theirs after calling it
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] the subclass ctors store
-                                    //       their state id here (0x3B cFEStateOnlineMainMenu, 0x43 cFEStateNetNews, 0x46
-                                    //       cFEStateNetMessenger, 0x4A cFEStateNetSSXWorld ...)
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateBraggingRights : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/cFEStateNet_cFEStateNet1; subclasses
+    //       store theirs after calling it
+    // cFEStateBraggingRights's notes on cUIState's fields:
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h, 0x6D0; copied from it, keep the two in step)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -194,21 +165,6 @@ struct cFEStateBraggingRights {
                                     //       func_001941B0 read rule ids from it (lb; EE char is signed)
 };
 
-CHECK_OFFSET(cFEStateBraggingRights, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateBraggingRights, mpNext, 0x004);
-CHECK_OFFSET(cFEStateBraggingRights, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateBraggingRights, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateBraggingRights, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateBraggingRights, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateBraggingRights, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateBraggingRights, unk_016, 0x016);
-CHECK_OFFSET(cFEStateBraggingRights, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateBraggingRights, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateBraggingRights, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateBraggingRights, mScreens, 0x024);
-CHECK_OFFSET(cFEStateBraggingRights, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateBraggingRights, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateBraggingRights, unk_045, 0x045);
 CHECK_OFFSET(cFEStateBraggingRights, unk_048, 0x048);
 CHECK_OFFSET(cFEStateBraggingRights, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateBraggingRights, mMessageHintFrame, 0x050);

@@ -281,7 +281,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x1) {
         cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_COMPETE_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -293,7 +293,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x2) {
         cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -305,7 +305,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x3) {
         cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -317,7 +317,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x4) {
         cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_SPOKE_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -329,7 +329,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x5) {
         cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -341,7 +341,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x6) {
         cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_ONLINE_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -353,7 +353,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x7) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_OPTIONS_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_OPTIONS_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -364,7 +364,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x8) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_HEAT_PREEVENT_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_HEAT_PREEVENT_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -375,7 +375,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x9) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00472778;
+        VPTR_OF(cListNode, overlay) = (void**)D_00472778;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -386,7 +386,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 10) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_HEAT_STANDINGS_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_HEAT_STANDINGS_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -397,7 +397,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 11) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_FINAL_STANDINGS_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_FINAL_STANDINGS_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -409,7 +409,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        overlay->mVtbl = (void**)cOVState_RACE_FINISHOV_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_RACE_FINISHOV_vtbl;
         *(int*)(((char*)overlay) + 0xA0) = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -422,7 +422,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        overlay->mVtbl = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
         *(int*)(((char*)overlay) + 0xA0) = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -434,7 +434,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0xE) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00474B80;
+        VPTR_OF(cListNode, overlay) = (void**)D_00474B80;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -445,7 +445,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0xF) {
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_TOPTIMES_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_TOPTIMES_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -456,7 +456,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x10) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_REWARDS_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_REWARDS_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -467,7 +467,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 17) {
         cOVState* overlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_REPLAY_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_REPLAY_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -484,7 +484,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 20) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_004725C8;
+        VPTR_OF(cListNode, overlay) = (void**)D_004725C8;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -495,7 +495,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 21) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_004726A0;
+        VPTR_OF(cListNode, overlay) = (void**)D_004726A0;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -506,7 +506,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 22) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00473ED8;
+        VPTR_OF(cListNode, overlay) = (void**)D_00473ED8;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -517,7 +517,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 23) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_004749D0;
+        VPTR_OF(cListNode, overlay) = (void**)D_004749D0;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -529,7 +529,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x18) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_004748F8;
+        VPTR_OF(cListNode, overlay) = (void**)D_004748F8;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)overlay) + 0x9C) = 0x1;
         overlay->mOVID = type;
@@ -541,7 +541,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 25) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00474820;
+        VPTR_OF(cListNode, overlay) = (void**)D_00474820;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)overlay) + 0x9C) = 0x2;
         overlay->mOVID = type;
@@ -553,7 +553,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 26) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00474748;
+        VPTR_OF(cListNode, overlay) = (void**)D_00474748;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)overlay) + 0x9C) = 0x3;
         overlay->mOVID = type;
@@ -565,7 +565,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 27) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00474670;
+        VPTR_OF(cListNode, overlay) = (void**)D_00474670;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)overlay) + 0x9C) = 0x4;
         overlay->mOVID = type;
@@ -577,7 +577,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x1C) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00474598;
+        VPTR_OF(cListNode, overlay) = (void**)D_00474598;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)overlay) + 0x9C) = 0x5;
         overlay->mOVID = type;
@@ -589,7 +589,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 29) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -601,7 +601,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x1E) {
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -613,7 +613,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x1F) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_ENTERLODGE_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_ENTERLODGE_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -629,14 +629,14 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        overlay->mVtbl = (void**)cOVState_MAP_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_MAP_vtbl;
         new (((char*)overlay) + 0x9C) sDlgSlot_AB50[8];
         result = ((char*)overlay);
     }
     if (type == 33) {
         cOVState* overlay = (cOVState*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_TRANSPORT_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -651,7 +651,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 35) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_00473C50;
+        VPTR_OF(cListNode, overlay) = (void**)D_00473C50;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -668,7 +668,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 38) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)D_004744C0;
+        VPTR_OF(cListNode, overlay) = (void**)D_004744C0;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)overlay) + 0x9C) = 0x6;
         overlay->mOVID = type;
@@ -680,7 +680,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 39) {
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        overlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)overlay) + 0xA0) = 0x1;
         overlay->mOVID = type;
@@ -695,7 +695,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cUIState_cUIState(overlay, mgr);
         overlay->mOVID = type;
         *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        overlay->mVtbl = (void**)D_00473248;
+        VPTR_OF(cListNode, overlay) = (void**)D_00473248;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
@@ -795,7 +795,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x1) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_COMPETE_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -807,7 +807,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x2) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -819,7 +819,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x3) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -831,7 +831,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x4) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_SPOKE_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -843,7 +843,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x5) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -855,7 +855,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x6) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_ONLINE_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -867,7 +867,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x7) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_OPTIONS_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_OPTIONS_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -878,7 +878,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x8) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_HEAT_PREEVENT_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_HEAT_PREEVENT_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -889,7 +889,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x9) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00472778;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00472778;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -900,7 +900,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 10) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_HEAT_STANDINGS_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_HEAT_STANDINGS_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -911,7 +911,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 11) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_FINAL_STANDINGS_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_FINAL_STANDINGS_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -923,7 +923,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        newOverlay->mVtbl = (void**)cOVState_RACE_FINISHOV_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_RACE_FINISHOV_vtbl;
         *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -936,7 +936,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        newOverlay->mVtbl = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
         *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -948,7 +948,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0xE) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00474B80;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00474B80;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -959,7 +959,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0xF) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_TOPTIMES_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TOPTIMES_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -970,7 +970,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x10) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_REWARDS_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_REWARDS_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -981,7 +981,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 17) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_REPLAY_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_REPLAY_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -998,7 +998,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 20) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_004725C8;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_004725C8;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1009,7 +1009,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 21) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_004726A0;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_004726A0;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1020,7 +1020,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 22) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00473ED8;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00473ED8;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1031,7 +1031,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 23) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_004749D0;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_004749D0;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1043,7 +1043,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x18) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_004748F8;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_004748F8;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)newOverlay) + 0x9C) = 0x1;
         newOverlay->mOVID = type;
@@ -1055,7 +1055,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 25) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00474820;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00474820;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)newOverlay) + 0x9C) = 0x2;
         newOverlay->mOVID = type;
@@ -1067,7 +1067,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 26) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00474748;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00474748;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)newOverlay) + 0x9C) = 0x3;
         newOverlay->mOVID = type;
@@ -1079,7 +1079,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 27) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00474670;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00474670;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)newOverlay) + 0x9C) = 0x4;
         newOverlay->mOVID = type;
@@ -1091,7 +1091,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x1C) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00474598;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00474598;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)newOverlay) + 0x9C) = 0x5;
         newOverlay->mOVID = type;
@@ -1103,7 +1103,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 29) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1115,7 +1115,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x1E) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1127,7 +1127,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x1F) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_ENTERLODGE_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_ENTERLODGE_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1143,14 +1143,14 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        newOverlay->mVtbl = (void**)cOVState_MAP_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_MAP_vtbl;
         new (((char*)newOverlay) + 0x9C) sDlgSlot_BAB8[8];
         result = ((char*)newOverlay);
     }
     if (type == 33) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TRANSPORT_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1165,7 +1165,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 35) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_00473C50;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00473C50;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1182,7 +1182,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 38) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)D_004744C0;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_004744C0;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)newOverlay) + 0x9C) = 0x6;
         newOverlay->mOVID = type;
@@ -1194,7 +1194,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 39) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        newOverlay->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
         *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
         newOverlay->mOVID = type;
@@ -1209,7 +1209,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cUIState_cUIState(newOverlay, mgr);
         newOverlay->mOVID = type;
         *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        newOverlay->mVtbl = (void**)D_00473248;
+        VPTR_OF(cListNode, newOverlay) = (void**)D_00473248;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;

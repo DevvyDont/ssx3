@@ -452,7 +452,7 @@ extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(cFEStateRiderDetail* se
 {
     cFEStateCharSetup_cFEStateCharSetup(self, engine, idx);
     self->mHashName = 13;
-    self->mVtbl = cFEStateRiderDetail_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRiderDetail_vtbl;
     self->mUserNum = idx;
     self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     self->mbDraw3D = 0;

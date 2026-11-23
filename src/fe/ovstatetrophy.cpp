@@ -1984,7 +1984,7 @@ extern "C" cOVState_PROFILE* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE*
     int idx = 0;
     cFEMemCard_cFEMemCard2((self), pEngine, 0);
     self->mHashName = 36;
-    self->mVtbl = (void**)cOVState_PROFILE_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_PROFILE_vtbl;
     self->mParentOV = parentOverlay;
     self->mPlayerIdx = 0;
     self->mIsOn = 0;

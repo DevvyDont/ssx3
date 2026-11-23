@@ -55,7 +55,7 @@ extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner)
     cUIState_cUIState(transition, self->mpEngine);
     transition->mpSnow = 0;
     transition->mpWhite = 0;
-    transition->mVtbl = (void**)cFEStateTransition_vtbl;
+    VPTR_OF(cListNode, transition) = (void**)cFEStateTransition_vtbl;
     self->mpTransitionState = (cFEStateTransition*)transition;
     if (((char*)transition) != 0) {
         cFEStateTransition_vtbl[4].fn(vthis(transition, cFEStateTransition_vtbl[4]));
@@ -1532,10 +1532,11 @@ struct sRealFE_1A2C40 {
  */
 extern "C" void cRealFE_loadStartState(cRealFE* self)
 {
-    cFEStateBackground* backState = new (str_cFEStateBackground, 0, 0) cFEStateBackground;
+    cFEStateBackground* backState =
+        (cFEStateBackground*)operator new(sizeof(cFEStateBackground), str_cFEStateBackground, 0, 0);
     cUIState_cUIState(backState, (char*)self->mpUI);
-    (*(sVEntry<void (void*)>**)&backState->mVtbl) = (sVEntry<void(void*)>*)cFEStateBackground_vtbl;
-    ((sVEntry<void (void*)>*)backState->mVtbl)[4].fn(vthis(backState, ((sVEntry<void (void*)>*)backState->mVtbl)[4]));
+    (*(sVEntry<void (void*)>**)&VPTR_OF(cListNode, backState)) = (sVEntry<void(void*)>*)cFEStateBackground_vtbl;
+    ((sVEntry<void (void*)>*)VPTR_OF(cListNode, backState))[4].fn(vthis(backState, ((sVEntry<void (void*)>*)VPTR_OF(cListNode, backState))[4]));
     cUIStateStack_pushExplicit(&self->mpUI->mStateStack, backState);
     switch (cRealFE_mStartState) {
     case 0: {
@@ -1710,7 +1711,7 @@ extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode(cFE
 {
     cUIState_cUIState(self, owner);
     self->mHashName = 22;
-    self->mVtbl = cFEStateSelectMultiplayerMode_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateSelectMultiplayerMode_vtbl;
     return ((void*)self);
 }
 #endif

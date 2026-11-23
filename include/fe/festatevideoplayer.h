@@ -20,8 +20,8 @@
 // dtor, 4 onCreateScreen, 5 onDestroyScreen, 7 onGainTransition__FPv, 8 onInputBegin, 10 onLoseTransition__FPv, 12
 // onUpdate, 15 onRender2D); the destructor deletes the movie player, stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. bools are
-// ints (ee-gcc 2.95's bool is 4 bytes).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// 4 bytes).
 // Evidence tags:
 //   [R] retail's constructor / destructor and allocation size;
 //   [P] the July 2003 preview (layout_xlate: 0x144 -> 0x248, 0x164 -> 0x270, 0x168 -> 0x274, 0x16C -> 0x278,
@@ -30,6 +30,7 @@
 //   [O] SSX On Tour's DWARF (class cFEStateVideoPlayer, cUIState, cListNode): names, types and order.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "movie/movieplayer.h"
 
 struct cListNode;
@@ -38,26 +39,11 @@ struct cUIState;
 struct cUIScreen;
 struct cMoviePlayer;
 
-struct cFEStateVideoPlayer {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState1 links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateVideoPlayer_vtbl (ctor; dtor first), cFEState_vtbl (dtor);
-                                    //       [P] preview slot-1 dtor
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 6
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument (cUIState_cUIState1); [U] Stop pops the state
-                                    //       through it
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's pParentState (cUIState_cUIState1)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]
-    signed char mUserNum;           // 0x044 [O]; [R] the ctor's userNum argument (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateVideoPlayer : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateVideoPlayer_vtbl (ctor; dtor first), cFEState_vtbl (dtor); [P] preview slot-1 dtor
+    // cFEStateVideoPlayer's notes on cUIState's fields:
+    //   mpEngine: [U] Stop pops the state through it
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateVideoPlayer
     char mVideoFileName[256];       // 0x048 [O]; [R] the ctor empties it and points mOptions.sVideoFileName at it;
@@ -81,21 +67,6 @@ struct cFEStateVideoPlayer {
                                     //       tests it, Stop clears it
 };
 
-CHECK_OFFSET(cFEStateVideoPlayer, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateVideoPlayer, mpNext, 0x004);
-CHECK_OFFSET(cFEStateVideoPlayer, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateVideoPlayer, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateVideoPlayer, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateVideoPlayer, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateVideoPlayer, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateVideoPlayer, unk_016, 0x016);
-CHECK_OFFSET(cFEStateVideoPlayer, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateVideoPlayer, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateVideoPlayer, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateVideoPlayer, mScreens, 0x024);
-CHECK_OFFSET(cFEStateVideoPlayer, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateVideoPlayer, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateVideoPlayer, unk_045, 0x045);
 CHECK_OFFSET(cFEStateVideoPlayer, mVideoFileName, 0x048);
 CHECK_OFFSET(cFEStateVideoPlayer, mAudioFileName, 0x148);
 CHECK_OFFSET(cFEStateVideoPlayer, mpMoviePlayer, 0x248);

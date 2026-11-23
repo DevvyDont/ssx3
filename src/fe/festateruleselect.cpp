@@ -1054,7 +1054,7 @@ extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(cFEStateBraggingR
     char* ruleSel;
     int i;
     cFEStateNet_cFEStateNet(self, engine, 0);
-    self->mVtbl = cFEStateBraggingRights_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateBraggingRights_vtbl;
     ruleSel = (char*)&self->mMenuCtrl[0];
     for (i = 1; i != -1; i--, ruleSel += 0x34) {
         cBraggingRightsMenu_cBraggingRightsMenu((cBraggingRightsMenu*)ruleSel);

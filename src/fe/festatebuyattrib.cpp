@@ -628,7 +628,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cFEStateCareerStats_cFEStateCareerStats(cFEStateCareerStats* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateCareerStats_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCareerStats_vtbl;
     self->mHashName = 42;
     *(char*)&self->mUserNum = 0;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, 0);

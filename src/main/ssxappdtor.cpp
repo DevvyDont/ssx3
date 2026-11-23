@@ -3505,7 +3505,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cGameLoadState__cGameLoadState(cGameLoadState* self)
 {
-    self->mVtbl = (void**)D_0047C948;
+    VPTR_OF(cListNode, self) = (void**)D_0047C948;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3631,7 +3631,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cGameLoadStateOutLodge__cGameLoadStateOutLodge(cGameLoadStateOutLodge* self)
 {
-    self->mVtbl = (void**)D_0047C878;
+    VPTR_OF(cListNode, self) = (void**)D_0047C878;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3716,7 +3716,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* func_00245708(cGameLoadStateConquer* self)
 {
-    self->mVtbl = (void**)D_0047C7A8;
+    VPTR_OF(cListNode, self) = (void**)D_0047C7A8;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3844,7 +3844,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cFELoadHintState__cFELoadHintState(cFELoadHintState* self)
 {
-    self->mVtbl = (void**)cFELoadHintState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFELoadHintState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif

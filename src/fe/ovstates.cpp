@@ -241,7 +241,7 @@ extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(cFEStateMainMenu* self)
 {
     cUIState_cUIState(self);
     self->mHashName = 2;
-    self->mVtbl = cFEStateMainMenu_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMainMenu_vtbl;
     self->mGoToNextState = 0;
     self->mpSelectMultiModeWidget = 0;
     return ((void*)self);
@@ -612,7 +612,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
             cFEPopupSelectMultiplayerMode* popup = (cFEPopupSelectMultiplayerMode*)((char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0));
             cUIState_cUIState1(popup, self_->mpEngine, ((char*)self_));
-            popup->mVtbl = cFEPopupSelectMultiplayerMode_vtbl;
+            VPTR_OF(cListNode, popup) = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
             bit <<= self_->mSaveCurrentCtrl;
             *(char*)&popup->mCtrlBits = bit;
@@ -726,7 +726,7 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* 
         int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
         *(char*)&self->mCurrentCtrl = savedCtrl;
         cUIThing_playKeyframerEvent(self->mpSelectMultiModeWidget, 2);
-        sVEntry<void(void*, ...)>* svt = (sVEntry<void(void*, ...)>*)self->mVtbl;
+        sVEntry<void(void*, ...)>* svt = (sVEntry<void(void*, ...)>*)VPTR_OF(cListNode, self);
         svt[19].fn(vthis(self, svt[19]), self->mpSelectMultiModeWidget, 5);
     }
     Show195328(self, str_hl);
@@ -751,7 +751,7 @@ extern char cFEStateBonusMaterial_vtbl[];
 extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(cFEStateBonusMaterial* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = (void**)cFEStateBonusMaterial_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEStateBonusMaterial_vtbl;
     self->mHashName = 5;
     return ((void*)self);
 }

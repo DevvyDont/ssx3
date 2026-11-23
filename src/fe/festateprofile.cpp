@@ -127,7 +127,7 @@ extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(cFEStateProfileLoad* se
 {
     cFEMemCard_cFEMemCard2(self, pEngine, 0);
     self->mHashName = 35;
-    self->mVtbl = cFEStateProfileLoad_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateProfileLoad_vtbl;
     cFEStateProfileLoad_mScreenAction = iType;
     self->mPlayerIdx = 0;
     self->mIsOn = 0;
@@ -1426,7 +1426,7 @@ extern "C" void* cFEStateRiderBio_cFEStateRiderBio(cFEStateRiderBio* self, int e
 {
     signed char idx = userNum;
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateRiderBio_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateRiderBio_vtbl;
     self->mHashName = 0xF;
     self->mUserNum = idx;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);

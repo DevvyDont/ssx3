@@ -906,7 +906,7 @@ extern void* cFEStateCredits_vtbl[];
 extern "C" void* cFEStateCredits_cFEStateCredits1(cFEStateCredits* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateCredits_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCredits_vtbl;
     self->mPixelOffset = -100;
     self->mPixelDelta = 1;
     self->mHashName = 36;
@@ -935,7 +935,7 @@ INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
 void* cFEStateCredits__cFEStateCredits(void* vself)
 {
     cFEStateCredits* self = (cFEStateCredits*)vself;
-    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif

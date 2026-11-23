@@ -3,12 +3,13 @@
 
 // This header: cFEStateCharSelect and cFEStateCheatCharSelect (below).
 // cFEStateCharSelect: the character select screen (a cUIState); cFEReal creates it with cMemMan_alloc(144, "cFEStateCharSelect").
-// Size 0x90 [R] (the retail allocation; On Tour's is the same). A FLAT layout, like main/game.h: member names,
+// Size 0x90 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -16,24 +17,8 @@ struct cUIScreen;
 struct cUIState;
 struct cUIThing;
 
-struct cFEStateCharSelect {
-    // --- cListNode
-    cListNode* mpPrev;              // 0x000 [O]
-    cListNode* mpNext;              // 0x004 [O]
-    void** mVtbl;                   // 0x008 the vtable
-    // --- cUIState
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O]
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateCharSelect : public cUIState {
+    // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateCharSelect
     cUIThing* mpSelectedCharWidget; // 0x048 [O]
     int mCheatCharID;               // 0x04C [O]
@@ -82,27 +67,16 @@ struct cUIIcon;
 struct cUIMenu;
 struct cTextureElement;
 
-struct cFEStateCheatCharSelect {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState1 links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateCheatCharSelect_vtbl (ctor), cFEState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 10
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; [U] onCreateScreen adds "131cheat_char"
-                                    //       through it; onWidgetEvent pops the engine's state stack (+0x18)
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the ctor stores cFECustom_getPlayerCtrlMask(user)
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]; [R] the parent argument; [U] the ctor looks the pictures up in its
-                                    //       texture bank (+0x58)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen
-    signed char mUserNum;           // 0x044 [O]; [R] the ctor's userNum; [U] onWidgetEvent sets that player's
-                                    //       cheat character
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateCheatCharSelect : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateCheatCharSelect_vtbl (ctor), cFEState_vtbl (dtor)
+    // cFEStateCheatCharSelect's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "131cheat_char" through it; onWidgetEvent pops the engine's state stack
+    //       (+0x18)
+    //   mCtrlBits: [R] the ctor stores cFECustom_getPlayerCtrlMask(user)
+    //   mpParentState: [U] the ctor looks the pictures up in its texture bank (+0x58)
+    //   mpScreen: [U] onCreateScreen stores the screen
+    //   mUserNum: [U] onWidgetEvent sets that player's cheat character
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateCheatCharSelect
     cUIThing* mpArrowPrev;          // 0x048 [O][P] (preview 0x44); [U] widget "arrowleft" (shown from 7 entries)
@@ -124,21 +98,6 @@ struct cFEStateCheatCharSelect {
                                     //       reward entry's name; [U] onWidgetEvent shows it
 };
 
-CHECK_OFFSET(cFEStateCheatCharSelect, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateCheatCharSelect, mpNext, 0x004);
-CHECK_OFFSET(cFEStateCheatCharSelect, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateCheatCharSelect, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateCheatCharSelect, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateCheatCharSelect, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateCheatCharSelect, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateCheatCharSelect, unk_016, 0x016);
-CHECK_OFFSET(cFEStateCheatCharSelect, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateCheatCharSelect, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateCheatCharSelect, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateCheatCharSelect, mScreens, 0x024);
-CHECK_OFFSET(cFEStateCheatCharSelect, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateCheatCharSelect, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateCheatCharSelect, unk_045, 0x045);
 CHECK_OFFSET(cFEStateCheatCharSelect, mpArrowPrev, 0x048);
 CHECK_OFFSET(cFEStateCheatCharSelect, mpArrowNext, 0x04C);
 CHECK_OFFSET(cFEStateCheatCharSelect, mpNameWidget, 0x050);

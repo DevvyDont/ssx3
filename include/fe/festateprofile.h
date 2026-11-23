@@ -22,9 +22,9 @@
 // dtor, 4 onCreateScreen, 5 onDestroyScreen__FPv, 15 onRender2D__FPv, 19 onWidgetEvent, 20 onWidgetMenu, 26
 // displayStatus, 33 updateDone, 37 hideActionButtons, 38 hideDeleteButton, 39 hideMainButton; the rest cFEMemCard's).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. The base classes
-// cListNode / cUIState / cOVState / cFEMemCard are written out inline with fe/fememcard.h's member names (see that
-// header for the full evidence of the inherited fields; only this class's own uses are added here).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The base classes cOVState / cFEMemCard
+// are written out inline with fe/fememcard.h's member names (see that header for the full evidence of the inherited
+// fields; only this class's own uses are added here).
 // Evidence tags:
 //   [R] retail's constructors and allocation size;
 //   [U] how retail code uses the field (this class's methods, asm and C);
@@ -33,6 +33,7 @@
 // (No preview evidence: layout_xlate finds no paired cFEStateProfileLoad methods.)
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -41,26 +42,12 @@ struct cUIScreen;
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cFEStateProfileLoad {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateProfileLoad_vtbl, stored over cFEMemCard_vtbl by both ctors;
-                                    //       the dtor stores it first
-    // --- cUIState (ui/uistate.h; same offsets as On Tour)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 35 (0x23)
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's pEngine; [U] onCreateScreen adds "93profile_load";
-                                    //       onWidgetEvent builds the cKeyboardPopup for it
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the ctor stores its ctrlMask argument (sb)
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; lw/sw the word)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] every widget lookup (cUIScreen_getObjectByHashName)
-    signed char mUserNum;           // 0x044 [O]; [R] the ctor stores (signed char)mPlayerIdx (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateProfileLoad : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateProfileLoad_vtbl, stored over cFEMemCard_vtbl by both ctors; the dtor stores it first
+    // cFEStateProfileLoad's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "93profile_load"; onWidgetEvent builds the cKeyboardPopup for it
+    //   mpScreen: [U] every widget lookup (cUIScreen_getObjectByHashName)
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
     int mAllowPauseMenu;            // 0x04C [O] (bool); [R] zeroed
@@ -127,21 +114,6 @@ struct cFEStateProfileLoad {
                                     //       load, 2 returns to the title screen
 };
 
-CHECK_OFFSET(cFEStateProfileLoad, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateProfileLoad, mpNext, 0x004);
-CHECK_OFFSET(cFEStateProfileLoad, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateProfileLoad, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateProfileLoad, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateProfileLoad, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateProfileLoad, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateProfileLoad, unk_016, 0x016);
-CHECK_OFFSET(cFEStateProfileLoad, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateProfileLoad, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateProfileLoad, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateProfileLoad, mScreens, 0x024);
-CHECK_OFFSET(cFEStateProfileLoad, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateProfileLoad, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateProfileLoad, unk_045, 0x045);
 CHECK_OFFSET(cFEStateProfileLoad, mDoneTransition, 0x048);
 CHECK_OFFSET(cFEStateProfileLoad, mAllowPauseMenu, 0x04C);
 CHECK_OFFSET(cFEStateProfileLoad, mRestoreCutSceneMode, 0x050);
@@ -209,47 +181,18 @@ CHECK_SIZE(cFEStateProfileLoad, 0x280);
 // runs cUIState_cUIState(this, pEngine) (its C definition declares only this), stores cFEStateProfileSelect_vtbl
 // (0x0046C158, 24 slots: 1 dtor, 4 onCreateScreen, 6 cFEState_onGainFocus, 11 cFEState_onLoseFocus, 19 onWidgetEvent)
 // and mHashName 8; the dtor stores cFEState_vtbl and runs cUIState__cUIState.
-// A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctors / dtor; [U] how retail code uses the field;
+// Derives from cUIState (ui/uistate.h). Evidence tags: [R] retail's ctors / dtor; [U] how retail code uses the field;
 // [O] SSX On Tour's DWARF (class cFEStateProfileSelect, cUIState): names, types and order.
 
-struct cFEStateProfileSelect {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateProfileSelect_vtbl (ctors), cFEState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the engine ctor stores 8
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] onCreateScreen adds "05sel_prof"
-                                    //       through it; onWidgetEvent asks its custom interface (+0x0) for the next /
-                                    //       previous state and pushes it on its stack (+0x18)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
-                                    //       ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen
-    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateProfileSelect : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateProfileSelect_vtbl (ctors), cFEState_vtbl (dtor)
+    // cFEStateProfileSelect's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "05sel_prof" through it; onWidgetEvent asks its custom interface (+0x0) for
+    //       the next / previous state and pushes it on its stack (+0x18)
+    //   mpScreen: [U] onCreateScreen stores the screen
 };
 
-CHECK_OFFSET(cFEStateProfileSelect, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateProfileSelect, mpNext, 0x004);
-CHECK_OFFSET(cFEStateProfileSelect, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateProfileSelect, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateProfileSelect, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateProfileSelect, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateProfileSelect, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateProfileSelect, unk_016, 0x016);
-CHECK_OFFSET(cFEStateProfileSelect, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateProfileSelect, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateProfileSelect, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateProfileSelect, mScreens, 0x024);
-CHECK_OFFSET(cFEStateProfileSelect, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateProfileSelect, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateProfileSelect, unk_045, 0x045);
 CHECK_SIZE(cFEStateProfileSelect, 0x48);
 
 #endif /* FE_FESTATEPROFILE_H */

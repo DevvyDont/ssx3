@@ -10,9 +10,9 @@
 // Constructor cFEStateNetMessenger_cFEStateNetMessenger (cFEStateNet ctor cFEStateNet_cFEStateNet, then vtable cFEStateNetMessenger_vtbl, mHashName 0x46 and its members),
 // destructor cFEStateNetMessenger__cFEStateNetMessenger. Methods: fe/feasyncfile 0x1A3DC8-0x1A7390 (43 functions) and the slots of cFEStateNetMessenger_vtbl.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep the two in step). No EA member names exist
-// for this class (no On Tour DWARF, no preview accessors): the own fields are named from their retail use.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep the two in step). No EA member names exist for this class (no On Tour
+// DWARF, no preview accessors): the own fields are named from their retail use.
 // Evidence tags:
 //   [R] retail's constructor cFEStateNetMessenger_cFEStateNetMessenger / destructor cFEStateNetMessenger__cFEStateNetMessenger (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (see fe/festatenet.h);
@@ -20,6 +20,7 @@
 //   [O] SSX On Tour's DWARF for the cListNode/cUIState base only.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h"
 
 struct cBXString;
@@ -40,29 +41,18 @@ CHECK_OFFSET(tFEStringPtrVector, mpFinish, 0x8);
 CHECK_OFFSET(tFEStringPtrVector, mpEndOfStorage, 0xC);
 CHECK_SIZE(tFEStringPtrVector, 0x10);
 
-struct cFEStateNetMessenger {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateNetMessenger_vtbl (vtables.tsv; 35 slots), stored by cFEStateNetMessenger_cFEStateNetMessenger after the
-                                    //       cFEStateNet ctor and by the destructor cFEStateNetMessenger__cFEStateNetMessenger
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetMessenger_cFEStateNetMessenger stores 0x46
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateNetMessenger : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateNetMessenger_vtbl (vtables.tsv; 35 slots), stored by cFEStateNetMessenger_cFEStateNetMessenger
+    //       after the cFEStateNet ctor and by the destructor cFEStateNetMessenger__cFEStateNetMessenger
+    // cFEStateNetMessenger's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetMessenger_cFEStateNetMessenger stores 0x46
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -139,21 +129,6 @@ struct cFEStateNetMessenger {
                                     //       name (func_001A5800) or -1; cFEStateNetMessenger_onInputBegin passes it to func_001A6C40
 };
 
-CHECK_OFFSET(cFEStateNetMessenger, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateNetMessenger, mpNext, 0x004);
-CHECK_OFFSET(cFEStateNetMessenger, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateNetMessenger, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateNetMessenger, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateNetMessenger, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateNetMessenger, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateNetMessenger, unk_016, 0x016);
-CHECK_OFFSET(cFEStateNetMessenger, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateNetMessenger, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateNetMessenger, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateNetMessenger, mScreens, 0x024);
-CHECK_OFFSET(cFEStateNetMessenger, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateNetMessenger, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateNetMessenger, unk_045, 0x045);
 CHECK_OFFSET(cFEStateNetMessenger, unk_048, 0x048);
 CHECK_OFFSET(cFEStateNetMessenger, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateNetMessenger, mMessageHintFrame, 0x050);

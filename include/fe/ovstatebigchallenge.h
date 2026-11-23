@@ -19,7 +19,7 @@
 // cOVState_BIGCHALLENGE_PASS is On Tour only: retail has no vtable, constructor or overlay id for it (the preview
 // has BIGCHALLENGE_PREVIEW / CONFIRM / LIST instead, which retail dropped too).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -29,34 +29,19 @@
 //       0x90 (retail 0x9C) and its bools are 1 byte (retail's are words), so its offsets are not used.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVState_BIGCHALLENGE_START {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_BIGCHALLENGE_START_vtbl, stored after cOVState_vtbl by the
-                                    //       constructors
-    // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U]
-                                    //       cUIEngine_addScreenByHashName(mpEngine, ...)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] triggerOverlay
-                                    //       sets bits 0x3F00 to 0x100
-    cUIState* mpParentState;        // 0x020 [O]; [R] 0 (1-argument cUIState ctor)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] onCreateScreen stores the screen; widget
-                                    //       lookups go through it
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVState_BIGCHALLENGE_START : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVState_BIGCHALLENGE_START_vtbl, stored after cOVState_vtbl by the constructors
+    // cOVState_BIGCHALLENGE_START's notes on cUIState's fields:
+    //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
+    //   mpScreen: [U] onCreateScreen stores the screen; widget lookups go through it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
@@ -70,21 +55,6 @@ struct cOVState_BIGCHALLENGE_START {
                                     //       onGainTransition / onWidgetEvent read it
 };
 
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mpPrev, 0x0);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mpNext, 0x4);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mVtbl, 0x8);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mHashName, 0xC);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mpEngine, 0x10);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, unk_016, 0x16);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, miMiscData, 0x18);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mAttrState, 0x1C);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mpParentState, 0x20);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mScreens, 0x24);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mpScreen, 0x40);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mUserNum, 0x44);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_START, unk_045, 0x45);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mDoneTransition, 0x48);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mAllowPauseMenu, 0x4C);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mRestoreCutSceneMode, 0x50);
@@ -94,28 +64,13 @@ CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mOVID, 0x98);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mMissionId, 0x9C);
 CHECK_SIZE(cOVState_BIGCHALLENGE_START, 0xA0);
 
-struct cOVState_BIGCHALLENGE_FAIL {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_BIGCHALLENGE_FAIL_vtbl, stored after cOVState_vtbl by the constructors
-    // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor; [U]
-                                    //       onCreateScreen stores the screen's hash
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U]
-                                    //       cUIEngine_addScreenByHashName(mpEngine, ...)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] triggerOverlay
-                                    //       sets bits 0x3F00 to 0x100
-    cUIState* mpParentState;        // 0x020 [O]; [R] 0 (1-argument cUIState ctor)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] onCreateScreen stores the screen; widget
-                                    //       lookups go through it
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVState_BIGCHALLENGE_FAIL : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVState_BIGCHALLENGE_FAIL_vtbl, stored after cOVState_vtbl by the constructors
+    // cOVState_BIGCHALLENGE_FAIL's notes on cUIState's fields:
+    //   mHashName: [U] onCreateScreen stores the screen's hash
+    //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
+    //   mpScreen: [U] onCreateScreen stores the screen; widget lookups go through it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
@@ -130,21 +85,6 @@ struct cOVState_BIGCHALLENGE_FAIL {
                                     //       no retail code reads or writes it
 };
 
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mpPrev, 0x0);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mpNext, 0x4);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mVtbl, 0x8);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mHashName, 0xC);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mpEngine, 0x10);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, unk_016, 0x16);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, miMiscData, 0x18);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mAttrState, 0x1C);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mpParentState, 0x20);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mScreens, 0x24);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mpScreen, 0x40);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mUserNum, 0x44);
-CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, unk_045, 0x45);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mDoneTransition, 0x48);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mAllowPauseMenu, 0x4C);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mRestoreCutSceneMode, 0x50);

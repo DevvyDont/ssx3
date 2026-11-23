@@ -64,7 +64,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     signed char pl = idx;
     cUIState_cUIState_Room(self, (int)ui);
     self->mHashName = 43;
-    self->mVtbl = cFEStateMountainRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMountainRoom_vtbl;
     cFEStateMountainRoom* room = self;
     room->mUserNum = pl;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, pl);
@@ -133,7 +133,7 @@ extern "C" void cUIState__cUIState(void* self, int flags);
  */
 extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom* self, int flags)
 {
-    self->mVtbl = cFEStateMountainRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMountainRoom_vtbl;
     int slot = self->mTextureFileIndex;
     if (slot >= 0) {
         func_0019DC20(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
@@ -144,7 +144,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ps2GraphicsMan->RemoveTexture(id);
     }
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -881,7 +881,7 @@ extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(cFEStatePeakRoom* self, int e
     signed char idx = userNum;
     cUIState_cUIState(self);
     self->mHashName = 44;
-    self->mVtbl = cFEStatePeakRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStatePeakRoom_vtbl;
     self->mUserNum = idx;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     sLodge_3780* peakRoom = (sLodge_3780*)self;
@@ -1385,7 +1385,7 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     signed char idx = userNum;
     cUIState_cUIState(self);
     self->mHashName = 45;
-    self->mVtbl = cFEStateTrophyRoom_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateTrophyRoom_vtbl;
     self->mUserNum = idx;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);
     cFEStateTrophyRoom* trophyRoom = self;

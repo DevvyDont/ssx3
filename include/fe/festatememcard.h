@@ -25,9 +25,9 @@
 // 26 displayStatus, 33 updateDone, 37 cFEStateMemCard_hideActionButtons (hideActionButtons, empty); the rest cFEMemCard's / cOVState's /
 // cUIState's); the dtor stores it, clears mInstance and runs cFEMemCard__cFEMemCard.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. The base classes
-// cListNode / cUIState / cOVState / cFEMemCard are written out inline with fe/fememcard.h's member names (see that
-// header for the full evidence of the inherited fields; only this class's own uses are added here).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The base classes cOVState / cFEMemCard
+// are written out inline with fe/fememcard.h's member names (see that header for the full evidence of the inherited
+// fields; only this class's own uses are added here).
 // Evidence tags:
 //   [R] retail's constructor func_00186A08 / destructor and allocation size;
 //   [U] how retail code uses the field (this class's methods and static callbacks, asm and C);
@@ -36,6 +36,7 @@
 // (No preview evidence: layout_xlate finds no paired cFEStateMemCard methods.)
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -44,27 +45,14 @@ struct cUIScreen;
 struct cKeyboardPopup;
 struct cFEPopupConfirm;
 
-struct cFEStateMemCard {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateMemCard_vtbl, stored over cFEMemCard_vtbl by both ctors; the dtor
-                                    //       stores it first; [U] the callbacks call getPopup (slot 36) / cancel (41)
-    // --- cUIState (ui/uistate.h; same offsets as On Tour)
-    int mHashName;                  // 0x00C [O]; [R] func_00186A08 stores 1
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's pEngine; [U] onCreateScreen adds "06cAutoload";
-                                    //       startProfileRead / startSettingsRead
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; lw/sw the word)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores it; onUpdate / displayStatus /
-                                    //       startProfileRead look "mc messages" and "!" up on it
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateMemCard : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateMemCard_vtbl, stored over cFEMemCard_vtbl by both ctors; the dtor stores it first; [U] the
+    //       callbacks call getPopup (slot 36) / cancel (41)
+    // cFEStateMemCard's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "06cAutoload"; startProfileRead / startSettingsRead
+    //   mpScreen: [U] onCreateScreen stores it; onUpdate / displayStatus / startProfileRead look "mc messages" and "!"
+    //       up on it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O] (bool); [R] the (inlined) cOVState ctor zeroes it
     int mAllowPauseMenu;            // 0x04C [O] (bool); [R] zeroed
@@ -132,21 +120,6 @@ struct cFEStateMemCard {
     int mCard1Error;                // 0x244 [O] (bool); [R] 0 (no other retail access)
 };
 
-CHECK_OFFSET(cFEStateMemCard, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateMemCard, mpNext, 0x004);
-CHECK_OFFSET(cFEStateMemCard, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateMemCard, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateMemCard, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateMemCard, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateMemCard, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateMemCard, unk_016, 0x016);
-CHECK_OFFSET(cFEStateMemCard, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateMemCard, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateMemCard, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateMemCard, mScreens, 0x024);
-CHECK_OFFSET(cFEStateMemCard, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateMemCard, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateMemCard, unk_045, 0x045);
 CHECK_OFFSET(cFEStateMemCard, mDoneTransition, 0x048);
 CHECK_OFFSET(cFEStateMemCard, mAllowPauseMenu, 0x04C);
 CHECK_OFFSET(cFEStateMemCard, mRestoreCutSceneMode, 0x050);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beinterface.h"
 #include "ui/uithing.h"
 #include "bx/math3d.h"
@@ -55,7 +56,7 @@ extern char cOVState_vtbl[];
  */
 extern "C" void* func_0021C640(cOVState* self) {
     cUIState_cUIState_xi(self, 0);
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return ((void*)self);
 }
 #endif
@@ -84,7 +85,7 @@ extern "C" void *cOVState_cOVState(cOVState* ovState, int engine, int overlayId)
     cUIState_cUIState(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
@@ -111,7 +112,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState__cOVState(cOVState* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -148,7 +149,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVTemplate_Simple__cOVTemplate_Simple(cOVTemplate_Simple* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -179,11 +180,11 @@ extern "C" void *cOVTemplate_Simple_cOVTemplate_Simple(cOVState* ovState, int en
     cUIState_cUIState(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_00474D30;
+    VPTR_OF(cListNode, ovState) = (void**)D_00474D30;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -207,7 +208,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVTemplate_Dialog__cOVTemplate_Dialog(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -239,11 +240,11 @@ extern "C" void *cOVTemplate_Dialog_cOVTemplate_Dialog(cOVTemplate_Dialog* ovSta
     cUIState_cUIState(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_00474C58;
+    VPTR_OF(cListNode, ovState) = (void**)D_00474C58;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -282,7 +283,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void func_0021C848(cOVState* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -304,7 +305,7 @@ extern char cOVState_vtbl[];
  * @param replayState  the replay overlay state being destroyed
  */
 extern "C" void cOVState_REPLAY__cOVState_REPLAY(cOVState_REPLAY* replayState) {
-    replayState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, replayState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(replayState);
 }
 #endif
@@ -335,11 +336,11 @@ extern "C" void *cOVState_REPLAY_cOVState_REPLAY(cOVState_REPLAY* ovState, int e
     cUIState_cUIState(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_REPLAY_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_REPLAY_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -362,7 +363,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_RESTART__cOVState_RESTART(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -384,7 +385,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_QUIT__cOVState_QUIT(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -418,11 +419,11 @@ extern "C" void *cOVState_QUIT_cOVState_QUIT(cOVTemplate_Dialog* ovState, int en
     cUIState_cUIState_C950(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_004748F8;
+    VPTR_OF(cListNode, ovState) = (void**)D_004748F8;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     ovState->mDialogType = 1;
     return ((void*)ovState);
@@ -446,7 +447,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_RESTARTCHALLENGE__cOVState_RESTARTCHALLENGE(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -468,7 +469,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_QUITCHALLENGE__cOVState_QUITCHALLENGE(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -490,7 +491,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_QUITCOMPETITION__cOVState_QUITCOMPETITION(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -512,7 +513,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_GIVEUP__cOVState_GIVEUP(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -534,7 +535,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_SAVEPROMPT__cOVState_SAVEPROMPT(cOVTemplate_Dialog* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -571,7 +572,7 @@ extern char cPDATemplate_vtbl[];
  */
 extern "C" void* cPDATemplate_cPDATemplate(cPDATemplate* self) {
     cUIState_cUIState_x(self);
-    self->mVtbl = (void**)cPDATemplate_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cPDATemplate_vtbl;
     return ((void*)self);
 }
 #endif
@@ -594,7 +595,7 @@ extern char cOVState_vtbl[];
  * @param messageCenter  the object being destroyed
  */
 extern "C" void cOVState_MESSAGECENTER__cOVState_MESSAGECENTER(cOVState_MESSAGECENTER* messageCenter) {
-    messageCenter->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, messageCenter) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(messageCenter);
 }
 #endif
@@ -616,7 +617,7 @@ extern char cOVState_ViewPopup_vtbl[];
  */
 extern "C" void* func_0021CB08(cOVState_ViewPopup* self) {
     cUIState_cUIState_xi(self, 0);
-    self->mVtbl = (void**)cOVState_ViewPopup_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_ViewPopup_vtbl;
     return ((void*)self);
 }
 #endif
@@ -638,7 +639,7 @@ extern char cOVState_ViewPopup_vtbl[];
  * @param viewPopup  the popup being destroyed
  */
 extern "C" void cOVState_ViewPopup__cOVState_ViewPopup(cOVState_ViewPopup* viewPopup) {
-    viewPopup->mVtbl = (void**)cOVState_ViewPopup_vtbl;
+    VPTR_OF(cListNode, viewPopup) = (void**)cOVState_ViewPopup_vtbl;
     cUIState__cUIState_a(viewPopup);
 }
 #endif
@@ -736,7 +737,7 @@ struct sElem_CBA0 {
  */
 extern "C" void *func_0021CBA0(cOVStateHUD1P* state) {
     cUIState_cUIState_CBA0(((char*)state), 0);
-    state->mVtbl = (void**)cOVStateHUD1P_vtbl;
+    VPTR_OF(cListNode, state) = (void**)cOVStateHUD1P_vtbl;
     new ((char*)&state->mRiderInfo[0]) sElem_CBA0[2];
     state->mGlow.mSourceShape = -1;
     state->mGlow.mWidth = 1.0f;
@@ -767,7 +768,7 @@ extern char cOVStateHUD1P_vtbl[];
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 set frees the object
  */
 extern "C" void cOVStateHUD1P__cOVStateHUD1P(cOVStateHUD1P* self, int flags) {
-    self->mVtbl = (void**)cOVStateHUD1P_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVStateHUD1P_vtbl;
     if ((char*)&self->mRiderInfo[0] != 0) {
         char *element = (char*)&self->mRiderInfo[0] + 0x118;
         while ((char*)&self->mRiderInfo[0] != element) {
@@ -814,7 +815,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS(cOVState_HEAT_STANDINGS* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -845,11 +846,11 @@ extern "C" void *cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS(cOVState_HEAT_S
     cUIState_cUIState(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_HEAT_STANDINGS_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_HEAT_STANDINGS_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -872,7 +873,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS(cOVState_FINAL_STANDINGS* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -903,11 +904,11 @@ extern "C" void *cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS(cOVState_FINA
     cUIState_cUIState(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_FINAL_STANDINGS_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_FINAL_STANDINGS_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -930,7 +931,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void func_0021CE00(cOVState* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -962,11 +963,11 @@ extern "C" void *func_0021CE28(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_CE28(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_00473ED8;
+    VPTR_OF(cListNode, ovState) = (void**)D_00473ED8;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -989,7 +990,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV(cOVState_RACE_FINISHOV* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -1024,13 +1025,13 @@ extern "C" void *cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV(cOVState_RACE_FIN
     cUIState_cUIState_CEB8(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     ovState->unk_0A0 = 1;
-    ovState->mVtbl = (void**)cOVState_RACE_FINISHOV_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_RACE_FINISHOV_vtbl;
     ovState->mHashName = GetHashValue32(str_finishov);
     return ((void*)ovState);
 }
@@ -1053,7 +1054,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV(cOVState_BASSSP_QUAL_FINISHOV* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -1088,13 +1089,13 @@ extern "C" void *cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV(cOV
     cUIState_cUIState_CF60(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     ovState->unk_0A0 = 1;
-    ovState->mVtbl = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
     ovState->mHashName = GetHashValue32(str_finishov);
     return ((void*)ovState);
 }
@@ -1117,7 +1118,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS(cOVState_TOURNAMENT_STANDINGS* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -1149,11 +1150,11 @@ extern "C" void *cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS(cOV
     cUIState_cUIState_D008(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_00473C50;
+    VPTR_OF(cListNode, ovState) = (void**)D_00473C50;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -1182,11 +1183,11 @@ extern "C" void *func_0021D070(cOVStateHiScoreList* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVStateHiScoreList_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -1218,11 +1219,11 @@ extern "C" void *cOVStateHiScoreList_cOVStateHiScoreList(cOVStateHiScoreList* ov
     cUIState_cUIState_D0D0(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVStateHiScoreList_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -1243,7 +1244,7 @@ extern char cOVState_vtbl[];
  * flags reach cUIState__cUIState() untouched in the second argument register.
  */
 extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(cOVStateHiScoreList* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(self);
 }
 #endif
@@ -1281,7 +1282,6 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderBoostPart);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 
 // Vertex position of the HUD sprite quads: 16-byte aligned, with an empty default ctor (vertex arrays get a vec_new
@@ -2979,7 +2979,7 @@ extern char cFEStateLodge_vtbl[];
  */
 extern "C" void* func_00220D38(cFEStateLodge* self) {
     cUIState_cUIState_xi(self, 0);
-    self->mVtbl = (void**)cFEStateLodge_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEStateLodge_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2999,7 +2999,7 @@ extern char cFEState_vtbl[];
  * flags reach cUIState__cUIState() untouched in the second argument register.
  */
 extern "C" void cFEStateLodge__cFEStateLodge(cFEStateLodge* self) {
-    self->mVtbl = (void**)cFEState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
     cUIState__cUIState_a(self);
 }
 #endif
@@ -3021,7 +3021,7 @@ extern char cFEStateLodgeRiderDetail_vtbl[];
  */
 extern "C" void* func_00220D98(cFEStateLodgeRiderDetail* self) {
     cUIState_cUIState_xi(self, 0);
-    self->mVtbl = (void**)cFEStateLodgeRiderDetail_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEStateLodgeRiderDetail_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3041,7 +3041,7 @@ extern char cFEState_vtbl[];
  * flags reach cUIState__cUIState() untouched in the second argument register.
  */
 extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(cFEStateLodgeRiderDetail* self) {
-    self->mVtbl = (void**)cFEState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
     cUIState__cUIState_a(self);
 }
 #endif
@@ -3062,7 +3062,7 @@ extern char cFEStateBuyAttrib_vtbl[];
  */
 extern "C" void* func_00220DF8(cFEStateBuyAttrib* self) {
     cUIState_cUIState_xi(self, 0);
-    self->mVtbl = (void**)cFEStateBuyAttrib_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEStateBuyAttrib_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3082,7 +3082,7 @@ extern char cFEState_vtbl[];
  * flags reach cUIState__cUIState() untouched in the second argument register.
  */
 extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(cFEStateBuyAttrib* self) {
-    self->mVtbl = (void**)cFEState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
     cUIState__cUIState_a(self);
 }
 #endif
@@ -3104,7 +3104,7 @@ extern char cFEStateCareerStats_vtbl[];
  */
 extern "C" void *func_00220E58(cFEStateCareerStats* state) {
     cUIState_cUIState(state, 0);
-    state->mVtbl = (void**)cFEStateCareerStats_vtbl;
+    VPTR_OF(cListNode, state) = (void**)cFEStateCareerStats_vtbl;
     return ((void*)state);
 }
 #endif
@@ -3124,7 +3124,7 @@ extern char cFEState_vtbl[];
  * flags reach cUIState__cUIState() untouched in the second argument register.
  */
 extern "C" void cFEStateCareerStats__cFEStateCareerStats(cFEStateCareerStats* self) {
-    self->mVtbl = (void**)cFEState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
     cUIState__cUIState_a(self);
 }
 #endif
@@ -3146,7 +3146,7 @@ extern char cOVState_vtbl[];
  * @param enterLodgeState  the enter-lodge overlay state being destroyed
  */
 extern "C" void cOVState_ENTERLODGE__cOVState_ENTERLODGE(cOVState_ENTERLODGE* enterLodgeState) {
-    enterLodgeState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, enterLodgeState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(enterLodgeState);
 }
 #endif
@@ -3178,11 +3178,11 @@ extern "C" void *cOVState_ENTERLODGE_cOVState_ENTERLODGE(cOVState_ENTERLODGE* ov
     cUIState_cUIState_0EE0(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_ENTERLODGE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_ENTERLODGE_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3211,11 +3211,11 @@ extern "C" void *func_00220F48(cOVState_BIGCHALLENGE_START* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3250,11 +3250,11 @@ extern "C" void *cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START(cOVStat
     cUIState_cUIState_0FA8(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_START_getChallengeData(ovState);
     return ((void*)ovState);
@@ -3276,7 +3276,7 @@ extern char cOVState_vtbl[];
  * flags reach cUIState__cUIState() untouched in the second argument register.
  */
 extern "C" void cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START(cOVState_BIGCHALLENGE_START* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(self);
 }
 #endif
@@ -3304,11 +3304,11 @@ extern "C" void *cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL(cOVState_
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3344,11 +3344,11 @@ extern "C" void *cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2(cOVStat
     cUIState_cUIState_10A0(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_FAIL_getChallengeData(ovState);
     return ((void*)ovState);
@@ -3372,7 +3372,7 @@ extern char cOVState_vtbl[];
  * @param ovState  the object being destroyed
  */
 extern "C" void cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL(cOVState_BIGCHALLENGE_FAIL* ovState) {
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -3394,7 +3394,7 @@ extern char cOVState_vtbl[];
  * @param topTimesState  the top-times overlay state being destroyed
  */
 extern "C" void cOVState_TOPTIMES__cOVState_TOPTIMES(cOVState_TOPTIMES* topTimesState) {
-    topTimesState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, topTimesState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(topTimesState);
 }
 #endif
@@ -3426,11 +3426,11 @@ extern "C" void *cOVState_TOPTIMES_cOVState_TOPTIMES(cOVState_TOPTIMES* ovState,
     cUIState_cUIState_1160(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_TOPTIMES_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_TOPTIMES_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3459,11 +3459,11 @@ extern "C" void *cOVState_TRANSPORT_cOVState_TRANSPORT(cOVState_TRANSPORT* ovSta
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_TRANSPORT_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3499,11 +3499,11 @@ extern "C" void *cOVState_TRANSPORT_cOVState_TRANSPORT_2(cOVState_TRANSPORT* ovS
     cUIState_cUIState_1228(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_TRANSPORT_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cUITemplate_MAP_init((char*)&ovState->mMap);
     return ((void*)ovState);
@@ -3526,7 +3526,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* cOVState_TRANSPORT__cOVState_TRANSPORT(cOVState_TRANSPORT* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -3564,11 +3564,11 @@ extern "C" void *func_002212C8(cOVState_MAP* ovState) {
     cUIState_cUIState_12C8(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_MAP_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)&ovState->mbSessionUnlocked) Elem[8];
     return ((void*)ovState);
@@ -3603,11 +3603,11 @@ extern "C" void *cOVState_MAP_cOVState_MAP(cOVState_MAP* ovState, int engine, in
     cUIState_cUIState_1350(ovState, engine);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_MAP_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)&ovState->mbSessionUnlocked) Elem[8];
     return ((void*)ovState);
@@ -3630,7 +3630,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 extern "C" void* cOVState_MAP__cOVState_MAP(cOVState_MAP* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -3665,11 +3665,11 @@ extern "C" void *func_00221408(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_00473248;
+    VPTR_OF(cListNode, ovState) = (void**)D_00473248;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -3702,11 +3702,11 @@ extern "C" void *func_00221468(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1468(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_00473248;
+    VPTR_OF(cListNode, ovState) = (void**)D_00473248;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -3728,7 +3728,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* func_002214D0(cOVState* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -3756,11 +3756,11 @@ extern "C" void *func_002214F8(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVTemplate_PauseMenu_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3793,11 +3793,11 @@ extern "C" void *cOVTemplate_PauseMenu_cOVTemplate_PauseMenu(cOVTemplate_PauseMe
     cUIState_cUIState_1558(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVTemplate_PauseMenu_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     ovState->mpThread = 0;
     return ((void*)ovState);
@@ -3820,7 +3820,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 extern "C" void* cOVTemplate_PauseMenu__cOVTemplate_PauseMenu(cOVTemplate_PauseMenu* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -3849,11 +3849,11 @@ extern "C" void *func_002215F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_COMPETE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -3888,11 +3888,11 @@ extern "C" void *cOVState_PAUSE_COMPETE_cOVState_PAUSE_COMPETE(cOVState* ovState
     cUIState_cUIState_1658(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_COMPETE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -3915,7 +3915,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* cOVState_PAUSE_COMPETE__cOVState_PAUSE_COMPETE(cOVTemplate_PauseMenu* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -3944,11 +3944,11 @@ extern "C" void *func_002216F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -3983,11 +3983,11 @@ extern "C" void *cOVState_PAUSE_BIGCHAL_cOVState_PAUSE_BIGCHAL(cOVState* ovState
     cUIState_cUIState_1758(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4010,7 +4010,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* cOVState_PAUSE_BIGCHAL__cOVState_PAUSE_BIGCHAL(cOVTemplate_PauseMenu* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4039,11 +4039,11 @@ extern "C" void *func_002217F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4078,11 +4078,11 @@ extern "C" void *cOVState_PAUSE_FREERIDE_cOVState_PAUSE_FREERIDE(cOVState* ovSta
     cUIState_cUIState_1858(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4105,7 +4105,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* cOVState_PAUSE_FREERIDE__cOVState_PAUSE_FREERIDE(cOVTemplate_PauseMenu* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4134,11 +4134,11 @@ extern "C" void *func_002218F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_SPOKE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4173,11 +4173,11 @@ extern "C" void *cOVState_PAUSE_SPOKE_cOVState_PAUSE_SPOKE(cOVState* ovState, in
     cUIState_cUIState_1958(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_SPOKE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4200,7 +4200,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* cOVState_PAUSE_SPOKE__cOVState_PAUSE_SPOKE(cOVTemplate_PauseMenu* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4229,11 +4229,11 @@ extern "C" void *func_002219F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4268,11 +4268,11 @@ extern "C" void *cOVState_PAUSE_QUICKPLAY_cOVState_PAUSE_QUICKPLAY(cOVState* ovS
     cUIState_cUIState_1A58(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4295,7 +4295,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* cOVState_PAUSE_QUICKPLAY__cOVState_PAUSE_QUICKPLAY(cOVTemplate_PauseMenu* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4323,11 +4323,11 @@ extern "C" void *func_00221AF0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_ONLINE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4362,11 +4362,11 @@ extern "C" void *cOVState_PAUSE_ONLINE_cOVState_PAUSE_ONLINE(cOVState* ovState, 
     cUIState_cUIState_1B58(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_ONLINE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4389,7 +4389,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE(cOVTemplate_PauseMenu* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4410,7 +4410,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 extern "C" void* cOVState_PAUSE_OPTIONS__cOVState_PAUSE_OPTIONS(cOVState_PAUSE_OPTIONS* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4442,11 +4442,11 @@ extern "C" void *cOVState_PAUSE_OPTIONS_cOVState_PAUSE_OPTIONS(cOVState_PAUSE_OP
     cUIState_cUIState_1C18(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_OPTIONS_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_OPTIONS_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -4475,11 +4475,11 @@ extern "C" void *func_00221C80(cOVState_PAUSE_ONLINE_ERROR* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -4513,11 +4513,11 @@ extern "C" void *cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR(cOVStat
     cUIState_cUIState_1CE0(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     ovState->mbShouldDisplayAuxInfo = 1;
     ((int)ovState->miStartPingTick) = 0;
@@ -4541,7 +4541,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 extern "C" void* cOVState_PAUSE_ONLINE_ERROR__cOVState_PAUSE_ONLINE_ERROR(cOVState_PAUSE_ONLINE_ERROR* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4568,7 +4568,7 @@ extern char cOVState_PROFILE_vtbl[];
  * @return no meaningful value (cFEMemCard__cFEMemCard() returns nothing)
  */
 extern "C" void* cOVState_PROFILE__cOVState_PROFILE(cOVState_PROFILE* self) {
-    self->mVtbl = (void**)cOVState_PROFILE_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_PROFILE_vtbl;
     return cFEMemCard__cFEMemCard_x(self);
 }
 #endif
@@ -4590,7 +4590,7 @@ extern char cOVState_PROFILE_vtbl[];
  */
 extern "C" void *func_00221DB0(cOVState_PROFILE* state) {
     cFEMemCard_cFEMemCard2(state, 0, 0);
-    state->mVtbl = (void**)cOVState_PROFILE_vtbl;
+    VPTR_OF(cListNode, state) = (void**)cOVState_PROFILE_vtbl;
     return ((void*)state);
 }
 #endif
@@ -4611,7 +4611,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT(cOVState_HEAT_PREEVENT* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4643,11 +4643,11 @@ extern "C" void *cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT(cOVState_HEAT_PRE
     cUIState_cUIState_1E18(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_HEAT_PREEVENT_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_HEAT_PREEVENT_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -4669,7 +4669,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* func_00221E80(cOVState* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4701,11 +4701,11 @@ extern "C" void *func_00221EA8(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1EA8(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_00472778;
+    VPTR_OF(cListNode, ovState) = (void**)D_00472778;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4727,7 +4727,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* func_00221F10(cOVState* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4759,11 +4759,11 @@ extern "C" void *func_00221F38(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1F38(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_004726A0;
+    VPTR_OF(cListNode, ovState) = (void**)D_004726A0;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4785,7 +4785,7 @@ extern char cOVState_vtbl[];
  * @return whatever cUIState__cUIState returns
  */
 extern "C" void* func_00221FA0(cOVState* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4817,11 +4817,11 @@ extern "C" void *func_00221FC8(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1FC8(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)D_004725C8;
+    VPTR_OF(cListNode, ovState) = (void**)D_004725C8;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4843,7 +4843,7 @@ extern char cOVState_SAVEREPLAY_vtbl[];
  * @return what the base destructor returns
  */
 extern "C" void* cOVState_SAVEREPLAY__cOVState_SAVEREPLAY(cOVState_SAVEREPLAY* self) {
-    self->mVtbl = (void**)cOVState_SAVEREPLAY_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_SAVEREPLAY_vtbl;
     return cFEMemCard__cFEMemCard_x(self);
 }
 #endif
@@ -4865,7 +4865,7 @@ extern char cOVState_SAVEREPLAY_vtbl[];
  */
 extern "C" void *func_00222058(cOVState_SAVEREPLAY* ovState) {
     cFEMemCard_cFEMemCard2(ovState, 0, 0);
-    ovState->mVtbl = (void**)cOVState_SAVEREPLAY_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_SAVEREPLAY_vtbl;
     return ((void*)ovState);
 }
 #endif
@@ -4886,7 +4886,7 @@ extern char cOVState_SAVEOPTIONS_vtbl[];
  * @return what the base destructor returns
  */
 extern "C" void* cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS(cOVState_SAVEOPTIONS* self) {
-    self->mVtbl = (void**)cOVState_SAVEOPTIONS_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_SAVEOPTIONS_vtbl;
     return cFEMemCard__cFEMemCard_x(self);
 }
 #endif
@@ -4908,7 +4908,7 @@ extern char cOVState_SAVEOPTIONS_vtbl[];
  */
 extern "C" void *func_002220C0(cOVState_SAVEOPTIONS* ovState) {
     cFEMemCard_cFEMemCard2(ovState, 0, 0);
-    ovState->mVtbl = (void**)cOVState_SAVEOPTIONS_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_SAVEOPTIONS_vtbl;
     return ((void*)ovState);
 }
 #endif
@@ -4936,11 +4936,11 @@ extern "C" void *func_00222100(cOVStateRewardsList* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVStateRewardsList_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4972,11 +4972,11 @@ extern "C" void *cOVStateRewardsList_cOVStateRewardsList(cOVStateRewardsList* ov
     cUIState_cUIState_2160(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVStateRewardsList_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4998,7 +4998,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 extern "C" void* cOVStateRewardsList__cOVStateRewardsList(cOVStateRewardsList* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -5019,7 +5019,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 extern "C" void* cOVState_REWARDS__cOVState_REWARDS(cOVState_REWARDS* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -5051,11 +5051,11 @@ extern "C" void *cOVState_REWARDS_cOVState_REWARDS(cOVState_REWARDS* ovState, in
     cUIState_cUIState_2218(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVState_REWARDS_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_REWARDS_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -5077,7 +5077,7 @@ extern char cOVState_AUTOSAVE_vtbl[];
  * @return no meaningful value (cFEMemCard__cFEMemCard() returns nothing)
  */
 extern "C" void* cOVState_AUTOSAVE__cOVState_AUTOSAVE(cOVState_AUTOSAVE* self) {
-    self->mVtbl = (void**)cOVState_AUTOSAVE_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_AUTOSAVE_vtbl;
     return cFEMemCard__cFEMemCard_x(self);
 }
 #endif
@@ -5113,7 +5113,7 @@ extern char cOVState_AUTOSAVE_vtbl[];
  */
 extern "C" void *func_002222B8(cOVState_AUTOSAVE* state) {
     cFEMemCard_cFEMemCard2(state, 0, 0);
-    state->mVtbl = (void**)cOVState_AUTOSAVE_vtbl;
+    VPTR_OF(cListNode, state) = (void**)cOVState_AUTOSAVE_vtbl;
     return ((void*)state);
 }
 #endif
@@ -5141,11 +5141,11 @@ extern "C" void *func_002222F8(cOVStateTrophy* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVStateTrophy_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -5177,11 +5177,11 @@ extern "C" void *cOVStateTrophy_cOVStateTrophy(cOVStateTrophy* ovState, int engi
     cUIState_cUIState_2358(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
-    ovState->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ovState->mVtbl = (void**)cOVStateTrophy_vtbl;
+    VPTR_OF(cListNode, ovState) = (void**)cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -5203,7 +5203,7 @@ extern char cOVState_vtbl[];
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 extern "C" void* cOVStateTrophy__cOVStateTrophy(cOVStateTrophy* self) {
-    self->mVtbl = (void**)cOVState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif

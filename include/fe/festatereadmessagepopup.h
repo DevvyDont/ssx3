@@ -17,9 +17,9 @@
 // cFEStateReadMessagePopup_onWidgetEvent, 20 cFEStateReadMessagePopup_onWidgetMenu, 24 handleEvent cFEStateNet_handleEvent, 31 func_001A7D40 (net events), 32 func_001A7B40).
 // Methods: fe/feasyncfile 0x1A77A0-0x1A81F0.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for
-// these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for these classes (On Tour has no
+// online FE), so the own fields are named from their retail use unless noted.
 // Evidence tags:
 //   [R] retail's constructors / destructors named above (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (its default constructors, destructors and inline accessors, see fe/festatenet.h);
@@ -30,6 +30,7 @@
 // creator.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h"
 #include "ui/uithing.h"
 
@@ -55,30 +56,20 @@ CHECK_OFFSET(tFEPrivateMessageVector, mpFinish, 0x8);
 CHECK_OFFSET(tFEPrivateMessageVector, mpEndOfStorage, 0xC);
 CHECK_SIZE(tFEPrivateMessageVector, 0x10);
 
-struct cFEStateReadMessagePopup {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateReadMessagePopup_vtbl (vtables.tsv), stored by cFEStateReadMessagePopup_cFEStateReadMessagePopup / cFEStateReadMessagePopup_cFEStateReadMessagePopup1
-                                    //       after the cFEStateNet ctor and by the destructor cFEStateReadMessagePopup__cFEStateReadMessagePopup
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateReadMessagePopup_cFEStateReadMessagePopup stores
-                                    //       0x49
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateReadMessagePopup : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateReadMessagePopup_vtbl (vtables.tsv), stored by cFEStateReadMessagePopup_cFEStateReadMessagePopup /
+    //       cFEStateReadMessagePopup_cFEStateReadMessagePopup1 after the cFEStateNet ctor and by the destructor
+    //       cFEStateReadMessagePopup__cFEStateReadMessagePopup
+    // cFEStateReadMessagePopup's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateReadMessagePopup_cFEStateReadMessagePopup
+    //       stores 0x49
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -149,21 +140,6 @@ struct cFEStateReadMessagePopup {
                                     //       (ldl/ldr)
 };
 
-CHECK_OFFSET(cFEStateReadMessagePopup, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateReadMessagePopup, mpNext, 0x004);
-CHECK_OFFSET(cFEStateReadMessagePopup, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateReadMessagePopup, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateReadMessagePopup, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateReadMessagePopup, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateReadMessagePopup, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateReadMessagePopup, unk_016, 0x016);
-CHECK_OFFSET(cFEStateReadMessagePopup, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateReadMessagePopup, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateReadMessagePopup, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateReadMessagePopup, mScreens, 0x024);
-CHECK_OFFSET(cFEStateReadMessagePopup, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateReadMessagePopup, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateReadMessagePopup, unk_045, 0x045);
 CHECK_OFFSET(cFEStateReadMessagePopup, unk_048, 0x048);
 CHECK_OFFSET(cFEStateReadMessagePopup, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateReadMessagePopup, mMessageHintFrame, 0x050);

@@ -115,7 +115,7 @@ extern void* cFEStateMPCircuit_vtbl[];
 extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit(cFEStateMPCircuit* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateMPCircuit_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateMPCircuit_vtbl;
     self->mHashName = 23;
     return ((void*)self);
 }

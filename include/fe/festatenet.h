@@ -17,9 +17,9 @@
 // EA source: probably d:/ssx/code/source/fe/festatenet.cpp (the preview's assert strings name its subclasses' files,
 // festatenetmessenger.cpp, festatenetlobby.cpp ..., not this one).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet (cListNode and cUIState
-// written out inline, as in fe/ovstate.h). Subclasses: retype a subclass method with this header only when it touches
-// nothing past 0x6D0; otherwise use the subclass's own header (e.g. fe/festatenetmessenger.h).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Subclasses: retype a subclass method
+// with this header only when it touches nothing past 0x6D0; otherwise use the subclass's own header (e.g.
+// fe/festatenetmessenger.h).
 // Evidence tags:
 //   [R] retail's constructors cFEStateNet_cFEStateNet / cFEStateNet_cFEStateNet1 and destructor cFEStateNet__cFEStateNet (and the cUIState
 //       constructor cUIState_cUIState1 for the base);
@@ -33,6 +33,7 @@
 // accessors), so only fields whose use is unambiguous are named, the rest are unk_.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -56,31 +57,17 @@ CHECK_OFFSET(tFEStateNetMsgList, unk_00, 0x0);
 CHECK_OFFSET(tFEStateNetMsgList, mpNode, 0x4);
 CHECK_SIZE(tFEStateNetMsgList, 0x8);
 
-struct cFEStateNet {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/cFEStateNet_cFEStateNet1;
-                                    //       subclasses store theirs after calling it
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] the subclass ctors store
-                                    //       their state id here (0x3B cFEStateOnlineMainMenu, 0x43 cFEStateNetNews, 0x46
-                                    //       cFEStateNetMessenger, 0x4A cFEStateNetSSXWorld ...)
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateNet : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/cFEStateNet_cFEStateNet1; subclasses
+    //       store theirs after calling it
+    // cFEStateNet's notes on cUIState's fields:
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -136,21 +123,6 @@ struct cFEStateNet {
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
 };
 
-CHECK_OFFSET(cFEStateNet, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateNet, mpNext, 0x004);
-CHECK_OFFSET(cFEStateNet, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateNet, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateNet, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateNet, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateNet, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateNet, unk_016, 0x016);
-CHECK_OFFSET(cFEStateNet, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateNet, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateNet, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateNet, mScreens, 0x024);
-CHECK_OFFSET(cFEStateNet, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateNet, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateNet, unk_045, 0x045);
 CHECK_OFFSET(cFEStateNet, unk_048, 0x048);
 CHECK_OFFSET(cFEStateNet, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateNet, mMessageHintFrame, 0x050);

@@ -21,8 +21,8 @@
 // 10 onLoseTransition__FPv, 12 onUpdate, 18 onWidgetCreate, 19 onWidgetEvent, 24 handleEvent); the destructor stores it
 // again and runs cUIState__cUIState.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. bools and
-// enums are ints (ee-gcc 2.95's bool is 4 bytes).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools and enums are ints (ee-gcc
+// 2.95's bool is 4 bytes).
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [U] how retail code uses the field (the C bodies in src/fe/festatenethelppopup.cpp, fe/fepopupmisc.cpp and the
@@ -31,6 +31,7 @@
 // (No preview evidence: layout_xlate finds no paired cFEStateNetHelpPopup methods.)
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -39,26 +40,14 @@ struct cUIScreen;
 struct cUIText;
 struct cUIIcon;
 
-struct cFEStateNetHelpPopup {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState1 links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateNetHelpPopup_vtbl (both ctors, the dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 76
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; [U] onCreateScreen adds "help_popup" through
-                                    //       it, onUpdate / onWidgetEvent pop the state stack at mpEngine + 0x18
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's parent argument; [U] handleEvent forwards to its slot
-                                    //       24
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the "help_popup" screen
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateNetHelpPopup : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateNetHelpPopup_vtbl (both ctors, the dtor)
+    // cFEStateNetHelpPopup's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "help_popup" through it, onUpdate / onWidgetEvent pop the state stack at
+    //       mpEngine + 0x18
+    //   mpParentState: [U] handleEvent forwards to its slot 24
+    //   mpScreen: [U] onCreateScreen stores the "help_popup" screen
     // --- cFEStateNetHelpPopup
     int miNumOptions;               // 0x048 [O]; [U] setNumHelpOptions stores it, clear zeroes it, onGainTransition
                                     //       shows rows i < miNumOptions
@@ -88,21 +77,6 @@ struct cFEStateNetHelpPopup {
                                     //       which does not fit; see the header comment)
 };
 
-CHECK_OFFSET(cFEStateNetHelpPopup, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateNetHelpPopup, mpNext, 0x004);
-CHECK_OFFSET(cFEStateNetHelpPopup, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateNetHelpPopup, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateNetHelpPopup, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateNetHelpPopup, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateNetHelpPopup, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateNetHelpPopup, unk_016, 0x016);
-CHECK_OFFSET(cFEStateNetHelpPopup, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateNetHelpPopup, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateNetHelpPopup, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateNetHelpPopup, mScreens, 0x024);
-CHECK_OFFSET(cFEStateNetHelpPopup, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateNetHelpPopup, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateNetHelpPopup, unk_045, 0x045);
 CHECK_OFFSET(cFEStateNetHelpPopup, miNumOptions, 0x048);
 CHECK_OFFSET(cFEStateNetHelpPopup, miReleasedCount, 0x04C);
 CHECK_OFFSET(cFEStateNetHelpPopup, mbReferEventsToParent, 0x050);

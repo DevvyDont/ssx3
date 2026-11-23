@@ -18,8 +18,8 @@
 // cOVStateHUD1P_vtbl (0x00474160, 24 slots: 1 dtor, 4 onCreateScreen, 12 onUpdate, 15 onRender2D, 24 handleEvent; the
 // rest cListNode_* / cUIState_*).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. bools are
-// ints (ee-gcc 2.95's bool is 4 bytes). On Tour's member order maps onto retail with these differences: the 0x3C
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// 4 bytes). On Tour's member order maps onto retail with these differences: the 0x3C
 // tracker inside each rider info, the three words at 0x160, no mEventStateAdditionalData (retail's mRenderFlags is
 // the word after mEventStateData: handleEvent's flag bits 0x10000 / 0x20000 / 0x40000 and the reset mask 0xFFBDC3FF
 // are On Tour's), 0x18-byte slope-style infos (no isTime), a second font (0x428) and a divider string (0x430), the
@@ -34,6 +34,7 @@
 // (No preview evidence: layout_xlate has no paired cOVStateHUD1P accessors.)
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "ui/uithing.h" // tARGB
 #include "fe/hudradar.h" // cHUDRadar
 #include "fe/textpictline.h" // tTextPictLine
@@ -125,25 +126,12 @@ struct tHUDDef {
     char unk_23[0x1];               // 0x23 tail padding
 };
 
-struct cOVStateHUD1P {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVStateHUD1P_vtbl (both ctors and the dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [U] onCreateScreen stores GetHashValue32("hud")
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; [U] onCreateScreen looks textures (+0x58) and
-                                    //       fonts (+0x8) up through it
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]
-    signed char mUserNum;           // 0x044 [O]
-    char unk_045[0x3];              // 0x045 padding
+struct cOVStateHUD1P : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVStateHUD1P_vtbl (both ctors and the dtor)
+    // cOVStateHUD1P's notes on cUIState's fields:
+    //   mHashName: [U] onCreateScreen stores GetHashValue32("hud")
+    //   mpEngine: [U] onCreateScreen looks textures (+0x58) and fonts (+0x8) up through it
     // --- cOVStateHUD1P
     tHUDRiderInfo mRiderInfo[2];    // 0x048 [O] (On Tour 0x50, 0x60 each); [R] the ctors build two 0x8C-byte elements
                                     //       here, the dtor destroys them last to first; [U] onCreateScreen fills one per
@@ -283,21 +271,6 @@ CHECK_OFFSET(tHUDDef, pivotY, 0x21);
 CHECK_OFFSET(tHUDDef, layer, 0x22);
 CHECK_SIZE(tHUDDef, 0x24);
 
-CHECK_OFFSET(cOVStateHUD1P, mpPrev, 0x000);
-CHECK_OFFSET(cOVStateHUD1P, mpNext, 0x004);
-CHECK_OFFSET(cOVStateHUD1P, mVtbl, 0x008);
-CHECK_OFFSET(cOVStateHUD1P, mHashName, 0x00C);
-CHECK_OFFSET(cOVStateHUD1P, mpEngine, 0x010);
-CHECK_OFFSET(cOVStateHUD1P, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cOVStateHUD1P, mCtrlBits, 0x015);
-CHECK_OFFSET(cOVStateHUD1P, unk_016, 0x016);
-CHECK_OFFSET(cOVStateHUD1P, miMiscData, 0x018);
-CHECK_OFFSET(cOVStateHUD1P, mAttrState, 0x01C);
-CHECK_OFFSET(cOVStateHUD1P, mpParentState, 0x020);
-CHECK_OFFSET(cOVStateHUD1P, mScreens, 0x024);
-CHECK_OFFSET(cOVStateHUD1P, mpScreen, 0x040);
-CHECK_OFFSET(cOVStateHUD1P, mUserNum, 0x044);
-CHECK_OFFSET(cOVStateHUD1P, unk_045, 0x045);
 CHECK_OFFSET(cOVStateHUD1P, mRiderInfo, 0x048);
 CHECK_OFFSET(cOVStateHUD1P, unk_160, 0x160);
 CHECK_OFFSET(cOVStateHUD1P, unk_164, 0x164);
@@ -371,33 +344,18 @@ CHECK_SIZE(cOVStateHUD1P, 0xC98);
 // cUIState_cUIState, the inlined cOVState ctor (mOVID, the three bools, cOVState_vtbl, mszChatBuff = " ") and store
 // cOVStateHiScoreList_vtbl (0x00473B78, 25 slots: 1 dtor, 4 onCreateScreen, 19 onWidgetEvent,
 // 25 cOVState_allowPauseMenu); the dtor stores cOVState_vtbl and runs cUIState__cUIState.
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. The cOVState
-// part is written out with fe/ovstate.h's names (see there for the inherited fields' full evidence).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The cOVState part is written out with
+// fe/ovstate.h's names (see there for the inherited fields' full evidence).
 // Evidence tags: [R] retail's ctors / dtor; [P] the July 2003 preview (fe/ovstate.h); [U] how retail code uses the
 // field; [O] SSX On Tour's DWARF (builds/x/ontour_kor/dwarf/types.h): names, types and order.
 
-struct cOVStateHiScoreList {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVStateHiScoreList_vtbl (ctors), cOVState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] onCreateScreen adds "hiscorelist"
-                                    //       through it; onWidgetEvent calls its custom interface (+0x0) slot 4 and
-                                    //       pushes the result on its stack (+0x18)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
-                                    //       ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; cUIState_showObjSafe /
-                                    //       hideObjSafe(this, ...) use it
-    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVStateHiScoreList : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVStateHiScoreList_vtbl (ctors), cOVState_vtbl (dtor)
+    // cOVStateHiScoreList's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen adds "hiscorelist" through it; onWidgetEvent calls its custom interface (+0x0)
+    //       slot 4 and pushes the result on its stack (+0x18)
+    //   mpScreen: [U] onCreateScreen stores the screen; cUIState_showObjSafe / hideObjSafe(this, ...) use it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O] (On Tour: bool at 0x48); [R] the ctors zero it
     int mAllowPauseMenu;            // 0x04C [O][P] (fe/ovstate.h); [R] the ctors zero it
@@ -407,21 +365,6 @@ struct cOVStateHiScoreList {
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the (pEngine, id) ctor stores id, the default ctor 0
 };
 
-CHECK_OFFSET(cOVStateHiScoreList, mpPrev, 0x000);
-CHECK_OFFSET(cOVStateHiScoreList, mpNext, 0x004);
-CHECK_OFFSET(cOVStateHiScoreList, mVtbl, 0x008);
-CHECK_OFFSET(cOVStateHiScoreList, mHashName, 0x00C);
-CHECK_OFFSET(cOVStateHiScoreList, mpEngine, 0x010);
-CHECK_OFFSET(cOVStateHiScoreList, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cOVStateHiScoreList, mCtrlBits, 0x015);
-CHECK_OFFSET(cOVStateHiScoreList, unk_016, 0x016);
-CHECK_OFFSET(cOVStateHiScoreList, miMiscData, 0x018);
-CHECK_OFFSET(cOVStateHiScoreList, mAttrState, 0x01C);
-CHECK_OFFSET(cOVStateHiScoreList, mpParentState, 0x020);
-CHECK_OFFSET(cOVStateHiScoreList, mScreens, 0x024);
-CHECK_OFFSET(cOVStateHiScoreList, mpScreen, 0x040);
-CHECK_OFFSET(cOVStateHiScoreList, mUserNum, 0x044);
-CHECK_OFFSET(cOVStateHiScoreList, unk_045, 0x045);
 CHECK_OFFSET(cOVStateHiScoreList, mDoneTransition, 0x048);
 CHECK_OFFSET(cOVStateHiScoreList, mAllowPauseMenu, 0x04C);
 CHECK_OFFSET(cOVStateHiScoreList, mRestoreCutSceneMode, 0x050);

@@ -26,9 +26,9 @@
 // onGainTransition cFEStateNetAccountMem_onGainTransition, 10 onLoseTransition cFEStateNetAccountMem_onLoseTransition, 12 onUpdate cFEStateNetAccountMem_onUpdate, 17 onPopupEvent
 // cFEStateNetAccountMem_onPopupEvent, 24 handleEvent cFEStateNetAccountMem_handleEvent). Methods: fe/feasyncfile 0x1B6ED0-0x1B8890.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
-// cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for
-// these classes and the preview keeps no accessors for them, so the own fields are named from their retail use.
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. cFEStateNet's part is written out
+// inline (copied from fe/festatenet.h; keep them in step). There is no On Tour DWARF for these classes and the preview
+// keeps no accessors for them, so the own fields are named from their retail use.
 // Evidence tags:
 //   [R] retail's constructors / destructors named above (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (see fe/festatenet.h);
@@ -37,35 +37,26 @@
 // Popup events: 0xF + i = option i chosen, 0x14 = back, 0x16 = the popup closed (fe/screenpopup.h).
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/festatenet.h"
 
 struct cUIThing;
 struct cUIMenu;
 struct cUIListBox;
 
-struct cFEStateNetConfig {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateNetConfig_vtbl (32 slots), stored by cFEStateNetConfig_cFEStateNetConfig / cFEStateNetConfig_cFEStateNetConfig1 after the cFEStateNet ctor and
-                                    //       by the destructor cFEStateNetConfig__cFEStateNetConfig
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetConfig_cFEStateNetConfig stores 0x31
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateNetConfig : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateNetConfig_vtbl (32 slots), stored by cFEStateNetConfig_cFEStateNetConfig /
+    //       cFEStateNetConfig_cFEStateNetConfig1 after the cFEStateNet ctor and by the destructor
+    //       cFEStateNetConfig__cFEStateNetConfig
+    // cFEStateNetConfig's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetConfig_cFEStateNetConfig stores 0x31
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h)
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -154,21 +145,6 @@ struct cFEStateNetConfig {
                                     //       func_001B4888 that becomes the popup's message (+ 0xC4); extent: to the end of the object
 };
 
-CHECK_OFFSET(cFEStateNetConfig, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateNetConfig, mpNext, 0x004);
-CHECK_OFFSET(cFEStateNetConfig, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateNetConfig, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateNetConfig, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateNetConfig, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateNetConfig, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateNetConfig, unk_016, 0x016);
-CHECK_OFFSET(cFEStateNetConfig, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateNetConfig, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateNetConfig, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateNetConfig, mScreens, 0x024);
-CHECK_OFFSET(cFEStateNetConfig, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateNetConfig, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateNetConfig, unk_045, 0x045);
 CHECK_OFFSET(cFEStateNetConfig, unk_048, 0x048);
 CHECK_OFFSET(cFEStateNetConfig, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateNetConfig, mMessageHintFrame, 0x050);
@@ -210,29 +186,20 @@ CHECK_OFFSET(cFEStateNetConfig, mpustrAuthError, 0x710);
 CHECK_OFFSET(cFEStateNetConfig, mustrPopupText, 0x71C);
 CHECK_SIZE(cFEStateNetConfig, 0x91C);
 
-struct cFEStateNetAccountMem {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateNetAccountMem_vtbl (24 slots), stored by cFEStateNetAccountMem_cFEStateNetAccountMem after cFEBlankPopup's ctor (cFEBlankPopup_cFEBlankPopup, vtable
-                                    //       cFEBlankPopup_vtbl) and by the destructor cFEStateNetAccountMem__cFEStateNetAccountMem (which restores cFEBlankPopup_vtbl before cFEStateNet's)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] 0 (not set by cFEStateNetAccountMem_cFEStateNetAccountMem)
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
-                                    //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word
-                                    //       (ui/uistate.h); [R] cUIState ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] func_001A92D8 calls its slot 17
-                                    //       (onPopupEvent)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
-                                    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
-    signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateNetAccountMem : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateNetAccountMem_vtbl (24 slots), stored by cFEStateNetAccountMem_cFEStateNetAccountMem after
+    //       cFEBlankPopup's ctor (cFEBlankPopup_cFEBlankPopup, vtable cFEBlankPopup_vtbl) and by the destructor
+    //       cFEStateNetAccountMem__cFEStateNetAccountMem (which restores cFEBlankPopup_vtbl before cFEStateNet's)
+    // cFEStateNetAccountMem's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] 0 (not set by
+    //       cFEStateNetAccountMem_cFEStateNetAccountMem)
+    //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
+    //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
+    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
+    //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
+    //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // --- cFEStateNet (fe/festatenet.h); cFEBlankPopup adds no members
     int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
@@ -307,21 +274,6 @@ struct cFEStateNetAccountMem {
                                     //       [U] cFEStateNetAccountMem_onPopupEvent restarts from it
 };
 
-CHECK_OFFSET(cFEStateNetAccountMem, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateNetAccountMem, mpNext, 0x004);
-CHECK_OFFSET(cFEStateNetAccountMem, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateNetAccountMem, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateNetAccountMem, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateNetAccountMem, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateNetAccountMem, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateNetAccountMem, unk_016, 0x016);
-CHECK_OFFSET(cFEStateNetAccountMem, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateNetAccountMem, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateNetAccountMem, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateNetAccountMem, mScreens, 0x024);
-CHECK_OFFSET(cFEStateNetAccountMem, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateNetAccountMem, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateNetAccountMem, unk_045, 0x045);
 CHECK_OFFSET(cFEStateNetAccountMem, unk_048, 0x048);
 CHECK_OFFSET(cFEStateNetAccountMem, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateNetAccountMem, mMessageHintFrame, 0x050);

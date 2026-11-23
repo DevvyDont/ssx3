@@ -342,7 +342,7 @@ extern "C" void* cFEStateUberTrick_cFEStateUberTrick(cFEStateUberTrick* self, in
 {
     signed char idx = userNum;
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateUberTrick_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateUberTrick_vtbl;
     self->mHashName = 18;
     self->mUserNum = idx;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, idx);

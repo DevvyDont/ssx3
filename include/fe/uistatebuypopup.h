@@ -17,7 +17,7 @@
 // Bases: cFEState (no members; On Tour size 0x48: its vtable cFEState_vtbl is the one ~20 FE destructors restore, and
 // slot 6 is cFEState_onGainFocus), then cUIState (ui/uistate.h) and cListNode, written out flat below.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
 //   [O] On Tour's DWARF (cUIState / cUIStateBuyPopup);
 //   [P] the July 2003 preview's inline accessors (cUIState: see ui/uistate.h; isAccept lw 0x68 at the preview's
 //       offset, tools/layout_xlate.py: preview 0x58/0x5C = retail 0x5C/0x60);
@@ -25,6 +25,7 @@
 //   [U] how retail code uses the field.
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/buypopupinfo.h"
 
 struct cListNode;
@@ -32,27 +33,18 @@ struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cUIStateBuyPopup {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cUIStateBuyPopup_vtbl D_0046CB08, stored by cUIStateBuyPopup_cUIStateBuyPopup / cUIStateBuyPopup_cUIStateBuyPopup1;
-                                    //       the destructor stores cFEState's cFEState_vtbl
-    // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h); cFEState adds no members
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] cUIStateBuyPopup_cUIStateBuyPopup stores 7
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName
-                                    //       (onCreateScreen); cUIStateBuyPopup_cUIStateBuyPopup reads *mpEngine for the controller bits
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor 0xF, then cUIStateBuyPopup_cUIStateBuyPopup stores
-                                    //       cFECustom_getPlayerCtrlMask(*mpEngine, userNum) when there is an input object
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's parent argument (the shop state)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the "139buy_popup" screen
-    signed char mUserNum;           // 0x044 [O]; [R] cUIStateBuyPopup_cUIStateBuyPopup stores its userNum argument (sb)
-    char unk_045[0x3];              // 0x045 padding
+struct cUIStateBuyPopup : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cUIStateBuyPopup_vtbl D_0046CB08, stored by cUIStateBuyPopup_cUIStateBuyPopup /
+    //       cUIStateBuyPopup_cUIStateBuyPopup1; the destructor stores cFEState's cFEState_vtbl
+    // cUIStateBuyPopup's notes on cUIState's fields:
+    //   mHashName: [P] cUIState::getHashName; [R] cUIStateBuyPopup_cUIStateBuyPopup stores 7
+    //   mpEngine: [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName (onCreateScreen);
+    //       cUIStateBuyPopup_cUIStateBuyPopup reads *mpEngine for the controller bits
+    //   mCtrlBits: [R] cUIState ctor 0xF, then cUIStateBuyPopup_cUIStateBuyPopup stores
+    //       cFECustom_getPlayerCtrlMask(*mpEngine, userNum) when there is an input object
+    //   mpScreen: [U] onCreateScreen stores the "139buy_popup" screen
+    //   mUserNum: [R] cUIStateBuyPopup_cUIStateBuyPopup stores its userNum argument (sb)
     // --- cUIStateBuyPopup
     cBuyPopupInfo mInfo;            // 0x048 [O]; [R] clear (cBuyPopupInfo_clear) in both ctors; [U] getPopupInfo cUIStateBuyPopup_getPopupInfo
                                     //       returns &mInfo; initBuyTrick / initBuyAttributes (cUIStateBuyPopup_initBuyAttributes) and the
@@ -61,21 +53,6 @@ struct cUIStateBuyPopup {
                                     //       [U] onWidgetEvent stores 1 for "yes", else 0; isAccept cUIStateBuyPopup_isAccept returns it
 };
 
-CHECK_OFFSET(cUIStateBuyPopup, mpPrev, 0x000);
-CHECK_OFFSET(cUIStateBuyPopup, mpNext, 0x004);
-CHECK_OFFSET(cUIStateBuyPopup, mVtbl, 0x008);
-CHECK_OFFSET(cUIStateBuyPopup, mHashName, 0x00C);
-CHECK_OFFSET(cUIStateBuyPopup, mpEngine, 0x010);
-CHECK_OFFSET(cUIStateBuyPopup, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cUIStateBuyPopup, mCtrlBits, 0x015);
-CHECK_OFFSET(cUIStateBuyPopup, unk_016, 0x016);
-CHECK_OFFSET(cUIStateBuyPopup, miMiscData, 0x018);
-CHECK_OFFSET(cUIStateBuyPopup, mAttrState, 0x01C);
-CHECK_OFFSET(cUIStateBuyPopup, mpParentState, 0x020);
-CHECK_OFFSET(cUIStateBuyPopup, mScreens, 0x024);
-CHECK_OFFSET(cUIStateBuyPopup, mpScreen, 0x040);
-CHECK_OFFSET(cUIStateBuyPopup, mUserNum, 0x044);
-CHECK_OFFSET(cUIStateBuyPopup, unk_045, 0x045);
 CHECK_OFFSET(cUIStateBuyPopup, mInfo, 0x048);
 CHECK_OFFSET(cUIStateBuyPopup, mbAccept, 0x06C);
 CHECK_SIZE(cUIStateBuyPopup, 0x70);

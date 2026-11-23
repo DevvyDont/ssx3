@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "ui/uiscreen.h"
 #include "fe/festatetransition.h"
@@ -129,7 +130,7 @@ extern void* cFEStateTitle_vtbl[];
 extern "C" void* cFEStateTitle_cFEStateTitle1(cFEStateTitle* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateTitle_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateTitle_vtbl;
     self->mNumTicksIdle = 0;
     self->mHashName = 0;
     return ((void*)self);

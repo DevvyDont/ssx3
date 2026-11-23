@@ -330,14 +330,14 @@ extern "C" void cFEStateOptions_onPopupEvent(cFEStateOptions* self, cUIState* po
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 1;
                     self->mbLetFrameGo = 1;
-                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)self->mVtbl;
+                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
                     vt2[19].fn(vthis(self, vt2[19]), uiObj, 5);
                 }
             } else {
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 0;
                     self->mbLetFrameGo = 1;
-                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)self->mVtbl;
+                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
                     vt2[19].fn(vthis(self, vt2[19]), uiObj, 6);
                 }
             }
@@ -378,7 +378,7 @@ extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self)
 {
     cFEPopupOptionReset* savePopup = (cFEPopupOptionReset*)((char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0));
     cUIState_cUIState1(savePopup, self->mpEngine, self);
-    savePopup->mVtbl = cFEPopupOptionReset_vtbl;
+    VPTR_OF(cListNode, savePopup) = cFEPopupOptionReset_vtbl;
     savePopup->mAccept = 0;
     cUIStateStack_pushPopup(&self->mpEngine->mStateStack, savePopup);
     D_004A14D8 = 0;
@@ -410,7 +410,7 @@ extern void* cFEStateOptionsGame_vtbl[];
 extern "C" void* func_00188EE8(cFEStateOptionsGame* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateOptionsGame_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOptionsGame_vtbl;
     self->mHashName = 0x1C;
     return ((void*)self);
 }
@@ -1022,7 +1022,7 @@ extern int D_004A14D4;
 extern "C" void* func_0018A258(cFEStateOptionsSound* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateOptionsSound_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOptionsSound_vtbl;
     self->mHashName = 29;
     D_004A14D4 = 0;
     return ((void*)self);
@@ -1652,7 +1652,7 @@ extern int D_004A14D8;
 extern "C" void* func_0018C0E8(cFEStateOptionsHUD* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateOptionsHUD_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOptionsHUD_vtbl;
     self->mHashName = 0x1E;
     D_004A14D8 = 0;
     return ((void*)self);
@@ -1935,7 +1935,7 @@ extern int D_004A14DC;
 extern "C" void* func_0018C658(cFEStateOptionsController* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateOptionsController_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOptionsController_vtbl;
     self->mHashName = 0x1F;
     self->mVibrateOn = 0;
     D_004A14DC = 0;
@@ -2487,7 +2487,7 @@ extern "C" void* cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cFEStateOption
 {
     cUIState_cUIState(self);
     self->mHashName = 0x20;
-    self->mVtbl = cFEStateOptionsSaveLoad_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOptionsSaveLoad_vtbl;
     *(char*)&self->mSaveLoadCurrentCtrl = 0;
     return ((void*)self);
 }
@@ -2786,7 +2786,7 @@ extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(cFESta
 {
     cFEMemCard_cFEMemCard2(self, engine, cardMode);
     self->mbOnline = isOnline;
-    self->mVtbl = cFEStateOptionsDeviceSelect_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateOptionsDeviceSelect_vtbl;
     self->mHashName = 33;
     self->mIsSaveScreen = isSave;
     self->mIsHidden = 0;
@@ -3184,20 +3184,20 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             self->mIsSavePressed = 1;
             self->mIsProcessing = 1;
             self->mState = st;
-            ((sVEntry<void(void*)>*)self->mVtbl)[47].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[47]));
+            ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
         } else if (self->mType == 1) {
             if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
-                ((sVEntry<void(void*)>*)self->mVtbl)[44].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[44]));
+                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44]));
             } else {
-                ((sVEntry<void(void*)>*)self->mVtbl)[47].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[47]));
+                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
             }
         } else {
             if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 2);
-                ((sVEntry<void(void*)>*)self->mVtbl)[44].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[44]));
+                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44]));
             } else {
-                ((sVEntry<void(void*)>*)self->mVtbl)[47].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[47]));
+                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
             }
         }
         break;
@@ -3656,7 +3656,7 @@ extern void* cFEStateProfileSelect_vtbl[];
 extern "C" void* cFEStateProfileSelect_cFEStateProfileSelect1(cFEStateProfileSelect* self)
 {
     cUIState_cUIState(self);
-    self->mVtbl = cFEStateProfileSelect_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateProfileSelect_vtbl;
     self->mHashName = 8;
     return ((void*)self);
 }

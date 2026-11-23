@@ -50,7 +50,7 @@ extern sQuad_58E8 gPopupBlack;
 extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, cUIEngine* engine, cUIState* owner)
 {
     cUIState_cUIState1(self, engine, owner);
-    self->mVtbl = cScreenPopup_vtbl;
+    VPTR_OF(cListNode, self) = cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo((char*)&self->info);
     int defaultStr = cBXString_EmptyString;
     self->mszInputText = (char*)defaultStr;
@@ -114,7 +114,7 @@ extern "C" void cUIState__cUIState(void* self, int flags);
  */
 extern "C" void cScreenPopup__cScreenPopup(cScreenPopup* self, int flags)
 {
-    self->mVtbl = cScreenPopup_vtbl;
+    VPTR_OF(cListNode, self) = cScreenPopup_vtbl;
     cBXString__cBXString((char*)&self->mszStaticText, 2);
     cBXString__cBXString((char*)&self->mszInputText, 2);
     cPopupInfo__cPopupInfo((char*)&self->info, 2);
@@ -195,7 +195,7 @@ extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
             ((void (*)(void*, int))vt[7].fn)(vthis(menu, vt[7]), 1);
         }
         {
-            sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
+            sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cListNode, self);
             ((int (*)(void*, void*, int, int))vt[20].fn)(vthis(self, vt[20]), self->mpMenu, 5, 0);
         }
     }
@@ -307,7 +307,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
         cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
         vt[6].fn(vthis(self, vt[6]), 0);
     }
 }
@@ -3413,7 +3413,7 @@ extern void* cUIStateBuyPopup_vtbl[];
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, cUIEngine* engine, cUIState* owner, signed char idx)
 {
     cUIState_cUIState1(self, engine, owner);
-    self->mVtbl = cUIStateBuyPopup_vtbl;
+    VPTR_OF(cListNode, self) = cUIStateBuyPopup_vtbl;
     cBuyPopupInfo_clear((cBuyPopupInfo*)&self->mInfo);
     self->mUserNum = idx;
     self->mHashName = 7;
@@ -3702,7 +3702,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* 
     self->miViewableEndIndex = 0;
     self->mbClearOnFirst = 0;
     self->mbDisableForFirst = 0;
-    self->mVtbl = cKeyboardPopup_vtbl;
+    VPTR_OF(cListNode, self) = cKeyboardPopup_vtbl;
     self->miCurrentKey = 29;
     self->mszStatic = (char*)defaultStr;
     self->miMaxCharacters = 0x3F;
@@ -3745,7 +3745,7 @@ extern "C" void cUIState__cUIState(void* self, int flags);
  */
 extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
 {
-    self->mVtbl = cKeyboardPopup_vtbl;
+    VPTR_OF(cListNode, self) = cKeyboardPopup_vtbl;
     void* ustrStatic = self->mpustrStatic;
     if (ustrStatic != 0) {
         cMemMan_free(ustrStatic);

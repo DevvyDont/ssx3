@@ -557,7 +557,7 @@ struct sElem_9A30 {
 extern "C" void* cOVStateHUD1P_cOVStateHUD1P(cOVStateHUD1P* hud, int pEngine)
 {
     cUIState_cUIState_9A30(((char*)hud), pEngine);
-    hud->mVtbl = (void**)cOVStateHUD1P_vtbl;
+    VPTR_OF(cListNode, hud) = (void**)cOVStateHUD1P_vtbl;
     new ((char*)&hud->mRiderInfo[0]) sElem_9A30[2];
     hud->mGlow.mSourceShape = -1;
     hud->mbHideHUD = 0;
@@ -2652,7 +2652,7 @@ extern "C" void* cFEStateLodge_cFEStateLodge(cFEStateLodge* self)
 {
     cUIState_cUIState(self);
     self->mHashName = 39;
-    self->mVtbl = cFEStateLodge_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateLodge_vtbl;
     int idx = cBENewPlayerInterface_getPlayerCtrlID(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     self->mUserNum = 0;
     void* factory = (void*)self->mpEngine->mpCustom;

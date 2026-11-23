@@ -432,7 +432,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(cFEStateAudioOptions*
 {
     cUIState_cUIState(self, engine);
     self->mHashName = 0x10;
-    self->mVtbl = cFEStateAudioOptions_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateAudioOptions_vtbl;
     self->mUserNum = idx;
     void* feCustom = (void*)self->mpEngine->mpCustom;
     if (feCustom != 0) {

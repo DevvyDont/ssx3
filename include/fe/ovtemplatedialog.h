@@ -19,7 +19,7 @@
 // template's size). So cOVState_QUIT_onUpdate and the template's methods take a cOVTemplate_Dialog*.
 // Base cOVState (fe/ovstate.h, 0x9C), written out flat below with the same member names.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -29,34 +29,19 @@
 //       0x90 (retail 0x9C) and its bools are 1 byte (retail's are words), so its offsets are not used.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVTemplate_Dialog {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00474C58 or a dialog overlay's vtable, stored after cOVState_vtbl
-                                    //       by the constructors
-    // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U]
-                                    //       cUIEngine_addScreenByHashName(mpEngine, ...)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] triggerOverlay
-                                    //       sets bits 0x3F00 to 0x100
-    cUIState* mpParentState;        // 0x020 [O]; [R] 0 (1-argument cUIState ctor)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] onCreateScreen stores the dialog screen;
-                                    //       widget lookups go through it
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVTemplate_Dialog : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] D_00474C58 or a dialog overlay's vtable, stored after cOVState_vtbl by the constructors
+    // cOVTemplate_Dialog's notes on cUIState's fields:
+    //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
+    //   mpScreen: [U] onCreateScreen stores the dialog screen; widget lookups go through it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
@@ -69,21 +54,6 @@ struct cOVTemplate_Dialog {
                                     //       above); [U] onCreateScreen / onWidgetCreate / onWidgetEvent switch on it
 };
 
-CHECK_OFFSET(cOVTemplate_Dialog, mpPrev, 0x0);
-CHECK_OFFSET(cOVTemplate_Dialog, mpNext, 0x4);
-CHECK_OFFSET(cOVTemplate_Dialog, mVtbl, 0x8);
-CHECK_OFFSET(cOVTemplate_Dialog, mHashName, 0xC);
-CHECK_OFFSET(cOVTemplate_Dialog, mpEngine, 0x10);
-CHECK_OFFSET(cOVTemplate_Dialog, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVTemplate_Dialog, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVTemplate_Dialog, unk_016, 0x16);
-CHECK_OFFSET(cOVTemplate_Dialog, miMiscData, 0x18);
-CHECK_OFFSET(cOVTemplate_Dialog, mAttrState, 0x1C);
-CHECK_OFFSET(cOVTemplate_Dialog, mpParentState, 0x20);
-CHECK_OFFSET(cOVTemplate_Dialog, mScreens, 0x24);
-CHECK_OFFSET(cOVTemplate_Dialog, mpScreen, 0x40);
-CHECK_OFFSET(cOVTemplate_Dialog, mUserNum, 0x44);
-CHECK_OFFSET(cOVTemplate_Dialog, unk_045, 0x45);
 CHECK_OFFSET(cOVTemplate_Dialog, mDoneTransition, 0x48);
 CHECK_OFFSET(cOVTemplate_Dialog, mAllowPauseMenu, 0x4C);
 CHECK_OFFSET(cOVTemplate_Dialog, mRestoreCutSceneMode, 0x50);
@@ -106,47 +76,18 @@ CHECK_SIZE(cOVTemplate_Dialog, 0xA0);
 // Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable cPDATemplate_vtbl (0x004743F0, 24 slots:
 // 1 dtor, 4 onCreateScreen; the rest cUIState's). The dtor only runs cUIState__cUIState (its C definition declares no
 // parameters: this stays in a0).
-// A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
-// field; [O] SSX On Tour's DWARF (class cPDATemplate, cUIState): names, types and order.
+// Derives from cUIState (ui/uistate.h). Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses
+// the field; [O] SSX On Tour's DWARF (class cPDATemplate, cUIState): names, types and order.
 
-struct cPDATemplate {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cPDATemplate_vtbl (ctor, cOVStateManager_addPDATemplate)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [U] onCreateScreen stores 41
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] onCreateScreen adds "PDATemplate"
-                                    //       and "bganim1" through it
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
-                                    //       ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the "PDATemplate" screen and looks
-                                    //       "temperature" up on it
-    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cPDATemplate : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cPDATemplate_vtbl (ctor, cOVStateManager_addPDATemplate)
+    // cPDATemplate's notes on cUIState's fields:
+    //   mHashName: [U] onCreateScreen stores 41
+    //   mpEngine: [U] onCreateScreen adds "PDATemplate" and "bganim1" through it
+    //   mpScreen: [U] onCreateScreen stores the "PDATemplate" screen and looks "temperature" up on it
 };
 
-CHECK_OFFSET(cPDATemplate, mpPrev, 0x000);
-CHECK_OFFSET(cPDATemplate, mpNext, 0x004);
-CHECK_OFFSET(cPDATemplate, mVtbl, 0x008);
-CHECK_OFFSET(cPDATemplate, mHashName, 0x00C);
-CHECK_OFFSET(cPDATemplate, mpEngine, 0x010);
-CHECK_OFFSET(cPDATemplate, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cPDATemplate, mCtrlBits, 0x015);
-CHECK_OFFSET(cPDATemplate, unk_016, 0x016);
-CHECK_OFFSET(cPDATemplate, miMiscData, 0x018);
-CHECK_OFFSET(cPDATemplate, mAttrState, 0x01C);
-CHECK_OFFSET(cPDATemplate, mpParentState, 0x020);
-CHECK_OFFSET(cPDATemplate, mScreens, 0x024);
-CHECK_OFFSET(cPDATemplate, mpScreen, 0x040);
-CHECK_OFFSET(cPDATemplate, mUserNum, 0x044);
-CHECK_OFFSET(cPDATemplate, unk_045, 0x045);
 CHECK_SIZE(cPDATemplate, 0x48);
 
 
@@ -166,31 +107,16 @@ CHECK_SIZE(cPDATemplate, 0x48);
 // inlined cOVState ctor (mOVID, the three bools, cOVState_vtbl, mszChatBuff = " "), then stores cOVTemplate_Simple_vtbl
 // (D_00474D30, 25 slots: 1 dtor, 4 onCreateScreen, 19 onWidgetEvent, 20 onWidgetMenu, 25 cOVState_allowPauseMenu); the
 // dtor stores cOVState_vtbl and runs cUIState__cUIState.
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. The cOVState
-// part is written out with fe/ovstate.h's names (see there for the inherited fields' full evidence).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The cOVState part is written out with
+// fe/ovstate.h's names (see there for the inherited fields' full evidence).
 // Evidence tags: [R] retail's ctors / dtor; [P] the July 2003 preview (fe/ovstate.h); [U] how retail code uses the
 // field; [O] SSX On Tour's DWARF (builds/x/ontour_kor/dwarf/types.h): names, types and order.
 
-struct cOVTemplate_Simple {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVTemplate_Simple_vtbl D_00474D30 (ctor), cOVState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
-                                    //       ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen looks "overlayMenu" and "overlayOpt0" ...
-                                    //       "overlayOpt4" up on it
-    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVTemplate_Simple : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVTemplate_Simple_vtbl D_00474D30 (ctor), cOVState_vtbl (dtor)
+    // cOVTemplate_Simple's notes on cUIState's fields:
+    //   mpScreen: [U] onCreateScreen looks "overlayMenu" and "overlayOpt0" ... "overlayOpt4" up on it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O] (On Tour: bool at 0x48); [R] the ctors zero it
     int mAllowPauseMenu;            // 0x04C [O][P] (fe/ovstate.h); [R] the ctors zero it
@@ -200,21 +126,6 @@ struct cOVTemplate_Simple {
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's id
 };
 
-CHECK_OFFSET(cOVTemplate_Simple, mpPrev, 0x000);
-CHECK_OFFSET(cOVTemplate_Simple, mpNext, 0x004);
-CHECK_OFFSET(cOVTemplate_Simple, mVtbl, 0x008);
-CHECK_OFFSET(cOVTemplate_Simple, mHashName, 0x00C);
-CHECK_OFFSET(cOVTemplate_Simple, mpEngine, 0x010);
-CHECK_OFFSET(cOVTemplate_Simple, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cOVTemplate_Simple, mCtrlBits, 0x015);
-CHECK_OFFSET(cOVTemplate_Simple, unk_016, 0x016);
-CHECK_OFFSET(cOVTemplate_Simple, miMiscData, 0x018);
-CHECK_OFFSET(cOVTemplate_Simple, mAttrState, 0x01C);
-CHECK_OFFSET(cOVTemplate_Simple, mpParentState, 0x020);
-CHECK_OFFSET(cOVTemplate_Simple, mScreens, 0x024);
-CHECK_OFFSET(cOVTemplate_Simple, mpScreen, 0x040);
-CHECK_OFFSET(cOVTemplate_Simple, mUserNum, 0x044);
-CHECK_OFFSET(cOVTemplate_Simple, unk_045, 0x045);
 CHECK_OFFSET(cOVTemplate_Simple, mDoneTransition, 0x048);
 CHECK_OFFSET(cOVTemplate_Simple, mAllowPauseMenu, 0x04C);
 CHECK_OFFSET(cOVTemplate_Simple, mRestoreCutSceneMode, 0x050);

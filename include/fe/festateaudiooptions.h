@@ -21,8 +21,8 @@
 // cFEState_onLoseFocus, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu; the rest cUIState_* / cListNode_*); the
 // destructor stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. bools are
-// ints (ee-gcc 2.95's bool is 4 bytes).
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. bools are ints (ee-gcc 2.95's bool is
+// 4 bytes).
 // Evidence tags:
 //   [R] retail's constructors / destructor and allocation size;
 //   [U] how retail code uses the field (the C bodies in src/util/locale.cpp, src/fe/festateaudiooptions.cpp,
@@ -31,6 +31,7 @@
 // (The preview's isInStore reads 0x60: the preview layout differs and layout_xlate has no paired method to shift it.)
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -40,25 +41,14 @@ struct cUIText;
 struct cUIIcon;
 struct cTextureElement;
 
-struct cFEStateAudioOptions {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateAudioOptions_vtbl (both ctors), cFEState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 0x10
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the engine argument; the ctor reads its cFECustom (*mpEngine) and
-                                    //       texture bank (+0x58); [U] onCreateScreen / onDestroyScreen / onWidgetEvent
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cFECustom_getPlayerCtrlMask(.., userNum)
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h)
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onWidgetEvent looks objects up on it
-    signed char mUserNum;           // 0x044 [O]; [R] the ctor's userNum (sb); [U] the BE calls take it (lb)
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateAudioOptions : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateAudioOptions_vtbl (both ctors), cFEState_vtbl (dtor)
+    // cFEStateAudioOptions's notes on cUIState's fields:
+    //   mpEngine: [U] onCreateScreen / onDestroyScreen / onWidgetEvent
+    //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum)
+    //   mpScreen: [U] onCreateScreen stores the screen; onWidgetEvent looks objects up on it
+    //   mUserNum: [U] the BE calls take it (lb)
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateAudioOptions
     cUIText* mpHelpText;            // 0x048 [O]; [R] 0
@@ -81,21 +71,6 @@ struct cFEStateAudioOptions {
                                     //       onGainFocus / onGainTransition / onWidgetEvent / onWidgetMenu test it
 };
 
-CHECK_OFFSET(cFEStateAudioOptions, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateAudioOptions, mpNext, 0x004);
-CHECK_OFFSET(cFEStateAudioOptions, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateAudioOptions, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateAudioOptions, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateAudioOptions, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateAudioOptions, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateAudioOptions, unk_016, 0x016);
-CHECK_OFFSET(cFEStateAudioOptions, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateAudioOptions, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateAudioOptions, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateAudioOptions, mScreens, 0x024);
-CHECK_OFFSET(cFEStateAudioOptions, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateAudioOptions, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateAudioOptions, unk_045, 0x045);
 CHECK_OFFSET(cFEStateAudioOptions, mpHelpText, 0x048);
 CHECK_OFFSET(cFEStateAudioOptions, mpChecks, 0x04C);
 CHECK_OFFSET(cFEStateAudioOptions, mpCheckBox, 0x05C);

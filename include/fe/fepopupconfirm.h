@@ -18,33 +18,25 @@
 // background (info.meBackgroundType 1, or 2 with info.miLayerOffset 4 while the static cFEPopupConfirm_mUsePreFE is
 // set) and runs initPopup; the dtor stores cFEPopupConfirm_vtbl and runs cScreenPopup__cScreenPopup.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. The base's
-// fields are copied from fe/screenpopup.h (first line of each comment). Evidence tags: [R] retail ctors / dtor and the
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. The base's fields are copied from
+// fe/screenpopup.h (first line of each comment). Evidence tags: [R] retail ctors / dtor and the
 // allocation size; [P] the July 2003 preview's inline accessors (base fields); [U] how retail code uses the field
 // (src/fe/fememcardcallbacks.cpp and the asm); [O] SSX On Tour's DWARF (class cFEPopupConfirm, cScreenPopup).
 
 #include "layout.h"
+#include "ui/uistate.h"
 #include "fe/screenpopup.h"
 
-struct cFEPopupConfirm {
+struct cFEPopupConfirm : public cUIState {
     // --- cScreenPopup (0x360; fe/screenpopup.h, which has the full evidence for these fields)
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEPopupConfirm_vtbl (both ctors, the dtor) over cScreenPopup_vtbl
-    // --- cUIState (On Tour: size 0x48, same offsets)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h); [U] cScreenPopup_initScreenPopup copies the popup info's miMiscData
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word (ui/uistate.h); [R] ctor sh 0x218
-    cUIState* mpParentState;        // 0x020 [O]; [R] the ctor's owner argument; [U] receives onPopupEvent (slot 17)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C)
-    cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] cScreenPopup_onCreateScreen stores the "popup" screen
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEPopupConfirm_vtbl (both ctors, the dtor) over cScreenPopup_vtbl
+    // cFEPopupConfirm's notes on cUIState's fields:
+    //   mpEngine: [U] cUIEngine_addScreenByHashName
+    //   miMiscData: [P] cUIState::getMiscData lw/sw (ui/uistate.h); [U] cScreenPopup_initScreenPopup copies the popup
+    //       info's miMiscData
+    //   mpParentState: [U] receives onPopupEvent (slot 17)
+    //   mpScreen: [R] ctor zeroes it; [U] cScreenPopup_onCreateScreen stores the "popup" screen
     // --- cScreenPopup
     cUIVector* mpBackGroundWhite;   // 0x048 [O]; [R] ctor zeroes; [U] widget "whitefg"
     cUIVector* mpBackGroundRed;     // 0x04C [O]; [U] widget "redbg"
@@ -130,21 +122,6 @@ struct cFEPopupConfirm {
                                     //       setButtonText stores 3 for a third button and tests >= 2
 };
 
-CHECK_OFFSET(cFEPopupConfirm, mpPrev, 0x000);
-CHECK_OFFSET(cFEPopupConfirm, mpNext, 0x004);
-CHECK_OFFSET(cFEPopupConfirm, mVtbl, 0x008);
-CHECK_OFFSET(cFEPopupConfirm, mHashName, 0x00C);
-CHECK_OFFSET(cFEPopupConfirm, mpEngine, 0x010);
-CHECK_OFFSET(cFEPopupConfirm, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEPopupConfirm, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEPopupConfirm, unk_016, 0x016);
-CHECK_OFFSET(cFEPopupConfirm, miMiscData, 0x018);
-CHECK_OFFSET(cFEPopupConfirm, mAttrState, 0x01C);
-CHECK_OFFSET(cFEPopupConfirm, mpParentState, 0x020);
-CHECK_OFFSET(cFEPopupConfirm, mScreens, 0x024);
-CHECK_OFFSET(cFEPopupConfirm, mpScreen, 0x040);
-CHECK_OFFSET(cFEPopupConfirm, mUserNum, 0x044);
-CHECK_OFFSET(cFEPopupConfirm, unk_045, 0x045);
 CHECK_OFFSET(cFEPopupConfirm, mpBackGroundWhite, 0x048);
 CHECK_OFFSET(cFEPopupConfirm, mpBackGroundRed, 0x04C);
 CHECK_OFFSET(cFEPopupConfirm, mpBackGroundLarge, 0x050);

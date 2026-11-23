@@ -10,7 +10,7 @@
 // cOVState_TOPTIMES__cOVState_TOPTIMES.
 // Base cOVState (fe/ovstate.h, 0x9C), written out flat below with the same member names.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
 //       mszChatBuff, vptr), destructors and the cMemMan_alloc(size, "cOVStateOverlay") sizes in
 //       cOVStateManager_triggerOverlay / cOVStateManager_triggerPopup (fe/ovtemplatedialog.cpp);
@@ -20,34 +20,20 @@
 //       0x90 (retail 0x9C) and its bools are 1 byte (retail's are words), so its offsets are not used.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cOVState_TOPTIMES {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cOVState_TOPTIMES_vtbl, stored after cOVState_vtbl by the
-                                    //       constructor; [U] onWidgetEvent calls slot 25 (handleNext) through it
-    // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U]
-                                    //       cUIEngine_addScreenByHashName(mpEngine, ...)
-    signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
-    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] triggerOverlay
-                                    //       sets bits 0x3F00 to 0x100
-    cUIState* mpParentState;        // 0x020 [O]; [R] 0 (1-argument cUIState ctor)
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [R] constructed by cList_cList(self + 0x24)
-    cUIScreen* mpScreen;            // 0x040 [O]; [R] ctor zeroes it; [U] onCreateScreen stores the "61toptimes"
-                                    //       screen; widget lookups go through it
-    signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
-    char unk_045[0x3];              // 0x045 padding
+struct cOVState_TOPTIMES : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cOVState_TOPTIMES_vtbl, stored after cOVState_vtbl by the constructor; [U] onWidgetEvent calls slot 25
+    //       (handleNext) through it
+    // cOVState_TOPTIMES's notes on cUIState's fields:
+    //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
+    //   mpScreen: [U] onCreateScreen stores the "61toptimes" screen; widget lookups go through it
     // --- cOVState (fe/ovstate.h, 0x9C)
     int mDoneTransition;            // 0x048 [O]; [R] zeroed by the (inlined) cOVState ctor
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
@@ -63,21 +49,6 @@ struct cOVState_TOPTIMES {
                                     //       19)
 };
 
-CHECK_OFFSET(cOVState_TOPTIMES, mpPrev, 0x0);
-CHECK_OFFSET(cOVState_TOPTIMES, mpNext, 0x4);
-CHECK_OFFSET(cOVState_TOPTIMES, mVtbl, 0x8);
-CHECK_OFFSET(cOVState_TOPTIMES, mHashName, 0xC);
-CHECK_OFFSET(cOVState_TOPTIMES, mpEngine, 0x10);
-CHECK_OFFSET(cOVState_TOPTIMES, mCurrentCtrl, 0x14);
-CHECK_OFFSET(cOVState_TOPTIMES, mCtrlBits, 0x15);
-CHECK_OFFSET(cOVState_TOPTIMES, unk_016, 0x16);
-CHECK_OFFSET(cOVState_TOPTIMES, miMiscData, 0x18);
-CHECK_OFFSET(cOVState_TOPTIMES, mAttrState, 0x1C);
-CHECK_OFFSET(cOVState_TOPTIMES, mpParentState, 0x20);
-CHECK_OFFSET(cOVState_TOPTIMES, mScreens, 0x24);
-CHECK_OFFSET(cOVState_TOPTIMES, mpScreen, 0x40);
-CHECK_OFFSET(cOVState_TOPTIMES, mUserNum, 0x44);
-CHECK_OFFSET(cOVState_TOPTIMES, unk_045, 0x45);
 CHECK_OFFSET(cOVState_TOPTIMES, mDoneTransition, 0x48);
 CHECK_OFFSET(cOVState_TOPTIMES, mAllowPauseMenu, 0x4C);
 CHECK_OFFSET(cOVState_TOPTIMES, mRestoreCutSceneMode, 0x50);

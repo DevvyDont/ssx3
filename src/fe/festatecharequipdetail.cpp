@@ -289,7 +289,7 @@ static inline void releaseK199148(int id)
  */
 extern "C" void cFEStateCharEquip__cFEStateCharEquip(cFEStateCharEquip* self, int flags)
 {
-    self->mVtbl = cFEStateCharEquip_vtbl;
+    VPTR_OF(cListNode, self) = cFEStateCharEquip_vtbl;
     if (self->mIconsFileIndex >= 0) {
         func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID,
                       self->mIconsFileIndex);
@@ -302,7 +302,7 @@ extern "C" void cFEStateCharEquip__cFEStateCharEquip(cFEStateCharEquip* self, in
     releaseK199148(self->mOldPreviewTextureID);
     self->mPreviewTextureID = -1;
     self->mOldPreviewTextureID = -1;
-    self->mVtbl = cFEState_vtbl;
+    VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif

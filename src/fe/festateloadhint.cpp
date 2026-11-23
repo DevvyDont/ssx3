@@ -135,7 +135,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cFELoadState__cFELoadState(cFELoadState* self)
 {
-    self->mVtbl = (void**)cFELoadState_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFELoadState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -252,7 +252,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cFELoadStateInLodge__cFELoadStateInLodge(cFELoadStateInLodge* self)
 {
-    self->mVtbl = (void**)cFELoadStateInLodge_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cFELoadStateInLodge_vtbl;
     return cUIState__cUIState(self);
 }
 #endif

@@ -22,8 +22,8 @@
 // cFEStateRequestLine_cFEStateRequestLine1; destructor cFEStateRequestLine__cFEStateRequestLine__FPv (cFEState_vtbl,
 // cUIState__cUIState).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. Note that
-// ee-gcc's `long` is 64-bit: the two song masks are `unsigned long` here, as in the C bodies (`long long` is 16
+// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Note that ee-gcc's `long` is 64-bit:
+// the two song masks are `unsigned long` here, as in the C bodies (`long long` is 16
 // bytes in ee-gcc).
 // Evidence tags:
 //   [R] retail's constructor / destructor named above;
@@ -32,6 +32,7 @@
 //   [O] SSX On Tour's DWARF (class cFEStateRequestLine, cUIState, cListNode): names, types and order.
 
 #include "layout.h"
+#include "ui/uistate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -42,25 +43,14 @@ struct cUIIcon;
 struct cUIMenu;
 struct cTextureElement;
 
-struct cFEStateRequestLine {
-    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
-    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
-    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateRequestLine_vtbl (both ctors), cFEState_vtbl (dtor)
-    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [R] the ctor stores 17
-    cUIEngine* mpEngine;            // 0x010 [O]; [R] cUIState_cUIState's engine; [U] cFECustom at *mpEngine, the
-                                    //       texture bank at +0x58, the state stack at +0x18
-    signed char mCurrentCtrl;       // 0x014 [O]
-    unsigned char mCtrlBits;        // 0x015 [O]; [R] cFECustom_getPlayerCtrlMask(.., userNum) when there is a cFECustom
-    char unk_016[0x2];              // 0x016 padding
-    int miMiscData;                 // 0x018 [O]
-    int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h); [U] onPopupEvent's flag word
-    cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens
-    cUIScreen* mpScreen;            // 0x040 [O]
-    signed char mUserNum;           // 0x044 [O]; [R] the ctor's userNum (sb); [U] the BE interfaces' user index
-    char unk_045[0x3];              // 0x045 padding
+struct cFEStateRequestLine : public cUIState {
+    // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
+    //   [R] cFEStateRequestLine_vtbl (both ctors), cFEState_vtbl (dtor)
+    // cFEStateRequestLine's notes on cUIState's fields:
+    //   mpEngine: [U] cFECustom at *mpEngine, the texture bank at +0x58, the state stack at +0x18
+    //   mCtrlBits: [R] cFECustom_getPlayerCtrlMask(.., userNum) when there is a cFECustom
+    //   mAttrState: [U] onPopupEvent's flag word
+    //   mUserNum: [U] the BE interfaces' user index
     // --- cFEState (On Tour: size 0x48, no data)
     // --- cFEStateRequestLine
     int mCharID;                    // 0x048 [O]; [R] cBENewPlayerInterface_getPlayerCharID(.., mUserNum)
@@ -102,21 +92,6 @@ struct cFEStateRequestLine {
     cTextureElement* mpDollarSign;  // 0x20C [O]; [R] "yell_dollar_sign"
 };
 
-CHECK_OFFSET(cFEStateRequestLine, mpPrev, 0x000);
-CHECK_OFFSET(cFEStateRequestLine, mpNext, 0x004);
-CHECK_OFFSET(cFEStateRequestLine, mVtbl, 0x008);
-CHECK_OFFSET(cFEStateRequestLine, mHashName, 0x00C);
-CHECK_OFFSET(cFEStateRequestLine, mpEngine, 0x010);
-CHECK_OFFSET(cFEStateRequestLine, mCurrentCtrl, 0x014);
-CHECK_OFFSET(cFEStateRequestLine, mCtrlBits, 0x015);
-CHECK_OFFSET(cFEStateRequestLine, unk_016, 0x016);
-CHECK_OFFSET(cFEStateRequestLine, miMiscData, 0x018);
-CHECK_OFFSET(cFEStateRequestLine, mAttrState, 0x01C);
-CHECK_OFFSET(cFEStateRequestLine, mpParentState, 0x020);
-CHECK_OFFSET(cFEStateRequestLine, mScreens, 0x024);
-CHECK_OFFSET(cFEStateRequestLine, mpScreen, 0x040);
-CHECK_OFFSET(cFEStateRequestLine, mUserNum, 0x044);
-CHECK_OFFSET(cFEStateRequestLine, unk_045, 0x045);
 CHECK_OFFSET(cFEStateRequestLine, mCharID, 0x048);
 CHECK_OFFSET(cFEStateRequestLine, mSongOrder, 0x04C);
 CHECK_OFFSET(cFEStateRequestLine, mNumSongs, 0x14C);

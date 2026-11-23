@@ -2372,7 +2372,7 @@ extern void* cOVState_SAVEREPLAY_vtbl[];
 extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(cOVState_SAVEREPLAY* self, int engine, int ovStateId)
 {
     cFEMemCard_cFEMemCard(self, engine, 1, ovStateId);
-    self->mVtbl = cOVState_SAVEREPLAY_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_SAVEREPLAY_vtbl;
     self->mIsHidden = 0;
     return ((void*)self);
 }
@@ -3136,7 +3136,7 @@ extern void* cOVState_SAVEOPTIONS_vtbl[];
 extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(cOVState_SAVEOPTIONS* self, int engine, int ovStateId)
 {
     cFEMemCard_cFEMemCard(self, engine, 2, ovStateId);
-    self->mVtbl = cOVState_SAVEOPTIONS_vtbl;
+    VPTR_OF(cListNode, self) = cOVState_SAVEOPTIONS_vtbl;
     self->mIsHidden = 0;
     return ((void*)self);
 }
