@@ -2244,8 +2244,7 @@ extern "C" void cRailslideMotion_step(char* self)
         if (hit.obj) {
             cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
             if (handler) {
-                sVE46_AF28* vt = (sVE46_AF28*)VPTR_OF(cObjNode, handler);
-                if (vt[46].fn(vthis(handler, vt[46])))
+                if (handler->isFlexRail())
                     *(int*)(RIDER_AF28 + 0x5AC) = 1;
             }
         }
@@ -2256,8 +2255,7 @@ extern "C" void cRailslideMotion_step(char* self)
         if (hit.obj) {
             cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
             if (handler) {
-                sVE42_AF28* vt = (sVE42_AF28*)VPTR_OF(cObjNode, handler);
-                vt[42].fn(vthis(handler, vt[42]), &hit);
+                handler->updateIntersectInfo(*(tIntersectInfo*)&hit);
             }
         }
         *(int*)(RIDER_AF28 + 0x438) = hit.mat;
@@ -2306,8 +2304,7 @@ extern "C" void cRailslideMotion_step(char* self)
             if (hit.obj) {
                 cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
                 if (handler) {
-                    sVE43_AF28* vt = (sVE43_AF28*)VPTR_OF(cObjNode, handler);
-                    vt[43].fn(vthis(handler, vt[43]), &hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
+                    handler->applyForce(*(const tIntersectInfo*)&hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
                 }
             }
             AddEq_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), Scale_AF28(acc, dt));
@@ -4596,8 +4593,6 @@ struct sInfo_13F488 {
 } __attribute__((aligned(16)));
 
 struct sVEnt_13F488 { short delta; short index; bool (*fn)(void*); };
-struct sVEntH_13F488 { short delta; short index; void (*fn)(void*, void*); };
-
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4HP vu0Scale_13F488(const sVec4HP& v, float s)
 {
@@ -4730,10 +4725,9 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return; }
     if (((char*)hit.Inst) != 0) {
-        char* handler = (char*)hit.Inst->m_pActiveNode;
+        cInstanceNode* handler = hit.Inst->m_pActiveNode;
         if (handler) {
-            sVEntH_13F488* vt = *(sVEntH_13F488**)(handler + 0xC);
-            vt[42].fn(vthis(handler, vt[42]), &hit);
+            handler->updateIntersectInfo(hit);
         }
     }
     {

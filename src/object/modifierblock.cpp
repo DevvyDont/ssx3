@@ -124,12 +124,6 @@ extern "C" int tModifierBlock_getBoundBox(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_setBoundBox__FP14tModifierBlock);
 #ifdef SKIP_ASM
-struct sMbVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-
 // PORT: the symbol's mangling says one parameter, but the body passes $5 through
 // to the virtual call untouched, so the real function takes a second argument.
 void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
@@ -143,10 +137,9 @@ void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box) __asm__("t
  */
 void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntry* vt = *(sMbVEntry**)node;
-        vt[13].fn(vthis(node, vt[13]), box);
+        node->setBoundBox(*(const tBoundBox*)box);
     }
 }
 #endif
@@ -454,10 +447,9 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_updateIntersectInfo);
  */
 extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* intInfo)
 {
-    sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
+    cTransformModifier* node = self->RootTransform;
     if (node != 0) {
-        sMbVEntry* vt = *(sMbVEntry**)node;
-        vt[22].fn(vthis(node, vt[22]), intInfo);
+        node->updateIntersectInfo(*(tIntersectInfo*)intInfo);
     }
 }
 #endif

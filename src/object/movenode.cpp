@@ -2190,8 +2190,7 @@ extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, tInte
     }
     int saved = obj->Mesh;
     obj->Mesh = self->Mesh;
-    sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)VPTR_OF(cObjNode, parentNode);
-    vt[42].fn(vthis(parentNode, vt[42]), obj);
+    parentNode->updateIntersectInfo(*obj);
     obj->Mesh = saved;
 }
 #endif
