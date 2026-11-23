@@ -201,13 +201,6 @@ struct sSnd0018Mgr {
     char pad0[0x1D8];
     sSnd0018Sub sub;         // 0x1D8
 };
-struct sSnd0018Req {
-    char pad0[0x18];
-    int f18;                 // 0x18
-    int f1C;                 // 0x1C
-    int f20;                 // 0x20
-    int vol;                 // 0x24
-};
 
 
 #define SND_0018_MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -252,14 +245,14 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
  * @param req  the cMonitorInstance that fired (On Tour Inst)
  * @return 1
  */
-extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
+extern "C" int cBankSys_Play2DCallback(cBankSys* self, cMonitorInstance* req)
 {
-    snd0018AddVoice(gBankSys, req->f1C, req->f20);
+    snd0018AddVoice(gBankSys, req->mData1, req->mData2);
     sSnd0018Mgr* bankMgr = (sSnd0018Mgr*)gBankSys->mpVBankManager;
-    bankMgr->sub.p3C[bankMgr->sub.cur] = req->f18;
+    bankMgr->sub.p3C[bankMgr->sub.cur] = ((int)req->mPtr);
     sSnd0018Mgr* bankMgrVol = (sSnd0018Mgr*)gBankSys->mpVBankManager;
     sSnd0018Sub* s2 = &bankMgrVol->sub;
-    s2->vals[bankMgrVol->sub.cur] = req->vol;
+    s2->vals[bankMgrVol->sub.cur] = req->mData3;
     s2->ch[bankMgrVol->sub.cur].vol = SND_0018_MAX(0, SND_0018_MIN(s2->vals[s2->cur], 0x7F));
     cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
@@ -309,14 +302,6 @@ struct sSnd0358Mgr {
     char pad0[0x1D8];
     sSnd0358Sub sub;         // 0x1D8
 };
-struct sSnd0358Req {
-    char pad0[0x18];
-    int f18;                 // 0x18
-    int f1C;                 // 0x1C
-    int f20;                 // 0x20
-    int vol;                 // 0x24
-    unsigned short f28;      // 0x28
-};
 
 
 #define SND_0358_MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -362,17 +347,17 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
  * @param req  the cMonitorInstance that fired (On Tour Inst)
  * @return 1
  */
-extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, sSnd0358Req* req)
+extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, cMonitorInstance* req)
 {
-    snd0358AddVoice(gBankSys, req->f1C, req->f20);
+    snd0358AddVoice(gBankSys, req->mData1, req->mData2);
     sSnd0358Mgr* bankMgr = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    bankMgr->sub.p3C[bankMgr->sub.cur] = req->f18;
+    bankMgr->sub.p3C[bankMgr->sub.cur] = ((int)req->mPtr);
     sSnd0358Mgr* bankMgrVol = (sSnd0358Mgr*)gBankSys->mpVBankManager;
     sSnd0358Sub* s2 = &bankMgrVol->sub;
-    s2->vals[bankMgrVol->sub.cur] = req->vol;
+    s2->vals[bankMgrVol->sub.cur] = req->mData3;
     s2->ch[bankMgrVol->sub.cur].vol = SND_0358_MAX(0, SND_0358_MIN(s2->vals[s2->cur], 0x7F));
     sSnd0358Mgr* bankMgrPitch = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    bankMgrPitch->sub.ch[bankMgrPitch->sub.cur].fC = req->f28;
+    bankMgrPitch->sub.ch[bankMgrPitch->sub.cur].fC = (*(unsigned short*)&req->mData4);
     cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
 }

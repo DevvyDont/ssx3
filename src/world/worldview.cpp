@@ -321,16 +321,6 @@ struct sSecInfo_9BB8 {
 };
 
 struct sSection_9BB8;
-struct sSection_9BB8 {
-    float bmin[4];      // 0x00
-    float bmax[4];      // 0x10
-    t4Vector m_v4SplitPlaneIn;        // 0x20
-    t4Vector m_v4SplitPlaneOut;        // 0x30
-    char pad40[0x10];
-    sSection_9BB8* child0; // 0x50
-    sSection_9BB8* child1; // 0x54
-    sSecInfo_9BB8* info; // 0x58
-};
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_9BB8(const t4Vector& a, const t4Vector& b)
@@ -352,12 +342,12 @@ static inline float Dot_9BB8(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-static inline int overlap_9BB8(const t4Vector* c, const sSection_9BB8* s)
+static inline int overlap_9BB8(const t4Vector* c, const tBxBSPNode* s)
 {
     int r = 0;
-    if (c[0].x <= s->bmax[0] && c[1].x >= s->bmin[0] &&
-        c[0].y <= s->bmax[1] && c[1].y >= s->bmin[1] &&
-        c[0].z <= s->bmax[2] && c[1].z >= s->bmin[2]) {
+    if (c[0].x <= s->m_v4BoxMax.m[0] && c[1].x >= s->m_v4BoxMin.m[0] &&
+        c[0].y <= s->m_v4BoxMax.m[1] && c[1].y >= s->m_v4BoxMin.m[1] &&
+        c[0].z <= s->m_v4BoxMax.m[2] && c[1].z >= s->m_v4BoxMin.m[2]) {
         r = 1;
     }
     return r;
@@ -375,28 +365,28 @@ static inline int overlap_9BB8(const t4Vector* c, const sSection_9BB8* s)
  * @param box  the box (minimum and maximum corners)
  * @param ok  set on entry; cleared when a page is missing
  */
-extern "C" void cWorldView_recursiveIsValid(cWorldView* world, sSection_9BB8* sec, t4Vector* box, int* ok)
+extern "C" void cWorldView_recursiveIsValid(cWorldView* world, tBxBSPNode* sec, t4Vector* box, int* ok)
 {
     if (*ok == 0)
         return;
     if (!overlap_9BB8(box, sec))
         return;
-    if (sec->info != 0) {
-        if (cWorldCache_isPageLoaded(world->mp_WorldCache, sec->info->id) == 0) {
+    if (((sSecInfo_9BB8*)sec->m_pHull) != 0) {
+        if (cWorldCache_isPageLoaded(world->mp_WorldCache, ((sSecInfo_9BB8*)sec->m_pHull)->id) == 0) {
             *ok = 0;
             return;
         }
     }
-    if (sec->child0 != 0) {
-        if (Dot_9BB8(sec->m_v4SplitPlaneIn, box[0]) < 0.0f) {
-            cWorldView_recursiveIsValid(world, sec->child0, box, ok);
+    if (sec->m_pInChild != 0) {
+        if (Dot_9BB8((*(t4Vector*)&sec->m_v4SplitPlaneIn), box[0]) < 0.0f) {
+            cWorldView_recursiveIsValid(world, sec->m_pInChild, box, ok);
             if (*ok == 0)
                 return;
         }
     }
-    if (sec->child1 != 0) {
-        if (Dot_9BB8(sec->m_v4SplitPlaneOut, box[1]) < 0.0f)
-            cWorldView_recursiveIsValid(world, sec->child1, box, ok);
+    if (sec->m_pOutChild != 0) {
+        if (Dot_9BB8((*(t4Vector*)&sec->m_v4SplitPlaneOut), box[1]) < 0.0f)
+            cWorldView_recursiveIsValid(world, sec->m_pOutChild, box, ok);
     }
 }
 #endif
@@ -2059,7 +2049,7 @@ int func_003ABF50_impl(void* self, tModelRecord* list) __asm__("func_003ABF50");
 int func_003ABF50_impl(void* self, tModelRecord* list)
 {
     int n = list->m_iNumMeshes;
-    tMeshHeirarchyRecord* entry = (list->m_MeshHeirarchy);
+    tMeshHeirarchyRecord* entry = list->m_MeshHeirarchy;
     int i;
     for (i = 0; i < n; i++, entry++) {
         if (((void*)entry->m_Mesh) != 0) {
@@ -2259,7 +2249,7 @@ extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve* self, tInstanc
     pInstance->m_MaterialBlock = (tMaterialBlockRecord*)resolved->fC;
     pInstance->m_pInstanceAudio = 0;
     pInstance->m_pCollideRecord = (tCollideRecord*)(self->m_pDummyCollideRecord);
-    int x = (self->m_pDummyCollideRecord)->InitFlags & 0xFFFF0000;
+    int x = self->m_pDummyCollideRecord->InitFlags & 0xFFFF0000;
     pInstance->m_iFlags = x | (x >> 16) | 2;
     func_003AC358((cPS2ChunkResolve*)self, pInstance);
     return 1;
@@ -2291,9 +2281,9 @@ extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* instance)
     list = instance->m_Model;
     cur = *(void**)((char*)instance + 0x98);
     int n = list->m_iNumMeshes;
-    tMeshHeirarchyRecord* entry = (list->m_MeshHeirarchy);
+    tMeshHeirarchyRecord* entry = list->m_MeshHeirarchy;
     for (i = 0; i < n; i++, entry++) {
-        tMeshRecord* object = (entry->m_Mesh);
+        tMeshRecord* object = entry->m_Mesh;
         if (object != 0) {
             int j;
             for (j = 0; j < object->m_iNumContexts; j++) {

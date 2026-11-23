@@ -829,16 +829,11 @@ INCLUDE_ASM("fe/feridermanager", cFERider_rotateBoard);
 extern "C" void cFERider_updateModelPose(cFERider* self);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sQuat_F5E8 {
-    float x, y, z, w;
-    sQuat_F5E8() {}
-    sQuat_F5E8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQuat_F5E8 QuatMul_F5E8(const sQuat_F5E8& a, const sQuat_F5E8& b)
+static inline t4Vector QuatMul_F5E8(const t4Vector& a, const t4Vector& b)
 {
-    sQuat_F5E8 r;
+    t4Vector r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -864,13 +859,13 @@ static inline sQuat_F5E8 QuatMul_F5E8(const sQuat_F5E8& a, const sQuat_F5E8& b)
  * @param axis   the axis (x, y, z used)
  * @param angle  the angle in radians
  */
-extern "C" void cFERider_rotateBoard(cFERider* self, sQuat_F5E8* axis, float angle)
+extern "C" void cFERider_rotateBoard(cFERider* self, t4Vector* axis, float angle)
 {
-    sQuat_F5E8* rot = (sQuat_F5E8*)(&self->mBoardPose.Q);
-    sQuat_F5E8 turn;
+    t4Vector* rot = ((&self->mBoardPose.Q));
+    t4Vector turn;
     float sinHalf, cosHalf;
     fSinCos(&sinHalf, &cosHalf, angle * 0.5f);
-    sQuat_F5E8 rotQuat;
+    t4Vector rotQuat;
     rotQuat.w = cosHalf;
     rotQuat.x = sinHalf * axis->x;
     rotQuat.y = sinHalf * axis->y;
@@ -893,7 +888,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBonePosition);
  * @return the address of the bone's position (first quadword)
  */
 extern "C" int cFERider_getBonePosition(cFERider* riderSlot, int index) {
-    return ((int)riderSlot->mpAnimModel->bones) + ((riderSlot->mBoneMap[index]) << 5);
+    return ((int)riderSlot->mpAnimModel->bones) + (riderSlot->mBoneMap[index] << 5);
 }
 #endif
 //100%
@@ -928,7 +923,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBoneQuaternion);
  * @return the address of the bone's quaternion
  */
 extern "C" int cFERider_getBoneQuaternion(cFERider* riderSlot, int index) {
-    return ((int)riderSlot->mpAnimModel->bones) + ((riderSlot->mBoneMap[index]) << 5) + 0x10;
+    return ((int)riderSlot->mpAnimModel->bones) + (riderSlot->mBoneMap[index] << 5) + 0x10;
 }
 #endif
 //100%

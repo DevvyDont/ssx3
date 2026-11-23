@@ -216,7 +216,7 @@ int GetHashValue32(char* str);
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float t);
 extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, cPopupInfo* p);
-extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
+extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, t3Vector* color);
 extern char str_Start[];
 
 /**
@@ -240,7 +240,7 @@ extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
         bgScale.b = 1.0f;
         self->mbFirstGainTran = 1;
         cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
+        cScreenPopup_scaleBackground(self, (t3Vector*)&bgScale);
         if (self->meBackgroundType == 1)
             cScreenPopup_SetTextObjectsAlpha(self, 0.0f);
         int startFrame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_Start));
@@ -260,14 +260,14 @@ extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
         sColF_5C30 bgScale;
         bgScale.r = transitionStep * self->mvAnimateIncrement[0] + 0.2f;
         bgScale.g = transitionStep * self->mvAnimateIncrement[1] + 0.2f;
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
+        cScreenPopup_scaleBackground(self, (t3Vector*)&bgScale);
         if (self->miGainTransistionCount < self->miStartFrame) {
             self->miGainTransistionCount += 1;
             return 0;
         }
     } else {
         sColF_5C30 bgScale = *(sColF_5C30*)&self->mvCurrentScale[0];
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
+        cScreenPopup_scaleBackground(self, (t3Vector*)&bgScale);
     }
     return 1;
 }
@@ -294,7 +294,7 @@ struct sColor_7738;
 struct sColor5DD8 { int r, g, b; };
 extern "C" void cScreenPopup_restoreElements(cScreenPopup* self);
 extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, cPopupInfo* p);
-extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
+extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, t3Vector* color);
 
 /**
  * Rebuilds the popup's layout from its info, once it has been shown at least once.
@@ -309,7 +309,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
         cScreenPopup_restoreElements(self);
         cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
+        cScreenPopup_scaleBackground(self, (t3Vector*)&bgScale);
         self->onGainFocus(0);
     }
 }
@@ -1152,7 +1152,6 @@ extern "C" void cScreenPopup_determineAndSetScaling(cScreenPopup* self, t3Vector
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_scaleBackground);
 #ifdef SKIP_ASM
-struct sColor_7738 { int r, g, b; };
 
 /**
  * Applies a scale to the background shapes of the popup's current background type.
@@ -1163,21 +1162,21 @@ struct sColor_7738 { int r, g, b; };
  *
  * @param color  the scale vector (On Tour: t3Vector vScale), despite the parameter's type name
  */
-extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color)
+extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, t3Vector* color)
 {
-    sColor_7738 scaleColor = *color;
+    t3Vector scaleColor = *color;
     switch (self->meBackgroundType) {
     case 0:
         {
             void* background = self->mpBackGroundWhite;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
             void* background = self->mpBackGroundRed;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         break;
@@ -1185,31 +1184,31 @@ extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* co
         {
             void* background = self->mpBackGroundSmall;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
             void* background = self->mpBackGroundSmallOutline;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
             void* background = self->mpBackGroundLarge;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
             void* background = self->mpBackGroundLargeOutline;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
             void* background = self->mpBackGroundShadow;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         break;
@@ -1217,7 +1216,7 @@ extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* co
         {
             void* background = self->mpBackGroundBlack;
             if (background != 0) {
-                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
+                *(t3Vector*)((char*)background + 0x50) = scaleColor;
             }
         }
         break;

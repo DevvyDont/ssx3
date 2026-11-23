@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/ridermetrix.h"
 #include "be/bedbprofile.h"
 #include "vtable.h"
 #include "be/beinterface.h"
@@ -166,9 +167,8 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int cBECharProfileDB_updateScoreStats(cBECharProfileDB* self, int event, int mode, unsigned int value);
 extern cBECharProfileDB cBELibrary_profileLib_154AB8[][10] __asm__("cBELibrary_profileLib");
 
-struct sRaceStats_154AB8 { int w[0xAC / 4]; };
 struct sScoreSlot_154AB8 {
-    sRaceStats_154AB8 stats;
+    tRiderStats stats;
     int result;     // 0xAC
 };
 struct sScore_154AB8 {
@@ -220,7 +220,7 @@ extern sEvent_154AB8 cBELibrary_locationDB_154AB8[] __asm__("cBELibrary_location
  * @param stats  the rider's event stats, 0xAC bytes (On Tour pRiderStats)
  * @param score  the event score or time in ticks (On Tour uiPoints)
  */
-extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, int rider, sRaceStats_154AB8* stats, unsigned int score)
+extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, int rider, tRiderStats* stats, unsigned int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)

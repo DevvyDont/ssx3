@@ -6976,7 +6976,7 @@ extern "C" void cMonitor_MONITOR_Create(int a, int b, long t, void* c, int d, in
  *
  * @param ent  the cSongInstance to time against
  */
-extern "C" void func_002B4568(cMusicSys* self, void* ent)
+extern "C" void func_002B4568(cMusicSys* self, cSongInstance* ent)
 {
     if (self->mSongInstance != 0) {
         float beatLength = func_002B2690((cSongInstance*)ent);
@@ -7107,7 +7107,7 @@ extern "C" int func_002B4720(cMusicSys* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B4740);
 #ifdef SKIP_ASM
-extern "C" void func_002B4568(cMusicSys* self, void* ent);
+extern "C" void func_002B4568(cMusicSys* self, cSongInstance* ent);
 
 /**
  * Monitor callback (D_004A3838) waiting for the song's loop bank: arms the beat callback once it is loaded.

@@ -2396,7 +2396,7 @@ extern "C" int cFEStateMountainRoom_isPassVisible(cFEStateMountainRoom* mountain
     temp_3 = ((void*)mountainRoom->mpPassGroup);
     var_2 = 0;
     if (temp_3 != 0) {
-        var_2 = ((int) (*(int *)((char*)(temp_3) + (0x14))) >> 6) & 1;
+        var_2 = ((int) (*(int *)((char*)(temp_3) + 0x14)) >> 6) & 1;
     }
     return var_2;
 }
@@ -2423,12 +2423,12 @@ extern "C" int cFEStateMountainRoom_isPassFrontVisible(cFEStateMountainRoom* mou
     var_5 = 0;
     var_2 = 0;
     if (temp_3 != 0) {
-        var_2 = ((int) (*(int *)((char*)(temp_3) + (0x14))) >> 6) & 1;
+        var_2 = ((int) (*(int *)((char*)(temp_3) + 0x14)) >> 6) & 1;
     }
     if (var_2 != 0) {
         temp_4 = ((void*)mountainRoom->mpPassFrontGroup);
         if (temp_4 != 0) {
-            var_5 = ((int) (*(int *)((char*)(temp_4) + (0x14))) >> 6) & 1;
+            var_5 = ((int) (*(int *)((char*)(temp_4) + 0x14)) >> 6) & 1;
         }
     }
     return var_5;
@@ -7357,7 +7357,7 @@ struct sObj_3C00 {
  * @param id  the overlay's id (On Tour cOVState ctor tOVStateEnum id; the overlay factory passes 0x22)
  * @return @p self
  */
-extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGECENTER* self, void* engine, int id)
+extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGECENTER* self, cUIEngine* engine, int id)
 {
     sObj_3C00* stateView = (sObj_3C00*)self;
     cUIState_cUIState(self, engine);

@@ -95,7 +95,7 @@ struct sFsMesh_CM {
  * @param flagSet  the flag set
  * @param item  the flag's instance record (On Tour tInstanceRecord* pInst)
  */
-extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, void* item)
+extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, tInstanceRecord* item)
 {
     cFlagSet* self = flagSet;
     int i;
@@ -590,7 +590,7 @@ INCLUDE_ASM("object/flagset", cFlagSet_readFromReplayFrame);
 #ifdef SKIP_ASM
 
 
-extern "C" void cFlagSet_CreateMesh(cFlagSet* self, void* item);
+extern "C" void cFlagSet_CreateMesh(cFlagSet* self, tInstanceRecord* item);
 
 /**
  * Reads a flag set back from a replay frame.
@@ -920,11 +920,6 @@ extern "C" void cFlagManager_readFromReplayFrame(cFlagManager* self, cBxReplayFr
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode1);
 #ifdef SKIP_ASM
-// cFenceNode::cFenceNode(int bucket, tInstanceRecord* pInst, tMakeFenceData* tdata, const tIntersectInfo* info)
-// (SSX On Tour symbols; On Tour passes the force in, retail computes it here like cFenceNode::onCollide).
-struct tMakeFenceData_C8E8 {
-    unsigned int w[4];
-};
 
 struct t3Vector_C8E8 {
     float x, y, z;
@@ -1031,14 +1026,14 @@ extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, tInstanceRecord* obj,
  * @param info  intersect info of the hit
  * @return self
  */
-extern "C" cFenceNode* cFenceNode_cFenceNode1(cFenceNode* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, tCollideInfo* info)
+extern "C" cFenceNode* cFenceNode_cFenceNode1(cFenceNode* self, int bucket, void* pInst, tMakeFenceData* tdata, tCollideInfo* info)
 {
     float force;
     cInstanceNode_cInstanceNode1((self), bucket, 9, pInst);
     self->FenceData.InstId = 0xFFFFFFFF;
     VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
     new (((t3Vector_C8E8*)&self->Verts[0])) t3Vector_C8E8[16];
-    *(tMakeFenceData_C8E8*)&self->FenceData = *tdata;
+    *(&self->FenceData) = *tdata;
     *(int*)&self->ForceMax = 0;
     *(int*)&self->Force = 0;
     *(int*)&self->ForceStep = 0;

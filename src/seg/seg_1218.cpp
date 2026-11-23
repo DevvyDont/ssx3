@@ -2373,12 +2373,6 @@ struct sBank_3AA0 {
     sRec_3AA0* recs;
 };
 
-struct sObj_3AA0 {
-    int f0;
-    unsigned int id;
-    char pad[0xA8];
-    char sub[1];
-};
 
 struct sBankTab_3AA0 {
     sBank_3AA0* banks[1];
@@ -2400,18 +2394,18 @@ extern "C" void cRiderAnim_triggerAnimSound(cRiderAnim*, int);
  *
  * @param sequence  the animation sequence
  */
-extern "C" void cRiderAnim_checkForSoundEvents(cRiderAnim* self, sObj_3AA0* sequence)
+extern "C" void cRiderAnim_checkForSoundEvents(cRiderAnim* self, cAnimSequence* sequence)
 {
-    int n = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF]->ents[sequence->id >> 8].count;
+    int n = cAnimDataBase_TheAnimDataBase->banks[sequence->SubAnims[0].AnimID & 0xFF]->ents[sequence->SubAnims[0].AnimID >> 8].count;
     for (int i = 0; i < n; i++) {
         int ok = 0;
-        if (tEventFlags_isSet1(sequence->sub, i) && tEventFlags_isJustChanged(sequence->sub, i))
+        if (tEventFlags_isSet1(((char*)&sequence->Events), i) && tEventFlags_isJustChanged(((char*)&sequence->Events), i))
             ok = 1;
         if (ok) {
-            sBank_3AA0* animBank = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF];
-            unsigned short soundEvent = animBank->recs[animBank->ents[sequence->id >> 8].first + i].b;
+            sBank_3AA0* animBank = cAnimDataBase_TheAnimDataBase->banks[sequence->SubAnims[0].AnimID & 0xFF];
+            unsigned short soundEvent = animBank->recs[animBank->ents[sequence->SubAnims[0].AnimID >> 8].first + i].b;
             if (soundEvent & 0x8000) {
-                tEventFlags_clear1(sequence->sub, i);
+                tEventFlags_clear1(((char*)&sequence->Events), i);
                 cRiderAnim_triggerAnimSound(self, soundEvent & 0x7FFF);
             }
         }
@@ -4183,15 +4177,6 @@ extern "C" void cRider_turnFromCollision(void* rider, void* hit);
 extern "C" void cRider_flagEventLand(void* rider, int a, int b, int c, void* hit, float speed);
 extern "C" void cRiderMetrix_evTakeoff(void* metrix, int a, int b);
 
-struct sHit_57B8 {
-    char pad0[0x10];
-    t4Vector n;         // 0x10
-    t4Vector vel;       // 0x20
-    char pad30[0x1C];
-    int mat;            // 0x4C
-    char pad50[0xC];
-    int surf;           // 0x5C
-};
 
 struct sVE_57B8 { short delta; short index; int (*fn)(void*); };
 struct sVEf_57B8 { short delta; short index; void (*fn)(void*, float); };
@@ -4360,11 +4345,11 @@ static inline float Sqrt_57B8(float x)
  * @param hit  the intersection (tIntersectInfo): normal, surface velocity, surface and material
  * @param depth  the penetration depth (On Tour overlap)
  */
-extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, sHit_57B8* hit, float depth)
+extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, tIntersectInfo* hit, float depth)
 {
     if (cRider_getControlState_57B8(rider) == 9)
         return;
-    int off = hit->surf * 12 + 0x10;
+    int off = hit->Mesh * 12 + 0x10;
     float* surf = (float*)(*(char**)(obj + 0x88) + off);
     float grip = Clamp_57B8(surf[1], 0.0f, 1.0f);
     float bounce = surf[0];
@@ -4372,11 +4357,11 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         cRider_doBump(rider, (tCollideInfo*)info, 1);
         return;
     }
-    float vn = Dot_57B8(hit->n, Sub_57B8(hit->vel, rider->mVelocity)) >= 0.0f
-                   ? Dot_57B8(hit->n, Sub_57B8(hit->vel, rider->mVelocity)) : 0.0f;
+    float vn = Dot_57B8(hit->Inorm, Sub_57B8(hit->Ivel, rider->mVelocity)) >= 0.0f
+                   ? Dot_57B8(hit->Inorm, Sub_57B8(hit->Ivel, rider->mVelocity)) : 0.0f;
     char* handler = *(char**)(obj + 0xC);
     if (handler == 0 || (*(sVE_57B8**)(handler + 0xC))[14].fn(handler + (*(sVE_57B8**)(handler + 0xC))[14].delta) != 0) {
-        cRider_moveFromCollision(rider, Scale_57B8(hit->n, depth * 1.100000023841858f));
+        cRider_moveFromCollision(rider, Scale_57B8(hit->Inorm, depth * 1.100000023841858f));
         if (vn < 0.0f)
             vn = 0.0f;
         bounce = vn + Clamp_57B8(grip * vn, 55.55555725097656f, 1388.888916015625f);
@@ -4389,17 +4374,17 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         float constTerm = (1.0f - grip) * inv;
         bounce = Sqrt_57B8((linearTerm * linearTerm - constTerm) >? 0.0f) - linearTerm; // PORT: g++ maximum operator
     }
-    float facing = DotV_57B8(rider->RiderRoot.row[2], hit->n);
+    float facing = DotV_57B8(rider->RiderRoot.row[2], hit->Inorm);
     if (cRider_getMotionState(rider) == 1 || (cRider_getMotionState(rider) == 2 && rider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
         if (Len_57B8(rider->mVelocity) < 833.3333740234375f) {
             float* acc = &rider->mImpactAccum2;
-            *acc = *acc + (2.5f - facing) * (hit->n.z >= 0.20000000298023224f ? hit->n.z : 0.20000000298023224f);
+            *acc = *acc + (2.5f - facing) * (hit->Inorm.z >= 0.20000000298023224f ? hit->Inorm.z : 0.20000000298023224f);
         }
     }
     int anim = cRiderAnimBase_getCurrentAnimCategory(rider->mRiderAnim, 2);
     int state = cRider_getMotionState(rider);
     if (state == 1 && (anim == 9 || anim == 2 || anim == 11 || anim == state) && facing > 0.30000001192092896f) {
-        t4Vector w = Add_57B8(Sub_57B8(rider->mVelocity, hit->vel), Scale_57B8(hit->n, vn));
+        t4Vector w = Add_57B8(Sub_57B8(rider->mVelocity, hit->Ivel), Scale_57B8(hit->Inorm, vn));
         float speed = Len_57B8(w);
         float out = Max_57B8(bounce - vn, 277.77777099609375f);
         float velScale = (speed + 555.5555419921875f) * 0.5f;
@@ -4408,7 +4393,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         else
             velScale = velScale / speed;
         ScaleEq_57B8(w, velScale);
-        rider->mVelocity = Add_57B8(w, Scale_57B8(hit->n, out));
+        rider->mVelocity = Add_57B8(w, Scale_57B8(hit->Inorm, out));
         sVEf_57B8* vt = *(sVEf_57B8**)&VPTR_AT(rider, sizeof(cRiderState));
         vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), vn);
         if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2) > 0.20000000298023224f) {
@@ -4424,8 +4409,8 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         cAirPredictor_startLaunchIntoAir_57B8(rider->mAirPredictor, pos, vel, rider->TerminalVelocity);
         return;
     }
-    AddEq_57B8(rider->mVelocity, Scale_57B8(hit->n, bounce));
-    cRider_reactToCollision(rider, info, hit->mat);
+    AddEq_57B8(rider->mVelocity, Scale_57B8(hit->Inorm, bounce));
+    cRider_reactToCollision(rider, info, hit->Stype);
 }
 #endif
 

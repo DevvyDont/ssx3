@@ -23,6 +23,7 @@
 
 #include "layout.h"
 #include "world/instancerecord.h"   // tf3Vector / tf4Vector / tf4Matrix, tInstanceRecord
+#include "bx/math3d.h"              // t3Vector (tPolyBoundBox)
 
 struct tMeshContextRecord;          // [P] meshRecord->m_pContexts[context]->m_sMaterialIndex (not laid out)
 struct tAnimRecord;
@@ -30,7 +31,6 @@ struct tSplineRecord;
 struct tInstanceAudio;              // [O] tInstanceRecord / tParticleInstanceRecord::m_pInstanceAudio
 struct bxSphereTree;                // object/rollermodifier.h (0x140)
 struct tPolyModelMesh;              // [O] 0x14 (laid out below)
-struct tPolyBoundBox;               // [O] (not laid out)
 struct t4Vector;                    // bx/math3d.h
 
 // A model's mesh table entry (On Tour tMeshHeirarchyRecord, 0x10; same layout).
@@ -331,6 +331,17 @@ CHECK_SIZE(tSphTreeList, 0x8);
 // tCollideModelRecord::m_pPolyMesh point at them; [U] cFlexBridgeNode_intersect (src/object/flexbridgenode.cpp, view
 // sFMesh_7268) builds one on the stack from its own grid (faces, boxes, vertices, normals) for
 // cWorldIntersectType_IsMeshInt.
+// One face-group box of a poly-model mesh (tPolyModelMesh::Boxes, one per 10 faces). [O] struct tPolyBoundBox (0x18;
+// On Tour also gives it constructors, left out: the records are only read from the world data); [U]
+// cWorldIntersectType_IsMeshInt hands MinPoint / MaxPoint to the tester's virtual box test.
+struct tPolyBoundBox {
+    t3Vector MinPoint;              // 0x00 [O]
+    t3Vector MaxPoint;              // 0x0C [O]
+};
+
+CHECK_OFFSET(tPolyBoundBox, MaxPoint, 0x0C);
+CHECK_SIZE(tPolyBoundBox, 0x18);
+
 struct tPolyModelMesh {
     unsigned short NumFaces;        // 0x00 [O]; [U] the triangle count
     unsigned short NumVertices;     // 0x02 [O]; [U] the vertex count

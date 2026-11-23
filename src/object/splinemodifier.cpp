@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/rider.h"
 #include "object/movenode.h"
 #include "world/worldrecords.h"
 #include "object/instancenode.h"
@@ -396,12 +397,6 @@ INCLUDE_ASM("object/splinemodifier", cSplineModifier_updateIntersectInfo);
 #ifdef SKIP_ASM
 
 
-struct sSmBody_9CF8 {
-    t4Vector pos;       // 0x00
-    t4Vector f10;       // 0x10
-    t4Vector vel;       // 0x20
-    t4Vector rot;       // 0x30
-};
 
 struct cSplineModifier_9CF8 {
     char pad_0x0[0x48];
@@ -567,7 +562,7 @@ static inline void vu0AddTo_9CF8(t4Vector& a, const t4Vector& b)
  *
  * @param body  the intersect info to update (On Tour tIntersectInfo&: Ipos +0x0, Ivel +0x20, Iangvel +0x30)
  */
-extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBody_9CF8* body)
+extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, tIntersectInfo* body)
 {
     tBoundBox* sub = &self->BoundBox;
     if (self->Start == 0) {
@@ -595,9 +590,9 @@ extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBo
     w.y = rateY * self->Velocity;
     w.w = 0.0f;
     w = vu0MulMat_9CF8(&(*(&self->Transform)), w);
-    t4Vector relPos = vu0Sub_9CF8(body->pos, *(t4Vector*)&self->Pos);
-    vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
-    vu0AddTo_9CF8(body->rot, w);
+    t4Vector relPos = vu0Sub_9CF8(body->Ipos, *(t4Vector*)&self->Pos);
+    vu0AddTo_9CF8(body->Ivel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
+    vu0AddTo_9CF8(body->Iangvel, w);
 }
 #endif
 
@@ -1719,7 +1714,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
     if (self->HeadTweak != 0.0f) {
         rot.setAxisRot(t4vect_ZAxis_AC20, *(float*)&sub->OrientType);
     }
-    tMultiNode* pt = (self->Nodes);
+    tMultiNode* pt = self->Nodes;
     for (i = 0; i < self->NumModels; i++, pt++) {
         float rx = 0.0f;
         float ry = rx;
@@ -2124,7 +2119,7 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, tAddRailData* 
     self->Instance = (tInstanceRecord*)model;
     self->SplineId = desc->SplineId;
     self->Mesh = desc->Mesh;
-    cInstanceNode* modelObj = (model->m_pActiveNode);
+    cInstanceNode* modelObj = model->m_pActiveNode;
     if (modelObj->hasBoundBox() == 0) {
         tInstanceRecord* instModel = self->Instance;
         tBoundBox bounds;
@@ -2547,9 +2542,9 @@ static inline void vecAddEq_C040(t4Vector& a, const t4Vector& b)
  */
 extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
 {
-    cInstanceNode* ownerObj = ((self->Instance)->m_pActiveNode);
+    cInstanceNode* ownerObj = self->Instance->m_pActiveNode;
     if (((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v44.fn(vthis(ownerObj, ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v44)) != 0) {
-        ownerObj = ((self->Instance)->m_pActiveNode);
+        ownerObj = self->Instance->m_pActiveNode;
         tBoundBox* bounds = ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v45.fn(vthis(ownerObj, ((sSmVtbl_C040*)VPTR_OF(cObjNode, ownerObj))->v45));
         (*(&self->BoundBox)) = *bounds;
         t4Vector margin;

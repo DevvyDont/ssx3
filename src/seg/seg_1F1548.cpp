@@ -1388,11 +1388,6 @@ extern sTun_2598 cSplashToggles_m_DropMinSize_2598 __asm__("cSplashToggles_m_Dro
 extern sTun_2598 cSplashToggles_m_DropMaxWidthHeightDifference_2598 __asm__("cSplashToggles_m_DropMaxWidthHeightDifference");
 extern sTun_2598 cSplashToggles_m_DropMaxRotationChange_2598 __asm__("cSplashToggles_m_DropMaxRotationChange");
 
-struct sV2_2598 {
-    float x, y;
-    sV2_2598() {}
-    sV2_2598(float ax, float ay) : x(ax), y(ay) {}
-};
 
 struct sV4_2598 {
     float x, y, z, w;
@@ -1402,13 +1397,13 @@ struct sV4_2598 {
 
 extern sV4_2598 D_005046E0;
 extern sV4_2598 D_005046F0;
-extern sV2_2598 t2vect_Zero[]; // PORT: 8-byte object, declared unsized so it is not $gp-addressed
+extern t2Vector t2vect_Zero[]; // PORT: 8-byte object, declared unsized so it is not $gp-addressed
 
 struct sPart_2598 {
     int active;
-    sV2_2598 pos;
-    sV2_2598 size;
-    sV2_2598 vel;
+    t2Vector pos;
+    t2Vector size;
+    t2Vector vel;
     int age;
     float life;
     sV4_2598 color;
@@ -1438,7 +1433,7 @@ static inline sV4_2598 operator+(const sV4_2598& a, const sV4_2598& b)
     return sV4_2598(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
 }
 
-extern "C" void tDrop_init_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range) __asm__("tDrop_init");
+extern "C" void tDrop_init_2598(sPart_2598* p, const t2Vector& pos, t2Vector* range) __asm__("tDrop_init");
 /**
  * Starts a screen-splash drop at a position with a random size, life, spin and tint.
  *
@@ -1453,7 +1448,7 @@ extern "C" void tDrop_init_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* ra
  * @param pos  the screen position
  * @param range  the largest width (x) and height (y)
  */
-extern "C" void tDrop_init_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598* range)
+extern "C" void tDrop_init_2598(sPart_2598* drop, const t2Vector& pos, t2Vector* range)
 {
     float maxY = range->y;
     float maxX = range->x;
@@ -1463,7 +1458,7 @@ extern "C" void tDrop_init_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598*
     drop->age = 0;
     drop->life = randRange_2598(cSplashToggles_m_DropMinLifeSpan_2598.v, cSplashToggles_m_DropMaxLifeSpan_2598.v);
     drop->active = 1;
-    drop->size = sV2_2598(x, y);
+    drop->size = t2Vector(x, y);
     drop->pos = pos;
     drop->vel = t2vect_Zero[0];
     drop->angle = randf_2598() * 360.0f;
@@ -2048,11 +2043,6 @@ extern "C" void tCrystal_update_3030(sPart_3030* crystal, float cameraSpeed)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", tCrystal_render);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sV2_3418 {
-    float x, y;
-};
 struct sV4_3418 {
     float x, y, z, w;
 };
@@ -2092,7 +2082,7 @@ public:
     virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
     virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75();
     virtual void v76(); virtual void v77();
-    virtual void DrawX(float, const sPos_3418&, const t3Vector&, const sV2_3418&, const sV2_3418&, const sV4_3418&, int);
+    virtual void DrawX(float, const sPos_3418&, const t3Vector&, const t2Vector&, const t2Vector&, const sV4_3418&, int);
 };
 
 struct sWorld_3418 {
@@ -2130,7 +2120,7 @@ extern int D_004A5528_3418 __asm__("D_004A5528");
  *
  * @param off  the screen offset added to the crystal position
  */
-extern "C" void tCrystal_render(tCrystal* self, const sV2_3418* off)
+extern "C" void tCrystal_render(tCrystal* self, const t2Vector* off)
 {
     if (D_004A5518_3418 == 0) {
         D_004A5510_3418 = 0.0f;
@@ -2147,7 +2137,7 @@ extern "C" void tCrystal_render(tCrystal* self, const sV2_3418* off)
     fade = 1.0f - fade * fade;
     col.x *= fade;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((sWorld_3418*)GrMan)->GetFB();
-    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), *(t3Vector*)&self->mSize[0], *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
+    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), *(t3Vector*)&self->mSize[0], *(t2Vector*)&D_004A5510_3418, *(t2Vector*)&D_004A5520_3418, col, 1);
 }
 #endif
 
@@ -2231,9 +2221,6 @@ extern "C" void cSplashManager__cSplashManager(cSplashManager* self) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_AddCrystal);
 #ifdef SKIP_ASM
-struct sVec2_3640 {
-    float x, y;
-};
 
 
 struct sEmit_3640 {
@@ -2247,7 +2234,7 @@ extern int D_004A3AFC;
 extern int cSplashToggles_m_NumIceCrystals;
 extern float cSplashToggles_m_CrystalGroupSpacingX;
 extern float cSplashToggles_m_CrystalGroupSpacingY;
-extern "C" void tCrystal_init(tCrystal*, sVec2_3640*, int);
+extern "C" void tCrystal_init(tCrystal*, t2Vector*, int);
 
 // PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
 static inline float randf_3640()
@@ -2271,14 +2258,14 @@ static inline float randRange_3640(float lo, float hi)
  * @param basePos  the group position
  * @param n  how many crystals to add
  */
-extern "C" void cSplashManager_AddCrystal(cSplashManager* self, sVec2_3640* basePos, int n)
+extern "C" void cSplashManager_AddCrystal(cSplashManager* self, t2Vector* basePos, int n)
 {
     for (int i = 0; i < n; i++) {
         if (self->mNumActiveCrystals < cSplashToggles_m_NumIceCrystals) {
-            sVec2_3640 off;
+            t2Vector off;
             off.x = randRange_3640(-cSplashToggles_m_CrystalGroupSpacingX, cSplashToggles_m_CrystalGroupSpacingX);
             off.y = randRange_3640(-cSplashToggles_m_CrystalGroupSpacingY, cSplashToggles_m_CrystalGroupSpacingY);
-            sVec2_3640 pos;
+            t2Vector pos;
             pos.x = basePos->x + off.x;
             pos.y = basePos->y + off.y;
             tCrystal_init(&((&self->mCrystalList[0]))[self->mNumActiveCrystals], &pos, i);

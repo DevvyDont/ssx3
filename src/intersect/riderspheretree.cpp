@@ -1,4 +1,6 @@
 #include "common.h"
+#include "world/worldrecords.h"
+#include "world/worldview.h"
 #include "vtable.h"
 #include "ai/rider.h"
 #include "intersect/worldline.h"
@@ -344,10 +346,6 @@ extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* node, t4Ve
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_GetBoundBox);
 #ifdef SKIP_ASM
-struct sSphereBox_9CE0 {
-    t4Vector mn;
-    t4Vector mx;
-};
 
 /**
  * Computes the bounding box of all of a rider sphere tree's spheres.
@@ -358,31 +356,31 @@ struct sSphereBox_9CE0 {
  * @param box  receives the box: min at +0x0, max at +0x10 (On Tour bb)
  */
 // Bounding box of all child spheres, seeded with the node's own center.
-extern "C" void cRiderSphereTree_GetBoundBox(sSphereTreeNode* self, sSphereBox_9CE0* box)
+extern "C" void cRiderSphereTree_GetBoundBox(sSphereTreeNode* self, tBoundBox* box)
 {
-    box->mn = box->mx = self->center;
+    box->MinPoint = box->MaxPoint = self->center;
     for (int i = 0; i < self->count; i++) {
         sSphereChild* child = &self->children[i];
         float childRadius = child->radius;
         float bound;
         bound = child->pos.x - childRadius;
-        if (bound < box->mn.x)
-            box->mn.x = bound;
+        if (bound < box->MinPoint.x)
+            box->MinPoint.x = bound;
         bound = child->pos.y - childRadius;
-        if (bound < box->mn.y)
-            box->mn.y = bound;
+        if (bound < box->MinPoint.y)
+            box->MinPoint.y = bound;
         bound = child->pos.z - childRadius;
-        if (bound < box->mn.z)
-            box->mn.z = bound;
+        if (bound < box->MinPoint.z)
+            box->MinPoint.z = bound;
         bound = child->pos.x + childRadius;
-        if (box->mx.x < bound)
-            box->mx.x = bound;
+        if (box->MaxPoint.x < bound)
+            box->MaxPoint.x = bound;
         bound = child->pos.y + childRadius;
-        if (box->mx.y < bound)
-            box->mx.y = bound;
+        if (box->MaxPoint.y < bound)
+            box->MaxPoint.y = bound;
         bound = child->pos.z + childRadius;
-        if (box->mx.z < bound)
-            box->mx.z = bound;
+        if (box->MaxPoint.z < bound)
+            box->MaxPoint.z = bound;
     }
 }
 #endif
@@ -1608,19 +1606,7 @@ static inline float vDot_C0F8(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-struct sTriBox_C0F8 {
-    float lo[3];
-    float hi[3];
-};
 
-struct sTriMesh_C0F8 {
-    unsigned short numTris;     // 0x0
-    short pad2;
-    unsigned char* indices;     // 0x4
-    sTriBox_C0F8* boxes;        // 0x8
-    t4Vector* verts;            // 0xC
-    t4Vector* normals;          // 0x10
-};
 
 
 struct sVE_C0F8a {
@@ -1631,7 +1617,7 @@ struct sVE_C0F8a {
 struct sVE_C0F8b {
     short delta;
     short index;
-    int (*fn)(void*, float*, float*);
+    int (*fn)(void*, const t3Vector&, const t3Vector&);
 };
 
 struct sTriTester_C0F8 {
@@ -1656,22 +1642,22 @@ struct sTriTester_C0F8 {
  * @param out   out: the hit records
  * @return the number of hits
  */
-extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int flag, tIntersectInfo* out)
+extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, tPolyModelMesh* mesh, int flag, tIntersectInfo* out)
 {
     t4Vector pos;
     t4Vector hn;
     float hitParam;
     int n = 0;
-    if (mesh->numTris < 11) {
-        for (int i = 0; i < mesh->numTris; i++) {
-            t4Vector* nrm = &mesh->normals[i];
+    if (mesh->NumFaces < 11) {
+        for (int i = 0; i < mesh->NumFaces; i++) {
+            t4Vector* nrm = &mesh->Normal[i];
             if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
                 continue;
             }
-                        t4Vector* vertices = mesh->verts;
-            t4Vector* corner0 = &vertices[mesh->indices[i * 3]];
-            t4Vector* corner1 = &vertices[mesh->indices[i * 3 + 1]];
-            t4Vector* corner2 = &vertices[mesh->indices[i * 3 + 2]];
+                        t4Vector* vertices = mesh->Vertex;
+            t4Vector* corner0 = &vertices[mesh->Face[i][0]];
+            t4Vector* corner1 = &vertices[mesh->Face[i][1]];
+            t4Vector* corner2 = &vertices[mesh->Face[i][2]];
             int isHit;
             if (flag != 0) {
                 isHit = self->vt[5].fn(vthis(self, self->vt[5]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
@@ -1703,23 +1689,23 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
             n++;
         }
     } else {
-        int nb = (mesh->numTris + 9) / 10;
+        int nb = (mesh->NumFaces + 9) / 10;
         for (int boxIndex = 0; boxIndex < nb; boxIndex++) {
-            sTriBox_C0F8* box = &mesh->boxes[boxIndex];
+            tPolyBoundBox* box = &mesh->Boxes[boxIndex];
             sVE_C0F8b* vt = (sVE_C0F8b*)self->vt;
-            if (!vt[9].fn(vthis(self, vt[9]), box->lo, box->hi)) {
+            if (!vt[9].fn(vthis(self, vt[9]), box->MinPoint, box->MaxPoint)) {
                 continue;
             }
-            int end = (boxIndex + 1) * 10 < mesh->numTris ? (boxIndex + 1) * 10 : mesh->numTris;
+            int end = (boxIndex + 1) * 10 < mesh->NumFaces ? (boxIndex + 1) * 10 : mesh->NumFaces;
             for (int i = boxIndex * 10; i < end; i++) {
-                t4Vector* nrm = &mesh->normals[i];
+                t4Vector* nrm = &mesh->Normal[i];
                 if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
                     continue;
                 }
-                                t4Vector* vertices = mesh->verts;
-                t4Vector* corner0 = &vertices[mesh->indices[i * 3]];
-                t4Vector* corner1 = &vertices[mesh->indices[i * 3 + 1]];
-                t4Vector* corner2 = &vertices[mesh->indices[i * 3 + 2]];
+                                t4Vector* vertices = mesh->Vertex;
+                t4Vector* corner0 = &vertices[mesh->Face[i][0]];
+                t4Vector* corner1 = &vertices[mesh->Face[i][1]];
+                t4Vector* corner2 = &vertices[mesh->Face[i][2]];
                 int isHit;
                 if (flag != 0) {
                     isHit = self->vt[5].fn(vthis(self, self->vt[5]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
@@ -2518,16 +2504,16 @@ extern "C" int SphereTree_isBoxCollision(SphereTree* selfp, t3Vector* boxMin, t3
     t4Vector normal;
     t4Vector dir;
     float dist;
-    if (gIsBoxSphereInt(boxMin, boxMax, pos, &normal, &dir, &dist, ((self->treeInfo)->levels)[depth].radius * self->scale) == 0) {
+    if (gIsBoxSphereInt(boxMin, boxMax, pos, &normal, &dir, &dist, (self->treeInfo->levels)[depth].radius * self->scale) == 0) {
         return 0;
     }
-    unsigned char mask = (self->treeInfo)->bitTree[base];
+    unsigned char mask = self->treeInfo->bitTree[base];
     if (depth < (self->treeInfo)->depth && mask != 0) {
-        float off = ((self->treeInfo)->levels)[depth + 1].cenOffset;
+        float off = (self->treeInfo->levels)[depth + 1].cenOffset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
                 t4Vector childPos = Add_D028(*(t4Vector*)pos, Scale_D028(((t4Vector*)&self->axis[0])[i], off));
-                if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * ((self->treeInfo)->levels)[depth].indexOffset + base, outPos, outNormal)) {
+                if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * (self->treeInfo->levels)[depth].indexOffset + base, outPos, outNormal)) {
                     return 1;
                 }
             }
@@ -2641,18 +2627,18 @@ extern "C" void SphereTree_checkPlaneCollision(SphereTree* selfp, void* plane, t
 {
     SphereTree* self = selfp;
     float planeDist = Dot_D208(*(t4Vector*)plane, *(t4Vector*)pos);
-    float nodeRadius = ((self->treeInfo)->levels)[depth].radius * self->scale;
+    float nodeRadius = (self->treeInfo->levels)[depth].radius * self->scale;
     if (!(planeDist < nodeRadius + self->worstCase))
         return;
     float distance;
-    unsigned char mask = (self->treeInfo)->bitTree[base];
+    unsigned char mask = self->treeInfo->bitTree[base];
     if (depth < (self->treeInfo)->depth && mask != 0) {
-        distance = ((self->treeInfo)->levels)[depth + 1].cenOffset;
+        distance = (self->treeInfo->levels)[depth + 1].cenOffset;
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
                 t4Vector childPos = Add_D208(*(t4Vector*)pos, Scale_D208(((t4Vector*)&self->axis[0])[k], distance));
-                SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * ((self->treeInfo)->levels)[depth].indexOffset + base, outA, outB);
+                SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * (self->treeInfo->levels)[depth].indexOffset + base, outA, outB);
             }
         }
         return;

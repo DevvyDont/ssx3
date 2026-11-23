@@ -6108,10 +6108,6 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 extern void* cGraphMenuItem_vtbl[];
 extern void* D_00486738[];
 
-struct sPair8_D0808 {
-    int a;
-    int b;
-};
 
 /**
  * Constructs a graph item: an editable curve of @p numPoints points with per-point axis locks, a slope rule and a range.
@@ -6130,7 +6126,7 @@ struct sPair8_D0808 {
  * @param maxPoint  the maximum point (x, y)
  * @return @p self
  */
-extern "C" void* cGraphMenuItem_cGraphMenuItem(cGraphMenuItem* self, int numPoints, int xLockBits, int yLockBits, int slope, int points, sPair8_D0808* minPoint, sPair8_D0808* maxPoint)
+extern "C" void* cGraphMenuItem_cGraphMenuItem(cGraphMenuItem* self, int numPoints, int xLockBits, int yLockBits, int slope, int points, t2Vector* minPoint, t2Vector* maxPoint)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->NumPoints = numPoints;
@@ -6139,8 +6135,8 @@ extern "C" void* cGraphMenuItem_cGraphMenuItem(cGraphMenuItem* self, int numPoin
     self->YLock = (unsigned int)yLockBits;
     self->mVtbl = cGraphMenuItem_vtbl;
     self->Slope = slope;
-    *(sPair8_D0808*)&self->MinPoint[0] = *minPoint;
-    *(sPair8_D0808*)&self->MaxPoint[0] = *maxPoint;
+    *(t2Vector*)&self->MinPoint[0] = *minPoint;
+    *(t2Vector*)&self->MaxPoint[0] = *maxPoint;
     self->Caption = (const char*)D_00486738;
     self->OnPoint = 0;
     self->IsEditMode = 0;

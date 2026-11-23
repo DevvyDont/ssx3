@@ -531,14 +531,11 @@ extern "C" void cGarbageMan_Purge()
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_DeformMeshMatrix);
 #ifdef SKIP_ASM
 
-struct sGmMtx_A2C0 {
-    t4Vector r[4];
-};
 
-extern "C" sGmMtx_A2C0* cPlants_getDeformationMatrix(t4Vector* pos);
+extern "C" t4Matrix* cPlants_getDeformationMatrix(t4Vector* pos);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply out = a * b); the PC port needs a plain multiply.
-static inline void gmMtxMul_A2C0(sGmMtx_A2C0* out, sGmMtx_A2C0* a, sGmMtx_A2C0* b)
+static inline void gmMtxMul_A2C0(t4Matrix* out, t4Matrix* a, t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -577,7 +574,7 @@ static inline void gmMtxMul_A2C0(sGmMtx_A2C0* out, sGmMtx_A2C0* a, sGmMtx_A2C0* 
 }
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy); the PC port needs a plain copy.
-static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
+static inline void gmMtxCopy_A2C0(t4Matrix* dst, t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -601,13 +598,13 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
  *
  * @param mat  the mesh matrix, updated in place
  */
-extern "C" void cGraphicsMan_DeformMeshMatrix(cGraphicsMan* self, sGmMtx_A2C0* mat)
+extern "C" void cGraphicsMan_DeformMeshMatrix(cGraphicsMan* self, t4Matrix* mat)
 {
     if (self->m_isInNIS[6] != 0) {
-        sGmMtx_A2C0 result;
-        t4Vector pos = mat->r[3];
-        sGmMtx_A2C0 product;
-        sGmMtx_A2C0* deform = cPlants_getDeformationMatrix(&pos);
+        t4Matrix result;
+        t4Vector pos = mat->row[3];
+        t4Matrix product;
+        t4Matrix* deform = cPlants_getDeformationMatrix(&pos);
         gmMtxMul_A2C0(&product, mat, deform);
         gmMtxCopy_A2C0(&result, &product);
         gmMtxCopy_A2C0(mat, &result);
