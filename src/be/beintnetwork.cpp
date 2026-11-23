@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "vtable.h"
 #include "be/beintplayer.h"
 #include "be/beintoption.h"
@@ -183,11 +184,8 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
 extern "C" void func_00156810(void* self);
 
-struct sProfChar_E5C8 {
-    char d[0xF88];
-};
 
-extern sProfChar_E5C8 cBELibrary_profileLib_E5C8[][10] __asm__("cBELibrary_profileLib");
+extern cBECharProfileDB cBELibrary_profileLib_E5C8[][10] __asm__("cBELibrary_profileLib");
 
 class cBEIface_E5C8 {
 public:

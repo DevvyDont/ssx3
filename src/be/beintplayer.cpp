@@ -1821,14 +1821,6 @@ INCLUDE_ASM("be/beintplayer", func_00147D20);
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_profileLib[];
 
-struct sCharRec_147D20 {
-    char pad0[0x280];
-    short b0;       // 0x280
-    short a0;       // 0x282
-    short b1;       // 0x284
-    short a1;       // 0x286
-    char pad288[0xF88 - 0x288];
-};
 
 /**
  * Records a win toward a difficulty level of the first profile's current character.
@@ -1846,13 +1838,13 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
     short difference, level;
     if (which)
     {
-        level = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0;
-        difference = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0;
+        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty;
+        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference;
     }
     else
     {
-        level = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1;
-        difference = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1;
+        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284;
+        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286;
     }
     difference++;
     if (difference >= 2)
@@ -1862,13 +1854,13 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
     }
     if (which)
     {
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0 = level;
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0 = difference;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty = level;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference = difference;
     }
     else
     {
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1 = level;
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1 = difference;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284 = level;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286 = difference;
     }
 }
 #endif
@@ -1879,14 +1871,6 @@ INCLUDE_ASM("be/beintplayer", func_00147E18);
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_profileLib[];
 
-struct sCharRec_147E18 {
-    char pad0[0x280];
-    short b0;       // 0x280
-    short a0;       // 0x282
-    short b1;       // 0x284
-    short a1;       // 0x286
-    char pad288[0xF88 - 0x288];
-};
 
 /**
  * Records a loss toward a difficulty level of the first profile's current character.
@@ -1904,13 +1888,13 @@ extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
     short difference, level;
     if (which)
     {
-        level = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0;
-        difference = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0;
+        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty;
+        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference;
     }
     else
     {
-        level = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1;
-        difference = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1;
+        level = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284;
+        difference = (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286;
     }
     difference--;
     if (difference < -1)
@@ -1920,13 +1904,13 @@ extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
     }
     if (which)
     {
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0 = level;
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0 = difference;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifficulty = level;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).mDifference = difference;
     }
     else
     {
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1 = level;
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1 = difference;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_284 = level;
+        (*(cBECharProfileDB*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).unk_286 = difference;
     }
 }
 #endif

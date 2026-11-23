@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "be/beprofilelib.h"
 #include "vtable.h"
 #include "be/beintmission.h"
@@ -1204,14 +1205,7 @@ struct sMissionOwnerView_001544D0
 };
 extern sMissionOwnerView_001544D0 D_0043D9A4[];
 
-// One character's economy block (0xF88 bytes); mission flag words start at 0x118.
-struct sEconFlags_001544D0
-{
-    char pad_0x00[0x118];
-    unsigned int flags[88];
-    char pad_0x278[0xF88 - 0x118 - 88 * 4];
-};
-extern sEconFlags_001544D0 cBELibrary_profileLib_flags[][10] __asm__("cBELibrary_profileLib");
+extern cBECharProfileDB cBELibrary_profileLib_flags[][10] __asm__("cBELibrary_profileLib");
 
 /**
  * Counts the missions one profile's character has completed on a peak.
@@ -1236,7 +1230,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBEMis
     {
         if (D_0043D9A4[cBELibrary_missionInfo[i].group].owner == owner)
         {
-            n += (cBELibrary_profileLib_flags[profile][character].flags[i] >> 3) & 1;
+            n += (cBELibrary_profileLib_flags[profile][character].mMissions[i] >> 3) & 1;
         }
     }
     return n;

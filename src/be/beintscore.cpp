@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "vtable.h"
 #include "be/beinterface.h"
 #include "be/beintscore.h"
@@ -162,9 +163,8 @@ extern "C" bool cBEScoreInterface_isEligibleForHighScore(cBEScoreInterface* self
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx);
 extern "C" char* strcpy(char* dst, const char* src);
 
-struct sProfileChar_154AB8 { char data[0xF88]; };
-extern "C" int cBECharProfileDB_updateScoreStats(sProfileChar_154AB8* self, int event, int mode, unsigned int value);
-extern sProfileChar_154AB8 cBELibrary_profileLib_154AB8[][10] __asm__("cBELibrary_profileLib");
+extern "C" int cBECharProfileDB_updateScoreStats(cBECharProfileDB* self, int event, int mode, unsigned int value);
+extern cBECharProfileDB cBELibrary_profileLib_154AB8[][10] __asm__("cBELibrary_profileLib");
 
 struct sRaceStats_154AB8 { int w[0xAC / 4]; };
 struct sScoreSlot_154AB8 {
@@ -227,7 +227,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
         return;
     self->slots[profile].stats = *stats;
     int mode;
-    sProfileChar_154AB8* pc;
+    cBECharProfileDB* pc;
     int timed = 0;
     self->slots[profile].result = -1;
     cBEScoreInterface_processRiderStats(rider, (int)stats);
