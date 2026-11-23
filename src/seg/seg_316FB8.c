@@ -10,14 +10,14 @@
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __errno);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 /**
- * Returns the address of errno: the current reentrancy struct D_00454944, whose first field is errno.
+ * Returns the address of errno: the current reentrancy struct _impure_ptr, whose first field is errno.
  *
  * @return a pointer to errno
  */
 int __errno(void) {
-    return D_00454944;
+    return _impure_ptr;
 }
 #endif
 
@@ -1151,19 +1151,19 @@ char *_fopen_r_(int ptr, char *file, char *mode) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", fopen);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern void _fopen_r(int, int, int);
 /**
  * Opens a file as a stdio stream for the global reentrancy struct.
  *
- * Forwards to _fopen_r with D_00454944. The definition is declared void, but $v0 still holds the stream
+ * Forwards to _fopen_r with _impure_ptr. The definition is declared void, but $v0 still holds the stream
  * _fopen_r returned.
  *
  * @param fileName  the path
  * @param mode  the mode string
  */
 void fopen(int fileName, int mode) {
-    _fopen_r(D_00454944, fileName, mode);
+    _fopen_r(_impure_ptr, fileName, mode);
 }
 #endif
 
@@ -1188,22 +1188,22 @@ void _cleanup_r(int reent) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _cleanup);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern void _cleanup_r(int);
 /**
- * Flushes every open stream of the global reentrancy struct D_00454944.
+ * Flushes every open stream of the global reentrancy struct _impure_ptr.
  *
- * Calls _cleanup_r(D_00454944). exit calls it.
+ * Calls _cleanup_r(_impure_ptr). exit calls it.
  */
 void _cleanup(void) {
-    _cleanup_r(D_00454944);
+    _cleanup_r(_impure_ptr);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", fseek);
 #ifdef SKIP_ASM
-extern struct _reent *g17008_impure __asm__("D_00454944");
+extern struct _reent *g17008_impure __asm__("_impure_ptr");
 extern void g17008_init(struct _reent *) __asm__("__sinit");
 extern int g17008_fflush(struct __sFILE *) __asm__("fflush");
 extern int g17008_fstat(struct _reent *, int, int *) __asm__("_fstat_r");
@@ -1214,7 +1214,7 @@ int fseek_(struct __sFILE *fp, long offset, int whence) __asm__("fseek");
 /**
  * Repositions a stdio stream, seeking inside the buffer when it can, and returns 0 or -1.
  *
- * Runs the stdio set-up check (stream data from D_00454944, __sinit once) and first flushes a stream that is both
+ * Runs the stdio set-up check (stream data from _impure_ptr, __sinit once) and first flushes a stream that is both
  * appending and writing (flags 0x108). A stream without a seek callback sets errno 29 (ESPIPE), a bad whence errno 22
  * (EINVAL). For whence 1 (current) it flushes with fflush, finds the current offset (cached +0x50 when flag
  * 0x1000 is set, else the seek callback), corrects it for buffered read or write data and continues as an absolute
@@ -1467,12 +1467,12 @@ INCLUDE_ASM("seg/seg_316FB8", printf);
 #define printf_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-extern int D_00454944;
+extern int _impure_ptr;
 extern int vfprintf(int, int, char *);
 /**
  * Prints formatted text to the standard output stream of the global reentrancy struct.
  *
- * Sets the stdout stream's reentrancy pointer (+0x54) to D_00454944 and calls the dispatcher vfprintf with stdout,
+ * Sets the stdout stream's reentrancy pointer (+0x54) to _impure_ptr and calls the dispatcher vfprintf with stdout,
  * the format and the arguments. PRINT_debuggerfunc calls it.
  *
  * @param fmt  the format string
@@ -1481,7 +1481,7 @@ void printf(int fmt, ...) {
     char *ap;
     int *reent;
     printf_va_start(ap);
-    reent = (int *)D_00454944;
+    reent = (int *)_impure_ptr;
     ((int *)reent[2])[0x54 / 4] = (int)reent;
     vfprintf(reent[2], fmt, ap);
 }
@@ -1533,7 +1533,7 @@ struct F7648 {
     char pad40[0x54 - 0x40];
     struct R7648 *data;
 };
-extern struct R7648 *g7648_impure __asm__("D_00454944");
+extern struct R7648 *g7648_impure __asm__("_impure_ptr");
 extern void g7648_init(struct R7648 *) __asm__("__sinit");
 extern int g7648_fflush(struct F7648 *) __asm__("fflush");
 extern void g7648_smakebuf(struct F7648 *) __asm__("__smakebuf");
@@ -1654,12 +1654,12 @@ struct Fsprintf {
     int pad[0x54 / 4 - 6];
     int ent;
 };
-extern int D_00454944;
+extern int _impure_ptr;
 /**
  * Formats into a string buffer with no size limit (newlib's sprintf, writing through a string FILE).
  *
  * Sets up a FILE with flags 0x208 (write, string), buffer @p buf, size INT_MAX and the reentrancy data
- * D_00454944, runs the formatter vfprintf (the floating-point or the integer-only vfprintf, by format)
+ * _impure_ptr, runs the formatter vfprintf (the floating-point or the integer-only vfprintf, by format)
  * and terminates the output. The C declaration returns void; the character count stays in the return
  * register.
  *
@@ -1675,7 +1675,7 @@ void sprintf(char *buf, int fmt, ...) {
     strFile.flags = 520;
     strFile.base = buf;
     strFile.size = 0x7FFFFFFF;
-    strFile.ent = D_00454944;
+    strFile.ent = _impure_ptr;
     vfprintf((int)&strFile, fmt, ap);
     *strFile.p = 0;
 }
@@ -1703,13 +1703,13 @@ INCLUDE_ASM("seg/seg_316FB8", sscanf);
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern int strlen(char *);
-extern int D_00454944;
+extern int _impure_ptr;
 extern int __svfscanf(struct __sFILE *, int, char *);
 /**
  * Scans formatted input from a string and returns the number of fields assigned.
  *
  * Builds a read-only string stream (flags 4, buffer and count from the string and its strlen, read callback
- * eofread, no ungetc or line buffer, reentrancy pointer D_00454944) and calls __svfscanf. Callers include
+ * eofread, no ungetc or line buffer, reentrancy pointer _impure_ptr) and calls __svfscanf. Callers include
  * FileParser_GetInt, FileParser_GetFloat and LobbyMan_onchatmsg.
  *
  * @param str  the input string
@@ -1726,7 +1726,7 @@ int sscanf(char *str, int fmt, ...) {
     (*(int (**)(void))&strStream._read) = eofread;
     (*(int*)&strStream._ub) = 0;
     (*(int*)&strStream._lb) = 0;
-    (*(int*)&strStream._data) = D_00454944;
+    (*(int*)&strStream._data) = _impure_ptr;
     sscanf_va_start(ap);
     return __svfscanf(&strStream, fmt, ap);
 }
@@ -1942,7 +1942,7 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
   nread = 0;
   for (;;)
     {
-      nbytes = mbtowc_r_7AB8 (D_00454944, &wc, fmt, MB_CUR_MAX_00417AB8, &state);
+      nbytes = mbtowc_r_7AB8 (_impure_ptr, &wc, fmt, MB_CUR_MAX_00417AB8, &state);
       fmt += nbytes;
       if (wc == 0)
 	return nassigned;
@@ -2622,12 +2622,12 @@ struct Fvsprintf {
     int pad[0x54 / 4 - 6];
     int ent;
 };
-extern int D_00454944;
+extern int _impure_ptr;
 extern int vfprintf(int, int, char *);
 /**
  * Formats a variable argument list into a caller buffer with no length limit.
  *
- * Builds a string stream on the stack (flags 0x208, sizes 0x7FFFFFFF, reentrancy pointer D_00454944), calls
+ * Builds a string stream on the stack (flags 0x208, sizes 0x7FFFFFFF, reentrancy pointer _impure_ptr), calls
  * vfprintf and terminates the text. Declared void, but $v0 still holds vfprintf's character count. Callers
  * include cBXString_vprintf, cFont_vtextf and DEBUG_trace.
  *
@@ -2642,7 +2642,7 @@ void vsprintf(char *buf, int fmt, char *ap) {
     strStream.flags = 520;
     strStream.base = buf;
     strStream.size = 0x7FFFFFFF;
-    strStream.ent = D_00454944;
+    strStream.ent = _impure_ptr;
     vfprintf((int)&strStream, fmt, ap);
     *strStream.p = 0;
 }
@@ -2651,11 +2651,11 @@ void vsprintf(char *buf, int fmt, char *ap) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", vsnprintf);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 /**
  * Formats a variable argument list into a buffer of limited size and returns the count, or -1 when it did not fit.
  *
- * Builds a string stream on the stack with write and buffer size n (flags 0x208, reentrancy pointer D_00454944), calls
+ * Builds a string stream on the stack with write and buffer size n (flags 0x208, reentrancy pointer _impure_ptr), calls
  * vfprintf and stores a NUL at the final position.
  *
  * Likely bug: the size given to the stream is n, not n - 1 as in newlib, so a full result writes its NUL to buf[n], one
@@ -2675,7 +2675,7 @@ int vsnprintf(char *buf, unsigned n, int fmt, char *ap) {
     strStream._flags = 520;
     (*(char**)&strStream._bf) = buf;
     strStream._bf._size = n;
-    (*(int*)&strStream._data) = D_00454944;
+    (*(int*)&strStream._data) = _impure_ptr;
     charCount = vfprintf((int)&strStream, fmt, ap);
     if (n < (unsigned)charCount) charCount = -1;
     *((char*)strStream._p) = 0;
@@ -2769,14 +2769,14 @@ void *bsearch(void *key, char *base, unsigned nmemb, unsigned size, int (*compar
 //100%
 INCLUDE_ASM("seg/seg_316FB8", malloc);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern void __malloc_lock(int);
 extern void __malloc_unlock(int);
 extern int _malloc_r(int, int);
 /**
  * Allocates memory from the C heap under the heap lock and returns it, or null.
  *
- * Takes the lock with __malloc_lock, allocates with _malloc_r using D_00454944, and releases the lock with
+ * Takes the lock with __malloc_lock, allocates with _malloc_r using _impure_ptr, and releases the lock with
  * __malloc_unlock.
  *
  * @param byteCount  bytes wanted
@@ -2784,9 +2784,9 @@ extern int _malloc_r(int, int);
  */
 int malloc(int byteCount) {
     int block;
-    __malloc_lock(D_00454944);
-    block = _malloc_r(D_00454944, byteCount);
-    __malloc_unlock(D_00454944);
+    __malloc_lock(_impure_ptr);
+    block = _malloc_r(_impure_ptr, byteCount);
+    __malloc_unlock(_impure_ptr);
     return block;
 }
 #endif
@@ -2794,22 +2794,22 @@ int malloc(int byteCount) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", free);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern void __malloc_lock(int);
 extern void __malloc_unlock(int);
 extern void _free_r(int, int);
 /**
  * Returns a block to the C heap under the heap lock.
  *
- * Takes the lock with __malloc_lock, releases the block with _free_r using D_00454944, and releases the lock with
+ * Takes the lock with __malloc_lock, releases the block with _free_r using _impure_ptr, and releases the lock with
  * __malloc_unlock.
  *
  * @param block  the block, or null
  */
 void free(int block) {
-    __malloc_lock(D_00454944);
-    _free_r(D_00454944, block);
-    __malloc_unlock(D_00454944);
+    __malloc_lock(_impure_ptr);
+    _free_r(_impure_ptr, block);
+    __malloc_unlock(_impure_ptr);
 }
 #endif
 
@@ -3159,14 +3159,14 @@ void ecvtf(int numDigits, int decptOut, int signOut) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", gcvt);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern int dpcmp(int, int);
 extern int _gcvt(int, int, int, char *, int, int);
 /**
  * Formats a double %g-style into a caller buffer, with a leading minus for negative values.
  *
  * Writes '-' and drops one digit of precision when dpcmp says the value is below zero, then formats with _gcvt
- * (reentrancy struct D_00454944, type 'g', no forced point).
+ * (reentrancy struct _impure_ptr, type 'g', no forced point).
  *
  * @param value     the double, passed in the first (64-bit) argument register
  * @param prec  significant digits
@@ -3180,7 +3180,7 @@ int gcvt(int value, int prec, int buf_) {
         *cursor++ = '-';
         prec--;
     }
-    return _gcvt(D_00454944, value, prec, cursor, 'g', 0) ? (int)buf : 0;
+    return _gcvt(_impure_ptr, value, prec, cursor, 'g', 0) ? (int)buf : 0;
 }
 #endif
 
@@ -3941,19 +3941,19 @@ ret:
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strtod);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern void _strtod_r(int, int, int);
 /**
  * Parses a floating-point number from a string with the global reentrancy struct (_strtod_r).
  *
- * Passes D_00454944 (the current reentrancy struct) on. Declared void in C; the double comes back from _strtod_r in the
+ * Passes _impure_ptr (the current reentrancy struct) on. Declared void in C; the double comes back from _strtod_r in the
  * return registers untouched.
  *
  * @param str  the string
  * @param endPtr  receives the end of the number, or null
  */
 void strtod(int str, int endPtr) {
-    _strtod_r(D_00454944, str, endPtr);
+    _strtod_r(_impure_ptr, str, endPtr);
 }
 #endif
 
@@ -4047,19 +4047,19 @@ unsigned long _strtoul_r_(int *ptr, char *nptr, char **endptr, int base) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strtoul);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern void _strtoul_r(int, int, int, int);
 /**
  * Parses an unsigned long from a string in the given base, for the global reentrancy struct.
  *
- * Forwards to _strtoul_r with D_00454944. The definition is declared void, but $v0 still holds the value.
+ * Forwards to _strtoul_r with _impure_ptr. The definition is declared void, but $v0 still holds the value.
  *
  * @param str  the string
  * @param endPtr  receives the end, or null
  * @param base  the base
  */
 void strtoul(int str, int endPtr, int base) {
-    _strtoul_r(D_00454944, str, endPtr, base);
+    _strtoul_r(_impure_ptr, str, endPtr, base);
 }
 #endif
 
@@ -5340,7 +5340,7 @@ long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strtol);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern long _strtol_r(int, int, int, int);
 /**
  * Parses an integer in a given base from a string with the global reentrancy struct (_strtol_r).
@@ -5351,7 +5351,7 @@ extern long _strtol_r(int, int, int, int);
  * @return the parsed value (64-bit long)
  */
 long strtol(int str, int end, int base) {
-    return _strtol_r(D_00454944, str, end, base);
+    return _strtol_r(_impure_ptr, str, end, base);
 }
 #endif
 
@@ -5447,32 +5447,32 @@ char *_localeconv_r(void) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", setlocale);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 extern void _setlocale_r(int, int, int);
 /**
  * Sets or queries the locale for a category, for the global reentrancy struct.
  *
- * Forwards to _setlocale_r with D_00454944. Declared void, but $v0 still holds the name.
+ * Forwards to _setlocale_r with _impure_ptr. Declared void, but $v0 still holds the name.
  *
  * @param category  the locale category
  * @param locale  the new locale, or null to query
  */
 void setlocale(int category, int locale) {
-    _setlocale_r(D_00454944, category, locale);
+    _setlocale_r(_impure_ptr, category, locale);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", localeconv);
 #ifdef SKIP_ASM
-extern int D_00454944;
+extern int _impure_ptr;
 /**
  * Returns the numeric-formatting locale table, for the global reentrancy struct.
  *
- * Calls _localeconv_r with D_00454944. Declared void, but $v0 still holds the table.
+ * Calls _localeconv_r with _impure_ptr. Declared void, but $v0 still holds the table.
  */
 void localeconv(void) {
-    ((char *(*)(int))_localeconv_r)(D_00454944);
+    ((char *(*)(int))_localeconv_r)(_impure_ptr);
 }
 #endif
 
@@ -6027,12 +6027,12 @@ double __ieee754_log10(double x)
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _close_r);
 #ifdef SKIP_ASM
-extern int D_004A5BB8;
+extern int errno;
 extern int _close(int);
 /**
  * Closes a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls _close and, when it returns -1 with errno set, stores errno through
+ * Clears the global errno errno, calls _close and, when it returns -1 with errno set, stores errno through
  * err. _close always returns -1 without setting errno, so nothing is stored.
  *
  * @param err  the reentrancy struct (its errno, the first field)
@@ -6041,10 +6041,10 @@ extern int _close(int);
  */
 int _close_r(int err, int fileDesc) {
     int closeResult;
-    D_004A5BB8 = 0;
+    errno = 0;
     closeResult = _close(fileDesc);
-    if (closeResult == -1 && D_004A5BB8)
-        *(int *)err = D_004A5BB8;
+    if (closeResult == -1 && errno)
+        *(int *)err = errno;
     return closeResult;
 }
 #endif
@@ -6052,12 +6052,12 @@ int _close_r(int err, int fileDesc) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _fstat_r);
 #ifdef SKIP_ASM
-extern int D_004A5BB8;
+extern int errno;
 extern int _fstat(int, int);
 /**
  * Reads a descriptor's file status and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls _fstat and stores errno through err when it returns -1 with errno
+ * Clears the global errno errno, calls _fstat and stores errno through err when it returns -1 with errno
  * set. _fstat reports every descriptor as a character device.
  *
  * @param err  receives errno on failure
@@ -6067,10 +6067,10 @@ extern int _fstat(int, int);
  */
 int _fstat_r(int *err, int fileDesc, int statBuf) {
     int fstatResult;
-    D_004A5BB8 = 0;
+    errno = 0;
     fstatResult = _fstat(fileDesc, statBuf);
-    if (fstatResult == -1 && D_004A5BB8)
-        *err = D_004A5BB8;
+    if (fstatResult == -1 && errno)
+        *err = errno;
     return fstatResult;
 }
 #endif
@@ -6078,12 +6078,12 @@ int _fstat_r(int *err, int fileDesc, int statBuf) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _lseek_r);
 #ifdef SKIP_ASM
-extern int D_004A5BB8;
+extern int errno;
 extern int _lseek(int, int, int);
 /**
  * Seeks a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls _lseek and stores errno through err when it returns -1 with errno
+ * Clears the global errno errno, calls _lseek and stores errno through err when it returns -1 with errno
  * set. _lseek always returns -1 without setting errno.
  *
  * @param err  receives errno on failure
@@ -6094,10 +6094,10 @@ extern int _lseek(int, int, int);
  */
 long _lseek_r(int *err, int fileDesc, int offset, int whence) {
     int newOffset;
-    D_004A5BB8 = 0;
+    errno = 0;
     newOffset = _lseek(fileDesc, offset, whence);
-    if (newOffset == -1 && D_004A5BB8)
-        *err = D_004A5BB8;
+    if (newOffset == -1 && errno)
+        *err = errno;
     return newOffset;
 }
 #endif
@@ -6105,12 +6105,12 @@ long _lseek_r(int *err, int fileDesc, int offset, int whence) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _open_r);
 #ifdef SKIP_ASM
-extern int D_004A5BB8;
+extern int errno;
 extern int _open(int, int, int);
 /**
  * Opens a file descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls _open and stores errno through err when it returns -1 with errno
+ * Clears the global errno errno, calls _open and stores errno through err when it returns -1 with errno
  * set. _open always fails (errno 5, EIO), so every open through stdio fails.
  *
  * @param err  receives errno on failure
@@ -6121,10 +6121,10 @@ extern int _open(int, int, int);
  */
 int _open_r(int *err, int path, int openFlags, int permissions) {
     int fileDesc;
-    D_004A5BB8 = 0;
+    errno = 0;
     fileDesc = _open(path, openFlags, permissions);
-    if (fileDesc == -1 && D_004A5BB8)
-        *err = D_004A5BB8;
+    if (fileDesc == -1 && errno)
+        *err = errno;
     return fileDesc;
 }
 #endif
@@ -6132,12 +6132,12 @@ int _open_r(int *err, int path, int openFlags, int permissions) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _read_r);
 #ifdef SKIP_ASM
-extern int D_004A5BB8;
+extern int errno;
 extern int _read(int, int, int);
 /**
  * Reads from a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls _read (console input for descriptor 0) and stores errno through err
+ * Clears the global errno errno, calls _read (console input for descriptor 0) and stores errno through err
  * when it returns -1 with errno set.
  *
  * @param err  receives errno on failure
@@ -6148,10 +6148,10 @@ extern int _read(int, int, int);
  */
 long _read_r(int *err, int fileDesc, int buffer, int byteCount) {
     int bytesRead;
-    D_004A5BB8 = 0;
+    errno = 0;
     bytesRead = _read(fileDesc, buffer, byteCount);
-    if (bytesRead == -1 && D_004A5BB8)
-        *err = D_004A5BB8;
+    if (bytesRead == -1 && errno)
+        *err = errno;
     return bytesRead;
 }
 #endif
@@ -6159,12 +6159,12 @@ long _read_r(int *err, int fileDesc, int buffer, int byteCount) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _sbrk_r);
 #ifdef SKIP_ASM
-extern int D_004A5BB8;
+extern int errno;
 extern unsigned _sbrk(int);
 /**
  * Moves the heap break and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls _sbrk and stores errno through err when it returns all ones with
+ * Clears the global errno errno, calls _sbrk and stores errno through err when it returns all ones with
  * errno set.
  *
  * @param err  receives errno on failure
@@ -6173,10 +6173,10 @@ extern unsigned _sbrk(int);
  */
 unsigned _sbrk_r(int *err, int increment) {
     unsigned oldBreak;
-    D_004A5BB8 = 0;
+    errno = 0;
     oldBreak = _sbrk(increment);
-    if (oldBreak == 0xFFFFFFFF && D_004A5BB8)
-        *err = D_004A5BB8;
+    if (oldBreak == 0xFFFFFFFF && errno)
+        *err = errno;
     return oldBreak;
 }
 #endif
@@ -6184,12 +6184,12 @@ unsigned _sbrk_r(int *err, int increment) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _write_r);
 #ifdef SKIP_ASM
-extern int D_004A5BB8;
+extern int errno;
 extern int _write(int, int, int);
 /**
  * Writes to a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls _write (console output for descriptors 1 and 2) and stores errno
+ * Clears the global errno errno, calls _write (console output for descriptors 1 and 2) and stores errno
  * through err when it returns -1 with errno set.
  *
  * @param err  receives errno on failure
@@ -6200,10 +6200,10 @@ extern int _write(int, int, int);
  */
 long _write_r(int *err, int fileDesc, int buffer, int byteCount) {
     int bytesWritten;
-    D_004A5BB8 = 0;
+    errno = 0;
     bytesWritten = _write(fileDesc, buffer, byteCount);
-    if (bytesWritten == -1 && D_004A5BB8)
-        *err = D_004A5BB8;
+    if (bytesWritten == -1 && errno)
+        *err = errno;
     return bytesWritten;
 }
 #endif
@@ -6267,7 +6267,7 @@ struct __sFILE_FE30 {
 #define __SNBF_FE30	0x0002
 #define __SWR_FE30	0x0008
 #define __SERR_FE30	0x0040
-extern struct _reent_FE30 *_impure_ptr_FE30 __asm__("D_00454944");
+extern struct _reent_FE30 *_impure_ptr_FE30 __asm__("_impure_ptr");
 #define _REENT_FE30 _impure_ptr_FE30
 extern void __sinit_FE30(struct _reent_FE30 *) __asm__("__sinit");
 extern int _fwalk_FE30(struct _reent_FE30 *, int (*)(struct __sFILE_FE30 *)) __asm__("_fwalk");
@@ -6286,7 +6286,7 @@ int fflush_FE30(struct __sFILE_FE30 *fp) __asm__("fflush");
 /**
  * Writes out a stream's buffered output (or every stream's, for null) and returns 0 or -1.
  *
- * A null stream walks all streams of D_00454944 with _fwalk and itself. Otherwise it runs the stdio set-up check
+ * A null stream walks all streams of _impure_ptr with _fwalk and itself. Otherwise it runs the stdio set-up check
  * (__sinit once) and, for a writing stream with a buffer, resets the buffer pointer and write count first, then
  * calls the write callback until the pending bytes are out. A write that returns 0 or less sets the error flag 0x40 and
  * returns -1.
@@ -6712,7 +6712,7 @@ struct __sFILE_0378 {
 #define __SEOF_0378	0x0020
 #define EOF_0378	(-1)
 #define HASUB_0378(fp) ((fp)->_ub._base != 0)
-extern struct _reent_0378 *_impure_ptr_0378 __asm__("D_00454944");
+extern struct _reent_0378 *_impure_ptr_0378 __asm__("_impure_ptr");
 #define _REENT_0378 _impure_ptr_0378
 extern void __sinit_0378(struct _reent_0378 *) __asm__("__sinit");
 extern int fflush_0378(struct __sFILE_0378 *) __asm__("fflush");
@@ -7733,7 +7733,7 @@ struct R218D8 {
     int cvtlen;
     char *cvtbuf;
 };
-extern struct R218D8 *g218D8_impure __asm__("D_00454944");
+extern struct R218D8 *g218D8_impure __asm__("_impure_ptr");
 #define REENT218D8 g218D8_impure
 extern char *g218D8_realloc(struct R218D8 *, char *, int) __asm__("_realloc_r");
 extern char *g218D8_dtoa(struct R218D8 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
@@ -7741,7 +7741,7 @@ char *fcvtbuf_(double invalue, int ndigit, int *decpt, int *sign, char *buf) __a
 /**
  * Converts a double to fixed-point decimal digits (fcvt style) and returns the digit string.
  *
- * With a null buf it uses the reentrancy struct's conversion buffer (D_00454944: length +0x50, buffer +0x54), grown
+ * With a null buf it uses the reentrancy struct's conversion buffer (_impure_ptr: length +0x50, buffer +0x54), grown
  * with _realloc_r to ndigit + 1 bytes when needed. Values strictly between -1 and 1 use _dtoa_r mode 2, others mode 3
  * (ndigit places past the point). The digits are then padded with '0' only up to ndigit in total.
  *
@@ -7798,15 +7798,15 @@ struct Reent51 {
     int cvtlen;
     char *cvtbuf;
 };
-extern int D_00454944;
-#define REENT ((struct Reent51 *)D_00454944)
+extern int _impure_ptr;
+#define REENT ((struct Reent51 *)_impure_ptr)
 extern char *_realloc_r(struct Reent51 *, char *, int);
 extern char *_dtoa_r(struct Reent51 *, double, int, int, int *, int *, char **);
 char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) __asm__("ecvtbuf");
 /**
  * Converts a double to exactly ndigit significant decimal digits (ecvt style) and returns the digit string.
  *
- * With a null buf it uses the reentrancy struct's conversion buffer (D_00454944: length +0x50, buffer +0x54), growing
+ * With a null buf it uses the reentrancy struct's conversion buffer (_impure_ptr: length +0x50, buffer +0x54), growing
  * it with _realloc_r to ndigit + 1 bytes when needed (returning 0 if that fails). The digits come from _dtoa_r mode 2
  * and are padded with '0' to ndigit and terminated.
  *
