@@ -15,6 +15,7 @@
 #include "fe/festatemountainroom.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
+#include "ui/uitext.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
@@ -595,8 +596,8 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
             }
             break;
         }
-        sText_MR* helpText = (sText_MR*)self->mpHelpText;
-        helpText->vt[9].fn(vthis(helpText, helpText->vt[9]), 1);
+        cUIText* helpText = self->mpHelpText;
+        helpText->setVisible(1);
         cUIText_setUnicodeStringByID(self->mpHelpText, stringId);
         break;
     }

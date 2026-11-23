@@ -689,12 +689,6 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateMenuColor);
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
-struct sVE_2488 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 struct sQuad_2488 {
     int a, b, c, d;
 };
@@ -723,17 +717,17 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
         cUIText* textBox = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name1));
         if (listBox && textBox) {
             if (*(signed char*)(((char*)selfp) + listBox->mMiscData + 0x51) > 0) {
-                ((sVE_2488*)VPTR_OF(cListNode, textBox))[25].fn(vthis(textBox, ((sVE_2488*)VPTR_OF(cListNode, textBox))[25]), 1);
+                textBox->setUseStaticColour(1);
                 (*(sQuad_2488*)&textBox->mStaticColour) = gStaticColour;
-                ((sVE_2488*)VPTR_OF(cListNode, textBox))[8].fn(vthis(textBox, ((sVE_2488*)VPTR_OF(cListNode, textBox))[8]), 1);
-                ((sVE_2488*)VPTR_OF(cListNode, listBox))[24].fn(vthis(listBox, ((sVE_2488*)VPTR_OF(cListNode, listBox))[24]), 1);
+                textBox->setStatic(1);
+                listBox->setUnicode(1);
                 (*(sQuad_2488*)&listBox->mStaticColour) = gStaticColour;
-                ((sVE_2488*)VPTR_OF(cListNode, listBox))[8].fn(vthis(listBox, ((sVE_2488*)VPTR_OF(cListNode, listBox))[8]), 1);
+                listBox->setStatic(1);
             } else {
-                ((sVE_2488*)VPTR_OF(cListNode, textBox))[25].fn(vthis(textBox, ((sVE_2488*)VPTR_OF(cListNode, textBox))[25]), 0);
-                ((sVE_2488*)VPTR_OF(cListNode, textBox))[8].fn(vthis(textBox, ((sVE_2488*)VPTR_OF(cListNode, textBox))[8]), 0);
-                ((sVE_2488*)VPTR_OF(cListNode, listBox))[24].fn(vthis(listBox, ((sVE_2488*)VPTR_OF(cListNode, listBox))[24]), 0);
-                ((sVE_2488*)VPTR_OF(cListNode, listBox))[8].fn(vthis(listBox, ((sVE_2488*)VPTR_OF(cListNode, listBox))[8]), 0);
+                textBox->setUseStaticColour(0);
+                textBox->setStatic(0);
+                listBox->setUnicode(0);
+                listBox->setStatic(0);
             }
         }
         if (i < 9) {

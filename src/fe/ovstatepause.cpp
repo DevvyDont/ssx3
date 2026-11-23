@@ -22,6 +22,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "ui/uitext.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onCreateScreen);
@@ -1018,8 +1019,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_O
         if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorServerCheckTimedOut));
         }
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)infoText + 0x8);
-        vt[9].fn(vthis(infoText, vt[9]), self->mbShouldDisplayAuxInfo);
+        infoText->setVisible(self->mbShouldDisplayAuxInfo);
     }
 }
 #endif
@@ -1050,8 +1050,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(cOVState_PAUSE_O
         if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorOpponentDisconnected));
         }
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)infoText + 0x8);
-        vt[9].fn(vthis(infoText, vt[9]), self->mbShouldDisplayAuxInfo);
+        infoText->setVisible(self->mbShouldDisplayAuxInfo);
         cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 1);
     }
 }

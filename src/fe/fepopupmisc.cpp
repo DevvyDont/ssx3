@@ -5141,6 +5141,7 @@ void* func_001E12D0(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E12F0);
 #ifdef SKIP_ASM
 #include "fakematch.h"
+#include "ui/uitext.h"
 // sPopupEntry14 (0x14 bytes: +0x4 start, +0x8 count) is defined later in the unit.
 struct sPopupEntry14;
 extern sPopupEntry14 D_00441630[];
@@ -8414,9 +8415,8 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
     cOVState_MESSAGECENTER* view = self;
     if (view->mpSubject[slot] != 0) {
         cUIText_setUnicodeStringByID(view->mpSubject[slot], GetHashValue32(buf));
-        char* textObj = (char*)view->mpSubject[slot];
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(textObj + 8);
-        vt[9].fn(vthis(textObj, vt[9]), 1);
+        cUIText* textObj = view->mpSubject[slot];
+        textObj->setVisible(1);
     }
 }
 #endif
@@ -8818,9 +8818,8 @@ extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
             char* lineWidget = (char*)self->mpMessageLine0;
             *(int*)(lineWidget + 0x14) |= 0x80;
             cUIText_setUnicodeStringByID(self->mpMessageLine0, *(int*)(messageEntry + 0x14));
-            void* obj = self->mpMessageLine0;
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-            vt[9].fn(vthis(obj, vt[9]), 1);
+            cUIText* obj = self->mpMessageLine0;
+            obj->setVisible(1);
         }
     }
 }

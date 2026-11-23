@@ -2703,12 +2703,6 @@ extern "C" void cScreenPopup_adjustLayer(void* self, int v)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_setStatic);
 #ifdef SKIP_ASM
-struct sVEntry_A0F0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Greys out or re-enables one popup option: setStatic(@p bStatic) and setUseStaticColour(1) on mpOptions[idx].
  *
@@ -2719,12 +2713,10 @@ struct sVEntry_A0F0 {
  */
 extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int bStatic)
 {
-    char* option = (char*)self->mpOptions[idx];
+    cUIText* option = self->mpOptions[idx];
     if (option != 0) {
-        sVEntry_A0F0* vt = *(sVEntry_A0F0**)(option + 8);
-        vt[8].fn(vthis(option, vt[8]), bStatic);
-        sVEntry_A0F0* vt2 = *(sVEntry_A0F0**)(option + 8);
-        vt2[25].fn(vthis(option, vt2[25]), 1);
+        option->setStatic(bStatic);
+        option->setUseStaticColour(1);
     }
 }
 #endif
