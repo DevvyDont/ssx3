@@ -1093,8 +1093,7 @@ extern "C" void cFEMemCard_callbackDisplayNoCards(void)
     fe->mState = 1;
     if (fe->mScreenStatus != 1) {
         fe->mScreenStatus = 1;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, fe);
-        vt[35].fn(vthis(fe, vt[35]), 1);
+        fe->triggerDisplayState(1);
     }
     char* st = (char*)cFEMemCard_mInstance;
     cUIThing* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
@@ -1129,8 +1128,7 @@ extern "C" void cFEMemCard_callbackDisplayNoFiles(void)
     cFEMemCard* fe = cFEMemCard_mInstance;
     if (fe->mScreenStatus != 2 && fe->mState == 0) {
         fe->mScreenStatus = 2;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, fe);
-        vt[35].fn(vthis(fe, vt[35]), 2);
+        fe->triggerDisplayState(2);
     }
 }
 #endif
@@ -1156,8 +1154,7 @@ static inline void SetMode_001D83A8(char* vfe, int mode)
     cFEMemCard* fe = (cFEMemCard*)vfe;
     if (fe->mScreenStatus != mode) {
         fe->mScreenStatus = mode;
-        sVEntry<void(void*, ...)>* vt = (sVEntry<void (void*, ...)>*)VPTR_OF(cListNode, fe);
-        vt[35].fn(vthis(fe, vt[35]), mode);
+        fe->triggerDisplayState(mode);
     }
 }
 
@@ -1945,8 +1942,7 @@ extern "C" void cFEMemCard_updateStart(cFEMemCard* self)
 {
     if (self->mScreenStatus != 1) {
         self->mScreenStatus = 1;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-        vt[35].fn(vthis(self, vt[35]), 1);
+        self->triggerDisplayState(1);
     }
 }
 #endif

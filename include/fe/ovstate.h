@@ -33,6 +33,8 @@ struct cOVState : public cUIState {
     //   mCtrlBits: [R] ctor stores 0xF; [U] masks in cUIState_setCtrlBitsByCtrlIndex / cFEState_setControllerFilter
     //   mpScreen: [R] ctor zeroes it; [U] cUIScreen_getObjectByHashName(mpScreen, ...)
     // --- cOVState
+    // cOVState's own slots ([R] cOVState_vtbl; types [O] On Tour's class cOVState):
+    virtual bool allowPauseMenu();                              // 25
     int mDoneTransition;        // 0x048 [O] (On Tour: bool at 0x48); [R] cOVState_cOVState zeroes it
     int mAllowPauseMenu;        // 0x04C [P] allowPauseMenu (preview 0x48); [R] cOVState_cOVState zeroes it;
                                 //       [U] cOVState_allowPauseMenu returns it

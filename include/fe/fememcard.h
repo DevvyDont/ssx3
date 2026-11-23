@@ -57,6 +57,30 @@ struct cFEMemCard : public cOVState {
     // cFEMemCard's notes on cOVState's fields:
     //   mOVID: [O] tOVStateEnum; [R] 0, or cFEMemCard_cFEMemCard's eOVState argument
     // --- cFEMemCard
+    // cFEMemCard's own slots ([R] cFEMemCard_vtbl; types [O] On Tour's class cFEMemCard):
+    virtual void displayStatus();                                                   // 26
+    virtual void updateChecking();                                                  // 27
+    virtual void updateSaving();                                                    // 28
+    virtual void updateLoading();                                                   // 29
+    virtual void updateDeleting();                                                  // 30
+    virtual void updateStart();                                                     // 31
+    virtual void updateSkip();                                                      // 32
+    virtual void updateDone();                                                      // 33
+    virtual void triggerArrowPulse(const char* strArrowName, const char* strAnimName); // 34
+    virtual void triggerDisplayState(int gotoScreenState);                          // 35
+    virtual void getPopup(unsigned short* ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate,
+                          int bSnowFlake);                                          // 36 (On Tour: the flags are bool)
+    virtual void hideActionButtons(int bHide);                                      // 37 (bool)
+    virtual void hideDeleteButton(int bHide);                                       // 38 (bool)
+    virtual void hideMainButton(int bLoadHide, int bSaveHide);                      // 39 (bools)
+    virtual void exit();                                                            // 40
+    virtual void cancel();                                                          // 41
+    virtual bool displayFileOK();                                                   // 42
+    virtual void setMenuHighlight();                                                // 43
+    virtual void confirmLoad();                                                     // 44
+    virtual void startLoad();                                                       // 45
+    virtual void exitDelete();                                                      // 46
+    virtual void displayStatusPopup();                                              // 47
     unsigned short mLastLoadFileName[64]; // 0x09C [O] ([32] in On Tour); [R] initFEMemCard clears the first char (sh);
                                     //       [U] cFEMemCard_SetLoadPressed(1) has the card (manager +0x434, slot 14)
                                     //       write
