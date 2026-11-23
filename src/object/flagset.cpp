@@ -580,7 +580,7 @@ extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, cBxReplayFrame* stre
     cFlagSet* self = elem;
     stream->write((const char*)self, 0x60);
     for (i = 0; i < self->mCurrentNumInstances; i++) {
-        stream->writeReplayInstance((const tInstanceRecord*)((void**)&self->mInstances[0])[i]);
+        stream->writeReplayInstance(self->mInstances[i]);
     }
 }
 #endif
@@ -608,10 +608,10 @@ extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, cBxReplayFrame* str
     cFlagSet* self = elem;
     stream->read((char*)self, 0x60);
     for (i = 0; i < self->mCurrentNumInstances; i++) {
-        ((void**)&self->mInstances[0])[i] = (void*)stream->readReplayInstance();
+        self->mInstances[i] = stream->readReplayInstance();
     }
     if (self->mCurrentNumInstances > 0) {
-        cFlagSet_CreateMesh((cFlagSet*)self, ((void**)&self->mInstances[0])[0]);
+        cFlagSet_CreateMesh(self, self->mInstances[0]);
     }
 }
 #endif

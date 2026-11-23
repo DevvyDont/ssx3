@@ -4217,12 +4217,12 @@ extern void (*SHAPE_memfree[])(char* buf);
  * Frees through the SHAPE library's free callback SHAPE_memfree. Called by the video frame destructor func_003B08E0 on the
  * image its constructor made with SHAPE_create.
  *
- * @param buf  the SHAPE
+ * @param shp  the SHAPE (On Tour shp)
  */
-extern "C" void SHAPE_destroy(SHAPE* buf)
+extern "C" void SHAPE_destroy(SHAPE* shp)
 {
-    ((char*)buf)[0] = 0;
-    SHAPE_memfree[0](((char*)buf));
+    shp->type = 0;
+    SHAPE_memfree[0]((char*)shp);
 }
 #endif
 

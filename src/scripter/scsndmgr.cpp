@@ -34,7 +34,7 @@ extern "C" cScriptSoundBankManager* cScriptSoundBankManager_cScriptSoundBankMana
     *(void**)&self->mVtbl = cScriptSoundBankManager_vtbl;
     self->mMemFlags = flags;
     self->mMaxBanks = count;
-    *(tScriptSoundBankInfo**)&self->mpBankInfo = (tScriptSoundBankInfo*)operator_new_tag(count * sizeof(tScriptSoundBankInfo), str_tScriptSoundBankInfo, flags, 0);
+    self->mpBankInfo = (tScriptSoundBankInfo*)operator_new_tag(count * sizeof(tScriptSoundBankInfo), str_tScriptSoundBankInfo, flags, 0);
     int idx = base;
     for (int i = 0; i < self->mMaxBanks; i++) {
         (self->mpBankInfo)[i].userID = -1;
@@ -76,10 +76,9 @@ extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(cScriptSoundBan
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_LinkBank);
 #ifdef SKIP_ASM
-struct sSndEntry;
 struct sSndList;
-extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id);
-extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(cScriptSoundBankManager* self);
+extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id);
+extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetEmptyBankInfo(cScriptSoundBankManager* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int b);
 
@@ -97,9 +96,9 @@ extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int
  */
 extern "C" int cScriptSoundBankManager_LinkBank(cScriptSoundBankManager* self, int id, void* data, int dataSize)
 {
-    tScriptSoundBankInfo* bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetBankInfo((self), id));
+    tScriptSoundBankInfo* bankInfo = cScriptSoundBankManager_GetBankInfo(self, id);
     if (((char*)bankInfo) == 0) {
-        bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetEmptyBankInfo((self)));
+        bankInfo = cScriptSoundBankManager_GetEmptyBankInfo(self);
         bankInfo->userID = id;
         bankInfo->pData = (char*)data;
         cBankManager_BANK_Attach(**(void***)&cAudioInterface_bxAudio()->MusicSys, bankInfo->bankNum, data, dataSize);
@@ -117,9 +116,8 @@ struct sScSndVEntry {
     void (*fn)(void*, void*);
 };
 
-struct sSndEntry;
 struct sSndList;
-extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id);
+extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id);
 
 /**
  * Unlinks the sound bank with user ID @p id, if linked.
@@ -131,7 +129,7 @@ extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManage
  */
 extern "C" void cScriptSoundBankManager_UnlinkBank1(cScriptSoundBankManager* self, int id)
 {
-    sSndEntry* bankInfo = cScriptSoundBankManager_GetBankInfo((self), id);
+    tScriptSoundBankInfo* bankInfo = cScriptSoundBankManager_GetBankInfo((self), id);
     if (bankInfo != 0) {
         sScSndVEntry* vt = (sScSndVEntry*)self->mVtbl;
         vt[2].fn(vthis(self, vt[2]), bankInfo);
@@ -168,13 +166,6 @@ extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* 
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_GetBankInfo);
 #ifdef SKIP_ASM
-struct sSndEntry {
-    int id;
-    int unk4;
-    void* data;
-};
-
-
 /**
  * Returns the linked sound bank record (user ID, bank number, data) with user ID @p id.
  *
@@ -183,11 +174,11 @@ struct sSndEntry {
  * @param id  the bank's user ID
  * @return the record, or 0
  */
-extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id)
+extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetBankInfo(cScriptSoundBankManager* self, int id)
 {
     for (int i = 0; i < self->mMaxBanks; i++) {
-        if (((sSndEntry*)self->mpBankInfo)[i].data != 0 && ((sSndEntry*)self->mpBankInfo)[i].id == id) {
-            return &((sSndEntry*)self->mpBankInfo)[i];
+        if (self->mpBankInfo[i].pData != 0 && self->mpBankInfo[i].userID == id) {
+            return &self->mpBankInfo[i];
         }
     }
     return 0;
@@ -208,11 +199,11 @@ extern "C" void cBankManager_BANK_UnAttach(void* bank, int handle);
  *
  * @param pBankInfo  the bank's slot (On Tour tScriptSoundBankInfo* pBankInfo: userID, bankNum, pData)
  */
-extern "C" void cScriptSoundBankManager_UnlinkBank(cScriptSoundBankManager* self, sSndEntry* pBankInfo)
+extern "C" void cScriptSoundBankManager_UnlinkBank(cScriptSoundBankManager* self, tScriptSoundBankInfo* pBankInfo)
 {
-    cBankManager_BANK_UnAttach(**(void***)&cAudioInterface_bxAudio()->MusicSys, pBankInfo->unk4);
-    pBankInfo->id = -1;
-    pBankInfo->data = 0;
+    cBankManager_BANK_UnAttach(**(void***)&cAudioInterface_bxAudio()->MusicSys, pBankInfo->bankNum);
+    pBankInfo->userID = -1;
+    pBankInfo->pData = 0;
 }
 #endif
 
@@ -225,11 +216,11 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_GetEmptyBankInfo);
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(cScriptSoundBankManager* self)
+extern "C" tScriptSoundBankInfo* cScriptSoundBankManager_GetEmptyBankInfo(cScriptSoundBankManager* self)
 {
     for (int i = 0; i < self->mMaxBanks; i++) {
-        if (((sSndEntry*)self->mpBankInfo)[i].data == 0) {
-            return &((sSndEntry*)self->mpBankInfo)[i];
+        if (self->mpBankInfo[i].pData == 0) {
+            return &self->mpBankInfo[i];
         }
     }
     return 0;

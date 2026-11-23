@@ -374,11 +374,11 @@ extern "C" void cFEStateNetHelpPopup_clear(cFEStateNetHelpPopup* self)
     helpPopup->miNumOptions = 0;
     helpPopup->muiScreenName = 0;
     for (i = 2; i >= 0; i--) {
-        ((int*)&helpPopup->muiDescription[0])[i] = 0;
+        helpPopup->muiDescription[i] = 0;
     }
     helpPopup->muiBottomText = 0;
     for (i = 0; i < 7; i++) {
-        ((int*)&helpPopup->muiOptions[0])[i] = 0;
+        helpPopup->muiOptions[i] = 0;
         helpPopup->meObject[i] = -1;
     }
 }

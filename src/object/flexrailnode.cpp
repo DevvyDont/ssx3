@@ -981,15 +981,6 @@ INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateMats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-struct sFrM4_A0B0 {
-    t4Vector r[4];
-};
-
-struct sFrElem_A0B0 {
-    t4Vector pos; // 0x00
-    char pad_0x10[0x50];
-};
-
 
 extern float CatmullRom[16];
 
@@ -1047,42 +1038,42 @@ static inline void set4_A0B0(t4Vector& r, float x, float y, float z, float w)
 }
 
 // Spline basis matrix for the segment from e[0] to e[1]: control points a, e[0], e[1], e[2].
-static inline void updateMatSeg_A0B0(sFrM4_A0B0& out, const t4Vector& a, const sFrElem_A0B0* e)
+static inline void updateMatSeg_A0B0(t4Matrix& out, const t4Vector& a, const tSpringRailNode* e)
 {
-    sFrM4_A0B0 L;
+    t4Matrix L;
     t4Vector v;
-    set4_A0B0(L.r[1], a.x, e[0].pos.x, e[1].pos.x, e[2].pos.x);
-    vu0BasisMul_A0B0(L.r[2], L.r[1], CatmullRom);
-    L.r[0] = L.r[2];
-    set4_A0B0(L.r[2], a.y, e[0].pos.y, e[1].pos.y, e[2].pos.y);
-    vu0BasisMul_A0B0(L.r[3], L.r[2], CatmullRom);
-    L.r[1] = L.r[3];
-    set4_A0B0(L.r[3], a.z, e[0].pos.z, e[1].pos.z, e[2].pos.z);
-    vu0BasisMul_A0B0(v, L.r[3], CatmullRom);
-    L.r[2] = v;
-    out.r[0] = L.r[0]; out.r[1] = L.r[1]; out.r[2] = L.r[2];
-    L.r[3].x = 0.0f; L.r[3].y = 0.0f; L.r[3].z = 0.0f; L.r[3].w = 1.0f;
-    out.r[3] = L.r[3];
+    set4_A0B0(L.row[1], a.x, e[0].P.x, e[1].P.x, e[2].P.x);
+    vu0BasisMul_A0B0(L.row[2], L.row[1], CatmullRom);
+    L.row[0] = L.row[2];
+    set4_A0B0(L.row[2], a.y, e[0].P.y, e[1].P.y, e[2].P.y);
+    vu0BasisMul_A0B0(L.row[3], L.row[2], CatmullRom);
+    L.row[1] = L.row[3];
+    set4_A0B0(L.row[3], a.z, e[0].P.z, e[1].P.z, e[2].P.z);
+    vu0BasisMul_A0B0(v, L.row[3], CatmullRom);
+    L.row[2] = v;
+    out.row[0] = L.row[0]; out.row[1] = L.row[1]; out.row[2] = L.row[2];
+    L.row[3].x = 0.0f; L.row[3].y = 0.0f; L.row[3].z = 0.0f; L.row[3].w = 1.0f;
+    out.row[3] = L.row[3];
     MMI_TRANSPOSE4(&out);
 }
 
 // Last segment: the end point e[1] is repeated as the fourth control point.
-static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const t4Vector& a, const sFrElem_A0B0* e)
+static inline void updateMatEnd_A0B0(t4Matrix& out, const t4Vector& a, const tSpringRailNode* e)
 {
-    sFrM4_A0B0 L;
+    t4Matrix L;
     t4Vector v;
-    set4_A0B0(L.r[1], a.x, e[0].pos.x, e[1].pos.x, e[1].pos.x);
-    vu0BasisMul_A0B0(L.r[2], L.r[1], CatmullRom);
-    L.r[0] = L.r[2];
-    set4_A0B0(L.r[2], a.y, e[0].pos.y, e[1].pos.y, e[1].pos.y);
-    vu0BasisMul_A0B0(L.r[3], L.r[2], CatmullRom);
-    L.r[1] = L.r[3];
-    set4_A0B0(L.r[3], a.z, e[0].pos.z, e[1].pos.z, e[1].pos.z);
-    vu0BasisMul_A0B0(v, L.r[3], CatmullRom);
-    L.r[2] = v;
-    out.r[0] = L.r[0]; out.r[1] = L.r[1]; out.r[2] = L.r[2];
-    L.r[3].x = 0.0f; L.r[3].y = 0.0f; L.r[3].z = 0.0f; L.r[3].w = 1.0f;
-    out.r[3] = L.r[3];
+    set4_A0B0(L.row[1], a.x, e[0].P.x, e[1].P.x, e[1].P.x);
+    vu0BasisMul_A0B0(L.row[2], L.row[1], CatmullRom);
+    L.row[0] = L.row[2];
+    set4_A0B0(L.row[2], a.y, e[0].P.y, e[1].P.y, e[1].P.y);
+    vu0BasisMul_A0B0(L.row[3], L.row[2], CatmullRom);
+    L.row[1] = L.row[3];
+    set4_A0B0(L.row[3], a.z, e[0].P.z, e[1].P.z, e[1].P.z);
+    vu0BasisMul_A0B0(v, L.row[3], CatmullRom);
+    L.row[2] = v;
+    out.row[0] = L.row[0]; out.row[1] = L.row[1]; out.row[2] = L.row[2];
+    L.row[3].x = 0.0f; L.row[3].y = 0.0f; L.row[3].z = 0.0f; L.row[3].w = 1.0f;
+    out.row[3] = L.row[3];
     MMI_TRANSPOSE4(&out);
 }
 
@@ -1101,11 +1092,11 @@ extern "C" void cSpringRailNode_updateMats(cSpringRailNode* selfv)
 {
     cSpringRailNode* self = selfv;
     int i = 1;
-    updateMatSeg_A0B0(((sFrM4_A0B0*)self->Mats)[0], ((sFrElem_A0B0*)self->Nodes)[0].pos, &((sFrElem_A0B0*)self->Nodes)[0]);
+    updateMatSeg_A0B0(self->Mats[0], self->Nodes[0].P, &self->Nodes[0]);
     for (; i < self->NumNodes - 2; i++) {
-        updateMatSeg_A0B0(((sFrM4_A0B0*)self->Mats)[i], ((sFrElem_A0B0*)self->Nodes)[i - 1].pos, &((sFrElem_A0B0*)self->Nodes)[i]);
+        updateMatSeg_A0B0(self->Mats[i], self->Nodes[i - 1].P, &self->Nodes[i]);
     }
-    updateMatEnd_A0B0(((sFrM4_A0B0*)self->Mats)[i], ((sFrElem_A0B0*)self->Nodes)[i - 1].pos, &((sFrElem_A0B0*)self->Nodes)[i]);
+    updateMatEnd_A0B0(self->Mats[i], self->Nodes[i - 1].P, &self->Nodes[i]);
 }
 #endif
 
@@ -1771,7 +1762,7 @@ extern "C" void* cFlagSet_cFlagSet(cFlagSet* self)
     (*(int*)&flagSet->mVerts) = 0;
     flagSet->mVtbl = cFlagSet_vtbl;
     for (i = 0; i < 60; i++) {
-        ((int*)&flagSet->mInstances[0])[i] = 0;
+        flagSet->mInstances[i] = 0;
     }
     int id = cFlagSet_mgFrameToUpdateGridCounter;
     flagSet->mFrameToUpdateGrid = id;

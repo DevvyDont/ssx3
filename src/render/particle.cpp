@@ -2199,12 +2199,12 @@ struct sPatchSet {
  * them with basis[i] and basis[j]; writes x, y, z of each point (12 bytes) to @p out in row order. func_003747A0 calls
  * it.
  *
- * @param mat  the patch record (tPatchRecord): coefficients at +0x40
+ * @param mat  the patch record (tPatchRecord): coefficients m_fBm0..m_fBm3 (+0x40)
  * @param out  the order x order position grid to fill
  * @param idx  the patch order: 0 = 4x4, 1 = 6x6, 2 = 8x8
  */
 // PORT: PS2-only VU0 inline asm (tensor-product patch evaluation: out[i][j] =
-// sum over basis[i] (x) basis[j] of the 4x4 control block at mat+0x40).
+// sum over basis[i] (x) basis[j] of the 4x4 control block at mat->m_fBm0).
 extern "C" void func_00374180(sPatchSet* self, tPatchRecord* mat, t3Vector* out, int idx)
 {
     int n = self->count[idx];
@@ -2229,7 +2229,7 @@ extern "C" void func_00374180(sPatchSet* self, tPatchRecord* mat, t3Vector* out,
         "lqc2      $vf15, 0xE0(%0)\n"
         "lqc2      $vf16, 0xF0(%0)\n"
         :
-        : "r"(((char*)mat) + 0x40));
+        : "r"(mat->m_fBm0));
     for (i = 0; i < n; i++) {
         __asm__ __volatile__(
             "lqc2      $vf17, 0x0(%0)\n"

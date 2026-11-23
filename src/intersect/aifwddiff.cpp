@@ -52,10 +52,9 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_GetFwdDiff);
 struct sFwdDiffList;
 struct sFwdDiffLink;
 struct sFwdDiffTable;
-struct sFwdDiffNode;
 extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(cAIFwdDiffCache* list, sFwdDiffLink* n);
 extern "C" void cAIFwdDiffCache_RemoveFromHash(void* self, void* node);
-extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, sFwdDiffNode* node);
+extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, tAIFwdDiff* node);
 extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* src, cAIFwdDiffCache* node);
 
 
@@ -88,7 +87,7 @@ extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, tAI
     n = (self->mAgeQueue);
     cAIFwdDiffCache_RemoveFromHash(self, n);
     n->mKey = key;
-    cAIFwdDiffCache_AddToHash(self, (sFwdDiffNode*)n);
+    cAIFwdDiffCache_AddToHash(self, n);
     *(tAIFwdDiff**)&self->mAgeQueue = n->mNext;
     cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, (cAIFwdDiffCache*)n);
     *out = n;
@@ -171,34 +170,26 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFw
 //100%
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_AddToHash);
 #ifdef SKIP_ASM
-struct sFwdDiffNode {
-    unsigned int key;
-    int pad4;
-    int pad8;
-    sFwdDiffNode* next;
-};
-
-
 /**
  * Adds an AI forward-difference cache node to the patch hash table, keeping its bucket sorted by key.
  *
- * The bucket is the node's key modulo the bucket count (+0xC); the node goes before the first entry with a larger key.
+ * The bucket is the node's key modulo the bucket count (mHashSize); the node goes before the first entry with a larger key.
  *
  * @param table  the cache (this)
  * @param node  the node (On Tour anode)
  */
-extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, sFwdDiffNode* node)
+extern "C" void cAIFwdDiffCache_AddToHash(cAIFwdDiffCache* table, tAIFwdDiff* node)
 {
-    unsigned int key = node->key;
-    sFwdDiffNode** link = &((sFwdDiffNode**)table->mPatchHash)[key % table->mHashSize];
+    unsigned int key = node->mKey;
+    tAIFwdDiff** link = &table->mPatchHash[key % table->mHashSize];
     for (;;) {
-        sFwdDiffNode* cur = *link;
-        if (cur == 0 || key < cur->key) {
+        tAIFwdDiff* cur = *link;
+        if (cur == 0 || key < cur->mKey) {
             *link = node;
-            node->next = cur;
+            node->mHashLink = cur;
             return;
         }
-        link = &cur->next;
+        link = &cur->mHashLink;
     }
 }
 #endif

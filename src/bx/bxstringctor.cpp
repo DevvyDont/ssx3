@@ -2292,12 +2292,6 @@ INCLUDE_ASM("bx/bxstringctor", cAIPath_getResetPos);
 struct sBXPath;
 extern "C" t4Vector cPath_getPathPos(cPath* self, int* inRange, float pathParam);
 
-struct sBXRangeK2 {
-    int type;   // 0x0
-    int pad_0x4;
-    float lo;   // 0x8
-    float hi;   // 0xC
-};
 
 
 /**
@@ -2320,17 +2314,17 @@ extern "C" t4Vector cAIPath_getResetPos(cPath* path, float* pathParam)
     float lo = hi;
     int i;
     for (i = 0; i < list->NumEvents; i++) {
-        sBXRangeK2* pathEvent = &((sBXRangeK2*)list->Events)[i];
-        if (*pathParam < pathEvent->lo)
+        tPathEventNode* pathEvent = &list->Events[i];
+        if (*pathParam < pathEvent->ParamStart)
             continue;
-        if (pathEvent->hi < *pathParam)
+        if (pathEvent->ParamEnd < *pathParam)
             continue;
-        if (pathEvent->type == 16)
-            hi = pathEvent->hi >? hi;
-        else if (pathEvent->type == 12)
-            lo = pathEvent->lo <? lo;
-        else if (pathEvent->type == 14)
-            lo = pathEvent->hi >? lo;
+        if (pathEvent->Type == 16)
+            hi = pathEvent->ParamEnd >? hi;
+        else if (pathEvent->Type == 12)
+            lo = pathEvent->ParamStart <? lo;
+        else if (pathEvent->Type == 14)
+            lo = pathEvent->ParamEnd >? lo;
     }
     if (lo != *pathParam)
         *pathParam = lo;
@@ -2405,15 +2399,9 @@ extern "C" void cTrackPath_populateData(cTrackPath* self, int data, int fieldId)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_getEventsInRange);
 #ifdef SKIP_ASM
-struct sBXRange {
-    int field_0x0;
-    int field_0x4;
-    float min; // 0x8
-    float max; // 0xC
-};
 
 
-extern "C" int cPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOut, float lo, float hi);
+extern "C" int cPath_getEventsInRange(cTrackPath* self, tPathEventNode* out, int maxOut, float lo, float hi);
 
 /**
  * Collects the track path's events between two distances from the finish.
@@ -2427,7 +2415,7 @@ extern "C" int cPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOu
  * @param hdist  the second distance from the finish (On Tour hdist)
  * @return the number of events written
  */
-extern "C" int cTrackPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOut, float ldist, float hdist)
+extern "C" int cTrackPath_getEventsInRange(cTrackPath* self, tPathEventNode* out, int maxOut, float ldist, float hdist)
 {
     float base = self->BaseDistanceLeft;
     return cPath_getEventsInRange((self), out, maxOut, base - ldist, base - hdist);
@@ -3131,7 +3119,7 @@ INCLUDE_ASM("bx/bxstringctor", cPath_getEventsInRange);
  * @param hi  the end of the stretch (On Tour h)
  * @return the number of events written
  */
-extern "C" int cPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOut, float lo, float hi)
+extern "C" int cPath_getEventsInRange(cTrackPath* self, tPathEventNode* out, int maxOut, float lo, float hi)
 {
     int n;
     int i;
@@ -3140,8 +3128,8 @@ extern "C" int cPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOu
     }
     n = 0;
     for (i = 0; i < self->NumEvents; i++) {
-        if (!(hi < ((sBXRange*)self->Events)[i].min) && !(((sBXRange*)self->Events)[i].max < lo)) {
-            *out++ = ((sBXRange*)self->Events)[i];
+        if (!(hi < self->Events[i].ParamStart) && !(self->Events[i].ParamEnd < lo)) {
+            *out++ = self->Events[i];
             n++;
             if (n == maxOut) {
                 goto done;
@@ -3291,8 +3279,8 @@ extern "C" int cPath_isForkInPath(cTrackPath* self, float lo, float hi)
 {
     int i;
     for (i = 0; i < self->NumEvents; i++) {
-        if (!(hi < ((sBXRange*)self->Events)[i].min) && !(((sBXRange*)self->Events)[i].max < lo)) {
-            if (((sBXRange*)self->Events)[i].field_0x0 == 20 || ((sBXRange*)self->Events)[i].field_0x0 == 18) {
+        if (!(hi < self->Events[i].ParamStart) && !(self->Events[i].ParamEnd < lo)) {
+            if (self->Events[i].Type == 20 || self->Events[i].Type == 18) {
                 return 1;
             }
         }

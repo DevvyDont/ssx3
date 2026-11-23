@@ -108,13 +108,13 @@ struct tPathIntersectInfo;    // path/basepath.h
 struct cOverlapList;          // intersect/overlaplist.h
 
 // One path event in range (On Tour struct tPathEventNode, size 0x10; path/basepath.h only forward-declares it). cRider
-// keeps 12 of them at 0x4DC (PathEventsCur). Layout [O]; [U] the path's getEventsInRange fills 16-byte entries
-// {int, int, float min, float max} (sBXRange in bx/bxstringctor.cpp), and cRider_updateTrackPath copies count << 4 bytes.
+// keeps 12 of them at 0x4DC (PathEventsCur). Layout [O]; [U] cPath_getEventsInRange copies these 16-byte entries
+// out of cPath::Events, and cRider_updateTrackPath copies count << 4 bytes.
 struct tPathEventNode {
     int Type;           // 0x0 [O] tPathEventType
     int Arg;            // 0x4 [O]
-    float ParamStart;   // 0x8 [O]; [U] sBXRange.min
-    float ParamEnd;     // 0xC [O]; [U] sBXRange.max
+    float ParamStart;   // 0x8 [O]; [U] the event walks' range start
+    float ParamEnd;     // 0xC [O]; [U] the event walks' range end
 };
 
 // cRider::tLegInfo (On Tour, nested in cRider; size 0x30). [P] the preview asserts "RightLeg.ThighSkelIndex >= 0",
