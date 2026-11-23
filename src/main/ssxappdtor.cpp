@@ -3339,7 +3339,7 @@ extern "C" void cGame_updateVibration(cGame* self) {
         do {
             obj = (cRider*)self->AI->Riders[i];
             i++;
-            vtbl = (char*)obj->mVtbl;
+            vtbl = (char*)VPTR_AT(obj, sizeof(cRiderState));
             (*(void (**)(void *))(vtbl + 0x9C))(((char*)obj) + *(short *)(vtbl + 0x98));
         } while (i < self->AI->NumberOfRidersAllocated);
     }

@@ -374,7 +374,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     int id = -1;
     cRider* rider = (cRider*)self->rider;
     if (((char*)rider) != 0) {
-        char* being = (char*)&rider->mVtbl;
+        char* being = (char*)&VPTR_AT(rider, sizeof(cRiderState));
         sVEi_CCB8* vt = *(sVEi_CCB8**)being;
         tbl = (cBECharProfileDB*)((char*)func_0014AD50(lib, vt[7].fn(vthis(being, vt[7]))));
         id = cRider_getCheatIdentity(self->rider);

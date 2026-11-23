@@ -1258,7 +1258,7 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             cRider* playerRider = ((cAI*)cAudioInterface_getAI())->Riders[0];
-            *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(&playerRider->mVtbl))->getAIIndex(), i);
+            *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(&VPTR_AT(playerRider, sizeof(cRiderState))))->getAIIndex(), i);
             i++;
             firstTimeFlag++;
         } while (i < 23);
@@ -2820,7 +2820,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, cRider* obj)
     if (cSSXAudio_GetNumViews_self(self) == 1) {
         return 0;
     }
-    char* being = (char*)&obj->mVtbl;
+    char* being = (char*)&VPTR_AT(obj, sizeof(cRiderState));
     sAudVtEnt* entry = &(*(sAudVtEnt**)being)[5];
     return cSSXAudio_GetClosestCamera(self, entry->fn(vthis(being, *entry)));
 }
@@ -3548,7 +3548,7 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider
     if (idx >= 2) return;
     t4Vector pos;
     {
-        char* being = (char*)&rider->mVtbl;
+        char* being = (char*)&VPTR_AT(rider, sizeof(cRiderState));
         sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)being;
         pos = *vt[5].fn(vthis(being, vt[5]));
     }
@@ -3759,7 +3759,7 @@ struct sSsxAudioVEntryI {
 extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, cRider* src)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    char* obj = (char*)&src->mVtbl;
+    char* obj = (char*)&VPTR_AT(src, sizeof(cRiderState));
     sSsxAudioVEntryI* vt = *(sSsxAudioVEntryI**)obj;
     int n = cBEStatInterface_getStatLevel(iface, vt[7].fn(vthis(obj, vt[7])));
     if (n < 4) {

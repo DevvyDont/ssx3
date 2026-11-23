@@ -979,7 +979,7 @@ static inline char* cMissionRider_ctor(char* vself, int inChrg)
     cPlayer_cPlayer(self, 0);
     self->mRider->mScriptObjectVtbl = (void*)(&D_00458240);
     self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    self->mRider->mVtbl = (void*)(&D_00458288);
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)(&D_00458288);
     self->mVtbl = (void**)cPlayer_vtbl;
     if (!inChrg)
     {
@@ -989,7 +989,7 @@ static inline char* cMissionRider_ctor(char* vself, int inChrg)
         int d = ((char*)self) - base;
         t1.e[1].delta = D_00458240.e[1].delta + d;
         sVtbl22_MR t2 = D_00458288;
-        self->mRider->mVtbl = &t2;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&t2;
         t2.e[1].delta = D_00458288.e[1].delta + d;
     }
     return ((char*)self);
@@ -1717,7 +1717,7 @@ extern "C" void func_0012A998(cAI* self)
         cRider* rider = *(cRider**)(list[i] + 0x18);
         if (rider->mRenderFlag != 0)
         {
-            char* sub = (char*)&rider->mVtbl;
+            char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
             if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex]))) != 0)
             {
@@ -1762,7 +1762,7 @@ extern "C" int func_0012AA78(sOwner_0012AA78* self) {
     int ok = 1;
     for (i = 0; i < self->count; i++) {
         if (cRider_isSafeToDelete(self->ent[i]->rider) == 0) {
-            char* obj = (char*)&self->ent[i]->rider->mVtbl;
+            char* obj = (char*)&VPTR_AT(self->ent[i]->rider, sizeof(cRiderState));
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
             if (func_0012A1F0((cAI*)self, vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))) != 0)
                 ok = 0;
@@ -2006,7 +2006,7 @@ extern "C" void cAI_purgeComputerRiders(cAI* aiManager)
         cComputer* computer = (cComputer*)self->mListA[i];
         if (((void*)computer))
         {
-            char* obj = (char*)&computer->RiderHandler.GroundMotion.mRider->mVtbl;
+            char* obj = (char*)&VPTR_AT(computer->RiderHandler.GroundMotion.mRider, sizeof(cRiderState));
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
             vt[1].fn(vthis(obj, vt[1]), 3);
         }
@@ -2038,7 +2038,7 @@ extern "C" void cAI_purgeComputerActors(cAI* aiManager)
         cComputer* actor = (cComputer*)self->mListB[i];
         if (((void*)actor))
         {
-            char* obj = (char*)&actor->RiderHandler.GroundMotion.mRider->mVtbl;
+            char* obj = (char*)&VPTR_AT(actor->RiderHandler.GroundMotion.mRider, sizeof(cRiderState));
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
             vt[1].fn(vthis(obj, vt[1]), 3);
         }
@@ -2070,7 +2070,7 @@ extern "C" void cAI_purgeMissionRiders(cAI* aiManager)
         cMissionRider* missionRider = (cMissionRider*)self->mListC[i];
         if (((void*)missionRider))
         {
-            char* obj = (char*)&missionRider->mRider->mVtbl;
+            char* obj = (char*)&VPTR_AT(missionRider->mRider, sizeof(cRiderState));
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
             vt[1].fn(vthis(obj, vt[1]), 3);
         }
@@ -2171,7 +2171,7 @@ extern "C" void cAI_shutdown(cAI* aiManager)
         cPlayer* player = (cPlayer*)self->mList[i];
         if (((void*)player))
         {
-            char* obj = (char*)&player->mRider->mVtbl;
+            char* obj = (char*)&VPTR_AT(player->mRider, sizeof(cRiderState));
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
             vt[1].fn(vthis(obj, vt[1]), 3);
         }
@@ -3801,14 +3801,14 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
     float k = cWipeoutControl_chooseTumbleAnimRate(self);
     {
         cRider* rider3 = self->mRider;
-        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider3->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider3, sizeof(cRiderState));
         vt[18].fn(vthis(rider3, vt[18]), k * 0.5f);
     }
     if (self->IsNewImpact != 0)
     {
         self->IsNewImpact = 0;
         cRider* rider4 = self->mRider;
-        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider4->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider4, sizeof(cRiderState));
         vt[17].fn(vthis(rider4, vt[17]), aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
@@ -3990,7 +3990,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
         }
         self->IsNewImpact = 0;
         cRider* rider3 = self->mRider;
-        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider3->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider3, sizeof(cRiderState));
         vt[17].fn(vthis(rider3, vt[17]), aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
@@ -4051,14 +4051,14 @@ extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
     {
         self->IsNewImpact = 0;
         cRider* rider = self->mRider;
-        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider, sizeof(cRiderState));
         vt[17].fn(((char*)rider) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
         cSSXAudio_Land(cAudioInterface_bxAudio(), self->mRider, 0.0f);
     }
     cRider* rider = self->mRider;
     if (rider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
     {
-        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider, sizeof(cRiderState));
         char* thisp = ((char*)rider) + vt[18].delta;
         float percentLeft = 1.0f - cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2);
         vt[18].fn(thisp, percentLeft + percentLeft);
@@ -4727,7 +4727,7 @@ extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
 {
     if ((AITick() & 1) == 0)
     {
-        char* sub = (char*)&self->mRider->mVtbl;
+        char* sub = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
         if (vt[8].fn(vthis(sub, vt[8])))
         {
@@ -10135,7 +10135,7 @@ extern "C" void* cWipeoutMotion_cWipeoutMotion(cWipeoutMotion* self, int inChrg)
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_004597B0;
     self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    self->mRider->mVtbl = (void*)&D_004597F8;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_004597F8;
     if (!inChrg)
     {
         sVtbl9_136980 scriptVtbl = D_004597B0;
@@ -10144,7 +10144,7 @@ extern "C" void* cWipeoutMotion_cWipeoutMotion(cWipeoutMotion* self, int inChrg)
         int thisDelta = (char*)self - base;
         scriptVtbl.e[1].delta = D_004597B0.e[1].delta + thisDelta;
         sVtbl22_136980 riderVtbl = D_004597F8;
-        self->mRider->mVtbl = &riderVtbl;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&riderVtbl;
         riderVtbl.e[1].delta = D_004597F8.e[1].delta + thisDelta;
     }
     self->BoardSphereTree = 0;

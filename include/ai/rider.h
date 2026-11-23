@@ -4,11 +4,15 @@
 // cRider: one snowboarder (player, CPU or mission rider). EA's header was ../source/ai/rider.h
 // (preview build assert path).
 //
-// This is a FLAT layout: every field at its retail offset, no C++ inheritance or virtuals yet.
-// Matching code uses it through `cRider* self` and `self->field`, and CHECK_OFFSET pins each field.
+// cRider : cRiderState, cBeing, as On Tour has it: cRiderState holds the state from 0x000 (On Tour's starts with the
+// same opponent table, tOpponentInfo Opponents[4]; retail's has 6), cBeing (object/being.h) is the vptr at 0x6C0,
+// whose virtuals cRider overrides (rider->getAIIndex()). The cScriptObjRider base and cRider's own members follow
+// as flat fields at their retail offsets. Matching code uses it through `cRider* self` and `self->field`, and
+// CHECK_OFFSET pins each field. cBeing is not at offset 0: a cRider* converts to a cBeing* with a null test, so
+// code calls the virtuals on the cRider* and reaches the vptr as VPTR_AT(rider, sizeof(cRiderState)).
 //
 // What the real class looked like (evidence, not yet modelled):
-//   - Bases: cBeing (primary; its vptr is at 0x6C0, after cBeing's data) and cScriptObjRider
+//   - Bases: cRiderState (On Tour), cBeing (the vptr at 0x6C0) and cScriptObjRider
 //     (-> cScriptEntity, cScriptObject), whose vptrs are at 0x6D0 and 0x6E8. Source: the three
 //     vtables the destructor (cRider__cRider) installs, _vt$6cRider / $15cScriptObjRider / $13cScriptObject.
 //   - cRider is a *virtual* base of cPlayer (at cPlayer+0xE10, see cPlayer_cPlayer) and of about 30
@@ -27,6 +31,7 @@
 // Everything else is unk_XXX. Rename only with evidence, and say which kind.
 
 #include "layout.h"
+#include "object/being.h"
 #include "bx/math3d.h"
 #include "animation/animmodel.h"
 
@@ -291,7 +296,9 @@ CHECK_OFFSET(tRiderLoadList, MdlLoadNum, 0x2940);
 CHECK_OFFSET(tRiderLoadList, TexLoadNum, 0x2944);
 CHECK_SIZE(tRiderLoadList, 0x2948);
 
-struct cRider {
+// cRiderState: the first 0x6C0 bytes of a cRider, its race and motion state. [O] On Tour's cRider : cRiderState
+// (size 0x12D0 there, at +0x0), starting with tOpponentInfo Opponents[4] (here sRiderPair mRelations[6]).
+struct cRiderState {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (cRider_initAlways)
     /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarBehind, cComputer_setupWarp
@@ -403,8 +410,14 @@ struct cRider {
     /* 0x5B4 */ float mSmoothedHeading; // [X] smoothed slope angle (cRider_updateSplit12)
     /* 0x5B8 */ unsigned int mVisitedIds; // [X]
     /* 0x5BC */ char unk_5BC[0x104];
-    /* 0x6C0 */ void* mVtbl; // cRider vtable (_vt$6cRider); cBeing's vptr slot
-    /* 0x6C4 */ char unk_6C4[0xC];
+};
+
+CHECK_SIZE(cRiderState, 0x6C0);
+
+struct cRider : public cRiderState, public cBeing {
+    // 0x6C0: cBeing's vptr (cRider vtable _vt$6cRider, retail cRider_vtbl; object/being.h has the slots)
+    // 0x6C4-0x6CF: alignment padding; the compiler starts the derived part on a 16-byte boundary (cScriptObjRider,
+    // holding a t4Matrix, began there in the original)
     /* 0x6D0 */ void* mScriptObjRiderVtbl; // _vt$6cRider$15cScriptObjRider; start of that base
     /* 0x6D4 */ char unk_6D4[0x4];
     /* 0x6D8 */ void* mpEntity;
@@ -505,99 +518,98 @@ struct cRider {
     /* 0xB34 */ int mStatsIndex; // [X] stat column for cBEStatInterface_getCollisionAttrib
 };
 
-CHECK_OFFSET(cRider, unk_0D8, 0xD8);
-CHECK_OFFSET(cRider, mRubberBandBehind, 0xDC);
-CHECK_OFFSET(cRider, mRubberBandAhead, 0xE0);
-CHECK_OFFSET(cRider, mGlueStrengthLevel, 0xE4);
-CHECK_OFFSET(cRider, PrevRanking, 0xE8);
-CHECK_OFFSET(cRider, RaceRanking, 0xEC);
-CHECK_OFFSET(cRider, PissedOff, 0xF0);
-CHECK_OFFSET(cRider, LastPunchTick, 0xF4);
-CHECK_OFFSET(cRider, PissedAIIndex, 0xF8);
-CHECK_OFFSET(cRider, PissedOffType, 0xFC);
-CHECK_OFFSET(cRider, unk_100, 0x100);
-CHECK_OFFSET(cRider, mPosition, 0x110);
-CHECK_OFFSET(cRider, mRotation, 0x120);
-CHECK_OFFSET(cRider, mUseRootPoseOverride, 0x150);
-CHECK_OFFSET(cRider, RiderRoot, 0x160);
-CHECK_OFFSET(cRider, mMatrix, 0x1A0);
-CHECK_OFFSET(cRider, mVelocity, 0x1E0);
-CHECK_OFFSET(cRider, mSlewed, 0x1F0);
-CHECK_OFFSET(cRider, SurfaceFlags, 0x2D4);
-CHECK_OFFSET(cRider, mWasFlipped, 0x2D8);
-CHECK_OFFSET(cRider, mSpinRate, 0x2DC);
-CHECK_OFFSET(cRider, mFlipRate, 0x2E0);
-CHECK_OFFSET(cRider, TerminalVelocity, 0x2E4);
-CHECK_OFFSET(cRider, mPowerUpBoostTimer, 0x2E8);
-CHECK_OFFSET(cRider, mPowerUpTrickTimer, 0x2EC);
-CHECK_OFFSET(cRider, mUberTimer, 0x2F0);
-CHECK_OFFSET(cRider, mUberLevel, 0x2F4);
-CHECK_OFFSET(cRider, BoostPowerBar, 0x2F8);
-CHECK_OFFSET(cRider, mBoostStrength, 0x2FC);
-CHECK_OFFSET(cRider, mTimeScale, 0x300);
-CHECK_OFFSET(cRider, mBoostMode, 0x304);
-CHECK_OFFSET(cRider, mAllowNaturalAir, 0x308);
-CHECK_OFFSET(cRider, mBoostMaxSpeed, 0x30C);
-CHECK_OFFSET(cRider, mCheatSteerAlign, 0x310);
-CHECK_OFFSET(cRider, mCheatSpeedLerp, 0x314);
-CHECK_OFFSET(cRider, LegIK, 0x318);
-CHECK_OFFSET(cRider, ChatterMag, 0x31C);
-CHECK_OFFSET(cRider, IsRidingFakie, 0x320);
-CHECK_OFFSET(cRider, IsGoofyStance, 0x324);
-CHECK_OFFSET(cRider, RailslideMode, 0x328);
-CHECK_OFFSET(cRider, HandplantMode, 0x32C);
-CHECK_OFFSET(cRider, PressMode, 0x330);
-CHECK_OFFSET(cRider, PunchVect, 0x340);
-CHECK_OFFSET(cRider, PunchStrength, 0x350);
-CHECK_OFFSET(cRider, ReactionEventTick, 0x354);
-CHECK_OFFSET(cRider, ReactionEventType, 0x358);
-CHECK_OFFSET(cRider, ProximityActionDelay, 0x35C);
-CHECK_OFFSET(cRider, JumpHeldSec, 0x360);
-CHECK_OFFSET(cRider, mGroundNormal, 0x370);
-CHECK_OFFSET(cRider, LastGroundNormal, 0x380);
-CHECK_OFFSET(cRider, mGroundForward, 0x3A0);
-CHECK_OFFSET(cRider, mGroundSide, 0x3B0);
-CHECK_OFFSET(cRider, HalfPipeNormal, 0x3C0);
-CHECK_OFFSET(cRider, GroundVelocity, 0x3D0);
-CHECK_OFFSET(cRider, mImpulse, 0x3E0);
-CHECK_OFFSET(cRider, mImpactAccum, 0x3F0);
-CHECK_OFFSET(cRider, mImpactAccum2, 0x3F4);
-CHECK_OFFSET(cRider, InTunnel, 0x3FC);
-CHECK_OFFSET(cRider, mBoundsMin, 0x400);
-CHECK_OFFSET(cRider, mBoundsMax, 0x410);
-CHECK_OFFSET(cRider, mBoundSphere, 0x420);
-CHECK_OFFSET(cRider, mGroundPolyId, 0x430);
-CHECK_OFFSET(cRider, mGroundMaterial, 0x434);
-CHECK_OFFSET(cRider, mSurfaceType, 0x438);
-CHECK_OFFSET(cRider, unk_450, 0x450);
-CHECK_OFFSET(cRider, SnowOffset, 0x454);
-CHECK_OFFSET(cRider, mGroundContactPoint, 0x460);
-CHECK_OFFSET(cRider, mFinishTime, 0x470);
-CHECK_OFFSET(cRider, mStartTick, 0x474);
-CHECK_OFFSET(cRider, mFinishTick, 0x478);
-CHECK_OFFSET(cRider, mPenaltyTicks, 0x47C);
-CHECK_OFFSET(cRider, mDidNotFinish, 0x480);
-CHECK_OFFSET(cRider, mEndOfTheWorldTimer, 0x484);
-CHECK_OFFSET(cRider, PathPos, 0x490);
-CHECK_OFFSET(cRider, IntersectPos, 0x4A0);
-CHECK_OFFSET(cRider, AimTargetPos, 0x4B0);
-CHECK_OFFSET(cRider, PrevPathParam, 0x4C0);
-CHECK_OFFSET(cRider, PathParam, 0x4C4);
-CHECK_OFFSET(cRider, PathDistXY, 0x4C8);
-CHECK_OFFSET(cRider, PathHeading, 0x4CC);
-CHECK_OFFSET(cRider, mDistToFinish, 0x4D0);
-CHECK_OFFSET(cRider, MinDistanceLeft, 0x4D4);
-CHECK_OFFSET(cRider, TotalPathDistance, 0x4D8);
-CHECK_OFFSET(cRider, PathEventsCur, 0x4DC);
-CHECK_OFFSET(cRider, NumPathEventsCur, 0x59C);
-CHECK_OFFSET(cRider, ConsecutiveAirFrames, 0x5A0);
-CHECK_OFFSET(cRider, VerticalJump, 0x5A4);
-CHECK_OFFSET(cRider, DidPop, 0x5A8);
-CHECK_OFFSET(cRider, RidingFlexRail, 0x5AC);
-CHECK_OFFSET(cRider, DangerLevel, 0x5B0);
-CHECK_OFFSET(cRider, mSmoothedHeading, 0x5B4);
-CHECK_OFFSET(cRider, mVisitedIds, 0x5B8);
-CHECK_OFFSET(cRider, mVtbl, 0x6C0);
+CHECK_OFFSET(cRiderState, unk_0D8, 0xD8);
+CHECK_OFFSET(cRiderState, mRubberBandBehind, 0xDC);
+CHECK_OFFSET(cRiderState, mRubberBandAhead, 0xE0);
+CHECK_OFFSET(cRiderState, mGlueStrengthLevel, 0xE4);
+CHECK_OFFSET(cRiderState, PrevRanking, 0xE8);
+CHECK_OFFSET(cRiderState, RaceRanking, 0xEC);
+CHECK_OFFSET(cRiderState, PissedOff, 0xF0);
+CHECK_OFFSET(cRiderState, LastPunchTick, 0xF4);
+CHECK_OFFSET(cRiderState, PissedAIIndex, 0xF8);
+CHECK_OFFSET(cRiderState, PissedOffType, 0xFC);
+CHECK_OFFSET(cRiderState, unk_100, 0x100);
+CHECK_OFFSET(cRiderState, mPosition, 0x110);
+CHECK_OFFSET(cRiderState, mRotation, 0x120);
+CHECK_OFFSET(cRiderState, mUseRootPoseOverride, 0x150);
+CHECK_OFFSET(cRiderState, RiderRoot, 0x160);
+CHECK_OFFSET(cRiderState, mMatrix, 0x1A0);
+CHECK_OFFSET(cRiderState, mVelocity, 0x1E0);
+CHECK_OFFSET(cRiderState, mSlewed, 0x1F0);
+CHECK_OFFSET(cRiderState, SurfaceFlags, 0x2D4);
+CHECK_OFFSET(cRiderState, mWasFlipped, 0x2D8);
+CHECK_OFFSET(cRiderState, mSpinRate, 0x2DC);
+CHECK_OFFSET(cRiderState, mFlipRate, 0x2E0);
+CHECK_OFFSET(cRiderState, TerminalVelocity, 0x2E4);
+CHECK_OFFSET(cRiderState, mPowerUpBoostTimer, 0x2E8);
+CHECK_OFFSET(cRiderState, mPowerUpTrickTimer, 0x2EC);
+CHECK_OFFSET(cRiderState, mUberTimer, 0x2F0);
+CHECK_OFFSET(cRiderState, mUberLevel, 0x2F4);
+CHECK_OFFSET(cRiderState, BoostPowerBar, 0x2F8);
+CHECK_OFFSET(cRiderState, mBoostStrength, 0x2FC);
+CHECK_OFFSET(cRiderState, mTimeScale, 0x300);
+CHECK_OFFSET(cRiderState, mBoostMode, 0x304);
+CHECK_OFFSET(cRiderState, mAllowNaturalAir, 0x308);
+CHECK_OFFSET(cRiderState, mBoostMaxSpeed, 0x30C);
+CHECK_OFFSET(cRiderState, mCheatSteerAlign, 0x310);
+CHECK_OFFSET(cRiderState, mCheatSpeedLerp, 0x314);
+CHECK_OFFSET(cRiderState, LegIK, 0x318);
+CHECK_OFFSET(cRiderState, ChatterMag, 0x31C);
+CHECK_OFFSET(cRiderState, IsRidingFakie, 0x320);
+CHECK_OFFSET(cRiderState, IsGoofyStance, 0x324);
+CHECK_OFFSET(cRiderState, RailslideMode, 0x328);
+CHECK_OFFSET(cRiderState, HandplantMode, 0x32C);
+CHECK_OFFSET(cRiderState, PressMode, 0x330);
+CHECK_OFFSET(cRiderState, PunchVect, 0x340);
+CHECK_OFFSET(cRiderState, PunchStrength, 0x350);
+CHECK_OFFSET(cRiderState, ReactionEventTick, 0x354);
+CHECK_OFFSET(cRiderState, ReactionEventType, 0x358);
+CHECK_OFFSET(cRiderState, ProximityActionDelay, 0x35C);
+CHECK_OFFSET(cRiderState, JumpHeldSec, 0x360);
+CHECK_OFFSET(cRiderState, mGroundNormal, 0x370);
+CHECK_OFFSET(cRiderState, LastGroundNormal, 0x380);
+CHECK_OFFSET(cRiderState, mGroundForward, 0x3A0);
+CHECK_OFFSET(cRiderState, mGroundSide, 0x3B0);
+CHECK_OFFSET(cRiderState, HalfPipeNormal, 0x3C0);
+CHECK_OFFSET(cRiderState, GroundVelocity, 0x3D0);
+CHECK_OFFSET(cRiderState, mImpulse, 0x3E0);
+CHECK_OFFSET(cRiderState, mImpactAccum, 0x3F0);
+CHECK_OFFSET(cRiderState, mImpactAccum2, 0x3F4);
+CHECK_OFFSET(cRiderState, InTunnel, 0x3FC);
+CHECK_OFFSET(cRiderState, mBoundsMin, 0x400);
+CHECK_OFFSET(cRiderState, mBoundsMax, 0x410);
+CHECK_OFFSET(cRiderState, mBoundSphere, 0x420);
+CHECK_OFFSET(cRiderState, mGroundPolyId, 0x430);
+CHECK_OFFSET(cRiderState, mGroundMaterial, 0x434);
+CHECK_OFFSET(cRiderState, mSurfaceType, 0x438);
+CHECK_OFFSET(cRiderState, unk_450, 0x450);
+CHECK_OFFSET(cRiderState, SnowOffset, 0x454);
+CHECK_OFFSET(cRiderState, mGroundContactPoint, 0x460);
+CHECK_OFFSET(cRiderState, mFinishTime, 0x470);
+CHECK_OFFSET(cRiderState, mStartTick, 0x474);
+CHECK_OFFSET(cRiderState, mFinishTick, 0x478);
+CHECK_OFFSET(cRiderState, mPenaltyTicks, 0x47C);
+CHECK_OFFSET(cRiderState, mDidNotFinish, 0x480);
+CHECK_OFFSET(cRiderState, mEndOfTheWorldTimer, 0x484);
+CHECK_OFFSET(cRiderState, PathPos, 0x490);
+CHECK_OFFSET(cRiderState, IntersectPos, 0x4A0);
+CHECK_OFFSET(cRiderState, AimTargetPos, 0x4B0);
+CHECK_OFFSET(cRiderState, PrevPathParam, 0x4C0);
+CHECK_OFFSET(cRiderState, PathParam, 0x4C4);
+CHECK_OFFSET(cRiderState, PathDistXY, 0x4C8);
+CHECK_OFFSET(cRiderState, PathHeading, 0x4CC);
+CHECK_OFFSET(cRiderState, mDistToFinish, 0x4D0);
+CHECK_OFFSET(cRiderState, MinDistanceLeft, 0x4D4);
+CHECK_OFFSET(cRiderState, TotalPathDistance, 0x4D8);
+CHECK_OFFSET(cRiderState, PathEventsCur, 0x4DC);
+CHECK_OFFSET(cRiderState, NumPathEventsCur, 0x59C);
+CHECK_OFFSET(cRiderState, ConsecutiveAirFrames, 0x5A0);
+CHECK_OFFSET(cRiderState, VerticalJump, 0x5A4);
+CHECK_OFFSET(cRiderState, DidPop, 0x5A8);
+CHECK_OFFSET(cRiderState, RidingFlexRail, 0x5AC);
+CHECK_OFFSET(cRiderState, DangerLevel, 0x5B0);
+CHECK_OFFSET(cRiderState, mSmoothedHeading, 0x5B4);
+CHECK_OFFSET(cRiderState, mVisitedIds, 0x5B8);
 CHECK_OFFSET(cRider, mScriptObjRiderVtbl, 0x6D0);
 CHECK_OFFSET(cRider, mpEntity, 0x6D8);
 CHECK_OFFSET(cRider, unk_6DC, 0x6DC);

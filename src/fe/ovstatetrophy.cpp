@@ -520,7 +520,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
     char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
-    int me = ((cBeing_EDA0*)(&rider->mVtbl))->getAIIndex();
+    int me = ((cBeing_EDA0*)(&VPTR_AT(rider, sizeof(cRiderState))))->getAIIndex();
     sRace_EDA0* race = (sRace_EDA0*)SSXApp->Game->AI;
     float myDist = D_004C8BC8_EDA0[me].dist;
     float myPos = D_004C8BC8_EDA0[me].pos;
@@ -1041,7 +1041,7 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
     char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
-    int me = ((cBeing_FB40*)(&rider->mVtbl))->getAIIndex();
+    int me = ((cBeing_FB40*)(&VPTR_AT(rider, sizeof(cRiderState))))->getAIIndex();
     sRace_FB40* race = (sRace_FB40*)SSXApp->Game->AI;
     float myDist = D_004C8BC8_FB40[me].dist;
     float myPos = D_004C8BC8_FB40[me].pos;

@@ -940,7 +940,7 @@ static inline void vu0SubEq_137860(t4Vector& a, const t4Vector& b)
 
 static inline bool isHuman_137860(cRider* rider)
 {
-    char* sub = (char*)&rider->mVtbl;
+    char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
     sVEntR_137860* vt = *(sVEntR_137860**)sub;
     return vt[kRiderVt_isHuman].fn(vthis(sub, vt[kRiderVt_isHuman]));
 }

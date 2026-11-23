@@ -760,7 +760,7 @@ static inline void walk_D320(void* vvnode, CameraCollisionCallback* ctx)
     for (e = *(char**)&node->nodesinside[2]; e != 0; e = *(char**)e) {
         if (*(int*)(e + 8) == 4) {
             char* trig = *(char**)(e + 0xC);
-            char* sub = (char*)&ctx->rider->mVtbl;
+            char* sub = (char*)&VPTR_AT(ctx->rider, sizeof(cRiderState));
             char* bound = *(char**)(trig + 8);
             sVEnt_D320* cvt = *(sVEnt_D320**)sub;
             sVEnt_D320* bvt = *(sVEnt_D320**)(bound + 0x24);
@@ -838,7 +838,7 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
         nash_Octant* w = (nash_Octant*)SSXApp->Game->BXNash;
         (*(void**)&ctx.ActiveTriggerList) = (char*)(idx * 4 + (int)self) + 0x14;
         (*(char**)&ctx.rider) = ((char*)rider);
-        char* sub = (char*)&rider->mVtbl;
+        char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
         t4Vector* riderPosMin = getPos_D320(sub);
         t4Vector* riderPosMax = getPos_D320(sub);
         tBoundBox box;

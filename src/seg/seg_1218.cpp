@@ -1214,12 +1214,12 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
         if (!(zoneCheckAIIndex < ((sRiders_13A8*)self->mpAI)->getNumRiders()))
             zoneCheckAIIndex = 0;
         cRider* pRider = ((sRiders_13A8*)self->mpAI)->getRider(zoneCheckAIIndex);
-        char* sub = (char*)&pRider->mVtbl;
+        char* sub = (char*)&VPTR_AT(pRider, sizeof(cRiderState));
         tRiderDangerTrack* pCurrentRiderTrack = &((&self->mRiderDangerTrack[0]))[zoneCheckAIIndex];
         sNode_13A8* pCurrDangerZone = ((sNode_13A8*)self->mpActiveList);
         int baseDangerZoneLevel = 0;
         do {
-            sVEntry<int(void*, sObj_13A8*)>* vt = *(sVEntry<int(void*, sObj_13A8*)>**)&pRider->mVtbl;
+            sVEntry<int(void*, sObj_13A8*)>* vt = *(sVEntry<int(void*, sObj_13A8*)>**)&VPTR_AT(pRider, sizeof(cRiderState));
             int (**pf)(void*, sObj_13A8*) = &vt[kRiderVt_isIntersecting].fn;
             if ((*pf)(vthis(sub, vt[kRiderVt_isIntersecting]), lookup_13A8(pCurrDangerZone->id))) {
                 if (baseDangerZoneLevel < pCurrDangerZone->val)
@@ -4422,7 +4422,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
             velScale = velScale / speed;
         ScaleEq_57B8(w, velScale);
         rider->mVelocity = Add_57B8(w, Scale_57B8(hit->n, out));
-        sVEf_57B8* vt = *(sVEf_57B8**)&rider->mVtbl;
+        sVEf_57B8* vt = *(sVEf_57B8**)&VPTR_AT(rider, sizeof(cRiderState));
         vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), vn);
         if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2) > 0.20000000298023224f) {
             rider->mSurfaceType = 0;
@@ -4432,7 +4432,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
             cRider_setControlState_57B8(rider, 5);
             cRiderAnimBase_play(rider->mRiderAnim, 268, 1, -1.0f);
         }
-        char* sub = (char*)&rider->mVtbl;
+        char* sub = (char*)&VPTR_AT(rider, sizeof(cRiderState));
         sVEv_57B8* vt2 = *(sVEv_57B8**)sub;
         t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
         sVEv_57B8* vt3 = *(sVEv_57B8**)sub;
@@ -4590,9 +4590,9 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
             return;
         }
     }
-    sVEf_5D98* vt = *(sVEf_5D98**)&self->mVtbl;
+    sVEf_5D98* vt = *(sVEf_5D98**)&VPTR_AT(self, sizeof(cRiderState));
     vt[kRiderVt_vibrationBump].fn(vthis(self, vt[kRiderVt_vibrationBump]), info->vn);
-    char* sub = (char*)&self->mVtbl;
+    char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
     if (cRider_getMotionState(self) == 2) {
         if (self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1) {
             sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
@@ -6296,7 +6296,7 @@ extern "C" void cRider_doOpponentCollision(cRider* self, cRider* other, t4Vector
     } else {
         AddEq_7E70(*(&self->mVelocity), imp);
         if (cRider_getMotionState((char*)self) == 1 || (cRider_getMotionState((char*)self) == 2 && self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
-            cAI_7E70* ai = (cAI_7E70*)(&self->mVtbl);
+            cAI_7E70* ai = (cAI_7E70*)(&VPTR_AT(self, sizeof(cRiderState)));
             t4Vector* pos = ai->GetPos();
             cAirPredictor_startLaunchIntoAir(self->mAirPredictor, pos, ai->GetDir(), self->TerminalVelocity);
             if (Dot_7E70(*n, Get_7E70((char*)&self->mMatrix.row[2])) * clampedSpeed > 0.0f)
@@ -6896,7 +6896,7 @@ extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
     cRiderHandler_cRiderHandler(((char*)self), 0);
     (self->RiderHandler.GroundMotion.mRider)->mScriptObjectVtbl = (void*)&D_00458618;
     (self->RiderHandler.GroundMotion.mRider)->mScriptObjRiderVtbl = D_00459B90;
-    (self->RiderHandler.GroundMotion.mRider)->mVtbl = (void*)&D_00458660;
+    VPTR_AT((self->RiderHandler.GroundMotion.mRider), sizeof(cRiderState)) = (void**)&D_00458660;
     if (!inChrg)
     {
         sVtbl9_108C80 ctorVtbl9 = D_00458618;
@@ -6905,7 +6905,7 @@ extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
         int vbOffset = ((char*)self) - base;
         ctorVtbl9.e[1].delta = D_00458618.e[1].delta + vbOffset;
         sVtbl22_108C80 ctorVtbl22 = D_00458660;
-        (self->RiderHandler.GroundMotion.mRider)->mVtbl = &ctorVtbl22;
+        VPTR_AT((self->RiderHandler.GroundMotion.mRider), sizeof(cRiderState)) = (void**)&ctorVtbl22;
         ctorVtbl22.e[1].delta = D_00458660.e[1].delta + vbOffset;
         ctorVtbl22.e[20].delta = D_00458660.e[20].delta + vbOffset;
     }
@@ -7846,12 +7846,12 @@ extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* cmd)
 {
     float framesLeft = 180.0f - (float)AITick();
     float th = 33.0f;
-    th -= (float)((((cLvl_B790*)(&self->RiderHandler.GroundMotion.mRider->mVtbl))->Level() - 1) * 10);
-    if (framesLeft < th && ((cLvl_B790*)(&self->RiderHandler.GroundMotion.mRider->mVtbl))->Level() < 4) {
+    th -= (float)((((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() - 1) * 10);
+    if (framesLeft < th && ((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() < 4) {
         cmd->b12 = 0x1F;
         return;
     }
-    if (framesLeft < 72.0f && ((cLvl_B790*)(&self->RiderHandler.GroundMotion.mRider->mVtbl))->Level() < 3) {
+    if (framesLeft < 72.0f && ((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() < 3) {
         cmd->b12 = -0x1F;
         return;
     }

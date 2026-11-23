@@ -94,14 +94,14 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     unsigned int none = 0xFFFFFFFF;
     int one = 1;
     cRiderState_cRiderState(self);
-    self->mVtbl = cBeing_vtbl;
+    VPTR_AT(self, sizeof(cRiderState)) = cBeing_vtbl;
     cScriptObjRider_cScriptObjRider(&self->mScriptObjRiderVtbl);
     self->mScriptObjectVtbl = D_00459BD0;
     self->mAIIndex = -1;
     self->mViewIndex = -1;
     self->mSafeRenderTick = -1;
     self->mScriptObjRiderVtbl = D_00459B90;
-    self->mVtbl = cRider_vtbl;
+    VPTR_AT(self, sizeof(cRiderState)) = cRider_vtbl;
     self->mGroundMaterial = 49;
     self->mLoadStep = 0;
     self->mRenderFlag = one;
@@ -218,7 +218,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
 {
     self->mScriptObjectVtbl = D_00459BD0;
     self->mScriptObjRiderVtbl = D_00459B90;
-    self->mVtbl = cRider_vtbl;
+    VPTR_AT(self, sizeof(cRiderState)) = cRider_vtbl;
     cSSXAudio_RiderDeleted_impl(cAudioInterface_bxAudio(), self);
     cScriptObject_DeInitScriptObject(self->unk_6DC);
     char* polyMember = (char*)self->mRiderAnim;
@@ -257,7 +257,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     self->mScriptObjectVtbl = D_00482018;
     self->mScriptObjRiderVtbl = cScriptObjRider_vtbl;
     cScriptObject__cScriptObject(self->unk_6DC, 0);
-    self->mVtbl = cBeing_vtbl;
+    VPTR_AT(self, sizeof(cRiderState)) = cBeing_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
 }
@@ -743,7 +743,7 @@ void cRider_initAlways_impl(cRider* self)
         self->mPowerUpBoostTimer = 0;
         self->mPowerUpTrickTimer = 0;
         self->ConsecutiveAirFrames = 0;
-        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_AT(self, sizeof(cRiderState));
         vt[kRiderVt_vibrationReset].fn(vthis(self, vt[kRiderVt_vibrationReset]));
         cRiderHandler_resetRiderFX(self->mRiderHandler);
         self->VerticalJump = 0;
@@ -1187,7 +1187,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     cOverlapList_geteverything(self->mOverlapList, &self->mBoundsMin);
     cRider_updateActiveLights(self);
     func_002105B0(self->mAIIndex);
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)&self->mVtbl;
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)&VPTR_AT(self, sizeof(cRiderState));
     vt[kRiderVt_vibrationReset].fn(vthis(self, vt[kRiderVt_vibrationReset]));
     if ((unsigned int)self->mViewIndex < 2)
     {
@@ -1366,7 +1366,7 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     if (notify != 0)
     {
-        char* sub = (char*)&self->mVtbl;
+        char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
         sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
         char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
         sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
@@ -2653,7 +2653,7 @@ extern "C" void cRider_updateBoost(cRider* self)
     if (0.01666666753590107f < self->mPowerUpTrickTimer || cRider_getMotionState(self) != 1) {
         self->mPowerUpTrickTimer = decay_1200D0(self->mPowerUpTrickTimer, step);
     }
-    char* sub = (char*)&self->mVtbl;
+    char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)sub)[kRiderVt_isComputer];
     vtEntry->fn(vthis(sub, *vtEntry));
     if ((cRider_getMotionState(self) == 1 || cRider_getControlState(self) == 12) && 0.0f < self->mUberTimer && self->mUberTimer <= 0.01666666753590107f) {
@@ -3395,11 +3395,11 @@ extern "C" void cRider_updateSplit10(cRider* self)
         if (obj != 0)
         {
             sVEntry<void(void*, void*, void*, void*)>* vt = *(sVEntry<void(void*, void*, void*, void*)>**)(obj + 0xC);
-            vt[40].fn(vthis(obj, vt[40]), (char*)&self->CollideInfo, (char*)&self->CollideIntersectInfo, (char*)&self->mVtbl);
+            vt[40].fn(vthis(obj, vt[40]), (char*)&self->CollideInfo, (char*)&self->CollideIntersectInfo, (char*)&VPTR_AT(self, sizeof(cRiderState)));
         }
         else
         {
-            cWScriptMan_doOnCollideScript(cWScriptMan_TheWScriptMan, (char*)&self->CollideInfo, (char*)&self->CollideIntersectInfo, (char*)&self->mVtbl);
+            cWScriptMan_doOnCollideScript(cWScriptMan_TheWScriptMan, (char*)&self->CollideInfo, (char*)&self->CollideIntersectInfo, (char*)&VPTR_AT(self, sizeof(cRiderState)));
         }
     }
     cRider_updateTestSurface(self);
@@ -3436,7 +3436,7 @@ extern "C" void cRider_updateSplit11(cRider* self)
 {
     if (~self->mGroundPolyId != 0)
         self->mGroundMaterial = cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, (unsigned char)self->mGroundPolyId);
-    char* obj = (char*)&self->mVtbl;
+    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
     cRenderStateMan_update(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
     char* handler = (char*)self->mRiderHandler;
@@ -3745,7 +3745,7 @@ extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     t4Vector* viewMtx = (t4Vector*)ps2GraphicsMan->GetView();
-    char* obj = (char*)&self->mVtbl;
+    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
     t4Vector* pos = (t4Vector*)vt[kRiderVt_getPosition].fn(vthis(obj, vt[kRiderVt_getPosition]));
     t4Vector viewPos = mtxMulVec_121F30(viewMtx, pos);
@@ -3920,14 +3920,14 @@ extern "C" void cRider_SetRiderLights(cRider* self)
     t4Vector hipPos;
     cIrradiance_Clear(self->unk_7C0);
     {
-        char* obj = (char*)&self->mVtbl;
+        char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
         sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
         *(cIrradiance*)&self->unk_7C0[0] = *(cIrradiance*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])));
     }
     cRider_getHipPosition(&hipPos, self);
     char* lightState = self->unk_7C0;
     {
-        char* obj = (char*)&self->mVtbl;
+        char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
         sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
         func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))));
     }
@@ -4603,7 +4603,7 @@ float cRider_getTotalPathDistance(void* self);
  */
 extern "C" int cRider_estimateFinishTick(cRider* self)
 {
-    char* sub = (char*)&self->mVtbl;
+    char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
     int n = SSXApp->Game->AI->EventTimerTick;
     float rate = (cRider_getTotalPathDistance(self) - self->mDistToFinish) / (float)n;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
@@ -4932,7 +4932,7 @@ extern "C" void cRider_transport_v(cRider* self, char* mat)
     cRider_setMotionState_impl(self, 0);
     cRider_setControlState_impl(self, 0);
     cRider_cancelRiderTransitions(self);
-    char* sub = (char*)&self->mVtbl;
+    char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
     char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
     sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
@@ -5869,7 +5869,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
  */
 extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
 {
-    char* vtObj = (char*)&self->mVtbl;
+    char* vtObj = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<t4Vector*(void*)>* ve = &(*(sVEntry<t4Vector*(void*)>**)vtObj)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(vthis(vtObj, *ve)));
     float sideOffset = self->mAnimModel->ScaleVect.x * (self->mSlewed[0].cur * 45.0f);
@@ -6378,7 +6378,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
     cRiderMetrix_evFinishRace(self->mMetrix);
     self->mFinishTick = SSXApp->Game->AI->EventTimerTick + self->mPenaltyTicks;
     if (self->mFinishTime < 0.0f) self->mFinishTime = 0.0f;
-    char* obj = (char*)&self->mVtbl;
+    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     cGameModeMan_raceFinish(getC0_125108(), vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])), (int)self->mMetrix + 0xFC);
     unsigned int k = *(unsigned int*)&self->mViewIndex;
@@ -6416,7 +6416,7 @@ extern int D_005308D0[];
  */
 extern "C" int cRider_updateFinishTest(cRider* self)
 {
-    char* obj = (char*)&self->mVtbl;
+    char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     if (vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]))) {
         float finishTime = self->mFinishTime;
@@ -6470,7 +6470,7 @@ extern "C" void cRider_quitEvent(cRider* self)
     if (!finished)
     {
         self->mDidNotFinish = 1;
-        char* sub = (char*)&self->mVtbl;
+        char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
         cGameModeMan_bGiveUp[vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex]))] = 1;
     }
@@ -6741,7 +6741,7 @@ extern "C" void cRider_updateWind(cRider* self)
         if (speedDeficit > dir.z)
         {
             t4Vector imp = Scale_125970(Scale_125970(dir, speedDeficit), 0.015000000596046448f);
-            char* obj = (char*)&self->mVtbl;
+            char* obj = (char*)&VPTR_AT(self, sizeof(cRiderState));
             sVEntry<void(void*, t4Vector*)>* vt = *(sVEntry<void(void*, t4Vector*)>**)obj;
             vt[kRiderVt_applyBoost].fn(vthis(obj, vt[kRiderVt_applyBoost]), &imp);
         }
@@ -7164,7 +7164,7 @@ extern "C" void cPlayer_vibrationUpdate(void* self)
     {
         int flag = 0;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        char* sub = (char*)&player->mRider->mVtbl;
+        char* sub = (char*)&VPTR_AT(player->mRider, sizeof(cRiderState));
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
         if (cBENewPlayerInterface_getUseDualShock(iface, vt[7].fn(vthis(sub, vt[7]))) != 0)
         {

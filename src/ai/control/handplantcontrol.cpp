@@ -2962,7 +2962,7 @@ extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_00459A98;
     self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    self->mRider->mVtbl = (void*)&D_00459AE0;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00459AE0;
     if (!inChrg)
     {
         sVtbl9_13C650 scriptObjVtbl = D_00459A98;
@@ -2971,7 +2971,7 @@ extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
         int baseDelta = (char*)self - base;
         scriptObjVtbl.e[1].delta = D_00459A98.e[1].delta + baseDelta;
         sVtbl22_13C650 riderVtbl = D_00459AE0;
-        self->mRider->mVtbl = &riderVtbl;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&riderVtbl;
         riderVtbl.e[1].delta = D_00459AE0.e[1].delta + baseDelta;
     }
     self->AITickOnLoseFocus = 0;
@@ -7209,7 +7209,7 @@ extern "C" void* cHandplantMotion_cHandplantMotion(cHandplantMotion* self, int i
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_004595C0_00141480;
     self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    self->mRider->mVtbl = (void*)&D_00459608_00141480;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00459608_00141480;
     if (!inChrg)
     {
         sVtblA_00141480 scriptObjVtbl = D_004595C0_00141480;
@@ -7218,7 +7218,7 @@ extern "C" void* cHandplantMotion_cHandplantMotion(cHandplantMotion* self, int i
         int baseDelta = (char*)self - base;
         scriptObjVtbl.e[1].delta = D_004595C0_00141480.e[1].delta + baseDelta;
         sVtblB_00141480 riderVtbl = D_00459608_00141480;
-        self->mRider->mVtbl = &riderVtbl;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&riderVtbl;
         riderVtbl.e[1].delta = D_00459608_00141480.e[1].delta + baseDelta;
     }
     return ((void*)self);
@@ -7543,7 +7543,7 @@ extern "C" void* cWipeoutControl_cWipeoutControl(cWipeoutControl* self, int inCh
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_00458C10_00142388;
     self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    self->mRider->mVtbl = (void*)&D_00458C58_00142388;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00458C58_00142388;
     if (!inChrg)
     {
         sVtblA_00142388 scriptObjVtbl = D_00458C10_00142388;
@@ -7552,7 +7552,7 @@ extern "C" void* cWipeoutControl_cWipeoutControl(cWipeoutControl* self, int inCh
         int baseDelta = (char*)self - base;
         scriptObjVtbl.e[1].delta = D_00458C10_00142388.e[1].delta + baseDelta;
         sVtblB_00142388 riderVtbl = D_00458C58_00142388;
-        self->mRider->mVtbl = &riderVtbl;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&riderVtbl;
         riderVtbl.e[1].delta = D_00458C58_00142388.e[1].delta + baseDelta;
     }
     return ((void*)self);

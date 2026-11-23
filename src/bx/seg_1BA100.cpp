@@ -2847,7 +2847,7 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree,
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         cRider* rider = SSXApp->Game->AI->Players[0]->mRider;
-        t4Vector cam = *((cQtCam_B928*)(&rider->mVtbl))->getPosition();
+        t4Vector cam = *((cQtCam_B928*)(&VPTR_AT(rider, sizeof(cRiderState))))->getPosition();
         t4Vector corner;
         corner.x = lo->x;
         corner.y = lo->y;

@@ -1097,7 +1097,7 @@ extern "C" int cComputer_checkForBlock(cComputer* self)
     int i;
     for (i = 0; i < ai->count; i++)
     {
-        char* myBeing = (char*)&self->RiderHandler.GroundMotion.mRider->mVtbl;
+        char* myBeing = (char*)&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState));
         sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)myBeing)[7];
         if (i == ve->fn(vthis(myBeing, *ve)))
             continue;
@@ -1139,7 +1139,7 @@ static inline int id_0010DBF0(char* vvself)
 {
     cComputer* vself = (cComputer*)vvself;
     cComputer* self = (cComputer*)vself;
-    char* o = (char*)&self->RiderHandler.GroundMotion.mRider->mVtbl;
+    char* o = (char*)&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState));
     sVE_0010DBF0* ve = &(*(sVE_0010DBF0**)o)[7];
     return ve->fn(vthis(o, *ve));
 }
@@ -1437,10 +1437,10 @@ extern "C" void cRider_flagEventBump(cRider* self, cRider* attacker)
     cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 0);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)&attacker->mVtbl;
+    char* ob = (char*)&VPTR_AT(attacker, sizeof(cRiderState));
     sVEntry<int(void*)>* eb = &(*(sVEntry<int(void*)>**)ob)[7];
     int rb = eb->fn(vthis(ob, *eb));
-    char* oa = (char*)&self->mVtbl;
+    char* oa = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* ea = &(*(sVEntry<int(void*)>**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(vthis(oa, *ea)), 0);
 }
@@ -1470,10 +1470,10 @@ extern "C" void cRider_flagEventBumpKnockdown(cRider* self, cRider* attacker)
     cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 1);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)&attacker->mVtbl;
+    char* ob = (char*)&VPTR_AT(attacker, sizeof(cRiderState));
     sVEntry<int(void*)>* eb = &(*(sVEntry<int(void*)>**)ob)[7];
     int rb = eb->fn(vthis(ob, *eb));
-    char* oa = (char*)&self->mVtbl;
+    char* oa = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* ea = &(*(sVEntry<int(void*)>**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(vthis(oa, *ea)), 1);
 }
@@ -1504,10 +1504,10 @@ extern "C" void cRider_flagEventPunch(cRider* self, cRider* attacker)
     cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, self);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 0);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)&attacker->mVtbl;
+    char* ob = (char*)&VPTR_AT(attacker, sizeof(cRiderState));
     sVEntry<int(void*)>* eb = &(*(sVEntry<int(void*)>**)ob)[7];
     int rb = eb->fn(vthis(ob, *eb));
-    char* oa = (char*)&self->mVtbl;
+    char* oa = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* ea = &(*(sVEntry<int(void*)>**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(vthis(oa, *ea)), 2);
 }
@@ -1545,10 +1545,10 @@ extern "C" void cRider_flagEventPunchKnockdown(cRider* self, cRider* attacker)
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 1);
     cSSXAudio_KnockdownSFX(cAudioInterface_bxAudio(), attacker);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)&attacker->mVtbl;
+    char* ob = (char*)&VPTR_AT(attacker, sizeof(cRiderState));
     sVEntry<int(void*)>* eb = &(*(sVEntry<int(void*)>**)ob)[7];
     int rb = eb->fn(vthis(ob, *eb));
-    char* oa = (char*)&self->mVtbl;
+    char* oa = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* ea = &(*(sVEntry<int(void*)>**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(vthis(oa, *ea)), 3);
     cRider_flagEventBoostPowerUp((cRider*)attacker, 2, cRiderMetrix_evFrag((char*)attacker->mMetrix));
@@ -1636,7 +1636,7 @@ extern "C" void cRider_flagEventPathEvent(cRider* self, int* pathEvent, int isPr
     }
     if (*pathEvent == 11)
     {
-        char* being = (char*)&self->mVtbl;
+        char* being = (char*)&VPTR_AT(self, sizeof(cRiderState));
         sVEntry<int(void*)>* idSlot = &(*(sVEntry<int(void*)>**)being)[7];
         void* tgt = SSXApp->Game->Replay;
         cReplay_eventChapter(tgt, idSlot->fn(vthis(being, *idSlot)), pathEvent[1]);
@@ -1801,7 +1801,7 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
         }
     }
     func_00111AA0_impl(self->mRiderHandler, evt, &evt->Inorm, evt->Stype, speed);
-    char* being = (char*)&self->mVtbl;
+    char* being = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)being)[8];
     if (ve->fn(vthis(being, *ve)))
     {
@@ -1815,7 +1815,7 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
     cRider_flagEventBoostPowerUp_fi(((char*)self), powerUp, 1);
     if (0.0f < powerUp)
         self->mPowerUpTrickTimer = 0.0f;
-    sVEntry<void(void*, float)>* vf = &((sVEntry<void(void*, float)>*)self->mVtbl)[17];
+    sVEntry<void(void*, float)>* vf = &((sVEntry<void(void*, float)>*)VPTR_AT(self, sizeof(cRiderState)))[17];
     vf->fn(vthis(self, *vf), speed * 0.5f);
     cSSXAudio_Land(gSSXAudio, ((char*)self), powerUp);
 }
@@ -2023,7 +2023,7 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
  */
 extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, int surf, tCollideInfo* evt)
 {
-    sVE_EB30* vt = *(sVE_EB30**)&rider->mVtbl;
+    sVE_EB30* vt = *(sVE_EB30**)&VPTR_AT(rider, sizeof(cRiderState));
     vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), evt->Vel * 5.0f);
     float amt = cRiderMetrix_evWipeout(rider->mMetrix, isPunch);
     cRider_flagEventBoostPowerUp(rider, 1, amt);
@@ -3262,7 +3262,7 @@ extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
 {
     if (cRenderToggles_m_DisableAIVisualFX != 0) {
         cRider* rider = self->GroundMotion.mRider;
-        char* riderBeing = (char*)&rider->mVtbl;
+        char* riderBeing = (char*)&VPTR_AT(rider, sizeof(cRiderState));
         sVEntry<int(void*)>* isComputerSlot = &(*(sVEntry<int(void*)>**)riderBeing)[kRiderVt_isComputer];
         if (isComputerSlot->fn(vthis(riderBeing, *isComputerSlot)) != 0)
             return;
@@ -3307,7 +3307,7 @@ extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* self)
 {
     if (cRenderToggles_m_DisableAIVisualFX != 0) {
         cRider* rider = self->GroundMotion.mRider;
-        char* riderBeing = (char*)&rider->mVtbl;
+        char* riderBeing = (char*)&VPTR_AT(rider, sizeof(cRiderState));
         sVEntry<int(void*)>* isComputerSlot = &(*(sVEntry<int(void*)>**)riderBeing)[kRiderVt_isComputer];
         if (isComputerSlot->fn(vthis(riderBeing, *isComputerSlot)) != 0)
             return;
@@ -4188,10 +4188,10 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
         t4Vector aheadDelta = vu0Sub_112A50(pos, cPath_getPathPos_112A50(paths[i], 0, nearParam + 796.0f));
         t4Vector nearDelta = vu0Sub_112A50(*(&vself->mPosition), out);
         float dist = vu0Dot_112A50(nearDelta, nearDelta) + vu0Dot_112A50(aheadDelta, aheadDelta);
-        char* being = (char*)&vself->mVtbl;
+        char* being = (char*)&VPTR_AT(vself, sizeof(cRiderState));
         sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)being)[9];
         if (ve->fn(vthis(being, *ve)) == 1) {
-            sVEntry<float(void*, void*)>* vf = &((sVEntry<float(void*, void*)>*)vself->mVtbl)[20];
+            sVEntry<float(void*, void*)>* vf = &((sVEntry<float(void*, void*)>*)VPTR_AT(vself, sizeof(cRiderState)))[20];
             dist = vf->fn(vthis(vself, *vf), paths[i]);
             if (bestW < dist) {
                 best = paths[i];
@@ -4292,7 +4292,7 @@ extern "C" void cRider_switchToResetPath(cRider* self)
         float tOut;
         float nearParam = cPath_intersectPath(paths[i], &self->mPosition, &pos, &tOut, 1);
         float len = cPath_getLength(paths[i]);
-        char* being = (char*)&self->mVtbl;
+        char* being = (char*)&VPTR_AT(self, sizeof(cRiderState));
         sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)being)[8];
         if (ve->fn(vthis(being, *ve)) == 0 && len - 200.0f < nearParam)
             continue;

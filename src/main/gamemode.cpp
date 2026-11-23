@@ -1880,7 +1880,7 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
     int heat = cGameModeHandler_pManager->iHeatNum - 1;
     sRace* rc = GetRace();
-    if (cAI_isRaceFinished(rc) == 0 || vcall_23A760((char*)&GetRace()->riders[idx]->mVtbl, 9) == 0) {
+    if (cAI_isRaceFinished(rc) == 0 || vcall_23A760((char*)&VPTR_AT(GetRace()->riders[idx], sizeof(cRiderState)), 9) == 0) {
         int tick = rc->riders[idx]->mFinishTick;
         if (GetRace()->riders[idx]->mDidNotFinish) {
             self->tbl[heat][idx] = 360000;
@@ -1893,7 +1893,7 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     if (cAI_isRaceFinished(rc) == 0) {
         return;
     }
-    if (vcall_23A760((char*)&GetRace()->riders[idx]->mVtbl, 8) == 0) {
+    if (vcall_23A760((char*)&VPTR_AT(GetRace()->riders[idx], sizeof(cRiderState)), 8) == 0) {
         return;
     }
     for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {

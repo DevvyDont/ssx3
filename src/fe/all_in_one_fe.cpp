@@ -2492,7 +2492,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
     if (flag == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         signed char mode = cBENewRaceInterface_newRace.cGameMode;
-        Obj_F660* being = (Obj_F660*)(&panelRider->mVtbl);
+        Obj_F660* being = (Obj_F660*)(&VPTR_AT(panelRider, sizeof(cRiderState)));
         int k = being->getAIIndex();
         int val = D_00536640[k];
         if (mode == 0 || mode == 5) {
@@ -2616,7 +2616,7 @@ extern "C" void func_0021F9B0(cOVStateHUD1P* self, char* obj, cRider* rider, int
         *(float*)(tx2 + 0x38) = *(float*)(tx2 + 0x30) * sc.x;
         *(float*)(tx2 + 0x3C) = *(float*)(tx2 + 0x34) * sc.y;
         *(V4_F9B0*)&self->mpHUDFont->Color[0] = col;
-        Obj_F9B0* being = (Obj_F9B0*)(&rider->mVtbl);
+        Obj_F9B0* being = (Obj_F9B0*)(&VPTR_AT(rider, sizeof(cRiderState)));
         sprintf(buf, str_pct_d_pct_d_b, cBEMissionInterface_getCurrentCollectForSection(iface, being->getAIIndex(), id), cBEMissionInterface_getTotalCollectForSection(iface, id));
         cFont_text((char*)self->mpHUDFont, drawPos.x, drawPos.y, buf);
         tx = (char*)self->mpHUDFont;
@@ -2749,28 +2749,11 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderSpeed);
 // call); plain form (`units = str_MPH` in the branch) 91.11%. Byte-identical and behaves like the plain form; landed
 // marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-// The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
 struct t4Vector;
 
 struct t4Matrix;
 
 struct tInstanceRecord;
-
-class cBeing {
-public:
-    virtual ~cBeing();
-    virtual const t4Vector* getVelocity() const;
-    virtual int isIntersecting(tInstanceRecord* rec) const;
-    virtual void applyBoost(const t4Vector& impulse);
-    virtual const t4Vector* getPosition() const;
-    virtual const t4Matrix* getTransform() const;
-    virtual int getAIIndex() const;
-    virtual bool isHuman() const;
-    virtual bool isComputer() const;
-    virtual void transport(const t4Matrix& m);
-    virtual void resetToPath();
-    virtual void initForMission(const t4Matrix& m);
-};
 
 extern "C" void tHUDDef_getPos(void*, void*);
 
@@ -2889,8 +2872,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider
     char* kmh = str_KM_H;
     char* mph = str_MPH;
     char* units = kmh;
-    cBeing* being = (cBeing*)(&rider->mVtbl);
-    float speed = vu0Length_00C0(*(const t4Vector*)being->getVelocity()) * 0.035999998450279236f;
+    float speed = vu0Length_00C0(*rider->getVelocity()) * 0.035999998450279236f;
     if (!settings.metric) {
         speed *= 0.6209999918937683f;
         units = mph;

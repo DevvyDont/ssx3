@@ -4731,7 +4731,7 @@ extern float kBeamPulseRate;
  */
 extern "C" void cPlayerIndicatorFX_update(cPlayerIndicatorFX* self)
 {
-    char* riderVptr = (char*)&self->mRider->mVtbl;
+    char* riderVptr = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)riderVptr;
     if (vt[8].fn(vthis(riderVptr, vt[8])) == 0) return;
     float half = 0.5f;
@@ -4924,7 +4924,7 @@ static inline int rsTex_3AF8(sRCtx_3AF8* ctx)
 
 static inline int IsHuman_3AF8(cRider* rider)
 {
-    char* obj = (char*)&rider->mVtbl;
+    char* obj = (char*)&VPTR_AT(rider, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     return vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]));
 }
@@ -7327,7 +7327,7 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
                 self->mSpeedBoostTrailNumSegs++;
             }
             self->mSpeedBoostTrailCurrentSeg = (self->mSpeedBoostTrailCurrentSeg + 29) % 30;
-            char* sub = (char*)&self->mRider->mVtbl;
+            char* sub = (char*)&VPTR_AT(self->mRider, sizeof(cRiderState));
             sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)sub;
             t4Vector pos = *vt[5].fn(vthis(sub, vt[5]));
             t4Vector boardPos = wakeRowE6C08(self->mRider, 3);

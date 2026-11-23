@@ -1826,7 +1826,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
     sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
-    char* riderIface = (char*)&self->Target->Rider->mVtbl;
+    char* riderIface = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
     sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)riderIface;
     return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(riderIface, vt2[7])));
 }
@@ -2599,7 +2599,7 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
 extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
 {
     {
-        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)&self->Target->Rider->mVtbl);
+        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState)));
         sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)calleeObj)[7];
         if (vEntry->fn(vthis(calleeObj, *vEntry)) != subjectId)
             return;
@@ -2658,7 +2658,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
     sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
-    char* riderIface = (char*)&self->Target->Rider->mVtbl;
+    char* riderIface = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
     sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)riderIface;
     return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(riderIface, vt2[7])));
 }
@@ -4943,7 +4943,7 @@ static inline t4Vector ctGetB_00177EF8(void* self)
  */
 extern "C" t4Vector cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
 {
-    char* riderIface = (char*)&self->Target->Rider->mVtbl;
+    char* riderIface = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
     sVEa_00177EF8* posEntry = &(*(sVEa_00177EF8**)riderIface)[5];
     t4Vector* riderPos = posEntry->fn(vthis(riderIface, *posEntry));
     return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
@@ -5315,25 +5315,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_snap);
 
 extern t4Vector t4vect_ZAxis_83E0 __asm__("t4vect_ZAxis");
 
-// A being: the script/AI-facing interface of a rider, at rider + 0x6C0 (seg/seg_1FBE38; slot order of the
-// prototype's vtable _vt$6cBeing).
 struct tInstanceRecord;
-
-class cBeing {
-public:
-    virtual ~cBeing();
-    virtual const t4Vector* getVelocity() const;
-    virtual int isIntersecting(tInstanceRecord* rec) const;
-    virtual void applyBoost(const t4Vector& impulse);
-    virtual const t4Vector* getPosition() const;
-    virtual const t4Matrix* getTransform() const;
-    virtual int getAIIndex() const;
-    virtual bool isHuman() const;
-    virtual bool isComputer() const;
-    virtual void transport(const t4Matrix& m);
-    virtual void resetToPath();
-    virtual void initForMission(const t4Matrix& m);
-};
 
 // A virtual-call view of a camera algorithm (cCameraAlgorithm, camera/cameraalgorithms.h): the vptr follows the base's own data at 0x10; slots by
 // position.
@@ -5400,7 +5382,7 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
 extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
 {
     cRider* rider = self->Target->Rider;
-    if (id == ((cBeing*)(&rider->mVtbl))->getAIIndex()) {
+    if (id == rider->getAIIndex()) {
         char* subject = (char*)self->Target;
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[4];
         self->LastLookDir = vEntry->fn(vthis(subject, *vEntry));
@@ -6263,7 +6245,7 @@ struct sCamVEntryVoidA {
  */
 extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self, int id)
 {
-    char* obj = (char*)&self->Target->Rider->mVtbl;
+    char* obj = (char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState));
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
     if (id == vt[7].fn(vthis(obj, vt[7])))
     {

@@ -154,7 +154,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
     }
     self->mRider->mScriptObjectVtbl = (void*)(&D_00488CB0);
     self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    self->mRider->mVtbl = (void*)(&D_00488CF8);
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)(&D_00488CF8);
     if (inChrg == 0) {
         int vc;
         vtbl1 = D_00488CB0;
@@ -165,7 +165,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
         }
         vtbl1.e[1].delta = D_00488CB0.e[1].delta + vc;
         vtbl2 = D_00488CF8;
-        self->mRider->mVtbl = &vtbl2;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&vtbl2;
         vtbl2.e[1].delta = D_00488CF8.e[1].delta + vc;
     }
     new ((char*)self + 0x2C) sBsElem[3];

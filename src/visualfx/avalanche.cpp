@@ -1687,7 +1687,7 @@ extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
         D_vtx_D8EA8[2 * j].r = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v < slot->m_currTime ? 0xFF : 0;
         D_vtx_D8EA8[2 * j].g = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v >= slot->m_currTime ? 0xFF : 0;
         cRider* rider = SSXApp->Game->AI->Riders[0];
-        D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(&rider->mVtbl))->getPos();
+        D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(&VPTR_AT(rider, sizeof(cRiderState))))->getPos();
         D_vtx_D8EA8[2 * j + 1].r = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v < slot->m_currTime ? 0xFF : 0;
         D_vtx_D8EA8[2 * j + 1].g = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v >= slot->m_currTime ? 0xFF : 0;
     }
