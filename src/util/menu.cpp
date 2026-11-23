@@ -13,6 +13,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "ai/rider.h"
 
 extern void* cMenuItem_vtbl[16];
 
@@ -7096,11 +7097,9 @@ INCLUDE_ASM("util/menu", cObjectInterface_getBeing);
  * @param i  rider index, 0 to 5
  * @return that rider's +0x6C0 subobject, or 0 when the slot is empty
  */
-extern "C" void* cObjectInterface_getBeing(int i)
+extern "C" cBeing* cObjectInterface_getBeing(int i)
 {
-    char* base = (char*)SSXApp->Game->AI;
-    char* rider = *(char**)(base + (i << 2) + 0x28);
-    return rider ? rider + 0x6C0 : 0;
+    return SSXApp->Game->AI->Riders[i];
 }
 #endif
 

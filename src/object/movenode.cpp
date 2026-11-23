@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/being.h"
 #include "object/multisplinemodifier.h"
 #include "world/worldrecords.h"
 #include "world/instancerecord.h"
@@ -2458,7 +2459,7 @@ INCLUDE_ASM("object/movenode", cMagnetModifier_intersect);
 INCLUDE_ASM("object/movenode", cMagnetModifier_runCollide);
 #ifdef SKIP_ASM
 
-extern "C" void* cObjectInterface_getBeing(int id);
+extern "C" cBeing* cObjectInterface_getBeing(int id);
 
 /**
  * Decides whether the magnet object collides with a rider, catching the first human rider that touches it.
@@ -2479,9 +2480,8 @@ extern "C" int cMagnetModifier_runCollide(cMagnetModifier* self, int id)
         }
         return 0;
     }
-    void* obj = cObjectInterface_getBeing(id);
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    if (vt[8].fn(vthis(obj, vt[8])) != 0) {
+    cBeing* obj = cObjectInterface_getBeing(id);
+    if (obj->isHuman() != 0) {
         self->Being = id;
     }
     return 0;

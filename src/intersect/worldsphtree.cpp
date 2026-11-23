@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/being.h"
 #include "object/debouncenode.h"
 #include "object/movenode.h"
 #include "object/instancenode.h"
@@ -5216,13 +5217,11 @@ void* cBoostNode__cBoostNode(void* vself)
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_update);
 #ifdef SKIP_ASM
 extern "C" int cObjectInterface_getNumBeings();
-extern "C" void** cObjectInterface_getBeing(int i);
+extern "C" cBeing* cObjectInterface_getBeing(int i);
 
 typedef void (*Fn0_003415D0)(void*);
 typedef void (*Fn1_003415D0)(void*, void*);
 typedef void (*FnI_003415D0)(void*, int);
-typedef int (*Test0_003415D0)(void*);
-typedef int (*Test_003415D0)(void*, int);
 
 struct sNode_003415D0 {
     int pad00[3];
@@ -5264,13 +5263,11 @@ extern "C" void cBoostNode_update(cBoostNode* self)
     ((Fn0_003415D0)vt[49].fn)(vthis(self, vt[49]));
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
-            void** obj = cObjectInterface_getBeing(i);
+            cBeing* obj = cObjectInterface_getBeing(i);
             if (self->Type == 2) {
-                sVEntry<void>* ovt = (sVEntry<void>*)*obj;
-                if (((Test0_003415D0)ovt[9].fn)(vthis(obj, ovt[9])) != 0) continue;
+                if (obj->isComputer() != 0) continue;
             }
-            sVEntry<void>* ovt = (sVEntry<void>*)*obj;
-            if (((Test_003415D0)ovt[3].fn)(vthis(obj, ovt[3]), (int)self->Instance) != 0) {
+            if (obj->isIntersecting(self->Instance) != 0) {
                 hit = 1;
                 if (self->Drag < 0.0f) {
                     sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
@@ -6485,11 +6482,10 @@ extern "C" void* cBoostModifier_cBoostModifier1(cBoostModifier* self, sVEntry<vo
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_update);
 #ifdef SKIP_ASM
 extern "C" int cObjectInterface_getNumBeings();
-extern "C" void** cObjectInterface_getBeing(int i);
+extern "C" cBeing* cObjectInterface_getBeing(int i);
 
 typedef void (*Fn0_00342880)(void*);
 typedef void (*Fn1_00342880)(void*, void*);
-typedef int (*Test_00342880)(void*, int);
 
 /**
  * Applies the boost modifier to every being touching it and updates its active flag (+0x0).
@@ -6517,9 +6513,8 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
     ((Fn0_00342880)vt[9].fn)(vthis(self, vt[9]));
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
-            void** obj = cObjectInterface_getBeing(i);
-            sVEntry<void>* ovt = (sVEntry<void>*)*obj;
-            if (((Test_00342880)ovt[3].fn)(vthis(obj, ovt[3]), (int)self->Instance) != 0) {
+            cBeing* obj = cObjectInterface_getBeing(i);
+            if (obj->isIntersecting(self->Instance) != 0) {
                 self->Active = 1;
                 if (self->Drag < 0.0f) {
                     sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
