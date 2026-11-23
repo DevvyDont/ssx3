@@ -483,9 +483,9 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.y = 12.0f;
             barSize.x = (float)self->mExperience[i] * 3.3636362552642822f;
             barSize.z = 0.0f;
-            sVEK1F50B0a* vt = (sVEK1F50B0a*)bar->mVtbl;
+            sVEK1F50B0a* vt = (sVEK1F50B0a*)VPTR_OF(cListNode, bar);
             vt[21].fn(vthis(bar, vt[21]), &barSize);
-            sVEntry<void(void*, int)>* vt2 = (sVEntry<void (void*, int)>*)bar->mVtbl;
+            sVEntry<void(void*, int)>* vt2 = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, bar);
             vt2[9].fn(vthis(bar, vt2[9]), 1);
         }
         sprintf(name, str_underpct_d, i);
@@ -495,9 +495,9 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.x = (float)(self->mPotentialExperience[i] + self->mExperience[i]) * 3.3636362552642822f;
             barSize.y = 12.0f;
             barSize.z = 0.0f;
-            sVEK1F50B0a* vt = (sVEK1F50B0a*)bar->mVtbl;
+            sVEK1F50B0a* vt = (sVEK1F50B0a*)VPTR_OF(cListNode, bar);
             vt[21].fn(vthis(bar, vt[21]), &barSize);
-            sVEntry<void(void*, int)>* vt2 = (sVEntry<void (void*, int)>*)bar->mVtbl;
+            sVEntry<void(void*, int)>* vt2 = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, bar);
             vt2[9].fn(vthis(bar, vt2[9]), 1);
         }
     }
@@ -990,12 +990,12 @@ extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self)
     }
     cUIThing* dashObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_horizontal_dash_b));
     if (((char*)dashObj) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)dashObj->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, dashObj);
         vt[9].fn(vthis(dashObj, vt[9]), show);
     }
     dashObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vertical_dash_b));
     if (((char*)dashObj) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)dashObj->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, dashObj);
         vt[9].fn(vthis(dashObj, vt[9]), show);
     }
 }

@@ -14680,7 +14680,7 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, void* popup, int event)
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         cUIThing* obj = self->mpPairSettings;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
         vt[8].fn(vthis(obj, vt[8]), 0);
         break;
     }
@@ -25192,7 +25192,7 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, cUIThing* m
         break;
     case 1: {
         tARGB color;
-        sVEntry<void(void*, tARGB*)>* vt = (sVEntry<void(void*, tARGB*)>*)msg->mVtbl;
+        sVEntry<void(void*, tARGB*)>* vt = (sVEntry<void(void*, tARGB*)>*)VPTR_OF(cListNode, msg);
         char* obj = ((char*)msg) + vt[11].delta;
         color.A = 1.0f;
         color.R = 1.0f;
@@ -25203,7 +25203,7 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, cUIThing* m
     }
     case 2: {
         tARGB color;
-        sVEntry<void(void*, tARGB*)>* vt = (sVEntry<void(void*, tARGB*)>*)msg->mVtbl;
+        sVEntry<void(void*, tARGB*)>* vt = (sVEntry<void(void*, tARGB*)>*)VPTR_OF(cListNode, msg);
         char* obj = ((char*)msg) + vt[11].delta;
         color.A = 1.0f;
         color.R = 0.0f;

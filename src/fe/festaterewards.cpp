@@ -1534,10 +1534,10 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
             barPos.x = cellPos.x + self->mHorizHilighterOffset;
             *(&self->mpHilighter->mPosition) = barPos;
             cUIThing* selectBar = self->mpHilighter;
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)selectBar->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, selectBar);
             vt[9].fn(vthis(selectBar, vt[9]), 1);
         } else {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)icon->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, icon);
             vt[9].fn(vthis(icon, vt[9]), 0);
         }
     }

@@ -706,7 +706,7 @@ struct cUIThing_cUIThing_sFlags {
  */
 extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, int pScreen, int pParent)
 {
-    self->mVtbl = (void**)cUIThing_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cUIThing_vtbl;
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b0 = 1;
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b7 = 0;
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b8 = 0;
@@ -766,12 +766,12 @@ public:
  */
 extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
 {
-    self->mVtbl = (void**)cUIThing_vtbl;
+    VPTR_OF(cListNode, self) = (void**)cUIThing_vtbl;
     cUIThing__cUIThing_cVirt* anim = (cUIThing__cUIThing_cVirt*)self->mpAnim;
     if (anim != 0) {
         anim->v01(3);
     }
-    self->mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, self) = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {
         operator_delete((int*)self);

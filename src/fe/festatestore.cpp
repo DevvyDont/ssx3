@@ -324,11 +324,11 @@ extern "C" void cFEStateUberTrick_onGainFocus(cFEStateUberTrick* self, int prevS
     cFEStateUberTrick_activateMainMenu(self);
     menu = (cUIThing*)self->mpMainMenu;
     if (menu != 0) {
-        ((sVEntry<void(void*, int)>*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry<void(void*, int)>*)menu->mVtbl)[7]), 1);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, menu))[7].fn(vthis(menu, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, menu))[7]), 1);
     }
     menu = (cUIThing*)self->mpTrickMenu;
     if (menu != 0) {
-        ((sVEntry<void(void*, int)>*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry<void(void*, int)>*)menu->mVtbl)[7]), 0);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, menu))[7].fn(vthis(menu, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, menu))[7]), 0);
     }
     cUIState_onGainFocus(self, prevState);
 }

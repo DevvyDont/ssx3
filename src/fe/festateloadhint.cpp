@@ -487,9 +487,9 @@ extern "C" void func_00245F50(cUIState* self)
     }
     cUIThing* noButton = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_c));
     if (((char*)noButton) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)noButton->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, noButton);
         vt[9].fn(((char*)noButton) + vt[9].delta, 0);
-        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)noButton->mVtbl;
+        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, noButton);
         vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
     }
     *(int*)((char*)self + 0x4C) = 300;
@@ -545,9 +545,9 @@ extern "C" void func_00246098(cUIState* self)
                 }
                 cUIThing* noButton = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_c));
                 if (((char*)noButton) != 0) {
-                    sVEK246098* vt = (sVEK246098*)noButton->mVtbl;
+                    sVEK246098* vt = (sVEK246098*)VPTR_OF(cListNode, noButton);
                     vt[9].fn(((char*)noButton) + vt[9].delta, 0);
-                    sVEK246098* vt2 = (sVEK246098*)noButton->mVtbl;
+                    sVEK246098* vt2 = (sVEK246098*)VPTR_OF(cListNode, noButton);
                     vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
                 }
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;

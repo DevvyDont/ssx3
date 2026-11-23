@@ -6,8 +6,8 @@
 // calling the cUIThing constructor cUIThing_cUIThing(this, pScreen, pParent) and then storing the derived vtable; derived
 // members all start at 0x74 (cUIGroup = 0x74 + a 0x1C cList = 0x90 bytes, tag "cUIGroup"), so cUIThing is 0x74 bytes.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
-// Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). cUIThing's vtable
+// A real class: cUIThing : cListNode (util/list.h: mpPrev 0x0, mpNext 0x4, the vptr at 0x8), its own members at
+// their retail offsets from 0xC. The derived widgets' headers still copy these fields (FLAT). cUIThing's vtable
 // _vt$8cUIThing (cUIThing_vtbl) keeps cListNode's traverseFlat/traverseRecurse (cListNode_traverseFlat/cListNode_traverseRecurse) in
 // slots 2-3. Objects are linked into their group's cList through mpPrev/mpNext.
 //
@@ -25,10 +25,13 @@
 // writes it as a whole word (lw/sw 0x14), so it is an int here.
 
 #include "layout.h"
+#include "util/list.h"
 
 struct cUIAnimation;
 struct cUIScreen;
-struct cListNode;
+struct tUIBaseObject;
+struct cUIInput;
+struct cUIRenderContext;
 
 // EA's 3-float vector (type name from the preview's setSize__8cUIThingRC8t3Vector). 12 bytes, 4-byte aligned: retail
 // copies it with ldl/ldr + lw. Member names are our guess (On Tour: x()/y()/z() accessors over an anonymous union).
@@ -60,10 +63,9 @@ struct tAttrThing {
                                      //       cUIVector_setChannelDataKCP channel 12 write bits 13-18
 };
 
-struct cUIThing {
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] _vt$8cUIThing (cUIThing_vtbl), stored by cUIThing_cUIThing and cUIThing_cUIThing1
+struct cUIThing : public cListNode {
+    // cListNode (util/list.h): mpPrev 0x000 and mpNext 0x004 ([R] the constructor self-links them; [U] walked by the
+    // cList code), the vptr 0x008 ([R] _vt$8cUIThing (cUIThing_vtbl), stored by cUIThing_cUIThing and cUIThing_cUIThing1)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail cUIThing_getAnimation/cUIThing_isPlayingAnimation);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -87,13 +89,34 @@ struct cUIThing {
     t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] cUIThing_getSound/cUIThing_setSound get/set by index
+
+    // Virtuals. Slots [R] cUIThing_vtbl (slots 2-3 are cListNode's traverseFlat / traverseRecurse, not overridden),
+    // names and order [O] (On Tour class cUIThing); parameter types from the retail implementations (the bool
+    // parameters are words: cUIThing_setActive(cUIThing*, int)), pointers where On Tour passes references. Slot 22 is
+    // a pure virtual On Tour does not name; not declared.
+    virtual ~cUIThing();                                                  // 1  cUIThing__cUIThing
+    virtual void setActive(int a);                                        // 4  cUIThing_setActive
+    virtual void setCached(int a);                                        // 5  cUIThing_setCached
+    virtual void setEnabled(int a);                                       // 6  cUIThing_setEnabled
+    virtual void setFocus(int a);                                         // 7  cUIThing_setFocus
+    virtual void setStatic(int a);                                        // 8  cUIThing_setStatic
+    virtual void setVisible(int a);                                       // 9  cUIThing_setVisible
+    virtual void setUIData(tUIBaseObject* pObj);                          // 10 cUIThing_setUIData
+    virtual void setColour(const tARGB* colour);                          // 11 cUIThing_setColour
+    virtual void setChannelData(unsigned short channel, float data);      // 12 cUIThing_setChannelData
+    virtual void setChannelDataKCP(unsigned int NumChannels, short* pPtr); // 13 cUIThing_setChannelDataKCP
+    virtual cUIThing* getObjectByHashName(unsigned int hashname);         // 14 cUIThing_getObjectByHashName
+    virtual bool onInput(const cUIInput* pInput);                         // 15 cUIThing_onInput
+    virtual void updateLocale();                                          // 16 cUIThing_updateLocale
+    virtual void render2D(float x, float y);                              // 17 cUIThing_render2D
+    virtual void render3D(cUIRenderContext* pRenCon);                     // 18 cUIThing_render3D
+    virtual void update(unsigned short FrameNum);                         // 19 cUIThing_update
+    virtual void getSize(t3Vector* vec);                                  // 20 cUIThing_getSize
+    virtual void setSize(const t3Vector* vec);                            // 21 cUIThing_setSize
 };
 
 CHECK_SIZE(tAttrThing, 0x4);
 
-CHECK_OFFSET(cUIThing, mpPrev, 0x000);
-CHECK_OFFSET(cUIThing, mpNext, 0x004);
-CHECK_OFFSET(cUIThing, mVtbl, 0x008);
 CHECK_OFFSET(cUIThing, mpAnim, 0x00C);
 CHECK_OFFSET(cUIThing, mAnimPlaybackStatus, 0x010);
 CHECK_OFFSET(cUIThing, mAttr, 0x014);

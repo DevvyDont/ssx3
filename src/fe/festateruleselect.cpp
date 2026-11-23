@@ -325,8 +325,8 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
         rowListBox->mAttr &= ~1;
         cUIThing* rowItem = (cUIThing*)find_19188(self, lp);
         if (i >= count) {
-            ((sVE_19188*)rowItem->mVtbl)[9].fn(vthis(rowItem, ((sVE_19188*)rowItem->mVtbl)[9]), 0);
-            ((sVE_19188*)rowItem->mVtbl)[8].fn(vthis(rowItem, ((sVE_19188*)rowItem->mVtbl)[8]), 1);
+            ((sVE_19188*)VPTR_OF(cListNode, rowItem))[9].fn(vthis(rowItem, ((sVE_19188*)VPTR_OF(cListNode, rowItem))[9]), 0);
+            ((sVE_19188*)VPTR_OF(cListNode, rowItem))[8].fn(vthis(rowItem, ((sVE_19188*)VPTR_OF(cListNode, rowItem))[8]), 1);
         }
         if (i < 9) {
             label.c[0]++;
@@ -826,7 +826,7 @@ extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int 
     for (i = 0; i < 8; i++) {
         cUIThing* item = ((cUIThing*)self->mpListBox[i]);
         if (item != 0) {
-            ((sVEntry<void(void*, int)>*)item->mVtbl)[8].fn(vthis(item, ((sVEntry<void(void*, int)>*)item->mVtbl)[8]), enabled);
+            ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, item))[8].fn(vthis(item, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, item))[8]), enabled);
         }
     }
 }
@@ -869,15 +869,15 @@ extern "C" void cBraggingRightsMenu_setMenuItemColor(sRuleSel_001927B0* self)
         }
         if (i == sel) {
             cUIThing* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
+            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)VPTR_OF(cListNode, item))[11];
             colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (cUIListBox_getCurrentEntryData(self->items[i])) {
             cUIThing* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
+            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)VPTR_OF(cListNode, item))[11];
             colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
         } else {
             cUIThing* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
+            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)VPTR_OF(cListNode, item))[11];
             colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
         }
     }

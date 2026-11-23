@@ -1004,13 +1004,13 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         return;
     switch (msg) {
     case 2: {
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, menu);
         vt[21].fn(vthis(menu, vt[21]), gSmallSize);
         break;
     }
     case 1: {
         int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, menu);
         vt[21].fn(vthis(menu, vt[21]), gBigSize);
         cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
         break;

@@ -229,8 +229,8 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
                 menuItem->mMiscData = i + 1;
             } else {
                 (selfp)->mbSessionUnlocked[i] = 0;
-                ((VIntFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[9].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[9]), 0);
-                ((VIntFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[8].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[8]), 1);
+                ((VIntFn_87F0)((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[9].fn)(vthis(menuItem, ((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[9]), 0);
+                ((VIntFn_87F0)((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[8].fn)(vthis(menuItem, ((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[8]), 1);
             }
         }
         void* menu = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
@@ -253,12 +253,12 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
         menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
         if (menuItem != 0) {
             menuItem->mMiscData = 0;
-            ((VPtrFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[11].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[11]), kMAPCOLOR_REGULAR);
+            ((VPtrFn_87F0)((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[11].fn)(vthis(menuItem, ((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[11]), kMAPCOLOR_REGULAR);
         }
         menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
         if (menuItem != 0) {
             menuItem->mMiscData = 1;
-            ((VPtrFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[11].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[11]), kMAPCOLOR_REGULAR);
+            ((VPtrFn_87F0)((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[11].fn)(vthis(menuItem, ((sVEntry<void>*)VPTR_OF(cListNode, menuItem))[11]), kMAPCOLOR_REGULAR);
         }
     }
     return 0;
@@ -288,8 +288,8 @@ extern "C" void cOVState_MAP_onGainFocus(cOVState_MAP* self, int pPrevState)
     cUIState_onGainFocus(self, pPrevState);
     confirmMenu = (cUIThing*)cUIScreen_getObjectByHashName(self->mpMapScreen, GetHashValue32(str_ConfirmMenu));
     if (confirmMenu != 0) {
-        ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[7].fn(vthis(confirmMenu, ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[7]), 0);
-        ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[9].fn(vthis(confirmMenu, ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, confirmMenu))[7].fn(vthis(confirmMenu, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, confirmMenu))[7]), 0);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, confirmMenu))[9].fn(vthis(confirmMenu, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, confirmMenu))[9]), 0);
     }
 }
 #endif
@@ -333,11 +333,11 @@ extern "C" void cOVState_MAP_setupScreenExit(cOVState_MAP* self)
     self->mMapTextureSet = 0;
     popupWidget = (cUIThing*)self->mpMap;
     if (popupWidget != 0) {
-        ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, popupWidget))[9].fn(vthis(popupWidget, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, popupWidget))[9]), 0);
     }
     popupWidget = (cUIThing*)self->mpPlayerIcon;
     if (popupWidget != 0) {
-        ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, popupWidget))[9].fn(vthis(popupWidget, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, popupWidget))[9]), 0);
     }
 }
 #endif
@@ -649,7 +649,7 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
  */
 extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, cUIThing* pInput)
 {
-    if (((sVEntry<int(void*)>*)pInput->mVtbl)[17].fn(vthis(pInput, ((sVEntry<int(void*)>*)pInput->mVtbl)[17])) != 0 || ((sVEntry<int(void*)>*)pInput->mVtbl)[18].fn(vthis(pInput, ((sVEntry<int(void*)>*)pInput->mVtbl)[18])) != 0) {
+    if (((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[17].fn(vthis(pInput, ((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[17])) != 0 || ((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[18].fn(vthis(pInput, ((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[18])) != 0) {
         cOVState_MAP_showIndicators(self);
     }
 }

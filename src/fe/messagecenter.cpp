@@ -86,7 +86,7 @@ struct sReqLine_6F98 {
 
 static inline void show_6F98(cUIThing* w, int on)
 {
-    ((sVEi_6F98*)w->mVtbl)[9].fn(vthis(w, ((sVEi_6F98*)w->mVtbl)[9]), on);
+    ((sVEi_6F98*)VPTR_OF(cListNode, w))[9].fn(vthis(w, ((sVEi_6F98*)VPTR_OF(cListNode, w))[9]), on);
 }
 
 static inline int countBits_6F98(ulong v)

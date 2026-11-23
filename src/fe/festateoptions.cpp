@@ -1837,7 +1837,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         break;
     }
     case 1: {
-        sVE_18C2A0* vt = (sVE_18C2A0*)widget->mVtbl;
+        sVE_18C2A0* vt = (sVE_18C2A0*)VPTR_OF(cListNode, widget);
         vt[9].fn(vthis(widget, vt[9]), 1);
         D_004A14D8 = 1;
         cBEOptionInterface_mOption_C2A0.mode = *(unsigned char*)&widget->mMiscData;
@@ -1846,7 +1846,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
     case 2:
         if (Is_0018C2A0(widget->mHashName, D_004A14F8) || Is_0018C2A0(widget->mHashName, D_004A1500) ||
             Is_0018C2A0(widget->mHashName, D_004A1508)) {
-            sVE_18C2A0* vt = (sVE_18C2A0*)widget->mVtbl;
+            sVE_18C2A0* vt = (sVE_18C2A0*)VPTR_OF(cListNode, widget);
             vt[9].fn(vthis(widget, vt[9]), 0);
         }
         break;
@@ -1908,11 +1908,11 @@ extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* vself)
             if (((char*)item) != 0) {
                 item->mMiscData = i;
                 if (i == optMode_C478(cBEOptionInterface_mOption_C478)) {
-                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)item->mVtbl;
+                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, item);
                     vt2[9].fn(vthis(item, vt2[9]), 1);
                     cUIMenu_setSelectedByIndex(menu, i);
                 } else {
-                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)item->mVtbl;
+                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, item);
                     vt2[9].fn(vthis(item, vt2[9]), 0);
                 }
             }

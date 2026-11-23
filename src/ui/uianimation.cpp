@@ -372,7 +372,7 @@ extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int 
     if (frame < (self->mpAnimHeader)->mNumFrames) {
         for (unsigned int i = 0; i < (self->mpAnimHeader)->mNumChannels; i++) {
             float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)&self->mpAnimChannels[i], frame);
-            sVEntry<void(void*, int, float)>* vt = (sVEntry<void(void*, int, float)>*)obj->mVtbl;
+            sVEntry<void(void*, int, float)>* vt = (sVEntry<void(void*, int, float)>*)VPTR_OF(cListNode, obj);
             vt[12].fn(vthis(obj, vt[12]), cUIAnimationChannel_getAnimChanType(&self->mpAnimChannels[i]), chanValue);
         }
     }

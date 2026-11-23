@@ -2102,12 +2102,12 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     case 1: {
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
             vt[7].fn(vthis(widget, vt[7]), 0);
         }
         widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
             vt[7].fn(vthis(widget, vt[7]), 1);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_off));
@@ -2131,12 +2131,12 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
             vt[7].fn(vthis(widget, vt[7]), 0);
         }
         widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
             vt[7].fn(vthis(widget, vt[7]), 1);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_file_display));
@@ -2158,12 +2158,12 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     case 3: {
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
             vt[7].fn(vthis(widget, vt[7]), 1);
         }
         widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
             vt[7].fn(vthis(widget, vt[7]), 0);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_on));
@@ -2221,7 +2221,7 @@ extern "C" void cFEMemCard_onGainFocus(cFEMemCard* self)
     cUIState_onGainFocus(self);
     cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
     if (((void*)obj) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, obj);
         vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }

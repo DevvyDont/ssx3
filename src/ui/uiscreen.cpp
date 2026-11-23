@@ -1182,12 +1182,12 @@ extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
     self->mVtbl = cUIScrollBar_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)background->mVtbl;
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, background);
         dtorEntry->fn((char*)background + dtorEntry->dtorDelta, 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)knob->mVtbl;
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, knob);
         dtorEntry->fn((char*)knob + dtorEntry->dtorDelta, 3);
     }
     cUIThing__cUIThing(self, flags);
@@ -1235,12 +1235,12 @@ extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
         if ((background->mAttr >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)background->mVtbl;
+            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)VPTR_OF(cListNode, background);
             vt[17].fn(vthis(background, vt[17]), px, py);
         }
         cUIThing* knob = self->mpObjKnob;
         if ((knob->mAttr >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)knob->mVtbl;
+            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)VPTR_OF(cListNode, knob);
             vt[17].fn(vthis(knob, vt[17]), px, py);
         }
     }
@@ -1479,12 +1479,12 @@ extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
     self->mVtbl = cUISlider_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)background->mVtbl;
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, background);
         dtorEntry->fn((char*)background + dtorEntry->dtorDelta, 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
-        sDeleteTarget* dtorEntry = (sDeleteTarget*)knob->mVtbl;
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, knob);
         dtorEntry->fn((char*)knob + dtorEntry->dtorDelta, 3);
     }
     cUIThing__cUIThing(self, flags);
@@ -1618,16 +1618,16 @@ extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
     }
     float x = dx + self->mPosition.x;
     float y = dy + self->mPosition.y;
-    cUISlider_render2D_sVEntryF* va = (cUISlider_render2D_sVEntryF*)background->mVtbl;
+    cUISlider_render2D_sVEntryF* va = (cUISlider_render2D_sVEntryF*)VPTR_OF(cListNode, background);
     va[17].fn(vthis(background, va[17]), x, y);
     cUIThing* bgObj = self->mpObjBackground;
     cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)&bgObj->mPosition;
     cUISlider_render2D_sVec3 bgSize;
-    cUISlider_render2D_sVEntryV* vo = (cUISlider_render2D_sVEntryV*)bgObj->mVtbl;
+    cUISlider_render2D_sVEntryV* vo = (cUISlider_render2D_sVEntryV*)VPTR_OF(cListNode, bgObj);
     vo[20].fn(vthis(bgObj, vo[20]), &bgSize);
     cUIThing* knob = self->mpObjKnob;
     cUISlider_render2D_sVec3 knobSize;
-    cUISlider_render2D_sVEntryV* vb = (cUISlider_render2D_sVEntryV*)knob->mVtbl;
+    cUISlider_render2D_sVEntryV* vb = (cUISlider_render2D_sVEntryV*)VPTR_OF(cListNode, knob);
     vb[20].fn(vthis(knob, vb[20]), &knobSize);
     float w = bgSize.x - knobSize.x;
     cUIThing* knobObj = self->mpObjKnob;
@@ -1635,7 +1635,7 @@ extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
     knobPos.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
     *(cUISlider_render2D_sVec3*)&knobObj->mPosition = knobPos;
     cUIThing* knobWidget = self->mpObjKnob;
-    cUISlider_render2D_sVEntryF* vb3 = (cUISlider_render2D_sVEntryF*)knobWidget->mVtbl;
+    cUISlider_render2D_sVEntryF* vb3 = (cUISlider_render2D_sVEntryF*)VPTR_OF(cListNode, knobWidget);
     vb3[17].fn(vthis(knobWidget, vb3[17]), x, y);
 }
 #endif

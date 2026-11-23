@@ -805,7 +805,7 @@ extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         do {
-            cUIGroup_getObjectByHashName_sVEntry* vtEntry = &((cUIGroup_getObjectByHashName_sVEntry*)n->mVtbl)[14];
+            cUIGroup_getObjectByHashName_sVEntry* vtEntry = &((cUIGroup_getObjectByHashName_sVEntry*)VPTR_OF(cListNode, n))[14];
             void* found = vtEntry->fn(vthis(n, *vtEntry), id);
             if (found != 0) {
                 return found;
@@ -841,7 +841,7 @@ extern "C" void cUIGroup_updateLocale(cUIGroup* self)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         do {
-            cUIGroup_updateLocale_sVEntry* vt = (cUIGroup_updateLocale_sVEntry*)n->mVtbl;
+            cUIGroup_updateLocale_sVEntry* vt = (cUIGroup_updateLocale_sVEntry*)VPTR_OF(cListNode, n);
             vt[16].fn(vthis(n, vt[16]));
             n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -903,7 +903,7 @@ extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            cUIGroup_render3D_sVEntry* vt = (cUIGroup_render3D_sVEntry*)n->mVtbl;
+            cUIGroup_render3D_sVEntry* vt = (cUIGroup_render3D_sVEntry*)VPTR_OF(cListNode, n);
             vt[18].fn(vthis(n, vt[18]), pRenCon);
             n = (cUIThing*)((void*)n->mpNext);
         }
@@ -932,7 +932,7 @@ extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
     if (((void*)n) != 0) {
         do {
             if ((n->mAttr >> 6) & 1) {
-                cUIGroup_render2D_sVEntry* vt = (cUIGroup_render2D_sVEntry*)n->mVtbl;
+                cUIGroup_render2D_sVEntry* vt = (cUIGroup_render2D_sVEntry*)VPTR_OF(cListNode, n);
                 vt[17].fn(vthis(n, vt[17]), self->mPosition.x + x, self->mPosition.y + y);
             }
             n = (cUIThing*)((void*)n->mpNext);
@@ -968,7 +968,7 @@ extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            cUIGroup_update_sVEntry* vt = (cUIGroup_update_sVEntry*)n->mVtbl;
+            cUIGroup_update_sVEntry* vt = (cUIGroup_update_sVEntry*)VPTR_OF(cListNode, n);
             vt[19].fn(vthis(n, vt[19]), ev);
             n = (cUIThing*)((void*)n->mpNext);
         }

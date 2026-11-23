@@ -1142,7 +1142,7 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
         cOVState_AUTOSAVE_displayOn(self);
     } else {
         cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
-        ((sVEntry<void(void*, int)>*)autosaveText->mVtbl)[9].fn(vthis(autosaveText, ((sVEntry<void(void*, int)>*)autosaveText->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, autosaveText))[9].fn(vthis(autosaveText, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, autosaveText))[9]), 0);
     }
 }
 #endif

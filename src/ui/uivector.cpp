@@ -847,7 +847,7 @@ extern "C" void* cUIThing_cUIThing1(cUIThing* self)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
-    self->mVtbl = cUIThing_vtbl;
+    VPTR_OF(cListNode, self) = cUIThing_vtbl;
     tAttrThing_tAttrThing((sFlags_6548*)(&self->mAttr));
     return ((char*)self);
 }
@@ -2546,7 +2546,7 @@ extern "C" void cUIPair_setEntry(cUIPair* self, cUIThing* obj)
 {
     cUIThing* old = self->mpEntry;
     if (((char*)old) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)old->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, old);
         vt[1].fn(vthis(old, vt[1]), 3);
     }
     self->mpEntry = (cUIThing*)obj;
@@ -2579,7 +2579,7 @@ extern "C" void cUIPair_setWidget(cUIPair* self, cUIThing* obj)
 {
     cUIThing* old = self->mpWidget;
     if (((char*)old) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)old->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, old);
         vt[1].fn(vthis(old, vt[1]), 3);
     }
     self->mpWidget = (cUIThing*)obj;

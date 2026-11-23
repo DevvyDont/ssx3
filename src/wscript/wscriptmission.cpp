@@ -210,11 +210,11 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     btnPos0 = *(sGateVec_3DE0*)&instBtn0->mPosition;
     btnPos1 = *(sGateVec_3DE0*)(instBtn1 + 0x44);
     btnPos2 = *(sGateVec_3DE0*)&instBtn2->mPosition;
-    sUIVtP_3DE0* vt0 = (sUIVtP_3DE0*)instBtn0->mVtbl;
+    sUIVtP_3DE0* vt0 = (sUIVtP_3DE0*)VPTR_OF(cListNode, instBtn0);
     vt0[20].fn(vthis(instBtn0, vt0[20]), &btnSize0);
     sUIVtP_3DE0* vt1 = *(sUIVtP_3DE0**)(instBtn1 + 8);
     vt1[20].fn(vthis(instBtn1, vt1[20]), &btnSize1);
-    sUIVtP_3DE0* vt2 = (sUIVtP_3DE0*)instBtn2->mVtbl;
+    sUIVtP_3DE0* vt2 = (sUIVtP_3DE0*)VPTR_OF(cListNode, instBtn2);
     vt2[20].fn(vthis(instBtn2, vt2[20]), &btnSize2);
     float x = instPos0.x + textSize0.x;
     btnPos0.x = x;

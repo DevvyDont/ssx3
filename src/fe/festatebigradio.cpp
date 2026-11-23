@@ -1070,12 +1070,12 @@ INCLUDE_ASM("fe/festatebigradio", DisableTextWidget);
  */
 extern "C" void DisableTextWidget(cUIThing* self)
 {
-    sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)self->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, self);
     vt[8].fn(vthis(self, vt[8]), 1);
     tARGB colour = self->mColour;
     if (colour.A > 0.5f) {
         colour.A = 0.5f;
-        sVEntry<void(void*, tARGB*)>* vt2 = (sVEntry<void(void*, tARGB*)>*)self->mVtbl;
+        sVEntry<void(void*, tARGB*)>* vt2 = (sVEntry<void(void*, tARGB*)>*)VPTR_OF(cListNode, self);
         vt2[11].fn(vthis(self, vt2[11]), &colour);
     }
 }
