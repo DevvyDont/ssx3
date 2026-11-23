@@ -7110,7 +7110,7 @@ static inline int snd7B0Add(void* vself, int a, int b)
  *
  * @param vself  the audio system
  */
-extern "C" void cSSXAudio_CountdownGateDrop(void* vself)
+extern "C" void cSSXAudio_CountdownGateDrop(cSSXAudio* vself)
 {
     sSnd7B0Sys* self = (sSnd7B0Sys*)vself;
     cSSXAudio* base = (cSSXAudio*)vself;

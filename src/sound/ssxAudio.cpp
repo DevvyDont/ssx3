@@ -1362,11 +1362,6 @@ extern "C" void cSSXAudio_InGamePurge(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_AttachAudioBank);
 #ifdef SKIP_ASM
-struct sSsxAudioBanks {
-    char pad[0x6C70];
-    int loaded[2];
-    int sub[2];
-};
 extern "C" void cBankManager_BANK_Attach(void* self, int i, int a, int b);
 
 /**
@@ -2410,11 +2405,6 @@ struct sIniParser7FC8 {
 };
 
 
-struct sAudio7FC8 {
-    char pad[0x6478];
-    int count;                      // 0x6478
-    tAudioMix entries[25];      // 0x647C
-};
 
 /**
  * Loads up to 25 audio mixes from "data/config/mix.inf".
@@ -2423,61 +2413,61 @@ struct sAudio7FC8 {
  * the next mix from its MUSIC, DJ, PA, CHARACTER, BOARD, COLLISION, AMBIENT, ARCADESFX and ARCADESPEECH values;
  * TIME is given in milliseconds and stored in seconds. The number of mixes read goes into the count.
  */
-extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
+extern "C" void cSSXAudio_LoadMixes(cSSXAudio* self)
 {
     sIniParser7FC8 parser;
     int val;
-    self->count = 0;
+    self->mNumAudioMixes = 0;
     FileParser_FileParser_r(&parser, kpAudioMixFilename, 0x100);
     parser.cur = parser.start;
     for (int i = 0; i < 25; i++) {
-        self->entries[i].musicLevel = 100;
-        self->entries[i].djLevel = 100;
-        self->entries[i].paLevel = 100;
-        self->entries[i].characterLevel = 100;
-        self->entries[i].boardLevel = 100;
-        self->entries[i].collisionLevel = 100;
-        self->entries[i].ambientLevel = 100;
-        self->entries[i].arcadeSFXLevel = 100;
-        self->entries[i].arcadeSpeechLevel = 100;
-        self->entries[i].time = 0.0f;
+        self->mAudioMixes[i].musicLevel = 100;
+        self->mAudioMixes[i].djLevel = 100;
+        self->mAudioMixes[i].paLevel = 100;
+        self->mAudioMixes[i].characterLevel = 100;
+        self->mAudioMixes[i].boardLevel = 100;
+        self->mAudioMixes[i].collisionLevel = 100;
+        self->mAudioMixes[i].ambientLevel = 100;
+        self->mAudioMixes[i].arcadeSFXLevel = 100;
+        self->mAudioMixes[i].arcadeSpeechLevel = 100;
+        self->mAudioMixes[i].time = 0.0f;
     }
-    while (self->count < 25 && FileParser_FindNextSection(&parser) != 0) {
+    while (self->mNumAudioMixes < 25 && FileParser_FindNextSection(&parser) != 0) {
         while (FileParser_IsEOF(&parser) == 0) {
             char* key = FileParser_GetName(&parser);
             if (strcasecmp(key, str_MUSIC) == 0) {
                 FileParser_AssignInt(&parser, str_MUSIC, &val);
-                self->entries[self->count].musicLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].musicLevel = val;
             } else if (strcasecmp(key, str_DJ) == 0) {
                 FileParser_AssignInt(&parser, str_DJ, &val);
-                self->entries[self->count].djLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].djLevel = val;
             } else if (strcasecmp(key, str_PA) == 0) {
                 FileParser_AssignInt(&parser, str_PA, &val);
-                self->entries[self->count].paLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].paLevel = val;
             } else if (strcasecmp(key, str_CHARACTER) == 0) {
                 FileParser_AssignInt(&parser, str_CHARACTER, &val);
-                self->entries[self->count].characterLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].characterLevel = val;
             } else if (strcasecmp(key, str_BOARD) == 0) {
                 FileParser_AssignInt(&parser, str_BOARD, &val);
-                self->entries[self->count].boardLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].boardLevel = val;
             } else if (strcasecmp(key, str_COLLISION) == 0) {
                 FileParser_AssignInt(&parser, str_COLLISION, &val);
-                self->entries[self->count].collisionLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].collisionLevel = val;
             } else if (strcasecmp(key, str_AMBIENT) == 0) {
                 FileParser_AssignInt(&parser, str_AMBIENT, &val);
-                self->entries[self->count].ambientLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].ambientLevel = val;
             } else if (strcasecmp(key, str_ARCADESFX) == 0) {
                 FileParser_AssignInt(&parser, str_ARCADESFX, &val);
-                self->entries[self->count].arcadeSFXLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].arcadeSFXLevel = val;
             } else if (strcasecmp(key, str_ARCADESPEECH) == 0) {
                 FileParser_AssignInt(&parser, str_ARCADESPEECH, &val);
-                self->entries[self->count].arcadeSpeechLevel = val;
+                self->mAudioMixes[self->mNumAudioMixes].arcadeSpeechLevel = val;
             } else if (strcasecmp(key, str_TIME_b) == 0) {
                 FileParser_AssignInt(&parser, str_TIME_b, &val);
-                self->entries[self->count].time = (float)val * 0.0010000000474974513f;
+                self->mAudioMixes[self->mNumAudioMixes].time = (float)val * 0.0010000000474974513f;
             }
         }
-        self->count++;
+        self->mNumAudioMixes++;
     }
     FileParser__FileParser(&parser, 2);
 }
@@ -3887,11 +3877,6 @@ struct sRing289DF0 {
     int tail;
 };
 
-struct sAsyncVt289DF0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int, int, char*, int, int);
-};
 
 struct sAsync289DF0 {
     int handle;            // 0x0
