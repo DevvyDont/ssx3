@@ -4472,10 +4472,8 @@ struct Src_CF38 { int pad0; float v[6]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* src, float blendFactor) {
-    VEnt_CF38* vtEntry;
     float inv;
-    vtEntry = (VEnt_CF38*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-    vtEntry->fn(vthis(self, *vtEntry));
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_CF38*)&self->m_FogDensity)[0].cur = blendFactor * ((float*)&src->m_FogDensity)[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
@@ -4490,16 +4488,13 @@ extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* sr
     ((Pair_CF38*)&self->m_FogDensity)[4].tgt = ((float*)&src->m_FogDensity)[4];
     ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * ((float*)&src->m_FogDensity)[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
     ((Pair_CF38*)&self->m_FogDensity)[5].tgt = ((float*)&src->m_FogDensity)[5];
-    vtEntry = (VEnt_CF38*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-    vtEntry->fn(vthis(self, *vtEntry));
+    self->debugBlend();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_blend);
 #ifdef SKIP_ASM
-struct VEnt_D068 { short delta; short idx; int (*fn)(void*); };
-struct VEntV_D068 { short delta; short idx; void (*fn)(void*); };
 struct Pair_D068 { float cur; float tgt; };
 struct Obj_D068 { int pad0; char* vt; Pair_D068 p[7]; };
 struct Src_D068 { int pad0; float v[7]; };
@@ -4515,10 +4510,8 @@ struct Src_D068 { int pad0; float v[7]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWPData_LightGlow* src, float blendFactor) {
-    VEnt_D068* vtEntry;
     float inv;
-    vtEntry = (VEnt_D068*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-    vtEntry->fn(vthis(self, *vtEntry));
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
@@ -4536,8 +4529,7 @@ extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWP
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = ((float*)&src->m_LightGlowCutoff)[6];
     {
-        VEntV_D068* vtEntryV = (VEntV_D068*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-        vtEntryV->fn(vthis(self, *vtEntryV));
+        self->debugBlend();
     }
 }
 #endif
@@ -4560,10 +4552,8 @@ struct Src_D1B8 { int pad0; float v[6]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, tWPData_ScreenTint* src, float blendFactor) {
-    VEnt_D1B8* vtEntry;
     float inv;
-    vtEntry = (VEnt_D1B8*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-    vtEntry->fn(vthis(self, *vtEntry));
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
@@ -4578,8 +4568,7 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, t
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = ((float*)&src->m_ScreenTintScaleR)[4];
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = ((float*)&src->m_ScreenTintScaleR)[5];
-    vtEntry = (VEnt_D1B8*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-    vtEntry->fn(vthis(self, *vtEntry));
+    self->debugBlend();
 }
 #endif
 
@@ -4608,7 +4597,6 @@ extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, tWPData_S
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_blend);
 #ifdef SKIP_ASM
-struct VEnt_D378 { short delta; short idx; int (*fn)(void*); };
 struct Pair_D378 { float cur; float tgt; };
 struct IPair_D378 { int cur; int tgt; };
 struct Obj_D378 { int pad0; char* vt; Pair_D378 p[6]; IPair_D378 i6; Pair_D378 q[2]; };
@@ -4625,10 +4613,8 @@ struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* src, float blendFactor) {
-    VEnt_D378* vtEntry;
     float inv;
-    vtEntry = (VEnt_D378*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-    vtEntry->fn(vthis(self, *vtEntry));
+    self->debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
@@ -4649,8 +4635,7 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* sr
     ((Pair_D378*)&self->m_LensIntensity)[0].tgt = ((float*)&src->m_LensIntensity)[0];
     ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * ((float*)&src->m_LensIntensity)[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
     ((Pair_D378*)&self->m_LensIntensity)[1].tgt = ((float*)&src->m_LensIntensity)[1];
-    vtEntry = (VEnt_D378*)((char*)VPTR_OF(tWPInGameData, self) + 0x218);
-    vtEntry->fn(vthis(self, *vtEntry));
+    self->debugBlend();
 }
 #endif
 
