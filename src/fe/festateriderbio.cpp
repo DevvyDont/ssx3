@@ -76,14 +76,11 @@ extern char str_Option_3[];
 extern char str_Option_4[];
 extern char str_Option_5[];
 
-struct sVtEnt_001833D0 { short delta; short index; void (*fn)(void*, int); };
-
 static inline void showObj_001833D0(void* self, char* name, int id)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+    cUIThing* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (obj != 0) {
-        sVtEnt_001833D0* vt = *(sVtEnt_001833D0**)((char*)obj + 8);
-        vt[9].fn(vthis(obj, vt[9]), 1);
+        obj->setVisible(1);
         *(int*)((char*)obj + 0x18) = id;
     }
 }

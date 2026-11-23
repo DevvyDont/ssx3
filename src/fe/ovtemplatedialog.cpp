@@ -1808,8 +1808,8 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
     switch ((unsigned int)self->mDialogType) {
     case 1: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNQuitGame));
-        sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
-        quitChallengeTitle->vt[9].fn(vthis(quitChallengeTitle, quitChallengeTitle->vt[9]), 0);
+        cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
+        quitChallengeTitle->setVisible(0);
         break;
     }
     case 0:
@@ -1829,8 +1829,8 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
         break;
     case 6: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSaveBeforeQuit));
-        sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
-        quitChallengeTitle->vt[9].fn(vthis(quitChallengeTitle, quitChallengeTitle->vt[9]), 0);
+        cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
+        quitChallengeTitle->setVisible(0);
         break;
     }
     default:
@@ -2211,12 +2211,10 @@ extern "C" void cOVState_REPLAY_onCreateScreen(cOVState_REPLAY* self)
     *(int*)(obj + 0x90) |= 8;
     if (self->mLoaded != 0) {
         if (obj != 0) cUIMenu_setSelectedByIndex(obj, 2);
-        char* saveReplayOption = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_savereplay));
+        cUIThing* saveReplayOption = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_savereplay));
         if (saveReplayOption != 0) {
-            sVEntry<void(void*, int)>* vtEntry = &(*(sVEntry<void(void*, int)>**)(saveReplayOption + 8))[9];
-            vtEntry->fn(vthis(saveReplayOption, *vtEntry), 0);
-            vtEntry = &(*(sVEntry<void(void*, int)>**)(saveReplayOption + 8))[8];
-            vtEntry->fn(vthis(saveReplayOption, *vtEntry), 0);
+            saveReplayOption->setVisible(0);
+            saveReplayOption->setStatic(0);
         }
     }
 }

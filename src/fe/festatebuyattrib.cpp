@@ -456,12 +456,6 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_Vectorpct_d[];
 extern char str_underpct_d[];
 
-struct sVEK1F50B0a {
-    short delta;
-    short index;
-    void (*fn)(void*, t3Vector*);
-};
-
 /**
  * Sizes the seven attributes' bars: "Vector%d" for the points owned and "under%d" for owned plus bought.
  *
@@ -483,10 +477,8 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.y = 12.0f;
             barSize.x = (float)self->mExperience[i] * 3.3636362552642822f;
             barSize.z = 0.0f;
-            sVEK1F50B0a* vt = (sVEK1F50B0a*)VPTR_OF(cListNode, bar);
-            vt[21].fn(vthis(bar, vt[21]), &barSize);
-            sVEntry<void(void*, int)>* vt2 = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, bar);
-            vt2[9].fn(vthis(bar, vt2[9]), 1);
+            bar->setSize(&barSize);
+            bar->setVisible(1);
         }
         sprintf(name, str_underpct_d, i);
         bar = (cUIThing*)((char*)cUIScreen_getObjectByHashName(((void*)self->mpAttribScreen), GetHashValue32(name)));
@@ -495,10 +487,8 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.x = (float)(self->mPotentialExperience[i] + self->mExperience[i]) * 3.3636362552642822f;
             barSize.y = 12.0f;
             barSize.z = 0.0f;
-            sVEK1F50B0a* vt = (sVEK1F50B0a*)VPTR_OF(cListNode, bar);
-            vt[21].fn(vthis(bar, vt[21]), &barSize);
-            sVEntry<void(void*, int)>* vt2 = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, bar);
-            vt2[9].fn(vthis(bar, vt2[9]), 1);
+            bar->setSize(&barSize);
+            bar->setVisible(1);
         }
     }
 }
@@ -990,13 +980,11 @@ extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self)
     }
     cUIThing* dashObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_horizontal_dash_b));
     if (((char*)dashObj) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, dashObj);
-        vt[9].fn(vthis(dashObj, vt[9]), show);
+        dashObj->setVisible(show);
     }
     dashObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vertical_dash_b));
     if (((char*)dashObj) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, dashObj);
-        vt[9].fn(vthis(dashObj, vt[9]), show);
+        dashObj->setVisible(show);
     }
 }
 #endif

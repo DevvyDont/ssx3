@@ -1097,15 +1097,14 @@ extern "C" void cFEMemCard_callbackDisplayNoCards(void)
         vt[35].fn(vthis(fe, vt[35]), 1);
     }
     char* st = (char*)cFEMemCard_mInstance;
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
+    cUIThing* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
     if (obj) {
         unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
         char* locale = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* ovt = *(sVEntry<void*(void*, ...)>**)(locale + 4);
         strcpy1(buf, ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMNoCardsPS2)));
         cUIText_setUnicodeStringWrap(obj, buf);
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-        vt[9].fn(vthis(obj, vt[9]), 1);
+        obj->setVisible(1);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1185,15 +1184,14 @@ extern "C" void cFEMemCard_callbackFileChecked(void)
     } else {
         SetMode_001D83A8((char*)cFEMemCard_mInstance, 1);
         char* st = (char*)cFEMemCard_mInstance;
-        void* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
+        cUIThing* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
         if (obj) {
             unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
             char* locale = (char*)SSXApp->FELocale;
             sVEntry<void*(void*, ...)>* ovt = *(sVEntry<void*(void*, ...)>**)(locale + 4);
             strcpy1(buf, ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMNoCardsPS2)));
             cUIText_setUnicodeStringWrap(obj, buf);
-            sVEntry<void(void*, ...)>* bvt = *(sVEntry<void(void*, ...)>**)((char*)obj + 8);
-            bvt[9].fn(vthis(obj, bvt[9]), 1);
+            obj->setVisible(1);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
@@ -2102,16 +2100,14 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     case 1: {
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-            vt[7].fn(vthis(widget, vt[7]), 0);
+            widget->setFocus(0);
         }
         widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-            vt[7].fn(vthis(widget, vt[7]), 1);
+            widget->setFocus(1);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_off));
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
+        cUIThing* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
@@ -2120,8 +2116,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
             sVEntry<unsigned short*(void*, int)>* mvt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
             sprintf1(str, mvt[4].fn(vthis(locale, mvt[4]), GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
-            sVEntry<void(void*, int)>* tvt = (sVEntry<void (void*, int)>*)text->mVtbl;
-            tvt[9].fn(vthis(text, tvt[9]), 1);
+            text->setVisible(1);
             if (str)
                 cMemMan_free(str);
         }
@@ -2131,16 +2126,14 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-            vt[7].fn(vthis(widget, vt[7]), 0);
+            widget->setFocus(0);
         }
         widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-            vt[7].fn(vthis(widget, vt[7]), 1);
+            widget->setFocus(1);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_file_display));
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
+        cUIThing* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager_getDeviceNumberString(mp, buf, mp->mSelectedDevice);
@@ -2148,8 +2141,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
             sVEntry<unsigned short*(void*, int)>* mvt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
             sprintf1(str, mvt[4].fn(vthis(locale, mvt[4]), GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
             cUIText_setUnicodeStringWrap(text, str);
-            sVEntry<void(void*, int)>* tvt = (sVEntry<void (void*, int)>*)text->mVtbl;
-            tvt[9].fn(vthis(text, tvt[9]), 1);
+            text->setVisible(1);
             if (str)
                 cMemMan_free(str);
         }
@@ -2158,13 +2150,11 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     case 3: {
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-            vt[7].fn(vthis(widget, vt[7]), 1);
+            widget->setFocus(1);
         }
         widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-            vt[7].fn(vthis(widget, vt[7]), 0);
+            widget->setFocus(0);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_on));
         break;
@@ -2221,8 +2211,7 @@ extern "C" void cFEMemCard_onGainFocus(cFEMemCard* self)
     cUIState_onGainFocus(self);
     cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
     if (((void*)obj) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, obj);
-        vt[9].fn(vthis(obj, vt[9]), 0);
+        obj->setVisible(0);
     }
 }
 #endif

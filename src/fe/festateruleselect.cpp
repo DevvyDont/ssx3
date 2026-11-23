@@ -229,12 +229,6 @@ struct sStr2_19188 { char c[2]; };
 extern char str_0b[];
 extern char D_004A13A0[];
 
-struct sVE_19188 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 
 struct sRuleSel_19188 {
     char pad0[0x10];
@@ -325,8 +319,8 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
         rowListBox->mAttr &= ~1;
         cUIThing* rowItem = (cUIThing*)find_19188(self, lp);
         if (i >= count) {
-            ((sVE_19188*)VPTR_OF(cListNode, rowItem))[9].fn(vthis(rowItem, ((sVE_19188*)VPTR_OF(cListNode, rowItem))[9]), 0);
-            ((sVE_19188*)VPTR_OF(cListNode, rowItem))[8].fn(vthis(rowItem, ((sVE_19188*)VPTR_OF(cListNode, rowItem))[8]), 1);
+            rowItem->setVisible(0);
+            rowItem->setStatic(1);
         }
         if (i < 9) {
             label.c[0]++;
@@ -826,7 +820,7 @@ extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int 
     for (i = 0; i < 8; i++) {
         cUIThing* item = ((cUIThing*)self->mpListBox[i]);
         if (item != 0) {
-            ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, item))[8].fn(vthis(item, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, item))[8]), enabled);
+            item->setStatic(enabled);
         }
     }
 }

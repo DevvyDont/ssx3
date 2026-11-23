@@ -30,8 +30,7 @@ extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
         do {
             cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(n, GetHashValue32(name));
             if (((void*)obj) != 0) {
-                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, obj);
-                vt[9].fn(vthis(obj, vt[9]), 0);
+                obj->setVisible(0);
                 return;
             }
             n = n->mpNext;
@@ -66,8 +65,7 @@ extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
         do {
             cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(n, GetHashValue32(name));
             if (((void*)obj) != 0) {
-                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, obj);
-                vt[9].fn(vthis(obj, vt[9]), 1);
+                obj->setVisible(1);
                 return;
             }
             n = n->mpNext;

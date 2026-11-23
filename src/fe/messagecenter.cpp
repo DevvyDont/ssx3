@@ -50,12 +50,6 @@ extern char* D_004411A0[];
 extern char* D_004411C0[];
 extern char* D_00441200[];
 
-struct sVEi_6F98 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sReqLine_6F98 {
@@ -86,7 +80,7 @@ struct sReqLine_6F98 {
 
 static inline void show_6F98(cUIThing* w, int on)
 {
-    ((sVEi_6F98*)VPTR_OF(cListNode, w))[9].fn(vthis(w, ((sVEi_6F98*)VPTR_OF(cListNode, w))[9]), on);
+    w->setVisible(on);
 }
 
 static inline int countBits_6F98(ulong v)

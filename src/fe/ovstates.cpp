@@ -543,19 +543,17 @@ extern char str_hl[];
 
 static inline void setWidgetHidden_194EB0(char* self, char* name)
 {
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+    cUIThing* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
     if (o != 0) {
-        sVEntry<void>* vt = *(sVEntry<void>**)(o + 0x8);
-        ((void (*)(void*, int))vt[9].fn)(vthis(o, vt[9]), 0);
+        o->setVisible(0);
     }
 }
 
 static inline void setWidgetVisible_194EB0(char* self, char* name)
 {
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+    cUIThing* o = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
     if (o != 0) {
-        sVEntry<void>* vt = *(sVEntry<void>**)(o + 0x8);
-        ((void (*)(void*, int))vt[8].fn)(vthis(o, vt[8]), 0);
+        o->setStatic(0);
     }
 }
 
@@ -696,10 +694,9 @@ extern char str_ps2sq[];
 
 static inline void Show195328(void* self, char* name)
 {
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+    cUIThing* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (o != 0) {
-        sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(o + 8);
-        vt[9].fn(vthis(o, vt[9]), 1);
+        o->setVisible(1);
     }
 }
 

@@ -784,12 +784,6 @@ void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 extern "C" void* cUIThing_getObjectByHashName(void* self, int a1);
 
-struct cUIGroup_getObjectByHashName_sVEntry {
-    short delta;
-    short index;
-    void* (*fn)(void*, int);
-};
-
 /**
  * Finds a widget by name hash in a group: the group itself, or the first child (searched recursively) that
  * matches.
@@ -805,8 +799,7 @@ extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         do {
-            cUIGroup_getObjectByHashName_sVEntry* vtEntry = &((cUIGroup_getObjectByHashName_sVEntry*)VPTR_OF(cListNode, n))[14];
-            void* found = vtEntry->fn(vthis(n, *vtEntry), id);
+            void* found = n->getObjectByHashName(id);
             if (found != 0) {
                 return found;
             }
@@ -825,12 +818,6 @@ struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct cUIGroup_updateLocale_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Refreshes the localised text of every object in a UI group.
  *
@@ -841,8 +828,7 @@ extern "C" void cUIGroup_updateLocale(cUIGroup* self)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         do {
-            cUIGroup_updateLocale_sVEntry* vt = (cUIGroup_updateLocale_sVEntry*)VPTR_OF(cListNode, n);
-            vt[16].fn(vthis(n, vt[16]));
+            n->updateLocale();
             n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
@@ -887,12 +873,6 @@ extern "C" int cUIGroup_onInput(cUIGroup* self, int pInput)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIGroup_render3D);
 #ifdef SKIP_ASM
-struct cUIGroup_render3D_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Renders a group's children in 3D.
  *
@@ -903,8 +883,7 @@ extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            cUIGroup_render3D_sVEntry* vt = (cUIGroup_render3D_sVEntry*)VPTR_OF(cListNode, n);
-            vt[18].fn(vthis(n, vt[18]), pRenCon);
+            n->render3D((cUIRenderContext*)pRenCon);
             n = (cUIThing*)((void*)n->mpNext);
         }
     }
@@ -914,12 +893,6 @@ extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIGroup_render2D);
 #ifdef SKIP_ASM
-struct cUIGroup_render2D_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, float, float);
-};
-
 /**
  * Draws a group's visible children at the group's position plus the given offset.
  *
@@ -932,8 +905,7 @@ extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
     if (((void*)n) != 0) {
         do {
             if ((n->mAttr >> 6) & 1) {
-                cUIGroup_render2D_sVEntry* vt = (cUIGroup_render2D_sVEntry*)VPTR_OF(cListNode, n);
-                vt[17].fn(vthis(n, vt[17]), self->mPosition.x + x, self->mPosition.y + y);
+                n->render2D(self->mPosition.x + x, self->mPosition.y + y);
             }
             n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -950,12 +922,6 @@ void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 extern "C" void cUIThing_update(void* self, unsigned short ev);
 
-struct cUIGroup_update_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, unsigned short);
-};
-
 /**
  * Updates every object in a UI group for a frame, then the group itself.
  *
@@ -968,8 +934,7 @@ extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
     cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
     if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            cUIGroup_update_sVEntry* vt = (cUIGroup_update_sVEntry*)VPTR_OF(cListNode, n);
-            vt[19].fn(vthis(n, vt[19]), ev);
+            n->update(ev);
             n = (cUIThing*)((void*)n->mpNext);
         }
     }

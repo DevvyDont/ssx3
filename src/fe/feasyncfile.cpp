@@ -934,9 +934,9 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
             int id = (int)VPTR_OF(cListNode, &pWidget->mScreens.mEnd);
             if (id == GetHashValue32(buf)) {
                 sprintf(buf, str_ps2Xpct_02d, i);
-                cUIState* o = (cUIState*)cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
+                cUIThing* o = cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
                 if (o != 0) {
-                    ((sVEntry<void(void*, ...)>*)o->mVtbl)[9].fn(vthis(o, ((sVEntry<void(void*, ...)>*)o->mVtbl)[9]), 0);
+                    o->setVisible(0);
                 }
                 ((cObjV_4330*)pWidget)->set(cVec_4330(1.0f, 0.0f, 0.0f, 0.0f));
                 func_001A66A8_4330(((char*)self), i, 0);
@@ -14680,8 +14680,7 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, void* popup, int event)
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         cUIThing* obj = self->mpPairSettings;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
-        vt[8].fn(vthis(obj, vt[8]), 0);
+        obj->setStatic(0);
         break;
     }
     case 22:

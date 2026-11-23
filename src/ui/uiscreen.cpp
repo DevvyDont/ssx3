@@ -1215,12 +1215,6 @@ void* cUIScrollBar_setUIData(void* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScrollBar_render2D);
 #ifdef SKIP_ASM
-struct cUIScrollBar_render2D_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, float, float);
-};
-
 /**
  * Draws the scroll bar's background and knob (each when visible, slot 17 render2D) at its position plus (@p x, @p y);
  * nothing unless both exist.
@@ -1235,13 +1229,11 @@ extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
         if ((background->mAttr >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)VPTR_OF(cListNode, background);
-            vt[17].fn(vthis(background, vt[17]), px, py);
+            background->render2D(px, py);
         }
         cUIThing* knob = self->mpObjKnob;
         if ((knob->mAttr >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)VPTR_OF(cListNode, knob);
-            vt[17].fn(vthis(knob, vt[17]), px, py);
+            knob->render2D(px, py);
         }
     }
 }
@@ -1589,17 +1581,6 @@ INCLUDE_ASM("ui/uiscreen", cUISlider_render2D);
 struct cUISlider_render2D_sVec3 {
     float x, y, z;
 };
-struct cUISlider_render2D_sVEntryF {
-    short delta;
-    short index;
-    void (*fn)(void*, float, float);
-};
-struct cUISlider_render2D_sVEntryV {
-    short delta;
-    short index;
-    void (*fn)(void*, cUISlider_render2D_sVec3*);
-};
-
 /**
  * Draws the slider's background, then its knob moved along it by the value.
  *
@@ -1618,25 +1599,21 @@ extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
     }
     float x = dx + self->mPosition.x;
     float y = dy + self->mPosition.y;
-    cUISlider_render2D_sVEntryF* va = (cUISlider_render2D_sVEntryF*)VPTR_OF(cListNode, background);
-    va[17].fn(vthis(background, va[17]), x, y);
+    background->render2D(x, y);
     cUIThing* bgObj = self->mpObjBackground;
     cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)&bgObj->mPosition;
     cUISlider_render2D_sVec3 bgSize;
-    cUISlider_render2D_sVEntryV* vo = (cUISlider_render2D_sVEntryV*)VPTR_OF(cListNode, bgObj);
-    vo[20].fn(vthis(bgObj, vo[20]), &bgSize);
+    bgObj->getSize((t3Vector*)&bgSize);
     cUIThing* knob = self->mpObjKnob;
     cUISlider_render2D_sVec3 knobSize;
-    cUISlider_render2D_sVEntryV* vb = (cUISlider_render2D_sVEntryV*)VPTR_OF(cListNode, knob);
-    vb[20].fn(vthis(knob, vb[20]), &knobSize);
+    knob->getSize((t3Vector*)&knobSize);
     float w = bgSize.x - knobSize.x;
     cUIThing* knobObj = self->mpObjKnob;
     cUISlider_render2D_sVec3 knobPos = *(cUISlider_render2D_sVec3*)&knobObj->mPosition;
     knobPos.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
     *(cUISlider_render2D_sVec3*)&knobObj->mPosition = knobPos;
     cUIThing* knobWidget = self->mpObjKnob;
-    cUISlider_render2D_sVEntryF* vb3 = (cUISlider_render2D_sVEntryF*)VPTR_OF(cListNode, knobWidget);
-    vb3[17].fn(vthis(knobWidget, vb3[17]), x, y);
+    knobWidget->render2D(x, y);
 }
 #endif
 

@@ -815,7 +815,7 @@ extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern "C" void cFEStateMemCard_displayStatus(void)
 {
     void* st = cFEStateMemCard_mInstance;
-    cUIText* obj = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
+    cUIThing* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
     void* mp = cSSXApp_getMCManager(SSXApp);
     int managerState = *(int*)((char*)mp + 0x130);
     if (managerState == 0x1F || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 49 || managerState == 50 || managerState == 51
@@ -823,11 +823,9 @@ extern "C" void cFEStateMemCard_displayStatus(void)
         unsigned short buf[800];
         cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
-        vt[9].fn(vthis(obj, vt[9]), 1);
+        obj->setVisible(1);
     } else {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
-        vt[9].fn(vthis(obj, vt[9]), 0);
+        obj->setVisible(0);
     }
 }
 #endif

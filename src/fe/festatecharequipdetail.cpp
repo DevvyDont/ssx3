@@ -712,7 +712,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
         func_0019A9B8(self);
     }
     void* screen = cList_first((cList*)(&self->mScreens));
-    char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
+    cUIThing* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
         char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
         int on = 0;
@@ -724,8 +724,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
             on = *(int*)(feRider + 0xCC8);
             on ^= 1;
         }
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-        vt[9].fn(vthis(obj, vt[9]), on);
+        obj->setVisible(on);
     }
     cFEStateCharEquip_updatePreviewLoad(self);
     cFEStateCharEquip_update3DPositions(self);
@@ -1202,18 +1201,15 @@ extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self)
     }
     cUIThing* widget = self->mpMoneyGroup;
     if (((char*)widget) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), 0);
+        widget->setVisible(0);
     }
     widget = (cUIThing*)self->mpLargePreview;
     if (((char*)widget) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), 0);
+        widget->setVisible(0);
     }
     widget = (cUIThing*)self->mpSmallIconPreviewGroup;
     if (((char*)widget) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), 1);
+        widget->setVisible(1);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 1);
     self->mCameraState = 1;
@@ -1242,19 +1238,16 @@ extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self)
     }
     cUIThing* widget = self->mpSmallIconPreviewGroup;
     if (((char*)widget) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), 0);
+        widget->setVisible(0);
     }
     widget = (cUIThing*)self->mpPointsGroup;
     if (((char*)widget) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), 0);
+        widget->setVisible(0);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
     widget = (cUIThing*)self->mpMoneyGroup;
     if (((char*)widget) != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), 1);
+        widget->setVisible(1);
     }
 }
 #endif
@@ -1760,18 +1753,6 @@ extern "C" void func_0019BA60(cFEStateCharEquip* self, int idx);
 extern "C" void* cUIText_getUnicodeString(void* item);
 extern "C" void cUIText_setUnicodeString(void* item, void* value);
 
-struct sVEntry0019AD18a {
-    short delta;
-    short index;
-    void (*fn)(void*, char*);
-};
-
-struct sVEntry0019AD18b {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 static inline int isMode1_19AD18(void* self)
 {
     return *(int*)((char*)self + 0xC8) == 1;
@@ -1790,12 +1771,10 @@ struct sCharEquipDetail_19AD18 {
 static inline void copyRow_19AD18(sCharEquipDetail_19AD18* self, int dst, int src)
 {
     cUIThing* o = (cUIThing*)self->a8C[dst];
-    sVEntry0019AD18a* vt = (sVEntry0019AD18a*)VPTR_OF(cListNode, o);
-    vt[11].fn(vthis(o, vt[11]), self->a8C[src] + 0x1C);
+    o->setColour((const tARGB*)(self->a8C[src] + 0x1C));
     cUIText_setUnicodeString(self->a8C[dst], cUIText_getUnicodeString(self->a8C[src]));
     o = (cUIThing*)self->aA4[dst];
-    sVEntry0019AD18b* vt2 = (sVEntry0019AD18b*)VPTR_OF(cListNode, o);
-    vt2[9].fn(vthis(o, vt2[9]), (*(int*)(self->aA4[src] + 0x14) >> 6) & 1);
+    o->setVisible((*(int*)(self->aA4[src] + 0x14) >> 6) & 1);
 }
 
 /**
@@ -2569,8 +2548,7 @@ extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self)
         if (fillRatio < 0.0f) {
             fillRatio = 0.0f;
         }
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, pointsBar);
-        vt[9].fn(vthis(pointsBar, vt[9]), 1);
+        pointsBar->setVisible(1);
         *(sVec3K19BC90*)&self->mpPointsBar->mScale = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
     }
 }
@@ -2609,17 +2587,14 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
         fillRatio = 0.0f;
     if (D_004A18D8 < self->mCurrentPolyCount + delta) {
         cUIThing* equipBar = self->mpPointsEquipBar;
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, equipBar);
-        vt[11].fn(vthis(equipBar, vt[11]), kInvalidColour);
+        equipBar->setColour((const tARGB*)kInvalidColour);
     } else {
         cUIThing* equipBar = self->mpPointsEquipBar;
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, equipBar);
-        vt[11].fn(vthis(equipBar, vt[11]), kOriginalColour);
+        equipBar->setColour((const tARGB*)kOriginalColour);
     }
     {
         cUIThing* equipBar = self->mpPointsEquipBar;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, equipBar);
-        vt[9].fn(vthis(equipBar, vt[9]), 1);
+        equipBar->setVisible(1);
     }
     *(sVec3K19BD48*)&self->mpPointsEquipBar->mScale = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
 }

@@ -1150,7 +1150,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         for (int i = 0; i < 4; i++) {
             cUIThing* listItem = ((cUIThing**)&self->mpTrophyIcons)[i];
             if (listItem != 0) {
-                ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, listItem))[9].fn(vthis(listItem, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, listItem))[9]), 0);
+                listItem->setVisible(0);
             }
         }
         cUICustomInterface* obj = self->mpEngine->mpCustom;

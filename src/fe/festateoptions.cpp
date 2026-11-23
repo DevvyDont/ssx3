@@ -1789,12 +1789,6 @@ struct sOptions_C2A0 {
 };
 extern sOptions_C2A0 cBEOptionInterface_mOption_C2A0 __asm__("cBEOptionInterface_mOption");
 
-struct sVE_18C2A0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 
 static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s); }
 
@@ -1837,8 +1831,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         break;
     }
     case 1: {
-        sVE_18C2A0* vt = (sVE_18C2A0*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), 1);
+        widget->setVisible(1);
         D_004A14D8 = 1;
         cBEOptionInterface_mOption_C2A0.mode = *(unsigned char*)&widget->mMiscData;
         break;
@@ -1846,8 +1839,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
     case 2:
         if (Is_0018C2A0(widget->mHashName, D_004A14F8) || Is_0018C2A0(widget->mHashName, D_004A1500) ||
             Is_0018C2A0(widget->mHashName, D_004A1508)) {
-            sVE_18C2A0* vt = (sVE_18C2A0*)VPTR_OF(cListNode, widget);
-            vt[9].fn(vthis(widget, vt[9]), 0);
+            widget->setVisible(0);
         }
         break;
     }

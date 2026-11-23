@@ -17,11 +17,6 @@ unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void cUIScreen_jumpToFrame(void* self, unsigned short frame);
 
-struct cUIMenu_sVEntryA {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 struct cUIMenu_sVEntryB {
     short delta;
     short index;
@@ -51,8 +46,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
             }
         }
         cUIThing* oldSelected = self->mpSelected;
-        cUIMenu_sVEntryA* va = (cUIMenu_sVEntryA*)VPTR_OF(cListNode, oldSelected);
-        va[7].fn(vthis(oldSelected, va[7]), 0);
+        oldSelected->setFocus(0);
         char* screenState = (char*)self->mpScreen->mpState;
         cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(screenState + 8);
         vb[19].fn(vthis(screenState, vb[19]), self->mpSelected, 2);
@@ -62,8 +56,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
     cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(selState + 8);
     vb2[19].fn(vthis(selState, vb2[19]), ((char*)item), 1);
     cUIThing* newSelected = self->mpSelected;
-    cUIMenu_sVEntryA* va2 = (cUIMenu_sVEntryA*)VPTR_OF(cListNode, newSelected);
-    va2[7].fn(vthis(newSelected, va2[7]), 1);
+    newSelected->setFocus(1);
     unsigned short ev2 = cUIThing_getKeyframerEvent(self->mpSelected, 0);
     if (ev2 != 0xFFFF) {
         void* scr = self->mpSelected->mpScreen;
@@ -214,8 +207,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         return 0;
     }
     if (bit_B000(((char*)cur), 20, 3) && !bit_B000(((char*)cur), 20, 5)) {
-        sVEntry<int(void*, ...)>* vt = (sVEntry<int(void*, ...)>*)VPTR_OF(cListNode, cur);
-        if (vt[15].fn(vthis(cur, vt[15]), in) != 0) {
+        if (cur->onInput(in) != 0) {
             return 1;
         }
     }
@@ -344,12 +336,6 @@ void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 extern "C" void cUIScrollBar_setValues(void* p, unsigned char a, unsigned char b, unsigned char c);
 
-struct cUIMenu_render2D_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, float, float);
-};
-
 /**
  * Draws the menu's scroll bar and its visible child widgets at the menu's position plus the given offset.
  *
@@ -366,8 +352,7 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
     if (((void*)n) != 0) {
         do {
             if ((n->mAttr >> 6) & 1) {
-                cUIMenu_render2D_sVEntry* vt = (cUIMenu_render2D_sVEntry*)VPTR_OF(cListNode, n);
-                vt[17].fn(vthis(n, vt[17]), self->mPosition.x + x, self->mPosition.y + y);
+                n->render2D(self->mPosition.x + x, self->mPosition.y + y);
             }
             n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -605,12 +590,6 @@ struct cUIPair_setVisible_sFlags {
     unsigned int on : 1;
 };
 
-struct cUIPair_setVisible_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Shows or hides a widget pair and both of its widgets.
  *
@@ -621,13 +600,11 @@ extern "C" void cUIPair_setVisible(cUIPair* self, int on)
     ((cUIPair_setVisible_sFlags*)&self->mAttr)->on = (on != 0);
     cUIThing* entry = self->mpEntry;
     if (entry != 0) {
-        cUIPair_setVisible_sVEntry* vt = (cUIPair_setVisible_sVEntry*)VPTR_OF(cListNode, entry);
-        vt[9].fn(vthis(entry, vt[9]), on);
+        entry->setVisible(on);
     }
     cUIThing* widget = self->mpWidget;
     if (widget != 0) {
-        cUIPair_setVisible_sVEntry* vt = (cUIPair_setVisible_sVEntry*)VPTR_OF(cListNode, widget);
-        vt[9].fn(vthis(widget, vt[9]), on);
+        widget->setVisible(on);
     }
 }
 #endif
@@ -639,11 +616,6 @@ struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-struct cUIPair_setFocus_sVEntryA {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 struct cUIPair_setFocus_sVEntryB {
     short delta;
     short index;
@@ -669,8 +641,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
     ((cUIPair_setFocus_sFlags*)(&self->mAttr))->on = on != 0;
     cUIThing* entry = self->mpEntry;
     if (((char*)entry) != 0) {
-        cUIPair_setFocus_sVEntryA* va = (cUIPair_setFocus_sVEntryA*)VPTR_OF(cListNode, entry);
-        va[7].fn(vthis(entry, va[7]), on);
+        entry->setFocus(on);
     }
     char* widget = (char*)self->mpWidget;
     if (widget == 0) {
@@ -685,8 +656,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
             }
         }
         cUIThing* widgetObj = self->mpWidget;
-        cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)VPTR_OF(cListNode, widgetObj);
-        vc[7].fn(vthis(widgetObj, vc[7]), 1);
+        widgetObj->setFocus(1);
         cUIState* screenState = self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)screenState->mVtbl;
         vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 1);
@@ -699,8 +669,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
             }
         }
         cUIThing* widgetObj = self->mpWidget;
-        cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)VPTR_OF(cListNode, widgetObj);
-        vc[7].fn(vthis(widgetObj, vc[7]), 0);
+        widgetObj->setFocus(0);
         cUIState* screenState = self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)screenState->mVtbl;
         vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 2);
@@ -936,8 +905,7 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
     } else {
         cUIThing* sub = self->mpWidget;
         if (((char*)sub) != 0) {
-            sVE_BED8* vt = (sVE_BED8*)VPTR_OF(cListNode, sub);
-            return vt[15].fn(vthis(sub, vt[15]), in);
+            return sub->onInput(in);
         }
         return 0;
     }
@@ -948,12 +916,6 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
 //100%
 INCLUDE_ASM("ui/uimenu", cUIPair_render2D);
 #ifdef SKIP_ASM
-struct cUIPair_render2D_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, float, float);
-};
-
 /**
  * Draws both widgets of a pair at the pair's position plus the given offset.
  *
@@ -964,13 +926,11 @@ extern "C" void cUIPair_render2D(cUIPair* self, float x, float y)
 {
     cUIThing* entry = self->mpEntry;
     if (entry != 0) {
-        cUIPair_render2D_sVEntry* vtEntry = &((cUIPair_render2D_sVEntry*)VPTR_OF(cListNode, entry))[17];
-        vtEntry->fn(vthis(entry, *vtEntry), x + self->mPosition.x, y + self->mPosition.y);
+        entry->render2D(x + self->mPosition.x, y + self->mPosition.y);
     }
     cUIThing* widget = self->mpWidget;
     if (widget != 0) {
-        cUIPair_render2D_sVEntry* vtEntry = &((cUIPair_render2D_sVEntry*)VPTR_OF(cListNode, widget))[17];
-        vtEntry->fn(vthis(widget, *vtEntry), x + self->mPosition.x, y + self->mPosition.y);
+        widget->render2D(x + self->mPosition.x, y + self->mPosition.y);
     }
 }
 #endif
@@ -1079,12 +1039,6 @@ extern "C" void cUIProgress_setUIData(cUIProgress* self)
 //100%
 INCLUDE_ASM("ui/uimenu", cUIProgress_render2D);
 #ifdef SKIP_ASM
-struct cUIProgress_render2D_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, float, float);
-};
-
 /**
  * Draws a progress bar's two widgets (when both exist) at its position plus the given offset.
  *
@@ -1097,11 +1051,9 @@ extern "C" void cUIProgress_render2D(cUIProgress* self, float x, float y)
     if (background != 0 && self->mpObjKnob != 0) {
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
-        cUIProgress_render2D_sVEntry* vt = (cUIProgress_render2D_sVEntry*)VPTR_OF(cListNode, background);
-        vt[17].fn(vthis(background, vt[17]), px, py);
+        background->render2D(px, py);
         cUIThing* knob = self->mpObjKnob;
-        cUIProgress_render2D_sVEntry* vt2 = (cUIProgress_render2D_sVEntry*)VPTR_OF(cListNode, knob);
-        vt2[17].fn(vthis(knob, vt2[17]), px, py);
+        knob->render2D(px, py);
     }
 }
 #endif
@@ -1111,12 +1063,6 @@ INCLUDE_ASM("ui/uimenu", cUIProgress_update);
 #ifdef SKIP_ASM
 extern "C" void cUIAnimation_updateThing(void* anim, void* thing, unsigned char flags, unsigned short ev);
 extern "C" void cUIAnimation_updateFrame(void* anim, unsigned char flags);
-
-struct cUIProgress_update_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, unsigned short);
-};
 
 /**
  * Updates the progress bar's own animation for a frame, then its two widgets.
@@ -1131,13 +1077,11 @@ extern "C" void cUIProgress_update(cUIProgress* self, unsigned short ev)
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
-        cUIProgress_update_sVEntry* vt = (cUIProgress_update_sVEntry*)VPTR_OF(cListNode, knob);
-        vt[19].fn(vthis(knob, vt[19]), ev);
+        knob->update(ev);
     }
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
-        cUIProgress_update_sVEntry* vt = (cUIProgress_update_sVEntry*)VPTR_OF(cListNode, background);
-        vt[19].fn(vthis(background, vt[19]), ev);
+        background->update(ev);
     }
 }
 #endif

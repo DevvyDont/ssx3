@@ -110,10 +110,8 @@ extern "C" void cFEStateLodge_onWidgetCreate(cFEStateLodge* self, cUIThing* w)
         w->mMiscData = 6;
     } else if (hashName == GetHashValue32(str_option_7)) {
         w->mMiscData = 7;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, w);
-        vt[8].fn(vthis(w, vt[8]), 1);
-        vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, w);
-        vt[9].fn(vthis(w, vt[9]), 0);
+        w->setStatic(1);
+        w->setVisible(0);
     } else if (hashName == GetHashValue32(str_title_lodge)) {
         int lvl = cBENewPlayerInterface_getLastHub(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
         if (lvl >= 17) {

@@ -356,8 +356,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                 }
             }
             cUIThing* selected = self->mpSelected;
-            sVEntry<void(void*, int)>* va = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, selected);
-            va[7].fn(vthis(selected, va[7]), 1);
+            selected->setFocus(1);
             char* owner = (char*)self->mpScreen->mpState;
             sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
             vb[19].fn(vthis(owner, vb[19]), self->mpSelected, 1);
@@ -373,8 +372,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                 }
             }
             cUIThing* selected = self->mpSelected;
-            sVEntry<void(void*, int)>* va = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, selected);
-            va[7].fn(vthis(selected, va[7]), 0);
+            selected->setFocus(0);
             char* owner = (char*)self->mpScreen->mpState;
             sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
             vb[19].fn(vthis(owner, vb[19]), self->mpSelected, 2);
