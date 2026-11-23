@@ -207,12 +207,12 @@ static inline int valid_0778(cWorldPainterSection* e)
 
 static inline void end_0778(tWPInGameData* o)
 {
-    ((tEnd_0778)((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[69].fn)(vthis(o, ((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[69]));
+    o->setDefaults();
 }
 
 static inline void set_0778(tWPInGameData* o, float* d, float v)
 {
-    ((tSet_0778)((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[66].fn)(vthis(o, ((sOutVt_0778*)VPTR_OF(tWPInGameData, o))[66]), d, v);
+    o->blend((const tWPData*)d, v);
 }
 
 /**
