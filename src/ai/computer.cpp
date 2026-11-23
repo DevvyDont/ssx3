@@ -230,11 +230,9 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self) __asm__("cComputer_upd
  */
 void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
 {
-    char* rider = *(char**)((char*)self + 0x18);
+    cRider* rider = *(cRider**)((char*)self + 0x18);
     int mode = *(int*)SSXApp_UR->fC0;
-    char* obj = rider + 0x6C0;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    int aiIndex = vt[7].fn(vthis(obj, vt[7]));
+    int aiIndex = rider->getAIIndex();
     int level = ValidOr_UR(aiIndex, -1, 1);
     self->diff = cComputer_updateRiderPathDifficulty(self, level, mode);
     if (level == 1 && mode == 3) {
@@ -291,13 +289,6 @@ extern "C" void cBEStatInterface_setStatLevel(void* iface, int a1, int a2);
 
 struct sVEntry10C9A8 { short delta; short index; int (*fn)(void*); };
 
-static inline int riderV7_10C9A8(char* rider)
-{
-    char* obj = rider + 0x6C0;
-    sVEntry10C9A8* vt = *(sVEntry10C9A8**)obj;
-    return vt[7].fn(vthis(obj, vt[7]));
-}
-
 /**
  * Sets every stat of the computer's rider to one level chosen by the current location.
  *
@@ -311,15 +302,15 @@ extern "C" void cComputer_setAttributeLevels(cComputer* self)
     void* newRaceInterface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_getLocationPeak1(newRaceInterface) == 2)
     {
-        cBEStatInterface_setStatLevel(statInterface, riderV7_10C9A8((char*)self->RiderHandler.GroundMotion.mRider), 7);
+        cBEStatInterface_setStatLevel(statInterface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), 7);
     }
     else if (cBENewRaceInterface_getLocationPeak1(newRaceInterface) == 1)
     {
-        cBEStatInterface_setStatLevel(statInterface, riderV7_10C9A8((char*)self->RiderHandler.GroundMotion.mRider), 4);
+        cBEStatInterface_setStatLevel(statInterface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), 4);
     }
     else
     {
-        cBEStatInterface_setStatLevel(statInterface, riderV7_10C9A8((char*)self->RiderHandler.GroundMotion.mRider), 1);
+        cBEStatInterface_setStatLevel(statInterface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), 1);
     }
 }
 #endif
@@ -392,13 +383,6 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(char* self, int a1, int frame
 
 struct sVEntry10CBE0 { short delta; short index; int (*fn)(void*); };
 
-static inline int riderV7_10CBE0(char* rider)
-{
-    char* obj = rider + 0x6C0;
-    sVEntry10CBE0* vt = *(sVEntry10CBE0**)obj;
-    return vt[7].fn(vthis(obj, vt[7]));
-}
-
 
 /**
  * Picks a random plain grab (slot 0-14) and times it against the air time; clears mIsUber and mIsTweak.
@@ -420,7 +404,7 @@ extern "C" int cComputer_chooseRandomGrab(cComputer* computer, float time)
     self->mGrabStartTime = time;
     int idx = AIrand() % 15;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    int anim = cBEBAGTInterface_getGrabAnim(iface, riderV7_10CBE0(((char*)self->RiderHandler.GroundMotion.mRider)), idx);
+    int anim = cBEBAGTInterface_getGrabAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), idx);
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->RiderHandler.GroundMotion.mRider));
     float grabTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 2) / spd;
     float holdTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 1) / spd;
@@ -449,13 +433,6 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(char* self, int a1, int frame
 
 struct sVEntry10CD20 { short delta; short index; int (*fn)(void*); };
 
-static inline int riderV7_10CD20(char* rider)
-{
-    char* obj = rider + 0x6C0;
-    sVEntry10CD20* vt = *(sVEntry10CD20**)obj;
-    return vt[7].fn(vthis(obj, vt[7]));
-}
-
 
 /**
  * Picks the least-used tweak grab (slots 1-14) whose animation fits in the air time and sets mIsTweak.
@@ -482,13 +459,13 @@ extern "C" int cComputer_chooseRandomTweakGrab(cComputer* computer, float time)
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->RiderHandler.GroundMotion.mRider));
     for (; i < 15; i++)
     {
-        int anim = cBEBAGTInterface_getTweakAnim(iface, riderV7_10CD20(((char*)self->RiderHandler.GroundMotion.mRider)), i);
+        int anim = cBEBAGTInterface_getTweakAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i);
         if (anim == 438)
             continue;
-        int alt = (self->RiderHandler.GroundMotion.mRider->mUberFlags & 1) ? cBEBAGTInterface_getUberAnim(iface, riderV7_10CD20(((char*)self->RiderHandler.GroundMotion.mRider)), i, self->RiderHandler.GroundMotion.mRider->mUberLevel >= 5) : 438;
+        int alt = (self->RiderHandler.GroundMotion.mRider->mUberFlags & 1) ? cBEBAGTInterface_getUberAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i, self->RiderHandler.GroundMotion.mRider->mUberLevel >= 5) : 438;
         if (0.0f < self->RiderHandler.GroundMotion.mRider->mUberTimer && alt != 438)
             continue;
-        int anim2 = cBEBAGTInterface_getGrabAnim(iface, riderV7_10CD20(((char*)self->RiderHandler.GroundMotion.mRider)), i);
+        int anim2 = cBEBAGTInterface_getGrabAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i);
         float normalTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim2, 1) / spd;
         float tweakHoldTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 1) / spd;
         float tweakTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 2) / spd;
@@ -523,13 +500,6 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(char* self, int a1, int frame
 
 struct sVEntry10CF68 { short delta; short index; int (*fn)(void*); };
 
-static inline int riderV7_10CF68(char* rider)
-{
-    char* obj = rider + 0x6C0;
-    sVEntry10CF68* vt = *(sVEntry10CF68**)obj;
-    return vt[7].fn(vthis(obj, vt[7]));
-}
-
 
 /**
  * Picks the least-used uber grab (slots 0-14) whose animation fits in the air time and sets mIsUber.
@@ -557,10 +527,10 @@ extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float time)
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->RiderHandler.GroundMotion.mRider));
     for (; i < 15; i++)
     {
-        int anim = cBEBAGTInterface_getUberAnim(iface, riderV7_10CF68(((char*)self->RiderHandler.GroundMotion.mRider)), i, self->RiderHandler.GroundMotion.mRider->mUberLevel >= 5);
+        int anim = cBEBAGTInterface_getUberAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i, self->RiderHandler.GroundMotion.mRider->mUberLevel >= 5);
         if (anim == 438)
             continue;
-        int anim2 = cBEBAGTInterface_getGrabAnim(iface, riderV7_10CF68(((char*)self->RiderHandler.GroundMotion.mRider)), i);
+        int anim2 = cBEBAGTInterface_getGrabAnim(iface, self->RiderHandler.GroundMotion.mRider->getAIIndex(), i);
         float normalTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim2, 1) / spd;
         float uberHoldTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 1) / spd;
         float uberTime = cRiderAnimBase_getAIAnimEventTime((char*)self->RiderHandler.GroundMotion.mRider->mRiderAnim, anim, 2) / spd;
