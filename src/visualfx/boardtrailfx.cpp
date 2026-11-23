@@ -1161,12 +1161,6 @@ extern "C" void cCutSceneTransitionMan_EndCutScene(cCutSceneTransitionMan* self,
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_ForceToRegularMode);
 #ifdef SKIP_ASM
-struct sBTVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-
 
 /**
  * Switches the screen straight back to regular (non cut-scene) mode.
@@ -1179,8 +1173,7 @@ extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan
     if (self->mCurrentState != 0) {
         self->mCurrentState = 0;
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-        sBTVEntry* vtblEntry = &(((sBTVEntry*)VPTR_OF(cGraphicsMan, obj)))[41];
-        vtblEntry->fn(vthis(obj, *vtblEntry), (char*)&self->mRegularTVFormat);
+        obj->SetTVDisplayFormat1(self->mRegularTVFormat);
     }
 }
 #endif
@@ -1202,8 +1195,7 @@ extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMa
     }
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     self->mCurrentState = 1;
-    sBTVEntry* vtblEntry = &(((sBTVEntry*)VPTR_OF(cGraphicsMan, obj)))[41];
-    vtblEntry->fn(vthis(obj, *vtblEntry), (char*)&self->mCutSceneTVFormat);
+    obj->SetTVDisplayFormat1(self->mCutSceneTVFormat);
 }
 #endif
 

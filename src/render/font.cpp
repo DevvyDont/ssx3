@@ -4050,12 +4050,6 @@ extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_SetViewportWindow1);
 #ifdef SKIP_ASM
-struct sFontVEntry23 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, float, float, float, float);
-};
-
 /**
  * Sets the viewport window from a rectangle: calls virtual slot 23 (cPS2GraphicsMan_SetViewportWindow) with
  * @p applyScreenOffset and the four floats of @p rect.
@@ -4065,8 +4059,7 @@ struct sFontVEntry23 {
  */
 extern "C" void cPS2GraphicsMan_SetViewportWindow1(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
 {
-    sFontVEntry23* vt = (sFontVEntry23*)VPTR_OF(cGraphicsMan, self);
-    vt[23].fn(vthis(self, vt[23]), applyScreenOffset, rect[0], rect[1], rect[2], rect[3]);
+    self->SetViewportWindow(rect[0], rect[1], rect[2], rect[3], applyScreenOffset);
 }
 #endif
 

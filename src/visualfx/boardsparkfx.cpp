@@ -255,6 +255,7 @@ INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX__cBoardSparkFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardsparkfx_classes.h"
+#include "render/graphicsman.h"
 
 /**
  * Destroys a board spark effect's parts: the emitter (+0x20), the particle settings (+0x24) and the glow
@@ -660,12 +661,6 @@ extern int D_004A54E8;
 extern int D_004A54EC;
 extern sVec4_B478 D_004D57A0;
 
-struct sVE_B478b {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, t2Vector*, const t2Vector*, const t2Vector*, const sVec4_B478*);
-};
-
 static inline void push_B478(cPS2GraphicsMan* ctx)
 {
     ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
@@ -693,8 +688,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         push_B478(GrMan);
         *GrMan->m_pCurrentDrawState = self->mSparkDrawState;
         cPS2GraphicsMan* ctx = GrMan;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cGraphicsMan, ctx);
-        vt[82].fn(vthis(ctx, vt[82]), (int)self->mSparkEmitter);
+        ctx->RenderParticleEmitter(*self->mSparkEmitter);
         pop_B478(GrMan);
     }
     if (self->mRenderSparkFlash != 0) {
@@ -722,8 +716,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         for (int i = 0; i < 3; i++) {
             t2Vector size(((float*)(((char*)self) + 0x60))[i], ((float*)(((char*)self) + 0x60))[i]);
             cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-            sVE_B478b* vt = (sVE_B478b*)VPTR_OF(cGraphicsMan, ctx);
-            vt[78].fn(vthis(ctx, vt[78]), ((char*)self) + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
+            ctx->DrawSprite(*(const t4Vector*)(((char*)self) + 0x30 + i * 0x10), size, *uv0, *uv1, *(const tARGB*)&D_004D57A0);
         }
         pop_B478(GrMan);
     }

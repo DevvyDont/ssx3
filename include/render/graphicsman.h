@@ -178,7 +178,7 @@ public:
     virtual void DrawFrame() = 0;                                                                        // slot 20: [R] cPS2GraphicsMan_DrawFrame
     virtual void PushViewport() = 0;                                                                     // slot 21: [R] cPS2GraphicsMan_PushViewport
     virtual void PopViewport() = 0;                                                                      // slot 22: [R] cPS2GraphicsMan_PopViewport
-    virtual void SetViewportWindow(float x, float y, float w, float rectHeight) = 0;                     // slot 23: [R] cPS2GraphicsMan_SetViewportWindow
+    virtual void SetViewportWindow(float x, float y, float w, float h, int applyScreenOffset) = 0;       // slot 23: [R] cPS2GraphicsMan_SetViewportWindow; its caller cPS2GraphicsMan_SetViewportWindow1 passes (applyScreenOffset, rect's four floats); [O] SetViewportWindow(float x, float y, float w, float h, bool applyScreenOffset)
     virtual void SetViewportWindow1(const tRect& rect, int applyScreenOffset) = 0;                       // slot 24: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_SetViewportWindow1
     virtual void SetViewportPerspective(float fov, float minz, float maxz) = 0;                          // slot 25: [R] cPS2GraphicsMan_SetViewportPerspective
     virtual void SetViewportOrthographic(float x, float y, float w, float h, float minz, float maxz, int adjustforsafezone, int scaleForFE) = 0; // slot 26: [R] cPS2GraphicsMan_SetViewportOrthographic (reads the six floats only); every retail caller passes six floats and two ints ((0, 0, 640, 480, 0, 1) for the full screen); [O] On Tour's signature (the two bools)

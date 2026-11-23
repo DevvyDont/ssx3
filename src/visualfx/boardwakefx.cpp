@@ -5116,12 +5116,6 @@ extern "C" void* cTransitionMan_cTransitionMan(cTransitionMan* self, void* bucke
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan__cTransitionMan);
 #ifdef SKIP_ASM
-struct sBWVEntry1 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
@@ -5145,8 +5139,7 @@ extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
     cTransitionMan_EndTransition(self);
     if (self->mRequestingDelete != 0) {
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-        sBWVEntry1* removeScreenGrab = &((sBWVEntry1*)VPTR_OF(cGraphicsMan, obj))[60];
-        removeScreenGrab->fn(vthis(obj, *removeScreenGrab), (char*)&self->mScreenGrabHandle);
+        obj->RemoveScreenGrabTexture(self->mScreenGrabHandle);
         self->mRequestingDelete = 0;
     }
     cScriptObject_DeInitScriptObject(scriptObj);
@@ -5416,10 +5409,8 @@ extern "C" void cTransitionMan_update(cTransitionMan* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (self->mRequestingDelete != 0) {
-        sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)VPTR_OF(cGraphicsMan, ctx);
-        if (vt[114].fn(vthis(ctx, vt[114])) - self->mRequestDeleteFrame >= 3) {
-            sVEntry<void(void*, void*)>* vt2 = (sVEntry<void (void*, void*)>*)VPTR_OF(cGraphicsMan, ctx);
-            vt2[60].fn(vthis(ctx, vt2[60]), (char*)&self->mScreenGrabHandle);
+        if (ctx->getCurrentFrameCount() - self->mRequestDeleteFrame >= 3) {
+            ctx->RemoveScreenGrabTexture(self->mScreenGrabHandle);
             self->mRequestingDelete = 0;
         }
     }
