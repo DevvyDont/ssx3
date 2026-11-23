@@ -3049,13 +3049,6 @@ static inline float ffloor_001607E0(float x)
     return t;
 }
 
-static inline t4Vector cmGet_001607E0(char* self, int slot)
-{
-    char* o = *(char**)(self + 0x30);
-    sVEv_001607E0* e = &(*(sVEv_001607E0**)o)[slot];
-    return e->fn(vthis(o, *e));
-}
-
 /**
  * Runs one frame of the matrix camera: circles the rider at a fixed radius of 216.2, advancing LastAngle each frame.
  *
@@ -4787,13 +4780,6 @@ static inline t4Vector cmNormalized_162568(const t4Vector& v)
     return r;
 }
 
-static inline int cmGetI_162568(char* self, int slot)
-{
-    char* o = *(char**)(self + 0x30);
-    sVEi_162568* e = &(*(sVEi_162568**)o)[slot];
-    return e->fn(vthis(o, *e));
-}
-
 static inline float cmGetF_162568(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
@@ -4853,7 +4839,7 @@ extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(char* self, char* out,
 extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(char* self, char* out, float normalVelMinSmoothness, float normalVelMaxSmoothness, float normalVelStartSlope, float normalVelEndSlope, float powderVelMinSmoothness, float powderVelMaxSmoothness,
                                    float powderVelStartSlope, float powderVelEndSlope)
 {
-    t4Vector targetVelocity = cmGet_001607E0(self, 3);
+    t4Vector targetVelocity = ((cLookAtChaseAlgorithm*)self)->Target->getVelocity();
     int mode = cRider_getMotionState(*(void**)(*(char**)(self + 0x30) + 4));
     if (cmLength_001607E0(targetVelocity) < 27.77777862548828f) {
         targetVelocity = *(t4Vector*)(self + 0x1B0);
@@ -4863,7 +4849,7 @@ extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(char* self, char* out,
     w.z = 0.0f;
     t4Vector dz = cmSub_162568(targetVelocity, w);
     t4Vector n = cmDot_162568(targetVelocity, targetVelocity) > 0.0f ? cmNormalized_162568(targetVelocity) : t4vect_Zero_v162568;
-    int k = cmGetI_162568(self, 20);
+    int k = ((cLookAtChaseAlgorithm*)self)->Target->getSurfaceType();
     float lo, hi, startSlope, endSlope;
     if ((unsigned)(k - 2) < 2 || k == 13) {
         lo = powderVelMinSmoothness;
@@ -5315,13 +5301,6 @@ static inline float Clamp_162C78(float v, float lo, float hi)
     return lo;
 }
 
-static inline t4Vector Get_162C78(char* self, int slot)
-{
-    char* o = *(char**)(self + 0x30);
-    sVE_162C78* e = &(*(sVE_162C78**)o)[slot];
-    return e->fn(vthis(o, *e));
-}
-
 static inline t4Vector Lerp_162C78(const t4Vector& p, const t4Vector& q, float t)
 {
     return Add_162C78(Scale_162C78(p, t), Scale_162C78(q, 1.0f - t));
@@ -5350,7 +5329,7 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, cChaseS
 {
     t4Vector n;
     if (info->TargetSpeed > 27.77777862548828f) {
-        t4Vector velocity = Get_162C78(self, 3);
+        t4Vector velocity = ((cLookAtChaseAlgorithm*)self)->Target->getVelocity();
         if (Dot_162C78(velocity, velocity) < 1.0f) {
             velocity = *(t4Vector*)(self + 0x1C0);
         }
@@ -6479,9 +6458,7 @@ extern "C" void cLookAtChaseAlgorithm_updateViewCam_v(char* self, float a, float
  */
 extern "C" void cLookAtChaseAlgorithm_updateViewCam_v(char* self, float side, float back, float up, float ease)
 {
-    char* target = *(char**)(self + 0x30);
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)target;
-    int onFlexRail = vt[24].fn(vthis(target, vt[24]));
+    int onFlexRail = ((cLookAtChaseAlgorithm*)self)->Target->isRidingFlexRail();
     t4Vector eyeOffset = Sub_41C0(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0x20));
     float wantedFactor = 0.0f;
     if (onFlexRail) {
