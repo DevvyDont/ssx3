@@ -2205,7 +2205,7 @@ struct sPatchSet {
  */
 // PORT: PS2-only VU0 inline asm (tensor-product patch evaluation: out[i][j] =
 // sum over basis[i] (x) basis[j] of the 4x4 control block at mat+0x40).
-extern "C" void func_00374180(sPatchSet* self, char* mat, t3Vector* out, int idx)
+extern "C" void func_00374180(sPatchSet* self, tPatchRecord* mat, t3Vector* out, int idx)
 {
     int n = self->count[idx];
     t4Vector* basis = self->basis[idx];
@@ -2229,7 +2229,7 @@ extern "C" void func_00374180(sPatchSet* self, char* mat, t3Vector* out, int idx
         "lqc2      $vf15, 0xE0(%0)\n"
         "lqc2      $vf16, 0xF0(%0)\n"
         :
-        : "r"(mat + 0x40));
+        : "r"(((char*)mat) + 0x40));
     for (i = 0; i < n; i++) {
         __asm__ __volatile__(
             "lqc2      $vf17, 0x0(%0)\n"
@@ -2299,13 +2299,13 @@ static inline sV2_4298 operator*(const sV2_4298& a, float k)
  * @param out  the n x n uv grid to fill
  * @param idx  the patch order: 0 = 4x4, 1 = 6x6, 2 = 8x8
  */
-extern "C" void func_00374298(char* self, char* src, sV2_4298* out, int idx)
+extern "C" void func_00374298(char* self, tPatchRecord* src, sV2_4298* out, int idx)
 {
     int n = *(int*)(self + (idx << 2) + 0x19C);
-    sV2_4298 leftEdge = *(sV2_4298*)(src + 0x20);
-    sV2_4298 rightEdge = *(sV2_4298*)(src + 0x28);
-    sV2_4298 bottomLeft = *(sV2_4298*)(src + 0x30);
-    sV2_4298 bottomRight = *(sV2_4298*)(src + 0x38);
+    sV2_4298 leftEdge = *(sV2_4298*)&src->m_fUV0[0][0];
+    sV2_4298 rightEdge = *(sV2_4298*)&src->m_fUV0[0][2];
+    sV2_4298 bottomLeft = *(sV2_4298*)&src->m_fUV0[1][0];
+    sV2_4298 bottomRight = *(sV2_4298*)&src->m_fUV0[1][2];
     float step = 1.0f / (float)(n - 1);
     sV2_4298 dl = (bottomLeft - leftEdge) * step;
     sV2_4298 dr = (bottomRight - rightEdge) * step;
@@ -2639,8 +2639,8 @@ extern "C" int func_003747A0(sPMgr_47A0* self, tPatchRecord* mat, int idx, int b
     t3Vector* pos = PosOf_47A0(self, idx, slot);
     t2Vector* uv = UVOf_47A0(self, idx, slot);
     t2Vector* col = ColOf_47A0(self, idx, slot);
-    func_00374180((sPatchSet*)self, ((char*)mat), (t3Vector*)pos, idx);
-    func_00374298((char*)self, ((char*)mat), (sV2_4298*)uv, idx);
+    func_00374180((sPatchSet*)self, (tPatchRecord*)((char*)mat), (t3Vector*)pos, idx);
+    func_00374298((char*)self, (tPatchRecord*)((char*)mat), (sV2_4298*)uv, idx);
     func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
     sPEnt_47A0* entry = &self->entries[idx][slot];
     entry->mat = ((char*)mat);

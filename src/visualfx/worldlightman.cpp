@@ -573,7 +573,7 @@ extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* pos,
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights);
 #ifdef SKIP_ASM
-extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, tLightRecord* light);
+extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* a, t4Vector* b, tLightRecord* light);
 
 
 struct sLightMgr_5B68 {
@@ -637,7 +637,7 @@ extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* lightMan, void* p
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_GetIntensity);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, tLightRecord* light);
+extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* a, t4Vector* b, tLightRecord* light);
 
 struct cWorldLightMan_CalcLightDist_sVec3;
 struct cWorldLightMan_CalcLightDist_sLight;
@@ -723,7 +723,7 @@ static inline float Pow_5D30(float x, int n)
  * @param lp  the light record
  * @return the intensity
  */
-extern "C" float cWorldLightMan_GetIntensity(void* lightMan, t4Vector* point, tLightRecord* lp)
+extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* lightMan, t4Vector* point, tLightRecord* lp)
 {
     tLightRecord* light = (tLightRecord*)lp;
     float dist;

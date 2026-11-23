@@ -23032,7 +23032,7 @@ public:
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void func_001BF438(cFEStateLogin* self, void* popup, int kind)
+extern "C" void func_001BF438(cFEStateLogin* self, cUIState* popup, int kind)
 {
     if (kind == 15) {
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, 15);
@@ -23114,7 +23114,7 @@ static inline void* GetSession_001BF5A8()
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void func_001BF5A8(cFEStateLogin* self, void* popup, int kind)
+extern "C" void func_001BF5A8(cFEStateLogin* self, cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case 15:
@@ -23179,8 +23179,8 @@ public:
 };
 
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void func_001BF438(cFEStateLogin* self, void* a1, int a2);
-extern "C" void func_001BF5A8(cFEStateLogin* self, void* a1, int a2);
+extern "C" void func_001BF438(cFEStateLogin* self, cUIState* a1, int a2);
+extern "C" void func_001BF5A8(cFEStateLogin* self, cUIState* a1, int a2);
 
 /**
  * Hands a popup's event on the login screen to the handler for that popup's id.

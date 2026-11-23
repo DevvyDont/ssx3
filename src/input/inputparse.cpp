@@ -2143,7 +2143,7 @@ extern "C" float cInputExec_getRegister_vm(cInputExec* self, unsigned int id) __
  * @return the value of register 0 when End is reached
  */
 // Runs one compiled input expression (see cInputMapParser_compileParseNode for the encoder); returns register 0.
-extern "C" float cInputExec_execute(cInputExec* self, void* list, sInsn_324678* code)
+extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, sInsn_324678* code)
 {
     int pc = 0;
     int done = 0;

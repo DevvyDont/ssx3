@@ -2201,8 +2201,8 @@ extern "C" void cScreenPopup_getTextBoxSize2(cScreenPopup* self, cUIText* text, 
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize1);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* text, const char* str, void* out);
-extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* text, void* str, void* out);
+extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* text, const char* str, t3Vector* out);
+extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* text, void* str, t3Vector* out);
 extern char str_String_pct_08x[];
 
 
@@ -2275,7 +2275,7 @@ extern char gUSTRBackSlash1;
  * @param strp  the unicode string
  * @param outp  receives the width (float)
  */
-extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* text, void* strp, void* outp)
+extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* text, void* strp, t3Vector* outp)
 {
     unsigned short* str = (unsigned short*)strp;
     float* out = (float*)outp;
@@ -2346,7 +2346,7 @@ extern char str_getMessageLineWrapSize[];
  * @param pString  the ASCII string
  * @param pvSize  receives the width in x (a t3Vector)
  */
-extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pText, const char* pString, void* pvSize)
+extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pText, const char* pString, t3Vector* pvSize)
 {
     t3Vector& vSize = *(t3Vector*)pvSize;
     *(int*)((char*)pText + 0x14) |= 0x80;
