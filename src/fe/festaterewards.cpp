@@ -101,10 +101,8 @@ extern "C" void cFEStateRewardGalleryBase_onGainFocus(cFEStateRewardGalleryBase*
         if ((int)self->mpSelected == 0) {
             self->mpSelected = (cUIIcon*)(*(int*)&self->mpIcons[0]);
         }
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-        vt[40].fn(vthis(self, vt[40]));
-        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-        vt2[33].fn(vthis(self, vt2[33]), 0);
+        self->updateList();
+        self->updateHelpText(0);
     }
 }
 #endif
@@ -589,9 +587,7 @@ extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase
             self->mAttrState |= 8;
         }
         if (widget->mHashName == 7 && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
-            sVE_FD18* vt = (sVE_FD18*)VPTR_OF(cListNode, self);
-            vt[30].fn(vthis(self, vt[30]),
-                      self->mFirstVisibleRow * self->mMaxRewardColumns + self->mpSelected->mMiscData);
+            self->buyReward(self->mFirstVisibleRow * self->mMaxRewardColumns + self->mpSelected->mMiscData);
         }
         break;
     }
@@ -642,7 +638,7 @@ int cFEStateRewardGalleryBase_getIconID_find(sRewardTable_FDD0* self, char* name
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_loadIcons);
 #ifdef SKIP_ASM
-extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int a4, int a5);
 struct sVE_FE60 {
     short delta;
     short index;
@@ -662,10 +658,8 @@ struct sVE_FE60 {
 extern "C" void cFEStateRewardGalleryBase_loadIcons(cFEStateRewardGalleryBase* self)
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    sVE_FE60* vt = (sVE_FE60*)VPTR_OF(cListNode, self);
-    if (vt[25].fn(vthis(self, vt[25])) != 0) {
-        sVE_FE60* fileNameEntry = &((sVE_FE60*)VPTR_OF(cListNode, self))[25];
-        self->mIconsFileIndex = func_0019DA10(mgr, self->mCharID, fileNameEntry->fn(vthis(self, *fileNameEntry)), 9, 1, 0);
+    if (self->getIconsFileName() != 0) {
+        self->mIconsFileIndex = func_0019DA10(mgr, self->mCharID, self->getIconsFileName(), 9, 1, 0);
         self->mLoadingState = (self->mLoadingState & ~8) | 4;
     } else {
         self->mLoadingState = (self->mLoadingState | 8) & ~4;
@@ -713,10 +707,8 @@ extern "C" void cFEStateRewardGalleryBase_updateIconsLoad(cFEStateRewardGalleryB
             self->mLoadingState = (self->mLoadingState & ~4) | 8;
             if ((self->mLoadingState >> 1) & 1) {
                 self->mpSelected = (cUIIcon*)(*(int*)&self->mpIcons[0]);
-                sVE_FF10* refreshEntry = &((sVE_FF10*)VPTR_OF(cListNode, self))[40];
-                refreshEntry->fn(vthis(self, *refreshEntry));
-                sVE_FF10i* helpTextEntry = &((sVE_FF10i*)VPTR_OF(cListNode, self))[33];
-                helpTextEntry->fn(vthis(self, *helpTextEntry), 0);
+                self->updateList();
+                self->updateHelpText(0);
             }
         }
     }
@@ -1006,14 +998,10 @@ extern "C" void cFEStateRewardGalleryBase_buyReward(cFEStateRewardGalleryBase* s
                   self->mCharID, self->mRewardType, rewardIndex, 1);
     self->mMoney = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum,
                                                 self->mCharID);
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt[42].fn(vthis(self, vt[42]));
-    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-    vt2[33].fn(vthis(self, vt2[33]), rewardIndex);
-    sVEntry<void(void*)>* vt3 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt3[43].fn(vthis(self, vt3[43]));
-    sVEntry<void(void*)>* vt4 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt4[45].fn(vthis(self, vt4[45]));
+    self->updateRewardInfo();
+    self->updateHelpText(rewardIndex);
+    self->updateAvailableCash();
+    self->updateHighlither();
 }
 #endif
 
@@ -1161,16 +1149,13 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBa
     if (txt == 0)
         return;
     txt->setVisible(0);
-    sVEntry<char*(void*, int)>* vtp = (sVEntry<char*(void*, int)>*)VPTR_OF(cListNode, self);
-    tCheatCharInfo* item = (tCheatCharInfo*)vtp[34].fn(vthis(self, vtp[34]), idx);
+    tCheatCharInfo* item = (tCheatCharInfo*)self->getReward(idx);
     if (((char*)item) == 0)
         return;
-    sVEntry<int(void*, int)>* vti = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-    int state = vti[36].fn(vthis(self, vti[36]), (int)item);
+    int state = self->getRewardStoreNum((const void*)item);
     self->mpHelpText->setVisible(1);
     if (self->mRewardType == 8) {
-        sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-        if (vt[38].fn(vthis(self, vt[38]), idx)) {
+        if (self->isRewardOwned(idx)) {
             setHelp_0648(((char*)self), str_kT_129HELPSelectCheatChar);
         } else if (state < 0) {
             setHelp_0648(((char*)self), ((const tCheatCharInfo*)item)->mpHelpStringID);
@@ -1185,8 +1170,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBa
                     else
                         setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak3);
                 } else {
-                    sVEntry<int(void*, int)>* vtbl = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-                    if (self->mMoney < vtbl[35].fn(vthis(self, vtbl[35]), (int)item))
+                    if (self->mMoney < self->getRewardCost((const void*)item))
                         setHelp_0648(((char*)self), str_kT_129HELPSaveCashItem);
                     else
                         setHelp_0648(((char*)self), str_kT_129HELPBuyItem);
@@ -1196,8 +1180,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBa
             }
         }
     } else {
-        sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-        if (vt[38].fn(vthis(self, vt[38]), idx)) {
+        if (self->isRewardOwned(idx)) {
             setHelp_0648(((char*)self), str_kT_129HELPViewItem);
         } else {
             int selected = self->mStoreNum;
@@ -1210,8 +1193,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBa
                     else
                         setHelp_0648(((char*)self), str_kT_129HELPBuyInPeak3);
                 } else {
-                    sVEntry<int(void*, int)>* vtbl = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-                    if (self->mMoney < vtbl[35].fn(vthis(self, vtbl[35]), (int)item))
+                    if (self->mMoney < self->getRewardCost((const void*)item))
                         setHelp_0648(((char*)self), str_kT_129HELPSaveCashItem);
                     else
                         setHelp_0648(((char*)self), str_kT_129HELPBuyItem);
@@ -1232,12 +1214,6 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern char str_dollar_sign[];
 extern char str_questmark[];
 extern char gFadedColour[];
-
-struct sVEi_08A0 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 
 
@@ -1261,14 +1237,14 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* s
         if (idx < self->mNumTotalRewards) {
             show_08A0(self->mpIcons[row][col], 1);
             show_08A0(((cUIIcon* (*)[8])&self->mpIconBacks[0][0])[row][col], 1);
-            if (((sVEi_08A0*)VPTR_OF(cListNode, self))[38].fn(vthis(self, ((sVEi_08A0*)VPTR_OF(cListNode, self))[38]), idx) != 0) {
-                int rewardIndex = ((sVEi_08A0*)VPTR_OF(cListNode, self))[26].fn(vthis(self, ((sVEi_08A0*)VPTR_OF(cListNode, self))[26]), idx);
+            if (self->isRewardOwned(idx) != 0) {
+                int rewardIndex = self->getIconID(idx);
                 if (rewardIndex >= 0) {
                     cUIIcon* cell = self->mpIcons[row][col];
                     cell->mTextureID = rewardIndex;
                     (*(void**)&cell->mpTextureElem) = 0;
                 } else {
-                    int texture = ((sVEi_08A0*)VPTR_OF(cListNode, self))[27].fn(vthis(self, ((sVEi_08A0*)VPTR_OF(cListNode, self))[27]), idx);
+                    int texture = (int)self->getTextureElement(idx);
                     if (texture != 0) {
                         cUIIcon* cell = self->mpIcons[row][col];
                         (*(void**)&cell->mpTextureElem) = (void*)texture;
@@ -1276,9 +1252,9 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* s
                     }
                 }
             } else {
-                int rewardItem = ((sVEi_08A0*)VPTR_OF(cListNode, self))[34].fn(vthis(self, ((sVEi_08A0*)VPTR_OF(cListNode, self))[34]), idx);
+                int rewardItem = (int)self->getReward(idx);
                 void* icon;
-                if (self->mStoreNum >= 0 && ((sVEi_08A0*)VPTR_OF(cListNode, self))[36].fn(vthis(self, ((sVEi_08A0*)VPTR_OF(cListNode, self))[36]), rewardItem) == self->mStoreNum) {
+                if (self->mStoreNum >= 0 && self->getRewardStoreNum((const void*)rewardItem) == self->mStoreNum) {
                     char* ui = ((char*)self->mpEngine);
                     int iconHash = GetHashValue32(str_dollar_sign);
                     icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
@@ -1316,19 +1292,13 @@ extern "C" void cFEStateRewardGalleryBase_updateList(cFEStateRewardGalleryBase* 
 {
     int i;
     for (i = 0; i < self->mMaxRewardRows; i++) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-        vt[39].fn(vthis(self, vt[39]), i);
+        self->updateRow(i);
     }
-    sVEntry<void(void*)>* vt1 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt1[46].fn(vthis(self, vt1[46]));
-    sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt2[45].fn(vthis(self, vt2[45]));
-    sVEntry<void(void*)>* vt3 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt3[44].fn(vthis(self, vt3[44]));
-    sVEntry<void(void*)>* vt4 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt4[41].fn(vthis(self, vt4[41]));
-    sVEntry<void(void*)>* vt5 = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt5[42].fn(vthis(self, vt5[42]));
+    self->updateArrows();
+    self->updateHighlither();
+    self->updateCounter();
+    self->updatePageNumber();
+    self->updateRewardInfo();
 }
 #endif
 
@@ -1414,18 +1384,14 @@ extern "C" void cFEStateRewardGalleryBase_updateRewardInfo(cFEStateRewardGallery
         return;
     }
     int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cListNode, self);
-    void* item = vt[34].fn(vthis(self, vt[34]), idx);
+    void* item = (void*)self->getReward(idx);
     if (self->mpRewardNameText != 0) {
-        sVEntry<const char*(void*, void*)>* vt2 = (sVEntry<const char*(void*, void*)>*)VPTR_OF(cListNode, self);
-        cUIText_setAsciiString(self->mpRewardNameText, vt2[37].fn(vthis(self, vt2[37]), item));
+        cUIText_setAsciiString(self->mpRewardNameText, self->getRewardName(item));
     }
     if (self->mpRewardCostText != 0) {
-        sVEntry<int(void*, void*)>* vt3 = (sVEntry<int(void*, void*)>*)VPTR_OF(cListNode, self);
-        int price = vt3[35].fn(vthis(self, vt3[35]), item);
+        int price = self->getRewardCost(item);
         if (price > 0) {
-            sVEntry<int(void*, int)>* vt4 = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-            if (vt4[38].fn(vthis(self, vt4[38]), idx) == 0) {
+            if (self->isRewardOwned(idx) == 0) {
                 cUIText_setAsciiString(self->mpRewardCostText, getDollarString_i(price));
                 return;
             }
@@ -1520,13 +1486,10 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
     if (((char*)grid) == 0)
         return;
     int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
-    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-    if (vt[38].fn(vthis(self, vt[38]), idx) != 0) {
-        sVEntry<int(void*, int)>* vt2 = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-        int iconId = vt2[26].fn(vthis(self, vt2[26]), idx);
+    if (self->isRewardOwned(idx) != 0) {
+        int iconId = self->getIconID(idx);
         if (iconId < 0) {
-            sVEntry<int(void*, int)>* vt3 = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-            int textureElement = vt3[27].fn(vthis(self, vt3[27]), idx);
+            int textureElement = (int)self->getTextureElement(idx);
             cUIIcon* curCell = self->mpSelected;
             curCell->mTextureID = -1;
             curCell->mpTextureElem = (const cTextureElement*)textureElement;
@@ -2733,7 +2696,7 @@ extern "C" void cFEStatePreviewReward_setReward(cFEStatePreviewReward* self, int
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_loadTexture);
 #ifdef SKIP_ASM
-extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int a4, int a5);
 
 /**
  * Requests the preview's picture file from the FE file table and keeps the slot in +0x6C.
@@ -2745,7 +2708,7 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
  */
 extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, int id)
 {
-    self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, id, 9, 1, 0);
+    self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, (const char*)id, 9, 1, 0);
 }
 #endif
 
