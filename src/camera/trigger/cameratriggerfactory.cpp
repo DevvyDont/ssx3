@@ -35,11 +35,8 @@ void* get_cCTActionNone(void* unused, int* outType);
 // PORT: the game's tagged allocator, bound as a placement operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
-struct sCTActVec3A {
-    float x, y, z;
-};
 
-extern sCTActVec3A t3vect_Zero_act __asm__("t3vect_Zero");     // zero vector
+extern t3Vector t3vect_Zero_act __asm__("t3vect_Zero");     // zero vector
 extern void* D_0045C2E8[];      // cCTAction vtable
 extern void* D_0045C1D0[];      // bounded cam
 extern void* D_0045C1B8[];      // spline
@@ -83,7 +80,7 @@ struct sCTActBoundedA : sCTActA {
     float f1C;          // 0x1C
     int f20;            // 0x20
     int f24;            // 0x24
-    sCTActVec3A f28;    // 0x28
+    t3Vector f28;    // 0x28
     sCTActBoundedA() : sCTActA()
     {
         vtable = D_0045C1D0;

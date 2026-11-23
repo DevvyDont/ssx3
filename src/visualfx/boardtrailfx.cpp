@@ -378,9 +378,6 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_update);
 enum { kTrailNumSeg = 54 };
 
 
-struct sBTMtx_8938 {
-    t4Vector row[4];
-};
 
 // One trail vertex: texture coordinates, integer colour (0..255) and position.
 struct sBTVtx_8938 {
@@ -656,9 +653,9 @@ static inline float btRandScale(const float& s)
 }
 
 // Bone matrix of the rider's model; off is the cRider field holding the bone index.
-static inline sBTMtx_8938* btBone(char* r, int off)
+static inline t4Matrix* btBone(char* r, int off)
 {
-    return &((sBTMtx_8938*)*(char**)(*(char**)(r + 0x780) + 0x34))[*(int*)(r + off)];
+    return &((t4Matrix*)*(char**)(*(char**)(r + 0x780) + 0x34))[*(int*)(r + off)];
 }
 
 static inline t4Vector btBoneRow(char* r, int off, int row)

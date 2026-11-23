@@ -1639,9 +1639,6 @@ struct sRect_2BC8 {
 struct sColor_2BC8 {
     float a, r, g, b;
 };
-struct sMat3_2BC8 {
-    float m[9];
-};
 struct sGfx_2BC8 {
     char pad[0xE84];
     sDrawState* top;          // 0xE84
@@ -1663,8 +1660,8 @@ struct sSprite_2BC8 {
     float v1;               // 0x18
 };
 extern int G2D_2BC8 __asm__("G2D");
-extern "C" void c2DRender_drawRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
-extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
+extern "C" void c2DRender_drawRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, t3Matrix* m);
+extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, t3Matrix* m);
 
 /**
  * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, like cTextureElement_renderTiled,
@@ -1686,7 +1683,7 @@ extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* ds
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void cTextureElement_renderRotTiled(sSprite_2BC8* element, sRect_2BC8 destRect, sMat3_2BC8 transform, sColor_2BC8 colour, int flags, float tx, float ty)
+extern "C" void cTextureElement_renderRotTiled(sSprite_2BC8* element, sRect_2BC8 destRect, t3Matrix transform, sColor_2BC8 colour, int flags, float tx, float ty)
 {
     int j;
     float x;

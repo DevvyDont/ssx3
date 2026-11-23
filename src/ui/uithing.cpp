@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "ui/uistate.h"
 #include "vtable.h"
 #include "ui/uidata.h"
@@ -235,14 +236,11 @@ extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, 
 //100%
 INCLUDE_ASM("ui/uithing", cUIThing_getAbsPosition);
 #ifdef SKIP_ASM
-struct sUIVec3 {
-    float x, y, z;
-};
 
 struct sUIThingPos {
     char pad0[0x40];
     sUIThingPos* parent;    // 0x40
-    sUIVec3 pos;            // 0x44
+    t3Vector pos;            // 0x44
 };
 
 /**
@@ -254,11 +252,11 @@ struct sUIThingPos {
  *
  * @param out  receives the summed position (x, y, z)
  */
-extern "C" void cUIThing_getAbsPosition(sUIThingPos* self, sUIVec3* out)
+extern "C" void cUIThing_getAbsPosition(sUIThingPos* self, t3Vector* out)
 {
     *out = self->pos;
     for (sUIThingPos* ancestor = self->parent; ancestor != 0; ancestor = ancestor->parent) {
-        sUIVec3 ancestorPos = ancestor->pos;
+        t3Vector ancestorPos = ancestor->pos;
         out->x += ancestorPos.x;
         out->y += ancestorPos.y;
         out->z += ancestorPos.z;

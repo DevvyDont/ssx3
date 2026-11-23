@@ -1732,9 +1732,6 @@ extern "C" void cRollerModifier_updateMOI(cRollerModifier* self);
 
 
 
-struct sRmMat33DF70 {
-    float m[9];
-};
 
 struct sRmMat44DF70 {
     t4Vector r[4];
@@ -1744,7 +1741,7 @@ struct sRmSrcDF70 {
     char pad_0x00[0x2C];
     float x, y, z;          // 0x2C
     char pad_0x38[0x5C - 0x38];
-    sRmMat33DF70 rot;       // 0x5C
+    t3Matrix rot;       // 0x5C
 };
 
 
@@ -1778,16 +1775,16 @@ extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* se
     off.z = src->z;
     off.w = 0.0f;
     (*(t4Vector*)&self->COMOffset) = off;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]) = src->rot;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[0] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[1] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[2] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[3] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[4] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[5] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[6] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[7] *= 0.5f;
-    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[8] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]) = src->rot;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[0] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[1] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[2] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[3] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[4] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[5] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[6] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[7] *= 0.5f;
+    (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[8] *= 0.5f;
     tPose x = cRollerModifier_getBodyPose_DA70(self);
     QuatPosToMtx_DA70(&(*(sRmMat44DF70*)&self->Transform), *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
     SphereTree_TransformAbs(((char*)&self->SphTree), &(*(sRmMat44DF70*)&self->Transform), 1.0f);

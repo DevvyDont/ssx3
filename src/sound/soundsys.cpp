@@ -8011,13 +8011,10 @@ extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio* self, tAvalanchePositiona
 struct sQDEF0 {
     int w[4];
 } __attribute__((aligned(16)));
-struct sV3DEF0 {
-    float x, y, z;
-};
 struct sOutDEF0 {
     sQDEF0 q[2];
 };
-extern "C" void cAvalanche_getAvalancheDataByPosition_c(sOutDEF0* out, sV3DEF0* in) __asm__("cAvalanche_getAvalancheDataByPosition");
+extern "C" void cAvalanche_getAvalancheDataByPosition_c(sOutDEF0* out, t3Vector* in) __asm__("cAvalanche_getAvalancheDataByPosition");
 
 extern sSndCallback D_004A36D0_cb[] __asm__("D_004A36D0");
 /**
@@ -8047,9 +8044,9 @@ extern "C" void cSSXAudio_Avalanche(cSSXAudio* vself, int on)
             char* obj = (char*)cSSXAudio_GetFocusRider(self, id);
             self->idx = sndVCall(obj + 0x6C0, 7);
             {
-                sV3DEF0* riderPos = (sV3DEF0*)sndVCall(obj + 0x6C0, 5);
+                t3Vector* riderPos = (t3Vector*)sndVCall(obj + 0x6C0, 5);
                 sOutDEF0 out;
-                sV3DEF0 pos;
+                t3Vector pos;
                 pos.x = riderPos->x;
                 pos.y = riderPos->y;
                 pos.z = riderPos->z;

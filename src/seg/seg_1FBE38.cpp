@@ -82,8 +82,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimDeltaNode_cAnimDeltaNode1_B060(void*, int, void*, void*) __asm__("cAnimDeltaNode_cAnimDeltaNode1");
 extern char D_00489658_B060[] __asm__("D_00489658");
-struct V3_B060 { float x, y, z; };
-extern V3_B060 luno_gLunoNil_B060 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_B060 __asm__("luno_gLunoNil");
 struct Tag_B060 { char c; Tag_B060() {} Tag_B060(const Tag_B060 &o) : c(o.c) {} };
 extern unsigned D_B060[] __asm__("D_004FB390");
 extern int D_004A55C0;
@@ -109,7 +108,7 @@ struct Ent_B060 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B060 MakeAnimDeltaFunc(int n, Ent_B060 *params) {
+extern "C" t3Vector MakeAnimDeltaFunc(int n, Ent_B060 *params) {
     if (D_004A55C0 == 0) {
         D_B060[0] = 0xFFFFFFFF;
         ((int*)D_B060)[1] = 1;
@@ -178,8 +177,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimComboNode_cAnimComboNode1_B270(void*, int, void*, void*) __asm__("cAnimComboNode_cAnimComboNode1");
 extern char D_00489668_B270[] __asm__("D_00489668");
-struct V3_B270 { float x, y, z; };
-extern V3_B270 luno_gLunoNil_B270 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_B270 __asm__("luno_gLunoNil");
 struct Tag_B270 { char c; Tag_B270() {} Tag_B270(const Tag_B270 &o) : c(o.c) {} };
 extern unsigned D_B270[] __asm__("D_004FB3C0");
 extern int D_004A55C4;
@@ -206,7 +204,7 @@ struct Ent_B270 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B270 MakeAnimComboFunc(int n, Ent_B270 *params) {
+extern "C" t3Vector MakeAnimComboFunc(int n, Ent_B270 *params) {
     if (D_004A55C4 == 0) {
         D_B270[0] = 0xFFFFFFFF;
         ((int*)D_B270)[1] = 1;
@@ -279,8 +277,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimTeeterNode_cAnimTeeterNode1_B498(void*, int, void*, void*) __asm__("cAnimTeeterNode_cAnimTeeterNode1");
 extern char D_00489678_B498[] __asm__("D_00489678");
-struct V3_B498 { float x, y, z; };
-extern V3_B498 luno_gLunoNil_B498 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_B498 __asm__("luno_gLunoNil");
 struct Tag_B498 { char c; Tag_B498() {} Tag_B498(const Tag_B498 &o) : c(o.c) {} };
 extern unsigned D_B498[] __asm__("D_004FB400");
 extern int D_004A55C8;
@@ -306,7 +303,7 @@ struct Ent_B498 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B498 MakeAnimTeeterFunc(int n, Ent_B498 *params) {
+extern "C" t3Vector MakeAnimTeeterFunc(int n, Ent_B498 *params) {
     if (D_004A55C8 == 0) {
         D_B498[0] = 0xFFFFFFFF;
         *(float*)&D_B498[1] = 0.6000000238418579f;
@@ -375,8 +372,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cConveyorNode_cConveyorNode_B6B8(void*, int, void*, void*) __asm__("cConveyorNode_cConveyorNode");
 extern char D_00489688_B6B8[] __asm__("D_00489688");
-struct V3_B6B8 { float x, y, z; };
-extern V3_B6B8 luno_gLunoNil_B6B8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_B6B8 __asm__("luno_gLunoNil");
 struct Tag_B6B8 { char c; Tag_B6B8() {} Tag_B6B8(const Tag_B6B8 &o) : c(o.c) {} };
 extern unsigned D_B6B8[] __asm__("D_004FB430");
 extern int D_004A55CC;
@@ -402,7 +398,7 @@ struct Ent_B6B8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B6B8 MakeConveyorFunc(int n, Ent_B6B8 *params) {
+extern "C" t3Vector MakeConveyorFunc(int n, Ent_B6B8 *params) {
     if (D_004A55CC == 0) {
         D_B6B8[0] = 0xFFFFFFFF;
         *(float*)&D_B6B8[1] = 100.0f;
@@ -474,8 +470,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cCounterNode_cCounterNode1_B8D0(void*, int, void*, void*) __asm__("cCounterNode_cCounterNode1");
 extern char D_004A3BE8_B8D0[] __asm__("D_004A3BE8");
-struct V3_B8D0 { float x, y, z; };
-extern V3_B8D0 luno_gLunoNil_B8D0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_B8D0 __asm__("luno_gLunoNil");
 struct Tag_B8D0 { char c; Tag_B8D0() {} Tag_B8D0(const Tag_B8D0 &o) : c(o.c) {} };
 extern unsigned D_B8D0[] __asm__("D_004FB468");
 extern int D_004A55D0;
@@ -500,7 +495,7 @@ struct Ent_B8D0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B8D0 MakeCounterFunc(int n, Ent_B8D0 *params) {
+extern "C" t3Vector MakeCounterFunc(int n, Ent_B8D0 *params) {
     if (D_004A55D0 == 0) {
         D_B8D0[0] = 0xFFFFFFFF;
         ((int*)D_B8D0)[1] = 3;
@@ -561,8 +556,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFloatingNode_cFloatingNode_BAB0(void*, int, void*, void*) __asm__("cFloatingNode_cFloatingNode");
 extern char D_00489698_BAB0[] __asm__("D_00489698");
-struct V3_BAB0 { float x, y, z; };
-extern V3_BAB0 luno_gLunoNil_BAB0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_BAB0 __asm__("luno_gLunoNil");
 struct Tag_BAB0 { char c; Tag_BAB0() {} Tag_BAB0(const Tag_BAB0 &o) : c(o.c) {} };
 extern unsigned D_BAB0[] __asm__("D_004FB478");
 extern int D_004A55D4;
@@ -588,7 +582,7 @@ struct Ent_BAB0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BAB0 MakeFloatingFunc(int n, Ent_BAB0 *params) {
+extern "C" t3Vector MakeFloatingFunc(int n, Ent_BAB0 *params) {
     if (D_004A55D4 == 0) {
         D_BAB0[0] = 0xFFFFFFFF;
         *(float*)&D_BAB0[1] = 10.0f;
@@ -654,8 +648,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimObjectNode_cAnimObjectNode1_BCB8(void*, int, int, void*, void*) __asm__("cAnimObjectNode_cAnimObjectNode1");
 extern char D_004896A8_BCB8[] __asm__("D_004896A8");
-struct V3_BCB8 { float x, y, z; };
-extern V3_BCB8 luno_gLunoNil_BCB8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_BCB8 __asm__("luno_gLunoNil");
 struct Tag_BCB8 { char c; Tag_BCB8() {} Tag_BCB8(const Tag_BCB8 &o) : c(o.c) {} };
 extern unsigned D_BCB8[] __asm__("D_004FB498");
 extern int D_004A55D8;
@@ -681,7 +674,7 @@ struct Ent_BCB8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BCB8 MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
+extern "C" t3Vector MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
     if (D_004A55D8 == 0) {
         D_BCB8[0] = 0xFFFFFFFF;
         ((int*)D_BCB8)[1] = 1;
@@ -750,8 +743,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cBoostNode_cBoostNode1_BEC8(void*, int, int, void*, void*) __asm__("cBoostNode_cBoostNode1");
 extern char D_004A3BF0_BEC8[] __asm__("D_004A3BF0");
-struct V3_BEC8 { float x, y, z; };
-extern V3_BEC8 luno_gLunoNil_BEC8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_BEC8 __asm__("luno_gLunoNil");
 struct Tag_BEC8 { char c; Tag_BEC8() {} Tag_BEC8(const Tag_BEC8 &o) : c(o.c) {} };
 extern unsigned D_BEC8[] __asm__("D_004FB4C8");
 extern int D_004A55DC;
@@ -777,7 +769,7 @@ struct Ent_BEC8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BEC8 MakeBoostFunc(int n, Ent_BEC8 *params) {
+extern "C" t3Vector MakeBoostFunc(int n, Ent_BEC8 *params) {
     if (D_004A55DC == 0) {
         D_BEC8[0] = 0xFFFFFFFF;
         ((int*)D_BEC8)[1] = 0;
@@ -845,8 +837,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cObjectNode_cObjectNode_C0D0(void*, int, void*, int, bool) __asm__("cObjectNode_cObjectNode");
 extern char D_004A3BF8_C0D0[] __asm__("D_004A3BF8");
-struct V3_C0D0 { float x, y, z; };
-extern V3_C0D0 luno_gLunoNil_C0D0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_C0D0 __asm__("luno_gLunoNil");
 struct Tag_C0D0 { char c; Tag_C0D0() {} Tag_C0D0(const Tag_C0D0 &o) : c(o.c) {} };
 extern unsigned D_C0D0[] __asm__("D_004FB4F0");
 extern int D_004A55E0;
@@ -871,7 +862,7 @@ struct Ent_C0D0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C0D0 MakeObjectFunc(int n, Ent_C0D0 *params) {
+extern "C" t3Vector MakeObjectFunc(int n, Ent_C0D0 *params) {
     if (D_004A55E0 == 0) {
         D_C0D0[0] = 0xFFFFFFFF;
         ((int*)D_C0D0)[1] = 0;
@@ -1000,8 +991,7 @@ static inline char *refToPtr_C420(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C420(unsigned i) { if (i == 0) return 0; return refToPtr_C420(i); }
 extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void makeDead_C420(void*, void*) __asm__("makeDead");
-struct V3_C420 { float x, y, z; };
-extern V3_C420 luno_gLunoNil_C420 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_C420 __asm__("luno_gLunoNil");
 struct Tag_C420 { char c; Tag_C420() {} Tag_C420(const Tag_C420 &o) : c(o.c) {} };
 extern unsigned D_C420[] __asm__("D_004FB500");
 extern int D_004A55E4;
@@ -1024,7 +1014,7 @@ struct Ent_C420 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C420 MakeDeadFunc(int n, Ent_C420 *params) {
+extern "C" t3Vector MakeDeadFunc(int n, Ent_C420 *params) {
     if (D_004A55E4 == 0) {
         D_C420[0] = 0xFFFFFFFF;
         ((int*)D_C420)[1] = 0;
@@ -1082,8 +1072,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cDeadFadeNode_cDeadFadeNode_C5D8(void*, int, void*, void*, int) __asm__("cDeadFadeNode_cDeadFadeNode");
 extern char D_004896D8_C5D8[] __asm__("D_004896D8");
-struct V3_C5D8 { float x, y, z; };
-extern V3_C5D8 luno_gLunoNil_C5D8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_C5D8 __asm__("luno_gLunoNil");
 struct Tag_C5D8 { char c; Tag_C5D8() {} Tag_C5D8(const Tag_C5D8 &o) : c(o.c) {} };
 extern unsigned D_C5D8[] __asm__("D_004FB510");
 extern int D_004A55E8;
@@ -1102,7 +1091,7 @@ struct Ent_C5D8 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
+extern "C" t3Vector MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
     if (D_004A55E8 == 0) {
         D_C5D8[0] = 0xFFFFFFFF;
         ((int*)D_C5D8)[1] = 0;
@@ -1165,8 +1154,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cDebounceNode_cDebounceNode1_C7D0(void*, int, void*, void*, int) __asm__("cDebounceNode_cDebounceNode1");
 extern char D_004896E8_C7D0[] __asm__("D_004896E8");
-struct V3_C7D0 { float x, y, z; };
-extern V3_C7D0 luno_gLunoNil_C7D0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_C7D0 __asm__("luno_gLunoNil");
 struct Tag_C7D0 { char c; Tag_C7D0() {} Tag_C7D0(const Tag_C7D0 &o) : c(o.c) {} };
 extern unsigned D_C7D0[] __asm__("D_004FB528");
 extern int D_004A55EC;
@@ -1187,7 +1175,7 @@ struct Ent_C7D0 { int idx; int val; int pad; int type; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *params) {
+extern "C" t3Vector MakeDebounceFunc(int n, Ent_C7D0 *params) {
     if (D_004A55EC == 0) {
         D_C7D0[0] = 0xFFFFFFFF;
         *(float*)&D_C7D0[1] = 1.0f;
@@ -1250,8 +1238,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFlagNode_cFlagNode1_C9C8(void*, int, void*, void*) __asm__("cFlagNode_cFlagNode1");
 extern char D_004A3C08_C9C8[] __asm__("D_004A3C08");
-struct V3_C9C8 { float x, y, z; };
-extern V3_C9C8 luno_gLunoNil_C9C8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_C9C8 __asm__("luno_gLunoNil");
 struct Tag_C9C8 { char c; Tag_C9C8() {} Tag_C9C8(const Tag_C9C8 &o) : c(o.c) {} };
 extern unsigned D_C9C8[] __asm__("D_004FB540");
 extern int D_004A55F0;
@@ -1279,7 +1266,7 @@ struct Ent_C9C8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C9C8 MakeFlagFunc(int n, Ent_C9C8 *params) {
+extern "C" t3Vector MakeFlagFunc(int n, Ent_C9C8 *params) {
     if (D_004A55F0 == 0) {
         D_C9C8[0] = 0xFFFFFFFF;
         ((int*)D_C9C8)[1] = 1;
@@ -1359,8 +1346,7 @@ INCLUDE_ASM("seg/seg_1FBE38", MakeFenceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_CC20 __asm__("cWScriptMan_TheWScriptMan");
-struct V3_CC20 { float x, y, z; };
-extern V3_CC20 luno_gLunoNil_CC20 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_CC20 __asm__("luno_gLunoNil");
 struct Tag_CC20 { char c; Tag_CC20() {} Tag_CC20(const Tag_CC20 &o) : c(o.c) {} };
 extern unsigned D_CC20[] __asm__("D_004FB5B0");
 extern int D_004A55F4;
@@ -1389,7 +1375,7 @@ extern "C" int checkActiveNode(void*, int, void*);
  * @return @p ret
  */
 // PORT: struct return written with the hidden return pointer explicit.
-extern "C" V3_CC20* MakeFenceFunc(V3_CC20* ret, int n, Ent_CC20 *params) {
+extern "C" t3Vector* MakeFenceFunc(t3Vector* ret, int n, Ent_CC20 *params) {
     if (D_004A55F4 == 0) {
         D_CC20[0] = 0xFFFFFFFF;
         *(float*)&D_CC20[2] = 0.5f;
@@ -1448,8 +1434,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFlexBridgeNode_cFlexBridgeNode_CDC8(void*, int, void*, void*) __asm__("cFlexBridgeNode_cFlexBridgeNode");
 extern char D_004896F8_CDC8[] __asm__("D_004896F8");
-struct V3_CDC8 { float x, y, z; };
-extern V3_CDC8 luno_gLunoNil_CDC8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_CDC8 __asm__("luno_gLunoNil");
 struct Tag_CDC8 { char c; Tag_CDC8() {} Tag_CDC8(const Tag_CDC8 &o) : c(o.c) {} };
 extern unsigned D_CDC8[] __asm__("D_004FB5C0");
 extern int D_004A55F8;
@@ -1468,7 +1453,7 @@ struct Ent_CDC8 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
+extern "C" t3Vector MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     if (D_004A55F8 == 0) {
         *(float*)&D_CDC8[0] = 500.0f;
         *(float*)&D_CDC8[1] = 1.0f;
@@ -1536,8 +1521,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cMeshAnimNode_cMeshAnimNode1_CFF0(void*, int, void*, void*, int, int) __asm__("cMeshAnimNode_cMeshAnimNode1");
 extern char D_00489708_CFF0[] __asm__("D_00489708");
-struct V3_CFF0 { float x, y, z; };
-extern V3_CFF0 luno_gLunoNil_CFF0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_CFF0 __asm__("luno_gLunoNil");
 struct Tag_CFF0 { char c; Tag_CFF0() {} Tag_CFF0(const Tag_CFF0 &o) : c(o.c) {} };
 extern unsigned D_CFF0[] __asm__("D_004FB5E8");
 extern int D_004A55FC;
@@ -1557,7 +1541,7 @@ struct Ent_CFF0 { int idx; int val; int pad; int type; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
+extern "C" t3Vector MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
     if (D_004A55FC == 0) {
         D_CFF0[0] = 0xFFFFFFFF;
         ((int*)D_CFF0)[1] = 0;
@@ -1630,8 +1614,7 @@ extern char *cWScriptMan_TheWScriptMan_D250 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_D250 __asm__("SSXApp");
 extern "C" void cMoveNode_addRoller_D250(void*, void*, int, int) __asm__("cMoveNode_addRoller");
 struct O_D250 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_D250 { float x, y, z; };
-extern V3_D250 luno_gLunoNil_D250 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_D250 __asm__("luno_gLunoNil");
 struct Tag_D250 { char c; Tag_D250() {} Tag_D250(const Tag_D250 &o) : c(o.c) {} };
 extern unsigned D_D250[] __asm__("D_004FB628");
 extern int D_004A5600;
@@ -1649,7 +1632,7 @@ struct Ent_D250 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
+extern "C" t3Vector AddRollerFunc(int n, Ent_D250 *params) {
     if (D_004A5600 == 0) {
         D_D250[0] = 0xFFFFFFFF;
         *(float*)&D_D250[1] = 1.0f;
@@ -1708,8 +1691,7 @@ extern "C" void cParticleNode_cParticleNode1_D420(void*, int, void*, void*, int)
 void operator_delete(int*);
 extern char D_00489718_D420[] __asm__("D_00489718");
 extern char D_00489730_D420[] __asm__("D_00489730");
-struct V3_D420 { float x, y, z; };
-extern V3_D420 luno_gLunoNil_D420 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_D420 __asm__("luno_gLunoNil");
 struct Tag_D420 { char c; Tag_D420() {} Tag_D420(const Tag_D420 &o) : c(o.c) {} };
 extern unsigned D_D420[] __asm__("D_004FB640");
 extern int D_004A5604;
@@ -1740,7 +1722,7 @@ struct Ent_D420 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D420 MakeParticleFunc(int n, Ent_D420 *params) {
+extern "C" t3Vector MakeParticleFunc(int n, Ent_D420 *params) {
     if (D_004A5604 == 0) {
         ((int*)D_D420)[0] = 1;
         ((int*)D_D420)[1] = 0;
@@ -1906,8 +1888,7 @@ static inline void vAddTo_D758(V4_D758 &a, const V4_D758 &b) {
         : "memory");
 }
 struct O_D758 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_D758 { float x, y, z; };
-extern V3_D758 luno_gLunoNil_D758 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_D758 __asm__("luno_gLunoNil");
 struct Tag_D758 { char c; Tag_D758() {} Tag_D758(const Tag_D758 &o) : c(o.c) {} };
 extern unsigned D_D758[] __asm__("D_004FB720");
 extern int D_004A5608;
@@ -1935,7 +1916,7 @@ struct Ent_D758 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D758 AddRiderPositionFunc(int n, Ent_D758 *params) {
+extern "C" t3Vector AddRiderPositionFunc(int n, Ent_D758 *params) {
     if (D_004A5608 == 0) {
         D_D758[0] = 0xFFFFFFFF;
         ((int*)D_D758)[1] = -1;
@@ -2001,8 +1982,7 @@ extern "C" void cMoveNode_addParent_D9F8(void*, int, int, V4_D9F8*) __asm__("cMo
 struct O_D9F8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_D9F8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_D9F8(unsigned i) { if (i == 0) return 0; return refToPtr_D9F8(i); }
-struct V3_D9F8 { float x, y, z; };
-extern V3_D9F8 luno_gLunoNil_D9F8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_D9F8 __asm__("luno_gLunoNil");
 struct Tag_D9F8 { char c; Tag_D9F8() {} Tag_D9F8(const Tag_D9F8 &o) : c(o.c) {} };
 extern unsigned D_D9F8[] __asm__("D_004FB738");
 extern int D_004A560C;
@@ -2028,7 +2008,7 @@ struct Ent_D9F8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D9F8 AddParentFunc(int n, Ent_D9F8 *params) {
+extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
     if (D_004A560C == 0) {
         D_D9F8[0] = 0xFFFFFFFF;
         D_D9F8[1] = 0xFFFFFFFF;
@@ -2108,8 +2088,7 @@ extern "C" void cMoveNode_addParent_DC60(void*, int, int, V4_DC60*) __asm__("cMo
 struct O_DC60 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DC60(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DC60(unsigned i) { if (i == 0) return 0; return refToPtr_DC60(i); }
-struct V3_DC60 { float x, y, z; };
-extern V3_DC60 luno_gLunoNil_DC60 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_DC60 __asm__("luno_gLunoNil");
 struct Tag_DC60 { char c; Tag_DC60() {} Tag_DC60(const Tag_DC60 &o) : c(o.c) {} };
 extern unsigned D_DC60[] __asm__("D_004FB758");
 extern int D_004A5610;
@@ -2136,7 +2115,7 @@ struct Ent_DC60 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_DC60 AddChildFunc(int n, Ent_DC60 *params) {
+extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
     if (D_004A5610 == 0) {
         D_DC60[0] = 0xFFFFFFFF;
         D_DC60[1] = 0xFFFFFFFF;
@@ -2215,8 +2194,7 @@ extern "C" void cMoveNode_addSpline1_DED0(void*, void*) __asm__("cMoveNode_addSp
 struct O_DED0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DED0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DED0(unsigned i) { if (i == 0) return 0; return refToPtr_DED0(i); }
-struct V3_DED0 { float x, y, z; };
-extern V3_DED0 luno_gLunoNil_DED0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_DED0 __asm__("luno_gLunoNil");
 struct Tag_DED0 { char c; Tag_DED0() {} Tag_DED0(const Tag_DED0 &o) : c(o.c) {} };
 extern unsigned D_DED0[] __asm__("D_004FB778");
 extern int D_004A5614;
@@ -2234,7 +2212,7 @@ struct Ent_DED0 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *params) {
+extern "C" t3Vector AddSplineFunc(int n, Ent_DED0 *params) {
     if (D_004A5614 == 0) {
         D_DED0[0] = 0xFFFFFFFF;
         D_DED0[1] = 0xFFFFFFFF;
@@ -2306,8 +2284,7 @@ extern "C" void cMoveNode_addSpline_E0C0(void*, void*) __asm__("cMoveNode_addSpl
 struct O_E0C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_E0C0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_E0C0(unsigned i) { if (i == 0) return 0; return refToPtr_E0C0(i); }
-struct V3_E0C0 { float x, y, z; };
-extern V3_E0C0 luno_gLunoNil_E0C0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_E0C0 __asm__("luno_gLunoNil");
 struct Tag_E0C0 { char c; Tag_E0C0() {} Tag_E0C0(const Tag_E0C0 &o) : c(o.c) {} };
 extern unsigned D_E0C0[] __asm__("D_004FB7A8");
 extern int D_004A5618;
@@ -2325,7 +2302,7 @@ struct Ent_E0C0 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
+extern "C" t3Vector AddMultiSplineFunc(int n, Ent_E0C0 *params) {
     if (D_004A5618 == 0) {
         D_E0C0[0] = 0xFFFFFFFF;
         D_E0C0[1] = 0xFFFFFFFF;
@@ -2396,8 +2373,7 @@ extern char *cWScriptMan_TheWScriptMan_E2C0 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_E2C0 __asm__("SSXApp");
 extern "C" void cMoveNode_addUVScroll_E2C0(void*, void*) __asm__("cMoveNode_addUVScroll");
 struct O_E2C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_E2C0 { float x, y, z; };
-extern V3_E2C0 luno_gLunoNil_E2C0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_E2C0 __asm__("luno_gLunoNil");
 struct Tag_E2C0 { char c; Tag_E2C0() {} Tag_E2C0(const Tag_E2C0 &o) : c(o.c) {} };
 extern unsigned D_E2C0[] __asm__("D_004FB7E0");
 extern int D_004A561C;
@@ -2422,7 +2398,7 @@ struct Ent_E2C0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E2C0 AddUVScrollFunc(int n, Ent_E2C0 *params) {
+extern "C" t3Vector AddUVScrollFunc(int n, Ent_E2C0 *params) {
     if (D_004A561C == 0) {
         D_E2C0[0] = 0xFFFFFFFF;
         ((int*)D_E2C0)[1] = 5;
@@ -2485,8 +2461,7 @@ extern char *cWScriptMan_TheWScriptMan_E4A8 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_E4A8 __asm__("SSXApp");
 extern "C" void cMoveNode_addTexFlip_E4A8(void*, void*) __asm__("cMoveNode_addTexFlip");
 struct O_E4A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_E4A8 { float x, y, z; };
-extern V3_E4A8 luno_gLunoNil_E4A8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_E4A8 __asm__("luno_gLunoNil");
 struct Tag_E4A8 { char c; Tag_E4A8() {} Tag_E4A8(const Tag_E4A8 &o) : c(o.c) {} };
 extern unsigned D_E4A8[] __asm__("D_004FB818");
 extern int D_004A5620;
@@ -2510,7 +2485,7 @@ struct Ent_E4A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E4A8 AddTexFlipFunc(int n, Ent_E4A8 *params) {
+extern "C" t3Vector AddTexFlipFunc(int n, Ent_E4A8 *params) {
     if (D_004A5620 == 0) {
         D_E4A8[0] = 0xFFFFFFFF;
         ((int*)D_E4A8)[1] = 0;
@@ -2563,8 +2538,7 @@ extern char *cWScriptMan_TheWScriptMan_E668 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_E668 __asm__("SSXApp");
 extern "C" void cMoveNode_addBoost_E668(void*, void*) __asm__("cMoveNode_addBoost");
 struct O_E668 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_E668 { float x, y, z; };
-extern V3_E668 luno_gLunoNil_E668 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_E668 __asm__("luno_gLunoNil");
 struct Tag_E668 { char c; Tag_E668() {} Tag_E668(const Tag_E668 &o) : c(o.c) {} };
 extern unsigned D_E668[] __asm__("D_004FB830");
 extern int D_004A5624;
@@ -2589,7 +2563,7 @@ struct Ent_E668 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E668 AddBoostFunc(int n, Ent_E668 *params) {
+extern "C" t3Vector AddBoostFunc(int n, Ent_E668 *params) {
     if (D_004A5624 == 0) {
         D_E668[0] = 0xFFFFFFFF;
         ((int*)D_E668)[1] = 1;
@@ -2710,8 +2684,7 @@ static inline int nearViewer_E840(const t4Vector &pos) {
     }
     return 0;
 }
-struct V3_E840 { float x, y, z; };
-extern V3_E840 luno_gLunoNil_E840 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_E840 __asm__("luno_gLunoNil");
 struct Tag_E840 { char c; Tag_E840() {} Tag_E840(const Tag_E840 &o) : c(o.c) {} };
 extern unsigned D_E840[] __asm__("D_004FB858");
 extern int D_004A5628;
@@ -2730,7 +2703,7 @@ struct Ent_E840 { int idx; int val; int pad; int type; };
  * @param params  the arguments (cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_E840 AddParticleFunc(int n, Ent_E840 *params) {
+extern "C" t3Vector AddParticleFunc(int n, Ent_E840 *params) {
     if (D_004A5628 == 0) {
         ((int*)D_E840)[0] = 1;
         ((int*)D_E840)[1] = 0;
@@ -2860,8 +2833,7 @@ struct O_EE98 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual 
 extern "C" void cMoveNode_addDynamicParticle_EE98(void*, void*, int, V4_EE98*) __asm__("cMoveNode_addDynamicParticle");
 void operator_delete(int*);
 extern char D_00489750_EE98[] __asm__("D_00489750");
-struct V3_EE98 { float x, y, z; };
-extern V3_EE98 luno_gLunoNil_EE98 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_EE98 __asm__("luno_gLunoNil");
 struct Tag_EE98 { char c; Tag_EE98() {} Tag_EE98(const Tag_EE98 &o) : c(o.c) {} };
 extern unsigned D_EE98[] __asm__("D_004FB938");
 extern int D_004A562C;
@@ -2892,7 +2864,7 @@ struct Ent_EE98 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_EE98 AddDynamicParticleFunc(int n, Ent_EE98 *params) {
+extern "C" t3Vector AddDynamicParticleFunc(int n, Ent_EE98 *params) {
     if (D_004A562C == 0) {
         ((int*)D_EE98)[0] = 1;
         ((int*)D_EE98)[1] = 0;
@@ -3006,8 +2978,7 @@ extern char *cWScriptMan_TheWScriptMan_F1C8 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_F1C8 __asm__("SSXApp");
 extern "C" void cMoveNode_addRail_F1C8(void*, void*) __asm__("cMoveNode_addRail");
 struct O_F1C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_F1C8 { float x, y, z; };
-extern V3_F1C8 luno_gLunoNil_F1C8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_F1C8 __asm__("luno_gLunoNil");
 struct Tag_F1C8 { char c; Tag_F1C8() {} Tag_F1C8(const Tag_F1C8 &o) : c(o.c) {} };
 extern unsigned D_F1C8[] __asm__("D_004FBA28");
 extern int D_004A5630;
@@ -3025,7 +2996,7 @@ struct Ent_F1C8 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
+extern "C" t3Vector AddRailFunc(int n, Ent_F1C8 *params) {
     if (D_004A5630 == 0) {
         D_F1C8[0] = 0xFFFFFFFF;
         D_F1C8[1] = 0xFFFFFFFF;
@@ -3084,8 +3055,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFloatRailNode_cFloatRailNode_F390(void*, void*, void*) __asm__("cFloatRailNode_cFloatRailNode");
 extern char D_00489768_F390[] __asm__("D_00489768");
-struct V3_F390 { float x, y, z; };
-extern V3_F390 luno_gLunoNil_F390 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_F390 __asm__("luno_gLunoNil");
 struct Tag_F390 { char c; Tag_F390() {} Tag_F390(const Tag_F390 &o) : c(o.c) {} };
 extern unsigned D_F390[] __asm__("D_004FBA38");
 extern int D_004A5634;
@@ -3113,7 +3083,7 @@ struct Ent_F390 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F390 MakeFloatRailFunc(int n, Ent_F390 *params) {
+extern "C" t3Vector MakeFloatRailFunc(int n, Ent_F390 *params) {
     if (D_004A5634 == 0) {
         D_F390[0] = 0xFFFFFFFF;
         D_F390[1] = 0xFFFFFFFF;
@@ -3201,8 +3171,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cSpringRailNode_cSpringRailNode_F5E8(void*, void*, void*) __asm__("cSpringRailNode_cSpringRailNode");
 extern char D_00489778_F5E8[] __asm__("D_00489778");
-struct V3_F5E8 { float x, y, z; };
-extern V3_F5E8 luno_gLunoNil_F5E8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_F5E8 __asm__("luno_gLunoNil");
 struct Tag_F5E8 { char c; Tag_F5E8() {} Tag_F5E8(const Tag_F5E8 &o) : c(o.c) {} };
 extern unsigned D_F5E8[] __asm__("D_004FBA90");
 extern int D_004A5638;
@@ -3230,7 +3199,7 @@ struct Ent_F5E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F5E8 MakeSpringRailFunc(int n, Ent_F5E8 *params) {
+extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
     if (D_004A5638 == 0) {
         D_F5E8[0] = 0xFFFFFFFF;
         D_F5E8[1] = 0xFFFFFFFF;
@@ -3388,8 +3357,7 @@ static inline char *look_F9A8(unsigned id) {
 }
 
 struct O_F9A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36(int, float); };
-struct V3_F9A8 { float x, y, z; };
-extern V3_F9A8 luno_gLunoNil_F9A8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_F9A8 __asm__("luno_gLunoNil");
 struct Tag_F9A8 { char c; Tag_F9A8() {} Tag_F9A8(const Tag_F9A8 &o) : c(o.c) {} };
 extern unsigned D_F9A8[] __asm__("D_004FBAF8");
 extern int D_004A5640;
@@ -3413,7 +3381,7 @@ struct Ent_F9A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F9A8 SignalFunc(int n, Ent_F9A8 *params) {
+extern "C" t3Vector SignalFunc(int n, Ent_F9A8 *params) {
     if (D_004A5640 == 0) {
         D_F9A8[0] = 0xFFFFFFFF;
         ((int*)D_F9A8)[1] = -1;
@@ -3459,8 +3427,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cHideNode_cHideNode_FB50(void*, void*) __asm__("cHideNode_cHideNode");
 extern char D_004A3C18_FB50[] __asm__("D_004A3C18");
 struct O_FB50 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
-struct V3_FB50 { float x, y, z; };
-extern V3_FB50 luno_gLunoNil_FB50 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_FB50 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_FB50(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FB50 { int idx; int val; int pad; int type; };
 /**
@@ -3479,7 +3446,7 @@ struct Ent_FB50 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FB50 HideInstanceFunc(int n, Ent_FB50 *params) {
+extern "C" t3Vector HideInstanceFunc(int n, Ent_FB50 *params) {
     if (D_004A5650_FB50 == 0) {
         D_004A5648_FB50 = 0xFFFFFFFF;
         D_004A5650_FB50 = 1;
@@ -3547,8 +3514,7 @@ static inline char *look_FD58(unsigned id) {
 }
 
 struct O_FD58 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
-struct V3_FD58 { float x, y, z; };
-extern V3_FD58 luno_gLunoNil_FD58 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_FD58 __asm__("luno_gLunoNil");
 struct Tag_FD58 { char c; Tag_FD58() {} Tag_FD58(const Tag_FD58 &o) : c(o.c) {} };
 extern unsigned D_FD58 __asm__("D_004A5658");
 extern Tag_FD58 D_004A565C;
@@ -3571,7 +3537,7 @@ struct Ent_FD58 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FD58 ShowInstanceFunc(int n, Ent_FD58 *params) {
+extern "C" t3Vector ShowInstanceFunc(int n, Ent_FD58 *params) {
     if (D_004A5660 == 0) {
         D_FD58 = 0xFFFFFFFF;
         D_004A5660 = 1;
@@ -3613,8 +3579,7 @@ static inline char *refToPtr_FF00(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FF00(unsigned i) { if (i == 0) return 0; return refToPtr_FF00(i); }
 extern "C" void *cAudioInterface_bxAudio_FF00(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_WorldSound_FF00(void*, void*, int) __asm__("cSSXAudio_WorldSound");
-struct V3_FF00 { float x, y, z; };
-extern V3_FF00 luno_gLunoNil_FF00 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_FF00 __asm__("luno_gLunoNil");
 struct Tag_FF00 { char c; Tag_FF00() {} Tag_FF00(const Tag_FF00 &o) : c(o.c) {} };
 extern unsigned D_FF00[] __asm__("D_004FBB08");
 extern int D_004A5664;
@@ -3636,7 +3601,7 @@ struct Ent_FF00 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FF00 PlayAudioFunc(int n, Ent_FF00 *params) {
+extern "C" t3Vector PlayAudioFunc(int n, Ent_FF00 *params) {
     if (D_004A5664 == 0) {
         D_FF00[0] = 0xFFFFFFFF;
         D_FF00[1] = 0xFFFFFFFF;
@@ -3692,8 +3657,7 @@ static inline char *refToPtr_00A8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_00A8(unsigned i) { if (i == 0) return 0; return refToPtr_00A8(i); }
 extern "C" void *cAudioInterface_bxAudio_00A8(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_AttachSound_00A8(void*, void*, int, int) __asm__("cSSXAudio_AttachSound");
-struct V3_00A8 { float x, y, z; };
-extern V3_00A8 luno_gLunoNil_00A8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_00A8 __asm__("luno_gLunoNil");
 struct Tag_00A8 { char c; Tag_00A8() {} Tag_00A8(const Tag_00A8 &o) : c(o.c) {} };
 extern unsigned D_00A8[] __asm__("D_004FBB18");
 extern int D_004A5668;
@@ -3715,7 +3679,7 @@ struct Ent_00A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_00A8 AttachAudioFunc(int n, Ent_00A8 *params) {
+extern "C" t3Vector AttachAudioFunc(int n, Ent_00A8 *params) {
     if (D_004A5668 == 0) {
         D_00A8[0] = 0xFFFFFFFF;
         D_00A8[1] = 0xFFFFFFFF;
@@ -3773,8 +3737,7 @@ static inline char *refToPtr_0260(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0260(unsigned i) { if (i == 0) return 0; return refToPtr_0260(i); }
 extern "C" void *cAudioInterface_bxAudio_0260(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_DetachSound_0260(void*, void*, int, int) __asm__("cSSXAudio_DetachSound");
-struct V3_0260 { float x, y, z; };
-extern V3_0260 luno_gLunoNil_0260 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_0260 __asm__("luno_gLunoNil");
 struct Tag_0260 { char c; Tag_0260() {} Tag_0260(const Tag_0260 &o) : c(o.c) {} };
 extern unsigned D_0260[] __asm__("D_004FBB28");
 extern int D_004A566C;
@@ -3796,7 +3759,7 @@ struct Ent_0260 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0260 DetachAudioFunc(int n, Ent_0260 *params) {
+extern "C" t3Vector DetachAudioFunc(int n, Ent_0260 *params) {
     if (D_004A566C == 0) {
         D_0260[0] = 0xFFFFFFFF;
         D_0260[1] = 0xFFFFFFFF;
@@ -3851,8 +3814,7 @@ INCLUDE_ASM("seg/seg_1FBE38", ExpireFunc);
 extern char *cWScriptMan_TheWScriptMan_0418 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_0418 __asm__("SSXApp");
 struct O_0418 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(int); };
-struct V3_0418 { float x, y, z; };
-extern V3_0418 luno_gLunoNil_0418 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_0418 __asm__("luno_gLunoNil");
 struct Tag_0418 { char c; Tag_0418() {} Tag_0418(const Tag_0418 &o) : c(o.c) {} };
 extern unsigned D_0418[] __asm__("D_004FBB38");
 extern int D_004A5670;
@@ -3876,7 +3838,7 @@ struct Ent_0418 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0418 ExpireFunc(int n, Ent_0418 *params) {
+extern "C" t3Vector ExpireFunc(int n, Ent_0418 *params) {
     if (D_004A5670 == 0) {
         D_0418[0] = 0xFFFFFFFF;
         ((int*)D_0418)[1] = 0;
@@ -3927,8 +3889,7 @@ INCLUDE_ASM("seg/seg_1FBE38", LoseFocusFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int cWScriptMan_TheWScriptMan_05E8 __asm__("cWScriptMan_TheWScriptMan");
 struct O_05E8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); };
-struct V3_05E8 { float x, y, z; };
-extern V3_05E8 luno_gLunoNil_05E8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_05E8 __asm__("luno_gLunoNil");
 struct Tag_05E8 { char c; Tag_05E8() {} Tag_05E8(const Tag_05E8 &o) : c(o.c) {} };
 extern unsigned D_05E8 __asm__("D_004A5678");
 extern Tag_05E8 D_004A567C;
@@ -3953,7 +3914,7 @@ struct Ent_05E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_05E8 LoseFocusFunc(int n, Ent_05E8 *params) {
+extern "C" t3Vector LoseFocusFunc(int n, Ent_05E8 *params) {
     if (D_004A5680 == 0) {
         D_05E8 = 0xFFFFFFFF;
         D_004A5680 = 1;
@@ -4009,8 +3970,7 @@ struct Sh_0770 { virtual void v01(); virtual void v02(); virtual void v03(); vir
 struct Lvl_0770 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_0770(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0770(unsigned i) { if (i == 0) return 0; return refToPtr_0770(i); }
-struct V3_0770 { float x, y, z; };
-extern V3_0770 luno_gLunoNil_0770 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_0770 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0770(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0770 { int idx; int val; int pad; int type; };
 /**
@@ -4030,7 +3990,7 @@ struct Ent_0770 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0770 TransportFunc(int n, Ent_0770 *params) {
+extern "C" t3Vector TransportFunc(int n, Ent_0770 *params) {
     if (D_004A5690_0770 == 0) {
         D_004A5688_0770 = 0xFFFFFFFF;
         D_004A5690_0770 = 1;
@@ -4097,8 +4057,7 @@ struct Sh_0948 { virtual void v01(); virtual void v02(); virtual void v03(); vir
 struct Lvl_0948 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_0948(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0948(unsigned i) { if (i == 0) return 0; return refToPtr_0948(i); }
-struct V3_0948 { float x, y, z; };
-extern V3_0948 luno_gLunoNil_0948 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_0948 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0948(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0948 { int idx; int val; int pad; int type; };
 /**
@@ -4118,7 +4077,7 @@ struct Ent_0948 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0948 SetupMissionRiderFunc(int n, Ent_0948 *params) {
+extern "C" t3Vector SetupMissionRiderFunc(int n, Ent_0948 *params) {
     if (D_004A56A0_0948 == 0) {
         D_004A5698_0948 = 0xFFFFFFFF;
         D_004A56A0_0948 = 1;
@@ -4240,8 +4199,7 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory_0C78(int, int, int
 extern "C" void cSSXScriptEngine_AddToNISListByScriptHashID_0C78(int, int, int, int, int, int, int) __asm__("cSSXScriptEngine_AddToNISListByScriptHashID");
 extern "C" void cSSXScriptEngine_ReadyNISList_0C78(int, int) __asm__("cSSXScriptEngine_ReadyNISList");
 extern "C" void cSSXScriptEngine_PlayNISList_0C78(int, int, int, int) __asm__("cSSXScriptEngine_PlayNISList");
-struct V3_0C78 { float x, y, z; };
-extern V3_0C78 luno_gLunoNil_0C78 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_0C78 __asm__("luno_gLunoNil");
 struct Tag_0C78 { char c; Tag_0C78() {} Tag_0C78(const Tag_0C78 &o) : c(o.c) {} };
 extern unsigned D_0C78[] __asm__("D_004FBB58");
 extern int D_004A56A8;
@@ -4264,7 +4222,7 @@ struct Ent_0C78 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0C78 NISFunc(int n, Ent_0C78 *params) {
+extern "C" t3Vector NISFunc(int n, Ent_0C78 *params) {
     if (D_004A56A8 == 0) {
         D_0C78[0] = 0xFFFFFFFF;
         ((int*)D_0C78)[1] = 0;
@@ -4364,8 +4322,7 @@ INCLUDE_ASM("seg/seg_1FBE38", CollectInstFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_0F50 __asm__("cWScriptMan_TheWScriptMan");
-struct V3_0F50 { float x, y, z; };
-extern V3_0F50 luno_gLunoNil_0F50 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_0F50 __asm__("luno_gLunoNil");
 struct Tag_0F50 { char c; Tag_0F50() {} Tag_0F50(const Tag_0F50 &o) : c(o.c) {} };
 extern unsigned D_0F50[] __asm__("D_004FBB78");
 extern int D_56B0_0F50 __asm__("D_004A56B0");
@@ -4390,7 +4347,7 @@ struct Ent_0F50 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0F50 CollectInstFunc(int n, Ent_0F50 *params) {
+extern "C" t3Vector CollectInstFunc(int n, Ent_0F50 *params) {
     if (D_56B0_0F50 == 0) {
         D_0F50[0] = 0xFFFFFFFF;
         D_0F50[1] = 0xFFFFFFFF;
@@ -5143,8 +5100,7 @@ struct Sh_1D78 { virtual void v01(); virtual void v02(); virtual void v03(); vir
 struct Lvl_1D78 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_1D78(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_1D78(unsigned i) { if (i == 0) return 0; return refToPtr_1D78(i); }
-struct V3_1D78 { float x, y, z; };
-extern V3_1D78 luno_gLunoNil_1D78 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_1D78 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_1D78(void*, void*, int) __asm__("MEM_copy");
 struct Chk_1D78 { virtual void v01(); virtual void v02(); virtual int v03(char*); };
 int* luno_cLunoVar_castInt_1D78(void*) __asm__("luno_cLunoVar_castInt__FPv");
@@ -5291,8 +5247,7 @@ extern int D_00445E40_2048[] __asm__("D_00445E40");
 extern "C" void cWScriptMan_failActiveLocalMission_2048(int*, int) __asm__("cWScriptMan_failActiveLocalMission");
 extern "C" void cSectionMan_eventbegin_2048(int, int) __asm__("cSectionMan_eventbegin");
 struct Sh_2048 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual int v09(); };
-struct V3_2048 { float x, y, z; };
-extern V3_2048 luno_gLunoNil_2048 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_2048 __asm__("luno_gLunoNil");
 struct Tag_2048 { char c; Tag_2048() {} Tag_2048(const Tag_2048 &o) : c(o.c) {} };
 extern unsigned D_2048[] __asm__("D_004FBC10");
 extern int D_004A572C;
@@ -5311,7 +5266,7 @@ struct Ent_2048 { int idx; int val; int pad; int type; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" V3_2048 SetGameModeFunc(int n, Ent_2048 *params) {
+extern "C" t3Vector SetGameModeFunc(int n, Ent_2048 *params) {
     if (D_004A572C == 0) {
         ((int*)D_2048)[0] = -1;
         ((int*)D_2048)[1] = -1;
@@ -5375,8 +5330,7 @@ extern const int D_004465C8_2210[] __asm__("D_004465C8");
 extern char* const D_00445E40_2210[] __asm__("D_00445E40");
 extern int* cWScriptMan_TheWScriptMan_2210 __asm__("cWScriptMan_TheWScriptMan");
 extern char* SSXApp_2210 __asm__("SSXApp");
-struct V3_2210 { float x, y, z; };
-extern V3_2210 luno_gLunoNil_2210 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_2210 __asm__("luno_gLunoNil");
 extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
 extern "C" cBEInterface* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationIDFromScript_2210(void* iface, int id) __asm__("cBENewRaceInterface_getLocationIDFromScript");
@@ -5411,7 +5365,7 @@ public:
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" V3_2210 SectionFunc(int n, Ent_2210* params)
+extern "C" t3Vector SectionFunc(int n, Ent_2210* params)
 {
     if (D_004A5730_2210 == 0) {
         D_004FBC20_2210.v[0] = -1;
@@ -5487,8 +5441,7 @@ INCLUDE_ASM("seg/seg_1FBE38", RemoveModifierFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_2490 __asm__("cWScriptMan_TheWScriptMan");
 struct O_2490 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_2490 { float x, y, z; };
-extern V3_2490 luno_gLunoNil_2490 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_2490 __asm__("luno_gLunoNil");
 struct Tag_2490 { char c; Tag_2490() {} Tag_2490(const Tag_2490 &o) : c(o.c) {} };
 struct T12_2490 { unsigned a; int b; Tag_2490 f; };
 extern T12_2490 D_4FBC30_2490 __asm__("D_004FBC30");
@@ -5514,7 +5467,7 @@ struct Ent_2490 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_2490 RemoveModifierFunc(int n, Ent_2490 *params) {
+extern "C" t3Vector RemoveModifierFunc(int n, Ent_2490 *params) {
     if (D_5734_2490 == 0) {
         D_4FBC30_2490.a = 0xFFFFFFFF;
         D_4FBC30_2490.b = -1;
@@ -6647,8 +6600,7 @@ extern char *SSXApp_39F0 __asm__("SSXApp");
 extern int TheCrowdMan3d_39F0 __asm__("TheCrowdMan3d");
 extern "C" void func_00343C60_39F0(int, int) __asm__("func_00343C60");
 extern "C" void func_00343F38_39F0(int, int) __asm__("func_00343F38");
-struct V3_39F0 { float x, y, z; };
-extern V3_39F0 luno_gLunoNil_39F0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_39F0 __asm__("luno_gLunoNil");
 struct Tag_39F0 { char c; Tag_39F0() {} Tag_39F0(const Tag_39F0 &o) : c(o.c) {} };
 extern unsigned D_39F0[] __asm__("D_004FBC70");
 extern int D_004A57DC;
@@ -6671,7 +6623,7 @@ struct Ent_39F0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_39F0 Crowd3dFunc(int n, Ent_39F0 *params) {
+extern "C" t3Vector Crowd3dFunc(int n, Ent_39F0 *params) {
     if (D_004A57DC == 0) {
         D_39F0[0] = 0xFFFFFFFF;
         ((int*)D_39F0)[1] = -1;
@@ -6722,8 +6674,7 @@ INCLUDE_ASM("seg/seg_1FBE38", Crowd2dFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_3BA0 __asm__("cWScriptMan_TheWScriptMan");
 extern int TheCrowdMan2d_3BA0 __asm__("TheCrowdMan2d");
-struct V3_3BA0 { float x, y, z; };
-extern V3_3BA0 luno_gLunoNil_3BA0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_3BA0 __asm__("luno_gLunoNil");
 struct Tag_3BA0 { char c; Tag_3BA0() {} Tag_3BA0(const Tag_3BA0 &o) : c(o.c) {} };
 struct T20_3BA0 { unsigned a; int b; int c; int d; Tag_3BA0 f; };
 extern T20_3BA0 D_4FBC80_3BA0 __asm__("D_004FBC80");
@@ -6751,7 +6702,7 @@ struct Ent_3BA0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_3BA0 Crowd2dFunc(int n, Ent_3BA0 *params) {
+extern "C" t3Vector Crowd2dFunc(int n, Ent_3BA0 *params) {
     if (D_57E0_3BA0 == 0) {
         D_4FBC80_3BA0.a = 0xFFFFFFFF;
         D_4FBC80_3BA0.b = -1;
@@ -6936,8 +6887,7 @@ INCLUDE_ASM("seg/seg_1FBE38", RiderInTunnelFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_3F80 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_3F80 __asm__("SSXApp");
-struct V3_3F80 { float x, y, z; };
-extern V3_3F80 luno_gLunoNil_3F80 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_3F80 __asm__("luno_gLunoNil");
 struct A_3F80 { char pad[0x6C0]; };
 struct B_3F80 { virtual void v01(); };
 struct D_3F80 : A_3F80, B_3F80 { };
@@ -6950,7 +6900,7 @@ struct Tab_3F80 { char pad[0x28]; D_3F80 *arr[1]; };
  *
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_3F80 RiderInTunnelFunc(void) {
+extern "C" t3Vector RiderInTunnelFunc(void) {
     int slot = *(int*)cWScriptMan_TheWScriptMan_3F80;
     if (slot != -1) {
         D_3F80 *riderEntry = (*(Tab_3F80**)(*(char**)(SSXApp_3F80 + 0x84) + 0xC))->arr[slot];
@@ -7308,8 +7258,7 @@ INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayTrickFunc);
 #ifdef SKIP_ASM
 // PORT: 64-bit bitfield container (unsigned long is 8 bytes on the EE).
 extern char *cWScriptMan_TheWScriptMan_45B8 __asm__("cWScriptMan_TheWScriptMan");
-struct V3_45B8 { float x, y, z; };
-extern V3_45B8 luno_gLunoNil_45B8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_45B8 __asm__("luno_gLunoNil");
 struct Tag_45B8 { char c; Tag_45B8() {} Tag_45B8(const Tag_45B8 &o) : c(o.c) {} };
 struct Rec_45B8 {
     unsigned a0; int a1; int a2; int a3;
@@ -7346,7 +7295,7 @@ struct Ent_45B8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_45B8 UpdateDisplayTrickFunc(int n, Ent_45B8 *params) {
+extern "C" t3Vector UpdateDisplayTrickFunc(int n, Ent_45B8 *params) {
     if (D_580C_45B8 == 0) {
         D_4FBCC8_45B8.a0 = 0;
         D_4FBCC8_45B8.a1 = 0;
@@ -7413,8 +7362,7 @@ extern char *cWScriptMan_TheWScriptMan_4980 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_4980 __asm__("SSXApp");
 void cMoveNode_addFade(void*, void*);
 struct O_4980 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_4980 { float x, y, z; };
-extern V3_4980 luno_gLunoNil_4980 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_4980 __asm__("luno_gLunoNil");
 struct Tag_4980 { char c; Tag_4980() {} Tag_4980(const Tag_4980 &o) : c(o.c) {} };
 extern unsigned D_4980[] __asm__("D_004FBD10");
 extern int D_004A5810;
@@ -7438,7 +7386,7 @@ struct Ent_4980 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_4980 AddFadeFunc(int n, Ent_4980 *params) {
+extern "C" t3Vector AddFadeFunc(int n, Ent_4980 *params) {
     if (D_004A5810 == 0) {
         D_4980[0] = 0xFFFFFFFF;
         *(float*)&D_4980[1] = 1.0f;
@@ -7637,8 +7585,7 @@ extern char *cWScriptMan_TheWScriptMan_4E38 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_4E38 __asm__("SSXApp");
 extern "C" void cMoveNode_addDebounce_4E38(void*, void*) __asm__("cMoveNode_addDebounce");
 struct O_4E38 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_4E38 { float x, y, z; };
-extern V3_4E38 luno_gLunoNil_4E38 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_4E38 __asm__("luno_gLunoNil");
 struct Tag_4E38 { char c; Tag_4E38() {} Tag_4E38(const Tag_4E38 &o) : c(o.c) {} };
 extern unsigned D_4E38[] __asm__("D_004FBD20");
 extern int D_004A5834;
@@ -7662,7 +7609,7 @@ struct Ent_4E38 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_4E38 AddDebounceFunc(int n, Ent_4E38 *params) {
+extern "C" t3Vector AddDebounceFunc(int n, Ent_4E38 *params) {
     if (D_004A5834 == 0) {
         D_4E38[0] = 0xFFFFFFFF;
         *(float*)&D_4E38[1] = 1.0f;
@@ -8048,8 +7995,7 @@ INCLUDE_ASM("seg/seg_1FBE38", AddMagnetFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_5478 __asm__("cWScriptMan_TheWScriptMan");
 struct O_5478 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
-struct V3_5478 { float x, y, z; };
-extern V3_5478 luno_gLunoNil_5478 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_5478 __asm__("luno_gLunoNil");
 struct Tag_5478 { char c; Tag_5478() {} Tag_5478(const Tag_5478 &o) : c(o.c) {} };
 struct Rec_5478 { unsigned id; float a; float b; Tag_5478 f; };
 extern Rec_5478 D_4FBD58_5478 __asm__("D_004FBD58");
@@ -8074,7 +8020,7 @@ struct Ent_5478 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5478 AddMagnetFunc(int n, Ent_5478 *params) {
+extern "C" t3Vector AddMagnetFunc(int n, Ent_5478 *params) {
     if (D_5840_5478 == 0) {
         D_4FBD58_5478.id = 0xFFFFFFFF;
         D_4FBD58_5478.a = 400.0f;
@@ -8129,8 +8075,7 @@ extern int *cWScriptMan_TheWScriptMan_5660 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_5660 __asm__("SSXApp");
 struct Sh_5660 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual int v08(); };
 extern "C" void DoLightningFlash_5660(float) __asm__("DoLightningFlash");
-struct V3_5660 { float x, y, z; };
-extern V3_5660 luno_gLunoNil_5660 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_5660 __asm__("luno_gLunoNil");
 struct Tag_5660 { char c; Tag_5660() {} Tag_5660(const Tag_5660 &o) : c(o.c) {} };
 extern unsigned D_5660 __asm__("D_004A5848");
 extern Tag_5660 D_004A584C;
@@ -8154,7 +8099,7 @@ struct Ent_5660 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5660 LightningFunc(int n, Ent_5660 *params) {
+extern "C" t3Vector LightningFunc(int n, Ent_5660 *params) {
     if (D_004A5850 == 0) {
         D_5660 = 0xFFFFFFFF;
         D_004A5850 = 1;
@@ -8193,8 +8138,7 @@ INCLUDE_ASM("seg/seg_1FBE38", AddHaloFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_57C0 __asm__("cWScriptMan_TheWScriptMan");
 struct O_57C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
-struct V3_57C0 { float x, y, z; };
-extern V3_57C0 luno_gLunoNil_57C0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_57C0 __asm__("luno_gLunoNil");
 struct Tag_57C0 { char c; Tag_57C0() {} Tag_57C0(const Tag_57C0 &o) : c(o.c) {} };
 struct Rec_57C0 { unsigned id; int a; int b; float c; float d; float e; float g; float h; int k; Tag_57C0 f; };
 extern Rec_57C0 D_4FBD68_57C0 __asm__("D_004FBD68");
@@ -8219,7 +8163,7 @@ struct Ent_57C0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_57C0 AddHaloFunc(int n, Ent_57C0 *params) {
+extern "C" t3Vector AddHaloFunc(int n, Ent_57C0 *params) {
     if (D_5854_57C0 == 0) {
         D_4FBD68_57C0.id = 0xFFFFFFFF;
         D_4FBD68_57C0.a = 0;
@@ -8445,8 +8389,7 @@ static inline char *refToPtr_5D90(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5D90(unsigned i) { if (i == 0) return 0; return refToPtr_5D90(i); }
 extern "C" void cMoveNode_addAvaSpline_5D90(void*, void*) __asm__("cMoveNode_addAvaSpline");
 struct O_5D90 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
-struct V3_5D90 { float x, y, z; };
-extern V3_5D90 luno_gLunoNil_5D90 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_5D90 __asm__("luno_gLunoNil");
 struct Tag_5D90 { char c; Tag_5D90() {} Tag_5D90(const Tag_5D90 &o) : c(o.c) {} };
 extern unsigned D_5D90 __asm__("D_004A5870");
 extern Tag_5D90 D_004A5874;
@@ -8469,7 +8412,7 @@ struct Ent_5D90 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5D90 AddAvaSplineFunc(int n, Ent_5D90 *params) {
+extern "C" t3Vector AddAvaSplineFunc(int n, Ent_5D90 *params) {
     if (D_004A5878 == 0) {
         D_5D90 = 0xFFFFFFFF;
         D_004A5878 = 1;
@@ -8521,8 +8464,7 @@ extern "C" V3_5D90 AddAvaSplineFunc(int n, Ent_5D90 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", SetAvalancheEmitterDataFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct V3_5F40 { float x, y, z; };
-extern V3_5F40 luno_gLunoNil_5F40 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_5F40 __asm__("luno_gLunoNil");
 struct Tag_5F40 { char c; Tag_5F40() {} Tag_5F40(const Tag_5F40 &o) : c(o.c) {} };
 struct Rec_5F40 {
     int a; int b; float c; float d; float e;
@@ -8555,7 +8497,7 @@ struct Ent_5F40 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5F40 SetAvalancheEmitterDataFunc(int n, Ent_5F40 *params) {
+extern "C" t3Vector SetAvalancheEmitterDataFunc(int n, Ent_5F40 *params) {
     if (D_587C_5F40 == 0) {
         Rec_5F40 &defaultBlock = D_4FBE58_5F40;
         float zero = 0.0f;
@@ -8814,8 +8756,7 @@ INCLUDE_ASM("seg/seg_1FBE38", DangerStartFunc);
 extern char *cWScriptMan_TheWScriptMan_6438 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_6438 __asm__("SSXApp");
 extern "C" void cDangerMan_AddDangerElem_6438(void*, void*, float, float) __asm__("cDangerMan_AddDangerElem");
-struct V3_6438 { float x, y, z; };
-extern V3_6438 luno_gLunoNil_6438 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_6438 __asm__("luno_gLunoNil");
 struct Tag_6438 { char c; Tag_6438() {} Tag_6438(const Tag_6438 &o) : c(o.c) {} };
 extern unsigned D_6438[] __asm__("D_004FBF48");
 extern int D_004A5890;
@@ -8838,7 +8779,7 @@ struct Ent_6438 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6438 DangerStartFunc(int n, Ent_6438 *params) {
+extern "C" t3Vector DangerStartFunc(int n, Ent_6438 *params) {
     if (D_004A5890 == 0) {
         D_6438[0] = 0xFFFFFFFF;
         *(float*)&D_6438[1] = 1000.0f;
@@ -8900,8 +8841,7 @@ static inline char *look_65E8(unsigned id) {
 }
 
 extern "C" void cDangerMan_RemoveDangerElem_65E8(void*, void*) __asm__("cDangerMan_RemoveDangerElem");
-struct V3_65E8 { float x, y, z; };
-extern V3_65E8 luno_gLunoNil_65E8 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_65E8 __asm__("luno_gLunoNil");
 struct Tag_65E8 { char c; Tag_65E8() {} Tag_65E8(const Tag_65E8 &o) : c(o.c) {} };
 extern unsigned D_65E8 __asm__("D_004A5898");
 extern Tag_65E8 D_004A589C;
@@ -8924,7 +8864,7 @@ struct Ent_65E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_65E8 DangerEndFunc(int n, Ent_65E8 *params) {
+extern "C" t3Vector DangerEndFunc(int n, Ent_65E8 *params) {
     if (D_004A58A0 == 0) {
         D_65E8 = 0xFFFFFFFF;
         D_004A58A0 = 1;
@@ -8970,8 +8910,7 @@ static inline char *look_6770(unsigned id) {
 }
 
 extern "C" void cDangerMan_AddDangerVolume_6770(void*, void*, int) __asm__("cDangerMan_AddDangerVolume");
-struct V3_6770 { float x, y, z; };
-extern V3_6770 luno_gLunoNil_6770 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_6770 __asm__("luno_gLunoNil");
 struct Tag_6770 { char c; Tag_6770() {} Tag_6770(const Tag_6770 &o) : c(o.c) {} };
 extern unsigned D_6770[] __asm__("D_004FBF58");
 extern int D_004A58A4;
@@ -8994,7 +8933,7 @@ struct Ent_6770 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6770 EnableDangerZoneFunc(int n, Ent_6770 *params) {
+extern "C" t3Vector EnableDangerZoneFunc(int n, Ent_6770 *params) {
     if (D_004A58A4 == 0) {
         D_6770[0] = 0xFFFFFFFF;
         D_6770[1] = 0;
@@ -9045,8 +8984,7 @@ INCLUDE_ASM("seg/seg_1FBE38", DisableDangerZoneFunc);
 extern char *cWScriptMan_TheWScriptMan_6908 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_6908 __asm__("SSXApp");
 extern "C" void cDangerMan_RemoveDangerVolume_6908(void*, void*) __asm__("cDangerMan_RemoveDangerVolume");
-struct V3_6908 { float x, y, z; };
-extern V3_6908 luno_gLunoNil_6908 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_6908 __asm__("luno_gLunoNil");
 struct Tag_6908 { char c; Tag_6908() {} Tag_6908(const Tag_6908 &o) : c(o.c) {} };
 extern unsigned D_6908 __asm__("D_004A58A8");
 extern Tag_6908 D_004A58AC;
@@ -9069,7 +9007,7 @@ struct Ent_6908 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6908 DisableDangerZoneFunc(int n, Ent_6908 *params) {
+extern "C" t3Vector DisableDangerZoneFunc(int n, Ent_6908 *params) {
     if (D_004A58B0 == 0) {
         D_6908 = 0xFFFFFFFF;
         D_004A58B0 = 1;
@@ -9113,8 +9051,7 @@ extern "C" V3_6908 DisableDangerZoneFunc(int n, Ent_6908 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", MultiParticleFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct V3_6A90 { float x, y, z; };
-extern V3_6A90 luno_gLunoNil_6A90 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_6A90 __asm__("luno_gLunoNil");
 struct Tag_6A90 { char c; Tag_6A90() {} Tag_6A90(const Tag_6A90 &o) : c(o.c) {} };
 struct Rec_6A90 {
     int a; int b; float c; float d; float e;
@@ -9141,7 +9078,7 @@ struct Ent_6A90 { int idx; int val; int pad; int type; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *params) {
+extern "C" t3Vector MultiParticleFunc(int n, Ent_6A90 *params) {
     if (D_58B4_6A90 == 0) {
         Rec_6A90 &defaults = D_4FBF68_6A90;
         float zero = 0.0f;
@@ -9234,8 +9171,7 @@ extern char *SSXApp_6CB0 __asm__("SSXApp");
 extern void *cMultiParticleMan_TheMultiParticleMan_6CB0 __asm__("cMultiParticleMan_TheMultiParticleMan");
 void cMultiParticleMan_addInst(void*, int, int);
 void cMultiParticleMan_remInst(void*, int, int);
-struct V3_6CB0 { float x, y, z; };
-extern V3_6CB0 luno_gLunoNil_6CB0 __asm__("luno_gLunoNil");
+extern t3Vector luno_gLunoNil_6CB0 __asm__("luno_gLunoNil");
 struct Tag_6CB0 { char c; Tag_6CB0() {} Tag_6CB0(const Tag_6CB0 &o) : c(o.c) {} };
 extern unsigned D_6CB0[] __asm__("D_004FC050");
 extern int D_004A58B8;
@@ -9258,7 +9194,7 @@ struct Ent_6CB0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6CB0 MultiParticleInstFunc(int n, Ent_6CB0 *params) {
+extern "C" t3Vector MultiParticleInstFunc(int n, Ent_6CB0 *params) {
     if (D_004A58B8 == 0) {
         ((int*)D_6CB0)[0] = 0;
         D_6CB0[1] = 0xFFFFFFFF;

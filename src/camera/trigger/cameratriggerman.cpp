@@ -2199,14 +2199,11 @@ extern "C" sCtmV cCTBoundObjLine_worldPoint2(char* src)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCTSpline_worldPoint);
 #ifdef SKIP_ASM
-struct sCtmV3_0D20 {
-    float x, y, z;
-};
 
 struct sCtmV_0D20 {
     float x, y, z, w;
     sCtmV_0D20() {}
-    sCtmV_0D20(const sCtmV3_0D20& v, float aw) : x(v.x), y(v.y), z(v.z), w(aw) {}
+    sCtmV_0D20(const t3Vector& v, float aw) : x(v.x), y(v.y), z(v.z), w(aw) {}
     sCtmV_0D20(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
@@ -2406,7 +2403,7 @@ static inline void ctmRotAxis_0D20(sCtmM_0D20* m, const sCtmV_0D20& axis, float 
 
 struct sCtmSrc_0D20 {
     char pad_0x0[0x28];
-    sCtmV3_0D20 corners[4];      // 0x28 (count from the callers: corners 0..3)
+    t3Vector corners[4];      // 0x28 (count from the callers: corners 0..3)
 };
 
 

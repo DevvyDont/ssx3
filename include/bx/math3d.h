@@ -19,6 +19,13 @@ struct tQuaternion {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
+// EA's 3-float vector (type name from the preview's setSize__8cUIThingRC8t3Vector; [O] On Tour's t3Vector : t3vect,
+// 0xC). 12 bytes, 4-byte aligned: retail copies it with ldl/ldr + lw. Member names are our guess (On Tour: x()/y()/z()
+// accessors over an anonymous union).
+struct t3Vector {
+    float x, y, z;
+};
+
 // Row-major; for an object transform the rows are side, front, up and position.
 struct t4Matrix {
     t4Vector row[4];

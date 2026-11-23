@@ -220,12 +220,9 @@ struct sRenderCam_C410 {
     float n;            // 0x28
     float f;            // 0x2C
 };
-struct sPatchVtx_C410 {
-    float x, y, z;
-};
 struct sPatch_C410 {
     char pad0[0x170];
-    sPatchVtx_C410 v[4];    // 0x170
+    t3Vector v[4];    // 0x170
     short id0;              // 0x1A0
     short id1;              // 0x1A2
 };

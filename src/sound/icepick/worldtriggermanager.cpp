@@ -722,7 +722,6 @@ extern "C" cWorldTriggerInstance* cWorldTriggerManager_GetTriggerInstance(cWorld
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_HandleTrigger);
 #ifdef SKIP_ASM
-struct sWtVec3 { float x, y, z; };
 struct sWtVec4 {
     float x, y, z, w;
     sWtVec4() {}
@@ -745,9 +744,9 @@ struct sWtVec4 {
  * @param volume  the volume (0..1)
  * @param pos  the sound position
  */
-extern "C" void cWorldTriggerManager_HandleTrigger(cWorldTriggerInstance** self, int objectRef, int volNum, int viewPort, int audioTrigger, int positional, float volume, const sWtVec3& pos)
+extern "C" void cWorldTriggerManager_HandleTrigger(cWorldTriggerInstance** self, int objectRef, int volNum, int viewPort, int audioTrigger, int positional, float volume, const t3Vector& pos)
 {
-    sWtVec3 localPos = pos;
+    t3Vector localPos = pos;
     if (*(int*)((char*)self + 0x334) != 0) {
         cWorldTriggerInstance* triggerInst = (cWorldTriggerInstance*)cWorldTriggerManager_GetTriggerInstance(self, objectRef, volNum, viewPort);
         if (((char*)triggerInst) == 0) {

@@ -4373,13 +4373,12 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_ProcessLens);
 extern "C" void cLightHalo_Process(cLightHalo* part, void* owner);
 extern "C" void cSunHalo_Process(void* emit, void* owner, int idx);
 
-struct sWkMtx3338 { t4Vector row[4]; };
 struct sWkPart3338 { char data[0x30]; };
 struct sWkEmit3338 { char data[0x210]; };
 
 struct sWkVtR3338 { short delta; short index; void (*fn)(tRect*, void*); };
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
+static inline void vu0CopyMatrix3338(t4Matrix* dst, t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4413,7 +4412,7 @@ extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
     tRect viewRect = ctx->GetViewportWindow();
     self->mViewInfo.mViewRect = viewRect;
     {
-        vu0CopyMatrix3338(&(*(sWkMtx3338*)&self->mViewInfo.mViewMat), (sWkMtx3338*)ctx->GetView());
+        vu0CopyMatrix3338(&(*(t4Matrix*)&self->mViewInfo.mViewMat), (t4Matrix*)ctx->GetView());
     }
     int i = 0;
     {
@@ -7362,14 +7361,11 @@ extern int cPowerUpFXToggles_m_EnableSpeedBoostFX;
 extern "C" void* func_0037A260(void* gfx, int n);
 extern "C" void func_0037A430(void* gfx);
 
-struct sWakeV3_7A10 {
-    float x, y, z;
-};
 
 struct sWakeV4_7A10 {
     float x, y, z, w;
     sWakeV4_7A10() {}
-    void SetXYZ(const sWakeV3_7A10& v)
+    void SetXYZ(const t3Vector& v)
     {
         x = v.x;
         y = v.y;
@@ -7433,8 +7429,8 @@ struct sWakeCol_7A10 {
 // Trail segment (0x1C bytes, 30 of them at self+0x50).
 struct sWakeSeg_7A10 {
     float len;              // 0x00
-    sWakeV3_7A10 p0;        // 0x04
-    sWakeV3_7A10 p1;        // 0x10
+    t3Vector p0;        // 0x04
+    t3Vector p1;        // 0x10
 };
 
 // Ribbon point pair (0x20 bytes, 20 of them at self->pts).

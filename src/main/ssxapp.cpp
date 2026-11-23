@@ -3535,9 +3535,6 @@ extern "C" void cSSXAudio_Update(void* snd, float dt, int a2);
 extern "C" void cWorldTriggerManager_Update(void* p);
 
 
-struct sMat_22B008 {
-    t4Vector row[4];
-};
 
 struct sRect_22B008 {
     float x, y, w, h;
@@ -3567,7 +3564,7 @@ struct sDrawState_22B008 {
 };
 
 extern sDrawState_22B008 sDrawState_s_defaultDrawState_22B008 __asm__("sDrawState_s_defaultDrawState");
-extern sMat_22B008 t4mat_Identity_22B008 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_22B008 __asm__("t4mat_Identity");
 
 class cGfx_22B008 {
 public:
@@ -3603,10 +3600,10 @@ public:
     virtual void SetViewportOrthographic(float a, float b, float c, float d, float e, float f, int g, int h);
     virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30();
     virtual void v31(); virtual void v32(); virtual void v33();
-    virtual void SetView1(sMat_22B008* m);
+    virtual void SetView1(t4Matrix* m);
     virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38();
     virtual void v39(); virtual void v40(); virtual void v41(); virtual void v42();
-    virtual sMat_22B008 GetNetMatrix();
+    virtual t4Matrix GetNetMatrix();
     virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
     virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
     virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
@@ -3641,7 +3638,7 @@ struct sCam_22B008 {
     float nearClip;         // 0x4
     float farClip;          // 0x8
     char pad_0xC[0x40 - 0xC];
-    sMat_22B008 mat;        // 0x40
+    t4Matrix mat;        // 0x40
 };
 
 struct sViewMan_22B008 {
@@ -3698,7 +3695,7 @@ struct sWorld_22B008 {
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through vf1..vf4).
-static inline void MatCopy_22B008(sMat_22B008* dst, const sMat_22B008* src)
+static inline void MatCopy_22B008(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3863,13 +3860,13 @@ extern "C" int cGame_render(cGame* self)
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFF00FFF) | 0xD000;
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
         sBox_22B008 box;
-        sMat_22B008 view = ((cGfx_22B008*)GrMan)->GetNetMatrix();
+        t4Matrix view = ((cGfx_22B008*)GrMan)->GetNetMatrix();
         float nearClip = cam->nearClip;
         float farClip = cam->farClip;
-        sMat_22B008 inv;
+        t4Matrix inv;
         MatCopy_22B008(&inv, &view);
         t4mat_invert(&inv);
-        sMat_22B008 invView = inv;
+        t4Matrix invView = inv;
         sBox_22B008& bounds = box;
         const t4Vector& right = invView.row[0];
         const t4Vector& up = invView.row[1];

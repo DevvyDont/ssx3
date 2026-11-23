@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "be/beinterface.h"
 #include "be/beintbagt.h"
 #include "ui/uithing.h"
@@ -42,10 +43,7 @@ extern char str_inst0[];
 extern char str_inst1[];
 extern char str_inst2[];
 
-struct sGateVec_3DE0 {
-    float x, y, z;
-};
-extern sGateVec_3DE0 t3vect_Zero;
+extern t3Vector t3vect_Zero;
 
 struct sGateEntry_3DE0 {
     int f0;
@@ -128,7 +126,7 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
             *mp = 0;
         }
     }
-    sGateVec_3DE0 textSize0, textSize1, textSize2, spareVec, instPos0, instPos1, instPos2, btnPos0, btnPos1, btnPos2, btnSize0, btnSize1, btnSize2;
+    t3Vector textSize0, textSize1, textSize2, spareVec, instPos0, instPos1, instPos2, btnPos0, btnPos1, btnPos2, btnSize0, btnSize1, btnSize2;
     int count;
     int cur;
     int slot = 1;
@@ -207,9 +205,9 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     textSize2.x += gap;
     cUIThing_getAbsPosition(w0, &instPos0);
     cUIThing_getAbsPosition(w2, &instPos2);
-    btnPos0 = *(sGateVec_3DE0*)&instBtn0->mPosition;
-    btnPos1 = *(sGateVec_3DE0*)(instBtn1 + 0x44);
-    btnPos2 = *(sGateVec_3DE0*)&instBtn2->mPosition;
+    btnPos0 = *(t3Vector*)&instBtn0->mPosition;
+    btnPos1 = *(t3Vector*)(instBtn1 + 0x44);
+    btnPos2 = *(t3Vector*)&instBtn2->mPosition;
     sUIVtP_3DE0* vt0 = (sUIVtP_3DE0*)VPTR_OF(cListNode, instBtn0);
     vt0[20].fn(vthis(instBtn0, vt0[20]), &btnSize0);
     sUIVtP_3DE0* vt1 = *(sUIVtP_3DE0**)(instBtn1 + 8);
@@ -226,13 +224,13 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
         btnSize1 = t3vect_Zero;
     }
     btnPos2.x = instPos2.x + textSize2.x;
-    *(sGateVec_3DE0*)&instBtn0->mPosition = btnPos0;
-    *(sGateVec_3DE0*)(instBtn1 + 0x44) = btnPos1;
-    *(sGateVec_3DE0*)&instBtn2->mPosition = btnPos2;
-    instPos0 = *(sGateVec_3DE0*)(w0 + 0x44);
-    instPos1 = *(sGateVec_3DE0*)&w1->mPosition;
+    *(t3Vector*)&instBtn0->mPosition = btnPos0;
+    *(t3Vector*)(instBtn1 + 0x44) = btnPos1;
+    *(t3Vector*)&instBtn2->mPosition = btnPos2;
+    instPos0 = *(t3Vector*)(w0 + 0x44);
+    instPos1 = *(t3Vector*)&w1->mPosition;
     instPos1.x = instPos0.x + textSize0.x + 10.0f + btnSize0.x + btnSize1.x;
-    *(sGateVec_3DE0*)&w1->mPosition = instPos1;
+    *(t3Vector*)&w1->mPosition = instPos1;
 }
 #endif
 

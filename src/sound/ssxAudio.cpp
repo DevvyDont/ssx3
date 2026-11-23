@@ -586,9 +586,6 @@ struct sObjList_5930 {
     char* items[1];
 };
 
-struct sV3_5930 {
-    float x, y, z;
-};
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
 static inline sV4_5930 vu0MtxApply_5930(char* m, const sV4_5930& v)
@@ -662,7 +659,7 @@ extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, cBankMonitorInstance* sou
     char* game = (char*)cAudioInterface_getGame();
     char* obj = (*(sObjList_5930**)(game + 0x84))->items[source->mViewport];
     float* src = (float*)source->mPosition;
-    sV3_5930 relPos;
+    t3Vector relPos;
     sV4_5930 tp = vu0MtxApply_5930(obj + 0x40, sV4_5930(src[0], src[1], src[2], 1.0f));
     float cy;
     float cz = -100.0f;

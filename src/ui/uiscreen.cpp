@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "ui/uiicon.h"
 #include "ui/uilistbox.h"
 #include "ui/uimenu.h"
@@ -1245,9 +1246,6 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUIScrollBar_setScrollVisibile(cUIScrollBar* self, int a);
 
-struct sV3_DA20 {
-    float x, y, z;
-};
 struct sV4_DA20 {
     float x, y, z, w;
 };
@@ -1260,7 +1258,7 @@ struct sWidget_DA20 {
     char pad0[8];
     sWVt_DA20* vt;      // 0x08
     char padC[0x44 - 0xC];
-    sV3_DA20 pos;       // 0x44
+    t3Vector pos;       // 0x44
 };
 
 struct sScroll_DA20 {
@@ -1335,8 +1333,8 @@ extern "C" void cUIScrollBar_setValues(sScroll_DA20* self, int pos, int visible,
     self->visible = visible;
     if (self->track == 0 || self->thumb == 0)
         return;
-    sV3_DA20 tpos = self->track->pos;
-    sV3_DA20 npos = self->thumb->pos;
+    t3Vector tpos = self->track->pos;
+    t3Vector npos = self->thumb->pos;
     sV4_DA20 tsize;
     sV4_DA20 nsize;
     {
@@ -1561,9 +1559,6 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUISlider_render2D);
 #ifdef SKIP_ASM
-struct cUISlider_render2D_sVec3 {
-    float x, y, z;
-};
 /**
  * Draws the slider's background, then its knob moved along it by the value.
  *
@@ -1584,17 +1579,17 @@ extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
     float y = dy + self->mPosition.y;
     background->render2D(x, y);
     cUIThing* bgObj = self->mpObjBackground;
-    cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)&bgObj->mPosition;
-    cUISlider_render2D_sVec3 bgSize;
+    t3Vector pos = *(t3Vector*)&bgObj->mPosition;
+    t3Vector bgSize;
     bgObj->getSize((t3Vector*)&bgSize);
     cUIThing* knob = self->mpObjKnob;
-    cUISlider_render2D_sVec3 knobSize;
+    t3Vector knobSize;
     knob->getSize((t3Vector*)&knobSize);
     float w = bgSize.x - knobSize.x;
     cUIThing* knobObj = self->mpObjKnob;
-    cUISlider_render2D_sVec3 knobPos = *(cUISlider_render2D_sVec3*)&knobObj->mPosition;
+    t3Vector knobPos = *(t3Vector*)&knobObj->mPosition;
     knobPos.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
-    *(cUISlider_render2D_sVec3*)&knobObj->mPosition = knobPos;
+    *(t3Vector*)&knobObj->mPosition = knobPos;
     cUIThing* knobWidget = self->mpObjKnob;
     knobWidget->render2D(x, y);
 }

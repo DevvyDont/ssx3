@@ -25,6 +25,7 @@
 // writes it as a whole word (lw/sw 0x14), so it is an int here.
 
 #include "layout.h"
+#include "bx/math3d.h"
 #include "util/list.h"
 
 struct cUIAnimation;
@@ -32,12 +33,6 @@ struct cUIScreen;
 struct tUIBaseObject;
 struct cUIInput;
 struct cUIRenderContext;
-
-// EA's 3-float vector (type name from the preview's setSize__8cUIThingRC8t3Vector). 12 bytes, 4-byte aligned: retail
-// copies it with ldl/ldr + lw. Member names are our guess (On Tour: x()/y()/z() accessors over an anonymous union).
-struct t3Vector {
-    float x, y, z;
-};
 
 // EA's colour (type name from the preview's setColour__8cUIThingRC5tARGB). 16 bytes, only 4-byte aligned on the PS2
 // (it sits at cUIThing+0x1C; copied with two ldl/ldr pairs). Members from On Tour's DWARF (struct tARGB: A R G B).

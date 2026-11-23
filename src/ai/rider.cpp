@@ -3812,11 +3812,10 @@ struct sV3_20D8 {
     sV3_20D8() {}
     sV3_20D8(float a, float b, float c) : x(a), y(b), z(c) {}
 };
-struct sPt_20D8 { float x, y, z; };
 struct sPath_20D8 {
     float x, y, z;
     int n;
-    sPt_20D8 pts[5];
+    t3Vector pts[5];
     int pad;
     t4Vector q[5];
 };

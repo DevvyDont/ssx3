@@ -132,9 +132,6 @@ void cOVState_MAP_onWidgetCreate(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainTransition);
 #ifdef SKIP_ASM
-struct sV3_87F0 {
-    float x, y, z;
-};
 
 
 
@@ -167,7 +164,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id);
 extern "C" void sprintf2(void* buf, const char* fmt, void* str, int n);
 extern "C" void cUIText_setUnicodeString(void* t, void* str);
-extern "C" int cPathSys_getNearestSessionPoint(void* tbl, sV3_87F0* pos);
+extern "C" int cPathSys_getNearestSessionPoint(void* tbl, t3Vector* pos);
 extern char str_SessionPointpct_d[];
 extern char str_kT_MAPSessionPt[];
 extern char str_kT_CMNTopOfRun[];
@@ -235,7 +232,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
         if (((char*)game) != 0) {
             char* rider = (char*)game->AI->Riders[0];
             t4Vector riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->getPosition();
-            sV3_87F0 riderPos3;
+            t3Vector riderPos3;
             riderPos3.x = riderPos.x;
             riderPos3.y = riderPos.y;
             riderPos3.z = riderPos.z;

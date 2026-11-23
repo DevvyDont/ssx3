@@ -2183,9 +2183,6 @@ extern "C" void func_00373EA8(void* self, sPtVec4_3EA8* points, sPtMtx_3EA8* mt,
 INCLUDE_ASM("render/particle", func_00374180);
 #ifdef SKIP_ASM
 
-struct sPatchOut {
-    float x, y, z;
-};
 
 struct sPatchSet {
     char pad_0x00[0x190];
@@ -2207,7 +2204,7 @@ struct sPatchSet {
  */
 // PORT: PS2-only VU0 inline asm (tensor-product patch evaluation: out[i][j] =
 // sum over basis[i] (x) basis[j] of the 4x4 control block at mat+0x40).
-extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int idx)
+extern "C" void func_00374180(sPatchSet* self, char* mat, t3Vector* out, int idx)
 {
     int n = self->count[idx];
     t4Vector* basis = self->basis[idx];
@@ -2264,7 +2261,7 @@ extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int id
                 "sqc2      $vf23, %0\n"
                 : "=m"(point)
                 : "r"(&basis[j]));
-            *out++ = *(sPatchOut*)&point;
+            *out++ = *(t3Vector*)&point;
         }
     }
 }
@@ -2641,7 +2638,7 @@ extern "C" int func_003747A0(sPMgr_47A0* self, char* mat, int idx, int bit, int 
     t3Vector* pos = PosOf_47A0(self, idx, slot);
     t2Vector* uv = UVOf_47A0(self, idx, slot);
     t2Vector* col = ColOf_47A0(self, idx, slot);
-    func_00374180((sPatchSet*)self, mat, (sPatchOut*)pos, idx);
+    func_00374180((sPatchSet*)self, mat, (t3Vector*)pos, idx);
     func_00374298((char*)self, mat, (sV2_4298*)uv, idx);
     func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
     sPEnt_47A0* entry = &self->entries[idx][slot];
@@ -8080,9 +8077,6 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderModel);
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetMeshQuad);
 #ifdef SKIP_ASM
-struct sV3_0380 {
-    float x, y, z;
-};
 
 struct sCol0380 {
     unsigned short r : 5;
@@ -8102,7 +8096,7 @@ struct sMdl0380 {
     char pad_0x0[0x8];
     sEnt0380* ents;         // 0x8
     char pad_0xC[0xC];
-    sV3_0380 scale;         // 0x18
+    t3Vector scale;         // 0x18
     int dataOff;            // 0x24
 };
 
@@ -8126,8 +8120,8 @@ extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, tInstanceReco
     short* texCoords = (short*)(data + 0x80);
     short* positions = (short*)(data + 0xA0);
     sCol0380* colours = (sCol0380*)(*(char**)(base + *(int*)(((char*)obj) + 0x98) + 0x14) + 0x10);
-    sV3_0380 k;
-    sV3_0380 modelScale = mdl->scale;
+    t3Vector k;
+    t3Vector modelScale = mdl->scale;
     k.x = modelScale.x * 3.0518509447574615e-05f;
     k.y = modelScale.y * 3.0518509447574615e-05f;
     k.z = modelScale.z * 3.0518509447574615e-05f;
@@ -10665,8 +10659,7 @@ struct sPtSurf52E8 {
     int rows;                   // 0x1BC
 };
 
-struct sPartVec3;
-extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* v);
+extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, t3Vector* v);
 
 /**
  * Updates the mesh's vertex positions: writes them into the strips of the buffer not in use and marks the mesh updated.
@@ -10691,8 +10684,8 @@ extern "C" void cPS2GridMesh_Update(sPtSurf52E8* self, t3Vector* verts)
             t3Vector* lowerVert = &verts[next];
             t3Vector* upperVert = &verts[base];
             do {
-                func_00385A38((cPS2GridMesh*)self, row->out, k, (sPartVec3*)upperVert);
-                func_00385A38((cPS2GridMesh*)self, row->out, k + 1, (sPartVec3*)lowerVert);
+                func_00385A38((cPS2GridMesh*)self, row->out, k, (t3Vector*)upperVert);
+                func_00385A38((cPS2GridMesh*)self, row->out, k + 1, (t3Vector*)lowerVert);
                 k += 2;
                 upperVert++;
                 lowerVert++;
@@ -10770,8 +10763,7 @@ extern "C" void cPS2GridMesh_Update1(sPtSurf5410* self, t2Vector* uvs)
 //100%
 INCLUDE_ASM("render/particle", cPS2GridMesh_Update2);
 #ifdef SKIP_ASM
-struct sPartVec3;
-extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* v);
+extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, t3Vector* v);
 extern "C" void func_00385AA0(cPS2GridMesh* self, unsigned short* buf, int idx, const float* c);
 
 
@@ -10821,9 +10813,9 @@ extern "C" void cPS2GridMesh_Update2(sPartGrid5530* self, t3Vector* pos, tARGB* 
             tARGB* curCol = (tARGB*)((rowStart << 4) + (int)col);  // PORT: pointer in int
             do {
                 func_00385AA0((cPS2GridMesh*)self, strip->col, k, ((float*)&curCol->A));
-                func_00385A38((cPS2GridMesh*)self, strip->pos, k, (sPartVec3*)curPos);
+                func_00385A38((cPS2GridMesh*)self, strip->pos, k, (t3Vector*)curPos);
                 func_00385AA0((cPS2GridMesh*)self, strip->col, k + 1, ((float*)&nextCol->A));
-                func_00385A38((cPS2GridMesh*)self, strip->pos, k + 1, (sPartVec3*)nextPos);
+                func_00385A38((cPS2GridMesh*)self, strip->pos, k + 1, (t3Vector*)nextPos);
                 k += 2;
                 curPos++;
                 curCol++;
@@ -10933,9 +10925,6 @@ extern "C" void cPS2GridMesh_Update3(sPartGrid_56B8* self, float* verts, float* 
 //100%
 INCLUDE_ASM("render/particle", func_00385A38);
 #ifdef SKIP_ASM
-struct sPartVec3 {
-    float x, y, z;
-};
 
 /**
  * Stores vertex @p i of a strip as three shorts: @p src's x, y and z times the mesh's position scale (+0x198, 32767 /
@@ -10947,10 +10936,10 @@ struct sPartVec3 {
  * @param i  the vertex index within the strip
  * @param src  the position
  */
-extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* src)
+extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, t3Vector* src)
 {
     float scale = self->unk_198;
-    sPartVec3 scaled;
+    t3Vector scaled;
     scaled.x = src->x * scale;
     scaled.y = src->y * scale;
     scaled.z = src->z * scale;

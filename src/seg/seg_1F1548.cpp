@@ -2053,9 +2053,6 @@ INCLUDE_ASM("seg/seg_1F1548", tCrystal_render);
 struct sV2_3418 {
     float x, y;
 };
-struct sV3_3418 {
-    float x, y, z;
-};
 struct sV4_3418 {
     float x, y, z, w;
 };
@@ -2095,7 +2092,7 @@ public:
     virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
     virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75();
     virtual void v76(); virtual void v77();
-    virtual void DrawX(float, const sPos_3418&, const sV3_3418&, const sV2_3418&, const sV2_3418&, const sV4_3418&, int);
+    virtual void DrawX(float, const sPos_3418&, const t3Vector&, const sV2_3418&, const sV2_3418&, const sV4_3418&, int);
 };
 
 struct sWorld_3418 {
@@ -2109,7 +2106,7 @@ struct sWorld_3418 {
 struct sEm_3418 {
     int f0, f4;
     float f8, fC;
-    sV3_3418 f10;
+    t3Vector f10;
     float pad1C_;
     float f20, f24;
     sV4_3418 col;
@@ -2150,7 +2147,7 @@ extern "C" void tCrystal_render(tCrystal* self, const sV2_3418* off)
     fade = 1.0f - fade * fade;
     col.x *= fade;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((sWorld_3418*)GrMan)->GetFB();
-    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), *(sV3_3418*)&self->mSize[0], *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
+    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), *(t3Vector*)&self->mSize[0], *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
 }
 #endif
 

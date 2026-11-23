@@ -211,7 +211,6 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onGainTransition);
 struct cUIScreen;
 struct sColor_7738;
 struct sColF_5C30 { float r, g, b; };
-struct sVec3_5C30 { float x, y, z; };
 int GetHashValue32(char* str);
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float t);
@@ -256,7 +255,7 @@ extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
     }
     if (self->meBackgroundType == 1) {
         float transitionStep = (float)self->miGainTransistionCount;
-        sVec3_5C30 pos = *(sVec3_5C30*)((char*)self->mpBackGroundSmall + 0x44);
+        t3Vector pos = *(t3Vector*)((char*)self->mpBackGroundSmall + 0x44);
         sColF_5C30 bgScale;
         bgScale.r = transitionStep * self->mvAnimateIncrement[0] + 0.2f;
         bgScale.g = transitionStep * self->mvAnimateIncrement[1] + 0.2f;
@@ -418,9 +417,6 @@ extern char str_Shadow[];
 extern char str_buttons[];
 extern char str_Optionpct_d[];
 
-struct sV3_6260 {
-    float x, y, z;
-};
 
 struct sVE_6260 {
     short delta;
@@ -432,7 +428,7 @@ struct sObj_6260 {
     char pad0[0x8];
     sVE_6260* vt;                   // 0x8
     char padC[0x44 - 0xC];
-    sV3_6260 pos;                   // 0x44
+    t3Vector pos;                   // 0x44
     void GetRect(void* out) { vt[20].fn((char*)this + vt[20].delta, out); }
 };
 
@@ -441,7 +437,7 @@ static inline sObj_6260* find_6260(void* self, char* name)
     return (sObj_6260*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
-#define POS_6260(o) (*(sV3_6260*)((char*)self + (o)))
+#define POS_6260(o) (*(t3Vector*)((char*)self + (o)))
 #define OBJ_6260(o) (*(sObj_6260**)((char*)self + (o)))
 
 /**
@@ -765,7 +761,6 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_handleEntryBox);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
-struct sVec3_6D30 { float x, y, z; };
 class cUIObj_6D30 {
 public:
     int pad[2];
@@ -779,7 +774,7 @@ public:
     virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
-extern sVec3_6D30 t3vect_Zero_6D30 __asm__("t3vect_Zero");
+extern t3Vector t3vect_Zero_6D30 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* info);
 extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
 extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, tRect* out);
@@ -803,7 +798,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
     cScreenPopup* screenPopup = self;
     float size[4];
     if (info[0] == -1) {
-        sVec3_6D30 pos = t3vect_Zero_6D30;
+        t3Vector pos = t3vect_Zero_6D30;
         float w = 0.0f;
         if (((cUIObj_6D30*)screenPopup->mpStaticBox) != 0) {
             float item[4];
@@ -812,15 +807,15 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
             cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpStaticBox), (tRect*)size);
             cScreenPopup_getStringSize(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it, item);
             w = item[2];
-            pos = *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpStaticBox) + 0x44);
+            pos = *(t3Vector*)((char*)((cUIObj_6D30*)screenPopup->mpStaticBox) + 0x44);
             ((cUIObj_6D30*)screenPopup->mpStaticBox)->setStatic(0);
             ((cUIObj_6D30*)screenPopup->mpStaticBox)->setVisible(1);
         }
         if (((cUIObj_6D30*)screenPopup->mpEnterBox) != 0) {
             cScreenPopup_setTextString1(self, (char*)&self->mszInputText, info + 7);
-            sVec3_6D30 boxPos = pos;
+            t3Vector boxPos = pos;
             boxPos.x = boxPos.x + w + 10.0f;
-            *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = boxPos;
+            *(t3Vector*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = boxPos;
             cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, size);
             ((cUIObj_6D30*)screenPopup->mpEnterBox)->setStatic(0);
             ((cUIObj_6D30*)screenPopup->mpEnterBox)->setVisible(1);
@@ -859,7 +854,6 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_handlePostPending);
 #ifdef SKIP_ASM
-struct sVec3_7040 { float x, y, z; };
 extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, void* b, int which, float t);
 extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 
@@ -878,9 +872,9 @@ extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, cPopupInfo* p
     char* postText = (char*)self->mpPostText;
     if (postText != 0) {
         if (pInfo->mtPostPending.eType != 0) {
-            sVec3_7040 textPos = *(sVec3_7040*)&self->mvPosTitle[0];
+            t3Vector textPos = *(t3Vector*)&self->mvPosTitle[0];
             textPos.y += self->mvCurSize[1];
-            *(sVec3_7040*)(postText + 0x44) = textPos;
+            *(t3Vector*)(postText + 0x44) = textPos;
             cScreenPopup_getTextBoxWrapSize(self, (char*)&pInfo->mtPostPending, (char*)&self->mvCurSize, 0, 10.0f);
             if (self->mbCenterText != 0) {
                 cScreenPopup_changePivot(self, self->mpPostText, 17, 0.0f);
@@ -917,8 +911,6 @@ struct cW_70F0 {
     virtual void get(void* out);
     virtual void set(void* in);
 };
-struct sVec3_70F0 { float x, y, z; };
-struct sVec3_7258;
 
 /**
  * Sets the size of the popup's message, post and title texts, keeping each text's own width or height where @p vp
@@ -930,12 +922,12 @@ struct sVec3_7258;
  *
  * @param vp  the new size (On Tour t3Vector& vSize); 0 components mean "keep"
  */
-extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* vp)
+extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, t3Vector* vp)
 {
-    sVec3_70F0* size = (sVec3_70F0*)vp;
+    t3Vector* size = (t3Vector*)vp;
     cW_70F0* textObj = (cW_70F0*)self->mpMessageText;
     if (textObj != 0) {
-        sVec3_70F0 curSize;
+        t3Vector curSize;
         textObj->get(&curSize);
         if (size->x != 0.0f) curSize.x = size->x;
         if (size->y != 0.0f) curSize.y = size->y;
@@ -943,7 +935,7 @@ extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v
     }
     textObj = (cW_70F0*)self->mpPostText;
     if (textObj != 0) {
-        sVec3_70F0 curSize;
+        t3Vector curSize;
         textObj->get(&curSize);
         if (size->x != 0.0f) curSize.x = size->x;
         if (size->y != 0.0f) curSize.y = size->y;
@@ -951,7 +943,7 @@ extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v
     }
     textObj = (cW_70F0*)self->mpTitleText;
     if (textObj != 0) {
-        sVec3_70F0 curSize;
+        t3Vector curSize;
         textObj->get(&curSize);
         if (size->x != 0.0f) curSize.x = size->x;
         if (size->y != 0.0f) curSize.y = size->y;
@@ -963,9 +955,8 @@ extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", cScreenPopup_setPopupMessage);
 #ifdef SKIP_ASM
-struct sVec3_7258 { float x, y, z; };
-extern sVec3_7258 t3vect_Zero;
-extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v);
+extern t3Vector t3vect_Zero;
+extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, t3Vector* v);
 extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* msg, void* out);
 extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, void* b, int which, float t);
 extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
@@ -984,12 +975,12 @@ extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, cPopupInfo* pIn
 {
     char* messageText = (char*)self->mpMessageText;
     if (messageText != 0) {
-        sVec3_7258 textPos = *(sVec3_7258*)&self->mvPosTitle[0];
+        t3Vector textPos = *(t3Vector*)&self->mvPosTitle[0];
         textPos.y += self->mvCurSize[1];
-        *(sVec3_7258*)(messageText + 0x44) = textPos;
+        *(t3Vector*)(messageText + 0x44) = textPos;
         char* message = (char*)&pInfo->mtMessage;
         if (self->mbCenterText != 0) {
-            sVec3_7258 wrapSize = t3vect_Zero;
+            t3Vector wrapSize = t3vect_Zero;
             cScreenPopup_getMessageLineWrapSize1(self, (int*)message, &wrapSize);
             if (wrapSize.x > self->mvCurSize[0])
                 cScreenPopup_setTextObjectSize(self, &wrapSize);
@@ -998,7 +989,7 @@ extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, cPopupInfo* pIn
         if (self->mbCenterText != 0)
             cScreenPopup_changePivot(self, self->mpMessageText, 17, 0.0f);
     }
-    *(sVec3_7258*)&self->mvMenuSize[0] = *(sVec3_7258*)&self->mvCurSize[0];
+    *(t3Vector*)&self->mvMenuSize[0] = *(t3Vector*)&self->mvCurSize[0];
 }
 #endif
 
@@ -1240,7 +1231,6 @@ extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* co
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_resizeBackground);
 #ifdef SKIP_ASM
-struct sVec3_78C0 { float x, y, z; };
 // PORT: SN soft-float helpers called by name (fptodp / dpsub / dptofp); on PC: y = (float)((double)(...) - 7.5)
 extern "C" double fptodp(float f);
 extern "C" double dpsub(double a, double b);
@@ -1256,56 +1246,56 @@ extern "C" float dptofp(double d);
  * @param fXOffset  horizontal offset
  * @param fYOffset  vertical offset
  */
-extern "C" void cScreenPopup_resizeBackground(cScreenPopup* self, sVec3_78C0 vSize, float fXOffset, float fYOffset)
+extern "C" void cScreenPopup_resizeBackground(cScreenPopup* self, t3Vector vSize, float fXOffset, float fYOffset)
 {
     float y = 0.0f;
     switch (self->meBackgroundType) {
     case 0:
         if ((char*)self->mpBackGroundWhite != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackWhite[0];
+            t3Vector piecePos = *(t3Vector*)&self->mvPosBackWhite[0];
             y = self->mvPosTitle[1] + fYOffset + vSize.y * 0.5f - 5.0f;
             piecePos.x += fXOffset;
             piecePos.y = y;
-            *(sVec3_78C0*)((char*)self->mpBackGroundWhite + 0x44) = piecePos;
+            *(t3Vector*)((char*)self->mpBackGroundWhite + 0x44) = piecePos;
         }
         if ((char*)self->mpBackGroundRed != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackRed[0];
+            t3Vector piecePos = *(t3Vector*)&self->mvPosBackRed[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)((char*)self->mpBackGroundRed + 0x44) = piecePos;
+            *(t3Vector*)((char*)self->mpBackGroundRed + 0x44) = piecePos;
         }
         break;
     case 1:
         if ((char*)self->mpBackGroundSmall != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackSmall[0];
+            t3Vector piecePos = *(t3Vector*)&self->mvPosBackSmall[0];
             y = dptofp(dpsub(fptodp(self->mvPosTitle[1] + fYOffset + vSize.y * 0.5f), 7.5));
             piecePos.x += fXOffset;
             piecePos.y = y;
-            *(sVec3_78C0*)((char*)self->mpBackGroundSmall + 0x44) = piecePos;
+            *(t3Vector*)((char*)self->mpBackGroundSmall + 0x44) = piecePos;
         }
         if ((char*)self->mpBackGroundSmallOutline != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackSmallOutline[0];
+            t3Vector piecePos = *(t3Vector*)&self->mvPosBackSmallOutline[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)((char*)self->mpBackGroundSmallOutline + 0x44) = piecePos;
+            *(t3Vector*)((char*)self->mpBackGroundSmallOutline + 0x44) = piecePos;
         }
         if ((char*)self->mpBackGroundLarge != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackLarge[0];
+            t3Vector piecePos = *(t3Vector*)&self->mvPosBackLarge[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)((char*)self->mpBackGroundLarge + 0x44) = piecePos;
+            *(t3Vector*)((char*)self->mpBackGroundLarge + 0x44) = piecePos;
         }
         if ((char*)self->mpBackGroundLargeOutline != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackLargeOutline[0];
+            t3Vector piecePos = *(t3Vector*)&self->mvPosBackLargeOutline[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)((char*)self->mpBackGroundLargeOutline + 0x44) = piecePos;
+            *(t3Vector*)((char*)self->mpBackGroundLargeOutline + 0x44) = piecePos;
         }
         if ((char*)self->mpBackGroundShadow != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackShadow[0];
+            t3Vector piecePos = *(t3Vector*)&self->mvPosBackShadow[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)((char*)self->mpBackGroundShadow + 0x44) = piecePos;
+            *(t3Vector*)((char*)self->mpBackGroundShadow + 0x44) = piecePos;
         }
         break;
     case 2:
@@ -1336,10 +1326,9 @@ extern "C" float cScreenPopup_centerOffset(cScreenPopup* self)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_centerPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVec3_7C20 { float x, y, z; };
 extern "C" float cScreenPopup_centerOffset(cScreenPopup* self);
-void cScreenPopup_determineAndSetScaling_7C20(void* self, sVec3_7C20 v) __asm__("cScreenPopup_determineAndSetScaling");
-void cScreenPopup_resizeBackground_7C20(void* self, sVec3_7C20 v, float a, float b) __asm__("cScreenPopup_resizeBackground");
+void cScreenPopup_determineAndSetScaling_7C20(void* self, t3Vector v) __asm__("cScreenPopup_determineAndSetScaling");
+void cScreenPopup_resizeBackground_7C20(void* self, t3Vector v, float a, float b) __asm__("cScreenPopup_resizeBackground");
 
 /**
  * Lays the popup out centred on screen.
@@ -1352,51 +1341,51 @@ extern "C" void cScreenPopup_centerPopup(cScreenPopup* self)
 {
     float x = cScreenPopup_centerOffset((cScreenPopup*)self) + self->mvOffset[0];
     float y = self->mvOffset[1];
-    cScreenPopup_determineAndSetScaling_7C20(self, *(sVec3_7C20*)&self->mvCurSize[0]);
-    cScreenPopup_resizeBackground_7C20(self, *(sVec3_7C20*)&self->mvCurSize[0], self->mvOffset[0], y);
+    cScreenPopup_determineAndSetScaling_7C20(self, *(t3Vector*)&self->mvCurSize[0]);
+    cScreenPopup_resizeBackground_7C20(self, *(t3Vector*)&self->mvCurSize[0], self->mvOffset[0], y);
     char* widget = (char*)self->mpMenu;
     if (widget != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)(widget + 0x44);
+        t3Vector widgetPos = *(t3Vector*)(widget + 0x44);
         widgetPos.x += self->mvOffset[0];
         widgetPos.y += y;
-        *(sVec3_7C20*)(widget + 0x44) = widgetPos;
+        *(t3Vector*)(widget + 0x44) = widgetPos;
     }
     widget = (char*)self->mpButtonGroup;
     if (widget != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)(widget + 0x44);
+        t3Vector widgetPos = *(t3Vector*)(widget + 0x44);
         widgetPos.x += self->mvOffset[0];
         widgetPos.y += y;
-        *(sVec3_7C20*)(widget + 0x44) = widgetPos;
+        *(t3Vector*)(widget + 0x44) = widgetPos;
     }
     if ((char*)self->mpMessageText != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)((char*)self->mpMessageText + 0x44);
+        t3Vector widgetPos = *(t3Vector*)((char*)self->mpMessageText + 0x44);
         if (self->mbCenterText != 0) {
             widgetPos.x = x + 320.0f;
         } else {
             widgetPos.x += x;
         }
         widgetPos.y += y;
-        *(sVec3_7C20*)((char*)self->mpMessageText + 0x44) = widgetPos;
+        *(t3Vector*)((char*)self->mpMessageText + 0x44) = widgetPos;
     }
     if ((char*)self->mpTitleText != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)((char*)self->mpTitleText + 0x44);
+        t3Vector widgetPos = *(t3Vector*)((char*)self->mpTitleText + 0x44);
         if (self->mbCenterText != 0) {
             widgetPos.x = x + 320.0f;
         } else {
             widgetPos.x += x;
         }
         widgetPos.y += y;
-        *(sVec3_7C20*)((char*)self->mpTitleText + 0x44) = widgetPos;
+        *(t3Vector*)((char*)self->mpTitleText + 0x44) = widgetPos;
     }
     if ((char*)self->mpPostText != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)((char*)self->mpPostText + 0x44);
+        t3Vector widgetPos = *(t3Vector*)((char*)self->mpPostText + 0x44);
         if (self->mbCenterText != 0) {
             widgetPos.x = x + 320.0f;
         } else {
             widgetPos.x += x;
         }
         widgetPos.y += y;
-        *(sVec3_7C20*)((char*)self->mpPostText + 0x44) = widgetPos;
+        *(t3Vector*)((char*)self->mpPostText + 0x44) = widgetPos;
     }
 }
 #endif
@@ -1404,7 +1393,6 @@ extern "C" void cScreenPopup_centerPopup(cScreenPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_FillTextEntryBox);
 #ifdef SKIP_ASM
-struct sVec3_7EB0 { float x, y, z; };
 struct sVec2_7EB0 { float x, y; };
 struct sVE_7EB0 {
     short delta;
@@ -1422,10 +1410,10 @@ struct sVE_7EB0 {
 extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self)
 {
     char* enterBox = (char*)self->mpEnterBox;
-    sVec3_7EB0 enterPos = *(sVec3_7EB0*)(enterBox + 0x44);
-    sVec3_7EB0 staticPos;
-    sVec3_7EB0 menuPos = *(sVec3_7EB0*)((char*)self->mpMenu + 0x44);
-    staticPos = *(sVec3_7EB0*)((char*)self->mpStaticBox + 0x44);
+    t3Vector enterPos = *(t3Vector*)(enterBox + 0x44);
+    t3Vector staticPos;
+    t3Vector menuPos = *(t3Vector*)((char*)self->mpMenu + 0x44);
+    staticPos = *(t3Vector*)((char*)self->mpStaticBox + 0x44);
     sVec2_7EB0 size;
     {
         sVE_7EB0* vt = *(sVE_7EB0**)(enterBox + 8);
@@ -1437,17 +1425,17 @@ extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self)
         sVE_7EB0* vt = *(sVE_7EB0**)(box + 8);
         vt[21].fn(vthis(box, vt[21]), &size);
     }
-    sVec3_7EB0 scale;
+    t3Vector scale;
     scale.x = (size.x + 6.0f) / self->mvSizeBackEnterBox[0];
     scale.y = 1.0f;
     scale.z = 1.0f;
     char* background = (char*)self->mpEnterBoxBackground;
     if (background != 0) {
-        sVec3_7EB0 backPos = enterPos;
+        t3Vector backPos = enterPos;
         backPos.y = backPos.y + self->mvSizeBackEnterBox[1] * 0.5f + menuPos.y - 3.0f;
         backPos.x = backPos.x + (size.x + 6.0f) * 0.5f;
-        *(sVec3_7EB0*)(background + 0x44) = backPos;
-        *(sVec3_7EB0*)((char*)self->mpEnterBoxBackground + 0x50) = scale;
+        *(t3Vector*)(background + 0x44) = backPos;
+        *(t3Vector*)((char*)self->mpEnterBoxBackground + 0x50) = scale;
     }
 }
 #endif
@@ -1604,7 +1592,6 @@ extern "C" void cScreenPopup_setTextString(cScreenPopup* self, void* dst, cUITex
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize);
 #ifdef SKIP_ASM
 struct cUIText;
-struct sVec3_8320 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" float cFont_textExtent1(void* self, const char* str, void* out, int n, float sx, float sy);
@@ -1625,7 +1612,7 @@ extern char str_String_pct_08x[];
  */
 extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out)
 {
-    sVec3_8320 textScale = *(sVec3_8320*)((char*)text + 0x50);
+    t3Vector textScale = *(t3Vector*)((char*)text + 0x50);
     cFont* scaledFont = (cFont*)cUIText_getFont(text);
     float sx = scaledFont->BaseScale[0] * textScale.x;
     float sy = scaledFont->BaseScale[1] * textScale.y;
@@ -1666,7 +1653,6 @@ extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, in
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize1);
 #ifdef SKIP_ASM
-struct sVec3_84A8 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
@@ -1683,7 +1669,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
  */
 extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, void* text, const char* str, void* out)
 {
-    sVec3_84A8 scale = *(sVec3_84A8*)((char*)text + 0x50);
+    t3Vector scale = *(t3Vector*)((char*)text + 0x50);
     cFont* font = (cFont*)cUIText_getFont(text);
     float sx = font->BaseScale[0] * scale.x;
     float sy = font->BaseScale[1] * scale.y;
@@ -1699,7 +1685,6 @@ extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, void* text, cons
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize2);
 #ifdef SKIP_ASM
-struct sVec3_8568 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent1(void* self, const char* str, void* out, int n, float sx, float sy);
 
@@ -1715,7 +1700,7 @@ extern "C" float cFont_textExtent1(void* self, const char* str, void* out, int n
  */
 extern "C" void cScreenPopup_getStringSize2(cScreenPopup* self, void* text, const char* str, void* out)
 {
-    sVec3_8568 scale = *(sVec3_8568*)((char*)text + 0x50);
+    t3Vector scale = *(t3Vector*)((char*)text + 0x50);
     cFont* font = (cFont*)cUIText_getFont(text);
     float sx = font->BaseScale[0] * scale.x;
     float sy = font->BaseScale[1] * scale.y;
@@ -1802,7 +1787,6 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_adjustMenuPosition);
 #ifdef SKIP_ASM
-struct sVec3_8758 { float x, y, z; };
 extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 
 /**
@@ -1816,16 +1800,16 @@ extern "C" void cScreenPopup_adjustMenuPosition(cScreenPopup* self)
 {
     char* menu = (char*)self->mpMenu;
     if (menu != 0) {
-        sVec3_8758 firstOptionPos = *(sVec3_8758*)((char*)self->mpOptions[0] + 0x44);
+        t3Vector firstOptionPos = *(t3Vector*)((char*)self->mpOptions[0] + 0x44);
         float x = (640.0f - self->mvLargestOption[0]) * 0.5f - firstOptionPos.x;
-        sVec3_8758 menuPos = *(sVec3_8758*)&self->mvPosMenu[0];
+        t3Vector menuPos = *(t3Vector*)&self->mvPosMenu[0];
         menuPos.y += self->mvMenuSize[1];
         menuPos.x += x;
-        *(sVec3_8758*)(menu + 0x44) = menuPos;
+        *(t3Vector*)(menu + 0x44) = menuPos;
         char* textBoxPair = (char*)self->mpTextBoxPair;
-        sVec3_8758 pairPos = *(sVec3_8758*)(textBoxPair + 0x44);
+        t3Vector pairPos = *(t3Vector*)(textBoxPair + 0x44);
         pairPos.x = pairPos.x - x + 5.0f;
-        *(sVec3_8758*)(textBoxPair + 0x44) = pairPos;
+        *(t3Vector*)(textBoxPair + 0x44) = pairPos;
         if (self->mbCenterOptions != 0) {
             int i;
             for (i = 0; i < 5; i++) {
@@ -1843,7 +1827,6 @@ extern "C" void cScreenPopup_adjustMenuPosition(cScreenPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_adjustButtonPosition);
 #ifdef SKIP_ASM
-struct sVec3_88C8 { float x, y, z; };
 
 /**
  * Moves the popup's button group to mvPosButtons plus the shift cScreenPopup_adjustMenuPosition stored in
@@ -1853,10 +1836,10 @@ extern "C" void cScreenPopup_adjustButtonPosition(cScreenPopup* self)
 {
     void* buttonGroup = self->mpButtonGroup;
     if (buttonGroup != 0) {
-        sVec3_88C8 buttonPos = *(sVec3_88C8*)&self->mvPosButtons[0];
+        t3Vector buttonPos = *(t3Vector*)&self->mvPosButtons[0];
         buttonPos.y += self->mvButtonOffset[1];
         buttonPos.x += self->mvButtonOffset[0];
-        *(sVec3_88C8*)((char*)buttonGroup + 0x44) = buttonPos;
+        *(t3Vector*)((char*)buttonGroup + 0x44) = buttonPos;
     }
 }
 #endif
@@ -1869,7 +1852,6 @@ struct sObjBitsK8930 {
     unsigned state : 6;
     unsigned hi : 13;
 };
-struct sVec3K8930 { float x, y, z; };
 
 struct sVEntryK8930 {
     short delta;
@@ -1895,7 +1877,7 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
     t2Vector size;
     sVEntryK8930* vt = *(sVEntryK8930**)((char*)obj + 8);
     vt[20].fn(vthis(obj, vt[20]), &size);
-    sVec3K8930 pos = *(sVec3K8930*)((char*)obj + 0x44);
+    t3Vector pos = *(t3Vector*)((char*)obj + 0x44);
     pivotBits->state = state;
     if (fOffset == 0.0f)
         fOffset = size.x * 0.5f;
@@ -1909,7 +1891,7 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
         pos.x -= fOffset;
         break;
     }
-    *(sVec3K8930*)((char*)obj + 0x44) = pos;
+    *(t3Vector*)((char*)obj + 0x44) = pos;
 }
 #endif
 
@@ -1922,9 +1904,8 @@ struct sVec3_8A38 {
     sVec3_8A38() {}
     sVec3_8A38(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 };
-struct sVec3_7258;
 extern sVec3_8A38 t3vect_Zero_8A38 __asm__("t3vect_Zero");
-extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v);
+extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, t3Vector* v);
 extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 extern "C" void cScreenPopup_adjustLayer(void* self, int v);
 
@@ -2010,7 +1991,7 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
     }
     sVec3_8A38 textSize = t3vect_Zero_8A38;
     textSize.x = 472.0f;
-    cScreenPopup_setTextObjectSize(self, (sVec3_7258*)&textSize);
+    cScreenPopup_setTextObjectSize(self, (t3Vector*)&textSize);
     sVec3_8A38 one;
     one.x = 1.0f;
     one.y = 1.0f;
@@ -2267,7 +2248,6 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVec3_94B0 { float x, y, z; };
 struct sVEntry_94B0 {
     short delta;
     short index;
@@ -2308,11 +2288,11 @@ extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* t
     int done = 0;
     unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
-    sVec3_94B0 textScale;
+    t3Vector textScale;
     t2Vector size;
     sVEntry_94B0* vt = *(sVEntry_94B0**)((char*)text + 8);
     vt[20].fn(vthis(text, vt[20]), &size);
-    textScale = *(sVec3_94B0*)((char*)text + 0x50);
+    textScale = *(t3Vector*)((char*)text + 0x50);
     while (i < n) {
         if (buf[i] == gUSTRBackSlash1 && buf[i + 1] == gUSTRBackSlash1) {
             w = 0.0f;
@@ -2340,11 +2320,10 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cScreenPopup::getMessageLineWrapSize(cUIText*, const char*, t3Vector&) (On Tour signature and locals).
-struct t3Vector_9648 { float x, y, z; };
 struct sVEntry_9648 {
     short delta;
     short index;
-    void (*fn)(void*, t3Vector_9648*);
+    void (*fn)(void*, t3Vector*);
 };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_charAdvance(void* font, int c);  // cFont::charAdvance(char) const
@@ -2368,7 +2347,7 @@ extern char str_getMessageLineWrapSize[];
  */
 extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pText, const char* pString, void* pvSize)
 {
-    t3Vector_9648& vSize = *(t3Vector_9648*)pvSize;
+    t3Vector& vSize = *(t3Vector*)pvSize;
     *(int*)((char*)pText + 0x14) |= 0x80;
     void* pFont = cUIText_getFont(pText);
     if (pFont == 0)
@@ -2379,11 +2358,11 @@ extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pT
     int j = 0;
     float Pixels = 0.0f;
     bool bFound = false;
-    t3Vector_9648 vScale;
-    t3Vector_9648 vTextSize;
+    t3Vector vScale;
+    t3Vector vTextSize;
     sVEntry_9648* vt = *(sVEntry_9648**)((char*)pText + 8);
     vt[20].fn(vthis(pText, vt[20]), &vTextSize);
-    vScale = *(t3Vector_9648*)((char*)pText + 0x50);
+    vScale = *(t3Vector*)((char*)pText + 0x50);
     while (pTempString[j] != 0) {
         char char1 = pTempString[j];
         char char2 = pTempString[j + 1];
@@ -2480,7 +2459,6 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
-struct sVec3_9938 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_charAdvance1(void* font, int c);
 extern "C" int USTR_length(unsigned short* s);
@@ -2517,10 +2495,10 @@ extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* te
     int i = 0;
     unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
-    sVec3_9938 textScale;
+    t3Vector textScale;
     t2Vector size;
     text->getSize((t3Vector*)&size);
-    textScale = *(sVec3_9938*)((char*)text + 0x50);
+    textScale = *(t3Vector*)((char*)text + 0x50);
     while (i < n) {
         if (buf[i] == gUSTRBackSlash1 && buf[i + 1] == gUSTRBackSlash1) {
             last = -1;
@@ -3092,7 +3070,6 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_checkAndFixTextEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
-struct sVec3_A6A0 { float x, y, z; };
 struct sVec2_A6A0 { float x, y; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
@@ -3124,7 +3101,7 @@ static inline void measure_A6A0(cUIText* text, const char* s, float* out)
 extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* text, const char* str)
 {
     int fixed = 0;
-    sVec3_A6A0 scale = *(sVec3_A6A0*)((char*)text + 0x50);
+    t3Vector scale = *(t3Vector*)((char*)text + 0x50);
     sVec2_A6A0 size;
     float ext[4];
     float dots[4];
@@ -5082,7 +5059,6 @@ extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int bDropFro
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateCursor);
 #ifdef SKIP_ASM
-struct sVec3_CC30 { float x, y, z; };
 struct sRect_CC30 {
     float x, y, w, h;
     void Measure(char* f, const char* str, int flag)
@@ -5108,19 +5084,19 @@ extern char str_CharacterCursor[];
  */
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
 {
-    sVec3_CC30 pos;
+    t3Vector pos;
 
     void* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     if (uiObj != 0) {
         sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
         vt[20].fn(vthis(uiObj, vt[20]), (char*)&self->mvSizeEnter[0]);
-        *(sVec3_CC30*)&self->mvPosEnter[0] = *(sVec3_CC30*)(uiObj + 0x44);
+        *(t3Vector*)&self->mvPosEnter[0] = *(t3Vector*)(uiObj + 0x44);
     }
     self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1] - self->mvSizeCursor[1] - 2.0f;
     unsigned char cursorChar = *(((char*)self) + self->miCursorPos + 0x74);
     char tc = *(((char*)self) + self->miCursorPos + 0x74);
-    pos = *(sVec3_CC30*)&self->mvSizeCursor[0];
+    pos = *(t3Vector*)&self->mvSizeCursor[0];
     if (tc != 0) {
         sRect_CC30 size;
         char ch[2];
@@ -5150,9 +5126,9 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     char* font = (char*)cUIText_getFont(text);
     sRect_CC30 size;
     size.Measure(font, buf, 1);
-    sVec3_CC30 cursorPos = *(sVec3_CC30*)&self->mvPosCursor[0];
+    t3Vector cursorPos = *(t3Vector*)&self->mvPosCursor[0];
     cursorPos.x = size.w + self->mvPosEnter[0];
-    *(sVec3_CC30*)(uiObj + 0x44) = cursorPos;
+    *(t3Vector*)(uiObj + 0x44) = cursorPos;
 }
 #endif
 
@@ -5458,7 +5434,6 @@ extern char str_ExtendCursorLeft[];
 extern char str_ExtendCursorRight[];
 extern char D_004A1408[];
 
-struct sVec3_D348 { float x, y, z; };
 
 
 
@@ -5529,18 +5504,18 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         if (charCursor != 0) {
             sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(charCursor + 8);
             vt[20].fn(vthis(charCursor, vt[20]), (char*)&self->mvSizeCursor[0]);
-            *(sVec3_D348*)&self->mvPosCursor[0] = *(sVec3_D348*)(charCursor + 0x44);
+            *(t3Vector*)&self->mvPosCursor[0] = *(t3Vector*)(charCursor + 0x44);
         }
         char* enterValue = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
         if (enterValue != 0) {
             sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(enterValue + 8);
             vt[20].fn(vthis(enterValue, vt[20]), (char*)&self->mvSizeEnter[0]);
-            *(sVec3_D348*)&self->mvPosEnter[0] = *(sVec3_D348*)(enterValue + 0x44);
+            *(t3Vector*)&self->mvPosEnter[0] = *(t3Vector*)(enterValue + 0x44);
             self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1];
         }
         char* nameBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Name_bar));
         if (nameBar != 0) {
-            sVec3_D348 nameBarPos = *(sVec3_D348*)(nameBar + 0x44);
+            t3Vector nameBarPos = *(t3Vector*)(nameBar + 0x44);
             self->mvPosEnter[0] += nameBarPos.x;
             self->mvPosEnter[1] += nameBarPos.y;
             self->mvPosEnter[2] += nameBarPos.z;
@@ -6104,7 +6079,6 @@ extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(cKeyboardPopup* self, int i
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setScale);
 #ifdef SKIP_ASM
-struct sVec3_CE4C8 { float x, y, z; };
 
 extern "C" void* cUIText_getFont(void* self);
 
@@ -6115,7 +6089,7 @@ extern "C" void* cUIText_getFont(void* self);
  */
 extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj)
 {
-    sVec3_CE4C8 objScale = *(sVec3_CE4C8*)((char*)obj + 0x50);
+    t3Vector objScale = *(t3Vector*)((char*)obj + 0x50);
     cFont* font = (cFont*)cUIText_getFont(obj);
     float x = font->BaseScale[0] * objScale.x;
     float y = font->BaseScale[1] * objScale.y;

@@ -658,13 +658,10 @@ extern "C" void tActiveAvalancheNode_calculateScale(tActiveAvalancheNode* self, 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_update);
 #ifdef SKIP_ASM
-struct sAvMatrixCA8 {
-    t4Vector row[4];
-};
 struct sAvFrameCA8 {
     t4Vector pos;             // 0x0
     t4Vector vel;             // 0x10
-    sAvMatrixCA8 rot;           // 0x20
+    t4Matrix rot;           // 0x20
 };
 struct sAvDataCA8 {
     char pad0[0xF0];
@@ -679,7 +676,7 @@ struct sAvNodeCA8 {
     sAvFrameCA8 getFrameData(float t) __asm__("tActiveAvalancheNode_getFrameData");
     char pad0[0x60];
     t4Vector pos;             // 0x60
-    sAvMatrixCA8 rot;           // 0x70
+    t4Matrix rot;           // 0x70
     float scale;                // 0xB0
     float fB4;                  // 0xB4
     char padB8[0xC0 - 0xB8];
@@ -695,7 +692,7 @@ extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void*
 extern t4Vector t4vect_Zero_7CA8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void vu0CopyMatrixCA8(sAvMatrixCA8* dst, sAvMatrixCA8* src)
+static inline void vu0CopyMatrixCA8(t4Matrix* dst, t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -2242,14 +2239,11 @@ extern "C" void cAvalanche_reset(void* self)
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_getTransform);
 #ifdef SKIP_ASM
 
-struct sAvMatrix {
-    t4Vector row[4];
-};
 
 struct sAvNode {
     char pad[0x60];
     t4Vector pos;            // 0x60
-    sAvMatrix rot;          // 0x70
+    t4Matrix rot;          // 0x70
     float scale;            // 0xB0
     char padB4[0x2E0 - 0xB4];
     void* data;             // 0x2E0
@@ -2259,7 +2253,7 @@ struct sAvNode {
 extern sAvNode cAvalanche_m_activeNodes[64];
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void vu0CopyMatrixAV(sAvMatrix* dst, sAvMatrix* src)
+static inline void vu0CopyMatrixAV(t4Matrix* dst, t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -2276,7 +2270,7 @@ static inline void vu0CopyMatrixAV(sAvMatrix* dst, sAvMatrix* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix times scalar).
-static inline void vu0ScaleMatrixAV(sAvMatrix* dst, sAvMatrix* src, float s)
+static inline void vu0ScaleMatrixAV(t4Matrix* dst, t4Matrix* src, float s)
 {
     int t;
     __asm__ __volatile__(
@@ -2309,7 +2303,7 @@ static inline void vu0ScaleMatrixAV(sAvMatrix* dst, sAvMatrix* src, float s)
  * @param id  the instance record to look for
  * @param out  receives the transform
  */
-extern "C" void cAvalanche_getTransform(int id, sAvMatrix* out)
+extern "C" void cAvalanche_getTransform(int id, t4Matrix* out)
 {
     int i;
     for (i = 0; i < 64; i++) {
@@ -2586,7 +2580,6 @@ struct sVec4_A1C0 {
     sVec4_A1C0() {}
     sVec4_A1C0(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
-struct sVec3_A1C0 { float x, y, z; };
 struct sAvInfo_A1C0 {
     sVec4_A1C0 center;          // 0x0
     float total;                // 0x10
@@ -2685,7 +2678,7 @@ static inline void vDivEq_A1C0(sVec4_A1C0& v, float s)
  * @return the 0x20-byte summary: average position, average scale, nearest distance, node count, type-2 flag
  */
 // PORT: g++ `<?` (min) operator.
-extern "C" sAvInfo_A1C0 cAvalanche_getAvalancheDataByPosition(sVec3_A1C0 position)
+extern "C" sAvInfo_A1C0 cAvalanche_getAvalancheDataByPosition(t3Vector position)
 {
     sAvInfo_A1C0 posData;
     posData.center = t4vect_Zero;

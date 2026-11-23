@@ -239,9 +239,6 @@ struct sVec4_E798 {
     sVec4_E798(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sVec3_E798 {
-    float x, y, z;
-};
 
 
 
@@ -394,7 +391,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         vu0ScaleEq_E798(rotv, animSpeed * (float)cAppMan_TheAppMan->TimerHz * d2r);
         t4Matrix eulerMat;
         {
-            sVec3_E798 eulerAngles;
+            t3Vector eulerAngles;
             eulerAngles.x = rot.x;
             eulerAngles.y = rot.y;
             eulerAngles.z = rot.z;
