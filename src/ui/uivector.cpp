@@ -1645,7 +1645,7 @@ extern void* cUIIcon_vtbl[];
 extern "C" void* cUIIcon_cUIIcon1(cUIIcon* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIIcon_vtbl;
+    VPTR_OF(cListNode, self) = cUIIcon_vtbl;
     func_0021CCC8(&self->mAttrIcon);
     return ((char*)self);
 }
@@ -1668,7 +1668,7 @@ extern void* cUIIcon_vtbl[];
 extern "C" void* cUIIcon_cUIIcon(cUIIcon* self)
 {
     cUIThing_cUIThing_self(((char*)self));
-    self->mVtbl = cUIIcon_vtbl;
+    VPTR_OF(cListNode, self) = cUIIcon_vtbl;
     func_0021CCC8(&self->mAttrIcon);
     self->mTextureID = -1;
     self->mpTextureElem = 0;
@@ -1690,7 +1690,7 @@ INCLUDE_ASM("ui/uivector", cUIIcon__cUIIcon__FPv);
 void* cUIIcon__cUIIcon(void* vself)
 {
     cUIIcon* self = (cUIIcon*)vself;
-    self->mVtbl = (void**)((int)(void*)cUIIcon_vtbl);
+    VPTR_OF(cListNode, self) = (void**)((int)(void*)cUIIcon_vtbl);
     return cUIThing__cUIThing(self);
 }
 #endif
@@ -1929,7 +1929,7 @@ extern void* cUIGroup_vtbl[];
 extern "C" void* cUIGroup_cUIGroup1(cUIGroup* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, self) = cUIGroup_vtbl;
     cList_cList(&self->mList);
     return ((char*)self);
 }
@@ -1951,7 +1951,7 @@ extern void* cUIGroup_vtbl[];
 extern "C" void* cUIGroup_cUIGroup(cUIGroup* self)
 {
     cUIThing_cUIThing_self(((char*)self));
-    self->mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, self) = cUIGroup_vtbl;
     cList_cList(&self->mList);
     return ((char*)self);
 }
@@ -1976,7 +1976,7 @@ extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cU
  */
 extern "C" void cUIGroup__cUIGroup(cUIGroup* self, int flag)
 {
-    self->mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, self) = cUIGroup_vtbl;
     VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v(&self->mList);
     VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
@@ -2154,9 +2154,9 @@ extern "C" void* tAttrMenu_tAttrMenu(void* self);
 extern "C" void* cUIMenu_cUIMenu(cUIMenu* self)
 {
     cUIThing_cUIThing_self(((char*)self));
-    self->mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, self) = cUIGroup_vtbl;
     cList_cList(&self->mList);
-    self->mVtbl = cUIMenu_vtbl;
+    VPTR_OF(cListNode, self) = cUIMenu_vtbl;
     tAttrMenu_tAttrMenu(&self->mAttrMenu);
     self->mStoredIndex = 0xFF;
     self->mScrollItemCurrent = 0;
@@ -2190,7 +2190,7 @@ extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cU
  */
 extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
 {
-    self->mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, self) = cUIGroup_vtbl;
     VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v(&self->mList);
     VPTR_OF(cListNode, &self->mList.mEnd) = cListNode_vtbl;
@@ -2433,7 +2433,7 @@ extern void* cUIPair_vtbl[];
 extern "C" void* cUIPair_cUIPair1(cUIPair* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIPair_vtbl;
+    VPTR_OF(cListNode, self) = cUIPair_vtbl;
     tAttrPair_tAttrPair(&self->mAttrPair);
     return ((char*)self);
 }
@@ -2455,7 +2455,7 @@ extern void* cUIPair_vtbl[];
 extern "C" void* cUIPair_cUIPair(cUIPair* self)
 {
     cUIThing_cUIThing_self(((char*)self));
-    self->mVtbl = cUIPair_vtbl;
+    VPTR_OF(cListNode, self) = cUIPair_vtbl;
     tAttrPair_tAttrPair(&self->mAttrPair);
     self->mpEntry = 0;
     self->mpWidget = 0;
@@ -2482,7 +2482,7 @@ extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThin
  */
 extern "C" void cUIPair__cUIPair(cUIPair* self, int flags)
 {
-    self->mVtbl = cUIPair_vtbl;
+    VPTR_OF(cListNode, self) = cUIPair_vtbl;
     cUIPair_destroyPair(self);
     cUIThing__cUIThing_dtor(self, flags);
 }
@@ -2606,7 +2606,7 @@ extern "C" void* cUIListBox_cUIListBox1(cUIListBox* self)
 {
     int i;
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIListBox_vtbl;
+    VPTR_OF(cListNode, self) = cUIListBox_vtbl;
     tAttrListBox_tAttrListBox((unsigned char*)(&self->mAttrListBox));
     char* entry = (char*)&self->mpEntries[0];
     for (i = 0x1F; i != -1; i--) {
@@ -2634,7 +2634,7 @@ extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThin
  */
 extern "C" void cUIListBox__cUIListBox(cUIListBox* self, int flags)
 {
-    self->mVtbl = cUIListBox_vtbl;
+    VPTR_OF(cListNode, self) = cUIListBox_vtbl;
     cUIListBox_deleteAllEntries(self);
     cUIThing__cUIThing_dtor(self, flags);
 }
@@ -3561,7 +3561,7 @@ extern "C" void* cUIScreen_cUIScreen1(cUIScreen* self)
     tAttrScreen_tAttrScreen(&self->mAttrScreen);
     cList_cList(&self->mThreads);
     cUIThing_cUIThing(&self->mRootGroup, 0, 0);
-    self->mRootGroup.mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, &self->mRootGroup) = cUIGroup_vtbl;
     cList_cList(&self->mRootGroup.mList);
     return ((char*)self);
 }
@@ -3598,7 +3598,7 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
     self->mpObjectBlock = 0;
     self->mppObjectList = 0;
     cUIThing_cUIThing(&self->mRootGroup, 0, 0);
-    self->mRootGroup.mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, &self->mRootGroup) = cUIGroup_vtbl;
     cList_cList(&self->mRootGroup.mList);
     self->mpState = (cUIState*)pState;
     return ((char*)self);
@@ -3756,7 +3756,7 @@ extern void* cUIText_vtbl[];
 extern "C" void* cUIText_cUIText1(cUIText* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIText_vtbl;
+    VPTR_OF(cListNode, self) = cUIText_vtbl;
     tAttrText_tAttrText((unsigned char*)(&self->mAttrText));
     return ((char*)self);
 }
@@ -3781,7 +3781,7 @@ extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThin
  */
 extern "C" void cUIText__cUIText(cUIText* self, int flags)
 {
-    self->mVtbl = cUIText_vtbl;
+    VPTR_OF(cListNode, self) = cUIText_vtbl;
     cUIText_deleteText(self);
     cUIThing__cUIThing_dtor(self, flags);
 }
@@ -4011,7 +4011,7 @@ extern void* cUIScrollBar_vtbl[];
 extern "C" void* cUIScrollBar_cUIScrollBar1(cUIScrollBar* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIScrollBar_vtbl;
+    VPTR_OF(cListNode, self) = cUIScrollBar_vtbl;
     return ((char*)self);
 }
 #endif
@@ -4033,7 +4033,7 @@ extern "C" void* cUIScrollBar_cUIScrollBar(cUIScrollBar* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     self->mpObjBackground = 0;
-    self->mVtbl = cUIScrollBar_vtbl;
+    VPTR_OF(cListNode, self) = cUIScrollBar_vtbl;
     self->mpObjKnob = 0;
     self->mpUpArrow = 0;
     self->mpDownArrow = 0;
@@ -4212,7 +4212,7 @@ extern void* cUIProgress_vtbl[];
 extern "C" void* cUIProgress_cUIProgress1(cUIProgress* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIProgress_vtbl;
+    VPTR_OF(cListNode, self) = cUIProgress_vtbl;
     return ((char*)self);
 }
 #endif
@@ -4232,7 +4232,7 @@ extern void* cUIProgress_vtbl[];
 extern "C" void* cUIProgress_cUIProgress(cUIProgress* self)
 {
     cUIThing_cUIThing_self(((char*)self));
-    self->mVtbl = cUIProgress_vtbl;
+    VPTR_OF(cListNode, self) = cUIProgress_vtbl;
     self->mpObjBackground = 0;
     self->mpObjKnob = 0;
     self->mValue = 0;
@@ -4323,7 +4323,7 @@ extern void* cUISlider_vtbl[];
 extern "C" void* cUISlider_cUISlider1(cUISlider* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUISlider_vtbl;
+    VPTR_OF(cListNode, self) = cUISlider_vtbl;
     return ((char*)self);
 }
 #endif
@@ -4343,7 +4343,7 @@ extern void* cUISlider_vtbl[];
 extern "C" void* cUISlider_cUISlider(cUISlider* self)
 {
     cUIThing_cUIThing_self(((char*)self));
-    self->mVtbl = cUISlider_vtbl;
+    VPTR_OF(cListNode, self) = cUISlider_vtbl;
     self->mValue = 0;
     self->mNumValues = 0;
     self->mStartPixel = 0;
@@ -4453,7 +4453,7 @@ extern void* cUITextScroll_vtbl[];
 extern "C" void* cUITextScroll_cUITextScroll1(cUITextScroll* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUITextScroll_vtbl;
+    VPTR_OF(cListNode, self) = cUITextScroll_vtbl;
     tAttrTextScroll_tAttrTextScroll((unsigned char*)(&self->mAttrTextScroll));
     cList_cList(&self->mList);
     return ((char*)self);
@@ -4482,7 +4482,7 @@ extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThin
  */
 extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
 {
-    self->mVtbl = cUITextScroll_vtbl;
+    VPTR_OF(cListNode, self) = cUITextScroll_vtbl;
     cUITextScroll_clearBuffer(self);
     VPTR_OF(cList, &self->mList) = cList_vtbl;
     cList_destroyList_v((char*)&self->mList);
@@ -4801,7 +4801,7 @@ extern void* cUIVector_vtbl[];
 extern "C" void* cUIVector_cUIVector1(cUIVector* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
-    self->mVtbl = cUIVector_vtbl;
+    VPTR_OF(cListNode, self) = cUIVector_vtbl;
     tAttrVector_tAttrVector(&self->mAttrVector);
     return ((char*)self);
 }

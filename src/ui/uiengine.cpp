@@ -1317,7 +1317,7 @@ extern tARGB gStaticColour;
 extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
 {
     cUIThing_cUIThing((self));
-    self->mVtbl = cUIListBox_vtbl;
+    VPTR_OF(cListNode, self) = cUIListBox_vtbl;
     *(unsigned char*)&self->mAttrListBox = (*(unsigned char*)&self->mAttrListBox | 4) & 0xC4;
     tListBoxEntry* listBoxEntry = ((&self->mpEntries[0]));
     for (int i = 31; i != -1; i--, listBoxEntry++) {

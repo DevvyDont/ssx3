@@ -14,7 +14,7 @@
 // Bases: cUIGroup (0x90 bytes: cUIThing 0x74 + cList mList 0x1C; ui/uigroup.h, tag "cUIGroup" 0x90) <- cUIThing <-
 // cListNode, written out flat below. The vptr is cUIThing's (0x8).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
+// A real subclass of cUIGroup (its own members FLAT), like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIMenu, size 0xC0: its cUIGroup is 0xA0, so every
 // cUIMenu member sits exactly 0x10 later there), placed at retail offsets by:
 //   [P] the July 2003 preview's inline accessors (linkonce names isFlipInput / setFlipInput / getScrollIndex /
@@ -35,6 +35,7 @@
 // lw/sltu/li -3/sll/and/or/sw, and a bool getter gives lw/sra/andi (cUIMenu_isFlipInput). mInputMap follows at 0x91.
 
 #include "layout.h"
+#include "ui/uigroup.h"
 #include "ui/uithing.h"
 #include "util/list.h"
 
@@ -54,35 +55,16 @@ struct tAttrMenu {
 
 CHECK_SIZE(tAttrMenu, 0x1);
 
-struct cUIMenu {
-    // --- cListNode / cUIThing (ui/uithing.h, 0x74)
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the cUIThing ctor self-links it
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
-    void** mVtbl;                    // 0x008 [R] _vt$7cUIMenu D_00494928 (cUIMenu_vtbl), stored after cUIGroup's D_004949E8;
-                                     //       the destructor stores cUIGroup's back
-    cUIAnimation* mpAnim;            // 0x00C [P] cUIThing::getAnimation (ui/uithing.h)
-    unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0 (cUIThing ctor)
-    char unk_011[0x3];               // 0x011 padding
-    int mAttr;                       // 0x014 [P] cUIThing's tAttrThing word (lw/sw 0x14); [U] cUIMenu_setFocus,
-                                     //       cUIMenu_getNext and cUIMenu_onInput test its bits
-    int mMiscData;                   // 0x018 [P] cUIThing::getMiscData
-    tARGB mColour;                   // 0x01C [P] cUIThing::setColour
-    t3Vector mAngle;                 // 0x02C [O]; [P] cUIThing::getRadAngle (mAngle.z)
-    int mHashName;                   // 0x038 [P] cUIThing::getHashName
-    unsigned short* mpEvents;        // 0x03C [O]; [U] cUIThing_getKeyframerEvent
-    cUIThing* mpParent;              // 0x040 [P] cUIThing::getParent; [R] = pParent (0 from cUIScreen_createObjectByStruct)
-    t3Vector mPosition;              // 0x044 [P] cUIThing::getPosition; [U] cUIMenu_render2D
-    t3Vector mScale;                 // 0x050 [P] cUIThing::getScale
-    cUIScreen* mpScreen;             // 0x05C [P] cUIThing::getScreen; [U] cUIScreen_playFrame(mpScreen, ...) in cUIMenu_setSelected,
-                                     //       cUIMenu_setFocus, cUIMenu_onInput
-    t3Vector mSize;                  // 0x060 [P] cUIThing::getSize/setSize
-    int mSound[2];                   // 0x06C [O]; [R] = {4, 6} (cUIThing ctor)
-    // --- cUIGroup (0x90)
-    cList mList;                     // 0x074 [O] cUIGroup::mList (util/list.h; as ui/uigroup.h): cListNode mStart 0x74, mEnd 0x80,
-                                     //       the list's vptr 0x8C: the menu items; [R] constructed by cList_cList(&mList); the
-                                     //       destructor cUIMenu__cUIMenu stores cList_vtbl in mList.mVtbl (0x8C) and cListNode_vtbl in
-                                     //       mEnd.mVtbl (0x88) / mStart.mVtbl (0x7C); [U] cList_size(&mList) in
-                                     //       cUIMenu_setScrollableMenu / setUIData, cList_getByIndex in the menu code
+struct cUIMenu : public cUIGroup {
+    // cUIGroup (ui/uigroup.h, 0x90): the vptr at 0x008:
+    //   [R] _vt$7cUIMenu D_00494928 (cUIMenu_vtbl), stored after cUIGroup's D_004949E8; the destructor stores
+    //       cUIGroup's back
+    // cUIMenu's uses of cUIThing's fields:
+    //   mAttr: [U] cUIMenu_setFocus, cUIMenu_getNext and cUIMenu_onInput test its bits
+    //   mpEvents: [U] cUIThing_getKeyframerEvent
+    //   mPosition: [U] cUIMenu_render2D
+    //   mpScreen: [U] cUIScreen_playFrame(mpScreen, ...) in cUIMenu_setSelected, cUIMenu_setFocus, cUIMenu_onInput
+    //   mList: [U] cList_size(&mList) in cUIMenu_setScrollableMenu / setUIData, cList_getByIndex in the menu code
     // --- cUIMenu
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;
                                      //       retail cUIMenu_isFlipInput/cUIMenu_setFlipInput); [R] tAttrMenu() tAttrMenu_tAttrMenu clears
@@ -107,25 +89,6 @@ struct cUIMenu {
     char unk_0A5[0x3];               // 0x0A5 padding (placed by the 0xA8 allocation)
 };
 
-CHECK_OFFSET(cUIMenu, mpPrev, 0x000);
-CHECK_OFFSET(cUIMenu, mpNext, 0x004);
-CHECK_OFFSET(cUIMenu, mVtbl, 0x008);
-CHECK_OFFSET(cUIMenu, mpAnim, 0x00C);
-CHECK_OFFSET(cUIMenu, mAnimPlaybackStatus, 0x010);
-CHECK_OFFSET(cUIMenu, unk_011, 0x011);
-CHECK_OFFSET(cUIMenu, mAttr, 0x014);
-CHECK_OFFSET(cUIMenu, mMiscData, 0x018);
-CHECK_OFFSET(cUIMenu, mColour, 0x01C);
-CHECK_OFFSET(cUIMenu, mAngle, 0x02C);
-CHECK_OFFSET(cUIMenu, mHashName, 0x038);
-CHECK_OFFSET(cUIMenu, mpEvents, 0x03C);
-CHECK_OFFSET(cUIMenu, mpParent, 0x040);
-CHECK_OFFSET(cUIMenu, mPosition, 0x044);
-CHECK_OFFSET(cUIMenu, mScale, 0x050);
-CHECK_OFFSET(cUIMenu, mpScreen, 0x05C);
-CHECK_OFFSET(cUIMenu, mSize, 0x060);
-CHECK_OFFSET(cUIMenu, mSound, 0x06C);
-CHECK_OFFSET(cUIMenu, mList, 0x074);
 CHECK_OFFSET(cUIMenu, mAttrMenu, 0x090);
 CHECK_OFFSET(cUIMenu, mInputMap, 0x091);
 CHECK_OFFSET(cUIMenu, mScrollItemCurrent, 0x095);

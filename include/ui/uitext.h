@@ -5,7 +5,7 @@
 // cUIScreen_createObjectByStruct allocates it with `cMemMan_alloc(0xBC, "UIText", ...)` and runs its constructor
 // cUIText_cUIText, which calls the cUIThing constructor and stores _vt$7cUIText (cUIText_vtbl): 0xBC bytes.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// A real subclass of cUIThing (its own members FLAT), like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Base class: cUIThing (0x00-0x74, written out below with the names and evidence of ui/uithing.h; cUIThing's own base
 // is cListNode). cUIText's members follow at 0x74.
 //
@@ -42,26 +42,16 @@ struct tAttrText {
 
 CHECK_SIZE(tAttrText, 0x4);
 
-struct cUIText {
-    // --- cUIThing (see ui/uithing.h for the evidence of each member) ---
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext
-    void** mVtbl;                    // 0x008 [R] _vt$7cUIText (cUIText_vtbl), stored by cUIText_cUIText/cUIText_cUIText1
-    cUIAnimation* mpAnim;            // 0x00C [P] cUIThing::getAnimation
-    unsigned char mAnimPlaybackStatus; // 0x010 [O] cUIThing
-    char unk_011[0x3];               // 0x011 padding
-    int mAttr;                       // 0x014 [P] cUIThing's tAttrThing; [U] cUIText_render2D tests mCached/mEnabled/mStatic, reads mLayer
-    int mMiscData;                   // 0x018 [P] cUIThing::getMiscData
-    tARGB mColour;                   // 0x01C [P] cUIThing::setColour; [U] cUIText_render2D's default text colour
-    t3Vector mAngle;                 // 0x02C [O] cUIThing; [P] getRadAngle = .z
-    int mHashName;                   // 0x038 [P] cUIThing::getHashName
-    unsigned short* mpEvents;        // 0x03C [O] cUIThing
-    cUIThing* mpParent;              // 0x040 [P] cUIThing::getParent
-    t3Vector mPosition;              // 0x044 [P] cUIThing::getPosition; [U] cUIText_render2D draws at mPosition + (x, y)
-    t3Vector mScale;                 // 0x050 [P] cUIThing::getScale; [U] font scale in cUIText_render2D, cUIText_getTextExtent
-    cUIScreen* mpScreen;             // 0x05C [P] cUIThing::getScreen; [U] cUIText_getFont: mpScreen->mpState->mpEngine's fonts
-    t3Vector mSize;                  // 0x060 [P] cUIThing::getSize; [U] cUIText_setUnicodeStringWrap wraps at mSize.x
-    int mSound[2];                   // 0x06C [O] cUIThing
+struct cUIText : public cUIThing {
+    // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
+    //   [R] _vt$7cUIText (cUIText_vtbl), stored by cUIText_cUIText/cUIText_cUIText1
+    // cUIText's uses of cUIThing's fields:
+    //   mAttr: [U] cUIText_render2D tests mCached/mEnabled/mStatic, reads mLayer
+    //   mColour: [U] cUIText_render2D's default text colour
+    //   mPosition: [U] cUIText_render2D draws at mPosition + (x, y)
+    //   mScale: [U] font scale in cUIText_render2D, cUIText_getTextExtent
+    //   mpScreen: [U] cUIText_getFont: mpScreen->mpState->mpEngine's fonts
+    //   mSize: [U] cUIText_setUnicodeStringWrap wraps at mSize.x
     // --- cUIText ---
     int mAttrText;                   // 0x074 [P] tAttrText: setFontIndex (bits 0-1), hasShadow (2), isUnicode (3), getUseStaticColour (4)
                                      //       (preview lw 0x6C; retail cUIText_setFontIndex..cUIText_setEllipses, which in On Tour's order also have
@@ -84,23 +74,6 @@ struct cUIText {
     unsigned short mLineSize;        // 0x0BA [O]; [R] = 0; [U] = mNumLines when there are 2+ lines (cUIText_setUnicodeStringPrivate)
 };
 
-CHECK_OFFSET(cUIText, mpPrev, 0x000);
-CHECK_OFFSET(cUIText, mpNext, 0x004);
-CHECK_OFFSET(cUIText, mVtbl, 0x008);
-CHECK_OFFSET(cUIText, mpAnim, 0x00C);
-CHECK_OFFSET(cUIText, mAnimPlaybackStatus, 0x010);
-CHECK_OFFSET(cUIText, mAttr, 0x014);
-CHECK_OFFSET(cUIText, mMiscData, 0x018);
-CHECK_OFFSET(cUIText, mColour, 0x01C);
-CHECK_OFFSET(cUIText, mAngle, 0x02C);
-CHECK_OFFSET(cUIText, mHashName, 0x038);
-CHECK_OFFSET(cUIText, mpEvents, 0x03C);
-CHECK_OFFSET(cUIText, mpParent, 0x040);
-CHECK_OFFSET(cUIText, mPosition, 0x044);
-CHECK_OFFSET(cUIText, mScale, 0x050);
-CHECK_OFFSET(cUIText, mpScreen, 0x05C);
-CHECK_OFFSET(cUIText, mSize, 0x060);
-CHECK_OFFSET(cUIText, mSound, 0x06C);
 CHECK_OFFSET(cUIText, mAttrText, 0x074);
 CHECK_OFFSET(cUIText, mShadowColour, 0x078);
 CHECK_OFFSET(cUIText, mStaticColour, 0x088);

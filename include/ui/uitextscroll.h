@@ -15,7 +15,7 @@
 // cUITextScroll_addUnicodeStringByID (string id).
 // Class name: the preview's cUITextScroll::getType (builds/x/v2/name_map_v2.tsv, cUITextScroll_getType) and On Tour.
 //
-// A FLAT layout, like main/game.h. Members: SSX On Tour's DWARF (class cUITextScroll 0xF0: its cUIThing is 0x80 and
+// A real subclass of cUIThing (its own members FLAT), like main/game.h. Members: SSX On Tour's DWARF (class cUITextScroll 0xF0: its cUIThing is 0x80 and
 // it aligns tARGB to 16, so the members sit 0xC-0x20 later there; same order and types).
 
 #include "layout.h"
@@ -34,34 +34,10 @@ struct tAttrTextScroll {
 
 CHECK_SIZE(tAttrTextScroll, 0x4);
 
-struct cUITextScroll {
-    // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] cUITextScroll_vtbl (the ctor cUITextScroll_cUITextScroll, cUITextScroll_cUITextScroll1, the dtor cUITextScroll__cUITextScroll)
-    cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail cUIThing_getAnimation/cUIThing_isPlayingAnimation);
-                                     //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
-    unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
-    char unk_011[0x3];               // 0x011 padding
-    int mAttr;                       // 0x014 [P] tAttrThing: isActive..isWrap, get/setDrawLayer, get/setPivot (lw/sw 0x14;
-                                     //       retail cUIThing_isHorizontal..cUIThing_getPivot, cUIThing_setActive..setVisible); [R] ctor sets it
-    int mMiscData;                   // 0x018 [P] getMiscData/setMiscData (lw/sw 0x18; retail cUIThing_getMiscData/cUIThing_setMiscData); [R] = 0
-    tARGB mColour;                   // 0x01C [P] setColour/getColour (0x1C; retail cUIThing_setColour, cUIThing_getColour/cUIThing_getColour1);
-                                     //       [R] = {1,1,1,1}; [U] keyframe channels 13-16 (x 1/255) in cUIThing_setChannelData
-    t3Vector mAngle;                 // 0x02C [O]; [P] getRadAngle/setRadAngle = mAngle.z (lwc1/swc1 0x34; retail cUIThing_getRadAngle/cUIThing_setRadAngle);
-                                     //       [R] = t3vect_Zero; [U] channels 3-5 (degrees -> radians)
-    int mHashName;                   // 0x038 [P] getHashName/setHashName (lw/sw 0x38; retail cUIThing_getHashName/cUIThing_setHashName);
-                                     //       [U] compared by cUIThing_getObjectByHashName; set from the object record (cUIScreen_createAllObjects)
-    unsigned short* mpEvents;        // 0x03C [O]; [R] = 0; [U] keyframer event per index, 0xFFFF = none (cUIThing_getKeyframerEvent);
-                                     //       cUIThing_setUIData points it after the object record
-    cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail cUIThing_getParent/cUIThing_setParent); [R] = pParent;
-                                     //       [U] cUIThing_getAbsPosition sums mPosition up the parent chain
-    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail cUIThing_getPosition/cUIThing_setPosition); [U] channels 0-1
-    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail cUIThing_getScale/cUIThing_setScale); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
-    cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail cUIThing_getScreen lw 0x5C); [R] = pScreen
-    t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
-                                     //       [U] channels 6-7; cUIText wraps at mSize.x
-    int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] cUIThing_getSound/cUIThing_setSound get/set by index
+struct cUITextScroll : public cUIThing {
+    // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
+    //   [R] cUITextScroll_vtbl (the ctor cUITextScroll_cUITextScroll, cUITextScroll_cUITextScroll1, the dtor
+    //       cUITextScroll__cUITextScroll)
     // --- cUITextScroll
     tAttrTextScroll mAttrTextScroll; // 0x074 [O]; [R] ctor cUITextScroll_cUITextScroll clears mMode/mShadow/mUnicode/mStaticColour
                                      //       (lbu/andi 0xC6/sb 0x74), cUITextScroll_cUITextScroll1 calls its ctor tAttrTextScroll_tAttrTextScroll; [U] setUIData
@@ -85,24 +61,6 @@ struct cUITextScroll {
     float mPixelOffset;              // 0x0CC [O] float; [R] = 0 (sw zero); [U] render2D cUITextScroll_render2D (lwc1 $f13 = y offset)
 };
 
-CHECK_OFFSET(cUITextScroll, mpPrev, 0x000);
-CHECK_OFFSET(cUITextScroll, mpNext, 0x004);
-CHECK_OFFSET(cUITextScroll, mVtbl, 0x008);
-CHECK_OFFSET(cUITextScroll, mpAnim, 0x00C);
-CHECK_OFFSET(cUITextScroll, mAnimPlaybackStatus, 0x010);
-CHECK_OFFSET(cUITextScroll, unk_011, 0x011);
-CHECK_OFFSET(cUITextScroll, mAttr, 0x014);
-CHECK_OFFSET(cUITextScroll, mMiscData, 0x018);
-CHECK_OFFSET(cUITextScroll, mColour, 0x01C);
-CHECK_OFFSET(cUITextScroll, mAngle, 0x02C);
-CHECK_OFFSET(cUITextScroll, mHashName, 0x038);
-CHECK_OFFSET(cUITextScroll, mpEvents, 0x03C);
-CHECK_OFFSET(cUITextScroll, mpParent, 0x040);
-CHECK_OFFSET(cUITextScroll, mPosition, 0x044);
-CHECK_OFFSET(cUITextScroll, mScale, 0x050);
-CHECK_OFFSET(cUITextScroll, mpScreen, 0x05C);
-CHECK_OFFSET(cUITextScroll, mSize, 0x060);
-CHECK_OFFSET(cUITextScroll, mSound, 0x06C);
 CHECK_OFFSET(cUITextScroll, mAttrTextScroll, 0x074);
 CHECK_OFFSET(cUITextScroll, mShadowColour, 0x078);
 CHECK_OFFSET(cUITextScroll, mInputMap, 0x088);

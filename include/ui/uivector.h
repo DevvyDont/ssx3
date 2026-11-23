@@ -11,7 +11,7 @@
 // Retail vtable _vt$9cUIVector = D_004941B8 (cUIVector_vtbl; stored by cUIVector_cUIVector, cUIVector_cUIVector1 and the destructor).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below; the vptr is cUIThing's (0x8).
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
+// A real subclass of cUIThing (its own members FLAT), like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
 // Member names and types are EA's, from SSX On Tour's PSP DWARF (class cUIVector, size 0xA0: its cUIThing is 0x80, so
 // every cUIVector member sits exactly 0xC later there), placed at retail offsets by:
 //   [R] retail's constructors cUIVector_cUIVector (stores 0x74 bits and every pointer) / cUIVector_cUIVector1, the destructor
@@ -45,27 +45,19 @@ struct tAttrVector {
 
 CHECK_SIZE(tAttrVector, 0x4);
 
-struct cUIVector {
-    // --- cListNode / cUIThing (ui/uithing.h, 0x74)
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the cUIThing ctor self-links it
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
-    void** mVtbl;                    // 0x008 [R] _vt$9cUIVector D_004941B8 (cUIVector_vtbl), stored by cUIVector_cUIVector,
-                                     //       cUIVector_cUIVector1 and cUIVector__cUIVector
-    cUIAnimation* mpAnim;            // 0x00C [P] cUIThing::getAnimation (ui/uithing.h); [U] cUIVector_update
-    unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0 (cUIThing ctor); [U] cUIVector_update passes it on
-    char unk_011[0x3];               // 0x011 padding
-    int mAttr;                       // 0x014 [P] cUIThing's tAttrThing word (lw/sw 0x14); [U] cUIVector_setChannelDataKCP
-    int mMiscData;                   // 0x018 [P] cUIThing::getMiscData
-    tARGB mColour;                   // 0x01C [P] cUIThing::setColour; [U] cUIVector_setColour copies the colour here
-    t3Vector mAngle;                 // 0x02C [O]; [P] cUIThing::getRadAngle (mAngle.z)
-    int mHashName;                   // 0x038 [P] cUIThing::getHashName
-    unsigned short* mpEvents;        // 0x03C [O]; [U] cUIThing_getKeyframerEvent
-    cUIThing* mpParent;              // 0x040 [P] cUIThing::getParent; [R] = pParent
-    t3Vector mPosition;              // 0x044 [P] cUIThing::getPosition; [U] cUIVector_render2D, setChannelDataKCP
-    t3Vector mScale;                 // 0x050 [P] cUIThing::getScale; [U] cUIVector_render2D, setChannelDataKCP
-    cUIScreen* mpScreen;             // 0x05C [P] cUIThing::getScreen; [R] = pScreen
-    t3Vector mSize;                  // 0x060 [P] cUIThing::getSize/setSize; [U] cUIVector_setSize stores it
-    int mSound[2];                   // 0x06C [O]; [R] = {4, 6} (cUIThing ctor)
+struct cUIVector : public cUIThing {
+    // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
+    //   [R] _vt$9cUIVector D_004941B8 (cUIVector_vtbl), stored by cUIVector_cUIVector, cUIVector_cUIVector1 and
+    //       cUIVector__cUIVector
+    // cUIVector's uses of cUIThing's fields:
+    //   mpAnim: [U] cUIVector_update
+    //   mAnimPlaybackStatus: [U] cUIVector_update passes it on
+    //   mAttr: [U] cUIVector_setChannelDataKCP
+    //   mColour: [U] cUIVector_setColour copies the colour here
+    //   mpEvents: [U] cUIThing_getKeyframerEvent
+    //   mPosition: [U] cUIVector_render2D, setChannelDataKCP
+    //   mScale: [U] cUIVector_render2D, setChannelDataKCP
+    //   mSize: [U] cUIVector_setSize stores it
     // --- cUIVector
     tAttrVector mAttrVector;         // 0x074 [O] tAttrVector (mFill:1 mLoop:1 mNumTriangles:15 mNumVertices:15); [R] the
                                      //       ctors clear mFill, mLoop, mNumVertices (tAttrVector_tAttrVector on this + 0x74);
@@ -84,24 +76,6 @@ struct cUIVector {
                                      //       ("UIVectorLine") when mFill is clear; cUIVector_render2D fills them
 };
 
-CHECK_OFFSET(cUIVector, mpPrev, 0x000);
-CHECK_OFFSET(cUIVector, mpNext, 0x004);
-CHECK_OFFSET(cUIVector, mVtbl, 0x008);
-CHECK_OFFSET(cUIVector, mpAnim, 0x00C);
-CHECK_OFFSET(cUIVector, mAnimPlaybackStatus, 0x010);
-CHECK_OFFSET(cUIVector, unk_011, 0x011);
-CHECK_OFFSET(cUIVector, mAttr, 0x014);
-CHECK_OFFSET(cUIVector, mMiscData, 0x018);
-CHECK_OFFSET(cUIVector, mColour, 0x01C);
-CHECK_OFFSET(cUIVector, mAngle, 0x02C);
-CHECK_OFFSET(cUIVector, mHashName, 0x038);
-CHECK_OFFSET(cUIVector, mpEvents, 0x03C);
-CHECK_OFFSET(cUIVector, mpParent, 0x040);
-CHECK_OFFSET(cUIVector, mPosition, 0x044);
-CHECK_OFFSET(cUIVector, mScale, 0x050);
-CHECK_OFFSET(cUIVector, mpScreen, 0x05C);
-CHECK_OFFSET(cUIVector, mSize, 0x060);
-CHECK_OFFSET(cUIVector, mSound, 0x06C);
 CHECK_OFFSET(cUIVector, mAttrVector, 0x074);
 CHECK_OFFSET(cUIVector, mpTriangles, 0x078);
 CHECK_OFFSET(cUIVector, mpVertexColour, 0x07C);

@@ -73,7 +73,7 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
         cMemMan_free__FPv(self->mpBuffer);
     }
     VPTR_OF(cList, &self->mRootGroup.mList) = cList_vtbl;
-    self->mRootGroup.mVtbl = cUIGroup_vtbl;
+    VPTR_OF(cListNode, &self->mRootGroup) = cUIGroup_vtbl;
     cList_destroyList_C558(&self->mRootGroup.mList);
     char* rootGroup = (char*)&self->mRootGroup;
     VPTR_OF(cListNode, &self->mRootGroup.mList.mEnd) = cListNode_vtbl;
@@ -1179,7 +1179,7 @@ extern void* cUIScrollBar_vtbl[];
  */
 extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 {
-    self->mVtbl = cUIScrollBar_vtbl;
+    VPTR_OF(cListNode, self) = cUIScrollBar_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, background);
@@ -1468,7 +1468,7 @@ extern void* cUISlider_vtbl[];
  */
 extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 {
-    self->mVtbl = cUISlider_vtbl;
+    VPTR_OF(cListNode, self) = cUISlider_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         sDeleteTarget* dtorEntry = (sDeleteTarget*)VPTR_OF(cListNode, background);
@@ -1957,7 +1957,7 @@ extern "C" void cUIState_onRender2D(cUIState* self)
         do {
             char* obj = (char*)&n->mRootGroup;
             if ((n->mRootGroup.mAttr >> 6) & 1) {
-                sVEntry<void(void*, float, float)>* vt2 = (sVEntry<void(void*, float, float)>*)n->mRootGroup.mVtbl;
+                sVEntry<void(void*, float, float)>* vt2 = (sVEntry<void(void*, float, float)>*)VPTR_OF(cListNode, &n->mRootGroup);
                 vt2[17].fn(vthis(obj, vt2[17]), 0.0f, 0.0f);
             }
             n = (cUIScreen*)((void*)n->mpNext);
@@ -2011,7 +2011,7 @@ extern "C" void cUIState_hideScreens(cUIState* self)
         do {
             char* obj = (char*)&n->mRootGroup;
             if ((n->mRootGroup.mAttr >> 6) & 1) {
-                sVEntry_cUIState_hideScreens* vt = (sVEntry_cUIState_hideScreens*)n->mRootGroup.mVtbl;
+                sVEntry_cUIState_hideScreens* vt = (sVEntry_cUIState_hideScreens*)VPTR_OF(cListNode, &n->mRootGroup);
                 vt[9].fn(vthis(obj, vt[9]), 0);
             }
             n = (cUIScreen*)((void*)n->mpNext);
@@ -2046,7 +2046,7 @@ extern "C" void cUIState_showScreens(cUIState* self)
         do {
             char* obj = (char*)&n->mRootGroup;
             if ((n->mRootGroup.mAttr >> 6) & 1) {
-                sVEntry_cUIState_showScreens* vt = (sVEntry_cUIState_showScreens*)n->mRootGroup.mVtbl;
+                sVEntry_cUIState_showScreens* vt = (sVEntry_cUIState_showScreens*)VPTR_OF(cListNode, &n->mRootGroup);
                 vt[9].fn(vthis(obj, vt[9]), 1);
             }
             n = (cUIScreen*)((void*)n->mpNext);

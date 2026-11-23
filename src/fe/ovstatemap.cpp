@@ -578,12 +578,12 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
         cUIState_showObjSafe(((char*)selfp), str_Popup1);
         cUIState_hideObjSafe(((char*)selfp), str_Popup2);
         if (list != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)list->mVtbl)[7].fn)(vthis(list, ((sVEntry<void>*)list->mVtbl)[7]), 0);
+            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, list))[7].fn)(vthis(list, ((sVEntry<void>*)VPTR_OF(cListNode, list))[7]), 0);
             n = list->mScrollItemCurrent;
         }
         if (menu != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)menu->mVtbl)[7].fn)(vthis(menu, ((sVEntry<void>*)menu->mVtbl)[7]), 1);
-            ((VIntFn_9010)((sVEntry<void>*)menu->mVtbl)[9].fn)(vthis(menu, ((sVEntry<void>*)menu->mVtbl)[9]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, menu))[7].fn)(vthis(menu, ((sVEntry<void>*)VPTR_OF(cListNode, menu))[7]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, menu))[9].fn)(vthis(menu, ((sVEntry<void>*)VPTR_OF(cListNode, menu))[9]), 1);
         }
         cFELocale* locale = SSXApp->FELocale;
         sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cUILocaleInterface, locale));
@@ -617,17 +617,17 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
             cUIText_setUnicodeStringByID(confirmYes, GetHashValue32(str_kT_CMNYes_b));
         }
         if (confirmNo != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)confirmNo->mVtbl)[9].fn)(vthis(confirmNo, ((sVEntry<void>*)confirmNo->mVtbl)[9]), 1);
-            ((VIntFn_9010)((sVEntry<void>*)confirmNo->mVtbl)[8].fn)(vthis(confirmNo, ((sVEntry<void>*)confirmNo->mVtbl)[8]), 0);
+            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[9].fn)(vthis(confirmNo, ((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[9]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[8].fn)(vthis(confirmNo, ((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[8]), 0);
         }
         cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No);
     } else {
         cUIState_hideObjSafe(((char*)selfp), str_ConfirmPopup);
         if (list != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)list->mVtbl)[7].fn)(vthis(list, ((sVEntry<void>*)list->mVtbl)[7]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, list))[7].fn)(vthis(list, ((sVEntry<void>*)VPTR_OF(cListNode, list))[7]), 1);
         }
         if (menu != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)menu->mVtbl)[7].fn)(vthis(menu, ((sVEntry<void>*)menu->mVtbl)[7]), 0);
+            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, menu))[7].fn)(vthis(menu, ((sVEntry<void>*)VPTR_OF(cListNode, menu))[7]), 0);
         }
     }
 }
@@ -806,10 +806,10 @@ extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
 {
     if (on != 0) {
-        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)obj->mVtbl;
+        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)VPTR_OF(cListNode, obj);
         vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED);
     } else {
-        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)obj->mVtbl;
+        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)VPTR_OF(cListNode, obj);
         vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED_LOCKED);
     }
 }
@@ -837,10 +837,10 @@ extern char kMAPCOLOR_REGULAR_LOCKED[];
 extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
 {
     if (on != 0) {
-        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)obj->mVtbl;
+        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)VPTR_OF(cListNode, obj);
         vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR);
     } else {
-        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)obj->mVtbl;
+        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)VPTR_OF(cListNode, obj);
         vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR_LOCKED);
     }
 }
@@ -940,7 +940,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     int py = (int)(fy * 266.0f);
     cUIIcon* ind = (cUIIcon*)cMemMan_alloc(136, str_Player_Indicator_Icon, 0x20000000, 0);
     cUIThing_cUIThing(ind, ((char*)self->mpMapScreen), 0);
-    ind->mVtbl = cUIIcon_vtbl;
+    VPTR_OF(cListNode, ind) = cUIIcon_vtbl;
     func_0021CCC8(&ind->mAttrIcon);
     ind->mTextureID = -1;
     (*(cFEObj_96A8**)&self->mpPlayerIcon) = (cFEObj_96A8*)ind;

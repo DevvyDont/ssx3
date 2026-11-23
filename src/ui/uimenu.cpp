@@ -1003,7 +1003,7 @@ struct cUIProgress__cUIProgress_sVEntry {
  */
 extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
 {
-    self->mVtbl = cUIProgress_vtbl;
+    VPTR_OF(cListNode, self) = cUIProgress_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = (cUIProgress__cUIProgress_sVEntry*)VPTR_OF(cListNode, background);

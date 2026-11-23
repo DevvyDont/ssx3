@@ -70,7 +70,7 @@ struct sLayerBits_05E8 {
 extern "C" void cUIText_render2D(cUIText* self, float x, float y)
 {
     if (self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        ((sVEntry<void(void*)>*)self->mVtbl)[16].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[16]));
+        ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[16].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[16]));
     }
     int* ov = (int*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (ov != 0 && ((*ov >> 27) & 1)) {
@@ -487,7 +487,7 @@ INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringByID__FP7cUITexti);
 void cUIText_setUnicodeStringByID(cUIText* self, int id)
 {
     self->mStringID = id;
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
     vt[5].fn(vthis(self, vt[5]), 0);  // virtual cUIThing::setCached(false)
 }
 #endif
@@ -531,7 +531,7 @@ struct cUIText_getTextExtent_sVEntry {
 extern "C" void cUIText_getTextExtent(cUIText* self, cUIText_getTextExtent_sVec3* out)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        cUIText_getTextExtent_sVEntry* vt = (cUIText_getTextExtent_sVEntry*)self->mVtbl;
+        cUIText_getTextExtent_sVEntry* vt = (cUIText_getTextExtent_sVEntry*)VPTR_OF(cListNode, self);
         vt[16].fn(vthis(self, vt[16]));
     }
     void* font = cUIText_getFont(self);
@@ -566,7 +566,7 @@ struct cUIText_getNumLinesOfString_sVEntry {
 extern "C" int cUIText_getNumLinesOfString(cUIText* self)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        cUIText_getNumLinesOfString_sVEntry* vt = (cUIText_getNumLinesOfString_sVEntry*)self->mVtbl;
+        cUIText_getNumLinesOfString_sVEntry* vt = (cUIText_getNumLinesOfString_sVEntry*)VPTR_OF(cListNode, self);
         vt[16].fn(vthis(self, vt[16]));
     }
     return self->mNumLines;
@@ -595,7 +595,7 @@ extern void* cUITextScroll_vtbl[];
 extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int pState, int pParent)
 {
     cUIThing_cUIThing(self, pState, pParent);
-    self->mVtbl = cUITextScroll_vtbl;
+    VPTR_OF(cListNode, self) = cUITextScroll_vtbl;
     *(unsigned char*)&self->mAttrTextScroll &= 0xC6;
     cList_cList(&self->mList);
     self->mpScrollBar = 0;
@@ -869,7 +869,7 @@ struct sVE_1588 { short delta; short index; void (*fn)(void*); };
 extern "C" void cUITextScroll_render2D(cUITextScroll* self, float x, float y)
 {
     if (((self->mAttr >> 2) & 1) == 0) {
-        ((sVE_1588*)self->mVtbl)[16].fn(vthis(self, ((sVE_1588*)self->mVtbl)[16]));
+        ((sVE_1588*)VPTR_OF(cListNode, self))[16].fn(vthis(self, ((sVE_1588*)VPTR_OF(cListNode, self))[16]));
     }
     cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {
@@ -1102,8 +1102,8 @@ extern "C" void cUITextScroll_setAsciiString(cUITextScroll* self, char* str)
 {
     cUITextScroll_clearBuffer_1(self);
     self->mStringID = (unsigned int)0;
-    ((sVEntry<void(void*, int)>*)self->mVtbl)[5].fn(vthis(self, ((sVEntry<void(void*, int)>*)self->mVtbl)[5]), 1);
-    ((sVEntry<void(void*, int)>*)self->mVtbl)[24].fn(vthis(self, ((sVEntry<void(void*, int)>*)self->mVtbl)[24]), 0);
+    ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[5].fn(vthis(self, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[5]), 1);
+    ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[24].fn(vthis(self, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[24]), 0);
     cUITextScroll_addAsciiString(self, str);
 }
 #endif
@@ -1842,7 +1842,7 @@ struct cUIVector_cUIVector_s {
 extern "C" cUIVector_cUIVector_s* cUIVector_cUIVector(cUIVector* self, int pScreen, int pParent)
 {
     cUIThing_cUIThing(((cUIVector_cUIVector_s*)self), pScreen, pParent);
-    self->mVtbl = cUIVector_vtbl;
+    VPTR_OF(cListNode, self) = cUIVector_vtbl;
     ((cUIVector_cUIVector_s*)self)->b0 = 0;
     ((cUIVector_cUIVector_s*)self)->b1 = 0;
     ((cUIVector_cUIVector_s*)self)->hi = 0;
@@ -1872,7 +1872,7 @@ extern void* cUIVector_vtbl[];
  */
 extern "C" void cUIVector__cUIVector(cUIVector* self, int flags)
 {
-    self->mVtbl = cUIVector_vtbl;
+    VPTR_OF(cListNode, self) = cUIVector_vtbl;
     if (self->mpVertexColour != 0) {
         cMemMan_free(self->mpVertexColour);
     }

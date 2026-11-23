@@ -12,42 +12,17 @@
 // derives from it and reuses most of these slots.
 // EA's source file is not known (On Tour: ui/all_in_one_ui.cpp); ui/uigroup.h is our name.
 //
-// A FLAT layout, like main/game.h. Member: SSX On Tour's DWARF (class cUIGroup 0xA0: cList mList at 0x80 behind its
+// A real subclass of cUIThing (its own members FLAT), like main/game.h. Member: SSX On Tour's DWARF (class cUIGroup 0xA0: cList mList at 0x80 behind its
 // 0x80-byte cUIThing).
 
 #include "layout.h"
 #include "ui/uithing.h"
 #include "util/list.h"
 
-struct cUIGroup {
-    // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] cUIGroup_vtbl D_004949E8 (createObjectByStruct, cUIGroup_cUIGroup1, cUIGroup_cUIGroup, the dtor;
-                                     //       cUIMenu / cUIScreen dtors restore it)
-    cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail cUIThing_getAnimation/cUIThing_isPlayingAnimation);
-                                     //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
-    unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
-    char unk_011[0x3];               // 0x011 padding
-    int mAttr;                       // 0x014 [P] tAttrThing: isActive..isWrap, get/setDrawLayer, get/setPivot (lw/sw 0x14;
-                                     //       retail cUIThing_isHorizontal..cUIThing_getPivot, cUIThing_setActive..setVisible); [R] ctor sets it
-    int mMiscData;                   // 0x018 [P] getMiscData/setMiscData (lw/sw 0x18; retail cUIThing_getMiscData/cUIThing_setMiscData); [R] = 0
-    tARGB mColour;                   // 0x01C [P] setColour/getColour (0x1C; retail cUIThing_setColour, cUIThing_getColour/cUIThing_getColour1);
-                                     //       [R] = {1,1,1,1}; [U] keyframe channels 13-16 (x 1/255) in cUIThing_setChannelData
-    t3Vector mAngle;                 // 0x02C [O]; [P] getRadAngle/setRadAngle = mAngle.z (lwc1/swc1 0x34; retail cUIThing_getRadAngle/cUIThing_setRadAngle);
-                                     //       [R] = t3vect_Zero; [U] channels 3-5 (degrees -> radians)
-    int mHashName;                   // 0x038 [P] getHashName/setHashName (lw/sw 0x38; retail cUIThing_getHashName/cUIThing_setHashName);
-                                     //       [U] compared by cUIThing_getObjectByHashName; set from the object record (cUIScreen_createAllObjects)
-    unsigned short* mpEvents;        // 0x03C [O]; [R] = 0; [U] keyframer event per index, 0xFFFF = none (cUIThing_getKeyframerEvent);
-                                     //       cUIThing_setUIData points it after the object record
-    cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail cUIThing_getParent/cUIThing_setParent); [R] = pParent;
-                                     //       [U] cUIThing_getAbsPosition sums mPosition up the parent chain
-    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail cUIThing_getPosition/cUIThing_setPosition); [U] channels 0-1
-    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail cUIThing_getScale/cUIThing_setScale); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
-    cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail cUIThing_getScreen lw 0x5C); [R] = pScreen
-    t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
-                                     //       [U] channels 6-7; cUIText wraps at mSize.x
-    int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] cUIThing_getSound/cUIThing_setSound get/set by index
+struct cUIGroup : public cUIThing {
+    // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
+    //   [R] cUIGroup_vtbl D_004949E8 (createObjectByStruct, cUIGroup_cUIGroup1, cUIGroup_cUIGroup, the dtor; cUIMenu /
+    //       cUIScreen dtors restore it)
     // --- cUIGroup
     cList mList;                     // 0x074 [O] the children (util/list.h, 0x1C); [R] ctor cList_cList on this + 0x74
                                      //       (createObjectByStruct, cUIGroup_cUIGroup1, cUIGroup_cUIGroup), dtor cUIGroup__cUIGroup
@@ -56,24 +31,6 @@ struct cUIGroup {
                                      //       on this + 0x74), every cUIGroup_* walker
 };
 
-CHECK_OFFSET(cUIGroup, mpPrev, 0x000);
-CHECK_OFFSET(cUIGroup, mpNext, 0x004);
-CHECK_OFFSET(cUIGroup, mVtbl, 0x008);
-CHECK_OFFSET(cUIGroup, mpAnim, 0x00C);
-CHECK_OFFSET(cUIGroup, mAnimPlaybackStatus, 0x010);
-CHECK_OFFSET(cUIGroup, unk_011, 0x011);
-CHECK_OFFSET(cUIGroup, mAttr, 0x014);
-CHECK_OFFSET(cUIGroup, mMiscData, 0x018);
-CHECK_OFFSET(cUIGroup, mColour, 0x01C);
-CHECK_OFFSET(cUIGroup, mAngle, 0x02C);
-CHECK_OFFSET(cUIGroup, mHashName, 0x038);
-CHECK_OFFSET(cUIGroup, mpEvents, 0x03C);
-CHECK_OFFSET(cUIGroup, mpParent, 0x040);
-CHECK_OFFSET(cUIGroup, mPosition, 0x044);
-CHECK_OFFSET(cUIGroup, mScale, 0x050);
-CHECK_OFFSET(cUIGroup, mpScreen, 0x05C);
-CHECK_OFFSET(cUIGroup, mSize, 0x060);
-CHECK_OFFSET(cUIGroup, mSound, 0x06C);
 CHECK_OFFSET(cUIGroup, mList, 0x074);
 CHECK_SIZE(cUIGroup, 0x90);
 

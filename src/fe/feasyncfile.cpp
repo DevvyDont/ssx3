@@ -2033,7 +2033,7 @@ extern "C" void func_001A5FB8(cFEStateNetMessenger* self, int sel)
         sprintf(buf, str_ps2Xpct_02d, i);
         cUIText* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (((void*)obj) != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
             vt[9].fn(vthis(obj, vt[9]), i == sel);
         }
         func_001A66A8(self, sel, i == sel);
@@ -2846,7 +2846,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
         strcat(buf, str_sp);
         strcat(buf, tags);
         func_003EFA48(wide, 0x60, buf);
-        sVEntry<int(void*, float*)>* vt = (sVEntry<int(void*, float*)>*)uiText->mVtbl;
+        sVEntry<int(void*, float*)>* vt = (sVEntry<int(void*, float*)>*)VPTR_OF(cListNode, uiText);
         vt[20].fn(vthis(uiText, vt[20]), size);
         t3Vector scale = *(&uiText->mScale);
         unsigned short* rest = cFont_textSmartLimit1(cUIText_getFont(uiText), scale.x, size[0], wide, wrapped, 0x30);
@@ -9546,7 +9546,7 @@ extern "C" void func_001AF568(cFEStateChallengePopup* self)
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_240WaitingChallenge)), name);
         cUIText_setUnicodeString(text, buf);
         cUIText* submitText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
-        sVEntry<void(void* self, int on)>* vt2 = (sVEntry<void(void* self, int on)>*)submitText->mVtbl;
+        sVEntry<void(void* self, int on)>* vt2 = (sVEntry<void(void* self, int on)>*)VPTR_OF(cListNode, submitText);
         vt2[8].fn(vthis(submitText, vt2[8]), 1);
         cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge)), 7);
         func_001AEC60(self, 1);
@@ -17450,7 +17450,7 @@ extern "C" int cFEStateCreateStep1_onGainTransition(cFEStateCreateStep1* self, i
         func_001BA178(self);
         cUIText* obj = self->mpStaticContinue;
         if (obj != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
             void* target = vthis(obj, vt[8]);
             vt[8].fn(target, !func_001B9558(self));
         }
@@ -17671,7 +17671,7 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
         func_001B9820(self);
         cUIText* staticContinue = self->mpStaticContinue;
         if (((char*)staticContinue) != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)staticContinue->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, staticContinue);
             vt[8].fn(vthis(staticContinue, vt[8]), !func_001B9558(self));
         }
         break;

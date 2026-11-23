@@ -330,7 +330,7 @@ extern cUIText_cUIText_sQuad gStaticColour;
 extern "C" cUIText* cUIText_cUIText(cUIText* self)
 {
     cUIThing_cUIThing(self);
-    self->mVtbl = cUIText_vtbl;
+    VPTR_OF(cListNode, self) = cUIText_vtbl;
     (*(unsigned char*)&self->mAttrText) = ((*(unsigned char*)&self->mAttrText) | 4) & 0x87;
     self->mNumLines = 0;
     (*(int*)&self->mpLineOffset) = 0;
@@ -439,7 +439,7 @@ extern "C" void cUIText_updateLocale(cUIText* self)
                     cUIText_setUnicodeStringPrivate(self, str);
                 }
             }
-            cUIText_updateLocale_sVEntry* vt2 = (cUIText_updateLocale_sVEntry*)self->mVtbl;
+            cUIText_updateLocale_sVEntry* vt2 = (cUIText_updateLocale_sVEntry*)VPTR_OF(cListNode, self);
             ((void (*)(void*, int))vt2[5].fn)(vthis(self, vt2[5]), 1);
         }
     }

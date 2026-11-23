@@ -138,7 +138,7 @@ extern "C" void cFEStateBuyAttrib_onGainFocus(cFEStateBuyAttrib* self)
 {
     cFEState_onGainFocus(self);
     cUIMenu* obj = self->pAttribMenu;
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
     vt[7].fn(vthis(obj, vt[7]), 1);
 }
 #endif
@@ -251,7 +251,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             self->mBuyPrompt = 0;
             cUIState_hideObjSafe(((char*)self), str_PopupGroup);
             cUIMenu* o = self->pAttribMenu;
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)o->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, o);
             vt[7].fn(vthis(o, vt[7]), 1);
         } else {
             cUICustomInterface* mgr = self->mpEngine->mpCustom;
@@ -439,7 +439,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self)
         if (text != 0) {
             cUIText_setAsciiString(text, getDollarString(cBEEconInterface_getAttribCost(iface, *levels - 1)));
             if (*levels >= 11) {
-                sVE4FC0* vt = (sVE4FC0*)text->mVtbl;
+                sVE4FC0* vt = (sVE4FC0*)VPTR_OF(cListNode, text);
                 vt[9].fn(vthis(text, vt[9]), 0);
             }
         }
@@ -580,7 +580,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
     self->mBuyPrompt = 0;
     cUIState_hideObjSafe(self, str_PopupGroup);
     cUIMenu* attribMenu = (self->pAttribMenu);
-    ((sVEntry<void(void*, int)>*)attribMenu->mVtbl)[7].fn(vthis(attribMenu, ((sVEntry<void(void*, int)>*)attribMenu->mVtbl)[7]), 1);
+    ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, attribMenu))[7].fn(vthis(attribMenu, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, attribMenu))[7]), 1);
     cBEEconInterface* iface = (cBEEconInterface*)cBE_getInterface_Fv(cBE_getBE(), 11);
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < self->mPotentialExperience[i]; j++) {
