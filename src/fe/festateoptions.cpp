@@ -325,20 +325,17 @@ extern "C" void cFEStateOptions_onPopupEvent(cFEStateOptions* self, cUIState* po
     case 22:
         if (IsK188D08(popup->mHashName, str_111resetopts)) {
             void* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1530));
-            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, popup);
-            if (vt[23].fn(vthis(popup, vt[23]), 0)) {
+            if ((int)popup->getData(0)) {
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 1;
                     self->mbLetFrameGo = 1;
-                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
-                    vt2[19].fn(vthis(self, vt2[19]), uiObj, 5);
+                    self->onWidgetEvent((cUIThing*)uiObj, 5);
                 }
             } else {
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 0;
                     self->mbLetFrameGo = 1;
-                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
-                    vt2[19].fn(vthis(self, vt2[19]), uiObj, 6);
+                    self->onWidgetEvent((cUIThing*)uiObj, 6);
                 }
             }
         }
@@ -1731,8 +1728,7 @@ extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, cUISta
     case 22: {
         int popupHash = widget->mHashName;
         if (popupHash == GetHashValue32(str_111resetopts)) {
-            sVEntry<int(void*, int)>* getDataEntry = &((sVEntry<int(void*, int)>*)VPTR_OF(cListNode, widget))[23];
-            if (getDataEntry->fn(vthis(widget, *getDataEntry), 2) != 0) {
+            if ((int)widget->getData(2) != 0) {
                 cBEOptionInterface_defaultHUD(iface);
                 cFEStateOptionsHUD_updateWidget(self);
                 D_004A14D8 = 1;

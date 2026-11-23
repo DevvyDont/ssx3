@@ -195,8 +195,7 @@ extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
             ((void (*)(void*, int))vt[7].fn)(vthis(menu, vt[7]), 1);
         }
         {
-            sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cListNode, self);
-            ((int (*)(void*, void*, int, int))vt[20].fn)(vthis(self, vt[20]), self->mpMenu, 5, 0);
+            self->onWidgetMenu(self->mpMenu, 5, 0);
         }
     }
 }
@@ -307,8 +306,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
         cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-        vt[6].fn(vthis(self, vt[6]), 0);
+        self->onGainFocus((cUIState*)(0));
     }
 }
 #endif
@@ -2928,7 +2926,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
     default:
         {
             cUIState* parentState = self->mpParentState;
-            ((void (*)(void*, int, int))((sPopupVE_1CA298*)VPTR_OF(cListNode, parentState))[19].fn)(vthis(parentState, ((sPopupVE_1CA298*)VPTR_OF(cListNode, parentState))[19]), id, ev);
+            parentState->onWidgetEvent((cUIThing*)id, ev);
         }
         break;
     }
@@ -3048,8 +3046,7 @@ extern "C" void cScreenPopup_onUpdate(cScreenPopup* self)
 {
     if (self->mbPassUpdate != 0) {
         cUIState* obj = self->mpParentState;
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, obj);
-        vt[12].fn(vthis(obj, vt[12]));
+        obj->onUpdate();
     }
     cUIState_onUpdate(self);
 }
@@ -3121,8 +3118,7 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, cUIState* child, i
             self->mpConfirmPopup = 0;
             if (self->miConfimationReturnCode != -1) {
                 cUIState* obj = self->mpParentState;
-                sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, obj);
-                vt[17].fn(vthis(obj, vt[17]), ((char*)self), self->miConfimationReturnCode);
+                obj->onPopupEvent((cUIState*)self, self->miConfimationReturnCode);
             }
         }
         break;
@@ -3803,8 +3799,7 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
     if (self->mbCallParentsUpdate != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, obj);
-            vt[12].fn(vthis(obj, vt[12]));
+            obj->onUpdate();
         }
     }
 }
@@ -3902,8 +3897,7 @@ extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, int pPa
     if (self->mbReferEventsToParent != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)VPTR_OF(cListNode, obj);
-            return vt[24].fn(vthis(obj, vt[24]), msg, pParam);
+            return obj->handleEvent(msg, (void*)pParam);
         }
     }
     return 0;
@@ -5982,9 +5976,8 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
             changed = 1;
             sound = 6;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-            char* o = (char*)self->mpParentState;
-            sVEntry<void>* vt = *(sVEntry<void>**)(o + 8);
-            ((void (*)(void*, int, int))vt[19].fn)(vthis(o, vt[19]), 0, 0xE);
+            cUIState* o = self->mpParentState;
+            o->onWidgetEvent((cUIThing*)(0), 0xE);
         } else if (InputK1CDB98(((char*)ev), 25)) {
             changed = 1;
             self->mbCapsOn ^= 1;

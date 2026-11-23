@@ -732,8 +732,6 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, tUIBaseObject* 
 extern "C" void* MEM_fill(void* dst, int c, int n);
 extern char str_UIScreenObjs[];
 
-struct sUIVtCED0 { short delta; short index; void (*fn)(void*, void*); };
-
 /**
  * Creates every widget described in the screen's object block, registers it by name and tells the state about
  * each one.
@@ -763,8 +761,7 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
         void* uiObj = self->mppObjectList[i];
         if (uiObj != 0) {
             cUIState* state = self->mpState;
-            sUIVtCED0* vt = (sUIVtCED0*)VPTR_OF(cListNode, state);
-            vt[18].fn(vthis(state, vt[18]), uiObj);
+            state->onWidgetCreate((cUIThing*)uiObj);
         }
     }
 }
@@ -1513,11 +1510,6 @@ struct cUISlider_onInput_sVEntryI {
     short index;
     int (*fn)(void*);
 };
-struct cUISlider_onInput_sVEntryM {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 struct cUISlider_onInput_sVEntryS {
     short delta;
     short index;
@@ -1548,8 +1540,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
             }
             self->mValue = self->mValue - 1;
             cUIState* mgr = self->mpScreen->mpState;
-            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)VPTR_OF(cListNode, mgr);
-            vm[19].fn(vthis(mgr, vm[19]), ((char*)self), 9);
+            mgr->onWidgetEvent((cUIThing*)self, 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
         }
@@ -1564,8 +1555,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
             }
             self->mValue = self->mValue + 1;
             cUIState* mgr = self->mpScreen->mpState;
-            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)VPTR_OF(cListNode, mgr);
-            vm[19].fn(vthis(mgr, vm[19]), ((char*)self), 9);
+            mgr->onWidgetEvent((cUIThing*)self, 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
         }
@@ -1952,8 +1942,7 @@ extern "C" void cUIState_onRender2D(cUIState* self)
 {
     cUIScreen* n = (cUIScreen*)cList_first((cList*)&self->mScreens);
     if (((void*)n) != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-        vt[14].fn(vthis(self, vt[14]));
+        self->onPreRender2D();
         do {
             char* obj = (char*)&n->mRootGroup;
             if ((n->mRootGroup.mAttr >> 6) & 1) {

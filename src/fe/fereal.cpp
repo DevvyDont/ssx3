@@ -70,12 +70,6 @@ INCLUDE_ASM("fe/fereal", cFECustom_onScreenEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_whitefade[];
-struct sVEntry001A07C8 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
-
 /**
  * Handles the front end's screen events: answers the "whitefade" event (cFECustom_vtbl entry 3, onScreenEvent).
  *
@@ -89,10 +83,9 @@ struct sVEntry001A07C8 {
 extern "C" int cFECustom_onScreenEvent(cFECustom* self, int screen, int hash)
 {
     if (hash == GetHashValue32(str_whitefade)) {
-        void* obj = self->mpTransitionState;
+        cUIState* obj = self->mpTransitionState;
         if (obj != 0) {
-            sVEntry001A07C8* vt = *(sVEntry001A07C8**)((char*)obj + 8);
-            vt[24].fn(vthis(obj, vt[24]), 1, 0);
+            obj->handleEvent(1, 0);
         }
         return 1;
     }
@@ -1536,7 +1529,7 @@ extern "C" void cRealFE_loadStartState(cRealFE* self)
         (cFEStateBackground*)operator new(sizeof(cFEStateBackground), str_cFEStateBackground, 0, 0);
     cUIState_cUIState(backState, (char*)self->mpUI);
     (*(sVEntry<void (void*)>**)&VPTR_OF(cListNode, backState)) = (sVEntry<void(void*)>*)cFEStateBackground_vtbl;
-    ((sVEntry<void (void*)>*)VPTR_OF(cListNode, backState))[4].fn(vthis(backState, ((sVEntry<void (void*)>*)VPTR_OF(cListNode, backState))[4]));
+    backState->onCreateScreen();
     cUIStateStack_pushExplicit(&self->mpUI->mStateStack, backState);
     switch (cRealFE_mStartState) {
     case 0: {

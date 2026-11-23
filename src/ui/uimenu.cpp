@@ -423,9 +423,8 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned 
     for (; i < self->mScrollItemNum; i++) {
         void* item = cList_getByIndex((char*)&self->mList, i);
         if (*(int*)&self->mAttrMenu & 4) {
-            char* mgr = (char*)self->mpScreen->mpState;
-            cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
-            if (vt[20].fn(vthis(mgr, vt[20]), self, 1, i)) {
+            cUIState* mgr = self->mpScreen->mpState;
+            if (mgr->onWidgetMenu(self, 1, i)) {
                 return i;
             }
         } else {
@@ -616,11 +615,6 @@ struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-struct cUIPair_setFocus_sVEntryB {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 struct cUIPair_setFocus_sFlags {
     unsigned int b0 : 1;
     unsigned int b1 : 1;
@@ -658,8 +652,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         widgetObj->setFocus(1);
         cUIState* screenState = self->mpScreen->mpState;
-        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)VPTR_OF(cListNode, screenState);
-        vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 1);
+        screenState->onWidgetEvent(self->mpWidget, 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 1);
         if (ev != 0xFFFF) {
@@ -671,8 +664,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         widgetObj->setFocus(0);
         cUIState* screenState = self->mpScreen->mpState;
-        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)VPTR_OF(cListNode, screenState);
-        vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 2);
+        screenState->onWidgetEvent(self->mpWidget, 2);
     }
 }
 #endif

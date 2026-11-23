@@ -215,12 +215,6 @@ extern "C" int cUIStateStack_checkForState(cUIStateStack* list, signed char id)
 //100%
 INCLUDE_ASM("ui/uistate", cUIStateStack_render2D);
 #ifdef SKIP_ASM
-struct cUIStateStack_render2D_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Draws a state stack: calls virtual slot 15 (2D render) on every visible state of the main and explicit lists.
  *
@@ -232,8 +226,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
     if (((char*)n) != 0) {
         do {
             if ((n->mAttrState >> 3) & 1) {
-                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)VPTR_OF(cListNode, n);
-                vt[15].fn(vthis(n, vt[15]));
+                n->onRender2D();
             }
             n = (cUIState*)n->mpNext;
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -242,8 +235,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
     if (((char*)n) != 0) {
         do {
             if ((n->mAttrState >> 3) & 1) {
-                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)VPTR_OF(cListNode, n);
-                vt[15].fn(vthis(n, vt[15]));
+                n->onRender2D();
             }
             n = (cUIState*)n->mpNext;
         } while (!cListNode_isSentinel((cListNode*)n));

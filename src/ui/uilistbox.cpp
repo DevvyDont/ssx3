@@ -304,8 +304,7 @@ extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
     *(char*)&self->mCurrentEntry = 0;
     *(int*)&self->mAttrListBox |= 0x10;
     cUIState* obj = self->mpScreen->mpState;
-    sVEntry<void(void*, void*, int)>* vt = (sVEntry<void (void*, void*, int)>*)VPTR_OF(cListNode, obj);
-    vt[19].fn(vthis(obj, vt[19]), self, 9);
+    obj->onWidgetEvent((cUIThing*)self, 9);
 }
 #endif
 
@@ -357,9 +356,8 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             }
             cUIThing* selected = self->mpSelected;
             selected->setFocus(1);
-            char* owner = (char*)self->mpScreen->mpState;
-            sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
-            vb[19].fn(vthis(owner, vb[19]), self->mpSelected, 1);
+            cUIState* owner = self->mpScreen->mpState;
+            owner->onWidgetEvent(self->mpSelected, 1);
         }
     } else {
         cUIThing* cur = self->mpSelected;
@@ -373,9 +371,8 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             }
             cUIThing* selected = self->mpSelected;
             selected->setFocus(0);
-            char* owner = (char*)self->mpScreen->mpState;
-            sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
-            vb[19].fn(vthis(owner, vb[19]), self->mpSelected, 2);
+            cUIState* owner = self->mpScreen->mpState;
+            owner->onWidgetEvent(self->mpSelected, 2);
         }
     }
 }
@@ -432,8 +429,6 @@ INCLUDE_ASM("ui/uilistbox", cUIMenu_getNext);
 #ifdef SKIP_ASM
 extern "C" void* cList_getByIndex(void* list, unsigned char i);
 
-struct sUIVtAB50 { short delta; short index; int (*fn)(void*, void*, int, int); };
-
 /**
  * Finds the next selectable item after the current one, wrapping to the start when the menu wraps (mAttr bit
  * 7).
@@ -449,9 +444,8 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
     do {
         if (i < self->mScrollItemNum) {
             if (*(int*)&self->mAttrMenu & 4) {
-                char* owner = (char*)self->mpScreen->mpState;
-                sUIVtAB50* vt = *(sUIVtAB50**)(owner + 8);
-                if (vt[20].fn(vthis(owner, vt[20]), self, 1, i) != 0) return i;
+                cUIState* owner = self->mpScreen->mpState;
+                if (owner->onWidgetMenu(self, 1, i) != 0) return i;
             } else {
                 char* item = (char*)cList_getByIndex((char*)&self->mList, i);
                 int bits = *(int*)(item + 0x14) >> 5;
@@ -473,12 +467,6 @@ INCLUDE_ASM("ui/uilistbox", cUIMenu_getPrev);
 #ifdef SKIP_ASM
 extern "C" void* cList_getByIndex(void* list, unsigned char i);
 
-struct cUIMenu_getPrev_sVEntry {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, int, unsigned char);
-};
-
 /**
  * Finds the selectable item before the current one (mScrollItemCurrent), wrapping to the last when mWrap is set.
  *
@@ -495,9 +483,8 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
     do {
         if (i != 0xFF) {
             if (*(int*)&self->mAttrMenu & 4) {
-                char* mgr = (char*)self->mpScreen->mpState;
-                cUIMenu_getPrev_sVEntry* vt = *(cUIMenu_getPrev_sVEntry**)(mgr + 8);
-                if (vt[20].fn(vthis(mgr, vt[20]), self, 1, i)) {
+                cUIState* mgr = self->mpScreen->mpState;
+                if (mgr->onWidgetMenu(self, 1, i)) {
                     return i;
                 }
             } else {

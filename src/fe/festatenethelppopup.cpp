@@ -50,8 +50,7 @@ extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int 
     if (self->mbReferEventsToParent != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            sVEntry<int(void*, int, int)>* vt = (sVEntry<int (void*, int, int)>*)VPTR_OF(cListNode, obj);
-            return vt[24].fn(vthis(obj, vt[24]), msg, msgParam);
+            return obj->handleEvent(msg, (void*)msgParam);
         }
     }
     return 0;

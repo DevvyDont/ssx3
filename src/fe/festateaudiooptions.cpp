@@ -526,8 +526,7 @@ extern "C" void cFEStateRequestLine_onCreateScreen(cFEStateRequestLine* self)
         void* list = (char*)&self->mpEngine->mStateStack;
         cUIState* obj = (cUIState*)((char*)cUIStateStack_findState(list, GetHashValue32(str_hud)));
         if (((char*)obj) != 0) {
-            sVEntry<int(void*, int, int)>* vt = (sVEntry<int (void*, int, int)>*)VPTR_OF(cListNode, obj);
-            vt[24].fn(vthis(obj, vt[24]), 3, 0);
+            obj->handleEvent(3, 0);
         }
     }
     void* engine = self->mpEngine;
@@ -556,8 +555,7 @@ extern "C" void cFEStateRequestLine_onDestroyScreen(cFEStateRequestLine* self)
     if ((int)SSXApp->Game != 0) {
         cUIState* obj = (cUIState*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
         if (((void*)obj) != 0) {
-            sVEntry<int(void*, int, int)>* vtEntry = &((sVEntry<int (void*, int, int)>*)VPTR_OF(cListNode, obj))[24];
-            vtEntry->fn(vthis(obj, *vtEntry), 4, 0);
+            obj->handleEvent(4, 0);
         }
     }
     cUIState_onDestroyScreen(self);

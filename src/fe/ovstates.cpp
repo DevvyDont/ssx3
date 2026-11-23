@@ -720,14 +720,12 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* 
     if (msg != 22) {
         return;
     }
-    sVEntry<int(void*, int)>* ovt = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, obj);
-    if (ovt[23].fn(vthis(obj, ovt[23]), 0) != 0) {
+    if ((int)obj->getData(0) != 0) {
         self->mGoToNextState = 1;
         int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
         *(char*)&self->mCurrentCtrl = savedCtrl;
         cUIThing_playKeyframerEvent(self->mpSelectMultiModeWidget, 2);
-        sVEntry<void(void*, ...)>* svt = (sVEntry<void(void*, ...)>*)VPTR_OF(cListNode, self);
-        svt[19].fn(vthis(self, svt[19]), self->mpSelectMultiModeWidget, 5);
+        self->onWidgetEvent(self->mpSelectMultiModeWidget, 5);
     }
     Show195328(self, str_hl);
     Show195328(self, str_3_help_multi);
