@@ -31,8 +31,8 @@ extern "C" void cWScriptMan_readFromReplayFrame(void* self, void* stream);
 extern "C" void func_00229E58(void* self, void* stream);
 extern "C" void func_00344240(void* self, void* stream);
 extern "C" void cMultiParticleMan_readFromReplayFrame(void* self, void* stream);
-extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream);
-extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream);
+extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cBxReplayFrame* stream);
+extern "C" void cReplay_restoreDeadBucket(cReplay* self, cBxReplayFrame* stream);
 extern "C" void cFocusMan_readFromReplayFrame(void* self, void* stream);
 extern "C" void cReplay_applyBucket(cReplay* self, int a);
 extern "C" void cAI_updateOverlapList(void* self);
@@ -85,8 +85,8 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cBxReplayFrame* stream)
     func_00229E58(TheCrowdMan2d, stream);
     func_00344240(TheCrowdMan3d, stream);
     cMultiParticleMan_readFromReplayFrame(cMultiParticleMan_TheMultiParticleMan, stream);
-    cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
-    cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
+    cReplay_restoreBucket(self, (void*)1, stream);
+    cReplay_restoreDeadBucket(self, stream);
     cFocusMan_readFromReplayFrame(SSXApp->Game->AI->FocusMan, stream);
     cReplay_applyBucket(self, 1);
     cAI_updateOverlapList(SSXApp->Game->AI);
@@ -104,7 +104,7 @@ public:
     virtual void read(void* buf, int size);
 };
 
-extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* stream);
+extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cBxReplayFrame* stream);
 extern "C" void cBucketMan_mergeBucket(void* mgr, void* bucket);
 extern char gBucketMan;
 
@@ -117,14 +117,14 @@ extern char gBucketMan;
  * @param bucket  the bucket the objects are restored into
  * @param stream  the replay stream to read from
  */
-extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream)
+extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cBxReplayFrame* stream)
 {
     struct {
         int count;
         int pad;
     } hdr;
     int i;
-    stream->read(&hdr, 8);
+    stream->read((char*)&hdr, 8);
     for (i = 0; i < hdr.count; i++) {
         cReplay_restoreObject(self, bucket, stream);
     }
@@ -226,7 +226,7 @@ extern "C" sObj_RO* cDeadFadeNode_cDeadFadeNode1_RO(void* self, void* bucket, vo
  * @param stream  the frame's stream, positioned at the object (On Tour cReplayFramePtr* data)
  */
 // Recreates a replay object of the recorded type and links it into the bucket.
-extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* stream)
+extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cBxReplayFrame* stream)
 {
     switch (cReplayFramePtr_peekObjNodeType(stream)) {
     case 0:
@@ -356,16 +356,16 @@ struct sRdbRef {
  *
  * @param stream  the replay stream to read from
  */
-extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream)
+extern "C" void cReplay_restoreDeadBucket(cReplay* self, cBxReplayFrame* stream)
 {
     struct {
         int count;
         int pad;
     } hdr;
     sRdbRef ref;
-    stream->read(&hdr, 8);
+    stream->read((char*)&hdr, 8);
     for (int i = 0; i < hdr.count; i++) {
-        stream->read(&ref, 4);
+        stream->read((char*)&ref, 4);
         void* mem = cMemMan_alloc(0x1C, str_Dead_Object, 0x20000000, 0);
         cDeadNode_cDeadNode(mem, ref.get());
     }

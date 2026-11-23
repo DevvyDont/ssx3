@@ -596,15 +596,13 @@ struct sFlagSet_C2E0 {
  * @param elem  the flag set
  * @param stream  replay stream to write to
  */
-extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* stream)
+extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, cBxReplayFrame* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
-    sFlagSetVEntryC2E0a* writeFn = &(*(sFlagSetVEntryC2E0a**)stream)[1];
-    writeFn->fn(vthis(stream, *writeFn), self, 0x60);
+    stream->write((const char*)self, 0x60);
     for (i = 0; i < self->count; i++) {
-        sFlagSetVEntryC2E0b* writeItemFn = &(*(sFlagSetVEntryC2E0b**)stream)[5];
-        writeItemFn->fn(vthis(stream, *writeItemFn), self->items[i]);
+        stream->writeReplayInstance((const tInstanceRecord*)self->items[i]);
     }
 }
 #endif
@@ -626,15 +624,13 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* self, void* item);
  * @param elem  the flag set
  * @param stream  replay stream to read from
  */
-extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* stream)
+extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, cBxReplayFrame* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
-    sVEntry<void(void*, void*, int)>* readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readFn->fn(vthis(stream, *readFn), self, 0x60);
+    stream->read((char*)self, 0x60);
     for (i = 0; i < self->count; i++) {
-        sVEntry<void*(void*)>* readItemFn = &(*(sVEntry<void*(void*)>**)stream)[3];
-        self->items[i] = readItemFn->fn(vthis(stream, *readItemFn));
+        self->items[i] = (void*)stream->readReplayInstance();
     }
     if (self->count > 0) {
         cFlagSet_CreateMesh((cFlagSet*)self, self->items[0]);
@@ -903,7 +899,7 @@ struct sFlagSet_C848 {
     cFlagSet elems[15]; // 0x20
 };
 
-extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* arg);
+extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, cBxReplayFrame* arg);
 
 /**
  * Saves the flag manager's flags into a replay frame.
@@ -931,7 +927,7 @@ struct sFlagSet_C898 {
     cFlagSet elems[15]; // 0x20
 };
 
-extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* arg);
+extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, cBxReplayFrame* arg);
 
 /**
  * Restores the flag manager's flags from a replay frame.

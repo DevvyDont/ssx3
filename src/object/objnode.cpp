@@ -93,12 +93,11 @@ cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm_
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, void* stream)
+extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, cBxReplayFrame* stream)
 {
     cObjNode_cObjNode_3((cObjNode*)self, bucket, stream);
     self->mVtbl = cTypeObjNode_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->ObjNodeType, 4);
+    stream->read((char*)&self->ObjNodeType, 4);
     cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
     return ((void*)self);
 }
@@ -176,7 +175,7 @@ struct sVEntryCSortObjNode {
 };
 
 extern void* cSortObjNode_vtbl[];
-extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* a, void* stream);
+extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* a, cBxReplayFrame* stream);
 
 /**
  * Recreates a sorted object node from a replay frame: the typed-node part and its sort index.

@@ -1365,6 +1365,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_restoreOverlapSystem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 #include "common.h"
+#include "replay/bxreplayframe.h"
 struct tModifierBlock;
 void tModifierBlock_setBoundBox_K(tModifierBlock* mb, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
 
@@ -1668,7 +1669,7 @@ extern "C" void tModifierBlock_writeToReplayFrame(void* block, void* stream);
 
 // PORT: the unit declares cMoveNode_writeToReplayFrame as `void* (void*)` for its callers; the body writes
 // to the stream in a1, so the 2-arg body is bound by asm label.
-void cMoveNode_writeToReplayFrame_2(void* self, void* stream) __asm__("cMoveNode_writeToReplayFrame");
+void cMoveNode_writeToReplayFrame_2(void* self, cBxReplayFrame* stream) __asm__("cMoveNode_writeToReplayFrame");
 
 /**
  * Writes a moving node to a replay frame: the instance-node part, debounce, fade, transfer flag and its
@@ -1676,19 +1677,15 @@ void cMoveNode_writeToReplayFrame_2(void* self, void* stream) __asm__("cMoveNode
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-void cMoveNode_writeToReplayFrame_2(void* vself, void* stream)
+void cMoveNode_writeToReplayFrame_2(void* vself, cBxReplayFrame* stream)
 {
     cMoveNode* self = (cMoveNode*)vself;
     cInstanceNode_writeToReplayFrame(self, stream);
-    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Debounce, 4);
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Fade, 4);
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->TransferHack, 4);
+    stream->write((const char*)&self->Debounce, 4);
+    stream->write((const char*)&self->Fade, 4);
+    stream->write((const char*)&self->TransferHack, 4);
     int flag = self->ModifierBlock != 0;
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), &flag, 4);
+    stream->write((const char*)&flag, 4);
     void* block = self->ModifierBlock;
     if (block != 0) {
         tModifierBlock_writeToReplayFrame(block, stream);
@@ -1991,7 +1988,7 @@ INCLUDE_ASM("object/movenode", cPositionModifier_cPositionModifier2);
 #ifdef SKIP_ASM
 
 // PORT: callers declare this void; the body returns self, so bind it via an asm label.
-extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stream) __asm__("cPositionModifier_cPositionModifier2");
+extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, cBxReplayFrame* stream) __asm__("cPositionModifier_cPositionModifier2");
 /**
  * Constructs a position modifier from a replay frame.
  *
@@ -2001,12 +1998,11 @@ extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stre
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cPositionModifier_cPositionModifier2_ret(void* vself, void* stream)
+extern "C" void* cPositionModifier_cPositionModifier2_ret(void* vself, cBxReplayFrame* stream)
 {
     cPositionModifier* self = (cPositionModifier*)vself;
     *(void***)self = cPositionModifier_vtbl;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), (char*)&self->BoundBox, 0x40);
+    stream->read((char*)&self->BoundBox, 0x40);
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2047,21 +2043,15 @@ extern "C" void cPositionModifier_updateRootTransform(cPositionModifier* self)
 //100%
 INCLUDE_ASM("object/movenode", cPositionModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cPositionModifier_writeToReplayFrame_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-};
-
 /**
  * Saves a position modifier to a replay frame: the 0x40 bytes from +0x10 (BoundBox, Offset, Radius,
  * RootTransformDirty) through the frame's write (slot 1).
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cPositionModifier_writeToReplayFrame_cObj* obj)
+extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cBxReplayFrame* obj)
 {
-    obj->write((char*)&self->BoundBox, 0x40);
+    obj->write((const char*)&self->BoundBox, 0x40);
 }
 #endif
 
@@ -2108,14 +2098,12 @@ extern char cParentModifier_vtbl[];
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* stream)
+extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, cBxReplayFrame* stream)
 {
     cPositionModifier_cPositionModifier2(self, stream);
     self->mVtbl = (void**)cParentModifier_vtbl;
-    sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->Mesh, 4);
-    sVEntry<void*(void*)>* readPtrEntry = &(*(sVEntry<void*(void*)>**)stream)[3];
-    self->ParentInst = (tInstanceRecord*)readPtrEntry->fn(vthis(stream, *readPtrEntry));
+    stream->read((char*)&self->Mesh, 4);
+    self->ParentInst = (tInstanceRecord*)(void*)stream->readReplayInstance();
     return ((void*)self);
 }
 #endif
@@ -2257,13 +2245,11 @@ INCLUDE_ASM("object/movenode", cParentModifier_writeToReplayFrame);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, void* stream)
+extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, cBxReplayFrame* stream)
 {
-    cPositionModifier_writeToReplayFrame((cPositionModifier*)self, (cPositionModifier_writeToReplayFrame_cObj*)stream);
-    sVEntry<void(void*, void*, int)>* vt1 = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt1[1].fn(vthis(stream, vt1[1]), (char*)&self->Mesh, 4);
-    sVEntry<void(void*, void*)>* vt2 = *(sVEntry<void(void*, void*)>**)stream;
-    vt2[5].fn(vthis(stream, vt2[5]), self->ParentInst);
+    cPositionModifier_writeToReplayFrame((cPositionModifier*)self, stream);
+    stream->write((const char*)&self->Mesh, 4);
+    stream->writeReplayInstance((const tInstanceRecord*)self->ParentInst);
 }
 #endif
 
@@ -2517,14 +2503,11 @@ INCLUDE_ASM("object/movenode", cMagnetModifier_writeToReplayFrame);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, void* stream)
+extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, cBxReplayFrame* stream)
 {
-    sVEntry<void(void*, void*)>* writePtrEntry = &(*(sVEntry<void(void*, void*)>**)stream)[5];
-    writePtrEntry->fn(vthis(stream, *writePtrEntry), self->Instance);
-    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Offset, 80);
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Transform, 0x40);
+    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
+    stream->write((const char*)&self->Offset, 80);
+    stream->write((const char*)&self->Transform, 0x40);
 }
 #endif
 
@@ -2625,12 +2608,10 @@ INCLUDE_ASM("object/movenode", cAvaSplineModifier_writeToReplayFrame);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, void* stream)
+extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, cBxReplayFrame* stream)
 {
-    sVEntry<void(void*, void*)>* vt1 = *(sVEntry<void(void*, void*)>**)stream;
-    vt1[5].fn(vthis(stream, vt1[5]), self->Instance);
-    sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt2[1].fn(vthis(stream, vt2[1]), (char*)&self->BoundBox, 0x30);
+    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
+    stream->write((const char*)&self->BoundBox, 0x30);
 }
 #endif
 
@@ -2946,13 +2927,12 @@ extern "C" void cMultiParticle_writeToReplayFrame(void* obj, void* stream);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cMultiParticleMan_writeToReplayFrame(void** self, void* stream)
+extern "C" void cMultiParticleMan_writeToReplayFrame(void** self, cBxReplayFrame* stream)
 {
     int i;
     for (i = 0; i < 4; i++) {
         int has = self[i] != 0;
-        sMnVEntrySer7CA8* writeEntry = &(*(sMnVEntrySer7CA8**)stream)[1];
-        writeEntry->fn(vthis(stream, *writeEntry), &has, 4);
+        stream->write((const char*)&has, 4);
         if (has) {
             cMultiParticle_writeToReplayFrame(self[i], stream);
         }
@@ -2964,7 +2944,7 @@ extern "C" void cMultiParticleMan_writeToReplayFrame(void** self, void* stream)
 INCLUDE_ASM("object/movenode", cMultiParticleMan_readFromReplayFrame);
 #ifdef SKIP_ASM
 
-extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, void* stream);
+extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, cBxReplayFrame* stream);
 
 /**
  * Restores the multi-particle systems from a replay frame.
@@ -2975,14 +2955,13 @@ extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, void* strea
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
-extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
+extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, cBxReplayFrame* stream)
 {
     int i;
     cMultiParticleMan_reset(self);
     for (i = 0; i < 4; i++) {
         int has;
-        sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-        readSlot->fn(vthis(stream, *readSlot), &has, 4);
+        stream->read((char*)&has, 4);
         if (has) {
             self[i] = cMultiParticle_cMultiParticle1((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), stream);
         } else {
@@ -3055,16 +3034,9 @@ INCLUDE_ASM("object/movenode", cMultiParticle_cMultiParticle1);
 #ifdef SKIP_ASM
 extern "C" void cStaticEmitter_readFromReplayFrame(void* self, void* stream);
 
-struct sMnSerVEntry_357E80 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
-static inline void read_357E80(void* stream, void* dst, int n)
+static inline void read_357E80(cBxReplayFrame* stream, void* dst, int n)
 {
-    sMnSerVEntry_357E80* vt = *(sMnSerVEntry_357E80**)stream;
-    vt[2].fn(vthis(stream, vt[2]), dst, n);
+    stream->read((char*)dst, n);
 }
 
 /**
@@ -3078,7 +3050,7 @@ static inline void read_357E80(void* stream, void* dst, int n)
  * @param stream  replay stream to read from
  * @return mem
  */
-extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, void* stream)
+extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, cBxReplayFrame* stream)
 {
     cMultiParticle* self = mem;
     sQuad_7DD8* ab = (sQuad_7DD8*)&self->BoundBox;

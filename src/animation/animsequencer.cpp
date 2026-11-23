@@ -408,7 +408,7 @@ class cAsStream;
  * @param node  the sequence to write
  * @param stream  the output stream
  */
-extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* stream)
+extern "C" void cAnimSequence_writeToReplayFrame(void* node, cBxReplayFrame* stream)
 {
     cAnimSequence* self = (cAnimSequence*)node;
     char* streamPtr = (char*)stream;
@@ -937,7 +937,7 @@ public:
 
 
 
-extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
+extern "C" void cAnimSequence_writeToReplayFrame(void* node, cBxReplayFrame* s);
 
 /**
  * Writes the sequencer to @p stream: its 4-byte count, then each of its sequences (cAnimSequence_writeToReplayFrame) in list order.
@@ -947,9 +947,9 @@ extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
  *
  * @param stream  the output stream
  */
-extern "C" void cAnimSequencer_writeToReplayFrame(cAnimSequencer* self, cAsStream* stream)
+extern "C" void cAnimSequencer_writeToReplayFrame(cAnimSequencer* self, cBxReplayFrame* stream)
 {
-    stream->serialize((self), 4);
+    stream->write((const char*)self, 4);
     cAnimSequence* n = self->PlayList;
     for (int i = 0; i < self->NumPlaying; i++)
     {

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "luno/lunotable.h"
 #include "luno/lunofunc.h"
+#include "replay/bxreplayframe.h"
 
 // A script value: {word0, word1, type}. Type 4 is a table, word0 -> cLunoTable.
 struct cLunoValue {
@@ -790,14 +791,14 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_writeToReplayFrame);
  * @param stream  the replay frame to write to
  * @param base  the address the chunk pointer is stored relative to
  */
-extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, sVEntry<void(void*, void*, int)>** stream, int base)
+extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, cBxReplayFrame* stream, int base)
 {
     int off;
     int secondWord;
     off = (int)self->Chunk - base;
-    (*stream)[1].fn(vthis(stream, (*stream)[1]), &off, 4);
+    stream->write((const char*)&off, 4);
     secondWord = self->FuncNum;
-    (*stream)[1].fn(vthis(stream, (*stream)[1]), &secondWord, 4);
+    stream->write((const char*)&secondWord, 4);
 }
 #endif
 
@@ -815,12 +816,12 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_readFromReplayFrame);
  * @param stream  the replay frame to read from
  * @param base  the address the chunk pointer was stored relative to
  */
-extern "C" void luno_cLunoFunc_readFromReplayFrame(luno_cLunoFunc* self, sVEntry<void(void*, void*, int)>** stream, int base)
+extern "C" void luno_cLunoFunc_readFromReplayFrame(luno_cLunoFunc* self, cBxReplayFrame* stream, int base)
 {
     int buf[2];
-    (*stream)[2].fn(vthis(stream, (*stream)[2]), &buf[0], 4);
+    stream->read((char*)&buf[0], 4);
     self->Chunk = (const char*)(base + buf[0]);
-    (*stream)[2].fn(vthis(stream, (*stream)[2]), &buf[1], 4);
+    stream->read((char*)&buf[1], 4);
     self->FuncNum = buf[1];
 }
 #endif
@@ -1325,7 +1326,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry<void(void*, void*, int)>** stream, int base);
+extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, cBxReplayFrame* stream, int base);
 
 /**
  * Writes a Luno table to a replay frame: the data's first 8 bytes, the number of used entries, then each one's key and
@@ -1340,10 +1341,10 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry<void(
  * @param stream  the replay frame to write to
  * @param base  the address pointers are stored relative to
  */
-extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry<void(void*, void*, int)>** stream, int base)
+extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, cBxReplayFrame* stream, int base)
 {
     cLunoTableRef* self = (cLunoTableRef*)vself;
-    (*stream)[1].fn(vthis(stream, (*stream)[1]), self->table, 8);
+    stream->write((const char*)self->table, 8);
     int cnt = 0;
     luno_cLunoTableData* hashTable = self->table;
     cLunoNode* n = (cLunoNode*)((cLunoTableEntry*)hashTable->Entries);
@@ -1359,7 +1360,7 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry<void(voi
         }
         n = next;
     }
-    (*stream)[1].fn(vthis(stream, (*stream)[1]), &cnt, 4);
+    stream->write((const char*)&cnt, 4);
     if (cnt > 0) {
         cLunoNode* n = (cLunoNode*)((cLunoTableEntry*)self->table->Entries);
         for (int i = 0; i <= self->table->Modulus; i++) {
@@ -1388,7 +1389,7 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry<void(voi
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
-extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry<void(void*, void*, int)>** stream, int base);
+extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, cBxReplayFrame* stream, int base);
 extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoValue* val);
 
 
@@ -1419,7 +1420,7 @@ struct cLunoNode_9A8 {
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame*)
  * @param base    passed through to the value reader (On Tour: const char* base)
  */
-extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry<void(void*, void*, int)>** stream, int base)
+extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, cBxReplayFrame* stream, int base)
 {
     if (((cLunoTableEntry*)self->table->Entries) != 0) {
         cLunoTableEntry* node = ((cLunoTableEntry*)self->table->Entries) + *(int*)((char*)((cLunoTableEntry*)self->table->Entries) - 0x10);
@@ -1429,14 +1430,14 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry
         }
         cMemMan_free((char*)((cLunoTableEntry*)self->table->Entries) - 0x10);
     }
-    (*stream)[2].fn(vthis(stream, (*stream)[2]), self->table, 8);
+    stream->read((char*)self->table, 8);
     cLunoTableEntry** slot = &(*(cLunoTableEntry**)&self->table->Entries);
     *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_9A8[self->table->Modulus + 1];
     int i;
     int cnt;
     cLunoValue key;
     cLunoValue val;
-    (*stream)[2].fn(vthis(stream, (*stream)[2]), &cnt, 4);
+    stream->read((char*)&cnt, 4);
     for (i = 0; i < cnt; i++) {
         key.type = 0;
         key.word0 = 0;
@@ -1476,8 +1477,8 @@ extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, sVEntry<void(void*, void*, int)>** stream, int base);
-extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, sVEntry<void(void*, void*, int)>** stream, int base);
+extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, cBxReplayFrame* stream, int base);
+extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, cBxReplayFrame* stream, int base);
 
 /**
  * Saves a Luno value into a replay frame.
@@ -1488,15 +1489,15 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, sVEntry<void(void
  * @param stream  the replay frame
  * @param base  the base address string pointers are stored relative to
  */
-extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry<void(void*, void*, int)>** stream, int base)
+extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, cBxReplayFrame* stream, int base)
 {
-    (*stream)[1].fn(vthis(stream, (*stream)[1]), &self->type, 4);
+    stream->write((const char*)&self->type, 4);
     if (self->type == 5) {
         luno_cLunoFunc_writeToReplayFrame((luno_cLunoFunc*)self, stream, base);
     } else if (self->type == 4) {
         luno_cLunoTable_writeToReplayFrame(self, stream, base);
     } else {
-        (*stream)[1].fn(vthis(stream, (*stream)[1]), self, 4);
+        stream->write((const char*)self, 4);
     }
 }
 #endif
@@ -1507,12 +1508,12 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoVar_readFromReplayFrame);
 
 // PORT: luno_cLunoTable_cLunoTable forwards a size argument to constructTable (unit declares 1 arg).
 extern "C++" cLunoTableRef* luno_cLunoTable_cLunoTable_sz(cLunoTableRef* self, int size) __asm__("luno_cLunoTable_cLunoTable");
-extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry<void(void*, void*, int)>** stream, int base);
+extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, cBxReplayFrame* stream, int base);
 
-static inline int lunoReadInt_225CA0(sVEntry<void(void*, void*, int)>** stream)
+static inline int lunoReadInt_225CA0(cBxReplayFrame* stream)
 {
     int v;
-    (*stream)[2].fn(vthis(stream, (*stream)[2]), &v, 4);
+    stream->read((char*)&v, 4);
     return v;
 }
 
@@ -1526,14 +1527,14 @@ static inline int lunoReadInt_225CA0(sVEntry<void(void*, void*, int)>** stream)
  * @param stream  the replay frame
  * @param base  the base address string pointers are relative to
  */
-extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry<void(void*, void*, int)>** stream, int base)
+extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, cBxReplayFrame* stream, int base)
 {
     int type = lunoReadInt_225CA0(stream);
     if (type == 5) {
         luno_cLunoFunc pair;
         (*(int*)&pair.Chunk) = 0;
         pair.FuncNum = 0;
-        luno_cLunoFunc_readFromReplayFrame((luno_cLunoFunc*)(&pair), (sVEntry<void(void*, void*, int)>**)stream, base);
+        luno_cLunoFunc_readFromReplayFrame((luno_cLunoFunc*)(&pair), stream, base);
         if (self->type == 4) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
@@ -1555,7 +1556,7 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry<void
         luno_cLunoTable__cLunoTable((cLunoTableRef*)&ref, 2);
     } else {
         self->type = type;
-        (*stream)[2].fn(vthis(stream, (*stream)[2]), self, 4);
+        stream->read((char*)self, 4);
     }
 }
 #endif

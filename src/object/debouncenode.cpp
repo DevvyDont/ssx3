@@ -1258,7 +1258,7 @@ extern "C" void func_00344138(sDebounceElem4138* self)
 INCLUDE_ASM("object/debouncenode", func_003441A8);
 #ifdef SKIP_ASM
 class cDebounceStream;
-extern "C" void func_00344FC0(void* self, cDebounceStream* s);
+extern "C" void func_00344FC0(void* self, cBxReplayFrame* s);
 
 struct sDebounceElem41A8 {
     int field_0x0;
@@ -1276,12 +1276,11 @@ struct sDebounceElem41A8 {
  *
  * @param replayStream  replay stream to write to
  */
-extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* replayStream)
+extern "C" void func_003441A8(sDebounceElem41A8* self, cBxReplayFrame* replayStream)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        sVEntry<void(void*, void*, int)>* writeSlot = &(*(sVEntry<void(void*, void*, int)>**)replayStream)[1];
-        writeSlot->fn(vthis(replayStream, *writeSlot), &self[i].field_0x8, 4);
+        replayStream->write((const char*)&self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
             func_00344FC0(&self[i], replayStream);
         }
@@ -1293,7 +1292,7 @@ extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* replaySt
 INCLUDE_ASM("object/debouncenode", func_00344240);
 #ifdef SKIP_ASM
 class cDebounceStream;
-extern "C" void func_00344FF8(void* self, cDebounceStream* s);
+extern "C" void func_00344FF8(void* self, cBxReplayFrame* s);
 
 struct sDebounceElem4240 {
     int field_0x0;
@@ -1311,13 +1310,12 @@ struct sDebounceElem4240 {
  *
  * @param replayStream  replay stream to read from
  */
-extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* replayStream)
+extern "C" void func_00344240(sDebounceElem4240* self, cBxReplayFrame* replayStream)
 {
     int i;
     func_00343BC0((sDebounceBlock*)self);
     for (i = 0; i < 5; i++) {
-        sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)replayStream)[2];
-        readSlot->fn(vthis(replayStream, *readSlot), &self[i].field_0x8, 4);
+        replayStream->read((char*)&self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
             func_00344FF8(&self[i], replayStream);
         }
@@ -2109,9 +2107,9 @@ public:
  *
  * @param replayStream  replay stream to write to (vtable entry 1)
  */
-extern "C" void func_00344FC0(void* self, cDebounceStream* replayStream)
+extern "C" void func_00344FC0(void* self, cBxReplayFrame* replayStream)
 {
-    replayStream->write(self, 268);
+    replayStream->write((const char*)self, 268);
 }
 #endif
 
@@ -2128,9 +2126,9 @@ extern "C" void func_003443A8(void* self);
  *
  * @param replayStream  replay stream to read from
  */
-extern "C" void func_00344FF8(void* self, cDebounceStream* replayStream)
+extern "C" void func_00344FF8(void* self, cBxReplayFrame* replayStream)
 {
-    replayStream->read(self, 268);
+    replayStream->read((char*)self, 268);
     func_00344800(self);
     func_003443A8(self);
 }
