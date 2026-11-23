@@ -439,8 +439,7 @@ extern "C" void cUIText_updateLocale(cUIText* self)
                     cUIText_setUnicodeStringPrivate(self, str);
                 }
             }
-            cUIText_updateLocale_sVEntry* vt2 = (cUIText_updateLocale_sVEntry*)VPTR_OF(cListNode, self);
-            ((void (*)(void*, int))vt2[5].fn)(vthis(self, vt2[5]), 1);
+            self->setCached(1);
         }
     }
 }

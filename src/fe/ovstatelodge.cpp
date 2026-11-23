@@ -463,8 +463,7 @@ extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUI
         sVEntry<void(void*, int)>* svt = *(sVEntry<void(void*, int)>**)snd;
         svt[2].fn(vthis(snd, svt[2]), 3);
         cUIGroup* w = self->mpPassGroup;
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, w);
-        vt[9].fn(vthis(w, vt[9]), 0);
+        w->setVisible(0);
     }
     return 1;
     }
@@ -717,12 +716,6 @@ extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vse
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_showPassFront);
 #ifdef SKIP_ASM
-struct sVEntry_cFEStateMountainRoom_showPassFront {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Shows the mountain room's peak pass: the pass group (+0x48) always, the pass-front group (+0x4C) only when the front
  * texture exists (+0xC4 >= 0).
@@ -733,13 +726,11 @@ extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self)
 {
     {
         cUIGroup* obj = self->mpPassGroup;
-        sVEntry_cFEStateMountainRoom_showPassFront* vt = (sVEntry_cFEStateMountainRoom_showPassFront*)VPTR_OF(cListNode, obj);
-        vt[9].fn(vthis(obj, vt[9]), 1);
+        obj->setVisible(1);
     }
     if (self->mFrontTextureID >= 0) {
         cUIGroup* obj = self->mpPassFrontGroup;
-        sVEntry_cFEStateMountainRoom_showPassFront* vt = (sVEntry_cFEStateMountainRoom_showPassFront*)VPTR_OF(cListNode, obj);
-        vt[9].fn(vthis(obj, vt[9]), 1);
+        obj->setVisible(1);
     }
 }
 #endif

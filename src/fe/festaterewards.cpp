@@ -367,11 +367,6 @@ extern char D_004A1408[];
 extern char* D_00441440[][8];
 extern char* D_004414C0[][8];
 
-struct sVEi_F820 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 struct sVEv_F820 {
     short delta;
     short index;
@@ -411,7 +406,7 @@ struct sGallery_F820 {
 
 static inline void show_F820(cUIIcon* w, int on)
 {
-    ((sVEi_F820*)VPTR_OF(cListNode, w))[9].fn(vthis(w, ((sVEi_F820*)VPTR_OF(cListNode, w))[9]), on);
+    w->setVisible(on);
 }
 
 /**
@@ -1249,11 +1244,6 @@ extern char str_dollar_sign[];
 extern char str_questmark[];
 extern char gFadedColour[];
 
-struct sVEv_08A0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 struct sVEi_08A0 {
     short delta;
     short index;
@@ -1264,8 +1254,7 @@ struct sVEi_08A0 {
 
 static inline void show_08A0(cUIIcon* c, int on)
 {
-    sVEv_08A0* vt = (sVEv_08A0*)((void*)VPTR_OF(cListNode, c));
-    vt[9].fn(vthis(c, vt[9]), on);
+    c->setVisible(on);
 }
 
 /**
@@ -1314,8 +1303,7 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* s
                 cell->mTextureID = -1;
             }
             cUIIcon* cell = self->mpIcons[row][col];
-            sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((void*)VPTR_OF(cListNode, cell));
-            vt[11].fn(vthis(cell, vt[11]), gFadedColour);
+            cell->setColour((const tARGB*)gFadedColour);
         } else {
             show_08A0(self->mpIcons[row][col], 0);
             show_08A0(((cUIIcon* (*)[8])&self->mpIconBacks[0][0])[row][col], 0);
@@ -1560,8 +1548,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
         }
     }
     cUIIcon* curCell = self->mpSelected;
-    sVEntry<void(void*, void*)>* vt4 = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, curCell);
-    vt4[11].fn(vthis(curCell, vt4[11]), gSolidColour);
+    curCell->setColour((const tARGB*)gSolidColour);
 }
 #endif
 
@@ -1577,14 +1564,11 @@ extern "C" void cFEStateRewardGalleryBase_updateArrows(cFEStateRewardGalleryBase
 {
     cUIIcon* obj = self->mpArrowUp;
     if (obj != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
-        vt[9].fn(vthis(obj, vt[9]), self->mFirstVisibleRow > 0);
+        obj->setVisible(self->mFirstVisibleRow > 0);
     }
     cUIIcon* obj2 = self->mpArrowDown;
     if (obj2 != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj2);
-        vt[9].fn(vthis(obj2, vt[9]),
-                 self->mFirstVisibleRow + self->mMaxRewardRows < self->mNumRows);
+        obj2->setVisible(self->mFirstVisibleRow + self->mMaxRewardRows < self->mNumRows);
     }
 }
 #endif
@@ -2492,12 +2476,6 @@ extern char str_Square_bitmap[];
 extern char str_Horizontal_bitmap[];
 extern char str_Vertical_bitmap[];
 
-struct sVE_1C98 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 
 struct sPreviewReward_1C98 {
     char pad_0x0[0x10];
@@ -2585,7 +2563,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
     } else if (hash == GetHashValue32(str_reward_name)) {
         switch (self->type) {
         case 4:
-            ((sVE_1C98*)VPTR_OF(cListNode, w))[9].fn(vthis(w, ((sVE_1C98*)VPTR_OF(cListNode, w))[9]), 0);
+            w->setVisible(0);
             break;
         case 3:
         case 5:
@@ -2597,13 +2575,13 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         }
     } else if (hash == GetHashValue32(str_Square_shape)) {
         self->frames[0] = w;
-        ((sVE_1C98*)VPTR_OF(cListNode, w))[9].fn(vthis(w, ((sVE_1C98*)VPTR_OF(cListNode, w))[9]), 0);
+        w->setVisible(0);
     } else if (hash == GetHashValue32(str_Horizontal_shape)) {
         self->frames[1] = w;
-        ((sVE_1C98*)VPTR_OF(cListNode, w))[9].fn(vthis(w, ((sVE_1C98*)VPTR_OF(cListNode, w))[9]), 0);
+        w->setVisible(0);
     } else if (hash == GetHashValue32(str_Vertical_shape)) {
         self->frames[2] = w;
-        ((sVE_1C98*)VPTR_OF(cListNode, w))[9].fn(vthis(w, ((sVE_1C98*)VPTR_OF(cListNode, w))[9]), 0);
+        w->setVisible(0);
     } else if (hash == GetHashValue32(str_Square_bitmap)) {
         self->items[0] = w;
     } else if (hash == GetHashValue32(str_Horizontal_bitmap)) {
@@ -2618,7 +2596,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             item->mTextureID = self->f70;
             (*(void**)&item->mpTextureElem) = 0;
             cUIIcon* frame = self->frames[self->sel];
-            ((sVE_1C98*)VPTR_OF(cListNode, frame))[9].fn(vthis(frame, ((sVE_1C98*)VPTR_OF(cListNode, frame))[9]), 1);
+            frame->setVisible(1);
         }
     }
 }

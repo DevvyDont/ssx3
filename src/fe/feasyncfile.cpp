@@ -2033,8 +2033,7 @@ extern "C" void func_001A5FB8(cFEStateNetMessenger* self, int sel)
         sprintf(buf, str_ps2Xpct_02d, i);
         cUIText* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (((void*)obj) != 0) {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
-            vt[9].fn(vthis(obj, vt[9]), i == sel);
+            obj->setVisible(i == sel);
         }
         func_001A66A8(self, sel, i == sel);
     }
@@ -9546,8 +9545,7 @@ extern "C" void func_001AF568(cFEStateChallengePopup* self)
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_240WaitingChallenge)), name);
         cUIText_setUnicodeString(text, buf);
         cUIText* submitText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
-        sVEntry<void(void* self, int on)>* vt2 = (sVEntry<void(void* self, int on)>*)VPTR_OF(cListNode, submitText);
-        vt2[8].fn(vthis(submitText, vt2[8]), 1);
+        submitText->setStatic(1);
         cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge)), 7);
         func_001AEC60(self, 1);
     }

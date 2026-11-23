@@ -70,7 +70,7 @@ struct sLayerBits_05E8 {
 extern "C" void cUIText_render2D(cUIText* self, float x, float y)
 {
     if (self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[16].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[16]));
+        self->updateLocale();
     }
     int* ov = (int*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (ov != 0 && ((*ov >> 27) & 1)) {
@@ -487,8 +487,7 @@ INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringByID__FP7cUITexti);
 void cUIText_setUnicodeStringByID(cUIText* self, int id)
 {
     self->mStringID = id;
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-    vt[5].fn(vthis(self, vt[5]), 0);  // virtual cUIThing::setCached(false)
+    self->setCached(0);  // virtual cUIThing::setCached(false)
 }
 #endif
 
@@ -512,12 +511,6 @@ struct cUIText_getTextExtent_sRect {
     float y1;
 };
 
-struct cUIText_getTextExtent_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Returns the size of a UI text's string at its font and scale.
  *
@@ -531,8 +524,7 @@ struct cUIText_getTextExtent_sVEntry {
 extern "C" void cUIText_getTextExtent(cUIText* self, cUIText_getTextExtent_sVec3* out)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        cUIText_getTextExtent_sVEntry* vt = (cUIText_getTextExtent_sVEntry*)VPTR_OF(cListNode, self);
-        vt[16].fn(vthis(self, vt[16]));
+        self->updateLocale();
     }
     void* font = cUIText_getFont(self);
     int str = (int)self->mpString;
@@ -550,12 +542,6 @@ extern "C" void cUIText_getTextExtent(cUIText* self, cUIText_getTextExtent_sVec3
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_getNumLinesOfString);
 #ifdef SKIP_ASM
-struct cUIText_getNumLinesOfString_sVEntry {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 /**
  * Returns a UI text's line count (+0xA8), refreshing the text first (virtual slot 16) when needed.
  *
@@ -566,8 +552,7 @@ struct cUIText_getNumLinesOfString_sVEntry {
 extern "C" int cUIText_getNumLinesOfString(cUIText* self)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        cUIText_getNumLinesOfString_sVEntry* vt = (cUIText_getNumLinesOfString_sVEntry*)VPTR_OF(cListNode, self);
-        vt[16].fn(vthis(self, vt[16]));
+        self->updateLocale();
     }
     return self->mNumLines;
 }
@@ -852,8 +837,6 @@ struct sDrawBits_1588 {
     unsigned int layer : 5;
 };
 
-struct sVE_1588 { short delta; short index; void (*fn)(void*); };
-
 
 /**
  * Draws the visible lines of the text scroll from mLinesOffset, then updates its scroll bar.
@@ -869,7 +852,7 @@ struct sVE_1588 { short delta; short index; void (*fn)(void*); };
 extern "C" void cUITextScroll_render2D(cUITextScroll* self, float x, float y)
 {
     if (((self->mAttr >> 2) & 1) == 0) {
-        ((sVE_1588*)VPTR_OF(cListNode, self))[16].fn(vthis(self, ((sVE_1588*)VPTR_OF(cListNode, self))[16]));
+        self->updateLocale();
     }
     cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {

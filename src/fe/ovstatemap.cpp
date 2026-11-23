@@ -578,12 +578,12 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
         cUIState_showObjSafe(((char*)selfp), str_Popup1);
         cUIState_hideObjSafe(((char*)selfp), str_Popup2);
         if (list != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, list))[7].fn)(vthis(list, ((sVEntry<void>*)VPTR_OF(cListNode, list))[7]), 0);
+            list->setFocus(0);
             n = list->mScrollItemCurrent;
         }
         if (menu != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, menu))[7].fn)(vthis(menu, ((sVEntry<void>*)VPTR_OF(cListNode, menu))[7]), 1);
-            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, menu))[9].fn)(vthis(menu, ((sVEntry<void>*)VPTR_OF(cListNode, menu))[9]), 1);
+            menu->setFocus(1);
+            menu->setVisible(1);
         }
         cFELocale* locale = SSXApp->FELocale;
         sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cUILocaleInterface, locale));
@@ -617,17 +617,17 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
             cUIText_setUnicodeStringByID(confirmYes, GetHashValue32(str_kT_CMNYes_b));
         }
         if (confirmNo != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[9].fn)(vthis(confirmNo, ((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[9]), 1);
-            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[8].fn)(vthis(confirmNo, ((sVEntry<void>*)VPTR_OF(cListNode, confirmNo))[8]), 0);
+            confirmNo->setVisible(1);
+            confirmNo->setStatic(0);
         }
         cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No);
     } else {
         cUIState_hideObjSafe(((char*)selfp), str_ConfirmPopup);
         if (list != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, list))[7].fn)(vthis(list, ((sVEntry<void>*)VPTR_OF(cListNode, list))[7]), 1);
+            list->setFocus(1);
         }
         if (menu != 0) {
-            ((VIntFn_9010)((sVEntry<void>*)VPTR_OF(cListNode, menu))[7].fn)(vthis(menu, ((sVEntry<void>*)VPTR_OF(cListNode, menu))[7]), 0);
+            menu->setFocus(0);
         }
     }
 }
@@ -786,11 +786,6 @@ extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setWidgetHiliteColor);
 #ifdef SKIP_ASM
-struct sVEntry_cOVState_MAP_setWidgetHiliteColor {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 extern char kMAPCOLOR_HIGHLIGHTED[];
 extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 
@@ -806,11 +801,9 @@ extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
 {
     if (on != 0) {
-        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)VPTR_OF(cListNode, obj);
-        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED);
+        obj->setColour((const tARGB*)kMAPCOLOR_HIGHLIGHTED);
     } else {
-        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)VPTR_OF(cListNode, obj);
-        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED_LOCKED);
+        obj->setColour((const tARGB*)kMAPCOLOR_HIGHLIGHTED_LOCKED);
     }
 }
 #endif
@@ -818,11 +811,6 @@ extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* o
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setWidgetUnHiliteColor);
 #ifdef SKIP_ASM
-struct sVEntry_cOVState_MAP_setWidgetUnHiliteColor {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 extern char kMAPCOLOR_REGULAR[];
 extern char kMAPCOLOR_REGULAR_LOCKED[];
 
@@ -837,11 +825,9 @@ extern char kMAPCOLOR_REGULAR_LOCKED[];
 extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
 {
     if (on != 0) {
-        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)VPTR_OF(cListNode, obj);
-        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR);
+        obj->setColour((const tARGB*)kMAPCOLOR_REGULAR);
     } else {
-        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)VPTR_OF(cListNode, obj);
-        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR_LOCKED);
+        obj->setColour((const tARGB*)kMAPCOLOR_REGULAR_LOCKED);
     }
 }
 #endif
