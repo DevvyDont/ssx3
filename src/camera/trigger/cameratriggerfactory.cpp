@@ -1784,14 +1784,12 @@ extern "C" void cTriggerAlgorithm_snap_x(char* vself, long key)
         return;
     t4Vector focusPos, riderFront, dir;
     {
-        char* posTarget = (char*)self->Target;
-        sVEntry<t4Vector(void*)>* posSlot = &(*(sVEntry<t4Vector(void*)>**)posTarget)[1];
-        focusPos = posSlot->fn(vthis(posTarget, *posSlot));
+        cCameraTarget* posTarget = self->Target;
+        focusPos = posTarget->getPosition();
     }
     {
-        char* frontTarget = (char*)self->Target;
-        sVEntry<t4Vector(void*)>* frontSlot = &(*(sVEntry<t4Vector(void*)>**)frontTarget)[4];
-        riderFront = frontSlot->fn(vthis(frontTarget, *frontSlot));
+        cCameraTarget* frontTarget = self->Target;
+        riderFront = frontTarget->getFront();
     }
     AddEq_1732E8(focusPos, Scale_1732E8(t4vect_ZAxis_32E8, self->HeightOffset));
     AddEq_1732E8(focusPos, Scale_1732E8(riderFront, self->LeadDistance));
@@ -5371,12 +5369,10 @@ extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
 {
     cRider* rider = self->Target->Rider;
     if (id == rider->getAIIndex()) {
-        char* subject = (char*)self->Target;
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[4];
-        self->LastLookDir = vEntry->fn(vthis(subject, *vEntry));
-        subject = (char*)self->Target;
-        vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[3];
-        self->Position = f_177FC0_1783E0(((cCameraAlgorithm_cVirt*)self), vEntry->fn(vthis(subject, *vEntry)));
+        cCameraTarget* subject = self->Target;
+        self->LastLookDir = subject->getFront();
+        subject = self->Target;
+        self->Position = f_177FC0_1783E0(((cCameraAlgorithm_cVirt*)self), subject->getVelocity());
         self->CamTargetPos = Add_1783E0(f_177EF8_1783E0(((cCameraAlgorithm_cVirt*)self)), ScaleP_1783E0(&t4vect_ZAxis_83E0, 37.0f));
         f_166C60_1783E0(((cCameraAlgorithm_cVirt*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCameraAlgorithm_cVirt*)self), 559.7440185546875f, 300.0f);

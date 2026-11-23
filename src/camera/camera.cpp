@@ -675,12 +675,10 @@ extern "C" void cCamera_shakeCamera_E460(char* self, int type, float amount, flo
  */
 extern "C" void cCamera_applyCameraShake(cCamera* self)
 {
-    char* tgt = (char*)self->ChaseController->Target;
-    sVEntry<float(void*)>* vf = *(sVEntry<float(void*)>**)tgt;
-    float spd = vf[17].fn(vthis(tgt, vf[17]));
+    cCameraTarget* tgt = self->ChaseController->Target;
+    float spd = tgt->getBoostWarp();
     if (((cPauseState_Flags & 1) ^ 1) != 0 && spd > 0.10000000149011612f) {
-        sVEntry<t4Vector(void*)>* vv = *(sVEntry<t4Vector(void*)>**)tgt;
-        t4Vector velocity = vv[3].fn(vthis(tgt, vv[3]));
+        t4Vector velocity = tgt->getVelocity();
         float speedKmh = Length_15E460(velocity) * 0.035999998450279236f;
         float k;
         if (60.0f <= speedKmh) {
@@ -5044,8 +5042,7 @@ extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* se
                 if (dir.z > 0.8500000238418579f)
                 {
                     cRiderCameraTarget* obj = self->Target;
-                    sVEntry<t4Vector(void*)>* vt = *(sVEntry<t4Vector(void*)>**)obj;
-                    t4Vector groundNormal = vt[9].fn(vthis(obj, vt[9]));
+                    t4Vector groundNormal = obj->getLastGroundNormal();
                     if (groundNormal.z < 0.10000000149011612f)
                     {
                         self->HalfPipeInitWait = 0.0f;
