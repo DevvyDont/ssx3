@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beinterface.h"
 #include "bx/bigfile.h"
 #include "worldpainter/worldpainterquery.h"
@@ -1602,7 +1603,7 @@ extern t4Vector t4vect_Origin_00173208 __asm__("t4vect_Origin");
 extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self)
 {
     cChaseAlgorithm_cChaseAlgorithm(self);
-    self->mVtbl = cTriggerAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cTriggerAlgorithm_vtbl;
     self->PitchMultiplier = 0.800000011920929f;
     self->HeadingAdjustRate = 10.300000190734863f;
     self->PitchAdjustRate = 1.100000023841858f;
@@ -1642,7 +1643,7 @@ void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags) __asm__("c
 void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* vself, int flags)
 {
     cTriggerAlgorithm* self = (cTriggerAlgorithm*)vself;
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1655,7 +1656,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snap);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-#include "vtable.h"
 
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 struct sVec2 {
@@ -1805,7 +1805,7 @@ extern "C" void cTriggerAlgorithm_snap_x(char* vself, long key)
     dir.z = -sinPitch;
     dir.w = 0.0f;
     self->Position = Sub_1732E8(focusPos, Scale_1732E8(dir, self->IdealDist));
-    sVEntry<void(void*)>* updateSlot = &((sVEntry<void (void*)>*)self->mVtbl)[5];
+    sVEntry<void(void*)>* updateSlot = &((sVEntry<void (void*)>*)VPTR_OF(cCameraAlgorithm, self))[5];
     updateSlot->fn(vthis(self, *updateSlot));
 }
 #endif
@@ -1823,7 +1823,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent
  */
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
-    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
+    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)VPTR_OF(cCameraAlgorithm, self);
     return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
 }
 #endif
@@ -2238,7 +2238,7 @@ extern "C" void* cBoundedAlgorithm_cBoundedAlgorithm(cBoundedAlgorithm* self)
 {
     cTriggerAlgorithm_cTriggerAlgorithm((cTriggerAlgorithm*)self);
     self->AlgorithmType = 91;
-    self->mVtbl = cBoundedAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cBoundedAlgorithm_vtbl;
     self->BoundAction = 0;
     *(int*)&self->LeadDistance = 0;
     return ((void*)self);
@@ -2262,7 +2262,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm__cBoundedAl
 void* cBoundedAlgorithm__cBoundedAlgorithm(void* vself)
 {
     cBoundedAlgorithm* self = (cBoundedAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cBoundedAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cBoundedAlgorithm_vtbl);
     return cTriggerAlgorithm__cTriggerAlgorithm(self);
 }
 #endif
@@ -2653,7 +2653,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent
  */
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
-    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
+    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)VPTR_OF(cCameraAlgorithm, self);
     return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
 }
 #endif
@@ -3218,7 +3218,7 @@ extern void* cCameraAlgorithm_vtbl[];
  */
 extern "C" void cCameraAlgorithm__cCameraAlgorithm1(cCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3372,7 +3372,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptAlgorithm__cScriptAlgorithm(cScriptAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3419,7 +3419,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(cScriptManualAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3443,7 +3443,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(cScriptPointAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3467,7 +3467,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(cScriptTargetAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3491,7 +3491,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3954,7 +3954,7 @@ extern "C" void* cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(cDEFAULT_2Cha
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = 0x3C;
-    self->mVtbl = cDEFAULT_2ChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cDEFAULT_2ChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3977,7 +3977,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm__cDE
 void* cDEFAULT_2ChaseAlgorithm__cDEFAULT_2ChaseAlgorithm(void* vself)
 {
     cDEFAULT_2ChaseAlgorithm* self = (cDEFAULT_2ChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cDEFAULT_2ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDEFAULT_2ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4137,7 +4137,7 @@ extern "C" void* cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(cDEFAULT_3Cha
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = 61;
-    self->mVtbl = cDEFAULT_3ChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cDEFAULT_3ChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -4160,7 +4160,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm__cDE
 void* cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm(void* vself)
 {
     cDEFAULT_3ChaseAlgorithm* self = (cDEFAULT_3ChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cDEFAULT_3ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDEFAULT_3ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4299,7 +4299,7 @@ extern "C" void* cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cDEFAULT_4Cha
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = 0x3E;
-    self->mVtbl = cDEFAULT_4ChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cDEFAULT_4ChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -4322,7 +4322,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm__cDE
 void* cDEFAULT_4ChaseAlgorithm__cDEFAULT_4ChaseAlgorithm(void* vself)
 {
     cDEFAULT_4ChaseAlgorithm* self = (cDEFAULT_4ChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cDEFAULT_4ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDEFAULT_4ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4515,7 +4515,7 @@ extern "C" void* cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cDirectionCha
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = n + 18;
-    self->mVtbl = cDirectionChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cDirectionChaseAlgorithm_vtbl;
     self->Angle = (float)n * 0.7853981852531433f;
     return ((void*)self);
 }
@@ -4539,7 +4539,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm__cDi
 void* cDirectionChaseAlgorithm__cDirectionChaseAlgorithm(void* vself)
 {
     cDirectionChaseAlgorithm* self = (cDirectionChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cDirectionChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDirectionChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4810,7 +4810,7 @@ extern "C" void* cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(cSPOKEChaseAlgorithm*
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = 66;
-    self->mVtbl = cSPOKEChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cSPOKEChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -4832,7 +4832,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm__cSPOKEC
 void* cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm(void* vself)
 {
     cSPOKEChaseAlgorithm* self = (cSPOKEChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cSPOKEChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cSPOKEChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -5402,7 +5402,7 @@ extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(cSUPERPIPECha
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = 67;
-    self->mVtbl = cSUPERPIPEChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cSUPERPIPEChaseAlgorithm_vtbl;
     *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)&self->Point1 = *point1;
     *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)&self->Point2 = *point2;
     return ((void*)self);
@@ -5427,7 +5427,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm__cSU
 void* cSUPERPIPEChaseAlgorithm__cSUPERPIPEChaseAlgorithm(void* vself)
 {
     cSUPERPIPEChaseAlgorithm* self = (cSUPERPIPEChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cSUPERPIPEChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cSUPERPIPEChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -5976,7 +5976,7 @@ extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RAC
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((char*)self));
     t4Vector* startDir = ((&self->StartDir));
     self->AlgorithmType = 68;
-    self->mVtbl = cPOST_RACE_1ChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cPOST_RACE_1ChaseAlgorithm_vtbl;
     self->AgeInFrames = 0;
     t4Vector dir = (Length_1789E8(Get_1789E8(((char*)src), 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(((char*)src), 3)) : Get_1789E8(((char*)src), 4);
     *startDir = dir;
@@ -6008,7 +6008,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm__c
 void* cPOST_RACE_1ChaseAlgorithm__cPOST_RACE_1ChaseAlgorithm(void* vself)
 {
     cPOST_RACE_1ChaseAlgorithm* self = (cPOST_RACE_1ChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cPOST_RACE_1ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cPOST_RACE_1ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -6229,7 +6229,7 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir(self, 100.0f, 100.0f);
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
+        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
         vt2[5].fn(vthis(self, vt2[5]));
     }
 }

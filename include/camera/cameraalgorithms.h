@@ -131,24 +131,34 @@ struct cCameraAlgorithm {
     int AlgorithmType;          // 0x0C [O] eCamAlgoType; [R] 0x4E, then each ctor stores its own (cBasic 0x4F,
                                 //      cChase 0x53, cLookAtChase 0x54); [U] cCameraAlgorithm_setAlgorithmType setAlgorithmType (sw),
                                 //      cCameraAlgorithm_getType getType (lw)
-    void** mVtbl;               // 0x10 [R] cCameraAlgorithm_vtbl, then each ctor's own vtable
+    // 0x10: the vptr. [R] cCameraAlgorithm_vtbl, then each ctor's own vtable
+    // Slots: names [R] the vtables (cCameraAlgorithm_vtbl; getPose is pure there, cBasicCameraAlgorithm_getPose and
+    // cLookAtChaseAlgorithm_getPose fill it), types [O] On Tour's cCameraAlgorithm / cBasicCameraAlgorithm::getPose
+    // (retail has getPose at 2 and no renderDebugInfo; the rest keep On Tour's order).
+    virtual ~cCameraAlgorithm();                                                    // 1
+    virtual tPose getPose() = 0;                                                    // 2
+    virtual void snap(int subjectID);                                               // 3
+    virtual void snapCurrent();                                                     // 4
+    virtual void update();                                                          // 5
+    virtual t4Vector getTargetPos();                                                // 6
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* data_outArg);     // 7
+    virtual void doRaceCamFinalPhase(int ignoreCollisions);                         // 8 (On Tour: bool)
+    virtual void updateAlgorithm(int ignoreCollisions);                             // 9 (bool)
+    virtual void notifyMoveZ(int didMoveZ);                                         // 10 (bool)
+    virtual bool shouldSnapOnUpdate();                                              // 11
 };
 
 CHECK_OFFSET(cCameraAlgorithm, View, 0x00);
 CHECK_OFFSET(cCameraAlgorithm, Near, 0x04);
 CHECK_OFFSET(cCameraAlgorithm, Far, 0x08);
 CHECK_OFFSET(cCameraAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cCameraAlgorithm, mVtbl, 0x10);
 CHECK_SIZE(cCameraAlgorithm, 0x14);
 
 // cBasicCameraAlgorithm (On Tour: 0x40): a camera at a position with a pitch and heading.
-struct cBasicCameraAlgorithm {
-    // --- cCameraAlgorithm
-    float View;                 // 0x00 [O]; [R]
-    float Near;                 // 0x04 [O]; [R]
-    float Far;                  // 0x08 [O]; [R]
-    int AlgorithmType;          // 0x0C [O]; [R] 0x4F
-    void** mVtbl;               // 0x10 [R] cBasicCameraAlgorithm_vtbl (cManual: D_0045BD10, cEditor: D_0045BCA8)
+struct cBasicCameraAlgorithm : public cCameraAlgorithm {
+    // cCameraAlgorithm (camera/cameraalgorithms.h, 0x14): the vptr at 0x10:
+    //   [R] cBasicCameraAlgorithm_vtbl (cManual: D_0045BD10, cEditor: D_0045BCA8)
+    virtual tPose getPose();                                                        // 2 ([R] cBasicCameraAlgorithm_vtbl: cBasicCameraAlgorithm_getPose)
     char unk_14[0xC];           // 0x14 alignment gap before the 16-byte-aligned t4Vector
     // --- cBasicCameraAlgorithm
     t4Vector Position;          // 0x20 [O]; [R] = t4vect_Origin; [U] cBasicCameraAlgorithm_setPosition setPosition (sq), cBasicCameraAlgorithm_getPosition
@@ -160,24 +170,17 @@ struct cBasicCameraAlgorithm {
     char unk_38[0x8];           // 0x38 padding to the 16-byte class alignment
 };
 
-CHECK_OFFSET(cBasicCameraAlgorithm, View, 0x00);
-CHECK_OFFSET(cBasicCameraAlgorithm, Near, 0x04);
-CHECK_OFFSET(cBasicCameraAlgorithm, Far, 0x08);
-CHECK_OFFSET(cBasicCameraAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cBasicCameraAlgorithm, mVtbl, 0x10);
 CHECK_OFFSET(cBasicCameraAlgorithm, Position, 0x20);
 CHECK_OFFSET(cBasicCameraAlgorithm, Pitch, 0x30);
 CHECK_OFFSET(cBasicCameraAlgorithm, Heading, 0x34);
 CHECK_SIZE(cBasicCameraAlgorithm, 0x40);
 
 // cChaseAlgorithm (On Tour: 0x40): an algorithm that follows a rider.
-struct cChaseAlgorithm {
-    // --- cCameraAlgorithm
-    float View;                 // 0x00 [O]; [R] cChaseAlgorithm_cChaseAlgorithm
-    float Near;                 // 0x04 [O]; [R]
-    float Far;                  // 0x08 [O]; [R]
-    int AlgorithmType;          // 0x0C [O]; [R] 0x53
-    void** mVtbl;               // 0x10 [R] cChaseAlgorithm_vtbl
+struct cChaseAlgorithm : public cCameraAlgorithm {
+    // cCameraAlgorithm (camera/cameraalgorithms.h, 0x14): the vptr at 0x10:
+    //   [R] cChaseAlgorithm_vtbl
+    // cChaseAlgorithm's own slots ([R] cChaseAlgorithm_vtbl; types [O] On Tour's class cChaseAlgorithm):
+    virtual void setTarget(cRiderCameraTarget* camTarget);                         // 12
     char unk_14[0xC];           // 0x14 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;      // 0x20 [O]; [U] cChaseAlgorithm_getTargetPos returns it (lq); the chase algorithms
@@ -187,28 +190,20 @@ struct cChaseAlgorithm {
     char unk_34[0xC];           // 0x34 padding to the 16-byte class alignment
 };
 
-CHECK_OFFSET(cChaseAlgorithm, View, 0x00);
-CHECK_OFFSET(cChaseAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cChaseAlgorithm, mVtbl, 0x10);
 CHECK_OFFSET(cChaseAlgorithm, CamTargetPos, 0x20);
 CHECK_OFFSET(cChaseAlgorithm, Target, 0x30);
 CHECK_SIZE(cChaseAlgorithm, 0x40);
 
 // cLookAtChaseAlgorithm (retail 0x390: the 0x390-byte allocations of its field-less subclasses, and cCamera's
 // embedded cDEFAULT_3ChaseAlgorithm spanning 0xC0..0x450).
-struct cLookAtChaseAlgorithm {
-    // --- cCameraAlgorithm
-    float View;                     // 0x000 [O]; [R] ctor: pi/4
-    float Near;                     // 0x004 [O]; [R] 10.0f
-    float Far;                      // 0x008 [O]; [R] 30000.0f
-    int AlgorithmType;              // 0x00C [O]; [R] 0x54; subclass ctors store their own
-    void** mVtbl;                   // 0x010 [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm ...)
-    char unk_014[0xC];              // 0x014 alignment gap
-    // --- cChaseAlgorithm
-    t4Vector CamTargetPos;          // 0x020 [O]; [U] sq/lqc2 in the update functions
-    cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
-    char unk_034[0xC];              // 0x034 padding
+struct cLookAtChaseAlgorithm : public cChaseAlgorithm {
+    // cChaseAlgorithm (camera/cameraalgorithms.h, 0x40): the vptr at 0x10:
+    //   [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
+    //       ...)
     // --- cLookAtChaseAlgorithm
+    // cLookAtChaseAlgorithm's own slots ([R] cLookAtChaseAlgorithm_vtbl; types [O] On Tour's class cLookAtChaseAlgorithm):
+    virtual tPose getPose();                                                        // 2 ([R] cLookAtChaseAlgorithm_vtbl: cLookAtChaseAlgorithm_getPose)
+    virtual float getRestDrop() = 0;                                                // 13 ([R] pure here; cManualChaseAlgorithm_getRestDrop)
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
     float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_calcPitchHeading, cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading)
     float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, cLookAtChaseAlgorithm_calcPitchHeading)
@@ -326,13 +321,6 @@ struct cLookAtChaseAlgorithm {
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
 };
 
-CHECK_OFFSET(cLookAtChaseAlgorithm, View, 0x000);
-CHECK_OFFSET(cLookAtChaseAlgorithm, Near, 0x004);
-CHECK_OFFSET(cLookAtChaseAlgorithm, Far, 0x008);
-CHECK_OFFSET(cLookAtChaseAlgorithm, AlgorithmType, 0x00C);
-CHECK_OFFSET(cLookAtChaseAlgorithm, mVtbl, 0x010);
-CHECK_OFFSET(cLookAtChaseAlgorithm, CamTargetPos, 0x020);
-CHECK_OFFSET(cLookAtChaseAlgorithm, Target, 0x030);
 CHECK_OFFSET(cLookAtChaseAlgorithm, Position, 0x040);
 CHECK_OFFSET(cLookAtChaseAlgorithm, Heading, 0x050);
 CHECK_OFFSET(cLookAtChaseAlgorithm, Pitch, 0x054);

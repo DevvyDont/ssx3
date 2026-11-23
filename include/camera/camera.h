@@ -28,7 +28,8 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
-#include "camera/cameraalgorithms.h"    // cLookAtChaseAlgorithm
+#include "camera/cameraalgorithms.h"
+#include "camera/race/directionchasealgo.h"    // cDEFAULT_3ChaseAlgorithm
 
 struct cCameraController;
 struct cManualCameraController;
@@ -144,7 +145,7 @@ struct cCamera {
     int bStreamIsReady;             // 0x0B4 [O] bool (a word in retail); [P] isStreamReady (lw); [R] 0;
                                     //       [U] cCamera_updateStreamFocus sets it, cCamera_isStreamReady returns it
     char unk_0B8[0x8];              // 0x0B8 alignment gap
-    cLookAtChaseAlgorithm ResultAlgorithm; // 0x0C0 [O] a cDEFAULT_3ChaseAlgorithm (no fields of its own); [R] constructed
+    cDEFAULT_3ChaseAlgorithm ResultAlgorithm; // 0x0C0 [O] cDEFAULT_3ChaseAlgorithm (no fields of its own); [R] constructed
                                     //       by cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm, destroyed by cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv; [U] cCamera_init sets its
                                     //       Target (cChaseAlgorithm_setTarget), cCamera_snapResultAlgorithm snaps it (cLookAtChaseAlgorithm_snapCurrent)
     int DominantCamShakeType;       // 0x450 [O] eCamShakeType; [R] 0; [U] cCamera_shakeCamera sw,

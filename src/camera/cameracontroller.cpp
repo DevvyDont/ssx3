@@ -133,7 +133,7 @@ extern "C" void cCameraController_snapCurrent(cCameraController* self)
     for (sCamCtrlNodeB* n = *(sCamCtrlNodeB**)self->AlgorithmList; n != 0; n = n->next)
     {
         cCameraAlgorithm* obj = (cCameraAlgorithm*)n->obj;
-        sCamCtrlVE0* vt = (sCamCtrlVE0*)obj->mVtbl;
+        sCamCtrlVE0* vt = (sCamCtrlVE0*)VPTR_OF(cCameraAlgorithm, obj);
         vt[4].fn(vthis(obj, vt[4]));
     }
     cCamera_snapResultAlgorithm(self->Camera);

@@ -30,6 +30,7 @@
 //       the tSSXFrameCamera* structs).
 
 #include "layout.h"
+#include "camera/cameraalgorithms.h"
 #include "bx/math3d.h"
 #include "camera/camerajitterer.h"
 
@@ -142,15 +143,15 @@ CHECK_SIZE(tSSXFrameCameraAlgorithmic, 0x24);
 
 // cScriptAlgorithm (On Tour: 0x30): base cCameraAlgorithm. Abstract (slot 2 of cScriptAlgorithm_vtbl, getPose, is
 // __pure_virtual 0x00411530); its ctor runs inside each subclass ctor.
-struct cScriptAlgorithm {
-    // --- cCameraAlgorithm (camera/cameraalgorithms.h, 0x14)
-    float View;                 // 0x00 [O]; [R] ctor = cCameraAlgorithm_getDefaultView() (swc1); [U] the updates set
-                                //      it from FrameInfo.fov (swc1)
-    float Near;                 // 0x04 [O]; [R] 10.0f; [U] the updates copy the camera header's near (swc1)
-    float Far;                  // 0x08 [O]; [R] 30000.0f; [U] ditto (far)
-    int AlgorithmType;          // 0x0C [O] eCamAlgoType; [R] 85 (0x55); each subclass ctor stores its own (sw)
-    void** mVtbl;               // 0x10 [R] cCameraAlgorithm_vtbl, then cScriptAlgorithm_vtbl (ctor); every dtor stores cCameraAlgorithm_vtbl;
-                                //      [U] snap calls slot 5 (update), snapCurrent slot 3 (snap) (lw)
+struct cScriptAlgorithm : public cCameraAlgorithm {
+    // cCameraAlgorithm (camera/cameraalgorithms.h, 0x14): the vptr at 0x10:
+    //   [R] cCameraAlgorithm_vtbl, then cScriptAlgorithm_vtbl (ctor); every dtor stores cCameraAlgorithm_vtbl; [U]
+    //       snap calls slot 5 (update), snapCurrent slot 3 (snap) (lw)
+    // cScriptAlgorithm's notes on cCameraAlgorithm's fields:
+    //   View: [R] ctor = cCameraAlgorithm_getDefaultView() (swc1); [U] the updates set it from FrameInfo.fov (swc1)
+    //   Near: [U] the updates copy the camera header's near (swc1)
+    //   Far: [U] ditto (far)
+    //   AlgorithmType: [R] 85 (0x55); each subclass ctor stores its own (sw)
     // --- cScriptAlgorithm
     cScriptObjCamera* ScriptObj; // 0x14 [O]; [R] 0; [U] cScriptAlgorithm_setScriptObj (sw) / cScriptAlgorithm_getScriptObj
                                 //      (lw); the updates follow ScriptObj->mpCameraEntity (+0x14)->entity (+0x8) and read
@@ -162,11 +163,6 @@ struct cScriptAlgorithm {
                                 //      the updates store the look-at point (sq) and read it back (lqc2)
 };
 
-CHECK_OFFSET(cScriptAlgorithm, View, 0x00);
-CHECK_OFFSET(cScriptAlgorithm, Near, 0x04);
-CHECK_OFFSET(cScriptAlgorithm, Far, 0x08);
-CHECK_OFFSET(cScriptAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cScriptAlgorithm, mVtbl, 0x10);
 CHECK_OFFSET(cScriptAlgorithm, ScriptObj, 0x14);
 CHECK_OFFSET(cScriptAlgorithm, Controller, 0x18);
 CHECK_OFFSET(cScriptAlgorithm, unk_1C, 0x1C);
@@ -175,19 +171,11 @@ CHECK_SIZE(cScriptAlgorithm, 0x30);
 
 // cScriptManualAlgorithm (retail and On Tour 0xB0): base cScriptAlgorithm <- cCameraAlgorithm. Position and look-at
 // point come straight from the script. [R] cMemMan_alloc(0xB0, "Manual Script Camera Algo") + ctor (type 86).
-struct cScriptManualAlgorithm {
-    // --- cCameraAlgorithm (0x14)
-    float View;                 // 0x00 [O]; [R] base ctor; [U] update (swc1)
-    float Near;                 // 0x04 [O]; [R] base ctor; [U] update (swc1)
-    float Far;                  // 0x08 [O]; [R] base ctor; [U] update (swc1)
-    int AlgorithmType;          // 0x0C [O]; [R] 86 (0x56)
-    void** mVtbl;               // 0x10 [R] cScriptManualAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
-    // --- cScriptAlgorithm (0x30)
-    cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] update (lw)
-    cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor
-    char unk_1C[0x4];           // 0x1C alignment gap
-    t4Vector Target;            // 0x20 [O]; [U] update: mBaseTransform x (targetX, targetY, targetZ, 1) (sq)
+struct cScriptManualAlgorithm : public cScriptAlgorithm {
+    // cScriptAlgorithm (camera/script/scriptalgorithms.h, 0x30): the vptr at 0x10:
+    //   [R] cScriptManualAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptManualAlgorithm
+    virtual tPose getPose();                                                        // 2 ([R] cScriptManualAlgorithm_vtbl: cScriptManualAlgorithm_getPose)
     t4Vector Position;          // 0x30 [O]; [R] = t4vect_Origin (sq); [U] update (sq, lqc2), getPose (lqc2)
     float Roll;                 // 0x40 [O]; [R] 0 (sw $0); [U] update (swc1), getPose (lwc1)
     float Heading;              // 0x44 [O]; [R] 0; [U] update: yaw of Target - Position (swc1); getPose (lwc1)
@@ -199,15 +187,6 @@ struct cScriptManualAlgorithm {
     char unk_A4[0xC];           // 0xA4 padding to the 16-byte class alignment (alloc 0xB0)
 };
 
-CHECK_OFFSET(cScriptManualAlgorithm, View, 0x00);
-CHECK_OFFSET(cScriptManualAlgorithm, Near, 0x04);
-CHECK_OFFSET(cScriptManualAlgorithm, Far, 0x08);
-CHECK_OFFSET(cScriptManualAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cScriptManualAlgorithm, mVtbl, 0x10);
-CHECK_OFFSET(cScriptManualAlgorithm, ScriptObj, 0x14);
-CHECK_OFFSET(cScriptManualAlgorithm, Controller, 0x18);
-CHECK_OFFSET(cScriptManualAlgorithm, unk_1C, 0x1C);
-CHECK_OFFSET(cScriptManualAlgorithm, Target, 0x20);
 CHECK_OFFSET(cScriptManualAlgorithm, Position, 0x30);
 CHECK_OFFSET(cScriptManualAlgorithm, Roll, 0x40);
 CHECK_OFFSET(cScriptManualAlgorithm, Heading, 0x44);
@@ -219,19 +198,11 @@ CHECK_SIZE(cScriptManualAlgorithm, 0xB0);
 
 // cScriptPointAlgorithm (retail and On Tour 0xB0): base cScriptAlgorithm. Orbits a scripted point at a distance,
 // heading and pitch. [R] cMemMan_alloc(0xB0, "Target Script Camera Algo") + ctor (type 87).
-struct cScriptPointAlgorithm {
-    // --- cCameraAlgorithm (0x14)
-    float View;                 // 0x00 [O]; [U] update (swc1)
-    float Near;                 // 0x04 [O]; [U] update stores it twice (swc1)
-    float Far;                  // 0x08 [O]; [U] ditto
-    int AlgorithmType;          // 0x0C [O]; [R] 87 (0x57)
-    void** mVtbl;               // 0x10 [R] cScriptPointAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
-    // --- cScriptAlgorithm (0x30)
-    cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] update (lw)
-    cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor
-    char unk_1C[0x4];           // 0x1C alignment gap
-    t4Vector Target;            // 0x20 [O]; [U] update: mBaseTransform x (targetX, targetY, targetZ, 1) (sq, lqc2)
+struct cScriptPointAlgorithm : public cScriptAlgorithm {
+    // cScriptAlgorithm (camera/script/scriptalgorithms.h, 0x30): the vptr at 0x10:
+    //   [R] cScriptPointAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptPointAlgorithm
+    virtual tPose getPose();                                                        // 2 ([R] cScriptPointAlgorithm_vtbl: cScriptPointAlgorithm_getPose)
     t4Vector Position;          // 0x30 [O]; [R] = t4vect_Origin (sq); [U] update: Target - direction x targetDistance
                                 //      (sq); getPose (lqc2)
     float Roll;                 // 0x40 [O]; [R] 0; [U] update (swc1), getPose (lwc1)
@@ -242,15 +213,6 @@ struct cScriptPointAlgorithm {
     char unk_A4[0xC];           // 0xA4 padding to the 16-byte class alignment (alloc 0xB0)
 };
 
-CHECK_OFFSET(cScriptPointAlgorithm, View, 0x00);
-CHECK_OFFSET(cScriptPointAlgorithm, Near, 0x04);
-CHECK_OFFSET(cScriptPointAlgorithm, Far, 0x08);
-CHECK_OFFSET(cScriptPointAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cScriptPointAlgorithm, mVtbl, 0x10);
-CHECK_OFFSET(cScriptPointAlgorithm, ScriptObj, 0x14);
-CHECK_OFFSET(cScriptPointAlgorithm, Controller, 0x18);
-CHECK_OFFSET(cScriptPointAlgorithm, unk_1C, 0x1C);
-CHECK_OFFSET(cScriptPointAlgorithm, Target, 0x20);
 CHECK_OFFSET(cScriptPointAlgorithm, Position, 0x30);
 CHECK_OFFSET(cScriptPointAlgorithm, Roll, 0x40);
 CHECK_OFFSET(cScriptPointAlgorithm, Heading, 0x44);
@@ -262,19 +224,11 @@ CHECK_SIZE(cScriptPointAlgorithm, 0xB0);
 
 // cScriptTargetAlgorithm (retail and On Tour 0xA0): base cScriptAlgorithm. A scripted position looking at the subject
 // rider. [R] cMemMan_alloc(0xA0, "Subject Script Camera Algo") + ctor (type 88).
-struct cScriptTargetAlgorithm {
-    // --- cCameraAlgorithm (0x14)
-    float View;                 // 0x00 [O]; [U] update (swc1)
-    float Near;                 // 0x04 [O]; [U] update (swc1)
-    float Far;                  // 0x08 [O]; [U] update (swc1)
-    int AlgorithmType;          // 0x0C [O]; [R] 88 (0x58)
-    void** mVtbl;               // 0x10 [R] cScriptTargetAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
-    // --- cScriptAlgorithm (0x30)
-    cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] update (lw)
-    cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor
-    char unk_1C[0x4];           // 0x1C alignment gap
-    t4Vector Target;            // 0x20 [O]; [U] update: the rider's position plus the leads (sq, lqc2)
+struct cScriptTargetAlgorithm : public cScriptAlgorithm {
+    // cScriptAlgorithm (camera/script/scriptalgorithms.h, 0x30): the vptr at 0x10:
+    //   [R] cScriptTargetAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptTargetAlgorithm
+    virtual tPose getPose();                                                        // 2 ([R] cScriptTargetAlgorithm_vtbl: cScriptTargetAlgorithm_getPose)
     t4Vector Position;          // 0x30 [O]; [R] = t4vect_Origin (sq); [U] update keeps .w (lwc1 +0x3C), stores the
                                 //      transformed position (sq); getPose (lqc2)
     float Roll;                 // 0x40 [O]; [R] 0; [U] update (swc1), getPose (lwc1)
@@ -284,15 +238,6 @@ struct cScriptTargetAlgorithm {
     cCameraJitterer Jitterer;   // 0x70 [O]; [R] cCameraJitterer_cCameraJitterer(this + 0x70); [U] update / getPose
 };
 
-CHECK_OFFSET(cScriptTargetAlgorithm, View, 0x00);
-CHECK_OFFSET(cScriptTargetAlgorithm, Near, 0x04);
-CHECK_OFFSET(cScriptTargetAlgorithm, Far, 0x08);
-CHECK_OFFSET(cScriptTargetAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cScriptTargetAlgorithm, mVtbl, 0x10);
-CHECK_OFFSET(cScriptTargetAlgorithm, ScriptObj, 0x14);
-CHECK_OFFSET(cScriptTargetAlgorithm, Controller, 0x18);
-CHECK_OFFSET(cScriptTargetAlgorithm, unk_1C, 0x1C);
-CHECK_OFFSET(cScriptTargetAlgorithm, Target, 0x20);
 CHECK_OFFSET(cScriptTargetAlgorithm, Position, 0x30);
 CHECK_OFFSET(cScriptTargetAlgorithm, Roll, 0x40);
 CHECK_OFFSET(cScriptTargetAlgorithm, Heading, 0x44);
@@ -304,19 +249,11 @@ CHECK_SIZE(cScriptTargetAlgorithm, 0xA0);
 // cScriptRelativeAlgorithm (retail and On Tour 0xA0): base cScriptAlgorithm. A camera placed at an optimal distance,
 // pitch and heading around the subject rider, chasing that place at a capped speed. [R] cMemMan_alloc(0xA0,
 // "Algorithmic Script Camera Algo") + ctor (type 89).
-struct cScriptRelativeAlgorithm {
-    // --- cCameraAlgorithm (0x14)
-    float View;                 // 0x00 [O]; [U] snap / update (swc1)
-    float Near;                 // 0x04 [O]; [U] snap / update (swc1)
-    float Far;                  // 0x08 [O]; [U] snap / update (swc1)
-    int AlgorithmType;          // 0x0C [O]; [R] 89 (0x59)
-    void** mVtbl;               // 0x10 [R] cScriptRelativeAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
-    // --- cScriptAlgorithm (0x30)
-    cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] snap / update (lw)
-    cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor
-    char unk_1C[0x4];           // 0x1C alignment gap
-    t4Vector Target;            // 0x20 [O]; [U] snap / update: the rider's position plus the leads (sq, lqc2)
+struct cScriptRelativeAlgorithm : public cScriptAlgorithm {
+    // cScriptAlgorithm (camera/script/scriptalgorithms.h, 0x30): the vptr at 0x10:
+    //   [R] cScriptRelativeAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptRelativeAlgorithm
+    virtual tPose getPose();                                                        // 2 ([R] cScriptRelativeAlgorithm_vtbl: cScriptRelativeAlgorithm_getPose)
     t4Vector Position;          // 0x30 [O]; [R] = t4vect_Origin (sq); [U] snap / update (sq, lqc2; update sets .w =
                                 //      1.0f with swc1 +0x3C); getPose (lqc2)
     float Roll;                 // 0x40 [O]; [R] 0; [U] snap / update (swc1), getPose (lwc1)
@@ -327,15 +264,6 @@ struct cScriptRelativeAlgorithm {
     cCameraJitterer Jitterer;   // 0x70 [O]; [R] cCameraJitterer_cCameraJitterer(this + 0x70); [U] snap / update / getPose
 };
 
-CHECK_OFFSET(cScriptRelativeAlgorithm, View, 0x00);
-CHECK_OFFSET(cScriptRelativeAlgorithm, Near, 0x04);
-CHECK_OFFSET(cScriptRelativeAlgorithm, Far, 0x08);
-CHECK_OFFSET(cScriptRelativeAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cScriptRelativeAlgorithm, mVtbl, 0x10);
-CHECK_OFFSET(cScriptRelativeAlgorithm, ScriptObj, 0x14);
-CHECK_OFFSET(cScriptRelativeAlgorithm, Controller, 0x18);
-CHECK_OFFSET(cScriptRelativeAlgorithm, unk_1C, 0x1C);
-CHECK_OFFSET(cScriptRelativeAlgorithm, Target, 0x20);
 CHECK_OFFSET(cScriptRelativeAlgorithm, Position, 0x30);
 CHECK_OFFSET(cScriptRelativeAlgorithm, Roll, 0x40);
 CHECK_OFFSET(cScriptRelativeAlgorithm, Heading, 0x44);

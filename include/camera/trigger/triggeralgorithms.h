@@ -29,27 +29,27 @@
 //   [O] SSX On Tour's DWARF (cTriggerAlgorithm 0x80, cBoundedAlgorithm 0x90): same members at the same offsets.
 
 #include "layout.h"
+#include "camera/cameraalgorithms.h"
 #include "bx/math3d.h"
 
 struct cRiderCameraTarget;
 struct cCTActionBoundedCam;
 
 // cTriggerAlgorithm (On Tour: 0x80): base cChaseAlgorithm <- cCameraAlgorithm.
-struct cTriggerAlgorithm {
-    // --- cCameraAlgorithm (camera/cameraalgorithms.h, 0x14)
-    float View;                 // 0x00 [O]; [R] cChaseAlgorithm_cChaseAlgorithm (getDefaultView)
-    float Near;                 // 0x04 [O]; [R] 10.0f (base ctor)
-    float Far;                  // 0x08 [O]; [R] 30000.0f (base ctor)
-    int AlgorithmType;          // 0x0C [O] eCamAlgoType; [R] cTriggerAlgorithm_cTriggerAlgorithm stores 90
-    void** mVtbl;               // 0x10 [R] cTriggerAlgorithm_vtbl (ctor); the dtor puts back cCameraAlgorithm's cCameraAlgorithm_vtbl;
-                                //      [U] snap calls slot 5 (update), snapCurrent calls slot 3 (snap)
-    char unk_14[0xC];           // 0x14 alignment gap before the 16-byte-aligned t4Vector
-    // --- cChaseAlgorithm (0x40)
-    t4Vector CamTargetPos;      // 0x20 [O]; [U] cTriggerAlgorithm_update stores the focus point (sq)
-    cRiderCameraTarget* Target; // 0x30 [O]; [U] snap / snapCurrent / update call its virtuals (getPosition slot 1,
-                                //      getVelocity slot 3, getFront slot 4) and reach the rider through its +0x4
-    char unk_34[0xC];           // 0x34 padding to cChaseAlgorithm's 16-byte size
+struct cTriggerAlgorithm : public cChaseAlgorithm {
+    // cChaseAlgorithm (camera/cameraalgorithms.h, 0x40): the vptr at 0x10:
+    //   [R] cTriggerAlgorithm_vtbl (ctor); the dtor puts back cCameraAlgorithm's cCameraAlgorithm_vtbl; [U] snap calls
+    //       slot 5 (update), snapCurrent calls slot 3 (snap)
+    // cTriggerAlgorithm's notes on cChaseAlgorithm's fields:
+    //   View: [R] cChaseAlgorithm_cChaseAlgorithm (getDefaultView)
+    //   Near: [R] 10.0f (base ctor)
+    //   Far: [R] 30000.0f (base ctor)
+    //   AlgorithmType: [R] cTriggerAlgorithm_cTriggerAlgorithm stores 90
+    //   CamTargetPos: [U] cTriggerAlgorithm_update stores the focus point (sq)
+    //   Target: [U] snap / snapCurrent / update call its virtuals (getPosition slot 1, getVelocity slot 3, getFront
+    //       slot 4) and reach the rider through its +0x4
     // --- cTriggerAlgorithm
+    virtual tPose getPose();                                                        // 2 ([R] cTriggerAlgorithm_vtbl: cTriggerAlgorithm_getPose)
     t4Vector Position;          // 0x40 [O]; [R] = t4vect_Origin; [U] snap/update store the new camera position (sq),
                                 //      cTriggerAlgorithm_getPose translates by it (lq); cBoundedAlgorithm_update passes
                                 //      &Position to the bound object's limitPoint
@@ -71,15 +71,6 @@ struct cTriggerAlgorithm {
     char unk_7C[0x4];           // 0x7C padding to the 16-byte class alignment
 };
 
-CHECK_OFFSET(cTriggerAlgorithm, View, 0x00);
-CHECK_OFFSET(cTriggerAlgorithm, Near, 0x04);
-CHECK_OFFSET(cTriggerAlgorithm, Far, 0x08);
-CHECK_OFFSET(cTriggerAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cTriggerAlgorithm, mVtbl, 0x10);
-CHECK_OFFSET(cTriggerAlgorithm, unk_14, 0x14);
-CHECK_OFFSET(cTriggerAlgorithm, CamTargetPos, 0x20);
-CHECK_OFFSET(cTriggerAlgorithm, Target, 0x30);
-CHECK_OFFSET(cTriggerAlgorithm, unk_34, 0x34);
 CHECK_OFFSET(cTriggerAlgorithm, Position, 0x40);
 CHECK_OFFSET(cTriggerAlgorithm, Heading, 0x50);
 CHECK_OFFSET(cTriggerAlgorithm, Pitch, 0x54);
@@ -96,33 +87,9 @@ CHECK_OFFSET(cTriggerAlgorithm, unk_7C, 0x7C);
 CHECK_SIZE(cTriggerAlgorithm, 0x80);
 
 // cBoundedAlgorithm (retail and On Tour: 0x90): base cTriggerAlgorithm <- cChaseAlgorithm <- cCameraAlgorithm.
-struct cBoundedAlgorithm {
-    // --- cCameraAlgorithm (camera/cameraalgorithms.h, 0x14)
-    float View;                 // 0x00 [O]; [U] cBoundedAlgorithm_update copies the action's FieldOfView (+0x14) (swc1)
-    float Near;                 // 0x04 [O]; [R] base ctor
-    float Far;                  // 0x08 [O]; [R] base ctor
-    int AlgorithmType;          // 0x0C [O] eCamAlgoType; [R] cBoundedAlgorithm_cBoundedAlgorithm stores 91
-    void** mVtbl;               // 0x10 [R] cBoundedAlgorithm_vtbl (ctor and dtor); [U] snapCurrent calls slot 3 (snap)
-    char unk_14[0xC];           // 0x14 alignment gap
-    // --- cChaseAlgorithm (0x40)
-    t4Vector CamTargetPos;      // 0x20 [O]; [U] cBoundedAlgorithm_update stores the look target (sq)
-    cRiderCameraTarget* Target; // 0x30 [O]; [U] update / snap / snapCurrent call its virtuals
-    char unk_34[0xC];           // 0x34 padding to cChaseAlgorithm's 16-byte size
-    // --- cTriggerAlgorithm (0x80)
-    t4Vector Position;          // 0x40 [O]; [U] update: &Position to the bound object's limitPoint, then lq
-    float Heading;              // 0x50 [O]; [U] update/snap (swc1)
-    float Pitch;                // 0x54 [O]; [U] update/snap (swc1)
-    float PitchMultiplier;      // 0x58 [O]; [R] cTriggerAlgorithm ctor
-    float HeadingAdjustRate;    // 0x5C [O]; [R] cTriggerAlgorithm ctor
-    float PitchAdjustRate;      // 0x60 [O]; [R] cTriggerAlgorithm ctor
-    float HeadingLookRate;      // 0x64 [O]; [R] cTriggerAlgorithm ctor
-    float PitchLookRate;        // 0x68 [O]; [R] cTriggerAlgorithm ctor
-    float HeightOffset;         // 0x6C [O]; [U] update/snap copy the action's HeightOffset
-    float IdealDist;            // 0x70 [O]; [U] update/snap copy the action's IdealDist
-    float LeadDistance;         // 0x74 [O]; [R] cBoundedAlgorithm ctor zeroes it again (sw $0); [U] update/snap copy
-                                //      the action's LeadDistance
-    float PitchOffset;          // 0x78 [O]; [U] update/snap copy the action's PitchOffset
-    char unk_7C[0x4];           // 0x7C padding to cTriggerAlgorithm's 16-byte size
+struct cBoundedAlgorithm : public cTriggerAlgorithm {
+    // cTriggerAlgorithm (camera/trigger/triggeralgorithms.h, 0x80): the vptr at 0x10:
+    //   [R] cBoundedAlgorithm_vtbl (ctor and dtor); [U] snapCurrent calls slot 3 (snap)
     // --- cBoundedAlgorithm
     cCTActionBoundedCam* BoundAction; // 0x80 [O]; [R] ctor 0; cChaseCameraController_createChaseAlgorithmBlend stores the
                                 //      action right after construction; [U] update/snap read its settings, its
@@ -131,28 +98,6 @@ struct cBoundedAlgorithm {
     char unk_84[0xC];           // 0x84 padding to the 16-byte class alignment
 };
 
-CHECK_OFFSET(cBoundedAlgorithm, View, 0x00);
-CHECK_OFFSET(cBoundedAlgorithm, Near, 0x04);
-CHECK_OFFSET(cBoundedAlgorithm, Far, 0x08);
-CHECK_OFFSET(cBoundedAlgorithm, AlgorithmType, 0x0C);
-CHECK_OFFSET(cBoundedAlgorithm, mVtbl, 0x10);
-CHECK_OFFSET(cBoundedAlgorithm, unk_14, 0x14);
-CHECK_OFFSET(cBoundedAlgorithm, CamTargetPos, 0x20);
-CHECK_OFFSET(cBoundedAlgorithm, Target, 0x30);
-CHECK_OFFSET(cBoundedAlgorithm, unk_34, 0x34);
-CHECK_OFFSET(cBoundedAlgorithm, Position, 0x40);
-CHECK_OFFSET(cBoundedAlgorithm, Heading, 0x50);
-CHECK_OFFSET(cBoundedAlgorithm, Pitch, 0x54);
-CHECK_OFFSET(cBoundedAlgorithm, PitchMultiplier, 0x58);
-CHECK_OFFSET(cBoundedAlgorithm, HeadingAdjustRate, 0x5C);
-CHECK_OFFSET(cBoundedAlgorithm, PitchAdjustRate, 0x60);
-CHECK_OFFSET(cBoundedAlgorithm, HeadingLookRate, 0x64);
-CHECK_OFFSET(cBoundedAlgorithm, PitchLookRate, 0x68);
-CHECK_OFFSET(cBoundedAlgorithm, HeightOffset, 0x6C);
-CHECK_OFFSET(cBoundedAlgorithm, IdealDist, 0x70);
-CHECK_OFFSET(cBoundedAlgorithm, LeadDistance, 0x74);
-CHECK_OFFSET(cBoundedAlgorithm, PitchOffset, 0x78);
-CHECK_OFFSET(cBoundedAlgorithm, unk_7C, 0x7C);
 CHECK_OFFSET(cBoundedAlgorithm, BoundAction, 0x80);
 CHECK_OFFSET(cBoundedAlgorithm, unk_84, 0x84);
 CHECK_SIZE(cBoundedAlgorithm, 0x90);

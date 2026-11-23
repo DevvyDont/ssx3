@@ -35,6 +35,7 @@ struct cRiderCameraTarget;
 // [P] the preview's _vt$24cDEFAULT_2ChaseAlgorithm matches retail cDEFAULT_2ChaseAlgorithm_vtbl.
 struct cDEFAULT_2ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
+    virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_2ChaseAlgorithm_vtbl: cDEFAULT_2ChaseAlgorithm_getRestDrop)
 };
 
 CHECK_SIZE(cDEFAULT_2ChaseAlgorithm, 0x390);
@@ -52,6 +53,7 @@ CHECK_SIZE(cDEFAULT_2ChaseAlgorithm, 0x390);
 // _vt$18cMidChaseAlgorithm by body similarity only; the retail tag, type 61 and On Tour say DEFAULT_3.
 struct cDEFAULT_3ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
+    virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_3ChaseAlgorithm_vtbl: cDEFAULT_3ChaseAlgorithm_getRestDrop)
 };
 
 CHECK_SIZE(cDEFAULT_3ChaseAlgorithm, 0x390);
@@ -66,6 +68,7 @@ CHECK_SIZE(cDEFAULT_3ChaseAlgorithm, 0x390);
 // getRaceCamFinalPhaseData cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cDEFAULT_4ChaseAlgorithm_getRestDrop (13); the other slots are the base's.
 struct cDEFAULT_4ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
+    virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_4ChaseAlgorithm_vtbl: cDEFAULT_4ChaseAlgorithm_getRestDrop)
 };
 
 CHECK_SIZE(cDEFAULT_4ChaseAlgorithm, 0x390);
@@ -77,6 +80,7 @@ CHECK_SIZE(cDEFAULT_4ChaseAlgorithm, 0x390);
 // Methods (vtable slot): dtor cDirectionChaseAlgorithm__cDirectionChaseAlgorithm__FPv (1), snap cDirectionChaseAlgorithm_snap (3), update cDirectionChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cDirectionChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cDirectionChaseAlgorithm_getRestDrop__FPv (13).
 struct cDirectionChaseAlgorithm : public cLookAtChaseAlgorithm {
+    virtual float getRestDrop();                                                    // 13 ([R] cDirectionChaseAlgorithm_vtbl: cDirectionChaseAlgorithm_getRestDrop__FPv)
     float Angle;                    // 0x390 [O] (On Tour 0x380); [R] ctor = dir * pi/4 (swc1); [U] update
                                     //       cDirectionChaseAlgorithm_update passes it to cLookAtChaseAlgorithm_updateRotation (lwc1)
     char unk_394[0xC];              // 0x394 padding to the 16-byte class alignment (alloc 0x3A0)

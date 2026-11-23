@@ -363,7 +363,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(cScriptManualAlgorithm* self)
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    self->mVtbl = cScriptManualAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cScriptManualAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 86;
@@ -741,7 +741,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(cScriptPointAlgorithm* self)
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    self->mVtbl = cScriptPointAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cScriptPointAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 87;
@@ -1089,7 +1089,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(cScriptTargetAlgorithm* self)
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    self->mVtbl = cScriptTargetAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cScriptTargetAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 88;
@@ -1505,7 +1505,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self)
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    self->mVtbl = cScriptRelativeAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cScriptRelativeAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
     self->AlgorithmType = 89;

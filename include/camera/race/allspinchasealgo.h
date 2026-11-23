@@ -32,6 +32,7 @@ struct cRiderCameraTarget;
 // non-virtual getRiderPosition cSPOKEChaseAlgorithm_getRiderPosition and getDesiredPosition(const t4Vector&) cSPOKEChaseAlgorithm_getDesiredPosition (both return a
 // t4Vector through a hidden pointer: a0 = result, a1 = this).
 struct cSPOKEChaseAlgorithm : public cLookAtChaseAlgorithm {
+    virtual float getRestDrop();                                                    // 13 ([R] cSPOKEChaseAlgorithm_vtbl: cSPOKEChaseAlgorithm_getRestDrop)
     t4Vector LastLookDir;           // 0x390 [O] (On Tour 0x380); [U] snap cSPOKEChaseAlgorithm_snap (sq), getDesiredPosition
                                     //       cSPOKEChaseAlgorithm_getDesiredPosition (lqc2, sq)
 };
@@ -46,6 +47,7 @@ CHECK_SIZE(cSPOKEChaseAlgorithm, 0x3A0);
 // cSUPERPIPEChaseAlgorithm_snap (3), update cSUPERPIPEChaseAlgorithm_update (5), getRaceCamFinalPhaseData cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cSUPERPIPEChaseAlgorithm_getRestDrop
 // (13); non-virtual getIdealPosition cSUPERPIPEChaseAlgorithm_getIdealPosition and getIdealTargetPos cSUPERPIPEChaseAlgorithm_getIdealTargetPos (a0 = result, a1 = this).
 struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
+    virtual float getRestDrop();                                                    // 13 ([R] cSUPERPIPEChaseAlgorithm_vtbl: cSUPERPIPEChaseAlgorithm_getRestDrop)
     t4Vector Point1;                // 0x390 [O] (On Tour 0x380); [R] ctor = *point1 (lq/sq); [U] getIdealPosition
                                     //       cSUPERPIPEChaseAlgorithm_getIdealPosition (lqc2)
     t4Vector Point2;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = *point2 (lq/sq); [U] getIdealPosition (lqc2)
@@ -61,6 +63,7 @@ CHECK_SIZE(cSUPERPIPEChaseAlgorithm, 0x3B0);
 // cPOST_RACE_1ChaseAlgorithm_snap (3), update cPOST_RACE_1ChaseAlgorithm_update (5), getRaceCamFinalPhaseData cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 (7), getRestDrop
 // cPOST_RACE_1ChaseAlgorithm_getRestDrop__FPv (13).
 struct cPOST_RACE_1ChaseAlgorithm : public cLookAtChaseAlgorithm {
+    virtual float getRestDrop();                                                    // 13 ([R] cPOST_RACE_1ChaseAlgorithm_vtbl: cPOST_RACE_1ChaseAlgorithm_getRestDrop__FPv)
     t4Vector StartDir;              // 0x390 [O] (On Tour 0x380); [R] ctor: the target's direction, normalised (sq),
                                     //       .z = 0 (sw), renormalised (lqc2/sqc2); [U] update cPOST_RACE_1ChaseAlgorithm_update (lqc2)
     int AgeInFrames;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = 0 (sw); [U] update cPOST_RACE_1ChaseAlgorithm_update (lw/sw)

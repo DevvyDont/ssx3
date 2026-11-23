@@ -474,15 +474,18 @@ extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* self, char* a1
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* vself, char* camPos, char* camTargetPos)
 {
     cSimpleCamera* self = (cSimpleCamera*)vself;
-    cLookAtChaseAlgorithm lookAtAlgo;
-    cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(&lookAtAlgo);
-    *(cQuad128*)&(&lookAtAlgo)->CamTargetPos = *(cQuad128*)camTargetPos;
-    *(cQuad128*)&(&lookAtAlgo)->Position = *(cQuad128*)camPos;
-    (&lookAtAlgo)->Position.w = 1.0f;
-    (&lookAtAlgo)->CamTargetPos.w = 1.0f;
-    cLookAtChaseAlgorithm_calcPitchHeading(&lookAtAlgo, 1);
-    cLookAtChaseAlgorithm_calcPose(&lookAtAlgo);
-    sXf out = cLookAtChaseAlgorithm_getPose_E050(&lookAtAlgo);
+    // the temporary lives in raw stack storage and its retail constructor / destructor are called by hand (a declared
+    // object of the polymorphic class would also get g++'s implicit ones)
+    char lookAtStore[sizeof(cDEFAULT_3ChaseAlgorithm)] __attribute__((aligned(16)));
+    cDEFAULT_3ChaseAlgorithm* lookAtAlgo = (cDEFAULT_3ChaseAlgorithm*)lookAtStore;
+    cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(lookAtAlgo);
+    *(cQuad128*)&lookAtAlgo->CamTargetPos = *(cQuad128*)camTargetPos;
+    *(cQuad128*)&lookAtAlgo->Position = *(cQuad128*)camPos;
+    lookAtAlgo->Position.w = 1.0f;
+    lookAtAlgo->CamTargetPos.w = 1.0f;
+    cLookAtChaseAlgorithm_calcPitchHeading(lookAtAlgo, 1);
+    cLookAtChaseAlgorithm_calcPose(lookAtAlgo);
+    sXf out = cLookAtChaseAlgorithm_getPose_E050(lookAtAlgo);
     t4Vector* poseQuat = (t4Vector*)(&self->Pose.Q);
     t4Matrix* camMatrix = (t4Matrix*)(&self->CamMat);
     *(sXf*)&self->Pose = out;
@@ -507,7 +510,7 @@ extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* vself, char* c
     out.pos.z = self->CamMat.row[2].z;
     out.pos.w = 0.0f;
     self->Direction = out.pos;
-    cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm_E050(&lookAtAlgo, 2);
+    cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm_E050(lookAtAlgo, 2);
 }
 #endif
 
@@ -1983,12 +1986,12 @@ extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
  */
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorithm* self)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
     self->AlgorithmType = 78;
     self->Near = 10.0f;
     self->Far = 30000.0f;
-    self->mVtbl = cBasicCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cBasicCameraAlgorithm_vtbl;
     *(int*)&self->Pitch = 0;
     *(int*)&self->Heading = 0;
     cQuad128 initPos = t4vect_Origin;
@@ -2165,7 +2168,7 @@ extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(cBasicCameraAlgor
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
     self->AlgorithmType = 81;
-    self->mVtbl = cManualCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cManualCameraAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2319,7 +2322,7 @@ extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(cBasicCameraAlgor
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
     self->AlgorithmType = 80;
-    self->mVtbl = cEditorCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cEditorCameraAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2610,7 +2613,7 @@ extern "C" void* cManualChaseAlgorithm_cManualChaseAlgorithm(cManualChaseAlgorit
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
     self->AlgorithmType = 11;
-    self->mVtbl = cManualChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cManualChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -2633,7 +2636,7 @@ INCLUDE_ASM("camera/camera", cManualChaseAlgorithm__cManualChaseAlgorithm__FPv);
 void* cManualChaseAlgorithm__cManualChaseAlgorithm(void* vself)
 {
     cManualChaseAlgorithm* self = (cManualChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cManualChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cManualChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -2846,7 +2849,7 @@ extern "C" void cManualChaseAlgorithm_snap(cManualChaseAlgorithm* self, int id)
     {
         cLookAtChaseAlgorithm_snap(((cLookAtChaseAlgorithm*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 100.0f, 100.0f);
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
+        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
         vt2[5].fn(vthis(self, vt2[5]));
     }
 }
@@ -2870,7 +2873,7 @@ extern "C" void* cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMatrixChaseAlgorit
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm((cLookAtChaseAlgorithm*)self);
     self->AlgorithmType = 41;
-    self->mVtbl = cMatrixChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cMatrixChaseAlgorithm_vtbl;
     *(int*)&self->LastAngle = 0;
     return ((void*)self);
 }
@@ -2894,7 +2897,7 @@ INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm__cMatrixChaseAlgorithm__FPv);
 void* cMatrixChaseAlgorithm__cMatrixChaseAlgorithm(void* vself)
 {
     cMatrixChaseAlgorithm* self = (cMatrixChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cMatrixChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cMatrixChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -3121,7 +3124,7 @@ extern "C" void cMatrixChaseAlgorithm_snap(cMatrixChaseAlgorithm* self, int id)
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
+        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
         vt2[5].fn(vthis(self, vt2[5]));
     }
 }
@@ -3146,7 +3149,7 @@ extern "C" void* cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cRelativeChaseA
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm((cLookAtChaseAlgorithm*)self);
     self->Angle = angle;
-    self->mVtbl = cRelativeChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cRelativeChaseAlgorithm_vtbl;
     self->Initialized = 0;
     return ((void*)self);
 }
@@ -3170,7 +3173,7 @@ INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm__cRelativeChaseAlgorithm__F
 void* cRelativeChaseAlgorithm__cRelativeChaseAlgorithm(void* vself)
 {
     cRelativeChaseAlgorithm* self = (cRelativeChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cRelativeChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cRelativeChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -3297,7 +3300,7 @@ extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int 
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
         self->Initialized = 0;
-        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
+        sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)VPTR_OF(cCameraAlgorithm, self);
         vt2[5].fn(vthis(self, vt2[5]));
     }
 }
@@ -3379,7 +3382,7 @@ extern "C" void* cSplineCamAlgorithm_cSplineCamAlgorithm(cSplineCamAlgorithm* se
                                float fov)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm((cLookAtChaseAlgorithm*)self);
-    self->mVtbl = cSplineCamAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cSplineCamAlgorithm_vtbl;
     char* sx = self->XOfT;
     char* sy = self->YOfT;
     char* sz = self->ZOfT;
@@ -3441,7 +3444,7 @@ void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* self, int flags) __
  */
 extern "C" void cSplineCamAlgorithm__cSplineCamAlgorithm(cSplineCamAlgorithm* self, int flags)
 {
-    self->mVtbl = cSplineCamAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cSplineCamAlgorithm_vtbl;
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)&self->ZOfT, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)&self->YOfT, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)&self->XOfT, 2);
@@ -3648,7 +3651,7 @@ extern "C" void cSplineCamAlgorithm_snap(cSplineCamAlgorithm* self, int id)
     if (id == self->Target->Rider->getAIIndex())
     {
         cLookAtChaseAlgorithm_snap(self, id);
-        sCamVEntryVoid* vt2 = (sCamVEntryVoid*)self->mVtbl;
+        sCamVEntryVoid* vt2 = (sCamVEntryVoid*)VPTR_OF(cCameraAlgorithm, self);
         vt2[5].fn(vthis(self, vt2[5]));
     }
 }
@@ -3672,7 +3675,7 @@ extern "C" void* cIdleChaseAlgorithm_cIdleChaseAlgorithm(cIdleChaseAlgorithm* se
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
     self->AlgorithmType = 0x7;
-    self->mVtbl = cIdleChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cIdleChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3695,7 +3698,7 @@ INCLUDE_ASM("camera/camera", cIdleChaseAlgorithm__cIdleChaseAlgorithm__FPv);
 void* cIdleChaseAlgorithm__cIdleChaseAlgorithm(void* vself)
 {
     cIdleChaseAlgorithm* self = (cIdleChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cIdleChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cIdleChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -3922,7 +3925,7 @@ extern "C" void cIdleChaseAlgorithm_snap_v(char* vself, int id)
         self->Position = cmAddP_1848(cmAdd_001607E0_1848(self->Target->getPosition(), cmScaleP_1848b(&t4vect_ZAxis_1848, 100.05000305175781f)), &t4vect_XAxis);
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 559.7440185546875f, 300.0f);
-        sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)self->mVtbl;
+        sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)VPTR_OF(cCameraAlgorithm, self);
         vt2[5].fn(vthis(self, vt2[5]));
     }
 }
@@ -4569,12 +4572,12 @@ extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
  */
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
     self->AlgorithmType = 78;
     self->Near = 10.0f;
     self->Far = 30000.0f;
-    self->mVtbl = cChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cChaseAlgorithm_vtbl;
     self->AlgorithmType = 83;
     return ((void*)self);
 }
@@ -4626,7 +4629,7 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
 {
     cChaseAlgorithm_cChaseAlgorithm((cChaseAlgorithm*)self);
     sCamFilter* filter = (sCamFilter*)(&self->TurningPIDFilter);
-    self->mVtbl = cLookAtChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cLookAtChaseAlgorithm_vtbl;
     cCubicSplineInterpolant_cCubicSplineInterpolant(&self->AirTargetSpline);
     cCubicSplineInterpolant_cCubicSplineInterpolant(&self->AirPositionSpline);
     cCubicSplineInterpolant_cCubicSplineInterpolant(&self->FullAirTargetSpline);
@@ -4681,13 +4684,13 @@ extern void* cCameraAlgorithm_vtbl[];
 void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* vself, int flags)
 {
     cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)vself;
-    self->mVtbl = cLookAtChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cLookAtChaseAlgorithm_vtbl;
     cCubicSplineInterpolant__cCubicSplineInterpolant(&self->HalfPipeAngleSpline, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant(&self->FullAirPositionSpline, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant(&self->FullAirTargetSpline, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant(&self->AirPositionSpline, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant(&self->AirTargetSpline, 2);
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4709,12 +4712,12 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateAlgorithm);
 extern "C" void cLookAtChaseAlgorithm_updateAlgorithm(cLookAtChaseAlgorithm* self, int ignoreCollisions)
 {
     if (self->DoSnap != 0) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cCameraAlgorithm, self);
         vt[4].fn(vthis(self, vt[4]));
     }
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cCameraAlgorithm, self);
     vt[5].fn(vthis(self, vt[5]));
-    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
+    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cCameraAlgorithm, self);
     vt2[8].fn(vthis(self, vt2[8]), ignoreCollisions);
 }
 #endif
@@ -7793,7 +7796,7 @@ extern "C" void cLookAtChaseAlgorithm_calcPose(void* self);
 extern "C" void cLookAtChaseAlgorithm_doRaceCamFinalPhase(cLookAtChaseAlgorithm* self)
 {
     cRaceCamFinalPhaseData finalPhaseData;
-    sCamVE166228* vt = (sCamVE166228*)self->mVtbl;
+    sCamVE166228* vt = (sCamVE166228*)VPTR_OF(cCameraAlgorithm, self);
     vt[7].fn(vthis(self, vt[7]), &finalPhaseData);
     cLookAtChaseAlgorithm_calcPitchHeading(self, 0);
     if (finalPhaseData.DoPitchBlending != 0)
@@ -8509,7 +8512,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         self->LastHalfPipeMove = t4vect_Zero_6C60;
         self->LastHalfPipeDistCorrection = t4vect_Zero_6C60;
         *(sVec4*)&self->LastCamDir = front;
-        sVEntry<void>* svt1 = (sVEntry<void>*)self->mVtbl;
+        sVEntry<void>* svt1 = (sVEntry<void>*)VPTR_OF(cCameraAlgorithm, self);
         self->LastDrop = ((FloatFn_6C60)svt1[13].fn)(vthis(self, svt1[13]));
         *(int*)&self->ExtraBoostDist = 0;
         *(int*)&self->LastBoostWarp = 0;
@@ -8575,9 +8578,9 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(sVec4*)&self->LastDirectionVel = directionVel;
         *(sVec4*)&self->LastHorizontalVel = velocity;
         *(int*)&self->LastHorizontalVel.z = 0;
-        sVEntry<void>* svt2 = (sVEntry<void>*)self->mVtbl;
+        sVEntry<void>* svt2 = (sVEntry<void>*)VPTR_OF(cCameraAlgorithm, self);
         ((VoidFn_6C60)svt2[5].fn)(vthis(self, svt2[5]));
-        sVEntry<void>* svt3 = (sVEntry<void>*)self->mVtbl;
+        sVEntry<void>* svt3 = (sVEntry<void>*)VPTR_OF(cCameraAlgorithm, self);
         ((IntFn_6C60)svt3[8].fn)(vthis(self, svt3[8]), 1);
     }
 }
@@ -8597,7 +8600,7 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_snapCurrent);
  */
 extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
 {
-    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
+    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)VPTR_OF(cCameraAlgorithm, self);
     return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
 }
 #endif
@@ -9159,7 +9162,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cCameraAlgorithm__cCameraAlgorithm(cCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9320,7 +9323,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cBasicCameraAlgorithm__cBasicCameraAlgorithm(cBasicCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9424,7 +9427,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cManualCameraAlgorithm__cManualCameraAlgorithm(cBasicCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9445,7 +9448,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cEditorCameraAlgorithm__cEditorCameraAlgorithm(cBasicCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9466,7 +9469,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cChaseAlgorithm__cChaseAlgorithm(cChaseAlgorithm* self, int flags)
 {
-    self->mVtbl = cCameraAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -10197,7 +10200,7 @@ extern "C" void* cLazyChaseAlgorithm_cLazyChaseAlgorithm(cLazyChaseAlgorithm* se
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
     self->AlgorithmType = 13;
-    self->mVtbl = cLazyChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cLazyChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -10219,7 +10222,7 @@ INCLUDE_ASM("camera/camera", cLazyChaseAlgorithm__cLazyChaseAlgorithm__FPv);
 void* cLazyChaseAlgorithm__cLazyChaseAlgorithm(void* vself)
 {
     cLazyChaseAlgorithm* self = (cLazyChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cLazyChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cLazyChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -10479,7 +10482,7 @@ extern "C" void cLazyChaseAlgorithm_snap_v(char* vself, long id)
         self->Position = nv;
         f_6C60_8508(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
-        sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)self->mVtbl;
+        sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)VPTR_OF(cCameraAlgorithm, self);
         vt2[5].fn(vthis(self, vt2[5]));
     }
 }
@@ -10503,7 +10506,7 @@ extern "C" void* cLookBackChaseAlgorithm_cLookBackChaseAlgorithm(cLookBackChaseA
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
     self->AlgorithmType = 0x20;
-    self->mVtbl = cLookBackChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cLookBackChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -10526,7 +10529,7 @@ INCLUDE_ASM("camera/camera", cLookBackChaseAlgorithm__cLookBackChaseAlgorithm__F
 void* cLookBackChaseAlgorithm__cLookBackChaseAlgorithm(void* vself)
 {
     cLookBackChaseAlgorithm* self = (cLookBackChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cLookBackChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cLookBackChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -10774,7 +10777,7 @@ extern "C" void* cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(cMidRightChaseA
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
     self->AlgorithmType = 0x9;
-    self->mVtbl = cMidRightChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cMidRightChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -10797,7 +10800,7 @@ INCLUDE_ASM("camera/camera", cMidRightChaseAlgorithm__cMidRightChaseAlgorithm__F
 void* cMidRightChaseAlgorithm__cMidRightChaseAlgorithm(void* vself)
 {
     cMidRightChaseAlgorithm* self = (cMidRightChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cMidRightChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cMidRightChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -10933,7 +10936,7 @@ extern "C" void* cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm(cMidLeftChaseAlgo
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
     self->AlgorithmType = 0x9;
-    self->mVtbl = cMidLeftChaseAlgorithm_vtbl;
+    VPTR_OF(cCameraAlgorithm, self) = cMidLeftChaseAlgorithm_vtbl;
     return ((void*)self);
 }
 #endif
@@ -10956,7 +10959,7 @@ INCLUDE_ASM("camera/camera", cMidLeftChaseAlgorithm__cMidLeftChaseAlgorithm__FPv
 void* cMidLeftChaseAlgorithm__cMidLeftChaseAlgorithm(void* vself)
 {
     cMidLeftChaseAlgorithm* self = (cMidLeftChaseAlgorithm*)vself;
-    self->mVtbl = (void**)((int)(void*)cMidLeftChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cMidLeftChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
