@@ -2566,11 +2566,7 @@ struct sRewardReq_1591E8
 };
 extern sRewardReq_1591E8 gMedalsInfo_1591E8[][4][5] __asm__("gMedalsInfo");
 
-struct sRaceSettings_1591E8 {
-    char pad_0x00[0x49];
-    signed char b49;    // 0x49
-};
-extern sRaceSettings_1591E8 cBELibrary_raceDB_1591E8 __asm__("cBELibrary_raceDB");
+extern cBERaceDB cBELibrary_raceDB_1591E8 __asm__("cBELibrary_raceDB");
 extern signed char D_005305F9[];
 
 
@@ -2678,7 +2674,7 @@ extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInter
         int kind = gMedalsInfo_1591E8[group][tier][i].kind;
         int track = gMedalsInfo_1591E8[group][tier][i].track;
         if (track == -1) {
-            if (cBELibrary_raceDB_1591E8.b49 == 0)
+            if (cBELibrary_raceDB_1591E8.cGamePath == 0)
                 func_001E1C10(group);
             break;
         }
@@ -2691,7 +2687,7 @@ extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInter
         } else {
             if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, charID, track, kind))) {
                 if (!any) {
-                    if (cBELibrary_raceDB_1591E8.b49 == 0)
+                    if (cBELibrary_raceDB_1591E8.cGamePath == 0)
                         func_001E1C10(group);
                     okA = 0;
                     okB = 0;

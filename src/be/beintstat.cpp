@@ -624,12 +624,6 @@ extern "C" void func_0041605C(void* dst, void* src, int n);
 void cMemMan_free(void*);
 extern "C" void cBEProfileLib_init(void* p, int v);
 
-struct sCharSlot_149BB8
-{
-    int a[6];
-    int b[6];
-    char pad[0x4C - 0x30];
-};
 
 
 struct sCharStat_149BB8
@@ -644,7 +638,7 @@ struct sCharSrc_149BB8
 
 extern char D_004A6750[];
 extern char cBELibrary_rewardDB[];
-extern sCharSlot_149BB8 cBELibrary_raceDB;
+extern cBERaceDB cBELibrary_raceDB;
 extern const char str_data_be_charDB_dbl[];
 extern char cBELibrary_characterDB[];
 extern sCharStat_149BB8 cBELibrary_statDefault[10];
@@ -672,8 +666,8 @@ extern "C" void cBELibrary_loadData(void)
     cBERewardDB_init(cBELibrary_rewardDB, 0);
     memset(&cBELibrary_raceDB, 0, 76);
     for (i = 0; i < 6; i++) {
-        cBELibrary_raceDB.a[i] = i;
-        cBELibrary_raceDB.b[i] = i;
+        cBELibrary_raceDB.playerID[i] = i;
+        cBELibrary_raceDB.riderID[i] = i;
     }
     memset(cBELibrary_playerDB, 0, sizeof(cBELibrary_playerDB));
     for (i = 0; i < 6; i++) {

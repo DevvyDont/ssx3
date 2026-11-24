@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/bedbprofile.h"
 #include "be/beprofilelib.h"
 #include "vtable.h"
@@ -452,11 +453,7 @@ int cBELibrary_getCharacterID(int);
 struct sBits8_1539A8 {
     unsigned int w[2];
 };
-struct sCfg_1539A8 {
-    char pad[0x40];
-    int base;           // 0x40
-};
-extern sCfg_1539A8 cBELibrary_raceDB;
+extern cBERaceDB cBELibrary_raceDB;
 extern char D_004A6CB0_raw[] __asm__("D_004A6CB0");
 extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
@@ -472,19 +469,19 @@ extern "C" void cBEMissionInterface_setBits(cBEMissionInterface* self, int rider
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    int bb = cBELibrary_raceDB.base * 12;
+    int bb = cBELibrary_raceDB.iLocationIdx * 12;
     *(sBits8_1539A8*)(D_004A6CB0_raw + (idx * 12 + (characterId * 0xF88 + profile * 0x9B50 + bb))) = *src;
     int count = 0;
     for (int i = 0; i < 64; i++) {
         int off = i / 32 * 4;
         off += idx * 12;
-        off += cBELibrary_raceDB.base * 12;
+        off += cBELibrary_raceDB.iLocationIdx * 12;
         off += characterId * 3976;
         off += profile * 39760;
         if (*(unsigned int*)(D_004A6CB0_raw + off) & (1 << i))
             count++;
     }
-    char* record = cBELibrary_profileLib_raw + ((idx + cBELibrary_raceDB.base) * 12 + characterId * 3976 + profile * 39760);
+    char* record = cBELibrary_profileLib_raw + ((idx + cBELibrary_raceDB.iLocationIdx) * 12 + characterId * 3976 + profile * 39760);
     *(signed char*)(record + 4) = count;
 }
 #endif
