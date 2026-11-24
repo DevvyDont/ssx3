@@ -15,6 +15,11 @@
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "visualfx/attachedemitterfx.h"
+#include "render/particle.h"
+#include "camera/camera.h"
+#include "world/world.h"
+#include "fe/ferider.h"
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan_cPS2VisualEffectsMan);
@@ -295,7 +300,7 @@ __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
 INCLUDE_ASM("seg/seg_1F1548", cPunchFX_reset);
 #ifdef SKIP_ASM
 /**
- * Resets the punch effect by clearing its active flag (+0xA0).
+ * Resets the punch effect by clearing its active flag (mActive).
  *
  * Despite the name it reads nothing from a replay frame (On Tour's version takes a cReplayFramePtr*); the
  * constructor calls it as a reset.
@@ -326,7 +331,7 @@ struct sMat_1150 {
 extern t4Vector t4vect_Zero;
 
 struct sFx_1150 {
-    char* owner;
+    cRider* owner;
     char pad4[0xC];
     t4Vector pos[4];
     sCol_1150 col[4];
@@ -402,44 +407,46 @@ static inline float randRange_1150(float lo, float hi)
 /**
  * Places the punch effect's four sprites around the rider's punching hand while a punch is playing.
  *
- * Active while the rider's PunchStrength (+0x350) is positive and a punch animation runs: 0x146 or 0x147 in
+ * Active while the rider's PunchStrength is positive and a punch animation runs: 0x146 or 0x147 in
  * anim slot 0, or 0x143 or 0x144 in slot 1 while its sequence's event bit 0 is set and bit 1 clear. That
- * picks the hand bone (+0x8B0 or +0x8B8, swapped when +0x320 is set). Each sprite gets a random offset of up
- * to 3 * blend around a point 8 units along the bone, a size of 15 to 15 + 15 * blend and a grey level of at
- * most 0.9 x blend.
+ * picks the hand bone (LHandSkelIndex or RHandSkelIndex, swapped when IsRidingFakie is set). Each sprite
+ * gets a random offset of up to 3 * blend around a point 8 units along the bone, a size of 15 to
+ * 15 + 15 * blend and a grey level of at most 0.9 x blend.
  */
 extern "C" void cPunchFX_update(sFx_1150* self)
 {
-    int active = 0.0f < *(float*)(self->owner + 0x350);
+    int active = 0.0f < self->owner->PunchStrength;
     self->active = active;
     if (!active)
         return;
-    int bone = *(int*)(self->owner + 0x8B0);
+    int bone = self->owner->LHandSkelIndex;
     int flag = 0;
-    int layer0Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 0);
-    int layer1Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 1);
-    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->owner + 0x784), 1) == 13) {
-        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1)->Events, 1) == 0) {
-            flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1)->Events, 0) != 0;
+    int layer0Anim = cRiderAnimBase_getCurrentAnimID(self->owner->mRiderAnim, 0);
+    int layer1Anim = cRiderAnimBase_getCurrentAnimID(self->owner->mRiderAnim, 1);
+    if (cRiderAnimBase_getCurrentAnimCategory(self->owner->mRiderAnim, 1) == 13) {
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->owner->mRiderAnim, 1)->Events, 1) == 0) {
+            flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->owner->mRiderAnim, 1)->Events, 0)
+                   != 0;
         }
     }
     if (layer0Anim == 326 || (layer1Anim == 323 && flag)) {
-        if (*(int*)(self->owner + 0x320))
-            bone = *(int*)(self->owner + 0x8B0);
+        if (self->owner->IsRidingFakie)
+            bone = self->owner->LHandSkelIndex;
         else
-            bone = *(int*)(self->owner + 0x8B8);
+            bone = self->owner->RHandSkelIndex;
     } else if (layer0Anim == 327 || (layer1Anim == 324 && flag)) {
-        if (*(int*)(self->owner + 0x320))
-            bone = *(int*)(self->owner + 0x8B8);
+        if (self->owner->IsRidingFakie)
+            bone = self->owner->RHandSkelIndex;
         else
-            bone = *(int*)(self->owner + 0x8B0);
+            bone = self->owner->LHandSkelIndex;
     } else {
         self->active = 0;
     }
     if (self->active) {
-        t4Vector base = *(t4Vector*)(*(char**)(*(char**)(self->owner + 0x780) + 0x30) + (bone << 6) + 0x30);
+        // SkelMatrices[bone].row[3] (the bone's position), by byte offset: the typed subscript swaps the addu operands
+        t4Vector base = *(t4Vector*)((char*)self->owner->mAnimModel->SkelMatrices + (bone << 6) + 0x30);
         sMat_1150 boneMat;
-        CopyMat_1150(&boneMat, &(*(sMat_1150**)(*(char**)(self->owner + 0x780) + 0x30))[bone]);
+        CopyMat_1150(&boneMat, (sMat_1150*)&self->owner->mAnimModel->SkelMatrices[bone]);
         boneMat.r[3] = t4vect_Zero;
         t4Vector point;
         t4Vector rnd;
@@ -454,7 +461,7 @@ extern "C" void cPunchFX_update(sFx_1150* self)
             base = point;
         }
         for (int i = 0; i < 4; i++) {
-            float attackBlend = *(float*)(self->owner + 0x350);
+            float attackBlend = self->owner->PunchStrength;
             float jitter = attackBlend * 3.0f;
             float hi = attackBlend * 15.0f + 15.0f;
             rnd.w = 0.0f;
@@ -464,7 +471,7 @@ extern "C" void cPunchFX_update(sFx_1150* self)
             Add_1150(&point, base, rnd);
             self->pos[i] = point;
             self->size[i] = randRange_1150(15.0f, hi);
-            float shade = *(float*)(self->owner + 0x350) * 0.9f;
+            float shade = self->owner->PunchStrength * 0.9f;
             shade *= randf_1150();
             point.x = 1.0f;
             point.y = shade;
@@ -580,16 +587,18 @@ extern char cAttachedDynamicEmitter_vtbl[];
 /**
  * Constructs an attached dynamic emitter (0x210 bytes, "cAttachedDynamicEmitter") on @p emitter and returns it.
  *
- * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable cAttachedDynamicEmitter_vtbl (+0x1F8) and zeroes the
- * attach-bone index (+0x200), the stopped flag (+0x204) and the pulse phase (+0x208). func_002F2130 is its only caller.
+ * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable cAttachedDynamicEmitter_vtbl
+ * (mVtbl) and zeroes the attach-bone index (+0x200), the stopped flag (+0x204) and the pulse phase (+0x208).
+ * func_002F2130 is its only caller.
  *
  * @param emitter  the memory to construct in
  * @return the constructed emitter (@p emitter)
  */
-extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(void *emitter) {
+extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cBaseClass_DynamicEmitter* emitter) {
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
+    // +0x200 .. +0x20C: cAttachedDynamicEmitter's own fields past its base (the subclass has no header yet)
     *(int *)((char*)emitter + 0x200) = 0;
-    *(char **)((char*)emitter + 0x1F8) = cAttachedDynamicEmitter_vtbl;
+    emitter->mVtbl = (void**)cAttachedDynamicEmitter_vtbl;
     *(int *)((char*)emitter + 0x204) = 0;
     *(int *)((char*)emitter + 0x208) = 0;
     return emitter;
@@ -603,15 +612,16 @@ extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void *);
 extern char cAttachedDynamicEmitter_vtbl[];
 
 /**
- * Destroys an attached dynamic emitter: restores its vtable cAttachedDynamicEmitter_vtbl (+0x1F8), then runs the base destructor.
+ * Destroys an attached dynamic emitter: restores its vtable cAttachedDynamicEmitter_vtbl (mVtbl), then runs the base
+ * destructor.
  *
  * Slot 4 of cAttachedDynamicEmitter_vtbl. The g++ delete flags arrive in the second argument register, which this body leaves alone, so
  * cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter receives them and frees the object when bit 0 is set.
  *
  * @param emitter  the emitter
  */
-extern "C" void cAttachedDynamicEmitter__cAttachedDynamicEmitter(void *emitter) {
-    *(char **)((char*)emitter + 0x1F8) = cAttachedDynamicEmitter_vtbl;
+extern "C" void cAttachedDynamicEmitter__cAttachedDynamicEmitter(cBaseClass_DynamicEmitter* emitter) {
+    emitter->mVtbl = (void**)cAttachedDynamicEmitter_vtbl;
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(emitter);
 }
 #endif
@@ -667,27 +677,27 @@ extern "C" void func_002F1810(void) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1850);
 #ifdef SKIP_ASM
-extern "C" void func_002F18D8(void *);
+extern "C" void func_002F18D8(cAttachedEmitterFX*);
 extern char cAttachedEmitterFX_vtbl[];
 
 /**
  * Constructs an attached-emitter FX object for an in-game rider and returns it.
  *
- * The attached-emitter FX object (0xA8 bytes, "AttachedEmitterFX"): +0x0 bones-looked-up flag, +0x4 26 bone indices,
- * +0x6C 10 emitter slots, +0x94 model, +0x98 cRider, +0x9C front-end rider, +0xA0 spread flag, +0xA4 vtable cAttachedEmitterFX_vtbl.
+ * The attached-emitter FX object (0xA8 bytes, "AttachedEmitterFX", visualfx/attachedemitterfx.h): the bone lookup,
+ * 10 emitter slots, model, cRider or front-end rider, the spread flag and the vtable cAttachedEmitterFX_vtbl.
  *
- * Clears the model and the front-end rider, stores @p rider as the rider (+0x98) and the vtable, then sets the object up
- * with func_002F18D8. The cRider constructor builds one into mAttachedEmitterFX.
+ * Clears mModel and mFERider, stores @p rider as mRider and the vtable, then sets the object up with
+ * func_002F18D8. The cRider constructor builds one into mAttachedEmitterFX.
  *
  * @param emitterFx  the memory to construct in (0xA8 bytes)
  * @param rider  the owning cRider
  * @return the constructed object (@p emitterFx)
  */
-extern "C" void *func_002F1850(void *emitterFx, int rider) {
-    *(int *)((char*)emitterFx + 0x94) = 0;
-    *(int *)((char*)emitterFx + 0x9C) = 0;
-    *(char **)((char*)emitterFx + 0xA4) = cAttachedEmitterFX_vtbl;
-    *(int *)((char*)emitterFx + 0x98) = rider;
+extern "C" void *func_002F1850(cAttachedEmitterFX* emitterFx, cRider* rider) {
+    emitterFx->mModel = 0;
+    emitterFx->mFERider = 0;
+    emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
+    emitterFx->mRider = rider;
     func_002F18D8(emitterFx);
     return emitterFx;
 }
@@ -696,25 +706,25 @@ extern "C" void *func_002F1850(void *emitterFx, int rider) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1890);
 #ifdef SKIP_ASM
-extern "C" void func_002F18D8(void *);
-extern "C" void func_002F1A00(void *);
+extern "C" void func_002F18D8(cAttachedEmitterFX*);
+extern "C" void func_002F1A00(cAttachedEmitterFX*);
 extern char cAttachedEmitterFX_vtbl[];
 
 /**
  * Constructs an attached-emitter FX object for a front-end rider and returns it.
  *
- * Like func_002F1850, but the cRider slot (+0x98) stays 0 and @p feRider goes to +0x9C; after the set-up (func_002F18D8)
+ * Like func_002F1850, but mRider stays 0 and @p feRider goes to mFERider; after the set-up (func_002F18D8)
  * it also clears the spread flag (func_002F1A00). The front-end rider builds one at its +0xC70.
  *
  * @param emitterFx  the memory to construct in (0xA8 bytes)
  * @param feRider  the owning front-end rider
  * @return the constructed object (@p emitterFx)
  */
-extern "C" void *func_002F1890(void *emitterFx, int feRider) {
-    *(int *)((char*)emitterFx + 0x94) = 0;
-    *(int *)((char*)emitterFx + 0x98) = 0;
-    *(int *)((char*)emitterFx + 0x9C) = feRider;
-    *(char **)((char*)emitterFx + 0xA4) = cAttachedEmitterFX_vtbl;
+extern "C" void *func_002F1890(cAttachedEmitterFX* emitterFx, cFERider* feRider) {
+    emitterFx->mModel = 0;
+    emitterFx->mRider = 0;
+    emitterFx->mFERider = feRider;
+    emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
     func_002F18D8(emitterFx);
     func_002F1A00(emitterFx);
     return emitterFx;
@@ -728,20 +738,20 @@ extern "C" void func_002F17D0();
 extern int D_004A3BB4;
 
 /**
- * Sets up an attached-emitter FX object: counts it in and empties its 10 emitter slots (+0x6C).
+ * Sets up an attached-emitter FX object: counts it in and empties its 10 emitter slots (mEmitters).
  *
  * The first instance (the count D_004A3BB4 still 0) loads the shared type table with func_002F17D0; the count then goes
  * up by one.
  *
  * @param emitterFx  the attached-emitter FX object
  */
-extern "C" void func_002F18D8(void *emitterFx) {
+extern "C" void func_002F18D8(cAttachedEmitterFX* emitterFx) {
     if (D_004A3BB4 == 0) {
         func_002F17D0();
     }
     D_004A3BB4 += 1;
     for (int i = 9; i >= 0; i--)
-        *(int *)((char*)emitterFx + 0x6C + i * 4) = 0;
+        emitterFx->mEmitters[i] = 0;
 }
 #endif
 
@@ -763,21 +773,21 @@ struct Obj1940 : Base1940 {
 /**
  * Destroys an attached-emitter FX object: deletes its emitters and, with the last instance, the type table.
  *
- * Slot 1 of the vtable cAttachedEmitterFX_vtbl (restored at +0xA4 first). Drops the instance count D_004A3BB4 and calls
- * func_002F1810 when it reaches 0, then deletes every emitter in the 10 slots (+0x6C) through its virtual destructor
+ * Slot 1 of the vtable cAttachedEmitterFX_vtbl (restored in mVtbl first). Drops the instance count D_004A3BB4 and
+ * calls func_002F1810 when it reaches 0, then deletes every emitter in mEmitters through its virtual destructor
  * and clears the slot. Frees the object when bit 0 of @p flags is set.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param flags  the g++ destructor flags (bit 0: free the memory)
  */
-extern "C" void cAttachedEmitterFX__cAttachedEmitterFX(void *emitterFx, int flags) {
+extern "C" void cAttachedEmitterFX__cAttachedEmitterFX(cAttachedEmitterFX* emitterFx, int flags) {
     int remaining = D_004A3BB4 - 1;
-    *(char **)((char*)emitterFx + 0xA4) = cAttachedEmitterFX_vtbl;
+    emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
     D_004A3BB4 = remaining;
     if (remaining == 0) {
         func_002F1810();
     }
-    Obj1940 **slot = (Obj1940 **)((char*)emitterFx + 0x6C);
+    Obj1940 **slot = (Obj1940 **)emitterFx->mEmitters;
     int n = 9;
     do {
         if (*slot != 0) {
@@ -797,7 +807,7 @@ extern "C" void cAttachedEmitterFX__cAttachedEmitterFX(void *emitterFx, int flag
 INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
 #ifdef SKIP_ASM
 /**
- * Gives an attached-emitter FX object its model (+0x94) and clears its bones-looked-up flag (+0x0).
+ * Gives an attached-emitter FX object its model (mModel) and clears mBonesLookedUp.
  *
  * The next update (func_002F1A08) then finds the bones again in the new model (func_002F22C8). The front-end rider
  * calls it with its new cAnimModel.
@@ -805,9 +815,9 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
  * @param emitterFx  the attached-emitter FX object
  * @param model  the cAnimModel the emitters follow
  */
-extern "C" void func_002F19F0(void *emitterFx, int model) {
-    (*(int *)((char*)(emitterFx) + 0x94)) = model;
-    (*(int *)((char*)(emitterFx) + 0)) = 0;
+extern "C" void func_002F19F0(cAttachedEmitterFX* emitterFx, cAnimModel* model) {
+    emitterFx->mModel = model;
+    emitterFx->mBonesLookedUp = 0;
 }
 #endif
 
@@ -815,15 +825,15 @@ extern "C" void func_002F19F0(void *emitterFx, int model) {
 INCLUDE_ASM("seg/seg_1F1548", func_002F1A00);
 #ifdef SKIP_ASM
 /**
- * Clears an attached-emitter FX object's spread flag (+0xA0).
+ * Clears an attached-emitter FX object's spread flag (mDisableSnowTrailSpray).
  *
  * func_002F1A08 clears the flag at the start of every update and sets it while an emitter sits on attach point 25.
  * cRider's reset paths and func_002F1890 call this.
  *
  * @param emitterFx  the attached-emitter FX object
  */
-extern "C" void func_002F1A00(void *emitterFx) {
-    (*(int *)((char*)(emitterFx) + 0xA0)) = 0;
+extern "C" void func_002F1A00(cAttachedEmitterFX* emitterFx) {
+    emitterFx->mDisableSnowTrailSpray = 0;
 }
 #endif
 
@@ -992,9 +1002,10 @@ static inline t4Vector bonePos_1A08(char* model, int i)
  *
  * The position is the bone's translation (model +0x30 matrices) plus the record's offset scaled by the model's scale
  * (+0x140..+0x148) and turned by the bone matrix; attach points 23 and 24 add +75 and -75 to x, and point 25 adds a
- * random -85..85 to x and -14..14 to z and sets the spread flag (+0xA0). An emitting update passes velocity * velocity
- * factor + normal * normal factor + normal * speed factor * speed, plus the record's direction turned by the bone;
- * cBaseClass_DynamicEmitter_updateBASE runs with dt 1/60 either way (no velocity and enable 0 when not emitting).
+ * random -85..85 to x and -14..14 to z and sets the spread flag (mDisableSnowTrailSpray). An emitting update passes
+ * velocity * velocity factor + normal * normal factor + normal * speed factor * speed, plus the record's direction
+ * turned by the bone; cBaseClass_DynamicEmitter_updateBASE runs with dt 1/60 either way (no velocity and enable 0 when
+ * not emitting).
  */
 extern "C" void func_002F1A08(sFxMgr_1A08* self)
 {
@@ -1097,41 +1108,24 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2088);
 #ifdef SKIP_ASM
 extern "C" void cDynamicEmitter_render(void* obj, int level);
 
-struct sRiderInfo_2088 {
-    char pad[0xB18];
-    int fB18;               // 0xB18
-    char padB1C[0xC2C - 0xB1C];
-    int fC2C;               // 0xC2C
-    char padC30[0xCC8 - 0xC30];
-    int fCC8;               // 0xCC8
-};
-
-struct sOwner_2088 {
-    char pad[0x6C];
-    void* items[10];        // 0x6C
-    char pad94[4];
-    sRiderInfo_2088* a;     // 0x98
-    sRiderInfo_2088* b;     // 0x9C
-};
-
 /**
  * Renders an attached-emitter FX object's emitters with cDynamicEmitter_render.
  *
- * Each used slot of the 10 is drawn only when the cRider (+0x98) is on screen (mIsOnScreen) or the front-end rider
- * (+0x9C) is shown (its +0xCC8). The draw layer is 7, or for a front-end rider its layer (+0xC2C) + 1, or 22 when that
- * layer is negative. cRider's func_00122638 and cFERider_render call it.
+ * Each used slot of the 10 (mEmitters) is drawn only when mRider is on screen (mIsOnScreen) or mFERider is shown
+ * (mVisible). The draw layer is 7, or for a front-end rider its mDrawLayer + 1, or 22 when that layer is negative.
+ * cRider's func_00122638 and cFERider_render call it.
  */
-extern "C" void func_002F2088(sOwner_2088* self)
+extern "C" void func_002F2088(cAttachedEmitterFX* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        if (self->items[i] != 0) {
+        if (self->mEmitters[i] != 0) {
             int level = 7;
-            if (self->b != 0)
-                level = (self->b->fC2C < 0) ? 22 : self->b->fC2C + 1;
-            sRiderInfo_2088* feRider = self->b;
-            if ((self->a != 0 && self->a->fB18 != 0) || (feRider != 0 && feRider->fCC8 != 0))
-                cDynamicEmitter_render(self->items[i], level);
+            if (self->mFERider != 0)
+                level = (self->mFERider->mDrawLayer < 0) ? 22 : self->mFERider->mDrawLayer + 1;
+            cFERider* feRider = self->mFERider;
+            if ((self->mRider != 0 && self->mRider->mIsOnScreen != 0) || (feRider != 0 && feRider->mVisible != 0))
+                cDynamicEmitter_render(self->mEmitters[i], level);
         }
     }
 }
@@ -1147,7 +1141,7 @@ struct Obj2130 : Base2130 {
     virtual void v2(int, float);
 };
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
-extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(void *);
+extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cBaseClass_DynamicEmitter*);
 extern char str_cAttachedDynamicEmitter[];
 extern int cAttachedEmitterFX_mEmitterDataArray;
 
@@ -1164,19 +1158,21 @@ extern int cAttachedEmitterFX_mEmitterDataArray;
  * @param boneIndex  the attach point (index into the 26 bone indices)
  * @return the slot index (0-9), or -1 when all 10 slots are used
  */
-extern "C" int func_002F2130(void *emitterFx, int typeIndex, int boneIndex) {
-    Obj2130 **slot = (Obj2130 **)((char*)emitterFx + 0x6C);
+extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex) {
+    Obj2130 **slot = (Obj2130 **)emitterFx->mEmitters;
     int i;
     for (i = 0; i < 10; i++, slot++) {
         if (*slot == 0) {
-            Obj2130 *n = (Obj2130 *)cAttachedDynamicEmitter_cAttachedDynamicEmitter(cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
+            Obj2130 *n = (Obj2130 *)cAttachedDynamicEmitter_cAttachedDynamicEmitter(
+                (cBaseClass_DynamicEmitter*)cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
             int typeData = cAttachedEmitterFX_mEmitterDataArray + typeIndex * 272;
             *slot = n;
+            // +0x200 bone, +0x204 stopped flag, +0x20C type record: cAttachedDynamicEmitter's own fields (no header)
             *(int *)((char*)*slot + 0x200) = boneIndex;
             *(int *)((char*)*slot + 0x204) = 0;
             *(int *)((char*)*slot + 0x20C) = typeData;
             Obj2130 *emitter = *slot;
-            emitter->v2(*(int *)((char*)emitter + 0x20C), *(float *)((char*)emitter + 0x58));
+            emitter->v2(*(int *)((char*)emitter + 0x20C), ((cBaseClass_DynamicEmitter*)emitter)->m_emitter.SeedX0);
             (*slot)->v1();
             return i;
         }
@@ -1204,6 +1200,7 @@ struct sVE_2F2218 {
  */
 extern "C" void func_002F2218(char* self, int idx)
 {
+    // retail adds 0x6C (mEmitters) to self before the scaled index; the typed &self->mEmitters[idx] folds them
     int off = idx * 4;
     self += 0x6C;
     char** slot = (char**)(self + off);
@@ -1227,8 +1224,9 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F2268(void *emitterFx, int emitterIndex) {
-    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x204) = 1;
+extern "C" void func_002F2268(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+    // +0x204: cAttachedDynamicEmitter's stopped flag (the subclass has no header yet)
+    *(int *)((char *)emitterFx->mEmitters[emitterIndex] + 0x204) = 1;
 }
 #endif
 
@@ -1243,8 +1241,9 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2280);
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F2280(void *emitterFx, int emitterIndex) {
-    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x204) = 0;
+extern "C" void func_002F2280(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+    // +0x204: cAttachedDynamicEmitter's stopped flag (the subclass has no header yet)
+    *(int *)((char *)emitterFx->mEmitters[emitterIndex] + 0x204) = 0;
 }
 #endif
 
@@ -1252,15 +1251,15 @@ extern "C" void func_002F2280(void *emitterFx, int emitterIndex) {
 INCLUDE_ASM("seg/seg_1F1548", func_002F2298);
 #ifdef SKIP_ASM
 /**
- * Disables the emitter in one slot: clears its m_enabled (+0x174).
+ * Disables the emitter in one slot: clears its m_enabled.
  *
  * No retail code calls it.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F2298(void *emitterFx, int emitterIndex) {
-    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x174) = 0;
+extern "C" void func_002F2298(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+    emitterFx->mEmitters[emitterIndex]->m_enabled = 0;
 }
 #endif
 
@@ -1268,15 +1267,15 @@ extern "C" void func_002F2298(void *emitterFx, int emitterIndex) {
 INCLUDE_ASM("seg/seg_1F1548", func_002F22B0);
 #ifdef SKIP_ASM
 /**
- * Enables the emitter in one slot: sets its m_enabled (+0x174) to 1.
+ * Enables the emitter in one slot: sets its m_enabled to 1.
  *
  * The counterpart of func_002F2298. No retail code calls it.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F22B0(void *emitterFx, int emitterIndex) {
-    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x174) = 1;
+extern "C" void func_002F22B0(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+    emitterFx->mEmitters[emitterIndex]->m_enabled = 1;
 }
 #endif
 
@@ -1714,9 +1713,10 @@ extern float D_004A5504;
 extern int D_004A5508;
 // PORT: the unit declares cGraphicsMan_TheGraphicsMan later as cGfx_3E28*; this view is bound by asm label.
 
-static inline void setId_2C30(char* p, int v)
+// Writes *m_texid: the subscript m_texid[0] reschedules tDrop_render against retail.
+static inline void setId_2C30(sDrawState* p, int v)
 {
-    *(short*)(p + 0x10) = v;
+    *p->m_textureState.m_texid = v;
 }
 
 static inline float lerp_2C30(float a, float d, float t)
@@ -1726,7 +1726,7 @@ static inline float lerp_2C30(float a, float d, float t)
 }
 
 // PORT: the unit declares tDrop_render later as (void*, sV2_3E28*); typed body bound by asm label.
-extern "C" void tDrop_render_impl(char* obj, sVec2_2C30* off) __asm__("tDrop_render");
+extern "C" void tDrop_render_impl(tDrop* obj, sVec2_2C30* off) __asm__("tDrop_render");
 /**
  * Draws a screen-splash drop as a rotated sprite offset by @p off.
  *
@@ -1738,7 +1738,7 @@ extern "C" void tDrop_render_impl(char* obj, sVec2_2C30* off) __asm__("tDrop_ren
  * @param obj  the drop
  * @param off  the screen offset added to the drop position
  */
-extern "C" void tDrop_render_impl(char* obj, sVec2_2C30* off)
+extern "C" void tDrop_render_impl(tDrop* obj, sVec2_2C30* off)
 {
     if (!D_004A54F8) {
         D_004A54F0 = 0;
@@ -1752,14 +1752,16 @@ extern "C" void tDrop_render_impl(char* obj, sVec2_2C30* off)
     }
     // The life ratio time/duration is written out twice (fade, then rotation);
     // CSE turns the second division into the mov.s copy retail has.
-    float fade = *(float*)(obj + 0x1C) / *(float*)(obj + 0x20);
-    sVec4_2C30 colour = *(sVec4_2C30*)(obj + 0x24);
+    float fade = obj->mAge / obj->mDeath;
+    sVec4_2C30 colour = *(sVec4_2C30*)obj->mColour;
     fade = 1.0f - fade * fade;
     colour.x *= fade;
-    float ang = lerp_2C30(*(float*)(obj + 0x34), *(float*)(obj + 0x38), *(float*)(obj + 0x1C) / *(float*)(obj + 0x20));
+    float ang = lerp_2C30(obj->mRotation, obj->mRotationChangeOverLifetime, obj->mAge / obj->mDeath);
     int id = GrMan->_EffectTexMap[66];
-    setId_2C30(((char*)GrMan->m_pCurrentDrawState), id);
-    ((cRender_2C30*)cGraphicsMan_TheGraphicsMan)->DrawSprite(sVec4_2C30(sVec2_2C30(*(float*)(obj + 4) + off->x, *(float*)(obj + 8) + off->y), 0.0f, 1.0f), obj + 0xC, &D_004A54F0, &D_004A5500, &colour, 1, ang * 0.01745329424738884f);
+    setId_2C30(GrMan->m_pCurrentDrawState, id);
+    ((cRender_2C30*)cGraphicsMan_TheGraphicsMan)->DrawSprite(
+        sVec4_2C30(sVec2_2C30(obj->mPosition[0] + off->x, obj->mPosition[1] + off->y), 0.0f, 1.0f), obj->mSize,
+        &D_004A54F0, &D_004A5500, &colour, 1, ang * 0.01745329424738884f);
 }
 #endif
 
@@ -2501,7 +2503,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
     cGameViewMan* w = SSXApp->Game->ViewMan;
     if (self->idx >= w->m_uiNumView)
         return;
-    t4Vector pos = *(t4Vector*)((char*)w->PlayerCamera[self->idx] + 0x20);
+    t4Vector pos = w->PlayerCamera[self->idx]->Pose.P;
     if (self->hasPrev) {
         t4Vector moved;
         Sub_39E0(&moved, pos, self->prevPos);
@@ -2702,24 +2704,22 @@ INCLUDE_ASM("seg/seg_1F1548", ReportImpact);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void *cGame_getSplashManager(void *, int);
 extern "C" void cSplashManager_ReportImpactLocal_4118(void *, float, void *) __asm__("cSplashManager_ReportImpactLocal");
-struct N4118 { char pad[0x84]; N4118 *c; };
-struct M4118 { char pad[0x10]; unsigned int cnt; };
 
 /**
  * Reports a snow impact at a world position to the splash manager of every view.
  *
- * For each view of the game's view manager (count at its +0x10) it calls cSplashManager_ReportImpactLocal on cGame_getSplashManager's
- * result. The board-wake effect calls it with its burst point and strength.
+ * For each view of the game's view manager (m_uiNumView) it calls cSplashManager_ReportImpactLocal on
+ * cGame_getSplashManager's result. The board-wake effect calls it with its burst point and strength.
  *
  * @param position  the impact position in the world
  * @param speed  the impact strength (a speed)
  */
 extern "C" void ReportImpact(void *position, float speed) {
     unsigned int i = 0;
-    if (((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt != 0) {
+    if (SSXApp->Game->ViewMan->m_uiNumView != 0) {
         do {
-            cSplashManager_ReportImpactLocal_4118(cGame_getSplashManager(((N4118 *)SSXApp)->c, i++), speed, position);
-        } while (i < ((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt);
+            cSplashManager_ReportImpactLocal_4118(cGame_getSplashManager(SSXApp->Game, i++), speed, position);
+        } while (i < SSXApp->Game->ViewMan->m_uiNumView);
     }
 }
 #endif
@@ -2736,31 +2736,30 @@ struct Obj41A8 : Base41A8 {
     virtual void v12(); virtual void reset();
 };
 Obj41A8 *cGame_getSplashManager_41A8(void *, int) __asm__("cGame_getSplashManager__FPvi");
-#define F84(p) (*(char **)((char*)(p) + 0x84))
 
 /**
  * Tells the splash effects that a camera snapped: resets the splash manager of each view using that camera.
  *
- * Loops over the game's views (SSXApp->Game->ViewMan: count at +0x10, camera pointers from +0x4); where view i's camera
+ * Loops over the game's views (SSXApp->Game->ViewMan: m_uiNumView, cameras in PlayerCamera); where view i's camera
  * is @p camera and cGame_getSplashManager__FPvi(game, i) returns a splash manager, it calls that manager's virtual at +0x70,
  * cSplashManager_reset, so no splashes carry over a camera cut. Called by cCameraController_snap and cCameraController_snapCurrent
  * (cameracontroller).
  *
- * @param camera  the camera that snapped (a cCamera*)
+ * @param camera  the camera that snapped
  */
-extern "C" void cSplashManager_CameraSnapped(int camera) {
+extern "C" void cSplashManager_CameraSnapped(cCamera* camera) {
     unsigned int i = 0;
-    if (*(unsigned int *)(F84(F84(SSXApp)) + 0x10) != 0) {
+    if (SSXApp->Game->ViewMan->m_uiNumView != 0) {
         do {
-            char *t5 = F84(SSXApp);
-            if (camera == *(int *)(F84(t5) + (i << 2) + 4)) {
-                if (cGame_getSplashManager_41A8(t5, i) != 0) {
-                    Obj41A8 *splashMan = cGame_getSplashManager_41A8(F84(SSXApp), i);
+            cGame* game = SSXApp->Game;
+            if (camera == game->ViewMan->PlayerCamera[i]) {
+                if (cGame_getSplashManager_41A8(game, i) != 0) {
+                    Obj41A8 *splashMan = cGame_getSplashManager_41A8(SSXApp->Game, i);
                     splashMan->reset();
                 }
             }
             i += 1;
-        } while (i < *(unsigned int *)(F84(F84(SSXApp)) + 0x10));
+        } while (i < SSXApp->Game->ViewMan->m_uiNumView);
     }
 }
 #endif
@@ -2842,17 +2841,20 @@ extern float cSplashToggles_m_SnowfallMultiplier;
 /**
  * Records the view's snowfall intensity and adds screen splashes for heavy snowfall.
  *
- * Stores @p intensity as the last snowfall intensity (+0x1028). Above "Lowest Snowfall Amount" (cSplashToggles_m_LowestSnowfallAmount) it adds @p intensity
- * * (last camera speed (+0x1020) + 10) * "Snowfall Multiplier" / 130 to the splash counter (+0x1024). The board-wake
- * code calls it per view with the snow intensity.
+ * Stores @p intensity in mLastSnowfallIntensity. Above "Lowest Snowfall Amount" (cSplashToggles_m_LowestSnowfallAmount)
+ * it adds @p intensity * (mLastCameraSpeed + 10) * "Snowfall Multiplier" / 130 to the splash counter
+ * (mNumSplashesToAdd). The board-wake code calls it per view with the snow intensity.
  *
  * @param splashManager  the splash manager
  * @param intensity  the snowfall intensity
  */
-extern "C" void cSplashManager_ReportSnowfall(void *splashManager, float intensity) {
-    *(float *)((char*)splashManager + 0x1028) = intensity;
+extern "C" void cSplashManager_ReportSnowfall(cSplashManager* splashManager, float intensity) {
+    // stored through a reference: the plain member store sinks below the toggle load, unlike retail
+    float& last = splashManager->mLastSnowfallIntensity;
+    last = intensity;
     if (cSplashToggles_m_LowestSnowfallAmount < intensity) {
-        *(float *)((char*)splashManager + 0x1024) += intensity * (*(float *)((char*)splashManager + 0x1020) + 10.0f) * (cSplashToggles_m_SnowfallMultiplier * 0.007692307699471712f);
+        splashManager->mNumSplashesToAdd += intensity * (splashManager->mLastCameraSpeed + 10.0f)
+                                            * (cSplashToggles_m_SnowfallMultiplier * 0.007692307699471712f);
     }
 }
 #endif
@@ -3457,7 +3459,7 @@ extern "C" void getRealTimeLights(tInstanceRecord* litObject) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cWorldLightMan_cWorldLightMan);
 #ifdef SKIP_ASM
-extern "C" void cWorldLightMan_initLightCache(void *);
+extern "C" void cWorldLightMan_initLightCache(cWorldLightMan*);
 struct cWorldPainterManArg;
 void *cWorldPainterMan_getQuery(void *, cWorldPainterManArg *);
 extern char kWPR_Lighting;
@@ -3467,20 +3469,21 @@ struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
 /**
  * Constructs the world light manager: empty light tables, the light cache and a lighting query.
  *
- * Marks the 8 0x40-byte entries at +0x10 and the 32 0x180-byte entries at +0x210 unused (first word -1),
- * keeps @p pNash at +0x0, builds the light cache (cWorldLightMan_initLightCache) and stores at +0x4 the world
- * painter manager's query for kWPR_Lighting.
+ * Marks the 8 overlap nodes (OverlapNodeList) and the 32 light cache entries (LightCacheArray) unused (first word
+ * -1), keeps @p pNash in m_pNash, builds the light cache (cWorldLightMan_initLightCache) and stores in m_pWPQuery the
+ * world painter manager's query for kWPR_Lighting.
  *
- * @param pNash  the world's NASH data (On Tour: cBXNash*), passed as an int
+ * @param pNash  the world's NASH data
  * @return self
  */
-extern "C" void *cWorldLightMan_cWorldLightMan(void *self, int pNash) {
-    new ((char*)self + 0x10) A5180[8];
-    new ((char*)self + 0x210) B5180[32];
-    *(int *)self = pNash;
+extern "C" void *cWorldLightMan_cWorldLightMan(cWorldLightMan* self, cBXNash* pNash) {
+    new (self->OverlapNodeList) A5180[8];
+    new (self->LightCacheArray) B5180[32];
+    self->m_pNash = pNash;
     cWorldLightMan_initLightCache(self);
-    char *world = (char*)SSXApp->Game->World;
-    *(void **)((char*)self + 4) = cWorldPainterMan_getQuery(*(void **)(world + 8), (cWorldPainterManArg *)&kWPR_Lighting);
+    cWorld* world = SSXApp->Game->World;
+    self->m_pWPQuery = (tWorldPainterQuery*)cWorldPainterMan_getQuery(world->m_pWorldPainterMan,
+                                                                      (cWorldPainterManArg *)&kWPR_Lighting);
     return self;
 }
 #endif

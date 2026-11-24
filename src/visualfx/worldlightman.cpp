@@ -2965,7 +2965,7 @@ extern "C" void cSplashToggles__cSplashToggles(void* self, int flags)
 INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_ShouldDisableSnowTrailSpray);
 #ifdef SKIP_ASM
 /**
- * Returns the int at +0xA0 of @p arg0.
+ * Returns @p arg0's mDisableSnowTrailSpray (set while an emitter sits on attach point 25).
  *
  * Nothing in the retail code references it.
  *
@@ -2973,7 +2973,7 @@ INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_ShouldDisableSnowTrailS
  * @return the value
  */
 extern "C" int cAttachedEmitterFX_ShouldDisableSnowTrailSpray(cAttachedEmitterFX* arg0) {
-    return (arg0->unk_0A0);
+    return (arg0->mDisableSnowTrailSpray);
 }
 #endif
 //100%

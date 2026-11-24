@@ -5359,7 +5359,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRiderState_cRiderState);
 
 /**
  * Constructs the rider's base state: clears the 19 mSlewed channels, sets mGroundPolyId to -1 and fills the 64 words
- * from mVisitedIds (+0x5B8) with -1.
+ * of mVisitedIds with -1.
  *
  * Called first by cRider_cRider.
  *
@@ -5425,7 +5425,7 @@ extern "C" cRider* cRiderState_cRiderState(cRider* self)
     ((int (*)[3])&self->mSlewed[0])[18][0] = 0;
     ((int (*)[3])&self->mSlewed[0])[18][1] = 0;
     self->mGroundPolyId = 0xFFFFFFFF;
-    unsigned int* visited = ((unsigned int*)&self->mVisitedIds);
+    unsigned int* visited = self->mVisitedIds;
     for (int i = 63; i != -1; i--, visited++) {
         *visited = 0xFFFFFFFF;
     }

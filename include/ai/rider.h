@@ -359,7 +359,10 @@ struct cRiderState {
     /* 0x358 */ int ReactionEventType; // [X] cleared on transport (cRider_putAt)
     /* 0x35C */ float ProximityActionDelay; // cleared on transport (cRider_putAt); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
     /* 0x360 */ float JumpHeldSec; // [O] cRiderState::JumpHeldSec (+0xF70, after ProximityActionDelay); [U] cRider_checkForPrewind tests it == 0 and sets it to 1.0 as On Tour's checkForPrewind does at +0xF70; the gainFocus of cBoardPressControl / cRailslideControl / cCruiseControl clear it
-    /* 0x364 */ char unk_364[0xC];
+    /* 0x364 */ unsigned int mAnimFilter; // [U] cRider_loadRider stores one bit per character (1, 4, 0x20, ...;
+                                          //   -1 otherwise), as cFERider_init does for cFERider::mAnimFilter;
+                                          //   cRiderAnim_mapAIDToGAD passes it as the anim filter (name ours)
+    /* 0x368 */ char unk_368[0x8];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
     /* 0x380 */ t4Vector LastGroundNormal; // [O] LastGroundNormal; [U] copy of mGroundNormal taken before the ground probe (cRider_SetNISGroundVectors)
     /* 0x390 */ t4Vector DampGroundNormal; // [O] DampGroundNormal; [U] reference axis for lean rotation: Cross/Dot with the bone side vector (cRider_updateSkeleton)
@@ -408,8 +411,11 @@ struct cRiderState {
     /* 0x5AC */ int RidingFlexRail; // cleared on reset (cRider_initAlways)
     /* 0x5B0 */ int DangerLevel;
     /* 0x5B4 */ float mSmoothedHeading; // [X] smoothed slope angle (cRider_updateSplit12)
-    /* 0x5B8 */ unsigned int mVisitedIds; // [X]
-    /* 0x5BC */ char unk_5BC[0x104];
+    /* 0x5B8 */ unsigned int mVisitedIds[64]; // [X] [U] the instance ids of the last static-object hits, ended by
+                                    //   0xFFFFFFFF: the ctor (cRiderState_cRiderState) fills all 64,
+                                    //   cRider_objectIntersect writes them (its end marker lands in unk_6B8 when
+                                    //   all 64 hits differ), cRider_isIntersecting searches them
+    /* 0x6B8 */ char unk_6B8[0x8];
 };
 
 CHECK_SIZE(cRiderState, 0x6C0);
@@ -574,6 +580,7 @@ CHECK_OFFSET(cRiderState, ReactionEventTick, 0x354);
 CHECK_OFFSET(cRiderState, ReactionEventType, 0x358);
 CHECK_OFFSET(cRiderState, ProximityActionDelay, 0x35C);
 CHECK_OFFSET(cRiderState, JumpHeldSec, 0x360);
+CHECK_OFFSET(cRiderState, mAnimFilter, 0x364);
 CHECK_OFFSET(cRiderState, mGroundNormal, 0x370);
 CHECK_OFFSET(cRiderState, LastGroundNormal, 0x380);
 CHECK_OFFSET(cRiderState, mGroundForward, 0x3A0);

@@ -1100,7 +1100,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     t4Vector placePos = *pos;
     t4Vector n = t4vect_ZAxis_D660;
     float angle = Atan2_D660(dir[1], dir[0]);
-    self->mVisitedIds = 0xFFFFFFFF;
+    self->mVisitedIds[0] = 0xFFFFFFFF;
     if (drop >= 0.0f)
     {
         t4Vector lo = Add_D660(*pos, Scale_D660(t4vect_ZAxis_D660, -7000.0f));
@@ -3121,7 +3121,7 @@ skip:
     }
     *(&self->mModelOffset) = t4vect_Zero_q120F20;
     self->CollideIntersectInfo.Inst = 0;
-    self->mVisitedIds = 0xFFFFFFFF;
+    self->mVisitedIds[0] = 0xFFFFFFFF;
     cRider_updateTerminalVelocity(self);
     float finishTime = self->mFinishTime;
     if (finishTime >= 0.0f)
