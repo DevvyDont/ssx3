@@ -388,9 +388,7 @@ extern "C" void cFEMemCard_callbackFileCorrupt(void)
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
     cMCOverlayManager_getDeviceNumberString(mp, name, mp->mSelectedDevice);
-    char* sf = (char*)mp->mpMemCard;
-    sVEntry<void(void*, ...)>* sfvt = *(sVEntry<void(void*, ...)>**)sf;
-    sfvt[14].fn(sf + sfvt[14].delta, mp->mFileCursor, name2);
+    mp->mpMemCard->GetTitleString(mp->mFileCursor, name2);
     (cFEMemCard_mInstance)->mPopupType = 0xC;
     char* locale = (char*)SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = *(sVEntry<void*(void*, ...)>**)(locale + 4);
@@ -727,9 +725,7 @@ extern "C" void cFEMemCard_callbackConfirmSaveTooBig(void)
     char* locale = (char*)SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = *(sVEntry<void*(void*, ...)>**)(locale + 4);
     unsigned short* fmt = (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
-    char* sf = (char*)mp->mpMemCard;
-    sVEntry<int(void*, ...)>* sfvt = *(sVEntry<int(void*, ...)>**)sf;
-    int n = sfvt[23].fn(sf + sfvt[23].delta);
+    int n = mp->mpMemCard->SpaceRequired1();
     sprintf1(buf, fmt, name, n);
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(fe + 8);
@@ -780,9 +776,7 @@ extern "C" void cFEMemCard_callbackConfirmNoFreeBlocks(void)
     char* locale = (char*)SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = *(sVEntry<void*(void*, ...)>**)(locale + 4);
     unsigned short* fmt = (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
-    char* sf = (char*)mp->mpMemCard;
-    sVEntry<int(void*, ...)>* sfvt = *(sVEntry<int(void*, ...)>**)sf;
-    int n = sfvt[23].fn(sf + sfvt[23].delta);
+    int n = mp->mpMemCard->SpaceRequired1();
     sprintf1(buf, fmt, &name, n);
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(fe + 8);
@@ -1678,11 +1672,6 @@ public:
     virtual int v75();
 };
 
-class cSubK1D8DE0 {
-public:
-    virtual void v01(int);
-};
-
 class cPopupK1D8DE0 {
 public:
     int pad[2];
@@ -2191,31 +2180,6 @@ void cFEMemCard_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_displayFileOK);
 #ifdef SKIP_ASM
-class cMovieStreamK1D9880 {
-public:
-    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
-    virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08();
-    virtual void v09(); virtual void v10();
-    virtual int IsBusy();
-    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
-    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
-    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
-    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
-    virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
-    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
-    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43();
-    virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
-    virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
-    virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
-    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
-    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
-    virtual void v64(); virtual void v65(); virtual void v66(); virtual void v67();
-    virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
-    virtual void v72(); virtual void v73(); virtual void v74();
-    virtual int v75();
-};
-
 static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) == m; }
 
 /**
@@ -2234,9 +2198,9 @@ extern "C" int cFEMemCard_displayFileOK(cFEMemCard* self)
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     int st = self->mState;
     if (st != 0 && st != 6 && mp->mCheckAllowed != 0 && mp->mGetDir == 0
-        && ((cMovieStreamK1D9880*)mp->mpMemCard)->IsBusy() == 0) {
+        && mp->mpMemCard->IsBusy() == 0) {
         if (!IsModeK1D9880(((char*)mp), 6) && !IsModeK1D9880(((char*)mp), 1)) {
-            if (((cMovieStreamK1D9880*)mp->mpMemCard)->v75() != 0) {
+            if (mp->mpMemCard->IsFileInfoValid() != 0) {
                 allowed = one;
             }
         }

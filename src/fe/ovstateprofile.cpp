@@ -9,6 +9,7 @@
 #include "fe/ovstateprofile.h"
 #include "fe/ovstateautosave.h"
 #include "main/ssxapp.h"
+#include "util/bxmemcard.h"
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onCreateScreen);
@@ -242,77 +243,6 @@ extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* vself)
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_displayOn);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cMCSub_1380 {
-public:
-    virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05();
-    virtual int v06();
-    virtual int v07();
-    virtual int v08();
-    virtual int v09();
-    virtual int v10();
-    virtual int v11();
-    virtual int v12();
-    virtual int v13();
-    virtual void GetTitleString(int, void*);
-    virtual int v15();
-    virtual int v16();
-    virtual int v17();
-    virtual int v18();
-    virtual int v19();
-    virtual int v20();
-    virtual int v21();
-    virtual int v22();
-    virtual int v23();
-    virtual int v24();
-    virtual int v25();
-    virtual int v26();
-    virtual int v27();
-    virtual int v28();
-    virtual int v29();
-    virtual int v30();
-    virtual int v31();
-    virtual int v32();
-    virtual int v33();
-    virtual int v34();
-    virtual int v35();
-    virtual int v36();
-    virtual int v37();
-    virtual int v38();
-    virtual int v39();
-    virtual int v40();
-    virtual int v41();
-    virtual int v42();
-    virtual int v43();
-    virtual int v44();
-    virtual int v45();
-    virtual int v46();
-    virtual int v47();
-    virtual int v48();
-    virtual int v49();
-    virtual int v50();
-    virtual int v51();
-    virtual int v52();
-    virtual int IsAvailable1();
-    virtual int v54(int);
-    virtual int IsFormatted1();
-    virtual int v56();
-    virtual int v57();
-    virtual int v58();
-    virtual int v59();
-    virtual int v60();
-    virtual int v61();
-    virtual int v62();
-    virtual int v63();
-    virtual void GetStatus1(void*);
-    virtual int v65();
-    virtual int IsFileSlotDisabled(int);
-    virtual int HasFileName(int);
-};
-
 class cState_1380 {
 public:
     int pad[2];
@@ -461,7 +391,7 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (self->displayFileOK()) {
-        if (!((cMCSub_1380*)mp->mpMemCard)->IsAvailable1()) {
+        if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
             cOVState_PROFILE_displayOff((cOVState_PROFILE*)self);
             return;
@@ -477,16 +407,16 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
         self->setMenuHighlight();
         cUIObj_1380* textWidget = getObj_1380(self, str_1percentage_b);
         *(sCol_1380*)((char*)textWidget + 0x88) = gStaticColour_1380;
-        ((cMCSub_1380*)mp->mpMemCard)->GetStatus1(buf);
+        mp->mpMemCard->GetStatus(buf);
         cUIText_setUnicodeString(textWidget, buf);
         textWidget->setVisible(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d_b, i);
             textWidget = getObj_1380(self, name);
-            ((cMCSub_1380*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x234);
+            mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)((char*)self + 0x234));
             cUIText_setUnicodeString(textWidget, (unsigned short*)((char*)self + 0x234));
-            if (!((cMCSub_1380*)mp->mpMemCard)->HasFileName(i - 1) && !((cMCSub_1380*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)
-                && ((cMCSub_1380*)mp->mpMemCard)->IsFormatted1()) {
+            if (!mp->mpMemCard->HasFileName(i - 1) && !mp->mpMemCard->IsFileSlotDisabled(i - 1)
+                && mp->mpMemCard->IsFormatted()) {
                 if (!first) {
                     first = 1;
                     textWidget->setStatic(0);
@@ -494,8 +424,8 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
                     textWidget->setUseStaticColour(1);
                     textWidget->setStatic(1);
                 }
-            } else if (((cMCSub_1380*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
-                if (((cMCSub_1380*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)) {
+            } else if (mp->mpMemCard->IsActionable(mp->mSelectedDevice)) {
+                if (mp->mpMemCard->IsFileSlotDisabled(i - 1)) {
                     textWidget->setStatic(1);
                     textWidget->setUseStaticColour(1);
                 } else {
@@ -705,71 +635,13 @@ void cOVState_PROFILE_onDestroyScreen(void* vself)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onWidgetMenu);
 #ifdef SKIP_ASM
-class cOvl211B38 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual int v54(void*);
-};
-
 extern "C" void* cSSXApp_getMCManager(void* app);
 
 /**
  * Profile overlay's menu-event filter: events 6 and 8 get 0x100 when the selected memory card is not usable, event 9
  * always 0x100, everything else 0x101.
  *
- * Usability is slot 54 of the manager's mpMemCard for mSelectedDevice. It is the onWidgetMenu slot (+0xA4) of
+ * Usability is the manager's mpMemCard->IsActionable(mSelectedDevice) (slot 54). It is the onWidgetMenu slot (+0xA4) of
  * cOVState_PROFILE_vtbl.
  *
  * @param menu  the menu (unused)
@@ -778,11 +650,11 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  */
 extern "C" int cOVState_PROFILE_onWidgetMenu(cOVState_PROFILE* self, int menu, unsigned int key)
 {
-    char* mgr = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mgr = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (key) {
     case 6:
     case 8:
-        if ((*(cOvl211B38**)(mgr + 0x434))->v54(*(void**)(mgr + 0x428)) == 0) return 0x100;
+        if (mgr->mpMemCard->IsActionable(mgr->mSelectedDevice) == 0) return 0x100;
         break;
     case 9:
         return 0x100;

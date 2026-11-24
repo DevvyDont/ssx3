@@ -9,6 +9,7 @@
 #include "fe/festateriderbio.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
+#include "util/bxmemcard.h"
 
 //100%
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileSelect_onCreateScreen);
@@ -224,62 +225,6 @@ void* cFEStateProfileLoad_onRender2D(void* self)
 //100%
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onWidgetMenu);
 #ifdef SKIP_ASM
-struct cList0018EEB8 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual int v54(int a);
-};
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern int cFEStateProfileLoad_mScreenAction;
 
@@ -287,7 +232,7 @@ extern int cFEStateProfileLoad_mScreenAction;
  * Answers the profile load screen's menu events: refuses events the current screen cannot take.
  *
  * Event 6 gives 0x100 when the card manager's mSelectedDevice fails the memory card's slot-54 check (mpMemCard,
- * func_002D3840); event 8 gives 0x100 on the load screen (cFEStateProfileLoad_mScreenAction 2) or while the delete
+ * cPS2MemCard_IsActionable); event 8 gives 0x100 on the load screen (cFEStateProfileLoad_mScreenAction 2) or while the delete
  * button is inactive (+0x220 clear); event 9 always gives 0x100; everything else gives 0x101. Fills slot +0xA4
  * (onWidgetMenu) of cFEStateProfileLoad_vtbl.
  *
@@ -297,10 +242,10 @@ extern int cFEStateProfileLoad_mScreenAction;
  */
 extern "C" int cFEStateProfileLoad_onWidgetMenu(cFEStateProfileLoad* self, void* widget, unsigned int msg)
 {
-    char* app = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
     case 6:
-        if ((*(cList0018EEB8**)(app + 0x434))->v54(*(int*)(app + 0x428)) == 0) {
+        if (app->mpMemCard->IsActionable(app->mSelectedDevice) == 0) {
             return 0x100;
         }
         break;
@@ -512,27 +457,6 @@ struct sColor_F2B8 {
 extern sColor_F2B8 gStaticColour;
 
 #define V_F2B8(n) virtual void v##n();
-class cMCSub_F2B8 {
-public:
-    V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07) V_F2B8(08) V_F2B8(09) V_F2B8(10)
-    V_F2B8(11) V_F2B8(12) V_F2B8(13)
-    virtual void GetTitleString(int, void*);
-    virtual void GetFileDate(int, void*);
-    virtual void GetFileTime(int, void*);
-    V_F2B8(17) V_F2B8(18) V_F2B8(19) V_F2B8(20)
-    V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24) V_F2B8(25) V_F2B8(26) V_F2B8(27) V_F2B8(28) V_F2B8(29) V_F2B8(30)
-    V_F2B8(31) V_F2B8(32) V_F2B8(33) V_F2B8(34) V_F2B8(35) V_F2B8(36) V_F2B8(37) V_F2B8(38) V_F2B8(39) V_F2B8(40)
-    V_F2B8(41) V_F2B8(42) V_F2B8(43) V_F2B8(44) V_F2B8(45) V_F2B8(46) V_F2B8(47) V_F2B8(48) V_F2B8(49) V_F2B8(50)
-    V_F2B8(51) V_F2B8(52)
-    virtual int IsAvailable1();
-    virtual int v54(int);
-    virtual int IsFormatted1();
-    V_F2B8(56) V_F2B8(57) V_F2B8(58) V_F2B8(59) V_F2B8(60)
-    V_F2B8(61) V_F2B8(62) V_F2B8(63) V_F2B8(64) V_F2B8(65)
-    virtual int IsFileSlotDisabled(int);
-    virtual int HasFileName(int);
-};
-
 class cState_F2B8 {
 public:
     int pad[2];
@@ -582,7 +506,7 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (self->displayFileOK()) {
-        if (!((cMCSub_F2B8*)mp->mpMemCard)->IsAvailable1()) {
+        if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
             cFEStateProfileLoad_displayOff((cFEStateProfileLoad*)self);
             return;
@@ -602,9 +526,9 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
             sprintf(name, str_playerpct_d, i);
             widget = getObj_F2B8(self, name);
             *(sColor_F2B8*)((char*)widget + 0x88) = gStaticColour;
-            if (!((cMCSub_F2B8*)mp->mpMemCard)->HasFileName(i - 1) && !((cMCSub_F2B8*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)
-                && ((cMCSub_F2B8*)mp->mpMemCard)->IsFormatted1()) {
-                ((cMCSub_F2B8*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x238);
+            if (!mp->mpMemCard->HasFileName(i - 1) && !mp->mpMemCard->IsFileSlotDisabled(i - 1)
+                && mp->mpMemCard->IsFormatted()) {
+                mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)((char*)self + 0x238));
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
                 if (cFEStateProfileLoad_mScreenAction != 2 && sel == 0) {
                     sel = 1;
@@ -620,10 +544,10 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
                 sprintf(name, str_timepct_d, i);
                 widget = getObj_F2B8(self, name);
                 widget->setVisible(0);
-            } else if (((cMCSub_F2B8*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
-                ((cMCSub_F2B8*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x238);
+            } else if (mp->mpMemCard->IsActionable(mp->mSelectedDevice)) {
+                mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)((char*)self + 0x238));
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
-                if (((cMCSub_F2B8*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)) {
+                if (mp->mpMemCard->IsFileSlotDisabled(i - 1)) {
                     widget->setStatic(1);
                     widget->setUseStaticColour(1);
                 } else {
@@ -632,16 +556,16 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
                 }
                 sprintf(name, str_datepct_d, i);
                 widget = getObj_F2B8(self, name);
-                ((cMCSub_F2B8*)mp->mpMemCard)->GetFileDate(i - 1, buf);
+                mp->mpMemCard->GetFileDate(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
                 widget->setVisible(1);
                 sprintf(name, str_timepct_d, i);
                 widget = getObj_F2B8(self, name);
-                ((cMCSub_F2B8*)mp->mpMemCard)->GetFileTime(i - 1, buf);
+                mp->mpMemCard->GetFileTime(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
                 widget->setVisible(1);
             } else {
-                ((cMCSub_F2B8*)mp->mpMemCard)->GetTitleString(i - 1, (char*)self + 0x238);
+                mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)((char*)self + 0x238));
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
                 widget->setUseStaticColour(1);
                 widget->setStatic(1);
@@ -1078,7 +1002,7 @@ static inline void* GetText_K18FD90(char* key)
  *
  * Event 6 (back): unless busy is 1 or state is 6, sets +0x1E4, resets the manager (cMCOverlayManager_SetState, state 0)
  * when state is 0, 1 or 2, and sets state 6. Event 7: unless busy, in state 6, on the load screen or with the delete
- * button inactive (+0x220), and only when the selected device passes the card's slot-54 check (func_002D3840): takes
+ * button inactive (+0x220), and only when the selected device passes the card's slot-54 check (cPS2MemCard_IsActionable): takes
  * the widget's slot as for event 5; in state 1 with a file in it (cPS2MemCard_HasFileName) sets busy and state 4,
  * cMCOverlayManager_SetAction(0) and manager state 0x18. Event 14 does nothing. Fills slot +0x9C (onWidgetEvent) of
  * cFEStateProfileLoad_vtbl.

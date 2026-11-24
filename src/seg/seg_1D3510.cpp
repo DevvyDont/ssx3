@@ -387,82 +387,25 @@ extern "C" void cPS2MemCard_IsAvailable1(cPS2MemCard* pS2MemCard) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3840);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsActionable);
 #ifdef SKIP_ASM
-struct Obj_3840 {
-  virtual void v1();
-  virtual void v2();
-  virtual void v3();
-  virtual void v4();
-  virtual void v5();
-  virtual void v6();
-  virtual void v7();
-  virtual void v8();
-  virtual void v9();
-  virtual void v10();
-  virtual void v11();
-  virtual void v12();
-  virtual void v13();
-  virtual void v14();
-  virtual void v15();
-  virtual void v16();
-  virtual void v17();
-  virtual void v18();
-  virtual void v19();
-  virtual void v20();
-  virtual void v21();
-  virtual void v22();
-  virtual void v23();
-  virtual void v24();
-  virtual void v25();
-  virtual void v26();
-  virtual void v27();
-  virtual void v28();
-  virtual void v29();
-  virtual void v30();
-  virtual void v31();
-  virtual void v32();
-  virtual void v33();
-  virtual void v34();
-  virtual void v35();
-  virtual void v36();
-  virtual void v37();
-  virtual void v38();
-  virtual void v39();
-  virtual void v40();
-  virtual void v41();
-  virtual void v42();
-  virtual void v43();
-  virtual void v44();
-  virtual void v45();
-  virtual void v46();
-  virtual void v47();
-  virtual int IsInvalid();
-  virtual void v49();
-  virtual int v50(int);
-  virtual void v51();
-  virtual int IsAvailable(int);
-  virtual void v53();
-  virtual void v54();
-  virtual void v55();
-  virtual int IsFormatted(int);
-};
 /**
  * Tells whether the card in a port is ready for use.
  *
- * Through the card's own virtual slots, with port @p x: not slot 48 (word 97, cPS2MemCard_IsInvalid), not slot 50 (word
- * 101, func_002C67A8__FPv, which always returns 0), slot 56 (word 113, cPS2MemCard_IsFormatted) and slot 52 (word 105,
- * cPS2MemCard_IsAvailable). The first call is declared without the port; it is still in its register. It is word 109
- * (slot 54) of cPS2MemCard_vtbl; the profile and options screens call it through the vtable before using a card.
+ * Through the card's own cMemCard virtuals, with port @p x: not IsInvalid (slot 48, word 97, cPS2MemCard_IsInvalid), not
+ * IsDamaged (slot 50, word 101, func_002C67A8__FPv, which always returns 0), IsFormatted1 (slot 56, word 113,
+ * cPS2MemCard_IsFormatted) and IsAvailable (slot 52, word 105, cPS2MemCard_IsAvailable). It is word 109 (slot 54) of
+ * cPS2MemCard_vtbl, cMemCard::IsActionable; the profile and options screens call it before using a card.
  *
  * @param pS2MemCard  the memory card
  * @param x  the port (0 or 1)
  * @return 1 when every test passes, else 0
  */
-extern "C" int func_002D3840(cPS2MemCard* pS2MemCard, int x) {
+extern "C" int cPS2MemCard_IsActionable(cPS2MemCard* pS2MemCard, int x) {
+    cMemCard* card = (cMemCard*)pS2MemCard;
     int ok = 0;
-    if (!((Obj_3840*)pS2MemCard)->IsInvalid() && !((Obj_3840*)pS2MemCard)->v50(x) && ((Obj_3840*)pS2MemCard)->IsFormatted(x)) {
-        ok = ((Obj_3840*)pS2MemCard)->IsAvailable(x) != 0;
+    if (!card->IsInvalid(x) && !card->IsDamaged(x) && card->IsFormatted1(x)) {
+        ok = card->IsAvailable(x) != 0;
     }
     return ok;
 }
@@ -533,7 +476,7 @@ extern "C" void cPS2MemCard_CardChanged1(cPS2MemCard* pS2MemCard) {
 INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetStatus1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cPS2MemCard_GetStatus_3950(void*, int, int) __asm__("cPS2MemCard_GetStatus");
+extern "C" void cPS2MemCard_GetStatus_3950(void*, int, unsigned short*) __asm__("cPS2MemCard_GetStatus");
 /**
  * Writes the status line of the card in the current port: calls cPS2MemCard_GetStatus with mDevice and @p outText.
  *
@@ -542,7 +485,7 @@ extern "C" void cPS2MemCard_GetStatus_3950(void*, int, int) __asm__("cPS2MemCard
  * @param pS2MemCard  the memory card
  * @param outText  the 16-bit text buffer
  */
-extern "C" void cPS2MemCard_GetStatus1(cPS2MemCard* pS2MemCard, int outText) {
+extern "C" void cPS2MemCard_GetStatus1(cPS2MemCard* pS2MemCard, unsigned short* outText) {
     cPS2MemCard_GetStatus_3950(pS2MemCard, (pS2MemCard->mDevice), outText);
 }
 #endif

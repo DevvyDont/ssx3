@@ -23,6 +23,7 @@
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "util/bxmemcard.h"
 
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onCreateScreen);
@@ -2953,69 +2954,13 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(cFEStateOptionsDevice
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onWidgetMenu);
 #ifdef SKIP_ASM
-struct cList0018DDD0 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual int v54(int a);
-};
 extern "C" void* cSSXApp_getMCManager(void* app);
 
 /**
  * Answers the device select menu's events: refuses accepting on an unusable memory card.
  *
  * Events 6 and 8 give 0x100 when the selected device (the card manager's mSelectedDevice) fails the memory card's
- * slot-54 check (mpMemCard vtable, func_002D3840 for a cPS2MemCard); event 9 always gives 0x100; everything else gives
+ * slot-54 check (mpMemCard vtable, cPS2MemCard_IsActionable for a cPS2MemCard); event 9 always gives 0x100; everything else gives
  * 0x101. The extra event-8 test on a save screen (+0x22C) returns 0x101 early for a usable card, the same result as
  * falling through. Fills slot +0xA4 (onWidgetMenu) of cFEStateOptionsDeviceSelect_vtbl.
  *
@@ -3028,11 +2973,11 @@ extern "C" int cFEStateOptionsDeviceSelect_onWidgetMenu(cFEStateOptionsDeviceSel
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
     case 8:
-        if (self->mIsSaveScreen != 0 && ((cList0018DDD0*)app->mpMemCard)->v54(app->mSelectedDevice) != 0) {
+        if (self->mIsSaveScreen != 0 && app->mpMemCard->IsActionable(app->mSelectedDevice) != 0) {
             return 257;
         }
     case 6:
-        if (((cList0018DDD0*)app->mpMemCard)->v54(app->mSelectedDevice) == 0) {
+        if (app->mpMemCard->IsActionable(app->mSelectedDevice) == 0) {
             return 0x100;
         }
         break;
@@ -3059,77 +3004,6 @@ struct sVE_18DEA0i {
 };
 
 
-class cDev_18DEA0 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual int v54(int a);
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual int HasFileName(int a);
-};
-
 /**
  * Handles the device select screen's widget events: accepting a save slot, backing out and the event-7 action.
  *
@@ -3145,7 +3019,7 @@ public:
  * (cMCOverlayManager_SetState through its mVtbl, state 0) when state is 0, 1 or 2, and sets state 6.
  *
  * Event 7: on a save screen, not busy and not in state 6, with the selected device passing the card's slot-54 check
- * (func_002D3840), takes the widget's slot as for event 5; in state 1 with a file in that slot it sets busy and state
+ * (cPS2MemCard_IsActionable), takes the widget's slot as for event 5; in state 1 with a file in that slot it sets busy and state
  * 4, cMCOverlayManager_SetAction(0) and the manager state 0x18.
  *
  * @param widget  the widget that sent the event (its +0x18 word is the slot index)
@@ -3176,14 +3050,14 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             self->mState = st;
             ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
         } else if (self->mType == 1) {
-            if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
+            if (app->mpMemCard->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
                 ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44]));
             } else {
                 ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
             }
         } else {
-            if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
+            if (app->mpMemCard->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 2);
                 ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44]));
             } else {
@@ -3215,7 +3089,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
         if (self->mIsSaveScreen == 0)
             return;
         cMCOverlayManager* mcManager = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (((cDev_18DEA0*)mcManager->mpMemCard)->v54(mcManager->mSelectedDevice) == 0)
+        if (mcManager->mpMemCard->IsActionable(mcManager->mSelectedDevice) == 0)
             return;
         int pickedSlot = widget->mMiscData;
         self->mSlot = pickedSlot;
@@ -3223,7 +3097,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
         int currentState = self->mState;
         if (currentState != 1)
             return;
-        if (((cDev_18DEA0*)mcManager->mpMemCard)->HasFileName(self->mSlot)) {
+        if (mcManager->mpMemCard->HasFileName(self->mSlot)) {
             self->mIsProcessing = currentState;
             self->mState = 4;
             cMCOverlayManager_SetAction(mcManager, 0);

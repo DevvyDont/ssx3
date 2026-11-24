@@ -23,6 +23,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "ui/uitext.h"
+#include "util/bxmemcard.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onCreateScreen);
@@ -2520,77 +2521,6 @@ extern "C" void cOVState_SAVEREPLAY_updateDone(cOVState_SAVEREPLAY* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_displayStatus);
 #ifdef SKIP_ASM
-class cMCSub_DF40 {
-public:
-    virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05();
-    virtual int v06();
-    virtual int v07();
-    virtual int v08();
-    virtual int v09();
-    virtual int v10();
-    virtual int v11();
-    virtual int v12();
-    virtual int v13();
-    virtual void GetTitleString(int, void*);
-    virtual int v15();
-    virtual int v16();
-    virtual int v17();
-    virtual int v18();
-    virtual int v19();
-    virtual int v20();
-    virtual int v21();
-    virtual int v22();
-    virtual int v23();
-    virtual int v24();
-    virtual int v25();
-    virtual int v26();
-    virtual int v27();
-    virtual int v28();
-    virtual int v29();
-    virtual int v30();
-    virtual int v31();
-    virtual int v32();
-    virtual int v33();
-    virtual int v34();
-    virtual int v35();
-    virtual int v36();
-    virtual int v37();
-    virtual int v38();
-    virtual int v39();
-    virtual int v40();
-    virtual int v41();
-    virtual int v42();
-    virtual int v43();
-    virtual int v44();
-    virtual int v45();
-    virtual int v46();
-    virtual int v47();
-    virtual int v48();
-    virtual int v49();
-    virtual int v50();
-    virtual int v51();
-    virtual int v52();
-    virtual int IsAvailable1();
-    virtual int v54(int);
-    virtual int IsFormatted1();
-    virtual int v56();
-    virtual int v57();
-    virtual int v58();
-    virtual int v59();
-    virtual int v60();
-    virtual int v61();
-    virtual int v62();
-    virtual int v63();
-    virtual void GetStatus1(void*);
-    virtual int v65();
-    virtual int IsFileSlotDisabled(int);
-    virtual int HasFileName(int);
-};
-
 class cState_DF40 {
 public:
     int pad[2];
@@ -2726,7 +2656,7 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (((cState_DF40*)self)->displayFileOK()) {
-        if (!((cMCSub_DF40*)mp->mpMemCard)->IsAvailable1()) {
+        if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
             ((cState_DF40*)self)->triggerDisplayState(3);
@@ -2738,7 +2668,7 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
         cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
         cUIText_setUnicodeStringWrap(getObj_DF40(((cState_DF40*)self), str_Memory_card_info), buf);
         cUIObj_DF40* widget = getObj_DF40(((cState_DF40*)self), str_1percentage_b);
-        ((cMCSub_DF40*)mp->mpMemCard)->GetStatus1(buf);
+        mp->mpMemCard->GetStatus(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
         char* localeObj = (char*)SSXApp->FELocale;
@@ -2748,10 +2678,10 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
             widget = getObj_DF40(((cState_DF40*)self), name);
-            ((cMCSub_DF40*)mp->mpMemCard)->GetTitleString(i - 1, (char*)&self->mTitle);
+            mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)&self->mTitle);
             cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
-            if (!((cMCSub_DF40*)mp->mpMemCard)->HasFileName(i - 1) && !((cMCSub_DF40*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)
-                && ((cMCSub_DF40*)mp->mpMemCard)->IsFormatted1()) {
+            if (!mp->mpMemCard->HasFileName(i - 1) && !mp->mpMemCard->IsFileSlotDisabled(i - 1)
+                && mp->mpMemCard->IsFormatted()) {
                 if (sel == 0) {
                     sel = 1;
                     widget->setUseStaticColour(0);
@@ -2760,8 +2690,8 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
                     widget->setUseStaticColour(1);
                     widget->setStatic(1);
                 }
-            } else if (((cMCSub_DF40*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
-                if (((cMCSub_DF40*)mp->mpMemCard)->IsFileSlotDisabled(i - 1)) {
+            } else if (mp->mpMemCard->IsActionable(mp->mSelectedDevice)) {
+                if (mp->mpMemCard->IsFileSlotDisabled(i - 1)) {
                     widget->setStatic(1);
                     widget->setUseStaticColour(1);
                 } else {
@@ -2923,77 +2853,6 @@ void cReplay_purgeSave(void* self);
 // asm label).
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
 
-class cMovieSub434_1FE6E8 {
-public:
-    virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05();
-    virtual int v06();
-    virtual int v07();
-    virtual int v08();
-    virtual int v09();
-    virtual int v10();
-    virtual int v11();
-    virtual int v12();
-    virtual int v13();
-    virtual int v14();
-    virtual int v15();
-    virtual int v16();
-    virtual int v17();
-    virtual int v18();
-    virtual int v19();
-    virtual int v20();
-    virtual int v21();
-    virtual int v22();
-    virtual int v23();
-    virtual int v24();
-    virtual int v25();
-    virtual int v26();
-    virtual int v27();
-    virtual int v28();
-    virtual int v29();
-    virtual int v30();
-    virtual int v31();
-    virtual int v32();
-    virtual int v33();
-    virtual int v34();
-    virtual int v35();
-    virtual int v36();
-    virtual int v37();
-    virtual int v38();
-    virtual int v39();
-    virtual int v40();
-    virtual int v41();
-    virtual int v42();
-    virtual int v43();
-    virtual int v44();
-    virtual int v45();
-    virtual int v46();
-    virtual int v47();
-    virtual int v48();
-    virtual int v49();
-    virtual int v50();
-    virtual int v51();
-    virtual int v52();
-    virtual int v53();
-    virtual int v54(int);
-    virtual int v55();
-    virtual int v56();
-    virtual int v57();
-    virtual int v58();
-    virtual int v59();
-    virtual int v60();
-    virtual int v61();
-    virtual int v62();
-    virtual int v63();
-    virtual int v64();
-    virtual int v65();
-    virtual int v66();
-    virtual int HasFileName(int);
-};
-
 class cMoviePlayer_1FE6E8 {
 public:
     char pad[0x748];
@@ -3067,7 +2926,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, voi
         if (self->mState == 6)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (!((cMovieSub434_1FE6E8*)mp->mpMemCard)->v54(mp->mSelectedDevice))
+        if (!mp->mpMemCard->IsActionable(mp->mSelectedDevice))
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
         self->mSlot = fileSlot;
@@ -3075,7 +2934,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, voi
         int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!((cMovieSub434_1FE6E8*)mp->mpMemCard)->HasFileName(self->mSlot))
+        if (!mp->mpMemCard->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
         self->mState = 4;
@@ -3268,77 +3127,6 @@ extern "C" void cOVState_SAVEOPTIONS_updateDone(cOVState_SAVEOPTIONS* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_displayStatus);
 #ifdef SKIP_ASM
-class cMCSub_ECA0 {
-public:
-    virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05();
-    virtual int v06();
-    virtual int v07();
-    virtual int v08();
-    virtual int v09();
-    virtual int v10();
-    virtual int v11();
-    virtual int v12();
-    virtual int v13();
-    virtual void GetTitleString(int, void*);
-    virtual int v15();
-    virtual int v16();
-    virtual int v17();
-    virtual int v18();
-    virtual int v19();
-    virtual int v20();
-    virtual int v21();
-    virtual int v22();
-    virtual int v23();
-    virtual int v24();
-    virtual int v25();
-    virtual int v26();
-    virtual int v27();
-    virtual int v28();
-    virtual int v29();
-    virtual int v30();
-    virtual int v31();
-    virtual int v32();
-    virtual int v33();
-    virtual int v34();
-    virtual int v35();
-    virtual int v36();
-    virtual int v37();
-    virtual int v38();
-    virtual int v39();
-    virtual int v40();
-    virtual int v41();
-    virtual int v42();
-    virtual int v43();
-    virtual int v44();
-    virtual int v45();
-    virtual int v46();
-    virtual int v47();
-    virtual int v48();
-    virtual int v49();
-    virtual int v50();
-    virtual int v51();
-    virtual int v52();
-    virtual int IsAvailable1();
-    virtual int v54(int);
-    virtual int IsFormatted1();
-    virtual int v56();
-    virtual int v57();
-    virtual int v58();
-    virtual int v59();
-    virtual int v60();
-    virtual int v61();
-    virtual int v62();
-    virtual int v63();
-    virtual void GetStatus1(void*);
-    virtual int v65();
-    virtual int IsFileSlotDisabled(int);
-    virtual int HasFileName(int);
-};
-
 class cState_ECA0 {
 public:
     int pad[2];
@@ -3469,7 +3257,7 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (((cState_ECA0*)self)->displayFileOK()) {
-        if (!((cMCSub_ECA0*)mp->mpMemCard)->IsAvailable1()) {
+        if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
             ((cState_ECA0*)self)->triggerDisplayState(3);
@@ -3480,7 +3268,7 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
         cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
         cUIText_setUnicodeStringWrap(getObj_ECA0(((cState_ECA0*)self), str_Memory_card_info), buf);
         cUIObj_ECA0* widget = getObj_ECA0(((cState_ECA0*)self), str_1percentage_b);
-        ((cMCSub_ECA0*)mp->mpMemCard)->GetStatus1(buf);
+        mp->mpMemCard->GetStatus(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
         char* localeObj = (char*)SSXApp->FELocale;
@@ -3489,14 +3277,14 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         sprintf(name, str_pct_dmemory_card_b, 1);
         widget = getObj_ECA0(((cState_ECA0*)self), name);
-        ((cMCSub_ECA0*)mp->mpMemCard)->GetTitleString(0, (char*)&self->mTitle);
+        mp->mpMemCard->GetTitleString(0, (unsigned short*)&self->mTitle);
         cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
-        if (!((cMCSub_ECA0*)mp->mpMemCard)->HasFileName(0) && !((cMCSub_ECA0*)mp->mpMemCard)->IsFileSlotDisabled(0)
-            && ((cMCSub_ECA0*)mp->mpMemCard)->IsFormatted1()) {
+        if (!mp->mpMemCard->HasFileName(0) && !mp->mpMemCard->IsFileSlotDisabled(0)
+            && mp->mpMemCard->IsFormatted()) {
             widget->setUseStaticColour(0);
             widget->setStatic(0);
-        } else if (((cMCSub_ECA0*)mp->mpMemCard)->v54(mp->mSelectedDevice)) {
-            if (((cMCSub_ECA0*)mp->mpMemCard)->IsFileSlotDisabled(0)) {
+        } else if (mp->mpMemCard->IsActionable(mp->mSelectedDevice)) {
+            if (mp->mpMemCard->IsFileSlotDisabled(0)) {
                 widget->setStatic(1);
                 widget->setUseStaticColour(1);
             } else {
@@ -3654,77 +3442,6 @@ extern "C" void cMCOverlayManager_writeSetFileType(void* self, int a, int b);
 // asm label).
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
 
-class cMovieSub434_1FF3B0 {
-public:
-    virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05();
-    virtual int v06();
-    virtual int v07();
-    virtual int v08();
-    virtual int v09();
-    virtual int v10();
-    virtual int v11();
-    virtual int v12();
-    virtual int v13();
-    virtual int v14();
-    virtual int v15();
-    virtual int v16();
-    virtual int v17();
-    virtual int v18();
-    virtual int v19();
-    virtual int v20();
-    virtual int v21();
-    virtual int v22();
-    virtual int v23();
-    virtual int v24();
-    virtual int v25();
-    virtual int v26();
-    virtual int v27();
-    virtual int v28();
-    virtual int v29();
-    virtual int v30();
-    virtual int v31();
-    virtual int v32();
-    virtual int v33();
-    virtual int v34();
-    virtual int v35();
-    virtual int v36();
-    virtual int v37();
-    virtual int v38();
-    virtual int v39();
-    virtual int v40();
-    virtual int v41();
-    virtual int v42();
-    virtual int v43();
-    virtual int v44();
-    virtual int v45();
-    virtual int v46();
-    virtual int v47();
-    virtual int v48();
-    virtual int v49();
-    virtual int v50();
-    virtual int v51();
-    virtual int v52();
-    virtual int v53();
-    virtual int v54(int);
-    virtual int v55();
-    virtual int v56();
-    virtual int v57();
-    virtual int v58();
-    virtual int v59();
-    virtual int v60();
-    virtual int v61();
-    virtual int v62();
-    virtual int v63();
-    virtual int v64();
-    virtual int v65();
-    virtual int v66();
-    virtual int HasFileName(int);
-};
-
 class cMoviePlayer_1FF3B0 {
 public:
     char pad[0x748];
@@ -3793,7 +3510,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, v
         if (self->mState == 6)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (!((cMovieSub434_1FF3B0*)mp->mpMemCard)->v54(mp->mSelectedDevice))
+        if (!mp->mpMemCard->IsActionable(mp->mSelectedDevice))
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
         self->mSlot = fileSlot;
@@ -3801,7 +3518,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, v
         int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!((cMovieSub434_1FF3B0*)mp->mpMemCard)->HasFileName(self->mSlot))
+        if (!mp->mpMemCard->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
         self->mState = 4;
