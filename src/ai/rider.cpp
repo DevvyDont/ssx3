@@ -2,6 +2,7 @@
 #include "common.h"
 #include "ai/controlcmd.h"
 #include "world/instancerecord.h"
+#include "world/patchrecord.h"
 #include "be/beinterface.h"
 #include "camera/race/racecontroller.h"
 #include "ui/uithing.h"
@@ -1193,12 +1194,12 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     vt[kRiderVt_vibrationReset].fn(vthis(self, vt[kRiderVt_vibrationReset]));
     if ((unsigned int)self->mViewIndex < 2)
     {
-        char* views = (char*)SSXApp->Game->ViewMan;
+        cGameViewMan* views = SSXApp->Game->ViewMan;
         if (views != 0)
         {
-            char* viewHandler = *(char**)(*(char**)(views + (self->mViewIndex << 2) + 4) + 0xA8);
-            sVEntry<void(void*)>* hv = *(sVEntry<void(void*)>**)(viewHandler + 0x14);
-            hv[4].fn(vthis(viewHandler, hv[4]));
+            cChaseCameraController* viewHandler = views->PlayerCamera[self->mViewIndex]->ChaseController;
+            sVEntry<void(void*)>* hv = (sVEntry<void(void*)>*)viewHandler->mVtbl;
+            hv[4].fn(vthis(viewHandler, hv[4])); // cCameraController_snapCurrent
         }
     }
 }
@@ -2334,10 +2335,8 @@ static inline float deadzone_LP(float v, float k)
     return d;
 }
 
-static inline void LeanAbout_LP(char* vvself, sXf_LP* xf, float a, float b, float ka, float kb)
+static inline void LeanAbout_LP(cRider* self, sXf_LP* xf, float a, float b, float ka, float kb)
 {
-    cRider* vself = (cRider*)vvself;
-    cRider* self = (cRider*)vself;
     cAnimModel* trk = self->mAnimModel;
     sVec4XW* n = (sVec4XW*)((self->mBoneBoardRoot << 4) + (int)trk->localPos);
     sVec4XW d = SubO_LP(sVec4XW(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
@@ -2354,28 +2353,29 @@ static inline void LeanAbout_LP(char* vvself, sXf_LP* xf, float a, float b, floa
     AddTo_LP(xf->pos, u);
 }
 
-extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf) __asm__("cRider_doLeanPoseAdjust");
+extern "C" void cRider_doLeanPoseAdjust_x(cRider* self, sXf_LP* xf) __asm__("cRider_doLeanPoseAdjust");
 /**
  * Tilts the rider's root pose for its lean inputs.
  *
  * Takes slewed channels 2 and 0, each less a dead zone of twice |channel 3|; when either is nonzero the pose
  * is rotated about the board root bone (mBoneBoardRoot) by channel 2 x 30 degrees about X and channel 0 x 45
  * degrees about Y. A nonzero channel 8 adds channel 8 x 45 degrees about X, and the position moves along
- * mGroundSide by channel 0 x 45 x the model's length scale (unk_140.x).
+ * mGroundSide by channel 0 x 45 x the model's length scale (mAnimModel->ScaleVect.x).
  *
  * @param xf  the root pose to adjust, position and rotation quaternion (On Tour: tPose & root)
  */
-extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf)
+extern "C" void cRider_doLeanPoseAdjust_x(cRider* self, sXf_LP* xf)
 {
-    float leanAboutX = deadzone_LP(*(float*)(self + 0x208), *(float*)(self + 0x214));
-    float leanAboutY = deadzone_LP(*(float*)(self + 0x1F0), *(float*)(self + 0x214));
+    float leanAboutX = deadzone_LP(self->mSlewed[2].cur, self->mSlewed[3].cur);
+    float leanAboutY = deadzone_LP(self->mSlewed[0].cur, self->mSlewed[3].cur);
     if (leanAboutY != 0.0f || leanAboutX != 0.0f)
         LeanAbout_LP(self, xf, leanAboutX, leanAboutY, 0.523598849773407f, 0.7853982448577881f);
-    float k = *(float*)(self + 0x250);
+    float k = self->mSlewed[8].cur;
     if (k != 0.0f) {
         QuatMulTo_LP(xf->rot, AxisAngle_LP(t4vect_XAxis, k * 0.7853982448577881f));
     }
-    sVec4XW sideShift = Scale_LP(*(sVec4XW*)(self + 0x3B0), *(float*)(*(char**)(self + 0x780) + 0x140) * (*(float*)(self + 0x1F0) * 45.0f));
+    sVec4XW sideShift = Scale_LP(*(sVec4XW*)&self->mGroundSide,
+                                 self->mAnimModel->ScaleVect.x * (self->mSlewed[0].cur * 45.0f));
     AddTo_LP(xf->pos, sideShift);
 }
 #endif
@@ -5040,18 +5040,12 @@ static inline sV_3640 QuatMul_3640(const sV_3640& a, const sV_3640& b)
     return r;
 }
 
-struct sTrack_3640
+// resets slewed channel i to v (cur and target) with rate z
+static inline void initTrack_3640(cRider* self, int i, float v, float z)
 {
-    float cur;
-    float rate;
-    float target;
-};
-
-static inline void initTrack_3640(cRider* self, int off, float v, float z)
-{
-    *(float*)((char*)self + off + 8) = v;
-    *(float*)((char*)self + off) = v;
-    *(float*)((char*)self + off + 4) = z;
+    self->mSlewed[i].target = v;
+    self->mSlewed[i].cur = v;
+    self->mSlewed[i].rate = z;
 }
 
 
@@ -5133,25 +5127,25 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     *(sV_3640*)&self->mVelocity = t4vect_Zero_3640;
     self->mLastSpeed = zeroF;
     cRiderHandler_resetRiderFX(self->mRiderHandler);
-    initTrack_3640(self, 0x1F0, zeroF, zeroF);
-    initTrack_3640(self, 0x1FC, zeroF, zeroF);
-    initTrack_3640(self, 520, zeroF, zeroF);
-    initTrack_3640(self, 532, zeroF, zeroF);
-    initTrack_3640(self, 544, zeroF, zeroF);
-    initTrack_3640(self, 556, zeroF, zeroF);
-    initTrack_3640(self, 568, zeroF, zeroF);
-    initTrack_3640(self, 580, zeroF, zeroF);
-    initTrack_3640(self, 592, zeroF, zeroF);
-    initTrack_3640(self, 604, one, zeroF);
-    initTrack_3640(self, 616, zeroF, zeroF);
-    initTrack_3640(self, 628, zeroF, zeroF);
-    initTrack_3640(self, 640, zeroF, zeroF);
-    initTrack_3640(self, 652, zeroF, zeroF);
-    initTrack_3640(self, 664, zeroF, zeroF);
-    initTrack_3640(self, 676, zeroF, zeroF);
-    initTrack_3640(self, 688, zeroF, zeroF);
-    initTrack_3640(self, 700, zeroF, zeroF);
-    initTrack_3640(self, 712, zeroF, zeroF);
+    initTrack_3640(self, 0, zeroF, zeroF);
+    initTrack_3640(self, 1, zeroF, zeroF);
+    initTrack_3640(self, 2, zeroF, zeroF);
+    initTrack_3640(self, 3, zeroF, zeroF);
+    initTrack_3640(self, 4, zeroF, zeroF);
+    initTrack_3640(self, 5, zeroF, zeroF);
+    initTrack_3640(self, 6, zeroF, zeroF);
+    initTrack_3640(self, 7, zeroF, zeroF);
+    initTrack_3640(self, 8, zeroF, zeroF);
+    initTrack_3640(self, 9, one, zeroF);
+    initTrack_3640(self, 10, zeroF, zeroF);
+    initTrack_3640(self, 11, zeroF, zeroF);
+    initTrack_3640(self, 12, zeroF, zeroF);
+    initTrack_3640(self, 13, zeroF, zeroF);
+    initTrack_3640(self, 14, zeroF, zeroF);
+    initTrack_3640(self, 15, zeroF, zeroF);
+    initTrack_3640(self, 16, zeroF, zeroF);
+    initTrack_3640(self, 17, zeroF, zeroF);
+    initTrack_3640(self, 18, zeroF, zeroF);
     func_0030E9E0(self->mAnimModel, 5, 0);
     func_0030E9E0(self->mAnimModel, 6, 0);
     func_0030E9E0(self->mAnimModel, 8, 0);
@@ -5766,11 +5760,11 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
 /**
  * Probes the ground under a position during an NIS (in-game cutscene) and sets the rider's ground vectors.
  *
- * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->unk_140.x * mSlewed[0].cur * 45; a line from 100 below
- * to 200 above it (along mGroundNormal) is built with cWorldLine_cWorldLine and intersected with the terrain through
- * mOverlapList (cOverlapList_terrainIntersect1). The speed is the length of the virtual getVelocity, and LastGroundNormal keeps the previous
- * mGroundNormal. A hit object sets mGroundPolyId (object +0x150), PatchUV (the hit's +0x6C / +0x70) and
- * SurfaceFlags (the object's half-word +0xA); otherwise mGroundPolyId becomes -1.
+ * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->ScaleVect.x * mSlewed[0].cur * 45; a line
+ * from 100 below to 200 above it (along mGroundNormal) is built with cWorldLine_cWorldLine and intersected with the
+ * terrain through mOverlapList (cOverlapList_terrainIntersect1). The speed is the length of the virtual getVelocity,
+ * and LastGroundNormal keeps the previous mGroundNormal. A hit patch sets mGroundPolyId (the patch's id at +0x150),
+ * PatchUV (the hit's u / v) and SurfaceFlags (the patch's m_sSurfaceFlags); otherwise mGroundPolyId becomes -1.
  *
  * On a miss (negative distance): unk_B00 = 0, mGroundNormal = the Z axis, GroundVelocity = zero, mSurfaceType and the four
  * audio values 0. On a hit: the first contact (unk_AFC set, unk_B00 clear) is reported to the rider handler
@@ -5801,7 +5795,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
         self->mGroundPolyId = *(int*)(((char*)hit.Patch) + 0x150);
         self->PatchUV.x = hit.u;
         self->PatchUV.y = hit.v;
-        self->SurfaceFlags = *(unsigned short*)(((char*)hit.Patch) + 0xA);
+        self->SurfaceFlags = hit.Patch->m_sSurfaceFlags;
     } else {
         *(unsigned int*)&self->mGroundPolyId = 0xFFFFFFFF;
     }
@@ -6298,8 +6292,8 @@ extern "C" void cRider_doFinishEvent(cRider* self)
     unsigned int k = *(unsigned int*)&self->mViewIndex;
     if (k < 2)
     {
-        char* tbl = (char*)SSXApp->Game->ViewMan;
-        cChaseCameraController_switchCamera_EndRace(*(void**)(*(char**)(tbl + (k << 2) + 4) + 0xA8));
+        cGameViewMan* tbl = SSXApp->Game->ViewMan;
+        cChaseCameraController_switchCamera_EndRace(tbl->PlayerCamera[k]->ChaseController);
     }
     cSSXAudio_OnFinishEvent(cAudioInterface_bxAudio(), self);
     if (self->mDidNotFinish == 1) self->unk_100 = 0;
@@ -6764,68 +6758,70 @@ extern "C" void* cReplay_addCache(void* p);
  * two of them are then replaced by stack copies with adjusted deltas (the g++ 2.95 pattern the PORT note
  * describes), which leaves the rider pointing into this function's stack frame.
  *
- * Then sets the cPlayer vtable (+0xDE8), clears Pad and the two rumble floats, sets mIsHuman and adds a
- * replay cache (cReplay_addCache).
+ * Then sets the cPlayer vtable (mVtbl), clears Pad and the two rumble floats, sets the rider's mIsHuman and adds
+ * a replay cache (ReplayCache = cReplay_addCache).
  *
  * @param inChrg  nonzero when this object is the most derived one and must build the virtual base
  * @return @p self
  */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xE10): vtable copies with delta fixups when not in charge.
-extern "C" void* cPlayer_cPlayer(char* self, int inChrg)
+extern "C" void* cPlayer_cPlayer(cPlayer* self, int inChrg)
 {
     sVt9_125C70 ctorVtbl9;
     sVt22_125C70 ctorVtbl22;
     if (inChrg) {
-        char* vb = self + 0xE10;
-        *(void**)(self + 0xD20) = vb;
-        *(void**)(self + 0xC70) = vb;
-        *(void**)(self + 0xB40) = vb;
-        *(void**)(self + 0xB00) = vb;
-        *(void**)(self + 0xAF0) = vb;
-        *(void**)(self + 0xAD0) = vb;
-        *(void**)(self + 0x9C0) = vb;
-        *(void**)(self + 0x610) = vb;
-        *(void**)(self + 0x520) = vb;
-        *(void**)(self + 0x470) = vb;
-        *(void**)(self + 0x3B0) = vb;
-        *(void**)(self + 0x3A0) = vb;
-        *(void**)(self + 0x398) = vb;
-        *(void**)(self + 0x384) = vb;
-        *(void**)(self + 0x364) = vb;
-        *(void**)(self + 0x358) = vb;
-        *(void**)(self + 0x340) = vb;
-        *(void**)(self + 0x2B8) = vb;
-        *(void**)(self + 0x2A4) = vb;
-        *(void**)(self + 0x288) = vb;
-        *(void**)(self + 0x224) = vb;
-        *(void**)(self + 0x200) = vb;
-        *(void**)(self + 0x1F0) = vb;
-        *(void**)(self + 0x1E4) = vb;
-        *(void**)(self + 0x1C0) = vb;
-        *(void**)(self + 0x1B0) = vb;
-        *(void**)(self + 0x100) = vb;
-        *(void**)(self + 0xA0) = vb;
-        *(void**)(self + 0x70) = vb;
-        *(void**)(self + 0x24) = vb;
-        *(void**)(self + 0x18) = vb;
+        // cRiderHandler's layout (ai/riderhandler.h) names the parts: cPlayer keeps that base as raw bytes
+        cRiderHandler* handler = (cRiderHandler*)self;
+        cRider* vb = &self->Rider;
+        handler->CheatFX.mRider = vb;
+        handler->PunchFX.mRider = vb;
+        handler->DynamicSprayFX.mRider = vb;
+        handler->PlayerIndicatorFX.mRider = vb;
+        handler->AngerFX.mRider = vb;
+        handler->AirStreamerFX.mRider = vb;
+        handler->TrickBoostFX.mRider = vb;
+        handler->SpeedBoostFX.mRider = vb;
+        handler->BoardTrailFX.mRider = vb;
+        handler->BoardSparkFX.mRider = vb;
+        handler->BoardWakeFX.mRider = vb;
+        handler->VoidControl.mRider = vb;
+        handler->UberGrindControl.mRider = vb;
+        handler->HandplantControl.mRider = vb;
+        handler->FinishLineControl.mRider = vb;
+        handler->ResetControl.mRider = vb;
+        handler->WipeoutControl.mRider = vb;
+        handler->RailslideControl.mRider = vb;
+        handler->GateControl.mRider = vb;
+        handler->SpinControl.mRider = vb;
+        handler->NaturalAirControl.mRider = vb;
+        handler->BumpControl.mRider = vb;
+        handler->PrewindControl.mRider = vb;
+        handler->BoardPressControl.mRider = vb;
+        handler->CruiseControl.mRider = vb;
+        handler->HandplantMotion.mRider = vb;
+        handler->RailslideMotion.mRider = vb;
+        handler->StaticMotion.mRider = vb;
+        handler->WipeoutMotion.mRider = vb;
+        handler->AirMotion.mRider = vb;
+        self->mRider = vb;
         cRider_cRider(vb);
     }
     cRiderHandler_cRiderHandler(self, 0);
-    *(void**)(*(char**)(self + 0x18) + 0x6E8) = (void*)&D_00458360;
-    *(void**)(*(char**)(self + 0x18) + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)(self + 0x18) + 0x6C0) = (void*)&D_004583A8;
+    self->mRider->mScriptObjectVtbl = (void*)&D_00458360;
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_004583A8;
     if (inChrg == 0) {
         int vc;
         ctorVtbl9 = D_00458360;
-        *(void**)(*(char**)(self + 0x18) + 0x6E8) = &ctorVtbl9;
+        self->mRider->mScriptObjectVtbl = &ctorVtbl9;
         {
-            char* vbo = *(char**)(self + 0x18) - 0xE10;
-            vc = self - vbo;
+            char* vbo = (char*)self->mRider - 0xE10;
+            vc = (char*)self - vbo;
         }
         ctorVtbl9.e[1].delta = D_00458360.e[1].delta + vc;
         ctorVtbl22 = D_004583A8;
-        *(void**)(*(char**)(self + 0x18) + 0x6C0) = &ctorVtbl22;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&ctorVtbl22;
         ctorVtbl22.e[1].delta = D_004583A8.e[1].delta + vc;
         ctorVtbl22.e[16].delta = D_004583A8.e[16].delta + vc;
         ctorVtbl22.e[17].delta = D_004583A8.e[17].delta + vc;
@@ -6833,12 +6829,12 @@ extern "C" void* cPlayer_cPlayer(char* self, int inChrg)
         ctorVtbl22.e[19].delta = D_004583A8.e[19].delta + vc;
         ctorVtbl22.e[20].delta = D_004583A8.e[20].delta + vc;
     }
-    *(void**)(self + 0xDE8) = cPlayer_vtbl;
-    *(int*)(self + 0xDF4) = 0;
-    *(int*)(self + 0xDFC) = 0;
-    *(int*)(self + 0xE00) = 0;
-    *(int*)(*(char**)(self + 0x18) + 0x874) = 1;
-    *(void**)(self + 0xDF8) = cReplay_addCache(SSXApp->Game->Replay);
+    self->mVtbl = (void**)cPlayer_vtbl;
+    self->Pad = 0;
+    self->mVibrationBump = 0;
+    self->mVibrationRumble = 0;
+    self->mRider->mIsHuman = 1;
+    self->ReplayCache = (cReplayCache*)cReplay_addCache(SSXApp->Game->Replay);
     return self;
 }
 #endif

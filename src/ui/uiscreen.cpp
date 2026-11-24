@@ -113,22 +113,22 @@ extern char str_UIScreenData[];
  *
  * @param data  the screen data (On Tour tUIScreenHeader* pScreenHeader)
  */
-extern "C" void cUIScreen_setData(cUIScreen* self, char* data)
+extern "C" void cUIScreen_setData(cUIScreen* self, tUIScreenHeader* data)
 {
     int size = unpacksizez(data);
     if (size != 0) {
         char* buf = (char*)operator_new_tag(size, str_UIScreenData, 0x100, 0);
         self->mpBuffer = buf;
-        char* old = data;
-        data = buf;
+        tUIScreenHeader* old = data;
+        data = (tUIScreenHeader*)buf;
         unpack(old, data);
         self->mAttrScreen |= 2;
     } else {
         self->mAttrScreen &= ~2;
     }
-    self->mpScreenHeader = (tUIScreenHeader*)data;
-    self->mpKeyframeBlock = (tUIKeyframeBlock*)(data + *(int*)(data + 8));
-    self->mpObjectBlock = (tUIObjectBlock*)(data + *(int*)(data + 4));
+    self->mpScreenHeader = data;
+    self->mpKeyframeBlock = (tUIKeyframeBlock*)((char*)data + data->mFrameBlockOffset);
+    self->mpObjectBlock = (tUIObjectBlock*)((char*)data + data->mObjectBlockOffset);
 }
 #endif
 
@@ -144,25 +144,20 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByIndex);
  * @param frame  the frame number to find (On Tour index)
  * @return the frame header (On Tour tUIFrameHeader), or 0
  */
-extern "C" void* cUIScreen_getFrameByIndex(cUIScreen* self, unsigned short frame)
+extern "C" tUIFrameHeader* cUIScreen_getFrameByIndex(cUIScreen* self, unsigned short frame)
 {
-    int* list = (int*)self->mpKeyframeBlock;
-    tUIFrameHeader* frameHeader = (tUIFrameHeader*)((char*)list + 4);
+    tUIKeyframeBlock* list = self->mpKeyframeBlock;
+    tUIFrameHeader* frameHeader = (tUIFrameHeader*)(list + 1);
     unsigned int i;
-    for (i = 0; i < (unsigned int)*list; i++) {
+    for (i = 0; i < list->mNumFrames; i++) {
         if (frameHeader->mFrameNumber == frame) {
-            return ((char*)frameHeader);
+            return frameHeader;
         }
         frameHeader = (tUIFrameHeader*)(((char*)frameHeader) + (int)frameHeader->mByteSize);
     }
     return 0;
 }
 #endif
-
-
-struct sFrameList {
-    int count; // 0x0
-};
 
 
 //100%
@@ -176,10 +171,10 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
  */
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
-    sFrameList* list = (sFrameList*)self->mpKeyframeBlock;
-    tUIFrameHeader* entry = (tUIFrameHeader*)((char*)list + 4);
+    tUIKeyframeBlock* list = self->mpKeyframeBlock;
+    tUIFrameHeader* entry = (tUIFrameHeader*)(list + 1);
     unsigned int i;
-    for (i = 0; i < (unsigned int)list->count; i++) {
+    for (i = 0; i < list->mNumFrames; i++) {
         if (((int)entry->mHashID) == label) {
             return entry->mFrameNumber;
         }
@@ -198,17 +193,17 @@ void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
 /**
- * Returns the screen's primary animation thread: the first one in mThreads with bit 25 of its word at +0x10
- * set.
+ * Returns the screen's primary animation thread: the first one in mThreads with mIsPrimary (bit 25 of its word
+ * at +0x10) set.
  *
  * @return that thread, or 0 when there is none
  */
-extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self)
+extern "C" cUIThread* cUIScreen_getPrimaryThread(cUIScreen* self)
 {
-    void* n = cList_first(&self->mThreads);
+    cUIThread* n = (cUIThread*)cList_first(&self->mThreads);
     if (n != 0) {
-        for (; !cListNode_isSentinel((cListNode*)n); n = *(void**)((char*)n + 4)) {
-            if ((*(int*)((char*)n + 0x10) >> 25) & 1) {
+        for (; !cListNode_isSentinel((cListNode*)n); n = (cUIThread*)n->mpNext) {
+            if ((*(int*)&n->mStopFrameNumber >> 25) & 1) { // mIsPrimary
                 return n;
             }
         }
@@ -217,7 +212,7 @@ extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self)
 }
 #endif
 
-extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self);
+extern "C" cUIThread* cUIScreen_getPrimaryThread(cUIScreen* self);
 void cUIThread_deleteThread(void* self);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
@@ -249,7 +244,7 @@ struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self);
+extern "C" cUIThread* cUIScreen_getPrimaryThread(cUIScreen* self);
 void cUIThread_deleteThread(void* self);
 extern char str_UIThread[];
 extern void* cUIThread_vtbl[];
@@ -336,14 +331,6 @@ extern void cUIScreen_parseScreenFocusLose_4(void *, void *, void *, void *) __a
 extern void cUIScreen_parseScreenStart_4(void *, void *, void *, void *) __asm__("cUIScreen_parseScreenStart__FPv");
 extern void cUIScreen_parseScreenEnd_4(void *, void *, void *, void *) __asm__("cUIScreen_parseScreenEnd");
 
-
-// The frame's command list (from cUIScreen_getFrameByIndex).
-struct sCmdList_C978 {
-    char pad0[0xA];
-    unsigned short count;     // 0xA
-    tUIKCPBase first;          // 0xC
-};
-
 /**
  * Advances a thread one frame (toward its stop frame, if any) and runs the commands of the frame it was on.
  *
@@ -356,7 +343,7 @@ struct sCmdList_C978 {
 extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
 {
     cUIThread_C870 *uiThread = (cUIThread_C870 *)thread;
-    sCmdList_C978 *list;
+    tUIFrameHeader *list;
     tUIKCPBase *cmd;
     unsigned int i;
     unsigned short CurrentFrame = uiThread->getCurrentFrameNumber();
@@ -374,11 +361,11 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
     } else {
         uiThread->mCurrentFrameNumber = uiThread->getCurrentFrameNumber() + uiThread->getFrameIncrement();
     }
-    list = (sCmdList_C978 *)cUIScreen_getFrameByIndex(self, CurrentFrame);
-    cmd = &list->first;
+    list = cUIScreen_getFrameByIndex(self, CurrentFrame);
+    cmd = (tUIKCPBase *)(list + 1); // the frame's packets follow its header
     if (list != 0) {
         i = 0;
-        if (list->count != 0) {
+        if (list->mNumKCP != 0) {
             do {
                 switch (cmd->mTag) {
                 case 0x10:
@@ -420,7 +407,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, cUIThread* thread)
                 }
                 i++;
                 cmd = (tUIKCPBase *)((char *)cmd + cmd->mPacketSize);
-            } while (i < list->count);
+            } while (i < list->mNumKCP);
         }
     }
 }
@@ -451,16 +438,16 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeJump);
  * Runs a keyframe jump command: moves the thread to the frame with the command's label.
  *
  * @param pFrame  the frame's command list (unused)
- * @param pKCP  the jump command; its label hash is at +4
+ * @param pKCP  the jump command; its label hash is mFrameHashName
  * @param pThread  the thread to move
  */
-extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
+extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, tUIKCPKeyframeJump* pKCP, cUIThread* pThread)
 {
-    tUIFrameHeader* entry = (tUIFrameHeader*)((char*)self->mpKeyframeBlock + 4);
+    tUIFrameHeader* entry = (tUIFrameHeader*)(self->mpKeyframeBlock + 1);
     unsigned int i;
-    for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (((int)entry->mHashID) == *(int*)((char*)pKCP + 4)) {
-            *(unsigned short*)((char*)pThread + 0xC) = entry->mFrameNumber;
+    for (i = 0; i < self->mpKeyframeBlock->mNumFrames; i++) {
+        if (entry->mHashID == pKCP->mFrameHashName) {
+            pThread->mCurrentFrameNumber = entry->mFrameNumber;
             return;
         }
         entry = (tUIFrameHeader*)((char*)entry + ((int)entry->mByteSize));
@@ -475,14 +462,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeSpawn);
  * Runs a keyframe spawn command: starts an extra thread at the frame with the command's label.
  *
  * @param pFrame  the frame's command list (unused; On Tour pFrame)
- * @param pKCP  the spawn command; its label hash is at +4 (On Tour pKCP)
+ * @param pKCP  the spawn command; its label hash is mFrameHashName (On Tour pKCP)
  */
-extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, void* pKCP)
+extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, tUIKCPKeyframeJump* pKCP)
 {
-    tUIFrameHeader* entry = (tUIFrameHeader*)((char*)self->mpKeyframeBlock + 4);
+    tUIFrameHeader* entry = (tUIFrameHeader*)(self->mpKeyframeBlock + 1);
     unsigned int i;
-    for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (((int)entry->mHashID) == *(int*)((char*)pKCP + 4)) {
+    for (i = 0; i < self->mpKeyframeBlock->mNumFrames; i++) {
+        if (entry->mHashID == pKCP->mFrameHashName) {
             cUIScreen_playFrame(self, entry->mFrameNumber, 1);
             return;
         }
@@ -729,7 +716,7 @@ struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, tUIBaseObject* rec);
+extern "C" cUIThing* cUIScreen_createObjectByStruct(cUIScreen* self, tUIBaseObject* rec);
 extern "C" void* MEM_fill(void* dst, int c, int n);
 extern char str_UIScreenObjs[];
 
@@ -742,23 +729,24 @@ extern char str_UIScreenObjs[];
  */
 extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
 {
-    char* data = (char*)self->mpObjectBlock;
-    char* rec = data + 4;
-    if (*(unsigned int*)data != 0) {
-        self->mppObjectList = (cUIThing**)((void**)operator_new_tag(*(unsigned int*)data * 4, str_UIScreenObjs, 0x20000000, 0));
-        MEM_fill((void**)self->mppObjectList, 0, *(unsigned int*)self->mpObjectBlock * 4);
+    tUIObjectBlock* data = self->mpObjectBlock;
+    tUIBaseObject* rec = (tUIBaseObject*)(data + 1);
+    if (data->mNumObjects != 0) {
+        self->mppObjectList =
+            (cUIThing**)operator_new_tag(data->mNumObjects * 4, str_UIScreenObjs, 0x20000000, 0);
+        MEM_fill(self->mppObjectList, 0, self->mpObjectBlock->mNumObjects * 4);
     }
-    void** out = (void**)self->mppObjectList;
-    for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
-        char* obj = cUIScreen_createObjectByStruct(self, (tUIBaseObject*)rec);
+    cUIThing** out = self->mppObjectList;
+    for (unsigned int i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
+        cUIThing* obj = cUIScreen_createObjectByStruct(self, rec);
         if (obj != 0) {
             *out++ = obj;
-            *(int*)(obj + 0x38) = *(int*)(rec + 4);
+            obj->mHashName = rec->mHashID;
             cList_addToEnd(&self->mRootGroup.mList, (cListNode*)obj);
         }
-        rec += *(unsigned short*)(rec + 2);
+        rec = (tUIBaseObject*)((char*)rec + rec->mByteSize);
     }
-    for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
+    for (unsigned int i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
         void* uiObj = self->mppObjectList[i];
         if (uiObj != 0) {
             cUIState* state = self->mpState;
@@ -775,20 +763,20 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByHashName);
 /**
  * Creates the object of a UI screen whose record has hash name @p key.
  *
- * Walks the screen's object records (count at the start of the block at +0x38, each record sized by its +0x2 and hashed
- * at +0x4); the match is built with cUIScreen_createObjectByStruct and gets @p key at +0x38.
+ * Walks the screen's object records (mpObjectBlock's mNumObjects of them, each mByteSize long, matched by mHashID);
+ * the match is built with cUIScreen_createObjectByStruct and gets @p key as its mHashName.
  *
  * @param key  the object hash name
  * @return the new object, or 0 when no record matches
  */
 extern "C" void* cUIScreen_createObjectByHashName(cUIScreen* self, int key)
 {
-    tUIBaseObject* record = (tUIBaseObject*)((char*)self->mpObjectBlock + 4);
+    tUIBaseObject* record = (tUIBaseObject*)(self->mpObjectBlock + 1);
     unsigned int i;
-    for (i = 0; i < *((unsigned int*)self->mpObjectBlock); i++) {
+    for (i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
         if (((int)record->mHashID) == key) {
-            char* obj = cUIScreen_createObjectByStruct((cUIScreen*)self, (tUIBaseObject*)record);
-            *(int*)(obj + 0x38) = key;
+            cUIThing* obj = cUIScreen_createObjectByStruct(self, record);
+            obj->mHashName = key;
             return obj;
         }
         record = (tUIBaseObject*)((char*)record + record->mByteSize);
@@ -831,243 +819,235 @@ extern void* cUIMenu_vtbl[];
 extern void* cUIGroup_vtbl[];
 extern void* cUIIcon_vtbl[];
 
-struct sUIVtRec_D078 { short delta; short index; void (*fn)(void*, char*); };
-struct sUIVtDel_D078 { short delta; short index; void (*fn)(void*, int); };
-
-// UI objects keep their vtable at +0x8; slot 10 builds the object from its screen record
-static inline void initFromRec_D078(char* o, char* rec)
+static inline void* alloc_D078(unsigned int size, const char* tag)
 {
-    sUIVtRec_D078* vt = *(sUIVtRec_D078**)(o + 8);
-    vt[10].fn(vthis(o, vt[10]), rec);
-}
-
-// slot 1: deleting destructor
-static inline void deleteObj_D078(char* o)
-{
-    sUIVtDel_D078* vt = *(sUIVtDel_D078**)(o + 8);
-    vt[1].fn(vthis(o, vt[1]), 3);
-}
-
-static inline char* alloc_D078(unsigned int size, const char* tag)
-{
-    return (char*)operator new(size, tag, 0x20000000, 0);
+    return operator new(size, tag, 0x20000000, 0);
 }
 
 /**
  * Creates the widget a screen-data record describes, by record type, and adopts the child widgets it names.
  *
  * Types: 0x10 group, 0x11 icon, 0x12 list box, 0x13 menu, 0x15 pair, 0x16 slider, 0x17 text, 0x18 vector,
- * 0x19
- * progress, 0x20 text scroll, 0x21 scroll.
+ * 0x19 progress, 0x20 text scroll, 0x21 scroll. Each kind is built inline or by its constructor and reads the record
+ * in its virtual setUIData; the container kinds also adopt the children their records name (tUIGroup, tUIMenu,
+ * tUIPair, tUIProgress, tUIScrollBar, tUISlider, tUITextScroll in ui/uidata.h).
  *
  * @param rec  the object record (On Tour tUIBaseObject* pObject)
  * @return the new widget, or 0 for an unknown type
  */
-extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, tUIBaseObject* rec)
+extern "C" cUIThing* cUIScreen_createObjectByStruct(cUIScreen* self, tUIBaseObject* rec)
 {
-    switch (*(unsigned short*)rec) {
+    switch (rec->mTag) {
     case 17: {
-        char* created = alloc_D078(136, str_UIIcon);
+        cUIIcon* created = (cUIIcon*)alloc_D078(sizeof(cUIIcon), str_UIIcon);
         cUIThing_cUIThing(created, self, 0);
-        *(void***)(created + 8) = cUIIcon_vtbl;
-        func_0021CCC8(created + 0x74);
-        *(int*)(created + 0x78) = -1;
-        *(int*)(created + 0x7C) = 0;
-        initFromRec_D078(created, ((char*)rec));
+        VPTR_OF(cListNode, created) = cUIIcon_vtbl;
+        func_0021CCC8(&created->mAttrIcon);
+        created->mTextureID = -1;
+        created->mpTextureElem = 0;
+        created->setUIData(rec);
         return created;
     }
     case 0x10: {
-        char* created = alloc_D078(144, str_cUIGroup);
+        cUIGroup* created = (cUIGroup*)alloc_D078(sizeof(cUIGroup), str_cUIGroup);
         cUIThing_cUIThing(created, self, 0);
-        *(void***)(created + 8) = cUIGroup_vtbl;
-        cList_cList(created + 0x74);
-        int* hashes = (int*)(((char*)rec) + 0x24);
-        for (unsigned int i = 0; i < *(unsigned int*)(((char*)rec) + 0x20); i++, hashes++) {
-            cUIThing* child = (cUIThing*)cUIScreen_getObjectByHashName(self, *hashes);
-            if (((char*)child) != 0) {
+        VPTR_OF(cListNode, created) = cUIGroup_vtbl;
+        cList_cList(&created->mList);
+        tUIGroup* data = (tUIGroup*)rec;
+        tUIPlaceWidget* pPBW = data->mWidgets;
+        for (unsigned int i = 0; i < data->mNumWidgets; i++, pPBW++) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, pPBW->mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                cList_addToEnd((cList*)(created + 0x74), (cListNode*)child);
+                child->mpParent = created;
+                cList_addToEnd(&created->mList, (cListNode*)child);
             }
         }
-        initFromRec_D078(created, ((char*)rec));
+        created->setUIData(rec);
         return created;
     }
     case 18: {
-        char* created = (char*)cUIListBox_cUIListBox(alloc_D078(796, str_UIListBox), self, 0);
-        initFromRec_D078(created, ((char*)rec));
+        cUIListBox* created =
+            (cUIListBox*)cUIListBox_cUIListBox(alloc_D078(sizeof(cUIListBox), str_UIListBox), self, 0);
+        created->setUIData(rec);
         return created;
     }
     case 19: {
-        char* created = alloc_D078(168, str_UIMenu);
+        cUIMenu* created = (cUIMenu*)alloc_D078(sizeof(cUIMenu), str_UIMenu);
         cUIThing_cUIThing(created, self, 0);
-        *(void***)(created + 8) = cUIGroup_vtbl;
-        cList_cList(created + 0x74);
-        *(void***)(created + 8) = cUIMenu_vtbl;
-        tAttrMenu_tAttrMenu(created + 0x90);
-        *(unsigned char*)(created + 0xA4) = 0xFF;
-        *(char*)(created + 0x95) = 0;
-        *(char*)(created + 0x96) = 0;
-        *(char*)(created + 0x97) = 0;
-        *(char*)(created + 0x98) = 0;
-        *(int*)(created + 0x9C) = 0;
-        *(int*)(created + 0xA0) = 0;
-        int* hashes = (int*)(((char*)rec) + 0x24);
-        for (unsigned int i = 0; i < *(unsigned char*)(((char*)rec) + 0x20); i++, hashes++) {
-            cUIThing* child = (cUIThing*)cUIScreen_getObjectByHashName(self, *hashes);
-            if (((char*)child) != 0) {
+        VPTR_OF(cListNode, created) = cUIGroup_vtbl;
+        cList_cList(&created->mList);
+        VPTR_OF(cListNode, created) = cUIMenu_vtbl;
+        tAttrMenu_tAttrMenu(&created->mAttrMenu);
+        created->mStoredIndex = 0xFF;
+        created->mScrollItemCurrent = 0;
+        created->mScrollItemNum = 0;
+        created->mScrollItemNumVisible = 0;
+        created->mScrollItemOffset = 0;
+        created->mpScrollBar = 0;
+        created->mpSelected = 0;
+        tUIMenu* data = (tUIMenu*)rec;
+        tUIPlaceWidget* pPBW = data->mWidgets;
+        for (unsigned int i = 0; i < data->mNumWidgets; i++, pPBW++) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, pPBW->mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                cList_addToEnd((cList*)(created + 0x74), (cListNode*)child);
+                child->mpParent = created;
+                cList_addToEnd(&created->mList, (cListNode*)child);
             }
         }
-        initFromRec_D078(created, ((char*)rec));
+        created->setUIData(rec);
         return created;
     }
     case 21: {
-        char* created = alloc_D078(0x80, str_UIPair);
-        int* hashes = (int*)(((char*)rec) + 0x20);
+        cUIPair* created = (cUIPair*)alloc_D078(sizeof(cUIPair), str_UIPair);
+        tUIPlaceWidget* pPBW = ((tUIPair*)rec)->mWidgets;
         cUIThing_cUIThing(created, self, 0);
-        *(void***)(created + 8) = cUIPair_vtbl;
-        tAttrPair_tAttrPair(created + 0x74);
-        *(int*)(created + 0x14) |= 2;
-        *(int*)(created + 0x78) = 0;
-        *(int*)(created + 0x7C) = 0;
-        initFromRec_D078(created, ((char*)rec));
-        cUIThing* child = (cUIThing*)cUIScreen_getObjectByHashName(self, hashes[0]);
-        if (((char*)child) != 0) {
+        VPTR_OF(cListNode, created) = cUIPair_vtbl;
+        tAttrPair_tAttrPair(&created->mAttrPair);
+        created->mAttr |= 2;
+        created->mpEntry = 0;
+        created->mpWidget = 0;
+        created->setUIData(rec);
+        cUIThing* child = cUIScreen_getObjectByHashName(self, pPBW[0].mHashID);
+        if (child != 0) {
             cListNode_removeFromList(child);
-            child->mpParent = (cUIThing*)created;
-            char* old = *(char**)(created + 0x78);
+            child->mpParent = created;
+            cUIThing* old = created->mpEntry;
             if (old != 0)
-                deleteObj_D078(old);
-            *(char**)(created + 0x78) = ((char*)child);
+                delete old;
+            created->mpEntry = child;
         }
-        child = (cUIThing*)cUIScreen_getObjectByHashName(self, hashes[1]);
-        if (((char*)child) != 0) {
+        child = cUIScreen_getObjectByHashName(self, pPBW[1].mHashID);
+        if (child != 0) {
             child->mAttr &= ~1;
             cListNode_removeFromList(child);
-            child->mpParent = (cUIThing*)created;
-            char* old = *(char**)(created + 0x7C);
+            child->mpParent = created;
+            cUIThing* old = created->mpWidget;
             if (old != 0)
-                deleteObj_D078(old);
-            *(char**)(created + 0x7C) = ((char*)child);
+                delete old;
+            created->mpWidget = child;
         }
         return created;
     }
     case 25: {
-        char* created = alloc_D078(136, str_cUIProgress);
+        cUIProgress* created = (cUIProgress*)alloc_D078(sizeof(cUIProgress), str_cUIProgress);
+        tUIProgress* data = (tUIProgress*)rec;
         cUIThing_cUIThing(created, self, 0);
-        *(int*)(created + 0x74) = 0;
-        *(int*)(created + 0x78) = 0;
-        *(int*)(created + 0x7C) = 0;
-        *(int*)(created + 0x80) = 0;
-        *(int*)(created + 0x84) = 0;
-        *(void***)(created + 8) = cUIProgress_vtbl;
-        initFromRec_D078(created, ((char*)rec));
+        created->mpObjBackground = 0;
+        created->mpObjKnob = 0;
+        created->mValue = 0;
+        created->mNumValues = 0;
+        created->mBackWidth = 0;
+        VPTR_OF(cListNode, created) = cUIProgress_vtbl;
+        created->setUIData(rec);
         {
-            cUIThing* child = (cUIThing*)((char*)cUIScreen_getObjectByHashName(self, *(int*)(((char*)rec) + 0x20)));
-            if (((char*)child) != 0) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, data->mBackground.mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                *(char**)(created + 0x74) = ((char*)child);
+                child->mpParent = created;
+                created->mpObjBackground = child;
             }
         }
         {
-            cUIThing* child = (cUIThing*)((char*)cUIScreen_getObjectByHashName(self, *(int*)(((char*)rec) + 0x24)));
-            if (((char*)child) != 0) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, data->mKnob.mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                *(char**)(created + 0x78) = ((char*)child);
+                child->mpParent = created;
+                created->mpObjKnob = child;
             }
         }
         return created;
     }
     case 33: {
-        char* created = alloc_D078(204, str_cUIScroll);
+        cUIScrollBar* created = (cUIScrollBar*)alloc_D078(sizeof(cUIScrollBar), str_cUIScroll);
+        tUIScrollBar* data = (tUIScrollBar*)rec;
         cUIThing_cUIThing(created, self, 0);
-        *(int*)(created + 0x74) = 0;
-        *(int*)(created + 0x78) = 0;
-        *(int*)(created + 0x7C) = 0;
-        *(int*)(created + 0x80) = 0;
-        *(int*)(created + 0x84) = 0;
-        *(int*)(created + 0x88) = 0;
-        *(int*)(created + 0xC0) = 0;
-        *(int*)(created + 0xC4) = 0;
-        *(int*)(created + 0xC8) = 0;
-        *(char*)(created + 0x8C) = 0;
-        *(char*)(created + 0xA5) = 0;
-        *(void***)(created + 8) = cUIScrollBar_vtbl;
-        initFromRec_D078(created, ((char*)rec));
+        created->mpObjBackground = 0;
+        created->mpObjKnob = 0;
+        created->mpUpArrow = 0;
+        created->mpDownArrow = 0;
+        created->mpHideOnEmpty = 0;
+        created->meHideState = 0;
+        created->mValue = 0;
+        created->mNumValues = 0;
+        created->mPage = 0;
+        created->mszUpAnimation[0] = 0;
+        created->mszDownAnimation[0] = 0;
+        VPTR_OF(cListNode, created) = cUIScrollBar_vtbl;
+        created->setUIData(rec);
         {
-            cUIThing* child = (cUIThing*)((char*)cUIScreen_getObjectByHashName(self, *(int*)(((char*)rec) + 0x20)));
-            if (((char*)child) != 0) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, data->mBackground.mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                *(char**)(created + 0x74) = ((char*)child);
+                child->mpParent = created;
+                created->mpObjBackground = child;
             }
         }
         {
-            cUIThing* child = (cUIThing*)((char*)cUIScreen_getObjectByHashName(self, *(int*)(((char*)rec) + 0x24)));
-            if (((char*)child) != 0) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, data->mKnob.mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                *(char**)(created + 0x78) = ((char*)child);
+                child->mpParent = created;
+                created->mpObjKnob = child;
             }
         }
         return created;
     }
     case 22: {
-        char* created = alloc_D078(144, str_cUISlider);
+        cUISlider* created = (cUISlider*)alloc_D078(sizeof(cUISlider), str_cUISlider);
+        tUISlider* data = (tUISlider*)rec;
         cUIThing_cUIThing(created, self, 0);
-        *(int*)(created + 0x74) = 0;
-        *(int*)(created + 0x78) = 0;
-        *(int*)(created + 0x7C) = 0;
-        *(int*)(created + 0x80) = 0;
-        *(int*)(created + 0x88) = 0;
-        *(int*)(created + 0x8C) = 0;
-        *(void***)(created + 8) = cUISlider_vtbl;
-        initFromRec_D078(created, ((char*)rec));
+        created->mValue = 0;
+        created->mNumValues = 0;
+        created->mStartPixel = 0;
+        created->mBackWidth = 0;
+        created->mpObjBackground = 0;
+        created->mpObjKnob = 0;
+        VPTR_OF(cListNode, created) = cUISlider_vtbl;
+        created->setUIData(rec);
         {
-            cUIThing* child = (cUIThing*)((char*)cUIScreen_getObjectByHashName(self, *(int*)(((char*)rec) + 0x24)));
-            if (((char*)child) != 0) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, data->mBackground.mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                *(char**)(created + 0x88) = ((char*)child);
+                child->mpParent = created;
+                created->mpObjBackground = child;
             }
         }
         {
-            cUIThing* child = (cUIThing*)((char*)cUIScreen_getObjectByHashName(self, *(int*)(((char*)rec) + 0x28)));
-            if (((char*)child) != 0) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, data->mKnob.mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                *(char**)(created + 0x8C) = ((char*)child);
+                child->mpParent = created;
+                created->mpObjKnob = child;
             }
         }
         return created;
     }
     case 23: {
-        char* created = (char*)cUIText_cUIText(alloc_D078(188, str_UIText), self, 0);
-        initFromRec_D078(created, ((char*)rec));
+        cUIText* created = (cUIText*)cUIText_cUIText(alloc_D078(sizeof(cUIText), str_UIText), self, 0);
+        created->setUIData(rec);
         return created;
     }
-    case 0x20: {
-        char* created = (char*)cUITextScroll_cUITextScroll(alloc_D078(208, str_cUITextScroll), self, 0);
-        int* hashes = (int*)(((char*)rec) + 0x2C);
-        for (unsigned int i = 0; i < *(unsigned char*)(((char*)rec) + 0x22); i++, hashes++) {
-            cUIThing* child = (cUIThing*)cUIScreen_getObjectByHashName(self, *hashes);
-            if (((char*)child) != 0) {
+    case 32: {
+        cUITextScroll* created =
+            (cUITextScroll*)cUITextScroll_cUITextScroll(alloc_D078(sizeof(cUITextScroll), str_cUITextScroll), self, 0);
+        tUITextScroll* data = (tUITextScroll*)rec;
+        tUIPlaceWidget* pPBW = (tUIPlaceWidget*)(data + 1);
+        for (unsigned int i = 0; i < data->mNumItems; i++, pPBW++) {
+            cUIThing* child = cUIScreen_getObjectByHashName(self, pPBW->mHashID);
+            if (child != 0) {
                 cListNode_removeFromList(child);
-                child->mpParent = (cUIThing*)created;
-                cList_addToEnd((cList*)(created + 0x8C), (cListNode*)child);
+                child->mpParent = created;
+                cList_addToEnd(&created->mList, (cListNode*)child);
             }
         }
-        initFromRec_D078(created, ((char*)rec));
+        created->setUIData(rec);
         return created;
     }
-    case 0x18: {
-        char* created = (char*)cUIVector_cUIVector(alloc_D078(144, str_UIVector), self, 0);
-        initFromRec_D078(created, ((char*)rec));
+    case 24: {
+        cUIVector* created = (cUIVector*)cUIVector_cUIVector(alloc_D078(sizeof(cUIVector), str_UIVector), self, 0);
+        created->setUIData(rec);
         return created;
     }
     }
@@ -1126,13 +1106,13 @@ extern "C" void cUIScreen_update(cUIScreen* self)
         }
     }
     unsigned short frame = 0xFFFF;
-    void* thread = cUIScreen_getPrimaryThread(self);
+    cUIThread* thread = cUIScreen_getPrimaryThread(self);
     if (thread != 0) {
-        frame = *(unsigned short*)((char*)thread + 0xC);
+        frame = thread->mCurrentFrameNumber;
     } else {
-        thread = cList_first((cList*)&self->mThreads);
+        thread = (cUIThread*)cList_first(&self->mThreads);
         if (thread != 0) {
-            frame = *(unsigned short*)((char*)thread + 0xC);
+            frame = thread->mCurrentFrameNumber;
         }
     }
     cUIGroup_update((char*)&self->mRootGroup, frame);
@@ -1150,10 +1130,10 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getObjectByHashName);
  */
 extern "C" cUIThing* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
 {
-    void** objs = (void**)self->mppObjectList;
+    cUIThing** objs = self->mppObjectList;
     if (objs != 0) {
-        for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
-            cUIThing* uiObj = (cUIThing*)objs[i];
+        for (unsigned int i = 0; i < self->mpObjectBlock->mNumObjects; i++) {
+            cUIThing* uiObj = objs[i];
             if (((void*)uiObj) != 0 && uiObj->mHashName == hash) {
                 return uiObj;
             }

@@ -7,11 +7,11 @@
 // 0x20-byte tUIBaseObject and continues with the kind's own fields from 0x20.
 //
 // Names and layouts: SSX On Tour's DWARF ([O] tUIBaseObject, tUIText, tUITextScroll, tUIIcon, tUIListBox, tUIARGB,
-// tUIAnimation, tUIFrameHeader, tUIKCPBase, tUIKCPObjectAnimate, tUIHeaderBlock, tUIScreenHeader, tUIKeyframeBlock),
-// placed by retail use ([U], the setUIData functions in ui/uithing,
-// ui/uitext and ui/uiengine; cUIScreen_createObjectByHashName / playFrameByThread in ui/uiscreen; cUIAnimation_updateThing
-// in ui/uianimation). The records are byte data, so On Tour's sizes and offsets hold unchanged (no bools, no vptrs).
-// The derived records repeat tUIBaseObject's members (flat, like main/game.h).
+// tUIAnimation, tUIFrameHeader, tUIKCPBase, tUIKCPObjectAnimate, tUIKCPKeyframeJump, tUIHeaderBlock, tUIScreenHeader,
+// tUIKeyframeBlock, tUIObjectBlock, tUIPlaceWidget), placed by retail use ([U], the setUIData functions in
+// ui/uithing, ui/uitext and ui/uiengine; cUIScreen_createObjectByHashName / playFrameByThread in ui/uiscreen;
+// cUIAnimation_updateThing in ui/uianimation). The records are byte data, so On Tour's sizes and offsets hold
+// unchanged (no bools, no vptrs). The derived records repeat tUIBaseObject's members (flat, like main/game.h).
 //
 // Evidence tags: [O] On Tour's DWARF; [U] how retail code uses the field.
 
@@ -105,6 +105,84 @@ struct tUIVector {
     char mPad;                      // 0x23 [O]
 };
 
+// A child a container record places: the hash name of an object created earlier on the same screen.
+// [O] struct tUIPlaceWidget (0x4) and On Tour cUIScreen::createObjectByStruct's locals tUIPlaceWidget * pPBW.
+struct tUIPlaceWidget {
+    unsigned int mHashID;           // 0x0 [O]; [U] cUIScreen_createObjectByStruct finds the child by it
+};
+
+// The container records (group, menu, pair, progress, scroll bar, slider). On Tour has no types for them: its
+// cUIScreen::createObjectByStruct reads them through a local char * base. Type and field names ours, placed by [U]
+// cUIScreen_createObjectByStruct (the only reader past 0x20; these kinds' setUIData read only tUIBaseObject).
+
+// A group's record (type 0x10): its children. A variable-length record (name ours).
+struct tUIGroup {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    unsigned int mNumWidgets;       // 0x20 (name ours) [U] createObjectByStruct: the child count (lw)
+    tUIPlaceWidget mWidgets[1];     // 0x24 (name ours) [U] mNumWidgets entries: the children, in list order
+};
+
+// A menu's record (type 0x13): its items. A variable-length record (name ours).
+struct tUIMenu {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    unsigned char mNumWidgets;      // 0x20 (name ours) [U] createObjectByStruct: the item count (lbu)
+    char unk_021[0x3];              // 0x21 no retail access seen
+    tUIPlaceWidget mWidgets[1];     // 0x24 (name ours) [U] mNumWidgets entries: the items, in list order
+};
+
+// A pair's record (type 0x15): its two children (name ours).
+struct tUIPair {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    tUIPlaceWidget mWidgets[2];     // 0x20 (name ours) [U] createObjectByStruct: [0] becomes cUIPair::mpEntry,
+                                    //     [1] cUIPair::mpWidget (its mAttr bit 0 cleared)
+};
+
+// A progress bar's record (type 0x19): background and knob (name ours).
+struct tUIProgress {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    tUIPlaceWidget mBackground;     // 0x20 (name ours) [U] createObjectByStruct: becomes cUIProgress::mpObjBackground
+    tUIPlaceWidget mKnob;           // 0x24 (name ours) [U] becomes cUIProgress::mpObjKnob
+};
+
+// A scroll bar's record (type 0x21): background and knob, as tUIProgress (name ours).
+struct tUIScrollBar {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    tUIPlaceWidget mBackground;     // 0x20 (name ours) [U] createObjectByStruct: becomes cUIScrollBar::mpObjBackground
+    tUIPlaceWidget mKnob;           // 0x24 (name ours) [U] becomes cUIScrollBar::mpObjKnob
+};
+
+// A slider's record (type 0x16): background and knob (name ours).
+struct tUISlider {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    unsigned int unk_020;           // 0x20 no retail access seen
+    tUIPlaceWidget mBackground;     // 0x24 (name ours) [U] createObjectByStruct: becomes cUISlider::mpObjBackground
+    tUIPlaceWidget mKnob;           // 0x28 (name ours) [U] becomes cUISlider::mpObjKnob
+};
+
 // An animation's header. [O] struct tUIAnimation (0x10).
 struct tUIAnimation {
     unsigned short mTag;            // 0x00 [O]
@@ -153,6 +231,16 @@ struct tUIKCPObjectAnimate {
                                     //     cUIThing_playAnimation
 };
 
+// The keyframe jump / spawn key-channel packet. [O] struct tUIKCPKeyframeJump : tUIKCPBase (0x8) and On Tour
+// cUIScreen::parseKeyframeJump / parseKeyframeSpawn's local tUIKCPKeyframeJump * pPacket. tUIKCPBase repeated flat.
+struct tUIKCPKeyframeJump {
+    unsigned char mTag;             // 0x0 [O] tUIKCPBase
+    unsigned char mPad1_tUIKCPBase; // 0x1 [O]
+    unsigned short mPacketSize;     // 0x2 [O]
+    unsigned int mFrameHashName;    // 0x4 [O]; [U] cUIScreen_parseKeyframeJump / parseKeyframeSpawn find the frame
+                                    //     whose mHashID it is
+};
+
 // The UI file's header: offsets (from the file start) of its blocks. [O] struct tUIHeaderBlock (0x18) and On Tour
 // cUIEngine::loadFile's local const tUIHeaderBlock * pHeaderBlock.
 struct tUIHeaderBlock {
@@ -177,6 +265,13 @@ struct tUIScreenHeader {
 // [O] struct tUIKeyframeBlock (0x4); cUIScreen::mpKeyframeBlock (ui/uiscreen.h).
 struct tUIKeyframeBlock {
     unsigned int mNumFrames;        // 0x0 [O]; [U] cUIScreen_getFrameByIndex loops over this many frames from +0x4
+};
+
+// A screen's object block: the object count, then the object records (each mByteSize long) from 0x4.
+// [O] struct tUIObjectBlock (0x4); cUIScreen::mpObjectBlock (ui/uiscreen.h).
+struct tUIObjectBlock {
+    unsigned int mNumObjects;       // 0x0 [O]; [U] cUIScreen_createAllObjects / createObjectByHashName /
+                                    //     getObjectByHashName loop over this many records from +0x4
 };
 
 CHECK_OFFSET(tUIARGB, a, 0x0);
@@ -224,6 +319,23 @@ CHECK_OFFSET(tUIVector, mNumTriangles, 0x21);
 CHECK_OFFSET(tUIVector, mFlags, 0x22);
 CHECK_SIZE(tUIVector, 0x24);
 
+CHECK_OFFSET(tUIPlaceWidget, mHashID, 0x0);
+CHECK_SIZE(tUIPlaceWidget, 0x4);
+
+CHECK_OFFSET(tUIGroup, mNumWidgets, 0x20);
+CHECK_OFFSET(tUIGroup, mWidgets, 0x24);
+CHECK_OFFSET(tUIMenu, mNumWidgets, 0x20);
+CHECK_OFFSET(tUIMenu, unk_021, 0x21);
+CHECK_OFFSET(tUIMenu, mWidgets, 0x24);
+CHECK_OFFSET(tUIPair, mWidgets, 0x20);
+CHECK_OFFSET(tUIProgress, mBackground, 0x20);
+CHECK_OFFSET(tUIProgress, mKnob, 0x24);
+CHECK_OFFSET(tUIScrollBar, mBackground, 0x20);
+CHECK_OFFSET(tUIScrollBar, mKnob, 0x24);
+CHECK_OFFSET(tUISlider, unk_020, 0x20);
+CHECK_OFFSET(tUISlider, mBackground, 0x24);
+CHECK_OFFSET(tUISlider, mKnob, 0x28);
+
 CHECK_OFFSET(tUIAnimation, mTag, 0x00);
 CHECK_OFFSET(tUIAnimation, mNumFrames, 0x02);
 CHECK_OFFSET(tUIAnimation, mNumChannels, 0x04);
@@ -256,6 +368,11 @@ CHECK_OFFSET(tUIKCPObjectAnimate, mObjectHashID, 0x8);
 CHECK_OFFSET(tUIKCPObjectAnimate, mPlaybackStatus, 0xC);
 CHECK_SIZE(tUIKCPObjectAnimate, 0x10);
 
+CHECK_OFFSET(tUIKCPKeyframeJump, mTag, 0x0);
+CHECK_OFFSET(tUIKCPKeyframeJump, mPacketSize, 0x2);
+CHECK_OFFSET(tUIKCPKeyframeJump, mFrameHashName, 0x4);
+CHECK_SIZE(tUIKCPKeyframeJump, 0x8);
+
 CHECK_OFFSET(tUIHeaderBlock, unk_000, 0x00);
 CHECK_OFFSET(tUIHeaderBlock, unk_004, 0x04);
 CHECK_OFFSET(tUIHeaderBlock, mAnimBlockOffset, 0x08);
@@ -272,5 +389,8 @@ CHECK_SIZE(tUIScreenHeader, 0x10);
 
 CHECK_OFFSET(tUIKeyframeBlock, mNumFrames, 0x0);
 CHECK_SIZE(tUIKeyframeBlock, 0x4);
+
+CHECK_OFFSET(tUIObjectBlock, mNumObjects, 0x0);
+CHECK_SIZE(tUIObjectBlock, 0x4);
 
 #endif /* UI_UIDATA_H */
