@@ -2066,7 +2066,7 @@ extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
         if (parentNode && !parentNode->isType(6)) {
             cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
             if (activeNode && activeNode->isMoveNode()) {
-                int k = *(int*)((char*)parentNode + 0x18);
+                int k = (int)parentNode->Instance;
                 V4_D9F8 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
                 cMoveNode_addParent_D9F8(activeNode, k, buf[2], &offset);
             }
@@ -2172,7 +2172,7 @@ extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
                 childInst = (char*)(childRef << 2);
             cInstanceNode *childNode = childInst ? *(cInstanceNode**)(childInst + 0xC) : 0;
             if (childNode && childNode->isMoveNode()) {
-                int k = *(int*)((char*)parentNode + 0x18);
+                int k = (int)parentNode->Instance;
                 V4_DC60 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
                 cMoveNode_addParent_DC60(childNode, k, buf[2], &offset);
             }

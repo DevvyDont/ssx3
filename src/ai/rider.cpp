@@ -4191,7 +4191,7 @@ extern "C" void func_00122680(void)
         ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[1] = ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[0];
         ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop++;
         *((cGraphicsMan_2680*)GrMan)->stateTop = sDrawState_s_defaultDrawState;
-        *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
+        *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
         GrMan->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
         GrMan->SetView1(t4mat_Identity);
         ((cGraphicsMan_2680*)GrMan)->stateTop->f8_5 = 24;

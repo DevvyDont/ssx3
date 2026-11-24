@@ -514,7 +514,7 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
             corner.z = 0.0f;
             corner.w = 1.0f;
             (*(&verts[3].p)) = corner;
-            *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_E95A0(img);
+            *GrMan->m_pCurrentDrawState->m_textureState.m_texid = texOf_E95A0(img);
             sVEnt_E95A0* vt = (sVEnt_E95A0*)VPTR_OF(cGraphicsMan, GrMan);
             vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
             pos[0] += wh.x;
@@ -1337,7 +1337,7 @@ extern "C" void cOVStateHUD1P_renderQuad(cOVStateHUD1P* self, float* pos, float*
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[3].p = corner;
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     GrMan->RenderTriStrip(4, verts, 0);
 }
 #endif

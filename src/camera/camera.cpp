@@ -6020,7 +6020,6 @@ static inline void AddEq_1635F8(t4Vector& v, const t4Vector& b)
         : "memory");
 }
 
-#define S_1635F8 ((char*)self)
 #define I_1635F8 ((char*)info)
 /**
  * Adds the jump camera's vertical swoop: builds height curves for the look-at point and the eye at take-off, plays
@@ -6061,8 +6060,8 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
             float airAmplitude = amplitude * fullScalar * k;
             self->VerticalJumpFactor = k;
             if (0.0f < airAmplitude) {
-                void* sa = S_1635F8 + 0x31C;
-                void* sb = S_1635F8 + 0x328;
+                void* sa = &self->FullAirTargetSpline;
+                void* sb = &self->FullAirPositionSpline;
                 cCubicSplineInterpolant_initAsNatural_2(sa, 13);
                 cCubicSplineInterpolant_addPoint(sa, 0.0f, 0.0f);
                 cCubicSplineInterpolant_addPoint(sa, 0.33000001311302185f, airAmplitude * -121.1346664428711f);
@@ -6119,8 +6118,8 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
             }
             float airAmplitude = k * amplitude * self->VerticalJumpFactor;
             if (0.0f < airAmplitude) {
-                void* sc = S_1635F8 + 0x304;
-                void* sd = S_1635F8 + 0x310;
+                void* sc = &self->AirTargetSpline;
+                void* sd = &self->AirPositionSpline;
                 cCubicSplineInterpolant_initAsNatural_2(sc, 13);
                 cCubicSplineInterpolant_addPoint(sc, 0.0f, 0.0f);
                 cCubicSplineInterpolant_addPoint(sc, sx * 0.33000001311302185f, airAmplitude * -121.1346664428711f);
@@ -6163,21 +6162,21 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
         } else {
             self->FullAirCamTimeInAir = (self->FullAirCamTimeInAir + 0.01666666753590107f) <? 4.0f;
         }
-        float yb = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x328, self->AirTimeScalar * self->FullAirCamTimeInAir);
-        float ya = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x31C, self->AirTimeScalar * self->FullAirCamTimeInAir);
+        float yb = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(&self->FullAirPositionSpline, self->AirTimeScalar * self->FullAirCamTimeInAir);
+        float ya = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(&self->FullAirTargetSpline, self->AirTimeScalar * self->FullAirCamTimeInAir);
         self->LastFullAirPositionDelta = yb;
         self->LastFullAirTargetDelta = ya;
     }
     if (self->ApplyingAirFunc != 0) {
         Approach_1635F8(self->AirCamTimeInAir, self->AirCamMaxTime);
-        float yd = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x310, self->AirTimeScalar * self->AirCamTimeInAir);
-        float yc = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x304, self->AirTimeScalar * self->AirCamTimeInAir);
+        float yd = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(&self->AirPositionSpline, self->AirTimeScalar * self->AirCamTimeInAir);
+        float yc = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(&self->AirTargetSpline, self->AirTimeScalar * self->AirCamTimeInAir);
         self->LastAirPositionDelta = yd;
         self->LastAirTargetDelta = yc;
         D_004A1288 = 1;
         // PORT: spline pointers kept in int globals.
-        D_004A4DD8 = (int)(S_1635F8 + 0x310);
-        D_004A4DDC = (int)(S_1635F8 + 0x304);
+        D_004A4DD8 = (int)(&self->AirPositionSpline);
+        D_004A4DDC = (int)(&self->AirTargetSpline);
     } else {
         D_004A1288 = 0;
         D_004A4DD8 = 0;
@@ -6220,7 +6219,6 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
     ScaleEq_1635F8(off, (dist >? 50.0f) / Length_1635F8(off));
     *(&self->Position) = Sub_1635F8(*(&self->CamTargetPos), off);
 }
-#undef S_1635F8
 #undef I_1635F8
 #endif
 

@@ -1719,7 +1719,7 @@ static inline void setLayer_9F00(cUIListBox* self)
 extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
 {
     cFont* font = (cFont*)cUIListBox_getFont(self);
-    if (font == 0 || *((unsigned char*)self + 0x318) == 0) {
+    if (font == 0 || self->mNumEntries == 0) {
         return;
     }
     t2Vector listScale(self->mScale.x, self->mScale.y);
@@ -1742,7 +1742,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
     if (*(int*)&self->mAttrListBox & 0x10) {
         str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[0].str;
     } else {
-        str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[*((unsigned char*)self + 0x319)].str;
+        str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[self->mCurrentEntry].str;
     }
     setLayer_9F00((self));
     int over = 0;

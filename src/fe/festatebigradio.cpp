@@ -712,7 +712,7 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self,
         return 0x100;
     case 5:
         if (isOn00193CF8() && found) {
-            func_00265458(cSetupMan_mSetupMan, *((unsigned char*)ctrl + 0x95));
+            func_00265458(cSetupMan_mSetupMan, ctrl->mScrollItemCurrent);
         }
         cBraggingRightsMenu_setMenuItemColor(item);
         return 257;

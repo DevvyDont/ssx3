@@ -1206,7 +1206,7 @@ extern "C" int cRealFE_render(cRealFE* self)
         corner.z = hgt;
         corner.w = 1.0f;
         verts[3].pos = corner;
-        *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
+        *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             ps2GraphicsMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
@@ -1221,11 +1221,11 @@ extern "C" int cRealFE_render(cRealFE* self)
     feCall(31);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->SetViewportPerspective(*(float*)((char*)self + 0x10), *(float*)((char*)self + 0x14), *(float*)((char*)self + 0x18));
+        ps2GraphicsMan->SetViewportPerspective(self->mCamera.View, self->mCamera.Near, self->mCamera.Far);
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->SetView1(*(const t4Matrix*)((char*)self + 0x50));
+        ps2GraphicsMan->SetView1(self->mCamera.CamMat);
     }
     {
         sFeWorld* w = feW();
@@ -1240,7 +1240,7 @@ extern "C" int cRealFE_render(cRealFE* self)
     feW()->top->setAlpha(21);
     feW()->top->setG2(5);
     cUIEngine_render3D(self->mpUI);
-    cFERiderManager_render((char*)self + 0xB0);
+    cFERiderManager_render(&self->mRiderManager);
     feW()->top--;
     feCall(32);
     feCall(22);

@@ -44,23 +44,23 @@ static inline int curLayer_C078(cPS2GraphicsMan* c)
  */
 extern "C" void cGame_renderModels(cGame* self, FrustumIntersector* world)
 {
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078(GrMan);
+    *(GrMan->m_pCurrentDrawState->m_textureState.m_texid + 1) = curLayer_C078(GrMan);
     cPS2GraphicsMan* ctx = GrMan;
     (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0xF80) | 0x880;
     (*(int*)&(ctx->m_pCurrentDrawState)->m_bitGroups[0]) |= 0x30;
     int flag = 0xC00;
-    if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
+    if (self->ViewMan->m_uiNumView >= 2) {
         flag = 0x400;
     }
     int n = world->numinstancesinside;
-    int* items = (int*)((char*)world + 0x20A0);
+    tInstanceRecord** items = world->instancesinside;
     for (int i = 0; i < n; i++) {
-        GrMan->RenderModel((tInstanceRecord*)items[i], 0, 0, flag);
+        GrMan->RenderModel(items[i], 0, 0, flag);
     }
     int secondCount = world->numinstancescrossing;
-    items = (int*)((char*)world + 0x40A4);
+    items = world->instancescrossing;
     for (int i = 0; i < secondCount; i++) {
-        GrMan->RenderModel((tInstanceRecord*)items[i], 0, 0, flag | 0x20);
+        GrMan->RenderModel(items[i], 0, 0, flag | 0x20);
     }
 }
 #endif

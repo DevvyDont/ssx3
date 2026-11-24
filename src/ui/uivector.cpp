@@ -310,7 +310,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | (((((sFlags14_3A39F8*)(((char*)self) + 0x14))->layer) + 9) << 5 & 0x3E0);
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     if (((sCount_3A39F8*)(((char*)self) + 0x74))->flag)
     {
         float pos[3];

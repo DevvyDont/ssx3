@@ -553,7 +553,7 @@ extern "C" void cPunchFX_render(sFx_1150* self)
     ((cGfx_1510*)GrMan)->PushState();
     *((cGfx_1510*)GrMan)->stateTop = sDrawState_s_defaultDrawState_1510;
     // Raw char** read of the stack top (as in ovstatehud) so the global is re-read afterwards.
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((cGfx_1510*)GrMan)->GetFB0();
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = ((cGfx_1510*)GrMan)->GetFB0();
     ((cGfx_1510*)GrMan)->stateTop->w0 |= 0xC;
     ((cGfx_1510*)GrMan)->stateTop->f4_23 = 0;
     ((cGfx_1510*)GrMan)->stateTop->f4_20 = 0;
@@ -2136,7 +2136,7 @@ extern "C" void tCrystal_render(tCrystal* self, const t2Vector* off)
     sV4_3418 col = *(sV4_3418*)&self->mColour[0];
     fade = 1.0f - fade * fade;
     col.x *= fade;
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((sWorld_3418*)GrMan)->GetFB();
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = ((sWorld_3418*)GrMan)->GetFB();
     ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), *(t3Vector*)&self->mSize[0], *(t2Vector*)&D_004A5510_3418, *(t2Vector*)&D_004A5520_3418, col, 1);
 }
 #endif

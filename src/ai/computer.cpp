@@ -3339,47 +3339,49 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, cBxReplayF
 {
     cBxReplayFrame* st = data;
     st->write((const char*)self->GroundMotion.mRider, 1728);
-    cRiderAnim_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
-    cAnimModel_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
-    cAirPredictor_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
-    cRiderMetrix_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
+    cRiderAnim_writeToReplayFrame(self->GroundMotion.mRider->mRiderAnim, data);
+    cAnimModel_writeToReplayFrame(self->GroundMotion.mRider->mAnimModel, data);
+    cAirPredictor_writeToReplayFrame(self->GroundMotion.mRider->mAirPredictor, data);
+    cRiderMetrix_writeToReplayFrame(self->GroundMotion.mRider->mMetrix, data);
     unsigned int id0 = 0xFFFFFFFF;
-    char* line = **(char***)((char*)self->GroundMotion.mRider + 0x864);
+    // The hints' mPatch is read as a char*: the typed reads (tIntHint*, tPatchRecord*) move the rider load above the
+    // id0 store. The patch's id at +0x150 is in tPatchRecord's unnamed gap.
+    char* line = **(char***)&self->GroundMotion.mRider->mLineHint;
     if (line != 0) {
         id0 = *(unsigned int*)(line + 0x150);
     }
     st->write((const char*)&id0, 4);
-    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
+    st->write((const char*)self->GroundMotion.mRider->mLineHint, 0x10);
     unsigned int id1 = 0xFFFFFFFF;
-    char* wall = **(char***)((char*)self->GroundMotion.mRider + 0x868);
+    char* wall = **(char***)&self->GroundMotion.mRider->mWallHint;
     if (wall != 0) {
         id1 = *(unsigned int*)(wall + 0x150);
     }
     st->write((const char*)&id1, 4);
-    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
-    st->write(((char*)self) + 0xDE0, 4);
-    st->write(((char*)self) + 0xDE4, 4);
-    cGroundMotion_writeToReplayFrame(((char*)self), data);
-    cAirMotion_writeToReplayFrame(((char*)self) + 0x20, data);
-    cWipeoutMotion_writeToReplayFrame(((char*)self) + 0x30, data);
-    cRailslideMotion_writeToReplayFrame(((char*)self) + 0xB0, data);
-    cHandplantMotion_writeToReplayFrame(((char*)self) + 0x110, data);
-    cBoardPressControl_writeToReplayFrame(((char*)self) + 0x1D0, data);
-    cNaturalAirControl_writeToReplayFrame(((char*)self) + 0x210, data);
-    cSpinControl_writeToReplayFrame(((char*)self) + 0x230, data);
-    cGateControl_writeToReplayFrame(((char*)self) + 0x290, data);
-    cRailslideControl_writeToReplayFrame(((char*)self) + 0x2B0, data);
-    cWipeoutControl_writeToReplayFrame(((char*)self) + 0x2C0, data);
-    cResetControl_writeToReplayFrame(((char*)self) + 0x350, data);
-    cFinishLineControl_writeToReplayFrame(((char*)self) + 0x360, data);
-    cHandplantControl_writeToReplayFrame(((char*)self) + 0x370, data);
-    cUberGrindControl_writeToReplayFrame(((char*)self) + 0x390, data);
-    cCheatFX_writeToReplayFrame(((char*)self) + 0xD20, data);
-    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
-    st->write((const char*)*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
+    st->write((const char*)self->GroundMotion.mRider->mWallHint, 0x10);
+    st->write((const char*)&self->MotionState, 4);
+    st->write((const char*)&self->ControlState, 4);
+    cGroundMotion_writeToReplayFrame(&self->GroundMotion, data);
+    cAirMotion_writeToReplayFrame(&self->AirMotion, data);
+    cWipeoutMotion_writeToReplayFrame(&self->WipeoutMotion, data);
+    cRailslideMotion_writeToReplayFrame(&self->RailslideMotion, data);
+    cHandplantMotion_writeToReplayFrame(&self->HandplantMotion, data);
+    cBoardPressControl_writeToReplayFrame(&self->BoardPressControl, data);
+    cNaturalAirControl_writeToReplayFrame(&self->NaturalAirControl, data);
+    cSpinControl_writeToReplayFrame(&self->SpinControl, data);
+    cGateControl_writeToReplayFrame(&self->GateControl, data);
+    cRailslideControl_writeToReplayFrame(&self->RailslideControl, data);
+    cWipeoutControl_writeToReplayFrame(&self->WipeoutControl, data);
+    cResetControl_writeToReplayFrame(&self->ResetControl, data);
+    cFinishLineControl_writeToReplayFrame(&self->FinishLineControl, data);
+    cHandplantControl_writeToReplayFrame(&self->HandplantControl, data);
+    cUberGrindControl_writeToReplayFrame(&self->UberGrindControl, data);
+    cCheatFX_writeToReplayFrame(&self->CheatFX, data);
+    st->write((const char*)self->GroundMotion.mRider->mAIPathHint, 0x20);
+    st->write((const char*)self->GroundMotion.mRider->mTrackPathHint, 0x20);
     int ids[2];
-    ids[0] = cPathSys_getTrackPathIndex(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB4));
-    ids[1] = cPathSys_getAIPathIndex(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB8));
+    ids[0] = cPathSys_getTrackPathIndex(gPaths, self->GroundMotion.mRider->TrackPath);
+    ids[1] = cPathSys_getAIPathIndex(gPaths, self->GroundMotion.mRider->AIPath);
     st->write((const char*)ids, 8);
 }
 #endif

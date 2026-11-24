@@ -1334,7 +1334,7 @@ static inline int texOf(sHudSprite* s)
 
 static inline void setTex(sHudSprite* s)
 {
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf(s);
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = texOf(s);
 }
 
 static inline void setUV(sHudVertex* v, sHudSprite* s)
@@ -1428,7 +1428,7 @@ extern "C" void cOVStateHUD1P_renderBoostPart(float fill, float sx, float sy, ch
     one.x = 1.0f;
     one.y = 1.0f;
     cOVStateHUD1P_calcElemPos(self, &drawPos, &a, &size, &one, hudDef[0x20], hudDef[0x21], x);
-    int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    int* w = (int*)&GrMan->m_pCurrentDrawState->m_bitGroups[2];
     *w = (*w & ~0x3E0) | ((hudDef[0x22] << 5) & 0x3E0);
     sHudVertex vtx[4];
     sHudVertex* verts = vtx;
@@ -1600,7 +1600,7 @@ struct sColour {
 
 static inline void setTex_D9A0(sHudSprite* s)
 {
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf(s);
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = texOf(s);
 }
 
 
@@ -1699,10 +1699,10 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, cOVSta
         tHUDDef_getColour(ie, &colourOrSize);
         if (alt == 0) {
             pos = elemPos;
-            drawTextPictLine(((char*)self) + 0x6AC, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
+            drawTextPictLine(&self->mTextRecoverHelp, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
         } else {
             pos = elemPos;
-            drawTextPictLine(((char*)self) + 0x7F8, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
+            drawTextPictLine(&self->mTextRecoverHelpAlt, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
         }
     }
     char* meterDef = elems + 0x798;
@@ -1716,7 +1716,7 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, cOVSta
     scratchVec.x = 1.0f;
     scratchVec.y = 1.0f;
     cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &colourOrSize, &scratchVec, elems[0x7B8], elems[0x7B9], idx);
-    int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    int* w = (int*)&GrMan->m_pCurrentDrawState->m_bitGroups[2];
     *w = (*w & ~0x3E0) | ((elems[0x7BA] << 5) & 0x3E0);
     sHudVertex vtx[4];
     sHudVertex* verts = vtx;
@@ -1800,7 +1800,7 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, cOVSta
         col.a *= alpha;
         scratchVec.x += fillInset.x;
         scratchVec.y += fillInset.y;
-        int* w2 = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+        int* w2 = (int*)&GrMan->m_pCurrentDrawState->m_bitGroups[2];
         *w2 = (*w2 & ~0x3E0) | (((elems[0x7BA] + 1) << 5) & 0x3E0);
         t2Vector one;
         one.x = 1.0f;

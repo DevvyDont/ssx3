@@ -2434,7 +2434,7 @@ extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
     verts[1].u = 1.0f; verts[1].v = 0.0f;
     verts[2].u = 0.0f; verts[2].v = 1.0f;
     verts[3].u = 1.0f; verts[3].v = 1.0f;
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = value;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = value;
     obj = (char*)VPTR_OF(cGraphicsMan, GrMan);
     (*(void (**)(void*, int, void*, int))(obj + 0x23C))((char*)GrMan + *(short*)(obj + 0x238), 4, verts, 0);
 }

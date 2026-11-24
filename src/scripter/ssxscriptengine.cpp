@@ -18,6 +18,9 @@
 #include "scripter/scriptobjevent.h"
 #include "scripter/scriptobjrider.h"
 #include "scripter/scriptobjcammgr.h"
+#include "ai/player.h"
+#include "input/input.h"
+#include "input/inputpad.h"
 #include "scripter/nislist.h"
 #include "inseq/scriptplayerentity.h"
 #include "inseq/scriptplayermain.h"
@@ -259,8 +262,8 @@ extern "C" void cSSXScriptEngine_Update(cSSXScriptEngine* self)
             int n = lvl->NumberOfPlayersAllocated;
             for (int j = 0; j < n; j++)
             {
-                void* obj = *(void**)(((char*)lvl->Players[j]) + 0xDF0);
-                if (**(int**)obj != 0 && self->mNumFramesNoSkip == 0 && cInput_getState(obj, 111))
+                cInput* input = lvl->Players[j]->Input;
+                if (input->Pad->NumButtons != 0 && self->mNumFramesNoSkip == 0 && cInput_getState(input, 111))
                 {
                     tNISList_DoSkip(nisList);
                     goto done;
@@ -360,9 +363,9 @@ extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self, int a1);
  * @param key  world section ID (On Tour worldSectionID)
  * @param val  the anchor table (On Tour pData)
  */
-extern "C" void cSSXScriptEngine_AttachAnchorDataTable(cSSXScriptEngine* self, int key, int val)
+extern "C" void cSSXScriptEngine_AttachAnchorDataTable(cSSXScriptEngine* self, int key, unsigned int* val)
 {
-    *(int*)((char*)self + (cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, key) << 2) + 0x558) = val;
+    self->mpAnchorTableDB[cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, key)] = val;
 }
 #endif
 
@@ -378,7 +381,7 @@ extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self, int a1);
  */
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(cSSXScriptEngine* self, int key)
 {
-    *(int*)((char*)self + (cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, key) << 2) + 0x558) = 0;
+    self->mpAnchorTableDB[cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, key)] = 0;
 }
 #endif
 
@@ -595,22 +598,15 @@ void cSSXScriptEngine_DisallowNISListSkip(void* vself, int val)
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SetNISListViewIndex);
 #ifdef SKIP_ASM
 /**
- * Sets the view index (+0x8) of both NIS lists (mpNISLists, +0x54C, 0xCC each).
+ * Sets the view index of both NIS lists (mpNISLists).
  *
  * @param scriptEngine  the script engine
  * @param viewIndex  the view index
  */
 extern "C" void cSSXScriptEngine_SetNISListViewIndex(cSSXScriptEngine* scriptEngine, int viewIndex) {
-    int var_3;
-    int var_6;
-
-    var_6 = 0;
-    var_3 = 1;
-    do {
-        var_3 -= 1;
-        ((tNISList*)(var_6 + ((int)scriptEngine->mpNISLists)))->mViewIndex = viewIndex;
-        var_6 += 204;
-    } while (var_3 >= 0);
+    for (int i = 0; i < 2; i++) {
+        scriptEngine->mpNISLists[i].mViewIndex = viewIndex;
+    }
 }
 #endif
 
