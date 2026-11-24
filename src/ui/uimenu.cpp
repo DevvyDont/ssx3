@@ -781,26 +781,19 @@ extern "C" void cUIPair_updateLocale(cUIPair* self)
 //100%
 INCLUDE_ASM("ui/uimenu", cUIPair_destroyPair);
 #ifdef SKIP_ASM
-class cUIPair_destroyPair_cVirt {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01(int);
-};
-
 /**
  * Deletes both widgets of a pair and clears the pointers.
  */
 extern "C" void cUIPair_destroyPair(cUIPair* self)
 {
-    cUIPair_destroyPair_cVirt* entry = (cUIPair_destroyPair_cVirt*)self->mpEntry;
+    cUIThing* entry = self->mpEntry;
     if (entry != 0) {
-        entry->v01(3);
+        delete entry;
         self->mpEntry = 0;
     }
-    cUIPair_destroyPair_cVirt* widget = (cUIPair_destroyPair_cVirt*)self->mpWidget;
+    cUIThing* widget = self->mpWidget;
     if (widget != 0) {
-        widget->v01(3);
+        delete widget;
         self->mpWidget = 0;
     }
 }

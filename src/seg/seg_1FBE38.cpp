@@ -2,6 +2,7 @@
 #include "be/beinterface.h"
 #include "wscript/wscriptman.h"
 #include "world/instancerecord.h"
+#include "object/instancenode.h"
 #include "world/worldcache.h"
 #include "wscript/wscriptmission.h"
 #include "be/beintnewrace.h"
@@ -1614,7 +1615,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRollerFunc);
 extern char *cWScriptMan_TheWScriptMan_D250 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_D250 __asm__("SSXApp");
 extern "C" void cMoveNode_addRoller_D250(void*, void*, int, int) __asm__("cMoveNode_addRoller");
-struct O_D250 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_D250 __asm__("luno_gLunoNil");
 struct Tag_D250 { char c; Tag_D250() {} Tag_D250(const Tag_D250 &o) : c(o.c) {} };
 extern unsigned D_D250[] __asm__("D_004FB628");
@@ -1670,9 +1670,9 @@ extern "C" t3Vector AddRollerFunc(int n, Ent_D250 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_D250 *activeNode = *(O_D250**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
-        if (activeNode->v16())
+        if (activeNode->isMoveNode())
             cMoveNode_addRoller_D250(activeNode, buf, *(int*)(cWScriptMan_TheWScriptMan_D250 + 0x298), *(int*)(cWScriptMan_TheWScriptMan_D250 + 0x294));
     }
     return luno_gLunoNil_D250;
@@ -1888,7 +1888,6 @@ static inline void vAddTo_D758(V4_D758 &a, const V4_D758 &b) {
         : "m"(a), "m"(b)
         : "memory");
 }
-struct O_D758 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_D758 __asm__("luno_gLunoNil");
 struct Tag_D758 { char c; Tag_D758() {} Tag_D758(const Tag_D758 &o) : c(o.c) {} };
 extern unsigned D_D758[] __asm__("D_004FB720");
@@ -1956,9 +1955,9 @@ extern "C" t3Vector AddRiderPositionFunc(int n, Ent_D758 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_D758 *activeNode = *(O_D758**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
-        if (activeNode->v16()) {
+        if (activeNode->isMoveNode()) {
             int k = buf[1];
             if (k != -1) {
                 V4_D758 pos = *shape_D758(k)->v05();
@@ -1980,7 +1979,6 @@ extern char *cWScriptMan_TheWScriptMan_D9F8 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_D9F8 __asm__("SSXApp");
 struct V4_D9F8 { float x, y, z, w; V4_D9F8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void cMoveNode_addParent_D9F8(void*, int, int, V4_D9F8*) __asm__("cMoveNode_addParent");
-struct O_D9F8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_D9F8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_D9F8(unsigned i) { if (i == 0) return 0; return refToPtr_D9F8(i); }
 extern t3Vector luno_gLunoNil_D9F8 __asm__("luno_gLunoNil");
@@ -2064,10 +2062,10 @@ extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
             parentInst = 0;
         else
             parentInst = (char*)(parentRef << 2);
-        O_D9F8 *parentNode = parentInst ? *(O_D9F8**)(parentInst + 0xC) : 0;
-        if (parentNode && !parentNode->v10(6)) {
-            O_D9F8 *activeNode = *(O_D9F8**)(obj + 0xC);
-            if (activeNode && activeNode->v16()) {
+        cInstanceNode *parentNode = parentInst ? *(cInstanceNode**)(parentInst + 0xC) : 0;
+        if (parentNode && !parentNode->isType(6)) {
+            cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
+            if (activeNode && activeNode->isMoveNode()) {
                 int k = *(int*)((char*)parentNode + 0x18);
                 V4_D9F8 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
                 cMoveNode_addParent_D9F8(activeNode, k, buf[2], &offset);
@@ -2086,7 +2084,6 @@ extern char *cWScriptMan_TheWScriptMan_DC60 __asm__("cWScriptMan_TheWScriptMan")
 extern char *SSXApp_DC60 __asm__("SSXApp");
 struct V4_DC60 { float x, y, z, w; V4_DC60(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void cMoveNode_addParent_DC60(void*, int, int, V4_DC60*) __asm__("cMoveNode_addParent");
-struct O_DC60 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DC60(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DC60(unsigned i) { if (i == 0) return 0; return refToPtr_DC60(i); }
 extern t3Vector luno_gLunoNil_DC60 __asm__("luno_gLunoNil");
@@ -2163,8 +2160,8 @@ extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
         obj = inst;
     }
     if (~buf[1] != 0) {
-        O_DC60 *parentNode = *(O_DC60**)(obj + 0xC);
-        if (parentNode && !parentNode->v10(6)) {
+        cInstanceNode *parentNode = ((tInstanceRecord*)obj)->m_pActiveNode;
+        if (parentNode && !parentNode->isType(6)) {
             unsigned id2 = buf[1];
             char *childSection = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id2 & 0xFF];
             unsigned childRef;
@@ -2173,8 +2170,8 @@ extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
                 childInst = 0;
             else
                 childInst = (char*)(childRef << 2);
-            O_DC60 *childNode = childInst ? *(O_DC60**)(childInst + 0xC) : 0;
-            if (childNode && childNode->v16()) {
+            cInstanceNode *childNode = childInst ? *(cInstanceNode**)(childInst + 0xC) : 0;
+            if (childNode && childNode->isMoveNode()) {
                 int k = *(int*)((char*)parentNode + 0x18);
                 V4_DC60 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
                 cMoveNode_addParent_DC60(childNode, k, buf[2], &offset);
@@ -2192,7 +2189,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddSplineFunc);
 extern char *cWScriptMan_TheWScriptMan_DED0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_DED0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline1_DED0(void*, void*) __asm__("cMoveNode_addSpline1");
-struct O_DED0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DED0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DED0(unsigned i) { if (i == 0) return 0; return refToPtr_DED0(i); }
 extern t3Vector luno_gLunoNil_DED0 __asm__("luno_gLunoNil");
@@ -2265,9 +2261,9 @@ extern "C" t3Vector AddSplineFunc(int n, Ent_DED0 *params) {
         obj = inst;
     }
     if (~buf[1] != 0) {
-        O_DED0 *activeNode = *(O_DED0**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         if (activeNode) {
-            if (activeNode->v16())
+            if (activeNode->isMoveNode())
                 cMoveNode_addSpline1_DED0(activeNode, buf);
         }
     }
@@ -2282,7 +2278,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddMultiSplineFunc);
 extern char *cWScriptMan_TheWScriptMan_E0C0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_E0C0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline_E0C0(void*, void*) __asm__("cMoveNode_addSpline");
-struct O_E0C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_E0C0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_E0C0(unsigned i) { if (i == 0) return 0; return refToPtr_E0C0(i); }
 extern t3Vector luno_gLunoNil_E0C0 __asm__("luno_gLunoNil");
@@ -2356,9 +2351,9 @@ extern "C" t3Vector AddMultiSplineFunc(int n, Ent_E0C0 *params) {
         obj = inst;
     }
     if (~buf[1] != 0) {
-        O_E0C0 *activeNode = *(O_E0C0**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         if (activeNode) {
-            if (activeNode->v16())
+            if (activeNode->isMoveNode())
                 cMoveNode_addSpline_E0C0(activeNode, buf);
         }
     }
@@ -2373,7 +2368,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddUVScrollFunc);
 extern char *cWScriptMan_TheWScriptMan_E2C0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_E2C0 __asm__("SSXApp");
 extern "C" void cMoveNode_addUVScroll_E2C0(void*, void*) __asm__("cMoveNode_addUVScroll");
-struct O_E2C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_E2C0 __asm__("luno_gLunoNil");
 struct Tag_E2C0 { char c; Tag_E2C0() {} Tag_E2C0(const Tag_E2C0 &o) : c(o.c) {} };
 extern unsigned D_E2C0[] __asm__("D_004FB7E0");
@@ -2445,9 +2439,9 @@ extern "C" t3Vector AddUVScrollFunc(int n, Ent_E2C0 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_E2C0 *activeNode = *(O_E2C0**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
-        if (activeNode->v16())
+        if (activeNode->isMoveNode())
             cMoveNode_addUVScroll_E2C0(activeNode, buf);
     }
     return luno_gLunoNil_E2C0;
@@ -2461,7 +2455,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddTexFlipFunc);
 extern char *cWScriptMan_TheWScriptMan_E4A8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_E4A8 __asm__("SSXApp");
 extern "C" void cMoveNode_addTexFlip_E4A8(void*, void*) __asm__("cMoveNode_addTexFlip");
-struct O_E4A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_E4A8 __asm__("luno_gLunoNil");
 struct Tag_E4A8 { char c; Tag_E4A8() {} Tag_E4A8(const Tag_E4A8 &o) : c(o.c) {} };
 extern unsigned D_E4A8[] __asm__("D_004FB818");
@@ -2522,9 +2515,9 @@ extern "C" t3Vector AddTexFlipFunc(int n, Ent_E4A8 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_E4A8 *activeNode = *(O_E4A8**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
-        if (activeNode->v16())
+        if (activeNode->isMoveNode())
             cMoveNode_addTexFlip_E4A8(activeNode, buf);
     }
     return luno_gLunoNil_E4A8;
@@ -2538,7 +2531,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddBoostFunc);
 extern char *cWScriptMan_TheWScriptMan_E668 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_E668 __asm__("SSXApp");
 extern "C" void cMoveNode_addBoost_E668(void*, void*) __asm__("cMoveNode_addBoost");
-struct O_E668 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_E668 __asm__("luno_gLunoNil");
 struct Tag_E668 { char c; Tag_E668() {} Tag_E668(const Tag_E668 &o) : c(o.c) {} };
 extern unsigned D_E668[] __asm__("D_004FB830");
@@ -2606,9 +2598,9 @@ extern "C" t3Vector AddBoostFunc(int n, Ent_E668 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_E668 *activeNode = *(O_E668**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
-        if (activeNode->v16())
+        if (activeNode->isMoveNode())
             cMoveNode_addBoost_E668(activeNode, buf);
     }
     return luno_gLunoNil_E668;
@@ -2631,7 +2623,6 @@ extern char D_00489730_E840[] __asm__("D_00489730");
 struct Sh_E840 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual t4Vector *v05(); };
 struct Ent_E840x { char pad[0x18]; char *obj; };
 struct Lvl_E840 { char pad[0x40]; Ent_E840x *a1[12]; Ent_E840x *a2[3]; int n1; int pad80[2]; int n2; };
-struct O_E840 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual char *v24(); };
 extern char *SSXApp_E840 __asm__("SSXApp");
 extern "C" void cMoveNode_addParticle_E840(void*, void*) __asm__("cMoveNode_addParticle");
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -2799,10 +2790,10 @@ extern "C" t3Vector AddParticleFunc(int n, Ent_E840 *params) {
         }
         obj = inst;
     }
-    O_E840 *activeNode = *(O_E840**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
-        if (activeNode->v16()) {
-            t4Vector pos = *(t4Vector*)(activeNode->v24() + 0x30);
+        if (activeNode->isMoveNode()) {
+            t4Vector pos = activeNode->getRootTransform()->row[3];
             if (nearViewer_E840(pos)) {
                 cMoveNode_addParticle_E840(activeNode, buf);
                 return luno_gLunoNil_E840;
@@ -2830,7 +2821,6 @@ static inline char *conv_EE98(unsigned i) { if (i == 0) return 0; return refToPt
 extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 struct V4_EE98 { float x, y, z, w; V4_EE98(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
-struct O_EE98 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern "C" void cMoveNode_addDynamicParticle_EE98(void*, void*, int, V4_EE98*) __asm__("cMoveNode_addDynamicParticle");
 void operator_delete(int*);
 extern char D_00489750_EE98[] __asm__("D_00489750");
@@ -2959,8 +2949,8 @@ extern "C" t3Vector AddDynamicParticleFunc(int n, Ent_EE98 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_EE98 *activeNode = *(O_EE98**)(obj + 0xC);
-    if (activeNode && activeNode->v16()) {
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
+    if (activeNode && activeNode->isMoveNode()) {
         float one = 1.0f;
         V4_EE98 offset(*(float*)&buf[56], *(float*)&buf[57], *(float*)&buf[58], one);
         cMoveNode_addDynamicParticle_EE98(activeNode, buf, buf[55], &offset);
@@ -2978,7 +2968,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRailFunc);
 extern char *cWScriptMan_TheWScriptMan_F1C8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_F1C8 __asm__("SSXApp");
 extern "C" void cMoveNode_addRail_F1C8(void*, void*) __asm__("cMoveNode_addRail");
-struct O_F1C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_F1C8 __asm__("luno_gLunoNil");
 struct Tag_F1C8 { char c; Tag_F1C8() {} Tag_F1C8(const Tag_F1C8 &o) : c(o.c) {} };
 extern unsigned D_F1C8[] __asm__("D_004FBA28");
@@ -3035,9 +3024,9 @@ extern "C" t3Vector AddRailFunc(int n, Ent_F1C8 *params) {
         obj = inst;
     }
     if (~buf[1] != 0) {
-        O_F1C8 *activeNode = *(O_F1C8**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         if (activeNode) {
-            if (activeNode->v16())
+            if (activeNode->isMoveNode())
                 cMoveNode_addRail_F1C8(activeNode, buf);
         }
     }
@@ -3357,7 +3346,6 @@ static inline char *look_F9A8(unsigned id) {
     return (char*)(i << 2);
 }
 
-struct O_F9A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36(int, float); };
 extern t3Vector luno_gLunoNil_F9A8 __asm__("luno_gLunoNil");
 struct Tag_F9A8 { char c; Tag_F9A8() {} Tag_F9A8(const Tag_F9A8 &o) : c(o.c) {} };
 extern unsigned D_F9A8[] __asm__("D_004FBAF8");
@@ -3405,9 +3393,9 @@ extern "C" t3Vector SignalFunc(int n, Ent_F9A8 *params) {
             *slot = x->val;
     }
     char *obj = look_F9A8(buf[0]);
-    O_F9A8 *activeNode = *(O_F9A8**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode)
-        activeNode->v36(buf[1], *(float*)&buf[2]);
+        activeNode->signal(buf[1], *(float*)&buf[2]);
     return luno_gLunoNil_F9A8;
 }
 #endif
@@ -3427,7 +3415,6 @@ static inline char *conv_FB50(unsigned i) { if (i == 0) return 0; return refToPt
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cHideNode_cHideNode_FB50(void*, void*) __asm__("cHideNode_cHideNode");
 extern char D_004A3C18_FB50[] __asm__("D_004A3C18");
-struct O_FB50 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
 extern t3Vector luno_gLunoNil_FB50 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_FB50(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FB50 { int idx; int val; int pad; int type; };
@@ -3487,11 +3474,11 @@ extern "C" t3Vector HideInstanceFunc(int n, Ent_FB50 *params) {
     }
     if (obj == 0)
         return luno_gLunoNil_FB50;
-    O_FB50 *activeNode = *(O_FB50**)(obj + 0xC);
+    cInstanceNode* activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
-        if (activeNode->v10(16) || activeNode->v10(6))
+        if (activeNode->isType(16) || activeNode->isType(6))
             return luno_gLunoNil_FB50;
-        activeNode->v01(3);
+        delete activeNode;
     }
     cHideNode_cHideNode_FB50(cMemMan_alloc(0x1C, D_004A3C18_FB50, 0x20000000, 0), obj);
     return luno_gLunoNil_FB50;
@@ -3514,7 +3501,6 @@ static inline char *look_FD58(unsigned id) {
     return (char*)(i << 2);
 }
 
-struct O_FD58 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
 extern t3Vector luno_gLunoNil_FD58 __asm__("luno_gLunoNil");
 struct Tag_FD58 { char c; Tag_FD58() {} Tag_FD58(const Tag_FD58 &o) : c(o.c) {} };
 extern unsigned D_FD58 __asm__("D_004A5658");
@@ -3560,10 +3546,10 @@ extern "C" t3Vector ShowInstanceFunc(int n, Ent_FD58 *params) {
     }
     tInstanceRecord* obj = (tInstanceRecord *)look_FD58(buf[0]);
     if (obj) {
-        O_FD58 *activeNode = (O_FD58 *)obj->m_pActiveNode;
+        cInstanceNode* activeNode = obj->m_pActiveNode;
         if (activeNode) {
-            if (activeNode->v10(0x10))
-                activeNode->v01(3);
+            if (activeNode->isType(0x10))
+                delete activeNode;
         }
     }
     return luno_gLunoNil_FD58;
@@ -3814,7 +3800,6 @@ INCLUDE_ASM("seg/seg_1FBE38", ExpireFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_0418 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_0418 __asm__("SSXApp");
-struct O_0418 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(int); };
 extern t3Vector luno_gLunoNil_0418 __asm__("luno_gLunoNil");
 struct Tag_0418 { char c; Tag_0418() {} Tag_0418(const Tag_0418 &o) : c(o.c) {} };
 extern unsigned D_0418[] __asm__("D_004FBB38");
@@ -3872,13 +3857,13 @@ extern "C" t3Vector ExpireFunc(int n, Ent_0418 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_0418 *activeNode = *(O_0418**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode) {
         int expireType = buf[1];
         if (expireType == 0)
-            activeNode->v34(0);
+            activeNode->expire(0);
         else if (expireType == 1)
-            activeNode->v34(1);
+            activeNode->expire(1);
     }
     return luno_gLunoNil_0418;
 }
@@ -3889,7 +3874,6 @@ INCLUDE_ASM("seg/seg_1FBE38", LoseFocusFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int cWScriptMan_TheWScriptMan_05E8 __asm__("cWScriptMan_TheWScriptMan");
-struct O_05E8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); };
 extern t3Vector luno_gLunoNil_05E8 __asm__("luno_gLunoNil");
 struct Tag_05E8 { char c; Tag_05E8() {} Tag_05E8(const Tag_05E8 &o) : c(o.c) {} };
 extern unsigned D_05E8 __asm__("D_004A5678");
@@ -3948,9 +3932,9 @@ extern "C" t3Vector LoseFocusFunc(int n, Ent_05E8 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_05E8 *activeNode = *(O_05E8**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode)
-        activeNode->v35();
+        activeNode->loseFocus();
     return luno_gLunoNil_05E8;
 }
 #endif
@@ -3966,8 +3950,7 @@ extern int D_004A5690_0770 __asm__("D_004A5690");
 extern int TransportFunc_types[2];
 extern int *cWScriptMan_TheWScriptMan_0770 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_0770 __asm__("SSXApp");
-struct O_0770 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
-struct Sh_0770 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
+struct Sh_0770 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(const void*); };
 struct Lvl_0770 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_0770(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0770(unsigned i) { if (i == 0) return 0; return refToPtr_0770(i); }
@@ -4031,10 +4014,10 @@ extern "C" t3Vector TransportFunc(int n, Ent_0770 *params) {
     }
     int k = *cWScriptMan_TheWScriptMan_0770;
     if (k >= 0 && obj) {
-        O_0770 *activeNode = *(O_0770**)(obj + 0xC);
-        void *rootTransform = obj + 0x10;
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
+        const void *rootTransform = obj + 0x10;
         if (activeNode)
-            rootTransform = activeNode->v24();
+            rootTransform = activeNode->getRootTransform();
         Lvl_0770 *lvl = *(Lvl_0770**)(*(char**)(SSXApp_0770 + 0x84) + 0xC);
         ((Sh_0770*)(lvl->sh[k] + 0x6C0))->v10(rootTransform);
     }
@@ -4053,8 +4036,7 @@ extern int D_004A56A0_0948 __asm__("D_004A56A0");
 extern int SetupMissionRiderFunc_types[2];
 extern int *cWScriptMan_TheWScriptMan_0948 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_0948 __asm__("SSXApp");
-struct O_0948 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
-struct Sh_0948 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(void*); };
+struct Sh_0948 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(const void*); };
 struct Lvl_0948 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_0948(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0948(unsigned i) { if (i == 0) return 0; return refToPtr_0948(i); }
@@ -4118,10 +4100,10 @@ extern "C" t3Vector SetupMissionRiderFunc(int n, Ent_0948 *params) {
     }
     int k = *cWScriptMan_TheWScriptMan_0948;
     if (k >= 0 && obj) {
-        O_0948 *activeNode = *(O_0948**)(obj + 0xC);
-        void *rootTransform = obj + 0x10;
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
+        const void *rootTransform = obj + 0x10;
         if (activeNode)
-            rootTransform = activeNode->v24();
+            rootTransform = activeNode->getRootTransform();
         Lvl_0948 *lvl = *(Lvl_0948**)(*(char**)(SSXApp_0948 + 0x84) + 0xC);
         ((Sh_0948*)(lvl->sh[k] + 0x6C0))->v12(rootTransform);
     }
@@ -4728,7 +4710,6 @@ static inline char *look_1680(unsigned id) {
 }
 
 float *luno_cLunoVar_castFloat_1680(void*) __asm__("luno_cLunoVar_castFloat__FPv");
-struct O_1680 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual float v30(); };
 struct V3_1680 { int w0, w1, w2; };
 struct Tag_1680 { char c; Tag_1680() {} Tag_1680(const Tag_1680 &o) : c(o.c) {} };
 extern unsigned D_1680 __asm__("D_004A56D0");
@@ -4777,9 +4758,9 @@ extern "C" V3_1680* AnimFrameFunc(V3_1680 *ret, int n, Ent_1680 *params) {
     char *obj = look_1680(buf[0]);
     float animFrame;
     if (obj) {
-        O_1680 *activeNode = *(O_1680**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         if (activeNode)
-            animFrame = activeNode->v30();
+            animFrame = activeNode->getAnimFrame();
         else
             animFrame = -1.0f;
         ((int*)ret)[2] = 2;
@@ -4810,7 +4791,6 @@ static inline char *look_1830(unsigned id) {
 }
 
 int *luno_cLunoVar_castInt(void*);
-struct O_1830 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual int v31(); };
 struct V3_1830 { int w0, w1, w2; };
 struct Tag_1830 { char c; Tag_1830() {} Tag_1830(const Tag_1830 &o) : c(o.c) {} };
 extern unsigned D_1830 __asm__("D_004A56E0");
@@ -4871,10 +4851,10 @@ extern "C" V3_1830* AnimDirFunc(V3_1830 *ret, int n, Ent_1830 *params) {
         obj = inst;
     }
     if (obj) {
-        O_1830 *activeNode = *(O_1830**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         int animDir;
         if (activeNode)
-            animDir = activeNode->v31();
+            animDir = activeNode->getAnimDir();
         else
             animDir = 0;
         ((int*)ret)[2] = 1;
@@ -4894,7 +4874,6 @@ INCLUDE_ASM("seg/seg_1FBE38", FrameUpdateEventFunc);
 extern char *cWScriptMan_TheWScriptMan_19C8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_19C8 __asm__("SSXApp");
 int *luno_cLunoVar_castInt(void*);
-struct O_19C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual int v32(float); };
 struct V3_19C8 { int w0, w1, w2; };
 struct Tag_19C8 { char c; Tag_19C8() {} Tag_19C8(const Tag_19C8 &o) : c(o.c) {} };
 extern unsigned D_19C8[] __asm__("D_004FBC00");
@@ -4954,11 +4933,11 @@ extern "C" V3_19C8* FrameUpdateEventFunc(V3_19C8 *ret, int n, Ent_19C8 *params) 
             obj = (char*)(i << 2);
     }
     if (obj) {
-        O_19C8 *activeNode = *(O_19C8**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         float frameArg = *(float*)&buf[1];
         int eventHit;
         if (activeNode)
-            eventHit = activeNode->v32(frameArg * 0.03333333507180214f);
+            eventHit = activeNode->frameUpdateEvent(frameArg * 0.03333333507180214f);
         else
             eventHit = 0;
         ((int*)ret)[2] = 1;
@@ -5096,7 +5075,6 @@ extern int D_004A5718_1D78 __asm__("D_004A5718");
 extern int RiderInVolumeFunc_types[2];
 extern int *cWScriptMan_TheWScriptMan_1D78 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_1D78 __asm__("SSXApp");
-struct O_1D78 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_1D78 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
 struct Lvl_1D78 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_1D78(unsigned i) { return (char*)(i << 2); }
@@ -5442,7 +5420,6 @@ INCLUDE_ASM("seg/seg_1FBE38", RemoveModifierFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_2490 __asm__("cWScriptMan_TheWScriptMan");
-struct O_2490 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_2490 __asm__("luno_gLunoNil");
 struct Tag_2490 { char c; Tag_2490() {} Tag_2490(const Tag_2490 &o) : c(o.c) {} };
 struct T12_2490 { unsigned a; int b; Tag_2490 f; };
@@ -5507,10 +5484,10 @@ extern "C" t3Vector RemoveModifierFunc(int n, Ent_2490 *params) {
         obj = inst;
     }
     if (obj) {
-        O_2490 *activeNode = *(O_2490**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         int mode = buf[1];
         if (activeNode) {
-            if (activeNode->v16()) {
+            if (activeNode->isMoveNode()) {
                 char *moveNode = *(char**)(obj + 0xC);
                 switch (mode) {
                 case 0: {
@@ -7363,7 +7340,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddFadeFunc);
 extern char *cWScriptMan_TheWScriptMan_4980 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_4980 __asm__("SSXApp");
 void cMoveNode_addFade(void*, void*);
-struct O_4980 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_4980 __asm__("luno_gLunoNil");
 struct Tag_4980 { char c; Tag_4980() {} Tag_4980(const Tag_4980 &o) : c(o.c) {} };
 extern unsigned D_4980[] __asm__("D_004FBD10");
@@ -7421,10 +7397,10 @@ extern "C" t3Vector AddFadeFunc(int n, Ent_4980 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_4980 *activeNode = *(O_4980**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode == 0)
         return luno_gLunoNil_4980;
-    if (activeNode->v16())
+    if (activeNode->isMoveNode())
         cMoveNode_addFade(activeNode, buf);
     return luno_gLunoNil_4980;
 }
@@ -7586,7 +7562,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddDebounceFunc);
 extern char *cWScriptMan_TheWScriptMan_4E38 __asm__("cWScriptMan_TheWScriptMan");
 extern char *SSXApp_4E38 __asm__("SSXApp");
 extern "C" void cMoveNode_addDebounce_4E38(void*, void*) __asm__("cMoveNode_addDebounce");
-struct O_4E38 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_4E38 __asm__("luno_gLunoNil");
 struct Tag_4E38 { char c; Tag_4E38() {} Tag_4E38(const Tag_4E38 &o) : c(o.c) {} };
 extern unsigned D_4E38[] __asm__("D_004FBD20");
@@ -7644,10 +7619,10 @@ extern "C" t3Vector AddDebounceFunc(int n, Ent_4E38 *params) {
         else
             obj = (char*)(i << 2);
     }
-    O_4E38 *activeNode = *(O_4E38**)(obj + 0xC);
+    cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
     if (activeNode == 0)
         return luno_gLunoNil_4E38;
-    if (activeNode->v16())
+    if (activeNode->isMoveNode())
         cMoveNode_addDebounce_4E38(activeNode, buf);
     return luno_gLunoNil_4E38;
 }
@@ -7996,7 +7971,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddMagnetFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_5478 __asm__("cWScriptMan_TheWScriptMan");
-struct O_5478 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 extern t3Vector luno_gLunoNil_5478 __asm__("luno_gLunoNil");
 struct Tag_5478 { char c; Tag_5478() {} Tag_5478(const Tag_5478 &o) : c(o.c) {} };
 struct Rec_5478 { unsigned id; float a; float b; Tag_5478 f; };
@@ -8004,7 +7978,7 @@ extern Rec_5478 D_4FBD58_5478 __asm__("D_004FBD58");
 extern int D_5840_5478 __asm__("D_004A5840");
 extern const int D_004466A0_5478[] __asm__("D_004466A0");
 extern "C" void* MEM_copy_5478(void*, void*, int) __asm__("MEM_copy");
-extern "C" void cMoveNode_addMagnet_5478(O_5478*, void*, float, float) __asm__("cMoveNode_addMagnet");
+extern "C" void cMoveNode_addMagnet_5478(cInstanceNode*, const t4Matrix*, float, float) __asm__("cMoveNode_addMagnet");
 struct Ent_5478 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[90]): adds a magnet modifier to a moving world instance.
@@ -8059,10 +8033,10 @@ extern "C" t3Vector AddMagnetFunc(int n, Ent_5478 *params) {
             obj = (char*)(i << 2);
     }
     if (obj) {
-        O_5478 *activeNode = *(O_5478**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         if (activeNode) {
-            if (activeNode->v16())
-                cMoveNode_addMagnet_5478(activeNode, activeNode->v24(), buf->a, buf->b);
+            if (activeNode->isMoveNode())
+                cMoveNode_addMagnet_5478(activeNode, activeNode->getRootTransform(), buf->a, buf->b);
         }
     }
     return luno_gLunoNil_5478;
@@ -8139,7 +8113,6 @@ INCLUDE_ASM("seg/seg_1FBE38", AddHaloFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *cWScriptMan_TheWScriptMan_57C0 __asm__("cWScriptMan_TheWScriptMan");
-struct O_57C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 extern t3Vector luno_gLunoNil_57C0 __asm__("luno_gLunoNil");
 struct Tag_57C0 { char c; Tag_57C0() {} Tag_57C0(const Tag_57C0 &o) : c(o.c) {} };
 struct Rec_57C0 { unsigned id; int a; int b; float c; float d; float e; float g; float h; int k; Tag_57C0 f; };
@@ -8208,9 +8181,9 @@ extern "C" t3Vector AddHaloFunc(int n, Ent_57C0 *params) {
             obj = (char*)(i << 2);
     }
     if (obj) {
-        O_57C0 *activeNode = *(O_57C0**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         if (activeNode) {
-            if (activeNode->v16())
+            if (activeNode->isMoveNode())
                 cMoveNode_addHalo_57C0(activeNode, buf);
         }
     }
@@ -8390,7 +8363,6 @@ extern char *SSXApp_5D90 __asm__("SSXApp");
 static inline char *refToPtr_5D90(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5D90(unsigned i) { if (i == 0) return 0; return refToPtr_5D90(i); }
 extern "C" void cMoveNode_addAvaSpline_5D90(void*, void*) __asm__("cMoveNode_addAvaSpline");
-struct O_5D90 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 extern t3Vector luno_gLunoNil_5D90 __asm__("luno_gLunoNil");
 struct Tag_5D90 { char c; Tag_5D90() {} Tag_5D90(const Tag_5D90 &o) : c(o.c) {} };
 extern unsigned D_5D90 __asm__("D_004A5870");
@@ -8452,9 +8424,9 @@ extern "C" t3Vector AddAvaSplineFunc(int n, Ent_5D90 *params) {
         obj = inst;
     }
     if (obj) {
-        O_5D90 *activeNode = *(O_5D90**)(obj + 0xC);
+        cInstanceNode *activeNode = ((tInstanceRecord*)obj)->m_pActiveNode;
         if (activeNode) {
-            if (activeNode->v16())
+            if (activeNode->isMoveNode())
                 cMoveNode_addAvaSpline_5D90(activeNode, obj);
         }
     }

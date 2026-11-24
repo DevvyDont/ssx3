@@ -1723,7 +1723,7 @@ public:
     cProcessList__cProcessList_cNode* next;   // 0x18
     char pad_0x1C[0x5C - 0x1C];
     // vptr at 0x5C; slot N at vtable offset N*8
-    virtual void v01(int);
+    virtual ~cProcessList__cProcessList_cNode();
 };
 
 /**
@@ -1740,9 +1740,7 @@ extern "C" void cProcessList__cProcessList(cProcessList__cProcessList_cNode** se
     while (n != 0) {
         cProcessList__cProcessList_cNode* cur = n;
         n = n->next;
-        if (cur != 0) {
-            cur->v01(3);
-        }
+        delete cur;
     }
     if (flags & 1) {
         operator_delete((int*)self);

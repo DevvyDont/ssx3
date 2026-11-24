@@ -1867,7 +1867,7 @@ extern void* cAIVisualEffectsMan_vtbl[];
 class cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(int);
+    virtual ~cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt();
 };
 
 /**
@@ -1882,9 +1882,7 @@ extern "C" void cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan(cPS2AIVisualEffec
 {
     self->mVtbl = cPS2AIVisualEffectsMan_vtbl;
     cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt* avalanche = *(cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt**)self;
-    if (avalanche != 0) {
-        avalanche->v01(3);
-    }
+    delete avalanche;
     self->mVtbl = cAIVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);

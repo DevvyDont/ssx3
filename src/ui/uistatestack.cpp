@@ -746,7 +746,7 @@ class cUIThing__cUIThing_cVirt {
 public:
     char pad[0x10];
     // vptr at 0x10; slot N at vtable offset N*8
-    virtual void v01(int);
+    virtual ~cUIThing__cUIThing_cVirt();
 };
 
 /**
@@ -761,9 +761,7 @@ extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
 {
     VPTR_OF(cListNode, self) = (void**)cUIThing_vtbl;
     cUIThing__cUIThing_cVirt* anim = (cUIThing__cUIThing_cVirt*)self->mpAnim;
-    if (anim != 0) {
-        anim->v01(3);
-    }
+    delete anim;
     VPTR_OF(cListNode, self) = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {

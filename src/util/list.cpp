@@ -278,8 +278,8 @@ class cList_destroyList_cVirt {
 public:
     void* mpPrev;                  // 0x0
     cList_destroyList_cVirt* mpNext;   // 0x4
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01(int);
+    // vptr at 0x8; slot 1: the virtual destructor
+    virtual ~cList_destroyList_cVirt();
 };
 
 /**
@@ -294,9 +294,7 @@ extern "C" void cList_destroyList(cList* self)
     cList_destroyList_cVirt* n = (cList_destroyList_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {
         cList_destroyList_cVirt* nextNode = n->mpNext;
-        if (n != 0) {
-            n->v01(3);
-        }
+        delete n;
         n = nextNode;
     }
     cList_clear(self);
