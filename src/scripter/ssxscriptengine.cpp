@@ -5092,37 +5092,37 @@ static inline void MulMat_SE(sRotMat_SE* top, sRotMat_SE* r)
 #define ROTATE_SE(TOP, AXIS, ANGLE) \
     { \
         const float* axis = (AXIS); \
-        sRotMat_SE r; \
-        float s; \
-        float c; \
-        fSinCos(&s, &c, (ANGLE)); \
-        float t = 1.0f - c; \
+        sRotMat_SE rot; \
+        float sinA; \
+        float cosA; \
+        fSinCos(&sinA, &cosA, (ANGLE)); \
+        float oneMinusCos = 1.0f - cosA; \
         float x = axis[0]; \
         float y = axis[1]; \
         float z = axis[2]; \
-        float tx = t * x; \
-        float ty = t * y; \
-        float tz = t * z; \
-        float sx = s * x; \
-        float sy = s * y; \
-        float sz = s * z; \
-        r.m[0][0] = tx * x + c; \
-        r.m[1][0] = tx * y + sz; \
-        r.m[2][0] = tx * z - sy; \
-        r.m[0][1] = ty * x - sz; \
-        r.m[1][1] = ty * y + c; \
-        r.m[2][1] = ty * z + sx; \
-        r.m[0][2] = tz * x + sy; \
-        r.m[1][2] = tz * y - sx; \
-        r.m[2][2] = tz * z + c; \
-        r.m[3][0] = 0.0f; \
-        r.m[3][1] = 0.0f; \
-        r.m[3][2] = 0.0f; \
-        r.m[0][3] = 0.0f; \
-        r.m[1][3] = 0.0f; \
-        r.m[2][3] = 0.0f; \
-        r.m[3][3] = 1.0f; \
-        MulTop_SE((TOP), &r); \
+        float tx = oneMinusCos * x; \
+        float ty = oneMinusCos * y; \
+        float tz = oneMinusCos * z; \
+        float sx = sinA * x; \
+        float sy = sinA * y; \
+        float sz = sinA * z; \
+        rot.m[0][0] = tx * x + cosA; \
+        rot.m[1][0] = tx * y + sz; \
+        rot.m[2][0] = tx * z - sy; \
+        rot.m[0][1] = ty * x - sz; \
+        rot.m[1][1] = ty * y + cosA; \
+        rot.m[2][1] = ty * z + sx; \
+        rot.m[0][2] = tz * x + sy; \
+        rot.m[1][2] = tz * y - sx; \
+        rot.m[2][2] = tz * z + cosA; \
+        rot.m[3][0] = 0.0f; \
+        rot.m[3][1] = 0.0f; \
+        rot.m[3][2] = 0.0f; \
+        rot.m[0][3] = 0.0f; \
+        rot.m[1][3] = 0.0f; \
+        rot.m[2][3] = 0.0f; \
+        rot.m[3][3] = 1.0f; \
+        MulTop_SE((TOP), &rot); \
     }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector into row 3).
@@ -5175,28 +5175,28 @@ extern "C" void cSSXScriptEngine_GetAnchorOrientation_f(void* self, int type, vo
 // One camera case: offset + euler angles from the record, then the player's frame on top.
 #define CAMARM_SE(SELF, OWNER, REC) \
     { \
-        sVec4_SE v; \
-        sRotMat_SE M; \
+        sVec4_SE baseTranslation; \
+        sRotMat_SE localBaseTransform; \
         (SELF)->rx = *(float*)((REC) + 0x1C) * 0.01745329424738884f; \
         (SELF)->ry = *(float*)((REC) + 0x18) * 0.01745329424738884f; \
         (SELF)->rz = *(float*)((REC) + 0x14) * 0.01745329424738884f; \
-        VSet_SE(&v, *(float*)((REC) + 8), *(float*)((REC) + 0xC), *(float*)((REC) + 0x10), 1.0f); \
-        sRotMat_SE* m = &M; \
-        CopyMat_SE(m, &t4mat_Identity); \
-        Translate_SE(m, &v); \
-        ROTATE_SE(m, t4vect_ZAxis_D970, -(SELF)->rz); \
-        ROTATE_SE(m, t4vect_YAxis_D970, (SELF)->ry); \
-        ROTATE_SE(m, t4vect_XAxis_D970, (SELF)->rx); \
-        sVec4_SE out; \
+        VSet_SE(&baseTranslation, *(float*)((REC) + 8), *(float*)((REC) + 0xC), *(float*)((REC) + 0x10), 1.0f); \
+        sRotMat_SE* pLocalBase = &localBaseTransform; \
+        CopyMat_SE(pLocalBase, &t4mat_Identity); \
+        Translate_SE(pLocalBase, &baseTranslation); \
+        ROTATE_SE(pLocalBase, t4vect_ZAxis_D970, -(SELF)->rz); \
+        ROTATE_SE(pLocalBase, t4vect_YAxis_D970, (SELF)->ry); \
+        ROTATE_SE(pLocalBase, t4vect_XAxis_D970, (SELF)->rx); \
+        sVec4_SE anchorTranslation; \
         float roll; \
         float pitch; \
         float yaw; \
-        cSSXScriptEngine_GetAnchorOrientation_f(ScriptEngine, *(char*)((REC) + 0x20), *(void**)((OWNER) + 8), &out, &roll, &pitch, &yaw); \
-        Translate_SE(&(SELF)->mat, &out); \
+        cSSXScriptEngine_GetAnchorOrientation_f(ScriptEngine, *(char*)((REC) + 0x20), *(void**)((OWNER) + 8), &anchorTranslation, &roll, &pitch, &yaw); \
+        Translate_SE(&(SELF)->mat, &anchorTranslation); \
         ROTATE_SE(&(SELF)->mat, t4vect_ZAxis_D970, -yaw); \
         ROTATE_SE(&(SELF)->mat, t4vect_YAxis_D970, pitch); \
         ROTATE_SE(&(SELF)->mat, t4vect_XAxis_D970, roll); \
-        MulMat_SE(&(SELF)->mat, m); \
+        MulMat_SE(&(SELF)->mat, pLocalBase); \
         (SELF)->rx = (SELF)->rx + roll; \
         (SELF)->ry = (SELF)->ry + pitch; \
         (SELF)->rz = (SELF)->rz + yaw; \
@@ -5470,25 +5470,25 @@ static inline void MulIn_F9F8(void* m, const void* b)
 
 #define ROTATE2_F9F8(mat, axis, angle) \
     { \
-        float s; \
-        float c; \
-        fSinCos(&s, &c, angle); \
-        sMat_F9F8 r; \
-        MakeRot_F9F8(&r, axis, s, c); \
-        r.m[3][3] = 1.0f; \
-        MulIn_F9F8(mat, &r); \
+        float sinA; \
+        float cosA; \
+        fSinCos(&sinA, &cosA, angle); \
+        sMat_F9F8 rot; \
+        MakeRot_F9F8(&rot, axis, sinA, cosA); \
+        rot.m[3][3] = 1.0f; \
+        MulIn_F9F8(mat, &rot); \
     }
 
 // Each rotation matrix is a block-scoped temporary of the caller.
 #define ROTATE_F9F8(mat, axis, angle) \
     { \
-        float s; \
-        float c; \
-        fSinCos(&s, &c, angle); \
-        sMat_F9F8 r; \
-        MakeRot_F9F8(&r, axis, s, c); \
-        r.m[3][3] = 1.0f; \
-        MulMat_F9F8(mat, mat, &r); \
+        float sinA; \
+        float cosA; \
+        fSinCos(&sinA, &cosA, angle); \
+        sMat_F9F8 rot; \
+        MakeRot_F9F8(&rot, axis, sinA, cosA); \
+        rot.m[3][3] = 1.0f; \
+        MulMat_F9F8(mat, mat, &rot); \
     }
 
 // PORT: PS2-only VU0 inline asm (matrix-vector product into row 3).
@@ -5539,12 +5539,12 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     *(float*)(self + 0x74) = info->baseRotY * 0.01745329424738884f;
     *(float*)(self + 0x78) = info->baseRotZ * 0.01745329424738884f;
     sVec_F9F8 baseOffset(info->basePosX, info->basePosY, info->basePosZ, 1.0f);
-    sMat_F9F8 m;
-    LoadIdentity_F9F8(&m);
-    Translate_F9F8(&m, baseOffset);
-    ROTATE_F9F8(&m, t4vect_ZAxis, -*(float*)(self + 0x78));
-    ROTATE_F9F8(&m, t4vect_YAxis, *(float*)(self + 116));
-    ROTATE_F9F8(&m, t4vect_XAxis, *(float*)(self + 0x70));
+    sMat_F9F8 localBaseTransform;
+    LoadIdentity_F9F8(&localBaseTransform);
+    Translate_F9F8(&localBaseTransform, baseOffset);
+    ROTATE_F9F8(&localBaseTransform, t4vect_ZAxis, -*(float*)(self + 0x78));
+    ROTATE_F9F8(&localBaseTransform, t4vect_YAxis, *(float*)(self + 116));
+    ROTATE_F9F8(&localBaseTransform, t4vect_XAxis, *(float*)(self + 0x70));
     sVec_F9F8 pos;
     float rx, ry, rz;
     cSSXScriptEngine_GetAnchorOrientation(ScriptEngine, info->anchorPos, obj->mpOwner, &pos, &rx, &ry, &rz);
@@ -5552,7 +5552,7 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     ROTATE2_F9F8(mat, t4vect_ZAxis, -rz);
     ROTATE2_F9F8(mat, t4vect_YAxis, ry);
     ROTATE2_F9F8(mat, t4vect_XAxis, rx);
-    MulMat_F9F8(mat, mat, &m);
+    MulMat_F9F8(mat, mat, &localBaseTransform);
     *(float*)(self + 0x70) += rx;
     *(float*)(self + 0x74) += ry;
     *(float*)(self + 0x78) += rz;

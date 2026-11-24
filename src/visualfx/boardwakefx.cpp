@@ -7267,8 +7267,8 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
             t4Vector tailPos = wakeAddE6C08(wakeSubE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             float lean = 0.0f;
             if (self->mRider->PressMode != 0) {
-                int s = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
-                if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
+                int curID = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
+                if ((curID >= 23 && curID <= 28) || curID == 37 || curID == 38) {
                     lean = 1.0f;
                 } else {
                     lean = -1.0f;
@@ -7290,15 +7290,15 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
             t4Vector nosePosOff = wakeSubE6C08(nosePos, self->mRider->mGroundContactPoint);
             t4Vector tailNegOff = wakeSubE6C08(tailNeg, self->mRider->mGroundContactPoint);
             t4Vector tailPosOff = wakeSubE6C08(tailPos, self->mRider->mGroundContactPoint);
-            float h0 = wakeDotE6C08(noseNegOff, n);
-            float h1 = wakeDotE6C08(nosePosOff, n);
-            float h2 = wakeDotE6C08(tailNegOff, n);
-            float h3 = wakeDotE6C08(tailPosOff, n);
-            float s = 1.0f / WAKE_MAX_E6C08(wakeAbsE6C08(h0), WAKE_MAX_E6C08(wakeAbsE6C08(h1), WAKE_MAX_E6C08(wakeAbsE6C08(h2), wakeAbsE6C08(h3))));
-            float noseNegNorm = h0 * s;
-            float nosePosNorm = h1 * s;
-            float tailNegNorm = h2 * s;
-            float tailPosNorm = h3 * s;
+            float noseNegDist = wakeDotE6C08(noseNegOff, n);
+            float nosePosDist = wakeDotE6C08(nosePosOff, n);
+            float tailNegDist = wakeDotE6C08(tailNegOff, n);
+            float tailPosDist = wakeDotE6C08(tailPosOff, n);
+            float invMaxD = 1.0f / WAKE_MAX_E6C08(wakeAbsE6C08(noseNegDist), WAKE_MAX_E6C08(wakeAbsE6C08(nosePosDist), WAKE_MAX_E6C08(wakeAbsE6C08(tailNegDist), wakeAbsE6C08(tailPosDist))));
+            float noseNegNorm = noseNegDist * invMaxD;
+            float nosePosNorm = nosePosDist * invMaxD;
+            float tailNegNorm = tailNegDist * invMaxD;
+            float tailPosNorm = tailPosDist * invMaxD;
             t4Vector lo;
             t4Vector hi;
             if (noseNegNorm < nosePosNorm && noseNegNorm < tailNegNorm + 0.5f && noseNegNorm < tailPosNorm + 0.5f) {

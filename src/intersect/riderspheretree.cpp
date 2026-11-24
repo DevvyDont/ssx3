@@ -2887,22 +2887,22 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, t4Vector* point1, t4
         }
     }
     if (!leaf) {
-        float f = ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth + 1].offset;
+        float offset = ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
-                t4Vector childPos = Add_D470(*pos, Scale_D470(self->axis[k], f));
+                t4Vector childPos = Add_D470(*pos, Scale_D470(self->axis[k], offset));
                 SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1, (k + 1) * ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth].stride + base, outA, outB);
             }
         }
         return;
     }
-    float f = planeDist - levelRadius;
-    if (f < self->worstCase) {
-        t4Vector n = Scale_D470(*uNorm, -f);
+    float offset = planeDist - levelRadius;
+    if (offset < self->worstCase) {
+        t4Vector n = Scale_D470(*uNorm, -offset);
         *outA = n;
         *outB = planePoint;
-        self->worstCase = f;
+        self->worstCase = offset;
     }
 }
 #endif

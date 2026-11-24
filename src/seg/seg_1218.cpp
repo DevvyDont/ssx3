@@ -4571,9 +4571,9 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
             t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
             cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->TerminalVelocity);
         }
-        cRiderHandler* h = self->mRiderHandler;
-        h->WipeoutControl.IsNewImpact = 1;
-        h->WipeoutControl.LatestImpact = self->mVelocity;
+        cRiderHandler* handler = self->mRiderHandler;
+        handler->WipeoutControl.IsNewImpact = 1;
+        handler->WipeoutControl.LatestImpact = self->mVelocity;
         return;
     }
     if (cRider_getMotionState(self) == 1) {
@@ -4588,7 +4588,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     float upDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot.row[2]), info->off);
     t4Vector origin = Get_5D98((char*)&self->RiderRoot.row[3]);
     t4Vector rel = Sub_5D98(info->pos, origin);
-    float h = Dot_5D98(rel, Get_5D98((char*)&self->RiderRoot.row[2]));
+    float contactHeight = Dot_5D98(rel, Get_5D98((char*)&self->RiderRoot.row[2]));
     int cur = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
     int anim = 438;
     if (cRider_getControlState_5D98(self) != 11) {
@@ -4611,7 +4611,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                 if (minSpeed < info->vn) {
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
-                        if (h < 60.0f && len > kHighSpeedCollideThresh) {
+                        if (contactHeight < 60.0f && len > kHighSpeedCollideThresh) {
                             anim = 342;
                         } else {
                             unsigned int k;
@@ -4653,7 +4653,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                 if (info->vn > k * 1388.880859375f) {
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
-                        if (h < 60.0f && len > kHighSpeedCollideThresh) {
+                        if (contactHeight < 60.0f && len > kHighSpeedCollideThresh) {
                             anim = 332;
                         } else {
                             unsigned int n;

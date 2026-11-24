@@ -10,6 +10,7 @@
 #include "ui/uimenu.h"
 #include "ui/uiinput.h"
 #include "ui/uithing.h"
+#include "ui/uiicon.h"
 #include "ui/uiengine.h"
 #include "fe/festatepeakroom.h"
 #include "fe/festatemountainroom.h"
@@ -746,49 +747,22 @@ struct sPeakEvent_3340 {
 };
 extern sPeakEvent_3340 gMedalsInfo[][4][5];
 
-class cWidget_3340 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
-struct sLodge_3340 {
-    char pad0[0x44];
-    signed char player;         // 0x44
-    char pad45[0x58 - 0x45];
-    cWidget_3340* a[5];         // 0x58
-    cWidget_3340* b[3];         // 0x6C
-    cWidget_3340* c[3];         // 0x78
-    cWidget_3340* d[3];         // 0x84
-    cWidget_3340* e[3];         // 0x90
-    cWidget_3340* f[3];         // 0x9C
-    int colOn;                  // 0xA8
-    int colOff;                 // 0xAC
-    int charId;                 // 0xB0
-};
-
-static inline void wColour_3340(cWidget_3340* w, int col)
+// Gives a marker its done / not-done picture: the texture element, with no texture id.
+static inline void setMarkerElem_3340(cUIIcon* marker, cTextureElement* elem)
 {
-    *(int*)((char*)w + 0x7C) = col;
-    *(int*)((char*)w + 0x78) = -1;
+    marker->mpTextureElem = elem;
+    marker->mTextureID = -1;
 }
 
-// Colour widget n of list `arr` by the event state, show it, advance n.
-#define WSET_3340(arr, n)                                   \
-    {                                                       \
-        if (st < 4)                                         \
-            wColour_3340(self->arr[n], self->colOn);        \
-        else                                                \
-            wColour_3340(self->arr[n], self->colOff);       \
-        self->arr[n++]->show(1);                            \
+// Pictures marker `count` of the list `markers` by the event's medal state st (below 4: done), shows it, and advances
+// the count.
+#define SHOW_MARKER_3340(markers, count)                                   \
+    {                                                                      \
+        if (st < 4)                                                        \
+            setMarkerElem_3340(self->markers[count], self->mpDoneElem);    \
+        else                                                               \
+            setMarkerElem_3340(self->markers[count], self->mpNotDoneElem); \
+        self->markers[count++]->setVisible(1);                             \
     }
 
 /**
@@ -797,22 +771,20 @@ static inline void wColour_3340(cWidget_3340* w, int col)
  *
  * For peaks 0-2 and challenge groups 0 and 1 (groups 2 and 3, collectibles / big challenges and earnings, are skipped)
  * it walks the peak's challenge table gMedalsInfo until an entry's list selector is negative. getChallengeMedal gives the
- * entry's medal for the player (+0x44) and character (+0xB0); a value below 4 picks the done element (+0xA8), anything
- * else the not-done element (+0xAC). The selector picks the next free marker of one list: 0 -> +0x58 (5 markers), 1 ->
- * +0x6C, 2 -> +0x90, 3 -> +0x9C, 4 -> +0x78, 5 -> +0x84 (3 each). The marker gets the element (+0x7C, texture id +0x78
- * = -1) and is shown (virtual slot 8).
- *
- * @param mountainRoom  the mountain-room state (this)
+ * entry's medal for the player (mUserNum) and character (mCharID); a value below 4 picks mpDoneElem, anything else
+ * mpNotDoneElem. The selector picks the next free marker of one list: 0 race (mpRaceMarkers, 5), 1 slopestyle, 2
+ * superpipe, 3 big air, 4 race backcountry, 5 freestyle backcountry (3 each). The marker gets the element (texture id
+ * -1) and is shown (setVisible). The six counts are On Tour's raceCount, ssCount, hpCount, baCount, raceBACount and
+ * freeBACount.
  */
-extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* mountainRoom)
+extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* self)
 {
-    sLodge_3340* self = (sLodge_3340*)mountainRoom;
-    int n0 = 0;
-    int n1 = 0;
-    int n2 = 0;
-    int n3 = 0;
-    int n4 = 0;
-    int n5 = 0;
+    int raceCount = 0;
+    int ssCount = 0;
+    int hpCount = 0;
+    int baCount = 0;
+    int raceBACount = 0;
+    int freeBACount = 0;
     for (int mountain = 0; mountain < 3; mountain++) {
         for (int peak = 0; peak < 4; peak++) {
             if (peak == 2 || peak == 3)
@@ -821,19 +793,19 @@ extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* mountai
                 int track = gMedalsInfo[mountain][peak][i].track;
                 if (track < 0)
                     break;
-                unsigned int st = getChallengeMedal(self->player, self->charId, mountain, peak, i);
+                unsigned int st = getChallengeMedal(self->mUserNum, self->mCharID, mountain, peak, i);
                 if (track == 0) {
-                    WSET_3340(a, n0);
+                    SHOW_MARKER_3340(mpRaceMarkers, raceCount);
                 } else if (track == 1) {
-                    WSET_3340(b, n1);
+                    SHOW_MARKER_3340(mpSlopeStyleMarkers, ssCount);
                 } else if (track == 2) {
-                    WSET_3340(e, n2);
+                    SHOW_MARKER_3340(mpSuperPipeMarkers, hpCount);
                 } else if (track == 3) {
-                    WSET_3340(f, n3);
+                    SHOW_MARKER_3340(mpBigAirMarkers, baCount);
                 } else if (track == 4) {
-                    WSET_3340(c, n4);
+                    SHOW_MARKER_3340(mpRaceBackCountryMarkers, raceBACount);
                 } else if (track == 5) {
-                    WSET_3340(d, n5);
+                    SHOW_MARKER_3340(mpFreestyleBackCountryMarkers, freeBACount);
                 }
             }
         }

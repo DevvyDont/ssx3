@@ -234,9 +234,9 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
     switch (msg) {
     case 5:
         if (self->mBank >= self->mTotalCost && self->mTotalCost > 0) {
-            void* o = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY_b, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
-            cUIStateBuyPopup_initBuyAttributes(o, 0, self->mTotalCost, self->mBank);
-            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, o);
+            void* pPopup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY_b, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
+            cUIStateBuyPopup_initBuyAttributes(pPopup, 0, self->mTotalCost, self->mBank);
+            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, pPopup);
         } else {
             cUISoundInterface* sound = *(cUISoundInterface**)&self->mpEngine->mpSound;
             if (sound == 0)
@@ -249,8 +249,8 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
         if (self->mBuyPrompt != 0) {
             self->mBuyPrompt = 0;
             cUIState_hideObjSafe(((char*)self), str_PopupGroup);
-            cUIMenu* o = self->pAttribMenu;
-            o->setFocus(1);
+            cUIMenu* attribMenu = self->pAttribMenu;
+            attribMenu->setFocus(1);
         } else {
             cUICustomInterface* mgr = self->mpEngine->mpCustom;
             void* nextState = mgr->getPrevState((cUIState*)self, (int)*(void**)(obj + 0x18));

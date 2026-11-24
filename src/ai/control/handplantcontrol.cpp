@@ -1306,10 +1306,10 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         t4Vector imp = vu0Scale_139C88(self->mRider->mGroundNormal, -vn);
         vu0ScaleEq_139C88(imp, surf->LandingHardness);
         vu0AddEq_139C88(self->mRider->mVelocity, imp);
-        cRider* r = self->mRider;
-        float vn2 = -vu0Dot_139C88(r->mVelocity, r->mGroundNormal);
+        cRider* rider = self->mRider;
+        float vn2 = -vu0Dot_139C88(rider->mVelocity, rider->mGroundNormal);
         if (surf->MaxLandingPenetrationVel < vn2) {
-            vu0AddEq_139C88(self->mRider->mVelocity, vu0Scale_139C88(r->mGroundNormal, vn2 - surf->MaxLandingPenetrationVel));
+            vu0AddEq_139C88(self->mRider->mVelocity, vu0Scale_139C88(rider->mGroundNormal, vn2 - surf->MaxLandingPenetrationVel));
         }
         if (hit.Inst != 0) {
             char* handler = (char*)hit.Inst->m_pActiveNode;
@@ -1319,8 +1319,8 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             }
         }
         int anim = 438;
-        cRider* r2 = self->mRider;
-        r2->mGroundForward = vu0Normalize_139C88(vu0Sub_139C88(row_139C88(((char*)r2), 1), vu0Scale_139C88(r2->mGroundNormal, vu0Dot_139C88(row_139C88(((char*)r2), 1), r2->mGroundNormal))));
+        cRider* landedRider = self->mRider;
+        landedRider->mGroundForward = vu0Normalize_139C88(vu0Sub_139C88(row_139C88(((char*)landedRider), 1), vu0Scale_139C88(landedRider->mGroundNormal, vu0Dot_139C88(row_139C88(((char*)landedRider), 1), landedRider->mGroundNormal))));
         self->mRider->mGroundSide = vu0Cross_139C88(self->mRider->mGroundNormal, self->mRider->mGroundForward);
         self->mRider->mSurfaceType = hit.Stype;
         self->mRider->mGroundContactPoint = (*(t4Vector*)&hit.Ipos);
@@ -1337,14 +1337,14 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                        !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 2)) {
                 flip = tEventFlags_isSet1_i(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0) != 0;
             }
-            cRider* r4 = self->mRider;
-            if (vu0Dot_139C88(row_139C88(((char*)r4), 2), r4->mGroundNormal) < 0.0f) {
+            cRider* rider = self->mRider;
+            if (vu0Dot_139C88(row_139C88(((char*)rider), 2), rider->mGroundNormal) < 0.0f) {
                 flip = 1;
             }
             if (flip) {
-                float sideDot = vu0Dot_139C88(row_139C88(((char*)r4), 0), r4->mGroundNormal);
-                float frontDot = vu0Dot_139C88(row_139C88(((char*)r4), 1), r4->mGroundNormal);
-                float upDot = vu0Dot_139C88(row_139C88(((char*)r4), 2), r4->mGroundNormal);
+                float sideDot = vu0Dot_139C88(row_139C88(((char*)rider), 0), rider->mGroundNormal);
+                float frontDot = vu0Dot_139C88(row_139C88(((char*)rider), 1), rider->mGroundNormal);
+                float upDot = vu0Dot_139C88(row_139C88(((char*)rider), 2), rider->mGroundNormal);
                 if (absf_139C88(frontDot) > absf_139C88(sideDot) && absf_139C88(frontDot) > absf_139C88(upDot)) {
                     anim = frontDot < 0.0f ? 354 : 355;
                 } else if (absf_139C88(upDot) > absf_139C88(sideDot) && absf_139C88(upDot) > absf_139C88(frontDot)) {
@@ -1366,8 +1366,8 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                 } else {
                     anim = sideDot < 0.0f ? 357 : 356;
                 }
-            } else if (r4->PressMode == 0) {
-                float tiltDot = vu0Dot_139C88(row_139C88(((char*)r4), 2), r4->mGroundForward);
+            } else if (rider->PressMode == 0) {
+                float tiltDot = vu0Dot_139C88(row_139C88(((char*)rider), 2), rider->mGroundForward);
                 float k = cBEStatInterface_getLandingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex) * 0.29999101161956787f + 1.0f;
                 if (k * 0.699962317943573f < tiltDot) {
                     anim = 348;
@@ -1412,8 +1412,8 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                     }
                 }
             }
-            cRider* r6 = self->mRider;
-            float k = clamp_139C88(absf_139C88(vu0Dot_139C88(row_139C88(((char*)r6), 1), vu0Normalize_139C88(r6->mVelocity))), 1.0f, 1.0f);
+            cRider* rider = self->mRider;
+            float k = clamp_139C88(absf_139C88(vu0Dot_139C88(row_139C88(((char*)rider), 1), vu0Normalize_139C88(rider->mVelocity))), 1.0f, 1.0f);
             vu0ScaleEq_139C88(self->mRider->mVelocity, k);
             cWScriptMan_eventLand(cWScriptMan_TheWScriptMan);
         }

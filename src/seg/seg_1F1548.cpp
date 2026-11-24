@@ -416,19 +416,19 @@ extern "C" void cPunchFX_update(sFx_1150* self)
         return;
     int bone = *(int*)(self->owner + 0x8B0);
     int flag = 0;
-    int a = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 0);
+    int layer0Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 0);
     int layer1Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 1);
     if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->owner + 0x784), 1) == 13) {
         if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1)->Events, 1) == 0) {
             flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1)->Events, 0) != 0;
         }
     }
-    if (a == 326 || (layer1Anim == 323 && flag)) {
+    if (layer0Anim == 326 || (layer1Anim == 323 && flag)) {
         if (*(int*)(self->owner + 0x320))
             bone = *(int*)(self->owner + 0x8B0);
         else
             bone = *(int*)(self->owner + 0x8B8);
-    } else if (a == 327 || (layer1Anim == 324 && flag)) {
+    } else if (layer0Anim == 327 || (layer1Anim == 324 && flag)) {
         if (*(int*)(self->owner + 0x320))
             bone = *(int*)(self->owner + 0x8B8);
         else
@@ -455,12 +455,12 @@ extern "C" void cPunchFX_update(sFx_1150* self)
         }
         for (int i = 0; i < 4; i++) {
             float attackBlend = *(float*)(self->owner + 0x350);
-            float a = attackBlend * 3.0f;
+            float jitter = attackBlend * 3.0f;
             float hi = attackBlend * 15.0f + 15.0f;
             rnd.w = 0.0f;
-            rnd.x = randRange_1150(-a, a);
-            rnd.y = randRange_1150(-a, a);
-            rnd.z = randRange_1150(-a, a);
+            rnd.x = randRange_1150(-jitter, jitter);
+            rnd.y = randRange_1150(-jitter, jitter);
+            rnd.z = randRange_1150(-jitter, jitter);
             Add_1150(&point, base, rnd);
             self->pos[i] = point;
             self->size[i] = randRange_1150(15.0f, hi);

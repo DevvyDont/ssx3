@@ -5825,9 +5825,9 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
         int sound = 1;
         cKeyboardPopup_getObjName(self, self->miCurrentKey, name, 1);
         {
-            cUIObjK1CDB98* o = (cUIObjK1CDB98*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-            if (o != 0) {
-                o->SetColor(sColorK1CDB98(0.3f, 0.0f, 0.0f, 0.0f));
+            cUIObjK1CDB98* textObj = (cUIObjK1CDB98*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+            if (textObj != 0) {
+                textObj->SetColor(sColorK1CDB98(0.3f, 0.0f, 0.0f, 0.0f));
             }
         }
         if (InputK1CDB98(((char*)ev), 19)) {
@@ -5867,8 +5867,8 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
             changed = 1;
             sound = 6;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-            cUIState* o = self->mpParentState;
-            o->onWidgetEvent(0, 0xE);
+            cUIState* parent = self->mpParentState;
+            parent->onWidgetEvent(0, 0xE);
         } else if (InputK1CDB98(((char*)ev), 25)) {
             changed = 1;
             self->mbCapsOn ^= 1;
@@ -5952,9 +5952,9 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
         }
         cKeyboardPopup_getObjName(self, self->miCurrentKey, name, 1);
         {
-            cUIObjK1CDB98* o = (cUIObjK1CDB98*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-            if (o != 0) {
-                o->SetColor(sColorK1CDB98(1.0f, 0.0f, 0.0f, 0.0f));
+            cUIObjK1CDB98* textObj = (cUIObjK1CDB98*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+            if (textObj != 0) {
+                textObj->SetColor(sColorK1CDB98(1.0f, 0.0f, 0.0f, 0.0f));
             }
         }
         sSndK1CDB98* snd = *(sSndK1CDB98**)&self->mpEngine->mpSound;
