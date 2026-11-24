@@ -3,6 +3,9 @@
 #include "be/beinterface.h"
 #include "fe/fepopupoptionreset.h"
 #include "fe/fepopupscreenpos.h"
+#include "input/padcache.h"
+#include "fe/fepopupconfirm.h"
+#include "ui/uitext.h"
 #include "fe/fepopupvideocalibration.h"
 #include "ui/uilistbox.h"
 #include "ui/uislider.h"
@@ -1042,20 +1045,6 @@ extern char str_fegroup[];
 extern char D_004A1528[];
 extern int D_004A1A70;
 
-class cUIObj_18A298 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 /**
  * Creates the sound options screen ("141advsettings") and fills its widgets.
  *
@@ -1072,15 +1061,15 @@ extern "C" void cFEStateOptionsSound_onCreateScreen(cFEStateOptionsSound* self)
     }
     cFEStateOptionsSound_updateWidget(self);
     int on = D_004A1A70 == 1;
-    cUIObj_18A298* onObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ongroup));
+    cUIThing* onObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ongroup));
     if (onObj != 0) {
         onObj->setVisible(on);
     }
-    cUIObj_18A298* offObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_fegroup));
+    cUIThing* offObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_fegroup));
     if (offObj != 0) {
         offObj->setVisible(on ^ 1);
     }
-    cUIObj_18A298* item7 = (cUIObj_18A298*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1528));
+    cUIThing* item7 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1528));
     if (item7 != 0) {
         item7->setVisible(on);
         item7->setStatic(on ^ 1);
@@ -2335,20 +2324,6 @@ extern char* D_004A15C0;
 extern char str_default_text[];
 extern char str_pro_text[];
 
-class cUIObj_18CF50 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 /**
  * Shows the default or the pro button-layout picture and caption on the controller options screen.
  *
@@ -2360,19 +2335,19 @@ public:
  */
 extern "C" void cFEStateOptionsController_displayPadConfig(cFEStateOptionsController* self, int on)
 {
-    cUIObj_18CF50* defaultPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15BC));
+    cUIThing* defaultPicture = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15BC));
     if (defaultPicture != 0) {
         defaultPicture->setVisible(on);
     }
-    cUIObj_18CF50* proPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15C0));
+    cUIThing* proPicture = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15C0));
     if (proPicture != 0) {
         proPicture->setVisible(on ^ 1);
     }
-    cUIObj_18CF50* defaultText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_default_text));
+    cUIThing* defaultText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_default_text));
     if (defaultText != 0) {
         defaultText->setVisible(on);
     }
-    cUIObj_18CF50* proText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pro_text));
+    cUIThing* proText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pro_text));
     if (proText != 0) {
         proText->setVisible(on ^ 1);
     }
@@ -2419,7 +2394,7 @@ extern "C" void cFEStateOptionsController_onUpdate(cFEStateOptionsController* se
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_vibratePad);
 #ifdef SKIP_ASM
-extern char* PadCache;
+extern cPadCache* PadCache;
 
 // The pad device (vtable 0x48E488: dtor, sampleButtons, numActuators, setActuator; On Tour cPadDevice).
 class cPadDevice {
@@ -2433,13 +2408,13 @@ public:
 /**
  * Rumbles a controller pad with two motor strengths derived from @p x and @p y.
  *
- * Scales @p x to x' = max(0, x * 0.91333 - 18.5185) and @p y by 0.99167, then looks up pad @p idx (as a signed char) in
- * PadCache's device table (+0x2EEC). When the device has 2 actuators (numActuators), sets motor 0 to the largest of 0,
- * (y - 0.5) * 0.01 and (x' - 2) / 972.22, and motor 1 to the largest of 0, (y - 70) * 0.00625 and (x' - 100) / 5000
- * (setActuator). Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen,
- * cFEStateOptionsController_onPopupEvent, cFEStateOptionsController_onWidgetEvent, cFEStateOptionsController_onUpdate;
- * fepopupmisc's func_001E3AC8 is the same body without the state argument. Likely bug: with no PadCache the device
- * stays 0 and numActuators() is still called through it.
+ * Scales @p x to x' = max(0, x * 0.91333 - 18.5185) and @p y by 0.99167, then looks up pad @p idx (as a signed char)
+ * in PadCache's device table (PadDevices). When the device has 2 actuators (numActuators), sets motor 0 to the
+ * largest of 0, (y - 0.5) * 0.01 and (x' - 2) / 972.22, and motor 1 to the largest of 0, (y - 70) * 0.00625 and
+ * (x' - 100) / 5000 (setActuator). Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen,
+ * cFEStateOptionsController_onPopupEvent, cFEStateOptionsController_onWidgetEvent,
+ * cFEStateOptionsController_onUpdate; fepopupmisc's func_001E3AC8 is the same body without the state argument.
+ * Likely bug: with no PadCache the device stays 0 and numActuators() is still called through it.
  *
  * @param idx  the pad index
  * @param x  first strength input (feeds both motors' second terms)
@@ -2457,7 +2432,7 @@ extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* 
     y = y * 0.9916666746139526f;
     cPadDevice* rumbleDevice = 0;
     if (PadCache != 0) {
-        rumbleDevice = *(cPadDevice**)(PadCache + (i << 2) + 0x2EEC);
+        rumbleDevice = PadCache->PadDevices[i];
     }
     if (rumbleDevice->numActuators() == 2) {
         rumbleDevice->setActuator(0, ((y - 0.5f) * 0.009999999776482582f >? (clampedX - 2.0f) / 972.2222290039062f) >? 0.0f);
@@ -2704,12 +2679,11 @@ extern char str_cFEPopupConfirm[];
 /**
  * Handles a select or back on the save/load menu.
  *
- * Event 5: reads the entry's action from its misc data (+0x18) and then always stores 3 there. Action 3 (new
- * game) remembers the current controller (+0x14 into +0x48) and pushes a cFEPopupConfirm with
- * kT_HELPCreateNewFilePrompt; other actions (above 3 with the controller bit added) push the state that the
- * engine's custom interface (engine + 0x0) virtual slot 4, probably getNextState returns. Event 6 pushes the
- * state from the engine's custom interface (engine + 0x0) virtual slot 5, probably getPrevState. A null
- * widget is ignored.
+ * Event 5: reads the entry's action from its misc data (mMiscData) and then always stores 3 there. Action 3 (new
+ * game) remembers the current controller (mCurrentCtrl into mSaveLoadCurrentCtrl) and pushes a cFEPopupConfirm with
+ * kT_HELPCreateNewFilePrompt (default button 1, miMiscData 0); other actions (above 3 with the controller bit added)
+ * push the state that the engine's custom interface (mpCustom) getNextState (virtual slot 4) returns. Event 6 pushes
+ * the state from the engine's custom interface getPrevState (virtual slot 5). A null widget is ignored.
  *
  * @param widget  the selected widget
  * @param event  UI event code (5 or 6 are handled)
@@ -2729,10 +2703,10 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
             sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_HELPCreateNewFilePrompt));
             char* mem = (char*)operator new(3068, str_cFEPopupConfirm, 0x100, 0);
-            char* confirmPopup = (char*)cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
-            sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(confirmPopup + 8);
-            vt2[25].fn(vthis(confirmPopup, vt2[25]), 1);
-            *(int*)(confirmPopup + 0x18) = 0;
+            cFEPopupConfirm* confirmPopup = (cFEPopupConfirm*)cFEPopupConfirm_cFEPopupConfirm(
+                mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
+            confirmPopup->setDefaultButton(1);
+            confirmPopup->miMiscData = 0;
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, confirmPopup);
         } else {
             if (widgetId > 3) {
@@ -2826,40 +2800,7 @@ extern char str_pct_dmemory_card[];
 extern char str_pct_d_b[];
 extern char str_empty_d[];
 
-struct sColor_DD60 {
-    float r, g, b, a;
-};
-extern sColor_DD60 gStaticColour;
-
-class cUIObj_DD60 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void setUseStaticColour(int v);
-};
+extern tARGB gStaticColour;
 
 struct sVE_DD60 {
     short delta;
@@ -2867,9 +2808,9 @@ struct sVE_DD60 {
     char* (*fn)(void*, int);
 };
 
-static inline cUIObj_DD60* getObj_DD60(void* self, char* name)
+static inline cUIText* getObj_DD60(cUIState* self, char* name)
 {
-    return (cUIObj_DD60*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+    return (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
 }
 
 // Looks up a localized string by the hash of its name.
@@ -2884,7 +2825,7 @@ static inline char* getString_DD60(char* name)
 /**
  * Creates the memory card selection screen ("120MCselect") and sets it up for its mode.
  *
- * The mode comes from +0x1BC (1: load replay) and +0x22C (nonzero: save options; else load options): it picks
+ * The mode comes from mType (1: load replay) and mIsSaveScreen (nonzero: save options; else load options): it picks
  * the title (kT_TITLELoadReplay/SaveOptions/LoadOptions) and which button and help texts show. The four
  * "%dmemory card" slots get kT_MEMEmpty and their index; outside replay mode only slot 1 stays visible.
  */
@@ -2897,7 +2838,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(cFEStateOptionsDevice
         return;
     }
     cUIScreen_playFrame(screen, 0, 0);
-    cUIObj_DD60* uiObj;
+    cUIText* uiObj;
     uiObj = getObj_DD60(self, str_btext3);
     uiObj->setVisible(0);
     uiObj = getObj_DD60(self, str_btext3a);
@@ -2936,9 +2877,9 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(cFEStateOptionsDevice
     for (int i = 1; i < 5; i++) {
         sprintf(buf, str_pct_dmemory_card, i);
         uiObj = getObj_DD60(self, buf);
-        *(int*)((char*)uiObj + 0x18) = i - 1;
+        uiObj->mMiscData = i - 1;
         cUIText_setUnicodeString(uiObj, slot);
-        *(sColor_DD60*)((char*)uiObj + 0x88) = gStaticColour;
+        uiObj->mStaticColour = gStaticColour;
         uiObj->setUseStaticColour(1);
         if (self->mType != 1 && i >= 2) {
             uiObj->setStatic(1);
@@ -2998,32 +2939,26 @@ extern "C" void cMCOverlayManager_readSetFileType(void* app, int a1);
 extern "C" void cMCOverlayManager_SetAction(void* app, int a1);
 
 
-struct sVE_18DEA0i {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
-
-
 /**
  * Handles the device select screen's widget events: accepting a save slot, backing out and the event-7 action.
  *
- * Event 5 (a slot widget): does nothing without a widget or while busy (+0x1A8); sets +0x238, then acts only when the
- * display state f214 is 3 and the main button is active (+0x224). It takes the slot from the widget (+0x18) into slot
- * and the card manager's mFileCursor. In mode 2 on a save screen (+0x22C) it starts a save of file type 2
- * (cMCOverlayManager_writeSetFileType with profile -1), sets +0x1DC, busy and state 3 and calls this state's vtable slot 47 (cFEMemCard_displayStatusPopup,
- * the status popup with the manager's message). Otherwise a slot holding a file (cPS2MemCard_HasFileName through
- * mpMemCard) starts a load (cMCOverlayManager_readSetFileType, file type 0 in mode 1, else 2) and calls slot 44 (cFEMemCard_confirmLoad); an empty
- * slot calls slot 47.
+ * Event 5 (a slot widget): does nothing without a widget or while busy (mIsProcessing); sets mbChoseToSave, then acts
+ * only when the display state mScreenStatus is 3 and the main button is active (mMainButtonActive). It takes the slot
+ * from the widget (mMiscData) into mSlot and the card manager's mFileCursor. In mode 2 on a save screen
+ * (mIsSaveScreen) it starts a save of file type 2 (cMCOverlayManager_writeSetFileType with profile -1), sets
+ * mIsSavePressed, busy and state 3 and calls displayStatusPopup (virtual slot 47: the status popup with the
+ * manager's message). Otherwise a slot holding a file (cPS2MemCard_HasFileName through mpMemCard) starts a load
+ * (cMCOverlayManager_readSetFileType, file type 0 in mode 1, else 2) and calls confirmLoad (slot 44); an empty slot
+ * calls displayStatusPopup.
  *
- * Event 6 (back): clears +0x238; unless busy is 1 or state is already 6, sets +0x1E4, resets the manager
- * (cMCOverlayManager_SetState through its mVtbl, state 0) when state is 0, 1 or 2, and sets state 6.
+ * Event 6 (back): clears mbChoseToSave; unless busy is 1 or state is already 6, sets mIsCancelPressed, resets the
+ * manager (cMCOverlayManager_SetState, state 0) when state is 0, 1 or 2, and sets state 6.
  *
  * Event 7: on a save screen, not busy and not in state 6, with the selected device passing the card's slot-54 check
  * (cPS2MemCard_IsActionable), takes the widget's slot as for event 5; in state 1 with a file in that slot it sets busy and state
  * 4, cMCOverlayManager_SetAction(0) and the manager state 0x18.
  *
- * @param widget  the widget that sent the event (its +0x18 word is the slot index)
+ * @param widget  the widget that sent the event (its mMiscData is the slot index)
  * @param event  the widget event
  */
 extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceSelect* self, cUIThing* widget, unsigned int event)
@@ -3049,20 +2984,20 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             self->mIsSavePressed = 1;
             self->mIsProcessing = 1;
             self->mState = st;
-            ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
+            self->displayStatusPopup();
         } else if (self->mType == 1) {
             if (app->mpMemCard->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
-                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44]));
+                self->confirmLoad();
             } else {
-                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
+                self->displayStatusPopup();
             }
         } else {
             if (app->mpMemCard->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 2);
-                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[44]));
+                self->confirmLoad();
             } else {
-                ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47].fn(vthis(self, ((sVEntry<void(void*)>*)VPTR_OF(cListNode, self))[47]));
+                self->displayStatusPopup();
             }
         }
         break;
@@ -3124,10 +3059,10 @@ extern char str_ps2sq[];
 /**
  * Shows or hides the device select screen's action buttons.
  *
- * Does nothing when +0x234 already equals @p on. Otherwise sets "ps2x" visible when @p on is 0 and hidden when 1, and
- * likewise "btext3", "btext5" and "ps2sq" on a save screen (+0x22C) or "btext3a" otherwise (cUIThing_setVisible), then
- * stores @p on in +0x234. Fills slot +0x12C of cFEStateOptionsDeviceSelect_vtbl, the slot of
- * cFEMemCard_hideActionButtons in the memory-card base vtable.
+ * Does nothing when mIsHidden already equals @p on. Otherwise sets "ps2x" visible when @p on is 0 and hidden when 1,
+ * and likewise "btext3", "btext5" and "ps2sq" on a save screen (mIsSaveScreen) or "btext3a" otherwise
+ * (cUIThing_setVisible), then stores @p on in mIsHidden. Fills slot +0x12C of cFEStateOptionsDeviceSelect_vtbl, the
+ * slot of cFEMemCard_hideActionButtons in the memory-card base vtable.
  *
  * @param on  1 to hide the buttons, 0 to show them
  */
@@ -3136,13 +3071,13 @@ extern "C" void cFEStateOptionsDeviceSelect_hideActionButtons(cFEStateOptionsDev
     if (self->mIsHidden == on)
         return;
     int off = on ^ 1;
-    ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x)))->setVisible(off);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x))->setVisible(off);
     if (self->mIsSaveScreen != 0) {
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(off);
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
     } else {
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a))->setVisible(off);
     }
     self->mIsHidden = on;
 }
@@ -3155,20 +3090,6 @@ int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_btext5[];
 extern char str_ps2sq[];
-struct cUIObj_E2C0 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Shows or hides the device select screen's delete button.
  *
@@ -3181,8 +3102,8 @@ extern "C" void cFEStateOptionsDeviceSelect_hideDeleteButton(cFEStateOptionsDevi
 {
     if (self->mIsSaveScreen != 0) {
         int off = !on;
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
     }
     self->mDeleteButtonActive = !on;
 }
@@ -3197,41 +3118,28 @@ extern char str_btext3[];
 extern char str_btext3a[];
 extern char str_ps2x[];
 
-struct cUIObj_E368 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Shows or hides the device select screen's main (accept) button.
  *
- * On a save screen (+0x22C) shows "btext3" and "ps2x" only when @p saveBlocked is false; otherwise shows "btext3a" and
- * "ps2x" only when @p loadBlocked is false. The shown state is also stored in +0x224, which event 5 of cFEStateOptionsDeviceSelect_onWidgetEvent
- * requires. Fills slot +0x13C of cFEStateOptionsDeviceSelect_vtbl (cFEMemCard_hideMainButton's slot).
+ * On a save screen (mIsSaveScreen) shows "btext3" and "ps2x" only when @p saveBlocked is false; otherwise shows
+ * "btext3a" and "ps2x" only when @p loadBlocked is false. The shown state is also stored in mMainButtonActive, which
+ * event 5 of cFEStateOptionsDeviceSelect_onWidgetEvent requires. Fills slot +0x13C of
+ * cFEStateOptionsDeviceSelect_vtbl (cFEMemCard_hideMainButton's slot).
  *
  * @param loadBlocked  true to hide the button on a load screen
  * @param saveBlocked  true to hide the button on a save screen
  */
 extern "C" void cFEStateOptionsDeviceSelect_hideMainButton(cFEStateOptionsDeviceSelect* self, bool loadBlocked, bool saveBlocked)
 {
-    cUIObj_E368* xButton = (cUIObj_E368*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
+    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
     if (self->mIsSaveScreen != 0) {
         int showButton = !saveBlocked;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(showButton);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(showButton);
         self->mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     } else {
         int showButton = !loadBlocked;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(showButton);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a))->setVisible(showButton);
         self->mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     }
@@ -3294,163 +3202,63 @@ extern char str_pct_dmemory_card[];
 extern char str_arrow_left[];
 extern char str_arrow_right[];
 
-// UI widget: data before the vptr (vtable at +8).
-class cUIObj_18E510 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void setUseStaticColour(int on);
-};
-
-// Device-list vtable entries (g++ 2.95 layout: delta, index, function).
-struct sDevVtI_18E510 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
-struct sDevVtS_18E510 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, char*);
-};
-
 // Virtual calls on the manager's memory card (cMCOverlayManager::mpMemCard, a cMemCard), slot n: 14 GetTitleString,
 // 54 IsActionable, 55 IsFormatted, 66 IsFileSlotDisabled, 67 HasFileName. Written as real cMemCard calls, each one
 // moves an instruction in cFEStateOptionsDeviceSelect_displayStatus's loop setup, so its loop keeps these entry calls.
-#define DEVS_18E510(mc, n, a, b) ((*(sDevVtS_18E510**)*(char**)((char*)(mc) + 0x434))[n].fn(*(char**)((char*)(mc) + 0x434) + (*(sDevVtS_18E510**)*(char**)((char*)(mc) + 0x434))[n].delta, a, b))
-#define DEV0_18E510(mc, n) ((*(sVEntry<int(void*)>**)*(char**)((char*)(mc) + 0x434))[n].fn(*(char**)((char*)(mc) + 0x434) + (*(sVEntry<int(void*)>**)*(char**)((char*)(mc) + 0x434))[n].delta))
-#define DEVI_18E510(mc, n, a) ((*(sDevVtI_18E510**)*(char**)((char*)(mc) + 0x434))[n].fn(*(char**)((char*)(mc) + 0x434) + (*(sDevVtI_18E510**)*(char**)((char*)(mc) + 0x434))[n].delta, a))
+#define DEVS_18E510(mc, n, a, b) ((*(sVEntry<void(void*, int, char*)>**)(mc)->mpMemCard)[n].fn( \
+    vthis((mc)->mpMemCard, (*(sVEntry<void(void*, int, char*)>**)(mc)->mpMemCard)[n]), a, b))
+#define DEV0_18E510(mc, n) ((*(sVEntry<int(void*)>**)(mc)->mpMemCard)[n].fn( \
+    vthis((mc)->mpMemCard, (*(sVEntry<int(void*)>**)(mc)->mpMemCard)[n])))
+#define DEVI_18E510(mc, n, a) ((*(sVEntry<int(void*, int)>**)(mc)->mpMemCard)[n].fn( \
+    vthis((mc)->mpMemCard, (*(sVEntry<int(void*, int)>**)(mc)->mpMemCard)[n]), a))
 
-
-class cStateBase_18E510 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void triggerDisplayState(int s);
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual int displayFileOK();
-    virtual void setMenuHighlight();
-};
-
-struct cState_18E510 : cStateBase_18E510 {
-    char padC[0x40 - 0xC];
-    void* screen;           // 0x40
-    char pad44[0x1BC - 0x44];
-    int mode;               // 0x1BC
-    char pad1C0[0x214 - 0x1C0];
-    int f214;               // 0x214
-    int pad218;
-    int dev;                // 0x21C
-    char pad220[0x22C - 0x220];
-    int f22C;               // 0x22C
-};
 
 /**
  * Refreshes the device select screen's memory-card panel: the device label, the slot entries and the device arrows.
  *
- * When this state's vtable slot 42 (cFEMemCard_displayFileOK) passes: with no card found (mpMemCard slot 53, cPS2MemCard_IsAvailable1) it
- * shows the no-cards message (cFEMemCard_callbackDisplayNoCards), otherwise it switches the display state to 3 (slot 35,
- * cFEMemCard_triggerDisplayState) unless f214 is 3 already. If slot 42 still passes it highlights a menu entry (slot
- * 43, cFEMemCard_setMenuHighlight), puts the label of the card manager's mSelectedDevice
- * (cMCOverlayManager_GetDeviceDisplayString) in "Memory card text", stores that device in dev and hides "1percentage".
+ * When this state's vtable slot 42 (cFEMemCard_displayFileOK) passes: with no card found (mpMemCard slot 53,
+ * cPS2MemCard_IsAvailable1) it shows the no-cards message (cFEMemCard_callbackDisplayNoCards), otherwise it switches
+ * the display state to 3 (slot 35, cFEMemCard_triggerDisplayState) unless mScreenStatus is 3 already. If slot 42
+ * still passes it highlights a menu entry (slot 43, cFEMemCard_setMenuHighlight), puts the label of the card
+ * manager's mSelectedDevice (cMCOverlayManager_GetDeviceDisplayString) in "Memory card text", stores that device in
+ * mLastSelectedDevice and hides "1percentage".
  *
- * Then for entries 1 to 4 (only entry 1 unless mode is 1) it sets the "%dmemory card" text to the card's title string
- * for file slot i - 1 (mpMemCard slot 14, cPS2MemCard_GetTitleString) and makes the entry selectable (setStatic(0) and
- * slot 25, cUIText_setUseStaticColour(0)) or static (both 1): an empty, enabled slot on a usable card (slots 67 and 66
- * false, slot 55 true) is static in mode 1, and on a save screen (f22C) only the first one is selectable; any other
- * slot is selectable when the selected device passes slot 54 and the slot is not disabled. The "arrow left" and "arrow
- * right" widgets are shown when cFEMemCard_checkNextAvailableDevice finds a device that way. Whenever f214 is not 3,
- * the shown entries get setUseStaticColour(0) and setStatic(1). Fills slot +0xD4 of cFEStateOptionsDeviceSelect_vtbl
- * (cFEMemCard_displayStatus's slot).
+ * Then for entries 1 to 4 (only entry 1 unless mType is 1) it sets the "%dmemory card" text to the card's title
+ * string for file slot i - 1 (mpMemCard slot 14, cPS2MemCard_GetTitleString) and makes the entry selectable
+ * (setStatic(0) and slot 25, cUIText_setUseStaticColour(0)) or static (both 1): an empty, enabled slot on a usable
+ * card (slots 67 and 66 false, slot 55 true) is static in mType 1, and on a save screen (mIsSaveScreen) only the
+ * first one is selectable; any other slot is selectable when the selected device passes slot 54 and the slot is not
+ * disabled. The "arrow left" and "arrow right" widgets are shown when cFEMemCard_checkNextAvailableDevice finds a
+ * device that way. Whenever mScreenStatus is not 3, the shown entries get setUseStaticColour(0) and setStatic(1).
+ * Fills slot +0xD4 of cFEStateOptionsDeviceSelect_vtbl (cFEMemCard_displayStatus's slot).
  * On Tour: cOVState_SAVEOPTIONS::displayStatus (ovstatereplay.cpp).
  */
 extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceSelect* self)
 {
     cMCOverlayManager* pMC = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     unsigned short ustrDisplay[800];
-    if (((cState_18E510*)self)->displayFileOK()) {
+    if (self->displayFileOK()) {
         if (pMC->mpMemCard->IsAvailable1() == 0) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
-            ((cState_18E510*)self)->triggerDisplayState(3);
+            self->triggerDisplayState(3);
         }
     }
-    if (((cState_18E510*)self)->displayFileOK()) {
+    if (self->displayFileOK()) {
         char text[80];
-        cUIObj_18E510* pText;
+        cUIText* pText;
         int bIsNewSet;
-        ((cState_18E510*)self)->setMenuHighlight();
+        self->setMenuHighlight();
         cMCOverlayManager_GetDeviceDisplayString(pMC, pMC->mSelectedDevice, ustrDisplay, 800);
         cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_text)), ustrDisplay);
         self->mLastSelectedDevice = pMC->mSelectedDevice;
-        pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage));
+        pText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage));
         pText->setVisible(0);
         bIsNewSet = 0;
         for (int i = 1; i < 5 && (self->mType == 1 || i < 2); i++) {
             char strObj[60];
             sprintf(strObj, str_pct_dmemory_card, i);
-            pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(strObj));
+            pText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(strObj));
             DEVS_18E510(pMC, 14, i - 1, text);
             cUIText_setUnicodeString(pText, text);
             if (DEVI_18E510(pMC, 67, i - 1) == 0 && DEVI_18E510(pMC, 66, i - 1) == 0
@@ -3479,15 +3287,15 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
                 pText->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, pMC->mSelectedDevice, 1) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(0);
+        if (cFEMemCard_checkNextAvailableDevice(self, pMC, pMC->mSelectedDevice, 1) == -1) {
+            ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(1);
+            ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, pMC->mSelectedDevice, 0) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(0);
+        if (cFEMemCard_checkNextAvailableDevice(self, pMC, pMC->mSelectedDevice, 0) == -1) {
+            ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(1);
+            ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(1);
         }
     }
     if (self->mScreenStatus != 3) {
@@ -3495,7 +3303,7 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
             char strObj[80];
             sprintf(strObj, str_pct_dmemory_card, i);
             i++;
-            cUIObj_18E510* pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(strObj));
+            cUIText* pText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(strObj));
             pText->setUseStaticColour(0);
             pText->setStatic(1);
         }

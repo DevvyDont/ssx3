@@ -101,8 +101,8 @@ extern "C" void cOVStateHiScoreList_onWidgetEvent(cOVStateHiScoreList* self, cUI
     if (((void*)item) != 0 && Event == 5) {
         void* nextState = 0;
         if (item->mMiscData == 1) {
-            cUICustomInterface* factory = *(cUICustomInterface**)self->mpEngine;
-            nextState = ((sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory))[4].fn((char*)factory + ((sVEntry<void*(void*, void*, int)>*)VPTR_OF(cUICustomInterface, factory))[4].delta, self, 1);
+            cUICustomInterface* factory = self->mpEngine->mpCustom;
+            nextState = factory->getNextState(self, 1);
         }
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     }
@@ -218,20 +218,20 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getScale__FPvT0);
 /**
  * Writes a HUD element definition's x and y scale into @p outRange.
  *
- * Copies the floats at +0x8/+0xC (rangeMin/rangeMax in this unit's cOVStateHUDElem view; On Tour tHUDDef::xx, xy).
- * Every renderer multiplies the element's size and font scale by them. The declaration also returns the x scale; the
- * callers ignore it.
+ * Copies the definition's xx and xy (On Tour tHUDDef::xx, xy). Every renderer multiplies the element's size and font
+ * scale by them. The declaration also returns the x scale; the callers ignore it.
  *
  * @param outRange  receives (scale x, scale y)
  * @return the x scale it copied
  */
 float tHUDDef_getScale(void* self, void* outRange)
 {
-    cTextureElement* elem = (cTextureElement*)self;
-    float minValue = elem->mHeight;
-    *(float*)outRange = minValue;
-    *(float*)((char*)outRange + 0x4) = elem->mTop;
-    return minValue;
+    const tHUDDef* def = (const tHUDDef*)self;
+    float* out = (float*)outRange;
+    float scaleX = def->xx;
+    out[0] = scaleX;
+    out[1] = def->xy;
+    return scaleX;
 }
 #endif
 
@@ -536,20 +536,19 @@ extern "C" void* cUIState_cUIState_9A30(void* self, int a1) __asm__("cUIState_cU
 extern "C" void cHUDRadar_cHUDRadar(void*);
 extern char cOVStateHUD1P_vtbl[];
 
-struct sElem_9A30 {
+// tHUDRiderInfo with EA's inline constructor (ours has none): it constructs the rider's course tracker.
+struct tHUDRiderInfoInit : tHUDRiderInfo {
     void* operator new[](unsigned int, void* p) { return p; }
-    char pad[8];
-    char sub[0x84];
-    sElem_9A30() { cHUDRadar_cHUDRadar(sub); }
+    tHUDRiderInfoInit() { cHUDRadar_cHUDRadar(&radar); }
 };
 
 /**
  * Constructs the one-player HUD overlay state.
  *
  * Runs the cUIState constructor (cUIState_cUIState) with @p pEngine, installs cOVStateHUD1P_vtbl at +0x8, constructs the
- * two 0x8C-byte HUD elements at +0x48 (cHUDRadar_cHUDRadar on each one's +0x8), sets +0x474 to -1, clears +0x3D4, +0x3D8,
- * +0x480 and +0x484 and sets the four scales +0x478, +0x47C, +0x488 and +0x48C to 1.0. The caller (gameload) passes a
- * third argument, 0, which is not used.
+ * two rider infos mRiderInfo (cHUDRadar_cHUDRadar on each one's radar), sets mGlow.mSourceShape to -1, clears
+ * mbHideHUD, mHideHUDOV, mGlow.mTop and mGlow.mLeft and sets mGlow's mWidth, mHeight, mRight and mBottom to 1.0. The
+ * caller (gameload) passes a third argument, 0, which is not used.
  *
  * @param hud     the memory for the state (this; the caller allocates 3224 bytes)
  * @param pEngine  the UI engine
@@ -560,7 +559,7 @@ extern "C" void* cOVStateHUD1P_cOVStateHUD1P(cOVStateHUD1P* hud, int pEngine)
 {
     cUIState_cUIState_9A30(((char*)hud), pEngine);
     VPTR_OF(cListNode, hud) = (void**)cOVStateHUD1P_vtbl;
-    new ((char*)&hud->mRiderInfo[0]) sElem_9A30[2];
+    new ((char*)&hud->mRiderInfo[0]) tHUDRiderInfoInit[2];
     hud->mGlow.mSourceShape = -1;
     hud->mbHideHUD = 0;
     hud->mHideHUDOV = 0;
@@ -1563,9 +1562,11 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText);
 #ifdef SKIP_ASM
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
-struct sVec4_001F1B30 {
-    float x, y, z, w;
-    sVec4_001F1B30(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
+// A tARGB with EA's constructors (ours has none): the renderers build colour temporaries. (cFont keeps its tARGBs,
+// Color and ShadowColor, as float[4]: the same four floats.)
+struct tARGBInit : tARGB {
+    tARGBInit() {}
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
 
@@ -1635,13 +1636,13 @@ extern "C" void cOVStateHUD1P_renderText(cOVStateHUD1P* ctx, cFont* font, tHUDDe
     } else {
         col = *color;
     }
-    sVec4_001F1B30 shadowColour(col.A, 0.0f, 0.0f, 0.0f);
+    tARGBInit shadowColour(col.A, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[idx].layer << 5) & 0x3E0);
     (*(tARGB*)&font->Color[0]) = col;
-    (*(sVec4_001F1B30*)&font->ShadowColor[0]) = shadowColour;
+    (*(tARGB*)&font->ShadowColor[0]) = shadowColour;
     cFont_text(font, out[0], out[1], str);
-    (*(sVec4_001F1B30*)&font->ShadowColor[0]) = sVec4_001F1B30(1.0f, 0.0f, 0.0f, 0.0f);
+    (*(tARGB*)&font->ShadowColor[0]) = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
     font->Scale[0] = font->BaseScale[0] * scale[0];
     font->Scale[1] = font->BaseScale[1] * scale[1];
 }
@@ -1663,11 +1664,6 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText1);
 // a 4-float ctor temp + struct copy gives the 'swc1 x4; ldl/ldr/sdl/sdr' colour build.
 
 
-struct sCol_001F1E28 {
-    float r, g, b, a;
-    sCol_001F1E28() {}
-    sCol_001F1E28(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
-};
 
 
 
@@ -1814,7 +1810,7 @@ extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, cFont
         rect[2] = extent[2] * resEsc[0];
         rect[3] = extent[3] * resEsc[1];
     }
-    sCol_001F1E28 col;
+    tARGB col;
     if (color == 0) {
         t4Vector startColour;
         t4Vector endColour;
@@ -1822,14 +1818,14 @@ extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, cFont
         tHUDDef_getColour1(&defs[idx2], &endColour);
         endColour.w = 0.0f;
         t4Vector blendedColour = vu0Add_1E28(vu0Scale_1E28(vu0Sub_1E28(endColour, startColour), blend), startColour);
-        col = sCol_001F1E28(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
+        col = tARGBInit(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
     } else {
-        col = *(sCol_001F1E28*)color;
-        col.r = col.r * (1.0f - blend);
+        col = *color;
+        col.A = col.A * (1.0f - blend);
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
-    (*(sCol_001F1E28*)&font->Color[0]) = col;
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[26].layer << 5) & 0x3E0);
+    (*(tARGB*)&font->Color[0]) = col;
     float baseScaleX = font->BaseScale[0];
     float blendScaleX = resEsc[0];
     float blendScaleY = resEsc[1];
@@ -1848,10 +1844,6 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText2);
 extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
 extern "C" void cFont_text1(void* self, float x, float y, const unsigned short* str);
 
-struct sVec4_001F22E8 {
-    float x, y, z, w;
-    sVec4_001F22E8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
-};
 
 
 
@@ -1918,13 +1910,13 @@ extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, cFont* font, tHUDD
     } else {
         col = *color;
     }
-    sVec4_001F22E8 shadowColour(col.A, 0.0f, 0.0f, 0.0f);
+    tARGBInit shadowColour(col.A, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[idx].layer << 5) & 0x3E0);
     (*(tARGB*)&font->Color[0]) = col;
-    (*(sVec4_001F22E8*)&font->ShadowColor[0]) = shadowColour;
+    (*(tARGB*)&font->ShadowColor[0]) = shadowColour;
     cFont_text1(font, out[0], out[1], str);
-    (*(sVec4_001F22E8*)&font->ShadowColor[0]) = sVec4_001F22E8(1.0f, 0.0f, 0.0f, 0.0f);
+    (*(tARGB*)&font->ShadowColor[0]) = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
     font->Scale[0] = font->BaseScale[0] * scale[0];
     font->Scale[1] = font->BaseScale[1] * scale[1];
 }
@@ -1934,11 +1926,6 @@ extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, cFont* font, tHUDD
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText3);
 #ifdef SKIP_ASM
 
-struct sCol_001F25E0 {
-    float r, g, b, a;
-    sCol_001F25E0() {}
-    sCol_001F25E0(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
-};
 
 
 
@@ -2082,7 +2069,7 @@ extern "C" void cOVStateHUD1P_renderText3(cOVStateHUD1P* ctx, float blend, cFont
         rect[2] = extent[2] * resEsc[0];
         rect[3] = extent[3] * resEsc[1];
     }
-    sCol_001F25E0 col;
+    tARGB col;
     if (color == 0) {
         t4Vector startColour;
         t4Vector endColour;
@@ -2090,14 +2077,14 @@ extern "C" void cOVStateHUD1P_renderText3(cOVStateHUD1P* ctx, float blend, cFont
         tHUDDef_getColour1(&defs[idx2], &endColour);
         endColour.w = 0.0f;
         t4Vector blendedColour = vu0Add_25E0(vu0Scale_25E0(vu0Sub_25E0(endColour, startColour), blend), startColour);
-        col = sCol_001F25E0(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
+        col = tARGBInit(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
     } else {
-        col = *(sCol_001F25E0*)color;
-        col.r = col.r * (1.0f - blend);
+        col = *color;
+        col.A = col.A * (1.0f - blend);
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
-    (*(sCol_001F25E0*)&font->Color[0]) = col;
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[26].layer << 5) & 0x3E0);
+    (*(tARGB*)&font->Color[0]) = col;
     float baseScaleX = font->BaseScale[0];
     float blendScaleX = resEsc[0];
     float blendScaleY = resEsc[1];
@@ -2173,7 +2160,7 @@ extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, cFont* font, 
     (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[idx].layer << 5) & 0x3E0);
     float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2AA0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
@@ -2270,7 +2257,7 @@ extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, cFont* font,
     (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((defs[idx].layer << 5) & 0x3E0);
     float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2DB0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
@@ -2333,13 +2320,6 @@ void* cBXLoadIndicator_cBXLoadIndicator(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Init);
 #ifdef SKIP_ASM
-struct sHudIds001F30D8 {
-    int a;
-    int b;
-    int c;
-    int d;
-};
-
 int GetHashValue32(char* str);
 extern "C" int cUIFontInterface_getFontByHashName(void* self, int key);
 extern char str_kT_ovrcmnloading_b[];
@@ -2348,24 +2328,25 @@ extern char str_fefont[];
 /**
  * Loads the loading indicator's text and font and clears its state.
  *
- * mpLoadText (+0x0) becomes the localized "kT_ovrcmnloading_b" string (its GetHashValue32 looked up through
- * SSXApp->FELocale's virtual slot 4) and mpFont (+0xC) the "fefont" font from the UI's font bank (cUIFontInterface_getFontByHashName on
- * SSXApp->Game->UI + 0x8); mLoadIndicators (+0x4) and mAnimFrame (+0x8) are cleared. cGame_gainFocus calls it.
+ * mpLoadText becomes the localized "kT_ovrcmnloading_b" string (its GetHashValue32 looked up through SSXApp->FELocale's
+ * getStringByHash, slot 4) and mpFont the "fefont" font from the UI's font bank (cUIFontInterface_getFontByHashName on
+ * SSXApp->Game->UI->mpFontInterface); mLoadIndicators and mAnimFrame are cleared. cGame_gainFocus calls it.
  *
  * @param vself  the loading indicator (this)
  */
 extern "C" void cBXLoadIndicator_Init(cBXLoadIndicator* vself)
 {
-    sHudIds001F30D8* self = (sHudIds001F30D8*)vself;
     cFELocale* locale = SSXApp->FELocale;
-    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
+    // getStringByHash (slot 4) by hand: retail reads the slot before it hashes the key.
+    sVEntry<unsigned short*(void*, int)>* vt =
+        (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
     void* adj = vthis(locale, vt[4]);
     int loadingHash = GetHashValue32(str_kT_ovrcmnloading_b);
-    self->a = vt[4].fn(adj, loadingHash);
+    vself->mpLoadText = vt[4].fn(adj, loadingHash);
     void* tbl = SSXApp->Game->UI->mpFontInterface;
-    self->d = cUIFontInterface_getFontByHashName(tbl, GetHashValue32(str_fefont));
-    self->b = 0;
-    self->c = 0;
+    vself->mpFont = (cFont*)cUIFontInterface_getFontByHashName(tbl, GetHashValue32(str_fefont));
+    vself->mLoadIndicators = 0;
+    vself->mAnimFrame = 0.0f;
 }
 #endif
 

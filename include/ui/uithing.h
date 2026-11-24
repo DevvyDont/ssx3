@@ -85,6 +85,9 @@ struct cUIThing : public cListNode {
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] cUIThing_getSound/cUIThing_setSound get/set by index
 
+    // EA's inline accessor ([P] the preview's setMiscData, sw 0x18; retail's out-of-line copy cUIThing_setMiscData).
+    void setMiscData(int data) { mMiscData = data; }
+
     // Virtuals. Slots [R] cUIThing_vtbl (slots 2-3 are cListNode's traverseFlat / traverseRecurse, not overridden),
     // names and order [O] (On Tour class cUIThing); parameter types from the retail implementations (the bool
     // parameters are words: cUIThing_setActive(cUIThing*, int)), pointers where On Tour passes references. Slot 22 is

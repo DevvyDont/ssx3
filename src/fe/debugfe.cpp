@@ -16,6 +16,7 @@
 #include "be/beintnewrace.h"
 #include "online/commsystem.h"
 #include "main/ssxapp.h"
+#include "render/playerlights.h"
 
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
@@ -241,16 +242,6 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_setGamePath);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-struct sDbgRaceSel17D008 {
-    char pad_0x00[0x48];
-    signed char mode;  // 0x48
-    signed char slot;  // 0x49
-};
-class cBENewRaceIfaceK17D008 {
-public:
-    char pad_0x00[0xC];
-    virtual int submit();
-};
 extern "C" void cBENewRaceInterface_setGamePath(void* iface, int idx);
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 
@@ -258,14 +249,14 @@ extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
  * Debug menu: switches the new race to another game path, keeping a remembered game mode per path.
  *
  * Saves cBENewRaceInterface_newRace's current mode in the screen's mode table at the current path's index, sets
- * the new path with cBENewRaceInterface_setGamePath, selects the mode remembered for it with cBENewRaceInterface_setGameMode and
- * calls the interface's virtual slot 1 (apply).
+ * the new path with cBENewRaceInterface_setGamePath, selects the mode remembered for it with
+ * cBENewRaceInterface_setGameMode and calls the interface's submit.
  *
  * @param idx  the game path to switch to (On Tour eBEGamePath)
  */
 extern "C" void cDebugMenuScreen_setGamePath(cDebugMenuScreen* self, int idx)
 {
-    cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
+    cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 0);
     (self)->LastGamePathGameMode[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
     cBENewRaceInterface_setGamePath(iface, idx);
     cBENewRaceInterface_setGameMode(iface, (self)->LastGamePathGameMode[idx]);
@@ -632,15 +623,11 @@ extern "C" void func_0025AC50(void*);
 extern "C" void cMenuSys_input(void* stack);
 extern "C" void func_0017DB18(cDebugLobbyScreen* self);
 
-struct sMenuStack17D688 {
-    int count;      // 0x0
-    void* items[8]; // 0x4
-};
-
-static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
+// The menu on top of the menu system's stack, or 0 when no menu is open.
+static inline cMenu* menuSysTop(cMenuSys* menuSys)
 {
-    if (self->count > 0)
-        return self->items[self->count - 1];
+    if (menuSys->MenuDepth > 0)
+        return menuSys->MenuStack[menuSys->MenuDepth - 1];
     return 0;
 }
 
@@ -649,15 +636,15 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
  *
  * Calls the comm system update cCommSystem_update (cCommSystem_mCommSystem) and the lobby manager update func_0025AC50
  * (LobbyMan_mLobbyMan), which delivers queued lobby events to func_0017D6F0 through func_0017D260. When the menu system
- * at +0x8 has a menu open it runs its input (cMenuSys_input), then func_0017DB18 advances the state. cDebugFE_update
+ * mMenuSys has a menu open it runs its input (cMenuSys_input), then func_0017DB18 advances the state. cDebugFE_update
  * calls it through the active screen's virtual slot 2.
  */
 extern "C" void cDebugLobbyScreen_update(cDebugLobbyScreen* self)
 {
     cCommSystem_update(cCommSystem_mCommSystem);
     func_0025AC50(LobbyMan_mLobbyMan);
-    if (sMenuStack17D688_top(&(*(sMenuStack17D688*)&self->mMenuSys)) != 0)
-        cMenuSys_input(&(*(sMenuStack17D688*)&self->mMenuSys));
+    if (menuSysTop(&self->mMenuSys) != 0)
+        cMenuSys_input(&self->mMenuSys);
     func_0017DB18((cDebugLobbyScreen*)self);
 }
 #endif
@@ -1543,11 +1530,6 @@ extern "C" void cMenuSys_render(void* self);
 extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* out);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
-struct sColor17E5C8 {
-    float r, g, b, a;
-    sColor17E5C8(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
-};
-
 
 // Returned by value through a hidden pointer and destroyed at the end of the
 // full expression, so it shares its stack slot with the colour temporaries.
@@ -1558,24 +1540,18 @@ struct sBXStr17E5C8 {
 };
 sBXStr17E5C8 getStr17E5C8(void* self, unsigned int tag) __asm__("func_00260E50");
 
-struct sDebugFE17E5C8 {
-    int f0;
-    int state;
-    int count;
-    void* items[0x1C14 / 4 - 3];
-    unsigned int tag;
-};
-
 static inline void scale17E5C8(cFont* f, float s)
 {
     f->Scale[0] = f->BaseScale[0] * s;
     f->Scale[1] = f->BaseScale[1] * s;
 }
 
-static inline void* top17E5C8(sDebugFE17E5C8* self)
+// The menu on top of the menu system's stack, or 0 when no menu is open. (cFont's Color is a tARGB stored as float[4]:
+// the draw code below writes it through this unit's tARGB, the same four floats.)
+static inline cMenu* top17E5C8(cMenuSys* menuSys)
 {
-    if (self->count > 0)
-        return self->items[self->count - 1];
+    if (menuSys->MenuDepth > 0)
+        return menuSys->MenuStack[menuSys->MenuDepth - 1];
     return 0;
 }
 
@@ -1592,144 +1568,144 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  * Draws the debug lobby screen: a status line for the current state, the error text or game details, the menus and this
  * console's address.
  *
- * Uses the debug front end's font (SSXApp->DebugFE +0x18), setting its Scale to BaseScale times a factor and its Color
- * (tARGB) before each part. By the state at +0x4 it centres a red (0.9, 0.2, 0.2) line at scale 1.5 (cFont_centertext):
+ * Uses the debug front end's font (SSXApp->DebugFE->Font), setting its Scale to BaseScale times a factor and its Color
+ * (tARGB) before each part. By mState it centres a red (0.9, 0.2, 0.2) line at scale 1.5 (cFont_centertext):
  * "Connecting to network" (0, 1), "Connecting to lobby" (2), "Creating account" (4), "Authenticating account" (5),
  * "Selecting Persona" (7), "Creating Persona" (8), "Deleting Persona" (9) and "Selecting Room" (11) at (320, 200);
  * "Waiting for reponse" (13) and "Challenge Declined!" (17) at (320, 100). The error states 18 "Error Connecting!", 19
  * "Disconnected from server!", 20 "Error Creating Account!", 21 "Error Authenticating Account!", 22 "Persona Error!",
  * 23 "Error Entering room!" and 24 "Error Issueing Challenge!" add a light grey line at scale 0.8 and y 150: the text
- * func_00260E50 builds for the error code at +0x1C14. State 16 shows "Play Game!" and, at scale 0.7 in pale yellow,
+ * func_00260E50 builds for mErrorCode. State 16 shows "Play Game!" and, at scale 0.7 in pale yellow,
  * rows 20 apart from y 200 with labels at x 110 and values right-aligned at x 530: Game (LobbyMan mGameName), Opponent
  * (mOpponent), Host/Client ("Host" or "Client" by mIsHost), Host Address (mHostAddr) and Client Address (mOppoAddr) in
  * dotted form, and Seed (mSeed). Then, at scale 0.9, the menu system renders its top menu (cMenuSys_render) when one is
  * open, and while the comm system is connected (mNetConnState 5) this console's address (cCommSystem_netConnLocalAddr) is centred in
  * yellow at (320, 420), scale 0.8. cDebugFE_render calls it through the active screen's virtual slot 3.
  */
-extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
+extern "C" void cDebugLobbyScreen_draw(cDebugLobbyScreen* self)
 {
     cFont* font = SSXApp->DebugFE->Font;
-    switch (self->state) {
+    switch (self->mState) {
     case 0:
     case 1:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Connecting_to_network);
         break;
     case 2:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Connecting_to_lobby);
         break;
     case 4:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Creating_account);
         break;
     case 5:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Authenticating_account);
         break;
     case 8:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Creating_Persona);
         break;
     case 9:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Deleting_Persona);
         break;
     case 7:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Selecting_Persona);
         break;
     case 11:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Selecting_Room);
         break;
     case 13:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Waiting_for_reponse);
         break;
     case 17:
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Challenge_Declined);
         break;
     case 18: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Connecting);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
         break;
     }
     case 19: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Disconnected_from_server);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
         break;
     }
     case 20: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Creating_Account);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
         break;
     }
     case 22: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Persona_Error);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
         break;
     }
     case 21: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Authenticating_Account);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
         break;
     }
     case 23: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Entering_room);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
         break;
     }
     case 24: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Issueing_Challenge);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.9f);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->mErrorCode).p);
         break;
     }
     case 16: {
         scale17E5C8(font, 1.5f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Play_Game);
         scale17E5C8(font, 0.7f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.6f);
         float y = 200.0f;
         cFont_text(font, 110.0f, y, str_Game);
         cFont_righttext(font, LobbyMan_mLobbyMan->mGameName, 530.0f, y);
@@ -1754,13 +1730,13 @@ extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
     }
     }
     scale17E5C8(font, 0.9f);
-    if (top17E5C8(self) != 0)
-        cMenuSys_render(&self->count);
+    if (top17E5C8(&self->mMenuSys) != 0)
+        cMenuSys_render(&self->mMenuSys);
     if (isEq17E5C8(cCommSystem_mCommSystem->mNetConnState, 5)) {
         unsigned int ip;
         cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, (int*)&ip);
         scale17E5C8(font, 0.8f);
-        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
+        (*(tARGB*)&font->Color[0]) = tARGB(1.0f, 0.9f, 0.9f, 0.2f);
         unsigned int localAddr = ip;
         cFont_centertextf(font, 320.0f, 420.0f, str_pct_d_pct_d_pct_d_pct_d, localAddr >> 24, (localAddr >> 16) & 0xFF, (localAddr >> 8) & 0xFF, localAddr & 0xFF);
     }
@@ -1993,57 +1969,50 @@ extern "C" int* FILE_load(const char* name, int flags);
 extern "C" void* cDebugMenuScreen_cDebugMenuScreen(void* self);
 extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self);
 
-typedef void (*Fn1_17F868)(void*, int);
-typedef int (*Load_17F868)(void*, void*, const char*, int, int, int);
-
-
-struct sDebugFE_17F868 {
-    char pad_0x00[0xC];
-    void* objs[2];      // 0xC
-    void* cur;          // 0x14
-    char* font;         // 0x18
-    int snd1C;          // 0x1C
-    int snd20;          // 0x20
-};
 
 /**
  * Loads the debug front end: its font, the dot and menu textures, and the debug and lobby menu screens.
  *
- * Starts on the lobby menu when SSXApp->unk_74 is set, otherwise on the debug menu screen.
+ * Starts on the lobby menu when SSXApp->AutoLobby is set, otherwise on the debug menu screen.
  */
-extern "C" void cDebugFE_load(sDebugFE_17F868* self)
+extern "C" void cDebugFE_load(cDebugFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ps2GraphicsMan->InitTextures(0);
-    self->font = (char*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
+    self->Font = (cFont*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
     t2Vector sc(1.600000023841858f, 1.600000023841858f);
-    *(t2Vector*)(self->font + 0x30) = sc;
-    *(t2Vector*)(self->font + 0x38) = *(t2Vector*)(self->font + 0x30);
-    self->snd1C = -1;
-    int* data = FILE_loadz(str_data_textures_dot_ssh, 0x100);
+    // cFont keeps its t2Vectors (BaseScale, Scale) as float[2]: the same two floats.
+    *(t2Vector*)&self->Font->BaseScale[0] = sc;
+    *(t2Vector*)&self->Font->Scale[0] = *(t2Vector*)&self->Font->BaseScale[0];
+    self->ParticleTID = -1;
+    SHAPEFILE* data = (SHAPEFILE*)FILE_loadz(str_data_textures_dot_ssh, 0x100);
+    // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file blob)
     if (data) {
-        char* payload = (char*)data + data[5];
+        char* payload = (char*)data + data->tbl[0].offset;
         if (payload) {
             cPS2GraphicsMan* theGraphicsMan = cGraphicsMan_TheGraphicsMan;
-            self->snd1C = theGraphicsMan->AddTexture((const SHAPE*)payload, str_part, 0, 1, -1);
+            self->ParticleTID = theGraphicsMan->AddTexture((const SHAPE*)payload, str_part, 0, 1, -1);
         }
         cMemMan_free(data);
     }
-    data = FILE_load(str_data_fonts_menu_ssh, 0x100);
+    data = (SHAPEFILE*)FILE_load(str_data_fonts_menu_ssh, 0x100);
     cPS2GraphicsMan* graphicsMan = GrMan;
-    self->snd20 = graphicsMan->AddTexture((const SHAPE*)((char*)data + data[5]), str_menu, 0, 1, -1);
+    self->BoxTID = graphicsMan->AddTexture((const SHAPE*)((char*)data + data->tbl[0].offset), str_menu, 0, 1, -1);
     if (data) {
         cMemMan_free(data);
     }
     for (int i = 0; i < 2; i++) {
-        self->objs[i] = 0;
+        self->Screens[i] = 0;
     }
-    self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
-    self->objs[1] = cDebugLobbyScreen_cDebugLobbyScreen((cDebugLobbyScreen*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
+    self->ActiveScreen = self->Screens[0] =
+        (cDebugScreen*)cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
+    self->Screens[1] =
+        (cDebugScreen*)cDebugLobbyScreen_cDebugLobbyScreen(
+            (cDebugLobbyScreen*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
     if (SSXApp->AutoLobby) {
-        self->cur = self->objs[1];
+        self->ActiveScreen = self->Screens[1];
     } else {
-        self->cur = self->objs[0];
+        self->ActiveScreen = self->Screens[0];
     }
 }
 #endif
@@ -2054,26 +2023,28 @@ INCLUDE_ASM("fe/debugfe", cDebugFE_gainFocus);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void cGraphicsMan_UploadTextures(void* p);
 extern int cDepthFog_m_Enable;
-struct sVec3K17FA60 {
-    int x, y, z;
-    sVec3K17FA60() { x = 0; y = 0; z = 0; }
+// A tRGB with a constructor (ours has none): the clear colour is passed as a temporary.
+struct tRGBInit : tRGB {
+    tRGBInit(float r, float g, float b) { R = r; G = g; B = b; }
 };
-typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
 
 /**
  * Gives the debug front end focus: uploads the textures, clears cDepthFog_m_Enable and sets a black clear colour.
  *
- * Calls cGraphicsMan_UploadTextures (On Tour cGraphicsMan::UploadTextures), then GrMan's slot 15 (SetClearColor) with (0, 0, 0).
+ * Calls cGraphicsMan_UploadTextures (On Tour cGraphicsMan::UploadTextures), then GrMan's SetScreenClearColour with
+ * (0, 0, 0).
  */
 extern "C" void cDebugFE_gainFocus(cDebugFE* self)
 {
-    char* graphicsMan;
-    char* vt;
     cGraphicsMan_UploadTextures((char*)GrMan);
     cDepthFog_m_Enable = 0;
-    graphicsMan = (char*)GrMan;
-    vt = *(char**)(graphicsMan + 0x10D8);
-    ((tFn_17FA60)*(void**)(vt + 0x7C))(graphicsMan + *(short*)(vt + 0x78), sVec3K17FA60());
+    cPS2GraphicsMan* graphicsMan = GrMan;
+    // SetScreenClearColour (slot 15) by hand, its vptr and slot words read through plain pointers: retail's loads may
+    // alias the cDepthFog_m_Enable store, so GrMan is loaded after it (member loads would let the load move up).
+    sVEntry<void(void*, const tRGB&)>* vt = *(sVEntry<void(void*, const tRGB&)>**)&VPTR_OF(cGraphicsMan, graphicsMan);
+    short* delta = &vt[15].delta;
+    void (**fn)(void*, const tRGB&) = &vt[15].fn;
+    (*fn)(vthis(graphicsMan, *delta), tRGBInit(0.0f, 0.0f, 0.0f));
 }
 #endif
 

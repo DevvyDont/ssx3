@@ -62,4 +62,43 @@ CHECK_OFFSET(tBEUber, unk_004, 0x4);
 CHECK_OFFSET(tBEUber, cost, 0x6);
 CHECK_SIZE(tBEUber, 0x8);
 
+// One grab's record in kGrabDB (On Tour struct tBEGrabDB, 0x14; [O] `const tBEGrabDB kGrabDB[7]`, retail has 15
+// entries). [U] cBEBAGTInterface_getGrabAnim ... getTweakName return the six halfwords; chooseUberVar,
+// func_0014FF90 and func_00150558 read numUbers; func_0014FF90 and the getUber* getters read ubers.
+struct tBEGrabDB {
+    unsigned short grabAnim;        // 0x00 [O]; [U] getGrabAnim: the start animation
+    unsigned short grabCycleAnim;   // 0x02 [O]; [U] getGrabCycleAnim: the held animation (438 = none)
+    unsigned short grabID;          // 0x04 [O]; [U] getGrabName: the trick id scored for the grab
+    unsigned short tweakAnim;       // 0x06 [O]; [U] getTweakAnim
+    unsigned short tweakCycleAnim;  // 0x08 [O]; [U] getTweakCycleAnim (438 = none)
+    unsigned short tweakID;         // 0x0A [O]; [U] getTweakName: the trick id scored for the tweak
+    unsigned short numUbers;        // 0x0C [O]; [U] chooseUberVar (0 = no uber variants), func_0014FF90
+    unsigned short pad_0x0E;
+    const tBEUber* ubers;           // 0x10 [O]; [U] func_0014FF90 returns it, getUber* index it by the chosen variant
+};
+
+CHECK_OFFSET(tBEGrabDB, grabAnim, 0x00);
+CHECK_OFFSET(tBEGrabDB, grabCycleAnim, 0x02);
+CHECK_OFFSET(tBEGrabDB, grabID, 0x04);
+CHECK_OFFSET(tBEGrabDB, tweakAnim, 0x06);
+CHECK_OFFSET(tBEGrabDB, tweakCycleAnim, 0x08);
+CHECK_OFFSET(tBEGrabDB, tweakID, 0x0A);
+CHECK_OFFSET(tBEGrabDB, numUbers, 0x0C);
+CHECK_OFFSET(tBEGrabDB, ubers, 0x10);
+CHECK_SIZE(tBEGrabDB, 0x14);
+
+// The grab table (On Tour: const tBEGrabDB kGrabDB[]), indexed by grab.
+extern const tBEGrabDB kGrabDB[];
+
+// A grab's points (On Tour struct tBEGrabPointsDB, 0x8). [U] cBELibrary_loadData fills cBELibrary_grabPointsDB
+// (85 entries); cBEBAGTInterface_getGrabPoints / getGrabPointsPerSec read them.
+struct tBEGrabPointsDB {
+    int pointsPerGrab;              // 0x0 [O]; [U] getGrabPoints
+    int pointsPerSec;               // 0x4 [O]; [U] getGrabPointsPerSec
+};
+
+CHECK_OFFSET(tBEGrabPointsDB, pointsPerGrab, 0x0);
+CHECK_OFFSET(tBEGrabPointsDB, pointsPerSec, 0x4);
+CHECK_SIZE(tBEGrabPointsDB, 0x8);
+
 #endif /* BE_BEINTBAGT_H */

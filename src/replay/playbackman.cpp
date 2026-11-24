@@ -11,6 +11,11 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "replay/bxreplayframe.h"
+#include "ai/player.h"
+#include "input/input.h"
+#include "input/inputpad.h"
+#include "object/instancenode.h"
+#include "world/instancerecord.h"
 
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_cPlaybackMan);
@@ -48,27 +53,27 @@ extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPl
 {
     cReplayFrame_cReplayFrame((cReplayFrame*)&self->SaveFramePtr);
     cGame* world = SSXApp->Game;
-    *(char**)&self->Game = ((char*)world);
+    self->Game = world;
     cAI* level = world->AI;
-    *(char**)&self->AI = ((char*)level);
+    self->AI = level;
     self->AsyncFileNum = -1;
     self->MaxPlaybackFiles = maxPlaybackFiles;
     self->AsyncHandle = -1;
     self->SaveFrame = 0;
-    *(int*)&self->SaveFrameData = 0;
-    *(int*)&self->CurrentFrame = 0;
+    self->SaveFrameData = 0;
+    self->CurrentFrame = 0;
     self->NumPlaybackFiles = 0;
-    *(int*)&self->PlaybackFiles = 0;
+    self->PlaybackFiles = 0;
     self->State = 0;
-    int* info = *(int**)((char*)level->Players[0] + 0xDF0);
-    int n = info[1];
-    *(int*)&self->RealInputPad = info[0];
-    *(int**)&self->InputPad = (int*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
-    ((int*)self->InputPad)[0] = 0;
-    void* replayStream = cMemMan_alloc(8, str_cInput, 0x20000000, 0);
-    cInput_setPad(replayStream, (int)((int*)self->InputPad));
-    cInput_setMap(replayStream, n);
-    *(void**)&self->Input = replayStream;
+    cInput* playerInput = level->Players[0]->Input;
+    cInputMap* map = playerInput->Map;
+    self->RealInputPad = playerInput->Pad;
+    self->InputPad = (cInputPad*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
+    self->InputPad->NumButtons = 0;
+    cInput* replayStream = (cInput*)cMemMan_alloc(8, str_cInput, 0x20000000, 0);
+    cInput_setPad(replayStream, (int)self->InputPad);
+    cInput_setMap(replayStream, (int)map);
+    self->Input = replayStream;
     char name[0x100];
     sprintf(name, kPlaybackBigFmt, kPlaybackPath);
     cBigFile* bf = cBigFile_cBigFile((cBigFile*)cMemMan_alloc(8, str_BigFile_b, 0, 0));
@@ -124,17 +129,10 @@ extern const char str_PlaybackFile[];
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
-struct sPlaybackEntry_C5F8 {
-    int field_0x0;
-    void* buf;      // 0x4
-    int size;       // 0x8
-};
-
-
 /**
  * Finishes a pending playback-file load by copying the file into the current entry.
  *
- * When the async request (+0x78) has completed (ASYNCFILE_getstatus() == 1), releases it, copies a non-empty
+ * When the async request (AsyncHandle) has completed (ASYNCFILE_getstatus() == 1), releases it, copies a non-empty
  * result into a new "PlaybackFile" buffer stored with its size in entries[cur], frees the loaded buffer and
  * sets the handle to -1. cPlaybackMan_load starts these loads.
  */
@@ -145,11 +143,12 @@ extern "C" void cPlaybackMan_update(cPlaybackMan* self)
         int size = 0;
         ASYNCFILE_release(self->AsyncHandle, &data, &size);
         if (data != 0 && size > 0) {
-            // PORT: pointer held in int for the entry address (index-first addu); not 64-bit safe.
-            sPlaybackEntry_C5F8* curEntry = (sPlaybackEntry_C5F8*)(self->AsyncFileNum * 12 + (int)((sPlaybackEntry_C5F8*)self->PlaybackFiles));
-            curEntry->buf = operator_new_tag(size, str_PlaybackFile, 0x20000000, 0);
-            ((sPlaybackEntry_C5F8*)self->PlaybackFiles)[self->AsyncFileNum].size = size;
-            MEM_copy(((sPlaybackEntry_C5F8*)self->PlaybackFiles)[self->AsyncFileNum].buf, data, size);
+            // PORT: pointer held in int for the entry address (index-first addu); not 64-bit safe. A typed
+            // &PlaybackFiles[AsyncFileNum] in a local adds base-first.
+            tPlaybackFile* curEntry = (tPlaybackFile*)(self->AsyncFileNum * 12 + (int)self->PlaybackFiles);
+            curEntry->PackData = (char*)operator_new_tag(size, str_PlaybackFile, 0x20000000, 0);
+            self->PlaybackFiles[self->AsyncFileNum].Size = size;
+            MEM_copy(self->PlaybackFiles[self->AsyncFileNum].PackData, data, size);
             MEM_free(data);
         }
         self->AsyncHandle = -1;
@@ -176,50 +175,42 @@ extern char str_SaveFrameData[];
 extern char str_CurrentFrame[];
 extern char str_tPlaybackFile[];
 
-struct sPbEntry_C6E8 {
-    unsigned int id;
-    void* buf;      // 0x4
-    int size;       // 0x8
-};
-
-
 /**
  * Prepares the playback manager for a location: frame buffers and one playback-file entry per mission.
  *
- * Copies @p name to +0x8, resets the counters, allocates the 0x14000-byte "SaveFrameData" buffer and attaches
- * it to the embedded replay frame, allocates the zeroed 0x1C22C-byte "CurrentFrame" block (header 0xDBAC0101,
- * 0x1C200) and maxPlaybackFiles "tPlaybackFile" entries (id -1, no buffer), then gives the first
+ * Copies @p name to Location, resets the counters, allocates the 0x14000-byte "SaveFrameData" buffer and attaches
+ * it to the embedded replay frame, allocates the zeroed 0x1C22C-byte "CurrentFrame" block (Version 0xDBAC0101,
+ * Buffer.Size 0x1C200) and MaxPlaybackFiles "tPlaybackFile" entries (Id -1, no data), then gives the first
  * cBEMissionInterface_getNumberMissions() entries their mission ids (cBEMissionInterface_getMissionID). The mission count is not
  * checked against the number of entries.
  *
  * @param name  location name (cWScriptMan_setupMissions passes the BE location record + 0x34)
  */
-// PORT: entry addresses formed as i*12 + (int)entries (pointer held in int) for the index-first addu.
 extern "C" void cPlaybackMan_initLocation(cPlaybackMan* self, const char* name)
 {
     strcpy(self->Location, name);
     self->SaveFrame = 0;
     self->AsyncFileNum = -1;
     self->AsyncHandle = -1;
-    (*(void**)&self->SaveFrameData) = operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
+    self->SaveFrameData = (char*)operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
     cReplayFrame_clearFrame((cReplayFrame*)(&self->SaveFramePtr));
     cReplayFramePtr_setBlock(&self->SaveFramePtr, ((void*)self->SaveFrameData), 0);
-    unsigned int* hdr = (unsigned int*)cMemMan_alloc(0x1C22C, str_CurrentFrame, 0, 0);
-    (*(unsigned int**)&self->CurrentFrame) = hdr;
-    MEM_fill(hdr, 0, 0x1C22C);
+    tPlaybackFrame* frame = (tPlaybackFrame*)cMemMan_alloc(0x1C22C, str_CurrentFrame, 0, 0);
+    self->CurrentFrame = frame;
+    MEM_fill(frame, 0, 0x1C22C);
     int n = self->MaxPlaybackFiles;
-    hdr[0] = 0xDBAC0101;
-    hdr[1] = 0x1C200;
-    (*(sPbEntry_C6E8**)&self->PlaybackFiles) = (sPbEntry_C6E8*)operator_new_tag(n * 12, str_tPlaybackFile, 0x20000000, 0);
+    frame->Version = 0xDBAC0101;
+    frame->Buffer.Size = 0x1C200;
+    self->PlaybackFiles = (tPlaybackFile*)operator_new_tag(n * 12, str_tPlaybackFile, 0x20000000, 0);
     for (int i = 0; i < self->MaxPlaybackFiles; i++) {
-        ((sPbEntry_C6E8*)(i * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->id = 0xFFFFFFFF;
-        ((sPbEntry_C6E8*)(i * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->buf = 0;
-        ((sPbEntry_C6E8*)(i * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->size = 0;
+        self->PlaybackFiles[i].Id = 0xFFFFFFFF;
+        self->PlaybackFiles[i].PackData = 0;
+        self->PlaybackFiles[i].Size = 0;
     }
     void* iface = cBE_getInterface_C6E8(cBE_getBE(), 10);
     self->NumPlaybackFiles = cBEMissionInterface_getNumberMissions(iface);
     for (int j = 0; j < self->NumPlaybackFiles; j++)
-        ((sPbEntry_C6E8*)(j * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->id = cBEMissionInterface_getMissionID(iface, j);
+        self->PlaybackFiles[j].Id = cBEMissionInterface_getMissionID(iface, j);
 }
 #endif
 
@@ -309,53 +300,40 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 extern int kPlaybackPath;
 
-struct sPbMan_26CFE8;
-
-extern "C" int cPlaybackMan_findFileById_C9F0(sPbMan_26CFE8* self, int key) __asm__("cPlaybackMan_findFileById");
+extern "C" int cPlaybackMan_findFileById_C9F0(cPlaybackMan* self, int key) __asm__("cPlaybackMan_findFileById");
 
 extern "C" int ASYNCFILE_load(char* path, int flags);
 extern char* D_004A3414;
 extern char str_bar_c[];
 
-struct sPb_26C9F0 {
-    char pad0[8];
-    char name[0x50];
-    int entries;                // 0x58 (pointer held as int)
-    char pad5C[0x18];
-    int cur;                    // 0x74
-    int handle;                 // 0x78
-};
-
 /**
  * Starts loading playback file @p key asynchronously; returns 1 when it is already loaded or the load has started.
  *
- * Looks the id up with cPlaybackMan_findFileById. A listed file whose data pointer (entry +0x4) is set needs nothing. Otherwise the
- * entry index becomes the current async file (+0x74), the path is built with sprintf from the format at D_004A3414,
- * str_bar_c, kPlaybackPath, the location name (+0x8) and the file id, and ASYNCFILE_load(path, 0x100) is started; its
- * handle is kept at +0x78 (-1 on failure). cPlaybackMan_update copies the finished file into the entry.
+ * Looks the id up with cPlaybackMan_findFileById. A listed file whose data pointer (PackData) is set needs nothing.
+ * Otherwise the entry index becomes the current async file (AsyncFileNum), the path is built with sprintf from the
+ * format at D_004A3414, str_bar_c, kPlaybackPath, the location name (Location) and the file id, and
+ * ASYNCFILE_load(path, 0x100) is started; its handle is kept in AsyncHandle (-1 on failure). cPlaybackMan_update
+ * copies the finished file into the entry.
  *
- * @param self_  the playback manager
  * @param key  the playback file id
  * @return 1 when loaded or the load started, 0 for an unknown id or a failed start
  */
-extern "C" int cPlaybackMan_load(cPlaybackMan* self_, int key)
+extern "C" int cPlaybackMan_load(cPlaybackMan* self, int key)
 {
-    sPb_26C9F0* self = (sPb_26C9F0*)self_;
     char path[0x100];
-    int idx = cPlaybackMan_findFileById_C9F0((sPbMan_26CFE8*)self, key);
+    int idx = cPlaybackMan_findFileById_C9F0(self, key);
     if (idx >= 0) {
-        tPlaybackFile* entry = (tPlaybackFile*)(idx * 0xC + self->entries);
-        if (((int)entry->PackData) != 0)
+        if (self->PlaybackFiles[idx].PackData != 0)
             return 1;
-        self->cur = idx;
-        self->handle = -1;
+        self->AsyncFileNum = idx;
+        self->AsyncHandle = -1;
         int num = kPlaybackPath;
-        sprintf(path, D_004A3414, str_bar_c, num, self->name, ((int)entry->Id));
+        sprintf(path, D_004A3414, str_bar_c, num, self->Location, self->PlaybackFiles[idx].Id);
         int asyncHandle = ASYNCFILE_load(path, 0x100);
-        self->handle = asyncHandle;
+        self->AsyncHandle = asyncHandle;
         if (asyncHandle >= 0)
             return 1;
-        self->handle = -1;
+        self->AsyncHandle = -1;
     }
     return 0;
 }
@@ -633,23 +611,12 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_isPauseAI);
 extern "C" void cInputPad_update(void* self, int n, float* vals);
 
 
-// Axis table at self+0x64.
-struct sPbAxisItem_26CE50 {
-    float value;
-    char pad4[0x18];
-};
-
-struct sPbAxes_26CE50 {
-    int count;
-    sPbAxisItem_26CE50 items[1];    // 0x4, stride 0x1C
-};
-
 /**
  * Steps the recorded pad input by one frame and says whether the AI should pause.
  *
- * Mode 1 (playback): reads one packed frame from the input buffer (+0x4: a count byte, then one byte per value, scaled
- * by 1/255) and feeds it to the playback pad (+0x68) with cInputPad_update (On Tour cInputPad::update). Mode 3 (record):
- * packs the live pad's values (+0x64, count then 0x1C-byte entries) into the buffer the same way and feeds the
+ * Mode 1 (playback): reads one packed frame from CurrentFrame's input buffer (a count byte, then one byte per value,
+ * scaled by 1/255) and feeds it to the playback pad (InputPad) with cInputPad_update (On Tour cInputPad::update).
+ * Mode 3 (record): packs the live pad's button values (RealInputPad) into the buffer the same way and feeds the
  * quantised values to the playback pad. cGame_update pauses the AI while it returns nonzero.
  *
  * @return 1 when the buffer is exhausted (mode 1) or full (mode 3), else 0
@@ -662,7 +629,7 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
     if (self->State == 1) {
         tPlaybackFrame* buf = self->CurrentFrame;
         if (buf->Buffer.Index < buf->Buffer.IndexMax) {
-            unsigned char* cursor = &((unsigned char*)&buf->Buffer.Buffer[0])[buf->Buffer.Index];
+            unsigned char* cursor = &buf->Buffer.Buffer[buf->Buffer.Index];
             int n = *cursor++;
             for (int i = 0; i < n; i++)
                 vals[i] = *cursor++ * 0.003921568859368563f;
@@ -675,14 +642,14 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
     } else if (self->State == 3) {
         tPlaybackFrame* buf = self->CurrentFrame;
         if (buf->Buffer.Index < buf->Buffer.Size - 0x18) {
-            unsigned char* cursor = &((unsigned char*)&buf->Buffer.Buffer[0])[buf->Buffer.Index];
-            int n = ((sPbAxes_26CE50*)self->RealInputPad)->count;
+            unsigned char* cursor = &buf->Buffer.Buffer[buf->Buffer.Index];
+            int n = self->RealInputPad->NumButtons;
             *cursor++ = n;
             for (int i = 0; i < n; i++) {
-                sPbAxes_26CE50* axes = (sPbAxes_26CE50*)self->RealInputPad;
+                cInputPad* axes = self->RealInputPad;
                 float axisValue;
-                if (i < axes->count)
-                    axisValue = axes->items[i].value;
+                if (i < axes->NumButtons)
+                    axisValue = axes->Buttons[i].Value;
                 else
                     axisValue = 0.0f;
                 *cursor = (int)(axisValue * 255.0f);
@@ -732,21 +699,21 @@ extern "C" int HUFF_decode(void* src, int a, int dst);
 extern "C" void MEM_fill(void* dst, int c, int n);
 
 /**
- * Unpacks playback file entry @p idx into the current frame (+0x4), or clears that frame when the file has no data.
+ * Unpacks playback file entry @p idx into the current frame (CurrentFrame), or clears that frame when the file has
+ * no data.
  *
- * With data (entry +0x4) it is decoded into the frame with HUFF_decode and the result is 1. Otherwise the
- * 0x1C22C-byte frame is zeroed, its version word set to 0xDBAC0101 and its input buffer size (+0x4) to 0x1C200, and the
- * result is 0.
+ * With data (the entry's PackData) it is decoded into the frame with HUFF_decode and the result is 1. Otherwise the
+ * 0x1C22C-byte frame is zeroed, its Version set to 0xDBAC0101 and its input buffer size (Buffer.Size) to 0x1C200, and
+ * the result is 0.
  *
- * @param idx  the index in the playback file table (+0x58)
+ * @param idx  the index in the playback file table (PlaybackFiles)
  * @return 1 when the file's data was unpacked, 0 when the frame was reset instead
  */
 extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx)
 {
-    tPlaybackFile* entry = (tPlaybackFile*)((char*)(idx * 0xC + (int)self->PlaybackFiles)); // PORT: pointer held as int
-    int data = (int)entry->PackData;
+    char* data = self->PlaybackFiles[idx].PackData;
     if (data != 0) {
-        HUFF_decode((void*)data, 0, (int)self->CurrentFrame);
+        HUFF_decode(data, 0, (int)self->CurrentFrame);
         return 1;
     }
     tPlaybackFrame* buf = self->CurrentFrame;
@@ -1314,35 +1281,6 @@ extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, sPbBytes4* 
 INCLUDE_ASM("replay/playbackman", cReplay_saveFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cPbObjSys {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void save(cBxReplayFrame* s);
-};
-
-class cPbWorld {
-public:
-    char data[0xCC];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void save(cBxReplayFrame* s);
-};
-
-struct sPbApp {
-    char pad_0x0[0x84];
-    cPbObjSys* objs;        // 0x84
-};
-
 struct sPbTime {
     int v[6];
 };
@@ -1362,16 +1300,14 @@ extern "C" void cFocusMan_writeToReplayFrame(void* self, cBxReplayFrame* s);
 
 extern int cSortObjNode_ObjNodeSortIndex;
 extern int cSortObjNode_ObjNodeNoSortIndex;
-extern sPbApp* SSXApp_D818 __asm__("SSXApp");
 extern void* cWScriptMan_TheWScriptMan;
 extern void* TheCrowdMan2d_D818 __asm__("TheCrowdMan2d");
 extern void* TheCrowdMan3d;
 extern void* cMultiParticleMan_TheMultiParticleMan;
 
-static inline cPbWorld* pbWorld(cPbObjSys* o)
-{
-    return *(cPbWorld**)((char*)o + 0xC);
-}
+// A replay-frame writer: the writeToReplayFrame virtual of cGame (slot 8) and cAI (slot 7). Both are flat here (their
+// vptr is the mVtbl member), so the slots are read by hand.
+typedef sVEntry<void(void*, cBxReplayFrame*)> tSaveSlot;
 
 /**
  * Writes one replay key frame: the state of every game system that a restore needs.
@@ -1397,8 +1333,12 @@ extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* stream)
     id = cSortObjNode_ObjNodeNoSortIndex;
     out->write((const char*)&id, 4);
     cBE_writeToReplayFrame(cBE_getBE(), out);
-    SSXApp_D818->objs->save(out);
-    pbWorld(SSXApp_D818->objs)->save(out);
+    cGame* game = SSXApp->Game;
+    tSaveSlot* gameVt = (tSaveSlot*)game->mVtbl;
+    gameVt[8].fn(vthis(game, gameVt[8]), out);
+    cAI* ai = SSXApp->Game->AI;
+    tSaveSlot* aiVt = (tSaveSlot*)ai->mVtbl;
+    aiVt[7].fn(vthis(ai, aiVt[7]), out);
     cAvalanche_writeToReplayFrame(out);
     cWScriptMan_writeToReplayFrame(cWScriptMan_TheWScriptMan, out);
     func_00229E20(TheCrowdMan2d_D818, out);
@@ -1406,7 +1346,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* stream)
     cMultiParticleMan_writeToReplayFrame(cMultiParticleMan_TheMultiParticleMan, out);
     cReplay_saveBucket(self, out, 1);
     cReplay_saveDeadBucket(self, out);
-    cFocusMan_writeToReplayFrame(*(void**)((char*)pbWorld(SSXApp_D818->objs) + 0xA4), out);
+    cFocusMan_writeToReplayFrame(SSXApp->Game->AI->FocusMan, out);
 }
 #endif
 
@@ -1421,26 +1361,9 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index);
 extern char gBucketMan;
 static inline cBucketMan* bucketMan_D988() { return (cBucketMan*)&gBucketMan; }
 
-// bucket node: 12 bytes of list links, then the polymorphic part (save is the 12th vtable entry)
-class cPbBucketNodeD988 {
-public:
-    char links[0xC];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void save(cBxReplayFrame* s);
-};
-
 /**
- * Writes the node count of one bucket (an 8-byte header) and then each node's saved state (its save virtual).
+ * Writes the node count of one bucket (an 8-byte header) and then each node's saved state (its writeToReplayFrame
+ * virtual, slot 12).
  *
  * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
  * @param bucket  the bucket
@@ -1459,7 +1382,7 @@ extern "C" void cReplay_saveBucket(cReplay* self, cBxReplayFrame* data, int buck
     data->write((const char*)hdr, 8);
     if (hdr[0] > 0) {
         for (node = cBucketMan_first(bucketMan_D988(), bucket); node != 0; node = cBucketMan_next(bucketMan_D988(), node, bucket)) {
-            ((cPbBucketNodeD988*)node)->save(data);
+            ((cObjNode*)node)->writeToReplayFrame(data);
         }
     }
 }
@@ -1473,15 +1396,10 @@ struct cBucketMan;
 void* cBucketMan_first(cBucketMan* self, int index);
 void* cBucketMan_next(cBucketMan* self, void* node, int index);
 extern char gBucketMan;
-struct sVEntryDA88 {
-    short delta;
-    short index;
-    void (*fn)(void* self, ...);
-};
 static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&gBucketMan; }
 /**
- * Writes the dead-object bucket (8): its node count (an 8-byte header), then each node's instance id (instance +
- * 0x78, 4 bytes).
+ * Writes the dead-object bucket (8): its node count (an 8-byte header), then each node's instance id (the
+ * cInstanceNode's Instance->m_RID, 4 bytes).
  *
  * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
  */
@@ -1501,7 +1419,7 @@ extern "C" void cReplay_saveDeadBucket(cReplay* self, cBxReplayFrame* data)
     if (hdr[0] > 0) {
         for (node = cBucketMan_first(bucketMan_DA88(), 8); node != 0; node = cBucketMan_next(bucketMan_DA88(), node, 8)) {
             int id[1];
-            id[0] = *(int*)(*(char**)((char*)node + 0x18) + 0x78);
+            id[0] = ((cInstanceNode*)node)->Instance->m_RID;
             data->write((const char*)id, 4);
         }
     }

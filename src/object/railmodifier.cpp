@@ -36,6 +36,8 @@
 #include "object/texflipmodifier.h"
 #include "object/splinemodifier.h"
 #include "object/railmodifier.h"
+#include "object/railspacenode.h"
+#include "replay/bxreplayframe.h"
 #include "object/raillink.h"
 #include "object/positionmodifier.h"
 #include "object/physicsmodifier.h"
@@ -213,10 +215,10 @@ static inline t4Matrix scaled_C0E8(const t4Matrix* src, const t4Vector& s)
 /**
  * Builds a rail modifier's world-to-rail transform and creates its rail node.
  *
- * The rail's frame is the instance's world matrix or, for a mesh index (+0x34) of 0 or more, that mesh's
+ * The rail's frame is the instance's world matrix or, for a mesh index (Mesh) of 0 or more, that mesh's
  * chain of link matrices (translations scaled by the instance scale) times the world matrix. The inverse
- * (transposed rotation, rotated negative translation) is stored at +0x50. Then allocates a 0x10-byte
- * "RailNode" (type 2, pointing back here) at +0x44.
+ * (transposed rotation, rotated negative translation) is stored in XForm. Then allocates a 0x10-byte
+ * "RailNode" (cRailSpaceNode: type 2, Rail pointing back here) as Node.
  */
 extern "C" void cRailModifier_buildXform(cRailModifier* self)
 {
@@ -235,6 +237,7 @@ extern "C" void cRailModifier_buildXform(cRailModifier* self)
         scl.z = modelScale;
         scl.w = 1.0f;
         t4Matrix* selfMat = &self->XForm;
+        // PORT: the link addresses are formed in an int (index-first addu; a typed &links[Mesh] adds base-first).
         sLink_C0E8* link = (sLink_C0E8*)(self->Mesh * 16 + (int)links);
         vu0CopyMat_C0E8(selfMat, link->mat);
         xform = selfMat;
@@ -299,10 +302,10 @@ extern "C" void cRailModifier_buildXform(cRailModifier* self)
     invTranslation = vu0MtxMul_C0E8(xform, invTranslation);
     invTranslation.w = 1.0f;
     self->XForm.row[3] = invTranslation;
-    void* n = cMemMan_alloc(0x10, str_RailNode, 0x20000000, 0);
-    ((void**)n)[3] = self;
-    ((int*)n)[2] = 2;
-    (*(void**)&self->Node) = n;
+    cRailSpaceNode* n = (cRailSpaceNode*)cMemMan_alloc(0x10, str_RailNode, 0x20000000, 0);
+    n->Rail = self;
+    n->type = 2;
+    self->Node = n;
 }
 #endif
 
@@ -333,23 +336,13 @@ extern "C" void cRailModifier_update(cRailModifier* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRailModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cStream0035C540 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-    virtual void v02(void* buf, int size);
-    virtual void v03(void* buf, int size);
-    virtual void v04(void* buf, int size);
-    virtual void writeReplayInstance(void* p);
-};
-
 /**
  * Writes the rail modifier to a replay frame: the 0x30-byte cRailModifierState (+0x10: BoundBox, SplineId, Mesh)
  * with slot 1, then Instance with slot 5.
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cStream0035C540* stream)
+extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cBxReplayFrame* stream)
 {
     stream->write((char*)&self->BoundBox, 0x30);
     stream->writeReplayInstance(self->Instance);
@@ -881,52 +874,49 @@ void* cRigidBody_cRigidBody(void* self)
 INCLUDE_ASM("object/railmodifier", cRigidBody_setW);
 #ifdef SKIP_ASM
 
-struct sMat33CFF0 {
-    float m[3][3];
-};
+// t3Matrix holds its nine floats row-major: m[3 * row + column].
 
-
-static inline sMat33CFF0 scaleCFF0(const sMat33CFF0& a, float s)
+static inline t3Matrix scaleCFF0(const t3Matrix& a, float s)
 {
-    sMat33CFF0 r;
-    r.m[0][0] = a.m[0][0] * s;
-    r.m[0][1] = a.m[0][1] * s;
-    r.m[0][2] = a.m[0][2] * s;
-    r.m[1][0] = a.m[1][0] * s;
-    r.m[1][1] = a.m[1][1] * s;
-    r.m[1][2] = a.m[1][2] * s;
-    r.m[2][0] = a.m[2][0] * s;
-    r.m[2][1] = a.m[2][1] * s;
-    r.m[2][2] = a.m[2][2] * s;
+    t3Matrix r;
+    r.m[0] = a.m[0] * s;
+    r.m[1] = a.m[1] * s;
+    r.m[2] = a.m[2] * s;
+    r.m[3] = a.m[3] * s;
+    r.m[4] = a.m[4] * s;
+    r.m[5] = a.m[5] * s;
+    r.m[6] = a.m[6] * s;
+    r.m[7] = a.m[7] * s;
+    r.m[8] = a.m[8] * s;
     return r;
 }
 
-static inline void invertCFF0(sMat33CFF0& a)
+static inline void invertCFF0(t3Matrix& a)
 {
-    sMat33CFF0 adj;
-    adj.m[0][0] = a.m[1][1] * a.m[2][2] - a.m[1][2] * a.m[2][1];
-    adj.m[0][1] = a.m[2][1] * a.m[0][2] - a.m[2][2] * a.m[0][1];
-    adj.m[0][2] = a.m[0][1] * a.m[1][2] - a.m[0][2] * a.m[1][1];
-    adj.m[1][0] = a.m[2][0] * a.m[1][2] - a.m[2][2] * a.m[1][0];
-    adj.m[1][1] = a.m[0][0] * a.m[2][2] - a.m[0][2] * a.m[2][0];
-    adj.m[1][2] = a.m[1][0] * a.m[0][2] - a.m[1][2] * a.m[0][0];
-    adj.m[2][0] = a.m[1][0] * a.m[2][1] - a.m[1][1] * a.m[2][0];
-    adj.m[2][1] = a.m[2][0] * a.m[0][1] - a.m[2][1] * a.m[0][0];
-    adj.m[2][2] = a.m[0][0] * a.m[1][1] - a.m[0][1] * a.m[1][0];
-    float inv = a.m[0][0] * adj.m[0][0] + a.m[1][0] * adj.m[0][1] + a.m[2][0] * adj.m[0][2];
+    t3Matrix adj;
+    adj.m[0] = a.m[4] * a.m[8] - a.m[5] * a.m[7];
+    adj.m[1] = a.m[7] * a.m[2] - a.m[8] * a.m[1];
+    adj.m[2] = a.m[1] * a.m[5] - a.m[2] * a.m[4];
+    adj.m[3] = a.m[6] * a.m[5] - a.m[8] * a.m[3];
+    adj.m[4] = a.m[0] * a.m[8] - a.m[2] * a.m[6];
+    adj.m[5] = a.m[3] * a.m[2] - a.m[5] * a.m[0];
+    adj.m[6] = a.m[3] * a.m[7] - a.m[4] * a.m[6];
+    adj.m[7] = a.m[6] * a.m[1] - a.m[7] * a.m[0];
+    adj.m[8] = a.m[0] * a.m[4] - a.m[1] * a.m[3];
+    float inv = a.m[0] * adj.m[0] + a.m[3] * adj.m[1] + a.m[6] * adj.m[2];
     inv = 1.0f / inv;
     a = scaleCFF0(adj, inv);
 }
 
-static inline t4Vector xformCFF0(const sMat33CFF0& m, cRigidBody* b)
+static inline t4Vector xformCFF0(const t3Matrix& m, cRigidBody* b)
 {
     t4Vector r;
     float x = (*(t4Vector*)&b->W).x;
     float y = (*(t4Vector*)&b->W).y;
     float z = (*(t4Vector*)&b->W).z;
-    r.x = m.m[0][0] * x + m.m[1][0] * y + m.m[2][0] * z;
-    r.y = m.m[0][1] * x + m.m[1][1] * y + m.m[2][1] * z;
-    r.z = m.m[0][2] * x + m.m[1][2] * y + m.m[2][2] * z;
+    r.x = m.m[0] * x + m.m[3] * y + m.m[6] * z;
+    r.y = m.m[1] * x + m.m[4] * y + m.m[7] * z;
+    r.z = m.m[2] * x + m.m[5] * y + m.m[8] * z;
     r.w = (*(t4Vector*)&b->W).w;
     return r;
 }
@@ -934,15 +924,16 @@ static inline t4Vector xformCFF0(const sMat33CFF0& m, cRigidBody* b)
 /**
  * Sets a rigid body's angular velocity and recomputes its angular momentum to match.
  *
- * Stores newPos as W (+0x90), inverts the inverse inertia InvMOI (+0x50, 3x3, by adjugate over determinant) and sets
- * the angular momentum (+0x30) to that inertia times W.
+ * Stores newPos as W, inverts the inverse inertia InvMOI (3x3, by adjugate over determinant) and sets the angular
+ * momentum L to that inertia times W.
  *
  * @param newPos  new angular velocity W
  */
 extern "C" void cRigidBody_setW(cRigidBody* self, const t4Vector* newPos)
 {
     (*(t4Vector*)&self->W) = *newPos;
-    sMat33CFF0 invRot = (*(sMat33CFF0*)&self->InvMOI[0][0]);
+    // InvMOI is On Tour's t3Matrix ([O]), kept as float[3][3]: the same nine floats.
+    t3Matrix invRot = (*(t3Matrix*)&self->InvMOI[0][0]);
     invertCFF0(invRot);
     (*(t4Vector*)&self->L) = xformCFF0(invRot, self);
 }
@@ -1631,8 +1622,9 @@ static inline float vu0Dot_35DDE8(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-struct sV4K_35DDE8 : public t4Vector {
-    sV4K_35DDE8(float ax, float ay, float az, float aw)
+// A t4Vector built from its four components.
+struct t4VectorInit : public t4Vector {
+    t4VectorInit(float ax, float ay, float az, float aw)
     {
         x = ax;
         y = ay;
@@ -1700,7 +1692,7 @@ void cRollerModifier_DDE8::Collision(const tCollideInfo* tc)
         addZ = 600.0f;
     }
     setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8((*(t4Vector*)&tc->Direct), tc->Vel), 2.0f),
-                        sV4K_35DDE8(0.0f, 0.0f, addZ, 0.0f)));
+                        t4VectorInit(0.0f, 0.0f, addZ, 0.0f)));
     setW(vu0ScaleR_35DDE8((*(t4Vector*)&tc->Reflect), 10.0f));
     mKineticEnergy = vu0Dot_35DDE8(V, P) + vu0Dot_35DDE8(W, L);
 }
@@ -1722,10 +1714,6 @@ extern "C" void cRollerModifier_updateMOI(cRollerModifier* self);
 
 
 
-
-struct sRmMat44DF70 {
-    t4Vector r[4];
-};
 
 struct sRmSrcDF70 {
     char pad_0x00[0x2C];
@@ -1776,8 +1764,8 @@ extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* se
     (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[7] *= 0.5f;
     (*(t3Matrix*)&self->InvBodyMOI[0][0]).m[8] *= 0.5f;
     tPose x = cRollerModifier_getBodyPose_DA70(self);
-    QuatPosToMtx_DA70(&(*(sRmMat44DF70*)&self->Transform), *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
-    SphereTree_TransformAbs(((char*)&self->SphTree), &(*(sRmMat44DF70*)&self->Transform), 1.0f);
+    QuatPosToMtx_DA70(&self->Transform, *(t4Vector*)&x.Q, *(t4Vector*)&x.P);
+    SphereTree_TransformAbs(((char*)&self->SphTree), &self->Transform, 1.0f);
     cRollerModifier_updateMOI((cRollerModifier*)self);
     cRigidBody_updateImplicit((cRollerModifier*)((char*)&self->Pose));
     return self;
@@ -2457,27 +2445,22 @@ extern "C" void cTexFlipModifier_setTexIndex(cTexFlipModifier* self, int i)
 //100%
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setupMaterialRecords);
 #ifdef SKIP_ASM
-struct sRailOut14 {
-    unsigned short value;   // 0x0
-    char pad_0x2[0x12];
-};
-
-
 /**
  * Points every flipping material of a texture-flip modifier at the texture for TexIndex.
  *
- * For each of the materials (count +0x20) it reads the instance model's material list (+0x94) and, where an entry has a
- * texture table (+0x10), copies the u16 for TexIndex (+0x14) into that material's record in MaterialBlock.
+ * For each of the NumMaterials materials it reads the instance's material list (m_MaterialBlock) and, where an entry
+ * has a texture table (m_TextureFlip), copies the texture for TexIndex into that material's record (m_sTexture) in
+ * MaterialBlock.
  */
 extern "C" void cTexFlipModifier_setupMaterialRecords(cTexFlipModifier* self)
 {
     int i;
     for (i = 0; i < self->NumMaterials; i++) {
-        tMaterialBlockRecord* list = (tMaterialBlockRecord*)((char*)self->Instance->m_MaterialBlock);
-        tMaterialRecord* item = (tMaterialRecord*)(*(char**)(((char*)list) + (i << 2) + 4));
-        tTextureFlipRecord* table = (tTextureFlipRecord*)(*(char**)&item->m_TextureFlip);
-        if (((char*)table) != 0) {
-            ((sRailOut14*)&self->MaterialBlock.MaterialRecords[0])[i].value = *(unsigned short*)(((char*)table) + (self->TexIndex << 2) + 4);
+        tMaterialBlockRecord* list = self->Instance->m_MaterialBlock;
+        tMaterialRecord* item = list->GetMaterialRecordList()[i];
+        tTextureFlipRecord* table = item->m_TextureFlip.m_pTextureFlip;
+        if (table != 0) {
+            self->MaterialBlock.MaterialRecords[i].m_sTexture = table->GetTextureTable()[self->TexIndex];
         }
     }
 }
@@ -2866,16 +2849,6 @@ INCLUDE_ASM("object/railmodifier", cUVScrollModifier_getTextureMat);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sRmAxisRot_35FC20 {
-    char pad_0x0[0x10];
-    float angle;        // 0x10
-    char pad_0x14[0xC];
-    float ax, ay, az;   // 0x20
-    char pad_0x2c[0x4];
-    float tx, ty;       // 0x30
-};
-
-
 extern t4Matrix t4mat_Identity_35FC20[] __asm__("t4mat_Identity");
 
 /**
@@ -2900,22 +2873,22 @@ extern "C" t4Matrix* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, t4
         float sx = sinA * self->Axis.x;
         float ty = oneMinusCos * self->Axis.y;
         float tz = oneMinusCos * self->Axis.z;
-        ((float (*)[4])&mat->row[0])[0][0] = tx * self->Axis.x + cosA;
-        ((float (*)[4])&mat->row[0])[1][0] = tx * self->Axis.y + sz;
-        ((float (*)[4])&mat->row[0])[2][0] = tx * self->Axis.z - sy;
-        ((float (*)[4])&mat->row[0])[3][0] = zeroF;
-        ((float (*)[4])&mat->row[0])[0][1] = ty * self->Axis.x - sz;
-        ((float (*)[4])&mat->row[0])[1][1] = ty * self->Axis.y + cosA;
-        ((float (*)[4])&mat->row[0])[2][1] = ty * self->Axis.z + sx;
-        ((float (*)[4])&mat->row[0])[3][1] = zeroF;
-        ((float (*)[4])&mat->row[0])[0][2] = tz * self->Axis.x + sy;
-        ((float (*)[4])&mat->row[0])[1][2] = tz * self->Axis.y - sx;
-        ((float (*)[4])&mat->row[0])[2][2] = tz * self->Axis.z + cosA;
-        ((float (*)[4])&mat->row[0])[3][2] = zeroF;
-        ((float (*)[4])&mat->row[0])[0][3] = zeroF;
-        ((float (*)[4])&mat->row[0])[1][3] = zeroF;
-        ((float (*)[4])&mat->row[0])[2][3] = zeroF;
-        ((float (*)[4])&mat->row[0])[3][3] = one;
+        mat->row[0].x = tx * self->Axis.x + cosA;
+        mat->row[1].x = tx * self->Axis.y + sz;
+        mat->row[2].x = tx * self->Axis.z - sy;
+        mat->row[3].x = zeroF;
+        mat->row[0].y = ty * self->Axis.x - sz;
+        mat->row[1].y = ty * self->Axis.y + cosA;
+        mat->row[2].y = ty * self->Axis.z + sx;
+        mat->row[3].y = zeroF;
+        mat->row[0].z = tz * self->Axis.x + sy;
+        mat->row[1].z = tz * self->Axis.y - sx;
+        mat->row[2].z = tz * self->Axis.z + cosA;
+        mat->row[3].z = zeroF;
+        mat->row[0].w = zeroF;
+        mat->row[1].w = zeroF;
+        mat->row[2].w = zeroF;
+        mat->row[3].w = one;
         } else {
         // PORT: PS2-only VU0 inline asm (4x4 matrix copy, identity -> m).
         __asm__ __volatile__(
@@ -2933,8 +2906,8 @@ extern "C" t4Matrix* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, t4
             : "r"(mat), "r"(t4mat_Identity_35FC20)
             : "memory");
     }
-    ((float (*)[4])&mat->row[0])[3][0] = self->UV[0];
-    ((float (*)[4])&mat->row[0])[3][1] = self->UV[1];
+    mat->row[3].x = self->UV[0];
+    mat->row[3].y = self->UV[1];
     return mat;
 }
 #endif
@@ -6360,25 +6333,6 @@ extern "C" t4Matrix* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatingNode_updateRootTransform);
 #ifdef SKIP_ASM
-struct sRmVEntryP1858 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
-
-struct sRmVEntry2_1858 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, void*);
-};
-
-struct sRmVtbl1858 {
-    sRmVEntryP1858 pad[24];
-    sRmVEntryP1858 get;      // slot 24 (0xC0)
-    sRmVEntryP1858 pad2[8];
-    sRmVEntry2_1858 set;     // slot 33 (0x108)
-};
-
 /**
  * Rebuilds a floating node's part matrices and clears its dirty bit.
  *
@@ -6386,10 +6340,14 @@ struct sRmVtbl1858 {
  */
 extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 {
-    sRmVtbl1858* vt = (sRmVtbl1858*)VPTR_OF(cObjNode, self);
-    void* obj = vthis(self, vt->set);
-    void* transform = vt->get.fn(vthis(self, vt->get));
-    vt->set.fn(obj, transform, self->AnimMats);
+    // makeAnimMats (slot 33) and getRootTransform (slot 24) by hand: retail adjusts this for makeAnimMats before it
+    // calls getRootTransform.
+    sVEntry<void(void*, const t4Matrix*, t4Matrix*)>* vt =
+        (sVEntry<void(void*, const t4Matrix*, t4Matrix*)>*)VPTR_OF(cObjNode, self);
+    sVEntry<const t4Matrix*(void*)>* getVt = (sVEntry<const t4Matrix*(void*)>*)vt;
+    void* obj = vthis(self, vt[33]);
+    const t4Matrix* transform = getVt[24].fn(vthis(self, getVt[24]));
+    vt[33].fn(obj, transform, self->AnimMats);
     self->Flags &= ~1;
 }
 #endif

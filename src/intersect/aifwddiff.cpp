@@ -8,6 +8,7 @@
 #include "bx/math3d.h"
 #include "intersect/aifwddiff.h"
 #include "render/ps2graphicsman.h"
+#include "world/patchrecord.h"
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_Init);
@@ -64,18 +65,19 @@ static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b
 /**
  * Returns the forward-difference tessellation of a terrain patch from the AI cache, building it when it is not cached.
  *
- * Looks the patch's key (+0x150) up in its hash bucket (key modulo the bucket count +0xC; chains are sorted by key). On
- * a hit the node is moved to the tail of the age queue (cAIFwdDiffCache_MoveToAgeQueueTail). On a miss the oldest node (+0x4) is reused: it
+ * Looks the patch's key (m_RID) up in its hash bucket (key modulo the bucket count mHashSize; chains are sorted by
+ * key). On a hit the node is moved to the tail of the age queue (cAIFwdDiffCache_MoveToAgeQueueTail). On a miss the
+ * oldest node (mAgeQueue) is reused: it
  * is taken out of the hash (cAIFwdDiffCache_RemoveFromHash), given the key, hashed again (cAIFwdDiffCache_AddToHash), the age queue head moves on,
  * and the patch is tessellated into it (cAIFwdDiffCache_TesselatePatch). Called by cOverlapList_terrainIntersect and TerrainCallback_intersectpatch.
  *
  * @param src  the terrain patch record (On Tour const tPatchRecord&)
  * @param out  receives the cache node (On Tour ppFwdDiff)
  */
-extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, tAIFwdDiff** out)
+extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, tPatchRecord* src, tAIFwdDiff** out)
 {
-    unsigned int key = *(unsigned int*)((char*)src + 0x150);
-    tAIFwdDiff* n = ((tAIFwdDiff**)self->mPatchHash)[key % self->mHashSize];
+    unsigned int key = src->m_RID;
+    tAIFwdDiff* n = self->mPatchHash[key % self->mHashSize];
     while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->mKey)) {
         if (n->mKey == key) {
             cAIFwdDiffCache_MoveToAgeQueueTail(self, (sFwdDiffLink*)n);
@@ -142,8 +144,8 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFw
 /**
  * Removes an AI forward-difference cache node from the patch hash table.
  *
- * Does nothing for an unused node (key 0xFFFFFFFF). Otherwise walks the node's bucket (key modulo +0xC; the chain is
- * sorted by key, so the walk stops at a larger key) and unlinks the entry with the node's key.
+ * Does nothing for an unused node (key 0xFFFFFFFF). Otherwise walks the node's bucket (key modulo mHashSize; the
+ * chain is sorted by key, so the walk stops at a larger key) and unlinks the entry with the node's key.
  *
  * @param node  the node (On Tour node)
  */
@@ -152,7 +154,7 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFw
     unsigned int key = node->mKey;
     if (key == 0xFFFFFFFF)
         return;
-    tAIFwdDiff** link = &((tAIFwdDiff**)self->mPatchHash)[key % self->mHashSize];
+    tAIFwdDiff** link = &self->mPatchHash[key % self->mHashSize];
     if (*link == 0)
         return;
     tAIFwdDiff* n = *link;
@@ -308,10 +310,10 @@ extern "C" int bxSphereTree_Load(bxSphereTree* self, char* buf, int aTreeID)
     if (buf == 0) {
         return 0;
     }
-    ((int*)&(*(&self->staticInfo)).treeID)[0] = aTreeID;
-    ((int*)&(*(&self->staticInfo)).treeID)[1] = 0;
+    self->staticInfo.treeID = aTreeID;
+    self->staticInfo.lastBufID = 0;
     (*(tSphTreeInfo**)&self->treeInfo) = &(*(&self->staticInfo));
-    ((int*)&(*(&self->staticInfo)).treeID)[4] = 1;
+    self->staticInfo.refCount = 1;
     int len0;
     int len1;
     MEM_copy(&len0, buf, 4);
@@ -536,11 +538,11 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
 /**
  * Recursively draws the occupied leaf cells of a sphere tree as magenta boxes.
  *
- * Above the target level each set bit i of the occupancy byte at @p off (buffer at info +0x28) selects child i: its
- * centre is @p pos plus axis vector i (+0x0 + 16i) scaled by the level's offset (level table at info +0x20, 12 bytes
- * per level, float +0x10 from the entry), and its index is off + (i + 1) x the level's stride (+0x8). At the target
- * level it draws a box of size level scale x the tree's scale (+0x90) at @p pos in colour (1, 0, 1, 0) through virtual
- * slot 87 of cGraphicsMan_TheGraphicsMan. Called by bxSphereTree_Draw and itself.
+ * Above the target level each set bit i of the occupancy byte at @p off (the info's bitTree) selects child i: its
+ * centre is @p pos plus axis[i] scaled by the next level's cenOffset (the info's levels table), and its index is off +
+ * (i + 1) x the level's indexOffset. At the target level it draws a box of size the level's radius x the tree's scale
+ * at @p pos in colour (1, 0, 1, 0) through DrawSphere (virtual slot 87) of cGraphicsMan_TheGraphicsMan. Called by
+ * bxSphereTree_Draw and itself.
  *
  * @param end  the level whose cells are drawn (On Tour desLevel)
  * @param pos  this cell's centre (On Tour center)
@@ -550,7 +552,7 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
 extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level, int off)
 {
     if (level < end) {
-        float levelOffset = *(float*)((char*)&(self->treeInfo)->levels[level] + 0x10);
+        float levelOffset = (self->treeInfo)->levels[level + 1].cenOffset;
         for (int i = 0; i < 8; i++) {
             if (((self->treeInfo)->bitTree[off] >> i) & 1) {
                 t4Vector sum;
@@ -566,8 +568,10 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
         }
     } else {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry<void(void*, float, void*, void*, int)>* vt = &((sVEntry<void(void*, float, void*, void*, int)>*)VPTR_OF(cGraphicsMan, w))[87];
-        char* thisp = (char*)w + vt->delta;
+        sVEntry<void(void*, float, void*, void*, int)>* vtable =
+            (sVEntry<void(void*, float, void*, void*, int)>*)VPTR_OF(cGraphicsMan, w);
+        sVEntry<void(void*, float, void*, void*, int)>* vt = &vtable[87]; // DrawSphere
+        void* thisp = vthis(w, *vt);
         t4Vector color;
         float boxSize = ((self->treeInfo)->levels)[level].radius * self->scale;
         color.x = 1.0f;
@@ -659,34 +663,6 @@ INCLUDE_ASM("intersect/aifwddiff", nash_Cell_remnode);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
-struct sList_003284B8 {
-    nash_Node* head;
-    void remove(nash_Node* it)
-    {
-        if (it->next) it->next->prev = it->prev;
-        if (it->prev) {
-            it->prev->next = it->next;
-        } else {
-            head = it->next;
-        }
-    }
-};
-struct sNode_003284B8 {
-    sNode_003284B8* child[2][2][2];     // 0x00
-    sList_003284B8 lists[3];            // 0x20
-    int empty()
-    {
-        if (child[0][0][0] || child[0][0][1] || child[0][1][0] || child[0][1][1] || child[1][0][0] ||
-            child[1][0][1] || child[1][1][0] || child[1][1][1]) {
-            return 0;
-        }
-        for (int i = 0; i < 3; i++) {
-            if (lists[i].head) return 0;
-        }
-        return 1;
-    }
-};
-
 /**
  * Removes a node from the spatial hash cell that holds it, freeing cells that become empty.
  *
@@ -699,12 +675,12 @@ struct sNode_003284B8 {
  * @param target  the node's cell key
  * @param cur     this cell's key
  */
-extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, nash_Node* item, const nash_CellKey* target,
+extern "C" void nash_Cell_remnode(nash_Cell* node, int idx, nash_Node* item, const nash_CellKey* target,
                               const nash_CellKey* cur)
 {
     int lv = cur->level;
     if (target->level == lv) {
-        node->lists[idx].remove(item);
+        node->nodesinside[idx].remove(item);
         return;
     }
     int sh = lv - target->level - 1;
@@ -716,7 +692,7 @@ extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, nash_Node* item
     childKey.level = --lv;
     childKey.y = cur->y * 2 + dy;
     childKey.z = cur->z * 2 + dz;
-    sNode_003284B8** ch = &node->child[dx][dy][dz];
+    nash_Cell** ch = &node->children[dx][dy][dz];
     nash_Cell_remnode(*ch, idx, item, target, &childKey);
     if ((*ch)->empty()) {
         operator_delete((int*)*ch);
@@ -733,21 +709,9 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void MEM_fill(void* p, int v, int n);
 extern char str_Cell[];
 
-struct sList_00328660 {
-    nash_Node* head;
-    sList_00328660() : head(0) {}
-    void push(nash_Node* it)
-    {
-        if (head) head->prev = it;
-        it->next = head;
-        it->prev = 0;
-        head = it;
-    }
-};
-struct sNode_00328660 {
-    sNode_00328660* child[2][2][2];     // 0x00
-    sList_00328660 lists[3];            // 0x20
-    sNode_00328660() { MEM_fill(child, 0, sizeof(child)); }
+// A new Cell (On Tour Cell::Cell()): the base clears the three node lists, then the children are cleared.
+struct tCellNew : nash_Cell {
+    tCellNew() { MEM_fill(children, 0, sizeof(children)); }
 };
 
 /**
@@ -763,7 +727,8 @@ struct sNode_00328660 {
  * @param target  the cell key the node belongs in
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, nash_Node* item, nash_CellKey* target, const nash_CellKey* mykey)
+extern "C" void nash_Cell_addnode(nash_Cell* node, int idx, nash_Node* item, nash_CellKey* target,
+                                  const nash_CellKey* mykey)
 {
     nash_CellKey cur = *mykey;
     while (cur.level != target->level) {
@@ -775,13 +740,13 @@ extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, nash_Node* item
         cur.x = cur.x * 2 + dx;
         cur.y = cur.y * 2 + dy;
         cur.z = cur.z * 2 + dz;
-        sNode_00328660** childSlot = &node->child[dx][dy][dz];
+        nash_Cell** childSlot = &node->children[dx][dy][dz];
         if (*childSlot == 0) {
-            *childSlot = new (str_Cell, 0x20000000, 0) sNode_00328660;
+            *childSlot = new (str_Cell, 0x20000000, 0) tCellNew;
         }
         node = *childSlot;
     }
-    node->lists[idx].push(item);
+    node->nodesinside[idx].prepend(item);
 }
 #endif
 
@@ -804,17 +769,17 @@ INCLUDE_ASM("intersect/aifwddiff", nash_Cell_movenode);
  * @param newkey  the cell key it moves to
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, nash_Node* item, nash_CellKey* oldkey,
+extern "C" void nash_Cell_movenode(nash_Cell* node, int type, nash_Node* item, nash_CellKey* oldkey,
                               nash_CellKey* newkey, nash_CellKey* mykey)
 {
     if (newkey->level == mykey->level) {
         nash_Cell_remnode(node, type, (nash_Node*)item, oldkey, mykey);
-        ((sList_00328660*)&node->lists[type])->push(item);
+        node->nodesinside[type].prepend(item);
         return;
     }
     if (oldkey->level == mykey->level) {
-        node->lists[type].remove((nash_Node*)item);
-        nash_Cell_addnode((sNode_00328660*)node, type, item, newkey, mykey);
+        node->nodesinside[type].remove((nash_Node*)item);
+        nash_Cell_addnode(node, type, item, newkey, mykey);
         return;
     }
     int olds = mykey->level - oldkey->level - 1;
@@ -831,7 +796,7 @@ extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, nash_Node* it
         childkey.x = mykey->x * 2 + newcx;
         childkey.y = mykey->y * 2 + newcy;
         childkey.z = mykey->z * 2 + newcz;
-        sNode_003284B8*& child = node->child[newcx][newcy][newcz];
+        nash_Cell*& child = node->children[newcx][newcy][newcz];
         nash_Cell_movenode(child, type, item, oldkey, newkey, &childkey);
         return;
     }
@@ -840,7 +805,7 @@ extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, nash_Node* it
     oldchildkey.x = mykey->x * 2 + oldcx;
     oldchildkey.y = mykey->y * 2 + oldcy;
     oldchildkey.z = mykey->z * 2 + oldcz;
-    sNode_003284B8*& oldchild = node->child[oldcx][oldcy][oldcz];
+    nash_Cell*& oldchild = node->children[oldcx][oldcy][oldcz];
     nash_Cell_remnode(oldchild, type, (nash_Node*)item, oldkey, (&oldchildkey));
     if (oldchild->empty()) {
         operator_delete((int*)oldchild);
@@ -851,28 +816,27 @@ extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, nash_Node* it
     newchildkey.x = mykey->x * 2 + newcx;
     newchildkey.y = mykey->y * 2 + newcy;
     newchildkey.z = mykey->z * 2 + newcz;
-    sNode_003284B8*& newchild = node->child[newcx][newcy][newcz];
+    nash_Cell*& newchild = node->children[newcx][newcy][newcz];
     if (newchild == 0) {
-        newchild = (sNode_003284B8*)new (str_Cell, 0x20000000, 0) sNode_00328660;
+        newchild = new (str_Cell, 0x20000000, 0) tCellNew;
     }
-    nash_Cell_addnode((sNode_00328660*)newchild, type, item, newkey, &newchildkey);
+    nash_Cell_addnode(newchild, type, item, newkey, &newchildkey);
 }
 #endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", nash_Octant_addnode);
 #ifdef SKIP_ASM
-struct sNode_8C20 {
-    sNode_8C20* child[2][2][2];         // 0x00
-    sList_00328660 lists[3];            // 0x20
-    sNode_8C20() {}
-    sNode_8C20(sNode_8C20* c, const nash_CellKey& cc, const nash_CellKey& pc)
+// A new root Cell one level up (On Tour Cell::Cell(childkey, child, mykey)): the base clears the three node lists,
+// then the children are cleared and the old root becomes the child at its octant.
+struct tCellWrap : nash_Cell {
+    tCellWrap(const nash_CellKey& childkey, nash_Cell* child, const nash_CellKey& mykey)
     {
-        int dx = cc.x - pc.x * 2;
-        int dy = cc.y - pc.y * 2;
-        int dz = cc.z - pc.z * 2;
-        MEM_fill(child, 0, sizeof(child));
-        child[dx][dy][dz] = c;
+        int dx = childkey.x - mykey.x * 2;
+        int dy = childkey.y - mykey.y * 2;
+        int dz = childkey.z - mykey.z * 2;
+        MEM_fill(children, 0, sizeof(children));
+        children[dx][dy][dz] = child;
     }
 };
 
@@ -913,22 +877,21 @@ static inline nash_CellKey Parent_8C20(const nash_CellKey& c)
  */
 extern "C" void nash_Octant_addnode(nash_Octant* root, int idx, nash_Node* item, nash_CellKey* cell)
 {
-    sNode_8C20** pn = &(*(sNode_8C20**)&root->rootcell);
-    if (((sNode_8C20*)root->rootcell) == 0) {
+    nash_Cell** pn = &root->rootcell;
+    if (root->rootcell == 0) {
         root->rootkey = *cell;
-        sNode_8C20* n = new (str_Cell, 0x20000000, 0) sNode_8C20;
-        MEM_fill(n->child, 0, sizeof(n->child));
+        nash_Cell* n = new (str_Cell, 0x20000000, 0) tCellNew;
         *pn = n;
-        ((sNode_8C20*)root->rootcell)->lists[idx].push(item);
+        root->rootcell->nodesinside[idx].prepend(item);
         return;
     }
     while (!Contains_8C20(root->rootkey, *cell)) {
         nash_CellKey nc = Parent_8C20(root->rootkey);
-        sNode_8C20* n = new (str_Cell, 0x20000000, 0) sNode_8C20(((sNode_8C20*)root->rootcell), root->rootkey, nc);
+        nash_Cell* n = new (str_Cell, 0x20000000, 0) tCellWrap(root->rootkey, root->rootcell, nc);
         root->rootkey = nc;
-        (*(sNode_8C20**)&root->rootcell) = n;
+        root->rootcell = n;
     }
-    nash_Cell_addnode((sNode_00328660*)((sNode_8C20*)root->rootcell), idx, item, cell, &root->rootkey);
+    nash_Cell_addnode(root->rootcell, idx, item, cell, &root->rootkey);
 }
 #endif
 
@@ -1062,7 +1025,7 @@ extern "C" void nash_Nash_findkey(nash_CellKey* key, tBoundBox* box)
 INCLUDE_ASM("intersect/aifwddiff", nash_Nash_movenode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void nash_Cell_movenode_91E0(sNode_003284B8* node, int idx, nash_Node* item, nash_CellKey* from,
+extern "C" void nash_Cell_movenode_91E0(nash_Cell* node, int idx, nash_Node* item, nash_CellKey* from,
                               nash_CellKey* to, nash_Octant* root) __asm__("nash_Cell_movenode");
 
 static inline int Equal_91E0(const nash_CellKey& a, const nash_CellKey& b)
@@ -1072,11 +1035,10 @@ static inline int Equal_91E0(const nash_CellKey& a, const nash_CellKey& b)
 
 static inline void Remove_91E0(nash_Octant* root, int idx, nash_Node* item, nash_CellKey* from)
 {
-    nash_Cell_remnode((sNode_003284B8*)((sNode_8C20*)root->rootcell), idx, (nash_Node*)item, from,
-                  (nash_CellKey*)root);
-    if (((sNode_003284B8*)((sNode_8C20*)root->rootcell))->empty()) {
-        operator_delete((int*)((sNode_8C20*)root->rootcell));
-        (*(sNode_8C20**)&root->rootcell) = 0;
+    nash_Cell_remnode(root->rootcell, idx, (nash_Node*)item, from, (nash_CellKey*)root);
+    if (root->rootcell->empty()) {
+        operator_delete((int*)root->rootcell);
+        root->rootcell = 0;
     }
 }
 
@@ -1086,7 +1048,7 @@ static inline void Move_91E0(nash_Octant* root, int idx, nash_Node* item, nash_C
         Remove_91E0(root, idx, item, from);
         nash_Octant_addnode(root, idx, item, (nash_CellKey*)to);
     } else {
-        nash_Cell_movenode_91E0((sNode_003284B8*)((sNode_8C20*)root->rootcell), idx, item, (nash_CellKey*)from, (nash_CellKey*)to, root);
+        nash_Cell_movenode_91E0(root->rootcell, idx, item, (nash_CellKey*)from, (nash_CellKey*)to, root);
     }
 }
 

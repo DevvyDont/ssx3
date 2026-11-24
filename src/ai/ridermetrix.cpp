@@ -11,6 +11,7 @@
 #include "main/ssxapp.h"
 #include "replay/bxreplayframe.h"
 #include "object/being.h"
+#include "util/surfprop.h"
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
@@ -22,34 +23,32 @@ extern char str_cHUDFX[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
-struct sMetrixEntry_001172E0
+// A cHUDFX built by its out-of-line constructor (cHUDFX_cHUDFX: a free slot, ID 0x34).
+struct tHUDFXInit : cHUDFX
 {
-    char pad_0x00[0x98];
-    int index;
-    sMetrixEntry_001172E0() { cHUDFX_cHUDFX(this); }
+    tHUDFXInit() { cHUDFX_cHUDFX(this); }
 };
 
 /**
  * Links the score object to its rider and, for a rider with a view, creates its HUD message bank.
  *
- * Stores @p rider at +0x1AC. When the rider's mViewIndex is not negative it allocates 44 (0x2C) cHUDFX slots
- * of 0x9C bytes (tag "cHUDFX"), each constructed free (type 0x34) with its index at +0x98, and stores the
- * array and the count at +0x1B0 / +0x1B4. Other riders keep a null bank.
+ * Stores @p rider in Rider. When the rider's mViewIndex is not negative it allocates 44 (0x2C) cHUDFX slots
+ * of 0x9C bytes (tag "cHUDFX"), each constructed free (ID 0x34) with its index in SlotID, and stores the
+ * array and the count in HUDfx / NumHUDfx. Other riders keep a null bank.
  *
  * @param rider  the owning rider
  */
-// PORT: element address built through int (pointer in int).
 extern "C" void cRiderMetrix_linkToRider(cRiderMetrix* self, cRider* rider)
 {
     self->Rider = (cRider*)rider;
     if (rider->mViewIndex >= 0)
     {
-        sMetrixEntry_001172E0** slot = (sMetrixEntry_001172E0**)(&self->HUDfx);
+        cHUDFX** slot = &self->HUDfx;
         self->NumHUDfx = 44;
-        *slot = new (operator_new_tag(44 * sizeof(sMetrixEntry_001172E0), str_cHUDFX, 0, 0)) sMetrixEntry_001172E0[44];
+        *slot = new (operator_new_tag(44 * sizeof(cHUDFX), str_cHUDFX, 0, 0)) tHUDFXInit[44];
         for (int i = 0; i < self->NumHUDfx; i++)
         {
-            ((sMetrixEntry_001172E0*)(i * 0x9C + (int)self->HUDfx))->index = i;
+            self->HUDfx[i].SlotID = i;
         }
     }
 }
@@ -108,6 +107,8 @@ extern "C" int cRiderMetrix_hasActiveHUDfx(cRiderMetrix* self, int type)
             int entryType = (self->HUDfx)[i].ID;
             if (entryType != 52)
             {
+                // ORIGINAL-PTR: a bit array addressed by byte offset: retail forms (bit & ~0x1F) >> 3 (and + sra 3)
+                // and adds it to the array's address, where a word index would be sra 5 / sll 2.
                 int off = (entryType & ~0x1F) >> 3;
                 int* bitArray = ((int*)&self->ActiveFXListCache[0]);
                 *(int*)((char*)bitArray + off) |= 1 << entryType;
@@ -254,17 +255,18 @@ static inline float rmClamp_117638(float v, float lo, float hi)
     return lo;
 }
 
-static inline bool rmIsState_117638(char* p, int st)
+static inline bool rmIsState_117638(cHUDFX* fx, int st)
 {
-    return *(int*)p == st;
+    return fx->ID == st;
 }
 
 /**
  * Adds a trick's points to the combo chain.
  *
- * For @p points above 0: increments the combo count (+0x9C), adds points x clamp((count + 10) x 0.05, 0.5, 2) to the
- * combo points (+0xA0), sets the reset delay (+0xA4) to -1 and, with a HUD bank (+0x1B0), updates HUD effect 3
- * (cHUDFX_setAsync on bank + 0x1D4) with its current value (0 when that slot's type is 52) and the new count.
+ * For @p points above 0: increments the combo count (NumCombos), adds points x clamp((count + 10) x 0.05, 0.5, 2) to
+ * the combo points (ComboPoints), sets the reset delay (ComboResetDelay) to -1 and, with a HUD bank (HUDfx), updates
+ * HUD effect 3 (cHUDFX_setAsync on HUDfx[3]) with its current DisplayInt (0 when that slot's ID is 52) and the new
+ * count.
  *
  * @param points  the points earned
  */
@@ -280,12 +282,12 @@ extern "C" void cRiderMetrix_addToComboChain(cRiderMetrix* self, int points)
         self->ComboResetDelay = -1.0f;
         self->ComboPoints += (int)(points * k);
         cHUDFX* hudBank = self->HUDfx;
-        if (((char*)hudBank) != 0)
+        if (hudBank != 0)
         {
             int curValue = 0;
-            char* hudSlot = ((char*)hudBank) + 0x1D4;
+            cHUDFX* hudSlot = &hudBank[3];
             if (!rmIsState_117638(hudSlot, 52))
-                curValue = *(int*)(((char*)hudBank) + 0x1E8);
+                curValue = hudBank[3].DisplayInt;
             cHUDFX_setAsync(hudSlot, 3, curValue, n, 0.0f);
         }
     }
@@ -1293,7 +1295,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
  * Steps a hold/air bonus up a level when its measure passes the next threshold, and returns the bonus points earned.
  *
  * Looks at entry *@p idx of @p tbl ({threshold, points}); a negative threshold ends the table. When @p x reaches it:
- * points = (int)(entry points * mPointsMultiplier (+0x1C4) + 0.5), the level advances, HUD effects 0x1C-0x20 are
+ * points = (int)(entry points * mPointsMultiplier + 0.5), the level advances, HUD effects 0x1C-0x20 are
  * removed and effect @p type shows the points and threshold for 1.5 s.
  *
  * @param idx  the bonus level to test and advance (On Tour curBonusLevel)
@@ -1304,14 +1306,12 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
  */
 extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(cRiderMetrix* self, int* idx, tHoldBonusDB* tbl, int type, float x)
 {
-    // PORT: pointer arithmetic through int.
-    tHoldBonusDB* bonusStep = (tHoldBonusDB*)(*idx * 8 + (int)tbl);
-    float stepThreshold = bonusStep->minTarget;
+    float stepThreshold = tbl[*idx].minTarget;
     if (stepThreshold < 0.0f) return 0;
     if (stepThreshold <= x)
     {
         float pointsMult = self->mPointsMultiplier;
-        int pointsEarned = (int)(bonusStep->points * pointsMult + 0.5f);
+        int pointsEarned = (int)(tbl[*idx].points * pointsMult + 0.5f);
         *idx = *idx + 1;
         cRiderMetrix_removeHUDfx(self, 0x1C);
         cRiderMetrix_removeHUDfx(self, 29);
@@ -1434,8 +1434,8 @@ extern "C" void cHUDFX_setAsync(void* self, int type, int value, int arg, float 
 /**
  * Records a collected multiplier and shows it when it beats the best so far.
  *
- * Increments the multiplier count (+0x130); with a HUD bank (+0x1B0) and @p value above the stored best (+0x18) it
- * shows HUD effect 4 with (int) @p value (cHUDFX_setAsync on bank + 0x270) and stores the new best.
+ * Increments the multiplier count (Totals.NumMultipliers); with a HUD bank (HUDfx) and @p value above the stored best
+ * (CurTrickPointMult) it shows HUD effect 4 with (int) @p value (cHUDFX_setAsync on HUDfx[4]) and stores the new best.
  *
  * @param value  the multiplier
  * @return 0.0 (no boost)
@@ -1444,11 +1444,11 @@ extern "C" float cRiderMetrix_evCollectMultiplier(cRiderMetrix* self, float valu
 {
     self->Totals.NumMultipliers += 1;
     cHUDFX* hudBank = self->HUDfx;
-    if (((char*)hudBank) != 0)
+    if (hudBank != 0)
     {
         if (self->CurTrickPointMult < value)
         {
-            cHUDFX_setAsync(((char*)hudBank) + 0x270, 4, (int)value, 0, 0.0f);
+            cHUDFX_setAsync(&hudBank[4], 4, (int)value, 0, 0.0f);
             self->CurTrickPointMult = value;
         }
     }
@@ -2904,23 +2904,25 @@ extern float kTerminalVelocityTable[2][3][4][2];
  *
  * Interpolates kTerminalVelocityTable (filled by InitTerminalVelocityTable) by surface property and tuck amount for each
  * speed-attribute row, mixes the rows by the rider's speed attribute (cBEStatInterface_getSpeedAttrib on the stat interface), scales by
- * 27.78 and smooths it into the old value (+0x2E4) with 0.9 (0.97 when slowing), losing 2% when off natural stance
- * without boost. In motion state 1 the limit is 3333.33. At uber level 11+ while boosting it never drops below +0x30C.
+ * 27.78 and smooths it into the old value (TerminalVelocity) with 0.9 (0.97 when slowing), losing 2% when off natural
+ * stance (IsRidingFakie != IsGoofyStance) without boost. In motion state 1 the limit is 3333.33. At uber level 11+
+ * while boosting it never drops below mBoostMaxSpeed. The tuck amount is slewed channel 4 (mSlewed[4].cur).
  */
 // cRider::updateTerminalVelocity (On Tour name; pairing unverified, structure fits the retail asm)
-extern "C" void cRider_updateTerminalVelocity(char* self)
+extern "C" void cRider_updateTerminalVelocity(cRider* self)
 {
-    float speedAttribute = cBEStatInterface_getSpeedAttrib(cBE_getInterface(cBE_getBE(), 3), *(int*)(self + 0x86C), *(int*)(self + 0xB34));
+    float speedAttribute = cBEStatInterface_getSpeedAttrib(cBE_getInterface(cBE_getBE(), 3),
+                                                         self->mAIIndex, self->mStatsIndex);
     // NOTE: the retail code adds and subtracts 1.0 (likely an inlined bx range helper).
     speedAttribute = speedAttribute + 1.0f - 1.0f;
     cGame* surfPropCache = SSXApp->Game;
-    char* snow = (char*)surfPropCache->SurfPropCache + *(int*)(self + 0x438) * 176;
+    tSurfData* snow = &surfPropCache->SurfPropCache->SurfData[self->mSurfaceType];
     const int motionState = cRider_getMotionState(self);
-    const float surfaceProperty = (motionState == 0) ? *(float*)(snow + 4) : 1.0f;
+    const float surfaceProperty = (motionState == 0) ? snow->TerminalVelocity : 1.0f;
     const bool fasterThanPacked = 0.0f < surfaceProperty;
     const int lowSurfaceIndex = fasterThanPacked ? 1 : 0;
     const float surfaceFactor = fasterThanPacked ? surfaceProperty : surfaceProperty + 1.0f;
-    float boostStrength = *(float*)(self + 0x2FC);
+    float boostStrength = self->mBoostStrength;
     int boostFactor = 0;
     if (0.1f <= boostStrength) {
         boostFactor = 1;
@@ -2931,7 +2933,7 @@ extern "C" void cRider_updateTerminalVelocity(char* self)
             }
         }
     }
-    const float crouchFactor = (motionState == 0) ? *(float*)(self + 0x220) : 1.0f;
+    const float crouchFactor = (motionState == 0) ? self->mSlewed[4].cur : 1.0f;
     float speeds[2];
     float newTerminalVelocity;
     float historyFactor;
@@ -2952,21 +2954,21 @@ extern "C" void cRider_updateTerminalVelocity(char* self)
         newTerminalVelocity = 3333.33349609375f;
     } else {
         newTerminalVelocity = (speedAttribute * speeds[1] + (1.0f - speedAttribute) * speeds[0]) * 27.77777862548828f;
-        *(int*)(self + 0x5A0) = 0;
+        self->ConsecutiveAirFrames = 0;
         historyFactor = 0.8999999761581421f;
-        if (*(int*)(self + 0x320) != *(int*)(self + 0x324)) {
-            if (*(float*)(self + 0x2FC) <= 0.0f) {
+        if (self->IsRidingFakie != self->IsGoofyStance) {
+            if (self->mBoostStrength <= 0.0f) {
                 newTerminalVelocity *= 0.9800000190734863f;
             }
         }
-        if (newTerminalVelocity < *(float*)(self + 0x2E4)) {
+        if (newTerminalVelocity < self->TerminalVelocity) {
             historyFactor = 0.9700000286102295f;
         }
-        newTerminalVelocity = (1.0f - historyFactor) * newTerminalVelocity + historyFactor * *(float*)(self + 0x2E4);
+        newTerminalVelocity = (1.0f - historyFactor) * newTerminalVelocity + historyFactor * self->TerminalVelocity;
     }
-    *(float*)(self + 0x2E4) = newTerminalVelocity;
-    if (*(int*)(self + 0x2F4) >= 11 && 0.0f < *(float*)(self + 0x2FC)) {
-        *(float*)(self + 0x2E4) = MAX(*(float*)(self + 780), newTerminalVelocity);
+    self->TerminalVelocity = newTerminalVelocity;
+    if (self->mUberLevel >= 11 && 0.0f < self->mBoostStrength) {
+        self->TerminalVelocity = MAX(self->mBoostMaxSpeed, newTerminalVelocity);
     }
 }
 #endif

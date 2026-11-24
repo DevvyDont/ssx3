@@ -8,6 +8,13 @@
 #include "fe/ovstatetransport.h"
 #include "main/ssxapp.h"
 #include "util/locale.h"
+#include "ui/uithing.h"
+#include "ui/uiicon.h"
+#include "ui/uimenu.h"
+#include "ui/uiinput.h"
+#include "ui/uitext.h"
+#include "fe/feasyncmanager.h"
+#include "be/beintnewrace.h"
 
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onCreateScreen);
@@ -178,26 +185,28 @@ static inline int isLabel2009D0(int id, char* s)
     return id == GetHashValue32(s);
 }
 // PORT: the unit declares cUITemplate_MAP_onWidgetCreate(void*); the body also takes the menu in $5.
-extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, void* menu) __asm__("cUITemplate_MAP_onWidgetCreate");
+extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, cUIThing* menu) __asm__("cUITemplate_MAP_onWidgetCreate");
 
 /**
  * Preselects the map's peak list when it is created: entry 2, or for map styles 2 and up the entry of the current race
  * location's peak.
  *
- * Only for the widget whose hash name (+0x38) is "SP_PeakList": with cUITemplate_MAP_mMapStyle 0 or 1 it selects index
- * 2; otherwise 2 minus the peak byte at +0x54 of cBENewRaceInterface_getLocation (race interface 0), so the list runs
+ * Only for the widget whose hash name (mHashName) is "SP_PeakList": with cUITemplate_MAP_mMapStyle 0 or 1 it selects
+ * index 2; otherwise 2 minus the low byte of the peak (segmentID) of cBENewRaceInterface_getLocation (race
+ * interface 0), so the list runs
  * from the last peak to the first.
  *
  * @param menu  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, void* menu)
+extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, cUIThing* menu)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (isLabel2009D0(*(int*)((char*)menu + 0x38), str_SP_PeakList)) {
+    if (isLabel2009D0(menu->mHashName, str_SP_PeakList)) {
         if (cUITemplate_MAP_mMapStyle < 2) {
             cUIMenu_setSelectedByIndex(menu, 2);
         } else {
-            cUIMenu_setSelectedByIndex(menu, 2 - *(unsigned char*)((char*)cBENewRaceInterface_getLocation(iface) + 0x54));
+            const tBELocationDB* location = (const tBELocationDB*)cBENewRaceInterface_getLocation(iface);
+            cUIMenu_setSelectedByIndex(menu, 2 - (unsigned char)location->segmentID);
         }
     }
 }
@@ -382,23 +391,6 @@ extern "C" int cUITemplate_MAP_isMapEventLocked(cUITemplate_MAP* self, int kind,
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupMenus);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
-// _vt$8cUIThing (as in fe/feasyncfile); the other slots are known only by position.
-class cUIThing {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void setEnabled(int on);
-    virtual void setFocus(int on);
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
-
-struct cUIText;
 
 int GetHashValue32(char* str);
 
@@ -456,19 +448,7 @@ extern char str_Peakpct_dEarningsGoal[];
 extern char str_empty_e[];
 extern char D_004A2590[];
 extern char str_ConfirmMenu_Yes[];
-extern char kMAPCOLOR_REGULAR[];
-
-// A menu entry widget: cUIThing plus its menu index at 0x18; slot 11 sets the text colour.
-class cUIObj_Menus : public cUIThing {
-public:
-    int f0C;
-    int f10;
-    int f14;
-    int idx;            // 0x18
-    void setIndex(int i) { idx = i; }
-    virtual void v10();
-    virtual void setColor(char* col);
-};
+extern tARGB kMAPCOLOR_REGULAR;
 
 
 // Location entries with track 0x17 have no event: no availability colour or text, the widget is made static.
@@ -490,48 +470,48 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
 {
     cUITemplate_MAP* self = tmpl;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    cUIObj_Menus* menuObj;
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak3));
+    cUIText* menuObj;
+    menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak3));
     if (menuObj != 0) {
-        menuObj->setIndex(2);
+        menuObj->setMiscData(2);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbPeakUnlocked[2]);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak2));
+    menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak2));
     if (menuObj != 0) {
-        menuObj->setIndex(1);
+        menuObj->setMiscData(1);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbPeakUnlocked[1]);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak1));
+    menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak1));
     if (menuObj != 0) {
-        menuObj->setIndex(0);
+        menuObj->setMiscData(0);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbPeakUnlocked[0]);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Mountain));
+    menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Mountain));
     if (menuObj != 0) {
-        menuObj->setIndex(3);
+        menuObj->setMiscData(3);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, 0);
     }
     char buf[32];
     for (int i = 0; i < 3; i++) {
         sprintf(buf, str_Peakpct_dRaceGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
-        menuObj->setIndex(0);
+        menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
+        menuObj->setMiscData(0);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[0]);
         sprintf(buf, str_Peakpct_dFreestyleGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
-        menuObj->setIndex(1);
+        menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
+        menuObj->setMiscData(1);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[1]);
         sprintf(buf, str_Peakpct_dFreerideGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
-        menuObj->setIndex(2);
+        menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
+        menuObj->setMiscData(2);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[2]);
         if (cUITemplate_MAP_mMapStyle < 2) {
             menuObj->setStatic(1);
             menuObj->setVisible(0);
         }
         sprintf(buf, str_Peakpct_dEarningsGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
-        menuObj->setIndex(3);
+        menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
+        menuObj->setMiscData(3);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[3]);
         if (cUITemplate_MAP_mMapStyle < 2) {
             menuObj->setStatic(1);
@@ -561,7 +541,7 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
                 if (mode == 0 || mode == 1)
                     self->mbLocationEventCompleted[peak][mode][j] = cUITemplate_MAP_isMapEventCompleted(self, &goal, peak);
                 sprintf(buf, fmt, peak + 1, j);
-                menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
+                menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
                 if (cUITemplate_MAP_mMapStyle < 2 && goal.f0C != 0) {
                     self->mbLocationUnlocked[peak][mode][j] = 0;
                     if (menuObj != 0) {
@@ -587,22 +567,22 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
                     } else {
                         cUIText_setUnicodeString_enus(menuObj, func_001FD190(goal.kind));
                     }
-                    menuObj->setIndex(j);
+                    menuObj->setMiscData(j);
                 } else if (menuObj != 0) {
                     menuObj->setStatic(1);
                 }
             }
         }
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_ConfirmMenu_Yes));
+    menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_ConfirmMenu_Yes));
     if (menuObj != 0) {
-        menuObj->setIndex(0);
-        menuObj->setColor(kMAPCOLOR_REGULAR);
+        menuObj->setMiscData(0);
+        menuObj->setColour(&kMAPCOLOR_REGULAR);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_ConfirmMenu_No));
+    menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_ConfirmMenu_No));
     if (menuObj != 0) {
-        menuObj->setIndex(1);
-        menuObj->setColor(kMAPCOLOR_REGULAR);
+        menuObj->setMiscData(1);
+        menuObj->setColour(&kMAPCOLOR_REGULAR);
     }
 }
 #endif
@@ -640,7 +620,6 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
-extern char cBENewRaceInterface_newRace[];
 
 
 /**
@@ -662,7 +641,7 @@ extern "C" void cUITemplate_MAP_setupPeakUnlock(cUITemplate_MAP* tmpl)
     self->mbPeakUnlocked[2] = 1;
     for (int peak = 1; peak < 3; peak++) {
         int locked;
-        if (cBENewRaceInterface_newRace[0x49] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             locked = cBENewPlayerInterface_isPeakLocked(player, 0, cBENewPlayerInterface_getPlayerCharID(player, 0), peak);
             if (locked) {
                 locked = cBENewPlayerInterface_isPeakLocked(player, 1, cBENewPlayerInterface_getPlayerCharID(player, 1), peak);
@@ -689,17 +668,16 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupScreenExit);
  * Prepares the map template for leaving the screen: marks it exiting, forgets the map texture and hides the map
  * picture.
  *
- * Sets +0x2F0 (On Tour mScreenExiting) to 1 and +0x2DC (On Tour mMapTextureSet) to 0, and calls setVisible(0) (slot 9)
- * on the map icon at +0x2E4 (On Tour mpMap) when there is one.
+ * Sets mScreenExiting to 1 and mMapTextureSet to 0, and calls setVisible(0) on the map icon mpMap when there is
+ * one.
  */
 extern "C" void cUITemplate_MAP_setupScreenExit(cUITemplate_MAP* self)
 {
     self->mScreenExiting = 1;
     self->mMapTextureSet = 0;
-    void* obj = self->mpMap;
-    if (obj != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-        vt[9].fn(vthis(obj, vt[9]), 0);
+    cUIIcon* map = self->mpMap;
+    if (map != 0) {
+        map->setVisible(0);
     }
 }
 #endif
@@ -752,22 +730,20 @@ extern int cUITemplate_MAP_mMapState;
 
 
 // PORT: the unit declares cUITemplate_MAP_onInputAlways(void*); the body also takes the menu object in $5.
-extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu) __asm__("cUITemplate_MAP_onInputAlways");
+extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, cUIInput* menu) __asm__("cUITemplate_MAP_onInputAlways");
 
 /**
- * Refreshes the map's info for the current map state when the input's vtable slot 17 or 18 test passes.
+ * Refreshes the map's info for the current map state when the input is up or down (isUp / isDown).
  *
  * Select peak refreshes the peak info, select goal the peak goals (both with the layout), select location
  * cUITemplate_MAP_setupLocationInfo().
  *
  * @param menu  the input (On Tour cUIInput* pInput)
  */
-extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu)
+extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, cUIInput* menu)
 {
-    sVEntry<int(void*)>* isUpSlot = &(*(sVEntry<int(void*)>**)((char*)menu + 8))[17];
-    if (isUpSlot->fn(vthis(menu, *isUpSlot)) == 0) {
-        sVEntry<int(void*)>* isDownSlot = &(*(sVEntry<int(void*)>**)((char*)menu + 8))[18];
-        if (isDownSlot->fn(vthis(menu, *isDownSlot)) == 0) {
+    if (!menu->isUp()) {
+        if (!menu->isDown()) {
             return;
         }
     }
@@ -795,7 +771,6 @@ extern "C" void* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-struct cFEAsyncManager;
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 extern char str_peak1outline[];
 extern char str_peak2outline[];
@@ -804,26 +779,6 @@ extern char str_Indicators[];
 extern char str_Ppct_dyou_are_here[];
 extern int cUITemplate_MAP_mMapState;
 extern unsigned int cUITemplate_MAP_mMapStyle;
-
-struct sColor_202828 {
-    float a, r, g, b;
-};
-
-class cUIPic_202828 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void setColour(sColor_202828* c);
-};
 
 /**
  * Fades in the map picture once its file has loaded, with the peak outlines or indicators, and the "you are
@@ -841,11 +796,11 @@ extern "C" void cUITemplate_MAP_onUpdate(cUITemplate_MAP* vself)
     if (vself->mMapTextureSet != 0) {
         if (vself->mMapPicAlpha < 1.0f)
             vself->mMapPicAlpha += 0.1f;
-        cUIPic_202828* pic = (cUIPic_202828*)vself->mpMap;
-        sColor_202828 color = *(sColor_202828*)((char*)pic + 0x1C);
-        color.a = vself->mMapPicAlpha;
+        cUIIcon* pic = vself->mpMap;
+        tARGB color = pic->mColour;
+        color.A = vself->mMapPicAlpha;
         pic->setColour(&color);
-        ((cUIPic_202828*)vself->mpMap)->setVisible(1);
+        vself->mpMap->setVisible(1);
         if (cUITemplate_MAP_mMapState == 0) {
             cUIState_showObjSafe(vself->mpUIState, str_peak1outline);
             cUIState_showObjSafe(vself->mpUIState, str_peak2outline);
@@ -855,7 +810,7 @@ extern "C" void cUITemplate_MAP_onUpdate(cUITemplate_MAP* vself)
         }
     } else {
         vself->mMapPicAlpha = 0.0f;
-        ((cUIPic_202828*)vself->mpMap)->setVisible(0);
+        vself->mpMap->setVisible(0);
         if (cUITemplate_MAP_mMapState == 0) {
             cUIState_hideObjSafe(vself->mpUIState, str_peak1outline);
             cUIState_hideObjSafe(vself->mpUIState, str_peak2outline);
@@ -869,19 +824,20 @@ extern "C" void cUITemplate_MAP_onUpdate(cUITemplate_MAP* vself)
     for (int i = 0; i < 3; i++) {
         char buf[0x20];
         sprintf(buf, str_Ppct_dyou_are_here, i + 1);
-        if (vself->mMapTextureSet != 0 && cUITemplate_MAP_mMapState == 0 && i == *(int*)((char*)cBENewRaceInterface_getLocation(iface) + 0x54) &&
-            *(int*)vself == 0 && cUITemplate_MAP_mMapStyle >= 2)
+        if (vself->mMapTextureSet != 0 && cUITemplate_MAP_mMapState == 0
+            && i == ((const tBELocationDB*)cBENewRaceInterface_getLocation(iface))->segmentID
+            && vself->mShowInfo == 0 && cUITemplate_MAP_mMapStyle >= 2)
             cUIState_showObjSafe(vself->mpUIState, buf);
         else
             cUIState_hideObjSafe(vself->mpUIState, buf);
     }
-    char* mgr = (char*)SSXApp->mFEAsyncManager;
-    if (cFEAsyncManager_GetFileStatus((cFEAsyncManager*)mgr, vself->mFEAsyncMapFileIndex) == 3 && vself->mMapTextureSet == 0) {
-        char* pic = (char*)vself->mpMap;
+    cFEAsyncManager* mgr = SSXApp->mFEAsyncManager;
+    if (cFEAsyncManager_GetFileStatus(mgr, vself->mFEAsyncMapFileIndex) == 3 && vself->mMapTextureSet == 0) {
+        cUIIcon* pic = vself->mpMap;
         if (pic != 0) {
-            int tex = *(int*)(mgr + vself->mFEAsyncMapFileIndex * 0x11C + 0x110);
-            *(int*)(pic + 0x7C) = 0;
-            *(int*)(pic + 0x78) = tex;
+            int tex = mgr->fileList[vself->mFEAsyncMapFileIndex].texID;
+            pic->mpTextureElem = 0;
+            pic->mTextureID = tex;
             vself->mMapTextureSet = 1;
             vself->mMapPicAlpha = 0.0f;
         }
@@ -960,10 +916,10 @@ extern "C" void cUITemplate_MAP_setupLayout(cUITemplate_MAP* vself)
         int state = 0;
         cUIState_hideObjSafe(vself->mpUIState, str_Indicators);
         cUIState_hideObjSafe(vself->mpUIState, str_SP_Info);
-        char* listMenu = (char*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_SP_PeakList));
+        cUIMenu* listMenu = (cUIMenu*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_SP_PeakList));
         if (listMenu != 0)
-            state = *(unsigned char*)(listMenu + 0x95);
-        if (*(int*)vself != 0 && state != 3)
+            state = listMenu->mScrollItemCurrent;
+        if (vself->mShowInfo != 0 && state != 3)
             cUIState_showObjSafe(vself->mpUIState, str_SP_Info);
         if (state == 3) {
             cUIState_hideObjSafe(vself->mpUIState, str_maptab);
@@ -1000,10 +956,10 @@ extern "C" void cUITemplate_MAP_setupLayout(cUITemplate_MAP* vself)
         cUIState_hideObjSafe(vself->mpUIState, str_SPG_EarningsGoals);
         cUIState_hideObjSafe(vself->mpUIState, str_SPG_InfoBack);
         sprintf(next, str_SPG_Peakpct_dGoals, cUITemplate_MAP_mPeak + 1);
-        char* listMenu = (char*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(next));
+        cUIMenu* listMenu = (cUIMenu*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(next));
         if (listMenu != 0)
-            state = *(unsigned char*)(listMenu + 0x95);
-        if (*(int*)vself != 0 || state == 3) {
+            state = listMenu->mScrollItemCurrent;
+        if (vself->mShowInfo != 0 || state == 3) {
             cUIState_showObjSafe(vself->mpUIState, str_SPG_InfoBack);
             switch (state) {
             case 0:
@@ -1056,7 +1012,7 @@ extern "C" void cUITemplate_MAP_setupLayout(cUITemplate_MAP* vself)
         sprintf(name, str_peakpct_dindicators, cUITemplate_MAP_mPeak);
         cUIState_showObjSafe(vself->mpUIState, name);
         cUIState_hideObjSafe(vself->mpUIState, str_SE_Info);
-        if (*(int*)vself != 0)
+        if (vself->mShowInfo != 0)
             cUIState_showObjSafe(vself->mpUIState, str_SE_Info);
         cUITemplate_MAP_setupLocationInfo(((char*)vself));
         cUIState_hideObjSafe(vself->mpUIState, str_peak0indicators);
@@ -1092,28 +1048,15 @@ extern char str_ConfirmMenu[];
 extern char str_kT_FEHelpSelectMode[];
 extern char str_kT_240SelectEvent[];
 
-class cUIObj_2030A0 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int on);
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
 
-static inline cUIObj_2030A0* getObj_2030A0(char* self, char* name)
+static inline cUIThing* getObj_2030A0(cUITemplate_MAP* self, char* name)
 {
-    return (cUIObj_2030A0*)cUIScreen_getObjectByHashName(*(void**)(self + 0x2E8), GetHashValue32(name));
+    return (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
 }
 
-static inline cUIObj_2030A0* hideObj_2030A0(char* self, char* name)
+static inline cUIThing* hideObj_2030A0(cUITemplate_MAP* self, char* name)
 {
-    cUIObj_2030A0* o = getObj_2030A0(self, name);
+    cUIThing* o = getObj_2030A0(self, name);
     if (o != 0) {
         o->setFocus(0);
         o->setVisible(0);
@@ -1135,30 +1078,30 @@ extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* vself, int focus
 {
     cUITemplate_MAP_setShowInfo(vself, 0);
     cUITemplate_MAP_mMapState = focus;
-    cUIObj_2030A0* peak = hideObj_2030A0(((char*)vself), str_SP_PeakList);
-    cUIObj_2030A0* goal0 = hideObj_2030A0(((char*)vself), str_SPG_Peak1Goals);
-    cUIObj_2030A0* goal1 = hideObj_2030A0(((char*)vself), str_SPG_Peak2Goals);
-    cUIObj_2030A0* goal2 = hideObj_2030A0(((char*)vself), str_SPG_Peak3Goals);
-    cUIObj_2030A0* ev00 = hideObj_2030A0(((char*)vself), str_Peak1RaceLocations);
-    cUIObj_2030A0* ev01 = hideObj_2030A0(((char*)vself), str_Peak1FreestyleLocations);
-    cUIObj_2030A0* ev02 = hideObj_2030A0(((char*)vself), str_Peak1FreerideLocations);
-    cUIObj_2030A0* ev10 = hideObj_2030A0(((char*)vself), str_Peak2RaceLocations);
-    cUIObj_2030A0* ev11 = hideObj_2030A0(((char*)vself), str_Peak2FreestyleLocations);
-    cUIObj_2030A0* ev12 = hideObj_2030A0(((char*)vself), str_Peak2FreerideLocations);
-    cUIObj_2030A0* ev20 = hideObj_2030A0(((char*)vself), str_Peak3RaceLocations);
-    cUIObj_2030A0* ev21 = hideObj_2030A0(((char*)vself), str_Peak3FreestyleLocations);
-    cUIObj_2030A0* ev22 = hideObj_2030A0(((char*)vself), str_Peak3FreerideLocations);
-    cUIObj_2030A0* popup = hideObj_2030A0(((char*)vself), str_ConfirmMenu);
+    cUIThing* peak = hideObj_2030A0(vself, str_SP_PeakList);
+    cUIThing* goal0 = hideObj_2030A0(vself, str_SPG_Peak1Goals);
+    cUIThing* goal1 = hideObj_2030A0(vself, str_SPG_Peak2Goals);
+    cUIThing* goal2 = hideObj_2030A0(vself, str_SPG_Peak3Goals);
+    cUIThing* ev00 = hideObj_2030A0(vself, str_Peak1RaceLocations);
+    cUIThing* ev01 = hideObj_2030A0(vself, str_Peak1FreestyleLocations);
+    cUIThing* ev02 = hideObj_2030A0(vself, str_Peak1FreerideLocations);
+    cUIThing* ev10 = hideObj_2030A0(vself, str_Peak2RaceLocations);
+    cUIThing* ev11 = hideObj_2030A0(vself, str_Peak2FreestyleLocations);
+    cUIThing* ev12 = hideObj_2030A0(vself, str_Peak2FreerideLocations);
+    cUIThing* ev20 = hideObj_2030A0(vself, str_Peak3RaceLocations);
+    cUIThing* ev21 = hideObj_2030A0(vself, str_Peak3FreestyleLocations);
+    cUIThing* ev22 = hideObj_2030A0(vself, str_Peak3FreerideLocations);
+    cUIThing* popup = hideObj_2030A0(vself, str_ConfirmMenu);
     if (vself->mTransportPopupActive != 0) {
         cUIState_hideObjSafe(vself->mpUIState, str_Locks);
         popup->setFocus(1);
         popup->setVisible(1);
         if (vself->mPopupType == 0) {
-            cUIObj_2030A0* widget = getObj_2030A0(((char*)vself), str_ConfirmMenu_No);
+            cUIThing* widget = getObj_2030A0(vself, str_ConfirmMenu_No);
             widget->setVisible(1);
             widget->setStatic(0);
         } else {
-            cUIObj_2030A0* widget = getObj_2030A0(((char*)vself), str_ConfirmMenu_No);
+            cUIThing* widget = getObj_2030A0(vself, str_ConfirmMenu_No);
             widget->setVisible(0);
             widget->setStatic(1);
         }
@@ -1168,35 +1111,37 @@ extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* vself, int focus
     case 0:
         cUITemplate_MAP_setupPeakInfo(vself);
         if (peak != 0) {
-            *(int*)((char*)peak + 0x14) |= 1;
+            peak->mAttr |= 1;
             peak->setFocus(1);
             peak->setVisible(1);
         }
         if (cUITemplate_MAP_mMapStyle < 2) {
-            cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(((char*)vself), str_title_title), GetHashValue32(str_kT_240SelectPeak));
+            cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(vself, str_title_title),
+                                         GetHashValue32(str_kT_240SelectPeak));
         }
         break;
     case 1:
         cUITemplate_MAP_setupPeakGoals(vself);
         if (cUITemplate_MAP_mPeak == 0 && goal0 != 0) {
-            *(int*)((char*)goal0 + 0x14) |= 1;
+            goal0->mAttr |= 1;
             goal0->setVisible(1);
             goal0->setFocus(1);
         } else if (cUITemplate_MAP_mPeak == 1 && goal1 != 0) {
-            *(int*)((char*)goal1 + 0x14) |= 1;
+            goal1->mAttr |= 1;
             goal1->setVisible(1);
             goal1->setFocus(1);
         } else if (goal2 != 0) {
-            *(int*)((char*)goal2 + 0x14) |= 1;
+            goal2->mAttr |= 1;
             goal2->setVisible(1);
             goal2->setFocus(1);
         }
         if (cUITemplate_MAP_mMapStyle < 2) {
-            cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(((char*)vself), str_title_title), GetHashValue32(str_kT_FEHelpSelectMode));
+            cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(vself, str_title_title),
+                                         GetHashValue32(str_kT_FEHelpSelectMode));
         }
         break;
     case 2: {
-        cUIObj_2030A0* widget = 0;
+        cUIThing* widget = 0;
         if (cUITemplate_MAP_mPeak == 0) {
             if (cUITemplate_MAP_mSelectedEvent == 0)
                 widget = ev00;
@@ -1220,12 +1165,13 @@ extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* vself, int focus
                 widget = ev22;
         }
         if (widget != 0) {
-            *(int*)((char*)widget + 0x14) |= 1;
+            widget->mAttr |= 1;
             widget->setVisible(1);
             widget->setFocus(1);
         }
         if (cUITemplate_MAP_mMapStyle < 2) {
-            cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(((char*)vself), str_title_title), GetHashValue32(str_kT_240SelectEvent));
+            cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(vself, str_title_title),
+                                         GetHashValue32(str_kT_240SelectEvent));
         }
         break;
     }
@@ -1295,24 +1241,10 @@ extern char str_Popup1[];
 extern char str_Popup2[];
 extern int cUITemplate_MAP_mMapState;
 
-class cUIObj_203A58 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
-
 /**
  * Shows or hides the transport confirm popup and sets its text and buttons.
  *
- * The popup's text is "go to peak now" or "transport to area"; a one-button popup (+0x2D0 is 1) shows OK and
+ * The popup's text is "go to peak now" or "transport to area"; a one-button popup (mPopupType 1) shows OK and
  * hides No, otherwise Yes and No.
  */
 extern "C" void cUITemplate_MAP_setupPopup(cUITemplate_MAP* self)
@@ -1337,21 +1269,22 @@ extern "C" void cUITemplate_MAP_setupPopup(cUITemplate_MAP* self)
         }
         cUIState_hideObjSafe(self->mpUIState, str_ConfirmMenu_No_x);
         cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ConfirmMenu_Yes));
-        char* confirmNo = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ConfirmMenu_No));
+        cUIThing* confirmNo =
+            (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ConfirmMenu_No));
         if (self->mPopupType == 1) {
             if (title != 0)
                 cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_BTNOK_b));
             if (confirmNo != 0) {
-                ((cUIObj_203A58*)confirmNo)->setVisible(0);
-                ((cUIObj_203A58*)confirmNo)->setStatic(1);
+                confirmNo->setVisible(0);
+                confirmNo->setStatic(1);
             }
             cUIState_hideObjSafe(self->mpUIState, str_ConfirmMenu_No);
         } else {
             if (title != 0)
                 cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_CMNYes_b));
             if (confirmNo != 0) {
-                ((cUIObj_203A58*)confirmNo)->setVisible(1);
-                ((cUIObj_203A58*)confirmNo)->setStatic(0);
+                confirmNo->setVisible(1);
+                confirmNo->setStatic(0);
             }
             cUIState_showObjSafe(self->mpUIState, str_ConfirmMenu_No);
         }
@@ -2300,16 +2233,16 @@ struct sNameList6_206690 {
 extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
 {
     sMapTmpl_200700* self = (sMapTmpl_200700*)tmpl;
-    sColor_202828 col0;
-    col0.a = 1.0f;
-    col0.r = 0.8901961445808411f;
-    col0.g = 0.16470588743686676f;
-    col0.b = 0.03529411926865578f;
-    sColor_202828 col1;
-    col1.a = 1.0f;
-    col1.r = 0.8705883026123047f;
-    col1.g = 0.5176470875740051f;
-    col1.b = 0.13333334028720856f;
+    tARGB col0;
+    col0.A = 1.0f;
+    col0.R = 0.8901961445808411f;
+    col0.G = 0.16470588743686676f;
+    col0.B = 0.03529411926865578f;
+    tARGB col1;
+    col1.A = 1.0f;
+    col1.R = 0.8705883026123047f;
+    col1.G = 0.5176470875740051f;
+    col1.B = 0.13333334028720856f;
     sNameList6_206690 namesA = *(sNameList6_206690*)D_004713A8;
     sNameList6_206690 namesB = *(sNameList6_206690*)D_00471420;
     sNameList5_206690 namesC = *(sNameList5_206690*)D_00471488;
@@ -2319,7 +2252,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
     sNameList2_206690 peak2FreestylePath = *(sNameList2_206690*)D_004A26B8;
     sNameList2_206690 peak3RacePath = *(sNameList2_206690*)D_004A26C0;
     sNameList2_206690 peak3FreestylePath = *(sNameList2_206690*)D_004A26C8;
-    cUIPic_202828* obj;
+    cUIThing* obj;
 
 
     if (cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name)) != 0
@@ -2327,7 +2260,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         switch (cUITemplate_MAP_mPeak) {
         case 0:
             for (int i = 0; i < 6; i++) {
-                obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
+                obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
                 if (obj != 0) {
                     if (strcmp(namesA.s[i], name) == 0) {
                         obj->setColour(&col0);
@@ -2339,7 +2272,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
             break;
         case 1:
             for (int i = 0; i < 6; i++) {
-                obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
+                obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
                 if (obj != 0) {
                     if (strcmp(namesB.s[i], name) == 0) {
                         obj->setColour(&col0);
@@ -2351,7 +2284,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
             break;
         case 2:
             for (int i = 0; i < 5; i++) {
-                obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
+                obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
                 if (obj != 0) {
                     if (strcmp(namesC.s[i], name) == 0) {
                         obj->setColour(&col0);
@@ -2364,7 +2297,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         }
     } else if (strcmp(name, str_peak1racepath) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 3; j++) {
@@ -2376,7 +2309,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         }
     } else if (strcmp(name, str_peak1fspath) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
@@ -2388,7 +2321,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         }
     } else if (strcmp(name, str_peak2racepath) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
@@ -2400,7 +2333,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         }
     } else if (strcmp(name, str_peak2fspath) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
@@ -2412,7 +2345,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         }
     } else if (strcmp(name, str_peak3racepath) == 0) {
         for (int i = 0; i < 5; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
@@ -2424,7 +2357,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         }
     } else if (strcmp(name, str_peak3fspath) == 0) {
         for (int i = 0; i < 5; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
@@ -2436,99 +2369,99 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         }
     } else if (strcmp(name, str_peak1racegroup) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 3; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478225[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478225[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak1fsgroup) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 4; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478735[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478735[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak1freeridegroup) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak2racegroup) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 3; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004783D5[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004783D5[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak2fsgroup) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 4; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478951[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478951[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak2freeridegroup) == 0) {
         for (int i = 0; i < 6; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak3racegroup) == 0) {
         for (int i = 0; i < 5; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 2; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478585[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478585[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak3fsgroup) == 0) {
         for (int i = 0; i < 5; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 4; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478B6D[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478B6D[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
     } else if (strcmp(name, str_peak3freeridegroup) == 0) {
         for (int i = 0; i < 5; i++) {
-            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
+            obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
@@ -2889,32 +2822,25 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setWidgetHiliteColor);
 #ifdef SKIP_ASM
-struct sVEntry_cUITemplate_MAP_setWidgetHiliteColor {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-extern char kMAPCOLOR_HIGHLIGHTED[];
-extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
+extern tARGB kMAPCOLOR_HIGHLIGHTED;
+extern tARGB kMAPCOLOR_HIGHLIGHTED_LOCKED;
 
 /**
  * Colours a highlighted map entry: the normal highlight when unlocked, the locked highlight otherwise.
  *
- * Does nothing for a null widget; otherwise calls its virtual slot 11 (set colour) with kMAPCOLOR_HIGHLIGHTED
- * when @p on is nonzero, else kMAPCOLOR_HIGHLIGHTED_LOCKED.
+ * Does nothing for a null widget; otherwise calls its setColour with kMAPCOLOR_HIGHLIGHTED when @p on is nonzero,
+ * else kMAPCOLOR_HIGHLIGHTED_LOCKED.
  *
  * @param obj  the text widget
  * @param on   nonzero when the entry is unlocked
  */
-extern "C" void cUITemplate_MAP_setWidgetHiliteColor(cUITemplate_MAP* self, void* obj, int on)
+extern "C" void cUITemplate_MAP_setWidgetHiliteColor(cUITemplate_MAP* self, cUIText* obj, int on)
 {
     if (obj != 0) {
         if (on != 0) {
-            sVEntry_cUITemplate_MAP_setWidgetHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED);
+            obj->setColour(&kMAPCOLOR_HIGHLIGHTED);
         } else {
-            sVEntry_cUITemplate_MAP_setWidgetHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED_LOCKED);
+            obj->setColour(&kMAPCOLOR_HIGHLIGHTED_LOCKED);
         }
     }
 }
@@ -2923,32 +2849,24 @@ extern "C" void cUITemplate_MAP_setWidgetHiliteColor(cUITemplate_MAP* self, void
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setWidgetUnHiliteColor);
 #ifdef SKIP_ASM
-struct sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-extern char kMAPCOLOR_REGULAR[];
-extern char kMAPCOLOR_REGULAR_LOCKED[];
+extern tARGB kMAPCOLOR_REGULAR_LOCKED;
 
 /**
  * Sets a map text widget's unhighlighted colour: regular when unlocked, the locked colour otherwise.
  *
- * Calls the widget's virtual slot 11 with kMAPCOLOR_REGULAR or kMAPCOLOR_REGULAR_LOCKED. Does nothing for a
- * null widget.
+ * Calls the widget's setColour with kMAPCOLOR_REGULAR or kMAPCOLOR_REGULAR_LOCKED. Does nothing for a null
+ * widget.
  *
  * @param obj  the text widget (On Tour cUIText* pText)
  * @param on   nonzero when the item is unlocked (On Tour unlocked)
  */
-extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor(cUITemplate_MAP* self, void* obj, int on)
+extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor(cUITemplate_MAP* self, cUIText* obj, int on)
 {
     if (obj != 0) {
         if (on != 0) {
-            sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR);
+            obj->setColour(&kMAPCOLOR_REGULAR);
         } else {
-            sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR_LOCKED);
+            obj->setColour(&kMAPCOLOR_REGULAR_LOCKED);
         }
     }
 }

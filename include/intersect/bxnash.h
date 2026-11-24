@@ -45,8 +45,9 @@ CHECK_SIZE(nash_CellKey, 0x10);
 // patch, a typed space node such as cRailSpaceNode). The Cell's lists hold these.
 struct nash_Node {
     nash_Node* next;                // 0x000 [O]; [U] nash_Cell_descend1/4/5 walk the lists through it (lw 0x0);
-                                    //       nash_Cell_addnode / remnode link and unlink (sItem_003284B8::next)
-    nash_Node* prev;                // 0x004 [O]; [U] nash_Cell_addnode / remnode (sItem_003284B8::prev)
+                                    //       nash_Cell_addnode / remnode link and unlink (nash_NodeList::prepend /
+                                    //       remove)
+    nash_Node* prev;                // 0x004 [O]; [U] nash_Cell_addnode / remnode (nash_NodeList::prepend / remove)
 };
 
 CHECK_OFFSET(nash_Node, next, 0x000);
@@ -74,7 +75,29 @@ CHECK_SIZE(cTypedSpaceNode, 0xC);
 
 // nash::NodeList (On Tour class NodeList, 0x4): the head of one per-type list of a Cell.
 struct nash_NodeList {
-    nash_Node* head;                // 0x000 [O]; [U] nash_Cell_addnode pushes, remnode unlinks (sList_003284B8::head)
+    nash_Node* head;                // 0x000 [O]; [U] nash_Cell_addnode pushes, remnode unlinks
+
+    // [O] NodeList::NodeList(); [R] every Cell allocation (nash_Cell_addnode / movenode, nash_Octant_addnode) clears
+    // the three heads in a loop before the children's MEM_fill.
+    nash_NodeList() : head(0) {}
+    // [O] NodeList::prepend; [R] nash_Cell_addnode / movenode / nash_Octant_addnode link the node in at the head.
+    void prepend(nash_Node* n)
+    {
+        if (head) head->prev = n;
+        n->next = head;
+        n->prev = 0;
+        head = n;
+    }
+    // [O] NodeList::remove; [R] nash_Cell_remnode / movenode unlink the node, moving the head on when it was first.
+    void remove(nash_Node* n)
+    {
+        if (n->next) n->next->prev = n->prev;
+        if (n->prev) {
+            n->prev->next = n->next;
+        } else {
+            head = n->next;
+        }
+    }
 };
 
 CHECK_OFFSET(nash_NodeList, head, 0x000);
@@ -93,6 +116,19 @@ struct nash_Cell {
     nash_NodeList nodesinside[3];   // 0x020 [O] NodeList nodesinside[3], indexed by NodeType; [U] 0x20 = instances
                                     //       (OverlapInstancesCallback_operatorCall, descend4/5), 0x24 = patches
                                     //       (descend2/3/4), 0x28 = typed nodes (descend1/3/6)
+
+    // [O] Cell::empty; [R] nash_Cell_remnode / movenode delete a child once it has no child cell and no node.
+    bool empty()
+    {
+        if (children[0][0][0] || children[0][0][1] || children[0][1][0] || children[0][1][1] || children[1][0][0] ||
+            children[1][0][1] || children[1][1][0] || children[1][1][1]) {
+            return false;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (nodesinside[i].head) return false;
+        }
+        return true;
+    }
 };
 
 CHECK_OFFSET(nash_Cell, children, 0x000);
