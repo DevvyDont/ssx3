@@ -1989,8 +1989,8 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* m, float s
 extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* mat, float scale)
 {
     for (int i = 0; i < 4; i++) {
-        ((t4Vector*)&self->axis[0])[i] = Scale_B2B8(mtxMulVec_9B90(mat, &((t4Vector*)&self->axis[0])[i]), scale);
-        ((t4Vector*)&self->axis[0])[7 - i] = Scale_B2B8(((t4Vector*)&self->axis[0])[i], -1.0f);
+        self->axis[i] = Scale_B2B8(mtxMulVec_9B90(mat, &self->axis[i]), scale);
+        self->axis[7 - i] = Scale_B2B8(self->axis[i], -1.0f);
     }
     t4Vector scaledCenter;
     t4Vector transformedCenter = mtxMulVec_9B90(mat, (t4Vector*)&self->transCenter);
@@ -2512,7 +2512,7 @@ extern "C" int SphereTree_isBoxCollision(SphereTree* selfp, t3Vector* boxMin, t3
         float off = (self->treeInfo->levels)[depth + 1].cenOffset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                t4Vector childPos = Add_D028(*(t4Vector*)pos, Scale_D028(((t4Vector*)&self->axis[0])[i], off));
+                t4Vector childPos = Add_D028(*(t4Vector*)pos, Scale_D028(self->axis[i], off));
                 if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * (self->treeInfo->levels)[depth].indexOffset + base, outPos, outNormal)) {
                     return 1;
                 }
@@ -2637,7 +2637,7 @@ extern "C" void SphereTree_checkPlaneCollision(SphereTree* selfp, void* plane, t
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
-                t4Vector childPos = Add_D208(*(t4Vector*)pos, Scale_D208(((t4Vector*)&self->axis[0])[k], distance));
+                t4Vector childPos = Add_D208(*(t4Vector*)pos, Scale_D208(self->axis[k], distance));
                 SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * (self->treeInfo->levels)[depth].indexOffset + base, outA, outB);
             }
         }
@@ -2891,7 +2891,7 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, t4Vector* point1, t4
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
-                t4Vector childPos = Add_D470(*pos, Scale_D470(((t4Vector*)&self->axis[0])[k], f));
+                t4Vector childPos = Add_D470(*pos, Scale_D470(self->axis[k], f));
                 SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1, (k + 1) * ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth].stride + base, outA, outB);
             }
         }

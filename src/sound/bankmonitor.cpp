@@ -6526,7 +6526,7 @@ extern "C" void func_002B3EB0(cMusicSys* self)
     self->mActiveMap = 0;
     self->mNumActiveSongs = 0;
     for (int i = 4; i >= 0; i--) {
-        ((int*)&self->mCategoryCount)[i] = 0;
+        self->mCategoryCount[i] = 0;
     }
 }
 #endif

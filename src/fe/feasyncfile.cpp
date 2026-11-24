@@ -20134,7 +20134,7 @@ extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* s
             }
         } else if (self->mbAccount != 0) {
             tLobbyAccount* lobbyAccount = self->mpAccount;
-            cBXString_operatorE(lobbyAccount, &((char**)&lobbyAccount->mNameOptions[0])[pWidget]);
+            cBXString_operatorE(lobbyAccount, &lobbyAccount->mNameOptions[pWidget]);
             func_001BC290(self);
         } else {
             func_001BC300(self, ((char**)(&self->mpAccount->mNameOptions[0]))[pWidget]);

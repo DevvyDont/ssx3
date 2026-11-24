@@ -3107,7 +3107,7 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         // PORT: function pointer passed through func_0025B608's int parameter.
         func_0025B608(self, 10, 0x63706572, buf, (int)func_00268CE8, 20.0f);
         LobbyMan* lobbyMan = self;
-        cBXString_operatorE1(&((char**)&lobbyMan->mPersonas[0])[lobbyMan->mNumPersonas], name);
+        cBXString_operatorE1(&lobbyMan->mPersonas[lobbyMan->mNumPersonas], name);
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
@@ -3317,7 +3317,7 @@ extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, char* msg)
         char* lst = (char*)&self->mEventList;
         lobbyMan->mNumPersonas--;
         for (int i = lobbyMan->mDeletePersonaIdx; i < lobbyMan->mNumPersonas; i++)
-            cBXString_operatorE(&((char**)&lobbyMan->mPersonas[0])[i], &((char**)&lobbyMan->mPersonas[0])[i + 1]);
+            cBXString_operatorE(&lobbyMan->mPersonas[i], &lobbyMan->mPersonas[i + 1]);
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
         event[0] = 216;

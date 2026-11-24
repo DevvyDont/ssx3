@@ -2834,7 +2834,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, 
             int* tileEntry = ((int*)self->mppTiles[k]);
             cGraphicsMan_TheGraphicsMan->SetNewTextureData1(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
             k++;
-            off += ((int*)&self->mRowHeights[0])[j];
+            off += self->mRowHeights[j];
         }
     }
     func_002548D0(self);

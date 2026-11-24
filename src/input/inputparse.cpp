@@ -2869,7 +2869,7 @@ extern "C" void cPadCache_purge(cPadCache* self)
 {
     int i;
     for (i = 0; i < self->NumPadDevices; i++) {
-        cPadDevice* inputPad = ((cPadDevice**)&self->PadDevices[0])[i];
+        cPadDevice* inputPad = self->PadDevices[i];
         if (inputPad != 0) {
             ((sVEntry00326A68*)inputPad->mVtbl)[1].fn(vthis(inputPad, ((sVEntry00326A68*)inputPad->mVtbl)[1]), 3);
         }

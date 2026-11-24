@@ -156,7 +156,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
         }
         for (int i = 0; i < 8; i++) {
             if (i < self->mPauseMenuNumOptions) {
-                sprintf(buf, str_pct_s_group, gMenuItemIcons[((int*)&self->mPauseMenuOptions)[i]]);
+                sprintf(buf, str_pct_s_group, gMenuItemIcons[self->mPauseMenuOptions[i]]);
                 cUIThing* obj = cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
                     obj->setVisible(1);
@@ -647,7 +647,7 @@ extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* sel
     int i;
     self->mPauseMenuNumOptions = 6;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = gPauseCompeteMenu[i];
+        self->mPauseMenuOptions[i] = gPauseCompeteMenu[i];
     }
     self->mPauseMenuType = 1;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -674,7 +674,7 @@ extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* sel
     int i;
     self->mPauseMenuNumOptions = 6;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = gPauseBigChallengeMenu[i];
+        self->mPauseMenuOptions[i] = gPauseBigChallengeMenu[i];
     }
     self->mPauseMenuType = 2;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -701,7 +701,7 @@ extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* se
     int i;
     self->mPauseMenuNumOptions = 7;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = gPauseFreerideMenu[i];
+        self->mPauseMenuOptions[i] = gPauseFreerideMenu[i];
     }
     self->mPauseMenuType = 3;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -728,7 +728,7 @@ extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
     int i;
     self->mPauseMenuNumOptions = 5;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = gPauseSpokeMenu[i];
+        self->mPauseMenuOptions[i] = gPauseSpokeMenu[i];
     }
     self->mPauseMenuType = 4;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -755,7 +755,7 @@ extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(cOVTemplate_PauseMenu* s
     int i;
     self->mPauseMenuNumOptions = 5;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = gQuickPlayMenu[i];
+        self->mPauseMenuOptions[i] = gQuickPlayMenu[i];
     }
     self->mPauseMenuType = 5;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -787,7 +787,7 @@ extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(cOVTemplate_PauseMenu* self
     }
     int i;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = items[i];
+        self->mPauseMenuOptions[i] = items[i];
     }
     self->mPauseMenuType = 6;
     cOVTemplate_PauseMenu_onCreateScreen(self);

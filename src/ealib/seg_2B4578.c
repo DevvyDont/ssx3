@@ -17542,10 +17542,10 @@ void MIX_stop(int idx) {
     struct SFILTERNODE *nd;
     struct SFILTERNODE *next;
     for (i = 0; i < 1; i++) {
-        sndmix.stoppedvoiceaccwet[i] += ((float*)&voiceState->wetbusgainprev[0])[i] * voiceState->lastmixed;
+        sndmix.stoppedvoiceaccwet[i] += voiceState->wetbusgainprev[i] * voiceState->lastmixed;
     }
     for (i = 0; i < sndmix.mc.outputchannels; i++) {
-        sndmix.stoppedvoiceaccdry[i] += ((float*)&voiceState->drybusgainprev[0])[i] * voiceState->lastmixed;
+        sndmix.stoppedvoiceaccdry[i] += voiceState->drybusgainprev[i] * voiceState->lastmixed;
     }
     do {
         if (((void (*)(struct Node_8468*))((struct SFILTERNODE*)voiceState->filterhead)->restorefn) != 0) {

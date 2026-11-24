@@ -178,8 +178,8 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
         ((&self->m_ViewRect[0]))[1].Y = 0.0f;
         ((&self->m_ViewRect[0]))[1].W = hw;
         ((&self->m_ViewRect[0]))[1].H = screenHeight;
-        ((cCamera**)&self->PlayerCamera[0])[0]->MaxFar = 20000.0f;
-        ((cCamera**)&self->PlayerCamera[0])[1]->MaxFar = 20000.0f;
+        self->PlayerCamera[0]->MaxFar = 20000.0f;
+        self->PlayerCamera[1]->MaxFar = 20000.0f;
         break;
     }
     default:
@@ -189,11 +189,11 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
         self->m_uiCurrentView = 0;
         ((&self->m_ViewRect[0]))[0].X = 0.0f;
         ((&self->m_ViewRect[0]))[0].Y = 0.0f;
-        ((cCamera**)&self->PlayerCamera[0])[0]->MaxFar = 30000.0f;
+        self->PlayerCamera[0]->MaxFar = 30000.0f;
         break;
     }
     if (((int)self->m_uiNumView) == 1) {
-        int idx = ((cCamera**)&self->PlayerCamera[0])[1]->StreamFocusID;
+        int idx = self->PlayerCamera[1]->StreamFocusID;
         (*(sSlots22E550**)SSXApp->Game->World)->e[idx].active = 0;
     } else {
         (*(sSlots22E550**)SSXApp->Game->World)->e[0].active = 0;
@@ -219,7 +219,7 @@ extern "C" void cGameViewMan__cGameViewMan(cGameViewMan* self, int flags)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumPlayers; i++) {
-        cCamera* it = ((cCamera**)&self->PlayerCamera[0])[i];
+        cCamera* it = self->PlayerCamera[i];
         if (it != 0) {
             ((sVEntry<void(void*, int)>*)it->mVtbl)[1].fn(vthis(it, ((sVEntry<void(void*, int)>*)it->mVtbl)[1]), 3);
         }
