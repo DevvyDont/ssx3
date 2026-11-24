@@ -226,9 +226,10 @@ INCLUDE_ASM("util/menu", cMenuItem_getLeft__FPv);
  *
  * @return cMenuSys_getLeft__FPv's result
  */
-void* cMenuItem_getLeft(void* self)
+void* cMenuItem_getLeft(void* vself)
 {
-    return cMenuSys_getLeft(*(int*)((char*)*(void**)self + 0x124));
+    cMenuItem* self = (cMenuItem*)vself;
+    return cMenuSys_getLeft((int)self->Menu->MenuSys);
 }
 #endif
 
@@ -244,9 +245,10 @@ INCLUDE_ASM("util/menu", cMenuItem_getRight__FPv);
  *
  * @return cMenuSys_getRight__FPv's result
  */
-void* cMenuItem_getRight(void* self)
+void* cMenuItem_getRight(void* vself)
 {
-    return cMenuSys_getRight(*(int*)((char*)*(void**)self + 0x124));
+    cMenuItem* self = (cMenuItem*)vself;
+    return cMenuSys_getRight((int)self->Menu->MenuSys);
 }
 #endif
 
@@ -262,9 +264,10 @@ INCLUDE_ASM("util/menu", cMenuItem_getUp__FPv);
  *
  * @return cMenuSys_getUp__FPv's result
  */
-void* cMenuItem_getUp(void* self)
+void* cMenuItem_getUp(void* vself)
 {
-    return cMenuSys_getUp(*(int*)((char*)*(void**)self + 0x124));
+    cMenuItem* self = (cMenuItem*)vself;
+    return cMenuSys_getUp((int)self->Menu->MenuSys);
 }
 #endif
 
@@ -280,9 +283,10 @@ INCLUDE_ASM("util/menu", cMenuItem_getDown__FPv);
  *
  * @return cMenuSys_getDown__FPv's result
  */
-void* cMenuItem_getDown(void* self)
+void* cMenuItem_getDown(void* vself)
 {
-    return cMenuSys_getDown(*(int*)((char*)*(void**)self + 0x124));
+    cMenuItem* self = (cMenuItem*)vself;
+    return cMenuSys_getDown((int)self->Menu->MenuSys);
 }
 #endif
 
@@ -294,14 +298,15 @@ INCLUDE_ASM("util/menu", cMenuItem_getLeftShift__FPv);
 /**
  * Tells whether the menu's left-shift key is held, asked of the item's Menu->MenuSys.
  *
- * Forwards to cMenuSys_getLeftShift (cMenuSys: cInput value 66 is nonzero) on the cMenuSys at Menu (+0x0) + 0x124. The
+ * Forwards to cMenuSys_getLeftShift (cMenuSys: cInput value 66 is nonzero) on the item's Menu->MenuSys. The
  * expandable items (cExpandMenuItem_input, cVectorMenuItem_input) test it together with cMenuItem_getRightShift.
  *
  * @return nonzero while left shift is held
  */
-void* cMenuItem_getLeftShift(void* self)
+void* cMenuItem_getLeftShift(void* vself)
 {
-    return cMenuSys_getLeftShift(*(int*)((char*)*(void**)self + 0x124));
+    cMenuItem* self = (cMenuItem*)vself;
+    return cMenuSys_getLeftShift((int)self->Menu->MenuSys);
 }
 #endif
 
@@ -313,14 +318,15 @@ INCLUDE_ASM("util/menu", cMenuItem_getRightShift__FPv);
 /**
  * Tells whether the menu's right-shift key is held, asked of the item's Menu->MenuSys.
  *
- * Forwards to cMenuSys_getRightShift (cMenuSys: cInput value 67 is nonzero) on the cMenuSys at Menu (+0x0) + 0x124. The
+ * Forwards to cMenuSys_getRightShift (cMenuSys: cInput value 67 is nonzero) on the item's Menu->MenuSys. The
  * expandable items test it together with cMenuItem_getLeftShift.
  *
  * @return nonzero while right shift is held
  */
-void* cMenuItem_getRightShift(void* self)
+void* cMenuItem_getRightShift(void* vself)
 {
-    return cMenuSys_getRightShift(*(int*)((char*)*(void**)self + 0x124));
+    cMenuItem* self = (cMenuItem*)vself;
+    return cMenuSys_getRightShift((int)self->Menu->MenuSys);
 }
 #endif
 
@@ -330,18 +336,18 @@ INCLUDE_ASM("util/menu", cMenuItem_textPreRender);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 
-static inline char* font_2CA4C8(char* item)
+static inline cFont* font_2CA4C8(cMenuItem* item)
 {
-    return *(char**)(*(char**)(*(char**)item + 0x124) + 0x58);
+    return item->Menu->MenuSys->Font;
 }
 
-static inline float width_2CA4C8(char* item, const char* s)
+static inline float width_2CA4C8(cMenuItem* item, const char* s)
 {
-    char* f = font_2CA4C8(item);
-    return cFont_textExtent(f, s, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+    cFont* f = font_2CA4C8(item);
+    return cFont_textExtent(f, s, 0, 0, f->Scale[0], f->Scale[1]);
 }
 
-static inline float widthOr0_2CA4C8(char* item, const char* s)
+static inline float widthOr0_2CA4C8(cMenuItem* item, const char* s)
 {
     float w;
     if (s)
@@ -355,12 +361,13 @@ static inline float widthOr0_2CA4C8(char* item, const char* s)
 
 // PORT: the unit's callers declare cMenuItem_textPreRender as (void*, void*, int, int, void*) returning void;
 // the body returns an sRect by value (hidden return pointer) from (item, left, center, right). Bound by asm label.
-extern "C" tRect cMenuItem_textPreRender_impl(char* item, const char* left, const char* center, const char* right) __asm__("cMenuItem_textPreRender");
+extern "C" tRect cMenuItem_textPreRender_impl(cMenuItem* item, const char* left, const char* center, const char* right)
+    __asm__("cMenuItem_textPreRender");
 
 /**
  * Measures a menu row made of up to three texts (left, centre, right) and returns its rect, by value.
  *
- * Uses the menu system's font (Menu->MenuSys + 0x58): the rect starts at (0, 0) and is MaxCharHeight * Scale.y high;
+ * Uses the menu system's font (Menu->MenuSys->Font): the rect starts at (0, 0) and is MaxCharHeight * Scale.y high;
  * text widths come from cFont_textExtent at the font's current Scale. With all three texts the width is the centre text
  * plus twice the wider of left and right, plus 32; otherwise it is the sum of the given texts, plus 16 when at least
  * two are given. Finally the height grows by 12 and the width becomes max(width, 100) + 32. The x scale ratio Scale.x /
@@ -372,14 +379,14 @@ extern "C" tRect cMenuItem_textPreRender_impl(char* item, const char* left, cons
  * @param right  text drawn at the right edge, or 0
  * @return the row's rect (x, y, w, h)
  */
-extern "C" tRect cMenuItem_textPreRender_impl(char* item, const char* left, const char* center, const char* right)
+extern "C" tRect cMenuItem_textPreRender_impl(cMenuItem* item, const char* left, const char* center, const char* right)
 {
     tRect rect;
     t2Vector sc;
     float zero = 0.0f;
     rect.Y = zero;
     rect.X = zero;
-    cFont* font = (cFont*)font_2CA4C8(item);
+    cFont* font = font_2CA4C8(item);
     float lineHeight = (float)font->MaxCharHeight * font->BaseScale[1];
     float sx = font->Scale[0] / font->BaseScale[0];
     float sy = font->Scale[1] / font->BaseScale[1];
@@ -419,20 +426,21 @@ struct sVec2_2CA768 {
 };
 
 
-static inline char* font_2CA768(char* item)
+static inline cFont* font_2CA768(cMenuItem* item)
 {
-    return *(char**)(*(char**)(*(char**)item + 0x124) + 0x58);
+    return item->Menu->MenuSys->Font;
 }
 
 // PORT: the unit's callers declare cMenuItem_textRender as (void*, int, int, int, void*, char*, sColor*) returning void*;
 // the body takes (item, rect, left, center, right, style, color) and returns nothing. Bound by asm label.
-extern "C" void cMenuItem_textRender_impl(char* item, tRect* rect, const char* left, const char* center, const char* right, char* style, tARGB* color) __asm__("cMenuItem_textRender");
+extern "C" void cMenuItem_textRender_impl(cMenuItem* item, tRect* rect, const char* left, const char* center,
+                                          const char* right, char* style, tARGB* color) __asm__("cMenuItem_textRender");
 
 /**
  * Draws a menu row: its box in @p style, then up to three texts in colour @p color.
  *
  * Calls the menu's vtable slot 8 (cMenu's cMenu_drawBox, the box drawer) with @p rect and @p style, sets the menu
- * font's Color (+0x40) to @p color and its ShadowOffset (+0x28) to (2, 2), and draws with cFont_text at y = rect.y + 5:
+ * font's Color to @p color and its ShadowOffset to (2, 2), and draws with cFont_text at y = rect.y + 5:
  * @p left at rect.x + 16, @p center centred in the rect, @p right ending 16 before the right edge (widths from
  * cFont_textExtent). Resets ShadowOffset to (0, 0) at the end. The unit's callers declare it with other types.
  *
@@ -444,29 +452,30 @@ extern "C" void cMenuItem_textRender_impl(char* item, tRect* rect, const char* l
  * @param style  the box colour (a tARGB) passed to the box drawer
  * @param color  the text colour (tARGB) copied into the font
  */
-extern "C" void cMenuItem_textRender_impl(char* item, tRect* rect, const char* left, const char* center, const char* right, char* style, tARGB* color)
+extern "C" void cMenuItem_textRender_impl(cMenuItem* item, tRect* rect, const char* left, const char* center,
+                                          const char* right, char* style, tARGB* color)
 {
-    char* menu = *(char**)item;
-    sVEntry<void(void*, tRect*, char*)>* vt = *(sVEntry<void(void*, tRect*, char*)>**)(menu + 0x12C);
+    cMenu* menu = item->Menu;
+    sVEntry<void(void*, tRect*, char*)>* vt = (sVEntry<void(void*, tRect*, char*)>*)menu->mVtbl;
     vt[8].fn(vthis(menu, vt[8]), rect, style);
-    *(tARGB*)(font_2CA768(item) + 0x40) = *color;
-    char* font = font_2CA768(item);
+    *(tARGB*)font_2CA768(item)->Color = *color;
+    cFont* font = font_2CA768(item);
     sVec2_2CA768 sc(2.0f, 2.0f);
-    *(sVec2_2CA768*)(font + 0x28) = sc;
+    *(sVec2_2CA768*)font->ShadowOffset = sc;
     if (left) {
         cFont_text(font_2CA768(item), rect->X + 16.0f, rect->Y + 6.0f - 1.0f, left);
     }
     if (center) {
-        cFont* measureFont = (cFont*)font_2CA768(item);
+        cFont* measureFont = font_2CA768(item);
         float w = cFont_textExtent(measureFont, center, 0, 0, measureFont->Scale[0], measureFont->Scale[1]);
         cFont_text(font_2CA768(item), rect->X + (rect->W - w) * 0.5f, rect->Y + 6.0f - 1.0f, center);
     }
     if (right) {
-        cFont* measureFont = (cFont*)font_2CA768(item);
+        cFont* measureFont = font_2CA768(item);
         float w = cFont_textExtent(measureFont, right, 0, 0, measureFont->Scale[0], measureFont->Scale[1]);
         cFont_text(font_2CA768(item), rect->X + (rect->W - w) - 16.0f, rect->Y + 6.0f - 1.0f, right);
     }
-    *(sVec2_2CA768*)(font_2CA768(item) + 0x28) = sVec2_2CA768(0.0f, 0.0f);
+    *(sVec2_2CA768*)font_2CA768(item)->ShadowOffset = sVec2_2CA768(0.0f, 0.0f);
 }
 #endif
 
@@ -1291,7 +1300,7 @@ extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
     vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
-    *(short*)((char*)((cCtx_2CB8C8*)GrMan)->top + 0x10) = -1;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     ((cCtx_2CB8C8*)GrMan)->top->f4_2 = 1;
     sVtx_2CB8C8 arrowVerts[6];
     int i;
@@ -1446,7 +1455,7 @@ extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
     vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
-    *(short*)((char*)((cCtx_2CBAC8*)GrMan)->top + 0x10) = -1;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     ((cCtx_2CBAC8*)GrMan)->top->f4_2 = 1;
     sVtx_2CBAC8 arrowVerts[6];
     int i;
@@ -4562,37 +4571,38 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
 {
     char buf[0x20];
     char* name = self->Text;
-    int focused = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self));
+    int focused = ((void*)self) == cMenu_getFocusItem(self->Menu);
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && self->CursorPos == len && self->CursorPos < 15) {
         strcat(buf, str_underscore);
     }
     {
-        char* menu = *(char**)self;
-        sVEntry2CB880* vt = *(sVEntry2CB880**)(menu + 0x12C);
+        cMenu* menu = self->Menu;
+        sVEntry2CB880* vt = (sVEntry2CB880*)menu->mVtbl;
         fn2CB880* drawBoxFn = &vt[8].fn;
         (*drawBoxFn)(vthis(menu, vt[8]), rect, focused ? kBoxSelectedColor : kBoxUnselectedColor);
     }
-    cMenuItem_textRender1_sVec3* col = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &kTextSelectedColor : &kTextUnselectedColor;
+    cMenuItem_textRender1_sVec3* col =
+        ((void*)self) == cMenu_getFocusItem(self->Menu) ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textColor;
     textColor.a = 1.0f;
     textColor.r = col->x;
     textColor.g = col->y;
     textColor.b = col->z;
-    *(cMenuItem_textRender1_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textColor;
-    *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(2.0f, 2.0f);
+    *(cMenuItem_textRender1_sColor*)self->Menu->MenuSys->Font->Color = textColor;
+    *(sVec2_2CE910*)self->Menu->MenuSys->Font->ShadowOffset = sVec2_2CE910(2.0f, 2.0f);
     char* label = (char*)self->Caption;
     if (label) {
-        cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
+        cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
     }
-    cFont* font = (cFont*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58));
+    cFont* font = self->Menu->MenuSys->Font;
     float w = cFont_textExtent(font, buf, 0, 0, font->Scale[0], font->Scale[1]);
-    cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + (rect[2] - w) - 16.0f, rect[1] + 6.0f - 1.0f, buf);
+    cFont_text(self->Menu->MenuSys->Font, rect[0] + (rect[2] - w) - 16.0f, rect[1] + 6.0f - 1.0f, buf);
     if (focused) {
-        font = (cFont*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58));
+        font = self->Menu->MenuSys->Font;
         float w1 = cFont_textExtent(font, buf + self->CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
-        font = (cFont*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58));
+        font = self->Menu->MenuSys->Font;
         char* next = buf + 1;
         float w2 = cFont_textExtent(font, next + self->CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
         float x1 = rect[0] + (rect[2] - w1) - 16.0f;
@@ -4623,10 +4633,10 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
         cursorVerts[3] = cursorVerts[0];
         cursorVerts[3].pos = vertexPos;
         ((cCtx_2CE910*)GrMan)->top->f4_2 = 1;
-        *(short*)((char*)((cCtx_2CE910*)GrMan)->top + 0x10) = -1;
+        *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
         GrMan->RenderTriStrip(4, (tBxVertex*)cursorVerts, 0);
     }
-    *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(0.0f, 0.0f);
+    *(sVec2_2CE910*)self->Menu->MenuSys->Font->ShadowOffset = sVec2_2CE910(0.0f, 0.0f);
 }
 #endif
 
@@ -4718,8 +4728,8 @@ extern "C" int cColorMenuItem_input(cColorMenuItem* self)
             value = 1.0f;
         }
         *chanPtr = value;
-        char* menu = *(char**)self;
-        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
+        cMenu* menu = self->Menu;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
         vt[4].fn(vthis(menu, vt[4]), self);
     }
     return result;
@@ -4737,32 +4747,15 @@ extern char* ColorNames[];
 
 struct sRect_2CEEE8 { float x, y, w, h; };
 
-struct sFont_2CEEE8 {
-    char pad_0x0[0x14];
-    int lineHeight;                 // 0x14
-    char pad_0x18[0x18];
-    float scaleX;                   // 0x30
-    float scaleY;                   // 0x34
-    float drawScaleX;               // 0x38
-    float drawScaleY;               // 0x3C
-};
-
-struct sMenuValueItem_2CEEE8 {
-    char* menu;                     // 0x00
-    char pad_0x4[0x10];
-    float* values;                  // 0x14
-    int index;                      // 0x18
-};
-
-static inline sFont_2CEEE8* font_2CEEE8(sMenuValueItem_2CEEE8* item)
+static inline cFont* font_2CEEE8(cColorMenuItem* item)
 {
-    return *(sFont_2CEEE8**)(*(char**)(item->menu + 0x124) + 0x58);
+    return item->Menu->MenuSys->Font;
 }
 
-static inline float textWidth_2CEEE8(sMenuValueItem_2CEEE8* item, const char* str)
+static inline float textWidth_2CEEE8(cColorMenuItem* item, const char* str)
 {
-    sFont_2CEEE8* f = font_2CEEE8(item);
-    return cFont_textExtent(f, str, 0, 0, f->drawScaleX, f->drawScaleY);
+    cFont* f = font_2CEEE8(item);
+    return cFont_textExtent(f, str, 0, 0, f->Scale[0], f->Scale[1]);
 }
 
 #define MAX_2CEEE8(a, b) ((a) > (b) ? (a) : (b))
@@ -4779,16 +4772,17 @@ static inline float textWidth_2CEEE8(sMenuValueItem_2CEEE8* item, const char* st
  * @param item  the colour-channel menu item (this)
  * @return @p ret
  */
-extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, sMenuValueItem_2CEEE8* item)
+extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, cColorMenuItem* item)
 {
     sRect_2CEEE8 rect;
     char buf[64];
-    sprintf(buf, str_pct_3f_999, fptodp(*(float*)((char*)item->values + (item->index << 2))));
+    // channel Adjust of *Color by byte stride (as in cColorMenuItem_render)
+    sprintf(buf, str_pct_3f_999, fptodp(*(float*)((char*)item->Color + (item->Adjust << 2))));
     float z = 0.0f;
     rect.y = z;
     rect.x = z;
-    sFont_2CEEE8* font = font_2CEEE8(item);
-    rect.h = (float)font->lineHeight * font->scaleY + 12.0f;
+    cFont* font = font_2CEEE8(item);
+    rect.h = (float)font->MaxCharHeight * font->BaseScale[1] + 12.0f;
     rect.w = MAX_2CEEE8(MAX_2CEEE8(textWidth_2CEEE8(item, ColorNames[0]), textWidth_2CEEE8(item, ColorNames[1])),
                      textWidth_2CEEE8(item, ColorNames[2]));
     rect.w = rect.w + textWidth_2CEEE8(item, buf) + 144.0f;
@@ -4934,29 +4928,31 @@ public:
 extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
 {
     {
-        cMenu* menu = (cMenu*)(*(char**)self);
+        cMenu* menu = self->Menu;
         sVEntry<void(void*, float*, int)>* vt = (sVEntry<void(void*, float*, int)>*)menu->mVtbl;
         char* thisp = ((char*)menu) + vt[9].delta;
         vt[9].fn(thisp, rect, ((void*)self) == cMenu_getFocusItem((cMenu*)menu));
     }
     float barX = rect[0] + rect[2] - 16.0f - 80.0f;
     float textX = barX - 16.0f;
-    cMenuItem_textRender1_sVec3* col = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &kTextSelectedColor : &kTextUnselectedColor;
+    cMenuItem_textRender1_sVec3* col =
+        ((void*)self) == cMenu_getFocusItem(self->Menu) ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textClr;
     textClr.a = 1.0f;
     textClr.r = col->x;
     textClr.g = col->y;
     textClr.b = col->z;
-    *(cMenuItem_textRender1_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textClr;
-    *(sVec2_2CF1C8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CF1C8(2.0f, 2.0f);
-    cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
+    *(cMenuItem_textRender1_sColor*)self->Menu->MenuSys->Font->Color = textClr;
+    *(sVec2_2CF1C8*)self->Menu->MenuSys->Font->ShadowOffset = sVec2_2CF1C8(2.0f, 2.0f);
+    cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
                   ColorNames[self->Adjust]);
     char buf[0x10];
+    // channel Adjust of *Color (A, R, G, B) by byte stride: a float subscript swaps retail's addu operands
     sprintf(buf, str_pct_3f_pct_03d,
             fptodp(*(float*)((char*)self->Color + (self->Adjust << 2))),
             (int)(*(float*)((char*)self->Color + (self->Adjust << 2)) * 255.99000549316406f));
-    char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-    float w = cFont_textExtent(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    cFont* font = self->Menu->MenuSys->Font;
+    float w = cFont_textExtent(font, buf, 0, 0, font->Scale[0], font->Scale[1]);
     cFont_text(font, textX - w, rect[1] + 6.0f - 1.0f, buf);
 
     cMenuItem_textRender1_sColor rampStart = *(cMenuItem_textRender1_sColor*)self->Color;
@@ -5013,7 +5009,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     } else {
         ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 1;
     }
-    *(short*)((char*)((cCtx_2CF1C8*)GrMan)->top + 0x10) = -1;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
 
     float mx = barRect.x + barRect.w * *(float*)((char*)self->Color + (self->Adjust << 2));
@@ -5826,7 +5822,7 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     } else {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
     }
-    *(short*)((char*)((cCtx_2D0008*)GrMan)->top + 0x10) = -1;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     GrMan->RenderTriStrip(4, verts, 0);
 }
 #endif
@@ -6289,16 +6285,16 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 extern char str_9_999_9_999[];
 
 
-static inline char* font_2D0D48(char* item)
+static inline cFont* font_2D0D48(cGraphMenuItem* item)
 {
-    return *(char**)(*(char**)(*(char**)item + 0x124) + 0x58);
+    return item->Menu->MenuSys->Font;
 }
 
 /**
  * Measures a graph item: one text line high (+12) normally, or a taller box while it is being edited with the focus.
  *
- * The width is 100 + the wider of the caption (+0x14) and "9.999,9.999" + 64. When the item has the focus and is in
- * edit mode (+0x40) the height is max(2 * line height + 6, 80) + 24 (the minimum is 20 otherwise, unused); else the
+ * The width is 100 + the wider of the Caption and "9.999,9.999" + 64. When the item has the focus and is in edit
+ * mode (IsEditMode) the height is max(2 * line height + 6, 80) + 24 (the minimum is 20 otherwise, unused); else the
  * font's MaxCharHeight * BaseScale.y + 12. Starts at (0, 0).
  *
  * @param ret  where the rect is returned
@@ -6309,15 +6305,15 @@ extern "C" tRect* cGraphMenuItem_preRender(tRect* ret, cGraphMenuItem* item)
 {
     int margin = 100;
     int focused = 0;
-    if (((char*)item) == cMenu_getFocusItem((cMenu*)(*(void**)item))) {
+    if (((char*)item) == cMenu_getFocusItem(item->Menu)) {
         focused = item->IsEditMode != 0;
     }
     int minHeight = focused ? 80 : 20;
-    cFont* font = (cFont*)font_2D0D48(((char*)item));
+    cFont* font = font_2D0D48(item);
     float lh = (float)font->MaxCharHeight * font->BaseScale[1];
     float w = cFont_textExtent(font, (char*)item->Caption, 0, 0, font->Scale[0], font->Scale[1]);
-    char* font2 = font_2D0D48(((char*)item));
-    float w2 = cFont_textExtent(font2, str_9_999_9_999, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
+    cFont* font2 = font_2D0D48(item);
+    float w2 = cFont_textExtent(font2, str_9_999_9_999, 0, 0, font2->Scale[0], font2->Scale[1]);
     if (w < w2) w = w2;
     tRect rect;
     float zero = 0.0f;
@@ -6333,8 +6329,8 @@ extern "C" tRect* cGraphMenuItem_preRender(tRect* ret, cGraphMenuItem* item)
         }
         rect.H = height;
     } else {
-        char* font3 = font_2D0D48(((char*)item));
-        rect.H = (float)*(int*)(font3 + 0x14) * *(float*)(font3 + 0x34) + 12.0f;
+        cFont* font3 = font_2D0D48(item);
+        rect.H = (float)font3->MaxCharHeight * font3->BaseScale[1] + 12.0f;
     }
     rect.W = (float)margin + w + 64.0f;
     *ret = rect;
@@ -6355,7 +6351,7 @@ struct sRect {
     float x, y, w, h;
 };
 
-// Menu colours, alpha first (cARGBMenuItem); the font colour at font + 0x40.
+// Menu colours, alpha first (cARGBMenuItem); also the layout of cFont::Color.
 struct sColor {
     float a, r, g, b;
 };
@@ -6506,8 +6502,8 @@ extern sColor D_004D53E0;
 // The focused-row style passed to the menu's frame draw is the line colour of the graph's axis.
 extern sColor kBoxSelectedColor_c __asm__("kBoxSelectedColor");
 
-// The font scale (font + 0x28), built from references like sVec4_2D0008: with the unit's by-value sVec2 the
-// second store keeps the temporary's address in a register (the target stores both straight to the frame).
+// The font's ShadowOffset (cFont::ShadowOffset), built from references like sVec4_2D0008: with the unit's by-value
+// sVec2 the second store keeps the temporary's address in a register (the target stores both straight to the frame).
 struct sVec2r_D0EF8 {
     float x, y;
     sVec2r_D0EF8(const float& ax, const float& ay) : x(ax), y(ay) {}
@@ -6542,10 +6538,10 @@ static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
  * points at the right of the row.
  *
  * Draws the box through the menu's vtable slot 9 (selected when focused), sets the font colour (kTextSelectedColor or
- * kTextUnselectedColor, alpha 1) and ShadowOffset (2, 2), and draws the caption at rect.x + 16. With edit mode (+0x40) and the
- * focus it prints prettyFloat(x) + "," + prettyFloat(y) of the current point (+0x24) one line lower at rect.x + 32. The
+ * kTextUnselectedColor, alpha 1) and ShadowOffset (2, 2), and draws the caption at rect.x + 16. With IsEditMode and the
+ * focus it prints prettyFloat(x) + "," + prettyFloat(y) of point OnPoint one line lower at rect.x + 32. The
  * plot box (100 wide, rect.h - 12 high, or - 24 when edited) is centred vertically, 16 from the right edge, and filled
- * in D_004D53C0 with texture -1 (func_002CB350); the y axis is flipped (MaxPoint.y +0x38 at the top). Each further
+ * in D_004D53C0 with texture -1 (func_002CB350); the y axis is flipped (MaxPoint.y at the top). Each further
  * layer is drawn one step higher in the draw state's 5-bit field at word +0x8 bits 5-9: the y = 0 line in kBoxSelectedColor
  * when the y range spans 0, the polyline through the points in D_004D53D0 (GrMan's vtable slot 73, 2-vertex lines), and
  * in edit mode a 5x5 marker on the current point in D_004D53E0. Restores the field at the end.
@@ -6554,26 +6550,27 @@ static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
  */
 extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
 {
-    int focused = self == cMenu_getFocusItem((cMenu*)((void*)self->Menu));
+    int focused = self == cMenu_getFocusItem(self->Menu);
     {
         cMenu* menu = self->Menu;
         sVEntry<void(void*, float*, int)>* vt = (sVEntry<void (void*, float*, int)>*)menu->mVtbl;
         vt[9].fn(vthis(menu, vt[9]), rect, focused);
     }
-    char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-    float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    cMenuItem_textRender1_sVec3* col = self == cMenu_getFocusItem((cMenu*)((void*)self->Menu)) ? &kTextSelectedColor : &kTextUnselectedColor;
+    cFont* font = self->Menu->MenuSys->Font;
+    float lineH = (float)font->MaxCharHeight * font->BaseScale[1];
+    cMenuItem_textRender1_sVec3* col =
+        self == cMenu_getFocusItem(self->Menu) ? &kTextSelectedColor : &kTextUnselectedColor;
     sColor textColor;
     textColor.a = 1.0f;
     textColor.r = col->x;
     textColor.g = col->y;
     textColor.b = col->z;
-    *(sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textColor;
-    *(sVec2r_D0EF8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2r_D0EF8(2.0f, 2.0f);
-    cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, ((char*)self->Caption));
+    *(sColor*)self->Menu->MenuSys->Font->Color = textColor;
+    *(sVec2r_D0EF8*)self->Menu->MenuSys->Font->ShadowOffset = sVec2r_D0EF8(2.0f, 2.0f);
+    cFont_text(self->Menu->MenuSys->Font, rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, ((char*)self->Caption));
     if (self->IsEditMode && focused) {
         cBXStr_D0EF8 str = FormatValue_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint].x) + str_comma + FormatValue_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint].y);
-        cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
+        cFont_text(self->Menu->MenuSys->Font, rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
     }
     float graphHeight;
     if (focused && self->IsEditMode) {
@@ -6596,7 +6593,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
         quadVerts[i].b = (int)(D_004D53C0.b * 128.0f);
         quadVerts[i].q = 1.0f;
     }
-    ((cRenderCtx*)GrMan)->top->f10 = -1;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
     {
         float fullUv[4];
         fullUv[0] = 0.0f;

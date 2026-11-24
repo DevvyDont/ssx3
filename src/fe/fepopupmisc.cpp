@@ -21,6 +21,7 @@
 #include "fe/festatebigradio.h"
 #include "fe/festatecharequip.h"
 #include "ui/uiinput.h"
+#include "ui/uitextscroll.h"
 #include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
 #include "fe/festatepeakroom.h"
@@ -304,21 +305,6 @@ extern char str_hl_right[];
 
 extern cUISoundInterface gUISoundNull;
 
-struct sVEi_F050 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
-
-
-
-static inline int padCall_F050(char* in, int slot)
-{
-    sVEi_F050* vt = *(sVEi_F050**)(in + 8);
-    return vt[slot].fn(vthis(in, vt[slot]));
-}
-
 static inline void sound_F050(cFEPopupScreenPos* s, int msg)
 {
     cUISoundInterface* p = s->mpEngine->mpSound;
@@ -361,29 +347,29 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
     for (int i = 0; i < 2; i++) {
         sVEntry<void(void*, unsigned char)>* vt = (sVEntry<void (void*, unsigned char)>*)VPTR_OF(cUIInput, in);
         vt[44].fn(vthis(in, vt[44]), i);
-        if (padCall_F050(((char*)in), 40) == 0) {
+        if (in->keyPressed() == 0) {
             continue;
         }
-        if (padCall_F050(((char*)in), 5)) {
+        if (in->isNext()) {
             sound_F050((self), 6);
             *(signed char*)&self->mAccept = 1;
             self->mAttrState |= 0x80;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-        } else if (padCall_F050(((char*)in), 6)) {
+        } else if (in->isPrevious()) {
             sound_F050((self), 3);
             *(signed char*)&self->mAccept = 0;
             self->mAttrState |= 0x80;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-        } else if (padCall_F050(((char*)in), 19)) {
+        } else if (in->isLeft()) {
             self->mX--;
             playFrame_F050((self), str_hl_left);
-        } else if (padCall_F050(((char*)in), 20)) {
+        } else if (in->isRight()) {
             self->mX++;
             playFrame_F050((self), str_hl_right);
-        } else if (padCall_F050(((char*)in), 17)) {
+        } else if (in->isUp()) {
             self->mY++;
             playFrame_F050((self), str_hl_up);
-        } else if (padCall_F050(((char*)in), 18)) {
+        } else if (in->isDown()) {
             self->mY--;
             playFrame_F050((self), str_hl_down);
         }
@@ -7524,108 +7510,86 @@ extern char str_Subjectpct_d[];
 extern char str_Numberpct_d[];
 
 
-struct sPopup_1E3EC0 {
-    char pad0[0x9C];
-    void* a9C[8];       // 0x9C
-    void* aBC[8];       // 0xBC
-    void* aDC[8];       // 0xDC
-    void* aFC[8];       // 0xFC
-    void* a11C[8];      // 0x11C
-    void* f13C;         // 0x13C
-    void* f140;         // 0x140
-    void* f144;         // 0x144
-    void* f148;         // 0x148
-    void* f14C;         // 0x14C
-    void* f150;         // 0x150
-    void* f154;         // 0x154
-    void* f158;         // 0x158
-    void* f15C;         // 0x15C
-    void* f160;         // 0x160
-};
-
 /**
  * Binds the message center's widgets by their hashed names as the screen creates them (vtable entry 18,
  * onWidgetCreate).
  *
  * Stores "ps2sq", "btext3", "ps2x", "btext1", "TotalMessagesLabel", "UnreadMessagesLabel", "MenuFroms", "arr_down",
  * "arr_up" and "NoMessage" (hidden) in their fields, hides "MessageView", and fills the eight-row tables from
- * "UnreadMail%d", "FAQIcon%d", "From%d", "Subject%d" (also calls its vtable entry 27 with 1) and "Number%d".
+ * "UnreadMail%d", "FAQIcon%d", "From%d", "Subject%d" (also setEllipses(1), vtable entry 27) and "Number%d".
  *
- * @param w  the widget being created (its name hash at +0x38)
+ * @param w  the widget being created (matched by its mHashName)
  */
-extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void* w)
+extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(cOVState_MESSAGECENTER* self, cUIThing* w)
 {
     char buf[32];
-    int widgetHash = *(int*)((char*)w + 0x38);
+    int widgetHash = w->mHashName;
     if (widgetHash == GetHashValue32(D_004A20A8))
-        self->f14C = w;
+        self->mpButtonSquare = w;
     else if (widgetHash == GetHashValue32(str_btext3_b))
-        self->f150 = w;
+        self->mpButtonText3 = w;
     if (widgetHash == GetHashValue32(D_004A2098)) {
-        self->f154 = w;
+        self->mpButtonCross = w;
         return;
     }
     if (widgetHash == GetHashValue32(str_btext1)) {
-        self->f158 = w;
+        self->mpButtonText1 = (cUIText*)w;
         return;
     }
     if (widgetHash == GetHashValue32(str_TotalMessagesLabel)) {
-        self->f13C = w;
+        self->mpTotalMessagesLabel = (cUIText*)w;
         return;
     }
     if (widgetHash == GetHashValue32(str_UnreadMessagesLabel)) {
-        self->f140 = w;
+        self->mpUnreadMessagesLabel = (cUIText*)w;
         return;
     }
     if (widgetHash == GetHashValue32(str_MessageView)) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)w + 8);
-        vt[9].fn(vthis(w, vt[9]), 0);
+        w->setVisible(0);
         return;
     }
     if (widgetHash == GetHashValue32(str_MenuFroms)) {
-        self->f144 = w;
+        self->mpMenu = (cUIMenu*)w;
         return;
     }
     if (widgetHash == GetHashValue32(str_arr_down_b)) {
-        self->f160 = w;
+        self->mpArrowDown = w;
         return;
     }
     if (widgetHash == GetHashValue32(str_arr_up_b)) {
-        self->f15C = w;
+        self->mpArrowUp = w;
         return;
     }
     if (widgetHash == GetHashValue32(str_NoMessage)) {
-        self->f148 = w;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)w + 8);
-        vt[9].fn(vthis(w, vt[9]), 0);
+        self->mpNoMessage = w;
+        w->setVisible(0);
         return;
     }
     for (int i = 0; i < 8; i++) {
         sprintf(buf, str_UnreadMailpct_d, i);
         if (widgetHash == GetHashValue32(buf)) {
-            self->a9C[i] = w;
+            self->mpUnreadMail[i] = w;
             break;
         }
         sprintf(buf, str_FAQIconpct_d, i);
         if (widgetHash == GetHashValue32(buf)) {
-            self->aBC[i] = w;
+            self->mpFAQIcon[i] = w;
             return;
         }
         sprintf(buf, str_Frompct_d, i);
         if (widgetHash == GetHashValue32(buf)) {
-            self->aDC[i] = w;
+            self->mpFrom[i] = (cUIText*)w;
             return;
         }
         sprintf(buf, str_Subjectpct_d, i);
         if (widgetHash == GetHashValue32(buf)) {
-            self->aFC[i] = w;
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)w + 8);
-            vt[27].fn(vthis(w, vt[27]), 1);
+            self->mpSubject[i] = (cUIText*)w;
+            ((cUIText*)w)->setEllipses(1);
             return;
         }
         sprintf(buf, str_Numberpct_d, i);
         if (widgetHash == GetHashValue32(buf)) {
-            self->a11C[i] = w;
+            self->mpNumber[i] = (cUIText*)w;
             return;
         }
     }
@@ -9860,18 +9824,15 @@ extern char str_kT_POPUP235Chat_b[];
 extern char str_helptexts[];
 extern char str_textScrollChat_b[];
 
-struct sRect_75D0 {
-    int a, b, c, d;
-};
-extern sRect_75D0 D_004C8408;
+extern tARGB D_004C8408;
 
 /**
  * Highlights the players' rows and sets up online chat when the final standings overlay gains focus (vtable entry 6).
  *
  * Runs cUIState_onGainFocus, fades the human riders' "rider%d" and "timePoints%d" entries with "@TextPulseWhiteOrange"
  * (player 1, and player 2 online; neither online in freestyle or challenge modes). In a connected network game shows
- * "ChatGroup", sets "chatText" to kT_POPUP235Chat, shows "helptexts" and prepares "textScrollChat" (flag +0x74 bit 0,
- * rectangle D_004C8408, input map 1). Plays menu sound 0xE.
+ * "ChatGroup", sets "chatText" to kT_POPUP235Chat, shows "helptexts" and prepares "textScrollChat" (chat window mode,
+ * selected colour D_004C8408, input map 1, hidden). Plays menu sound 0xE.
  */
 extern "C" void cOVState_FINAL_STANDINGS_onGainFocus(cOVState_FINAL_STANDINGS* self)
 {
@@ -9904,7 +9865,7 @@ extern "C" void cOVState_FINAL_STANDINGS_onGainFocus(cOVState_FINAL_STANDINGS* s
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        cUIObjK1DEB90* groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
+        cUIThing* groupWidget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
         if (groupWidget != 0) {
             groupWidget->setVisible(1);
         }
@@ -9912,15 +9873,16 @@ extern "C" void cOVState_FINAL_STANDINGS_onGainFocus(cOVState_FINAL_STANDINGS* s
         if (uiText != 0) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_POPUP235Chat_b));
         }
-        groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
+        groupWidget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
         if (groupWidget != 0) {
             groupWidget->setVisible(1);
         }
-        char* chatScroll = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
-        *(int*)(chatScroll + 0x74) |= 1;
-        *(sRect_75D0*)(chatScroll + 0xA8) = D_004C8408;
+        cUITextScroll* chatScroll =
+            (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
+        chatScroll->mAttrTextScroll.mMode = 1;
+        chatScroll->mSelectedColour = D_004C8408;
         cUITextScroll_setInputMap(chatScroll, 1);
-        ((cUIObjK1DEB90*)chatScroll)->setVisible(0);
+        chatScroll->setVisible(0);
     }
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
