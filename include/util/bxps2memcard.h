@@ -38,8 +38,9 @@
 // WriteData), mDataSize (slot 19 SetDataSize), mReadFailed / mWriteFailed (slots 33 / 44), mFileInfoValid (slot 75
 // IsFileInfoValid). Ours from the code's use: mFilePath (the "<name>/<name>" path for sceMcOpen / sceMcMkdir /
 // sceMcDelete), mIconFilePath, mDirTable (the table [P] mNumDirTable counts), mFileDirEntry, mIconFileData /
-// mIconFileSize (after [P] mIconFileHandle), mGetInfoPending, mScanFileSlot, mTitleOffsLF (sceMcIconSys offsLF),
-// mModifyTime. The rest stay unk_XXX.
+// mIconFileSize (after [P] mIconFileHandle), mGetInfoPending / mGetInfoDevice, mScanFileSlot, mTitleOffsLF
+// (sceMcIconSys offsLF), mModifyTime, mOpenMode / mSeekOffset / mSeekOrigin (the sceMcOpen / sceMcSeek arguments they
+// hold). The rest stay unk_XXX.
 
 #include "layout.h"
 
@@ -146,8 +147,9 @@ struct cPS2MemCard {
                                     //       it (> 0) into the icon's offsLF (asm: lhu, a narrowing load)
     int mDevice;                    // 0x000C [P] GetDevice; [R] Reset 0; [U] the port of every sceMc* call; indexes
                                     //       mDevices; retail slot 4 cPS2MemCard_GetDevice
-    int unk_010;                    // 0x0010 [R] Reset 0; [U] slot 5 cPS2MemCard_CheckDevice and func_002C67E8 store the device
-                                    //       before SetState(3)
+    int mGetInfoDevice;             // 0x0010 [R] Reset 0; [U] the port of the pending sceMcGetInfo: slot 5
+                                    //       cPS2MemCard_CheckDevice and func_002C67E8 store it before SetState(3),
+                                    //       Update files the results under mDevices[mGetInfoDevice]
     int mMaxFiles;                  // 0x0014 [P] GetMaxFiles, "(file >= 0) && (file < mMaxFiles)"; [R] Reset 6 (the
                                     //       mFileSlots count); retail slot 68 cPS2MemCard_GetMaxFiles
     int mFileDescriptor;            // 0x0018 [P] "mFileDescriptor >= 0"; [R] Reset -1; [U] sceMcOpen's result, passed
@@ -207,9 +209,9 @@ struct cPS2MemCard {
     char mSourceIconPath[0x20];     // 0x14C0 [P] "strlen(pszInfo) < sizeof(mSourceIconPath)" (0x20 fits the gap);
                                     //       [R] Reset clears it; [U] slot 39 cPS2MemCard_SetFileSlotInfo copies it; SetState(0x28/0x2C/
                                     //       0x30) builds the icon file paths from it
-    int unk_14E0;                   // 0x14E0 [R] Reset 0; [U] sceMcOpen mode (func_002C6968 stores, func_002C69A0 uses)
-    int unk_14E4;                   // 0x14E4 [R] Reset 0; [U] sceMcSeek offset (func_002C6A60 stores, func_002C6A88)
-    int unk_14E8;                   // 0x14E8 [R] Reset 0; [U] sceMcSeek origin (see unk_14E4)
+    int mOpenMode;                  // 0x14E0 [R] Reset 0; [U] sceMcOpen mode (func_002C6968 stores, func_002C69A0 uses)
+    int mSeekOffset;                // 0x14E4 [R] Reset 0; [U] sceMcSeek offset (func_002C6A60 stores, func_002C6A88)
+    int mSeekOrigin;                // 0x14E8 [R] Reset 0; [U] sceMcSeek origin (see mSeekOffset)
     char pad_14EC[0x14];            // 0x14EC never accessed (allocation size 0x1500)
 };
 
@@ -217,7 +219,7 @@ CHECK_OFFSET(cPS2MemCard, mVtbl, 0x0000);
 CHECK_OFFSET(cPS2MemCard, mState, 0x0004);
 CHECK_OFFSET(cPS2MemCard, mTitleOffsLF, 0x0008);
 CHECK_OFFSET(cPS2MemCard, mDevice, 0x000C);
-CHECK_OFFSET(cPS2MemCard, unk_010, 0x0010);
+CHECK_OFFSET(cPS2MemCard, mGetInfoDevice, 0x0010);
 CHECK_OFFSET(cPS2MemCard, mMaxFiles, 0x0014);
 CHECK_OFFSET(cPS2MemCard, mFileDescriptor, 0x0018);
 CHECK_OFFSET(cPS2MemCard, mCurrentFileSlot, 0x001C);
@@ -247,9 +249,9 @@ CHECK_OFFSET(cPS2MemCard, pad_474, 0x0474);
 CHECK_OFFSET(cPS2MemCard, mFileDirEntry, 0x0480);
 CHECK_OFFSET(cPS2MemCard, mDirTable, 0x04C0);
 CHECK_OFFSET(cPS2MemCard, mSourceIconPath, 0x14C0);
-CHECK_OFFSET(cPS2MemCard, unk_14E0, 0x14E0);
-CHECK_OFFSET(cPS2MemCard, unk_14E4, 0x14E4);
-CHECK_OFFSET(cPS2MemCard, unk_14E8, 0x14E8);
+CHECK_OFFSET(cPS2MemCard, mOpenMode, 0x14E0);
+CHECK_OFFSET(cPS2MemCard, mSeekOffset, 0x14E4);
+CHECK_OFFSET(cPS2MemCard, mSeekOrigin, 0x14E8);
 CHECK_OFFSET(cPS2MemCard, pad_14EC, 0x14EC);
 CHECK_SIZE(cPS2MemCard, 0x1500);
 

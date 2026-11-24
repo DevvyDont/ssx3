@@ -1350,112 +1350,63 @@ extern int D_004A393C;
 extern int D_004A3940;
 extern int D_004A3944;
 
-struct cPS2MemCard_Init_sSlot {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-};
-
-struct cPS2MemCard_Init_sSelf {
-    int vtbl;                        // 0x00
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-    int f24;
-    int f28;
-    int f2C;
-    int f30;
-    int f34;
-    int f38;
-    int f3C;
-    int f40;
-    int f44;
-    int f48;
-    int f4C;
-    int f50;
-    int f54;
-    char pad_0x58[0x21];
-    char buf79[0x40];                // 0x79
-    char bufB9[0x40];                // 0xB9
-    char bufF9[0x40];                // 0xF9
-    char buf139[0x40];               // 0x139
-    char pad_0x179[3];
-    cPS2MemCard_Init_sSlot slots[2];    // 0x17C
-    char buf1A4[0x2D0];              // 0x1A4
-    char buf474[0xC];
-    char buf480[0x40];               // 0x480
-    char pad_0x4C0[0];
-    char buf4C0[0x1000];             // 0x4C0
-    char buf14C0[0x20];              // 0x14C0
-    int f14E0;
-    int f14E4;
-    int f14E8;
-};
-
 // PORT: the unit declares cPS2MemCard_Init(void*) earlier; bound by asm label
-void cPS2MemCard_Init_impl(cPS2MemCard_Init_sSelf* self) __asm__("cPS2MemCard_Init");
+void cPS2MemCard_Init_impl(cPS2MemCard* self) __asm__("cPS2MemCard_Init");
 
 /**
  * Puts the memory-card object into its idle state.
  *
- * Called by the constructor and through virtual slot 2. Sets mTitleOffsLF to 0x1C, mState, mDevice and unk_010 to 0,
- * mMaxFiles to 6, mFileDescriptor, mCurrentFileSlot and mIconFileHandle to -1, clears the remaining counters and
+ * Called by the constructor and through virtual slot 2. Sets mTitleOffsLF to 0x1C, mState, mDevice and mGetInfoDevice
+ * to 0, mMaxFiles to 6, mFileDescriptor, mCurrentFileSlot and mIconFileHandle to -1, clears the remaining counters and
  * pending flags, the static libmc result words D_004A3938 / D_004A393C / D_004A3944 (sceMcGetInfo) and D_004A3940 (last
  * result), the name/path buffers, both device records (mDevices), the file slots (mFileSlots), the directory entries
  * (mFileDirEntry, mDirTable) and mSourceIconPath.
  */
-void cPS2MemCard_Init_impl(cPS2MemCard_Init_sSelf* self)
+void cPS2MemCard_Init_impl(cPS2MemCard* self)
 {
-    self->f8 = 0x1C;
-    self->f4 = 0;
-    self->fC = 0;
-    self->f10 = 0;
-    self->f40 = 0;
-    self->f4C = 0;
+    self->mTitleOffsLF = 0x1C;
+    self->mState = 0;
+    self->mDevice = 0;
+    self->mGetInfoDevice = 0;
+    self->mGetInfoPending = 0;
+    self->unk_04C = 0;
     D_004A3938 = 0;
     D_004A393C = 0;
     D_004A3940 = 0;
-    self->f18 = -1;
-    self->f1C = -1;
-    self->f38 = -1;
-    self->f14 = 6;
-    self->f50 = 0;
-    self->f54 = 0;
-    self->f20 = 0;
-    self->f24 = 0;
-    self->f2C = 0;
-    self->f30 = 0;
-    self->f34 = 0;
-    self->f44 = 0;
-    self->f48 = 0;
+    self->mFileDescriptor = -1;
+    self->mCurrentFileSlot = -1;
+    self->mIconFileHandle = -1;
+    self->mMaxFiles = 6;
+    self->unk_050 = 0;
+    self->mNumDirTable = 0;
+    self->mTransferSize = 0;
+    self->mDataSize = 0;
+    self->mBuffer = 0;
+    self->mIconFileData = 0;
+    self->mIconFileSize = 0;
+    self->mReadFailed = 0;
+    self->mWriteFailed = 0;
     D_004A3944 = 0;
-    self->f28 = 0;
-    self->f14E0 = 0;
-    self->f14E8 = 0;
-    self->f14E4 = 0;
-    self->f3C = 0;
-    MEM_fill_4050(self->bufB9, 0, 0x40);
-    MEM_fill_4050(self->bufF9, 0, 0x40);
-    MEM_fill_4050(self->buf79, 0, 0x40);
-    MEM_fill_4050(self->buf139, 0, 0x40);
+    self->mScanFileSlot = 0;
+    self->mOpenMode = 0;
+    self->mSeekOrigin = 0;
+    self->mSeekOffset = 0;
+    self->mFileInfoValid = 0;
+    MEM_fill_4050(self->mFileName, 0, 0x40);
+    MEM_fill_4050(self->mFilePath, 0, 0x40);
+    MEM_fill_4050(self->mIconFilePath, 0, 0x40);
+    MEM_fill_4050(self->mDirPattern, 0, 0x40);
     for (int i = 0; i < 2; i++) {
-        self->slots[i].f0 = 0;
-        self->slots[i].f4 = 0;
-        self->slots[i].f8 = 0;
-        self->slots[i].fC = 0;
-        self->slots[i].f10 = 0;
+        self->mDevices[i].mType = 0;
+        self->mDevices[i].mFreeClusters = 0;
+        self->mDevices[i].mLastError = 0;
+        self->mDevices[i].mFormat = 0;
+        self->mDevices[i].mCardChanged = 0;
     }
-    MEM_fill_4050(self->buf480, 0, 0x40);
-    MEM_fill_4050(self->buf1A4, 0, 720);
-    MEM_fill_4050(self->buf4C0, 0, 0x1000);
-    MEM_fill_4050(self->buf14C0, 0, 0x20);
+    MEM_fill_4050(&self->mFileDirEntry, 0, 0x40);
+    MEM_fill_4050(self->mFileSlots, 0, 720);
+    MEM_fill_4050(self->mDirTable, 0, 0x1000);
+    MEM_fill_4050(self->mSourceIconPath, 0, 0x20);
 }
 #endif
 
@@ -1710,9 +1661,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_CheckDevice);
 /**
  * Selects a memory-card port and starts checking what is in it.
  *
- * Stores @p device in mDevice; when the card is not busy (virtual slot 11, cPS2MemCard_IsBusy) also stores it in unk_010 and
- * calls func_002C48C0 with state 3, which starts a sceMcGetInfo on the port (func_002C50E0). Update (cPS2MemCard_Update)
- * records the result in the device record.
+ * Stores @p device in mDevice; when the card is not busy (virtual slot 11, cPS2MemCard_IsBusy) also stores it in
+ * mGetInfoDevice and calls func_002C48C0 with state 3, which starts a sceMcGetInfo on the port (func_002C50E0). Update
+ * (cPS2MemCard_Update) records the result in the device record.
  *
  * @param device  the port to use (0 or 1)
  */
@@ -1720,7 +1671,7 @@ extern "C" void cPS2MemCard_CheckDevice(cPS2MemCard* self, int device)
 {
     self->mDevice = device;
     if (((cMemCard*)self)->IsBusy() == 0) {
-        self->unk_010 = device;
+        self->mGetInfoDevice = device;
         func_002C48C0(self, 3);
     }
 }
@@ -2634,8 +2585,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsInvalid);
  */
 extern "C" int cPS2MemCard_IsInvalid(cPS2MemCard* self, int device)
 {
-    char* devicePtr = (char*)self + device * 0x14;
-    return *(int*)(devicePtr + 0x184) == -10002;
+    return self->mDevices[device].mLastError == -10002;
 }
 #endif
 
@@ -2712,8 +2662,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFormatted);
  */
 extern "C" int cPS2MemCard_IsFormatted(cPS2MemCard* self, int device)
 {
-    char* devicePtr = (char*)self + device * 0x14;
-    return *(int*)(devicePtr + 0x188) != 0;
+    return self->mDevices[device].mFormat != 0;
 }
 #endif
 
@@ -2729,8 +2678,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_CardChanged);
  */
 extern "C" int cPS2MemCard_CardChanged(cPS2MemCard* self, int device)
 {
-    char* devicePtr = (char*)self + device * 0x14;
-    return *(int*)(devicePtr + 0x18c) != 0;
+    return self->mDevices[device].mCardChanged != 0;
 }
 #endif
 
@@ -2744,19 +2692,6 @@ extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" int cPS2MemCard_GetFreeSpace1_i(void* self, int idx) __asm__("cPS2MemCard_GetFreeSpace1");
 extern char str_sp_d[];
 extern char str_kT_MEMFreePS2[];
-
-struct sQTEntry_53E0 {
-    int count;
-    int status;
-    void* data;
-    int fC;
-    int f10;
-};
-
-struct sQT_53E0 {
-    char pad[0x180];
-    sQTEntry_53E0 entries[1];
-};
 
 struct cPS2MemCard_GetStatus_sVEntry {
     short delta;
@@ -2775,13 +2710,13 @@ struct cPS2MemCard_GetStatus_sVEntry {
  * @param idx  the memory-card port (0 or 1)
  * @param dst  the 16-bit output buffer
  */
-extern "C" void cPS2MemCard_GetStatus(sQT_53E0* self, int idx, unsigned short* dst)
+extern "C" void cPS2MemCard_GetStatus(cPS2MemCard* self, int idx, unsigned short* dst)
 {
-    if (self->entries[idx].data == 0) {
+    if (self->mDevices[idx].mFormat == 0) {
         func_002C2540(dst, str_sp_d);
         return;
     }
-    switch (self->entries[idx].status) {
+    switch (self->mDevices[idx].mLastError) {
     case -2:
         func_002C2540(dst, str_sp_d);
         break;
@@ -2936,60 +2871,6 @@ extern "C" int cPS2MemCard_IsFileSlotDisabled(cPS2MemCard* self, int fileSlot)
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_Update);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sMCPort_55D8 {
-    int a;
-    int b;
-    int status;
-    int d;
-    int e;
-};
-struct sMCEnt_55D8 {
-    int f0;
-    int f4;
-    int f8;
-    char name[0x40];
-    char x4C[0x22];
-    char x6E[8];
-    char pad76[2];
-};
-struct sMC_55D8 {
-    char* vt;
-    int state;
-    int x08;
-    int port;
-    int port2;
-    int count;
-    int x18;
-    int x1C;
-    int size;
-    int x24;
-    int index;
-    int x2C;
-    int x30;
-    int x34;
-    int handle;
-    int x3C;
-    int busy;
-    int x44;
-    int x48;
-    int x4C;
-    int x50;
-    int x54;
-    char name[0x21];
-    char path[0x40];
-    char dir[0x40];
-    char padF9[0x83];
-    sMCPort_55D8 ports[2];
-    sMCEnt_55D8 entries[6];
-    char pad474[0x14];
-    char x488[8];
-    int x490;
-    char pad494[0x4C];
-    char dirbuf[0x40][0x40];
-};
-typedef int (*fn1_55D8)(void*);
-typedef int (*fn2_55D8)(void*, int);
-typedef void (*fn2v_55D8)(void*, int);
 // PORT: the unit declares these later with other signatures; bound by asm label.
 extern "C" int sceMcSync_i(int a0, int* a1, int* out) __asm__("sceMcSync");
 extern "C" int cPS2MemCard_GetLastError_i(void* self, int i) __asm__("cPS2MemCard_GetLastError");
@@ -3015,9 +2896,6 @@ extern int D_00487450[];
 extern "C" void MEM_fill_v(void* dst, int c, int n) __asm__("MEM_fill");
 extern short D_005377B8[];
 
-#define VC1_55D8(s, o) (((fn1_55D8)*(void**)((s)->vt + (o) + 4))((char*)(s) + *(short*)((s)->vt + (o))))
-#define VC2v_55D8(s, o, x) (((fn2v_55D8)*(void**)((s)->vt + (o) + 4))((char*)(s) + *(short*)((s)->vt + (o)), x))
-#define VC2_55D8(s, o, x) (((fn2_55D8)*(void**)((s)->vt + (o) + 4))((char*)(s) + *(short*)((s)->vt + (o)), x))
 
 /**
  * Advances the memory-card state machine; called every frame.
@@ -3031,16 +2909,16 @@ extern short D_005377B8[];
  * func_002C42B0...). Also finishes the directory scan (copies names, titles and dates into the file slots) and the
  * asynchronous icon file loads. mFileInfoValid is 1 while no call is outstanding.
  */
-extern "C" void cPS2MemCard_Update(sMC_55D8* self)
+extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
 {
-    if (self->ports[self->port].d == 0) {
-        self->x50 = 0;
-        self->x54 = 0;
-        MEM_fill(self->entries, 0, 720);
+    if (self->mDevices[self->mDevice].mFormat == 0) {
+        self->unk_050 = 0;
+        self->mNumDirTable = 0;
+        MEM_fill(self->mFileSlots, 0, 720);
     }
     int one = 1;
-    self->x3C = one;
-    if (self->busy != 0) {
+    self->mFileInfoValid = one;
+    if (self->mGetInfoPending != 0) {
         int syncCmd;
         D_004A3940 = 0;
         syncCmd = 0;
@@ -3053,48 +2931,50 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
         }
         if (syncResult == -2) {
         set:
-            *(int*)((char*)self + self->port2 * 0x14 + 0x18C) = one;
+            // mDevices[mGetInfoDevice].mCardChanged; both member spellings change the code here
+            *(int*)((char*)self + self->mGetInfoDevice * 0x14 + 0x18C) = one;
             syncResult = D_004A3940;
         }
-        if ((unsigned)(syncResult + 19) < 9 || (unsigned)(syncResult + 49) < 10 || (unsigned)(syncResult + 59) < 10 || (unsigned)(syncResult + 79) < 10) {
+        if ((unsigned)(syncResult + 19) < 9 || (unsigned)(syncResult + 49) < 10 || (unsigned)(syncResult + 59) < 10
+            || (unsigned)(syncResult + 79) < 10) {
             D_004A3940 = -10;
         }
-        if (func_002C63E8((cPS2MemCard*)self, D_004A3940) == 0) {
+        if (func_002C63E8(self, D_004A3940) == 0) {
             if (D_004A3938 != 2) {
                 D_004A3940 = -10002;
             } else if (D_004A3944 == 0) {
                 D_004A3940 = -2;
             }
         }
-        self->busy = 0;
-        self->ports[self->port2].status = D_004A3940;
-        self->ports[self->port2].a = D_004A3938;
-        self->ports[self->port2].b = D_004A393C;
-        self->ports[self->port2].d = D_004A3944;
+        self->mGetInfoPending = 0;
+        self->mDevices[self->mGetInfoDevice].mLastError = D_004A3940;
+        self->mDevices[self->mGetInfoDevice].mType = D_004A3938;
+        self->mDevices[self->mGetInfoDevice].mFreeClusters = D_004A393C;
+        self->mDevices[self->mGetInfoDevice].mFormat = D_004A3944;
     }
-    switch (self->state) {
+    switch (self->mState) {
     case 2: case 6: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 18: case 22: case 23: case 24: case 28: case 29: case 30: case 35: case 36: case 37:
     case 38: case 39: case 41: case 42: case 43: case 45: case 46: case 47: case 49: case 50:
     case 51: case 54: case 55: case 56: case 57: case 58: case 59: case 61: case 64: case 66:
     case 68: case 70: case 72: case 74: case 76: case 78:
         {
-            self->x3C = 0;
+            self->mFileInfoValid = 0;
             D_004A3940 = 0;
             if (sceMcSync_i(1, 0, &D_004A3940) == 0) {
                 return;
             }
-            self->x3C = 1;
+            self->mFileInfoValid = 1;
             if (D_004A3940 == -1) {
-                self->ports[self->port].e = 1;
+                self->mDevices[self->mDevice].mCardChanged = 1;
             }
             int syncResult = D_004A3940;
             if (syncResult < 0) {
-                int st = self->state;
+                int st = self->mState;
                 if (st != 36 && (unsigned)(st - 54) >= 6) {
-                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && func_002C63E8((cPS2MemCard*)self, syncResult) == 0) {
-                        VC2v_55D8(self, 320, self->index);
-                        func_002C48C0((cPS2MemCard*)self, 0x10);
+                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && func_002C63E8(self, syncResult) == 0) {
+                        ((cMemCard*)self)->SetBrokenFile(self->mScanFileSlot);
+                        func_002C48C0(self, 0x10);
                         return;
                     }
                 } else {
@@ -3103,31 +2983,31 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
                     }
                 }
                 if (D_004A3940 < 0) {
-                    if (self->state == 35 || self->state == 7) {
-                        func_002C52D8((cPS2MemCard*)self);
+                    if (self->mState == 35 || self->mState == 7) {
+                        func_002C52D8(self);
                     }
-                    if (self->state == 19) {
-                        self->x1C = -1;
+                    if (self->mState == 19) {
+                        self->mCurrentFileSlot = -1;
                     }
-                    func_002C48C0((cPS2MemCard*)self, 1);
+                    func_002C48C0(self, 1);
                     return;
                 }
             }
-            self->ports[self->port].status = 0;
+            self->mDevices[self->mDevice].mLastError = 0;
         }
         break;
     }
-    if (self->x44 != 0) {
-        self->x44 = 0;
-        func_002C48C0((cPS2MemCard*)self, 0x1E);
+    if (self->mReadFailed != 0) {
+        self->mReadFailed = 0;
+        func_002C48C0(self, 0x1E);
         return;
     }
-    if (self->x48 != 0) {
-        self->x48 = 0;
-        func_002C48C0((cPS2MemCard*)self, 0x18);
+    if (self->mWriteFailed != 0) {
+        self->mWriteFailed = 0;
+        func_002C48C0(self, 0x18);
         return;
     }
-    switch (self->state) {
+    switch (self->mState) {
     case 0:
     case 1:
     case 78:
@@ -3138,76 +3018,76 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
             return;
         }
         if (D_004A3940 == -1) {
-            self->ports[self->port].e = 1;
+            self->mDevices[self->mDevice].mCardChanged = 1;
         }
         break;
     case 3:
-        func_002C48C0((cPS2MemCard*)self, 4);
+        func_002C48C0(self, 4);
         break;
     case 5:
-        if (VC1_55D8(self, 584) == 0) {
-            func_002C4210((cPS2MemCard*)self);
+        if (((cMemCard*)self)->DidErrorOccur() == 0) {
+            func_002C4210(self);
             return;
         }
         break;
     case 34:
-        if (VC1_55D8(self, 584) == 0) {
-            func_002C42B0((cPS2MemCard*)self);
+        if (((cMemCard*)self)->DidErrorOccur() == 0) {
+            func_002C42B0(self);
             return;
         }
         break;
     case 6:
         {
             int i;
-            self->x50 = self->count;
-            MEM_fill_v(self->entries, 0, 720);
-            for (i = 0; i < self->count; i++) {
+            self->unk_050 = self->mMaxFiles;
+            MEM_fill_v(self->mFileSlots, 0, 720);
+            for (i = 0; i < self->mMaxFiles; i++) {
                 unsigned char slotDigit = i + '1';
                 int j;
-                for (j = 0; j < self->x50; j++) {
-                    int n = strlen(self->dirbuf[j]);
-                    if (n != 0 && (unsigned char)self->dirbuf[j][n - 1] == slotDigit) {
-                        strcpy(self->entries[i].name, self->dirbuf[j]);
+                for (j = 0; j < self->unk_050; j++) {
+                    int n = strlen((char*)self->mDirTable[j].m_entryName);
+                    if (n != 0 && self->mDirTable[j].m_entryName[n - 1] == slotDigit) {
+                        strcpy(self->mFileSlots[i].mFileName, (char*)self->mDirTable[j].m_entryName);
                         break;
                     }
                 }
             }
             D_004A3940 = 0;
-            func_002C48C0((cPS2MemCard*)self, 7);
+            func_002C48C0(self, 7);
             return;
         }
     case 8:
-        self->x18 = D_004A3940;
-        func_002C48C0((cPS2MemCard*)self, 10);
+        self->mFileDescriptor = D_004A3940;
+        func_002C48C0(self, 10);
         return;
     case 10:
-        cMemCard_ShiftJISToAscii(self, self->entries[self->index].x4C, D_005377B8);
-        func_002C48C0((cPS2MemCard*)self, 9);
+        cMemCard_ShiftJISToAscii(self, self->mFileSlots[self->mScanFileSlot].mTitle, D_005377B8);
+        func_002C48C0(self, 9);
         return;
     case 9:
-        func_002C48C0((cPS2MemCard*)self, 11);
+        func_002C48C0(self, 11);
         return;
     case 11:
-        if (self->x490 != self->x24) {
-            VC2v_55D8(self, 320, self->index);
-            func_002C48C0((cPS2MemCard*)self, 0x10);
+        if (self->mFileDirEntry.m_fileSizeByte != self->mDataSize) {
+            ((cMemCard*)self)->SetBrokenFile(self->mScanFileSlot);
+            func_002C48C0(self, 0x10);
         }
-        __builtin_memcpy(self->entries[self->index].x6E, self->x488, 8);
-        func_002C48C0((cPS2MemCard*)self, 12);
+        __builtin_memcpy(&self->mFileSlots[self->mScanFileSlot].mModifyTime, &self->mFileDirEntry.m_modify, 8);
+        func_002C48C0(self, 12);
         return;
     case 12:
     case 13:
     case 14:
         {
             int k;
-            if (self->state != 13) {
-                k = self->state == 14 ? 2 : 0;
+            if (self->mState != 13) {
+                k = self->mState == 14 ? 2 : 0;
             } else {
                 k = 1;
             }
-            if (self->x490 != D_00487450[k]) {
-                func_002C5570((cPS2MemCard*)self, self->index);
-                func_002C48C0((cPS2MemCard*)self, 0x10);
+            if (self->mFileDirEntry.m_fileSizeByte != D_00487450[k]) {
+                func_002C5570(self, self->mScanFileSlot);
+                func_002C48C0(self, 0x10);
                 return;
             }
         }
@@ -3215,8 +3095,8 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
     case 15:
     case 16:
     next:
-        while (++self->index < self->count) {
-            if (VC2_55D8(self, 536, self->index) != 0) {
+        while (++self->mScanFileSlot < self->mMaxFiles) {
+            if (((cMemCard*)self)->HasFileName(self->mScanFileSlot) != 0) {
                 goto found;
             }
         }
@@ -3225,32 +3105,32 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
         break;
     case 35:
         if (D_004A3940 != 1) {
-            func_002C52D8((cPS2MemCard*)self);
+            func_002C52D8(self);
         }
         D_004A3940 = 0;
         break;
     case 17:
-        if (self->ports[self->port].d != 0) {
+        if (self->mDevices[self->mDevice].mFormat != 0) {
             break;
         }
-        func_002C4388((cPS2MemCard*)self);
+        func_002C4388(self);
         return;
     case 19:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C4410((cPS2MemCard*)self);
+        func_002C4410(self);
         return;
     case 40:
     case 44:
     case 48:
-        if (ASYNCFILE_getstatus(self->handle) != 1) {
+        if (ASYNCFILE_getstatus(self->mIconFileHandle) != 1) {
             return;
         }
-        self->x30 = 0;
-        self->x34 = 0;
-        ASYNCFILE_release(self->handle, &self->x30, &self->x34);
-        func_002C48C0((cPS2MemCard*)self, self->state + 1);
+        self->mIconFileData = 0;
+        self->mIconFileSize = 0;
+        ASYNCFILE_release(self->mIconFileHandle, &self->mIconFileData, &self->mIconFileSize);
+        func_002C48C0(self, self->mState + 1);
         return;
     case 22:
     case 28:
@@ -3258,24 +3138,24 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
     case 41:
     case 45:
     case 49:
-        self->x18 = D_004A3940;
-        func_002C48C0((cPS2MemCard*)self, self->state + 1);
+        self->mFileDescriptor = D_004A3940;
+        func_002C48C0(self, self->mState + 1);
         return;
     case 20:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0((cPS2MemCard*)self, 36);
+        func_002C48C0(self, 36);
         return;
     case 27:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0((cPS2MemCard*)self, 0x1C);
+        func_002C48C0(self, 0x1C);
         return;
     case 55:
     case 56:
-        func_002C48C0((cPS2MemCard*)self, 58);
+        func_002C48C0(self, 58);
         return;
     case 36:
     case 38:
@@ -3286,104 +3166,104 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
     case 54:
     case 57:
     case 58:
-        func_002C48C0((cPS2MemCard*)self, self->state + 1);
+        func_002C48C0(self, self->mState + 1);
         return;
     case 21:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0((cPS2MemCard*)self, 22);
+        func_002C48C0(self, 22);
         return;
     case 23:
-        func_002C48C0((cPS2MemCard*)self, 52);
+        func_002C48C0(self, 52);
         return;
     case 29:
-        if (D_004A3940 != self->size) {
+        if (D_004A3940 != self->mTransferSize) {
             D_004A3940 = -10001;
-            func_002C48C0((cPS2MemCard*)self, 1);
+            func_002C48C0(self, 1);
             return;
         }
-        func_002C48C0((cPS2MemCard*)self, 53);
+        func_002C48C0(self, 53);
         return;
     case 25:
-        self->x3C = 0;
-        self->entries[self->x1C].f4 = 0;
-        self->entries[self->x1C].f0 = 0;
-        self->entries[self->x1C].f8 = 0;
-        strcpy(self->entries[self->x1C].name, self->dir);
-        strcpy(self->entries[self->x1C].x4C, self->name);
+        self->mFileInfoValid = 0;
+        self->mFileSlots[self->mCurrentFileSlot].mIconSysUnreadable = 0;
+        self->mFileSlots[self->mCurrentFileSlot].mBroken = 0;
+        self->mFileSlots[self->mCurrentFileSlot].mDisabled = 0;
+        strcpy(self->mFileSlots[self->mCurrentFileSlot].mFileName, self->mFileName);
+        strcpy(self->mFileSlots[self->mCurrentFileSlot].mTitle, self->mTitle);
         break;
     case 60:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6848((cPS2MemCard*)self);
+        func_002C6848(self);
         return;
     case 61:
-        self->x54 = D_004A3940;
+        self->mNumDirTable = D_004A3940;
         break;
     case 63:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C69A0((cPS2MemCard*)self);
+        func_002C69A0(self);
         return;
     case 73:
-        if (VC1_55D8(self, 584) != 0 || self->x18 < 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
             break;
         }
-        func_002C6A28((cPS2MemCard*)self);
+        func_002C6A28(self);
         return;
     case 65:
-        if (VC1_55D8(self, 584) != 0 || self->x18 < 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
             break;
         }
-        func_002C6A88((cPS2MemCard*)self);
+        func_002C6A88(self);
         return;
     case 71:
-        if (VC1_55D8(self, 584) != 0 || self->x18 < 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
             break;
         }
-        func_002C6B00((cPS2MemCard*)self);
+        func_002C6B00(self);
         return;
     case 67:
-        if (VC1_55D8(self, 584) != 0 || self->x18 < 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
             break;
         }
-        func_002C6B78((cPS2MemCard*)self);
+        func_002C6B78(self);
         return;
     case 69:
-        if (VC1_55D8(self, 584) != 0 || self->x18 < 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
             break;
         }
-        func_002C6BF8((cPS2MemCard*)self);
+        func_002C6BF8(self);
         return;
     case 75:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6C88((cPS2MemCard*)self);
+        func_002C6C88(self);
         return;
     case 77:
-        if (VC1_55D8(self, 584) != 0) {
+        if (((cMemCard*)self)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6D18((cPS2MemCard*)self);
+        func_002C6D18(self);
         return;
     case 64:
         {
             int lastResult = D_004A3940;
-            self->state = 0;
-            self->x18 = lastResult;
+            self->mState = 0;
+            self->mFileDescriptor = lastResult;
         }
         break;
     case 74:
-        self->state = 0;
-        self->x18 = -1;
+        self->mState = 0;
+        self->mFileDescriptor = -1;
         break;
     found:
-        sprintf(self->path, str_pct_s_pct_s_h, self->entries[self->index].name, str_icon_sys);
-        func_002C48C0((cPS2MemCard*)self, 8);
+        sprintf(self->mIconFilePath, str_pct_s_pct_s_h, self->mFileSlots[self->mScanFileSlot].mFileName, str_icon_sys);
+        func_002C48C0(self, 8);
         return;
     case 52:
     case 53:
@@ -3392,17 +3272,19 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
     case 68:
     case 70:
     case 72:
-        self->state = 0;
+        self->mState = 0;
         break;
     }
-    if (cPS2MemCard_GetLastError_i(self, self->port) == -10 || cPS2MemCard_GetLastError_i(self, self->port) == -1) {
-        func_002C5250((cPS2MemCard*)((cPS2MemCard*)self));
+    if (cPS2MemCard_GetLastError_i(self, self->mDevice) == -10
+        || cPS2MemCard_GetLastError_i(self, self->mDevice) == -1) {
+        func_002C5250(self);
     }
-    if (cPS2MemCard_GetLastError_i(self, self->port) == -10 || cPS2MemCard_GetLastError_i(self, self->port) == -2) {
-        func_002C5278((cPS2MemCard*)self);
+    if (cPS2MemCard_GetLastError_i(self, self->mDevice) == -10
+        || cPS2MemCard_GetLastError_i(self, self->mDevice) == -2) {
+        func_002C5278(self);
     }
-    if (self->state != 0) {
-        func_002C48C0((cPS2MemCard*)self, 0);
+    if (self->mState != 0) {
+        func_002C48C0(self, 0);
     }
 }
 #endif
@@ -3410,27 +3292,6 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetTitleString);
 #ifdef SKIP_ASM
-struct sQTVt6128 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-
-
-struct sQTEnt6128 {
-    int f0;                     // 0x00 (self + 0x1A4)
-    int f4;                     // 0x04
-    int f8;                     // 0x08
-    char padC[0x52 - 0xC];
-    char name[0x78 - 0x52];     // 0x52 (self + 0x1F6)
-};
-
-struct sQT6128 {
-    sQTVt6128* vt;              // 0x000
-    char pad4[0x1A0];
-    sQTEnt6128 ents[1];         // 0x1A4
-};
-
 extern char str_kT_MEMEmpty_c[];
 extern char str_kT_MEMUnavailable[];
 extern char str_kT_MEMFileCorruptPS2[];
@@ -3456,21 +3317,21 @@ static inline unsigned short* qtLoc6128(char* key)
  * @param fileSlot  the file slot
  * @param dst  the wide-character buffer that receives the text
  */
-extern "C" void cPS2MemCard_GetTitleString(sQT6128* self, int fileSlot, unsigned short* dst)
+extern "C" void cPS2MemCard_GetTitleString(cPS2MemCard* self, int fileSlot, unsigned short* dst)
 {
     unsigned short buf[64];
-    if (self->vt[53].fn(vthis(self, self->vt[53])) == 0) {
+    if (((cMemCard*)self)->IsAvailable1() == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
-    } else if (self->vt[55].fn(vthis(self, self->vt[55])) == 0) {
+    } else if (((cMemCard*)self)->IsFormatted() == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMUnavailable));
-    } else if (self->ents[fileSlot].f0 != 0 || self->ents[fileSlot].f4 != 0) {
+    } else if (self->mFileSlots[fileSlot].mBroken != 0 || self->mFileSlots[fileSlot].mIconSysUnreadable != 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMFileCorruptPS2));
-    } else if (self->ents[fileSlot].f8 != 0) {
+    } else if (self->mFileSlots[fileSlot].mDisabled != 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMNoFreeSpace));
-    } else if (((sVEntry<int(void*, int)>*)self->vt)[67].fn(vthis(self, self->vt[67]), fileSlot) == 0) {
+    } else if (((cMemCard*)self)->HasFileName(fileSlot) == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
     } else {
-        func_002C2540(buf, self->ents[fileSlot].name);
+        func_002C2540(buf, &self->mFileSlots[fileSlot].mTitle[6]);
     }
     buf[32] = 0;
     strcpy1(dst, buf);
@@ -3480,16 +3341,6 @@ extern "C" void cPS2MemCard_GetTitleString(sQT6128* self, int fileSlot, unsigned
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6280);
 #ifdef SKIP_ASM
-struct func_002C6280_sElem {
-    int flag;
-    char pad[0x74];
-};
-
-struct func_002C6280_sData {
-    char pad[0x1AC];
-    func_002C6280_sElem elems[1];
-};
-
 /**
  * Marks the empty file slots a new save no longer fits in.
  *
@@ -3504,12 +3355,12 @@ extern "C" void func_002C6280(cPS2MemCard* self)
     int remain = ((cMemCard*)self)->GetFreeSpace();
     int unit = ((cMemCard*)self)->SpaceRequired(self->mDataSize);
     for (; i < self->mMaxFiles; i++) {
-        ((func_002C6280_sData*)self)->elems[i].flag = 0;
+        self->mFileSlots[i].mDisabled = 0;
         if (((cMemCard*)self)->HasFileName(i) == 0) {
             if (remain >= unit) {
                 remain -= unit;
             } else {
-                ((func_002C6280_sData*)self)->elems[i].flag = 1;
+                self->mFileSlots[i].mDisabled = 1;
             }
         }
     }
@@ -3655,120 +3506,28 @@ extern "C" void cPS2MemCard_GetFileTime(cPS2MemCard* self, int fileSlot, unsigne
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetLastSavedFile);
 #ifdef SKIP_ASM
-struct sSaveSlot_2C64F8 {
-    int busy;               // 0x00
-    int locked;             // 0x04
-    int bad;                // 0x08
-    char pad0C[0x63];
-    unsigned char sec;      // 0x6F
-    unsigned char min;      // 0x70
-    unsigned char hour;     // 0x71
-    unsigned char day;      // 0x72
-    unsigned char month;    // 0x73
-    unsigned short year;    // 0x74
-    char pad76[0x2];
-};
-struct sSaveMgrBase_2C64F8 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual int IsFormatted1();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual int HasFileName(int slot);
-};
-struct sSaveMgr_2C64F8 : sSaveMgrBase_2C64F8 {
-    char pad4[0x1A0];
-    sSaveSlot_2C64F8 slots[6];  // 0x1A4
-};
-
-/**
- * Finds the most recently saved file slot.
- *
- * Returns -1 unless slot 55 (cPS2MemCard_IsFormatted1) passes. Among the six slots that are not flagged (mBroken,
- * mIconSysUnreadable, mDisabled all 0) and have a name (slot 67, cPS2MemCard_HasFileName) it keeps the one with the
- * latest modify time (mModifyTime), compared by year, month, day and then time of day. Likely bug: the candidate's time of
- * day adds the current best slot's seconds instead of its own.
- *
- * @return the newest file slot, or -1 when there is none
- */
-extern "C" int cPS2MemCard_GetLastSavedFile(sSaveMgr_2C64F8* self)
+extern "C" int cPS2MemCard_GetLastSavedFile(cPS2MemCard* self)
 {
     int best = -1;
-    if (self->IsFormatted1() == 0) {
+    if (((cMemCard*)self)->IsFormatted() == 0) {
         return -1;
     }
     for (int i = 0; i < 6; i++) {
-        if (self->slots[i].busy == 0 && self->slots[i].locked == 0 && self->HasFileName(i) != 0 && self->slots[i].bad == 0) {
+        if (self->mFileSlots[i].mBroken == 0 && self->mFileSlots[i].mIconSysUnreadable == 0
+            && ((cMemCard*)self)->HasFileName(i) != 0 && self->mFileSlots[i].mDisabled == 0) {
             if (best != -1) {
-                unsigned int ct = self->slots[i].hour * 3600 + self->slots[i].min * 60 + self->slots[best].sec;
-                unsigned short cy = self->slots[i].year;
-                unsigned char cd = self->slots[i].day;
-                unsigned int bt = self->slots[best].hour * 3600 + self->slots[best].min * 60 + self->slots[best].sec;
-                unsigned short by = self->slots[best].year;
-                unsigned char bm = self->slots[best].month;
-                unsigned char bd = self->slots[best].day;
-                unsigned char cm = self->slots[i].month;
+                unsigned int ct = self->mFileSlots[i].mModifyTime.m_hour * 3600
+                                  + self->mFileSlots[i].mModifyTime.m_min * 60
+                                  + self->mFileSlots[best].mModifyTime.m_sec;
+                unsigned short cy = self->mFileSlots[i].mModifyTime.m_year;
+                unsigned char cd = self->mFileSlots[i].mModifyTime.m_day;
+                unsigned int bt = self->mFileSlots[best].mModifyTime.m_hour * 3600
+                                  + self->mFileSlots[best].mModifyTime.m_min * 60
+                                  + self->mFileSlots[best].mModifyTime.m_sec;
+                unsigned short by = self->mFileSlots[best].mModifyTime.m_year;
+                unsigned char bm = self->mFileSlots[best].mModifyTime.m_month;
+                unsigned char bd = self->mFileSlots[best].mModifyTime.m_day;
+                unsigned char cm = self->mFileSlots[i].mModifyTime.m_month;
                 if (cy < by) {
                 } else if (by < cy) {
                     best = i;
@@ -3825,8 +3584,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_FileExistsError);
  */
 extern "C" int cPS2MemCard_FileExistsError(cPS2MemCard* self)
 {
-    char* devicePtr = (char*)self + self->mDevice * 0x14;
-    return *(int*)(devicePtr + 0x184) == -11;
+    return self->mDevices[self->mDevice].mLastError == -11;
 }
 #endif
 
@@ -4013,8 +3771,8 @@ int cPS2MemCard_GetFreeDirEntries(void* self)
 INCLUDE_ASM("worldpainter/quadtree", func_002C67E8__FPvi);
 #ifdef SKIP_ASM
 /**
- * Selects a port and checks its card: stores @p device in mDevice and unk_010 and calls func_002C48C0 with state 3,
- * which starts a sceMcGetInfo (func_002C50E0).
+ * Selects a port and checks its card: stores @p device in mDevice and mGetInfoDevice and calls func_002C48C0 with state
+ * 3, which starts a sceMcGetInfo (func_002C50E0).
  *
  * The network-config screen (cFEStateNetConfig) and the network-account library's card callbacks (dirtysock/tagsunk)
  * call it.
@@ -4026,7 +3784,7 @@ void* func_002C67E8(void* vself, int device)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->mDevice = device;
-    self->unk_010 = device;
+    self->mGetInfoDevice = device;
     return func_002C48C0((cPS2MemCard*)self, 3);
 }
 #endif
@@ -4134,7 +3892,7 @@ extern "C" int cPS2MemCard_GetNumFiles(cPS2MemCard_GetNumFiles_sTree* self)
 INCLUDE_ASM("worldpainter/quadtree", func_002C6968);
 #ifdef SKIP_ASM
 /**
- * Starts opening a file: stores the sceMcOpen mode in unk_14E0, copies @p name into the path (mFilePath) and calls
+ * Starts opening a file: stores the sceMcOpen mode in mOpenMode, copies @p name into the path (mFilePath) and calls
  * func_002C48C0 with state 63; cPS2MemCard_Update then runs func_002C69A0 and, when the open completes, stores the
  * descriptor in mFileDescriptor.
  *
@@ -4143,7 +3901,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6968);
  */
 extern "C" void func_002C6968(cPS2MemCard* self, const char* name, int openMode)
 {
-    self->unk_14E0 = openMode;
+    self->mOpenMode = openMode;
     strcpy(self->mFilePath, name);
     func_002C48C0(self, 0x3F);
 }
@@ -4157,7 +3915,7 @@ extern int D_004A3940;
 
 /**
  * Issues the open of func_002C6968: sets mFileDescriptor to -1 and calls sceMcOpen (sceMcOpen) on mDevice with the
- * path mFilePath and the mode unk_14E0.
+ * path mFilePath and the mode mOpenMode.
  *
  * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 64.
  * cPS2MemCard_Update calls it in state 63.
@@ -4165,7 +3923,7 @@ extern int D_004A3940;
 extern "C" void func_002C69A0(cPS2MemCard* self)
 {
     self->mFileDescriptor = -1;
-    int mcResult = sceMcOpen(self->mDevice, 0, self->mFilePath, self->unk_14E0);
+    int mcResult = sceMcOpen(self->mDevice, 0, self->mFilePath, self->mOpenMode);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
         func_002C48C0(self, 1);
@@ -4213,8 +3971,8 @@ extern "C" void func_002C6A28(cPS2MemCard* self)
 INCLUDE_ASM("worldpainter/quadtree", func_002C6A60__FPvii);
 #ifdef SKIP_ASM
 /**
- * Starts a seek in the open file: stores the offset in unk_14E4 and the origin in unk_14E8 and calls func_002C48C0 with
- * state 65; cPS2MemCard_Update then runs func_002C6A88.
+ * Starts a seek in the open file: stores the offset in mSeekOffset and the origin in mSeekOrigin and calls
+ * func_002C48C0 with state 65; cPS2MemCard_Update then runs func_002C6A88.
  *
  * @param seekOffset  the offset in bytes
  * @param seekOrigin  the sceMcSeek origin
@@ -4223,8 +3981,8 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6A60__FPvii);
 void* func_002C6A60(void* vself, int seekOffset, int seekOrigin)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->unk_14E4 = seekOffset;
-    self->unk_14E8 = seekOrigin;
+    self->mSeekOffset = seekOffset;
+    self->mSeekOrigin = seekOrigin;
     return func_002C48C0((cPS2MemCard*)self, 65);
 }
 #endif
@@ -4236,15 +3994,15 @@ extern "C" int sceMcSeek(int h, int a1, int a2);
 extern int D_004A3940;
 
 /**
- * Issues the seek of func_002C6A60__FPvii: calls sceMcSeek (sceMcSeek) on mFileDescriptor with unk_14E4 and
- * unk_14E8.
+ * Issues the seek of func_002C6A60__FPvii: calls sceMcSeek (sceMcSeek) on mFileDescriptor with mSeekOffset and
+ * mSeekOrigin.
  *
  * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 66.
  * cPS2MemCard_Update calls it in state 65.
  */
 extern "C" void func_002C6A88(cPS2MemCard* self)
 {
-    int mcResult = sceMcSeek(self->mFileDescriptor, self->unk_14E4, self->unk_14E8);
+    int mcResult = sceMcSeek(self->mFileDescriptor, self->mSeekOffset, self->mSeekOrigin);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
         func_002C48C0(self, 1);
