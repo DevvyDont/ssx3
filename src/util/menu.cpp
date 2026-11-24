@@ -2310,19 +2310,19 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the on/off item
  * @return @p ret
  */
-extern "C" tRect* cBoolMenuItem_preRender(tRect* ret, char* item)
+extern "C" tRect* cBoolMenuItem_preRender(tRect* ret, cBoolMenuItem* item)
 {
-    if (*(void**)(item + 0x18) != 0 && *(void**)(item + 0x1C) != 0) {
+    if (item->OnText != 0 && item->OffText != 0) {
         tRect trueRect;
         tRect falseRect;
         tRect measured;
-        cMenuItem_textPreRender(&measured, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x18));
+        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, (void*)item->OnText);
         trueRect = measured;
-        cMenuItem_textPreRender(&measured, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x1C));
+        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, (void*)item->OffText);
         falseRect = measured;
         *ret = (trueRect.W > falseRect.W) ? trueRect : falseRect;
     } else {
-        cMenuItem_textPreRender(ret, item, 0, *(int*)(item + 0x14), 0);
+        cMenuItem_textPreRender(ret, item, 0, (int)item->Caption, 0);
     }
     return ret;
 }
@@ -2335,21 +2335,21 @@ INCLUDE_ASM("util/menu", cBoolMenuItem_render);
 void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
 
 /**
- * Draws an on/off item: caption on the left and the on (+0x18) or off (+0x1C) text on the right, chosen by the int at
- * the flag pointer (+0x20); with either text missing, just the caption, centred.
+ * Draws an on/off item: caption on the left and the OnText or OffText on the right, chosen by the int at the
+ * flag pointer Flag; with either text missing, just the caption, centred.
  *
  * Draws through cMenuItem_textRender1 (the focus-coloured row).
  *
  * @param rect  the row's rect
  */
-extern "C" void cBoolMenuItem_render(void* self, int rect)
+extern "C" void cBoolMenuItem_render(cBoolMenuItem* self, int rect)
 {
-    void* trueText = *(void**)((char*)self + 0x18);
-    void* falseText;
-    if (trueText != 0 && (falseText = *(void**)((char*)self + 0x1C)) != 0) {
-        cMenuItem_textRender1_5(self, rect, *(int*)((char*)self + 0x14), 0, **(int**)((char*)self + 0x20) ? trueText : falseText);
+    const char* trueText = self->OnText;
+    const char* falseText;
+    if (trueText != 0 && (falseText = self->OffText) != 0) {
+        cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, (void*)(*self->Flag ? trueText : falseText));
     } else {
-        cMenuItem_textRender1_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
+        cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
     }
 }
 #endif
@@ -2934,21 +2934,22 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_preRender);
 extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
 
 /**
- * Measures a command item: caption on the left with the state text (+0x18) on the right, or the caption alone, centred,
+ * Measures a command item: caption on the left with the State text on the right, or the caption alone, centred,
  * without one (cMenuItem_textPreRender).
  *
+ * @param ret  where the rect is returned (the hidden return pointer)
  * @param item  the command item
- * @return @p self, the hidden return rect
+ * @return @p ret
  */
-extern "C" void* cCommandMenuItem_preRender(cCommandMenuItem* self, void* item)
+extern "C" tRect* cCommandMenuItem_preRender(tRect* ret, cCommandMenuItem* item)
 {
-    void* rightText = *(void**)((char*)item + 0x18);
+    const char* rightText = item->State;
     if (rightText != 0) {
-        cMenuItem_textPreRender(self, item, *(int*)((char*)item + 0x14), 0, rightText);
+        cMenuItem_textPreRender(ret, item, (int)item->Caption, 0, (void*)rightText);
     } else {
-        cMenuItem_textPreRender(self, item, 0, *(int*)((char*)item + 0x14), 0);
+        cMenuItem_textPreRender(ret, item, 0, (int)item->Caption, 0);
     }
-    return ((void*)self);
+    return ret;
 }
 #endif
 
@@ -2959,18 +2960,18 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_render);
 void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
 
 /**
- * Draws a command item: caption on the left with the state text (+0x18) on the right, or the caption alone, centred,
+ * Draws a command item: caption on the left with the State text on the right, or the caption alone, centred,
  * without one (cMenuItem_textRender1).
  *
  * @param rect  the row's rect
  */
-extern "C" void cCommandMenuItem_render(void* self, int rect)
+extern "C" void cCommandMenuItem_render(cCommandMenuItem* self, int rect)
 {
-    void* rightText = *(void**)((char*)self + 0x18);
+    const char* rightText = self->State;
     if (rightText != 0) {
-        cMenuItem_textRender1_5(self, rect, *(int*)((char*)self + 0x14), 0, rightText);
+        cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, (void*)rightText);
     } else {
-        cMenuItem_textRender1_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
+        cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
     }
 }
 #endif

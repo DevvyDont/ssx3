@@ -1,6 +1,7 @@
 #include "vtable.h"
 #include "common.h"
 #include "ui/uithing.h"
+#include "ui/uimenu.h"
 #include "ui/uistate.h"
 #include "main/gamemode.h"
 #include "util/locale.h"
@@ -47,6 +48,8 @@
 #include "fe/festatenetconfig.h"
 #include "fe/messagecenter.h"
 #include "fe/festatenetmessenger.h"
+#include "fe/festatechatroom.h"
+#include "fe/festatereadmessagepopup.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -613,11 +616,11 @@ extern void* cFEStateChatRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateChatRoom_cFEStateChatRoom1(void* self)
+extern "C" void* cFEStateChatRoom_cFEStateChatRoom1(cFEStateChatRoom* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    *(int*)((char*)self + 0x6F8) = 0;
-    *(void***)((char*)self + 0x8) = cFEStateChatRoom_vtbl;
+    self->mbExiting = 0;
+    VPTR_OF(cListNode, self) = cFEStateChatRoom_vtbl;
     return self;
 }
 #endif
@@ -2381,7 +2384,7 @@ extern "C" void cFEStateMountainRoom_hidePass(cFEStateMountainRoom* self)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassVisible);
 #ifdef SKIP_ASM
 /**
- * Reports whether the mountain room's peak-pass group (the widget at +0x48) is visible.
+ * Reports whether the mountain room's peak-pass group (mpPassGroup) is visible.
  *
  * Reads the mVisible bit (bit 6) of the widget's mAttr; 0 when there is no widget. An out-of-line inline accessor with
  * no caller.
@@ -2391,12 +2394,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassVisible);
  */
 extern "C" int cFEStateMountainRoom_isPassVisible(cFEStateMountainRoom* mountainRoom) {
     int var_2;
-    void *temp_3;
+    cUIGroup* temp_3;
 
-    temp_3 = ((void*)mountainRoom->mpPassGroup);
+    temp_3 = mountainRoom->mpPassGroup;
     var_2 = 0;
     if (temp_3 != 0) {
-        var_2 = ((int) (*(int *)((char*)(temp_3) + 0x14)) >> 6) & 1;
+        var_2 = (temp_3->mAttr >> 6) & 1;
     }
     return var_2;
 }
@@ -2633,28 +2636,28 @@ extern char D_004A13A0[];
 extern char D_004A14F8[];
 
 /**
- * Sets up the multiplayer-mode popup's widgets: menu0000 becomes a wrapping two-item menu, items "0" and "1"
- * get indices 0 and 1.
+ * Sets up the multiplayer-mode popup's widgets: menu0000 becomes a wrapping two-item menu (mAttr bits 0 and 7),
+ * items "0" and "1" get mMiscData 0 and 1.
  *
  * @param item  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(cFEPopupSelectMultiplayerMode* self, void* item)
+extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(cFEPopupSelectMultiplayerMode* self, cUIThing* item)
 {
-    int itemHash = *(int*)((char*)item + 0x38);
+    int itemHash = item->mHashName;
     if (itemHash == GetHashValue32(str_menu0000)) {
-        *(int*)((char*)item + 0x14) |= 1;
+        item->mAttr |= 1;
         cUIMenu_setScrollableMenu(item, 2);
-        *(int*)((char*)item + 0x14) |= 0x80;
+        item->mAttr |= 0x80;
         return;
     }
-    int itemHash2 = *(int*)((char*)item + 0x38);
+    int itemHash2 = item->mHashName;
     if (itemHash2 == GetHashValue32(D_004A13A0)) {
-        *(int*)((char*)item + 0x18) = 0;
+        item->mMiscData = 0;
         return;
     }
-    int itemHash3 = *(int*)((char*)item + 0x38);
+    int itemHash3 = item->mHashName;
     if (itemHash3 == GetHashValue32(D_004A14F8)) {
-        *(int*)((char*)item + 0x18) = 1;
+        item->mMiscData = 1;
     }
 }
 #endif
@@ -2674,13 +2677,14 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
  * @param pWidget  the widget that sent the event
  * @param Event  the widget event
  */
-extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultiplayerMode* self, void* pWidget, int Event)
+extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultiplayerMode* self, cUIThing* pWidget,
+                                                           int Event)
 {
     switch (Event) {
     case 5: {
         cUIEngine* engine = self->mpEngine;
         self->mMultiMode = 1;
-        D_004A19D4 = *(int*)((char*)pWidget + 0x18) != 0;
+        D_004A19D4 = pWidget->mMiscData != 0;
         cUIStateStack_pop(&engine->mStateStack, 1);
         break;
     }
@@ -4269,29 +4273,29 @@ struct sAlloc_E0FF0 {
     sAlloc_E0FF0(const sAlloc_E0FF0&) {}
 };
 
-// The zeroed triple at 0x6DC looks like an STL vector; its constructor takes an
+// The zeroed triple at 0x6DC is the STL vector mMessages; its constructor takes an
 // allocator temporary, which is what leaves the unused stack slot.
-static inline void InitVec_E0FF0(void* self, const sAlloc_E0FF0& a = sAlloc_E0FF0())
+static inline void InitVec_E0FF0(cFEStateReadMessagePopup* self, const sAlloc_E0FF0& a = sAlloc_E0FF0())
 {
-    *(int*)((char*)self + 0x6DC) = 0;
-    *(int*)((char*)self + 0x6E0) = 0;
-    *(int*)((char*)self + 0x6E4) = 0;
+    self->mMessages.mpStart = 0;
+    self->mMessages.mpFinish = 0;
+    self->mMessages.mpEndOfStorage = 0;
 }
 
 /**
  * Constructs a read-message popup with no engine (the default-constructor copy).
  *
  * Runs cFEStateNet_cFEStateNet(self, 0, 0), stores cFEStateReadMessagePopup_vtbl, points mszSender at the empty
- * cBXString rep and zeroes the message vector's three words (+0x6DC..+0x6E4).
+ * cBXString rep and zeroes the message vector mMessages (mpStart, mpFinish, mpEndOfStorage).
  *
  * @return @p self
  */
-extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup1(void* self)
+extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup1(cFEStateReadMessagePopup* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
-    *(void***)((char*)self + 0x8) = cFEStateReadMessagePopup_vtbl;
-    *(int*)((char*)self + 0x6D0) = emptyStr;
+    VPTR_OF(cListNode, self) = cFEStateReadMessagePopup_vtbl;
+    self->mszSender = (char*)emptyStr;
     InitVec_E0FF0(self);
     return self;
 }
@@ -7639,8 +7643,9 @@ extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
 /**
  * Focuses the message center's menu and, when it opened by itself, shows message 37 (vtable entry 6, onGainFocus).
  *
- * In opening modes 0 and 1 (miMiscData) selects the row of message 37 (func_001E3680), focuses the menu (vtable entry 7
- * with 1) and opens the view popup for message 37 with number -1 (func_001E50C8); otherwise only focuses the menu.
+ * In opening modes 0 and 1 (miMiscData) selects the row of message 37 (func_001E3680), focuses the menu (setFocus(1),
+ * vtable entry 7) and opens the view popup for message 37 with number -1 (func_001E50C8); otherwise only focuses the
+ * menu.
  */
 extern "C" void cOVState_MESSAGECENTER_onGainFocus(cOVState_MESSAGECENTER* self)
 {
@@ -7651,14 +7656,12 @@ extern "C" void cOVState_MESSAGECENTER_onGainFocus(cOVState_MESSAGECENTER* self)
     if (state == 1) {
     reset:
         cUIMenu_setSelectedByIndex(self->mpMenu, func_001E3680(37));
-        void* menu = self->mpMenu;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)menu + 8);
-        vt[7].fn(vthis(menu, vt[7]), 1);
+        cUIMenu* menu = self->mpMenu;
+        menu->setFocus(1);
         func_001E50C8(self, 37, -1);
     } else {
-        void* menu = self->mpMenu;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)menu + 8);
-        vt[7].fn(vthis(menu, vt[7]), 1);
+        cUIMenu* menu = self->mpMenu;
+        menu->setFocus(1);
     }
 }
 #endif
@@ -7793,8 +7796,8 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" int func_001E2C80(int type, int idx, int mode);
 extern "C" int func_001E3A30(void* self);
-extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj);
-extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, void* obj);
+extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, cUIThing* obj);
+extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, cUIThing* obj);
 extern char str_kT_BTNView[];
 extern char str_kT_BTNCollapse[];
 extern char str_kT_BTNExpand[];
@@ -8006,11 +8009,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4840);
  *
  * @param obj  the widget
  */
-extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj)
+extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, cUIThing* obj)
 {
     if (obj != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 0x8);
-        vt[9].fn(vthis(obj, vt[9]), 0);
+        obj->setVisible(0);
     }
 }
 #endif
@@ -8024,11 +8026,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4878);
  *
  * @param obj  the widget
  */
-extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, void* obj)
+extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, cUIThing* obj)
 {
     if (obj != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 0x8);
-        vt[9].fn(vthis(obj, vt[9]), 1);
+        obj->setVisible(1);
     }
 }
 #endif
@@ -8318,16 +8319,16 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
                 setTint_4C78(self->aBC[slot], self->f16C, idx);
             }
         }
-        func_001E4840((cOVState_MESSAGECENTER*)self, self->a9C[slot]);
-        func_001E4878((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
+        func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->a9C[slot]);
+        func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->aBC[slot]);
     } else {
         int mask = 1 << idx;
         if (*(int*)(messageList + 0xC8) & mask) {
-            func_001E4840((cOVState_MESSAGECENTER*)self, self->a9C[slot]);
-            func_001E4840((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->a9C[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->aBC[slot]);
         } else {
-            func_001E4878((cOVState_MESSAGECENTER*)self, self->a9C[slot]);
-            func_001E4840((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
+            func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->a9C[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->aBC[slot]);
         }
     }
     if (self->a11C[slot] != 0) {
@@ -8596,17 +8597,16 @@ extern char str_MenuDummy[];
 /**
  * Shows each of the message view's widgets as it is created and binds the ones it fills.
  *
- * Every widget is shown (slot 9). "From", "Subject", "NumberLabel", "Number", "MV_KeepMessage", the square button
- * (D_004A20A8), "MV_DeleteMessage" and "MessageLine0" are stored in their members; "MenuDummy" gets bit 3 of its
- * +0x90 word.
+ * Every widget is shown (setVisible, slot 9). "From", "Subject", "NumberLabel", "Number", "MV_KeepMessage", the square
+ * button (D_004A20A8), "MV_DeleteMessage" and "MessageLine0" are stored in their members; the menu "MenuDummy" gets
+ * mAttrMenu.mDisableDirSound (bit 3 of the word at 0x90).
  *
  * @param widget  the widget being created (On Tour pWidget)
  */
-extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, void* widget)
+extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, cUIThing* widget)
 {
-    int nameHash = *(int*)((char*)widget + 0x38);
-    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
-    vt[9].fn(vthis(widget, vt[9]), 1);
+    int nameHash = widget->mHashName;
+    widget->setVisible(1);
     if (nameHash == GetHashValue32(str_From)) {
         self->mpFrom = (cUIText*)widget;
     } else if (nameHash == GetHashValue32(str_Subject)) {
@@ -8618,13 +8618,13 @@ extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, void
     } else if (nameHash == GetHashValue32(str_MV_KeepMessage)) {
         self->mpKeepMessage = (cUIText*)widget;
     } else if (nameHash == GetHashValue32(D_004A20A8)) {
-        self->mpButtonSquare = (cUIThing*)widget;
+        self->mpButtonSquare = widget;
     } else if (nameHash == GetHashValue32(str_MV_DeleteMessage)) {
-        self->mpDeleteMessage = (cUIThing*)widget;
+        self->mpDeleteMessage = widget;
     } else if (nameHash == GetHashValue32(str_MessageLine0)) {
         self->mpMessageLine0 = (cUIText*)widget;
     } else if (nameHash == GetHashValue32(str_MenuDummy)) {
-        *(int*)((char*)widget + 0x90) |= 8;
+        ((cUIMenu*)widget)->mAttrMenu.mDisableDirSound = 1;
     }
 }
 #endif
@@ -9321,12 +9321,12 @@ void cReplay_setReplayPadNum(void* self, int val);
  * @param input  the input
  * @return 0
  */
-extern "C" int cOVState_HEAT_STANDINGS_onInputBegin(cOVState_HEAT_STANDINGS* self, void* input)
+extern "C" int cOVState_HEAT_STANDINGS_onInputBegin(cOVState_HEAT_STANDINGS* self, cUIInput* input)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
+    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     if (obj != 0) {
-        if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            cReplay_setReplayPadNum(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
+        if (obj->mScrollItemCurrent == 2) {
+            cReplay_setReplayPadNum(SSXApp->Game->Replay, input->mPadNum);
         }
     }
     return 0;
@@ -9358,16 +9358,16 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the freestyle standings overlay to the overlay manager (vtable entry 19, onWidgetEvent).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18), which
- * cOVStateManager_gotoNextOverlay then acts on.
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData),
+ * which cOVStateManager_gotoNextOverlay then acts on.
  *
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_HEAT_STANDINGS_onWidgetEvent(cOVState_HEAT_STANDINGS* self, void* popup, int event)
+extern "C" void cOVState_HEAT_STANDINGS_onWidgetEvent(cOVState_HEAT_STANDINGS* self, cUIThing* popup, int event)
 {
     if (popup != 0 && event == 5) {
-        int popupId = *(int*)((char*)popup + 0x18);
+        int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;
     }
@@ -9822,9 +9822,9 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  *
  * @param menu  the widget being created
  */
-extern "C" void cOVState_FINAL_STANDINGS_onWidgetCreate(cOVState_FINAL_STANDINGS* self, void* menu)
+extern "C" void cOVState_FINAL_STANDINGS_onWidgetCreate(cOVState_FINAL_STANDINGS* self, cUIThing* menu)
 {
-    int hash = *(int*)((char*)menu + 0x38);
+    int hash = menu->mHashName;
     if (hash == GetHashValue32(str_overlayMenu)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (cBENewRaceInterface_newRace.cGamePath == 1) {
@@ -10009,9 +10009,9 @@ extern "C" void cOVStateManager_triggerOverlay(int state);
  */
 extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* self, cUIInput* input)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
+    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     if (obj != 0) {
-        if (*(unsigned char*)((char*)obj + 0x95) == 2) {
+        if (obj->mScrollItemCurrent == 2) {
             cReplay_setReplayPadNum(SSXApp->Game->Replay, input->mPadNum);
         }
     }
@@ -10050,15 +10050,15 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the final standings overlay to the overlay manager (vtable entry 19, onWidgetEvent).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18).
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
  *
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_FINAL_STANDINGS_onWidgetEvent(cOVState_FINAL_STANDINGS* self, void* popup, int event)
+extern "C" void cOVState_FINAL_STANDINGS_onWidgetEvent(cOVState_FINAL_STANDINGS* self, cUIThing* popup, int event)
 {
     if (popup != 0 && event == 5) {
-        int popupId = *(int*)((char*)popup + 0x18);
+        int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;
     }
@@ -10792,15 +10792,15 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the peak challenge results overlay to the overlay manager (vtable entry 19).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18).
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
  *
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8EA8(void* self, void* popup, int event)
+extern "C" void func_001E8EA8(void* self, cUIThing* popup, int event)
 {
     if (popup != 0 && event == 5) {
-        int popupId = *(int*)((char*)popup + 0x18);
+        int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;
     }
@@ -10883,15 +10883,16 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the multiplayer standings overlay to the overlay manager (vtable entry 19).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18).
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
  *
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_TOURNAMENT_STANDINGS_onWidgetEvent(cOVState_TOURNAMENT_STANDINGS* self, void* popup, int event)
+extern "C" void cOVState_TOURNAMENT_STANDINGS_onWidgetEvent(cOVState_TOURNAMENT_STANDINGS* self, cUIThing* popup,
+                                                            int event)
 {
     if (popup != 0 && event == 5) {
-        int popupId = *(int*)((char*)popup + 0x18);
+        int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;
     }

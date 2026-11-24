@@ -1411,7 +1411,7 @@ static inline void pop_6418()
  * Choosing the current location (outside 14-16) asks the game flow to teleport (0xF); otherwise it plays the
  * transport sequence, then loads the target location (cSectionMan load, mode 7) during it.
  */
-extern "C" void cGFUserSelectState_update(void* self)
+extern "C" void cGFUserSelectState_update(cGFUserSelectState* self)
 {
     // Retail builds `flag` as a copy of a register holding 1, then `movn flag, zero, (D != 4)`: a condition the
     //       compiler
@@ -1419,16 +1419,16 @@ extern "C" void cGFUserSelectState_update(void* self)
     //       (96.81).
     int one = 1;
     int ns;
-    switch (*(int*)((char*)self + 0x10)) {
+    switch (self->mCurrState) {
     case 0: {
         int nisListInfo = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1);
         if (!(nisListInfo == 4 || nisListInfo == 5 || nisListInfo == 0))
             return;
-        int curMode = *(int*)((char*)self + 0x14);
+        int curMode = self->mMode;
         if (curMode == 0) {
             cOVStateManager_triggerOverlay(0x1F);
             push2_6418();
-            *(int*)((char*)self + 0x8) = 0;
+            self->mOverlayDone = 0;
         } else if (curMode == 2) {
             int flag = 0;
             if (atLeast_6418(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))))
@@ -1439,52 +1439,56 @@ extern "C" void cGFUserSelectState_update(void* self)
                 cUITemplate_MAP_mMapStyle = 4;
             cOVStateManager_triggerOverlay(33);
             push2_6418();
-            *(int*)((char*)self + 0x8) = 0;
+            self->mOverlayDone = 0;
         }
         ns = 1;
         break;
     }
-    case 1:
-        if (*(int*)((char*)self + 0x8) == 0)
+    case 1: {
+        if (self->mOverlayDone == 0)
             return;
         cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 0x1E);
-        if (!isOne_6418(*(int*)((char*)self + 0x14)))
+        // Read through a plain int pointer: retail reloads the mode after pop_6418's stores (ee-gcc 2.95 lets a
+        // direct member load survive stores to scalar globals).
+        int* mode = &self->mMode;
+        if (!isOne_6418(*mode))
             pop_6418();
-        if (*(int*)((char*)self + 0x14) == 0) {
+        if (*mode == 0) {
             ns = 2;
             break;
         }
         {
             int curLocation = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
-            int destLocation = *(int*)((char*)self + 0x18);
+            int destLocation = self->mNextLocation;
             int curInBackcountry = (unsigned)(curLocation - 0xE) < 3;
             int destInBackcountry = (unsigned)(destLocation - 0xE) < 3;
             if (destLocation == curLocation && !destInBackcountry) {
-                *(int*)((char*)self + 0x10) = 3;
+                self->mCurrState = 3;
                 ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 10))->f10 = one;
                 cGame_setState(SSXApp->Game, 0xF, 0, 0);
                 return;
             }
             if (destInBackcountry && cBENewRaceInterface_newRace.cGamePath == 0)
-                *(int*)((char*)self + 0x8) = 0;
+                self->mOverlayDone = 0;
             cSSXScriptEngine_PlayTransportSequence(ScriptEngine, !destInBackcountry && !curInBackcountry, 1);
             ns = 2;
         }
         break;
+    }
     case 2:
-        if (*(int*)((char*)self + 0x14) != 0) {
+        if (self->mMode != 0) {
             int nisListInfo = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 1, 0);
             if (nisListInfo == 0xE || nisListInfo == 20) {
-                if (*(int*)((char*)self + 0x8) == 0) {
-                    if (*(int*)((char*)self + 0x1C) != 0)
+                if (self->mOverlayDone == 0) {
+                    if (self->mWaitingForOverlay != 0)
                         return;
-                    *(int*)((char*)self + 0x1C) = one;
-                    *(int*)((char*)self + 0x8) = one;
+                    self->mWaitingForOverlay = one;
+                    self->mOverlayDone = one;
                     return;
                 }
-                *(int*)((char*)self + 0x1C) = 0;
+                self->mWaitingForOverlay = 0;
                 ((cSectionMan*)(void*)SSXApp->Game->SectionMan)->mWaitTransport = one;
-                cSectionMan_load(SSXApp->Game->SectionMan, *(int*)((char*)self + 0x18), 7);
+                cSectionMan_load(SSXApp->Game->SectionMan, self->mNextLocation, 7);
                 ns = 3;
                 break;
             }
@@ -1498,7 +1502,7 @@ extern "C" void cGFUserSelectState_update(void* self)
     default:
         return;
     }
-    *(int*)((char*)self + 0x10) = ns;
+    self->mCurrState = ns;
 }
 #endif
 

@@ -181,23 +181,21 @@ extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, cUIMenu
  * Re-activates the popup's menu when the popup gets the focus back.
  *
  * Only when mpMenu exists: sets the text alpha to 1 (cScreenPopup_SetTextObjectsAlpha()), calls the menu's
- * slot 8 with 0, selects the default option with cScreenPopup_setPrivateDefaultOption(), calls the menu's
- * slot 7 with 1, then recolours the entries through its own onWidgetMenu (slot 20) with message 5.
+ * setStatic(0) (slot 8), selects the default option with cScreenPopup_setPrivateDefaultOption(), calls the menu's
+ * setFocus(1) (slot 7), then recolours the entries through its own onWidgetMenu (slot 20) with message 5.
  */
 extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
 {
     if (self->mpMenu != 0) {
         cScreenPopup_SetTextObjectsAlpha(self, 1.0f);
         {
-            char* menu = (char*)self->mpMenu;
-            sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
-            ((void (*)(void*, int))vt[8].fn)(vthis(menu, vt[8]), 0);
+            cUIMenu* menu = self->mpMenu;
+            menu->setStatic(0);
         }
         cScreenPopup_setPrivateDefaultOption(self, self->mpMenu, self->miDefaultOption, self->meType);
         {
-            char* menu = (char*)self->mpMenu;
-            sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
-            ((void (*)(void*, int))vt[7].fn)(vthis(menu, vt[7]), 1);
+            cUIMenu* menu = self->mpMenu;
+            menu->setFocus(1);
         }
         {
             self->onWidgetMenu(self->mpMenu, 5, 0);
@@ -866,12 +864,12 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
  */
 extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, cPopupInfo* pInfo)
 {
-    char* postText = (char*)self->mpPostText;
+    cUIText* postText = self->mpPostText;
     if (postText != 0) {
         if (pInfo->mtPostPending.eType != 0) {
             t3Vector textPos = *(t3Vector*)&self->mvPosTitle[0];
             textPos.y += self->mvCurSize[1];
-            *(t3Vector*)(postText + 0x44) = textPos;
+            postText->mPosition = textPos;
             cScreenPopup_getTextBoxWrapSize(self, (char*)&pInfo->mtPostPending, (char*)&self->mvCurSize, 0, 10.0f);
             if (self->mbCenterText != 0) {
                 cScreenPopup_changePivot(self, self->mpPostText, 17, 0.0f);
@@ -970,11 +968,11 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
  */
 extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, cPopupInfo* pInfo)
 {
-    char* messageText = (char*)self->mpMessageText;
+    cUIText* messageText = self->mpMessageText;
     if (messageText != 0) {
         t3Vector textPos = *(t3Vector*)&self->mvPosTitle[0];
         textPos.y += self->mvCurSize[1];
-        *(t3Vector*)(messageText + 0x44) = textPos;
+        messageText->mPosition = textPos;
         char* message = (char*)&pInfo->mtMessage;
         if (self->mbCenterText != 0) {
             t3Vector wrapSize = t3vect_Zero;
@@ -1157,8 +1155,8 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_scaleBackground);
  * Applies a scale to the background shapes of the popup's current background type.
  *
  * Type 0 (online) scales the white and red backgrounds, type 1 (blue) the small and large shapes, their
- * outlines and the shadow, type 2 (black) the black background; the vector is stored at +0x50 (the widget's
- * scale) of each existing shape.
+ * outlines and the shadow, type 2 (black) the black background; the vector is stored in the mScale of each
+ * existing shape.
  *
  * @param color  the scale vector (On Tour: t3Vector vScale), despite the parameter's type name
  */
@@ -1168,55 +1166,55 @@ extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, t3Vector* color
     switch (self->meBackgroundType) {
     case 0:
         {
-            void* background = self->mpBackGroundWhite;
+            cUIVector* background = self->mpBackGroundWhite;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         {
-            void* background = self->mpBackGroundRed;
+            cUIVector* background = self->mpBackGroundRed;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         break;
     case 1:
         {
-            void* background = self->mpBackGroundSmall;
+            cUIVector* background = self->mpBackGroundSmall;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         {
-            void* background = self->mpBackGroundSmallOutline;
+            cUIVector* background = self->mpBackGroundSmallOutline;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         {
-            void* background = self->mpBackGroundLarge;
+            cUIVector* background = self->mpBackGroundLarge;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         {
-            void* background = self->mpBackGroundLargeOutline;
+            cUIVector* background = self->mpBackGroundLargeOutline;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         {
-            void* background = self->mpBackGroundShadow;
+            cUIVector* background = self->mpBackGroundShadow;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         break;
     case 2:
         {
-            void* background = self->mpBackGroundBlack;
+            cUIVector* background = self->mpBackGroundBlack;
             if (background != 0) {
-                *(t3Vector*)((char*)background + 0x50) = scaleColor;
+                background->mScale = scaleColor;
             }
         }
         break;
@@ -1329,9 +1327,10 @@ void cScreenPopup_resizeBackground_7C20(void* self, t3Vector v, float a, float b
 /**
  * Lays the popup out centred on screen.
  *
- * Takes the horizontal offset from cScreenPopup_centerOffset plus +0x26C and the vertical one from +0x270,
- * scales (cScreenPopup_determineAndSetScaling) and places (cScreenPopup_resizeBackground) the background for the content size (+0x260), then moves
- * the title, message, option and button widgets by the same offsets.
+ * Takes the horizontal offset from cScreenPopup_centerOffset plus mvOffset.x and the vertical one from mvOffset.y,
+ * scales (cScreenPopup_determineAndSetScaling) and places (cScreenPopup_resizeBackground) the background for the
+ * content size (mvCurSize), then moves the title, message, option and button widgets (their mPosition) by the same
+ * offsets.
  */
 extern "C" void cScreenPopup_centerPopup(cScreenPopup* self)
 {
@@ -1339,19 +1338,19 @@ extern "C" void cScreenPopup_centerPopup(cScreenPopup* self)
     float y = self->mvOffset[1];
     cScreenPopup_determineAndSetScaling_7C20(self, *(t3Vector*)&self->mvCurSize[0]);
     cScreenPopup_resizeBackground_7C20(self, *(t3Vector*)&self->mvCurSize[0], self->mvOffset[0], y);
-    char* widget = (char*)self->mpMenu;
+    cUIThing* widget = self->mpMenu;
     if (widget != 0) {
-        t3Vector widgetPos = *(t3Vector*)(widget + 0x44);
+        t3Vector widgetPos = widget->mPosition;
         widgetPos.x += self->mvOffset[0];
         widgetPos.y += y;
-        *(t3Vector*)(widget + 0x44) = widgetPos;
+        widget->mPosition = widgetPos;
     }
-    widget = (char*)self->mpButtonGroup;
+    widget = self->mpButtonGroup;
     if (widget != 0) {
-        t3Vector widgetPos = *(t3Vector*)(widget + 0x44);
+        t3Vector widgetPos = widget->mPosition;
         widgetPos.x += self->mvOffset[0];
         widgetPos.y += y;
-        *(t3Vector*)(widget + 0x44) = widgetPos;
+        widget->mPosition = widgetPos;
     }
     if ((char*)self->mpMessageText != 0) {
         t3Vector widgetPos = self->mpMessageText->mPosition;
@@ -1597,7 +1596,7 @@ extern char str_String_pct_08x[];
 /**
  * Measures a popup string element as a text widget would draw it.
  *
- * Scales the widget's font by the widget's mScale (font +0x38/+0x3C = font +0x30/+0x34 times mScale.x/.y), then by @p
+ * Scales the widget's font by the widget's mScale (font Scale = BaseScale times mScale.x/.y), then by @p
  * info's eType: 1 measures the unicode string (cFont_textExtent1), 2 the ascii string (cFont_textExtent); 3 looks the id up
  * through SSXApp->FELocale's virtual slot 4 and measures that unicode string, or, when it is missing, the text "String
  * %08x" of the id (64-byte stack buffer) as ascii. Type 0 sets @p out[2] and @p out[3] (width and height) to 0.
@@ -1614,27 +1613,27 @@ extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, in
     float sy = scaledFont->BaseScale[1] * textScale.y;
     scaledFont->Scale[0] = sx;
     scaledFont->Scale[1] = sy;
-    char* measureFont;
+    cFont* measureFont;
     switch (info[0]) {
     case 1:
-        measureFont = (char*)cUIText_getFont(text);
-        cFont_textExtent1(measureFont, (const char*)info[1], out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+        measureFont = (cFont*)cUIText_getFont(text);
+        cFont_textExtent1(measureFont, (const char*)info[1], out, 0, measureFont->Scale[0], measureFont->Scale[1]);
         break;
     case 2:
-        measureFont = (char*)cUIText_getFont(text);
-        cFont_textExtent(measureFont, (const char*)info[1], out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+        measureFont = (cFont*)cUIText_getFont(text);
+        cFont_textExtent(measureFont, (const char*)info[1], out, 0, measureFont->Scale[0], measureFont->Scale[1]);
         break;
     case 3: {
         cFELocale* feLocale = SSXApp->FELocale;
         char* str = (char*)feLocale->getStringByHash(info[1]);
         if (str) {
-            measureFont = (char*)cUIText_getFont(text);
-            cFont_textExtent1(measureFont, str, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+            measureFont = (cFont*)cUIText_getFont(text);
+            cFont_textExtent1(measureFont, str, out, 0, measureFont->Scale[0], measureFont->Scale[1]);
         } else {
             char buf[0x40];
             sprintf(buf, str_String_pct_08x, info[1]);
-            measureFont = (char*)cUIText_getFont(text);
-            cFont_textExtent(measureFont, buf, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+            measureFont = (cFont*)cUIText_getFont(text);
+            cFont_textExtent(measureFont, buf, out, 0, measureFont->Scale[0], measureFont->Scale[1]);
         }
         break;
     }
@@ -1656,14 +1655,14 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
  * Measures an ascii string as a text widget would draw it, including the line height.
  *
  * Scales the widget's font by its mScale (as cScreenPopup_getStringSize does), measures @p str with cFont_textExtent into @p out,
- * and sets @p out's height (+0xC) to mScale.y times the font's line height (font +0x14, as a float) times its y scale
- * (font +0x34).
+ * and sets @p out's height (H) to mScale.y times the font's line height (MaxCharHeight, as a float) times its base y
+ * scale (BaseScale[1]).
  *
  * @param text  the text widget whose font and scale are used
  * @param str   the ascii string
  * @param out   the result rectangle (four floats)
  */
-extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, cUIText* text, const char* str, void* out)
+extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, cUIText* text, const char* str, tRect* out)
 {
     t3Vector scale = text->mScale;
     cFont* font = (cFont*)cUIText_getFont(text);
@@ -1674,7 +1673,7 @@ extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, cUIText* text, c
     font = (cFont*)cUIText_getFont(text);
     cFont_textExtent(font, str, out, 0, font->Scale[0], font->Scale[1]);
     font = (cFont*)cUIText_getFont(text);
-    *(float*)((char*)out + 0xC) = scale.y * ((float)font->MaxCharHeight * font->BaseScale[1]);
+    out->H = scale.y * ((float)font->MaxCharHeight * font->BaseScale[1]);
 }
 #endif
 
@@ -1830,12 +1829,12 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_adjustButtonPosition);
  */
 extern "C" void cScreenPopup_adjustButtonPosition(cScreenPopup* self)
 {
-    void* buttonGroup = self->mpButtonGroup;
+    cUIGroup* buttonGroup = self->mpButtonGroup;
     if (buttonGroup != 0) {
         t3Vector buttonPos = *(t3Vector*)&self->mvPosButtons[0];
         buttonPos.y += self->mvButtonOffset[1];
         buttonPos.x += self->mvButtonOffset[0];
-        *(t3Vector*)((char*)buttonGroup + 0x44) = buttonPos;
+        buttonGroup->mPosition = buttonPos;
     }
 }
 #endif
@@ -2130,7 +2129,7 @@ struct cUIText;
 extern "C" int strlen(const char* s);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, cUIText* text, const char* str, void* out);
+extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, cUIText* text, const char* str, tRect* out);
 extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 
@@ -2160,14 +2159,14 @@ extern "C" void cScreenPopup_getTextBoxSize2(cScreenPopup* self, cUIText* text, 
         char next = str[i + 1];
         if (chr == '\\' && next == '\\') {
             buf[j] = 0;
-            cScreenPopup_getStringSize1(self, text, buf, item);
+            cScreenPopup_getStringSize1(self, text, buf, (tRect*)item);
             i += 2;
             cScreenPopup_increaseBoxSize(self, size, item);
             j = 0;
             size[1] += 3.0f;
         } else if (chr == '\r') {
             buf[j] = 0;
-            cScreenPopup_getStringSize1(self, text, buf, item);
+            cScreenPopup_getStringSize1(self, text, buf, (tRect*)item);
             i += 1;
             cScreenPopup_increaseBoxSize(self, size, item);
             j = 0;
@@ -2180,7 +2179,7 @@ extern "C" void cScreenPopup_getTextBoxSize2(cScreenPopup* self, cUIText* text, 
     }
     if (j != 0) {
         buf[j] = 0;
-        cScreenPopup_getStringSize1(self, text, buf, item);
+        cScreenPopup_getStringSize1(self, text, buf, (tRect*)item);
         cScreenPopup_increaseBoxSize(self, size, item);
     }
     if (buf != 0)
@@ -2704,11 +2703,11 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getCurrentlySelected);
  */
 extern "C" int cScreenPopup_getCurrentlySelected(cScreenPopup* self)
 {
-    void* menu = self->mpMenu;
+    cUIMenu* menu = self->mpMenu;
     if (menu == 0) {
         return self->info.miDefaultOption;
     }
-    int n = *(unsigned char*)((char*)menu + 0x95);
+    int n = menu->mScrollItemCurrent;
     if (self->meType == -1) {
         return n;
     }
@@ -2739,13 +2738,13 @@ static inline void SetColour1CA180(cUIThing* obj, void* colour)
  * @return 0 or 0x101 as above; 0x101 for the other events
  */
 // Popup menu event handler: on draw (5) colours the selected entry; 0x101 = not handled.
-extern "C" int cScreenPopup_onWidgetMenu(cScreenPopup* self, char* menu, int msg)
+extern "C" int cScreenPopup_onWidgetMenu(cScreenPopup* self, cUIMenu* menu, int msg)
 {
     switch (msg) {
     case 5: {
-        int sel = *(unsigned char*)(menu + 0x95);
-        for (int i = 0; i < *(unsigned char*)(menu + 0x96); i++) {
-            cUIThing* obj = (cUIThing*)cList_getByIndex(menu + 0x74, i);
+        int sel = menu->mScrollItemCurrent;
+        for (int i = 0; i < menu->mScrollItemNum; i++) {
+            cUIThing* obj = (cUIThing*)cList_getByIndex(&menu->mList, i);
             if (obj == self->mpTextBoxPair) {
                 obj = self->mpStaticBox;
             }
@@ -3484,11 +3483,11 @@ extern char str_yes[];
  * @param item  the widget (ignored when 0)
  * @param event  the widget event; only 5 is handled
  */
-extern "C" void cUIStateBuyPopup_onWidgetEvent(cUIStateBuyPopup* self, void* item, int event)
+extern "C" void cUIStateBuyPopup_onWidgetEvent(cUIStateBuyPopup* self, cUIThing* item, int event)
 {
     if (item != 0) {
         if (event == 5) {
-            int widgetHash = *(int*)((char*)item + 0x38);
+            int widgetHash = item->mHashName;
             if (widgetHash == GetHashValue32(str_yes)) {
                 self->mbAccept = 1;
             } else {
@@ -3766,24 +3765,21 @@ static inline int IsK1CB2C8(int id, char* s)
  *
  * @param widget  the widget being created
  */
-extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget)
+extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, cUIThing* widget)
 {
-    if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_HelpGroup)) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
-        vt[9].fn(vthis(widget, vt[9]), 0);
+    if (IsK1CB2C8(widget->mHashName, str_HelpGroup)) {
+        widget->setVisible(0);
         if (isOnK1CB2C8()) {
-            sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
-            vt2[9].fn(vthis(widget, vt2[9]), 1);
+            widget->setVisible(1);
         }
         if ((int)SSXApp->Game != 0) {
-            sVEntry<void(void*, int)>* vt3 = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
-            vt3[9].fn(vthis(widget, vt3[9]), 0);
+            widget->setVisible(0);
         }
-    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_com)) {
+    } else if (IsK1CB2C8(widget->mHashName, str_back_com)) {
         self->mpBackCompact = (cUIVector*)widget;
-    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_exp)) {
+    } else if (IsK1CB2C8(widget->mHashName, str_back_exp)) {
         self->mpBackExpand = (cUIVector*)widget;
-    } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_reg)) {
+    } else if (IsK1CB2C8(widget->mHashName, str_back_reg)) {
         self->mpBackRegular = (cUIVector*)widget;
     }
 }
@@ -4924,7 +4920,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateViewable);
 #ifdef SKIP_ASM
 // cKeyboardPopup::updateViewable(bool bDropFromRight) (On Tour signature and locals).
 extern "C" char* strncpy(char* dst, const char* src, int n);
-extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj);
+extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, cUIText* obj);
 extern char str_EnterValue[];  // "EnterValue"
 extern char str_ExtendCursorLeft[];  // "ExtendCursorLeft"
 extern char str_ExtendCursorRight[];  // "ExtendCursorRight"
@@ -4981,7 +4977,8 @@ extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int bDropFro
     cUIThing_CC8D8* pCursor;
     if (strlen((self)->mszEditString) != 0) {
         float fAllowableLength;
-        void* pText = cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(str_EnterValue));
+        cUIText* pText =
+            (cUIText*)cUIScreen_getObjectByHashName(((void*)(self)->mpScreen), GetHashValue32(str_EnterValue));
         tRect_CC8D8 rectString;
         int iCutLength = (self)->miViewableEndIndex - (self)->miViewableStartIndex;
         strncpy((self)->mszViewableString, (self)->mszEditString + (self)->miViewableStartIndex, iCutLength);
@@ -5049,7 +5046,7 @@ struct sVEntry_CC30 {
     short index;
     void (*fn)(void*, void*);
 };
-extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj);
+extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, cUIText* obj);
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern char str_CharacterCursor[];
 
@@ -5064,7 +5061,7 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
 {
     t3Vector pos;
 
-    void* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     if (uiObj != 0) {
         sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
@@ -6061,9 +6058,9 @@ extern "C" void* cUIText_getFont(void* self);
  *
  * @param obj  the text object (On Tour: cUIText *pText)
  */
-extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj)
+extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, cUIText* obj)
 {
-    t3Vector objScale = *(t3Vector*)((char*)obj + 0x50);
+    t3Vector objScale = obj->mScale;
     cFont* font = (cFont*)cUIText_getFont(obj);
     float x = font->BaseScale[0] * objScale.x;
     float y = font->BaseScale[1] * objScale.y;
