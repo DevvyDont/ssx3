@@ -7091,8 +7091,6 @@ extern "C" void cReplayCache_updateControlCmd(void* cache, void* input);
 
 // One frame of pad input packed for the rider's current state (cRider_getControlState); each state has its own layout.
 // Buttons are 1 bit, analog values are 0..31 in 6 bits.
-#define PAD_127998 (*(void**)(self + 0xDF0))
-
 /**
  * Fills this frame's control command from the player's pad, packed for the rider's current control state, and records
  * it for replays.
@@ -7107,111 +7105,111 @@ extern "C" void cReplayCache_updateControlCmd(void* cache, void* input);
  * @param cmd  receives the packed command (On Tour tControlCmd)
  */
 // Reads the pad into the input record for the rider's state, and records it for replays.
-extern "C" void cPlayer_getControlCmd(char* self, tControlCmd* cmd)
+extern "C" void cPlayer_getControlCmd(cPlayer* self, tControlCmd* cmd)
 {
     MEM_fill(cmd, 0, 8);
-    switch (cRider_getControlState(*(void**)(self + 0x18))) {
+    switch (cRider_getControlState(self->mRider)) {
     case 0: {
         float k = 31.0f;
-        cmd->CruiseCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->CruiseCmd.Handplant = cInput_getState(PAD_127998, 25);
-        cmd->CruiseCmd.JumpPressed = cInput_getState(PAD_127998, 17);
-        cmd->CruiseCmd.JumpHeld = cInput_getState(PAD_127998, 18);
-        cmd->CruiseCmd.BoostPressed = cInput_getState(PAD_127998, 19);
-        cmd->CruiseCmd.BoostHeld = cInput_getState(PAD_127998, 20);
-        cmd->CruiseCmd.AttackLeft = cInput_getState(PAD_127998, 5);
-        cmd->CruiseCmd.AttackRight = cInput_getState(PAD_127998, 6);
-        cmd->CruiseCmd.CruiseTurn = (int)(cInput_getValue(PAD_127998, 0) * k);
-        cmd->CruiseCmd.CruiseCrouch = (int)(cInput_getValue(PAD_127998, 1) * k);
-        cmd->CruiseCmd.CruiseBrake = (int)(cInput_getValue(PAD_127998, 2) * k);
-        cmd->CruiseCmd.BoardPress = (int)(cInput_getValue(PAD_127998, 3) * k);
+        cmd->CruiseCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->CruiseCmd.Handplant = cInput_getState(self->Input, 25);
+        cmd->CruiseCmd.JumpPressed = cInput_getState(self->Input, 17);
+        cmd->CruiseCmd.JumpHeld = cInput_getState(self->Input, 18);
+        cmd->CruiseCmd.BoostPressed = cInput_getState(self->Input, 19);
+        cmd->CruiseCmd.BoostHeld = cInput_getState(self->Input, 20);
+        cmd->CruiseCmd.AttackLeft = cInput_getState(self->Input, 5);
+        cmd->CruiseCmd.AttackRight = cInput_getState(self->Input, 6);
+        cmd->CruiseCmd.CruiseTurn = (int)(cInput_getValue(self->Input, 0) * k);
+        cmd->CruiseCmd.CruiseCrouch = (int)(cInput_getValue(self->Input, 1) * k);
+        cmd->CruiseCmd.CruiseBrake = (int)(cInput_getValue(self->Input, 2) * k);
+        cmd->CruiseCmd.BoardPress = (int)(cInput_getValue(self->Input, 3) * k);
         break;
     }
     case 11:
-        cmd->HandplantCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->HandplantCmd.Handplant = cInput_getState(PAD_127998, 25);
-        cmd->HandplantCmd.HandplantBalance = (int)(cInput_getValue(PAD_127998, 0x18) * 31.0f);
+        cmd->HandplantCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->HandplantCmd.Handplant = cInput_getState(self->Input, 25);
+        cmd->HandplantCmd.HandplantBalance = (int)(cInput_getValue(self->Input, 0x18) * 31.0f);
         break;
     case 1: {
         float k = 31.0f;
-        cmd->BoardPressCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->BoardPressCmd.BoostPressed = cInput_getState(PAD_127998, 19);
-        cmd->BoardPressCmd.BoostHeld = cInput_getState(PAD_127998, 20);
-        cmd->BoardPressCmd.JumpPressed = cInput_getState(PAD_127998, 17);
-        cmd->BoardPressCmd.JumpHeld = cInput_getState(PAD_127998, 18);
-        cmd->BoardPressCmd.OllieHeld = cInput_getState(PAD_127998, 22);
-        cmd->BoardPressCmd.RailBalance = (int)(cInput_getValue(PAD_127998, 23) * k);
-        cmd->BoardPressCmd.CruiseTurn = (int)(cInput_getValue(PAD_127998, 0) * k);
-        cmd->BoardPressCmd.BoardPress = (int)(cInput_getValue(PAD_127998, 3) * k);
-        cmd->BoardPressCmd.BoardPivot = (int)(cInput_getValue(PAD_127998, 4) * k);
+        cmd->BoardPressCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->BoardPressCmd.BoostPressed = cInput_getState(self->Input, 19);
+        cmd->BoardPressCmd.BoostHeld = cInput_getState(self->Input, 20);
+        cmd->BoardPressCmd.JumpPressed = cInput_getState(self->Input, 17);
+        cmd->BoardPressCmd.JumpHeld = cInput_getState(self->Input, 18);
+        cmd->BoardPressCmd.OllieHeld = cInput_getState(self->Input, 22);
+        cmd->BoardPressCmd.RailBalance = (int)(cInput_getValue(self->Input, 23) * k);
+        cmd->BoardPressCmd.CruiseTurn = (int)(cInput_getValue(self->Input, 0) * k);
+        cmd->BoardPressCmd.BoardPress = (int)(cInput_getValue(self->Input, 3) * k);
+        cmd->BoardPressCmd.BoardPivot = (int)(cInput_getValue(self->Input, 4) * k);
         break;
     }
     case 6:
-        cmd->GateCmd.Anticipate = (int)(cInput_getValue(PAD_127998, 26) * 31.0f);
+        cmd->GateCmd.Anticipate = (int)(cInput_getValue(self->Input, 26) * 31.0f);
         break;
     case 7: {
         float k = 31.0f;
-        cmd->RailslideCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->RailslideCmd.JumpPressed = cInput_getState(PAD_127998, 17);
-        cmd->RailslideCmd.JumpHeld = cInput_getState(PAD_127998, 18);
-        cmd->RailslideCmd.BoostPressed = cInput_getState(PAD_127998, 19);
-        cmd->RailslideCmd.BoostHeld = cInput_getState(PAD_127998, 20);
+        cmd->RailslideCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->RailslideCmd.JumpPressed = cInput_getState(self->Input, 17);
+        cmd->RailslideCmd.JumpHeld = cInput_getState(self->Input, 18);
+        cmd->RailslideCmd.BoostPressed = cInput_getState(self->Input, 19);
+        cmd->RailslideCmd.BoostHeld = cInput_getState(self->Input, 20);
         cmd->RailslideCmd.UberGrindID = cPlayer_getUberGrindHeld((cPlayer*)self);
-        cmd->RailslideCmd.RailBalance = (int)(cInput_getValue(PAD_127998, 23) * k);
-        cmd->RailslideCmd.RailSpin = (int)(cInput_getValue(PAD_127998, 13) * k);
-        cmd->RailslideCmd.BoardPress = (int)(cInput_getValue(PAD_127998, 3) * k);
+        cmd->RailslideCmd.RailBalance = (int)(cInput_getValue(self->Input, 23) * k);
+        cmd->RailslideCmd.RailSpin = (int)(cInput_getValue(self->Input, 13) * k);
+        cmd->RailslideCmd.BoardPress = (int)(cInput_getValue(self->Input, 3) * k);
         break;
     }
     case 12:
-        cmd->UberGrindCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->UberGrindCmd.BoostPressed = cInput_getState(PAD_127998, 19);
-        cmd->UberGrindCmd.BoostHeld = cInput_getState(PAD_127998, 20);
+        cmd->UberGrindCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->UberGrindCmd.BoostPressed = cInput_getState(self->Input, 19);
+        cmd->UberGrindCmd.BoostHeld = cInput_getState(self->Input, 20);
         cmd->UberGrindCmd.UberGrindID = cPlayer_getUberGrindHeld((cPlayer*)self);
-        cmd->UberGrindCmd.RailBalance = (int)(cInput_getValue(PAD_127998, 23) * 31.0f);
+        cmd->UberGrindCmd.RailBalance = (int)(cInput_getValue(self->Input, 23) * 31.0f);
         break;
     case 2: {
         float k = 31.0f;
-        cmd->PrewindCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->PrewindCmd.JumpHeld = cInput_getState(PAD_127998, 18);
-        cmd->PrewindCmd.BoostHeld = cInput_getState(PAD_127998, 20);
-        cmd->PrewindCmd.PrewindSpin = (int)(cInput_getValue(PAD_127998, 8) * k);
-        cmd->PrewindCmd.PrewindFlip = (int)(cInput_getValue(PAD_127998, 9) * k);
-        cmd->PrewindCmd.PrewindTurn = (int)(cInput_getValue(PAD_127998, 7) * k);
-        cmd->PrewindCmd.RailBalance = (int)(cInput_getValue(PAD_127998, 23) * k);
+        cmd->PrewindCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->PrewindCmd.JumpHeld = cInput_getState(self->Input, 18);
+        cmd->PrewindCmd.BoostHeld = cInput_getState(self->Input, 20);
+        cmd->PrewindCmd.PrewindSpin = (int)(cInput_getValue(self->Input, 8) * k);
+        cmd->PrewindCmd.PrewindFlip = (int)(cInput_getValue(self->Input, 9) * k);
+        cmd->PrewindCmd.PrewindTurn = (int)(cInput_getValue(self->Input, 7) * k);
+        cmd->PrewindCmd.RailBalance = (int)(cInput_getValue(self->Input, 23) * k);
         break;
     }
     case 3: {
         float k = 31.0f;
-        cmd->BumpCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->BumpCmd.BoostPressed = cInput_getState(PAD_127998, 19);
-        cmd->BumpCmd.BoostHeld = cInput_getState(PAD_127998, 20);
-        cmd->BumpCmd.CruiseTurn = (int)(cInput_getValue(PAD_127998, 0) * k);
-        cmd->BumpCmd.RailBalance = (int)(cInput_getValue(PAD_127998, 23) * k);
+        cmd->BumpCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->BumpCmd.BoostPressed = cInput_getState(self->Input, 19);
+        cmd->BumpCmd.BoostHeld = cInput_getState(self->Input, 20);
+        cmd->BumpCmd.CruiseTurn = (int)(cInput_getValue(self->Input, 0) * k);
+        cmd->BumpCmd.RailBalance = (int)(cInput_getValue(self->Input, 23) * k);
         break;
     }
     case 4: {
         float k = 31.0f;
-        cmd->NaturalAirCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->NaturalAirCmd.Handplant = cInput_getState(PAD_127998, 25);
-        cmd->NaturalAirCmd.AttackLeft = cInput_getState(PAD_127998, 5);
-        cmd->NaturalAirCmd.AttackRight = cInput_getState(PAD_127998, 6);
+        cmd->NaturalAirCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->NaturalAirCmd.Handplant = cInput_getState(self->Input, 25);
+        cmd->NaturalAirCmd.AttackLeft = cInput_getState(self->Input, 5);
+        cmd->NaturalAirCmd.AttackRight = cInput_getState(self->Input, 6);
         cmd->NaturalAirCmd.GrabID = cPlayer_getGrabHeld((cPlayer*)self);
-        cmd->NaturalAirCmd.CruiseTurn = (int)(cInput_getValue(PAD_127998, 0) * k);
-        cmd->NaturalAirCmd.CruiseCrouch = (int)(cInput_getValue(PAD_127998, 1) * k);
+        cmd->NaturalAirCmd.CruiseTurn = (int)(cInput_getValue(self->Input, 0) * k);
+        cmd->NaturalAirCmd.CruiseCrouch = (int)(cInput_getValue(self->Input, 1) * k);
         break;
     }
     case 5: {
         float k = 31.0f;
-        cmd->SpinCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->SpinCmd.Handplant = cInput_getState(PAD_127998, 25);
-        cmd->SpinCmd.Tweak = cInput_getState(PAD_127998, 21);
-        cmd->SpinCmd.LateSpin = cInput_getState(PAD_127998, 0xC);
+        cmd->SpinCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->SpinCmd.Handplant = cInput_getState(self->Input, 25);
+        cmd->SpinCmd.Tweak = cInput_getState(self->Input, 21);
+        cmd->SpinCmd.LateSpin = cInput_getState(self->Input, 0xC);
         cmd->SpinCmd.GrabID = cPlayer_getGrabHeld((cPlayer*)self);
-        cmd->SpinCmd.SpinAdjust = (int)(cInput_getValue(PAD_127998, 0xE) * k);
-        cmd->SpinCmd.FlipAdjust = (int)(cInput_getValue(PAD_127998, 0xF) * k);
-        cmd->SpinCmd.AirAdjRotLR = (int)(cInput_getValue(PAD_127998, 11) * k);
-        cmd->SpinCmd.AirAdjRotFB = (int)(cInput_getValue(PAD_127998, 10) * k);
-        float axisValue = cInput_getValue(PAD_127998, 3);
+        cmd->SpinCmd.SpinAdjust = (int)(cInput_getValue(self->Input, 0xE) * k);
+        cmd->SpinCmd.FlipAdjust = (int)(cInput_getValue(self->Input, 0xF) * k);
+        cmd->SpinCmd.AirAdjRotLR = (int)(cInput_getValue(self->Input, 11) * k);
+        cmd->SpinCmd.AirAdjRotFB = (int)(cInput_getValue(self->Input, 10) * k);
+        float axisValue = cInput_getValue(self->Input, 3);
         int axisDir;
         if (-0.5f <= axisValue) {
             axisDir = 0.5f < axisValue;
@@ -7222,17 +7220,17 @@ extern "C" void cPlayer_getControlCmd(char* self, tControlCmd* cmd)
         break;
     }
     case 8:
-        cmd->WipeoutCmd.Reset = cInput_getState(PAD_127998, 46);
-        cmd->WipeoutCmd.Recover = cInput_getState(PAD_127998, 0x10);
+        cmd->WipeoutCmd.Reset = cInput_getState(self->Input, 46);
+        cmd->WipeoutCmd.Recover = cInput_getState(self->Input, 0x10);
         break;
     case 10:
-        cmd->FinishLineCmd.CruiseTurn = (int)(cInput_getValue(PAD_127998, 0) * 31.0f);
+        cmd->FinishLineCmd.CruiseTurn = (int)(cInput_getValue(self->Input, 0) * 31.0f);
         break;
     case 13:
         break;
     }
-    if (*(void**)(self + 0xDF8)) {
-        cReplayCache_updateControlCmd(*(void**)(self + 0xDF8), cmd);
+    if (self->ReplayCache) {
+        cReplayCache_updateControlCmd(self->ReplayCache, cmd);
     }
 }
 #endif

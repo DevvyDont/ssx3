@@ -6,6 +6,7 @@
 #include "sound/speechinstance.h"
 #include "sound/soundsys.h"
 #include "sound/bankmonitor.h"
+#include "sound/pathfinderplat.h"
 #include "sound/speechsys.h"
 #include "sound/musicsys.h"
 
@@ -1319,22 +1320,20 @@ extern "C" int cSoundSys_SetMode(cSoundSys* self, int mode)
 }
 #endif
 
-extern void* D_004D3E98[];
-
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADFB0__Fi);
 #ifdef SKIP_ASM
 /**
  * Returns the Pathfinder sound back end's player-slot pointer D_004D3E98[slot] (24 slots).
  *
- * func_002B2488 reads the slot's first word (its sound handle).
+ * func_002B2488 reads its mHandle (the stream handle).
  *
  * @param slot  the slot index
  * @return the slot pointer (0 when the slot is unused)
  */
-int func_002ADFB0(int slot)
+tPathPlayer* func_002ADFB0(int slot)
 {
-    return *(int*)((char*)(void*)D_004D3E98 + slot * 4);
+    return D_004D3E98[slot];
 }
 #endif
 
@@ -1402,7 +1401,6 @@ extern "C" int func_002AE020()
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE048);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void REAL_abortmessage();
 extern "C" void printf();
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
@@ -1414,21 +1412,6 @@ extern void (*D_004A3784)();
 extern void* (*D_004A378C)(void*, int, int);
 extern void* (*D_004A3790)(void*, int);
 extern void* (*D_004A3794)(void*);
-
-struct sBankMonSlot28_E048 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-    int f24;
-};
-// D_004D3EF8's own type is defined later in the unit; bind a same-layout view.
-extern sBankMonSlot28_E048 D_004D3EF8_E048[] __asm__("D_004D3EF8");
 
 /**
  * Starts the Pathfinder sound back end ("pathxSND"): clears its slot tables and installs its hooks and clients.
@@ -1446,10 +1429,10 @@ extern "C" void func_002AE048(void (*cb)(), int id)
 {
     for (int i = 0; i < 24; i++) {
         D_004D3E98[i] = 0;
-        D_004D3EF8_E048[i].f8 = -1;
-        D_004D3EF8_E048[i].f4 = -1;
-        D_004D3EF8_E048[i].f0 = -1;
-        D_004D3EF8_E048[i].f18 = 0;
+        D_004D3EF8[i].mPlayer = -1;
+        D_004D3EF8[i].mHandle = -1;
+        D_004D3EF8[i].mBankIndex = -1;
+        D_004D3EF8[i].unk_18 = 0;
     }
     D_004A3798 = cb;
     D_004A379C = id;
@@ -1500,15 +1483,15 @@ extern "C" void* memset(void* dst, int c, int n);
  * Words +0x0, +0x4, +0x8 and +0x5C become -1, byte +0x66 (the request count) -1 and byte +0x65 1. Called by
  * func_002AE4C0 on a newly claimed slot.
  */
-extern "C" void func_002AE138(void* self)
+extern "C" void func_002AE138(tPathPlayer* self)
 {
-    memset(self, 0, 0x70);
-    *(int*)((char*)self + 0x0) = -1;
-    *(int*)((char*)self + 0x4) = -1;
-    *(char*)((char*)self + 0x66) = -1;
-    *(int*)((char*)self + 0x5C) = -1;
-    *(int*)((char*)self + 0x8) = -1;
-    *(char*)((char*)self + 0x65) = 1;
+    memset(self, 0, sizeof(tPathPlayer));
+    self->mHandle = -1;
+    self->mPatch = -1;
+    self->mRequestCount = -1;
+    self->mCurrentRequest = -1;
+    self->mFadeTarget = -1;
+    self->mDirty = 1;
 }
 #endif
 
@@ -1520,12 +1503,12 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE188);
  *
  * func_002AE690 calls it when it closes a slot.
  *
- * @param slotMemory  the slot memory to forget
+ * @param player  the player record to forget
  */
-extern "C" void func_002AE188(void* slotMemory)
+extern "C" void func_002AE188(tPathPlayer* player)
 {
     for (int i = 0; i < 24; i++) {
-        if (D_004D3E98[i] == slotMemory) {
+        if (D_004D3E98[i] == player) {
             D_004D3E98[i] = 0;
         }
     }
@@ -1561,28 +1544,18 @@ extern "C" void* memset(void* dst, int c, int n);
  *
  * func_002AE690 calls it for each bank of a closed player slot.
  */
-extern "C" void func_002AE1F0(int* self)
+extern "C" void func_002AE1F0(tPathBank* self)
 {
-    memset(self, 0, 40);
-    self[2] = -1;
-    self[1] = -1;
-    self[0] = -1;
+    memset(self, 0, sizeof(tPathBank));
+    self->mPlayer = -1;
+    self->mHandle = -1;
+    self->mBankIndex = -1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE230);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sBankSlot_2AE230 {
-    int id;         // 0x0
-    int pad4;
-    int bank;       // 0x8
-    char pad[0x28 - 0xC];
-};
-// D_004D3EF8's own type is defined later in the unit; bind a same-layout view.
-extern sBankSlot_2AE230 D_004D3EF8_2AE230[24] __asm__("D_004D3EF8");
-
 /**
  * Finds a Pathfinder bank record (D_004D3EF8, 24 records of 0x28 bytes).
  *
@@ -1595,17 +1568,17 @@ extern sBankSlot_2AE230 D_004D3EF8_2AE230[24] __asm__("D_004D3EF8");
  */
 extern "C" int func_002AE230(int bank, int id)
 {
-    sBankSlot_2AE230* record = D_004D3EF8_2AE230;
+    tPathBank* record = D_004D3EF8;
     for (int i = 0; i < 24; i++, record++) {
         if (bank < 0) {
-            if (record->bank < 0) {
+            if (record->mPlayer < 0) {
                 // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
                 do {
                     return i;
                 } while (0);
             }
-        } else if (record->bank == bank) {
-            if (id < 0 || record->id == id)
+        } else if (record->mPlayer == bank) {
+            if (id < 0 || record->mBankIndex == id)
                 return i;
         }
     }
@@ -1629,21 +1602,6 @@ extern "C" int func_002AE290(void) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002AE298);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sBankMonSlot28v {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-    int f24;
-};
-// sBankMonSlot28 / D_004D3EF8 are defined later in the unit; bind a same-layout view.
-extern sBankMonSlot28v D_004D3EF8_v[] __asm__("D_004D3EF8");
 extern "C" int func_002AE230(int a, int b);
 
 /**
@@ -1663,11 +1621,11 @@ extern "C" int func_002AE298(int slotIndex, int bankName, int bankIndex, int ban
 {
     int i = func_002AE230(slotIndex, bankIndex);
     if (i >= 0 || (i = func_002AE230(-1, -1)) >= 0) {
-        sBankMonSlot28v* record = &D_004D3EF8_v[i];
-        record->f1C = 1;
-        record->f8 = slotIndex;
-        record->f0 = bankIndex;
-        record->f4 = bankHandle;
+        tPathBank* record = &D_004D3EF8[i];
+        record->mUsed = 1;
+        record->mPlayer = slotIndex;
+        record->mBankIndex = bankIndex;
+        record->mHandle = bankHandle;
         return bankHandle;
     }
     return -13;
@@ -1677,19 +1635,6 @@ extern "C" int func_002AE298(int slotIndex, int bankName, int bankIndex, int ban
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002AE328);
 #ifdef SKIP_ASM
-struct sBankMonSlot28 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-    int f24;
-};
-extern sBankMonSlot28 D_004D3EF8[];
 extern "C" int func_002AE230(int a, int b);
 extern "C" int SNDbankremove(int id);
 
@@ -1711,15 +1656,15 @@ extern "C" int func_002AE328(int slotIndex, int bankIndex)
     if (i < 0) {
         return -1;
     }
-    sBankMonSlot28* record = &D_004D3EF8[i];
-    if (record->f4 >= 0) {
+    tPathBank* record = &D_004D3EF8[i];
+    if (record->mHandle >= 0) {
         SNDbankremove(-1);
-        record->f14 = 0;
-        record->f4 = none;
-        record->f8 = none;
-        record->f0 = none;
-        record->f1C = 0;
-        record->f24 = none;
+        record->mMemory = 0;
+        record->mHandle = none;
+        record->mPlayer = none;
+        record->mBankIndex = none;
+        record->mUsed = 0;
+        record->mLastPlayTime = none;
     }
     return 0;
 }
@@ -1728,7 +1673,6 @@ extern "C" int func_002AE328(int slotIndex, int bankIndex)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002AE3A8);
 #ifdef SKIP_ASM
-extern sBankMonSlot28 D_004D3EF8[];
 extern "C" int func_002AE230(int a, int b);
 extern "C" int func_002AE328(int a, int b);
 
@@ -1747,10 +1691,10 @@ extern "C" int func_002AE3A8(int slotIndex)
     int best = 0x7FFFFFF;
     int bestIdx = -1;
     int i = 0;
-    sBankMonSlot28* tbl = D_004D3EF8;
+    tPathBank* tbl = D_004D3EF8;
     int id;
     while (i < 24 && (id = func_002AE230(slotIndex, i)) >= 0) {
-        int playTime = tbl[id].f24;
+        int playTime = tbl[id].mLastPlayTime;
         if (playTime >= 0 && playTime < best) {
             best = playTime;
             bestIdx = i;
@@ -1793,10 +1737,8 @@ extern "C" int func_002AE478(int n, int maxChunks)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE4C0);
 #ifdef SKIP_ASM
-struct sBankDesc_2AE4C0 { char c[24]; };
-struct sBankEnt_2AE4C0 { int f0; int f4; int f8; };
 extern "C" int func_002AE1B8(void);
-extern "C" void func_002AE138(void* self);
+extern "C" void func_002AE138(tPathPlayer* self);
 extern "C" int SNDSTRM_create(void* desc, int n, int m, void* mem, int size);
 extern "C" int SNDplaysetdef(void* desc);
 extern char str_pct_s_c[];
@@ -1820,38 +1762,38 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
  * @param size  its size in bytes
  * @return the slot index, -13 when none is free, or SNDSTRM_create's error
  */
-extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int maxChunks, char* mem, int size)
+extern "C" int func_002AE4C0(char* name, SNDPLAYOPTS* desc, int count, int maxChunks, char* mem, int size)
 {
     int slot = func_002AE1B8();
     if (slot < 0)
         return -13;
-    D_004D3E98[slot] = mem;
-    mem += 0x70;
+    D_004D3E98[slot] = (tPathPlayer*)mem;
+    mem += sizeof(tPathPlayer);
     func_002AE138(D_004D3E98[slot]);
-    char* slotData = (char*)D_004D3E98[slot];
-    *(char**)(slotData + 0x6C) = mem;
-    mem = count * 12 + mem;
-    int off = mem - slotData;
+    tPathPlayer* player = D_004D3E98[slot];
+    player->mRequests = (tPathRequest*)mem;
+    mem = count * sizeof(tPathRequest) + mem;
+    int off = mem - (char*)player;
     mem = mem + (0x10 - off % 16);
-    size -= mem - slotData;
+    size -= mem - (char*)player;
     int i;
     for (i = 0; i < count; i++)
-        (*(sBankEnt_2AE4C0**)(slotData + 0x6C))[i].f4 = -1;
+        player->mRequests[i].mHandle = -1;
     if (desc)
-        *(sBankDesc_2AE4C0*)(slotData + 0x30) = *desc;
+        player->mPlayOpts = *desc;
     else
-        SNDplaysetdef(slotData + 0x30);
-    *(char*)(slotData + 0x35) = 0;
-    sprintf(slotData + 0x1C, str_pct_s_c, 11, name);
+        SNDplaysetdef(&player->mPlayOpts);
+    player->mPlayOpts.fxlevel0 = 0;
+    sprintf(player->mName, str_pct_s_c, 11, name);
     if (maxChunks > 0)
-        *(int*)(slotData + 0x0) = SNDSTRM_create(slotData + 0x30, count, maxChunks, mem, size);
+        player->mHandle = SNDSTRM_create(&player->mPlayOpts, count, maxChunks, mem, size);
     else
-        *(char*)(slotData + 0x64) = 1;
-    if (*(int*)(slotData + 0x0) < 0 && *(signed char*)(slotData + 0x64) == 0)
-        return *(int*)(slotData + 0x0);
-    *(char*)(slotData + 0x66) = count;
-    *(int*)(slotData + 0x14) = 0x7F;
-    *(int*)(slotData + 0x10) = 0;
+        player->mIsBankPlayer = 1;
+    if (player->mHandle < 0 && player->mIsBankPlayer == 0)
+        return player->mHandle;
+    player->mRequestCount = count;
+    player->mDryLevel = 0x7F;
+    player->mFxLevel = 0;
     return slot;
 }
 #endif
@@ -1873,21 +1815,21 @@ extern "C" void SNDSTRM_destroy(int id);
  */
 extern "C" void func_002AE690(int idx)
 {
-    void* slotData = D_004D3E98[idx];
-    if (*(signed char*)((char*)slotData + 0x64) != 0) {
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player->mIsBankPlayer != 0) {
         int id = func_002AE230(idx, -1);
         while (id >= 0) {
-            sBankMonSlot28* record = &D_004D3EF8[id];
-            if (D_004A3794 != 0 && record->f14 != 0) {
-                D_004A3794((void*)record->f14);
+            tPathBank* record = &D_004D3EF8[id];
+            if (D_004A3794 != 0 && record->mMemory != 0) {
+                D_004A3794(record->mMemory);
             }
-            func_002AE1F0((int*)record);
+            func_002AE1F0(record);
             id = func_002AE230(idx, -1);
         }
     } else {
-        SNDSTRM_destroy(*(int*)slotData);
+        SNDSTRM_destroy(player->mHandle);
     }
-    func_002AE188(slotData);
+    func_002AE188(player);
 }
 #endif
 
@@ -1907,10 +1849,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE768);
 extern "C" void func_002AE768(unsigned int idx, int preloadData, int preloadSize)
 {
     if (idx < 24) {
-        void* slotData = D_004D3E98[idx];
-        if (slotData != 0 && *(signed char*)((char*)slotData + 0x64) == 0) {
-            *(int*)((char*)slotData + 0x28) = preloadData;
-            *(int*)((char*)slotData + 0x2c) = preloadSize;
+        tPathPlayer* player = D_004D3E98[idx];
+        if (player != 0 && player->mIsBankPlayer == 0) {
+            player->mPreloadData = preloadData;
+            player->mPreloadSize = preloadSize;
         }
     }
 }
@@ -1919,7 +1861,6 @@ extern "C" void func_002AE768(unsigned int idx, int preloadData, int preloadSize
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE7A8);
 #ifdef SKIP_ASM
-struct sBankEnt_2AE7A8 { int f0; int f4; int f8; };
 extern "C" int func_002AE230(int a, int b);
 // PORT: the unit defines func_002AF370 as void; its body returns __fixunssfsi's result.
 unsigned int func_002AF370_r(void) __asm__("func_002AF370");
@@ -1962,31 +1903,31 @@ extern "C" int func_002AE7A8(int idx, int holdTime, int fileName, unsigned int k
     // a function-scope local set early whose pseudo gets no callee-saved register (all nine are taken),
     // so reload re-creates the constant at each use.
     signed char dirty = 1;
-    char* slotData = (char*)D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     if (vol >= 0)
     {
-        *(signed char*)(slotData + 0x30) = vol;
+        player->mPlayOpts.vol = vol;
         func_002AF6C0(idx, vol);
     }
     int playHandle;
-    if (*(signed char*)(slotData + 0x64) != 0)
+    if (player->mIsBankPlayer != 0)
     {
         if (patchOffset <= bankHandle)
             patchOffset = 0;
         int bankRecord = func_002AE230(idx, key >> 16);
         if (bankRecord >= 0)
-            bankHandle = D_004D3EF8[bankRecord].f4;
+            bankHandle = D_004D3EF8[bankRecord].mHandle;
         if (bankHandle < 0)
             return -1;
-        *(int*)(slotData + 4) = (key & 0xFFFF) + patchOffset - 1;
+        player->mPatch = (key & 0xFFFF) + patchOffset - 1;
         SNDSYS_entercritical();
-        playHandle = SNDBANK_play(bankHandle, *(int*)(slotData + 4), slotData + 0x30);
+        playHandle = SNDBANK_play(bankHandle, player->mPatch, &player->mPlayOpts);
         SNDSYS_leavecritical();
-        D_004D3EF8[bankRecord].f24 = func_002AF370_r();
-        *(int*)(slotData + 0) = bankHandle;
-        (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f4 = playHandle;
-        (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f0 = requestLength;
-        *(signed char*)(slotData + 0x65) = dirty;
+        D_004D3EF8[bankRecord].mLastPlayTime = func_002AF370_r();
+        player->mHandle = bankHandle;
+        player->mRequests[0].mHandle = playHandle;
+        player->mRequests[0].mLength = requestLength;
+        player->mDirty = dirty;
     }
     else
     {
@@ -1994,25 +1935,25 @@ extern "C" int func_002AE7A8(int idx, int holdTime, int fileName, unsigned int k
         int j;
         if (purgeFirst)
         {
-            SNDSTRM_purge_r(*(int*)(slotData + 0));
-            for (j = *(signed char*)(slotData + 0x66) - 1; j > 0; j--)
+            SNDSTRM_purge_r(player->mHandle);
+            for (j = player->mRequestCount - 1; j > 0; j--)
             {
-                (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j - 1].f4 = -1;
-                (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j - 1].f0 = -1;
+                player->mRequests[j - 1].mHandle = -1;
+                player->mRequests[j - 1].mLength = -1;
             }
         }
-        if (*(int*)(slotData + 0x28) && fileOffset < *(unsigned int*)(slotData + 0x2C))
-            playHandle = func_003B7E10(*(int*)(slotData + 0), holdTime, *(int*)(slotData + 0x28), fileOffset);
+        if (player->mPreloadData && fileOffset < player->mPreloadSize)
+            playHandle = func_003B7E10(player->mHandle, holdTime, player->mPreloadData, fileOffset);
         else
-            playHandle = SNDSTRM_queuefile(*(int*)(slotData + 0), holdTime, fileName, fileOffset);
+            playHandle = SNDSTRM_queuefile(player->mHandle, holdTime, fileName, fileOffset);
         if (playHandle >= 0)
         {
-            for (j = *(signed char*)(slotData + 0x66) - 1; j > 0; j--)
-                (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j] = (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j - 1];
-            (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f4 = playHandle;
-            (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f0 = requestLength;
+            for (j = player->mRequestCount - 1; j > 0; j--)
+                player->mRequests[j] = player->mRequests[j - 1];
+            player->mRequests[0].mHandle = playHandle;
+            player->mRequests[0].mLength = requestLength;
         }
-        *(signed char*)(slotData + 0x65) = dirty;
+        player->mDirty = dirty;
     }
     return playHandle;
 }
@@ -2021,7 +1962,7 @@ extern "C" int func_002AE7A8(int idx, int holdTime, int fileName, unsigned int k
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE9F8);
 #ifdef SKIP_ASM
-extern "C" void SNDSTRM_modifyhold(void*);
+extern "C" void SNDSTRM_modifyhold(int requestHandle);
 
 /**
  * Releases the newest queued request of a stream player slot (SNDSTRM_modifyhold on request 0's handle).
@@ -2033,9 +1974,9 @@ extern "C" void SNDSTRM_modifyhold(void*);
  */
 extern "C" void func_002AE9F8(int i)
 {
-    void* slotData = D_004D3E98[i];
-    if (*(signed char*)((char*)slotData + 0x64) == 0) {
-        SNDSTRM_modifyhold(*(void**)((char*)*(void**)((char*)slotData + 0x6C) + 0x4));
+    tPathPlayer* player = D_004D3E98[i];
+    if (player->mIsBankPlayer == 0) {
+        SNDSTRM_modifyhold(player->mRequests[0].mHandle);
     }
 }
 #endif
@@ -2055,13 +1996,13 @@ extern "C" void func_002AEFA8(int a0);
  */
 extern "C" int func_002AEA38(int idx)
 {
-    void* slotData = D_004D3E98[idx];
-    if (slotData != 0) {
-        if (*(char*)((char*)slotData + 0x65) != 0) {
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player != 0) {
+        if (player->mDirty != 0) {
             func_002AEFA8(0);
         }
     }
-    return *(int*)((char*)D_004D3E98[idx] + 0x50);
+    return D_004D3E98[idx]->mBuffered;
 }
 #endif
 
@@ -2069,8 +2010,6 @@ extern "C" int func_002AEA38(int idx)
 INCLUDE_ASM("sound/bankmonitor", func_002AEAA8);
 #ifdef SKIP_ASM
 extern "C" void func_002AEFA8(int a0);
-
-struct sMonEntC { int f0; int f4; int f8; };
 
 /**
  * Returns a request's progress on a Pathfinder player slot, refreshing the slots' status first when it is dirty.
@@ -2084,16 +2023,16 @@ struct sMonEntC { int f0; int f4; int f8; };
  */
 extern "C" int func_002AEAA8(int idx, int sub)
 {
-    void* slotData = D_004D3E98[idx];
-    if (slotData != 0 && *(signed char*)((char*)slotData + 0x65) != 0) {
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player != 0 && player->mDirty != 0) {
         func_002AEFA8(0);
     }
     if (sub < 0) {
-        return *(int*)((char*)slotData + 0x54);
+        return player->mPositionTotal;
     }
-    if (sub < *(signed char*)((char*)slotData + 0x66)) {
-        if ((*(sMonEntC**)((char*)slotData + 0x6C))[sub].f4 >= 0) {
-            return (*(sMonEntC**)((char*)slotData + 0x6C))[sub].f8;
+    if (sub < player->mRequestCount) {
+        if (player->mRequests[sub].mHandle >= 0) {
+            return player->mRequests[sub].mPosition;
         }
         return -8;
     }
@@ -2105,8 +2044,6 @@ extern "C" int func_002AEAA8(int idx, int sub)
 INCLUDE_ASM("sound/bankmonitor", func_002AEB40);
 #ifdef SKIP_ASM
 extern "C" void func_002AEFA8(int a0);
-
-struct sEntryEB40 { int pad0; int key; int value; };
 
 /**
  * Returns the position of the request with the given handle on a Pathfinder player slot (-8 when not queued).
@@ -2120,14 +2057,14 @@ struct sEntryEB40 { int pad0; int key; int value; };
  */
 extern "C" int func_002AEB40(int idx, int key)
 {
-    void* ch = D_004D3E98[idx];
-    if (ch != 0 && *(char*)((char*)ch + 0x65) != 0) {
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player != 0 && player->mDirty != 0) {
         func_002AEFA8(0);
     }
-    for (int i = 0; i < *(signed char*)((char*)ch + 0x66); i++) {
-        sEntryEB40* request = &(*(sEntryEB40**)((char*)ch + 0x6C))[i];
-        if (request->key == key) {
-            return request->value;
+    for (int i = 0; i < player->mRequestCount; i++) {
+        tPathRequest* request = &player->mRequests[i];
+        if (request->mHandle == key) {
+            return request->mPosition;
         }
     }
     return -8;
@@ -2150,10 +2087,10 @@ extern "C" void func_002AEFA8(int a0);
 extern "C" int func_002AEBD0(int idx)
 {
     if (D_004D3E98[idx] != 0) {
-        if (*(signed char*)((char*)D_004D3E98[idx] + 0x65) != 0) {
+        if (D_004D3E98[idx]->mDirty != 0) {
             func_002AEFA8(0);
         }
-        return *(int*)((char*)D_004D3E98[idx] + 0x58);
+        return D_004D3E98[idx]->mBusy;
     }
     return -8;
 }
@@ -2172,11 +2109,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002AEC28);
  */
 extern "C" int func_002AEC28(int idx)
 {
-    void* slotData = D_004D3E98[idx];
-    if (slotData == 0) {
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player == 0) {
         return -8;
     }
-    *(char*)((char*)slotData + 0x65) = 1;
+    player->mDirty = 1;
     return 1;
 }
 #endif
@@ -2184,7 +2121,6 @@ extern "C" int func_002AEC28(int idx)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AEC58);
 #ifdef SKIP_ASM
-extern void* D_004D3E98[];
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
@@ -2194,32 +2130,6 @@ extern "C" int SNDSTRM_status(int h, void* out);
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
 extern "C" void SNDSTRM_requeststatus(int h, int v);
 extern "C" int func_003B7F18(int h);
-
-struct sMonSub_EC58 {
-    int size;   // 0x0
-    int id;     // 0x4
-    int pos;    // 0x8
-};
-
-struct sMonSlot_EC58 {
-    int h;              // 0x0
-    int sub;            // 0x4
-    char pad08[0x4];
-    int status;         // 0xC
-    char pad10[0x38];
-    int f48;            // 0x48
-    int f4C;            // 0x4C
-    int f50;            // 0x50
-    int f54;            // 0x54
-    int busy;           // 0x58
-    int f5C;            // 0x5C
-    int f60;            // 0x60
-    signed char isMem;  // 0x64
-    signed char dirty;  // 0x65
-    signed char count;  // 0x66
-    char pad67[0x5];
-    sMonSub_EC58* subs; // 0x6C
-};
 
 struct sStrmInfo_EC58 {
     int count;
@@ -2263,61 +2173,61 @@ struct sStrmHdr_EC58 {
 // PORT: the end of this function stores the out-pointers themselves into the slot (as in the original)
 extern "C" int func_002AEC58(int idx, int* outA, int* outB)
 {
-    sMonSlot_EC58* slotData = (sMonSlot_EC58*)D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     *outA = 0;
     *outB = 0;
-    if (slotData == 0) {
+    if (player == 0) {
         return -1;
     }
     int statusResult = -8;
-    slotData->busy = 1;
-    if (slotData->h < 0) {
+    player->mBusy = 1;
+    if (player->mHandle < 0) {
         return -2;
     }
-    slotData->dirty = 1;
+    player->mDirty = 1;
     SNDSYS_entercritical();
     sStrmInfo_EC58 info;
     sStrmState_EC58 st;
     sStrmHdr_EC58 hdr;
     char buf[0x70];
     sStrmPos_EC58 pos;
-    if (slotData->isMem != 0) {
-        if (slotData->sub >= 0 && slotData->subs->id >= 0) {
-            statusResult = func_003B6670(slotData->h, slotData->sub, &hdr, buf, &pos.samples);
+    if (player->mIsBankPlayer != 0) {
+        if (player->mPatch >= 0 && player->mRequests->mHandle >= 0) {
+            statusResult = func_003B6670(player->mHandle, player->mPatch, &hdr, buf, &pos.samples);
             if (statusResult >= 0) {
-                *outB = SNDtimeremaining(slotData->subs->id);
+                *outB = SNDtimeremaining(player->mRequests->mHandle);
                 if (*outB < 0) {
                     *outB = 0;
-                    slotData->subs->id = -1;
+                    player->mRequests->mHandle = -1;
                     goto done;
                 }
                 *outB *= 10;
                 *outA = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - *outB;
             }
-            slotData->subs->pos = *outB;
-            slotData->f50 = slotData->subs->size;
-            slotData->status = func_003B86C0(slotData->subs->id);
-            slotData->f5C = slotData->subs->id;
+            player->mRequests->mPosition = *outB;
+            player->mBuffered = player->mRequests->mLength;
+            player->mVolume = func_003B86C0(player->mRequests->mHandle);
+            player->mCurrentRequest = player->mRequests->mHandle;
         }
     } else {
-        statusResult = SNDSTRM_status(slotData->h, &info);
-        slotData->f50 = 0;
-        if (info.count >= slotData->count) {
-            slotData->busy = 0;
+        statusResult = SNDSTRM_status(player->mHandle, &info);
+        player->mBuffered = 0;
+        if (info.count >= player->mRequestCount) {
+            player->mBusy = 0;
         }
-        for (int j = 0; j < slotData->count; j++) {
-            slotData->subs[j].pos = 0;
-            if (slotData->subs[j].id < 0) {
+        for (int j = 0; j < player->mRequestCount; j++) {
+            player->mRequests[j].mPosition = 0;
+            if (player->mRequests[j].mHandle < 0) {
                 continue;
             }
-            SNDSTRM_requeststatus(slotData->subs[j].id, (int)&st);
+            SNDSTRM_requeststatus(player->mRequests[j].mHandle, (int)&st);
             switch (st.state) {
             case 1:
-                slotData->subs[j].pos = slotData->subs[j].size;
-                slotData->f54 += slotData->subs[j].size;
-                slotData->f50 += st.c;
-                slotData->busy = 0;
-                slotData->f5C = slotData->subs[j].id;
+                player->mRequests[j].mPosition = player->mRequests[j].mLength;
+                player->mPositionTotal += player->mRequests[j].mLength;
+                player->mBuffered += st.c;
+                player->mBusy = 0;
+                player->mCurrentRequest = player->mRequests[j].mHandle;
                 break;
             case 0:
             case 2:
@@ -2325,28 +2235,28 @@ extern "C" int func_002AEC58(int idx, int* outA, int* outB)
                 *outB = st.b;
                 if (outA == 0 && outB == 0) {
                     *outA = 0;
-                    *outB = slotData->subs[j].size;
+                    *outB = player->mRequests[j].mLength;
                 }
-                slotData->subs[j].pos = *outB;
-                slotData->f54 += *outB;
-                slotData->f50 += st.c;
+                player->mRequests[j].mPosition = *outB;
+                player->mPositionTotal += *outB;
+                player->mBuffered += st.c;
                 if (st.c < st.b) {
-                    slotData->busy = 0;
+                    player->mBusy = 0;
                 }
-                slotData->f5C = slotData->subs[j].id;
+                player->mCurrentRequest = player->mRequests[j].mHandle;
                 break;
             default:
-                slotData->subs[j].id = -1;
+                player->mRequests[j].mHandle = -1;
                 break;
             }
         }
-        slotData->status = func_003B7F18(slotData->h);
+        player->mVolume = func_003B7F18(player->mHandle);
     }
 done:
-    slotData->f48 = (int)outA;
-    slotData->f4C = (int)outB;
-    slotData->f60 = statusResult;
-    slotData->dirty = 0;
+    player->mElapsedMs = (int)outA;
+    player->mRemainingMs = (int)outB;
+    player->mStatus = statusResult;
+    player->mDirty = 0;
     SNDSYS_leavecritical();
     return 0;
 }
@@ -2355,7 +2265,6 @@ done:
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AEFA8);
 #ifdef SKIP_ASM
-extern void* D_004D3E98[];
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
@@ -2365,32 +2274,6 @@ extern "C" int SNDSTRM_status(int h, void* out);
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
 extern "C" void SNDSTRM_requeststatus(int h, int v);
 extern "C" int func_003B7F18(int h);
-
-struct sMonSub_EFA8 {
-    int size;   // 0x0
-    int id;     // 0x4
-    int pos;    // 0x8
-};
-
-struct sMonSlot_EFA8 {
-    int h;              // 0x0
-    int sub;            // 0x4
-    char pad08[0x4];
-    int status;         // 0xC
-    char pad10[0x38];
-    int f48;            // 0x48
-    int f4C;            // 0x4C
-    int f50;            // 0x50
-    int f54;            // 0x54
-    int busy;           // 0x58
-    int f5C;            // 0x5C
-    int f60;            // 0x60
-    signed char isMem;  // 0x64
-    signed char dirty;  // 0x65
-    signed char count;  // 0x66
-    char pad67[0x5];
-    sMonSub_EFA8* subs; // 0x6C
-};
 
 struct sStrmInfo_EFA8 {
     int count;
@@ -2433,92 +2316,92 @@ extern "C" void func_002AEFA8(int reset)
 {
     SNDSYS_entercritical();
     for (int i = 0; i < 24; i++) {
-        sMonSlot_EFA8* slotData = (sMonSlot_EFA8*)D_004D3E98[i];
-        if (slotData == 0) {
+        tPathPlayer* player = D_004D3E98[i];
+        if (player == 0) {
             continue;
         }
         if (reset != 0) {
-            slotData->f60 = 0;
-            slotData->dirty = 1;
+            player->mStatus = 0;
+            player->mDirty = 1;
             continue;
         }
-        int f60 = -8;
+        int statusResult = -8;
         int elapsedMs = 0;
-        int f4C = 0;
-        slotData->busy = 1;
-        if (slotData->h >= 0) {
+        int remainingMs = 0;
+        player->mBusy = 1;
+        if (player->mHandle >= 0) {
             sStrmInfo_EFA8 info;
             sStrmState_EFA8 st;
             sStrmHdr_EFA8 hdr;
             char buf[0x70];
             sStrmPos_EFA8 pos;
-            if (slotData->isMem != 0) {
-                if (slotData->sub >= 0 && slotData->subs->id >= 0) {
-                    f60 = func_003B6670(slotData->h, slotData->sub, &hdr, buf, &pos.samples);
-                    if (f60 >= 0) {
-                        f4C = SNDtimeremaining(slotData->subs->id);
-                        if (f4C < 0) {
-                            f4C = 0;
-                            slotData->subs->id = -1;
+            if (player->mIsBankPlayer != 0) {
+                if (player->mPatch >= 0 && player->mRequests->mHandle >= 0) {
+                    statusResult = func_003B6670(player->mHandle, player->mPatch, &hdr, buf, &pos.samples);
+                    if (statusResult >= 0) {
+                        remainingMs = SNDtimeremaining(player->mRequests->mHandle);
+                        if (remainingMs < 0) {
+                            remainingMs = 0;
+                            player->mRequests->mHandle = -1;
                             goto done;
                         }
-                        f4C *= 10;
-                        elapsedMs = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - f4C;
+                        remainingMs *= 10;
+                        elapsedMs = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - remainingMs;
                     }
-                    slotData->subs->pos = f4C;
-                    slotData->f50 = slotData->subs->size;
-                    slotData->status = func_003B86C0(slotData->subs->id);
-                    slotData->f5C = slotData->subs->id;
+                    player->mRequests->mPosition = remainingMs;
+                    player->mBuffered = player->mRequests->mLength;
+                    player->mVolume = func_003B86C0(player->mRequests->mHandle);
+                    player->mCurrentRequest = player->mRequests->mHandle;
                 }
             } else {
-                f60 = SNDSTRM_status(slotData->h, &info);
-                slotData->f50 = 0;
-                if (info.count >= slotData->count) {
-                    slotData->busy = 0;
+                statusResult = SNDSTRM_status(player->mHandle, &info);
+                player->mBuffered = 0;
+                if (info.count >= player->mRequestCount) {
+                    player->mBusy = 0;
                 }
-                for (int j = 0; j < slotData->count; j++) {
-                    slotData->subs[j].pos = 0;
-                    if (slotData->subs[j].id < 0) {
+                for (int j = 0; j < player->mRequestCount; j++) {
+                    player->mRequests[j].mPosition = 0;
+                    if (player->mRequests[j].mHandle < 0) {
                         continue;
                     }
-                    SNDSTRM_requeststatus(slotData->subs[j].id, (int)&st);
+                    SNDSTRM_requeststatus(player->mRequests[j].mHandle, (int)&st);
                     switch (st.state) {
                     case 1:
-                        slotData->subs[j].pos = slotData->subs[j].size;
-                        slotData->f54 += slotData->subs[j].size;
-                        slotData->f50 += st.c;
-                        slotData->busy = 0;
-                        slotData->f5C = slotData->subs[j].id;
+                        player->mRequests[j].mPosition = player->mRequests[j].mLength;
+                        player->mPositionTotal += player->mRequests[j].mLength;
+                        player->mBuffered += st.c;
+                        player->mBusy = 0;
+                        player->mCurrentRequest = player->mRequests[j].mHandle;
                         break;
                     case 0:
                     case 2:
                         elapsedMs = st.a;
-                        f4C = st.b;
-                        if (elapsedMs == 0 && f4C == 0) {
-                            elapsedMs = f4C;
-                            f4C = slotData->subs[j].size;
+                        remainingMs = st.b;
+                        if (elapsedMs == 0 && remainingMs == 0) {
+                            elapsedMs = remainingMs;
+                            remainingMs = player->mRequests[j].mLength;
                         }
-                        slotData->subs[j].pos = f4C;
-                        slotData->f54 += f4C;
-                        slotData->f50 += st.c;
+                        player->mRequests[j].mPosition = remainingMs;
+                        player->mPositionTotal += remainingMs;
+                        player->mBuffered += st.c;
                         if (st.c < st.b) {
-                            slotData->busy = 0;
+                            player->mBusy = 0;
                         }
-                        slotData->f5C = slotData->subs[j].id;
+                        player->mCurrentRequest = player->mRequests[j].mHandle;
                         break;
                     default:
-                        slotData->subs[j].id = -1;
+                        player->mRequests[j].mHandle = -1;
                         break;
                     }
                 }
-                slotData->status = func_003B7F18(slotData->h);
+                player->mVolume = func_003B7F18(player->mHandle);
             }
         }
     done:
-        slotData->f48 = elapsedMs;
-        slotData->f4C = f4C;
-        slotData->f60 = f60;
-        slotData->dirty = 0;
+        player->mElapsedMs = elapsedMs;
+        player->mRemainingMs = remainingMs;
+        player->mStatus = statusResult;
+        player->mDirty = 0;
     }
     SNDSYS_leavecritical();
 }
@@ -2541,19 +2424,19 @@ extern "C" void func_002AEFA8(int a0);
  */
 extern "C" int func_002AF2F0(int idx, int* elapsedOut, int* remainingOut)
 {
-    void* slotData = D_004D3E98[idx];
-    if (slotData == 0) {
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player == 0) {
         return -8;
     }
-    if (*(signed char*)((char*)slotData + 0x65) != 0) {
+    if (player->mDirty != 0) {
         func_002AEFA8(0);
     }
-    *elapsedOut = *(int*)((char*)slotData + 0x48);
-    *remainingOut = *(int*)((char*)slotData + 0x4C);
-    if (*(int*)((char*)slotData + 0x60) != 0) {
-        return *(int*)((char*)slotData + 0x60);
+    *elapsedOut = player->mElapsedMs;
+    *remainingOut = player->mRemainingMs;
+    if (player->mStatus != 0) {
+        return player->mStatus;
     }
-    return *(int*)((char*)slotData + 0x5C);
+    return player->mCurrentRequest;
 }
 #endif
 
@@ -2586,11 +2469,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF3B8);
  * @return the handle, or -1
  */
 extern "C" int func_002AF3B8(int slotIndex) {
-    void *temp_4;
-
-    temp_4 = D_004D3E98[slotIndex];
-    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + 0x64)) != 0)) {
-        return (*(int *)((char*)(temp_4) + 0));
+    tPathPlayer* player = D_004D3E98[slotIndex];
+    if (player != 0 && player->mIsBankPlayer != 0) {
+        return player->mHandle;
     }
     return -1;
 }
@@ -2605,11 +2486,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF3F0);
  * @return the handle, or -1
  */
 extern "C" int func_002AF3F0(int slotIndex) {
-    void *temp_4;
-
-    temp_4 = D_004D3E98[slotIndex];
-    if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + 0x64)) == 0)) {
-        return (*(int *)((char*)(temp_4) + 0));
+    tPathPlayer* player = D_004D3E98[slotIndex];
+    if (player != 0 && player->mIsBankPlayer == 0) {
+        return player->mHandle;
     }
     return -1;
 }
@@ -2631,10 +2510,10 @@ extern "C" void func_002AEFA8(int a0);
 extern "C" int func_002AF428(int idx)
 {
     if (D_004D3E98[idx] != 0) {
-        if (*(signed char*)((char*)D_004D3E98[idx] + 0x65) != 0) {
+        if (D_004D3E98[idx]->mDirty != 0) {
             func_002AEFA8(0);
         }
-        return *(int*)((char*)D_004D3E98[idx] + 0xC);
+        return D_004D3E98[idx]->mVolume;
     }
     return -8;
 }
@@ -2651,9 +2530,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF480);
  */
 extern "C" int func_002AF480(int idx)
 {
-    void* slotData = D_004D3E98[idx];
-    if (slotData != 0) {
-        return *(int*)((char*)slotData + 0x14);
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player != 0) {
+        return player->mDryLevel;
     }
     return -8;
 }
@@ -2670,9 +2549,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF4B0);
  */
 extern "C" int func_002AF4B0(int idx)
 {
-    void* slotData = D_004D3E98[idx];
-    if (slotData != 0) {
-        return *(int*)((char*)slotData + 0x10);
+    tPathPlayer* player = D_004D3E98[idx];
+    if (player != 0) {
+        return player->mFxLevel;
     }
     return -8;
 }
@@ -2683,8 +2562,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF4E0);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" int func_003B8050(void* h, int a, int b);
-extern "C" int func_003B88C8(void* h, int a, int b);
+extern "C" int func_003B8050(int h, int a, int b);
+extern "C" int func_003B88C8(int h, int a, int b);
 
 /**
  * Sets a Pathfinder player slot's effect send level: func_003B88C8 for a bank player, func_003B8050 for a stream.
@@ -2699,17 +2578,17 @@ extern "C" int func_003B88C8(void* h, int a, int b);
  */
 extern "C" int func_002AF4E0(int idx, int effectBus, int sendLevel)
 {
-    void* slotData = D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     int result = -8;
-    if (slotData != 0) {
+    if (player != 0) {
         SNDSYS_entercritical();
-        if (*(signed char*)((char*)slotData + 0x64) != 0) {
-            result = func_003B88C8(*(void**)slotData, effectBus, sendLevel);
+        if (player->mIsBankPlayer != 0) {
+            result = func_003B88C8(player->mHandle, effectBus, sendLevel);
         } else {
-            result = func_003B8050(*(void**)slotData, effectBus, sendLevel);
+            result = func_003B8050(player->mHandle, effectBus, sendLevel);
         }
         SNDSYS_leavecritical();
-        *(int*)((char*)slotData + 0x10) = sendLevel;
+        player->mFxLevel = sendLevel;
     }
     return result;
 }
@@ -2720,8 +2599,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF580);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" int func_003B8010(void* h, int a);
-extern "C" int func_003B8700(void* h, int a);
+extern "C" int func_003B8010(int h, int a);
+extern "C" int func_003B8700(int h, int a);
 
 /**
  * Sets a Pathfinder player slot's dry level: func_003B8700 for a bank player, func_003B8010 for a stream.
@@ -2735,17 +2614,17 @@ extern "C" int func_003B8700(void* h, int a);
  */
 extern "C" int func_002AF580(int idx, int dryLevel)
 {
-    void* slotData = D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     int result = -8;
-    if (slotData != 0) {
+    if (player != 0) {
         SNDSYS_entercritical();
-        if (*(signed char*)((char*)slotData + 0x64) != 0) {
-            result = func_003B8700(*(void**)slotData, dryLevel);
+        if (player->mIsBankPlayer != 0) {
+            result = func_003B8700(player->mHandle, dryLevel);
         } else {
-            result = func_003B8010(*(void**)slotData, dryLevel);
+            result = func_003B8010(player->mHandle, dryLevel);
         }
         SNDSYS_leavecritical();
-        *(int*)((char*)slotData + 0x14) = dryLevel;
+        player->mDryLevel = dryLevel;
     }
     return result;
 }
@@ -2775,15 +2654,15 @@ int func_003B7EB0_r(int h, int v, int c) __asm__("func_003B7EB0");
  */
 extern "C" int func_002AF608(int idx, int targetVolume, int fadeMs, char busy)
 {
-    void* slotData = D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     int driverResult = 0;
     if (busy == 0) {
         SNDSYS_entercritical();
-        *(int*)((char*)slotData + 0x8) = targetVolume;
-        if (*(signed char*)((char*)slotData + 0x64) != 0) {
-            driverResult = SNDautovol(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 0x4), fadeMs / 10, targetVolume);
+        player->mFadeTarget = targetVolume;
+        if (player->mIsBankPlayer != 0) {
+            driverResult = SNDautovol(player->mRequests[0].mHandle, fadeMs / 10, targetVolume);
         } else {
-            driverResult = func_003B7EB0_r(*(int*)slotData, fadeMs, targetVolume);
+            driverResult = func_003B7EB0_r(player->mHandle, fadeMs, targetVolume);
         }
         SNDSYS_leavecritical();
     }
@@ -2815,24 +2694,24 @@ extern "C" void func_003B7E70(int h, int v);
  */
 extern "C" int func_002AF6C0(int idx, int volume)
 {
-    void* slotData = D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     int result = 0;
     if (cAudioInterface_bxAudio()->mPathfinderCanChangeVolume == 0) return 0;
-    if (*(signed char*)((char*)slotData + 0x65) != 0) {
+    if (player->mDirty != 0) {
         func_002AEFA8(0);
     }
-    int cur = *(int*)((char*)slotData + 0xC);
-    if (*(int*)((char*)slotData + 0x8) < 0 || *(int*)((char*)slotData + 0x8) == cur) {
-        *(int*)((char*)slotData + 0x8) = -1;
+    int cur = player->mVolume;
+    if (player->mFadeTarget < 0 || player->mFadeTarget == cur) {
+        player->mFadeTarget = -1;
         if (cur != volume && volume >= 0 && cur >= 0) {
             SNDSYS_entercritical();
-            if (*(signed char*)((char*)slotData + 0x64) != 0) {
-                SNDvol(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 0x4), volume);
+            if (player->mIsBankPlayer != 0) {
+                SNDvol(player->mRequests[0].mHandle, volume);
             } else {
-                func_003B7E70(*(int*)slotData, volume);
+                func_003B7E70(player->mHandle, volume);
             }
             SNDSYS_leavecritical();
-            *(int*)((char*)slotData + 0xC) = volume;
+            player->mVolume = volume;
         }
     } else {
         result = -8;
@@ -2862,22 +2741,22 @@ extern "C" void SNDpitchmult(int h, int v);
  */
 extern "C" int func_002AF7A0(int idx, int reset)
 {
-    void* slotData = D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     unsigned short pitchMult;
     if (reset != 0) {
         pitchMult = 0;
-        *(int*)((char*)slotData + 0x18) = *(unsigned short*)((char*)slotData + 0x3C);
+        player->mSavedPitchMult = player->mPlayOpts.pitchmult;
     } else {
-        pitchMult = *(int*)((char*)slotData + 0x18);
+        pitchMult = player->mSavedPitchMult;
     }
     SNDSYS_entercritical();
-    if (*(signed char*)((char*)slotData + 0x64) != 0) {
-        SNDpitchmult(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 4), pitchMult);
+    if (player->mIsBankPlayer != 0) {
+        SNDpitchmult(player->mRequests[0].mHandle, pitchMult);
     } else {
-        SNDSTRM_pitchmult(*(int*)slotData, pitchMult);
+        SNDSTRM_pitchmult(player->mHandle, pitchMult);
     }
     SNDSYS_leavecritical();
-    *(char*)((char*)slotData + 0x65) = 1;
+    player->mDirty = 1;
     return 0;
 }
 #endif
@@ -2901,15 +2780,15 @@ extern "C" void SNDstop(int);
  */
 extern "C" int func_002AF838(int idx)
 {
-    void* slotData = D_004D3E98[idx];
+    tPathPlayer* player = D_004D3E98[idx];
     SNDSYS_entercritical();
-    if (*(signed char*)((char*)slotData + 0x64) != 0) {
-        SNDstop(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 0x4));
+    if (player->mIsBankPlayer != 0) {
+        SNDstop(player->mRequests[0].mHandle);
     } else {
-        SNDSTRM_purge(*(int*)((char*)slotData + 0x0));
+        SNDSTRM_purge(player->mHandle);
     }
     SNDSYS_leavecritical();
-    *(char*)((char*)slotData + 0x65) = 1;
+    player->mDirty = 1;
     return 0;
 }
 #endif
@@ -5280,8 +5159,7 @@ extern "C" int func_002B2488(cSongInstance* self)
     if (idx < 0) {
         return -1;
     }
-    // PORT: func_002ADFB0 returns a pointer held in int
-    return *(int*)func_002ADFB0(idx);
+    return func_002ADFB0(idx)->mHandle;
 }
 #endif
 

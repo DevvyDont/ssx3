@@ -12526,7 +12526,7 @@ INCLUDE_ASM("render/particle", func_00389160);
  * Fills @p dst with ten vectors built from 30 floats taken three at a time: vector i = (f[3i], f[3i + 1], f[3i + 2], 0)
  * and returns @p dst.
  *
- * The floats arrive in fparg0-7 and then on the stack (arg_sp0 to arg_spA8); the w words are stored as integer 0.
+ * The floats arrive in fparg0-7 and then on the stack (arg_sp0 to arg_spA8); the w words are stored as 0 (sw $zero).
  * Nothing in the retail code references it.
  *
  * @param dst  the ten 16-byte vectors to fill
@@ -12562,47 +12562,47 @@ INCLUDE_ASM("render/particle", func_00389160);
  * @param arg_spA8  z of vector 9
  * @return @p dst
  */
-extern "C" void *func_00389160(void *dst, float fparg0, float fparg1, float fparg2, float fparg3, float fparg4, float fparg5, float fparg6, float fparg7, float arg_sp0, float arg_sp8, float arg_sp10, float arg_sp18, float arg_sp20, float arg_sp28, float arg_sp30, float arg_sp38, float arg_sp40, float arg_sp48, float arg_sp50, float arg_sp58, float arg_sp60, float arg_sp68, float arg_sp70, float arg_sp78, float arg_sp80, float arg_sp88, float arg_sp90, float arg_sp98, float arg_spA0, float arg_spA8) {
-    (*(float *)((char*)(dst) + 0x10)) = fparg3;
-    (*(float *)((char*)(dst) + 0x20)) = fparg6;
-    (*(float *)((char*)(dst) + 0x30)) = arg_sp8;
-    (*(float *)((char*)(dst) + 0x40)) = arg_sp20;
-    (*(float *)((char*)(dst) + 0x50)) = arg_sp38;
-    (*(float *)((char*)(dst) + 0x60)) = arg_sp50;
-    (*(float *)((char*)(dst) + 0x70)) = arg_sp68;
-    (*(float *)((char*)(dst) + 0x80)) = arg_sp80;
-    (*(float *)((char*)(dst) + 0x90)) = arg_sp98;
-    (*(float *)((char*)(dst) + 4)) = fparg1;
-    (*(float *)((char*)(dst) + 0)) = fparg0;
-    (*(float *)((char*)(dst) + 0x14)) = fparg4;
-    (*(float *)((char*)(dst) + 0x24)) = fparg7;
-    (*(float *)((char*)(dst) + 0x34)) = arg_sp10;
-    (*(float *)((char*)(dst) + 0x44)) = arg_sp28;
-    (*(float *)((char*)(dst) + 0x54)) = arg_sp40;
-    (*(float *)((char*)(dst) + 0x64)) = arg_sp58;
-    (*(float *)((char*)(dst) + 0x74)) = arg_sp70;
-    (*(float *)((char*)(dst) + 0x84)) = arg_sp88;
-    (*(float *)((char*)(dst) + 0x94)) = arg_spA0;
-    (*(float *)((char*)(dst) + 8)) = fparg2;
-    (*(float *)((char*)(dst) + 0x18)) = fparg5;
-    (*(float *)((char*)(dst) + 0x28)) = arg_sp0;
-    (*(float *)((char*)(dst) + 0x38)) = arg_sp18;
-    (*(float *)((char*)(dst) + 0x48)) = arg_sp30;
-    (*(float *)((char*)(dst) + 0x58)) = arg_sp48;
-    (*(float *)((char*)(dst) + 0x68)) = arg_sp60;
-    (*(float *)((char*)(dst) + 0x78)) = arg_sp78;
-    (*(float *)((char*)(dst) + 0x88)) = arg_sp90;
-    (*(float *)((char*)(dst) + 0x98)) = arg_spA8;
-    (*(int *)((char*)(dst) + 0xC)) = 0;
-    (*(int *)((char*)(dst) + 0x1C)) = 0;
-    (*(int *)((char*)(dst) + 0x2C)) = 0;
-    (*(int *)((char*)(dst) + 0x3C)) = 0;
-    (*(int *)((char*)(dst) + 0x4C)) = 0;
-    (*(int *)((char*)(dst) + 0x5C)) = 0;
-    (*(int *)((char*)(dst) + 0x6C)) = 0;
-    (*(int *)((char*)(dst) + 0x7C)) = 0;
-    (*(int *)((char*)(dst) + 0x8C)) = 0;
-    (*(int *)((char*)(dst) + 0x9C)) = 0;
+extern "C" t4Vector* func_00389160(t4Vector* dst, float fparg0, float fparg1, float fparg2, float fparg3, float fparg4, float fparg5, float fparg6, float fparg7, float arg_sp0, float arg_sp8, float arg_sp10, float arg_sp18, float arg_sp20, float arg_sp28, float arg_sp30, float arg_sp38, float arg_sp40, float arg_sp48, float arg_sp50, float arg_sp58, float arg_sp60, float arg_sp68, float arg_sp70, float arg_sp78, float arg_sp80, float arg_sp88, float arg_sp90, float arg_sp98, float arg_spA0, float arg_spA8) {
+    dst[1].x = fparg3;
+    dst[2].x = fparg6;
+    dst[3].x = arg_sp8;
+    dst[4].x = arg_sp20;
+    dst[5].x = arg_sp38;
+    dst[6].x = arg_sp50;
+    dst[7].x = arg_sp68;
+    dst[8].x = arg_sp80;
+    dst[9].x = arg_sp98;
+    dst[0].y = fparg1;
+    dst[0].x = fparg0;
+    dst[1].y = fparg4;
+    dst[2].y = fparg7;
+    dst[3].y = arg_sp10;
+    dst[4].y = arg_sp28;
+    dst[5].y = arg_sp40;
+    dst[6].y = arg_sp58;
+    dst[7].y = arg_sp70;
+    dst[8].y = arg_sp88;
+    dst[9].y = arg_spA0;
+    dst[0].z = fparg2;
+    dst[1].z = fparg5;
+    dst[2].z = arg_sp0;
+    dst[3].z = arg_sp18;
+    dst[4].z = arg_sp30;
+    dst[5].z = arg_sp48;
+    dst[6].z = arg_sp60;
+    dst[7].z = arg_sp78;
+    dst[8].z = arg_sp90;
+    dst[9].z = arg_spA8;
+    dst[0].w = 0.0f;
+    dst[1].w = 0.0f;
+    dst[2].w = 0.0f;
+    dst[3].w = 0.0f;
+    dst[4].w = 0.0f;
+    dst[5].w = 0.0f;
+    dst[6].w = 0.0f;
+    dst[7].w = 0.0f;
+    dst[8].w = 0.0f;
+    dst[9].w = 0.0f;
     return dst;
 }
 #endif

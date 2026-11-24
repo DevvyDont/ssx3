@@ -1080,6 +1080,57 @@ extern "C" void atof();
 extern "C" void atoi();
 extern "C" void bsearch();
 extern "C" void qsort();
+// A GameLink platform function table (names ours, from the routine stored in each slot; word 0 is not written by the filler).
+struct tGameLinkPlatFuncs {
+    void* unk_00;                   // 0x00
+    void* pfnStrlen;                // 0x04 strlen
+    void* pfnStrcpy;                // 0x08 strcpy
+    void* pfnStrcmp;                // 0x0C strcmp
+    void* pfnAtoi;                  // 0x10 atoi
+    void* pfnAtof;                  // 0x14 atof
+    void* pfnQsort;                 // 0x18 qsort
+    void* pfnBsearch;               // 0x1C bsearch
+    void* pfnThreadCreate;          // 0x20 func_002C29D0
+    void* pfnThreadFree;            // 0x24 func_002C2AA8
+    void* pfnYield;                 // 0x28 func_002C2B08
+    void* pfnMutexCreate;           // 0x2C func_002C2B28
+    void* pfnMutexDestroy;          // 0x30 func_002C2B68
+    void* pfnLock;                  // 0x34 func_002C2B98
+    void* pfnUnlock;                // 0x38 func_002C2BB8
+    void* pfnAlloc;                 // 0x3C func_002C28C0
+    void* pfnRealloc;               // 0x40 func_002C2940
+    void* pfnFree;                  // 0x44 func_002C28F8
+    void* pfnMemset;                // 0x48 memset
+    void* pfnMemcpy;                // 0x4C func_0041605C
+    void* pfnMemmove;               // 0x50 func_0041610C
+    void* pfnMemcmp;                // 0x54 memcmp
+    void* pfnCounter;               // 0x58 func_002C28A0
+};
+
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnStrlen, 0x04);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnStrcpy, 0x08);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnStrcmp, 0x0C);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnAtoi, 0x10);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnAtof, 0x14);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnQsort, 0x18);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnBsearch, 0x1C);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnThreadCreate, 0x20);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnThreadFree, 0x24);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnYield, 0x28);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnMutexCreate, 0x2C);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnMutexDestroy, 0x30);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnLock, 0x34);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnUnlock, 0x38);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnAlloc, 0x3C);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnRealloc, 0x40);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnFree, 0x44);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnMemset, 0x48);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnMemcpy, 0x4C);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnMemmove, 0x50);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnMemcmp, 0x54);
+CHECK_OFFSET(tGameLinkPlatFuncs, pfnCounter, 0x58);
+CHECK_SIZE(tGameLinkPlatFuncs, 0x5C);
+
 /**
  * Fills a GameLink platform function table with the game's implementations.
  *
@@ -1090,29 +1141,29 @@ extern "C" void qsort();
  * func_0041605C, +0x50 func_0041610C, +0x54 memcmp and +0x58 func_002C28A0 (counter). Nothing in retail calls
  * it.
  */
-extern "C" void func_002C2BD8(char* self) {
-    *(void**)(self + 0x3C) = (void*)&func_002C28C0_2BD8;
-    *(void**)(self + 0x40) = (void*)&func_002C2940_2BD8;
-    *(void**)(self + 0x44) = (void*)&func_002C28F8;
-    *(void**)(self + 0x48) = (void*)&memset;
-    *(void**)(self + 0x50) = (void*)&func_0041610C;
-    *(void**)(self + 0x54) = (void*)&memcmp;
-    *(void**)(self + 0x4C) = (void*)&func_0041605C;
-    *(void**)(self + 0x58) = (void*)&func_002C28A0;
-    *(void**)(self + 0x14) = (void*)&atof;
-    *(void**)(self + 0x10) = (void*)&atoi;
-    *(void**)(self + 0x1C) = (void*)&bsearch;
-    *(void**)(self + 0x18) = (void*)&qsort;
-    *(void**)(self + 0xC) = (void*)&strcmp;
-    *(void**)(self + 0x8) = (void*)&strcpy;
-    *(void**)(self + 0x4) = (void*)&strlen;
-    *(void**)(self + 0x20) = (void*)&func_002C29D0;
-    *(void**)(self + 0x24) = (void*)&func_002C2AA8;
-    *(void**)(self + 0x28) = (void*)&func_002C2B08;
-    *(void**)(self + 0x2C) = (void*)&func_002C2B28;
-    *(void**)(self + 0x30) = (void*)&func_002C2B68;
-    *(void**)(self + 0x34) = (void*)&func_002C2B98;
-    *(void**)(self + 0x38) = (void*)&func_002C2BB8;
+extern "C" void func_002C2BD8(tGameLinkPlatFuncs* self) {
+    self->pfnAlloc = (void*)&func_002C28C0_2BD8;
+    self->pfnRealloc = (void*)&func_002C2940_2BD8;
+    self->pfnFree = (void*)&func_002C28F8;
+    self->pfnMemset = (void*)&memset;
+    self->pfnMemmove = (void*)&func_0041610C;
+    self->pfnMemcmp = (void*)&memcmp;
+    self->pfnMemcpy = (void*)&func_0041605C;
+    self->pfnCounter = (void*)&func_002C28A0;
+    self->pfnAtof = (void*)&atof;
+    self->pfnAtoi = (void*)&atoi;
+    self->pfnBsearch = (void*)&bsearch;
+    self->pfnQsort = (void*)&qsort;
+    self->pfnStrcmp = (void*)&strcmp;
+    self->pfnStrcpy = (void*)&strcpy;
+    self->pfnStrlen = (void*)&strlen;
+    self->pfnThreadCreate = (void*)&func_002C29D0;
+    self->pfnThreadFree = (void*)&func_002C2AA8;
+    self->pfnYield = (void*)&func_002C2B08;
+    self->pfnMutexCreate = (void*)&func_002C2B28;
+    self->pfnMutexDestroy = (void*)&func_002C2B68;
+    self->pfnLock = (void*)&func_002C2B98;
+    self->pfnUnlock = (void*)&func_002C2BB8;
 }
 #endif
 //100%
@@ -1250,6 +1301,39 @@ extern "C" void atoi();
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* strcpy(char* dst, const char* src);
 
+// An ISTR function table (names ours, from the routine stored in each slot; word 0 is not written by the filler).
+struct tIstrFuncs {
+    void* unk_00;                   // 0x00
+    void* pfnStrcat;                // 0x04 strcat
+    void* pfnStrlen;                // 0x08 strlen
+    void* pfnStrlen16;              // 0x0C func_002C2E40
+    void* pfnSprintf;               // 0x10 sprintf
+    void* pfnStrcpy;                // 0x14 strcpy
+    void* pfnAtoi;                  // 0x18 atoi
+    void* pfnAlloc;                 // 0x1C func_002C2D30
+    void* pfnRealloc;               // 0x20 func_002C2DB0
+    void* pfnFree;                  // 0x24 func_002C2D68
+    void* pfnMemset;                // 0x28 memset
+    void* pfnCopy;                  // 0x2C func_002C2D88
+    void* pfnMemmove;               // 0x30 func_0041610C
+    void* pfnMemcmp;                // 0x34 memcmp
+};
+
+CHECK_OFFSET(tIstrFuncs, pfnStrcat, 0x04);
+CHECK_OFFSET(tIstrFuncs, pfnStrlen, 0x08);
+CHECK_OFFSET(tIstrFuncs, pfnStrlen16, 0x0C);
+CHECK_OFFSET(tIstrFuncs, pfnSprintf, 0x10);
+CHECK_OFFSET(tIstrFuncs, pfnStrcpy, 0x14);
+CHECK_OFFSET(tIstrFuncs, pfnAtoi, 0x18);
+CHECK_OFFSET(tIstrFuncs, pfnAlloc, 0x1C);
+CHECK_OFFSET(tIstrFuncs, pfnRealloc, 0x20);
+CHECK_OFFSET(tIstrFuncs, pfnFree, 0x24);
+CHECK_OFFSET(tIstrFuncs, pfnMemset, 0x28);
+CHECK_OFFSET(tIstrFuncs, pfnCopy, 0x2C);
+CHECK_OFFSET(tIstrFuncs, pfnMemmove, 0x30);
+CHECK_OFFSET(tIstrFuncs, pfnMemcmp, 0x34);
+CHECK_SIZE(tIstrFuncs, 0x38);
+
 /**
  * Fills an ISTR function table with the game's implementations.
  *
@@ -1257,20 +1341,20 @@ extern "C" char* strcpy(char* dst, const char* src);
  * func_002C2D30 (alloc), +0x20 func_002C2DB0 (realloc), +0x24 func_002C2D68 (free), +0x28 memset, +0x2C
  * func_002C2D88 (copy), +0x30 func_0041610C and +0x34 memcmp. Nothing in retail calls it.
  */
-extern "C" void func_002C2E78(char* self) {
-    *(void**)(self + 0x1C) = (void*)&func_002C2D30_2E78;
-    *(void**)(self + 0x20) = (void*)&func_002C2DB0_2E78;
-    *(void**)(self + 0x24) = (void*)&func_002C2D68;
-    *(void**)(self + 0x2C) = (void*)&func_002C2D88;
-    *(void**)(self + 0x28) = (void*)&memset;
-    *(void**)(self + 0x30) = (void*)&func_0041610C;
-    *(void**)(self + 0x34) = (void*)&memcmp;
-    *(void**)(self + 0x04) = (void*)&strcat;
-    *(void**)(self + 0x08) = (void*)&strlen;
-    *(void**)(self + 0x0C) = (void*)&func_002C2E40;
-    *(void**)(self + 0x10) = (void*)&sprintf;
-    *(void**)(self + 0x14) = (void*)&strcpy;
-    *(void**)(self + 0x18) = (void*)&atoi;
+extern "C" void func_002C2E78(tIstrFuncs* self) {
+    self->pfnAlloc = (void*)&func_002C2D30_2E78;
+    self->pfnRealloc = (void*)&func_002C2DB0_2E78;
+    self->pfnFree = (void*)&func_002C2D68;
+    self->pfnCopy = (void*)&func_002C2D88;
+    self->pfnMemset = (void*)&memset;
+    self->pfnMemmove = (void*)&func_0041610C;
+    self->pfnMemcmp = (void*)&memcmp;
+    self->pfnStrcat = (void*)&strcat;
+    self->pfnStrlen = (void*)&strlen;
+    self->pfnStrlen16 = (void*)&func_002C2E40;
+    self->pfnSprintf = (void*)&sprintf;
+    self->pfnStrcpy = (void*)&strcpy;
+    self->pfnAtoi = (void*)&atoi;
 }
 #endif
 
