@@ -125,8 +125,10 @@ struct cAnimComboNode {
     float FrameEnd;                 // 0x40 [O]; [U] as FrameStart (this + 0xC)
     int MeshVelocityDirty;          // 0x44 [O] bool (word); [U] cAnimNode_cacheFrame / updateMeshVelocity (this + 0x10)
     // --- cMoveNode at +0x48 (0x2C; object/movenode.h): cObjNode / cTypeObjNode / cSortObjNode / cInstanceNode first
-    int unk_048;                    // 0x48 cObjNode's leading word (unk_00 in object/movenode.h); never written by a
-                                    //       node ctor
+    int MoveNodeBase;               // 0x48 where the cMoveNode base starts (name ours): `&MoveNodeBase` is the
+                                    //      cMoveNode subobject the methods pass on (cMoveNode_* calls, vtable
+                                    //      thunks). The word is cObjNode's unnamed leading word (unk_00 in
+                                    //      object/objnode.h); no ctor writes it
     cObjNode* Next;                 // 0x4C [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x50 [O] cObjNode::Prev; [U] bucket list
     void** mVtbl;                   // 0x54 [R] cAnimComboNode_vtbl (both ctors and the dtor)
@@ -175,7 +177,7 @@ CHECK_OFFSET(cAnimComboNode, CacheTime, 0x38);
 CHECK_OFFSET(cAnimComboNode, FrameStart, 0x3C);
 CHECK_OFFSET(cAnimComboNode, FrameEnd, 0x40);
 CHECK_OFFSET(cAnimComboNode, MeshVelocityDirty, 0x44);
-CHECK_OFFSET(cAnimComboNode, unk_048, 0x48);
+CHECK_OFFSET(cAnimComboNode, MoveNodeBase, 0x48);
 CHECK_OFFSET(cAnimComboNode, Next, 0x4C);
 CHECK_OFFSET(cAnimComboNode, Prev, 0x50);
 CHECK_OFFSET(cAnimComboNode, mVtbl, 0x54);

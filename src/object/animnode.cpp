@@ -114,7 +114,7 @@ struct sVEntry_E600b {
  */
 extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, t4Vector* out)
 {
-    void* obj = (char*)&self->unk_014;
+    void* obj = (char*)&self->MoveNodeBase;
     if (id == (int)self->Instance) {
         sVEntry_E600a* vt = (sVEntry_E600a*)self->mVtbl;
         t4Vector position = vt[29].fn(vthis(obj, vt[29]), idx)->r[3];
@@ -214,7 +214,7 @@ static inline void vu0AddEq_E698(t4Vector& a, const t4Vector& b)
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
 extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, tIntersectInfo* body)
 {
-    cMoveNode_updateIntersectInfo(&self->unk_014, body);
+    cMoveNode_updateIntersectInfo(&self->MoveNodeBase, body);
     int bone = body->Mesh;
     if (bone < 0)
         return;
@@ -365,7 +365,7 @@ static inline sVec4_E798 boneE798Pos(char* vself, int i)
  */
 extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
 {
-    cMoveNode* obj = (cMoveNode*)((char*)&self->unk_014);
+    cMoveNode* obj = (cMoveNode*)&self->MoveNodeBase;
     if (self->Flags & 1) {
         sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
         ((void (*)(void*))vt[51].fn)(vthis(obj, vt[51]));
@@ -463,7 +463,7 @@ struct sAnimNode_EBA0 {
 // is this node's link at the head of its list, after cObjectInterface_runFrameUpdateScript?
 extern "C" int cAnimNode_frameUpdate(cAnimNode* self)
 {
-    sAnimLink_EBA0* link = (sAnimLink_EBA0*)&self->unk_014;
+    sAnimLink_EBA0* link = (sAnimLink_EBA0*)&self->MoveNodeBase;
     cObjectInterface_runFrameUpdateScript(self->Instance);
     return ((sAnimLink_EBA0*)link->list->m_pActiveNode) == link;
 }

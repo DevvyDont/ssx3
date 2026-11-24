@@ -76,7 +76,7 @@ struct cFEStateReadMessagePopup : public cFEStateNet {
                                     //       [U] cFEStateReadMessagePopup_onWidgetEvent sends the typed reply to it (func_00262690) and titles
                                     //       the keyboard with it; func_001A7F78 moves BuddyMan's messages from it
                                     //       into mMessages; func_001A81F0 shows it ("kT_POPUP242PlayerID")
-    int unk_6D4;                    // 0x6D4 [R] 0; [U] cFEStateReadMessagePopup_onWidgetMenu (slot 20, event 4: the text scroller moved)
+    int mScrollIndex;               // 0x6D4 [R] 0; [U] cFEStateReadMessagePopup_onWidgetMenu (slot 20, event 4: the text scroller moved)
                                     //       stores the value, then refreshes; no read seen
     tFEPrivateMessageVector mMessages; // 0x6D8 [R] see tFEPrivateMessageVector (the default ctor zeroes
                                     //       0x6DC..0x6E4); [U] func_001A81F0 lists "sender: text" for each message in
@@ -89,7 +89,7 @@ struct cFEStateReadMessagePopup : public cFEStateNet {
 };
 
 CHECK_OFFSET(cFEStateReadMessagePopup, mszSender, 0x6D0);
-CHECK_OFFSET(cFEStateReadMessagePopup, unk_6D4, 0x6D4);
+CHECK_OFFSET(cFEStateReadMessagePopup, mScrollIndex, 0x6D4);
 CHECK_OFFSET(cFEStateReadMessagePopup, mMessages, 0x6D8);
 CHECK_OFFSET(cFEStateReadMessagePopup, mbResetScroll, 0x6E8);
 CHECK_OFFSET(cFEStateReadMessagePopup, mTextColour, 0x6EC);

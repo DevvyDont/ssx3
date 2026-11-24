@@ -270,7 +270,7 @@ struct cSSXAudio {
     int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] cSSXAudio_SetArcadeSFX stores it (and sets volume controls 9/10); cSSXAudio_SetSFXVolume re-applies controls 9/10 only when set
     int unk_62B8;                       // 0x62B8 [R] ctor 0; [U] cSSXAudio_SetDJSpeech stores 1/0; func_00287410 re-applies control 2 only when set (and the mode is not 2)
     tSoundVolume mSoundVolume[11];      // 0x62BC [O]; [U] cSSXAudio_DuckVolume: entry j curVolume * duck -> duckedVolume, * mMixLevel[j] -> appliedVolume
-    float unk_636C[10];                 // 0x636C [U] DuckVolume/MixVolume (cSSXAudio_DuckVolume/cSSXAudio_UpdateDuck/cSSXAudio_MixVolume/cSSXAudio_UpdateMix): mSoundVolume[4].appliedVolume times constants gMobyScaling..
+    float mCharacterVolume[10];         // 0x636C (name ours) per-character voice level, indexed Moby .. Deiter: [U] DuckVolume/MixVolume (cSSXAudio_DuckVolume/cSSXAudio_UpdateDuck/cSSXAudio_MixVolume/cSSXAudio_UpdateMix): mSoundVolume[4].appliedVolume times constants gMobyScaling..
     float mDuckLevel[11];               // 0x6394 [O]; [R] ctor 11 x 1.0f; [U] DuckVolume writes [j]
     int mDucking;                       // 0x63C0 [O] (On Tour bool); [R] ctor 0; [U] DuckVolume sets it when fading
     unsigned int mCurDuck;              // 0x63C4 [O]; [U] DuckVolume stores the mask
@@ -461,7 +461,7 @@ CHECK_OFFSET(cSSXAudio, mAudioMode, 0x62B0);
 CHECK_OFFSET(cSSXAudio, mArcadeSFX, 0x62B4);
 CHECK_OFFSET(cSSXAudio, unk_62B8, 0x62B8);
 CHECK_OFFSET(cSSXAudio, mSoundVolume, 0x62BC);
-CHECK_OFFSET(cSSXAudio, unk_636C, 0x636C);
+CHECK_OFFSET(cSSXAudio, mCharacterVolume, 0x636C);
 CHECK_OFFSET(cSSXAudio, mDuckLevel, 0x6394);
 CHECK_OFFSET(cSSXAudio, mDucking, 0x63C0);
 CHECK_OFFSET(cSSXAudio, mCurDuck, 0x63C4);

@@ -1007,7 +1007,7 @@ extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
  */
 extern "C" void cAnimComboNode_updateIntersectInfo(cAnimComboNode* self, tIntersectInfo* out)
 {
-    cMoveNode_updateIntersectInfo(&self->unk_048, out);
+    cMoveNode_updateIntersectInfo(&self->MoveNodeBase, out);
     *(sMpQuad*)&out->Ivel = t4vect_Zero;
     *(sMpQuad*)&out->Iangvel = t4vect_Zero;
 }
@@ -1126,7 +1126,7 @@ extern "C" void cInstanceNode_loseFocus(void*);
 extern "C" void cAnimComboNode_loseFocus(cAnimComboNode* self)
 {
     if (*(signed char*)&self->AnimComplete2 == 0) {
-        cInstanceNode_loseFocus(&self->unk_048);
+        cInstanceNode_loseFocus(&self->MoveNodeBase);
     }
 }
 #endif
@@ -1306,7 +1306,7 @@ extern "C" int cAnimDeltaNode_updateNode(cAnimDeltaNode* self)
                 self->Delay = countdown - 1;
             }
             if (self->AnimComplete != 0) {
-                char* obj = (char*)&self->unk_030;
+                char* obj = (char*)&self->MoveNodeBase;
                 sVEntry<void(void*, int)>* vtEntry = &((sVEntry<void(void*, int)>*)self->mVtbl)[34];
                 vtEntry->fn(vthis(obj, *vtEntry), 1);
                 return 0;

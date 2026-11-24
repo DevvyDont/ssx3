@@ -53,9 +53,11 @@ struct cPlayer {
     cPadDevice* Pad;           // 0xDF4 [P] setInput's second argument; [R] ctor = 0, cPlayer_setInput; [O];
                                //       [U] vibrationUpdate (cPlayer_vibrationUpdate) rumbles it
     cReplayCache* ReplayCache; // 0xDF8 [R] ctor = cReplay_addCache(Game->Replay), released by ~cPlayer; [O]
-    float unk_DFC;             // 0xDFC [R] ctor = 0; [U] vibrationReset = 0, vibrationBump adds to it; decayed with
-                               //       0xE00 by func_00125B18(&unk_DFC, Pad, on) (a pair of floats)
-    float unk_E00;             // 0xE00 [R] ctor = 0; [U] vibrationReset = 0, vibrationRumble(float) stores it
+    float mVibrationBump;      // 0xDFC bump level (name ours): [R] ctor = 0; [U] vibrationReset = 0, vibrationBump
+                               //       raises it to its argument; decayed with 0xE00 by
+                               //       func_00125B18(&mVibrationBump, Pad, on) (a pair of floats)
+    float mVibrationRumble;    // 0xE00 rumble level (name ours): [R] ctor = 0; [U] vibrationReset = 0,
+                               //       vibrationRumble(float) stores it
     char pad_E04[0xC];         // 0xE04 the cRider virtual base is 16-byte aligned
     // ---- virtual base cRider (0xE10-0x1950) ----
     cRider Rider;              // 0xE10 [R] cPlayer_cPlayer: cRider_cRider(this + 0xE10) when in charge
@@ -77,8 +79,8 @@ CHECK_OFFSET(cPlayer, pad_DEC, 0xDEC);
 CHECK_OFFSET(cPlayer, Input, 0xDF0);
 CHECK_OFFSET(cPlayer, Pad, 0xDF4);
 CHECK_OFFSET(cPlayer, ReplayCache, 0xDF8);
-CHECK_OFFSET(cPlayer, unk_DFC, 0xDFC);
-CHECK_OFFSET(cPlayer, unk_E00, 0xE00);
+CHECK_OFFSET(cPlayer, mVibrationBump, 0xDFC);
+CHECK_OFFSET(cPlayer, mVibrationRumble, 0xE00);
 CHECK_OFFSET(cPlayer, pad_E04, 0xE04);
 CHECK_OFFSET(cPlayer, Rider, 0xE10);
 CHECK_SIZE(cPlayer, 0x1950);

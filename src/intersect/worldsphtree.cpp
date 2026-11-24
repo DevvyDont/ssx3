@@ -5693,7 +5693,7 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
             }
         }
     }
-    char* obj = (char*)&self->unk_030;
+    char* obj = (char*)&self->MoveNodeBase;
     self->Flags |= 1;
     self->CacheTime = self->CurrTime;
     if (self->AnimComplete == 0) {
@@ -5848,7 +5848,7 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_expire);
 extern "C" void cAnimObjectNode_expire(cAnimObjectNode* self, int runscript)
 {
     if (runscript != 0) {
-        cInstanceNode_runExpireScript(&self->unk_030);
+        cInstanceNode_runExpireScript(&self->MoveNodeBase);
     }
 }
 #endif
@@ -5912,7 +5912,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
     } else if (msg == 105) {
         *(short*)self = 0;
     } else {
-        cMoveNode_signal(&self->unk_030);
+        cMoveNode_signal(&self->MoveNodeBase);
     }
 }
 #endif
@@ -6324,7 +6324,7 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo
 {
     int idx = intInfo->Mesh;
     if (idx >= 0) {
-        cMoveNode* sub = (cMoveNode*)(&self->unk_044);
+        cMoveNode* sub = (cMoveNode*)(&self->MoveNodeBase);
         tMeshHeirarchyRecord* ents = (tMeshHeirarchyRecord*)((sBodyTbl_342538*)(sub->Instance)->m_Model)->ents;
         if ((int)ents[idx].m_MeshAnim != 0) {
             sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;

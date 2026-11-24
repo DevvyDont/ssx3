@@ -1779,7 +1779,7 @@ struct sFlagSlot_34D9B0 {
  */
 extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType, tInstanceRecord* instRecord, int force)
 {
-    cMoveNode* node = (cMoveNode*)((char*)&self->unk_014);
+    cMoveNode* node = (cMoveNode*)((char*)&self->MoveNodeBase);
     cMoveNode_cMoveNode1(node, bucket, nodeType, instRecord);
     self->mVtbl = cAnimNode_vtbl;
     sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(&self->AnimMats);
@@ -1794,7 +1794,7 @@ extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType
     self->CacheTime = startTime;
     self->MeshVelocityDirty = 1;
     self->FrameEnd = 10000000000.0f;
-    cMoveNode* sub = (cMoveNode*)((char*)&self->unk_014);
+    cMoveNode* sub = (cMoveNode*)((char*)&self->MoveNodeBase);
     if (force != 0 || ((unsigned int)sub->Instance->m_iFlags & 1)) {
         tInstanceRecord* n = (tInstanceRecord*)sub->Instance;
         n->m_iFlags = ((unsigned int)n->m_iFlags & ~2u) | 4;
@@ -1830,7 +1830,7 @@ struct sFlagSlot_34DAC8 {
 extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, cBxReplayFrame* stream)
 {
     int skippedWord;
-    char* node = (char*)&self->unk_014;
+    char* node = (char*)&self->MoveNodeBase;
     sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(&self->AnimMats);
     cMoveNode_cMoveNode_3(node, bucket, stream);
     self->mVtbl = cAnimNode_vtbl;
@@ -1900,7 +1900,7 @@ extern "C" void cAnimNode__cAnimNode(cAnimNode* self, int flags)
     if (self->MeshVelocity != 0) {
         cMemMan_free(self->MeshVelocity);
     }
-    cMoveNode__cMoveNode(((char*)&self->unk_014), 0);
+    cMoveNode__cMoveNode(((char*)&self->MoveNodeBase), 0);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1940,7 +1940,7 @@ extern "C" void cAnimNode_updateRootTransform(cAnimNode* self)
 {
     sFlagSetVEntry_DC90a* vt = (sFlagSetVEntry_DC90a*)self->mVtbl;
     vt[52].fn(vthis(self, vt[52]));
-    char* sub = (char*)&self->unk_014;
+    char* sub = (char*)&self->MoveNodeBase;
     sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)self->mVtbl;
     void* objB = vthis(sub, vt2[33]);
     void* rootTransform = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(vthis(sub, vt2[24]));
@@ -2185,7 +2185,7 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, cBxReplayFrame* stream)
 {
     int dummy;
-    cMoveNode_writeToReplayFrame(&self->unk_014, stream);
+    cMoveNode_writeToReplayFrame(&self->MoveNodeBase, stream);
     stream->write((const char*)self, 20);
     stream->write((const char*)&dummy, 4);
 }

@@ -2010,16 +2010,16 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
         func_002B4388(&self->MusicSys);
         break;
     case 4:
-        self->unk_636C[0] = currVolume->appliedVolume * gMobyScaling;
-        self->unk_636C[1] = currVolume->appliedVolume * gKaoriScaling;
-        self->unk_636C[2] = currVolume->appliedVolume * gAerielScaling;
-        self->unk_636C[3] = currVolume->appliedVolume * gMacScaling;
-        self->unk_636C[4] = currVolume->appliedVolume * gZoeScaling;
-        self->unk_636C[5] = currVolume->appliedVolume * gGrommetScaling;
-        self->unk_636C[6] = currVolume->appliedVolume * gEliseScaling;
-        self->unk_636C[7] = currVolume->appliedVolume * gRocoScaling;
-        self->unk_636C[8] = currVolume->appliedVolume * gPsymonScaling;
-        self->unk_636C[9] = currVolume->appliedVolume * gDeiterScaling;
+        self->mCharacterVolume[0] = currVolume->appliedVolume * gMobyScaling;
+        self->mCharacterVolume[1] = currVolume->appliedVolume * gKaoriScaling;
+        self->mCharacterVolume[2] = currVolume->appliedVolume * gAerielScaling;
+        self->mCharacterVolume[3] = currVolume->appliedVolume * gMacScaling;
+        self->mCharacterVolume[4] = currVolume->appliedVolume * gZoeScaling;
+        self->mCharacterVolume[5] = currVolume->appliedVolume * gGrommetScaling;
+        self->mCharacterVolume[6] = currVolume->appliedVolume * gEliseScaling;
+        self->mCharacterVolume[7] = currVolume->appliedVolume * gRocoScaling;
+        self->mCharacterVolume[8] = currVolume->appliedVolume * gPsymonScaling;
+        self->mCharacterVolume[9] = currVolume->appliedVolume * gDeiterScaling;
         break;
     }
 }
@@ -2047,7 +2047,8 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrAppliedVolume);
 /**
  * Returns the applied level of a volume control, or a character's own level for control 4.
  *
- * Control 4 (Character) with a character below 10 reads unk_636C[charIndex]; others read mSoundVolume[i].appliedVolume.
+ * Control 4 (Character) with a character below 10 reads mCharacterVolume[charIndex]; others read
+ * mSoundVolume[i].appliedVolume.
  *
  * @param volumeIndex  the volume control (eVolumeControl)
  * @param charIndex  the character for control 4
@@ -2058,7 +2059,7 @@ extern "C" float cSSXAudio_GetCurrAppliedVolume(cSSXAudio* self, int volumeIndex
     if (volumeIndex != 4 || charIndex >= 10) {
         return self->mSoundVolume[volumeIndex].appliedVolume;
     }
-    return self->unk_636C[charIndex];
+    return self->mCharacterVolume[charIndex];
 }
 #endif
 
@@ -2080,7 +2081,7 @@ extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int volumeIn
         // PORT: pointer held in int (only spelling found that gives idx-first addu)
         return (char*)((volumeIndex << 4) + (int)self + 0x62C8);
     }
-    return (char*)&self->unk_636C[charIndex];
+    return (char*)&self->mCharacterVolume[charIndex];
 }
 #endif
 
@@ -2201,16 +2202,16 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self_, int mask, float finalLeve
             sSaMix7A10_set(self, 4, finalLevel);
             float level = self->chan[4].out;
             cSSXAudio* mixOut = (cSSXAudio*)self;
-            mixOut->unk_636C[0] = level * gMobyScaling;
-            mixOut->unk_636C[1] = level * gKaoriScaling;
-            mixOut->unk_636C[2] = level * gAerielScaling;
-            mixOut->unk_636C[3] = level * gMacScaling;
-            mixOut->unk_636C[4] = level * gZoeScaling;
-            mixOut->unk_636C[5] = level * gGrommetScaling;
-            mixOut->unk_636C[6] = level * gEliseScaling;
-            mixOut->unk_636C[7] = level * gRocoScaling;
-            mixOut->unk_636C[8] = level * gPsymonScaling;
-            mixOut->unk_636C[9] = level * gDeiterScaling;
+            mixOut->mCharacterVolume[0] = level * gMobyScaling;
+            mixOut->mCharacterVolume[1] = level * gKaoriScaling;
+            mixOut->mCharacterVolume[2] = level * gAerielScaling;
+            mixOut->mCharacterVolume[3] = level * gMacScaling;
+            mixOut->mCharacterVolume[4] = level * gZoeScaling;
+            mixOut->mCharacterVolume[5] = level * gGrommetScaling;
+            mixOut->mCharacterVolume[6] = level * gEliseScaling;
+            mixOut->mCharacterVolume[7] = level * gRocoScaling;
+            mixOut->mCharacterVolume[8] = level * gPsymonScaling;
+            mixOut->mCharacterVolume[9] = level * gDeiterScaling;
         }
         if (mask & 8)
             sSaMix7A10_set(self, 2, finalLevel);
@@ -2308,16 +2309,16 @@ extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self_)
             sSaMix7C48_set(self, 4, self->fadeCur);
             float level = self->chan[4].out;
             cSSXAudio* mixOut = (cSSXAudio*)self;
-            mixOut->unk_636C[0] = level * gMobyScaling;
-            mixOut->unk_636C[1] = level * gKaoriScaling;
-            mixOut->unk_636C[2] = level * gAerielScaling;
-            mixOut->unk_636C[3] = level * gMacScaling;
-            mixOut->unk_636C[4] = level * gZoeScaling;
-            mixOut->unk_636C[5] = level * gGrommetScaling;
-            mixOut->unk_636C[6] = level * gEliseScaling;
-            mixOut->unk_636C[7] = level * gRocoScaling;
-            mixOut->unk_636C[8] = level * gPsymonScaling;
-            mixOut->unk_636C[9] = level * gDeiterScaling;
+            mixOut->mCharacterVolume[0] = level * gMobyScaling;
+            mixOut->mCharacterVolume[1] = level * gKaoriScaling;
+            mixOut->mCharacterVolume[2] = level * gAerielScaling;
+            mixOut->mCharacterVolume[3] = level * gMacScaling;
+            mixOut->mCharacterVolume[4] = level * gZoeScaling;
+            mixOut->mCharacterVolume[5] = level * gGrommetScaling;
+            mixOut->mCharacterVolume[6] = level * gEliseScaling;
+            mixOut->mCharacterVolume[7] = level * gRocoScaling;
+            mixOut->mCharacterVolume[8] = level * gPsymonScaling;
+            mixOut->mCharacterVolume[9] = level * gDeiterScaling;
         }
         if (self->fadeMask & 8)
             sSaMix7C48_set(self, 2, self->fadeCur);
@@ -2667,7 +2668,7 @@ struct sSaMix87F8 {
  *
  * Only while mMixing is set (cleared first, set again while a control still moves). Each of the 11 controls with a step
  * moves mMixLevel by mMixStep, stopping at mMixFinalValue, and gets appliedVolume = duckedVolume * mMixLevel. Then the
- * ten character levels unk_636C are the Character control's applied volume times the constants gMobyScaling ..
+ * ten character levels mCharacterVolume are the Character control's applied volume times the constants gMobyScaling ..
  * gDeiterScaling.
  */
 extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
@@ -2697,16 +2698,16 @@ extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
     }
     cSSXAudio* mixOut = (cSSXAudio*)self;
     float charLevel = mixOut->mSoundVolume[4].appliedVolume;
-    mixOut->unk_636C[0] = charLevel * gMobyScaling;
-    mixOut->unk_636C[1] = charLevel * gKaoriScaling;
-    mixOut->unk_636C[2] = charLevel * gAerielScaling;
-    mixOut->unk_636C[3] = charLevel * gMacScaling;
-    mixOut->unk_636C[4] = charLevel * gZoeScaling;
-    mixOut->unk_636C[5] = charLevel * gGrommetScaling;
-    mixOut->unk_636C[6] = charLevel * gEliseScaling;
-    mixOut->unk_636C[7] = charLevel * gRocoScaling;
-    mixOut->unk_636C[8] = charLevel * gPsymonScaling;
-    mixOut->unk_636C[9] = charLevel * gDeiterScaling;
+    mixOut->mCharacterVolume[0] = charLevel * gMobyScaling;
+    mixOut->mCharacterVolume[1] = charLevel * gKaoriScaling;
+    mixOut->mCharacterVolume[2] = charLevel * gAerielScaling;
+    mixOut->mCharacterVolume[3] = charLevel * gMacScaling;
+    mixOut->mCharacterVolume[4] = charLevel * gZoeScaling;
+    mixOut->mCharacterVolume[5] = charLevel * gGrommetScaling;
+    mixOut->mCharacterVolume[6] = charLevel * gEliseScaling;
+    mixOut->mCharacterVolume[7] = charLevel * gRocoScaling;
+    mixOut->mCharacterVolume[8] = charLevel * gPsymonScaling;
+    mixOut->mCharacterVolume[9] = charLevel * gDeiterScaling;
 }
 #endif
 

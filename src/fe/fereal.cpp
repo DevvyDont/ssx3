@@ -1540,7 +1540,7 @@ extern "C" void cRealFE_loadStartState(cRealFE* self)
         gInLodge = 0;
         void* st = cFEStateRelogin_cFEStateRelogin(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), (char*)self->mpUI);
         cUIStateStack_push(&self->mpUI->mStateStack, st);
-        cCommSystem_closeChannel(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
+        cCommSystem_closeChannel(cCommSystem_mCommSystem, cGameComm_mGameComm->mChannel);
         func_00266E88(VoipMan);
         func_00266DF8(VoipMan);
         func_0025B6D8(LobbyMan_mLobbyMan, 1);

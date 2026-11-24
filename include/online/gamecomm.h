@@ -101,8 +101,9 @@ struct cGameComm {
                                  //       mLoading = bit 10); "CERRFLGS"
     int mCheating[2];            // 0x024 [O] (On Tour [4]); [U] checkErrors (cGameComm_checkErrors) sets 2 (6+ pauses) or 3
                                  //       (3+ unplugs) for this machine / the peer; "CHEAT0/1"
-    int unk_02C;                 // 0x02C [R] 0; [U] set to 1 when the link times out (unk_094 runs out in checkErrors,
-                                 //       mSyncInputDelay reaches 1800 in cGameComm_checkActive); never read in retail
+    int mLinkTimedOut;           // 0x02C (name ours) [R] 0; [U] set to 1 when the link times out (mLinkTimeout runs
+                                 //       out in checkErrors, mSyncInputDelay reaches 1800 in cGameComm_checkActive);
+                                 //       never read in retail
     int mCommError;              // 0x030 [O]; [U] setCommError sets 1 (once: it guards the other fields); "COMMERR"
     int unk_034;                 // 0x034 [R] the time at construction; [U] gameStartRace (cGameComm_gameStartRace) stores the race
                                  //       start time (SSXApp +0x18 / +0x10); the reporter subtracts it from unk_038/unk_03C
@@ -128,8 +129,9 @@ struct cGameComm {
                                  //       ovtemplatedialog), stop it (-1) and test == 0; counted down by cGameComm_updateTimeout
     int mPauseTimeout;           // 0x068 [O]; [R] -1; [U] counted down by cGameComm_updateTimeout, tested and reset to -1 by the pause
                                  //       menu; never armed in retail
-    int unk_06C;                 // 0x06C [R] the constructor's first argument: the cCommSystem channel index passed to
-                                 //       its readPacket/writePacket/getLatency/getError (On Tour has no channel member)
+    int mChannel;                // 0x06C (name ours) [R] the constructor's first argument: the cCommSystem channel
+                                 //       index passed to its readPacket/writePacket/getLatency/getError (On Tour has no
+                                 //       channel member)
     int mState;                  // 0x070 [O] tGameComm; [U] setState (cGameComm_setState) stores it; cInputSync waits for >= 14
     int mPauseMenu[2];           // 0x074 [O] (On Tour [4]); [U] [0] this machine paused (sendPauseCmd), [1] the peer
                                  //       (commands 0/1)
@@ -142,8 +144,8 @@ struct cGameComm {
                                  //       then calls displayError
     int unk_090;                 // 0x090 [R] 0; [U] festateloadscreen cGFFinishlineState_gainFocus sets 1 right after stopSyncInput
                                  //       (leaving the race for a load state); read only into bit 9 of mFlagsOnCommError
-    int unk_094;                 // 0x094 [U] link timeout in frames: func_00258870 arms it (1800/3600/3660), checkErrors
-                                 //       counts it down (0 = timed out, unk_02C)
+    int mLinkTimeout;            // 0x094 (name ours) [U] link timeout in frames: func_00258870 arms it
+                                 //       (1800/3600/3660), checkErrors counts it down (0 = timed out, mLinkTimedOut)
     int mMessageDisplay;         // 0x098 [O]; [U] updateMessageDisplay's popup state (0 none, 1 peer paused, 2 waiting)
     int unk_09C;                 // 0x09C [R] 1; [U] ping result: cleared by the online-error overlay (cOVState_PAUSE_ONLINE_ERROR_onUpdate) when
                                  //       the ping times out; "PINGRSLT"
@@ -226,7 +228,7 @@ CHECK_OFFSET(cGameComm, mCommErrorWasSignificant, 0x018);
 CHECK_OFFSET(cGameComm, mStateOnCommError, 0x01C);
 CHECK_OFFSET(cGameComm, mFlagsOnCommError, 0x020);
 CHECK_OFFSET(cGameComm, mCheating, 0x024);
-CHECK_OFFSET(cGameComm, unk_02C, 0x02C);
+CHECK_OFFSET(cGameComm, mLinkTimedOut, 0x02C);
 CHECK_OFFSET(cGameComm, mCommError, 0x030);
 CHECK_OFFSET(cGameComm, unk_034, 0x034);
 CHECK_OFFSET(cGameComm, unk_038, 0x038);
@@ -241,7 +243,7 @@ CHECK_OFFSET(cGameComm, mSyncInputDelay, 0x05C);
 CHECK_OFFSET(cGameComm, mWaitingTimer, 0x060);
 CHECK_OFFSET(cGameComm, mOverlayTimeout, 0x064);
 CHECK_OFFSET(cGameComm, mPauseTimeout, 0x068);
-CHECK_OFFSET(cGameComm, unk_06C, 0x06C);
+CHECK_OFFSET(cGameComm, mChannel, 0x06C);
 CHECK_OFFSET(cGameComm, mState, 0x070);
 CHECK_OFFSET(cGameComm, mPauseMenu, 0x074);
 CHECK_OFFSET(cGameComm, mGameStartGate, 0x07C);
@@ -250,7 +252,7 @@ CHECK_OFFSET(cGameComm, mWaitingMessage, 0x084);
 CHECK_OFFSET(cGameComm, mRemoteExitGame, 0x088);
 CHECK_OFFSET(cGameComm, mRemoteEndGame, 0x08C);
 CHECK_OFFSET(cGameComm, unk_090, 0x090);
-CHECK_OFFSET(cGameComm, unk_094, 0x094);
+CHECK_OFFSET(cGameComm, mLinkTimeout, 0x094);
 CHECK_OFFSET(cGameComm, mMessageDisplay, 0x098);
 CHECK_OFFSET(cGameComm, unk_09C, 0x09C);
 CHECK_OFFSET(cGameComm, mLocalFinishedRace, 0x0A0);

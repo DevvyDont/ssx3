@@ -43,7 +43,7 @@ struct cPS2SoundManager {
     int unk_310;                      // 0x310 [R] ctor -1, Init 31; [U] head of the unused-node chain (func_002A92B8 pops, func_002A92F8 pushes)
     char unk_314[0x4];                // 0x314 no access
     int unk_318;                      // 0x318 [R] ctor -1; Init -1; [U] head of the free-block list (sorted by address: AllocSoundMem / DeallocSoundMem)
-    int unk_31C;                      // 0x31C [R] ctor 0; [U] SetSoundMemLoadLimits (cPS2SoundManager_SetSoundMemLoadLimits) 1, RestoreSoundMemLoadLimits (cPS2SoundManager_RestoreSoundMemLoadLimits) 0; AllocSoundMem returns -2 while set (preview lw 796)
+    int mMemLoadLimited;              // 0x31C [R] ctor 0; [U] SetSoundMemLoadLimits (cPS2SoundManager_SetSoundMemLoadLimits) 1, RestoreSoundMemLoadLimits (cPS2SoundManager_RestoreSoundMemLoadLimits) 0; AllocSoundMem returns -2 while set (preview lw 796)
 };
 
 CHECK_OFFSET(tPS2SoundMemNode, index, 0x00);
@@ -61,7 +61,7 @@ CHECK_OFFSET(cPS2SoundManager, mMainMemHighAddr, 0x30C);
 CHECK_OFFSET(cPS2SoundManager, unk_310, 0x310);
 CHECK_OFFSET(cPS2SoundManager, unk_314, 0x314);
 CHECK_OFFSET(cPS2SoundManager, unk_318, 0x318);
-CHECK_OFFSET(cPS2SoundManager, unk_31C, 0x31C);
+CHECK_OFFSET(cPS2SoundManager, mMemLoadLimited, 0x31C);
 CHECK_SIZE(cPS2SoundManager, 0x320);
 
 #endif /* SOUND_PS2SOUNDMAN_H */

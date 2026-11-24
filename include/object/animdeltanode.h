@@ -56,7 +56,10 @@ struct cAnimDeltaNode {
     float FrameEnd;                 // 0x28 [O]; [P] 0x28; [U] updateNode 1e10 (swc1)
     int MeshVelocityDirty;          // 0x2C [O] bool (word); [U] cAnimNode_cacheFrame / updateMeshVelocity
     // --- cMoveNode at +0x30 (0x2C; object/movenode.h): cObjNode / cTypeObjNode / cSortObjNode / cInstanceNode first
-    int unk_030;                    // 0x30 cObjNode's leading word (unk_00 in object/objnode.h); no ctor writes it
+    int MoveNodeBase;               // 0x30 where the cMoveNode base starts (name ours): `&MoveNodeBase` is the
+                                    //      cMoveNode subobject the methods pass on (cMoveNode_* calls, vtable
+                                    //      thunks). The word is cObjNode's unnamed leading word (unk_00 in
+                                    //      object/objnode.h); no ctor writes it
     cObjNode* Next;                 // 0x34 [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x38 [O] cObjNode::Prev; [U] bucket list
     void** mVtbl;                   // 0x3C [R] cAnimDeltaNode_vtbl (both ctors, the dtor); [P] 0x3C; [U] updateNode calls slot
@@ -93,7 +96,7 @@ CHECK_OFFSET(cAnimDeltaNode, CacheTime, 0x20);
 CHECK_OFFSET(cAnimDeltaNode, FrameStart, 0x24);
 CHECK_OFFSET(cAnimDeltaNode, FrameEnd, 0x28);
 CHECK_OFFSET(cAnimDeltaNode, MeshVelocityDirty, 0x2C);
-CHECK_OFFSET(cAnimDeltaNode, unk_030, 0x30);
+CHECK_OFFSET(cAnimDeltaNode, MoveNodeBase, 0x30);
 CHECK_OFFSET(cAnimDeltaNode, Next, 0x34);
 CHECK_OFFSET(cAnimDeltaNode, Prev, 0x38);
 CHECK_OFFSET(cAnimDeltaNode, mVtbl, 0x3C);

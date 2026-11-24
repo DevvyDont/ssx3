@@ -1465,13 +1465,6 @@ extern "C" void cWScriptMan_purgeGlobalTables(cWScriptMan* self);
 // PORT: the unit declares cWScriptMan_allocateGlobalTable as (void* self); the body also takes the slot index
 void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptMan_allocateGlobalTable");
 
-struct cWScriptMan_rebuildGlobalTables_sSection {
-    short type;
-    short pad2;
-    int f4;
-    int f8;
-};
-
 /**
  * Recreates the global script tables for the loaded world sections.
  *
@@ -1484,8 +1477,8 @@ extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self)
     cWScriptMan_purgeGlobalTables(self);
     int n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
     for (; i < n; i++) {
-        cWScriptMan_rebuildGlobalTables_sSection* tbl = (cWScriptMan_rebuildGlobalTables_sSection*)self->World->m_pWScriptCache->mpCache;
-        int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
+        cWScriptCacheEntry* tbl = self->World->m_pWScriptCache->mpCache;
+        int ok = tbl[i].mState >= 2 && tbl[i].mpScriptHeader != 0;
         if (ok) {
             cWScriptMan_allocateGlobalTable_impl(self, i);
         }
@@ -1791,13 +1784,6 @@ extern "C" void cWScriptMan_init(cWScriptMan* self);
 extern "C" void cWScriptMan_activeSection(cWScriptMan* self, int section);
 extern "C" void cWScriptMan_purgeSection(cWScriptMan* self, int section);
 
-struct cWScriptMan_initMissions_sSection {
-    short type;
-    short pad2;
-    int f4;
-    int f8;
-};
-
 /**
  * Rebuilds the world-script processes: deletes every process, resets the manager and re-adds the processes of
  * each ready world section.
@@ -1816,8 +1802,8 @@ extern "C" void cWScriptMan_initMissions(cWScriptMan* self)
     cWScriptMan_init(self);
     int n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
     for (; i < n; i++) {
-        cWScriptMan_initMissions_sSection* tbl = (cWScriptMan_initMissions_sSection*)self->World->m_pWScriptCache->mpCache;
-        int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
+        cWScriptCacheEntry* tbl = self->World->m_pWScriptCache->mpCache;
+        int ok = tbl[i].mState >= 2 && tbl[i].mpScriptHeader != 0;
         if (ok) {
             cWScriptMan_activeSection(self, i);
         } else {

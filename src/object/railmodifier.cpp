@@ -5401,7 +5401,7 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimMats);
 extern "C" int cAnimNode_getAnimMats(cAnimNode* self)
 {
     if (self->Flags & 1) {
-        void* sub = (char*)&self->unk_014;
+        void* sub = (char*)&self->MoveNodeBase;
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[51].fn(vthis(sub, vt[51]));
     }
@@ -5425,7 +5425,7 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimMat);
  */
 extern "C" t4Matrix* cAnimNode_getAnimMat(cAnimNode* self, int i)
 {
-    char* obj = (char*)&self->unk_014;
+    char* obj = (char*)&self->MoveNodeBase;
     if (self->Flags & 1) {
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[51].fn(vthis(obj, vt[51]));

@@ -1418,7 +1418,7 @@ extern int D_004804B8[];
  *
  * Stores the result in cGameComm_mGameComm; cGameComm_destroy destroys it.
  *
- * @param channel  the cCommSystem channel index the game link uses (stored in unk_06C)
+ * @param channel  the cCommSystem channel index the game link uses (stored in mChannel)
  * @param isServer  nonzero to run the server side of the handshake (mServer)
  */
 extern "C" void cGameComm_construct(int channel, int isServer) {
@@ -1556,7 +1556,7 @@ extern sGcGlobals_6C78* SSXApp_6C78 __asm__("SSXApp");
 /**
  * Constructs the online game link: the handshake state, timers, counters and empty packet queues.
  *
- * Stores the cCommSystem channel index in unk_06C and @p isServer in mServer, sets mState to kGameComm_Init through
+ * Stores the cCommSystem channel index in mChannel and @p isServer in mServer, sets mState to kGameComm_Init through
  * cGameComm_setState, and sizes mBEBufferSize with cBENetworkInterface_getSyncDataSize__FPv (cBENetworkInterface::getSyncDataSize) on BE interface
  * 7. Then: mConnected 1, mSyncInput 1, unk_060 30, unk_09C 1, mLoading 1, mOverlayTimeout/mPauseTimeout -1, mNumSamples
  * 3, both mNetLatency entries and mLatency to the default frame time (SSXApp +0x14), unk_034 to the current time
@@ -1907,7 +1907,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 9:
-            vs->mNetLatency[0] = cCommSystem_getLatency_70D8((int)cCommSystem_mCommSystem, vs->unk_06C);
+            vs->mNetLatency[0] = cCommSystem_getLatency_70D8((int)cCommSystem_mCommSystem, vs->mChannel);
             cGameComm_asyncWrite_70D8(((char*)vs), (int)(&vs->mNetLatency[0]), 4);
             cGameComm_setState_70D8(((char*)vs), 10);
             break;
@@ -1987,7 +1987,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 9:
-            vs->mNetLatency[1] = cCommSystem_getLatency_70D8((int)cCommSystem_mCommSystem, vs->unk_06C);
+            vs->mNetLatency[1] = cCommSystem_getLatency_70D8((int)cCommSystem_mCommSystem, vs->mChannel);
             cGameComm_asyncWrite_70D8(((char*)vs), (int)(&vs->mNetLatency[1]), 4);
             cGameComm_setState_70D8(((char*)vs), 10);
             break;
@@ -2121,7 +2121,7 @@ extern "C" int cGameComm_checkErrors(cGameComm* gameComm)
         cGameComm_displayError(gameComm);
         return 1;
     }
-    if (cCommSystem_getError_77C8((int)cCommSystem_mCommSystem, gameComm->unk_06C) != 0) {
+    if (cCommSystem_getError_77C8((int)cCommSystem_mCommSystem, gameComm->mChannel) != 0) {
         cGameComm_setCommError(gameComm);
         cGameComm_displayError(gameComm);
         return 1;
@@ -2151,9 +2151,9 @@ extern "C" int cGameComm_checkErrors(cGameComm* gameComm)
         cGameComm_displayError(gameComm);
         return 1;
     }
-    if (gameComm->unk_094 <= 0) return 0;
-    if (--gameComm->unk_094 > 0) return 0;
-    gameComm->unk_02C = 1;
+    if (gameComm->mLinkTimeout <= 0) return 0;
+    if (--gameComm->mLinkTimeout > 0) return 0;
+    gameComm->mLinkTimedOut = 1;
     cGameComm_setCommError(gameComm);
     cGameComm_displayError(gameComm);
     return 1;
@@ -2283,7 +2283,7 @@ extern "C" void cGameComm_checkActive(cGameComm* gameComm)
             }
             if (gameComm->mPauseMenu[1] == 0) ++gameComm->mSyncInputDelay;
             if (gameComm->mSyncInputDelay >= 1800) {
-                gameComm->unk_02C = 1;
+                gameComm->mLinkTimedOut = 1;
                 cGameComm_setCommError(gameComm);
                 cGameComm_displayError(gameComm);
                 return;
@@ -2350,7 +2350,7 @@ extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int maxsiz
             gameComm->mStallThreshold = 0;
             gameComm->mWaitingMessage = 0;
         }
-        if (gameComm->unk_094 > 0) func_00258870((cGameComm*)gameComm, 1800, 0);
+        if (gameComm->mLinkTimeout > 0) func_00258870((cGameComm*)gameComm, 1800, 0);
         return len;
     }
     return 0;
@@ -2437,7 +2437,7 @@ extern "C" void cGameComm_updateWriteQueue(cGameComm* self) {
             } else {
                 item = 0;
             }
-            if (cCommSystem_writePacket_7DC0((int)cCommSystem_mCommSystem, self->unk_06C, (char *)item, item->mSize) == 0) return;
+            if (cCommSystem_writePacket_7DC0((int)cCommSystem_mCommSystem, self->mChannel, (char *)item, item->mSize) == 0) return;
             self->mWriteQueue.mTail = self->mWriteQueue.mTail + 1;
             cGameComm_freePacket_7DC0(((char*)self), (char *)item);
         } while (self->mWriteQueue.mTail != self->mWriteQueue.mHead);
@@ -2490,7 +2490,7 @@ extern "C" int cGameComm_writePacket_impl(char* vself, int type, const void* dat
     pkt.flags = 0;
     MEM_copy_7E98(pkt.data, data, len);
     if (self->mWriteQueue.mTail == self->mWriteQueue.mHead) {
-        if (cCommSystem_writePacket_7E98((int)cCommSystem_mCommSystem, self->unk_06C, &pkt, pkt.size)) return 1;
+        if (cCommSystem_writePacket_7E98((int)cCommSystem_mCommSystem, self->mChannel, &pkt, pkt.size)) return 1;
     }
     {
         Packet_7E98* queuedPacket = cGameComm_allocPacket_7E98(((char*)self));
@@ -2844,7 +2844,7 @@ extern "C" float cCommSystem_getLatency(int, int);
  * @return the latency
  */
 extern "C" float cGameComm_getLatency(cGameComm* gameComm) {
-    return cCommSystem_getLatency((int)cCommSystem_mCommSystem, gameComm->unk_06C) + ((float) (gameComm->mNumSamples) * (SSXApp->TimerPeriod));
+    return cCommSystem_getLatency((int)cCommSystem_mCommSystem, gameComm->mChannel) + ((float) (gameComm->mNumSamples) * (SSXApp->TimerPeriod));
 }
 #endif
 
@@ -2996,7 +2996,7 @@ static inline int rd8(char *p) { return *(int*)(p + 8); }
  *
  * The host sends command 3 first and then waits; the client waits for the host's and then answers. While
  * waiting it pumps update (cGameComm_update) with a 3600-frame link timeout armed, until mSyncWaitComplete or an
- * error. Afterwards it disarms the timeout (unk_094) and clears mLoading.
+ * error. Afterwards it disarms the timeout (mLinkTimeout) and clears mLoading.
  */
 extern "C" void cGameComm_syncWait(cGameComm* self) {
     char buf[12];
@@ -3010,7 +3010,7 @@ extern "C" void cGameComm_syncWait(cGameComm* self) {
         cGameComm_update(self);
         THREAD_yieldticks(1);
     }
-    self->unk_094 = 0;
+    self->mLinkTimeout = 0;
     if (self->mError == 0 && rd8(((char*)&cBENetworkInterface_networkOpt)) == 0) {
         buf[0] = 3;
         cGameComm_writePacket(self, 3, (int)buf, 0xC);
@@ -3082,7 +3082,7 @@ INCLUDE_ASM("seg/seg_156860", func_00258870);
  */
 extern "C" void func_00258870(cGameComm* gameComm, int timeoutFrames, int forceArm) {
     if ((forceArm != 0) || ((gameComm->mPauseMenu[1] == 0) && (gameComm->mPauseMenu[0] == 0)) || (gameComm->mGameStartGate != 0)) {
-        gameComm->unk_094 = timeoutFrames;
+        gameComm->mLinkTimeout = timeoutFrames;
     }
 }
 #endif
@@ -3138,14 +3138,14 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartGate);
 /**
  * Notes that the race's start gate is up: arms the start-gate flag while the game is still running.
  *
- * Only while mState is below kGameComm_GameOver (15): clears the link timeout unk_094 and sets mGameStartGate. Called
- * by cGFGateState_gainFocus. On Tour also clears mRaceInProgress and runs heatInit here.
+ * Only while mState is below kGameComm_GameOver (15): clears the link timeout mLinkTimeout and sets mGameStartGate.
+ * Called by cGFGateState_gainFocus. On Tour also clears mRaceInProgress and runs heatInit here.
  *
  * @param gameComm  the game link (this)
  */
 extern "C" void cGameComm_gameStartGate(cGameComm* gameComm) {
     if (gameComm->mState < 0xF) {
-        gameComm->unk_094 = 0;
+        gameComm->mLinkTimeout = 0;
         gameComm->mGameStartGate = 1;
     }
 }
@@ -3185,7 +3185,7 @@ extern "C" void cGameComm_gameStartRace(cGameComm* self) {
         }
         self->unk_034 = SSXApp->TimerTick / SSXApp->TimerHz;
         self->mRaceInProgress = 1;
-        self->unk_094 = 0;
+        self->mLinkTimeout = 0;
     }
 }
 #endif

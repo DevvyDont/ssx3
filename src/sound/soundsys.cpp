@@ -15492,9 +15492,9 @@ extern char cPS2SoundManager_vtbl[];
 /**
  * Constructs the PS2 sound manager.
  *
- * Stores the vtable cPS2SoundManager_vtbl and resets the state: no mSoundHeap, driver mode unk_008 0, mMainMemHighAddr -1, empty
- * unused-node and free-block lists (unk_310 / unk_318 -1) and load limits off (unk_31C 0). The nodes are set up later
- * by cPS2SoundManager_Init.
+ * Stores the vtable cPS2SoundManager_vtbl and resets the state: no mSoundHeap, driver mode unk_008 0, mMainMemHighAddr
+ * -1, empty unused-node and free-block lists (unk_310 / unk_318 -1) and load limits off (mMemLoadLimited 0). The nodes
+ * are set up later by cPS2SoundManager_Init.
  *
  * @return @p self
  */
@@ -15505,7 +15505,7 @@ extern "C" void* cPS2SoundManager_cPS2SoundManager(cPS2SoundManager* self)
     self->unk_008 = 0;
     self->mMainMemHighAddr = -1;
     self->unk_310 = -1;
-    self->unk_31C = 0;
+    self->mMemLoadLimited = 0;
     self->unk_318 = -1;
     return ((void*)self);
 }
@@ -15583,7 +15583,7 @@ extern "C" void cPS2SoundManager_Init(cPS2SoundManager* self, int mode)
         self->mNodes[i].state = 0;
         self->mNodes[i].next = i - 1;
     }
-    self->unk_31C = 0;
+    self->mMemLoadLimited = 0;
     int blockAddr = 0;
     int blockSize = func_003B5B68(&blockAddr);
     self->mMainMemHighAddr = blockAddr + blockSize;
@@ -15733,10 +15733,10 @@ tPS2SoundMemNode* func_002A92B8_v(cPS2SoundManager* self) __asm__("func_002A92B8
  * First walks the free-block list (unk_318, sorted by address): a block of exactly @p size is marked used and unlinked,
  * a bigger one is split (a new node from func_002A92B8 takes its top @p size bytes). Otherwise carves the block off the
  * top of main sound memory: fails with -1 when func_003B5B68 reports less free memory than @p size, with -2 while load
- * limits are on (unk_31C), else lowers mMainMemHighAddr by @p size and tells the driver (func_003B5B20). No check that
- * func_002A92B8 found a node. Likely bug: an exact fit at the head of the free list is never unlinked (unk_318 keeps
- * pointing at the now-used node, whose next is cleared), so the rest of the free list is lost and the next request of
- * that size gets the same block again.
+ * limits are on (mMemLoadLimited), else lowers mMainMemHighAddr by @p size and tells the driver (func_003B5B20). No
+ * check that func_002A92B8 found a node. Likely bug: an exact fit at the head of the free list is never unlinked
+ * (unk_318 keeps pointing at the now-used node, whose next is cleared), so the rest of the free list is lost and the
+ * next request of that size gets the same block again.
  *
  * @param size  bytes wanted
  * @return the node index (the memory handle), -1 when out of memory, -2 while load limits are set
@@ -15777,7 +15777,7 @@ extern "C" int cPS2SoundManager_AllocSoundMem(cPS2SoundManager* self, int size)
     if (func_003B5B68(&avail) < size) {
         return -1;
     }
-    if (self->unk_31C != 0) {
+    if (self->mMemLoadLimited != 0) {
         return -2;
     }
     tPS2SoundMemNode* n = func_002A92B8_v((self));
@@ -15871,7 +15871,7 @@ struct sSndPool2A9250 {
  */
 extern "C" void cPS2SoundManager_SetSoundMemLoadLimits(cPS2SoundManager* self, int memHandle)
 {
-    self->unk_31C = 1;
+    self->mMemLoadLimited = 1;
     tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[memHandle];
     func_003B5B20(ps2SoundMemNode->lowAddr, ps2SoundMemNode->highAddr);
 }
@@ -15890,7 +15890,7 @@ extern "C" void func_003B5B20(int a, int b);
 extern "C" void cPS2SoundManager_RestoreSoundMemLoadLimits(cPS2SoundManager* self)
 {
     func_003B5B20(-1, self->mMainMemHighAddr);
-    self->unk_31C = 0;
+    self->mMemLoadLimited = 0;
 }
 #endif
 
@@ -15943,8 +15943,8 @@ struct s2A92F8Entry {
  * Returns the block at the top of main sound memory to the pool and puts its node back on the unused chain.
  *
  * mMainMemHighAddr becomes the node's highAddr; the node's lowAddr / highAddr become -1, size and state 0 (unused), and
- * it is pushed on unk_310. Unless load limits are set (unk_31C), func_003B5B20(-1, mMainMemHighAddr) applies the new
- * limit. cPS2SoundManager_DeallocSoundMem calls it.
+ * it is pushed on unk_310. Unless load limits are set (mMemLoadLimited), func_003B5B20(-1, mMainMemHighAddr) applies
+ * the new limit. cPS2SoundManager_DeallocSoundMem calls it.
  *
  * @param memNode  the memory node
  */
@@ -15957,7 +15957,7 @@ extern "C" void func_002A92F8(cPS2SoundManager* self, s2A92F8Entry* memNode)
     memNode->unk10 = 0;
     memNode->next = self->unk_310;
     self->unk_310 = memNode->index;
-    if (self->unk_31C == 0) {
+    if (self->mMemLoadLimited == 0) {
         func_003B5B20(-1, self->mMainMemHighAddr);
     }
 }

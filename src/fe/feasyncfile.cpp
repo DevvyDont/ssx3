@@ -2923,7 +2923,7 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEState
  * Constructs the private-message conversation popup for one sender.
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with the engine and parent, stores cFEStateReadMessagePopup_vtbl,
- * builds mszSender from @p name, sets mbResetScroll 1, mHashName 0x49, unk_6D4 0, empties mMessages and sets
+ * builds mszSender from @p name, sets mbResetScroll 1, mHashName 0x49, mScrollIndex 0, empties mMessages and sets
  * mTextColour to white (1, 1, 1, 1).
  *
  * @param engine  the UI engine (On Tour cUIState's pEngine)
@@ -2940,7 +2940,7 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEState
     cBXString_cBXString2(((char*)&self->mszSender), name);
     self->mbResetScroll = 1;
     self->mHashName = 73;
-    self->unk_6D4 = 0;
+    self->mScrollIndex = 0;
     *(int*)&self->mMessages.mpStart = 0;
     *(int*)&self->mMessages.mpFinish = 0;
     *(int*)&self->mMessages.mpEndOfStorage = 0;
@@ -3242,7 +3242,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 /**
  * Handles menu events on the private-message popup: event 4 (the text scroller moved) stores the index and refreshes.
  *
- * The index goes to unk_6D4 and func_001A81F0 rebuilds the conversation.
+ * The index goes to mScrollIndex and func_001A81F0 rebuilds the conversation.
  *
  * @param pMenu  the menu (On Tour pMenu); unused
  * @param Event  the menu event (On Tour Event)
@@ -3252,7 +3252,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 extern "C" int cFEStateReadMessagePopup_onWidgetMenu(cFEStateReadMessagePopup* self, int pMenu, int Event, int index)
 {
     if (Event == 4) {
-        self->unk_6D4 = index;
+        self->mScrollIndex = index;
         func_001A81F0(self);
         return 0;
     }

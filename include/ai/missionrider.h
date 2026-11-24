@@ -45,8 +45,8 @@ struct cMissionRider {
     cInput* Input;             // 0xDF0 [R] cAI_initMissionRiders stores PlaybackMan +0x6C; [O]
     cPadDevice* Pad;           // 0xDF4 [R] cAI_initMissionRiders stores 0; [O]
     cReplayCache* ReplayCache; // 0xDF8 [R] cPlayer_cPlayer; [O]
-    float unk_DFC;             // 0xDFC [R] cPlayer_cPlayer = 0 (vibration, see ai/player.h)
-    float unk_E00;             // 0xE00 [R] cPlayer_cPlayer = 0 (vibration, see ai/player.h)
+    float mVibrationBump;      // 0xDFC [R] cPlayer_cPlayer = 0 (vibration, see ai/player.h)
+    float mVibrationRumble;    // 0xE00 [R] cPlayer_cPlayer = 0 (vibration, see ai/player.h)
     char pad_E04[0xC];         // 0xE04 the cRider virtual base is 16-byte aligned
     // ---- virtual base cRider (0xE10-0x1950) ----
     cRider Rider;              // 0xE10 [R] the inlined ctor: cRider_cRider(this + 0xE10), then the cMissionRider vtables at
@@ -63,8 +63,8 @@ CHECK_OFFSET(cMissionRider, pad_DEC, 0xDEC);
 CHECK_OFFSET(cMissionRider, Input, 0xDF0);
 CHECK_OFFSET(cMissionRider, Pad, 0xDF4);
 CHECK_OFFSET(cMissionRider, ReplayCache, 0xDF8);
-CHECK_OFFSET(cMissionRider, unk_DFC, 0xDFC);
-CHECK_OFFSET(cMissionRider, unk_E00, 0xE00);
+CHECK_OFFSET(cMissionRider, mVibrationBump, 0xDFC);
+CHECK_OFFSET(cMissionRider, mVibrationRumble, 0xE00);
 CHECK_OFFSET(cMissionRider, pad_E04, 0xE04);
 CHECK_OFFSET(cMissionRider, Rider, 0xE10);
 CHECK_SIZE(cMissionRider, 0x1950);

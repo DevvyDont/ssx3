@@ -6699,7 +6699,7 @@ extern "C" void cPadDevice_clearAllVibrations(void* obj);
  * With @p on 0 both levels are zeroed and cPadDevice_clearAllVibrations stops the pad. Otherwise level 0 (bump) becomes max(level x
  * 0.9133 - 18.5, 0) and level 1 (rumble) is multiplied by 0.99167; when the pad's virtual slot 3 returns 2, slot 4 sets
  * motor 0 to max((rumble - 0.5) x 0.01, (bump - 2) / 972.2, 0) and motor 1 to max((rumble - 70) / 160, (bump - 100) /
- * 5000, 0). Called by cPlayer_vibrationUpdate with &unk_DFC.
+ * 5000, 0). Called by cPlayer_vibrationUpdate with &mVibrationBump.
  *
  * @param vibState  the two levels (bump, rumble)
  * @param controller  the cPadDevice
@@ -7007,13 +7007,13 @@ extern "C" int cPlayer_getUberGrindHeld(cPlayer* self)
 INCLUDE_ASM("ai/rider", cPlayer_vibrationReset__FPv);
 #ifdef SKIP_ASM
 /**
- * Clears the player's two vibration levels, unk_DFC and unk_E00 (cRider virtual slot 16).
+ * Clears the player's two vibration levels, mVibrationBump and mVibrationRumble (cRider virtual slot 16).
  */
 void cPlayer_vibrationReset(void* vself)
 {
     cPlayer* self = (cPlayer*)vself;
-    self->unk_E00 = 0.0f;
-    self->unk_DFC = 0.0f;
+    self->mVibrationRumble = 0.0f;
+    self->mVibrationBump = 0.0f;
 }
 #endif
 
@@ -7021,13 +7021,13 @@ void cPlayer_vibrationReset(void* vself)
 INCLUDE_ASM("ai/rider", cPlayer_vibrationBump);
 #ifdef SKIP_ASM
 /**
- * Raises the player's bump vibration level (unk_DFC) to @p val when that is higher (cRider virtual slot 17).
+ * Raises the player's bump vibration level (mVibrationBump) to @p val when that is higher (cRider virtual slot 17).
  *
  * @param val  the bump strength
  */
 extern "C" void cPlayer_vibrationBump(cPlayer* self, float val)
 {
-    self->unk_DFC = val >? self->unk_DFC;
+    self->mVibrationBump = val >? self->mVibrationBump;
 }
 #endif
 
@@ -7035,14 +7035,14 @@ extern "C" void cPlayer_vibrationBump(cPlayer* self, float val)
 INCLUDE_ASM("ai/rider", cPlayer_vibrationRumble__FPvf);
 #ifdef SKIP_ASM
 /**
- * Sets the player's rumble vibration level (unk_E00) to @p val (cRider virtual slot 18).
+ * Sets the player's rumble vibration level (mVibrationRumble) to @p val (cRider virtual slot 18).
  *
  * @param val  the rumble strength
  */
 void cPlayer_vibrationRumble(void* vself, float val)
 {
     cPlayer* self = (cPlayer*)vself;
-    self->unk_E00 = val;
+    self->mVibrationRumble = val;
 }
 #endif
 
@@ -7077,7 +7077,7 @@ extern "C" void cPlayer_vibrationUpdate(cPlayer* self)
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);
         }
-        func_00125B18(&player->unk_DFC, (int)player->Pad, flag);
+        func_00125B18(&player->mVibrationBump, (int)player->Pad, flag);
     }
 }
 #endif

@@ -66,7 +66,10 @@ struct cAnimNode {
     int MeshVelocityDirty;          // 0x10 [O] bool (word); [R] ctor 1; [U] cacheFrame sets 1, updateMeshVelocity
                                     //      clears it, updateIntersectInfo tests it (lw/sw 0x10)
     // --- cMoveNode at +0x14 (0x2C; object/movenode.h): cObjNode / cTypeObjNode / cSortObjNode / cInstanceNode first
-    int unk_014;                    // 0x14 cObjNode's leading word (unk_00 in object/objnode.h); no ctor writes it
+    int MoveNodeBase;               // 0x14 where the cMoveNode base starts (name ours): `&MoveNodeBase` is the
+                                    //      cMoveNode subobject the methods pass on (cMoveNode_* calls, vtable
+                                    //      thunks). The word is cObjNode's unnamed leading word (unk_00 in
+                                    //      object/objnode.h); no ctor writes it
     cObjNode* Next;                 // 0x18 [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x1C [O] cObjNode::Prev; [U] bucket list
     void** mVtbl;                   // 0x20 [R] cAnimNode_vtbl (both ctors, the dtor); [U] getAnimMats/getAnimMat/
@@ -101,7 +104,7 @@ CHECK_OFFSET(cAnimNode, CacheTime, 0x04);
 CHECK_OFFSET(cAnimNode, FrameStart, 0x08);
 CHECK_OFFSET(cAnimNode, FrameEnd, 0x0C);
 CHECK_OFFSET(cAnimNode, MeshVelocityDirty, 0x10);
-CHECK_OFFSET(cAnimNode, unk_014, 0x14);
+CHECK_OFFSET(cAnimNode, MoveNodeBase, 0x14);
 CHECK_OFFSET(cAnimNode, Next, 0x18);
 CHECK_OFFSET(cAnimNode, Prev, 0x1C);
 CHECK_OFFSET(cAnimNode, mVtbl, 0x20);
