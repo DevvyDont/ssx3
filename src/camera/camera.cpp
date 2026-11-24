@@ -147,7 +147,6 @@ INCLUDE_ASM("camera/camera", cCamera_init);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg);
 extern "C" void cChaseCameraController_setTarget(cChaseCameraController* self, int* p);
-struct sCam162060;
 extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int arg, float blend);
 void cChaseAlgorithm_setTarget(void* self, int val);
 void* cCamera_snapResultAlgorithm(void* self);
@@ -226,7 +225,7 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int riderIndex, float view, f
     VPTR_AT(riderRef, 0) = cRiderCameraTarget_vtbl;
     (*(int*)&riderRef->Rider) = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (riderIndex << 2) + 0x28);
     cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);
-    cChaseCameraController_switchCamera_Volume((cChaseCameraController*)((sCam162060*)self->chase), 76, 0, 1.0f);
+    cChaseCameraController_switchCamera_Volume((cChaseCameraController*)self->chase, 76, 0, 1.0f);
     cChaseAlgorithm_setTarget((char*)self + 0xC0, (int)riderRef);
     cCamera_snapResultAlgorithm(self);
     self->f454 = 0;
@@ -3907,11 +3906,6 @@ extern "C" void cIdleChaseAlgorithm_snap_v(char* vself, int id)
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_HardReset);
 #ifdef SKIP_ASM
-struct cChaseCameraController_switchCamera_HardReset_flags {
-    unsigned int b0 : 1;
-    unsigned int b1 : 1;
-    unsigned int b2 : 1;
-};
 
 extern int persistentPlayerChoiceType[2];
 
@@ -3927,7 +3921,9 @@ extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraContro
 {
     self->PreferredChaseAlgoLastFrame = 61;
     *(int*)&self->TimeSinceLastSuggestedVolumeTrigger = 0;
-    ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b1 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b0 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b2 = 0;
+    self->CamSwitchRecord.IsInReplay = 0;
+    self->CamSwitchRecord.IsInVolume = 0;
+    self->CamSwitchRecord.IsSlow = 0;
     self->GoingSlow = 0;
     self->NumFramesSlowGround = 0;
     self->CamSwitchRecord.LatestReplayType = 61;
@@ -4097,7 +4093,6 @@ extern "C" void cChaseCameraController_processInput(cChaseCameraController* self
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_update);
 #ifdef SKIP_ASM
-struct sCam162060;
 extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int arg, float blend);
 extern int cPauseState_Flags;
 
@@ -4248,7 +4243,7 @@ extern "C" void cChaseCameraController_switchCamera_UserChange(cChaseCameraContr
 {
     self->CamSwitchRecord.PlayerChoiceType = type;
     persistentPlayerChoiceType[self->Target->Rider->mViewIndex] = type;
-    if ((*(int*)((char*)self + 0x30) & 7) == 0) {
+    if (!self->CamSwitchRecord.IsInVolume && !self->CamSwitchRecord.IsInReplay && !self->CamSwitchRecord.IsSlow) {
         cChaseCameraController_createChaseAlgorithmCut(self, type, 0);
     }
 }
@@ -4257,18 +4252,6 @@ extern "C" void cChaseCameraController_switchCamera_UserChange(cChaseCameraContr
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndReplay);
 #ifdef SKIP_ASM
-struct sCam161F50 {
-    char pad_0x00[0x24];
-    int field_0x24;
-    int field_0x28;
-    int pad_0x2C;
-    unsigned int b0 : 1; // 0x30
-    unsigned int b1 : 1;
-    unsigned int b2 : 1;
-    unsigned int rest : 29;
-    int field_0x34;
-};
-
 extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void*, int, int);
 
 /**
@@ -4280,13 +4263,13 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void*, int, int)
 extern "C" void cChaseCameraController_switchCamera_EndReplay(cChaseCameraController* self)
 {
     int mode;
-    ((sCam161F50*)self)->b1 = 0;
-    ((sCam161F50*)self)->b0 = 0;
+    self->CamSwitchRecord.IsInReplay = 0;
+    self->CamSwitchRecord.IsInVolume = 0;
     mode = 66;
-    if (!((sCam161F50*)self)->b2) {
+    if (!self->CamSwitchRecord.IsSlow) {
         mode = self->CamSwitchRecord.PlayerChoiceType;
     }
-    cChaseCameraController_createChaseAlgorithmCut(((sCam161F50*)self), mode, (int)self->CamSwitchRecord.TriggerAction);
+    cChaseCameraController_createChaseAlgorithmCut(self, mode, (int)self->CamSwitchRecord.TriggerAction);
 }
 #endif
 
@@ -4326,18 +4309,6 @@ extern "C" void cChaseCameraController_switchCamera_ReplayToggle(cChaseCameraCon
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_Volume);
 #ifdef SKIP_ASM
-struct sCam162060 {
-    char pad_0x00[0x24];
-    int field_0x24;
-    int field_0x28;
-    int field_0x2C;
-    unsigned int b0 : 1; // 0x30
-    unsigned int b1 : 1;
-    unsigned int b2 : 1;
-    unsigned int rest : 29;
-    int field_0x34;
-};
-
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
 /**
@@ -4353,16 +4324,16 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
 extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int action, float blend)
 {
     if (mode == 76) {
-        ((sCam162060*)self)->b0 = 0;
+        self->CamSwitchRecord.IsInVolume = 0;
         mode = self->CamSwitchRecord.PlayerChoiceType;
     } else {
         self->CamSwitchRecord.VolumeType = mode;
-        ((sCam162060*)self)->b0 = 1;
+        self->CamSwitchRecord.IsInVolume = 1;
         self->CamSwitchRecord.TriggerAction = (cCTAction*)action;
     }
-    int ok = !((sCam162060*)self)->b1 ? 1 : self->CamSwitchRecord.LatestReplayType == 93;
+    int ok = !self->CamSwitchRecord.IsInReplay ? 1 : self->CamSwitchRecord.LatestReplayType == 93;
     if (ok) {
-        cChaseCameraController_createChaseAlgorithmBlend(((sCam162060*)self), mode, action, blend);
+        cChaseCameraController_createChaseAlgorithmBlend(self, mode, action, blend);
     }
 }
 #endif
@@ -4370,18 +4341,6 @@ extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraControlle
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_Chapter);
 #ifdef SKIP_ASM
-struct sCam1620D0 {
-    char pad_0x00[0x24];
-    int field_0x24;
-    int field_0x28;
-    int field_0x2C;
-    unsigned int b0 : 1; // 0x30
-    unsigned int b1 : 1;
-    unsigned int b2 : 1;
-    unsigned int rest : 29;
-    int field_0x34;
-};
-
 extern "C" void cCamera_invalidateSafePosition();
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
@@ -4394,11 +4353,11 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
 extern "C" void cChaseCameraController_switchCamera_Chapter(cChaseCameraController* self)
 {
     int mode = self->CamSwitchRecord.LatestReplayType;
-    ((sCam1620D0*)self)->b0 = 0;
+    self->CamSwitchRecord.IsInVolume = 0;
     if (mode == 93)
         mode = self->CamSwitchRecord.PlayerChoiceType;
     cCamera_invalidateSafePosition();
-    cChaseCameraController_createChaseAlgorithmBlend(((sCam1620D0*)self), mode, 0, 1.0f);
+    cChaseCameraController_createChaseAlgorithmBlend(self, mode, 0, 1.0f);
 }
 #endif
 

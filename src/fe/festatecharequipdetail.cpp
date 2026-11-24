@@ -292,7 +292,7 @@ extern "C" void cFEStateCharEquip__cFEStateCharEquip(cFEStateCharEquip* self, in
 {
     VPTR_OF(cListNode, self) = cFEStateCharEquip_vtbl;
     if (self->mIconsFileIndex >= 0) {
-        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID,
+        func_0019DC20((sEquipTable_DC20*)(SSXApp->RealFE->mBoltFileManager), self->mCharID,
                       self->mIconsFileIndex);
         self->mIconsFileIndex = -1;
     }
@@ -707,7 +707,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
 {
     cUIState_onUpdate(self);
     if (self->mIconsLoaded == 0
-        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID,
+        && func_0019E238((sEquipTable*)(SSXApp->RealFE->mBoltFileManager), self->mCharID,
                          self->mIconsFileIndex)) {
         self->mIconsLoaded = 1;
         func_0019A9B8(self);
@@ -1127,7 +1127,7 @@ extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* 
 {
     if (self->mIconsLoaded == 0)
         return -1;
-    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70),
+    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0((sEquipTable*)(SSXApp->RealFE->mBoltFileManager),
                                                   self->mCharID, self->mIconsFileIndex);
     if (pkg == 0)
         return -1;
@@ -1171,7 +1171,7 @@ extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updateIconTexturesLoad(cFEStateCharEquip* self)
 {
     if (self->mIconsLoaded == 0
-        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID,
+        && func_0019E238((sEquipTable*)(SSXApp->RealFE->mBoltFileManager), self->mCharID,
                          self->mIconsFileIndex)) {
         self->mIconsLoaded = 1;
         func_0019A9B8(self);
@@ -1319,7 +1319,7 @@ extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self
 {
     int idx = self->mPreviewTextureFileIndex;
     if (idx >= 0) {
-        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID, idx);
+        func_0019DC20((sEquipTable_DC20*)(SSXApp->RealFE->mBoltFileManager), self->mCharID, idx);
     }
     self->mLargePreviewFileName[0] = 0;
     self->mPreviewTextureFileIndex = -1;

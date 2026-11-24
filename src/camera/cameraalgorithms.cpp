@@ -71,7 +71,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
 {
     cCamAlgo_D0A0* algo = 0;
     float blendRate = blend;
-    if (*(int*)(((char*)self) + 0x30) & 2) {
+    if (self->CamSwitchRecord.IsInReplay) {
         blendRate = 1.0f;
     }
     switch (kind) {

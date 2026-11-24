@@ -375,7 +375,7 @@ INCLUDE_ASM("camera/cameracontroller", cChaseCameraController_shouldDoExtraGroun
 extern "C" int cChaseCameraController_shouldDoExtraGroundTest(cChaseCameraController* self)
 {
     int replayCamActive = 0;
-    if (*(int*)((char*)self + 0x30) & 2) {
+    if (self->CamSwitchRecord.IsInReplay) {
         int replayType = self->CamSwitchRecord.LatestReplayType;
         if (replayType != 93) {
             replayCamActive = replayType != 0x3C;
