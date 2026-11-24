@@ -49,7 +49,7 @@ struct cBezierCache {
     t4Vector unk_0B0[6];             // 0x0B0 [U] 6x6 basis table
     t4Vector unk_110[8];             // 0x110 [U] 8x8 basis table
     t4Vector* unk_190[3];            // 0x190 [U] the three basis tables, indexed by patch size (cPS2BezierMan_GetBezST)
-    int unk_19C[3];                  // 0x19C [U] the patch order per size (4, 6, 8)
+    int mPatchOrder[3];              // 0x19C (name ours) [U] the patch order per size (4, 6, 8): the grid side n
     int mNrmCacheSize[3];                  // 0x1A8 [R] normal-cache sizes per patch size
     t3Vector* unk_1B4[3];            // 0x1B4 [R] "4x4NrmCache" / 6x6 / 8x8
     int* unk_1C0[3];                 // 0x1C0 [R] "4x4FreeNrmList" / 6x6 / 8x8 buffers
@@ -78,7 +78,7 @@ CHECK_OFFSET(cBezierCache, unk_070, 0x070);
 CHECK_OFFSET(cBezierCache, unk_0B0, 0x0B0);
 CHECK_OFFSET(cBezierCache, unk_110, 0x110);
 CHECK_OFFSET(cBezierCache, unk_190, 0x190);
-CHECK_OFFSET(cBezierCache, unk_19C, 0x19C);
+CHECK_OFFSET(cBezierCache, mPatchOrder, 0x19C);
 CHECK_OFFSET(cBezierCache, mNrmCacheSize, 0x1A8);
 CHECK_OFFSET(cBezierCache, unk_1B4, 0x1B4);
 CHECK_OFFSET(cBezierCache, unk_1C0, 0x1C0);

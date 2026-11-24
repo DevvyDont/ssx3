@@ -4452,7 +4452,7 @@ extern "C" void cPS2GraphicsMan_AddDMAToWorld(cPS2GraphicsMan* gfx, unsigned int
     cPS2DeferManager* ring = gfx->mpDeferMan;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         tDeferSubmit* record = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((tDeferSubmit*)&ring->mSubmits[0]) | 0x30000000));
         record->mDrawState = *rs;
         record->mPacket = buf;

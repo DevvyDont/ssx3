@@ -223,7 +223,7 @@ CHECK_SIZE(tSplineSegmentRecord, 0x90);
 // A spline (On Tour tSplineRecord : _tPSPSplineRecord, 0x30; same layout). Its segments follow it ([U]
 // cChunkResolve_resolveSpline's first segment is this + 0x30).
 struct tSplineRecord {
-    unsigned int unk_000;           // 0x00 [O] tResourceID m_RID
+    unsigned int m_RID;             // 0x00 [O] tResourceID; [U] cRailslideMotion_step stores it as the rail's SplineID
     char unk_004[0x18];             // 0x04 [O] tf3Vector m_fvMin, m_fvMax
     int m_iFlags;                   // 0x1C [O]; [U] cWScriptCacheEntry_resolve stores it (tSplineData::Flags); the
                                     //      spline queries test m_Parent->m_iFlags
@@ -234,7 +234,7 @@ struct tSplineRecord {
     char unk_02C[0x4];              // 0x2C [O] m_PadBytes
 };
 
-CHECK_OFFSET(tSplineRecord, unk_000, 0x00);
+CHECK_OFFSET(tSplineRecord, m_RID, 0x00);
 CHECK_OFFSET(tSplineRecord, unk_004, 0x04);
 CHECK_OFFSET(tSplineRecord, m_iFlags, 0x1C);
 CHECK_OFFSET(tSplineRecord, m_iNumSegments, 0x20);

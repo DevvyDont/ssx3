@@ -159,8 +159,9 @@ struct cPS2DeferManager {
     sDrawState mCurrentState;       // 0x69CA8 [R] ctor (texture ids -1); [U] func_00362CC8 = sDrawState::s_defaultDrawState;
                                     //         func_00364C90 copies one in; func_00363C20 reads it
     unsigned int unk_69CBC;         // 0x69CBC [U] func_00363C20 (sRmRend3C20::frame)
-    int unk_69CC0;                  // 0x69CC0 [U] the active view state: func_00362CC8 -1; func_003645B8 sets the
-                                    //         index it found or added (sRailXfTable_45B8::found)
+    int mActiveViewIndex;           // 0x69CC0 (name ours) [U] the active view state: func_00362CC8 -1; func_003645B8
+                                    //         sets the index it found or added (sRailXfTable_45B8::found); the
+                                    //         submitters store it as tDeferSubmit::mViewIndex
     int mActivePortIndex;           // 0x69CC4 [P] "mActivePortIndex >= 0" (the word after the view index); [U]
                                     //         func_00362CC8 -1; func_00364B88 sets it (sRailKeyTable::found)
     int mIndexView;                 // 0x69CC8 [P] "mIndexView < kMaxNumViewState"; [U] func_00362CC8 0;
@@ -192,7 +193,7 @@ CHECK_OFFSET(cPS2DeferManager, mNumSortItems, 0x67CA4);
 CHECK_OFFSET(cPS2DeferManager, mSortItems, 0x67CA8);
 CHECK_OFFSET(cPS2DeferManager, mCurrentState, 0x69CA8);
 CHECK_OFFSET(cPS2DeferManager, unk_69CBC, 0x69CBC);
-CHECK_OFFSET(cPS2DeferManager, unk_69CC0, 0x69CC0);
+CHECK_OFFSET(cPS2DeferManager, mActiveViewIndex, 0x69CC0);
 CHECK_OFFSET(cPS2DeferManager, mActivePortIndex, 0x69CC4);
 CHECK_OFFSET(cPS2DeferManager, mIndexView, 0x69CC8);
 CHECK_OFFSET(cPS2DeferManager, unk_69CCC, 0x69CCC);

@@ -35,12 +35,19 @@ struct tPatchRecord {
     float m_fBm1[4][4];             // 0x080 [O]; [U] as m_fBm0
     float m_fBm2[4][4];             // 0x0C0 [O]; [U] as m_fBm0
     float m_fBm3[4][4];             // 0x100 [O]; [U] as m_fBm0
-    char unk_140[0x18];             // 0x140 no retail access checked (On Tour's m_fmControl / m_fvBSphere do not fit here)
+    char unk_140[0x10];             // 0x140 no retail access checked (On Tour's m_fmControl / m_fvBSphere do not
+                                    //       fit here)
+    unsigned int m_RID;             // 0x150 [O] tResourceID m_RID (On Tour's name; placed by retail use); [U] the
+                                    //       patch's id: cAirMotion_resolve / cGroundMotion_setupGroundVectors copy it
+                                    //       to the rider's mGroundPolyId, cAirPredictor_simStep to GuessLandPatchRID,
+                                    //       the ground hit sort (isBetter_13D1B8) compares it unsigned
+    char unk_154[0x4];              // 0x154 no retail access checked
     tf3Vector m_fvMin;              // 0x158 [O] (after the bound sphere in On Tour); [U] func_0038CA08 passes it as Min
                                     //       of cPS2GraphicsMan_CheckProjectiveTexturesHits ([O] (const t4Vector& Min,
                                     //       const t4Vector& Max)); func_0038D690: the box diagonal (sparkle count)
     tf3Vector m_fvMax;              // 0x164 [O]; [U] func_0038CA08: Max; func_0038D690
-    char unk_170[0x30];             // 0x170 no retail access checked (On Tour: m_RID, m_SMap, m_iPatchIndex)
+    char unk_170[0x30];             // 0x170 no retail access checked (On Tour: m_SMap, m_iPatchIndex; its m_RID is at
+                                    //       0x150 here)
     short m_sTextures[3];           // 0x1A0 [O]; [U] func_0038CA70: +0x1A0 / +0x1A2 go into the draw state's two texture
                                     //       ids (and the deferred entry's tex / tex2); func_0038D168: +0x1A4 = the shine
                                     //       texture (mSpecTexID when negative)
@@ -61,6 +68,8 @@ CHECK_OFFSET(tPatchRecord, m_fBm1, 0x080);
 CHECK_OFFSET(tPatchRecord, m_fBm2, 0x0C0);
 CHECK_OFFSET(tPatchRecord, m_fBm3, 0x100);
 CHECK_OFFSET(tPatchRecord, unk_140, 0x140);
+CHECK_OFFSET(tPatchRecord, m_RID, 0x150);
+CHECK_OFFSET(tPatchRecord, unk_154, 0x154);
 CHECK_OFFSET(tPatchRecord, m_fvMin, 0x158);
 CHECK_OFFSET(tPatchRecord, m_fvMax, 0x164);
 CHECK_OFFSET(tPatchRecord, unk_170, 0x170);

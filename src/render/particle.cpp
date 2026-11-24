@@ -20,6 +20,7 @@
 #include "render/particle.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
+#include "render/ps2scratchpad.h"
 
 //100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_Allocate);
@@ -2291,17 +2292,17 @@ static inline sV2_4298 operator*(const sV2_4298& a, float k)
 /**
  * Fills a patch's texture-UV grid by bilinear interpolation between its four corner UVs.
  *
- * The corners come from @p src: +0x20 and +0x28 (first row's ends) and +0x30 and +0x38 (last row's ends). With order n
- * from +0x19C[@p idx], each of the n rows steps its two ends by 1 / (n - 1) of the way to the last row and writes n
- * evenly spaced uv pairs from one end to the other. func_003747A0 calls it.
+ * The corners come from @p src's m_fUV0: [0][0..1] and [0][2..3] (first row's ends), [1][0..1] and [1][2..3] (last
+ * row's ends). With order n from mPatchOrder[@p idx], each of the n rows steps its two ends by 1 / (n - 1) of the way
+ * to the last row and writes n evenly spaced uv pairs from one end to the other. func_003747A0 calls it.
  *
  * @param src  the patch record (tPatchRecord)
  * @param out  the n x n uv grid to fill
  * @param idx  the patch order: 0 = 4x4, 1 = 6x6, 2 = 8x8
  */
-extern "C" void func_00374298(char* self, tPatchRecord* src, sV2_4298* out, int idx)
+extern "C" void func_00374298(cBezierCache* self, tPatchRecord* src, sV2_4298* out, int idx)
 {
-    int n = *(int*)(self + (idx << 2) + 0x19C);
+    int n = self->mPatchOrder[idx];
     sV2_4298 leftEdge = *(sV2_4298*)&src->m_fUV0[0][0];
     sV2_4298 rightEdge = *(sV2_4298*)&src->m_fUV0[0][2];
     sV2_4298 bottomLeft = *(sV2_4298*)&src->m_fUV0[1][0];
@@ -2341,17 +2342,17 @@ struct sPtRect {
 /**
  * Fills a patch's lightmap-UV grid: an even n x n grid over the rectangle at +0x10 of @p rect.
  *
- * With order n from +0x19C[@p idx], the step is the rectangle's size (+0x18) / (n - 1); for each column x from the
+ * With order n from mPatchOrder[@p idx], the step is the rectangle's size (+0x18) / (n - 1); for each column x from the
  * origin (+0x10) it writes n points stepping y. func_003747A0 calls it for the lightmap UV cache.
  *
  * @param rect  the patch record (tPatchRecord): lightmap origin at +0x10, size at +0x18
  * @param out  the n x n uv grid to fill
  * @param idx  the patch order: 0 = 4x4, 1 = 6x6, 2 = 8x8
  */
-extern "C" void func_00374440(char* self, sPtRect* rect, sPtVec2* out, int idx)
+extern "C" void func_00374440(cBezierCache* self, sPtRect* rect, sPtVec2* out, int idx)
 {
     int i, j;
-    int n = *(int*)(self + (idx << 2) + 0x19C);
+    int n = self->mPatchOrder[idx];
     sPtVec2 pos = rect->origin;
     sPtVec2 step = rect->size;
     float inv = 1.0f / (float)(n - 1);
@@ -2401,21 +2402,21 @@ static inline sPatchOut4518 Normalize4518(const sPatchOut4518& v)
 /**
  * Computes a patch's n x n grid of unit normals (VU0 macro code).
  *
- * Loads the 16 coefficient vectors from +0x40 of @p mat. A first pass evaluates the patch with the derivative basis
- * (3t^2, 2t, 1, 0; +0x310[@p idx]) in one direction and the basis (+0x190[@p idx]) in the other, storing that tangent
- * in
- * @p out; a second pass evaluates the other tangent and replaces each entry with the normalised cross product of the
- * two (left unnormalised when its length is 0). func_003747A0 calls it for patches that need normals.
+ * Loads the 16 coefficient vectors of @p mat (m_fBm0 .. m_fBm3). A first pass evaluates the patch with the
+ * derivative basis (3t^2, 2t, 1, 0; unk_310[@p idx]) in one direction and the basis (unk_190[@p idx]) in the other,
+ * storing that tangent in @p out; a second pass evaluates the other tangent and replaces each entry with the
+ * normalised cross product of the two (left unnormalised when its length is 0). func_003747A0 calls it for patches
+ * that need normals.
  *
- * @param mat  the patch record (tPatchRecord): coefficients at +0x40
+ * @param mat  the patch record: its coefficient rows m_fBm0 .. m_fBm3
  * @param out  the n x n normal grid to fill
  * @param idx  the patch order: 0 = 4x4, 1 = 6x6, 2 = 8x8
  */
 // PORT: PS2-only VU0 inline asm (tensor-product patch evaluation, then normals
 // as the normalised cross product of the two partial derivatives).
-extern "C" void func_00374518(cBezierCache* self, char* mat, sPatchOut4518* out, int idx)
+extern "C" void func_00374518(cBezierCache* self, tPatchRecord* mat, sPatchOut4518* out, int idx)
 {
-    int n = self->unk_19C[idx];
+    int n = self->mPatchOrder[idx];
     t4Vector* basis = self->unk_190[idx];
     t4Vector* dbasis = self->unk_310[idx];
     sPatchOut4518* cursor = out;
@@ -2438,7 +2439,7 @@ extern "C" void func_00374518(cBezierCache* self, char* mat, sPatchOut4518* out,
         "lqc2      $vf15, 0xE0(%0)\n"
         "lqc2      $vf16, 0xF0(%0)\n"
         :
-        : "r"(mat + 0x40));
+        : "r"(mat->m_fBm0));
     for (i = 0; i < n; i++) {
         __asm__ __volatile__(
             "lqc2      $vf17, 0x0(%0)\n"
@@ -2640,8 +2641,8 @@ extern "C" int func_003747A0(sPMgr_47A0* self, tPatchRecord* mat, int idx, int b
     t2Vector* uv = UVOf_47A0(self, idx, slot);
     t2Vector* col = ColOf_47A0(self, idx, slot);
     func_00374180((sPatchSet*)self, (tPatchRecord*)((char*)mat), (t3Vector*)pos, idx);
-    func_00374298((char*)self, (tPatchRecord*)((char*)mat), (sV2_4298*)uv, idx);
-    func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
+    func_00374298((cBezierCache*)self, (tPatchRecord*)((char*)mat), (sV2_4298*)uv, idx);
+    func_00374440((cBezierCache*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
     sPEnt_47A0* entry = &self->entries[idx][slot];
     entry->mat = ((char*)mat);
     mat->m_sCacheRecord[idx] = slot;
@@ -2998,7 +2999,7 @@ void operator_delete(int* ptr);
 /**
  * Destroys a rider's shadow: releases its locked texture and frees it if asked.
  *
- * When mLockTexture (+0x170) is a valid id, frees it in cGraphicsMan_TheGraphicsMan's texture manager (+0x18F4,
+ * When mLockTexture is a valid id, frees it in cGraphicsMan_TheGraphicsMan's texture manager (mTexMan,
  * func_00367B60), removes it through the graphics manager's vtable slot 50 (cPS2GraphicsMan_RemoveTexture) and resets
  * it to -1. Then operator_delete on @p flags bit 0 (cRider__cRider passes 3).
  *
@@ -3008,8 +3009,8 @@ extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
 {
     int tex = self->mLockTexture;
     if (tex >= 0) {
-        func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
-        cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
+        func_00367B60(cGraphicsMan_TheGraphicsMan->mTexMan, tex);
+        cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
         mgr->RemoveTexture(self->mLockTexture);
         self->mLockTexture = -1;
     }
@@ -4323,7 +4324,7 @@ struct sVEnt_7A10 {
 
 inline void cGfx_7A10::ResetViewport()
 {
-    sVEnt_7A10* vt = *(sVEnt_7A10**)((char*)this + 0x10D8);
+    sVEnt_7A10* vt = (sVEnt_7A10*)VPTR_OF(cGraphicsMan, this);
     void (**pf)(void*, const sRect_7A10&, int) = &vt[24].fn;
     (*pf)(vthis(this, vt[24]), sRect_7A10(0.0f, 0.0f, (float)GetWidth(), (float)GetHeight()), 1);
 }
@@ -4402,17 +4403,11 @@ struct sEnt_7CF0 {
     char pad_0x20[0x60];
 };
 
-struct sRing_7CF0 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sEnt_7CF0 ents[1];              // 0x80
-};
-
 struct sGfx_7CF0 {
     char pad_0x0[0xE84];
     sRS_7CF0* top;                  // 0xE84
     char pad_0xE88[0x18F0 - 0xE88];
-    sRing_7CF0* ring;               // 0x18F0
+    cPS2DeferManager* ring;         // 0x18F0
     char pad_0x18F4[0x5A00 - 0x18F4];
     unsigned int bufAddr;           // 0x5A00
     char pad_0x5A04[0x6AF0 - 0x5A04];
@@ -4571,12 +4566,12 @@ extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, t4Vector* pos, float
     packet += 12;
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     self->bufAddr = next;
-    sRing_7CF0* ring = self->ring;
+    cPS2DeferManager* ring = self->ring;
     sRS_7CF0* rs = self->top;
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_7CF0* ringEntry = (sEnt_7CF0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->mActiveViewIndex;
+        sEnt_7CF0* ringEntry = (sEnt_7CF0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)ring->mSubmits | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -4758,7 +4753,7 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, sV_81A0
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ringEntry->mDrawState = *rs;
         ringEntry->mPacket = buf;
@@ -4793,13 +4788,6 @@ struct sPtRingEnt {
     short key;               // 0x1C
     short flag;              // 0x1E
     char pad_0x20[0x60];
-};
-
-// The graphics manager draw ring (cPS2GraphicsMan + 0x18F0): entry count, then the 0x80-byte entries from 0x80.
-struct sPtRing {
-    int count;               // 0x0
-    char pad_0x4[0x7C];
-    sPtRingEnt ents[1];      // 0x80
 };
 
 union uPtFloatBits {
@@ -4888,8 +4876,8 @@ static inline tGlyph* Find8808(cFont* f, int c)
  * The packet at mVifCursor (uncached) holds a DMA cnt tag, a VIF DIRECT code, PRIM 0x56 (sprite, textured, blended)
  * with RGBAQ R, G, B = color[1..3] * 204, A = color[0] * 128, Q = 1, and a REGLIST GIF tag of ST/XYZ2 pairs. Then,
  * while mpDeferMan holds fewer than 2600 entries, a 0x80-byte entry is appended to it with the current draw state
- * (*m_pCurrentDrawState, low 5 bits of its third word from the manager's +0x69CC4), the packet's start and end and the
- * sort key at +0x69CC0. mVifCursor moves past the packet. Slot 80 of cPS2GraphicsMan_vtbl.
+ * (*m_pCurrentDrawState, low 5 bits of its third word from the manager's mActivePortIndex), the packet's start and
+ * end and the view index mActiveViewIndex. mVifCursor moves past the packet. Slot 80 of cPS2GraphicsMan_vtbl.
  *
  * @param font  the font (cFont layout)
  * @param text  the zero-terminated string
@@ -4985,13 +4973,14 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
     packetHead[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)34816 << 47);
     packetHead[9] = 21074;
     unsigned int next = (unsigned int)glyphOut & 0x0FFFFFFF;
-    sPtRing* ring = ((sPtRing*)self->mpDeferMan);
+    cPS2DeferManager* ring = self->mpDeferMan;
     sPtRenderState* rs = ((sPtRenderState*)self->m_pCurrentDrawState);
     self->mVifCursor = next + 0x10;
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->mActiveViewIndex;
+        sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
+            + ((unsigned int)ring->mSubmits | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -5084,8 +5073,8 @@ static inline tGlyph* Find9028(cFont* f, int c)
  * The packet at mVifCursor (uncached) holds a DMA cnt tag, a VIF DIRECT code, PRIM 0x56 (sprite, textured, blended)
  * with RGBAQ R, G, B = color[1..3] * 204, A = color[0] * 128, Q = 1, and a REGLIST GIF tag of ST/XYZ2 pairs. Then,
  * while mpDeferMan holds fewer than 2600 entries, a 0x80-byte entry is appended with the current draw state (low 5 bits
- * of its third word from the manager's +0x69CC4), the packet's start and end and the sort key at +0x69CC0. mVifCursor
- * moves past the packet. Slot 81 of cPS2GraphicsMan_vtbl.
+ * of its third word from the manager's mActivePortIndex), the packet's start and end and the view index
+ * mActiveViewIndex. mVifCursor moves past the packet. Slot 81 of cPS2GraphicsMan_vtbl.
  *
  * @param font  the font (cFont layout)
  * @param wideText  the zero-terminated 16-bit character string
@@ -5181,13 +5170,14 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
     packetHead[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)34816 << 47);
     packetHead[9] = 21074;
     unsigned int next = func_0038F668(D_004A4474, packetCursor, 4);
-    sPtRing* ring = ((sPtRing*)self->mpDeferMan);
+    cPS2DeferManager* ring = self->mpDeferMan;
     sPtRenderState* rs = ((sPtRenderState*)self->m_pCurrentDrawState);
     self->mVifCursor = next + 0x10;
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtRingEnt* deferEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->mActiveViewIndex;
+        sPtRingEnt* deferEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
+            + ((unsigned int)ring->mSubmits | 0x30000000));
         deferEntry->rs = *rs;
         deferEntry->buf = buf;
         deferEntry->next = next;
@@ -5227,7 +5217,7 @@ static inline void QueueRecord_9860(cPS2GraphicsMan* self, unsigned int buf, uns
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 0xA28) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         sPtEnt_9860* e = (sPtEnt_9860*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_9860*)&ring->mSubmits[0]) | 0x30000000));
         e->rs = *rs;
         e->buf = buf;
@@ -5275,7 +5265,7 @@ extern "C" void cPS2GraphicsMan_RenderTriStrip(cPS2GraphicsMan* self, int numVer
     int dma = D_004A4474;
     unsigned int buf = self->mVifCursor;
     unsigned long* packet = func_0038F460(dma, buf, -1, 0);
-    int qwc = *(int*)(dma + 0x10);
+    int qwc = ((cPS2ScratchPad*)dma)->mBlockSize;
     unsigned long* end = (unsigned long*)((char*)packet + qwc * 16);
     for (; numVerts >= 3; ) {
         int k = numVerts < 73 ? numVerts : 72;
@@ -5427,9 +5417,9 @@ extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
  *
  * Ends the packet at unk_5A2C with func_0038F668 (DMA channel D_004A4474) and moves mVifCursor there. While mpDeferMan
  * holds fewer than 2600 entries it appends a 0x80-byte entry with the current draw state (low 5 bits of its third word
- * from the manager's +0x69CC4), the packet's start (unk_5A28) and end and the sort key at +0x69CC0. Then mVifCursor
- * skips 0x10 bytes, bits 6-9 of the draw state's first word and the low 30 bits of its fourth word are cleared, and
- * unk_5A28/unk_5A2C are reset to 0. cSpeedBoostFX_render calls it after filling the vertices.
+ * from the manager's mActivePortIndex), the packet's start (unk_5A28) and end and the view index mActiveViewIndex.
+ * Then mVifCursor skips 0x10 bytes, bits 6-9 of the draw state's first word and the low 30 bits of its fourth word
+ * are cleared, and unk_5A28/unk_5A2C are reset to 0. cSpeedBoostFX_render calls it after filling the vertices.
  */
 // PORT: uncached (0x30000000) pointers held in int.
 extern "C" void func_0037A430(cPS2GraphicsMan* self)
@@ -5441,7 +5431,7 @@ extern "C" void func_0037A430(cPS2GraphicsMan* self)
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         sPtEnt_A430* deferEntry = (sPtEnt_A430*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_A430*)&ring->mSubmits[0]) | 0x30000000));
         deferEntry->rs = *rs;
         deferEntry->buf = buf;
@@ -5728,13 +5718,14 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                     packet += 2;
                 }
                 unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-                sPtRing* ring = ((sPtRing*)self->mpDeferMan);
+                cPS2DeferManager* ring = self->mpDeferMan;
                 self->mVifCursor = next;
                 sDrawState* rs = self->m_pCurrentDrawState;
-                if (ring->count < 2600) {
-                    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-                    int key = *(int*)((char*)ring + 0x69CC0);
-                    sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+                if (ring->mNumSubmitDMA < 2600) {
+                    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+                    int key = ring->mActiveViewIndex;
+                    sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
+                        + ((unsigned int)ring->mSubmits | 0x30000000));
                     *(sDrawState*)&ringEntry->rs = *rs;
                     ringEntry->buf = buf;
                     ringEntry->next = next;
@@ -5841,13 +5832,14 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                     }
                 }
                 unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-                sPtRing* ring = ((sPtRing*)self->mpDeferMan);
+                cPS2DeferManager* ring = self->mpDeferMan;
                 self->mVifCursor = next;
                 sDrawState* rs = self->m_pCurrentDrawState;
-                if (ring->count < 2600) {
-                    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-                    int key = *(int*)((char*)ring + 0x69CC0);
-                    sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+                if (ring->mNumSubmitDMA < 2600) {
+                    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+                    int key = ring->mActiveViewIndex;
+                    sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
+                        + ((unsigned int)ring->mSubmits | 0x30000000));
                     *(sDrawState*)&ringEntry->rs = *rs;
                     ringEntry->buf = buf;
                     ringEntry->next = next;
@@ -5980,7 +5972,7 @@ static inline void QueueRecord_B548(cPS2GraphicsMan* self, unsigned int buf, uns
     sPtRS_B548* rs = ((sPtRS_B548*)self->m_pCurrentDrawState);
     if (ring->mNumSubmitDMA < 0xA28) {
         rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         sPtEnt_B548* e = (sPtEnt_B548*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_B548*)&ring->mSubmits[0]) | 0x30000000));
         e->rs = *rs;
         e->buf = buf;
@@ -6934,8 +6926,10 @@ struct sPtTexTbl_CC98 {
 struct sPtGfxB_CC98 {
     char pad_0x0[0xE84];
     sPtRenderState* top;                // 0xE84
-    char pad_0xE88[0x18F0 - 0xE88];
-    sPtRing* ring;             // 0x18F0
+    char pad_0xE88[0xF44 - 0xE88];
+    int mSkipNextPageFlip;          // 0xF44 cGraphicsMan::mSkipNextPageFlip
+    char pad_0xF48[0x18F0 - 0xF48];
+    cPS2DeferManager* ring;    // 0x18F0
     sPtTexTbl_CC98* tbl;            // 0x18F4
     char pad_0x18F8[0x5900 - 0x18F8];
     unsigned short vx;              // 0x5900
@@ -7025,19 +7019,20 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     packet += 4;
     unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->bufAddr = next;
-    sPtRing* ring = self->ring;
+    cPS2DeferManager* ring = self->ring;
     sPtRenderState* rs = self->top;
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->mActiveViewIndex;
+        sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
+            + ((unsigned int)ring->mSubmits | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
         ringEntry->key = key;
         ringEntry->flag = 0;
     }
-    *(int*)((char*)self + 0xF44) = 1;
+    self->mSkipNextPageFlip = 1;
     self->bufAddr += 0x10;
     self->top--;
 }
@@ -7243,7 +7238,7 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ringEntry->mDrawState = *rs;
         ringEntry->mPacket = buf;
@@ -7298,7 +7293,7 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
     int one = 1;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ringEntry->mDrawState = *rs;
         ringEntry->mContinuation = one;
@@ -7478,7 +7473,7 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         tDeferSubmit* e = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ASSERT_D800(e != 0);
         e->mDrawState = *rs;
@@ -8232,7 +8227,7 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, t4Vecto
     sPtRS_0518* rs = self->top;
     if (ring->mNumSubmitDMA < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         sPtEnt_0518* ringEntry = (sPtEnt_0518*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_0518*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
@@ -8308,9 +8303,9 @@ static inline void CopyQuads_07A0(unsigned long** pp, const void* srcp, int n)
  *
  * It flushes the buffer (func_0038F668) and stores the result in mVifCursor; while mpDeferMan holds fewer than 2600
  * entries, a 0x80-byte entry is appended to it with the current draw state (*m_pCurrentDrawState, low 5 bits of its
- * third word from the manager's +0x69CC4), the packet's start and end and the sort key at +0x69CC0; and it advances
- * mVifCursor by 0x10. Finally it clears the draw-state bits it set. When m_numSubEmitters is a multiple of 64 the last
- * block is empty but still sent. Slot 83 of cPS2GraphicsMan_vtbl.
+ * third word from the manager's mActivePortIndex), the packet's start and end and the view index mActiveViewIndex;
+ * and it advances mVifCursor by 0x10. Finally it clears the draw-state bits it set. When m_numSubEmitters is a
+ * multiple of 64 the last block is empty but still sent. Slot 83 of cPS2GraphicsMan_vtbl.
  *
  * @param obj  the emitter (cBaseClass_DynamicEmitter layout)
  */
@@ -8386,7 +8381,7 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
         sDrawState* rs = self->m_pCurrentDrawState;
         if (ring->mNumSubmitDMA < 2600) {
             rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-            int key = ring->unk_69CC0;
+            int key = ring->mActiveViewIndex;
             sPtEnt_07A0* e = (sPtEnt_07A0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_07A0*)&ring->mSubmits[0]) | 0x30000000));
             e->rs = *rs;
             e->buf = buf;
@@ -8462,7 +8457,7 @@ struct sPS2GfxView_0CE0 {  // PORT: a view of cPS2GraphicsMan (render/ps2graphic
     int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
     sPtVtVP* vtable;                // 0x10D8
     char pad_0x10DC[0x18F0 - 0x10DC];
-    sPtRing* ring;                  // 0x18F0
+    cPS2DeferManager* ring;         // 0x18F0
     void* texset;                   // 0x18F4
     char pad_0x18F8[0x5860 - 0x18F8];
     sPtMatrixV m5860;               // 0x5860
@@ -8550,7 +8545,7 @@ extern char D_F10[];
  *
  * Each block is flushed (func_0038F668) into mVifCursor and, while mpDeferMan holds fewer than 2600 entries, a
  * 0x80-byte entry is appended to it with the current draw state (*m_pCurrentDrawState, low 5 bits of its third word
- * from the manager's +0x69CC4), the packet's start and end and the sort key at +0x69CC0. Slot 84 of
+ * from the manager's mActivePortIndex), the packet's start and end and the view index mActiveViewIndex. Slot 84 of
  * cPS2GraphicsMan_vtbl.
  *
  * @param obj  the emitter (cDynamicColourEmitter layout)
@@ -8568,7 +8563,7 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
     int n = obj->count;
     sPtSegHdr hdr;
     int done = 0;
-    hdr.step = *(int*)((char*)obj + 0x20) / n;
+    hdr.step = ((cDynamicColourEmitter*)obj)->m_emitter.NumParticles / n;
     hdr.fstep = (float)hdr.step;
     int nb = n / 43 + 1;
     unsigned int prog = (unsigned int)(obj->alt != 0 ? D_F10 : D_A00) >> 3;
@@ -8579,7 +8574,7 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
         writePtr[1] = 0;
         writePtr[2] = 0;
         writePtr[3] = (unsigned long)55517 << 47;
-        hdr.v = hdr.fstep * (float)(i * 43) * *(float*)((char*)obj + 0x2C);
+        hdr.v = hdr.fstep * (float)(i * 43) * ((cDynamicColourEmitter*)obj)->m_emitter.TimeStep;
         int seg = obj->count - done;
         if (seg >= 44)
             seg = 43;
@@ -8636,12 +8631,12 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
         writePtr += 2;
         unsigned int next = func_0038F668(D_004A4474, writePtr, 4);
         self->bufAddr = next;
-        sPtRing* ring = self->ring;
+        cPS2DeferManager* ring = self->ring;
         sPtRenderState* rs = self->top;
-        if (ring->count < 2600) {
-            rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-            int key = *(int*)((char*)ring + 0x69CC0);
-            sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        if (ring->mNumSubmitDMA < 2600) {
+            rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+            int key = ring->mActiveViewIndex;
+            sPtRingEnt* e = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)ring->mSubmits | 0x30000000));
             e->rs = *rs;
             e->buf = buf;
             e->next = next;
@@ -8802,7 +8797,7 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, tSnow
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         sPtEnt_1310* ringEntry = (sPtEnt_1310*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_1310*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
@@ -8965,7 +8960,7 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, tSnow
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         sPtEnt_16F0* ringEntry = (sPtEnt_16F0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_16F0*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
@@ -9200,7 +9195,7 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, t4Matrix* Be
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ringEntry->mDrawState = *rs;
         ringEntry->mPacket = buf;
@@ -10357,17 +10352,11 @@ struct sPtEnt_4E50 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_4E50 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_4E50 ents[1];            // 0x80
-};
-
 struct sPtGfx_4E50 {
     char pad_0x0[0xE84];
     sPtRS_4E50* top;                // 0xE84
     char pad_0xE88[0x18F0 - 0xE88];
-    sPtRing_4E50* ring;             // 0x18F0
+    cPS2DeferManager* ring;         // 0x18F0
 };
 
 struct sPktBuilder_4E50 {
@@ -10388,8 +10377,9 @@ void operator_delete(int*);
  * When a packet was started (+0x8): closes the open strip (func_00384DC0), writes a DMA cnt tag and a VIF DIRECT code
  * covering the packet at its start, and, while the defer manager (mpDeferMan) holds fewer than 2600 entries, adds a
  * 0x80-byte entry with a copy of *m_pCurrentDrawState (its low 5 bits of word +0x8 set from the defer manager's scissor
- * index +0x69CC4), the packet's start and end (physical addresses), the manager's key (+0x69CC0) and flag 0. It then
- * moves the cursor one quadword on and writes it back to the cursor it was opened on. cPS2GraphicsMan_RenderLineStrip calls it with 2.
+ * index mActivePortIndex), the packet's start and end (physical addresses), the manager's view index
+ * (mActiveViewIndex) and flag 0. It then moves the cursor one quadword on and writes it back to the cursor it was
+ * opened on. cPS2GraphicsMan_RenderLineStrip calls it with 2.
  *
  * @param flags  bit 0: delete the builder afterwards
  */
@@ -10411,12 +10401,13 @@ extern "C" void func_00384E50(sPktBuilder_4E50* self, int flags)
         self->cur = next;
         self->start = buf;
         sPtGfx_4E50* graphicsMan = cGraphicsMan_TheGraphicsMan_4E50;
-        sPtRing_4E50* ring = graphicsMan->ring;
+        cPS2DeferManager* ring = graphicsMan->ring;
         sPtRS_4E50* rs = graphicsMan->top;
-        if (ring->count < 2600) {
-            rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-            int key = *(int*)((char*)ring + 0x69CC0);
-            sPtEnt_4E50* deferEntry = (sPtEnt_4E50*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        if (ring->mNumSubmitDMA < 2600) {
+            rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+            int key = ring->mActiveViewIndex;
+            sPtEnt_4E50* deferEntry = (sPtEnt_4E50*)((ring->mNumSubmitDMA++ << 7)
+                + ((unsigned int)ring->mSubmits | 0x30000000));
             deferEntry->rs = *rs;
             deferEntry->buf = buf;
             deferEntry->next = next;
@@ -11057,17 +11048,11 @@ struct sPtEnt_5C10 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_5C10 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_5C10 ents[1];            // 0x80
-};
-
 struct sPtGfx_5C10 {
     char pad_0x0[0xE84];
     sPtRS_5C10* top;                // 0xE84
     char pad_0xE88[0x18F0 - 0xE88];
-    sPtRing_5C10* ring;             // 0x18F0
+    cPS2DeferManager* ring;         // 0x18F0
     char pad_0x18F4[0x5A00 - 0x18F4];
     unsigned int bufAddr;           // 0x5A00
     char pad_0x5A04[0x6B90 - 0x5A04];
@@ -11182,13 +11167,14 @@ extern "C" void cPS2GridMesh_Render1(sBez_5C10* self, sMat_5C10* mat, int tex, i
     *(ulong*)(packetCursor + 8) = 0;
     packetCursor += 0x10;
     addr = func_0038F668(D_004A4474, (unsigned long*)packetCursor, 4);
-    sPtRing_5C10* ring = self->gfx->ring;
+    cPS2DeferManager* ring = self->gfx->ring;
     sPtRS_5C10* rs = self->gfx->top;
     unsigned int cur = self->gfx->bufAddr;
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_5C10* deferEntry = (sPtEnt_5C10*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->mActiveViewIndex;
+        sPtEnt_5C10* deferEntry = (sPtEnt_5C10*)((ring->mNumSubmitDMA++ << 7)
+            + ((unsigned int)ring->mSubmits | 0x30000000));
         deferEntry->rs = *rs;
         deferEntry->buf = cur;
         deferEntry->next = addr;
@@ -11776,12 +11762,6 @@ struct sEnt_6E78 {
     char pad_0x20[0x60];
 };
 
-struct sRing_6E78 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sEnt_6E78 ents[1];              // 0x80
-};
-
 
 struct sPkt_6E78 {
     ulong* cur;                     // 0x00 next free quad
@@ -12039,13 +12019,14 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self,
         DmaEnd_6E78(pkt, self);
     }
 
-    sRing_6E78* ring = ((sRing_6E78*)self->mpDeferMan);
+    cPS2DeferManager* ring = self->mpDeferMan;
     unsigned int next = self->mVifCursor;
     sRS_6E78* rs = ((sRS_6E78*)self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_6E78* deferEntry = (sEnt_6E78*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->mActiveViewIndex;
+        sEnt_6E78* deferEntry = (sEnt_6E78*)((ring->mNumSubmitDMA++ << 7)
+            + ((unsigned int)ring->mSubmits | 0x30000000));
         deferEntry->rs = *rs;
         deferEntry->buf = start;
         deferEntry->next = next;
@@ -12289,7 +12270,7 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
-        int key = ring->unk_69CC0;
+        int key = ring->mActiveViewIndex;
         tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ringEntry->mDrawState = *rs;
         ringEntry->mPacket = buf;

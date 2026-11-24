@@ -8402,7 +8402,7 @@ extern "C" void func_00362CC8(cPS2DeferManager* self)
     sRail20_2CC8* currentState = (sRail20_2CC8*)(&self->mCurrentState);
     *currentState = sDrawState_s_defaultDrawState;
     self->mIndexPort = 0;
-    self->unk_69CC0 = -1;
+    self->mActiveViewIndex = -1;
     self->mIndexView = 0;
     self->mActivePortIndex = -1;
 }
@@ -9181,15 +9181,15 @@ struct sRailXf_45B8 {
 extern "C" void func_003645B8(cPS2DeferManager* self, sRailXf_45B8* in)
 {
     int i;
-    self->unk_69CC0 = -1;
+    self->mActiveViewIndex = -1;
     for (i = 0; i < self->mIndexView; i++) {
         if (in->Key0Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key0) && in->Key1Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key1) &&
             in->Key2Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key2) && in->Key3Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key3)) {
-            self->unk_69CC0 = i;
+            self->mActiveViewIndex = i;
             break;
         }
     }
-    if (self->unk_69CC0 < 0) {
+    if (self->mActiveViewIndex < 0) {
         ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m0 = in->m0;
         ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m1 = in->m1;
         ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m2 = in->m2;
@@ -9199,7 +9199,7 @@ extern "C" void func_003645B8(cPS2DeferManager* self, sRailXf_45B8* in)
         ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key1 = in->key1;
         ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key2 = in->key2;
         ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key3 = in->key3;
-        self->unk_69CC0 = self->mIndexView;
+        self->mActiveViewIndex = self->mIndexView;
         self->mIndexView++;
     }
 }
@@ -9425,7 +9425,7 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
 {
     cPS2DeferManager* self = vself;
     sPkt_4CD0 pk(*pp);
-    sMtxRec_4CD0* mtxRec = &((sMtxRec_4CD0*)&self->mViewStates[0])[self->unk_69CC0];
+    sMtxRec_4CD0* mtxRec = &((sMtxRec_4CD0*)&self->mViewStates[0])[self->mActiveViewIndex];
     switch (type) {
     case 0:
         break;
