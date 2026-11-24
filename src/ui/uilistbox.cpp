@@ -6,6 +6,7 @@
 #include "ui/uithing.h"
 #include "ui/uilistbox.h"
 #include "ui/uimenu.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByAsciiString);
@@ -85,19 +86,18 @@ extern char str_UILBStrID[];
  * @param data  caller data stored with the entry (On Tour void* pData)
  * @return the new entry's index
  */
-extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id, int data)
+extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id, void* data)
 {
-    char* tbl = (char*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
-    if (tbl != 0) {
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(tbl + 4);
-        unsigned short* str = vt[4].fn(vthis(tbl, vt[4]), id);
+    cUILocaleInterface* loc = self->mpScreen->mpState->mpEngine->mpLocaleInterface;
+    if (loc != 0) {
+        unsigned short* str = loc->getStringByHash(id);
         if (str != 0) {
             unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILBStrID, 0x100, 0);
             USTR_copy(wide, str);
             self->mpEntries[self->mNumEntries].mpAsciiString = 0;
-            *(unsigned short**)&self->mpEntries[self->mNumEntries].mpString = wide;
-            *(int*)&self->mpEntries[self->mNumEntries].mpData = data;
-            *(int*)&self->mpEntries[self->mNumEntries].mStringID = id;
+            self->mpEntries[self->mNumEntries].mpString = wide;
+            self->mpEntries[self->mNumEntries].mpData = data;
+            self->mpEntries[self->mNumEntries].mStringID = id;
         }
     }
     return (self->mNumEntries)++;
@@ -109,34 +109,29 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_deleteAllEntries);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-struct cUIListBox_deleteAllEntries_sItem {
-    void* data;
-    char pad[0x10];
-};
-
 /**
  * Deletes all entries of a list box: frees their strings and sets the entry count and current index to 0.
  *
- * With bit 0x10 of the attributes (+0x74) one shared buffer at +0x9C is freed; otherwise each of the +0x318 entries
- * (0x14 bytes from +0x9C) frees its string. Then +0x319 and +0x318 are cleared. The options, rule-select and network
- * screens call it before refilling a list.
+ * With mAttrListBox.mCallback (bit 0x10) set, one shared buffer (the first entry's mpString) is freed; otherwise each
+ * of the mNumEntries entries frees its mpString. Then mCurrentEntry and mNumEntries are cleared. The options,
+ * rule-select and network screens call it before refilling a list.
  */
-extern "C" void cUIListBox_deleteAllEntries(void* self)
+extern "C" void cUIListBox_deleteAllEntries(cUIListBox* self)
 {
-    if (*(int*)((char*)self + 0x74) & 0x10) {
-        if (*(void**)((char*)self + 0x9C) != 0) {
-            cMemMan_free(*(void**)((char*)self + 0x9C));
+    if (self->mAttrListBox.mCallback) {
+        if (self->mpEntries[0].mpString != 0) {
+            cMemMan_free((void*)self->mpEntries[0].mpString);
         }
     } else {
-        for (int i = 0; i < *(unsigned char*)((char*)self + 0x318); i++) {
-            cUIListBox_deleteAllEntries_sItem* it = (cUIListBox_deleteAllEntries_sItem*)((char*)self + 0x9C) + i;
-            if (it->data != 0) {
-                cMemMan_free(it->data);
+        for (int i = 0; i < self->mNumEntries; i++) {
+            tListBoxEntry* entry = &self->mpEntries[i];
+            if (entry->mpString != 0) {
+                cMemMan_free((void*)entry->mpString);
             }
         }
     }
-    *(unsigned char*)((char*)self + 0x319) = 0;
-    *(unsigned char*)((char*)self + 0x318) = 0;
+    self->mCurrentEntry = 0;
+    self->mNumEntries = 0;
 }
 #endif
 
@@ -318,23 +313,17 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" unsigned char cUIMenu_findFirstHighlightable(void* self, int a1);
 
 
-struct sUIFlags39A928 {
-    unsigned int pad0 : 4;
-    unsigned int active : 1;
-};
-
 /**
  * Gives or removes focus on a menu, refocusing its stored, selected or first selectable item.
  *
- * A stored index (set before the screen was ready) wins. Focus changes of the item are reported to the
- * screen's
- * state (slot 19: 1 gained, 2 lost).
+ * Sets mAttr's mFocused bit. A stored index (set before the screen was ready) wins. Focus changes of the item are
+ * reported to the screen's state (slot 19: 1 gained, 2 lost).
  *
  * @param on  nonzero to focus (On Tour focus)
  */
 extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
 {
-    ((sUIFlags39A928*)(&self->mAttr))->active = on != 0;
+    ((tAttrThing*)&self->mAttr)->mFocused = on != 0;
     if (on) {
         if (self->mStoredIndex != 0xFF) {
             cUIMenu_setSelectedByIndex(((char*)self), self->mStoredIndex);
@@ -433,7 +422,7 @@ extern "C" void* cList_getByIndex(void* list, unsigned char i);
  * Finds the next selectable item after the current one, wrapping to the start when the menu wraps (mAttr bit
  * 7).
  *
- * Scrollable menus ask the screen's state (slot 20); others skip disabled child widgets.
+ * Scrollable menus ask the screen's state (slot 20); others skip child widgets whose mAttr mStatic bit is set.
  *
  * @return the next item's index, or the current one at the end of a non-wrapping menu
  */
@@ -447,8 +436,8 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
                 cUIState* owner = self->mpScreen->mpState;
                 if (owner->onWidgetMenu(self, 1, i) != 0) return i;
             } else {
-                char* item = (char*)cList_getByIndex((char*)&self->mList, i);
-                int bits = *(int*)(item + 0x14) >> 5;
+                cUIThing* item = (cUIThing*)cList_getByIndex((char*)&self->mList, i);
+                int bits = item->mAttr >> 5;
                 if ((bits & 1) == 0) return i;
             }
             i = i + 1;
@@ -488,8 +477,8 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
                     return i;
                 }
             } else {
-                void* item = cList_getByIndex((char*)&self->mList, i);
-                int bits = *(int*)((char*)item + 0x14);
+                cUIThing* item = (cUIThing*)cList_getByIndex((char*)&self->mList, i);
+                int bits = item->mAttr;
                 if (((bits >> 5) & 1) == 0) {
                     return i;
                 }

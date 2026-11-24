@@ -13,35 +13,28 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 extern char str_Buckets[];
 extern char cObjNode_vtbl[];
 
-struct sBucketList_3549E0 {
-    int f0;
-    sBucketList_3549E0* prev;
-    sBucketList_3549E0* next;
-    void* vt;
-};
-
-struct sBucket_3549E0 {
-    int flags;
-    sBucketList_3549E0 Head;
-    sBucketList_3549E0 Tail;
-    sBucketList_3549E0 AddHead;
-    sBucketList_3549E0 AddTail;
-    sBucket_3549E0()
+// A bucket as new[] builds it: tBucketHeader's storage with the constructor retail inlines, which gives each cObjNode
+// sentinel cObjNode_vtbl and clears its links. Same layout as tBucketHeader (its bytes, read through it); not derived
+// from it, since the implicit cObjNode constructor would store the compiler's own vtable symbol instead.
+struct tBucketHeaderNew {
+    int Storage[sizeof(tBucketHeader) / sizeof(int)];
+    tBucketHeaderNew()
     {
-        Head.vt = cObjNode_vtbl;
-        Head.prev = 0;
-        Head.next = 0;
-        Tail.vt = cObjNode_vtbl;
-        Tail.prev = 0;
-        Tail.next = 0;
-        AddHead.vt = cObjNode_vtbl;
-        AddHead.prev = 0;
-        AddHead.next = 0;
-        AddTail.vt = cObjNode_vtbl;
-        AddTail.prev = 0;
-        AddTail.next = 0;
+        tBucketHeader* bucket = (tBucketHeader*)Storage;
+        VPTR_OF(cObjNode, &bucket->Head) = (void**)cObjNode_vtbl;
+        bucket->Head.Next = 0;
+        bucket->Head.Prev = 0;
+        VPTR_OF(cObjNode, &bucket->Tail) = (void**)cObjNode_vtbl;
+        bucket->Tail.Next = 0;
+        bucket->Tail.Prev = 0;
+        VPTR_OF(cObjNode, &bucket->AddHead) = (void**)cObjNode_vtbl;
+        bucket->AddHead.Next = 0;
+        bucket->AddHead.Prev = 0;
+        VPTR_OF(cObjNode, &bucket->AddTail) = (void**)cObjNode_vtbl;
+        bucket->AddTail.Next = 0;
+        bucket->AddTail.Prev = 0;
     }
-    ~sBucket_3549E0() {}
+    ~tBucketHeaderNew() {}
 };
 
 /**
@@ -55,19 +48,19 @@ struct sBucket_3549E0 {
  */
 extern "C" void cBucketMan_init(cBucketMan* self, int n)
 {
-    char** slot = (char**)&self->Buckets;
-    *slot = (char*)new (str_Buckets, 0, 0) sBucket_3549E0[n];
-    *(int*)self = n;
-    for (int i = 0; i < *(int*)self; i++) {
-        ((sBucket_3549E0*)self->Buckets)[i].Head.prev = &((sBucket_3549E0*)self->Buckets)[i].Tail;
-        ((sBucket_3549E0*)self->Buckets)[i].Head.next = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].Tail.prev = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].Tail.next = &((sBucket_3549E0*)self->Buckets)[i].Head;
-        ((sBucket_3549E0*)self->Buckets)[i].AddHead.prev = &((sBucket_3549E0*)self->Buckets)[i].AddTail;
-        ((sBucket_3549E0*)self->Buckets)[i].AddHead.next = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].AddTail.prev = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].AddTail.next = &((sBucket_3549E0*)self->Buckets)[i].AddHead;
-        ((sBucket_3549E0*)self->Buckets)[i].flags = 0;
+    tBucketHeader** slot = &self->Buckets;
+    *slot = (tBucketHeader*)new (str_Buckets, 0, 0) tBucketHeaderNew[n];
+    self->NumBuckets = n;
+    for (int i = 0; i < self->NumBuckets; i++) {
+        self->Buckets[i].Head.Next = &self->Buckets[i].Tail;
+        self->Buckets[i].Head.Prev = 0;
+        self->Buckets[i].Tail.Next = 0;
+        self->Buckets[i].Tail.Prev = &self->Buckets[i].Head;
+        self->Buckets[i].AddHead.Next = &self->Buckets[i].AddTail;
+        self->Buckets[i].AddHead.Prev = 0;
+        self->Buckets[i].AddTail.Next = 0;
+        self->Buckets[i].AddTail.Prev = &self->Buckets[i].AddHead;
+        self->Buckets[i].Flags = 0;
     }
 }
 #endif
@@ -88,23 +81,25 @@ void cMemMan_free(void*);
 extern "C" void cBucketMan_purge(cBucketMan* self)
 {
     int i;
-    for (i = 0; i < *(int*)self; i++) {
+    for (i = 0; i < self->NumBuckets; i++) {
         cBucketMan_purgeBucket(self, i);
     }
-    char* buckets = ((char*)self->Buckets);
+    // ORIGINAL-PTR: delete[] Buckets as g++ 2.95 inlines it: the element count sits in the 16-byte new[] cookie
+    // before the array (a heap block header), and the block itself starts at the cookie
+    tBucketHeader* buckets = self->Buckets;
     if (buckets != 0) {
-        char* bucket = buckets + ((int*)buckets)[-4] * 68;
-        while (((char*)self->Buckets) != bucket) {
-            bucket -= 0x44;
-            cObjNode__cObjNode(bucket + 0x34, 2);
-            cObjNode__cObjNode(bucket + 0x24, 2);
-            cObjNode__cObjNode(bucket + 0x14, 2);
-            cObjNode__cObjNode(bucket + 0x4, 2);
+        tBucketHeader* bucket = buckets + ((int*)buckets)[-4];
+        while (self->Buckets != bucket) {
+            bucket--;
+            cObjNode__cObjNode(&bucket->AddTail, 2);
+            cObjNode__cObjNode(&bucket->AddHead, 2);
+            cObjNode__cObjNode(&bucket->Tail, 2);
+            cObjNode__cObjNode(&bucket->Head, 2);
         }
-        cMemMan_free(((char*)self->Buckets) - 0x10);
+        cMemMan_free((char*)self->Buckets - 0x10);
     }
-    *(char**)&self->Buckets = 0;
-    *(int*)self = 0;
+    self->Buckets = 0;
+    self->NumBuckets = 0;
 }
 #endif
 
@@ -174,7 +169,8 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
         n->Prev->Next = n->Next;
         n->Next->Prev = n->Prev;
         cObjNode* other;
-        for (other = (cObjNode*)cBucketMan_last(self, index); other; other = (cObjNode*)cBucketMan_prev(self, (cObjNode*)other, index)) {
+        for (other = (cObjNode*)cBucketMan_last(self, index); other;
+             other = (cObjNode*)cBucketMan_prev(self, (cObjNode*)other, index)) {
             if (n->compare(other)) {
                 if (n->equal(other)) {
                     n->Next = other->Next;
@@ -194,10 +190,10 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
             }
         }
         if (other == 0) {
-            n->Next = ((*(&((tBucketHeader*)self->Buckets)[index].Head)).Next);
-            ((*(&((tBucketHeader*)self->Buckets)[index].Head)).Next)->Prev = n;
-            n->Prev = (&self->Buckets[index].Head);
-            (*(cObjNode**)&(*(&((tBucketHeader*)self->Buckets)[index].Head)).Next) = n;
+            n->Next = self->Buckets[index].Head.Next;
+            self->Buckets[index].Head.Next->Prev = n;
+            n->Prev = &self->Buckets[index].Head;
+            self->Buckets[index].Head.Next = n;
         }
         n = nextN;
     }
@@ -257,13 +253,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);
  * @param index  bucket index
  * @return the first node, or 0
  */
-// PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_first(cBucketMan* self, int index)
 {
-    index *= 68;
-    index += (int)((char*)self->Buckets);
-    void* head = *(void**)(index + 0x8);
-    return (head == (void*)(index + 0x14)) ? 0 : head;
+    cObjNode* head = self->Buckets[index].Head.Next;
+    return (head == &self->Buckets[index].Tail) ? 0 : head;
 }
 #endif
 
@@ -279,13 +272,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_last);
  * @param index  the bucket (On Tour bucket)
  * @return the last node (On Tour cObjNode*), or 0
  */
-// PORT: holds a pointer in an int (same shape as cBucketMan_first); not 64-bit safe.
 extern "C" void* cBucketMan_last(cBucketMan* self, int index)
 {
-    index *= 68;
-    index += (int)((char*)self->Buckets);
-    void* tail = *(void**)(index + 0x1C);
-    return (tail == (void*)(index + 0x4)) ? 0 : tail;
+    cObjNode* tail = self->Buckets[index].Tail.Prev;
+    return (tail == &self->Buckets[index].Head) ? 0 : tail;
 }
 #endif
 
@@ -338,13 +328,10 @@ INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
  * @param index  bucket index
  * @return the first pending node, or 0
  */
-// PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_addfirst(cBucketMan* self, int index)
 {
-    index *= 68;
-    index += (int)((char*)self->Buckets);
-    void* head = *(void**)(index + 0x28);
-    return (head == (void*)(index + 0x34)) ? 0 : head;
+    cObjNode* head = self->Buckets[index].AddHead.Next;
+    return (head == &self->Buckets[index].AddTail) ? 0 : head;
 }
 #endif
 

@@ -180,7 +180,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
     int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)((void*)self->mpScreen), GetHashValue32(frame));
     if (frameIndex != 0xFFFF)
         cUIScreen_playFrame(((void*)self->mpScreen), frameIndex, 1);
-    cFEStateRuleSelect_updateMenuColor((cFEStateRuleSelect*)self);
+    cFEStateRuleSelect_updateMenuColor(self);
 }
 #endif
 
@@ -343,8 +343,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
 extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int a2);
-struct sRuleSel_2380;
-extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, cUIListBox* item);
+extern "C" void cFEStateRuleSelect_checkConflictForMenu(cFEStateRuleSelect* self, cUIListBox* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void MEM_fill(void* dst, int c, int n);
@@ -352,36 +351,27 @@ extern char str_FEOptions[];
 extern char cBERules_mRules[];
 
 
-struct sMsg_1C68 {
-    char pad_0x0[0x18];
-    int id;             // 0x18
-    char pad_0x1C[0x60];
-    int* info;          // 0x7C
-};
-
 /**
  * Handles the rule screen's widget events: open states through the factory, apply an option change, open
  * options.
  *
- * Event 5 (select, when the entry allows it) and event 6 push the engine factory's state for the entry (slot
- * 4 or
- * 5); event 6 also resets the rule settings. Event 9 stores the list box's new value for the rule and updates
- * the
- * rules it disables; event 7 pushes a "FEOptions" state.
+ * Event 5 (select, when the pair's widget has mMiscData 0) and event 6 push the engine factory's state for the
+ * entry (slot 4 or 5); event 6 also resets the rule settings. Event 9 stores the list box's new value for the rule
+ * and updates the rules it disables; event 7 pushes a "FEOptions" state.
  *
- * @param msg  the widget (its rule at +0x18), or 0
+ * @param msg  the widget (its rule in mMiscData; a cUIPair for event 5, a cUIListBox for event 9), or 0
  * @param type  widget event number (On Tour Event)
  */
-extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_1C68* msg, unsigned int type)
+extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUIThing* msg, unsigned int type)
 {
     if (msg == 0) {
         return;
     }
     switch (type) {
     case 5:
-        if (msg->info[6] == 0) {
+        if (((cUIPair*)msg)->mpWidget->mMiscData == 0) {
             cUICustomInterface* custom = self->mpEngine->mpCustom;
-            void* st = custom->getNextState((cUIState*)self, msg->id);
+            void* st = custom->getNextState((cUIState*)self, msg->mMiscData);
             if (st) {
                 cUIStateStack_push(&self->mpEngine->mStateStack, st);
             }
@@ -389,7 +379,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
         break;
     case 6: {
         cUICustomInterface* custom = self->mpEngine->mpCustom;
-        void* st = custom->getPrevState((cUIState*)self, msg->id);
+        void* st = custom->getPrevState((cUIState*)self, msg->mMiscData);
         if (st) {
             cUIStateStack_push(&self->mpEngine->mStateStack, st);
         }
@@ -397,14 +387,14 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
         break;
     }
     case 9: {
-        int id = msg->id;
+        int id = msg->mMiscData;
         cFEStateRuleSelect_updateBE(self, id, cUIListBox_getCurrentEntryData(msg));
-        cFEStateRuleSelect_checkConflictForMenu((sRuleSel_2380*)self, (cUIListBox*)msg);
+        cFEStateRuleSelect_checkConflictForMenu(self, (cUIListBox*)msg);
         break;
     }
     case 7: {
-        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
-        *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
+        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
+        st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
         break;
     }
@@ -640,33 +630,28 @@ extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, i
 extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* self);
 extern int D_004410C8[];
 
-struct sRuleSel_2380 {
-    char pad[0x51];
-    unsigned char count[15];
-};
-
 /**
  * Updates the rule conflict counters after a rule's list box changed, and turns conflicting rules off.
  *
- * The rule is the list box's mMiscData (+0x18); D_004410C8[rule] << 1 has a bit for each rule (1-14) that may stay on
- * with it, so every rule whose bit is clear conflicts. When the list box's current entry data
- * (cUIListBox_getCurrentEntryData) is 0 each conflicting rule's counter in +0x51 (On Tour mcRuleConflictRefTable) is
- * decremented, not below 0; otherwise each is incremented and that rule's setting is cleared (cFEStateRuleSelect_updateBE with 0).
+ * The rule is the list box's mMiscData; D_004410C8[rule] << 1 has a bit for each rule (1-14) that may stay on with
+ * it, so every rule whose bit is clear conflicts. When the list box's current entry data
+ * (cUIListBox_getCurrentEntryData) is 0 each conflicting rule's counter in mcRuleConflictRefTable is decremented, not
+ * below 0; otherwise each is incremented and that rule's setting is cleared (cFEStateRuleSelect_updateBE with 0).
  * Then the menu is recoloured (cFEStateRuleSelect_updateMenuColor).
  *
  * @param item  the rule's list box that changed
  */
-extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, cUIListBox* item)
+extern "C" void cFEStateRuleSelect_checkConflictForMenu(cFEStateRuleSelect* self, cUIListBox* item)
 {
     int mask = D_004410C8[item->mMiscData] << 1;
     if (cUIListBox_getCurrentEntryData(item) == 0) {
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
             if ((bit & mask) == 0) {
-                int newCount = self->count[i] - 1;
-                self->count[i] = newCount;
+                int newCount = (unsigned char)self->mcRuleConflictRefTable[i] - 1;
+                self->mcRuleConflictRefTable[i] = newCount;
                 if ((signed char)newCount <= 0) {
-                    self->count[i] = 0;
+                    self->mcRuleConflictRefTable[i] = 0;
                 }
             }
         }
@@ -674,12 +659,12 @@ extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, cUI
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
             if ((bit & mask) == 0) {
-                self->count[i] += 1;
-                cFEStateRuleSelect_updateBE((cFEStateRuleSelect*)self, i, 0);
+                self->mcRuleConflictRefTable[i] += 1;
+                cFEStateRuleSelect_updateBE(self, i, 0);
             }
         }
     }
-    cFEStateRuleSelect_updateMenuColor((cFEStateRuleSelect*)self);
+    cFEStateRuleSelect_updateMenuColor(self);
 }
 #endif
 
@@ -688,11 +673,7 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateMenuColor);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
-
-struct sQuad_2488 {
-    int a, b, c, d;
-};
-extern sQuad_2488 gStaticColour;
+extern tARGB gStaticColour;
 
 
 // PORT: the names are built with the builtin block move (the original likely used
@@ -716,12 +697,13 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
         cUIText* listBox = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name0));
         cUIText* textBox = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name1));
         if (listBox && textBox) {
-            if (*(signed char*)(((char*)selfp) + listBox->mMiscData + 0x51) > 0) {
+            int rule = listBox->mMiscData;
+            if (selfp->mcRuleConflictRefTable[rule] > 0) {
                 textBox->setUseStaticColour(1);
-                (*(sQuad_2488*)&textBox->mStaticColour) = gStaticColour;
+                textBox->mStaticColour = gStaticColour;
                 textBox->setStatic(1);
                 listBox->setUnicode(1);
-                (*(sQuad_2488*)&listBox->mStaticColour) = gStaticColour;
+                listBox->mStaticColour = gStaticColour;
                 listBox->setStatic(1);
             } else {
                 textBox->setUseStaticColour(0);
@@ -748,9 +730,8 @@ extern void* cBraggingRightsMenu_vtbl[];
 /**
  * Constructs one bragging-rights choice panel (0x34 bytes; the bragging-rights state holds two at +0x6D0).
  *
- * Stores the vtable cBraggingRightsMenu_vtbl at +0x30 and clears the eight list-box pointers (+0x8), the menu (+0x0), the group
- * (+0x4), the confirmed flag (+0x28) and the row enable mask (+0x2C) (On Tour mpListBox, mpPlayerMenu, mpGroup,
- * mbConfirmed, mcItemEnableFlag).
+ * Stores the vtable cBraggingRightsMenu_vtbl in mVtbl and clears the eight list-box pointers (mpListBox), the menu
+ * (mpPlayerMenu), the group (mpGroup), the confirmed flag (mbConfirmed) and the row enable mask (mcItemEnableFlag).
  *
  * @return @p self
  */
@@ -759,7 +740,7 @@ extern "C" void* cBraggingRightsMenu_cBraggingRightsMenu(cBraggingRightsMenu* se
     int i;
     self->mVtbl = cBraggingRightsMenu_vtbl;
     for (i = 7; i >= 0; i--) {
-        ((int*)(&self->mpListBox[0]))[i] = 0;
+        self->mpListBox[i] = 0;
     }
     self->mpPlayerMenu = 0;
     self->mcItemEnableFlag = 0;
@@ -802,47 +783,51 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setMenuItemColor);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" int cBraggingRightsMenu_isItemEnable(cBraggingRightsMenu* self, int idx);
 
-struct sColor_001927B0 {
-    float r, g, b, a;
-    sColor_001927B0(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+// A tARGB built from its four components (A, R, G, B), as setColour takes it.
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
-struct sVEnt_001927B0 { short delta; short index; void (*fn)(void*, const sColor_001927B0&); };
-struct sRuleSel_001927B0 { void* owner; int f4; cUIThing* items[8]; };
+// cUIThing's setColour slot (11), called by hand with the colour as a reference (the slot takes const tARGB*)
+typedef sVEntry<void(void*, const tARGB&)> tSetColourEntry;
 
 /**
  * Colours a bragging-rights panel's rows: the selected row white, the others by their current value.
  *
- * Does nothing without a menu (+0x0). Skips missing list boxes and rows not enabled (cBraggingRightsMenu_isItemEnable). The row equal to
- * the menu's mScrollItemCurrent (+0x95) gets (A, R, G, B) = (1, 1, 1, 1); a row whose current entry data
- * (cUIListBox_getCurrentEntryData) is non-zero gets (1, 0.592, 0.043, 0) and the rest (1, 0.145, 0.027, 0.020), through
- * setColour (vtable slot 11).
+ * Does nothing without a menu (mpPlayerMenu). Skips missing list boxes and rows not enabled
+ * (cBraggingRightsMenu_isItemEnable). The row equal to the menu's mScrollItemCurrent gets (A, R, G, B) = (1, 1, 1, 1);
+ * a row whose current entry data (cUIListBox_getCurrentEntryData) is non-zero gets (1, 0.592, 0.043, 0) and the rest
+ * (1, 0.145, 0.027, 0.020), through setColour (vtable slot 11).
  */
-extern "C" void cBraggingRightsMenu_setMenuItemColor(sRuleSel_001927B0* self)
+extern "C" void cBraggingRightsMenu_setMenuItemColor(cBraggingRightsMenu* self)
 {
-    void* owner = self->owner;
-    if (owner == 0) {
+    cUIMenu* menu = self->mpPlayerMenu;
+    if (menu == 0) {
         return;
     }
-    int sel = *(signed char*)((char*)owner + 0x95);
+    int sel = (signed char)menu->mScrollItemCurrent;
     for (int i = 0; i < 8; i++) {
-        if (self->items[i] == 0) {
+        if (self->mpListBox[i] == 0) {
             continue;
         }
-        if (cBraggingRightsMenu_isItemEnable((cBraggingRightsMenu*)self, i) == 0) {
+        if (cBraggingRightsMenu_isItemEnable(self, i) == 0) {
             continue;
         }
         if (i == sel) {
-            cUIThing* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)VPTR_OF(cListNode, item))[11];
-            colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
-        } else if (cUIListBox_getCurrentEntryData(self->items[i])) {
-            cUIThing* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)VPTR_OF(cListNode, item))[11];
-            colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
+            cUIThing* item = self->mpListBox[i];
+            tSetColourEntry* vt = (tSetColourEntry*)VPTR_OF(cListNode, item);
+            tSetColourEntry* colorEntry = &vt[11];
+            colorEntry->fn(vthis(item, *colorEntry), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (cUIListBox_getCurrentEntryData(self->mpListBox[i])) {
+            cUIThing* item = self->mpListBox[i];
+            tSetColourEntry* vt = (tSetColourEntry*)VPTR_OF(cListNode, item);
+            tSetColourEntry* colorEntry = &vt[11];
+            colorEntry->fn(vthis(item, *colorEntry), tARGBInit(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
         } else {
-            cUIThing* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)VPTR_OF(cListNode, item))[11];
-            colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
+            cUIThing* item = self->mpListBox[i];
+            tSetColourEntry* vt = (tSetColourEntry*)VPTR_OF(cListNode, item);
+            tSetColourEntry* colorEntry = &vt[11];
+            colorEntry->fn(vthis(item, *colorEntry),
+                           tARGBInit(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
         }
     }
 }
@@ -852,16 +837,16 @@ extern "C" void cBraggingRightsMenu_setMenuItemColor(sRuleSel_001927B0* self)
 INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_findListBoxP);
 #ifdef SKIP_ASM
 /**
- * Returns the row index (0-7) of a list box in a bragging-rights panel's eight list boxes (+0x8), or -1.
+ * Returns the row index (0-7) of a list box in a bragging-rights panel's eight list boxes (mpListBox), or -1.
  *
  * @param val  the list box to look for
  * @return its index, or -1 when the panel does not hold it
  */
-extern "C" int cBraggingRightsMenu_findListBoxP(cBraggingRightsMenu* self, int val)
+extern "C" int cBraggingRightsMenu_findListBoxP(cBraggingRightsMenu* self, cUIListBox* val)
 {
     int i;
     for (i = 0; i < 8; i++) {
-        if (((int*)(&self->mpListBox[0]))[i] == val) {
+        if (self->mpListBox[i] == val) {
             return i;
         }
     }

@@ -6,6 +6,9 @@
 #include "ui/uiscreen.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
+#include "ui/uiengine.h"
+#include "ui/uifontinterface.h"
+#include "util/locale.h"
 
 
 //100%
@@ -78,30 +81,6 @@ extern "C" void cUIThing_update(cUIThing* self, unsigned short ev)
 INCLUDE_ASM("ui/uithing", cUIThing_setChannelData);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sUIThing0048 {
-    char pad0[0x14];
-    unsigned int b0 : 13;
-    unsigned int frame : 6;   // 0x14 bits 13..18
-    unsigned int b19 : 13;
-    char pad18[0x4];
-    float r;                  // 0x1C
-    float g;                  // 0x20
-    float b;                  // 0x24
-    float a;                  // 0x28
-    float rotX;               // 0x2C
-    float rotY;               // 0x30
-    float rotZ;               // 0x34
-    char pad38[0xC];
-    float x;                  // 0x44
-    float y;                  // 0x48
-    char pad4C[0x4];
-    float scaleX;             // 0x50
-    float scaleY;             // 0x54
-    char pad58[0x8];
-    float f60;                // 0x60
-    float f64;                // 0x64
-};
-
 /**
  * Sets one animatable property of a widget from a keyframe value.
  *
@@ -136,7 +115,7 @@ extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, floa
         self->mAngle.z = data * 0.017444444820284843f;
         break;
     case 12:
-        ((sUIThing0048*)self)->frame = (int)data;
+        ((tAttrThing*)&self->mAttr)->mPivot = (int)data;
         break;
     case 13:
         self->mColour.A = data * 0.003921568859368563f;
@@ -273,8 +252,7 @@ INCLUDE_ASM("ui/uithing", cUIThing_getSound);
  */
 extern "C" int cUIThing_getSound(cUIThing* self, int soundIndex)
 {
-    self = (cUIThing*)((char*)self + ((signed char)soundIndex << 2));
-    return self->mSound[0];
+    return self->mSound[(signed char)soundIndex];
 }
 #endif
 
@@ -292,8 +270,7 @@ INCLUDE_ASM("ui/uithing", cUIThing_setSound);
  */
 extern "C" void cUIThing_setSound(cUIThing* self, int soundIndex, int sound)
 {
-    self = (cUIThing*)((char*)self + ((signed char)soundIndex << 2));
-    self->mSound[0] = sound;
+    self->mSound[(signed char)soundIndex] = sound;
 }
 #endif
 
@@ -345,19 +322,15 @@ void cUIText_setUnicodeStringByID(cUIText*, int);
 // PORT: cUIThing_setUIData really takes (self, data); other units declare it with one argument.
 void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
 
-struct sUIColor03F0 {
-    float r, g, b, a;
-    sUIColor03F0() {}
-    sUIColor03F0(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
-};
-struct sUIVt03F0 { short delta; short index; void (*fn)(void*, int); };
-struct sUIThing03F0 {
-    char pad0[0x8];
-    sUIVt03F0* vt;              // 0x8
-    char padC[0x74 - 0xC];
-    unsigned int mode : 2;      // 0x74
-    unsigned int rest : 30;
-    sUIColor03F0 color;         // 0x78
+// tARGB with EA's 4-float constructor (ours has none).
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b)
+    {
+        A = a;
+        R = r;
+        G = g;
+        B = b;
+    }
 };
 
 /**
@@ -366,16 +339,18 @@ struct sUIThing03F0 {
  *
  * @param data  the widget's record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIText_setUIData(sUIThing03F0* self, tUIText* data)
+extern "C" void cUIText_setUIData(cUIText* self, tUIText* data)
 {
     cUIThing_setUIData_2(self, data);
-    self->mode = data->mFontID & 3;
-    self->vt[23].fn(vthis(self, self->vt[23]), data->mBools1 & 1);
-    cUIText_setUnicodeStringByID((cUIText*)self, ((int)data->mStringID));
-    int textFlags = *(int*)((char*)self + 0x74) >> 2;
+    ((tAttrText*)&self->mAttrText)->mFont = data->mFontID & 3;
+    self->setShadow(data->mBools1 & 1);
+    cUIText_setUnicodeStringByID(self, ((int)data->mStringID));
+    int textFlags = self->mAttrText >> 2;
     if (textFlags & 1) {
-        self->color = sUIColor03F0(data->mSColour.a * 0.003921568859368563f, data->mSColour.r * 0.003921568859368563f,
-                                   data->mSColour.g * 0.003921568859368563f, data->mSColour.b * 0.003921568859368563f);
+        self->mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
+                                        data->mSColour.r * 0.003921568859368563f,
+                                        data->mSColour.g * 0.003921568859368563f,
+                                        data->mSColour.b * 0.003921568859368563f);
     }
 }
 #endif
@@ -390,9 +365,11 @@ INCLUDE_ASM("ui/uithing", cUIText_getFont);
  */
 extern "C" int cUIText_getFont(cUIText* self)
 {
-    void* engine = self->mpScreen->mpState->mpEngine;
+    cUIEngine* engine = self->mpScreen->mpState->mpEngine;
     if (engine != 0) {
-        return *(int*)((char*)*(void**)((char*)engine + 0x8) + (*(unsigned char*)&self->mAttrText & 3) * 12 + 0xC);
+        // the font index is tAttrText::mFont, read as the low byte of mAttrText (EA's tAttrText is one byte);
+        // indexing from &mFontEntry[0] keeps retail's index-first address add
+        return (int)(&engine->mpFontInterface->mFontEntry[0])[*(unsigned char*)&self->mAttrText & 3].mpFont;
     }
     return 0;
 }
@@ -404,12 +381,6 @@ INCLUDE_ASM("ui/uithing", cUIText_updateLocale);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern "C" void cUIText_setUnicodeStringPrivate(void* self, unsigned short* str);
 
-struct cUIText_updateLocale_sVEntry {
-    short delta;
-    short index;
-    void* fn;
-};
-
 /**
  * Reloads a text widget's localized string for the current language, wrapping it when the widget wraps.
  */
@@ -418,12 +389,11 @@ extern "C" void cUIText_updateLocale(cUIText* self)
     int id = self->mStringID;
     if (id != 0) {
         cUIScreen* screen = self->mpScreen;
-        void* state = screen->mpState;
-        void* engine = *(void**)((char*)state + 0x10);
-        char* loc = *(char**)((char*)engine + 0x10);
+        cUIState* state = screen->mpState;
+        cUIEngine* engine = state->mpEngine;
+        cUILocaleInterface* loc = engine->mpLocaleInterface;
         if (loc != 0) {
-            cUIText_updateLocale_sVEntry* vt = *(cUIText_updateLocale_sVEntry**)(loc + 4);
-            unsigned short* str = ((unsigned short* (*)(void*, int))vt[4].fn)(vthis(loc, vt[4]), id);
+            unsigned short* str = loc->getStringByHash(id);
             if (str != 0) {
                 int attrBits = self->mAttr >> 7;
                 if ((attrBits & 1) || ((self->mAttrText >> 6) & 1)) {

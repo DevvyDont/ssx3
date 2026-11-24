@@ -14,6 +14,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "camera/camera.h"
+#include "camera/race/racecontroller.h"
 #include "replay/bxreplayframe.h"
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
@@ -57,11 +58,11 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_setBlock);
  * @param data  the block's data (On Tour char* data)
  * @param size  the block's size in bytes (On Tour size)
  */
-extern "C" void cReplayFramePtr_setBlock(cReplayFramePtr* self, int data, int size)
+extern "C" void cReplayFramePtr_setBlock(cReplayFramePtr* self, char* data, int size)
 {
-    self->Block = (char*)data;
-    self->WriteData = (char*)(data + size);
-    self->ReadData = (char*)data;
+    self->Block = data;
+    self->WriteData = data + size;
+    self->ReadData = data;
     self->Size = size;
 }
 #endif
@@ -157,18 +158,10 @@ extern "C" void cReplayFramePtr_read(cReplayFramePtr* self, void* dst, int n)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_peekObjNodeType);
 #ifdef SKIP_ASM
-class cStream26EA68 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 /**
  * Reads the type of the next object record in the replay frame without consuming it.
  *
- * Reads the 4-byte record header (type, size) through the read virtual (slot 2), then puts the read position
- * (+0xC) back.
+ * Reads the 4-byte record header (type, size) through the read virtual (slot 2), then puts ReadData back.
  *
  * @return the record's object node type (On Tour tObjNodeType)
  */
@@ -179,9 +172,9 @@ extern "C" short cReplayFramePtr_peekObjNodeType(cReplayFramePtr* self)
         short id;
         short size;
     } hdr;
-    int pos = (int)self->ReadData;
-    ((cStream26EA68*)self)->read(&hdr, 4);
-    self->ReadData = (char*)pos;
+    char* pos = self->ReadData;
+    self->read((char*)&hdr, 4);
+    self->ReadData = pos;
     return hdr.id;
 }
 #endif
@@ -189,7 +182,7 @@ extern "C" short cReplayFramePtr_peekObjNodeType(cReplayFramePtr* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_loadBlock);
 #ifdef SKIP_ASM
-extern "C" int HUFF_decode(void* src, int a, int dst);
+extern "C" int HUFF_decode(void* src, int a, char* dst);
 
 /**
  * Loads a saved replay frame block: unpacks the saved bytes into Block and rewinds the read cursor.
@@ -202,7 +195,7 @@ extern "C" int HUFF_decode(void* src, int a, int dst);
  * @param src  the frame's save record (On Tour tFramePtrSave* ptrsave)
  * @return always 1
  */
-extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, void* src)
+extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, tFramePtrSave* src)
 {
     struct {
         int tag;
@@ -211,9 +204,9 @@ extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, void*
     MEM_copy(&hdr.tag, src, 4);
     MEM_copy(&hdr.size, *pp, 4);
     *pp += 4;
-    int n = HUFF_decode(*pp, 0, ((int)self->Block));
+    int n = HUFF_decode(*pp, 0, self->Block);
     *pp += hdr.size;
-    self->WriteData = (char*)(((int)self->Block) + n);
+    self->WriteData = self->Block + n;
     cReplayFramePtr_readRewind(self);
     return 1;
 }
@@ -591,20 +584,19 @@ void cReplay_setReplayState(void* self, int state);
  */
 extern "C" void* cReplay_cReplay(cReplay* self)
 {
-    char* frame = (char*)&self->Frames;
-    for (int i = 15; i != -1; i--, frame += 0x38) {
+    cReplayFrame* frame = self->Frames;
+    for (int i = 15; i != -1; i--, frame++) {
         cReplayFrame_cReplayFrame(frame);
     }
-    char* highlight = (char*)&self->Highlight;
-    cReplayFrameList_cReplayFrameList((char*)&self->FrameList);
-    cReplayFrameList_cReplayFrameList((char*)&self->FreeFrameList);
-    for (int i = 1; i != -1; i--, highlight += 0xB4) {
+    cReplayHighlight* highlight = self->Highlight;
+    cReplayFrameList_cReplayFrameList(&self->FrameList);
+    cReplayFrameList_cReplayFrameList(&self->FreeFrameList);
+    for (int i = 1; i != -1; i--, highlight++) {
         cReplayHighlight_reset(highlight);
     }
     cReplay_setReplayState(self, 15);
     for (int i = 1; i >= 0; i--) {
-        int* caches = (int*)(0x48C + (char*)self);
-        caches[i] = 0;
+        self->InputCache[i] = 0;
     }
     return ((void*)self);
 }
@@ -1387,7 +1379,8 @@ extern "C" void cChaseCameraController_switchCamera_Chapter(void* p);
  * - 0 (and any other value): unless paused (State 3), sets NextFrame and steps one frame.
  *
  * Commands 1 to 4 also redraw: they switch the first view's chase camera (cChaseCameraController_switchCamera_Chapter
- * on ViewMan + 4, then + 0xA8), call its virtual slot 4 and update all views (cGameViewMan_updateAll).
+ * on ViewMan's PlayerCamera[0]->ChaseController), call its snapCurrent (virtual slot 4) and update all views
+ * (cGameViewMan_updateAll).
  */
 extern "C" void cReplay_processInput(cReplay* self)
 {
@@ -1446,7 +1439,7 @@ extern "C" void cReplay_processInput(cReplay* self)
         cReplay_setReplayState(((char*)self), 4);
         break;
     case 6:
-        if (*(int*)self == 3) {
+        if (self->State == 3) {
             cReplay_setReplayState(((char*)self), 1);
         } else {
             cReplay_setReplayState(((char*)self), 3);
@@ -1458,7 +1451,7 @@ extern "C" void cReplay_processInput(cReplay* self)
     case 8:
         break;
     default:
-        if (*(int*)self != 3) {
+        if (self->State != 3) {
             self->NextFrame = 1;
             cReplay_stepFrame(((char*)self), 0);
         }
@@ -1467,9 +1460,10 @@ extern "C" void cReplay_processInput(cReplay* self)
     self->Cmd = 0;
     if (redraw) {
         cGameViewMan* views = SSXApp->Game->ViewMan;
-        char* controller = (char*)views->PlayerCamera[0]->ChaseController;
+        cChaseCameraController* controller = views->PlayerCamera[0]->ChaseController;
         cChaseCameraController_switchCamera_Chapter(controller);
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(controller + 0x14);
+        // slot 4: snapCurrent (cCameraController_snapCurrent)
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
         vt[4].fn(vthis(controller, vt[4]));
         cGameViewMan_updateAll(views);
     }

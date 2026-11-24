@@ -10,6 +10,7 @@
 #include "render/ps2graphicsman.h"
 #include "object/effectlink.h"
 #include "replay/bxreplayframe.h"
+#include "ui/uithing.h"
 
 struct sEffectLinkView {  // this unit's view of cEffectLink (object/effectlink.h); typed members schedule differently
     sEffectLinkView* next; // 0x0
@@ -89,12 +90,6 @@ INCLUDE_ASM("object/effectlink", cEffectModifier_cEffectModifier);
 extern int cEffectModifier_EffectCount;
 extern void* cEffectModifier_vtbl[];
 
-struct sEffectLinkObj_5798 {
-    sEffectLinkView link;  // 0x0
-    void** vt;         // 0x8
-    int value;         // 0xC
-};
-
 /**
  * Constructs a cEffectModifier for an instance (On Tour cEffectModifier(tInstanceRecord* inst)).
  *
@@ -106,11 +101,10 @@ struct sEffectLinkObj_5798 {
  */
 extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int inst)
 {
-    sEffectLinkObj_5798* modifier = (sEffectLinkObj_5798*)self;
-    modifier->link.next = 0;
-    modifier->link.prev = 0;
-    modifier->vt = cEffectModifier_vtbl;
-    modifier->value = inst;
+    self->Next = 0;
+    self->Prev = 0;
+    VPTR_OF(cEffectLink, self) = cEffectModifier_vtbl;
+    self->Instance = (tInstanceRecord*)inst;
     cEffectModifier_EffectCount++;
     return ((void*)self);
 }
@@ -121,12 +115,6 @@ INCLUDE_ASM("object/effectlink", cEffectModifier_cEffectModifier1);
 #ifdef SKIP_ASM
 extern int cEffectModifier_EffectCount;
 extern void* cEffectModifier_vtbl[];
-
-struct sEffectLinkObj_57C8 {
-    sEffectLinkView link;  // 0x0
-    void** vt;         // 0x8
-    int value;         // 0xC
-};
 
 
 /**
@@ -142,11 +130,10 @@ struct sEffectLinkObj_57C8 {
  */
 extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifier, cBxReplayFrame* obj)
 {
-    sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)effectModifier;
-    self->link.next = 0;
-    self->link.prev = 0;
-    self->vt = cEffectModifier_vtbl;
-    self->value = (int)obj->readReplayInstance();
+    effectModifier->Next = 0;
+    effectModifier->Prev = 0;
+    VPTR_OF(cEffectLink, effectModifier) = cEffectModifier_vtbl;
+    effectModifier->Instance = obj->readReplayInstance();
     cEffectModifier_EffectCount++;
     return ((void*)effectModifier);
 }
@@ -425,10 +412,10 @@ extern int cDynamicParticleModifier_DynamicParticleCount;
 extern void* cDynamicParticleModifier_vtbl[];
 extern void* cDynamicEmitter_vtbl[];
 
-struct sVec4_00345C90 {
-    float x, y, z, w;
-    sVec4_00345C90(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
-} __attribute__((aligned(16)));
+// A t4Vector with EA's 4-float constructor (ours has none).
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
 
 
@@ -448,7 +435,8 @@ struct sVec4_00345C90 {
  * @param pos  offset from that mesh
  * @return @p self
  */
-extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, tParticleData* particleDesc, int owner, int bone, sVec4_00345C90* pos)
+extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(
+    cDynamicParticleModifier* self, tParticleData* particleDesc, int owner, int bone, t4Vector* pos)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
     VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
@@ -456,8 +444,8 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
     self->ParticleData = (tParticleData*)particleDesc;
     self->Mesh = bone;
-    *(sVec4_00345C90*)&self->Offset = *pos;
-    *(sVec4_00345C90*)&self->InitVel = sVec4_00345C90(particleDesc->VelX, particleDesc->VelY, particleDesc->VelZ, 0.0f);
+    self->Offset = *pos;
+    self->InitVel = t4VectorXYZW(particleDesc->VelX, particleDesc->VelY, particleDesc->VelZ, 0.0f);
     self->Fade = 0;
     particleDesc->VelX = 0.0f;
     particleDesc->VelY = 0.0f;
@@ -474,8 +462,7 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
 INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_cDynamicParticleModifier);
 #ifdef SKIP_ASM
 void* operator_new1(int size);
-struct cStream00371318;
-extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(void* self, cStream00371318* stream);
+extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(void* self, cBxReplayFrame* stream);
 extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b, int flag, float dt);
 
 
@@ -494,7 +481,8 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b
  * @param stream  the replay frame to read from (On Tour data)
  * @return @p self
  */
-extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, cBxReplayFrame* stream)
+extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self,
+                                                                                         cBxReplayFrame* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
@@ -507,8 +495,8 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
         self->ParticleData = (tParticleData*)((tParticleData*)particleData);
         stream->read((char*)particleData, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), self->ParticleData, -1.0f);
-        cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
-        cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), (sVec4_00345C90*)&self->Pos, (sVec4_00345C90*)&self->Vel, 1, 0.01666666753590107f);
+        cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), stream);
+        cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), &self->Pos, &self->Vel, 1, 0.01666666753590107f);
     } else {
         self->ParticleData = 0;
     }
@@ -715,24 +703,6 @@ extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
 extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1);
 
-struct sEffQuat_6120 {
-    float x, y, z, w;
-    sEffQuat_6120(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
-} __attribute__((aligned(16)));
-
-struct sEffObj_6120 {
-    sEffectLinkView link;   // 0x0
-    void** vt;          // 0x8
-    int value;          // 0xC
-    sEffQuat_6120 q;    // 0x10
-    float Radius;          // 0x20
-    int Type;            // 0x24
-    int Mesh;            // 0x28
-    int Speed;            // 0x2C
-    int Angle;            // 0x30
-};
-
-
 /**
  * Constructs a halo modifier for an instance from halo make-data.
  *
@@ -744,13 +714,13 @@ struct sEffObj_6120 {
  * @param instRecord  instance record the halo belongs to
  * @return self
  */
-extern "C" void* cHaloModifier_cHaloModifier(sEffObj_6120* self, tAddHaloData* src, int instRecord)
+extern "C" void* cHaloModifier_cHaloModifier(cHaloModifier* self, tAddHaloData* src, int instRecord)
 {
-    cEffectModifier_cEffectModifier((cEffectModifier*)self, instRecord);
-    self->vt = cHaloModifier_vtbl;
+    cEffectModifier_cEffectModifier(self, instRecord);
+    VPTR_OF(cEffectLink, self) = cHaloModifier_vtbl;
     self->Type = src->Type;
     self->Mesh = src->Mesh;
-    self->q = sEffQuat_6120(src->ColourR, src->ColourG, src->ColourB, src->ColourA);
+    self->Color = t4VectorXYZW(src->ColourR, src->ColourG, src->ColourB, src->ColourA);
     self->Radius = src->Radius;
     self->Speed = src->Speed;
     self->Angle = 0;
@@ -877,17 +847,13 @@ extern "C" void cHaloModifier_writeToReplayFrame(cHaloModifier* self, cBxReplayF
 //100%
 INCLUDE_ASM("object/effectlink", cFlexBridgeNode_cFlexBridgeNode);
 #ifdef SKIP_ASM
-struct sEffV3_346350 {
-    float x, y, z;
-    sEffV3_346350() {}
+// t3Vector and tARGB with EA's empty default constructors (ours have none): retail builds the mesh-quad arrays with a
+// constructor loop each.
+struct t3VectorCtor : t3Vector {
+    t3VectorCtor() {}
 };
-struct sEffV2_346350 {
-    float u, v;
-    sEffV2_346350() {}
-};
-struct sEffV4_346350 {
-    float x, y, z, w;
-    sEffV4_346350() {}
+struct tARGBCtor : tARGB {
+    tARGBCtor() {}
 };
 
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int a2, int a3);
@@ -935,11 +901,11 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int buck
     cSpring_cSpring((char*)&self->Mesh);
     self->TextureId = 12;
     self->RailHeight = 100.0f;
-    sEffV3_346350 pts[4];
-    sEffV2_346350 uv[4];
-    sEffV4_346350 col[4];
-    cGraphicsMan_TheGraphicsMan->GetMeshQuad(self->Instance, 0, (t3Vector*)pts, (t2Vector*)uv, (tARGB*)col);
-    sEffV3_346350 span;
+    t3VectorCtor pts[4];
+    t2Vector uv[4];
+    tARGBCtor col[4];
+    cGraphicsMan_TheGraphicsMan->GetMeshQuad(self->Instance, 0, pts, uv, col);
+    t3VectorCtor span;
     span.x = pts[1].x - pts[0].x;
     span.y = pts[1].y - pts[0].y;
     span.z = pts[1].z - pts[0].z;

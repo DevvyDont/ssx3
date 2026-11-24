@@ -333,20 +333,6 @@ INCLUDE_ASM("object/movenode", cMoveNode_onCollide);
 extern "C" int cObjectInterface_getAIIndex(int);
 void cInstanceNode_runCollideScript(void*, int, int, int);
 
-struct cMN_355770_Obj {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual int v09(int);
-    virtual int collide(int a, int b);
-};
-
-
 /**
  * Handles a collision with the node: the root transform reacts first, then the collision is passed on at most
  * every half second.
@@ -363,14 +349,15 @@ struct cMN_355770_Obj {
  */
 extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
 {
-    cMN_355770_Obj** modBlock = (cMN_355770_Obj**)((void*)self->ModifierBlock);
+    tModifierBlock* modBlock = self->ModifierBlock;
     if (modBlock != 0) {
-        cMN_355770_Obj* obj = *modBlock;
+        cTransformModifier* obj = modBlock->RootTransform;
         if (obj != 0) {
-            obj->collide(tc, ti);
-            char* transformModifier = *(char**)self->ModifierBlock;
-            sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)transformModifier;
-            if (vt[9].fn(vthis(transformModifier, vt[9]), cObjectInterface_getAIIndex(pBeing)) == 0) {
+            obj->collide((const tCollideInfo*)tc, (const tIntersectInfo*)ti);
+            // runCollide (slot 9) by hand: the virtual call keeps the slot's address instead of the vtable's
+            cTransformModifier* transform = self->ModifierBlock->RootTransform;
+            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cTransformModifier, transform);
+            if (vt[9].fn(vthis(transform, vt[9]), cObjectInterface_getAIIndex(pBeing)) == 0) {
                 return;
             }
         }
@@ -1758,8 +1745,8 @@ INCLUDE_ASM("object/movenode", cMoveNode_getFocusCount);
 /**
  * Returns the focus count of a node driven by a multi-spline modifier.
  *
- * Only a transform modifier whose getTransformType() (slot 26) is 2, cMultiSplineModifier, has one: the word at
- * +0x34 of that modifier.
+ * Only a transform modifier whose getTransformType() (slot 26) is 2, cMultiSplineModifier, has one: its FocusCount
+ * (+0x34).
  *
  * @return the modifier's count, or 0 when there is no modifier block, no modifier or another modifier type
  */
@@ -1776,7 +1763,7 @@ extern "C" int cMoveNode_getFocusCount(cMoveNode* self)
     if (node->getTransformType() != 2) {
         return 0;
     }
-    return *(int*)((char*)*(void**)self->ModifierBlock + 0x34);
+    return ((cMultiSplineModifier*)self->ModifierBlock->RootTransform)->FocusCount;
 }
 #endif
 
@@ -2671,7 +2658,7 @@ extern "C" void* cMultiParticleMan_cMultiParticleMan(cMultiParticleMan* self)
     int i;
     cMultiParticleMan_TheMultiParticleMan = ((void*)self);
     for (i = 0; i < 4; i++) {
-        ((void**)self)[i] = 0;
+        self->Particles[i] = 0;
     }
     return ((void*)self);
 }
@@ -2694,9 +2681,9 @@ extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, in
 {
     int i;
     for (i = 0; i < 4; i++) {
-        void* particle = ((void**)self)[i];
+        cMultiParticle* particle = self->Particles[i];
         if (particle != 0) {
-            cMultiParticle__cMultiParticle((cMultiParticle*)particle, 3);
+            cMultiParticle__cMultiParticle(particle, 3);
         }
     }
     cMultiParticleMan_TheMultiParticleMan = 0;

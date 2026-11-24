@@ -28,20 +28,6 @@ extern char str_have_num[];
 extern char str_cost_text[];
 extern char str_have_text[];
 
-class cWidget_00184668 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int a);
-};
-
 /**
  * Shows or hides the uber-trick store's cost display: "cost_num", "cost_text", "have_num" and "have_text".
  *
@@ -53,19 +39,19 @@ public:
 extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on)
 {
     void* screen = cList_first((cList*)&self->mScreens);
-    cWidget_00184668* costNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
+    cUIThing* costNum = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costNum) {
         costNum->setVisible(on);
     }
-    cWidget_00184668* costText = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_text));
+    cUIThing* costText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_text));
     if (costText) {
         costText->setVisible(on);
     }
-    cWidget_00184668* haveNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
+    cUIThing* haveNum = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
     if (haveNum) {
         haveNum->setVisible(on);
     }
-    cWidget_00184668* haveText = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_text));
+    cUIThing* haveText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_text));
     if (haveText) {
         haveText->setVisible(on);
     }
@@ -81,40 +67,25 @@ int GetHashValue32(char* str);
 extern char str_btext5[];
 extern char str_ps2sq[];
 
-class cWidget_00184780 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int a);
-};
-
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 
 /**
  * Shows or hides the uber-trick screen's "btext5" and "ps2sq" objects.
  *
- * Looks both up on the state's first screen (cList_first on the screen list +0x24) and calls setVisible (vtable slot
- * 9). cFEStateUberTrick_onWidgetEvent shows them with the cost display when the trick menu gets focus and hides them when it is left;
- * cFEStateUberTrick_onCreateScreen hides them.
+ * Looks both up on the state's first screen (cList_first on mScreens) and calls setVisible (vtable slot 9).
+ * cFEStateUberTrick_onWidgetEvent shows them with the cost display when the trick menu gets focus and hides them when
+ * it is left; cFEStateUberTrick_onCreateScreen hides them.
  *
  * @param on  1 to show, 0 to hide
  */
 extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on)
 {
     void* screen = cList_first((cList*)&self->mScreens);
-    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
+    cUIThing* w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
     if (w) {
         w->setVisible(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_ps2sq));
+    w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_ps2sq));
     if (w) {
         w->setVisible(on);
     }
@@ -144,27 +115,27 @@ extern char str_InstBtn2[];
 extern "C" void cFEStateUberTrick_trickVisible(cFEStateUberTrick* self, int on)
 {
     void* screen = cList_first((cList*)&self->mScreens);
-    cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_To_Execute_info));
+    cUIThing* w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_To_Execute_info));
     if (w) {
         w->setVisible(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Checkboxes));
+    w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Checkboxes));
     if (w) {
         w->setVisible(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_MenuTrick));
+    w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_MenuTrick));
     if (w) {
         w->setVisible(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn0));
+    w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn0));
     if (w) {
         w->setVisible(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn1));
+    w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn1));
     if (w) {
         w->setVisible(on);
     }
-    w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn2));
+    w = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn2));
     if (w) {
         w->setVisible(on);
     }
@@ -343,23 +314,21 @@ extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cUIState_onUpdate(void* self);
 
-struct sQuat_184C60
-{
-    float x, y, z, w;
-    sQuat_184C60() {}
-    sQuat_184C60(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+// A t4Vector built from its four components (the pose's position and rotation quaternions below).
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
-
-extern sQuat_184C60 t4vect_XAxis;
-extern sQuat_184C60 t4vect_YAxis;
-extern sQuat_184C60 t4vect_ZAxis;
+extern t4Vector t4vect_XAxis;
+extern t4Vector t4vect_YAxis;
+extern t4Vector t4vect_ZAxis;
 extern "C" void cFERider_setPose(void* rider, tPose* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQuat_184C60 QuatMul_184C60(const sQuat_184C60& a, const sQuat_184C60& b)
+static inline t4VectorXYZW QuatMul_184C60(const t4Vector& a, const t4Vector& b)
 {
-    sQuat_184C60 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -379,28 +348,29 @@ static inline sQuat_184C60 QuatMul_184C60(const sQuat_184C60& a, const sQuat_184
     return r;
 }
 
-static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angle)
+static inline t4VectorXYZW AxisAngle_184C60(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sQuat_184C60(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorXYZW(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 /**
  * Poses the user's FE rider on the uber-trick screen once it has loaded, then runs cUIState_onUpdate.
  *
- * Until +0x48 (On Tour mbModelVisible) is set it takes the user's FE rider (cFERiderManager_getHuman1 on RealFE + 0xB0). When the
- * rider's character (+0x0) is below 10 and +0xCB8 and +0xCB4 are both set, it sets the rider's +0xCCC, resets its
- * animation (+0xC, cRiderAnimBase_reset) and plays animation 436 (cRiderAnimBase_play, blend -1), places it at (-228,
- * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; fSinCos gives the sines) with
- * cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable cFEStateUberTrick_vtbl.
+ * Until mbModelVisible is set it takes the user's FE rider (cFERiderManager_getHuman1 on RealFE's mRiderManager).
+ * When the rider's mCharID is below 10 and mDoneLoadingTextures and mCompiledModel are both set, it sets the rider's
+ * mAnimateBoard, resets its animation (mpRiderAnim, cRiderAnimBase_reset) and plays animation 436
+ * (cRiderAnimBase_play, blend -1), places it at (-228, -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y
+ * turns are 0; fSinCos gives the sines) with cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and
+ * sets mbModelVisible. onUpdate slot (+0x64) of the vtable cFEStateUberTrick_vtbl.
  */
 extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
 {
     if (self->mbModelVisible == 0) {
         cFERider* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
         int ok = 0;
-        if (*(unsigned int*)rider < 10 && rider->mDoneLoadingTextures != 0) {
+        if ((unsigned int)rider->mCharID < 10 && rider->mDoneLoadingTextures != 0) {
             ok = rider->mCompiledModel != 0;
         }
         if (ok) {
@@ -410,25 +380,25 @@ extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
                 cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 436, 0, -1.0f);
             }
-            sQuat_184C60 pos;
+            t4VectorXYZW pos;
             tPose xf;
             {
-                sQuat_184C60 position;
+                t4VectorXYZW position;
                 position.x = -228.0f;
                 position.y = -205.0f;
                 position.z = 63.0f;
                 position.w = 1.0f;
                 pos = position;
-                (*(sQuat_184C60*)&xf.P) = position;
+                xf.P = position;
                 self->mbModelVisible = 1;
-                (*(sQuat_184C60*)&xf.Q).x = 0.0f;
-                (*(sQuat_184C60*)&xf.Q).y = 0.0f;
-                (*(sQuat_184C60*)&xf.Q).z = 0.0f;
-                (*(sQuat_184C60*)&xf.Q).w = 1.0f;
-                (*(sQuat_184C60*)&xf.Q) = QuatMul_184C60((*(sQuat_184C60*)&xf.Q), AxisAngle_184C60(t4vect_XAxis, 0.0f));
+                xf.Q.x = 0.0f;
+                xf.Q.y = 0.0f;
+                xf.Q.z = 0.0f;
+                xf.Q.w = 1.0f;
+                xf.Q = QuatMul_184C60(xf.Q, AxisAngle_184C60(t4vect_XAxis, 0.0f));
             }
-            (*(sQuat_184C60*)&xf.Q) = QuatMul_184C60((*(sQuat_184C60*)&xf.Q), AxisAngle_184C60(t4vect_YAxis, 0.0f));
-            (*(sQuat_184C60*)&xf.Q) = QuatMul_184C60((*(sQuat_184C60*)&xf.Q), AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
+            xf.Q = QuatMul_184C60(xf.Q, AxisAngle_184C60(t4vect_YAxis, 0.0f));
+            xf.Q = QuatMul_184C60(xf.Q, AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
             cFERider_setPose(rider, &xf);
             cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 1);
         }
@@ -598,8 +568,7 @@ extern "C" void cUIStateBuyPopup_initBuyTrick(void* popup, int trick, int cost, 
 extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 extern "C" int gGetGrabName(int id);
 extern "C" void func_0014FD80(void* iface, int rider, int a, int b);
-struct sTrick_185268;
-extern "C" sTrick_185268* func_0014FF90(void* iface, int rider, int a, int* out);
+extern "C" tBEUber* func_0014FF90(void* iface, int rider, int a, int* out);
 extern "C" int func_0014FFB8(void* iface, int rider, int a, int b);
 extern "C" int func_00150048(void* iface, int rider, int a, int b);
 extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
@@ -622,94 +591,70 @@ extern char str_kT_FEHELPTrickAvailBuy[];
 extern char str_kT_OVRCMNSaveCashUber[];
 extern char str_kT_FEHELPTrickBuyCTM[];
 
-struct sSnd_185268 {
-    sVEntry<void>* vt;
-};
-extern sSnd_185268 gUISoundNull;
+extern cUISoundInterface gUISoundNull;
 
-struct sColor_185268 {
-    float a, r, g, b;
-    sColor_185268(float a_, float r_, float g_, float b_) : a(a_), r(r_), g(g_), b(b_) {}
+// A tARGB built from its four components (A, R, G, B), as setColour takes it.
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
-class cUIObj_185268 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void SetColor(const sColor_185268& c);
-};
-
-struct sTrick_185268 {
-    unsigned short anim;
-    unsigned short f2;
-    unsigned short id;
-    unsigned short cost;
-};
+// cUIThing's setColour slot (11), called by hand with the colour as a reference (the slot takes const tARGB*)
+typedef sVEntry<void(void*, const tARGB&)> tSetColourEntry;
 
 static inline int Is_185268(int id, char* s)
 {
     return id == GetHashValue32(s);
 }
 
-static inline void SetActive_185268(char* menu, int on)
+static inline void SetActive_185268(cUIThing* menu, int on)
 {
-    sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
-    ((void (*)(void*, int))vt[7].fn)(vthis(menu, vt[7]), on);
+    menu->setFocus(on);
 }
 
-static inline void PlaySound_185268(char* self, int id)
+static inline void PlaySound_185268(cFEStateUberTrick* self, int id)
 {
-    sSnd_185268* snd = *(sSnd_185268**)(*(char**)(self + 0x10) + 0x14);
+    cUISoundInterface* snd = self->mpEngine->mpSound;
     if (snd == 0)
         snd = &gUISoundNull;
     if (snd != 0)
-        ((void (*)(void*, int))snd->vt[2].fn)(vthis(snd, snd->vt[2]), id);
+        snd->playSound(id);
 }
 
-static inline void Back_185268(char* self)
+static inline void Back_185268(cFEStateUberTrick* self)
 {
-    char* mgr = **(char***)(self + 0x10);
-    sVEntry<void>* vt = *(sVEntry<void>**)(mgr + 4);
-    void* r = ((void* (*)(void*, void*, int))vt[5].fn)(vthis(mgr, vt[5]), self, 0);
+    cUICustomInterface* custom = self->mpEngine->mpCustom;
+    void* r = custom->getPrevState(self, 0);
     if (r != 0)
-        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        cUIStateStack_push(&self->mpEngine->mStateStack, r);
 }
 
 /**
  * Handles the uber-trick screen's widget events: moving between the menus, equipping or buying a trick, previewing it,
  * and the help texts.
  *
- * A widget's menu is its mpParent (+0x40): the category menu +0x4C or the trick menu +0x50 (On Tour mpMainMenu,
- * mpTrickMenu). The category and trick are the menus' selected items' (mpSelected, +0xA0) mMiscData (+0x18); the trick
- * table comes from func_0014FF90 on cBE interface 6. "Back" pushes the state that the custom front end (*mpEngine)
- * returns from its vtable slot 5 (cFECustom_getPrevState). onWidgetEvent slot (+0x9C) of the vtable cFEStateUberTrick_vtbl.
+ * A widget's menu is its mpParent: the category menu mpMainMenu or the trick menu mpTrickMenu. The category and
+ * trick are the menus' selected items' (mpSelected) mMiscData; the trick table (tBEUber) comes from func_0014FF90 on
+ * cBE interface 6. "Back" pushes the state that the engine's mpCustom returns from getPrevState (slot 5,
+ * cFECustom_getPrevState). onWidgetEvent slot (+0x9C) of the vtable cFEStateUberTrick_vtbl.
  * - 5 (accept) on the category menu: "done" goes back; another item gives the trick menu focus at row 0 (setFocus,
- *   vtable slot 7), runs cFEStateUberTrick_activateTrickMenu and shows the cost display (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's
- *   objects. On the trick menu: an unlocked trick (func_00150048) that is not for sale (func_0014FFB8) becomes the
- *   category's trick (func_0014FD80), interface 6's vtable slot 1 runs and the list is refilled
- *   (cFEStateUberTrick_updateTrickMenu). Otherwise, outside game path 0 (newRace.cGamePath) UI sound 4 plays; a trick for sale opens a
+ *   vtable slot 7), runs cFEStateUberTrick_activateTrickMenu and shows the cost display
+ *   (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. On the trick menu: an unlocked
+ *   trick (func_00150048) that is not for sale (func_0014FFB8) becomes the category's trick (func_0014FD80),
+ *   interface 6 is submitted (slot 1) and the list is refilled (cFEStateUberTrick_updateTrickMenu). Otherwise,
+ *   outside game path 0 (newRace.cGamePath) UI sound 4 plays; a trick for sale opens a
  *   "UITRICKBUY" cUIStateBuyPopup (cUIStateBuyPopup_initBuyTrick with the trick's name, cost and the character's money)
  *   when the money covers the cost, else sound 4 plays.
  * - 6 (back) on the trick menu: gives the category menu focus, colours the trick menu's selected item opaque black
- *   (setColour, slot 11), deselects it (index 0xFF), runs cFEStateUberTrick_activateMainMenu and hides the cost display and cFEStateUberTrick_previewVisible's
- *   objects. On the category menu it goes back.
- * - 7 on the trick menu: once the rider is shown (+0x48) plays the trick's animation (its table entry's first
- *   halfword).
- * - 1 (highlight) sets the FE rider's +0xCD0. On the category menu an item with a category (mMiscData not -1) shows the
- *   trick widgets (cFEStateUberTrick_trickVisible), refills the list and sets "helptext_choose" to
+ *   (setColour, slot 11), deselects it (index 0xFF), runs cFEStateUberTrick_activateMainMenu and hides the cost
+ *   display and cFEStateUberTrick_previewVisible's objects. On the category menu it goes back.
+ * - 7 on the trick menu: once the rider is shown (mbModelVisible) plays the trick's animation (its table entry's
+ *   anim).
+ * - 1 (highlight) sets the FE rider's mUberIrradiance. On the category menu an item with a category (mMiscData not
+ *   -1) shows the trick widgets (cFEStateUberTrick_trickVisible), refills the list and sets "helptext_choose" to
  *   "kT_66HELPChooseCat"; other items hide them and set "kT_FEHELPAcceptTrick". On the trick menu "helptext_custom"
  *   says "kT_66HELPCustomUber" for an equippable trick, "kT_FEHELPTrickAvailBuy" or "kT_OVRCMNSaveCashUber" for a trick
  *   for sale by whether the money covers it, "kT_FEHELPTrickBuyCTM" outside game path 0; then the cost numbers are
  *   refreshed (cFEStateUberTrick_updateTrickMenuEntry).
- * - 2 clears the FE rider's +0xCD0.
+ * - 2 clears the FE rider's mUberIrradiance.
  *
  * @param item  the widget that sent the event
  * @param msg  the widget event
@@ -720,11 +665,11 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
     case 5:
         if ((char*)item->mpParent == (char*)self->mpMainMenu) {
             if (Is_185268(item->mHashName, str_done)) {
-                Back_185268(((char*)self));
+                Back_185268(self);
             } else {
-                SetActive_185268((char*)self->mpMainMenu, 0);
+                SetActive_185268(self->mpMainMenu, 0);
                 cUIMenu_setSelectedByIndex(self->mpTrickMenu, 0);
-                SetActive_185268((char*)self->mpTrickMenu, 1);
+                SetActive_185268(self->mpTrickMenu, 1);
                 cFEStateUberTrick_activateTrickMenu(((char*)self));
                 cFEStateUberTrick_costVisible(self, 1);
                 cFEStateUberTrick_previewVisible(self, 1);
@@ -735,32 +680,31 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             if (((char*)categoryItem) != 0 && ((char*)trickItem) != 0) {
                 int ai = *(signed char*)&categoryItem->mMiscData;
                 int bi = *(signed char*)&trickItem->mMiscData;
-                char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
+                cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     func_0014FD80(pi, self->mUserNum, ai, bi);
-                    sVEntry<void>* vt = *(sVEntry<void>**)(pi + 0xC);
-                    ((int (*)(void*))vt[1].fn)(vthis(pi, vt[1]));
+                    // submit (slot 1) by hand, through an int-returning slot: the void virtual call allocates
+                    // other registers
+                    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cBEInterface, pi);
+                    vt[1].fn(vthis(pi, vt[1]));
                     cFEStateUberTrick_updateTrickMenu(((char*)self));
                 } else if (cBENewRaceInterface_newRace.cGamePath != 0) {
-                    PlaySound_185268(((char*)self), 4);
+                    PlaySound_185268(self, 4);
                 } else if (func_0014FFB8(pi, self->mUserNum, ai, bi)) {
-                    char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+                    cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
                     signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
-                    {
-                        sVEntry<void>* vt = *(sVEntry<void>**)(player + 0xC);
-                        ((void (*)(void*))vt[2].fn)(vthis(player, vt[2]));
-                    }
+                    player->discard();
                     int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
                     int n;
-                    sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
+                    tBEUber* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                     int trick = gGetGrabName(tbl[bi].id);
                     if (points >= tbl[bi].cost) {
                         void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);
                         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
                     } else {
-                        PlaySound_185268(((char*)self), 4);
+                        PlaySound_185268(self, 4);
                     }
                 }
             }
@@ -768,19 +712,22 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
         break;
     case 6:
         if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
-            SetActive_185268((char*)self->mpMainMenu, 1);
-            SetActive_185268((char*)self->mpTrickMenu, 0);
+            SetActive_185268(self->mpMainMenu, 1);
+            SetActive_185268(self->mpTrickMenu, 0);
             {
-                cUIObj_185268* trickSelection = (cUIObj_185268*)self->mpTrickMenu->mpSelected;
-                if (trickSelection != 0)
-                    trickSelection->SetColor(sColor_185268(1.0f, 0.0f, 0.0f, 0.0f));
+                cUIThing* trickSelection = self->mpTrickMenu->mpSelected;
+                if (trickSelection != 0) {
+                    tSetColourEntry* vt = (tSetColourEntry*)VPTR_OF(cListNode, trickSelection);
+                    tSetColourEntry* colorEntry = &vt[11];
+                    colorEntry->fn(vthis(trickSelection, *colorEntry), tARGBInit(1.0f, 0.0f, 0.0f, 0.0f));
+                }
             }
             cUIMenu_setSelectedByIndex(self->mpTrickMenu, 0xFF);
             cFEStateUberTrick_activateMainMenu(((char*)self));
             cFEStateUberTrick_costVisible(self, 0);
             cFEStateUberTrick_previewVisible(self, 0);
         } else {
-            Back_185268(((char*)self));
+            Back_185268(self);
         }
         break;
     case 7:
@@ -788,11 +735,11 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             cUIThing* categoryItem = (cUIThing*)self->mpMainMenu->mpSelected;
             cUIThing* trickItem = (cUIThing*)self->mpTrickMenu->mpSelected;
             if (((char*)categoryItem) != 0 && ((char*)trickItem) != 0) {
-                char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
+                cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
                 int bi = *(signed char*)&trickItem->mMiscData;
                 int ai = *(signed char*)&categoryItem->mMiscData;
                 int n = 0;
-                sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
+                tBEUber* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                 if (self->mbModelVisible != 0) {
                     cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
                     cRiderAnimBase_play(feRider->mpRiderAnim, tbl[bi].anim, 0, -1.0f);
@@ -822,21 +769,18 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             if (((char*)categoryItem) != 0 && ((char*)trickItem) != 0 && helpText != 0) {
                 int ai = *(signed char*)&categoryItem->mMiscData;
                 int bi = *(signed char*)&trickItem->mMiscData;
-                char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
+                cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPCustomUber));
                 } else if (cBENewRaceInterface_newRace.cGamePath == 0) {
                     if (func_0014FFB8(pi, self->mUserNum, ai, bi)) {
-                        char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+                        cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
                         signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
-                        {
-                            sVEntry<void>* vt = *(sVEntry<void>**)(player + 0xC);
-                            ((void (*)(void*))vt[2].fn)(vthis(player, vt[2]));
-                        }
+                        player->discard();
                         int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
                         int n;
-                        sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
+                        tBEUber* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                         if (points >= tbl[bi].cost)
                             cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPTrickAvailBuy));
                         else

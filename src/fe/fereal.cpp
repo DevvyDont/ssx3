@@ -21,6 +21,8 @@
 #include "online/gamecomm.h"
 #include "main/ssxapp.h"
 #include "render/graphicsman.h"
+#include "render/playerlights.h"
+#include "animation/animdatabase.h"
 
 //100%
 INCLUDE_ASM("fe/fereal", cFECustom_cFECustom);
@@ -561,66 +563,78 @@ static inline bool IsMode1_1A16C0()
  * @param stateData   the state data passed along (picks the branch for state 33; the peak and rewards rooms get it)
  * @return the new state, or 0 when there is none
  */
-extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateData)
+extern "C" void* cFECustom_getPrevState(cFECustom* self, cUIState* desc, int stateData)
 {
     switch (desc->mHashName) {
     case 9:
         if (IsMode1_1A16C0()) {
-            return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *self);
+            return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0),
+                                                                 self->mpEngine);
         }
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (cBENewRaceInterface_newRace.cGamePath) {
         case 1:
-            return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
+            return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), self->mpEngine);
         case 0:
-            return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
+            return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), self->mpEngine);
         case 2:
             if (*(char*)&desc->mUserNum == 1) {
-                return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
+                return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0),
+                                                           self->mpEngine, 0);
             }
-            return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
+            return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), self->mpEngine);
         }
         break;
     case 23:
-        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 1);
+        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0),
+                                                     self->mpEngine, 1);
     case 13:
     case 14:
     case 16:
         if (gInLodge != 0) {
-            return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
+            return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), self->mpEngine);
         }
-        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, *(char*)&desc->mUserNum);
+        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0),
+                                                   self->mpEngine, *(char*)&desc->mUserNum);
     case 15:
     case 18:
         if (gInLodge != 0) {
-            return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+            return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(
+                cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), self->mpEngine);
         }
-        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, *(char*)&desc->mUserNum);
+        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0),
+                                                       self->mpEngine, *(char*)&desc->mUserNum);
     case 17:
-        return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, *(char*)&desc->mUserNum, gInLodge);
+        return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0),
+                                                         self->mpEngine, *(char*)&desc->mUserNum, gInLodge);
     case 19:
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (cBENewRaceInterface_newRace.cGamePath) {
         case 0:
         case 1:
-            return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
+            return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0),
+                                                       self->mpEngine, 0);
         case 2:
-            return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 1);
+            return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0),
+                                                       self->mpEngine, 1);
         }
         break;
     case 20: {
         cUITemplate_MAP_mMapFEStart = 1;
         cUITemplate_MAP_mMapStyle = 0;
-        char* eventSelect = (char*)cFEStateEventSelect_cFEStateEventSelect1(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
+        char* eventSelect = (char*)cFEStateEventSelect_cFEStateEventSelect1(
+            cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), self->mpEngine, 0);
         eventSelect[0x44] = 0;
         return eventSelect;
     }
     case 21:
         cUITemplate_MAP_mMapFEStart = 1;
         cUITemplate_MAP_mMapStyle = 0;
-        return cFEStateEventSelect_cFEStateEventSelect1(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
+        return cFEStateEventSelect_cFEStateEventSelect1(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0),
+                                                        self->mpEngine, 0);
     case 12:
-        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, *(char*)&desc->mUserNum);
+        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0),
+                                                     self->mpEngine, *(char*)&desc->mUserNum);
     case 8: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int gamePath = cBENewRaceInterface_newRace.cGamePath;
@@ -634,16 +648,18 @@ extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateDa
     case 5:
     case 11:
     case 22:
-        return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
+        return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), self->mpEngine);
     case 35:
     other: {
-        int sc = ((int*)self)[3];
+        int sc = self->mProfileLaunchScreen;
         if (sc == 24) {
-            return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
+            return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(
+                cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), self->mpEngine);
         } else if (sc == 9) {
-            return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, *(char*)&desc->mUserNum);
+            return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0),
+                                                         self->mpEngine, *(char*)&desc->mUserNum);
         } else if (sc == 39) {
-            return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
+            return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), self->mpEngine);
         }
         break;
     }
@@ -655,48 +671,60 @@ extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateDa
     case 36:
     case 37:
     case 38:
-        return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), *self, 0);
+        return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), self->mpEngine, 0);
     case 33:
         switch (stateData) {
         case 0:
-            if (((int*)self)[3] == 34) {
-                return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), *self, 0);
+            if (self->mProfileLaunchScreen == 34) {
+                return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), self->mpEngine, 0);
             }
-            return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
+            return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(
+                cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), self->mpEngine);
         case 1:
-            cAppMan_setNextModule((struct cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
+            cAppMan_setNextModule((struct cAppMan*)SSXApp,
+                                  cPreGameLoadScreen_cPreGameLoadScreen(
+                                      cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
             break;
         case 2:
             if (IsMode1_1A16C0()) {
-                return cFEStateNetSSXWorld_cFEStateNetSSXWorld(cMemMan_alloc(1744, str_cFEStateNetSSXWorld, 0, 0), *self);
+                return cFEStateNetSSXWorld_cFEStateNetSSXWorld(cMemMan_alloc(1744, str_cFEStateNetSSXWorld, 0, 0),
+                                                               self->mpEngine);
             }
             break;
         }
         break;
     case 2:
     case 39:
-        return cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), *self);
+        return cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), self->mpEngine);
     case 40:
     case 41:
-        return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
+        return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), self->mpEngine);
     case 43:
         if (gInLodge != 0) {
-            return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+            return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(
+                cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), self->mpEngine);
         }
-        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, *(char*)&desc->mUserNum);
+        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0),
+                                                   self->mpEngine, *(char*)&desc->mUserNum);
     case 42:
-        return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+        return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0),
+                                                                 self->mpEngine);
     case 46:
         if (gInLodge != 0) {
-            return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+            return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(
+                cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), self->mpEngine);
         }
-        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, *(char*)&desc->mUserNum);
+        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0),
+                                                       self->mpEngine, *(char*)&desc->mUserNum);
     case 44:
-        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, *(char*)&desc->mUserNum);
+        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0),
+                                                         self->mpEngine, *(char*)&desc->mUserNum);
     case 45:
-        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, *(char*)&desc->mUserNum, stateData);
+        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0),
+                                                 self->mpEngine, *(char*)&desc->mUserNum, stateData);
     case 47:
-        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, *(char*)&desc->mUserNum, stateData != 0);
+        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0),
+                                                       self->mpEngine, *(char*)&desc->mUserNum, stateData != 0);
     }
     return 0;
 }
@@ -713,8 +741,7 @@ INCLUDE_ASM("fe/fereal", cFECustom_setPlayerCtrlMask);
  */
 extern "C" void cFECustom_setPlayerCtrlMask(cFECustom* self, int index, int val)
 {
-    char* entry = (char*)self + (signed char)index;
-    *(char*)(entry + 0x8) = val;
+    self->mCtrlMask[(signed char)index] = val;
 }
 #endif
 
@@ -731,8 +758,7 @@ INCLUDE_ASM("fe/fereal", cFECustom_getPlayerCtrlMask);
  */
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(cFECustom* self, int index)
 {
-    char* entry = (char*)self + (signed char)index;
-    return *(unsigned char*)(entry + 0x8);
+    return self->mCtrlMask[(signed char)index];
 }
 #endif
 
@@ -808,26 +834,26 @@ extern int cDepthFog_m_Enable;
 extern int cScreenTint_m_Enable;
 extern int cLightGlow_m_Enable;
 
-struct sVec3K1A1DC0 {
-    int x, y, z;
-    sVec3K1A1DC0() { x = 0; y = 0; z = 0; }
+// A tRGB built from its three components (the clear colour passed to SetScreenClearColour).
+struct tRGBInit : tRGB {
+    tRGBInit(float r, float g, float b) { R = r; G = g; B = b; }
 };
-typedef void (*tFn_1A1DC0)(void*, const sVec3K1A1DC0&);
-typedef void (*tVoid_1A1DC0)(void*);
+typedef void tClearColourFn(void*, const tRGB&);
 
 /**
  * Prepares the front end when it gains focus and pushes its first states.
  *
  * If gWeHaveToClearTheBackEnd is set, it resets back-end entries 0-2 (cBE_newProfile), zeroes the 0x20 bytes at
- * cBERules_mRules and clears the flag. It then clears +0xB5AD8 and +0xB5ADC, sets back-end state 0 (cBE_setState()),
- * uploads the textures (cGraphicsMan_UploadTextures()), calls cFELocale_unloadOV on the front-end locale, turns off depth
- * fog, screen tint and light glow, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)), gives
- * the front-end flow state gFlowState 86 states and finally calls its own virtual slot 8 (cRealFE_loadStartState()).
+ * cBERules_mRules and clears the flag. It then clears mMovieSkippable and mWaitRenderNum, sets back-end state 0
+ * (cBE_setState()), uploads the textures (cGraphicsMan_UploadTextures()), calls cFELocale_unloadOV on the front-end
+ * locale, turns off depth fog, screen tint and light glow, sets the graphics manager's clear colour to black
+ * (SetScreenClearColour, slot 15, with (0, 0, 0)), gives the front-end flow state gFlowState 86 states and finally
+ * calls its own virtual slot 8 (cRealFE_loadStartState()).
  */
 extern "C" void cRealFE_gainFocus(cRealFE* self)
 {
-    char* graphicsMan;
-    char* vt;
+    cPS2GraphicsMan* graphicsMan;
+    sVEntry<tClearColourFn>* vt;
     if (gWeHaveToClearTheBackEnd != 0) {
         cBE_newProfile(cBE_getBE(), 0);
         cBE_newProfile(cBE_getBE(), 1);
@@ -843,11 +869,18 @@ extern "C" void cRealFE_gainFocus(cRealFE* self)
     cDepthFog_m_Enable = 0;
     cScreenTint_m_Enable = 0;
     cLightGlow_m_Enable = 0;
-    graphicsMan = (char*)GrMan;
-    vt = *(char**)(graphicsMan + 0x10D8);
-    ((tFn_1A1DC0)*(void**)(vt + 0x7C))(graphicsMan + *(short*)(vt + 0x78), sVec3K1A1DC0());
+    // SetScreenClearColour (slot 15) by hand, the vptr and the slot's words read through plain pointers: read as
+    // struct members, the compiler moves them (and GrMan's read) above the three stores, which retail does not
+    graphicsMan = GrMan;
+    void*** vptr = &VPTR_OF(cGraphicsMan, graphicsMan);
+    vt = (sVEntry<tClearColourFn>*)*vptr;
+    short* delta = &vt[15].delta;
+    tClearColourFn** fn = &vt[15].fn;
+    (*fn)(vthis(graphicsMan, *delta), tRGBInit(0.0f, 0.0f, 0.0f));
     cFEFlowState_setNumStates(&gFlowState, 86);
-    ((tVoid_1A1DC0)*(void**)(*(char**)self + 0x44))(((char*)self) + *(short*)(*(char**)self + 0x40));
+    // slot 8: loadStartState (cRealFE_loadStartState)
+    sVEntry<void(void*)>* selfVt = (sVEntry<void(void*)>*)self->mVtbl;
+    selfVt[8].fn(vthis(self, selfVt[8]));
 }
 #endif
 
@@ -1441,7 +1474,6 @@ extern "C" void cRealFE_loadCharAnimations(void)
 //100%
 INCLUDE_ASM("fe/fereal", cRealFE_purgeCharAnimations);
 #ifdef SKIP_ASM
-extern void** cAnimDataBase_TheAnimDataBase;
 extern void* cGameAnimMap_TheGameAnimMap;
 extern "C" void cGameAnimMap_remSource(void* a, void* b);
 extern "C" void cAnimDataBase_purgeChanCache(void* a);
@@ -1459,11 +1491,11 @@ extern "C" void cRealFE_purgeCharAnimations(cRealFE* self)
     int i;
     for (i = 0; i < 1; i++) {
         unsigned char idx = i;
-        void* animData = *(void**)((char*)cAnimDataBase_TheAnimDataBase + (idx << 2));
+        cAdfDataSource* animData = cAnimDataBase_TheAnimDataBase->DataSources[idx];
         if (animData != 0) {
             cGameAnimMap_remSource(cGameAnimMap_TheGameAnimMap, animData);
-            void** tbl = cAnimDataBase_TheAnimDataBase;
-            *(void**)((char*)tbl + (idx << 2)) = 0;
+            cAnimDataBase* tbl = cAnimDataBase_TheAnimDataBase;
+            tbl->DataSources[idx] = 0;
             cAnimDataBase_purgeChanCache(tbl);
             cAdfDataSource__cAdfDataSource(animData, 3);
         }

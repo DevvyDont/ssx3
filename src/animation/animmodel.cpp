@@ -1283,7 +1283,7 @@ extern "C" void cAnimDataBase_purgeChanCache(void)
 //100%
 INCLUDE_ASM("animation/animmodel", cAdfDataSource_cAdfDataSource1);
 #ifdef SKIP_ASM
-extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, cAdfDataSource* data);
+extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, tAdfArchive* data);
 
 /**
  * Constructs an animation data source over @p data that is already in memory, and returns @p self.
@@ -1297,7 +1297,7 @@ extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, cAdfDataSo
 extern "C" void* cAdfDataSource_cAdfDataSource1(cAdfDataSource* self, char* data)
 {
     *(int*)self = 0;
-    cAdfDataSource_populateFromData((cAdfDataSource*)self, (cAdfDataSource*)data);
+    cAdfDataSource_populateFromData((cAdfDataSource*)self, (tAdfArchive*)data);
     return ((void*)self);
 }
 #endif
@@ -1320,7 +1320,7 @@ extern "C" void* cAdfDataSource_cAdfDataSource(char** self, void* src)
 {
     char* data = FILE_loadpack(src, 0);
     *self = data;
-    cAdfDataSource_populateFromData((cAdfDataSource*)self, (cAdfDataSource*)data);
+    cAdfDataSource_populateFromData((cAdfDataSource*)self, (tAdfArchive*)data);
     return self;
 }
 #endif
@@ -1336,13 +1336,15 @@ INCLUDE_ASM("animation/animmodel", cAdfDataSource_populateFromData);
  *
  * @param data  the loaded animation archive
  */
-extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, cAdfDataSource* data)
+extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, tAdfArchive* data)
 {
-    self->Archive = (tAdfArchive*)data;
-    self->Anims = (tAdfAnimHeader*)(&data->Tags);
-    self->Chunks = (tAdfAnimChunk*)(((char*)data) + (int)data->Archive);
-    self->Tags = (tAdfTag*)(((char*)data) + (int)data->Anims);
-    self->ChannelData = (unsigned char*)(((char*)data) + (int)data->Chunks);
+    // ORIGINAL-PTR: a file blob: the loaded archive's header is followed by the animation headers and holds the byte
+    // offsets of its other sections
+    self->Archive = data;
+    self->Anims = (tAdfAnimHeader*)(data + 1);
+    self->Chunks = (tAdfAnimChunk*)((char*)data + data->mAnimChunkOffset);
+    self->Tags = (tAdfTag*)((char*)data + data->mTagOffset);
+    self->ChannelData = (unsigned char*)((char*)data + data->mChannelOffset);
 }
 #endif
 

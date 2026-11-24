@@ -17,6 +17,7 @@
 #include "ui/uiicon.h"
 #include "ui/uigroup.h"
 #include "render/ps2graphicsman.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("ui/uiengine", UIAsciiToUnicode__FPUsPCc);
@@ -152,10 +153,12 @@ extern "C" int cUIEngine_loadFile(cUIEngine* self, int id)
     sprintf(name, str_pct_s_lui, id);
     char* file = (char*)FILE_load(name, 0);
     self->mpData = file;
-    // PORT: the font setter stores the data pointer in an int.
-    cUIAnimationBank_setData((char*)&self->mAnimBank, (int)(file + *(int*)(file + 0x8)));
+    tUIHeaderBlock* header = (tUIHeaderBlock*)file;
+    // PORT: the animation bank's setter takes the data pointer as an int.
+    cUIAnimationBank_setData(&self->mAnimBank, (int)(file + header->mAnimBlockOffset));
     file = self->mpData;
-    cUITextureBank_setData((cUITextureBank*)&self->mTextureBank, id, file + *(int*)(file + 0x10));
+    header = (tUIHeaderBlock*)file;
+    cUITextureBank_setData(&self->mTextureBank, id, file + header->mTextureBlockOffset);
     return 1;
 }
 #endif
@@ -678,22 +681,25 @@ extern "C" void cUIFontInterface_addFontEntry(void* self, unsigned int index, vo
 /**
  * Points a font interface at a font table and adds each of its records as a font entry.
  *
- * Stores @p hdr at +0x0; each record (after the 4-byte count) has its hash name at +0x0, its size at +0x4 and the file
- * name from +0x8, and goes to cUIFontInterface_addFontEntry with its index. Nothing in the C code calls it directly.
+ * Stores @p hdr in mpFontTableHeader; each record (after the 4-byte count) has its hash name at +0x0, its size at
+ * +0x4 and the file name from +0x8, and goes to cUIFontInterface_addFontEntry with its index. Nothing in the C code
+ * calls it directly.
  *
  * @param hdr  the font table: a count followed by the records
  */
-extern "C" void cUIFontInterface_setData(tUIFontTableHeader** self, tUIFontTableHeader* hdr)
+extern "C" void cUIFontInterface_setData(cUIFontInterface* self, tUIFontTableHeader* hdr)
 {
+    // ORIGINAL-PTR: the records are variable-length ({hash, name size, name}) in the loaded UI file's font chunk, so
+    // the walk steps over each by its stored size
     char* rec = (char*)hdr + 4;
-    *self = hdr;
+    self->mpFontTableHeader = hdr;
     unsigned int i = 0;
     if (hdr->mNumEntries != 0) {
         do {
             cUIFontInterface_addFontEntry(self, i, rec + 8, *(int*)rec);
             i++;
             rec += *(int*)(rec + 4) + 8;
-        } while (i < (*self)->mNumEntries);
+        } while (i < self->mpFontTableHeader->mNumEntries);
     }
 }
 #endif
@@ -947,42 +953,22 @@ INCLUDE_ASM("ui/uiengine", cUIIcon_setUIData);
 // PORT: cUIThing_setUIData really takes (self, data) and its result is unused here; the unit declares it with one argument.
 void cUIThing_setUIData_8998(void* self, void* data) __asm__("cUIThing_setUIData");
 
-struct sUIObj8998 {
-    char pad0[0x5C];
-    char* scene;                // 0x5C
-    char pad60[0x74 - 0x60];
-    unsigned int b0 : 1;        // 0x74
-    unsigned int clip : 1;
-    unsigned int align : 2;
-    unsigned int rest : 28;
-    char pad78[0x7C - 0x78];
-    cTextureElement* item;          // 0x7C
-    t2Vector size;           // 0x80
-};
-struct sUIData8998 {
-    char pad0[0x20];
-    unsigned char align : 2;    // 0x20
-    unsigned int clip : 1;
-    unsigned int rest : 29;
-    int id;                     // 0x24
-    unsigned short w;           // 0x28
-    unsigned short h;           // 0x2A
-};
-
 /**
  * Sets an icon up from its screen-data record: clip and alignment bits, its texture element and its size.
  *
- * The size is stored in hundredths in the record.
+ * The record's mIconFlags bit 2 goes to mAttrIcon.mIconFlip and bits 0-1 to mIconRotate; the element is the texture
+ * bank's mTextureID entry. The size (mTiledU, mTiledV) is stored in hundredths in the record.
  *
  * @param data  the icon's record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
+extern "C" void cUIIcon_setUIData(cUIIcon* self, tUIIcon* data)
 {
-    cUIThing_setUIData_8998(((sUIObj8998*)self), data);
-    ((sUIObj8998*)self)->clip = data->clip;
-    ((sUIObj8998*)self)->align = data->align;
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)(&self->mpScreen->mpState->mpEngine->mTextureBank), data->id);
-    *(t2Vector*)&self->mTileUV[0] = t2Vector(data->w * 0.01f, data->h * 0.01f);
+    cUIThing_setUIData_8998(self, data);
+    self->mAttrIcon.mIconFlip = data->mIconFlags >> 2;
+    self->mAttrIcon.mIconRotate = (unsigned char)data->mIconFlags;
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(
+        (cUITextureBank*)(&self->mpScreen->mpState->mpEngine->mTextureBank), data->mTextureID);
+    *(t2Vector*)&self->mTileUV[0] = t2Vector(data->mTiledU * 0.01f, data->mTiledV * 0.01f);
 }
 #endif
 
@@ -1340,44 +1326,35 @@ INCLUDE_ASM("ui/uiengine", cUIListBox_setUIData);
 // PORT: cUIThing_setUIData really takes (self, data); the unit declares it with one argument.
 void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
 
-struct sUIColor9820 {
-    float r, g, b, a;
-    sUIColor9820() {}
-    sUIColor9820(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
-};
-struct sUIVt9820 { short delta; short index; void (*fn)(void*, int); };
-struct sUIObj9820 {
-    char pad0[0x8];
-    sUIVt9820* vt;              // 0x8
-    char padC[0x14 - 0xC];
-    int flags14;                // 0x14
-    char pad18[0x74 - 0x18];
-    unsigned int mode : 2;      // 0x74
-    unsigned int tinted : 1;
-    unsigned int rest : 29;
-    sUIColor9820 color;         // 0x78
+// A tARGB built from its four components (A, R, G, B).
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
 /**
  * Sets a list box up from its screen record.
  *
- * Runs cUIThing's setUIData, takes the font (mFont) from the record's +0x20 byte, calls slot 23 (cUIListBox_setShadow) with
- * bit 0 of its +0x22 word and, when mShadow is then set, takes mShadowColour from its RGBA bytes (+0x24, scaled by
+ * Runs cUIThing's setUIData, takes the font (mFont) from the record's mFontID, calls slot 23 (cUIListBox_setShadow)
+ * with bit 0 of its mFlags and, when mShadow is then set, takes mShadowColour from its mSColour bytes (scaled by
  * 1/255). Always sets mWrap (bit 7 of mAttr).
  *
  * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIListBox_setUIData(sUIObj9820* self, tUIListBox* data)
+extern "C" void cUIListBox_setUIData(cUIListBox* self, tUIListBox* data)
 {
     cUIThing_setUIData_2(self, data);
-    self->mode = data->mFontID & 3;
-    self->vt[23].fn(vthis(self, self->vt[23]), data->mFlags & 1);
-    int listAttr = *(int*)((char*)self + 0x74) >> 2;
-    if (listAttr & 1) {
-        self->color = sUIColor9820(data->mSColour.a * 0.003921568859368563f, data->mSColour.r * 0.003921568859368563f,
-                                   data->mSColour.g * 0.003921568859368563f, data->mSColour.b * 0.003921568859368563f);
+    self->mAttrListBox.mFont = data->mFontID & 3;
+    // slot 23 (cUIListBox_setShadow) by hand: cUIListBox declares no virtual for it
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
+    vt[23].fn(vthis(self, vt[23]), data->mFlags & 1);
+    // hasShadow, read as cUIListBox_hasShadow does: mShadow from the attribute word
+    if ((*(int*)&self->mAttrListBox >> 2) & 1) {
+        self->mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
+                                        data->mSColour.r * 0.003921568859368563f,
+                                        data->mSColour.g * 0.003921568859368563f,
+                                        data->mSColour.b * 0.003921568859368563f);
     }
-    self->flags14 |= 0x80;
+    self->mAttr |= 0x80;
 }
 #endif
 
@@ -1608,49 +1585,30 @@ INCLUDE_ASM("ui/uiengine", cUIListBox_updateLocale);
 #ifdef SKIP_ASM
 extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str);
 
-struct cUIListBox_updateLocale_sEntry {
-    int id;
-    unsigned short* str;
-    int pad[3];
-};
-
-struct cUIListBox_updateLocale_sObj {
-    char pad[0x98];
-    cUIListBox_updateLocale_sEntry entries[32];
-    unsigned char count;
-};
-
-struct cUIListBox_updateLocale_sVEntry {
-    short delta;
-    short index;
-    void* fn;
-};
-
 /**
  * Re-reads every entry's localised text after a language change.
  *
- * For each entry with a string id, looks the text up in the engine's locale (slot 4) and stores it (cUIListBox_setUnicodePrivate);
- * then sets the box cached (slot 5, setCached(1)). Does nothing without a locale.
+ * For each entry with a string id (mStringID), looks the text up in the engine's locale (getStringByHash, slot 4) and
+ * stores it (cUIListBox_setUnicodePrivate); then sets the box cached (slot 5, setCached(1)). Does nothing without a
+ * locale.
  */
-extern "C" void cUIListBox_updateLocale(cUIListBox_updateLocale_sObj* self)
+extern "C" void cUIListBox_updateLocale(cUIListBox* self)
 {
-    void* screen = *(void**)((char*)self + 0x5C);
-    void* state = *(void**)((char*)screen + 0xD0);
-    void* engine = *(void**)((char*)state + 0x10);
-    char* loc = *(char**)((char*)engine + 0x10);
+    cUIScreen* screen = self->mpScreen;
+    cUIState* state = screen->mpState;
+    cUIEngine* engine = state->mpEngine;
+    cUILocaleInterface* loc = engine->mpLocaleInterface;
     if (loc != 0) {
-        for (unsigned char i = 0; i < self->count; i++) {
-            int id = self->entries[i].id;
+        for (unsigned char i = 0; i < self->mNumEntries; i++) {
+            int id = self->mpEntries[i].mStringID;
             if (id != 0) {
-                cUIListBox_updateLocale_sVEntry* vt = *(cUIListBox_updateLocale_sVEntry**)(loc + 4);
-                unsigned short* unicodeStr = ((unsigned short* (*)(void*, int))vt[4].fn)(vthis(loc, vt[4]), id);
+                unsigned short* unicodeStr = loc->getStringByHash(id);
                 if (unicodeStr != 0) {
-                    cUIListBox_setUnicodePrivate((cUIListBox*)self, i, unicodeStr);
+                    cUIListBox_setUnicodePrivate(self, i, unicodeStr);
                 }
             }
         }
-        cUIListBox_updateLocale_sVEntry* vt2 = *(cUIListBox_updateLocale_sVEntry**)((char*)self + 8);
-        ((void (*)(void*, int))vt2[5].fn)(vthis(self, vt2[5]), 1);
+        self->setCached(1);
     }
 }
 #endif

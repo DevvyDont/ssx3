@@ -135,6 +135,17 @@ CHECK_OFFSET(tBEEventDB, iValidMode, 0x00);
 CHECK_OFFSET(tBEEventDB, strEventName, 0x04);
 CHECK_SIZE(tBEEventDB, 0x54);
 
+// tBEModeDB: one game mode's record (name ours): its display name. [R] retail's cBELibrary_gameModeDB (0x0043E7D0)
+// holds seven 0x3C-byte records, one per mode ("Race", "Slope Style", "Big Air", "Half Pipe", "Free Ride", "Time
+// Challenge", "Points Challenge"; seven, as tBEPathDB's mode flags); [U] cBENewRaceInterface_getModeName /
+// getModeName1 return record [mode].
+struct tBEModeDB {
+    char strModeName[60];           // 0x00 (name ours, after tBEPathDB::strPathName); [R] the mode's name
+};
+
+CHECK_OFFSET(tBEModeDB, strModeName, 0x00);
+CHECK_SIZE(tBEModeDB, 0x3C);
+
 // tBELocationDB: one race location (17 tracks, 5 stations and the debug track). [O] On Tour struct tBELocationDB
 // {eBELocationID locationID; char locationName[32]; char shortName[16]; char fileName[16]; char bigfileName[32];
 // eBEPeakID segmentID; eBELocationType type; int scriptID; eLocationDifficulty difficulty;} (0x74) and the static

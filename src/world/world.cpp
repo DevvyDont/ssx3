@@ -7,6 +7,7 @@
 #include "vtable.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
+#include "world/worldview.h"
 #include "object/rollermodifier.h"
 //100%
 INCLUDE_ASM("world/world", cWorld_cWorld);
@@ -223,27 +224,15 @@ extern char str_bar_e[];
 extern char str_sdb[];
 
 
-struct sEntry_3A6948 {
-    char name[0x58];
-};
-
-struct sFile_3A6948 {
-    unsigned short magic;       // 0x00
-    char pad_2[6];
-    unsigned int count;         // 0x08
-    char pad_c[8];
-    sEntry_3A6948* entries;     // 0x14
-};
-
 
 /**
  * Checks which of @p n section names exist in a track's .sdb section table.
  *
- * Loads the file named str_bar_e + @p path + str_sdb with FILE_loadz. When it loaded and its first halfword is 0x3800,
- * each name is upper-cased and compared (strcmp) with the 0x58-byte section records after the 0x50-byte header
- * (count at +0x8); a found name gets its flag set (names[i].ok = 1, else 0). The file is freed afterwards. When the
- * file is missing or has the wrong cookie the flags are left untouched. Called by cTrackFileMan_scanLocations' helpers
- * (cTrackFileMan_checkLocation, cTrackFileMan_checkLocation1).
+ * Loads the file named str_bar_e + @p path + str_sdb with FILE_loadz. When it loaded and its cookie's first halfword
+ * is 0x3800, each name is upper-cased and compared (strcmp) with the m_uiNumSections section records (tBxSection,
+ * after the 0x50-byte tStreamDataHeader); a found name gets its flag set (names[i].bFound = 1, else 0). The file is
+ * freed afterwards. When the file is missing or has the wrong cookie the flags are left untouched. Called by
+ * cTrackFileMan_scanLocations' helpers (cTrackFileMan_checkLocation, cTrackFileMan_checkLocation1).
  *
  * @param path  the track's base name
  * @param n  how many names to check
@@ -252,7 +241,7 @@ struct sFile_3A6948 {
  */
 extern "C" int isValidMap(const char* path, int n, tWorldSectionScan* names)
 {
-    sFile_3A6948* data;
+    tStreamDataHeader* data;
     int ret;
     {
         cBXString full;
@@ -263,16 +252,18 @@ extern "C" int isValidMap(const char* path, int n, tWorldSectionScan* names)
         cBXString_cBXString2(&str, path);
         func_003186D0(prefixed, pre, (cBXString*)&str);
         func_00318630((cBXString*)&full, prefixed, str_sdb);
-        data = (sFile_3A6948*)FILE_loadz(full.Str, 0x3000000);
+        data = (tStreamDataHeader*)FILE_loadz(full.Str, 0x3000000);
         cBXString__cBXString(&full, 2);
         cBXString__cBXString(prefixed, 2);
         cBXString__cBXString(&str, 2);
     }
-    ret = data && data->magic == 0x3800;
+    ret = data && *(unsigned short*)data->m_cCookie == 0x3800;
     if (ret)
     {
         int i;
-        data->entries = (sEntry_3A6948*)((char*)data + 0x50);
+        // ORIGINAL-PTR: m_pSection is a pointer in the loaded .sdb file (On Tour tStreamDataHeader); like
+        // cWorldCache_init this fixes it up to the section records that follow the 0x50-byte header
+        data->m_pSection = (tBxSection*)((char*)data + 0x50);
         ret = 0;
         for (i = 0; i < n; i++)
         {
@@ -281,9 +272,9 @@ extern "C" int isValidMap(const char* path, int n, tWorldSectionScan* names)
             names[i].bFound = 0;
             cBXString_cBXString2(&upperName, ((char*)names[i].sectionName));
             cBXString_makeUpper((cBXString*)&upperName);
-            for (j = 0; j < data->count; j++)
+            for (j = 0; j < data->m_uiNumSections; j++)
             {
-                if (strcmp(&data->entries[j], upperName.Str) == 0)
+                if (strcmp(data->m_pSection[j].m_sSectionName, upperName.Str) == 0)
                 {
                     names[i].bFound = ret = 1;
                     break;
@@ -323,14 +314,14 @@ struct cWorld_load_sBXString {
  * @param name  the world's base file name (On Tour base)
  * @param nash  the Nash collision grid to use (On Tour nash::Nash*)
  */
-extern "C" void cWorld_load(void** self, const char* name, int nash)
+extern "C" void cWorld_load(cWorld* self, const char* name, int nash)
 {
     cWorld_load_sBXString nameStr;
     cBXString_cBXString2(&nameStr, name);
-    cWorldCache_reset(self[0]);
-    cWorldCache_init(self[0], name, nash);
-    cWScriptCache_init(self[1], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
-    cWorldPainterMan_init(self[2], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
+    cWorldCache_reset(self->m_pWorldCache);
+    cWorldCache_init(self->m_pWorldCache, name, nash);
+    cWScriptCache_init(self->m_pWScriptCache, cWorldView_getNumSections(&self->m_pWorldCache->m_WorldView));
+    cWorldPainterMan_init(self->m_pWorldPainterMan, cWorldView_getNumSections(&self->m_pWorldCache->m_WorldView));
     cBXString__cBXString(&nameStr, 2);
 }
 #endif
@@ -484,8 +475,8 @@ extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
 INCLUDE_ASM("world/world", cWorld_getSphereTreeInfo__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns a world instance's sphere-tree list: the word at +0x8 of the record that the instance's +0x88 record links at
- * +0xC (cWScriptCacheEntry_resolve puts a collide model there).
+ * Returns a world instance's sphere-tree list: m_pSphTreeList of the collide model (CollideModel) that the instance's
+ * m_pCollideRecord links (cWScriptCacheEntry_resolve puts the model there).
  *
  * No null checks. The body is identical to cWorld_getPolyModelInfo's.
  *
@@ -494,7 +485,7 @@ INCLUDE_ASM("world/world", cWorld_getSphereTreeInfo__FPvT0);
  */
 int cWorld_getSphereTreeInfo(void* self, void* instance)
 {
-    return *(int*)((char*)*(void**)((char*)*(void**)((char*)instance + 0x88) + 0xc) + 0x8);
+    return (int)((tInstanceRecord*)instance)->m_pCollideRecord->CollideModel->m_pSphTreeList;
 }
 #endif
 
@@ -502,8 +493,8 @@ int cWorld_getSphereTreeInfo(void* self, void* instance)
 INCLUDE_ASM("world/world", cWorld_getPolyModelInfo__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns a world instance's poly-model list: the word at +0x8 of the record that the instance's +0x88 record links at
- * +0xC (cWScriptCacheEntry_resolve puts a collide model there).
+ * Returns a world instance's poly-model list: m_pPolyModelList of the collide model (CollideModel) that the
+ * instance's m_pCollideRecord links (cWScriptCacheEntry_resolve puts the model there).
  *
  * No null checks. The body is identical to cWorld_getSphereTreeInfo's; cRollerModifier_cRollerModifier1 (railmodifier) passes its result to
  * tSphTreeList_getMeshTree.
@@ -513,7 +504,7 @@ INCLUDE_ASM("world/world", cWorld_getPolyModelInfo__FPvT0);
  */
 int cWorld_getPolyModelInfo(void* self, void* instance)
 {
-    return *(int*)((char*)*(void**)((char*)*(void**)((char*)instance + 0x88) + 0xc) + 0x8);
+    return (int)((tInstanceRecord*)instance)->m_pCollideRecord->CollideModel->m_pPolyModelList;
 }
 #endif
 
@@ -539,11 +530,11 @@ INCLUDE_ASM("world/world", tPolyModelList_getMeshPolyModel__FPvi);
  * Returns the collision poly model of one mesh of a model.
  *
  * @param meshNum  mesh index (On Tour meshNum)
- * @return entry @p meshNum of the pointer array at +0x0
+ * @return entry @p meshNum of MeshPolyModel
  */
 int tPolyModelList_getMeshPolyModel(void* self, int meshNum)
 {
-    return *(int*)((char*)*(void**)self + meshNum * 4);
+    return (int)((tPolyModelList*)self)->MeshPolyModel[meshNum];
 }
 #endif
 

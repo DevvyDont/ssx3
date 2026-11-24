@@ -4,6 +4,7 @@
 #include "ui/uianimation.h"
 #include "ui/uistatestack.h"
 #include "ui/uithing.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIStateStack_pushExplicit);
@@ -12,29 +13,19 @@ struct cList;
 struct cListNode;
 void cList_addToEnd(cList*, cListNode*);
 
-class cUIStateStack_pushExplicit_cState {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void onCreateScreen();
-};
-
 /**
  * Adds an explicit state: enables it, notifies it and appends it to the stack's second list.
  *
- * Sets mEnabled and mExplicit (0x60) in the state's mAttrState, calls its virtual slot 4 (empty in cUIState;
- * the slot before onDestroyScreen) and adds it to the end of the cList at +0x1C, not the main stack at +0x0.
+ * Sets mEnabled and mExplicit (0x60) in the state's mAttrState, calls its onCreateScreen (virtual slot 4, empty in
+ * cUIState) and adds it to the end of mExplicitStack, not the main stack mStack.
  *
  * @param state  the state to add (On Tour pPushState)
  */
-extern "C" void cUIStateStack_pushExplicit(cUIStateStack* self, cUIStateStack_pushExplicit_cState* state)
+extern "C" void cUIStateStack_pushExplicit(cUIStateStack* self, cUIState* state)
 {
-    *(int*)((char*)state + 0x1C) |= 0x60;
+    state->mAttrState |= 0x60;
     state->onCreateScreen();
-    cList_addToEnd((cList*)&self->mExplicitStack, (cListNode*)state);
+    cList_addToEnd((cList*)&self->mExplicitStack, state);
 }
 #endif
 
@@ -256,7 +247,8 @@ extern "C" void cUIStateStack_pushCheck(cUIStateStack* self, cUIStateStack_pushC
             top = top->next;
             skipped = 1;
         }
-        int stateFlags = *(int*)((char*)top + 0x1C);
+        // the whole flag word: the node is a cUIState (same layout), its bits cUIState::mAttrState
+        int stateFlags = ((cUIState*)top)->mAttrState;
         if (skipped || ((stateFlags >> 5) & 1)) {
             if (((stateFlags >> 6) & 1) == 0 && cUIStateStack_pushCheck_stateId(top) < 6) {
                 covered = 1;
@@ -312,7 +304,8 @@ extern "C" cUIStateStack_popToFloor_node* cUIStateStack_popToFloor(cUIStateStack
     cUIStateStack_popToFloor_node* n = (cUIStateStack_popToFloor_node*)cList_first(((cList*)list));
     if (n != 0) {
         while (n->mIsPopup) {
-            if ((*(int*)((char*)n + 0x1C) >> 15) & 1) {
+            // mPopFloor read as the whole word: the node is a cUIState (same layout), its bits cUIState::mAttrState
+            if ((((cUIState*)n)->mAttrState >> 15) & 1) {
                 break;
             }
             if (n->id < 6) {
@@ -428,44 +421,34 @@ extern "C" cUIStateStack_popToStateInclusive_node* cUIStateStack_popToStateInclu
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIStateStack_setVisibleToChain);
 #ifdef SKIP_ASM
-struct sUIState39F7B8 {
-    char pad0[0x4];
-    sUIState39F7B8* next;       // 0x04
-    char pad8[0x14];
-    unsigned int b0 : 3;        // 0x1C
-    unsigned int active : 1;
-    unsigned int b4 : 4;
-    unsigned int type : 6;
-    unsigned int b14 : 18;
-    int child;                  // 0x20
-};
-
-static inline void Set39F7B8(sUIState39F7B8* s, int on)
+// Sets mVisible (bit 3 of mAttrState) unless the state's mMode (bits 8-13) is 6 or above. Retail reads and writes
+// the whole word (lw/sw 0x1C), so the bits are handled on the int, not through tAttrState's halfword fields.
+static inline void Set39F7B8(cUIState* s, int on)
 {
-    if (s->type < 6) {
-        s->active = on;
+    if ((((unsigned int)s->mAttrState >> 8) & 0x3F) < 6) {
+        s->mAttrState = (s->mAttrState & ~8) | ((on & 1) << 3);
     }
 }
 
 /**
  * Sets the visible bit of a chain of states, from @p state down through the states that have a parent.
  *
- * Walks next links while the state's parent (+0x20) is set, then also the last one when @p last is nonzero; states in
- * mode 6 or above are left alone. cUIStateStack_updateLoop uses it on a popup's parent chain.
+ * Walks next links (mpNext) while the state's mpParentState is set, then also the last one when @p last is nonzero;
+ * states in mode 6 or above are left alone. cUIStateStack_updateLoop uses it on a popup's parent chain.
  *
  * @param state  the first state of the chain
  * @param on  1 to show, 0 to hide
  * @param last  nonzero to include the state without a parent
  */
-extern "C" void cUIStateStack_setVisibleToChain(cUIStateStack* self, sUIState39F7B8* state, int on, int last)
+extern "C" void cUIStateStack_setVisibleToChain(cUIStateStack* self, cUIState* state, int on, int last)
 {
     if (state == 0) {
         return;
     }
-    sUIState39F7B8* cur = state;
-    while (cur->child != 0) {
+    cUIState* cur = state;
+    while (cur->mpParentState != 0) {
         Set39F7B8(cur, on);
-        cur = cur->next;
+        cur = (cUIState*)cur->mpNext;
     }
     state = cur;
     if (last != 0) {
@@ -971,14 +954,14 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_getEngine__FPv);
 /**
  * Returns the UI engine a widget belongs to.
  *
- * Follows the widget's mpScreen (+0x5C) to the screen's mpState (+0xD0) and returns that state's mpEngine (+0x10).
+ * Follows the widget's mpScreen to the screen's mpState and returns that state's mpEngine.
  *
  * @return the UI engine
  */
 int cUIThing_getEngine(void* vself)
 {
     cUIThing* self = (cUIThing*)vself;
-    return *(int*)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
+    return (int)self->mpScreen->mpState->mpEngine;
 }
 #endif
 

@@ -50,15 +50,15 @@ CHECK_SIZE(cBEBAGTInterface, 0x10);
 // count +0xC); cFEStateUberTrick_updateTrickMenuEntry (view sWSMEntry4520) shows the selected entry's cost (lhu +0x6)
 // with getDollarString in "cost_num".
 struct tBEUber {
-    unsigned short unk_000;         // 0x0 [O] anim
-    unsigned short unk_002;         // 0x2 [O] cycleAnim
-    unsigned short unk_004;         // 0x4 [O] id
+    unsigned short anim;            // 0x0 [O]; [U] the uber-trick screen plays it when the trick is previewed
+    unsigned short cycleAnim;       // 0x2 [O]
+    unsigned short id;              // 0x4 [O]; [U] the trick id (gGetGrabName gives its name for the buy popup)
     unsigned short cost;            // 0x6 [O]; [U] the trick's price on the uber-trick screen
 };
 
-CHECK_OFFSET(tBEUber, unk_000, 0x0);
-CHECK_OFFSET(tBEUber, unk_002, 0x2);
-CHECK_OFFSET(tBEUber, unk_004, 0x4);
+CHECK_OFFSET(tBEUber, anim, 0x0);
+CHECK_OFFSET(tBEUber, cycleAnim, 0x2);
+CHECK_OFFSET(tBEUber, id, 0x4);
 CHECK_OFFSET(tBEUber, cost, 0x6);
 CHECK_SIZE(tBEUber, 0x8);
 

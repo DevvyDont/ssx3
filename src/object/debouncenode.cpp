@@ -16,6 +16,7 @@
 #include "replay/bxreplayframe.h"
 #include "object/movenode.h"
 #include "object/instancenode.h"
+#include "main/crowdman3d.h"
 
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
@@ -273,11 +274,12 @@ typedef int cQuad3130 __attribute__((mode(TI)));
 extern cQuad3130 t4vect_YAxis;
 
 
-struct sMat3130 {
-    t4Vector r[4];
-    sMat3130() {}
+// t4Matrix with the copies retail inlines here: a VU0 quadword copy (lqc2/sqc2) for the copy constructor and the
+// assignment. Adds no members.
+struct t4MatrixVU : t4Matrix {
+    t4MatrixVU() {}
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-    sMat3130(const sMat3130& o)
+    t4MatrixVU(const t4MatrixVU& o)
     {
         __asm__ __volatile__(
             "lqc2      $vf1, 0x0(%1)\n"
@@ -293,7 +295,7 @@ struct sMat3130 {
             : "memory");
     }
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-    sMat3130& operator=(const sMat3130& o)
+    t4MatrixVU& operator=(const t4MatrixVU& o)
     {
         __asm__ __volatile__(
             "lqc2      $vf1, 0x0(%1)\n"
@@ -312,9 +314,9 @@ struct sMat3130 {
 } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * matrix).
-static inline sMat3130 mulMat3130(const sMat3130& a, const sMat3130& b)
+static inline t4MatrixVU mulMat3130(const t4MatrixVU& a, const t4MatrixVU& b)
 {
-    sMat3130 r;
+    t4MatrixVU r;
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%1)\n"
         "lqc2      $vf5, 0x10(%1)\n"
@@ -357,7 +359,7 @@ static inline void loadVf8_3130(const t4Vector& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vf8).
-static inline t4Vector mulVec3130(const sMat3130& m)
+static inline t4Vector mulVec3130(const t4MatrixVU& m)
 {
     t4Vector r;
     __asm__ __volatile__(
@@ -480,27 +482,11 @@ static inline t4Vector norm3130(const t4Vector& v)
     return r;
 }
 
-static inline t4Vector pos3130(const sMat3130& m)
+static inline t4Vector pos3130(const t4MatrixVU& m)
 {
-    return m.r[3];
+    return m.row[3];
 }
 
-
-struct sVE3130 {
-    short delta;
-    short index;
-    sMat3130* (*fn)(void*);
-};
-
-
-struct sNode3130 {
-    char pad0[0xC];
-    sVE3130* vt;                // 0x0C
-    char pad10[0x8];            // 0x10
-    char* model;                // 0x18
-    float strength;             // 0x1C
-    signed char flags[32];      // 0x20
-};
 
 /**
  * Applies the conveyor's push to a rider's intersect info for the bone it hit.
@@ -514,21 +500,23 @@ struct sNode3130 {
  *
  * @param hit  intersect info of the collision (position, direction, accumulators, bone index)
  */
-extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, tIntersectInfo* hit)
+extern "C" void cConveyorNode_updateIntersectInfo(cConveyorNode* self, tIntersectInfo* hit)
 {
     if (hit->Mesh < 0) {
         return;
     }
-    sMat3130* w = self->vt[24].fn(vthis(self, self->vt[24]));
-    tMeshHeirarchyRecord* bones = *(tMeshHeirarchyRecord**)(*(char**)(self->model + 0x80) + 0x8);
-    sMat3130 boneMat = *((sMat3130*)bones[hit->Mesh].m_pMeshMatrix);
-    for (int parentIndex = bones[hit->Mesh].m_iParentID; parentIndex != -1; parentIndex = bones[parentIndex].m_iParentID) {
-        boneMat = mulMat3130(*((sMat3130*)bones[parentIndex].m_pMeshMatrix), boneMat);
+    const t4MatrixVU* root = (const t4MatrixVU*)self->getRootTransform();
+    tMeshHeirarchyRecord* bones = self->Instance->m_Model->m_MeshHeirarchy;
+    // a bone's tf4Matrix has t4Matrix's layout (16 floats)
+    t4MatrixVU boneMat = *((t4MatrixVU*)bones[hit->Mesh].m_pMeshMatrix);
+    for (int parentIndex = bones[hit->Mesh].m_iParentID; parentIndex != -1;
+         parentIndex = bones[parentIndex].m_iParentID) {
+        boneMat = mulMat3130(*((t4MatrixVU*)bones[parentIndex].m_pMeshMatrix), boneMat);
     }
-    boneMat = mulMat3130(*w, boneMat);
-    if (self->flags[hit->Mesh] != 0) {
+    boneMat = mulMat3130(*root, boneMat);
+    if (self->Rotate[hit->Mesh] != 0) {
         t4Vector offset = sub3130((*(&hit->Ipos)), pos3130(boneMat));
-        float k = self->strength / len3130(offset);
+        float k = self->Vel / len3130(offset);
         t4Vector impulse = scale3130((*(&hit->Inorm)), k);
         t4Vector torque = cross3130(offset, impulse);
         addEq3130((*(&hit->Ivel)), torque);
@@ -536,7 +524,7 @@ extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, tIntersectInf
     } else {
         loadVf8_3130(*(t4Vector*)&t4vect_YAxis);
         t4Vector n = norm3130(mulVec3130(boneMat));
-        t4Vector torque = scale3130(cross3130(n, (*(&hit->Inorm))), self->strength);
+        t4Vector torque = scale3130(cross3130(n, (*(&hit->Inorm))), self->Vel);
         addEq3130((*(&hit->Ivel)), torque);
     }
 }
@@ -579,50 +567,17 @@ extern "C" void cConveyorNode_update(cConveyorNode* self)
 INCLUDE_ASM("object/debouncenode", cConveyorNode_render);
 #ifdef SKIP_ASM
 
-struct sDfMat_343588 {
-    t4Vector r[4];
-};
+// cGraphicsMan slot 43 (GetNetMatrix; the matrix comes back through a result pointer), slot 93 (ClipBoundBox) and
+// slot 96 (RenderModel), for the hand-made calls that keep the vtable in a register across them
+typedef t4Matrix tGetNetMatrixFn(void* self);
+typedef int tClipBoundBoxFn(void* self, t4Vector* minp, t4Vector* maxp, const t4Matrix& mat);
+typedef void tRenderModelFn(void* self, tInstanceRecord* obj, void* animMats, t4Matrix* texMat, int renderFlags);
 
-struct sDfSlot_343588 {
-    int f0;
-    int type;
-};
-
-struct sDfCam_343588 {
-    char pad_0x0[0x20];
-    sDfSlot_343588 slots[(0x3F0 - 0x20) / 8];  // 0x20
-    struct {
-        int kind;
-        char pad[0x14];
-    } paths[1];                     // 0x3F0
-};
-
-struct sDfObj_343588 {
-    char pad_0x0[0x60];
-    float pos[3];                   // 0x60
-    float scl[3];                   // 0x6C
-    char pad_0x78[0x7D - 0x78];
-    unsigned char slot;             // 0x7D
-    short path;                     // 0x7E
-    char pad_0x80[0x94 - 0x80];
-    void* light;                    // 0x94
-};
-
-
-struct cDfGfx_343588 {
-    char pad_0x0[0x10D8];
-    sVEntry<void>* vt;            // 0x10D8
-};
-
-typedef sDfMat_343588 (*DfViewFn_343588)(void*);
-typedef int (*DfCullFn_343588)(void*, t4Vector*, t4Vector*, const sDfMat_343588&);
-typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
-
-extern sDfMat_343588 t4mat_Identity_343588 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity;
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void MatCopy_343588(sDfMat_343588* d, const sDfMat_343588* s)
+static inline void MatCopy_343588(t4Matrix* d, const t4Matrix* s)
 {
     __asm__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -638,18 +593,20 @@ static inline void MatCopy_343588(sDfMat_343588* d, const sDfMat_343588* s)
         : "memory");
 }
 
-static inline bool IsT6_343588(sDfCam_343588* c, int i)
+static inline bool sectionActive(cWorldCache* cache, int i)
 {
-    return c->slots[i].type == 6;
+    return cache->m_WorldView.mp_SectionState[i].state == 6;
 }
 
-static inline int Visible_343588(sDfCam_343588* cam, sDfObj_343588* obj)
+// Whether an instance's world-cache page is in memory: always for a shared instance (section 0xFF), else when its
+// section is active (state 6) and its hull page loaded (m_State 3).
+static inline int instancePageLoaded(cWorldCache* cache, tInstanceRecord* inst)
 {
-    if (obj->slot == 0xFF) {
+    if (inst->m_SMap.m_uiSectionID == 0xFF) {
         return 1;
     }
-    if (IsT6_343588(cam, obj->slot)) {
-        return cam->paths[obj->path].kind == 3;
+    if (sectionActive(cache, inst->m_SMap.m_uiSectionID)) {
+        return cache->m_HullPages[inst->m_SMap.m_iHullID].m_State == 3;
     }
     return 0;
 }
@@ -658,39 +615,42 @@ static inline int Visible_343588(sDfCam_343588* cam, sDfObj_343588* obj)
  * Draws the conveyor's instance with its texture scrolled by the current UV.
  *
  * Returns when the instance's world-cache page is not loaded, or when graphics-manager slot 93 culls the instance's
- * bounding box (+0x60..+0x74) against the view matrix from slot 43. Otherwise copies the identity matrix t4mat_Identity,
- * puts UV (+0x40/+0x44) into its translation x/y and draws the instance through graphics-manager slot 96 with that
- * texture matrix and mode 2.
+ * bounding box (m_fvMin .. m_fvMax) against the view matrix from slot 43. Otherwise copies the identity matrix
+ * t4mat_Identity, puts UV (+0x40/+0x44) into its translation x/y and draws the instance through graphics-manager
+ * slot 96 with that texture matrix and mode 2.
  */
 extern "C" void cConveyorNode_render(cConveyorNode* self)
 {
-    sDfCam_343588* cam = (sDfCam_343588*)cWorld_m_pTheWorld->m_pWorldCache;
-    if (!Visible_343588(cam, ((sDfObj_343588*)self->Instance))) {
+    cWorldCache* cache = cWorld_m_pTheWorld->m_pWorldCache;
+    if (!instancePageLoaded(cache, self->Instance)) {
         return;
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     {
         sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
-        char* thisp = (char*)gfx + vt[93].delta;
+        void* clipThis = vthis(gfx, vt[93]);
         t4Vector cullBox[2];
-        cullBox[0].x = ((sDfObj_343588*)self->Instance)->pos[0];
-        cullBox[0].y = ((sDfObj_343588*)self->Instance)->pos[1];
-        cullBox[0].z = ((sDfObj_343588*)self->Instance)->pos[2];
+        cullBox[0].x = self->Instance->m_fvMin.m[0];
+        cullBox[0].y = self->Instance->m_fvMin.m[1];
+        cullBox[0].z = self->Instance->m_fvMin.m[2];
         cullBox[0].w = 1.0f;
-        cullBox[1].x = ((sDfObj_343588*)self->Instance)->scl[0];
-        cullBox[1].y = ((sDfObj_343588*)self->Instance)->scl[1];
-        cullBox[1].z = ((sDfObj_343588*)self->Instance)->scl[2];
+        cullBox[1].x = self->Instance->m_fvMax.m[0];
+        cullBox[1].y = self->Instance->m_fvMax.m[1];
+        cullBox[1].z = self->Instance->m_fvMax.m[2];
         cullBox[1].w = 1.0f;
-        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &cullBox[0], &cullBox[1], ((DfViewFn_343588)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
+        sVEntry<void>* viewVt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
+        int res = ((tClipBoundBoxFn*)vt[93].fn)(clipThis, &cullBox[0], &cullBox[1],
+                                                 ((tGetNetMatrixFn*)viewVt[43].fn)(vthis(gfx, viewVt[43])));
         if (res == 1) {
             return;
         }
     }
-    sDfMat_343588 xf;
-    MatCopy_343588(&xf, &t4mat_Identity_343588);
-    xf.r[3].x = self->UV[0];
-    xf.r[3].y = self->UV[1];
-    ((DfDrawFn_343588)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[96].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[96].delta, ((sDfObj_343588*)self->Instance), 0, &xf, 2);
+    t4Matrix xf;
+    MatCopy_343588(&xf, &t4mat_Identity);
+    xf.row[3].x = self->UV[0];
+    xf.row[3].y = self->UV[1];
+    sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
+    ((tRenderModelFn*)vt[96].fn)(vthis(gfx, vt[96]), self->Instance, 0, &xf, 2);
 }
 #endif
 
@@ -954,14 +914,6 @@ extern int TheCrowdMan3d;
 void operator_delete(int*);
 void* func_00344348(void* self);
 
-struct sDebounceElem_343B28 {
-    char data[0x1F4];
-};
-
-struct sDebounce_343B28 {
-    sDebounceElem_343B28 elems[5];
-};
-
 /**
  * Destroys the 3D crowd manager.
  *
@@ -971,17 +923,16 @@ struct sDebounce_343B28 {
  *
  * @param flags  destructor flags; bit 0 deletes the storage
  */
-extern "C" void cCrowdMan3d__cCrowdMan3d(void* self, int flags)
+extern "C" void cCrowdMan3d__cCrowdMan3d(cCrowdMan3d* self, int flags)
 {
-    sDebounce_343B28* crowdMan = (sDebounce_343B28*)self;
     int i;
     for (i = 0; i < 5; i++) {
-        func_00344348(&crowdMan->elems[i]);
+        func_00344348(&self->mBlocks[i]);
     }
     TheCrowdMan3d = 0;
-    if (crowdMan->elems != 0) {
-        sDebounceElem_343B28* blockIter = crowdMan->elems + 5;
-        while (crowdMan->elems != blockIter) {
+    if (self->mBlocks != 0) {
+        tCrowdBlock3d* blockIter = self->mBlocks + 5;
+        while (self->mBlocks != blockIter) {
             blockIter--;
             func_00344348(blockIter);
         }
@@ -1054,8 +1005,7 @@ INCLUDE_ASM("object/debouncenode", func_00343F38);
 // `id` is still referenced after the found arm when cse2 picks the canonical register for `ents[j].ref.id == id` (flow
 // deletes the cycle); plain form 92.09% (the earlier `id == ents[j].ref.id` spelling scores 96.46%). Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
+extern "C" cWorld* cObjectInterface_getWorld();
 struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
 extern "C" void* func_00344800(void* self);
@@ -1392,8 +1342,7 @@ INCLUDE_ASM("object/debouncenode", func_003443A8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
+extern "C" cWorld* cObjectInterface_getWorld();
 extern "C" void cAnimFrame_init(void* self);
 extern "C" void cMeshAnimFrame_init(void* self);
 extern "C" void cAnimFrame_setAnimRecord(void* self, void* src);
@@ -1587,8 +1536,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344730);
 #ifdef SKIP_ASM
-struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
+extern "C" cWorld* cObjectInterface_getWorld();
 
 struct sItem4730 {
     char pad_0x0[0x10];
@@ -1775,8 +1723,7 @@ extern "C" void func_003449F0(void* elem)
 INCLUDE_ASM("object/debouncenode", func_00344AA0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
+extern "C" cWorld* cObjectInterface_getWorld();
 
 
 struct sDbMat_4AA0 {
@@ -1994,8 +1941,7 @@ extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344E18);
 #ifdef SKIP_ASM
-struct sTrackWorld51C0;
-extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
+extern "C" cWorld* cObjectInterface_getWorld();
 extern "C" void func_00344730(sDebounce4730* self, int index);
 
 
@@ -2204,43 +2150,27 @@ INCLUDE_ASM("object/debouncenode", cSpline_init);
 struct cSpline;
 float cSpline_calcLength(cSpline* self);
 
-struct sTrackNode51C0 {
-    char pad_0x0[0x24];
-    int value;              // 0x24
-};
+extern "C" cWorld* cObjectInterface_getWorld();
 
-struct sTrackSet51C0 {
-    char pad_0x0[0x44];
-    unsigned int* refs;     // 0x44, (node >> 2) << 8 | low byte
-};
-
-struct sTrackWorld51C0 {
-    char pad_0x0[0x8];
-    sTrackSet51C0** sets;   // 0x8
-};
-
-extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
-
-static inline sTrackNode51C0* refToNode51C0(unsigned int p)
+// A world-cache slot's record: the slot keeps its address >> 2.
+static inline tSplineRecord* refToSpline(unsigned int p)
 {
-    return (sTrackNode51C0*)(p << 2);
+    return (tSplineRecord*)(p << 2);
 }
 
-struct sTrackRef51C0 {
-    unsigned int id;
-
-    sTrackNode51C0* get()
-    {
-        sTrackSet51C0* set = (*cObjectInterface_getWorld())->sets[id & 0xFF];
-        if (set != 0) {
-            unsigned int p = set->refs[id >> 8] >> 8;
-            if (p != 0) {
-                return refToNode51C0(p);
-            }
+// The spline record that resource id @p id names (world cache type 8: a section's cache table keeps each record as
+// its address >> 2), or 0 when its section is not loaded or its slot is empty. EA's inline world-cache lookup.
+static inline tSplineRecord* splineRecord(const unsigned int& id)
+{
+    cWorldCacheTable* table = cObjectInterface_getWorld()->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
+    if (table != 0) {
+        unsigned int p = table->m_pCacheTable[8].m_pDataTag[id >> 8].m_bfuiMemLoc;
+        if (p != 0) {
+            return refToSpline(p);
         }
-        return 0;
     }
-};
+    return 0;
+}
 
 
 /**
@@ -2252,9 +2182,9 @@ struct sTrackRef51C0 {
  */
 extern "C" void cSpline_init(cSpline* self, unsigned int id)
 {
-    (*(sTrackRef51C0*)&self->SplineId).id = id;
-    sTrackNode51C0* node = (*(sTrackRef51C0*)&self->SplineId).get();
-    (*(int*)&self->Seg) = node->value;
+    self->SplineId = id;
+    tSplineRecord* spline = splineRecord(self->SplineId);
+    self->Seg = spline->m_HeaderSeg;
     self->SegIndex = 0;
     self->Length = cSpline_calcLength((cSpline*)self);
 }
@@ -2263,26 +2193,6 @@ extern "C" void cSpline_init(cSpline* self, unsigned int id)
 //100%
 INCLUDE_ASM("object/debouncenode", cSpline_getPos);
 #ifdef SKIP_ASM
-
-struct sDebTrack5248 {
-    int field_0x0;
-    int index;          // 0x4
-    tSplineSegmentRecord* key;   // 0x8
-    float length;       // 0xC
-
-    void back()
-    {
-        tSplineSegmentRecord* p = key->m_PrevSeg;
-        index--;
-        key = p;
-    }
-    void forward()
-    {
-        tSplineSegmentRecord* n = key->m_NextSeg;
-        index++;
-        key = n;
-    }
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ftrunc_00345248(float x)
@@ -2305,24 +2215,28 @@ static inline float ftrunc_00345248(float x)
  * @param vel  receives the direction
  * @param acc  receives the direction's derivative (On Tour dDir)
  */
-extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, t4Vector* pos, t4Vector* vel, t4Vector* acc)
+extern "C" void cSpline_getPos(cSpline* self, float distance, t4Vector* pos, t4Vector* vel, t4Vector* acc)
 {
-    float len = self->length;
+    float len = self->Length;
     float laps = distance / len;
     float wholeLaps = ftrunc_00345248(laps);
     if (laps < wholeLaps) {
         wholeLaps -= 1.0f;
     }
     distance -= wholeLaps * len;
-    while (distance < self->key->m_fDistance && self->key->m_PrevSeg != 0) {
-        self->back();
+    while (distance < self->Seg->m_fDistance && self->Seg->m_PrevSeg != 0) {
+        tSplineSegmentRecord* prev = self->Seg->m_PrevSeg;
+        self->SegIndex--;
+        self->Seg = prev;
     }
-    tSplineSegmentRecord* next = self->key->m_NextSeg;
+    tSplineSegmentRecord* next = self->Seg->m_NextSeg;
     while (next != 0 && next->m_fDistance <= distance) {
-        self->forward();
-        next = self->key->m_NextSeg;
+        tSplineSegmentRecord* following = self->Seg->m_NextSeg;
+        self->SegIndex++;
+        self->Seg = following;
+        next = self->Seg->m_NextSeg;
     }
-    cSplineSegment_getPos((sDebCurve*)self->key, distance, pos, vel, acc);
+    cSplineSegment_getPos((sDebCurve*)self->Seg, distance, pos, vel, acc);
 }
 #endif
 
@@ -2337,22 +2251,23 @@ INCLUDE_ASM("object/debouncenode", cSpline_isVisible);
  *
  * @return 1 unless the cull test returns 1 (fully outside)
  */
-extern "C" int cSpline_isVisible(sTrackRef51C0* self)
+extern "C" int cSpline_isVisible(cSpline* self)
 {
-    float* bounds = (float*)self->get();
+    tSplineRecord* spline = splineRecord(self->SplineId);
     t4Vector box[2];
-    box[0].x = bounds[1];
-    box[0].y = bounds[2];
-    box[0].z = bounds[3];
+    box[0].x = spline->m_fvMin.m[0];
+    box[0].y = spline->m_fvMin.m[1];
+    box[0].z = spline->m_fvMin.m[2];
     box[0].w = 1.0f;
-    box[1].x = bounds[4];
-    box[1].y = bounds[5];
-    box[1].z = bounds[6];
+    box[1].x = spline->m_fvMax.m[0];
+    box[1].y = spline->m_fvMax.m[1];
+    box[1].z = spline->m_fvMax.m[2];
     box[1].w = 1.0f;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
-    char* thisp = (char*)gfx + vt[93].delta;
-    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_343588)((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].fn)((char*)gfx + ((sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx))[43].delta));
+    void* clipThis = vthis(gfx, vt[93]);
+    int res = ((tClipBoundBoxFn*)vt[93].fn)(clipThis, &box[0], &box[1],
+                                             ((tGetNetMatrixFn*)vt[43].fn)(vthis(gfx, vt[43])));
     return res != 1;
 }
 #endif

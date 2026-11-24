@@ -25,7 +25,7 @@ struct sRaceEntry18 {
 };
 extern sRaceEntry18 cBELibrary_sectionDB[];
 
-extern sPad16 cBELibrary_gameModeDB;
+extern tBEModeDB cBELibrary_gameModeDB[];
 
 //99.58%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getThis__Fv);
@@ -393,9 +393,9 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_assignPlayer__FPvii);
  */
 void* cBENewRaceInterface_assignPlayer(void* self, int iGate, int iPlayer)
 {
-    *(int*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + iGate * 4) = iPlayer;
-    *(int*)((char*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + iPlayer * 4) + 0x18) = iGate;
-    return ((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + iGate * 4);
+    cBENewRaceInterface_newRace.playerID[iGate] = iPlayer;
+    cBENewRaceInterface_newRace.riderID[iPlayer] = iGate;
+    return &cBENewRaceInterface_newRace.playerID[iGate];
 }
 #endif
 
@@ -435,17 +435,6 @@ int cBENewPlayerInterface_isMissionMan(int a0);
 void* cBENewPlayerInterface_getThis();
 
 
-struct sVE_144DF0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
-static inline char* Race_144DF0()
-{
-    return (char*)&(*(&cBENewRaceInterface_newRace));
-}
-
 /**
  * Sets the race's game mode and the matching numbers of human, AI and mission riders.
  *
@@ -459,10 +448,10 @@ static inline char* Race_144DF0()
  */
 extern "C" int cBENewRaceInterface_setGameMode(cBENewRaceInterface* self, int mode)
 {
-    tBEPathDB row = cBELibrary_gamePathDB[*((signed char*)Race_144DF0() + 0x49)];
+    tBEPathDB row = cBELibrary_gamePathDB[cBENewRaceInterface_newRace.cGamePath];
     int humans = 1;
     int ai = 5;
-    if (*((signed char*)Race_144DF0() + 0x49) == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         humans = 2;
         ai = 4;
     }
@@ -470,30 +459,28 @@ extern "C" int cBENewRaceInterface_setGameMode(cBENewRaceInterface* self, int mo
         return 0;
     }
     if (mode == 4) {
-        *((signed char*)Race_144DF0() + 0x48) = mode;
+        cBENewRaceInterface_newRace.cGameMode = mode;
         cBENewRaceInterface_setNumberHumans(self, 1);
         cBENewRaceInterface_setNumberAI(self, 0);
         cBENewRaceInterface_setNumberMission(self, 1);
-        char* playerInterface = (char*)cBENewPlayerInterface_getThis();
+        cBEInterface* playerInterface = (cBEInterface*)cBENewPlayerInterface_getThis();
         cBENewPlayerInterface_setToMissionMan(1);
-        sVE_144DF0* vt = *(sVE_144DF0**)(playerInterface + 0xC);
-        vt[1].fn(vthis(playerInterface, vt[1]));
-    } else if (*((signed char*)Race_144DF0() + 0x48) == 4) {
+        playerInterface->submit();
+    } else if (cBENewRaceInterface_newRace.cGameMode == 4) {
         cBENewRaceInterface_setNumberHumans(self, humans);
         cBENewRaceInterface_setNumberAI(self, 0);
         cBENewRaceInterface_setNumberMission(self, 0);
-        char* playerInterface = (char*)cBENewPlayerInterface_getThis();
+        cBEInterface* playerInterface = (cBEInterface*)cBENewPlayerInterface_getThis();
         if (cBENewPlayerInterface_isMissionMan(1) != 0) {
             cBENewPlayerInterface_resetFromMissionMan(playerInterface, 1);
-            sVE_144DF0* vt = *(sVE_144DF0**)(playerInterface + 0xC);
-            vt[1].fn(vthis(playerInterface, vt[1]));
+            playerInterface->submit();
         }
     }
-    *((signed char*)Race_144DF0() + 0x48) = mode;
+    cBENewRaceInterface_newRace.cGameMode = mode;
     if (mode == 3 || mode == 5 || mode == 6) {
         cBENewRaceInterface_setNumberHumans(self, humans);
-        unsigned char ev = *((unsigned char*)Race_144DF0() + 0x4A);
-        if (ev >= 4 && ev <= 5 && *((signed char*)Race_144DF0() + 0x49) != 2) {
+        unsigned char ev = (unsigned char)cBENewRaceInterface_newRace.cGameEvent;
+        if (ev >= 4 && ev <= 5 && cBENewRaceInterface_newRace.cGamePath != 2) {
             cBENewRaceInterface_setNumberAI(self, 1);
         } else {
             cBENewRaceInterface_setNumberAI(self, 0);
@@ -558,11 +545,6 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
 #ifdef SKIP_ASM
 extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
 
-static inline char* Race_1451E8()
-{
-    return (char*)&(*(&cBENewRaceInterface_newRace));
-}
-
 /**
  * Sets the race's game event; events 4 and 5 also set one AI rider (none on game path 2).
  *
@@ -572,18 +554,18 @@ static inline char* Race_1451E8()
 extern "C" int cBENewRaceInterface_setGameEvent(cBENewRaceInterface* self, int event)
 {
     tBEEventDB eventRec = cBELibrary_gameEventDB[event];
-    *((signed char*)Race_1451E8() + 0x4A) = event;
+    cBENewRaceInterface_newRace.cGameEvent = event;
     if (event < 6)
     {
         if (event >= 4)
         {
-            if (*((signed char*)Race_1451E8() + 0x49) == 2)
+            if (cBENewRaceInterface_newRace.cGamePath == 2)
                 cBENewRaceInterface_setNumberAI(self, 0);
             else
                 cBENewRaceInterface_setNumberAI(self, 1);
         }
     }
-    return eventRec.iValidMode == *((signed char*)Race_1451E8() + 0x48);
+    return eventRec.iValidMode == cBENewRaceInterface_newRace.cGameMode;
 }
 #endif
 
@@ -640,13 +622,13 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getModeName);
 #ifdef SKIP_ASM
 
 /**
- * Returns the record (name first) of the race's game mode: cBELibrary_gameModeDB + newRace.cGameMode * 0x3C.
+ * Returns the name of the race's game mode: cBELibrary_gameModeDB[newRace.cGameMode] (0x3C-byte records).
  *
  * @return the mode name
  */
 extern "C" void* cBENewRaceInterface_getModeName()
 {
-    return (char*)&cBELibrary_gameModeDB + cBENewRaceInterface_newRace.cGameMode * 0x3c;
+    return cBELibrary_gameModeDB[cBENewRaceInterface_newRace.cGameMode].strModeName;
 }
 #endif
 
@@ -654,14 +636,14 @@ extern "C" void* cBENewRaceInterface_getModeName()
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getModeName1);
 #ifdef SKIP_ASM
 /**
- * Returns the record (name first) of game mode @p gameMode: cBELibrary_gameModeDB + @p gameMode * 0x3C.
+ * Returns the name of game mode @p gameMode: cBELibrary_gameModeDB[@p gameMode] (0x3C-byte records).
  *
  * @param gameMode  the game mode
  * @return the mode name
  */
 extern "C" void* cBENewRaceInterface_getModeName1(cBENewRaceInterface* self, int gameMode)
 {
-    return (char*)&cBELibrary_gameModeDB + gameMode * 0x3c;
+    return cBELibrary_gameModeDB[gameMode].strModeName;
 }
 #endif
 
