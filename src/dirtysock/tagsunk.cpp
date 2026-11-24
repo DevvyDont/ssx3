@@ -8858,10 +8858,6 @@ static inline void post_3828(char* self, void* msg)
     sMsgList3828_insert(*(sMsgListNode3828**)(self + 0xF0), mp);
 }
 
-struct sDsTimer_263828 {
-    int state;
-    float timer;
-};
 
 /**
  * Updates the connection manager started by func_002636A8(), once per front-end frame (cRealFE_update).
@@ -8873,14 +8869,14 @@ struct sDsTimer_263828 {
  */
 extern "C" void func_00263828(int* self)
 {
-    sDsTimer_263828* connection = (sDsTimer_263828*)self;
-    switch (connection->state)
+    cConnMan* connection = (cConnMan*)self;
+    switch (connection->mState)
     {
     case 0:
         break;
     case 1:
         if (isState_3828(5)) {
-            connection->state = 2;
+            connection->mState = 2;
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
@@ -8889,11 +8885,11 @@ extern "C" void func_00263828(int* self)
         } else if (isState_3828(6)) {
             func_002636F0(self, cCommSystem_mCommSystem->mNetConnError);
         } else {
-            int expired = connection->timer < 0.0f;
+            int expired = connection->mTimeout < 0.0f;
             if (expired)
                 func_002636F0(self, 0x2D3F3F3F);
             else
-                connection->timer -= SSXApp->TimerPeriod;
+                connection->mTimeout -= SSXApp->TimerPeriod;
         }
         break;
     case 2:

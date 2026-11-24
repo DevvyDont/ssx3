@@ -758,7 +758,7 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box
     }
     sRmMat44 mat;
     cRailModifier_getInvMat_C698((self), &mat);
-    tSplineSegmentRecord* seg = (spline->m_HeaderSeg);
+    tSplineSegmentRecord* seg = spline->m_HeaderSeg;
     for (int i = 0; i < spline->m_iNumSegments; i++, seg = seg->m_NextSeg) {
         float tLo = 0.0f;
         float tHi = 1.0f;
@@ -3421,7 +3421,7 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_resetRootTransformDirty);
  * @param node  the typed object node
  */
 extern "C" void cTypeObjNode_resetRootTransformDirty(cTypeObjNode* node) {
-    node->Flags = (unsigned short) ((node->Flags) & 0xFFFE);
+    node->Flags = (unsigned short) (node->Flags & 0xFFFE);
 }
 #endif
 //100%
@@ -5761,7 +5761,7 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getFocalLength);
  * @param out  receives the focal length
  */
 extern "C" void cCamAnimFrame_getFocalLength(cCamAnimFrame* frame, float *out) {
-    *out = (frame->Vals[11]);
+    *out = frame->Vals[11];
 }
 #endif
 
@@ -7336,7 +7336,7 @@ INCLUDE_ASM("object/railmodifier", func_00361D48);
  * @return that int
  */
 extern "C" int func_00361D48(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x10)));
+    return (*(int *)((char*)(arg0) + 0x10));
 }
 #endif
 
@@ -7657,7 +7657,7 @@ extern "C" void EnableDmac(int);
  */
 extern "C" void func_00362058(int owner, int channel, int handler, int next) {
     DisableDmac(channel);
-    (*(int *)(((char*)(owner) + (channel << 2)) + (0x40))) = AddDmacHandler(channel, handler, next);
+    (*(int *)(((char*)(owner) + (channel << 2)) + 0x40)) = AddDmacHandler(channel, handler, next);
     EnableDmac(channel);
 }
 #endif
@@ -8418,17 +8418,6 @@ extern "C" void func_0038F6A8(void* ring);
 extern "C" void func_0038F7B0();
 extern "C" unsigned int func_00364240(unsigned int* self, int key);
 
-// One deferred draw record (0x80; REF structs/render.md / n2-render-layer.md "Record"): render state
-// words, texture key, DMA packet start/end, matrix index, continuation flag.
-struct sRmEntry_2DE8 {
-    unsigned int w[4];      // 0x0
-    short tex[2];           // 0x10
-    int packet;             // 0x14
-    int tail;               // 0x18
-    short mtxIndex;         // 0x1C
-    short continuation;     // 0x1E
-    char pad_0x20[0x60];
-};
 
 // A bucket: one (state, textures, matrix) combination with its DMA chain (0x20; REF structs/render.md "Bucket").
 struct sRmNode_2DE8 {
@@ -8450,7 +8439,7 @@ struct sRmSortItem_2DE8 {
 struct sRmBatch_2DE8 {
     int count;                          // 0x0
     char pad_0x4[0x7C];
-    sRmEntry_2DE8 entries[0xA29];       // 0x80
+    tDeferSubmit entries[0xA29];       // 0x80
     char pad_0x51500[0x57494 - 0x51500];
     int nNodes;                         // 0x57494
     sRmNode_2DE8 nodes[0x800];          // 0x57498
@@ -8463,7 +8452,7 @@ struct sRmBatch_2DE8 {
 };
 
 // REF n2-render-layer.md: InternState, FindBucket, AppendPacket (0x362978).
-extern "C" unsigned int* cPS2DeferManager_Find(sRmBatch_2DE8* self, sRmEntry_2DE8* e, int hash);
+extern "C" unsigned int* cPS2DeferManager_Find(sRmBatch_2DE8* self, tDeferSubmit* e, int hash);
 extern "C" sRmNode_2DE8* cPS2DeferManager_Find1(sRmBatch_2DE8* self, unsigned int* state, int key, int hash, int mtxIndex);
 extern "C" void func_00362978(tDeferBucket* self, int packet, int tail);
 
@@ -8502,23 +8491,23 @@ static inline sRmNode_2DE8* newNode_2DE8(sRmBatch_2DE8* self, unsigned int* stat
     return n;
 }
 
-static inline unsigned int* findState_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e)
+static inline unsigned int* findState_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e)
 {
-    int x = e->w[0] ^ e->w[1] ^ e->w[2] ^ e->w[3];
+    int x = e->mDrawState.m_bitGroups[0] ^ e->mDrawState.m_bitGroups[1] ^ e->mDrawState.m_bitGroups[2] ^ e->mDrawState.m_bitGroups[3];
     return cPS2DeferManager_Find(self, e, hash8_2DE8(x));
 }
 
-static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned int* state, int key)
+static inline void addEntry_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e, unsigned int* state, int key)
 {
     sRmNode_2DE8* node;
-    if (e->continuation != 0)
+    if (e->mContinuation != 0)
         node = 0;
     else
-        node = cPS2DeferManager_Find1(self, state, key, nodeHash_2DE8(state, key), e->mtxIndex);
+        node = cPS2DeferManager_Find1(self, state, key, nodeHash_2DE8(state, key), e->mViewIndex);
     if (node == 0) {
-        sRmNode_2DE8* n = newNode_2DE8(self, state, key, e->mtxIndex);
+        sRmNode_2DE8* n = newNode_2DE8(self, state, key, e->mViewIndex);
         node = n;
-        if (e->continuation != 0 && self->last != 0) {
+        if (e->mContinuation != 0 && self->last != 0) {
             node->linked = 1;
         } else {
             unsigned int sortKey = func_00364240(state, key);
@@ -8529,8 +8518,8 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned
             self->items[self->nItems++].node = n;
         }
     }
-    func_00362978((tDeferBucket*)node, e->packet, e->tail);
-    if (e->continuation != 0) {
+    func_00362978((tDeferBucket*)node, e->mPacket, e->mTail);
+    if (e->mContinuation != 0) {
         sRmNode_2DE8* prev = self->last;
         if (prev != 0) {
             prev->link = node;
@@ -8559,17 +8548,17 @@ extern "C" void func_00362DE8(cPS2DeferManager* vself)
     SyncDCache(self->entries, (char*)&self->entries[self->count] - 1);
     void* ring = D_004A4474;
     int bytes = *(int*)((char*)ring + 0x10) << 4;
-    int chunk = bytes / sizeof(sRmEntry_2DE8);
+    int chunk = bytes / sizeof(tDeferSubmit);
     int nChunks = self->count / chunk;
-    int chunkBytes = chunk * sizeof(sRmEntry_2DE8);
-    sRmEntry_2DE8* buf = (sRmEntry_2DE8*)func_0038F4F8(ring, self->entries, chunkBytes, 4);
+    int chunkBytes = chunk * sizeof(tDeferSubmit);
+    tDeferSubmit* buf = (tDeferSubmit*)func_0038F4F8(ring, self->entries, chunkBytes, 4);
     for (int i = 0; i < nChunks; i++) {
-        sRmEntry_2DE8* next = (sRmEntry_2DE8*)func_0038F4F8(ring, &self->entries[(i + 1) * chunk], chunkBytes, 4);
+        tDeferSubmit* next = (tDeferSubmit*)func_0038F4F8(ring, &self->entries[(i + 1) * chunk], chunkBytes, 4);
         for (int j = 0; j < chunk; j++) {
-            sRmEntry_2DE8* drawRecord = &buf[j];
+            tDeferSubmit* drawRecord = &buf[j];
             unsigned int* state = findState_2DE8(self, drawRecord);
             sRmTexKey_2DE8 key;
-            key.set(drawRecord->tex[0], drawRecord->tex[1]);
+            key.set(drawRecord->mDrawState.m_textureState.m_texid[0], drawRecord->mDrawState.m_textureState.m_texid[1]);
             addEntry_2DE8(self, drawRecord, state, key.i);
         }
         buf = next;
@@ -8578,10 +8567,10 @@ extern "C" void func_00362DE8(cPS2DeferManager* vself)
     }
     func_0038F7B0();
     for (int j = 0; j < self->count - chunk * nChunks; j++) {
-        sRmEntry_2DE8* drawRecord = &buf[j];
+        tDeferSubmit* drawRecord = &buf[j];
         unsigned int* state = findState_2DE8(self, drawRecord);
         sRmTexKey_2DE8 key;
-        key.set(drawRecord->tex[0], drawRecord->tex[1]);
+        key.set(drawRecord->mDrawState.m_textureState.m_texid[0], drawRecord->mDrawState.m_textureState.m_texid[1]);
         addEntry_2DE8(self, drawRecord, state, key.i);
     }
     func_0038F6A8(ring);
@@ -9179,14 +9168,6 @@ struct sRailXf_45B8 {
     int Key3Eq(const sV4_45B8& e) const { return VEC_EQ_45B8(e, key3); }
 };
 
-struct sRailXfTable_45B8 {
-    char pad_0x00[0x69CC0];
-    int found;                  // 0x69CC0
-    int pad_0x69CC4;
-    int count;                  // 0x69CC8
-    int pad_0x69CCC;
-    sRailXf_45B8 entries[1];    // 0x69CD0
-};
 
 /**
  * Finds or adds a 0x180-byte matrix record in the defer manager's matrix cache.

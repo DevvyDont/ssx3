@@ -2934,7 +2934,6 @@ void SNDSTRMI_releasecallback(void *samples) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_framescallback);
 #ifdef SKIP_ASM
-struct C_6B10 { char pad[0x11C]; struct SNDSTREAMREQUEST *q; };
 
 /**
  * Advances a stream's requests by the amount just played and retires finished ones.
@@ -2947,13 +2946,13 @@ struct C_6B10 { char pad[0x11C]; struct SNDSTREAMREQUEST *q; };
  * @param n  the amount played
  * @param stream  the stream
  */
-void SNDSTRMI_framescallback(int packetChan, unsigned int n, struct C_6B10 *stream) {
+void SNDSTRMI_framescallback(int packetChan, unsigned int n, struct SNDSTREAMCHANNEL *stream) {
     unsigned int rem = 0;
     int i = 0;
     while (1) {
         struct SNDSTREAMREQUEST *request;
         i++;
-        request = stream->q;
+        request = (*(struct SNDSTREAMREQUEST**)&stream->allocatedrequests);
         if (i >= 201) {
             SNDSTRMI_removerequest(request->sndrequesthandle);
             return;
@@ -15816,8 +15815,8 @@ int SNDMEM_gethighwater_6240(void) __asm__("SNDMEM_gethighwater");
 int SNDMEM_gethighwater_6240(void) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)sndgs.mm + 8));
-    return (int) ((temp_3 - (*(int *)((char*)sndgs.mm + 0x10))) * 100) / temp_3;
+    temp_3 = sndgs.mm->heapsize;
+    return (int) ((temp_3 - (sndgs.mm->lowmark)) * 100) / temp_3;
 }
 #endif
 

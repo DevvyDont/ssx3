@@ -176,13 +176,6 @@ extern "C" void DeletePersonaMenu_setpersonas_impl(char *vself, char *src) {
 INCLUDE_ASM("main/all_in_one_main", PersonaMenu_setpersonas);
 #ifdef SKIP_ASM
 
-struct Menu_B418 {
-    char pad0[0x2E8];
-    char sub2E8[0x518 - 0x2E8];     // 0x2E8
-    cCommandMenuItem items[4];         // 0x518
-    char item5A8[0x1C];             // 0x5A8
-    char item5C4[0x1C];             // 0x5C4
-};
 
 
 extern "C" void cMenuItem_activate(void* item, int enable);
@@ -223,10 +216,6 @@ extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, LobbyMan* src)
 INCLUDE_ASM("main/all_in_one_main", LobbyMenu_updaterooms);
 #ifdef SKIP_ASM
 
-struct Menu_B528 {
-    char pad0[0x168];
-    cCommandMenuItem items[12];    // 0x168
-};
 
 extern "C" int LobbyMan_getnumrooms(void* src);
 extern "C" void* func_0025F150(void* src, int i);
@@ -270,10 +259,6 @@ extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, LobbyMan* src)
 INCLUDE_ASM("main/all_in_one_main", RoomMenu_updateusers);
 #ifdef SKIP_ASM
 
-struct Menu_B620 {
-    char pad0[0x16C];
-    cCommandMenuItem items[24];    // 0x16C
-};
 
 extern "C" int func_0025F1B0(void* src);
 extern "C" void* func_0025F1E0(void* src, int i, int flags);
@@ -563,7 +548,7 @@ extern "C" void func_0017E4F0(int);
 extern "C" int ChallengeResponseMenu_onCommand(ChallengeResponseMenu* menu, cMenuItem* item) {
     int temp_3;
 
-    temp_3 = (item->ID);
+    temp_3 = item->ID;
     if (temp_3 == 0) {
         func_0017E490(((int)menu->unk_130));
     } else if (temp_3 == 1) {
@@ -643,7 +628,7 @@ extern "C" void func_0017E2F8(int, int);
 extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, cMenuItem* item) {
     int temp_5;
 
-    temp_5 = (item->ID);
+    temp_5 = item->ID;
     if (temp_5 >= 0) {
         func_0017E2F8(((int)menu->unk_130), temp_5);
     }
@@ -668,7 +653,7 @@ extern "C" void func_0017E290(int, int);
  * @return 0
  */
 extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, cMenuItem* item) {
-    func_0017E290(((int)menu->unk_4E0), (item->ID));
+    func_0017E290(((int)menu->unk_4E0), item->ID);
     return 0;
 }
 #endif
@@ -712,7 +697,7 @@ extern "C" void func_0017E228(int, int);
  * @return 0
  */
 extern "C" int DeletePersonaMenu_onCommand(DeletePersonaMenu* menu, cMenuItem* item) {
-    func_0017E228(((int)menu->unk_130), (item->ID));
+    func_0017E228(((int)menu->unk_130), item->ID);
     return 0;
 }
 #endif
@@ -2576,7 +2561,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorRight);
 extern "C" void cScreenKeyboard_cursorRight(cScreenKeyboard* screen) {
     int temp_3;
 
-    temp_3 = (screen->mCursorPos) + 1;
+    temp_3 = screen->mCursorPos + 1;
     if (temp_3 < (screen->mMaxChars)) {
         screen->mCursorPos = temp_3;
     }
@@ -2596,7 +2581,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorLeft);
 extern "C" void cScreenKeyboard_cursorLeft(cScreenKeyboard* screen) {
     int temp_2;
 
-    temp_2 = (screen->mCursorPos);
+    temp_2 = screen->mCursorPos;
     if (temp_2 > 0) {
         screen->mCursorPos = (int) (temp_2 - 1);
     }
@@ -3902,7 +3887,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isCancelPressed);
 extern "C" int cFEMemCard_isCancelPressed(void) {
     int temp_2;
 
-    temp_2 = (cFEMemCard_mInstance->mIsCancelPressed);
+    temp_2 = cFEMemCard_mInstance->mIsCancelPressed;
     cFEMemCard_mInstance->mIsCancelPressed = 0;
     return temp_2;
 }
@@ -3957,7 +3942,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isNextMCPressed);
 extern "C" int cFEMemCard_isNextMCPressed(void) {
     int temp_2;
 
-    temp_2 = (cFEMemCard_mInstance->mDoNextMemCard);
+    temp_2 = cFEMemCard_mInstance->mDoNextMemCard;
     cFEMemCard_mInstance->mDoNextMemCard = 0;
     return temp_2;
 }
@@ -3978,7 +3963,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isPrevMCPressed);
 extern "C" int cFEMemCard_isPrevMCPressed(void) {
     int temp_2;
 
-    temp_2 = (cFEMemCard_mInstance->mDoPrevMemCard);
+    temp_2 = cFEMemCard_mInstance->mDoPrevMemCard;
     cFEMemCard_mInstance->mDoPrevMemCard = 0;
     return temp_2;
 }
@@ -4016,7 +4001,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEMemCard_callbackIsRetryPressed);
 extern "C" int cFEMemCard_callbackIsRetryPressed(void) {
     int temp_2;
 
-    temp_2 = (cFEMemCard_mInstance->mIsRetryPressed);
+    temp_2 = cFEMemCard_mInstance->mIsRetryPressed;
     cFEMemCard_mInstance->mIsRetryPressed = 0;
     return temp_2;
 }
@@ -4999,8 +4984,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorRight);
 extern "C" void cKeyboardPopup_cursorRight(cKeyboardPopup* keyboard) {
     int temp_3;
 
-    temp_3 = (keyboard->miCursorPos);
-    if (temp_3 < ((keyboard->miMaxCharacters) - 1)) {
+    temp_3 = keyboard->miCursorPos;
+    if (temp_3 < (keyboard->miMaxCharacters - 1)) {
         keyboard->miCursorPos = (int) (temp_3 + 1);
     }
 }
@@ -5019,7 +5004,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorLeft);
 extern "C" void cKeyboardPopup_cursorLeft(cKeyboardPopup* keyboard) {
     int temp_2;
 
-    temp_2 = (keyboard->miCursorPos);
+    temp_2 = keyboard->miCursorPos;
     if (temp_2 > 0) {
         keyboard->miCursorPos = (int) (temp_2 - 1);
     }
@@ -5522,7 +5507,7 @@ extern "C" int cFEStateNet_isProcessingEvents(cFEStateNet* netState) {
 
     var_3 = 0;
     if (((int)netState->mpScreen) != 0) {
-        var_3 = (netState->unk_048) != 0;
+        var_3 = netState->unk_048 != 0;
     }
     return var_3;
 }

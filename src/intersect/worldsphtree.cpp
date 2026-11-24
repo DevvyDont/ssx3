@@ -1204,7 +1204,7 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
                 n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
             }
         } else if (flags & 0x40) {
-            if ((node->m_pActiveNode) == 0) {
+            if (node->m_pActiveNode == 0) {
                 continue;
             }
             if (node->m_pActiveNode->hasBoundBox()) {
@@ -1365,9 +1365,9 @@ extern "C" int cOverlapList_staticObjectIntersect(cOverlapList* self, cWorldInte
                 n += intersect_instanceIntersect(query, node, &buf[n], cap - n, mode);
             }
         } else if (flags & 0x40) {
-            sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
+            sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cObjNode, node->m_pActiveNode));
             if (((Test_334458)vt[44].fn)((char*)(node->m_pActiveNode) + vt[44].delta)) {
-                sVEntry<void>* vt2 = ((sVEntry<void>*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
+                sVEntry<void>* vt2 = ((sVEntry<void>*)VPTR_OF(cObjNode, node->m_pActiveNode));
                 sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)(node->m_pActiveNode) + vt2[45].delta);
                 if (overlapBox_334458(query, objBox)) {
                     n += intersect_instanceIntersect(query, node, &buf[n], cap - n, mode);
@@ -1538,13 +1538,6 @@ struct sWsMat_4888 {
     }
 };
 
-// A bone of an instance's skeleton (16 bytes): parent index, collision mesh, local matrix.
-struct sWsBone_4888 {
-    int parent;         // 0x0
-    char* mesh;         // 0x4
-    int pad08;
-    sWsMat_4888* mat;   // 0xC
-};
 
 
 // Per-bone part record of an instance definition (12 bytes).
@@ -1766,17 +1759,17 @@ extern "C" int func_4888(cWorldIntersectType* q, tInstanceRecord* node, sWsHit_4
  */
 extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* node, sWsHit_4888* buf, int cap, int mode)
 {
-    if ((node->m_pActiveNode) != 0) {
-        sWsVtSlot* vt = ((sWsVtSlot*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
-        if (((Test_4888)vt[38].fn)(vthis((node->m_pActiveNode), vt[38]))) {
-            sWsVtSlot* vt2 = ((sWsVtSlot*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
-            return ((Query_4888)vt2[39].fn)(vthis((node->m_pActiveNode), vt2[39]), intersectType, buf, cap, mode);
+    if (node->m_pActiveNode != 0) {
+        sWsVtSlot* vt = ((sWsVtSlot*)VPTR_OF(cObjNode, node->m_pActiveNode));
+        if (((Test_4888)vt[38].fn)(vthis(node->m_pActiveNode, vt[38]))) {
+            sWsVtSlot* vt2 = ((sWsVtSlot*)VPTR_OF(cObjNode, node->m_pActiveNode));
+            return ((Query_4888)vt2[39].fn)(vthis(node->m_pActiveNode, vt2[39]), intersectType, buf, cap, mode);
         }
     }
     int type = ((sWsInstDef_4888*)node->m_pCollideRecord)->type;
     if (type != 3 && type != 1 && type != 2)
         return 0;
-    cInstanceNode* obj = (node->m_pActiveNode);
+    cInstanceNode* obj = node->m_pActiveNode;
     sWsMat_4888 mats[24];
     sWsMat_4888* pMat = &(*(sWsMat_4888*)&node->m_fmTransform);
     int useLocal = 1;
@@ -1792,8 +1785,8 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
             pMat = ((GetMat_4888)vt2[25].fn)(vthis(obj, vt2[25]), node);
         }
     }
-    tModelRecord* tbl = (node->m_Model);
-    sWsBone_4888* bone = ((sWsBone_4888*)tbl->m_MeshHeirarchy);
+    tModelRecord* tbl = node->m_Model;
+    tMeshHeirarchyRecord* bone = tbl->m_MeshHeirarchy;
     float instScale = node->m_fScale;
     t4Vector scl;
     scl.x = instScale;
@@ -1804,13 +1797,13 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
     sWsMat_4888* boneMat = boneMats;
     for (int i = 0, k = 0; i < tbl->m_iNumMeshes; i++, bone++, boneMat++) {
         if (useLocal) {
-            int parent = bone->parent;
+            int parent = bone->m_iParentID;
             if (parent != -1) {
                 sWsMat_4888 productCopy;
                 sWsMat_4888 scaledLocal;
                 t4Vector res;
                 t4Vector translation;
-                sWsMat_4888* lm = bone->mat;
+                sWsMat_4888* lm = ((sWsMat_4888*)bone->m_pMeshMatrix);
                 res = lm->row[0];
                 scaledLocal.row[0] = res;
                 res = lm->row[1];
@@ -1834,7 +1827,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
                 sWsMat_4888 scaledLocal;
                 t4Vector res;
                 t4Vector translation;
-                sWsMat_4888* lm = bone->mat;
+                sWsMat_4888* lm = ((sWsMat_4888*)bone->m_pMeshMatrix);
                 res = lm->row[0];
                 scaledLocal.row[0] = res;
                 res = lm->row[1];
@@ -1855,7 +1848,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
                 vu0CopyMat_4888(&mats[i], pt2);
             }
         }
-        if (bone->mesh == 0)
+        if (bone->m_Mesh == 0)
             continue;
         if (mode == 2) {
             if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id == -1) {
@@ -1877,15 +1870,15 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
         void* tri = 0;
         ((SetXf_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[1].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[1]), 1.0f / node->m_fScale, &inv);
         if (type == 2) {
-            inum = ((Tris_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7]), bone->mesh, bone->mesh + 0xC, ii, 64);
+            inum = ((Tris_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[7]), ((char*)bone->m_Mesh), (char*)&bone->m_Mesh->m_fvMax, ii, 64);
         } else {
-            if (((Hit_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9]), bone->mesh, bone->mesh + 0xC)) {
+            if (((Hit_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[9]), ((char*)bone->m_Mesh), (char*)&bone->m_Mesh->m_fvMax)) {
                 if (type == 3) {
                     tri = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo_4888(cWorld_m_pTheWorld, node), k);
                     inum = ((Mesh_4888)((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[6].fn)(vthis(intersectType, ((sWsVtSlot*)VPTR_AT(intersectType, 0x50))[6]), tri, ii, 64);
                 } else {
                     inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(cWorld_getSphereTreeInfo_4888(cWorld_m_pTheWorld, node), k),
-                                             *(int*)(bone->mesh + 0x18) & 1, ii, 64);
+                                             bone->m_Mesh->m_iFlags & 1, ii, 64);
                 }
             }
             k++;
@@ -2308,9 +2301,9 @@ extern "C" void TerrainCallback_intersectpatch(void* vctx, void* vobj)
     void* node;
     float dist;
     if ((obj->flags & 0x41) != 65) return;
-    if (!overlap_335960((ctx->intersecttype), obj)) return;
+    if (!overlap_335960(ctx->intersecttype, obj)) return;
     cAIFwdDiffCache_GetFwdDiff(((void*)ctx->fwddiffcache), obj, &node);
-    if (!cWorldIntersectType_IsPatchInt((ctx->intersecttype), obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
+    if (!cWorldIntersectType_IsPatchInt(ctx->intersecttype, obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
     reset_335960(&(ctx->intersectinfo)[*ctx->numintersectinfo]);
     (ctx->intersectinfo)[*ctx->numintersectinfo].Ipos = pos;
     (ctx->intersectinfo)[*ctx->numintersectinfo].Inorm = nrm;
@@ -2362,7 +2355,7 @@ static inline int overlapBox_335B90(const cWorldIntersectType* q, const tBoundBo
 static inline void collect_335B90(TerrainCallback* ctx, tInstanceRecord* node)
 {
     int n = *ctx->numintersectinfo;
-    *ctx->numintersectinfo += intersect_instanceIntersect((ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, 2);
+    *ctx->numintersectinfo += intersect_instanceIntersect(ctx->intersecttype, node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, 2);
 }
 
 /**
@@ -2384,16 +2377,16 @@ extern "C" void TerrainCallback_intersectinstance(void* vctx, void* vnode)
     if (((int)node->m_pCollideRecord) == 0) return;
     int flags = node->m_iFlags;
     if (flags & 0x20) {
-        if (overlapNode_335B90((ctx->intersecttype), node)) {
+        if (overlapNode_335B90(ctx->intersecttype, node)) {
             collect_335B90(ctx, node);
         }
     } else if (flags & 0x40) {
-        if ((node->m_pActiveNode) == 0) return;
-        sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
+        if (node->m_pActiveNode == 0) return;
+        sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cObjNode, node->m_pActiveNode));
         if (((Test_335B90)vt[44].fn)((char*)(node->m_pActiveNode) + vt[44].delta)) {
-            sVEntry<void>* vt2 = ((sVEntry<void>*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
+            sVEntry<void>* vt2 = ((sVEntry<void>*)VPTR_OF(cObjNode, node->m_pActiveNode));
             tBoundBox* objBox = ((GetBox_335B90)vt2[45].fn)((char*)(node->m_pActiveNode) + vt2[45].delta);
-            if (overlapBox_335B90((ctx->intersecttype), objBox)) {
+            if (overlapBox_335B90(ctx->intersecttype, objBox)) {
                 collect_335B90(ctx, node);
             }
         }
@@ -2772,7 +2765,7 @@ static inline int overlapBox_336D40(const cWorldIntersectType* q, const tBoundBo
 static inline void collect_336D40(StaticObjectCallback* ctx, tInstanceRecord* node, int mode)
 {
     int n = *ctx->numintersectinfo;
-    *ctx->numintersectinfo += intersect_instanceIntersect((ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, mode);
+    *ctx->numintersectinfo += intersect_instanceIntersect(ctx->intersecttype, node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, mode);
 }
 
 /**
@@ -2794,15 +2787,15 @@ extern "C" void StaticObjectCallback_intersectinstance(void* vctx, void* vnode)
     int mode = ctx->includeridable ? 3 : 1;
     int flags = node->m_iFlags;
     if (flags & 0x20) {
-        if (overlapNode_336D40((ctx->intersecttype), node)) {
+        if (overlapNode_336D40(ctx->intersecttype, node)) {
             collect_336D40(ctx, node, mode);
         }
     } else if (flags & 0x40) {
-        sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
+        sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cObjNode, node->m_pActiveNode));
         if (((Test_336D40)vt[44].fn)((char*)(node->m_pActiveNode) + vt[44].delta)) {
-            sVEntry<void>* vt2 = ((sVEntry<void>*)VPTR_OF(cObjNode, (node->m_pActiveNode)));
+            sVEntry<void>* vt2 = ((sVEntry<void>*)VPTR_OF(cObjNode, node->m_pActiveNode));
             tBoundBox* objBox = ((GetBox_336D40)vt2[45].fn)((char*)(node->m_pActiveNode) + vt2[45].delta);
-            if (overlapBox_336D40((ctx->intersecttype), objBox)) {
+            if (overlapBox_336D40(ctx->intersecttype, objBox)) {
                 collect_336D40(ctx, node, mode);
             }
         }
@@ -6721,12 +6714,12 @@ extern "C" void* cDebounceNode_cDebounceNode1(cDebounceNode* self, void* bucket,
     self->Type = def->Type;
     cMoveNode_transferFromOld(self, oldNode);
     if (def->Visible == 0) {
-        (*(unsigned int*)&(self->Instance)->m_iFlags) &= 0xFFFFFFF0;
+        (*(unsigned int*)&self->Instance->m_iFlags) &= 0xFFFFFFF0;
     } else if (def->Visible == 1) {
-        (*(unsigned int*)&(self->Instance)->m_iFlags) |= 1;
-        (self->Instance)->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2u) | 4;
+        (*(unsigned int*)&self->Instance->m_iFlags) |= 1;
+        self->Instance->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2u) | 4;
     } else {
-        tInstanceRecord* n = (self->Instance);
+        tInstanceRecord* n = self->Instance;
         if ((((unsigned int)n->m_iFlags) & 3) == 3) {
             n->m_iFlags = (((unsigned int)n->m_iFlags) & ~2u) | 4;
         }

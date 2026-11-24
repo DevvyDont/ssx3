@@ -3874,7 +3874,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         return;
     }
     t3Vector n;
-    tHaloRecord* haloRecord = (self->mpHalo);
+    tHaloRecord* haloRecord = self->mpHalo;
     float x = (*(t3Vector*)&haloRecord->m_fvColor[0]).x;
     float y = (*(t3Vector*)&haloRecord->m_fvColor[0]).y;
     float z = (*(t3Vector*)&haloRecord->m_fvColor[0]).z;
@@ -3895,7 +3895,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
     (*(t3Vector*)&col.R).z = n.z;
     sRsCtx_2868* ctx = cGraphicsMan_TheGraphicsMan_2868;
     if (self->mbRequestZSample != 0) {
-        col.A = (self->mpHalo)->m_fOcclude[idx];
+        col.A = self->mpHalo->m_fOcclude[idx];
         rsSetA_2868(ctx, 0x1800000, 23, 2);
         rsSetA_2868(ctx, 0x300000, 20, 0);
         rsSetA_2868(ctx, 0xFF000, 12, 20);
@@ -3923,7 +3923,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         size = 350.0f;
         break;
     }
-    tHaloRecord* drawRecord = (self->mpHalo);
+    tHaloRecord* drawRecord = self->mpHalo;
     ctx->Draw(sV4_2868((*(t3Vector*)&drawRecord->m_fvWorldPos[0]).x, (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).y, (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->mAngle, 2);
 }
 #endif
@@ -3984,9 +3984,9 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, tViewInfo* viewInfo)
     float* rect = (float*)viewInfo;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     t4Vector pos;
-    pos.x = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).x;
-    pos.y = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).y;
-    pos.z = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).z;
+    pos.x = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).x;
+    pos.y = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).y;
+    pos.z = (*(t3Vector*)&self->mpHalo->m_fvWorldPos[0]).z;
     pos.w = 1.0f;
     if (obj->GetOutCode(pos)) {
         self->mbOnScreen = 0;
@@ -5436,17 +5436,17 @@ struct sFadeVt47E8 {
 
 static inline void rsSetA47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void rsSetB47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    (ctx->m_pCurrentDrawState)->m_bitGroups[2] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[2]) & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[2] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[2]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void rsSet047E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    (ctx->m_pCurrentDrawState)->m_bitGroups[0] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[0]) & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[0] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[0]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline int fadeTex47E8(cTransitionMan* self)
@@ -5512,9 +5512,9 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     rsSetA47E8(ctx, 0x3, 0, 2);
     rsSetB47E8(ctx, 0x1FFFFC00, 10, 0);
     if (self->mUsingScreenGrab != 0) {
-        (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = fadeTex47E8((self));
+        ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = fadeTex47E8((self));
     } else {
-        (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
+        ctx->m_pCurrentDrawState->m_textureState.m_texid[0] = -1;
     }
     if (self->mUsingScreenGrab == 0 || self->mRequestingScreenGrab == 0) {
         sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
@@ -6893,10 +6893,6 @@ static inline float vu0Dot(const t4Vector& a, const t4Vector& b)
 int cRider_getMotionState(void*);
 
 
-struct sSeg_66B8 {
-    t4Vector a;             // 0x00
-    t4Vector b;             // 0x10
-};
 
 struct sWake_66B8 {
     char* rider;            // 0x000 (virtual base)
@@ -6912,7 +6908,7 @@ struct sWake_66B8 {
     int count;              // 0x3A0
     int max;                // 0x3A4
     int air;                // 0x3A8
-    sSeg_66B8* segs;        // 0x3AC
+    tSpeedBoostStreamerSeg* segs;        // 0x3AC
     float& Width() { return fC; }
 };
 
@@ -6980,8 +6976,8 @@ static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, flo
         self->segs[self->head] = self->segs[prev];
         t4Vector d = vu0Scale(pos, 1.4f);
         for (int i = 0; i < 20; i++) {
-            SubEq_66B8(self->segs[i].a, d);
-            vu0AddEq(self->segs[i].b, d);
+            SubEq_66B8(self->segs[i].l, d);
+            vu0AddEq(self->segs[i].r, d);
         }
     } else {
         self->count = Approach_66B8(self->count, 0, 1);
@@ -6992,11 +6988,11 @@ static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, flo
         t4Vector b = BonePos_66B8(o, 0x8B0);
         t4Vector c = BonePos_66B8(o, 0x8B8);
         if (vu0Dot(b, pos) < vu0Dot(c, pos)) {
-            self->segs[self->head].a = vu0Sub(b, vu0Scale(a, 0.7f));
-            self->segs[self->head].b = vu0Sub(c, vu0Scale(a, 0.7f));
+            self->segs[self->head].l = vu0Sub(b, vu0Scale(a, 0.7f));
+            self->segs[self->head].r = vu0Sub(c, vu0Scale(a, 0.7f));
         } else {
-            self->segs[self->head].a = vu0Sub(c, vu0Scale(a, 0.7f));
-            self->segs[self->head].b = vu0Sub(b, vu0Scale(a, 0.7f));
+            self->segs[self->head].l = vu0Sub(c, vu0Scale(a, 0.7f));
+            self->segs[self->head].r = vu0Sub(b, vu0Scale(a, 0.7f));
         }
         self->phase -= k * (speed * 0.016666668f);
         if (self->phase < 0.0f) {
