@@ -51,7 +51,7 @@ struct cRealFE {
                                     //       cUIEngine_cUIEngine; [U] load / loadStartState / render / update
     cSimpleCamera mCamera;          // 0x010 [O] cFECamera mCamera (On Tour 0xA0: a cSimpleCamera, no data of its own); [P]
                                     //       getCamera returns this + 0x10; [R] cSimpleCamera_cSimpleCamera(&mCamera), cFECamera's
-                                    //       vtable D_0046D8D8 in mCamera.mVtbl (0xA0), cSimpleCamera_init; [U] render passes
+                                    //       vtable cFECamera_vtbl in mCamera.mVtbl (0xA0), cSimpleCamera_init; [U] render passes
                                     //       mCamera.View / Near / Far (0x10 / 0x14 / 0x18) and &mCamera.CamMat (0x50) to the
                                     //       graphics manager; update calls slot 3 of mCamera.mVtbl; load sets mCamera.Pose
     cFERiderManager mRiderManager;  // 0x0B0 [O] cFERiderManager (fe/feridermanager.h, 0x19C0); [P] getRiderManager returns
@@ -128,7 +128,7 @@ struct cFE {
                                     //       set; [U] cFE_getUI returns it
     cSimpleCamera mCamera;          // 0x010 [O] cFECamera mCamera (= cSimpleCamera, camera/camera.h, with cFECamera's
                                     //       vtable in mCamera.mVtbl at 0xA0); [P] getCamera returns this + 0x10; [R] cFE_cFE:
-                                    //       cSimpleCamera_cSimpleCamera(&mCamera), D_0046D8D8 in mCamera.mVtbl,
+                                    //       cSimpleCamera_cSimpleCamera(&mCamera), cFECamera_vtbl in mCamera.mVtbl,
                                     //       cSimpleCamera_init(&mCamera, 0, pi/4, 5, 5000); cFE__cFE stores cSimpleCamera_vtbl
                                     //       back; [U] cRealFE_load sets mCamera.Pose (P 0x30, Q 0x40) and updates it
     cFERiderManager mRiderManager;  // 0x0B0 [O] cFERiderManager (fe/feridermanager.h, 0x19C0); [P] getRiderManager /

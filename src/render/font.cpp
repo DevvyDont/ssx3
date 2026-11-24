@@ -3022,7 +3022,7 @@ extern "C" void cGarbageMan__cGarbageMan(cGarbageMan* self, int flags)
 INCLUDE_ASM("render/font", cGridMesh_SetScale__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base-class body of slot 9 of the grid-mesh vtable D_004938E0.
+ * Does nothing: the base-class body of slot 9 of the grid-mesh vtable cGridMesh_vtbl.
  *
  * The derived vtable cPS2GridMesh_vtbl overrides the slot with cPS2GridMesh_SetScale.
  */

@@ -1692,7 +1692,7 @@ public:
  * Runs cOVState_onCreateScreen, sets flag 8 in the "overlayMenu" widget's word at +0x90, then walks "overlayOpt0" ...
  * "overlayOpt4" of mpScreen: option 0 gets the localised string named D_00441D10[D_004A2860[0]] and that index as its
  * misc data (+0x18); options 1-4 are hidden (setVisible(0), slot 9) and made static (setStatic(1), slot 8). It fills the
- * onCreateScreen slot (+0x24) of D_00474D30, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; func_001FBD20
+ * onCreateScreen slot (+0x24) of cOVTemplate_Simple_vtbl, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; func_001FBD20
  * and cOVState_HEAT_PREEVENT_onCreateScreen call it as their base.
  */
 extern "C" void cOVTemplate_Simple_onCreateScreen(cOVTemplate_Simple* self)
@@ -1724,7 +1724,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetMenu);
 /**
  * Simple overlay's menu-event filter: event 6 gets 0x101, every other event 0.
  *
- * It fills the onWidgetMenu slot (+0xA4) of D_00474D30 and of the overlay vtables built on it (D_004726A0, D_00472778,
+ * It fills the onWidgetMenu slot (+0xA4) of cOVTemplate_Simple_vtbl and of the overlay vtables built on it (D_004726A0, D_00472778,
  * cOVState_HEAT_PREEVENT_vtbl).
  *
  * @param menu  the menu (unused)
@@ -1746,7 +1746,7 @@ extern int cOVStateManager_mStatus;
  * Simple overlay's widget handler: selecting a widget (event 5) sets cOVStateManager_mStatus to 1, so the next
  * cOVStateManager_update moves on to the next overlay.
  *
- * It fills the onWidgetEvent slot (+0x9C) of D_00474D30 and of the overlay vtables built on it (D_004726A0, D_00472778,
+ * It fills the onWidgetEvent slot (+0x9C) of cOVTemplate_Simple_vtbl and of the overlay vtables built on it (D_004726A0, D_00472778,
  * cOVState_HEAT_PREEVENT_vtbl).
  *
  * @param widget  the widget; nothing happens when it is null

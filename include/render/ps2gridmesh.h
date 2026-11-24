@@ -16,7 +16,7 @@
 // Bases: cGridMesh (0x8) <- cGarbageMan (0x8: mNext at 0x0, the vptr at 0x4: cGarbageMan declares the virtual dtor;
 // On Tour class cGarbageMan { cGarbageMan* mNext; }), written out inline. Vtables: cPS2GridMesh_vtbl (D_00493208, 9
 // slots: 1 dtor, 2 IsOk, 3 Update(t3Vector*), 4 Update(t2Vector*), 5 Update(t3Vector*, tARGB*), 6 Update(vert, rgb, uv),
-// 7 Render(BMat, material, TexMat), 8 Render(BMat, texid, TexMat), 9 SetScale); cGridMesh's D_004938E0 (dtor, 7 x
+// 7 Render(BMat, material, TexMat), 8 Render(BMat, texid, TexMat), 9 SetScale); cGridMesh's cGridMesh_vtbl (dtor, 7 x
 // __pure_virtual, SetScale) and cGarbageMan's cGarbageMan_vtbl (dtor) are restored by the base destructor.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Tags:

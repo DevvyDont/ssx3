@@ -5725,3 +5725,29 @@ ps2_addr	name	previous	source	evidence
 004744C0	cOVState_SAVEPROMPT_vtbl	D_004744C0	retail	slot 1 = cOVState_SAVEPROMPT__cOVState_SAVEPROMPT; factory id 38 after AUTOSAVE 37 as On Tour's SAVEPROMPT follows AUTOSAVE (kind 6, kT_CMNSaveBeforeQuit)
 00473C50	cOVState_TOURNAMENT_STANDINGS_vtbl	D_00473C50	retail	slot 1 = cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS; factory id 35
 00474C58	cOVTemplate_Dialog_vtbl	D_00474C58	retail	slot 1 = cOVTemplate_Dialog__cOVTemplate_Dialog; its methods fill the dialog vtables' other slots
+0045C1B8	cCTActionSpline_vtbl	D_0045C1B8	retail	[M] own method(s) cCTActionSpline_purge; stored by get_camaction
+0045C1D0	cCTActionBoundedCam_vtbl	D_0045C1D0	retail	[M] own method(s) cCTActionBoundedCam_purge; stored by get_camaction
+0045C2E8	cCTAction_vtbl	D_0045C2E8	retail	[M] own method(s) cCTAction_purge__FPv; stored by get_camaction
+0046D8D8	cFECamera_vtbl	D_0046D8D8	retail	[D] slot 1 cFECamera__cFECamera; stored by cFE_cFE
+00474D30	cOVTemplate_Simple_vtbl	D_00474D30	retail	[D] slot 1 cOVTemplate_Simple__cOVTemplate_Simple; stored by cOVTemplate_Simple_cOVTemplate_Simple
+0047C878	cGameLoadStateOutLodge_vtbl	D_0047C878	retail	[D] slot 1 cGameLoadStateOutLodge__cGameLoadStateOutLodge; stored by cGameLoadScreen_load,cGameLoadStateOutLodge__cGameLoadStateOutLodge
+0047C948	cGameLoadState_vtbl	D_0047C948	retail	[D] slot 1 cGameLoadState__cGameLoadState; stored by cGameLoadScreen_load,cGameLoadState__cGameLoadState
+0047CC60	cGMPointHandler_vtbl	D_0047CC60	retail	[D] slot 1 cGMPointHandler__cGMPointHandler; stored by cGameModeMan_getGM
+0047CE68	cGMMPSlopeHandler_vtbl	D_0047CE68	retail	[D] slot 1 cGMMPSlopeHandler__cGMMPSlopeHandler; stored by cGameModeMan_getGM
+0047CED0	cGMMPRaceHandler_vtbl	D_0047CED0	retail	[D] slot 1 cGMMPRaceHandler__cGMMPRaceHandler; stored by cGameModeMan_getGM
+00481448	cTrackPath_vtbl	D_00481448	retail	[M] own method(s) cTrackPath_getEventsInRange, cTrackPath_isForkInPath, cTrackPath_populateData, cTrackPath_populateDataWithDefaults__FPv; stored by cPathSys_loadTrackPaths
+00481478	cAIPath_vtbl	D_00481478	retail	[M] own method(s) cAIPath_populateData, cAIPath_populateDataWithDefaults__FPv; stored by cPathSys_loadAIPaths
+00483980	cSongConfiguration_vtbl	D_00483980	retail	[D] slot 1 cSongConfiguration__cSongConfiguration; stored by cSongConfiguration__cSongConfiguration,cSongConfiguration_cSongConfiguration
+00487DC8	cFlags_vtbl	D_00487DC8	retail	[D] slot 1 cFlags__cFlags; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+00487DF8	cSnowSurface_vtbl	D_00487DF8	retail	[D] slot 1 cSnowSurface__cSnowSurface; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+00487E28	cShadow_vtbl	D_00487E28	retail	[D] slot 1 cShadow__cShadow; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+00487E58	cHeightFog_vtbl	D_00487E58	retail	[D] slot 1 cHeightFog__cHeightFog; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+00487E88	cDepthFog_vtbl	D_00487E88	retail	[D] slot 1 cDepthFog__cDepthFog; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+00487EB8	cLightGlow_vtbl	D_00487EB8	retail	[D] slot 1 cLightGlow__cLightGlow; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+00487FA8	cBoardTrail_vtbl	D_00487FA8	retail	[D] slot 1 cBoardTrail__cBoardTrail; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+00488050	cSnowfallToggles_vtbl	D_00488050	retail	[D] slot 1 cSnowfallToggles__cSnowfallToggles; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+004882B0	cSplashToggles_vtbl	D_004882B0	retail	[D] slot 1 cSplashToggles__cSplashToggles; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+004882E0	cPS2FogParticleMan_vtbl	D_004882E0	retail	[D] slot 1 cPS2FogParticleMan__cPS2FogParticleMan; stored by cGame_loadTrack
+00488330	cPowerUpFXToggles_vtbl	D_00488330	retail	[D] slot 1 cPowerUpFXToggles__cPowerUpFXToggles; stored by cPS2VisualEffectsMan_cPS2VisualEffectsMan
+004938E0	cGridMesh_vtbl	D_004938E0	retail	[D] slot 1 cGridMesh__cGridMesh
+004946A0	cUIThread_vtbl	D_004946A0	retail	[D] slot 1 cUIThread__cUIThread; stored by cUIScreen_playFrame

@@ -16,7 +16,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" int cPath_initPath(void* path, char* data);
 extern char str_TrackPaths[];
-extern void* D_00481448[];
+extern void* cTrackPath_vtbl[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -24,7 +24,7 @@ struct sPathB310 {
     char pad_0x0[0x34];
     void** vtable;          // 0x34
     int field_0x38;         // 0x38
-    sPathB310() { vtable = D_00481448; }
+    sPathB310() { vtable = cTrackPath_vtbl; }
 };
 
 
@@ -59,14 +59,14 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" int cPath_initPath(void* path, char* data);
 extern char str_AIPaths[];
-extern void* D_00481478[];
+extern void* cAIPath_vtbl[];
 
 struct sPathB410 {
     char pad_0x0[0x34];
     void** vtable;          // 0x34
     int field_0x38;         // 0x38
     int field_0x3C;         // 0x3C
-    sPathB410() { vtable = D_00481478; }
+    sPathB410() { vtable = cAIPath_vtbl; }
     void* operator new[](unsigned int, void* p) { return p; }
 };
 

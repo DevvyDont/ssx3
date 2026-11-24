@@ -37,9 +37,9 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 
 
 extern t3Vector t3vect_Zero_act __asm__("t3vect_Zero");     // zero vector
-extern void* D_0045C2E8[];      // cCTAction vtable
-extern void* D_0045C1D0[];      // bounded cam
-extern void* D_0045C1B8[];      // spline
+extern void* cCTAction_vtbl[];      // cCTAction vtable
+extern void* cCTActionBoundedCam_vtbl[];      // bounded cam
+extern void* cCTActionSpline_vtbl[];      // spline
 extern char str_Camera_Switch_Action[];
 extern char str_Camera_Bound_Action[];
 extern char str_Camera_Spline_Action[];
@@ -52,11 +52,11 @@ struct sCTActA {
     void** vtable;      // 0x04
     sCTActA()
     {
-        vtable = D_0045C2E8;
+        vtable = cCTAction_vtbl;
     }
     sCTActA(int t)
     {
-        vtable = D_0045C2E8;
+        vtable = cCTAction_vtbl;
         type = t;
     }
 };
@@ -83,7 +83,7 @@ struct sCTActBoundedA : sCTActA {
     t3Vector f28;    // 0x28
     sCTActBoundedA() : sCTActA()
     {
-        vtable = D_0045C1D0;
+        vtable = cCTActionBoundedCam_vtbl;
         type = 1;
         f08 = 0;
         blend = 1.0f;
@@ -106,7 +106,7 @@ struct sCTActSplineA : sCTActA {
     int f1C;            // 0x1C
     sCTActSplineA() : sCTActA()
     {
-        vtable = D_0045C1B8;
+        vtable = cCTActionSpline_vtbl;
         type = 2;
         f08 = 0;
         blend = 1.0f;
@@ -3681,7 +3681,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTAction_purge__FPv);
 /**
  * Does nothing: a camera trigger action's default purge.
  *
- * Slot 1 of the cCTAction vtable D_0045C2E8 (the plain switch and none actions). The bounded and spline actions
+ * Slot 1 of the cCTAction vtable cCTAction_vtbl (the plain switch and none actions). The bounded and spline actions
  * override it with cCTActionBoundedCam_purge and cCTActionSpline_purge, which free their bound object or spline.
  */
 void cCTAction_purge(void* self)
@@ -3809,7 +3809,7 @@ void operator_delete(int* ptr);
  * Frees a bounded-camera trigger action's bound object.
  *
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionBoundedCam::BoundObj) when it is set; the pointer
- * itself is not cleared. Slot 1 of the bounded action vtable D_0045C1D0.
+ * itself is not cleared. Slot 1 of the bounded action vtable cCTActionBoundedCam_vtbl.
  */
 extern "C" void cCTActionBoundedCam_purge(cCTActionBoundedCam* self)
 {
@@ -3829,7 +3829,7 @@ void operator_delete(int* ptr);
  * Frees a spline trigger action's spline.
  *
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionSpline::Spline) when it is set; the pointer itself is
- * not cleared. Slot 1 of the spline action vtable D_0045C1B8.
+ * not cleared. Slot 1 of the spline action vtable cCTActionSpline_vtbl.
  */
 extern "C" void cCTActionSpline_purge(cCTActionSpline* self)
 {

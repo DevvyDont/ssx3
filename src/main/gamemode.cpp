@@ -23,13 +23,13 @@ extern char str_GM_Handler[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* memset(void* dst, int c, int n);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern void* D_0047CC60[];
+extern void* cGMPointHandler_vtbl[];
 extern void* cGMRivalPointHandler_vtbl[];
 extern void* cGMRivalTimeHandler_vtbl[];
 extern void* cGMTimeHandler_vtbl[];
 extern void* cGMFreerideHandler_vtbl[];
-extern void* D_0047CE68[];
-extern void* D_0047CED0[];
+extern void* cGMMPSlopeHandler_vtbl[];
+extern void* cGMMPRaceHandler_vtbl[];
 extern void* cGMRaceHandler_vtbl[];
 extern void* cGMBigAirHandler_vtbl[];
 
@@ -113,23 +113,23 @@ extern "C" int* cGameModeMan_getGM(void)
             cGameModeMan_aHandler[6] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_4(cGMRivalPointHandler_vtbl);
         }
         if (cGameModeMan_aHandler[7] == 0) {
-            cGameModeMan_aHandler[7] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CC60);
+            cGameModeMan_aHandler[7] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_C(cGMPointHandler_vtbl);
             if (cGameModeMan_aHandler[7] == 0) {
-                cGameModeMan_aHandler[7] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CC60);
+                cGameModeMan_aHandler[7] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_C(cGMPointHandler_vtbl);
                 if (cGameModeMan_aHandler[7] == 0) {
-                    cGameModeMan_aHandler[7] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_C(D_0047CC60);
+                    cGameModeMan_aHandler[7] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_C(cGMPointHandler_vtbl);
                 }
             }
         }
         if (cGameModeMan_aHandler[8] == 0) {
-            cGameModeMan_aHandler[8] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_2C(D_0047CED0);
+            cGameModeMan_aHandler[8] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_2C(cGMMPRaceHandler_vtbl);
         }
         if (cGameModeMan_aHandler[9] == 0) {
-            cGameModeMan_aHandler[9] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_8(D_0047CE68);
+            cGameModeMan_aHandler[9] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_8(cGMMPSlopeHandler_vtbl);
             if (cGameModeMan_aHandler[9] == 0) {
-                cGameModeMan_aHandler[9] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_8(D_0047CE68);
+                cGameModeMan_aHandler[9] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_8(cGMMPSlopeHandler_vtbl);
                 if (cGameModeMan_aHandler[9] == 0) {
-                    cGameModeMan_aHandler[9] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_8(D_0047CE68);
+                    cGameModeMan_aHandler[9] = (cGameModeHandler*)new (str_GM_Handler, 0, 0) sGMMode_8(cGMMPSlopeHandler_vtbl);
                 }
             }
         }
@@ -1292,7 +1292,7 @@ struct sGM_239D88 {
 
 
 /**
- * Starts the two-player online event of handler 9 (vtable D_0047CE68; online events 1-3).
+ * Starts the two-player online event of handler 9 (vtable cGMMPSlopeHandler_vtbl; online events 1-3).
  *
  * Sets a single last heat (3) with no AI, a time limit of cBENewRaceInterface_getTimeLimit(race, 3) * 60, runs slot +0x24, puts both
  * players' characters and cheat characters in the tables and clears the two per-player counters (+0x4, +0x6).
@@ -1340,7 +1340,7 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_raceFinish);
  *
  * Stores the rider's score (or 0 and a did-not-finish mark in D_005366A8); when cAI_isRaceFinished, sets the event
  * done, locks the results, ranks the two riders with sortScores and clears +0x100 of a rider who did not win. Slot
- * +0x44 (raceFinish) of D_0047CE68.
+ * +0x44 (raceFinish) of cGMMPSlopeHandler_vtbl.
  *
  * @param idx  the rider index
  */
@@ -1378,7 +1378,7 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_riderCheckpointHit);
  *
  * Increments the player's counter (+0x4 + 2 * @p player); returns 0 unless it is now ahead of the other player's. In
  * event 1 the leader also adds @p secs seconds to the time limit, unless the limit has already passed (then 0). Slot
- * +0x34 (riderCheckpointHit) of D_0047CE68.
+ * +0x34 (riderCheckpointHit) of cGMMPSlopeHandler_vtbl.
  *
  * @param player  the player (0 or 1)
  * @param secs  seconds to add
@@ -1969,7 +1969,7 @@ struct sGM_23AC88 {
 
 
 /**
- * Starts the online race of handler 8 (vtable D_0047CED0; online event 0 and the online default).
+ * Starts the online race of handler 8 (vtable cGMMPRaceHandler_vtbl; online event 0 and the online default).
  *
  * Sets path 2 and event 0, a single last heat (3) with four AI riders (newRace.iNumberAI when cBENetworkInterface_networkOpt
  * says it is a network game), no time limit, fills the time table (+0x4) with 9s, runs slot +0x2C and stores both
@@ -2072,7 +2072,7 @@ static inline int finished_23AE00(sRider_23AE00* r)
  *
  * Stores the rider's time (360000 for did-not-finish) in its table (+0x0) and D_00536640. Once cAI_isRaceFinished,
  * estimates the unfinished riders (cRider_estimateFinishTick), ranks with sortTimes (cGameModeMan_sortTimes), clears +0x100 of a
- * rider placed 4th or worse and locks the results. Slot +0x44 (raceFinish) of D_0047CED0.
+ * rider placed 4th or worse and locks the results. Slot +0x44 (raceFinish) of cGMMPRaceHandler_vtbl.
  *
  * @param idx  the rider index
  */
@@ -2113,7 +2113,7 @@ INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_writeToReplayFrame);
  * Saves the online race handler's first 44 bytes (from +0x0, vtable pointer included) to a replay frame with the
  * stream's write (its first virtual).
  *
- * Slot +0x54 (writeToReplayFrame) of D_0047CED0.
+ * Slot +0x54 (writeToReplayFrame) of cGMMPRaceHandler_vtbl.
  *
  * @param stream  the replay stream
  */
@@ -2131,7 +2131,7 @@ INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_readFromReplayFrame);
  * Restores the online race handler's first 44 bytes (from +0x0, vtable pointer included) from a replay frame with the
  * stream's read (its second virtual).
  *
- * Slot +0x5C (readFromReplayFrame) of D_0047CED0.
+ * Slot +0x5C (readFromReplayFrame) of cGMMPRaceHandler_vtbl.
  *
  * @param stream  the replay stream
  */
@@ -2862,12 +2862,12 @@ struct sGM_23C0D0 {
 };
 
 /**
- * Starts the point-target event of handler 7 (vtable D_0047CC60; events 9-11) at its location.
+ * Starts the point-target event of handler 7 (vtable cGMPointHandler_vtbl; events 9-11) at its location.
  *
  * Event 9, 10 or 11 maps to location 14, 15 or 16 (next locations 5, 6, 4). The medal already won (cBEScoreInterface_getBestMedalOnTrack) picks
  * the tier (+0xA); the point target (+0x4) is cBENewRaceInterface_getPeakGoal(race, event, tier) * 100 and the time limit
  * cBENewRaceInterface_getPeakTimeLimit(..) * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot
- * +0x14 (init) of D_0047CC60.
+ * +0x14 (init) of cGMPointHandler_vtbl.
  */
 extern "C" void cGMPointHandler_init(cGMPointHandler* self)
 {
@@ -2974,7 +2974,7 @@ struct sClk_23C2D8 {
  *
  * Did-not-finish or a score below uiPointTarget retries the heat; otherwise the event is done and the rank is 0, 1 or 2
  * against the tier-2 and tier-1 targets (cBENewRaceInterface_getPeakGoal * 100). Always locks the results. Slot +0x44 (raceFinish) of
- * D_0047CC60.
+ * cGMPointHandler_vtbl.
  *
  * @param idx  the rider index
  */
@@ -3032,7 +3032,7 @@ extern "C" float cRiderMetrix_evSplitPoints(void* self, int value);
  *
  * Asks cBENewRaceInterface_getPeakSplitTimePoints for the bonus of checkpoint +0x8 (then advances it) at the tier (+0xA), times 100, and calls
  * cRiderMetrix_evSplitPoints on the first rider's object (+0x790) with its score (+0x198) minus the bonus. Slot +0x34
- * (riderCheckpointHit) of D_0047CC60.
+ * (riderCheckpointHit) of cGMPointHandler_vtbl.
  *
  * @return 1
  */

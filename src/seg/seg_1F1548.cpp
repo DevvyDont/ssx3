@@ -37,16 +37,16 @@ extern char str_PowerUpFXToggles[];
 extern char str_SnowfallToggles[];
 extern char str_SplashToggles[];
 extern char str_PathArrow[];
-extern char D_00487DC8[];
-extern char D_00487DF8[];
-extern char D_00487E28[];
-extern char D_00487E58[];
-extern char D_00487E88[];
-extern char D_00487EB8[];
-extern char D_00487FA8[];
-extern char D_00488050[];
-extern char D_004882B0[];
-extern char D_00488330[];
+extern char cFlags_vtbl[];
+extern char cSnowSurface_vtbl[];
+extern char cShadow_vtbl[];
+extern char cHeightFog_vtbl[];
+extern char cDepthFog_vtbl[];
+extern char cLightGlow_vtbl[];
+extern char cBoardTrail_vtbl[];
+extern char cSnowfallToggles_vtbl[];
+extern char cSplashToggles_vtbl[];
+extern char cPowerUpFXToggles_vtbl[];
 extern char cScreenTint_vtbl[];
 extern char cVisualEffectsTest_vtbl[];
 extern char cTube_vtbl[];
@@ -75,19 +75,19 @@ extern "C" cPS2VisualEffectsMan* cPS2VisualEffectsMan_cPS2VisualEffectsMan(cPS2V
     self->mVtbl = (void**)cPS2VisualEffectsMan_vtbl;
     { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = cRenderToggles_vtbl; (&self->m_RenderToggles)[0] = (cRenderToggles*)effect; }
     { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = cVisualEffectsTest_vtbl; (&self->m_RenderToggles)[1] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = D_00487EB8; (&self->m_RenderToggles)[2] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = cLightGlow_vtbl; (&self->m_RenderToggles)[2] = (cRenderToggles*)effect; }
     { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = cPlants_vtbl; (&self->m_RenderToggles)[3] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = D_00487E88; (&self->m_RenderToggles)[4] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_HeightFog, 0, 0); *(char**)effect = D_00487E58; (&self->m_RenderToggles)[5] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = cDepthFog_vtbl; (&self->m_RenderToggles)[4] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_HeightFog, 0, 0); *(char**)effect = cHeightFog_vtbl; (&self->m_RenderToggles)[5] = (cRenderToggles*)effect; }
     (&self->m_RenderToggles)[6] = (cRenderToggles*)cDetailSystem_cDetailSystem(cMemMan_alloc(4, str_DetailSystem, 0, 0));
     { void* effect = cMemMan_alloc(4, str_ScreenTint, 0, 0); *(char**)effect = cScreenTint_vtbl; (&self->m_RenderToggles)[7] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_Shadow_c, 0, 0); *(char**)effect = D_00487E28; (&self->m_RenderToggles)[8] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_SnowSurface, 0, 0); *(char**)effect = D_00487DF8; (&self->m_RenderToggles)[9] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_BoardTrail, 0, 0); *(char**)effect = D_00487FA8; (&self->m_RenderToggles)[10] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_Flags_b, 0, 0); *(char**)effect = D_00487DC8; (&self->m_RenderToggles)[11] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_PowerUpFXToggles, 0, 0); *(char**)effect = D_00488330; (&self->m_RenderToggles)[12] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_SnowfallToggles, 0, 0); *(char**)effect = D_00488050; (&self->m_RenderToggles)[13] = (cRenderToggles*)effect; }
-    { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = D_004882B0; (&self->m_RenderToggles)[14] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_Shadow_c, 0, 0); *(char**)effect = cShadow_vtbl; (&self->m_RenderToggles)[8] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_SnowSurface, 0, 0); *(char**)effect = cSnowSurface_vtbl; (&self->m_RenderToggles)[9] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_BoardTrail, 0, 0); *(char**)effect = cBoardTrail_vtbl; (&self->m_RenderToggles)[10] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_Flags_b, 0, 0); *(char**)effect = cFlags_vtbl; (&self->m_RenderToggles)[11] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_PowerUpFXToggles, 0, 0); *(char**)effect = cPowerUpFXToggles_vtbl; (&self->m_RenderToggles)[12] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_SnowfallToggles, 0, 0); *(char**)effect = cSnowfallToggles_vtbl; (&self->m_RenderToggles)[13] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = cSplashToggles_vtbl; (&self->m_RenderToggles)[14] = (cRenderToggles*)effect; }
     { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = cTube_vtbl; (&self->m_RenderToggles)[15] = (cRenderToggles*)effect; }
     (&self->m_RenderToggles)[16] = (cRenderToggles*)cPathArrow_cPathArrow(cMemMan_alloc(4, str_PathArrow, 0, 0));
     return (self);

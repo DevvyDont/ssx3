@@ -140,12 +140,12 @@ extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 
 /**
- * Destroys the one-option overlay menu whose vtable is D_00474D30.
+ * Destroys the one-option overlay menu whose vtable is cOVTemplate_Simple_vtbl.
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00474D30. Its onCreateScreen cOVTemplate_Simple_onCreateScreen fills the single "overlayOpt"
- * entry; nothing outside this unit stores D_00474D30.
+ * own. It is the destructor slot (+0xC) of cOVTemplate_Simple_vtbl. Its onCreateScreen cOVTemplate_Simple_onCreateScreen fills the single "overlayOpt"
+ * entry; nothing outside this unit stores cOVTemplate_Simple_vtbl.
  *
  * @param ovState  the object being destroyed
  */
@@ -159,13 +159,13 @@ extern "C" void cOVTemplate_Simple__cOVTemplate_Simple(cOVTemplate_Simple* ovSta
 INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_Simple_cOVTemplate_Simple);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
-extern char D_00474D30[];
+extern char cOVTemplate_Simple_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
  * Constructs the one-option overlay menu (onCreateScreen cOVTemplate_Simple_onCreateScreen) for engine @p engine and overlay id @p overlayId;
- * installs D_00474D30.
+ * installs cOVTemplate_Simple_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -185,7 +185,7 @@ extern "C" void *cOVTemplate_Simple_cOVTemplate_Simple(cOVState* ovState, int en
     ovState->mAllowPauseMenu = 0;
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)D_00474D30;
+    VPTR_OF(cListNode, ovState) = (void**)cOVTemplate_Simple_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }

@@ -2253,7 +2253,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the online race handler (handler 8, vtable D_0047CED0): resets the vtable to the base handler vtable
+ * Destroys the online race handler (handler 8, vtable cGMMPRaceHandler_vtbl): resets the vtable to the base handler vtable
  * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -2275,7 +2275,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the two-player online event handler (handler 9, vtable D_0047CE68): resets the vtable to the base handler
+ * Destroys the two-player online event handler (handler 9, vtable cGMMPSlopeHandler_vtbl): resets the vtable to the base handler
  * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -2293,9 +2293,9 @@ extern "C" void cGMMPSlopeHandler__cGMMPSlopeHandler(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: handler 9 (the two-player online event, vtable D_0047CE68) saves nothing into a replay frame.
+ * Does nothing: handler 9 (the two-player online event, vtable cGMMPSlopeHandler_vtbl) saves nothing into a replay frame.
  *
- * Slot +0x54 (writeToReplayFrame) of D_0047CE68.
+ * Slot +0x54 (writeToReplayFrame) of cGMMPSlopeHandler_vtbl.
  */
 void cGMMPSlopeHandler_writeToReplayFrame(void* vself)
 {
@@ -2307,9 +2307,9 @@ void cGMMPSlopeHandler_writeToReplayFrame(void* vself)
 INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: handler 9 (the two-player online event, vtable D_0047CE68) restores nothing from a replay frame.
+ * Does nothing: handler 9 (the two-player online event, vtable cGMMPSlopeHandler_vtbl) restores nothing from a replay frame.
  *
- * Slot +0x5C (readFromReplayFrame) of D_0047CE68.
+ * Slot +0x5C (readFromReplayFrame) of cGMMPSlopeHandler_vtbl.
  */
 void cGMMPSlopeHandler_readFromReplayFrame(void* vself)
 {
@@ -2413,7 +2413,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the point-target event handler (handler 7, vtable D_0047CC60): resets the vtable to the base handler vtable
+ * Destroys the point-target event handler (handler 7, vtable cGMPointHandler_vtbl): resets the vtable to the base handler vtable
  * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -3492,11 +3492,11 @@ extern "C" int func_002453E0(void* self, int menu, int event)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameLoadState__cGameLoadState);
 #ifdef SKIP_ASM
-extern void* D_0047C948[];
+extern void* cGameLoadState_vtbl[];
 extern "C" void* cUIState__cUIState(void* self);
 
 /**
- * Destroys the match / event loading state: installs its vtable D_0047C948 at +0x8 and runs the UI-state base
+ * Destroys the match / event loading state: installs its vtable cGameLoadState_vtbl at +0x8 and runs the UI-state base
  * destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register.
@@ -3505,7 +3505,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cGameLoadState__cGameLoadState(cGameLoadState* self)
 {
-    VPTR_OF(cListNode, self) = (void**)D_0047C948;
+    VPTR_OF(cListNode, self) = (void**)cGameLoadState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3528,7 +3528,7 @@ extern char str_99QPEvent[];
  *
  * Fetches the BE interface 0 first (result unused), adds the screen to the UI engine (+0x10) with this state as owner,
  * keeps it at +0x40 and plays its first frame, then fills both players' panels with func_00246CF8(self, 0) and (self,
- * 1). Slot +0x24 (onCreateScreen) of D_0047C948.
+ * 1). Slot +0x24 (onCreateScreen) of cGameLoadState_vtbl.
  */
 extern "C" void cGameLoadState_onCreateScreen(cGameLoadState* self)
 {
@@ -3566,7 +3566,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  *
  * Formats cAppMan_TheAppMan's float at +0x38 as an int with str_pct_3dpct_pct into the text widget hashed from
  * str_pct on the screen at +0x40; with @p refresh set it also runs func_00246CF8 for players 0 and 1. Slot +0x3C
- * (onGainTransition) of D_0047C948.
+ * (onGainTransition) of cGameLoadState_vtbl.
  *
  * @param refresh  non-zero to refresh both player panels
  * @return 0
@@ -3599,7 +3599,7 @@ extern "C" void cGameLoadState_widgetCreateMultiP(void* self, int a1);
 /**
  * Creates a widget of the match / event loading screen: cGameLoadState_widgetCreateMultiP when newRace.cGamePath is 2, else cGameLoadState_widgetCreateQP.
  *
- * Fetches the BE interface 0 first (result unused). Slot +0x94 (onWidgetCreate) of D_0047C948.
+ * Fetches the BE interface 0 first (result unused). Slot +0x94 (onWidgetCreate) of cGameLoadState_vtbl.
  *
  * @param widget  the widget being created (passed on)
  */
@@ -3618,11 +3618,11 @@ extern "C" void cGameLoadState_onWidgetCreate(cGameLoadState* self, int widget)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge__cGameLoadStateOutLodge);
 #ifdef SKIP_ASM
-extern void* D_0047C878[];
+extern void* cGameLoadStateOutLodge_vtbl[];
 extern "C" void* cUIState__cUIState(void* self);
 
 /**
- * Destroys the leaving-the-lodge loading state: installs its vtable D_0047C878 at +0x8 and runs the UI-state base
+ * Destroys the leaving-the-lodge loading state: installs its vtable cGameLoadStateOutLodge_vtbl at +0x8 and runs the UI-state base
  * destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register.
@@ -3631,7 +3631,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cGameLoadStateOutLodge__cGameLoadStateOutLodge(cGameLoadStateOutLodge* self)
 {
-    VPTR_OF(cListNode, self) = (void**)D_0047C878;
+    VPTR_OF(cListNode, self) = (void**)cGameLoadStateOutLodge_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3646,7 +3646,7 @@ extern char str_118loadoutlodge[];
 
 /**
  * Creates the leaving-the-lodge loading screen ("118loadoutlodge"): adds it to the UI engine (+0x10) with this state as
- * owner, keeps it at +0x40 and plays its first frame. Slot +0x24 (onCreateScreen) of D_0047C878.
+ * owner, keeps it at +0x40 and plays its first frame. Slot +0x24 (onCreateScreen) of cGameLoadStateOutLodge_vtbl.
  */
 extern "C" void cGameLoadStateOutLodge_onCreateScreen(cGameLoadStateOutLodge* self)
 {
@@ -3664,7 +3664,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the leaving-the-lodge loading state creates no widgets of its own. Slot +0x94 (onWidgetCreate) of
- * D_0047C878.
+ * cGameLoadStateOutLodge_vtbl.
  */
 void cGameLoadStateOutLodge_onWidgetCreate(void* vself)
 {
@@ -3684,7 +3684,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * Shows the loading percentage on the leaving-the-lodge loading screen.
  *
  * Formats cAppMan_TheAppMan's float at +0x38 as an int with str_pct_3dpct_pct into the text widget hashed from
- * str_pct on the screen at +0x40. Slot +0x3C (onGainTransition) of D_0047C878.
+ * str_pct on the screen at +0x40. Slot +0x3C (onGainTransition) of cGameLoadStateOutLodge_vtbl.
  *
  * @return 0
  */

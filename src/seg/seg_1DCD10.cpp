@@ -572,7 +572,7 @@ static inline int outcode_C190(const sCtx_C190* g, const sV4_C190& v)
  * Each remaining point gets a sort key in cFogParticleMan_mSortKey (index and depth) and a sprite in mSprites: corners from the
  * point's size (+0x18) scaled by +0x6AF0 / +0x6B04, colour alpha * 128 then the point's colour * 128. With @p clip set,
  * a sprite whose two corners lie outside the same clip edge is dropped. miNumSphere counts the sprites; nothing checks
- * it against the 256 sprites of the manager. It is word 5 (slot 2) of D_004882E0.
+ * it against the 256 sprites of the manager. It is word 5 (slot 2) of cPS2FogParticleMan_vtbl.
  *
  * @param out  the fog-sprite manager
  * @param objs  the instances
@@ -701,7 +701,7 @@ static inline int FBits_C7B0(float f) { return *(int*)&f; }
 /**
  * Draws the queued fog sprites as GS sprite primitives, far to near, in DMA chunks.
  *
- * Called through slot 3 of the cPS2FogParticleMan vtable (D_004882E0) by cFogParticleMan_render after it has sorted the
+ * Called through slot 3 of the cPS2FogParticleMan vtable (cPS2FogParticleMan_vtbl) by cFogParticleMan_render after it has sorted the
  * sort keys in cFogParticleMan_mSortKey. Each chunk holds at most (D_004A4474 buffer size - 4) * 2 / 5 - 1 sprites. For a chunk it
  * opens a packet at the graphics manager's current buffer address (+0x5A00) with func_0038F460, writes a DMA cnt tag, a
  * VIF DIRECT code, a GIF tag that sets PRIM to 0x56 (textured, alpha-blended sprite) and a REGLIST GIF tag of 5

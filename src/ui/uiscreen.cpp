@@ -252,7 +252,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self);
 void cUIThread_deleteThread(void* self);
 extern char str_UIThread[];
-extern void* D_004946A0[];
+extern void* cUIThread_vtbl[];
 
 // cUIThread (On Tour member names): a cListNode (prev, next, vptr) plus frame state.
 struct cUIThread_C870 {
@@ -305,7 +305,7 @@ void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType
     pNewThread->mIsPrimary = 0;
     pNewThread->setFrameIncrement(1);
     pNewThread->setStopFrameNumber(0xFFFF);
-    pNewThread->vt = D_004946A0;
+    pNewThread->vt = cUIThread_vtbl;
     pNewThread->setCurrentFrameNumber(frame);
     pNewThread->setLastFrameNumber(0xFFFF);
     pNewThread->mpNext = pNewThread;

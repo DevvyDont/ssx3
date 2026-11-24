@@ -87,7 +87,7 @@ CHECK_SIZE(cUIScreen, 0xD4);
 //
 // Size 0x14: [R] cUIScreen_playFrame: cMemMan_alloc(0x14, "UIThread") and the inlined ctor (stores up to 0x13, the
 // flag byte, through the word at 0x10); [O] On Tour's class is 0x14 with the same members at the same offsets.
-// Base: cListNode (mpPrev / mpNext, vptr at 0x8). Vtable cUIThread_vtbl D_004946A0 (3 slots: 1 dtor, 2 / 3
+// Base: cListNode (mpPrev / mpNext, vptr at 0x8). Vtable cUIThread_vtbl cUIThread_vtbl (3 slots: 1 dtor, 2 / 3
 // cListNode_traverseFlat / traverseRecurse); the dtor stores cListNode_vtbl and runs cListNode_destroyListNode.
 // The two flags are On Tour's `unsigned char mIsActive : 1, mIsPrimary : 1` at 0x13, but retail reads and writes them
 // as bits 24 / 25 of the word at 0x10 (lw / and / or / sw), so they are int bitfields here, as in src/ui/uiscreen.cpp's
@@ -101,7 +101,7 @@ struct cUIThread {
                                     //       cList_addToEnd(&screen->mThreads)
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto; [U] cUIScreen_getPrimaryThread walks the
                                     //       list through it
-    void** mVtbl;                   // 0x008 [R] cUIThread_vtbl D_004946A0 (playFrame), cListNode_vtbl (dtor); [U]
+    void** mVtbl;                   // 0x008 [R] cUIThread_vtbl cUIThread_vtbl (playFrame), cListNode_vtbl (dtor); [U]
                                     //       deleteThread calls slot 1 (dtor, flags 3)
     // --- cUIThread
     unsigned short mCurrentFrameNumber; // 0x00C [O]; [R] playFrame's frame (sh)

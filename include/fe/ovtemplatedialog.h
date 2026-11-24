@@ -105,7 +105,7 @@ CHECK_SIZE(cPDATemplate, 0x48);
 // (fe/ovstate.h) and the ctor writes nothing past mOVID (0x98). Retail never calls the out-of-line ctor.
 // Base: cOVState (fe/ovstate.h, 0x9C) : cUIState : cListNode (vptr at 0x8). The ctor runs cUIState_cUIState, the
 // inlined cOVState ctor (mOVID, the three bools, cOVState_vtbl, mszChatBuff = " "), then stores cOVTemplate_Simple_vtbl
-// (D_00474D30, 25 slots: 1 dtor, 4 onCreateScreen, 19 onWidgetEvent, 20 onWidgetMenu, 25 cOVState_allowPauseMenu); the
+// (cOVTemplate_Simple_vtbl, 25 slots: 1 dtor, 4 onCreateScreen, 19 onWidgetEvent, 20 onWidgetMenu, 25 cOVState_allowPauseMenu); the
 // dtor stores cOVState_vtbl and runs cUIState__cUIState.
 // Derives from cOVState (fe/ovstate.h); its own members at their retail offsets. fe/ovstate.h has the inherited fields'
 // full evidence. Evidence tags: [R] retail's ctors / dtor; [P] the July 2003 preview (fe/ovstate.h); [U] how retail
@@ -113,7 +113,7 @@ CHECK_SIZE(cPDATemplate, 0x48);
 
 struct cOVTemplate_Simple : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] cOVTemplate_Simple_vtbl D_00474D30 (ctor), cOVState_vtbl (dtor)
+    //   [R] cOVTemplate_Simple_vtbl cOVTemplate_Simple_vtbl (ctor), cOVState_vtbl (dtor)
     // cOVTemplate_Simple's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen looks "overlayMenu" and "overlayOpt0" ... "overlayOpt4" up on it
     // cOVState (fe/ovstate.h, 0x9C)

@@ -5,11 +5,11 @@
 // d:/ssx/code/source/visualfx/fog.cpp: the preview's asserts pair the sort comparator cFogParticleMan__FogSortFuc with it; retail
 // unit seg/seg_1DCD10, plus the two destructors in src/visualfx/worldlightman.cpp). One instance, cGame::FogMan
 // (main/game.h +0x18): cMemMan_alloc(0x3010, "cPS2FogParticleMan") + cFogParticleMan ctor cFogParticleMan_cFogParticleMan + the
-// cPS2FogParticleMan vtable D_004882E0 stored inline + 256 sprites constructed at +0x10 (cGame_loadTrack).
+// cPS2FogParticleMan vtable cPS2FogParticleMan_vtbl stored inline + 256 sprites constructed at +0x10 (cGame_loadTrack).
 //   cFogParticleMan     0x8 (On Tour 0x8): miNumSphere + vptr. Vtable cFogParticleMan_vtbl: 1 dtor cFogParticleMan__cFogParticleMan, 2
 //                       addFogInstance and 3 platformrender pure (__pure_virtual). render (cFogParticleMan_render) is
 //                       non-virtual. Static mSortKey = cFogParticleMan_mSortKey (0x800 bytes: 256 tFogSortKey; On Tour has 128).
-//   cPS2FogParticleMan  0x3010: + 256 tFogSprite. Vtable D_004882E0: 1 dtor cPS2FogParticleMan__cPS2FogParticleMan, 2 addFogInstance
+//   cPS2FogParticleMan  0x3010: + 256 tFogSprite. Vtable cPS2FogParticleMan_vtbl: 1 dtor cPS2FogParticleMan__cPS2FogParticleMan, 2 addFogInstance
 //                       cPS2FogParticleMan_addFogInstance, 3 platformrender cPS2FogParticleMan_platformrender.
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] ctor/dtors/allocation; [U] matched retail use; [O] SSX On Tour's

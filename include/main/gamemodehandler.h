@@ -98,11 +98,11 @@ CHECK_OFFSET(cGMRaceHandler, mLineup, 0x10);
 CHECK_OFFSET(cGMRaceHandler, uiTime, 0x58);
 CHECK_SIZE(cGMRaceHandler, 0xD0);
 
-// cGMMPRaceHandler: the multiplayer race. Vtable 0x0047CED0 (D_0047CED0): init cGMMPRaceHandler_init, raceFinish
+// cGMMPRaceHandler: the multiplayer race. Vtable 0x0047CED0 (cGMMPRaceHandler_vtbl): init cGMMPRaceHandler_init, raceFinish
 // cGMMPRaceHandler_raceFinish, writeToReplayFrame cGMMPRaceHandler_writeToReplayFrame / readFromReplayFrame cGMMPRaceHandler_readFromReplayFrame (the whole 0x2C bytes);
 // dtor cGMMPRaceHandler__cGMMPRaceHandler.
 struct cGMMPRaceHandler : public cGameModeHandler {
-    // 0x00: the vptr: [R] D_0047CED0
+    // 0x00: the vptr: [R] cGMMPRaceHandler_vtbl
     unsigned int uiTime[10];        // 0x04 [O] uiTime (On Tour [62]); [U] init fills 9s (40 bytes), raceFinish stores
                                     //      each rider's finish tick (360000 = DNF) and copies it to D_00536640
 };
@@ -111,11 +111,11 @@ CHECK_OFFSET(cGMMPRaceHandler, uiTime, 0x04);
 CHECK_SIZE(cGMMPRaceHandler, 0x2C);
 
 // cGMMPSlopeHandler: the two-player online event (online events 1-3; On Tour: the multiplayer slope event). Vtable
-// 0x0047CE68 (D_0047CE68): init cGMMPSlopeHandler_init, riderCheckpointHit cGMMPSlopeHandler_riderCheckpointHit, raceFinish cGMMPSlopeHandler_raceFinish,
+// 0x0047CE68 (cGMMPSlopeHandler_vtbl): init cGMMPSlopeHandler_init, riderCheckpointHit cGMMPSlopeHandler_riderCheckpointHit, raceFinish cGMMPSlopeHandler_raceFinish,
 // writeToReplayFrame cGMMPSlopeHandler_writeToReplayFrame / readFromReplayFrame cGMMPSlopeHandler_readFromReplayFrame (empty); dtor cGMMPSlopeHandler__cGMMPSlopeHandler. On Tour's class
 // overrides exactly these five.
 struct cGMMPSlopeHandler : public cGameModeHandler {
-    // 0x00: the vptr: [R] D_0047CE68
+    // 0x00: the vptr: [R] cGMMPSlopeHandler_vtbl
     short LastCheckpointHit[2];     // 0x04 [O] short LastCheckpointHit[2]; [R] init clears both (sh 0x4 / 0x6);
                                     //      [U] riderCheckpointHit counts per player and compares with the other
 };
@@ -141,11 +141,11 @@ CHECK_OFFSET(cGMTimeHandler, uiTrackProgress, 0x08);
 CHECK_OFFSET(cGMTimeHandler, mCurrentDifficulty, 0x0A);
 CHECK_SIZE(cGMTimeHandler, 0xC);
 
-// cGMPointHandler: the points peak challenge (events 9-11). Vtable 0x0047CC60 (D_0047CC60): init cGMPointHandler_init,
+// cGMPointHandler: the points peak challenge (events 9-11). Vtable 0x0047CC60 (cGMPointHandler_vtbl): init cGMPointHandler_init,
 // riderCheckpointHit cGMPointHandler_riderCheckpointHit, raceFinish cGMPointHandler_raceFinish; dtor cGMPointHandler__cGMPointHandler. On Tour's class overrides exactly
 // these three.
 struct cGMPointHandler : public cGameModeHandler {
-    // 0x00: the vptr: [R] D_0047CC60
+    // 0x00: the vptr: [R] cGMPointHandler_vtbl
     int uiScoreToBeat;              // 0x04 [O] (int in On Tour); [R] init: cBENewRaceInterface_getPeakGoal(..) * 100,
                                     //      also cGameModeMan's uiPointTarget
     unsigned short uiTrackProgress; // 0x08 [O]; [R] init 0; [U] riderCheckpointHit passes it on and increments it

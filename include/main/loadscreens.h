@@ -240,7 +240,7 @@ CHECK_SIZE(cFELoadStateInLodge, 0x48);
 //
 // Size 0x4C: [R] cGameLoadScreen_load: operator new(0x4C, "cGameLoadState") + cUIState_cUIState(mem, mpUI), vtable,
 // word 0x48 = 0, then 0x48 = the load screen.
-// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C948 (24 slots: 1 dtor, 4 onCreateScreen,
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable cGameLoadState_vtbl (24 slots: 1 dtor, 4 onCreateScreen,
 // 7 onGainTransition, 18 onWidgetCreate).
 // Derives from cUIState (ui/uistate.h). Evidence tags: [R] retail's dtor and the inlined ctor / allocation in
 // cGameLoadScreen_load; [U] how retail code uses the field (src/main/ssxappdtor.cpp, src/fe/festateloadhint.cpp);
@@ -248,7 +248,7 @@ CHECK_SIZE(cFELoadStateInLodge, 0x48);
 
 struct cGameLoadState : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] D_0047C948 (cGameLoadScreen_load, dtor cGameLoadState__cGameLoadState)
+    //   [R] cGameLoadState_vtbl (cGameLoadScreen_load, dtor cGameLoadState__cGameLoadState)
     // cGameLoadState's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds the screen through it
     //   mpScreen: [U] onCreateScreen stores the screen; onGainTransition looks "%" up on it
@@ -272,13 +272,13 @@ CHECK_SIZE(cGameLoadState, 0x4C);
 //
 // Size 0x48: [R] cGameLoadScreen_load: operator new(0x48, "cGameLoadStateOutLodge") + cUIState_cUIState(mem, mpUI) +
 // vtable (no own members).
-// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C878 (24 slots: 1 dtor, 4 onCreateScreen,
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable cGameLoadStateOutLodge_vtbl (24 slots: 1 dtor, 4 onCreateScreen,
 // 7 onGainTransition, 18 onWidgetCreate).
 // Derives from cUIState (ui/uistate.h). Evidence tags as for cGameLoadState.
 
 struct cGameLoadStateOutLodge : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] D_0047C878 (cGameLoadScreen_load, dtor cGameLoadStateOutLodge__cGameLoadStateOutLodge)
+    //   [R] cGameLoadStateOutLodge_vtbl (cGameLoadScreen_load, dtor cGameLoadStateOutLodge__cGameLoadStateOutLodge)
     // cGameLoadStateOutLodge's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "118loadoutlodge" through it
     //   mpScreen: [U] onCreateScreen stores the screen; onGainTransition looks "%" up on it

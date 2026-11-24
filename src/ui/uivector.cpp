@@ -3512,7 +3512,7 @@ extern void* cListNode_vtbl[];
  * Destroys a cUIThread: puts back cListNode_vtbl, unlinks the node from its list with cListNode_destroyListNode and
  * frees it with operator_delete when bit 0 of @p flags is set.
  *
- * It is slot 1 (the destructor) of D_004946A0, the vtable cUIScreen_playFrame gives each "UIThread" it creates.
+ * It is slot 1 (the destructor) of cUIThread_vtbl, the vtable cUIScreen_playFrame gives each "UIThread" it creates.
  *
  * @param flags  bit 0 set to free the memory
  */

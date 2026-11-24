@@ -16,7 +16,7 @@ extern "C" void* func_0019CDF0(void* self);
 // PORT: called with an extra int in $a1 here; cSimpleCamera_init's body is (self, x, y, z). Bound by asm label.
 void cSimpleCamera_init_i(void* self, int a1, float x, float y, float z) __asm__("cSimpleCamera_init");
 extern void* cFE_vtbl[];
-extern void* D_0046D8D8[];
+extern void* cFECamera_vtbl[];
 extern char str_UIEngine[];
 extern char str_FXLoader_FE[];
 
@@ -46,7 +46,7 @@ extern "C" void* cFE_cFE(cFE* self)
     cFadeScreen_cFadeScreen(self);
     self->mVtbl = cFE_vtbl;
     cSimpleCamera_cSimpleCamera(&self->mCamera);
-    self->mCamera.mVtbl = D_0046D8D8;
+    self->mCamera.mVtbl = cFECamera_vtbl;
     cFERiderManager_cFERiderManager(&self->mRiderManager);
     func_0019CDF0(self->mBoltFileManager);
     self->mpUI = (cUIEngine*)(new (str_UIEngine, 0, 0) cFEObjK1956F8_70);

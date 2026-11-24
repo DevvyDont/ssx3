@@ -4,7 +4,7 @@
 // cTrackPath: one track path of the path file (the race line a rider follows) - a cPath (path/basepath.h) plus the
 // distance left from its start to the finish (BaseDistanceLeft): getEventsInRange / isForkInPath take distances left
 // and turn them into path distances (BaseDistanceLeft - d) before calling cPath's. cPathSys::TrackPaths (path/pathsys.h) is
-// the array cPathSys_loadTrackPaths allocates ("TrackPaths") and builds with the inlined array ctor (vtable D_00481448
+// the array cPathSys_loadTrackPaths allocates ("TrackPaths") and builds with the inlined array ctor (vtable cTrackPath_vtbl
 // at +0x34), then cPath_initPath fills each one (populateDataWithDefaults / populateData: slots 3 / 4).
 // cRider::TrackPath (ai/rider.h) points to one; the preview's cRider::getTrackPath returns it.
 // EA's source: d:/ssx/code/source/path/trackpath.cpp (preview assert path). Retail code: unit bx/bxstringctor
@@ -13,7 +13,7 @@
 // Size 0x3C: [R] cPathSys_loadTrackPaths steps the array 0x3C (its element view sPathB310 in src/path/pathsys.cpp: vptr
 // 0x34, word 0x38); [O] On Tour's cTrackPath is 0x3C (BaseDistanceLeft 0x38).
 // Base: cPath (0x00-0x38, path/basepath.h, copied inline with its names; cPath's vptr at 0x34 is the only one).
-// Vtable D_00481448 (cTrackPath's; preview _vt$10cTrackPath; 4 slots: 1 cTrackPath_getEventsInRange,
+// Vtable cTrackPath_vtbl (cTrackPath's; preview _vt$10cTrackPath; 4 slots: 1 cTrackPath_getEventsInRange,
 // 2 cTrackPath_isForkInPath, 3 cTrackPath_populateDataWithDefaults, 4 cTrackPath_populateData).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
@@ -39,7 +39,7 @@ struct cTrackPath {
     tPathNode* Nodes;               // 0x018 [O]; [U] initPath, getLength / getPathPos / getPathHeading / intersectPath
     float MinBound[3];              // 0x01C [O] t3Vector; [U] initPath, getProximity / isPathInBox
     float MaxBound[3];              // 0x028 [O] t3Vector; [U] initPath, getProximity / isPathInBox
-    void** mVtbl;                   // 0x034 [R] D_00481448 (the inlined array ctor in cPathSys_loadTrackPaths);
+    void** mVtbl;                   // 0x034 [R] cTrackPath_vtbl (the inlined array ctor in cPathSys_loadTrackPaths);
                                     //       [U] initPath calls slots 3 / 4 (lw 0x34)
     // --- cTrackPath
     float BaseDistanceLeft;         // 0x038 [O]; [P] getBaseDistanceLeft (lwc1 0x38); [U] populateDataWithDefaults = 0

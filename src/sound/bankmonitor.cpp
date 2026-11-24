@@ -4725,7 +4725,7 @@ extern "C" void func_002B1A70(void) {
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSongConfiguration_cSongConfiguration);
 #ifdef SKIP_ASM
-extern char D_00483980[];
+extern char cSongConfiguration_vtbl[];
 extern unsigned char D_004A35A8[];
 
 struct cSongConfiguration_cSongConfiguration_sElem20 {
@@ -4736,7 +4736,7 @@ struct cSongConfiguration_cSongConfiguration_sElem20 {
 /**
  * Constructs a song configuration with the music.inf defaults.
  *
- * Stores the vtable D_00483980 and sets the defaults a music.inf section can override: no bank data, 4 beats per
+ * Stores the vtable cSongConfiguration_vtbl and sets the defaults a music.inf section can override: no bank data, 4 beats per
  * measure, 2 measures per bar, 4 phrases per bank, 8 beats per phrase, phrase align 16, delay count 0 / feedback 90 /
  * time 100 / level 50, path and async levels 100, 120 BPM, duck to loops on, mSedValue and mPreview -1, mLowPass
  * 0xFFFF, mSongBig 1, and empties the path strings (first byte of D_004A35A8).
@@ -4745,7 +4745,7 @@ struct cSongConfiguration_cSongConfiguration_sElem20 {
  */
 extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
 {
-    self->mVtbl = (void**)D_00483980;
+    self->mVtbl = (void**)cSongConfiguration_vtbl;
     self->mNumBankData = 0;
     self->mBeatsPerMeasure = 4;
     self->mMeasuresPerBar = 2;
@@ -4777,10 +4777,10 @@ extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSongConfiguration__cSongConfiguration);
 #ifdef SKIP_ASM
-extern char D_00483980[];
+extern char cSongConfiguration_vtbl[];
 
 /**
- * Destroys a cSongConfiguration: restores its vptr (D_00483980) and frees it when bit 0 of flags is set.
+ * Destroys a cSongConfiguration: restores its vptr (cSongConfiguration_vtbl) and frees it when bit 0 of flags is set.
  *
  * Virtual slot 1 of _vt$18cSongConfiguration; cMusicSys's destructor calls it with 3 for each song.
  *
@@ -4788,7 +4788,7 @@ extern char D_00483980[];
  */
 extern "C" void cSongConfiguration__cSongConfiguration(cSongConfiguration* self, int flags)
 {
-    self->mVtbl = (void**)D_00483980;
+    self->mVtbl = (void**)cSongConfiguration_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }

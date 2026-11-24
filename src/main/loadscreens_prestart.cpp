@@ -945,9 +945,9 @@ extern char str_cGameLoadStateOutLodge[];
 extern char str_cGameLoadStateConquer[];
 extern char str_cGameLoadState[];
 extern char cFEInput_vtbl[];
-extern char D_0047C878[];
+extern char cGameLoadStateOutLodge_vtbl[];
 extern char D_0047C7A8[];
-extern char D_0047C948[];
+extern char cGameLoadState_vtbl[];
 
 
 struct sNode_2E20 {
@@ -975,7 +975,7 @@ struct cLoadItemA_2E20 {
     cLoadItemA_2E20(void* ui)
     {
         cUIState_cUIState(this, ui);
-        *(void**)(pad + 8) = D_0047C878;
+        *(void**)(pad + 8) = cGameLoadStateOutLodge_vtbl;
         gInLodge = 0;
     }
 };
@@ -996,7 +996,7 @@ struct cLoadItemC_2E20 {
     cLoadItemC_2E20(void* ui)
     {
         cUIState_cUIState(this, ui);
-        *(void**)(pad + 8) = D_0047C948;
+        *(void**)(pad + 8) = cGameLoadState_vtbl;
         owner = 0;
     }
 };
@@ -1007,10 +1007,10 @@ struct cLoadItemC_2E20 {
  * Calls GrMan's InitTextures (slot 44) with 0x100 and cBE_getInterface (result unused), builds a 0x70-byte UI engine
  * (tag "UIEngine", cUIEngine_cUIEngine) into +0xC, loads "data/ui/gl", gives it SSXApp's Fonts and FELocale and a 0x1C-byte
  * "GLUIInput" input. Then pushes one 0x48-byte state built on cUIState_cUIState:
- * - "cGameLoadStateOutLodge" (vtable D_0047C878, clears gInLodge) when gInLodge is set, or on the career path
+ * - "cGameLoadStateOutLodge" (vtable cGameLoadStateOutLodge_vtbl, clears gInLodge) when gInLodge is set, or on the career path
  *   (cGamePath 0) in game mode 5 or 6;
  * - "cGameLoadStateConquer" (D_0047C7A8, clears D_004A19DC) on the career path in any other mode;
- * - otherwise "cGameLoadState" (D_0047C948) with this screen as its owner (+0x48), after
+ * - otherwise "cGameLoadState" (cGameLoadState_vtbl) with this screen as its owner (+0x48), after
  *   cGameLoadScreen_loadTexture(this, 0).
  *
  * Load slot (+0x14) of cGameLoadScreen_vtbl.

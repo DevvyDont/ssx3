@@ -43,7 +43,7 @@ struct cSongConfiguration {
     int mLowPass;            // 0x9C [R] music.inf LOWPASS (ctor 0xFFFF); [U] func_002B21E0 -> func_002B2160 (low-pass cutoff, 0..0xFFFF)
     int mPreview;            // 0xA0 [R] music.inf PREVIEW (ctor -1)
     int mSongBig;            // 0xA4 [R] music.inf SONGBIG (ctor 1); [U] cSongInstance ctor: 1 = "audio/music.big", else "audio/music2.big"
-    void** mVtbl;            // 0xA8 [R] D_00483980 (_vt$18cSongConfiguration: slot 1 = the dtor cSongConfiguration__cSongConfiguration)
+    void** mVtbl;            // 0xA8 [R] cSongConfiguration_vtbl (_vt$18cSongConfiguration: slot 1 = the dtor cSongConfiguration__cSongConfiguration)
 };
 
 // cSongInstance (0xC4): the playing song (cMusicSys::mSongInstance). No vtable.

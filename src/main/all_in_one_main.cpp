@@ -1465,7 +1465,7 @@ extern void* cSimpleCamera_vtbl[];
 /**
  * Destroys the front end's camera: stores cSimpleCamera's vtable at +0x90, then frees the object when asked to.
  *
- * It is slot 1 of D_0046D8D8, the vtable cFE_cFE stores at +0x90 of the camera it builds at +0x10 of the front end; the
+ * It is slot 1 of cFECamera_vtbl, the vtable cFE_cFE stores at +0x90 of the camera it builds at +0x10 of the front end; the
  * derived class adds nothing to destroy, so only the base vtable store is left.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory

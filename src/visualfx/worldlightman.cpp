@@ -2145,7 +2145,7 @@ INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_update__FPv);
 /**
  * Does nothing: the base visual effect's per-frame update.
  *
- * It is the slot after the destructor in cVisualEffect_vtbl and in the effect vtables built on it (D_00487EB8 and others).
+ * It is the slot after the destructor in cVisualEffect_vtbl and in the effect vtables built on it (cLightGlow_vtbl and others).
  */
 void cVisualEffect_update(void* self)
 {
@@ -2878,7 +2878,7 @@ void operator_delete(int*);
  * Destroys the "PowerUpFXToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit
  * 0 of @p flags is set.
  *
- * It is the destructor slot of D_00488330, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cPowerUpFXToggles_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "PowerUpFXToggles".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -2947,7 +2947,7 @@ void operator_delete(int*);
  * Destroys the "SplashToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0
  * of @p flags is set.
  *
- * It is the destructor slot of D_004882B0, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cSplashToggles_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "SplashToggles".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3210,7 +3210,7 @@ void operator_delete(int*);
  * Destroys the "SnowfallToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit
  * 0 of @p flags is set.
  *
- * It is the destructor slot of D_00488050, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cSnowfallToggles_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "SnowfallToggles".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3266,7 +3266,7 @@ void operator_delete(int*);
  * Destroys the "BoardTrail" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
- * It is the destructor slot of D_00487FA8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cBoardTrail_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "BoardTrail".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3340,7 +3340,7 @@ void operator_delete(int*);
  * Destroys the "LightGlow" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
- * It is the destructor slot of D_00487EB8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cLightGlow_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "LightGlow".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3364,7 +3364,7 @@ void operator_delete(int*);
  * Destroys the "DepthFog" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
  * flags is set.
  *
- * It is the destructor slot of D_00487E88, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cDepthFog_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "DepthFog".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3388,7 +3388,7 @@ void operator_delete(int*);
  * Destroys the "HeightFog" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
- * It is the destructor slot of D_00487E58, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cHeightFog_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "HeightFog".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3412,7 +3412,7 @@ void operator_delete(int*);
  * Destroys the "Shadow" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
  * flags is set.
  *
- * It is the destructor slot of D_00487E28, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cShadow_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "Shadow".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3436,7 +3436,7 @@ void operator_delete(int*);
  * Destroys the "SnowSurface" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
- * It is the destructor slot of D_00487DF8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cSnowSurface_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "SnowSurface".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -3460,7 +3460,7 @@ void operator_delete(int*);
  * Destroys the "Flags" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
  * flags is set.
  *
- * It is the destructor slot of D_00487DC8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * It is the destructor slot of cFlags_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
  * effect it allocates as "Flags".
  *
  * @param flags  g++ destructor flags; bit 0 frees the object

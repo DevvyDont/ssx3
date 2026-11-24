@@ -10,7 +10,7 @@
 // in the retail units bx/bxstringctor (0x0026A180..0x0026AD70) and path/pathsys (0x0026C3D0..0x0026C420).
 // Vtable: cPath's own vt_004814A8 (unnamed in symbol_addrs; 4 slots: getEventsInRange, isForkInPath,
 // populateDataWithDefaults = func_0026C410__FPv, populateData = func_0026C418__FPv; no destructor slot); cTrackPath
-// D_00481448 and cAIPath D_00481478 override some. No out-of-line ctor: the array new inlines it.
+// cTrackPath_vtbl and cAIPath cAIPath_vtbl override some. No out-of-line ctor: the array new inlines it.
 // Size 0x38: [R] the vptr is at 0x34 (initPath calls slots 3 / 4 through lw 0x34; the inlined array ctors store the
 // derived vtables at +0x34) and the derived classes' own members start at 0x38 (sPathB310::field_0x38,
 // sPathB410::field_0x38 / 0x3C in path/pathsys.cpp: cTrackPath 0x3C, cAIPath 0x40); [O] On Tour's cPath is 0x38 (data
@@ -48,7 +48,7 @@ struct cPath {
                                     //       isPathInBox read it
     float MaxBound[3];              // 0x028 [O] t3Vector; [U] initPath fills it (&MaxBound); getProximity /
                                     //       isPathInBox read it
-    void** mVtbl;                   // 0x034 [R] vt_004814A8 (cPath), D_00481448 (cTrackPath), D_00481478 (cAIPath) from
+    void** mVtbl;                   // 0x034 [R] vt_004814A8 (cPath), cTrackPath_vtbl (cTrackPath), cAIPath_vtbl (cAIPath) from
                                     //       the inlined ctors; [U] initPath calls populateDataWithDefaults /
                                     //       populateData through it (lw 0x34)
 };

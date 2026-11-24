@@ -445,7 +445,7 @@ extern char str_cWorldSound[];
 extern char str_cPS2FogParticleMan[];
 extern char str_bar_b[];
 extern char str_cam[];
-extern void* D_004882E0[];
+extern void* cPS2FogParticleMan_vtbl[];
 
 extern "C" void* cBXString_cBXString2(cBXString* self, const char* s);
 extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
@@ -570,7 +570,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     }
     cPS2FogParticleMan* obj = (cPS2FogParticleMan*)cMemMan_alloc(12304, str_cPS2FogParticleMan, 0, 0);
     cFogParticleMan_cFogParticleMan(obj);
-    obj->mVtbl = D_004882E0;
+    obj->mVtbl = cPS2FogParticleMan_vtbl;
     new ((char*)&obj->mSprites[0]) sElemFF_F6B0[256];
     ent = ((char*)obj);
     *(void**)&self->LensFxMan = cLensFxMan_construct();

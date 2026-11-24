@@ -5,16 +5,16 @@
 // preview's assert strings; the preview keeps purge__9cCTAction, purge__19cCTActionBoundedCam and
 // purge__15cCTActionSpline as out-of-line inlines). A trigger's enter / exit action says what the chase camera does
 // when a rider enters or leaves the trigger volume; doTriggerAction (camera/trigger/cameratriggerman.cpp) plays it.
-//   cCTAction (0x8)                    Type (eCTActionType), vptr at 0x4; vtable D_0045C2E8 (slot 1 purge, empty)
+//   cCTAction (0x8)                    Type (eCTActionType), vptr at 0x4; vtable cCTAction_vtbl (slot 1 purge, empty)
 //    +- cCTActionSwitchCam (0x10)      Type 0, "Camera Switch Action" (not in this header)
 //    +- cCTActionBoundedCam (0x34)     Type 1, "Camera Bound Action": camera type 91 (cBoundedAlgorithm, or a SUPERPIPE
 //    |                                 chase camera when the bound object is a line)
 //    +- cCTActionSpline (0x20)         Type 2, "Camera Spline Action": camera type 92 (cSplineCamAlgorithm)
 //    +- cCTActionNone (0x8)            Type 3, "Camera Action None" (not in this header)
 // Sizes [R]: get_camaction (camera/trigger/cameratriggerfactory, 0x1712B0) allocates cMemMan_alloc(0x10 / 0x34 / 0x20 /
-// 0x8, tag), builds each action inline (cCTAction vtable D_0045C2E8 first, then the derived vtable, then Type and the
+// 0x8, tag), builds each action inline (cCTAction vtable cCTAction_vtbl first, then the derived vtable, then Type and the
 // defaults) and reads its data (get_cCTActionBoundedCam / get_cCTActionSpline). Retail vtables (1 slot each, purge):
-// D_0045C1D0 cCTActionBoundedCam (cCTActionBoundedCam_purge), D_0045C1B8 cCTActionSpline (cCTActionSpline_purge).
+// cCTActionBoundedCam_vtbl cCTActionBoundedCam (cCTActionBoundedCam_purge), cCTActionSpline_vtbl cCTActionSpline (cCTActionSpline_purge).
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, the cCTAction base written out inline, no C++
 // inheritance. Member names, types and order are On Tour's (offsets equal retail's). Evidence tags:
@@ -33,12 +33,12 @@ struct cCTSpline;
 
 // cCTAction (retail and On Tour 0x8): the base of every action, and the type a trigger's EnterAction / ExitAction and
 // cChaseCameraController_createChaseAlgorithmBlend's action argument have ([O] createChaseAlgorithmBlend(...,
-// cCTAction* action, float blendRate)). [R] get_camaction stores D_0045C2E8 first in every action it builds, then Type;
+// cCTAction* action, float blendRate)). [R] get_camaction stores cCTAction_vtbl first in every action it builds, then Type;
 // the "Camera Action None" action is a bare cCTAction (cMemMan_alloc(0x8)).
 struct cCTAction {
     int Type;                   // 0x00 [O] eCTActionType; [R] get_camaction stores 0..3 per kind; [U] doTriggerAction
                                 //      switches on it
-    void** mVtbl;               // 0x04 [R] D_0045C2E8 (slot 1 purge)
+    void** mVtbl;               // 0x04 [R] cCTAction_vtbl (slot 1 purge)
 };
 
 CHECK_OFFSET(cCTAction, Type, 0x00);
@@ -51,7 +51,7 @@ CHECK_SIZE(cCTAction, 0x8);
 struct cCTActionSwitchCam {
     // --- cCTAction (0x8)
     int Type;                   // 0x00 [O] eCTActionType; [R] 0 = eCTActionSwitchCam; [U] get_cCTActionSwitchCam (sw $0)
-    void** mVtbl;               // 0x04 [R] D_0045C2E8, then the derived vtable
+    void** mVtbl;               // 0x04 [R] cCTAction_vtbl, then the derived vtable
     // --- cCTActionSwitchCam
     int SwitchType;             // 0x08 [O] eCTSwitchType; [U] get_cCTActionSwitchCam (get_uint)
     float BlendTime;            // 0x0C [O]; [U] get_cCTActionSwitchCam (get_float)
@@ -68,7 +68,7 @@ struct cCTActionBoundedCam {
     // --- cCTAction (0x8)
     int Type;                   // 0x00 [O] eCTActionType; [R] 1 = eCTActionBoundedCam (sw); [U] get_cCTActionBoundedCam
                                 //      stores 1 again; doTriggerAction switches on it (lw)
-    void** mVtbl;               // 0x04 [R] D_0045C2E8 (cCTAction), then D_0045C1D0 (sw)
+    void** mVtbl;               // 0x04 [R] cCTAction_vtbl (cCTAction), then cCTActionBoundedCam_vtbl (sw)
     // --- cCTActionBoundedCam
     cCTBoundObj* BoundObj;      // 0x08 [O]; [R] 0 (sw $0); [U] cCTActionBoundedCam_purge deletes it (lw);
                                 //      cBoundedAlgorithm_update / _snap call its limitPoint (slot 6 of its vtable at
@@ -105,7 +105,7 @@ struct cCTActionSpline {
     // --- cCTAction (0x8)
     int Type;                   // 0x00 [O] eCTActionType; [R] 2 = eCTActionSpline (sw); [U] get_cCTActionSpline stores
                                 //      2 again; doTriggerAction (lw)
-    void** mVtbl;               // 0x04 [R] D_0045C2E8 (cCTAction), then D_0045C1B8 (sw)
+    void** mVtbl;               // 0x04 [R] cCTAction_vtbl (cCTAction), then cCTActionSpline_vtbl (sw)
     // --- cCTActionSpline
     cCTSpline* Spline;          // 0x08 [O]; [R] 0 (sw $0); [U] cCTActionSpline_purge deletes it (lw);
                                 //      createChaseAlgorithmBlend passes it to cCTSpline_worldPoint (points 0..3)
