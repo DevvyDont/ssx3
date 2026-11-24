@@ -46,11 +46,14 @@ public:
 
 void cMemMan_free(void* p);
 
+// The destructor views below stay classes (not the flat ai/riderhandler.h layouts) for codegen: g++ must see the
+// virtual cRider base to emit the vtable fix-ups. Their members carry the real layouts' names.
+// cBoardWakeFX (ai/riderhandler.h) as its destructor sees it.
 class cVbDtor002DCDA0 : virtual public cRiderVb_bwf {
 public:
     char pad04[0x8];
-    void* m0C;
-    void* m10;
+    void* mWakeLines;               // 0x0C cBoardWakeFX::mWakeLines ([O]; "WakeLines_cBoardWakeFX")
+    void* mWakeVerts;               // 0x10 cBoardWakeFX::mWakeVerts[0] ([O]; the one "WakeVerts_cBoardWakeFX" block)
     char pad14[0xA8];
     virtual ~cVbDtor002DCDA0();
     static void operator delete(void* p) { operator_delete((int*)p); }
@@ -72,13 +75,14 @@ public:
     static void operator delete[](void* p) { cMemMan_free(p); }
 };
 
+// cDynamicSprayFX (ai/riderhandler.h) as its destructor sees it.
 class cVbDtor002DF1C8 : virtual public cRiderVb_bwf {
 public:
     char pad04[0x24];
-    cVbElem002DF1C8* m28;
-    void* m2C;
+    cVbElem002DF1C8* mEmitters;     // 0x28 cDynamicSprayFX::mEmitters (new[] of 10, "DynamicSprayEmitter")
+    void* mSprayData;               // 0x2C (name ours) the 10 spray settings ("DynamicSprayData", 0xE8 bytes each)
     char pad30[0x4C];
-    void* m7C;
+    void* mBoneIndicies;            // 0x7C cDynamicSprayFX::mBoneIndicies ("BoneIndicies")
     char pad80[0xAC];
     virtual ~cVbDtor002DF1C8();
     static void operator delete(void* p) { operator_delete((int*)p); }
@@ -94,10 +98,11 @@ public:
 
 extern "C" void func_0037C720(void* mgr, float f);
 
+// cSpeedBoostFX (ai/riderhandler.h) as its destructor sees it.
 class cVbDtor002E64C0 : virtual public cRiderVb_bwf {
 public:
     char pad04[0x3A8];
-    void* m3AC;
+    void* mStreamBuf;               // 0x3AC cSpeedBoostFX::mStreamBuf ([O]; "cSpeedBoostStreamerFX")
     virtual ~cVbDtor002E64C0();
     static void operator delete(void* p) { operator_delete((int*)p); }
 };

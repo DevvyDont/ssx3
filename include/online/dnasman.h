@@ -32,8 +32,9 @@ struct DNASMan {
                                         //       "AuthData" buffer and loads CONFIG.DAT into it; func_00256510 decodes
                                         //       it; func_002562D0 passes it on; func_002563A8 frees it
     int AuthSize;                       // 0x010 [R] 0; [U] func_00256510: the loaded size; func_002562D0 passes it on
-    int unk_014;                        // 0x014 [R] 0; [U] func_00256258 0; cFEStateAuthDNAS_onInputBegin sets 1
-                                        //       (cancel); func_002565E0 reads it
+    int CancelRequest;                  // 0x014 (name ours) [R] 0; [U] func_00256258 0; cFEStateAuthDNAS_onInputBegin
+                                        //        sets 1 when the player cancels (next / previous while authenticating);
+                                        //        func_002565E0 passes it to the DNAS module's update func_003FD100
     int FileHandle;                     // 0x018 [R] -1; [U] func_00256258 / func_00256460: the ASYNCFILE_loadat handle;
                                         //       func_00256460 / func_00256510 poll it
     int AuthError;                      // 0x01C (name ours) [U] func_00256258 / func_002562D0 0; func_002565E0 stores
@@ -75,7 +76,7 @@ CHECK_OFFSET(DNASMan, ElfData, 0x004);
 CHECK_OFFSET(DNASMan, ElfSize, 0x008);
 CHECK_OFFSET(DNASMan, AuthData, 0x00C);
 CHECK_OFFSET(DNASMan, AuthSize, 0x010);
-CHECK_OFFSET(DNASMan, unk_014, 0x014);
+CHECK_OFFSET(DNASMan, CancelRequest, 0x014);
 CHECK_OFFSET(DNASMan, FileHandle, 0x018);
 CHECK_OFFSET(DNASMan, AuthError, 0x01C);
 CHECK_OFFSET(DNASMan, AuthMode, 0x020);

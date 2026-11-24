@@ -60,6 +60,8 @@ struct cUIListBox : public cUIThing {
     // --- cUIListBox
     // cUIListBox's own slots ([R] cUIListBox_vtbl; types [O] On Tour's class cUIListBox):
     virtual char getType();                                               // 22 cUIListBox_getType__FPv
+    virtual void setShadow(int a);                                        // 23 cUIListBox_setShadow
+    virtual void setUseStaticColour(int a);                               // 24 cUIListBox_setUseStaticColour
     tAttrListBox mAttrListBox;       // 0x074 [O] tAttrListBox; [R] the ctor cUIListBox_cUIListBox sets mShadow, clears mUnicode /
                                      //       mCallback (lbu/sb 0x74), cUIListBox_cUIListBox1 calls its ctor tAttrListBox_tAttrListBox; [U] setUIData
                                      //       cUIListBox_setUIData (lw/sw), accessors cUIListBox_setFontIndex..cUIListBox_setUseStaticColour (lw/sw)

@@ -40,29 +40,39 @@ struct tDisplayMode {
     char m_name[64];                // 0x00 [O] char m_name[64]; [U] GetDisplayModeName returns the record's start ([O]
                                     //      const char* GetDisplayModeName(int mode))
     char unk_040[0x40];             // 0x40 no retail access seen
-    int unk_080;                    // 0x80 [U] SetDisplayMode1 passes it to func_0037BD98 as the display width
-    int unk_084;                    // 0x84 [U] SetDisplayMode1: the display height
-    int unk_088;                    // 0x88 [P] GetScreenWidth; [U] GetDisplayMode matches the width; func_0037BD98's
-                                    //      frame-buffer width
-    int unk_08C;                    // 0x8C [P] GetScreenHeight; [U] GetDisplayMode matches the height
-    int unk_090;                    // 0x90 [U] the display pixel format (GetDisplayMode: 32 -> 0, 24 -> 1, 16 -> 2)
-    int unk_094;                    // 0x94 [U] the frame-buffer pixel format (GetDisplayMode, SetDisplayMode1)
-    int unk_098;                    // 0x98 [U] the z-buffer format (GetDisplayMode: 49 = PSMZ24)
-    int unk_09C;                    // 0x9C [U] SetDisplayMode1: a flag passed with its inverse
-    int unk_0A0;                    // 0xA0 [U] the mode id GetDisplayMode matches; SetDisplayMode1's last argument
+    int mDisplayWidth;              // 0x80 (name ours) [U] SetDisplayMode1 passes it to func_0037BD98, which stores it
+                                    //        as the display width (+0x5A54) and picks MAGH from it (256 / 320 / 384 /
+                                    //        512 / 640)
+    int mDisplayHeight;             // 0x84 (name ours) [U] SetDisplayMode1 -> func_0037BD98: the display height
+                                    //        (+0x5A58)
+    int mFrameWidth;                // 0x88 (name ours) [P] GetScreenWidth; [U] GetDisplayMode matches the width;
+                                    //        func_0037BD98 stores it in mFBWidth
+    int mFrameHeight;               // 0x8C (name ours) [P] GetScreenHeight; [U] GetDisplayMode matches the height;
+                                    //        func_0037BD98 stores it in mFBHeight
+    int mDisplayPSM;                // 0x90 (name ours) [U] the display pixel format (GetDisplayMode: 32 -> 0, 24 -> 1,
+                                    //        16 -> 2); func_0037BD98 stores it at +0x5A38
+    int mFramePSM;                  // 0x94 (name ours) [U] the frame-buffer pixel format (GetDisplayMode);
+                                    //        func_0037BD98 stores it in mCurrentFBFormat
+    int mZBufferPSM;                // 0x98 (name ours) [U] the z-buffer format (GetDisplayMode: 49 = PSMZ24);
+                                    //        func_0037BD98 stores it in mCurrentZBFormat
+    int mInterlace;                 // 0x9C (name ours) [U] SetDisplayMode1 passes it and its inverse to func_0037BD98
+                                    //        (+0x5A44 / +0x5A46; [X] interlace / ffmd)
+    int mDTV;                       // 0xA0 (name ours) [U] the mode id GetDisplayMode matches; SetDisplayMode1's last
+                                    //        argument, which func_0037BD98 stores at +0x5A4C (the accessor
+                                    //        cPS2GraphicsMan_GetDTV returns it)
 };
 
 CHECK_OFFSET(tDisplayMode, m_name, 0x00);
 CHECK_OFFSET(tDisplayMode, unk_040, 0x40);
-CHECK_OFFSET(tDisplayMode, unk_080, 0x80);
-CHECK_OFFSET(tDisplayMode, unk_084, 0x84);
-CHECK_OFFSET(tDisplayMode, unk_088, 0x88);
-CHECK_OFFSET(tDisplayMode, unk_08C, 0x8C);
-CHECK_OFFSET(tDisplayMode, unk_090, 0x90);
-CHECK_OFFSET(tDisplayMode, unk_094, 0x94);
-CHECK_OFFSET(tDisplayMode, unk_098, 0x98);
-CHECK_OFFSET(tDisplayMode, unk_09C, 0x9C);
-CHECK_OFFSET(tDisplayMode, unk_0A0, 0xA0);
+CHECK_OFFSET(tDisplayMode, mDisplayWidth, 0x80);
+CHECK_OFFSET(tDisplayMode, mDisplayHeight, 0x84);
+CHECK_OFFSET(tDisplayMode, mFrameWidth, 0x88);
+CHECK_OFFSET(tDisplayMode, mFrameHeight, 0x8C);
+CHECK_OFFSET(tDisplayMode, mDisplayPSM, 0x90);
+CHECK_OFFSET(tDisplayMode, mFramePSM, 0x94);
+CHECK_OFFSET(tDisplayMode, mZBufferPSM, 0x98);
+CHECK_OFFSET(tDisplayMode, mInterlace, 0x9C);
+CHECK_OFFSET(tDisplayMode, mDTV, 0xA0);
 CHECK_SIZE(tDisplayMode, 0xA4);
 
 // [O] tTVDisplayFormat (0x14 in On Tour too). [P] GetTVDisplayFormat returns &self->mTVDisplayFormat.
@@ -81,7 +91,10 @@ struct tProjTexInfo {
     t4Vector mShdwProjPos;                // 0x00 [U] cPS2GraphicsMan_AddProjectiveTexture (first argument)
     t4Matrix mShdwClipMat;                // 0x10 [U] cPS2GraphicsMan_AddProjectiveTexture (second argument); passed to slot 93 by cPS2GraphicsMan_CheckProjectiveTexturesHits
     t4Matrix mShdwProjMat;                // 0x50 [U] cPS2GraphicsMan_AddProjectiveTexture (third argument)
-    float unk_90;                   // 0x90 [U] cPS2GraphicsMan_AddProjectiveTexture (float argument)
+    float mShdwIntensity;                 // 0x90 (name ours, On Tour's argument name) [U]
+                                          //        cPS2GraphicsMan_AddProjectiveTexture (On Tour
+                                          //        AddProjectiveTexture(pos, clipMat, projMat, intensity, texid)): the
+                                          //        intensity
     int mShdwTexID;                     // 0x94 [U] cPS2GraphicsMan_AddProjectiveTexture (int argument)
     char unk_98[0x8];               // 0x98 padding to 16
 };
@@ -90,16 +103,23 @@ struct tProjTexInfo {
 // one pushed viewport/projection state, 0x230 bytes. PushViewport (cPS2GraphicsMan_PushViewport) saves the live members listed
 // below into it, PopViewport (cPS2GraphicsMan_PopViewport) restores them.
 struct sViewportStack {
-    float unk_000[4];               // 0x000 [U] cPS2GraphicsMan_SetViewportWindow; [X] viewport x, y, w, h
-    float unk_010[3];               // 0x010 [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic store, cPS2GraphicsMan_GetViewportPerspective reads; [X] near?, 1.0, fov
-    float unk_01C;                  // 0x01C [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportZBias read; [R] Init zeroes entry 0
-    int unk_020;                    // 0x020 [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic store; [X] projection type
-    float unk_024;                  // 0x024 [U] copy of unk_590C
-    float unk_028;                  // 0x028 [U] copy of unk_5908
-    float unk_02C;                  // 0x02C [U] copy of mFar? (0x5910)
-    t4Vector unk_030;               // 0x030 [U] copy of unk_6B70
-    t4Vector unk_040;               // 0x040 [U] copy of unk_6B80
-    t4Vector unk_050;               // 0x050 [U] copy of unk_5920
+    float mWindow[4];               // 0x000 (name ours) [U] cPS2GraphicsMan_SetViewportWindow stores,
+                                    //        cPS2GraphicsMan_GetViewportWindow reads, the projections read the viewport
+                                    //        x, y, w, h
+    float mProjParams[3];           // 0x010 (name ours) [U] cPS2GraphicsMan_SetViewportPerspective stores zNear, zFar,
+                                    //        fov, cPS2GraphicsMan_SetViewportOrthographic zNear and zFar;
+                                    //        cPS2GraphicsMan_GetViewportPerspective reads them
+    float mZBias;                   // 0x01C (name ours) [U] cPS2GraphicsMan_SetViewportZBias stores the depth offset,
+                                    //        cPS2GraphicsMan_SetViewportPerspective adds it to the screen z offset; [R]
+                                    //        Init zeroes entry 0
+    int mProjectionType;            // 0x020 (name ours) [U] cPS2GraphicsMan_SetViewportPerspective stores 0,
+                                    //        cPS2GraphicsMan_SetViewportOrthographic 1; [X] projection type
+    float mPerspFar;                // 0x024 (name ours) [U] PushViewport's copy of cPS2GraphicsMan::mPerspFar
+    float mPerspFov;                // 0x028 (name ours) [U] PushViewport's copy of cPS2GraphicsMan::mPerspFov
+    float mSortZFar;                // 0x02C (name ours) [U] PushViewport's copy of cPS2GraphicsMan::mSortZFar
+    t4Vector mClipMin;              // 0x030 (name ours) [U] PushViewport's copy of cPS2GraphicsMan::mClipMin
+    t4Vector mClipMax;              // 0x040 (name ours) [U] PushViewport's copy of cPS2GraphicsMan::mClipMax
+    t4Vector mSortZScale;           // 0x050 (name ours) [U] PushViewport's copy of cPS2GraphicsMan::mSortZScale
     t4Matrix mScreenMatrix;         // 0x060 [U] copy of mScreenMatrix
     t4Matrix mWorld;                // 0x0A0 [U] copy of mWorld
     t4Matrix mView;                 // 0x0E0 [U] copy of mView
@@ -127,8 +147,13 @@ public:
     tProjTexInfo mProjTextures[8];  // 0x13F0 [P] GetProjTexInfo; [R] ctor's second array loop (8)
     cPS2DeferManager* mpDeferMan;   // 0x18F0 [P] GetDeferMan (cPS2GraphicsMan_GetDeferMan); [X] "DEFER MAN" (0x6B100)
     cTextureMan* mTexMan;      // 0x18F4 [P] asserts "mTexMan->GetTextureWidth(iTexId) == ..."; GetTextureMan (cPS2GraphicsMan_GetTextureMan); [X] "TEX MAN" (0x6740)
-    int unk_18F8[2000];             // 0x18F8 [U] per texture id: cPS2GraphicsMan_PlatformPurgeTextures frees each non-zero one, cPS2GraphicsMan_RemoveTexture clears it
-    int unk_3838[2000];             // 0x3838 [U] per texture id: cPS2GraphicsMan_AddTexture1 sets 1 after creating it
+    int mTextureUploaded[2000];     // 0x18F8 (name ours) [U] per texture id, the table in use:
+                                    //        cPS2GraphicsMan_PlatformUploadTextures copies mTextureAdded into it,
+                                    //        cPS2GraphicsMan_PlatformPurgeTextures removes each non-zero one,
+                                    //        cPS2GraphicsMan_RemoveTexture clears it
+    int mTextureAdded[2000];        // 0x3838 (name ours) [U] per texture id, the staged table:
+                                    //        cPS2GraphicsMan_AddTexture1 sets 1 after creating it,
+                                    //        cPS2GraphicsMan_InitTextures clears it
     char unk_5778[0x8];             // 0x5778 padding to 16
     t4Matrix mWorld;                // 0x5780 [X] world (copy of *mCurrentView); [U] cPS2GraphicsMan_PopViewport restores it
     t4Matrix mView;                 // 0x57C0 [X] view; [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic build it
@@ -140,14 +165,26 @@ public:
     t4Vector mScreenScale;          // 0x58E0 [X] screenScale
     t4Vector mScreenOffset;         // 0x58F0 [X] screenOffset
     unsigned short mScissor[4];     // 0x5900 [X] scissor x, y, w, h; [U] func_00376938, func_0036B158
-    float unk_5908;                 // 0x5908 [U] saved by cPS2GraphicsMan_PushViewport; [X] fovOrAspect?
-    float unk_590C;                 // 0x590C [U] saved by cPS2GraphicsMan_PushViewport
-    float unk_5910;                 // 0x5910 [U] saved by cPS2GraphicsMan_PushViewport; [X] far
+    float mPerspFov;                // 0x5908 (name ours) [U] cPS2GraphicsMan_SetViewportPerspective stores its fov;
+                                    //        saved by cPS2GraphicsMan_PushViewport; [X] fovOrAspect?
+    float mPerspFar;                // 0x590C (name ours) [U] cPS2GraphicsMan_SetViewportPerspective stores its zFar;
+                                    //        saved by cPS2GraphicsMan_PushViewport
+    float mSortZFar;                // 0x5910 (name ours) [U] both projections set 40000, the depth range of the sort
+                                    //        keys (mSortZScale.w = 1023 / it); saved by cPS2GraphicsMan_PushViewport;
+                                    //        [X] far
     char unk_5914[0xC];             // 0x5914 padding to 16
-    t4Vector unk_5920;              // 0x5920 [U] saved by cPS2GraphicsMan_PushViewport; cPS2GraphicsMan_CalcSortZ
-    t4Matrix unk_5930[2];           // 0x5930 [R] ctor's third array loop (2); [U] per view, func_0036A428; [X] viewMatrices
-    unsigned short unk_59B0[2][4];  // 0x59B0 [R] ctor's fourth array loop (2); [U] per-view scissor, func_0036B158/func_0036C790
-    int unk_59C0;                   // 0x59C0 [U] accessor func_003956D8; func_00363490 loop count; [X] numViews (split screen)
+    t4Vector mSortZScale;           // 0x5920 (name ours) [U] both projections set (1023, 0, 0, 1023 / 40000);
+                                    //        cPS2GraphicsMan_CalcSortZ scales w by .w and clamps it to 0...x; saved by
+                                    //        cPS2GraphicsMan_PushViewport
+    t4Matrix mViewScreenMatrix[2];  // 0x5930 (name ours) [R] ctor's third array loop (2); [U] per view:
+                                    //        cPS2GraphicsMan_RenderFullScreenEffects copies mScreenMatrix into [view],
+                                    //        func_0036A428 reads it; [X] viewMatrices
+    unsigned short mViewScissor[2][4]; // 0x59B0 (name ours) [R] ctor's fourth array loop (2); [U] per view:
+                                       //        cPS2GraphicsMan_RenderFullScreenEffects copies mScissor into [view];
+                                       //        func_0036B158 / func_0036C790 draw over it
+    int mNumViews;                  // 0x59C0 (name ours) [U] cPS2GraphicsMan_RenderFullScreenEffects sets view + 1;
+                                    //        accessor func_003956D8; func_00363490 and cRailModifier's split-screen
+                                    //        loops run over it; [X] numViews (split screen)
     int NumDisplayModes;            // 0x59C4 [O] cPSPGraphicsMan; [P] GetNumDisplayModes (cPS2GraphicsMan_GetNumDisplayModes)
     int CurrentDisplayMode;         // 0x59C8 [O]; [P] GetDisplayMode (cPS2GraphicsMan_GetDisplayMode1); [R] Init stores -1
     tDisplayMode* DisplayModes;     // 0x59CC [O]; [P] GetScreenWidth/Height read [CurrentDisplayMode] (0xA4 each)
@@ -218,8 +255,13 @@ public:
     char unk_6AE4[0xC];             // 0x6AE4 padding to 16
     t4Matrix mScreenMatrix;         // 0x6AF0 [X] screenMatrix (clip -> GS coordinates)
     t4Matrix mScreenWorld;          // 0x6B30 [X] screenWorld; [U] the draw slots load it
-    t4Vector unk_6B70;              // 0x6B70 [U] saved by cPS2GraphicsMan_PushViewport; cPS2GraphicsMan_projOutCode; [X] screenOffset4
-    t4Vector unk_6B80;              // 0x6B80 [U] saved by cPS2GraphicsMan_PushViewport
+    t4Vector mClipMin;              // 0x6B70 (name ours) [U] the screen clip bounds' minimum (x, y, z at the near
+                                    //        plane, 1 / zNear), set by both projections; cPS2GraphicsMan_GetOutCode /
+                                    //        projOutCode test against it; saved by cPS2GraphicsMan_PushViewport; [X]
+                                    //        screenOffset4
+    t4Vector mClipMax;              // 0x6B80 (name ours) [U] the screen clip bounds' maximum (x + w, y + h, z at the
+                                    //        far plane, 1 / zFar), set by both projections; cPS2GraphicsMan_GetOutCode
+                                    //        tests against it; saved by cPS2GraphicsMan_PushViewport
     int mMatricesValid;             // 0x6B90 [P] updateNetMat recomputes when 0; [U] PopView clears it; [X] matricesValid
     tTVDisplayFormat mTVDisplayFormat; // 0x6B94 [P] GetTVDisplayFormat returns its address (cPS2GraphicsMan_GetTVDisplayFormat)
     char unk_6BA8[0x8];             // 0x6BA8 padding to 16
@@ -254,21 +296,21 @@ CHECK_SIZE(tTVDisplayFormat, 0x14);
 CHECK_OFFSET(tProjTexInfo, mShdwProjPos, 0x00);
 CHECK_OFFSET(tProjTexInfo, mShdwClipMat, 0x10);
 CHECK_OFFSET(tProjTexInfo, mShdwProjMat, 0x50);
-CHECK_OFFSET(tProjTexInfo, unk_90, 0x90);
+CHECK_OFFSET(tProjTexInfo, mShdwIntensity, 0x90);
 CHECK_OFFSET(tProjTexInfo, mShdwTexID, 0x94);
 CHECK_OFFSET(tProjTexInfo, unk_98, 0x98);
 CHECK_SIZE(tProjTexInfo, 0xA0);
 
-CHECK_OFFSET(sViewportStack, unk_000, 0x000);
-CHECK_OFFSET(sViewportStack, unk_010, 0x010);
-CHECK_OFFSET(sViewportStack, unk_01C, 0x01C);
-CHECK_OFFSET(sViewportStack, unk_020, 0x020);
-CHECK_OFFSET(sViewportStack, unk_024, 0x024);
-CHECK_OFFSET(sViewportStack, unk_028, 0x028);
-CHECK_OFFSET(sViewportStack, unk_02C, 0x02C);
-CHECK_OFFSET(sViewportStack, unk_030, 0x030);
-CHECK_OFFSET(sViewportStack, unk_040, 0x040);
-CHECK_OFFSET(sViewportStack, unk_050, 0x050);
+CHECK_OFFSET(sViewportStack, mWindow, 0x000);
+CHECK_OFFSET(sViewportStack, mProjParams, 0x010);
+CHECK_OFFSET(sViewportStack, mZBias, 0x01C);
+CHECK_OFFSET(sViewportStack, mProjectionType, 0x020);
+CHECK_OFFSET(sViewportStack, mPerspFar, 0x024);
+CHECK_OFFSET(sViewportStack, mPerspFov, 0x028);
+CHECK_OFFSET(sViewportStack, mSortZFar, 0x02C);
+CHECK_OFFSET(sViewportStack, mClipMin, 0x030);
+CHECK_OFFSET(sViewportStack, mClipMax, 0x040);
+CHECK_OFFSET(sViewportStack, mSortZScale, 0x050);
 CHECK_OFFSET(sViewportStack, mScreenMatrix, 0x060);
 CHECK_OFFSET(sViewportStack, mWorld, 0x0A0);
 CHECK_OFFSET(sViewportStack, mView, 0x0E0);
@@ -329,8 +371,8 @@ CHECK_OFFSET(cPS2GraphicsMan, mNumShdw, 0x13EC);
 CHECK_OFFSET(cPS2GraphicsMan, mProjTextures, 0x13F0);
 CHECK_OFFSET(cPS2GraphicsMan, mpDeferMan, 0x18F0);
 CHECK_OFFSET(cPS2GraphicsMan, mTexMan, 0x18F4);
-CHECK_OFFSET(cPS2GraphicsMan, unk_18F8, 0x18F8);
-CHECK_OFFSET(cPS2GraphicsMan, unk_3838, 0x3838);
+CHECK_OFFSET(cPS2GraphicsMan, mTextureUploaded, 0x18F8);
+CHECK_OFFSET(cPS2GraphicsMan, mTextureAdded, 0x3838);
 CHECK_OFFSET(cPS2GraphicsMan, unk_5778, 0x5778);
 CHECK_OFFSET(cPS2GraphicsMan, mWorld, 0x5780);
 CHECK_OFFSET(cPS2GraphicsMan, mView, 0x57C0);
@@ -342,14 +384,14 @@ CHECK_OFFSET(cPS2GraphicsMan, mNetMatrix, 0x58A0);
 CHECK_OFFSET(cPS2GraphicsMan, mScreenScale, 0x58E0);
 CHECK_OFFSET(cPS2GraphicsMan, mScreenOffset, 0x58F0);
 CHECK_OFFSET(cPS2GraphicsMan, mScissor, 0x5900);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5908, 0x5908);
-CHECK_OFFSET(cPS2GraphicsMan, unk_590C, 0x590C);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5910, 0x5910);
+CHECK_OFFSET(cPS2GraphicsMan, mPerspFov, 0x5908);
+CHECK_OFFSET(cPS2GraphicsMan, mPerspFar, 0x590C);
+CHECK_OFFSET(cPS2GraphicsMan, mSortZFar, 0x5910);
 CHECK_OFFSET(cPS2GraphicsMan, unk_5914, 0x5914);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5920, 0x5920);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5930, 0x5930);
-CHECK_OFFSET(cPS2GraphicsMan, unk_59B0, 0x59B0);
-CHECK_OFFSET(cPS2GraphicsMan, unk_59C0, 0x59C0);
+CHECK_OFFSET(cPS2GraphicsMan, mSortZScale, 0x5920);
+CHECK_OFFSET(cPS2GraphicsMan, mViewScreenMatrix, 0x5930);
+CHECK_OFFSET(cPS2GraphicsMan, mViewScissor, 0x59B0);
+CHECK_OFFSET(cPS2GraphicsMan, mNumViews, 0x59C0);
 CHECK_OFFSET(cPS2GraphicsMan, NumDisplayModes, 0x59C4);
 CHECK_OFFSET(cPS2GraphicsMan, CurrentDisplayMode, 0x59C8);
 CHECK_OFFSET(cPS2GraphicsMan, DisplayModes, 0x59CC);
@@ -420,8 +462,8 @@ CHECK_OFFSET(cPS2GraphicsMan, mClearColour, 0x6AE0);
 CHECK_OFFSET(cPS2GraphicsMan, unk_6AE4, 0x6AE4);
 CHECK_OFFSET(cPS2GraphicsMan, mScreenMatrix, 0x6AF0);
 CHECK_OFFSET(cPS2GraphicsMan, mScreenWorld, 0x6B30);
-CHECK_OFFSET(cPS2GraphicsMan, unk_6B70, 0x6B70);
-CHECK_OFFSET(cPS2GraphicsMan, unk_6B80, 0x6B80);
+CHECK_OFFSET(cPS2GraphicsMan, mClipMin, 0x6B70);
+CHECK_OFFSET(cPS2GraphicsMan, mClipMax, 0x6B80);
 CHECK_OFFSET(cPS2GraphicsMan, mMatricesValid, 0x6B90);
 CHECK_OFFSET(cPS2GraphicsMan, mTVDisplayFormat, 0x6B94);
 CHECK_OFFSET(cPS2GraphicsMan, unk_6BA8, 0x6BA8);

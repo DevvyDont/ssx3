@@ -789,7 +789,7 @@ extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("
  */
 extern "C" void func_00256258(DNASMan* self, int authMode) {
     self->AuthMode = authMode;
-    self->unk_014 = 0;
+    self->CancelRequest = 0;
     self->AuthError = 0;
     self->State = 1;
     void *mem = operator_new__FUi_6258(0x195000, D_004A2EE0, 0x04000100, 0);
@@ -988,7 +988,7 @@ extern "C" void USTR_copy_65E0(char *, char *) __asm__("USTR_copy");
  * (USTR_copy), stores whether the result was 0 in AuthError and sets the state to 5.
  */
 extern "C" void func_002565E0(DNASMan* self) {
-    if (func_003FD100_65E0(self->unk_014) == 0) {
+    if (func_003FD100_65E0(self->CancelRequest) == 0) {
         char *infoBuf = ((char*)self) + 0xC4;
         MEM_fill_65E0(infoBuf, 0, 908);
         char *secondText = (char*)&self->ErrorText2[0];

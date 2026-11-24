@@ -49,6 +49,7 @@
 #include "fe/festatenetconfig.h"
 #include "fe/festatenetmessenger.h"
 #include "fe/festatenet.h"
+#include "fe/feasyncmanager.h"
 #include "online/buddyman.h"
 #include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
@@ -172,21 +173,6 @@ void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status)
 void cMemMan_free(void* p);
 extern "C" int ASYNCFILE_release(int handle, void** data, int* size);
 
-struct sFEUnloadFile {
-    char name[0x100];
-    void* data;    // 0x100
-    int handle;    // 0x104
-    int async;     // 0x108
-    int size;      // 0x10C
-    int id;        // 0x110
-    int status;    // 0x114
-    int f118;      // 0x118
-};
-
-struct sFEUnloadFiles {
-    sFEUnloadFile files[5];
-};
-
 struct sVEUnload {
     short delta;
     short index;
@@ -197,40 +183,29 @@ struct sVEUnload {
  * Releases an async file slot at whatever stage its load is in and marks it free (status 0).
  *
  * Requested (1): only the status changes. Loading (2): releases the ASYNCFILE handle and frees the buffer.
- * Loaded (3): keeps the texture and buffer and sets +0x118 to the graphics frame count (GrMan vtable slot
- * 114) + 14, so cFEAsyncManager_Update() frees them once that frame has passed.
+ * Loaded (3): keeps the texture and buffer and sets safeToDeleteTick to the graphics frame count (GrMan vtable
+ * slot 114) + 14, so cFEAsyncManager_Update() frees them once that frame has passed.
  *
  * @param idx  index of the file slot (On Tour fileNum)
  */
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(cFEAsyncManager* self, int idx)
 {
-    sFEUnloadFiles* asyncMan = (sFEUnloadFiles*)self;
     if (cFEAsyncManager_GetFileStatus(self, idx) == 1) {
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     } else if (cFEAsyncManager_GetFileStatus(self, idx) == 2) {
-        ASYNCFILE_release(asyncMan->files[idx].handle, 0, 0);
-        if (asyncMan->files[idx].data != 0) {
-            cMemMan_free(asyncMan->files[idx].data);
+        ASYNCFILE_release(self->fileList[idx].asyncFileHandle, 0, 0);
+        if (self->fileList[idx].dataPtr != 0) {
+            cMemMan_free(self->fileList[idx].dataPtr);
         }
-        asyncMan->files[idx].data = 0;
+        self->fileList[idx].dataPtr = 0;
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     } else if (cFEAsyncManager_GetFileStatus(self, idx) == 3) {
         cPS2GraphicsMan* obj = GrMan;
-        asyncMan->files[idx].f118 = obj->getCurrentFrameCount() + 0xE;
+        self->fileList[idx].safeToDeleteTick = obj->getCurrentFrameCount() + 0xE;
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     }
 }
 #endif
-
-struct cFEAsyncFileEntry {
-    char pad_0x00[0x114];
-    int mStatus; // 0x114
-    char pad_0x118[0x11C - 0x114 - 4];
-};
-
-struct cFEAsyncManager {
-    cFEAsyncFileEntry mFiles[1];
-};
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_GetFileStatus__FP15cFEAsyncManageri);
@@ -239,11 +214,11 @@ INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_GetFileStatus__FP15cFEAsyncManager
  * Returns the status of one of the async manager's files.
  *
  * @param index  file slot, not range-checked
- * @return mFiles[index].mStatus
+ * @return fileList[index].fileStatus
  */
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index)
 {
-    return self->mFiles[index].mStatus;
+    return self->fileList[index].fileStatus;
 }
 #endif
 
@@ -254,31 +229,17 @@ INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_SetFileStatus__FP15cFEAsyncManager
  * Sets the status of one of the async manager's files.
  *
  * @param index   file slot, not range-checked
- * @param status  value stored in mFiles[index].mStatus
+ * @param status  value stored in fileList[index].fileStatus
  */
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status)
 {
-    self->mFiles[index].mStatus = status;
+    self->fileList[index].fileStatus = status;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_Update);
 #ifdef SKIP_ASM
-struct sFE39F0File {
-    char name[0x100];
-    char* data;    // 0x100
-    int handle;    // 0x104
-    int async;     // 0x108
-    int size;      // 0x10C
-    int id;        // 0x110
-    int status;    // 0x114
-    int f118;      // 0x118
-};
-
-struct sFE39F0Files {
-    sFE39F0File files[5];
-};
 
 
 
@@ -294,45 +255,46 @@ extern char str_map[];
 /**
  * Advances the five async file slots by one frame: deferred frees, load starts and finished reads.
  *
- * A free or requested slot whose release frame (+0x118) is before the current frame count and which still
- * holds a buffer releases its texture (GrMan vtable slot 50) and buffer; a requested slot past that frame
+ * A free or requested slot whose release frame (safeToDeleteTick) is before the current frame count and which
+ * still holds a buffer releases its texture (GrMan vtable slot 50) and buffer; a requested slot past that frame
  * then starts loading (cFEAsyncManager_LoadDataFile()). A loading slot whose ASYNCFILE read is done becomes
  * loaded (3): its handle is released and the image (file + its word at +0x14) becomes a texture named "map"
- * (GrMan slot 46), whose ID goes to +0x110.
+ * (GrMan slot 46), whose ID goes to texID.
  */
 extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
 {
-    sFE39F0Files* asyncMan = (sFE39F0Files*)self;
     int i;
     for (i = 0; i < 5; i++) {
         if (cFEAsyncManager_GetFileStatus(self, i) == 0 || cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            if (asyncMan->files[i].f118 < obj->getCurrentFrameCount()) {
-                if (asyncMan->files[i].data != 0) {
+            if (self->fileList[i].safeToDeleteTick < obj->getCurrentFrameCount()) {
+                if (self->fileList[i].dataPtr != 0) {
                     cPS2GraphicsMan* obj2 = GrMan;
-                    obj2->RemoveTexture(asyncMan->files[i].id);
-                    if (asyncMan->files[i].data != 0) {
-                        cMemMan_free(asyncMan->files[i].data);
+                    obj2->RemoveTexture(self->fileList[i].texID);
+                    if (self->fileList[i].dataPtr != 0) {
+                        cMemMan_free(self->fileList[i].dataPtr);
                     }
-                    asyncMan->files[i].data = 0;
-                    asyncMan->files[i].f118 = 0;
-                    asyncMan->files[i].id = -1;
+                    self->fileList[i].dataPtr = 0;
+                    self->fileList[i].safeToDeleteTick = 0;
+                    self->fileList[i].texID = -1;
                 }
             }
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            if (asyncMan->files[i].f118 < obj->getCurrentFrameCount()) {
+            if (self->fileList[i].safeToDeleteTick < obj->getCurrentFrameCount()) {
                 cFEAsyncManager_LoadDataFile(self, i);
             }
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 2) {
-            if (ASYNCFILE_getstatus(asyncMan->files[i].handle) == 1) {
+            if (ASYNCFILE_getstatus(self->fileList[i].asyncFileHandle) == 1) {
                 cFEAsyncManager_SetFileStatus(self, i, 3);
-                ASYNCFILE_release(asyncMan->files[i].handle, 0, 0);
+                ASYNCFILE_release(self->fileList[i].asyncFileHandle, 0, 0);
                 cPS2GraphicsMan* obj = GrMan;
-                char* data = asyncMan->files[i].data;
-                asyncMan->files[i].id = obj->AddTexture((const SHAPE*)(data + *(int*)(data + 0x14)), str_map, 0, 0, -1);
+                // ORIGINAL-PTR: the loaded file is a texture file blob; its word at +0x14 is its SHAPE's byte offset.
+                char* data = (char*)self->fileList[i].dataPtr;
+                self->fileList[i].texID =
+                    obj->AddTexture((const SHAPE*)(data + *(int*)(data + 0x14)), str_map, 0, 0, -1);
             }
         }
     }
@@ -364,20 +326,6 @@ extern "C" int cFEAsyncManager_GetFreeAsyncFile(cFEAsyncManager* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_FlushFEAsyncTextures);
 #ifdef SKIP_ASM
-struct sFE3C50File {
-    char name[0x100];
-    void* data;    // 0x100
-    int handle;    // 0x104
-    int async;     // 0x108
-    int size;      // 0x10C
-    int id;        // 0x110
-    int status;    // 0x114
-    int f118;      // 0x118
-};
-
-struct sFE3C50Files {
-    sFE3C50File files[5];
-};
 
 
 void cMemMan_free(void* p);
@@ -386,22 +334,21 @@ void cMemMan_free(void* p);
  * Releases the front-end's five asynchronously loaded textures.
  *
  * For each slot with data: unloads its texture id through graphics manager slot 50, frees the data (cMemMan_free),
- * then clears the data pointer and the word at +0x118 and sets the id to -1.
+ * then clears dataPtr and safeToDeleteTick and sets texID to -1.
  */
 extern "C" void cFEAsyncManager_FlushFEAsyncTextures(cFEAsyncManager* self)
 {
-    sFE3C50Files* asyncMan = (sFE3C50Files*)self;
     int i;
     for (i = 0; i < 5; i++) {
-        if (asyncMan->files[i].data != 0) {
+        if (self->fileList[i].dataPtr != 0) {
             cPS2GraphicsMan* obj = GrMan;
-            obj->RemoveTexture(asyncMan->files[i].id);
-            if (asyncMan->files[i].data != 0) {
-                cMemMan_free(asyncMan->files[i].data);
+            obj->RemoveTexture(self->fileList[i].texID);
+            if (self->fileList[i].dataPtr != 0) {
+                cMemMan_free(self->fileList[i].dataPtr);
             }
-            asyncMan->files[i].data = 0;
-            asyncMan->files[i].f118 = 0;
-            asyncMan->files[i].id = -1;
+            self->fileList[i].dataPtr = 0;
+            self->fileList[i].safeToDeleteTick = 0;
+            self->fileList[i].texID = -1;
         }
     }
 }
@@ -838,18 +785,19 @@ extern char str_kT_231FindPlayer[];
 extern char str_personapct_02d[];
 extern char str_ps2Xpct_02d[];
 
-struct cVec_4330 {
-    float x, y, z, w;
-    cVec_4330(float a, float b, float c, float e) { x = a; y = b; z = c; w = e; }
+// A tARGB with a constructor (ours has none), for the colour temporary below; address() hands the temporary to
+// cUIThing::setColour, which takes a pointer (retail passes the temporary's stack address).
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b)
+    {
+        A = a;
+        R = r;
+        G = g;
+        B = b;
+    }
+    const tARGB* address() const { return this; }
 };
 
-class cObjV_4330 {
-public:
-    int pad[2];
-    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
-    virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
-    virtual void set(const cVec_4330& v);
-};
 
 
 
@@ -862,8 +810,8 @@ public:
  *   cFEStateNet_onWidgetEvent.
  * - 2 (focus lost): hides that row's "ps2X%02d" icon, sets @p pWidget's colour (virtual setColour) to (1, 0, 0, 0) and
  *   recolours the row by the buddy's state (func_001A66A8(.., i, 0)), then cFEStateNet_onWidgetEvent.
- * - 5 (a row picked): takes the buddy at index @p pWidget +0x18 from the BuddyMan session (created and connected on demand),
- *   makes that name the current user (func_001A9890) and opens the user popup (func_001AB370).
+ * - 5 (a row picked): takes the buddy at index @p pWidget's mMiscData from the BuddyMan session (created and connected
+ *   on demand), makes that name the current user (func_001A9890) and opens the user popup (func_001AB370).
  * - 6: reports event 20 to the parent state (its onPopupEvent, vtable entry 17).
  * - 8: opens the keyboard popup (func_001A9150: title kT_231FindPlayer, popup id 1, at most 16 characters), sets its
  *   words +0x438 and +0x58 to 1 and changes two keys (cKeyboardPopup_setIncludeKey 75 on, 53 off).
@@ -873,13 +821,13 @@ public:
  * @param pWidget  the widget (On Tour: cUIThing* pWidget)
  * @param msg  the widget event
  */
-extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, cUIState* pWidget, int msg)
+extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, cUIThing* pWidget, int msg)
 {
     char buf[0x20];
     switch (msg) {
     case 6: {
-        cUIState* o = self->mpParentState;
-        o->onPopupEvent((cUIState*)self, 20);
+        cUIState* parentState = self->mpParentState;
+        parentState->onPopupEvent((cUIState*)self, 20);
         break;
     }
     case 8:
@@ -890,7 +838,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
         break;
     case 5: {
-        int idx = pWidget->miMiscData;
+        int idx = pWidget->mMiscData;
         if (idx < 0) {
             break;
         }
@@ -917,7 +865,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
     case 1:
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = (int)VPTR_OF(cListNode, &pWidget->mScreens.mEnd);
+            int id = pWidget->mHashName;
             if (id == GetHashValue32(buf)) {
                 func_001A6070_4330(((char*)self), i + self->miScrollOffset);
                 func_001A5FB8_4330(((char*)self), i);
@@ -932,14 +880,14 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
     case 2: {
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = (int)VPTR_OF(cListNode, &pWidget->mScreens.mEnd);
+            int id = pWidget->mHashName;
             if (id == GetHashValue32(buf)) {
                 sprintf(buf, str_ps2Xpct_02d, i);
-                cUIThing* o = cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
-                if (o != 0) {
-                    o->setVisible(0);
+                cUIThing* xIcon = cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
+                if (xIcon != 0) {
+                    xIcon->setVisible(0);
                 }
-                ((cObjV_4330*)pWidget)->set(cVec_4330(1.0f, 0.0f, 0.0f, 0.0f));
+                pWidget->setColour(tARGBInit(1.0f, 0.0f, 0.0f, 0.0f).address());
                 func_001A66A8_4330(((char*)self), i, 0);
                 break;
             }
@@ -1271,46 +1219,6 @@ extern "C" void func_001A4B20(cFEStateNetMessenger* self, void* popup, unsigned 
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onPopupEvent);
 #ifdef SKIP_ASM
-class cFEVObj_001A4C58 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33(void* a1, int a2);
-    virtual void v34(void* a1, int a2);
-    virtual void v35(void* a1, int a2);
-};
 
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
@@ -1328,16 +1236,25 @@ extern "C" void cFEStateNetMessenger_onPopupEvent(cFEStateNetMessenger* self, cU
 {
     switch ((unsigned int)pPopup->miMiscData) {
     case 2057:
-        ((cFEVObj_001A4C58*)self)->v33(pPopup, popupEvent);
+        {
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
+            vt[33].fn(vthis(self, vt[33]), pPopup, popupEvent);
+        }
         break;
     case 2059:
-        ((cFEVObj_001A4C58*)self)->v34(pPopup, popupEvent);
+        {
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
+            vt[34].fn(vthis(self, vt[34]), pPopup, popupEvent);
+        }
         break;
     case 2060:
-        ((cFEVObj_001A4C58*)self)->v35(pPopup, popupEvent);
+        {
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
+            vt[35].fn(vthis(self, vt[35]), pPopup, popupEvent);
+        }
         break;
     default:
-        cFEStateNet_onPopupEvent(((cFEVObj_001A4C58*)self), pPopup, popupEvent);
+        cFEStateNet_onPopupEvent(self, pPopup, popupEvent);
         break;
     }
 }
@@ -3266,43 +3183,6 @@ extern "C" void* func_001A7D40(cFEStateReadMessagePopup* self, int msg)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup_onGainTransition);
 #ifdef SKIP_ASM
-class cFEVObj_001A7D90 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 
 extern "C" void func_001A7F78(cFEStateReadMessagePopup* self);
 extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
@@ -3317,7 +3197,8 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
  */
 extern "C" int cFEStateReadMessagePopup_onGainTransition(cFEStateReadMessagePopup* self)
 {
-    ((cFEVObj_001A7D90*)self)->v32();
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+    vt[32].fn(vthis(self, vt[32]));
     func_001A7F78(self);
     func_001A81F0(self);
     return 1;
@@ -3816,39 +3697,6 @@ void cFEStateNet_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onUpdate);
 #ifdef SKIP_ASM
-class cFEAsync1A8770 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-};
 
 extern "C" void cUIState_onUpdate(void*);
 extern "C" void* cFEStateNet_handleEvent(void* self, int size, int a2);
@@ -3865,8 +3713,14 @@ extern "C" void* cFEStateNet_handleEvent(void* self, int size, int a2);
  */
 extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self)
 {
-    ((cFEAsync1A8770*)self)->v27();
-    ((cFEAsync1A8770*)self)->v28();
+    {
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+        vt[27].fn(vthis(self, vt[27]));
+    }
+    {
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+        vt[28].fn(vthis(self, vt[28]));
+    }
     cUIState_onUpdate(self);
     return cFEStateNet_handleEvent(self, 276, 0);
 }
@@ -3919,40 +3773,6 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
 
-class cFEVObj_001A8830 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual int v29();
-};
 
 static inline void* GetSession_001A8830()
 {
@@ -3978,7 +3798,8 @@ static inline void* GetSession_001A8830()
  */
 extern "C" void func_001A8830(cFEStateNet* self)
 {
-    if (((cFEVObj_001A8830*)self)->v29() != 0) {
+    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, self);
+    if (vt[29].fn(vthis(self, vt[29])) != 0) {
         func_00262768(GetSession_001A8830(), 1, 0, 0, 0, 0);
     } else {
         func_00262768(GetSession_001A8830(), 0, 1, 0, 0, 0);
@@ -3989,35 +3810,6 @@ extern "C" void func_001A8830(cFEStateNet* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onWidgetEvent);
 #ifdef SKIP_ASM
-class cFEVObj_001A8918 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25(void* popup);
-};
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* mem, void* a1, void* owner);
@@ -4042,7 +3834,8 @@ extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int pWidget, int ms
         cFEStateNetHelpPopup* helpPopup = (cFEStateNetHelpPopup*)cFEStateNetHelpPopup_cFEStateNetHelpPopup(
                 cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
         helpPopup->mbReferEventsToParent = 1;
-        ((cFEVObj_001A8918*)self)->v25(helpPopup);
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, self);
+        vt[25].fn(vthis(self, vt[25]), helpPopup);
         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, helpPopup);
     }
 }
@@ -4080,36 +3873,6 @@ extern "C" void* func_001A89B0(cFEStateNet* self, cUIState* msg)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8A40);
 #ifdef SKIP_ASM
-class cFEVObj_001A8A40 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void* v26(void* obj);
-};
 
 int GetHashValue32(char* str);
 extern char str_TransitionOut[];
@@ -4137,7 +3900,8 @@ extern "C" int func_001A8A40_r(void* vself, void* obj)
     if (child != 0) {
         return func_001A8A40_r(child, obj);
     }
-    void* item = ((cFEVObj_001A8A40*)self)->v26(obj);
+    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)VPTR_OF(cListNode, self);
+    void* item = vt[26].fn(vthis(self, vt[26]), obj);
     if (item != 0) {
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF) {
@@ -4742,42 +4506,6 @@ extern "C" void func_001A93D0_impl(void* vself, int id, int event)
 INCLUDE_ASM("fe/feasyncfile", func_001A9438);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cFEVObj_001A9438 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
@@ -4798,7 +4526,8 @@ extern const char str_cFEStateLogin_MemoryCard[];
 extern "C" void func_001A9438(cFEStateNet* self, int popup, int event)
 {
     if (event == 22) {
-        ((cFEVObj_001A9438*)self)->v32();
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+        vt[32].fn(vthis(self, vt[32]));
         func_001A8A40(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateLogin_MemoryCard, 0, 0), (int)self->mpEngine));
         func_001A93D0_3(self, popup, 22);
     } else {
@@ -4824,42 +4553,6 @@ void func_001A94D8(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001A94E0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cFEVObj_001A94E0 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 
@@ -4879,7 +4572,10 @@ extern "C" void func_001A94E0(cFEStateNet* self, int popup, int event)
         func_001A93D0_3(self, popup, 21);
         break;
     case 22:
-        ((cFEVObj_001A94E0*)self)->v32();
+        {
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+            vt[32].fn(vthis(self, vt[32]));
+        }
         self->mpKeyboard = 0;
         func_001A93D0_3(self, popup, 22);
         break;
@@ -8055,44 +7751,6 @@ extern "C" void cFEStateSelectPersona_onWidgetEvent(cFEStateSelectPersona* selfp
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateSelectPersona_onPopupEvent);
 #ifdef SKIP_ASM
-class cFEVObj_001AD8C0 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33(void* a1, int a2);
-};
 
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_001AD930(cFEStateSelectPersona* self, void* a1, int a2);
@@ -8110,13 +7768,16 @@ extern "C" void cFEStateSelectPersona_onPopupEvent(cFEStateSelectPersona* self, 
 {
     switch (pPopup->miMiscData) {
     case 2070:
-        ((cFEVObj_001AD8C0*)self)->v33(pPopup, Event);
+        {
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
+            vt[33].fn(vthis(self, vt[33]), pPopup, Event);
+        }
         break;
     case 2073:
         func_001AD930(self, pPopup, Event);
         break;
     default:
-        cFEStateNet_onPopupEvent(((cFEVObj_001AD8C0*)self), pPopup, Event);
+        cFEStateNet_onPopupEvent(self, pPopup, Event);
         break;
     }
 }
@@ -8468,42 +8129,6 @@ extern "C" void cFEStateChallengePopup_onCreateScreen(cFEStateChallengePopup* se
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onGainTransition);
 #ifdef SKIP_ASM
-class cFEStateChallengePopup_onGainTransition_cObj {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 
 /**
  * Prepares the challenge popup as it opens: calls its slot 32 (func_001AEBF0).
@@ -8512,7 +8137,8 @@ public:
  */
 extern "C" int cFEStateChallengePopup_onGainTransition(cFEStateChallengePopup* self)
 {
-    ((cFEStateChallengePopup_onGainTransition_cObj*)self)->v32();
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+    vt[32].fn(vthis(self, vt[32]));
     return 1;
 }
 #endif
@@ -9293,44 +8919,6 @@ extern "C" int func_001AF3E0(cFEStateChallengePopup* self, void* popup, int even
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onPopupEvent);
 #ifdef SKIP_ASM
-class cFEVObj_001AF428 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33(void* a1, int a2);
-};
 
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
@@ -9345,9 +8933,10 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void cFEStateChallengePopup_onPopupEvent(cFEStateChallengePopup* self, cFEStateChallengePopup* pPopup, int Event)
 {
     if (pPopup->miMiscData == 2101) {
-        ((cFEVObj_001AF428*)self)->v33(pPopup, Event);
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
+        vt[33].fn(vthis(self, vt[33]), pPopup, Event);
     } else {
-        cFEStateNet_onPopupEvent(((cFEVObj_001AF428*)self), pPopup, Event);
+        cFEStateNet_onPopupEvent(self, pPopup, Event);
     }
 }
 #endif
@@ -10163,44 +9752,6 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetEvent(cFEStateChallengeRe
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onPopupEvent);
 #ifdef SKIP_ASM
-class cFEVObj_001B05E0 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33(void* a1, int a2);
-};
 
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
@@ -10215,9 +9766,10 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void cFEStateChallengeReceivedPopup_onPopupEvent(cFEStateChallengeReceivedPopup* self, cFEStateChallengeReceivedPopup* pPopup, int Event)
 {
     if (pPopup->miMiscData == 2101) {
-        ((cFEVObj_001B05E0*)self)->v33(pPopup, Event);
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
+        vt[33].fn(vthis(self, vt[33]), pPopup, Event);
     } else {
-        cFEStateNet_onPopupEvent(((cFEVObj_001B05E0*)self), pPopup, Event);
+        cFEStateNet_onPopupEvent(self, pPopup, Event);
     }
 }
 #endif
@@ -10251,43 +9803,6 @@ extern "C" int func_001B0628(cFEStateChallengeReceivedPopup* self, void* popup, 
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onGainTransition);
 #ifdef SKIP_ASM
-class cFEVObj_001B0670 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -10304,7 +9819,8 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
  */
 extern "C" int cFEStateChallengeReceivedPopup_onGainTransition(cFEStateChallengeReceivedPopup* self, int bFirstTime)
 {
-    ((cFEVObj_001B0670*)self)->v32();
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+    vt[32].fn(vthis(self, vt[32]));
     if (bFirstTime != 0) {
         func_001B0850(self, cBE_getInterface_Fv(cBE_getBE(), 0), self->mpScreen);
     }
@@ -11793,8 +11309,7 @@ extern "C" int func_0025DA90(void* self);
 extern "C" const char* func_0025F1E0_p(void* self, int idx, int* flag) __asm__("func_0025F1E0");
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-struct sFEObj_001BCB58;
-extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58* self, int a1);
+extern "C" cFEStateLobbyMenu* cFEStateLobbyMenu_cFEStateLobbyMenu(cFEStateLobbyMenu* self, int a1);
 extern char* cBXString_EmptyString_p __asm__("cBXString_EmptyString");
 extern char str_PlayerListMenu[];
 extern char str_PlayerListItempct_02d[];
@@ -11874,7 +11389,10 @@ extern "C" void func_001B2378(cFEStateChatRoom* vself, int reselect)
                 char buf[256];
                 func_001B25E0(func_0025DA90_s(LobbyMan_mLobbyMan), buf);
                 if (func_0025DA90(LobbyMan_mLobbyMan) == 0) {
-                    func_001A8A40(((char*)vself), cFEStateLobbyMenu_cFEStateLobbyMenu((sFEObj_001BCB58*)cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0), (int)vself->mpEngine));
+                    func_001A8A40(((char*)vself),
+                                  cFEStateLobbyMenu_cFEStateLobbyMenu(
+                                      (cFEStateLobbyMenu*)cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0),
+                                      (int)vself->mpEngine));
                 }
                 cUIText_setUnicodeString(vself->mpTextRoomName, buf);
             }
@@ -12819,8 +12337,7 @@ extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_001B2378(cFEStateChatRoom* self, int a1);
 extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
-struct sFEObj_001BCB58;
-extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58* self, int a1);
+extern "C" cFEStateLobbyMenu* cFEStateLobbyMenu_cFEStateLobbyMenu(cFEStateLobbyMenu* self, int a1);
 extern "C" void func_001B2CD0(cFEStateChatRoom* self, int a1);
 extern "C" int func_0025DA90(void* self);
 int func_001A98B0(void* self);
@@ -12857,7 +12374,9 @@ extern "C" void* func_001B3A30(cFEStateChatRoom* self, int msgId, int data)
     }
     case 220:
         if (func_0025DA90(LobbyMan_mLobbyMan) == 0) {
-            func_001A8A40(self, cFEStateLobbyMenu_cFEStateLobbyMenu((sFEObj_001BCB58*)cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0), (int)self->mpEngine));
+            func_001A8A40(self, cFEStateLobbyMenu_cFEStateLobbyMenu(
+                                    (cFEStateLobbyMenu*)cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0),
+                                    (int)self->mpEngine));
             break;
         }
         func_001B2378(self, 1);
@@ -15204,30 +14723,20 @@ extern "C" void cFEStateAuthDNAS_onWidgetCreate(cFEStateAuthDNAS* self, cUIText*
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS_onInputBegin);
 #ifdef SKIP_ASM
-class cFEVObj_001B66B8 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual int isNext();
-    virtual int isPrevious();
-};
 
 /**
  * Swallows all input on the DNAS screen; while authenticating (miState 2), "next" or "previous" cancels.
  *
- * A cancel sets the DNAS object's word at +0x14 and miState 4.
+ * A cancel sets the DNAS object's CancelRequest and miState 4.
  *
  * @param obj  the input (On Tour cUIInput* pInput); slots 5 (isNext) and 6 (isPrevious) are read
  * @return always 1
  */
-extern "C" int cFEStateAuthDNAS_onInputBegin(cFEStateAuthDNAS* self, cFEVObj_001B66B8* obj)
+extern "C" int cFEStateAuthDNAS_onInputBegin(cFEStateAuthDNAS* self, cUIInput* obj)
 {
     if (self->miState == 2) {
         if (obj->isNext() || obj->isPrevious()) {
-            self->mpAuth->unk_014 = 1;
+            self->mpAuth->CancelRequest = 1;
             self->miState = 4;
         }
     }
@@ -15809,9 +15318,9 @@ extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountM
     *((char*)&self->mszUserName) = 0;
     *((char*)&self->mszPassword) = 0;
     self->miError = 0;
-    self->unk_6D8 = 0;
+    self->mbCardError = 0;
     self->mbCardBusy = 0;
-    self->unk_B08 = 0;
+    self->mbAccountMismatch = 0;
     SetNames_001B6ED0(buf1, buf2, (const char*)name, (const char*)name2);
     switch (mode) {
     case 0:
@@ -15963,8 +15472,8 @@ extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
  * "kT_POPUPTITLEDeleteAccount" Yes/No (id 22). 22: deletes (func_00265E20, "kT_MEMDeletingPS2"). 25:
  * "kT_MEMOVDamagedDataPS2" Yes/No (id 26). 26: func_00265E20 with the saving text. 27: like 16 without the space check.
  * 3, 9, 15, 17, 23 (after copying the names) and 28 show the result popup func_001B7E40 for miError. 4, 10, 18, 24, 29
- * pop this popup (cUIStateStack_pop). 8, 22 and 26 jump to 9, 23 and 28 when unk_6D8 (card error) is set; mbCardBusy is 1
- * while a request runs. 0, 5, 11 and 19 clear unk_6D8 and mbCardBusy, 2 only mbCardBusy. The Yes/No popups' ids are the
+ * pop this popup (cUIStateStack_pop). 8, 22 and 26 jump to 9, 23 and 28 when mbCardError is set; mbCardBusy is 1 while
+ * a request runs. 0, 5, 11 and 19 clear mbCardError and mbCardBusy, 2 only mbCardBusy. The Yes/No popups' ids are the
  * next step (default option 1).
  *
  * @param vself  the account memory-card popup (this)
@@ -15996,7 +15505,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     }
     case 7: {
         char* text = ((char*)&self->mustrText[0]);
-        self->unk_6D8 = 0;
+        self->mbCardError = 0;
         self->mbCardBusy = 0;
         func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVOverWriteFile), str);
@@ -16008,7 +15517,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 8: {
         func_001B7778_v(self);
         self->mbCardBusy = 1;
-        if (self->unk_6D8 != 0) {
+        if (self->mbCardError != 0) {
             func_001B70D0_v(self, 9);
             break;
         }
@@ -16029,7 +15538,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 13: {
         char* text = ((char*)&self->mustrText[0]);
         self->mbCardBusy = 0;
-        self->unk_6D8 = 0;
+        self->mbCardError = 0;
         func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFormatCardPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
@@ -16064,7 +15573,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 5:
     case 11:
     case 19:
-        self->unk_6D8 = 0;
+        self->mbCardError = 0;
     case 2:
         self->mbCardBusy = 0;
         break;
@@ -16079,7 +15588,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 21: {
         char* text = ((char*)&self->mustrText[0]);
         self->mbCardBusy = 0;
-        self->unk_6D8 = 0;
+        self->mbCardError = 0;
         func_00265D08(SharedLoginMan);
         strcpy1(text, Loc1B70D0(str_kT_POPUPTITLEDeleteAccount));
         int yesId = GetHashValue32(str_kT_CMNYes);
@@ -16089,7 +15598,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     }
     case 22: {
         self->mbCardBusy = 1;
-        if (self->unk_6D8 != 0) {
+        if (self->mbCardError != 0) {
             func_001B70D0_v(self, 23);
             break;
         }
@@ -16110,7 +15619,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 25: {
         char* text = ((char*)&self->mustrText[0]);
         self->mbCardBusy = 0;
-        self->unk_6D8 = 0;
+        self->mbCardError = 0;
         func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVDamagedDataPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
@@ -16120,7 +15629,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     }
     case 26: {
         self->mbCardBusy = 1;
-        if (self->unk_6D8 != 0) {
+        if (self->mbCardError != 0) {
             func_001B70D0_v(self, 0x1C);
             break;
         }
@@ -16442,18 +15951,18 @@ static inline bool IsMode_001B7A98(int m)
  * Runs step 20 of the account memory-card popup (delete): checks the saved account before asking to delete it.
  *
  * Read succeeded: when the card's account (AccountData name / AccountData + 0x11 password) differs from mszUserName /
- * mszPassword it sets miError 24, unk_B08 and unk_6D8 and goes to 23 (error popup), else to 21 (ask to delete). Read
- * failed: miError 1 is treated like a mismatch; 5 or 6 go to 21; 2 sets miError 24 and unk_B08 when the card is
- * available but unformatted, then calls func_001B70D0(self, 23) twice (the branch falls into the default one; likely
- * bug); anything else goes to 23.
+ * mszPassword it sets miError 24, mbAccountMismatch and mbCardError and goes to 23 (error popup), else to 21 (ask to
+ * delete). Read failed: miError 1 is treated like a mismatch; 5 or 6 go to 21; 2 sets miError 24 and mbAccountMismatch
+ * when the card is available but unformatted, then calls func_001B70D0(self, 23) twice (the branch falls into the
+ * default one; likely bug); anything else goes to 23.
  */
 extern "C" void func_001B7A98(cFEStateNetAccountMem* self)
 {
     if (IsMode_001B7A98(4)) {
         if (strcmp(AccountData, (char*)&self->mszUserName) != 0 || strcmp(AccountData + 0x11, (char*)&self->mszPassword) != 0) {
             self->miError = 0x18;
-            self->unk_B08 = 1;
-            self->unk_6D8 = 1;
+            self->mbAccountMismatch = 1;
+            self->mbCardError = 1;
             func_001B70D0(self, 23);
         } else {
             func_001B70D0(self, 21);
@@ -16461,8 +15970,8 @@ extern "C" void func_001B7A98(cFEStateNetAccountMem* self)
     } else if (IsMode_001B7A98(5)) {
         int error = self->miError;
         if (error == 1) {
-            self->unk_B08 = 1;
-            self->unk_6D8 = 1;
+            self->mbAccountMismatch = 1;
+            self->mbCardError = 1;
             self->miError = 0x18;
             func_001B70D0(self, 23);
         } else if (error == 5) {
@@ -16471,7 +15980,7 @@ extern "C" void func_001B7A98(cFEStateNetAccountMem* self)
             func_001B70D0(self, 21);
         } else if (error == 2) {
             if (func_00265CB0(SharedLoginMan) != 0) {
-                self->unk_B08 = 1;
+                self->mbAccountMismatch = 1;
                 self->miError = 0x18;
             }
             func_001B70D0(self, 23);
@@ -16589,7 +16098,7 @@ extern "C" void func_001B7C70(cFEStateNetAccountMem* self);
  * Runs one frame of the account memory-card popup: polls the card and steps the current card state.
  *
  * Updates the card object SharedLoginMan (func_00265A68) and copies its status word into miError; when func_00265D38
- * reports a card change it sets unk_6D8 (and error 2 if none). Then by miState: the start steps 0, 5, 11 and 19
+ * reports a card change it sets mbCardError (and error 2 if none). Then by miState: the start steps 0, 5, 11 and 19
  * advance to 1, 6, 12 and 20 with func_001B70D0; 1, 2, 6, 8, 12, 14, 16, 20, 22, 26 and 27 run their step helpers
  * (func_001B77A8 .. func_001B7C70); the popup-wait states 7, 13, 21 and 25 call func_002659E8 on the card; 28 and
  * 29 do nothing.
@@ -16600,7 +16109,7 @@ extern "C" void cFEStateNetAccountMem_onUpdate(cFEStateNetAccountMem* self)
     int* mc = SharedLoginMan;
     self->miError = mc[1];
     if (func_00265D38(mc) != 0) {
-        self->unk_6D8 = 1;
+        self->mbCardError = 1;
         if (self->miError == 0) {
             self->miError = 2;
         }
@@ -16693,7 +16202,7 @@ extern "C" void func_001B7E40_s(cFEStateNetAccountMem* self, unsigned int mode) 
  * failure text. 3: "kT_MEMOnlineTooBigPS2" (17 KB needed). 5: in step 3 "kT_MEMOnlineCorruptPS2", else func_001B83C0.
  * 1, 4 and 6-24: func_001B83C0. 0: only when the format failed (manager state 22): "kT_MEMOVNotDetectedPS2" with no
  * card (func_00265D68), else "kT_MEMFEFormatFailed". Those get Retry / Continue. Except for 2, 3 and 5-in-step-3,
- * unk_6D8 (card error) replaces the text with "kT_POPUPCMNCardRemoved" (Retry / Continue). In step 23 the options
+ * mbCardError replaces the text with "kT_POPUPCMNCardRemoved" (Retry / Continue). In step 23 the options
  * become a single Continue. Shown with func_001B7650 (id -1 with two options, 0 with one; slot "1").
  *
  * @param mode  the card error (miError)
@@ -16781,7 +16290,7 @@ extern "C" void func_001B7E40_s(cFEStateNetAccountMem* self, unsigned int mode)
         }
         break;
     }
-    if (flag && self->unk_6D8 != 0) {
+    if (flag && self->mbCardError != 0) {
         sprintf1_v(((char*)&self->mustrText[0]), Loc_B7E40(str_kT_POPUPCMNCardRemoved), buf);
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
@@ -16927,38 +16436,16 @@ extern "C" int func_001B8890(cFEStateNetAccountMem* self, int state);
 extern "C" int func_00265D68(void* p);
 extern int* SharedLoginMan;
 
-class cListener_001B84D8 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void onPopupEvent(void* owner, int v);
-};
 
 /**
  * Handles the account popup's events per card state and tells the parent state the result when it closes.
  *
- * Results are reported to mpParentState's slot 17 on event 0x16 (closed). States 7/13/21/25 (card prompts): option
- * 0 (0xF) goes to func_001B8890's follow-up step for the state when the card changed (func_00265D68; error 2) or
- * unk_6D8 is set (error 6), else to the popup's next state (+0x18) when nonzero; 0x10 / 0x14 set miResult 0x11 (in
- * 7/13/25) or 0x10; 0x16 reports miResult. State 3: 0xF restarts from miStartState when miMiscData is set (else
- * result 0x10), 0x10 / 0x14 result 0xF. States 9/15/17/28: 0xF result 0x11, 0x10 / 0x14 result 0xF. State 23: 0xF
- * restarts from step 0 when unk_B08 is set, else result 0x10. States 4/10/18/24/29 report 0xF on close. Every event
+ * Results are reported to mpParentState's slot 17 on event 0x16 (closed). States 7/13/21/25 (card prompts): option 0
+ * (0xF) goes to func_001B8890's follow-up step for the state when the card changed (func_00265D68; error 2) or
+ * mbCardError is set (error 6), else to the popup's next state (+0x18) when nonzero; 0x10 / 0x14 set miResult 0x11 (in
+ * 7/13/25) or 0x10; 0x16 reports miResult. State 3: 0xF restarts from miStartState when miMiscData is set (else result
+ * 0x10), 0x10 / 0x14 result 0xF. States 9/15/17/28: 0xF result 0x11, 0x10 / 0x14 result 0xF. State 23: 0xF restarts
+ * from step 0 when mbAccountMismatch is set, else result 0x10. States 4/10/18/24/29 report 0xF on close. Every event
  * also goes to the cFEStateNet handler (cFEStateNet_onPopupEvent).
  *
  * @param w  the popup state that sent the event (On Tour pPopup); its miMiscData names the next state
@@ -16978,7 +16465,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             if (func_00265D68(SharedLoginMan) != 0) {
                 self->miError = 2;
                 func_001B70D0(self, func_001B8890(self, self->miState));
-            } else if (self->unk_6D8 != 0) {
+            } else if (self->mbCardError != 0) {
                 self->miError = 6;
                 func_001B70D0(self, func_001B8890(self, self->miState));
             } else {
@@ -17001,7 +16488,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
         }
         case 22:
             cFEStateNet_onPopupEvent_v(self, w, 22);
-            ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, self->miResult);
+            self->mpParentState->onPopupEvent(self, self->miResult);
             break;
         default:
             cFEStateNet_onPopupEvent_v(self, w, msg);
@@ -17015,7 +16502,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             if (self->miMiscData != 0) {
                 self->miResult = 0;
                 self->miError = 0;
-                self->unk_6D8 = 0;
+                self->mbCardError = 0;
                 func_001B70D0(self, self->miStartState);
             } else {
                 self->miResult = 0x10;
@@ -17030,7 +16517,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             cFEStateNet_onPopupEvent_v(self, w, 22);
             result = self->miResult;
             if (result != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, result);
+                self->mpParentState->onPopupEvent(self, result);
             }
             break;
         default:
@@ -17056,7 +16543,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             cFEStateNet_onPopupEvent_v(self, w, 22);
             result = self->miResult;
             if (result != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, result);
+                self->mpParentState->onPopupEvent(self, result);
             }
             break;
         default:
@@ -17068,13 +16555,13 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
         switch (msg) {
         case 15:
             cFEStateNet_onPopupEvent_v(self, w, 15);
-            if (self->unk_B08 == 0) {
+            if (self->mbAccountMismatch == 0) {
                 self->miResult = 0x10;
             } else {
                 self->miResult = 0;
                 self->miError = 0;
-                self->unk_6D8 = 0;
-                self->unk_B08 = 0;
+                self->mbCardError = 0;
+                self->mbAccountMismatch = 0;
                 self->miStartState = 0;
                 func_001B70D0(self, 0);
             }
@@ -17083,7 +16570,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             cFEStateNet_onPopupEvent_v(self, w, 22);
             result = self->miResult;
             if (result != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, result);
+                self->mpParentState->onPopupEvent(self, result);
             }
             break;
         default:
@@ -17098,7 +16585,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
     case 29:
         if (msg == 22) {
             cFEStateNet_onPopupEvent_v(self, w, 22);
-            ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, 0xF);
+            self->mpParentState->onPopupEvent(self, 0xF);
         } else {
             cFEStateNet_onPopupEvent_v(self, w, msg);
         }
@@ -20526,31 +20013,6 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
 extern void* cFEStateLobbyMenu_vtbl[];
 extern int cBXString_EmptyString;
 
-struct sFEObj_001BCB58 {
-    char pad0[0x8];
-    void** vt;          // 0x8
-    int fC;             // 0xC
-    char pad10[0x6D0 - 0x10];
-    int f6D0;           // 0x6D0
-    int f6D4;           // 0x6D4
-    int f6D8[10];       // 0x6D8
-    int f700;           // 0x700
-    int f704;           // 0x704
-    int f708[4];        // 0x708
-    int f718[4];        // 0x718
-    int f728;           // 0x728
-    int f72C;           // 0x72C
-    int f730[4];        // 0x730
-    int f740[4];        // 0x740
-    int f750[4];        // 0x750
-    char pad760[0x76C - 0x760];
-    int f76C;           // 0x76C
-    char pad770[0x778 - 0x770];
-    int f778;           // 0x778
-    char pad77C[0xB80 - 0x77C];
-    int fB80;           // 0xB80
-};
-
 /**
  * Constructs the online lobby screen state ("231lobby_menu"): empty names and no widgets bound yet.
  *
@@ -20562,28 +20024,28 @@ struct sFEObj_001BCB58 {
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
  * @return @p self
  */
-extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58* self, int pEngine)
+extern "C" cFEStateLobbyMenu* cFEStateLobbyMenu_cFEStateLobbyMenu(cFEStateLobbyMenu* self, int pEngine)
 {
     cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    self->vt = cFEStateLobbyMenu_vtbl;
-    self->fB80 = self->f76C = cBXString_EmptyString;
-    self->fC = 0x3C;
-    self->f778 = 0;
-    self->f6D0 = 0;
-    self->f6D4 = 0;
+    VPTR_OF(cListNode, self) = cFEStateLobbyMenu_vtbl;
+    self->mszRoomName = self->mszChannelName = (char*)cBXString_EmptyString;
+    self->mHashName = 0x3C;
+    self->miFirstPlayer = 0;
+    self->mpMenuPlayers = 0;
+    self->mpMenuRoomMenus = 0;
     for (int i = 9; i >= 0; i--) {
-        self->f6D8[i] = 0;
+        self->mpTextPlayer[i] = 0;
     }
-    self->f704 = 0;
+    self->mpText3InRoom = 0;
     for (int j = 0; j < 4; j++) {
-        self->f708[j] = 0;
-        self->f718[j] = 0;
-        self->f730[j] = 0;
-        self->f740[j] = 0;
-        self->f750[j] = 0;
+        self->mpChannelList[j] = 0;
+        self->mpChannelPair[j] = 0;
+        self->mpChannelArrow[j] = 0;
+        self->mpChannelLock[j] = 0;
+        self->miChannelRow[j] = 0;
     }
-    self->f728 = 0;
-    self->f72C = 0;
+    self->mpPlayerUp = 0;
+    self->mpPlayerDown = 0;
     return self;
 }
 #endif
@@ -20591,39 +20053,6 @@ extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58*
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onCreateScreen);
 #ifdef SKIP_ASM
-class cFEVObj_001BCC30 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-};
 
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -20636,11 +20065,12 @@ extern char str_231lobby_menu[];
 extern "C" void cFEStateLobbyMenu_onCreateScreen(cFEStateLobbyMenu* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEVObj_001BCC30*)self), GetHashValue32(str_231lobby_menu), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_231lobby_menu), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        ((cFEVObj_001BCC30*)self)->v28();
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+        vt[28].fn(vthis(self, vt[28]));
     }
 }
 #endif
@@ -22859,44 +22289,6 @@ extern "C" void func_001BF5A8(cFEStateLogin* self, cUIState* popup, int kind)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", cFEStateLogin_onPopupEvent);
 #ifdef SKIP_ASM
-class cFEVObj_001BF6C0 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33(void* a1, int a2);
-};
 
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_001BF438(cFEStateLogin* self, cUIState* a1, int a2);
@@ -22915,7 +22307,10 @@ extern "C" void cFEStateLogin_onPopupEvent(cFEStateLogin* self, cUIState* pPopup
 {
     switch ((unsigned int)pPopup->miMiscData) {
     case 2062:
-        ((cFEVObj_001BF6C0*)self)->v33(pPopup, Event);
+        {
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
+            vt[33].fn(vthis(self, vt[33]), pPopup, Event);
+        }
         break;
     case 2092:
         func_001BF438(self, pPopup, Event);
@@ -22924,7 +22319,7 @@ extern "C" void cFEStateLogin_onPopupEvent(cFEStateLogin* self, cUIState* pPopup
         func_001BF5A8(self, pPopup, Event);
         break;
     default:
-        cFEStateNet_onPopupEvent(((cFEVObj_001BF6C0*)self), pPopup, Event);
+        cFEStateNet_onPopupEvent(self, pPopup, Event);
         break;
     }
 }
@@ -23840,43 +23235,6 @@ extern char str_AgTextScroll[];
 extern char str_top_arrow[];
 extern char str_bot_arrow[];
 
-class cFEVObj_001C0B20 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int on);
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 
 /**
  * Wires the terms-of-service scroll bar to its text as the screen opens.
@@ -23890,7 +23248,8 @@ public:
  */
 extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement* self)
 {
-    ((cFEVObj_001C0B20*)self)->v32();
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+    vt[32].fn(vthis(self, vt[32]));
     cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
     cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
     cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
@@ -23916,9 +23275,9 @@ extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement*
     cUITextScroll* x = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
     x->mpScrollBar = (cUIThing*)scrollBar;
     cUITextScroll_setInputMap(x, 1);
-    ((cFEVObj_001C0B20*)x)->setFocus(1);
+    x->setFocus(1);
     if (scrollBar) {
-        ((cFEVObj_001C0B20*)scrollBar)->setVisible(1);
+        scrollBar->setVisible(1);
     }
     return 1;
 }
@@ -24162,36 +23521,6 @@ extern char str_SuperpipePair[];
 extern char str_SlopestylePair[];
 extern char str_TextSearching[];
 
-class cFEVObj_001C1080 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24(int on);
-    virtual void v25(int on);
-};
 
 /**
  * Binds the quick-match widgets as the screen creates them; every widget is made visible first.
@@ -24202,47 +23531,47 @@ public:
  *
  * @param obj  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateNetQuickPlayPopup_onWidgetCreate(cFEStateNetQuickPlayPopup* self, cFEVObj_001C1080* obj)
+extern "C" void cFEStateNetQuickPlayPopup_onWidgetCreate(cFEStateNetQuickPlayPopup* self, cUIThing* obj)
 {
-    int id = ((cUIThing*)obj)->mHashName;
+    int id = obj->mHashName;
     obj->setVisible(1);
     if (id == GetHashValue32(str_TextOK)) {
         self->mpTextOK = (cUIText*)obj;
-        obj->v25(1);
+        ((cUIText*)obj)->setUseStaticColour(1);
     } else if (id == GetHashValue32(str_LBRanked)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox*)obj, 1);
-        obj->v24(1);
+        ((cUIListBox*)obj)->setUseStaticColour(1);
         self->mpLBRanked = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBRace)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox*)obj, 1);
-        obj->v24(1);
+        ((cUIListBox*)obj)->setUseStaticColour(1);
         self->mpLBRace = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBBigAir)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox*)obj, 1);
-        obj->v24(1);
+        ((cUIListBox*)obj)->setUseStaticColour(1);
         self->mpLBBigAir = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBSuperpipe)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox*)obj, 1);
-        obj->v24(1);
+        ((cUIListBox*)obj)->setUseStaticColour(1);
         self->mpLBSuperpipe = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBSlopeStyle)) {
         func_001A9AB8((cFEStateNet*)self, (cUIListBox*)obj, 1);
-        obj->v24(1);
+        ((cUIListBox*)obj)->setUseStaticColour(1);
         self->mpLBSlopeStyle = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_StaticRanked)) {
-        obj->v25(1);
+        ((cUIText*)obj)->setUseStaticColour(1);
         self->mpStaticRanked = (cUIThing*)obj;
     } else if (id == GetHashValue32(str_StaticRace)) {
-        obj->v25(1);
+        ((cUIText*)obj)->setUseStaticColour(1);
         self->mpStaticRace = (cUIThing*)obj;
     } else if (id == GetHashValue32(str_StaticBigAir)) {
-        obj->v25(1);
+        ((cUIText*)obj)->setUseStaticColour(1);
         self->mpStaticBigAir = (cUIThing*)obj;
     } else if (id == GetHashValue32(str_StaticSuperpipe)) {
-        obj->v25(1);
+        ((cUIText*)obj)->setUseStaticColour(1);
         self->mpStaticSuperpipe = (cUIThing*)obj;
     } else if (id == GetHashValue32(str_StaticSlopeStyle)) {
-        obj->v25(1);
+        ((cUIText*)obj)->setUseStaticColour(1);
         self->mpStaticSlopeStyle = (cUIThing*)obj;
     } else if (id == GetHashValue32(str_RankedPair)) {
         self->mpRankedPair = (cUIThing*)obj;
@@ -24362,37 +23691,16 @@ extern char str_kT_BTNCancel[];
 
 
 
-class cFEVObj_001C1560 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void onPopupEvent(void* owner, int msg);
-};
 
 /**
  * Handles the quick-match popup: OK starts or aborts the search, back aborts or closes.
  *
- * Event 5 on mpTextOK: while searching, shows "kT_233AbortingQuickmatch", makes OK static and aborts
- * (func_001C13E0(.., 0), func_0025EED8); otherwise clears unk_6F0, sets mbSearching, stores the ranked choice in the
- * network options (committed), sets no AI riders, copies the five boxes into miSearchOptions and starts the search
- * (func_0025EE20 with mCurrentCtrl), shows "TextSearching", relabels OK "kT_BTNCancel", sets miBlinkFrames 30 and
- * locks the options (func_001C17F8(.., 1)). Event 6 aborts the same way while searching, else tells the parent 0x14.
- * Event 7 reaches the cFEStateNet handler only while not searching; the rest always do.
+ * Event 5 on mpTextOK: while searching, shows "kT_233AbortingQuickmatch", makes OK static and aborts (func_001C13E0(..,
+ * 0), func_0025EED8); otherwise clears mbQuickMatchTimeout, sets mbSearching, stores the ranked choice in the network
+ * options (committed), sets no AI riders, copies the five boxes into miSearchOptions and starts the search
+ * (func_0025EE20 with mCurrentCtrl), shows "TextSearching", relabels OK "kT_BTNCancel", sets miBlinkFrames 30 and locks
+ * the options (func_001C17F8(.., 1)). Event 6 aborts the same way while searching, else tells the parent 0x14. Event 7
+ * reaches the cFEStateNet handler only while not searching; the rest always do.
  *
  * @param pWidget  the widget, as an int (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
@@ -24410,11 +23718,11 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
         if ((int)self->mpTextOK == pWidget) {
             if (self->mbSearching != 0) {
                 cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
-                ((cFEVObj_001C1560*)self->mpTextOK)->setStatic(1);
+                self->mpTextOK->setStatic(1);
                 func_001C13E0(self, self->mbSearching ^ 1);
                 func_0025EED8(LobbyMan_mLobbyMan);
             } else {
-                self->unk_6F0 = 0;
+                self->mbQuickMatchTimeout = 0;
                 self->mbSearching = 1;
                 cFEStateNetQuickPlayPopup* feStateNetQuickPlayPopup = self;
                 int* ids = feStateNetQuickPlayPopup->miSearchOptions;
@@ -24429,7 +23737,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
                 feStateNetQuickPlayPopup->miSearchOptions[3] = cUIListBox_getCurrentEntryData(self->mpLBSuperpipe);
                 feStateNetQuickPlayPopup->miSearchOptions[4] = cUIListBox_getCurrentEntryData(self->mpLBSlopeStyle);
                 func_0025EE20(LobbyMan_mLobbyMan, ids, self->mCurrentCtrl);
-                ((cFEVObj_001C1560*)self->mpTextSearching)->setVisible(1);
+                self->mpTextSearching->setVisible(1);
                 cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(str_kT_BTNCancel));
                 self->miBlinkFrames = 0x1E;
                 func_001C17F8(self, 1);
@@ -24440,10 +23748,10 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
         func_001C13E0(self, self->mbSearching ^ 1);
         if (self->mbSearching != 0) {
             cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
-            ((cFEVObj_001C1560*)self->mpTextOK)->setStatic(1);
+            self->mpTextOK->setStatic(1);
             func_0025EED8(LobbyMan_mLobbyMan);
         } else {
-            ((cFEVObj_001C1560*)self->mpParentState)->onPopupEvent(self, 20);
+            self->mpParentState->onPopupEvent(self, 20);
         }
         break;
     default:
@@ -24573,11 +23881,12 @@ struct cFEObj_001C19C8 {
 /**
  * Handles the lobby events of the quick-match popup (cFEStateNetQuickPlayPopup's vtable slot 31).
  *
- * 0xE6 sets unk_6F0. 268 and 274 close the popups on the engine's state stack (cUIStateStack_popToState) and show the network
- * error popup for that event (func_001AB178). 0xE7 opens "kT_POPUP233QuickMatchTimeout" (one "kT_BTNOK" option,
- * miLayerOffset 6, miMiscData 0x82F) when unk_6F0 is set, otherwise clears mbSearching and reports event 0x14 to
- * mpParentState (virtual slot 17, onPopupEvent). 243 switches to a new cFEStateOnlineCharacterSelect (cMemMan_alloc
- * 0x6E4, func_001A8A40); 239 is ignored. Anything else returns func_001A8E40's result.
+ * 0xE6 sets mbQuickMatchTimeout. 268 and 274 close the popups on the engine's state stack (cUIStateStack_popToState)
+ * and show the network error popup for that event (func_001AB178). 0xE7 opens "kT_POPUP233QuickMatchTimeout" (one
+ * "kT_BTNOK" option, miLayerOffset 6, miMiscData 0x82F) when mbQuickMatchTimeout is set, otherwise clears mbSearching
+ * and reports event 0x14 to mpParentState (virtual slot 17, onPopupEvent). 243 switches to a new
+ * cFEStateOnlineCharacterSelect (cMemMan_alloc 0x6E4, func_001A8A40); 239 is ignored. Anything else returns
+ * func_001A8E40's result.
  *
  * @param netEvent  the net event id
  * @param eventData  the event's data
@@ -24587,14 +23896,14 @@ extern "C" void* func_001C19C8(cFEStateNetQuickPlayPopup* self, int netEvent, in
 {
     switch (netEvent) {
     case 230:
-        self->unk_6F0 = 1;
+        self->mbQuickMatchTimeout = 1;
         break;
     case 268: case 274:
         cUIStateStack_popToState(&self->mpEngine->mStateStack);
         func_001AB178((cFEStateNet*)self, netEvent);
         break;
     case 231:
-        if (self->unk_6F0 != 0) {
+        if (self->mbQuickMatchTimeout != 0) {
             cScreenPopup* timeoutPopup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
             char* sub = (char*)&timeoutPopup->info;
             timeoutPopup->info.meType = 1;
@@ -25090,43 +24399,6 @@ extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_onGainTransition);
 #ifdef SKIP_ASM
-class cFEVObj_001C23C0 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 
 extern "C" void func_001C2418(cFEStateNetQuickMessages* self);
 
@@ -25140,7 +24412,8 @@ extern "C" void func_001C2418(cFEStateNetQuickMessages* self);
  */
 extern "C" int cFEStateNetQuickMessages_onGainTransition(cFEStateNetQuickMessages* self, int bFirstTime)
 {
-    ((cFEVObj_001C23C0*)self)->v32();
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+    vt[32].fn(vthis(self, vt[32]));
     if (bFirstTime != 0) {
         func_001C2418(self);
     }
@@ -25848,43 +25121,6 @@ extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cFEVObj_001C2F
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onGainTransition);
 #ifdef SKIP_ASM
-class cFEVObj_001C32B8 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-};
 
 extern "C" void func_001C3EE8(cFEStateStats* self, int a1);
 
@@ -25897,7 +25133,8 @@ extern "C" void func_001C3EE8(cFEStateStats* self, int a1);
  */
 extern "C" int cFEStateStats_onGainTransition(cFEStateStats* self, int bFirstTime)
 {
-    ((cFEVObj_001C32B8*)self)->v32();
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
+    vt[32].fn(vthis(self, vt[32]));
     if (bFirstTime != 0) {
         func_001C3EE8(self, 0);
     }

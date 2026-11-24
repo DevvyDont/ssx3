@@ -8692,7 +8692,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
             }
             switch (split.v[pass]) {
             case 6: {
-                for (int k = 0; k < gs->unk_59C0; k++)
+                for (int k = 0; k < gs->mNumViews; k++)
                     func_0036AC00(gs, k, &pkt, path);
                 self->lastTex = -1;
                 prev = 0;
@@ -8714,9 +8714,9 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                 *path += 0x10;
                 *out1 = (int)pkt & 0x0FFFFFFF;
                 *out2 = *path;
-                for (int k = 0; k < gs->unk_59C0; k++)
+                for (int k = 0; k < gs->mNumViews; k++)
                     func_0036C790(gs, k, &pkt, path);
-                for (int k = 0; k < gs->unk_59C0; k++)
+                for (int k = 0; k < gs->mNumViews; k++)
                     func_003904A0(gs, k, &pkt, path);
                 self->lastTex = -1;
                 prev = 0;

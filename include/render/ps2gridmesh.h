@@ -44,6 +44,22 @@ CHECK_OFFSET(cGridMesh, mNext, 0x000);
 CHECK_OFFSET(cGridMesh, mVtbl, 0x004);
 CHECK_SIZE(cGridMesh, 0x008);
 
+struct sShortUV;
+
+// One strip of a cPS2GridMesh buffer's strip table (0x10; name ours): where the strip's vertex attributes sit in its
+// packet buffer. [R] func_00386128 lays the table out; [U] the Update functions write the attributes through it.
+struct tGridMeshStrip {
+    int unk_00;                     // 0x0 no Update access
+    short* mPositions;              // 0x4 [U] cPS2GridMesh_Update / Update2: func_00385A38 writes the scaled positions
+    sShortUV* mUVs;                 // 0x8 [U] cPS2GridMesh_Update1: func_00385BA0 writes the fixed-point u, v
+    unsigned short* mColours;       // 0xC [U] cPS2GridMesh_Update2: func_00385AA0 writes the 16-bit colours
+};
+
+CHECK_OFFSET(tGridMeshStrip, mPositions, 0x4);
+CHECK_OFFSET(tGridMeshStrip, mUVs, 0x8);
+CHECK_OFFSET(tGridMeshStrip, mColours, 0xC);
+CHECK_SIZE(tGridMeshStrip, 0x10);
+
 struct cPS2GridMesh {
     // --- cGridMesh / cGarbageMan (0x8)
     cGridMesh* mNext;               // 0x000 [O] cGarbageMan::mNext (no retail access seen)
@@ -57,19 +73,20 @@ struct cPS2GridMesh {
     unsigned short m_iWidth;        // 0x190 [O] cPSPGridMesh::m_iWidth (an int there); [R] the ctor's width (sh); [U] the
                                     //       Update loops (lhu)
     unsigned short m_iHeight;       // 0x192 [O] cPSPGridMesh::m_iHeight; [R] the ctor's height (sh)
-    float unk_194;                  // 0x194 the scale: [R] 20000.0; [P][U] SetScale(scale) stores it; Render1 reads it
-    float unk_198;                  // 0x198 the position-to-short factor: [R] 32767 / 20000; [P][U] SetScale stores
-                                    //       32767 / scale; func_00385A38 multiplies positions by it
+    float mScale;                   // 0x194 (name ours) the scale: [R] 20000.0; [P][U] SetScale(scale) stores it;
+                                    //        Render1 reads it
+    float mPosToShort;              // 0x198 (name ours) the position-to-short factor: [R] 32767 / 20000; [P][U]
+                                    //        SetScale stores 32767 / scale; func_00385A38 multiplies positions by it
     char* m_pMem;                   // 0x19C [O] cPSPGridMesh::m_pMem; [R] the one "GridMeshMem" allocation (2 packet
                                     //       buffers + 2 strip tables); [P] 0x19C; [U] the dtor frees it
-    int unk_1A0;                    // 0x1A0 the index of the buffer on screen: [R] -1; [U] Update* fill the other one
-                                    //       (index == 0); Render1 swaps it when unk_1A4 is set
+    int mScreenBuffer;              // 0x1A0 (name ours) the index of the buffer on screen: [R] -1; [U] Update* fill the
+                                    //        other one (index == 0); Render1 swaps it when m_bUpdate is set
     int m_bUpdate;                  // 0x1A4 [O] cPSPGridMesh::m_bUpdate (bool; a word here); [R] 0; [U] Update* set it,
                                     //       Render1 clears it
     int unk_1A8;                    // 0x1A8 one buffer's packet size: [U] func_00385EB0 stores it, func_00386128 reads it
-    char* unk_1AC[2];               // 0x1AC the two packet buffers: [R] m_pMem and m_pMem + size
-    void* unk_1B4[2];               // 0x1B4 the two strip tables (16 bytes per strip: {?, positions, uvs, colours});
-                                    //       [R] after the buffers; [U] Update* write through [index]
+    char* mPacketBuffer[2];         // 0x1AC (name ours) the two packet buffers: [R] m_pMem and m_pMem + size
+    tGridMeshStrip* mStripTable[2]; // 0x1B4 (name ours) the two strip tables (one tGridMeshStrip per strip); [R] after
+                                    //        the buffers; [U] Update* write through [index]
     int m_iNumStrip;                // 0x1BC [O] cPSPGridMesh::m_iNumStrip; [R] height - 1; [U] the Update loops
     int m_iStripLen;                // 0x1C0 [O] cPSPGridMesh::m_iStripLen; [R] 2 * width
     cPS2GraphicsMan* m_pGfxMan;     // 0x1C4 [O] cPSPGridMesh::m_pGfxMan; [R] the ctor's graphics manager; [U] Render1
@@ -84,14 +101,14 @@ CHECK_OFFSET(cPS2GridMesh, unk_00C, 0x00C);
 CHECK_OFFSET(cPS2GridMesh, unk_18C, 0x18C);
 CHECK_OFFSET(cPS2GridMesh, m_iWidth, 0x190);
 CHECK_OFFSET(cPS2GridMesh, m_iHeight, 0x192);
-CHECK_OFFSET(cPS2GridMesh, unk_194, 0x194);
-CHECK_OFFSET(cPS2GridMesh, unk_198, 0x198);
+CHECK_OFFSET(cPS2GridMesh, mScale, 0x194);
+CHECK_OFFSET(cPS2GridMesh, mPosToShort, 0x198);
 CHECK_OFFSET(cPS2GridMesh, m_pMem, 0x19C);
-CHECK_OFFSET(cPS2GridMesh, unk_1A0, 0x1A0);
+CHECK_OFFSET(cPS2GridMesh, mScreenBuffer, 0x1A0);
 CHECK_OFFSET(cPS2GridMesh, m_bUpdate, 0x1A4);
 CHECK_OFFSET(cPS2GridMesh, unk_1A8, 0x1A8);
-CHECK_OFFSET(cPS2GridMesh, unk_1AC, 0x1AC);
-CHECK_OFFSET(cPS2GridMesh, unk_1B4, 0x1B4);
+CHECK_OFFSET(cPS2GridMesh, mPacketBuffer, 0x1AC);
+CHECK_OFFSET(cPS2GridMesh, mStripTable, 0x1B4);
 CHECK_OFFSET(cPS2GridMesh, m_iNumStrip, 0x1BC);
 CHECK_OFFSET(cPS2GridMesh, m_iStripLen, 0x1C0);
 CHECK_OFFSET(cPS2GridMesh, m_pGfxMan, 0x1C4);

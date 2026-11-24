@@ -972,8 +972,8 @@ static inline unsigned int gmVCall_B5E8(sGmMan_B5E8* self, int slot)
  * Sets FRAME_1 (32-bit), ZBUF without writes, TEST 0x70000 (depth test GREATER), XYOFFSET from the view, ALPHA_1 17
  * ((Cd - Cs) * Ad + Cs) and PRIM 70 (sprite with blending). RGBAQ is the fog entry's floats at +0x14, +0x18 and +0x1C
  * times 256 with alpha 0x80; a value of 1.0 gives 256 and spills into the next byte. It draws 32-pixel-wide strips at Z
- * 0x7FFF over the saved view rectangle unk_59B0[@p idx] (a width remainder below 32 is not drawn), then restores FRAME,
- * XYOFFSET and SCISSOR from mScissor. No caller.
+ * 0x7FFF over the saved view rectangle mViewScissor[@p idx] (a width remainder below 32 is not drawn), then restores
+ * FRAME, XYOFFSET and SCISSOR from mScissor. No caller.
  *
  * @param idx  the view index
  * @param pp  in/out: the packet write pointer
@@ -1456,7 +1456,7 @@ struct sGmViews_C790 {
  * the entry's IntensityTex2/IntensityTex3 values, each times 127.5; when all are 0 it does nothing. The buffers are at
  * mCurrentZBufferPage << 5 and 0x400 above it, 1 << cLightGlow_m_PS2CaptureSize ("PS2 Capture Size (2^x)") texels square.
  *
- * func_0036B9D8 downsamples the view (unk_59B0[@p idx]) from mCurrentFrameBufferPage with the FrameSrcScale value;
+ * func_0036B9D8 downsamples the view (mViewScissor[@p idx]) from mCurrentFrameBufferPage with the FrameSrcScale value;
  * func_0036C188 subtracts the MinIntensity value and scales by cLightGlow_m_PS2ModIntensity (the global, not the
  * entry). For three levels it composites the current buffer with func_0036C398 when that level's strength is set
  * (FrameDstScale as the scale), then blurs it into the other buffer at half size with four passes of func_0036B9D8

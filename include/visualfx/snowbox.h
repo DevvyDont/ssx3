@@ -98,4 +98,34 @@ CHECK_OFFSET(tSnowBoxData, mBoxScale, 0x4C);
 CHECK_OFFSET(tSnowBoxData, mSnowBoxToWorldMatrix, 0x50);
 CHECK_SIZE(tSnowBoxData, 0x90);
 
+// One view's snowfall settings (On Tour struct tWorldPainterSnowfallParameters, 0x40; names and offsets [O]).
+// [U] cSnowFall_update fills one per view on the stack, from the debug toggles (cSnowfallToggles_m_*) or the render
+// state manager (cRenderStateMan_SnowIntensity ...), and passes the box's view entry to cSnowBox_update, which reads
+// it.
+struct tWorldPainterSnowfallParameters {
+    float mFlakeRatio;              // 0x00 [O]; [U] cRenderStateMan_SnowIntensity; cSnowBox_update: flakes = it * 500
+    float mFlakeWindRatio;          // 0x04 [O]; [U] cRenderStateMan_WindIntensity; flake wind = it * 500
+    float mFluffRatio;              // 0x08 [O]; [U] cRenderStateMan_SnowFluffItensity; fluffs = it * 6
+    float mFluffWindRatio;          // 0x0C [O]; [U] cRenderStateMan_SnowFluffWindIntensity; fluff wind = it * 250
+    float mFlakeSize;               // 0x10 [O]; [U] cRenderStateMan_FlakeSize; copied to cSnowBox::mFlakeSize
+    float mWindRotation;            // 0x14 [O]; [U] cRenderStateMan_WindRotation; the wind angle in degrees
+    float mSnowFlurries;            // 0x18 [O]; [U] cRenderStateMan_SnowFlurries; the random share of the wind
+    float mGravityMultiplier;       // 0x1C [O]; [U] cRenderStateMan_SnowGravityMultiplier; scales cSnowBox::mGravity
+    float mFlakeColourA;            // 0x20 [O]; [U] the flake box's opacity
+    float mFlakeColourR;            // 0x24 [O]
+    float mFlakeColourG;            // 0x28 [O]
+    float mFlakeColourB;            // 0x2C [O]
+    float mFluffColourA;            // 0x30 [O]; [U] the fluff box's opacity
+    float mFluffColourR;            // 0x34 [O]
+    float mFluffColourG;            // 0x38 [O]
+    float mFluffColourB;            // 0x3C [O]
+};
+
+CHECK_OFFSET(tWorldPainterSnowfallParameters, mFlakeRatio, 0x00);
+CHECK_OFFSET(tWorldPainterSnowfallParameters, mGravityMultiplier, 0x1C);
+CHECK_OFFSET(tWorldPainterSnowfallParameters, mFlakeColourA, 0x20);
+CHECK_OFFSET(tWorldPainterSnowfallParameters, mFluffColourA, 0x30);
+CHECK_OFFSET(tWorldPainterSnowfallParameters, mFluffColourB, 0x3C);
+CHECK_SIZE(tWorldPainterSnowfallParameters, 0x40);
+
 #endif

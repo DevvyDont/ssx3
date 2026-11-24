@@ -128,12 +128,12 @@ INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX__cBoardWakeFX);
 #include "visualfx/boardwakefx_classes.h"
 
 /**
- * Destroys a board wake effect's arrays: frees the wake segments (+0xC) and the point rows (+0x10).
+ * Destroys a board wake effect's arrays: frees the wake segments (mWakeLines) and the point rows (mWakeVerts).
  */
 cVbDtor002DCDA0::~cVbDtor002DCDA0()
 {
-    if (m0C != 0) cMemMan_free(m0C);
-    if (m10 != 0) cMemMan_free(m10);
+    if (mWakeLines != 0) cMemMan_free(mWakeLines);
+    if (mWakeVerts != 0) cMemMan_free(mWakeVerts);
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002DCDA0; expose it under the address-derived name.
@@ -1885,14 +1885,14 @@ INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX__cDynamicSprayFX);
 #include "visualfx/boardwakefx_classes.h"
 
 /**
- * Destroys a snow spray effect's arrays: the emitters (+0x28), the spray data (+0x2C) and the bone indices
- * (+0x7C).
+ * Destroys a snow spray effect's arrays: the emitters (mEmitters), the spray data (mSprayData) and the bone indices
+ * (mBoneIndicies).
  */
 cVbDtor002DF1C8::~cVbDtor002DF1C8()
 {
-    delete[] m28;
-    if (m2C != 0) cMemMan_free(m2C);
-    if (m7C != 0) cMemMan_free(m7C);
+    delete[] mEmitters;
+    if (mSprayData != 0) cMemMan_free(mSprayData);
+    if (mBoneIndicies != 0) cMemMan_free(mBoneIndicies);
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002DF1C8; expose it under the address-derived name.
@@ -5860,16 +5860,9 @@ extern "C" void cSnowBox__cSnowBox(int* self, int flags)
 INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_update);
 #ifdef SKIP_ASM
 
-// tWorldPainterSnowfallParameters (filled by cSnowFall_update).
-struct tWorldPainterSnowfallParameters_4F50 {
-    float f[8];                     // 0x00
-    float c0[4];                    // 0x20
-    float c1[4];                    // 0x30
-};
-
 // t4Vector with EA's 4-float constructor.
-struct t4Vec_4F50 : t4Vector {
-    t4Vec_4F50(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
 extern t4Vector t4vect_ZAxis_4F50 __asm__("t4vect_ZAxis");     // t4vect::ZAxis
@@ -5920,40 +5913,39 @@ static inline t4Vector Scale_4F50(float s, const t4Vector& v)
     return r;
 }
 
-// The unit declares cSnowBox_update(int*, sWakeRec_5DA0*) later; define it through a typed alias.
-extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfallParameters_4F50* params) __asm__("cSnowBox_update");
 /**
  * Updates a snow box for this frame: takes its flake settings from the snowfall parameters, varies the wind and moves
  * the box offset.
  *
- * Mode 0 (+0x4) takes its alpha, colour (+0xA4..+0xAC), flake count (parameter 0 * 500), wind strength (parameter 1 *
- * 500) and +0x14 from the first parameter set; mode 1 takes the second colour set, parameter 2 * 6 flakes and parameter
- * 3 * 250 wind. When the wind timer (+0x90) runs out the old wind (+0x30) is kept at +0x40 and a new one is picked: the
- * strength along the parameter-5 angle, mixed with random flurries by parameter 6, for 1 to 5 seconds. The offset
- * (+0x20) moves by the blended wind and the fall (+0x1C * parameter 7) times the frame time (1 / cAppMan_TheAppMan
- * +0x10) and is wrapped into the box size (+0xC). cSnowFall_update calls it per box.
+ * A flake box (mSnowBoxType 0) takes its opacity and colour from the flake colour, mNumFlakes = mFlakeRatio * 500,
+ * mWindScale = mFlakeWindRatio * 500 and mFlakeSize; a fluff box (1) the fluff colour, mFluffRatio * 6 flakes and
+ * mFluffWindRatio * 250 wind. When the wind timer mCurrentTimeToWindChange runs out the old wind mWindNext is kept in
+ * mWindLast and a new one is picked: the strength along the mWindRotation angle, mixed with random flurries by
+ * mSnowFlurries, for 1 to 5 seconds. mOffset moves by the blended wind and the fall (mGravity * mGravityMultiplier)
+ * times the frame time (1 / cAppMan_TheAppMan->TimerHz) and is wrapped into the box size mBoxScale. cSnowFall_update
+ * calls it per box.
  *
  * @param params  the snowfall parameters filled by cSnowFall_update
  */
-extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfallParameters_4F50* params)
+extern "C" void cSnowBox_update(cSnowBox* self, const tWorldPainterSnowfallParameters* params)
 {
     switch (self->mSnowBoxType) {
     case 0:
-        self->mOpacity = params->c0[0];
-        ((float*)&self->mColourR)[0] = params->c0[1];
-        ((float*)&self->mColourR)[1] = params->c0[2];
-        ((float*)&self->mColourR)[2] = params->c0[3];
-        self->mNumFlakes = (int)(params->f[0] * 500.0f);
-        self->mWindScale = params->f[1] * 500.0f;
-        self->mFlakeSize = params->f[4];
+        self->mOpacity = params->mFlakeColourA;
+        self->mColourR = params->mFlakeColourR;
+        self->mColourG = params->mFlakeColourG;
+        self->mColourB = params->mFlakeColourB;
+        self->mNumFlakes = (int)(params->mFlakeRatio * 500.0f);
+        self->mWindScale = params->mFlakeWindRatio * 500.0f;
+        self->mFlakeSize = params->mFlakeSize;
         break;
     case 1:
-        self->mOpacity = params->c1[0];
-        ((float*)&self->mColourR)[0] = params->c1[1];
-        ((float*)&self->mColourR)[1] = params->c1[2];
-        ((float*)&self->mColourR)[2] = params->c1[3];
-        self->mNumFlakes = (int)(params->f[2] * 6.0f);
-        self->mWindScale = params->f[3] * 250.0f;
+        self->mOpacity = params->mFluffColourA;
+        self->mColourR = params->mFluffColourR;
+        self->mColourG = params->mFluffColourG;
+        self->mColourB = params->mFluffColourB;
+        self->mNumFlakes = (int)(params->mFluffRatio * 6.0f);
+        self->mWindScale = params->mFluffWindRatio * 250.0f;
         break;
     }
     const float kTimeDiff = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
@@ -5963,31 +5955,36 @@ extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfall
     float z;
     self->mCurrentTimeToWindChange -= kTimeDiff;
     if (self->mCurrentTimeToWindChange < 0.0f) {
-        *(t4Vector*)&self->mWindLast = *(t4Vector*)&self->mWindNext;
+        self->mWindLast = self->mWindNext;
         float windSin;
         float windCos;
-        sincos_4F50(deg2rad_4F50(params->f[5]), windSin, windCos);
-        t4Vec_4F50 windBaseRotated(self->mWindScale * windCos, self->mWindScale * windSin, 0.0f, 0.0f);
-        t4Vec_4F50 windBaseFlurries(windBaseRotated.x * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale),
-                                    windBaseRotated.y * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale),
-                                    params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale), 0.0f);
-        *(t4Vector*)&self->mWindNext = windBaseFlurries;
+        sincos_4F50(deg2rad_4F50(params->mWindRotation), windSin, windCos);
+        t4VectorXYZW windBaseRotated(self->mWindScale * windCos, self->mWindScale * windSin, 0.0f, 0.0f);
+        t4VectorXYZW windBaseFlurries(
+            windBaseRotated.x * (1.0f - params->mSnowFlurries) +
+                params->mSnowFlurries * FXRand_4F50(-self->mWindScale, self->mWindScale),
+            windBaseRotated.y * (1.0f - params->mSnowFlurries) +
+                params->mSnowFlurries * FXRand_4F50(-self->mWindScale, self->mWindScale),
+            params->mSnowFlurries * FXRand_4F50(-self->mWindScale, self->mWindScale), 0.0f);
+        self->mWindNext = windBaseFlurries;
         self->mCurrentTimeToWindChange = self->mTotalTimeToWindChange = FXRand_4F50(1.0f, 5.0f);
         if (self->mResetWind) {
-            *(t4Vector*)&self->mWindLast = *(t4Vector*)&self->mWindNext;
+            self->mWindLast = self->mWindNext;
             self->mResetWind = 0;
         }
     }
     windBlend = self->mCurrentTimeToWindChange / self->mTotalTimeToWindChange;
-    wakeAddE398(*(t4Vector*)&self->mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(*(t4Vector*)&self->mWindNext, 1.0f - windBlend), wakeScale0EE8(*(t4Vector*)&self->mWindLast, windBlend)), kTimeDiff));
-    wakeAddE398(*(t4Vector*)&self->mOffset, Scale_4F50(self->mGravity * params->f[7] * kTimeDiff, t4vect_ZAxis_4F50));
-    x = (*(t4Vector*)&self->mOffset).x;
-    y = (*(t4Vector*)&self->mOffset).y;
-    z = (*(t4Vector*)&self->mOffset).z;
+    wakeAddE398(self->mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(self->mWindNext, 1.0f - windBlend),
+                                                         wakeScale0EE8(self->mWindLast, windBlend)),
+                                             kTimeDiff));
+    wakeAddE398(self->mOffset, Scale_4F50(self->mGravity * params->mGravityMultiplier * kTimeDiff, t4vect_ZAxis_4F50));
+    x = (self->mOffset).x;
+    y = (self->mOffset).y;
+    z = (self->mOffset).z;
     BringIntoRange_4F50(x, self->mBoxScale);
     BringIntoRange_4F50(y, self->mBoxScale);
     BringIntoRange_4F50(z, self->mBoxScale);
-    *(t4Vector*)&self->mOffset = t4Vec_4F50(x, y, z, 1.0f);
+    self->mOffset = t4VectorXYZW(x, y, z, 1.0f);
 }
 #endif
 
@@ -6396,9 +6393,8 @@ extern float cSnowfallToggles_m_TestSnowFlurries;
 extern float cSnowfallToggles_m_SnowGravityMultiplier;
 extern float cSnowfallToggles_m_SnowFluffItensity;
 extern float cSnowfallToggles_m_SnowFluffWindIntensity;
-struct sWakeV4_5DA0 { float x, y, z, w; };
-extern sWakeV4_5DA0 cSnowfallToggles_m_SnowFlakeColour;
-extern sWakeV4_5DA0 cSnowfallToggles_m_SnowFluffColour;
+extern tARGB cSnowfallToggles_m_SnowFlakeColour;  // [O] static tARGB cSnowfallToggles::m_SnowFlakeColour
+extern tARGB cSnowfallToggles_m_SnowFluffColour;  // [O] static tARGB cSnowfallToggles::m_SnowFluffColour
 extern "C" float cRenderStateMan_SnowIntensity(int i);
 extern "C" float cRenderStateMan_WindIntensity(int i);
 extern "C" float cRenderStateMan_SnowFluffItensity(int i);
@@ -6418,12 +6414,6 @@ extern "C" float cRenderStateMan_SnowFluffColourB(int i);
 void* cGame_getSplashManager(void* self, int i);
 extern "C" void cSplashManager_ReportSnowfall(void* obj, float v);
 
-struct sWakeRec_5DA0 {
-    float f[8];
-    sWakeV4_5DA0 c0;
-    sWakeV4_5DA0 c1;
-};
-extern "C" void cSnowBox_update(int* elem, sWakeRec_5DA0* rec);
 
 /**
  * Updates the falling snow from each view's snow settings, then advances every snow box with its view's
@@ -6438,46 +6428,54 @@ extern "C" void cSnowBox_update(int* elem, sWakeRec_5DA0* rec);
  */
 extern "C" void cSnowFall_update(cSnowFall* self)
 {
-    sWakeRec_5DA0 recs[2];
+    tWorldPainterSnowfallParameters params[2];
     unsigned int i;
     for (i = 0; i < SSXApp->Game->ViewMan->m_uiNumView; i++) {
         if (cSnowfallToggles_m_EnableTest != 0) {
-            recs[i].f[0] = cSnowfallToggles_m_TestSnowIntensity;
-            recs[i].f[1] = cSnowfallToggles_m_TestWindIntensity;
-            recs[i].f[2] = cSnowfallToggles_m_SnowFluffItensity;
-            recs[i].f[3] = cSnowfallToggles_m_SnowFluffWindIntensity;
-            recs[i].f[4] = cSnowfallToggles_m_TestFlakeSize;
-            recs[i].f[5] = cSnowfallToggles_m_TestWindRotation;
-            recs[i].f[6] = cSnowfallToggles_m_TestSnowFlurries;
-            recs[i].f[7] = cSnowfallToggles_m_SnowGravityMultiplier;
-            const sWakeV4_5DA0* flakeColour = &cSnowfallToggles_m_SnowFlakeColour; recs[i].c0.x = flakeColour->x; recs[i].c0.y = flakeColour->y; recs[i].c0.z = flakeColour->z; recs[i].c0.w = flakeColour->w;
-            const sWakeV4_5DA0* fluffColour = &cSnowfallToggles_m_SnowFluffColour; recs[i].c1.x = fluffColour->x; recs[i].c1.y = fluffColour->y; recs[i].c1.z = fluffColour->z; recs[i].c1.w = fluffColour->w;
+            params[i].mFlakeRatio = cSnowfallToggles_m_TestSnowIntensity;
+            params[i].mFlakeWindRatio = cSnowfallToggles_m_TestWindIntensity;
+            params[i].mFluffRatio = cSnowfallToggles_m_SnowFluffItensity;
+            params[i].mFluffWindRatio = cSnowfallToggles_m_SnowFluffWindIntensity;
+            params[i].mFlakeSize = cSnowfallToggles_m_TestFlakeSize;
+            params[i].mWindRotation = cSnowfallToggles_m_TestWindRotation;
+            params[i].mSnowFlurries = cSnowfallToggles_m_TestSnowFlurries;
+            params[i].mGravityMultiplier = cSnowfallToggles_m_SnowGravityMultiplier;
+            const tARGB* flakeColour = &cSnowfallToggles_m_SnowFlakeColour;
+            params[i].mFlakeColourA = flakeColour->A;
+            params[i].mFlakeColourR = flakeColour->R;
+            params[i].mFlakeColourG = flakeColour->G;
+            params[i].mFlakeColourB = flakeColour->B;
+            const tARGB* fluffColour = &cSnowfallToggles_m_SnowFluffColour;
+            params[i].mFluffColourA = fluffColour->A;
+            params[i].mFluffColourR = fluffColour->R;
+            params[i].mFluffColourG = fluffColour->G;
+            params[i].mFluffColourB = fluffColour->B;
         } else {
             int k = (i == 0) ? 6 : 7;
-            recs[i].f[0] = cRenderStateMan_SnowIntensity(k);
-            recs[i].f[1] = cRenderStateMan_WindIntensity(k);
-            recs[i].f[2] = cRenderStateMan_SnowFluffItensity(k);
-            recs[i].f[3] = cRenderStateMan_SnowFluffWindIntensity(k);
-            recs[i].f[4] = cRenderStateMan_FlakeSize(k);
-            recs[i].f[5] = cRenderStateMan_WindRotation(k);
-            recs[i].f[6] = cRenderStateMan_SnowFlurries(k);
-            recs[i].f[7] = cRenderStateMan_SnowGravityMultiplier(k);
-            recs[i].c0.x = cRenderStateMan_SnowFlakeColourA(k);
-            recs[i].c0.y = cRenderStateMan_SnowFlakeColourR(k);
-            recs[i].c0.z = cRenderStateMan_SnowFlakeColourG(k);
-            recs[i].c0.w = cRenderStateMan_SnowFlakeColourB(k);
-            recs[i].c1.x = cRenderStateMan_SnowFluffColourA(k);
-            recs[i].c1.y = cRenderStateMan_SnowFluffColourR(k);
-            recs[i].c1.z = cRenderStateMan_SnowFluffColourG(k);
-            recs[i].c1.w = cRenderStateMan_SnowFluffColourB(k);
+            params[i].mFlakeRatio = cRenderStateMan_SnowIntensity(k);
+            params[i].mFlakeWindRatio = cRenderStateMan_WindIntensity(k);
+            params[i].mFluffRatio = cRenderStateMan_SnowFluffItensity(k);
+            params[i].mFluffWindRatio = cRenderStateMan_SnowFluffWindIntensity(k);
+            params[i].mFlakeSize = cRenderStateMan_FlakeSize(k);
+            params[i].mWindRotation = cRenderStateMan_WindRotation(k);
+            params[i].mSnowFlurries = cRenderStateMan_SnowFlurries(k);
+            params[i].mGravityMultiplier = cRenderStateMan_SnowGravityMultiplier(k);
+            params[i].mFlakeColourA = cRenderStateMan_SnowFlakeColourA(k);
+            params[i].mFlakeColourR = cRenderStateMan_SnowFlakeColourR(k);
+            params[i].mFlakeColourG = cRenderStateMan_SnowFlakeColourG(k);
+            params[i].mFlakeColourB = cRenderStateMan_SnowFlakeColourB(k);
+            params[i].mFluffColourA = cRenderStateMan_SnowFluffColourA(k);
+            params[i].mFluffColourR = cRenderStateMan_SnowFluffColourR(k);
+            params[i].mFluffColourG = cRenderStateMan_SnowFluffColourG(k);
+            params[i].mFluffColourB = cRenderStateMan_SnowFluffColourB(k);
         }
-        cSplashManager_ReportSnowfall(cGame_getSplashManager(SSXApp->Game, i), recs[i].f[0]);
+        cSplashManager_ReportSnowfall(cGame_getSplashManager(SSXApp->Game, i), params[i].mFlakeRatio);
     }
     int j;
     for (j = 0; j < 12; j++) {
-        int* snowBox = ((int*)self->mSnowBoxes[j]);
+        cSnowBox* snowBox = self->mSnowBoxes[j];
         if (snowBox != 0) {
-            cSnowBox_update(snowBox, &recs[*snowBox]);
+            cSnowBox_update(snowBox, &params[snowBox->mViewNum]);
         }
     }
 }
@@ -6734,12 +6732,12 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX__cSpeedBoostFX);
 #include "visualfx/boardwakefx_classes.h"
 
 /**
- * Destroys a speed boost effect: frees its ribbon points and calls func_0037C720 on the graphics manager with
- * 0.
+ * Destroys a speed boost effect: frees its ribbon points (mStreamBuf) and calls func_0037C720 on the graphics manager
+ * with 0.
  */
 cVbDtor002E64C0::~cVbDtor002E64C0()
 {
-    if (m3AC != 0) cMemMan_free(m3AC);
+    if (mStreamBuf != 0) cMemMan_free(mStreamBuf);
     func_0037C720(GrMan_boardwakefx, 0.0f);
 }
 

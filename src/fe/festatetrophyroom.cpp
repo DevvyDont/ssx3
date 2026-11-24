@@ -1637,12 +1637,13 @@ struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
  * Switches the audio output mode, restarting the sound system when the mode changes.
  *
  * The output setting @p mode maps to an SSXAUDIO mode: 1 -> 2, 2 -> 0, 3 -> 3, anything else -> 1. The audio object
- * (cAudioInterface_bxAudio) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's first
- * pointer; only when that returns 1 does the restart run: it saves the SFX, speech and music volumes (func_00287670,
- * cSSXAudio_GetSFXVolume, func_002876D0), the DJ-speech flag (+0x62B8), the arcade-SFX flag (+0x62B4) and the +0x534 word, then calls
- * cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(new mode), puts the volumes and flags back (func_00287410,
- * cSSXAudio_SetSFXVolume, func_00287520, cSSXAudio_SetDJSpeech, cSSXAudio_SetArcadeSFX), reloads with cSSXAudio_FrontEndLoad and hands the saved
- * +0x534 word back through virtual slot 4 of the audio object's second base.
+ * (cAudioInterface_bxAudio) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's
+ * first pointer; only when that returns 1 does the restart run: it saves the SFX, speech and music volumes
+ * (func_00287670, cSSXAudio_GetSFXVolume, func_002876D0), the DJ-speech flag (mDJSpeech), the arcade-SFX flag (+0x62B4)
+ * and the +0x534 word, then calls cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(new mode), puts the
+ * volumes and flags back (func_00287410, cSSXAudio_SetSFXVolume, func_00287520, cSSXAudio_SetDJSpeech,
+ * cSSXAudio_SetArcadeSFX), reloads with cSSXAudio_FrontEndLoad and hands the saved +0x534 word back through virtual
+ * slot 4 of the audio object's second base.
  *
  * @param mode  the output setting, 0-3 (bits 12-13 of cBEOptionInterface_mOption)
  */
@@ -1668,7 +1669,7 @@ extern "C" void cFEMemCard_setSoundMode(unsigned int mode)
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
-        int djSpeech = cAudioInterface_bxAudio()->unk_62B8;
+        int djSpeech = cAudioInterface_bxAudio()->mDJSpeech;
         int arcadeSfx = cAudioInterface_bxAudio()->mArcadeSFX;
         int saved534 = cAudioInterface_bxAudio()->MusicSys.unk_41C;
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());

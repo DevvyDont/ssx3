@@ -129,9 +129,14 @@ struct cSSXAudio {
     // --- cSSXAudio (own fields 0x5728..0x6C90; fields from mGruntCycle on follow On Tour's cSSXAudio member order, retail-only fields before it)
     void* unk_5728;                     // 0x5728 [R] ctor 0; dtor closes it with FILESYS_delbigsync(h, 100); [U] func_0029ED90 opens a language stream file into it
     int unk_572C;                       // 0x572C [R] ctor -1; [U] func_0029ED90: language mode of the stream in unk_5728
-    float unk_5730;                     // 0x5730 [R] ctor 1.0f; [U] cSSXAudio_UpdateSpeechVolume returns &it as the volume control of speech type 0xB
-    int unk_5734;                       // 0x5734 [R] ctor 0; [U] cSSXAudio_PlayGrunt
-    int unk_5738;                       // 0x5738 [U] cSSXAudio_GetSpeechVolumeIdentifier sets it from a speech name prefix (DJ_ 2/11, PA_ 3, Arcade 10, else 4); func_0029F088 returns it
+    float mFrontEndDJVolume;            // 0x5730 (name ours) [R] ctor 1.0f; [U] cSSXAudio_UpdateSpeechVolume returns
+                                        //        &it as the volume control of a front-end DJ line (class 11), so those
+                                        //        play at 1.0
+    int mGruntPatchCycle;               // 0x5734 (name ours) [R] ctor 0; [U] cSSXAudio_PlayGrunt: the patch of a
+                                        //        cycling grunt, advanced after each use and wrapped to 0 at 6
+    int mSpeechVolumeID;                // 0x5738 (name ours) [U] cSSXAudio_GetSpeechVolumeIdentifier stores speech
+                                        //        instance 0's volume class from the file name prefix (DJ_ 2/11, PA_ 3,
+                                        //        Arcade 10, else 4); func_0029F088 returns it
     int unk_573C;                       // 0x573C [U] func_002A2E50
     int unk_5740;                       // 0x5740 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
     int unk_5744;                       // 0x5744 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
@@ -146,17 +151,28 @@ struct cSSXAudio {
     int unk_5768;                       // 0x5768 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
     int unk_576C;                       // 0x576C [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
     int unk_5770;                       // 0x5770 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5774;                       // 0x5774 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5778;                       // 0x5778 [U] cSSXAudio_CountdownGateDrop/func_002A3170/func_002A43B8
+    int mSongAnnouncePending;           // 0x5774 (name ours) [R] ctor; [U] the DJ's pending song announcement: set with
+                                        //        mSongAnnounceNum by cSSXAudio_CountdownGateDrop, func_002A3170 and
+                                        //        cSSXAudio_StartEventWithNoStartGate; func_002A43B8 plays
+                                        //        func_002A2860(mSongAnnounceNum) and clears it; reset by func_002A4550
+    int mSongAnnounceNum;               // 0x5778 (name ours) [U] the song number func_002A43B8 passes to func_002A2860
+                                        //        (the DJ's song announcement); stored from func_002B4908 (the current
+                                        //        song) with mSongAnnouncePending
     int unk_577C;                       // 0x577C [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
     int unk_5780;                       // 0x5780 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
     int unk_5784;                       // 0x5784 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5788;                       // 0x5788 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
+    int mRiderRemarkPending;            // 0x5788 (name ours) [R] ctor; [U] cSSXAudio_StartEventWithNoStartGate sets it
+                                        //        in game events 4 and 5; func_002A43B8 then plays func_002A1138(0, 0)
+                                        //        (speech line 8403, a rider about another) and clears it; reset by
+                                        //        func_002A4550
     int unk_578C;                       // 0x578C [R] ctor 0; [U] func_002A2E50, func_002A4A78; retail accessor 0x2BAD48 (lw)
     int unk_5790;                       // 0x5790 [R] ctor 1; [U] func_002A2E50; retail accessor 0x2BAD50 (lw)
     int unk_5794;                       // 0x5794 [R] ctor 1; [U] func_002A26F0
     int unk_5798;                       // 0x5798 [R] ctor -1; [U] func_002A2E50
-    int unk_579C[23];                   // 0x579C [R] ctor zeroes 23; [U] cSSXAudio_InGameInit passes its address
+    int mFirstTimeOnTrack[23];          // 0x579C (name ours) [R] ctor zeroes 23; [U] cSSXAudio_InGameInit fills entry i
+                                        //        with cBENewPlayerInterface_isFirstTimeOnTrack(rider, i) for the 23
+                                        //        tracks; func_0028E548 tests entries for 1 and clears them,
+                                        //        func_0028E8C0 tests [mTransportTrack] != 1
     int unk_57F8;                       // 0x57F8 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
     int unk_57FC;                       // 0x57FC [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
     int unk_5800;                       // 0x5800 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
@@ -166,10 +182,15 @@ struct cSSXAudio {
     int unk_5810;                       // 0x5810 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
     int unk_5814;                       // 0x5814 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
     int unk_5818;                       // 0x5818 [R] ctor 0; [U] func_002A49E8/func_002A4A38/func_002A4A68
-    int unk_581C;                       // 0x581C [R] ctor -1; [U] cSSXAudio_UpdateLandedUber
-    int unk_5820;                       // 0x5820 [R] ctor 0; [U] cSSXAudio_UpdateLandedUber
-    int unk_5824;                       // 0x5824 [U] cSSXAudio_CountdownGateDrop
-    int unk_5828;                       // 0x5828 [R] ctor 0
+    int mLastUberLevel;                 // 0x581C (name ours) [R] ctor -1; [U] cSSXAudio_UpdateLandedUber: the focus
+                                        //        rider's mUberLevel last frame (the DJ event fires when it becomes 10)
+    int mUberViewIndex;                 // 0x5820 (name ours) [R] ctor 0; [U] cSSXAudio_UpdateLandedUber: the focus
+                                        //        rider's mViewIndex; a change only records the new view
+    int mGateDropHeat;                  // 0x5824 (name ours) [U] cSSXAudio_CountdownGateDrop stores cGameModeMan
+                                        //        iHeatNum; cSSXAudio_PartialRestart compares it with iNextHeat
+    int mStopSpeechOnResume;            // 0x5828 (name ours) [R] ctor 0; [U] func_0028FAE0 (map-screen music restart)
+                                        //        sets it; cSSXAudio_ResumeAudio then stops speech instance 0, clears
+                                        //        the pending speech flags (func_002A4550) and clears it
     int mGruntCycle;                    // 0x582C [O] first own member; [U] cSSXAudio_StartEvent/cSSXAudio_StartEventWithNoStartGate set it, func_002A0560 reads it
     float mWindVolume;                  // 0x5830 [O]; [U] cSSXAudio_BeginWind passes &it as the stream's volume control, cSSXAudio_EndWind and cSSXAudio_BeginAllRiderSound clear it
     int mWindPlaying;                   // 0x5834 [O] (On Tour bool); [U] BeginWind/EndWind
@@ -230,7 +251,9 @@ struct cSSXAudio {
                                         //        ...); retail accessor 0x2BAD68; the radio mode: values 0..3 as
                                         //        On Tour's eRadioModeID (cSSXAudio_NeedWPAmbience tests 2,
                                         //        kRADIOMODE_MOUNTAIN); the preview's GetRadioModeID (0x6134; the paired NeedWPAmbience reads it)
-    int unk_6090;                       // 0x6090 [R] ctor 0; [U] cSSXAudio_FrontEndLoad copies mRadioModeID into it, cSSXAudio_FrontEndPurge tests == 2
+    int mFrontEndRadioModeID;           // 0x6090 (name ours) [R] ctor 0; [U] cSSXAudio_FrontEndLoad copies mRadioModeID
+                                        //        into it, cSSXAudio_FrontEndPurge stops the stream (instead of a fade)
+                                        //        when it or mRadioModeID is 2
     char unk_6094[0x4];                 // 0x6094 no retail access seen (or padding)
     unsigned long mRadioPlayList;       // 0x6098 PORT: 64-bit long; [P] GetRadioPlayList (preview 0x6138, retail 0x2BAD70 ld 0x6098; layout_xlate pair-seen); [R] ctor sd 0
     float unk_60A0;                     // 0x60A0 [U] func_0028C8C8: the song's overlay level during a long jump
@@ -253,10 +276,16 @@ struct cSSXAudio {
                                         //        kWPR_MusicTrigger queries, cSSXAudio_InGameDeInit frees them,
                                         //        cSSXAudio_UpdateAudioWorldPainter queries them
                                         //        (result to func_0028D988)
-    int unk_6264;                       // 0x6264 [U] cSSXAudio_InGameInit stores
-    int unk_6268;                       // 0x6268 [U] cSSXAudio_InGameInit stores
+    int mLastMusicTriggerType;          // 0x6264 (name ours) [U] func_0028D988 compares the music-trigger region's
+                                        //        m_Type (its query result's slot 1) with it and stores it;
+                                        //        cSSXAudio_InGameInit = -1
+    int mLastMusicTriggerValue;         // 0x6268 (name ours) [U] func_0028D988 compares the music-trigger region's
+                                        //        m_Value (its query result's slot 2) with it and stores it;
+                                        //        cSSXAudio_InGameInit = -1
     int unk_626C;                       // 0x626C [U] cSSXAudio_InGameInit stores
-    int unk_6270;                       // 0x6270 [U] cSSXAudio_InGameInit stores
+    int mMusicTriggerReady;             // 0x6270 (name ours) [U] cSSXAudio_InGameInit = 1; func_0028D988 sets it on
+                                        //        leaving a type 1 / 2 trigger region (type -1), acts on a state-11
+                                        //        trigger only while it is set, and clears it after acting
     int mMusicRequestPending;           // 0x6274 (name ours) [U] cSSXAudio_InGameInit stores; func_0028E088 sets 1 with
                                         //        mMusicRequest, func_0028E100 acts while set and clears it (the shift
                                         //        here is -0x94: the preview's PathfinderCanChangeVolume is
@@ -265,27 +294,43 @@ struct cSSXAudio {
                                         //        mData1), func_0028E100 carries it out (0 peak theme, 2 location
                                         //        song, 4 stop, else event 36 / 0). Not the preview's
                                         //        SetTransportTrack field: that is mTransportTrack, shift -0x94
-    int unk_627C;                       // 0x627C [R] ctor 1; [U] cSSXAudio_InGameLoad, cSSXAudio_CountdownBeep, cSSXAudio_CountdownGateDrop
+    int mRaceMusicOn;                   // 0x627C (name ours) [R] ctor 1; [U] cSSXAudio_InGameLoad = 1;
+                                        //        cSSXAudio_OnFinishEvent clears it when it plays the between-heats
+                                        //        track 36; cSSXAudio_CountdownBeep starts the race music only when set;
+                                        //        cSSXAudio_CountdownGateDrop sets it (music state 37) when clear;
+                                        //        func_0028E8C0 sets it on transport start, tests it on transport end
     int mPathfinderCanChangeVolume;                       // 0x6280 [P] PathfinderCanChangeVolume__9cSSXAudio (preview 0x6314; func_002AF6C0 = preview 0x281170); retail accessor 0x2BADA0 (lw); [U] the Pathfinder volume callback applies a volume only when set
     int mTransportTrack;                       // 0x6284 [P] SetTransportTrack__9cSSXAudio13eBELocationID (preview 0x6318: both ctors store 23 there, kMAX_LOCATIONS); [R] ctor 23; [U] func_0028F558 stores the map screen's location
-    int unk_6288;                       // 0x6288 [U] cSSXAudio_InGameInit
+    int mMusicRampState;                // 0x6288 (name ours) [U] cSSXAudio_InGameInit = 0; func_0028F000 starts a
+                                        //        volume ramp (mMusicRampCounter = 0) when it is not 2 and sets it to 2
     int mMusicRampCounter;              // 0x628C (name ours) [U] func_0028F000: zeroed when a volume ramp starts
-                                        //        (unk_6288 = 2), then counted up to the tier's 800 / 1000 / 1200
-    int unk_6290;                       // 0x6290 [U] cSSXAudio_FrontEndLoad stores 10
+                                        //        (mMusicRampState = 2), then counted up to the tier's 800 / 1000 / 1200
+    int mFrontEndMusicMode;             // 0x6290 (name ours) [U] func_0028F140 switches the front-end music to a mode
+                                        //        (0-9) only when it differs from this, then stores it;
+                                        //        cSSXAudio_FrontEndLoad stores 10 (no mode, so the next switch
+                                        //        applies); func_0028FC58 restores it
     int unk_6294;                       // 0x6294 [R] ctor 0
-    int unk_6298;                       // 0x6298 [R] ctor 0; [U] cSSXAudio_CountdownGateDrop
+    int mReplaySongPlaying;             // 0x6298 (name ours) [R] ctor 0; [U] func_0028F200 (replay music) sets it when
+                                        //        a song is playing, func_0028F2C0 then sets music state 36 and clears
+                                        //        it; cSSXAudio_CountdownGateDrop sets state 37 in a replay when set
     int mLastMusicState;                // 0x629C (name ours) [U] func_0028DEF0 stores its argument (11, 13, 18) and
                                         //        reports whether it changed; func_0028DF08 resets it to -1
     int mMusicEventOwner;               // 0x62A0 (name ours) [U] the AI index (cRider virtual slot 7) of the rider
                                         //        whose music event runs, -1 for none: func_0028CF98 resets it,
                                         //        func_0028D630 claims it, func_0028D740 / func_0028D7D8 test and release
     int unk_62A4;                       // 0x62A4 [R] ctor -1
-    int unk_62A8;                       // 0x62A8 [R] ctor -1; [U] cSSXAudio_WorldSound, cSSXAudio_AttachSound
+    int mLoadingLoopHandle;             // 0x62A8 (name ours) [R] ctor -1; [U] the loading-screen loop's voice handle
+                                        //        (bank 13, patch 0): func_0028F768 starts it, func_0028FA98 stops it
+                                        //        (-1 = none); cSSXAudio_WorldSound and cSSXAudio_AttachSound play
+                                        //        nothing while it is >= 0
     int mSavedSongNum;                  // 0x62AC (name ours) [U] func_0028CDF8 saves MusicSys.mCurrentSongNum before
                                         //        the podium tune; func_0028F200 (replay music) restores it
     int mAudioMode;                     // 0x62B0 [O] eSOUNDDEF_MODE; [R] ctor stores its audioMode argument; [U] cSSXAudio_SetMode stores, cSSXAudio_Calc3DPos and cSSXAudio_GetCurrentSoundMode (GetMode) read
     int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] cSSXAudio_SetArcadeSFX stores it (and sets volume controls 9/10); cSSXAudio_SetSFXVolume re-applies controls 9/10 only when set
-    int unk_62B8;                       // 0x62B8 [R] ctor 0; [U] cSSXAudio_SetDJSpeech stores 1/0; func_00287410 re-applies control 2 only when set (and the mode is not 2)
+    int mDJSpeech;                      // 0x62B8 (name ours) [R] ctor 0; [U] cSSXAudio_SetDJSpeech stores 1 (DJ volume
+                                        //        control 2 on) or 0; func_00287410 re-applies control 2 only when set
+                                        //        (and the radio mode is not 2); retail accessor func_002BADB0 returns
+                                        //        it
     tSoundVolume mSoundVolume[11];      // 0x62BC [O]; [U] cSSXAudio_DuckVolume: entry j curVolume * duck -> duckedVolume, * mMixLevel[j] -> appliedVolume
     float mCharacterVolume[10];         // 0x636C (name ours) per-character voice level, indexed Moby .. Deiter: [U] DuckVolume/MixVolume (cSSXAudio_DuckVolume/cSSXAudio_UpdateDuck/cSSXAudio_MixVolume/cSSXAudio_UpdateMix): mSoundVolume[4].appliedVolume times constants gMobyScaling..
     float mDuckLevel[11];               // 0x6394 [O]; [R] ctor 11 x 1.0f; [U] DuckVolume writes [j]
@@ -353,9 +398,9 @@ CHECK_OFFSET(cSSXAudio, unk_5720, 0x5720);
 CHECK_OFFSET(cSSXAudio, unk_5724, 0x5724);
 CHECK_OFFSET(cSSXAudio, unk_5728, 0x5728);
 CHECK_OFFSET(cSSXAudio, unk_572C, 0x572C);
-CHECK_OFFSET(cSSXAudio, unk_5730, 0x5730);
-CHECK_OFFSET(cSSXAudio, unk_5734, 0x5734);
-CHECK_OFFSET(cSSXAudio, unk_5738, 0x5738);
+CHECK_OFFSET(cSSXAudio, mFrontEndDJVolume, 0x5730);
+CHECK_OFFSET(cSSXAudio, mGruntPatchCycle, 0x5734);
+CHECK_OFFSET(cSSXAudio, mSpeechVolumeID, 0x5738);
 CHECK_OFFSET(cSSXAudio, unk_573C, 0x573C);
 CHECK_OFFSET(cSSXAudio, unk_5740, 0x5740);
 CHECK_OFFSET(cSSXAudio, unk_5744, 0x5744);
@@ -370,17 +415,17 @@ CHECK_OFFSET(cSSXAudio, unk_5764, 0x5764);
 CHECK_OFFSET(cSSXAudio, unk_5768, 0x5768);
 CHECK_OFFSET(cSSXAudio, unk_576C, 0x576C);
 CHECK_OFFSET(cSSXAudio, unk_5770, 0x5770);
-CHECK_OFFSET(cSSXAudio, unk_5774, 0x5774);
-CHECK_OFFSET(cSSXAudio, unk_5778, 0x5778);
+CHECK_OFFSET(cSSXAudio, mSongAnnouncePending, 0x5774);
+CHECK_OFFSET(cSSXAudio, mSongAnnounceNum, 0x5778);
 CHECK_OFFSET(cSSXAudio, unk_577C, 0x577C);
 CHECK_OFFSET(cSSXAudio, unk_5780, 0x5780);
 CHECK_OFFSET(cSSXAudio, unk_5784, 0x5784);
-CHECK_OFFSET(cSSXAudio, unk_5788, 0x5788);
+CHECK_OFFSET(cSSXAudio, mRiderRemarkPending, 0x5788);
 CHECK_OFFSET(cSSXAudio, unk_578C, 0x578C);
 CHECK_OFFSET(cSSXAudio, unk_5790, 0x5790);
 CHECK_OFFSET(cSSXAudio, unk_5794, 0x5794);
 CHECK_OFFSET(cSSXAudio, unk_5798, 0x5798);
-CHECK_OFFSET(cSSXAudio, unk_579C, 0x579C);
+CHECK_OFFSET(cSSXAudio, mFirstTimeOnTrack, 0x579C);
 CHECK_OFFSET(cSSXAudio, unk_57F8, 0x57F8);
 CHECK_OFFSET(cSSXAudio, unk_57FC, 0x57FC);
 CHECK_OFFSET(cSSXAudio, unk_5800, 0x5800);
@@ -390,10 +435,10 @@ CHECK_OFFSET(cSSXAudio, unk_580C, 0x580C);
 CHECK_OFFSET(cSSXAudio, unk_5810, 0x5810);
 CHECK_OFFSET(cSSXAudio, unk_5814, 0x5814);
 CHECK_OFFSET(cSSXAudio, unk_5818, 0x5818);
-CHECK_OFFSET(cSSXAudio, unk_581C, 0x581C);
-CHECK_OFFSET(cSSXAudio, unk_5820, 0x5820);
-CHECK_OFFSET(cSSXAudio, unk_5824, 0x5824);
-CHECK_OFFSET(cSSXAudio, unk_5828, 0x5828);
+CHECK_OFFSET(cSSXAudio, mLastUberLevel, 0x581C);
+CHECK_OFFSET(cSSXAudio, mUberViewIndex, 0x5820);
+CHECK_OFFSET(cSSXAudio, mGateDropHeat, 0x5824);
+CHECK_OFFSET(cSSXAudio, mStopSpeechOnResume, 0x5828);
 CHECK_OFFSET(cSSXAudio, mGruntCycle, 0x582C);
 CHECK_OFFSET(cSSXAudio, mWindVolume, 0x5830);
 CHECK_OFFSET(cSSXAudio, mWindPlaying, 0x5834);
@@ -441,7 +486,7 @@ CHECK_OFFSET(cSSXAudio, mLastTime, 0x607C);
 CHECK_OFFSET(cSSXAudio, mLastWipeoutRecoverPercent, 0x6080);
 CHECK_OFFSET(cSSXAudio, mPausedSFXForMapScreen, 0x6088);
 CHECK_OFFSET(cSSXAudio, mRadioModeID, 0x608C);
-CHECK_OFFSET(cSSXAudio, unk_6090, 0x6090);
+CHECK_OFFSET(cSSXAudio, mFrontEndRadioModeID, 0x6090);
 CHECK_OFFSET(cSSXAudio, unk_6094, 0x6094);
 CHECK_OFFSET(cSSXAudio, mRadioPlayList, 0x6098);
 CHECK_OFFSET(cSSXAudio, unk_60A0, 0x60A0);
@@ -457,28 +502,28 @@ CHECK_OFFSET(cSSXAudio, unk_6250, 0x6250);
 CHECK_OFFSET(cSSXAudio, unk_6254, 0x6254);
 CHECK_OFFSET(cSSXAudio, unk_6258, 0x6258);
 CHECK_OFFSET(cSSXAudio, mpMusicTriggerQuery, 0x625C);
-CHECK_OFFSET(cSSXAudio, unk_6264, 0x6264);
-CHECK_OFFSET(cSSXAudio, unk_6268, 0x6268);
+CHECK_OFFSET(cSSXAudio, mLastMusicTriggerType, 0x6264);
+CHECK_OFFSET(cSSXAudio, mLastMusicTriggerValue, 0x6268);
 CHECK_OFFSET(cSSXAudio, unk_626C, 0x626C);
-CHECK_OFFSET(cSSXAudio, unk_6270, 0x6270);
+CHECK_OFFSET(cSSXAudio, mMusicTriggerReady, 0x6270);
 CHECK_OFFSET(cSSXAudio, mMusicRequestPending, 0x6274);
 CHECK_OFFSET(cSSXAudio, mMusicRequest, 0x6278);
-CHECK_OFFSET(cSSXAudio, unk_627C, 0x627C);
+CHECK_OFFSET(cSSXAudio, mRaceMusicOn, 0x627C);
 CHECK_OFFSET(cSSXAudio, mPathfinderCanChangeVolume, 0x6280);
 CHECK_OFFSET(cSSXAudio, mTransportTrack, 0x6284);
-CHECK_OFFSET(cSSXAudio, unk_6288, 0x6288);
+CHECK_OFFSET(cSSXAudio, mMusicRampState, 0x6288);
 CHECK_OFFSET(cSSXAudio, mMusicRampCounter, 0x628C);
-CHECK_OFFSET(cSSXAudio, unk_6290, 0x6290);
+CHECK_OFFSET(cSSXAudio, mFrontEndMusicMode, 0x6290);
 CHECK_OFFSET(cSSXAudio, unk_6294, 0x6294);
-CHECK_OFFSET(cSSXAudio, unk_6298, 0x6298);
+CHECK_OFFSET(cSSXAudio, mReplaySongPlaying, 0x6298);
 CHECK_OFFSET(cSSXAudio, mLastMusicState, 0x629C);
 CHECK_OFFSET(cSSXAudio, mMusicEventOwner, 0x62A0);
 CHECK_OFFSET(cSSXAudio, unk_62A4, 0x62A4);
-CHECK_OFFSET(cSSXAudio, unk_62A8, 0x62A8);
+CHECK_OFFSET(cSSXAudio, mLoadingLoopHandle, 0x62A8);
 CHECK_OFFSET(cSSXAudio, mSavedSongNum, 0x62AC);
 CHECK_OFFSET(cSSXAudio, mAudioMode, 0x62B0);
 CHECK_OFFSET(cSSXAudio, mArcadeSFX, 0x62B4);
-CHECK_OFFSET(cSSXAudio, unk_62B8, 0x62B8);
+CHECK_OFFSET(cSSXAudio, mDJSpeech, 0x62B8);
 CHECK_OFFSET(cSSXAudio, mSoundVolume, 0x62BC);
 CHECK_OFFSET(cSSXAudio, mCharacterVolume, 0x636C);
 CHECK_OFFSET(cSSXAudio, mDuckLevel, 0x6394);

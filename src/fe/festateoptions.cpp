@@ -1599,7 +1599,7 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
-        int djSpeech = cAudioInterface_bxAudio()->unk_62B8;
+        int djSpeech = cAudioInterface_bxAudio()->mDJSpeech;
         int arcadeSfx = cAudioInterface_bxAudio()->mArcadeSFX;
         int saved534 = cAudioInterface_bxAudio()->MusicSys.unk_41C;
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());

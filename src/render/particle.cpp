@@ -3276,10 +3276,15 @@ extern "C" int cPS2GraphicsMan_SetDisplayMode1(cPS2GraphicsMan* self, int idx)
     if (self->CurrentDisplayMode == idx) {
         return 1;
     }
-    func_0037BD98_3764C0(self, ((unsigned int)(self->DisplayModes)[idx].unk_080), ((unsigned int)(self->DisplayModes)[idx].unk_084), ((unsigned int)(self->DisplayModes)[idx].unk_088),
-                         ((unsigned int)(self->DisplayModes)[idx].unk_08C), ((unsigned int)(self->DisplayModes)[idx].unk_090), ((unsigned int)(self->DisplayModes)[idx].unk_094),
-                         ((unsigned int)(self->DisplayModes)[idx].unk_098), 0, (*(bool*)&(self->DisplayModes)[idx].unk_09C) ? 1 : 0,
-                         (*(bool*)&(self->DisplayModes)[idx].unk_09C) ? 0 : 1, (self->DisplayModes)[idx].unk_0A0);
+    func_0037BD98_3764C0(self, ((unsigned int)(self->DisplayModes)[idx].mDisplayWidth),
+                         ((unsigned int)(self->DisplayModes)[idx].mDisplayHeight),
+                         ((unsigned int)(self->DisplayModes)[idx].mFrameWidth),
+                         ((unsigned int)(self->DisplayModes)[idx].mFrameHeight),
+                         ((unsigned int)(self->DisplayModes)[idx].mDisplayPSM),
+                         ((unsigned int)(self->DisplayModes)[idx].mFramePSM),
+                         ((unsigned int)(self->DisplayModes)[idx].mZBufferPSM), 0,
+                         (*(bool*)&(self->DisplayModes)[idx].mInterlace) ? 1 : 0,
+                         (*(bool*)&(self->DisplayModes)[idx].mInterlace) ? 0 : 1, (self->DisplayModes)[idx].mDTV);
     self->CurrentDisplayMode = idx;
     return 1;
 }
@@ -3382,8 +3387,8 @@ extern "C" void cPS2GraphicsMan_sViewportStack_operatorE(sViewportStack* dst, sV
 
 /**
  * Pushes the viewport stack: saves the scissor, the DeferMan scissor index, the screen, world, view, guard-band,
- * view-projection and net matrices, the guard and screen scales and offsets, and the clip bounds (unk_6B70 /
- * unk_6B80) into mViewportStack[mViewportDepth], then increments mViewportDepth and copies the entry into the new top
+ * view-projection and net matrices, the guard and screen scales and offsets, and the clip bounds (mClipMin /
+ * mClipMax) into mViewportStack[mViewportDepth], then increments mViewportDepth and copies the entry into the new top
  * (cPS2GraphicsMan_sViewportStack_operatorE). No overflow check.
  */
 extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
@@ -3391,11 +3396,11 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
     *(tDeferViewPort*)&viewportStack->mScissor[0] = *(tDeferViewPort*)&self->mScissor[0];
     viewportStack->mDeferScissorIndex = self->mpDeferMan->mActivePortIndex;
-    viewportStack->unk_024 = self->unk_590C;
-    viewportStack->unk_028 = self->unk_5908;
+    viewportStack->mPerspFar = self->mPerspFar;
+    viewportStack->mPerspFov = self->mPerspFov;
     vu0CopyMtx65B8((&viewportStack->mScreenMatrix), (&self->mScreenMatrix));
-    *(&viewportStack->unk_030) = *(&self->unk_6B70);
-    *(&viewportStack->unk_040) = *(&self->unk_6B80);
+    *(&viewportStack->mClipMin) = *(&self->mClipMin);
+    *(&viewportStack->mClipMax) = *(&self->mClipMax);
     vu0CopyMtx65B8((&viewportStack->mWorld), (&self->mWorld));
     vu0CopyMtx65B8((&viewportStack->mView), (&self->mView));
     vu0CopyMtx65B8((&viewportStack->mGuardBandMatrix), (&self->mGuardBandMatrix));
@@ -3405,8 +3410,8 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
     vu0CopyMtx65B8((&viewportStack->mNetMatrix), (&self->mNetMatrix));
     *(&viewportStack->mScreenScale) = *(&self->mScreenScale);
     *(&viewportStack->mScreenOffset) = *(&self->mScreenOffset);
-    viewportStack->unk_02C = self->unk_5910;
-    *(&viewportStack->unk_050) = *(&self->unk_5920);
+    viewportStack->mSortZFar = self->mSortZFar;
+    *(&viewportStack->mSortZScale) = *(&self->mSortZScale);
     self->mViewportDepth++;
     cPS2GraphicsMan_sViewportStack_operatorE(&((&self->mViewportStack[0]))[self->mViewportDepth], viewportStack);
 }
@@ -3485,11 +3490,11 @@ extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
     } else {
         self->mpDeferMan->mActivePortIndex = viewportStack->mDeferScissorIndex;
     }
-    self->unk_590C = viewportStack->unk_024;
-    self->unk_5908 = viewportStack->unk_028;
+    self->mPerspFar = viewportStack->mPerspFar;
+    self->mPerspFov = viewportStack->mPerspFov;
     vu0CopyMtx6768((&self->mScreenMatrix), (&viewportStack->mScreenMatrix));
-    *(&self->unk_6B70) = *(&viewportStack->unk_030);
-    *(&self->unk_6B80) = *(&viewportStack->unk_040);
+    *(&self->mClipMin) = *(&viewportStack->mClipMin);
+    *(&self->mClipMax) = *(&viewportStack->mClipMax);
     vu0CopyMtx6768((&self->mWorld), (&viewportStack->mWorld));
     vu0CopyMtx6768((&self->mView), (&viewportStack->mView));
     vu0CopyMtx6768((&self->mGuardBandMatrix), (&viewportStack->mGuardBandMatrix));
@@ -3499,8 +3504,8 @@ extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
     vu0CopyMtx6768((&self->mNetMatrix), (&viewportStack->mNetMatrix));
     *(&self->mScreenScale) = *(&viewportStack->mScreenScale);
     *(&self->mScreenOffset) = *(&viewportStack->mScreenOffset);
-    self->unk_5910 = viewportStack->unk_02C;
-    *(&self->unk_5920) = *(&viewportStack->unk_050);
+    self->mSortZFar = viewportStack->mSortZFar;
+    *(&self->mSortZScale) = *(&viewportStack->mSortZScale);
     self->mMatricesValid = 0;
 }
 #endif
@@ -3601,10 +3606,10 @@ extern "C" void cPS2GraphicsMan_SetViewportWindow(cPS2GraphicsMan* self, float x
             }
         }
     }
-    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[0] = x;
-    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[1] = y;
-    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[2] = w;
-    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[3] = rectHeight;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].mWindow[0] = x;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].mWindow[1] = y;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].mWindow[2] = w;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].mWindow[3] = rectHeight;
     func_00376938((cPS2GraphicsMan*)self, x, y, w, rectHeight);
     func_00364B88(((void*)self->mpDeferMan), self->mScissor);
 }
@@ -3630,7 +3635,7 @@ struct sPartVec4i {
 extern "C" sPartVec4i* cPS2GraphicsMan_GetViewportWindow(sPartVec4i* out, cPS2GraphicsMan* self)
 {
     int i = self->mViewportDepth;
-    float* window = &self->mViewportStack[i].unk_000[0];
+    float* window = &self->mViewportStack[i].mWindow[0];
     int x = (int)window[0];
     int y = (int)window[1];
     int z = (int)window[2];
@@ -3674,18 +3679,18 @@ struct sPartSys {
 /**
  * Reads the current viewport's perspective (On Tour GetViewportPerspective(float& fov, float& minz, float& maxz)).
  *
- * The viewport entry stores them as unk_010[0] = near, [1] = far, [2] = field of view.
+ * The viewport entry stores them as mProjParams[0] = near, [1] = far, [2] = field of view.
  *
- * @param fov  receives the field of view (unk_010[2])
- * @param minz  receives the near distance (unk_010[0])
- * @param maxz  receives the far distance (unk_010[1])
+ * @param fov  receives the field of view (mProjParams[2])
+ * @param minz  receives the near distance (mProjParams[0])
+ * @param maxz  receives the far distance (mProjParams[1])
  */
 extern "C" void cPS2GraphicsMan_GetViewportPerspective(cPS2GraphicsMan* self, float* fov, float* minz, float* maxz)
 {
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *fov = viewportStack->unk_010[2];
-    *minz = viewportStack->unk_010[0];
-    *maxz = viewportStack->unk_010[1];
+    *fov = viewportStack->mProjParams[2];
+    *minz = viewportStack->mProjParams[0];
+    *maxz = viewportStack->mProjParams[1];
 }
 #endif
 
@@ -3735,17 +3740,17 @@ static inline void ClampScale6C58(cPS2GraphicsMan* self, float& x, float& y)
 /**
  * Sets a perspective projection with field-of-view angle @p fov for the current viewport.
  *
- * Marks the stack entry perspective (+0x20 = 0) and stores @p zNear, @p zFar and @p fov in it and in unk_590C/unk_5908.
- * The viewport rectangle comes from mViewportStack[mViewportDepth] (x, y, w, h); the depth range is 2^24 - 1 when
- * mCurrentZBFormat is 0x31 (24-bit Z), else 65535, and offX/offY = 32768 - 8 * the slot 10/11 screen width/height place
- * the screen in the GS's 4096 space (1/16 pixels). The horizontal scale is (w / 2) / tan(@p fov) and the vertical one
- * that times the screen's height * 4/3 / width; when mTVDisplayFormat.mDisplayFormat is 0 to 2 both are multiplied by
- * mfXAspectAdjust and mfYAspectAdjust.
+ * Marks the stack entry perspective (mProjectionType = 0) and stores @p zNear, @p zFar and @p fov in it and in
+ * mPerspFar/mPerspFov. The viewport rectangle comes from mViewportStack[mViewportDepth] (x, y, w, h); the depth range
+ * is 2^24 - 1 when mCurrentZBFormat is 0x31 (24-bit Z), else 65535, and offX/offY = 32768 - 8 * the slot 10/11 screen
+ * width/height place the screen in the GS's 4096 space (1/16 pixels). The horizontal scale is (w / 2) / tan(@p fov) and
+ * the vertical one that times the screen's height * 4/3 / width; when mTVDisplayFormat.mDisplayFormat is 0 to 2 both
+ * are multiplied by mfXAspectAdjust and mfYAspectAdjust.
  *
- * It writes mScreenMatrix (with the entry's depth bias at +0x1C in the z offset), the screen bounds unk_6B70/unk_6B80
+ * It writes mScreenMatrix (with the entry's depth bias mZBias in the z offset), the screen bounds mClipMin/mClipMax
  * (w = 1 / zNear and 1 / zFar), mViewProj, mScreenScale/mScreenOffset and the guard-band
- * mView/mGuardScale/mGuardOffset, clears mMatricesValid, sets the scissor (func_00376938), unk_5910 = 40000 and
- * unk_5920 = (1023, ..., 1023 / 40000). Slot 25 of cPS2GraphicsMan_vtbl.
+ * mView/mGuardScale/mGuardOffset, clears mMatricesValid, sets the scissor (func_00376938), mSortZFar = 40000 and
+ * mSortZScale = (1023, ..., 1023 / 40000). Slot 25 of cPS2GraphicsMan_vtbl.
  *
  * @param fov  the field-of-view angle (radians) whose tangent sets the scale
  * @param zNear  the near plane
@@ -3754,10 +3759,10 @@ static inline void ClampScale6C58(cPS2GraphicsMan* self, float& x, float& y)
 extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, float fov, float zNear, float zFar)
 {
     sViewportStack* viewEntry = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    viewEntry->unk_020 = 0;
-    viewEntry->unk_010[0] = zNear;
-    viewEntry->unk_010[1] = zFar;
-    viewEntry->unk_010[2] = fov;
+    viewEntry->mProjectionType = 0;
+    viewEntry->mProjParams[0] = zNear;
+    viewEntry->mProjParams[1] = zFar;
+    viewEntry->mProjParams[2] = fov;
     // PORT: int-arithmetic view address (as in cPS2GraphicsMan_GetViewportFOV); the typed self->views[i] reads score 94-95%.
     char* viewBase = (char*)self + self->mViewportDepth * 0x230;
     float x = *(float*)(viewBase + 0x6D20);
@@ -3774,8 +3779,8 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
         zlo = -32767.5f;
         zhi = 32767.5f;
     }
-    self->unk_590C = zFar;
-    self->unk_5908 = fov;
+    self->mPerspFar = zFar;
+    self->mPerspFov = fov;
     sPtVtU6C58* vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[11];
     unsigned height = vtEntry->fn(vthis(self, *vtEntry));
     vtEntry = &((sPtVtU6C58*)VPTR_OF(cGraphicsMan, self))[10];
@@ -3802,20 +3807,20 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][2] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][2] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][2] = zA;
-    float zB = -zFar * zA + viewEntry->unk_01C;
+    float zB = -zFar * zA + viewEntry->mZBias;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][2] = zB;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][3] = 1.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][3] = 0.0f;
-    ((float*)&(*(&self->unk_6B70)).x)[0] = x * 16.0f + offX;
-    ((float*)&(*(&self->unk_6B70)).x)[1] = y * 16.0f + offY;
-    ((float*)&(*(&self->unk_6B70)).x)[2] = zA * zNear + zB;
-    ((float*)&(*(&self->unk_6B80)).x)[0] = (x + w) * 16.0f + offX;
-    ((float*)&(*(&self->unk_6B80)).x)[1] = (y + viewHeight) * 16.0f + offY;
-    ((float*)&(*(&self->unk_6B80)).x)[2] = zA * zFar + zB;
-    ((float*)&(*(&self->unk_6B70)).x)[3] = 1.0f / zNear;
-    ((float*)&(*(&self->unk_6B80)).x)[3] = 1.0f / zFar;
+    ((float*)&(*(&self->mClipMin)).x)[0] = x * 16.0f + offX;
+    ((float*)&(*(&self->mClipMin)).x)[1] = y * 16.0f + offY;
+    ((float*)&(*(&self->mClipMin)).x)[2] = zA * zNear + zB;
+    ((float*)&(*(&self->mClipMax)).x)[0] = (x + w) * 16.0f + offX;
+    ((float*)&(*(&self->mClipMax)).x)[1] = (y + viewHeight) * 16.0f + offY;
+    ((float*)&(*(&self->mClipMax)).x)[2] = zA * zFar + zB;
+    ((float*)&(*(&self->mClipMin)).x)[3] = 1.0f / zNear;
+    ((float*)&(*(&self->mClipMax)).x)[3] = 1.0f / zFar;
     self->mMatricesValid = 0;
     float aspect2 = aspect * (w / viewHeight);
     float px = 1.0f / tanf(fov);
@@ -3851,7 +3856,7 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     ((float*)&(*(&self->mScreenScale)).x)[3] = 0.0f;
     ((float*)&(*(&self->mScreenOffset)).x)[0] = cx + 2047.5f;
     ((float*)&(*(&self->mScreenOffset)).x)[1] = cy + 2047.5f;
-    ((float*)&(*(&self->mScreenOffset)).x)[2] = zhi + viewEntry->unk_01C;
+    ((float*)&(*(&self->mScreenOffset)).x)[2] = zhi + viewEntry->mZBias;
     ((float*)&(*(&self->mScreenOffset)).x)[3] = 0.0f;
     float gw = 2048.0f - 2.0f * fsAbs_6C58(cx);
     float gh = 2048.0f - 2.0f * fsAbs_6C58(cy);
@@ -3877,34 +3882,40 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     ((float*)&(*(&self->mGuardScale)).x)[3] = 0.0f;
     ((float*)&(*(&self->mGuardOffset)).x)[0] = cx + 2047.5f;
     ((float*)&(*(&self->mGuardOffset)).x)[1] = cy + 2047.5f;
-    ((float*)&(*(&self->mGuardOffset)).x)[2] = zhi + viewEntry->unk_01C;
+    ((float*)&(*(&self->mGuardOffset)).x)[2] = zhi + viewEntry->mZBias;
     ((float*)&(*(&self->mGuardOffset)).x)[3] = 0.0f;
     func_00376938_6C58(self, x, y, w, viewHeight);
-    self->unk_5910 = 40000.0f;
-    ((float*)&(*(&self->unk_5920)).x)[0] = 1023.0f;
-    ((float*)&(*(&self->unk_5920)).x)[1] = 0.0f;
-    ((float*)&(*(&self->unk_5920)).x)[2] = 0.0f;
-    ((float*)&(*(&self->unk_5920)).x)[3] = 1023.0f / 40000.0f;
+    self->mSortZFar = 40000.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[0] = 1023.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[1] = 0.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[2] = 0.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[3] = 1023.0f / 40000.0f;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetViewportZBias);
 #ifdef SKIP_ASM
-struct sPt7278 {
-    float x, y, z, w;
-    sPt7278() {}
-    sPt7278(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
+// A t4Vector with constructors (ours has none), for the by-value VU0 helpers below.
+struct t4VectorInit : t4Vector {
+    t4VectorInit() {}
+    t4VectorInit(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
 
 
 
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
-static inline sPt7278 MulMat7278(const t4Matrix* m, const sPt7278& v)
+static inline t4VectorInit MulMat7278(const t4Matrix* m, const t4VectorInit& v)
 {
-    sPt7278 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -3923,9 +3934,9 @@ static inline sPt7278 MulMat7278(const t4Matrix* m, const sPt7278& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar); the PC port needs a C fallback.
-static inline sPt7278 Scale7278(const sPt7278& v, float s)
+static inline t4VectorInit Scale7278(const t4VectorInit& v, float s)
 {
-    sPt7278 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3940,9 +3951,9 @@ static inline sPt7278 Scale7278(const sPt7278& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add); the PC port needs a C fallback.
-static inline sPt7278 Add7278(const sPt7278& a, const sPt7278& b)
+static inline t4VectorInit Add7278(const t4VectorInit& a, const t4VectorInit& b)
 {
-    sPt7278 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3956,12 +3967,12 @@ static inline sPt7278 Add7278(const sPt7278& a, const sPt7278& b)
 
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 
-static inline float DepthOffset7278(cPS2GraphicsMan* self, sPt7278* pos, float dist)
+static inline float DepthOffset7278(cPS2GraphicsMan* self, t4VectorInit* pos, float dist)
 {
     if (dist != 0.0f) {
-    sPt7278 dir(self->mCurrentView->row[0].z, self->mCurrentView->row[1].z, self->mCurrentView->row[2].z, 0.0f);
-    sPt7278 a = MulMat7278((&self->mNetMatrix), *pos);
-    sPt7278 c = MulMat7278((&self->mNetMatrix), Add7278(*pos, Scale7278(dir, dist)));
+    t4VectorInit dir(self->mCurrentView->row[0].z, self->mCurrentView->row[1].z, self->mCurrentView->row[2].z, 0.0f);
+    t4VectorInit a = MulMat7278((&self->mNetMatrix), *pos);
+    t4VectorInit c = MulMat7278((&self->mNetMatrix), Add7278(*pos, Scale7278(dir, dist)));
     float za = a.z / a.w;
     float zc = c.z / c.w;
     if (-1.0f <= za && za <= 1.0f && -1.0f <= zc && zc <= 1.0f) {
@@ -3981,21 +3992,21 @@ static inline float DepthOffset7278(cPS2GraphicsMan* self, sPt7278* pos, float d
  * @param pos  the world position the bias is measured at
  * @param dist  the bias distance in world units
  */
-extern "C" void cPS2GraphicsMan_SetViewportZBias(cPS2GraphicsMan* self, sPt7278* pos, float dist)
+extern "C" void cPS2GraphicsMan_SetViewportZBias(cPS2GraphicsMan* self, t4VectorInit* pos, float dist)
 {
     sViewportStack* view = &((&self->mViewportStack[0]))[self->mViewportDepth];
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
     float depthOffset = DepthOffset7278(self, pos, dist);
-    if (depthOffset != view->unk_01C) {
-        view->unk_01C = depthOffset;
+    if (depthOffset != view->mZBias) {
+        view->mZBias = depthOffset;
         float k = 32767.5f;
         if (self->mCurrentZBFormat == 49) {
             k = 8388467.5f;
         }
         self->mScreenOffset.z = k + depthOffset;
-        self->mGuardOffset.z = k + view->unk_01C;
+        self->mGuardOffset.z = k + view->mZBias;
         self->mMatricesValid = 0;
     }
 }
@@ -4030,15 +4041,15 @@ static inline void ZScale7458(cPS2GraphicsMan* self, float& zscale)
  * Sets an orthographic projection mapping the box from (@p cx, @p cy), @p fx wide and @p fy high, onto the current
  * viewport.
  *
- * Marks the stack entry orthographic (+0x20 = 1) and stores @p zNear and @p zFar in it. The viewport rectangle comes
- * from mViewportStack[mViewportDepth] (x, y, w, h); the depth range is 2^24 - 1 when mCurrentZBFormat is 0x31 (24-bit
- * Z), else 65535, and offX/offY = 32768 - 8 * the slot 10/11 screen width/height place the screen in the GS's 4096
- * space (1/16 pixels). It writes mScreenMatrix (scale w / @p fx * 16 and h / @p fy * 16, depth -range / (zFar -
- * zNear)), the screen bounds unk_6B70/unk_6B80, mViewProj (2 / @p fx, 2 / @p fy, offset -1), mScreenScale and
+ * Marks the stack entry orthographic (mProjectionType = 1) and stores @p zNear and @p zFar in it. The viewport
+ * rectangle comes from mViewportStack[mViewportDepth] (x, y, w, h); the depth range is 2^24 - 1 when mCurrentZBFormat
+ * is 0x31 (24-bit Z), else 65535, and offX/offY = 32768 - 8 * the slot 10/11 screen width/height place the screen in
+ * the GS's 4096 space (1/16 pixels). It writes mScreenMatrix (scale w / @p fx * 16 and h / @p fy * 16, depth -range /
+ * (zFar - zNear)), the screen bounds mClipMin/mClipMax, mViewProj (2 / @p fx, 2 / @p fy, offset -1), mScreenScale and
  * mScreenOffset, and the guard-band mView, mGuardScale and mGuardOffset, and clears mMatricesValid.
  *
- * Then func_00376938 sets the scissor to the viewport, unk_5910 = 40000 and unk_5920 = (1023, 0, 0, 1023 / 40000). Slot
- * 26 of cPS2GraphicsMan_vtbl.
+ * Then func_00376938 sets the scissor to the viewport, mSortZFar = 40000 and mSortZScale = (1023, 0, 0, 1023 / 40000).
+ * Slot 26 of cPS2GraphicsMan_vtbl.
  *
  * @param cx  the box's left edge
  * @param cy  the box's top edge
@@ -4050,9 +4061,9 @@ static inline void ZScale7458(cPS2GraphicsMan* self, float& zscale)
 extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, float cx, float cy, float fx, float fy, float zNear, float zFar)
 {
     sViewportStack* viewEntry = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    viewEntry->unk_020 = 1;
-    viewEntry->unk_010[0] = zNear;
-    viewEntry->unk_010[1] = zFar;
+    viewEntry->mProjectionType = 1;
+    viewEntry->mProjParams[0] = zNear;
+    viewEntry->mProjParams[1] = zFar;
     // PORT: int-arithmetic view address, as in the perspective sibling cPS2GraphicsMan_SetViewportPerspective.
     char* viewBase = (char*)self + self->mViewportDepth * 0x230;
     float x = *(float*)(viewBase + 0x6D20);
@@ -4086,14 +4097,14 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][3] = 1.0f;
-    ((float*)&(*(&self->unk_6B70)).x)[0] = x * 16.0f + offX;
-    ((float*)&(*(&self->unk_6B70)).x)[1] = y * 16.0f + offY;
-    ((float*)&(*(&self->unk_6B70)).x)[2] = zA * zNear + zB;
-    ((float*)&(*(&self->unk_6B70)).x)[3] = 1.0f;
-    ((float*)&(*(&self->unk_6B80)).x)[0] = (x + w) * 16.0f + offX;
-    ((float*)&(*(&self->unk_6B80)).x)[1] = (y + viewHeight) * 16.0f + offY;
-    ((float*)&(*(&self->unk_6B80)).x)[2] = zA * zFar + zB;
-    ((float*)&(*(&self->unk_6B80)).x)[3] = 1.0f;
+    ((float*)&(*(&self->mClipMin)).x)[0] = x * 16.0f + offX;
+    ((float*)&(*(&self->mClipMin)).x)[1] = y * 16.0f + offY;
+    ((float*)&(*(&self->mClipMin)).x)[2] = zA * zNear + zB;
+    ((float*)&(*(&self->mClipMin)).x)[3] = 1.0f;
+    ((float*)&(*(&self->mClipMax)).x)[0] = (x + w) * 16.0f + offX;
+    ((float*)&(*(&self->mClipMax)).x)[1] = (y + viewHeight) * 16.0f + offY;
+    ((float*)&(*(&self->mClipMax)).x)[2] = zA * zFar + zB;
+    ((float*)&(*(&self->mClipMax)).x)[3] = 1.0f;
     self->mMatricesValid = 0;
     float zlo, zhi;
     if (self->mCurrentZBFormat == 49) {
@@ -4168,11 +4179,11 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     ((float*)&(*(&self->mGuardOffset)).x)[2] = zhi;
     ((float*)&(*(&self->mGuardOffset)).x)[3] = 0.0f;
     func_00376938((cPS2GraphicsMan*)self, x, y, w, viewHeight);
-    self->unk_5910 = 40000.0f;
-    ((float*)&(*(&self->unk_5920)).x)[0] = 1023.0f;
-    ((float*)&(*(&self->unk_5920)).x)[1] = 0.0f;
-    ((float*)&(*(&self->unk_5920)).x)[2] = 0.0f;
-    ((float*)&(*(&self->unk_5920)).x)[3] = 1023.0f / 40000.0f;
+    self->mSortZFar = 40000.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[0] = 1023.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[1] = 0.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[2] = 0.0f;
+    ((float*)&(*(&self->mSortZScale)).x)[3] = 1023.0f / 40000.0f;
 }
 #endif
 
@@ -4798,9 +4809,9 @@ union uPtFloatBits {
 typedef int cQuad128_CF0 __attribute__((mode(TI)));
 
 // PORT: PS2-only VU0 inline asm (vector subtract); the PC port needs a C fallback.
-static inline sPt7278 Sub_CF0(const sPt7278& a, const sPt7278& b)
+static inline t4VectorInit Sub_CF0(const t4VectorInit& a, const t4VectorInit& b)
 {
-    sPt7278 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4823,8 +4834,8 @@ static inline int Bits_CF0(float f)
 
 
 // Homogeneous position (w given) with a const-reference ctor: its stores, w included, go straight to the stack
-// slot, where the by-value sPt7278 ctor keeps `this` in a register for a constant w.
-struct sPtPos8808 : sPt7278 {
+// slot, where the by-value t4VectorInit ctor keeps `this` in a register for a constant w.
+struct sPtPos8808 : t4VectorInit {
     sPtPos8808(const float& ax, const float& ay, const float& az, const float& aw)
     {
         x = ax;
@@ -4901,10 +4912,10 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
     unsigned long* packetHead = (unsigned long*)(buf | 0x30000000);
     unsigned long* glyphOut = packetHead + 10;
     int nloop = 0;
-    if (((&self->mViewportStack[0]))[self->mViewportDepth].unk_020 != 0) {
+    if (((&self->mViewportStack[0]))[self->mViewportDepth].mProjectionType != 0) {
         float vz = self->mScreenMatrix.row[2].z * z + self->mScreenMatrix.row[3].z;
-        sPt7278 cornerMin;
-        sPt7278 cornerMax;
+        t4VectorInit cornerMin;
+        t4VectorInit cornerMax;
         cornerMin.z = vz;
         cornerMin.w = 1.0f;
         cornerMax.z = vz;
@@ -4941,16 +4952,16 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
                 Set2_8808(uv1, (glyphRec->u + glyphRec->width) * su, (glyphRec->v + glyphRec->height) * sv);
                 Set2_8808(size, glyphRec->width * sx * 0.5f, glyphRec->height * sy * 0.5f);
                 sPtPos8808 pos(x + glyphRec->xoffset * sx + size[0], y + glyphRec->yoffset * sy + size[1], z, 1.0f);
-                sPt7278 projCentre = MulMat7278((&self->mScreenWorld), pos);
+                t4VectorInit projCentre = MulMat7278((&self->mScreenWorld), pos);
                 float inv = 1.0f / projCentre.w;
                 projCentre.x *= inv;
                 projCentre.y *= inv;
                 float dx = self->mScreenMatrix.row[0].x * size[0] * inv;
                 projCentre.w = inv;
                 float dy = self->mScreenMatrix.row[1].y * size[1] * inv;
-                sPt7278 halfExtent(dx, dy, 0.0f, 0.0f);
-                sPt7278 cornerMin = Sub_CF0(projCentre, halfExtent);
-                sPt7278 cornerMax = Add7278(projCentre, halfExtent);
+                t4VectorInit halfExtent(dx, dy, 0.0f, 0.0f);
+                t4VectorInit cornerMin = Sub_CF0(projCentre, halfExtent);
+                t4VectorInit cornerMax = Add7278(projCentre, halfExtent);
                 glyphOut[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
                 glyphOut[1] = (int)cornerMin.x | ((long)(int)cornerMin.y << 16) | ((long)(int)(cornerMin.z * cornerMin.w) << 32);
                 glyphOut[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
@@ -5020,8 +5031,8 @@ typedef int cQuad128_CF0 __attribute__((mode(TI)));
 
 
 // Homogeneous position (w given) with a const-reference ctor: its stores, w included, go straight to the stack
-// slot, where the by-value sPt7278 ctor keeps `this` in a register for a constant w.
-struct sPtPos9028 : sPt7278 {
+// slot, where the by-value t4VectorInit ctor keeps `this` in a register for a constant w.
+struct sPtPos9028 : t4VectorInit {
     sPtPos9028(const float& ax, const float& ay, const float& az, const float& aw)
     {
         x = ax;
@@ -5098,10 +5109,10 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
     unsigned long* packetHead = func_0038F460(D_004A4474, buf, -1, 0);
     unsigned long* packetCursor = packetHead + 10;
     int nloop = 0;
-    if (((&self->mViewportStack[0]))[self->mViewportDepth].unk_020 != 0) {
+    if (((&self->mViewportStack[0]))[self->mViewportDepth].mProjectionType != 0) {
         float vz = self->mScreenMatrix.row[2].z * z + self->mScreenMatrix.row[3].z;
-        sPt7278 topLeft;
-        sPt7278 bottomRight;
+        t4VectorInit topLeft;
+        t4VectorInit bottomRight;
         topLeft.z = vz;
         topLeft.w = 1.0f;
         bottomRight.z = vz;
@@ -5138,16 +5149,16 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
                 Set2_9028(uv1, (glyphInfo->u + glyphInfo->width) * su, (glyphInfo->v + glyphInfo->height) * sv);
                 Set2_9028(size, glyphInfo->width * sx * 0.5f, glyphInfo->height * sy * 0.5f);
                 sPtPos9028 pos(x + glyphInfo->xoffset * sx + size[0], y + glyphInfo->yoffset * sy + size[1], z, 1.0f);
-                sPt7278 screenCentre = MulMat7278((&self->mScreenWorld), pos);
+                t4VectorInit screenCentre = MulMat7278((&self->mScreenWorld), pos);
                 float inv = 1.0f / screenCentre.w;
                 screenCentre.x *= inv;
                 screenCentre.y *= inv;
                 float dx = self->mScreenMatrix.row[0].x * size[0] * inv;
                 screenCentre.w = inv;
                 float dy = self->mScreenMatrix.row[1].y * size[1] * inv;
-                sPt7278 halfExtent(dx, dy, 0.0f, 0.0f);
-                sPt7278 topLeft = Sub_CF0(screenCentre, halfExtent);
-                sPt7278 bottomRight = Add7278(screenCentre, halfExtent);
+                t4VectorInit halfExtent(dx, dy, 0.0f, 0.0f);
+                t4VectorInit topLeft = Sub_CF0(screenCentre, halfExtent);
+                t4VectorInit bottomRight = Add7278(screenCentre, halfExtent);
                 packetCursor[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
                 packetCursor[1] = (int)topLeft.x | ((long)(int)topLeft.y << 16) | ((long)(int)(topLeft.z * topLeft.w) << 32);
                 packetCursor[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
@@ -5573,7 +5584,7 @@ static inline int Depth_A610(cPS2GraphicsMan* self, t4Vector v)
         "vmtir      $vi1, $vf11w\n"
         "cfc2.ni    %0, $vi1\n"
         : "=&r"(r)
-        : "m"(*(sPtQuadF*)&self->unk_5920), "m"(v), "r"((&self->mNetMatrix))
+        : "m"(*(sPtQuadF*)&self->mSortZScale), "m"(v), "r"((&self->mNetMatrix))
         : "memory");
     return (int)r;
 }
@@ -6539,13 +6550,14 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 void cTextureMan_SetTextureMemType(void* p, int a1);
 
 /**
- * Clears the texture table (0x1F40 bytes at +0x3838) and sets the texture manager's memory type (cTextureMan_SetTextureMemType).
+ * Clears the texture table mTextureAdded (0x1F40 bytes) and sets the texture manager's memory type
+ * (cTextureMan_SetTextureMemType).
  *
  * @param memtype  the memory type for textures (On Tour memtype)
  */
 extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int memtype)
 {
-    MEM_fill(&self->unk_3838[0], 0, 8000);
+    MEM_fill(&self->mTextureAdded[0], 0, 8000);
     cTextureMan_SetTextureMemType(self->mTexMan, memtype);
 }
 #endif
@@ -6558,14 +6570,15 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformUploadTextures__FPv);
 /**
  * Makes the staged texture table current.
  *
- * MEM_copy()s 8000 bytes (0x1F40) from +0x3838 to +0x18F8. Called by cGraphicsMan_UploadTextures() through slot 121.
+ * MEM_copy()s 8000 bytes (0x1F40) from mTextureAdded to mTextureUploaded. Called by cGraphicsMan_UploadTextures()
+ * through slot 121.
  *
  * @return no meaningful value (MEM_copy returns nothing)
  */
 void* cPS2GraphicsMan_PlatformUploadTextures(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return MEM_copy(&self->unk_18F8[0], &self->unk_3838[0], 8000);
+    return MEM_copy(&self->mTextureUploaded[0], &self->mTextureAdded[0], 8000);
 }
 #endif
 
@@ -6574,14 +6587,14 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformPurgeTextures);
 #ifdef SKIP_ASM
 
 /**
- * Removes every loaded texture: for each of the 2000 slots with a non-zero entry at +0x18F8 calls virtual slot 50
+ * Removes every loaded texture: for each of the 2000 slots with a non-zero mTextureUploaded entry calls virtual slot 50
  * (the remove) with its index.
  */
 extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
 {
     int i;
     for (i = 0; i < 2000; i++) {
-        if (((int*)(&self->unk_18F8[0]))[i] != 0) {
+        if (self->mTextureUploaded[i] != 0) {
             self->RemoveTexture(i);
         }
     }
@@ -6736,9 +6749,9 @@ extern "C" int cTextureMan_AddTexture(void* mgr, int a1, int a2, int a3, int a4,
                              int a8, int a9, int a10, int a11);
 
 /**
- * Creates a texture in the texture manager (cTextureMan_AddTexture on mTexMan) and marks its id in unk_3838.
+ * Creates a texture in the texture manager (cTextureMan_AddTexture on mTexMan) and marks its id in mTextureAdded.
  *
- * All eleven arguments go through unchanged; unk_3838[id] is set to 1. Slot 47 of cPS2GraphicsMan_vtbl;
+ * All eleven arguments go through unchanged; mTextureAdded[id] is set to 1. Slot 47 of cPS2GraphicsMan_vtbl;
  * cPS2GraphicsMan_AddTexture calls it through the vtable.
  *
  * @param pixels  the texel data
@@ -6758,7 +6771,7 @@ extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, in
                               int clutData, int lockType, int copyMem, int bindId)
 {
     int i = cTextureMan_AddTexture(self->mTexMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
-    self->unk_3838[i] = 1;
+    self->mTextureAdded[i] = 1;
     return i;
 }
 #endif
@@ -6769,14 +6782,14 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RemoveTexture);
 extern "C" void cTextureMan_RemoveTexture(void* tbl, int idx);
 
 /**
- * Removes texture @p idx from the texture manager (cTextureMan_RemoveTexture) and clears its slot at +0x18F8.
+ * Removes texture @p idx from the texture manager (cTextureMan_RemoveTexture) and clears its slot in mTextureUploaded.
  *
  * @param idx  the texture id (On Tour texid)
  */
 extern "C" void cPS2GraphicsMan_RemoveTexture(cPS2GraphicsMan* self, int idx)
 {
     cTextureMan_RemoveTexture(self->mTexMan, idx);
-    self->unk_18F8[idx] = 0;
+    self->mTextureUploaded[idx] = 0;
 }
 #endif
 
@@ -7422,18 +7435,18 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
  * Appends a projected texture to mProjTextures and increments mNumShdw (On Tour AddProjectiveTexture(pos,
  * clipMat, projMat, intensity, texid)). There is no bound check on the 8-entry array.
  *
- * @param pos  the projector position (unk_00)
- * @param clipMat  the clip matrix (unk_10)
- * @param projMat  the projection matrix (unk_50)
- * @param intensity  the intensity (unk_90)
- * @param i  the texture id (On Tour texid; unk_94)
+ * @param pos  the projector position (mShdwProjPos)
+ * @param clipMat  the clip matrix (mShdwClipMat)
+ * @param projMat  the projection matrix (mShdwProjMat)
+ * @param intensity  the intensity (mShdwIntensity)
+ * @param i  the texture id (On Tour texid; mShdwTexID)
  */
 extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPartQ16* pos, sPartMtx* clipMat, sPartMtx* projMat, float intensity, int i)
 {
     (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwProjPos) = *pos;
     vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwClipMat), clipMat);
     vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwProjMat), projMat);
-    ((&self->mProjTextures[0]))[self->mNumShdw].unk_90 = intensity;
+    ((&self->mProjTextures[0]))[self->mNumShdw].mShdwIntensity = intensity;
     ((&self->mProjTextures[0]))[self->mNumShdw].mShdwTexID = i;
     self->mNumShdw++;
 }
@@ -7658,8 +7671,8 @@ static inline t4Vector mtxApplyDBE8(t4Matrix* m, const t4Vector& v)
  * Computes the clip outcode of a point against the current screen bounds.
  *
  * Refreshes the matrices if mMatricesValid is clear (func_0037D968), transforms @p point by mScreenWorld and divides x
- * and y by w. Bits: 2 / 1 for x below unk_6B70.x / above unk_6B80.x, 8 / 4 for y below / above, and when w is
- * positive 0x20 for z above unk_6B70.z and 0x10 for z below unk_6B80.z (z is not divided by w). A point behind the
+ * and y by w. Bits: 2 / 1 for x below mClipMin.x / above mClipMax.x, 8 / 4 for y below / above, and when w is
+ * positive 0x20 for z above mClipMin.z and 0x10 for z below mClipMax.z (z is not divided by w). A point behind the
  * eye (w < 0) has its code xor'd with 0x2F.
  *
  * @param point  the world-space point (On Tour point)
@@ -7676,26 +7689,26 @@ extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const t4Vector*
     screenPos.x *= w;
     screenPos.y *= w;
     screenPos.w = w;
-    if (screenPos.x < self->unk_6B70.x) {
+    if (screenPos.x < self->mClipMin.x) {
         code |= 2;
     }
-    if (self->unk_6B80.x < screenPos.x) {
+    if (self->mClipMax.x < screenPos.x) {
         code |= 1;
     }
-    if (screenPos.y < self->unk_6B70.y) {
+    if (screenPos.y < self->mClipMin.y) {
         code |= 8;
     }
-    if (self->unk_6B80.y < screenPos.y) {
+    if (self->mClipMax.y < screenPos.y) {
         code |= 4;
     }
     float z = screenPos.z;
     if (w < 0.0f) {
         code ^= 0x2F;
     } else {
-        if (self->unk_6B70.z < z) {
+        if (self->mClipMin.z < z) {
             code |= 0x20;
         }
-        if (z < self->unk_6B80.z) {
+        if (z < self->mClipMax.z) {
             code |= 0x10;
         }
     }
@@ -9035,7 +9048,7 @@ static inline sPt1AD0 MulMat1AD0(const sMat1AD0* m, const sPt1AD0& v)
  *
  * Recomputes the matrices (func_0037D968) when mMatricesValid is 0 and opens a packet builder on mVifCursor
  * (func_00384D98). Each position is transformed by mScreenWorld; x and y are divided by w (whose reciprocal is kept as
- * Q) and get clip codes against the guard band unk_6B70 / unk_6B80 (x 2/1, y 8/4, z 0x20/0x10; a negative w flips
+ * Q) and get clip codes against the guard band mClipMin / mClipMax (x 2/1, y 8/4, z 0x20/0x10; a negative w flips
  * them). A segment with both ends inside extends the open strip (func_00384FD0); one that enters or leaves the band is
  * clipped with func_00383A10 and the inside part is drawn, starting a new strip (func_003850A8) where it enters; a
  * segment with both ends outside but not on the same side is clipped and drawn as a strip of its own if anything is
@@ -9063,15 +9076,15 @@ extern "C" void cPS2GraphicsMan_RenderLineStrip(cPS2GraphicsMan* self, int n, sV
         cur.w = 1.0f / cur.w;
         cur.x *= cur.w;
         cur.y *= cur.w;
-        if (cur.x < self->unk_6B70.x) code |= 2;
-        if (self->unk_6B80.x < cur.x) code |= 1;
-        if (cur.y < self->unk_6B70.y) code |= 8;
-        if (self->unk_6B80.y < cur.y) code |= 4;
+        if (cur.x < self->mClipMin.x) code |= 2;
+        if (self->mClipMax.x < cur.x) code |= 1;
+        if (cur.y < self->mClipMin.y) code |= 8;
+        if (self->mClipMax.y < cur.y) code |= 4;
         if (cur.w < 0.0f) {
             code ^= 0x2F;
         } else {
-            if (cur.z > self->unk_6B70.z) code |= 0x20;
-            if (cur.z < self->unk_6B80.z) code |= 0x10;
+            if (cur.z > self->mClipMin.z) code |= 0x20;
+            if (cur.z < self->mClipMax.z) code |= 0x10;
         }
         if (code == 0) {
             if (prevCode == 0) {
@@ -10130,7 +10143,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* v, t4Vector*
  * when nothing is left.
  *
  * @p codes holds the two ends' clip codes from cPS2GraphicsMan_RenderLineStrip. For each plane crossed (far 0x20 and near 0x10 in w, then
- * y min 8 and max 4, then x min 2 and max 1, bounds from unk_6B70 / unk_6B80) the end outside is moved to the crossing:
+ * y min 8 and max 4, then x min 2 and max 1, bounds from mClipMin / mClipMax) the end outside is moved to the crossing:
  * x, y, z and w of @p points are interpolated and s, t and the four colour ints of @p verts are interpolated with the
  * same fraction (for the w planes the fraction is corrected by the w ratio); that end's codes are recomputed, and it
  * returns 0 as soon as both ends are outside the same plane. cPS2GraphicsMan_RenderLineStrip calls it.
@@ -10146,7 +10159,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
 
     if (unionCodes & 0x20) {
         float w0 = points[0].w;
-        float plane = self->unk_6B70.w;
+        float plane = self->mClipMin.w;
         float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x20) == 0;
         float dx = frac * (points[0].x - points[1].x);
@@ -10154,8 +10167,8 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         float tv = frac * points[1].w / plane;
         points[k].x = points[0].x - dx;
         points[k].y = points[0].y - dy;
-        points[k].z = self->unk_6B70.z;
-        points[k].w = self->unk_6B70.w;
+        points[k].z = self->mClipMin.z;
+        points[k].w = self->mClipMin.w;
         verts[k].u = verts[0].u + tv * (verts[1].u - verts[0].u);
         verts[k].v = verts[0].v + tv * (verts[1].v - verts[0].v);
         *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + tv * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
@@ -10163,16 +10176,16 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + tv * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + tv * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
-        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
-        if (points[k].y < self->unk_6B70.y) codes[k] |= 8;
-        if (points[k].y > self->unk_6B80.y) codes[k] |= 4;
+        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
+        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
+        if (points[k].y < self->mClipMin.y) codes[k] |= 8;
+        if (points[k].y > self->mClipMax.y) codes[k] |= 4;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 0x10) {
         float w0 = points[0].w;
-        float plane = self->unk_6B80.w;
+        float plane = self->mClipMax.w;
         float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x10) == 0;
         float dx = frac * (points[0].x - points[1].x);
@@ -10180,8 +10193,8 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         float tv = frac * points[1].w / plane;
         points[k].x = points[0].x - dx;
         points[k].y = points[0].y - dy;
-        points[k].z = self->unk_6B80.z;
-        points[k].w = self->unk_6B80.w;
+        points[k].z = self->mClipMax.z;
+        points[k].w = self->mClipMax.w;
         verts[k].u = verts[0].u + tv * (verts[1].u - verts[0].u);
         verts[k].v = verts[0].v + tv * (verts[1].v - verts[0].v);
         *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + tv * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
@@ -10189,21 +10202,21 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + tv * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + tv * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
-        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
-        if (points[k].y < self->unk_6B70.y) codes[k] |= 8;
-        if (points[k].y > self->unk_6B80.y) codes[k] |= 4;
+        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
+        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
+        if (points[k].y < self->mClipMin.y) codes[k] |= 8;
+        if (points[k].y > self->mClipMax.y) codes[k] |= 4;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 8) {
-        float frac = (points[0].y - self->unk_6B70.y) / (points[0].y - points[1].y);
+        float frac = (points[0].y - self->mClipMin.y) / (points[0].y - points[1].y);
         int k = (codes[0] & 8) == 0;
         float dx = frac * (points[0].x - points[1].x);
         float dz = frac * (points[0].z - points[1].z);
         float dw = frac * (points[0].w - points[1].w);
         points[k].x = points[0].x - dx;
-        points[k].y = self->unk_6B70.y;
+        points[k].y = self->mClipMin.y;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
         verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
@@ -10213,19 +10226,19 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
-        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
+        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
+        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 4) {
-        float frac = (points[0].y - self->unk_6B80.y) / (points[0].y - points[1].y);
+        float frac = (points[0].y - self->mClipMax.y) / (points[0].y - points[1].y);
         int k = (codes[0] & 4) == 0;
         float dx = frac * (points[0].x - points[1].x);
         float dz = frac * (points[0].z - points[1].z);
         float dw = frac * (points[0].w - points[1].w);
         points[k].x = points[0].x - dx;
-        points[k].y = self->unk_6B80.y;
+        points[k].y = self->mClipMax.y;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
         verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
@@ -10235,13 +10248,13 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
-        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
+        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
+        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 2) {
-        float plane = self->unk_6B70.x;
+        float plane = self->mClipMin.x;
         float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 2) == 0;
         float dy = frac * (points[0].y - points[1].y);
@@ -10260,7 +10273,7 @@ extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vec
         codes[k] = 0;
     }
     if (unionCodes & 1) {
-        float plane = self->unk_6B80.x;
+        float plane = self->mClipMax.x;
         float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 1) == 0;
         float dy = frac * (points[0].y - points[1].y);
@@ -10544,8 +10557,8 @@ extern "C" cPS2GridMesh* cPS2GridMesh_cPS2GridMesh_impl(cPS2GridMesh* self, int 
     self->m_iNumStrip = rows;
     self->m_iStripLen = pitch;
     *(int*)&self->m_pGfxMan = graphicsMan;
-    self->unk_194 = 20000.0f;
-    self->unk_198 = 1.638350009918213f;
+    self->mScale = 20000.0f;
+    self->mPosToShort = 1.638350009918213f;
     self->m_iWidth = w;
     self->m_iHeight = gridHeight;
     int size = func_00385EB0(self, rows, pitch);
@@ -10556,17 +10569,18 @@ extern "C" cPS2GridMesh* cPS2GridMesh_cPS2GridMesh_impl(cPS2GridMesh* self, int 
     } else {
         char* bufCursor = buf + size;
         int rowCount = self->m_iNumStrip;
-        self->unk_1AC[1] = bufCursor;
+        self->mPacketBuffer[1] = bufCursor;
         bufCursor += size;
-        *(char**)&self->unk_1B4[0] = bufCursor;
+        *(char**)&self->mStripTable[0] = bufCursor;
         self->mbOK = 1;
         bufCursor += rowCount * 16;
-        *(char**)&self->unk_1B4[1] = bufCursor;
-        self->unk_1AC[0] = buf;
-        func_00386128(self, rowCount, self->m_iStripLen, ((char*)self->unk_1B4[0]), buf);
-        func_00386128(self, self->m_iNumStrip, self->m_iStripLen, ((char*)self->unk_1B4[1]), self->unk_1AC[1]);
+        *(char**)&self->mStripTable[1] = bufCursor;
+        self->mPacketBuffer[0] = buf;
+        func_00386128(self, rowCount, self->m_iStripLen, ((char*)self->mStripTable[0]), buf);
+        func_00386128(self, self->m_iNumStrip, self->m_iStripLen, ((char*)self->mStripTable[1]),
+                      self->mPacketBuffer[1]);
         self->m_bUpdate = 0;
-        self->unk_1A0 = -1;
+        self->mScreenBuffer = -1;
     }
     return self;
 }
@@ -10625,60 +10639,42 @@ extern "C" void cPS2GridMesh__cPS2GridMesh(cPS2GridMesh* self, int flags)
 INCLUDE_ASM("render/particle", cPS2GridMesh_Update);
 #ifdef SKIP_ASM
 
-struct sPtRow52E8 {
-    int field_0x0;
-    short* out;             // 0x4
-    int field_0x8;
-    int field_0xC;
-};
-
-struct sPtSurf52E8 {
-    char pad_0x0[0x190];
-    unsigned short w;           // 0x190
-    unsigned short h;           // 0x192
-    char pad_0x194[0xC];
-    int field_0x1A0;            // 0x1A0
-    int field_0x1A4;            // 0x1A4
-    char pad_0x1A8[0xC];
-    sPtRow52E8* rowTabs[2];     // 0x1B4
-    int rows;                   // 0x1BC
-};
-
 extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, t3Vector* v);
 
 /**
  * Updates the mesh's vertex positions: writes them into the strips of the buffer not in use and marks the mesh updated.
  *
- * For each strip i (the rows of vertices i and i + 1) of the strip table +0x1B4 / +0x1B8 picked by the buffer index
- * (+0x1A0; the other buffer), stores the positions of row i and row i + 1 alternately with func_00385A38 (scaled to
- * shorts). Sets the updated flag +0x1A4, so the next render swaps buffers. Slot 3 of the grid-mesh vtable cPS2GridMesh_vtbl.
+ * For each strip i (the rows of vertices i and i + 1) of the strip table mStripTable picked by the buffer index
+ * (mScreenBuffer; the other buffer), stores the positions of row i and row i + 1 alternately with func_00385A38 (scaled
+ * to shorts). Sets the updated flag m_bUpdate, so the next render swaps buffers. Slot 3 of the grid-mesh vtable
+ * cPS2GridMesh_vtbl.
  *
  * @param verts  the grid positions, row by row (x, y, z floats)
  */
-extern "C" void cPS2GridMesh_Update(sPtSurf52E8* self, t3Vector* verts)
+extern "C" void cPS2GridMesh_Update(cPS2GridMesh* self, t3Vector* verts)
 {
-    int idx = self->field_0x1A0 == 0;
-    for (int i = 0; i < self->rows; i++) {
-        int w = self->w;
-        sPtRow52E8* row = &self->rowTabs[idx][i];
+    int idx = self->mScreenBuffer == 0;
+    for (int i = 0; i < self->m_iNumStrip; i++) {
+        int w = self->m_iWidth;
+        tGridMeshStrip* row = &self->mStripTable[idx][i];
         int base = i * w;
         int next = base + w;
         int k = 0;
         int j = 0;
-        if (j < self->w) {
+        if (j < self->m_iWidth) {
             t3Vector* lowerVert = &verts[next];
             t3Vector* upperVert = &verts[base];
             do {
-                func_00385A38((cPS2GridMesh*)self, row->out, k, (t3Vector*)upperVert);
-                func_00385A38((cPS2GridMesh*)self, row->out, k + 1, (t3Vector*)lowerVert);
+                func_00385A38(self, row->mPositions, k, upperVert);
+                func_00385A38(self, row->mPositions, k + 1, lowerVert);
                 k += 2;
                 upperVert++;
                 lowerVert++;
                 j++;
-            } while (j < self->w);
+            } while (j < self->m_iWidth);
         }
     }
-    self->field_0x1A4 = 1;
+    self->m_bUpdate = 1;
 }
 #endif
 
@@ -10688,25 +10684,6 @@ INCLUDE_ASM("render/particle", cPS2GridMesh_Update1);
 
 struct sShortUV;
 
-struct sPtRow5410 {
-    int field_0x0;
-    int field_0x4;
-    sShortUV* uv;           // 0x8
-    int field_0xC;
-};
-
-struct sPtSurf5410 {
-    char pad_0x0[0x190];
-    unsigned short w;           // 0x190
-    unsigned short h;           // 0x192
-    char pad_0x194[0xC];
-    int field_0x1A0;            // 0x1A0
-    int field_0x1A4;            // 0x1A4
-    char pad_0x1A8[0xC];
-    sPtRow5410* rowTabs[2];     // 0x1B4
-    int rows;                   // 0x1BC
-};
-
 extern "C" void func_00385BA0(cPS2GridMesh* self, sShortUV* dst, int idx, float* src);
 
 /**
@@ -10714,34 +10691,35 @@ extern "C" void func_00385BA0(cPS2GridMesh* self, sShortUV* dst, int idx, float*
  * updated.
  *
  * For each strip i, picked as in cPS2GridMesh_Update, stores the u, v of row i and row i + 1 alternately with func_00385BA0
- * (fixed point, 4096 = 1.0). Sets the updated flag +0x1A4. Slot 4 of the grid-mesh vtable cPS2GridMesh_vtbl.
+ * (fixed point, 4096 = 1.0). Sets the updated flag m_bUpdate. Slot 4 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param uvs  the grid texture coordinates, row by row (u, v floats)
  */
-extern "C" void cPS2GridMesh_Update1(sPtSurf5410* self, t2Vector* uvs)
+extern "C" void cPS2GridMesh_Update1(cPS2GridMesh* self, t2Vector* uvs)
 {
-    int idx = self->field_0x1A0 == 0;
-    for (int i = 0; i < self->rows; i++) {
-        int w = self->w;
-        sPtRow5410* row = &self->rowTabs[idx][i];
+    int idx = self->mScreenBuffer == 0;
+    for (int i = 0; i < self->m_iNumStrip; i++) {
+        int w = self->m_iWidth;
+        tGridMeshStrip* row = &self->mStripTable[idx][i];
         int base = i * w;
         int next = base + w;
         int k = 0;
         int j = 0;
-        if (j < self->w) {
-            t2Vector* lowerUv = (t2Vector*)((next << 3) + (int)uvs);  // PORT: pointer in int
-            t2Vector* upperUv = (t2Vector*)((base << 3) + (int)uvs);  // PORT: pointer in int
+        if (j < self->m_iWidth) {
+            // PORT: pointers in int (retail adds the offset first; &uvs[next] adds uvs first).
+            t2Vector* lowerUv = (t2Vector*)((next << 3) + (int)uvs);
+            t2Vector* upperUv = (t2Vector*)((base << 3) + (int)uvs);
             do {
-                func_00385BA0((cPS2GridMesh*)self, row->uv, k, (float*)upperUv);
-                func_00385BA0((cPS2GridMesh*)self, row->uv, k + 1, (float*)lowerUv);
+                func_00385BA0(self, row->mUVs, k, (float*)upperUv);
+                func_00385BA0(self, row->mUVs, k + 1, (float*)lowerUv);
                 k += 2;
                 upperUv++;
                 lowerUv++;
                 j++;
-            } while (j < self->w);
+            } while (j < self->m_iWidth);
         }
     }
-    self->field_0x1A4 = 1;
+    self->m_bUpdate = 1;
 }
 #endif
 
@@ -10923,7 +10901,7 @@ INCLUDE_ASM("render/particle", func_00385A38);
  */
 extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, t3Vector* src)
 {
-    float scale = self->unk_198;
+    float scale = self->mPosToShort;
     t3Vector scaled;
     scaled.x = src->x * scale;
     scaled.y = src->y * scale;
@@ -11346,7 +11324,7 @@ struct sPartPair {
 
 /**
  * Records view @p i for the full-screen effects rather than drawing anything: copies mScreenMatrix (+0x6AF0) to
- * unk_5930[i] and the scissor to unk_59B0[i], and sets unk_59C0 = i + 1.
+ * mViewScreenMatrix[i] and the scissor to mViewScissor[i], and sets mNumViews = i + 1.
  *
  * @param i  the view index (On Tour View)
  */
@@ -11366,8 +11344,8 @@ extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, i
         :
         : "r"((char*)&self->mScreenMatrix), "r"((char*)((i << 6) + (int)self) + 0x5930)
         : "memory");
-    ((sPartPair*)(&self->unk_59B0[0]))[i] = *(sPartPair*)&self->mScissor[0];
-    self->unk_59C0 = i + 1;
+    ((sPartPair*)(&self->mViewScissor[0]))[i] = *(sPartPair*)&self->mScissor[0];
+    self->mNumViews = i + 1;
 }
 #endif
 

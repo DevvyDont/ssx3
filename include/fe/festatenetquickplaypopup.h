@@ -65,9 +65,9 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
                                     //       OK button then aborts it (func_0025EED8); func_001C1B88 (popup 0xF/0x14)
                                     //       and the net-event handler func_001C19C8 (0xE7) clear it; message 7 passes
                                     //       to cFEStateNet only while it is 0
-    int unk_6F0;                    // 0x6F0 [U] onWidgetEvent clears it when the search starts; the net-event handler
-                                    //       func_001C19C8 sets 1 on 0xE6 and, on 0xE7, opens
-                                    //       "kT_POPUP233QuickMatchTimeout" when set, else ends the search
+    int mbQuickMatchTimeout;        // 0x6F0 (name ours) [U] onWidgetEvent clears it when the search starts; the
+                                    //        net-event handler func_001C19C8 sets 1 on 0xE6 and, on 0xE7, opens
+                                    //        "kT_POPUP233QuickMatchTimeout" when set, else ends the search
     cUIText* mpTextOK;              // 0x6F4 [U] onWidgetCreate: widget "TextOK"; onWidgetEvent compares the selected
                                     //       widget with it and relabels it "kT_BTNCancel" while searching ("kT_BTNOK"
                                     //       again in func_001C1B88)
@@ -94,7 +94,7 @@ CHECK_OFFSET(cFEStateNetQuickPlayPopup, miSearchOptions, 0x6D0);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, mpTextSearching, 0x6E4);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, miBlinkFrames, 0x6E8);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, mbSearching, 0x6EC);
-CHECK_OFFSET(cFEStateNetQuickPlayPopup, unk_6F0, 0x6F0);
+CHECK_OFFSET(cFEStateNetQuickPlayPopup, mbQuickMatchTimeout, 0x6F0);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, mpTextOK, 0x6F4);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, mpStaticRanked, 0x6F8);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, mpStaticRace, 0x6FC);

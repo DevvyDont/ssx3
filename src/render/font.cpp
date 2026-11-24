@@ -3935,7 +3935,7 @@ extern "C" int cPS2GraphicsMan_GetScreenWidth(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
     tDisplayMode* modes = self->DisplayModes;
-    return modes[i].unk_088;
+    return modes[i].mFrameWidth;
 }
 #endif
 
@@ -3951,7 +3951,7 @@ extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
     tDisplayMode* modes = self->DisplayModes;
-    return modes[i].unk_08C;
+    return modes[i].mFrameHeight;
 }
 #endif
 
@@ -4494,15 +4494,15 @@ extern "C" void cPS2GraphicsMan_updateNetMat(cPS2GraphicsMan* self)
 INCLUDE_ASM("render/font", func_003956D8);
 #ifdef SKIP_ASM
 /**
- * Returns the graphics manager's word at +0x59C0 (unk_59C0).
+ * Returns the graphics manager's view count mNumViews (+0x59C0).
  *
  * func_00363490 uses the field as a loop count. A retail-only accessor (the preview's run has no counterpart).
  *
  * @param pS2GraphicsMan  the graphics manager
- * @return unk_59C0
+ * @return mNumViews
  */
 extern "C" int func_003956D8(cPS2GraphicsMan* pS2GraphicsMan) {
-    return (pS2GraphicsMan->unk_59C0);
+    return (pS2GraphicsMan->mNumViews);
 }
 #endif
 
@@ -5006,7 +5006,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_CalcSortZ);
  * Returns the integer depth-sort key of a point.
  *
  * Recomputes the matrices first when mMatricesValid is 0 (func_0037D968). With VU0 it transforms @p vec by mNetMatrix,
- * multiplies the result's w by unk_5920.w, clamps it to 0..unk_5920.x and converts it to an integer.
+ * multiplies the result's w by mSortZScale.w, clamps it to 0..mSortZScale.x and converts it to an integer.
  *
  * @param vec  the point (t4Vector)
  * @return the clamped, scaled w as an integer
@@ -5091,10 +5091,10 @@ void cPS2GraphicsMan_SetLightMats(void* self)
 INCLUDE_ASM("render/font", cPS2GraphicsMan_projOutCode);
 #ifdef SKIP_ASM
 /**
- * Returns the clip out-code of a projected point against the bounds unk_6B70 (min) and unk_6B80 (max).
+ * Returns the clip out-code of a projected point against the bounds mClipMin (min) and mClipMax (max).
  *
  * Bits: 2 x below min.x, 1 x above max.x, 8 y below min.y, 4 y above max.y. If w is negative it returns those bits XOR
- * 0x2F at once; otherwise it adds 0x20 when z is above unk_6B70.z and 0x10 when z is below unk_6B80.z.
+ * 0x2F at once; otherwise it adds 0x20 when z is above mClipMin.z and 0x10 when z is below mClipMax.z.
  *
  * @param vec  the point (x, y, z, w)
  * @return the out-code bits
@@ -5102,27 +5102,27 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_projOutCode);
 extern "C" int cPS2GraphicsMan_projOutCode(cPS2GraphicsMan* self, t4Vector* vec) {
     float x = vec->x;
     int flags = 0;
-    if (x < self->unk_6B70.x) {
+    if (x < self->mClipMin.x) {
         flags = 2;
     }
-    if (self->unk_6B80.x < x) {
+    if (self->mClipMax.x < x) {
         flags |= 1;
     }
     float y = vec->y;
-    if (y < self->unk_6B70.y) {
+    if (y < self->mClipMin.y) {
         flags |= 8;
     }
-    if (self->unk_6B80.y < y) {
+    if (self->mClipMax.y < y) {
         flags |= 4;
     }
     if (vec->w < 0.0f) {
         return flags ^ 0x2F;
     }
     float z = vec->z;
-    if (self->unk_6B70.z < z) {
+    if (self->mClipMin.z < z) {
         flags |= 0x20;
     }
-    if (z < self->unk_6B80.z) {
+    if (z < self->mClipMax.z) {
         flags |= 0x10;
     }
     return flags;
@@ -5208,8 +5208,8 @@ INCLUDE_ASM("render/font", cPS2GridMesh_SetScale);
  */
 extern "C" void cPS2GridMesh_SetScale(cPS2GridMesh* self, float range)
 {
-    self->unk_194 = range;
-    self->unk_198 = 32767.0f / range;
+    self->mScale = range;
+    self->mPosToShort = 32767.0f / range;
 }
 #endif
 

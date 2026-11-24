@@ -52,7 +52,7 @@ INCLUDE_ASM("sound/ssxAudio", SSXAUDIO_DeInit);
 class SSXAUDIO_DeInit_cObj {
 public:
     char data[0x1D4];
-    virtual void v01(int flags);
+    virtual void Destroy(int flags); // slot 1: the virtual destructor (g++ 2.95: flags 3 = destroy and delete)
 };
 
 
@@ -65,7 +65,7 @@ public:
 extern "C" void SSXAUDIO_DeInit()
 {
     if (gSSXAudio != 0) {
-        (*((SSXAUDIO_DeInit_cObj**)gSSXAudio->MusicSys.mpVStreamSys))->v01(3);
+        (*((SSXAUDIO_DeInit_cObj**)gSSXAudio->MusicSys.mpVStreamSys))->Destroy(3);
     }
     gSSXAudio = 0;
 }
@@ -210,8 +210,8 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     self->mVtbl = cSSXAudio_vtbl;
     self->unk_5728 = 0;
     self->unk_572C = -1;
-    self->unk_5730 = 1.0f;
-    self->unk_5734 = 0;
+    self->mFrontEndDJVolume = 1.0f;
+    self->mGruntPatchCycle = 0;
     self->unk_5740 = 0;
     self->unk_5744 = 0;
     self->unk_574C = 0;
@@ -222,19 +222,19 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     self->unk_5768 = 0;
     self->unk_576C = 0;
     self->unk_5770 = 0;
-    self->unk_5774 = 0;
+    self->mSongAnnouncePending = 0;
     self->unk_577C = 0;
     self->unk_5780 = 1;
     self->unk_5784 = 0;
-    self->unk_5788 = 0;
+    self->mRiderRemarkPending = 0;
     self->unk_578C = 0;
     self->unk_5790 = 1;
     self->unk_5794 = 1;
     self->unk_5798 = -1;
     self->unk_5818 = 0;
-    self->unk_581C = -1;
-    self->unk_5820 = 0;
-    self->unk_5828 = 0;
+    self->mLastUberLevel = -1;
+    self->mUberViewIndex = 0;
+    self->mStopSpeechOnResume = 0;
     self->mPlayHistory.ArraySize = 200;
     self->mPlayHistory.Head = 0;
     self->mPlayHistory.Tail = 0;
@@ -249,17 +249,17 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     self->mAvalancheHitIndex = -1;
     self->mAvalancheInstanceCount = 0;
     self->mRadioModeID = 0;
-    self->unk_6090 = 0;
+    self->mFrontEndRadioModeID = 0;
     *(long*)&self->mRadioPlayList = 0;
     self->unk_6254 = 0;
-    self->unk_627C = 1;
+    self->mRaceMusicOn = 1;
     self->mTransportTrack = 23;
     self->unk_6294 = 0;
-    self->unk_6298 = 0;
+    self->mReplaySongPlaying = 0;
     self->unk_62A4 = -1;
-    self->unk_62A8 = -1;
+    self->mLoadingLoopHandle = -1;
     self->mArcadeSFX = 0;
-    self->unk_62B8 = 0;
+    self->mDJSpeech = 0;
     self->mDucking = 0;
     self->mDuckCurValue = 1.0f;
     self->mDuckStream = 3;
@@ -449,41 +449,31 @@ int cStreamSys_STREAM_GetInstance(void* self, int a1);
 extern "C" void cBankMonitorInstance_SetStream(void* self, int a, const char* name, int b);
 extern "C" void* memset(void* dst, int c, int n);
 
-struct sSnd54F8Ch {
-    signed char vol;
-    char pad1[0x17];
-};
-struct sSnd54F8E16 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-};
-struct sSnd54F8Sub {
-    char pad0[4];
-    sSnd54F8Ch def;          // 0x04
-    volatile int cur;        // 0x1C
-    sSnd54F8Ch* ch;          // 0x20
-    int tgt[4];              // 0x24
-    int* p34;                // 0x34
-    int* vals;               // 0x38
-    int* p3C;                // 0x3C
-    char e40[4][8];          // 0x40
-    int* p60;                // 0x60
-    int* p64;                // 0x64
-    float* p68;              // 0x68
-    float* p6C;              // 0x6C
-    sSnd54F8E16* p70;        // 0x70
-    int* p74;                // 0x74
-    int* p78;                // 0x78
-    int* p7C;                // 0x7C
-    int* p80;                // 0x80
-    int* p84;                // 0x84
-};
-struct sSnd54F8Mgr {
-    char pad0[0x1D8];
-    sSnd54F8Sub sub;         // 0x1D8
-};
+// cSndPlayOpts::OPTS_Open's push, inlined (On Tour cBankSys::SFX_Begin): a new play-option level with the defaults.
+static inline void pushPlayOptsLevel(cBankManager* bankMgr)
+{
+    cBankMonitor* playOpts = &bankMgr->BankMonitor;
+    bankMgr->BankMonitor.mInst++;
+    playOpts->mCurrent[bankMgr->BankMonitor.mInst] = bankMgr->BankMonitor.mDefault;
+    bankMgr->BankMonitor.mPosition[bankMgr->BankMonitor.mInst] = 0;
+    playOpts->mPosStatic[bankMgr->BankMonitor.mInst] = 0;
+    playOpts->mBaseVol[bankMgr->BankMonitor.mInst] = playOpts->mCurrent[bankMgr->BankMonitor.mInst].vol;
+    playOpts->mVolControl[bankMgr->BankMonitor.mInst] = 0;
+    memset((char*)playOpts + bankMgr->BankMonitor.mInst * 8 + 0x40, 0, 8); // mCallback[mInst] (retail's add order)
+    playOpts->mPtr[bankMgr->BankMonitor.mInst] = 0;
+    playOpts->mViewport[bankMgr->BankMonitor.mInst] = 0;
+    playOpts->mVanish[bankMgr->BankMonitor.mInst] = 0.0f;
+    playOpts->mRadius[bankMgr->BankMonitor.mInst] = 0.0f;
+    playOpts->mDelay[bankMgr->BankMonitor.mInst].mCount = 0;
+    playOpts->mDelay[bankMgr->BankMonitor.mInst].mTime = 100;
+    playOpts->mDelay[bankMgr->BankMonitor.mInst].mFeedback = 90;
+    playOpts->mDelay[bankMgr->BankMonitor.mInst].mLevel = 50;
+    playOpts->mExternalVol[bankMgr->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerPan[bankMgr->BankMonitor.mInst] = 0;
+    playOpts->mTwoPlayerSide[bankMgr->BankMonitor.mInst] = 0;
+    playOpts->mMapToMaxVol[bankMgr->BankMonitor.mInst] = 0x7F;
+    playOpts->mCloseOnEnd[bankMgr->BankMonitor.mInst] = 1;
+}
 
 /**
  * Plays a speech file from a stream at a position (or 2D) and registers the voice with the bank monitor.
@@ -513,57 +503,44 @@ extern "C" int cSSXAudio_PlayPositional(cSSXAudio* vself, int streamIndex, const
 {
     cSSXAudio* self = vself;
     // PORT: a2 (a name pointer) is passed through cStreamSys_STREAM_Queue as an int
-    int voiceHandle = cStreamSys_STREAM_Queue(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), streamIndex, holdTime, (int)fileName, fileOffset);
+    int voiceHandle = cStreamSys_STREAM_Queue(self->MusicSys.mpVStreamSys, streamIndex, holdTime, (int)fileName,
+                                              fileOffset);
     if (voiceHandle < 0) {
         return voiceHandle;
     }
-    sSnd54F8Mgr* bankMgr = *((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys);
-    sSnd54F8Sub* playOpts = &bankMgr->sub;
-    bankMgr->sub.cur++;
-    playOpts->ch[bankMgr->sub.cur] = bankMgr->sub.def;
-    bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
-    playOpts->p34[bankMgr->sub.cur] = 0;
-    playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
-    playOpts->p3C[bankMgr->sub.cur] = 0;
-    memset((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
-    playOpts->p60[bankMgr->sub.cur] = 0;
-    playOpts->p64[bankMgr->sub.cur] = 0;
-    playOpts->p68[bankMgr->sub.cur] = 0.0f;
-    playOpts->p6C[bankMgr->sub.cur] = 0.0f;
-    playOpts->p70[bankMgr->sub.cur].f4 = 0;
-    playOpts->p70[bankMgr->sub.cur].f0 = 100;
-    playOpts->p70[bankMgr->sub.cur].f8 = 90;
-    playOpts->p70[bankMgr->sub.cur].fC = 50;
-    playOpts->p74[bankMgr->sub.cur] = 0;
-    playOpts->p80[bankMgr->sub.cur] = 0;
-    playOpts->p84[bankMgr->sub.cur] = 0;
-    playOpts->p78[bankMgr->sub.cur] = 0x7F;
-    playOpts->p7C[bankMgr->sub.cur] = 1;
+    pushPlayOptsLevel(self->MusicSys.mpVStreamSys->mpVBankManager);
     if (radius <= 0.0f) {
         if (isHuman != 0) {
-            cSndPlayOpts_OPTS_Radius(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, 29.997713088989258f, -1.0f);
+            cSndPlayOpts_OPTS_Radius(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, 29.997713088989258f,
+                                     -1.0f);
         } else {
-            cSndPlayOpts_OPTS_Radius(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, 100.0f, -1.0f);
+            cSndPlayOpts_OPTS_Radius(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, 100.0f, -1.0f);
         }
     } else {
-        cSndPlayOpts_OPTS_Radius(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, radius, -1.0f);
+        cSndPlayOpts_OPTS_Radius(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, radius, -1.0f);
     }
-    (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p60[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = userInfo;
+    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
+        .mPtr[self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = (void*)userInfo;
     if (position != 0) {
-        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.tgt[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = position;
-        sSnd54F8Mgr** pp = ((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys);
+        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
+            .mPosition[self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = (const t4Vector*)position;
+        cStreamSys* streamSys = self->MusicSys.mpVStreamSys;
         int closestView = cSSXAudio_GetClosestCamera(self, position);
-        (*pp)->sub.p64[(*pp)->sub.cur] = closestView;
+        streamSys->mpVBankManager->BankMonitor.mViewport[streamSys->mpVBankManager->BankMonitor.mInst] = closestView;
     }
     if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGamePath == 2 && isHuman != 0 && cSSXAudio_ReplayMode(self) == 0) {
-        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p80[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = 1;
-        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p84[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = viewport;
+        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
+            .mTwoPlayerPan[self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
+        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
+            .mTwoPlayerSide[self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = viewport;
     }
-    void* bm = cBankMonitor_BANKMONITOR_Create(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, voiceHandle, 0x7F, 3);
+    void* bm = cBankMonitor_BANKMONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, voiceHandle,
+                                              0x7F, 3);
     if (bm != 0) {
-        cBankMonitorInstance_SetStream(bm, cStreamSys_STREAM_GetInstance(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), streamIndex), fileName, fileOffset);
+        cBankMonitorInstance_SetStream(bm, cStreamSys_STREAM_GetInstance(self->MusicSys.mpVStreamSys, streamIndex),
+                                       fileName, fileOffset);
     }
-    (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur--;
+    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst--;
     return voiceHandle;
 }
 #endif
@@ -932,10 +909,11 @@ struct sSaVt5FB0 { short delta; short index; void (*fn)(void*, char*, int, void*
  * Loads the front-end audio: the front-end sound levels, its main bank from banks.inf and the character-select music.
  *
  * Sets sound level 0 (cSSXAudio_InitSoundLevels) and update state 1, reads data/config/banks.inf: BASEPATH of the
- * GLOBAL section, then section FE, whose MAIN bank is loaded synchronously into slot 0 (cBankManager_BANK_SyncLoad). Un-ducks
- * (cSSXAudio_DuckToStream(self, 3, 0.5, 1.0)), starts the "charsel" stream through the music system's vtable slot 2 with the
- * Music volume control, sets the song state 301, unk_6290 to 10 and unk_6090 to unk_608C, and resumes the audio
- * (cSSXAudio_ResumeAudio). cRealFE_load and the sound-mode setters of the options and memory-card screens call it.
+ * GLOBAL section, then section FE, whose MAIN bank is loaded synchronously into slot 0 (cBankManager_BANK_SyncLoad).
+ * Un-ducks (cSSXAudio_DuckToStream(self, 3, 0.5, 1.0)), starts the "charsel" stream through the music system's vtable
+ * slot 2 with the Music volume control, sets the song state 301, mFrontEndMusicMode to 10 and mFrontEndRadioModeID to
+ * mRadioModeID, and resumes the audio (cSSXAudio_ResumeAudio). cRealFE_load and the sound-mode setters of the options
+ * and memory-card screens call it.
  */
 extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
 {
@@ -973,8 +951,8 @@ extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
     char* thisp = mon + vt[2].delta;
     vt[2].fn(thisp, str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr((cSSXAudio*)self, 1, 0), 1);
     func_002B49C0(mon, 301);
-    self->unk_6290 = 10;
-    self->unk_6090 = self->mRadioModeID;
+    self->mFrontEndMusicMode = 10;
+    self->mFrontEndRadioModeID = self->mRadioModeID;
     cSSXAudio_ResumeAudio(self);
     FileParser__FileParser(&parser, 2);
 }
@@ -1006,13 +984,13 @@ extern "C" void cBankManager_BANK_UnLoad(void*, int);
 /**
  * Releases the front end's audio before leaving it: stops or fades the streams and purges bank slot 0.
  *
- * When unk_608C or unk_6090 is 2 (probably a radio mode) it calls func_002B3AC0 on the stream system.
+ * When mRadioModeID or mFrontEndRadioModeID is 2 (probably a radio mode) it calls func_002B3AC0 on the stream system.
  * Otherwise it calls func_002B3D48 with 1.0 (probably a one-second fade). It then sets the update state to 0
  * and resets the bank monitor (cMonitor_MONITOR_DestroyAll) and the bank manager (its virtual slot 2).
  */
 extern "C" void cSSXAudio_FrontEndPurge(cSSXAudio* self)
 {
-    if (self->mRadioModeID == 2 || self->unk_6090 == 2) {
+    if (self->mRadioModeID == 2 || self->mFrontEndRadioModeID == 2) {
         func_002B3AC0((char*)&self->MusicSys);
     } else {
         func_002B3D48((char*)&self->MusicSys, 1.0f);
@@ -1142,7 +1120,7 @@ extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
         func_002A6D78(((char*)self), str_H, ext, 1, 5);
     }
     func_0029F3F8(((char*)self), 0);
-    self->unk_627C = 1;
+    self->mRaceMusicOn = 1;
     FileParser__FileParser(&parser, 2);
 }
 #endif
@@ -1234,17 +1212,17 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
     self->unk_626C = 0;
     self->mMusicRequestPending = 0;
     self->mPlayingTone = 0;
-    self->unk_6264 = -1;
-    self->unk_6268 = -1;
-    self->unk_6270 = 1;
+    self->mLastMusicTriggerType = -1;
+    self->mLastMusicTriggerValue = -1;
+    self->mMusicTriggerReady = 1;
     *(char*)&self->mLastPatchRID = 50;
     self->mpMixQuery[1] = secondMixQuery;
     cSSXAudio_DuckToStream(self, 3, 0.5f, 1.0f);
-    self->unk_6288 = 0;
+    self->mMusicRampState = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (sa_state_867E8() == 0) {
         int i = 0;
-        int* firstTimeFlag = (int*)(&self->unk_579C[0]);
+        int* firstTimeFlag = (int*)(&self->mFirstTimeOnTrack[0]);
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             cRider* playerRider = ((cAI*)cAudioInterface_getAI())->Riders[0];
@@ -1491,12 +1469,12 @@ struct sSaVt6EA0 { short delta; short index; int (*fn)(void*, int); };
  * Plays the finish of a rider's event for its view: crowd cheer, music, the PA's place line and the result record.
  *
  * Only for the focus rider of its view. Raises a level-2 TRICK cheer (func_002A73A8; view 0 when replaying), stops the
- * rider's wipeout slide and tumble (cSSXAudio_WipeoutSlideEnd, cSSXAudio_WipeoutTumbleEnd) and uber spin. In game modes 2 and 3 before the last
- * heat the music gets track 36 (and unk_627C is cleared), otherwise track 10, each when func_0028D960 allows. A rider
- * that finished (mDidNotFinish 0) gets the PA's place line: func_002A3708 at the locations of func_002A4078; in the
- * multiplayer game path func_002A3708 when the race is over (cAI_isRaceFinished), else func_002A34D0; otherwise
- * func_002A34D0 before heat 3 and func_002A3708 from heat 3. In game path 0 the result is recorded (func_002A45C0).
- * cRider_doFinishEvent calls it.
+ * rider's wipeout slide and tumble (cSSXAudio_WipeoutSlideEnd, cSSXAudio_WipeoutTumbleEnd) and uber spin. In game modes
+ * 2 and 3 before the last heat the music gets track 36 (and mRaceMusicOn is cleared), otherwise track 10, each when
+ * func_0028D960 allows. A rider that finished (mDidNotFinish 0) gets the PA's place line: func_002A3708 at the
+ * locations of func_002A4078; in the multiplayer game path func_002A3708 when the race is over (cAI_isRaceFinished),
+ * else func_002A34D0; otherwise func_002A34D0 before heat 3 and func_002A3708 from heat 3. In game path 0 the result is
+ * recorded (func_002A45C0). cRider_doFinishEvent calls it.
  *
  * @param rider  the rider (cRider)
  */
@@ -1522,7 +1500,7 @@ extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
             sSaVt6EA0* vt = (sSaVt6EA0*)self->MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), 36);
             flag = 0;
-            self->unk_627C = 0;
+            self->mRaceMusicOn = 0;
         }
     }
     if (flag) {
@@ -1587,7 +1565,7 @@ extern "C" int func_002A41D8(void* self);
  * Resets the audio for a partial restart (cSSXAudio_ResetAudioVariables), and in game modes of func_002A4168 / func_002A41D8 marks
  * play-history event 0.
  *
- * That event is added (cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0)) when the game mode is not 4, unk_5824 has
+ * That event is added (cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0)) when the game mode is not 4, mGateDropHeat has
  * reached cGameModeMan iNextHeat and the event is not live yet. cGame_partialRestart calls it.
  */
 extern "C" void cSSXAudio_PartialRestart(cSSXAudio* self)
@@ -1595,7 +1573,7 @@ extern "C" void cSSXAudio_PartialRestart(cSSXAudio* self)
     cSSXAudio_ResetAudioVariables(self);
     if (func_002A4168(self) != 0 || func_002A41D8(self) != 0) {
         if (func_002A4040(self) == 0
-            && self->unk_5824 >= SSXApp->GameModeMan->iNextHeat
+            && self->mGateDropHeat >= SSXApp->GameModeMan->iNextHeat
             && cSSXAudio_PlayHistoryExists(self, 0, 0) == 0) {
             cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0);
         }
@@ -1655,16 +1633,15 @@ extern "C" void func_002A26F0(void* self, int a1, int a2);
 void func_002B1758(void* self, int a1);
 int func_002B4908(void* mon);
 
-struct sSaVt72A8 { short delta; short index; int (*fn)(void*, int); };
 
 /**
  * Starts the music and DJ intro of an event without a start gate (game modes 5 and 6).
  *
  * Stores the cAI's AITick in mGruntCycle, then only in game modes 5 and 6: with unk_530 set the music system's vtable
  * slot 4 gets track 0, else func_0028D488 and func_0028CF98(self, 0, 0, -1, 0). Unless play-history event 0 is live: in
- * game events 4 and 5 it queues the DJ line func_002A1138 (unk_5788), or in the multiplayer path plays func_002A26F0(0,
- * 0) at once, then queues the song announcement (unk_5774, unk_5778 = func_002B4908). The pre-event overlays in
- * fe/ovstatepause.cpp call it when they close.
+ * game events 4 and 5 it queues the DJ line func_002A1138 (mRiderRemarkPending), or in the multiplayer path plays
+ * func_002A26F0(0, 0) at once, then queues the song announcement (mSongAnnouncePending, mSongAnnounceNum =
+ * func_002B4908). The pre-event overlays in fe/ovstatepause.cpp call it when they close.
  */
 extern "C" void cSSXAudio_StartEventWithNoStartGate(cSSXAudio* self)
 {
@@ -1675,7 +1652,7 @@ extern "C" void cSSXAudio_StartEventWithNoStartGate(cSSXAudio* self)
     if (mode != 5 && mode != 6) return;
     char* mon = (char*)&self->MusicSys;
     if (self->MusicSys.mSongPlaying != 0) {
-        sSaVt72A8* vt = (sSaVt72A8*)self->MusicSys.mVtbl;
+        sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->MusicSys.mVtbl; // slot 4 sets the music state
         vt[4].fn(vthis(mon, vt[4]), 0);
     } else {
         func_0028D488(self);
@@ -1686,14 +1663,14 @@ extern "C" void cSSXAudio_StartEventWithNoStartGate(cSSXAudio* self)
     int gameEvent = newRace[0x4A];
     if (gameEvent == 4 || gameEvent == 5) {
         if (newRace[0x49] != 2) {
-            self->unk_5788 = 1;
+            self->mRiderRemarkPending = 1;
         } else {
             func_002A26F0(self, 0, 0);
             func_002B1758(&self->SpeechSys, 0);
         }
     }
-    self->unk_5774 = 1;
-    self->unk_5778 = func_002B4908(mon);
+    self->mSongAnnouncePending = 1;
+    self->mSongAnnounceNum = func_002B4908(mon);
 }
 #endif
 
@@ -1733,7 +1710,7 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
 /**
  * Applies the music volume setting (0..11, passed on in $a1 to cSSXAudio_Volume2Float) to the Music, Ambient and DJ controls.
  *
- * Sets controls 1 and 8 to the level, and control 2 too when DJ speech is on (unk_62B8) and unk_608C is not 2. The
+ * Sets controls 1 and 8 to the level, and control 2 too when DJ speech is on (mDJSpeech) and unk_608C is not 2. The
  * options screens, the pause options, the memory-card load and cSSXApp_initload call it. The setting is not a declared
  * parameter: it stays in $a1 for cSSXAudio_Volume2Float.
  */
@@ -1742,7 +1719,7 @@ extern "C" void func_00287410(cSSXAudio* self)
     float level = cSSXAudio_Volume2Float(self);
     cSSXAudio_SetCurrVolume_if(self, 1, level);
     cSSXAudio_SetCurrVolume_if(self, 8, level);
-    if (self->unk_62B8 != 0 && self->mRadioModeID != 2) {
+    if (self->mDJSpeech != 0 && self->mRadioModeID != 2) {
         cSSXAudio_SetCurrVolume_if(self, 2, level);
     }
 }
@@ -1799,22 +1776,22 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
 extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
 /**
- * Turns the arcade sound effects on or off.
+ * Turns the DJ speech on or off.
  *
- * When @p on is set and the sound mode at +0x608C is neither 2 nor 3, volume control 2 is set to its user level
- * (cSSXAudio_GetCurrSetVolume(self, 1), i.e. control 1's level) and +0x62B8 becomes 1; otherwise control 2 is set to 0 and +0x62B8
- * cleared.
+ * When @p on is set and the radio mode mRadioModeID is neither 2 nor 3, volume control 2 (DJ) is set to its user
+ * level (cSSXAudio_GetCurrSetVolume(self, 1), i.e. control 1's level) and mDJSpeech becomes 1; otherwise control 2 is
+ * set to 0 and mDJSpeech cleared.
  *
- * @param on  nonzero to enable the arcade effects (On Tour bOn)
+ * @param on  nonzero to enable the DJ speech (On Tour bOn)
  */
 extern "C" void cSSXAudio_SetDJSpeech(cSSXAudio* self, int on)
 {
     if (on != 0 && self->mRadioModeID != 2 && self->mRadioModeID != 3) {
         cSSXAudio_SetCurrVolume((cSSXAudio*)self, cSSXAudio_GetCurrSetVolume(self, 1), 2);
-        self->unk_62B8 = 1;
+        self->mDJSpeech = 1;
     } else {
         cSSXAudio_SetCurrVolume((cSSXAudio*)self, 0.0f, 2);
-        self->unk_62B8 = 0;
+        self->mDJSpeech = 0;
     }
 }
 #endif
@@ -3589,8 +3566,9 @@ extern "C" void func_002A4550(void*);
 /**
  * Resumes paused audio: the music (func_002B3A98) and the effects (cSSXAudio_ResumeSFX), clearing mAudioPaused.
  *
- * When unk_5828 is set it also stops speech instance 0 (func_002B11B0), clears the pending speech flags (func_002A4550)
- * and unk_5828. cSSXAudio_Update, cSSXAudio_FrontEndLoad, cSSXAudio_InGameDeInit and a game state call it.
+ * When mStopSpeechOnResume is set it also stops speech instance 0 (func_002B11B0), clears the pending speech flags
+ * (func_002A4550) and mStopSpeechOnResume. cSSXAudio_Update, cSSXAudio_FrontEndLoad, cSSXAudio_InGameDeInit and a game
+ * state call it.
  */
 extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self)
 {
@@ -3598,10 +3576,10 @@ extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self)
         func_002B3A98((char*)&self->MusicSys);
         cSSXAudio_ResumeSFX(self);
         self->mAudioPaused = 0;
-        if (self->unk_5828 != 0) {
+        if (self->mStopSpeechOnResume != 0) {
             func_002B11B0((char*)&self->SpeechSys, 0);
             func_002A4550(self);
-            self->unk_5828 = 0;
+            self->mStopSpeechOnResume = 0;
         }
     }
 }
@@ -3766,32 +3744,9 @@ extern "C" int ASYNCFILE_cancel(int h);
 extern "C" int ASYNCFILE_release(int h, int a, int b);
 extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
 
-struct sRing289DF0 {
-    int size;
-    int* data;
-    int head;
-    int tail;
-};
-
-
-struct sAsync289DF0 {
-    int handle;            // 0x0
-    int busy;              // 0x4
-    int slot;              // 0x8
-    char names[6][0x40];   // 0xC
-    char pad18C[0x18C - 0xC - 6 * 0x40];
-    sRing289DF0 mUserHandle;      // 0x18C
-    sRing289DF0 mFilenameIndex;      // 0x19C
-    sRing289DF0 mMemType;      // 0x1AC
-    sRing289DF0 mMainMemFlags;      // 0x1BC
-    int pad1CC[2];
-    // vptr at 0x1D4
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05(int id, int a, int mode, char* name, int b, int c);
-};
+// cAsyncSys virtual slot 5, ASYNCSYS_OnEndAsyncLoad (cBankManager_ASYNCSYS_OnEndAsyncLoad overrides it).
+typedef void tAsyncOnEndLoad(void* self, int userHandle, int soundHandle, int endState, char* fileName, void* buffer,
+                             int dataSize);
 
 /**
  * Cancels the current asynchronous bank load, optionally the whole queue, then starts the next one.
@@ -3806,73 +3761,75 @@ struct sAsync289DF0 {
  */
 extern "C" void cAsyncSys_DoCancel(cAsyncSys* self, int flush)
 {
-    sAsync289DF0* asyncSys = (sAsync289DF0*)self;
+    cAsyncSys* asyncSys = self;
     int id = -1;
     {
-        sRing289DF0* queue = &asyncSys->mUserHandle;
-        if (asyncSys->mUserHandle.head != asyncSys->mUserHandle.tail) {
-            int frontValue = queue->data[queue->tail];
-            if (++asyncSys->mUserHandle.tail >= asyncSys->mUserHandle.size)
-                asyncSys->mUserHandle.tail = 0;
+        cCircBuffer* queue = &asyncSys->mUserHandle;
+        if (asyncSys->mUserHandle.Head != asyncSys->mUserHandle.Tail) {
+            int frontValue = queue->Array[queue->Tail];
+            if (++asyncSys->mUserHandle.Tail >= asyncSys->mUserHandle.ArraySize)
+                asyncSys->mUserHandle.Tail = 0;
             id = frontValue;
         }
     }
     int slot;
     {
-        sRing289DF0* queue = &asyncSys->mFilenameIndex;
-        if (asyncSys->mFilenameIndex.head == asyncSys->mFilenameIndex.tail) {
+        cCircBuffer* queue = &asyncSys->mFilenameIndex;
+        if (asyncSys->mFilenameIndex.Head == asyncSys->mFilenameIndex.Tail) {
             slot = -1;
         } else {
-            int frontValue = queue->data[queue->tail];
-            if (++asyncSys->mFilenameIndex.tail >= asyncSys->mFilenameIndex.size)
-                asyncSys->mFilenameIndex.tail = 0;
+            int frontValue = queue->Array[queue->Tail];
+            if (++asyncSys->mFilenameIndex.Tail >= asyncSys->mFilenameIndex.ArraySize)
+                asyncSys->mFilenameIndex.Tail = 0;
             slot = frontValue;
         }
     }
     int kind;
     {
-        sRing289DF0* queue = &asyncSys->mMemType;
-        if (asyncSys->mMemType.head == asyncSys->mMemType.tail) {
+        cCircBuffer* queue = &asyncSys->mMemType;
+        if (asyncSys->mMemType.Head == asyncSys->mMemType.Tail) {
             kind = -1;
         } else {
-            int frontValue = queue->data[queue->tail];
-            if (++asyncSys->mMemType.tail >= asyncSys->mMemType.size)
-                asyncSys->mMemType.tail = 0;
+            int frontValue = queue->Array[queue->Tail];
+            if (++asyncSys->mMemType.Tail >= asyncSys->mMemType.ArraySize)
+                asyncSys->mMemType.Tail = 0;
             kind = frontValue;
         }
     }
     {
-        sRing289DF0* queue = &asyncSys->mMainMemFlags;
-        if (asyncSys->mMainMemFlags.head != asyncSys->mMainMemFlags.tail) {
-            int frontValue = queue->data[queue->tail];
-            if (++asyncSys->mMainMemFlags.tail >= asyncSys->mMainMemFlags.size)
-                asyncSys->mMainMemFlags.tail = 0;
+        cCircBuffer* queue = &asyncSys->mMainMemFlags;
+        if (asyncSys->mMainMemFlags.Head != asyncSys->mMainMemFlags.Tail) {
+            int frontValue = queue->Array[queue->Tail];
+            if (++asyncSys->mMainMemFlags.Tail >= asyncSys->mMainMemFlags.ArraySize)
+                asyncSys->mMainMemFlags.Tail = 0;
         }
     }
-    if (asyncSys->busy) {
+    if (asyncSys->mBusy) {
         switch (kind) {
         case 0:
         case 2: {
-            int cancelResult = ASYNCFILE_cancel(asyncSys->handle);
-            ASYNCFILE_release(asyncSys->handle, 0, 0);
-            asyncSys->v05(id, -1, cancelResult == 1 ? 1 : 2, asyncSys->names[slot], 0, 0);
-            asyncSys->busy = 0;
+            int cancelResult = ASYNCFILE_cancel(asyncSys->mHandle);
+            ASYNCFILE_release(asyncSys->mHandle, 0, 0);
+            sVEntry<tAsyncOnEndLoad>* vt = (sVEntry<tAsyncOnEndLoad>*)asyncSys->mVtbl;
+            vt[5].fn(vthis(asyncSys, vt[5]), id, -1, cancelResult == 1 ? 1 : 2, asyncSys->mFilename[slot], 0, 0);
+            asyncSys->mBusy = 0;
             break;
         }
         case 1: {
-            int cancelResult = ASYNCFILE_cancel(asyncSys->handle);
-            ASYNCFILE_release(asyncSys->handle, 0, 0);
-            asyncSys->v05(id, -1, cancelResult == 1 ? 1 : 2, asyncSys->names[slot], 0, 0);
-            asyncSys->busy = 0;
+            int cancelResult = ASYNCFILE_cancel(asyncSys->mHandle);
+            ASYNCFILE_release(asyncSys->mHandle, 0, 0);
+            sVEntry<tAsyncOnEndLoad>* vt = (sVEntry<tAsyncOnEndLoad>*)asyncSys->mVtbl;
+            vt[5].fn(vthis(asyncSys, vt[5]), id, -1, cancelResult == 1 ? 1 : 2, asyncSys->mFilename[slot], 0, 0);
+            asyncSys->mBusy = 0;
             break;
         }
         }
     }
     if (flush) {
-        asyncSys->mUserHandle.tail = asyncSys->mUserHandle.head;
-        asyncSys->mFilenameIndex.tail = asyncSys->mFilenameIndex.head;
-        asyncSys->mMemType.tail = asyncSys->mMemType.head;
-        asyncSys->mMainMemFlags.tail = asyncSys->mMainMemFlags.head;
+        asyncSys->mUserHandle.Tail = asyncSys->mUserHandle.Head;
+        asyncSys->mFilenameIndex.Tail = asyncSys->mFilenameIndex.Head;
+        asyncSys->mMemType.Tail = asyncSys->mMemType.Head;
+        asyncSys->mMainMemFlags.Tail = asyncSys->mMainMemFlags.Head;
     }
     cAsyncSys_ASYNCSYS_StartLoad(self);
 }

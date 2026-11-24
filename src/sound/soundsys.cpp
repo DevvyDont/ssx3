@@ -326,12 +326,13 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
 extern "C" int cBankSys_Play2DCallback(cBankSys* self, cMonitorInstance* req)
 {
     snd0018AddVoice(gBankSys, req->mData1, req->mData2);
-    sSnd0018Mgr* bankMgr = (sSnd0018Mgr*)gBankSys->mpVBankManager;
-    bankMgr->sub.p3C[bankMgr->sub.cur] = ((int)req->mPtr);
-    sSnd0018Mgr* bankMgrVol = (sSnd0018Mgr*)gBankSys->mpVBankManager;
-    sSnd0018Sub* s2 = &bankMgrVol->sub;
-    s2->vals[bankMgrVol->sub.cur] = req->mData3;
-    s2->ch[bankMgrVol->sub.cur].vol = SND_0018_MAX(0, SND_0018_MIN(s2->vals[s2->cur], 0x7F));
+    cBankManager* bankMgr = gBankSys->mpVBankManager;
+    bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = (float*)req->mPtr;
+    cBankManager* bankMgrVol = gBankSys->mpVBankManager;
+    cBankMonitor* playOpts = &bankMgrVol->BankMonitor;
+    playOpts->mBaseVol[bankMgrVol->BankMonitor.mInst] = req->mData3;
+    playOpts->mCurrent[bankMgrVol->BankMonitor.mInst].vol =
+        SND_0018_MAX(0, SND_0018_MIN(playOpts->mBaseVol[playOpts->mInst], 0x7F));
     cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
 }
@@ -428,14 +429,15 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
 extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, cMonitorInstance* req)
 {
     snd0358AddVoice(gBankSys, req->mData1, req->mData2);
-    sSnd0358Mgr* bankMgr = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    bankMgr->sub.p3C[bankMgr->sub.cur] = ((int)req->mPtr);
-    sSnd0358Mgr* bankMgrVol = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    sSnd0358Sub* s2 = &bankMgrVol->sub;
-    s2->vals[bankMgrVol->sub.cur] = req->mData3;
-    s2->ch[bankMgrVol->sub.cur].vol = SND_0358_MAX(0, SND_0358_MIN(s2->vals[s2->cur], 0x7F));
-    sSnd0358Mgr* bankMgrPitch = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    bankMgrPitch->sub.ch[bankMgrPitch->sub.cur].fC = (*(unsigned short*)&req->mData4);
+    cBankManager* bankMgr = gBankSys->mpVBankManager;
+    bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = (float*)req->mPtr;
+    cBankManager* bankMgrVol = gBankSys->mpVBankManager;
+    cBankMonitor* playOpts = &bankMgrVol->BankMonitor;
+    playOpts->mBaseVol[bankMgrVol->BankMonitor.mInst] = req->mData3;
+    playOpts->mCurrent[bankMgrVol->BankMonitor.mInst].vol =
+        SND_0358_MAX(0, SND_0358_MIN(playOpts->mBaseVol[playOpts->mInst], 0x7F));
+    cBankManager* bankMgrPitch = gBankSys->mpVBankManager;
+    bankMgrPitch->BankMonitor.mCurrent[bankMgrPitch->BankMonitor.mInst].pitchmult = (*(unsigned short*)&req->mData4);
     cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
 }
@@ -700,42 +702,6 @@ extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
-struct sSnd0CC0Ch {
-    signed char vol;
-    char pad1[0x17];
-};
-struct sSnd0CC0E16 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-};
-struct sSnd0CC0Sub {
-    char pad0[4];
-    sSnd0CC0Ch def;          // 0x04
-    volatile int cur;        // 0x1C
-    sSnd0CC0Ch* ch;          // 0x20
-    void* tgt[4];            // 0x24
-    int* p34;                // 0x34
-    int* vals;               // 0x38
-    int* p3C;                // 0x3C
-    char e40[4][8];          // 0x40
-    int* p60;                // 0x60
-    int* p64;                // 0x64
-    int* p68;                // 0x68
-    int* p6C;                // 0x6C
-    sSnd0CC0E16* p70;        // 0x70
-    int* p74;                // 0x74
-    int* p78;                // 0x78
-    int* p7C;                // 0x7C
-    int* p80;                // 0x80
-    int* p84;                // 0x84
-};
-struct sSnd0CC0Mgr {
-    char pad0[0x1D8];
-    sSnd0CC0Sub sub;         // 0x1D8
-};
-
 /**
  * Plays a 2D (non-positional) sound effect from a bank at the sound-effects volume.
  *
@@ -752,33 +718,10 @@ struct sSnd0CC0Mgr {
 extern "C" int cSSXAudio_SFX_Play2D(cSSXAudio* vself, int bank, int patch)
 {
     cSSXAudio* self = vself;
-    sSnd0CC0Mgr* bankMgr = ((sSnd0CC0Mgr*)self->mpVBankManager);
-    sSnd0CC0Sub* monitor = &bankMgr->sub;
-    bankMgr->sub.cur++;
-    monitor->ch[bankMgr->sub.cur] = bankMgr->sub.def;
-    bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
-    monitor->p34[bankMgr->sub.cur] = 0;
-    monitor->vals[bankMgr->sub.cur] = monitor->ch[bankMgr->sub.cur].vol;
-    monitor->p3C[bankMgr->sub.cur] = 0;
-    memset((char*)monitor + bankMgr->sub.cur * 8 + 0x40, 0, 8);
-    monitor->p60[bankMgr->sub.cur] = 0;
-    monitor->p64[bankMgr->sub.cur] = 0;
-    monitor->p68[bankMgr->sub.cur] = 0;
-    monitor->p6C[bankMgr->sub.cur] = 0;
-    monitor->p70[bankMgr->sub.cur].f4 = 0;
-    monitor->p70[bankMgr->sub.cur].f0 = 100;
-    monitor->p70[bankMgr->sub.cur].f8 = 90;
-    monitor->p70[bankMgr->sub.cur].fC = 50;
-    monitor->p74[bankMgr->sub.cur] = 0;
-    monitor->p80[bankMgr->sub.cur] = 0;
-    monitor->p84[bankMgr->sub.cur] = 0;
-    monitor->p78[bankMgr->sub.cur] = 0x7F;
-    monitor->p7C[bankMgr->sub.cur] = 1;
-    self->mBank[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = bank;
-    self->mPatch[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = patch;
-    sSnd0CC0Mgr** pp = ((sSnd0CC0Mgr**)self->MusicSys.mpVStreamSys);
-    int volumePtr = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
+    snd0018AddVoice(self, bank, patch);
+    cStreamSys* streamSys = self->MusicSys.mpVStreamSys;
+    float* volumePtr = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
+    streamSys->mpVBankManager->BankMonitor.mVolControl[streamSys->mpVBankManager->BankMonitor.mInst] = volumePtr;
     return cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
@@ -4062,7 +4005,7 @@ extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int 
 /**
  * Plays a one-shot positional sound at a world instance, chosen by its patch number.
  *
- * Patch 0 plays nothing, 102 is skipped at location 0, and nothing plays while unk_62A8 is set or the
+ * Patch 0 plays nothing, 102 is skipped at location 0, and nothing plays while mLoadingLoopHandle is set or the
  * instance is
  * already in the play history. Patches below 100 use bank 2, 100-149 bank 8, 150-199 bank 9 and 200+ bank 4.
  *
@@ -4073,7 +4016,7 @@ extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, tInstanceRecord* evt, int 
 {
     if (n == 0) return;
     if (n == 102 && *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0) return;
-    if (self->unk_62A8 >= 0) return;
+    if (self->mLoadingLoopHandle >= 0) return;
     if (cSSXAudio_PlayHistoryExists(self, (int)evt, 0) != 0) return;
     int pri = 80;
     t4Vector pos = *(t4Vector*)evt->m_fmTransform.m[3];
@@ -4092,19 +4035,19 @@ extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, tInstanceRecord* evt, int 
         type = 4;
     }
     snd74A0AddVoice(self, type, patch, 5);
-    sSnd74A0Mgr** pp;
+    cStreamSys* streamSys;
     int closestCamera;
     cSSXAudio* sys = self;
-    sSnd74A0Mgr* voiceMgr = *(*(sSnd74A0Mgr***)&sys->MusicSys);
-    voiceMgr->sub.tgt[voiceMgr->sub.cur] = &pos;
-    sSnd74A0Mgr* voiceMgr2 = *(*(sSnd74A0Mgr***)&sys->MusicSys);
-    voiceMgr2->sub.p34[voiceMgr2->sub.cur] = 1;
-    cSndPlayOpts_OPTS_Radius(&(*(*(sSnd74A0Mgr***)&sys->MusicSys))->sub, 300.0f, -1.0f);
-    pp = (*(sSnd74A0Mgr***)&sys->MusicSys);
+    cBankManager* voiceMgr = sys->MusicSys.mpVStreamSys->mpVBankManager;
+    voiceMgr->BankMonitor.mPosition[voiceMgr->BankMonitor.mInst] = &pos;
+    cBankManager* voiceMgr2 = sys->MusicSys.mpVStreamSys->mpVBankManager;
+    voiceMgr2->BankMonitor.mPosStatic[voiceMgr2->BankMonitor.mInst] = 1;
+    cSndPlayOpts_OPTS_Radius(&sys->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, 300.0f, -1.0f);
+    streamSys = sys->MusicSys.mpVStreamSys;
     closestCamera = cSSXAudio_GetClosestCamera(sys, &pos);
-    (*pp)->sub.p64[(*pp)->sub.cur] = closestCamera;
-    sSnd74A0Mgr* voiceMgr3 = *(*(sSnd74A0Mgr***)&sys->MusicSys);
-    voiceMgr3->sub.p78[voiceMgr3->sub.cur] = pri;
+    streamSys->mpVBankManager->BankMonitor.mViewport[streamSys->mpVBankManager->BankMonitor.mInst] = closestCamera;
+    cBankManager* voiceMgr3 = sys->MusicSys.mpVStreamSys->mpVBankManager;
+    voiceMgr3->BankMonitor.mMapToMaxVol[voiceMgr3->BankMonitor.mInst] = pri;
     int sfxHandle = cBankSys_SFX_End((cBankSys*)self);
     cSSXAudio_PlayHistoryAdd(self, evt, sfxHandle,
                              self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCounter + 50, 0, 0);
@@ -4197,7 +4140,7 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, tInstanceRecord* obj, int
         if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0)
             return;
     }
-    if (self->unk_62A8 >= 0)
+    if (self->mLoadingLoopHandle >= 0)
         return;
     if ((int)obj->m_pActiveNode == 0)
         return;
@@ -4261,9 +4204,9 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, tInstanceRecord* obj, int
         }
     }
     sndPushVoice(((sSSXAudioView*)self), curBank, curPatch);
-    cBankManager** pp = (cBankManager**)self->MusicSys.mpVStreamSys;
-    int volumePtr = (int)cSSXAudio_GetCurrAppliedVolumePtr(((sSSXAudioView*)self), 5, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
+    cStreamSys* streamSys = self->MusicSys.mpVStreamSys;
+    float* volumePtr = (float*)cSSXAudio_GetCurrAppliedVolumePtr(((sSSXAudioView*)self), 5, 0);
+    streamSys->mpVBankManager->BankMonitor.mVolControl[streamSys->mpVBankManager->BankMonitor.mInst] = volumePtr;
     self->AttachedSounds[i].handle = snd7950Commit(((sSSXAudioView*)self), &self->AttachedSounds[i].pos, radius, pri);
 }
 #endif
@@ -6342,24 +6285,24 @@ extern "C" void func_002A3DE0(cSSXAudio* self, cRider* obj, int ev);
  * Raises the DJ event func_002A3DE0 when the focus rider's uber level reaches 10.
  *
  * Does nothing while replaying. Takes the focus rider (cSSXAudio_GetFocusRider(self, -1)); when its mViewIndex differs
- * from the one remembered in unk_5820 it only records the new view. Otherwise, when the rider's mUberLevel is 10,
- * differs from the level remembered in unk_581C and the game state is 4, it calls func_002A3DE0(self, rider, 2). The
- * level is remembered in unk_581C every time.
+ * from the one remembered in mUberViewIndex it only records the new view. Otherwise, when the rider's mUberLevel is 10,
+ * differs from the level remembered in mLastUberLevel and the game state is 4, it calls func_002A3DE0(self, rider, 2).
+ * The level is remembered in mLastUberLevel every time.
  */
 extern "C" void cSSXAudio_UpdateLandedUber(cSSXAudio* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) return;
     // PORT: cSSXAudio_GetFocusRider returns a rider pointer as int
     cRider* localRider = (cRider*)cSSXAudio_GetFocusRider(self, -1);
-    if (localRider->mViewIndex == self->unk_5820) {
-        if (localRider->mUberLevel == 10 && self->unk_581C != localRider->mUberLevel &&
+    if (localRider->mViewIndex == self->mUberViewIndex) {
+        if (localRider->mUberLevel == 10 && self->mLastUberLevel != localRider->mUberLevel &&
             cAudioInterface_getGame()->mCurrentStateID == 4) {
             func_002A3DE0((cSSXAudio*)self, (cRider*)localRider, 2);
         }
     } else {
-        self->unk_5820 = localRider->mViewIndex;
+        self->mUberViewIndex = localRider->mViewIndex;
     }
-    self->unk_581C = localRider->mUberLevel;
+    self->mLastUberLevel = localRider->mUberLevel;
 }
 #endif
 
@@ -6841,9 +6784,9 @@ extern "C" void func_002B3A70(void*);
  * Plays a start-gate countdown beep and, on the first and last beeps, prepares the race music.
  *
  * Does nothing while replaying. Plays bank 0, patch 78 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0). On beep 3,
- * when the current song's state (func_002B49E0) is 201, 1, 2 or 3 and unk_627C is set, fades it over 2 seconds
+ * when the current song's state (func_002B49E0) is 201, 1, 2 or 3 and mRaceMusicOn is set, fades it over 2 seconds
  * (func_002B3D48). On beep 1, when no song is playing (MusicSys.mSongPlaying) or the state is one of those, and
- * unk_627C is set, it calls func_0028D488, func_0028CF98(self, 0, 0, -1, 0) and func_002B3A70 on the music system.
+ * mRaceMusicOn is set, it calls func_0028D488, func_0028CF98(self, 0, 0, -1, 0) and func_002B3A70 on the music system.
  *
  * @param mode  the countdown second (3, 2, 1; cGFGateState passes 3 first, then each whole second left)
  */
@@ -6857,7 +6800,7 @@ extern "C" void cSSXAudio_CountdownBeep(cSSXAudio* self, int mode)
     if (mode == 3) {
         int st = func_002B49E0((char*)&self->MusicSys);
         if (st == 201 || st == 1 || st == 2 || st == 3) {
-            if (self->unk_627C != 0) {
+            if (self->mRaceMusicOn != 0) {
                 func_002B3D48((char*)&self->MusicSys, 2.0f);
             }
         }
@@ -6865,7 +6808,7 @@ extern "C" void cSSXAudio_CountdownBeep(cSSXAudio* self, int mode)
     if (mode == 1) {
         int st = func_002B49E0((char*)&self->MusicSys);
         if (self->MusicSys.mSongPlaying == 0 || st == 201 || st == 1 || st == 2 || st == 3) {
-            if (self->unk_627C != 0) {
+            if (self->mRaceMusicOn != 0) {
                 func_0028D488(self);
                 func_0028CF98(self, 0, 0, -1, 0);
                 func_002B3A70((char*)&self->MusicSys);
@@ -6935,7 +6878,7 @@ struct sSnd7B0Mgr {
 struct sSs7B0PreC { char pad[0xC]; };
 class sSs7B0Self : public sSs7B0PreC {
 public:
-    virtual void v01(int a, int b);
+    virtual void SFX_Play2D(int bank, int patch); // slot 1: cSSXAudio_SFX_Play2D
 };
 struct sSs7B0Pre118 { char pad[0x5440]; };
 class sSs7B0Obj : public sSs7B0Pre118 {
@@ -6943,7 +6886,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04(int a);
+    virtual void SetMusicState(int state); // slot 4: cSSXAudio's override func_0028F3C8 sets the music state
 };
 
 static inline int snd7B0Add(void* vself, int a, int b)
@@ -6988,13 +6931,13 @@ static inline int snd7B0Add(void* vself, int a, int b)
  *
  * Calls func_002B3A98 on the music system and func_0028DF08 (mLastMusicState = -1), stores the cAI's AITick in
  * mGruntCycle and plays bank 0, patch 98 through this object's vtable slot 1; when not replaying also bank 0, patch 94
- * at volume 127 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(vself, 9, 0). With unk_627C set the music
+ * at volume 127 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(vself, 9, 0). With mRaceMusicOn set the music
  * system's vtable slot 4 gets 0. Unless play-history event 0 is live: in game paths 1 and 2 (newRace.cGamePath)
  * func_002A3170; otherwise on the last heat (cGameModeMan bIsLastHeat) func_002A3400, func_002B1758(SpeechSys, 0) and,
- * when func_002A4078 or func_002A40E8 is nonzero, unk_5774 = 1 and unk_5778 = the current song's value from
- * func_002B4908; on heat 1 the latter unconditionally, on heat 2 under the same test. When unk_627C is 0 it is set to 1
- * and music slot 4 gets 37 (not replaying), or slot 4 gets 37 when replaying with unk_6298 set. Finally play-history
- * event 0 is moved to 50 ms past the monitor clock and unk_5824 records iHeatNum.
+ * when func_002A4078 or func_002A40E8 is nonzero, mSongAnnouncePending = 1 and mSongAnnounceNum = the current song's
+ * value from func_002B4908; on heat 1 the latter unconditionally, on heat 2 under the same test. When mRaceMusicOn is 0
+ * it is set to 1 and music slot 4 gets 37 (not replaying), or slot 4 gets 37 when replaying with mReplaySongPlaying
+ * set. Finally play-history event 0 is moved to 50 ms past the monitor clock and mGateDropHeat records iHeatNum.
  *
  * @param vself  the audio system
  */
@@ -7005,12 +6948,12 @@ extern "C" void cSSXAudio_CountdownGateDrop(cSSXAudio* vself)
     func_002B3A98_C7B0(&base->MusicSys);
     func_0028DF08_C7B0(vself);
     base->mGruntCycle = cAudioInterface_getGame()->AI->AITick;
-    ((sSs7B0Self*)vself)->v01(0, 98);
+    ((sSs7B0Self*)vself)->SFX_Play2D(0, 98);
     if (cSSXAudio_ReplayMode(vself) == 0) {
         snd7B0Add(vself, 0, 94);
     }
-    if (base->unk_627C != 0) {
-        ((sSs7B0Obj*)(&base->MusicSys))->v04(0);
+    if (base->mRaceMusicOn != 0) {
+        ((sSs7B0Obj*)(&base->MusicSys))->SetMusicState(0);
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)vself, 0, 0) == 0) {
@@ -7025,34 +6968,34 @@ extern "C" void cSSXAudio_CountdownGateDrop(cSSXAudio* vself)
                 func_002A3400((cSSXAudio*)vself);
                 func_002B1758(&base->SpeechSys, 0);
                 if (func_002A4078(vself) != 0 || func_002A40E8(vself) != 0) {
-                    base->unk_5774 = 1;
-                    base->unk_5778 = func_002B4908(&base->MusicSys);
+                    base->mSongAnnouncePending = 1;
+                    base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
                 }
             } else {
                 int heatNum = gameModeMan[0];
                 if (heatNum == 1) {
-                    base->unk_5774 = 1;
-                    base->unk_5778 = func_002B4908(&base->MusicSys);
+                    base->mSongAnnouncePending = 1;
+                    base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
                 } else if (heatNum == 2) {
                     if (func_002A4078(vself) != 0 || func_002A40E8(vself) != 0) {
-                        base->unk_5774 = 1;
-                        base->unk_5778 = func_002B4908(&base->MusicSys);
+                        base->mSongAnnouncePending = 1;
+                        base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
                     }
                 }
             }
         }
     }
-    if (base->unk_627C == 0) {
+    if (base->mRaceMusicOn == 0) {
         if (cSSXAudio_ReplayMode(vself) == 0) {
-            base->unk_627C = 1;
-            ((sSs7B0Obj*)(&base->MusicSys))->v04(37);
-        } else if (base->unk_6298 != 0) {
-            ((sSs7B0Obj*)(&base->MusicSys))->v04(37);
+            base->mRaceMusicOn = 1;
+            ((sSs7B0Obj*)(&base->MusicSys))->SetMusicState(37);
+        } else if (base->mReplaySongPlaying != 0) {
+            ((sSs7B0Obj*)(&base->MusicSys))->SetMusicState(37);
         }
     }
     cSSXAudio_PlayHistoryUpdateTime((cSSXAudio*)vself, 0,
                                     base->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCounter + 50, 0);
-    base->unk_5824 = *(int*)SSXApp->GameModeMan;
+    base->mGateDropHeat = *(int*)SSXApp->GameModeMan;
 }
 #endif
 
@@ -8435,7 +8378,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_GetSpeechVolumeIdentifier);
 extern "C" int cAudioInterface_isInGame();
 
 /**
- * Classifies a speech file by its name for speech instance 0, records the class in unk_5738 and returns it.
+ * Classifies a speech file by its name for speech instance 0, records the class in mSpeechVolumeID and returns it.
  *
  * Names starting "DJ_" give 2 (the DJ volume control) in game and 11 in the front end, "PA_" gives 3 (PA), "Arcade"
  * gives 10 (ArcadeSpeech) and anything else 4 (Character). Other instances return -1, as the cSpeechSys base does. It
@@ -8451,18 +8394,18 @@ extern "C" int cSSXAudio_GetSpeechVolumeIdentifier(cSSXAudio* self, int instance
     if (instanceIndex == 0) {
         if (name[0] == 'D' && name[1] == 'J' && name[2] == '_') {
             if (cAudioInterface_isInGame() != 0) {
-                self->unk_5738 = 2;
+                self->mSpeechVolumeID = 2;
             } else {
-                self->unk_5738 = 11;
+                self->mSpeechVolumeID = 11;
             }
         } else if (name[0] == 'P' && name[1] == 'A' && name[2] == '_') {
-            self->unk_5738 = 3;
+            self->mSpeechVolumeID = 3;
         } else if (name[0] == 'A' && name[1] == 'r' && name[2] == 'c' && name[3] == 'a' && name[4] == 'd' && name[5] == 'e') {
-            self->unk_5738 = 10;
+            self->mSpeechVolumeID = 10;
         } else {
-            self->unk_5738 = 4;
+            self->mSpeechVolumeID = 4;
         }
-        return self->unk_5738;
+        return self->mSpeechVolumeID;
     }
     return -1;
 }
@@ -8476,10 +8419,11 @@ extern "C" void cSSXAudio_DuckToStream(void* self, int a1, float f0, float f1);
 /**
  * Returns the volume control a speech of a given class plays at, for speech instance 0 (0 for other instances).
  *
- * Class 2 (DJ) also ducks stream 0 to 0.65 over about a second (cSSXAudio_DuckToStream(self, 0, 0.9999, 0.65)). Class 11 (a DJ
- * line in the front end) returns &unk_5730, a fixed 1.0; every other class returns cSSXAudio_GetCurrAppliedVolumePtr(self, type, a3), the
- * applied volume of that control (per character for 4). It fills slot 3 of cSSXAudio's cSpeechSys vtable (D_004836D8),
- * where cSpeechSys has cSpeechSys_UpdateSpeechVolume (which returns 0).
+ * Class 2 (DJ) also ducks stream 0 to 0.65 over about a second (cSSXAudio_DuckToStream(self, 0, 0.9999, 0.65)). Class
+ * 11 (a DJ line in the front end) returns &mFrontEndDJVolume, a fixed 1.0; every other class returns
+ * cSSXAudio_GetCurrAppliedVolumePtr(self, type, a3), the applied volume of that control (per character for 4). It fills
+ * slot 3 of cSSXAudio's cSpeechSys vtable (D_004836D8), where cSpeechSys has cSpeechSys_UpdateSpeechVolume (which
+ * returns 0).
  *
  * @param instanceIndex  the speech instance (0 is the only one handled)
  * @param type  the volume class from cSSXAudio_GetSpeechVolumeIdentifier
@@ -8493,7 +8437,7 @@ extern "C" void* cSSXAudio_UpdateSpeechVolume(cSSXAudio* self, int instanceIndex
             cSSXAudio_DuckToStream(self, 0, 0.9999024868011475f, 0.6499993801116943f);
         }
         if (type == 11) {
-            return (char*)&self->unk_5730;
+            return (char*)&self->mFrontEndDJVolume;
         }
         return cSSXAudio_GetCurrAppliedVolumePtr(self, type, charIndex);
     }
@@ -8505,7 +8449,8 @@ extern "C" void* cSSXAudio_UpdateSpeechVolume(cSSXAudio* self, int instanceIndex
 INCLUDE_ASM("sound/soundsys", func_0029F088);
 #ifdef SKIP_ASM
 /**
- * Returns the speech volume class last recorded for speech instance 0 (unk_5738, set by cSSXAudio_GetSpeechVolumeIdentifier), else -1.
+ * Returns the speech volume class last recorded for speech instance 0 (mSpeechVolumeID, set by
+ * cSSXAudio_GetSpeechVolumeIdentifier), else -1.
  *
  * cSSXAudio_ApplyRMSData reads it to pick the RMS duck level.
  *
@@ -8515,7 +8460,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F088);
 extern "C" int func_0029F088(cSSXAudio* self, int instanceIndex)
 {
     if (instanceIndex == 0) {
-        return self->unk_5738;
+        return self->mSpeechVolumeID;
     }
     return -1;
 }
@@ -8867,10 +8812,10 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
             prio = (cSoundSys_SndRand(self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF)
                    * 3 / 0x7FFF + 3;
         } else {
-            prio = self->unk_5734;
-            self->unk_5734 = prio + 1;
+            prio = self->mGruntPatchCycle;
+            self->mGruntPatchCycle = prio + 1;
             if (prio + 1 >= 6) {
-                self->unk_5734 = 0;
+                self->mGruntPatchCycle = 0;
             }
         }
     } else if (length == 1) {
@@ -8887,58 +8832,42 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
         }
     }
     int vol = cSSXAudio_GetGruntVol((cSSXAudio*)self, rider);
-    sSnd17D0Mgr* voiceMgr = ((sSnd17D0Mgr*)self->mpVBankManager);
-    sSnd17D0Sub* voiceSub = &voiceMgr->sub;
-    voiceMgr->sub.cur++;
-    voiceSub->ch[voiceMgr->sub.cur] = voiceMgr->sub.def;
-    voiceMgr->sub.tgt[voiceMgr->sub.cur] = 0;
-    voiceSub->p34[voiceMgr->sub.cur] = 0;
-    voiceSub->vals[voiceMgr->sub.cur] = voiceSub->ch[voiceMgr->sub.cur].vol;
-    voiceSub->p3C[voiceMgr->sub.cur] = 0;
-    memset((char*)voiceSub + voiceMgr->sub.cur * 8 + 0x40, 0, 8);
-    voiceSub->p60[voiceMgr->sub.cur] = 0;
-    voiceSub->p64[voiceMgr->sub.cur] = 0;
-    voiceSub->p68[voiceMgr->sub.cur] = 0;
-    voiceSub->p6C[voiceMgr->sub.cur] = 0;
-    voiceSub->p70[voiceMgr->sub.cur].f4 = 0;
-    voiceSub->p70[voiceMgr->sub.cur].f0 = 100;
-    voiceSub->p70[voiceMgr->sub.cur].f8 = 90;
-    voiceSub->p70[voiceMgr->sub.cur].fC = 50;
-    voiceSub->p74[voiceMgr->sub.cur] = 0;
-    voiceSub->p80[voiceMgr->sub.cur] = 0;
-    voiceSub->p84[voiceMgr->sub.cur] = 0;
-    voiceSub->p78[voiceMgr->sub.cur] = 0x7F;
-    voiceSub->p7C[voiceMgr->sub.cur] = 1;
-    self->mBank[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = kind;
-    self->mPatch[((sSnd17D0Mgr*)self->mpVBankManager)->sub.cur] = prio;
-    sSnd17D0Mgr* curVoiceMgr = *(*(sSnd17D0Mgr***)&self->MusicSys);
-    sSnd17D0Sub* curVoiceSub = &curVoiceMgr->sub;
-    curVoiceSub->vals[curVoiceMgr->sub.cur] = vol;
-    curVoiceSub->ch[curVoiceMgr->sub.cur].vol = (curVoiceSub->vals[curVoiceSub->cur] < 0x7F && curVoiceSub->vals[curVoiceSub->cur] < 0) ? 0 : (curVoiceSub->vals[curVoiceSub->cur] < 0x7F ? (unsigned char)curVoiceSub->vals[curVoiceSub->cur] : 0x7F);
+    snd0018AddVoice(self, kind, prio);
+    cBankManager* curVoiceMgr = self->MusicSys.mpVStreamSys->mpVBankManager;
+    cBankMonitor* curVoiceSub = &curVoiceMgr->BankMonitor;
+    curVoiceSub->mBaseVol[curVoiceMgr->BankMonitor.mInst] = vol;
+    curVoiceSub->mCurrent[curVoiceMgr->BankMonitor.mInst].vol =
+        (curVoiceSub->mBaseVol[curVoiceSub->mInst] < 0x7F && curVoiceSub->mBaseVol[curVoiceSub->mInst] < 0)
+            ? 0
+            : (curVoiceSub->mBaseVol[curVoiceSub->mInst] < 0x7F
+                   ? (unsigned char)curVoiceSub->mBaseVol[curVoiceSub->mInst]
+                   : 0x7F);
     {
-        sSnd17D0Mgr** pq = (*(sSnd17D0Mgr***)&self->MusicSys);
+        cStreamSys* pq = self->MusicSys.mpVStreamSys;
         int closestCamera = cSSXAudio_GetClosestCamera1(self, rider);
-        (*pq)->sub.p64[(*pq)->sub.cur] = closestCamera;
+        pq->mpVBankManager->BankMonitor.mViewport[pq->mpVBankManager->BankMonitor.mInst] = closestCamera;
     }
     {
-        sSnd17D0Mgr** pp = (*(sSnd17D0Mgr***)&self->MusicSys);
-        int volumePtr = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 4, cRider_getIdentity(rider));
-        (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
+        cStreamSys* pp = self->MusicSys.mpVStreamSys;
+        float* volumePtr = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 4, cRider_getIdentity(rider));
+        pp->mpVBankManager->BankMonitor.mVolControl[pp->mpVBankManager->BankMonitor.mInst] = volumePtr;
     }
     int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (ok3) {
-        cSndPlayOpts_OPTS_Radius(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, 29.997713088989258f, -1.0f);
+        cSndPlayOpts_OPTS_Radius(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, 29.997713088989258f, -1.0f);
     } else {
-        cSndPlayOpts_OPTS_Radius(&(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub, 100.0f, -1.0f);
+        cSndPlayOpts_OPTS_Radius(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, 100.0f, -1.0f);
     }
     {
-        sSnd17D0Mgr** pt = (*(sSnd17D0Mgr***)&self->MusicSys);
-        void* pos = rider->getPosition();
-        (*pt)->sub.tgt[(*pt)->sub.cur] = pos;
+        cStreamSys* pt = self->MusicSys.mpVStreamSys;
+        t4Vector* pos = rider->getPosition();
+        pt->mpVBankManager->BankMonitor.mPosition[pt->mpVBankManager->BankMonitor.mInst] = pos;
     }
     if (flag) {
-        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p80[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = 1;
-        (*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.p84[(*(*(sSnd17D0Mgr***)&self->MusicSys))->sub.cur] = rider->mViewIndex;
+        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
+            .mTwoPlayerPan[self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = 1;
+        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor
+            .mTwoPlayerSide[self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mInst] = rider->mViewIndex;
     }
     int sfxHandle = cBankSys_SFX_End((cBankSys*)self);
     cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)3, sfxHandle,
@@ -10756,7 +10685,8 @@ extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C"
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
  * speech hook D_004A482C gets its packed id, 4 arguments: the language bit, 3, and the song as one bit in two words: 1
  * << n in the first for n below 100, 1 << (n - 100) in the second from 100 on, none for a negative n or 999.
- * func_002A43B8 calls it with unk_5778 (the song value cSSXAudio_CountdownGateDrop and func_002A3170 store from func_002B4908).
+ * func_002A43B8 calls it with mSongAnnounceNum (the song value cSSXAudio_CountdownGateDrop and func_002A3170 store from
+ * func_002B4908).
  *
  * @param n  the song number, or -1 / 999 for none
  */
@@ -11148,16 +11078,16 @@ int func_002B4908(void* self);
 /**
  * Starts the DJ intro of a race: DJ line 8421 with (0, 0), then queues the song announcement.
  *
- * Calls func_002A26F0(self, 0, 0) and func_002B1758(SpeechSys, 0), then sets unk_5774 (pending announcement) and stores
- * the current song's value func_002B4908 in unk_5778 for func_002A43B8 / func_002A2860. cSSXAudio_CountdownGateDrop calls it in game
- * paths 1 and 2.
+ * Calls func_002A26F0(self, 0, 0) and func_002B1758(SpeechSys, 0), then sets mSongAnnouncePending (pending
+ * announcement) and stores the current song's value func_002B4908 in mSongAnnounceNum for func_002A43B8 /
+ * func_002A2860. cSSXAudio_CountdownGateDrop calls it in game paths 1 and 2.
  */
 extern "C" void func_002A3170(cSSXAudio* self)
 {
     func_002A26F0(self, 0, 0);
     func_002B1758(&self->SpeechSys, 0);
-    self->unk_5774 = 1;
-    self->unk_5778 = func_002B4908(&self->MusicSys);
+    self->mSongAnnouncePending = 1;
+    self->mSongAnnounceNum = func_002B4908(&self->MusicSys);
 }
 #endif
 
@@ -12153,10 +12083,10 @@ extern "C" void func_002A2E50(cSSXAudio* self, int a);
  *
  * Fills slot 4 of cSSXAudio's cSpeechSys vtable (D_004836D8); func_002AFC88 calls it while the speech instance is idle.
  * The first set pending flag, in this order, is cleared and its line played: unk_5768 func_002A26F0(0, 0), unk_5784
- * func_002A2AD0, unk_576C func_002A2638, unk_577C func_002A2B88, unk_5770 func_002A2C30, unk_5788 func_002A1138(0, 0),
- * unk_5774 func_002A2860(unk_5778), unk_574C and unk_5750 func_002A2E50(0), unk_5754 func_002A2E50(1), unk_5758
- * func_002A2568(unk_575C), unk_5740 func_002A27D8. Independently, unk_5744 requests the place line func_002A1400 for
- * the cAI's rider unk_5748 (when there is one) and is cleared.
+ * func_002A2AD0, unk_576C func_002A2638, unk_577C func_002A2B88, unk_5770 func_002A2C30, mRiderRemarkPending
+ * func_002A1138(0, 0), mSongAnnouncePending func_002A2860(mSongAnnounceNum), unk_574C and unk_5750 func_002A2E50(0),
+ * unk_5754 func_002A2E50(1), unk_5758 func_002A2568(unk_575C), unk_5740 func_002A27D8. Independently, unk_5744 requests
+ * the place line func_002A1400 for the cAI's rider unk_5748 (when there is one) and is cleared.
  */
 extern "C" void func_002A43B8(cSSXAudio* self)
 {
@@ -12175,12 +12105,12 @@ extern "C" void func_002A43B8(cSSXAudio* self)
     } else if (self->unk_5770 != 0) {
         func_002A2C30((cSSXAudio*)self);
         self->unk_5770 = 0;
-    } else if (self->unk_5788 != 0) {
+    } else if (self->mRiderRemarkPending != 0) {
         func_002A1138(((char*)self), 0, 0);
-        self->unk_5788 = 0;
-    } else if (self->unk_5774 != 0) {
-        func_002A2860((cSSXAudio*)self, self->unk_5778);
-        self->unk_5774 = 0;
+        self->mRiderRemarkPending = 0;
+    } else if (self->mSongAnnouncePending != 0) {
+        func_002A2860((cSSXAudio*)self, self->mSongAnnounceNum);
+        self->mSongAnnouncePending = 0;
     } else if (self->unk_574C != 0) {
         func_002A2E50(self, 0);
         self->unk_574C = 0;
@@ -12211,7 +12141,7 @@ extern "C" void func_002A43B8(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A4550);
 #ifdef SKIP_ASM
 /**
- * Clears every pending DJ / place line flag that func_002A43B8 checks (unk_5740 .. unk_5788, plus unk_5760).
+ * Clears every pending DJ / place line flag that func_002A43B8 checks (unk_5740 .. mRiderRemarkPending, plus unk_5760).
  *
  * cSSXAudio_InGameDeInit, cSSXAudio_ResumeAudio and func_0028E8C0 call it.
  */
@@ -12227,10 +12157,10 @@ extern "C" void func_002A4550(cSSXAudio* self)
     self->unk_5768 = 0;
     self->unk_576C = 0;
     self->unk_5770 = 0;
-    self->unk_5774 = 0;
+    self->mSongAnnouncePending = 0;
     self->unk_577C = 0;
     self->unk_5784 = 0;
-    self->unk_5788 = 0;
+    self->mRiderRemarkPending = 0;
 }
 #endif
 
@@ -15404,9 +15334,9 @@ extern char cPS2SoundManager_vtbl[];
 /**
  * Constructs the PS2 sound manager.
  *
- * Stores the vtable cPS2SoundManager_vtbl and resets the state: no mSoundHeap, driver mode unk_008 0, mMainMemHighAddr
- * -1, empty unused-node and free-block lists (unk_310 / unk_318 -1) and load limits off (mMemLoadLimited 0). The nodes
- * are set up later by cPS2SoundManager_Init.
+ * Stores the vtable cPS2SoundManager_vtbl and resets the state: no mSoundHeap, driver mode mModeGroup 0,
+ * mMainMemHighAddr -1, empty unused-node and free-block lists (mUnusedNodeHead / mFreeNodeHead -1) and load limits off
+ * (mMemLoadLimited 0). The nodes are set up later by cPS2SoundManager_Init.
  *
  * @return @p self
  */
@@ -15414,11 +15344,11 @@ extern "C" void* cPS2SoundManager_cPS2SoundManager(cPS2SoundManager* self)
 {
     *(void**)self = cPS2SoundManager_vtbl;
     self->mSoundHeap = 0;
-    self->unk_008 = 0;
+    self->mModeGroup = 0;
     self->mMainMemHighAddr = -1;
-    self->unk_310 = -1;
+    self->mUnusedNodeHead = -1;
     self->mMemLoadLimited = 0;
-    self->unk_318 = -1;
+    self->mFreeNodeHead = -1;
     return ((void*)self);
 }
 #endif
@@ -15485,8 +15415,8 @@ extern "C" void cPS2SoundManager_Init(cPS2SoundManager* self, int mode)
     sSndVtE8CB0* vt = ((sSndVtE8CB0*)self->mVtbl);
     vt[2].fn(vthis(self, vt[2]), mode);
     SNDSYSI_init(self->mSoundHeap, 0x32000, 0x80303);
-    self->unk_310 = 31;
-    self->unk_318 = -1;
+    self->mUnusedNodeHead = 31;
+    self->mFreeNodeHead = -1;
     for (int i = 31; i >= 0; i--) {
         self->mNodes[i].index = i;
         self->mNodes[i].lowAddr = -1;
@@ -15514,10 +15444,10 @@ extern "C" void func_003BC930();
  * Switches the sound driver configuration for an audio mode.
  *
  * Fills a driver configuration (SNDSYS_getopts defaults, then rates 36000/24000 and fixed levels) with per-mode voice
- * and buffer counts: mode 3 (calls func_003BC930, records unk_008 = 2), mode 2 and modes 0/1 (record unk_008 = 1), and
- * applies it with SNDSYS_setopts; any other mode applies the defaults. Likely bug: the early return tests the other
- * group's value (mode 3 returns 1 when unk_008 is 1, modes 0-2 when it is 2), so re-applying the current setting goes
- * through and switching between the two groups never does.
+ * and buffer counts: mode 3 (calls func_003BC930, records mModeGroup = 2), mode 2 and modes 0/1 (record mModeGroup =
+ * 1), and applies it with SNDSYS_setopts; any other mode applies the defaults. Likely bug: the early return tests the
+ * other group's value (mode 3 returns 1 when mModeGroup is 1, modes 0-2 when it is 2), so re-applying the current
+ * setting goes through and switching between the two groups never does.
  *
  * @param mode  the audio mode (On Tour eSOUNDDEF_MODE mode)
  * @return 1 when the call was refused, 2 when the configuration was applied (On Tour eSOUNDMANAGER_SETMODE)
@@ -15534,7 +15464,7 @@ extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
     cfg.set.maxbanks = 20;
     switch (mode) {
     case 3:
-        if (self->unk_008 == 1) return 1;
+        if (self->mModeGroup == 1) return 1;
         cfg.set.voicesmaincpu = 0x10;
         cfg.set.voicesiopcpu = 8;
         cfg.set.voicesspu = 0x18;
@@ -15545,10 +15475,10 @@ extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
         cfg.set.rendermode[2] = 36;
         cfg.set.outputspdifmode = 2;
         func_003BC930();
-        self->unk_008 = 2;
+        self->mModeGroup = 2;
         break;
     case 2:
-        if (self->unk_008 == 2) return 1;
+        if (self->mModeGroup == 2) return 1;
         cfg.set.voicesmaincpu = 0x10;
         cfg.set.voicesiopcpu = 8;
         cfg.set.voicesspu = 0x30;
@@ -15561,11 +15491,11 @@ extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
         cfg.set.rendermode[3] = 40;
         cfg.set.rendermode[4] = 288;
         cfg.set.rendermode[5] = 36;
-        self->unk_008 = 1;
+        self->mModeGroup = 1;
         break;
     case 0:
     case 1:
-        if (self->unk_008 == 2) return 1;
+        if (self->mModeGroup == 2) return 1;
         cfg.set.voicesmaincpu = 0x10;
         cfg.set.voicesiopcpu = 8;
         cfg.set.voicesspu = 0x30;
@@ -15575,7 +15505,7 @@ extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
         cfg.set.rendermode[0] = 40;
         cfg.set.rendermode[1] = 288;
         cfg.set.rendermode[2] = 36;
-        self->unk_008 = 1;
+        self->mModeGroup = 1;
         break;
     }
     SNDSYS_setopts(&cfg);
@@ -15642,20 +15572,20 @@ tPS2SoundMemNode* func_002A92B8_v(cPS2SoundManager* self) __asm__("func_002A92B8
 /**
  * Allocates a block of sound memory and returns its handle.
  *
- * First walks the free-block list (unk_318, sorted by address): a block of exactly @p size is marked used and unlinked,
- * a bigger one is split (a new node from func_002A92B8 takes its top @p size bytes). Otherwise carves the block off the
- * top of main sound memory: fails with -1 when func_003B5B68 reports less free memory than @p size, with -2 while load
- * limits are on (mMemLoadLimited), else lowers mMainMemHighAddr by @p size and tells the driver (func_003B5B20). No
- * check that func_002A92B8 found a node. Likely bug: an exact fit at the head of the free list is never unlinked
- * (unk_318 keeps pointing at the now-used node, whose next is cleared), so the rest of the free list is lost and the
- * next request of that size gets the same block again.
+ * First walks the free-block list (mFreeNodeHead, sorted by address): a block of exactly @p size is marked used and
+ * unlinked, a bigger one is split (a new node from func_002A92B8 takes its top @p size bytes). Otherwise carves the
+ * block off the top of main sound memory: fails with -1 when func_003B5B68 reports less free memory than @p size, with
+ * -2 while load limits are on (mMemLoadLimited), else lowers mMainMemHighAddr by @p size and tells the driver
+ * (func_003B5B20). No check that func_002A92B8 found a node. Likely bug: an exact fit at the head of the free list is
+ * never unlinked (mFreeNodeHead keeps pointing at the now-used node, whose next is cleared), so the rest of the free
+ * list is lost and the next request of that size gets the same block again.
  *
  * @param size  bytes wanted
  * @return the node index (the memory handle), -1 when out of memory, -2 while load limits are set
  */
 extern "C" int cPS2SoundManager_AllocSoundMem(cPS2SoundManager* self, int size)
 {
-    int i = self->unk_318;
+    int i = self->mFreeNodeHead;
     if (i >= 0) {
         tPS2SoundMemNode* prev = 0;
         tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[i];
@@ -15713,8 +15643,9 @@ extern "C" void func_002A92F8_v(cPS2SoundManager* self, tPS2SoundMemNode* e) __a
 /**
  * Frees a block of sound memory allocated by cPS2SoundManager_AllocSoundMem (cPS2SoundManager_AllocSoundMem).
  *
- * Marks node @p memHandle free. A block at mMainMemHighAddr goes back to main memory (func_002A92F8), followed by every free
- * block that now sits at the new top; any other block is inserted into the free-block list (unk_318) in address order.
+ * Marks node @p memHandle free. A block at mMainMemHighAddr goes back to main memory (func_002A92F8), followed by every
+ * free block that now sits at the new top; any other block is inserted into the free-block list (mFreeNodeHead) in
+ * address order.
  *
  * @param memHandle  the memory handle (node index) AllocSoundMem returned (On Tour memHandle)
  */
@@ -15724,26 +15655,26 @@ extern "C" void cPS2SoundManager_DeallocSoundMem(cPS2SoundManager* self, int mem
     n->state = 1;
     if (n->lowAddr == self->mMainMemHighAddr) {
         func_002A92F8_v((self), n);
-        while (self->unk_318 >= 0) {
-            tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[self->unk_318];
+        while (self->mFreeNodeHead >= 0) {
+            tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[self->mFreeNodeHead];
             if (ps2SoundMemNode->lowAddr != self->mMainMemHighAddr) return;
-            self->unk_318 = ps2SoundMemNode->next;
+            self->mFreeNodeHead = ps2SoundMemNode->next;
             func_002A92F8_v((self), ps2SoundMemNode);
         }
-    } else if (self->unk_318 < 0) {
-        n->next = self->unk_318;
-        self->unk_318 = n->index;
+    } else if (self->mFreeNodeHead < 0) {
+        n->next = self->mFreeNodeHead;
+        self->mFreeNodeHead = n->index;
     } else {
         tPS2SoundMemNode* prev = 0;
-        tPS2SoundMemNode* freeNode = &((&self->mNodes[0]))[self->unk_318];
+        tPS2SoundMemNode* freeNode = &((&self->mNodes[0]))[self->mFreeNodeHead];
         for (;;) {
             if (n->lowAddr < freeNode->lowAddr) {
                 if (prev) {
                     n->next = prev->next;
                     prev->next = n->index;
                 } else {
-                    n->next = self->unk_318;
-                    self->unk_318 = n->index;
+                    n->next = self->mFreeNodeHead;
+                    self->mFreeNodeHead = n->index;
                 }
                 return;
             }
@@ -15818,7 +15749,8 @@ struct s2A92B8 {
 };
 
 /**
- * Takes a node from the PS2 sound manager's chain of unused memory nodes (unk_310), or returns 0 when none is left.
+ * Takes a node from the PS2 sound manager's chain of unused memory nodes (mUnusedNodeHead), or returns 0 when none is
+ * left.
  *
  * The node is unlinked (next = -1). cPS2SoundManager_AllocSoundMem uses it.
  *
@@ -15826,12 +15758,12 @@ struct s2A92B8 {
  */
 extern "C" tPS2SoundMemNode* func_002A92B8(cPS2SoundManager* self)
 {
-    int i = self->unk_310;
+    int i = self->mUnusedNodeHead;
     if (i < 0) {
         return 0;
     }
     tPS2SoundMemNode* ps2SoundMemNode = &((&self->mNodes[0]))[i];
-    self->unk_310 = ps2SoundMemNode->next;
+    self->mUnusedNodeHead = ps2SoundMemNode->next;
     ps2SoundMemNode->next = -1;
     return ps2SoundMemNode;
 }
@@ -15855,8 +15787,8 @@ struct s2A92F8Entry {
  * Returns the block at the top of main sound memory to the pool and puts its node back on the unused chain.
  *
  * mMainMemHighAddr becomes the node's highAddr; the node's lowAddr / highAddr become -1, size and state 0 (unused), and
- * it is pushed on unk_310. Unless load limits are set (mMemLoadLimited), func_003B5B20(-1, mMainMemHighAddr) applies
- * the new limit. cPS2SoundManager_DeallocSoundMem calls it.
+ * it is pushed on mUnusedNodeHead. Unless load limits are set (mMemLoadLimited), func_003B5B20(-1, mMainMemHighAddr)
+ * applies the new limit. cPS2SoundManager_DeallocSoundMem calls it.
  *
  * @param memNode  the memory node
  */
@@ -15867,8 +15799,8 @@ extern "C" void func_002A92F8(cPS2SoundManager* self, s2A92F8Entry* memNode)
     memNode->unk8 = -1;
     memNode->unkC = 0;
     memNode->unk10 = 0;
-    memNode->next = self->unk_310;
-    self->unk_310 = memNode->index;
+    memNode->next = self->mUnusedNodeHead;
+    self->mUnusedNodeHead = memNode->index;
     if (self->mMemLoadLimited == 0) {
         func_003B5B20(-1, self->mMainMemHighAddr);
     }

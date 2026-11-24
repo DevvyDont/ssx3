@@ -132,8 +132,12 @@ struct cFEStateNetAccountMem : public cFEStateNet {
     int miResult;                   // 0x6D0 [U] onPopupEvent cFEStateNetAccountMem_onPopupEvent: the event (0xF/0x10/0x11) reported to mpParentState's
                                     //       onPopupEvent (slot 17) when the popup closes (0x16)
     int miError;                    // 0x6D4 [R] 0; [U] func_001B70D0 / func_001B7A98 / cFEStateNetAccountMem_onPopupEvent store the card result (2, 3, 6, 0x18 ..)
-    int unk_6D8;                    // 0x6D8 [R] 0; [U] func_001B70D0 clears it in states 0/5/7/11/13/19/21 and skips to the next state when
-                                    //       it is set (8 -> 9, 22 -> 23); func_001B7A98 / cFEStateNetAccountMem_onPopupEvent set it on errors
+    int mbCardError;                // 0x6D8 (name ours) [R] 0; [U] func_001B7A98 sets it on a card read error or an
+                                    //        account mismatch, the card-change check in onUpdate
+                                    //        cFEStateNetAccountMem_onUpdate sets it; func_001B70D0 clears it in states
+                                    //        0/5/7/11/13/19/21 and skips to the error step when it is set (8 -> 9, 22
+                                    //        -> 23, 26 -> 28); onPopupEvent cFEStateNetAccountMem_onPopupEvent reports
+                                    //        error 6 when it is set
     int miState;                    // 0x6DC [U] func_001B70D0(self, state) stores it and sets up the state's popup text; onUpdate
                                     //       cFEStateNetAccountMem_onUpdate and onPopupEvent cFEStateNetAccountMem_onPopupEvent switch on it
     char mszUserName[0x11];         // 0x6E0 [R] strcpy of the constructor's 5th argument (LobbyMan mUserName / tLobbyAccount mName at
@@ -145,20 +149,23 @@ struct cFEStateNetAccountMem : public cFEStateNet {
                                     //       passed to the popup (func_001B7650); func_001B7E40 / func_001B8238 / func_001B83C0; extent: up to 0xB04
     int mbCardBusy;                 // 0xB04 [R] 0; [U] func_001B70D0: 1 while a card operation runs (states 8/14/16/22), 0 otherwise;
                                     //       func_001B7E40 tests it
-    int unk_B08;                    // 0xB08 [R] 0; [U] func_001B7A98 / cFEStateNetAccountMem_onPopupEvent set it with miError 0x18; cFEStateNetAccountMem_onPopupEvent reads it
+    int mbAccountMismatch;          // 0xB08 (name ours) [R] 0; [U] func_001B7A98 sets it with miError 0x18 when the
+                                    //        card's account (AccountData) is not mszUserName / mszPassword;
+                                    //        cFEStateNetAccountMem_onPopupEvent: in step 23, OK restarts from step 0
+                                    //        when it is set
     int miStartState;               // 0xB0C [R] by the constructor's mode: 0 -> 0, 1 -> 5, 2 -> 0xB, 3 -> 0x13 (func_001B70D0 starts there);
                                     //       [U] cFEStateNetAccountMem_onPopupEvent restarts from it
 };
 
 CHECK_OFFSET(cFEStateNetAccountMem, miResult, 0x6D0);
 CHECK_OFFSET(cFEStateNetAccountMem, miError, 0x6D4);
-CHECK_OFFSET(cFEStateNetAccountMem, unk_6D8, 0x6D8);
+CHECK_OFFSET(cFEStateNetAccountMem, mbCardError, 0x6D8);
 CHECK_OFFSET(cFEStateNetAccountMem, miState, 0x6DC);
 CHECK_OFFSET(cFEStateNetAccountMem, mszUserName, 0x6E0);
 CHECK_OFFSET(cFEStateNetAccountMem, mszPassword, 0x6F1);
 CHECK_OFFSET(cFEStateNetAccountMem, mustrText, 0x702);
 CHECK_OFFSET(cFEStateNetAccountMem, mbCardBusy, 0xB04);
-CHECK_OFFSET(cFEStateNetAccountMem, unk_B08, 0xB08);
+CHECK_OFFSET(cFEStateNetAccountMem, mbAccountMismatch, 0xB08);
 CHECK_OFFSET(cFEStateNetAccountMem, miStartState, 0xB0C);
 CHECK_SIZE(cFEStateNetAccountMem, 0xB10);
 

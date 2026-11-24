@@ -1410,11 +1410,11 @@ static inline void bmLoad_CF98(cSSXAudio* self, char* name, int bank, int id)
  * In radio mode 2 (unk_608C) it starts the ambience "Peak1Amb", "Peak2Amb" or "Peak3Amb" by @p type, or, when that is
  * -1, by func_002A1E20 of the race location (1, 2, anything else), on the ambient control (8) and tagged 101-103; then
  * func_002B46D0, sets unk_6280 to 1 and calls func_002B3CC0(0) and func_002B3C28. Else, at location 17 or above with @p
- * a2 and @p requestLine zero and func_002A42C8 false, it starts the theme "Peak1", "Peak2" or "Peak3" (by the location) on the
- * music control, tagged 1-3, func_002B3CC0(1), event 12 and func_002B3C28. Otherwise it starts the current song of the
- * active list (null name), with MusicSys.mCurrentSongNum saved in unk_62A4 and the song's SEDVALUE (func_002B4908) in
- * unk_5778, func_002B3CC0(1), event @p startEvent (36 when @p requestLine is set at location 17 or above), then func_0028F108 with the
- * focus rider (cSSXAudio_GetFocusRider(-1)).
+ * a2 and @p requestLine zero and func_002A42C8 false, it starts the theme "Peak1", "Peak2" or "Peak3" (by the location)
+ * on the music control, tagged 1-3, func_002B3CC0(1), event 12 and func_002B3C28. Otherwise it starts the current song
+ * of the active list (null name), with MusicSys.mCurrentSongNum saved in unk_62A4 and the song's SEDVALUE
+ * (func_002B4908) in mSongAnnounceNum, func_002B3CC0(1), event @p startEvent (36 when @p requestLine is set at location
+ * 17 or above), then func_0028F108 with the focus rider (cSSXAudio_GetFocusRider(-1)).
  *
  * @param startEvent  music event sent to the playlist song (callers pass 0 or 36)
  * @param skipPeakTheme  non-zero skips the peak theme (func_0028E100 passes 1)
@@ -1466,7 +1466,7 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
     sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), 0, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
     self->unk_62A4 = self->MusicSys.mCurrentSongNum;
-    self->unk_5778 = func_002B4908(mon);
+    self->mSongAnnounceNum = func_002B4908(mon);
     func_002B3CC0(mon, 1);
     if (requestLine != 0 && info.locationID >= 17) {
         startEvent = 36;
@@ -1828,7 +1828,7 @@ typedef int (*tBmSetDF18)(void*, int);
 /**
  * Switches to the next song unless func_002A10C0 says speech 10 is playing; otherwise retries later unless @p quiet.
  *
- * When func_002A10C0(self, 10) is 0: fades the song out over 2 s (func_002B3D48) unless unk_62B8 is set, sends music
+ * When func_002A10C0(self, 10) is 0: fades the song out over 2 s (func_002B3D48) unless mDJSpeech is set, sends music
  * event 18 through MusicSys.mVtbl slot 4, picks a new song (func_0028D488) and adds two timed callbacks to the
  * cBankManager's cBankMonitor (cMonitor_MONITOR_Create): func_0028E088 after 2000 with data 1, 1 and func_0028E548 after 1500
  * with data 3 and the new song's SEDVALUE (func_002B4908). Otherwise, unless @p quiet, it adds func_0028E068 after 100,
@@ -1843,7 +1843,7 @@ extern "C" int func_0028DF18(cSSXAudio* self, int quiet)
     int ok = 0;
     if (func_002A10C0(self, 10) == 0) {
         char* mon = (char*)&self->MusicSys;
-        if (self->unk_62B8 == 0) {
+        if (self->mDJSpeech == 0) {
             func_002B3D48(mon, 2.0f);
         }
         sBmVtDF18* vt = (sBmVtDF18*)self->MusicSys.mVtbl;
@@ -2073,9 +2073,10 @@ struct sLocks_E548 {
  * 1, unk_5780 = 2 and +0x57D4 = 0; kinds 1 and 2 set unk_574C.
  *
  * Kinds 3, 4 and 5 act only when mData2 != -1: with the peak locked (cBENewPlayerInterface_isPeakLocked1) in a group-1
- * location whose unk_579C entry is 1, they set unk_5770 when func_002A40E0 or func_002A4158 accept the location and
- * clear the entry; then unk_5774 = 1 and unk_5778 = mData2. Kind 7 sets unk_5784 and unk_5774, stores the current
- * song's mSedValue (func_002B4908) in unk_5778 and clears +0x57D8 (group 2) or +0x57DC. Other kinds do nothing.
+ * location whose mFirstTimeOnTrack entry is 1, they set unk_5770 when func_002A40E0 or func_002A4158 accept the
+ * location and clear the entry; then mSongAnnouncePending = 1 and mSongAnnounceNum = mData2. Kind 7 sets unk_5784 and
+ * mSongAnnouncePending, stores the current song's mSedValue (func_002B4908) in mSongAnnounceNum and clears +0x57D8
+ * (group 2) or +0x57DC. Other kinds do nothing.
  *
  * @param ev  the cMonitorInstance (mData1 = event kind, mData2 = its argument)
  * @return 1
@@ -2094,7 +2095,7 @@ extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
             if (locGroup == 1) {
                 self->unk_577C = locGroup;
                 self->unk_5780 = 2;
-                self->unk_579C[14] = 0;
+                self->mFirstTimeOnTrack[14] = 0;
             }
         }
     } else if (st == 1 || st == 2) {
@@ -2120,16 +2121,16 @@ extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
             int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
             int locGroup = func_002A1E20(self, id);
             if (locGroup == 1) {
-                int lock = ((sLocks_E548*)(&self->unk_579C[0]))->v[id];
+                int lock = ((sLocks_E548*)(&self->mFirstTimeOnTrack[0]))->v[id];
                 if (lock == locGroup) {
                     if (func_002A40E0(self, id) != 0 || func_002A4158(self, id) != 0)
                         self->unk_5770 = lock;
-                    ((sLocks_E548*)(&self->unk_579C[0]))->v[id] = 0;
+                    ((sLocks_E548*)(&self->mFirstTimeOnTrack[0]))->v[id] = 0;
                 }
             }
         }
-        self->unk_5774 = 1;
-        self->unk_5778 = ev->mData2;
+        self->mSongAnnouncePending = 1;
+        self->mSongAnnounceNum = ev->mData2;
         }
     } else if (st == 7) {
         char* mon = (char*)&self->SpeechSys;
@@ -2137,12 +2138,12 @@ extern "C" int func_0028E548(cSSXAudio* self, cMonitorInstance* ev)
         func_002A26F0(self, 1, 0);
         func_002B1758(mon, 0);
         self->unk_5784 = 1;
-        self->unk_5774 = 1;
-        self->unk_5778 = func_002B4908(&self->MusicSys);
+        self->mSongAnnouncePending = 1;
+        self->mSongAnnounceNum = func_002B4908(&self->MusicSys);
         if (func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) == 2)
-            self->unk_579C[15] = 0;
+            self->mFirstTimeOnTrack[15] = 0;
         else
-            self->unk_579C[16] = 0;
+            self->mFirstTimeOnTrack[16] = 0;
     }
     return 1;
 }
@@ -2209,21 +2210,21 @@ typedef int (*tBmSetE8C0)(void*, int);
 /**
  * Handles a music event id: 19 and 20 end and start the transport sequence, 21-25 fade, others set the state.
  *
- * Id 19 with a2 set and unk_627C set: when the location qualifies (func_002A3FE8) and unk_578C is 0, in a music mode
- * accepted by func_0028D960 and a newRace.cGameMode mode other than 5 and 6, it arms the D_004A3650 event (func_0028E548) with
- * kind 4 (unk_6258 clear) or 5 and the song's mSedValue, and sets music state 0. With unk_578C set it fades the song
- * out over 2 s (unless unk_62B8), then in a group-1 location arms events 0 and 1 (3000 / 2500 ms) once
- * (func_0028DEF0(self, 11)), or else picks a new song (func_0028D488) and arms kinds 1 and 7. Otherwise, for locations
- * 17-21 (func_002A3F90) without unk_6258, it queues DJ speech (func_002A26F0(self, 0, 1)) and sets unk_574C. Clears
- * unk_6258 at the end.
+ * Id 19 with a2 set and mRaceMusicOn set: when the location qualifies (func_002A3FE8) and unk_578C is 0, in a music
+ * mode accepted by func_0028D960 and a newRace.cGameMode mode other than 5 and 6, it arms the D_004A3650 event
+ * (func_0028E548) with kind 4 (unk_6258 clear) or 5 and the song's mSedValue, and sets music state 0. With unk_578C set
+ * it fades the song out over 2 s (unless mDJSpeech), then in a group-1 location arms events 0 and 1 (3000 / 2500 ms)
+ * once (func_0028DEF0(self, 11)), or else picks a new song (func_0028D488) and arms kinds 1 and 7. Otherwise, for
+ * locations 17-21 (func_002A3F90) without unk_6258, it queues DJ speech (func_002A26F0(self, 0, 1)) and sets unk_574C.
+ * Clears unk_6258 at the end.
  *
  * Id 20 with a2 set: stores the location (unk_6284) in unk_5814, sets unk_6254, clears the speech-cue flags
- * (func_002A4550) and the three pending callbacks D_004A3648..D_004A3658 (cMonitor_MONITOR_DestroyAll1), stops the tone, cSSXAudio_WipeoutSlideEnd
- * / cSSXAudio_WipeoutTumbleEnd on rider 0 and cSSXAudio_EndUberSpin. In a qualifying music mode it either plays the "pktrans" song
- * (cMusicSys slot 2, tagged 401, state 2 or 3 by location group, volume 127, paused) for an unlocked 14-16 location, or
- * arms D_004A3648 kinds 3 / 2 and may queue speech; otherwise it calls func_0028D5A0(unk_6284) and sets state 30. Then
- * sets unk_627C. Ids 21-25 pick a new song, fade out over 1 s and arm kind 3 after 3000 ms. Any other id (and 19 / 20
- * with a2 == 0) sets the music state through slot 4.
+ * (func_002A4550) and the three pending callbacks D_004A3648..D_004A3658 (cMonitor_MONITOR_DestroyAll1), stops the
+ * tone, cSSXAudio_WipeoutSlideEnd / cSSXAudio_WipeoutTumbleEnd on rider 0 and cSSXAudio_EndUberSpin. In a qualifying
+ * music mode it either plays the "pktrans" song (cMusicSys slot 2, tagged 401, state 2 or 3 by location group, volume
+ * 127, paused) for an unlocked 14-16 location, or arms D_004A3648 kinds 3 / 2 and may queue speech; otherwise it calls
+ * func_0028D5A0(unk_6284) and sets state 30. Then sets mRaceMusicOn. Ids 21-25 pick a new song, fade out over 1 s and
+ * arm kind 3 after 3000 ms. Any other id (and 19 / 20 with a2 == 0) sets the music state through slot 4.
  *
  * The NIS script engine passes its audio events here with a2 = 0; the transport-sequence starter passes 20 and
  * func_0028E888 passes 19, both with 1.
@@ -2235,7 +2236,7 @@ typedef int (*tBmSetE8C0)(void*, int);
 // PORT: 64-bit long sound key
 extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
 {
-    if (id == 19 && transportCall != 0 && vself->unk_627C != 0) {
+    if (id == 19 && transportCall != 0 && vself->mRaceMusicOn != 0) {
         if (func_002A3FE8(((char*)vself)) != 0 && vself->unk_578C == 0) {
             if (func_0028D960((cSSXAudio*)vself)) {
                 cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2262,7 +2263,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                 // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
                 int wantType = 1;
                 int locationGroup = func_002A1E20(((char*)vself), *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-                if (vself->unk_62B8 == 0) {
+                if (vself->mDJSpeech == 0) {
                     func_002B3D48(&vself->MusicSys, 2.0f);
                 }
                 if (locationGroup == wantType) {
@@ -2322,7 +2323,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                     }
                 }
                 if (vself->mTransportTrack == 23 || func_002A4030_id(((char*)vself), vself->mTransportTrack) == 0
-                    || vself->unk_579C[vself->mTransportTrack] != 1) {
+                    || vself->mFirstTimeOnTrack[vself->mTransportTrack] != 1) {
                     if (flag && vself->mTransportTrack != 23) {
                         func_0028D488(vself);
                         cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
@@ -2357,7 +2358,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                 sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
                 ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), 0x1E);
             }
-            vself->unk_627C = 1;
+            vself->mRaceMusicOn = 1;
         }
     } else if (id >= 21 && id <= 25) {
         if (func_0028D960((cSSXAudio*)vself)) {
@@ -2414,8 +2415,8 @@ extern "C" int cSSXAudio_GetCharacterLevel(void* self, int rider);
  * Ramps the music volume up over 800, 1000 or 1200 updates depending on the focus rider's tier (cSSXAudio_GetCharacterLevel).
  *
  * When the current song's tag (func_002B49E0) is 1-3 it sets full volume (func_002B3C28(127)). Otherwise it starts a
- * new ramp when unk_6288 is not 2 (unk_6288 = 2, counter mMusicRampCounter = 0), advances the counter up to the tier's
- * maximum and sets the volume to 127 x counter / maximum, clamped to 0..1. Called by cSSXAudio_Update.
+ * new ramp when mMusicRampState is not 2 (mMusicRampState = 2, counter mMusicRampCounter = 0), advances the counter up
+ * to the tier's maximum and sets the volume to 127 x counter / maximum, clamped to 0..1. Called by cSSXAudio_Update.
  */
 extern "C" void func_0028F000(cSSXAudio* self)
 {
@@ -2425,8 +2426,8 @@ extern "C" void func_0028F000(cSSXAudio* self)
         func_002B3C28(mon, 0x7F);
         return;
     }
-    if (self->unk_6288 != 2) {
-        self->unk_6288 = 2;
+    if (self->mMusicRampState != 2) {
+        self->mMusicRampState = 2;
         self->mMusicRampCounter = 0;
     }
     int max = 800;
@@ -2465,19 +2466,19 @@ typedef int (*tBmSetF140)(void*, int);
 /**
  * Switches the front-end music to a mode (0-9) by setting the matching music state through cMusicSys's slot 4.
  *
- * Does nothing when mode equals unk_6290; otherwise stores it. Mode 0 maps to state 0, or 9 when the music code
- * (cMusicSys unk_41C) is not -1; modes 1 and 3-8 map to the same state; 2 and 9 map to 2; other values set nothing.
- * Called by the front-end states (title 0, rider and lodge screens 1, store 5, trophy room 6, ...).
+ * Does nothing when mode equals mFrontEndMusicMode; otherwise stores it. Mode 0 maps to state 0, or 9 when the music
+ * code (cMusicSys unk_41C) is not -1; modes 1 and 3-8 map to the same state; 2 and 9 map to 2; other values set
+ * nothing. Called by the front-end states (title 0, rider and lodge screens 1, store 5, trophy room 6, ...).
  *
  * @param mode  the front-end music mode
  */
 extern "C" void func_0028F140(cSSXAudio* self, int mode)
 {
     int bank;
-    if (mode == self->unk_6290) {
+    if (mode == self->mFrontEndMusicMode) {
         return;
     }
-    self->unk_6290 = mode;
+    self->mFrontEndMusicMode = mode;
     switch (mode) {
     case 0:
         bank = (self->MusicSys.unk_41C == -1) ? 0 : 9;
@@ -2516,17 +2517,17 @@ extern const sSndKeyF200 D_004A3648[];
 /**
  * Prepares the music for a replay: with no song (or a 201-tagged one) arms a delayed change, else marks a resume.
  *
- * Clears unk_6294 and unk_6298. When no song is playing (mSongPlaying 0) or the current song's tag is 201: in a music
- * mode accepted by func_0028D960 it restores mCurrentSongNum from mSavedSongNum for a 201 song and arms D_004A3648
- * (func_0028E088) after 10 ms with data (3, 1); then sets unk_6294. Otherwise sets unk_6298. Called from the replay
- * code; func_0028F2C0 undoes it.
+ * Clears unk_6294 and mReplaySongPlaying. When no song is playing (mSongPlaying 0) or the current song's tag is 201: in
+ * a music mode accepted by func_0028D960 it restores mCurrentSongNum from mSavedSongNum for a 201 song and arms
+ * D_004A3648 (func_0028E088) after 10 ms with data (3, 1); then sets unk_6294. Otherwise sets mReplaySongPlaying.
+ * Called from the replay code; func_0028F2C0 undoes it.
  */
 // PORT: 64-bit long sound key
 extern "C" void func_0028F200(cSSXAudio* self)
 {
     char* mon = (char*)&self->MusicSys;
     self->unk_6294 = 0;
-    self->unk_6298 = 0;
+    self->mReplaySongPlaying = 0;
     if (self->MusicSys.mSongPlaying == 0 || func_002B49E0(mon) == 201) {
         if (func_0028D960((cSSXAudio*)self)) {
             if (func_002B49E0(mon) == 201) {
@@ -2537,7 +2538,7 @@ extern "C" void func_0028F200(cSSXAudio* self)
         }
         self->unk_6294 = 1;
     } else {
-        self->unk_6298 = 1;
+        self->mReplaySongPlaying = 1;
     }
 }
 #endif
@@ -2554,7 +2555,8 @@ struct sBankMgrVEntry {
 };
 
 /**
- * Ends the replay music: stops the song when func_0028F200 set unk_6294, or sets music state 36 when unk_6298.
+ * Ends the replay music: stops the song when func_0028F200 set unk_6294, or sets music state 36 when
+ * mReplaySongPlaying.
  *
  * Clears both flags.
  */
@@ -2562,13 +2564,13 @@ extern "C" void func_0028F2C0(cSSXAudio* self)
 {
     if (self->unk_6294 != 0) {
         func_002B3AC0(&self->MusicSys);
-    } else if (self->unk_6298 != 0) {
+    } else if (self->mReplaySongPlaying != 0) {
         char* obj = (char*)&self->MusicSys;
         sBankMgrVEntry* vt = (sBankMgrVEntry*)self->MusicSys.mVtbl;
         vt[4].fn(vthis(obj, vt[4]), 36);
     }
     self->unk_6294 = 0;
-    self->unk_6298 = 0;
+    self->mReplaySongPlaying = 0;
 }
 #endif
 
@@ -2807,9 +2809,9 @@ extern "C" void func_0028FA98(cSSXAudio* self, float v);
 /**
  * Leaves the map screen: resumes the sound effects paused by func_0028F5B8 and stops the loading-screen loop.
  *
- * When unk_6088 is set it calls cSSXAudio_ResumeSFX and clears it. When the loop is playing (unk_62A8 >= 0) it stops it
- * with a 1 s fade (func_0028FA98) and, with a1 set in locations 17-21 (func_002A3F90), restarts the location music
- * (func_0028CF98(self, 0, 0, -1, 0)).
+ * When unk_6088 is set it calls cSSXAudio_ResumeSFX and clears it. When the loop is playing (mLoadingLoopHandle >= 0)
+ * it stops it with a 1 s fade (func_0028FA98) and, with a1 set in locations 17-21 (func_002A3F90), restarts the
+ * location music (func_0028CF98(self, 0, 0, -1, 0)).
  *
  * @param restartMusic  nonzero to restart the location music
  */
@@ -2819,7 +2821,7 @@ extern "C" void func_0028F678(cSSXAudio* self, int restartMusic)
         cSSXAudio_ResumeSFX(self);
         self->mPausedSFXForMapScreen = 0;
     }
-    if (self->unk_62A8 >= 0) {
+    if (self->mLoadingLoopHandle >= 0) {
         func_0028FA98(self, 1.0f);
         if (restartMusic != 0 && func_002A3F90(self) != 0) {
             func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
@@ -2904,7 +2906,7 @@ static inline void bmPush_F768(cSSXAudio* audio, int kind)
 #define BM_MAX_F768(a, b) ((a) >= (b) ? (a) : (b))
 
 /**
- * Starts the loading-screen loop: plays patch 0 of bank 13 at full volume and keeps its handle in unk_62A8.
+ * Starts the loading-screen loop: plays patch 0 of bank 13 at full volume and keeps its handle in mLoadingLoopHandle.
  *
  * Opens a play-option level as cBankSys_SFX_Begin2(self, 13, 0) does, sets its base volume to 127, uses music volume
  * control 1 (cSSXAudio_GetCurrAppliedVolumePtr(1, 0)) and plays it with cBankSys_SFX_End. Called by the load screen and func_0028F5B8;
@@ -2922,7 +2924,7 @@ extern "C" void func_0028F768(cSSXAudio* ssxAudio)
     cStreamSys* streamSys = ssxAudio->MusicSys.mpVStreamSys;
     streamSys->mpVBankManager->BankMonitor.mVolControl[streamSys->mpVBankManager->BankMonitor.mInst] =
         (float*)cSSXAudio_GetCurrAppliedVolumePtr(ssxAudio, 1, 0);
-    ssxAudio->unk_62A8 = cBankSys_SFX_End(ssxAudio);
+    ssxAudio->mLoadingLoopHandle = cBankSys_SFX_End(ssxAudio);
 }
 #endif
 
@@ -2934,16 +2936,16 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
 /**
  * Stops the loading-screen sound started by func_0028F768 (cBankMonitor_BANKMONITOR_StopHandle, type 1).
  *
- * Does nothing when unk_62A8 is negative; clears it to -1 afterwards.
+ * Does nothing when mLoadingLoopHandle is negative; clears it to -1 afterwards.
  *
  * @param fadeTime  the fade time (0 stops at once)
  */
 extern "C" void func_0028FA98(cSSXAudio* self, float fadeTime)
 {
-    int idx = self->unk_62A8;
+    int idx = self->mLoadingLoopHandle;
     if (idx >= 0) {
         cBankMonitor_BANKMONITOR_StopHandle(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, idx, 1, fadeTime);
-        self->unk_62A8 = -1;
+        self->mLoadingLoopHandle = -1;
     }
 }
 #endif
@@ -2971,10 +2973,11 @@ extern const sBmKeyFAE0 D_004A3658_FAE0[] __asm__("D_004A3658");
 /**
  * Restarts the in-game music after the map screen: cancels pending events, stops the song and arms a new one.
  *
- * Only in a music mode accepted by func_0028D960. Cancels D_004A3648..D_004A3658 (cMonitor_MONITOR_DestroyAll1). When the current
- * song's tag is 1-3 or 401, or no song is playing, it records event 18 (func_0028DEF0), sets +0x5828, stops the song,
- * picks the next one (func_0028D488), starts the location music (func_0028CF98) and arms the D_004A3650 event
- * (func_0028E548) after 3000 ms with kind 4 and the song's mSedValue. Called by the map state.
+ * Only in a music mode accepted by func_0028D960. Cancels D_004A3648..D_004A3658 (cMonitor_MONITOR_DestroyAll1). When
+ * the current song's tag is 1-3 or 401, or no song is playing, it records event 18 (func_0028DEF0), sets
+ * mStopSpeechOnResume, stops the song, picks the next one (func_0028D488), starts the location music (func_0028CF98)
+ * and arms the D_004A3650 event (func_0028E548) after 3000 ms with kind 4 and the song's mSedValue. Called by the map
+ * state.
  */
 // PORT: 64-bit long sound keys.
 extern "C" void func_0028FAE0(cSSXAudio* self)
@@ -2988,7 +2991,7 @@ extern "C" void func_0028FAE0(cSSXAudio* self)
     int st = func_002B49E0(&self->MusicSys);
     if ((unsigned int)(st - 1) < 3 || st == 401 || self->MusicSys.mSongPlaying == 0) {
         func_0028DEF0((cSSXAudio*)self, 18);
-        self->unk_5828 = 1;
+        self->mStopSpeechOnResume = 1;
         func_002B3AC0(&self->MusicSys);
         func_0028D488(self);
         func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
@@ -3036,7 +3039,7 @@ typedef void (*tBmLoadFC58)(void*, void*, int, void*, int);
 typedef int (*tBmSetFC58)(void*, int);
 
 /**
- * Plays the "charsel" song (cMusicSys slot 2, tagged 301) and restores the front-end music state (unk_6290).
+ * Plays the "charsel" song (cMusicSys slot 2, tagged 301) and restores the front-end music state (mFrontEndMusicMode).
  *
  * Uses music volume control 1 and loads synchronously. Called when the network-configuration screen closes.
  */
@@ -3047,7 +3050,7 @@ extern "C" void func_0028FC58(cSSXAudio* self)
     ((tBmLoadFC58)vt[2].fn)(vthis(mon, vt[2]), str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
     func_002B49C0(mon, 301);
     sBmVtFC58* vt2 = (sBmVtFC58*)self->MusicSys.mVtbl;
-    ((tBmSetFC58)vt2[4].fn)(vthis(mon, vt2[4]), self->unk_6290);
+    ((tBmSetFC58)vt2[4].fn)(vthis(mon, vt2[4]), self->mFrontEndMusicMode);
 }
 #endif
 
