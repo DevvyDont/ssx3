@@ -128,6 +128,37 @@ CHECK_OFFSET(tRiderBest, eventStat, 0x00);
 CHECK_OFFSET(tRiderBest, comboLongestOverall, 0x50);
 CHECK_SIZE(tRiderBest, 0x54);
 
+// The character's owned-reward bits (On Tour struct tRewardBits, 0x50; member names, types and offsets are On Tour's).
+// Retail reaches every member at On Tour's offset: cBERewardInterface's own / mark / count functions pass the
+// bPosters .. bCheatChars arrays (bits per reward id), buySong ORs a bit into iOwnedSongList, getOwnedSongList /
+// getPlayList / setOwnedSongList / setPlayList read and write the two 64-bit words, and getNumOwnedSongs /
+// getNumSongsInPlayList count 0x40 bits of them. bOwnedSongList / bPlayList: no retail access seen.
+struct tRewardBits {
+    char bPosters[6];               // 0x00 [O]
+    char bTradingCards[15];         // 0x06 [O]
+    char bConceptArts[13];          // 0x15 [O]
+    char bVideos[1];                // 0x22 [O]
+    char bToys[4];                  // 0x23 [O]
+    char bCheatChars[3];            // 0x27 [O]
+    char bOwnedSongList[8];         // 0x2A [O]
+    char bPlayList[8];              // 0x32 [O]
+    char pad_3A[0x6];               // 0x3A alignment of the 64-bit words
+    unsigned long iOwnedSongList;   // 0x40 [O] (unsigned long long: ee-gcc's long is 64-bit)
+    unsigned long iPlayList;        // 0x48 [O] (unsigned long long)
+};
+
+CHECK_OFFSET(tRewardBits, bPosters, 0x00);
+CHECK_OFFSET(tRewardBits, bTradingCards, 0x06);
+CHECK_OFFSET(tRewardBits, bConceptArts, 0x15);
+CHECK_OFFSET(tRewardBits, bVideos, 0x22);
+CHECK_OFFSET(tRewardBits, bToys, 0x23);
+CHECK_OFFSET(tRewardBits, bCheatChars, 0x27);
+CHECK_OFFSET(tRewardBits, bOwnedSongList, 0x2A);
+CHECK_OFFSET(tRewardBits, bPlayList, 0x32);
+CHECK_OFFSET(tRewardBits, iOwnedSongList, 0x40);
+CHECK_OFFSET(tRewardBits, iPlayList, 0x48);
+CHECK_SIZE(tRewardBits, 0x50);
+
 struct cBECharProfileDB {
     int bFirstTimeWorldCircuit;     // 0x000 [O] (bool; a word) - first data member after On Tour's strProfileName;
                                     //       [R] init: 1
@@ -191,8 +222,7 @@ struct cBECharProfileDB {
     char unk_F10[0x18];             // 0xF10 no retail access seen
     unsigned char mAwardsReceived[4]; // 0xF28 [O]; [R] init MEM_fills 4; [U] cBERewardInterface_isAwardReceived's bits
     char unk_F2C[0x4];              // 0xF2C no retail access seen (On Tour aligns tRewardBits to 0x7A0 the same way)
-    char mRewards[0x50];            // 0xF30 [O] tRewardBits (0x50: bPosters[6], bTradingCards[15], bConceptArts[13], ...);
-                                    //       [R] init MEM_fills 80; [U] cBERewardInterface: +0xF30 posters, +0xF36 cards, ...
+    tRewardBits mRewards;           // 0xF30 [O]; [R] init MEM_fills 80; [U] cBERewardInterface (see tRewardBits)
     int mRadioMode;                 // 0xF80 [O] eRadioModeID (after mRewards in both games); [R] init: 0; [U] the radio
                                     //       mode getter / setter
 };
