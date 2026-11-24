@@ -882,13 +882,81 @@ CHECK_SIZE(cPlayerIndicatorFX, 0x40);
 
 // cDynamicSprayFX (cRiderHandler + 0xB40, 0x130 bytes): FX part; ctor cDynamicSprayFX_cDynamicSprayFX (in charge: cRider at this +
 // 0x130); vtable cDynamicSprayFX$6cRider D_004883A8.
+// Members: partly laid out (names ours); the gaps are still covered by the unit's local views (src/visualfx/
+// boardwakefx.cpp: sSprayFxE4A8, sWakeFxF920, ...).
 struct cDynamicSprayFX {
-    cRider* mRider;      // 0x00 [R] virtual-base pointer to the shared cRider; [R] cDynamicSprayFX_cDynamicSprayFX
-    char unk_004[0x12C]; // 0x04 not laid out yet (see the unit's local view)
+    cRider* mRider;                     // 0x000 [R] virtual-base pointer to the shared cRider; [R]
+                                        //       cDynamicSprayFX_cDynamicSprayFX
+    float mShedAmount;                  // 0x004 (name ours) [U] func_002DF3B0 clears it; func_002E1598 raises it on an
+                                        //       impact (at most 2); func_002E2260 sheds snow from the body bones while
+                                        //       it is positive (alpha = it * 1.5) and lowers it
+    char unk_008[0x8];                  // 0x008
+    float mPowderLevel;                 // 0x010 (name ours) [U] func_002DF3B0 clears it; func_002E1F70 moves it towards
+                                        //       the surface's SnowBuildupAmount and fades the powder trail with it
+    char unk_014[0x8];                  // 0x014
+    float mHeadPuffGlow;                // 0x01C (name ours) [U] func_002DF3B0 clears it; func_002E1120 steps it towards
+                                        //       the anim's target and derives the head puffs' period and alpha from it
+    char unk_020[0x8];                  // 0x020
+    cDynamicColourEmitter* mEmitters;   // 0x028 (name ours) [R] ctor new cDynamicColourEmitter[10]
+                                        //       ("DynamicSprayEmitter"), dtor delete[]; [U] func_002E2550 sets their
+                                        //       m_enabled, func_002E26B8 re-runs emitters 5 and 6's setupEmitter
+    char unk_02C[0x14];                 // 0x02C 0x2C: the 10 spray settings (0xE8 bytes each: a tParticleData and 4
+                                        //       velocity scales; ctor "DynamicSprayData"; local view sSprayParams);
+                                        //       0x30: row 1 of the board bone's matrix (func_002DF920)
+    t4Vector mBoardSide;                // 0x040 (name ours) [U] func_002DF920: row 2 of the board bone's
+                                        //       (mBoneBoardChild) SkelMatrices (cBoardTrailFX_update steps across
+                                        //       the board along it); func_002DE398 scatters the emission point +-10
+                                        //       along it
+    t4Vector mBoardForward;             // 0x050 (name ours) [U] func_002DF920: row 0 of that matrix (the board's
+                                        //       length); func_002DE398 scatters the emission point along it by the lean
+                                        //       side
+    char unk_060[0x14];                 // 0x060
+    float mLastSpeed;                   // 0x074 (name ours) [U] func_002DF920: last frame's speed (the slow-down test);
+                                        //       func_002DF3B0 clears it
+    int mShedBone;                      // 0x078 (name ours) [U] func_002E2260 walks mBoneIndicies with it (wraps at
+                                        //       30); func_002DF3B0 clears it
+    int* mBoneIndicies;                 // 0x07C (name ours, the allocation tag's spelling) [R] ctor: a 0x78-byte
+                                        //       "BoneIndicies" block (30 ints), dtor frees it; [U] func_002DF4D0 fills
+                                        //       it with cAnimModel_getBoneSkelIndex results
+    int mBoneIndiciesValid;             // 0x080 (name ours) [U] func_002DF4D0 sets 1 after filling mBoneIndicies;
+                                        //       func_002DF3B0 clears it; func_002DF920 refills the table while 0
+    char unk_084[0xC];                  // 0x084
+    t4Vector mColour;                   // 0x090 (name ours) [U] func_002DF3B0: white; func_002DF920: the rider's render
+                                        //       state colour doubled, alpha 1 (the emitters' colour)
+    char unk_0A0[0x40];                 // 0x0A0
+    float mBurstStrength;               // 0x0E0 (name ours) [U] func_002E23E0 keeps the strongest burst's strength;
+                                        //       func_002E1598 plays it and decays it; func_002DF3B0 clears it
+    char unk_0E4[0x3C];                 // 0x0E4
+    float mBurstAlpha;                  // 0x120 (name ours) [U] func_002DF3B0 0.5; func_002E1598 blends the burst
+                                        //       colour's alpha with it
+    int mIsPlayer;                      // 0x124 (name ours) [U] func_002E26B8: = (mRider->mViewIndex >= 0);
+                                        //       func_002DF3B0 re-tunes when it changes; func_002E2550 enables the
+                                        //       player emitters with it
+    int mLOD;                           // 0x128 (name ours) [U] func_002E2550 stores mRider->mLOD; func_002DF920
+                                        //       re-chooses the emitters when it differs
+    float mLeanSide;                    // 0x12C (name ours) [U] func_002DF920: +-1 from PressMode, the anim and
+                                        //       IsRidingFakie, else 0; func_002DF3B0 clears it; func_002DE398 biases
+                                        //       the emission point with it
 };
 
-CHECK_OFFSET(cDynamicSprayFX, mRider, 0x00);
-CHECK_OFFSET(cDynamicSprayFX, unk_004, 0x04);
+CHECK_OFFSET(cDynamicSprayFX, mRider, 0x000);
+CHECK_OFFSET(cDynamicSprayFX, mShedAmount, 0x004);
+CHECK_OFFSET(cDynamicSprayFX, mPowderLevel, 0x010);
+CHECK_OFFSET(cDynamicSprayFX, mHeadPuffGlow, 0x01C);
+CHECK_OFFSET(cDynamicSprayFX, mEmitters, 0x028);
+CHECK_OFFSET(cDynamicSprayFX, unk_02C, 0x02C);
+CHECK_OFFSET(cDynamicSprayFX, mBoardSide, 0x040);
+CHECK_OFFSET(cDynamicSprayFX, mBoardForward, 0x050);
+CHECK_OFFSET(cDynamicSprayFX, mLastSpeed, 0x074);
+CHECK_OFFSET(cDynamicSprayFX, mShedBone, 0x078);
+CHECK_OFFSET(cDynamicSprayFX, mBoneIndicies, 0x07C);
+CHECK_OFFSET(cDynamicSprayFX, mBoneIndiciesValid, 0x080);
+CHECK_OFFSET(cDynamicSprayFX, mColour, 0x090);
+CHECK_OFFSET(cDynamicSprayFX, mBurstStrength, 0x0E0);
+CHECK_OFFSET(cDynamicSprayFX, mBurstAlpha, 0x120);
+CHECK_OFFSET(cDynamicSprayFX, mIsPlayer, 0x124);
+CHECK_OFFSET(cDynamicSprayFX, mLOD, 0x128);
+CHECK_OFFSET(cDynamicSprayFX, mLeanSide, 0x12C);
 CHECK_SIZE(cDynamicSprayFX, 0x130);
 
 // cPunchFX (cRiderHandler + 0xC70, 0xB0 bytes): FX part; ctor cPunchFX_cPunchFX (in charge: cRider at this + 0xB0); vtable

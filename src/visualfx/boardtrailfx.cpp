@@ -67,7 +67,7 @@ extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
     }
     self->mRider->mScriptObjectVtbl = (void*)(&D_00488BB8);
     self->mRider->mScriptObjRiderVtbl = D_00459B90;
-    *(const void**)(((char*)self->mRider) + 0x6C0) = &D_00488C00;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488C00;
     if (inChrg == 0) {
         int vc;
         sBTVt9 vtbl1 = D_00488BB8;
@@ -78,7 +78,7 @@ extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
         }
         vtbl1.e[1].delta = D_00488BB8.e[1].delta + vc;
         sBTVt22 vtbl2 = D_00488C00;
-        *(void**)(((char*)self->mRider) + 0x6C0) = &vtbl2;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&vtbl2;
         vtbl2.e[1].delta = D_00488C00.e[1].delta + vc;
     }
     self->CurSliceCap = 0;
@@ -276,60 +276,58 @@ extern float cBoardTrail_m_LooseDepthScale;
 extern float cBoardTrail_m_PowderDepthScale;
 extern float cBoardTrail_m_DeepPowderDepthScale;
 
-static inline int boardTrailCanDraw(char* vvr)
+static inline int boardTrailCanDraw(cRider* r)
 {
-    cRider* vr = (cRider*)vvr;
-    cRider* r = (cRider*)vr;
     int ok = 0;
     if (r->mIsInNIS != 0 && r->mHiddenNIS == 0) ok = r->mNISShowBoardVisualFX != 0;
     return ok;
 }
 /**
- * Returns whether the rider lays a board trail this frame and sets the trail's fade rate (+0x9C) from the surface.
+ * Returns whether the rider lays a board trail this frame and sets the trail's fade rate (CurDepth) from the surface.
  *
- * In motion state 2 (wipeout, cRider_getMotionState) there is no trail when the word at mRiderHandler + 0x30 is set. In
- * the other non-ground states it needs mIsInNIS set, unk_AD0 clear and unk_AFC and unk_B00 set. When layer 2's
- * animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is 22 and tEventFlags_isSet1 on its sequence (+0xB0) is true for
- * 0 but false for 1, there is no trail either.
+ * In motion state 2 (wipeout, cRider_getMotionState) there is no trail when the handler's WipeoutMotionState is set. In
+ * the other non-ground states it needs mIsInNIS set, mHiddenNIS clear and mNISShowBoardVisualFX and mOnGroundNIS set.
+ * When layer 2's animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is 22 and tEventFlags_isSet1 on its
+ * sequence (+0xB0) is true for 0 but false for 1, there is no trail either.
  *
  * Then by mSurfaceType: 1 sets cBoardTrail_m_LooseDepthScale (0); 0, 5, 6 and 12 set cBoardTrail_m_PackedDepthScale (5); 2 and 13 set cBoardTrail_m_PowderDepthScale (-20); 3 sets
  * cBoardTrail_m_DeepPowderDepthScale (-40). Any other surface gives no trail. cBoardTrailFX_update closes the trail when it returns 0.
  *
  * @return 1 when a trail is laid, otherwise 0
  */
-extern "C" int cBoardTrailFX_shouldPlow(char** self)
+extern "C" int cBoardTrailFX_shouldPlow(cBoardTrailFX* self)
 {
-    if (cRider_getMotionState(self[0]) == 2) {
-        if (*(int*)(*(char**)(self[0] + 0x77C) + 0x30) != 0) {
+    if (cRider_getMotionState(self->mRider) == 2) {
+        if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState != 0) {
             return 0;
         }
-    } else if (cRider_getMotionState(self[0]) != 0) {
-        if (!boardTrailCanDraw(self[0])) return 0;
-        if (*(int*)(self[0] + 0xB00) == 0) return 0;
+    } else if (cRider_getMotionState(self->mRider) != 0) {
+        if (!boardTrailCanDraw(self->mRider)) return 0;
+        if (self->mRider->mOnGroundNIS == 0) return 0;
     }
-    if (cRiderAnimBase_getCurrentAnimID(*(void**)(self[0] + 0x784), 2) == 22) {
-        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2)->Events, 0)) {
-            if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2)->Events, 1)) {
+    if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 22) {
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0)) {
+            if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)) {
                 return 0;
             }
         }
     }
-    switch (*(int*)(self[0] + 0x438)) {
+    switch (self->mRider->mSurfaceType) {
     case 1:
-        *(float*)((char*)self + 0x9C) = cBoardTrail_m_LooseDepthScale;
+        self->CurDepth = cBoardTrail_m_LooseDepthScale;
         return 1;
     case 0:
     case 5:
     case 6:
     case 12:
-        *(float*)((char*)self + 0x9C) = cBoardTrail_m_PackedDepthScale;
+        self->CurDepth = cBoardTrail_m_PackedDepthScale;
         return 1;
     case 2:
     case 13:
-        *(float*)((char*)self + 0x9C) = cBoardTrail_m_PowderDepthScale;
+        self->CurDepth = cBoardTrail_m_PowderDepthScale;
         return 1;
     case 3:
-        *(float*)((char*)self + 0x9C) = cBoardTrail_m_DeepPowderDepthScale;
+        self->CurDepth = cBoardTrail_m_DeepPowderDepthScale;
         return 1;
     }
     return 0;
@@ -355,7 +353,7 @@ struct sBTVtx_8938 {
 
 // The trail part of sBoardTrailFXView (the cRider virtual base follows at +0xF0).
 struct sBTrail_8938 {
-    char* rider;                // 0x00 virtual base pointer (the cRider part)
+    cRider* rider;              // 0x00 virtual base pointer (the cRider part)
     float w1;                   // 0x04
     float w2;                   // 0x08
     int flip;                   // 0x0C
@@ -618,26 +616,24 @@ static inline float btRandScale(const float& s)
     return s * btRand();
 }
 
-// Bone matrix of the rider's model; off is the cRider field holding the bone index.
-static inline t4Matrix* btBone(char* r, int off)
+// Bone matrix of the rider's model (SkelMatricesScaled); bone is one of the rider's bone indices.
+static inline t4Matrix* btBone(cRider* r, int bone)
 {
-    return &((t4Matrix*)*(char**)(*(char**)(r + 0x780) + 0x34))[*(int*)(r + off)];
+    return &r->mAnimModel->SkelMatricesScaled[bone];
 }
 
-static inline t4Vector btBoneRow(char* r, int off, int row)
+static inline t4Vector btBoneRow(cRider* r, int bone, int row)
 {
-    return btBone(r, off)->row[row];
+    return btBone(r, bone)->row[row];
 }
 
-static inline t4Vector btBonePos(char* r, int off)
+static inline t4Vector btBonePos(cRider* r, int bone)
 {
-    return btBone(r, off)->row[3];
+    return btBone(r, bone)->row[3];
 }
 
-static inline int btCanDraw(char* vvr)
+static inline int btCanDraw(cRider* r)
 {
-    cRider* vr = (cRider*)vvr;
-    cRider* r = (cRider*)vr;
     int ok = 0;
     if (r->mIsInNIS != 0 && r->mHiddenNIS == 0) ok = r->mNISShowBoardVisualFX != 0;
     return ok;
@@ -660,7 +656,7 @@ static inline void btGrow(sBTrail_8938* self)
 extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
 {
     int prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
-    if (cBoardTrailFX_shouldPlow((char**)self) == 0) {
+    if (cBoardTrailFX_shouldPlow((cBoardTrailFX*)self) == 0) {
         if (self->state == 0) return;
         if (self->state == 1) {
             self->head = (self->head + kTrailNumSeg - 3) % kTrailNumSeg;
@@ -690,23 +686,23 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     }
     self->lift = cBoardTrail_m_HeightScale - self->fade * cBoardTrail_m_Depth2HeightScale;
     t4Vector pts[4];
-    const t4Vector& pos = btBoneRow(self->rider, 2212, 3);
-    const t4Vector& side = btBoneRow(self->rider, 2212, 2);
-    const t4Vector& fwd = btBoneRow(self->rider, 2212, 0);
+    const t4Vector& pos = btBoneRow(self->rider, self->rider->mBoneBoardChild, 3);
+    const t4Vector& side = btBoneRow(self->rider, self->rider->mBoneBoardChild, 2);
+    const t4Vector& fwd = btBoneRow(self->rider, self->rider->mBoneBoardChild, 0);
     t4Vector halfLengthVec = btScale(fwd, 87.5f);
     t4Vector halfWidthVec = btScale(side, 17.5f);
-    if (cRider_getMotionState(self->rider) == 0 || (btCanDraw(self->rider) && *(int*)(self->rider + 0xB00) != 0)) {
+    if (cRider_getMotionState(self->rider) == 0 || (btCanDraw(self->rider) && self->rider->mOnGroundNIS != 0)) {
         t4Vector left = btSub(pos, halfLengthVec);
         float sideSign = 0.0f;
         t4Vector right = btAdd(pos, halfLengthVec);
-        if (*(int*)(self->rider + 0x330) != 0) {
-            int k = cRiderAnimBase_getCurrentAnimID(*(void**)(self->rider + 0x784), 2);
+        if (self->rider->PressMode != 0) {
+            int k = cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2);
             if (k >= 23 && k <= 0x1E) {
                 sideSign = -1.0f;
-                if (*(int*)(self->rider + 0x320) != 0) sideSign = 1.0f;
+                if (self->rider->IsRidingFakie != 0) sideSign = 1.0f;
             } else {
                 sideSign = 1.0f;
-                if (*(int*)(self->rider + 0x320) != 0) sideSign = -1.0f;
+                if (self->rider->IsRidingFakie != 0) sideSign = -1.0f;
             }
         }
         if (0.0f < sideSign) {
@@ -719,34 +715,34 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         pts[1] = btSub(right, halfWidthVec);
         pts[3] = btSub(left, halfWidthVec);
     } else {
-        cRider* riderObj = (cRider*)self->rider;
-        pts[0] = btBonePos(((char*)riderObj), 2224);
-        pts[1] = btBonePos(((char*)riderObj), 2232);
+        cRider* riderObj = self->rider;
+        pts[0] = btBonePos(riderObj, riderObj->LHandSkelIndex);
+        pts[1] = btBonePos(riderObj, riderObj->RHandSkelIndex);
         if (riderObj->mUseRootPoseOverride != 0) {
-            pts[2] = btBonePos(((char*)riderObj), 2328);
-            pts[3] = btBonePos(((char*)riderObj), 2280);
+            pts[2] = btBonePos(riderObj, riderObj->LeftLeg.FootSkelIndex);
+            pts[3] = btBonePos(riderObj, riderObj->RightLeg.FootSkelIndex);
         } else {
             t4Vector left = btSub(pos, halfLengthVec);
             pts[2] = btAdd(left, halfWidthVec);
             pts[3] = btSub(left, halfWidthVec);
         }
     }
-    float speed = btLength(*(t4Vector*)(self->rider + 0x1E0));
+    float speed = btLength(self->rider->mVelocity);
     t4Vector dir;
     if (speed < 0.01f) {
         dir = self->lastDir;
     } else {
-        dir = btDiv(*(t4Vector*)(self->rider + 0x1E0), speed);
+        dir = btDiv(self->rider->mVelocity, speed);
     }
-    dir = btNormalize(btSub(dir, btScale(*(t4Vector*)(self->rider + 0x370), btDot(dir, *(t4Vector*)(self->rider + 0x370)))));
-    t4Vector across = btCross(dir, *(t4Vector*)(self->rider + 0x370));
+    dir = btNormalize(btSub(dir, btScale(self->rider->mGroundNormal, btDot(dir, self->rider->mGroundNormal))));
+    t4Vector across = btCross(dir, self->rider->mGroundNormal);
     if (btDot(across, self->side) < 0.0f) {
         across = btScale(across, -1.0f);
     }
-    t4Vector contactToPt1 = btSub(pts[1], *(t4Vector*)(self->rider + 0x460));
-    t4Vector contactToPt0 = btSub(pts[0], *(t4Vector*)(self->rider + 0x460));
-    t4Vector contactToPt3 = btSub(pts[3], *(t4Vector*)(self->rider + 0x460));
-    t4Vector contactToPt2 = btSub(pts[2], *(t4Vector*)(self->rider + 0x460));
+    t4Vector contactToPt1 = btSub(pts[1], self->rider->mGroundContactPoint);
+    t4Vector contactToPt0 = btSub(pts[0], self->rider->mGroundContactPoint);
+    t4Vector contactToPt3 = btSub(pts[3], self->rider->mGroundContactPoint);
+    t4Vector contactToPt2 = btSub(pts[2], self->rider->mGroundContactPoint);
     float sideDist1 = btDot(contactToPt1, across);
     float sideDist0 = btDot(contactToPt0, across);
     float sideDist3 = btDot(contactToPt3, across);
@@ -754,32 +750,42 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     t4Vector top;
     t4Vector bot;
     if (sideDist0 < sideDist1 && sideDist3 < sideDist1 && sideDist2 < sideDist1) {
-        top = btSub(pts[1], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt1) - D_004A3B28));
+        top = btSub(pts[1], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt1) - D_004A3B28));
     } else if (sideDist1 < sideDist0 && sideDist3 < sideDist0 && sideDist2 < sideDist0) {
-        top = btSub(pts[0], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt0) - D_004A3B28));
+        top = btSub(pts[0], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt0) - D_004A3B28));
     } else if (sideDist1 < sideDist3 && sideDist0 < sideDist3 && sideDist2 < sideDist3) {
-        top = btSub(pts[3], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt3) - D_004A3B28));
+        top = btSub(pts[3], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt3) - D_004A3B28));
     } else {
-        top = btSub(pts[2], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt2) - D_004A3B28));
+        top = btSub(pts[2], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt2) - D_004A3B28));
     }
     if (sideDist1 < sideDist0 && sideDist1 < sideDist3 && sideDist1 < sideDist2) {
-        bot = btSub(pts[1], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt1) - D_004A3B28));
+        bot = btSub(pts[1], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt1) - D_004A3B28));
     } else if (sideDist0 < sideDist1 && sideDist0 < sideDist3 && sideDist0 < sideDist2) {
-        bot = btSub(pts[0], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt0) - D_004A3B28));
+        bot = btSub(pts[0], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt0) - D_004A3B28));
     } else if (sideDist3 < sideDist1 && sideDist3 < sideDist0 && sideDist3 < sideDist2) {
-        bot = btSub(pts[3], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt3) - D_004A3B28));
+        bot = btSub(pts[3], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt3) - D_004A3B28));
     } else {
-        bot = btSub(pts[2], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt2) - D_004A3B28));
+        bot = btSub(pts[2], btScale(self->rider->mGroundNormal,
+                                    btDot(self->rider->mGroundNormal, contactToPt2) - D_004A3B28));
     }
-    t4Vector et = btSub(top, *(t4Vector*)(self->rider + 0x460));
-    t4Vector eb = btSub(bot, *(t4Vector*)(self->rider + 0x460));
+    t4Vector et = btSub(top, self->rider->mGroundContactPoint);
+    t4Vector eb = btSub(bot, self->rider->mGroundContactPoint);
     float ft = btDot(et, dir);
     float fb = btDot(eb, dir);
     float st = btDot(et, across);
     float sb = btDot(eb, across);
     if (cRider_getMotionState(self->rider) == 2) {
-        top = btAdd(btAdd(*(t4Vector*)(self->rider + 0x460), btScale(across, st * 0.75f)), btScale(*(t4Vector*)(self->rider + 0x370), D_004A3B28));
-        bot = btAdd(btAdd(*(t4Vector*)(self->rider + 0x460), btScale(across, sb * 0.75f)), btScale(*(t4Vector*)(self->rider + 0x370), D_004A3B28));
+        top = btAdd(btAdd(self->rider->mGroundContactPoint, btScale(across, st * 0.75f)),
+                    btScale(self->rider->mGroundNormal, D_004A3B28));
+        bot = btAdd(btAdd(self->rider->mGroundContactPoint, btScale(across, sb * 0.75f)),
+                    btScale(self->rider->mGroundNormal, D_004A3B28));
     }
     self->strip[2][self->head].pos = top;
     self->strip[0][self->head].pos = top;
@@ -797,7 +803,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     if (speed * 0.0036000001709908247f <= 1.0f) {
         k *= speed * 0.0036000001709908247f;
     }
-    t4Vector ground = btAdd(*(t4Vector*)(self->rider + 0x460), btScale(*(t4Vector*)(self->rider + 0x370), D_004A3B28));
+    t4Vector ground = btAdd(self->rider->mGroundContactPoint, btScale(self->rider->mGroundNormal, D_004A3B28));
     t4Vector mid;
     if (ft < fb) {
         mid = btAdd(ground, btScale(dir, k * ft));
@@ -808,16 +814,17 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     t4Vector botEdge = btAdd(mid, btScale(across, sb));
     t4Vector n = btNormalize(btSub(botEdge, topEdge));
     t4Vector innerWidth = btScale(n, cBoardTrail_m_InnerWidthScale);
-    t4Vector outerWidth = btScale(btScale(n, cBoardTrail_m_OuterWidthScale), btAbs(*(float*)(self->rider + 0x454) <? 0.0f) + 10.0f);
-    t4Vector w = btScale(*(t4Vector*)(self->rider + 0x370), self->lift);
-    t4Vector h = btScale(*(t4Vector*)(self->rider + 0x370), *(float*)(self->rider + 0x454) <? 0.0f);
+    t4Vector outerWidth = btScale(btScale(n, cBoardTrail_m_OuterWidthScale),
+                                  btAbs(self->rider->SnowOffset <? 0.0f) + 10.0f);
+    t4Vector w = btScale(self->rider->mGroundNormal, self->lift);
+    t4Vector h = btScale(self->rider->mGroundNormal, self->rider->SnowOffset <? 0.0f);
     self->strip[2][prev].pos = btAdd(btAdd(btSub(topEdge, outerWidth), h), h);
     self->strip[0][prev].pos = btAdd(btSub(topEdge, btScale(innerWidth, self->w1)), w);
     self->strip[3][prev].pos = btAdd(topEdge, h);
     self->strip[4][prev].pos = btAdd(botEdge, h);
     self->strip[1][prev].pos = btAdd(btAdd(botEdge, btScale(innerWidth, self->w2)), w);
     self->strip[5][prev].pos = btAdd(btAdd(btAdd(botEdge, outerWidth), h), h);
-    char* being = self->rider + 0x6C0;
+    char* being = (char*)&VPTR_AT(self->rider, sizeof(cRiderState));
     sBTVEnt_8938* vt = *(sBTVEnt_8938**)being;
     sBTCol_8938 c = ((sBTRSRow_8938*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(vthis(being, vt[7]))].col;
     for (int i = 0; i < 6; i++) {
@@ -925,7 +932,7 @@ static inline void pop_A480(sRenderCtx_A480* ctx)
  * Board trail render stub: pushes and pops a draw state but draws nothing.
  *
  * Returns early when cRenderToggles_m_DisableBoardTrail is set, when cRenderToggles_m_DisableAIBoardTrail is set and the rider part's virtual slot 9 is true,
- * or with fewer than 2 segments (+0x90).
+ * or with fewer than 2 segments (BufLen).
  */
 extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
 {
@@ -933,7 +940,7 @@ extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
         return;
     }
     if (cRenderToggles_m_DisableAIBoardTrail != 0) {
-        cBoardTrailFX_render_cObj* being = (cBoardTrailFX_render_cObj*)(*(char**)self + 0x6C0);
+        cBoardTrailFX_render_cObj* being = (cBoardTrailFX_render_cObj*)&VPTR_AT(self->mRider, sizeof(cRiderState));
         if (being->isComputer() != 0) {
             return;
         }
@@ -1208,13 +1215,11 @@ struct sFade_A900 {
     float to[4];        // 0x38
 };
 
-extern char* cAppMan_TheAppMan_A900 __asm__("cAppMan_TheAppMan");
-
 /**
  * Blends the TV display format between regular and cut-scene mode.
  *
  * Only while not paused (+0x1C) and in state 2 (to regular) or 3 (to cut-scene): advances the time by 1 / the
- * app manager's word at +0x10 and, at the end, forces regular (cCutSceneTransitionMan_ForceToRegularMode) or cut-scene mode
+ * app manager's TimerHz and, at the end, forces regular (cCutSceneTransitionMan_ForceToRegularMode) or cut-scene mode
  * (cCutSceneTransitionMan_ForceToCutSceneMode). Otherwise it lerps the four floats of the regular (+0x20) and cut-scene (+0x34) formats
  * and applies them through the graphics manager's virtual slot 41.
  */
@@ -1225,7 +1230,7 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
     int mode = self->mCurrentState;
     if (mode != 2 && mode != 3)
         return;
-    self->mfCurrentTime += 1.0f / (float)*(int*)(cAppMan_TheAppMan_A900 + 0x10);
+    self->mfCurrentTime += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     if (self->mfLengthOfTime < self->mfCurrentTime) {
         if (mode == 2)
             cCutSceneTransitionMan_ForceToRegularMode(self);
@@ -1565,7 +1570,8 @@ extern "C" void cTrickBoostFX_render(cTrickBoostFX* self)
     push_B198((sRctx_B198*)GrMan);
     *((sRS_B198*)GrMan->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_B198;
     int tex = GrMan->_EffectTexMap[62];
-    *(short*)((char*)(sRS_B198*)GrMan->m_pCurrentDrawState + 0x10) = tex;
+    short* texSlot = &((sRS_B198*)GrMan->m_pCurrentDrawState)->tex;
+    *texSlot = tex;
     ((sRS_B198*)GrMan->m_pCurrentDrawState)->f0 |= 0xC;
     ((sRS_B198*)GrMan->m_pCurrentDrawState)->f4 &= 0xFE7FFFFF;
     ((sRS_B198*)GrMan->m_pCurrentDrawState)->f4 &= 0xFFCFFFFF;

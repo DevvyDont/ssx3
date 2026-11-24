@@ -89,23 +89,23 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
     sVt9_BW vtbl1;
     sVt22_BW vtbl2;
     if (inChrg) {
-        *(void**)self = (char*)self + 0xC0;
+        (*(char**)&self->mRider) = (char*)self + 0xC0;
         cRider_cRider((char*)self + 0xC0);
     }
-    *(void**)(*(char**)self + 0x6E8) = (void*)&D_00488DA8;
-    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488DF0;
+    self->mRider->mScriptObjectVtbl = (void*)&D_00488DA8;
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488DF0;
     if (inChrg == 0) {
         int vc;
         vtbl1 = D_00488DA8;
-        *(void**)(*(char**)self + 0x6E8) = &vtbl1;
+        self->mRider->mScriptObjectVtbl = &vtbl1;
         {
-            char* vbo = *(char**)self - 0xC0;
+            char* vbo = ((char*)self->mRider) - 0xC0;
             vc = (char*)self - vbo;
         }
         vtbl1.e[1].delta = D_00488DA8.e[1].delta + vc;
         vtbl2 = D_00488DF0;
-        *(void**)(*(char**)self + 0x6C0) = &vtbl2;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&vtbl2;
         vtbl2.e[1].delta = D_00488DF0.e[1].delta + vc;
     }
     sWakeStripBW*& strips = (sWakeStripBW*)self->mWakeLines;
@@ -162,7 +162,7 @@ struct sWakeColDCF28 {
 };
 
 struct sWakeDCF28 {
-    char* obj;                    // 0x00
+    cRider* obj;                  // 0x00
     int f4;                       // 0x04
     int f8;                       // 0x08
     int fC;                       // 0x0C
@@ -196,7 +196,7 @@ extern "C" void cBoardWakeFX_reset(sWakeDCF28* self)
     float one;
     sWakeColDCF28 white;
     int i;
-    if (*(int*)(self->obj + 0x870) >= 0) {
+    if (self->obj->mViewIndex >= 0) {
         self->count = 5;
         self->fB8 = 0x20;
         self->fBC = 1.25f;
@@ -790,7 +790,7 @@ struct sSegDD30 {
 };
 
 struct sWakeDD30 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     int i4;                     // 0x04
     int head;                   // 0x08
     sElemDD30* elems;           // 0x0C
@@ -901,8 +901,8 @@ extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, t4Vector* pos, floa
     sElemDD30* wakeLine = &self->elems[self->head];
     wakeLine->i64 = 0;
     wakeLine->pts[0] = t4vect_Zero_DD30;
-    t4Vector dir = wakeScaleDD30(wakeScaleDD30(self->v80, -1.0f), wakeLenDD30(*(t4Vector*)(self->obj + 0x1E0)));
-    t4Vector neg = wakeScaleDD30(*(t4Vector*)(self->obj + 0x1E0), -1.0f);
+    t4Vector dir = wakeScaleDD30(wakeScaleDD30(self->v80, -1.0f), wakeLenDD30(self->obj->mVelocity));
+    t4Vector neg = wakeScaleDD30(self->obj->mVelocity, -1.0f);
     {
         t4Vector x = wakeScaleDD30(wakeSubDD30(dir, neg), 0.85f);
         wakeLine->dir = x;
@@ -919,7 +919,7 @@ extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, t4Vector* pos, floa
     {
         sSegDD30* firstRow = self->rings[0];
         sSegDD30* headEntry = (sSegDD30*)(self->head * (int)sizeof(sSegDD30) + (int)firstRow); // PORT: pointer in int
-        t4Vector x = wakeSubDD30(*pos, wakeScaleDD30(*(t4Vector*)(self->obj + 0x370), 5.0f));
+        t4Vector x = wakeSubDD30(*pos, wakeScaleDD30(self->obj->mGroundNormal, 5.0f));
         headEntry->pos = x;
     }
     self->rings[0][self->head].f1C = (int)(self->f94 * 128.0f);
@@ -951,7 +951,7 @@ struct sSeg_E058 {
 
 
 struct sWake_E058 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     int count;                  // 0x04
     int head;                   // 0x08
     char padC[0x4];             // 0x0C
@@ -1004,7 +1004,7 @@ extern "C" void cBoardWakeFX_createSeg(sWake_E058* self)
         self->count++;
     }
     self->head = (self->head + self->cap - 1) % self->cap;
-    char* sub = self->obj + 0x6C0;
+    char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
     tARGB col = ((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
     col.A *= 2.0f;
@@ -1106,24 +1106,24 @@ static inline void wakeAddE398(t4Vector& a, const t4Vector& b)
 /**
  * Scatters a spray emission position randomly around the board.
  *
- * With bias = the lean side (+0x12C, -1..1) it adds the vector at +0x50 times (bias * 55 + a random value within +-(1 -
- * |bias|) * 55), then the vector at +0x40 times a random value in -10..10. func_002DF920 fills both vectors from the
- * board bone's matrix rows 0 and 2. The random numbers come from the generator in D_004A3AFC. The spray updates
+ * With bias = the lean side (mLeanSide, -1..1) it adds mBoardForward times (bias * 55 + a random value within +-(1 -
+ * |bias|) * 55), then mBoardSide times a random value in -10..10. func_002DF920 fills both vectors from the board
+ * bone's matrix rows 0 and 2. The random numbers come from the generator in D_004A3AFC. The spray updates
  * func_002DFE88, func_002E02B8, func_002E0EE8 and func_002E1F70 call it.
  *
  * @param out  the position, changed in place
  */
 extern "C" void func_002DE398(cDynamicSprayFX* self, t4Vector* out)
 {
-    float bias = *(float*)(((char*)self) + 0x12C);
+    float bias = self->mLeanSide;
     float spread = (1.0f - wakeAbsE398(bias)) * 55.0f;
     float lo = -spread;
     t4Vector offset;
     t4Vector scaled;
-    wakeScaleE398(scaled, *(t4Vector*)(((char*)self) + 0x50), bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
+    wakeScaleE398(scaled, self->mBoardForward, bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
     offset = scaled;
     wakeAddE398(*out, offset);
-    wakeScaleE398(scaled, *(t4Vector*)(((char*)self) + 0x40), wakeRandE398() * 20.0f + -10.0f);
+    wakeScaleE398(scaled, self->mBoardSide, wakeRandE398() * 20.0f + -10.0f);
     offset = scaled;
     wakeAddE398(*out, offset);
 }
@@ -1914,8 +1914,9 @@ extern "C" void func_002E2550(cDynamicSprayFX* self);
 /**
  * Resets a rider's snow spray effect.
  *
- * Sets +0x120 to 0.5 and the colour (+0x90) to white, and zeroes +0x4, +0x10, +0x1C, +0x74, +0x78, +0x80 (so the bone
- * table is looked up again), +0xE0 and the lean side +0x12C. When the stored player flag (+0x124) no longer matches
+ * Sets mBurstAlpha to 0.5 and mColour to white, and zeroes mShedAmount, mPowderLevel, mHeadPuffGlow, mLastSpeed,
+ * mShedBone, mBoneIndiciesValid (so the bone table is looked up again), mBurstStrength and the lean side mLeanSide.
+ * When the stored player flag (mIsPlayer) no longer matches
  * whether the rider has a view (mViewIndex >= 0) it re-tunes the emitters with func_002E26B8; then it picks the
  * emitters for the rider's detail level (func_002E2550). The cDynamicSprayFX constructor and cRiderHandler_resetRiderFX
  * (on cRiderHandler + 0xB40) call it.
@@ -1927,17 +1928,17 @@ extern "C" void func_002DF3B0(cDynamicSprayFX* self)
     white.y = 1.0f;
     white.z = 1.0f;
     white.w = 1.0f;
-    *(float*)((char*)self + 0x120) = 0.5f;
-    *(int*)((char*)self + 0x10) = 0;
-    *(t4Vector*)((char*)self + 0x90) = white;
-    *(int*)((char*)self + 0x74) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x80) = 0;
-    *(int*)((char*)self + 0x78) = 0;
-    *(int*)((char*)self + 0xE0) = 0;
-    *(int*)((char*)self + 0x12C) = 0;
-    if (*(int*)((char*)self + 0x124) != (*(int*)(*(char**)self + 0x870) >= 0)) {
+    self->mBurstAlpha = 0.5f;
+    self->mPowderLevel = 0.0f;
+    self->mColour = white;
+    self->mLastSpeed = 0.0f;
+    self->mShedAmount = 0.0f;
+    self->mHeadPuffGlow = 0.0f;
+    self->mBoneIndiciesValid = 0;
+    self->mShedBone = 0;
+    self->mBurstStrength = 0.0f;
+    self->mLeanSide = 0.0f;
+    if (self->mIsPlayer != (self->mRider->mViewIndex >= 0)) {
         func_002E26B8(self);
     }
     func_002E2550(self);
@@ -2004,49 +2005,49 @@ extern const char str_forearmright_b[];
 extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name);
 
 /**
- * Looks up the 30 rider bones the spray effect uses and marks the table as filled (+0x80 = 1).
+ * Looks up the 30 rider bones the spray effect uses and marks the table as filled (mBoneIndiciesValid = 1).
  *
- * Stores cAnimModel_getBoneSkelIndex results for the rider's mAnimModel into the 0x78-byte table at +0x7C: shins, feet,
- * thighs, hips, spine, neck, clavicles, biceps, forearms and hands by name ("shinleft_b", "footleft_b", ...). Entries
- * 0-14 and 15-29 repeat the leg, hip and spine bones; entry 12 is "handright_b" between left-arm bones, possibly a
- * slip. func_002DF920 calls it while +0x80 is 0.
+ * Stores cAnimModel_getBoneSkelIndex results for the rider's mAnimModel into the 0x78-byte table mBoneIndicies: shins,
+ * feet, thighs, hips, spine, neck, clavicles, biceps, forearms and hands by name ("shinleft_b", "footleft_b", ...).
+ * Entries 0-14 and 15-29 repeat the leg, hip and spine bones; entry 12 is "handright_b" between left-arm bones,
+ * possibly a slip. func_002DF920 calls it while mBoneIndiciesValid is 0.
  */
 extern "C" void func_002DF4D0(cDynamicSprayFX* self)
 {
-    (*(int**)(((char*)self) + 0x7C))[0] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinleft_b);
-    (*(int**)(((char*)self) + 0x7C))[1] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footleft_b);
-    (*(int**)(((char*)self) + 0x7C))[2] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinright_b);
-    (*(int**)(((char*)self) + 0x7C))[3] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footright_b);
-    (*(int**)(((char*)self) + 0x7C))[4] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighleft_b);
-    (*(int**)(((char*)self) + 0x7C))[5] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighright_b);
-    (*(int**)(((char*)self) + 0x7C))[6] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_hips_b);
-    (*(int**)(((char*)self) + 0x7C))[7] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_lowerspine);
-    (*(int**)(((char*)self) + 0x7C))[8] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_middlespine);
-    (*(int**)(((char*)self) + 0x7C))[9] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_upperspine);
-    (*(int**)(((char*)self) + 0x7C))[10] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_neck);
-    (*(int**)(((char*)self) + 0x7C))[11] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_clavicleleft);
-    (*(int**)(((char*)self) + 0x7C))[12] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_handright_b);
-    (*(int**)(((char*)self) + 0x7C))[13] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_bicepleft);
-    (*(int**)(((char*)self) + 0x7C))[14] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_biceptwistleft);
-    (*(int**)(((char*)self) + 0x7C))[15] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinleft_b);
-    (*(int**)(((char*)self) + 0x7C))[16] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footleft_b);
-    (*(int**)(((char*)self) + 0x7C))[17] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinright_b);
-    (*(int**)(((char*)self) + 0x7C))[18] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footright_b);
-    (*(int**)(((char*)self) + 0x7C))[19] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighleft_b);
-    (*(int**)(((char*)self) + 0x7C))[20] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighright_b);
-    (*(int**)(((char*)self) + 0x7C))[21] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_hips_b);
-    (*(int**)(((char*)self) + 0x7C))[22] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_lowerspine);
-    (*(int**)(((char*)self) + 0x7C))[23] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_middlespine);
-    (*(int**)(((char*)self) + 0x7C))[24] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_forearmleft_b);
-    (*(int**)(((char*)self) + 0x7C))[25] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_handleft_b);
-    (*(int**)(((char*)self) + 0x7C))[26] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_clavicleright);
-    (*(int**)(((char*)self) + 0x7C))[27] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_bicepright);
-    (*(int**)(((char*)self) + 0x7C))[28] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_biceptwistright);
-    (*(int**)(((char*)self) + 0x7C))[29] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_forearmright_b);
+    self->mBoneIndicies[0] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinleft_b);
+    self->mBoneIndicies[1] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footleft_b);
+    self->mBoneIndicies[2] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinright_b);
+    self->mBoneIndicies[3] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footright_b);
+    self->mBoneIndicies[4] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighleft_b);
+    self->mBoneIndicies[5] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighright_b);
+    self->mBoneIndicies[6] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_hips_b);
+    self->mBoneIndicies[7] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_lowerspine);
+    self->mBoneIndicies[8] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_middlespine);
+    self->mBoneIndicies[9] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_upperspine);
+    self->mBoneIndicies[10] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_neck);
+    self->mBoneIndicies[11] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_clavicleleft);
+    self->mBoneIndicies[12] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_handright_b);
+    self->mBoneIndicies[13] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_bicepleft);
+    self->mBoneIndicies[14] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_biceptwistleft);
+    self->mBoneIndicies[15] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinleft_b);
+    self->mBoneIndicies[16] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footleft_b);
+    self->mBoneIndicies[17] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinright_b);
+    self->mBoneIndicies[18] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footright_b);
+    self->mBoneIndicies[19] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighleft_b);
+    self->mBoneIndicies[20] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighright_b);
+    self->mBoneIndicies[21] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_hips_b);
+    self->mBoneIndicies[22] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_lowerspine);
+    self->mBoneIndicies[23] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_middlespine);
+    self->mBoneIndicies[24] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_forearmleft_b);
+    self->mBoneIndicies[25] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_handleft_b);
+    self->mBoneIndicies[26] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_clavicleright);
+    self->mBoneIndicies[27] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_bicepright);
+    self->mBoneIndicies[28] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_biceptwistright);
+    self->mBoneIndicies[29] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_forearmright_b);
     int i;
     for (i = 0; i < 30; i++) {
     }
-    *(int*)(((char*)self) + 0x80) = 1;
+    self->mBoneIndiciesValid = 1;
 }
 #endif
 
@@ -2054,9 +2055,9 @@ extern "C" void func_002DF4D0(cDynamicSprayFX* self)
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF920);
 #ifdef SKIP_ASM
 struct sWakeFxF920 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     char pad4[0x24];            // 0x04
-    char* p28;                  // 0x28
+    cDynamicColourEmitter* p28; // 0x28
     char pad2C[0x4];            // 0x2C
     t4Vector v30;           // 0x30
     t4Vector v40;           // 0x40
@@ -2074,7 +2075,7 @@ struct sWakeFxF920 {
     float fB8;                  // 0xB8
     float fBC;                  // 0xBC
     t4Vector dir;           // 0xC0
-    char* pD0;                  // 0xD0
+    tSurfData* pD0;             // 0xD0
     int iD4;                    // 0xD4
     char padD8[0x50];           // 0xD8
     int i128;                   // 0x128
@@ -2179,9 +2180,10 @@ static inline t4Vector wakeAddF920(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-static inline t4Vector wakeRowF920(char* o, int k)
+static inline t4Vector wakeRowF920(cRider* o, int k)
 {
-    return ((t4Vector*)(*(char**)(*(char**)(o + 0x780) + 0x30) + (*(int*)(o + 0x8A4) << 6)))[k];
+    // The matrix stride is spelled as bytes: indexing SkelMatrices[] swaps the addu operands.
+    return ((t4Vector*)((char*)o->mAnimModel->SkelMatrices + (o->mBoneBoardChild << 6)))[k];
 }
 
 /**
@@ -2194,11 +2196,12 @@ static inline t4Vector wakeRowF920(char* o, int k)
  * (length of kRiderVt_getVelocity's vector), +0xBC its absolute value and +0xC0 the normalised mVelocity.
  *
  * The spray flag +0xB0 is cleared in motion states 1, 2 and 4 (cRider_getMotionState), in control state 9, or when
- * mIsInNIS is set without (unk_AD0 clear, unk_AFC and unk_B00 set). +0x30/+0x40/+0x50/+0xA0 get rows 1, 2, 0 and 3 of
+ * mIsInNIS is set without (mHiddenNIS clear, mNISShowBoardVisualFX and mOnGroundNIS set). +0x30/+0x40/+0x50/+0xA0 get
+ * rows 1, 2, 0 and 3 of
  * the mBoneBoardChild matrix; +0xD0 the SurfPropCache record for mSurfaceType. A sharp slow-down (speed drop * 60 above
  * 555.6 at a speed above 555.6, or at least 27.8 in the NIS case) reports a burst through func_002E23E0. The emitters
  * are re-chosen (func_002E2550) when mLOD changed, the colour (+0x90) becomes the doubled table colour for the rider
- * (as in cBoardWakeFX_createSeg) with alpha 1, and every emitter whose enable word (+0x174) is set runs its update: 0
+ * (as in cBoardWakeFX_createSeg) with alpha 1, and every emitter whose m_enabled is set runs its update: 0
  * func_002E0EE8, 1 func_002E02B8, 3 func_002DFE88, 4 func_002E1120, 5 func_002E1598, 7 func_002E1A80, 8 func_002E1F70,
  * 9 func_002E2260. cRiderHandler_updateRiderFX and cAI_update call it on cRiderHandler + 0xB40.
  */
@@ -2211,26 +2214,26 @@ extern "C" void func_002DF920(sWakeFxF920* self)
         func_002DF4D0_F920(self);
     }
     self->f12C = 0.0f;
-    cRider* obj = (cRider*)self->obj;
+    cRider* obj = self->obj;
     if (obj->PressMode != 0) {
         int animId = cRiderAnimBase_getCurrentAnimID(obj->mRiderAnim, 2);
         if ((animId >= 23 && animId <= 28) || animId == 37 || animId == 38) {
-            self->f12C = *(int*)(self->obj + 0x320) ? -1.0f : 1.0f;
+            self->f12C = self->obj->IsRidingFakie ? -1.0f : 1.0f;
         } else {
-            self->f12C = *(int*)(self->obj + 0x320) ? 1.0f : -1.0f;
+            self->f12C = self->obj->IsRidingFakie ? 1.0f : -1.0f;
         }
     }
-    obj = (cRider*)self->obj;
+    obj = self->obj;
     self->fB4 = -obj->mSlewed[0].cur * (1.0f - wakeAbsE398(obj->mSlewed[3].cur));
     if (obj->IsRidingFakie != 0) {
         self->fB4 = -self->fB4;
     }
-    char* sub = self->obj + 0x6C0;
+    char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVtF920* vt = *(sWakeVtF920**)sub;
     float sp = wakeLenF920(*vt[2].fn(sub + vt[2].delta));
     self->fB8 = sp;
     self->fBC = wakeAbsE398(sp);
-    self->dir = *(t4Vector*)(self->obj + 0x1E0);
+    self->dir = self->obj->mVelocity;
     if (0.0f < sp) {
         wakeDivEqF920(self->dir, wakeLenF920(self->dir));
     }
@@ -2240,7 +2243,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     if (st == 1 || st == 2 || st == 4 || cRider_getControlState(self->obj) == 9) {
         self->iB0 = 0;
     } else {
-        cRider* riderObj = (cRider*)self->obj;
+        cRider* riderObj = self->obj;
         if (riderObj->mIsInNIS != 0) {
             int nisSpray = riderObj->mHiddenNIS == 0 && riderObj->mNISShowBoardVisualFX != 0;
             if (!nisSpray || riderObj->mOnGroundNIS == 0) {
@@ -2248,19 +2251,19 @@ extern "C" void func_002DF920(sWakeFxF920* self)
             }
         }
     }
-    cRider* riderObj = (cRider*)self->obj;
-    self->v50 = wakeRowF920(((char*)riderObj), 0);
+    cRider* riderObj = self->obj;
+    self->v50 = wakeRowF920(riderObj, 0);
     float acc = (self->f74 - self->fB8) * 59.999996185302734f;
-    self->v30 = wakeRowF920(((char*)riderObj), 1);
-    self->v40 = wakeRowF920(((char*)riderObj), 2);
-    self->pos = wakeRowF920(((char*)riderObj), 3);
-    self->pD0 = (char*)&SSXApp->Game->SurfPropCache->SurfData[riderObj->mSurfaceType];
+    self->v30 = wakeRowF920(riderObj, 1);
+    self->v40 = wakeRowF920(riderObj, 2);
+    self->pos = wakeRowF920(riderObj, 3);
+    self->pD0 = &SSXApp->Game->SurfPropCache->SurfData[riderObj->mSurfaceType];
     int x = 0;
     if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
         x = cRider_getControlState(riderObj) != 9;
     }
     float burstStrength = acc * 0.5f;
-    cRider* nisRider = (cRider*)self->obj;
+    cRider* nisRider = self->obj;
     int y = 0;
     if (nisRider->mIsInNIS != 0 && nisRider->mHiddenNIS == 0) {
         y = nisRider->mNISShowBoardVisualFX != 0;
@@ -2270,14 +2273,14 @@ extern "C" void func_002DF920(sWakeFxF920* self)
         burstStrength = acc;
     }
     if (self->iB0 != 0 && x) {
-        t4Vector burstPos = wakeAddF920(self->pos, wakeScaleF920(*(t4Vector*)(self->obj + 0x370), 10.0f));
-        func_002E23E0_F920(self, &burstPos, self->obj + 0x370, *(int*)(self->obj + 0x438), 1, burstStrength);
+        t4Vector burstPos = wakeAddF920(self->pos, wakeScaleF920(self->obj->mGroundNormal, 10.0f));
+        func_002E23E0_F920(self, &burstPos, &self->obj->mGroundNormal, self->obj->mSurfaceType, 1, burstStrength);
     }
     self->f74 = self->fB8;
-    if (self->i128 != *(int*)(self->obj + 0x898)) {
+    if (self->i128 != self->obj->mLOD) {
         func_002E2550((cDynamicSprayFX*)self);
     }
-    char* sub2 = self->obj + 0x6C0;
+    char* sub2 = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
     int idx = vt2[7].fn(sub2 + vt2[7].delta);
     sEnt_E058* colourRow = &((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[idx];
@@ -2289,14 +2292,14 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->col = groundColour;
     wakeScaleE398(self->col, self->col, 2.0f);
     self->col.w = 1.0f;
-    if (*(int*)(self->p28 + 0x384)) func_002E02B8_F920(self);
-    if (*(int*)(self->p28 + 0x7A4)) func_002DFE88_F920(self);
-    if (*(int*)(self->p28 + 0x174)) func_002E0EE8_F920(self);
-    if (*(int*)(self->p28 + 0x9B4)) func_002E1120_F920(self);
-    if (*(int*)(self->p28 + 0xBC4)) func_002E1598_F920(self);
-    if (*(int*)(self->p28 + 0xFE4)) func_002E1A80_F920(self);
-    if (*(int*)(self->p28 + 0x1404)) func_002E2260_F920(self);
-    if (*(int*)(self->p28 + 0x11F4)) func_002E1F70_F920(self);
+    if (self->p28[1].m_enabled) func_002E02B8_F920(self);
+    if (self->p28[3].m_enabled) func_002DFE88_F920(self);
+    if (self->p28[0].m_enabled) func_002E0EE8_F920(self);
+    if (self->p28[4].m_enabled) func_002E1120_F920(self);
+    if (self->p28[5].m_enabled) func_002E1598_F920(self);
+    if (self->p28[7].m_enabled) func_002E1A80_F920(self);
+    if (self->p28[9].m_enabled) func_002E2260_F920(self);
+    if (self->p28[8].m_enabled) func_002E1F70_F920(self);
 }
 #endif
 
@@ -2481,10 +2484,10 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E02B8);
 INCLUDE_ASM("visualfx/boardwakefx", func_002E0EE8);
 #ifdef SKIP_ASM
 struct sWakeFx0EE8 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     char pad4[0x24];            // 0x04
-    char* em;                   // 0x28
-    char* p2C;                  // 0x2C
+    cDynamicColourEmitter* em;  // 0x28
+    sSprayParams* p2C;          // 0x2C
     t4Vector dir;           // 0x30
     char pad40[0x50];           // 0x40
     t4Vector col;           // 0x90
@@ -2493,7 +2496,7 @@ struct sWakeFx0EE8 {
     char padB4[0x8];            // 0xB4
     float fBC;                  // 0xBC
     char padC0[0x10];           // 0xC0
-    char* pD0;                  // 0xD0
+    tSurfData* pD0;             // 0xD0
 };
 
 struct sWakeVt0EE8 {
@@ -2551,18 +2554,18 @@ static inline float wakeLimit0EE8()
  */
 extern "C" void func_002E0EE8(sWakeFx0EE8* self)
 {
-    int flag = *(int*)(*(char**)(self->obj + 0x88C) + 0xA0);
-    char* em = self->em;
-    if (self->iB0 != 0 && wakeLimit0EE8() < self->fBC && *(int*)(self->pD0 + 0x58) != 0 && flag == 0) {
+    int flag = *(int*)((char*)self->obj->mAttachedEmitterFX + 0xA0);
+    cDynamicColourEmitter* em = self->em;
+    if (self->iB0 != 0 && wakeLimit0EE8() < self->fBC && self->pD0->ParticleSnowTrailActive != 0 && flag == 0) {
         t4Vector pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
         func_002DE398((cDynamicSprayFX*)self, &pos);
-        char* sub = self->obj + 0x6C0;
+        char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
         sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
         t4Vector* riderVel = vt[2].fn(sub + vt[2].delta);
         t4Vector vel = wakeAdd0EE8(
-            wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0xD8)),
-                        wakeScale0EE8(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0xDC))),
-            wakeScale0EE8(wakeScale0EE8(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0xE0)), self->fBC));
+            wakeAdd0EE8(wakeScale0EE8(*riderVel, self->p2C[0].fD8),
+                        wakeScale0EE8(self->obj->mGroundNormal, self->p2C[0].fDC)),
+            wakeScale0EE8(wakeScale0EE8(self->obj->mGroundNormal, self->p2C[0].fE0), self->fBC));
         cDynamicColourEmitter_update(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
     } else {
         cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
@@ -2641,15 +2644,15 @@ struct sMat1120 {
 extern t4Vector t4vect_Origin_1120 __asm__("t4vect_Origin");
 
 struct sWakeFx1120 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     char pad4[0x10];            // 0x04
     float rate;                 // 0x14
     int blink;                  // 0x18
     float glow;                 // 0x1C
     float timer;                // 0x20
     float period;               // 0x24
-    char* p28;                  // 0x28
-    char* p2C;                  // 0x2C
+    cDynamicColourEmitter* p28; // 0x28
+    sSprayParams* p2C;          // 0x2C
     char pad30[0x8C];           // 0x30
     float fBC;                  // 0xBC
 };
@@ -2760,8 +2763,8 @@ static inline float wakeClamp1120(float v, float lo, float hi)
  */
 extern "C" void func_002E1120(sWakeFx1120* self)
 {
-    void* em = self->p28 + 0x840;
-    cRider* obj = (cRider*)self->obj;
+    cDynamicColourEmitter* em = &self->p28[4];
+    cRider* obj = self->obj;
     int k = obj->mBoneHead;
     sMat1120* mats = (sMat1120*)obj->mAnimModel->SkelMatrices;
     sMat1120 mat = mats[k];
@@ -2775,7 +2778,7 @@ extern "C" void func_002E1120(sWakeFx1120* self)
         return;
     } else {
         float target = 0.0f;
-        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->obj + 0x784), 2) == 30) {
+        if (cRiderAnimBase_getCurrentAnimCategory(self->obj->mRiderAnim, 2) == 30) {
             target = 1.0f;
         }
         if (self->glow <= target) {
@@ -2793,7 +2796,7 @@ extern "C" void func_002E1120(sWakeFx1120* self)
                 self->period = (1.0f - self->glow) * 0.6000000238418579f + 0.4000000059604645f;
             }
         }
-        char* sub = self->obj + 0x6C0;
+        char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
         sWakeVtI1120* vi = *(sWakeVtI1120**)sub;
         float stateValue = cRenderStateMan_Temperature(vi[7].fn(sub + vi[7].delta));
         float zero = 0.0f;
@@ -2810,13 +2813,13 @@ extern "C" void func_002E1120(sWakeFx1120* self)
             if (1.0f < self->rate) {
                 self->rate -= 1.0f;
                 mat.v[3] = t4vect_Origin_1120;
-                char* sub2 = self->obj + 0x6C0;
+                char* sub2 = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
                 sWakeVtV1120* vv = *(sWakeVtV1120**)sub2;
                 sVec1120* riderVel = vv[2].fn(sub2 + vv[2].delta);
                 sVec1120 vel = wakeAdd1120(
-                    wakeAdd1120(wakeScale1120(*riderVel, *(float*)(self->p2C + 0x478)),
-                                wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x47C))),
-                    wakeScale1120(wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x480)), self->fBC));
+                    wakeAdd1120(wakeScale1120(*riderVel, self->p2C[4].fD8),
+                                wakeScale1120(*(sVec1120*)&self->obj->mGroundNormal, self->p2C[4].fDC)),
+                    wakeScale1120(wakeScale1120(*(sVec1120*)&self->obj->mGroundNormal, self->p2C[4].fE0), self->fBC));
                 wakeAddEq1120(vel, wakeMulMat1120(&mat, sVec1120(zero, zero, 150.0f, one2)));
                 cDynamicColourEmitter_update(em, &pos, &vel, pcol, 1, dt);
                 return;
@@ -2835,15 +2838,15 @@ off:
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1598);
 #ifdef SKIP_ASM
 struct sWakeFx1598 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     float f4;                   // 0x04
     char pad8[0x20];            // 0x08
-    char* p28;                  // 0x28
+    cDynamicColourEmitter* p28; // 0x28
     char pad2C[0x64];           // 0x2C
     t4Vector col;           // 0x90
     t4Vector pos;           // 0xA0
     char padB0[0x20];           // 0xB0
-    char* pD0;                  // 0xD0
+    tSurfData* pD0;             // 0xD0
     int iD4;                    // 0xD4
     char padD8[0x8];            // 0xD8
     float fE0;                  // 0xE0
@@ -2919,7 +2922,7 @@ static inline float wakeMin1598(float a, float b)
 
 static inline t4Vector* wakeVel1598(sWakeFx1598* self)
 {
-    char* sub = self->obj + 0x6C0;
+    char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVt1598* vt = *(sWakeVt1598**)sub;
     return vt[2].fn(sub + vt[2].delta);
 }
@@ -2939,7 +2942,7 @@ static inline t4Vector* wakeVel1598(sWakeFx1598* self)
 // PORT: g++ minimum operator (<?).
 extern "C" void func_002E1598(sWakeFx1598* self)
 {
-    tSurfData* cfg = (tSurfData*)self->pD0;
+    tSurfData* cfg = self->pD0;
     if (27.77777862548828f < self->fE0 && cfg->ImpactActive != 0) {
         int emitterIdx = 6;
         int otherIdx = 5;
@@ -2947,7 +2950,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
             emitterIdx = 5;
             otherIdx = 6;
         }
-        if (emitterIdx == 5 && *(int*)(self->obj + 0xAC4) == 0) {
+        if (emitterIdx == 5 && self->obj->mIsInNIS == 0) {
             ReportImpact(&self->vF0, self->fE0);
         }
         t4Vector pos = self->vF0;
@@ -2992,7 +2995,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         }
         t4Vector* va = wakeVel1598(self);
         t4Vector* vb = wakeVel1598(self);
-        t4Vector* up = (t4Vector*)(self->obj + 0x370);
+        t4Vector* up = &self->obj->mGroundNormal;
         t4Vector t = wakeSub1598(*va, wakeScale0EE8(*up, wakeDot1598(*vb, *up) * 0.75f));
         float m = 0.30000001192092896f;
         if (self->i114 == 0) m = 0.4000000059604645f;
@@ -3006,8 +3009,8 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         }
         t4Vector col = self->col;
         col.w = self->f120;
-        cDynamicColourEmitter_update(self->p28 + emitterIdx * 528, &pos, &vel, &col, 1, 0.01666666753590107f);
-        cDynamicColourEmitter_update(self->p28 + otherIdx * 528, &self->vF0, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(&self->p28[emitterIdx], &pos, &vel, &col, 1, 0.01666666753590107f);
+        cDynamicColourEmitter_update(&self->p28[otherIdx], &self->vF0, 0, 0, 0, 0.01666666753590107f);
         if (self->fE0 < 83.33333587646484f) {
             self->fE0 = 0.0f;
         } else {
@@ -3018,8 +3021,8 @@ extern "C" void func_002E1598(sWakeFx1598* self)
             self->fE0 = self->fE0 * m;
         }
     } else {
-        cDynamicColourEmitter_update(self->p28 + 0xC60, &self->pos, 0, 0, 0, 0.01666666753590107f);
-        cDynamicColourEmitter_update(self->p28 + 0xA50, &self->pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(&self->p28[6], &self->pos, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(&self->p28[5], &self->pos, 0, 0, 0, 0.01666666753590107f);
         self->fE0 = 0.0f;
     }
 }
@@ -3134,10 +3137,10 @@ static inline float vu0Dot_1A80(const t4Vector& a, const t4Vector& b)
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 
 struct sWakeFx1A80 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     char pad4[0x24];            // 0x04
-    char* em;                   // 0x28
-    char* p2C;                  // 0x2C
+    cDynamicColourEmitter* em;  // 0x28
+    sSprayParams* p2C;          // 0x2C
     char pad30[0x20];           // 0x30
     t4Vector v50;               // 0x50
     char pad60[0x30];           // 0x60
@@ -3148,7 +3151,7 @@ struct sWakeFx1A80 {
     float fB8;                  // 0xB8
     float fBC;                  // 0xBC
     t4Vector vC0;               // 0xC0
-    char* pD0;                  // 0xD0
+    tSurfData* pD0;             // 0xD0
     char padD4[0x58];           // 0xD4
     float f12C;                 // 0x12C
 };
@@ -3177,7 +3180,7 @@ static inline float wakeRamp1A80(float lo, float range, float v)
 
 static inline t4Vector* wakeVel1A80(sWakeFx1A80* self)
 {
-    char* sub = self->obj + 0x6C0;
+    char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)sub;
     return vt[2].fn(vthis(sub, vt[2]));
 }
@@ -3194,39 +3197,42 @@ static inline t4Vector* wakeVel1A80(sWakeFx1A80* self)
  */
 extern "C" void func_002E1A80(sWakeFx1A80* self)
 {
-    float facing = fsAbs(vu0Dot_1A80(*(t4Vector*)(self->obj + 0x3B0), self->vC0));
+    float facing = fsAbs(vu0Dot_1A80(self->obj->mGroundSide, self->vC0));
     facing = facing + facing;
-    char* em = self->em + 0xE70;
+    cDynamicColourEmitter* em = &self->em[7];
     float k = 1.0f;
     if (facing <= 1.0f)
         k = facing;
     float ak = fsAbs(k);
     float speedRamp = wakeRamp1A80(416.66668701171875f, 1250.0f, self->fB8);
-    float leanSum = fsAbs(*(float*)(self->obj + 0x1F0)) + ak - 0.10000000149011612f;
+    float leanSum = fsAbs(self->obj->mSlewed[0].cur) + ak - 0.10000000149011612f;
     float rampSq = 1.0f;
     if (speedRamp < 1.0f)
         rampSq = speedRamp;
     rampSq *= rampSq;
     float thr = leanSum * rampSq;
     float roll = wakeRand() * 0.4000000059604645f;
-    if (self->iB0 != 0 && roll <= thr && *(int*)(self->pD0 + 0x50) != 0 && fsAbs(self->f12C) < 0.20000000298023224f) {
+    if (self->iB0 != 0 && roll <= thr && self->pD0->CloudySprayActive != 0 &&
+        fsAbs(self->f12C) < 0.20000000298023224f) {
         t4Vector pos = self->pos;
-        float spd = *(float*)(self->pD0 + 0x54);
+        float spd = self->pD0->CloudySprayMaxHeight;
         float lift = wakeRand() + 0.5f;
-        vu0AddEq_1A80(pos, vu0Sub_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), lift * spd),
-                             vu0Scale_1A80(vu0Scale_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x1E0), 3.0f), 0.01666666753590107f), lift)));
-        t4Vector side = wakeCross1A80(self->v50, *(t4Vector*)(self->obj + 0x370));
+        vu0AddEq_1A80(pos, vu0Sub_1A80(vu0Scale_1A80(self->obj->mGroundNormal, lift * spd),
+                             vu0Scale_1A80(vu0Scale_1A80(vu0Scale_1A80(self->obj->mVelocity, 3.0f),
+                                                         0.01666666753590107f), lift)));
+        t4Vector side = wakeCross1A80(self->v50, self->obj->mGroundNormal);
         if (self->fB4 < 0.0f)
             side = vu0Scale_1A80(side, -1.0f);
-        t4Vector n = *(int*)(self->obj + 0x320) != 0 ? vu0Scale_1A80(self->v50, -1.0f) : self->v50;
+        t4Vector n = self->obj->IsRidingFakie != 0 ? vu0Scale_1A80(self->v50, -1.0f) : self->v50;
         t4Vector boardBack = vu0Scale_1A80(vu0Scale_1A80(n, -1.0f), self->fB8);
-        t4Vector negVel = vu0Scale_1A80(*(t4Vector*)(self->obj + 0x1E0), -1.0f);
+        t4Vector negVel = vu0Scale_1A80(self->obj->mVelocity, -1.0f);
         t4Vector w = vu0Scale_1A80(vu0Sub_1A80(boardBack, negVel), 0.30000001192092896f);
         t4Vector* riderVel = wakeVel1A80(self);
         t4Vector vel = vu0Add(
-            vu0Add(vu0Add(vu0Add(vu0Scale_1A80(*riderVel, *(float*)(self->p2C + 0x730)), vu0Scale_1A80(vu0Scale_1A80(side, self->fB8), 0.0f)),
-                          vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x734))),
-                   vu0Scale_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x738)), self->fBC)),
+            vu0Add(vu0Add(vu0Add(vu0Scale_1A80(*riderVel, self->p2C[7].fD8),
+                                 vu0Scale_1A80(vu0Scale_1A80(side, self->fB8), 0.0f)),
+                          vu0Scale_1A80(self->obj->mGroundNormal, self->p2C[7].fDC)),
+                   vu0Scale_1A80(vu0Scale_1A80(self->obj->mGroundNormal, self->p2C[7].fE0), self->fBC)),
             w);
         cDynamicColourEmitter_update(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
     } else {
@@ -3239,12 +3245,12 @@ extern "C" void func_002E1A80(sWakeFx1A80* self)
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1F70);
 #ifdef SKIP_ASM
 struct sWakeFx1F70 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     char pad4[0xC];             // 0x04
     float f10;                  // 0x10
     char pad14[0x14];           // 0x14
-    char* p28;                  // 0x28
-    char* p2C;                  // 0x2C
+    cDynamicColourEmitter* p28; // 0x28
+    sSprayParams* p2C;          // 0x2C
     t4Vector dir;           // 0x30
     char pad40[0x50];           // 0x40
     t4Vector col;           // 0x90
@@ -3253,7 +3259,7 @@ struct sWakeFx1F70 {
     char padB4[0x8];            // 0xB4
     float fBC;                  // 0xBC
     char padC0[0x10];           // 0xC0
-    char* pD0;                  // 0xD0
+    tSurfData* pD0;             // 0xD0
 };
 
 struct sWakeVt1F70 {
@@ -3281,7 +3287,7 @@ static inline float wakeLimit1F70()
 
 static inline t4Vector* wakeVel1F70(sWakeFx1F70* self)
 {
-    char* sub = self->obj + 0x6C0;
+    char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVt1F70* vt = *(sWakeVt1F70**)sub;
     return vt[2].fn(vthis(sub, vt[2]));
 }
@@ -3299,12 +3305,12 @@ static inline t4Vector* wakeVel1F70(sWakeFx1F70* self)
 extern "C" void func_002E1F70(sWakeFx1F70* self)
 {
     int done = 0;
-    void* em = self->p28 + 0x1080;
-    if (self->iB0 == 0 || *(float*)(self->pD0 + 0x5C) < 0.009999999776482582f) {
+    cDynamicColourEmitter* em = &self->p28[8];
+    if (self->iB0 == 0 || self->pD0->SnowBuildupAmount < 0.009999999776482582f) {
         self->f10 = (self->f10 - 0.01666666753590107f) >? 0.0f;
     } else {
         done = 1;
-        self->f10 = (self->f10 + 0.010000000707805157f) <? *(float*)(self->pD0 + 0x5C);
+        self->f10 = (self->f10 + 0.010000000707805157f) <? self->pD0->SnowBuildupAmount;
     }
     if ((self->iB0 == 0 && wakeVel1F70(self)->z < -3333.33349609375f) || self->fBC < wakeLimit1F70()) {
         self->f10 = 0.0f;
@@ -3319,9 +3325,9 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
         col.w = alpha;
         t4Vector* riderVel = wakeVel1F70(self);
         t4Vector vel = wakeAdd0EE8(
-            wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0x818)),
-                        wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x81C))),
-            wakeScale0EE8(wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x820)), self->fBC));
+            wakeAdd0EE8(wakeScale0EE8(*riderVel, self->p2C[8].fD8),
+                        wakeScale0EE8(self->dir, self->p2C[8].fDC)),
+            wakeScale0EE8(wakeScale0EE8(self->dir, self->p2C[8].fE0), self->fBC));
         func_002DE398((cDynamicSprayFX*)self, &pos);
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, 0.01666666753590107f);
     } else {
@@ -3335,11 +3341,11 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2260);
 #ifdef SKIP_ASM
 
 struct sWakeFx2260 {
-    char* obj;                  // 0x00
+    cRider* obj;                // 0x00
     float f4;                   // 0x04
     char pad8[0x20];            // 0x08
-    char* p28;                  // 0x28
-    char* p2C;                  // 0x2C
+    cDynamicColourEmitter* p28; // 0x28
+    sSprayParams* p2C;          // 0x2C
     char pad30[0x48];           // 0x30
     int i78;                    // 0x78
     int* p7C;                   // 0x7C
@@ -3379,7 +3385,7 @@ static inline float wakeLimit2260()
 extern "C" void func_002E2260(sWakeFx2260* self)
 {
     float zero = 0.0f;
-    void* em = self->p28 + 0x1290;
+    cDynamicColourEmitter* em = &self->p28[9];
     if (zero < self->f4 && wakeLimit2260() < self->fB8) {
         float dt;
         float alpha;
@@ -3394,11 +3400,11 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         col = self->col;
         col.w = alpha;
         dt = 0.01666666753590107f;
-        obj = (cRider*)self->obj;
+        obj = self->obj;
         k = self->p7C[self->i78];
         boneMats = obj->mAnimModel->SkelMatrices;
         pos = ((t4Vector*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
-        wakeScaleE398(scaledVel, *(t4Vector*)&obj->mVelocity, *(float*)(self->p2C + 0x900));
+        wakeScaleE398(scaledVel, obj->mVelocity, self->p2C[9].fD8);
         vel = scaledVel;
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, dt);
         self->i78++;
@@ -3409,7 +3415,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
             self->f4 = (self->f4 - dt) >? zero;
         }
     } else {
-        cRider* obj = (cRider*)self->obj;
+        cRider* obj = self->obj;
         int k = obj->mBoneHips;
         t4Matrix* boneMats = obj->mAnimModel->SkelMatrices;
         t4Vector pos = ((t4Vector*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
@@ -3465,23 +3471,13 @@ static inline float Length_23E0(const t4Vector& v)
     return r;
 }
 
-struct sRiderState_23E0 {
-    char pad[0xAC4];
-    int fAC4;
-    char padAC8[8];
-    int fAD0;
-    char padAD4[0x28];
-    int fAFC;
-    int fB00;
-};
-
-static inline int Carving_23E0(sRiderState_23E0* r)
+static inline int Carving_23E0(cRider* r)
 {
-    return r->fAC4 != 0 && r->fAD0 == 0 && r->fAFC != 0;
+    return r->mIsInNIS != 0 && r->mHiddenNIS == 0 && r->mNISShowBoardVisualFX != 0;
 }
 
 struct sWake_23E0 {
-    sRiderState_23E0* rider;    // 0x00
+    cRider* rider;              // 0x00
     char pad4[0xDC];
     float lastSpeed;            // 0xE0
     char padE4[0xC];
@@ -3497,8 +3493,9 @@ struct sWake_23E0 {
  * Records a spray burst when it is stronger than the current one and far enough from it.
  *
  * Takes it when |@p speed| exceeds the stored strength (+0xE0) and the point is more than 180 units (100 for a player,
- * +0x124) from the stored point (+0xF0), or the rider is in the NIS state that allows a trail (mIsInNIS set, unk_AD0
- * clear, unk_AFC and unk_B00 set). It then stores the strength (doubled when @p isSlowdown is 0), @p pos (+0xF0), @p dir
+ * +0x124) from the stored point (+0xF0), or the rider is in the NIS state that allows a trail (mIsInNIS set,
+ * mHiddenNIS clear, mNISShowBoardVisualFX and mOnGroundNIS set). It then stores the strength (doubled when
+ * @p isSlowdown is 0), @p pos (+0xF0), @p dir
  * (+0x100), @p surfaceType (+0x110) and @p isSlowdown (+0x114). func_002DF920 reports slow-downs with @p isSlowdown = 1; func_00111AA0 (wipeout
  * impacts) passes 0. func_002E1598 plays the burst.
  *
@@ -3516,7 +3513,7 @@ extern "C" void func_002E23E0(sWake_23E0* self, t4Vector* pos, t4Vector* dir, in
     if (self->f124 != 0)
         maxd = 100.0f;
     if (self->lastSpeed < absSpeed) {
-        if (maxd < distance || (Carving_23E0(self->rider) && self->rider->fB00 != 0)) {
+        if (maxd < distance || (Carving_23E0(self->rider) && self->rider->mOnGroundNIS != 0)) {
             if (isSlowdown == 0)
                 self->lastSpeed = absSpeed + absSpeed;
             else
@@ -3537,7 +3534,7 @@ extern "C" void cDynamicColourEmitter_render(void* self, int mode);
 
 
 struct func_002E24D0_sFx {
-    void* owner;                    // 0x0
+    cRider* owner;                  // 0x0
     char pad_0x04[0x24];
     cDynamicColourEmitter* wakes;     // 0x28
 };
@@ -3545,13 +3542,13 @@ struct func_002E24D0_sFx {
 /**
  * Draws a rider's snow spray: renders each enabled emitter that has live particles, when the rider is on screen.
  *
- * Does nothing unless the rider's mIsOnScreen is set. Of the ten emitters (+0x28) it renders those whose enable word
- * (+0x174) is set and whose particle count (+0x1E0) is positive, with cDynamicColourEmitter_render mode 7.
+ * Does nothing unless the rider's mIsOnScreen is set. Of the ten emitters (+0x28) it renders those whose m_enabled is
+ * set and whose m_enabledCount is positive, with cDynamicColourEmitter_render mode 7.
  * cRiderHandler_renderRiderFX and cAI_render call it on cRiderHandler + 0xB40.
  */
 extern "C" void func_002E24D0(func_002E24D0_sFx* self)
 {
-    if (*(int*)((char*)self->owner + 0xB18) != 0) {
+    if (self->owner->mIsOnScreen != 0) {
         int i;
         for (i = 0; i < 10; i++) {
             cDynamicColourEmitter* w = &self->wakes[i];
@@ -3566,65 +3563,62 @@ extern "C" void func_002E24D0(func_002E24D0_sFx* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
 #ifdef SKIP_ASM
-#define S28(off) (*(int*)((char*)*(void**)((char*)self + 0x28) + (off)))
-
 /**
- * Chooses which spray emitters run for the rider's detail level (mLOD), which it also stores at +0x128.
+ * Chooses which spray emitters run for the rider's detail level (mLOD), which it also stores in its own mLOD.
  *
- * Sets the enable word (+0x174) of each 0x210-byte emitter at +0x28. Level 0: emitters 0, 5 and 6 on, 4 on for a player
- * (+0x124) or in an NIS (mIsInNIS), 1, 2, 3, 7, 8 and 9 on for a player. Level 1: 0, 5 and 6 on, 1, 2, 3, 7 and 8 for a
- * player, 4 and 9 off. Other levels: 5 on, 6 for a player, the rest off. func_002DF3B0 and func_002DF920 (when mLOD
+ * Sets m_enabled of each of the ten mEmitters. Level 0: emitters 0, 5 and 6 on, 4 on for a player (mIsPlayer) or in
+ * an NIS (mIsInNIS), 1, 2, 3, 7, 8 and 9 on for a player. Level 1: 0, 5 and 6 on, 1, 2, 3, 7 and 8 for a player, 4 and
+ * 9 off. Other levels: 5 on, 6 for a player, the rest off. func_002DF3B0 and func_002DF920 (when mLOD
  * changes) call it.
  */
 extern "C" void func_002E2550(cDynamicSprayFX* self)
 {
-    int mode = *(int*)((char*)*(void**)self + 0x898);
-    *(int*)((char*)self + 0x128) = mode;
+    int mode = self->mRider->mLOD;
+    self->mLOD = mode;
     switch (mode) {
     case 0:
-        S28(3012) = 1;
-        S28(3540) = 1;
-        S28(372) = 1;
+        self->mEmitters[5].m_enabled = 1;
+        self->mEmitters[6].m_enabled = 1;
+        self->mEmitters[0].m_enabled = 1;
         {
             int enabled = 0;
-            if (*(int*)((char*)self + 0x124) != 0 || *(int*)((char*)*(void**)self + 0xAC4) != 0)
+            if (self->mIsPlayer != 0 || self->mRider->mIsInNIS != 0)
                 enabled = 1;
-            S28(2484) = enabled;
+            self->mEmitters[4].m_enabled = enabled;
         }
-        S28(900) = *(int*)((char*)self + 0x124);
-        S28(1428) = *(int*)((char*)self + 0x124);
-        S28(1956) = *(int*)((char*)self + 0x124);
-        S28(4068) = *(int*)((char*)self + 0x124);
-        S28(4596) = *(int*)((char*)self + 0x124);
-        S28(5124) = *(int*)((char*)self + 0x124);
+        self->mEmitters[1].m_enabled = self->mIsPlayer;
+        self->mEmitters[2].m_enabled = self->mIsPlayer;
+        self->mEmitters[3].m_enabled = self->mIsPlayer;
+        self->mEmitters[7].m_enabled = self->mIsPlayer;
+        self->mEmitters[8].m_enabled = self->mIsPlayer;
+        self->mEmitters[9].m_enabled = self->mIsPlayer;
         break;
     case 1:
-        S28(3012) = 1;
-        S28(3540) = 1;
-        S28(372) = 1;
-        S28(900) = *(int*)((char*)self + 0x124);
-        S28(1428) = *(int*)((char*)self + 0x124);
-        S28(1956) = *(int*)((char*)self + 0x124);
-        S28(4068) = *(int*)((char*)self + 0x124);
-        S28(4596) = *(int*)((char*)self + 0x124);
-        S28(2484) = 0;
-        S28(5124) = 0;
+        self->mEmitters[5].m_enabled = 1;
+        self->mEmitters[6].m_enabled = 1;
+        self->mEmitters[0].m_enabled = 1;
+        self->mEmitters[1].m_enabled = self->mIsPlayer;
+        self->mEmitters[2].m_enabled = self->mIsPlayer;
+        self->mEmitters[3].m_enabled = self->mIsPlayer;
+        self->mEmitters[7].m_enabled = self->mIsPlayer;
+        self->mEmitters[8].m_enabled = self->mIsPlayer;
+        self->mEmitters[4].m_enabled = 0;
+        self->mEmitters[9].m_enabled = 0;
         break;
     default:
-        S28(3012) = 1;
-        S28(3540) = *(int*)((char*)self + 0x124);
-        S28(900) = 0;
-        S28(372) = 0;
-        S28(1428) = 0;
-        S28(1956) = 0;
-        S28(4068) = 0;
-        S28(2484) = 0;
-        S28(4596) = 0;
-        S28(5124) = 0;
+        self->mEmitters[5].m_enabled = 1;
+        self->mEmitters[6].m_enabled = self->mIsPlayer;
+        self->mEmitters[1].m_enabled = 0;
+        self->mEmitters[0].m_enabled = 0;
+        self->mEmitters[2].m_enabled = 0;
+        self->mEmitters[3].m_enabled = 0;
+        self->mEmitters[7].m_enabled = 0;
+        self->mEmitters[4].m_enabled = 0;
+        self->mEmitters[8].m_enabled = 0;
+        self->mEmitters[9].m_enabled = 0;
         break;
     }
 }
-#undef S28
 #endif
 
 //100%
@@ -3635,17 +3629,18 @@ struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); 
 /**
  * Tunes the burst emitters 5 and 6 for a player or a computer rider and re-initialises them.
  *
- * Stores whether the rider has a view (mViewIndex >= 0) at +0x124. Sets settings sets 5 and 6 (+0x2C, 0xE8 bytes each)
- * at +0x10, +0x18 and +0xCC to 55, 25, 170 and 30, 20, 60 for a player, or 24.75, 5, 76.5 and 19.5, 8, 39 otherwise,
- * then re-initialises emitters 5 and 6 through their virtual slot 3 with their settings and float +0x58. The
+ * Stores whether the rider has a view (mViewIndex >= 0) in mIsPlayer. Sets settings sets 5 and 6 (+0x2C, 0xE8 bytes
+ * each) at +0x10, +0x18 and +0xCC to 55, 25, 170 and 30, 20, 60 for a player, or 24.75, 5, 76.5 and 19.5, 8, 39
+ * otherwise, then re-initialises emitters 5 and 6 through their virtual slot 3 with their settings and their
+ * m_emitter.SeedX0. The
  * cDynamicSprayFX constructor and func_002DF3B0 call it.
  *
  * @param vself  the spray effect (cDynamicSprayFX, this)
  */
 extern "C" void func_002E26B8(cDynamicSprayFX* vself)
 {
-    int on = *(int*)(*(char**)vself + 0x870) >= 0;
-    *(int*)(((char*)vself) + 0x124) = on;
+    int on = vself->mRider->mViewIndex >= 0;
+    vself->mIsPlayer = on;
     if (on) {
         *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x498) = 55.0f;
         *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x4A0) = 25.0f;
@@ -3662,16 +3657,16 @@ extern "C" void func_002E26B8(cDynamicSprayFX* vself)
         *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x63C) = 39.0f;
     }
     {
-        char* emitters = *(char**)(((char*)vself) + 0x28);
-        char* emitter = emitters + 0xA50;
-        sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xC48);
-        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x488, *(float*)(emitters + 0xAA8));
+        cDynamicColourEmitter* emitters = vself->mEmitters;
+        cDynamicColourEmitter* emitter = &emitters[5];
+        sWakeVt26B8* vt = (sWakeVt26B8*)emitters[5].mVtbl;
+        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x488, emitters[5].m_emitter.SeedX0);
     }
     {
-        char* emitters = *(char**)(((char*)vself) + 0x28);
-        char* emitter = emitters + 0xC60;
-        sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xE58);
-        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x570, *(float*)(emitters + 0xCB8));
+        cDynamicColourEmitter* emitters = vself->mEmitters;
+        cDynamicColourEmitter* emitter = &emitters[6];
+        sWakeVt26B8* vt = (sWakeVt26B8*)emitters[6].mVtbl;
+        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x570, emitters[6].m_emitter.SeedX0);
     }
 }
 #endif
@@ -4550,11 +4545,11 @@ extern char* GrMan_boardwakefx __asm__("GrMan");
 /**
  * Restores the graphics state after the lens flare effects are drawn.
  *
- * Pops one 0x14-byte entry off the draw-state stack (top pointer at GrMan+0xE84).
+ * Pops one 0x14-byte entry off the draw-state stack (GrMan->m_pCurrentDrawState).
  */
 extern "C" void cLensFxMan_endDrawFrame(void)
 {
-    *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
+    GrMan->m_pCurrentDrawState--;
 }
 #endif
 
@@ -4600,23 +4595,23 @@ extern "C" void* cPlayerIndicatorFX_cPlayerIndicatorFX(cPlayerIndicatorFX* self,
     sVt9_3680 vtbl1;
     sVt22_3680 vtbl2;
     if (inChrg) {
-        *(void**)self = (char*)self + 0x40;
+        (*(char**)&self->mRider) = (char*)self + 0x40;
         cRider_cRider((char*)self + 0x40);
     }
-    *(void**)(*(char**)self + 0x6E8) = (void*)&D_004889C8;
-    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488A10;
+    self->mRider->mScriptObjectVtbl = (void*)&D_004889C8;
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488A10;
     if (inChrg == 0) {
         int vc;
         vtbl1 = D_004889C8;
-        *(void**)(*(char**)self + 0x6E8) = &vtbl1;
+        self->mRider->mScriptObjectVtbl = &vtbl1;
         {
-            char* vbo = *(char**)self - 0x40;
+            char* vbo = ((char*)self->mRider) - 0x40;
             vc = (char*)self - vbo;
         }
         vtbl1.e[1].delta = D_004889C8.e[1].delta + vc;
         vtbl2 = D_00488A10;
-        *(void**)(*(char**)self + 0x6C0) = &vtbl2;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&vtbl2;
         vtbl2.e[1].delta = D_00488A10.e[1].delta + vc;
     }
     cPlayerIndicatorFX_reset(self);
@@ -5049,7 +5044,7 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
         verts[7].t = 0.0f;
     }
     GrMan->RenderTriStrip(8, (tBxVertex*)verts, 0);
-    *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
+    GrMan->m_pCurrentDrawState--;
 }
 #endif
 
@@ -6705,23 +6700,23 @@ extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
     sVt9_3680 vtbl1;
     sVt22_3680 vtbl2;
     if (inChrg) {
-        *(void**)self = (char*)self + 0x3B0;
+        (*(char**)&self->mRider) = (char*)self + 0x3B0;
         cRider_cRider((char*)self + 0x3B0);
     }
-    *(void**)(*(char**)self + 0x6E8) = (void*)&D_00488550;
-    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488598;
+    self->mRider->mScriptObjectVtbl = (void*)&D_00488550;
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488598;
     if (inChrg == 0) {
         int vc;
         vtbl1 = D_00488550;
-        *(void**)(*(char**)self + 0x6E8) = &vtbl1;
+        self->mRider->mScriptObjectVtbl = &vtbl1;
         {
-            char* vbo = *(char**)self - 0x3B0;
+            char* vbo = ((char*)self->mRider) - 0x3B0;
             vc = (char*)self - vbo;
         }
         vtbl1.e[1].delta = D_00488550.e[1].delta + vc;
         vtbl2 = D_00488598;
-        *(void**)(*(char**)self + 0x6C0) = &vtbl2;
+        VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&vtbl2;
         vtbl2.e[1].delta = D_00488598.e[1].delta + vc;
     }
     new ((char*)&self->mSpeedBoostTrail[0]) sWakeSeg_6320[30];
@@ -6771,8 +6766,8 @@ struct sWakeVec4 {
 /**
  * Resets a speed boost effect; despite the name it reads no replay data (it takes no frame).
  *
- * Sets the colour to red, the ribbon texture to 57 and clears the trail. +0x3A4 is 20 for a rider with a view
- * (a player) and 18 for others.
+ * Sets the colour to red, the ribbon texture to 57 and clears the trail. mMaxStreamerSegments is 20 for a rider with a
+ * view (a player) and 18 for others.
  */
 extern "C" void cSpeedBoostFX_reset(cSpeedBoostFX* self)
 {
@@ -6791,7 +6786,7 @@ extern "C" void cSpeedBoostFX_reset(cSpeedBoostFX* self)
     self->mSpeedBoostTrailCurrentSeg = 0;
     self->mStreamBufLen = 0;
     self->mStreamBufHead = 0;
-    self->mMaxStreamerSegments = (*(int*)(*(char**)self + 0x870) >= 0) ? 20 : 18;
+    self->mMaxStreamerSegments = (self->mRider->mViewIndex >= 0) ? 20 : 18;
     self->mWasInAir = 0;
 }
 #endif
@@ -6895,7 +6890,7 @@ int cRider_getMotionState(void*);
 
 
 struct sWake_66B8 {
-    char* rider;            // 0x000 (virtual base)
+    cRider* rider;          // 0x000 (virtual base)
     float f4;               // 0x004
     float f8;               // 0x008
     float fC;               // 0x00C
@@ -6959,9 +6954,9 @@ static inline void SubEq_66B8(t4Vector& a, const t4Vector& b)
 }
 
 
-static inline t4Vector BonePos_66B8(char* o, int off)
+static inline t4Vector BonePos_66B8(cRider* o, int bone)
 {
-    return ((t4Vector*)(*(char**)(*(char**)(o + 0x780) + 0x30) + (*(int*)(o + off) << 6)))[3];
+    return ((t4Vector*)((char*)o->mAnimModel->SkelMatrices + (bone << 6)))[3];
 }
 
 static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, float k, float speed)
@@ -6983,10 +6978,10 @@ static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, flo
         self->count = Approach_66B8(self->count, 0, 1);
     }
     if (self->count > 0) {
-        char* o = self->rider;
-        t4Vector a = BonePos_66B8(o, 0x89C);
-        t4Vector b = BonePos_66B8(o, 0x8B0);
-        t4Vector c = BonePos_66B8(o, 0x8B8);
+        cRider* o = self->rider;
+        t4Vector a = BonePos_66B8(o, o->mBoneHips);
+        t4Vector b = BonePos_66B8(o, o->LHandSkelIndex);
+        t4Vector c = BonePos_66B8(o, o->RHandSkelIndex);
         if (vu0Dot(b, pos) < vu0Dot(c, pos)) {
             self->segs[self->head].l = vu0Sub(b, vu0Scale(a, 0.7f));
             self->segs[self->head].r = vu0Sub(c, vu0Scale(a, 0.7f));
@@ -7016,7 +7011,7 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
     int air = cRider_getMotionState(self->rider) == 1;
     int on = 0;
     if (!air) {
-        cRider* riderPtr = (cRider*)self->rider;
+        cRider* riderPtr = self->rider;
         if (0.0f < riderPtr->mBoostStrength || 0.0f < riderPtr->mPowerUpBoostTimer) {
             on = 1;
         }
@@ -7027,7 +7022,7 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
         self->f14 = 0;
     }
     self->air = air;
-    cRider* riderPtr = (cRider*)self->rider;
+    cRider* riderPtr = self->rider;
     float k = 0.002f;
     int type = riderPtr->mUberLevel;
     if (type == 11) {
@@ -7045,7 +7040,7 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
     } else {
         self->tex = 57;
     }
-    riderPtr = (cRider*)self->rider;
+    riderPtr = self->rider;
     float speed = vu0Length(riderPtr->mVelocity);
     if (on) {
         float boostAmt = Clamp_66B8(Max_66B8(riderPtr->mPowerUpBoostTimer, riderPtr->mBoostStrength), 0.0f, 1.0f);
@@ -7058,7 +7053,7 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
         self->Width() *= 0.95f;
     }
     if (cPowerUpFXToggles_m_EnableSpeedBoostStreamers != 0) {
-        t4Vector pos = *(t4Vector*)(self->rider + 0x1A0);
+        t4Vector pos = self->rider->mMatrix.row[0];
         Trail_66B8(self, pos, on, k, speed);
     }
     cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(self);

@@ -470,7 +470,15 @@ struct cRider : public cRiderState, public cBeing {
     /* 0x8A0 */ int mBoneBoardRoot; // [X] same array
     /* 0x8A4 */ int mBoneBoardChild; // [X] second bone index into mAnimModel localPos/localRot/bones, like unk_8A0 (cRider_updateSkeleton)
     /* 0x8A8 */ int mBoneHead; // [X] bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (cPlayerIndicatorFX_render, func_002D5048)
-    /* 0x8AC */ char unk_8AC[0x14];
+    /* 0x8AC */ char unk_8AC[0x4];
+    /* 0x8B0 */ int LHandSkelIndex; // [O] cRider::LHandSkelIndex (+0x1460; On Tour's Head, MidSpine, LHand, LForearm,
+                                    //     RHand, RForearm follow BoardChild as here, minus its ski / pole indices); [U]
+                                    //     bone index: cPunchFX_update (punching hand), cBoardTrailFX_update and
+                                    //     cSpeedBoostFX_update read the bone's matrix through mAnimModel
+    /* 0x8B4 */ char unk_8B4[0x4];
+    /* 0x8B8 */ int RHandSkelIndex; // [O] cRider::RHandSkelIndex (+0x1468); [U] the other hand, same users as
+                                    //     LHandSkelIndex
+    /* 0x8BC */ char unk_8BC[0x4];
     /* 0x8C0 */ long mUpperBodyBoneMask; // [X] 64-bit (PORT: long is 64-bit on the EE); copied to mRiderAnim+0x20 before each cRiderAnimBase_play, then reset to -1 (cRider_checkForPunch, cRider_checkForProximityAction)
     /* 0x8C8 */ long GraftFromUpperSpine; // [O] cRider::GraftFromUpperSpine (unsigned long long, +0x1478, between GraftFromLowerSpine = mUpperBodyBoneMask and GraftFromClavicles = mHeadBoneMask); [U] 64-bit mask copied to mRiderAnim+0x20 before cRiderAnimBase_play in cRider_checkForReaction, as On Tour's checkForReaction does with +0x1478 (PORT: long is 64-bit on the EE)
     /* 0x8D0 */ long mHeadBoneMask; // [X] 64-bit; same use for the wide-glance anims (cRider_checkForProximityAction)
@@ -654,6 +662,8 @@ CHECK_OFFSET(cRider, mLOD, 0x898);
 CHECK_OFFSET(cRider, mBoneHips, 0x89C);
 CHECK_OFFSET(cRider, mBoneBoardRoot, 0x8A0);
 CHECK_OFFSET(cRider, mBoneHead, 0x8A8);
+CHECK_OFFSET(cRider, LHandSkelIndex, 0x8B0);
+CHECK_OFFSET(cRider, RHandSkelIndex, 0x8B8);
 CHECK_OFFSET(cRider, mUpperBodyBoneMask, 0x8C0);
 CHECK_OFFSET(cRider, GraftFromUpperSpine, 0x8C8);
 CHECK_OFFSET(cRider, mHeadBoneMask, 0x8D0);
