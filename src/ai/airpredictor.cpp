@@ -376,7 +376,7 @@ static inline t4Vector vu0Add_3648(const t4Vector& a, const t4Vector& b)
  * @param airVel  receives the predicted air velocity (On Tour airVel); also the launch velocity on a re-launch
  * @param dt  seconds to advance
  */
-extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, sQuad* airPos, sQuad* airVel, float dt)
+extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, t4Vector* airPos, t4Vector* airVel, float dt)
 {
     if (self->TotalAirTime > 60.0f) {
         if (self->SimState == 2) {
@@ -386,12 +386,14 @@ extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, sQuad* airPo
             *(sQuadR*)&self->GuessLandNormal = t4vect_ZAxis;
             self->GuessLandSurface = 13;
         } else {
-            cAirPredictor_initLaunch(((char*)self), airPos, airVel);
+            // Same-layout cast: initLaunch takes the vectors as its 16-byte sQuad (kept: its mangled name has it).
+            cAirPredictor_initLaunch(((char*)self), (sQuad*)airPos, (sQuad*)airVel);
             self->SimState = 2;
         }
     } else {
         if (self->SimState == 1 && self->TotalAirTime - self->CurAirTime < -0.2f) {
-            cAirPredictor_initLaunch(((char*)self), airPos, airVel);
+            // Same-layout cast: initLaunch takes the vectors as its 16-byte sQuad (kept: its mangled name has it).
+            cAirPredictor_initLaunch(((char*)self), (sQuad*)airPos, (sQuad*)airVel);
         }
         int st = self->SimState;
         if (st == 0) {
@@ -417,9 +419,9 @@ extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, sQuad* airPo
         t4Vector nextSimVel;
         cAirPredictor_simOneTick_3648(((char*)self), ((&self->PrevTickPos)), ((&self->PrevTickVel)), &nextSimPos, &nextSimVel);
         float k = sinceLastTick * 59.999996185302734f;
-        *(t4Vector*)airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(&self->PrevTickPos), 1.0f - k));
-        *(t4Vector*)airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(&self->PrevTickVel), 1.0f - k));
-        ((float*)airPos)[3] = 1.0f;
+        *airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(&self->PrevTickPos), 1.0f - k));
+        *airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(&self->PrevTickVel), 1.0f - k));
+        airPos->w = 1.0f;
     } else {
         *(sQuad*)airPos = *(sQuad*)&self->PrevTickPos;
         *(sQuad*)airVel = *(sQuad*)&self->PrevTickVel;
@@ -447,17 +449,16 @@ void cAirPredictor_land(void* vself)
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_simOneTick);
 #ifdef SKIP_ASM
-struct sVec4_1139A0
-{
-    float x, y, z, w;
-    sVec4_1139A0() {}
-    sVec4_1139A0(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+// A t4Vector with EA's constructors (ours has none): the VU0 helpers' results and the (dx, dy, gravity, 0) step.
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_1139A0 vu0Scale_1139A0(const sVec4_1139A0& v, float s)
+static inline t4VectorXYZW vu0Scale_1139A0(const t4Vector& v, float s)
 {
-    sVec4_1139A0 r;
+    t4VectorXYZW r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -471,9 +472,9 @@ static inline sVec4_1139A0 vu0Scale_1139A0(const sVec4_1139A0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4_1139A0 vu0Add_1139A0(const sVec4_1139A0& a, const sVec4_1139A0& b)
+static inline t4VectorXYZW vu0Add_1139A0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1139A0 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -485,7 +486,7 @@ static inline sVec4_1139A0 vu0Add_1139A0(const sVec4_1139A0& a, const sVec4_1139
 }
 
 // PORT: PS2-only VU0 inline asm (vector times-assign scalar).
-static inline void vu0ScaleEq_1139A0(sVec4_1139A0& v, float s)
+static inline void vu0ScaleEq_1139A0(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -499,7 +500,7 @@ static inline void vu0ScaleEq_1139A0(sVec4_1139A0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component length).
-static inline float vu0Length_1139A0(const sVec4_1139A0& v)
+static inline float vu0Length_1139A0(const t4Vector& v)
 {
     float r;
     int t;
@@ -532,14 +533,15 @@ static inline float vu0Length_1139A0(const sVec4_1139A0& v)
  * @param outVel  receives the next velocity
  * @return the length of the new velocity, at most TerminalVel
  */
-extern "C" float cAirPredictor_simOneTick(cAirPredictor* self, sVec4_1139A0* pos, sVec4_1139A0* vel, sVec4_1139A0* outPos, sVec4_1139A0* outVel)
+extern "C" float cAirPredictor_simOneTick(cAirPredictor* self, t4Vector* pos, t4Vector* vel, t4Vector* outPos,
+                                          t4Vector* outVel)
 {
     *outPos = vu0Add_1139A0(*pos, vu0Scale_1139A0(*vel, 0.01666666753590107f));
     float dx = vel->x * -0.0033333336468786f;
     float dy = vel->y * -0.0033333336468786f;
     float gravity = -31.666667938232422f;
     if (vel->z > 0.0f) gravity = -14.166666984558105f;
-    *outVel = vu0Add_1139A0(*vel, sVec4_1139A0(dx, dy, gravity, 0.0f));
+    *outVel = vu0Add_1139A0(*vel, t4VectorXYZW(dx, dy, gravity, 0.0f));
     float len = vu0Length_1139A0(*outVel);
     if (self->TerminalVel < len)
     {

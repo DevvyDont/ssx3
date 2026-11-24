@@ -11,6 +11,7 @@
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
 #include "main/inputsync.h"
+#include "input/inputpad.h"
 #include "main/gamestate.h"
 #include "replay/frameptr.h"
 #include "replay/replay.h"
@@ -968,17 +969,6 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void* cBE_getBE();
 struct sVec4_236960;
 
-struct cRiderObj_235CC8 {
-    int f0, f4, f8;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual int isBusy();
-};
 
 extern "C" int cAI_isReadyToPurgeComputerRiders(void* p);
 extern "C" void cAI_cleanupAfterRace(void* p);
@@ -1049,7 +1039,9 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
             cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0)
                 break;
-            if (((cRiderObj_235CC8*)(&transitionMan->mObjType))->isBusy() != 0)
+            // IsTransitionPending: slot 8 of the script-object part's vtable (mScriptVtbl), on that part (+0x10)
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)transitionMan->mScriptVtbl;
+            if (vt[8].fn(vthis(&transitionMan->mObjType, vt[8])) != 0)
                 break;
             if (transitionMan->mbPlayingTransition != 0)
                 break;
@@ -1602,17 +1594,6 @@ extern "C" void cGFSectionLoadState_gainFocus(cGFSectionLoadState* self)
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_update);
 #ifdef SKIP_ASM
 
-struct cRiderObj_236960 {
-    int f0, f4, f8;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual int isBusy();
-};
 
 extern "C" int cSectionMan_isLoaded(void* self, int idx);
 extern "C" void cSectionMan_activate(void* self, int idx, int mode);
@@ -1660,7 +1641,9 @@ extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
             break;
         }
         cTransitionMan* transitionMan = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
-        if (((cRiderObj_236960*)(&transitionMan->mObjType))->isBusy() != 0) {
+        // IsTransitionPending: slot 8 of the script-object part's vtable (mScriptVtbl), on that part (+0x10)
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)transitionMan->mScriptVtbl;
+        if (vt[8].fn(vthis(&transitionMan->mObjType, vt[8])) != 0) {
             break;
         }
         if (transitionMan->mbPlayingTransition != 0) {
@@ -2395,18 +2378,16 @@ static inline cGameComm* GameComm() { return cGameComm_mGameComm; }
 
 
 
-struct sInputPadButton_2373B8 {
-    float value;
-    char pad[0x18];
-};
+// On Tour's inline cInputPad::getNumButtons / getButtonValue (a value past NumButtons reads 0).
+static inline int cInputPad_getNumButtonsInline(cInputPad* pad)
+{
+    return pad->NumButtons;
+}
 
-// cInputPad: button count and values (getNumButtons / getButtonValue in On Tour).
-struct cInputPad_2373B8 {
-    int numbuttons;
-    sInputPadButton_2373B8 buttons[1];
-    int getNumButtons() { return numbuttons; }
-    float getButtonValue(int k) { return k < numbuttons ? buttons[k].value : 0.0f; }
-};
+static inline float cInputPad_getButtonValueInline(cInputPad* pad, int k)
+{
+    return k < pad->NumButtons ? pad->Buttons[k].Value : 0.0f;
+}
 
 
 struct cInputSync_2373B8 {
@@ -2437,7 +2418,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
     for (int i = 0; i < self->numsyncedpads; i++) {
         cInputSync_SyncedPad* psp = &((&self->syncedpads[0]))[i];
         cInputSync_SyncedPad& sp = *psp;
-        if (((cInputPad_2373B8*)sp.sourcepad) == 0) {
+        if (sp.sourcepad == 0) {
             cGameComm* gc = GameComm();
             int net = gc->mSyncInput != 0 && gc->mError == 0 && gc->mConnected != 0;
             if (net) {
@@ -2464,9 +2445,9 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
             self->tick++;
             if (self->tick % self->numsamples == 0) {
                 cInputSync_PadSample localsample;
-                localsample.NumButtons = ((cInputPad_2373B8*)sp.sourcepad)->getNumButtons();
+                localsample.NumButtons = cInputPad_getNumButtonsInline(sp.sourcepad);
                 for (int j = 0; j < localsample.NumButtons; j++) {
-                    localsample.Buttons[j] = ((cInputPad_2373B8*)sp.sourcepad)->getButtonValue(j);
+                    localsample.Buttons[j] = cInputPad_getButtonValueInline(sp.sourcepad, j);
                 }
                 cInputSync_sendClientInput(self, (&localsample));
                 for (int j = 0; j < self->numsamples; j++) {

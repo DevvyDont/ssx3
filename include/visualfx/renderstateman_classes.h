@@ -48,16 +48,13 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 
 extern char str_cAirStreamerFX[];
 
-extern "C" void cAirStreamerFX_readFromReplayFrame_F3B0(void* self) __asm__("cAirStreamerFX_reset");
+struct tAirStreamerSeg;     // ai/riderhandler.h
 
-struct cRsmItem_2EF3B0 {
-    char data[0x20];
-    cRsmItem_2EF3B0() {}
-};
+extern "C" void cAirStreamerFX_readFromReplayFrame_F3B0(void* self) __asm__("cAirStreamerFX_reset");
 
 class cRsm_2EF3B0 : virtual public cRiderVb_rsm {
 public:
-    cRsmItem_2EF3B0* items;     // 0x4
+    tAirStreamerSeg* items;     // 0x4 (cAirStreamerFX::StreamBuf)
     char pad08[0x18];
     cRsm_2EF3B0();
     virtual ~cRsm_2EF3B0();

@@ -8,6 +8,8 @@
 #include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "util/locale.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onCreateScreen);
@@ -53,12 +55,10 @@ extern char* str_H_J[];
  * Creates the pause menu ("31paus_freeride"): labels its up-to-8 option rows, decides which options are
  * enabled, pauses audio.
  *
- * Options come from the state's list (+0x9C, +0xBC entries): return, restart event, options, audio, quit,
- * give up,
- * challenge and competition quits, session, transport, messages. In game state 0xB give up is disabled;
- * offline,
- * when cGame_canUserActivatePauseMenu() fails or a controller is unplugged, only return stays enabled. Restores the last
- * selection.
+ * Options come from the state's list (mPauseMenuOptions, mPauseMenuNumOptions entries): return, restart event, options,
+ * audio, quit, give up, challenge and competition quits, session, transport, messages. In game state 0xB give up is
+ * disabled; offline, when cGame_canUserActivatePauseMenu() fails or a controller is unplugged, only return stays
+ * enabled. Restores the last selection.
  *
  * @param state  the pause menu state
  */
@@ -78,21 +78,20 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
     memset(name, 0, 2);
     for (int i = 0; i < 8; i++) {
         name[0] = '0' + i;
-        char* textObj = (char*)cUIScreen_getObjectByHashName(((void*)self->mpPauseScreen), GetHashValue32(name));
+        cUIThing* textObj = cUIScreen_getObjectByHashName(((void*)self->mpPauseScreen), GetHashValue32(name));
         if (textObj != 0) {
             if (i < self->mPauseMenuNumOptions) {
                 int nameHash = GetHashValue32(str_H_J[self->mPauseMenuOptions[i]]);
-                char* mgr = *(char**)((char*)((void*)self->mpEngine) + 0x10);
-                sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(mgr + 4);
-                if (vt[4].fn(vthis(mgr, vt[4]), nameHash) != 0) {
+                cUILocaleInterface* mgr = self->mpEngine->mpLocaleInterface;
+                if (mgr->getStringByHash(nameHash) != 0) {
                     cUIText_setUnicodeStringByID((cUIText*)textObj, nameHash);
                 } else {
                     cUIText_setAsciiString((cUIText*)textObj, str_H_J[self->mPauseMenuOptions[i]]);
                 }
-                *(int*)(textObj + 0x18) = self->mPauseMenuOptions[i];
+                textObj->mMiscData = self->mPauseMenuOptions[i];
             } else {
-                ((cUIThing*)textObj)->setVisible(0);
-                ((cUIThing*)textObj)->setStatic(1);
+                textObj->setVisible(0);
+                textObj->setStatic(1);
             }
         }
     }
@@ -264,8 +263,6 @@ extern int cPauseState_FlagsTable[];
 extern char str_NewMail[];
 extern char str_trans_out[];
 
-struct sColor_1F8728 { float r, g, b, a; };
-
 /**
  * Pulses the "NewMail" icon while messages are waiting and closes the pause menu when an online pause times
  * out.
@@ -291,13 +288,12 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
             self->mNewMailAlpha = 0.0f;
             self->mNewMailAlphaDiff = -self->mNewMailAlphaDiff;
         }
-        char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_NewMail));
+        cUIThing* uiObj = cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_NewMail));
         if (uiObj != 0)
         {
-            sColor_1F8728 color = *(sColor_1F8728*)(uiObj + 0x1C);
-            color.r = self->mNewMailAlpha;
-            sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-            vt[11].fn(vthis(uiObj, vt[11]), &color);
+            tARGB color = uiObj->mColour;
+            color.A = self->mNewMailAlpha;
+            uiObj->setColour(&color);
         }
     }
     cOVState_onUpdate(self);
@@ -619,8 +615,8 @@ extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* sel
         sprintf(buf, str_pct_s_R, gMenuItemIcons[idx]);
         unsigned short frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(buf));
         if (frame != 0xFFFF) {
-            *(unsigned short*)((char*)self->mpThread + 0xC) = frame;
-            *(unsigned short*)((char*)self->mpThread + 0xE) = 0xFFFF;
+            self->mpThread->mCurrentFrameNumber = frame;
+            self->mpThread->mLastFrameNumber = 0xFFFF;
             self->mpThread = 0;
         }
     }

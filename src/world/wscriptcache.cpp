@@ -4,6 +4,8 @@
 #include "world/chunkresolve.h"
 #include "wscript/wscriptcache.h"
 #include "world/world.h"
+#include "world/worldcache.h"
+#include "world/worldrecords.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -17,38 +19,35 @@ extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(cWScriptCacheEntry* self,
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_tWScriptCache[];
 
+// cWScriptCacheEntry's constructor and destructor as new[] / delete[] inline them per element (ctor and dtor only).
+// operator delete[] frees the block (the array cookie sits 0x10 bytes before the entries).
+struct cWScriptCacheEntryArr : cWScriptCacheEntry {
+    cWScriptCacheEntryArr() { cWScriptCacheEntry_cWScriptCacheEntry(this); }
+    ~cWScriptCacheEntryArr() { cWScriptCacheEntry__cWScriptCacheEntry(this, 0); }
+    void* operator new[](unsigned int size, const char* tag, int flags, int d)
+    {
+        return operator_new_tag(size, tag, flags, d);
+    }
+    void operator delete[](void* p) { cMemMan_free(p); }
+};
+
 /**
  * Sizes the world-script cache for a number of sections by replacing its section array with empty entries.
  *
- * Destroys any old array at +0x4 (cWScriptCacheEntry__cWScriptCacheEntry on each entry, last to first) and frees it, stores @p count
- * at +0x8, allocates @p count 12-byte "tWScriptCache" entries behind an array cookie, constructs each
- * (cWScriptCacheEntry_cWScriptCacheEntry: state 0, +0x4 = -1, no data) and clears +0xC.
+ * Destroys any old array mpCache (delete[]: cWScriptCacheEntry__cWScriptCacheEntry on each entry, last to first) and
+ * frees it, stores @p count in mNumSections, allocates @p count 12-byte "tWScriptCache" entries behind an array
+ * cookie, constructs each (cWScriptCacheEntry_cWScriptCacheEntry: state 0, mAsyncHandle -1, no data) and clears
+ * mNumLoading.
  *
  * @param count  number of world sections (On Tour numSections)
  */
-// PORT: array cookie arithmetic through int (pointer in int).
 extern "C" void cWScriptCache_init(cWScriptCache* self, int count)
 {
-    char* old = (char*)self->mpCache;
-    if (old != 0) {
-        char* oldEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
-        while ((char*)self->mpCache != oldEntry) {
-            oldEntry -= 0xC;
-            cWScriptCacheEntry__cWScriptCacheEntry((cWScriptCacheEntry*)((int*)oldEntry), 0);
-        }
-        cMemMan_free((char*)self->mpCache - 0x10);
-    }
+    // Same-layout cast: cWScriptCacheEntryArr only adds the constructor and destructor.
+    delete[] (cWScriptCacheEntryArr*)self->mpCache;
     self->mNumSections = (unsigned int)count;
-    char** slot = (char**)((char*)&self->mpCache);
-    char* mem = (char*)operator_new_tag(count * 0xC + 0x10, str_tWScriptCache, 0x20000000, 0);
-    char* arr = mem + 0x10;
-    *(int*)mem = count;
-    char* newEntry = arr;
-    int i;
-    for (i = count - 1; i != -1; i--, newEntry += 0xC) {
-        cWScriptCacheEntry_cWScriptCacheEntry(newEntry);
-    }
-    *slot = arr;
+    cWScriptCacheEntry*& cache = self->mpCache;
+    cache = new (str_tWScriptCache, 0x20000000, 0) cWScriptCacheEntryArr[count];
     self->mNumLoading = 0;
 }
 #endif
@@ -64,27 +63,20 @@ extern int cWScriptCache_mpWScriptCache;
 /**
  * Destroys the world script cache and its per-section entries.
  *
- * If the entry array at +0x4 exists, runs cWScriptCacheEntry__cWScriptCacheEntry (flag 0) on each 0xC-byte entry from the last to the first (the
- * count is the cookie at array - 0x10) and frees the block with cMemMan_free. Then clears cWScriptCache_mpWScriptCache
+ * If the entry array mpCache exists, delete[] runs cWScriptCacheEntry__cWScriptCacheEntry (flag 0) on each 0xC-byte
+ * entry from the last to the first (the count is the array cookie 0x10 bytes before it) and frees the block with
+ * cMemMan_free. Then clears cWScriptCache_mpWScriptCache
  * and calls operator delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
-// PORT: array cookie arithmetic through int (pointer in int).
-extern "C" void cWScriptCache__cWScriptCache(int* self, int flags)
+extern "C" void cWScriptCache__cWScriptCache(cWScriptCache* self, int flags)
 {
-    char* old = *(char**)((char*)self + 0x4);
-    if (old != 0) {
-        char* cacheEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
-        while (*(char**)((char*)self + 0x4) != cacheEntry) {
-            cacheEntry -= 0xC;
-            cWScriptCacheEntry__cWScriptCacheEntry((cWScriptCacheEntry*)((int*)cacheEntry), 0);
-        }
-        cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
-    }
+    // Same-layout cast: cWScriptCacheEntryArr only adds the constructor and destructor.
+    delete[] (cWScriptCacheEntryArr*)self->mpCache;
     cWScriptCache_mpWScriptCache = 0;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete((int*)self);
     }
 }
 #endif
@@ -1026,9 +1018,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptScript);
 /**
  * Returns the code of one script in a world-script cache entry.
  *
- * When the entry's state (the short at +0x0) is 3 (loaded), it reads the script table pointer at +0x3C of the entry's
- * data (+0x8) and returns element @p i; otherwise it returns 0. Unlike the other getters it does not check the data
- * pointer for null. cWorld_getWScriptScript calls it with the high 24 bits of a script resource id.
+ * When the entry's state (the short at +0x0) is 3 (loaded), it returns entry @p i of the script table
+ * (WScriptScriptHeaders) of the entry's data (mpScriptHeader); otherwise it returns 0. Unlike the other getters it does
+ * not check the data pointer for null. cWorld_getWScriptScript calls it with the high 24 bits of a script resource id.
  *
  * @param i  index of the script within the section
  * @return the script's code pointer, or 0 when the entry is not loaded
@@ -1037,7 +1029,7 @@ extern "C" int cWScriptCacheEntry_getWScriptScript(cWScriptCacheEntry* self, int
 {
     if (*(short*)self == 3) {
         tScriptFileHeader* data = self->mpScriptHeader;
-        return ((int*)data->WScriptScriptHeaders)[i];
+        return data->WScriptScriptHeaders[i].ScriptCode;
     }
     return 0;
 }

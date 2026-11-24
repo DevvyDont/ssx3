@@ -239,12 +239,6 @@ extern const char str_cKeyboardPopup[];
 extern const char str_cFEStateCheatCharSelect[];
 extern const char str_FEOptions[];
 
-struct sBits_3710 {
-    unsigned lo : 8;
-    unsigned mode : 6;
-    unsigned hi : 18;
-};
-
 /**
  * Handles the rider-details options: edit the name, pick a cheat character, other screens, back and options.
  *
@@ -252,7 +246,7 @@ struct sBits_3710 {
  * on option 6 it opens "cFEStateCheatCharSelect" when the character has cheat characters; other options push
  * the custom interface's next state. Event 6 pushes the previous state; 7 opens "FEOptions" (mode 1).
  *
- * @param item  the widget (ignored when 0); its miscellaneous data (+0x18) is the option
+ * @param item  the widget (ignored when 0); its mMiscData is the option
  * @param msg  the widget event
  */
 extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUIThing* item, unsigned int msg)
@@ -262,11 +256,12 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
     case 5: {
         int sub = item->mMiscData;
         if (sub == 8) {
-            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), self->mpEngine, ((char*)self), 0, 0xF);
-            *(int*)(w + 0x140) = 55;
+            cKeyboardPopup* w = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
+                cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), self->mpEngine, ((char*)self), 0, 0xF);
+            w->miCurrentKey = 55;
             cKeyboardPopup_setMaxCharacters(w, 8);
             cKeyboardPopup_setIncludeKey(w, 75, 1, 2);
-            *(int*)(w + 0x58) = 1;
+            w->mbDisableForFirst = 1;
             cKeyboardPopup_setDisableShiftNumbers(w, 1);
             cKeyboardPopup_setIncludeKey(w, 0xE, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 39, 0, 2);
@@ -284,8 +279,10 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         } else if (sub == 6) {
             int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
             if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, cid) > 0) {
-                char* w = (char*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), self->mpEngine, ((char*)self), self->mUserNum, cid);
-                *(unsigned char*)(w + 0x15) = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, self->mUserNum);
+                cFEStateCheatCharSelect* w = (cFEStateCheatCharSelect*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(
+                    cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), self->mpEngine, ((char*)self),
+                    self->mUserNum, cid);
+                w->mCtrlBits = cFECustom_getPlayerCtrlMask((void*)self->mpEngine->mpCustom, self->mUserNum);
                 cUIStateStack_pushPopup(&self->mpEngine->mStateStack, w);
                 cFEStateCharSetup_show3DCharacter(((char*)self), 0);
             }
@@ -309,8 +306,8 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         break;
     }
     case 7: {
-        char* w = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
-        ((sBits_3710*)(w + 0x1C))->mode = 1;
+        cUIState* w = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
+        w->mAttrState = (w->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
         cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, w, 0, 0);
         break;
     }
@@ -362,42 +359,28 @@ extern char str_hilite_left[];
 extern char str_helptext_choose[];
 extern char str_helptext_custom[];
 
-class cUIObj_183B08 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 /**
  * Switches the uber-trick screen's highlight and help text to the category menu.
  *
- * On mpScreen (+0x40) it hides "hilite_right" and "helptext_custom" and shows "hilite_left" and "helptext_choose"
+ * On mpScreen it hides "hilite_right" and "helptext_custom" and shows "hilite_left" and "helptext_choose"
  * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateTrickMenu does the opposite. Called when the
  * state gains focus (cFEStateUberTrick_onGainFocus) and when the trick menu is left (event 6 in cFEStateUberTrick_onWidgetEvent).
  */
 extern "C" void cFEStateUberTrick_activateMainMenu(cFEStateUberTrick* self)
 {
-    cUIObj_183B08* hiliteRight = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
+    cUIThing* hiliteRight = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
         hiliteRight->setVisible(0);
     }
-    cUIObj_183B08* hiliteLeft = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
+    cUIThing* hiliteLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
     if (hiliteLeft != 0) {
         hiliteLeft->setVisible(1);
     }
-    cUIObj_183B08* helpChoose = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
+    cUIThing* helpChoose = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
     if (helpChoose != 0) {
         helpChoose->setVisible(1);
     }
-    cUIObj_183B08* helpCustom = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
+    cUIThing* helpCustom = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
     if (helpCustom != 0) {
         helpCustom->setVisible(0);
     }
@@ -414,42 +397,28 @@ extern char str_hilite_left[];
 extern char str_helptext_choose[];
 extern char str_helptext_custom[];
 
-class cUIObj_183C08 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 /**
  * Switches the uber-trick screen's highlight and help text to the trick menu.
  *
- * On mpScreen (+0x40) it shows "hilite_right" and "helptext_custom" and hides "hilite_left" and "helptext_choose"
+ * On mpScreen it shows "hilite_right" and "helptext_custom" and hides "hilite_left" and "helptext_choose"
  * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateMainMenu does the opposite. Called when a
  * category is accepted (event 5 in cFEStateUberTrick_onWidgetEvent).
  */
 extern "C" void cFEStateUberTrick_activateTrickMenu(cFEStateUberTrick* self)
 {
-    cUIObj_183C08* hiliteRight = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
+    cUIThing* hiliteRight = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
         hiliteRight->setVisible(1);
     }
-    cUIObj_183C08* hiliteLeft = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
+    cUIThing* hiliteLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
     if (hiliteLeft != 0) {
         hiliteLeft->setVisible(0);
     }
-    cUIObj_183C08* helpChoose = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
+    cUIThing* helpChoose = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
     if (helpChoose != 0) {
         helpChoose->setVisible(0);
     }
-    cUIObj_183C08* helpCustom = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
+    cUIThing* helpCustom = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
     if (helpCustom != 0) {
         helpCustom->setVisible(1);
     }

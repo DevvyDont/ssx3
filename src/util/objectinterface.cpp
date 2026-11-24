@@ -3,6 +3,8 @@
 #include "bx/math3d.h"
 #include "util/objectinterface.h"
 #include "render/ps2graphicsman.h"
+#include "ui/uithing.h"
+#include "render/occlusionman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -56,46 +58,27 @@ static inline void setB_1D10(sDrawState* drawState, int v, int mask, int shift)
     drawState->m_bitGroups[2] = (((int)drawState->m_bitGroups[2]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
 }
 
-// 2D vector (8 bytes, BLKmode: its temporaries share 16-byte frame slots that combine when freed).
-// The ctor takes const float&: a by-value float ctor folds the 1.0f into the inlined
-// stores, which then fail to validate and leave the uv1 temp addressed through a register.
-struct sVec2_1D10 {
-    float x, y;
-    sVec2_1D10(const float& ax, const float& ay) : x(ax), y(ay) {}
+// t2Vector with a const float& constructor (ctor only): 8 bytes, BLKmode, so its temporaries share 16-byte frame
+// slots that combine when freed. A by-value float ctor (t2Vector's own) folds the 1.0f into the inlined stores, which
+// then fail to validate and leave the uv1 temp addressed through a register.
+struct t2VectorRef : t2Vector {
+    t2VectorRef(const float& ax, const float& ay)
+    {
+        x = ax;
+        y = ay;
+    }
 };
-
-struct sCol_1D10 {
-    float a, r, g, b;
-};
-
-
-typedef int (*IsHiddenFn_1D10)(void*, void*);
-typedef void (*DrawFn_1D10)(void*, void*, const sVec2_1D10&, const sVec2_1D10&, const sVec2_1D10&, const sCol_1D10*);
-typedef void (*DrawRotFn_1D10)(void*, float, void*, const sVec2_1D10&, const sVec2_1D10&, const sVec2_1D10&, const sCol_1D10*, int);
-
-struct sRCtx_1D10 {
-    char pad[0xE84];
-    sDrawState* top;          // 0xE84
-    char padE88[0xF50 - 0xE88];
-    int texs[0x40];             // 0xF50
-    char pad1050[0x10D8 - 0x1050];
-    sVEntry<void>* vt;               // 0x10D8
-};
-
-static inline int tex_1D10(sRCtx_1D10* c, int i)
-{
-    return c->texs[i];
-}
 
 extern sDrawState sDrawState_s_defaultDrawState;
 
 /**
  * Draws a light halo sprite at a world position.
  *
- * Returns early when the graphics manager's virtual slot 91 says the position is hidden. Otherwise pushes a copy of the
- * default draw state with additive-style blend bits, binds texture @p kind + 0x25 and draws a @p size square sprite in
- * the colour @p src: rotated by @p angle degrees through virtual slot 79 (a second, counter-rotated sprite for kinds 1
- * and 4) or unrotated through slot 78. The draw state is popped at the end.
+ * Returns early when the graphics manager's GetOutCode (virtual slot 91) says the position is outside the view.
+ * Otherwise pushes a copy of the default draw state with additive-style blend bits, binds effect texture
+ * _EffectTexMap[@p kind + 0x25] and draws a @p size square sprite in the colour @p src: rotated by @p angle degrees
+ * through DrawRotatedSprite (slot 79; a second, counter-rotated sprite for kinds 1 and 4) or unrotated through
+ * DrawSprite (slot 78). The draw state is popped at the end.
  *
  * @param obj  the halo's world position (On Tour P)
  * @param src  the colour as r, g, b, a floats (On Tour color)
@@ -106,14 +89,14 @@ extern sDrawState sDrawState_s_defaultDrawState;
 extern "C" void cObjectInterface_renderSimpleLightHalo(t4Vector* obj, float* src, int kind, float size, float angle)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    if (((IsHiddenFn_1D10)((sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[91].fn)(vthis(ps2GraphicsMan, ((sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[91]), obj) != 0) {
+    if (ps2GraphicsMan->GetOutCode(*obj) != 0) {
         return;
     }
-    sCol_1D10 col;
-    col.a = src[3];
-    col.r = src[0];
-    col.g = src[1];
-    col.b = src[2];
+    tARGB col;
+    col.A = src[3];
+    col.R = src[0];
+    col.G = src[1];
+    col.B = src[2];
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     (ctx->m_pCurrentDrawState)[1] = (ctx->m_pCurrentDrawState)[0];
     (*(sDrawState**)&ctx->m_pCurrentDrawState)++;
@@ -126,14 +109,17 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(t4Vector* obj, float* src
     setA_1D10((ctx->m_pCurrentDrawState), 1, 3, 23);
     setA_1D10((ctx->m_pCurrentDrawState), 0, 3, 20);
     setA_1D10((ctx->m_pCurrentDrawState), 20, 0xFF, 12);
-    (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex_1D10((sRCtx_1D10*)ctx, kind + 37);
+    int texId = ctx->_EffectTexMap[kind + 37];
+    (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = texId;
     if (angle != 0.0f) {
-        ((DrawRotFn_1D10)((sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx))[79].fn)(vthis(ctx, ((sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx))[79]), angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+        ctx->DrawRotatedSprite(*obj, t2VectorRef(size, size), t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f), col,
+                               angle * 0.01745329424738884f, 1);
         if (kind == 1 || kind == 4) {
-            ((DrawRotFn_1D10)((sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx))[79].fn)(vthis(ctx, ((sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx))[79]), -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+            ctx->DrawRotatedSprite(*obj, t2VectorRef(size, size), t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f),
+                                   col, -angle * 0.01745329424738884f, 1);
         }
     } else {
-        ((DrawFn_1D10)((sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx))[78].fn)(vthis(ctx, ((sVEntry<void>*)VPTR_OF(cGraphicsMan, ctx))[78]), obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
+        ctx->DrawSprite(*obj, t2VectorRef(size, size), t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f), col);
     }
     (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
 }
@@ -150,10 +136,10 @@ struct sQ128 { float v[4]; } __attribute__((aligned(16)));
 /**
  * Tells whether @p box is hidden behind one of the active occluders, using a VU0 microprogram.
  *
- * Walks the occluders of SSXApp->Game->OcclusionMan (count at +0x10C, enable mask at +0x110, entry i's pointer at +0x8
- * + 8i): for each enabled one it loads five quadwords of its data (+0x50) and @p box into vf1-vf6, runs the VU0 micro
- * routine at 0x828 (vcallmsr) and reads vi1; a result of 1 means occluded. cMoveNode's render skips drawing when it
- * returns 1.
+ * Walks the occluders of SSXApp->Game->OcclusionMan (m_iNumActive of them, enabled by m_uiVisMask; curtain i is
+ * m_InView[i].pVis): for each enabled one it loads the curtain's plane and its four view-frustum planes
+ * (m_fvPlaneCoeffs, m_fvVisFrustum) and @p box into vf1-vf6, runs the VU0 micro routine at 0x828 (vcallmsr) and reads
+ * vi1; a result of 1 means occluded. cMoveNode's render skips drawing when it returns 1.
  *
  * @param box  the bounds to test (one quadword)
  * @return 1 when an occluder hides it, else 0
@@ -161,12 +147,12 @@ struct sQ128 { float v[4]; } __attribute__((aligned(16)));
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version.
 extern "C" int cObjectInterface_isSphereOccluded(sQ128* box)
 {
-    char* inst = (char*)(void*)SSXApp->Game->OcclusionMan;
-    int mask = *(int*)(inst + 0x110);
-    for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
+    cOcclusionMan* occlusionMan = SSXApp->Game->OcclusionMan;
+    int mask = occlusionMan->m_uiVisMask;
+    for (int i = 0; i < occlusionMan->m_iNumActive; i++) {
         int bit = 1 << i;
         if (mask & bit) {
-            sQ128* occluder = (sQ128*)(*(char**)(inst + 8 + i * 8) + 0x50);
+            tVisCurtainRecord* curtain = occlusionMan->m_InView[i].pVis;
             int result;
             __asm__ __volatile__(
                 ".set push\n"
@@ -184,7 +170,8 @@ extern "C" int cObjectInterface_isSphereOccluded(sQ128* box)
                 "cfc2.i    %0, $vi1\n"
                 ".set pop\n"
                 : "=&r"(result)
-                : "m"(occluder[0]), "m"(occluder[1]), "m"(occluder[2]), "m"(occluder[3]), "m"(occluder[4]), "m"(*box), "r"((int)D_828 >> 3)
+                : "m"(curtain->m_fvPlaneCoeffs), "m"(curtain->m_fvVisFrustum[0]), "m"(curtain->m_fvVisFrustum[1]),
+                  "m"(curtain->m_fvVisFrustum[2]), "m"(curtain->m_fvVisFrustum[3]), "m"(*box), "r"((int)D_828 >> 3)
                 : "memory");
             int ok = result == 1;
             if (ok) return 1;
@@ -375,7 +362,8 @@ INCLUDE_ASM("util/objectinterface", put_float);
 // PORT: later callers in the unit declare put_float as void; bound by asm label with its real int return.
 int put_float_impl(signed char **stream, float v) __asm__("put_float");
 
-union uFloatBits_002D21D0 {
+// A float and its bit pattern (put_float writes the bits).
+union uFloatBits {
     float f;
     unsigned int u;
 };
@@ -389,7 +377,7 @@ union uFloatBits_002D21D0 {
  */
 int put_float_impl(signed char **stream, float value)
 {
-    uFloatBits_002D21D0 floatBits;
+    uFloatBits floatBits;
     floatBits.f = value;
     unsigned int bits = floatBits.u;
     signed char *cursor = *stream;
@@ -563,7 +551,7 @@ extern "C" int put_data(signed char** out, tCommDataBlock** pp)
     unsigned int i;
     int n = put_uint(out, (*pp)->Size);
     for (i = 0; i < (*pp)->Size; i++) {
-        n += put_char(out, ((signed char*)(*pp)->Data)[i]);
+        n += put_char(out, (*pp)->Data[i]);
     }
     return n;
 }

@@ -3,11 +3,6 @@
 
 void operator_delete(int* ptr);
 
-struct sTriggerNode {
-    void* Trigger;
-    sTriggerNode* next;
-};
-
 
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_purge__FP18cActiveTriggerList);
@@ -17,15 +12,15 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_purge__FP18cA
  */
 void cActiveTriggerList_purge(cActiveTriggerList* self)
 {
-    sTriggerNode* node = ((sTriggerNode*)self->Head);
+    cActiveTriggerNode* node = self->Head;
     if (node != 0) {
         do {
-            sTriggerNode* next = node->next;
+            cActiveTriggerNode* next = node->Next;
             operator_delete((int*)node);
             node = next;
         } while (node != 0);
     }
-    (*(sTriggerNode**)&self->Head) = 0;
+    self->Head = 0;
 }
 #endif
 
@@ -33,16 +28,16 @@ void cActiveTriggerList_purge(cActiveTriggerList* self)
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_clearFlags);
 #ifdef SKIP_ASM
 /**
- * Clears the two flag words (+0x8 and +0xC) of every node in the active trigger list.
+ * Clears the two flags (IsNewFlag and IsActiveFlag) of every node in the active trigger list.
  */
 extern "C" void cActiveTriggerList_clearFlags(cActiveTriggerList* self)
 {
-    sTriggerNode* node = ((sTriggerNode*)self->Head);
+    cActiveTriggerNode* node = self->Head;
     if (node != 0) {
         do {
-            *(int*)((char*)node + 0xC) = 0;
-            *(int*)((char*)node + 0x8) = 0;
-            node = node->next;
+            node->IsActiveFlag = 0;
+            node->IsNewFlag = 0;
+            node = node->Next;
         } while (node != 0);
     }
 }
@@ -59,15 +54,15 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find);
  * @param key  the camera trigger to look for (On Tour tCameraTrigger*)
  * @return the node, or 0 when the trigger is not listed
  */
-extern "C" sTriggerNode* cActiveTriggerList_find(cActiveTriggerList* self, void* key)
+extern "C" cActiveTriggerNode* cActiveTriggerList_find(cActiveTriggerList* self, void* key)
 {
-    sTriggerNode* node = ((sTriggerNode*)self->Head);
+    cActiveTriggerNode* node = self->Head;
     if (node != 0) {
         do {
             if (node->Trigger == key) {
                 return node;
             }
-            node = node->next;
+            node = node->Next;
         } while (node != 0);
     }
     return 0;
@@ -87,14 +82,14 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find1);
  */
 extern "C" void* cActiveTriggerList_find1(cActiveTriggerList* self, void* key)
 {
-    sTriggerNode* node = ((sTriggerNode*)self->Head);
+    cActiveTriggerNode* node = self->Head;
     if (node != 0) {
         do {
             void* item = node->Trigger;
             if (*(void**)item == key) {
                 return item;
             }
-            node = node->next;
+            node = node->Next;
         } while (node != 0);
     }
     return 0;
@@ -110,20 +105,20 @@ extern char str_Active_Camera_Trigger[];
 /**
  * Adds a camera trigger to the front of the active trigger list.
  *
- * Allocates a 16-byte "Active Camera Trigger" node, stores @p item in its first word (the struct calls it
- * pad) and sets both node flags (+0x8, +0xC; cActiveTriggerList_clearFlags clears them on every node) to 1.
+ * Allocates a 16-byte "Active Camera Trigger" node, stores @p item as its Trigger and sets both node flags
+ * (IsNewFlag, IsActiveFlag; cActiveTriggerList_clearFlags clears them on every node) to 1.
  *
  * @param item  the trigger to add (On Tour tCameraTrigger*)
  */
-extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
+extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, tCameraTrigger* item)
 {
-    sTriggerNode* n = (sTriggerNode*)cMemMan_alloc(0x10, str_Active_Camera_Trigger, 0x20000000, 0);
-    sTriggerNode* old = ((sTriggerNode*)self->Head);
-    (*(sTriggerNode**)&self->Head) = n;
+    cActiveTriggerNode* n = (cActiveTriggerNode*)cMemMan_alloc(0x10, str_Active_Camera_Trigger, 0x20000000, 0);
+    cActiveTriggerNode* old = self->Head;
+    self->Head = n;
     n->Trigger = item;
-    n->next = old;
-    *(int*)((char*)n + 0xC) = 1;
-    *(int*)((char*)n + 0x8) = 1;
+    n->Next = old;
+    n->IsActiveFlag = 1;
+    n->IsNewFlag = 1;
 }
 #endif
 
@@ -136,21 +131,21 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_remove);
  * @param target  the node to remove
  * @return the node that followed it (the new head when it was the head), or 0 when it was last or not in the list
  */
-extern "C" sTriggerNode* cActiveTriggerList_remove(cActiveTriggerList* self, sTriggerNode* target)
+extern "C" cActiveTriggerNode* cActiveTriggerList_remove(cActiveTriggerList* self, cActiveTriggerNode* target)
 {
-    sTriggerNode* head = ((sTriggerNode*)self->Head);
+    cActiveTriggerNode* head = self->Head;
     if (target == head) {
-        sTriggerNode* next = target->next;
+        cActiveTriggerNode* next = target->Next;
         operator_delete((int*)target);
-        (*(sTriggerNode**)&self->Head) = next;
+        self->Head = next;
         return next;
     }
-    sTriggerNode* prev = head;
-    for (sTriggerNode* node = prev->next; node != 0; node = node->next) {
+    cActiveTriggerNode* prev = head;
+    for (cActiveTriggerNode* node = prev->Next; node != 0; node = node->Next) {
         if (node == target) {
-            prev->next = node->next;
+            prev->Next = node->Next;
             operator_delete((int*)node);
-            return prev->next;
+            return prev->Next;
         }
         prev = node;
     }
@@ -201,19 +196,19 @@ extern "C" void cCameraTriggerList__cCameraTriggerList(void* self, int flags);
 /**
  * Destroys the camera trigger manager: purges it and destroys its member lists.
  *
- * Calls cCameraTriggerMan_purge, runs cActiveTriggerList__cActiveTriggerList on the two active lists (+0x14,
- * +0x18) from last to first, destroys the embedded trigger list with cCameraTriggerList__cCameraTriggerList(self, 2) and frees the object
- * when @p flags bit 0 is set.
+ * Calls cCameraTriggerMan_purge, runs cActiveTriggerList__cActiveTriggerList on the two ActiveTriggerList entries from
+ * last to first, destroys the embedded trigger list with cCameraTriggerList__cCameraTriggerList(self, 2) and frees the
+ * object when @p flags bit 0 is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cCameraTriggerMan__cCameraTriggerMan(cCameraTriggerMan* self, int flags)
 {
     cCameraTriggerMan_purge(self);
-    if ((char*)&self->ActiveTriggerList != 0) {
-        char* activeList = (char*)&self->ActiveTriggerList[0] + 8;
-        while ((char*)&self->ActiveTriggerList != activeList) {
-            activeList -= 4;
+    if (self->ActiveTriggerList != 0) {
+        cActiveTriggerList* activeList = &self->ActiveTriggerList[2]; // one past the last: destroyed last to first
+        while (self->ActiveTriggerList != activeList) {
+            activeList--;
             cActiveTriggerList__cActiveTriggerList(activeList, 0);
         }
     }

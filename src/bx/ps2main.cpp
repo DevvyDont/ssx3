@@ -1,5 +1,6 @@
 #include "common.h"
 #include "bx/appman.h"
+#include "bx/math3d.h"
 
 //100%
 INCLUDE_ASM("bx/ps2main", systemInit);
@@ -362,40 +363,30 @@ extern "C" void t4mat_invert(void* mat)
 //100%
 INCLUDE_ASM("bx/ps2main", tPose_tPose);
 #ifdef SKIP_ASM
-struct sVec4_B748 {
-    float x, y, z, w;
-
-    sVec4_B748() {}
-    sVec4_B748(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-struct sMtx_B748 {
-    float m[4][4];
-};
-
-struct sXform_B748 {
-    sVec4_B748 pos;     // 0x0
-    sVec4_B748 rot;     // 0x10, quaternion
+// A t4Vector with EA's constructors (ours has none): the pose's position, built from the matrix's row 3.
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
 // PORT: tQuaternion_tQuaternion returns the quaternion by value (hidden result pointer).
-extern "C" sVec4_B748 tQuaternion_tQuaternion_v(sMtx_B748* mat) __asm__("tQuaternion_tQuaternion");
+extern "C" t4VectorXYZW tQuaternion_tQuaternion_v(t4Matrix* mat) __asm__("tQuaternion_tQuaternion");
 
 /**
  * Splits a rigid transform matrix into a pose: its translation row and its rotation quaternion.
  *
- * Copies row 3 (x, y, z, w) to @p out's position (+0x0) and stores the quaternion of the matrix's rotation
- * (tQuaternion_tQuaternion) at +0x10.
+ * Copies row 3 (x, y, z, w) to @p out's position P and stores the quaternion of the matrix's rotation
+ * (tQuaternion_tQuaternion) in Q.
  *
  * @param out  the pose to fill
  * @param mat  the 4x4 transform matrix
  * @return @p out
  */
 // Splits a rigid transform matrix into its translation row and rotation quaternion.
-extern "C" sXform_B748* tPose_tPose(sXform_B748* out, sMtx_B748* mat)
+extern "C" tPose* tPose_tPose(tPose* out, t4Matrix* mat)
 {
-    out->pos = sVec4_B748(mat->m[3][0], mat->m[3][1], mat->m[3][2], mat->m[3][3]);
-    out->rot = tQuaternion_tQuaternion_v(mat);
+    out->P = t4VectorXYZW(mat->row[3].x, mat->row[3].y, mat->row[3].z, mat->row[3].w);
+    out->Q = tQuaternion_tQuaternion_v(mat);
     return out;
 }
 #endif
@@ -474,7 +465,6 @@ extern "C" sQuat_B7A8* tQuaternion_tQuaternion(sQuat_B7A8* qu, sMtx_B7A8* mat)
 //100%
 INCLUDE_ASM("bx/ps2main", tquat_rotateto);
 #ifdef SKIP_ASM
-#include "bx/math3d.h"
 
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C128(float x);
@@ -647,15 +637,15 @@ INCLUDE_ASM("bx/ps2main", tquat_prerotateto);
 extern "C" void fSinCos(float* sout, float* cout, float x);
 extern "C" float func_0031C128(float x);
 
-struct sVec4_31BB30
-{
-    float x, y, z, w;
-    sVec4_31BB30() {}
-    sVec4_31BB30(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
-} __attribute__((aligned(16)));
+// A t4Vector with EA's constructors (ours has none); the 4-float one stores w first (the rotation quaternion's
+// order in retail).
+struct t4VectorWXYZ : t4Vector {
+    t4VectorWXYZ() {}
+    t4VectorWXYZ(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+};
 
 // PORT: PS2-only VU0 inline asm (r = a x b, w = 0).
-static inline void CrossTo_31BB30(sVec4_31BB30& r, const sVec4_31BB30& a, const sVec4_31BB30& b)
+static inline void CrossTo_31BB30(t4Vector& r, const t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf4, %1\n"
@@ -670,7 +660,7 @@ static inline void CrossTo_31BB30(sVec4_31BB30& r, const sVec4_31BB30& a, const 
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_31BB30(const sVec4_31BB30& v)
+static inline float Length_31BB30(const t4Vector& v)
 {
     float r;
     int t;
@@ -691,7 +681,7 @@ static inline float Length_31BB30(const sVec4_31BB30& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void DivEq_31BB30(sVec4_31BB30& v, float s)
+static inline void DivEq_31BB30(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -708,7 +698,7 @@ static inline void DivEq_31BB30(sVec4_31BB30& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_31BB30(const sVec4_31BB30& a, const sVec4_31BB30& b)
+static inline float Dot_31BB30(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -728,9 +718,9 @@ static inline float Dot_31BB30(const sVec4_31BB30& a, const sVec4_31BB30& b)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sVec4_31BB30 QuatMul_31BB30(const sVec4_31BB30& a, const sVec4_31BB30& b)
+static inline t4VectorWXYZ QuatMul_31BB30(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_31BB30 r;
+    t4VectorWXYZ r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -750,11 +740,11 @@ static inline sVec4_31BB30 QuatMul_31BB30(const sVec4_31BB30& a, const sVec4_31B
     return r;
 }
 
-static inline sVec4_31BB30 AxisAngle_31BB30(const sVec4_31BB30& axis, float angle)
+static inline t4VectorWXYZ AxisAngle_31BB30(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sVec4_31BB30(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorWXYZ(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 /**
@@ -768,10 +758,10 @@ static inline sVec4_31BB30 AxisAngle_31BB30(const sVec4_31BB30& axis, float angl
  * @param fromVec  the starting direction
  * @param toVec  the target direction
  */
-extern "C" void tquat_prerotateto(sVec4_31BB30* quat, const sVec4_31BB30* fromVec, const sVec4_31BB30* toVec)
+extern "C" void tquat_prerotateto(t4Vector* quat, const t4Vector* fromVec, const t4Vector* toVec)
 {
-    sVec4_31BB30 axis;
-    sVec4_31BB30 cr;
+    t4VectorWXYZ axis;
+    t4VectorWXYZ cr;
     CrossTo_31BB30(cr, *fromVec, *toVec);
     axis = cr;
     float len = Length_31BB30(axis);
@@ -795,11 +785,11 @@ INCLUDE_ASM("bx/ps2main", tquat_slerp);
 extern "C" float func_0031C128(float x);
 extern "C" float fSin(float x);
 
-struct sQuat_31BCB0 {
-    float x, y, z, w;
-    sQuat_31BCB0() {}
-    sQuat_31BCB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
+// A tQuaternion with EA's constructors (ours has none): the result, built from its four components.
+struct tQuaternionXYZW : tQuaternion {
+    tQuaternionXYZW() {}
+    tQuaternionXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
 /**
  * Returns the spherical linear interpolation between two quaternions.
@@ -815,10 +805,10 @@ struct sQuat_31BCB0 {
  * @return the interpolated quaternion
  */
 // Quaternion slerp.
-extern "C" sQuat_31BCB0 tquat_slerp(const sQuat_31BCB0* fromQuat, const sQuat_31BCB0* toQuat, float blend)
+extern "C" tQuaternionXYZW tquat_slerp(const tQuaternion* fromQuat, const tQuaternion* toQuat, float blend)
 {
     float cosom = fromQuat->x * toQuat->x + fromQuat->y * toQuat->y + fromQuat->z * toQuat->z + fromQuat->w * toQuat->w;
-    sQuat_31BCB0 to;
+    tQuaternionXYZW to;
     if (cosom < 0.0f) {
         cosom = -cosom;
         to.x = -toQuat->x;
@@ -841,7 +831,8 @@ extern "C" sQuat_31BCB0 tquat_slerp(const sQuat_31BCB0* fromQuat, const sQuat_31
         fromWeight = 1.0f - blend;
         toWeight = blend;
     }
-    sQuat_31BCB0 result(fromWeight * fromQuat->x + toWeight * to.x, fromWeight * fromQuat->y + toWeight * to.y, fromWeight * fromQuat->z + toWeight * to.z, fromWeight * fromQuat->w + toWeight * to.w);
+    tQuaternionXYZW result(fromWeight * fromQuat->x + toWeight * to.x, fromWeight * fromQuat->y + toWeight * to.y,
+                           fromWeight * fromQuat->z + toWeight * to.z, fromWeight * fromQuat->w + toWeight * to.w);
     return result;
 }
 #endif

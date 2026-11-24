@@ -29,7 +29,7 @@ extern "C" void* cAppMan_cAppMan(cAppMan* self)
     self->Tick = 0;
     self->TimerTick = 0;
     *(int*)&self->FracTick = 0;
-    *(int*)&self->FrameRate = 0;
+    self->FrameRate = 0.0f;
     self->m_AIUpdatesPerRender = 0;
     cAppMan_TheAppMan = self;
     return ((void*)self);
@@ -190,87 +190,88 @@ static inline void call1_6F00(char* o, int vtoff, int slot, int a)
  */
 extern "C" void cAppMan_mainLoop(void* appMan)
 {
-    char* self = (char*)appMan;
+    cAppMan* self = (cAppMan*)appMan;
     int count = 0;
-    calli_6F00(self, 92, 5);
+    calli_6F00((char*)self, 92, 5);
     for (;;) {
-        callv_6D60(*(char**)(self + 0x8), 8, 11);
+        callv_6D60((char*)self->ExecutionMan, 8, 11);
         SYNCTASK_run(0);
-        callv_6D60(*(char**)(self + 0x8), 8, 12);
-        switch (*(volatile int*)(self + 0x58)) {
+        callv_6D60((char*)self->ExecutionMan, 8, 12);
+        switch (*(volatile int*)&self->LoadState) {
         case 1:
-            if (calli_6F00(*(char**)(self + 0x8), 8, 10)) {
-                *(volatile int*)(self + 0x58) = 2;
-                cLoadTimer_endload(self + 0x38);
+            if (calli_6F00((char*)self->ExecutionMan, 8, 10)) {
+                *(volatile int*)&self->LoadState = 2;
+                cLoadTimer_endload(&self->LoadTimer);
             } else {
-                cLoadTimer_update(self + 0x38);
+                cLoadTimer_update(&self->LoadTimer);
             }
             break;
         case 2:
-            if (calli_6F00(*(char**)(self + 0x0), 0, 4)) {
-                cAppMan_checkHalt_v((cAppMan*)self);
-                callv_6D60(*(char**)(self + 0x0), 0, 3);
-                cAppMan_checkHalt_v((cAppMan*)self);
-                char* cur = *(char**)(self + 0x0);
+            if (calli_6F00((char*)self->ActiveModule, 0, 4)) {
+                cAppMan_checkHalt_v(self);
+                callv_6D60((char*)self->ActiveModule, 0, 3);
+                cAppMan_checkHalt_v(self);
+                char* cur = (char*)self->ActiveModule;
                 if (cur)
                     call1_6F00(cur, 0, 1, 3);
                 func_00319D18_2(1, 1);
                 func_00319D10_0();
                 count = 0;
-                char* next = *(char**)(self + 0x4);
-                *(int*)(self + 0x4) = 0;
-                *(char**)(self + 0x0) = next;
-                callv_6D60(next, 0, 5);
-                cAppMan_checkHalt_v((cAppMan*)self);
-                calli_6F00(self, 92, 5);
-                *(int*)(self + 0x2C) = 0;
-                *(volatile int*)(self + 0x58) = 0;
+                cAppModule* next = self->LoadingModule;
+                self->LoadingModule = 0;
+                self->ActiveModule = next;
+                callv_6D60((char*)next, 0, 5);
+                cAppMan_checkHalt_v(self);
+                calli_6F00((char*)self, 92, 5);
+                self->FrameRate = 0.0f;
+                *(volatile int*)&self->LoadState = 0;
             }
             break;
         case 3:
-            if (calli_6F00(*(char**)(self + 0x0), 0, 4)) {
-                cAppMan_checkHalt_v((cAppMan*)self);
-                callv_6D60(*(char**)(self + 0x0), 0, 3);
-                cAppMan_checkHalt_v((cAppMan*)self);
-                char* cur = *(char**)(self + 0x0);
+            if (calli_6F00((char*)self->ActiveModule, 0, 4)) {
+                cAppMan_checkHalt_v(self);
+                callv_6D60((char*)self->ActiveModule, 0, 3);
+                cAppMan_checkHalt_v(self);
+                char* cur = (char*)self->ActiveModule;
                 if (cur)
                     call1_6F00(cur, 0, 1, 3);
-                *(int*)(self + 0x0) = 0;
+                self->ActiveModule = 0;
                 return;
             }
             break;
         case 0:
-            if (*(int*)(self + 0x4)) {
-                cLoadTimer_startload(self + 0x38, 10.0f);
-                call1_6F00(*(char**)(self + 0x8), 8, 9, *(int*)(self + 0x4));
-                *(volatile int*)(self + 0x58) = 1;
+            if (self->LoadingModule) {
+                cLoadTimer_startload(&self->LoadTimer, 10.0f);
+                call1_6F00((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
+                *(volatile int*)&self->LoadState = 1;
             }
             break;
         }
-        while (calli_6F00(self, 92, 6)) {
-            cAppMan_checkHalt_v((cAppMan*)self);
+        while (calli_6F00((char*)self, 92, 6)) {
+            cAppMan_checkHalt_v(self);
             count++;
-            if (*(int*)(self + 0x20) < count) {
-                count += calli_6F00(self, 92, 5);
+            if (self->MaxUpdateSteps < count) {
+                count += calli_6F00((char*)self, 92, 5);
                 break;
             }
-            (*(int*)(self + 0x1C))++;
-            callv_6D60(*(char**)(self + 0x0), 0, 6);
-            cAppMan_checkHalt_v((cAppMan*)self);
+            self->Tick++;
+            callv_6D60((char*)self->ActiveModule, 0, 6);
+            cAppMan_checkHalt_v(self);
         }
-        if ((*(int*)(self + 0x34) == 1 && count > 1 && calli_6F00(*(char**)(self + 0x0), 0, 7))
-            || (*(int*)(self + 0x34) == 0 && count != 0 && calli_6F00(*(char**)(self + 0x0), 0, 7))) {
-            cAppMan_checkHalt_v((cAppMan*)self);
-            if (0.0f < *(float*)(self + 0x2C)) {
-                float k = *(float*)(self + 0x30);
-                *(float*)(self + 0x2C) = (1.0f - k) * *(float*)(self + 0x24) * (float)*(int*)(self + 0x10) / (float)count + k * *(float*)(self + 0x2C);
+        if ((self->mLock30Fps == 1 && count > 1 && calli_6F00((char*)self->ActiveModule, 0, 7))
+            || (self->mLock30Fps == 0 && count != 0 && calli_6F00((char*)self->ActiveModule, 0, 7))) {
+            cAppMan_checkHalt_v(self);
+            if (0.0f < self->FrameRate) {
+                float k = self->FrameRateDamp;
+                self->FrameRate = (1.0f - k) * self->GameRate * (float)self->TimerHz / (float)count
+                                  + k * self->FrameRate;
             } else {
-                *(float*)(self + 0x2C) = *(float*)(self + 0x24) * (float)*(int*)(self + 0x10) / (float)count;
+                self->FrameRate = self->GameRate * (float)self->TimerHz / (float)count;
             }
             count = 0;
         } else {
-            callv_6D60(*(char**)(self + 0x8), 8, 4);
-            cAppMan_checkHalt_v((cAppMan*)self);
+            callv_6D60((char*)self->ExecutionMan, 8, 4);
+            cAppMan_checkHalt_v(self);
         }
     }
 }
@@ -372,24 +373,19 @@ int cAppMan_timerFunction(void* appMan)
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_loadexecpurge);
 #ifdef SKIP_ASM
-struct sVEntry00317400 {
-    short delta;
-    short index;
-    void* fn;
-};
-
-
 /**
- * Tells the execution manager to purge (slot 3), then to shut down with code 3 (slot 1).
+ * Tells the execution manager to purge (virtual slot 3), then deletes it (slot 1, its destructor, with flags 3).
  */
 extern "C" void cAppMan_loadexecpurge(cAppMan* self)
 {
     cExecutionMan* execMan = self->ExecutionMan;
-    ((void (*)(void*))((sVEntry00317400*)execMan->mVtbl)[3].fn)(vthis(execMan, ((sVEntry00317400*)execMan->mVtbl)[3]));
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)execMan->mVtbl;
+    vt[3].fn(vthis(execMan, vt[3]));
     cExecutionMan* execMan2 = self->ExecutionMan;
     if (execMan2 != 0)
     {
-        ((void (*)(void*, int))((sVEntry00317400*)execMan2->mVtbl)[1].fn)(vthis(execMan2, ((sVEntry00317400*)execMan2->mVtbl)[1]), 3);
+        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)execMan2->mVtbl;
+        vt2[1].fn(vthis(execMan2, vt2[1]), 3);
     }
 }
 #endif
@@ -449,7 +445,7 @@ INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
 /**
  * Runs the execution manager's halt callback, when one is set, and optionally its virtual halt.
  *
- * Calls the callback (+0x0) with its argument (+0x4). When @p flag is set it then calls virtual slot 14, which
+ * Calls HaltCallback with HaltData. When @p flag is set it then calls virtual slot 14, which
  * is pure in the base class; the PS2 execution manager's version (cPS2ExecutionMan_signalHalt) wakes a thread and then idles
  * forever.
  *
@@ -459,14 +455,14 @@ INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
 int cExecutionMan_checkHalt(void* vself, int flag)
 {
     cExecutionMan* self = (cExecutionMan*)vself;
-    void (*fn)(void*) = *(void (**)(void*))self;
+    void (*fn)(void*) = self->HaltCallback;
     if (fn != 0) {
         fn(self->HaltData);
         if (flag != 0) {
-            void* vt = self->mVtbl;
-            short off = *(short*)((char*)vt + 0x70);
-            void (*fn2)(void*) = *(void (**)(void*))((char*)vt + 0x74);
-            fn2((char*)self + off);
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+            short delta = vt[14].delta;
+            void (*signalHalt)(void*) = vt[14].fn;
+            signalHalt(vthis(self, delta));
         }
     }
 }

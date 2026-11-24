@@ -87,39 +87,25 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_discard);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
-struct sScoreSlot_001549E8 {
-    char pad_0x00[0xAC];
-    int last; // 0xAC
-};
-
-struct sScore_001549E8 {
-    char pad_0x00[0x10];
-    int a;    // 0x10
-    int b;    // 0x14
-    int c;    // 0x18
-    int d;    // 0x1C
-    sScoreSlot_001549E8 slots[2]; // 0x20
-};
-
 /**
  * Clears all of the score interface's recorded results.
  *
- * +0x10 and +0x14 become 0, +0x18 and +0x1C -1; the two 0xB0-byte slots at +0x20 are zeroed and each slot's +0xAC set
- * to -1.
+ * bNewHighScore[0..1] become 0 and mNewTrackHighScoreIndex[0..1] -1; the two human profiles' 0xB0-byte
+ * LastEventStats slots are zeroed and each slot's rank set to -1.
  *
  * @param scoreIface  the score interface (this)
  */
 extern "C" void cBEScoreInterface_discard(cBEScoreInterface* scoreIface)
 {
-    sScore_001549E8* self = (sScore_001549E8*)scoreIface;
-    self->a = 0;
-    self->b = 0;
-    self->c = -1;
-    self->d = -1;
-    MEM_fill(self->slots, 0, sizeof(self->slots));
+    cBEScoreInterface* self = scoreIface;
+    self->bNewHighScore[0] = 0;
+    self->bNewHighScore[1] = 0;
+    self->mNewTrackHighScoreIndex[0] = -1;
+    self->mNewTrackHighScoreIndex[1] = -1;
+    MEM_fill(self->LastEventStats, 0, 2 * sizeof(tLastEventRiderStats)); // the two human profiles' slots
     for (int i = 1; i >= 0; i--)
     {
-        self->slots[i].last = -1;
+        self->LastEventStats[i].rank = -1;
     }
 }
 #endif
@@ -167,26 +153,9 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int cBECharProfileDB_updateScoreStats(cBECharProfileDB* self, int event, int mode, unsigned int value);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
-struct sScoreSlot_154AB8 {
-    tRiderStats stats;
-    int result;     // 0xAC
-};
-struct sScore_154AB8 {
-    char pad_0x00[0x10];
-    int best[2];    // 0x10
-    int rank[2];    // 0x18
-    sScoreSlot_154AB8 slots[2]; // 0x20
-};
-
 tBEHighScore* cBELibrary_getHighScoreTable_154AB8(int event, int mode) __asm__("cBELibrary_getHighScoreTable");
 
 extern cBERaceDB cBELibrary_raceDB_154AB8 __asm__("cBELibrary_raceDB");
-struct sRaceGlobal_154AB8 {
-    char pad_0x00[0x34];
-    int numHumans;      // 0x34
-    char pad_0x38[0x12];
-    signed char mode;   // 0x4A
-};
 struct sEvent_154AB8 {
     int id;
     char pad_0x4[0x60];
@@ -197,9 +166,9 @@ extern sEvent_154AB8 cBELibrary_locationDB_154AB8[] __asm__("cBELibrary_location
  * Records a human rider's finished-event stats and score: keeps the stats, enters the score in the event's top-5 table,
  * and updates the character's best records.
  *
- * Only profiles 0 and 1. Copies @p stats into the profile's last-event slot (+0x20 + profile * 0xB0) with result -1,
- * passes them to cBEScoreInterface_processRiderStats, and resets the profile's high-score rank (+0x18) to -1 and best flag (+0x10) to 0. The
- * location comes from cBELibrary_locationDB[raceDB +0x40].id (22 becomes 0) and the event from
+ * Only profiles 0 and 1. Copies @p stats into the profile's LastEventStats slot with rank -1, passes them to
+ * cBEScoreInterface_processRiderStats, and resets the profile's mNewTrackHighScoreIndex to -1 and bNewHighScore to 0.
+ * The location comes from cBELibrary_locationDB[raceDB +0x40].id (22 becomes 0) and the event from
  * cBENewRaceInterface_newRace.cGameEvent. Race kinds 0 and 5 (raceDB +0x48) are timed: @p score is converted from ticks
  * to seconds.
  *
@@ -213,31 +182,32 @@ extern sEvent_154AB8 cBELibrary_locationDB_154AB8[] __asm__("cBELibrary_location
  * @param stats  the rider's event stats, 0xAC bytes (On Tour pRiderStats)
  * @param score  the event score or time in ticks (On Tour uiPoints)
  */
-extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, int rider, tRiderStats* stats, unsigned int score)
+extern "C" void cBEScoreInterface_processEventRiderStats(cBEScoreInterface* self, int rider, tRiderStats* stats,
+                                                        unsigned int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)
         return;
-    self->slots[profile].stats = *stats;
+    self->LastEventStats[profile].ridingStats = *stats;
     int mode;
     cBECharProfileDB* pc;
     int timed = 0;
-    self->slots[profile].result = -1;
+    self->LastEventStats[profile].rank = -1;
     cBEScoreInterface_processRiderStats(rider, (int)stats);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     mode = cBENewRaceInterface_newRace.cGameEvent;
     int event = cBELibrary_locationDB_154AB8[cBELibrary_raceDB_154AB8.iLocationIdx].id;
     pc = &cBELibrary_profileLib[profile][charID];
-    self->best[profile] = 0;
-    self->rank[profile] = -1;
+    self->bNewHighScore[profile] = 0;
+    self->mNewTrackHighScoreIndex[profile] = -1;
     if (event == 22)
         event = 0;
     if (cBELibrary_raceDB_154AB8.cGameMode == 0 || cBELibrary_raceDB_154AB8.cGameMode == 5) {
         timed = 1;
         score = (int)(score * (1.0f / 60.0f));
     }
-    if (cBEScoreInterface_isEligibleForHighScore((cBEScoreInterface*)self, profile)) {
+    if (cBEScoreInterface_isEligibleForHighScore(self, profile)) {
         tBEHighScore* highScores = cBELibrary_getHighScoreTable_154AB8(event, mode);
         if (highScores != 0) {
             for (int i = 0; i < 5; i++) {
@@ -252,12 +222,12 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
                     highScores[i].cCharacter = charID;
                     highScores[i].uiHighScore = score;
                     strcpy(highScores[i].strUserName, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
-                    self->rank[profile] = i;
+                    self->mNewTrackHighScoreIndex[profile] = i;
                     if (cBENewRaceInterface_newRace.iNumberHumans >= 2) {
-                        if (self->rank[1 - profile] >= i) {
-                            self->rank[1 - profile]++;
-                            if (self->rank[1 - profile] >= 5)
-                                self->rank[1 - profile] = -1;
+                        if (self->mNewTrackHighScoreIndex[1 - profile] >= i) {
+                            self->mNewTrackHighScoreIndex[1 - profile]++;
+                            if (self->mNewTrackHighScoreIndex[1 - profile] >= 5)
+                                self->mNewTrackHighScoreIndex[1 - profile] = -1;
                         }
                     }
                     break;
@@ -270,7 +240,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
     else
         cBEScoreInterface_processRiderBest(rider, (int)stats, score, -1);
     if (cBELibrary_raceDB_154AB8.cGamePath == 0)
-        self->best[profile] = cBECharProfileDB_updateScoreStats(pc, event, mode, score);
+        self->bNewHighScore[profile] = cBECharProfileDB_updateScoreStats(pc, event, mode, score);
 }
 #endif
 
@@ -602,15 +572,17 @@ extern short cBELibrary_highlightLevel[][3];
  * Raises a character's level in one career highlight to the level a value reaches.
  *
  * The level is 1, 2 or 3 for the highest of the highlight's three thresholds cBELibrary_highlightLevel[@p idx][0..2] that @p score
- * reaches (0 for none). The stored level, the signed byte at +0xBB8 + @p idx of the character record (what
- * cBEScoreInterface_getCurrentHighlightLevel reads), only goes up. cBEScoreInterface_processRiderBest calls it for highlights 0 to 7.
+ * reaches (0 for none). The stored level, mCareerHighlights[@p idx] of the character record (what
+ * cBEScoreInterface_getCurrentHighlightLevel reads), only goes up. cBEScoreInterface_processRiderBest calls it for
+ * highlights 0 to 7, passing the character record where a method would pass `this`.
  *
+ * @param rec  the character record (cBELibrary_profileLib[profile][character])
  * @param idx  which highlight, 0 to 7
  * @param score  the value to rate
  */
-extern "C" void cBEScoreInterface_processHighlight(cBEScoreInterface* self, int idx, int score)
+extern "C" void cBEScoreInterface_processHighlight(cBECharProfileDB* rec, int idx, int score)
 {
-    signed char cur = *(signed char*)(((char*)self) + idx + 0xBB8);
+    signed char cur = rec->mCareerHighlights[idx];
     int level = 0;
     int i;
     for (i = 2; i >= 0; i--) {
@@ -620,7 +592,7 @@ extern "C" void cBEScoreInterface_processHighlight(cBEScoreInterface* self, int 
         }
     }
     if (cur < level) {
-        *(signed char*)(((char*)self) + idx + 0xBB8) = level;
+        rec->mCareerHighlights[idx] = level;
     }
 }
 #endif
@@ -629,7 +601,7 @@ extern "C" void cBEScoreInterface_processHighlight(cBEScoreInterface* self, int 
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_processRiderBest);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern "C" void cBEScoreInterface_processHighlight(cBEScoreInterface* self, int idx, int score);
+extern "C" void cBEScoreInterface_processHighlight(cBECharProfileDB* rec, int idx, int score);
 
 extern cBERaceDB cBELibrary_raceDB_r155420 __asm__("cBELibrary_raceDB");
 
@@ -709,7 +681,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 3, statValue);
+                cBEScoreInterface_processHighlight(rec, 3, statValue);
             }
             break;
         case 1:
@@ -724,7 +696,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 5, statValue);
+                cBEScoreInterface_processHighlight(rec, 5, statValue);
             }
             break;
         case 3:
@@ -732,7 +704,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 4, statValue);
+                cBEScoreInterface_processHighlight(rec, 4, statValue);
             }
             break;
         case 4:
@@ -740,7 +712,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 7, statValue);
+                cBEScoreInterface_processHighlight(rec, 7, statValue);
             }
             break;
         case 5:
@@ -748,7 +720,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 1, statValue);
+                cBEScoreInterface_processHighlight(rec, 1, statValue);
             }
             break;
         case 6:
@@ -756,7 +728,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 0, statValue);
+                cBEScoreInterface_processHighlight(rec, 0, statValue);
             }
             break;
         case 7:
@@ -764,7 +736,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 2, statValue);
+                cBEScoreInterface_processHighlight(rec, 2, statValue);
             }
             break;
         case 8:
@@ -781,7 +753,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
                     if (eventPoints >= slot->score) {
                         slot->score = eventPoints;
                         slot->event = event;
-                        cBEScoreInterface_processHighlight((cBEScoreInterface*)rec, 6, eventPoints / 100);
+                        cBEScoreInterface_processHighlight(rec, 6, eventPoints / 100);
                     }
                 }
             }

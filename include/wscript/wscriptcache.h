@@ -15,7 +15,6 @@ struct tCollideRecord;          // world/worldrecords.h
 struct tWScriptGlobalData;      // [O] 4 bytes (not laid out)
 struct tWScriptProcessData;     // [O] 0x40 (laid out below; resolve's view sRec40_CCD8)
 struct tWScriptTaskData;        // [O] 0x38 (not laid out)
-struct tWScriptScriptHeader;    // [O] 4 bytes (not laid out)
 
 // One instance's event scripts in a section's script file (On Tour tWScriptInstanceData, 0x18).
 // A world-script process's data in the resolved script file (On Tour struct tWScriptProcessData, 0x40; same offsets;
@@ -60,6 +59,16 @@ struct tWScriptInstanceData {
 
 CHECK_OFFSET(tWScriptInstanceData, EventScriptId, 0x00);
 CHECK_SIZE(tWScriptInstanceData, 0x18);
+
+// One entry of the script file's script table (On Tour tWScriptScriptHeader, 4 bytes; its member's name is lost).
+// [U] cWScriptCacheEntry_resolve adds the file's base to each entry (a file offset, then a pointer);
+// cWScriptCacheEntry_getWScriptScript returns entry i as the script's code.
+struct tWScriptScriptHeader {
+    int ScriptCode;                 // 0x0 (name ours) [U] the script's code: an offset in the file until resolve
+};
+
+CHECK_OFFSET(tWScriptScriptHeader, ScriptCode, 0x0);
+CHECK_SIZE(tWScriptScriptHeader, 0x4);
 
 // One spline's script settings (On Tour tSplineData, 4 bytes).
 struct tSplineData {

@@ -24,15 +24,14 @@ extern char str_MeshVelocity[];
 extern void* cMeshAnimFrame_vtbl[];
 extern void* cAnimFrame_vtbl[];
 
-struct sMeshInst_E448 {
-    char pad_0x0[0x84];
-    void** vtable;          // 0x84
-    char pad_0x88[0x48];
-    sMeshInst_E448()
+// cMeshAnimFrame's constructor as new[] inlines it per element: the cAnimFrame part first, then its own. Ctor only;
+// the sized operator delete[] makes new[] store the element count.
+struct cMeshAnimFrameCtor : cMeshAnimFrame {
+    cMeshAnimFrameCtor()
     {
-        vtable = cAnimFrame_vtbl;
+        mVtbl = cAnimFrame_vtbl;
         cAnimFrame_init(this);
-        vtable = cMeshAnimFrame_vtbl;
+        mVtbl = cMeshAnimFrame_vtbl;
         cMeshAnimFrame_init(this);
     }
     void operator delete[](void* p, unsigned int size);
@@ -46,10 +45,10 @@ struct sMeshInst_E448 {
  * Allocates an animation node's per-mesh caches: one cMeshAnimFrame per animated mesh and one tMeshVelocity
  * per mesh.
  *
- * Counts the meshes of the instance's model (record +0x2C, model +0x80) that have an animation record (+0x8
- * of each 0x10-byte entry) into NumAnimMeshes (+0x40). AnimFrames (+0x48) gets that many 0xD0-byte frames
- * (tag "IntersectInfo"; 0 when none) and MeshVelocity (+0x4C) one 0x20-byte entry per mesh ("MeshVelocity");
- * each animated mesh's frame is then pointed at its record (cAnimFrame_setAnimRecord).
+ * Counts the meshes of the instance's model (Instance->m_Model) whose m_MeshHeirarchy entry has an animation
+ * record (m_MeshAnim) into NumAnimMeshes. AnimFrames gets that many 0xD0-byte frames (tag "IntersectInfo"; 0 when
+ * none) and MeshVelocity one 0x20-byte entry per mesh ("MeshVelocity"); each animated mesh's frame is then pointed
+ * at its record (cAnimFrame_setAnimRecord).
  */
 extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
 {
@@ -62,10 +61,10 @@ extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
             self->NumAnimMeshes++;
     }
     if (self->NumAnimMeshes != 0) {
-        sMeshInst_E448*& meshes = ((sMeshInst_E448*)self->AnimFrames);
-        meshes = new (str_IntersectInfo, 0x20000000, 0) sMeshInst_E448[self->NumAnimMeshes];
+        cMeshAnimFrame*& frames = self->AnimFrames;
+        frames = new (str_IntersectInfo, 0x20000000, 0) cMeshAnimFrameCtor[self->NumAnimMeshes];
     } else {
-        *(sMeshInst_E448**)&self->AnimFrames = 0;
+        self->AnimFrames = 0;
     }
     tMeshVelocity*& refs = (self->MeshVelocity);
     refs = new (str_MeshVelocity, 0x20000000, 0) tMeshVelocity[def->m_iNumMeshes];
@@ -73,7 +72,7 @@ extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
     int k = 0;
     for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
         if (((void*)entry->m_MeshAnim) != 0) {
-            cAnimFrame_setAnimRecord(&((sMeshInst_E448*)self->AnimFrames)[k++], ((void*)entry->m_MeshAnim));
+            cAnimFrame_setAnimRecord(&self->AnimFrames[k++], ((void*)entry->m_MeshAnim));
         }
     }
 }
@@ -83,29 +82,17 @@ extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
 INCLUDE_ASM("object/animnode", cAnimNode_calcPosition);
 #ifdef SKIP_ASM
 
-struct sMat_E600 {
-    t4Vector r[4];
-    sMat_E600() {}
-};
-
-struct sVEntry_E600a {
-    short delta;
-    short index;
-    sMat_E600* (*fn)(void*, int);
-};
-
-struct sVEntry_E600b {
-    short delta;
-    short index;
-    void (*fn)(void*, int, sMat_E600*);
+// t4Matrix with an empty constructor, as the matrix array here was declared (ctor only).
+struct t4MatrixCtor : t4Matrix {
+    t4MatrixCtor() {}
 };
 
 /**
  * Finds the world position of one animated mesh of an instance: the translation row of its animation matrix.
  *
- * The node's cMoveNode part starts at +0x14 (cAnimNodeState comes first), so its Instance is +0x2C and its vtable
- * +0x20. When @p id is the node's own instance, the position is row 3 of the matrix returned by virtual slot 29
- * (getAnimMat(@p idx)); otherwise slot 33 (makeAnimMats) builds 24 matrices on the stack from the record's root
+ * The node's cMoveNode part starts at MoveNodeBase (+0x14; cAnimNodeState comes first); the virtual calls go through
+ * mVtbl on that part. When @p id is the node's own Instance, the position is row 3 of the matrix returned by virtual
+ * slot 29 (getAnimMat(@p idx)); otherwise slot 33 (makeAnimMats) builds 24 matrices on the stack from the record's root
  * transform (record +0x10) and row 3 of matrix @p idx is used.
  *
  * @param id   the instance record (On Tour tInstanceRecord* inst) whose mesh is wanted
@@ -116,15 +103,15 @@ extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, t4Vecto
 {
     void* obj = (char*)&self->MoveNodeBase;
     if (id == (int)self->Instance) {
-        sVEntry_E600a* vt = (sVEntry_E600a*)self->mVtbl;
-        t4Vector position = vt[29].fn(vthis(obj, vt[29]), idx)->r[3];
+        sVEntry<t4Matrix*(void*, int)>* vt = (sVEntry<t4Matrix*(void*, int)>*)self->mVtbl;
+        t4Vector position = vt[29].fn(vthis(obj, vt[29]), idx)->row[3];
         *out = position;
         return;
     }
-    sMat_E600 buf[24];
-    sVEntry_E600b* vt = (sVEntry_E600b*)self->mVtbl;
+    t4MatrixCtor buf[24];
+    sVEntry<void(void*, int, t4Matrix*)>* vt = (sVEntry<void(void*, int, t4Matrix*)>*)self->mVtbl;
     vt[33].fn(vthis(obj, vt[33]), id + 0x10, buf);
-    t4Vector position = buf[idx].r[3];
+    t4Vector position = buf[idx].row[3];
     *out = position;
 }
 #endif
@@ -203,10 +190,10 @@ static inline void vu0AddEq_E698(t4Vector& a, const t4Vector& b)
 /**
  * Adds the motion of the animated mesh that was hit to an intersection's velocity and angular velocity.
  *
- * Calls cMoveNode_updateIntersectInfo() on the cMoveNode part (+0x14) first. If the hit names a mesh (@p body +0x5C
- * >= 0), it refreshes the per-mesh velocities with cAnimNode_updateMeshVelocity when MeshVelocityDirty (+0x10) is set, gets the
- * mesh's position with cAnimNode_calcPosition (instance at @p body +0x50), and with that mesh's MeshVelocity entry (+0x4C,
- * 0x20 bytes: linear, angular) does vel += linear + (hit point - mesh position) x angular and angVel += angular.
+ * Calls cMoveNode_updateIntersectInfo() on the cMoveNode part (MoveNodeBase) first. If the hit names a mesh
+ * (@p body Mesh >= 0), it refreshes the per-mesh velocities with cAnimNode_updateMeshVelocity when MeshVelocityDirty
+ * is set, gets the mesh's position with cAnimNode_calcPosition (instance @p body Inst), and with that mesh's
+ * MeshVelocity entry (Vel, AngVel) does vel += Vel + (hit point - mesh position) x AngVel and angVel += AngVel.
  *
  * @param body  the intersection info (On Tour tIntersectInfo& intInfo): hit point +0x00, velocity +0x20, angular
  *              velocity +0x30, instance +0x50, mesh index +0x5C
@@ -223,9 +210,9 @@ extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, tIntersectInfo* b
     t4Vector meshPos;
     cAnimNode_calcPosition_E698(((char*)self), ((int)body->Inst), bone, &meshPos);
     t4Vector offset = vu0Sub_E698((*(&body->Ipos)), meshPos);
-    t4Vector rot = (*(&((tMeshVelocity*)(char*)self->MeshVelocity)[bone].AngVel));
-    vu0AddEq_E698((*(&body->Ivel)), vu0Add_E698((*(&((tMeshVelocity*)(char*)self->MeshVelocity)[bone].Vel)),
-                                          vu0Cross_E698(offset, (*(&((tMeshVelocity*)(char*)self->MeshVelocity)[bone].AngVel)))));
+    t4Vector rot = self->MeshVelocity[bone].AngVel;
+    vu0AddEq_E698((*(&body->Ivel)), vu0Add_E698(self->MeshVelocity[bone].Vel,
+                                                vu0Cross_E698(offset, self->MeshVelocity[bone].AngVel)));
     vu0AddEq_E698((*(&body->Iangvel)), rot);
 }
 #endif
@@ -233,11 +220,12 @@ extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, tIntersectInfo* b
 //100%
 INCLUDE_ASM("object/animnode", cAnimNode_updateMeshVelocity);
 #ifdef SKIP_ASM
-struct sVec4_E798 {
-    float x, y, z, w;
-    sVec4_E798() {}
-    sVec4_E798(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+// A t4Vector with EA's constructors (ours has none): returned by value (hidden result pointer) and built from
+// four floats.
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
 
 
@@ -245,12 +233,12 @@ struct sVec4_E798 {
 
 
 
-extern sVec4_E798 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" void cAnimFrame_getDeriv(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
+extern "C" void cAnimFrame_getDeriv(void* node, t4Vector* pos, t4Vector* rot, float t);
 
 // PORT: PS2-only VU0 inline asm (vector times-assign scalar).
-static inline void vu0ScaleEq_E798(sVec4_E798& v, float s)
+static inline void vu0ScaleEq_E798(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -265,9 +253,9 @@ static inline void vu0ScaleEq_E798(sVec4_E798& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sVec4_E798 vu0MulMat_E798(const t4Matrix* m, const sVec4_E798& v)
+static inline t4VectorXYZW vu0MulMat_E798(const t4Matrix* m, const t4Vector& v)
 {
-    sVec4_E798 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -286,9 +274,9 @@ static inline sVec4_E798 vu0MulMat_E798(const t4Matrix* m, const sVec4_E798& v)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sVec4_E798 vu0Sub_E798(const sVec4_E798& a, const sVec4_E798& b)
+static inline t4VectorXYZW vu0Sub_E798(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_E798 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -301,9 +289,9 @@ static inline sVec4_E798 vu0Sub_E798(const sVec4_E798& a, const sVec4_E798& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec4_E798 vu0Add_E798(const sVec4_E798& a, const sVec4_E798& b)
+static inline t4VectorXYZW vu0Add_E798(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_E798 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -316,9 +304,9 @@ static inline sVec4_E798 vu0Add_E798(const sVec4_E798& a, const sVec4_E798& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sVec4_E798 vu0Cross_E798(const sVec4_E798& a, const sVec4_E798& b)
+static inline t4VectorXYZW vu0Cross_E798(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_E798 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -333,7 +321,7 @@ static inline sVec4_E798 vu0Cross_E798(const sVec4_E798& a, const sVec4_E798& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void vu0AddEq_E798(sVec4_E798& a, const sVec4_E798& b)
+static inline void vu0AddEq_E798(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -345,23 +333,24 @@ static inline void vu0AddEq_E798(sVec4_E798& a, const sVec4_E798& b)
         : "memory");
 }
 
-static inline sVec4_E798 boneE798Pos(char* vself, int i)
+// The translation row of mesh @p i's animation matrix. Same-layout cast: t4VectorXYZW only adds constructors to
+// t4Vector.
+static inline t4VectorXYZW boneE798Pos(cAnimNode* self, int i)
 {
-    cAnimNode* self = (cAnimNode*)vself;
-    return *(sVec4_E798*)&((&(self->AnimMats)[i].row[0]))[3];
+    return *(t4VectorXYZW*)&self->AnimMats[i].row[3];
 }
 
 /**
  * Recomputes the per-mesh linear and angular velocities (MeshVelocity) of an animated instance.
  *
- * If the cMoveNode part's RootTransformDirty flag (+0x26 bit 0) is set, virtual slot 51 refreshes the root first.
- * For each mesh of the model's hierarchy (Instance's model +0x80: count +0x4, 0x10-byte entries +0x8) the
- * MeshVelocity entry (+0x4C) is zeroed; meshes with an animation (entry +0x8) take the next AnimFrames entry (+0x48,
- * 0xD0 bytes each) and cAnimFrame_getDeriv gives its position/rotation derivatives at CacheTime (+0x4). Both are scaled by
- * the animation speed (virtual slot 53) times the frame rate (cAppMan_TheAppMan +0x10), the rotation also by
- * degrees-to-radians and an Euler matrix built from the frame's negated angles (+0x50..+0x58), then transformed by the
- * mesh's AnimMats (+0x44) matrix. A mesh with a parent adds the parent's velocity plus (offset x parent angular
- * velocity) and the parent's angular velocity. Clears MeshVelocityDirty (+0x10) at the end.
+ * If the cMoveNode part's RootTransformDirty flag (Flags bit 0) is set, virtual slot 51 refreshes the root first.
+ * For each mesh of the model's hierarchy (Instance->m_Model: m_iNumMeshes entries of m_MeshHeirarchy) the
+ * MeshVelocity entry is zeroed; meshes with an animation (m_MeshAnim) take the next AnimFrames entry and
+ * cAnimFrame_getDeriv gives its position/rotation derivatives at CacheTime. Both are scaled by the animation speed
+ * (virtual slot 53) times the frame rate (cAppMan_TheAppMan->TimerHz), the rotation also by degrees-to-radians and an
+ * Euler matrix built from the frame's negated angles (Vals[3..5]), then transformed by the mesh's AnimMats matrix. A
+ * mesh with a parent adds the parent's velocity plus (offset x parent angular velocity) and the parent's angular
+ * velocity. Clears MeshVelocityDirty at the end.
  */
 extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
 {
@@ -374,19 +363,19 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
     int k = 0;
     tMeshHeirarchyRecord* ent = info->m_MeshHeirarchy;
     for (int i = 0; i < info->m_iNumMeshes; i++, ent++) {
-        (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].Vel) = t4vect_Zero;
-        (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].AngVel) = t4vect_Zero;
+        self->MeshVelocity[i].Vel = t4vect_Zero;
+        self->MeshVelocity[i].AngVel = t4vect_Zero;
         float d2r = 0.01745329424738884f;
         if (((int)ent->m_MeshAnim) == 0) continue;
         cMeshAnimFrame* node = &self->AnimFrames[k];
         k++;
         sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
         float animSpeed = ((float (*)(void*))vt[53].fn)(vthis(self, vt[53]));
-        sVec4_E798 pos;
-        sVec4_E798 rotv;
+        t4VectorXYZW pos;
+        t4VectorXYZW rotv;
         cAnimFrame_getDeriv(node, &pos, &rotv, self->CacheTime);
-        sVec4_E798 rot;
-        rot = sVec4_E798(-node->Vals[3], -node->Vals[4], -node->Vals[5], 0.0f);
+        t4VectorXYZW rot;
+        rot = t4VectorXYZW(-node->Vals[3], -node->Vals[4], -node->Vals[5], 0.0f);
         vu0ScaleEq_E798(pos, animSpeed * (float)cAppMan_TheAppMan->TimerHz);
         vu0ScaleEq_E798(rotv, animSpeed * (float)cAppMan_TheAppMan->TimerHz * d2r);
         t4Matrix eulerMat;
@@ -419,13 +408,13 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         pos = vu0MulMat_E798(&(self->AnimMats)[i], pos);
         rotv = vu0MulMat_E798(&(self->AnimMats)[i], rotv);
         if (ent->m_iParentID >= 0) {
-            sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(((char*)self), i), boneE798Pos(((char*)self), ent->m_iParentID));
-            vu0AddEq_E798(rotv, (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[ent->m_iParentID].AngVel));
-            vu0AddEq_E798(pos, vu0Add_E798((*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[ent->m_iParentID].Vel),
-                                           vu0Cross_E798(parentOffset, (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[ent->m_iParentID].AngVel))));
+            t4VectorXYZW parentOffset = vu0Sub_E798(boneE798Pos(self, i), boneE798Pos(self, ent->m_iParentID));
+            vu0AddEq_E798(rotv, self->MeshVelocity[ent->m_iParentID].AngVel);
+            vu0AddEq_E798(pos, vu0Add_E798(self->MeshVelocity[ent->m_iParentID].Vel,
+                                           vu0Cross_E798(parentOffset, self->MeshVelocity[ent->m_iParentID].AngVel)));
         }
-        (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].Vel) = pos;
-        vu0AddEq_E798((*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].AngVel), rotv);
+        self->MeshVelocity[i].Vel = pos;
+        vu0AddEq_E798(self->MeshVelocity[i].AngVel, rotv);
     }
     self->MeshVelocityDirty = 0;
 }

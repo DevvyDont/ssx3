@@ -3,9 +3,12 @@
 #include "render/2drender.h"
 #include "camera/camera.h"
 #include "main/gameviewman.h"
+#include "camera/cameracontroller.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "world/world.h"
+#include "world/worldcache.h"
 
 //100%
 INCLUDE_ASM("main/gamerender", cGameViewMan_cGameViewMan);
@@ -104,46 +107,16 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
 INCLUDE_ASM("main/gamerender", cGameViewMan_updateViewState);
 #ifdef SKIP_ASM
 
-class cDisp22E550 {
-public:
-    char pad[0x10D8];
-    // vptr at 0x10D8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual unsigned int GetScreenWidth();
-    virtual unsigned int GetScreenHeight();
-};
-
-
-struct sSlot22E550 {
-    int active;
-    char pad[0x4C];
-};
-
-struct sSlots22E550 {
-    char pad[0x250];
-    sSlot22E550 e[2];
-};
-
-
-
 /**
  * Splits or joins the screen when the game's state changes: one full-screen view, or two side-by-side halves for states
  * 3-5.
  *
- * Does nothing when the stored state (+0xC) already equals the game's mCurrentStateID (+0x214), while a replay is
- * playing (Replay state 1-9), or with one player (+0x0). Otherwise stores the state and, from GrMan's width and height
- * (vtable slots 10 and 11), sets the view count (+0x10), current view (+0x14) and view rectangles (+0x18): states 3-5
- * give two half-width views with far clip 20000 on both cameras, any other state one full view with far clip 30000.
- * Then clears the world view's active flags for the unused view (one view) or for both (two views). cGame_updateState
- * calls it.
+ * Does nothing when the stored state (m_GFState) already equals the game's mCurrentStateID, while a replay is
+ * playing (Replay state 1-9), or with one player (m_uiNumPlayers). Otherwise stores the state and, from GrMan's width
+ * and height (vtable slots 10 and 11), sets m_uiNumView, m_uiCurrentView and m_ViewRect: states 3-5 give two
+ * half-width views with far clip 20000 on both cameras, any other state one full view with far clip 30000. Then
+ * clears the world view's stream-focus active flags for the unused view (one view) or for both (two views).
+ * cGame_updateState calls it.
  */
 extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
 {
@@ -161,8 +134,8 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
     if (self->m_uiNumPlayers == 1) {
         return;
     }
-    float w = (float)((cDisp22E550*)GrMan)->GetScreenWidth();
-    float screenHeight = (float)((cDisp22E550*)GrMan)->GetScreenHeight();
+    float w = (float)(unsigned int)GrMan->GetScreenWidth();
+    float screenHeight = (float)(unsigned int)GrMan->GetScreenHeight();
     switch (self->m_GFState) {
     case 3:
     case 4:
@@ -194,10 +167,10 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
     }
     if (((int)self->m_uiNumView) == 1) {
         int idx = self->PlayerCamera[1]->StreamFocusID;
-        (*(sSlots22E550**)SSXApp->Game->World)->e[idx].active = 0;
+        SSXApp->Game->World->m_pWorldCache->m_WorldView.m_StreamFocus[idx].m_bActive = 0;
     } else {
-        (*(sSlots22E550**)SSXApp->Game->World)->e[0].active = 0;
-        (*(sSlots22E550**)SSXApp->Game->World)->e[1].active = 0;
+        SSXApp->Game->World->m_pWorldCache->m_WorldView.m_StreamFocus[0].m_bActive = 0;
+        SSXApp->Game->World->m_pWorldCache->m_WorldView.m_StreamFocus[1].m_bActive = 0;
     }
 }
 #endif
@@ -210,7 +183,7 @@ void operator_delete(int* p);
 /**
  * Destroys the game view manager and every view it holds.
  *
- * Deletes each non-null view through its virtual destructor (slot 1, flags 3), clears +0x10 and frees this
+ * Deletes each non-null view through its virtual destructor (slot 1, flags 3), clears m_uiNumView and frees this
  * object when bit 0 of @p flags is set.
  *
  * @param flags  bit 0: free the object's memory
@@ -221,7 +194,8 @@ extern "C" void cGameViewMan__cGameViewMan(cGameViewMan* self, int flags)
     for (i = 0; i < self->m_uiNumPlayers; i++) {
         cCamera* it = self->PlayerCamera[i];
         if (it != 0) {
-            ((sVEntry<void(void*, int)>*)it->mVtbl)[1].fn(vthis(it, ((sVEntry<void(void*, int)>*)it->mVtbl)[1]), 3);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)it->mVtbl;
+            vt[1].fn(vthis(it, vt[1]), 3);
         }
     }
     self->m_uiNumView = 0;
@@ -238,16 +212,16 @@ INCLUDE_ASM("main/gamerender", cGameViewMan_snapAll);
 /**
  * Snaps the camera of every active view through its current controller's virtual slot 4 (probably snap).
  *
- * Loops over the active view count (+0x10), not the camera count (+0x0); the controller is the camera's
- * Controller (+0xA0).
+ * Loops over the active view count (m_uiNumView), not the camera count (m_uiNumPlayers); the controller is the
+ * camera's Controller.
  */
 extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumView; i++) {
         cCamera* camera = self->PlayerCamera[i];
-        void* controller = camera->Controller;
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)controller + 0x14);
+        cCameraController* controller = camera->Controller;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
         vt[4].fn(vthis(controller, vt[4]));
     }
 }
@@ -347,13 +321,6 @@ extern "C" void cGFUserSelectState_cGFUserSelectState(void* self);
 extern "C" void cGFSectionLoadState_cGFSectionLoadState(void* self);
 extern "C" void cPauseState_set(int a);
 
-struct sArr_22E968 {
-    char pad[0x5C];
-    int a[2];
-    int pad64;
-    int b[2];
-};
-
 static inline void Base_22E968(char* s, int off)
 {
     *(void**)(s + off + 0xC) = cGameState_vtbl;
@@ -417,8 +384,8 @@ extern "C" char* cGame_cGame(cGame* self)
     self->PauseOwner = -1;
     self->ControllerUnplugged = 0;
     for (int i = 0; i < 2; i++) {
-        ((sArr_22E968*)self)->a[i] = 0;
-        ((sArr_22E968*)self)->b[i] = 0;
+        self->TransitionMan[i] = 0;
+        self->SplashManager[i] = 0;
     }
     return ((char*)self);
 }

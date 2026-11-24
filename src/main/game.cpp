@@ -18,6 +18,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 #include "render/graphicsman.h"
 
 extern tSectionMap cSectionMan_mSectionMap[];
@@ -1153,7 +1154,7 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
     }
     cAI_resetRidersStatTotals(SSXApp->Game->AI);
     cSSXApp* app = SSXApp;
-    *(int*)((char*)app->Game->AI + 0xC) = 0;
+    app->Game->AI->EventTimerTick = 0;
     if ((unsigned int)(app->Game->SectionMan->mBELocationID - 14) < 3) {
         cBENewRaceInterface_setGameMode(race, 4);
         cBENewRaceInterface_setGameEvent(race, 12);
@@ -1452,11 +1453,6 @@ extern "C" void cSectionMan_skySwap(cSectionMan* self)
 //100%
 INCLUDE_ASM("main/game", cSectionMan_preLoadMode);
 #ifdef SKIP_ASM
-class cBEIface22DF50 {
-public:
-    int pad[3];
-    virtual void submit();
-};
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1471,7 +1467,7 @@ extern int cBENewRaceInterface_bIsBamLocation;
 extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
 {
     cGame_setState(self->mpGame, 11, 0, 1);
-    cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_newRace.iLocationIdx = self->mBELocationID;
     cBENewRaceInterface_bIsBamLocation = 1;
     iface->submit();
@@ -1499,15 +1495,6 @@ void* cSectionMan_isPreLoadModeDone(void* vself)
 //100%
 INCLUDE_ASM("main/game", cSectionMan_changeMode);
 #ifdef SKIP_ASM
-class cRace22DFF0 {
-public:
-    char pad[0xCC];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void restart(int);
-};
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1524,7 +1511,9 @@ extern "C" void cSectionMan_changeMode(cSectionMan* self)
     cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
     if (self->mModeReset != 0) {
         self->mModeReset = 0;
-        ((cRace22DFF0*)SSXApp->Game->AI)->restart(3);
+        cAI* ai = SSXApp->Game->AI;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ai->mVtbl;
+        vt[5].fn(vthis(ai, vt[5]), 3); // the AI's restart
     }
     cGame_setState(self->mpGame, 10, 0, 0);
 }

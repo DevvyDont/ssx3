@@ -71,8 +71,9 @@ struct tBEOptionDB {
     unsigned int iReplayOption : 1;     // 0x0 bit 29 [O]; [R] defaultGame 0
     unsigned int iHUDDetail : 2;        // 0x0 bits 30-31 [R] defaultHUD 0; the pause menu's HUD list (Full / Minimal /
                                         //     None) (On Tour: iAutosave here, iHUDDetail in byte 4)
-    unsigned char unk_04 : 2;           // 0x4 bits 0-1 [R] defaultSound 1 (On Tour's byte 4 holds iHUDDetail /
-                                        //     iCameraMode)
+    unsigned char iExtraSoundOption : 2; // 0x4 bits 0-1 (name ours: a 2-bit option reset with the sound settings)
+                                        //     [R] defaultSound 1; no retail reader found (On Tour's byte 4 holds
+                                        //     iHUDDetail / iCameraMode)
     signed char iVtDelta;               // 0x5 [O]; [R] defaultGame 0; bedbreward's vertical-offset setter
     signed char iHzDelta;               // 0x6 [O]; [R] defaultGame 0; the horizontal-offset setter
     char szQuickMessage[10][64];        // 0x7 [O]; [R] setQuickKeyMessage / resetQuickKey: 64-byte entries from +7

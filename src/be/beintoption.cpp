@@ -96,28 +96,8 @@ extern "C" void cBEOptionInterface_revert(cBEOptionInterface* self)
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sOptBits_0014F458
-{
-    unsigned int a : 4;
-    unsigned int b : 4;
-    unsigned int c : 4;
-    unsigned int d : 2;
-    unsigned int e : 2;
-    unsigned int f : 1;
-    unsigned int g : 1;
-    unsigned int h : 1;
-    unsigned int rest0 : 13;
-    unsigned int w1a : 2;
-    unsigned int rest1 : 30;
-};
-extern sOptBits_0014F458 cBEOptionInterface_mOption_v0014F458[] __asm__("cBEOptionInterface_mOption");
-
-class cBEOptionInterfaceV_0014F458
-{
-public:
-    char pad_0x00[0xC];
-    virtual void apply();
-};
+// The option block as the static cBEOptionInterface::mOption (this unit's submit / discard copy it as raw words).
+extern tBEOptionDB cBEOptionInterface_mOptionDB[] __asm__("cBEOptionInterface_mOption");
 
 /**
  * Resets the sound options and submits them.
@@ -128,17 +108,17 @@ public:
  */
 extern "C" void cBEOptionInterface_defaultSound(cBEOptionInterface* self)
 {
-    sOptBits_0014F458* options = cBEOptionInterface_mOption_v0014F458;
-    options->a = 10;
-    options->b = 10;
-    options->c = 10;
-    options->d = 0;
-    options->e = 0;
-    options->f = 1;
-    options->g = 1;
-    options->h = 1;
-    options->w1a = 1;
-    ((cBEOptionInterfaceV_0014F458*)cBEOptionInterface_instance)->apply();
+    tBEOptionDB* options = cBEOptionInterface_mOptionDB;
+    options->iRadioBigVolume = 10;
+    options->iCharVolume = 10;
+    options->iSFXVolume = 10;
+    options->iSoundMode = 0;
+    options->iAudioMix = 0;
+    options->iUseArcadeSFX = 1;
+    options->iUseDJSpeech = 1;
+    options->iUseVOIP = 1;
+    options->iExtraSoundOption = 1;
+    cBEOptionInterface_instance->submit();
 }
 #endif
 
@@ -206,46 +186,25 @@ extern "C" void cBEOptionInterface_defaultGame(cBEOptionInterface* self)
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultHUD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sOptBits_0014F600
-{
-    unsigned int pad : 30;
-    unsigned int top : 2;
-};
-extern sOptBits_0014F600 cBEOptionInterface_mOption_v0014F600[] __asm__("cBEOptionInterface_mOption");
-
-class cBEOptionInterfaceV_0014F600
-{
-public:
-    char pad_0x00[0xC];
-    virtual void apply();
-};
-
 /**
  * Resets the HUD option (bits 30-31 of the first option word) to 0 and submits (vtable slot 1, cBEOptionInterface_submit).
  */
 extern "C" void cBEOptionInterface_defaultHUD(cBEOptionInterface* self)
 {
-    cBEOptionInterface_mOption_v0014F600[0].top = 0;
-    ((cBEOptionInterfaceV_0014F600*)cBEOptionInterface_instance)->apply();
+    cBEOptionInterface_mOptionDB[0].iHUDDetail = 0;
+    cBEOptionInterface_instance->submit();
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultCtrl);
 #ifdef SKIP_ASM
-class cBEOptionInterfaceV_0014F648
-{
-public:
-    char pad_0x00[0xC];
-    virtual void apply();
-};
-
 /**
  * Submits the options (the option interface's vtable slot 1, cBEOptionInterface_submit) without changing any.
  */
 extern "C" void cBEOptionInterface_defaultCtrl(cBEOptionInterface* self)
 {
-    ((cBEOptionInterfaceV_0014F648*)cBEOptionInterface_instance)->apply();
+    cBEOptionInterface_instance->submit();
 }
 #endif
 

@@ -41,27 +41,12 @@ extern char str_Option_Radio[];
 extern char str_Option_GBA[];
 
 
-class cWidget_182928 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void enable(int on);
-    virtual void show(int on);
-};
-
-
 static inline void showIdx_182928(cFEStateCharSetup* self, char* name, int idx)
 {
-    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(name));
+    cUIThing* o = cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(name));
     if (o != 0) {
-        o->show(1);
-        *(int*)((char*)o + 0x18) = idx;
+        o->setVisible(1);
+        o->mMiscData = idx;
     }
 }
 
@@ -109,10 +94,10 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
     showIdx_182928((self), str_Option_Equip, 1);
     showIdx_182928((self), str_Option_Rider, 2);
     showIdx_182928((self), str_Option_Radio, 3);
-    cWidget_182928* gbaOption = (cWidget_182928*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_GBA));
+    cUIThing* gbaOption = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_GBA));
     if (gbaOption != 0) {
-        gbaOption->show(0);
-        gbaOption->enable(1);
+        gbaOption->setVisible(0);
+        gbaOption->setStatic(1);
     }
 }
 #endif
@@ -183,13 +168,6 @@ extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int a
 extern char str_FEOptions[];
 
 
-struct sStateK182C80 {
-    char pad_0x0[0x1C];
-    unsigned lo : 8;
-    unsigned mode : 6;
-    unsigned hi : 18;
-};
-
 /**
  * Handles the character setup screen's widget events: next state, previous state, or the options screen.
  *
@@ -224,9 +202,8 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         break;
     }
     case 7: {
-        sStateK182C80* st = (sStateK182C80*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0),
-                                                          self->mpEngine, 1);
-        st->mode = 1;
+        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
+        st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
         cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
         break;
     }
@@ -294,24 +271,22 @@ extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cFERider_speak(void* rider);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
-struct sQuat_182EC0
-{
-    float x, y, z, w;
-    sQuat_182EC0() {}
-    sQuat_182EC0(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+// A t4Vector with EA's constructors (ours has none): the pose position and the rotation quaternions.
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
-
-extern sQuat_182EC0 t4vect_XAxis;
-extern sQuat_182EC0 t4vect_YAxis;
-extern sQuat_182EC0 t4vect_ZAxis;
+extern t4Vector t4vect_XAxis;
+extern t4Vector t4vect_YAxis;
+extern t4Vector t4vect_ZAxis;
 extern "C" void cFERider_setPose(void* rider, tPose* xf);
 extern "C" void cFERider_setBoardPose(void* rider, tPose* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQuat_182EC0 QuatMul_182EC0(const sQuat_182EC0& a, const sQuat_182EC0& b)
+static inline t4VectorXYZW QuatMul_182EC0(const t4Vector& a, const t4Vector& b)
 {
-    sQuat_182EC0 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -331,11 +306,11 @@ static inline sQuat_182EC0 QuatMul_182EC0(const sQuat_182EC0& a, const sQuat_182
     return r;
 }
 
-static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angle)
+static inline t4VectorXYZW AxisAngle_182EC0(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sQuat_182EC0(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorXYZW(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 /**
@@ -357,32 +332,32 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
         ok = rider->mCompiledModel != 0;
     }
     if (ok && self_->mbDraw3D != 0) {
-        sQuat_182EC0 pos;
+        t4VectorXYZW pos;
         tPose xf;
         {
-            sQuat_182EC0 position;
+            t4VectorXYZW position;
             position.x = 136.0f;
             position.y = -250.0f;
             position.z = -82.0f;
             position.w = 1.0f;
             pos = position;
-            (*(sQuat_182EC0*)&xf.P) = position;
-            (*(sQuat_182EC0*)&xf.Q).x = 0.0f;
-            (*(sQuat_182EC0*)&xf.Q).w = 1.0f;
-            (*(sQuat_182EC0*)&xf.Q).y = 0.0f;
-            (*(sQuat_182EC0*)&xf.Q).z = 0.0f;
-            (*(sQuat_182EC0*)&xf.Q) = QuatMul_182EC0((*(sQuat_182EC0*)&xf.Q), AxisAngle_182EC0(t4vect_XAxis, 0.0f));
+            xf.P = position;
+            xf.Q.x = 0.0f;
+            xf.Q.w = 1.0f;
+            xf.Q.y = 0.0f;
+            xf.Q.z = 0.0f;
+            xf.Q = QuatMul_182EC0(xf.Q, AxisAngle_182EC0(t4vect_XAxis, 0.0f));
         }
-        (*(sQuat_182EC0*)&xf.Q) = QuatMul_182EC0((*(sQuat_182EC0*)&xf.Q), AxisAngle_182EC0(t4vect_YAxis, 0.0f));
-        (*(sQuat_182EC0*)&xf.Q) = QuatMul_182EC0((*(sQuat_182EC0*)&xf.Q), AxisAngle_182EC0(t4vect_ZAxis, 1.7453293800354004f));
+        xf.Q = QuatMul_182EC0(xf.Q, AxisAngle_182EC0(t4vect_YAxis, 0.0f));
+        xf.Q = QuatMul_182EC0(xf.Q, AxisAngle_182EC0(t4vect_ZAxis, 1.7453293800354004f));
         cFERider_setPose(rider, &xf);
         {
-            sQuat_182EC0 position;
+            t4VectorXYZW position;
             position.x = 0.0f;
             position.y = 10000.0f;
             position.z = 0.0f;
             position.w = 1.0f;
-            (*(sQuat_182EC0*)&xf.P) = position;
+            xf.P = position;
         }
         cFERider_setBoardPose(rider, &xf);
         if (self_->mbIsFirst != 0) {

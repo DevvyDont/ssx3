@@ -1730,8 +1730,6 @@ extern "C" void cStreamSys_STREAM_Update(cStreamSys* self);
 extern "C" void func_002B0C78(void* self);
 extern "C" void func_002B4388(void* self);
 
-struct sStrmVtEntF { short delta; short index; void (*fn)(void*, float); };
-
 /**
  * Updates the sound controller each frame: async loads, crowd, bank monitor, music, speech and streams.
  *
@@ -1747,7 +1745,8 @@ extern "C" void cController_Update(cController* self, float frameTime)
     func_002A6D18(self);
     cBankManager* bankMan = sys->mpVStreamSys->mpVBankManager;
     cBankMonitor* bankMon = &bankMan->BankMonitor;
-    sStrmVtEntF* entry = &((sStrmVtEntF*)bankMan->BankMonitor.mVtbl)[5];
+    sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)bankMan->BankMonitor.mVtbl;
+    sVEntry<void(void*, float)>* entry = &vt[5];
     entry->fn(vthis(bankMon, *entry), frameTime);
     func_002B4388(sys);
     func_002B0C78(&self->SpeechSys);

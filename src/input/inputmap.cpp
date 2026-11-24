@@ -109,7 +109,7 @@ void cMemMan_free(void* p);
 extern "C" void MEM_copy(void* dst, void* src, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" int cInputMapParser_compileStatement(void* parser, char* src, int* dst, int room, int a4);
+extern "C" int cInputMapParser_compileStatement(void* parser, char* src, tInputOpCode* dst, int room, int a4);
 extern char str_TempOpCodes[];
 
 struct sInputMap_0E18 {
@@ -146,7 +146,8 @@ extern "C" void cInputMap_compileMap(cInputMap* self, int idx, char* src)
         self->OpCodeLen = newCap;
     }
     self->MapOffset[idx] = self->OpCodeTop;
-    self->OpCodeTop += cInputMapParser_compileStatement(self->Parser, src, (int*)self->OpCodeBuf + self->OpCodeTop, self->OpCodeLen - self->OpCodeTop, 5);
+    self->OpCodeTop += cInputMapParser_compileStatement(self->Parser, src, &self->OpCodeBuf[self->OpCodeTop],
+                                                       self->OpCodeLen - self->OpCodeTop, 5);
 }
 #endif
 
@@ -217,7 +218,8 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * Evaluates one compiled map statement against a controller pad with a default button modifier and eight config values.
  *
  * Like cInputMap_getValue, but before running the statement through cInputExec_execute it stores @p modifier as the evaluator's
- * default button modifier (+0x0) and @p config0..@p config7 as its config values 1..8 (+0x10C..+0x128; config 0 always reads 0).
+ * default button modifier (DefaultButtonModifier) and @p config0..@p config7 as its config values 1..8 (Config[1..8];
+ * config 0 always reads 0).
  * Called by cInput_getValue1, the cInput wrapper beside cInput_getValue.
  *
  * @param inputPad  the controller pad to read (On Tour cInputPad*)
@@ -238,14 +240,14 @@ extern "C" float cInputMap_getValue1(cInputMap* self, cInputPad* inputPad, int s
     cInputExec parser;
     cInputExec_cInputExec(&parser);
     parser.DefaultButtonModifier = modifier;
-    ((float*)&parser.Config[1])[0] = config0;
-    ((float*)&parser.Config[1])[1] = config1;
-    ((float*)&parser.Config[1])[2] = config2;
-    ((float*)&parser.Config[1])[3] = config3;
-    ((float*)&parser.Config[1])[4] = config4;
-    ((float*)&parser.Config[1])[5] = config5;
-    ((float*)&parser.Config[1])[6] = config6;
-    ((float*)&parser.Config[1])[7] = config7;
+    parser.Config[1] = config0;
+    parser.Config[2] = config1;
+    parser.Config[3] = config2;
+    parser.Config[4] = config3;
+    parser.Config[5] = config4;
+    parser.Config[6] = config5;
+    parser.Config[7] = config6;
+    parser.Config[8] = config7;
     return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]);
 }
 #endif
@@ -284,7 +286,8 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * Tells whether one compiled map statement is nonzero for a controller pad, with a default button modifier and eight
  * config values.
  *
- * Same evaluation as cInputMap_getValue1 (modifier into +0x0, config values 1..8 into +0x10C..), compared with 0.0 like
+ * Same evaluation as cInputMap_getValue1 (modifier into DefaultButtonModifier, config values into Config[1..8]),
+ * compared with 0.0 like
  * cInputMap_getState. Called by cInput_getState1, the cInput wrapper beside cInput_getState.
  *
  * @param inputPad  the controller pad to read (On Tour cInputPad*)
@@ -305,14 +308,14 @@ extern "C" int cInputMap_getState1(cInputMap* self, cInputPad* inputPad, int sta
     cInputExec parser;
     cInputExec_cInputExec(&parser);
     parser.DefaultButtonModifier = modifier;
-    ((float*)&parser.Config[1])[0] = config0;
-    ((float*)&parser.Config[1])[1] = config1;
-    ((float*)&parser.Config[1])[2] = config2;
-    ((float*)&parser.Config[1])[3] = config3;
-    ((float*)&parser.Config[1])[4] = config4;
-    ((float*)&parser.Config[1])[5] = config5;
-    ((float*)&parser.Config[1])[6] = config6;
-    ((float*)&parser.Config[1])[7] = config7;
+    parser.Config[1] = config0;
+    parser.Config[2] = config1;
+    parser.Config[3] = config2;
+    parser.Config[4] = config3;
+    parser.Config[5] = config4;
+    parser.Config[6] = config5;
+    parser.Config[7] = config6;
+    parser.Config[8] = config7;
     return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]) != 0.0f;
 }
 #endif
@@ -387,13 +390,6 @@ INCLUDE_ASM("input/inputmap", cInputMapParser_cInputMapParser);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cInputMapParser_parseFile(void* self);
 
-struct sMapNode_1428 {
-    int f0;
-    sMapNode_1428* next;    // 0x4
-    int f8;
-    int fC;
-};
-
 
 /**
  * Constructs an input-map parser over a script in memory and parses the whole file.
@@ -423,11 +419,11 @@ extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* f
     for (int i = 63; i > 0; i--) {
         self->FreeRegisters[self->NumFreeRegisters++] = i;
     }
-    (*(sMapNode_1428**)&self->FreeParseNodes) = ((sMapNode_1428*)&self->ParseNodes[0]);
+    self->FreeParseNodes = &self->ParseNodes[0];
     for (int j = 1; j < 0x800; j++) {
-        ((sMapNode_1428*)&self->ParseNodes[0])[j - 1].next = &((sMapNode_1428*)&self->ParseNodes[0])[j];
+        self->ParseNodes[j - 1].Operand1 = &self->ParseNodes[j]; // the free-list link
     }
-    ((sMapNode_1428*)&self->ParseNodes[0])[0x7FF].next = 0;
+    self->ParseNodes[0x7FF].Operand1 = 0;
     cInputMapParser_parseFile(self);
     return self;
 }

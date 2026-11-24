@@ -94,72 +94,35 @@ extern char cIrradianceDataBase_TheDataBase[];
 extern int cIrradianceDataBase_mDefaultId;
 extern int cRenderStateMan_m_hasCustomIrradiance;
 
-struct sVec_5400 {
-    float x, y, z, w;
-    sVec_5400() {}
-    sVec_5400(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-// Plain (ctor-less) quadword for matrix rows, so a local matrix needs no construction loop.
-
-
-struct sAABox_5400 {
-    sVec_5400 min;
-    sVec_5400 max;
-    sAABox_5400() {}
-    sAABox_5400(const sVec_5400& a, const sVec_5400& b) { min = a; max = b; }
+// A t4Vector with EA's constructors (ours has none): returned by value (hidden result pointer) and built from
+// four floats. Ctor only.
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-
-struct sBox_5400 {
-    unsigned int id;
-    int priority;
-    char pad08[0x8];
-    sAABox_5400 bounds; // 0x10
-    void* cell;         // 0x30
+// tBoundBox built from its two corners (ctor only).
+struct tBoundBoxCtor : tBoundBox {
+    tBoundBoxCtor(const t4Vector& a, const t4Vector& b)
+    {
+        MinPoint = a;
+        MaxPoint = b;
+    }
 };
 
-
-struct sMan_5400 {
-    char pad000[0x4];
-    char* world;              // 0x4
-    char pad008[0x210 - 0x8];
-    tLightCacheEntry nodes[32];     // 0x210
-    tLightCacheEntry* heads[32];    // 0x3210
-    unsigned int count;       // 0x3290
-};
-
-// Light-set reference: a name until first use, then a cached handle tagged 0x123400.
-struct sLightRef_5400 {
-    int handle;
-    int magic;
-};
-
-struct sVEf_5400 {
-    short delta;
-    short index;
-    int (*fn)(void*, float, float, float);
-};
-struct sVEr_5400 {
-    short delta;
-    short index;
-    sLightRef_5400* (*fn)(void*);
-};
-
-// The unit defines cWorldLightMan_evictHashTableEntry later with its own node type.
-extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry_n(sMan_5400* self, int priority) __asm__("cWorldLightMan_evictHashTableEntry");
-extern "C" sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400* self, int priority);
+extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry(cWorldLightMan* self, int priority);
+extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode(cWorldLightMan* self, int priority);
 extern "C" void cWorldLightMan_IntersectLights1(cWorldLightMan* self, void* a1, void* a2, cIrradiance* a3, int count);
 extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, t4Matrix* out);
-extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
+extern "C" void cOverlapList_gettyped(cOverlapList* list, tBoundBox* box);
 extern "C" cIrradiance* cRenderStateMan_getCustomIrradiance(void);
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 extern "C" cIrradiance* cIrradianceDataBase_Get(void* self, int i);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec_5400 Sub_5400(const sVec_5400& a, const sVec_5400& b)
+static inline t4VectorXYZW Sub_5400(const t4Vector& a, const t4Vector& b)
 {
-    sVec_5400 r;
+    t4VectorXYZW r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -171,9 +134,9 @@ static inline sVec_5400 Sub_5400(const sVec_5400& a, const sVec_5400& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec_5400 Add_5400(const sVec_5400& a, const sVec_5400& b)
+static inline t4VectorXYZW Add_5400(const t4Vector& a, const t4Vector& b)
 {
-    sVec_5400 r;
+    t4VectorXYZW r;
     __asm__ __volatile__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -185,7 +148,7 @@ static inline sVec_5400 Add_5400(const sVec_5400& a, const sVec_5400& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_5400(const sVec_5400& v)
+static inline float Length_5400(const t4Vector& v)
 {
     float r;
     int t;
@@ -205,24 +168,27 @@ static inline float Length_5400(const sVec_5400& v)
     return r;
 }
 
-static inline sVec_5400 Trans_5400(const t4Matrix& m)
+// The translation row of a matrix. Same-layout cast: t4VectorXYZW only adds constructors to t4Vector.
+static inline t4VectorXYZW Trans_5400(const t4Matrix& m)
 {
-    return *(const sVec_5400*)&((t4Vector*)&m.row[0])[3];
+    return *(const t4VectorXYZW*)&m.row[3];
 }
 
-static inline sVec_5400 ObjPos_5400(char* vobj)
+// The translation row of the instance's world transform (a float[4][4]; same-layout cast to the vector).
+static inline t4VectorXYZW ObjPos_5400(tInstanceRecord* obj)
 {
-    tInstanceRecord* obj = (tInstanceRecord*)vobj;
-    return *(sVec_5400*)&obj->m_fmTransform.m[3][0];
+    return *(t4VectorXYZW*)&obj->m_fmTransform.m[3][0];
 }
 
-static inline cIrradiance* Resolve_5400(sLightRef_5400* ref)
+// A painted irradiance name is resolved on first use: m_nameId[0] becomes the irradiance id and m_nameId[1] the tag
+// 0x123400 (the field is the world painter's, written in place).
+static inline cIrradiance* Resolve_5400(tWPNameField* ref)
 {
-    if (ref->magic != 0x123400) {
-        ref->handle = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, ref);
-        ref->magic = 0x123400;
+    if (ref->m_nameId[1] != 0x123400) {
+        ref->m_nameId[0] = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, ref);
+        ref->m_nameId[1] = 0x123400;
     }
-    return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, ref->handle);
+    return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, ref->m_nameId[0]);
 }
 
 // Pushes node onto the front of hash chain heads[slot].
@@ -238,10 +204,10 @@ static inline void Link_5400(tLightCacheEntry** heads, int slot, tLightCacheEntr
     *p = node;
 }
 
-static inline sLightRef_5400* GetRef_5400(char* vo, int slot)
+// Irradiance-name getter @p slot (37 LightIrradianceName, 40 ObjectIrradianceName) of the painted lighting data.
+static inline tWPNameField* GetRef_5400(tWPInGameData* o, int slot)
 {
-    tWPInGameData* o = (tWPInGameData*)vo;
-    sVEr_5400* vt = (sVEr_5400*)VPTR_OF(tWPInGameData, o);
+    sVEntry<tWPNameField*(void*)>* vt = (sVEntry<tWPNameField*(void*)>*)VPTR_OF(tWPInGameData, o);
     return vt[slot].fn(vthis(o, vt[slot]));
 }
 
@@ -249,30 +215,33 @@ static inline sLightRef_5400* GetRef_5400(char* vo, int slot)
  * Returns an instance's cached real-time lighting, finding or creating its light-cache entry and relighting it when the
  * instance is new or has moved.
  *
- * The entry is looked up by the instance id (+0x78) in the 32-chain hash at +0x3210 (chain (id >> 8) & 0x1F); a new one
- * comes from the 32 entries at +0x210 (count +0x3290) or, when they are used up, from cWorldLightMan_evictHashTableEntry, the least recently
- * used. Its tick (+0x4) becomes cAppMan_TheAppMan +0x18. The position is the translation of cInstanceNode_buildMeshMat
- * when the instance has a mesh node (+0xC), else the instance's +0x40; with @p force it is re-read for a known entry,
- * which relights after a move of more than 10 and reloads its irradiance after more than 500.
+ * The entry is looked up by the instance id (m_RID) in the 32-chain hash LightCacheHashTable (chain (id >> 8) & 0x1F);
+ * a new one comes from the 32 entries of LightCacheArray (count m_uiNumLightCacheEntry) or, when they are used up,
+ * from cWorldLightMan_evictHashTableEntry, the least recently used. Its tick (iTick) becomes
+ * cAppMan_TheAppMan->TimerTick. The position is the translation of cInstanceNode_buildMeshMat when the instance has a
+ * mesh node (m_pActiveNode), else that of its m_fmTransform; with @p force it is re-read for a known entry, which
+ * relights after a move of more than 10 and reloads its irradiance after more than 500.
  *
- * On a relight the entry's overlap node (+0xC0, taken from cWorldLightMan_evictOverlapNode unless it still belongs to this entry) gets a
- * 2000-unit box around the position, rebuilt with cOverlapList_gettyped when new or left. A reload sets the target
- * irradiance (+0xD0) to cRenderStateMan_getCustomIrradiance's custom one while cRenderStateMan_m_hasCustomIrradiance is set; otherwise it queries the world painter
- * (+0x4) at the position and uses the object irradiance name (accessor 40), else the light irradiance name (37), else
- * the default cIrradianceDataBase_mDefaultId. The current set (+0x10) is then the target plus the 4 strongest lights of the overlap list
- * (cWorldLightMan_IntersectLights1). getRealTimeLights calls it with bit 12 of the instance's +0x8 as @p force.
+ * On a relight the entry's overlap node (pOverlapNode, taken from cWorldLightMan_evictOverlapNode unless it still
+ * belongs to this entry) gets a 2000-unit box around the position, rebuilt with cOverlapList_gettyped when new or
+ * left. A reload sets the target irradiance (ObjIrradiance) to cRenderStateMan_getCustomIrradiance's custom one while
+ * cRenderStateMan_m_hasCustomIrradiance is set; otherwise it queries the world painter (m_pWPQuery) at the position
+ * and uses the object irradiance name (accessor 40), else the light irradiance name (37), else the default
+ * cIrradianceDataBase_mDefaultId. The current set (RTlightInfo) is then the target plus the 4 strongest lights of the
+ * overlap list (cWorldLightMan_IntersectLights1). getRealTimeLights calls it with bit 12 of the instance's +0x8 as
+ * @p force.
  *
  * @param obj  the instance record
  * @param force  nonzero for a moving instance: re-check its position
- * @return the entry's current light set (+0x10)
+ * @return the entry's current light set (RTlightInfo)
  */
-extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInstanceRecord* obj, int force)
+extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(cWorldLightMan* self, tInstanceRecord* obj, int force)
 {
     unsigned int key = obj->m_RID;
     int slot = (key >> 8) & 0x1F;
     int found = 0;
     tLightCacheEntry* node;
-    for (node = self->heads[slot]; node != 0; node = node->pNext) {
+    for (node = self->LightCacheHashTable[slot]; node != 0; node = node->pNext) {
         if (node->RID == obj->m_RID) {
             found = 1;
             break;
@@ -280,18 +249,18 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
     }
     int prio = cAppMan_TheAppMan->TimerTick;
     if (!found) {
-        if (self->count < 32) {
-            node = &self->nodes[self->count++];
+        if (self->m_uiNumLightCacheEntry < 32) {
+            node = &self->LightCacheArray[self->m_uiNumLightCacheEntry++];
         } else {
-            node = cWorldLightMan_evictHashTableEntry_n(self, prio);
+            node = cWorldLightMan_evictHashTableEntry(self, prio);
         }
         node->RID = obj->m_RID;
-        Link_5400(self->heads, slot, node);
+        Link_5400(self->LightCacheHashTable, slot, node);
     }
     node->iTick = prio;
     int reload = 0;
     int moved = 0;
-    sVec_5400 pos;
+    t4VectorXYZW pos;
     if (!found) {
         reload = 1;
         moved = 1;
@@ -300,7 +269,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
         } else {
-            pos = ObjPos_5400(((char*)obj));
+            pos = ObjPos_5400(obj);
         }
     } else if (force) {
         if ((int)obj->m_pActiveNode != 0) {
@@ -308,48 +277,48 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
         } else {
-            pos = ObjPos_5400(((char*)obj));
+            pos = ObjPos_5400(obj);
         }
-        float moveDist = Length_5400(Sub_5400(pos, (*(sVec_5400*)&node->pos)));
+        float moveDist = Length_5400(Sub_5400(pos, node->pos));
         if (10.0f < moveDist) moved = 1;
         if (500.0f < moveDist) reload = 1;
     }
     if (moved) {
-        (*(sVec_5400*)&node->pos) = pos;
+        node->pos = pos;
         int rebuild = 0;
-        if (((sBox_5400*)node->pOverlapNode) == 0 || ((sBox_5400*)node->pOverlapNode)->id != node->RID) {
-            (*(sBox_5400**)&node->pOverlapNode) = cWorldLightMan_evictOverlapNode(self, node->iTick);
-            ((sBox_5400*)node->pOverlapNode)->id = node->RID;
+        if (node->pOverlapNode == 0 || node->pOverlapNode->RID.m_uiRID != node->RID) {
+            node->pOverlapNode = cWorldLightMan_evictOverlapNode(self, node->iTick);
+            node->pOverlapNode->RID.m_uiRID = node->RID;
             rebuild = 1;
         }
-        ((sBox_5400*)node->pOverlapNode)->priority = node->iTick;
+        node->pOverlapNode->iTick = node->iTick;
         if (!rebuild) {
-            sBox_5400* overlapBox = ((sBox_5400*)node->pOverlapNode);
+            tOverlapListNode* overlapBox = node->pOverlapNode;
             int inside = 0;
-            if (overlapBox->bounds.min.x < (*(sVec_5400*)&node->pos).x && (*(sVec_5400*)&node->pos).x < overlapBox->bounds.max.x && overlapBox->bounds.min.y < (*(sVec_5400*)&node->pos).y && (*(sVec_5400*)&node->pos).y < overlapBox->bounds.max.y &&
-                overlapBox->bounds.min.z < (*(sVec_5400*)&node->pos).z && (*(sVec_5400*)&node->pos).z < overlapBox->bounds.max.z) {
+            if (overlapBox->box.MinPoint.x < node->pos.x && node->pos.x < overlapBox->box.MaxPoint.x &&
+                overlapBox->box.MinPoint.y < node->pos.y && node->pos.y < overlapBox->box.MaxPoint.y &&
+                overlapBox->box.MinPoint.z < node->pos.z && node->pos.z < overlapBox->box.MaxPoint.z) {
                 inside = 1;
             }
             if (!inside) rebuild = 1;
         }
         if (rebuild) {
             float extent = 1000.0f;
-            ((sBox_5400*)node->pOverlapNode)->bounds = sAABox_5400(Sub_5400((*(sVec_5400*)&node->pos), sVec_5400(extent, extent, extent, 0.0f)),
-                                            Add_5400((*(sVec_5400*)&node->pos), sVec_5400(extent, extent, extent, 0.0f)));
-            cOverlapList_gettyped(((sBox_5400*)node->pOverlapNode)->cell, &((sBox_5400*)node->pOverlapNode)->bounds);
+            node->pOverlapNode->box = tBoundBoxCtor(Sub_5400(node->pos, t4VectorXYZW(extent, extent, extent, 0.0f)),
+                                                    Add_5400(node->pos, t4VectorXYZW(extent, extent, extent, 0.0f)));
+            cOverlapList_gettyped(node->pOverlapNode->pOverlapList, &node->pOverlapNode->box);
         }
         if (reload) {
             if (cRenderStateMan_m_hasCustomIrradiance != 0) {
                 node->ObjIrradiance = *cRenderStateMan_getCustomIrradiance();
             } else {
-                tWorldPainterQuery* world = (tWorldPainterQuery*)self->world;
-                sVEf_5400* vt = (sVEf_5400*)VPTR_OF(tWorldPainterQuery, world);
-                vt[2].fn(vthis(world, vt[2]), (*(sVec_5400*)&node->pos).x, (*(sVec_5400*)&node->pos).y, -99999.0f);
-                sLightRef_5400* ref = GetRef_5400(*(char**)self->world, 40);
+                tWorldPainterQuery* world = self->m_pWPQuery;
+                world->queryPosition(node->pos.x, node->pos.y, -99999.0f);
+                tWPNameField* ref = GetRef_5400(self->m_pWPQuery->m_data, 40);
                 if (*(signed char*)ref != 0) {
                     node->ObjIrradiance = *Resolve_5400(ref);
                 } else {
-                    ref = GetRef_5400(*(char**)self->world, 37);
+                    ref = GetRef_5400(self->m_pWPQuery->m_data, 37);
                     if (*(signed char*)ref != 0) {
                         node->ObjIrradiance = *Resolve_5400(ref);
                     } else {
@@ -359,7 +328,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
             }
         }
         node->RTlightInfo = node->ObjIrradiance;
-        cWorldLightMan_IntersectLights1((cWorldLightMan*)self, &(*(sVec_5400*)&node->pos), ((sBox_5400*)node->pOverlapNode)->cell, &node->RTlightInfo, 4);
+        cWorldLightMan_IntersectLights1(self, &node->pos, node->pOverlapNode->pOverlapList, &node->RTlightInfo, 4);
     }
     return &node->RTlightInfo;
 }
@@ -394,56 +363,44 @@ extern "C" void cWorldLightMan_flushOverlapCache(sWorldLight* lights)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_evictHashTableEntry);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-struct sWorldLightNode {
-    long key;
-    char pad08[0x168];
-    sWorldLightNode* next;
-    sWorldLightNode* prev;
-    char pad178[8];
-};
-
-struct sWorldLightMan {
-    char pad000[0x210];
-    sWorldLightNode nodes[32];
-    sWorldLightNode* heads[32];
-};
-
 /**
  * Takes the least recently used light-cache entry for reuse: the one of the 32 with the lowest tick, unlinked from its
  * hash chain.
  *
- * Entries with a tick (+0x4) of @p priority or more are never picked. The chain is (id >> 8) & 0x1F of the entry's
- * first word; the entry is unlinked through its next (+0x170) and prev (+0x174) links. cWorldLightMan_getRealTimeLights calls it when all
- * 32 entries are in use.
+ * Entries with a tick (iTick) of @p priority or more are never picked. The chain (LightCacheHashTable) is
+ * (RID >> 8) & 0x1F; the entry is unlinked through its pNext and pPrev links. cWorldLightMan_getRealTimeLights calls
+ * it when all 32 entries are in use.
  *
- * @param priority  the current tick (cAppMan_TheAppMan +0x18)
+ * @param priority  the current tick (cAppMan_TheAppMan->TimerTick)
  * @return the entry, or null when every tick is at least @p priority
  */
-extern "C" sWorldLightNode* cWorldLightMan_evictHashTableEntry(sWorldLightMan* self, int priority)
+extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry(cWorldLightMan* self, int priority)
 {
-    sWorldLightNode* best = 0;
+    tLightCacheEntry* best = 0;
     int min = priority + 1;
     unsigned int i;
     for (i = 0; i < 32; i++) {
-        int nodePriority = *(int*)((char*)&self->nodes[i] + 4);
+        int nodePriority = self->LightCacheArray[i].iTick;
         if (nodePriority < min) {
             min = nodePriority;
-            best = &self->nodes[i];
+            best = &self->LightCacheArray[i];
         }
     }
-    int slot = (int)(best->key >> 8) & 0x1F;
-    if (best->prev == 0) {
-        self->heads[slot] = best->next;
-        if (best->next != 0) {
-            best->next->prev = 0;
+    // Retail loads RID together with iTick as one doubleword and hashes bits 8-12 of it.
+    // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
+    long ridAndTick = *(long*)&best->RID;
+    int slot = (int)(ridAndTick >> 8) & 0x1F;
+    if (best->pPrev == 0) {
+        self->LightCacheHashTable[slot] = best->pNext;
+        if (best->pNext != 0) {
+            best->pNext->pPrev = 0;
         }
     } else {
-        if (best->next == 0) {
-            best->prev->next = 0;
+        if (best->pNext == 0) {
+            best->pPrev->pNext = 0;
         } else {
-            best->prev->next = best->next;
-            best->next->prev = best->prev;
+            best->pPrev->pNext = best->pNext;
+            best->pNext->pPrev = best->pPrev;
         }
     }
     return best;
@@ -456,7 +413,7 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_evictOverlapNode);
 
 
 
-// The unit declares this function as `sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400*, int)` (line ~198); define it under its own types.
+// getRealTimeLights declares this function under its C name; define it under a second name bound to the symbol.
 extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan* self, int iCurrentTick) __asm__("cWorldLightMan_evictOverlapNode");
 /**
  * Takes an overlap node for reuse: the first free one (id -1) of the 8, else the one with the oldest tick.
@@ -523,16 +480,10 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights);
 extern "C" float cWorldLightMan_GetIntensity(cWorldLightMan* a, t4Vector* b, tLightRecord* light);
 
 
-struct sLightMgr_5B68 {
-    char pad_0x0[0x210];
-    unsigned int count;         // 0x210
-    tLightRecord* lights[1];     // 0x214
-};
-
 /**
  * Picks the up to @p max strongest lights of an overlap list at a point, best first.
  *
- * Walks the list's records (count +0x210, pointers from +0x214) of resource type 6 (+0x8), scores each with
+ * Walks the list's typed space nodes (numtyped, typed[]) of type 6 (lights; m_iIntersect[2]), scores each with
  * cWorldLightMan_GetIntensity and keeps the best @p max in @p outp in descending order (cleared to null first); a light must beat the
  * weakest kept score, and scores of 0 or less never count. Called by cWorldLightMan_IntersectLights1 and cRider_updateActiveLights (8
  * lights at the rider's hips).
@@ -545,7 +496,7 @@ struct sLightMgr_5B68 {
  */
 extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* lightMan, void* point, void* mgrp, void** outp, int max)
 {
-    sLightMgr_5B68* mgr = (sLightMgr_5B68*)mgrp;
+    cOverlapList* mgr = (cOverlapList*)mgrp;
     tLightRecord** out = (tLightRecord**)outp;
     float score[32];
     int count = 0;
@@ -555,9 +506,10 @@ extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* lightMan, void* p
         score[i] = 0.0f;
     }
     float minScore = 0.0f;
-    unsigned int n = mgr->count;
+    unsigned int n = mgr->numtyped;
     for (unsigned int j = 0; j < n; j++) {
-        tLightRecord* lightRec = mgr->lights[j];
+        // A typed space node of type 6 (kSNT_Light) is a tLightRecord, which begins with the node's next, prev, type.
+        tLightRecord* lightRec = (tLightRecord*)mgr->typed[j];
         if (lightRec->m_iIntersect[2] == 6) {
             float lightScore = cWorldLightMan_GetIntensity(lightMan, (t4Vector*)point, lightRec);
             if (minScore < lightScore) {

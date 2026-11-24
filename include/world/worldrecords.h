@@ -413,7 +413,8 @@ struct tCollideRecord {
                                     //     [U] cPS2ChunkResolve_resolveInstance builds the instance's m_iFlags from its
                                     //     high half (the dummy record's; view cPS2ChunkResolve_resolveInstance_sView f4).
                                     //     [Renamed from unk_004 by lstruct L2.]
-    unsigned int unk_008;           // 0x8 [O] tResourceID InstanceScriptId
+    unsigned int InstanceScriptId;  // 0x8 [O] tResourceID InstanceScriptId; [U] cWScriptCacheEntry_getWScriptHeaderId:
+                                    //     -1 = none, else its UID (high 24 bits) picks the InstanceScriptData row
     union {
         tCollideModelRecord* CollideModel; // 0xC [O]; [P] "->CollideModel"; [U] cWScriptCacheEntry_resolve stores the
                                     //      resolved model (or 0); cWorld_getSphereTreeInfo / getPolyModelInfo read it
@@ -423,7 +424,7 @@ struct tCollideRecord {
 
 CHECK_OFFSET(tCollideRecord, Method, 0x0);
 CHECK_OFFSET(tCollideRecord, InitFlags, 0x4);
-CHECK_OFFSET(tCollideRecord, unk_008, 0x8);
+CHECK_OFFSET(tCollideRecord, InstanceScriptId, 0x8);
 CHECK_OFFSET(tCollideRecord, CollideModel, 0xC);
 CHECK_SIZE(tCollideRecord, 0x10);
 

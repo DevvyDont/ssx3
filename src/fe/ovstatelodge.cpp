@@ -17,6 +17,7 @@
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 #include "ui/uitext.h"
+#include "ealib/shape.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
@@ -74,14 +75,14 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     (*(int*)&room->mpPassIcon) = 0;
     (*(int*)&room->mpHelpText) = 0;
     for (int i = 4; i >= 0; i--) {
-        ((int*)&room->mpRaceMarkers[0])[i] = 0;
+        room->mpRaceMarkers[i] = 0;
     }
-    int* row1 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[1];
-    int* row2 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[2];
-    int* row3 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[3];
-    int* row4 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[4];
+    cUIIcon** row1 = room->mpRaceBackCountryMarkers;
+    cUIIcon** row2 = room->mpFreestyleBackCountryMarkers;
+    cUIIcon** row3 = room->mpSuperPipeMarkers;
+    cUIIcon** row4 = room->mpBigAirMarkers;
     for (int i = 2; i >= 0; i--) {
-        ((int (*)[3])&room->mpSlopeStyleMarkers[0])[0][i] = 0;
+        room->mpSlopeStyleMarkers[i] = 0;
     }
     for (int i = 2; i >= 0; i--) {
         row1[i] = 0;
@@ -671,12 +672,12 @@ static inline int isActive_31C0(cUIGroup* w)
  * Finishes the mountain room's peak-pass picture load: once the file is in, turns it into the "pass" texture, shows the
  * pass front when appropriate and releases the file.
  *
- * Does nothing without the pass icon (+0x50) or while the loader (SSXApp->RealFE + 0x1A70) reports slot +0xBC of
- * character +0xB0 as not loaded (func_0019E238). Otherwise takes the file data (func_0019E2B0), creates the texture
- * "pass" from the data at its own offset (+0x14) through GrMan's virtual slot 46, and stores the texture id at +0xC4
- * and in the icon (+0x78, with +0x7C cleared). When the pass group (+0x48) is visible (widget flag bit 6) and the
- * pass-front group (+0x4C) is not, shows them (cFEStateMountainRoom_showPassFront). Finally frees the loader slot (func_0019DC20) and sets
- * +0xBC to -1.
+ * Does nothing without the pass icon (mpPassIcon) or while the loader (SSXApp->RealFE + 0x1A70) reports slot
+ * mTextureFileIndex of character mCharID as not loaded (func_0019E238). Otherwise takes the shape file (func_0019E2B0),
+ * creates the texture "pass" from its first shape (tbl[0].offset) through GrMan's virtual slot 46, and stores the
+ * texture id in mFrontTextureID and in the icon (mTextureID, with mpTextureElem cleared). When the pass group (+0x48)
+ * is visible (widget flag bit 6) and the pass-front group (+0x4C) is not, shows them
+ * (cFEStateMountainRoom_showPassFront). Finally frees the loader slot (func_0019DC20) and sets +0xBC to -1.
  *
  * @param vself  the mountain-room state (this)
  */
@@ -689,13 +690,14 @@ extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vse
     if (func_0019E238(mgr, vself->mCharID, vself->mTextureFileIndex) == 0) {
         return;
     }
-    char* fileData = (char*)func_0019E2B0(mgr, vself->mCharID, vself->mTextureFileIndex);
+    SHAPEFILE* fileData = (SHAPEFILE*)func_0019E2B0(mgr, vself->mCharID, vself->mTextureFileIndex);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    int id = ps2GraphicsMan->AddTexture((const SHAPE*)(fileData + *(int*)(fileData + 0x14)), str_pass, 0, 1, -1);
-    char* snd = (char*)vself->mpPassIcon;
+    // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file blob)
+    int id = ps2GraphicsMan->AddTexture((const SHAPE*)((char*)fileData + fileData->tbl[0].offset), str_pass, 0, 1, -1);
+    cUIIcon* passIcon = vself->mpPassIcon;
     vself->mFrontTextureID = id;
-    *(int*)(snd + 0x78) = id;
-    *(int*)(snd + 0x7C) = 0;
+    passIcon->mTextureID = id;
+    passIcon->mpTextureElem = 0;
     cUIGroup* passGroup = vself->mpPassGroup;
     if (isActive_31C0(passGroup)) {
         int both = 0;
@@ -1111,7 +1113,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
     case 6: {
         int id = (self->mPeakNum << 16) | item->mMiscData;
         for (int i = 0; i < 4; i++) {
-            cUIThing* listItem = ((cUIThing**)&self->mpTrophyIcons)[i];
+            cUIThing* listItem = self->mpTrophyIcons[i];
             if (listItem != 0) {
                 listItem->setVisible(0);
             }
@@ -1226,95 +1228,64 @@ cBEInterface* cBE_getInterface_Fv_3F80(void* be, int kind) __asm__("cBE_getInter
 extern "C" int func_001CE6F0(int mountain);
 extern "C" int getChallengeMedal(int player, int charId, int mountain, int peak, int i);
 extern "C" void setChallengeName(void* text, int mountain, int peak, int i);
-extern "C" char* cBERewardInterface_getMedal(void* iface, int peak, int ch);
+extern "C" tMedalInfo* cBERewardInterface_getMedal(void* iface, int peak, int ch);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
-
-class cWidget_3F80 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
-struct sRoom_3F80 {
-    char pad_0x0[0x10];
-    char* engine;                   // 0x10
-    char pad_0x14[0x30];
-    signed char player;             // 0x44
-    char pad_0x45[0x13];
-    cWidget_3F80* icon[5];          // 0x58
-    cWidget_3F80* box[5];           // 0x6C
-    cWidget_3F80* name[5];          // 0x80
-    cWidget_3F80* bar[5];           // 0x94
-    cWidget_3F80* medal[5];         // 0xA8
-    cWidget_3F80* lock[5];          // 0xBC
-    char pad_0xD0[0xC];
-    int charId;                     // 0xDC
-    int mountain;                   // 0xE0
-};
 
 /**
  * Fills the peak room's medal list for one trophy group of the current peak: a line per challenge with its name and,
  * when earned, the medal and a check mark, else a cross.
  *
- * First hides all six widget lists (+0x58 medal icons, +0x6C backgrounds, +0x80 names, +0x94 name backgrounds, +0xA8
- * check marks, +0xBC cross marks). func_001CE6F0 counts the group's entries in the challenge table for the peak
- * (+0xE0); it is declared here with one argument and gets the group from $a1, which still holds @p peak. For each
- * entry: getChallengeMedal gives the medal for the player (+0x44) and character (+0xDC), setChallengeName labels the line,
- * and the name, its background and the medal background are shown. With a medal (not -1) the icon takes the
- * texture-bank element (mpEngine + 0x58) named by the medal record's string (cBERewardInterface_getMedal on back-end
- * interface 13, record +0x8) and is shown with the check mark; without one the cross mark is shown.
+ * First hides all six widget lists (mpMedals, mpMedalsBackground, mpMedalsText, mpMedalsTextBackground,
+ * mpMedalsCheckMark, mpMedalsCrossMark). func_001CE6F0 counts the group's entries in the challenge table for the peak
+ * (mPeakNum); it is declared here with one argument and gets the group from $a1, which still holds @p peak. For each
+ * entry: getChallengeMedal gives the medal for the player (mUserNum) and character (mCharID), setChallengeName labels
+ * the line, and the name, its background and the medal background are shown. With a medal (not -1) the icon takes the
+ * texture-bank element (mpEngine->mTextureBank) named by the medal record's mpIconName (cBERewardInterface_getMedal on
+ * back-end interface 13) and is shown with the check mark; without one the cross mark is shown.
  *
  * @param vself  the peak-room state (this)
- * @param peak  the trophy group, 0-3 (On Tour trophyType): despite its name not a peak; the peak is +0xE0
+ * @param peak  the trophy group, 0-3 (On Tour trophyType): despite its name not a peak; the peak is mPeakNum
  */
 extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* vself, int peak)
 {
-    sRoom_3F80* self = (sRoom_3F80*)vself;
+    cFEStatePeakRoom* self = vself;
     int n;
     void* iface;
     int i;
-    cWidget_3F80** icon = self->icon;
-    cWidget_3F80** box = self->box;
-    cWidget_3F80** name = self->name;
-    cWidget_3F80** bar = self->bar;
-    cWidget_3F80** medal = self->medal;
-    cWidget_3F80** lock = self->lock;
-    n = func_001CE6F0(self->mountain);
+    cUIIcon** icon = self->mpMedals;
+    cUIIcon** box = self->mpMedalsBackground;
+    cUIText** name = self->mpMedalsText;
+    cUIThing** bar = self->mpMedalsTextBackground;
+    cUIIcon** medal = self->mpMedalsCheckMark;
+    cUIIcon** lock = self->mpMedalsCrossMark;
+    n = func_001CE6F0(self->mPeakNum);
     for (int j = 0; j < 5; j++) {
-        self->icon[j]->show(0);
-        self->box[j]->show(0);
-        self->name[j]->show(0);
-        self->bar[j]->show(0);
-        self->medal[j]->show(0);
-        self->lock[j]->show(0);
+        self->mpMedals[j]->setVisible(0);
+        self->mpMedalsBackground[j]->setVisible(0);
+        self->mpMedalsText[j]->setVisible(0);
+        self->mpMedalsTextBackground[j]->setVisible(0);
+        self->mpMedalsCheckMark[j]->setVisible(0);
+        self->mpMedalsCrossMark[j]->setVisible(0);
     }
     iface = cBE_getInterface_Fv_3F80(cBE_getBE(), 13);
     for (i = 0; i < n; i++) {
-        int ch = getChallengeMedal(self->player, self->charId, self->mountain, peak, i);
-        setChallengeName(name[i], self->mountain, peak, i);
-        name[i]->show(1);
-        bar[i]->show(1);
-        box[i]->show(1);
+        int ch = getChallengeMedal(self->mUserNum, self->mCharID, self->mPeakNum, peak, i);
+        setChallengeName(name[i], self->mPeakNum, peak, i);
+        name[i]->setVisible(1);
+        bar[i]->setVisible(1);
+        box[i]->setVisible(1);
         if (ch != -1) {
-            char* trophyRec = cBERewardInterface_getMedal(iface, peak, ch);
-            char* eng = self->engine;
-            int hash = GetHashValue32(*(char**)(trophyRec + 8));
-            int textureElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);
-            cWidget_3F80* w = icon[i];
-            *(int*)((char*)w + 0x7C) = textureElem;
-            *(int*)((char*)w + 0x78) = -1;
-            icon[i]->show(1);
-            medal[i]->show(1);
+            tMedalInfo* medalInfo = cBERewardInterface_getMedal(iface, peak, ch);
+            cUIEngine* eng = self->mpEngine;
+            int hash = GetHashValue32(medalInfo->mpIconName);
+            int textureElem = cUITextureBank_getElementByHashname(&eng->mTextureBank, hash);
+            cUIIcon* w = icon[i];
+            *(int*)&w->mpTextureElem = textureElem;
+            w->mTextureID = -1;
+            icon[i]->setVisible(1);
+            medal[i]->setVisible(1);
         } else {
-            lock[i]->show(1);
+            lock[i]->setVisible(1);
         }
     }
 }

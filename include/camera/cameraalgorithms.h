@@ -175,6 +175,21 @@ CHECK_OFFSET(cBasicCameraAlgorithm, Pitch, 0x30);
 CHECK_OFFSET(cBasicCameraAlgorithm, Heading, 0x34);
 CHECK_SIZE(cBasicCameraAlgorithm, 0x40);
 
+// cManualCameraAlgorithm / cEditorCameraAlgorithm: the two free cameras a cManualCameraController owns
+// (camera/cameracontroller.h ManualAlgo / EditorAlgo). Both add no fields to cBasicCameraAlgorithm: [R]
+// cManualCameraController_cManualCameraController allocates each with cMemMan_alloc(0x40, "Manual Cam Algo" /
+// "Editor Cam Algo") and runs cManualCameraAlgorithm_cManualCameraAlgorithm /
+// cEditorCameraAlgorithm_cEditorCameraAlgorithm (vtables D_0045BD10 / D_0045BCA8); [U] the controller's dtor deletes
+// them (slot 1), snap / snapCurrent call slots 3 / 4.
+struct cManualCameraAlgorithm : public cBasicCameraAlgorithm {
+};
+
+struct cEditorCameraAlgorithm : public cBasicCameraAlgorithm {
+};
+
+CHECK_SIZE(cManualCameraAlgorithm, 0x40);
+CHECK_SIZE(cEditorCameraAlgorithm, 0x40);
+
 // cChaseAlgorithm (On Tour: 0x40): an algorithm that follows a rider.
 struct cChaseAlgorithm : public cCameraAlgorithm {
     // cCameraAlgorithm (camera/cameraalgorithms.h, 0x14): the vptr at 0x10:

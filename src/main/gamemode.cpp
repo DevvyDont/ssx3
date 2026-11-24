@@ -153,10 +153,6 @@ extern "C" int* cGameModeMan_getGM(void)
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_purgeGM);
 #ifdef SKIP_ASM
-class cMode2380E8 {
-public:
-    virtual ~cMode2380E8();
-};
 void operator_delete(int*);
 extern cGameModeHandler* cGameModeMan_aHandler[];
 
@@ -169,7 +165,7 @@ extern "C" void cGameModeMan_purgeGM(void)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        delete (cMode2380E8*)cGameModeMan_aHandler[i];
+        delete cGameModeMan_aHandler[i];
     }
     if (cGameModeMan_instance != 0) {
         operator_delete((int*)cGameModeMan_instance);
@@ -1197,26 +1193,21 @@ extern "C" void cGMBigAirHandler_fillScoreTable(sScore_239AA0* self)
 //100%
 INCLUDE_ASM("main/gamemode", cGMBigAirHandler_getHeatScore);
 #ifdef SKIP_ASM
-struct sScoreTable239CE0 {
-    int f0;
-    int tbl[8][10];
-};
-
 /**
  * Returns a rider's score in one heat of the scored event, or 0 for a heat not run yet.
  *
- * Slot +0x4C (getHeatScore) of cGMBigAirHandler_vtbl; reads the table at +0x4 (heat x 10 riders).
+ * Slot +0x4C (getHeatScore) of cGMBigAirHandler_vtbl; reads uiScore (heat x 10 riders).
  *
  * @param col  the rider index
  * @param row  the heat
  * @return the score, or 0 when @p row is past iHeatNum
  */
-extern "C" int cGMBigAirHandler_getHeatScore(sScoreTable239CE0* self, int col, int row)
+extern "C" int cGMBigAirHandler_getHeatScore(cGMBigAirHandler* self, int col, int row)
 {
     if (cGameModeHandler_pManager->iHeatNum < row) {
         return 0;
     }
-    return self->tbl[row][col];
+    return self->uiScore[row][col];
 }
 #endif
 
@@ -1376,9 +1367,9 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_riderCheckpointHit);
 /**
  * Counts a checkpoint for one player in the two-player event of handler 9.
  *
- * Increments the player's counter (+0x4 + 2 * @p player); returns 0 unless it is now ahead of the other player's. In
- * event 1 the leader also adds @p secs seconds to the time limit, unless the limit has already passed (then 0). Slot
- * +0x34 (riderCheckpointHit) of cGMMPSlopeHandler_vtbl.
+ * Increments the player's counter (LastCheckpointHit[@p player]); returns 0 unless it is now ahead of the other
+ * player's. In event 1 the leader also adds @p secs seconds to the time limit, unless the limit has already passed
+ * (then 0). Slot +0x34 (riderCheckpointHit) of cGMMPSlopeHandler_vtbl.
  *
  * @param player  the player (0 or 1)
  * @param secs  seconds to add
@@ -1386,14 +1377,15 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_riderCheckpointHit);
  */
 extern "C" int cGMMPSlopeHandler_riderCheckpointHit(cGMMPSlopeHandler* self, int player, int secs)
 {
-    short* score = (short*)(&self->LastCheckpointHit[0]);
-    short* mine = (short*)((char*)score + (player << 1));
+    short* score = self->LastCheckpointHit;
+    short* mine = &score[player];
     short newScore = ++*mine;
     int other = 0;
     if (player == 0) {
         other = 1;
     }
-    if (*(short*)((char*)score + (other << 1)) >= newScore) {
+    short* theirs = &score[other];
+    if (*theirs >= newScore) {
         return 0;
     }
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;

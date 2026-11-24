@@ -14,6 +14,7 @@
 #include "fe/festatelodge.h"
 #include "fe/festatebuyattrib.h"
 #include "main/ssxapp.h"
+#include "fe/fecustom.h"
 
 //100%
 INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onCreateScreen);
@@ -155,10 +156,10 @@ extern char str_TransitionOut_b[];
  * Acts on an accepted lodge option: asks to save or quit, opens the profile state, or moves on.
  *
  * Only event 5, and only for options enabled in gLodgeOptionUnlocked. Until bToNextState (0x4C) is set, option 0 and
- * option 6 push a cFEPopupConfirm asking kT_CMNSaveProgress or kT_OVRCMNQuitTitlePrompt (path 0x10 or 6 at
- * 0x50). Option 8 sets the custom interface's +0xC to 0x27 and pushes a cFEStateProfileLoad (cFEStateProfileLoad_cFEStateProfileLoad,
- * mode 3); any other plays "TransitionOut" and pushes the custom interface's getNextState for the option. BE
- * interface 4 is fetched first and its result ignored.
+ * option 6 push a cFEPopupConfirm asking kT_CMNSaveProgress or kT_OVRCMNQuitTitlePrompt (path 0x10 or 6 at 0x50).
+ * Option 8 sets the cFECustom's mProfileLaunchScreen to 0x27 and pushes a cFEStateProfileLoad
+ * (cFEStateProfileLoad_cFEStateProfileLoad, mode 3); any other plays "TransitionOut" and pushes the custom interface's
+ * getNextState for the option. BE interface 4 is fetched first and its result ignored.
  *
  * @param w  the option widget that sent the event; nothing happens when null
  * @param event  the widget event (only 5, accept, is handled)
@@ -197,7 +198,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
         return;
     }
     if (k == 8) {
-        *(int*)((char*)self->mpEngine->mpCustom + 0xC) = 39;
+        ((cFECustom*)self->mpEngine->mpCustom)->mProfileLaunchScreen = 39;
         void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0, 0);
         void* newState = cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, 1 << self->mCurrentCtrl);
         cUIStateStack_push(&self->mpEngine->mStateStack, newState);
@@ -260,12 +261,6 @@ extern char str_cFEPopupConfirm_b[];
 extern char str_cFEStateProfileLoad_b[];
 extern char str_kT_CMNSaveBeforeQuit[];
 
-struct sVE_1F3CF0s {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
-
 
 
 /**
@@ -323,23 +318,26 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         switch (self->mPathToSaveProfile) {
         case 0x10: {
             void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
-            char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
-            *(int*)(newState + 0x27C) = 1;
-            *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
+            cFEStateProfileLoad* newState =
+                (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
+            newState->mTypeOfQuit = 1;
+            newState->mAttrState = (newState->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
             cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
             break;
         }
         case 17: {
             void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
-            char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
-            *(int*)(newState + 0x27C) = 2;
-            *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
+            cFEStateProfileLoad* newState =
+                (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
+            newState->mTypeOfQuit = 2;
+            newState->mAttrState = (newState->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
             cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
             break;
         }
         case 6: {
             cFELocale* mgr = SSXApp->FELocale;
-            sVE_1F3CF0s* vt = (sVE_1F3CF0s*)VPTR_OF(cUILocaleInterface, mgr);
+            sVEntry<unsigned short*(void*, int)>* vt =
+                (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveBeforeQuit));
             void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
             void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
@@ -639,12 +637,13 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         }
         if (k == 14) {
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0);
-            char* popup = (char*)cKeyboardPopup_cKeyboardPopup(mem, self->mpEngine, ((char*)self), 0, self->mCtrlBits);
-            *(char*)(popup + 0x44) = 0;
-            *(int*)(popup + 0x140) = 55;
+            cKeyboardPopup* popup =
+                (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(mem, self->mpEngine, ((char*)self), 0, self->mCtrlBits);
+            popup->mUserNum = 0;
+            popup->miCurrentKey = 55;
             cKeyboardPopup_setMaxCharacters(popup, 8);
             cKeyboardPopup_setIncludeKey(popup, 75, 1, 2);
-            *(int*)(popup + 0x58) = 1;
+            popup->mbDisableForFirst = 1;
             cKeyboardPopup_setDisableShiftNumbers(popup, 1);
             cKeyboardPopup_setIncludeKey(popup, 0xE, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 39, 0, 2);

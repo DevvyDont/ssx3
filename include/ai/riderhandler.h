@@ -829,7 +829,7 @@ struct tAirStreamerSeg {
     t4Vector r; // 0x10 [O]; [U] cAirStreamerFX_update: board point - board axis * 90 (p1)
 
     tAirStreamerSeg() {} // [O] tAirStreamerSeg::tAirStreamerSeg(); [R] cAirStreamerFX's ctor keeps the empty
-                         //     construction loop of its new tAirStreamerSeg[25] (view cRsmItem_2EF3B0)
+                         //     construction loop of its new tAirStreamerSeg[25]
 };
 
 CHECK_OFFSET(tAirStreamerSeg, l, 0x00);

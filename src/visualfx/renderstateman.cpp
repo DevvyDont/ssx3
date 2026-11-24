@@ -11,6 +11,7 @@
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
+#include "ui/uithing.h"
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourR);
@@ -1094,8 +1095,8 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_cAirStreamerFX);
  */
 cRsm_2EF3B0::cRsm_2EF3B0()
 {
-    cRsmItem_2EF3B0** slot = &items;
-    *slot = new (str_cAirStreamerFX, 0, 0) cRsmItem_2EF3B0[25];
+    tAirStreamerSeg** slot = &items;
+    *slot = new (str_cAirStreamerFX, 0, 0) tAirStreamerSeg[25];
     cAirStreamerFX_readFromReplayFrame_F3B0(this);
 }
 
@@ -1142,13 +1143,13 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_reset);
 /**
  * Resets the air streamer: empties the trail and picks its maximum length.
  *
- * Clears the head, count and texture scroll (+0x8, +0xC, +0x10) and sets the length (+0x14) to 25 segments
- * for a rider with a view (mViewIndex >= 0), otherwise 18. Despite the name it reads nothing from a replay
- * frame.
+ * Clears the head, count and texture scroll (StreamBufHead, StreamBufLen, mVOffset) and sets the length
+ * (mMaxStreamerSegments) to 25 segments for a rider with a view (mRider->mViewIndex >= 0), otherwise 18. Despite the
+ * name it reads nothing from a replay frame.
  */
 extern "C" void cAirStreamerFX_reset(cAirStreamerFX* self)
 {
-    int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 25 : 18;
+    int mode = (self->mRider->mViewIndex >= 0) ? 25 : 18;
     *(int*)&self->mVOffset = 0;
     self->StreamBufHead = 0;
     self->StreamBufLen = 0;
@@ -1661,32 +1662,18 @@ extern float cLightGlow_m_PS2FrameDstScale;
 extern float cLightGlow_m_PS2IntensityTex2;
 extern float cLightGlow_m_PS2IntensityTex3;
 
-// A colour in On Tour's tARGB order: alpha first, then red, green, blue.
-struct sRsCol_F00A0 {
-    float A, R, G, B;
-    sRsCol_F00A0(const float& ia, const float& ir, const float& ig, const float& ib) : A(ia), R(ir), G(ig), B(ib) {}
+// tARGB (alpha first, then red, green, blue) with a const float& constructor (ctor only).
+struct tARGBCtor : tARGB {
+    tARGBCtor(const float& ia, const float& ir, const float& ig, const float& ib)
+    {
+        A = ia;
+        R = ir;
+        G = ig;
+        B = ib;
+    }
 };
-extern sRsCol_F00A0 cDepthFog_m_Colour;
+extern tARGB cDepthFog_m_Colour;
 
-struct sRsCtx_F00A0 {
-    char pad0[0x8C];
-    void* m_isInNIS[8];       // 0x8C
-    float m_SnowSparkleDensity[8];       // 0xAC
-    float m_DrawDistance[8];       // 0xCC
-    float m_FogDensity[8];       // 0xEC
-    float m_FogColourR[8];      // 0x10C
-    float m_FogColourG[8];      // 0x12C
-    float m_FogColourB[8];      // 0x14C
-    float m_FogNear[8];      // 0x16C
-    float m_FogFar[8];      // 0x18C
-    float m_ScreenTintScaleR[8];      // 0x1AC
-    float m_ScreenTintScaleG[8];      // 0x1CC
-    float m_ScreenTintScaleB[8];      // 0x1EC
-    float m_ScreenTintOffsetR[8];      // 0x20C
-    float m_ScreenTintOffsetG[8];      // 0x22C
-    float m_ScreenTintOffsetB[8];      // 0x24C
-};
-extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
 
 /**
  * Pulls one camera's visual-effect settings from the render-state manager into the effect systems.
@@ -1701,9 +1688,9 @@ extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
  */
 extern "C" void cVisualEffectsMan_commonUpdate(cVisualEffectsMan* self, int i)
 {
-    sRsCtx_F00A0* ctx = D_ctx_F00A0;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (cDepthFog_m_OverrideWP == 0) {
-        sRsCol_F00A0* dst = &cDepthFog_m_Colour;
+        tARGB* dst = &cDepthFog_m_Colour;
         cDepthFog_m_Density = cRenderStateMan_FogDensity(i);
         cDepthFog_m_Exponent = 1;
         cDepthFog_m_NearPlane = cRenderStateMan_FogNear(i);
@@ -1711,7 +1698,7 @@ extern "C" void cVisualEffectsMan_commonUpdate(cVisualEffectsMan* self, int i)
         float fogRed = cRenderStateMan_FogColourR(i);
         float fogGreen = cRenderStateMan_FogColourG(i);
         float fogBlue = cRenderStateMan_FogColourB(i);
-        *dst = sRsCol_F00A0(1.0f, fogRed, fogGreen, fogBlue);
+        *dst = tARGBCtor(1.0f, fogRed, fogGreen, fogBlue);
     }
     if (cScreenTint_m_OverrideWP == 0) {
         cScreenTint_m_ColourR = cRenderStateMan_ScreenTintScaleR(i);
@@ -1736,7 +1723,7 @@ extern "C" void cVisualEffectsMan_commonUpdate(cVisualEffectsMan* self, int i)
         cLightGlow_m_PS2IntensityTex2 = cRenderStateMan_LightGlowBlend2(i);
         cLightGlow_m_PS2IntensityTex3 = cRenderStateMan_LightGlowBlend3(i);
     }
-    ctx->m_isInNIS[i] = cRenderStateMan_m_inNIS;
+    ctx->m_isInNIS[i] = (int)cRenderStateMan_m_inNIS;
     ctx->m_SnowSparkleDensity[i] = cRenderStateMan_SnowSparkleDensity(i);
     ctx->m_DrawDistance[i] = cRenderStateMan_DrawDistance(i);
     ctx->m_FogDensity[i] = cRenderStateMan_FogDensity(i);
