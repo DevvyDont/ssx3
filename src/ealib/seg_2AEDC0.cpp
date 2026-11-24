@@ -1350,10 +1350,10 @@ extern unsigned char D_00499C81[];
 extern "C" void SkipWhiteSpace(char** pp, unsigned int* plen)
 {
     unsigned int i;
-    char* p = *pp;
-    for (i = 0; i < *plen && ((D_00499C81 + p[i])[0] & 8) != 0; i++) {
+    char* String = *pp;
+    for (i = 0; i < *plen && ((D_00499C81 + String[i])[0] & 8) != 0; i++) {
     }
-    *pp = p + i;
+    *pp = String + i;
     *plen -= i;
 }
 #endif

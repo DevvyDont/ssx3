@@ -5,7 +5,7 @@
 // asm label because this file declares these symbols with their argument lists elsewhere.
 #define SYSCALL_STUB(name, n) \
     void name##_syscall(void) __asm__(#name); \
-    void name##_syscall(void) { register int v __asm__("$3") = (n); __asm__ volatile("syscall" : : "r"(v)); }
+    void name##_syscall(void) { register int syscallNo __asm__("$3") = (n); __asm__ volatile("syscall" : : "r"(syscallNo)); }
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __errno);

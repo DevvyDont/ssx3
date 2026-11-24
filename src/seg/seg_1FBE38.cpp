@@ -132,9 +132,9 @@ extern "C" t3Vector MakeAnimDeltaFunc(int n, Ent_B060 *params) {
     Ent_B060 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445E70[idx];
+        int expectedType = D_00445E70[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -151,8 +151,8 @@ extern "C" t3Vector MakeAnimDeltaFunc(int n, Ent_B060 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_B060(i);
-            inst = t;
+            char *found = conv_B060(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -232,9 +232,9 @@ extern "C" t3Vector MakeAnimComboFunc(int n, Ent_B270 *params) {
     Ent_B270 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445E98[idx];
+        int expectedType = D_00445E98[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -251,8 +251,8 @@ extern "C" t3Vector MakeAnimComboFunc(int n, Ent_B270 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_B270(i);
-            inst = t;
+            char *found = conv_B270(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -327,9 +327,9 @@ extern "C" t3Vector MakeAnimTeeterFunc(int n, Ent_B498 *params) {
     Ent_B498 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445ED0[idx];
+        int expectedType = D_00445ED0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -346,8 +346,8 @@ extern "C" t3Vector MakeAnimTeeterFunc(int n, Ent_B498 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_B498(i);
-            inst = t;
+            char *found = conv_B498(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -425,9 +425,9 @@ extern "C" t3Vector MakeConveyorFunc(int n, Ent_B6B8 *params) {
     Ent_B6B8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445EF8[idx];
+        int expectedType = D_00445EF8[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -444,8 +444,8 @@ extern "C" t3Vector MakeConveyorFunc(int n, Ent_B6B8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_B6B8(i);
-            inst = t;
+            char *found = conv_B6B8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -511,9 +511,9 @@ extern "C" t3Vector MakeCounterFunc(int n, Ent_B8D0 *params) {
     Ent_B8D0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004A3BE0_B8D0[idx];
+        int expectedType = D_004A3BE0_B8D0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -530,8 +530,8 @@ extern "C" t3Vector MakeCounterFunc(int n, Ent_B8D0 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_B8D0(i);
-            inst = t;
+            char *found = conv_B8D0(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -603,9 +603,9 @@ extern "C" t3Vector MakeFloatingFunc(int n, Ent_BAB0 *params) {
     Ent_BAB0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445F28[idx];
+        int expectedType = D_00445F28[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -622,8 +622,8 @@ extern "C" t3Vector MakeFloatingFunc(int n, Ent_BAB0 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_BAB0(i);
-            inst = t;
+            char *found = conv_BAB0(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -698,9 +698,9 @@ extern "C" t3Vector MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
     Ent_BCB8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445F48[idx];
+        int expectedType = D_00445F48[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -717,8 +717,8 @@ extern "C" t3Vector MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_BCB8(i);
-            inst = t;
+            char *found = conv_BCB8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -792,9 +792,9 @@ extern "C" t3Vector MakeBoostFunc(int n, Ent_BEC8 *params) {
     Ent_BEC8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445F70[idx];
+        int expectedType = D_00445F70[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -811,8 +811,8 @@ extern "C" t3Vector MakeBoostFunc(int n, Ent_BEC8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_BEC8(i);
-            inst = t;
+            char *found = conv_BEC8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -879,9 +879,9 @@ extern "C" t3Vector MakeObjectFunc(int n, Ent_C0D0 *params) {
     Ent_C0D0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445F90[idx];
+        int expectedType = D_00445F90[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -898,8 +898,8 @@ extern "C" t3Vector MakeObjectFunc(int n, Ent_C0D0 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_C0D0(i);
-            inst = t;
+            char *found = conv_C0D0(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -1028,9 +1028,9 @@ extern "C" t3Vector MakeDeadFunc(int n, Ent_C420 *params) {
     Ent_C420 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C00)[idx];
+        int expectedType = (&D_004A3C00)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1047,8 +1047,8 @@ extern "C" t3Vector MakeDeadFunc(int n, Ent_C420 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_C420(i);
-            inst = t;
+            char *found = conv_C420(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -1109,9 +1109,9 @@ extern "C" t3Vector MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
     Ent_C5D8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445FA0[idx];
+        int expectedType = D_00445FA0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1128,8 +1128,8 @@ extern "C" t3Vector MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_C5D8(i);
-            inst = t;
+            char *found = conv_C5D8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -1193,9 +1193,9 @@ extern "C" t3Vector MakeDebounceFunc(int n, Ent_C7D0 *params) {
     Ent_C7D0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445FB0[idx];
+        int expectedType = D_00445FB0[idx];
         unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)field = (float)x->val;
         else
             *field = x->val;
@@ -1212,8 +1212,8 @@ extern "C" t3Vector MakeDebounceFunc(int n, Ent_C7D0 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_C7D0(i);
-            inst = t;
+            char *found = conv_C7D0(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -1307,9 +1307,9 @@ extern "C" t3Vector MakeFlagFunc(int n, Ent_C9C8 *params) {
     Ent_C9C8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00445FC0[idx];
+        int expectedType = D_00445FC0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1326,8 +1326,8 @@ extern "C" t3Vector MakeFlagFunc(int n, Ent_C9C8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_C9C8(i);
-            inst = t;
+            char *found = conv_C9C8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -1476,9 +1476,9 @@ extern "C" t3Vector MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     Ent_CDC8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446038[idx];
+        int expectedType = D_00446038[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1495,8 +1495,8 @@ extern "C" t3Vector MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_CDC8(i);
-            inst = t;
+            char *found = conv_CDC8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -1572,9 +1572,9 @@ extern "C" t3Vector MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
     Ent_CFF0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446060[idx];
+        int expectedType = D_00446060[idx];
         unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)field = (float)x->val;
         else
             *field = x->val;
@@ -1591,8 +1591,8 @@ extern "C" t3Vector MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_CFF0(i);
-            inst = t;
+            char *found = conv_CFF0(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -1791,9 +1791,9 @@ extern "C" t3Vector MakeParticleFunc(int n, Ent_D420 *params) {
     Ent_D420 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004460B0[idx];
+        int expectedType = D_004460B0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -1810,8 +1810,8 @@ extern "C" t3Vector MakeParticleFunc(int n, Ent_D420 *params) {
             r = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_D420(i);
-            r = t;
+            char *found = conv_D420(i);
+            r = found;
         }
         obj = r;
     }
@@ -2030,9 +2030,9 @@ extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
     Ent_D9F8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004461A8[idx];
+        int expectedType = D_004461A8[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2049,8 +2049,8 @@ extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_D9F8(i);
-            inst = t;
+            char *found = conv_D9F8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -2137,9 +2137,9 @@ extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
     Ent_DC60 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004461C0[idx];
+        int expectedType = D_004461C0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2156,8 +2156,8 @@ extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_DC60(i);
-            inst = t;
+            char *found = conv_DC60(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -2239,9 +2239,9 @@ extern "C" t3Vector AddSplineFunc(int n, Ent_DED0 *params) {
     Ent_DED0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004461D8[idx];
+        int expectedType = D_004461D8[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2258,8 +2258,8 @@ extern "C" t3Vector AddSplineFunc(int n, Ent_DED0 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_DED0(i);
-            inst = t;
+            char *found = conv_DED0(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -2330,9 +2330,9 @@ extern "C" t3Vector AddMultiSplineFunc(int n, Ent_E0C0 *params) {
     Ent_E0C0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446208[idx];
+        int expectedType = D_00446208[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2349,8 +2349,8 @@ extern "C" t3Vector AddMultiSplineFunc(int n, Ent_E0C0 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_E0C0(i);
-            inst = t;
+            char *found = conv_E0C0(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -2772,9 +2772,9 @@ extern "C" t3Vector AddParticleFunc(int n, Ent_E840 *params) {
     Ent_E840 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004462A0[idx];
+        int expectedType = D_004462A0[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -2793,8 +2793,8 @@ extern "C" t3Vector AddParticleFunc(int n, Ent_E840 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_E840(i);
-            inst = t;
+            char *found = conv_E840(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -2937,9 +2937,9 @@ extern "C" t3Vector AddDynamicParticleFunc(int n, Ent_EE98 *params) {
     Ent_EE98 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446380[idx];
+        int expectedType = D_00446380[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3126,9 +3126,9 @@ extern "C" t3Vector MakeFloatRailFunc(int n, Ent_F390 *params) {
     Ent_F390 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446480[idx];
+        int expectedType = D_00446480[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3145,8 +3145,8 @@ extern "C" t3Vector MakeFloatRailFunc(int n, Ent_F390 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_F390(i);
-            inst = t;
+            char *found = conv_F390(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -3242,9 +3242,9 @@ extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
     Ent_F5E8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004464D8[idx];
+        int expectedType = D_004464D8[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3261,8 +3261,8 @@ extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_F5E8(i);
-            inst = t;
+            char *found = conv_F5E8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -3460,9 +3460,9 @@ extern "C" t3Vector HideInstanceFunc(int n, Ent_FB50 *params) {
     Ent_FB50 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004A3C10_FB50[idx];
+        int expectedType = D_004A3C10_FB50[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3479,8 +3479,8 @@ extern "C" t3Vector HideInstanceFunc(int n, Ent_FB50 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_FB50(i);
-            inst = t;
+            char *found = conv_FB50(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -3615,9 +3615,9 @@ extern "C" t3Vector PlayAudioFunc(int n, Ent_FF00 *params) {
     Ent_FF00 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C28)[idx];
+        int expectedType = (&D_004A3C28)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3634,8 +3634,8 @@ extern "C" t3Vector PlayAudioFunc(int n, Ent_FF00 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_FF00(i);
-            inst = t;
+            char *found = conv_FF00(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -3694,9 +3694,9 @@ extern "C" t3Vector AttachAudioFunc(int n, Ent_00A8 *params) {
     Ent_00A8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446550[idx];
+        int expectedType = D_00446550[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3713,8 +3713,8 @@ extern "C" t3Vector AttachAudioFunc(int n, Ent_00A8 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_00A8(i);
-            inst = t;
+            char *found = conv_00A8(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -3774,9 +3774,9 @@ extern "C" t3Vector DetachAudioFunc(int n, Ent_0260 *params) {
     Ent_0260 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446560[idx];
+        int expectedType = D_00446560[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -3793,8 +3793,8 @@ extern "C" t3Vector DetachAudioFunc(int n, Ent_0260 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_0260(i);
-            inst = t;
+            char *found = conv_0260(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -4004,9 +4004,9 @@ extern "C" t3Vector TransportFunc(int n, Ent_0770 *params) {
     Ent_0770 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004A3C40_0770[idx];
+        int expectedType = D_004A3C40_0770[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -4023,8 +4023,8 @@ extern "C" t3Vector TransportFunc(int n, Ent_0770 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_0770(i);
-            inst = t;
+            char *found = conv_0770(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -4091,9 +4091,9 @@ extern "C" t3Vector SetupMissionRiderFunc(int n, Ent_0948 *params) {
     Ent_0948 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004A3C48_0948[idx];
+        int expectedType = D_004A3C48_0948[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -4110,8 +4110,8 @@ extern "C" t3Vector SetupMissionRiderFunc(int n, Ent_0948 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_0948(i);
-            inst = t;
+            char *found = conv_0948(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -5139,9 +5139,9 @@ extern "C" void* RiderInVolumeFunc(void* self, int n, Ent_1D78 *params) {
     Ent_1D78 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004A3CB0_1D78[idx];
+        int expectedType = D_004A3CB0_1D78[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -5158,8 +5158,8 @@ extern "C" void* RiderInVolumeFunc(void* self, int n, Ent_1D78 *params) {
             r = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_1D78(i);
-            r = t;
+            char *found = conv_1D78(i);
+            r = found;
         }
         obj = r;
     }
@@ -7164,9 +7164,9 @@ extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
     sBindArg_1FBE38* x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004A3D58_4320[idx];
+        int expectedType = D_004A3D58_4320[idx];
         unsigned* slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -7184,8 +7184,8 @@ extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
             inst = 0;
         else {
             i = section->refs[id >> 8] >> 8;
-            char *t = refToObj_1FBE38(i);
-            inst = t;
+            char *found = refToObj_1FBE38(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -8425,9 +8425,9 @@ extern "C" t3Vector AddAvaSplineFunc(int n, Ent_5D90 *params) {
     Ent_5D90 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3DA0)[idx];
+        int expectedType = (&D_004A3DA0)[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -8444,8 +8444,8 @@ extern "C" t3Vector AddAvaSplineFunc(int n, Ent_5D90 *params) {
             inst = 0;
         else {
             i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_5D90(i);
-            inst = t;
+            char *found = conv_5D90(i);
+            inst = found;
         }
         obj = inst;
     }
@@ -9292,9 +9292,9 @@ extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
     Ent_6E68 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446980[idx];
+        int expectedType = D_00446980[idx];
         unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != expectedType && expectedType == 2)
             *(float*)slot = (float)x->val;
         else
             *slot = x->val;
@@ -9310,8 +9310,8 @@ extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
             obj = 0;
         } else {
             unsigned i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
-            char *t = conv_6E68(i);
-            obj = t;
+            char *found = conv_6E68(i);
+            obj = found;
         }
         if (obj)
             cSSXAudio_WorldSound_6E68(cAudioInterface_bxAudio_6E68(), obj, 92);

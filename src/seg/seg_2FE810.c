@@ -383,7 +383,6 @@ void *sceGsGetGParam(void);
  */
 void sceGsResetGraph(short mode, short interlace, short videoMode, short frameMode) {
     struct S3FD910 *gsState;
-    int e;
     switch (mode) {
     case 0:
         gsState = sceGsGetGParam();

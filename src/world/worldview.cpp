@@ -1862,15 +1862,15 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     }
     case 8: {
         int i = 0;
-        char* e = *(char**)(data + 0x24);
+        char* node = *(char**)(data + 0x24);
         if (i < *(int*)(data + 0x20)) {
             int one = 1;
             do {
-                *(int*)(e + 0x8) = one;
+                *(int*)(node + 0x8) = one;
                 sWVBox_B498 box;
-                WV_MAKEBOX_B498(box, e, 108);
-                update_B498((char*)self->mp_Nash, 2, e, &box);
-                e = *(char**)(e + 0x64);
+                WV_MAKEBOX_B498(box, node, 108);
+                update_B498((char*)self->mp_Nash, 2, node, &box);
+                node = *(char**)(node + 0x64);
                 i++;
             } while (i < *(int*)(data + 0x20));
         }

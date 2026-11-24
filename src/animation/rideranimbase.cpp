@@ -1229,10 +1229,10 @@ static inline void setType_003130A8(sRabChannelSet* self, sRabChannel* ch, int t
  */
 extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data, int frames)
 {
-    unsigned char* p = data;
-    int n = *p;
-    p++;
-    if (n == 0) {
+    unsigned char* ptr = data;
+    int numChan = *ptr;
+    ptr++;
+    if (numChan == 0) {
         return;
     }
     sRabChannel* ch = self->channels;
@@ -1240,49 +1240,49 @@ extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data,
     self->count7 = 0;
     self->count8 = 0;
     self->count9 = 0;
-    sRabChannel* end = ch + n;
+    sRabChannel* end = ch + numChan;
     while (1) {
-        setType_003130A8(self, ch, *p >> 4);
+        setType_003130A8(self, ch, *ptr >> 4);
         if (++ch == end) break;
-        setType_003130A8(self, ch, *p & 0xF);
+        setType_003130A8(self, ch, *ptr & 0xF);
         if (++ch == end) break;
-        p++;
+        ptr++;
     }
-    p++;
+    ptr++;
     ch = self->channels;
     do {
         switch (ch->type) {
         case 1:
-            ch->v4 = READ24_003130A8(p, 0);
-            p += 3;
+            ch->v4 = READ24_003130A8(ptr, 0);
+            ptr += 3;
             break;
         case 3:
-            ch->v4 = READ24_003130A8(p, 0);
-            ch->v8 = READ24_003130A8(p, 3);
-            ch->vC = READ24_003130A8(p, 6);
-            p += 9;
+            ch->v4 = READ24_003130A8(ptr, 0);
+            ch->v8 = READ24_003130A8(ptr, 3);
+            ch->vC = READ24_003130A8(ptr, 6);
+            ptr += 9;
             break;
         case 4:
-            ch->v4 = READ24_003130A8(p, 0);
-            ch->v8 = READ24_003130A8(p, 3);
-            ch->vC = READ24_003130A8(p, 6);
-            ch->v10 = READ24_003130A8(p, 9);
-            p += 12;
+            ch->v4 = READ24_003130A8(ptr, 0);
+            ch->v8 = READ24_003130A8(ptr, 3);
+            ch->vC = READ24_003130A8(ptr, 6);
+            ch->v10 = READ24_003130A8(ptr, 9);
+            ptr += 12;
             break;
         case 5:
-            ch->v4 = READ24_003130A8(p, 0);
-            ch->v8 = READ24_003130A8(p, 3);
-            ch->vC = READ24_003130A8(p, 6);
-            ch->v10 = (float)(p[9] | (p[10] << 8));
-            p += 11;
+            ch->v4 = READ24_003130A8(ptr, 0);
+            ch->v8 = READ24_003130A8(ptr, 3);
+            ch->vC = READ24_003130A8(ptr, 6);
+            ch->v10 = (float)(ptr[9] | (ptr[10] << 8));
+            ptr += 11;
             break;
         case 2:
         case 6:
         case 7:
         case 8:
-            ch->v4 = READ24_003130A8(p, 0);
-            ch->v8 = READ24_003130A8(p, 3);
-            p += 6;
+            ch->v4 = READ24_003130A8(ptr, 0);
+            ch->v8 = READ24_003130A8(ptr, 3);
+            ptr += 6;
             break;
         }
         ch++;
@@ -1290,12 +1290,12 @@ extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data,
     int sizeQB = frames * self->count6;
     int sizeQB2 = ((frames - 2) / 2 + 2) * self->count7;
     int sizeShort = frames * self->count8 * 2;
-    int ofs = (p - data) + sizeQB + sizeQB2;
-    self->data4 = p;
-    self->data8 = p + sizeQB;
+    int ofs = (ptr - data) + sizeQB + sizeQB2;
+    self->data4 = ptr;
+    self->data8 = ptr + sizeQB;
     int alignPad = ofs & 1;
-    self->dataC = p + sizeQB + sizeQB2 + alignPad;
-    self->data10 = p + sizeQB + sizeQB2 + sizeShort + ((ofs + sizeShort + alignPad) & 3);
+    self->dataC = ptr + sizeQB + sizeQB2 + alignPad;
+    self->data10 = ptr + sizeQB + sizeQB2 + sizeShort + ((ofs + sizeShort + alignPad) & 3);
 }
 #endif
 

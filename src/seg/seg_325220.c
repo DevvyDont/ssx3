@@ -550,15 +550,15 @@ INCLUDE_ASM("seg/seg_325220", func_004245F0);
 void func_004245F0(unsigned lo, unsigned hi) {
     int i;
     for (i = 0; i < 0x1000; i += 0x40) {
-        unsigned t;
+        unsigned tag;
         CACHE_4248(0x10, 0, i);
-        MFC0_TAGLO_4248(t);
-        t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(20, 0, i);
+        MFC0_TAGLO_4248(tag);
+        tag = (tag & 0xFFFFF000) + i;
+        if (!(tag < lo) && !(hi < tag)) CACHE_4248(20, 0, i);
         CACHE_4248(0x10, 1, i);
-        MFC0_TAGLO_4248(t);
-        t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(20, 1, i);
+        MFC0_TAGLO_4248(tag);
+        tag = (tag & 0xFFFFF000) + i;
+        if (!(tag < lo) && !(hi < tag)) CACHE_4248(20, 1, i);
         SYNC_4248();
     }
 }
@@ -620,15 +620,15 @@ INCLUDE_ASM("seg/seg_325220", func_00424730);
 void func_00424730(unsigned lo, unsigned hi) {
     int i;
     for (i = 0; i < 0x1000; i += 0x40) {
-        unsigned t;
+        unsigned tag;
         CACHE_4248(0x10, 0, i);
-        MFC0_TAGLO_4248(t);
-        t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(22, 0, i);
+        MFC0_TAGLO_4248(tag);
+        tag = (tag & 0xFFFFF000) + i;
+        if (!(tag < lo) && !(hi < tag)) CACHE_4248(22, 0, i);
         CACHE_4248(0x10, 1, i);
-        MFC0_TAGLO_4248(t);
-        t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(22, 1, i);
+        MFC0_TAGLO_4248(tag);
+        tag = (tag & 0xFFFFF000) + i;
+        if (!(tag < lo) && !(hi < tag)) CACHE_4248(22, 1, i);
         SYNC_4248();
     }
 }
@@ -687,9 +687,9 @@ INCLUDE_ASM("seg/seg_325220", func_00424870);
  * @return 1 or 0
  */
 int func_00424870(void) {
-    int s;
-    MFC0_STATUS_4248(s);
-    return (s ^ 1) & 1;
+    int status;
+    MFC0_STATUS_4248(status);
+    return (status ^ 1) & 1;
 }
 #endif
 
@@ -6544,9 +6544,9 @@ int EIntr_r(void) __asm__("EIntr");
  * @return 1 when Status.EIE (0x10000) was set before, else 0
  */
 int EIntr_r(void) {
-    int s, eie;
-    MFC0_STATUS_4248(s);
-    eie = s & 0x10000;
+    int status, eie;
+    MFC0_STATUS_4248(status);
+    eie = status & 0x10000;
     EI_4248();
     return eie != 0;
 }

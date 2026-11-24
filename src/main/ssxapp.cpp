@@ -683,10 +683,10 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 }
                 cBXString track;
                 cBXString_cBXString2(&track, argv[i]);
-                int a = cBXString_reverseFind(&track, '/');
-                int b = cBXString_reverseFind(&track, '\\');
-                int c = cBXString_reverseFind(&track, ':');
-                int sepPos = MAX_7BF0(a, MAX_7BF0(b, c));
+                int slash = cBXString_reverseFind(&track, '/');
+                int backslash = cBXString_reverseFind(&track, '\\');
+                int colon = cBXString_reverseFind(&track, ':');
+                int sepPos = MAX_7BF0(slash, MAX_7BF0(backslash, colon));
                 if (sepPos >= 0) {
                     cBXString trimmed;
                     cBXString_right(&trimmed, &track, *(int*)((int)track.Str - 8) - sepPos - 1);

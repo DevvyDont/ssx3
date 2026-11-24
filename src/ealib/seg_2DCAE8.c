@@ -501,53 +501,53 @@ int output_number_impl(unsigned short **pp, double val, int base, unsigned int f
 int output_number_impl(unsigned short **pp, double val, int base, unsigned int flags, int width, int prec, unsigned short *digits) {
     unsigned short *out = *pp;
     unsigned short buf[128];
-    unsigned short *p = &buf[127];
+    unsigned short *text = &buf[127];
     int len;
-    *p = 0;
+    *text = 0;
     if (flags & 0x40) {
         // the 0x80 / 0x100 / default arms are identical in the release build, but the binary keeps the
         // two tests and three separate call copies (the prototype likely differed in a debug-only detail)
         if (flags & 0x80) {
-            p = f068_C148(p, val, prec);
+            text = f068_C148(text, val, prec);
         } else if (flags & 0x100) {
-            p = f068_C148(p, val, prec);
+            text = f068_C148(text, val, prec);
         } else {
-            p = f068_C148(p, val, prec);
+            text = f068_C148(text, val, prec);
         }
     } else if (flags & 0x20) {
-        p = fBFD8_C148(p, f6A0_C148(val), base, digits);
+        text = fBFD8_C148(text, f6A0_C148(val), base, digits);
     } else {
-        p = f038_C148(p, f608_C148(val), base, digits);
+        text = f038_C148(text, f608_C148(val), base, digits);
     }
     if ((flags & 0x18) == 8) {
-        PAD_LEFT_C148(p, 0x30, width);
+        PAD_LEFT_C148(text, 0x30, width);
     }
     if (base == 10 && !(flags & 0x20)) {
         if (f500_C148(val, 0.0) < 0) {
-            *--p = 45;
+            *--text = 45;
         }
         if (f500_C148(val, 0.0) > 0 && (flags & 1)) {
-            *--p = 43;
+            *--text = 43;
         }
         if (f500_C148(val, 0.0) == 0 && (flags & 1)) {
-            *--p = 0x20;
+            *--text = 0x20;
         }
         if (f500_C148(val, 0.0) >= 0 && (flags & 5) == 4) {
-            *--p = 0x20;
+            *--text = 0x20;
         }
     }
     if (base == 8 && (flags & 2)) {
-        *--p = 0x30;
+        *--text = 0x30;
     }
     if (base == 16 && (flags & 2)) {
-        *--p = 0x78;
-        *--p = 0x30;
+        *--text = 0x78;
+        *--text = 0x30;
     }
     if (!(flags & 0x10)) {
-        PAD_LEFT_C148(p, (flags & 8) ? 0x30 : 0x20, width);
+        PAD_LEFT_C148(text, (flags & 8) ? 0x30 : 0x20, width);
     }
-    len = ulen_C148(p);
-    ucopy_C148(out, p);
+    len = ulen_C148(text);
+    ucopy_C148(out, text);
     out += len;
     if (flags & 0x10) {
         PAD_RIGHT_C148(out, 0x20, len, width);

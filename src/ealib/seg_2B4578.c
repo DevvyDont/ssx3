@@ -5964,22 +5964,23 @@ extern char sndms_9DC8[] __asm__("sndms");
  * @return the new status from SNDseqstatus, or -8 for an invalid handle
  */
 int SNDseqresume(int seqHandle) {
-    int var_16;
-    char *temp_4;
+    int seqindex;
+    int status;
+    char *pssi;
 
     SNDSYS_entercritical();
-    var_16 = SNDI_midigetseqindex(seqHandle);
-    if (var_16 < 0) {
+    seqindex = SNDI_midigetseqindex(seqHandle);
+    if (seqindex < 0) {
         SNDSYS_leavecritical();
-        return var_16;
+        return seqindex;
     }
-    temp_4 = sndms_9DC8 + var_16 * 0x70;
-    if (*(signed char *)(temp_4 + 0x28) == 5) {
-        *(signed char *)(temp_4 + 0x28) = 3;
+    pssi = sndms_9DC8 + seqindex * 0x70;
+    if (*(signed char *)(pssi + 0x28) == 5) {
+        *(signed char *)(pssi + 0x28) = 3;
     }
-    var_16 = SNDseqstatus_9DC8(seqHandle);
+    status = SNDseqstatus_9DC8(seqHandle);
     SNDSYS_leavecritical();
-    return var_16;
+    return status;
 }
 #endif
 
@@ -6473,21 +6474,21 @@ extern short f_A888_A938(int) __asm__("iSNDdetunetolinear");
  * @param idx  the channel
  */
 void iSNDcalcpitch(int idx) {
-    struct CHANPUB *e = &sndgs.chan[idx];
-    int v;
-    if (e->detunepitch == 0) {
-        int a = e->initialdetune;
-        if (e->bendrange != 0) {
-            int c = e->pbendtable != 0 ? e->pbendtable[e->pitchbend] : e->pitchbend;
-            a += ((c - 0x40) * e->bendrange) >> 6;
+    struct CHANPUB *pchan = &sndgs.chan[idx];
+    int pitch;
+    if (pchan->detunepitch == 0) {
+        int detune = pchan->initialdetune;
+        if (pchan->bendrange != 0) {
+            int bend = pchan->pbendtable != 0 ? pchan->pbendtable[pchan->pitchbend] : pchan->pitchbend;
+            detune += ((bend - 0x40) * pchan->bendrange) >> 6;
         }
-        if (e->ppitchlfo != 0) {
-            a += ((e->ppitchlfo[e->curpitchlfoentry] - 0x40) * e->pitchlfodepth) >> 6;
+        if (pchan->ppitchlfo != 0) {
+            detune += ((pchan->ppitchlfo[pchan->curpitchlfoentry] - 0x40) * pchan->pitchlfodepth) >> 6;
         }
-        e->detunepitch = f_A888_A938(a);
+        pchan->detunepitch = f_A888_A938(detune);
     }
-    v = e->detunepitch;
-    e->finalpitch = (v * e->progpitch) >> 12;
+    pitch = pchan->detunepitch;
+    pchan->finalpitch = (pitch * pchan->progpitch) >> 12;
 }
 #endif
 
@@ -19848,31 +19849,31 @@ INCLUDE_ASM("ealib/seg_2B4578", determineaction);
  * @return 0 to keep the window, otherwise the shift (negative when slowing down)
  */
 int determineaction(int n, unsigned char **pp, float *err, float timeRatio) {
-    int k = **pp + n / 2;
-    float e1, e2;
+    int delay = **pp + n / 2;
+    float error1, error2;
     if (timeRatio < 1.0f) {
-        e1 = ((float)n + *err) - timeRatio * n;
-        e2 = ((float)(n * 2 - k) + *err) - (timeRatio + timeRatio) * n;
-        if (FABS_AB28(e1) < FABS_AB28(e2)) {
+        error1 = ((float)n + *err) - timeRatio * n;
+        error2 = ((float)(n * 2 - delay) + *err) - (timeRatio + timeRatio) * n;
+        if (FABS_AB28(error1) < FABS_AB28(error2)) {
             *pp += 1;
-            *err = e1;
+            *err = error1;
             return 0;
         }
         *pp += 2;
-        *err = e2;
-        return -k;
+        *err = error2;
+        return -delay;
     } else {
         float tn = timeRatio * n;
-        e1 = ((float)n + *err) - tn;
-        e2 = ((float)(n + k) + *err) - tn;
-        if (FABS_AB28(e1) < FABS_AB28(e2)) {
+        error1 = ((float)n + *err) - tn;
+        error2 = ((float)(n + delay) + *err) - tn;
+        if (FABS_AB28(error1) < FABS_AB28(error2)) {
             *pp += 1;
-            *err = e1;
+            *err = error1;
             return 0;
         }
         *pp += 1;
-        *err = e2;
-        return k;
+        *err = error2;
+        return delay;
     }
 }
 #endif
@@ -23024,8 +23025,8 @@ int SFILTER_amplf_C(struct AMPLFSTATE *self, int n, float *src, float *dst) __as
 // with the C loop.
 int SFILTER_amplf_C(struct AMPLFSTATE *self, int n, float *src, float *dst) {
     if (((int*)self->sfn.pfnnext)) {
-        int r = ((int (*)(int *, int, float *, float *, int))*((int*)self->sfn.pfnnext))(((int*)self->sfn.pfnnext), n, dst, src, self->sfn.requester);
-        if (r <= 0) return r;
+        int inputResult = ((int (*)(int *, int, float *, float *, int))*((int*)self->sfn.pfnnext))(((int*)self->sfn.pfnnext), n, dst, src, self->sfn.requester);
+        if (inputResult <= 0) return inputResult;
     }
     // PORT: PS2-only VU0 hand-written loop (scale 4x4 blocks by a factor); one inline asm block.
     __asm__ volatile(
