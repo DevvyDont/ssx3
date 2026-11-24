@@ -32,6 +32,7 @@
 struct RCMP_DECODER;
 struct RCMP_FRAME;
 struct cPS2GraphicsMan;
+struct SHAPE;
 
 // RCMP::VIDEO_DRIVER (0x8 [O]; [R] VIDEO_DRIVER__VIDEO_DRIVER stores RCMP_VIDEO_DRIVER_vtbl at +0x4).
 struct RCMP_VIDEO_DRIVER {
@@ -51,8 +52,8 @@ struct SSX_VD_PS2_SINGLE_BUFFERD {
                                         //      uses it; [P] same
     RCMP_FRAME* mpCurrentFrame;         // 0x0C [R] ctor 0; [U] Draw stores the frame it is given; CompleteDraw and the dtor
                                         //      release it and clear it; [P] same
-    char* mpImageHeader;                // 0x10 [R] ctor: the first frame's SHAPE (frame + 4); [U] Draw: each new frame's
-                                        //      SHAPE (width / height at +4 / +6, pixel data after it)
+    SHAPE* mpImageHeader;               // 0x10 [R] ctor: the first frame's SHAPE (RCMP_FRAME::m_Shp); [U] Draw: each
+                                        //      new frame's SHAPE (width / height, pixel data after it)
     int** mppTiles;                     // 0x14 [R] ctor: "VD::VD_TEXTURE_POINTER" table of mNumTiles pointers to 12-byte
                                         //      tiles {texture handle, width 16, height} (graphics-manager slot 47); [U] Draw
                                         //      updates each tile's texture (SetNewTextureData1), the dtor frees them; [P]

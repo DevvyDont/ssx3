@@ -20,11 +20,6 @@ extern char str_InSeqHeap[];
 extern char str_BXScriptDatabase[];
 extern char str_InSeq[];
 
-struct sBXSlot {
-    int a;
-    short b;
-};
-
 /**
  * Sets up the BX script engine: allocates the InSeq sequencer with its heap and an empty script database.
  *
@@ -42,10 +37,10 @@ extern "C" void cBXScriptEngine_SetupBXEngine(cBXScriptEngine* self, int count, 
     self->mpInSeq = (cInSeq*)cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
         self->mpInSeqHeap, size, maxUniqueAnimPlayers, (char*)&self->mInSeqCommVtbl);
     self->mScriptDatabaseSize = count;
-    self->mpScriptDatabase = (tBXScriptState*)((sBXSlot*)operator_new_tag(count * 8, str_BXScriptDatabase, 0, 0));
+    self->mpScriptDatabase = (tBXScriptState*)operator_new_tag(count * 8, str_BXScriptDatabase, 0, 0);
     for (int i = 0; i < self->mScriptDatabaseSize; i++) {
-        ((sBXSlot*)self->mpScriptDatabase)[i].a = 0;
-        ((sBXSlot*)self->mpScriptDatabase)[i].b = 0;
+        self->mpScriptDatabase[i].pScriptData = 0;
+        self->mpScriptDatabase[i].numLocks = 0;
     }
 }
 #endif
@@ -222,7 +217,8 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int
         request->loadingScriptIndex = idx;
         request->state = one;
         request->loadPending = one;
-        sVEntry<int(void*, int)>* vtableEntry = &((sVEntry<int(void*, int)>*)self->mVtbl)[7];
+        sVEntry<int(void*, int)>* vtable = (sVEntry<int(void*, int)>*)self->mVtbl;
+        sVEntry<int(void*, int)>* vtableEntry = &vtable[7];
         if (vtableEntry->fn(vthis(self, *vtableEntry), idx) == 0) {
             request->state = 7;
             cBXScriptEngine_ResetRequest(self, request);
@@ -283,13 +279,13 @@ extern "C" int cBXScriptEngine_PlayScript(cBXScriptEngine* self, int id, int val
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_StopScript);
 #ifdef SKIP_ASM
 extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
-extern "C" void cInSeq_Stop(void* cache, void* data);
+extern "C" void cInSeq_Stop(void* cache, int playerID);
 
 /**
  * Stops a script request's InSeq player if it is running.
  *
- * Looks the request up with cBXScriptEngine_GetRequest and calls cInSeq_Stop on mpInSeq for its player (+0x0) when the player
- * exists, its mPlayState (+0x20) is not 0 (stopped), and the request is an animation request (type 1).
+ * Looks the request up with cBXScriptEngine_GetRequest and calls cInSeq_Stop on mpInSeq for its player's mID when the
+ * player (pPlayer) exists, its mPlayState is not 0 (stopped), and the request is an animation request (requestType 1).
  *
  * Quirk: the lookup result is not checked, so a free handle would be dereferenced; the callers only pass live requests.
  *
@@ -297,10 +293,10 @@ extern "C" void cInSeq_Stop(void* cache, void* data);
  */
 extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
-    char* obj = *(char**)request;
-    if (obj != 0 && *(int*)(obj + 0x20) != 0 && *(int*)(request + 0x20) == 1) {
-        cInSeq_Stop(self->mpInSeq, *(void**)obj);
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
+    cScriptPlayerMain* player = request->pPlayer;
+    if (player != 0 && player->mPlayState != 0 && request->requestType == 1) {
+        cInSeq_Stop(self->mpInSeq, player->mID);
     }
 }
 #endif
@@ -605,8 +601,8 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
 /**
  * Pauses script request @p requestHandle.
  *
- * Calls cScriptPlayerMain_Pause on the request's player (+0x0) and sets the request state (+0x4) to 5 (paused) when the
- * player's mNumPaused (+0x2C) is above 0. The request is indexed directly in mScriptRequests (+0x2C0, 0x24 each)
+ * Calls cScriptPlayerMain_Pause on the request's player (pPlayer) and sets the request state to 5 (paused) when the
+ * player's mNumPaused is above 0. The request is indexed directly in mScriptRequests (+0x2C0, 0x24 each)
  * without checking that it is live.
  *
  * @param requestHandle  the request handle (0-15)
@@ -614,8 +610,8 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
 extern "C" void cBXScriptEngine_PauseScript(cBXScriptEngine* self, int requestHandle)
 {
     tScriptRequestInfo* request = &self->mScriptRequests[requestHandle];
-    cScriptPlayerMain_Pause(*(void**)request);
-    if (*(int*)(*(char**)request + 0x2C) > 0) {
+    cScriptPlayerMain_Pause(request->pPlayer);
+    if (request->pPlayer->mNumPaused > 0) {
         request->state = 5;
     }
 }
@@ -900,16 +896,6 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqRequestEntityCommI
 #ifdef SKIP_ASM
 extern "C" int cScriptDatabaseObject_GetAvailableEntities(void* self, int key, void** out, int max);
 
-class cBxsHandler2A80 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual int IsMatchingEntity(void* ctx, int arg);
-};
-
 /**
  * Finds the script entity that should drive InSeq player entity @p ctx.
  *
@@ -921,14 +907,18 @@ public:
  * @param entityType  the entity type passed to the match test
  * @return the matching script entity, or 0
  */
-extern "C" cBxsHandler2A80* cBXScriptEngine_OnInSeqRequestEntityCommInterface(cBXScriptEngine* self, cScriptPlayerEntity* ctx, int entityType)
+extern "C" cScriptEntity* cBXScriptEngine_OnInSeqRequestEntityCommInterface(cBXScriptEngine* self,
+                                                                            cScriptPlayerEntity* ctx, int entityType)
 {
-    cBxsHandler2A80* buf[30];
-    cBxsHandler2A80* found = 0;
-    int n = cScriptDatabaseObject_GetAvailableEntities(self, *(int*)ctx->mpOwner, (void**)buf, 30);
+    cScriptEntity* buf[30];
+    cScriptEntity* found = 0;
+    int n = cScriptDatabaseObject_GetAvailableEntities(self, ctx->mpOwner->mID, (void**)buf, 30);
     for (int i = 0; i < n; i++) {
-        cBxsHandler2A80* candidate = buf[i];
-        if (candidate->IsMatchingEntity(ctx, entityType)) {
+        cScriptEntity* candidate = buf[i];
+        // vtable slot 5: IsMatchingEntity
+        sVEntry<int(void*, cScriptPlayerEntity*, int)>* vtable =
+            (sVEntry<int(void*, cScriptPlayerEntity*, int)>*)candidate->mVtbl;
+        if (vtable[5].fn(vthis(candidate, vtable[5]), ctx, entityType)) {
             found = candidate;
             break;
         }
@@ -994,14 +984,15 @@ extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard(cBXScriptEngine
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestUserData__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the user data (+0xC) of the script request bound to InSeq player @p player (its mpUserData, +0xC).
+ * Returns the user data (pUserData) of the script request bound to InSeq player @p player (its mpUserData).
  *
  * @param player  the InSeq player (cScriptPlayerMain)
  * @return the request's user data
  */
 int cBXScriptEngine_GetRequestUserData(void* self, void* player)
 {
-    return *(int*)((char*)*(void**)((char*)player + 0xc) + 0xc);
+    tScriptRequestInfo* request = (tScriptRequestInfo*)((cScriptPlayerMain*)player)->mpUserData;
+    return (int)request->pUserData;
 }
 #endif
 
@@ -1026,7 +1017,7 @@ extern "C" int cBXScriptEngine_GetRequestUserData1(cBXScriptEngine* self, int re
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestHandleFromPlayer__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Returns the handle (+0x1C) of the script request bound to InSeq player @p player (its mpUserData, +0xC).
+ * Returns the handle (requestHandle) of the script request bound to InSeq player @p player (its mpUserData).
  *
  * cSSXScriptEngine's InSeq hooks (cSSXScriptEngine_OnInSeqPlay and others) use it to find the NIS list entry.
  *
@@ -1035,7 +1026,8 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestHandleFromPlaye
  */
 int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* player)
 {
-    return *(int*)((char*)*(void**)((char*)player + 0xc) + 0x1c);
+    tScriptRequestInfo* request = (tScriptRequestInfo*)((cScriptPlayerMain*)player)->mpUserData;
+    return request->requestHandle;
 }
 #endif
 
@@ -1628,17 +1620,19 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_cScriptObject__FPvi);
 /**
  * Constructs a script object of a given type that is not yet registered in the script database.
  *
- * Stores cScriptObject's vtable at +0xC, @p objType at +0x0, -1 (no database handle) at +0x4 and 0 at +0x8.
+ * Stores cScriptObject's vtable (mVtbl), @p objType (mObjType), -1 (no database handle, mObjID) and a use count
+ * (mInUse) of 0.
  *
  * @param objType  the object's script type
  * @return @p self
  */
 void* cScriptObject_cScriptObject(void* self, int objType)
 {
-    *(void***)((char*)self + 0xc) = cScriptObject_vtbl;
-    *(int*)self = objType;
-    *(int*)((char*)self + 0x4) = -1;
-    *(int*)((char*)self + 0x8) = 0;
+    cScriptObject* object = (cScriptObject*)self;
+    object->mVtbl = cScriptObject_vtbl;
+    object->mObjType = objType;
+    object->mObjID = -1;
+    object->mInUse = 0;
     return self;
 }
 #endif
@@ -1724,21 +1718,6 @@ extern "C" void cScriptObject_DeInitScriptObject(cScriptObject* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_PauseObjScript);
 #ifdef SKIP_ASM
-class cScriptOwner3320 {
-public:
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    // vptr at 0xC; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual int GetNumScriptEntities();
-    virtual void* GetScriptEntity(int i);
-};
-
 /**
  * Pauses the scripts of every script entity the object owns.
  *
@@ -1750,9 +1729,13 @@ public:
 extern "C" void cScriptObject_PauseObjScript(cScriptObject* self)
 {
     int i = 0;
-    int n = ((cScriptOwner3320*)self)->GetNumScriptEntities();
+    // vtable slot 6: GetNumScriptEntities
+    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)self->mVtbl;
+    int n = countVtable[6].fn(vthis(self, countVtable[6]));
     for (; i < n; i++) {
-        cScriptEntity_PauseEntityScript((cScriptEntity*)((cScriptOwner3320*)self)->GetScriptEntity(i));
+        // vtable slot 7: GetScriptEntity
+        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)self->mVtbl;
+        cScriptEntity_PauseEntityScript(entityVtable[7].fn(vthis(self, entityVtable[7]), i));
     }
 }
 #endif
@@ -1760,21 +1743,6 @@ extern "C" void cScriptObject_PauseObjScript(cScriptObject* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_ResumeObjScript);
 #ifdef SKIP_ASM
-class cScriptOwner33A8 {
-public:
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    // vptr at 0xC; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual int GetNumScriptEntities();
-    virtual void* GetScriptEntity(int i);
-};
-
 /**
  * Resumes the scripts of every script entity the object owns.
  *
@@ -1785,9 +1753,13 @@ public:
 extern "C" void cScriptObject_ResumeObjScript(cScriptObject* self)
 {
     int i = 0;
-    int n = ((cScriptOwner33A8*)self)->GetNumScriptEntities();
+    // vtable slot 6: GetNumScriptEntities
+    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)self->mVtbl;
+    int n = countVtable[6].fn(vthis(self, countVtable[6]));
     for (; i < n; i++) {
-        cScriptEntity_ResumeEntityScript((cScriptEntity*)((cScriptOwner33A8*)self)->GetScriptEntity(i));
+        // vtable slot 7: GetScriptEntity
+        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)self->mVtbl;
+        cScriptEntity_ResumeEntityScript(entityVtable[7].fn(vthis(self, entityVtable[7]), i));
     }
 }
 #endif
@@ -1804,11 +1776,11 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnStartObjectUse__FPv);
  *
  * @return the new use count (left in $v0 by the code; On Tour's method is void)
  */
-void* cScriptObject_OnStartObjectUse(void* vself)
+int cScriptObject_OnStartObjectUse(void* vself)
 {
     cScriptObject* self = (cScriptObject*)vself;
-    void* useCount = (char*)self->mInUse + 0x1;
-    self->mInUse = (int)useCount;
+    int useCount = self->mInUse + 0x1;
+    self->mInUse = useCount;
     return useCount;
 }
 #endif
@@ -1817,15 +1789,15 @@ void* cScriptObject_OnStartObjectUse(void* vself)
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnEndObjectUse__FPv);
 #ifdef SKIP_ASM
 /**
- * Drops a script object's use count (+0x8) by one.
+ * Drops a script object's use count (mInUse) by one.
  *
  * @return the new use count
  */
-void* cScriptObject_OnEndObjectUse(void* vself)
+int cScriptObject_OnEndObjectUse(void* vself)
 {
     cScriptObject* self = (cScriptObject*)vself;
-    void* useCount = (char*)self->mInUse - 0x1;
-    self->mInUse = (int)useCount;
+    int useCount = self->mInUse - 0x1;
+    self->mInUse = useCount;
     return useCount;
 }
 #endif

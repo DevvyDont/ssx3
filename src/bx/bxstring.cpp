@@ -18,14 +18,14 @@ extern "C" cBXString* cBXString_operatorE1(cBXString* self, const char* str);
  * @param other  the string to copy
  * @return @p self
  */
-// PORT: pointer held in int to get the target's negative header offsets.
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other)
 {
-    int buffer = (int)other->Str;
-    if (*(int*)(buffer - 0xC) >= 0)
+    char* buffer = other->Str;
+    tStringData* data = other->getData();
+    if (data->NumRefs >= 0)
     {
-        *(int*)self = buffer;
-        *(int*)(buffer - 0xC) = *(int*)(buffer - 0xC) + 1;
+        self->Str = buffer;
+        data->NumRefs = data->NumRefs + 1;
     }
     else
     {
@@ -60,13 +60,13 @@ extern "C" void cBXString_Realloc(cBXString* self, int size)
         self->Str = cBXString_EmptyString;
         return;
     }
-    int* hdr = (int*)operator new(size + 13, str_cStringData, 0x20000000, 0);
-    char* buffer = (char*)(hdr + 3);
-    hdr[0] = 1;
+    tStringData* hdr = (tStringData*)operator new(size + 13, str_cStringData, 0x20000000, 0);
+    char* buffer = hdr->data();
+    hdr->NumRefs = 1;
     self->Str = buffer;
     buffer[size] = 0;
-    hdr[1] = size;
-    hdr[2] = size;
+    hdr->DataLength = size;
+    hdr->AllocLength = size;
 }
 #endif
 
@@ -115,15 +115,17 @@ extern "C" void* func_0041605C(void* dst, const void* src, int n);
  * When NumRefs is 2 or more, releases the shared buffer, allocates one of the same length and copies the text
  * with its terminator.
  */
-// PORT: pointer held in int to get the target's negative load offsets.
 extern "C" void cBXString_copyBeforeWrite(cBXString* self)
 {
+    // ORIGINAL-PTR: the text's tStringData header sits right before it (On Tour getData() is `(tStringData*)Str - 1`);
+    // retail keeps only the old text pointer and reads each header field at a negative offset from it (-0xC, -8).
+    // A held getData() pointer or a typed `- 1` builds other code, so the header is located from the text each time.
     int old = (int)self->Str;
-    if (*(int*)(old - 0xC) >= 2)
+    if (((tStringData*)(old - 0xC))->NumRefs >= 2)
     {
         cBXString_Reset(self);
-        cBXString_Realloc(self, *(int*)(old - 8));
-        func_0041605C(self->Str, (void*)old, *(int*)(old - 8) + 1);
+        cBXString_Realloc(self, ((tStringData*)(old - 0xC))->DataLength);
+        func_0041605C(self->Str, (void*)old, ((tStringData*)(old - 0xC))->DataLength + 1);
     }
 }
 #endif
@@ -142,11 +144,12 @@ extern "C" void cBXString_Realloc(cBXString* self, int size);
  *
  * @param size  number of characters needed
  */
-// PORT: pointer held in int to get the target's negative load offsets.
 extern "C" void cBXString_Resize(cBXString* self, int size)
 {
-    int buffer = (int)self->Str;
-    if (*(int*)(buffer - 0xC) >= 2 || *(int*)(buffer - 4) < size)
+    // ORIGINAL-PTR: the text's tStringData header sits right before it (On Tour getData() is `(tStringData*)Str - 1`);
+    // retail reads both fields at negative offsets from the one text pointer (-0xC, -4).
+    int text = (int)self->Str;
+    if (((tStringData*)(text - 0xC))->NumRefs >= 2 || ((tStringData*)(text - 0xC))->AllocLength < size)
     {
         cBXString_Reset(self);
         cBXString_Realloc(self, size);
@@ -591,12 +594,6 @@ extern "C" void cBXString_Reset(cBXString* self);
 extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
-struct cBXStringHdrK2 {
-    int ref; // -0xC
-    int len; // -0x8
-    int cap; // -0x4
-};
-
 /**
  * Appends @p len characters of @p str to the string, in place when its buffer is private and big enough.
  *
@@ -607,25 +604,27 @@ struct cBXStringHdrK2 {
  * @param len  number of characters to append
  * @param str  the text to append
  */
-// PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str)
 {
-    int buffer = (int)self->Str;
-    cBXStringHdrK2* header = (cBXStringHdrK2*)(buffer - 0xC);
-    if (*(int*)(buffer - 0xC) >= 2 || *(int*)(buffer - 4) < *(int*)(buffer - 8) + len)
+    // ORIGINAL-PTR: the text's tStringData header sits right before it (On Tour getData() is `(tStringData*)Str - 1`);
+    // retail reads its fields at negative offsets from the text pointer (-0xC, -8, -4), the old text's too.
+    int text = (int)self->Str;
+    tStringData* header = (tStringData*)(text - 0xC);
+    if (((tStringData*)(text - 0xC))->NumRefs >= 2
+        || ((tStringData*)(text - 0xC))->AllocLength < ((tStringData*)(text - 0xC))->DataLength + len)
     {
         char* copy;
         cBXString_cBXString1((cBXString*)&copy, self);
         int old = (int)self->Str;
         cBXString_Reset(self);
-        cBXString_concatCopy(self, *(int*)(old - 8), (char*)old, len, str);
+        cBXString_concatCopy(self, ((tStringData*)(old - 0xC))->DataLength, (char*)old, len, str);
         cBXString__cBXString((cBXString*)&copy, 2);
     }
     else
     {
-        func_0041605C((char*)buffer + header->len, str, len);
-        *(int*)((int)self->Str - 8) += len;
-        (self->Str)[*(int*)((int)self->Str - 8)] = 0;
+        func_0041605C((char*)text + header->DataLength, str, len);
+        ((tStringData*)((int)self->Str - 0xC))->DataLength += len;
+        self->Str[self->getData()->DataLength] = 0;
     }
 }
 #endif
@@ -709,19 +708,20 @@ extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
  * @param size  the minimum number of characters the buffer must hold (On Tour minlen)
  * @return the string's text buffer (Str)
  */
-// PORT: pointer held in int to get the target's negative header offsets.
 extern "C" char* cBXString_getBuffer(cBXString* self, int size)
 {
-    int buffer = (int)self->Str;
-    if (*(int*)(buffer - 0xC) >= 2 || *(int*)(buffer - 4) < size)
+    // ORIGINAL-PTR: the text's tStringData header sits right before it (On Tour getData() is `(tStringData*)Str - 1`);
+    // retail reads both fields at negative offsets from the one text pointer (-0xC, -4).
+    int text = (int)self->Str;
+    if (((tStringData*)(text - 0xC))->NumRefs >= 2 || ((tStringData*)(text - 0xC))->AllocLength < size)
     {
         char* copy;
         cBXString_cBXString1((cBXString*)&copy, self);
-        int len = *(int*)((int)copy - 8);
+        int len = ((cBXString*)&copy)->getData()->DataLength;
         cBXString_Reset(self);
         cBXString_Realloc(self, len < size ? size : len);
         func_0041605C(self->Str, copy, len);
-        *(int*)((int)self->Str - 8) = len;
+        self->getData()->DataLength = len;
         (self->Str)[len] = 0;
         cBXString__cBXString((cBXString*)&copy, 2);
     }
@@ -764,7 +764,7 @@ INCLUDE_ASM("bx/bxstring", cBXString_getBufferSetLength);
 /**
  * Returns a writable buffer of at least @p len characters and sets the string's length to exactly @p len.
  *
- * Calls cBXString_getBuffer, stores @p len in the length header (Str - 8) and terminates the string at it.
+ * Calls cBXString_getBuffer, stores @p len in the header's DataLength and terminates the string at it.
  *
  * @param len  the new length (On Tour newlen)
  * @return the string's character buffer
@@ -772,7 +772,7 @@ INCLUDE_ASM("bx/bxstring", cBXString_getBufferSetLength);
 extern "C" char* cBXString_getBufferSetLength(cBXString* self, int len)
 {
     cBXString_getBuffer(self, len);
-    *(int*)((int)self->Str - 8) = len;
+    self->getData()->DataLength = len;
     self->Str[len] = 0;
     return self->Str;
 }
@@ -785,18 +785,19 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
 /**
  * Shrinks the string's buffer to its length when the allocation is larger.
  *
- * When the length (Str - 8) and capacity (Str - 4) headers differ, copies the string, resets and reallocates this one
+ * When the header's DataLength and AllocLength differ, copies the string, resets and reallocates this one
  * to the exact length and copies the characters back (func_0041605C, memcpy).
  */
 // Make the string unique (copy-on-write detach) when its two header counts differ.
-// PORT: pointer held in int for the negative header offsets.
 extern "C" void cBXString_freeExtra(cBXString* self)
 {
-    int buffer = (int)self->Str;
-    if (*(int*)(buffer - 8) != *(int*)(buffer - 4)) {
+    // ORIGINAL-PTR: the text's tStringData header sits right before it (On Tour getData() is `(tStringData*)Str - 1`);
+    // retail reads both fields at negative offsets from the one text pointer (-8, -4).
+    int text = (int)self->Str;
+    if (((tStringData*)(text - 0xC))->DataLength != ((tStringData*)(text - 0xC))->AllocLength) {
         cBXString copy;
         cBXString_cBXString1(&copy, self);
-        int len = *(int*)(*(int*)&copy - 8);
+        int len = copy.getData()->DataLength;
         cBXString_Reset(self);
         cBXString_Realloc(self, len);
         func_0041605C(self->Str, copy.Str, len);
@@ -808,14 +809,14 @@ extern "C" void cBXString_freeExtra(cBXString* self)
 INCLUDE_ASM("bx/bxstring", cBXString_lockBuffer);
 #ifdef SKIP_ASM
 /**
- * Returns a writable buffer and locks it by setting the reference count (Str - 0xC) to -1, so it is never shared.
+ * Returns a writable buffer and locks it by setting the header's NumRefs to -1, so it is never shared.
  *
  * @return the string's character buffer
  */
 extern "C" char* cBXString_lockBuffer(cBXString* self)
 {
     char* str = cBXString_getBuffer(self, 0);
-    *(int*)((int)self->Str - 0xC) = -1;
+    self->getData()->NumRefs = -1;
     return str;
 }
 #endif
@@ -949,12 +950,11 @@ static inline int to_upper(int c) { if (D_00499C81[c] & 2) return c - 0x20; retu
  * ctype table D_00499C81 marks lower-case (mask 2).
  */
 // In-place upper-case; D_00499C81 is the ctype table (+1), bit 2 = lower-case.
-// PORT: pointer held in int to get the target's negative load offset.
 extern "C" void cBXString_makeUpper(cBXString* self)
 {
     cBXString_copyBeforeWrite(self);
     char* cursor = self->Str;
-    int i = *(int*)((int)cursor - 8);
+    int i = self->getData()->DataLength;
     while (--i >= 0)
     {
         *cursor = to_upper(*cursor);
@@ -972,12 +972,11 @@ static inline int to_lower(int c) { if (D_00499C81[c] & 1) return c + 0x20; retu
  * Converts the string to lower case in place, after detaching it from any shared copy (cBXString_copyBeforeWrite).
  */
 // In-place lower-case; D_00499C81 is the ctype table (+1), bit 1 = upper-case.
-// PORT: pointer held in int to get the target's negative load offset.
 extern "C" void cBXString_makeLower(cBXString* self)
 {
     cBXString_copyBeforeWrite(self);
     char* cursor = self->Str;
-    int i = *(int*)((int)cursor - 8);
+    int i = self->getData()->DataLength;
     while (--i >= 0)
     {
         *cursor = to_lower(*cursor);
@@ -995,12 +994,11 @@ INCLUDE_ASM("bx/bxstring", cBXString_substitute);
  * @param to  its replacement
  */
 // Replace every `from` with `to` in place.
-// PORT: pointer held in int to get the target's negative load offset.
 extern "C" void cBXString_substitute(cBXString* self, char from, char to)
 {
     cBXString_copyBeforeWrite(self);
     char* cursor = self->Str;
-    int i = *(int*)((int)cursor - 8);
+    int i = self->getData()->DataLength;
     while (--i >= 0)
     {
         if (*cursor == from)
@@ -1089,7 +1087,7 @@ extern "C" cBXString* cBXString_mid1(cBXString* self, cBXString* other, int star
  */
 extern "C" cBXString* cBXString_mid(cBXString* self, cBXString* other, int start)
 {
-    cBXString_mid1(self, other, start, *(int*)((int)other->Str - 8) - start);
+    cBXString_mid1(self, other, start, other->getData()->DataLength - start);
     return self;
 }
 #endif
@@ -1109,14 +1107,14 @@ INCLUDE_ASM("bx/bxstring", cBXString_mid1);
  * @param count  the number of characters
  * @return @p self
  */
-// Mid(start, count). PORT: pointer held in int for the header offset.
+// Mid(start, count).
 extern "C" cBXString* cBXString_mid1(cBXString* self, cBXString* other, int start, int count)
 {
     if (start < 0)
         start = 0;
     if (count < 0)
         count = 0;
-    int len = *(int*)((int)other->Str - 8);
+    int len = other->getData()->DataLength;
     if (len < start + count)
         count = len - start;
     if (len < start)
@@ -1148,19 +1146,21 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @param n      number of characters to take from the end (On Tour count)
  * @return @p self
  */
-// Right(n): the last n chars of other. PORT: pointer held in int for the header offset.
+// Right(n): the last n chars of other.
 extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n)
 {
     if (n < 0)
         n = 0;
     else
     {
-        int len = *(int*)((int)other->Str - 8);
+        int len = other->getData()->DataLength;
         if (len < n)
             n = len;
     }
     char* dest = cBXString_EmptyString;
-    cBXString_allocCopy(other, (cBXString*)&dest, n, *(int*)((int)other->Str - 8) - n, 0);
+    // read through a plain int* (not a member access), so the load stays after the store to dest, as in retail
+    int* length = &other->getData()->DataLength;
+    cBXString_allocCopy(other, (cBXString*)&dest, n, *length - n, 0);
     cBXString_cBXString1(self, (cBXString*)&dest);
     cBXString__cBXString((cBXString*)&dest, 2);
     return self;
@@ -1187,14 +1187,13 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @param n      number of leading characters to keep; negative gives an empty string
  * @return @p self
  */
-// PORT: pointer held in int to get the target's negative header offset.
 extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, int n)
 {
     if (n < 0)
         n = 0;
     else
     {
-        int len = *(int*)((int)other->Str - 8);
+        int len = other->getData()->DataLength;
         if (len < n)
             n = len;
     }

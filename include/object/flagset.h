@@ -68,7 +68,7 @@ struct cFlagSet {
     // --- tFlagSetState (On Tour struct, 0x60)
     tFlagState mFlagData;           // 0x000 [O]; [U] AddFlag copies the caller's tFlagState into it (ldl/ldr, 0x58
                                     //       bytes); SameKind compares it; update / render / updateGrid / CreateMesh read it
-    int mModelID;                   // 0x058 [O] tResourceID; [P] assert "...m_RID == mModelID"; [R] tFlagSetState
+    unsigned int mModelID;          // 0x058 [O] tResourceID; [P] assert "...m_RID == mModelID"; [R] tFlagSetState
                                     //       ctor: -1; [U] SameKind, AddFlag, RemoveFlag
     int mCurrentNumInstances;       // 0x05C [O]; [R] tFlagSetState ctor: 0; [P] Empty__8cFlagSet; [U] Empty, AddFlag,
                                     //       RemoveFlag, update, render, write/readFromReplayFrame

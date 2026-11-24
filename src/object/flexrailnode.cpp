@@ -12,6 +12,9 @@
 #include "object/floatrailnode.h"
 #include "object/flexrailnode.h"
 #include "replay/bxreplayframe.h"
+#include "world/world.h"
+#include "world/worldcache.h" /* tResourceID */
+#include "world/worldrecords.h" /* tModelRecord */
 
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlexRailNode_addSpaceHash);
@@ -73,16 +76,17 @@ static inline int octEmpty_8C48(nash_Cell* o)
 /**
  * Removes a flex rail from the world space hash.
  *
- * Takes the space hash (cObjectInterface_getNash), bumps its +0xA0 counter, finds the hash key of BoundBox (+0x30,
- * nash_Nash_findkey), picks the octant from the key's sign bits and removes the rail's hash node (+0x54) from that
+ * Takes the space hash (cObjectInterface_getNash), bumps its deletecount, finds the hash key of BoundBox
+ * (nash_Nash_findkey), picks the octant from the key's sign bits and removes the rail's hash node (Node) from that
  * cell's list 2 (nash_Cell_remnode). An octant left with no children and no lists is deleted. Finally deletes the hash
- * node and nulls +0x54.
+ * node and nulls Node.
  */
 extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
 {
-    nash_Octant* cell = (nash_Octant*)cObjectInterface_getNash();
+    cBXNash* nash = (cBXNash*)cObjectInterface_getNash();
     cFlexRailSpaceNode* node = self->Node;
-    (*(int*)((char*)cell + 0xA0))++;
+    nash->deletecount++;
+    nash_Octant* cell = nash->octant[0][0];
     nash_CellKey key;
     nash_Nash_findkey(&key, (char*)&self->BoundBox);
     nash_Octant* cellX = key.x < 0 ? cell + 4 : cell;
@@ -116,29 +120,25 @@ extern char str_FloatRailNodes[];
 
 extern t4Vector t4vect_Zero;
 
-struct sFlexRailRef_348D98 {
-    unsigned int id;
-    sFlexRailRef_348D98() : id(0xFFFFFFFF) {}
+// tResourceID with EA's inline constructor to the invalid id (retail fills the local id array with -1 first).
+struct tRailInstId : public tResourceID {
+    tRailInstId() : tResourceID(0xFFFFFFFF) {}
 };
 
-struct sFlexRailElem_348D98 {
-    t4Vector force;            // 0x00
-    t4Vector vel;              // 0x10
-    t4Vector posA;             // 0x20
-    t4Vector posB;             // 0x30
-    sFlexRailRef_348D98 link;   // 0x40
-    int bone;                   // 0x44
-    char pad48[8];
+// tFloatRailNode with EA's inline constructor: a new node's InstId starts invalid (retail's new[] runs a constructor
+// loop storing -1 at +0x40).
+struct tFloatRailNodeInit : public tFloatRailNode {
+    tFloatRailNodeInit() { InstId = 0xFFFFFFFF; }
 };
 
 /**
  * Constructs a float rail (node type 20) for a placed rail instance.
  *
- * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs cFloatRailNode_vtbl and copies LSpring, LDamp and ForceScale (desc
- * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x50-byte nodes ("FloatRailNodes", +0x70); each gets the next valid
- * instance id (desc +0x4) and mesh (desc +0x24), zero Vel and Force, and its Pos and OPos from the mesh position
- * (cFloatRailNode_getPosition). Then builds the segment matrices (cFloatRailNode_updateMats), BoundBox (cFloatRailNode_updateBoundBox) and the space hash entry
- * (cFlexRailNode_addSpaceHash).
+ * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs cFloatRailNode_vtbl and copies LSpring, LDamp
+ * and ForceScale from the make data. Allocates NumNodes 0x50-byte nodes (Nodes, "FloatRailNodes"); each gets the next
+ * valid instance id (InstId1..8) and mesh (Mesh1..8), zero Vel and Force, and its Pos and OPos from the mesh position
+ * (cFloatRailNode_getPosition). Then builds the segment matrices (cFloatRailNode_updateMats), BoundBox
+ * (cFloatRailNode_updateBoundBox) and the space hash entry (cFlexRailNode_addSpaceHash).
  *
  * @param instRecord  rail instance record
  * @param desc  float rail make-data
@@ -151,28 +151,28 @@ extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instR
     self->LSpring = desc->LSpring;
     self->LDamp = desc->LDamp;
     self->ForceScale = desc->ForceScale;
-    sFlexRailRef_348D98 refs[8];
+    tRailInstId refs[8];
     int bones[8];
     int n = 0;
-    unsigned int* ids = (unsigned int*)(&desc->InstId1);
-    int* bn = (int*)(&desc->Mesh1);
+    unsigned int* ids = &desc->InstId1;
+    int* bn = &desc->Mesh1;
     for (int i = 0; i < 8; i++, ids++, bn++) {
         unsigned int id = *ids;
         if (id != 0xFFFFFFFF) {
-            refs[n].id = id;
+            refs[n].m_uiRID = id;
             bones[n] = *bn;
             n++;
         }
     }
-    sFlexRailElem_348D98*& elems = (sFlexRailElem_348D98*)self->Nodes;
-    elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348D98[self->NumNodes];
+    tFloatRailNode*& nodes = self->Nodes;
+    nodes = new (str_FloatRailNodes, 0x20000000, 0) tFloatRailNodeInit[self->NumNodes];
     for (int j = 0; j < self->NumNodes; j++) {
-        ((sFlexRailElem_348D98*)self->Nodes)[j].link.id = refs[j].id;
-        ((sFlexRailElem_348D98*)self->Nodes)[j].bone = bones[j];
-        ((sFlexRailElem_348D98*)self->Nodes)[j].vel = t4vect_Zero;
-        ((sFlexRailElem_348D98*)self->Nodes)[j].force = t4vect_Zero;
-        cFloatRailNode_getPosition(self, (tFloatRailNode*)&((sFlexRailElem_348D98*)self->Nodes)[j]);
-        ((sFlexRailElem_348D98*)self->Nodes)[j].posB = ((sFlexRailElem_348D98*)self->Nodes)[j].posA;
+        self->Nodes[j].InstId = refs[j].m_uiRID;
+        self->Nodes[j].Mesh = bones[j];
+        self->Nodes[j].Vel = t4vect_Zero;
+        self->Nodes[j].Force = t4vect_Zero;
+        cFloatRailNode_getPosition(self, &self->Nodes[j]);
+        self->Nodes[j].OPos = self->Nodes[j].Pos;
     }
     cFloatRailNode_updateMats(self);
     cFloatRailNode_updateBoundBox(self);
@@ -194,24 +194,15 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 extern char cFloatRailNode_vtbl[];
 extern char str_FloatRailNodes[];
 
-struct sFlexRailRef_348FA0 {
-    unsigned int id;
-    sFlexRailRef_348FA0() : id(0xFFFFFFFF) {}
-};
-
-struct sFlexRailElem_348FA0 {
-    char pad[0x40];
-    sFlexRailRef_348FA0 link;
-    char pad44[0xC];
-};
 
 
 /**
  * Constructs a float rail from a replay frame.
  *
- * Runs cFlexRailNode_cFlexRailNode1, installs cFloatRailNode_vtbl, reads LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50
- * node array (allocated as "FloatRailNodes" at +0x70), then rebuilds the matrices (cFloatRailNode_updateMats), BoundBox
- * (cFloatRailNode_updateBoundBox) and space hash entry (cFlexRailNode_addSpaceHash).
+ * Runs cFlexRailNode_cFlexRailNode1, installs cFloatRailNode_vtbl, reads LSpring/LDamp/ForceScale (0xC bytes) and
+ * the NumNodes * 0x50 node array (Nodes, allocated as "FloatRailNodes"), then rebuilds the matrices
+ * (cFloatRailNode_updateMats), BoundBox (cFloatRailNode_updateBoundBox) and space hash entry
+ * (cFlexRailNode_addSpaceHash).
  *
  * @param bucket  update bucket
  * @param stream  replay stream to read from
@@ -222,8 +213,8 @@ extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* buck
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     VPTR_OF(cObjNode, self) = (void**)cFloatRailNode_vtbl;
     stream->read((char*)&self->LSpring, 0xC);
-    sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(&self->Nodes);
-    *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[self->NumNodes];
+    tFloatRailNode** nodes = &self->Nodes;
+    *nodes = new (str_FloatRailNodes, 0x20000000, 0) tFloatRailNodeInit[self->NumNodes];
     stream->read((char*)self->Nodes, self->NumNodes * 80);
     cFloatRailNode_updateMats(self);
     cFloatRailNode_updateBoundBox(self);
@@ -352,40 +343,29 @@ struct sFrNodeMtx {
     t4Vector r[4];
 };
 
-struct sFrModelSet9220 {
-    char pad_0x0[0x1C];
-    unsigned int* refs;     // 0x1C, (model >> 2) << 8 | low byte
-};
-
-struct sFrWorld9220 {
-    char pad_0x0[0x8];
-    sFrModelSet9220** sets; // 0x8
-};
-
-extern "C" sFrWorld9220** cObjectInterface_getWorld();
+extern "C" cWorld* cObjectInterface_getWorld();
 extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sFrNodeMtx* out);
 
-static inline void* refToPtr9220(unsigned int p)
+static inline tInstanceRecord* refToInstance(unsigned int p)
 {
-    return (void*)(p << 2);
+    return (tInstanceRecord*)(p << 2);
 }
 
-struct sFrModelRef9220 {
-    unsigned int id;
-
-    void* get()
-    {
-        sFrModelSet9220* set = (*cObjectInterface_getWorld())->sets[id & 0xFF];
-        if (set == 0) {
-            return 0;
-        }
-        unsigned int p = set->refs[id >> 8] >> 8;
-        if (p == 0) {
-            return 0;
-        }
-        return refToPtr9220(p);
+// The instance record that resource id @p id names, or 0 when its section is not loaded or its slot is empty: the
+// section's cache table keeps each instance (type 3) as its address >> 2 (EA's inline world-cache lookup; the same
+// one as src/object/multiparticle.cpp's lookup58260).
+static inline tInstanceRecord* getRailInstance(const unsigned int& id)
+{
+    cWorldCacheTable* table = cObjectInterface_getWorld()->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
+    if (table == 0) {
+        return 0;
     }
-};
+    unsigned int p = table->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc;
+    if (p == 0) {
+        return 0;
+    }
+    return refToInstance(p);
+}
 
 
 /**
@@ -398,7 +378,7 @@ struct sFrModelRef9220 {
 extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node)
 {
     sFrNodeMtx boneMat;
-    cInstanceNode_buildMeshMat((*(sFrModelRef9220*)&node->InstId).get(), node->Mesh, &boneMat);
+    cInstanceNode_buildMeshMat(getRailInstance(node->InstId), node->Mesh, &boneMat);
     t4Vector bonePos = boneMat.r[3];
     (*(t4Vector*)&node->OPos) = bonePos;
     (*(t4Vector*)&node->Pos) = bonePos;
@@ -409,10 +389,6 @@ extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode*
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateMats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sFrV4_92A8 {
-    float x, y, z, w;
-    const float& operator[](int i) const { return (&x)[i]; }
-} __attribute__((aligned(16)));
 
 
 
@@ -420,7 +396,7 @@ struct sFrV4_92A8 {
 extern float CatmullRom[16];
 
 // PORT: PS2-only VU0 inline asm (vector * 4x4 basis matrix, row-vector convention).
-static inline void vu0BasisMul_92A8(sFrV4_92A8& dst, const sFrV4_92A8& g, const float* b)
+static inline void vu0BasisMul_92A8(t4Vector& dst, const t4Vector& g, const float* b)
 {
     __asm__(
         "lqc2         $vf8, %1\n"
@@ -467,35 +443,47 @@ typedef int tMmiQuad __attribute__((mode(TI)));
             : "memory");                                                                                               \
     }
 
-static inline void set4_92A8(sFrV4_92A8& r, float x, float y, float z, float w)
+static inline void set4_92A8(t4Vector& r, float x, float y, float z, float w)
 {
     r.x = x; r.y = y; r.z = z; r.w = w;
 }
 
+// Component @p i (0 x, 1 y, 2 z, 3 w) of @p v, read through its address as EA's vector index operator does.
+static inline const float& component_92A8(const t4Vector& v, int i)
+{
+    return (&v.x)[i];
+}
+
 // Spline basis matrix for control points a, b, c, d.
-static inline void updateMat_92A8(t4Matrix& out, const sFrV4_92A8& a, const sFrV4_92A8& b, const sFrV4_92A8& c, const sFrV4_92A8& d)
+static inline void updateMat_92A8(t4Matrix& out, const t4Vector& a, const t4Vector& b, const t4Vector& c,
+                                  const t4Vector& d)
 {
     t4Matrix L;
-    sFrV4_92A8 v;
-    set4_92A8(((sFrV4_92A8*)&L.row[0])[1], a[0], b[0], c[0], d[0]);
-    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[2], ((sFrV4_92A8*)&L.row[0])[1], CatmullRom);
-    *(sFrV4_92A8*)&L.row[0].x = ((sFrV4_92A8*)&L.row[0])[2];
-    set4_92A8(((sFrV4_92A8*)&L.row[0])[2], a[1], b[1], c[1], d[1]);
-    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[3], ((sFrV4_92A8*)&L.row[0])[2], CatmullRom);
-    ((sFrV4_92A8*)&L.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[3];
-    set4_92A8(((sFrV4_92A8*)&L.row[0])[3], a[2], b[2], c[2], d[2]);
-    vu0BasisMul_92A8(v, ((sFrV4_92A8*)&L.row[0])[3], CatmullRom);
-    ((sFrV4_92A8*)&L.row[0])[2] = v;
-    *(sFrV4_92A8*)&out.row[0].x = *(sFrV4_92A8*)&L.row[0].x; ((sFrV4_92A8*)&out.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[1]; ((sFrV4_92A8*)&out.row[0])[2] = ((sFrV4_92A8*)&L.row[0])[2];
-    ((sFrV4_92A8*)&L.row[0])[3].x = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].y = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].z = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].w = 1.0f;
-    ((sFrV4_92A8*)&out.row[0])[3] = ((sFrV4_92A8*)&L.row[0])[3];
+    t4Vector v;
+    set4_92A8(L.row[1], component_92A8(a, 0), component_92A8(b, 0), component_92A8(c, 0), component_92A8(d, 0));
+    vu0BasisMul_92A8(L.row[2], L.row[1], CatmullRom);
+    L.row[0] = L.row[2];
+    set4_92A8(L.row[2], component_92A8(a, 1), component_92A8(b, 1), component_92A8(c, 1), component_92A8(d, 1));
+    vu0BasisMul_92A8(L.row[3], L.row[2], CatmullRom);
+    L.row[1] = L.row[3];
+    set4_92A8(L.row[3], component_92A8(a, 2), component_92A8(b, 2), component_92A8(c, 2), component_92A8(d, 2));
+    vu0BasisMul_92A8(v, L.row[3], CatmullRom);
+    L.row[2] = v;
+    out.row[0] = L.row[0];
+    out.row[1] = L.row[1];
+    out.row[2] = L.row[2];
+    L.row[3].x = 0.0f;
+    L.row[3].y = 0.0f;
+    L.row[3].z = 0.0f;
+    L.row[3].w = 1.0f;
+    out.row[3] = L.row[3];
     MMI_TRANSPOSE4(&out);
 }
 
 /**
  * Rebuilds a float rail's segment matrices from its node positions.
  *
- * Each segment matrix (+0x50) is the cubic for that segment built from the four surrounding node positions with the
+ * Each segment matrix (Mats) is the cubic for that segment built from the four surrounding node positions with the
  * basis CatmullRom; the first and last segments repeat the end node as the missing control point.
  *
  * @param selfv  the float rail
@@ -507,23 +495,19 @@ extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
 {
     cFloatRailNode* self = selfv;
     int i = 1;
-    updateMat_92A8((self->Mats)[0], (*(sFrV4_92A8*)&(self->Nodes)[0].Pos), (*(sFrV4_92A8*)&(self->Nodes)[0].Pos), (*(sFrV4_92A8*)&(self->Nodes)[1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[2].Pos));
+    updateMat_92A8(self->Mats[0], self->Nodes[0].Pos, self->Nodes[0].Pos, self->Nodes[1].Pos, self->Nodes[2].Pos);
     for (; i < self->NumNodes - 2; i++) {
-        updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&self->Nodes[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 2].Pos));
+        updateMat_92A8(self->Mats[i], self->Nodes[i - 1].Pos, self->Nodes[i].Pos, self->Nodes[i + 1].Pos,
+                       self->Nodes[i + 2].Pos);
     }
-    updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&self->Nodes[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos));
+    updateMat_92A8(self->Mats[i], self->Nodes[i - 1].Pos, self->Nodes[i].Pos, self->Nodes[i + 1].Pos,
+                   self->Nodes[i + 1].Pos);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_applyForce);
 #ifdef SKIP_ASM
-
-struct sFrElem {
-    t4Vector pos;   // 0x00
-    t4Vector vel;   // 0x10
-    char pad[0x30];
-};
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector vu0ScaleFR(const t4Vector& v, float s)
@@ -557,19 +541,17 @@ static inline void vu0AddFR(t4Vector& dst, t4Vector b)
 /**
  * Adds a force at a hit point to the two float rail nodes around it.
  *
- * Does nothing when the hit segment (intInfo +0x64) is negative. Otherwise node seg gets offset * (1 - t) and node seg
- * + 1 gets offset * t added to its Force (t at +0x68).
+ * Does nothing when the hit segment (Seg) is negative. Otherwise node Seg gets offset * (1 - T) and node Seg + 1 gets
+ * offset * T added to its Force.
  *
- * @param node  intersect info of the hit (segment +0x64, t +0x68)
+ * @param node  intersect info of the hit (its Seg and T)
  * @param offset  force to apply
  */
-extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, cFloatRailNode* node, t4Vector* offset)
+extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, tIntersectInfo* node, t4Vector* offset)
 {
-    if (*(int*)&node->LDamp >= 0) {
-        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp].pos,
-                 vu0ScaleFR(*offset, 1.0f - node->ForceScale));
-        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp + 1].pos,
-                 vu0ScaleFR(*offset, node->ForceScale));
+    if (node->Seg >= 0) {
+        vu0AddFR(self->Nodes[node->Seg].Force, vu0ScaleFR(*offset, 1.0f - node->T));
+        vu0AddFR(self->Nodes[node->Seg + 1].Force, vu0ScaleFR(*offset, node->T));
     }
 }
 #endif
@@ -580,8 +562,8 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
 /**
  * Adds the float rail's velocity at the hit point to an intersect info.
  *
- * Does nothing when the hit segment (+0x64) is negative. Otherwise adds Vel[seg] * t + Vel[seg + 1] * (1 - t) to the
- * info's +0x20 vector (t at +0x68).
+ * Does nothing when the hit segment (Seg) is negative. Otherwise adds Vel[Seg] * T + Vel[Seg + 1] * (1 - T) to the
+ * info's Ivel.
  *
  * Likely bug: the weights are the reverse of cFloatRailNode_applyForce, which gives node seg the (1 - t) share.
  *
@@ -589,15 +571,11 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
  */
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, cFloatRailNode* node)
+extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, tIntersectInfo* node)
 {
-    if (*(int*)&node->LDamp >= 0) {
-        vu0AddFR(*(t4Vector*)&node->NumNodes,
-                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp].vel,
-                            node->ForceScale));
-        vu0AddFR(*(t4Vector*)&node->NumNodes,
-                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp + 1].vel,
-                            1.0f - node->ForceScale));
+    if (node->Seg >= 0) {
+        vu0AddFR(node->Ivel, vu0ScaleFR(self->Nodes[node->Seg].Vel, node->T));
+        vu0AddFR(node->Ivel, vu0ScaleFR(self->Nodes[node->Seg + 1].Vel, 1.0f - node->T));
     }
 }
 #endif
@@ -674,21 +652,23 @@ static inline void vu0AddEq_98E8(t4Vector& dst, t4Vector b)
 /**
  * Steps the float rail's spring simulation by one update.
  *
- * For each node: snaps Pos and OPos back to the mesh (cFloatRailNode_getPosition) while the instance has an active node (+0xC);
- * accel = -(Pos - OPos) * LSpring (+0x60) + Force * ForceScale (+0x68) - Vel * LDamp (+0x64); Pos += Vel * dt; Vel +=
- * accel * dt (dt from cObjectInterface_getUpdateTime); Force is cleared.
+ * For each node: snaps Pos and OPos back to the mesh (cFloatRailNode_getPosition) while the instance has an active node
+ * (m_pActiveNode); accel = -(Pos - OPos) * LSpring + Force * ForceScale - Vel * LDamp; Pos += Vel * dt; Vel += accel *
+ * dt (dt from cObjectInterface_getUpdateTime); Force is cleared.
  */
 extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
 {
     float dt = cObjectInterface_getUpdateTime();
     tFloatRailNode* n = self->Nodes;
     for (int i = 0; i < self->NumNodes; i++, n++) {
-        if (*(int*)((char*)(*(sFrModelRef9220*)&n->InstId).get() + 0xC))
+        if (getRailInstance(n->InstId)->m_pActiveNode)
             cFloatRailNode_getPosition(self, (tFloatRailNode*)n);
-        float* k = (float*)(&self->LSpring);
+        // The three cFloatRailNodeState words (LSpring, LDamp, ForceScale): retail keeps their address in a register
+        // and reads ForceScale as its third word.
+        float* state = &self->LSpring;
         float ks = -self->LSpring;
         t4Vector acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8((*(&n->Pos)), (*(&n->OPos))), ks),
-                                    vu0Scale_98E8((*(&n->Force)), k[2]));
+                                    vu0Scale_98E8((*(&n->Force)), state[2]));
         vu0AddEq_98E8(acc, vu0Scale_98E8((*(&n->Vel)), -self->LDamp));
         vu0AddEq_98E8((*(&n->Pos)), vu0Scale_98E8((*(&n->Vel)), dt));
         vu0AddEq_98E8((*(&n->Vel)), vu0Scale_98E8(acc, dt));
@@ -752,30 +732,20 @@ static inline t4Vector Sub_9B48(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-struct sFlexRef_9B48 {
-    unsigned int id;
-    sFlexRef_9B48() : id(0xFFFFFFFF) {}
-};
-
-struct sFlexElem_9B48 {
-    t4Vector pos;              // 0x00
-    t4Vector dir;              // 0x10
-    t4Vector v20;              // 0x20
-    t4Vector v30;              // 0x30
-    t4Vector v40;              // 0x40
-    sFlexRef_9B48 link;         // 0x50
-    int bone;                   // 0x54
-    char pad58[8];
+// tSpringRailNode with EA's inline constructor: a new node's InstId starts invalid (retail's new[] runs a constructor
+// loop storing -1 at +0x50).
+struct tSpringRailNodeInit : public tSpringRailNode {
+    tSpringRailNodeInit() { InstId = 0xFFFFFFFF; }
 };
 
 /**
  * Constructs a spring rail (node type 21) for a placed rail instance.
  *
- * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs cSpringRailNode_vtbl and copies ASpring, ADamp and TorqueScale (desc
- * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x60-byte nodes ("SpringRailNodes", +0x70); each gets the next
- * valid instance id and mesh, zero V/O/W/T and its P from the mesh position (cSpringRailNode_getPosition). V of each node becomes the
- * vector to the next node's P. Then builds the segment matrices (cSpringRailNode_updateMats), BoundBox (cSpringRailNode_updateBoundBox) and the space
- * hash entry (cFlexRailNode_addSpaceHash).
+ * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs cSpringRailNode_vtbl and copies ASpring, ADamp
+ * and TorqueScale from the make data. Allocates NumNodes 0x60-byte nodes (Nodes, "SpringRailNodes"); each gets the
+ * next valid instance id and mesh, zero V/O/W/T and its P from the mesh position (cSpringRailNode_getPosition). V of
+ * each node becomes the vector to the next node's P. Then builds the segment matrices (cSpringRailNode_updateMats),
+ * BoundBox (cSpringRailNode_updateBoundBox) and the space hash entry (cFlexRailNode_addSpaceHash).
  *
  * @param instRecord  rail instance record
  * @param desc  spring rail make-data
@@ -788,33 +758,32 @@ extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* in
     self->ASpring = desc->ASpring;
     self->ADamp = desc->ADamp;
     self->TorqueScale = desc->TorqueScale;
-    sFlexRef_9B48 refs[8];
+    tRailInstId refs[8];
     int bones[8];
     int n = 0;
-    unsigned int* ids = (unsigned int*)(&desc->InstId1);
-    int* bn = (int*)(&desc->Mesh1);
+    unsigned int* ids = &desc->InstId1;
+    int* bn = &desc->Mesh1;
     for (int i = 0; i < 8; i++, ids++, bn++) {
         unsigned int id = *ids;
         if (id != 0xFFFFFFFF) {
-            refs[n].id = id;
+            refs[n].m_uiRID = id;
             bones[n] = *bn;
             n++;
         }
     }
-    sFlexElem_9B48*& elems = (sFlexElem_9B48*)self->Nodes;
-    elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexElem_9B48[self->NumNodes];
+    tSpringRailNode*& nodes = self->Nodes;
+    nodes = new (str_SpringRailNodes, 0x20000000, 0) tSpringRailNodeInit[self->NumNodes];
     for (int j = 0; j < self->NumNodes; j++) {
-        ((sFlexElem_9B48*)self->Nodes)[j].link.id = refs[j].id;
-        ((sFlexElem_9B48*)self->Nodes)[j].bone = bones[j];
-        ((sFlexElem_9B48*)self->Nodes)[j].v30 = t4vect_Zero_9B48;
-        ((sFlexElem_9B48*)self->Nodes)[j].v40 = t4vect_Zero_9B48;
-        ((sFlexElem_9B48*)self->Nodes)[j].v20 = t4vect_Zero_9B48;
-        ((sFlexElem_9B48*)self->Nodes)[j].dir = t4vect_Zero_9B48;
-        cSpringRailNode_getPosition(self, (tSpringRailNode*)&((sFlexElem_9B48*)self->Nodes)[j]);
+        self->Nodes[j].InstId = refs[j].m_uiRID;
+        self->Nodes[j].Mesh = bones[j];
+        self->Nodes[j].W = t4vect_Zero_9B48;
+        self->Nodes[j].T = t4vect_Zero_9B48;
+        self->Nodes[j].O = t4vect_Zero_9B48;
+        self->Nodes[j].V = t4vect_Zero_9B48;
+        cSpringRailNode_getPosition(self, &self->Nodes[j]);
     }
     for (int k = 0; k < self->NumNodes - 1; k++) {
-        ((sFlexElem_9B48*)self->Nodes)[k].dir =
-            Sub_9B48(((sFlexElem_9B48*)self->Nodes)[k + 1].pos, ((sFlexElem_9B48*)self->Nodes)[k].pos);
+        self->Nodes[k].V = Sub_9B48(self->Nodes[k + 1].P, self->Nodes[k].P);
     }
     cSpringRailNode_updateMats(self);
     cSpringRailNode_updateBoundBox(self);
@@ -834,20 +803,15 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 extern char cSpringRailNode_vtbl[];
 extern char str_SpringRailNodes[];
 
-struct sFlexRailElem_349DB0 {
-    char pad[0x50];
-    unsigned int link;
-    char pad54[0xC];
-    sFlexRailElem_349DB0() : link(~0u) {}
-};
 
 
 /**
  * Constructs a spring rail from a replay frame.
  *
- * Runs cFlexRailNode_cFlexRailNode1, installs cSpringRailNode_vtbl, reads ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60
- * node array ("SpringRailNodes", +0x70), then rebuilds the matrices (cSpringRailNode_updateMats) and the space hash entry. Unlike
- * the float rail's replay ctor it does not recompute BoundBox (it comes back from the replay state).
+ * Runs cFlexRailNode_cFlexRailNode1, installs cSpringRailNode_vtbl, reads ASpring/ADamp/TorqueScale (0xC bytes) and
+ * the NumNodes * 0x60 node array (Nodes, "SpringRailNodes"), then rebuilds the matrices (cSpringRailNode_updateMats)
+ * and the space hash entry. Unlike the float rail's replay ctor it does not recompute BoundBox (it comes back from the
+ * replay state).
  *
  * @param bucket  update bucket
  * @param stream  replay stream to read from
@@ -858,8 +822,8 @@ extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* b
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     VPTR_OF(cObjNode, self) = (void**)cSpringRailNode_vtbl;
     stream->read((char*)&self->ASpring, 0xC);
-    sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(&self->Nodes);
-    *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[self->NumNodes];
+    tSpringRailNode** nodes = &self->Nodes;
+    *nodes = new (str_SpringRailNodes, 0x20000000, 0) tSpringRailNodeInit[self->NumNodes];
     stream->read((char*)self->Nodes, self->NumNodes * 0x60);
     cSpringRailNode_updateMats(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
@@ -958,10 +922,6 @@ extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
 //100%
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode_getPosition);
 #ifdef SKIP_ASM
-extern "C" sFrWorld9220** cObjectInterface_getWorld();
-extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sFrNodeMtx* out);
-
-
 /**
  * Sets a spring rail node's P to the current position of its mesh (cInstanceNode_buildMeshMat translation).
  *
@@ -970,7 +930,7 @@ extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sFrNodeMtx* ou
 extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, tSpringRailNode* node)
 {
     sFrNodeMtx boneMat;
-    cInstanceNode_buildMeshMat((*(sFrModelRef9220*)&node->InstId).get(), node->Mesh, &boneMat);
+    cInstanceNode_buildMeshMat(getRailInstance(node->InstId), node->Mesh, &boneMat);
     t4Vector bonePos = boneMat.r[3];
     (*(t4Vector*)&node->P) = bonePos;
 }
@@ -1504,8 +1464,6 @@ extern "C" void cSpringRailNode_writeToReplayFrame(cSpringRailNode* self, cBxRep
 INCLUDE_ASM("object/flexrailnode", tFlagState_tFlagState);
 #ifdef SKIP_ASM
 
-struct sFrRailDesc;
-
 struct sFrRailOut_AC88 {
     char on0, on1, on2, on3;  // 0x0
     float a[4];               // 0x4
@@ -1548,7 +1506,7 @@ static inline float perSec_34AC88(float x)
  * @param src  tMakeFlagData to read
  * @return out
  */
-extern "C" sFrRailDesc* tFlagState_tFlagState(sFrRailDesc* out, void* src)
+extern "C" tFlagState* tFlagState_tFlagState(tFlagState* out, void* src)
 {
     sFrRailOut_AC88* flagState = (sFrRailOut_AC88*)out;
     sFrRailSrc_AC88* makeData = (sFrRailSrc_AC88*)src;
@@ -1598,17 +1556,14 @@ extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, vo
 extern "C" void* cObjectInterface_getFlagManager(void);
 extern char cFlagNode_vtbl[];
 
-struct sFrRailDesc {
-    int data[0x58 / 4];
-};
-
-extern "C" sFrRailDesc* tFlagState_tFlagState(sFrRailDesc* out, void* src);
-extern "C" void cFlagManager_AddFlag(void* mgr, void* node, sFrRailDesc* desc);
+extern "C" tFlagState* tFlagState_tFlagState(tFlagState* out, void* src);
+extern "C" void cFlagManager_AddFlag(void* mgr, tInstanceRecord* node, tFlagState* desc);
 
 /**
  * Constructs a flag node (node type 10) and registers the flag with the flag manager.
  *
- * Runs the record constructor cInstanceNode_cInstanceNode1, installs cFlagNode_vtbl, sets the record flags to (flags & ~0x2) | 0x4,
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs cFlagNode_vtbl, sets the record's m_iFlags to
+ * (m_iFlags & ~0x2) | 0x4,
  * converts src (tFlagState_tFlagState) and adds the instance to the flag manager (cFlagManager_AddFlag on cObjectInterface_getFlagManager()).
  *
  * @param bucket  update bucket
@@ -1616,12 +1571,12 @@ extern "C" void cFlagManager_AddFlag(void* mgr, void* node, sFrRailDesc* desc);
  * @param src  flag make-data
  * @return self
  */
-extern "C" void* cFlagNode_cFlagNode1(cFlagNode* self, void* bucket, cFlagNode* node, void* src)
+extern "C" void* cFlagNode_cFlagNode1(cFlagNode* self, void* bucket, tInstanceRecord* node, void* src)
 {
-    sFrRailDesc desc;
+    tFlagState desc;
     cInstanceNode_cInstanceNode1(self, bucket, 10, node);
     VPTR_OF(cObjNode, self) = (void**)cFlagNode_vtbl;
-    node->Prev = (cObjNode*)(((unsigned int)node->Prev & 0xFFFFFFFD) | 4);
+    node->m_iFlags = (node->m_iFlags & 0xFFFFFFFD) | 4;
     tFlagState_tFlagState(&desc, src);
     cFlagManager_AddFlag(cObjectInterface_getFlagManager(), node, &desc);
     return ((void*)self);
@@ -1709,14 +1664,15 @@ INCLUDE_ASM("object/flexrailnode", tFlagSetState_tFlagSetState);
 /**
  * Constructs a flag-set state: no instances, model id -1.
  *
- * Sets mCurrentNumInstances (+0x5C) to 0 and mModelID (+0x58) to -1.
+ * Sets mCurrentNumInstances to 0 and mModelID to -1. The state is the first 0x60 bytes of a cFlagSet.
  *
  * @return self
  */
 extern "C" void* tFlagSetState_tFlagSetState(void* self)
 {
-    *(int*)((char*)self + 0x5c) = 0;
-    *(unsigned int*)((char*)self + 0x58) = 0xFFFFFFFFU;
+    cFlagSet* flagSet = (cFlagSet*)self;
+    flagSet->mCurrentNumInstances = 0;
+    flagSet->mModelID = 0xFFFFFFFFU;
     return self;
 }
 #endif
@@ -1811,33 +1767,25 @@ INCLUDE_ASM("object/flexrailnode", cFlagSet_AddFlag);
 extern "C" void cFlagSet_CreateMesh(void* self, void* mesh);
 
 
-struct sFlagSet_34B038 {
-    tFlagState def;
-    int mModelID;
-    int count;
-    char pad60[0x94 - 0x60];
-    void* meshes[1];
-};
-
 /**
  * Adds a flag instance to a flag set, creating the set's cloth mesh for the first one.
  *
- * For an empty set it copies the flag data, stores the instance's model id (+0x58) and builds the mesh
- * (cFlagSet_CreateMesh). The instance is appended to mInstances (+0x94) and the count (+0x5C) incremented; nothing
- * checks the 60-entry limit.
+ * For an empty set it copies the flag data (mFlagData), stores the instance's model id (mModelID) and builds the mesh
+ * (cFlagSet_CreateMesh). The instance is appended to mInstances and mCurrentNumInstances incremented; nothing checks
+ * the 60-entry limit.
  *
  * @param def  converted flag data
  * @param mesh  instance record of the flag
  */
-extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, tFlagState* def, tInstanceRecord* mesh)
+extern "C" void cFlagSet_AddFlag(cFlagSet* self, tFlagState* def, tInstanceRecord* mesh)
 {
-    if (self->count == 0) {
-        self->def = *def;
-        self->mModelID = *(int*)mesh->m_Model;
+    if (self->mCurrentNumInstances == 0) {
+        self->mFlagData = *def;
+        self->mModelID = mesh->m_Model->m_RID;
         cFlagSet_CreateMesh(self, mesh);
     }
-    self->meshes[self->count] = ((char*)mesh);
-    self->count++;
+    self->mInstances[self->mCurrentNumInstances] = mesh;
+    self->mCurrentNumInstances++;
 }
 #endif
 

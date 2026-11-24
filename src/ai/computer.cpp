@@ -587,18 +587,8 @@ int cRider_getControlState(void* self);
 extern "C" float func_0031C228(float x);
 
 
-struct sRider_0010D1A0 {
-    char pad0[0x1B0];
-    t4Vector vel;  // 0x1B0
-    char pad1C0[0x4C8 - 0x1C0];
-    float speed;        // 0x4C8
-    float heading;      // 0x4CC
-    char pad4D0[0x788 - 0x4D0];
-    char* board;        // 0x788
-
-    t4Vector getVel() { return vel; }
-};
-
+// The rider's facing direction (mMatrix front row), returned by value: retail copies it out (lq / sq) for each use.
+static inline t4Vector riderFacing_0010D1A0(cRider* rider) { return rider->mMatrix.row[1]; }
 
 static inline float atan2_0010D1A0(float y, float x)
 {
@@ -641,19 +631,20 @@ static inline float wrap_0010D1A0(float x)
 /**
  * Returns whether the computer rider should reset: it has been going the wrong way or has been stuck for too long.
  *
- * When the rider's mTargetID is negative (no target), mBadHeadingTime counts the calls in which the rider's +0x4CC
- * angle is more than 60 degrees off its facing (mMatrix front row), else it is zeroed; 61 or more means wrong way.
- * Motion state 2 (cRider_getMotionState) counts mWanderTime up and cancels wrong way; state 4 with any bad-heading count
- * returns 1 at once; state 1 or a speed (+0x4C8) under 1000 zeroes mWanderTime and, in state 1, returns 1 once the air
- * predictor's CurAirTime (mAirPredictor + 0xA0) passes 30 s; anything else counts mWanderTime up. The result is wrong
+ * When the rider's mTargetID is negative (no target), mBadHeadingTime counts the calls in which the rider's
+ * PathHeading is more than 60 degrees off its facing (mMatrix front row), else it is zeroed; 61 or more means wrong
+ * way. Motion state 2 (cRider_getMotionState) counts mWanderTime up and cancels wrong way; state 4 with any bad-heading
+ * count returns 1 at once; state 1 or a PathDistXY under 1000 zeroes mWanderTime and, in state 1, returns 1 once the
+ * air predictor's CurAirTime passes 30 s; anything else counts mWanderTime up. The result is wrong
  * way or mWanderTime >= 223, and outside control state 8 (cRider_getControlState) only while mTargetID is negative.
  *
  * @return 1 when the rider should reset, else 0
  */
 extern "C" int cComputer_checkForReset(cComputer* self)
 {
-    float ang = atan2_0010D1A0(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)->getVel().y, ((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)->getVel().x);
-    float headingDiff = wrap_0010D1A0(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)->heading - ang);
+    float ang = atan2_0010D1A0(riderFacing_0010D1A0(self->RiderHandler.GroundMotion.mRider).y,
+                               riderFacing_0010D1A0(self->RiderHandler.GroundMotion.mRider).x);
+    float headingDiff = wrap_0010D1A0(self->RiderHandler.GroundMotion.mRider->PathHeading - ang);
     if (self->mTargetID < 0) {
         if (__builtin_fabsf(headingDiff) > 1.047197699546814f) {
             self->mBadHeadingTime++;
@@ -664,22 +655,24 @@ extern "C" int cComputer_checkForReset(cComputer* self)
         self->mBadHeadingTime = 0;
     }
     int wrong = self->mBadHeadingTime >= 61;
-    if (cRider_getMotionState(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)) == 2) {
+    if (cRider_getMotionState(self->RiderHandler.GroundMotion.mRider) == 2) {
         wrong = 0;
         self->mWanderTime++;
-    } else if (cRider_getMotionState(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)) == 4 && self->mBadHeadingTime > 0) {
+    } else if (cRider_getMotionState(self->RiderHandler.GroundMotion.mRider) == 4 && self->mBadHeadingTime > 0) {
         return 1;
-    } else if (cRider_getMotionState(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)) == 1 || ((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)->speed < 1000.0f) {
+    } else if (cRider_getMotionState(self->RiderHandler.GroundMotion.mRider) == 1 ||
+               self->RiderHandler.GroundMotion.mRider->PathDistXY < 1000.0f) {
         self->mWanderTime = 0;
         wrong = 0;
-        if (cRider_getMotionState(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)) == 1 && *(float*)(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)->board + 0xA0) > 30.0f) {
+        if (cRider_getMotionState(self->RiderHandler.GroundMotion.mRider) == 1 &&
+            self->RiderHandler.GroundMotion.mRider->mAirPredictor->CurAirTime > 30.0f) {
             return 1;
         }
     } else {
         self->mWanderTime++;
     }
     int stuck = wrong || self->mWanderTime >= 223;
-    if (cRider_getControlState(((sRider_0010D1A0*)self->RiderHandler.GroundMotion.mRider)) != 8) {
+    if (cRider_getControlState(self->RiderHandler.GroundMotion.mRider) != 8) {
         stuck = stuck && self->mTargetID < 0;
     }
     return stuck;
@@ -691,8 +684,7 @@ INCLUDE_ASM("ai/computer", cComputer_scorePath);
 #ifdef SKIP_ASM
 unsigned int AIrand();
 extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int a1, int a2, int a3);
-struct sAi0010FC30;
-extern "C" int cAI_aiRidersOnPath(sAi0010FC30* self, int team);
+extern "C" int cAI_aiRidersOnPath(cAI* self, cAIPath* path);
 extern "C" float cRider_calculateAheadDist(cRider* self, int arg1);
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
 
@@ -772,12 +764,6 @@ static inline int speedLimit_10D410(int kind)
     return 0;
 }
 
-struct sAi_10D410 {
-    char pad0[0x28];
-    char* riders[20];
-    int count;
-};
-
 /**
  * Scores an AI path as a route choice for this computer rider (route selection); higher is better.
  *
@@ -794,7 +780,7 @@ struct sAi_10D410 {
 extern "C" float cComputer_scorePath(cComputer* self, cAIPath* tgt)
 {
     float sc[7];
-    char* ai = (char*)SSXApp->Game->AI;
+    cAI* ai = SSXApp->Game->AI;
     int flags = tgt->PathAttributes;
     int kind = (flags >> 7) & 7;
     int lvl = (flags >> 4) & 7;
@@ -840,15 +826,14 @@ extern "C" float cComputer_scorePath(cComputer* self, cAIPath* tgt)
     }
     sc[0] = distScore * 0.22727273404598236f;
     cRider* rider2 = self->RiderHandler.GroundMotion.mRider;
-    if (rider2->PissedOff != 0 && *(char**)(((sAi_10D410*)ai)->riders[rider2->PissedAIIndex] + 0xAB8) == ((char*)tgt)) {
+    if (rider2->PissedOff != 0 && ai->Riders[rider2->PissedAIIndex]->AIPath == tgt) {
         return 100.0f;
     }
     float zero = 0.0f;
     sc[1] = zero;
     float w = 1.0f / total;
     sc[2] = (float)lvl * (w * 0.3333333432674408f);
-    // PORT: the path pointer is passed as cAI_aiRidersOnPath's int team
-    int n = cAI_aiRidersOnPath((sAi0010FC30*)ai, (int)tgt);
+    int n = cAI_aiRidersOnPath(ai, tgt);
     n -= ((char*)tgt) == (char*)self->RiderHandler.GroundMotion.mRider->AIPath;
     float occupiedScore;
     if (n <= 0) {
@@ -1030,9 +1015,6 @@ extern "C" int cComputer_checkForAttack(cComputer* self, int oppID)
 //100%
 INCLUDE_ASM("ai/computer", cComputer_checkForBlock);
 #ifdef SKIP_ASM
-struct sEnt_0010DA10 { int vis; int val; float dist; int c; int d; int e; int f; int g; int h; };
-struct sRider_0010DA10 { sEnt_0010DA10 ent[6]; };
-struct sAI_0010DA10 { char pad[0x28]; char* riders[20]; int count; };
 extern "C" int AITick();
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 unsigned int AIrand();
@@ -1061,19 +1043,17 @@ extern "C" int cComputer_checkForBlock(cComputer* self)
     }
     if (AITick() % 6 != 0)
         return 0;
-    sAI_0010DA10* ai = (sAI_0010DA10*)SSXApp->Game->AI;
+    cAI* ai = SSXApp->Game->AI;
     int i;
-    for (i = 0; i < ai->count; i++)
+    for (i = 0; i < ai->NumberOfRidersAllocated; i++)
     {
         if (i == self->RiderHandler.GroundMotion.mRider->getAIIndex())
             continue;
-        char* otherBeing = ai->riders[i] + 0x6C0;
-        sVEntry<int(void*)>* ve2 = &(*(sVEntry<int(void*)>**)otherBeing)[8];
-        if (ve2->fn(vthis(otherBeing, *ve2)) == 0)
+        if (!ai->Riders[i]->isHuman())
             continue;
-        if (!(((sRider_0010DA10*)self->RiderHandler.GroundMotion.mRider)->ent[i].dist < 200.0f))
+        if (!(self->RiderHandler.GroundMotion.mRider->mRelations[i].mDistance < 200.0f))
             continue;
-        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(ai->riders[i] + 0x784), 1) != 13)
+        if (cRiderAnimBase_getCurrentAnimCategory(ai->Riders[i]->mRiderAnim, 1) != 13)
             continue;
         unsigned int randomRoll = AIrand() % 100;
         int* pf = (int*)(&self->mShouldIBlock);
@@ -1090,15 +1070,6 @@ INCLUDE_ASM("ai/computer", cComputer_checkForPunching);
 #ifdef SKIP_ASM
 extern "C" int cBEAggressionInterface_getAggression(void* self, int a, int b);
 void* cBEAggressionInterface_getThis();
-
-struct sEnt_0010DBF0 { int vis; int val; float dist; float angle; int d; int e; int f; int g; int h; };
-struct sRider_0010DBF0 {
-    sEnt_0010DBF0 ent[6];           // 0x0
-    char padD8[0xF4 - 0xD8];
-    int lastTaunt;                  // 0xF4
-    char padF8[0x1B0 - 0xF8];
-    t4Vector vel;              // 0x1B0
-};
 
 static inline int id_0010DBF0(char* vvself)
 {
@@ -1177,13 +1148,13 @@ extern "C" int cComputer_checkForPunching(cComputer* self, int* side)
         float hi = 2.6179940700531006f;
         if (i == id_0010DBF0(((char*)self)))
             continue;
-        sRider_0010DBF0* rider = (sRider_0010DBF0*)self->RiderHandler.GroundMotion.mRider;
-        if (!(rider->ent[i].dist < 200.0f))
+        cRider* rider = self->RiderHandler.GroundMotion.mRider;
+        if (!(rider->mRelations[i].mDistance < 200.0f))
             continue;
-        t4Vector velForY = rider->vel;
-        t4Vector velForX = rider->vel;
-        float ang = atan2_0010DBF0(velForY.y, velForX.x, pi);
-        float angleDiff = wrap_0010DBF0(ang - ((sRider_0010DBF0*)self->RiderHandler.GroundMotion.mRider)->ent[i].angle);
+        t4Vector facingForY = rider->mMatrix.row[1];
+        t4Vector facingForX = rider->mMatrix.row[1];
+        float ang = atan2_0010DBF0(facingForY.y, facingForX.x, pi);
+        float angleDiff = wrap_0010DBF0(ang - self->RiderHandler.GroundMotion.mRider->mRelations[i].mAngle);
         float ad = __builtin_fabsf(angleDiff);
         if (!(lo < ad))
             continue;
@@ -1192,10 +1163,10 @@ extern "C" int cComputer_checkForPunching(cComputer* self, int* side)
         void* agg = cBEAggressionInterface_getThis();
         if (!isAggr_0010DBF0(agg, id_0010DBF0(((char*)self)), i))
             continue;
-        if (!(((sRider_0010DBF0*)self->RiderHandler.GroundMotion.mRider)->lastTaunt + 120 < AITick()))
+        if (!(self->RiderHandler.GroundMotion.mRider->LastPunchTick + 120 < AITick()))
             continue;
         *side = 0.0f < angleDiff;
-        ((sRider_0010DBF0*)self->RiderHandler.GroundMotion.mRider)->lastTaunt = AITick();
+        self->RiderHandler.GroundMotion.mRider->LastPunchTick = AITick();
         return 1;
     }
     return 0;
@@ -1554,15 +1525,15 @@ static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMod
  * A finish event (type 1) counts when the game mode (cBENewRaceInterface_newRace.cGameMode) is 0-3, or 5/6 with the
  * game-mode manager's +0x98 set (On Tour isLastHeat), or the location is 1 or 5-13, or a game path is set; then a rider
  * not yet past the line (mFinishTime < 0) gets cRider_doFinishEvent. A chapter event (type 11) calls
- * cReplay_eventChapter on the game's replay with the rider's id (cBeing vtable slot 7) and the event's second word.
+ * cReplay_eventChapter on the game's replay with the rider's id (cBeing vtable slot 7) and the event's Arg.
  *
  * @p isPrev and @p isCur (On Tour isPrev/isCur) are not read.
  *
- * @param pathEvent  the path event node (On Tour tPathEventNode *ev): type, then a value
+ * @param pathEvent  the path event node (On Tour tPathEventNode *ev)
  * @param isPrev  On Tour isPrev; unused
  * @param isCur  On Tour isCur; unused
  */
-extern "C" void cRider_flagEventPathEvent(cRider* self, int* pathEvent, int isPrev, int isCur)
+extern "C" void cRider_flagEventPathEvent(cRider* self, tPathEventNode* pathEvent, int isPrev, int isCur)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cGameModeMan* gameModeMan = SSXApp->GameModeMan;
@@ -1575,16 +1546,16 @@ extern "C" void cRider_flagEventPathEvent(cRider* self, int* pathEvent, int isPr
         || mode == 10 || mode == 11 || mode == 12 || mode == 13 || mode == 1
         || cBENewRaceInterface_newRace.cGamePath != 0)
         shouldTriggerFinishLine = 1;
-    if (*pathEvent == 1 && shouldTriggerFinishLine != 0)
+    if (pathEvent->Type == 1 && shouldTriggerFinishLine != 0)
     {
         int ok = self->mFinishTime >= 0.0f;
         if (!ok)
             cRider_doFinishEvent(self);
     }
-    if (*pathEvent == 11)
+    if (pathEvent->Type == 11)
     {
         void* tgt = SSXApp->Game->Replay;
-        cReplay_eventChapter(tgt, self->getAIIndex(), pathEvent[1]);
+        cReplay_eventChapter(tgt, self->getAIIndex(), pathEvent->Arg);
     }
 }
 #endif
@@ -1758,7 +1729,8 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
     cRider_flagEventBoostPowerUp_fi(((char*)self), powerUp, 1);
     if (0.0f < powerUp)
         self->mPowerUpTrickTimer = 0.0f;
-    sVEntry<void(void*, float)>* vf = &((sVEntry<void(void*, float)>*)VPTR_AT(self, sizeof(cRiderState)))[17];
+    sVEntry<void(void*, float)>* vtable = (sVEntry<void(void*, float)>*)VPTR_AT(self, sizeof(cRiderState));
+    sVEntry<void(void*, float)>* vf = &vtable[17];
     vf->fn(vthis(self, *vf), speed * 0.5f);
     cSSXAudio_Land(gSSXAudio, ((char*)self), powerUp);
 }
@@ -2240,50 +2212,9 @@ INCLUDE_ASM("ai/computer", cAI_UpdateGroupAI);
 void* cBEAggressionInterface_getThis();
 extern "C" int cBEAggressionInterface_getAggression(void* agg, int a, int b);
 extern "C" float func_0031C228(float x);
-struct sComputer_0010F878;
-extern "C" void cAI_UpdateAggression(sComputer_0010F878* self);
+extern "C" void cAI_UpdateAggression(cAI* self);
 extern "C" void cAI_UpdateRankingPlacement(cAI* self);
 
-
-struct sVEntry0010F560 {
-    short delta;
-    short index;
-    t4Vector* (*fn)(void*);
-};
-
-struct sRiderInfo_0010F560 {
-    int active;     // 0x0
-    int f4;         // 0x4
-    float dist;     // 0x8
-    float angle;    // 0xC
-    char pad10[0xC];
-    int aggressive; // 0x1C
-    int f20;        // 0x20
-};
-
-struct sRider_0010F560 {
-    sRiderInfo_0010F560 info[6];  // 0x0
-    char padD8[0xDC - 0xD8];
-    float minDist;                // 0xDC
-    float maxDist;                // 0xE0
-
-    t4Vector* getPos()
-    {
-        char* o = (char*)this + 0x6C0;
-        sVEntry0010F560* e = &(*(sVEntry0010F560**)o)[5];
-        return e->fn(o + e->delta);
-    }
-};
-
-struct sComputer_0010F560 {
-    char pad0[0x8];
-    int frame;                       // 0x8
-    char padC[0x28 - 0xC];
-    sRider_0010F560* riders[0x14];   // 0x28
-    int count;                       // 0x78
-    char pad7C[0x84 - 0x7C];
-    int skip;                        // 0x84
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector sub_0010F560(const t4Vector& a, const t4Vector& b)
@@ -2342,31 +2273,32 @@ static inline float wrap_0010F560(float x)
  * Updates every rider's view of its opponents every sixth tick: distance, bearing and whether they are aggressive.
  *
  * Runs when AITick % 6 == 0. Calls cAI_UpdateRankingPlacement (On Tour cAI::UpdateRankingPlacement) first, then works on the first
- * NumberOfRidersAllocated - NumberOfActorsAllocated riders (at least 2): each rider's range pair at +0xDC/+0xE0 is
- * reset to -50000/50000, and for each valid pair (i, j) (rider i's opponent record j, 0x24 bytes from +0x0, field 0
- * set) it stores the planar distance in both records, the bearing from j to i in j's record and the opposite bearing
- * (wrapped to -pi..pi) in i's, and marks the pair aggressive when cBEAggressionInterface_getAggression (On Tour getAggression) is at least 2.
+ * NumberOfRidersAllocated - NumberOfActorsAllocated riders (at least 2): each rider's mRubberBandBehind /
+ * mRubberBandAhead pair is reset to -50000/50000, and for each valid pair (i, j) (rider i's mRelations[j].mValid set)
+ * it stores the planar distance in both records, the bearing from j to i in j's record and the opposite bearing
+ * (wrapped to -pi..pi) in i's, and marks the pair aggressive when cBEAggressionInterface_getAggression (On Tour
+ * getAggression) is at least 2.
  *
  * Ends with cAI_UpdateAggression (On Tour cAI::UpdateAggression).
  */
-extern "C" void cAI_UpdateGroupAI(sComputer_0010F560* self)
+extern "C" void cAI_UpdateGroupAI(cAI* self)
 {
-    if (self->frame % 6 != 0) {
+    if (self->AITick % 6 != 0) {
         return;
     }
-    cAI_UpdateRankingPlacement((cAI*)self);
-    int n = self->count - self->skip;
+    cAI_UpdateRankingPlacement(self);
+    int n = self->NumberOfRidersAllocated - self->NumberOfActorsAllocated;
     if (n < 2) {
         return;
     }
     for (int i = 0; i < n; i++) {
-        self->riders[i]->minDist = -50000.0f;
-        self->riders[i]->maxDist = 50000.0f;
+        self->Riders[i]->mRubberBandBehind = -50000.0f;
+        self->Riders[i]->mRubberBandAhead = 50000.0f;
         for (int j = i + 1; j < n; j++) {
-            if (self->riders[i]->info[j].active == 0) {
+            if (self->Riders[i]->mRelations[j].mValid == 0) {
                 continue;
             }
-            t4Vector delta = sub_0010F560(*self->riders[i]->getPos(), *self->riders[j]->getPos());
+            t4Vector delta = sub_0010F560(*self->Riders[i]->getPosition(), *self->Riders[j]->getPosition());
             float dist;
             float dx = delta.x;
             float dy = delta.y;
@@ -2374,18 +2306,18 @@ extern "C" void cAI_UpdateGroupAI(sComputer_0010F560* self)
             // PORT: sqrt.s (sqrtf without errno check)
             __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(sq));
             float ang = atan2_0010F560(dy, dx);
-            self->riders[i]->info[j].dist = dist;
-            self->riders[j]->info[i].dist = dist;
-            self->riders[i]->info[j].angle = wrap_0010F560(ang + 3.1415927410125732f);
-            self->riders[j]->info[i].angle = ang;
+            self->Riders[i]->mRelations[j].mDistance = dist;
+            self->Riders[j]->mRelations[i].mDistance = dist;
+            self->Riders[i]->mRelations[j].mAngle = wrap_0010F560(ang + 3.1415927410125732f);
+            self->Riders[j]->mRelations[i].mAngle = ang;
             if (cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), i, j) >= 2) {
-                self->riders[i]->info[j].aggressive = 1;
+                self->Riders[i]->mRelations[j].mAggressive = 1;
             } else {
-                self->riders[i]->info[j].aggressive = 0;
+                self->Riders[i]->mRelations[j].mAggressive = 0;
             }
         }
     }
-    cAI_UpdateAggression((sComputer_0010F878*)self);
+    cAI_UpdateAggression(self);
 }
 #endif
 
@@ -2395,40 +2327,31 @@ INCLUDE_ASM("ai/computer", cAI_UpdateAggression);
 void* cBEAggressionInterface_getThis();
 extern "C" int cBEAggressionInterface_getAggression(void* self, int a, int b);
 
-struct sComputer_0010F878
-{
-    char pad0[0x28];
-    char* mRiders[20];  // 0x28
-    int mCount;         // 0x78
-    int pad7C;          // 0x7C
-    int f80;            // 0x80
-};
-
 /**
  * Refreshes each rider's aggression toward the others and picks a chase target.
  *
- * Skipped when NumberOfComputersAllocated (+0x80) is 0. For each rider i of NumberOfRidersAllocated: clears its chase
- * flag (+0xF0) and target (+0xF8 = -1), then for every other rider j stores cBEAggressionInterface_getAggression (On Tour
- * cBEAggressionInterface::getAggression(i, j)) in +0xFC and, at level 4 (kAGG_CHASE), sets the chase flag and target j.
- * Only the last j's level survives in +0xFC (likely an oversight).
+ * Skipped when NumberOfComputersAllocated is 0. For each rider i of NumberOfRidersAllocated: clears its chase flag
+ * (PissedOff) and target (PissedAIIndex = -1), then for every other rider j stores cBEAggressionInterface_getAggression
+ * (On Tour cBEAggressionInterface::getAggression(i, j)) in PissedOffType and, at level 4 (kAGG_CHASE), sets the chase
+ * flag and target j. Only the last j's level survives in PissedOffType (likely an oversight).
  */
-extern "C" void cAI_UpdateAggression(sComputer_0010F878* self)
+extern "C" void cAI_UpdateAggression(cAI* self)
 {
-    if (self->f80 <= 0) return;
-    for (int i = 0; i < self->mCount; i++)
+    if (self->NumberOfComputersAllocated <= 0) return;
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        *(int*)(self->mRiders[i] + 0xF0) = 0;
-        *(int*)(self->mRiders[i] + 0xF8) = -1;
-        for (int j = 0; j < self->mCount; j++)
+        self->Riders[i]->PissedOff = 0;
+        self->Riders[i]->PissedAIIndex = -1;
+        for (int j = 0; j < self->NumberOfRidersAllocated; j++)
         {
             if (i == j) continue;
             int curAgg = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), i, j);
             if (curAgg == 4)
             {
-                *(int*)(self->mRiders[i] + 0xF0) = 1;
-                *(int*)(self->mRiders[i] + 0xF8) = j;
+                self->Riders[i]->PissedOff = 1;
+                self->Riders[i]->PissedAIIndex = j;
             }
-            *(int*)(self->mRiders[i] + 0xFC) = curAgg;
+            self->Riders[i]->PissedOffType = curAgg;
         }
     }
 }
@@ -2517,7 +2440,7 @@ extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
 INCLUDE_ASM("ai/computer", cAI_ridersOnPath);
 #ifdef SKIP_ASM
 /**
- * Counts the riders whose AI path (+0xAB8, the word cRider_getAIPath returns) equals @p value.
+ * Counts the riders whose AI path (cRider::AIPath, the pointer cRider_getAIPath returns) equals @p value.
  *
  * Goes over the AI's NumberOfRidersAllocated Riders. Nothing in the source calls it.
  *
@@ -2528,7 +2451,7 @@ extern "C" int cAI_ridersOnPath(cAI* self, int value)
 {
     int count = 0;
     for (int i = 0; i < self->NumberOfRidersAllocated; i++) {
-        cRider* rider = *(cRider**)((char*)&self->Riders[0] + i * 4);
+        cRider* rider = self->Riders[i];
         if ((int)rider->AIPath == value) {
             count++;
         }
@@ -2541,32 +2464,22 @@ extern "C" int cAI_ridersOnPath(cAI* self, int value)
 INCLUDE_ASM("ai/computer", cAI_aiRidersOnPath);
 #ifdef SKIP_ASM
 
-struct sAi0010FC30
-{
-    char pad0[0x28];
-    char* mRiders[20];
-    int mCount;
-};
-
 /**
- * Counts the computer riders whose AI path (+0xAB8, the word cRider_getAIPath returns) equals @p team.
+ * Counts the computer riders whose AI path (cRider::AIPath, the pointer cRider_getAIPath returns) is @p path.
  *
- * A rider counts when its isComputer virtual (slot 9) returns true. cComputer_scorePath passes a path pointer as @p
- * team.
+ * A rider counts when its isComputer virtual (slot 9) returns true. cComputer_scorePath uses it.
  *
- * @param team  the value to look for (a path pointer)
+ * @param path  the path to look for
  * @return the number of matching computer riders
  */
-extern "C" int cAI_aiRidersOnPath(sAi0010FC30* self, int team)
+extern "C" int cAI_aiRidersOnPath(cAI* self, cAIPath* path)
 {
     int n = 0;
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        char* obj = self->mRiders[i] + 0x6C0;
-        sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)obj)[9];
-        if (vtEntry->fn(vthis(obj, *vtEntry)))
+        if (self->Riders[i]->isComputer())
         {
-            if (*(int*)(self->mRiders[i] + 0xAB8) == team)
+            if (self->Riders[i]->AIPath == path)
                 n++;
         }
     }
@@ -2581,6 +2494,7 @@ INCLUDE_ASM("ai/computer", cRiderHandler_cRiderHandler);
 #include "ai/computer_classes.h"
 #include "replay/bxreplayframe.h"
 #include "object/being.h"
+#include "world/patchrecord.h"
 
 /**
  * Constructs a computer rider's handler, a composite of 31 rider behaviour parts sharing one virtual cRider base.
@@ -3329,9 +3243,9 @@ extern "C" int cPathSys_getAIPathIndex(void* tree, void* path);
  * Writes the rider's state into one replay frame: the cRider, its helpers, every stateful part and its paths.
  *
  * In order: the first 0x6C0 bytes of the cRider; the rider anim, anim model, air predictor and metrix; the
- * line and wall hints (each a world-object ID from +0x150 of what it points at, or -1, then the hint's 16
- * bytes); MotionState and ControlState; each motion and control part that has state, and cCheatFX; 0x20 bytes
- * each of mAIPathHint and mTrackPathHint; and the IDs of the two paths at +0xAB4 and +0xAB8.
+ * line and wall hints (each the m_RID of the hint's patch, or -1, then the hint's 16 bytes); MotionState and
+ * ControlState; each motion and control part that has state, and cCheatFX; 0x20 bytes each of mAIPathHint and
+ * mTrackPathHint; and the IDs of the two paths (TrackPath and AIPath).
  *
  * @param data  the replay stream (On Tour cReplayFramePtr*), written through its virtual Write
  */
@@ -3344,18 +3258,24 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, cBxReplayF
     cAirPredictor_writeToReplayFrame(self->GroundMotion.mRider->mAirPredictor, data);
     cRiderMetrix_writeToReplayFrame(self->GroundMotion.mRider->mMetrix, data);
     unsigned int id0 = 0xFFFFFFFF;
-    // The hints' mPatch is read as a char*: the typed reads (tIntHint*, tPatchRecord*) move the rider load above the
-    // id0 store. The patch's id at +0x150 is in tPatchRecord's unnamed gap.
-    char* line = **(char***)&self->GroundMotion.mRider->mLineHint;
+    // The hint pointer, its mPatch and the patch's m_RID are read through plain pointers: direct member reads move
+    // the rider load above the id0 store.
+    tIntHint** lineHint = &self->GroundMotion.mRider->mLineHint;
+    tPatchRecord** linePatch = &(*lineHint)->mPatch;
+    tPatchRecord* line = *linePatch;
     if (line != 0) {
-        id0 = *(unsigned int*)(line + 0x150);
+        unsigned int* lineId = &line->m_RID;
+        id0 = *lineId;
     }
     st->write((const char*)&id0, 4);
     st->write((const char*)self->GroundMotion.mRider->mLineHint, 0x10);
     unsigned int id1 = 0xFFFFFFFF;
-    char* wall = **(char***)&self->GroundMotion.mRider->mWallHint;
+    tIntHint** wallHint = &self->GroundMotion.mRider->mWallHint;
+    tPatchRecord** wallPatch = &(*wallHint)->mPatch;
+    tPatchRecord* wall = *wallPatch;
     if (wall != 0) {
-        id1 = *(unsigned int*)(wall + 0x150);
+        unsigned int* wallId = &wall->m_RID;
+        id1 = *wallId;
     }
     st->write((const char*)&id1, 4);
     st->write((const char*)self->GroundMotion.mRider->mWallHint, 0x10);
@@ -3389,15 +3309,7 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, cBxReplayF
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sRefSet_00111D98 {
-    char pad_0x0[0xC];
-    unsigned int* refs;     // 0xC
-};
-
-struct sRefWorld_00111D98 {
-    char pad_0x0[0x8];
-    sRefSet_00111D98** sets;    // 0x8
-};
+#include "world/worldcache.h"
 
 extern char gPaths[];
 extern "C" void cRiderAnim_readFromReplayFrame(void* self, void* s);
@@ -3435,40 +3347,42 @@ extern "C" void cRiderAnimBase_setupAnimation(void* self, int a1);
 extern "C" void cAnimModel_buildSkelMatrices(void* self);
 extern "C" void cRider_updateCollideInfo(void* self);
 
-static inline void* idxToPtr_00111D98(unsigned int i)
+static inline tPatchRecord* idxToPatch(unsigned int i)
 {
-    return (void*)(i << 2);
+    return (tPatchRecord*)(i << 2);
 }
 
-static inline void* refToPtr_00111D98(unsigned int v)
+// A cache tag's record: the tag keeps its address >> 2 (0 = not loaded).
+static inline tPatchRecord* tagToPatch(unsigned int memLoc)
 {
-    unsigned int i = v >> 8;
-    if (i == 0) {
+    if (memLoc == 0) {
         return 0;
     }
-    return idxToPtr_00111D98(i);
+    return idxToPatch(memLoc);
 }
 
-struct sRef_00111D98 {
-    unsigned int id;
-    sRef_00111D98() : id(0xFFFFFFFF) {}
-
-    void* get()
-    {
-        sRefSet_00111D98* set = ((sRefWorld_00111D98*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
-        if (set == 0) {
-            return 0;
-        }
-        return refToPtr_00111D98(set->refs[id >> 8]);
-    }
+// A saved resource id: EA's local starts as tResourceID::Invalid() (retail stores -1 before reading it).
+struct tSavedResourceID : public tResourceID {
+    tSavedResourceID() : tResourceID(0xFFFFFFFF) {}
 };
+
+// The patch record that resource id @p id names, or 0 when its section is not loaded or its slot is empty: a section's
+// cache table keeps each patch (type 1) as its address >> 2 (EA's inline world-cache lookup).
+static inline tPatchRecord* getPatchRecord(tResourceID& id)
+{
+    cWorldCacheTable* table = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id.m_uiRID & 0xFF];
+    if (table == 0) {
+        return 0;
+    }
+    return tagToPatch(table->m_pCacheTable[1].m_pDataTag[id.m_uiRID >> 8].m_bfuiMemLoc);
+}
 
 
 /**
  * Restores the rider from one replay frame, reading back what cRiderHandler_writeToReplayFrame() wrote.
  *
- * Turns the saved world-object IDs back into hint pointers (through the world cache) and the path IDs into
- * the paths at +0xAB4 and +0xAB8, resets the FX parts (all but the dynamic spray, which resetRiderFX() does
+ * Turns the saved world-object IDs back into hint patches (through the world cache) and the path IDs into
+ * TrackPath and AIPath, resets the FX parts (all but the dynamic spray, which resetRiderFX() does
  * reset) and reads cCheatFX. It then copies mPosition into the focus box when there is one, updates the rider
  * anim (cRiderAnimBase_setupAnimation), rebuilds the skeleton matrices and refreshes the body spheres (cRider_updateCollideInfo).
  *
@@ -3483,17 +3397,17 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, cBxReplay
     cAirPredictor_readFromReplayFrame(self->GroundMotion.mRider->mAirPredictor, data);
     cRiderMetrix_readFromReplayFrame(self->GroundMotion.mRider->mMetrix, data);
     int ids[2];
-    sRef_00111D98 lineId;
+    tSavedResourceID lineId;
     st->read((char*)&lineId, 4);
     st->read((char*)self->GroundMotion.mRider->mLineHint, 0x10);
-    if (~lineId.id != 0) {
-        *(void**)self->GroundMotion.mRider->mLineHint = lineId.get();
+    if (~lineId.m_uiRID != 0) {
+        self->GroundMotion.mRider->mLineHint->mPatch = getPatchRecord(lineId);
     }
-    sRef_00111D98 wallId;
+    tSavedResourceID wallId;
     st->read((char*)&wallId, 4);
     st->read((char*)self->GroundMotion.mRider->mWallHint, 0x10);
-    if (~wallId.id != 0) {
-        *(void**)self->GroundMotion.mRider->mWallHint = wallId.get();
+    if (~wallId.m_uiRID != 0) {
+        self->GroundMotion.mRider->mWallHint->mPatch = getPatchRecord(wallId);
     }
     st->read((char*)&self->MotionState, 4);
     st->read((char*)&self->ControlState, 4);
@@ -3587,35 +3501,35 @@ static inline void vu0AddEq_112180(t4Vector& dst, t4Vector b)
  * rider is put at the start position moved along the start direction by cRider_getStartGateHorizOffset (On Tour
  * getStartGateHorizOffset), facing that direction, with AI anim 5 (cRider_putAt, putAt).
  *
- * Then the path hints (mAIPathHint, mTrackPathHint) are reset (+0x14 = -1), the start point's track and AI paths are
- * stored at +0xAB4/+0xAB8, the distance to the finish (mDistToFinish and +0x4D4) is the track length (+0x38) minus the
- * rider's position on the track path (0 if past the end), the AI path position goes to +0x4C0/+0x4C4, and the aim point
- * +0x4A0 is the AI path point 796 units ahead.
+ * Then the path hints (mAIPathHint, mTrackPathHint) are reset (NodeID = -1), the start point's InitTrackPath and
+ * InitAIPath are stored in TrackPath / AIPath, the distance to the finish (mDistToFinish and MinDistanceLeft) is the
+ * track length (+0x38) minus the rider's position on the track path (0 if past the end), the AI path position goes to
+ * PrevPathParam / PathParam, and IntersectPos is the AI path point 796 units ahead.
  *
  * @param flag  On Tour resetPosition: also move the rider to the start gate
  */
 extern "C" void cRider_initPath(cRider* self, int flag)
 {
-    float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 1, self->mAIIndex);
+    tPathStartpoint* startPoint = (tPathStartpoint*)cPathSys_getStartpoint(gPaths, 1, self->mAIIndex);
     if (flag)
     {
         t4Vector dir;
         t4Vector pos;
-        dir.x = startPoint[5];
-        dir.y = startPoint[6];
-        dir.z = startPoint[7];
+        dir.x = startPoint->Dir.x;
+        dir.y = startPoint->Dir.y;
+        dir.z = startPoint->Dir.z;
         dir.w = 0.0f;
-        pos.x = startPoint[2];
-        pos.y = startPoint[3];
-        pos.z = startPoint[4];
+        pos.x = startPoint->Pos.x;
+        pos.y = startPoint->Pos.y;
+        pos.z = startPoint->Pos.z;
         pos.w = 1.0f;
         vu0AddEq_112180(pos, vu0Scale_112180(dir, cRider_getStartGateHorizOffset((char*)self)));
         cRider_putAt_112180(((char*)self), &pos, &dir, 5, 0.0f);
     }
     self->mAIPathHint->NodeID = -1;
     self->mTrackPathHint->NodeID = -1;
-    self->TrackPath = (cTrackPath*)((void**)startPoint)[8];
-    self->AIPath = (cAIPath*)((void**)startPoint)[9];
+    self->TrackPath = startPoint->InitTrackPath;
+    self->AIPath = startPoint->InitAIPath;
     t4Vector up;
     up.x = 0.0f;
     up.y = 0.0f;
@@ -3637,33 +3551,30 @@ extern "C" void cRider_initPath(cRider* self, int flag)
 //100%
 INCLUDE_ASM("ai/computer", cRider_updateTrackPath);
 #ifdef SKIP_ASM
-struct sEnt_00112338 { int a; int b; int c; int d; };
-struct sComp_00112338 { char pad[0x4DC]; sEnt_00112338 ent[12]; int count; };
-
-extern sEnt_00112338 cRider_updateTrackPath_pathEventsPrev[];
+extern tPathEventNode cRider_updateTrackPath_pathEventsPrev[];
 extern "C" void* MEM_copy(void*, void*, int);
 extern "C" void cRider_checkTrackPathEvents(cRider* self, float* a, float* b, t4Vector* c);
 extern "C" void cRider_checkTrackPathSwitch(cRider* self, int a);
 extern "C" float cPath_getLength(void* self);
-extern "C" void cRider_flagEventPathEvent(cRider* self, int* arg, int a2, int a3);
+
 
 /**
  * Tracks the rider along its track path: switches path when needed and raises the path events it enters and leaves.
  *
- * Copies the rider's current event list (count at +0x50C, 16-byte entries from +0x4DC) to cRider_updateTrackPath_pathEventsPrev, then
- * cRider_checkTrackPathEvents (On Tour checkTrackPathEvents) gives the distance from the path, the path position and point. While the
- * rider has distance left (+0x4D4 > 0) it calls cRider_checkTrackPathSwitch (On Tour checkTrackPathSwitch) with 0 when more than 500
- * off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot 2
- * says to; a path change resets mTrackPathHint and re-measures.
+ * Copies the rider's current event list (PathEventsCur, NumPathEventsCur entries) to
+ * cRider_updateTrackPath_pathEventsPrev, then cRider_checkTrackPathEvents (On Tour checkTrackPathEvents) gives the
+ * distance from the path, the path position and point. While the rider has distance left (MinDistanceLeft > 0) it
+ * calls cRider_checkTrackPathSwitch (On Tour checkTrackPathSwitch) with 0 when more than 500 off the path (only
+ * every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot 2 says to; a path
+ * change resets mTrackPathHint and re-measures.
  *
  * Each event in the new list is reported with cRider_flagEventPathEvent as current, flagged as previous too
  * when it was in the old list; old events no longer present are reported as previous only.
  */
 extern "C" void cRider_updateTrackPath(cRider* self)
 {
-    sComp_00112338* rider = (sComp_00112338*)self;
-    MEM_copy(cRider_updateTrackPath_pathEventsPrev, rider->ent, rider->count << 4);
-    int n = rider->count;
+    MEM_copy(cRider_updateTrackPath_pathEventsPrev, self->PathEventsCur, self->NumPathEventsCur << 4);
+    int n = self->NumPathEventsCur;
     t4Vector pathPos;
     float pathDistXY;
     float pathParam;
@@ -3678,7 +3589,8 @@ extern "C" void cRider_updateTrackPath(cRider* self)
         else
         {
             cTrackPath* trackPath = self->TrackPath;
-            sVEntry<int(void*, float, float)>* ve = &((sVEntry<int (void*, float, float)>*)trackPath->mVtbl)[2];
+            sVEntry<int(void*, float, float)>* vtable = (sVEntry<int(void*, float, float)>*)trackPath->mVtbl;
+            sVEntry<int(void*, float, float)>* ve = &vtable[2];
             if (ve->fn(vthis(trackPath, *ve), self->MinDistanceLeft, self->mDistToFinish))
                 cRider_checkTrackPathSwitch(self, 0);
         }
@@ -3689,23 +3601,24 @@ extern "C" void cRider_updateTrackPath(cRider* self)
         }
     }
     int i;
-    for (i = 0; i < rider->count; i++)
+    for (i = 0; i < self->NumPathEventsCur; i++)
     {
         int j;
         for (j = 0; j < n; j++)
         {
-            if (rider->ent[i].a == cRider_updateTrackPath_pathEventsPrev[j].a && rider->ent[i].b == cRider_updateTrackPath_pathEventsPrev[j].b)
+            if (self->PathEventsCur[i].Type == cRider_updateTrackPath_pathEventsPrev[j].Type
+                && self->PathEventsCur[i].Arg == cRider_updateTrackPath_pathEventsPrev[j].Arg)
             {
-                cRider_updateTrackPath_pathEventsPrev[j].a = 0;
+                cRider_updateTrackPath_pathEventsPrev[j].Type = 0;
                 break;
             }
         }
-        cRider_flagEventPathEvent(self, (int*)&rider->ent[i], j < n, 1);
+        cRider_flagEventPathEvent(self, &self->PathEventsCur[i], j < n, 1);
     }
     for (i = 0; i < n; i++)
     {
-        if (cRider_updateTrackPath_pathEventsPrev[i].a)
-            cRider_flagEventPathEvent(self, (int*)&cRider_updateTrackPath_pathEventsPrev[i], 1, 0);
+        if (cRider_updateTrackPath_pathEventsPrev[i].Type)
+            cRider_flagEventPathEvent(self, &cRider_updateTrackPath_pathEventsPrev[i], 1, 0);
     }
 }
 #endif
@@ -3836,7 +3749,8 @@ extern "C" void cRider_updateAIPath(cRider* self)
         else
         {
             cAIPath* aiPath = self->AIPath;
-            sVEntry<int(void*, float, float)>* ve = &((sVEntry<int (void*, float, float)>*)aiPath->mVtbl)[2];
+            sVEntry<int(void*, float, float)>* vtable = (sVEntry<int(void*, float, float)>*)aiPath->mVtbl;
+            sVEntry<int(void*, float, float)>* ve = &vtable[2];
             if (ve->fn(vthis(aiPath, *ve), self->PrevPathParam, self->PathParam))
                 cRider_checkAIPathSwitch(self, 0);
         }
@@ -4135,7 +4049,8 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
         t4Vector nearDelta = vu0Sub_112A50(*(&vself->mPosition), out);
         float dist = vu0Dot_112A50(nearDelta, nearDelta) + vu0Dot_112A50(aheadDelta, aheadDelta);
         if (vself->isComputer() == 1) {
-            sVEntry<float(void*, void*)>* vf = &((sVEntry<float(void*, void*)>*)VPTR_AT(vself, sizeof(cRiderState)))[20];
+            sVEntry<float(void*, void*)>* vtable = (sVEntry<float(void*, void*)>*)VPTR_AT(vself, sizeof(cRiderState));
+            sVEntry<float(void*, void*)>* vf = &vtable[20];
             dist = vf->fn(vthis(vself, *vf), paths[i]);
             if (bestW < dist) {
                 best = paths[i];

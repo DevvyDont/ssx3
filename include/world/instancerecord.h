@@ -78,8 +78,10 @@ struct tInstanceRecord {
                                     //      skip a 0 record)
     tInstanceAudio* m_pInstanceAudio; // 0x8C [O] (by order: after m_pCollideRecord); [U] cChunkResolve_resolveInstance
                                     //      zeroes it, as resolveParticleInstance zeroes the particle's m_pInstanceAudio
-    char unk_090[0x4];              // 0x90 [O] short m_sLightCacheID, unsigned short m_sRenderFlags (by order; no
-                                    //      retail access confirmed)
+    short m_sLightCacheID;          // 0x90 [O] (by order; no retail access confirmed)
+    unsigned short m_sRenderFlags;  // 0x92 [O] (by order); [U] cAvalanche_addAvalancheNode keeps its low byte and
+                                    //      ORs in (node index << 8) | 2; cAvalanche_getColour reads the index back
+                                    //      (>> 8) (src/visualfx/avalanche.cpp)
     tMaterialBlockRecord* m_MaterialBlock; // 0x94 [O] (by order: the last member; tMaterialBlockID); [U]
                                     //      resolveInstance copies the model's m_MaterialBlock here; cMoveNode_render,
                                     //      cMoveNode_getMaterialBlock, cMeshAnimNode_render, the tex-flip setup read it
@@ -99,7 +101,8 @@ CHECK_OFFSET(tInstanceRecord, m_Model, 0x80);
 CHECK_OFFSET(tInstanceRecord, m_fScale, 0x84);
 CHECK_OFFSET(tInstanceRecord, m_pCollideRecord, 0x88);
 CHECK_OFFSET(tInstanceRecord, m_pInstanceAudio, 0x8C);
-CHECK_OFFSET(tInstanceRecord, unk_090, 0x90);
+CHECK_OFFSET(tInstanceRecord, m_sLightCacheID, 0x90);
+CHECK_OFFSET(tInstanceRecord, m_sRenderFlags, 0x92);
 CHECK_OFFSET(tInstanceRecord, m_MaterialBlock, 0x94);
 CHECK_OFFSET(tInstanceRecord, unk_098, 0x98);
 CHECK_SIZE(tInstanceRecord, 0xAC);

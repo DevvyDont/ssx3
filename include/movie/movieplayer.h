@@ -23,6 +23,7 @@
 #include "layout.h"
 
 struct RCMP_VIDEO_DRIVER; // movie/videodriver.h
+struct RCMP_AV_PLAYER;    // ealib/avplayer.h
 
 struct cMoviePlayer;
 
@@ -62,7 +63,7 @@ struct cMoviePlayer {
     tMoviePlayOptions m_PlayOp; // 0x14 [O]; [R] ctor tMoviePlayOptions_SetDefaults(this + 0x14); [U] cMoviePlayer_init
                                 //       copies the caller's options (0x24 bytes) and reads +0x14 / +0x18 / +0x1C /
                                 //       +0x24; startPlay +0x30 (iDrawLayer); ctor / init +0x34 (fPlaySpeed)
-    void* m_pPlayer;            // 0x38 [O] (On Tour PspAvPlayer*; on PS2 the REAL decoder object); [R] ctor 0; [U]
+    RCMP_AV_PLAYER* m_pPlayer;  // 0x38 [O] (On Tour PspAvPlayer*; on PS2 the AV player); [R] ctor 0; [U]
                                 //       cMoviePlayer_init creates it (0x78 bytes from the movie allocator,
                                 //       func_003ADE08 / func_003ADDC0), purge deletes it (func_003AE300(p, 3)); every
                                 //       method tests it first

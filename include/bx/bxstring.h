@@ -28,6 +28,11 @@ struct tStringData {
     int DataLength;     // 0x004 [O]; [R] cBXString_Realloc stores len; [U] read as the length (Str-8) everywhere
     int AllocLength;    // 0x008 [O]; [R] cBXString_Realloc stores len; [U] compared with the needed size by
                         //       cBXString_Resize, cBXString_ConcatImpl, cBXString_getBuffer (getBuffer-like)
+#ifdef __cplusplus
+    // The text right after the header. [O] On Tour `char* tStringData::data()` (returns this + 1); [R]
+    // cBXString_Realloc stores the block + 0xC as the string's Str.
+    char* data() { return (char*)(this + 1); }
+#endif
 };
 
 CHECK_OFFSET(tStringData, NumRefs, 0x0);

@@ -8,6 +8,7 @@
 #include "render/ps2graphicsman.h"
 #include "online/commchannel.h"
 #include "ealib/rcmpbase.h"
+#include "ealib/avplayer.h"
 //100%
 INCLUDE_ASM("mem/memstd", MEMCLASS_create);
 #ifdef SKIP_ASM
@@ -44,6 +45,9 @@ extern void* memclass[];
  */
 extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int sizeAlign, int align, int hdr, int endMarker, int nameBlocks, int lock)
 {
+    // ORIGINAL-PTR: a byte heap laid out over raw memory: the first free block's data is aligned up (address & -align),
+    // the top block sits at a byte offset from the end, the free block's size is the byte distance to the next block,
+    // and the free list is searched from the end nearer to the block's address.
     char buf[0x100];
     int flags = id;
     if (endMarker) {
@@ -162,7 +166,7 @@ extern "C" void* MEMCLASS_purge(int id)
     void* freeResult = (void*)1;
     for (MEMBLOCK* n = cls->bottomblock; n != 0 && freeResult != 0; n = n->next) {
         if (!(n->type & 0xC000)) {
-            freeResult = MEM_free((char*)n + 0x10);
+            freeResult = MEM_free(n + 1);
         }
     }
     return freeResult;
@@ -321,14 +325,14 @@ extern "C" void* MEM_find(int name)
         MEMCLASS* cls = (MEMCLASS*)memclass[i & 0x3F];
         if (cls != 0) {
             MEMBLOCK* n = cls->bottomblock;
-            void* data = (char*)n + 0x10;
+            void* data = n + 1;
             do {
                 int blockName = MEM_name(data);
                 if (blockName != 0 && strcasecmp(blockName, name) == 0) {
                     return data;
                 }
                 n = n->next;
-                data = (char*)n + 0x10;
+                data = n + 1;
             } while (n != 0);
         }
     }
@@ -417,6 +421,9 @@ extern void* memclass[];
  */
 extern "C" int MEMCLASS_link(int id, char* mem, int size)
 {
+    // ORIGINAL-PTR: a byte heap laid out over raw memory: the free block's data is aligned up (address & -align), the
+    // top block sits at a byte offset from the end, the free block's size is the byte distance to the next block, and
+    // the free list is searched from the end nearer to the block's address.
     MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     char buf[0x100];
     int hdr = cls->infosize;
@@ -763,14 +770,17 @@ extern "C" int _MEM_free(void* mem)
     int size;
     int sz;
 
+    // ORIGINAL-PTR: allocator block headers: the block's MEMBLOCK header sits right before its data; the merged block
+    // is re-placed at the aligned byte offset after its neighbour, and the free list is searched from the end nearer
+    // to its address.
     if (mem != 0) {
-        cls = (MEMCLASS*)memclass[*(unsigned short*)((int)mem - 0xE) & 0x3F];
+        cls = (MEMCLASS*)memclass[((MEMBLOCK*)((int)mem - 0x10))->type & 0x3F];
         blk = (FREEBLOCK*)((int)mem - 0x10);
         if (cls->hasmutex) {
             MUTEX_lock(((char*)&cls->mutex));
         }
-        back = *(FREEBLOCK**)((int)mem - 4);
-        fwd = *(FREEBLOCK**)((int)mem - 8);
+        back = (FREEBLOCK*)((MEMBLOCK*)((int)mem - 0x10))->prev;
+        fwd = (FREEBLOCK*)((MEMBLOCK*)((int)mem - 0x10))->next;
         if (back->type & 0x4000) {
             Unlink_2523D0(back);
             back->signature = 16975;
@@ -864,7 +874,8 @@ INCLUDE_ASM("mem/memstd", _MEM_size);
  * @return the size in bytes
  */
 extern "C" int _MEM_size(void *allocation) {
-    return (*(int *)((char*)(allocation) + (-0xC)));
+    // ORIGINAL-PTR: allocator block headers: the block's MEMBLOCK header sits right before its data.
+    return ((MEMBLOCK*)allocation - 1)->size;
 }
 #endif
 //100%
@@ -877,7 +888,8 @@ INCLUDE_ASM("mem/memstd", MEM_type);
  * @return the type word
  */
 extern "C" unsigned short MEM_type(void *allocation) {
-    return (*(unsigned short *)((char*)(allocation) + (-0xE)));
+    // ORIGINAL-PTR: allocator block headers: the block's MEMBLOCK header sits right before its data.
+    return ((MEMBLOCK*)allocation - 1)->type;
 }
 #endif
 
@@ -917,9 +929,12 @@ struct sMemUnalignedInt {
 // emit the offset as unsigned 0xFFFFFFF2 (addiu -0x8000 / 0x7ff2 split).
 extern "C" int MEM_comment(void* allocation)
 {
+    // ORIGINAL-PTR: allocator block headers: the block's MEMBLOCK header sits right before its data, and the comment
+    // word is stored unaligned 4 bytes past the end of the data.
     int trailerValue = 0;
-    if (*(unsigned short*)((int)allocation - 0xE) & 0x800) {
-        trailerValue = ((sMemUnalignedInt*)((char*)allocation + *(int*)((int)allocation - 0xC) + 4))->value;
+    if (((MEMBLOCK*)((int)allocation - 0x10))->type & 0x800) {
+        trailerValue =
+            ((sMemUnalignedInt*)((char*)allocation + ((MEMBLOCK*)((int)allocation - 0x10))->size + 4))->value;
     }
     return trailerValue;
 }
@@ -939,10 +954,13 @@ INCLUDE_ASM("mem/memstd", MEM_setcomment);
 // PORT: pointer arithmetic done in int (see MEM_comment).
 extern "C" int MEM_setcomment(void* allocation, int trailerValue)
 {
+    // ORIGINAL-PTR: allocator block headers: the block's MEMBLOCK header sits right before its data, and the comment
+    // word is stored unaligned 4 bytes past the end of the data.
     int written = 0;
-    if (*(unsigned short*)((int)allocation - 0xE) & 0x800) {
+    if (((MEMBLOCK*)((int)allocation - 0x10))->type & 0x800) {
         written = 1;
-        ((sMemUnalignedInt*)((char*)allocation + *(int*)((int)allocation - 0xC) + 4))->value = trailerValue;
+        ((sMemUnalignedInt*)((char*)allocation + ((MEMBLOCK*)((int)allocation - 0x10))->size + 4))->value =
+            trailerValue;
     }
     return written;
 }
@@ -1012,7 +1030,10 @@ static inline void Unlink_252718(FREEBLOCK* b)
 // PORT: pointer arithmetic done in int (see MEM_comment).
 extern "C" void* _MEM_resize(void* mem, int size)
 {
-    int id = *(unsigned short*)((int)mem - 0xE);
+    // ORIGINAL-PTR: allocator block headers: the block's MEMBLOCK header sits right before its data; the free space up
+    // to the next block and the split-off remainder are byte offsets, and the free list is searched from the end
+    // nearer to the remainder's address.
+    int id = ((MEMBLOCK*)((int)mem - 0x10))->type;
     MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     FREEBLOCK* blk = (FREEBLOCK*)((int)mem - 0x10);
     FREEBLOCK* fwd;
@@ -1027,13 +1048,13 @@ extern "C" void* _MEM_resize(void* mem, int size)
     if (cls->hasmutex) {
         MUTEX_lock(((char*)&cls->mutex));
     }
-    fwd = *(FREEBLOCK**)((int)mem - 8);
+    fwd = (FREEBLOCK*)((MEMBLOCK*)((int)mem - 0x10))->next;
     if (fwd->type & 0x4000) {
         Unlink_252718(fwd);
         fwd->signature = 16975;
         fwd->type &= ~0x4000;
         fwd = ((FREEBLOCK*)fwd->next);
-        *(FREEBLOCK**)((int)mem - 8) = fwd;
+        ((MEMBLOCK*)((int)mem - 0x10))->next = (MEMBLOCK*)fwd;
         (*(FREEBLOCK**)&fwd->prev) = blk;
     }
     want = size;
@@ -1651,6 +1672,8 @@ INCLUDE_ASM("mem/memstd", FREE_add);
  */
 extern "C" void FREE_add(MEMCLASS* cls, FREEBLOCK* blk)
 {
+    // ORIGINAL-PTR: allocator block headers: a free block's size is the byte distance to the next block, and the
+    // address-sorted free list is searched from the end nearer to the block's address.
     FREEBLOCK* nextNode = &(*(&cls->freehead));
     FREEBLOCK* prevNode = nextNode;
     int sz = ((char*)blk->next) - (char*)blk;
@@ -1844,10 +1867,12 @@ extern "C" int cMoviePlayer_init_impl(void* vself, tMoviePlayOptions* cfg)
     char* name = (char*)self->m_PlayOp.sAudioFileName;
     if (name != 0 && *name != 0) {
         void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
-        self->m_pPlayer = func_003ADE08(mem, *(int*)&self->m_PlayOp, 0x60000, (char*)self->m_PlayOp.sAudioFileName, 0x20000, optionSet, soundOff);
+        self->m_pPlayer = (RCMP_AV_PLAYER*)func_003ADE08(mem, *(int*)&self->m_PlayOp, 0x60000,
+                                                         (char*)self->m_PlayOp.sAudioFileName, 0x20000, optionSet,
+                                                         soundOff);
     } else {
         void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
-        self->m_pPlayer = func_003ADDC0(mem, *(int*)&self->m_PlayOp, 0x80000, optionSet, soundOff);
+        self->m_pPlayer = (RCMP_AV_PLAYER*)func_003ADDC0(mem, *(int*)&self->m_PlayOp, 0x80000, optionSet, soundOff);
     }
     return 1;
 }
@@ -1878,11 +1903,12 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
         cGraphicsMan_TheGraphicsMan->FlushRenderer();
     }
     if (moviePlayer->mbNewFrame != 0 && moviePlayer->mpCurrFrame != 0) {
-        RCMP_DECODER_ReleaseFrame(*(void**)(((char*)moviePlayer->m_pPlayer) + 0x64), moviePlayer->mpCurrFrame);
+        RCMP_DECODER_ReleaseFrame(moviePlayer->m_pPlayer->mpDecoder, moviePlayer->mpCurrFrame);
     }
     RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
     if (((void*)videoDriver) != 0) {
-        sVEntry<void(void*, int)>* dtorEntry = &((sVEntry<void(void*, int)>*)videoDriver->mVtbl)[1];
+        sVEntry<void(void*, int)>* vtable = (sVEntry<void(void*, int)>*)videoDriver->mVtbl;
+        sVEntry<void(void*, int)>* dtorEntry = &vtable[1];
         dtorEntry->fn(vthis(videoDriver, *dtorEntry), 3);
         moviePlayer->m_pVd = 0;
         cMoviePlayer_m_isPlaying--;
@@ -1926,7 +1952,8 @@ extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self)
     self->mpCurrFrame = (void*)func_003AE450(self->m_pPlayer, 1, 33);
     self->mbNewFrame = 1;
     func_003AE938(self->m_pPlayer);
-    self->m_pVd = (RCMP_VIDEO_DRIVER*)SSX_VD_create(*(void**)((char*)self->m_pPlayer + 0x64), (int)self->mpCurrFrame, (int)cGraphicsMan_TheGraphicsMan, self->m_PlayOp.iDrawLayer);
+    self->m_pVd = (RCMP_VIDEO_DRIVER*)SSX_VD_create(self->m_pPlayer->mpDecoder, (int)self->mpCurrFrame,
+                                                    (int)cGraphicsMan_TheGraphicsMan, self->m_PlayOp.iDrawLayer);
     func_003AE958_i(self->m_pPlayer);
     cMoviePlayer_m_isPlaying++;
 }
@@ -1966,11 +1993,13 @@ extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
         do {
             if (moviePlayer->mbReDraw != 0) {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
-                sVEntry<void(void*)>* slotEntry = &((sVEntry<void(void*)>*)videoDriver->mVtbl)[5];
+                sVEntry<void(void*)>* vtable = (sVEntry<void(void*)>*)videoDriver->mVtbl;
+                sVEntry<void(void*)>* slotEntry = &vtable[5];
                 slotEntry->fn(vthis(videoDriver, *slotEntry));
             } else {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
-                sVEntry<void(void*, void*)>* slotEntry = &((sVEntry<void(void*, void*)>*)videoDriver->mVtbl)[4];
+                sVEntry<void(void*, void*)>* vtable = (sVEntry<void(void*, void*)>*)videoDriver->mVtbl;
+                sVEntry<void(void*, void*)>* slotEntry = &vtable[4];
                 slotEntry->fn(vthis(videoDriver, *slotEntry), moviePlayer->mpCurrFrame);
             }
             cGraphicsMan_TheGraphicsMan->DrawFrame();
@@ -1978,9 +2007,11 @@ extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
             THREAD_yield(0);
             if (func_003AE780(((char*)moviePlayer->m_pPlayer)) != 0) {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
-                sVEntry<void(void*)>* slotEntry = &((sVEntry<void(void*)>*)videoDriver->mVtbl)[6];
+                sVEntry<void(void*)>* vtable = (sVEntry<void(void*)>*)videoDriver->mVtbl;
+                sVEntry<void(void*)>* slotEntry = &vtable[6];
                 slotEntry->fn(vthis(videoDriver, *slotEntry));
-                moviePlayer->mpCurrFrame = (void*)func_003AE6C8(((char*)moviePlayer->m_pPlayer), *(float*)(((char*)moviePlayer->m_pPlayer) + 0x48));
+                moviePlayer->mpCurrFrame = (void*)func_003AE6C8(((char*)moviePlayer->m_pPlayer),
+                                                                moviePlayer->m_pPlayer->mGoalFrame);
                 moviePlayer->mbReDraw = 0;
             } else {
                 moviePlayer->mbReDraw = 1;
@@ -2089,8 +2120,8 @@ extern "C" void cMoviePlayer_asyncUpdate(cMoviePlayer* self)
 {
     if (self->mbNewFrame == 0 && func_003AE780(self->m_pPlayer) != 0) {
         ((cMemObj_253938*)self->m_pVd)->v06();
-        void* decoder = self->m_pPlayer;
-        self->mpCurrFrame = (void*)func_003AE6C8(decoder, *(float*)((char*)decoder + 0x48));
+        RCMP_AV_PLAYER* player = self->m_pPlayer;
+        self->mpCurrFrame = (void*)func_003AE6C8(player, player->mGoalFrame);
         self->mbNewFrame = 1;
         self->mbReDraw = 0;
     } else {
@@ -2356,10 +2387,6 @@ INCLUDE_ASM("mem/memstd", SSX_VD_create);
 extern char str_empty_h[];
 extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD(void* self, void* a0, int a1, int a2, int a3);
 
-// PORT: the unit's sMemAllocFuncs declares alloc as `void* (*)(int)`; it really
-// takes (tag, size, align, d, flags) (see MEM_allocalign / cMoviePlayer_SSXAllocMemFunc).
-typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
-
 /**
  * Creates the movie's video driver: allocates 84 bytes from the movie allocator table RCMP_rcmp_sys and constructs the
  * tiled-texture driver in it (SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD).
@@ -2372,8 +2399,7 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
  */
 extern "C" void* SSX_VD_create(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
 {
-    void* driverMem = ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(str_empty_h, 84, 0, 0,
-                                                                        RCMP_rcmp_sys.m_DefaultMemDir);
+    void* driverMem = RCMP_rcmp_sys.AllocMemFunc(str_empty_h, 84, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
     return SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
 }
 #endif
@@ -2507,15 +2533,15 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
     self->mVtbl = D_00480270;
     (*(cRend_4410**)&self->m_pGrMan) = rend;
     char* hdr = *(char**)(res + 0x4);
-    self->mpImageHeader = hdr;
+    self->mpImageHeader = (SHAPE*)hdr;
     char* data;
     if (*(int*)(hdr + 0xC) & 0x1000) {
         data = hdr + *(int*)(hdr + 0x10);
     } else {
         data = hdr + 0x10;
     }
-    int w = *(short*)(self->mpImageHeader + 4);
-    int frameHeight = *(short*)(self->mpImageHeader + 6);
+    int w = self->mpImageHeader->width;
+    int frameHeight = self->mpImageHeader->height;
     self->mNumRows = 0;
     self->mNumColumns = w / 16;
     int rem = frameHeight;
@@ -2809,28 +2835,32 @@ extern "C" void* func_002548D0(void* self);
 
 
 /**
- * Draws a new movie frame: uploads the frame's pixels (@p res + 4 header, data as in SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD) into each tile's
- * texture (graphics manager slot 49, cPS2GraphicsMan_SetNewTextureData1) and draws the tiles (func_002548D0).
+ * Draws a new movie frame: uploads the frame's pixels (its SHAPE, data as in
+ * SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD) into each tile's texture (graphics manager slot 49,
+ * cPS2GraphicsMan_SetNewTextureData1) and draws the tiles (func_002548D0).
  *
- * Remembers @p res in +0xC when it is non-null, though it then reads it unconditionally. Vtable slot 4 of D_00480270.
+ * Remembers @p frame in mpCurrentFrame when it is non-null, though it then reads it unconditionally. Vtable slot 4 of
+ * D_00480270.
  *
- * @param res  the frame
+ * @param frame  the frame
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, void* res)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, RCMP_FRAME* frame)
 {
-    if (res != 0) {
-        (*(void**)&self->mpCurrentFrame) = res;
+    if (frame != 0) {
+        self->mpCurrentFrame = frame;
     }
-    char* hdr = *(char**)((char*)res + 4);
-    self->mpImageHeader = hdr;
+    SHAPE* shape = frame->m_Shp;
+    self->mpImageHeader = shape;
+    // ORIGINAL-PTR: a SHAPE file blob: a referenced shape (flag 0x1000) keeps its pixels' byte offset in the word after
+    // the 0x10-byte header, otherwise the pixels follow the header.
     char* data;
-    if (*(int*)(hdr + 0xC) & 0x1000) {
-        data = hdr + *(int*)(hdr + 0x10);
+    if (shape->referenced) {
+        data = (char*)shape + *(int*)(shape + 1);
     } else {
-        data = hdr + 0x10;
+        data = (char*)(shape + 1);
     }
     int k = 0;
-    short stride = *(short*)(self->mpImageHeader + 6);
+    short stride = self->mpImageHeader->height;
     for (int i = 0; i < self->mNumColumns; i++) {
         int off = 0;
         for (int j = 0; j < self->mNumRows; j++) {
@@ -3060,7 +3090,7 @@ INCLUDE_ASM("mem/memstd", func_002556F0);
  */
 extern "C" void func_002556F0(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(tag, size, align, hdrSize, flags);
+    RCMP_rcmp_sys.AllocMemFunc((const char*)tag, size, align, hdrSize, flags);
 }
 #endif
 //100%
@@ -3078,7 +3108,7 @@ INCLUDE_ASM("mem/memstd", func_00255720);
  */
 extern "C" void func_00255720(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(tag, size, align, hdrSize, flags);
+    RCMP_rcmp_sys.AllocMemFunc((const char*)tag, size, align, hdrSize, flags);
 }
 #endif
 //100%
