@@ -10837,7 +10837,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
 /**
- * Creates the multiplayer standings overlay's screens (overlay 35, vtable D_00473C50, entry 4 onCreateScreen).
+ * Creates the multiplayer standings overlay's screens (overlay 35, vtable cOVState_TOURNAMENT_STANDINGS_vtbl, entry 4 onCreateScreen).
  *
  * Adds "109MultiplayerStandings" (kept at +0x40) over "OV_darkblue", calls the empty func_001E8FC0, runs
  * cOVState_onCreateScreen and plays menu sound 0xE.

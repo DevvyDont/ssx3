@@ -12,7 +12,7 @@
 //   11    cOVState_FINAL_STANDINGS       0xA0  cOVState_FINAL_STANDINGS_vtbl  "43final_standings"         cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS
 //   12    cOVState_RACE_FINISHOV         0xA4  cOVState_RACE_FINISHOV_vtbl  "finishov" (mHashName)      cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV
 //   13    cOVState_BASSSP_QUAL_FINISHOV  0xA4  cOVState_BASSSP_QUAL_FINISHOV_vtbl  "finishov" (mHashName)      cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV
-//   35    cOVState_TOURNAMENT_STANDINGS  0x9C  D_00473C50  "109MultiplayerStandings"   cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS
+//   35    cOVState_TOURNAMENT_STANDINGS  0x9C  cOVState_TOURNAMENT_STANDINGS_vtbl  "109MultiplayerStandings"   cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS
 //
 // Names (two signals each): HEAT_STANDINGS and FINAL_STANDINGS - On Tour's DWARF has both classes with exactly the
 // retail override sets (6 and 9 slots) and sizes base+0 / base+4 (doInit), and the retail screens / texts say
@@ -123,7 +123,7 @@ CHECK_SIZE(cOVState_BASSSP_QUAL_FINISHOV, 0xA4);
 
 struct cOVState_TOURNAMENT_STANDINGS : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS stores D_00473C50 after cOVState_vtbl
+    //   [R] cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS stores cOVState_TOURNAMENT_STANDINGS_vtbl after cOVState_vtbl
     // cOVState_TOURNAMENT_STANDINGS's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen stores the new screen
     // cOVState (fe/ovstate.h, 0x9C)

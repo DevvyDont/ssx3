@@ -6,17 +6,27 @@
 // fe/all_in_one_fe.cpp; EA's source file is not known (the preview's linkonce sections name _$_13cOVState_QUIT,
 // _$_22cOVState_QUITCHALLENGE, _$_24cOVState_QUITCOMPETITION).
 //
-// cOVTemplate_Dialog: vtable D_00474C58; constructor cOVTemplate_Dialog_cOVTemplate_Dialog (out of line, no
-// callers), destructor cOVTemplate_Dialog__cOVTemplate_Dialog. On Tour size 0x94 = 0x90 + mDialogType. Its methods are
-// cOVTemplate_Dialog_onCreateScreen / onWidgetCreate / onWidgetEvent / onWidgetMenu / onUpdate.
+// cOVTemplate_Dialog: vtable cOVTemplate_Dialog_vtbl; constructor cOVTemplate_Dialog_cOVTemplate_Dialog (out of
+// line, no callers), destructor cOVTemplate_Dialog__cOVTemplate_Dialog. On Tour size 0x94 = 0x90 + mDialogType. Its
+// methods are cOVTemplate_Dialog_onCreateScreen / onWidgetCreate / onWidgetEvent / onWidgetMenu / onUpdate.
 //
 // The dialog overlays add no members: each is cMemMan_alloc(0xA0, "cOVStateOverlay") with its own vtable (all
 // slots but the destructor are the template's, except cOVState_QUIT's onUpdate) and mDialogType set by the
-// factory: id 23 D_004749D0 kind 0, id 24 D_004748F8 kind 1 (cOVState_QUIT: constructor cOVState_QUIT_cOVState_QUIT,
-// destructor cOVState_QUIT__cOVState_QUIT, own method cOVState_QUIT_onUpdate), id 25 D_00474820 kind 2, id 26
-// D_00474748 kind 3, id 27 D_00474670 kind 4, id 28 D_00474598 kind 5, id 38 D_004744C0 kind 6 (On Tour's
+// factory (cOVStateManager_triggerOverlay / triggerPopup):
+//   id 23 kind 0 cOVState_RESTART_vtbl            "kT_OVRCMNRestartEvent"
+//   id 24 kind 1 cOVState_QUIT_vtbl               "kT_OVRCMNQuitGame" (constructor cOVState_QUIT_cOVState_QUIT, own
+//                                                 method cOVState_QUIT_onUpdate)
+//   id 25 kind 2 cOVState_RESTARTCHALLENGE_vtbl   "kT_OVRCMNRestartChal"
+//   id 26 kind 3 cOVState_QUITCHALLENGE_vtbl      "kT_OVRCMNQuitChal"
+//   id 27 kind 4 cOVState_QUITCOMPETITION_vtbl    "kT_CMNQuitEventQues"
+//   id 28 kind 5 cOVState_GIVEUP_vtbl             "kT_CMNGiveUp"
+//   id 38 kind 6 cOVState_SAVEPROMPT_vtbl         "kT_CMNSaveBeforeQuit"
+// The class names: each vtable's slot 1 is the destructor of that name (cOVState_RESTART__cOVState_RESTART ...; the
+// preview's linkonce sections name _$_13cOVState_QUIT, _$_22cOVState_QUITCHALLENGE, _$_24cOVState_QUITCOMPETITION),
+// in On Tour's tOVStateEnum order (RESTART, QUIT, RESTARTCHALLENGE, QUITCHALLENGE, QUITCOMPETITION, GIVEUP; SAVEPROMPT
+// after AUTOSAVE, retail id 37), and each kind's title text above (onCreateScreen) fits its name. On Tour's
 // QUITCHALLENGE / QUITCOMPETITION / RESTART / RESTARTCHALLENGE / GIVEUP / SAVEPROMPT are all 0x94 = the
-// template's size). So cOVState_QUIT_onUpdate and the template's methods take a cOVTemplate_Dialog*.
+// template's size. So cOVState_QUIT_onUpdate and the template's methods take a cOVTemplate_Dialog*.
 //
 // Derives from cOVState (fe/ovstate.h, 0x9C); its own members at their retail offsets. Evidence tags:
 //   [R] retail's constructors (the cOVState part is inlined: mOVID, mDoneTransition, mAllowPauseMenu, mRemovePDA,
@@ -38,7 +48,7 @@ struct cUIScreen;
 
 struct cOVTemplate_Dialog : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] D_00474C58 or a dialog overlay's vtable, stored after cOVState_vtbl by the constructors
+    //   [R] cOVTemplate_Dialog_vtbl or a dialog overlay's vtable, stored after cOVState_vtbl by the constructors
     // cOVTemplate_Dialog's notes on cUIState's fields:
     //   mpEngine: [U] cUIEngine_addScreenByHashName(mpEngine, ...)
     //   mpScreen: [U] onCreateScreen stores the dialog screen; widget lookups go through it

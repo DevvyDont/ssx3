@@ -10,6 +10,9 @@
 #include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
 #include "fe/ovstatereplay.h"
+#include "fe/ovstatepause.h"
+#include "fe/ovstateeventresults.h"
+#include "fe/ovstatetransport.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -248,19 +251,19 @@ extern char cOVState_TOPTIMES_vtbl[];
 extern char cOVState_BIGCHALLENGE_FAIL_vtbl[];
 extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char cOVState_ENTERLODGE_vtbl[];
-extern char D_00473C50[];
+extern char cOVState_TOURNAMENT_STANDINGS_vtbl[];
 extern char cOVState_BASSSP_QUAL_FINISHOV_vtbl[];
 extern char cOVState_RACE_FINISHOV_vtbl[];
 extern char D_00473ED8[];
 extern char cOVState_FINAL_STANDINGS_vtbl[];
 extern char cOVState_HEAT_STANDINGS_vtbl[];
-extern char D_004744C0[];
-extern char D_00474598[];
-extern char D_00474670[];
-extern char D_00474748[];
-extern char D_00474820[];
-extern char D_004748F8[];
-extern char D_004749D0[];
+extern char cOVState_SAVEPROMPT_vtbl[];
+extern char cOVState_GIVEUP_vtbl[];
+extern char cOVState_QUITCOMPETITION_vtbl[];
+extern char cOVState_QUITCHALLENGE_vtbl[];
+extern char cOVState_RESTARTCHALLENGE_vtbl[];
+extern char cOVState_QUIT_vtbl[];
+extern char cOVState_RESTART_vtbl[];
 extern char cOVState_REPLAY_vtbl[];
 extern char D_00474B80[];
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
@@ -276,350 +279,350 @@ extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int 
  */
 extern "C" void cOVStateManager_triggerOverlay(int type)
 {
-    char* result = 0;
+    cUIState* result = 0;
     cUIEngine* mgr = SSXApp->Game->UI;
     if (type == 0x1) {
-        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_COMPETE_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0xC4) = 0;
-        result = ((char*)overlay);
+        overlay->mpThread = 0;
+        result = overlay;
     }
     if (type == 0x2) {
-        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0xC4) = 0;
-        result = ((char*)overlay);
+        overlay->mpThread = 0;
+        result = overlay;
     }
     if (type == 0x3) {
-        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0xC4) = 0;
-        result = ((char*)overlay);
+        overlay->mpThread = 0;
+        result = overlay;
     }
     if (type == 0x4) {
-        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_SPOKE_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0xC4) = 0;
-        result = ((char*)overlay);
+        overlay->mpThread = 0;
+        result = overlay;
     }
     if (type == 0x5) {
-        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0xC4) = 0;
-        result = ((char*)overlay);
+        overlay->mpThread = 0;
+        result = overlay;
     }
     if (type == 0x6) {
-        cOVState* overlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_ONLINE_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0xC4) = 0;
-        result = ((char*)overlay);
+        overlay->mpThread = 0;
+        result = overlay;
     }
     if (type == 0x7) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_OPTIONS_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0x8) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_HEAT_PREEVENT_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0x9) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_00472778;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 10) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_HEAT_STANDINGS_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 11) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_FINAL_STANDINGS_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0xC) {
-        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
+        cOVState_RACE_FINISHOV* overlay = (cOVState_RACE_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, overlay) = (void**)cOVState_RACE_FINISHOV_vtbl;
-        *(int*)(((char*)overlay) + 0xA0) = 0x1;
+        overlay->unk_0A0 = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         overlay->mHashName = GetHashValue32(str_finishov);
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 13) {
-        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
+        cOVState_BASSSP_QUAL_FINISHOV* overlay = (cOVState_BASSSP_QUAL_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, overlay) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
-        *(int*)(((char*)overlay) + 0xA0) = 0x1;
+        overlay->unk_0A0 = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         overlay->mHashName = GetHashValue32(str_finishov);
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0xE) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_00474B80;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0xF) {
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_TOPTIMES_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0x10) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_REWARDS_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 17) {
         cOVState* overlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_REPLAY_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 18) {
-        result = (char*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
+        result = (cUIState*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
     }
     if (type == 19) {
-        result = (char*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
+        result = (cUIState*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
     if (type == 20) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_004725C8;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 21) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_004726A0;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 22) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_00473ED8;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 23) {
-        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_004749D0;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_RESTART_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0x9C) = 0;
-        result = ((char*)overlay);
+        overlay->mDialogType = 0;
+        result = overlay;
     }
     if (type == 0x18) {
-        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_004748F8;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)overlay) + 0x9C) = 0x1;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_QUIT_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
+        overlay->mDialogType = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 25) {
-        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_00474820;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)overlay) + 0x9C) = 0x2;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_RESTARTCHALLENGE_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
+        overlay->mDialogType = 0x2;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 26) {
-        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_00474748;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)overlay) + 0x9C) = 0x3;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_QUITCHALLENGE_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
+        overlay->mDialogType = 0x3;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 27) {
-        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_00474670;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)overlay) + 0x9C) = 0x4;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_QUITCOMPETITION_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
+        overlay->mDialogType = 0x4;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0x1C) {
-        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_00474598;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)overlay) + 0x9C) = 0x5;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_GIVEUP_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
+        overlay->mDialogType = 0x5;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 29) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_START_getChallengeData(overlay);
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0x1E) {
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_FAIL_getChallengeData(overlay);
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0x1F) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_ENTERLODGE_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 0x20) {
         cOVState* overlay = (cOVState*)((char*)operator new(468, str_cOVStateOverlay, 0, 0));
@@ -628,81 +631,81 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, overlay) = (void**)cOVState_MAP_vtbl;
         new (((char*)overlay) + 0x9C) sDlgSlot_AB50[8];
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 33) {
-        cOVState* overlay = (cOVState*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
+        cOVState_TRANSPORT* overlay = (cOVState_TRANSPORT*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_TRANSPORT_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        cUITemplate_MAP_init(((char*)overlay) + 0x9C);
-        result = ((char*)overlay);
+        cUITemplate_MAP_init(&overlay->mMap);
+        result = overlay;
     }
     if (type == 34) {
-        result = (char*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
+        result = (cUIState*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
     }
     if (type == 35) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_00473C50;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_TOURNAMENT_STANDINGS_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 36) {
-        result = (char*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
+        result = (cUIState*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
     }
     if (type == 37) {
-        result = (char*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
+        result = (cUIState*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
     }
     if (type == 38) {
-        cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_004744C0;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)overlay) + 0x9C) = 0x6;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_SAVEPROMPT_vtbl;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
+        overlay->mDialogType = 0x6;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
     if (type == 39) {
-        cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
+        cOVState_PAUSE_ONLINE_ERROR* overlay = (cOVState_PAUSE_ONLINE_ERROR*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)overlay) + 0xA0) = 0x1;
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
+        overlay->mbShouldDisplayAuxInfo = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        *(int*)(((char*)overlay) + 0x9C) = 0;
-        result = ((char*)overlay);
+        overlay->miStartPingTick = 0;
+        result = overlay;
     }
     if (type == 40) {
         cOVState* overlay = (cOVState*)((char*)operator new(228, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         overlay->mOVID = type;
-        *(unsigned short*)(((char*)overlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, overlay) = (void**)D_00473248;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        result = ((char*)overlay);
+        result = overlay;
     }
 
-    *(int*)(result + 0x1C) = (*(int*)(result + 0x1C) & ~0x3F00) | 0x100;
+    result->mAttrState = (result->mAttrState & ~0x3F00) | 0x100;
     cUIStateStack_pushSpecial(&mgr->mStateStack, result, 0, 0);
 }
 #endif
@@ -754,19 +757,19 @@ extern char cOVState_TOPTIMES_vtbl[];
 extern char cOVState_BIGCHALLENGE_FAIL_vtbl[];
 extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char cOVState_ENTERLODGE_vtbl[];
-extern char D_00473C50[];
+extern char cOVState_TOURNAMENT_STANDINGS_vtbl[];
 extern char cOVState_BASSSP_QUAL_FINISHOV_vtbl[];
 extern char cOVState_RACE_FINISHOV_vtbl[];
 extern char D_00473ED8[];
 extern char cOVState_FINAL_STANDINGS_vtbl[];
 extern char cOVState_HEAT_STANDINGS_vtbl[];
-extern char D_004744C0[];
-extern char D_00474598[];
-extern char D_00474670[];
-extern char D_00474748[];
-extern char D_00474820[];
-extern char D_004748F8[];
-extern char D_004749D0[];
+extern char cOVState_SAVEPROMPT_vtbl[];
+extern char cOVState_GIVEUP_vtbl[];
+extern char cOVState_QUITCOMPETITION_vtbl[];
+extern char cOVState_QUITCHALLENGE_vtbl[];
+extern char cOVState_RESTARTCHALLENGE_vtbl[];
+extern char cOVState_QUIT_vtbl[];
+extern char cOVState_RESTART_vtbl[];
 extern char cOVState_REPLAY_vtbl[];
 extern char D_00474B80[];
 
@@ -789,351 +792,351 @@ extern char D_00474B80[];
  */
 extern "C" void cOVStateManager_triggerPopup(int type)
 {
-    char* result = 0;
+    cUIState* result = 0;
     cUIEngine* mgr = SSXApp->Game->UI;
     int cur = (int)cUIStateStack_getCurrentState(&mgr->mStateStack);
     if (type == 0x1) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_COMPETE_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0xC4) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->mpThread = 0;
+        result = newOverlay;
     }
     if (type == 0x2) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0xC4) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->mpThread = 0;
+        result = newOverlay;
     }
     if (type == 0x3) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0xC4) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->mpThread = 0;
+        result = newOverlay;
     }
     if (type == 0x4) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_SPOKE_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0xC4) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->mpThread = 0;
+        result = newOverlay;
     }
     if (type == 0x5) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0xC4) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->mpThread = 0;
+        result = newOverlay;
     }
     if (type == 0x6) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_ONLINE_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0xC4) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->mpThread = 0;
+        result = newOverlay;
     }
     if (type == 0x7) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_OPTIONS_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0x8) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_HEAT_PREEVENT_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0x9) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_00472778;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 10) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_HEAT_STANDINGS_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 11) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_FINAL_STANDINGS_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0xC) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
+        cOVState_RACE_FINISHOV* newOverlay = (cOVState_RACE_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_RACE_FINISHOV_vtbl;
-        *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
+        newOverlay->unk_0A0 = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         newOverlay->mHashName = GetHashValue32(str_finishov);
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 13) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
+        cOVState_BASSSP_QUAL_FINISHOV* newOverlay = (cOVState_BASSSP_QUAL_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
-        *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
+        newOverlay->unk_0A0 = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         newOverlay->mHashName = GetHashValue32(str_finishov);
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0xE) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_00474B80;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0xF) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TOPTIMES_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0x10) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_REWARDS_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 17) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_REPLAY_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 18) {
-        result = (char*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
+        result = (cUIState*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
     }
     if (type == 19) {
-        result = (char*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
+        result = (cUIState*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
     if (type == 20) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_004725C8;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 21) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_004726A0;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 22) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_00473ED8;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 23) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_004749D0;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_RESTART_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0x9C) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->mDialogType = 0;
+        result = newOverlay;
     }
     if (type == 0x18) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_004748F8;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)newOverlay) + 0x9C) = 0x1;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_QUIT_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
+        newOverlay->mDialogType = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 25) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_00474820;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)newOverlay) + 0x9C) = 0x2;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_RESTARTCHALLENGE_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
+        newOverlay->mDialogType = 0x2;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 26) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_00474748;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)newOverlay) + 0x9C) = 0x3;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_QUITCHALLENGE_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
+        newOverlay->mDialogType = 0x3;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 27) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_00474670;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)newOverlay) + 0x9C) = 0x4;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_QUITCOMPETITION_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
+        newOverlay->mDialogType = 0x4;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0x1C) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_00474598;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)newOverlay) + 0x9C) = 0x5;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_GIVEUP_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
+        newOverlay->mDialogType = 0x5;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 29) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_START_getChallengeData(newOverlay);
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0x1E) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         cOVState_BIGCHALLENGE_FAIL_getChallengeData(newOverlay);
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0x1F) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_ENTERLODGE_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 0x20) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(468, str_cOVStateOverlay, 0, 0));
@@ -1142,81 +1145,81 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_MAP_vtbl;
         new (((char*)newOverlay) + 0x9C) sDlgSlot_BAB8[8];
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 33) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
+        cOVState_TRANSPORT* newOverlay = (cOVState_TRANSPORT*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TRANSPORT_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        cUITemplate_MAP_init(((char*)newOverlay) + 0x9C);
-        result = ((char*)newOverlay);
+        cUITemplate_MAP_init(&newOverlay->mMap);
+        result = newOverlay;
     }
     if (type == 34) {
-        result = (char*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
+        result = (cUIState*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
     }
     if (type == 35) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_00473C50;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TOURNAMENT_STANDINGS_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 36) {
-        result = (char*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
+        result = (cUIState*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
     }
     if (type == 37) {
-        result = (char*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
+        result = (cUIState*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
     }
     if (type == 38) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
+        cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_004744C0;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)newOverlay) + 0x9C) = 0x6;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_SAVEPROMPT_vtbl;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
+        newOverlay->mDialogType = 0x6;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
     if (type == 39) {
-        cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
+        cOVState_PAUSE_ONLINE_ERROR* newOverlay = (cOVState_PAUSE_ONLINE_ERROR*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
-        *(int*)(((char*)newOverlay) + 0xA0) = 0x1;
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
+        newOverlay->mbShouldDisplayAuxInfo = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        *(int*)(((char*)newOverlay) + 0x9C) = 0;
-        result = ((char*)newOverlay);
+        newOverlay->miStartPingTick = 0;
+        result = newOverlay;
     }
     if (type == 40) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(228, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         newOverlay->mOVID = type;
-        *(unsigned short*)(((char*)newOverlay) + 0x58) = str_sp_b[0];
+        *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, newOverlay) = (void**)D_00473248;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        result = ((char*)newOverlay);
+        result = newOverlay;
     }
 
-    *(int*)(result + 0x20) = cur;
+    result->mpParentState = (cUIState*)cur;
     cUIStateStack_pushPopup(&mgr->mStateStack, result);
 }
 #endif
@@ -1851,7 +1854,7 @@ extern char str_Menu0000_b[];
  * Preselects the dialog's "Menu0000" menu when it is created: entry 0 for dialog type 6, entry 1 for every other type.
  *
  * The dialog type is the word at +0x9C, the value cOVStateManager_triggerOverlay stores per dialog overlay (0-6; On
- * Tour mDialogType). It fills the onWidgetCreate slot (+0x94) of the dialog vtables (D_004744C0 ... D_00474C58) whose
+ * Tour mDialogType). It fills the onWidgetCreate slot (+0x94) of the dialog vtables (cOVState_SAVEPROMPT_vtbl ... cOVTemplate_Dialog_vtbl) whose
  * onCreateScreen and onWidgetEvent are cOVTemplate_Dialog_onCreateScreen and cOVTemplate_Dialog_onWidgetEvent.
  *
  * @param item  the widget being created; only the one whose hash name (+0x38) is "Menu0000" is touched
@@ -1875,7 +1878,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetMenu);
 /**
  * Dialog's menu-event filter: events 8 and 9 get 0x100, every other event 0x101.
  *
- * It fills the onWidgetMenu slot (+0xA4) of the dialog vtables (D_004744C0 ... D_00474C58).
+ * It fills the onWidgetMenu slot (+0xA4) of the dialog vtables (cOVState_SAVEPROMPT_vtbl ... cOVTemplate_Dialog_vtbl).
  *
  * @param menu  the menu (unused)
  * @param key  the menu event
@@ -2126,7 +2129,7 @@ extern char str_TransitionOut_b[];
  * After cOVState_onUpdate, when cGameComm_mGameComm exists and its mPauseTimeout or mOverlayTimeout is 0: plays the
  * "TransitionOut" label of mpScreen (cUIScreen_getFrameByLabel, cUIScreen_playFrame) when it exists, and pops one state
  * from mpEngine's state stack (cUIStateStack_pop, On Tour cUIStateStack::pop). It is the onUpdate slot (+0x64) of
- * D_004748F8, the dialog type 1 overlay (cOVStateManager_triggerOverlay type 0x18).
+ * cOVState_QUIT_vtbl, the dialog type 1 overlay (cOVStateManager_triggerOverlay type 0x18).
  */
 extern "C" void cOVState_QUIT_onUpdate(cOVTemplate_Dialog* self)
 {

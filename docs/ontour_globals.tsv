@@ -5716,3 +5716,12 @@ ps2_addr	name	previous	source	evidence
 00441138	gLocaleFilenames	D_00441138	ontour	[O] On Tour static const char* gLocaleFilenames[6] (dwarf_dbg 004D7268), only user cFELocale::addFile(char) which loads gLocaleFilenames[i] into a new cLocaleFile ("LocaleFile", PSP 0x000E324C); [U] retail cFELocale_addFile loads D_00441138[i] into a new 0x14-byte "LocaleFile" (util/locale.cpp:52); contents differ (On Tour English/French/German(+TRC) .loc x6, retail data/locale/cmnamer..  x20)
 00454944	_impure_ptr	D_00454944	ontour+newlib	On Tour release/debug pair (tier A); newlib: __errno returns &_impure_ptr->_errno, fopen calls _fopen_r(_impure_ptr, ...)
 004A5BB8	errno	D_004A5BB8	ontour+newlib	On Tour release/debug pair (tier A); newlib reent/closer.c, fstatr.c: errno = 0; ... if (ret == -1 && errno != 0) ptr->_errno = errno
+004749D0	cOVState_RESTART_vtbl	D_004749D0	retail	slot 1 = cOVState_RESTART__cOVState_RESTART; factory id 23 (dialog kind 0, text kT_OVRCMNRestartEvent)
+004748F8	cOVState_QUIT_vtbl	D_004748F8	retail	slot 1 = cOVState_QUIT__cOVState_QUIT; stored by cOVState_QUIT_cOVState_QUIT; factory id 24 (kind 1, kT_OVRCMNQuitGame)
+00474820	cOVState_RESTARTCHALLENGE_vtbl	D_00474820	retail	slot 1 = cOVState_RESTARTCHALLENGE__cOVState_RESTARTCHALLENGE; factory id 25 (kind 2, kT_OVRCMNRestartChal)
+00474748	cOVState_QUITCHALLENGE_vtbl	D_00474748	retail	slot 1 = cOVState_QUITCHALLENGE__cOVState_QUITCHALLENGE (preview linkonce _$_22cOVState_QUITCHALLENGE); factory id 26 (kind 3, kT_OVRCMNQuitChal)
+00474670	cOVState_QUITCOMPETITION_vtbl	D_00474670	retail	slot 1 = cOVState_QUITCOMPETITION__cOVState_QUITCOMPETITION (preview linkonce _$_24cOVState_QUITCOMPETITION); factory id 27 (kind 4, kT_CMNQuitEventQues)
+00474598	cOVState_GIVEUP_vtbl	D_00474598	retail	slot 1 = cOVState_GIVEUP__cOVState_GIVEUP; factory id 28 (kind 5, kT_CMNGiveUp)
+004744C0	cOVState_SAVEPROMPT_vtbl	D_004744C0	retail	slot 1 = cOVState_SAVEPROMPT__cOVState_SAVEPROMPT; factory id 38 after AUTOSAVE 37 as On Tour's SAVEPROMPT follows AUTOSAVE (kind 6, kT_CMNSaveBeforeQuit)
+00473C50	cOVState_TOURNAMENT_STANDINGS_vtbl	D_00473C50	retail	slot 1 = cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS; factory id 35
+00474C58	cOVTemplate_Dialog_vtbl	D_00474C58	retail	slot 1 = cOVTemplate_Dialog__cOVTemplate_Dialog; its methods fill the dialog vtables' other slots

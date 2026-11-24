@@ -17977,3 +17977,14 @@ heapsize = 0x005157B0;
 // SSX On Tour (PSP, ULKS-46038) dev-build global names, round round_newlib (docs/ontour_globals.tsv)
 _impure_ptr = 0x00454944;
 errno = 0x004A5BB8;
+
+// Retail vtable names (each from its named slot-1 destructor), round ovstate_vtbls_2026-11-23 (docs/ontour_globals.tsv)
+cOVState_TOURNAMENT_STANDINGS_vtbl = 0x00473C50;
+cOVState_SAVEPROMPT_vtbl = 0x004744C0;
+cOVState_GIVEUP_vtbl = 0x00474598;
+cOVState_QUITCOMPETITION_vtbl = 0x00474670;
+cOVState_QUITCHALLENGE_vtbl = 0x00474748;
+cOVState_RESTARTCHALLENGE_vtbl = 0x00474820;
+cOVState_QUIT_vtbl = 0x004748F8;
+cOVState_RESTART_vtbl = 0x004749D0;
+cOVTemplate_Dialog_vtbl = 0x00474C58;
