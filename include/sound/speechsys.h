@@ -22,24 +22,27 @@
 #include "layout.h"
 
 struct cStreamSys;
+struct cSpeechInstance;  // sound/speechinstance.h
 
 // One pending speech request (0x20; our name). [U] func_002B1458 adds one (timer 180 frames; refreshes a match),
 // func_002B1720 counts timers down, func_002B1520 applies a matching request to its speech instance
-// (instance + 0x8CC/0x8D0/0x8F4/0x8F8/0x8FC), func_002B16A0 drops it.
+// (mPosition / mUserInfo / mRadius / mIsHuman / mViewport), func_002B16A0 drops it.
 struct tSpeechRequest { // member names are ours, from use
     int used;       // 0x00 [U] func_002B1458 1; func_002B1428 clears all; func_002B16A0 0
     int timer;      // 0x04 [U] func_002B1458 180; func_002B1720 decrements, frees at 0
     int instance;   // 0x08 [U] speech instance index (0..1) the request is for (func_002B1458/func_002B1520 match on it)
     int id;         // 0x0C [U] request key (matched with instance)
     void* object;   // 0x10 [U] func_002B1520 calls its virtual slots (object + 0x6C0) and reads object + 0x870
-    int unk_14;     // 0x14 [U] func_002B1520 -> instance + 0x8D0
-    float unk_18;   // 0x18 [U] func_002B1520 -> instance + 0x8F4
+    int unk_14;     // 0x14 [U] func_002B1520 -> instance mUserInfo
+    float unk_18;   // 0x18 [U] func_002B1520 -> instance mRadius
     void (*callback)(int); // 0x1C [U] func_002B1458 stores it; func_002B1520 copies it to mCallback (0 clears mCallback / mCallbackInstance)
 };
 
 struct cSpeechSys {
     cStreamSys* mpVStreamSys;           // 0x000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0xC98 in a complete object; cSSXAudio + 0x7768); [U] methods reach cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
-    void** mSpeechInstance;             // 0x004 [R] operator new[](2 x 4, "mSpeechInstance"), both 0; [U] func_002B0E60 fills slot i with cMemMan_alloc(0x904, "SpeechInstance") + ctor func_002AFA68; the dtor frees the array
+    cSpeechInstance** mSpeechInstance;  // 0x004 [R] operator new[](2 x 4, "mSpeechInstance"), both 0; [U] func_002B0E60
+                                        //       fills slot i with cMemMan_alloc(0x904, "SpeechInstance") + ctor
+                                        //       func_002AFA68; the dtor frees the array
     void* unk_008;                      // 0x008 [U] SPCH_Init: MEM_alloc("bank mem", n, 0) (the speech bank buffer); func_002B0DA0 MEM_free()s and clears it
     void (*mCallback)(int);             // 0x00C (our name) [R] ctor 0; [U] func_002B0F48 calls it with the started speech's handle (result unused); func_002B1058/func_002B1520 store it (as int)
     int mCallbackInstance;              // 0x010 (our name) [R] ctor -1; [U] the speech instance index mCallback is armed for (func_002B0F48 compares, func_002B1058 sets/clears)

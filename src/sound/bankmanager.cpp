@@ -8,10 +8,14 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "sound/streamsys.h"
+#include "ai/rider.h"
+#include "ai/airpredictor.h"
+#include "main/game.h"
+#include "ui/uiengine.h"
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
 #ifdef SKIP_ASM
-extern char* gpBankManager;
+extern cBankManager* gpBankManager;
 extern char str_StaticSoundMem[];
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 #include "sound/soundsys.h"
@@ -43,7 +47,7 @@ extern "C" void* cBankInstance_AllocMem(cBankInstance* self, int size, int extra
     if (size != 0 || extra != 0) {
         self->mAllocLocation = 1;
         if (extra != 0) {
-            int id = (**(cSndStream_B588***)(gpBankManager + 0x1D8))->alloc(extra);
+            int id = ((cSndStream_B588*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->alloc(extra);
             if (id >= 0) {
                 self->mSoundMemHandle = id;
                 self->mAllocLocation = 2;
@@ -62,7 +66,7 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_DeallocMem);
 #ifdef SKIP_ASM
 extern "C" void cBankInstance_Unload(void*);
 extern "C" void* MEM_free(void* self);
-extern char* gpBankManager;
+extern cBankManager* gpBankManager;
 
 class cSndStream_B650 {
 public:
@@ -88,7 +92,7 @@ extern "C" void cBankInstance_DeallocMem(cBankInstance* self)
     int state = self->mAllocLocation;
     if (state != 0) {
         if (state == 2) {
-            (**(cSndStream_B650***)(gpBankManager + 0x1D8))->stop(self->mSoundMemHandle);
+            ((cSndStream_B650*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->stop(self->mSoundMemHandle);
             self->mSoundMemHandle = -1;
         }
         MEM_free(self->mpMainMemData);
@@ -105,34 +109,34 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_ShareBank);
 /**
  * Makes bank @p dst share the memory of bank @p src.
  *
- * Links @p dst into @p src's ring of sharing banks (the next pointer at +0x18 and prev at +0x1C): after @p src when
- * @p src is already in a ring, else @p src and @p dst become a two-bank ring. When @p src has an allocation (location
- * at +0x8 non-zero), copies the location, the main-memory data and size (+0x10, +0x14) and the sound-memory handle
- * (+0xC) into @p dst. Called by cBankManager_BANK_ShareBank with two banks of the manager's array.
+ * Links @p dst into @p src's ring of sharing banks (mpNext / mpPrev): after @p src when @p src is already in a ring,
+ * else @p src and @p dst become a two-bank ring. When @p src has an allocation (mAllocLocation non-zero), copies the
+ * location, the main-memory data and size (mpMainMemData, mMainMemDataSize) and the sound-memory handle
+ * (mSoundMemHandle) into @p dst. Called by cBankManager_BANK_ShareBank with two banks of the manager's array.
  *
  * @param dst  the bank that shares
  * @param src  the bank whose memory is shared
  */
-extern "C" void cBankInstance_ShareBank(void *dst, cBankInstance* src) {
+extern "C" void cBankInstance_ShareBank(cBankInstance* dst, cBankInstance* src) {
     int flag;
 
     if (src->mpNext != 0) {
-        *(void **)((char*)dst + 0x18) = ((void*)src);
-        *(void **)((char*)dst + 0x1C) = (void*)src->mpPrev;
-        src->mpPrev = (cBankInstance*)dst;
-        *(void **)((char*)*(void **)((char*)dst + 0x1C) + 0x18) = dst;
+        dst->mpNext = src;
+        dst->mpPrev = src->mpPrev;
+        src->mpPrev = dst;
+        dst->mpPrev->mpNext = dst;
     } else {
-        src->mpNext = (cBankInstance*)dst;
-        src->mpPrev = (cBankInstance*)dst;
-        *(void **)((char*)dst + 0x18) = ((void*)src);
-        *(void **)((char*)dst + 0x1C) = ((void*)src);
+        src->mpNext = dst;
+        src->mpPrev = dst;
+        dst->mpNext = src;
+        dst->mpPrev = src;
     }
     flag = src->mAllocLocation;
     if (flag != 0) {
-        *(int *)((char*)dst + 8) = flag;
-        *(int *)((char*)dst + 0x10) = (int)src->mpMainMemData;
-        *(int *)((char*)dst + 0x14) = src->mMainMemDataSize;
-        *(int *)((char*)dst + 0xC) = src->mSoundMemHandle;
+        dst->mAllocLocation = flag;
+        dst->mpMainMemData = src->mpMainMemData;
+        dst->mMainMemDataSize = src->mMainMemDataSize;
+        dst->mSoundMemHandle = src->mSoundMemHandle;
     }
 }
 #endif
@@ -251,7 +255,7 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_OnBeginAsyncLoad);
 #ifdef SKIP_ASM
 extern "C" void cBankInstance_Unload(void*);
 extern "C" void cBankInstance_SharedUnload(void* self);
-extern char* gpBankManager;
+extern cBankManager* gpBankManager;
 
 class cSndStream_B878 {
 public:
@@ -268,7 +272,8 @@ public:
  *
  * Calls cBankInstance_Unload and cBankInstance_SharedUnload (On Tour Unload and SharedUnload), sets the status (+0x0, mBankStatus) to 2
  * (loading) and, for a bank held in sound memory (mAllocLocation +0x8 == 2), passes its sound memory handle (+0xC) to
- * virtual slot 6 of the bank manager's sound system (the cSoundSys virtual base reached through gpBankManager +0x1D8).
+ * virtual slot 6 (SetSoundMemLoadLimits) of the sound manager, the pManager of the cSoundSys virtual base reached
+ * through gpBankManager->BankMonitor.mpVSoundSys.
  * On Tour asserts the bank was not already loading and that the handle is valid; retail checks neither.
  */
 extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance* self)
@@ -277,7 +282,7 @@ extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance* self)
     cBankInstance_SharedUnload(self);
     *(int*)self = 2;
     if (self->mAllocLocation == 2) {
-        (**(cSndStream_B878***)(gpBankManager + 0x1D8))->v6(self->mSoundMemHandle);
+        ((cSndStream_B878*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->v6(self->mSoundMemHandle);
     }
 }
 #endif
@@ -329,7 +334,7 @@ int cBankInstance_OnAsyncMainMemSize(void* vself)
 INCLUDE_ASM("sound/bankmanager", cBankInstance_OnEndAsyncLoad);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
-extern char* gpBankManager;
+extern cBankManager* gpBankManager;
 
 class cSndStream_B930 {
 public:
@@ -345,7 +350,8 @@ public:
 /**
  * Finishes a bank's asynchronous load: records the sound handle, the outcome and the file name.
  *
- * Calls virtual slot 7 of the bank manager's sound system (gpBankManager +0x1D8), stores the sound handle as the bank
+ * Calls virtual slot 7 (RestoreSoundMemLoadLimits) of the sound manager (gpBankManager->BankMonitor.mpVSoundSys->
+ * pManager), stores the sound handle as the bank
  * handle (+0x4), sets the status (+0x0) to 1 (loaded) when the end state is 0 and to 0 otherwise, and copies the file
  * name into the bank's name buffer (+0x20, 64 bytes in On Tour). On Tour also checks the buffer against the reserved
  * one and the size against it and logs "WARNING: Asynchronous bank loading operation failed." on failure; retail drops
@@ -360,7 +366,7 @@ public:
 // PORT: name is passed as int (matches the unit's 6-int caller declaration); d, e unused.
 extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* self, int id, int flag, int name, int pBuffer, int dataSize)
 {
-    (**(cSndStream_B930***)(gpBankManager + 0x1D8))->v7();
+    ((cSndStream_B930*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->v7();
     self->mBankHandle = id;
     if (flag == 0) {
         *(int*)self = 1;
@@ -380,7 +386,7 @@ extern "C" void* cBankInstance_cBankInstance(void* self);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern char* gpBankManager;
+extern cBankManager* gpBankManager;
 extern const char str_BankInstances[];
 extern void* cBankMonitor_vtbl[];
 extern void* cBankManager_vtbl[];
@@ -401,16 +407,11 @@ struct sBmBank {
     void operator delete[](void* p, unsigned int size);
 };
 
-struct sBankManager {
-    char pad_0x0[0x1D4];
-    void** vtbl;                // 0x1D4
-    cSoundSys* monitor;         // 0x1D8 cBankMonitor::mpVSoundSys (the shared cSoundSys virtual base)
-    char pad_0x1DC[0xAB0 - 0x1DC];
-    void** vtbl2;               // 0xAB0
-    char pad_0xAB4[0xAC8 - 0xAB4];
-    int count;                  // 0xAC8
-    sBmBank* banks;             // 0xACC
-    char embedded[0x4];         // 0xAD0
+// A complete cBankManager (the in-charge ctor builds it): g++ 2.95 puts the cSoundSys virtual base after the
+// non-virtual part.
+struct cBankManagerComplete {
+    cBankManager mBankManager;  // 0x000
+    cSoundSys mSoundSys;        // 0xAD0
 };
 
 /**
@@ -425,29 +426,29 @@ struct sBankManager {
  * @param heap  audio mode (eSOUNDDEF_MODE), passed to cSoundSys and the bank monitor
  * @return @p self
  */
-extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embedded, int count, int heap)
+extern "C" cBankManager* cBankManager_cBankManager(cBankManager* self, int embedded, int count, int heap)
 {
     if (embedded) {
-        self->monitor = (cSoundSys*)self->embedded;
-        cSoundSys_cSoundSys(self->embedded, heap);
+        self->BankMonitor.mpVSoundSys = &((cBankManagerComplete*)self)->mSoundSys;
+        cSoundSys_cSoundSys(&((cBankManagerComplete*)self)->mSoundSys, heap);
     }
     cAsyncSys_cAsyncSys(self);
-    cBankMonitor_cBankMonitor(&self->monitor, 0, heap);
-    *(const sBmVtbl**)&self->monitor->mVtbl = &D_00483AB8;
+    cBankMonitor_cBankMonitor(&self->BankMonitor, 0, heap);
+    *(const sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &D_00483AB8;
     if (!embedded) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtbl vt = D_00483AB8;
-        *(sBmVtbl**)&self->monitor->mVtbl = &vt;
-        int base = (int)self->monitor - 0xAD0;
+        *(sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &vt;
+        int base = (int)self->BankMonitor.mpVSoundSys - 0xAD0;
         int thisDelta = (int)self - base;
         vt.e[1].delta = D_00483AB8.e[1].delta + thisDelta;
     }
-    self->count = count;
-    self->vtbl2 = cBankMonitor_vtbl;
-    self->vtbl = cBankManager_vtbl;
-    sBmBank** slot = &self->banks;
+    self->mMaxBanks = count;
+    self->BankMonitor.mVtbl = cBankMonitor_vtbl;
+    self->mVtbl = cBankManager_vtbl;
+    sBmBank** slot = (sBmBank**)&self->mBank;
     *slot = new (str_BankInstances, 0, 0) sBmBank[count];
-    gpBankManager = (char*)self;
+    gpBankManager = (cBankManager*)self;
     return self;
 }
 #endif
@@ -461,7 +462,7 @@ extern "C" void cAsyncSys__cAsyncSys(void* self, int flags);
 extern "C" void cBankInstance__cBankInstance(void* self, int flags);
 extern "C" void cBankMonitor__cBankMonitor(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
-extern char* gpBankManager;
+extern cBankManager* gpBankManager;
 extern void* cBankMonitor_vtbl[];
 extern void* cBankManager_vtbl[];
 
@@ -482,10 +483,10 @@ extern const sBmVtblBB10 D_00483AB8_BB10 __asm__("D_00483AB8");
  * gpBankManager.
  *
  * Restores the cBankManager and cBankMonitor vtables and the virtual base's vtable (D_00483AB8; with flags 0 the g++
- * 2.95 virtual-base this-adjust fix-up runs on a stack copy), clears gpBankManager, destroys the cBankInstance array at
- * +0xACC last-first with cBankInstance__cBankInstance (its count is the word 0x10 bytes before it) and frees it, then runs
- * cBankMonitor__cBankMonitor on +0x1D8 and cAsyncSys__cAsyncSys (On Tour ~cAsyncSys) on the object. cSoundSys__cSoundSys
- * destroys the virtual base only when flags bit 1 is set.
+ * 2.95 virtual-base this-adjust fix-up runs on a stack copy), clears gpBankManager, destroys the cBankInstance array
+ * mBank last-first with cBankInstance__cBankInstance (its count is the word 0x10 bytes before it) and frees it, then
+ * runs cBankMonitor__cBankMonitor on BankMonitor and cAsyncSys__cAsyncSys (On Tour ~cAsyncSys) on the object.
+ * cSoundSys__cSoundSys destroys the virtual base only when flags bit 1 is set.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object's memory, bit 1 destroys the cSoundSys virtual base
  */
@@ -493,12 +494,12 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
 {
     self->BankMonitor.mVtbl = cBankMonitor_vtbl;
     self->mVtbl = cBankManager_vtbl;
-    *(const sBmVtblBB10**)(*(char**)&self->BankMonitor + 4) = &D_00483AB8_BB10;
+    self->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483AB8_BB10;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtblBB10 vt = D_00483AB8_BB10;
-        *(sBmVtblBB10**)(*(char**)&self->BankMonitor + 4) = &vt;
-        char* base = *(char**)&self->BankMonitor - 0xAD0;
+        self->BankMonitor.mpVSoundSys->mVtbl = (void**)&vt;
+        char* base = (char*)self->BankMonitor.mpVSoundSys - 0xAD0;
         int soundSysAdjust = (char*)self - base;
         vt.e[1].delta = D_00483AB8_BB10.e[1].delta + soundSysAdjust;
     }
@@ -511,10 +512,10 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
         }
         cMemMan_free((char*)self->mBank - 0x10);
     }
-    cBankMonitor__cBankMonitor((char**)&self->BankMonitor, 0);
+    cBankMonitor__cBankMonitor(&self->BankMonitor, 0);
     cAsyncSys__cAsyncSys((self), 0);
     if (flags & 2) {
-        cSoundSys__cSoundSys(*(char**)&self->BankMonitor, 0);
+        cSoundSys__cSoundSys(self->BankMonitor.mpVSoundSys, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -638,7 +639,7 @@ extern "C" void cBankManager_BANK_DeallocMem(cBankManager* self, int i)
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_ShareBank);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_ShareBank(void* dst, cBankInstance* src);
+extern "C" void cBankInstance_ShareBank(cBankInstance* dst, cBankInstance* src);
 
 /**
  * Makes bank slot @p i share the memory of bank slot @p j: calls cBankInstance_ShareBank with those two 0x60-byte bank instances
@@ -897,15 +898,15 @@ extern "C" void func_002B4070(void* monitor);
 extern "C" int func_002B49E0(void* monitor);
 extern "C" int func_002B4AF0(void* monitor);
 
-static inline void bmRestartC2D0(char* self)
+static inline void bmRestartC2D0(cSSXAudio* self)
 {
     if (cAudioInterface_isInGame() == 0) {
         return;
     }
-    if (*(int*)(self + 0x530) == 0) {
+    if (self->MusicSys.mSongPlaying == 0) {
         return;
     }
-    char* mon = self + 0x118;
+    cMusicSys* mon = &self->MusicSys;
     int st = func_002B49E0(mon);
     if ((unsigned int)(st - 1) < 3) {
         return;
@@ -913,8 +914,8 @@ static inline void bmRestartC2D0(char* self)
     if (func_002B4AF0(mon) != 0 && st != 0x12D) {
         return;
     }
-    func_0028D488((cSSXAudio*)self);
-    func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
+    func_0028D488(self);
+    func_0028CF98(self, 0, 0, -1, 0);
 }
 
 /**
@@ -937,12 +938,12 @@ extern "C" void func_0028C2D0(cSSXAudio* self, long key)
         int state = self->mRadioModeID;
         if (state == 1 || state == 3) {
             func_002B4070(&self->MusicSys);
-            bmRestartC2D0(((char*)self));
+            bmRestartC2D0(self);
         }
     } else {
         int state = self->mRadioModeID;
         if (state == 1 || state == 3) {
-            bmRestartC2D0(((char*)self));
+            bmRestartC2D0(self);
         }
     }
 }
@@ -955,41 +956,6 @@ extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void func_002B2850(void* a, void* mon);
 
-struct sEntry_C430 {
-    signed char kind;
-    char pad[0x17];
-};
-struct sQuad_C430 {
-    int a;
-    int b;
-    int c;
-    int d;
-};
-struct sStack_C430 {
-    int field_0x0;                  // 0x1D8
-    sEntry_C430 cur;                // 0x1DC
-    volatile int depth;             // 0x1F4
-    sEntry_C430* entries;           // 0x1F8
-    int flags[4];                   // 0x1FC
-    int* a34;
-    int* a38;
-    int* a3C;
-    char a40[4][8];
-    int* a60;
-    int* a64;
-    int* a68;
-    int* a6C;
-    sQuad_C430* a70;
-    int* a74;
-    int* a78;
-    int* a7C;
-    int* a80;
-    int* a84;
-};
-struct sMgr_C430 {
-    char pad_0x0[0x1D8];
-    sStack_C430 st;                 // 0x1D8
-};
 
 struct sDesc_C430 {
     char pad0[0x70];
@@ -1012,32 +978,34 @@ struct sCue_C430 {
     int f24;            // 0x24
 };
 
-static inline void bmPush_C430(sMgr_C430** self, int kind, int data)
+// The inlined SFX_Begin: push a play-option level on the shared cBankManager's cBankMonitor and record its bank /
+// patch.
+static inline void bmPush_C430(cSSXAudio* audio, int kind, int data)
 {
-    sMgr_C430* m = *self;
-    sStack_C430* st = &m->st;
-    m->st.depth++;
-    st->entries[m->st.depth] = m->st.cur;
-    m->st.flags[m->st.depth] = 0;
-    st->a34[m->st.depth] = 0;
-    st->a38[m->st.depth] = st->entries[m->st.depth].kind;
-    st->a3C[m->st.depth] = 0;
-    memset((char*)st + m->st.depth * 8 + 0x40, 0, 8);
-    st->a60[m->st.depth] = 0;
-    st->a64[m->st.depth] = 0;
-    st->a68[m->st.depth] = 0;
-    st->a6C[m->st.depth] = 0;
-    st->a70[m->st.depth].b = 0;
-    st->a70[m->st.depth].a = 100;
-    st->a70[m->st.depth].c = 90;
-    st->a70[m->st.depth].d = 50;
-    st->a74[m->st.depth] = 0;
-    st->a80[m->st.depth] = 0;
-    st->a84[m->st.depth] = 0;
-    st->a78[m->st.depth] = 127;
-    st->a7C[m->st.depth] = 1;
-    (*(int**)((char*)self + 4))[(*self)->st.depth] = kind;
-    (*(int**)((char*)self + 8))[(*self)->st.depth] = data;
+    cBankManager* m = audio->mpVBankManager;
+    cBankMonitor* st = &m->BankMonitor;
+    m->BankMonitor.mInst++;
+    st->mCurrent[m->BankMonitor.mInst] = m->BankMonitor.mDefault;
+    m->BankMonitor.mPosition[m->BankMonitor.mInst] = 0;
+    st->mPosStatic[m->BankMonitor.mInst] = 0;
+    st->mBaseVol[m->BankMonitor.mInst] = st->mCurrent[m->BankMonitor.mInst].vol;
+    st->mVolControl[m->BankMonitor.mInst] = 0;
+    memset((char*)st + m->BankMonitor.mInst * 8 + 0x40, 0, 8);
+    st->mPtr[m->BankMonitor.mInst] = 0;
+    st->mViewport[m->BankMonitor.mInst] = 0;
+    st->mVanish[m->BankMonitor.mInst] = 0;
+    st->mRadius[m->BankMonitor.mInst] = 0;
+    st->mDelay[m->BankMonitor.mInst].mCount = 0;
+    st->mDelay[m->BankMonitor.mInst].mTime = 100;
+    st->mDelay[m->BankMonitor.mInst].mFeedback = 90;
+    st->mDelay[m->BankMonitor.mInst].mLevel = 50;
+    st->mExternalVol[m->BankMonitor.mInst] = 0;
+    st->mTwoPlayerPan[m->BankMonitor.mInst] = 0;
+    st->mTwoPlayerSide[m->BankMonitor.mInst] = 0;
+    st->mMapToMaxVol[m->BankMonitor.mInst] = 127;
+    st->mCloseOnEnd[m->BankMonitor.mInst] = 1;
+    audio->mBank[audio->mpVBankManager->BankMonitor.mInst] = kind;
+    audio->mPatch[audio->mpVBankManager->BankMonitor.mInst] = data;
 }
 
 #define BM_MIN_C430(a, b) ((a) < (b) ? (a) : (b))
@@ -1061,7 +1029,6 @@ static inline void bmPush_C430(sMgr_C430** self, int kind, int data)
  */
 extern "C" int func_0028C430(cSSXAudio* audio, sCue_C430* cue)
 {
-    sMgr_C430** self = (sMgr_C430**)audio;
     int* pidx = &cue->idx;
     char* data = cue->data;
     int saved = cue->f24;
@@ -1080,15 +1047,17 @@ extern "C" int func_0028C430(cSSXAudio* audio, sCue_C430* cue)
         int idx = cue->idx;
         while (idx < 0)
             idx += count;
-        bmPush_C430(self, kind, (int)(data + idx));
-        sMgr_C430** pp = *(sMgr_C430***)((char*)self + 0x118);
-        (*pp)->st.a3C[(*pp)->st.depth] = (int)((char*)self + 0x60A0);
-        sMgr_C430* bankManager = **(sMgr_C430***)((char*)self + 0x118);
-        sStack_C430* st2 = &bankManager->st;
-        st2->a38[bankManager->st.depth] = (int)BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth] * (vol * 0.009999999776482582f), 127.0f), 0.0f);
-        st2->entries[st2->depth].kind = BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth], 127), 0);
-        func_002B2850(*(void**)((char*)self + 0x520), (char*)self + 0x118);
-        cBankSys_SFX_End(self);
+        bmPush_C430(audio, kind, (int)(data + idx));
+        cStreamSys* streamSys = audio->MusicSys.mpVStreamSys;
+        streamSys->mpVBankManager->BankMonitor.mVolControl[streamSys->mpVBankManager->BankMonitor.mInst] =
+            &audio->unk_60A0;
+        cBankManager* bankManager = audio->MusicSys.mpVStreamSys->mpVBankManager;
+        cBankMonitor* st2 = &bankManager->BankMonitor;
+        st2->mBaseVol[bankManager->BankMonitor.mInst] =
+            (int)BM_MAX_C430(BM_MIN_C430(st2->mBaseVol[st2->mInst] * (vol * 0.009999999776482582f), 127.0f), 0.0f);
+        st2->mCurrent[st2->mInst].vol = BM_MAX_C430(BM_MIN_C430(st2->mBaseVol[st2->mInst], 127), 0);
+        func_002B2850(audio->MusicSys.mSongInstance, &audio->MusicSys);
+        cBankSys_SFX_End(audio);
         (*pidx)++;
         cue->f4 = saved;
     }
@@ -1121,8 +1090,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028C8C8);
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
-struct sRiderC8C8;
-extern "C" sRiderC8C8* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
+extern "C" cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 int cRider_getMotionState(void* rider);
 int func_0028D898(void* self);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
@@ -1143,51 +1111,22 @@ extern int D_004A3620;
 
 struct sBmVtC8C8 { short delta; short index; void (*fn)(void*, int); };
 
-struct sApC8C8 {
-    char pad0[0x98];
-    float f98;          // 0x98
-    float f9C;          // 0x9C
-    float fA0;          // 0xA0
-    char padA4[0xAC - 0xA4];
-    int state;          // 0xAC
-};
-
-struct sRiderC8C8 {
-    char pad0[0x788];
-    sApC8C8* ap;        // 0x788
-};
-
-struct sBmC8C8 {
-    char pad0[0x118];
-    char mon[0x5558 - 0x118];   // 0x118
-    sBmVtC8C8* monVt;           // 0x5558
-    char pad555C[0x5830 - 0x555C];
-    float f5830;                // 0x5830
-    char pad5834[0x60A0 - 0x5834];
-    float f60A0;                // 0x60A0
-    char pad60A4[0x6244 - 0x60A4];
-    float f6244;                // 0x6244
-    float f6248;                // 0x6248
-    float f624C;                // 0x624C
-    int f6250;                  // 0x6250
-};
-
-static inline float bmAirTime_C8C8(sBmC8C8* self, sRiderC8C8* rider)
+static inline float bmAirTime_C8C8(cSSXAudio* self, cRider* rider)
 {
-    int s = rider->ap->state;
+    int s = rider->mAirPredictor->SimState;
     int air = 0;
     if (s == 1 || s == 3)
         air = 1;
     if (air) {
         if (D_004A361C == 1)
-            return self->f6244;
-        float v = rider->ap->f98;
-        self->f6248 = 0.0f;
-        self->f6244 = v;
+            return self->unk_6244;
+        float v = rider->mAirPredictor->TotalAirTime;
+        self->unk_6248 = 0.0f;
+        self->unk_6244 = v;
         return v;
     }
     if (D_004A361C == 1)
-        return self->f6244;
+        return self->unk_6244;
     return 0.0f;
 }
 
@@ -1195,13 +1134,14 @@ static inline float bmAirTime_C8C8(sBmC8C8* self, sRiderC8C8* rider)
  * Updates the wind sound and the music volume for the focus rider's air time; called every frame from cSSXAudio_Update.
  *
  * Counts unk_6250 down. For the focus rider (cSSXAudio_GetFocusRider(-1)) in motion state 1 with its mAirPredictor's
- * state (+0xAC, On Tour SimState) 1 or 3, the air time is the predictor's +0x98 (On Tour TotalAirTime), cached in
+ * SimState 1 or 3, the air time is the predictor's TotalAirTime, cached in
  * unk_6244 on the first frame (unk_6248 cleared); while D_004A361C is 1 the cached value is reused; otherwise it is 0.
  * unk_60A0 is set to the music volume (cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0)), and
  * D_004A3620 takes last frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
  * (func_002B4878) is 1, func_002A4168 and func_002A41D8 are false and no rider event runs (func_0028D898), the song is
  * driven too (local play). Outside replays, above 2 s: D_004A361C = 1; unk_6248 keeps the largest current air time
- * (+0xA0), and unk_624C, set on the first frame, is that plus max((+0x9C - +0xA0) / 2, 0.5). From their ratio and a
+ * (CurAirTime), and unk_624C, set on the first frame, is that plus max((ApexTime - CurAirTime) / 2, 0.5). From their
+ * ratio and a
  * volume falling with the air time (20..127) it sets mWindVolume (then scaled by the SFX volume, control 5) and, with
  * play, the song's base volume (func_002B3C98) and overlay level (unk_60A0 via func_002B3D10). On the first such frame
  * it starts the wind (cSSXAudio_BeginWind) and, with play, func_002B4620 true and the radio on (func_0028D960), sends music
@@ -1209,40 +1149,40 @@ static inline float bmAirTime_C8C8(sBmC8C8* self, sRiderC8C8* rider)
  * sends event 8 when func_002B46E8 reports the song's unk_4C set (and the radio is on) and clears it with
  * func_002B4708; then it restores base volume 127 and the overlay level.
  */
-extern "C" void func_0028C8C8(sBmC8C8* self)
+extern "C" void func_0028C8C8(cSSXAudio* self)
 {
-    if (self->f6250 > 0)
-        self->f6250--;
-    sRiderC8C8* rider = cSSXAudio_GetFocusRider_p(self, -1);
+    if (self->unk_6250 > 0)
+        self->unk_6250--;
+    cRider* rider = cSSXAudio_GetFocusRider_p(self, -1);
     float airTime;
     if (cRider_getMotionState(rider) == 1) {
-        int simState = rider->ap->state;
+        int simState = rider->mAirPredictor->SimState;
         int air = 0;
         if (simState == 1 || simState == 3)
             air = 1;
         if (air) {
             if (D_004A361C == 1) {
-                airTime = self->f6244;
+                airTime = self->unk_6244;
             } else {
-                airTime = rider->ap->f98;
-                self->f6248 = 0.0f;
-                self->f6244 = airTime;
+                airTime = rider->mAirPredictor->TotalAirTime;
+                self->unk_6248 = 0.0f;
+                self->unk_6244 = airTime;
             }
             goto have;
         }
         if (D_004A361C == 1) {
-            airTime = self->f6244;
+            airTime = self->unk_6244;
             goto have;
         }
     }
     airTime = 0.0f;
 have:
     int play = 0;
-    self->f60A0 = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
+    self->unk_60A0 = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
     D_004A3620 = D_004A361C;
     D_004A361C = 0;
     if (3.9994986057281494f < airTime) {
-        int duckToLoops = func_002B4878(self->mon);
+        int duckToLoops = func_002B4878(&self->MusicSys);
         if (duckToLoops == 1 && !func_002A4168(self) && !func_002A41D8(self)) {
             if (!func_0028D898(self))
                 play = duckToLoops;
@@ -1251,19 +1191,19 @@ have:
     if (cSSXAudio_ReplayMode(self) == 0) {
         if (2.0f < airTime) {
             D_004A361C = 1;
-            float lo = rider->ap->fA0;
-            if (lo < self->f6248)
-                lo = self->f6248;
-            self->f6248 = lo;
+            float lo = rider->mAirPredictor->CurAirTime;
+            if (lo < self->unk_6248)
+                lo = self->unk_6248;
+            self->unk_6248 = lo;
             float hi;
             if (D_004A3620 == 0) {
-                hi = (rider->ap->f9C - rider->ap->fA0) * 0.5f;
+                hi = (rider->mAirPredictor->ApexTime - rider->mAirPredictor->CurAirTime) * 0.5f;
                 if (hi < 0.5f)
                     hi = 0.5f;
                 hi = hi + lo;
-                self->f624C = hi;
+                self->unk_624C = hi;
             } else {
-                hi = self->f624C;
+                hi = self->unk_624C;
             }
             float vmax = 127.0f;
             float inv = 0.007874015718698502f;
@@ -1277,46 +1217,50 @@ have:
                     float k = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
                     int volumeAboveMin = clampedVolume - 20;
                     float musicLevel = (float)(full - volumeAboveMin) * (k * inv);
-                    self->f60A0 = musicLevel;
-                    func_002B3D10(self->mon, (int)(musicLevel * 100.0f));
+                    self->unk_60A0 = musicLevel;
+                    func_002B3D10(&self->MusicSys, (int)(musicLevel * 100.0f));
                 }
                 rawVolume = vmax - (vmax - vol) * ratio;
                 clampedVolume = (int)((rawVolume <? vmax) >? vol);
-                self->f5830 = (float)(full - clampedVolume) * inv;
+                self->mWindVolume = (float)(full - clampedVolume) * inv;
                 if (play)
-                    func_002B3C98(self->mon, clampedVolume);
+                    func_002B3C98(&self->MusicSys, clampedVolume);
             } else {
-                self->f5830 = (vmax - vol) * inv;
+                self->mWindVolume = (vmax - vol) * inv;
                 if (play) {
-                    func_002B3C98(self->mon, (int)vol);
+                    func_002B3C98(&self->MusicSys, (int)vol);
                     float k = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
-                    self->f60A0 = k;
-                    func_002B3D10(self->mon, (int)(k * 100.0f));
+                    self->unk_60A0 = k;
+                    func_002B3D10(&self->MusicSys, (int)(k * 100.0f));
                 }
             }
-            self->f5830 = self->f5830 * *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
+            self->mWindVolume = self->mWindVolume * *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
             if (D_004A3620 == 0) {
                 cSSXAudio_BeginWind(self);
                 if (play) {
-                    char* mon = self->mon;
-                    if (func_002B4620(mon) && func_0028D960((cSSXAudio*)self))
-                        self->monVt[3].fn(vthis(mon, self->monVt[3]), 7);
+                    char* mon = (char*)&self->MusicSys;
+                    if (func_002B4620(mon) && func_0028D960((cSSXAudio*)self)) {
+                        sBmVtC8C8* musicVt = (sBmVtC8C8*)self->MusicSys.mVtbl;
+                        musicVt[3].fn(vthis(mon, musicVt[3]), 7);
+                    }
                 }
             }
             return;
         }
     }
-    char* mon = self->mon;
+    char* mon = (char*)&self->MusicSys;
     if (D_004A3620 == 1) {
         cSSXAudio_EndWind(self);
         if (func_002B46E8(mon)) {
-            if (func_0028D960((cSSXAudio*)self))
-                self->monVt[3].fn(vthis(mon, self->monVt[3]), 8);
+            if (func_0028D960((cSSXAudio*)self)) {
+                sBmVtC8C8* musicVt = (sBmVtC8C8*)self->MusicSys.mVtbl;
+                musicVt[3].fn(vthis(mon, musicVt[3]), 8);
+            }
             func_002B4708(mon);
         }
     }
     func_002B3C98(mon, 0x7F);
-    func_002B3D10(mon, (int)(self->f60A0 * 100.0f));
+    func_002B3D10(mon, (int)(self->unk_60A0 * 100.0f));
 }
 #endif
 
@@ -1447,10 +1391,10 @@ extern char str_Peak3_b[];
 
 
 
-static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
+static inline void bmLoad_CF98(cSSXAudio* self, char* name, int bank, int id)
 {
-    char* mon = (char*)self + 0x118;
-    sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
+    char* mon = (char*)&self->MusicSys;
+    sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), name, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, bank, 0), 0);
     func_002B49C0(mon, id);
 }
@@ -1611,23 +1555,21 @@ INCLUDE_ASM("sound/bankmanager", func_0028D630);
 #ifdef SKIP_ASM
 extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 
-struct sBmVt630 { short delta; short index; int (*fn)(void*); };
 struct sBmVt630b { short delta; short index; int (*fn)(void*, int); };
 
 /**
  * Starts rider music event @p id for the rider @p obj, which then owns the rider-event slot.
  *
- * Does nothing during a big challenge (mInBigChallenge or mBigChallengeStarting) or when the event in the word at
- * 0x623C is already @p id. With no owner (mMusicEventOwner == -1) only the focus rider (cSSXAudio_GetFocusRider(-1))
- * can start one, and its AI index (virtual slot 7 of the cRider vtable at +0x6C0) becomes mMusicEventOwner; otherwise
- * @p obj must have the owner's AI index. It then sends the previous event + 1 (if one was running) and @p id through
- * MusicSys.mVtbl slot 4, stores
- * @p id at 0x623C and clears the word at 0x6240. Called by func_0028D988.
+ * Does nothing during a big challenge (mInBigChallenge or mBigChallengeStarting) or when the event in unk_623C is
+ * already @p id. With no owner (mMusicEventOwner == -1) only the focus rider (cSSXAudio_GetFocusRider(-1)) can start
+ * one, and its AI index (getAIIndex, cRider virtual slot 7) becomes mMusicEventOwner; otherwise @p obj must have the
+ * owner's AI index. It then sends the previous event + 1 (if one was running) and @p id through MusicSys.mVtbl slot 4,
+ * stores @p id in unk_623C and clears unk_6240. Called by func_0028D988.
  *
  * @param id  the music event
  * @param obj  the rider (cRider*)
  */
-extern "C" void func_0028D630(cSSXAudio* self, int id, void* obj)
+extern "C" void func_0028D630(cSSXAudio* self, int id, cRider* obj)
 {
     int ok;
     if (self->mInBigChallenge != 0) return;
@@ -1637,15 +1579,11 @@ extern "C" void func_0028D630(cSSXAudio* self, int id, void* obj)
     if (self->mMusicEventOwner == -1) {
         // PORT: cSSXAudio_GetFocusRider returns an object pointer as int
         if ((int)obj == cSSXAudio_GetFocusRider(self, -1)) {
-            char* subObj = (char*)obj + 0x6C0;
-            sBmVt630* vtEntry = &(*(sBmVt630**)subObj)[7];
             ok = 1;
-            self->mMusicEventOwner = vtEntry->fn(vthis(subObj, *vtEntry));
+            self->mMusicEventOwner = obj->getAIIndex();
         }
     } else {
-        char* subObj = (char*)obj + 0x6C0;
-        sBmVt630* vtEntry = &(*(sBmVt630**)subObj)[7];
-        ok = vtEntry->fn(vthis(subObj, *vtEntry)) == self->mMusicEventOwner;
+        ok = obj->getAIIndex() == self->mMusicEventOwner;
     }
     if (ok) {
         int n = self->unk_623C;
@@ -1669,19 +1607,17 @@ INCLUDE_ASM("sound/bankmanager", func_0028D740);
 #ifdef SKIP_ASM
 extern "C" void func_0028D7D8(void* self, void* a1);
 
-struct sVtEnt { short delta; short index; int (*fn)(void*); };
-
 /**
  * Ends rider music event @p id for the owning rider @p obj, or records it as the follow-up of the running one.
  *
- * Does nothing when the word at 0x6240 already holds @p id or when @p obj is not the owner (its AI index, cRider
- * virtual slot 7, differs from mMusicEventOwner; no owner counts as not). When the running event (word at 0x623C) is @p
- * id, @p id is stored at 0x6240; otherwise func_0028D7D8 releases the slot. Called by func_0028D988.
+ * Does nothing when unk_6240 already holds @p id or when @p obj is not the owner (its AI index, getAIIndex, differs
+ * from mMusicEventOwner; no owner counts as not). When the running event (unk_623C) is @p id, @p id is stored in
+ * unk_6240; otherwise func_0028D7D8 releases the slot. Called by func_0028D988.
  *
  * @param id  the music event
  * @param obj  the rider (cRider*)
  */
-extern "C" void func_0028D740(cSSXAudio* self, int id, void* obj)
+extern "C" void func_0028D740(cSSXAudio* self, int id, cRider* obj)
 {
     int ok;
     if (self->unk_6240 == id) {
@@ -1689,9 +1625,7 @@ extern "C" void func_0028D740(cSSXAudio* self, int id, void* obj)
     }
     ok = 0;
     if (self->mMusicEventOwner != -1) {
-        char* subObj = (char*)obj + 0x6C0;
-        sVtEnt* vtEntry = &(*(sVtEnt**)subObj)[7];
-        ok = vtEntry->fn(vthis(subObj, *vtEntry)) == self->mMusicEventOwner;
+        ok = obj->getAIIndex() == self->mMusicEventOwner;
     }
     if (ok) {
         if (self->unk_623C == id) {
@@ -1713,43 +1647,41 @@ struct sBmVtD7D8 {
 };
 
 // PORT: the unit declares func_0028D7D8 as returning void; it really returns 0/1.
-int func_0028D7D8_impl(void* self, void* obj) __asm__("func_0028D7D8");
+int func_0028D7D8_impl(cSSXAudio* self, cRider* obj) __asm__("func_0028D7D8");
 
 /**
  * Releases the rider-event slot that func_0028D630 gave to a rider and ends its music event.
  *
- * With @p obj null, or when @p obj's AI index (cRider virtual slot 7) equals the owner mMusicEventOwner, it sets
- * mMusicEventOwner to -1; then, if an event is running (word at 0x623C), it sends that event + 1 through MusicSys.mVtbl
- * slot 4 and clears the words at 0x623C and 0x6240. The unit declares it void although it returns the flag.
+ * With @p obj null, or when @p obj's AI index (getAIIndex) equals the owner mMusicEventOwner, it sets
+ * mMusicEventOwner to -1; then, if an event is running (unk_623C), it sends that event + 1 through MusicSys.mVtbl
+ * slot 4 and clears unk_623C and unk_6240. The unit declares it void although it returns the flag.
  *
  * @param obj  the rider (cRider*), or null to release unconditionally
  * @return 1 when the slot was released, else 0
  */
-int func_0028D7D8_impl(void* self, void* obj)
+int func_0028D7D8_impl(cSSXAudio* self, cRider* obj)
 {
     int ok = 0;
     if (obj == 0) {
         ok = 1;
-        *(int*)((char*)self + 0x62A0) = -1;
+        self->mMusicEventOwner = -1;
     } else {
         int none = -1;
-        if (*(int*)((char*)self + 0x62A0) != none) {
-            char* subObj = (char*)obj + 0x6C0;
-            sVtEnt* vtEntry = &(*(sVtEnt**)subObj)[7];
-            if (vtEntry->fn(vthis(subObj, *vtEntry)) == *(int*)((char*)self + 0x62A0)) {
-                *(int*)((char*)self + 0x62A0) = none;
+        if (self->mMusicEventOwner != none) {
+            if (obj->getAIIndex() == self->mMusicEventOwner) {
+                self->mMusicEventOwner = none;
                 ok = 1;
             }
         }
     }
     if (ok) {
-        int n = *(int*)((char*)self + 0x623C);
+        int n = self->unk_623C;
         if (n != 0) {
-            char* mon = (char*)self + 0x118;
-            sBmVtD7D8* vt = *(sBmVtD7D8**)((char*)self + 0x5558);
+            char* mon = (char*)&self->MusicSys;
+            sBmVtD7D8* vt = (sBmVtD7D8*)self->MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), n + 1);
-            *(int*)((char*)self + 0x623C) = 0;
-            *(int*)((char*)self + 0x6240) = 0;
+            self->unk_623C = 0;
+            self->unk_6240 = 0;
         }
     }
     return ok;
@@ -1918,13 +1850,15 @@ extern "C" int func_0028DF18(cSSXAudio* self, int quiet)
         ok = 1;
         ((tBmSetDF18)vt[4].fn)(vthis(mon, vt[4]), 18);
         func_0028D488(self);
-        cMonitor_MONITOR_Create_DF18(**(char***)&self->MusicSys + 0x1D8, 2000, D_004A3648_DF18->v, 0, 1, 1, 0, 0);
-        char* bankMonitor = **(char***)&self->MusicSys + 0x1D8;
+        cMonitor_MONITOR_Create_DF18(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                     2000, D_004A3648_DF18->v, 0, 1, 1, 0, 0);
+        cBankMonitor* bankMonitor = &self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
         const sSndKey8_DF18* key = D_004A3650_DF18;
         int sedValue = func_002B4908(mon);
         cMonitor_MONITOR_Create_DF18(bankMonitor, 1500, key->v, 0, 3, sedValue, 0, 0);
     } else if (quiet == 0) {
-        cMonitor_MONITOR_Create_DF18(**(char***)&self->MusicSys + 0x1D8, 100, D_004A3658_DF18->v, 0, 0, 0, 0, 0);
+        cMonitor_MONITOR_Create_DF18(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                     100, D_004A3658_DF18->v, 0, 0, 0, 0, 0);
     }
     return ok;
 }
@@ -1951,27 +1885,27 @@ extern "C" int func_002B2550(int);
 /**
  * Timed callback that asks func_0028E100 to act once the old song has stopped.
  *
- * When there is no current song (MusicSys.mCurrent) or func_002B2550 of it returns -1, or when @p event's mData2
- * (+0x20) is 1, it sets mMusicRequestPending to 1 and mMusicRequest to @p event's mData1 (+0x1C) and returns 1;
- * otherwise it returns 0. func_0028DF18 schedules it with data 1, 1.
+ * When there is no current song (MusicSys.mSongInstance) or func_002B2550 of it returns -1, or when @p event's mData2
+ * is 1, it sets mMusicRequestPending to 1 and mMusicRequest to @p event's mData1 and returns 1; otherwise it returns 0.
+ * func_0028DF18 schedules it with data 1, 1.
  *
  * @param event  the cMonitorInstance that fired
  * @return 1 when the request was posted, else 0
  */
-extern "C" int func_0028E088(cSSXAudio* self, char *event) {
+extern "C" int func_0028E088(cSSXAudio* self, cMonitorInstance* event) {
     int obj;
     int eventValue;
 
     obj = (int)self->MusicSys.mSongInstance;
     if (obj == 0 || func_002B2550(obj) == -1) {
         self->mMusicRequestPending = 1;
-        self->mMusicRequest = *(int *)(event + 0x1C);
+        self->mMusicRequest = event->mData1;
         return 1;
     }
-    eventValue = *(int *)(event + 0x20);
+    eventValue = event->mData2;
     if (eventValue == 1) {
         self->mMusicRequestPending = eventValue;
-        self->mMusicRequest = *(int *)(event + 0x1C);
+        self->mMusicRequest = event->mData1;
         return 1;
     }
     return 0;
@@ -2006,15 +1940,15 @@ struct sBmVtE100 {
 typedef void (*tBmLoadE100)(void*, void*, int, void*, int);
 typedef int (*tBmSetE100)(void*, int);
 
-static inline void bmLoad_E100(char* self, char* bank, int n)
+static inline void bmLoad_E100(cSSXAudio* self, char* bank, int n)
 {
-    char* mon = self + 0x118;
-    sBmVtE100* vt = *(sBmVtE100**)(self + 0x5558);
+    char* mon = (char*)&self->MusicSys;
+    sBmVtE100* vt = (sBmVtE100*)self->MusicSys.mVtbl;
     ((tBmLoadE100)vt[2].fn)(vthis(mon, vt[2]), bank, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
     func_002B49C0(mon, n);
 }
 
-static inline void bmLoadBank_E100(char* self, int t)
+static inline void bmLoadBank_E100(cSSXAudio* self, int t)
 {
     if (t == 1) {
         bmLoad_E100(self, str_Peak1_b, 1);
@@ -2023,8 +1957,8 @@ static inline void bmLoadBank_E100(char* self, int t)
     } else {
         bmLoad_E100(self, str_Peak3_b, 3);
     }
-    char* mon = self + 0x118;
-    sBmVtE100* vt2 = *(sBmVtE100**)(self + 0x5558);
+    char* mon = (char*)&self->MusicSys;
+    sBmVtE100* vt2 = (sBmVtE100*)self->MusicSys.mVtbl;
     ((tBmSetE100)vt2[4].fn)(vthis(mon, vt2[4]), 0xC);
     func_002B3C28(mon, 0x7F);
 }
@@ -2057,7 +1991,7 @@ extern "C" void func_0028E100(cSSXAudio* self)
                 locGroup = func_002A1E20(self, id);
                 self->mTransportTrack = 23;
             }
-            bmLoadBank_E100(((char*)self), locGroup);
+            bmLoadBank_E100(self, locGroup);
         }
     } else if (st == 2) {
         if (func_0028D960(self)) {
@@ -2068,7 +2002,7 @@ extern "C" void func_0028E100(cSSXAudio* self)
                     func_0028CF98(self, 36, 1, -1, 0);
                 } else {
                     id = self->mTransportTrack;
-                    bmLoadBank_E100(((char*)self), func_002A1E20(self, id));
+                    bmLoadBank_E100(self, func_002A1E20(self, id));
                 }
                 self->mTransportTrack = 23;
             }
@@ -2100,11 +2034,11 @@ struct sBmVtE510 { short delta; short index; int (*fn)(void*, int); };
  * @param ev  the cMonitorInstance (mData1 = the music state)
  * @return 1
  */
-extern "C" int func_0028E510(cSSXAudio* self, char* ev)
+extern "C" int func_0028E510(cSSXAudio* self, cMonitorInstance* ev)
 {
     char* mon = (char*)&self->MusicSys;
     sBmVtE510* vt = (sBmVtE510*)self->MusicSys.mVtbl;
-    vt[4].fn(vthis(mon, vt[4]), *(int*)(ev + 0x1C));
+    vt[4].fn(vthis(mon, vt[4]), ev->mData1);
     return 1;
 }
 #endif
@@ -2308,12 +2242,12 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                 int mode = cBENewRaceInterface_newRace.cGameMode;
                 if (mode != 5 && mode != 6) {
                     if (vself->unk_6258 == 0) {
-                        char* monitor = **(char***)&vself->MusicSys + 0x1D8;
+                        cBankMonitor* monitor = &vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
                         const sSndKey8_E8C0* key = D_004A3650_E8C0;
                         int sedValue = func_002B4908(&vself->MusicSys);
                         cMonitor_MONITOR_Create(monitor, 0, key->v, 0, 4, sedValue, 0, 0);
                     } else {
-                        char* monitor = **(char***)&vself->MusicSys + 0x1D8;
+                        cBankMonitor* monitor = &vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
                         const sSndKey8_E8C0* key = D_004A3650_E8C0;
                         int sedValue = func_002B4908(&vself->MusicSys);
                         cMonitor_MONITOR_Create(monitor, 0, key->v, 0, 5, sedValue, 0, 0);
@@ -2333,14 +2267,18 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                 }
                 if (locationGroup == wantType) {
                     if (func_0028DEF0((cSSXAudio*)vself, 11)) {
-                        cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 3000, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
-                        cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 2500, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
+                        cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                                3000, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
+                        cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                                2500, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
                     }
                 } else {
                     func_0028DF08(((char*)vself));
                     func_0028D488(vself);
-                    cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 2000, D_004A3648_E8C0->v, 0, 1, 1, 0, 0);
-                    cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 1500, D_004A3650_E8C0->v, 0, 7, 0, 0, 0);
+                    cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                            2000, D_004A3648_E8C0->v, 0, 1, 1, 0, 0);
+                    cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                            1500, D_004A3650_E8C0->v, 0, 7, 0, 0, 0);
                 }
             }
         } else {
@@ -2362,9 +2300,11 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
             vself->unk_578C = 0;
             func_002A4550(((char*)vself));
             long key = D_004A3648_E8C0->v;
-            cMonitor_MONITOR_DestroyAll1(**(char***)&vself->MusicSys + 0x1D8, key);
-            cMonitor_MONITOR_DestroyAll1(**(char***)&vself->MusicSys + 0x1D8, D_004A3650_E8C0->v);
-            cMonitor_MONITOR_DestroyAll1(**(char***)&vself->MusicSys + 0x1D8, D_004A3658_E8C0->v);
+            cMonitor_MONITOR_DestroyAll1(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, key);
+            cMonitor_MONITOR_DestroyAll1(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                         D_004A3650_E8C0->v);
+            cMonitor_MONITOR_DestroyAll1(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                         D_004A3658_E8C0->v);
             cSSXAudio_StopTone(((char*)vself), 5.029983997344971f);
             cSSXAudio_WipeoutSlideEnd(((char*)vself), (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
             cSSXAudio_WipeoutTumbleEnd(((char*)vself), (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
@@ -2376,7 +2316,8 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                         if (*(int*)SSXApp->GameModeMan >= 2) {
                             func_0028D488(vself);
                             flag = 0;
-                            cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 10, key, 0, 3, 1, 0, 0);
+                            cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                                    10, key, 0, 3, 1, 0, 0);
                         }
                     }
                 }
@@ -2384,7 +2325,8 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                     || vself->unk_579C[vself->mTransportTrack] != 1) {
                     if (flag && vself->mTransportTrack != 23) {
                         func_0028D488(vself);
-                        cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 10, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
+                        cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                                10, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
                     }
                     if (func_002A4718(((char*)vself)) && func_002A4A38(((char*)vself)) == 0) {
                         func_002A26F0(((char*)vself), 0, 1);
@@ -2421,7 +2363,8 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
         if (func_0028D960((cSSXAudio*)vself)) {
             func_0028D488(vself);
             func_002B3D48(&vself->MusicSys, 1.0f);
-            cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 3000, D_004A3648_E8C0->v, 0, 3, 1, 0, 0);
+            cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                    3000, D_004A3648_E8C0->v, 0, 3, 1, 0, 0);
         }
     } else {
         char* mon = (char*)&vself->MusicSys;
@@ -2455,7 +2398,8 @@ extern "C" void func_0028EF90(cSSXAudio* self)
     func_0028DF08(self);
     self->unk_578C = 0;
     func_0028D488(self);
-    cMonitor_MONITOR_Create(**(char***)&self->MusicSys + 0x1D8, 10, D_004A3648_EF90->v, 0, 2, 1, 0, 0);
+    cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                            10, D_004A3648_EF90->v, 0, 2, 1, 0, 0);
 }
 #endif
 
@@ -2588,7 +2532,8 @@ extern "C" void func_0028F200(cSSXAudio* self)
             if (func_002B49E0(mon) == 201) {
                 self->MusicSys.mCurrentSongNum = self->mSavedSongNum;
             }
-            cMonitor_MONITOR_Create(**(char***)&self->MusicSys + 0x1D8, 10, D_004A3648[0].v, 0, 3, 1, 0, 0);
+            cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                    10, D_004A3648[0].v, 0, 3, 1, 0, 0);
         }
         self->unk_6294 = 1;
     } else {
@@ -2744,11 +2689,11 @@ extern "C" void func_0028F478(cSSXAudio* self)
 {
     func_002B35A0(&self->MusicSys);
     if (cSSXAudio_GetCurrAppliedVolume(self, 1, 0) > 0.0f) {
-        char* game = (char*)SSXApp->Game;
+        cGame* game = SSXApp->Game;
         if (game != 0) {
-            char* owner = *(char**)(game + 0x48);
-            if (owner != 0) {
-                void* list = owner + 0x18;
+            cUIEngine* ui = game->UI;
+            if (ui != 0) {
+                cUIStateStack* list = &ui->mStateStack;
                 if (list != 0) {
                     cUiObj_F478* obj = cUIStateStack_findState(list, GetHashValue32(str_hud_f));
                     if (obj != 0) {
@@ -2896,7 +2841,7 @@ extern void* D_004A3624;
  */
 extern "C" void func_0028F700(cSSXAudio* self)
 {
-    cBankManager_BANK_SyncLoad((cBankManager*)(**(void***)&self->MusicSys), 13, D_004A3624, 0);
+    cBankManager_BANK_SyncLoad(self->MusicSys.mpVStreamSys->mpVBankManager, 13, D_004A3624, 0);
 }
 #endif
 
@@ -2914,7 +2859,7 @@ extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i);
 extern "C" void func_0028F730(cSSXAudio* self)
 {
     func_0028FA98(self, 0.0f);
-    cBankManager_BANK_UnLoad((cBankManager*)(**(void***)&self->MusicSys), 0);
+    cBankManager_BANK_UnLoad(self->MusicSys.mpVStreamSys->mpVBankManager, 0);
 }
 #endif
 
@@ -2925,68 +2870,34 @@ extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 
-struct sEntry_F768 {
-    signed char kind;
-    char pad[0x17];
-};
-struct sQuad_F768 {
-    int a;
-    int b;
-    int c;
-    int d;
-};
-struct sStack_F768 {
-    int field_0x0;                  // 0x1D8
-    sEntry_F768 cur;                // 0x1DC
-    volatile int depth;             // 0x1F4
-    sEntry_F768* entries;           // 0x1F8
-    int flags[4];                   // 0x1FC
-    int* a34;
-    int* a38;
-    int* a3C;
-    char a40[4][8];
-    int* a60;
-    int* a64;
-    int* a68;
-    int* a6C;
-    sQuad_F768* a70;
-    int* a74;
-    int* a78;
-    int* a7C;
-    int* a80;
-    int* a84;
-};
-struct sMgr_F768 {
-    char pad_0x0[0x1D8];
-    sStack_F768 st;                 // 0x1D8
-};
-
-static inline void bmPush_F768(sMgr_F768** self, int kind)
+// The inlined SFX_Begin(kind, 0): push a play-option level on the shared cBankManager's cBankMonitor and record its
+// bank / patch.
+static inline void bmPush_F768(cSSXAudio* audio, int kind)
 {
-    sMgr_F768* m = *self;
-    sStack_F768* st = &m->st;
-    m->st.depth++;
-    st->entries[m->st.depth] = m->st.cur;
-    m->st.flags[m->st.depth] = 0;
-    st->a34[m->st.depth] = 0;
-    st->a38[m->st.depth] = st->entries[m->st.depth].kind;
-    st->a3C[m->st.depth] = 0;
-    memset((char*)st + m->st.depth * 8 + 0x40, 0, 8);
-    st->a60[m->st.depth] = 0;
-    st->a64[m->st.depth] = 0;
-    st->a68[m->st.depth] = 0;
-    st->a6C[m->st.depth] = 0;
-    st->a70[m->st.depth].b = 0;
-    st->a70[m->st.depth].a = 100;
-    st->a70[m->st.depth].c = 90;
-    st->a70[m->st.depth].d = 50;
-    st->a74[m->st.depth] = 0;
-    st->a80[m->st.depth] = 0;
-    st->a84[m->st.depth] = 0;
-    st->a78[m->st.depth] = 127;
-    st->a7C[m->st.depth] = 1;
-    (*(int**)((char*)self + 4))[(*self)->st.depth] = kind;
-    (*(int**)((char*)self + 8))[(*self)->st.depth] = 0;
+    cBankManager* m = audio->mpVBankManager;
+    cBankMonitor* st = &m->BankMonitor;
+    m->BankMonitor.mInst++;
+    st->mCurrent[m->BankMonitor.mInst] = m->BankMonitor.mDefault;
+    m->BankMonitor.mPosition[m->BankMonitor.mInst] = 0;
+    st->mPosStatic[m->BankMonitor.mInst] = 0;
+    st->mBaseVol[m->BankMonitor.mInst] = st->mCurrent[m->BankMonitor.mInst].vol;
+    st->mVolControl[m->BankMonitor.mInst] = 0;
+    memset((char*)st + m->BankMonitor.mInst * 8 + 0x40, 0, 8);
+    st->mPtr[m->BankMonitor.mInst] = 0;
+    st->mViewport[m->BankMonitor.mInst] = 0;
+    st->mVanish[m->BankMonitor.mInst] = 0;
+    st->mRadius[m->BankMonitor.mInst] = 0;
+    st->mDelay[m->BankMonitor.mInst].mCount = 0;
+    st->mDelay[m->BankMonitor.mInst].mTime = 100;
+    st->mDelay[m->BankMonitor.mInst].mFeedback = 90;
+    st->mDelay[m->BankMonitor.mInst].mLevel = 50;
+    st->mExternalVol[m->BankMonitor.mInst] = 0;
+    st->mTwoPlayerPan[m->BankMonitor.mInst] = 0;
+    st->mTwoPlayerSide[m->BankMonitor.mInst] = 0;
+    st->mMapToMaxVol[m->BankMonitor.mInst] = 127;
+    st->mCloseOnEnd[m->BankMonitor.mInst] = 1;
+    audio->mBank[audio->mpVBankManager->BankMonitor.mInst] = kind;
+    audio->mPatch[audio->mpVBankManager->BankMonitor.mInst] = 0;
 }
 
 #define BM_MIN_F768(a, b) ((a) < (b) ? (a) : (b))
@@ -3003,15 +2914,15 @@ static inline void bmPush_F768(sMgr_F768** self, int kind)
  */
 extern "C" void func_0028F768(cSSXAudio* ssxAudio)
 {
-    sMgr_F768** self = (sMgr_F768**)ssxAudio;
-    bmPush_F768(self, 13);
-    sMgr_F768* bankManager = **(sMgr_F768***)((char*)self + 0x118);
-    sStack_F768* st2 = &bankManager->st;
-    st2->a38[bankManager->st.depth] = 127;
-    st2->entries[bankManager->st.depth].kind = BM_MAX_F768(BM_MIN_F768(st2->a38[st2->depth], 127), 0);
-    sMgr_F768** pp = *(sMgr_F768***)((char*)self + 0x118);
-    (*pp)->st.a3C[(*pp)->st.depth] = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
-    *(int*)((char*)self + 0x62A8) = cBankSys_SFX_End(self);
+    bmPush_F768(ssxAudio, 13);
+    cBankManager* bankManager = ssxAudio->MusicSys.mpVStreamSys->mpVBankManager;
+    cBankMonitor* st2 = &bankManager->BankMonitor;
+    st2->mBaseVol[bankManager->BankMonitor.mInst] = 127;
+    st2->mCurrent[bankManager->BankMonitor.mInst].vol = BM_MAX_F768(BM_MIN_F768(st2->mBaseVol[st2->mInst], 127), 0);
+    cStreamSys* streamSys = ssxAudio->MusicSys.mpVStreamSys;
+    streamSys->mpVBankManager->BankMonitor.mVolControl[streamSys->mpVBankManager->BankMonitor.mInst] =
+        (float*)cSSXAudio_GetCurrAppliedVolumePtr(ssxAudio, 1, 0);
+    ssxAudio->unk_62A8 = cBankSys_SFX_End(ssxAudio);
 }
 #endif
 
@@ -3071,9 +2982,9 @@ extern "C" void func_0028FAE0(cSSXAudio* self)
     if (func_0028D960((cSSXAudio*)self) == 0) {
         return;
     }
-    cMonitor_MONITOR_DestroyAll1(**(char***)&self->MusicSys + 0x1D8, D_004A3648_FAE0[0].v);
-    cMonitor_MONITOR_DestroyAll1(**(char***)&self->MusicSys + 0x1D8, D_004A3650_FAE0[0].v);
-    cMonitor_MONITOR_DestroyAll1(**(char***)&self->MusicSys + 0x1D8, D_004A3658_FAE0[0].v);
+    cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3648_FAE0[0].v);
+    cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3650_FAE0[0].v);
+    cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3658_FAE0[0].v);
     int st = func_002B49E0(&self->MusicSys);
     if ((unsigned int)(st - 1) < 3 || st == 401 || self->MusicSys.mSongPlaying == 0) {
         func_0028DEF0((cSSXAudio*)self, 18);
@@ -3081,7 +2992,7 @@ extern "C" void func_0028FAE0(cSSXAudio* self)
         func_002B3AC0(&self->MusicSys);
         func_0028D488(self);
         func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
-        char* bankMonitor = **(char***)&self->MusicSys + 0x1D8;
+        cBankMonitor* bankMonitor = &self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
         const sBmKeyFAE0* key = D_004A3650_FAE0;
         int sedValue = func_002B4908(&self->MusicSys);
         cMonitor_MONITOR_Create_FAE0(bankMonitor, 3000, key->v, 0, 4, sedValue, 0, 0);
