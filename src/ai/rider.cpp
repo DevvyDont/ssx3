@@ -1325,7 +1325,7 @@ extern "C" void cRider_putAtStartpoint(cRider* self, int StartpointID, int Start
 //100%
 INCLUDE_ASM("ai/rider", cRider_cleanupAfterPutAt);
 #ifdef SKIP_ASM
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void cWScriptMan_eventReset(void* self);
 extern void* cWScriptMan_TheWScriptMan;
@@ -1361,7 +1361,7 @@ static inline t4Vector vu0Scale_11DF18(const t4Vector& v, float s)
 extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
 {
     t4Vector forwardAxis = *(&self->mMatrix.row[1]);
-    *(int*)(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0x90) = 0;
+    cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2)->TimeScale = 0;
     t4Vector launchVelocity = vu0Scale_11DF18(forwardAxis, 833.3333740234375f);
     *(&self->mVelocity) = launchVelocity;
     self->mVelocity.z = 0.0f;
@@ -2900,13 +2900,13 @@ extern "C" void func_00120378(cRider* vself)
     float speed = Length_120378(v);
     float rate = Clamp_120378(speed / 1666.666748046875f, 0.5f, 2.0f);
     if (cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 3)) {
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 3) + 0x90) = rate;
+        cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 3)->TimeScale = rate;
     }
     if (cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 4)) {
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 4) + 0x90) = rate;
+        cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 4)->TimeScale = rate;
     }
     if (cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 5)) {
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 5) + 0x90) = rate;
+        cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 5)->TimeScale = rate;
     }
     if (AITick() % 6 == self->mAIIndex) {
         int still = speed <= 138.88888549804688f;
@@ -4636,8 +4636,8 @@ extern "C" int cRider_getMissionInt(cRider* self, int query)
     case 18:
         res = 0;
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13) {
-            if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0)) {
-                res = !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1);
+            if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 0)) {
+                res = !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1);
             }
         }
         return res;
@@ -5870,7 +5870,7 @@ extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" float cRider_getStartGateKneeOffset(cRider* self);
 extern "C" float cRider_getStartGateHorizOffset(void* self);
 extern "C" void cRiderAnimBase_playFromAnimID(void* anim, int id, tAnimID animId, float t);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" void cAnimSequence_setSubAnimTime(void* p, int a1, float t);
 extern "C" void cRiderAnimBase_setupAnimation(void* anim, int a1);
 extern "C" void cRider_EulerToQuat(cRider* self, tQuaternion* out, float rx, float ry, float rz);
@@ -6174,7 +6174,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
         self->mVelocity.y = self->mVelocity.y / frameDelta;
         self->mVelocity.z = self->mVelocity.z / frameDelta;
     }
-    char* ch = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0;
+    tEventFlags* ch = &cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2)->Events;
     int on = 0;
     if (tEventFlags_isSet1(ch, 0) != 0) {
         on = tEventFlags_isJustChanged(ch, 0) != 0;

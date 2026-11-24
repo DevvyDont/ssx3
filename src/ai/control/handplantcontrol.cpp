@@ -1068,7 +1068,7 @@ extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern "C" void cRider_flagEventWipeout_9C88(void* rider, int anim, int a2, int a3, sInfo_139C88* info) __asm__("cRider_flagEventWipeout");
 extern "C" void cRider_flagEventLand(void* rider, int a1, int a2, int a3, tIntersectInfo* hit, float spd);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* ra, int layer);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* ra, int layer);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void* ra, int layer);
 extern "C" bool tEventFlags_isSet1(tEventFlags* self, int bit);
 extern "C" int tEventFlags_isSet1_i(void* self, int bit) __asm__("tEventFlags_isSet1");
 extern "C" float cBEStatInterface_getLandingAttrib(void* be, int idx, int stat);
@@ -1326,16 +1326,16 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         self->mRider->mGroundContactPoint = (*(t4Vector*)&hit.Ipos);
         self->mRider->SnowOffset = vu0Dot_139C88(vu0Sub_139C88(self->mRider->mPosition, (*(t4Vector*)&hit.Ipos)), self->mRider->mGroundNormal);
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 20) {
-            if (!tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0), 2)) anim = 361;
+            if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 2)) anim = 361;
         } else if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 21) {
-            if (!tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0), 3)) anim = 361;
+            if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 3)) anim = 361;
         } else {
             int flip = 0;
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
-                flip = tEventFlags_isSet1_i(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 2) == 0;
+                flip = tEventFlags_isSet1_i(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 2) == 0;
             } else if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 18 &&
-                       !tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0), 2)) {
-                flip = tEventFlags_isSet1_i(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0) != 0;
+                       !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 2)) {
+                flip = tEventFlags_isSet1_i(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0) != 0;
             }
             cRider* r4 = self->mRider;
             if (vu0Dot_139C88(row_139C88(((char*)r4), 2), r4->mGroundNormal) < 0.0f) {

@@ -5898,7 +5898,7 @@ static inline float Len_7888(const t4Vector& v)
         : "m"(v));
     return r;
 }
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int AITick();
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -5990,8 +5990,8 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
     int busy = 0;
     float mass = cRider_getMass(self);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 13 ||
-        tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) ||
-        !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0))
+        tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) ||
+        !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 0))
         busy = 1;
     for (int i = 0; i < 6; i++) {
         if (!Rec_7888(self, i)->active)
@@ -6031,8 +6031,8 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
         if (orec->lastShove >= AITick() - 3)
             continue;
         if (cRiderAnimBase_getCurrentAnimCategory(other->mRiderAnim, 1) == 3 &&
-            tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1) + 0xB0, 0) &&
-            !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1) + 0xB0, 1))
+            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1)->Events, 0) &&
+            !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1)->Events, 1))
             continue;
         t4Vector toOther = Sub_7888(other->mPosition, self->mPosition);
         float len = Len_7888(toOther);
@@ -6723,7 +6723,7 @@ static inline float vDot_8A48(const t4Vector& a, const t4Vector& b)
 int cRider_getMotionState(void*);
 extern "C" int cOverlapList_splineIntersect(void*, t4Vector*, t4Vector*, int, float);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int tEventFlags_isSet1(void*, int);
 extern "C" int cRider_isRailBoardIntersect(void*, t4Vector*, t4Vector*);
 
@@ -6754,12 +6754,12 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, t4Vector* tgt)
             return 0;
     }
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 18) {
-        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 2) &&
-            tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 0))
+        if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2)->Events, 2) &&
+            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2)->Events, 0))
             return 0;
     } else if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 19 ||
                cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 20) {
-        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 2))
+        if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2)->Events, 2))
             return 0;
     }
     return cRider_isRailBoardIntersect(((char*)self), tgt, tgt + 1);

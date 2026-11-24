@@ -18,18 +18,6 @@ struct sSsPlayer_99D8 {
     int* vols;                  // 0x38
     float** scales;             // 0x3C
 };
-struct sStreamInst_99D8 {
-    char* mem;          // 0x0
-    int f4;             // 0x4
-    int handle;         // 0x8
-    char vol;           // 0xC
-    float* scale;       // 0x10
-    char pad14[0x74 - 0x14];
-    int f74;            // 0x74
-    int f78;            // 0x78
-    int heap;           // 0x7C
-    int f80;            // 0x80
-};
 extern "C" int SNDSTRM_create(void* desc, int n, int m, void* mem, int size);
 extern "C" int SNDSTRM_overhead(int n, int m);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -52,23 +40,23 @@ static inline int curVol_99D8(sSsPlayer_99D8* p) { return p->vols[p->cur]; }
  * @param extra  extra buffer space in bytes (On Tour BuffSpace)
  * @return @p self
  */
-extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* self, sSsPlayer_99D8* p, int heap, int extra)
+extern "C" cStreamInstance* cStreamInstance_cStreamInstance(cStreamInstance* self, sSsPlayer_99D8* p, int heap, int extra)
 {
-    self->f74 = 0;
-    self->handle = -1;
-    self->f78 = 0;
-    self->heap = heap;
-    self->f80 = 0;
-    self->scale = p->scales[p->cur];
-    self->vol = curVol_99D8(p);
-    if (self->scale) {
-        p->vols[p->cur] = (int)MAX_99D8(MIN_99D8((float)p->vols[p->cur] * *self->scale, 127.0f), 0.0f);
+    self->mBigHeader = 0;
+    self->mHandle = -1;
+    self->mBigHandle = 0;
+    self->mMemAllocType = heap;
+    self->mQueuedTimeout = 0;
+    self->mVolControl = p->scales[p->cur];
+    self->mBaseVol = curVol_99D8(p);
+    if (self->mVolControl) {
+        p->vols[p->cur] = (int)MAX_99D8(MIN_99D8((float)p->vols[p->cur] * *self->mVolControl, 127.0f), 0.0f);
         p->ents[p->cur].vol = MAX_99D8(MIN_99D8(p->vols[p->cur], 127), 0);
     }
     int n = SNDSTRM_overhead(8, 300) + extra;
-    self->mem = new (str_Stream, heap, 0) char[n];
-    self->f4 = 0;
-    self->handle = SNDSTRM_create(&p->ents[p->cur], 8, 300, self->mem, n);
+    self->mBuffer = new (str_Stream, heap, 0) char[n];
+    self->mExternalBuffer = 0;
+    self->mHandle = SNDSTRM_create(&p->ents[p->cur], 8, 300, self->mBuffer, n);
     return self;
 }
 #endif
@@ -90,17 +78,17 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance1);
  * @param maxChunks  the maximum number of chunks
  * @return this
  */
-extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance1(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int maxChunks)
+extern "C" cStreamInstance* cStreamInstance_cStreamInstance1(cStreamInstance* self, sSsPlayer_99D8* p, char* mem, int size, int n, int maxChunks)
 {
-    self->scale = p->scales[p->cur];
-    self->vol = curVol_99D8(p);
-    if (self->scale) {
-        p->vols[p->cur] = (int)MAX_99D8(MIN_99D8((float)p->vols[p->cur] * *self->scale, 127.0f), 0.0f);
+    self->mVolControl = p->scales[p->cur];
+    self->mBaseVol = curVol_99D8(p);
+    if (self->mVolControl) {
+        p->vols[p->cur] = (int)MAX_99D8(MIN_99D8((float)p->vols[p->cur] * *self->mVolControl, 127.0f), 0.0f);
         p->ents[p->cur].vol = MAX_99D8(MIN_99D8(p->vols[p->cur], 127), 0);
     }
-    self->mem = mem;
-    self->f4 = 1;
-    self->handle = SNDSTRM_create(&p->ents[p->cur], n, maxChunks, mem, size);
+    self->mBuffer = mem;
+    self->mExternalBuffer = 1;
+    self->mHandle = SNDSTRM_create(&p->ents[p->cur], n, maxChunks, mem, size);
     return self;
 }
 #endif
@@ -813,9 +801,9 @@ extern "C" void cStreamSys__cStreamSys(cStreamSys* streamSysObj, int flags)
         bankMgrVtbl.e[1].delta = D_004839B8_A648.e[1].delta + bankMgrDelta;
     }
     for (int i = 0; i < streamSysObj->mNumStreams; i++) {
-        void* streamInst = streamSysObj->mStreamInstance[i];
+        cStreamInstance* streamInst = streamSysObj->mStreamInstance[i];
         if (streamInst != 0) {
-            cStreamInstance__cStreamInstance((cStreamInstance*)streamInst, 3);
+            cStreamInstance__cStreamInstance(streamInst, 3);
         }
     }
     if (streamSysObj->mStreamInstance != 0) {
@@ -847,9 +835,9 @@ extern char str_StreamBuffer[];
  */
 extern "C" void cStreamSys_STREAM_CreateInstance(cStreamSys* self, int idx, int heap, int extra)
 {
-    sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + (int)self->mStreamInstance);
+    cStreamInstance** slot = (cStreamInstance**)((idx << 2) + (int)self->mStreamInstance);
     void* mem = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
-    *slot = cStreamInstance_cStreamInstance((sStreamInst_99D8*)mem, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), heap, extra);
+    *slot = cStreamInstance_cStreamInstance((cStreamInstance*)mem, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), heap, extra);
 }
 #endif
 
@@ -858,7 +846,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_CreateInstance1);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_StreamBuffer[];
-extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance1(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int m);
+extern "C" cStreamInstance* cStreamInstance_cStreamInstance1(cStreamInstance* self, sSsPlayer_99D8* p, char* mem, int size, int n, int m);
 
 /**
  * Creates stream instance @p idx in caller-supplied memory: allocates the 132-byte object ("StreamBuffer") and runs
@@ -873,9 +861,9 @@ extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance1(sStreamInst_99D8* 
  */
 extern "C" void cStreamSys_STREAM_CreateInstance1(cStreamSys* self, int idx, int heap, char* mem, int size, int n, int maxChunks)
 {
-    sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + (int)self->mStreamInstance);
+    cStreamInstance** slot = (cStreamInstance**)((idx << 2) + (int)self->mStreamInstance);
     void* obj = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
-    *slot = cStreamInstance_cStreamInstance1((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, maxChunks);
+    *slot = cStreamInstance_cStreamInstance1((cStreamInstance*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, maxChunks);
 }
 #endif
 
@@ -973,9 +961,9 @@ extern "C" void cStreamInstance_SetBigFile(cStreamInstance*, int);
  */
 extern "C" void cStreamSys_STREAM_SetBigFile(cStreamSys* self, int i, int val)
 {
-    void* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = self->mStreamInstance[i];
     if (stream != 0) {
-        cStreamInstance_SetBigFile((cStreamInstance*)stream, val);
+        cStreamInstance_SetBigFile(stream, val);
     }
 }
 #endif
@@ -992,9 +980,9 @@ extern "C" void cStreamInstance__cStreamInstance(cStreamInstance* e, int a1);
  */
 extern "C" void cStreamSys_STREAM_Destroy(cStreamSys* self, int i)
 {
-    void* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = self->mStreamInstance[i];
     if (stream != 0) {
-        cStreamInstance__cStreamInstance((cStreamInstance*)stream, 3);
+        cStreamInstance__cStreamInstance(stream, 3);
     }
     self->mStreamInstance[i] = 0;
 }
@@ -1011,9 +999,9 @@ extern "C" void cStreamInstance_Update(cStreamInstance* e);
 extern "C" void cStreamSys_STREAM_Update(cStreamSys* self)
 {
     for (int i = 0; i < self->mNumStreams; i++) {
-        void* stream = self->mStreamInstance[i];
+        cStreamInstance* stream = self->mStreamInstance[i];
         if (stream != 0) {
-            cStreamInstance_Update((cStreamInstance*)stream);
+            cStreamInstance_Update(stream);
         }
     }
 }
@@ -1031,9 +1019,9 @@ extern "C" void cStreamSys_STREAM_Pause(cStreamSys* self)
 {
     int i;
     for (i = 0; i < self->mNumStreams; i++) {
-        void* stream = *(void**)((char*)self->mStreamInstance + i * 4);
+        cStreamInstance* stream = self->mStreamInstance[i];
         if (stream != 0) {
-            cStreamInstance_Pause((cStreamInstance*)stream);
+            cStreamInstance_Pause(stream);
         }
     }
 }
@@ -1050,9 +1038,9 @@ extern "C" void cStreamSys_STREAM_Resume(cStreamSys* self)
 {
     int i;
     for (i = 0; i < self->mNumStreams; i++) {
-        void* stream = *(void**)((char*)self->mStreamInstance + i * 4);
+        cStreamInstance* stream = self->mStreamInstance[i];
         if (stream != 0) {
-            cStreamInstance_Resume((cStreamInstance*)stream);
+            cStreamInstance_Resume(stream);
         }
     }
 }
@@ -1074,9 +1062,9 @@ extern "C" int cStreamInstance_Queue(cStreamInstance* e, int a, int b, int c);
  */
 extern "C" int cStreamSys_STREAM_Queue(cStreamSys* self, int i, int holdTime, int buf, int offset)
 {
-    void* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = self->mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_Queue((cStreamInstance*)stream, holdTime, buf, offset);
+        return cStreamInstance_Queue(stream, holdTime, buf, offset);
     }
     return -1;
 }
@@ -1098,9 +1086,9 @@ extern "C" int cStreamInstance_Queue1(cStreamInstance*, int, int, int);
  */
 extern "C" int cStreamSys_STREAM_Queue1(cStreamSys* self, int idx, int holdTime, int element, int offset)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
+    cStreamInstance* stream = self->mStreamInstance[idx];
     if (stream != 0) {
-        return cStreamInstance_Queue1((cStreamInstance*)stream, holdTime, element, offset);
+        return cStreamInstance_Queue1(stream, holdTime, element, offset);
     }
     return -1;
 }
@@ -1119,9 +1107,9 @@ extern "C" int cStreamInstance_Requests(cStreamInstance*);
  */
 extern "C" int cStreamSys_STREAM_Requests(cStreamSys* self, int i)
 {
-    void* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = self->mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_Requests((cStreamInstance*)stream);
+        return cStreamInstance_Requests(stream);
     }
     return 0;
 }
@@ -1137,7 +1125,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Purge);
  */
 extern "C" void cStreamSys_STREAM_Purge(cStreamSys* self, int i)
 {
-    void* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = self->mStreamInstance[i];
     if (stream != 0) {
         cStreamInstance_Purge(stream);
     }
@@ -1157,11 +1145,11 @@ extern "C" float cStreamInstance_GetTimeRemaining(cStreamInstance* self);
  */
 extern "C" float cStreamSys_STREAM_TimeRemaining(cStreamSys* self, int i)
 {
-    void* stream;
-    if (i < 0 || (stream = ((void*)self->mStreamInstance[i])) == 0) {
+    cStreamInstance* stream;
+    if (i < 0 || (stream = self->mStreamInstance[i]) == 0) {
         return 0.0f;
     }
-    return cStreamInstance_GetTimeRemaining((cStreamInstance*)stream);
+    return cStreamInstance_GetTimeRemaining(stream);
 }
 #endif
 
@@ -1178,11 +1166,11 @@ extern "C" float cStreamInstance_GetRequestLength(cStreamInstance*);
  */
 extern "C" float cStreamSys_STREAM_RequestLength(cStreamSys* self, int idx)
 {
-    void* stream;
-    if (idx < 0 || (stream = *(void**)((char*)self->mStreamInstance + idx * 4)) == 0) {
+    cStreamInstance* stream;
+    if (idx < 0 || (stream = self->mStreamInstance[idx]) == 0) {
         return 0.0f;
     }
-    return cStreamInstance_GetRequestLength((cStreamInstance*)stream);
+    return cStreamInstance_GetRequestLength(stream);
 }
 #endif
 //100%
@@ -1199,8 +1187,8 @@ extern "C" int cStreamInstance_IsBufferFilled(cStreamInstance*, int);
  */
 extern "C" int cStreamSys_STREAM_IsBufferFilled(cStreamSys* self, int idx, int minVal)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
-    return stream != 0 ? cStreamInstance_IsBufferFilled((cStreamInstance*)stream, minVal) : 0;
+    cStreamInstance* stream = self->mStreamInstance[idx];
+    return stream != 0 ? cStreamInstance_IsBufferFilled(stream, minVal) : 0;
 }
 #endif
 //100%
@@ -1216,8 +1204,8 @@ extern "C" int cStreamInstance_IsCurrRequestedRead(cStreamInstance*);
  */
 extern "C" int cStreamSys_STREAM_IsCurrRequestedRead(cStreamSys* self, int idx)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
-    return stream != 0 ? cStreamInstance_IsCurrRequestedRead((cStreamInstance*)stream) : 0;
+    cStreamInstance* stream = self->mStreamInstance[idx];
+    return stream != 0 ? cStreamInstance_IsCurrRequestedRead(stream) : 0;
 }
 #endif
 //100%
@@ -1278,9 +1266,9 @@ extern "C" int cStreamInstance_Playing(cStreamInstance*);
  */
 extern "C" int cStreamSys_STREAM_Playing(cStreamSys* self, int i)
 {
-    void* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = self->mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_Playing((cStreamInstance*)stream);
+        return cStreamInstance_Playing(stream);
     }
     return 0;
 }
@@ -1298,9 +1286,9 @@ extern "C" void cStreamInstance_ReleaseHold(cStreamInstance*);
  */
 extern "C" void cStreamSys_STREAM_ReleaseHold(cStreamSys* self, int idx)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
+    cStreamInstance* stream = self->mStreamInstance[idx];
     if (stream != 0) {
-        cStreamInstance_ReleaseHold((cStreamInstance*)stream);
+        cStreamInstance_ReleaseHold(stream);
     }
 }
 #endif
@@ -1317,9 +1305,9 @@ extern "C" void cStreamInstance_ReleaseHold1(cStreamInstance*, int);
  */
 extern "C" void cStreamSys_STREAM_ReleaseHold1(cStreamSys* self, int idx, int requestHandle)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
+    cStreamInstance* stream = self->mStreamInstance[idx];
     if (stream != 0) {
-        cStreamInstance_ReleaseHold1((cStreamInstance*)stream, requestHandle);
+        cStreamInstance_ReleaseHold1(stream, requestHandle);
     }
 }
 #endif
@@ -1353,7 +1341,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetBaseVolume);
  */
 extern "C" void cStreamSys_STREAM_SetBaseVolume(cStreamSys* self, int idx, int val)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
+    cStreamInstance* stream = self->mStreamInstance[idx];
     if (stream != 0) {
         cStreamInstance_SetBaseVolume(stream, val);
     }
@@ -1370,7 +1358,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetHandle);
  */
 extern "C" int cStreamSys_STREAM_GetHandle(cStreamSys* self, int idx)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
+    cStreamInstance* stream = self->mStreamInstance[idx];
     if (stream != 0) {
         return *(int*)((char*)stream + 0x8);
     }
@@ -1391,9 +1379,9 @@ extern "C" int cStreamInstance_GetCurrActiveSampleHandle(cStreamInstance*);
  */
 extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(cStreamSys* self, int i)
 {
-    void* stream = self->mStreamInstance[i];
+    cStreamInstance* stream = self->mStreamInstance[i];
     if (stream != 0) {
-        return cStreamInstance_GetCurrActiveSampleHandle((cStreamInstance*)stream);
+        return cStreamInstance_GetCurrActiveSampleHandle(stream);
     }
     return -1;
 }
@@ -1411,7 +1399,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetInstance__FPvi);
 int cStreamSys_STREAM_GetInstance(void* vself, int index)
 {
     cStreamSys* self = (cStreamSys*)vself;
-    return *(int*)((char*)self->mStreamInstance + index * 4);
+    return (int)self->mStreamInstance[index];
 }
 #endif
 
@@ -1446,8 +1434,8 @@ extern "C" int cStreamInstance_TimeMult(cStreamInstance*, int);
  */
 extern "C" int cStreamSys_STREAM_TimeMult(cStreamSys* self, int idx, int multAmount)
 {
-    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
-    return stream != 0 ? cStreamInstance_TimeMult((cStreamInstance*)stream, multAmount) : -1;
+    cStreamInstance* stream = self->mStreamInstance[idx];
+    return stream != 0 ? cStreamInstance_TimeMult(stream, multAmount) : -1;
 }
 #endif
 

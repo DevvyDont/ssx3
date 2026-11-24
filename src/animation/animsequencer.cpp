@@ -861,10 +861,6 @@ extern "C" void cAnimSequencer_removeAllEndTriggers(cAnimSequencer* self, int tr
 }
 #endif
 
-struct cAnimSequenceNode {
-    char pad_0x00[0xC8];
-    cAnimSequenceNode* next; // 0xC8
-};
 
 
 //100%
@@ -878,11 +874,11 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getSequence__FP14cAnimSequ
  * @param index  zero-based position in the list
  * @return the node, or 0 if the list has no node at that position
  */
-cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
+cAnimSequence* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 {
-    cAnimSequenceNode* cur = ((cAnimSequenceNode*)self->PlayList);
+    cAnimSequence* cur = self->PlayList;
     while (cur != 0 && index-- > 0) {
-        cur = cur->next;
+        cur = cur->Next;
     }
     return cur;
 }
@@ -898,7 +894,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_isPlaying);
  * @return 1 when found, else 0
  */
 extern "C" int cAnimSequencer_isPlaying(cAnimSequencer* self, int id) {
-    for (cAnimSequenceNode *n = ((cAnimSequenceNode*)self->PlayList); n != 0; n = n->next) {
+    for (cAnimSequence *n = self->PlayList; n != 0; n = n->Next) {
         if (*(int *)n == id) {
             return 1;
         }
@@ -917,7 +913,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getPosition);
  */
 extern "C" int cAnimSequencer_getPosition(cAnimSequencer* self, int id) {
     int index = 0;
-    for (cAnimSequenceNode *n = ((cAnimSequenceNode*)self->PlayList); n != 0; n = n->next) {
+    for (cAnimSequence *n = self->PlayList; n != 0; n = n->Next) {
         if (*(int *)n == id) {
             return index;
         }

@@ -3555,11 +3555,11 @@ extern "C" void cWipeoutControl_update(cWipeoutControl* self, tWipeoutCmd* input
 INCLUDE_ASM("ai/ai", cWipeoutControl_updateLaunch);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cWipeoutControl_playWipeoutHitTransitionAnim(cWipeoutControl* self);
@@ -3665,7 +3665,7 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
     float framePercent = cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2);
     if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2))
     {
-        cAnimSequence* an = (cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2);
+        cAnimSequence* an = cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2);
         float rate = an->TimeScale;
         float invDeltaTime = rate / ((framePercent - self->PrevFramePercent) * an->SubAnims[0].TotalTime);
         sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(*(sV_12CD20*)&pose->P, *(sV_12CD20*)&self->RiderPrevPose), self->mRider->mRiderAnim->FrameRateFactor), invDeltaTime);
@@ -3870,7 +3870,7 @@ extern "C" void cSSXAudio_WipeoutHit(void* mgr, void* rider);
 extern "C" void cSSXAudio_WipeoutSlideStart(void* mgr, void* self);
 extern "C" void cSSXAudio_WipeoutTumbleStart(void* mgr, void* self);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" void cAnimSequence_setSubAnimTime(void* self, int idx, float v);
@@ -3968,7 +3968,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                 {
                     float framePercent = cRiderAnimBase_getCurrentAnimFramePercent(self->mRider->mRiderAnim, 2);
                     cWipeoutControl_playWipeoutGroundAnim(self);
-                    float animDuration = *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x10);
+                    float animDuration = cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->SubAnims[0].TotalTime;
                     cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2), 0, animDuration * framePercent);
                     cSSXAudio_WipeoutTumbleStart(cAudioInterface_bxAudio(), self);
                 }
@@ -4645,7 +4645,7 @@ extern "C" void cWipeoutControl_playWipeoutGroundImpactAnim(cWipeoutControl* sel
 INCLUDE_ASM("ai/ai", cWipeoutControl_chooseTumbleAnimRate);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 
 static inline bool aiOk_12E528(void* vself)
 {
@@ -4674,22 +4674,22 @@ extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self)
 {
     cRider* rider = self->mRider;
     cRiderHandler* handler = rider->mRiderHandler;
-    cAnimSequence* animSeq = (cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(rider->mRiderAnim, 2);
+    cAnimSequence* animSeq = cRiderAnimBase_getCurrentAnimSequence(rider->mRiderAnim, 2);
     float rawRate = aiLength_12C5C8(*(&handler->WipeoutMotion.RiderAngVelocity)) * animSeq->SubAnims[0].TotalTime * 0.15915493667125702f;
     float res = aiClamp_12E528(rawRate, 0.5f, 2.0f);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 29 ||
         cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)
     {
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 1.0f;
+        cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 1.0f;
     }
     else if (self->RecoverPercent >= 1.0f || aiOk_12E528(self))
     {
         // PORT: g++ `>?` (max) operator.
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = res >? 2.0f;
+        cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = res >? 2.0f;
     }
     else
     {
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = res;
+        cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = res;
     }
     return res;
 }
@@ -5210,7 +5210,7 @@ extern "C" float cPrewindControl_getFlipSpinInputAng(cPrewindControl* self, int*
 //100%
 INCLUDE_ASM("ai/ai", cResetControl_gainFocus);
 #ifdef SKIP_ASM
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
 void* cGame_getTransitionMan(void* self, int id);
 extern "C" void cTransitionMan_EndTransition(void* obj);
@@ -5244,7 +5244,7 @@ extern "C" void cResetControl_gainFocus(cResetControl* self)
 {
     int* flag = (int*)&self->FadePercent;
     *flag = 0;
-    *(int*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0;
+    cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 0;
     if (cResetControl_shouldTransition(self))
     {
         cTransitionMan* obj = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, self->mRider->mViewIndex);
@@ -5274,7 +5274,7 @@ INCLUDE_ASM("ai/ai", cResetControl_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
 void* cGame_getTransitionMan(void* self, int id);
 extern "C" void cTransitionMan_EndTransition(void* obj);
@@ -5336,7 +5336,7 @@ extern "C" void cResetControl_update(cResetControl* self, tResetCmd* cmd)
         if (cResetControl_shouldTransition(self))
             cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, self->mRider->mViewIndex));
         cRiderMetrix_evTakeoff(self->mRider->mMetrix, 0, 0);
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 1.0f;
+        cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 1.0f;
         cRider_setControlState_impl(self->mRider, 4);
         cRider_setMotionState_impl(self->mRider, 1);
     }
@@ -5619,7 +5619,7 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 
 /**
  * Leaves the natural air control: when going anywhere but cruise, ends an attack still playing on the upper
@@ -5639,7 +5639,7 @@ extern "C" void cNaturalAirControl_loseFocus(cNaturalAirControl* self, int next)
             cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 1) == 13)
         {
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 0, 0.10000000149011612f);
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = 1.0f;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->TimeScale = 1.0f;
         }
     }
 }
@@ -7106,7 +7106,7 @@ INCLUDE_ASM("ai/ai", cCruiseControl_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 
 /**
  * Leaves cruising; unless natural air follows, it fades out anim layer 0 while a punch plays on layer 1.
@@ -7124,7 +7124,7 @@ extern "C" void cCruiseControl_loseFocus(cCruiseControl* self, int next)
             cRiderAnimBase_getCurrentAnimCategory(*(void**)(*(char**)self + 0x784), 1) == 13)
         {
             cRiderAnimBase_blendOutAll(*(void**)(*(char**)self + 0x784), 0, 0.10000000149011612f);
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(*(char**)self + 0x784), 1) + 0x90) = 1.0f;
+            cRiderAnimBase_getCurrentAnimSequence(*(void**)(*(char**)self + 0x784), 1)->TimeScale = 1.0f;
         }
     }
 }
@@ -7223,7 +7223,7 @@ extern "C" void cRailslideControl_update(cRailslideControl* self, tRailslideCmd*
     cRider_checkForReaction(self->mRider);
     cRider_checkForProximityAction(self->mRider);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0xE) {
-        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
+        if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0))
             return;
         if (cRider_checkForBoardPress(self->mRider, in->BoardPress * k))
             return;
@@ -7485,7 +7485,7 @@ int cRider_getMotionState(void* self);
 // forwards $5 to cRiderHandler__setControlState.
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" bool tEventFlags_isSet1(void* self, int bit);
 extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 
@@ -7507,7 +7507,7 @@ extern "C" int cRailslideControl_checkAirMotion(cRailslideControl* self, tRailsl
     }
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0xE)
     {
-        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
+        if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0))
         {
             return 0;
         }
@@ -7663,7 +7663,7 @@ INCLUDE_ASM("ai/ai", cHandplantControl_update);
 #ifdef SKIP_ASM
 extern "C" int cRider_checkForReset_2A30(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" float cRiderMetrix_evHandplantStart(void* self, int a1);
 extern "C" float cRiderMetrix_evHandplantEnd(void* self);
@@ -7801,7 +7801,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, tHandplantCmd*
         cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantEnd(self->mRider->mMetrix));
         cRider_setMotionState_impl(self->mRider, 1);
     }
-    if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+    if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)) {
         if (cRider_checkRailBoardCollisions(self->mRider)) {
             return;
         }
@@ -7818,7 +7818,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, tHandplantCmd*
                 cAirPredictor* airPredictor = self->mRider->mAirPredictor;
                 float airTimeLeft = airPredictor->TotalAirTime - airPredictor->CurAirTime;
                 if (airTimeLeft > 0.0f) {
-                    cAnimSequence* seq = (cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2);
+                    cAnimSequence* seq = cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2);
                     float animRate = (seq->SubAnims[0].TotalTime - seq->SubAnims[0].Time) / airTimeLeft;
                     seq->TimeScale = clamp_2A30(animRate, 0.5f, 2.0f);
                 }
@@ -7970,7 +7970,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float cSpinControl_calcFlipAxisWeight(cSpinControl* self);
 extern "C" void cSpinControl_initDesSpin(cSpinControl* self, float a, float b);
 
@@ -8037,7 +8037,7 @@ extern "C" void cSpinControl_gainFocus(cSpinControl* self)
         float spinAttrib = cBEStatInterface_getSpinAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
         cRider* rider3 = self->mRider;
         float animRate = (spinAttrib * 0.5002591609954834f + 1.0f) * (rider3->mFlipRate >? rider3->mSpinRate) * 0.14284929633140564f;
-        *(float*)(cRiderAnimBase_getCurrentAnimSequence(rider3->mRiderAnim, 2) + 0x90) = animRate;
+        cRiderAnimBase_getCurrentAnimSequence(rider3->mRiderAnim, 2)->TimeScale = animRate;
         *(int*)self = 1;
     }
     else
@@ -9203,7 +9203,7 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     if (self->GrabState == 0) {
         if (trick == -1) {
             if (self->CurrentGrab != trick) {
-                *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = -1.0f;
+                cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = -1.0f;
                 cRiderAnimBase_play(self->mRider->mRiderAnim, 287, 0, -1.0f);
                 self->CurrentGrab = trick;
             }
@@ -9216,20 +9216,20 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getGrabAnim(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             }
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
-        } else if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
+        } else if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0)) {
             self->GrabState = 1;
         }
     }
     if (self->GrabState == 1) {
-        if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)) {
             cRider* rider = self->mRider;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getGrabName(iface, rider->mAIIndex, self->CurrentGrab)));
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 0.0f;
             if (cBEBAGTInterface_getGrabCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
                 cRider* rider2 = self->mRider;
                 cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getGrabCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
-                *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
+                cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->TimeScale = speed;
             }
             self->GrabState = 2;
         }
@@ -9239,7 +9239,7 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
             cRider* rider = self->mRider;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, cBEBAGTInterface_getGrabName(iface, rider->mAIIndex, self->CurrentGrab)));
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
             self->GrabState = 5;
         } else if (held != 0) {
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.10000000149011612f);
@@ -9253,21 +9253,21 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getUberAnim(iface, rider->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
             }
             cSSXAudio_Tweak(cAudioInterface_bxAudio(), self->mRider);
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
             self->GrabState = 3;
         }
     }
     if (self->GrabState == 3) {
         if (trick == self->CurrentGrab && held != 0
-            && tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
+            && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)) {
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 0.0f;
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
                 cRider* rider = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
                 if (cBEBAGTInterface_getTweakCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
                     cRider* rider2 = self->mRider;
                     cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getTweakCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
-                    *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
+                    cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->TimeScale = speed;
                 }
             } else {
                 cRider* rider = self->mRider;
@@ -9275,13 +9275,13 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 if (cBEBAGTInterface_getUberCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) != 438) {
                     cRider* rider2 = self->mRider;
                     cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getUberCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
-                    *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
+                    cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->TimeScale = speed;
                 }
             }
             self->GrabState = 4;
-        } else if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)
-                   || tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)
-                   || tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
+        } else if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 1)
+                   || tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 3)
+                   || tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 2)) {
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
                 cRider* rider = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
@@ -9306,20 +9306,20 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, cBEBAGTInterface_getUberName(iface, rider->mAIIndex, self->CurrentGrab, hi)));
             }
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
             self->GrabState = 5;
         }
     }
     anim = cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2);
     if (self->GrabState == 5) {
-        if (anim == 2 || tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)) {
+        if (anim == 2 || tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 3)) {
             if (anim == 20 && held != 0 && trick != -1
                 && cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, trick, hi) != 438) {
                 self->CurrentGrab = trick;
                 cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
                 cRider* rider = self->mRider;
                 cRiderAnimBase_play_i(rider->mRiderAnim, cBEBAGTInterface_getUberAnim(iface, rider->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
-                *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
+                cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = speed;
                 self->GrabState = 3;
             } else {
                 self->GrabState = 0;
@@ -9758,7 +9758,7 @@ void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlSt
 extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
 extern "C" bool tEventFlags_isSet1(void* self, int bit);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 
@@ -9818,7 +9818,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd*
         if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2))
         {
             cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, tbl->CycleAnim, 0, -1.0f);
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 1.0f;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 1.0f;
             self->GrindState = 1;
         }
     }
@@ -9827,7 +9827,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd*
         if (((sAiBitsB_136508*)in)->v != self->CurrentGrind || cRider_getMotionState((char*)self->mRider) == 0)
         {
             cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, tbl->OutOfAnim, 0, -1.0f);
-            *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 1.0f;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 1.0f;
             self->GrindState = 2;
         }
         else if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) != tbl->LandAnim ||
@@ -9862,7 +9862,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd*
         rider2->mSlewed[6].rate = 0.05833333730697632f;
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 21 &&
             !cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) &&
-            !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
+            !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->Events, 0))
             return;
         if (cRider_getMotionState((char*)self->mRider) == 4)
         {

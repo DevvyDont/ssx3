@@ -269,7 +269,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_shouldPlow);
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cRider_getMotionState(void* self);
 int cRiderAnimBase_getCurrentAnimID(void* self, int a1);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* self, int a1);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void* self, int a1);
 extern "C" int tEventFlags_isSet1(void* self, int a1);
 extern float cBoardTrail_m_PackedDepthScale;
 extern float cBoardTrail_m_LooseDepthScale;
@@ -308,8 +308,8 @@ extern "C" int cBoardTrailFX_shouldPlow(char** self)
         if (*(int*)(self[0] + 0xB00) == 0) return 0;
     }
     if (cRiderAnimBase_getCurrentAnimID(*(void**)(self[0] + 0x784), 2) == 22) {
-        if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 0)) {
-            if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 1)) {
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2)->Events, 0)) {
+            if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2)->Events, 1)) {
                 return 0;
             }
         }

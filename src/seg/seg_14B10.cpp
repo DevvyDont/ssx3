@@ -2044,7 +2044,7 @@ extern "C" int cRider_checkForFinishLine(cRider* rider) {
 INCLUDE_ASM("seg/seg_14B10", cRider_checkForPunch);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" void* cRiderAnimBase_getCurrentAnimSequence(void* anim, int layer);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void* anim, int layer);
 extern "C" int tEventFlags_isSet1(void* p, int i);
 extern "C" int tEventFlags_isJustChanged(void* p, int i);
 extern "C" void cRiderAnimBase_blendOutAll(void* anim, int layer, float t);
@@ -2075,7 +2075,7 @@ static inline t4Vector Scale_163B0(const t4Vector& v, float s)
     return r;
 }
 
-static inline int seqDone_163B0(char* p)
+static inline int seqDone_163B0(tEventFlags* p)
 {
     return tEventFlags_isSet1(p, 2) && tEventFlags_isJustChanged(p, 2);
 }
@@ -2096,22 +2096,22 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
 {
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3) {
         if (isLeft != 0 && isRight != 0) {
-            if (seqDone_163B0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0)) {
-                *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 0.0f;
+            if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events)) {
+                cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 0.0f;
                 *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
                 cRiderAnimBase_play(self->mRiderAnim, 325, 0, -1.0f);
-                float w = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x94);
-                float targWeight = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x98);
-                float weightTimer = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x9C);
-                cAnimSequence* baseSeq = (cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
+                float w = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->CurrentWeight;
+                float targWeight = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TargetWeight;
+                float weightTimer = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->WeightTimer;
+                cAnimSequence* baseSeq = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
                 baseSeq->TargetWeight = w;
                 baseSeq->CurrentWeight = w;
                 if (weightTimer != 0.0f)
-                    cAnimSequence_fadeWeight((cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0), targWeight, weightTimer);
+                    cAnimSequence_fadeWeight(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0), targWeight, weightTimer);
                 *(long*)&self->mRiderAnim->GraftMask = -1;
             }
         } else {
-            *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 1.0f;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 1.0f;
             cRiderAnimBase_blendOutAll(self->mRiderAnim, 0, 0.1f);
         }
     }
@@ -2119,8 +2119,8 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
         int id = cRiderAnimBase_getCurrentAnimID(self->mRiderAnim, 1);
         int match = self->IsRidingFakie ? id == 323 : id == 324;
         if ((isLeft != 0 && isRight == 0 && match) || (isLeft == 0 && isRight != 0 && !match)) {
-            if (seqDone_163B0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0)) {
-                *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 0.0f;
+            if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events)) {
+                cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 0.0f;
                 *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
                 if (id == 323)
                     cRiderAnimBase_play(self->mRiderAnim, 326, 0, -1.0f);
@@ -2137,7 +2137,7 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
                 else if (cur < 1.0f - blendStep)
                     newBlend = cur + blendStep;
                 self->PunchStrength = newBlend;
-                cAnimSequence* baseSeq = (cAnimSequence*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
+                cAnimSequence* baseSeq = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
                 baseSeq->CurrentWeight = baseSeq->TargetWeight = self->PunchStrength;
             }
             if (match)
@@ -2145,25 +2145,25 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
             else
                 self->PunchVect = GetSide_163B0(self);
         } else {
-            *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 1.0f;
+            cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->TimeScale = 1.0f;
             cRiderAnimBase_blendOutAll(self->mRiderAnim, 0, 0.1f);
         }
     }
     if (isLeft != 0 && isRight != 0) {
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
-            tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 0) != 0 &&
+            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
             return 1;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
             return 1;
         *(long*)&self->mRiderAnim->GraftMask = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, 322, 1, -1.0f);
         *(long*)&self->mRiderAnim->GraftMask = -1;
         self->PunchStrength = 0.0f;
     } else if (isLeft != 0 || isRight != 0) {
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
-            tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 0) != 0 &&
+            tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
             return 1;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 1) == 0)
             return 1;
         int anim;
         if (isLeft != 0) {

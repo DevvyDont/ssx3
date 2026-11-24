@@ -190,10 +190,9 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(cRiderAnimBase* self, int i
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimSequence);
 #ifdef SKIP_ASM
-struct cAnimSequenceNode;
 
 
-cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index);
+cAnimSequence* cAnimSequencer_getSequence(cAnimSequencer* self, int index);
 
 /**
  * Returns the newest sequence playing on one of the rider's sequencers.
@@ -203,7 +202,7 @@ cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index);
  * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
  * @return the sequence, or null
  */
-extern "C" cAnimSequenceNode* cRiderAnimBase_getCurrentAnimSequence(cRiderAnimBase* self, int i)
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(cRiderAnimBase* self, int i)
 {
     cAnimSequencer* seqs = self->Sequencer;
     return cAnimSequencer_getSequence(&seqs[i], 0);
@@ -355,8 +354,8 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, tPo
         int j = 0;
         if (j < (self->Sequencer)[i].NumPlaying) {
             do {
-            tPose* src = (tPose*)((char*)cAnimSequencer_getSequence(&(self->Sequencer)[i], j) + 0x60);
-            tPose* dst = (tPose*)((char*)cAnimSequencer_getSequence(&(self->Sequencer)[i], j) + 0x60);
+            tPose* src = &cAnimSequencer_getSequence(&(self->Sequencer)[i], j)->OrientationOffset;
+            tPose* dst = &cAnimSequencer_getSequence(&(self->Sequencer)[i], j)->OrientationOffset;
             *dst = Combine_00311BF0(*xf, *src);
                 j++;
             } while (j < (self->Sequencer)[i].NumPlaying);
@@ -385,7 +384,7 @@ extern "C" void cRiderAnimBase_changeIsFlipped(cRiderAnimBase* self, int value)
         {
             do
             {
-                *(int*)((char*)cAnimSequencer_getSequence(&((cAnimSequencer*)(char*)self->Sequencer)[i], j++) + 0x80) = value;
+                cAnimSequencer_getSequence(&((cAnimSequencer*)(char*)self->Sequencer)[i], j++)->IsFlipped = value;
             } while (j < ((cAnimSequencer*)(char*)self->Sequencer)[i].NumPlaying);
         }
     }
@@ -608,7 +607,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_updateAnimation);
 struct sVEntry003123C0 {
     short delta;
     short index;
-    void (*fn)(void*, cAnimSequencer*, cAnimSequenceNode*, float);
+    void (*fn)(void*, cAnimSequencer*, cAnimSequence*, float);
 };
 
 extern "C" void cRiderAnimBase_setupAnimation(cRiderAnimBase* self, int a1);
@@ -627,10 +626,10 @@ extern "C" void cRiderAnimBase_updateAnimation(cRiderAnimBase* self, int animMin
 {
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequenceNode* node = cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
+        cAnimSequence* node = cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
         while (node)
         {
-            cAnimSequenceNode* next = *(cAnimSequenceNode**)((char*)node + 0xC8);
+            cAnimSequence* next = node->Next;
             sVEntry003123C0* vt = (sVEntry003123C0*)self->mVtbl;
             vt[2].fn(vthis(self, vt[2]), &(self->Sequencer)[i], node, timescale);
             node = next;
@@ -648,7 +647,7 @@ extern "C" int tEventFlags_isSet1(void* self, int mask);
 struct sVEntry00312490 {
     short delta;
     short index;
-    void (*fn)(void*, cAnimSequencer*, cAnimSequenceNode*);
+    void (*fn)(void*, cAnimSequencer*, cAnimSequence*);
 };
 
 
@@ -665,22 +664,22 @@ extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
     int n = 0;
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequence* node = (cAnimSequence*)cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
+        cAnimSequence* node = cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
         while (node)
         {
             if (tEventFlags_isSet1(&node->Events, 0x3F) != 0)
             {
-                (*(cAnimSequenceNode**)&list[n].seq) = ((cAnimSequenceNode*)node);
+                (*(cAnimSequence**)&list[n].seq) = ((cAnimSequence*)node);
                 list[n].seqr = &(self->Sequencer)[i];
                 n++;
             }
-            node = (cAnimSequence*)((cAnimSequenceNode*)node->Next);
+            node = node->Next;
         }
     }
     for (int k = 0; k < n; k++)
     {
         sVEntry00312490* vt = (sVEntry00312490*)self->mVtbl;
-        vt[3].fn(vthis(self, vt[3]), list[k].seqr, ((cAnimSequenceNode*)list[k].seq));
+        vt[3].fn(vthis(self, vt[3]), list[k].seqr, ((cAnimSequence*)list[k].seq));
     }
 }
 #endif
@@ -933,7 +932,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimFramePercent
 extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(cRiderAnimBase* self, int i)
 {
     cAnimSequencer* seqs = self->Sequencer;
-    cAnimSequence* node = (cAnimSequence*)cAnimSequencer_getSequence(&seqs[i], 0);
+    cAnimSequence* node = cAnimSequencer_getSequence(&seqs[i], 0);
     return node->SubAnims[0].Time / node->SubAnims[0].TotalTime;
 }
 #endif
@@ -953,7 +952,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_isCurrentAnimEndFlag);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(cRiderAnimBase* self, int i)
 {
     cAnimSequencer* seqs = self->Sequencer;
-    return *(int*)((char*)cAnimSequencer_getSequence(&seqs[i], 0) + 0xC0);
+    return cAnimSequencer_getSequence(&seqs[i], 0)->EndEvent;
 }
 #endif
 
@@ -985,7 +984,7 @@ extern "C" int cRiderAnimBase_playInto(cRiderAnimBase* self, cAnimSequencer* seq
     float targetWeight = node->TargetWeight;
     cAnimSequencer_expire(seq, node);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
-    cAnimSequence* sequence = (cAnimSequence*)cAnimSequencer_getSequence(seq, 0);
+    cAnimSequence* sequence = cAnimSequencer_getSequence(seq, 0);
     sequence->TargetWeight = currentWeight;
     sequence->CurrentWeight = currentWeight;
     if (timeLeft != 0.0f)
