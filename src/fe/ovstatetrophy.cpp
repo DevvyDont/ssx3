@@ -1678,7 +1678,7 @@ extern "C" void func_00210940(cOVState* self)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
 #ifdef SKIP_ASM
-extern char D_004A2560[];
+extern char str_empty_e[];
 extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
 extern "C" void func_00210BD8(cOVState* self, char* name, int a);
 extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
@@ -1703,7 +1703,7 @@ extern "C" int func_00210B58(void* self, int ok)
             func_00210BD8((cOVState*)self, name, 0);
         } else {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
-            func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 61);
+            func_00210F40(self, 0, (int)str_empty_e, (int)str_empty_e, 0, 0, 61);
         }
     }
     return 1;
@@ -1825,7 +1825,7 @@ extern "C" void func_00210DD0(void* self, int popup, int event)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
 #ifdef SKIP_ASM
-extern char D_004A2560[];
+extern char str_empty_e[];
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cOVState_onWidgetEvent(void* self);
 extern "C" void cGameComm_sendChat(int a, char* name);
@@ -1861,7 +1861,7 @@ extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
     case 5:
         if (*(int*)((char*)self + 0xE0) == 0) {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
-            func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 61);
+            func_00210F40(self, 0, (int)str_empty_e, (int)str_empty_e, 0, 0, 61);
             cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
         }
         break;

@@ -5781,3 +5781,15 @@ ps2_addr	name	previous	source	evidence
 004A3CB0	RiderInVolumeFunc_types	D_004A3CB0	ontour	On Tour RiderInVolumeFunc has a static eLunoVarType types[1]; retail RiderInVolumeFunc reads this table at the keyword index as the argument's expected type (its only reader)
 004A3D58	UpdateDisplayHeightFunc_types	D_004A3D58	ontour	On Tour UpdateDisplayHeightFunc has a static eLunoVarType types[1]; retail UpdateDisplayHeightFunc reads this table at the keyword index as the argument's expected type (its only reader)
 00446980	CheckGateFunc_types	D_00446980	ontour	On Tour CheckGateFunc has a static eLunoVarType types[3]; retail CheckGateFunc reads this table at the keyword index as the argument's expected type (its only reader)
+004979A8	str_empty	D_004979A8	retail	[R] the empty string "" (a NUL) at 0x004979A8; [U] its first byte copied as a string terminator
+0049A7C0	str_empty_b	D_0049A7C0	retail	[R] the empty string "" (a NUL) at 0x0049A7C0; [U] strcmp'd against the locale
+0049AD90	str_empty_c	D_0049AD90	retail	[R] the empty string "" (a NUL) at 0x0049AD90; [U] the program-name argument of the argv builder
+004A1408	str_empty_d	D_004A1408	retail	[R] the empty string "" (a NUL) at 0x004A1408; [U] cUIText_setAsciiString / setPlayerName / setInputText / cTextMenuItem text
+004A2560	str_empty_e	D_004A2560	retail	[R] the empty string "" (a NUL) at 0x004A2560; [U] cUIText_setAsciiString text
+004A2E58	str_empty_f	D_004A2E58	retail	[R] the empty string "" (a NUL) at 0x004A2E58; [U] the block name / comment of a heap dump line
+004A2E98	str_empty_g	D_004A2E98	retail	[R] the empty string "" (a NUL) at 0x004A2E98; [U] the allocation name of a movie allocation
+004A2EA0	str_empty_h	D_004A2EA0	retail	[R] the empty string "" (a NUL) at 0x004A2EA0; [U] the allocation name of the movie allocator
+004A2F40	str_empty_i	D_004A2F40	retail	[R] the empty string "" (a NUL) at 0x004A2F40; [U] the TagFieldGetString default
+004A35A8	str_empty_j	D_004A35A8	retail	[R] the empty string "" (a NUL) at 0x004A35A8; [U] strcmp'd against a trigger name; its first byte empties path strings
+004A4888	str_empty_k	D_004A4888	retail	[R] the empty string "" (a NUL) at 0x004A4888; [U] a string argument
+004A4BB8	str_empty_l	D_004A4BB8	retail	[R] the empty string "" (a NUL) at 0x004A4BB8; [U] an empty payload string

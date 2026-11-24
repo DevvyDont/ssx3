@@ -540,7 +540,7 @@ extern char str_Not_initialized[];
 extern char str_SPACE[];
 extern char D_004801C0[];
 extern char* D_004801E8[];
-extern char D_004A2E58[];
+extern char str_empty_f[];
 extern char str_FREE[];
 extern char str_unknown[];
 extern char D_004A2E70[];
@@ -577,17 +577,18 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
         char* data = (char*)blk + 0x10;
         char* blockName = (char*)MEM_name(data);
         if (blockName == 0)
-            blockName = D_004A2E58;
+            blockName = str_empty_f;
         char* comment = (char*)MEM_comment(data);
         if (comment == 0)
-            comment = D_004A2E58;
+            comment = str_empty_f;
         if (blk->type & 0x4000) {
             int sz = blk->size;
             if (sz > 0x10 && !(blk->type & 0x8000))
                 crc = MEM_crc16((char*)blk + 0x18, sz - 0x18, 64490);
             total += sz;
             int st = checksentinel((FREEBLOCK*)blk);
-            cb(fmt, str_FREE, str_SPACE, data, sz, ((char*)blk->next) - (char*)blk, blk->type, crc, D_004801E8[st], D_004A2E58);
+            cb(fmt, str_FREE, str_SPACE, data, sz, ((char*)blk->next) - (char*)blk, blk->type, crc, D_004801E8[st],
+               str_empty_f);
         } else {
             int sz = blk->size;
             crc = 0;
@@ -1808,7 +1809,7 @@ struct sMemAllocFuncs_2534A8 {
 };
 // Typed view of the allocator table (the unit defines sMemAllocFuncs later).
 extern sMemAllocFuncs_2534A8 RCMP_rcmp_sys_2534A8 __asm__("RCMP_rcmp_sys");
-extern char D_004A2E98[];
+extern char str_empty_g[];
 extern "C" void* func_003ADE08(void* mem, int a1, int a2, char* name, int a4, int a5, int a6);
 extern "C" void* func_003ADDC0(void* mem, int a1, int a2, int a3, int a4);
 
@@ -1842,10 +1843,10 @@ extern "C" int cMoviePlayer_init_impl(void* vself, tMoviePlayOptions* cfg)
     self->m_fSpeed = self->m_PlayOp.fPlaySpeed;
     char* name = (char*)self->m_PlayOp.sAudioFileName;
     if (name != 0 && *name != 0) {
-        void* mem = RCMP_rcmp_sys_2534A8.alloc(D_004A2E98, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
+        void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
         self->m_pPlayer = func_003ADE08(mem, *(int*)&self->m_PlayOp, 0x60000, (char*)self->m_PlayOp.sAudioFileName, 0x20000, optionSet, soundOff);
     } else {
-        void* mem = RCMP_rcmp_sys_2534A8.alloc(D_004A2E98, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
+        void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
         self->m_pPlayer = func_003ADDC0(mem, *(int*)&self->m_PlayOp, 0x80000, optionSet, soundOff);
     }
     return 1;
@@ -2352,7 +2353,7 @@ extern "C" int func_00254350(int x)
 //100%
 INCLUDE_ASM("mem/memstd", SSX_VD_create);
 #ifdef SKIP_ASM
-extern char D_004A2EA0[];
+extern char str_empty_h[];
 extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD(void* self, void* a0, int a1, int a2, int a3);
 
 // PORT: the unit's sMemAllocFuncs declares alloc as `void* (*)(int)`; it really
@@ -2371,7 +2372,8 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
  */
 extern "C" void* SSX_VD_create(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
 {
-    void* driverMem = ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(D_004A2EA0, 84, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    void* driverMem = ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(str_empty_h, 84, 0, 0,
+                                                                        RCMP_rcmp_sys.m_DefaultMemDir);
     return SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
 }
 #endif
@@ -2424,7 +2426,7 @@ struct sMemAlloc_4410 {
 extern sMemAlloc_4410 RCMP_rcmp_sys_4410 __asm__("RCMP_rcmp_sys");
 extern void* D_00480270[];
 extern char str_VD_VD_TEXTURE_POINTER[];
-extern char D_004A2EA0[];
+extern char str_empty_h[];
 extern char D_004A2EA8[];
 extern float D_004A2EB0[];
 extern "C" int func_00254350(int x);
@@ -2466,7 +2468,8 @@ struct sTile_4410 {
     int tex;        // 0x0
     int w;          // 0x4
     int h;          // 0x8
-    static void* operator new(unsigned int size) { return RCMP_rcmp_sys_4410.alloc(D_004A2EA0, size, 0, 0, RCMP_rcmp_sys_4410.flags); }
+    static void* operator new(unsigned int size) { return RCMP_rcmp_sys_4410.alloc(str_empty_h, size, 0, 0,
+                                                                                   RCMP_rcmp_sys_4410.flags); }
     sTile_4410(char* pixels, int height)
     {
         w = 16;
@@ -3019,15 +3022,15 @@ extern "C" void* func_00254E60(int, int);
 INCLUDE_ASM("mem/memstd", func_00255670);
 #ifdef SKIP_ASM
 /**
- * Allocates @p allocSize bytes through the movie allocator table (RCMP_rcmp_sys's allocate with name D_004A2EA0 and memory type
- * +0x8); the video driver's class operator new.
+ * Allocates @p allocSize bytes through the movie allocator table (RCMP_rcmp_sys's allocate with name str_empty_h and
+ * memory type +0x8); the video driver's class operator new.
  *
  * The result is left in the return register.
  *
  * @param allocSize  bytes wanted
  */
 extern "C" void func_00255670(int allocSize) {
-    RCMP_rcmp_sys.AllocMemFunc(D_004A2EA0, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    RCMP_rcmp_sys.AllocMemFunc(str_empty_h, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 //100%
@@ -3039,7 +3042,7 @@ INCLUDE_ASM("mem/memstd", func_002556B0);
  * @param allocSize  bytes wanted
  */
 extern "C" void func_002556B0(int allocSize) {
-    RCMP_rcmp_sys.AllocMemFunc(D_004A2EA0, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    RCMP_rcmp_sys.AllocMemFunc(str_empty_h, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 //100%

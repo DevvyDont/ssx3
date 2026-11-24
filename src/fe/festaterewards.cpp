@@ -362,7 +362,7 @@ extern char str_reward_name[];
 extern char str_reward_cost[];
 extern char str_you_have_amount[];
 extern char str_pct_d_b[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char* D_00441440[][8];
 extern char* D_004414C0[][8];
 
@@ -512,7 +512,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
         }
     } else if (hash == GetHashValue32(str_Page_of_text)) {
         self->w904 = w;
-        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        cUIText_setAsciiString((cUIText*)w, str_empty_d);
     } else if (hash == GetHashValue32(str_reward_name_colon)) {
         int type = self->type;
         if (type == 3)
@@ -529,10 +529,10 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNCheatCharColon));
     } else if (hash == GetHashValue32(str_reward_name)) {
         self->w908 = w;
-        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        cUIText_setAsciiString((cUIText*)w, str_empty_d);
     } else if (hash == GetHashValue32(str_reward_cost)) {
         self->w90C = w;
-        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        cUIText_setAsciiString((cUIText*)w, str_empty_d);
     } else if (hash == GetHashValue32(str_you_have_amount)) {
         self->w910 = w;
         self->vt[43].fn(vthis(self, self->vt[43]));
@@ -1210,7 +1210,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern char str_kT_OVRCMNPageOf[];
 extern char str_R1_ps2[];
 extern char str_L1_ps2[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 
 /**
@@ -1246,7 +1246,7 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(cFEStateRewardGallery
             return;
         }
     }
-    cUIText_setAsciiString(self->mpPageNumberText, D_004A1408);
+    cUIText_setAsciiString(self->mpPageNumberText, str_empty_d);
 }
 #endif
 
@@ -1258,7 +1258,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" const char* getDollarString(void* a0);
 // PORT: getDollarString really takes the int value to format; bound by asm label
 extern "C" const char* getDollarString_i(int v) __asm__("getDollarString");
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 
 /**
@@ -1274,9 +1274,9 @@ extern "C" void cFEStateRewardGalleryBase_updateRewardInfo(cFEStateRewardGallery
     cUIIcon* grid = self->mpSelected;
     if (((char*)grid) == 0) {
         if (self->mpRewardNameText != 0)
-            cUIText_setAsciiString(self->mpRewardNameText, D_004A1408);
+            cUIText_setAsciiString(self->mpRewardNameText, str_empty_d);
         if (self->mpRewardCostText != 0)
-            cUIText_setAsciiString(self->mpRewardCostText, D_004A1408);
+            cUIText_setAsciiString(self->mpRewardCostText, str_empty_d);
         return;
     }
     int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
@@ -1292,7 +1292,7 @@ extern "C" void cFEStateRewardGalleryBase_updateRewardInfo(cFEStateRewardGallery
                 return;
             }
         }
-        cUIText_setAsciiString(self->mpRewardCostText, D_004A1408);
+        cUIText_setAsciiString(self->mpRewardCostText, str_empty_d);
     }
 }
 #endif

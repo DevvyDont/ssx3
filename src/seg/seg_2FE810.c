@@ -2366,7 +2366,7 @@ int scePadGetState(int port, int slot) {
 INCLUDE_ASM("seg/seg_2FE810", scePadStateIntToStr);
 #ifdef SKIP_ASM
 extern char *D_004515D0[];
-extern char D_004979A8[];
+extern char str_empty[];
 extern char *strcpy(char *, const char *);
 /**
  * Copies the name of pad state @p i: DISCONNECT, FINDCTP1, EXECCMD, STABLE, ERROR for 0, 2, 5, 6, 7; empty for the
@@ -2380,7 +2380,7 @@ void scePadStateIntToStr(unsigned i, char *dst) {
         strcpy(dst, D_004515D0[i]);
         return;
     }
-    *dst = D_004979A8[0];
+    *dst = str_empty[0];
 }
 #endif
 
@@ -2423,7 +2423,7 @@ int scePadGetReqState(int port, int slot) {
 INCLUDE_ASM("seg/seg_2FE810", scePadReqIntToStr);
 #ifdef SKIP_ASM
 extern char *D_004515F0[];
-extern char D_004979A8[];
+extern char str_empty[];
 extern char *strcpy(char *, const char *);
 /**
  * Copies the name of request state @p i: COMPLETE, FAILED, BUSY; empty for 4 or more. Quirk: entry 3 of the table
@@ -2437,7 +2437,7 @@ void scePadReqIntToStr(unsigned i, char *dst) {
         strcpy(dst, D_004515F0[i]);
         return;
     }
-    *dst = D_004979A8[0];
+    *dst = str_empty[0];
 }
 #endif
 

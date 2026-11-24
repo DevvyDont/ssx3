@@ -4726,7 +4726,7 @@ extern "C" void func_002B1A70(void) {
 INCLUDE_ASM("sound/bankmonitor", cSongConfiguration_cSongConfiguration);
 #ifdef SKIP_ASM
 extern char cSongConfiguration_vtbl[];
-extern unsigned char D_004A35A8[];
+extern unsigned char str_empty_j[];
 
 struct cSongConfiguration_cSongConfiguration_sElem20 {
     unsigned char b;
@@ -4739,7 +4739,7 @@ struct cSongConfiguration_cSongConfiguration_sElem20 {
  * Stores the vtable cSongConfiguration_vtbl and sets the defaults a music.inf section can override: no bank data, 4 beats per
  * measure, 2 measures per bar, 4 phrases per bank, 8 beats per phrase, phrase align 16, delay count 0 / feedback 90 /
  * time 100 / level 50, path and async levels 100, 120 BPM, duck to loops on, mSedValue and mPreview -1, mLowPass
- * 0xFFFF, mSongBig 1, and empties the path strings (first byte of D_004A35A8).
+ * 0xFFFF, mSongBig 1, and empties the path strings (first byte of str_empty_j).
  *
  * @return @p self
  */
@@ -4764,11 +4764,11 @@ extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
     self->mLowPass = 0xFFFF;
     self->mPreview = -1;
     self->mSongBig = 1;
-    self->mPathData[0] = D_004A35A8[0];
-    self->mMusData[0] = D_004A35A8[0];
+    self->mPathData[0] = str_empty_j[0];
+    self->mMusData[0] = str_empty_j[0];
     cSongConfiguration_cSongConfiguration_sElem20* bankData = (cSongConfiguration_cSongConfiguration_sElem20*)&self->mBankData;
     for (int i = 0; i >= 0; i--, bankData++) {
-        bankData->b = D_004A35A8[0];
+        bankData->b = str_empty_j[0];
     }
     return ((void*)self);
 }
@@ -5790,9 +5790,9 @@ extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, 
             categoryInts[j] = 0;
     }
     for (int textOffset = 0; textOffset < 6400; textOffset += 100) {
-        ((char*)self)[textOffset + 2356] = D_004A35A8[0];
-        ((char*)self)[textOffset + 8756] = D_004A35A8[0];
-        ((char*)self)[textOffset + 15156] = D_004A35A8[0];
+        ((char*)self)[textOffset + 2356] = str_empty_j[0];
+        ((char*)self)[textOffset + 8756] = str_empty_j[0];
+        ((char*)self)[textOffset + 15156] = str_empty_j[0];
     }
     sLoc28C0 musicInf;
     FileParser_FileParser_p(musicInf.parser, D_004A37E8, 0x100);

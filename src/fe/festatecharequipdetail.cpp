@@ -468,7 +468,7 @@ extern char str_overbar2[];
 extern char str_equip_points[];
 extern char str_equip_btm_left[];
 extern char str_largeshape[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_btext5[];
 extern char str_ps2sq[];
 extern char str_xby[];
@@ -577,7 +577,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
         cFEStateCharEquip_updateBankWidget_eate(self);
     } else if (id == GetHashValue32(str_2right)) {
         self->f68 = ((void*)w);
-        cUIText_setAsciiString_eate(self->f68, D_004A1408);
+        cUIText_setAsciiString_eate(self->f68, str_empty_d);
     } else if (id == GetHashValue32(str_bolt01)) {
         self->f84 = ((void*)w);
     } else if (id == GetHashValue32(str_barandpoints)) {
@@ -596,7 +596,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
         hide_FE(self->f80);
     } else if (id == GetHashValue32(str_points)) {
         self->f7C = ((void*)w);
-        cUIText_setAsciiString_eate(self->f7C, D_004A1408);
+        cUIText_setAsciiString_eate(self->f7C, str_empty_d);
     } else if (id == GetHashValue32(str_largeshape)) {
         self->f88 = ((void*)w);
         hide_FE(self->f88);

@@ -10843,7 +10843,7 @@ extern void sprintf_7C40(char *, char *, int) __asm__("sprintf");
 
 extern char str_ORIG[];
 extern char str_NAME_b[];
-extern char D_004A4888[];
+extern char str_empty_k[];
 extern char str_ADDR_b[];
 extern char str_PING_b[];
 extern char str_pct_dms[];
@@ -10890,7 +10890,8 @@ void func_003E7C40(char *self) {
             break;
         }
         addr = cDirtysock_tag_TagFieldGetAddr_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_ORIG), info[1]);
-        cDirtysock_tag_TagFieldGetString_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_NAME_b), name, 0x20, D_004A4888);
+        cDirtysock_tag_TagFieldGetString_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_NAME_b), name, 0x20,
+                                              str_empty_k);
         if (func_003E7918_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
             ev.unk_00 = 0;
             ev.unk_04 = 0x70696E67;
@@ -11589,7 +11590,7 @@ extern int func_003EE9A0_8B10(int) __asm__("func_003EE9A0");
 extern void func_003F35D0_8B10(char *, int, char *, char *, int, int) __asm__("func_003F35D0");
 extern void func_003F5910_8B10(int, int, int, char *, int) __asm__("func_003F5910");
 
-extern char D_004A4888[];
+extern char str_empty_k[];
 extern char str_PASS_b[];
 extern char str_MASK[];
 extern char str_CHAN_b[];
@@ -11644,7 +11645,8 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
     if (cmd == 0x61757468 || cmd == 0x61636374 || cmd == 0x70617373) {
         cDirtysock_tag_TagFieldDupl_8B10(buf, 0x200, tags);
         func_003ECB00_8B10(buf, 0x200, self->f34);
-        cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, str_PASS_b), str + 1, 0x1F, D_004A4888);
+        cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, str_PASS_b), str + 1, 0x1F,
+                                              str_empty_k);
         if (self->f24[0] == 0) {
             cDirtysock_tag_TagFieldSetCrypt_8B10(buf, 0x200, str_PASS_b, self->f4BC, str + 1);
             cDirtysock_tag_TagFieldSetNumber_8B10(buf, 0x200, str_MASK, self->f4B8);
@@ -11976,7 +11978,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9378);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct N_9378 { int f0; int f4; unsigned int f8; int fC; int f10; int f14; int f18; char name[1]; };
-extern char D_004A4888_9378[] __asm__("D_004A4888");
+extern char D_004A4888_9378[] __asm__("str_empty_k");
 extern int func_003EE620_9378(int) __asm__("func_003EE620");
 extern int func_003EE600(int, int);
 extern int func_003EE558_9378(int) __asm__("func_003EE558");
@@ -12240,7 +12242,7 @@ extern char D_00495F30_95C8[] __asm__("D_00495F30");
 extern char D_00495FB0_95C8[] __asm__("D_00495FB0");
 extern char D_004A4870_95C8[] __asm__("D_004A4870");
 extern char str_NAME_b_95C8[] __asm__("str_NAME_b");
-extern char D_004A4888_95C8[] __asm__("D_004A4888");
+extern char D_004A4888_95C8[] __asm__("str_empty_k");
 extern char str_ADDR_b_95C8[] __asm__("str_ADDR_b");
 extern char str_MASK_95C8[] __asm__("str_MASK");
 extern char str_CHAN_b_95C8[] __asm__("str_CHAN_b");

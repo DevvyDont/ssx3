@@ -51,7 +51,7 @@ extern "C" void WORLDTRIGGERMANAGER_DeInit()
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_cWorldTriggerInstance);
 #ifdef SKIP_ASM
-extern unsigned char D_004A35A8[];
+extern unsigned char str_empty_j[];
 
 /**
  * Constructs a world trigger instance (0x70 bytes): clears every field, audio handle -1, last frame -1.0.
@@ -77,7 +77,7 @@ extern "C" void* cWorldTriggerInstance_cWorldTriggerInstance(cWorldTriggerInstan
     *(int*)&self->m_vPosition.z = 0;
     self->m_bTouch = 0;
     self->m_bCrowdTrigger = 0;
-    self->m_iSwapString[0] = D_004A35A8[0];
+    self->m_iSwapString[0] = str_empty_j[0];
     self->m_iLastAnimFrame = -1.0f;
     self->m_iBankReference = 0;
     self->m_iPatchReference = 0;
@@ -158,7 +158,7 @@ extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* 
 extern "C" int cWorldTriggerManager_ObjectHit(cWorldTriggerManager* self, int id);
 extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(cWorldTriggerManager* self, unsigned int i);
 extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* self, void* src, cWorldTriggerInstance* state);
-extern unsigned char D_004A35A8[];
+extern unsigned char str_empty_j[];
 
 struct sSnd4C38Ch {
     signed char vol;
@@ -335,7 +335,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
                 cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                 return;
             }
-            if (strcmp(instance->f40, D_004A35A8) == 0) {
+            if (strcmp(instance->f40, str_empty_j) == 0) {
                 if (cWorldTriggerInstance_SwapTriggerToString((cWorldTriggerInstance*)instance, instance->fC, instance->f40) == 0) {
                     cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                     return;
@@ -397,7 +397,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_Stop);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A72D8(void* snd, int id, float t);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
-extern unsigned char D_004A35A8[];
+extern unsigned char str_empty_j[];
 struct sWorldTrigger70;
 
 /**
@@ -421,7 +421,7 @@ extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* instance)
         cBankMonitor_BANKMONITOR_StopHandle(**(char***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, instance->m_iAudioHandle, 1, 0.25f);
     }
     instance->m_iAudioHandle = -1;
-    instance->m_iSwapString[0] = D_004A35A8[0];
+    instance->m_iSwapString[0] = str_empty_j[0];
     instance->m_iLastAnimFrame = -1.0f;
     instance->m_iBankReference = 0;
     instance->m_iPatchReference = 0;
@@ -498,7 +498,7 @@ extern "C" int cWorldTriggerInstance_SwapTriggerToString(cWorldTriggerInstance* 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_Reset);
 #ifdef SKIP_ASM
-extern unsigned char D_004A35A8[];
+extern unsigned char str_empty_j[];
 
 /**
  * Resets a world trigger instance to unused: no sound (-1), untouched, empty swap string, last frame -1.0.
@@ -510,7 +510,7 @@ extern "C" void cWorldTriggerInstance_Reset(cWorldTriggerInstance* self)
     self->m_bInUse = 0;
     self->m_iAudioHandle = -1;
     self->m_bTouch = 0;
-    self->m_iSwapString[0] = D_004A35A8[0];
+    self->m_iSwapString[0] = str_empty_j[0];
     self->m_iLastAnimFrame = -1.0f;
     self->m_iBankReference = 0;
     self->m_iPatchReference = 0;
@@ -778,7 +778,7 @@ extern "C" int strcmp(const void* a, const void* b);
 void cSSXAudio_SwapBankStopped_2(void* mgr, void* name) __asm__("cSSXAudio_SwapBankStopped__FPv");
 extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* t);
 extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* t);
-extern unsigned char D_004A35A8[];
+extern unsigned char str_empty_j[];
 
 /**
  * Per-frame update of the world triggers: stops untouched instances, updates touched ones, clears the touches.
@@ -793,7 +793,7 @@ extern "C" void cWorldTriggerManager_Update(cWorldTriggerInstance** self)
     for (int i = 0; i < 40; i++) {
         if ((*self)[i].m_bInUse == 1) {
             if ((*self)[i].m_bTouch == 0) {
-                if (strcmp((&(*self)[i])->m_iSwapString, D_004A35A8)) {
+                if (strcmp((&(*self)[i])->m_iSwapString, str_empty_j)) {
                     // PORT: pointer arithmetic through int
                     cSSXAudio_SwapBankStopped_2(cAudioInterface_bxAudio(), (char*)(i * 0x70 + *(int*)self) + 0x40);
                 }
@@ -1174,7 +1174,7 @@ int cWorldTriggerManager_AdvancedTriggerToString(void* self)
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_SwapTriggerPlaying);
 #ifdef SKIP_ASM
 extern "C" int strcmp(const void* a, const void* b);
-extern unsigned char D_004A35A8[];
+extern unsigned char str_empty_j[];
 
 /**
  * Counts the in-use instances that hold a swap string and play a trigger other than id.
@@ -1188,7 +1188,7 @@ extern "C" int cWorldTriggerManager_SwapTriggerPlaying(cWorldTriggerInstance** s
 {
     int n = 0;
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].m_bInUse == 1 && strcmp((&(*self)[i])->m_iSwapString, D_004A35A8)) {
+        if ((*self)[i].m_bInUse == 1 && strcmp((&(*self)[i])->m_iSwapString, str_empty_j)) {
             if ((&(*self)[i])->m_eAudioTrigger != id) n++;
         }
     }

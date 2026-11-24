@@ -1443,14 +1443,14 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Sets a text widget's string from a popup string element.
  *
  * By @p info's eType (tPopupElement): 1 sets the unicode string (cUIText_setUnicodeString), 2 the ascii string
  * (cUIText_setAsciiString), 3 the localised string by id (cUIText_setUnicodeStringByID); 0 sets the empty string
- * D_004A1408. Other types leave the text unchanged.
+ * str_empty_d. Other types leave the text unchanged.
  *
  * @param text  the text widget to fill
  * @param info  the string element: eType at [0], the string or id at [1]
@@ -1468,7 +1468,7 @@ extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, i
         cUIText_setUnicodeStringByID(text, info[1]);
         break;
     case 0:
-        cUIText_setAsciiString(text, D_004A1408);
+        cUIText_setAsciiString(text, str_empty_d);
         break;
     }
 }
@@ -1486,7 +1486,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_setTextString[];
 extern char str_String_pct_08x[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 
 /**
@@ -1533,7 +1533,7 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
         break;
     }
     case 0:
-        cBXString_operatorE1(dst, D_004A1408);
+        cBXString_operatorE1(dst, str_empty_d);
         break;
     }
 }
@@ -1552,7 +1552,7 @@ void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_ScreenPopuponWidgetEvent[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Copies a text widget's string into a cBXString as ASCII.
@@ -1579,7 +1579,7 @@ extern "C" void cScreenPopup_setTextString(cScreenPopup* self, void* dst, cUITex
             cMemMan_free(buf);
         }
     } else {
-        cBXString_operatorE1(dst, D_004A1408);
+        cBXString_operatorE1(dst, str_empty_d);
     }
 }
 #endif
@@ -3551,7 +3551,7 @@ INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_initBuyAttributes);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_kT_OVRCMNBuyAttributesColon[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Sets up the buy popup for buying attribute points.
@@ -3565,7 +3565,7 @@ extern char D_004A1408[];
  */
 extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int pAttrName, int cost, int money)
 {
-    char* defaultStr = D_004A1408;
+    char* defaultStr = str_empty_d;
     int two = 2;
     self->mInfo.mItemName.pustr = (const unsigned short*)defaultStr;
     self->mInfo.mItemName.eType = two;
@@ -5420,7 +5420,7 @@ extern char str_EnterValue[];
 extern char str_Name_bar[];
 extern char str_ExtendCursorLeft[];
 extern char str_ExtendCursorRight[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 
 
@@ -5534,7 +5534,7 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
                 cKeyboardPopup_setStatic2((cKeyboardPopup*)(((char*)self)), *str);
                 cBXString_Reset(str);
             } else {
-                cKeyboardPopup_setStatic2((cKeyboardPopup*)(((char*)self)), D_004A1408);
+                cKeyboardPopup_setStatic2((cKeyboardPopup*)(((char*)self)), str_empty_d);
             }
         }
         cKeyboardPopup_updateCursor(self);

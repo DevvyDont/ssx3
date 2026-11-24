@@ -251,7 +251,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHelpPopup* self);
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 struct sVEnt_1DA238 { short delta; short index; void (*fn)(void*, int); };
 
@@ -301,17 +301,17 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
         if (self->title) {
             cUIText_setUnicodeStringByID((cUIText*)self->wA8, self->title);
         } else {
-            cUIText_setAsciiString((cUIText*)self->wA8, D_004A1408);
+            cUIText_setAsciiString((cUIText*)self->wA8, str_empty_d);
         }
         if (self->c[0]) {
             cFEStateNetHelpPopup_createAndSetDescriptionString((cFEStateNetHelpPopup*)self);
         } else {
-            cUIText_setAsciiString((cUIText*)self->wAC, D_004A1408);
+            cUIText_setAsciiString((cUIText*)self->wAC, str_empty_d);
         }
         if (self->muiBottomText) {
             cUIText_setUnicodeStringByID((cUIText*)self->wB0, self->muiBottomText);
         } else {
-            cUIText_setAsciiString((cUIText*)self->wB0, D_004A1408);
+            cUIText_setAsciiString((cUIText*)self->wB0, str_empty_d);
         }
         for (int j = 0; j < 9; j++) {
             show_1DA238(self->icons[j], 0);
@@ -326,7 +326,7 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
                 if (self->a[i]) {
                     cUIText_setUnicodeStringByID((cUIText*)self->rows[i], self->a[i]);
                 } else {
-                    cUIText_setAsciiString((cUIText*)self->rows[i], D_004A1408);
+                    cUIText_setAsciiString((cUIText*)self->rows[i], str_empty_d);
                 }
             } else {
                 show_1DA238(self->rows[i], 0);
@@ -526,7 +526,7 @@ extern char str_Create_Account[];
 extern char str_Login_Name[];
 extern char str_Password[];
 extern char str_Cancel[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 static inline void copyName_1DA648(char* dst, const char* src)
 {
@@ -556,8 +556,8 @@ extern "C" void* AccountDetailsMenu_AccountDetailsMenu(AccountDetailsMenu* self,
     self->unk_130 = (cDebugLobbyScreen*)(*(int*)vinfo);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Account);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)10);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Login_Name, D_004A1408);
-    cTextMenuItem_cTextMenuItem(&self->unk_194, str_Password, D_004A1408);
+    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Login_Name, str_empty_d);
+    cTextMenuItem_cTextMenuItem(&self->unk_194, str_Password, str_empty_d);
     cCommandMenuItem_cCommandMenuItem2(&self->unk_1C0, 0, actionLabel, 0);
     cPopMenuItem_cPopMenuItem(&self->unk_1E4, str_Cancel);
     cMenu_addItem(self, &self->unk_134, -1);
@@ -590,7 +590,7 @@ extern char str_Create_Account[];
 extern char str_Login_Name[];
 extern char str_Password[];
 extern char str_Cancel[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 static inline void copyName_1DA7E8(char* dst, const char* src)
 {
@@ -618,8 +618,8 @@ extern "C" void* AccountDetailsMenu_AccountDetailsMenu1(AccountDetailsMenu* self
     self->unk_130 = (cDebugLobbyScreen*)(*(int*)vinfo);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Account);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)10);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Login_Name, D_004A1408);
-    cTextMenuItem_cTextMenuItem(&self->unk_194, str_Password, D_004A1408);
+    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Login_Name, str_empty_d);
+    cTextMenuItem_cTextMenuItem(&self->unk_194, str_Password, str_empty_d);
     cCommandMenuItem_cCommandMenuItem2(&self->unk_1C0, 0, actionLabel, 0);
     cPopMenuItem_cPopMenuItem(&self->unk_1E4, str_Cancel);
     cMenu_addItem(self, &self->unk_134, -1);
@@ -695,7 +695,7 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* CreatePersonaMenu_vtbl[];
 extern char str_Create_Persona[];
 extern char str_Persona_Name[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_Create[];
 
 /**
@@ -715,7 +715,7 @@ extern "C" void* CreatePersonaMenu_CreatePersonaMenu(CreatePersonaMenu* self, in
     self->unk_130 = (cDebugLobbyScreen*)(*info);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Persona_Name, D_004A1408);
+    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Persona_Name, str_empty_d);
     cCommandMenuItem_cCommandMenuItem2(&self->unk_194, 0, str_Create, 0);
     cMenu_addItem(self, &self->unk_134, -1);
     cMenu_addItem(self, &self->unk_150, -1);
@@ -947,7 +947,7 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* ChatMenu_vtbl[];
 extern char str_Chat_Menu[];
 extern char str_Enter_Chat[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern int D_00467D70[];
 
 /**
@@ -971,7 +971,7 @@ extern "C" void* ChatMenu_ChatMenu(ChatMenu* self, int* info)
     self->unk_130 = (cDebugLobbyScreen*)(*info);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Chat_Menu);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Enter_Chat, D_004A1408);
+    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Enter_Chat, str_empty_d);
     for (; i != -1; i--) {
         cCommandMenuItem_cCommandMenuItem(chatItem);
         chatItem += 0x24;

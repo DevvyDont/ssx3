@@ -2330,7 +2330,7 @@ extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void func_002C2540(void*, void*);
 extern char str_kT_CMNYes[];
 extern char str_kT_CMNNo[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Sets up a confirmation popup's info: Yes/No options, message, button count and layer, then redraws it.
@@ -2368,7 +2368,7 @@ extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int ustrDisplay
         displayText = (char*)&self->mDisplayText[0];
     } else {
         displayText = (char*)&self->mDisplayText[0];
-        func_002C2540(displayText, D_004A1408);
+        func_002C2540(displayText, str_empty_d);
     }
     strcpy1(displayText, str);
     if (bNoButtons) {

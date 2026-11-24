@@ -6462,8 +6462,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SwapBankStopped__FPv);
 /**
  * Does nothing: called with a world trigger's swap-bank name when the trigger stops.
  *
- * cWorldTriggerManager_Update (the world-trigger update) calls it for each stopped trigger whose name (+0x40) is not D_004A35A8;
- * func_0029B818 handles the same name when a trigger starts.
+ * cWorldTriggerManager_Update (the world-trigger update) calls it for each stopped trigger whose name (+0x40) is not
+ * str_empty_j; func_0029B818 handles the same name when a trigger starts.
  */
 void cSSXAudio_SwapBankStopped(void* self)
 {

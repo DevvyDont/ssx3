@@ -1959,7 +1959,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5A70);
 /* A network session (func_003F5A70 / func_003F5C38 read from its receive buffer f18). */
 
 extern char D_00525F60[];
-extern char D_004A4BB8[];
+extern char str_empty_l[];
 extern int func_003F4C98(char *, int, int);
 extern void a70_47D8(unsigned char *, unsigned char *) __asm__("InvalidDCache");
 extern int a70_4C68(char *, int, int, int, int, int, unsigned char *, int, int, int) __asm__("func_003F4C68");
@@ -1997,7 +1997,7 @@ int func_003F5A70(struct sSess *self, unsigned *kindOut, unsigned *argOut, char 
         char *payload = (char *)(self->f18 + self->fC) + 0xC;
         n = header[8] << 24 | header[9] << 16 | header[10] << 8 | header[11];
         n -= 0xC;
-        if (n < 1) payload = D_004A4BB8;
+        if (n < 1) payload = str_empty_l;
         else payload[n - 1] = 0;
         if (kindOut) *kindOut = header[0] << 24 | header[1] << 16 | header[2] << 8 | header[3];
         if (argOut) *argOut = header[4] << 24 | header[5] << 16 | header[6] << 8 | header[7];

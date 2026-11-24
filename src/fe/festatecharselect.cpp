@@ -889,7 +889,7 @@ extern char str_6pics[];
 extern char str_arrowleft[];
 extern char str_arrowright[];
 extern char str_nametext[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char* D_00440FA0[];
 extern char gBigSize[];
 extern "C" void cUIMenu_setScrollableMenu(void* w, unsigned char n);
@@ -947,7 +947,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(cFEStateCheatCharSelect* 
     }
     if (hashName == GetHashValue32(str_nametext)) {
         *(sCW_2460**)&self->mpNameWidget = w;
-        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        cUIText_setAsciiString((cUIText*)w, str_empty_d);
         return;
     }
     int i = 0;

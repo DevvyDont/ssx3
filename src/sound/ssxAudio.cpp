@@ -1048,7 +1048,7 @@ extern "C" void func_0029F3F8(void* self, int a1);
 extern char* str_H;
 // Default stream-group extension string (gcc inlines strcpy of the literal as an aligned block copy).
 extern char D_004A35A0[] __attribute__((aligned(8)));
-extern char D_004A35A8[];
+extern char str_empty_j[];
 extern char str_BOARD[];
 extern char str_CROWD[];
 extern char str_AUX[];
@@ -1080,7 +1080,7 @@ extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
     __builtin_memcpy(ext, D_004A35A0, 6);
     cSSXAudio_InitSoundLevels((cSSXAudio*)self, 1);
     cAsyncSys_Init3(**(cAsyncSys***)&self->MusicSys, 0, 0);
-    self->mUsedBank[0] = D_004A35A8[0];
+    self->mUsedBank[0] = str_empty_j[0];
     self->mNextUsedBank = 0;
     FileParser_FileParser_r(&parser, str_H_H, 0x100);
     parser.cur = parser.start;

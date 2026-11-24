@@ -28,8 +28,8 @@ struct cPrivateMessage {
     cBXString mText;                // 0x4 [R] ctor second; [U] BuddyMan_onReceiveMessage: "SUBJ" + "BODY"; func_001A7ED8:
                                     //     the reply text
     cBXString mDate;                // 0x8 [R] ctor third; [U] BuddyMan_onReceiveMessage: the "TIME" field printed as
-                                    //     "%02d/%02d/%02d %02d:%02d"; func_001A7ED8: D_004A1408 (""); the popup shows it in
-                                    //     its "TextFromX" line
+                                    //     "%02d/%02d/%02d %02d:%02d"; func_001A7ED8: str_empty_d (""); the popup shows
+                                    //     it in its "TextFromX" line
     void** mVtbl;                   // 0xC [R] the ctors and both dtors store cPrivateMessage_vtbl here; [P] _vt$15cPrivateMessage
 };
 

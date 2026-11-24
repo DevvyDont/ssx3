@@ -452,7 +452,7 @@ extern char str_Peakpct_dRaceGoal[];
 extern char str_Peakpct_dFreestyleGoal[];
 extern char str_Peakpct_dFreerideGoal[];
 extern char str_Peakpct_dEarningsGoal[];
-extern char D_004A2560[];
+extern char str_empty_e[];
 extern char D_004A2590[];
 extern char str_ConfirmMenu_Yes[];
 extern char kMAPCOLOR_REGULAR[];
@@ -575,7 +575,7 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
                 if (hasEvent(goal.track)) {
                     if (goal.useTrackName == 1) {
                         cUIText_setAsciiString((cUIText*)menuObj, cBENewRaceInterface_getLocationName_enus(iface, goal.track));
-                    } else if (strcmp(goal.name, D_004A2560)) {
+                    } else if (strcmp(goal.name, str_empty_e)) {
                         cUIText_setAsciiString((cUIText*)menuObj, goal.name);
                     } else if (goal.kind == 4) {
                         unsigned short text[200];
@@ -1914,7 +1914,7 @@ int cBERewardInterface_getEarningsTarget(void* self, int peak);
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
 extern "C" const char* getDollarString(int value);
 extern char D_004A2550[];
-extern char D_004A2560_oals[] __asm__("D_004A2560");
+extern char D_004A2560_oals[] __asm__("str_empty_e");
 extern char D_004A23C0[];
 extern char str_pct_S_pct_s_b[];
 extern char str_pct_S_Jam_b_oals[] __asm__("str_pct_S_Jam_b");
@@ -2241,7 +2241,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_showEventPath);
 #ifdef SKIP_ASM
 extern "C" int strcmp(const char* a, const char* b);
 extern int cUITemplate_MAP_mPeak;
-extern char D_004A2560[];
+extern char str_empty_e[];
 extern char str_peak1racepath[];
 extern char str_peak1fspath[];
 extern char str_peak2racepath[];
@@ -2322,7 +2322,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
 
 
     if (cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name)) != 0
-        || strcmp(name, D_004A2560) == 0) {
+        || strcmp(name, str_empty_e) == 0) {
         switch (cUITemplate_MAP_mPeak) {
         case 0:
             for (int i = 0; i < 6; i++) {
@@ -2748,7 +2748,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
         if (cUITemplate_MAP_mMapState == 2)
             cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_CMNHELPStations));
     } else {
-        if (strcmp((char*)&desc.w[0] + 0x32, D_004A2560) != 0) {
+        if (strcmp((char*)&desc.w[0] + 0x32, str_empty_e) != 0) {
             if (cUITemplate_MAP_mMapState == 2)
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32((char*)&desc.w[0] + 0x32));
         } else if (desc.w[2] == 4) {

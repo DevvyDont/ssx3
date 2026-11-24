@@ -6975,7 +6975,7 @@ void func_0042C628(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", ExecPS2);
 #ifdef SKIP_ASM
-extern char D_0049AD90[];
+extern char str_empty_c[];
 extern void func_0042C510_v(char *, int, int) __asm__("func_0042C510");
 extern void func_0042C628(void);
 extern int _ExecPS2(int, int, int, int);
@@ -6993,7 +6993,7 @@ extern int _ExecPS2(int, int, int, int);
  * @return the syscall's result (it does not return on success)
  */
 int ExecPS2(int entryAddr, int gpValue, int argCount, int argVector) {
-    func_0042C510_v(D_0049AD90, argCount, argVector);
+    func_0042C510_v(str_empty_c, argCount, argVector);
     func_0042C628();
     return _ExecPS2(entryAddr, gpValue, argCount, D_00456538 + 4);
 }
@@ -7042,7 +7042,7 @@ void Exit(int status) {
 //100%
 INCLUDE_ASM("seg/seg_325220", ExecOSD);
 #ifdef SKIP_ASM
-extern char D_0049AD90[];
+extern char str_empty_c[];
 extern int func_0042C510_3(char *a0, int a1, int a2) __asm__("func_0042C510");
 extern void _ExecOSD(int a0, int a1);
 /**
@@ -7056,7 +7056,7 @@ extern void _ExecOSD(int a0, int a1);
  * @param argVector  argument strings
  */
 void ExecOSD(int argCount, int argVector) {
-    func_0042C510_3(D_0049AD90, argCount, argVector);
+    func_0042C510_3(str_empty_c, argCount, argVector);
     func_0042C628();
     _ExecOSD(argCount, D_00456538 + 4);
 }

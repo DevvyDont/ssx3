@@ -73,8 +73,8 @@ struct cWorldTriggerInstance {
                                         //      stores CrowdTrigger's result; Stop picks the crowd system when set
     int m_iViewPort;                    // 0x3C [O] (On Tour 0x38); [U] SameTriggerInstance compares it; Update passes it to
                                         //      TriggerToPatch (not set by the ctor)
-    char m_iSwapString[31];             // 0x40 [O] (On Tour 0x3C); [R] ctor / Reset / Stop store "" (sb of D_004A35A8[0]);
-                                        //      [U] Update fills it with SwapTriggerToString
+    char m_iSwapString[31];             // 0x40 [O] (On Tour 0x3C); [R] ctor / Reset / Stop store "" (sb of
+                                        //      str_empty_j[0]); [U] Update fills it with SwapTriggerToString
     char unk_5F[0x1];                   // 0x5F padding
     int m_iBankReference;               // 0x60 [O] (On Tour 0x5C); [R] ctor / Reset / Stop 0; [U] Update stores the bank
                                         //      TriggerToPatch returns

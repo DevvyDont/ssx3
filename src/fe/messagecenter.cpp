@@ -39,7 +39,7 @@ extern char str_free_songs[];
 extern char str_btext_select[];
 extern char str_btext_preview[];
 extern char str_Menu0000[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_arr_up[];
 extern char str_singer[];
 extern char str_song_by[];
@@ -106,10 +106,10 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, cUIThing
     int hash = w->mHashName;
     if (hash == GetHashValue32(str_CurrentSong)) {
         self->title = w;
-        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        cUIText_setAsciiString((cUIText*)w, str_empty_d);
     } else if (hash == GetHashValue32(str_CurrentArtist)) {
         self->artist = w;
-        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        cUIText_setAsciiString((cUIText*)w, str_empty_d);
     } else if (hash == GetHashValue32(str_helptext)) {
         self->text = w;
     } else if (hash == GetHashValue32(str_arr_up)) {
@@ -142,7 +142,7 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, cUIThing
         self->w1DC = w;
     } else if (hash == GetHashValue32(str_cost_answer)) {
         self->w1D8 = w;
-        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        cUIText_setAsciiString((cUIText*)w, str_empty_d);
         if (self->f16C == 0) {
             show_6F98(w, 0);
         }
@@ -1107,7 +1107,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_kT_OVRCMNSongBy[];
 extern char str_kT_OVRCMNFree[];
 extern char str_disconnected_from_serverErrorString[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 
 class cMsgWidget_1986D0 {
@@ -1158,7 +1158,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
     }
     ulong mask = self->mOwnedSong;
     if ((int)((mask >> idx) & 1)) {
-        cUIText_setAsciiString(self->mpCost, D_004A1408);
+        cUIText_setAsciiString(self->mpCost, str_empty_d);
         ((cMsgWidget_1986D0*)self->mpCostText)->show(0);
         return;
     }

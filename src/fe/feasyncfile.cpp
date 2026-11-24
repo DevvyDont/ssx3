@@ -822,7 +822,7 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" cUIThing* cUIScreen_getObjectByHashName_4330(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_002625C8_4330(void* session, int idx) __asm__("func_002625C8");
 extern "C" void func_001A9890_4330(void* self, void* entry) __asm__("func_001A9890");
@@ -882,7 +882,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
         break;
     }
     case 8:
-        func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_231FindPlayer), (int)D_004A1408, 0, 1, 0x10);
+        func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_231FindPlayer), (int)str_empty_d, 0, 1, 0x10);
         self->mpKeyboard->mbReferEventsToParent = 1;
         self->mpKeyboard->mbDisableForFirst = 1;
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
@@ -2764,7 +2764,7 @@ extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
 extern "C" char* strcat(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char str_sp[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_LOCID[];
 extern char str_SSX3ID[];
 extern char str_SZ1[];
@@ -2832,9 +2832,9 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
     const char* tags = name + 0x54;
     unsigned int state = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(tags, str_LOCID), -1);
     cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(tags, str_SSX3ID), -1);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(tags, str_SZ1), detail1, 0x20, D_004A1408);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(tags, str_SZ2), detail2, 0x20, D_004A1408);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(tags, str_SZ3), detail3, 0x20, D_004A1408);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(tags, str_SZ1), detail1, 0x20, str_empty_d);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(tags, str_SZ2), detail2, 0x20, str_empty_d);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(tags, str_SZ3), detail3, 0x20, str_empty_d);
     if (mode == 0) {
         char buf[0x60];
         unsigned short wide[0x60];
@@ -3161,7 +3161,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A7ED8(cFEStateReadMessagePopup* self, const char* name);
 extern "C" void func_001A9090(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 struct cFEObj_001A7BB8 {
     int f0;
@@ -3205,7 +3205,7 @@ extern "C" void cFEStateReadMessagePopup_onWidgetEvent(cFEStateReadMessagePopup*
         ((cFEObj_001A7BB8*)self->mpParentState)->onPopupEvent(self, 20);
         break;
     case 5:
-        func_001A9090((cFEStateNet*)self, 0, (int)self->mszSender, (int)D_004A1408, 0, 0, 0x3F);
+        func_001A9090((cFEStateNet*)self, 0, (int)self->mszSender, (int)str_empty_d, 0, 0, 0x3F);
         self->mpKeyboard->meType = 0;
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
         cKeyboardPopup_setIncludeQuickKeyRow(self->mpKeyboard, 1);
@@ -3415,7 +3415,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void func_001A7DD8(cFEStateReadMessagePopup* self, void* item);
 extern char str_cPrivateMessage[];
 extern void* cPrivateMessage_vtbl[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 static inline void* Init_001A7ED8(char* vvp, const char* a, const char* b, const char* c)
 {
@@ -3439,7 +3439,7 @@ static inline void* Init_001A7ED8(char* vvp, const char* a, const char* b, const
 extern "C" void func_001A7ED8(cFEStateReadMessagePopup* self, const char* name)
 {
     func_001A7DD8(self, Init_001A7ED8((char*)cMemMan_alloc(0x10, str_cPrivateMessage, 0x20000000, 0),
-                                      ((const char*)LobbyMan_mLobbyMan->mPersona), name, D_004A1408));
+                                      ((const char*)LobbyMan_mLobbyMan->mPersona), name, str_empty_d));
 }
 #endif
 
@@ -3529,7 +3529,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern char str_TextFromX[];
 extern char str_kT_POPUP242PlayerID[];
 extern char str_textScrollChat[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_colon_sp[];
 
 struct sVEntry_001A81F0 {
@@ -3580,7 +3580,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
     if (text != 0 && Count1A81F0(self) != 0) {
         cPrivateMessage* msgEntry = ((cPrivateMessage**)(self)->mMessages.mpStart)[0];
         char* who = self->mszSender;
-        sprintf1_1A81F0(buf, Loc1A81F0(str_kT_POPUP242PlayerID), who, msgEntry->mDate.Str, D_004A1408);
+        sprintf1_1A81F0(buf, Loc1A81F0(str_kT_POPUP242PlayerID), who, msgEntry->mDate.Str, str_empty_d);
         cUIText_setUnicodeString(text, buf);
         ((cFEVObj_001A81F0*)text)->setVisible(1);
     }
@@ -6641,7 +6641,7 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup(void* mem, in
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int v);
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_cFEStateReadMessagePopup[];
 
 
@@ -6658,7 +6658,7 @@ extern char str_cFEStateReadMessagePopup[];
  * @param popup  unused (the popup)
  * @param event  unused (the popup event)
  */
-// PORT: passes D_004A1408 through an int parameter.
+// PORT: passes str_empty_d through an int parameter.
 extern "C" void func_001ABB30(cFEStateNet* feStateNet, int playerName, void* popup, int event)
 {
     cFEStateNet* self = feStateNet;
@@ -6676,7 +6676,7 @@ extern "C" void func_001ABB30(cFEStateNet* feStateNet, int playerName, void* pop
         void* obj = cFEStateReadMessagePopup_cFEStateReadMessagePopup(cMemMan_alloc(1788, str_cFEStateReadMessagePopup, 0x100, 0), ((int)self->mpEngine), self, playerName);
         cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, obj);
     } else {
-        func_001A9090((cFEStateNet*)self, 0, playerName, (int)D_004A1408, 0, 2, 0x3F);
+        func_001A9090((cFEStateNet*)self, 0, playerName, (int)str_empty_d, 0, 2, 0x3F);
         self->mpKeyboard->meType = 0;
         cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 75, 1, 2);
         cKeyboardPopup_setIncludeQuickKeyRow(((char*)self->mpKeyboard), 1);
@@ -6978,7 +6978,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 void cFEStateNet_onCreateScreen(void* self);
 extern char str_204use_existing_account[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Creates the "204use_existing_account" screen and clears LobbyMan's two login strings (+0x48 and +0x4C).
@@ -6993,8 +6993,8 @@ extern "C" void cFEUseExistingAccount_onCreateScreen(cFEUseExistingAccount* self
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, D_004A1408);
-    cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, D_004A1408);
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, str_empty_d);
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, str_empty_d);
     cFEStateNet_onCreateScreen(((cFEStateNet*)self));
 }
 #endif
@@ -7026,7 +7026,7 @@ extern char str_TextForgotAccount[];
 extern char str_EnterAccountName[];
 extern char str_EnterPassword[];
 extern char str_TextOK[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 struct cFEVObj_001AC170 {
     int f0;
@@ -7083,7 +7083,7 @@ extern "C" void cFEUseExistingAccount_onWidgetCreate(cFEUseExistingAccount* self
     } else if (IsHash_001AC170(text->mHashName, str_TextForgotAccount)) {
         text->mMiscData = 3;
     } else if (IsHash_001AC170(text->mHashName, str_EnterAccountName) || IsHash_001AC170(text->mHashName, str_EnterPassword)) {
-        cUIText_setAsciiString(text, D_004A1408);
+        cUIText_setAsciiString(text, str_empty_d);
     } else if (IsHash_001AC170(text->mHashName, str_TextOK)) {
         text->mMiscData = 4;
     }
@@ -8065,7 +8065,8 @@ extern "C" void cFEStateSelectPersona_onWidgetEvent(cFEStateSelectPersona* selfp
             break;
         }
         if (idx >= LobbyMan_mLobbyMan->mNumPersonas) {
-            func_001A9150((cFEStateNet*)selfp, (int)pWidget, GetHashValue32(str_kT_220CreateNewPersona), (int)D_004A1408, 0, -1, 0xC);
+            func_001A9150((cFEStateNet*)selfp, (int)pWidget, GetHashValue32(str_kT_220CreateNewPersona),
+                          (int)str_empty_d, 0, -1, 0xC);
             selfp->mpKeyboard->mbDisableForFirst = 1;
             cKeyboardPopup_setIncludeKey(selfp->mpKeyboard, 75, 1, 2);
             cKeyboardPopup_setIncludeKey(selfp->mpKeyboard, 53, 0, 2);
@@ -12092,7 +12093,7 @@ extern const char* D_004A1B38;
 extern const char* D_004A1B3C;
 extern const char* D_004A1B40;
 extern char str_sp[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_ps2X[];
 extern char str_TextPlayerName[];
 extern char str_kT_CMNGamesPlayed[];
@@ -12171,7 +12172,7 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
             sprintf2_v(buf, D_004A1B30, Loc1B25E0(str_kT_CMNRaceRanking), info.a);
             cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(uiText, D_004A1408);
+            cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
     uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextGamesPlayed));
@@ -12180,7 +12181,7 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
             sprintf2_v(buf, D_004A1B34, Loc1B25E0(str_kT_CMNGamesPlayed), info.c);
             cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(uiText, D_004A1408);
+            cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
     uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextWinRatio));
@@ -12197,7 +12198,7 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
             sprintf2_v(buf, D_004A1B38, Loc1B25E0(str_kT_CMNWinRatio), info.b, info.c, fptodp(pct));
             cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(uiText, D_004A1408);
+            cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
     uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextDisconnects));
@@ -12206,7 +12207,7 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
             sprintf2_v(buf, D_004A1B3C, Loc1B25E0(str_kT_CMNDisconnects), info.d);
             cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(uiText, D_004A1408);
+            cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
     uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextOverallRanking));
@@ -12215,7 +12216,7 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
             sprintf2_v(buf, D_004A1B40, Loc1B25E0(str_kT_235OverallRanking), info.a);
             cUIText_setUnicodeString(uiText, buf);
         } else {
-            cUIText_setAsciiString(uiText, D_004A1408);
+            cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
     cBXString__cBXString(&playerName, 2);
@@ -12321,7 +12322,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_0025F1B0(void* self);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_TextPlayerName[];
 extern char str_PlayerListMenu[];
 extern char str_Txt_Select[];
@@ -12382,7 +12383,7 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
         obj->setVisible(1);
     } else if (id == GetHashValue32(str_TextPlayerName)) {
         obj->setVisible(1);
-        cUIText_setAsciiString((cUIText*)obj, D_004A1408);
+        cUIText_setAsciiString((cUIText*)obj, str_empty_d);
     } else if (id == GetHashValue32(str_TextAvailablePlayersTitle)) {
         obj->setVisible(1);
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_235AvailablePlayers));
@@ -12842,7 +12843,7 @@ extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4,
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int v);
 extern char str_kT_POPUP235Chat[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Opens the chat keyboard when L1 is pressed in the chat room.
@@ -12857,7 +12858,7 @@ extern "C" int cFEStateChatRoom_onInputBegin(cFEStateChatRoom* self, cUIInput* o
 {
     if (obj->isLShift1() != 0) {
         // PORT: string pointer passed through an int parameter (func_001A9150's a3)
-        func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP235Chat), (int)D_004A1408, 0, 4, 0x3F);
+        func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP235Chat), (int)str_empty_d, 0, 4, 0x3F);
         self->mpKeyboard->meType = 0;
         cKeyboardPopup_setIncludeQuickKeyRow(self->mpKeyboard, 1);
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
@@ -20079,7 +20080,7 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int func_00261460(void* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_cFEStateNetAccountMem[];
 extern const char str_cFEStateSelectPersona[];
 extern char str_kT_TITLEDuplicateUser[];
@@ -20122,12 +20123,14 @@ extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* s
         if (pWidget == 4) {
             if (self->mbAccount != 0) {
                 // PORT: string pointer passed through an int parameter (func_001A9150's a3)
-                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_TITLEDuplicateAccount), (int)D_004A1408, 0, -1, 0x10);
+                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_TITLEDuplicateAccount), (int)str_empty_d, 0,
+                              -1, 0x10);
                 self->mpKeyboard->mbDisableForFirst = 1;
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
             } else {
-                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_TITLEDuplicateUser), (int)D_004A1408, 0, -1, 0xC);
+                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_TITLEDuplicateUser), (int)str_empty_d, 0, -1,
+                              0xC);
                 self->mpKeyboard->mbDisableForFirst = 1;
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
@@ -20306,13 +20309,13 @@ struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern char str_SelectNamepct_d[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Shows the server's suggested names in the "SelectName0".."SelectName3" texts.
  *
  * For each of the four texts found on mpScreen: when i < mpAccount->mNumNameOptions it shows mNameOptions[i] and calls
- * the text's virtual slot 8 with 0; otherwise it shows D_004A1408 and calls slot 8 with 1. Called on screen creation
+ * the text's virtual slot 8 with 0; otherwise it shows str_empty_d and calls slot 8 with 1. Called on screen creation
  * and again when a 'dupl' reply arrives (func_001BC4F0).
  */
 extern "C" void func_001BC400(cFEStateCreateDuplicate* self)
@@ -20328,7 +20331,7 @@ extern "C" void func_001BC400(cFEStateCreateDuplicate* self)
                 cUIText_setAsciiString(text, ((char**)((char*)&names->mNameOptions))[i]);
                 ((cFEVText_001BC400*)text)->setStatic(0);
             } else {
-                cUIText_setAsciiString(text, D_004A1408);
+                cUIText_setAsciiString(text, str_empty_d);
                 ((cFEVText_001BC400*)text)->setStatic(1);
             }
         }
@@ -21694,7 +21697,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern char str_kT_POPUP231EnterPassword[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Popup handler for the 0x82A popup (room needs a password): on "enter password" opens the keyboard for it.
@@ -21711,7 +21714,8 @@ extern "C" void func_001BDD60(cFEStateLobbyMenu* self, cUIState* popup, int even
     if (event == 0xF) {
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, 0xF);
         // PORT: string pointer passed through an int parameter (func_001A9150's a3)
-        func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP231EnterPassword), (int)D_004A1408, 0, 8, 0x3F);
+        func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP231EnterPassword), (int)str_empty_d, 0, 8,
+                      0x3F);
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
     } else {
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
@@ -22374,7 +22378,7 @@ extern char str_kT_POPUP232Beginner[];
 extern char str_kT_POPUP232Advanced[];
 extern char str_kT_POPUP232Elite[];
 extern char str_kT_POPUP232Voice[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 /**
  * Sets up the create-room widgets as the screen creates them.
@@ -22396,10 +22400,10 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetCreate(cFEStateNetCreateRoomP
         cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A6C);
         self->mpLBChannelName = (cUIListBox*)text;
     } else if (id == GetHashValue32(str_EnterRoomName)) {
-        cUIText_setAsciiString(text, D_004A1408);
+        cUIText_setAsciiString(text, str_empty_d);
         self->mpTextRoomName = text;
     } else if (id == GetHashValue32(str_EnterPassword)) {
-        cUIText_setAsciiString(text, D_004A1408);
+        cUIText_setAsciiString(text, str_empty_d);
         self->mpTextPassword = text;
     } else if (id == GetHashValue32(str_PairChannelName)) {
         text->mMiscData = 0;

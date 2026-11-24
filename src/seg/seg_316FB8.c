@@ -5376,7 +5376,7 @@ int tolower(int charCode) {
 INCLUDE_ASM("seg/seg_316FB8", _setlocale_r);
 #ifdef SKIP_ASM
 extern char D_0049A7D0b[] __asm__("D_0049A7D0");
-extern char D_0049A7C0[], D_0049A7D0[], D_0049A7D8[], D_0049A7E0[], D_0049A7E8[];
+extern char str_empty_b[], D_0049A7D0[], D_0049A7D8[], D_0049A7E0[], D_0049A7E8[];
 extern char __mb_cur_max[], lc_ctype[], last_lc_ctype[];
 extern int strcmp_cmp(char *, char *) __asm__("strcmp");
 extern char *strcpy_(char *, char *) __asm__("strcpy");
@@ -5399,7 +5399,7 @@ char *_setlocale_r_(int *p, int category, char *locale) __asm__("_setlocale_r");
 char *_setlocale_r_(int *reent, int category, char *locale) {
     if (locale) {
         if (category != 2) {
-            if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, D_0049A7C0))
+            if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, str_empty_b))
                 return 0;
             if (category == 0) {
                 strcpy_(last_lc_ctype, lc_ctype);
@@ -5407,7 +5407,7 @@ char *_setlocale_r_(int *reent, int category, char *locale) {
                 *(int *)__mb_cur_max = 1;
             }
         } else {
-            if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, D_0049A7C0) && strcmp_cmp(locale, D_0049A7D0) &&
+            if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, str_empty_b) && strcmp_cmp(locale, D_0049A7D0) &&
                 strcmp_cmp(locale, D_0049A7D8) && strcmp_cmp(locale, D_0049A7E0) &&
                 strcmp_cmp(locale, D_0049A7E8))
                 return 0;

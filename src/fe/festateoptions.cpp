@@ -114,7 +114,7 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cKeyboardPopup[];
 extern char str_TransitionOut[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char D_004A1520[];
 extern char D_004A1530[];
 extern int D_004A14D0;
@@ -159,8 +159,8 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
             void* pop = cKeyboardPopup_cKeyboardPopup(mem, (char*)self->mpEngine, (self), 0, self->mCtrlBits);
             self->mpKeyboard = (cKeyboardPopup*)pop;
-            cKeyboardPopup_setInputText(pop, D_004A1408);
-            cKeyboardPopup_setStatic2(self->mpKeyboard, D_004A1408);
+            cKeyboardPopup_setInputText(pop, str_empty_d);
+            cKeyboardPopup_setStatic2(self->mpKeyboard, str_empty_d);
             cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, self->mpKeyboard);
             break;
@@ -2622,7 +2622,7 @@ extern "C" void cFERider_purge(void* self);
 extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
-extern char D_004A1408[];
+extern char str_empty_d[];
 extern char str_TransitionOut[];
 
 
@@ -2661,7 +2661,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
             sel = 0;
         }
         cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        cBENewPlayerInterface_setPlayerName(iface, sel, D_004A1408);
+        cBENewPlayerInterface_setPlayerName(iface, sel, str_empty_d);
         iface->submit();
         cBE_newProfile(cBE_getBE(), sel);
         void* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, 0);
@@ -2822,7 +2822,7 @@ extern char str_Memory_card_text[];
 extern char str_kT_MEMEmpty[];
 extern char str_pct_dmemory_card[];
 extern char str_pct_d_b[];
-extern char D_004A1408[];
+extern char str_empty_d[];
 
 struct sColor_DD60 {
     float r, g, b, a;
@@ -2927,8 +2927,8 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(cFEStateOptionsDevice
         uiObj->setVisible(0);
     }
     cUIText_setUnicodeString(getObj_DD60(self, str_title_Save_Load), title);
-    cUIText_setAsciiString((cUIText*)getObj_DD60(self, str_1percentage), D_004A1408);
-    cUIText_setAsciiString((cUIText*)getObj_DD60(self, str_Memory_card_text), D_004A1408);
+    cUIText_setAsciiString((cUIText*)getObj_DD60(self, str_1percentage), str_empty_d);
+    cUIText_setAsciiString((cUIText*)getObj_DD60(self, str_Memory_card_text), str_empty_d);
     char* slot = getString_DD60(str_kT_MEMEmpty);
     char buf[32];
     for (int i = 1; i < 5; i++) {

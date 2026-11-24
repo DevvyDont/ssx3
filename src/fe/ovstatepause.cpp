@@ -2393,7 +2393,7 @@ extern int cPauseState_Flags;
 extern int cPauseState_StackIdx;
 extern int cPauseState_Stack[];
 extern int cPauseState_FlagsTable[];
-extern char D_004A2560[];
+extern char str_empty_e[];
 extern char str_119Save_Replay[];
 extern char str_1percentage_b[];
 extern char str_title_Save_Replay[];
@@ -2439,7 +2439,7 @@ extern "C" void cOVState_SAVEREPLAY_onCreateScreen(cOVState_SAVEREPLAY* self)
         cUIObj_DC30* widget;
         cUIScreen_playFrame_DC30(screen, 0, 0);
         widget = getObj_DC30(((char*)self), str_1percentage_b);
-        cUIText_setAsciiString((cUIText*)widget, D_004A2560);
+        cUIText_setAsciiString((cUIText*)widget, str_empty_e);
         widget = getObj_DC30(((char*)self), str_title_Save_Replay);
         widget->setVisible(1);
         widget = getObj_DC30(((char*)self), str_title_Save_Records);
@@ -2447,7 +2447,7 @@ extern "C" void cOVState_SAVEREPLAY_onCreateScreen(cOVState_SAVEREPLAY* self)
         widget = getObj_DC30(((char*)self), str_helptext01);
         widget->setVisible(0);
         widget = getObj_DC30(((char*)self), str_Memory_card_info);
-        cUIText_setAsciiString((cUIText*)widget, D_004A2560);
+        cUIText_setAsciiString((cUIText*)widget, str_empty_e);
         char name[0x20];
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
@@ -3161,7 +3161,7 @@ extern char str_title_Save_Records[];
 extern char str_Memory_card_info[];
 extern char str_pct_dmemory_card_b[];
 extern char D_004A2138[];
-extern char D_004A2560[];
+extern char str_empty_e[];
 
 class cUIObj_1FE9A8 {
 public:
@@ -3196,14 +3196,16 @@ extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(cOVState_SAVEOPTIONS* self)
     self->mpScreen = (cUIScreen*)scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage_b)), D_004A2560);
+        cUIText_setAsciiString(
+            (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage_b)), str_empty_e);
         cUIObj_1FE9A8* widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Replay));
         widget->setVisible(0);
         widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Records));
         widget->setVisible(1);
         widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext01));
         widget->setVisible(1);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_info)), D_004A2560);
+        cUIText_setAsciiString(
+            (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_info)), str_empty_e);
         for (int i = 1; i < 5; i++) {
             char buf[0x20];
             sprintf(buf, str_pct_dmemory_card_b, i);
