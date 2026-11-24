@@ -1526,10 +1526,10 @@ extern "C" void func_001A4FB0(cFEStateNetMessenger* self, int a1, int a2);
  * Handles the online events delivered to the messenger (cFEStateNetMessenger's vtable entry 31).
  *
  * 263 rebuilds the name list (func_001A5898) and then, like 234/236/237/239/241/262/265/266/267/274/275, unless the
- * disconnect popup is up (unk_6AC), adds new roster names (func_001A54D8), re-picks the pending buddy (func_001A52B0),
- * redraws the list (func_001A6978) and refreshes the open user popup (func_001AB3D0). 270 shows func_001A4D90, 227 the
- * find result (func_001A4CE8), 258 errors go to func_001A4FB0. Anything else refreshes the user popup and goes to
- * cFEStateNet's handler func_001A8E40, whose result is returned.
+ * disconnect popup is up (mDisconnectPopupOpen), adds new roster names (func_001A54D8), re-picks the pending buddy
+ * (func_001A52B0), redraws the list (func_001A6978) and refreshes the open user popup (func_001AB3D0). 270 shows
+ * func_001A4D90, 227 the find result (func_001A4CE8), 258 errors go to func_001A4FB0. Anything else refreshes the user
+ * popup and goes to cFEStateNet's handler func_001A8E40, whose result is returned.
  *
  * @param eventType  event type
  * @param eventData  the event
@@ -1542,7 +1542,7 @@ extern "C" void* func_001A5010(cFEStateNetMessenger* self, int eventType, int ev
         func_001A5898(self);
     case 234: case 236: case 237: case 239: case 241: case 262:
     case 265: case 266: case 267: case 274: case 275:
-        if (self->unk_6AC != 0) {
+        if (self->mDisconnectPopupOpen != 0) {
             break;
         }
         func_001A54D8(self);
@@ -3696,10 +3696,11 @@ extern "C" void* cFEStateNet_cFEStateNet_impl(void* self, void* engine, void* ow
 /**
  * Constructs the cFEStateNet part of an online front-end state.
  *
- * Runs the cUIState constructor cUIState_cUIState1(self, engine, owner), zeroes unk_048..unk_058, mpKeyboard, mpPopup,
- * mpKeyboardText, unk_6AC..unk_6B8 and unk_6C4, sets unk_6A8 to 1 and unk_6BC to 2, stores the vtable cFEStateNet_vtbl,
- * builds unk_6C0 as cBXString " ", allocates mMsgList's sentinel node (cMemMan_alloc(0xC, "StlBlock")) linked to itself
- * and sets mUserNum to 0. An unused 16-byte local keeps the retail stack frame.
+ * Runs the cUIState constructor cUIState_cUIState1(self, engine, owner), zeroes mHasFocus..unk_058, mpKeyboard,
+ * mpPopup, mpKeyboardText, mDisconnectPopupOpen..mpPopupTextBuf and unk_6C4, sets mNeedsLobby to 1 and unk_6BC to 2,
+ * stores the vtable cFEStateNet_vtbl, builds mszTargetUser as cBXString " ", allocates mMsgList's sentinel node
+ * (cMemMan_alloc(0xC, "StlBlock")) linked to itself and sets mUserNum to 0. An unused 16-byte local keeps the retail
+ * stack frame.
  *
  * @param engine  the UI engine (mpEngine)
  * @param owner  the parent state (mpParentState)
@@ -3786,9 +3787,9 @@ extern "C" void f_1A85D0(char* self, int flags) __asm__("cFEStateNet__cFEStateNe
 /**
  * Destroys the cFEStateNet part of an online front-end state.
  *
- * Restores the vtable cFEStateNet_vtbl, deletes every queued event in mMsgList (each through its virtual destructor), frees
- * the unk_6B8 text buffer, clears the list (func_001DB718) and frees its sentinel, destroys the unk_6C0 string and runs
- * the cUIState destructor cUIState__cUIState with @p flags.
+ * Restores the vtable cFEStateNet_vtbl, deletes every queued event in mMsgList (each through its virtual destructor),
+ * frees the mpPopupTextBuf text buffer, clears the list (func_001DB718) and frees its sentinel, destroys the
+ * mszTargetUser string and runs the cUIState destructor cUIState__cUIState with @p flags.
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState (bit 0 frees the object)
  */
@@ -3931,7 +3932,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  * Runs when an online front-end state gets the focus: refreshes the buddy presence and enables event processing.
  *
  * Calls the state's own virtual at vtable entry 32 (cFEStateNet's func_001A8830 unless overridden, which sets the
- * player's buddy presence through func_00262768), then cUIState_onGainFocus with @p pPrevState, and sets unk_048 to 1
+ * player's buddy presence through func_00262768), then cUIState_onGainFocus with @p pPrevState, and sets mHasFocus to 1
  * (cFEStateNet_isProcessingEvents reports the state as processing events only while it is set).
  *
  * @param pPrevState  the state that had the focus (On Tour: cUIState* pPrevState)
@@ -3941,7 +3942,7 @@ extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int pPrevState)
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
     vt[32].fn(vthis(self, vt[32]));
     cUIState_onGainFocus(self, pPrevState);
-    self->unk_048 = 1;
+    self->mHasFocus = 1;
 }
 #endif
 
@@ -4111,7 +4112,7 @@ extern "C" void func_001A9930(cFEStateNet* self);
 /**
  * Vets a state about to be pushed: while offline it deletes it and shows the disconnect popup instead.
  *
- * cFEStateNet's vtable entry 26, called by func_001A8A40. When unk_6A8 is set (the state needs the lobby),
+ * cFEStateNet's vtable entry 26, called by func_001A8A40. When mNeedsLobby is set (the state needs the lobby),
  * LobbyMan_mLobbyMan->mState is 0 (disconnected) and the new state's mHashName (+0xC) is not one of the offline screens
  * 49 (cFEStateNetConfig), 51 (cFEStateLogin), 77 or 78 (account creation steps 1 and 2), the new state is deleted and
  * func_001A9930 opens the disconnect popup.
@@ -4122,7 +4123,7 @@ extern "C" void func_001A9930(cFEStateNet* self);
 extern "C" void* func_001A89B0(cFEStateNet* self, cFEMsg_001A89B0* msg)
 {
     int kind = *(int*)((char*)msg + 0xC);
-    if (self->unk_6A8 != 0 && kind != 49 && kind != 51 && kind != 77 && kind != 78
+    if (self->mNeedsLobby != 0 && kind != 49 && kind != 51 && kind != 77 && kind != 78
         && LobbyMan_mLobbyMan->mState == 0) {
         delete msg;
         func_001A9930(self);
@@ -4356,11 +4357,11 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
  *
  * Events outside 200..278 go straight to the state's message handler (vtable entry 31). The network errors 277/278 are
  * delivered at once when the state processes events (entry 30, isProcessingEvents); 277 first resets and disconnects
- * BuddyMan (func_00261058, func_00261408). When the state cannot take it yet, unk_6B4 is set and the next online event
- * re-delivers it as (277, 0) instead of being handled; these paths return 1. Other online events except 276 (onUpdate's
- * poll) are cloned into mMsgList (func_001A8AE8). Then, unless the state is not processing events or its popup defers
- * events (mbDeferEventsFlag, popup +0x170), it pops each queued event, passes it to entry 31, refreshes the hints
- * (entry 27) after 236/237/239/241/265/274/275 (menu sounds 7 for 236 and 8 for 265) and deletes it.
+ * BuddyMan (func_00261058, func_00261408). When the state cannot take it yet, mEventPending is set and the next online
+ * event re-delivers it as (277, 0) instead of being handled; these paths return 1. Other online events except 276
+ * (onUpdate's poll) are cloned into mMsgList (func_001A8AE8). Then, unless the state is not processing events or its
+ * popup defers events (mbDeferEventsFlag, popup +0x170), it pops each queued event, passes it to entry 31, refreshes
+ * the hints (entry 27) after 236/237/239/241/265/274/275 (menu sounds 7 for 236 and 8 for 265) and deletes it.
  *
  * @param st  the online state (this)
  * @param msg  event type
@@ -5032,7 +5033,7 @@ extern const char str_cFEStateLogin[];
  *
  * On 15 or 20: func_001A93D0, closes the stack's popups (cUIStateStack_popToState), sets unk_058 (the onInputBegin override then
  * swallows input), sets bit 0x80 of the current state's mAttrState, pushes a new cFEStateLogin (func_001A8A40) and
- * clears unk_6AC. Also used by cFEStateRelogin_onPopupEvent.
+ * clears mDisconnectPopupOpen. Also used by cFEStateRelogin_onPopupEvent.
  *
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 21 keyboard text, 22 the popup is gone)
@@ -5046,7 +5047,7 @@ extern "C" void func_001A9668(cFEStateNet* self, int popup, int event)
         cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
         st->mAttrState |= 0x80;
         func_001A8A40(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateLogin, 0, 0), (int)self->mpEngine));
-        self->unk_6AC = 0;
+        self->mDisconnectPopupOpen = 0;
     } else {
         func_001A93D0_3(self, popup, event);
     }
@@ -5084,7 +5085,7 @@ extern "C" void func_001A9710(cFEStateNet* self, int popup, int event)
         cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
         st->mAttrState |= 0x80;
         func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig((cFEStateNetConfig*)cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), (int)self->mpEngine));
-        self->unk_6AC = 0;
+        self->mDisconnectPopupOpen = 0;
     } else {
         func_001A93D0_3(self, popup, event);
     }
@@ -5161,13 +5162,13 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9890);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 
 /**
- * Sets the current user name unk_6C0 (cBXString_operatorE1 on the member).
+ * Sets the target user name mszTargetUser (cBXString_operatorE1 on the member).
  *
  * @param str  the user name
  */
 extern "C" void func_001A9890(cFEStateNet* self, const char* str)
 {
-    cBXString_operatorE1(&self->unk_6C0, str);
+    cBXString_operatorE1(&self->mszTargetUser, str);
 }
 #endif
 
@@ -5175,14 +5176,14 @@ extern "C" void func_001A9890(cFEStateNet* self, const char* str)
 INCLUDE_ASM("fe/feasyncfile", func_001A98B0__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the current user name: the text pointer of the unk_6C0 cBXString.
+ * Returns the target user name: the text pointer of the mszTargetUser cBXString.
  *
  * @return the name (as an int)
  */
 int func_001A98B0(void* vself)
 {
     cFEStateNet* self = (cFEStateNet*)vself;
-    return (int)self->unk_6C0;
+    return (int)self->mszTargetUser;
 }
 #endif
 
@@ -5232,15 +5233,15 @@ extern char str_kT_POPUPCMNDisconnected[];
 /**
  * Shows the "disconnected" or "network interrupted" popup once, closing all other popups.
  *
- * Only while unk_6AC is clear; sets it, closes the stack's popups (cUIStateStack_popToState) and shows a one-OK popup
- * (mbDeferEventsFlag 1, mbReceivePrev 0, layer 6): "kT_POPUPCMNNetInterrupted" with id 2110 when the word at
- * func_002591B8() is 0, else "kT_POPUPCMNDisconnected" with id 2109.
+ * Only while mDisconnectPopupOpen is clear; sets it, closes the stack's popups (cUIStateStack_popToState) and shows a
+ * one-OK popup (mbDeferEventsFlag 1, mbReceivePrev 0, layer 6): "kT_POPUPCMNNetInterrupted" with id 2110 when the word
+ * at func_002591B8() is 0, else "kT_POPUPCMNDisconnected" with id 2109.
  */
 extern "C" void func_001A9930(cFEStateNet* self)
 {
-    if (self->unk_6AC == 0) {
+    if (self->mDisconnectPopupOpen == 0) {
         int one = 1;
-        self->unk_6AC = one;
+        self->mDisconnectPopupOpen = one;
         cUIStateStack_popToState(&self->mpEngine->mStateStack);
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50(self);
         cPopupInfo* sub = &popup->info;
@@ -5587,12 +5588,12 @@ static inline void* GetSession_1A9CC0()
  *
  * One OK button, id 258, and a message chosen from about 100 codes ('imst' invalid account, 'pass', 'dupl', 'kick',
  * 'full', 'cdev' cheat device, ...; unknown codes "kT_POPUPCMNUnknownServerError"). 'lock' builds "kT_POPUPCMNLocked"
- * with the event's two strings into a new unk_6B8 buffer (tag "EC_LOCKED"); 'down' shows the server's text (newlines
- * turned into spaces, double ones into "\r\r") titled "kT_POPUP200Maintenance2". 'maut' only changes the id to 2109.
- * Unknown codes and 'dnsf' also reset cCommSystem (cCommSystem_netConnDisconnect) and get id 2110, 'cdev' id 2109; for these three
- * cases it then disconnects BuddyMan (func_00261408) and the lobby (func_0025B800, LobbyMan_mLobbyMan) and shuts the
- * online session down (func_002636F0(func_002591B8(), 0)). Quirk: 'ipas' (invalid password) and 'inam' both show
- * "kT_POPUP210AccountNameLength".
+ * with the event's two strings into a new mpPopupTextBuf buffer (tag "EC_LOCKED"); 'down' shows the server's text
+ * (newlines turned into spaces, double ones into "\r\r") titled "kT_POPUP200Maintenance2". 'maut' only changes the id
+ * to 2109. Unknown codes and 'dnsf' also reset cCommSystem (cCommSystem_netConnDisconnect) and get id 2110, 'cdev' id
+ * 2109; for these three cases it then disconnects BuddyMan (func_00261408) and the lobby (func_0025B800,
+ * LobbyMan_mLobbyMan) and shuts the online session down (func_002636F0(func_002591B8(), 0)). Quirk: 'ipas' (invalid
+ * password) and 'inam' both show "kT_POPUP210AccountNameLength".
  *
  * @param popup  receives mpPopup
  * @param owner  unused
@@ -5718,14 +5719,14 @@ extern "C" void func_001A9CC0(cFEStateNet* self, void** popup, void* owner, onli
             sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
             void* text = vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUPCMNLocked));
             int len = USTR_length(text) + strlen(who) + strlen(name) + 7;
-            if (self->unk_6B8 != 0) {
-                cMemMan_free(self->unk_6B8);
-                self->unk_6B8 = 0;
+            if (self->mpPopupTextBuf != 0) {
+                cMemMan_free(self->mpPopupTextBuf);
+                self->mpPopupTextBuf = 0;
             }
             void* buf = operator_new_tag(len * 2, str_EC_LOCKED, 0, 0);
-            self->unk_6B8 = buf;
+            self->mpPopupTextBuf = buf;
             sprintf2_1A9CC0(buf, fmt, text, who, name);
-            sub->mtMessage.pustr = (const unsigned short*)self->unk_6B8;
+            sub->mtMessage.pustr = (const unsigned short*)self->mpPopupTextBuf;
             sub->mtMessage.eType = 1;
         }
         break;
@@ -6529,12 +6530,13 @@ static inline int Text_001AB478(char* name)
 /**
  * Fills a user-actions popup for a player: challenge, read/send message, messenger add/remove, block/unblock.
  *
- * Stores the name in LobbyMan_mLobbyMan->mOpponent and as the ASCII title (layer 3). With @p fiveOptions: 5 options, id 2059,
- * the last being "kT_235ReportAbuse". Else a player online (func_002633C8) who is in SSX 3 (func_00263490) or has
+ * Stores the name in LobbyMan_mLobbyMan->mOpponent and as the ASCII title (layer 3). With @p fiveOptions: 5 options, id
+ * 2059, the last being "kT_235ReportAbuse". Else a player online (func_002633C8) who is in SSX 3 (func_00263490) or has
  * challenged gets 4 options, id 2059; anyone else 3 options, id 2060 (no challenge). The challenge option reads
  * ChallengeReceived when a challenge is pending (func_00263128); the message option Read or Send (func_00262A38); the
- * messenger and block options carry confirmation texts built in unk_49C / unk_59C (func_00262360 and func_002623B0 pick
- * Remove/Unblock). Sets miDefaultOption to @p selectedOption and mbCenterOptions, then shows the popup (func_001A9BC0).
+ * messenger and block options carry confirmation texts built in mustrStatusLine1 / mustrStatusLine2 (func_00262360 and
+ * func_002623B0 pick Remove/Unblock). Sets miDefaultOption to @p selectedOption and mbCenterOptions, then shows the
+ * popup (func_001A9BC0).
  *
  * @param popup  the popup to fill
  * @param namePtr  the player's name (char* passed as int)
@@ -6594,26 +6596,26 @@ extern "C" void func_001AB478(cFEStateNet* self, cScreenPopup* popup, int namePt
         func_001C57C0(sub, n++, GetHashValue32(str_kT_POPUP235SendMessage));
     }
     if (func_00262360(GetSession_001AB478(), name)) {
-        char* buf = (char*)&self->unk_49C[0];
+        char* buf = (char*)&self->mustrStatusLine1[0];
         sprintf1(buf, Text_001AB478(str_kT_POPUP279ConfirmRemoveMessenger), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(str_kT_POPUP235RemoveMessenger));
         n++;
     } else {
-        char* buf = (char*)&self->unk_49C[0];
+        char* buf = (char*)&self->mustrStatusLine1[0];
         sprintf1(buf, Text_001AB478(str_kT_POPUP279ConfirmAddMessenger), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(str_kT_POPUP235AddMessenger));
         n++;
     }
     if (func_002623B0(GetSession_001AB478(), name)) {
-        char* buf = (char*)&self->unk_59C[0];
+        char* buf = (char*)&self->mustrStatusLine2[0];
         sprintf1(buf, Text_001AB478(str_kT_POPUP235RemoveBlockConfirm), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(str_kT_POPUP235UnblockUser));
         n++;
     } else {
-        char* buf = (char*)&self->unk_59C[0];
+        char* buf = (char*)&self->mustrStatusLine2[0];
         sprintf1(buf, Text_001AB478(str_kT_POPUP235BlockAllConfirm), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(str_kT_POPUP235BlockUser));
@@ -6927,9 +6929,9 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
 /**
  * Constructs the "use existing account" screen state.
  *
- * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with no parent, stores cFEUseExistingAccount_vtbl and mHashName
- * 0x35, starts mszEmail as the empty string (cBXString_EmptyString), and clears unk_6D0, mpTextForgotPassword and unk_6A8 (so
- * net messages are not filtered on this screen).
+ * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with no parent, stores cFEUseExistingAccount_vtbl and
+ * mHashName 0x35, starts mszEmail as the empty string (cBXString_EmptyString), and clears unk_6D0, mpTextForgotPassword
+ * and mNeedsLobby (so net messages are not filtered on this screen).
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @return @p self
@@ -6943,7 +6945,7 @@ extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccou
     self->mHashName = 53;
     self->unk_6D0 = 0;
     self->mpTextForgotPassword = 0;
-    self->unk_6A8 = 0;
+    self->mNeedsLobby = 0;
     return ((void*)self);
 }
 #endif
@@ -12543,7 +12545,7 @@ static inline void* GetSession_001B33D8()
  * Sends what was typed in the chat room's keyboard: a chat line (keyboard id 4) or a private message (id 2).
  *
  * 4: func_0025AAE0(LobbyMan, the keyboard's mszEditString). 2: func_00262690(BuddyMan, the name from func_001A98B0
- * (unk_6C0), the text), BuddyMan created or reconnected on demand.
+ * (mszTargetUser), the text), BuddyMan created or reconnected on demand.
  */
 extern "C" void func_001B33D8(cFEStateChatRoom* self)
 {
@@ -12683,8 +12685,8 @@ extern char str_kT_POPUP235SubmittingAbuse[];
 /**
  * Handles the chat room's 5-option user-actions popup (id 2059): challenge, message, messenger, block, report.
  *
- * The player is unk_6C0 (func_001A98B0). 15 challenges him (func_001ABCD0); 16 closes the popup and reads or sends
- * messages (func_001ABB30); 17 adds/removes him in the messenger (func_001ABE58) and 18 blocks/unblocks
+ * The player is mszTargetUser (func_001A98B0). 15 challenges him (func_001ABCD0); 16 closes the popup and reads or
+ * sends messages (func_001ABB30); 17 adds/removes him in the messenger (func_001ABE58) and 18 blocks/unblocks
  * (func_001ABC50), both showing "MaxBuddiesExceeded" (func_001ABED8) on result 1, else closing the popup; 19 clears
  * unk_6C4, reports him for abuse (func_0025DF00) and shows the button-less "kT_POPUP235SubmittingAbuse" popup (id 2053,
  * no back), then also reaches cFEStateNet_onPopupEvent. The existing comment calls this a memory-card result handler.
@@ -12939,8 +12941,8 @@ extern char str_kT_BTNOK[];
  * 224 (player list changed) and 225 rebuild the player list and re-select mszPlayerName (func_001B2378(.., 1); 224
  * selects a saved copy again with func_001B3978). 220 pushes a cFEStateLobbyMenu when not in a room (func_0025DA90),
  * else rebuilds the list. 232 shows "kT_POPUP235Abuse" (OK, id 2052). 222 adds a chat line (func_001B2CD0) unless
- * mbExiting. 234-240, 262, 266 and 267 refresh the user-actions popup (func_001AB3D0(.., unk_6C0, 1)); anything else
- * does that and goes to func_001A8E40.
+ * mbExiting. 234-240, 262, 266 and 267 refresh the user-actions popup (func_001AB3D0(.., mszTargetUser, 1)); anything
+ * else does that and goes to func_001A8E40.
  *
  * @param msgId  event type
  * @param data  the event (pointer passed as int)
@@ -13194,7 +13196,7 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
  * Constructs the network-configuration screen state ("200net_config") and creates the network configuration object.
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet, no parent state), zeroes the selection, setting count, list
- * boxes, menu, widgets, popup text, auth-error texts and state, clears unk_6A8, stores cFEStateNetConfig_vtbl and
+ * boxes, menu, widgets, popup text, auth-error texts and state, clears mNeedsLobby, stores cFEStateNetConfig_vtbl and
  * mHashName 0x31, then stores cMemCard_CreateInstance()'s object in D_004A1B78 (the object the connect state machine drives;
  * its delete, cMemCard_DeleteInstance, matches On Tour's cMemCard::DeleteInstance) and calls its slot 2. miWaitFrames starts
  * at -1.
@@ -13220,7 +13222,7 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig(cFEStateNetConfig* mem, int
     mem->mpustrAuthError[0] = 0;
     mem->mpustrAuthError[1] = 0;
     mem->mpustrAuthError[2] = 0;
-    mem->unk_6A8 = 0;
+    mem->mNeedsLobby = 0;
     VPTR_OF(cListNode, mem) = cFEStateNetConfig_vtbl;
     mem->mHashName = 49;
     cFEVObj_001B3F78* memCard = cMemCard_CreateInstance();
@@ -15110,7 +15112,7 @@ extern char str_cFEStateAuthDNAS[];
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with the engine and parent, sets unk_6F4 2, unk_6F8 0x1E,
  * cFEStateAuthDNAS_vtbl and mHashName 0x44, clears mpAuth, mpTextAuth, miState and mpustrText, then allocates
  * mpustrText (tag "cFEStateAuthDNAS") with room for the localised "kT_205Authenticating" text plus 5 characters, and
- * clears unk_6A8 (net messages are not filtered here).
+ * clears mNeedsLobby (net messages are not filtered here).
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param pParentState  the parent state that receives the result (On Tour pParentState)
@@ -15135,7 +15137,7 @@ extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS*
         self->mpustrText = 0;
     }
     self->mpustrText = (unsigned short*)operator_new_tag((n + 5) * 2, str_cFEStateAuthDNAS, 0x100, 0);
-    self->unk_6A8 = 0;
+    self->mNeedsLobby = 0;
     return (self);
 }
 #endif
@@ -17321,10 +17323,11 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
  * Constructs step 1 of the online account creation (or editing) screen.
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet, no parent), stores cFEStateCreateStep1_vtbl, clears
- * mpStaticContinue and unk_6A8, points the saved password, confirmation and mail texts at cBXString_EmptyString (an empty
- * string), stores @p bNewAccount in mbEditAccount and mHashName 0x4D when it is set, else 0x50. Despite the field's name a
- * nonzero flag means a new account: the callers pass 1 from "create account" (cFEStateLogin_onWidgetEvent,
- * cFEStateOnlineAgreement id 0x14, Step2's back) and the screen then uses LobbyMan's mNewAccount form.
+ * mpStaticContinue and mNeedsLobby, points the saved password, confirmation and mail texts at cBXString_EmptyString (an
+ * empty string), stores @p bNewAccount in mbEditAccount and mHashName 0x4D when it is set, else 0x50. Despite the
+ * field's name a nonzero flag means a new account: the callers pass 1 from "create account"
+ * (cFEStateLogin_onWidgetEvent, cFEStateOnlineAgreement id 0x14, Step2's back) and the screen then uses LobbyMan's
+ * mNewAccount form.
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
  * @param bNewAccount  nonzero to create a new account, 0 to edit the logged-in one (stored in mbEditAccount)
@@ -17345,7 +17348,7 @@ extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* se
         self->mHashName = 80;
     }
     self->mbEditAccount = bNewAccount;
-    self->unk_6A8 = 0;
+    self->mNeedsLobby = 0;
     return ((void*)self);
 }
 #endif
@@ -18653,7 +18656,7 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
  * Constructs step 2 of online account creation ("211create_step2": birth date, gender, legal box).
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet, no parent), stores mHashName 0x4E and cFEStateCreateStep2_vtbl
- * and clears unk_6A8.
+ * and clears mNeedsLobby.
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
  * @return @p self
@@ -18663,7 +18666,7 @@ extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* se
     cFEStateNet_cFEStateNet_3(((cFEStateNet*)self), pEngine, 0);
     self->mHashName = 78;
     VPTR_OF(cListNode, self) = cFEStateCreateStep2_vtbl;
-    self->unk_6A8 = 0;
+    self->mNeedsLobby = 0;
     return ((void*)self);
 }
 #endif
@@ -19949,7 +19952,7 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
  * Constructs the "name already taken" state for an account name or a persona name.
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with no parent, stores the kind in mbAccount, the vtable and
- * mHashName 0x4F, and clears unk_6A8.
+ * mHashName 0x4F, and clears mNeedsLobby.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param bAccount  nonzero for an account name, 0 for a persona name (stored in mbAccount)
@@ -19961,7 +19964,7 @@ extern "C" void* cFEStateCreateDuplicate_cFEStateCreateDuplicate(cFEStateCreateD
     self->mbAccount = bAccount;
     VPTR_OF(cListNode, self) = cFEStateCreateDuplicate_vtbl;
     self->mHashName = 79;
-    self->unk_6A8 = 0;
+    self->mNeedsLobby = 0;
     return ((void*)self);
 }
 #endif
@@ -22679,7 +22682,7 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
  * Constructs the online login-type state (use, choose, create or delete an account).
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with no parent, stores mHashName 0x33 and cFEStateLogin_vtbl,
- * clears mpustrDisconnect and unk_6A8 (net messages are not filtered here).
+ * clears mpustrDisconnect and mNeedsLobby (net messages are not filtered here).
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @return @p self
@@ -22690,7 +22693,7 @@ extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* self, int pEngine)
     self->mHashName = 51;
     VPTR_OF(cListNode, self) = cFEStateLogin_vtbl;
     self->mpustrDisconnect = 0;
-    self->unk_6A8 = 0;
+    self->mNeedsLobby = 0;
     return ((void*)self);
 }
 #endif

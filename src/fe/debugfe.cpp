@@ -396,8 +396,8 @@ extern "C" void* ContinueMenu_ContinueMenu(ContinueMenu* self)
 {
     cMenu_cMenu(self);
     self->mVtbl = ContinueMenu_vtbl;
-    cPopMenuItem_cPopMenuItem(&self->unk_130, str_Continue);
-    cMenu_addItem(self, &self->unk_130, -1);
+    cPopMenuItem_cPopMenuItem(&self->mContinueItem, str_Continue);
+    cMenu_addItem(self, &self->mContinueItem, -1);
     return ((void*)self);
 }
 #endif
@@ -826,7 +826,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
             }
             self->mState = 0xF;
             cBXString_operatorE(&(*(int*)&self->mChallenger), (char*)ev + 8);
-            (*(int*)&self->mChallengedMenu.unk_170.Caption) = ((int)self->mChallenger);
+            (*(int*)&self->mChallengedMenu.mChallengerItem.Caption) = ((int)self->mChallenger);
             cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mChallengedMenu));
         } else {
             func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)ev + 8));

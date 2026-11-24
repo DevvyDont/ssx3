@@ -553,21 +553,21 @@ extern "C" void* AccountDetailsMenu_AccountDetailsMenu(AccountDetailsMenu* self,
 {
     cMenu_cMenu(self);
     self->mVtbl = AccountDetailsMenu_vtbl;
-    self->unk_130 = (cDebugLobbyScreen*)(*(int*)vinfo);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Account);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)10);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Login_Name, str_empty_d);
-    cTextMenuItem_cTextMenuItem(&self->unk_194, str_Password, str_empty_d);
-    cCommandMenuItem_cCommandMenuItem2(&self->unk_1C0, 0, actionLabel, 0);
-    cPopMenuItem_cPopMenuItem(&self->unk_1E4, str_Cancel);
-    cMenu_addItem(self, &self->unk_134, -1);
-    cMenu_addItem(self, &self->unk_150, -1);
-    cMenu_addItem(self, &self->unk_168, -1);
-    cMenu_addItem(self, &self->unk_194, -1);
-    cMenu_addItem(self, &self->unk_1C0, -1);
-    cMenu_addItem(self, &self->unk_1E4, -1);
-    copyName_1DA648((char*)&self->unk_168.Text[0], SSXApp->UserName);
-    copyName_1DA648((char*)&self->unk_194.Text[0], SSXApp->Password);
+    self->mScreen = (cDebugLobbyScreen*)(*(int*)vinfo);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Create_Account);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)10);
+    cTextMenuItem_cTextMenuItem(&self->mLoginNameItem, str_Login_Name, str_empty_d);
+    cTextMenuItem_cTextMenuItem(&self->mPasswordItem, str_Password, str_empty_d);
+    cCommandMenuItem_cCommandMenuItem2(&self->mActionItem, 0, actionLabel, 0);
+    cPopMenuItem_cPopMenuItem(&self->mCancelItem, str_Cancel);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
+    cMenu_addItem(self, &self->mLoginNameItem, -1);
+    cMenu_addItem(self, &self->mPasswordItem, -1);
+    cMenu_addItem(self, &self->mActionItem, -1);
+    cMenu_addItem(self, &self->mCancelItem, -1);
+    copyName_1DA648((char*)&self->mLoginNameItem.Text[0], SSXApp->UserName);
+    copyName_1DA648((char*)&self->mPasswordItem.Text[0], SSXApp->Password);
     return ((void*)self);
 }
 #endif
@@ -615,21 +615,21 @@ extern "C" void* AccountDetailsMenu_AccountDetailsMenu1(AccountDetailsMenu* self
 {
     cMenu_cMenu(self);
     self->mVtbl = AccountDetailsMenu1_vtbl;
-    self->unk_130 = (cDebugLobbyScreen*)(*(int*)vinfo);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Account);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)10);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Login_Name, str_empty_d);
-    cTextMenuItem_cTextMenuItem(&self->unk_194, str_Password, str_empty_d);
-    cCommandMenuItem_cCommandMenuItem2(&self->unk_1C0, 0, actionLabel, 0);
-    cPopMenuItem_cPopMenuItem(&self->unk_1E4, str_Cancel);
-    cMenu_addItem(self, &self->unk_134, -1);
-    cMenu_addItem(self, &self->unk_150, -1);
-    cMenu_addItem(self, &self->unk_168, -1);
-    cMenu_addItem(self, &self->unk_194, -1);
-    cMenu_addItem(self, &self->unk_1C0, -1);
-    cMenu_addItem(self, &self->unk_1E4, -1);
-    copyName_1DA7E8((char*)&self->unk_168.Text[0], SSXApp->UserName);
-    copyName_1DA7E8((char*)&self->unk_194.Text[0], SSXApp->Password);
+    self->mScreen = (cDebugLobbyScreen*)(*(int*)vinfo);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Create_Account);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)10);
+    cTextMenuItem_cTextMenuItem(&self->mLoginNameItem, str_Login_Name, str_empty_d);
+    cTextMenuItem_cTextMenuItem(&self->mPasswordItem, str_Password, str_empty_d);
+    cCommandMenuItem_cCommandMenuItem2(&self->mActionItem, 0, actionLabel, 0);
+    cPopMenuItem_cPopMenuItem(&self->mCancelItem, str_Cancel);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
+    cMenu_addItem(self, &self->mLoginNameItem, -1);
+    cMenu_addItem(self, &self->mPasswordItem, -1);
+    cMenu_addItem(self, &self->mActionItem, -1);
+    cMenu_addItem(self, &self->mCancelItem, -1);
+    copyName_1DA7E8((char*)&self->mLoginNameItem.Text[0], SSXApp->UserName);
+    copyName_1DA7E8((char*)&self->mPasswordItem.Text[0], SSXApp->Password);
     return ((void*)self);
 }
 #endif
@@ -667,16 +667,16 @@ extern "C" void* AccountMenu_AccountMenu(AccountMenu* self, void* createOwner, v
 {
     cMenu_cMenu(self);
     self->mVtbl = AccountMenu_vtbl;
-    AccountDetailsMenu_AccountDetailsMenu((AccountDetailsMenu*)(&self->unk_130), createOwner, str_Create_Account);
-    AccountDetailsMenu_AccountDetailsMenu1((AccountDetailsMenu*)(&self->unk_32C), loginOwner, str_Login);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_528), str_Login_Method);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_544), (void*)10);
-    cSubMenuItem_cSubMenuItem(&self->unk_55C, &self->unk_130, str_Create_Account);
-    cSubMenuItem_cSubMenuItem(&self->unk_578, &self->unk_32C, str_Login);
-    cMenu_addItem(self, &self->unk_528, -1);
-    cMenu_addItem(self, &self->unk_544, -1);
-    cMenu_addItem(self, &self->unk_55C, -1);
-    cMenu_addItem(self, &self->unk_578, -1);
+    AccountDetailsMenu_AccountDetailsMenu((AccountDetailsMenu*)(&self->mCreateAccountMenu), createOwner, str_Create_Account);
+    AccountDetailsMenu_AccountDetailsMenu1((AccountDetailsMenu*)(&self->mLoginMenu), loginOwner, str_Login);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Login_Method);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)10);
+    cSubMenuItem_cSubMenuItem(&self->mCreateAccountItem, &self->mCreateAccountMenu, str_Create_Account);
+    cSubMenuItem_cSubMenuItem(&self->mLoginItem, &self->mLoginMenu, str_Login);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
+    cMenu_addItem(self, &self->mCreateAccountItem, -1);
+    cMenu_addItem(self, &self->mLoginItem, -1);
     return ((void*)self);
 }
 #endif
@@ -712,15 +712,15 @@ extern "C" void* CreatePersonaMenu_CreatePersonaMenu(CreatePersonaMenu* self, in
 {
     cMenu_cMenu(self);
     self->mVtbl = CreatePersonaMenu_vtbl;
-    self->unk_130 = (cDebugLobbyScreen*)(*info);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Persona);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Persona_Name, str_empty_d);
-    cCommandMenuItem_cCommandMenuItem2(&self->unk_194, 0, str_Create, 0);
-    cMenu_addItem(self, &self->unk_134, -1);
-    cMenu_addItem(self, &self->unk_150, -1);
-    cMenu_addItem(self, &self->unk_168, -1);
-    cMenu_addItem(self, &self->unk_194, -1);
+    self->mScreen = (cDebugLobbyScreen*)(*info);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Create_Persona);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)0xE);
+    cTextMenuItem_cTextMenuItem(&self->mPersonaNameItem, str_Persona_Name, str_empty_d);
+    cCommandMenuItem_cCommandMenuItem2(&self->mCreateItem, 0, str_Create, 0);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
+    cMenu_addItem(self, &self->mPersonaNameItem, -1);
+    cMenu_addItem(self, &self->mCreateItem, -1);
     return ((void*)self);
 }
 #endif
@@ -751,22 +751,22 @@ extern char str_Delete_Persona[];
  */
 extern "C" void* DeletePersonaMenu_DeletePersonaMenu(DeletePersonaMenu* self, int* info)
 {
-    char* personaItem = (char*)&self->unk_168[0];
+    char* personaItem = (char*)&self->mPersonaItems[0];
     int i = 3;
     cMenu_cMenu(self);
     self->mVtbl = DeletePersonaMenu_vtbl;
-    self->unk_130 = (cDebugLobbyScreen*)(*info);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Delete_Persona);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
+    self->mScreen = (cDebugLobbyScreen*)(*info);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Delete_Persona);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)0xE);
     for (; i != -1; i--) {
         cCommandMenuItem_cCommandMenuItem(personaItem);
         personaItem += 0x24;
     }
-    cMenu_addItem(self, &self->unk_134, -1);
-    cMenu_addItem(self, &self->unk_150, -1);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
     int j;
     for (j = 0; j < 4; j++) {
-        cMenu_addItem(self, &self->unk_168[j], -1);
+        cMenu_addItem(self, &self->mPersonaItems[j], -1);
     }
     return ((void*)self);
 }
@@ -810,26 +810,26 @@ extern "C" void* PersonaMenu_PersonaMenu(PersonaMenu* self, int* info, int* crea
 {
     cMenu_cMenu(self);
     self->mVtbl = PersonaMenu_vtbl;
-    CreatePersonaMenu_CreatePersonaMenu_v(&self->unk_130, createOwner);
-    DeletePersonaMenu_DeletePersonaMenu_v(&self->unk_2E8, deleteOwner);
-    self->unk_4E0 = (cDebugLobbyScreen*)(*info);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_4E4), str_Select_Persona);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_500), (void*)0xE);
-    char* personaItem = (char*)&self->unk_518[0];
+    CreatePersonaMenu_CreatePersonaMenu_v(&self->mCreatePersonaMenu, createOwner);
+    DeletePersonaMenu_DeletePersonaMenu_v(&self->mDeletePersonaMenu, deleteOwner);
+    self->mScreen = (cDebugLobbyScreen*)(*info);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Select_Persona);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)0xE);
+    char* personaItem = (char*)&self->mPersonaItems[0];
     for (int i = 3; i != -1; i--) {
         cCommandMenuItem_cCommandMenuItem(personaItem);
         personaItem += 0x24;
     }
-    cSubMenuItem_cSubMenuItem(&self->unk_5A8, &self->unk_130, str_Create_Persona);
-    cSubMenuItem_cSubMenuItem(&self->unk_5C4, &self->unk_2E8, str_Delete_Persona);
-    cMenu_addItem(self, &self->unk_4E4, -1);
-    cMenu_addItem(self, &self->unk_500, -1);
+    cSubMenuItem_cSubMenuItem(&self->mCreatePersonaItem, &self->mCreatePersonaMenu, str_Create_Persona);
+    cSubMenuItem_cSubMenuItem(&self->mDeletePersonaItem, &self->mDeletePersonaMenu, str_Delete_Persona);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
     int j;
     for (j = 0; j < 4; j++) {
-        cMenu_addItem(self, &self->unk_518[j], -1);
+        cMenu_addItem(self, &self->mPersonaItems[j], -1);
     }
-    cMenu_addItem(self, &self->unk_5A8, -1);
-    cMenu_addItem(self, &self->unk_5C4, -1);
+    cMenu_addItem(self, &self->mCreatePersonaItem, -1);
+    cMenu_addItem(self, &self->mDeletePersonaItem, -1);
     return ((void*)self);
 }
 #endif
@@ -859,22 +859,22 @@ extern char str_Select_Room[];
  */
 extern "C" void* LobbyMenu_LobbyMenu(LobbyMenu* self, int* info)
 {
-    char* roomItem = (char*)&self->unk_168[0];
+    char* roomItem = (char*)&self->mRoomItems[0];
     int i = 11;
     cMenu_cMenu(self);
     self->mVtbl = LobbyMenu_vtbl;
-    self->unk_130 = (cDebugLobbyScreen*)(*info);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Select_Room);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
+    self->mScreen = (cDebugLobbyScreen*)(*info);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Select_Room);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)0xE);
     for (; i != -1; i--) {
         cCommandMenuItem_cCommandMenuItem(roomItem);
         roomItem += 0x24;
     }
-    cMenu_addItem(self, &self->unk_134, -1);
-    cMenu_addItem(self, &self->unk_150, -1);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
     int j;
     for (j = 0; j < 12; j++) {
-        cMenu_addItem(self, &self->unk_168[j], -1);
+        cMenu_addItem(self, &self->mRoomItems[j], -1);
     }
     return ((void*)self);
 }
@@ -909,26 +909,26 @@ extern char str_Chat[];
  */
 extern "C" void* RoomMenu_RoomMenu(RoomMenu* self, int* occupantOwner, int* chatOwner)
 {
-    char* occupantItem = (char*)&self->unk_16C[0];
+    char* occupantItem = (char*)&self->mUserItems[0];
     int i = 23;
     cMenu_cMenu(self);
     self->mVtbl = RoomMenu_vtbl;
-    self->unk_130 = (cDebugLobbyScreen*)(*occupantOwner);
-    self->unk_134 = (cDebugLobbyScreen*)(*chatOwner);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_138), str_Room_Occupants);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_154), (void*)0xE);
+    self->mSelectUserScreen = (cDebugLobbyScreen*)(*occupantOwner);
+    self->mChatScreen = (cDebugLobbyScreen*)(*chatOwner);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Room_Occupants);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)0xE);
     for (; i != -1; i--) {
         cCommandMenuItem_cCommandMenuItem(occupantItem);
         occupantItem += 0x24;
     }
-    cCommandMenuItem_cCommandMenuItem2(&self->unk_4CC, -2, str_Chat, 0);
-    cMenu_addItem(self, &self->unk_138, -1);
-    cMenu_addItem(self, &self->unk_154, -1);
+    cCommandMenuItem_cCommandMenuItem2(&self->mChatItem, -2, str_Chat, 0);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
     int j;
     for (j = 0; j < 0x18; j++) {
-        cMenu_addItem(self, &self->unk_16C[j], -1);
+        cMenu_addItem(self, &self->mUserItems[j], -1);
     }
-    cMenu_addItem(self, &self->unk_4CC, -1);
+    cMenu_addItem(self, &self->mChatItem, -1);
     return ((void*)self);
 }
 #endif
@@ -964,23 +964,23 @@ extern int D_00467D70[];
  */
 extern "C" void* ChatMenu_ChatMenu(ChatMenu* self, int* info)
 {
-    char* chatItem = (char*)&self->unk_194[0];
+    char* chatItem = (char*)&self->mMessageItems[0];
     int i = 13;
     cMenu_cMenu(self);
     self->mVtbl = ChatMenu_vtbl;
-    self->unk_130 = (cDebugLobbyScreen*)(*info);
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Chat_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
-    cTextMenuItem_cTextMenuItem(&self->unk_168, str_Enter_Chat, str_empty_d);
+    self->mScreen = (cDebugLobbyScreen*)(*info);
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->mTitleItem), str_Chat_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->mSpaceItem), (void*)0xE);
+    cTextMenuItem_cTextMenuItem(&self->mEnterChatItem, str_Enter_Chat, str_empty_d);
     for (; i != -1; i--) {
         cCommandMenuItem_cCommandMenuItem(chatItem);
         chatItem += 0x24;
     }
-    cMenu_addItem(self, &self->unk_134, -1);
-    cMenu_addItem(self, &self->unk_150, -1);
+    cMenu_addItem(self, &self->mTitleItem, -1);
+    cMenu_addItem(self, &self->mSpaceItem, -1);
     int j;
     for (j = 0; j < 0xE; j++) {
-        cCommandMenuItem* item = &self->unk_194[j];
+        cCommandMenuItem* item = &self->mMessageItems[j];
         item->ID = j;
         item->Caption = (const char*)D_00467D70[j];
         cMenu_addItem(self, item, -1);

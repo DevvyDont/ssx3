@@ -20,7 +20,9 @@
 // the destructors and onCommand slots in main/all_in_one_main.
 //
 // A FLAT layout, like main/game.h: base cMenu written out inline (its vptr at 0x12C), rows embedded by value. No row
-// or functor has a name source, so all own members are unk_XXX; the comments give each row's caption.
+// or functor has a name source; the own members' names are ours: each row after its caption (the constructor's
+// string), each functor word after the screen callback it is passed to (mScreen, or mAcceptScreen / mDeclineScreen
+// where a menu has two).
 // Evidence tags: [R] retail constructors / destructors; [U] retail usage; [O] On Tour (cMenu's own members only).
 
 #include "layout.h"
@@ -43,7 +45,7 @@ struct ContinueMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] ContinueMenu_ContinueMenu stores ContinueMenu_vtbl
-    cPopMenuItem unk_130;            // 0x130 [R] ctor cPopMenuItem_cPopMenuItem(this + 0x130, "Continue");
+    cPopMenuItem mContinueItem;      // 0x130 [R] ctor cPopMenuItem_cPopMenuItem(this + 0x130, "Continue");
                                      //       ContinueMenu__ContinueMenu destroys it
 };
 
@@ -54,7 +56,7 @@ CHECK_OFFSET(ContinueMenu, Items, 0x00C);
 CHECK_OFFSET(ContinueMenu, MenuSys, 0x124);
 CHECK_OFFSET(ContinueMenu, DrawLayer, 0x128);
 CHECK_OFFSET(ContinueMenu, mVtbl, 0x12C);
-CHECK_OFFSET(ContinueMenu, unk_130, 0x130);
+CHECK_OFFSET(ContinueMenu, mContinueItem, 0x130);
 CHECK_SIZE(ContinueMenu, 0x148);
 
 // AccountDetailsMenu<cDebugLobbyScreen::OnCreate> / <cDebugLobbyScreen::OnLogin> (0x1FC): title, spacer, login name
@@ -71,21 +73,22 @@ struct AccountDetailsMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] ctors store AccountDetailsMenu_vtbl (OnCreate) / AccountDetailsMenu1_vtbl (OnLogin)
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
+    void** mVtbl;                    // 0x12C [R] ctors store AccountDetailsMenu_vtbl (OnCreate) /
+                                     //       AccountDetailsMenu1_vtbl (OnLogin)
+    cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnCreate / OnLogin: the owning screen); [U]
                                      //       onCommand passes it to func_0017E030 / func_0017E118
-    cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, title ("Create Account"
+    cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, title ("Create Account"
                                      //       / "Login")); destroyed by the dtor
-    cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
-    cTextMenuItem unk_168;           // 0x168 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x168, "Login Name");
+    cTextMenuItem mLoginNameItem;    // 0x168 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x168, "Login Name");
                                      //       destroyed by the dtor [U] onCommand passes its Text (this + 0x180)
-    cTextMenuItem unk_194;           // 0x194 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x194, "Password"); destroyed
+    cTextMenuItem mPasswordItem;     // 0x194 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x194, "Password"); destroyed
                                      //       by the dtor [U] onCommand passes its Text (this + 0x1AC)
-    cCommandMenuItem unk_1C0;        // 0x1C0 [R] ctor cCommandMenuItem_cCommandMenuItem2 (the action row); destroyed by
+    cCommandMenuItem mActionItem;    // 0x1C0 [R] ctor cCommandMenuItem_cCommandMenuItem2 (the action row); destroyed by
                                      //       the dtor
-    cPopMenuItem unk_1E4;            // 0x1E4 [R] ctor cPopMenuItem_cPopMenuItem(this + 0x1E4, "Cancel"); destroyed by
+    cPopMenuItem mCancelItem;        // 0x1E4 [R] ctor cPopMenuItem_cPopMenuItem(this + 0x1E4, "Cancel"); destroyed by
                                      //       the dtor
 };
 
@@ -96,13 +99,13 @@ CHECK_OFFSET(AccountDetailsMenu, Items, 0x00C);
 CHECK_OFFSET(AccountDetailsMenu, MenuSys, 0x124);
 CHECK_OFFSET(AccountDetailsMenu, DrawLayer, 0x128);
 CHECK_OFFSET(AccountDetailsMenu, mVtbl, 0x12C);
-CHECK_OFFSET(AccountDetailsMenu, unk_130, 0x130);
-CHECK_OFFSET(AccountDetailsMenu, unk_134, 0x134);
-CHECK_OFFSET(AccountDetailsMenu, unk_150, 0x150);
-CHECK_OFFSET(AccountDetailsMenu, unk_168, 0x168);
-CHECK_OFFSET(AccountDetailsMenu, unk_194, 0x194);
-CHECK_OFFSET(AccountDetailsMenu, unk_1C0, 0x1C0);
-CHECK_OFFSET(AccountDetailsMenu, unk_1E4, 0x1E4);
+CHECK_OFFSET(AccountDetailsMenu, mScreen, 0x130);
+CHECK_OFFSET(AccountDetailsMenu, mTitleItem, 0x134);
+CHECK_OFFSET(AccountDetailsMenu, mSpaceItem, 0x150);
+CHECK_OFFSET(AccountDetailsMenu, mLoginNameItem, 0x168);
+CHECK_OFFSET(AccountDetailsMenu, mPasswordItem, 0x194);
+CHECK_OFFSET(AccountDetailsMenu, mActionItem, 0x1C0);
+CHECK_OFFSET(AccountDetailsMenu, mCancelItem, 0x1E4);
 CHECK_SIZE(AccountDetailsMenu, 0x1FC);
 
 // AccountMenu<cDebugLobbyScreen::OnCreate, cDebugLobbyScreen::OnLogin> (0x594): "Login Method" with two sub-menu rows
@@ -119,17 +122,17 @@ struct AccountMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] AccountMenu_AccountMenu stores AccountMenu_vtbl
-    AccountDetailsMenu unk_130;      // 0x130 [R] ctor AccountDetailsMenu_AccountDetailsMenu(this + 0x130, functor, "Create Account"); dtor
-                                     //       destroys its rows
-    AccountDetailsMenu unk_32C;      // 0x32C [R] ctor AccountDetailsMenu_AccountDetailsMenu1(this + 0x32C, functor, "Login"); dtor destroys its
-                                     //       rows
-    cNullMenuItem unk_528;           // 0x528 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x528, "Login Method");
+    AccountDetailsMenu mCreateAccountMenu; // 0x130 [R] ctor AccountDetailsMenu_AccountDetailsMenu(this + 0x130,
+                                     //       functor, "Create Account"); dtor destroys its rows
+    AccountDetailsMenu mLoginMenu;   // 0x32C [R] ctor AccountDetailsMenu_AccountDetailsMenu1(this + 0x32C, functor,
+                                     //       "Login"); dtor destroys its rows
+    cNullMenuItem mTitleItem;        // 0x528 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x528, "Login Method");
                                      //       destroyed by the dtor
-    cSpaceMenuItem unk_544;          // 0x544 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x544, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x544 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x544, h); destroyed by the
                                      //       dtor
-    cSubMenuItem unk_55C;            // 0x55C [R] ctor cSubMenuItem_cSubMenuItem(this + 0x55C, "Create Account", this +
+    cSubMenuItem mCreateAccountItem; // 0x55C [R] ctor cSubMenuItem_cSubMenuItem(this + 0x55C, "Create Account", this +
                                      //       0x130); destroyed by the dtor
-    cSubMenuItem unk_578;            // 0x578 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x578, "Login", this + 0x32C);
+    cSubMenuItem mLoginItem;         // 0x578 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x578, "Login", this + 0x32C);
                                      //       destroyed by the dtor
 };
 
@@ -140,12 +143,12 @@ CHECK_OFFSET(AccountMenu, Items, 0x00C);
 CHECK_OFFSET(AccountMenu, MenuSys, 0x124);
 CHECK_OFFSET(AccountMenu, DrawLayer, 0x128);
 CHECK_OFFSET(AccountMenu, mVtbl, 0x12C);
-CHECK_OFFSET(AccountMenu, unk_130, 0x130);
-CHECK_OFFSET(AccountMenu, unk_32C, 0x32C);
-CHECK_OFFSET(AccountMenu, unk_528, 0x528);
-CHECK_OFFSET(AccountMenu, unk_544, 0x544);
-CHECK_OFFSET(AccountMenu, unk_55C, 0x55C);
-CHECK_OFFSET(AccountMenu, unk_578, 0x578);
+CHECK_OFFSET(AccountMenu, mCreateAccountMenu, 0x130);
+CHECK_OFFSET(AccountMenu, mLoginMenu, 0x32C);
+CHECK_OFFSET(AccountMenu, mTitleItem, 0x528);
+CHECK_OFFSET(AccountMenu, mSpaceItem, 0x544);
+CHECK_OFFSET(AccountMenu, mCreateAccountItem, 0x55C);
+CHECK_OFFSET(AccountMenu, mLoginItem, 0x578);
 CHECK_SIZE(AccountMenu, 0x594);
 
 // CreatePersonaMenu<cDebugLobbyScreen::OnCreatePersona> (0x1B8): "Create Persona", a name entry row and "Create".
@@ -161,16 +164,17 @@ struct CreatePersonaMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] CreatePersonaMenu_CreatePersonaMenu stores CreatePersonaMenu_vtbl
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
+    cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnCreatePersona: the owning screen); [U]
                                      //       CreatePersonaMenu_onCommand passes it to func_0017E1C0
-    cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Create Persona");
+    cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Create Persona");
                                      //       destroyed by the dtor
-    cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
-    cTextMenuItem unk_168;           // 0x168 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x168, "Persona Name");
-                                     //       destroyed by the dtor [U] CreatePersonaMenu_onCommand passes its Text (this + 0x180)
-    cCommandMenuItem unk_194;        // 0x194 [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Create"); destroyed by the
+    cTextMenuItem mPersonaNameItem;  // 0x168 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x168, "Persona Name");
+                                     //       destroyed by the dtor [U] CreatePersonaMenu_onCommand passes its Text
+                                     //       (this + 0x180)
+    cCommandMenuItem mCreateItem;    // 0x194 [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Create"); destroyed by the
                                      //       dtor
 };
 
@@ -181,11 +185,11 @@ CHECK_OFFSET(CreatePersonaMenu, Items, 0x00C);
 CHECK_OFFSET(CreatePersonaMenu, MenuSys, 0x124);
 CHECK_OFFSET(CreatePersonaMenu, DrawLayer, 0x128);
 CHECK_OFFSET(CreatePersonaMenu, mVtbl, 0x12C);
-CHECK_OFFSET(CreatePersonaMenu, unk_130, 0x130);
-CHECK_OFFSET(CreatePersonaMenu, unk_134, 0x134);
-CHECK_OFFSET(CreatePersonaMenu, unk_150, 0x150);
-CHECK_OFFSET(CreatePersonaMenu, unk_168, 0x168);
-CHECK_OFFSET(CreatePersonaMenu, unk_194, 0x194);
+CHECK_OFFSET(CreatePersonaMenu, mScreen, 0x130);
+CHECK_OFFSET(CreatePersonaMenu, mTitleItem, 0x134);
+CHECK_OFFSET(CreatePersonaMenu, mSpaceItem, 0x150);
+CHECK_OFFSET(CreatePersonaMenu, mPersonaNameItem, 0x168);
+CHECK_OFFSET(CreatePersonaMenu, mCreateItem, 0x194);
 CHECK_SIZE(CreatePersonaMenu, 0x1B8);
 
 // DeletePersonaMenu<cDebugLobbyScreen::OnDeletePersona> (0x1F8): "Delete Persona" and four persona rows. Preview vtable
@@ -202,15 +206,16 @@ struct DeletePersonaMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] DeletePersonaMenu_DeletePersonaMenu stores DeletePersonaMenu_vtbl
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
+    cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnDeletePersona: the owning screen); [U]
                                      //       DeletePersonaMenu_onCommand passes it to func_0017E228
-    cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Delete Persona");
+    cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Delete Persona");
                                      //       destroyed by the dtor
-    cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
-    cCommandMenuItem unk_168[4];     // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (4 persona rows); destroyed by
-                                     //       the dtor (loop of 4) [U] DeletePersonaMenu_setpersonas sets their captions and IDs
+    cCommandMenuItem mPersonaItems[4]; // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (4 persona rows); destroyed
+                                     //       by the dtor (loop of 4) [U] DeletePersonaMenu_setpersonas sets their
+                                     //       captions and IDs
 };
 
 CHECK_OFFSET(DeletePersonaMenu, NumItems, 0x000);
@@ -220,10 +225,10 @@ CHECK_OFFSET(DeletePersonaMenu, Items, 0x00C);
 CHECK_OFFSET(DeletePersonaMenu, MenuSys, 0x124);
 CHECK_OFFSET(DeletePersonaMenu, DrawLayer, 0x128);
 CHECK_OFFSET(DeletePersonaMenu, mVtbl, 0x12C);
-CHECK_OFFSET(DeletePersonaMenu, unk_130, 0x130);
-CHECK_OFFSET(DeletePersonaMenu, unk_134, 0x134);
-CHECK_OFFSET(DeletePersonaMenu, unk_150, 0x150);
-CHECK_OFFSET(DeletePersonaMenu, unk_168, 0x168);
+CHECK_OFFSET(DeletePersonaMenu, mScreen, 0x130);
+CHECK_OFFSET(DeletePersonaMenu, mTitleItem, 0x134);
+CHECK_OFFSET(DeletePersonaMenu, mSpaceItem, 0x150);
+CHECK_OFFSET(DeletePersonaMenu, mPersonaItems, 0x168);
 CHECK_SIZE(DeletePersonaMenu, 0x1F8);
 
 // PersonaMenu<cDebugLobbyScreen::OnSelectPersona, ::OnCreatePersona, ::OnDeletePersona> (0x5E0): "Select Persona",
@@ -240,22 +245,23 @@ struct PersonaMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] PersonaMenu_PersonaMenu stores PersonaMenu_vtbl
-    CreatePersonaMenu unk_130;       // 0x130 [R] ctor CreatePersonaMenu_CreatePersonaMenu(this + 0x130, functor); dtor
-    DeletePersonaMenu unk_2E8;       // 0x2E8 [R] ctor DeletePersonaMenu_DeletePersonaMenu(this + 0x2E8, functor); dtor; [U] PersonaMenu_setpersonas
-                                     //       fills it (DeletePersonaMenu_setpersonas)
-    cDebugLobbyScreen* unk_4E0;      // 0x4E0 [R] ctor stores the first word of its functor argument (preview template
+    CreatePersonaMenu mCreatePersonaMenu; // 0x130 [R] ctor CreatePersonaMenu_CreatePersonaMenu(this + 0x130, functor);
+                                     //       dtor
+    DeletePersonaMenu mDeletePersonaMenu; // 0x2E8 [R] ctor DeletePersonaMenu_DeletePersonaMenu(this + 0x2E8, functor);
+                                     //       dtor; [U] PersonaMenu_setpersonas fills it (DeletePersonaMenu_setpersonas)
+    cDebugLobbyScreen* mScreen;      // 0x4E0 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnSelectPersona: the owning screen); [U]
                                      //       PersonaMenu_onCommand passes it to func_0017E290
-    cNullMenuItem unk_4E4;           // 0x4E4 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x4E4, "Select Persona");
+    cNullMenuItem mTitleItem;        // 0x4E4 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x4E4, "Select Persona");
                                      //       destroyed by the dtor
-    cSpaceMenuItem unk_500;          // 0x500 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x500, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x500 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x500, h); destroyed by the
                                      //       dtor
-    cCommandMenuItem unk_518[4];     // 0x518 [R] ctor cCommandMenuItem_cCommandMenuItem2 (4 persona rows); destroyed by
-                                     //       the dtor [U] PersonaMenu_setpersonas sets their data and IDs (view Menu_B418
-                                     //       items[4])
-    cSubMenuItem unk_5A8;            // 0x5A8 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x5A8, "Create Persona", this +
+    cCommandMenuItem mPersonaItems[4]; // 0x518 [R] ctor cCommandMenuItem_cCommandMenuItem2 (4 persona rows); destroyed
+                                     //       by the dtor [U] PersonaMenu_setpersonas sets their data and IDs (view
+                                     //       Menu_B418 items[4])
+    cSubMenuItem mCreatePersonaItem; // 0x5A8 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x5A8, "Create Persona", this +
                                      //       0x130); destroyed by the dtor
-    cSubMenuItem unk_5C4;            // 0x5C4 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x5C4, "Delete Persona", this +
+    cSubMenuItem mDeletePersonaItem; // 0x5C4 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x5C4, "Delete Persona", this +
                                      //       0x2E8); destroyed by the dtor
 };
 
@@ -266,14 +272,14 @@ CHECK_OFFSET(PersonaMenu, Items, 0x00C);
 CHECK_OFFSET(PersonaMenu, MenuSys, 0x124);
 CHECK_OFFSET(PersonaMenu, DrawLayer, 0x128);
 CHECK_OFFSET(PersonaMenu, mVtbl, 0x12C);
-CHECK_OFFSET(PersonaMenu, unk_130, 0x130);
-CHECK_OFFSET(PersonaMenu, unk_2E8, 0x2E8);
-CHECK_OFFSET(PersonaMenu, unk_4E0, 0x4E0);
-CHECK_OFFSET(PersonaMenu, unk_4E4, 0x4E4);
-CHECK_OFFSET(PersonaMenu, unk_500, 0x500);
-CHECK_OFFSET(PersonaMenu, unk_518, 0x518);
-CHECK_OFFSET(PersonaMenu, unk_5A8, 0x5A8);
-CHECK_OFFSET(PersonaMenu, unk_5C4, 0x5C4);
+CHECK_OFFSET(PersonaMenu, mCreatePersonaMenu, 0x130);
+CHECK_OFFSET(PersonaMenu, mDeletePersonaMenu, 0x2E8);
+CHECK_OFFSET(PersonaMenu, mScreen, 0x4E0);
+CHECK_OFFSET(PersonaMenu, mTitleItem, 0x4E4);
+CHECK_OFFSET(PersonaMenu, mSpaceItem, 0x500);
+CHECK_OFFSET(PersonaMenu, mPersonaItems, 0x518);
+CHECK_OFFSET(PersonaMenu, mCreatePersonaItem, 0x5A8);
+CHECK_OFFSET(PersonaMenu, mDeletePersonaItem, 0x5C4);
 CHECK_SIZE(PersonaMenu, 0x5E0);
 
 // LobbyMenu<cDebugLobbyScreen::OnSelectRoom> (0x318): "Select Room" and twelve room rows. Preview vtable pairs with
@@ -290,16 +296,16 @@ struct LobbyMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] LobbyMenu_LobbyMenu stores LobbyMenu_vtbl
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
+    cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnSelectRoom: the owning screen); [U]
                                      //       LobbyMenu_onCommand passes it to func_0017E2F8
-    cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Select Room");
+    cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Select Room");
                                      //       destroyed by the dtor
-    cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
-    cCommandMenuItem unk_168[12];    // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (12 room rows); destroyed by
-                                     //       the dtor (loop of 12) [U] LobbyMenu_updaterooms sets their data (+0x14 Caption)
-                                     //       and ID (view Menu_B528 items[12])
+    cCommandMenuItem mRoomItems[12]; // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (12 room rows); destroyed by
+                                     //       the dtor (loop of 12) [U] LobbyMenu_updaterooms sets their data (+0x14
+                                     //       Caption) and ID (view Menu_B528 items[12])
 };
 
 CHECK_OFFSET(LobbyMenu, NumItems, 0x000);
@@ -309,10 +315,10 @@ CHECK_OFFSET(LobbyMenu, Items, 0x00C);
 CHECK_OFFSET(LobbyMenu, MenuSys, 0x124);
 CHECK_OFFSET(LobbyMenu, DrawLayer, 0x128);
 CHECK_OFFSET(LobbyMenu, mVtbl, 0x12C);
-CHECK_OFFSET(LobbyMenu, unk_130, 0x130);
-CHECK_OFFSET(LobbyMenu, unk_134, 0x134);
-CHECK_OFFSET(LobbyMenu, unk_150, 0x150);
-CHECK_OFFSET(LobbyMenu, unk_168, 0x168);
+CHECK_OFFSET(LobbyMenu, mScreen, 0x130);
+CHECK_OFFSET(LobbyMenu, mTitleItem, 0x134);
+CHECK_OFFSET(LobbyMenu, mSpaceItem, 0x150);
+CHECK_OFFSET(LobbyMenu, mRoomItems, 0x168);
 CHECK_SIZE(LobbyMenu, 0x318);
 
 // RoomMenu<cDebugLobbyScreen::OnSelectUser, cDebugLobbyScreen::OnChat> (0x4F0): "Room Occupants", 24 user rows and
@@ -329,20 +335,20 @@ struct RoomMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] RoomMenu_RoomMenu stores RoomMenu_vtbl
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
-                                     //       argument cDebugLobbyScreen::OnSelectUser: the owning screen); [U]
+    cDebugLobbyScreen* mSelectUserScreen; // 0x130 [R] ctor stores the first word of its functor argument (preview
+                                     //       template argument cDebugLobbyScreen::OnSelectUser: the owning screen); [U]
                                      //       RoomMenu_onCommand passes it to func_0017E368 (a user row)
-    cDebugLobbyScreen* unk_134;      // 0x134 [R] ctor stores the first word of its functor argument (preview template
-                                     //       argument cDebugLobbyScreen::OnChat: the owning screen); [U] RoomMenu_onCommand
-                                     //       passes it to func_0017E3B8 (ID -2, "Chat")
-    cNullMenuItem unk_138;           // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "Room Occupants");
+    cDebugLobbyScreen* mChatScreen;  // 0x134 [R] ctor stores the first word of its functor argument (preview template
+                                     //       argument cDebugLobbyScreen::OnChat: the owning screen); [U]
+                                     //       RoomMenu_onCommand passes it to func_0017E3B8 (ID -2, "Chat")
+    cNullMenuItem mTitleItem;        // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "Room Occupants");
                                      //       destroyed by the dtor
-    cSpaceMenuItem unk_154;          // 0x154 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x154, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x154 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x154, h); destroyed by the
                                      //       dtor
-    cCommandMenuItem unk_16C[24];    // 0x16C [R] ctor cCommandMenuItem_cCommandMenuItem2 (24 user rows); destroyed by
+    cCommandMenuItem mUserItems[24]; // 0x16C [R] ctor cCommandMenuItem_cCommandMenuItem2 (24 user rows); destroyed by
                                      //       the dtor [U] RoomMenu_updateusers sets their data and ID (view Menu_B620
                                      //       items[24])
-    cCommandMenuItem unk_4CC;        // 0x4CC [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Chat"); destroyed by the
+    cCommandMenuItem mChatItem;      // 0x4CC [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Chat"); destroyed by the
                                      //       dtor
 };
 
@@ -353,12 +359,12 @@ CHECK_OFFSET(RoomMenu, Items, 0x00C);
 CHECK_OFFSET(RoomMenu, MenuSys, 0x124);
 CHECK_OFFSET(RoomMenu, DrawLayer, 0x128);
 CHECK_OFFSET(RoomMenu, mVtbl, 0x12C);
-CHECK_OFFSET(RoomMenu, unk_130, 0x130);
-CHECK_OFFSET(RoomMenu, unk_134, 0x134);
-CHECK_OFFSET(RoomMenu, unk_138, 0x138);
-CHECK_OFFSET(RoomMenu, unk_154, 0x154);
-CHECK_OFFSET(RoomMenu, unk_16C, 0x16C);
-CHECK_OFFSET(RoomMenu, unk_4CC, 0x4CC);
+CHECK_OFFSET(RoomMenu, mSelectUserScreen, 0x130);
+CHECK_OFFSET(RoomMenu, mChatScreen, 0x134);
+CHECK_OFFSET(RoomMenu, mTitleItem, 0x138);
+CHECK_OFFSET(RoomMenu, mSpaceItem, 0x154);
+CHECK_OFFSET(RoomMenu, mUserItems, 0x16C);
+CHECK_OFFSET(RoomMenu, mChatItem, 0x4CC);
 CHECK_SIZE(RoomMenu, 0x4F0);
 
 // ChatMenu<cDebugLobbyScreen::OnMessage> (0x38C): "Chat Menu", an "Enter Chat" entry row and 14 message rows.
@@ -375,17 +381,17 @@ struct ChatMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] ChatMenu_ChatMenu stores ChatMenu_vtbl
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
+    cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnMessage: the owning screen); [U]
                                      //       ChatMenu_onCommand passes it to func_0017E418
-    cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Chat Menu"); destroyed
+    cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Chat Menu"); destroyed
                                      //       by the dtor
-    cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
-    cTextMenuItem unk_168;           // 0x168 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x168, "Enter Chat");
+    cTextMenuItem mEnterChatItem;    // 0x168 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x168, "Enter Chat");
                                      //       destroyed by the dtor
-    cCommandMenuItem unk_194[14];    // 0x194 [R] ctor cCommandMenuItem_cCommandMenuItem2 (14 message rows); destroyed
-                                     //       by the dtor (loop of 14)
+    cCommandMenuItem mMessageItems[14]; // 0x194 [R] ctor cCommandMenuItem_cCommandMenuItem2 (14 message rows);
+                                     //       destroyed by the dtor (loop of 14)
 };
 
 CHECK_OFFSET(ChatMenu, NumItems, 0x000);
@@ -395,11 +401,11 @@ CHECK_OFFSET(ChatMenu, Items, 0x00C);
 CHECK_OFFSET(ChatMenu, MenuSys, 0x124);
 CHECK_OFFSET(ChatMenu, DrawLayer, 0x128);
 CHECK_OFFSET(ChatMenu, mVtbl, 0x12C);
-CHECK_OFFSET(ChatMenu, unk_130, 0x130);
-CHECK_OFFSET(ChatMenu, unk_134, 0x134);
-CHECK_OFFSET(ChatMenu, unk_150, 0x150);
-CHECK_OFFSET(ChatMenu, unk_168, 0x168);
-CHECK_OFFSET(ChatMenu, unk_194, 0x194);
+CHECK_OFFSET(ChatMenu, mScreen, 0x130);
+CHECK_OFFSET(ChatMenu, mTitleItem, 0x134);
+CHECK_OFFSET(ChatMenu, mSpaceItem, 0x150);
+CHECK_OFFSET(ChatMenu, mEnterChatItem, 0x168);
+CHECK_OFFSET(ChatMenu, mMessageItems, 0x194);
 CHECK_SIZE(ChatMenu, 0x38C);
 
 // ChallengeResponseMenu<cDebugLobbyScreen::OnAcceptChallenge, cDebugLobbyScreen::OnDeclineChallenge> (0x1EC):
@@ -417,23 +423,23 @@ struct ChallengeResponseMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] ctor (0x001DB148) stores D_0046D3D0
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
+    cDebugLobbyScreen* mAcceptScreen; // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnAcceptChallenge: the owning screen); [U]
                                      //       ChallengeResponseMenu_onCommand ID 0 calls func_0017E490 with it
-    cDebugLobbyScreen* unk_134;      // 0x134 [R] ctor stores the first word of its functor argument (preview template
+    cDebugLobbyScreen* mDeclineScreen; // 0x134 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnDeclineChallenge: the owning screen); [U]
                                      //       ChallengeResponseMenu_onCommand ID 1 calls func_0017E4F0 with it
-    cNullMenuItem unk_138;           // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "You've been
+    cNullMenuItem mTitleItem;        // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "You've been
                                      //       Challenged!"); destroyed by the dtor
-    cNullMenuItem unk_154;           // 0x154 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x154, "by"); destroyed by the
+    cNullMenuItem mByItem;           // 0x154 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x154, "by"); destroyed by the
                                      //       dtor
-    cNullMenuItem unk_170;           // 0x170 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x170, "" (the challenger));
+    cNullMenuItem mChallengerItem;   // 0x170 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x170, "" (the challenger));
                                      //       destroyed by the dtor
-    cSpaceMenuItem unk_18C;          // 0x18C [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x18C, h); destroyed by the
+    cSpaceMenuItem mSpaceItem;       // 0x18C [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x18C, h); destroyed by the
                                      //       dtor
-    cCommandMenuItem unk_1A4;        // 0x1A4 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 0 "Accept"); destroyed by
+    cCommandMenuItem mAcceptItem;    // 0x1A4 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 0 "Accept"); destroyed by
                                      //       the dtor
-    cCommandMenuItem unk_1C8;        // 0x1C8 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 1 "Decline"); destroyed by
+    cCommandMenuItem mDeclineItem;   // 0x1C8 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 1 "Decline"); destroyed by
                                      //       the dtor
 };
 
@@ -444,14 +450,14 @@ CHECK_OFFSET(ChallengeResponseMenu, Items, 0x00C);
 CHECK_OFFSET(ChallengeResponseMenu, MenuSys, 0x124);
 CHECK_OFFSET(ChallengeResponseMenu, DrawLayer, 0x128);
 CHECK_OFFSET(ChallengeResponseMenu, mVtbl, 0x12C);
-CHECK_OFFSET(ChallengeResponseMenu, unk_130, 0x130);
-CHECK_OFFSET(ChallengeResponseMenu, unk_134, 0x134);
-CHECK_OFFSET(ChallengeResponseMenu, unk_138, 0x138);
-CHECK_OFFSET(ChallengeResponseMenu, unk_154, 0x154);
-CHECK_OFFSET(ChallengeResponseMenu, unk_170, 0x170);
-CHECK_OFFSET(ChallengeResponseMenu, unk_18C, 0x18C);
-CHECK_OFFSET(ChallengeResponseMenu, unk_1A4, 0x1A4);
-CHECK_OFFSET(ChallengeResponseMenu, unk_1C8, 0x1C8);
+CHECK_OFFSET(ChallengeResponseMenu, mAcceptScreen, 0x130);
+CHECK_OFFSET(ChallengeResponseMenu, mDeclineScreen, 0x134);
+CHECK_OFFSET(ChallengeResponseMenu, mTitleItem, 0x138);
+CHECK_OFFSET(ChallengeResponseMenu, mByItem, 0x154);
+CHECK_OFFSET(ChallengeResponseMenu, mChallengerItem, 0x170);
+CHECK_OFFSET(ChallengeResponseMenu, mSpaceItem, 0x18C);
+CHECK_OFFSET(ChallengeResponseMenu, mAcceptItem, 0x1A4);
+CHECK_OFFSET(ChallengeResponseMenu, mDeclineItem, 0x1C8);
 CHECK_SIZE(ChallengeResponseMenu, 0x1EC);
 
 // AbortMenu<cDebugLobbyScreen::OnAbortChallenge> (0x158): one "Abort" row. Preview vtable pairs with retail
@@ -467,10 +473,10 @@ struct AbortMenu {
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] AbortMenu_AbortMenu stores AbortMenu_vtbl
-    cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
+    cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnAbortChallenge: the owning screen); [U]
                                      //       AbortMenu_onCommand passes it to func_0017E558
-    cCommandMenuItem unk_134;        // 0x134 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 0 "Abort"); destroyed by
+    cCommandMenuItem mAbortItem;     // 0x134 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 0 "Abort"); destroyed by
                                      //       the dtor
 };
 
@@ -481,8 +487,8 @@ CHECK_OFFSET(AbortMenu, Items, 0x00C);
 CHECK_OFFSET(AbortMenu, MenuSys, 0x124);
 CHECK_OFFSET(AbortMenu, DrawLayer, 0x128);
 CHECK_OFFSET(AbortMenu, mVtbl, 0x12C);
-CHECK_OFFSET(AbortMenu, unk_130, 0x130);
-CHECK_OFFSET(AbortMenu, unk_134, 0x134);
+CHECK_OFFSET(AbortMenu, mScreen, 0x130);
+CHECK_OFFSET(AbortMenu, mAbortItem, 0x134);
 CHECK_SIZE(AbortMenu, 0x158);
 
 #endif /* FE_DEBUGLOBBYMENUS_H */

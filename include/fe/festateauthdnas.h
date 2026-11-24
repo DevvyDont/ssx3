@@ -11,7 +11,7 @@
 // (slot 17: 0xF ok, 0x10 error with the three texts copied into cFEStateNetConfig's mpustrAuthError[], 0x14 cancel).
 // EA's name: the preview's __16cFEStateAuthDNAS, onGainTransition__16cFEStateAuthDNASb, onLoseTransition__16...
 // Size 0x700: cMemMan_alloc(0x700, "NetConfigAuthPopup") + cFEStateAuthDNAS_cFEStateAuthDNAS(mem, pEngine, pParent) (func_001B55B0, the
-// only site). Constructors cFEStateAuthDNAS_cFEStateAuthDNAS (cFEStateNet(pEngine, pParent), vtable cFEStateAuthDNAS_vtbl, mHashName 0x44, unk_6A8 =
+// only site). Constructors cFEStateAuthDNAS_cFEStateAuthDNAS (cFEStateNet(pEngine, pParent), vtable cFEStateAuthDNAS_vtbl, mHashName 0x44, mNeedsLobby =
 // 0) and the default cFEStateAuthDNAS_cFEStateAuthDNAS1 (fe/fepopupmisc); destructor cFEStateAuthDNAS__cFEStateAuthDNAS (slot 1: deletes mpAuth, frees
 // mpustrText). Retail vtable cFEStateAuthDNAS_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNAS_onCreateScreen, 7
 // cFEStateAuthDNAS_onGainTransition

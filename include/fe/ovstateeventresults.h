@@ -82,15 +82,16 @@ struct cOVState_RACE_FINISHOV : public cOVState {
     //   mpScreen: [U] onCreateScreen stores the new screen
     // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_RACE_FINISHOV
-    float unk_09C;                   // 0x09C [U] onUpdate (slot 12) advances it by 1/60 per frame (lwc1/swc1);
-                                     //       onCreateScreen zeroes it
-    int unk_0A0;                     // 0x0A0 [R] the ctor stores 1; [U] handleEvent (slot 24) clears it on event 0 and
-                                     //       sets it on 1; onUpdate, onWidgetEvent / onWidgetMenu (slots 19 / 20) test
-                                     //       it. Preview: the same store of 1 in its ctor and the same handleEvent
+    float mElapsedTime;              // 0x09C seconds shown (name ours): [U] onUpdate (slot 12) advances it by 1/60 per
+                                     //       frame (lwc1/swc1) and moves on at 3 s (1 s); onCreateScreen zeroes it
+    int mCanContinue;                // 0x0A0 may the overlay move on (name ours): [R] the ctor stores 1; [U] handleEvent
+                                     //       (slot 24) clears it on event 0 and sets it on 1; onUpdate, onWidgetEvent /
+                                     //       onWidgetMenu (slots 19 / 20) move on only while it is set. Preview: the
+                                     //       same store of 1 in its ctor and the same handleEvent
 };
 
-CHECK_OFFSET(cOVState_RACE_FINISHOV, unk_09C, 0x09C);
-CHECK_OFFSET(cOVState_RACE_FINISHOV, unk_0A0, 0x0A0);
+CHECK_OFFSET(cOVState_RACE_FINISHOV, mElapsedTime, 0x09C);
+CHECK_OFFSET(cOVState_RACE_FINISHOV, mCanContinue, 0x0A0);
 CHECK_SIZE(cOVState_RACE_FINISHOV, 0xA4);
 
 // cOVState_BASSSP_QUAL_FINISHOV (0xA4: cMemMan size for type 13; same members as RACE_FINISHOV, both written by the
@@ -106,15 +107,16 @@ struct cOVState_BASSSP_QUAL_FINISHOV : public cOVState {
     //   mpScreen: [U] onCreateScreen stores the new screen
     // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_BASSSP_QUAL_FINISHOV
-    float unk_09C;                   // 0x09C [U] onUpdate (slot 12) advances it by 1/60 per frame (lwc1/swc1);
-                                     //       onCreateScreen zeroes it
-    int unk_0A0;                     // 0x0A0 [R] the ctor stores 1; [U] handleEvent (slot 24) clears it on event 0 and
-                                     //       sets it on 1; onUpdate, onWidgetEvent / onWidgetMenu (slots 19 / 20) test
-                                     //       it. Preview: the same store of 1 in its ctor and the same handleEvent
+    float mElapsedTime;              // 0x09C seconds shown (name ours): [U] onUpdate (slot 12) advances it by 1/60 per
+                                     //       frame (lwc1/swc1) and moves on at 3 s (1 s); onCreateScreen zeroes it
+    int mCanContinue;                // 0x0A0 may the overlay move on (name ours): [R] the ctor stores 1; [U] handleEvent
+                                     //       (slot 24) clears it on event 0 and sets it on 1; onUpdate, onWidgetEvent /
+                                     //       onWidgetMenu (slots 19 / 20) move on only while it is set. Preview: the
+                                     //       same store of 1 in its ctor and the same handleEvent
 };
 
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, unk_09C, 0x09C);
-CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, unk_0A0, 0x0A0);
+CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mElapsedTime, 0x09C);
+CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mCanContinue, 0x0A0);
 CHECK_SIZE(cOVState_BASSSP_QUAL_FINISHOV, 0xA4);
 
 // cOVState_TOURNAMENT_STANDINGS (0x9C, no own members). Slots: 4 onCreateScreen cOVState_TOURNAMENT_STANDINGS_onCreateScreen, 19 onWidgetEvent

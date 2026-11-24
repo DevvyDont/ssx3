@@ -10,7 +10,7 @@
 //
 // Size 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateDuplicate") + cFEStateCreateDuplicate_cFEStateCreateDuplicate(mem, pEngine, bAccount) at both sites
 // (func_001ADC30 with 0, func_001BAC90). Constructors cFEStateCreateDuplicate_cFEStateCreateDuplicate (cFEStateNet(pEngine, 0), vtable cFEStateCreateDuplicate_vtbl,
-// mHashName 0x4F, unk_6A8 = 0) and the default cFEStateCreateDuplicate_cFEStateCreateDuplicate1 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
+// mHashName 0x4F, mNeedsLobby = 0) and the default cFEStateCreateDuplicate_cFEStateCreateDuplicate1 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
 // (fe/fepopupmisc;
 // slot 1; the preview's _$_23cFEStateCreateDuplicate). Retail vtable cFEStateCreateDuplicate_vtbl (32 slots: 4 onCreateScreen
 // cFEStateCreateDuplicate_onCreateScreen, 12 onUpdate cFEStateCreateDuplicate_onUpdate, 17 onPopupEvent cFEStateCreateDuplicate_onPopupEvent, 18 onWidgetCreate cFEStateCreateDuplicate_onWidgetCreate,

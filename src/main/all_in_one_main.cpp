@@ -76,16 +76,16 @@ extern int D_00467DD8[];
  */
 extern "C" char* ChallengeResponseMenu_ChallengeResponseMenu(ChallengeResponseMenu* self, int* acceptOwner, int* declineOwner)
 {
-    char* item0 = (char*)&self->unk_138;
-    char* item1 = (char*)&self->unk_154;
-    char* item2 = (char*)&self->unk_170;
-    char* item3 = (char*)&self->unk_18C;
-    char* item4 = (char*)&self->unk_1A4;
-    char* item5 = (char*)&self->unk_1C8;
+    char* item0 = (char*)&self->mTitleItem;
+    char* item1 = (char*)&self->mByItem;
+    char* item2 = (char*)&self->mChallengerItem;
+    char* item3 = (char*)&self->mSpaceItem;
+    char* item4 = (char*)&self->mAcceptItem;
+    char* item5 = (char*)&self->mDeclineItem;
     cMenu_cMenu(self);
     self->mVtbl = (void**)D_0046D3D0;
-    self->unk_130 = (cDebugLobbyScreen*)(*acceptOwner);
-    self->unk_134 = (cDebugLobbyScreen*)(*declineOwner);
+    self->mAcceptScreen = (cDebugLobbyScreen*)(*acceptOwner);
+    self->mDeclineScreen = (cDebugLobbyScreen*)(*declineOwner);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item0, str_You_ve_been_Challenged);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, str_by);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
@@ -124,9 +124,9 @@ extern int AbortMenu_vtbl[];
  */
 extern "C" void *AbortMenu_AbortMenu(AbortMenu* menu, int *owner) {
     cMenu_cMenu(menu);
-    char *abortItem = (char*)&menu->unk_134;
+    char *abortItem = (char*)&menu->mAbortItem;
     menu->mVtbl = (void**)AbortMenu_vtbl;
-    menu->unk_130 = (cDebugLobbyScreen*)(*owner);
+    menu->mScreen = (cDebugLobbyScreen*)(*owner);
     cCommandMenuItem_cCommandMenuItem2(abortItem, 0, D_00467DE0, 0);
     cMenu_addItem(menu, abortItem, -1);
     return ((char*)menu);
@@ -198,17 +198,17 @@ extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, LobbyMan* src)
     int i = 0;
     for (; i < src->mNumPersonas; i++) {
         int id = ((int*)&src->mPersonas[0])[i];
-        cCommandMenuItem* it = &((&self->unk_518[0]))[i];
+        cCommandMenuItem* it = &((&self->mPersonaItems[0]))[i];
         (*(int*)&it->Caption) = id;
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     for (; i < 4; i++) {
-        cMenuItem_activate(&((&self->unk_518[0]))[i], 0);
+        cMenuItem_activate(&((&self->mPersonaItems[0]))[i], 0);
     }
-    DeletePersonaMenu_setpersonas(((char*)&self->unk_2E8), src);
-    cMenuItem_activate(((char*)&self->unk_5C4), src->mNumPersonas >= 2);
-    cMenuItem_activate(((char*)&self->unk_5A8), src->mNumPersonas < 4);
+    DeletePersonaMenu_setpersonas(((char*)&self->mDeletePersonaMenu), src);
+    cMenuItem_activate(((char*)&self->mDeletePersonaItem), src->mNumPersonas >= 2);
+    cMenuItem_activate(((char*)&self->mCreatePersonaItem), src->mNumPersonas < 4);
 }
 #endif
 
@@ -238,19 +238,19 @@ extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, LobbyMan* src)
     int i = 0;
     int n = LobbyMan_getnumrooms(src);
     for (; i < n; i++) {
-        cCommandMenuItem* it = &((&self->unk_168[0]))[i];
+        cCommandMenuItem* it = &((&self->mRoomItems[0]))[i];
         (*(void**)&it->Caption) = func_0025F150(src, i);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     if (i == 0) {
-        (*(void**)&((&self->unk_168[0]))[0].Caption) = str_Receiving_Room_List;
+        (*(void**)&((&self->mRoomItems[0]))[0].Caption) = str_Receiving_Room_List;
         i = 1;
-        cMenuItem_activate(&((&self->unk_168[0]))[0], 1);
-        ((&self->unk_168[0]))[0].ID = -1;
+        cMenuItem_activate(&((&self->mRoomItems[0]))[0], 1);
+        ((&self->mRoomItems[0]))[0].ID = -1;
     }
     for (; i < 12; i++) {
-        cMenuItem_activate(&((&self->unk_168[0]))[i], 0);
+        cMenuItem_activate(&((&self->mRoomItems[0]))[i], 0);
     }
 }
 #endif
@@ -281,19 +281,19 @@ extern "C" void RoomMenu_updateusers(RoomMenu* self, LobbyMan* src)
     int i = 0;
     int n = func_0025F1B0(src);
     for (; i < n; i++) {
-        cCommandMenuItem* it = &((&self->unk_16C[0]))[i];
+        cCommandMenuItem* it = &((&self->mUserItems[0]))[i];
         (*(void**)&it->Caption) = func_0025F1E0(src, i, 0);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
     if (i == 0) {
-        (*(void**)&((&self->unk_16C[0]))[0].Caption) = str_No_users_in_room;
+        (*(void**)&((&self->mUserItems[0]))[0].Caption) = str_No_users_in_room;
         i = 1;
-        cMenuItem_activate(&((&self->unk_16C[0]))[0], 1);
-        ((&self->unk_16C[0]))[0].ID = -1;
+        cMenuItem_activate(&((&self->mUserItems[0]))[0], 1);
+        ((&self->mUserItems[0]))[0].ID = -1;
     }
     for (; i < 24; i++) {
-        cMenuItem_activate(&((&self->unk_16C[0]))[i], 0);
+        cMenuItem_activate(&((&self->mUserItems[0]))[i], 0);
     }
 }
 #endif
@@ -523,7 +523,7 @@ extern "C" void func_0017E558(int);
  * @return 0
  */
 extern "C" int AbortMenu_onCommand(AbortMenu* menu) {
-    func_0017E558(((int)menu->unk_130));
+    func_0017E558(((int)menu->mScreen));
     return 0;
 }
 #endif
@@ -550,9 +550,9 @@ extern "C" int ChallengeResponseMenu_onCommand(ChallengeResponseMenu* menu, cMen
 
     temp_3 = item->ID;
     if (temp_3 == 0) {
-        func_0017E490(((int)menu->unk_130));
+        func_0017E490(((int)menu->mAcceptScreen));
     } else if (temp_3 == 1) {
-        func_0017E4F0(((int)menu->unk_134));
+        func_0017E4F0(((int)menu->mDeclineScreen));
     }
     return 0;
 }
@@ -575,7 +575,7 @@ extern "C" void func_0017E418(int, int);
  * @return 0
  */
 extern "C" int ChatMenu_onCommand(ChatMenu* menu, cCommandMenuItem* item) {
-    func_0017E418(((int)menu->unk_130), ((int)item->Caption));
+    func_0017E418(((int)menu->mScreen), ((int)item->Caption));
     return 0;
 }
 #endif
@@ -601,9 +601,9 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
 extern "C" int RoomMenu_onCommand(RoomMenu* menu, cMenuItem* item) {
     int itemValue = item->ID;
     if (itemValue == -2) {
-        func_0017E3B8_BB48((int)menu->unk_134);
+        func_0017E3B8_BB48((int)menu->mChatScreen);
     } else if (itemValue != -1) {
-        func_0017E368_BB48((int)menu->unk_130, itemValue);
+        func_0017E368_BB48((int)menu->mSelectUserScreen, itemValue);
     }
     return 0;
 }
@@ -630,7 +630,7 @@ extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, cMenuItem* item) {
 
     temp_5 = item->ID;
     if (temp_5 >= 0) {
-        func_0017E2F8(((int)menu->unk_130), temp_5);
+        func_0017E2F8(((int)menu->mScreen), temp_5);
     }
     return 0;
 }
@@ -653,7 +653,7 @@ extern "C" void func_0017E290(int, int);
  * @return 0
  */
 extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, cMenuItem* item) {
-    func_0017E290(((int)menu->unk_4E0), item->ID);
+    func_0017E290(((int)menu->mScreen), item->ID);
     return 0;
 }
 #endif
@@ -675,7 +675,7 @@ extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
  * @return 0
  */
 extern "C" int CreatePersonaMenu_onCommand(CreatePersonaMenu* menu) {
-    func_0017E1C0_BBE8((int)menu->unk_130, &menu->unk_168.Text[0]);
+    func_0017E1C0_BBE8((int)menu->mScreen, &menu->mPersonaNameItem.Text[0]);
     return 0;
 }
 #endif
@@ -697,7 +697,7 @@ extern "C" void func_0017E228(int, int);
  * @return 0
  */
 extern "C" int DeletePersonaMenu_onCommand(DeletePersonaMenu* menu, cMenuItem* item) {
-    func_0017E228(((int)menu->unk_130), item->ID);
+    func_0017E228(((int)menu->mScreen), item->ID);
     return 0;
 }
 #endif
@@ -720,7 +720,7 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
  * @return 0
  */
 extern "C" int AccountDetailsMenu_onCommand(AccountDetailsMenu* self) {
-    func_0017E030_BC38((int)self->unk_130, (char*)&self->unk_168.Text[0], (char*)&self->unk_194.Text[0]);
+    func_0017E030_BC38((int)self->mScreen, (char*)&self->mLoginNameItem.Text[0], (char*)&self->mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -743,7 +743,7 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
  * @return 0
  */
 extern "C" int AccountDetailsMenu_onCommand1(AccountDetailsMenu* self) {
-    func_0017E118_BC68((int)self->unk_130, (char*)&self->unk_168.Text[0], (char*)&self->unk_194.Text[0]);
+    func_0017E118_BC68((int)self->mScreen, (char*)&self->mLoginNameItem.Text[0], (char*)&self->mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -2052,10 +2052,10 @@ extern "C" void cMenu__cMenu(int, int);
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
 extern "C" void DeletePersonaMenu__DeletePersonaMenu(DeletePersonaMenu* self, int flags) {
-    if (((&self->unk_168[0])) != 0) {
-        cCommandMenuItem *end = ((&self->unk_168[0])) + 4;
+    if (((&self->mPersonaItems[0])) != 0) {
+        cCommandMenuItem *end = ((&self->mPersonaItems[0])) + 4;
         cCommandMenuItem *elem = end;
-        while (((&self->unk_168[0])) != elem) {
+        while (((&self->mPersonaItems[0])) != elem) {
             elem--;
             ((VTab*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab*)elem->mVtbl)->dtor), 0);
         }
@@ -2177,10 +2177,10 @@ struct Obj_D258 { char pad[0x168]; cCommandMenuItem elems[12]; };
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
 extern "C" void LobbyMenu__LobbyMenu(LobbyMenu* self, int flags) {
-    if (((&self->unk_168[0])) != 0) {
-        cCommandMenuItem *end = ((&self->unk_168[0])) + 12;
+    if (((&self->mRoomItems[0])) != 0) {
+        cCommandMenuItem *end = ((&self->mRoomItems[0])) + 12;
         cCommandMenuItem *elem = end;
-        while (((&self->unk_168[0])) != elem) {
+        while (((&self->mRoomItems[0])) != elem) {
             elem--;
             ((VTab_D258*)elem->mVtbl)->dtor.fn((char*)elem + ((VTab_D258*)elem->mVtbl)->dtor.delta, 0);
         }
@@ -2209,9 +2209,9 @@ struct Obj_D2F0 { char pad[0x16C]; cCommandMenuItem elems[24]; };
  */
 extern "C" void RoomMenu__RoomMenu(RoomMenu* self, int flags) {
     cMenuItem__cMenuItem((int)self + 1228, 2);
-    if (((&self->unk_16C[0])) != 0) {
-        cCommandMenuItem *elem = ((&self->unk_16C[0])) + 24;
-        while (((&self->unk_16C[0])) != elem) {
+    if (((&self->mUserItems[0])) != 0) {
+        cCommandMenuItem *elem = ((&self->mUserItems[0])) + 24;
+        while (((&self->mUserItems[0])) != elem) {
             elem--;
             ((VTab_D2F0*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab_D2F0*)elem->mVtbl)->dtor), 0);
         }
@@ -2239,9 +2239,9 @@ struct Obj_D398 { char pad[0x194]; cCommandMenuItem elems[14]; };
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
 extern "C" void ChatMenu__ChatMenu(ChatMenu* self, int flags) {
-    if (((&self->unk_194[0])) != 0) {
-        cCommandMenuItem *elem = ((&self->unk_194[0])) + 14;
-        while (((&self->unk_194[0])) != elem) {
+    if (((&self->mMessageItems[0])) != 0) {
+        cCommandMenuItem *elem = ((&self->mMessageItems[0])) + 14;
+        while (((&self->mMessageItems[0])) != elem) {
             elem--;
             ((VTab_D398*)elem->mVtbl)->dtor.fn((char*)elem + ((VTab_D398*)elem->mVtbl)->dtor.delta, 0);
         }
@@ -5363,10 +5363,10 @@ struct sList_E7B0 {
 /**
  * Constructs an online front-end state with no engine and no parent (the default constructor).
  *
- * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, clears unk_048, unk_058,
- * mpKeyboard, mpKeyboardText, unk_6AC, unk_6B0 and unk_6B8, sets unk_6BC to 2, stores the cFEStateNet vtable
- * cFEStateNet_vtbl, builds the string at +0x6C0 from the empty string str_sp (cBXString_cBXString2) and allocates the
- * pending-message list's sentinel node (cMemMan_alloc(0xC, "StlBlock")), linking it to itself.
+ * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, clears mHasFocus, unk_058,
+ * mpKeyboard, mpKeyboardText, mDisconnectPopupOpen, unk_6B0 and mpPopupTextBuf, sets unk_6BC to 2, stores the
+ * cFEStateNet vtable cFEStateNet_vtbl, builds the string at +0x6C0 from the empty string str_sp (cBXString_cBXString2)
+ * and allocates the pending-message list's sentinel node (cMemMan_alloc(0xC, "StlBlock")), linking it to itself.
  *
  * @return @p self
  */
@@ -5376,16 +5376,16 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
     int framePad[4];
     cUIState_cUIState1_E7B0(self, 0, 0);
     sList_E7B0* msgList = (sList_E7B0*)(&self->mMsgList);
-    self->unk_048 = 0;
+    self->mHasFocus = 0;
     self->unk_058 = 0;
     self->mpKeyboard = 0;
     self->mpKeyboardText = 0;
-    self->unk_6AC = 0;
+    self->mDisconnectPopupOpen = 0;
     self->unk_6B0 = 0;
-    self->unk_6B8 = 0;
+    self->mpPopupTextBuf = 0;
     self->unk_6BC = 2;
     VPTR_OF(cListNode, self) = cFEStateNet_vtbl;
-    cBXString_cBXString2(&self->unk_6C0, str_sp_E7B0);
+    cBXString_cBXString2(&self->mszTargetUser, str_sp_E7B0);
     self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
     msgList->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
     msgList->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;
@@ -5494,10 +5494,10 @@ extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int value) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateNet_isProcessingEvents);
 #ifdef SKIP_ASM
 /**
- * Tells whether an online state handles net events: its screen (+0x40) exists and unk_048 (+0x48) is set.
+ * Tells whether an online state handles net events: its screen (+0x40) exists and mHasFocus (+0x48) is set.
  *
  * Slot +0xF4 of the cFEStateNet vtable cFEStateNet_vtbl and of most online states' vtables; cFEStateNet_onGainFocus calls it,
- * and sets unk_048 to 1.
+ * and sets mHasFocus to 1.
  *
  * @param netState  the online state (cFEStateNet)
  * @return 1 when both are set, otherwise 0
@@ -5507,7 +5507,7 @@ extern "C" int cFEStateNet_isProcessingEvents(cFEStateNet* netState) {
 
     var_3 = 0;
     if (((int)netState->mpScreen) != 0) {
-        var_3 = netState->unk_048 != 0;
+        var_3 = netState->mHasFocus != 0;
     }
     return var_3;
 }

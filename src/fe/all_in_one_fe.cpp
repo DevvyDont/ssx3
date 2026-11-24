@@ -1031,7 +1031,7 @@ extern "C" void *cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV(cOVState_RACE_FIN
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
     *(unsigned short*)ovState->mszChatBuff = chatInit;
-    ovState->unk_0A0 = 1;
+    ovState->mCanContinue = 1;
     VPTR_OF(cListNode, ovState) = (void**)cOVState_RACE_FINISHOV_vtbl;
     ovState->mHashName = GetHashValue32(str_finishov);
     return ((void*)ovState);
@@ -1095,7 +1095,7 @@ extern "C" void *cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV(cOV
     ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
     *(unsigned short*)ovState->mszChatBuff = chatInit;
-    ovState->unk_0A0 = 1;
+    ovState->mCanContinue = 1;
     VPTR_OF(cListNode, ovState) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
     ovState->mHashName = GetHashValue32(str_finishov);
     return ((void*)ovState);

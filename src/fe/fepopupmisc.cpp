@@ -10122,11 +10122,11 @@ public:
 /**
  * Builds the race finish overlay (overlay 12, vtable cOVState_RACE_FINISHOV_vtbl, entry 4 onCreateScreen).
  *
- * Adds the "finishov" screen (kept at +0x40), runs cOVState_onCreateScreen, zeroes the timer (+0x9C), sets flag 8 in
- * "Menu0000"'s +0x90, hides the run labels, shows the human rider's time in "pointstotal" (frames / 60) and only their
- * "place%d". Shows the platinum, gold, silver or bronze icon by the reward interface's word +0x14 (0-3) on a final
- * (mode 3) or game event 4, setting D_004A213C for platinum, and "new_record" when the score interface has a new record
- * (+0x18 or +0x1C not negative). Online, when the human rider's word +0x480 is set, or for game events 6-8 hides
+ * Adds the "finishov" screen (kept at +0x40), runs cOVState_onCreateScreen, zeroes the timer (mElapsedTime), sets flag
+ * 8 in "Menu0000"'s +0x90, hides the run labels, shows the human rider's time in "pointstotal" (frames / 60) and only
+ * their "place%d". Shows the platinum, gold, silver or bronze icon by the reward interface's word +0x14 (0-3) on a
+ * final (mode 3) or game event 4, setting D_004A213C for platinum, and "new_record" when the score interface has a new
+ * record (+0x18 or +0x1C not negative). Online, when the human rider's word +0x480 is set, or for game events 6-8 hides
  * "screendata" and "3D_Ov"; otherwise plays menu sound 0xE.
  */
 extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* self)
@@ -10139,7 +10139,7 @@ extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* se
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    *(int*)&self->unk_09C = 0;
+    *(int*)&self->mElapsedTime = 0;
     char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000_b));
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
@@ -10222,8 +10222,8 @@ extern "C" void cGame_doNextState(void* self);
 /**
  * Moves the race finish overlay on after a delay (vtable entry 12, onUpdate).
  *
- * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
- * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
+ * Runs cOVState_onUpdate and adds 1/60 to the timer (mElapsedTime); when mCanContinue is set and the timer reaches 3
+ * seconds (1 second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
  */
 extern "C" void cOVState_RACE_FINISHOV_onUpdate(cOVState_RACE_FINISHOV* self)
 {
@@ -10235,8 +10235,8 @@ extern "C" void cOVState_RACE_FINISHOV_onUpdate(cOVState_RACE_FINISHOV* self)
         limit = 1.0f;
     }
     cOVState_onUpdate(self);
-    self->unk_09C += 0.01666666753590107f;
-    if (self->unk_0A0 != 0 && self->unk_09C >= limit) {
+    self->mElapsedTime += 0.01666666753590107f;
+    if (self->mCanContinue != 0 && self->mElapsedTime >= limit) {
         cUIStateStack_purgeNormalStates(&SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
@@ -10250,7 +10250,8 @@ extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
 
 /**
- * Moves the race finish overlay on when its button is pressed while +0xA0 is set (vtable entry 19, onWidgetEvent).
+ * Moves the race finish overlay on when its button is pressed while mCanContinue is set (vtable entry 19,
+ * onWidgetEvent).
  *
  * On event 5 purges the normal UI states and calls cGame_doNextState.
  *
@@ -10260,7 +10261,7 @@ extern "C" void cGame_doNextState(void* self);
 extern "C" void cOVState_RACE_FINISHOV_onWidgetEvent(cOVState_RACE_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
-        if (event == 5 && self->unk_0A0 != 0) {
+        if (event == 5 && self->mCanContinue != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10276,7 +10277,7 @@ extern "C" void cOVState_RACE_FINISHOV_onWidgetEvent(cOVState_RACE_FINISHOV* sel
 INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the race finish menu's events (vtable entry 20): 257 for event 6 while +0xA0 is set, else 0.
+ * Answers the race finish menu's events (vtable entry 20): 257 for event 6 while mCanContinue is set, else 0.
  *
  * @param widget  the menu
  * @param key     the menu event
@@ -10286,7 +10287,7 @@ extern "C" int cOVState_RACE_FINISHOV_onWidgetMenu(cOVState_RACE_FINISHOV* self,
 {
     int result = 0;
     if (key == 6) {
-        if (self->unk_0A0 == 0) {
+        if (self->mCanContinue == 0) {
             result = 0;
         } else {
             return 257;
@@ -10300,7 +10301,7 @@ extern "C" int cOVState_RACE_FINISHOV_onWidgetMenu(cOVState_RACE_FINISHOV* self,
 INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_handleEvent);
 #ifdef SKIP_ASM
 /**
- * Sets the race finish overlay's may-continue flag (+0xA0) from a message (vtable entry 24, handleEvent).
+ * Sets the race finish overlay's may-continue flag (mCanContinue) from a message (vtable entry 24, handleEvent).
  *
  * Message 0 clears it and 1 sets it (the overlay factory starts it at 1); others are ignored.
  *
@@ -10311,10 +10312,10 @@ extern "C" int cOVState_RACE_FINISHOV_handleEvent(cOVState_RACE_FINISHOV* self, 
 {
     switch (message) {
     case 0:
-        self->unk_0A0 = 0;
+        self->mCanContinue = 0;
         break;
     case 1:
-        self->unk_0A0 = 1;
+        self->mCanContinue = 1;
         break;
     }
     return 0;
@@ -10368,7 +10369,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    *(int*)&self->unk_09C = 0;
+    *(int*)&self->mElapsedTime = 0;
     char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000_b));
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
@@ -10474,8 +10475,8 @@ extern "C" void cGame_doNextState(void* self);
 /**
  * Moves the event finish overlay on after a delay (vtable entry 12, onUpdate).
  *
- * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
- * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
+ * Runs cOVState_onUpdate and adds 1/60 to the timer (mElapsedTime); when mCanContinue is set and the timer reaches 3
+ * seconds (1 second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
  */
 extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onUpdate(cOVState_BASSSP_QUAL_FINISHOV* self)
 {
@@ -10487,8 +10488,8 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onUpdate(cOVState_BASSSP_QUAL_FINI
         limit = 1.0f;
     }
     cOVState_onUpdate(self);
-    self->unk_09C += 0.01666666753590107f;
-    if (self->unk_0A0 != 0 && self->unk_09C >= limit) {
+    self->mElapsedTime += 0.01666666753590107f;
+    if (self->mCanContinue != 0 && self->mElapsedTime >= limit) {
         cUIStateStack_purgeNormalStates(&SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
@@ -10502,7 +10503,8 @@ extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
 
 /**
- * Moves the event finish overlay on when its button is pressed while +0xA0 is set (vtable entry 19, onWidgetEvent).
+ * Moves the event finish overlay on when its button is pressed while mCanContinue is set (vtable entry 19,
+ * onWidgetEvent).
  *
  * On event 5 purges the normal UI states and calls cGame_doNextState.
  *
@@ -10512,7 +10514,7 @@ extern "C" void cGame_doNextState(void* self);
 extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
-        if (event == 5 && self->unk_0A0 != 0) {
+        if (event == 5 && self->mCanContinue != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10525,7 +10527,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent(cOVState_BASSSP_QUAL
 INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the event finish menu's events (vtable entry 20): 257 for event 6 while +0xA0 is set, else 0.
+ * Answers the event finish menu's events (vtable entry 20): 257 for event 6 while mCanContinue is set, else 0.
  *
  * @param widget  the menu
  * @param key     the menu event
@@ -10535,7 +10537,7 @@ extern "C" int cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu(cOVState_BASSSP_QUAL_F
 {
     int result = 0;
     if (key == 6) {
-        if (self->unk_0A0 == 0) {
+        if (self->mCanContinue == 0) {
             result = 0;
         } else {
             return 257;
@@ -10549,7 +10551,7 @@ extern "C" int cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu(cOVState_BASSSP_QUAL_F
 INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_handleEvent);
 #ifdef SKIP_ASM
 /**
- * Sets the event finish overlay's may-continue flag (+0xA0) from a message (vtable entry 24, handleEvent).
+ * Sets the event finish overlay's may-continue flag (mCanContinue) from a message (vtable entry 24, handleEvent).
  *
  * Message 0 clears it and 1 sets it (the overlay factory starts it at 1); others are ignored.
  *
@@ -10560,10 +10562,10 @@ extern "C" int cOVState_BASSSP_QUAL_FINISHOV_handleEvent(cOVState_BASSSP_QUAL_FI
 {
     switch (message) {
     case 0:
-        self->unk_0A0 = 0;
+        self->mCanContinue = 0;
         break;
     case 1:
-        self->unk_0A0 = 1;
+        self->mCanContinue = 1;
         break;
     }
     return 0;

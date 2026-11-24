@@ -413,7 +413,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, overlay) = (void**)cOVState_RACE_FINISHOV_vtbl;
-        overlay->unk_0A0 = 0x1;
+        overlay->mCanContinue = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
@@ -426,7 +426,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, overlay) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
-        overlay->unk_0A0 = 0x1;
+        overlay->mCanContinue = 0x1;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
@@ -927,7 +927,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_RACE_FINISHOV_vtbl;
-        newOverlay->unk_0A0 = 0x1;
+        newOverlay->mCanContinue = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
@@ -940,7 +940,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
-        newOverlay->unk_0A0 = 0x1;
+        newOverlay->mCanContinue = 0x1;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
