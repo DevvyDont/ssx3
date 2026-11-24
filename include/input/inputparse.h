@@ -26,36 +26,40 @@
 
 // One expression-tree node; 0x800 of them are embedded in the parser as a pool (cInputMapParser::ParseNodes).
 // On Tour: struct tParseNode { eNodeType Type; <anonymous union, members not in the dump>; } (size 0x10).
-// The union's member names are unknown; the members below are typed by retail use and named by offset.
+// The union's member names are unknown; the members below are typed and named by retail use (Operand1..3 are the
+// child nodes in the order freeParseNode frees them and compileParseNode compiles them).
 struct tIdentifier;
 struct tParseNode {
     int Type;                       // 0x00 [O] eNodeType; [U] the switch in freeParseNode / compileParseNode
                                     //      (1 Reference, 2 Button, 3 Config, 4 Constant, 5 Selection, 6.. operators)
     union {
-        tParseNode* unk_04;         // 0x04 [U] first operand (operators, Selection's condition); the free-list link
+        tParseNode* Operand1;       // 0x04 [U] first operand (operators, Selection's condition); the free-list link
                                     //       (cInputMapParser_cInputMapParser, cInputMapParser_newParseNode,
                                     //       freeParseNode)
-        tIdentifier* unk_04_id;     // 0x04 [U] Reference node (Type 1): the identifier (compileParseNode reads
+        tIdentifier* Identifier;    // 0x04 [U] Reference node (Type 1): the identifier (compileParseNode reads
                                     //       ->Expression)
-        int unk_04_i;               // 0x04 [U] Button/Config node (Type 2/3): the button or config index
+        int Index;                  // 0x04 [U] Button/Config node (Type 2/3): the button or config index
                                     //       (compileParseNode)
-        float unk_04_f;             // 0x04 [U] Constant node (Type 4): the value (parseOr/parseAnd/parseExpression fold
+        float Value;                // 0x04 [U] Constant node (Type 4): the value (parseOr/parseAnd/parseExpression fold
                                     //       it)
     };
     union {
-        tParseNode* unk_08;         // 0x08 [U] second operand (binary operators), Selection's then-branch
-        int unk_08_i;               // 0x08 [U] Reference/Button node: the button modifier (compileParseNode compares
+        tParseNode* Operand2;       // 0x08 [U] second operand (binary operators), Selection's then-branch
+        int Modifier;               // 0x08 [U] Reference/Button node: the button modifier (compileParseNode compares
                                     //      it with 5 = On Tour kButtonModifier_Default)
     };
-    tParseNode* unk_0C;             // 0x0C [U] Selection node (Type 5): the else-branch (freeParseNode,
+    tParseNode* Operand3;           // 0x0C [U] Selection node (Type 5): the else-branch (freeParseNode,
                                     //       compileParseNode)
 };
 
 CHECK_OFFSET(tParseNode, Type, 0x00);
-CHECK_OFFSET(tParseNode, unk_04, 0x04);
-CHECK_OFFSET(tParseNode, unk_04_f, 0x04);
-CHECK_OFFSET(tParseNode, unk_08, 0x08);
-CHECK_OFFSET(tParseNode, unk_0C, 0x0C);
+CHECK_OFFSET(tParseNode, Operand1, 0x04);
+CHECK_OFFSET(tParseNode, Identifier, 0x04);
+CHECK_OFFSET(tParseNode, Index, 0x04);
+CHECK_OFFSET(tParseNode, Value, 0x04);
+CHECK_OFFSET(tParseNode, Operand2, 0x08);
+CHECK_OFFSET(tParseNode, Modifier, 0x08);
+CHECK_OFFSET(tParseNode, Operand3, 0x0C);
 CHECK_SIZE(tParseNode, 0x10);
 
 // One named statement of the map file ("name = expression;"); 512 are embedded in the parser.

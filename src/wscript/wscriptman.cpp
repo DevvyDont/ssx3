@@ -17,9 +17,11 @@
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "world/world.h"
+#include "world/worldcache.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "ai/rider.h"
 #include "replay/bxreplayframe.h"
 #include "object/instancenode.h"
 
@@ -402,24 +404,6 @@ extern "C" int cWScriptMan_getScriptCode(cWScriptMan* self, int id)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getHeightCurr);
 #ifdef SKIP_ASM
-struct cWScriptMan_getHeightCurr_sVec {
-    float x;
-    float y;
-    float z;
-    float w;
-} __attribute__((aligned(16)));
-
-struct cWScriptMan_getHeightCurr_sPos {
-    char pad[8];
-    float z;
-};
-
-struct cWScriptMan_getHeightCurr_sVEntry {
-    short delta;
-    short index;
-    cWScriptMan_getHeightCurr_sPos* (*fn)(void*);
-};
-
 
 static inline char* cWScriptMan_getHeightCurr_toPtr(unsigned int i)
 {
@@ -446,11 +430,11 @@ static inline char* cWScriptMan_getHeightCurr_resolve(char* tbl, unsigned int h)
 
 /**
  * Returns the current height of the mission's rider above its height instance, or 0 when the height display is off
- * (+0x28).
+ * (MissionHeightEnable).
  *
- * The instance (resource ID +0x2C, resolved through the world's instance tables, +0x28C) gives the base height (z of
- * its position, +0x40); the rider (index +0x30 into the game's AI rider list) gives its position through virtual slot 5
- * of its +0x6C0 part.
+ * The instance (MissionHeightInstId, resolved through the World's instance tables) gives the base height (z of its
+ * transform's translation row); the rider (MissionHeightBeing in the game's AI rider list) gives its position
+ * (getPosition, cBeing's virtual slot 5).
  *
  * @return the height above the instance, never negative
  */
@@ -459,14 +443,12 @@ extern "C" float cWScriptMan_getHeightCurr(cWScriptMan* self)
     if (self->MissionHeightEnable == 0) {
         return 0.0f;
     }
-    char* node = cWScriptMan_getHeightCurr_resolve(*(char**)self->World, self->MissionHeightInstId);
-    char* list = (char*)SSXApp->Game->AI;
-    char* obj = *(char**)(list + (self->MissionHeightBeing << 2) + 0x28);
-    char* sub = obj + 0x6C0;
-    cWScriptMan_getHeightCurr_sVEntry* vt = *(cWScriptMan_getHeightCurr_sVEntry**)sub;
-    cWScriptMan_getHeightCurr_sPos* riderPos = vt[5].fn(vthis(sub, vt[5]));
+    tInstanceRecord* node =
+        (tInstanceRecord*)cWScriptMan_getHeightCurr_resolve(*(char**)self->World, self->MissionHeightInstId);
+    cRider* rider = SSXApp->Game->AI->Riders[self->MissionHeightBeing];
+    t4Vector* riderPos = rider->getPosition();
     float z = riderPos->z;
-    cWScriptMan_getHeightCurr_sVec pos = *(cWScriptMan_getHeightCurr_sVec*)(node + 0x40);
+    t4Vector pos = *(t4Vector*)node->m_fmTransform.m[3]; // the translation row
     float height = z - pos.z;
     if (height >= 0.0f) {
         return height;
@@ -572,14 +554,11 @@ extern "C" void luno_cLunoVar__cLunoVar(luno_cLunoVar* self, int flags);
  */
 extern "C" int cWScriptMan_isFunc(cWScriptMan* self, int idx, int value)
 {
-    int off = idx << 2;
-    char* base = (char*)self->GlobalTables;
-    void** slot = (void**)(base + off);
-    if (*slot != 0) {
+    if (self->GlobalTables[idx] != 0) {
         luno_cLunoVar key;
         key.Type = 3;
         *(int*)luno_cLunoVar_castIndex(&key) = value;
-        int isFunction = luno_cLunoTable_get1(*slot, &key)->Type == 5;
+        int isFunction = luno_cLunoTable_get1(self->GlobalTables[idx], &key)->Type == 5;
         luno_cLunoVar__cLunoVar(&key, 2);
         return isFunction;
     }
@@ -615,9 +594,8 @@ extern "C" void cWScriptMan_runFunc(cWScriptMan* self, int idx, int value)
     luno_cLunoVar key;
     key.Type = 3;
     *(int*)luno_cLunoVar_castIndex(&key) = value;
-    int off = idx << 2;
-    char* base = (char*)self->GlobalTables;
-    void** slot = (void**)(base + off);
+    cLunoTable** base = self->GlobalTables;
+    cLunoTable** slot = base + idx;
     cWScriptMan_runFunc_sArg scriptFunc = *(cWScriptMan_runFunc_sArg*)luno_cLunoTable_get1(*slot, &key);
     luno_cLunoVar ret;
     ret.Type = 0;
@@ -636,21 +614,6 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runGlobalScripts);
 struct cWorldView;
 int cWorldView_getNumSections(cWorldView* view);
 
-struct sWSSection9F18 {
-    short type;                 // 0x0
-    short pad2;
-    int f4;
-    int f8;
-};
-
-struct sWSWorld9F18 {
-    char* view;                 // 0x0 (cWorldView at +0x10)
-    struct {
-        int f0;
-        sWSSection9F18* sections;   // 0x4
-    }* info;                    // 0x4
-};
-
 
 struct cWScriptIdTable;
 extern "C" void cCollectPool_init(cCollectPool* self);
@@ -659,9 +622,9 @@ extern "C" void cAvalanche_reset(void);
 extern "C" int cWorld_getNumGlobalScripts(void* world, int i);
 extern "C" int* cWorld_getGlobalScripts(void* world, int i);
 
-static inline bool wsIsType3_9F18(sWSSection9F18* s)
+static inline bool wsIsType3_9F18(cWScriptCacheEntry* s)
 {
-    return s->type == 3;
+    return s->mState == 3;
 }
 
 /**
@@ -689,12 +652,12 @@ extern "C" void cWScriptMan_runGlobalScripts(cWScriptMan* self)
     *(int*)&self->IntersectInfo = 0;
     *(int*)&self->CurrentProcess = 0;
     *(int*)&self->CurrentTask = 0;
-    n = cWorldView_getNumSections((cWorldView*)(((sWSWorld9F18*)self->World)->view + 0x10));
+    n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
     for (i = 0; i < n; i++) {
-        if (wsIsType3_9F18(&((sWSWorld9F18*)self->World)->info->sections[i])) {
-            int* globalScript = cWorld_getGlobalScripts(((sWSWorld9F18*)self->World), i);
+        if (wsIsType3_9F18(&self->World->m_pWScriptCache->mpCache[i])) {
+            int* globalScript = cWorld_getGlobalScripts(self->World, i);
             if (globalScript != 0) {
-                int cnt = cWorld_getNumGlobalScripts(((sWSWorld9F18*)self->World), i);
+                int cnt = cWorld_getNumGlobalScripts(self->World, i);
                 int j;
                 for (j = 0; j < cnt; j++, globalScript++) {
                     cWScriptMan_runScript((cWScriptMan*)self, globalScript);
@@ -715,9 +678,9 @@ extern "C" void cWScriptMan_runGlobalScripts(cWScriptMan* self)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnCollideScript);
 #ifdef SKIP_ASM
 struct cWScriptMan_isFunc_sValue;
-struct sCall_30A060 {
-    int pad;
-    ~sCall_30A060() {}
+// A luno_cLunoVM with EA's inline (empty) destructor, which places it in the frame as retail does.
+struct luno_cLunoVMLocal : luno_cLunoVM {
+    ~luno_cLunoVMLocal() {}
 };
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
@@ -737,36 +700,31 @@ static inline bool valid_30A060(int* id) { return *id != -1; }
 /**
  * Runs the world script attached to an object a being collided with.
  *
- * Saves the current being and makes @p obj's (its virtual slot 7) current, remembering the instance (from the intersect
- * info's +0x50) and both infos. If the being's virtual slot 8 says so, a collide event for the instance is raised
- * (cWScriptMan_eventCollide), unless a non-replay rider has its +0x480 flag set, which ends the call. The instance's collide
- * script id (header entry 2) is then run directly (cWScriptMan_runScript) when no process or task is current, or otherwise in
- * the current task's or process's local table (a new 8-slot table named "SetupLocalTable" when there is none). Finally
- * the instance's +0xC object gets virtual slot 41 with 0.5, and the being and saved fields are restored.
+ * Saves the current being and makes @p obj's (getAIIndex, virtual slot 7) current, remembering the instance (the
+ * intersect info's Inst) and both infos. If the being is human (virtual slot 8), a collide event for the instance is
+ * raised (cWScriptMan_eventCollide), unless a non-replay rider has mDidNotFinish set, which ends the call. The
+ * instance's collide script id (header entry 2) is then run directly (cWScriptMan_runScript) when no process or task
+ * is current, or otherwise in the current task's or process's local table (a new 8-slot table named
+ * "SetupLocalTable" when there is none). Finally the instance's +0xC object gets virtual slot 41 with 0.5, and the
+ * being and saved fields are restored.
  *
  * @param collideInfo  collision info (On Tour tc)
  * @param intersectInfo  intersection info (On Tour ti)
  * @param obj  the being that collided (On Tour pBeing)
  */
-extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideInfo, void* intersectInfo, void* obj)
+extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, tCollideInfo* collideInfo,
+                                               tIntersectInfo* intersectInfo, cBeing* obj)
 {
     int saved = self->Being;
-    {
-        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-        self->Being = vt[7].fn(vthis(obj, vt[7]));
-    }
-    self->Inst = (tInstanceRecord*)(*(int*)((char*)intersectInfo + 0x50));
-    self->CollideInfo = (tCollideInfo*)collideInfo;
-    self->IntersectInfo = (tIntersectInfo*)intersectInfo;
-    int raiseEvent;
-    {
-        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-        raiseEvent = vt[8].fn(vthis(obj, vt[8]));
-    }
+    self->Being = obj->getAIIndex();
+    self->Inst = intersectInfo->Inst;
+    self->CollideInfo = collideInfo;
+    self->IntersectInfo = intersectInfo;
+    int raiseEvent = obj->isHuman();
     if (raiseEvent) {
         if (SSXApp->Game->mCurrentStateID != 4) {
-            char* rider = obj ? (char*)obj - 0x6C0 : 0;
-            if (*(int*)(rider + 0x480) != 0) {
+            cRider* rider = (cRider*)obj;
+            if (rider->mDidNotFinish != 0) {
                 self->Being = saved;
                 goto done;
             }
@@ -776,7 +734,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
     {
         luno_cLunoVar scriptFunc;
         luno_cLunoVar ret;
-        sCall_30A060 call;
+        luno_cLunoVMLocal call;
         int id = cWorld_getWScriptHeaderId(self->World, (int)self->Inst, 2);
         if (valid_30A060(&id)) {
             if ((int)self->CurrentProcess == 0 && (int)self->CurrentTask == 0) {
@@ -999,10 +957,10 @@ extern "C" void cWScriptMan_doOnLoseFocusScript(cWScriptMan* self, int id);
 /**
  * Handles a world instance losing the player's focus.
  *
- * If the instance has a script controller (+0xC): when the controller's virtual slot 20 says so, its slot 22 handles
- * the instance and nothing else happens; a type-6 controller does nothing; otherwise the controller's own instance
- * (+0x18) runs its lose-focus script when cWScriptMan_hasOnLoseFocusScript finds one, or the controller's slot 35 is called. An instance
- * without a controller runs its lose-focus script when it has one.
+ * If the instance has a script controller (m_pActiveNode): when the controller's virtual slot 20 says so, its slot 22
+ * handles the instance and nothing else happens; a type-6 controller (ObjNodeType) does nothing; otherwise the
+ * controller's own Instance runs its lose-focus script when cWScriptMan_hasOnLoseFocusScript finds one, or the
+ * controller's slot 35 is called. An instance without a controller runs its lose-focus script when it has one.
  *
  * @param obj  the instance losing focus (On Tour inst)
  */
@@ -1015,11 +973,11 @@ extern "C" void cWScriptMan_downFocusScript(cWScriptMan* self, tInstanceRecord* 
             ((cWScriptCtl*)obj->m_pActiveNode)->decFocusCount(obj);
             return;
         }
-        ctl = (cWScriptCtl*)obj->m_pActiveNode;
-        if (*(short*)((char*)ctl + 0x10) == 6) {
+        cInstanceNode* node = obj->m_pActiveNode;
+        if (node->ObjNodeType == 6) {
             return;
         }
-        obj = (tInstanceRecord*)(*(void**)((char*)ctl + 0x18));
+        obj = node->Instance;
         if (cWScriptMan_hasOnLoseFocusScript(self, (int)obj) != 0) {
             cWScriptMan_doOnLoseFocusScript(self, (int)obj);
             return;
@@ -1267,7 +1225,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int kind);
-// PORT: the unit defines tMissionMenuQueue_addEntry later as (cWSQueue*, int, int, int)
+// PORT: the unit defines tMissionMenuQueue_addEntry later as (tMissionMenuQueue*, int, int, int)
 extern "C" void tMissionMenuQueue_addEntry_a(void* queue, unsigned int id, int kind, int ctx) __asm__("tMissionMenuQueue_addEntry");
 extern "C" void* cWScriptMan_getCurrentMission(cWScriptMan* self);
 extern "C" int cWScriptMan_isLocalMissionActive(cWScriptMan* self);
@@ -1281,36 +1239,16 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_BigChallengeBegin(void* p, unsigned int id);
 extern "C" void cSSXAudio_BigChallengeFailed(void* p, int a1);
 
-class cWSObj_30A868 {
-public:
-    char pad_0x00[0x20];
-    unsigned int id;        // 0x20
-    char pad_0x24[0x5C - 0x24];
-    // vptr at 0x5C
-    virtual void v01();
-    virtual void processComplete();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void missionRestart();
-    virtual void v18();
-    virtual void missionFail();
-    virtual void missionUpdateWorld();
-};
+// A cWScriptMission virtual with no arguments, called through its vptr (mVtbl): slot 2 processComplete, 17
+// missionRestart, 19 missionFail, 20 missionUpdateWorld.
+static inline void missionCall_30A868(cWScriptMission* mission, int slot)
+{
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)mission->mVtbl;
+    vt[slot].fn(vthis(mission, vt[slot]));
+}
 
 // PORT: the unit defines cProcessList_findMission later with its own class type
-extern "C" cWSObj_30A868* cProcessList_findMission_a(void* self, unsigned int id) __asm__("cProcessList_findMission");
+extern "C" cWScriptMission* cProcessList_findMission_a(void* self, unsigned int id) __asm__("cProcessList_findMission");
 
 /**
  * Carries out a mission command from a world script, or answers a question about a mission.
@@ -1363,7 +1301,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
     }
     }
     int result = 0;
-    cWSObj_30A868* obj = (cWSObj_30A868*)cWScriptMan_getCurrentMission(self);
+    cWScriptMission* obj = (cWScriptMission*)cWScriptMan_getCurrentMission(self);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
     switch (cmd) {
     case 0:
@@ -1376,7 +1314,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             }
         }
         if (obj != 0) {
-            obj->missionRestart();
+            missionCall_30A868(obj, 17); // missionRestart
             cSSXAudio_BigChallengeBegin(cAudioInterface_bxAudio(), id);
         }
         break;
@@ -1385,7 +1323,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             obj = cProcessList_findMission_a((char*)&self->ActiveList, id);
         }
         if (obj != 0) {
-            obj->processComplete();
+            missionCall_30A868(obj, 2); // processComplete
         }
         break;
     case 5:
@@ -1393,7 +1331,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             obj = cProcessList_findMission_a((char*)&self->ActiveList, id);
         }
         if (obj != 0) {
-            obj->missionFail();
+            missionCall_30A868(obj, 19); // missionFail
             cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 0);
         }
         break;
@@ -1405,13 +1343,13 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             }
         }
         if (obj != 0) {
-            obj->missionUpdateWorld();
+            missionCall_30A868(obj, 20); // missionUpdateWorld
         }
         break;
     case 13:
         if (id == 0xFFFFFFFF) {
             if (obj != 0) {
-                id = obj->id;
+                id = obj->ProcessId;
             }
             if (id == 0xFFFFFFFF) {
                 break;
@@ -1422,7 +1360,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
     case 12:
         if (id == 0xFFFFFFFF) {
             if (obj != 0) {
-                id = obj->id;
+                id = obj->ProcessId;
             }
             if (id == 0xFFFFFFFF) {
                 break;
@@ -1433,7 +1371,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
     case 16:
         if (id == 0xFFFFFFFF) {
             if (obj != 0) {
-                id = obj->id;
+                id = obj->ProcessId;
             }
             if (id == 0xFFFFFFFF) {
                 break;
@@ -1454,7 +1392,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
     case 19:
         if (id == 0xFFFFFFFF) {
             if (obj != 0) {
-                id = obj->id;
+                id = obj->ProcessId;
             }
             if (id == 0xFFFFFFFF) {
                 break;
@@ -1465,7 +1403,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
     case 14:
         if (id == 0xFFFFFFFF) {
             if (obj != 0) {
-                id = obj->id;
+                id = obj->ProcessId;
             }
             if (id == 0xFFFFFFFF) {
                 break;
@@ -1476,7 +1414,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
     case 15:
         if (id == 0xFFFFFFFF) {
             if (obj != 0) {
-                id = obj->id;
+                id = obj->ProcessId;
             }
             if (id == 0xFFFFFFFF) {
                 break;
@@ -2185,8 +2123,8 @@ void cWScriptMan_updateMissionTicks(void* vself, int ticks, int dir)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionHeight__FPviT0);
 #ifdef SKIP_ASM
 /**
- * Turns on the mission height display (+0x28) for rider @p being (+0x30) above instance @p src (its resource ID, +0x78,
- * goes to +0x2C).
+ * Turns on the mission height display (MissionHeightEnable) for rider @p being (MissionHeightBeing) above instance
+ * @p src (its m_RID goes to MissionHeightInstId).
  *
  * @param being  the rider index
  * @param src  the instance record
@@ -2196,7 +2134,7 @@ void cWScriptMan_updateMissionHeight(void* vself, int being, void* src)
     cWScriptMan* self = (cWScriptMan*)vself;
     self->MissionHeightEnable = 1;
     self->MissionHeightBeing = being;
-    self->MissionHeightInstId = *(int*)((char*)src + 0x78);
+    self->MissionHeightInstId = ((tInstanceRecord*)src)->m_RID;
 }
 #endif
 
@@ -2291,9 +2229,9 @@ extern "C" void cRider_resetForMission(void* self);
 /**
  * Cancels the local (big challenge) mission and resets the rider.
  *
- * Stops and resets the playback manager (cPlaybackMan_stop, cPlaybackMan_reset__FPv), resets the replay and restarts its race, resets
- * the rider whose index is at +0x0 for the mission, then sets the state at +0x2AC to 3, saves the mission id (+0x2A0)
- * in +0x2B0 and sets the id to -1.
+ * Stops and resets the playback manager (cPlaybackMan_stop, cPlaybackMan_reset__FPv), resets the replay and restarts
+ * its race, resets the rider whose index is Being for the mission, then sets LocalMissionCmd to 3, saves the mission id
+ * (LocalMissionId) in LocalMissionCmdId and sets the id to -1.
  */
 extern "C" void cWScriptMan_cancelLocalMission(cWScriptMan* self)
 {
@@ -2301,8 +2239,7 @@ extern "C" void cWScriptMan_cancelLocalMission(cWScriptMan* self)
     cPlaybackMan_reset(SSXApp->Game->PlaybackMan);
     cReplay_reset(SSXApp->Game->Replay);
     cReplay_startRace((int*)SSXApp->Game->Replay);
-    char* riders = (char*)SSXApp->Game->AI;
-    cRider_resetForMission(*(void**)(riders + (self->Being << 2) + 0x28));
+    cRider_resetForMission(SSXApp->Game->AI->Riders[self->Being]);
     self->LocalMissionCmd = 3;
     self->LocalMissionCmdId = (unsigned int)((int)self->LocalMissionId);
     self->LocalMissionId = 0xFFFFFFFF;
@@ -2344,9 +2281,9 @@ extern "C" void cRider_resetForMission(void* self);
 /**
  * Quits the local (big challenge) mission and resets the rider.
  *
- * Stops and resets the playback manager, resets the replay and restarts its race, resets the rider whose index is at
- * +0x0 for the mission, then sets the state at +0x2AC to 4, saves the mission id (+0x2A0) in +0x2B0 and sets the id to
- * -1.
+ * Stops and resets the playback manager, resets the replay and restarts its race, resets the rider whose index is
+ * Being for the mission, then sets LocalMissionCmd to 4, saves the mission id (LocalMissionId) in LocalMissionCmdId and
+ * sets the id to -1.
  */
 extern "C" void cWScriptMan_quitLocalMission(cWScriptMan* self)
 {
@@ -2354,8 +2291,7 @@ extern "C" void cWScriptMan_quitLocalMission(cWScriptMan* self)
     cPlaybackMan_reset(SSXApp->Game->PlaybackMan);
     cReplay_reset(SSXApp->Game->Replay);
     cReplay_startRace((int*)SSXApp->Game->Replay);
-    char* riders = (char*)SSXApp->Game->AI;
-    cRider_resetForMission(*(void**)(riders + (self->Being << 2) + 0x28));
+    cRider_resetForMission(SSXApp->Game->AI->Riders[self->Being]);
     self->LocalMissionCmd = 4;
     self->LocalMissionCmdId = (unsigned int)((int)self->LocalMissionId);
     self->LocalMissionId = 0xFFFFFFFF;
@@ -2405,12 +2341,12 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isProcessActive__FPvT0);
  * Tells whether a world script process is in the active list.
  *
  * @param process  the process (On Tour process)
- * @return 1 when a process with @p process's id (+0x20) is in the active list at +0x2B8, else 0
+ * @return 1 when a process with @p process's ProcessId is in ActiveList, else 0
  */
 int cWScriptMan_isProcessActive(void* vself, void* process)
 {
     cWScriptMan* self = (cWScriptMan*)vself;
-    return (cProcessList_findProcess1(&self->ActiveList, *(int*)((char*)process + 0x20)) != 0);
+    return (cProcessList_findProcess1(&self->ActiveList, ((cWScriptProcess*)process)->ProcessId) != 0);
 }
 #endif
 
@@ -2431,14 +2367,14 @@ public:
 /**
  * Tells whether a local mission is running.
  *
- * @return 1 when some process in the active list (+0x2B8) is a mission (its virtual slot 3) in state 2 (+0x60), else 0
+ * @return 1 when some process in ActiveList is a mission (its virtual slot 3) whose Scope is 2 (local), else 0
  */
 extern "C" int cWScriptMan_isLocalMissionActive(cWScriptMan* self)
 {
     int n = 0;
     cWScriptMan_isLocalMissionActive_cNode* node;
     for (node = *(cWScriptMan_isLocalMissionActive_cNode**)&self->ActiveList; node != 0; node = node->next) {
-        if (node->isMission() != 0 && *(int*)((char*)node + 0x60) == 2) {
+        if (node->isMission() != 0 && ((cWScriptMission*)node)->Scope == 2) {
             n++;
         }
     }
@@ -2707,16 +2643,6 @@ extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** lis
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sWSMan_30BD20 {
-    char pad0[0x28C];
-    char* world;                // 0x28C
-    char pad290[0x28];
-    void* list2B8;              // 0x2B8
-    void* list2BC;              // 0x2BC
-    char tables[1][0x10C];      // 0x2C0
-    void* objs[50];             // 0x3CC
-};
-
 struct cWScriptListHead;
 extern "C" void* cProcessList_removeHead(cProcessList* self);
 int cProcessList_addProcess(void* self, void* a1);
@@ -2731,39 +2657,39 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cBxReplayFrame* s
 /**
  * Restores the world script manager's state from a replay frame.
  *
- * Reads the first 0x28C bytes of the manager, then the collect pool (cCollectPool_readFromReplayFrame). Every process in the active
- * (+0x2B8) and pending (+0x2BC) lists goes back to the idle list, and both lists are then read back from @p stream
- * (cWScriptMan_readReplayProcessList). The 50 section tables at +0x3CC are emptied (luno_cLunoTable_emptyTable), and a count of saved tables follows,
- * each read back against its section's script base (cWScriptCache_getScriptBase). Finally the current instance, infos, process and
- * task are cleared.
+ * Reads the first 0x28C bytes of the manager (cWScriptManState), then the collect pool
+ * (cCollectPool_readFromReplayFrame). Every process in ActiveList and AddList goes back to IdleList, and both lists are
+ * then read back from @p stream (cWScriptMan_readReplayProcessList). The 50 GlobalTables are emptied
+ * (luno_cLunoTable_emptyTable), and a count of saved tables follows, each read back against its section's script base
+ * (cWScriptCache_getScriptBase). Finally the current instance, infos, process and task are cleared.
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
-extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cBxReplayFrame* stream)
+extern "C" void cWScriptMan_readFromReplayFrame(cWScriptMan* self, cBxReplayFrame* stream)
 {
     stream->read((char*)self, 652);
     {
         int k;
         for (k = 0; k < 1; k++) {
-            cCollectPool_readFromReplayFrame(self->tables[k], stream);
+            cCollectPool_readFromReplayFrame(&self->CollectPools[k], stream);
         }
     }
-    void* process;
-    while ((process = cProcessList_removeHead((cProcessList*)(&self->list2B8))) != 0) {
-        *(int*)process = 0;
-        cProcessList_addProcess((char*)self + 0x2B4, process);
+    cWScriptProcess* process;
+    while ((process = (cWScriptProcess*)cProcessList_removeHead(&self->ActiveList)) != 0) {
+        process->State = 0;
+        cProcessList_addProcess(&self->IdleList, process);
     }
-    while ((process = cProcessList_removeHead((cProcessList*)(&self->list2BC))) != 0) {
-        *(int*)process = 0;
-        cProcessList_addProcess((char*)self + 0x2B4, process);
+    while ((process = (cWScriptProcess*)cProcessList_removeHead(&self->AddList)) != 0) {
+        process->State = 0;
+        cProcessList_addProcess(&self->IdleList, process);
     }
-    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cProcessList*)&self->list2B8, stream);
-    cWScriptMan_readReplayProcessList((cWScriptMan*)self, (cProcessList*)&self->list2BC, stream);
+    cWScriptMan_readReplayProcessList(self, &self->ActiveList, stream);
+    cWScriptMan_readReplayProcessList(self, &self->AddList, stream);
     {
         int i;
         for (i = 0; i < 50; i++) {
-            if (self->objs[i] != 0) {
-                luno_cLunoTable_emptyTable(self->objs[i]);
+            if (self->GlobalTables[i] != 0) {
+                luno_cLunoTable_emptyTable(self->GlobalTables[i]);
             }
         }
     }
@@ -2772,14 +2698,14 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cBxReplayFr
     for (int j = 0; j < count; j++) {
         int id;
         stream->read((char*)&id, 4);
-        int scriptBase = cWScriptCache_getScriptBase(*(void**)(self->world + 4), id);
-        luno_cLunoTable_readFromReplayFrame(self->objs[id], stream, scriptBase);
+        int scriptBase = cWScriptCache_getScriptBase(self->World->m_pWScriptCache, id);
+        luno_cLunoTable_readFromReplayFrame(self->GlobalTables[id], stream, scriptBase);
     }
-    *(int*)((char*)self + 0x290) = 0;
-    *(int*)((char*)self + 0x294) = 0;
-    *(int*)((char*)self + 0x298) = 0;
-    *(int*)((char*)self + 0x2A4) = 0;
-    *(int*)((char*)self + 0x2A8) = 0;
+    self->Inst = 0;
+    self->CollideInfo = 0;
+    self->IntersectInfo = 0;
+    self->CurrentProcess = 0;
+    self->CurrentTask = 0;
 }
 #endif
 
@@ -3079,13 +3005,6 @@ struct sVE_C4A8 {
     void (*fn)(void*, int);
 };
 
-struct sEntry_C4A8 {
-    int id;
-    int f4;
-    int count;
-    unsigned int ids[1];
-};
-
 static inline void* refToPtr_C4A8(unsigned int p)
 {
     return (void*)(p << 2);
@@ -3121,8 +3040,8 @@ static inline void respawn_C4A8(unsigned int id)
 /**
  * Adds instances to a collect pool and takes the already collected ones out of the world.
  *
- * Each of the @p size IDs (-1 skipped) is stored in the pool's next entry (+0xC + 4 * count, count +0x8). When the race
- * has a game path (cGamePath of cBENewRaceInterface_newRace) or the mission bit for that entry and the pool's ID (+0x0)
+ * Each of the @p size IDs (-1 skipped) is stored in the pool's next entry (InstIds[NumInstIds]). When the race
+ * has a game path (cGamePath of cBENewRaceInterface_newRace) or the mission bit for that entry and the pool's PoolId
  * is set (cBEMissionInterface_isBitSet), the instance is removed: its script controller (+0xC), if any, is destroyed
  * (virtual slot 1, flag 3) and a cDeadNode ("DeadNode", 0x1C bytes) is created for it.
  *
@@ -3135,7 +3054,7 @@ static inline void respawn_C4A8(unsigned int id)
 // PORT: a1 is really an unsigned int* id list and a2 its count (the unit declares both int).
 extern "C" void cCollectPool_collectInst(void* ep, int instIds, int size)
 {
-    sEntry_C4A8* pool = (sEntry_C4A8*)ep;
+    cCollectPool* pool = (cCollectPool*)ep;
     unsigned int* ids = (unsigned int*)instIds;
     void* iface = cBE_getInterface_C4A8(cBE_getBE(), 10);
     if (size <= 0)
@@ -3145,15 +3064,15 @@ extern "C" void cCollectPool_collectInst(void* ep, int instIds, int size)
         unsigned int id = *ids;
         if (~id == 0)
             continue;
-        ((unsigned int*)((char*)pool + 0xC))[pool->count] = id;
+        (&pool->InstIds[0])[pool->NumInstIds] = id; // indexed from the element address: retail's addu order
         cBE_getInterface_C4A8(cBE_getBE(), 0);
         if (beRaceDB->cGamePath == 0) {
-            if (cBEMissionInterface_isBitSet(iface, 0, pool->count, pool->id))
+            if (cBEMissionInterface_isBitSet(iface, 0, pool->NumInstIds, pool->PoolId))
                 respawn_C4A8(*ids);
         } else {
             respawn_C4A8(*ids);
         }
-        pool->count++;
+        pool->NumInstIds++;
     }
 }
 #endif
@@ -3260,24 +3179,10 @@ extern "C" void tMissionMenuQueue_empty(tMissionMenuQueue* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_addEntry);
 #ifdef SKIP_ASM
-// Same layout as cWScriptQueue / cWScriptQueueEntry, which the unit defines
-// further down (above tMissionMenuQueue_getNextEntry). Renamed here only to avoid a redefinition.
-struct cWSQEntry {
-    int a;
-    int b;
-    int c;
-};
-
-struct cWSQueue {
-    int head;
-    int tail;
-    cWSQEntry entries[16];
-};
-
 /**
  * Queues a mission command for the menus.
  *
- * Stores the three values in the entry at the write position (+0x4) and moves the write position on, wrapping at 16.
+ * Stores the three values in the entry at the write position (Next) and moves the write position on, wrapping at 16.
  * There is no full-queue check in this build.
  *
  * @param missionId  the mission (On Tour missionId)
@@ -3286,9 +3191,9 @@ struct cWSQueue {
  */
 extern "C" void tMissionMenuQueue_addEntry(tMissionMenuQueue* self, int missionId, int cmd, int being)
 {
-    ((cWSQEntry*)&self->Queue[0])[self->Next].a = missionId;
-    ((cWSQEntry*)&self->Queue[0])[self->Next].b = cmd;
-    ((cWSQEntry*)&self->Queue[0])[self->Next].c = being;
+    self->Queue[self->Next].MissionId = missionId;
+    self->Queue[self->Next].Cmd = cmd;
+    self->Queue[self->Next].Being = being;
     self->Next = (self->Next + 1) % 16;
 }
 #endif
@@ -3296,34 +3201,22 @@ extern "C" void tMissionMenuQueue_addEntry(tMissionMenuQueue* self, int missionI
 //100%
 INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_getNextEntry);
 #ifdef SKIP_ASM
-struct cWScriptQueueEntry {
-    int a;
-    int b;
-    int c;
-};
-
-struct cWScriptQueue {
-    int head;
-    int tail;
-    cWScriptQueueEntry entries[16];
-};
-
 /**
  * Takes the next mission command off the menu queue.
  *
- * Returns 0 when the read position (+0x0, On Tour Current) has caught up with the write position (+0x4, On Tour Next);
+ * Returns 0 when the read position (Current) has caught up with the write position (Next);
  * otherwise returns the entry at the read position and advances it, wrapping at 16.
  *
  * @return the entry (mission id, command, rider; On Tour tMissionMenuQueueEntry), or 0 when the queue is empty
  */
-extern "C" cWScriptQueueEntry* tMissionMenuQueue_getNextEntry(tMissionMenuQueue* self)
+extern "C" tMissionMenuQueueEntry* tMissionMenuQueue_getNextEntry(tMissionMenuQueue* self)
 {
     int head = self->Current;
     if (head == self->Next) {
         return 0;
     }
     self->Current = (head + 1) % 16;
-    return &((cWScriptQueueEntry*)&self->Queue[0])[head];
+    return &self->Queue[head];
 }
 #endif
 
@@ -3335,12 +3228,12 @@ INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_getEntry);
  *
  * @return the entry at the read position, or 0 when the queue is empty
  */
-extern "C" cWScriptQueueEntry* tMissionMenuQueue_getEntry(tMissionMenuQueue* self)
+extern "C" tMissionMenuQueueEntry* tMissionMenuQueue_getEntry(tMissionMenuQueue* self)
 {
     if (self->Current == self->Next) {
         return 0;
     }
-    return &((cWScriptQueueEntry*)&self->Queue[0])[self->Current];
+    return &self->Queue[self->Current];
 }
 #endif
 
@@ -4096,7 +3989,7 @@ extern "C" void cWScriptMan_setInst(cWScriptMan* wscriptMan, tInstanceRecord* in
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getGlobalTable);
 #ifdef SKIP_ASM
 /**
- * Returns the global Luno table of world section @p sectionId (the array at +0x3CC, On Tour GlobalTables).
+ * Returns the global Luno table of world section @p sectionId (GlobalTables).
  *
  * cWScriptMan_allocateGlobalTable allocates these tables; no bounds check.
  *
@@ -4104,8 +3997,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getGlobalTable);
  * @param sectionId  the world section index
  * @return the section's cLunoTable, or 0 when none was allocated
  */
-extern "C" int cWScriptMan_getGlobalTable(int wscriptMan, int sectionId) {
-    return (*(int *)(((char*)(wscriptMan) + (sectionId << 2)) + 0x3CC));
+extern "C" cLunoTable* cWScriptMan_getGlobalTable(cWScriptMan* wscriptMan, int sectionId) {
+    return wscriptMan->GlobalTables[sectionId];
 }
 #endif
 //100%

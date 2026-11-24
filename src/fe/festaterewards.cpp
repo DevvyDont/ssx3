@@ -18,6 +18,8 @@
 #include "fe/festaterewards.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
+#include "ui/uiscreen.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onCreateScreen);
@@ -174,11 +176,6 @@ static inline void Play_F270(cUISoundInterface* snd, int id)
     snd->playSound(id);
 }
 
-struct sGallery_F270 {
-    char pad0[0x924];
-    char* cells[4][8]; // 0x924
-};
-
 /**
  * Handles input on the reward gallery: back leaves it, accept views or buys the highlighted reward, and the direction
  * and page inputs move the highlight around the grid.
@@ -186,7 +183,7 @@ struct sGallery_F270 {
  * Vtable slot 8 of the gallery vtables (cFEStateCharEquip_onInputBegin's slot). "Sound n" below is vtable slot 2 of the
  * engine's sound object (the word at mpEngine + 0x14), or of gUISoundNull when there is none; "test n" is vtable slot n
  * of @p in.
- * - Back (test 6): sound 3, hides all 32 grid cells (+0x924, setVisible 0), plays the screen's "TransitionOut" frame,
+ * - Back (test 6): sound 3, hides all 32 grid cells (mpIcons, setVisible 0), plays the screen's "TransitionOut" frame,
  *   asks the engine's cFECustom (*mpEngine, its vtable slot 5: cFECustom_getPrevState) for the state to return to, passing 1
  *   when a store number is set (+0x8F0 >= 0), and pushes that with cUIStateStack_push().
  * - Accept (test 5): the reward index is first visible row (+0x64) * columns (+0x5C) + the current cell's mMiscData. An
@@ -199,8 +196,8 @@ struct sGallery_F270 {
  *   first visible row back or forward by a page of rows, wrapping at either end.
  *
  * After a move the index is clamped to the last reward. If the cell or the page changed, stores the page, makes the
- * matching cell current (+0x8FC), refreshes the grid (slot 40) and the help text (slot 33) for the new index, and plays
- * sound 2 for up/down or sound 1 otherwise; if nothing changed it plays sound 4.
+ * matching cell current (mpSelected), refreshes the grid (updateList) and the help text (slot 33) for the new index,
+ * and plays sound 2 for up/down or sound 1 otherwise; if nothing changed it plays sound 4.
  *
  * @param in  the input object; its vtable slots are the button tests
  * @return 1 when the input was handled (every back, accept and move input), otherwise 0
@@ -217,10 +214,9 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         for (i = 0; i < 4; i++) {
             int j;
             for (j = 0; j < 8; j++) {
-                char* w = ((sGallery_F270*)self)->cells[i][j];
+                cUIIcon* w = self->mpIcons[i][j];
                 if (w != 0) {
-                    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(w + 8);
-                    vt[9].fn(vthis(w, vt[9]), 0);
+                    w->setVisible(0);
                 }
             }
         }
@@ -301,9 +297,8 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         local = idx - scroll * cols;
         if (curIdx != local || scroll != self->mFirstVisibleRow) {
             self->mFirstVisibleRow = scroll;
-            self->mpSelected = (cUIIcon*)((sGallery_F270*)self)->cells[local / cols][local % cols];
-            sVEi_F270* svt = (sVEi_F270*)VPTR_OF(cListNode, self);
-            svt[40].fn(vthis(self, svt[40]));
+            self->mpSelected = self->mpIcons[local / cols][local % cols];
+            self->updateList();
             Call_F270(((char*)self), 33, idx);
             if (Test_F270(((char*)in), 17) || Test_F270(((char*)in), 18)) {
                 Play_F270(snd, 2);
@@ -749,9 +744,11 @@ extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* 
     self->mNumIcons = data->num;
     int i;
     for (i = 0; i < self->mNumIcons; i++) {
-        SHAPE_name(data, i, &((&self->mIcons[0]))[i]);
-        ((&self->mIcons[0]))[i].mName[4] = 0;
-        ((&self->mIcons[0]))[i].mID = GrMan->AddTexture((const SHAPE*)((char*)data + ((sDataEnt001CFFF8*)&data->tbl[0].offset)[i].off), (const char*)&((&self->mIcons[0]))[i], 0, 1, -1);
+        SHAPE_name(data, i, &self->mIcons[i]);
+        self->mIcons[i].mName[4] = 0;
+        // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file blob)
+        const SHAPE* shape = (const SHAPE*)((char*)data + data->tbl[i].offset);
+        self->mIcons[i].mID = GrMan->AddTexture(shape, self->mIcons[i].mName, 0, 1, -1);
     }
 }
 #endif
@@ -760,16 +757,6 @@ extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* 
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_purgeIcons);
 #ifdef SKIP_ASM
 extern "C" void func_0019DC20(void* self, int bank, int i);
-struct sEntry001D00C0 {
-    char name[5];
-    int handle;
-};
-struct sSelf001D00C0 {
-    char pad[0x78];
-    int count;
-    sEntry001D00C0 entries[1];
-};
-
 /**
  * Empties the gallery's icon table, releasing every registered icon and any icon-file slot still held.
  *
@@ -778,22 +765,22 @@ struct sSelf001D00C0 {
  * bank +0x50) and set to -1. Clears bit 3 (icons loaded) of flags +0x48. The callers are in fe/fepopupmisc.cpp, among
  * them the gallery vtables' slot-1 destructors (cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts, cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos, cFEStateRewardGalleryToys__cFEStateRewardGalleryToys, cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars).
  */
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(sSelf001D00C0* self)
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(cFEStateRewardGalleryBase* self)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->entries[i].handle >= 0) {
-            GrMan->RemoveTexture(self->entries[i].handle);
+    for (i = 0; i < self->mNumIcons; i++) {
+        if (self->mIcons[i].mID >= 0) {
+            GrMan->RemoveTexture(self->mIcons[i].mID);
         }
-        self->entries[i].handle = -1;
-        self->entries[i].name[0] = 0;
+        self->mIcons[i].mID = -1;
+        self->mIcons[i].mName[0] = 0;
     }
-    int iconSlot = *(int*)((char*)self + 0x8EC);
+    int iconSlot = self->mIconsFileIndex;
     if (iconSlot >= 0) {
-        func_0019DC20(SSXApp->RealFE->mBoltFileManager, *(int*)((char*)self + 0x50), iconSlot);
-        *(int*)((char*)self + 0x8EC) = -1;
+        func_0019DC20(SSXApp->RealFE->mBoltFileManager, self->mCharID, iconSlot);
+        self->mIconsFileIndex = -1;
     }
-    *(int*)((char*)self + 0x48) &= ~8;
+    self->mLoadingState &= ~8;
 }
 #endif
 
@@ -1132,7 +1119,7 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* s
     for (int col = 0; col < self->mMaxRewardColumns; col++, idx++) {
         if (idx < self->mNumTotalRewards) {
             show_08A0(self->mpIcons[row][col], 1);
-            show_08A0(((cUIIcon* (*)[8])&self->mpIconBacks[0][0])[row][col], 1);
+            self->mpIconBacks[row][col]->setVisible(1);
             if (self->isRewardOwned(idx) != 0) {
                 int rewardIndex = self->getIconID(idx);
                 if (rewardIndex >= 0) {
@@ -1167,7 +1154,7 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* s
             cell->setColour((const tARGB*)gFadedColour);
         } else {
             show_08A0(self->mpIcons[row][col], 0);
-            show_08A0(((cUIIcon* (*)[8])&self->mpIconBacks[0][0])[row][col], 0);
+            self->mpIconBacks[row][col]->setVisible(0);
         }
     }
 }
@@ -1222,10 +1209,12 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(cFEStateRewardGallery
 {
     if (self->mpPageNumberText == 0)
         return;
-    char* obj = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
-    if (obj != 0) {
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(obj + 4);
-        char* thisp = obj + vt[4].delta;
+    cUILocaleInterface* locale = self->mpScreen->mpState->mpEngine->mpLocaleInterface;
+    if (locale != 0) {
+        // getStringByHash (slot 4), called by hand
+        sVEntry<unsigned short*(void*, int)>* vt =
+            (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
+        void* thisp = vthis(locale, vt[4]);
         unsigned short* fmt = vt[4].fn(thisp, GetHashValue32(str_kT_OVRCMNPageOf));
         if (fmt != 0) {
             unsigned short buf[100];
@@ -1233,15 +1222,13 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(cFEStateRewardGallery
             int pages = (self->mNumRows + per - 1) / per;
             sprintf1(buf, fmt, (self->mFirstVisibleRow + per - 1) / per + 1, pages);
             cUIText_setUnicodeString(self->mpPageNumberText, buf);
-            char* buttonPrompt = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_R1_ps2));
+            cUIThing* buttonPrompt = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_R1_ps2));
             if (buttonPrompt != 0) {
-                sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(buttonPrompt + 8);
-                vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
+                buttonPrompt->setVisible(pages > 1);
             }
-            buttonPrompt = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_L1_ps2));
+            buttonPrompt = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_L1_ps2));
             if (buttonPrompt != 0) {
-                sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(buttonPrompt + 8);
-                vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
+                buttonPrompt->setVisible(pages > 1);
             }
             return;
         }
@@ -1505,29 +1492,21 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBERewardInterface_getTotalNumPosters(void* self);
 extern "C" cBERewardDB* cBERewardInterface_getDB();
 
-struct sRewardList_11F8 {
-    char pad_0x0[0x68];
-    int count;
-    char pad_0x6C[0xA24 - 0x6C];
-    int base;
-    int items[1];
-};
-
 /**
  * Builds the posters gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the posters vtable cFEStateRewardGalleryPosters_vtbl. The count comes from cBERewardInterface_getTotalNumPosters() on the reward interface (kind
- * 13); the list base +0xA24 is the posters array pointer at +0x14 of cBERewardInterface_getDB(); list entry k (+0xA28)
- * gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 43
- * entries the object has room for.
+ * Vtable slot 28 of the posters vtable cFEStateRewardGalleryPosters_vtbl. The count comes from
+ * cBERewardInterface_getTotalNumPosters() on the reward interface (kind 13); mpDBPosters is the database's mpPosters
+ * (cBERewardInterface_getDB()); entry k of mpPosters gets &mpDBPosters[k] (16-byte reward records) and mNumTotalRewards
+ * counts them. There is no check against the 43 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryPosters_allocRewards(sRewardList_11F8* self)
+extern "C" void cFEStateRewardGalleryPosters_allocRewards(cFEStateRewardGalleryPosters* self)
 {
     int n = cBERewardInterface_getTotalNumPosters(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->count = 0;
-    self->base = (int)cBERewardInterface_getDB()->mpPosters;
+    self->mNumTotalRewards = 0;
+    self->mpDBPosters = cBERewardInterface_getDB()->mpPosters;
     for (int i = 0; i < n; i++) {
-        self->items[self->count++] = self->base + i * 16;
+        self->mpPosters[self->mNumTotalRewards++] = &self->mpDBPosters[i];
     }
 }
 #endif
@@ -1536,8 +1515,7 @@ extern "C" void cFEStateRewardGalleryPosters_allocRewards(sRewardList_11F8* self
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_purgeRewards);
 #ifdef SKIP_ASM
 /**
- * Clears the posters gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 43 entries from
- * +0xA28.
+ * Clears the posters gallery's reward list: mNumTotalRewards, mpDBPosters and the 43 entries of mpPosters.
  *
  * Vtable slot 29 of the posters vtable cFEStateRewardGalleryPosters_vtbl.
  */
@@ -1547,7 +1525,7 @@ extern "C" void cFEStateRewardGalleryPosters_purgeRewards(cFEStateRewardGalleryP
     self->mNumTotalRewards = 0;
     self->mpDBPosters = 0;
     for (i = 42; i >= 0; i--) {
-        ((int*)(&self->mpPosters[0]))[i] = 0;
+        self->mpPosters[i] = 0;
     }
 }
 #endif
@@ -1635,29 +1613,21 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBERewardInterface_getTotalNumTradingCards(void* self);
 extern "C" cBERewardDB* cBERewardInterface_getDB();
 
-struct sRewardList_1390 {
-    char pad_0x0[0x68];
-    int count;
-    char pad_0x6C[0xA24 - 0x6C];
-    int base;
-    int items[1];
-};
-
 /**
  * Builds the trading-card gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl. The count comes from cBERewardInterface_getTotalNumTradingCards() on the reward interface
- * (kind 13); the list base +0xA24 is the trading-card array pointer at +0x18 of cBERewardInterface_getDB(); list entry
- * k (+0xA28) gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check
- * against the 116 entries the object has room for.
+ * Vtable slot 28 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl. The count comes from
+ * cBERewardInterface_getTotalNumTradingCards() on the reward interface (kind 13); mpDBTradingCards is the database's
+ * mpTradingCards (cBERewardInterface_getDB()); entry k of mpTradingCards gets &mpDBTradingCards[k] (16-byte reward
+ * records) and mNumTotalRewards counts them. There is no check against the 116 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryTradingCards_allocRewards(sRewardList_1390* self)
+extern "C" void cFEStateRewardGalleryTradingCards_allocRewards(cFEStateRewardGalleryTradingCards* self)
 {
     int n = cBERewardInterface_getTotalNumTradingCards(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->count = 0;
-    self->base = (int)cBERewardInterface_getDB()->mpTradingCards;
+    self->mNumTotalRewards = 0;
+    self->mpDBTradingCards = cBERewardInterface_getDB()->mpTradingCards;
     for (int i = 0; i < n; i++) {
-        self->items[self->count++] = self->base + i * 16;
+        self->mpTradingCards[self->mNumTotalRewards++] = &self->mpDBTradingCards[i];
     }
 }
 #endif
@@ -1666,8 +1636,8 @@ extern "C" void cFEStateRewardGalleryTradingCards_allocRewards(sRewardList_1390*
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_purgeRewards);
 #ifdef SKIP_ASM
 /**
- * Clears the trading-card gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 116 entries
- * from +0xA28.
+ * Clears the trading-card gallery's reward list: mNumTotalRewards, mpDBTradingCards and the 116 entries of
+ * mpTradingCards.
  *
  * Vtable slot 29 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl.
  */
@@ -1677,7 +1647,7 @@ extern "C" void cFEStateRewardGalleryTradingCards_purgeRewards(cFEStateRewardGal
     self->mNumTotalRewards = 0;
     self->mpDBTradingCards = 0;
     for (i = 115; i >= 0; i--) {
-        ((int*)(&self->mpTradingCards[0]))[i] = 0;
+        self->mpTradingCards[i] = 0;
     }
 }
 #endif
@@ -1765,29 +1735,21 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBERewardInterface_getTotalNumConceptArts(void* self);
 extern "C" cBERewardDB* cBERewardInterface_getDB();
 
-struct sRewardList_1528 {
-    char pad_0x0[0x68];
-    int count;
-    char pad_0x6C[0xA24 - 0x6C];
-    int base;
-    int items[1];
-};
-
 /**
  * Builds the art gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the art vtable cFEStateRewardGalleryConceptArts_vtbl. The count comes from cBERewardInterface_getTotalNumConceptArts() on the reward interface (kind 13);
- * the list base +0xA24 is the art array pointer at +0x1C of cBERewardInterface_getDB(); list entry k (+0xA28) gets base
- * + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 100 entries
- * the object has room for.
+ * Vtable slot 28 of the art vtable cFEStateRewardGalleryConceptArts_vtbl. The count comes from
+ * cBERewardInterface_getTotalNumConceptArts() on the reward interface (kind 13); mpDBConceptArts is the database's
+ * mpConceptArts (cBERewardInterface_getDB()); entry k of mpConceptArts gets &mpDBConceptArts[k] (16-byte reward
+ * records) and mNumTotalRewards counts them. There is no check against the 100 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryConceptArts_allocRewards(sRewardList_1528* self)
+extern "C" void cFEStateRewardGalleryConceptArts_allocRewards(cFEStateRewardGalleryConceptArts* self)
 {
     int n = cBERewardInterface_getTotalNumConceptArts(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->count = 0;
-    self->base = (int)cBERewardInterface_getDB()->mpConceptArts;
+    self->mNumTotalRewards = 0;
+    self->mpDBConceptArts = cBERewardInterface_getDB()->mpConceptArts;
     for (int i = 0; i < n; i++) {
-        self->items[self->count++] = self->base + i * 16;
+        self->mpConceptArts[self->mNumTotalRewards++] = &self->mpDBConceptArts[i];
     }
 }
 #endif
@@ -1796,8 +1758,7 @@ extern "C" void cFEStateRewardGalleryConceptArts_allocRewards(sRewardList_1528* 
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_purgeRewards);
 #ifdef SKIP_ASM
 /**
- * Clears the art gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 100 entries from
- * +0xA28.
+ * Clears the art gallery's reward list: mNumTotalRewards, mpDBConceptArts and the 100 entries of mpConceptArts.
  *
  * Vtable slot 29 of the art vtable cFEStateRewardGalleryConceptArts_vtbl.
  */
@@ -1807,7 +1768,7 @@ extern "C" void cFEStateRewardGalleryConceptArts_purgeRewards(cFEStateRewardGall
     self->mNumTotalRewards = 0;
     self->mpDBConceptArts = 0;
     for (i = 99; i >= 0; i--) {
-        ((int*)(&self->mpConceptArts[0]))[i] = 0;
+        self->mpConceptArts[i] = 0;
     }
 }
 #endif
@@ -1895,29 +1856,22 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBERewardInterface_getTotalNumVideos(void* self);
 extern "C" cBERewardDB* cBERewardInterface_getDB();
 
-struct sRewardList_16C0 {
-    char pad_0x0[0x68];
-    int count;
-    char pad_0x6C[0xA24 - 0x6C];
-    int base;
-    int items[1];
-};
-
 /**
  * Builds the video gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the video vtable cFEStateRewardGalleryVideos_vtbl. The count comes from cBERewardInterface_getTotalNumVideos() on the reward interface (kind
- * 13); the list base +0xA24 is the video array pointer at +0x24 of cBERewardInterface_getDB(); list entry k (+0xA28)
- * gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 2
- * entries the object has room for, so more than 2 videos in the database would overrun it.
+ * Vtable slot 28 of the video vtable cFEStateRewardGalleryVideos_vtbl. The count comes from
+ * cBERewardInterface_getTotalNumVideos() on the reward interface (kind 13); mpDBVideos is the database's mpVideos
+ * (cBERewardInterface_getDB()); entry k of mpVideos gets &mpDBVideos[k] (16-byte reward records) and mNumTotalRewards
+ * counts them. There is no check against the 2 entries the object has room for, so more than 2 videos in the database
+ * would overrun it.
  */
-extern "C" void cFEStateRewardGalleryVideos_allocRewards(sRewardList_16C0* self)
+extern "C" void cFEStateRewardGalleryVideos_allocRewards(cFEStateRewardGalleryVideos* self)
 {
     int n = cBERewardInterface_getTotalNumVideos(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->count = 0;
-    self->base = (int)cBERewardInterface_getDB()->mpVideos;
+    self->mNumTotalRewards = 0;
+    self->mpDBVideos = cBERewardInterface_getDB()->mpVideos;
     for (int i = 0; i < n; i++) {
-        self->items[self->count++] = self->base + i * 16;
+        self->mpVideos[self->mNumTotalRewards++] = &self->mpDBVideos[i];
     }
 }
 #endif
@@ -1926,8 +1880,7 @@ extern "C" void cFEStateRewardGalleryVideos_allocRewards(sRewardList_16C0* self)
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_purgeRewards);
 #ifdef SKIP_ASM
 /**
- * Clears the video gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 2 entries from
- * +0xA28.
+ * Clears the video gallery's reward list: mNumTotalRewards, mpDBVideos and the 2 entries of mpVideos.
  *
  * Vtable slot 29 of the video vtable cFEStateRewardGalleryVideos_vtbl.
  */
@@ -1937,7 +1890,7 @@ extern "C" void cFEStateRewardGalleryVideos_purgeRewards(cFEStateRewardGalleryVi
     self->mNumTotalRewards = 0;
     self->mpDBVideos = 0;
     for (i = 1; i >= 0; i--) {
-        ((int*)(&self->mpVideos[0]))[i] = 0;
+        self->mpVideos[i] = 0;
     }
 }
 #endif
@@ -2025,29 +1978,21 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBERewardInterface_getTotalNumToys(void* self);
 extern "C" cBERewardDB* cBERewardInterface_getDB();
 
-struct sRewardList_1858 {
-    char pad_0x0[0x68];
-    int count;
-    char pad_0x6C[0xA24 - 0x6C];
-    int base;
-    int items[1];
-};
-
 /**
  * Builds the toy gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the toy vtable cFEStateRewardGalleryToys_vtbl. The count comes from cBERewardInterface_getTotalNumToys() on the reward interface (kind 13);
- * the list base +0xA24 is the toy array pointer at +0x20 of cBERewardInterface_getDB(); list entry k (+0xA28) gets base
- * + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 28 entries
- * the object has room for.
+ * Vtable slot 28 of the toy vtable cFEStateRewardGalleryToys_vtbl. The count comes from
+ * cBERewardInterface_getTotalNumToys() on the reward interface (kind 13); mpDBToys is the database's mpToys
+ * (cBERewardInterface_getDB()); entry k of mpToys gets &mpDBToys[k] (16-byte reward records) and mNumTotalRewards
+ * counts them. There is no check against the 28 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryToys_allocRewards(sRewardList_1858* self)
+extern "C" void cFEStateRewardGalleryToys_allocRewards(cFEStateRewardGalleryToys* self)
 {
     int n = cBERewardInterface_getTotalNumToys(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->count = 0;
-    self->base = (int)cBERewardInterface_getDB()->mpToys;
+    self->mNumTotalRewards = 0;
+    self->mpDBToys = cBERewardInterface_getDB()->mpToys;
     for (int i = 0; i < n; i++) {
-        self->items[self->count++] = self->base + i * 16;
+        self->mpToys[self->mNumTotalRewards++] = &self->mpDBToys[i];
     }
 }
 #endif
@@ -2056,8 +2001,7 @@ extern "C" void cFEStateRewardGalleryToys_allocRewards(sRewardList_1858* self)
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_purgeRewards);
 #ifdef SKIP_ASM
 /**
- * Clears the toy gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 28 entries from
- * +0xA28.
+ * Clears the toy gallery's reward list: mNumTotalRewards, mpDBToys and the 28 entries of mpToys.
  *
  * Vtable slot 29 of the toy vtable cFEStateRewardGalleryToys_vtbl.
  */
@@ -2067,7 +2011,7 @@ extern "C" void cFEStateRewardGalleryToys_purgeRewards(cFEStateRewardGalleryToys
     self->mNumTotalRewards = 0;
     self->mpDBToys = 0;
     for (i = 27; i >= 0; i--) {
-        ((int*)(&self->mpToys[0]))[i] = 0;
+        self->mpToys[i] = 0;
     }
 }
 #endif
@@ -2113,29 +2057,21 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBERewardInterface_getTotalNumCheatChars(void* self);
 extern "C" cBERewardDB* cBERewardInterface_getDB();
 
-struct sRewardList_1990 {
-    char pad_0x0[0x68];
-    int count;
-    char pad_0x6C[0xA24 - 0x6C];
-    int base;
-    int items[1];
-};
-
 /**
  * Builds the cheat-character gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the cheat-character vtable cFEStateRewardGalleryCheatChars_vtbl. The count comes from cBERewardInterface_getTotalNumCheatChars() on the reward interface
- * (kind 13); the list base +0xA24 is the cheat-character array pointer at +0x28 of cBERewardInterface_getDB(); list
- * entry k (+0xA28) gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no
- * check against the 28 entries the object has room for.
+ * Vtable slot 28 of the cheat-character vtable cFEStateRewardGalleryCheatChars_vtbl. The count comes from
+ * cBERewardInterface_getTotalNumCheatChars() on the reward interface (kind 13); mpDBCheatChars is the database's
+ * mpCheatChars (cBERewardInterface_getDB()); entry k of mpCheatChars gets &mpDBCheatChars[k] (16-byte reward records)
+ * and mNumTotalRewards counts them. There is no check against the 28 entries the object has room for.
  */
-extern "C" void cFEStateRewardGalleryCheatChars_allocRewards(sRewardList_1990* self)
+extern "C" void cFEStateRewardGalleryCheatChars_allocRewards(cFEStateRewardGalleryCheatChars* self)
 {
     int n = cBERewardInterface_getTotalNumCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13));
-    self->count = 0;
-    self->base = (int)cBERewardInterface_getDB()->mpCheatChars;
+    self->mNumTotalRewards = 0;
+    self->mpDBCheatChars = cBERewardInterface_getDB()->mpCheatChars;
     for (int i = 0; i < n; i++) {
-        self->items[self->count++] = self->base + i * 16;
+        self->mpCheatChars[self->mNumTotalRewards++] = &self->mpDBCheatChars[i];
     }
 }
 #endif
@@ -2144,8 +2080,8 @@ extern "C" void cFEStateRewardGalleryCheatChars_allocRewards(sRewardList_1990* s
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_purgeRewards);
 #ifdef SKIP_ASM
 /**
- * Clears the cheat-character gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 28 entries
- * from +0xA28.
+ * Clears the cheat-character gallery's reward list: mNumTotalRewards, mpDBCheatChars and the 28 entries of
+ * mpCheatChars.
  *
  * Vtable slot 29 of the cheat-character vtable cFEStateRewardGalleryCheatChars_vtbl.
  */
@@ -2155,7 +2091,7 @@ extern "C" void cFEStateRewardGalleryCheatChars_purgeRewards(cFEStateRewardGalle
     self->mNumTotalRewards = 0;
     self->mpDBCheatChars = 0;
     for (i = 27; i >= 0; i--) {
-        ((int*)(&self->mpCheatChars[0]))[i] = 0;
+        self->mpCheatChars[i] = 0;
     }
 }
 #endif
@@ -2538,10 +2474,9 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, c
     }
     int i;
     for (i = 0; i < 3; i++) {
-        char* bitmap = ((char**)((char*)&self->mpIcon))[i];
+        cUIIcon* bitmap = self->mpIcon[i];
         if (bitmap != 0) {
-            sVE_1FF0b* vt2 = *(sVE_1FF0b**)(bitmap + 8);
-            vt2[9].fn(vthis(bitmap, vt2[9]), 0);
+            bitmap->setVisible(0);
         }
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
@@ -2555,14 +2490,14 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, c
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_setReward);
 #ifdef SKIP_ASM
-extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, int a1);
+extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, const char* fileName);
 
 /**
  * Sets the reward the preview shows and starts loading its picture.
  *
- * Stores @p kind in +0x68 and @p data in +0x60; for types 3, 4, 5 and 7 (posters, trading cards, art, toys) loads the
- * file named by the record's word at +4 with cFEStatePreviewReward_loadTexture(). Videos (type 6) and other types load nothing. Called by
- * cFEStateRewardGalleryBase_showReward.
+ * Stores @p kind in mRewardType and @p data in mpReward; for types 3, 4, 5 and 7 (posters, trading cards, art, toys)
+ * loads the record's mpTextureFileName with cFEStatePreviewReward_loadTexture(). Videos (type 6) and other types load
+ * nothing. Called by cFEStateRewardGalleryBase_showReward.
  *
  * @param kind  the reward type (3 posters, 4 trading cards, 5 art, 6 videos, 7 toys)
  * @param data  the 16-byte reward record
@@ -2573,16 +2508,16 @@ extern "C" void cFEStatePreviewReward_setReward(cFEStatePreviewReward* self, int
     self->mpReward = data;
     switch (kind) {
     case 3:
-        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, ((tPosterInfo*)data)->mpTextureFileName);
         break;
     case 4:
-        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, ((tTradingCardInfo*)data)->mpTextureFileName);
         break;
     case 5:
-        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, ((tConceptArtInfo*)data)->mpTextureFileName);
         break;
     case 7:
-        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, ((tToyInfo*)data)->mpTextureFileName);
         break;
     }
 }
@@ -2599,11 +2534,11 @@ extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int
  * Calls func_0019DA10() on SSXApp->RealFE + 0x1A70 in the bank of the player's character (+0x64) with the name and
  * arguments 9, 1 and 0.
  *
- * @param id  the picture file name (the reward record's word at +4), passed as an int
+ * @param fileName  the picture file name (the reward record's mpTextureFileName)
  */
-extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, int id)
+extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, const char* fileName)
 {
-    self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, (const char*)id, 9, 1, 0);
+    self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, fileName, 9, 1, 0);
 }
 #endif
 

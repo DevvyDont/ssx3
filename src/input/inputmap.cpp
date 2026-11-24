@@ -492,7 +492,7 @@ extern "C" void* memset(void* dst, int c, int n);
 /**
  * Takes a parse node from the input map parser's free node list and returns it cleared.
  *
- * Pops the head of FreeParseNodes (+0xE0, linked through each node's +0x4) and zeroes the node's 16 bytes
+ * Pops the head of FreeParseNodes (+0xE0, linked through each node's Operand1) and zeroes the node's 16 bytes
  * (memset). There is no check for an empty list: once the 0x800-node pool is used up it reads through the list's
  * null end. The parse functions (parseOr, parseAnd, parseTerm and the others) call it for every node they build.
  *
@@ -501,7 +501,7 @@ extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cInputMapParser_newParseNode(cInputMapParser* self)
 {
     tParseNode* freeNode = self->FreeParseNodes;
-    self->FreeParseNodes = (tParseNode*)(freeNode->unk_04);
+    self->FreeParseNodes = (tParseNode*)(freeNode->Operand1);
     memset(freeNode, 0, 0x10);
     return freeNode;
 }
@@ -530,24 +530,24 @@ extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, tParseNode*
     case 18: case 19:
     case 24: case 25: case 26: case 27: case 28:
     case 29: case 30: case 31: case 32: case 33:
-        cInputMapParser_freeParseNode(self, node->unk_04);
+        cInputMapParser_freeParseNode(self, node->Operand1);
         break;
     case 6: case 7: case 8: case 9: case 10: case 11:
     case 12: case 13: case 14: case 15: case 16: case 17:
     case 20: case 21:
-        cInputMapParser_freeParseNode(self, node->unk_04);
-        cInputMapParser_freeParseNode(self, node->unk_08);
+        cInputMapParser_freeParseNode(self, node->Operand1);
+        cInputMapParser_freeParseNode(self, node->Operand2);
         break;
     case 5:
-        cInputMapParser_freeParseNode(self, node->unk_04);
-        cInputMapParser_freeParseNode(self, node->unk_08);
-        cInputMapParser_freeParseNode(self, node->unk_0C);
+        cInputMapParser_freeParseNode(self, node->Operand1);
+        cInputMapParser_freeParseNode(self, node->Operand2);
+        cInputMapParser_freeParseNode(self, node->Operand3);
         break;
     case 0: case 1: case 2: case 3: case 4:
     case 22: case 23:
         break;
     }
-    node->unk_04 = self->FreeParseNodes;
+    node->Operand1 = self->FreeParseNodes;
     self->FreeParseNodes = (tParseNode*)node;
 }
 #endif

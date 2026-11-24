@@ -752,15 +752,6 @@ extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self);
 
-struct sOrNode_003233B8 {
-    int type;
-    union {
-        float value;
-        sOrNode_003233B8* a;
-    };
-    sOrNode_003233B8* b;
-};
-
 /**
  * Parses an OR expression: one or more AND expressions joined by the `||` token (token 12).
  *
@@ -772,41 +763,41 @@ struct sOrNode_003233B8 {
  */
 extern "C" void* cInputMapParser_parseOr(cInputMapParser* self)
 {
-    sOrNode_003233B8* left = (sOrNode_003233B8*)cInputMapParser_parseAnd(self);
+    tParseNode* left = (tParseNode*)cInputMapParser_parseAnd(self);
     if (left == 0) {
         return 0;
     }
     int isTrue = 0;
-    if (left->type == 4 && left->value != 0.0f) {
+    if (left->Type == 4 && left->Value != 0.0f) {
         isTrue = 1;
     }
     while (self->CurrentToken == 0xC) {
         cInputMapParser_readToken(self);
-        sOrNode_003233B8* right = (sOrNode_003233B8*)cInputMapParser_parseAnd(self);
+        tParseNode* right = (tParseNode*)cInputMapParser_parseAnd(self);
         if (right == 0) {
             cInputMapParser_freeParseNode(self, left);
             return 0;
         }
         if (isTrue) {
-            left->value = 1.0f;
+            left->Value = 1.0f;
             cInputMapParser_freeParseNode(self, right);
-        } else if (right->type == 4) {
-            if (right->value != 0.0f) {
-                right->value = 1.0f;
+        } else if (right->Type == 4) {
+            if (right->Value != 0.0f) {
+                right->Value = 1.0f;
                 cInputMapParser_freeParseNode(self, left);
                 left = right;
                 isTrue = 1;
             } else {
                 cInputMapParser_freeParseNode(self, right);
             }
-        } else if (left->type == 4) {
+        } else if (left->Type == 4) {
             cInputMapParser_freeParseNode(self, left);
             left = right;
         } else {
-            sOrNode_003233B8* n = (sOrNode_003233B8*)cInputMapParser_newParseNode(self);
-            n->a = left;
-            n->b = right;
-            n->type = 6;
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            n->Operand1 = left;
+            n->Operand2 = right;
+            n->Type = 6;
             left = n;
         }
     }
@@ -822,15 +813,6 @@ extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self);
 
-struct sAndNode_00323540 {
-    int type;
-    union {
-        float value;
-        sAndNode_00323540* a;
-    };
-    sAndNode_00323540* b;
-};
-
 /**
  * Parses a chain of "&&" operands, folding constants: a constant 0 makes the whole chain 0.
  *
@@ -838,41 +820,41 @@ struct sAndNode_00323540 {
  */
 extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self)
 {
-    sAndNode_00323540* left = (sAndNode_00323540*)cInputMapParser_parseCompare(self);
+    tParseNode* left = (tParseNode*)cInputMapParser_parseCompare(self);
     if (left == 0) {
         return 0;
     }
     int isFalse = 0;
-    if (left->type == 4 && left->value == 0.0f) {
+    if (left->Type == 4 && left->Value == 0.0f) {
         isFalse = 1;
     }
     while (self->CurrentToken == 13) {
         cInputMapParser_readToken(self);
-        sAndNode_00323540* right = (sAndNode_00323540*)cInputMapParser_parseCompare(self);
+        tParseNode* right = (tParseNode*)cInputMapParser_parseCompare(self);
         if (right == 0) {
             cInputMapParser_freeParseNode(self, left);
             return 0;
         }
         if (isFalse) {
             cInputMapParser_freeParseNode(self, right);
-        } else if (right->type == 4) {
-            if (right->value == 0.0f) {
+        } else if (right->Type == 4) {
+            if (right->Value == 0.0f) {
                 cInputMapParser_freeParseNode(self, left);
                 left = right;
                 isFalse = 1;
             } else {
                 cInputMapParser_freeParseNode(self, right);
-                if (left->type == 4)
-                    left->value = 1.0f;
+                if (left->Type == 4)
+                    left->Value = 1.0f;
             }
-        } else if (left->type == 4) {
+        } else if (left->Type == 4) {
             cInputMapParser_freeParseNode(self, left);
             left = right;
         } else {
-            sAndNode_00323540* n = (sAndNode_00323540*)cInputMapParser_newParseNode(self);
-            n->a = left;
-            n->b = right;
-            n->type = 7;
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            n->Operand1 = left;
+            n->Operand2 = right;
+            n->Type = 7;
             left = n;
         }
     }
@@ -886,15 +868,6 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseCompare);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cInputMapParser_parseSum(cInputMapParser* self);
 
-struct sCmpNode_003236D8 {
-    int type;
-    union {
-        float value;
-        sCmpNode_003236D8* a;
-    };
-    sCmpNode_003236D8* b;
-};
-
 /**
  * Parses a chain of comparison operators; comparisons of two constants fold to 1.0 or 0.0.
  *
@@ -903,7 +876,7 @@ struct sCmpNode_003236D8 {
 // Parses a chain of comparison operators; comparisons of two constants are folded to 1.0/0.0.
 extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
 {
-    sCmpNode_003236D8* left = (sCmpNode_003236D8*)cInputMapParser_parseSum(self);
+    tParseNode* left = (tParseNode*)cInputMapParser_parseSum(self);
     if (left == 0) {
         return 0;
     }
@@ -932,38 +905,38 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
             return left;
         }
         cInputMapParser_readToken(self);
-        sCmpNode_003236D8* right = (sCmpNode_003236D8*)cInputMapParser_parseSum(self);
+        tParseNode* right = (tParseNode*)cInputMapParser_parseSum(self);
         if (right == 0) {
             cInputMapParser_freeParseNode(self, left);
             return 0;
         }
-        if (left->type == 4 && right->type == 4) {
+        if (left->Type == 4 && right->Type == 4) {
             switch (op) {
             case 10:
-                left->value = left->value < right->value ? 1.0f : 0.0f;
+                left->Value = left->Value < right->Value ? 1.0f : 0.0f;
                 break;
             case 11:
-                left->value = left->value <= right->value ? 1.0f : 0.0f;
+                left->Value = left->Value <= right->Value ? 1.0f : 0.0f;
                 break;
             case 9:
-                left->value = left->value >= right->value ? 1.0f : 0.0f;
+                left->Value = left->Value >= right->Value ? 1.0f : 0.0f;
                 break;
             case 8:
-                left->value = left->value > right->value ? 1.0f : 0.0f;
+                left->Value = left->Value > right->Value ? 1.0f : 0.0f;
                 break;
             case 0xC:
-                left->value = left->value == right->value ? 1.0f : 0.0f;
+                left->Value = left->Value == right->Value ? 1.0f : 0.0f;
                 break;
             case 13:
-                left->value = left->value != right->value ? 1.0f : 0.0f;
+                left->Value = left->Value != right->Value ? 1.0f : 0.0f;
                 break;
             }
             cInputMapParser_freeParseNode(self, right);
         } else {
-            sCmpNode_003236D8* n = (sCmpNode_003236D8*)cInputMapParser_newParseNode(self);
-            n->a = left;
-            n->type = op;
-            n->b = right;
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            n->Operand1 = left;
+            n->Type = op;
+            n->Operand2 = right;
             left = n;
         }
     }
@@ -978,15 +951,6 @@ extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self);
 
-struct sAddNode_00323900 {
-    int type;
-    union {
-        float value;
-        sAddNode_00323900* a;
-    };
-    sAddNode_00323900* b;
-};
-
 /**
  * Parses a chain of additions and subtractions, folding all constant operands into one constant.
  *
@@ -996,12 +960,12 @@ struct sAddNode_00323900 {
  */
 extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
 {
-    sAddNode_00323900* left = (sAddNode_00323900*)cInputMapParser_parseProduct(self);
+    tParseNode* left = (tParseNode*)cInputMapParser_parseProduct(self);
     if (left == 0) {
         return 0;
     }
-    sAddNode_00323900* konst = 0;
-    if (left->type == 4) {
+    tParseNode* konst = 0;
+    if (left->Type == 4) {
         konst = left;
     }
     for (;;) {
@@ -1017,38 +981,38 @@ extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
             return left;
         }
         cInputMapParser_readToken(self);
-        sAddNode_00323900* right = (sAddNode_00323900*)cInputMapParser_parseProduct(self);
+        tParseNode* right = (tParseNode*)cInputMapParser_parseProduct(self);
         if (right == 0) {
             cInputMapParser_freeParseNode(self, left);
             return 0;
         }
-        if (right->type == 4) {
+        if (right->Type == 4) {
             if (konst != 0) {
                 switch (op) {
                 case 0xE:
-                    konst->value = konst->value + right->value;
+                    konst->Value = konst->Value + right->Value;
                     break;
                 case 0xF:
-                    konst->value = konst->value - right->value;
+                    konst->Value = konst->Value - right->Value;
                     break;
                 }
                 cInputMapParser_freeParseNode(self, right);
             } else {
                 konst = right;
                 if (op == 0xF) {
-                    right->value = -right->value;
+                    right->Value = -right->Value;
                 }
-                sAddNode_00323900* n = (sAddNode_00323900*)cInputMapParser_newParseNode(self);
-                n->a = left;
-                n->type = 0xE;
-                n->b = right;
+                tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+                n->Operand1 = left;
+                n->Type = 0xE;
+                n->Operand2 = right;
                 left = n;
             }
         } else {
-            sAddNode_00323900* n = (sAddNode_00323900*)cInputMapParser_newParseNode(self);
-            n->a = left;
-            n->type = op;
-            n->b = right;
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            n->Operand1 = left;
+            n->Type = op;
+            n->Operand2 = right;
             left = n;
         }
     }
@@ -1063,15 +1027,6 @@ extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self);
 
-struct sMulNode_00323A68 {
-    int type;
-    union {
-        float value;
-        sMulNode_00323A68* a;
-    };
-    sMulNode_00323A68* b;
-};
-
 /**
  * Parses a chain of multiplications and divisions, folding all constant operands into one constant.
  *
@@ -1081,12 +1036,12 @@ struct sMulNode_00323A68 {
  */
 extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
 {
-    sMulNode_00323A68* left = (sMulNode_00323A68*)cInputMapParser_parseTerm(self);
+    tParseNode* left = (tParseNode*)cInputMapParser_parseTerm(self);
     if (left == 0) {
         return 0;
     }
-    sMulNode_00323A68* konst = 0;
-    if (left->type == 4) {
+    tParseNode* konst = 0;
+    if (left->Type == 4) {
         konst = left;
     }
     for (;;) {
@@ -1102,38 +1057,38 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
             return left;
         }
         cInputMapParser_readToken(self);
-        sMulNode_00323A68* right = (sMulNode_00323A68*)cInputMapParser_parseTerm(self);
+        tParseNode* right = (tParseNode*)cInputMapParser_parseTerm(self);
         if (right == 0) {
             cInputMapParser_freeParseNode(self, left);
             return 0;
         }
-        if (right->type == 4) {
+        if (right->Type == 4) {
             if (konst != 0) {
                 switch (op) {
                 case 0x10:
-                    konst->value = konst->value * right->value;
+                    konst->Value = konst->Value * right->Value;
                     break;
                 case 17:
-                    konst->value = konst->value / right->value;
+                    konst->Value = konst->Value / right->Value;
                     break;
                 }
                 cInputMapParser_freeParseNode(self, right);
             } else {
                 konst = right;
                 if (op == 17) {
-                    right->value = 1.0f / right->value;
+                    right->Value = 1.0f / right->Value;
                 }
-                sMulNode_00323A68* n = (sMulNode_00323A68*)cInputMapParser_newParseNode(self);
-                n->a = left;
-                n->type = 0x10;
-                n->b = right;
+                tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+                n->Operand1 = left;
+                n->Type = 0x10;
+                n->Operand2 = right;
                 left = n;
             }
         } else {
-            sMulNode_00323A68* n = (sMulNode_00323A68*)cInputMapParser_newParseNode(self);
-            n->a = left;
-            n->type = op;
-            n->b = right;
+            tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+            n->Operand1 = left;
+            n->Type = op;
+            n->Operand2 = right;
             left = n;
         }
     }
@@ -1366,15 +1321,6 @@ extern char str_Expected_in_expression_b[];
 extern char str_Expected_in_expression_c[];
 extern char str_Expected_in_expression[];
 
-struct sBinNode_4138 {
-    int type;
-    union {
-        float value;
-        sBinNode_4138* a;
-    };
-    sBinNode_4138* b;
-};
-
 static inline float pow_4138(float x, float y)
 {
     return expf(logf(x) * y);
@@ -1418,7 +1364,7 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
         return 0;
     }
     cInputMapParser_readToken(self);
-    sBinNode_4138* firstArg = (sBinNode_4138*)cInputMapParser_parseExpression(self);
+    tParseNode* firstArg = (tParseNode*)cInputMapParser_parseExpression(self);
     if (firstArg == 0) {
         return 0;
     }
@@ -1428,7 +1374,7 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
         return 0;
     }
     cInputMapParser_readToken(self);
-    sBinNode_4138* secondArg = (sBinNode_4138*)cInputMapParser_parseExpression(self);
+    tParseNode* secondArg = (tParseNode*)cInputMapParser_parseExpression(self);
     if (secondArg == 0) {
         return 0;
     }
@@ -1439,28 +1385,28 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
         return 0;
     }
     cInputMapParser_readToken(self);
-    if (firstArg->type == 4 && secondArg->type == 4) {
+    if (firstArg->Type == 4 && secondArg->Type == 4) {
         switch (op) {
         case 21:
-            firstArg->value = secondArg->value <? firstArg->value;
+            firstArg->Value = secondArg->Value <? firstArg->Value;
             break;
         case 20:
-            firstArg->value = secondArg->value >? firstArg->value;
+            firstArg->Value = secondArg->Value >? firstArg->Value;
             break;
         case 22:
-            firstArg->value = pow_4138(firstArg->value, secondArg->value);
+            firstArg->Value = pow_4138(firstArg->Value, secondArg->Value);
             break;
         case 23:
-            firstArg->value = atan2_4138(firstArg->value, secondArg->value);
+            firstArg->Value = atan2_4138(firstArg->Value, secondArg->Value);
             break;
         }
         cInputMapParser_freeParseNode(self, secondArg);
         return firstArg;
     }
-    sBinNode_4138* n = (sBinNode_4138*)cInputMapParser_newParseNode(self);
-    n->type = op;
-    n->a = firstArg;
-    n->b = secondArg;
+    tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+    n->Type = op;
+    n->Operand1 = firstArg;
+    n->Operand2 = secondArg;
     return n;
 }
 #endif
@@ -1471,14 +1417,6 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseUnaryFunc);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" float fSin(float x);
 extern "C" float fCos(float x);
-
-struct sUnNode_43A0 {
-    int type;
-    union {
-        float value;
-        sUnNode_43A0* a;
-    };
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float trunc_43A0(float x)
@@ -1539,7 +1477,7 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
         return 0;
     }
     cInputMapParser_readToken(self);
-    sUnNode_43A0* operand = (sUnNode_43A0*)cInputMapParser_parseExpression(self);
+    tParseNode* operand = (tParseNode*)cInputMapParser_parseExpression(self);
     if (operand == 0) {
         return 0;
     }
@@ -1549,46 +1487,46 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
         return 0;
     }
     cInputMapParser_readToken(self);
-    if (operand->type == 4) {
+    if (operand->Type == 4) {
         switch (op) {
         case 0x18:
-            operand->value = func_0031C228(operand->value);
+            operand->Value = func_0031C228(operand->Value);
             break;
         case 25:
-            operand->value = fSin(operand->value);
+            operand->Value = fSin(operand->Value);
             break;
         case 26:
-            operand->value = fCos(operand->value);
+            operand->Value = fCos(operand->Value);
             break;
         case 27:
-            operand->value = expf(operand->value);
+            operand->Value = expf(operand->Value);
             break;
         case 0x1C:
-            operand->value = logf(operand->value);
+            operand->Value = logf(operand->Value);
             break;
         case 29:
-            operand->value = floor_43A0(operand->value);
+            operand->Value = floor_43A0(operand->Value);
             break;
         case 0x1E:
-            operand->value = ceil_43A0(operand->value);
+            operand->Value = ceil_43A0(operand->Value);
             break;
         case 0x1F:
-            operand->value = abs_43A0(operand->value);
+            operand->Value = abs_43A0(operand->Value);
             break;
         case 0x20:
-            operand->value = sqrt_43A0(operand->value);
+            operand->Value = sqrt_43A0(operand->Value);
             break;
         case 33: {
-            float x = operand->value;
-            operand->value = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
+            float x = operand->Value;
+            operand->Value = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         }
         return operand;
     }
-    sUnNode_43A0* n = (sUnNode_43A0*)cInputMapParser_newParseNode(self);
-    n->type = op;
-    n->a = operand;
+    tParseNode* n = (tParseNode*)cInputMapParser_newParseNode(self);
+    n->Type = op;
+    n->Operand1 = operand;
     return n;
 }
 #endif
@@ -1637,7 +1575,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileParseNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" int cInputMapParser_configToRegister_i(void* self, void* var) __asm__("cInputMapParser_configToRegister");
+extern "C" int cInputMapParser_configToRegister_i(void* self, int varIndex) __asm__("cInputMapParser_configToRegister");
 extern "C" int cInputMapParser_buttonToRegister(cInputMapParser* self, int a1, int a2);
 extern "C" int cInputMapParser_compileBinaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileBinaryNode");
 extern "C" int cInputMapParser_compileUnaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileUnaryNode");
@@ -1645,33 +1583,6 @@ extern char str_opcode_buffer_overflow[];
 extern char str_failed_to_allocate_temporary_register[];
 extern char str_branch_offset_overflow[];
 
-struct sNode_324678 {
-    int type;
-    union {
-        float value;
-        int index;
-        void* a;
-    };
-    union {
-        int b;
-        sNode_324678* then_;
-    };
-    sNode_324678* else_;
-};
-union sInsn_324678 {
-    struct {
-        unsigned int op : 6;
-        unsigned int dst : 6;
-        unsigned int src : 10;
-        unsigned int arg : 10;
-    } r;
-    struct {
-        unsigned int op : 6;
-        unsigned int reg : 10;
-        unsigned int offset : 16;
-    } j;
-    float f;
-};
 /**
  * Compiles an expression tree into op-codes whose result lands in a register, allocating one when needed.
  *
@@ -1681,18 +1592,18 @@ union sInsn_324678 {
  * then
  * branch, a jump and the else branch; operators go to compileBinaryNode() or compileUnaryNode().
  *
- * @param vnode  the tree (On Tour tParseNode* node)
+ * @param node  the tree
  * @param dst  the result register in and out; -1 lets the node pick one (On Tour int& reg)
- * @param vcode  where to write the op-codes (On Tour codes)
+ * @param vcode  where to write the op-codes (On Tour const tInputOpCode* codes)
  * @param cap  room left in op-codes (On Tour clen)
  * @param defaultModifier  button modifier for buttons and references without one
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* vnode, int* dst, void* vcode, int cap, int defaultModifier)
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* node, int* dst, void* vcode, int cap,
+                                                int defaultModifier)
 {
-    sNode_324678* node = (sNode_324678*)vnode;
-    sInsn_324678* code = (sInsn_324678*)vcode;
-    switch (node->type) {
+    tInputOpCode* code = (tInputOpCode*)vcode;
+    switch (node->Type) {
     case 4:
         if (*dst < 0) {
             if (self->NumFreeRegisters > 0) {
@@ -1707,16 +1618,18 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->r.op = 0;
-        code->r.dst = *dst;
-        code->r.src = 0;
-        code->r.arg = 0;
-        code[1].f = node->value;
+        code->Binary.opcode = 0;
+        code->Binary.dest = *dst;
+        code->Binary.operand1 = 0;
+        code->Binary.operand2 = 0;
+        code[1].Float.value = node->Value;
         return 2;
     case 1:
-        return cInputMapParser_compileParseNode(self, (tParseNode*)((sNode_324678*)((tIdentifier*)node->a)->Expression), dst, code, cap, node->b != 5 ? node->b : defaultModifier);
+        return cInputMapParser_compileParseNode(self, node->Identifier->Expression, dst, code, cap,
+                                                node->Modifier != 5 ? node->Modifier : defaultModifier);
     case 2: {
-        int idx = cInputMapParser_buttonToRegister(self, node->index, node->b == 5 ? defaultModifier : node->b);
+        int idx = cInputMapParser_buttonToRegister(self, node->Index,
+                                                   node->Modifier == 5 ? defaultModifier : node->Modifier);
         if (*dst == -1) {
             *dst = idx;
             return 0;
@@ -1725,29 +1638,29 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->r.op = 1;
-        code->r.dst = *dst;
-        code->r.src = idx;
-        code->r.arg = 0;
+        code->Binary.opcode = 1;
+        code->Binary.dest = *dst;
+        code->Binary.operand1 = idx;
+        code->Binary.operand2 = 0;
         return 1;
     }
     case 3:
         if (*dst == -1) {
-            *dst = cInputMapParser_configToRegister_i(self, node->a);
+            *dst = cInputMapParser_configToRegister_i(self, node->Index);
             return 0;
         }
         if (cap <= 0) {
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->r.op = 1;
-        code->r.dst = *dst;
-        code->r.src = cInputMapParser_configToRegister_i(self, node->a);
-        code->r.arg = 0;
+        code->Binary.opcode = 1;
+        code->Binary.dest = *dst;
+        code->Binary.operand1 = cInputMapParser_configToRegister_i(self, node->Index);
+        code->Binary.operand2 = 0;
         return 1;
     case 5: {
         int cond = -1;
-        int condLen = cInputMapParser_compileParseNode(self, (tParseNode*)node->a, &cond, code, cap, defaultModifier);
+        int condLen = cInputMapParser_compileParseNode(self, node->Operand1, &cond, code, cap, defaultModifier);
         if (condLen < 0) {
             return -1;
         }
@@ -1758,13 +1671,13 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             return -1;
         }
         unsigned int reg = cond;
-        code->j.op = 2;
-        code->j.reg = reg;
+        code->Branch.opcode = 2;
+        code->Branch.operand = reg;
         if (reg < 0x40) {
             self->FreeRegisters[self->NumFreeRegisters++] = reg;
         }
         cap--;
-        int thenLen = cInputMapParser_compileParseNode(self, (tParseNode*)node->then_, dst, code + 1, cap, defaultModifier);
+        int thenLen = cInputMapParser_compileParseNode(self, node->Operand2, dst, code + 1, cap, defaultModifier);
         if (thenLen < 0) {
             return -1;
         }
@@ -1772,16 +1685,16 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_branch_offset_overflow);
             return -1;
         }
-        code->j.offset = thenLen + 1;
+        code->Branch.offset = thenLen + 1;
         code += thenLen + 1;
         cap -= thenLen;
         if (cap <= 0) {
             cInputMapParser_error(self, str_opcode_buffer_overflow);
             return -1;
         }
-        code->j.op = 3;
-        code->j.reg = 0;
-        int elseLen = cInputMapParser_compileParseNode(self, (tParseNode*)node->else_, dst, code + 1, cap - 1, defaultModifier);
+        code->Branch.opcode = 3;
+        code->Branch.operand = 0;
+        int elseLen = cInputMapParser_compileParseNode(self, node->Operand3, dst, code + 1, cap - 1, defaultModifier);
         if (elseLen < 0) {
             return -1;
         }
@@ -1789,7 +1702,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
             cInputMapParser_error(self, str_branch_offset_overflow);
             return -1;
         }
-        code->j.offset = elseLen;
+        code->Branch.offset = elseLen;
         return condLen + thenLen + elseLen + 2;
     }
     case 6: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 4, defaultModifier);
@@ -1833,12 +1746,6 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
 extern char str_failed_to_allocate_temporary_register[];
 extern char str_opcode_buffer_overflow[];
 
-struct sInsn_00324EC8 {
-    unsigned int op : 6;
-    unsigned int dst : 6;
-    unsigned int src : 10;
-    unsigned int arg : 10;
-};
 /**
  * Compiles both operands of a binary operator, frees their temporary registers and emits the operation.
  *
@@ -1850,17 +1757,18 @@ struct sInsn_00324EC8 {
  * @param defaultModifier  button modifier passed down to the operands
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, tParseNode* node, int* dst, sInsn_00324EC8* code, int cap, int op, int defaultModifier)
+extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, tParseNode* node, int* dst, tInputOpCode* code,
+                                                 int cap, int op, int defaultModifier)
 {
     int src = -1;
-    int srcLen = cInputMapParser_compileParseNode(self, (tParseNode*)(node->unk_04), &src, code, cap, defaultModifier);
+    int srcLen = cInputMapParser_compileParseNode(self, node->Operand1, &src, code, cap, defaultModifier);
     if (srcLen < 0) {
         return -1;
     }
     code += srcLen;
     cap -= srcLen;
     int argReg = -1;
-    int argLen = cInputMapParser_compileParseNode(self, (tParseNode*)(node->unk_08), &argReg, code, cap, defaultModifier);
+    int argLen = cInputMapParser_compileParseNode(self, node->Operand2, &argReg, code, cap, defaultModifier);
     if (argLen < 0) {
         return -1;
     }
@@ -1885,10 +1793,10 @@ extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, tParseNo
         cInputMapParser_error(self, str_opcode_buffer_overflow);
         return -1;
     }
-    code->op = op;
-    code->dst = *dst;
-    code->src = src;
-    code->arg = argReg;
+    code->Binary.opcode = op;
+    code->Binary.dest = *dst;
+    code->Binary.operand1 = src;
+    code->Binary.operand2 = argReg;
     return srcLen + argLen + 1;
 }
 #endif
@@ -1901,12 +1809,6 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
 extern char str_failed_to_allocate_temporary_register[];
 extern char str_opcode_buffer_overflow[];
 
-struct sInsn_003250D8 {
-    unsigned int op : 6;
-    unsigned int dst : 6;
-    unsigned int src : 10;
-    unsigned int arg : 10;
-};
 /**
  * Compiles the operand of a unary operator, frees its temporary register and emits the operation.
  *
@@ -1918,11 +1820,12 @@ struct sInsn_003250D8 {
  * @param defaultModifier  button modifier passed down to the operand
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, tParseNode* node, int* dst, sInsn_003250D8* code, int cap, int op, int defaultModifier)
+extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, tParseNode* node, int* dst, tInputOpCode* code,
+                                                int cap, int op, int defaultModifier)
 {
-    void* operand = node->unk_04;
+    tParseNode* operand = node->Operand1;
     int src = -1;
-    int n = cInputMapParser_compileParseNode(self, (tParseNode*)operand, &src, code, cap, defaultModifier);
+    int n = cInputMapParser_compileParseNode(self, operand, &src, code, cap, defaultModifier);
     if (n < 0) {
         return -1;
     }
@@ -1944,10 +1847,10 @@ extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, tParseNod
         cInputMapParser_error(self, str_opcode_buffer_overflow);
         return -1;
     }
-    code->op = op;
-    code->dst = *dst;
-    code->src = src;
-    code->arg = 0;
+    code->Binary.opcode = op;
+    code->Binary.dest = *dst;
+    code->Binary.operand1 = src;
+    code->Binary.operand2 = 0;
     return n + 1;
 }
 #endif
@@ -2012,14 +1915,14 @@ INCLUDE_ASM("input/inputparse", cInputExec_getTempReg);
 /**
  * Returns the address of one of an input map evaluator's temporary registers.
  *
- * Temporaries are 64 floats from +0x8; no range check.
+ * Temporaries are the 64 floats of Temp; no range check.
  *
  * @param i  the temporary register index
  * @return the register's address
  */
 extern "C" void* cInputExec_getTempReg(cInputExec* self, int i)
 {
-    return &((int*)&(self)->Temp[0])[i];
+    return &self->Temp[i];
 }
 #endif
 
@@ -2105,7 +2008,7 @@ INCLUDE_ASM("input/inputparse", cInputExec_getConfig);
 /**
  * Returns one of an input map evaluator's config values; config 0 always reads 0.
  *
- * The values are floats from +0x108. cInputMap_getValue1 and cInputMap_getState1 fill configs 1..8.
+ * The values are the floats of Config. cInputMap_getValue1 and cInputMap_getState1 fill configs 1..8.
  *
  * @param varIndex  the config index
  * @return the value, or 0.0 for config 0
@@ -2115,8 +2018,7 @@ extern "C" float cInputExec_getConfig(cInputExec* self, int varIndex)
     if (varIndex == 0) {
         return 0.0f;
     }
-    char* varBase = (char*)self + varIndex * 4;
-    return *(float*)(varBase + 0x108);
+    return self->Config[varIndex];
 }
 #endif
 
@@ -2130,7 +2032,7 @@ extern "C" float cInputExec_getRegister_vm(cInputExec* self, unsigned int id) __
 /**
  * Runs a compiled input map statement against a controller pad and returns its result.
  *
- * Stores @p list as the evaluator's pad (+0x4) and steps through the op-codes from @p code until op 32 (End). The op
+ * Stores @p list as the evaluator's Pad and steps through the op-codes from @p code until op 32 (End). The op
  * numbers are On Tour's eInputOpCodes: 0 Load (the next word is a float constant), 1 Move, 2 BranchFalse and 3 Branch
  * (relative jumps), 4 Or, 5 And, 6..11 the comparisons (>, >=, <, <=, ==, !=) giving 1.0 or 0.0, 12..15 + - x /, 16
  * Max, 17 Min, 18 Pow (computed as exp(log(x) x y), so a negative base gives NaN), 19 Atan2, 20 Atan, 21 Sin, 22 Cos,
@@ -2143,36 +2045,37 @@ extern "C" float cInputExec_getRegister_vm(cInputExec* self, unsigned int id) __
  * @return the value of register 0 when End is reached
  */
 // Runs one compiled input expression (see cInputMapParser_compileParseNode for the encoder); returns register 0.
-extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, sInsn_324678* code)
+extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, const tInputOpCode* code)
 {
     int pc = 0;
     int done = 0;
     self->Pad = (cInputPad*)list;
     do {
-        sInsn_324678* ins = &code[pc];
+        const tInputOpCode* ins = &code[pc];
         pc++;
-        switch (ins->r.op) {
+        switch (ins->Base.opcode) {
         case 0: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = code[pc++].f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Load.dest);
+            *destSlot = code[pc++].Float.value;
             break;
         }
         case 1: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = cInputExec_getRegister_vm((self), ins->r.src);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = cInputExec_getRegister_vm((self), ins->Unary.operand);
             break;
         }
         case 2:
-            if (cInputExec_getRegister_vm((self), ins->j.reg) != 0.0f) {
+            if (cInputExec_getRegister_vm((self), ins->Branch.operand) != 0.0f) {
                 break;
             }
         case 3:
-            pc += ins->j.offset;
+            pc += ins->Branch.offset;
             break;
         case 4: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            if (cInputExec_getRegister_vm((self), ins->r.src) != 0.0f || cInputExec_getRegister_vm((self), ins->r.arg) != 0.0f) {
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
+                || cInputExec_getRegister_vm((self), ins->Binary.operand2) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
@@ -2180,156 +2083,161 @@ extern "C" float cInputExec_execute(cInputExec* self, cInputPad* list, sInsn_324
         }
         case 5: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            if (cInputExec_getRegister_vm((self), ins->r.src) != 0.0f && cInputExec_getRegister_vm((self), ins->r.arg) != 0.0f) {
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            if (cInputExec_getRegister_vm((self), ins->Binary.operand1) != 0.0f
+                && cInputExec_getRegister_vm((self), ins->Binary.operand2) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
             break;
         }
         case 6: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = (lhs > cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = (lhs > cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 7: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = (lhs >= cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = (lhs >= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 8: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = (lhs < cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = (lhs < cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 9: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = (lhs <= cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = (lhs <= cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 10: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = (lhs == cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = (lhs == cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 11: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = (lhs != cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = (lhs != cInputExec_getRegister_vm((self), ins->Binary.operand2)) ? 1.0f : 0.0f;
             break;
         }
         case 12: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = lhs + cInputExec_getRegister_vm((self), ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = lhs + cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 13: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = lhs - cInputExec_getRegister_vm((self), ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = lhs - cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 14: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = lhs * cInputExec_getRegister_vm((self), ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = lhs * cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 15: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = lhs / cInputExec_getRegister_vm((self), ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = lhs / cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 16: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm((self), ins->r.src) > cInputExec_getRegister_vm((self), ins->r.arg))
-                ? cInputExec_getRegister_vm((self), ins->r.src) : cInputExec_getRegister_vm((self), ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
+                         > cInputExec_getRegister_vm((self), ins->Binary.operand2))
+                ? cInputExec_getRegister_vm((self), ins->Binary.operand1)
+                : cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 17: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm((self), ins->r.src) < cInputExec_getRegister_vm((self), ins->r.arg))
-                ? cInputExec_getRegister_vm((self), ins->r.src) : cInputExec_getRegister_vm((self), ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            *destSlot = (cInputExec_getRegister_vm((self), ins->Binary.operand1)
+                         < cInputExec_getRegister_vm((self), ins->Binary.operand2))
+                ? cInputExec_getRegister_vm((self), ins->Binary.operand1)
+                : cInputExec_getRegister_vm((self), ins->Binary.operand2);
             break;
         }
         case 18: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm((self), ins->r.arg));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
             break;
         }
         case 19: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
-            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm((self), ins->r.arg));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Binary.dest);
+            float lhs = cInputExec_getRegister_vm((self), ins->Binary.operand1);
+            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm((self), ins->Binary.operand2));
             break;
         }
         case 20: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = func_0031C228(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = func_0031C228(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 21: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = fSin(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = fSin(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 22: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = fCos(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = fCos(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 23: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = expf(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = expf(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 24: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = logf(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = logf(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 25: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = floor_43A0(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = floor_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 26: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = ceil_43A0(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = ceil_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 27: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = abs_43A0(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = abs_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 28: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = sqrt_43A0(cInputExec_getRegister_vm((self), ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = sqrt_43A0(cInputExec_getRegister_vm((self), ins->Unary.operand));
             break;
         }
         case 29: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float x = cInputExec_getRegister_vm((self), ins->r.src);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            float x = cInputExec_getRegister_vm((self), ins->Unary.operand);
             *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         case 30: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = -cInputExec_getRegister_vm((self), ins->r.src);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = -cInputExec_getRegister_vm((self), ins->Unary.operand);
             break;
         }
         case 31: {
-            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm((self), ins->r.src) == 0.0f) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->Unary.dest);
+            *destSlot = (cInputExec_getRegister_vm((self), ins->Unary.operand) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
         case 32:
@@ -2836,24 +2744,11 @@ extern "C" void cPadCache_init(cPadCache* self)
 //100%
 INCLUDE_ASM("input/inputparse", cPadCache_purge);
 #ifdef SKIP_ASM
-struct sVEntry00326A68 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-
-struct sOwner00326A68 {
-    char pad[0x2EE8];
-    int count;
-    cPadDevice* objs[1];
-};
-
 /**
  * Destroys every pad device of the pad cache.
  *
  * Calls each non-null device's virtual destructor (slot 1) with flags 3, which frees it. The array entries and the
- * count (+0x2EE8) are left as they were. Called by cSSXApp_purge.
+ * count (NumPadDevices) are left as they were. Called by cSSXApp_purge.
  */
 extern "C" void cPadCache_purge(cPadCache* self)
 {
@@ -2861,7 +2756,8 @@ extern "C" void cPadCache_purge(cPadCache* self)
     for (i = 0; i < self->NumPadDevices; i++) {
         cPadDevice* inputPad = self->PadDevices[i];
         if (inputPad != 0) {
-            ((sVEntry00326A68*)inputPad->mVtbl)[1].fn(vthis(inputPad, ((sVEntry00326A68*)inputPad->mVtbl)[1]), 3);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)inputPad->mVtbl;
+            vt[1].fn(vthis(inputPad, vt[1]), 3);
         }
     }
 }
@@ -2870,7 +2766,7 @@ extern "C" void cPadCache_purge(cPadCache* self)
 //100%
 INCLUDE_ASM("input/inputparse", cPadCache_clearAllVibrations);
 #ifdef SKIP_ASM
-extern "C" void cPadDevice_clearAllVibrations(void* p);
+extern "C" void cPadDevice_clearAllVibrations(cPadDevice* inputPad);
 
 /**
  * Stops the vibration of every pad device of the pad cache.
@@ -2923,35 +2819,19 @@ extern "C" int cPadCache_nextInput(cPadCache* controllerCache)
 //100%
 INCLUDE_ASM("input/inputparse", cPadCache_cacheInput);
 #ifdef SKIP_ASM
-class cInputDevice_326B88 {
-public:
-    virtual void v01();
-    virtual int read(char* buf, int size);
-};
-
-struct sInputSlot_00326B88 {
-    int value;
-    char data[0x60];
-};
-
-struct sInputParse_00326B88 {
-    sInputSlot_00326B88 slots[30][4];
-    unsigned int head;
-    unsigned int tail;
-    int count;
-    cInputDevice_326B88* devices[4];
-};
-
 /**
  * Reads every pad device into the next slot of the 30-entry input ring buffer.
  */
-extern "C" void cPadCache_cacheInput(sInputParse_00326B88* self)
+extern "C" void cPadCache_cacheInput(cPadCache* self)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        self->slots[self->tail][i].value = self->devices[i]->read(self->slots[self->tail][i].data, 0x18);
+    for (i = 0; i < self->NumPadDevices; i++) {
+        cPadDevice* device = self->PadDevices[i];
+        sVEntry<int(void*, float*, int)>* vt = (sVEntry<int(void*, float*, int)>*)device->mVtbl;
+        self->InputCache[self->CacheWritePos][i].NumButtons =
+            vt[2].fn(vthis(device, vt[2]), self->InputCache[self->CacheWritePos][i].Buttons, 0x18);
     }
-    self->tail = (self->tail + 1) % 30;
+    self->CacheWritePos = (self->CacheWritePos + 1) % 30;
 }
 #endif
 
@@ -2986,20 +2866,10 @@ extern "C" int cPadCache_flush(cPadCache* self)
 //100%
 INCLUDE_ASM("input/inputparse", cPadCache_numButtons);
 #ifdef SKIP_ASM
-struct sInputSlot_00326CA0 {
-    int value;
-    char pad[0x60];
-};
-
-struct sInputParse_00326CA0 {
-    sInputSlot_00326CA0 slots[30][4];
-    int bank;
-};
-
 /**
  * Returns how many button values a pad delivered in the pad cache's current input frame.
  *
- * Reads the count word of line (read position +0x2EE0), pad @p i. Called by cSSXApp_preUpdate and
+ * Reads NumButtons of line CacheReadPos, pad @p i. Called by cSSXApp_preUpdate and
  * cPreStartScreen_update together with cPadCache_buttonValues.
  *
  * @param i  the pad index (On Tour pad)
@@ -3007,32 +2877,24 @@ struct sInputParse_00326CA0 {
  */
 extern "C" int cPadCache_numButtons(cPadCache* self, int i)
 {
-    sInputParse_00326CA0* controllerCache = (sInputParse_00326CA0*)self;
-    return controllerCache->slots[controllerCache->bank][i].value;
+    return self->InputCache[(int)self->CacheReadPos][i].NumButtons;
 }
 #endif
 
 //100%
 INCLUDE_ASM("input/inputparse", cPadCache_buttonValues);
 #ifdef SKIP_ASM
-struct sInputSlot_00326CC8 {
-    int value;
-    char data[0x60];
-};
-
-
 /**
  * Returns the button values a pad delivered in the pad cache's current input frame.
  *
- * The values (up to 24 floats) of line (read position +0x2EE0), pad @p i.
+ * The values (Buttons, up to 24 floats) of line CacheReadPos, pad @p i.
  *
  * @param i  the pad index (On Tour pad)
  * @return the address of the values
  */
 extern "C" void* cPadCache_buttonValues(cPadCache* self, int i)
 {
-    cPadCache* controllerCache = self;
-    return ((sInputSlot_00326CC8 (*)[4])&controllerCache->InputCache[0][0])[((int)controllerCache->CacheReadPos)][i].data;
+    return self->InputCache[(int)self->CacheReadPos][i].Buttons;
 }
 #endif
 
@@ -3040,8 +2902,18 @@ extern "C" void* cPadCache_buttonValues(cPadCache* self, int i)
 INCLUDE_ASM("input/inputparse", cPadDevice_clearAllVibrations);
 #ifdef SKIP_ASM
 
-typedef int (*CountFn00326CF0)(void*);
-typedef void (*SetFn00326CF0)(void*, int, float);
+// cPadDevice's virtual numActuators (slot 3) and setActuator (slot 4), called through the vtable.
+static inline int padNumActuators(cPadDevice* pad)
+{
+    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)pad->mVtbl;
+    return vt[3].fn(vthis(pad, vt[3]));
+}
+
+static inline void padSetActuator(cPadDevice* pad, int act, float level)
+{
+    sVEntry<void(void*, int, float)>* vt = (sVEntry<void(void*, int, float)>*)pad->mVtbl;
+    vt[4].fn(vthis(pad, vt[4]), act, level);
+}
 
 /**
  * Stops a pad device's vibration: sets every actuator to 0.
@@ -3051,12 +2923,11 @@ typedef void (*SetFn00326CF0)(void*, int, float);
  *
  * @param inputPad  the pad device (this)
  */
-extern "C" void cPadDevice_clearAllVibrations(void* inputPad)
+extern "C" void cPadDevice_clearAllVibrations(cPadDevice* inputPad)
 {
-    sVEntry<void>** self = (sVEntry<void>**)inputPad;
     int i;
-    for (i = 0; i < ((CountFn00326CF0)(*self)[3].fn)(vthis(self, (*self)[3])); i++) {
-        ((SetFn00326CF0)(*self)[4].fn)(vthis(self, (*self)[4]), i, 0.0f);
+    for (i = 0; i < padNumActuators(inputPad); i++) {
+        padSetActuator(inputPad, i, 0.0f);
     }
 }
 #endif
@@ -3101,8 +2972,9 @@ extern void* cPS2PadDevice_vtbl[];
 /**
  * Constructs a PS2 pad device for a controller port and slot.
  *
- * Installs the vtable cPS2PadDevice_vtbl, stores @p port (+0x4) and @p slot (+0x8), zeroes 36 bytes at +0xC and the sampling state
- * words +0x48..+0x5C (state 0: the port is opened on the next sample). Called by cPadDevice_construct.
+ * Installs the vtable cPS2PadDevice_vtbl, stores @p port (mPort) and @p slot (mSlot), zeroes the 36 bytes of mReserved
+ * and the sampling state words mPhase..mActuator (+0x48..+0x5C; state 0: the port is opened on the next sample).
+ * Called by cPadDevice_construct.
  *
  * @param port  the controller port
  * @param slot  the multitap slot
@@ -3110,10 +2982,10 @@ extern void* cPS2PadDevice_vtbl[];
  */
 extern "C" void* cPS2PadDevice_cPS2PadDevice(cPS2PadDevice* self, int port, int slot)
 {
-    *(void***)self = cPS2PadDevice_vtbl;
+    self->mVtbl = cPS2PadDevice_vtbl;
     self->mPort = port;
     self->mSlot = slot;
-    memset((char*)self + 0xC, 0, 36);
+    memset(self->mReserved, 0, 36);
     self->mPressure = 0;
     self->mAnalog = 0;
     self->mModeSet = 0;
