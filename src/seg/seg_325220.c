@@ -5,7 +5,7 @@
 // asm label because this file declares these symbols with their argument lists elsewhere.
 #define SYSCALL_STUB(name, n) \
     void name##_syscall(void) __asm__(#name); \
-    void name##_syscall(void) { register int v __asm__("$3") = (n); __asm__ volatile("syscall" : : "r"(v)); }
+    void name##_syscall(void) { register int syscallNo __asm__("$3") = (n); __asm__ volatile("syscall" : : "r"(syscallNo)); }
 
 // PORT: PS2-only COP0 (read the Status register; ee-gcc 2.9 needs noreorder so gas adds no nop).
 #define MFC0_STATUS_4248(v) __asm__ volatile(".set push\n\t.set noreorder\n\tmfc0 %0, $12\n\t.set pop" : "=r"(v))
@@ -579,12 +579,12 @@ extern void func_004245F0(unsigned, unsigned);
  * @param endAddr    the last address
  */
 void SyncDCache(unsigned startAddr, unsigned endAddr) {
-    int s;
-    MFC0_STATUS_4248(s);
-    s &= 0x10000;
-    if (s) DIntr();
+    int intrEnabled;
+    MFC0_STATUS_4248(intrEnabled);
+    intrEnabled &= 0x10000;
+    if (intrEnabled) DIntr();
     func_004245F0(startAddr & ~63, endAddr & ~63);
-    if (s) EIntr();
+    if (intrEnabled) EIntr();
 }
 #endif
 
@@ -649,12 +649,12 @@ extern void func_00424730(unsigned, unsigned);
  * @param endAddr    the last address
  */
 void InvalidDCache(unsigned startAddr, unsigned endAddr) {
-    int s;
-    MFC0_STATUS_4248(s);
-    s &= 0x10000;
-    if (s) DIntr();
+    int intrEnabled;
+    MFC0_STATUS_4248(intrEnabled);
+    intrEnabled &= 0x10000;
+    if (intrEnabled) DIntr();
     func_00424730(startAddr & ~63, endAddr & ~63);
-    if (s) EIntr();
+    if (intrEnabled) EIntr();
 }
 #endif
 
@@ -707,13 +707,13 @@ extern int _DisableIntc(int);
  * @return _DisableIntc's result
  */
 int DisableIntc(int cause) {
-    int s, result;
-    MFC0_STATUS_4248(s);
-    s &= 0x10000;
-    if (s) DIntr();
+    int intrEnabled, result;
+    MFC0_STATUS_4248(intrEnabled);
+    intrEnabled &= 0x10000;
+    if (intrEnabled) DIntr();
     result = _DisableIntc(cause);
     SYNC_4248();
-    if (s) EIntr();
+    if (intrEnabled) EIntr();
     return result;
 }
 #endif
@@ -732,13 +732,13 @@ extern int _EnableIntc(int);
  * @return _EnableIntc's result
  */
 int EnableIntc(int cause) {
-    int s, result;
-    MFC0_STATUS_4248(s);
-    s &= 0x10000;
-    if (s) DIntr();
+    int intrEnabled, result;
+    MFC0_STATUS_4248(intrEnabled);
+    intrEnabled &= 0x10000;
+    if (intrEnabled) DIntr();
     result = _EnableIntc(cause);
     SYNC_4248();
-    if (s) EIntr();
+    if (intrEnabled) EIntr();
     return result;
 }
 #endif
@@ -758,13 +758,13 @@ extern int _DisableDmac(int);
  * @return _DisableDmac's result
  */
 int DisableDmac(int channel) {
-    int s, result;
-    MFC0_STATUS_4248(s);
-    s &= 0x10000;
-    if (s) DIntr();
+    int intrEnabled, result;
+    MFC0_STATUS_4248(intrEnabled);
+    intrEnabled &= 0x10000;
+    if (intrEnabled) DIntr();
     result = _DisableDmac(channel);
     SYNC_4248();
-    if (s) EIntr();
+    if (intrEnabled) EIntr();
     return result;
 }
 #endif
@@ -784,13 +784,13 @@ extern int _EnableDmac(int);
  * @return _EnableDmac's result
  */
 int EnableDmac(int channel) {
-    int s, result;
-    MFC0_STATUS_4248(s);
-    s &= 0x10000;
-    if (s) DIntr();
+    int intrEnabled, result;
+    MFC0_STATUS_4248(intrEnabled);
+    intrEnabled &= 0x10000;
+    if (intrEnabled) DIntr();
     result = _EnableDmac(channel);
     SYNC_4248();
-    if (s) EIntr();
+    if (intrEnabled) EIntr();
     return result;
 }
 #endif

@@ -605,8 +605,8 @@ extern "C" void cCamera_shakeCamera(cCamera* self, int type, float amount, float
     float scale;
     float range = kCamShakeValues_E360[type].range;
     if (0.0f < dist && 0.0f < range) {
-        float t = 2.0f - (dist + dist) / range;
-        scale = MAX_E360(MIN_E360(t, 1.0f), 0.0f);
+        float falloff = 2.0f - (dist + dist) / range;
+        scale = MAX_E360(MIN_E360(falloff, 1.0f), 0.0f);
     } else {
         scale = 1.0f;
     }
@@ -5774,9 +5774,9 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* sel
 {
     if (trig->Handplanting)
     {
-        t4Vector t = Sub_163450(*(&self->CamTargetPos), *(&self->Position));
+        t4Vector look = Sub_163450(*(&self->CamTargetPos), *(&self->Position));
         self->SecondsSinceLastHandplant = 0.0f;
-        *(&self->LastHandplantLook) = t;
+        *(&self->LastHandplantLook) = look;
     }
     else if (self->SecondsSinceLastHandplant < 5.0f)
     {
@@ -5788,9 +5788,9 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* sel
             float smoothFraction = fractionSquared * 3.0f - (fractionSquared + fractionSquared) * fractionDone;
             if (smoothFraction > 1.0f)
                 smoothFraction = 1.0f;
-            t4Vector t = Add_163450(Scale_163450(Sub_163450(*(&self->CamTargetPos), *(&self->LastHandplantLook)), 1.0f - smoothFraction),
-                                        Scale_163450(*(&self->Position), smoothFraction));
-            *(&self->Position) = t;
+            t4Vector blendedPos = Add_163450(Scale_163450(Sub_163450(*(&self->CamTargetPos), *(&self->LastHandplantLook)), 1.0f - smoothFraction),
+                                             Scale_163450(*(&self->Position), smoothFraction));
+            *(&self->Position) = blendedPos;
         }
     }
     *(&self->LastRiderPos) = trig->TPos;

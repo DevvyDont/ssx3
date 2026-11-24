@@ -940,7 +940,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
             } else {
                 cRiderMetrix_addHUDfx1(self, 0xC, 0, 0, -1.0f);
                 int invertZone1 = 52;
-                int s2 = 52;
+                int invertZone2 = 52;
                 int offAxisZone1 = 52;
                 int offAxisZone2 = 52;
                 int main;
@@ -949,7 +949,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                 } else if (yaw > 1.9634956121444702f) {
                     main = 23;
                     invertZone1 = 21;
-                    s2 = 22;
+                    invertZone2 = 22;
                     offAxisZone1 = 17;
                     offAxisZone2 = 0x10;
                 } else if (yaw > 1.1780973672866821f) {
@@ -957,13 +957,13 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                 } else if (yaw > 0.39269912242889404f) {
                     main = 21;
                     invertZone1 = 23;
-                    s2 = 22;
+                    invertZone2 = 22;
                     offAxisZone1 = 19;
                     offAxisZone2 = 20;
                 } else if (yaw < -1.9634956121444702f) {
                     main = 17;
                     invertZone1 = 19;
-                    s2 = 18;
+                    invertZone2 = 18;
                     offAxisZone1 = 23;
                     offAxisZone2 = 0x10;
                 } else if (yaw < -1.1780973672866821f) {
@@ -971,7 +971,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                 } else if (yaw < -0.39269912242889404f) {
                     main = 19;
                     invertZone1 = 17;
-                    s2 = 18;
+                    invertZone2 = 18;
                     offAxisZone1 = 21;
                     offAxisZone2 = 20;
                 } else {
@@ -982,8 +982,8 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                 cHUDFX_setAsync_f(&self->HUDfx[main], main, 0, 1.0f, 0);
                 if (invertZone1 != 52)
                     cHUDFX_setAsync_f(&self->HUDfx[invertZone1], invertZone1, 0, w1, 1);
-                if (s2 != 52)
-                    cHUDFX_setAsync_f(&self->HUDfx[s2], s2, 0, w1, 1);
+                if (invertZone2 != 52)
+                    cHUDFX_setAsync_f(&self->HUDfx[invertZone2], invertZone2, 0, w1, 1);
                 if (offAxisZone1 != 52)
                     cHUDFX_setAsync_f(&self->HUDfx[offAxisZone1], offAxisZone1, 0, w2, 2);
                 if (offAxisZone2 != 52)
@@ -1140,17 +1140,17 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
             self->HUDfx[3].AdditionalData = (int)(self->ComboResetDelay * 3.266666889190674f);
     }
     int x = cRiderMetrix_getCurTrickStyleSubPoints((cRiderMetrix*)self);
-    cHUDFX* s2 = &self->HUDfx[2];
+    cHUDFX* invertZone2 = &self->HUDfx[2];
     int val = self->CurTrickBonusPoints + x;
-    if (!slotFree_117FE0(s2)) {
+    if (!slotFree_117FE0(invertZone2)) {
         float curPct;
         if (self->HUDfx[2].DisplayInt - self->HUDfx[2].Data == self->CurTrickBonusPoints)
             curPct = approach_117FE0(1.0f, self->HUDfx[2].CurDecay / self->HUDfx[2].MaxDecay, 0.01666666753590107f);
         else
             curPct = 0.0f;
-        cHUDFX_setAsync_f(s2, 2, val, curPct, x);
+        cHUDFX_setAsync_f(invertZone2, 2, val, curPct, x);
     } else if (val > 0) {
-        cHUDFX_setAsync_f(s2, 2, val, 0.0f, x);
+        cHUDFX_setAsync_f(invertZone2, 2, val, 0.0f, x);
     }
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 11);
     int moneyTotal = cBEEconInterface_getMoney1(stats, self->Rider->getAIIndex());
