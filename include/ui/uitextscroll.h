@@ -41,6 +41,8 @@ struct cUITextScroll : public cUIThing {
     // --- cUITextScroll
     // cUITextScroll's own slots ([R] cUITextScroll_vtbl; types [O] On Tour's class cUITextScroll):
     virtual char getType();                                               // 22 cUITextScroll_getType__FPv
+    virtual void setShadow(int a);                                        // 23 cUITextScroll_setShadow
+    virtual void setUnicode(int a);                                       // 24 cUITextScroll_setUnicode
     tAttrTextScroll mAttrTextScroll; // 0x074 [O]; [R] ctor cUITextScroll_cUITextScroll clears mMode/mShadow/mUnicode/mStaticColour
                                      //       (lbu/andi 0xC6/sb 0x74), cUITextScroll_cUITextScroll1 calls its ctor tAttrTextScroll_tAttrTextScroll; [U] setUIData
                                      //       cUITextScroll_setUIData (lw/sw), accessors cUITextScroll_setFontIndex..cUITextScroll_setUnicode, cUITextScroll_setChatWindowMode/90
@@ -53,7 +55,7 @@ struct cUITextScroll : public cUIThing {
                                      //       [U] cUITextScroll_first..cUITextScroll_addToEnd (first/last/getByIndex/addToFront/addToEnd)
     tARGB mSelectedColour;           // 0x0A8 [O]; [U] cUITextScroll_setSelectedColour (set, ldl/ldr), render2D cUITextScroll_render2D
     cUIThing* mpScrollBar;           // 0x0B8 [O] cUIScrollBar*; [R] = 0; [U] cUITextScroll_setScrollBar setScrollBar (sw); render2D
-    unsigned short* mpLineOffset;    // 0x0BC [O] line start offsets (allocated); [R] = 0; [U] cUITextScroll_allocLine,
+    unsigned short** mpLineOffset;   // 0x0BC [O] line start offsets (allocated); [R] = 0; [U] cUITextScroll_allocLine,
                                      //       cUITextScroll_clearBuffer (free), cUITextScroll_deleteLineByIndex, cUITextScroll_addUnicodeString, render2D
     unsigned int mStringID;          // 0x0C0 [O]; [R] = 0; [U] cUITextScroll_setAsciiString / cUITextScroll_addUnicodeStringByID (sw), cUITextScroll_updateLocale (lw)
     unsigned short mSelectedIndex;   // 0x0C4 [O]; [R] = 0 (sh); [U] cUITextScroll_setSelectedIndex (sh), cUITextScroll_getSelectedIndex (lhu), onInput

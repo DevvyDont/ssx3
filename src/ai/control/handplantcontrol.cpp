@@ -424,18 +424,16 @@ extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, fl
 extern "C" int cHandplantMotion_calcExitVel(void* self);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sQ_91A8 {
-    float x, y, z, w;
-    sQ_91A8() {}
-    sQ_91A8(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
-} __attribute__((aligned(16)));
-
-
+// t4Vector with an element-wise constructor (w stored first).
+struct t4VectorWXYZ : t4Vector {
+    t4VectorWXYZ() {}
+    t4VectorWXYZ(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sQ_91A8 vu0Sub_91A8(const sQ_91A8& a, const sQ_91A8& b)
+static inline t4VectorWXYZ vu0Sub_91A8(const t4Vector& a, const t4Vector& b)
 {
-    sQ_91A8 r;
+    t4VectorWXYZ r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -448,9 +446,9 @@ static inline sQ_91A8 vu0Sub_91A8(const sQ_91A8& a, const sQ_91A8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sQ_91A8 vu0Add_91A8(const sQ_91A8& a, const sQ_91A8& b)
+static inline t4VectorWXYZ vu0Add_91A8(const t4Vector& a, const t4Vector& b)
 {
-    sQ_91A8 r;
+    t4VectorWXYZ r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -463,9 +461,9 @@ static inline sQ_91A8 vu0Add_91A8(const sQ_91A8& a, const sQ_91A8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sQ_91A8 vu0ScaleP_91A8(const sQ_91A8* v, float s)
+static inline t4VectorWXYZ vu0ScaleP_91A8(const t4Vector* v, float s)
 {
-    sQ_91A8 r;
+    t4VectorWXYZ r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -480,9 +478,9 @@ static inline sQ_91A8 vu0ScaleP_91A8(const sQ_91A8* v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sQ_91A8 vu0Scale_91A8(const sQ_91A8& v, float s)
+static inline t4VectorWXYZ vu0Scale_91A8(const t4Vector& v, float s)
 {
-    sQ_91A8 r;
+    t4VectorWXYZ r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -497,7 +495,7 @@ static inline sQ_91A8 vu0Scale_91A8(const sQ_91A8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_91A8(const sQ_91A8& a, const sQ_91A8& b)
+static inline float vu0Dot_91A8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -517,9 +515,9 @@ static inline float vu0Dot_91A8(const sQ_91A8& a, const sQ_91A8& b)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQ_91A8 QuatMul_91A8(const sQ_91A8& a, const sQ_91A8& b)
+static inline t4VectorWXYZ QuatMul_91A8(const t4Vector& a, const t4Vector& b)
 {
-    sQ_91A8 r;
+    t4VectorWXYZ r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -539,16 +537,17 @@ static inline sQ_91A8 QuatMul_91A8(const sQ_91A8& a, const sQ_91A8& b)
     return r;
 }
 
-static inline sQ_91A8 AxisAngle_91A8(const sQ_91A8& axis, float angle)
+static inline t4VectorWXYZ AxisAngle_91A8(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sQ_91A8(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorWXYZ(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-static inline int eq_91A8(cHandplantMotion* handplantMotion, const sQ_91A8& b)
+static inline int eq_91A8(cHandplantMotion* handplantMotion, const t4Vector& b)
 {
-    return (*(sQ_91A8*)&handplantMotion->ExitVel).x == b.x && (*(sQ_91A8*)&handplantMotion->ExitVel).y == b.y && (*(sQ_91A8*)&handplantMotion->ExitVel).z == b.z && (*(sQ_91A8*)&handplantMotion->ExitVel).w == b.w;
+    return handplantMotion->ExitVel.x == b.x && handplantMotion->ExitVel.y == b.y &&
+           handplantMotion->ExitVel.z == b.z && handplantMotion->ExitVel.w == b.w;
 }
 
 static inline int landed_91A8(cAirPredictor* ap)
@@ -576,36 +575,40 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
     self->ElapsedSec += step;
     if (self->ElapsedSec <= self->EnterSec) {
         float progress = self->ElapsedSec / self->EnterSec;
-        *(sQ_91A8*)&self->mRider->mPosition =
-            vu0Add_91A8(vu0Scale_91A8(vu0Sub_91A8(*(sQ_91A8*)&self->InitPos, *(sQ_91A8*)&self->SplinePos), progress * (progress - 2.0f)), *(sQ_91A8*)&self->InitPos);
+        self->mRider->mPosition =
+            vu0Add_91A8(vu0Scale_91A8(vu0Sub_91A8(self->InitPos, self->SplinePos), progress * (progress - 2.0f)),
+                        self->InitPos);
         self->mRider->mPosition.w = 1.0f;
-        sQ_91A8 deltaRot;
+        t4VectorWXYZ deltaRot;
         {
             float sinHalf, cosHalf;
             fSinCos(&sinHalf, &cosHalf, self->SnapRotationRate * step * 0.5f);
-            deltaRot = sQ_91A8(sinHalf * self->SnapRotationAxis.x, sinHalf * self->SnapRotationAxis.y, sinHalf * self->SnapRotationAxis.z, cosHalf);
+            deltaRot = t4VectorWXYZ(sinHalf * self->SnapRotationAxis.x, sinHalf * self->SnapRotationAxis.y,
+                                    sinHalf * self->SnapRotationAxis.z, cosHalf);
         }
-        *(sQ_91A8*)&self->mRider->mRotation = QuatMul_91A8(deltaRot, *(sQ_91A8*)&self->mRider->mRotation);
+        self->mRider->mRotation = QuatMul_91A8(deltaRot, self->mRider->mRotation);
     } else {
-        *(sQ_91A8*)&self->mRider->mPosition = *(sQ_91A8*)&self->SplinePos;
-        *(sQ_91A8*)&self->mRider->mVelocity = (const sQ_91A8&)t4vect_Zero_91A8;
-        if (eq_91A8((self), (const sQ_91A8&)t4vect_Zero_91A8)) {
+        self->mRider->mPosition = self->SplinePos;
+        self->mRider->mVelocity = t4vect_Zero_91A8;
+        if (eq_91A8((self), t4vect_Zero_91A8)) {
             if (cHandplantMotion_calcExitVel((self))) {
-                *(sQ_91A8*)&self->AirPredictorPos = vu0Add_91A8(*(sQ_91A8*)&self->SplinePos, vu0ScaleP_91A8((const sQ_91A8*)&t4vect_ZAxis_91A8, 5.0f));
-                *(sQ_91A8*)&self->AirPredictorVel = *(sQ_91A8*)&self->ExitVel;
-                cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel,
-                                                 3333.33349609375f);
+                self->AirPredictorPos = vu0Add_91A8(self->SplinePos, vu0ScaleP_91A8(&t4vect_ZAxis_91A8, 5.0f));
+                self->AirPredictorVel = self->ExitVel;
+                cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &self->AirPredictorPos,
+                                                 &self->AirPredictorVel, 3333.33349609375f);
                 for (int i = 0; i < 8 || !landed_91A8(self->mRider->mAirPredictor); i++)
-                    cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel, 0.01666666753590107f);
+                    cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, &self->AirPredictorPos,
+                                                   &self->AirPredictorVel, 0.01666666753590107f);
             }
         } else {
             if (landed_91A8(self->mRider->mAirPredictor)) {
                 cAirPredictor* ap = self->mRider->mAirPredictor;
-                if (0.0f < vu0Dot_91A8(*(sQ_91A8*)&ap->GuessLandNormal, *(sQ_91A8*)&self->ExitVel))
+                if (0.0f < vu0Dot_91A8(ap->GuessLandNormal, self->ExitVel))
                     cRider_alignRiderAxis((char*)self->mRider, &ap->GuessLandNormal, &ap->GuessLandVelocity, self->mRider->mTimeScale + self->mRider->mTimeScale,
                                   self->mRider->mTimeScale * 6.632251739501953f);
             } else {
-                cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel, 0.01666666753590107f);
+                cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, &self->AirPredictorPos,
+                                               &self->AirPredictorVel, 0.01666666753590107f);
             }
         }
     }
@@ -3321,8 +3324,8 @@ extern void* t4vect_Zero[];
 
 // The probe's hit array: retail runs an (empty) constructor loop over its 64 entries, so the element type has a
 // user-written default constructor; tIntersectInfo itself is a plain struct.
-struct sHit_13D1B8 : tIntersectInfo {
-    sHit_13D1B8() {}
+struct tIntersectInfoInit : tIntersectInfo {
+    tIntersectInfoInit() {}
 };
 
 extern "C" int cOverlapList_terrainIntersect(void* world, void* seg, tIntersectInfo* hits, int max, int flags);
@@ -3535,7 +3538,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, tIntersectI
     t4Vector lineTop = vu0Add_13D1B8(pos, vu0Scale_13D1B8(self->mRider->mGroundNormal, 200.0f));
     char seg[176];
     cWorldLine_cWorldLine(seg, lineBottom, lineTop, 2, 0.5f);
-    sHit_13D1B8 hits[64];
+    tIntersectInfoInit hits[64];
     int n = cOverlapList_terrainIntersect(self->mRider->mOverlapList, seg, hits, 0x40, (int)self->mRider->mLineHint);
     if (n == 0) {
         self->mRider->mGroundNormal = t4vect_ZAxis;
@@ -5367,63 +5370,63 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRiderState_cRiderState);
  */
 extern "C" cRider* cRiderState_cRiderState(cRider* self)
 {
-    ((int (*)[3])&self->mSlewed[0])[0][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[0][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[0][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[1][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[1][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[1][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[2][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[2][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[2][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[3][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[3][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[3][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[4][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[4][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[4][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[5][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[5][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[5][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[6][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[6][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[6][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[7][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[7][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[7][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[8][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[8][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[8][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[9][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[9][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[9][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[10][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[10][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[10][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[11][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[11][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[11][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[12][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[12][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[12][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[13][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[13][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[13][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[14][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[14][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[14][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[15][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[15][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[15][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[16][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[16][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[16][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[17][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[17][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[17][1] = 0;
-    ((int (*)[3])&self->mSlewed[0])[18][2] = 0;
-    ((int (*)[3])&self->mSlewed[0])[18][0] = 0;
-    ((int (*)[3])&self->mSlewed[0])[18][1] = 0;
+    self->mSlewed[0].target = 0.0f;
+    self->mSlewed[0].cur = 0.0f;
+    self->mSlewed[0].rate = 0.0f;
+    self->mSlewed[1].target = 0.0f;
+    self->mSlewed[1].cur = 0.0f;
+    self->mSlewed[1].rate = 0.0f;
+    self->mSlewed[2].target = 0.0f;
+    self->mSlewed[2].cur = 0.0f;
+    self->mSlewed[2].rate = 0.0f;
+    self->mSlewed[3].target = 0.0f;
+    self->mSlewed[3].cur = 0.0f;
+    self->mSlewed[3].rate = 0.0f;
+    self->mSlewed[4].target = 0.0f;
+    self->mSlewed[4].cur = 0.0f;
+    self->mSlewed[4].rate = 0.0f;
+    self->mSlewed[5].target = 0.0f;
+    self->mSlewed[5].cur = 0.0f;
+    self->mSlewed[5].rate = 0.0f;
+    self->mSlewed[6].target = 0.0f;
+    self->mSlewed[6].cur = 0.0f;
+    self->mSlewed[6].rate = 0.0f;
+    self->mSlewed[7].target = 0.0f;
+    self->mSlewed[7].cur = 0.0f;
+    self->mSlewed[7].rate = 0.0f;
+    self->mSlewed[8].target = 0.0f;
+    self->mSlewed[8].cur = 0.0f;
+    self->mSlewed[8].rate = 0.0f;
+    self->mSlewed[9].target = 0.0f;
+    self->mSlewed[9].cur = 0.0f;
+    self->mSlewed[9].rate = 0.0f;
+    self->mSlewed[10].target = 0.0f;
+    self->mSlewed[10].cur = 0.0f;
+    self->mSlewed[10].rate = 0.0f;
+    self->mSlewed[11].target = 0.0f;
+    self->mSlewed[11].cur = 0.0f;
+    self->mSlewed[11].rate = 0.0f;
+    self->mSlewed[12].target = 0.0f;
+    self->mSlewed[12].cur = 0.0f;
+    self->mSlewed[12].rate = 0.0f;
+    self->mSlewed[13].target = 0.0f;
+    self->mSlewed[13].cur = 0.0f;
+    self->mSlewed[13].rate = 0.0f;
+    self->mSlewed[14].target = 0.0f;
+    self->mSlewed[14].cur = 0.0f;
+    self->mSlewed[14].rate = 0.0f;
+    self->mSlewed[15].target = 0.0f;
+    self->mSlewed[15].cur = 0.0f;
+    self->mSlewed[15].rate = 0.0f;
+    self->mSlewed[16].target = 0.0f;
+    self->mSlewed[16].cur = 0.0f;
+    self->mSlewed[16].rate = 0.0f;
+    self->mSlewed[17].target = 0.0f;
+    self->mSlewed[17].cur = 0.0f;
+    self->mSlewed[17].rate = 0.0f;
+    self->mSlewed[18].target = 0.0f;
+    self->mSlewed[18].cur = 0.0f;
+    self->mSlewed[18].rate = 0.0f;
     self->mGroundPolyId = 0xFFFFFFFF;
     unsigned int* visited = self->mVisitedIds;
     for (int i = 63; i != -1; i--, visited++) {

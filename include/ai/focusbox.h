@@ -39,6 +39,8 @@ struct FocusRecord {
     char unk_004[0xC];              // 0x004 padding (t4Vector alignment)
     t4Vector LastUpdatePos;         // 0x010 [O]; [U] addbox copies the box's position into it (lq/sq); update compares the
                                     //       current position with it (moved >= 2000) and stores it after a pass
+
+    FocusRecord() {}                // [R] cAI_cAI runs six of these empty constructors (an empty countdown loop)
 };
 CHECK_OFFSET(FocusRecord, Box, 0x0);
 CHECK_OFFSET(FocusRecord, unk_004, 0x4);
@@ -58,6 +60,10 @@ struct cFocusMan {
     int NumFocusInstances;          // 0x0D8 [O]; [R] 0; [U] addfocusinstance appends, purgesection compacts, reset zeroes it
     tInstanceRecord* FocusInstances[512]; // 0x0DC [O]; [U] update rebuilds it (MEM_copy of the new list); purgesection
                                     //       drops the instances of a section (+0x78); saved / restored in the replay frame
+
+    // [R] EA's inline constructor, as cAI_cAI expands it after cMemMan_alloc(0x8E0, "FocusMan"): NumBoxes 0, the six
+    // FocusRecord constructors, then LastUpdateTick -1, IsEven 1, NumFocusInstances 0.
+    cFocusMan() : NumBoxes(0) { LastUpdateTick = -1; IsEven = 1; NumFocusInstances = 0; }
 };
 CHECK_OFFSET(cFocusMan, NumBoxes, 0x0);
 CHECK_OFFSET(cFocusMan, unk_004, 0x4);

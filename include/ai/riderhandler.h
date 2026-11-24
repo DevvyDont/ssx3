@@ -480,6 +480,18 @@ CHECK_OFFSET(cHandplantControl, mRider, 0x14);
 CHECK_OFFSET(cHandplantControl, pad_18, 0x18);
 CHECK_SIZE(cHandplantControl, 0x20);
 
+// One entry of the handplant anim table kHandplantAnim (On Tour struct tHandplantAnimInfo, size 0x8). Retail's table
+// is [7][2] (0x70 bytes of .rodata), indexed [the rider's HandplantMode][HandplantType] (mode * 0x10 + type * 8);
+// On Tour's is const tHandplantAnimInfo[2][7].
+struct tHandplantAnimInfo {
+    int TypeAnim;          // 0x0 [O] tAIAnimID; [U] cHandplantControl_gainFocus times it, playHandplantAnim plays it
+    int IsRotate180;       // 0x4 [O] bool (a word: lw); [U] playHandplantAnim turns the rider round first when set
+};
+
+CHECK_OFFSET(tHandplantAnimInfo, TypeAnim, 0x0);
+CHECK_OFFSET(tHandplantAnimInfo, IsRotate180, 0x4);
+CHECK_SIZE(tHandplantAnimInfo, 0x8);
+
 // cUberGrindControl (cRiderHandler + 0x390, 0x10 bytes): control state 12 (CS_UberGrind). Base cUberGrindControlState
 // (0x00-0x08).
 struct cUberGrindControl {

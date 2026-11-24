@@ -19,6 +19,7 @@
 #include "visualfx/transitionobj.h"
 #include "vtable.h"
 #include "animation/animmodel.h"
+#include "animation/animdatabase.h"
 #include "ai/computer.h"
 #include "ai/player.h"
 #include "replay/frameptr.h"
@@ -27,6 +28,9 @@
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "ai/ai.h"
+#include "ai/focusbox.h"
+#include "ai/dangerman.h"
+#include "world/worldrecords.h"
 #include "input/input.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -51,32 +55,17 @@ extern char cShutdownHandler_vtbl[];
 extern char str_FocusMan[];
 extern char str_DangerMan[];
 
-struct sAIEntry_1286A0 {
-    char pad[0x20];
-    sAIEntry_1286A0() {}
-};
-
-struct sAIState_1286A0 {
-    int f0;                     // 0x00
-    char pad4[0xC];
-    sAIEntry_1286A0 e[6];       // 0x10
-    int d0;                     // 0xD0
-    int d4;                     // 0xD4
-    int d8;                     // 0xD8
-    char padDC[0x8E0 - 0xDC];
-    sAIState_1286A0() : f0(0) { d0 = -1; d4 = 1; d8 = 0; }
-};
-
-struct sAIObj_1286A0 {
-    char pad[0xB60];
-    sAIObj_1286A0(void* owner) __asm__("cDangerMan_cDangerMan");
+// cDangerMan with its constructor (cDangerMan_cDangerMan, defined elsewhere; the header's flat struct declares none).
+struct cDangerManNew : cDangerMan {
+    cDangerManNew(cAI* ai) __asm__("cDangerMan_cDangerMan");
 };
 
 /**
  * Constructs the AI manager: its vtables, its focus and danger managers and a cleared race rank type.
  *
  * Stores _vt$3cAI and the seven state handlers' vtables (GameInit .. Shutdown). The "FocusMan" block (0x8E0)
- * is built inline (+0x00 = 0, +0xD0 = -1, +0xD4 = 1, +0xD8 = 0); DangerMan is cDangerMan_cDangerMan() on a
+ * is built inline (cFocusMan's constructor: NumBoxes 0, LastUpdateTick -1, IsEven 1, NumFocusInstances 0); DangerMan is
+ * cDangerMan_cDangerMan() on a
  * new "DangerMan" block (0xB60) with this AI. mRaceHandler gets cRaceHandler_vtbl (0x00458528).
  *
  * @return the constructed object (self)
@@ -91,9 +80,9 @@ extern "C" void* cAI_cAI(cAI* self)
     *(void**)&self->mRaceHandler = cRaceHandler_vtbl;
     *(void**)&self->mEndRaceHandler = cEndRaceHandler_vtbl;
     *(void**)&self->mShutdownHandler = cShutdownHandler_vtbl;
-    sAIState_1286A0** slot = (sAIState_1286A0**)&self->FocusMan;
-    *slot = new (str_FocusMan, 0, 0) sAIState_1286A0;
-    self->DangerMan = (cDangerMan*)(new (str_DangerMan, 0, 0) sAIObj_1286A0(self));
+    cFocusMan** slot = &self->FocusMan;
+    *slot = new (str_FocusMan, 0, 0) cFocusMan;
+    self->DangerMan = new (str_DangerMan, 0, 0) cDangerManNew(self);
     self->RaceRankType = 0;
     return ((void*)self);
 }
@@ -137,39 +126,6 @@ extern "C" void* cAI_commonInit(cAI*, int);
 // PORT: cAI_loadAnims is defined (void) in this unit, but this caller passes self in $a0; bound by asm label.
 void cAI_loadAnims_self(void* self) __asm__("cAI_loadAnims");
 
-struct sVEntry128818 { short delta; short index; void (*fn)(void*); };
-
-struct sAiObj128818
-{
-    int CurrentAIState;             // 0x00
-    char pad4[0xC];
-    int IsAIReadyToRace;            // 0x10
-    int ComputerRidersActive;            // 0x14
-    int EndOfRaceTimer;            // 0x18
-    int CountdownTicksLeft;            // 0x1C
-    int PodiumActorList[2];         // 0x20
-    int Riders[6];         // 0x28
-    char pad40[0x8];
-    int Computers[5];         // 0x48
-    char pad5C[0x14];
-    int MissionRiders[1];         // 0x70
-    int RaceRankType;            // 0x74
-    int NumberOfRidersAllocated;            // 0x78
-    int NumberOfPlayersAllocated;            // 0x7C
-    int NumberOfComputersAllocated;            // 0x80
-    int NumberOfActorsAllocated;            // 0x84
-    int NumberOfMissionRidersLoaded;            // 0x88
-    int ComputerActorsActive;            // 0x8C
-    int MissionRidersActive;            // 0x90
-    int NumberOfActorsRequired;            // 0x94
-    int CurrentAIStateHandler;            // 0x98
-    char pad9C[0x8];
-    void* FocusMan;          // 0xA4
-    void* DangerMan;          // 0xA8
-    char padAC[0x20];
-    sVEntry128818* vt;  // 0xCC
-};
-
 /**
  * Initialises the AI manager for a new event: clears its state, counts and rider tables, then sets up the players.
  *
@@ -179,7 +135,7 @@ struct sAiObj128818
  * MissionRiders[1] and Computers[5]. Then loads the AI anims, calls the InitPlayers virtual (slot 6),
  * cAI_commonInit(self, 1) and clears PodiumActorList[2].
  */
-extern "C" void cAI_init(sAiObj128818* self)
+extern "C" void cAI_init(cAI* self)
 {
     int i;
     cFocusMan_reset(self->FocusMan);
@@ -200,8 +156,9 @@ extern "C" void cAI_init(sAiObj128818* self)
     for (i = 0; i < 1; i++) self->MissionRiders[i] = 0;
     for (i = 0; i < 5; i++) self->Computers[i] = 0;
     cAI_loadAnims_self(self);
-    self->vt[6].fn(vthis(self, self->vt[6]));
-    cAI_commonInit((cAI*)self, 1);
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+    vt[kAIVt_InitPlayers].fn(vthis(self, vt[kAIVt_InitPlayers]));
+    cAI_commonInit(self, 1);
     for (i = 0; i < 2; i++) self->PodiumActorList[i] = 0;
 }
 #endif
@@ -279,7 +236,6 @@ void* cAI_resolveRace(void* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_initFreeride);
 #ifdef SKIP_ASM
-struct sAiObj128A48;
 extern "C" void cAI_setRaceRankType(cAI* self, int mode);
 
 /**
@@ -298,14 +254,6 @@ extern "C" void cAI_initFreeride(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_setRaceRankType);
 #ifdef SKIP_ASM
-struct sAiObj128A48
-{
-    char pad0[0x28];
-    char* mRiders[19];
-    int mMode;
-    int mCount;
-};
-
 /**
  * Sets the race rank type and seeds every rider's place to match it.
  *
@@ -492,16 +440,16 @@ extern "C" void cAnimModel_buildSkelMatrices(void*);
  * Advances every rider's animation by one frame and rebuilds their skeletons.
  *
  * For each of the NumberOfRidersAllocated riders (Riders[]): cRider_updateAnimation(rider, 1.0f), cRider_updateSkeleton (On
- * Tour cRider::updateSkeleton) and cAnimModel_buildSkelMatrices on the rider's anim model (+0x780). Used when an event
+ * Tour cRider::updateSkeleton) and cAnimModel_buildSkelMatrices on the rider's mAnimModel. Used when an event
  * start loses focus, so the riders are posed before the first rendered frame.
  */
-extern "C" void cAI_updateAnimation(sAiObj128A48* self)
+extern "C" void cAI_updateAnimation(cAI* self)
 {
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        cRider_updateAnimation(self->mRiders[i], 1.0f);
-        cRider_updateSkeleton(self->mRiders[i]);
-        cAnimModel_buildSkelMatrices(*(void**)(self->mRiders[i] + 0x780));
+        cRider_updateAnimation(self->Riders[i], 1.0f);
+        cRider_updateSkeleton(self->Riders[i]);
+        cAnimModel_buildSkelMatrices(self->Riders[i]->mAnimModel);
     }
 }
 #endif
@@ -630,13 +578,13 @@ extern "C" void cRider_loadRider(void* self);
  * Walks Riders[0 .. NumberOfRidersAllocated) and calls cRider_loadRider() on the first one for which
  * cRider_isLoaded() is 0, then stops.
  */
-extern "C" void cAI_loadRiders(sAiObj128A48* self)
+extern "C" void cAI_loadRiders(cAI* self)
 {
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        if (cRider_isLoaded(self->mRiders[i]) == 0)
+        if (cRider_isLoaded(self->Riders[i]) == 0)
         {
-            cRider_loadRider(self->mRiders[i]);
+            cRider_loadRider(self->Riders[i]);
             break;
         }
     }
@@ -1067,19 +1015,6 @@ void cRider_addRiderMetrix(cRider* rider);
 extern char str_ComputerActorRider[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sAiObj129FF8
-{
-    char pad0[0x20];
-    int mCharIds[2];
-    cRider* mRiders[13];
-    char* mObjs[7];
-    int mCount;
-    char pad7C[8];
-    int mNumActors;
-    char pad88[0xC];
-    int mMaxActors;
-};
-
 /**
  * Creates the computer actors (podium riders) still missing up to NumberOfActorsRequired.
  *
@@ -1087,36 +1022,33 @@ struct sAiObj129FF8
  * (0x1A90, actor) with mAIIndex = slot, mViewIndex -1, controller -1, player-record byte 0x12 = 0
  * (cBENewPlayerInterface_setRiderCheatCharID) and metrics. PodiumActorList has 2 entries, so a third actor would read Riders[0]. Updates
  * NumberOfRidersAllocated.
- *
- * @param aiManager  the AI manager (cAI), viewed through a local layout
  */
-extern "C" void cAI_initComputerActors(cAI* aiManager)
+extern "C" void cAI_initComputerActors(cAI* self)
 {
-    sAiObj129FF8* self = (sAiObj129FF8*)aiManager;
     cBENewPlayerInterface* iface = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    int n = self->mMaxActors - self->mNumActors;
-    int idx = self->mCount;
+    int n = self->NumberOfActorsRequired - self->NumberOfActorsAllocated;
+    int idx = self->NumberOfRidersAllocated;
     for (int i = 0; i < n; i++)
     {
-        int ch = self->mCharIds[self->mNumActors];
+        int ch = self->PodiumActorList[self->NumberOfActorsAllocated];
         cComputer* obj = (cComputer*)cComputer_cComputer(cMemMan_alloc(6800, str_ComputerActorRider, 0x80000000, 0), 1, 1);
         cRider* rider = ((char*)obj) ? obj->RiderHandler.GroundMotion.mRider : 0;
-        self->mRiders[idx] = rider;
+        self->Riders[idx] = rider;
         rider->mAIIndex = idx;
         cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
         cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
         cBENewPlayerInterface_setRiderCheatCharID(iface, idx, 0);
         iface->submit();
-        cRider* slotRider = self->mRiders[idx];
+        cRider* slotRider = self->Riders[idx];
         int noController = -1;
         slotRider->mViewIndex = noController;
         cRider_addRiderMetrix(obj->RiderHandler.GroundMotion.mRider);
-        self->mObjs[self->mNumActors] = ((char*)obj);
-        self->mNumActors++;
+        self->Actors[self->NumberOfActorsAllocated] = obj;
+        self->NumberOfActorsAllocated++;
         idx++;
     }
     iface->submit();
-    self->mCount = idx;
+    self->NumberOfRidersAllocated = idx;
 }
 #endif
 
@@ -1237,7 +1169,7 @@ extern char gPaths[];
  * path.
  *
  * Calls cPathSys_purgePaths (On Tour cPathSys::purgePaths) and cPathSys_loadPaths on PathSys (gPaths) with the file, then
- * cRider_initPath (cRider::initPath(false)) on each of the NumberOfRidersAllocated riders (+0x28 table).
+ * cRider_initPath (cRider::initPath(false)) on each of the NumberOfRidersAllocated Riders.
  *
  * @param filename  the path file name, passed as an int (On Tour const char* filename)
  */
@@ -1246,7 +1178,7 @@ extern "C" void cAI_swaploadPathFile(cAI* self, int filename) {
     cPathSys_purgePaths(gPaths);
     cPathSys_loadPaths(gPaths, filename);
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
-        cRider_initPath(*(void**)((char*)&self->Riders[0] + (i << 2)), 0);
+        cRider_initPath(self->Riders[i], 0);
     }
 }
 #endif
@@ -1372,7 +1304,7 @@ INCLUDE_ASM("ai/ai", func_0012A4F0);
 extern "C" void func_0012A4F0(cAI* self) {
     int i;
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
-        cRider_initPath(*(void**)((char*)&self->Riders[0] + (i << 2)), 0);
+        cRider_initPath(self->Riders[i], 0);
     }
 }
 #endif
@@ -1701,37 +1633,25 @@ extern "C" int func_0012AA78(sOwner_0012AA78* self) {
 //100%
 INCLUDE_ASM("ai/ai", cAI_prepareToPurgeComputerRiders);
 #ifdef SKIP_ASM
-struct sAiObj12AB20
-{
-    char pad0[0x14];
-    int ComputerRidersActive;
-    char pad18[0x30];
-    char* mRiders[14];
-    int mCount;
-};
-
-
-
 /**
  * Stops drawing the computer riders so they can be purged once the renderer no longer uses them.
  *
- * Clears ComputerRidersActive (+0x14). For each of the NumberOfComputersAllocated computers (Computers[] at +0x48)
- * whose rider (+0x18) still has its render flag (+0x884) set, it clears the flag and stores a safe-render tick (+0x888)
- * of the graphics manager's current frame count (GrMan vtable slot 114) + 4; cAI_isReadyToPurgeComputerRiders then
- * waits for that frame.
+ * Clears ComputerRidersActive. For each of the NumberOfComputersAllocated Computers whose cRider still has its
+ * mRenderFlag set, it clears the flag and stores in mSafeRenderTick the graphics manager's current frame count (GrMan
+ * vtable slot 114) + 4; cAI_isReadyToPurgeComputerRiders then waits for that frame.
  */
-extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
+extern "C" void cAI_prepareToPurgeComputerRiders(cAI* self)
 {
     self->ComputerRidersActive = 0;
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        cRider* computerRider = (cRider*)(*(char**)(self->mRiders[i] + 0x18));
+        cRider* computerRider = self->Computers[i]->RiderHandler.GroundMotion.mRider;
         if (computerRider->mRenderFlag != 0)
         {
             computerRider->mRenderFlag = 0;
             computerRider->mSafeRenderTick = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            cComputer* rider = (cComputer*)self->mRiders[i];
+            cComputer* rider = self->Computers[i];
             rider->RiderHandler.GroundMotion.mRider->mSafeRenderTick = ps2GraphicsMan->getCurrentFrameCount() + 4;
         }
     }
@@ -1741,13 +1661,6 @@ extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeComputerRiders);
 #ifdef SKIP_ASM
-struct sAiObj12ABD0
-{
-    char pad0[0x48];
-    char* mRiders[14];
-    int mCount;
-};
-
 extern "C" int cRider_isSafeToDelete(void*);
 
 /**
@@ -1775,36 +1688,25 @@ extern "C" int cAI_isReadyToPurgeComputerRiders(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_prepareToPurgeComputerActors);
 #ifdef SKIP_ASM
-struct sAiObj12AC48
-{
-    char pad0[0x5C];
-    char* mRiders[10];
-    int mCount;
-    int NumberOfMissionRidersLoaded;
-    int ComputerActorsActive;
-};
-
-
-
 /**
  * Stops drawing the computer actors so they can be purged once the renderer no longer uses them.
  *
- * Clears ComputerActorsActive (+0x8C). For each of the NumberOfActorsAllocated actors (Actors[] at +0x5C) whose rider
- * (+0x18) still has its render flag (+0x884) set, it clears the flag and stores a safe-render tick (+0x888) of the
- * graphics manager's current frame count (GrMan vtable slot 114) + 4, which cAI_isReadyToPurgeComputerActors waits for.
+ * Clears ComputerActorsActive. For each of the NumberOfActorsAllocated Actors whose cRider still has its mRenderFlag
+ * set, it clears the flag and stores in mSafeRenderTick the graphics manager's current frame count (GrMan vtable slot
+ * 114) + 4, which cAI_isReadyToPurgeComputerActors waits for.
  */
-extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
+extern "C" void cAI_prepareToPurgeComputerActors(cAI* self)
 {
     self->ComputerActorsActive = 0;
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfActorsAllocated; i++)
     {
-        cRider* actorRider = (cRider*)(*(char**)(self->mRiders[i] + 0x18));
+        cRider* actorRider = self->Actors[i]->RiderHandler.GroundMotion.mRider;
         if (actorRider->mRenderFlag != 0)
         {
             actorRider->mRenderFlag = 0;
             actorRider->mSafeRenderTick = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            cComputer* rider = (cComputer*)self->mRiders[i];
+            cComputer* rider = self->Actors[i];
             rider->RiderHandler.GroundMotion.mRider->mSafeRenderTick = ps2GraphicsMan->getCurrentFrameCount() + 4;
         }
     }
@@ -1814,13 +1716,6 @@ extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeComputerActors);
 #ifdef SKIP_ASM
-struct sAiObj12ACF8
-{
-    char pad0[0x5C];
-    char* mRiders[10];
-    int mCount;
-};
-
 extern "C" int cRider_isSafeToDelete(void*);
 
 /**
@@ -1851,16 +1746,14 @@ INCLUDE_ASM("ai/ai", cAI_prepareToPurgeMissionRiders);
 /**
  * Stops drawing the loaded mission riders so they can be deleted safely.
  *
- * For each of the NumberOfMissionRidersLoaded entries (+0x70 table), takes the cRider virtual-base pointer (+0x18)
- * and, when its mRenderFlag is set, clears it and resets mSafeRenderTick to -1.
+ * For each of the NumberOfMissionRidersLoaded MissionRiders, takes its cRider virtual-base pointer (mRider) and, when
+ * its mRenderFlag is set, clears it and resets mSafeRenderTick to -1.
  */
-// self is a cAI (no header yet); +0x70 is its list of rider objects (count at +0x88),
-// each holding its cRider virtual-base pointer at +0x18.
 extern "C" void cAI_prepareToPurgeMissionRiders(cAI* self)
 {
     for (int i = 0; i < self->NumberOfMissionRidersLoaded; i++)
     {
-        cMissionRider* obj = (cMissionRider*)((char**)((char*)&self->MissionRiders))[i];
+        cMissionRider* obj = self->MissionRiders[i];
         cRider* rider = obj->mRider;
         if (rider->mRenderFlag != 0)
         {
@@ -1876,8 +1769,8 @@ INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeMissionRiders);
 /**
  * Tells whether every loaded mission rider may now be deleted.
  *
- * Asks cRider_isSafeToDelete for each of the NumberOfMissionRidersLoaded entries (+0x70 table, cRider at +0x18) and
- * does not stop early at the first refusal.
+ * Asks cRider_isSafeToDelete for the mRider of each of the NumberOfMissionRidersLoaded MissionRiders and does not
+ * stop early at the first refusal.
  *
  * @return 1 when all mission riders are safe to delete, else 0
  */
@@ -1885,7 +1778,7 @@ extern "C" int cAI_isReadyToPurgeMissionRiders(cAI* self) {
     int i;
     int ok = 1;
     for (i = 0; i < self->NumberOfMissionRidersLoaded; i++) {
-        cMissionRider* missionRider = (cMissionRider*)(*(void**)((char*)&self->MissionRiders[0] + (i << 2)));
+        cMissionRider* missionRider = self->MissionRiders[i];
         if (cRider_isSafeToDelete(missionRider->mRider) == 0)
             ok = 0;
     }
@@ -2066,49 +1959,36 @@ INCLUDE_ASM("ai/ai", cAI_shutdown);
 extern "C" void cBEScoreInterface_processRiderStats(int rider, int a);
 extern "C" void cAI_purgeAnims(cAI*);
 
-struct sAiObj12B090
-{
-    char pad0[0x28];
-    char* mRiders[6];
-    void* mList[13];
-    int RaceRankType;
-    int mCount;
-    int mCount2;
-};
-
 /**
  * Shuts the AI down: records every rider's stats, deletes all riders and frees the character animations.
  *
- * Passes each rider's stats (metrix + 0xFC) to cBEScoreInterface_processRiderStats, deletes the players (virtual destructor, flags
- * 3), purges the mission riders, computers and actors, zeroes NumberOfPlayersAllocated and
+ * Passes each rider's stats (mMetrix->Totals) to cBEScoreInterface_processRiderStats, deletes the players (virtual
+ * destructor, flags 3), purges the mission riders, computers and actors, zeroes NumberOfPlayersAllocated and
  * NumberOfRidersAllocated, calls cAI_purgeAnims() and sets RaceRankType to 0.
- *
- * @param aiManager  the AI manager (cAI), viewed through a local layout
  */
-extern "C" void cAI_shutdown(cAI* aiManager)
+extern "C" void cAI_shutdown(cAI* self)
 {
-    sAiObj12B090* self = (sAiObj12B090*)aiManager;
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        cBEScoreInterface_processRiderStats(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
+        cBEScoreInterface_processRiderStats(i, (int)&self->Riders[i]->mMetrix->Totals);
     }
-    for (int i = 0; i < self->mCount2; i++)
+    for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
-        cPlayer* player = (cPlayer*)self->mList[i];
+        cPlayer* player = self->Players[i];
         if (((void*)player))
         {
             char* obj = (char*)&VPTR_AT(player->mRider, sizeof(cRiderState));
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
             vt[1].fn(vthis(obj, vt[1]), 3);
         }
-        self->mList[i] = 0;
+        self->Players[i] = 0;
     }
-    cAI_purgeMissionRiders((cAI*)self);
-    cAI_purgeComputerRiders((cAI*)self);
-    cAI_purgeComputerActors((cAI*)self);
-    self->mCount2 = 0;
-    self->mCount = 0;
-    cAI_purgeAnims((cAI*)self);
+    cAI_purgeMissionRiders(self);
+    cAI_purgeComputerRiders(self);
+    cAI_purgeComputerActors(self);
+    self->NumberOfPlayersAllocated = 0;
+    self->NumberOfRidersAllocated = 0;
+    cAI_purgeAnims(self);
     self->RaceRankType = 0;
 }
 #endif
@@ -2117,20 +1997,21 @@ extern "C" void cAI_shutdown(cAI* aiManager)
 INCLUDE_ASM("ai/ai", cAI_resetRidersStatTotals);
 #ifdef SKIP_ASM
 extern "C" void cBEScoreInterface_processRiderStats(int rider, int a);
-extern "C" void cRiderMetrix_resetTotals(char* self);
+extern "C" void cRiderMetrix_resetTotals(cRiderMetrix* self);
 
 /**
  * Records each rider's race stats with the BE score code, then clears the rider's metrix totals.
  *
- * For every allocated rider, passes the stats block at offset 0xFC of its mMetrix to cBEScoreInterface_processRiderStats() (which hands
- * them to cBEScoreInterface_processRiderBest() for profile indexes 0 and 1 only), then calls cRiderMetrix_resetTotals() on the metrix.
+ * For every allocated rider, passes its mMetrix->Totals to cBEScoreInterface_processRiderStats() (which hands them to
+ * cBEScoreInterface_processRiderBest() for profile indexes 0 and 1 only), then calls cRiderMetrix_resetTotals() on the
+ * metrix.
  */
-extern "C" void cAI_resetRidersStatTotals(sAiObj128A48* self)
+extern "C" void cAI_resetRidersStatTotals(cAI* self)
 {
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        cBEScoreInterface_processRiderStats(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
-        cRiderMetrix_resetTotals(*(char**)(self->mRiders[i] + 0x790));
+        cBEScoreInterface_processRiderStats(i, (int)&self->Riders[i]->mMetrix->Totals);
+        cRiderMetrix_resetTotals(self->Riders[i]->mMetrix);
     }
 }
 #endif
@@ -2138,7 +2019,6 @@ extern "C" void cAI_resetRidersStatTotals(sAiObj128A48* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_purgeAnims);
 #ifdef SKIP_ASM
-extern void** cAnimDataBase_TheAnimDataBase;
 extern void* cGameAnimMap_TheGameAnimMap;
 extern "C" void cGameAnimMap_remSource(void*, void*);
 extern "C" void cAnimDataBase_purgeChanCache(void*);
@@ -2147,21 +2027,21 @@ extern "C" void cAdfDataSource__cAdfDataSource(void*, int);
 /**
  * Unloads the character animation file that cAI_loadAnims() loaded.
  *
- * For the one entry of the anim table cAnimDataBase_TheAnimDataBase: removes its animations from the game anim map cGameAnimMap_TheGameAnimMap,
- * clears the entry, frees the animation banks (cAnimDataBase_purgeChanCache) and deletes the data source (cAdfDataSource__cAdfDataSource,
- * flags 3).
+ * For the one entry of cAnimDataBase_TheAnimDataBase->DataSources: removes its animations from the game anim map
+ * cGameAnimMap_TheGameAnimMap, clears the entry, frees the animation banks (cAnimDataBase_purgeChanCache) and deletes
+ * the data source (cAdfDataSource__cAdfDataSource, flags 3).
  */
 extern "C" void cAI_purgeAnims(cAI* self)
 {
     int i;
     for (i = 0; i < 1; i++)
     {
-        void* bank = *(void**)((char*)cAnimDataBase_TheAnimDataBase + ((unsigned char)i << 2));
+        cAdfDataSource* bank = cAnimDataBase_TheAnimDataBase->DataSources[(unsigned char)i];
         if (bank != 0)
         {
             cGameAnimMap_remSource(cGameAnimMap_TheGameAnimMap, bank);
-            void** animTable = cAnimDataBase_TheAnimDataBase;
-            *(void**)((char*)animTable + ((unsigned char)i << 2)) = 0;
+            cAnimDataBase* animTable = cAnimDataBase_TheAnimDataBase;
+            animTable->DataSources[(unsigned char)i] = 0;
             cAnimDataBase_purgeChanCache(animTable);
             cAdfDataSource__cAdfDataSource(bank, 3);
         }
@@ -2656,21 +2536,21 @@ extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-struct sQuat_12BE20
+// t4Vector with an element-wise constructor.
+struct t4VectorInit : t4Vector
 {
-    float x, y, z, w;
-    sQuat_12BE20() {}
-    sQuat_12BE20(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+    t4VectorInit() {}
+    t4VectorInit(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
-extern sQuat_12BE20 t4vect_Origin_12BE20 __asm__("t4vect_Origin");
-extern sQuat_12BE20 t4vect_ZAxis_12BE20 __asm__("t4vect_ZAxis");
+extern t4VectorInit t4vect_Origin_12BE20 __asm__("t4vect_Origin");
+extern t4VectorInit t4vect_ZAxis_12BE20 __asm__("t4vect_ZAxis");
 
-static inline sQuat_12BE20 AxisAngle_12BE20(const sQuat_12BE20& axis, float angle)
+static inline t4VectorInit AxisAngle_12BE20(const t4VectorInit& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sQuat_12BE20(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorInit(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 /**
@@ -2692,8 +2572,8 @@ extern "C" void cGateControl_gainFocus(cGateControl* self)
     float fakieAngle = 0.0f;
     if (rider->IsRidingFakie != 0) fakieAngle = 3.1415927410125732f;
     cRiderAnim* anim = rider->mRiderAnim;
-    *(sQuat_12BE20*)&anim->OrientationOffset = t4vect_Origin_12BE20;
-    *(sQuat_12BE20*)&anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
+    anim->OrientationOffset.P = t4vect_Origin_12BE20;
+    anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
     if (*(int*)self == 2)
     {
         cRiderAnimBase_play(self->mRider->mRiderAnim, 1, 0, -1.0f);
@@ -3334,20 +3214,6 @@ static inline void vu0AddEq_12CA30(t4Vector& dst, const t4Vector& b)
         : "m"(dst), "m"(b));
 }
 
-struct sAiObj12CA30
-{
-    int f0;                 // 0x00
-    char pad4[0xC];
-    tPose m10;    // 0x10
-    tPose m30;    // 0x30
-    char pad50[0x4];
-    int f54;                // 0x54
-    char pad58[0x18];
-    int f70;                // 0x70
-    char pad74[0xC];
-    char* mRider;           // 0x80
-};
-
 /**
  * Enters the wipeout control: clears the power-up timers and recovery, and snapshots the hip and board poses.
  *
@@ -3366,8 +3232,9 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
     *(int*)&self->RecoverPercent = 0;
     cSSXAudio_ResetWipeoutRecoverHit(cAudioInterface_bxAudio(), (char*)self->mRider);
     cRider* rider = self->mRider;
-    (*(&self->RiderPrevPose)) = ((tPose*)rider->mAnimModel->bones)[rider->mBoneHips];
-    (*(&self->BoardPrevPose)) = ((tPose*)rider->mAnimModel->bones)[rider->mBoneBoardChild];
+    // a bone (pos, rot) is a pose (P, Q): copied whole
+    self->RiderPrevPose = *(tPose*)&rider->mAnimModel->bones[rider->mBoneHips];
+    self->BoardPrevPose = *(tPose*)&rider->mAnimModel->bones[rider->mBoneBoardChild];
     vu0AddEq_12CA30(*(t4Vector*)&self->RiderPrevPose, *(&self->mRider->mModelOffset));
     vu0AddEq_12CA30(*(t4Vector*)&self->BoardPrevPose, *(&self->mRider->mModelOffset));
     self->RiderState = 0;
@@ -3376,7 +3243,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
         cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, ((&self->mRider->mVelocity)), (t4Vector*)t4vect_Zero, boardPrevPose);
         *(int*)&self->mRider->LegIK = 0;
     }
-    cReplay_eventWipeout(SSXApp->Game->Replay, self->mRider->mAIIndex, (int)self->mRider->mMetrix + 0xFC);
+    cReplay_eventWipeout(SSXApp->Game->Replay, self->mRider->mAIIndex, (int)&self->mRider->mMetrix->Totals);
     cWScriptMan_eventWipeout(cWScriptMan_TheWScriptMan);
 }
 #endif
@@ -3482,19 +3349,10 @@ extern "C" void cWipeoutMotion_throwRider(char* self, void* vel, void* angvel);
 extern "C" void cSSXAudio_WipeoutSlideStart(void* mgr, void* self);
 extern "C" void cSSXAudio_WipeoutTumbleStart(void* mgr, void* self);
 
-struct sV_12CD20
-{
-    float x, y, z, w;
-    sV_12CD20() {}
-    sV_12CD20(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-
-
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sV_12CD20 Sub_12CD20(const sV_12CD20& a, const sV_12CD20& b)
+static inline t4VectorInit Sub_12CD20(const t4Vector& a, const t4Vector& b)
 {
-    sV_12CD20 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -3507,9 +3365,9 @@ static inline sV_12CD20 Sub_12CD20(const sV_12CD20& a, const sV_12CD20& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV_12CD20 Scale_12CD20(const sV_12CD20& v, float s)
+static inline t4VectorInit Scale_12CD20(const t4Vector& v, float s)
 {
-    sV_12CD20 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3524,9 +3382,9 @@ static inline sV_12CD20 Scale_12CD20(const sV_12CD20& v, float s)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sV_12CD20 QuatMul_12CD20(const sV_12CD20& a, const sV_12CD20& b)
+static inline t4VectorInit QuatMul_12CD20(const t4Vector& a, const t4Vector& b)
 {
-    sV_12CD20 r;
+    t4VectorInit r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -3546,13 +3404,13 @@ static inline sV_12CD20 QuatMul_12CD20(const sV_12CD20& a, const sV_12CD20& b)
     return r;
 }
 
-static inline sV_12CD20 Conj_12CD20(const tPose& p)
+static inline t4VectorInit Conj_12CD20(const tPose& p)
 {
-    sV_12CD20 r;
-    r.w = (*(sV_12CD20*)&p.Q).w;
-    r.x = (*(sV_12CD20*)&p.Q).x;
-    r.y = (*(sV_12CD20*)&p.Q).y;
-    r.z = (*(sV_12CD20*)&p.Q).z;
+    t4VectorInit r;
+    r.w = p.Q.w;
+    r.x = p.Q.x;
+    r.y = p.Q.y;
+    r.z = p.Q.z;
     r.x = -r.x;
     r.y = -r.y;
     r.z = -r.z;
@@ -3583,19 +3441,22 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
         cAnimSequence* an = cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2);
         float rate = an->TimeScale;
         float invDeltaTime = rate / ((framePercent - self->PrevFramePercent) * an->SubAnims[0].TotalTime);
-        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(*(sV_12CD20*)&pose->P, *(sV_12CD20*)&self->RiderPrevPose), self->mRider->mRiderAnim->FrameRateFactor), invDeltaTime);
+        t4VectorInit vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(pose->P, self->RiderPrevPose.P),
+                                                     self->mRider->mRiderAnim->FrameRateFactor), invDeltaTime);
         float doubleInvDeltaTime = invDeltaTime + invDeltaTime;
-        sV_12CD20 deltaQuat = Sub_12CD20(*(sV_12CD20*)&pose->Q, *(sV_12CD20*)&self->RiderPrevPose.Q);
-        sV_12CD20 angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*pose));
-        sV_12CD20 angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
+        t4VectorInit deltaQuat = Sub_12CD20(pose->Q, self->RiderPrevPose.Q);
+        t4VectorInit angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*pose));
+        t4VectorInit angvel = Scale_12CD20(t4VectorInit(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f),
+                                           doubleInvDeltaTime);
         cWipeoutMotion_throwRider((char*)&self->mRider->mRiderHandler->WipeoutMotion, &self->mRider->mVelocity, &angvel);
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 23)
         {
-            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(*(sV_12CD20*)&boardPose->P, *(sV_12CD20*)&self->BoardPrevPose), self->mRider->mRiderAnim->FrameRateFactor), invDeltaTime);
-            deltaQuat = Sub_12CD20(*(sV_12CD20*)&boardPose->Q, *(sV_12CD20*)&self->BoardPrevPose.Q);
+            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(boardPose->P, self->BoardPrevPose.P),
+                                            self->mRider->mRiderAnim->FrameRateFactor), invDeltaTime);
+            deltaQuat = Sub_12CD20(boardPose->Q, self->BoardPrevPose.Q);
             angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*boardPose));
-            angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
-            cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (t4Vector*)&vel, (t4Vector*)&angvel, boardPose);
+            angvel = Scale_12CD20(t4VectorInit(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
+            cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, &vel, &angvel, boardPose);
         }
         if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)
         {
@@ -3955,14 +3816,14 @@ extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
         self->IsNewImpact = 0;
         cRider* rider = self->mRider;
         sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider, sizeof(cRiderState));
-        vt[17].fn(((char*)rider) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
+        vt[17].fn(vthis(rider, vt[17]), aiLength_12C5C8(*(&self->LatestImpact)));
         cSSXAudio_Land(cAudioInterface_bxAudio(), self->mRider, 0.0f);
     }
     cRider* rider = self->mRider;
     if (rider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
     {
         sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider, sizeof(cRiderState));
-        char* thisp = ((char*)rider) + vt[18].delta;
+        void* thisp = vthis(rider, vt[18]);
         float percentLeft = 1.0f - cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2);
         vt[18].fn(thisp, percentLeft + percentLeft);
     }
@@ -4362,9 +4223,9 @@ extern "C" void cRider_updateOrientationImplicit(void*);
 
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQuat_12BE20 QuatMul_12E010(const sQuat_12BE20& a, const sQuat_12BE20& b)
+static inline t4VectorInit QuatMul_12E010(const t4VectorInit& a, const t4VectorInit& b)
 {
-    sQuat_12BE20 r;
+    t4VectorInit r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -4385,9 +4246,9 @@ static inline sQuat_12BE20 QuatMul_12E010(const sQuat_12BE20& a, const sQuat_12B
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sQuat_12BE20 Sub_12E010(const sQuat_12BE20& a, const sQuat_12BE20& b)
+static inline t4VectorInit Sub_12E010(const t4VectorInit& a, const t4VectorInit& b)
 {
-    sQuat_12BE20 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4400,9 +4261,9 @@ static inline sQuat_12BE20 Sub_12E010(const sQuat_12BE20& a, const sQuat_12BE20&
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sQuat_12BE20 Add_12E010(const sQuat_12BE20& a, const sQuat_12BE20& b)
+static inline t4VectorInit Add_12E010(const t4VectorInit& a, const t4VectorInit& b)
 {
-    sQuat_12BE20 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4415,9 +4276,9 @@ static inline sQuat_12BE20 Add_12E010(const sQuat_12BE20& a, const sQuat_12BE20&
 }
 
 // PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
-static inline sQuat_12BE20 Rot_12E010(const sQuat_12BE20& q, const sQuat_12BE20& v)
+static inline t4VectorInit Rot_12E010(const t4VectorInit& q, const t4VectorInit& v)
 {
-    sQuat_12BE20 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -4439,9 +4300,9 @@ static inline sQuat_12BE20 Rot_12E010(const sQuat_12BE20& q, const sQuat_12BE20&
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sQuat_12BE20 Scale_12E010(const sQuat_12BE20& v, float s)
+static inline t4VectorInit Scale_12E010(const t4VectorInit& v, float s)
 {
-    sQuat_12BE20 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4455,13 +4316,13 @@ static inline sQuat_12BE20 Scale_12E010(const sQuat_12BE20& v, float s)
     return r;
 }
 
-static inline sQuat_12BE20 Conj_12E010(const tPose& p)
+static inline t4VectorInit Conj_12E010(const tPose& p)
 {
-    sQuat_12BE20 r;
-    r.w = (*(sQuat_12BE20*)&p.Q).w;
-    r.x = (*(sQuat_12BE20*)&p.Q).x;
-    r.y = (*(sQuat_12BE20*)&p.Q).y;
-    r.z = (*(sQuat_12BE20*)&p.Q).z;
+    t4VectorInit r;
+    r.w = (*(t4VectorInit*)&p.Q).w;
+    r.x = (*(t4VectorInit*)&p.Q).x;
+    r.y = (*(t4VectorInit*)&p.Q).y;
+    r.z = (*(t4VectorInit*)&p.Q).z;
     r.x = -r.x;
     r.y = -r.y;
     r.z = -r.z;
@@ -4471,16 +4332,21 @@ static inline sQuat_12BE20 Conj_12E010(const tPose& p)
 static inline tPose Invert_12E010(const tPose& a)
 {
     tPose r;
-    (*(sQuat_12BE20*)&r.Q) = Conj_12E010(a);
-    (*(sQuat_12BE20*)&r.P) = Add_12E010(Scale_12E010(Rot_12E010((*(sQuat_12BE20*)&r.Q), Sub_12E010((*(sQuat_12BE20*)&a.P), t4vect_Origin_12BE20)), -1.0f), t4vect_Origin_12BE20);
+    (*(t4VectorInit*)&r.Q) = Conj_12E010(a);
+    (*(t4VectorInit*)&r.P) = Add_12E010(
+        Scale_12E010(Rot_12E010((*(t4VectorInit*)&r.Q), Sub_12E010((*(t4VectorInit*)&a.P), t4vect_Origin_12BE20)),
+                     -1.0f),
+        t4vect_Origin_12BE20);
     return r;
 }
 
 static inline tPose Combine_12E010(const tPose& a, const tPose& b)
 {
     tPose r;
-    (*(sQuat_12BE20*)&r.Q) = QuatMul_12E010((*(sQuat_12BE20*)&a.Q), (*(sQuat_12BE20*)&b.Q));
-    (*(sQuat_12BE20*)&r.P) = Add_12E010(Rot_12E010((*(sQuat_12BE20*)&a.Q), Sub_12E010((*(sQuat_12BE20*)&b.P), t4vect_Origin_12BE20)), (*(sQuat_12BE20*)&a.P));
+    (*(t4VectorInit*)&r.Q) = QuatMul_12E010((*(t4VectorInit*)&a.Q), (*(t4VectorInit*)&b.Q));
+    (*(t4VectorInit*)&r.P) = Add_12E010(
+        Rot_12E010((*(t4VectorInit*)&a.Q), Sub_12E010((*(t4VectorInit*)&b.P), t4vect_Origin_12BE20)),
+        (*(t4VectorInit*)&a.P));
     return r;
 }
 
@@ -4505,11 +4371,11 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self)
     func_0030ECD8(&newPose, self->mRider->mAnimModel, buf, 0);
     cRider* rd = self->mRider;
     cAnimModel* trk = rd->mAnimModel;
-    sQuat_12BE20* n = (sQuat_12BE20*)((rd->mBoneHips << 4) + (int)trk->localPos);
+    t4VectorInit* n = (t4VectorInit*)((rd->mBoneHips << 4) + (int)trk->localPos);
     tPose node;
-    (*(sQuat_12BE20*)&node.P) = sQuat_12BE20(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
+    (*(t4VectorInit*)&node.P) = t4VectorInit(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
                             n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w);
-    (*(sQuat_12BE20*)&node.Q) = *(sQuat_12BE20*)((char*)rd->mAnimModel->localRot + (rd->mBoneHips << 4));
+    (*(t4VectorInit*)&node.Q) = *(t4VectorInit*)((char*)rd->mAnimModel->localRot + (rd->mBoneHips << 4));
     tPose y = Combine_12E010(node, Invert_12E010(newPose));
     tPose* rx = (tPose*)(&self->mRider->mPosition);
     *rx = Combine_12E010(*rx, y);
@@ -4783,8 +4649,8 @@ extern "C" void cBumpControl_update(cBumpControl* self, tBumpCmd* in)
 //100%
 INCLUDE_ASM("ai/ai", cPrewindControl_gainFocus);
 #ifdef SKIP_ASM
-extern "C" void cPrewindControl_playFromTable(cPrewindControl*, void*);
-extern char kAnimPrewindTable[];
+extern "C" void cPrewindControl_playFromTable(cPrewindControl*, int (*)[5]);
+extern int kAnimPrewindTable[9][5];
 
 /**
  * Enters the prewind control: resets the animation-turn target and plays the prewind clip for the current
@@ -4831,12 +4697,12 @@ extern "C" void cRider_verifyRailslideModeDEBUG(void* rider);
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 int cRider_getMotionState(void* self);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
-extern "C" void cPrewindControl_playFromTable(cPrewindControl*, void*);
+extern "C" void cPrewindControl_playFromTable(cPrewindControl*, int (*)[5]);
 extern "C" void cSSXAudio_Lift(void* self, void* rider);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
-extern char kAnimIntoAirTable[];
-extern char kAnimPrewindTable[];
+extern int kAnimIntoAirTable[9][5];
+extern int kAnimPrewindTable[9][5];
 
 
 // PORT: g++ `<?` (min) operator.
@@ -4898,8 +4764,8 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, tPrewindCmd* in)
         {
             float fakieAngle = 0.0f;
             cRiderAnim* anim = (cRiderAnim*)rider->mRiderAnim;
-            *(sQuat_12BE20*)&anim->OrientationOffset = t4vect_Origin_12BE20;
-            *(sQuat_12BE20*)&anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
+            anim->OrientationOffset.P = t4vect_Origin_12BE20;
+            anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
         }
         cPrewindControl_playFromTable(self, kAnimIntoAirTable);
         self->mRider->RailslideMode = 0;
@@ -5023,14 +4889,13 @@ static inline float aiAbs_12EE30(float x)
 /**
  * Plays the prewind or release clip for the prewind input's direction from a table of semantics.
  *
- * The row comes from the prewind spin and flip values (rider + 0x2A4, + 0x2B0): row 0 when both are 0, else
- * rows 1-8 by atan2(-flip, spin) in pi/4 sectors (spin negated in switch stance, rider + 0x320); the column
- * is the rail style (rider + 0x328). The clip plays on the main channel (blend -1) only if it is not already
- * playing.
+ * The row comes from the prewind spin and flip values (the rider's mSlewed[15] and [16]): row 0 when both are 0, else
+ * rows 1-8 by atan2(-flip, spin) in pi/4 sectors (spin negated when IsRidingFakie); the column is the rail style
+ * (RailslideMode). The clip plays on the main channel (blend -1) only if it is not already playing.
  *
- * @param tbl_  semantic table of 9 rows of 5 (kAnimPrewindTable prewinds or kAnimIntoAirTable releases)
+ * @param tbl  semantic table of 9 rows of 5 (kAnimPrewindTable prewinds or kAnimIntoAirTable releases)
  */
-extern "C" void cPrewindControl_playFromTable(cPrewindControl* self, void* tbl_)
+extern "C" void cPrewindControl_playFromTable(cPrewindControl* self, int (*tbl)[5])
 {
     cRider* obj = self->mRider;
     float x = obj->mSlewed[15].cur;
@@ -5046,23 +4911,23 @@ extern "C" void cPrewindControl_playFromTable(cPrewindControl* self, void* tbl_)
     int cur = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
     int anim;
     if (mag == 0.0f)
-        anim = ((int (*)[5])tbl_)[0][self->mRider->RailslideMode];
+        anim = tbl[0][self->mRider->RailslideMode];
     else if (aiAbs_12EE30(angle) > 2.7488937377929688f)
-        anim = ((int (*)[5])tbl_)[1][self->mRider->RailslideMode];
+        anim = tbl[1][self->mRider->RailslideMode];
     else if (angle > 1.9634956121444702f)
-        anim = ((int (*)[5])tbl_)[2][self->mRider->RailslideMode];
+        anim = tbl[2][self->mRider->RailslideMode];
     else if (angle > 1.1780973672866821f)
-        anim = ((int (*)[5])tbl_)[3][self->mRider->RailslideMode];
+        anim = tbl[3][self->mRider->RailslideMode];
     else if (angle > 0.39269912242889404f)
-        anim = ((int (*)[5])tbl_)[4][self->mRider->RailslideMode];
+        anim = tbl[4][self->mRider->RailslideMode];
     else if (angle < -1.9634956121444702f)
-        anim = ((int (*)[5])tbl_)[5][self->mRider->RailslideMode];
+        anim = tbl[5][self->mRider->RailslideMode];
     else if (angle < -1.1780973672866821f)
-        anim = ((int (*)[5])tbl_)[6][self->mRider->RailslideMode];
+        anim = tbl[6][self->mRider->RailslideMode];
     else if (angle < -0.39269912242889404f)
-        anim = ((int (*)[5])tbl_)[7][self->mRider->RailslideMode];
+        anim = tbl[7][self->mRider->RailslideMode];
     else
-        anim = ((int (*)[5])tbl_)[8][self->mRider->RailslideMode];
+        anim = tbl[8][self->mRider->RailslideMode];
     if (anim != cur)
         cRiderAnimBase_play(self->mRider->mRiderAnim, anim, 0, -1.0f);
 }
@@ -5477,8 +5342,8 @@ extern "C" void cNaturalAirControl_update(cNaturalAirControl* self, tNaturalAirC
         return;
     cRider_setupBoostWarp((char*)self->mRider, 0, 0);
     if (self->IsGrabHeld != 0 && self->InitGrabHeld == -1)
-        self->InitGrabHeld = *((signed char*)in + 2);
-    if (*((signed char*)in + 2) != self->InitGrabHeld || *((signed char*)in + 2) == -1)
+        self->InitGrabHeld = in->GrabID;
+    if (in->GrabID != self->InitGrabHeld || in->GrabID == -1)
         self->IsGrabHeld = 0;
     if (self->IsGrabHeld == 0 && self->InitGrabHeld != -1)
         self->LimitMag = -1.0f;
@@ -5744,29 +5609,22 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_changeFakieBoardPress);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_verifyRailslideModeDEBUG(void* rider);
 
-struct sQuat_12FEC8
-{
-    float x, y, z, w;
-    sQuat_12FEC8() {}
-    sQuat_12FEC8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+extern t4Vector t4vect_Origin;
+extern t4Vector t4vect_ZAxis;
 
-extern sQuat_12FEC8 t4vect_Origin;
-extern sQuat_12FEC8 t4vect_ZAxis;
-
-static inline sQuat_12FEC8 AxisAngle_12FEC8(const sQuat_12FEC8& axis, float angle)
+static inline t4VectorInit AxisAngle_12FEC8(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sQuat_12FEC8(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorInit(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 /**
  * Flips the rider's stance for a board pivot: toggles switch stance and swaps the nose and tail sides.
  *
- * Toggles the switch flag (rider + 0x320), sets the animation orientation offset to a turn of 0 or pi about Z
- * (t4vect_Origin, t4vect_ZAxis) and copies the flag to the animator's IsFlipped; swaps rail styles 1 and 2 and
- * negates the pivot value and target (rider + 0x280, + 0x288).
+ * Toggles the switch flag (IsRidingFakie), sets the animation orientation offset to a turn of 0 or pi about Z
+ * (t4vect_Origin, t4vect_ZAxis) and copies the flag to the animator's IsFlipped; swaps rail styles 1 and 2
+ * (RailslideMode) and negates the pivot value and target (mSlewed[12]).
  */
 extern "C" void cBoardPressControl_changeFakieBoardPress(cBoardPressControl* self)
 {
@@ -5775,8 +5633,8 @@ extern "C" void cBoardPressControl_changeFakieBoardPress(cBoardPressControl* sel
     float fakieAngle = 0.0f;
     if (rider->IsRidingFakie != 0) fakieAngle = 3.1415927410125732f;
     cRiderAnim* anim = rider->mRiderAnim;
-    *(sQuat_12FEC8*)&anim->OrientationOffset = t4vect_Origin;
-    *(sQuat_12FEC8*)&anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, -fakieAngle);
+    anim->OrientationOffset.P = t4vect_Origin;
+    anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, -fakieAngle);
     cRider* rider2 = self->mRider;
     rider2->mRiderAnim->IsFlipped = rider2->IsRidingFakie;
     cRider* rider3 = self->mRider;
@@ -6386,7 +6244,7 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_checkForWipeout);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A1560(void* mgr, void* rider);
-extern "C" void cRider_flagEventWipeout(void* rider, int id, int a, int b, void* info);
+extern "C" void cRider_flagEventWipeout(void* rider, int id, int a, int b, tCollideInfo* info);
 
 struct sCurvePt_130DD0
 {
@@ -6401,18 +6259,10 @@ struct sCurve_130DD0
 extern sCurve_130DD0* kBPEasyBalanceRate;
 extern sCurve_130DD0* kBPHardBalanceRate;
 
-struct sInfo_130DD0
-{
-    sQuat_12FEC8 pos;
-    sQuat_12FEC8 dir;
-    sQuat_12FEC8 up;
-    float speed;
-};
-
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sQuat_12FEC8 Scale_130DD0(const sQuat_12FEC8& v, float s)
+static inline t4VectorInit Scale_130DD0(const t4Vector& v, float s)
 {
-    sQuat_12FEC8 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6427,9 +6277,9 @@ static inline sQuat_12FEC8 Scale_130DD0(const sQuat_12FEC8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sQuat_12FEC8 Div_130DD0(const sQuat_12FEC8& v, float s)
+static inline t4VectorInit Div_130DD0(const t4Vector& v, float s)
 {
-    sQuat_12FEC8 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6534,16 +6384,16 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, tBoa
     rider3->mSlewed[11].rate = desRate * k;
     if (self->OffBalanceSec > 1.0f)
     {
-        sInfo_130DD0 info;
+        tCollideInfo info;
         cRider* rider4 = self->mRider;
         float speed = aiLength_12C5C8(*(&rider4->mVelocity));
-        info.pos = *(sQuat_12FEC8*)&rider4->mPosition;
-        info.up = Scale_130DD0(t4vect_ZAxis, -1.0f);
-        info.speed = speed;
+        info.Pos = rider4->mPosition;
+        info.Reflect = Scale_130DD0(t4vect_ZAxis, -1.0f);
+        info.Vel = speed;
         if (speed > 0.0010000000474974513f)
-            info.dir = Div_130DD0(*(sQuat_12FEC8*)&self->mRider->mVelocity, speed);
+            info.Direct = Div_130DD0(self->mRider->mVelocity, speed);
         else
-            info.dir = t4vect_ZAxis;
+            info.Direct = t4vect_ZAxis;
         cRider* rider5 = self->mRider;
         if (rider5->PressMode == 2)
             cRider_flagEventWipeout(rider5, 359, 0, rider5->mSurfaceType, &info);
@@ -7484,7 +7334,7 @@ extern "C" void cSSXAudio_HandPlantSound(void* self, void* rider);
 extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int a1);
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int a1, int a2);
 extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
-extern char kHandplantAnim[];
+extern tHandplantAnimInfo kHandplantAnim[7][2];
 
 /**
  * Starts a handplant: resets the steering channels, plays the sound and an entry anim timed to EnterSec.
@@ -7506,7 +7356,8 @@ extern "C" void cHandplantControl_gainFocus(cHandplantControl* self)
     self->mRider->HandplantMode = 1;
     cSSXAudio_HandPlantSound(cAudioInterface_bxAudio(), self->mRider);
     cRider* rider3 = self->mRider;
-    float enterAnimSec = cRiderAnimBase_getAIAnimDuration((char*)rider3->mRiderAnim, *(int*)(kHandplantAnim + self->HandplantType * 8 + rider3->HandplantMode * 16));
+    float enterAnimSec = cRiderAnimBase_getAIAnimDuration(
+        (char*)rider3->mRiderAnim, kHandplantAnim[rider3->HandplantMode][self->HandplantType].TypeAnim);
     self->mRider->mRiderAnim->FrameRateFactor = enterAnimSec / *(float*)self;
     cHandplantControl_playHandplantAnim(self, self->mRider->HandplantMode, self->HandplantType);
     self->mRider->mRiderAnim->FrameRateFactor = 1.0f;
@@ -7542,19 +7393,12 @@ static inline float Length_29B0(const t4Vector& v)
 }
 
 
-struct sFlags_29B0 {
-    char pad[0x1C];
-    int flags;
-};
-
-
-
 /**
  * Sets up a handplant from the intersection that started it: entry time, toeside, speed and a surface flag.
  *
- * Stores @p enterSec (+0x0) and @p flag as a 0/1 bool (+0x10), sets +0x8 when the rider's velocity (+0x1E0) is longer than
- * 2222.2222 (80 kph in cm/s), and sets +0xC from bit 0 of the flags word (+0x1C) of the object at +0x58 of the
- * intersect info, or 0 when there is none.
+ * Stores @p enterSec (EnterSec) and @p flag as a 0/1 bool (HandplantType), sets IsMissedHandplant when the rider's
+ * mVelocity is longer than 2222.2222 (80 kph in cm/s), and sets IsRailSpline from bit 0 of m_iFlags of the intersect
+ * info's Spline, or 0 when there is none.
  *
  * @param self  the handplant control (this)
  * @param intersectInfo  the intersect info the handplant started from (On Tour tIntersectInfo)
@@ -7568,9 +7412,9 @@ extern "C" void cHandplantControl_init(cHandplantControl* self, tIntersectInfo* 
     self->HandplantType = flag ? on : 0;
     self->IsMissedHandplant = Length_29B0((*(&(self->mRider)->mVelocity))) > 2222.2222f;
     bool surfaceFlag = false;
-    sFlags_29B0* hitObj = ((sFlags_29B0*)intersectInfo->Spline);
-    if (hitObj != 0)
-        surfaceFlag = (hitObj->flags & 1) ? on : 0;
+    tSplineRecord* hitSpline = intersectInfo->Spline;
+    if (hitSpline != 0)
+        surfaceFlag = (hitSpline->m_iFlags & 1) ? on : 0;
     self->IsRailSpline = surfaceFlag;
 }
 #endif
@@ -7778,32 +7622,24 @@ INCLUDE_ASM("ai/ai", cHandplantControl_playHandplantAnim);
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
 
-struct sAnimEntry_132FB8
-{
-    int anim;
-    int flip;
-};
-// Typed view of kHandplantAnim (cHandplantControl_gainFocus reads it as raw bytes); bound by asm label.
-extern sAnimEntry_132FB8 kHandplantAnim_tbl[][2] __asm__("kHandplantAnim");
+extern tHandplantAnimInfo kHandplantAnim[7][2];
 
-
-struct sVec3_132FB8
+// t3Vector made from the xyz of a t4Vector (taken by value).
+struct t3VectorFrom4 : t3Vector
 {
-    float x, y, z;
-    sVec3_132FB8(t4Vector v) { x = v.x; y = v.y; z = v.z; }
+    t3VectorFrom4(t4Vector v) { x = v.x; y = v.y; z = v.z; }
 };
 
-struct sQuat_132FB8
+// t4Vector made from a t3Vector and a w.
+struct t4VectorFrom3 : t4Vector
 {
-    float x, y, z, w;
-    sQuat_132FB8() {}
-    sQuat_132FB8(const sVec3_132FB8& v, float aw) { x = v.x; y = v.y; z = v.z; w = aw; }
-} __attribute__((aligned(16)));
+    t4VectorFrom3(const t3Vector& v, float aw) { x = v.x; y = v.y; z = v.z; w = aw; }
+};
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQuat_132FB8 QuatMul_132FB8(const sQuat_132FB8& a, const sQuat_132FB8& b)
+static inline t4VectorInit QuatMul_132FB8(const t4Vector& a, const t4Vector& b)
 {
-    sQuat_132FB8 r;
+    t4VectorInit r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -7826,7 +7662,7 @@ static inline sQuat_132FB8 QuatMul_132FB8(const sQuat_132FB8& a, const sQuat_132
 /**
  * Plays the handplant anim for a mode and type from kHandplantAnim, first turning the rider round if asked.
  *
- * When the entry's flip word is set it rotates the rider 180 degrees about its up axis (mMatrix row 2),
+ * When the entry's IsRotate180 is set it rotates the rider 180 degrees about its up axis (mMatrix row 2),
  * refreshes the orientation and adds pi to the anim heading offset.
  *
  * @param mode  handplant mode (On Tour eHandplantMode; the rider's HandplantMode)
@@ -7834,15 +7670,16 @@ static inline sQuat_132FB8 QuatMul_132FB8(const sQuat_132FB8& a, const sQuat_132
  */
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int mode, int type)
 {
-    if (kHandplantAnim_tbl[mode][type].flip != 0)
+    if (kHandplantAnim[mode][type].IsRotate180 != 0)
     {
         cRider* rider = self->mRider;
-        sQuat_132FB8 newRotation = QuatMul_132FB8(sQuat_132FB8(sVec3_132FB8(*(&rider->mMatrix.row[2])), 0.0f), *(sQuat_132FB8*)&rider->mRotation);
-        *(sQuat_132FB8*)&self->mRider->mRotation = newRotation;
+        t4VectorInit newRotation = QuatMul_132FB8(t4VectorFrom3(t3VectorFrom4(rider->mMatrix.row[2]), 0.0f),
+                                                  rider->mRotation);
+        self->mRider->mRotation = newRotation;
         cRider_updateOrientationImplicit(self->mRider);
         cRiderAnimBase_changeHeadingOffset(self->mRider->mRiderAnim, 3.1415927410125732f);
     }
-    cRiderAnimBase_play(self->mRider->mRiderAnim, kHandplantAnim_tbl[mode][type].anim, 0, -1.0f);
+    cRiderAnimBase_play(self->mRider->mRiderAnim, kHandplantAnim[mode][type].TypeAnim, 0, -1.0f);
 }
 #endif
 
@@ -9629,8 +9466,8 @@ extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
     int railStyle = rider->RailslideMode;
     if (railStyle == 4) {
         cRiderAnim* anim = rider->mRiderAnim;
-        *(sQuat_12FEC8*)&anim->OrientationOffset = t4vect_Origin;
-        *(sQuat_12FEC8*)&anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
+        anim->OrientationOffset.P = t4vect_Origin;
+        anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
         cRiderAnimBase_play(self->mRider->mRiderAnim, grind->BSIntoAnim, 0, -1.0f);
     } else if (railStyle == 3) {
         cRiderAnimBase_play(rider->mRiderAnim, grind->FSIntoAnim, 0, -1.0f);
@@ -9638,13 +9475,13 @@ extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
         rider->IsRidingFakie = 0;
         self->mRider->mRiderAnim->IsFlipped = 0;
         cRiderAnim* anim = self->mRider->mRiderAnim;
-        *(sQuat_12FEC8*)&anim->OrientationOffset = t4vect_Origin;
-        *(sQuat_12FEC8*)&anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
+        anim->OrientationOffset.P = t4vect_Origin;
+        anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
         cRiderAnimBase_play(self->mRider->mRiderAnim, grind->FakieIntoAnim, 0, -1.0f);
     } else {
         cRiderAnim* anim = rider->mRiderAnim;
-        *(sQuat_12FEC8*)&anim->OrientationOffset = t4vect_Origin;
-        *(sQuat_12FEC8*)&anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
+        anim->OrientationOffset.P = t4vect_Origin;
+        anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
         cRiderAnimBase_play(self->mRider->mRiderAnim, grind->RegIntoAnim, 0, -1.0f);
     }
     float k = 0.33000001311302185f;
@@ -9680,12 +9517,6 @@ int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 
 
-struct sAiBitsB_136508
-{
-    int pad : 15;
-    int v : 8;
-};
-
 // PORT: PS2-only inline asm (float absolute value).
 static inline float aiAbs_136508(float x)
 {
@@ -9694,18 +9525,11 @@ static inline float aiAbs_136508(float x)
     return r;
 }
 
-struct sAiObj136508
-{
-    int mState;
-    int mIndex;
-    char* mRider;
-};
-
 /**
  * Runs one frame of an uber grind: the locked-in entry, the hold while the grind button stays down, the exit.
  *
  * GrindState 0 waits for the entry anim, then plays the hold anim (state 1). State 1 ends when the held grind
- * id (bits 15-22) changes or the rider is on the ground, else leans with RailOffCenter and swaps hold anims.
+ * id (UberGrindID) changes or the rider is on the ground, else leans with RailOffCenter and swaps hold anims.
  * State 2 waits out the exit anim, returns to CS_Railslide, CS_Spin or CS_Cruise, scores the grind and counts
  * mUberLevel up to 10 (reaching 10 sets mUberTimer to 60).
  *
@@ -9715,7 +9539,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd*
 {
     if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
-    tBEUberGrindAnim* tbl = (tBEUberGrindAnim*)((char*)kUberGrindAnim + self->CurrentGrind * 0x24);
+    tBEUberGrindAnim* tbl = &kUberGrindAnim[self->CurrentGrind];
     if (cRider_checkRailBoardCollisions((char*)self->mRider))
     {
         if (self->GrindState == 1)
@@ -9741,7 +9565,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd*
     }
     if (self->GrindState == 1)
     {
-        if (((sAiBitsB_136508*)in)->v != self->CurrentGrind || cRider_getMotionState((char*)self->mRider) == 0)
+        if (in->UberGrindID != self->CurrentGrind || cRider_getMotionState((char*)self->mRider) == 0)
         {
             cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, tbl->OutOfAnim, 0, -1.0f);
             cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2)->TimeScale = 1.0f;

@@ -39,6 +39,7 @@ struct cBankManager;
 struct cStreamSys;
 struct cSoundSys;
 struct tInstanceRecord;
+struct tWorldPainterQuery; // worldpainter/worldpainterquery.h
 
 // AudioTable: a 5-point piecewise-linear curve (keys x, values y) for volumes and pitches. [O] On Tour struct
 // AudioTable (0x28, all_in_one_sound.cpp) with TABLE_Scale(AudioTable* table, float input) and TABLE_Scale(int
@@ -184,7 +185,9 @@ struct cSSXAudio {
     int mTurboRef;                      // 0x59E4 [O]; [U] TurboOn increments, cSSXAudio_TurboOff decrements
     int mNeedLift[6];                   // 0x59E8 [O] (On Tour bool[6]); [U] cSSXAudio_UpdateLift, cSSXAudio_ResetLift clears 6 words
     tAttachSoundStruct AttachedSounds[30]; // 0x5A00 [O] (On Tour's name); [R] ctor's 30-element empty-ctor loop; [U] cSSXAudio_AttachSound/cSSXAudio_DetachSound/cSSXAudio_InitAttachedSounds/cSSXAudio_ResetAttachedSounds walk 30 x 0x30 from 0x5A00
-    void* mpAmbienceQuery[2];           // 0x5FA0 [O] tWorldPainterQuery*[2]; [U] cSSXAudio_InGameInit stores, cSSXAudio_InGameDeInit frees
+    tWorldPainterQuery* mpAmbienceQuery[2]; // 0x5FA0 [O]; [U] cSSXAudio_InGameInit stores,
+                                        //        cSSXAudio_InGameDeInit frees,
+                                        //        cSSXAudio_UpdateAudioWorldPainter queries
     int mPointsLastValue;               // 0x5FA8 [O]; [U] cSSXAudio_PointsEvent
     int mPointsEventHandle;             // 0x5FAC [O]; [U] cSSXAudio_PointsEvent
     int mSFXPaused;                     // 0x5FB0 [O] (On Tour bool); [R] ctor-time 0; [U] cSSXAudio_PauseSFX sets, cSSXAudio_ResumeSFX reads; retail accessor 0x2BAD60 (lw)
@@ -246,7 +249,10 @@ struct cSSXAudio {
                                         //        it; nothing reads it otherwise
     int unk_6254;                       // 0x6254 [R] ctor 0; [U] func_002A4770; retail accessor 0x2BAD30 sets it to 1
     int unk_6258;                       // 0x6258 [U] func_002A2E50
-    void* unk_625C[2];                  // 0x625C [U] cSSXAudio_InGameInit creates two objects, cSSXAudio_InGameDeInit frees them
+    tWorldPainterQuery* mpMusicTriggerQuery[2]; // 0x625C (name ours) [U] cSSXAudio_InGameInit creates two
+                                        //        kWPR_MusicTrigger queries, cSSXAudio_InGameDeInit frees them,
+                                        //        cSSXAudio_UpdateAudioWorldPainter queries them
+                                        //        (result to func_0028D988)
     int unk_6264;                       // 0x6264 [U] cSSXAudio_InGameInit stores
     int unk_6268;                       // 0x6268 [U] cSSXAudio_InGameInit stores
     int unk_626C;                       // 0x626C [U] cSSXAudio_InGameInit stores
@@ -313,7 +319,8 @@ struct cSSXAudio {
     float mRMSFinalValue;               // 0x6C6C [O]
     int mTrackBankLoaded[2];            // 0x6C70 [O] (On Tour bool[2]); [R] ctor zeroes both; [U] cSSXAudio_StartTone reads [1]
     int mTrackBankLoadedSection[2];     // 0x6C78 [O]; [R] ctor sets both -1
-    void* mpMixQuery[2];                // 0x6C80 [O] tWorldPainterQuery*[2]; [U] cSSXAudio_InGameInit stores, cSSXAudio_InGameDeInit frees
+    tWorldPainterQuery* mpMixQuery[2];  // 0x6C80 [O]; [U] cSSXAudio_InGameInit stores, cSSXAudio_InGameDeInit frees,
+                                        //        cSSXAudio_UpdateAudioWorldPainter queries
     int mPlayIntroMovieWithDJ;          // 0x6C88 [O] (On Tour bool, the last member); [R] ctor 1; [U] cSSXAudio_PlayIntroMovieWithDJ
     char unk_6C8C[0x4];                 // 0x6C8C no retail access seen (or padding)
     // --- virtual base cSoundSys (0x8; ctor cSoundSys_cSoundSys(this + 0x6C90))
@@ -449,7 +456,7 @@ CHECK_OFFSET(cSSXAudio, unk_624C, 0x624C);
 CHECK_OFFSET(cSSXAudio, unk_6250, 0x6250);
 CHECK_OFFSET(cSSXAudio, unk_6254, 0x6254);
 CHECK_OFFSET(cSSXAudio, unk_6258, 0x6258);
-CHECK_OFFSET(cSSXAudio, unk_625C, 0x625C);
+CHECK_OFFSET(cSSXAudio, mpMusicTriggerQuery, 0x625C);
 CHECK_OFFSET(cSSXAudio, unk_6264, 0x6264);
 CHECK_OFFSET(cSSXAudio, unk_6268, 0x6268);
 CHECK_OFFSET(cSSXAudio, unk_626C, 0x626C);

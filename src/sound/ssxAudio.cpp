@@ -18,6 +18,8 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "ai/player.h"
+#include "main/gameviewman.h"
+#include "camera/camera.h"
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", SSXAUDIO_Init);
@@ -574,23 +576,16 @@ extern "C" cSSXApp* cAudioInterface_getApp();
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" float func_0031C228(float);
 
-// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-struct sV4_5930 {
-    float x, y, z, w;
-    sV4_5930() {}
-    sV4_5930(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-struct sObjList_5930 {
-    int count;
-    char* items[1];
+// A t4Vector with EA's constructors (ours has none).
+struct t4VectorInit : t4Vector {
+    t4VectorInit() {}
+    t4VectorInit(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sV4_5930 vu0MtxApply_5930(char* m, const sV4_5930& v)
+static inline t4VectorInit vu0MtxApply_5930(const t4Matrix* m, const t4Vector& v)
 {
-    sV4_5930 out;
+    t4VectorInit out;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -641,10 +636,11 @@ static inline float Atan2_5930(float y, float x)
 /**
  * Computes a positional voice's place relative to its view's camera: pan and elevation angles and squared distance.
  *
- * Returns 1.0 outside the game (no cGame). The voice's position (+0x68) is transformed by the camera matrix of its
- * viewport (+0x84) with VU0, offset by (0, 25, -100) and scaled to metres (0.01). With mAudioMode 0 the angles at +8 /
- * +10 of @p outAngles are 0; otherwise the azimuth at +8 is atan2(x, z) in 1/65536 turns (0x4000 or 0xC000 for a
- * two-player-panned voice, by its side at +0xA4) and the elevation at +10 is atan2(y, horizontal distance). It fills
+ * Returns 1.0 outside the game (no cGame). The voice's mPosition is transformed by the CamMat of its viewport's
+ * camera (cGameViewMan::PlayerCamera[mViewport]) with VU0, offset by (0, 25, -100) and scaled to metres (0.01). With
+ * mAudioMode 0 the angles (azimuth, elevation) of @p outAngles are 0; otherwise the azimuth is atan2(x, z) in 1/65536
+ * turns (0x4000 or 0xC000 for a two-player-panned voice, by mTwoPlayerSide) and the elevation is atan2(y, horizontal
+ * distance). It fills
  * slot 6 of cSSXAudio's cBankMonitor vtable (D_00483640), pure virtual in cBankMonitor's cBankMonitor_vtbl.
  *
  * @param audio  the audio system
@@ -657,10 +653,10 @@ extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, cBankMonitorInstance* sou
     if ((int)cAudioInterface_getApp()->Game == 0)
         return 1.0f;
     cGame* game = cAudioInterface_getGame();
-    char* obj = ((sObjList_5930*)game->ViewMan)->items[source->mViewport];
+    cCamera* camera = game->ViewMan->PlayerCamera[source->mViewport];
     float* src = (float*)source->mPosition;
     t3Vector relPos;
-    sV4_5930 tp = vu0MtxApply_5930(obj + 0x40, sV4_5930(src[0], src[1], src[2], 1.0f));
+    t4VectorInit tp = vu0MtxApply_5930(&camera->CamMat, t4VectorInit(src[0], src[1], src[2], 1.0f));
     float cy;
     float cz = -100.0f;
     relPos.x = tp.x * 0.009999999776482582f;
@@ -714,8 +710,7 @@ extern "C" void cSSXAudio_PlayThunder(void* p, float f);
 extern "C" void cController_Update(void* self, float dt);
 extern "C" int cStreamSys_STREAM_Playing(void* p, int idx);
 extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self);
-struct sSaMix87F8;
-extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self);
+extern "C" void cSSXAudio_UpdateMix(cSSXAudio* self);
 extern "C" void func_0028C8C8(void* self);
 extern "C" void func_0028F000(void* self);
 extern "C" void cSSXAudio_PlayHistoryUpdate(void* self);
@@ -763,7 +758,7 @@ extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
         }
     }
     cSSXAudio_UpdateDuck((cSSXAudio*)self);
-    cSSXAudio_UpdateMix((sSaMix87F8*)self);
+    cSSXAudio_UpdateMix(self);
     if ((int)cAudioInterface_getApp()->Game != 0) {
         func_0028C8C8(((char*)self));
         if (self->mAudioUpdateState == 6) {
@@ -988,16 +983,14 @@ extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndFadeSong);
 #ifdef SKIP_ASM
-struct sSaVt61D0 { short delta; short index; int (*fn)(void*, int); };
-
 /**
  * Calls the music system's vtable slot 4 (set track) with 1; the retail image has no call or data reference to it.
  */
 extern "C" void cSSXAudio_FrontEndFadeSong(cSSXAudio* self)
 {
-    char* mon = (char*)&self->MusicSys;
-    sSaVt61D0* vt = (sSaVt61D0*)self->MusicSys.mVtbl;
-    vt[4].fn(vthis(mon, vt[4]), 1);
+    cMusicSys* musicSys = &self->MusicSys;
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->MusicSys.mVtbl;
+    vt[4].fn(vthis(musicSys, vt[4]), 1);
 }
 #endif
 
@@ -1025,11 +1018,11 @@ extern "C" void cSSXAudio_FrontEndPurge(cSSXAudio* self)
         func_002B3D48((char*)&self->MusicSys, 1.0f);
     }
     cSSXAudio_SetAudioUpdateState(self, 0);
-    cMonitor_MONITOR_DestroyAll(*(char**)self->MusicSys.mpVStreamSys + 0x1D8);
-    char* in = *(char**)self->MusicSys.mpVStreamSys;
-    char* obj = in + 0x1D8;
-    cSSXAudio_FrontEndPurge_vte* vt = *(cSSXAudio_FrontEndPurge_vte**)(in + 0xAB0);
-    vt[2].fn(vthis(obj, vt[2]));
+    cMonitor_MONITOR_DestroyAll(&(*(cBankManager**)self->MusicSys.mpVStreamSys)->BankMonitor);
+    cBankManager* bankManager = *(cBankManager**)self->MusicSys.mpVStreamSys;
+    cBankMonitor* monitor = &bankManager->BankMonitor;
+    cSSXAudio_FrontEndPurge_vte* vt = (cSSXAudio_FrontEndPurge_vte*)bankManager->BankMonitor.mVtbl;
+    vt[2].fn(vthis(monitor, vt[2]));
     cBankManager_BANK_UnLoad(*(void**)self->MusicSys.mpVStreamSys, 0);
 }
 #endif
@@ -1177,7 +1170,7 @@ void func_0028DF08_C7B0(void* p) __asm__("func_0028DF08__FPv");
 extern "C" void cSSXAudio_StartEvent(cSSXAudio* self);
 extern "C" void func_002A4A78(void* self);
 struct cWorldPainterManArg;
-void* cWorldPainterMan_getQuery(void*, cWorldPainterManArg*);
+tWorldPainterQuery* cWorldPainterMan_getQuery(void*, cWorldPainterManArg*);
 extern char kWPR_MusicTrigger_2;
 extern char kWPR_Mix_2;
 extern char kWPR_Ambience_2;
@@ -1205,7 +1198,7 @@ public:
  * Reads the player rider's playlist and radio mode from the reward interface (cBERewardInterface_getPlayList, cBERewardInterface_getRadioMode) and applies
  * them (func_0028BF78, func_0028C2D0). Unless the music stream already plays track 0x191, it restarts the music
  * (func_0028D488, func_0028CF98 with 0 or 0x24 depending on the race state byte). Then it resets the lift state,
- * creates six world-painter queries (+0x625C/+0x6260, +0x5FA0/+0x5FA4, +0x6C80/+0x6C84) from the world's painter
+ * creates six world-painter queries (mpMusicTriggerQuery, mpAmbienceQuery, mpMixQuery) from the world's painter
  * manager, resets the ambience bookkeeping, sets mix channel 3 (cSSXAudio_DuckToStream), records per-track first-time flags for
  * 23 tracks when the race state is 0 (cBENewPlayerInterface_isFirstTimeOnTrack), and finishes with func_0028DF08, cSSXAudio_StartEvent and func_002A4A78.
  */
@@ -1232,12 +1225,12 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
     cWorldPainterManArg* pb = (cWorldPainterManArg*)&kWPR_Ambience_2;
     cWorldPainterManArg* pc = (cWorldPainterManArg*)&kWPR_Mix_2;
     void* painterMan = SSXApp->Game->World->m_pWorldPainterMan;
-    self->unk_625C[0] = cWorldPainterMan_getQuery(painterMan, pa);
-    self->unk_625C[1] = cWorldPainterMan_getQuery(painterMan, pa);
+    self->mpMusicTriggerQuery[0] = cWorldPainterMan_getQuery(painterMan, pa);
+    self->mpMusicTriggerQuery[1] = cWorldPainterMan_getQuery(painterMan, pa);
     self->mpAmbienceQuery[0] = cWorldPainterMan_getQuery(painterMan, pb);
     self->mpAmbienceQuery[1] = cWorldPainterMan_getQuery(painterMan, pb);
     self->mpMixQuery[0] = cWorldPainterMan_getQuery(painterMan, pc);
-    void* secondMixQuery = cWorldPainterMan_getQuery(painterMan, pc);
+    tWorldPainterQuery* secondMixQuery = cWorldPainterMan_getQuery(painterMan, pc);
     self->unk_626C = 0;
     self->mMusicRequestPending = 0;
     self->mPlayingTone = 0;
@@ -1296,8 +1289,8 @@ static inline void saDeleteObj(void** slot)
  * Shuts down the in-game audio: resumes and stops everything, and deletes the per-race objects.
  *
  * It resumes the audio (cSSXAudio_ResumeAudio) and sets the update state to 0. It then stops the streams
- * (func_002B3AC0) and the tone, and deletes the objects at +0x625C/+0x6260, +0x5FA0/+0x5FA4 and
- * +0x6C80/+0x6C84 (probably the world painter queries). It resets the attached sounds, switches to mix 0,
+ * (func_002B3AC0) and the tone, and deletes the world-painter queries (mpMusicTriggerQuery, mpAmbienceQuery and
+ * mpMixQuery). It resets the attached sounds, switches to mix 0,
  * resets the bank monitor and bank manager as FrontEndPurge does, and calls func_002B11B0 on the speech
  * system.
  */
@@ -1309,19 +1302,19 @@ extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
     cSSXAudio_StopTone(self, 0.0f);
     func_002A4550(self);
     cSSXAudio_StopAllRiderSounds(self);
-    saDeleteObj((void**)(&self->unk_625C[0]));
-    saDeleteObj((void**)(&self->unk_625C[1]));
+    saDeleteObj((void**)(&self->mpMusicTriggerQuery[0]));
+    saDeleteObj((void**)(&self->mpMusicTriggerQuery[1]));
     saDeleteObj((void**)&self->mpAmbienceQuery);
     saDeleteObj((void**)(&self->mpAmbienceQuery[1]));
     saDeleteObj((void**)&self->mpMixQuery);
     saDeleteObj((void**)(&self->mpMixQuery[1]));
     cSSXAudio_ResetAttachedSounds(self);
     cSSXAudio_MixVolume(self, 0);
-    cMonitor_MONITOR_DestroyAll(*(char**)self->MusicSys.mpVStreamSys + 0x1D8);
-    char* in = *(char**)self->MusicSys.mpVStreamSys;
-    char* obj = in + 0x1D8;
-    cSSXAudio_FrontEndPurge_vte* vt = *(cSSXAudio_FrontEndPurge_vte**)(in + 0xAB0);
-    vt[2].fn(vthis(obj, vt[2]));
+    cMonitor_MONITOR_DestroyAll(&(*(cBankManager**)self->MusicSys.mpVStreamSys)->BankMonitor);
+    cBankManager* bankManager = *(cBankManager**)self->MusicSys.mpVStreamSys;
+    cBankMonitor* monitor = &bankManager->BankMonitor;
+    cSSXAudio_FrontEndPurge_vte* vt = (cSSXAudio_FrontEndPurge_vte*)bankManager->BankMonitor.mVtbl;
+    vt[2].fn(vthis(monitor, vt[2]));
     func_002B11B0((char*)&self->SpeechSys, 0);
 }
 #endif
@@ -1392,15 +1385,13 @@ extern "C" void cBankMonitor_BANKMONITOR_StopBank(void* p, int id, float v);
 extern "C" void cSSXAudio_StopTone(void* self, float v);
 extern "C" void cBankManager_BANK_UnAttach(void* mgr, int i);
 
-static inline int saIsOn(char* cfg, int off) { return *(int*)(cfg + off) == 1; }
-
 /**
  * Unloads one of the two track sound banks, given the handle it was loaded with.
  *
  * The handle is the slot (0 or 1) in bits 8 and up and the section in the low byte. Nothing happens unless
- * that section is the one loaded in the slot (+0x6C78). The bank configured for the slot (if any) is stopped
- * at once; slot 1 also stops the tone. If the slot is loaded (+0x6C70), bank-manager slot 8 + slot is freed
- * and the slot cleared.
+ * that section is the one loaded in the slot (mTrackBankLoadedSection). The bank in bank-manager slot 8 + slot is
+ * stopped at once if it is in use (its mBankHandle, else -1); slot 1 also stops the tone. If the slot is loaded
+ * (mTrackBankLoaded), bank-manager slot 8 + slot is freed and the slot cleared.
  *
  * @param handle  the bank handle: slot << 8 | section
  */
@@ -1412,24 +1403,21 @@ extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle
         cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
         cBankInstance* cfg = mgr->mBank;
         char* bm = (char*)&mgr->BankMonitor;
-        int id = saIsOn(((char*)cfg), 0x300);
-        if (id) id = *(int*)(((char*)cfg) + 0x304); else id = -1;
+        int id = cfg[8].mBankStatus == 1;
+        if (id) id = cfg[8].mBankHandle; else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     } else {
         cSSXAudio_StopTone(self, 0.0f);
         cBankManager* mgr = (cBankManager*)(*(char**)self->MusicSys.mpVStreamSys);
         cBankInstance* cfg = mgr->mBank;
         char* bm = (char*)&mgr->BankMonitor;
-        int id = saIsOn(((char*)cfg), 864);
-        if (id) id = *(int*)(((char*)cfg) + 0x364); else id = -1;
+        int id = cfg[9].mBankStatus == 1;
+        if (id) id = cfg[9].mBankHandle; else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     }
-    int off = slot << 2;
-    char* tbl = (char*)&self->mTrackBankLoaded;
-    int* bankEntry = (int*)(tbl + off);
-    if (*bankEntry != 0) {
+    if (self->mTrackBankLoaded[slot] != 0) {
         cBankManager_BANK_UnAttach(*(void**)self->MusicSys.mpVStreamSys, slot + 8);
-        *bankEntry = 0;
+        self->mTrackBankLoaded[slot] = 0;
         self->mTrackBankLoadedSection[slot] = -1;
     }
 }
@@ -2078,8 +2066,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrAppliedVolumePtr);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
-        // PORT: pointer held in int (only spelling found that gives idx-first addu)
-        return (char*)((volumeIndex << 4) + (int)self + 0x62C8);
+        return &self->mSoundVolume[volumeIndex].appliedVolume;
     }
     return (char*)&self->mCharacterVolume[charIndex];
 }
@@ -2096,7 +2083,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrSetVolumePtr);
  */
 extern "C" char* cSSXAudio_GetCurrSetVolumePtr(cSSXAudio* self, int idx)
 {
-    return &((char*)self)[25276 + (idx << 4)];
+    return (char*)&self->mSoundVolume[idx].setVolume;
 }
 #endif
 //100%
@@ -2148,33 +2135,12 @@ extern float gRocoScaling;
 extern float gPsymonScaling;
 extern float gDeiterScaling;
 
-struct sSaChan7A10 {
-    float base;     // +0x0
-    float gain;     // +0x4
-    float out;      // +0x8
-    float pad;
-};
-
-
-struct sSaMix7A10 {
-    char pad0[0x62C0];
-    sSaChan7A10 chan[11];   // 0x62C0 (chan[10].pad overlaps mix[0])
-    char pad6370[0x6398 - 0x6370];
-    float vol[10];          // 0x6398 (vol[j-1])
-    int fading;             // 0x63C0
-    int fadeMask;           // 0x63C4
-    float fadeRate;         // 0x63C8
-    float fadeTarget;       // 0x63CC
-    float fadeCur;          // 0x63D0
-    char pad63D4[0x63E8 - 0x63D4];
-    float cur[10];          // 0x63E8 (cur[j-1])
-};
-
-static inline void sSaMix7A10_set(sSaMix7A10* self, int j, float v)
+// Ducks volume control j to level v: mDuckLevel[j] = v, then its ducked and applied volumes.
+static inline void duckVolumeSet(cSSXAudio* self, int j, float v)
 {
-    self->vol[j - 1] = v;
-    self->chan[j].gain = self->chan[j].base * v;
-    self->chan[j].out = self->chan[j].gain * self->cur[j - 1];
+    self->mDuckLevel[j] = v;
+    self->mSoundVolume[j].duckedVolume = self->mSoundVolume[j].curVolume * v;
+    self->mSoundVolume[j].appliedVolume = self->mSoundVolume[j].duckedVolume * self->mMixLevel[j];
 }
 
 /**
@@ -2185,23 +2151,21 @@ static inline void sSaMix7A10_set(sSaMix7A10* self, int j, float v)
  * per-character mix values. With a nonzero @p time the duck fades per frame (UpdateDuck) from the current
  * level instead.
  *
- * @param self_  the audio system
  * @param mask   which volume controls to duck (On Tour duck)
  * @param finalLevel      the duck level to reach (On Tour finalLevel)
  * @param time   fade time in seconds; 0 applies the level at once
  */
-extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self_, int mask, float finalLevel, float time)
+extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self, int mask, float finalLevel, float time)
 {
-    sSaMix7A10* self = (sSaMix7A10*)self_;
     if (time == 0.0f) {
         if (mask & 1)
-            sSaMix7A10_set(self, 1, finalLevel);
+            duckVolumeSet(self, 1, finalLevel);
         if (mask & 2)
-            sSaMix7A10_set(self, 5, finalLevel);
+            duckVolumeSet(self, 5, finalLevel);
         if (mask & 4) {
-            sSaMix7A10_set(self, 4, finalLevel);
-            float level = self->chan[4].out;
-            cSSXAudio* mixOut = (cSSXAudio*)self;
+            duckVolumeSet(self, 4, finalLevel);
+            float level = self->mSoundVolume[4].appliedVolume;
+            cSSXAudio* mixOut = self;
             mixOut->mCharacterVolume[0] = level * gMobyScaling;
             mixOut->mCharacterVolume[1] = level * gKaoriScaling;
             mixOut->mCharacterVolume[2] = level * gAerielScaling;
@@ -2214,25 +2178,25 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self_, int mask, float finalLeve
             mixOut->mCharacterVolume[9] = level * gDeiterScaling;
         }
         if (mask & 8)
-            sSaMix7A10_set(self, 2, finalLevel);
+            duckVolumeSet(self, 2, finalLevel);
         if (mask & 0x80)
-            sSaMix7A10_set(self, 3, finalLevel);
+            duckVolumeSet(self, 3, finalLevel);
         if (mask & 0x20)
-            sSaMix7A10_set(self, 6, finalLevel);
+            duckVolumeSet(self, 6, finalLevel);
         if (mask & 0x40)
-            sSaMix7A10_set(self, 7, finalLevel);
+            duckVolumeSet(self, 7, finalLevel);
         if (mask & 0x10)
-            sSaMix7A10_set(self, 8, finalLevel);
+            duckVolumeSet(self, 8, finalLevel);
         if (mask & 0x100)
-            sSaMix7A10_set(self, 9, finalLevel);
+            duckVolumeSet(self, 9, finalLevel);
         if (mask & 0x200)
-            sSaMix7A10_set(self, 10, finalLevel);
+            duckVolumeSet(self, 10, finalLevel);
     } else {
-        self->fadeMask = mask;
-        self->fadeTarget = finalLevel;
-        self->fadeRate = (finalLevel - self->fadeCur) / time * 0.01666666753590107f;
-        if (self->fadeRate != 0.0f)
-            self->fading = 1;
+        self->mCurDuck = mask;
+        self->mDuckFinalValue = finalLevel;
+        self->mDuckStep = (finalLevel - self->mDuckCurValue) / time * 0.01666666753590107f;
+        if (self->mDuckStep != 0.0f)
+            self->mDucking = 1;
     }
 }
 #endif
@@ -2251,64 +2215,40 @@ extern float gRocoScaling;
 extern float gPsymonScaling;
 extern float gDeiterScaling;
 
-struct sSaChan7C48 {
-    float base;     // +0x0
-    float gain;     // +0x4
-    float out;      // +0x8
-    float pad;
-};
-
-
-struct sSaMix7C48 {
-    char pad0[0x62C0];
-    sSaChan7C48 chan[11];   // 0x62C0 (chan[10].pad overlaps mix[0])
-    char pad6370[0x6398 - 0x6370];
-    float vol[10];          // 0x6398 (vol[j-1])
-    int fading;             // 0x63C0
-    int fadeMask;           // 0x63C4
-    float fadeRate;         // 0x63C8
-    float fadeTarget;       // 0x63CC
-    float fadeCur;          // 0x63D0
-    char pad63D4[0x63E8 - 0x63D4];
-    float cur[10];          // 0x63E8 (cur[j-1])
-};
-
-static inline void sSaMix7C48_set(sSaMix7C48* self, int j, float v)
+// Ducks volume control j to level v: mDuckLevel[j] = v, then its ducked and applied volumes.
+static inline void updateDuckSet(cSSXAudio* self, int j, float v)
 {
-    self->vol[j - 1] = v;
-    self->chan[j].gain = self->chan[j].base * v;
-    self->chan[j].out = self->chan[j].gain * self->cur[j - 1];
+    self->mDuckLevel[j] = v;
+    self->mSoundVolume[j].duckedVolume = self->mSoundVolume[j].curVolume * v;
+    self->mSoundVolume[j].appliedVolume = self->mSoundVolume[j].duckedVolume * self->mMixLevel[j];
 }
 
 /**
  * Advances a duck fade by one frame and applies the current duck level to the controls being ducked.
  *
  * The level stops at its target, which ends the fade. The controls are those of the DuckVolume mask.
- *
- * @param self_  the audio system
  */
-extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self_)
+extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self)
 {
-    sSaMix7C48* self = (sSaMix7C48*)self_;
-    if (self->fading) {
-        self->fadeCur += self->fadeRate;
-        if (self->fadeRate < 0.0f) {
-            if (self->fadeCur < self->fadeTarget) {
-                self->fadeCur = self->fadeTarget;
-                self->fading = 0;
+    if (self->mDucking) {
+        self->mDuckCurValue += self->mDuckStep;
+        if (self->mDuckStep < 0.0f) {
+            if (self->mDuckCurValue < self->mDuckFinalValue) {
+                self->mDuckCurValue = self->mDuckFinalValue;
+                self->mDucking = 0;
             }
-        } else if (self->fadeCur > self->fadeTarget) {
-            self->fadeCur = self->fadeTarget;
-            self->fading = 0;
+        } else if (self->mDuckCurValue > self->mDuckFinalValue) {
+            self->mDuckCurValue = self->mDuckFinalValue;
+            self->mDucking = 0;
         }
-        if (self->fadeMask & 1)
-            sSaMix7C48_set(self, 1, self->fadeCur);
-        if (self->fadeMask & 2)
-            sSaMix7C48_set(self, 5, self->fadeCur);
-        if (self->fadeMask & 4) {
-            sSaMix7C48_set(self, 4, self->fadeCur);
-            float level = self->chan[4].out;
-            cSSXAudio* mixOut = (cSSXAudio*)self;
+        if (self->mCurDuck & 1)
+            updateDuckSet(self, 1, self->mDuckCurValue);
+        if (self->mCurDuck & 2)
+            updateDuckSet(self, 5, self->mDuckCurValue);
+        if (self->mCurDuck & 4) {
+            updateDuckSet(self, 4, self->mDuckCurValue);
+            float level = self->mSoundVolume[4].appliedVolume;
+            cSSXAudio* mixOut = self;
             mixOut->mCharacterVolume[0] = level * gMobyScaling;
             mixOut->mCharacterVolume[1] = level * gKaoriScaling;
             mixOut->mCharacterVolume[2] = level * gAerielScaling;
@@ -2320,20 +2260,20 @@ extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self_)
             mixOut->mCharacterVolume[8] = level * gPsymonScaling;
             mixOut->mCharacterVolume[9] = level * gDeiterScaling;
         }
-        if (self->fadeMask & 8)
-            sSaMix7C48_set(self, 2, self->fadeCur);
-        if (self->fadeMask & 0x80)
-            sSaMix7C48_set(self, 3, self->fadeCur);
-        if (self->fadeMask & 0x20)
-            sSaMix7C48_set(self, 6, self->fadeCur);
-        if (self->fadeMask & 0x40)
-            sSaMix7C48_set(self, 7, self->fadeCur);
-        if (self->fadeMask & 0x10)
-            sSaMix7C48_set(self, 8, self->fadeCur);
-        if (self->fadeMask & 0x100)
-            sSaMix7C48_set(self, 9, self->fadeCur);
-        if (self->fadeMask & 0x200)
-            sSaMix7C48_set(self, 10, self->fadeCur);
+        if (self->mCurDuck & 8)
+            updateDuckSet(self, 2, self->mDuckCurValue);
+        if (self->mCurDuck & 0x80)
+            updateDuckSet(self, 3, self->mDuckCurValue);
+        if (self->mCurDuck & 0x20)
+            updateDuckSet(self, 6, self->mDuckCurValue);
+        if (self->mCurDuck & 0x40)
+            updateDuckSet(self, 7, self->mDuckCurValue);
+        if (self->mCurDuck & 0x10)
+            updateDuckSet(self, 8, self->mDuckCurValue);
+        if (self->mCurDuck & 0x100)
+            updateDuckSet(self, 9, self->mDuckCurValue);
+        if (self->mCurDuck & 0x200)
+            updateDuckSet(self, 10, self->mDuckCurValue);
     }
 }
 #endif
@@ -2514,31 +2454,6 @@ extern float gRocoScaling;
 extern float gPsymonScaling;
 extern float gDeiterScaling;
 
-struct sSaChan83B0 {
-    float base;     // +0x0
-    float gain;     // +0x4
-    float out;      // +0x8
-    float pad;
-};
-
-
-struct sSaMixOut83B0 {
-    char pad0[0x636C];
-    float mix[10];          // 0x636C
-};
-
-struct sAudio83B0 {
-    char pad0[0x62C0];
-    sSaChan83B0 chan[11];   // 0x62C0
-    char pad6370[0x63E4 - 0x6370];
-    float cur[11];          // 0x63E4
-    int faded;              // 0x6410
-    char pad6414[0x646C - 0x6414];
-    int preset;             // 0x646C
-    char pad6470[0x647C - 0x6470];
-    tAudioMix entries[25];      // 0x647C
-};
-
 /**
  * Switches to one of the audio mix presets, at once or with a fade.
  *
@@ -2546,66 +2461,68 @@ struct sAudio83B0 {
  * and 6-10 go through MixIntToFloat (cSSXAudio_MixIntToFloat); SFX (5) is not part of a mix. A preset time of 0 applies
  * them at once, otherwise each control fades to its level (ChangeMixFinalAndStepValues, cSSXAudio_ChangeMixFinalAndStepValues).
  *
- * @param vself  the audio system
  * @param id     the mix preset, 0-24 (On Tour Parm)
  */
-extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
+extern "C" void cSSXAudio_MixVolume(cSSXAudio* self, int id)
 {
-    sAudio83B0* self = (sAudio83B0*)vself;
     if (id < 0) {
         id = 0;
     }
-    if (id == self->preset) {
+    if (id == self->mLastMix) {
         return;
     }
-    self->preset = id;
-    float musicVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 1, self->entries[id].musicLevel);
-    float djVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 2, self->entries[id].djLevel);
-    float paVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 3, self->entries[id].paLevel);
-    float characterVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 4, self->entries[id].characterLevel);
-    float boardVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 6, self->entries[id].boardLevel);
-    float collisionVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 7, self->entries[id].collisionLevel);
-    float ambientVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 8, self->entries[id].ambientLevel);
-    float arcadeSfxVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 9, self->entries[id].arcadeSFXLevel);
-    float arcadeSpeechVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 10, self->entries[id].arcadeSpeechLevel);
-    float fadeTime = self->entries[id].time;
+    self->mLastMix = id;
+    float musicVol = cSSXAudio_MixIntToFloat(self, 1, self->mAudioMixes[id].musicLevel);
+    float djVol = cSSXAudio_MixIntToFloat(self, 2, self->mAudioMixes[id].djLevel);
+    float paVol = cSSXAudio_MixIntToFloat(self, 3, self->mAudioMixes[id].paLevel);
+    float characterVol = cSSXAudio_MixIntToFloat(self, 4, self->mAudioMixes[id].characterLevel);
+    float boardVol = cSSXAudio_MixIntToFloat(self, 6, self->mAudioMixes[id].boardLevel);
+    float collisionVol = cSSXAudio_MixIntToFloat(self, 7, self->mAudioMixes[id].collisionLevel);
+    float ambientVol = cSSXAudio_MixIntToFloat(self, 8, self->mAudioMixes[id].ambientLevel);
+    float arcadeSfxVol = cSSXAudio_MixIntToFloat(self, 9, self->mAudioMixes[id].arcadeSFXLevel);
+    float arcadeSpeechVol = cSSXAudio_MixIntToFloat(self, 10, self->mAudioMixes[id].arcadeSpeechLevel);
+    float fadeTime = self->mAudioMixes[id].time;
     if (fadeTime == 0.0f) {
-        self->cur[1] = musicVol;
-        self->cur[2] = djVol;
-        self->cur[3] = paVol;
-        self->cur[4] = characterVol;
-        self->cur[6] = boardVol;
-        self->cur[7] = collisionVol;
-        self->cur[8] = ambientVol;
-        self->cur[9] = arcadeSfxVol;
-        self->cur[10] = arcadeSpeechVol;
+        self->mMixLevel[1] = musicVol;
+        self->mMixLevel[2] = djVol;
+        self->mMixLevel[3] = paVol;
+        self->mMixLevel[4] = characterVol;
+        self->mMixLevel[6] = boardVol;
+        self->mMixLevel[7] = collisionVol;
+        self->mMixLevel[8] = ambientVol;
+        self->mMixLevel[9] = arcadeSfxVol;
+        self->mMixLevel[10] = arcadeSpeechVol;
         for (int k = 0; k < 11; k++) {
-            self->chan[k].out = self->chan[k].gain * self->cur[k];
+            self->mSoundVolume[k].appliedVolume = self->mSoundVolume[k].duckedVolume * self->mMixLevel[k];
         }
-        float characterOut = self->chan[4].out;
-        sSaMixOut83B0* mixOut = (sSaMixOut83B0*)self;
-        mixOut->mix[0] = characterOut * gMobyScaling;
-        mixOut->mix[1] = characterOut * gKaoriScaling;
-        mixOut->mix[2] = characterOut * gAerielScaling;
-        mixOut->mix[3] = characterOut * gMacScaling;
-        mixOut->mix[4] = characterOut * gZoeScaling;
-        mixOut->mix[5] = characterOut * gGrommetScaling;
-        mixOut->mix[6] = characterOut * gEliseScaling;
-        mixOut->mix[7] = characterOut * gRocoScaling;
-        mixOut->mix[8] = characterOut * gPsymonScaling;
-        mixOut->mix[9] = characterOut * gDeiterScaling;
+        float characterOut = self->mSoundVolume[4].appliedVolume;
+        cSSXAudio* mixOut = self;
+        mixOut->mCharacterVolume[0] = characterOut * gMobyScaling;
+        mixOut->mCharacterVolume[1] = characterOut * gKaoriScaling;
+        mixOut->mCharacterVolume[2] = characterOut * gAerielScaling;
+        mixOut->mCharacterVolume[3] = characterOut * gMacScaling;
+        mixOut->mCharacterVolume[4] = characterOut * gZoeScaling;
+        mixOut->mCharacterVolume[5] = characterOut * gGrommetScaling;
+        mixOut->mCharacterVolume[6] = characterOut * gEliseScaling;
+        mixOut->mCharacterVolume[7] = characterOut * gRocoScaling;
+        mixOut->mCharacterVolume[8] = characterOut * gPsymonScaling;
+        mixOut->mCharacterVolume[9] = characterOut * gDeiterScaling;
     } else {
-        cSSXAudio* fader = (cSSXAudio*)self;
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 1, self->entries[id].musicLevel != -1, musicVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 2, self->entries[id].djLevel != -1, djVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 3, self->entries[id].paLevel != -1, paVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 4, self->entries[id].characterLevel != -1, characterVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 6, self->entries[id].boardLevel != -1, boardVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 7, self->entries[id].collisionLevel != -1, collisionVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 8, self->entries[id].ambientLevel != -1, ambientVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 9, self->entries[id].arcadeSFXLevel != -1, arcadeSfxVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 10, self->entries[id].arcadeSpeechLevel != -1, arcadeSpeechVol, fadeTime);
-        self->faded = 1;
+        cSSXAudio* fader = self;
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 1, self->mAudioMixes[id].musicLevel != -1, musicVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 2, self->mAudioMixes[id].djLevel != -1, djVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 3, self->mAudioMixes[id].paLevel != -1, paVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 4, self->mAudioMixes[id].characterLevel != -1, characterVol,
+                                              fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 6, self->mAudioMixes[id].boardLevel != -1, boardVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 7, self->mAudioMixes[id].collisionLevel != -1, collisionVol,
+                                              fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 8, self->mAudioMixes[id].ambientLevel != -1, ambientVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 9, self->mAudioMixes[id].arcadeSFXLevel != -1, arcadeSfxVol,
+                                              fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 10, self->mAudioMixes[id].arcadeSpeechLevel != -1,
+                                              arcadeSpeechVol, fadeTime);
+        self->mMixing = 1;
     }
 }
 #endif
@@ -2652,17 +2569,6 @@ extern float gRocoScaling;
 extern float gPsymonScaling;
 extern float gDeiterScaling;
 
-struct sSaMix87F8 {
-    char pad0[0x62C4];
-    float chan[11][4];          // 0x62C4 (gain, out, -, -)
-    char pad6374[0x63E4 - 0x6374];
-    float cur[11];              // 0x63E4
-    int dirty;                  // 0x6410
-    float delta[11];            // 0x6414
-    float target[11];           // 0x6440
-};
-
-
 /**
  * Steps the mix levels toward their final values and re-applies the volumes, while a mix is fading.
  *
@@ -2671,32 +2577,32 @@ struct sSaMix87F8 {
  * ten character levels mCharacterVolume are the Character control's applied volume times the constants gMobyScaling ..
  * gDeiterScaling.
  */
-extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
+extern "C" void cSSXAudio_UpdateMix(cSSXAudio* self)
 {
-    if (self->dirty == 0) return;
-    self->dirty = 0;
+    if (self->mMixing == 0) return;
+    self->mMixing = 0;
     for (int i = 0; i < 11; i++) {
-        if (self->delta[i] == 0.0f) continue;
-        float mixValue = self->cur[i] + self->delta[i];
-        self->cur[i] = mixValue;
-        if (self->delta[i] < 0.0f) {
-            if (mixValue <= self->target[i]) {
-                self->cur[i] = self->target[i];
-                self->delta[i] = 0.0f;
+        if (self->mMixStep[i] == 0.0f) continue;
+        float mixValue = self->mMixLevel[i] + self->mMixStep[i];
+        self->mMixLevel[i] = mixValue;
+        if (self->mMixStep[i] < 0.0f) {
+            if (mixValue <= self->mMixFinalValue[i]) {
+                self->mMixLevel[i] = self->mMixFinalValue[i];
+                self->mMixStep[i] = 0.0f;
             } else {
-                self->dirty = 1;
+                self->mMixing = 1;
             }
         } else {
-            if (self->target[i] <= mixValue) {
-                self->cur[i] = self->target[i];
-                self->delta[i] = 0.0f;
+            if (self->mMixFinalValue[i] <= mixValue) {
+                self->mMixLevel[i] = self->mMixFinalValue[i];
+                self->mMixStep[i] = 0.0f;
             } else {
-                self->dirty = 1;
+                self->mMixing = 1;
             }
         }
-        self->chan[i][1] = self->chan[i][0] * self->cur[i];
+        self->mSoundVolume[i].appliedVolume = self->mSoundVolume[i].duckedVolume * self->mMixLevel[i];
     }
-    cSSXAudio* mixOut = (cSSXAudio*)self;
+    cSSXAudio* mixOut = self;
     float charLevel = mixOut->mSoundVolume[4].appliedVolume;
     mixOut->mCharacterVolume[0] = charLevel * gMobyScaling;
     mixOut->mCharacterVolume[1] = charLevel * gKaoriScaling;
@@ -2811,7 +2717,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, cRider* obj)
 }
 #endif
 
-extern "C" void* cAudioInterface_getGameView(int);
+extern "C" cCamera* cAudioInterface_getGameView(int);
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCameraPos__FPvi);
@@ -2819,14 +2725,14 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCameraPos__FPvi);
 /**
  * Returns the camera position of one game view.
  *
- * cAudioInterface_getGameView returns the game view; its position is at +0x20.
+ * cAudioInterface_getGameView returns the game view's camera; the position is its Pose.P.
  *
  * @param viewport  the view index (On Tour viewport)
  * @return pointer to the view's position (On Tour const t4Vector&)
  */
 void* cSSXAudio_GetCameraPos(void* self, int viewport)
 {
-    return (char*)cAudioInterface_getGameView(viewport) + 0x20;
+    return &cAudioInterface_getGameView(viewport)->Pose.P;
 }
 #endif
 
@@ -3397,7 +3303,7 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
             audio->mRMSCurValue = audio->mRMSFinalValue;
             int idx = (int)((float)(frame * audio->mRMSDataFrameRate) / cAppMan_TheAppMan->FrameRate);
             if (idx < audio->mRMSSize) {
-                int val = *(signed char*)(((char*)self_) + idx + 0x6868);
+                int val = (signed char)audio->mRMSData[idx];
                 if (val > 0) {
                     int lowThreshold, midThreshold, highThreshold;
                     float vb, va;
@@ -3446,11 +3352,11 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
     int stepFrame = audio->mRMSStepFrame;
     if (stepFrame <= 0) {
         if (stepFrame == 0) {
-            cSSXAudio_DuckByRMS((cSSXAudio*)(((char*)self_)), audio->mRMSFinalValue);
+            cSSXAudio_DuckByRMS(self_, audio->mRMSFinalValue);
             (audio->mRMSStepFrame)++;
         } else {
             audio->mRMSCurValue = audio->mRMSCurValue + audio->mRMSStepValue;
-            cSSXAudio_DuckByRMS((cSSXAudio*)(((char*)self_)), audio->mRMSCurValue);
+            cSSXAudio_DuckByRMS(self_, audio->mRMSCurValue);
             (audio->mRMSStepFrame)++;
         }
     }
@@ -3500,25 +3406,16 @@ extern "C" void cSSXAudio_CancelRMSData(cSSXAudio* audio) {
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_UpdateAudioWorldPainter);
 #ifdef SKIP_ASM
 extern "C" int func_0028D960(void* self);
-extern "C" void func_0028D988(void* self, void* rider, void* obj);
+extern "C" void func_0028D988(void* self, void* rider, const void* obj);
 extern "C" int cSSXAudio_NeedWPAmbience(cSSXAudio* self);
 extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider, tWPInGameData* obj);
 extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameData* obj);
 
 
-struct sSaObjs98A8 {
-    char pad0[0x5FA0];
-    char* c[2];                 // 0x5FA0
-    char pad5FA8[0x625C - 0x5FA8];
-    char* a[2];                 // 0x625C
-    char pad6264[0x6C80 - 0x6264];
-    char* b[2];                 // 0x6C80
-};
-
 /**
  * Applies the world painter's audio data under a player rider: mix changes and ambience.
  *
- * Only the two players (rider index +0x870 below 2) count. The painter queries for that player are evaluated
+ * Only the two players (mViewIndex below 2) count. The painter queries for that player are evaluated
  * at the rider's x/y. When func_0028D960 allows it, two results go to func_0028D988 and to ReactToWPMixEvent.
  * When ambience is needed, a third result goes to ReactToWPAmbienceEvent (cSSXAudio_ReactToWPAmbienceEvent).
  *
@@ -3534,18 +3431,16 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider
     }
     if (func_0028D960(self) != 0) {
         float k = -99999.0f;
-        char* painterQuery = ((sSaObjs98A8*)self)->a[idx];
-        sVEntry<void*(void*, float, float, float)>* va = *(sVEntry<void*(void*, float, float, float)>**)(painterQuery + 4);
-        func_0028D988(self, ((char*)rider), va[2].fn(vthis(painterQuery, va[2]), pos.x, pos.y, k));
-        char* mixQuery = ((sSaObjs98A8*)self)->b[idx];
-        sVEntry<void*(void*, float, float, float)>* vb = *(sVEntry<void*(void*, float, float, float)>**)(mixQuery + 4);
+        tWorldPainterQuery* musicQuery = self->mpMusicTriggerQuery[idx];
+        func_0028D988(self, rider, musicQuery->queryPosition(pos.x, pos.y, k));
+        tWorldPainterQuery* mixQuery = self->mpMixQuery[idx];
         // PORT: cSSXAudio_ReactToWPMixEvent's unit declaration takes the rider as int
-        cSSXAudio_ReactToWPMixEvent(self, (int)rider, (tWPInGameData*)vb[2].fn(vthis(mixQuery, vb[2]), pos.x, pos.y, k));
+        cSSXAudio_ReactToWPMixEvent(self, (int)rider, (tWPInGameData*)mixQuery->queryPosition(pos.x, pos.y, k));
     }
     if (cSSXAudio_NeedWPAmbience(self) != 0) {
-        char* ambienceQuery = ((sSaObjs98A8*)self)->c[idx];
-        sVEntry<void*(void*, float, float, float)>* vc = *(sVEntry<void*(void*, float, float, float)>**)(ambienceQuery + 4);
-        cSSXAudio_ReactToWPAmbienceEvent(self, rider, (tWPInGameData*)vc[2].fn(vthis(ambienceQuery, vc[2]), pos.x, pos.y, -99999.0f));
+        tWorldPainterQuery* ambienceQuery = self->mpAmbienceQuery[idx];
+        cSSXAudio_ReactToWPAmbienceEvent(self, rider,
+                                         (tWPInGameData*)ambienceQuery->queryPosition(pos.x, pos.y, -99999.0f));
     }
 }
 #endif

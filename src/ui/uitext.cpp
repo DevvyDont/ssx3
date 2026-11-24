@@ -280,35 +280,6 @@ extern "C" int strlen(const char* s);
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
 extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned short* str);
 
-class cUIText_3A0C70 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void setCached(int);
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void setUnicode(int);
-};
-
 /**
  * Sets a text object's string from an ASCII string.
  *
@@ -321,8 +292,8 @@ public:
 extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str)
 {
     unsigned short buf[0x200];
-    ((cUIText_3A0C70*)self)->setCached(1);
-    ((cUIText_3A0C70*)self)->setUnicode(0);
+    self->setCached(1);
+    self->setUnicode(0);
     if (strlen(str) + 1 < 0x200) {
         UIAsciiToUnicode(buf, str);
         cUIText_setUnicodeStringPrivate(self, buf);
@@ -355,7 +326,7 @@ extern unsigned short gUSTRBackSlash;
  */
 extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
 {
-    ((cUIText_3A0C70*)self)->setCached(1);
+    self->setCached(1);
     void* font = cUIText_getFont(self);
     if (font == 0) {
         return;
@@ -436,8 +407,8 @@ extern unsigned short gUSTRBackSlash;
  */
 extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned short* str)
 {
-    ((cUIText_3A0C70*)self_)->setCached(1);
-    ((cUIText_3A0C70*)self_)->setUnicode(1);
+    self_->setCached(1);
+    self_->setUnicode(1);
     cUIText_deleteText(self_);
     int len = USTR_length((unsigned short*)str);
     if (len < 801) {
@@ -604,20 +575,10 @@ void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData")
 void cUITextScroll_clearBuffer_1(void* self) __asm__("cUITextScroll_clearBuffer");
 extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id);
 
-struct sUIColor11B8 {
-    float r, g, b, a;
-    sUIColor11B8() {}
-    sUIColor11B8(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
-};
-struct sUIVt11B8 { short delta; short index; void (*fn)(void*, int); };
-struct sUIText11B8 {
-    char pad0[0x8];
-    sUIVt11B8* vt;              // 0x8
-    char padC[0x74 - 0xC];
-    unsigned int b0 : 1;        // 0x74
-    unsigned int mode : 2;
-    unsigned int rest : 29;
-    sUIColor11B8 color;         // 0x78
+// A tARGB with EA's constructors (ours has none): mShadowColour is a tARGB ([O]).
+struct tARGBInit : tARGB {
+    tARGBInit() {}
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
 /**
@@ -629,19 +590,21 @@ struct sUIText11B8 {
  *
  * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUITextScroll_setUIData(sUIText11B8* self, tUITextScroll* data)
+extern "C" void cUITextScroll_setUIData(cUITextScroll* self, tUITextScroll* data)
 {
     cUIThing_setUIData_2(self, data);
-    self->mode = data->mFontID & 3;
-    self->vt[23].fn(vthis(self, self->vt[23]), data->mTextFlags & 1);
+    self->mAttrTextScroll.mFont = data->mFontID & 3;
+    self->setShadow(data->mTextFlags & 1);
     if (((int)data->mStringID) != 0) {
         cUITextScroll_clearBuffer_1(self);
-        cUITextScroll_addUnicodeStringByID((cUITextScroll*)self, ((int)data->mStringID));
+        cUITextScroll_addUnicodeStringByID(self, ((int)data->mStringID));
     }
-    int bits = *(int*)((char*)self + 0x74) >> 3;
+    int bits = *(int*)&self->mAttrTextScroll >> 3;
     if (bits & 1) {
-        self->color = sUIColor11B8(data->mSColour.a * 0.003921568859368563f, data->mSColour.r * 0.003921568859368563f,
-                                   data->mSColour.g * 0.003921568859368563f, data->mSColour.b * 0.003921568859368563f);
+        self->mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
+                                        data->mSColour.r * 0.003921568859368563f,
+                                        data->mSColour.g * 0.003921568859368563f,
+                                        data->mSColour.b * 0.003921568859368563f);
     }
 }
 #endif
@@ -650,8 +613,8 @@ extern "C" void cUITextScroll_setUIData(sUIText11B8* self, tUITextScroll* data)
 INCLUDE_ASM("ui/uitext", cUITextScroll_getFont);
 #ifdef SKIP_ASM
 /**
- * Returns the text box's font: entry mFont + 1 (bits 1-2 of mAttrTextScroll) of the UI engine's font table (engine +
- * 8, 12-byte entries), the engine being mpScreen->mpState->mpEngine.
+ * Returns the text box's font: the mpFont of entry mFont (bits 1-2 of mAttrTextScroll) in the UI engine's font table
+ * (mpFontInterface->mFontEntry), the engine being mpScreen->mpState->mpEngine.
  *
  * @return the cFont (as an int), or 0 without an engine
  */
@@ -659,7 +622,7 @@ extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 {
     cUIEngine* engine = self->mpScreen->mpState->mpEngine;
     if (((void*)engine) != 0) {
-        return *(int*)((char*)engine->mpFontInterface + ((*(unsigned int*)&self->mAttrTextScroll >> 1) & 3) * 12 + 0xC);
+        return (int)(&engine->mpFontInterface->mFontEntry[0])[(*(unsigned int*)&self->mAttrTextScroll >> 1) & 3].mpFont;
     }
     return 0;
 }
@@ -910,22 +873,21 @@ void cMemMan_free(void*);
  * Frees every text line (mpLineOffset[0 .. mLineSize - 1]) and the line array, then zeroes mpLineOffset, mLinesOffset
  * and mLineSize.
  *
- * mpLineOffset is declared unsigned short* but holds an array of line pointers. On Tour's clearBuffer() takes no
- * argument.
+ * On Tour's clearBuffer() takes no argument.
  *
  * @param ignored  not read (callers pass whatever is in $a1)
  */
 extern "C" void cUITextScroll_clearBuffer(cUITextScroll* self, void* ignored)
 {
-    if ((void**)self->mpLineOffset != 0) {
+    if (self->mpLineOffset != 0) {
         unsigned short i;
         for (i = 0; i < self->mLineSize; i++) {
-            if (((void**)self->mpLineOffset)[i] != 0) {
-                cMemMan_free(((void**)self->mpLineOffset)[i]);
+            if (self->mpLineOffset[i] != 0) {
+                cMemMan_free(self->mpLineOffset[i]);
             }
         }
-        if ((void**)self->mpLineOffset != 0) {
-            cMemMan_free((void**)self->mpLineOffset);
+        if (self->mpLineOffset != 0) {
+            cMemMan_free(self->mpLineOffset);
         }
         self->mpLineOffset = 0;
     }
@@ -963,7 +925,7 @@ extern "C" int cUITextScroll_allocLine(cUITextScroll* self)
             cMemMan_free(prev);
         }
     }
-    self->mpLineOffset = (unsigned short*)arr;
+    self->mpLineOffset = (unsigned short**)arr;
     return old;
 }
 #endif
@@ -987,7 +949,7 @@ extern "C" void func_002C2540(void* dst, void* src);
  */
 extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
 {
-    ((cUIText_3A0C70*)self)->setCached(1);
+    self->setCached(1);
     void* font = (void*)cUITextScroll_getFont(self);
     if (font == 0) {
         return;
@@ -1064,7 +1026,7 @@ extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned sho
     int idx = cUITextScroll_allocLine(self);
     unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UITXTSCRSTR, 0x100, 0);
     USTR_copy(copy, str);
-    ((unsigned short**)self->mpLineOffset)[idx] = copy;
+    self->mpLineOffset[idx] = copy;
 }
 #endif
 
@@ -1085,8 +1047,8 @@ extern "C" void cUITextScroll_setAsciiString(cUITextScroll* self, char* str)
 {
     cUITextScroll_clearBuffer_1(self);
     self->mStringID = (unsigned int)0;
-    ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[5].fn(vthis(self, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[5]), 1);
-    ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[24].fn(vthis(self, ((sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self))[24]), 0);
+    self->setCached(1);
+    self->setUnicode(0);
     cUITextScroll_addAsciiString(self, str);
 }
 #endif
@@ -1127,7 +1089,7 @@ extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned sho
 extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vstr)
 {
     unsigned short* str = (unsigned short*)vstr;
-    ((cUIText_3A0C70*)self)->setCached(1);
+    self->setCached(1);
     void* font = (void*)cUITextScroll_getFont(self);
     if (font == 0) {
         return;
@@ -1251,7 +1213,7 @@ extern "C" void cUITextScroll_deleteLineByIndex(cUITextScroll* self, int idx)
             if ((void**)self->mpLineOffset != 0) {
                 cMemMan_free((void**)self->mpLineOffset);
             }
-            self->mpLineOffset = (unsigned short*)arr;
+            self->mpLineOffset = (unsigned short**)arr;
             (self->mLineSize)--;
         }
     }
@@ -1411,18 +1373,14 @@ extern "C" void cTextureElement_render2(cTextureElement* element, tRect rect, tA
 INCLUDE_ASM("ui/uitext", cTextureElement_renderTiled);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sRect_23B8 {
-    float x, y, w, h;
-    sRect_23B8() {}
-    sRect_23B8(float x_, float y_, float w_, float h_) : x(x_), y(y_), w(w_), h(h_) {}
-};
-struct sGfx_23B8 {
-    char pad[0xE84];
-    sDrawState* top;          // 0xE84
+// A tRect with EA's constructors (ours has none).
+struct tRectInit : tRect {
+    tRectInit() {}
+    tRectInit(float x, float y, float w, float h) { X = x; Y = y; W = w; H = h; }
 };
 extern int G2D_23B8 __asm__("G2D");
-extern "C" void c2DRender_drawRect2(int ctx, tBxVertex* v, sRect_23B8* dst, sRect_23B8* uv);
-extern "C" void c2DRender_drawRotRect2(int ctx, tBxVertex* v, sRect_23B8* dst, sRect_23B8* uv);
+extern "C" void c2DRender_drawRect2(int ctx, tBxVertex* v, tRect* dst, tRect* uv);
+extern "C" void c2DRender_drawRotRect2(int ctx, tBxVertex* v, tRect* dst, tRect* uv);
 
 /**
  * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, cropping the last
@@ -1445,12 +1403,13 @@ extern "C" void c2DRender_drawRotRect2(int ctx, tBxVertex* v, sRect_23B8* dst, s
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8 destRect, tARGB colour, int flags, float tx, float ty)
+extern "C" void cTextureElement_renderTiled(cTextureElement* element, tRect destRect, tARGB colour, int flags, float tx,
+                                            float ty)
 {
     int tex = element->mSourceShape;
     GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
-    float x0 = destRect.x;
-    float y0 = destRect.y;
+    float x0 = destRect.X;
+    float y0 = destRect.Y;
     float topV = element->mTop;
     float bottomV = element->mBottom;
     float leftU = element->mLeft;
@@ -1461,8 +1420,8 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8
     if (ty <= 0.0f) {
         return;
     }
-    float w = destRect.w / tx;
-    float tileHeight = destRect.h / ty;
+    float w = destRect.W / tx;
+    float tileHeight = destRect.H / ty;
     if (flags & 1) {
         leftU = rightU;
         rightU = element->mLeft;
@@ -1491,26 +1450,26 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8
             x = x0;
             if (flags & 4) {
                 for (int i = 0; i < nx; i++) {
-                    sRect_23B8 dst(x, y, w, tileHeight);
-                    sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
+                    tRectInit dst(x, y, w, tileHeight);
+                    tRectInit uv(leftU, topV, rightU - leftU, bottomV - topV);
                     c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
-                    sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
-                    sRect_23B8 uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
+                    tRectInit dst(x, y, (x0 + destRect.W) - x, tileHeight);
+                    tRectInit uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
                     c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
                 }
             } else {
                 for (int i = 0; i < nx; i++) {
-                    sRect_23B8 dst(x, y, w, tileHeight);
-                    sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
+                    tRectInit dst(x, y, w, tileHeight);
+                    tRectInit uv(leftU, topV, rightU - leftU, bottomV - topV);
                     c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
-                    sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
-                    sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
+                    tRectInit dst(x, y, (x0 + destRect.W) - x, tileHeight);
+                    tRectInit uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
                     c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
                 }
             }
@@ -1521,30 +1480,30 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8
         x = x0;
         if (flags & 4) {
             float u0b = leftU + (rightU - leftU) * (1.0f - (ty - fny));
-            float hh = (y0 + destRect.h) - y;
+            float hh = (y0 + destRect.H) - y;
             for (int i = 0; i < nx; i++) {
-                sRect_23B8 dst(x, y, w, hh);
-                sRect_23B8 uv(u0b, topV, rightU - u0b, bottomV - topV);
+                tRectInit dst(x, y, w, hh);
+                tRectInit uv(u0b, topV, rightU - u0b, bottomV - topV);
                 c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
-                sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
-                sRect_23B8 uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
+                tRectInit dst(x, y, (x0 + destRect.W) - x, hh);
+                tRectInit uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
                 c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
             }
         } else {
             float v1b = topV + (bottomV - topV) * (ty - fny);
-            float hh = (y0 + destRect.h) - y;
+            float hh = (y0 + destRect.H) - y;
             for (int i = 0; i < nx; i++) {
-                sRect_23B8 dst(x, y, w, hh);
-                sRect_23B8 uv(leftU, topV, rightU - leftU, v1b - topV);
+                tRectInit dst(x, y, w, hh);
+                tRectInit uv(leftU, topV, rightU - leftU, v1b - topV);
                 c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
-                sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
-                sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
+                tRectInit dst(x, y, (x0 + destRect.W) - x, hh);
+                tRectInit uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
                 c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
             }
         }
@@ -1554,22 +1513,9 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8
 //100%
 INCLUDE_ASM("ui/uitext", cTextureElement_renderRot);
 #ifdef SKIP_ASM
-struct sGfx_2A00 {
-    char pad[0xE84];
-    sDrawState* top;          // 0xE84
-};
-// One vertex of a submitted quad (stride 0x30).
-struct sQuadVtx_2A00 {
-    float s, t, q;
-    int pad;
-    int r, g, b, a;
-    float pos[4];
-    sQuadVtx_2A00() {}
-};
-// The unit declares GrMan as char*; typed views by asm label.
 extern int G2D_2A00 __asm__("G2D");
-extern "C" void c2DRender_drawRect1(int ctx, sQuadVtx_2A00* v, tRect* r, t3Matrix* m);
-extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, tRect* r, t3Matrix* m);
+extern "C" void c2DRender_drawRect1(int ctx, tBxVertex* v, tRect* r, t3Matrix* m);
+extern "C" void c2DRender_drawRotRect1(int ctx, tBxVertex* v, tRect* r, t3Matrix* m);
 
 /**
  * Draws the texture element @p element once over the rectangle @p destRect, with the corners transformed by the 3x3 matrix @p transform.
@@ -1603,23 +1549,23 @@ extern "C" void cTextureElement_renderRot(cTextureElement* element, tRect destRe
         topV = bottomV;
         bottomV = element->mTop;
     }
-    sQuadVtx_2A00 quadVerts[4];
+    tBxVertex quadVerts[4];
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_2A00* vert = &quadVerts[i];
+        tBxVertex* vert = &quadVerts[i];
         vert->a = (int)(colour.A * 128.0f);
         vert->r = (int)(colour.R * 255.0f);
         vert->g = (int)(colour.G * 255.0f);
         vert->b = (int)(colour.B * 255.0f);
-        vert->q = 1.0f;
+        vert->one = 1.0f;
     }
-    quadVerts[0].s = leftU;
-    quadVerts[0].t = topV;
-    quadVerts[1].s = rightU;
-    quadVerts[1].t = topV;
-    quadVerts[2].s = leftU;
-    quadVerts[2].t = bottomV;
-    quadVerts[3].s = rightU;
-    quadVerts[3].t = bottomV;
+    quadVerts[0].u = leftU;
+    quadVerts[0].v = topV;
+    quadVerts[1].u = rightU;
+    quadVerts[1].v = topV;
+    quadVerts[2].u = leftU;
+    quadVerts[2].v = bottomV;
+    quadVerts[3].u = rightU;
+    quadVerts[3].v = bottomV;
     if (flags & 4) {
         c2DRender_drawRotRect1(G2D_2A00, quadVerts, &destRect, &transform);
     } else {
