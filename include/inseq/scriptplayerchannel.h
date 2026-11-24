@@ -43,14 +43,26 @@ enum eChannelType {
     kChannelEvent = 3
 };
 
-// The abstract base, as seen through a channel pointer of unknown type (e.g. the entity's channel array).
+// The abstract base, as seen through a channel pointer of unknown type (e.g. the entity's channel array). A real
+// C++ class: g++ 2.95 puts the vptr after the data of the class that declares the virtuals, so it lands at 0x4,
+// where [R] every constructor stores its vtable. Slots [O] (On Tour's order, names, parameters and return types;
+// int& events as int*); [U] cScriptPlayerEntity_SetupPlay / _Restart call Play, _Restart Stop, _DoFrameUpdate
+// Update, _Update GetNextKeyFrame. Slot 10 is the destructor (cScriptPlayerEntity_Stop calls it with flags 3 for the
+// object, block and event channels); not declared here.
 struct cScriptPlayerChannel {
     int unk_00;                    // 0x000 retail-only base data (On Tour's cScriptPlayerChannel has none: its vptr
                                    //       is at 0); no retail access seen. It is why the vptr sits at 0x4 and every
                                    //       On Tour member is +4 here
-    void** mVtbl;                  // 0x004 [R] the constructors store the class's vtable here; slots 1..10: Play,
-                                   //       Stop, Update, GetValue, GetCustom, GetNextKeyFrame, GetType, GetOwner,
-                                   //       IsPlaying, destructor
+    // 0x004: the vptr
+    virtual bool Play(const char* pScriptData, cScriptPlayerEntity* pOwner, int* events) = 0;  // 1
+    virtual void Stop() = 0;                                                                  // 2
+    virtual bool Update(float currFrameNum, float frameDelta, int* events) = 0;               // 3
+    virtual void* GetValue() = 0;                                                             // 4
+    virtual void* GetCustom() = 0;                                                            // 5
+    virtual int GetNextKeyFrame() = 0;                                                        // 6
+    virtual eChannelType GetType() = 0;                                                       // 7
+    virtual cScriptPlayerEntity* GetOwner() = 0;                                              // 8
+    virtual bool IsPlaying() = 0;                                                             // 9
 };
 
 // cScriptPlayerChannelSpline: size 0x28 [R] (cScriptPlayerEntity_SetupPlay allocates 0x28); GetType() = 0;
@@ -151,7 +163,6 @@ struct cScriptPlayerChannelEvent {
 };
 
 CHECK_OFFSET(cScriptPlayerChannel, unk_00, 0x0);
-CHECK_OFFSET(cScriptPlayerChannel, mVtbl, 0x4);
 CHECK_SIZE(cScriptPlayerChannel, 0x8);
 CHECK_OFFSET(cScriptPlayerChannelSpline, unk_00, 0x0);
 CHECK_OFFSET(cScriptPlayerChannelSpline, mVtbl, 0x4);
@@ -364,6 +375,18 @@ CHECK_OFFSET(tInSeqEventChannelKey, frameNum, 0x2);
 CHECK_OFFSET(tInSeqEventChannelKey, enumVal, 0x4);
 CHECK_OFFSET(tInSeqEventChannelKey, customDataStart, 0x8);
 CHECK_SIZE(tInSeqEventChannelKey, 0xC);
+
+// An active event (On Tour tEventEntry, 0x8; same layout). [R] cScriptPlayerChannelEvent_Play allocates
+// maxSimultaneousEvents x 8 of them (mpEventArray); [U] cScriptPlayerChannelEvent_AddActiveKey fills entry
+// [mNumActiveEvents] from a key.
+struct tEventEntry {
+    int eventID;                    // 0x0 [O]; [U] AddActiveKey: the key's enumVal
+    void* pCustom;                  // 0x4 [O]; [U] AddActiveKey: &key->customDataStart when keySize > 8, else 0
+};
+
+CHECK_OFFSET(tEventEntry, eventID, 0x0);
+CHECK_OFFSET(tEventEntry, pCustom, 0x4);
+CHECK_SIZE(tEventEntry, 0x8);
 
 struct tInSeqBlockChannelHeader {
     unsigned short numKeys;         // 0x0 [O]; [U] cScriptPlayerChannelBlock_Play tests data[0]; the key loaders

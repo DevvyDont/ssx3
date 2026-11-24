@@ -19,7 +19,11 @@ struct cScriptEntityCamera;
 struct cScriptObjCameraManager;
 
 struct cScriptObjCamera {
-    char unk_000[0xC];                        // 0x000 the base part; no retail access
+    // --- cScriptObject (scripter/scriptobj.h, 0xC of data; [R] the ctor runs cScriptObject_cScriptObject(self, 1))
+    int mObjType;                             // 0x000 [O] cScriptObject; [R] cScriptObject ctor stores 1 (camera)
+    int mObjID;                               // 0x004 [O] cScriptObject; [R] cScriptObject ctor -1; [U]
+                                              //       cScriptObjCameraManager_RemoveCameraObject matches cameras by it
+    int mInUse;                               // 0x008 [O] cScriptObject; [R] cScriptObject ctor 0
     void** mVtbl;                             // 0x00C [R] ctor = cScriptObjCamera_vtbl; [U] SetCameraEntity's virtual call
     cScriptObjCameraManager* mpCameraManager; // 0x010 [O]
     cScriptEntityCamera* mpCameraEntity;      // 0x014 [O]
@@ -34,6 +38,9 @@ struct cScriptObjCamera {
     int mViewIndex;                           // 0x07C [O]
 };
 
+CHECK_OFFSET(cScriptObjCamera, mObjType, 0x000);
+CHECK_OFFSET(cScriptObjCamera, mObjID, 0x004);
+CHECK_OFFSET(cScriptObjCamera, mInUse, 0x008);
 CHECK_OFFSET(cScriptObjCamera, mVtbl, 0x00C);
 CHECK_OFFSET(cScriptObjCamera, mpCameraManager, 0x010);
 CHECK_OFFSET(cScriptObjCamera, mpCameraEntity, 0x014);

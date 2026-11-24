@@ -319,6 +319,74 @@ CHECK_OFFSET(tSSXFrameActor, rotY, 0x28);
 CHECK_OFFSET(tSSXFrameActor, rotZ, 0x2C);
 CHECK_SIZE(tSSXFrameActor, 0x30);
 
+// A game-state entity's frame (On Tour struct tSSXFrameGameStateManager, 0x8; [O] GetSSXGameStateManagerFrame(
+// cScriptPlayerEntity*, tSSXFrameGameStateManager*)). [R] retail GetSSXGameStateManagerFrame stores these 2 words from
+// channel 0 (its value word, then its custom word).
+struct tGameState;  // On Tour: a 0x1C list node (an inseq block, then pIgnore and pNext); not defined here
+
+struct tSSXFrameGameStateManager {
+    int numGameState;               // 0x00 [O]
+    tGameState* pGameStateList;     // 0x04 [O]
+};
+
+CHECK_OFFSET(tSSXFrameGameStateManager, numGameState, 0x00);
+CHECK_OFFSET(tSSXFrameGameStateManager, pGameStateList, 0x04);
+CHECK_SIZE(tSSXFrameGameStateManager, 0x8);
+
+// The custom data of a camera-manager cut (On Tour struct tTagCustomActiveCamera, 0x8). [U]
+// cScriptObjCameraManager_DoCameraTransition hands the four values to the transition object; OnInSeqKeyEvent and
+// OnInSeqUpdate switch on transitionIn.
+struct tTagCustomActiveCamera {
+    signed char transitionIn;       // 0x0 [O]; [U] 0 blend, 1-6 cScriptObjTransition_SetTransition1, 7 and up
+                                    //     cScriptObjTransition_SetTransition, 8 cut
+    signed char transitionColour;   // 0x1 [O]; [U] DoCameraTransition passes it to SetTransition1
+    short transitionHoldFrames;     // 0x2 [O]; [U] DoCameraTransition: SetTransition1's hold time (as float)
+    short transitionOutFrames;      // 0x4 [O]; [U] DoCameraTransition: SetTransition1's out time (as float)
+    signed char padding[2];         // 0x6 [O]
+};
+
+CHECK_OFFSET(tTagCustomActiveCamera, transitionIn, 0x0);
+CHECK_OFFSET(tTagCustomActiveCamera, transitionColour, 0x1);
+CHECK_OFFSET(tTagCustomActiveCamera, transitionHoldFrames, 0x2);
+CHECK_OFFSET(tTagCustomActiveCamera, transitionOutFrames, 0x4);
+CHECK_SIZE(tTagCustomActiveCamera, 0x8);
+
+// An active camera of a camera-manager frame, a list node (On Tour struct tActiveCamera, 0x1C). [U] the camera
+// manager's OnInSeqKeyEvent / OnInSeqUpdate / DoCameraTransition read the list head; OnInSeqKeyEvent walks pNext.
+struct tActiveCamera {
+    tInSeqBlock data;                // 0x00 [O]; [U] value: the camera to set up (SetupCameraObject), track: its
+                                     //      track (0 / 1), scriptStartFrame and overlapInFrames time the transition
+    tTagCustomActiveCamera* pCustom; // 0x14 [O]
+    tActiveCamera* pNext;            // 0x18 [O]
+};
+
+CHECK_OFFSET(tActiveCamera, data, 0x00);
+CHECK_OFFSET(tActiveCamera, pCustom, 0x14);
+CHECK_OFFSET(tActiveCamera, pNext, 0x18);
+CHECK_SIZE(tActiveCamera, 0x1C);
+
+// A camera-manager entity's frame (On Tour struct tSSXFrameCameraManager, 0x8; [O] GetSSXCameraManagerFrame(
+// cScriptPlayerEntity*, tSSXFrameCameraManager*)). [R] retail GetSSXCameraManagerFrame stores these 2 words from
+// channel 0 (its value word, then its custom word).
+struct tSSXFrameCameraManager {
+    int numActiveCamera;               // 0x00 [O]
+    tActiveCamera* pActiveCameraList;  // 0x04 [O]
+};
+
+CHECK_OFFSET(tSSXFrameCameraManager, numActiveCamera, 0x00);
+CHECK_OFFSET(tSSXFrameCameraManager, pActiveCameraList, 0x04);
+CHECK_SIZE(tSSXFrameCameraManager, 0x8);
+
+// A camera-manager entity's SSX header (On Tour struct tSSXHeaderCameraManager, 0x4; [O]
+// GetSSXCameraManagerHeader returns it). [U] the camera manager's OnInSeqKeyEvent / OnInSeqUpdate test musicSync.
+struct tSSXHeaderCameraManager {
+    signed char musicSync;          // 0x0 [O]; [U] nonzero: cuts wait for the music beat
+    signed char padding[3];         // 0x1 [O]
+};
+
+CHECK_OFFSET(tSSXHeaderCameraManager, musicSync, 0x0);
+CHECK_SIZE(tSSXHeaderCameraManager, 0x4);
+
 // tSSXHeaderCameraAlgorithmic (0x20): the SSX header of an algorithmic camera entity's script data
 // (GetSSXCameraAlgorithmicHeader; On Tour tSSXHeaderCameraAlgorithmic, same offsets). [U]
 // cScriptObjCamera_CalculateBaseTransform_SE reads the three rotations (degrees) at On Tour's offsets;

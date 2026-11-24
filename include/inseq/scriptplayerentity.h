@@ -107,14 +107,20 @@ CHECK_OFFSET(cScriptPlayerEntity, mWaitingPlayExec, 0x38);
 CHECK_SIZE(cScriptPlayerEntity, 0x3C);
 
 // cInSeqCommEntity: the per-entity callback interface (On Tour class cInSeqCommEntity: pure virtuals OnInSeqLock 1,
-// OnInSeqRelease 2, OnInSeqKeyEvent 3, OnInSeqUpdate 4). cScriptEntity implements it with its vptr at +0
-// (scripter/scriptentity.h: cScriptEntity_vtbl slots 1..4 are these). [U] cScriptPlayerEntity_SetEntityComm calls
-// slots 1 / 2 (view cRcListener4240), cScriptPlayerEntity_ExecutePlay slots 3 / 4 (view cRcListener3D20).
+// OnInSeqRelease 2, OnInSeqKeyEvent 3, OnInSeqUpdate 4; the vptr is its only data, at 0x0). cScriptEntity implements
+// it with its vptr at +0 (scripter/scriptentity.h: cScriptEntity_vtbl slots 1..4 are these). [U]
+// cScriptPlayerEntity_SetupPlay / _SetEntityComm call slots 1 / 2, cScriptPlayerEntity_ExecutePlay / _Restart /
+// _DoFrameUpdate slots 3 / 4. Parameters [O] (On Tour's cScriptEntity::OnInSeqKeyEvent(pEntity, type, currFrame,
+// eventBits) and OnInSeqUpdate(pEntity, type, currFrame, frameDelta, eventBits)).
 struct cInSeqCommEntity {
-    void** mVtbl;                   // 0x0 [O] (interface: vptr only); [U] the callers load it at +0
+    // 0x0: the vptr
+    virtual void OnInSeqLock(cScriptPlayerEntity* pEntity, int type) = 0;                       // 1
+    virtual void OnInSeqRelease(cScriptPlayerEntity* pEntity, int type) = 0;                    // 2
+    virtual void OnInSeqKeyEvent(cScriptPlayerEntity* pEntity, int type, float currFrame, int eventBits) = 0; // 3
+    virtual void OnInSeqUpdate(cScriptPlayerEntity* pEntity, int type, float currFrame, float frameDelta,
+                               int eventBits) = 0;                                              // 4
 };
 
-CHECK_OFFSET(cInSeqCommEntity, mVtbl, 0x0);
 CHECK_SIZE(cInSeqCommEntity, 0x4);
 
 // One channel record of a variation (On Tour tInSeqEntityChannelHeader, 0x8): the channel type and the size of its

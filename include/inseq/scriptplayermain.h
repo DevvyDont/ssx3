@@ -23,6 +23,7 @@ struct cInSeq;
 struct cInSeqComm;          // On Tour: interface, vptr only (OnInSeqPlay, OnInSeqUpdate, OnInSeqPlayStopping, OnInSeqStop,
                             // OnInSeqLoop, OnInSeqRequestEntityCommInterface, ...); cBXScriptEngine implements it
 struct cScriptPlayerEntity;
+struct cInSeqCommEntity;    // inseq/scriptplayerentity.h
 
 // mPlayState values (On Tour eScriptPlayState). [U] Play(bool) 0 -> 1; DoUpdateFrame 1 -> 2 (calls OnInSeqPlay), 2 -> 3;
 // UpdateFrame/DoUpdateFrame stop at the end in state 4.
@@ -106,14 +107,21 @@ CHECK_OFFSET(cScriptPlayerMain, mpPreviewCommInterface, 0x44);
 CHECK_SIZE(cScriptPlayerMain, 0x48);
 
 // cInSeqComm: the interface the script player calls back on (On Tour class cInSeqComm: pure virtuals only, in this
-// slot order: OnInSeqPlay 1, OnInSeqUpdate 2, OnInSeqPlayStopping 3, OnInSeqStop 4, OnInSeqLoop,
-// OnInSeqRequestEntityCommInterface, ...). cBXScriptEngine implements it at +0x2AC. [U] cScriptPlayerMain_Stop calls
-// slot 4 (view cRcListener4918), cScriptPlayerMain_DoUpdate slot 2 (view cRcListener51A0), through the vptr at +0.
+// slot order: OnInSeqPlay 1, OnInSeqUpdate 2, OnInSeqPlayStopping 3, OnInSeqStop 4, OnInSeqLoop 5,
+// OnInSeqRequestEntityCommInterface 6, ...; the vptr is its only data, at 0x0). cBXScriptEngine implements it at
+// +0x2AC (retail tables D_00482450 / D_00482100: 11 slots). [U] cScriptPlayerMain_Stop calls slot 4,
+// cScriptPlayerMain_DoUpdate slot 2, cScriptPlayerEntity_SetupPlay slot 6. Parameters [O] (On Tour's
+// cSSXScriptEngine / cBXScriptEngine overrides); slots 7.. are not declared (no retail caller seen).
 struct cInSeqComm {
-    void** mVtbl;                   // 0x0 [O] (interface: vptr only); [U] the callers above load it at +0
+    // 0x0: the vptr
+    virtual void OnInSeqPlay(cScriptPlayerMain* pPlayer) = 0;                                   // 1
+    virtual void OnInSeqUpdate(cScriptPlayerMain* pPlayer, float currFrame, float frameDelta) = 0; // 2
+    virtual void OnInSeqPlayStopping(cScriptPlayerMain* pPlayer) = 0;                           // 3
+    virtual void OnInSeqStop(cScriptPlayerMain* pPlayer) = 0;                                   // 4
+    virtual bool OnInSeqLoop(cScriptPlayerMain* pPlayer) = 0;                                   // 5
+    virtual cInSeqCommEntity* OnInSeqRequestEntityCommInterface(cScriptPlayerEntity* pEntity, int type) = 0; // 6
 };
 
-CHECK_OFFSET(cInSeqComm, mVtbl, 0x0);
 CHECK_SIZE(cInSeqComm, 0x4);
 
 #endif /* INSEQ_SCRIPTPLAYERMAIN_H */

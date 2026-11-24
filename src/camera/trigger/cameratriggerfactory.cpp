@@ -343,13 +343,21 @@ struct sCTBoundPointG : sCTBoundObjG {
     sCTBoundPointG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTBoundObjPoint_vtbl) { type = 3; }
 };
 
-class cCTBoundObjEllK2;
-class cCTBoundObjBoxK2;
-class cCTBoundObjLineK2;
+// The cCTObject accessors every trigger shape has (vtable slots 1-5: pos, heading, pitch, roll, scale; inline in EA's
+// headers, retail keeps out-of-line copies cCTObject_pos__FPv .. cCTObject_scale__FPv). Each returns the address of
+// one cCTObject member, which the get_* readers fill. The flat headers keep the vptr as mVtbl, so the call is by hand.
+enum eCTObjectAccessor { kCTObjectPos = 1, kCTObjectHeading, kCTObjectPitch, kCTObjectRoll, kCTObjectScale };
+
+template <class T> static inline void* ctObjectAccessor(T* obj, int slot)
+{
+    sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)obj->mVtbl;
+    return vt[slot].fn(vthis(obj, vt[slot]));
+}
+
 struct sBoundObjPoint;
-extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllK2* obj);
-extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj);
-extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj);
+extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllipse* obj);
+extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObj* obj);
+extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLine* obj);
 void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj);
 
 /**
@@ -370,21 +378,21 @@ extern "C" int get_camboundobj(void* reader, void** out)
     switch (type) {
     case 0: {
         sCTBoundEllG* boundObj = new (str_Camera_Ellipse_BoundObj, 0, 0) sCTBoundEllG;
-        int bytesRead = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllK2*)boundObj);
+        int bytesRead = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllipse*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
     case 1: {
         sCTBoundBoxG* boundObj = new (str_Camera_Box_BoundObj, 0, 0) sCTBoundBoxG;
-        int bytesRead = get_cCTBoundObjBox(reader, (cCTBoundObjBoxK2*)boundObj);
+        int bytesRead = get_cCTBoundObjBox(reader, (cCTBoundObj*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
     }
     case 2: {
         sCTBoundLineG* boundObj = new (str_Camera_Line_BoundObj, 0, 0) sCTBoundLineG;
-        int bytesRead = get_cCTBoundObjLine(reader, (cCTBoundObjLineK2*)boundObj);
+        int bytesRead = get_cCTBoundObjLine(reader, (cCTBoundObjLine*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
@@ -409,17 +417,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjEllipse);
 // get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
 extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
-class cCTBoundObjEllK2 {
-public:
-    char pad_0x00[0x24];
-    // vptr at 0x24; int at 0x28
-    virtual void* center();
-    virtual void* sizeX();
-    virtual void* sizeY();
-    virtual void* sizeZ();
-    virtual void* axis();
-};
-
 /**
  * Reads an ellipse bounding object's data from a trigger stream.
  *
@@ -430,15 +427,15 @@ public:
  * @param obj     the ellipse to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllK2* obj)
+extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllipse* obj)
 {
     int n;
-    *(int*)((char*)obj + 0x28) = 0;
-    n = get_t3Vector_n(reader, obj->center());
-    n += get_t3Vector_n(reader, obj->axis());
-    n += get_float(reader, obj->sizeX());
-    n += get_float(reader, obj->sizeY());
-    n += get_float(reader, obj->sizeZ());
+    obj->Type = 0;
+    n = get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectPos));
+    n += get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectScale));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectHeading));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectPitch));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectRoll));
     return n;
 }
 #endif
@@ -450,17 +447,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjBox);
 // get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
 extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
-class cCTBoundObjBoxK2 {
-public:
-    char pad_0x00[0x24];
-    // vptr at 0x24; int at 0x28
-    virtual void* center();
-    virtual void* sizeX();
-    virtual void* sizeY();
-    virtual void* sizeZ();
-    virtual void* axis();
-};
-
 /**
  * Reads a box bounding object's data from a trigger stream.
  *
@@ -471,15 +457,15 @@ public:
  * @param obj     the box to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObjBoxK2* obj)
+extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObj* obj)
 {
     int n;
-    *(int*)((char*)obj + 0x28) = 1;
-    n = get_t3Vector_n(reader, obj->center());
-    n += get_t3Vector_n(reader, obj->axis());
-    n += get_float(reader, obj->sizeX());
-    n += get_float(reader, obj->sizeY());
-    n += get_float(reader, obj->sizeZ());
+    obj->Type = 1;
+    n = get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectPos));
+    n += get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectScale));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectHeading));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectPitch));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectRoll));
     return n;
 }
 #endif
@@ -491,53 +477,34 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjLine);
 // get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
 extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
-class cCTBoundObjLineK2 {
-public:
-    char pad_0x00[0x24];
-    // vptr at 0x24; int at 0x28
-    virtual void* center();
-    virtual void* sizeX();
-    virtual void* sizeY();
-    virtual void* sizeZ();
-    virtual void* axis();
-};
-
 /**
  * Reads a line bounding object's data from a trigger stream.
  *
  * Sets the shape type to 2, reads position, scale, heading, pitch and roll like the other shapes, then the
- * line's two end points (vectors at +0x2C and +0x38).
+ * line's two end points (Point[0] and Point[1]).
  *
  * @param reader  pointer to the stream's read cursor
  * @param obj     the line to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLineK2* obj)
+extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLine* obj)
 {
     int n;
-    *(int*)((char*)obj + 0x28) = 2;
-    n = get_t3Vector_n(reader, obj->center());
-    n += get_t3Vector_n(reader, obj->axis());
-    n += get_float(reader, obj->sizeX());
-    n += get_float(reader, obj->sizeY());
-    n += get_float(reader, obj->sizeZ());
-    n += get_t3Vector_n(reader, (char*)obj + 0x2C);
-    n += get_t3Vector_n(reader, (char*)obj + 0x38);
+    obj->Type = 2;
+    n = get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectPos));
+    n += get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectScale));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectHeading));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectPitch));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectRoll));
+    n += get_t3Vector_n(reader, &obj->Point[0]);
+    n += get_t3Vector_n(reader, &obj->Point[1]);
     return n;
 }
 #endif
 
-struct sBoundObjVTable {
-    char pad_0x00[0x8];
-    short field_0x8;
-    char pad_0xA[2];
-    void* (*fn)(void*); // 0xC
-};
-
-struct sBoundObjPoint {
-    char pad_0x00[0x24];
-    sBoundObjVTable* vtable;
-    int field_0x28;
+// The point bound object: a cCTBoundObj with no members of its own (named as the reader's symbol spells it,
+// get_cCTBoundObjPoint__FPvP14sBoundObjPoint).
+struct sBoundObjPoint : cCTBoundObj {
 };
 
 extern "C" void* get_t3Vector(void* self, void* v);
@@ -549,7 +516,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjPoint__FPvP14s
  * Reads a point bounding object's data from a trigger stream: sets its shape type to 3 and reads its
  * position.
  *
- * The position vector is read through the object's first virtual accessor (vtable at +0x24), the one the
+ * The position vector is read through the object's first virtual accessor (cCTObject pos), the one the
  * other shapes read their position through. The first parameter is the stream cursor, not a this pointer.
  *
  * @param self  pointer to the stream's read cursor (On Tour char** src)
@@ -558,8 +525,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjPoint__FPvP14s
  */
 void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj)
 {
-    obj->field_0x28 = 3;
-    void* result = obj->vtable->fn((char*)obj + obj->vtable->field_0x8);
+    obj->Type = 3;
+    void* result = ctObjectAccessor(obj, kCTObjectPos);
     return get_t3Vector(self, result);
 }
 #endif
@@ -583,41 +550,30 @@ struct sCTSplineG : sCTBoundObjG {
     }
 };
 
-class cCTSplineK2 {
-public:
-    char pad_0x00[0x24];
-    // vptr at 0x24; control points at 0x28
-    virtual void* center();
-    virtual void* sizeX();
-    virtual void* sizeY();
-    virtual void* sizeZ();
-    virtual void* axis();
-};
-
 /**
  * Allocates a camera trigger spline and reads its data from a trigger stream.
  *
  * Constructs a "Camera Trigger Spline" (scale 1, position and control points zero; it keeps the cCTBoundObj
  * vtable cCTObject_vtbl), reads position, scale, heading, pitch and roll like the bounding shapes, then the four
- * control-point vectors at +0x28, +0x34, +0x40 and +0x4C. readAction calls it for a spline action.
+ * control-point vectors Point[0..3]. readAction calls it for a spline action.
  *
  * @param reader  pointer to the stream's read cursor, advanced past what is read
  * @param out  receives the new spline (On Tour cCTSpline*&)
  * @return the number of bytes read
  */
-extern "C" int get_camspline(void* reader, cCTSplineK2** out)
+extern "C" int get_camspline(void* reader, cCTSpline** out)
 {
     int n;
-    *out = (cCTSplineK2*)new (str_Camera_Trigger_Spline, 0, 0) sCTSplineG;
-    n = get_t3Vector_n(reader, (*out)->center());
-    n += get_t3Vector_n(reader, (*out)->axis());
-    n += get_float(reader, (*out)->sizeX());
-    n += get_float(reader, (*out)->sizeY());
-    n += get_float(reader, (*out)->sizeZ());
-    n += get_t3Vector_n(reader, (char*)*out + 0x28);
-    n += get_t3Vector_n(reader, (char*)*out + 0x34);
-    n += get_t3Vector_n(reader, (char*)*out + 0x40);
-    n += get_t3Vector_n(reader, (char*)*out + 0x4C);
+    *out = (cCTSpline*)new (str_Camera_Trigger_Spline, 0, 0) sCTSplineG;
+    n = get_t3Vector_n(reader, ctObjectAccessor(*out, kCTObjectPos));
+    n += get_t3Vector_n(reader, ctObjectAccessor(*out, kCTObjectScale));
+    n += get_float(reader, ctObjectAccessor(*out, kCTObjectHeading));
+    n += get_float(reader, ctObjectAccessor(*out, kCTObjectPitch));
+    n += get_float(reader, ctObjectAccessor(*out, kCTObjectRoll));
+    n += get_t3Vector_n(reader, &(*out)->Point[0]);
+    n += get_t3Vector_n(reader, &(*out)->Point[1]);
+    n += get_t3Vector_n(reader, &(*out)->Point[2]);
+    n += get_t3Vector_n(reader, &(*out)->Point[3]);
     return n;
 }
 #endif
@@ -625,23 +581,6 @@ extern "C" int get_camspline(void* reader, cCTSplineK2** out)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolume_getBoundaryPointClosestTo);
 #ifdef SKIP_ASM
-
-struct sBox_171FA8 {
-    t4Vector lo;
-    t4Vector hi;
-};
-
-struct sVEbox_171FA8 {
-    short delta;
-    short index;
-    sBox_171FA8 (*fn)(void*);
-};
-
-struct sVEin_171FA8 {
-    short delta;
-    short index;
-    int (*fn)(void*, t4Vector*);
-};
 
 extern "C" float logf(float x);
 
@@ -713,27 +652,23 @@ static inline float Length_171FA8(const t4Vector& v)
     return r;
 }
 
-static inline sBox_171FA8 GetBox_171FA8(char* o)
+// The volume's bounding box, from its virtual slot 6 (boundBox).
+static inline tBoundBox GetBox_171FA8(cCTVolume* o)
 {
-    sVEbox_171FA8* e = &(*(sVEbox_171FA8**)(o + 0x24))[6];
-    return e->fn(o + e->delta);
+    sVEntry<tBoundBox(void*)>* vt = (sVEntry<tBoundBox(void*)>*)o->mVtbl;
+    sVEntry<tBoundBox(void*)>* e = &vt[6];
+    return e->fn(vthis(o, *e));
 }
 
-static inline int Inside_171FA8(char* o, t4Vector* p)
+static inline t4Vector Center_171FA8(const tBoundBox& b)
 {
-    sVEin_171FA8* e = &(*(sVEin_171FA8**)(o + 0x24))[7];
-    return e->fn(o + e->delta, p);
-}
-
-static inline t4Vector Center_171FA8(const sBox_171FA8& b)
-{
-    return Scale_171FA8(Add_171FA8(b.lo, b.hi), 0.5f);
+    return Scale_171FA8(Add_171FA8(b.MinPoint, b.MaxPoint), 0.5f);
 }
 
 /**
  * Returns the point where the ray from a trigger volume's centre through @p pos leaves the volume, found by bisection.
  *
- * Gets the volume's bounding box from its own virtual slot 6 (boundBox; the vtable sits at +0x24 of the cCTObject part)
+ * Gets the volume's bounding box from its own virtual slot 6 (boundBox; the vtable is the cCTObject part's mVtbl)
  * and starts from the box centre. While the volume still contains the test point (slot 7, containsPoint) it moves the
  * test point out along centre-to-@p pos at 2, 4, 8, ... times that offset, remembering the last point that was inside.
  * It then halves the inside/outside bracket (int)logf(length / @p step) + 1 times and returns the outside end.
@@ -748,15 +683,18 @@ static inline t4Vector Center_171FA8(const sBox_171FA8& b)
  * @param step  the wanted accuracy in cm (On Tour tolerance_cm)
  * @return the boundary point (the last tested point outside the volume), returned by value
  */
-extern "C" t4Vector cCTVolume_getBoundaryPointClosestTo(char* obj, t4Vector* pos, float step)
+extern "C" t4Vector cCTVolume_getBoundaryPointClosestTo(cCTVolume* obj, t4Vector* pos, float step)
 {
     t4Vector center = Center_171FA8(GetBox_171FA8(obj));
     t4Vector dir = Sub_171FA8(*pos, center);
     t4Vector outsidePos = *pos;
     t4Vector lastInsidePos = center;
     float k = 2.0f;
-    sVEin_171FA8* containsEntry;
-    while (containsEntry = &(*(sVEin_171FA8**)(obj + 0x24))[7], containsEntry->fn(obj + containsEntry->delta, &outsidePos)) {
+    // the volume's virtual slot 7, containsPoint
+    sVEntry<int(void*, t4Vector*)>* vt;
+    sVEntry<int(void*, t4Vector*)>* containsEntry;
+    while (vt = (sVEntry<int(void*, t4Vector*)>*)obj->mVtbl, containsEntry = &vt[7],
+           containsEntry->fn(vthis(obj, *containsEntry), &outsidePos)) {
         lastInsidePos = outsidePos;
         t4Vector off = Scale_171FA8(dir, k);
         outsidePos = Add_171FA8(center, off);
@@ -766,8 +704,9 @@ extern "C" t4Vector cCTVolume_getBoundaryPointClosestTo(char* obj, t4Vector* pos
     int n = (int)logf(len / step) + 1;
     for (int i = 0; i < n; i++) {
         t4Vector testPos = Scale_171FA8(Add_171FA8(outsidePos, lastInsidePos), 0.5f);
-        containsEntry = &(*(sVEin_171FA8**)(obj + 0x24))[7];
-        if (containsEntry->fn(obj + containsEntry->delta, &testPos)) {
+        vt = (sVEntry<int(void*, t4Vector*)>*)obj->mVtbl;
+        containsEntry = &vt[7];
+        if (containsEntry->fn(vthis(obj, *containsEntry), &testPos)) {
             lastInsidePos = testPos;
         } else {
             outsidePos = testPos;
@@ -833,22 +772,22 @@ extern "C" sCTBoxK2 cCTVolumeEllipse_boundBox(cCTVolumeEllipse* obj)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeEllipse_containsPoint);
 #ifdef SKIP_ASM
-struct sV3_172278 {
-    float x, y, z;
-    sV3_172278() {}
-    sV3_172278(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+// EA's vector and matrix classes have constructors, and t4Matrix copies through VU0; ours are plain structs. These
+// local stand-ins add them back (the code below builds, negates and copies them by value).
+struct t3VectorXYZ : t3Vector {
+    t3VectorXYZ() {}
+    t3VectorXYZ(float ax, float ay, float az) { x = ax; y = ay; z = az; }
 };
 
-struct sV_172278 {
-    float x, y, z, w;
-    sV_172278() {}
-    sV_172278(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-    sV_172278(const sV3_172278& v, float aw) { x = v.x; y = v.y; z = v.z; w = aw; }
-} __attribute__((aligned(16)));
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+    t4VectorXYZW(const t3Vector& v, float aw) { x = v.x; y = v.y; z = v.z; w = aw; }
+};
 
-static inline sV3_172278 operator-(const sV3_172278& a)
+static inline t3VectorXYZ operator-(const t3Vector& a)
 {
-    return sV3_172278(-a.x, -a.y, -a.z);
+    return t3VectorXYZ(-a.x, -a.y, -a.z);
 }
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -871,23 +810,23 @@ static inline void vu0CopyMtx_172278(void* dst, const void* src)
 }
 
 
-struct sM_172278 {
-    float m[4][4];
-    sM_172278() {}
-    sM_172278(const sM_172278& o) { vu0CopyMtx_172278(this, &o); }
-    sM_172278& operator=(const sM_172278& o) { vu0CopyMtx_172278(this, &o); return *this; }
-} __attribute__((aligned(16)));
+struct t4MatrixVU0 : t4Matrix {
+    t4MatrixVU0() {}
+    t4MatrixVU0(const t4Matrix& o) { vu0CopyMtx_172278(this, &o); }
+    t4MatrixVU0(const t4MatrixVU0& o) { vu0CopyMtx_172278(this, &o); }
+    t4MatrixVU0& operator=(const t4MatrixVU0& o) { vu0CopyMtx_172278(this, &o); return *this; }
+};
 
-extern sM_172278 t4mat_Identity_v172278 __asm__("t4mat_Identity");
-extern sV_172278 t4vect_XAxis_v172278 __asm__("t4vect_XAxis");
-extern sV_172278 t4vect_YAxis_v172278 __asm__("t4vect_YAxis");
-extern sV_172278 t4vect_ZAxis_v172278 __asm__("t4vect_ZAxis");
+extern t4Matrix t4mat_Identity_v172278 __asm__("t4mat_Identity");
+extern t4Vector t4vect_XAxis_v172278 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_YAxis_v172278 __asm__("t4vect_YAxis");
+extern t4Vector t4vect_ZAxis_v172278 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (scale the rows of m by s.x, s.y, s.z, s.w).
-static inline sM_172278 vu0ScaleMtx_172278(const sM_172278& m, const sV_172278& s)
+static inline t4MatrixVU0 vu0ScaleMtx_172278(const t4Matrix& m, const t4Vector& s)
 {
-    sM_172278 r;
+    t4MatrixVU0 r;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, %2\n"
@@ -911,7 +850,7 @@ static inline sM_172278 vu0ScaleMtx_172278(const sM_172278& m, const sV_172278& 
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_172278(sM_172278* dst, const sM_172278* a, const sM_172278* b)
+static inline void vu0MulMtx_172278(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -950,7 +889,7 @@ static inline void vu0MulMtx_172278(sM_172278* dst, const sM_172278* a, const sM
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_172278(sM_172278* m, const sV_172278& v)
+static inline void vu0TransMtx_172278(t4Matrix* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -971,9 +910,9 @@ static inline void vu0TransMtx_172278(sM_172278* m, const sV_172278& v)
 }
 
 // PORT: PS2-only VU0 inline asm (r = m * v).
-static inline sV_172278 vu0MulVec_172278(const sM_172278& m, const sV_172278& v)
+static inline t4Vector vu0MulVec_172278(const t4Matrix& m, const t4Vector& v)
 {
-    sV_172278 r;
+    t4Vector r;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2         $vf8, %2\n"
@@ -998,9 +937,9 @@ static inline void SinCos_172278(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float angle)
+static inline void RotAxis_172278(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_172278 r;
+    t4MatrixVU0 r;
     float s;
     float c;
     float one = 1.0f;
@@ -1015,47 +954,48 @@ static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float ang
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    r.row[0].x = tx * x + c;
+    r.row[1].x = tx * y + sz;
+    r.row[2].x = tx * z - sy;
+    r.row[0].y = ty * x - sz;
+    r.row[1].y = ty * y + c;
+    r.row[2].y = ty * z + sx;
+    r.row[0].z = tz * x + sy;
+    r.row[1].z = tz * y - sx;
+    r.row[2].z = tz * z + c;
+    r.row[3].x = 0.0f;
+    r.row[3].y = 0.0f;
+    r.row[3].z = 0.0f;
+    r.row[0].w = 0.0f;
+    r.row[1].w = 0.0f;
+    r.row[2].w = 0.0f;
+    r.row[3].w = one;
     vu0MulMtx_172278(m, m, &r);
 }
 
 /**
  * Tells whether a world point lies inside an ellipse (ellipsoid) trigger volume.
  *
- * Builds the inverse of the volume's transform: t4mat_Identity scaled by 1 / scale (+0x18, +0x1C, +0x20), rotated about
- * t4vect_ZAxis by -heading (+0xC), about t4vect_YAxis by -roll (+0x14) and about t4vect_XAxis by -pitch (+0x10), then
- * translated by -position (+0x0). The point mapped into that unit-sphere space is inside when x*x + y*y + z*z <= 1.
- * Slot 7 of the ellipse volume vtable cCTVolumeEllipse_vtbl.
+ * Builds the inverse of the volume's transform: t4mat_Identity scaled by 1 / Scale, rotated about t4vect_ZAxis by
+ * -Heading, about t4vect_YAxis by -Roll and about t4vect_XAxis by -Pitch, then translated by -Pos. The point mapped
+ * into that unit-sphere space is inside when x*x + y*y + z*z <= 1. Slot 7 of the ellipse volume vtable
+ * cCTVolumeEllipse_vtbl.
  *
  * @param point  the world point to test
  * @return 1 when the point is inside (or on) the ellipsoid, else 0
  */
 // Ellipsoid volume test: is p inside the unit sphere after the inverse transform?
-extern "C" int cCTVolumeEllipse_containsPoint(cCTVolumeEllipse* self, sV_172278* point)
+extern "C" int cCTVolumeEllipse_containsPoint(cCTVolumeEllipse* self, t4Vector* point)
 {
-    sM_172278 toLocal(t4mat_Identity_v172278);
+    t4MatrixVU0 toLocal(t4mat_Identity_v172278);
     float one = 1.0f;
-    toLocal = vu0ScaleMtx_172278(toLocal, sV_172278(one / self->Scale.x, one / self->Scale.y, one / self->Scale.z, one));
+    toLocal = vu0ScaleMtx_172278(toLocal,
+                                 t4VectorXYZW(one / self->Scale.x, one / self->Scale.y, one / self->Scale.z, one));
     RotAxis_172278(&toLocal, t4vect_ZAxis_v172278, -self->Heading);
     RotAxis_172278(&toLocal, t4vect_YAxis_v172278, -self->Roll);
     RotAxis_172278(&toLocal, t4vect_XAxis_v172278, -self->Pitch);
-    vu0TransMtx_172278(&toLocal, sV_172278(-*(sV3_172278*)self, one));
-    sV_172278 localPt = vu0MulVec_172278(toLocal, *point);
+    vu0TransMtx_172278(&toLocal, t4VectorXYZW(-self->Pos, one));
+    t4Vector localPt = vu0MulVec_172278(toLocal, *point);
     return localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z <= one;
 }
 #endif
@@ -1410,10 +1350,8 @@ extern "C" int cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camvolume);
 #ifdef SKIP_ASM
-class cCTVolumeEllK2;
-class cCTVolumeBoxK2;
-extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj);
-extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj);
+extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllipse* obj);
+extern "C" int get_cCTVolumeBox(void* reader, cCTVolume* obj);
 extern void* cCTVolumeEllipse_vtbl[];      // volume ellipse vtable
 extern void* cCTVolumeBox_vtbl[];      // volume box vtable
 extern char str_Camera_Sphere_Trigger[];
@@ -1446,14 +1384,14 @@ extern "C" int get_camvolume(void* reader, void** out)
     switch (type) {
     case 0: {
         sCTVolEllG* volume = new (str_Camera_Sphere_Trigger, 0, 0) sCTVolEllG;
-        int bytesRead = get_cCTVolumeEllipse(reader, (cCTVolumeEllK2*)volume);
+        int bytesRead = get_cCTVolumeEllipse(reader, (cCTVolumeEllipse*)volume);
         *out = volume;
         n += bytesRead;
         break;
     }
     case 1: {
         sCTVolBoxG* volume = new (str_Camera_Box_Trigger, 0, 0) sCTVolBoxG;
-        int bytesRead = get_cCTVolumeBox(reader, (cCTVolumeBoxK2*)volume);
+        int bytesRead = get_cCTVolumeBox(reader, (cCTVolume*)volume);
         *out = volume;
         n += bytesRead;
         break;
@@ -1473,17 +1411,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeEllipse);
 // get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
 extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
-class cCTVolumeEllK2 {
-public:
-    char pad_0x00[0x24];
-    // vptr at 0x24; int at 0x28
-    virtual void* center();
-    virtual void* sizeX();
-    virtual void* sizeY();
-    virtual void* sizeZ();
-    virtual void* axis();
-};
-
 /**
  * Reads an ellipse (sphere) trigger volume's data from a trigger stream.
  *
@@ -1494,15 +1421,15 @@ public:
  * @param obj     the volume to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj)
+extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllipse* obj)
 {
     int n;
-    *(int*)((char*)obj + 0x28) = 0;
-    n = get_t3Vector_n(reader, obj->center());
-    n += get_t3Vector_n(reader, obj->axis());
-    n += get_float(reader, obj->sizeX());
-    n += get_float(reader, obj->sizeY());
-    n += get_float(reader, obj->sizeZ());
+    obj->Type = 0;
+    n = get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectPos));
+    n += get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectScale));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectHeading));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectPitch));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectRoll));
     return n;
 }
 #endif
@@ -1514,17 +1441,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTVolumeBox);
 // get_t3Vector returns the byte count read (the unit declares it void*); bind an int-returning alias.
 extern "C" int get_t3Vector_n(void* reader, void* dst) __asm__("get_t3Vector");
 
-class cCTVolumeBoxK2 {
-public:
-    char pad_0x00[0x24];
-    // vptr at 0x24; int at 0x28
-    virtual void* center();
-    virtual void* sizeX();
-    virtual void* sizeY();
-    virtual void* sizeZ();
-    virtual void* axis();
-};
-
 /**
  * Reads a box trigger volume's data from a trigger stream.
  *
@@ -1535,15 +1451,15 @@ public:
  * @param obj     the volume to fill
  * @return the number of bytes read
  */
-extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj)
+extern "C" int get_cCTVolumeBox(void* reader, cCTVolume* obj)
 {
     int n;
-    *(int*)((char*)obj + 0x28) = 1;
-    n = get_t3Vector_n(reader, obj->center());
-    n += get_t3Vector_n(reader, obj->axis());
-    n += get_float(reader, obj->sizeX());
-    n += get_float(reader, obj->sizeY());
-    n += get_float(reader, obj->sizeZ());
+    obj->Type = 1;
+    n = get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectPos));
+    n += get_t3Vector_n(reader, ctObjectAccessor(obj, kCTObjectScale));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectHeading));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectPitch));
+    n += get_float(reader, ctObjectAccessor(obj, kCTObjectRoll));
     return n;
 }
 #endif
@@ -1762,8 +1678,8 @@ extern "C" void cTriggerAlgorithm_snap_x(char* self, long key) __asm__("cTrigger
 /**
  * Snaps a trigger camera into place behind the rider it follows, when @p key names that rider.
  *
- * Does nothing unless @p key equals slot 7 (getAIIndex) of the target rider's cBeing part (Target +0x30, its Rider
- * +0x4, then +0x6C0). The focus point is Target's getPosition (slot 1) raised by HeightOffset (+0x6C) along
+ * Does nothing unless @p key equals the AI index of the rider Target follows (Target->Rider->getAIIndex(), cBeing
+ * slot 7). The focus point is Target's getPosition (slot 1) raised by HeightOffset (+0x6C) along
  * t4vect_ZAxis and pushed LeadDistance (+0x74) along getFront (slot 4). Heading (+0x50) becomes the wrapped yaw of the
  * front vector and Pitch (+0x54) the wrapped -PitchMultiplier (+0x58) x the front vector's pitch minus PitchOffset
  * (+0x78, degrees); Position (+0x40) is put IdealDist (+0x70) back from the focus along the direction given by that
@@ -1774,10 +1690,7 @@ extern "C" void cTriggerAlgorithm_snap_x(char* self, long key) __asm__("cTrigger
 extern "C" void cTriggerAlgorithm_snap_x(char* vself, long key)
 {
     cTriggerAlgorithm* self = (cTriggerAlgorithm*)vself;
-    char* riderTarget = (char*)self->Target;
-    char* riderPart = *(char**)(riderTarget + 4) + 0x6C0;
-    sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)riderPart)[7];
-    if (key != vEntry->fn(vthis(riderPart, *vEntry)))
+    if (key != self->Target->Rider->getAIIndex())
         return;
     t4Vector focusPos, riderFront, dir;
     {
@@ -2420,13 +2333,14 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
-        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)self->Target);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
-        ((void (*)(void*, void*))vEntry->fn)(&riderPos, vthis(calleeObj, *vEntry));
+        // Target's getPosition (slot 1) and getFront (slot 4), called by hand with the result pointer first
+        cCameraTarget* target = self->Target;
+        sVEntry<void(t4Vector*, void*)>* vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[1];
+        vEntry->fn(&riderPos, vthis(target, *vEntry));
         float k = self->LeadDistance;
-        calleeObj = (cCTBoundObj*)((char*)self->Target);
-        vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
-        ((void (*)(void*, void*))vEntry->fn)(&riderFront, vthis(calleeObj, *vEntry));
+        target = self->Target;
+        vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[4];
+        vEntry->fn(&riderFront, vthis(target, *vEntry));
         ScaleTo_174200(leadOffset, riderFront, k);
         AddTo_174200(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
@@ -2435,9 +2349,11 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
     }
     self->CamTargetPos = lookTarget;
     {
-        cCTBoundObj* calleeObj = self->BoundAction->BoundObj;
-        sVEntry<t4Vector(void*)>* vEntry = &((sVEntry<t4Vector (void*)>*)calleeObj->mVtbl)[6];
-        ((void (*)(void*, void*))vEntry->fn)(vthis(calleeObj, *vEntry), (char*)&self->Position);
+        // the bound object's virtual slot 6, limitPoint(t4Vector&)
+        cCTBoundObj* boundObj = self->BoundAction->BoundObj;
+        sVEntry<void(void*, t4Vector*)>* vt = (sVEntry<void(void*, t4Vector*)>*)boundObj->mVtbl;
+        sVEntry<void(void*, t4Vector*)>* limitPoint = &vt[6];
+        limitPoint->fn(vthis(boundObj, *limitPoint), &self->Position);
     }
     t4Vector toTarget = Sub_174200(lookTarget, self->Position);
     self->Heading = Atan2_174200(toTarget.y, toTarget.x);
@@ -2579,12 +2495,12 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
  * Snaps a bounded trigger camera into place for the rider @p subjectId names: the trigger camera snap, then the bound object
  * limit.
  *
- * Does nothing unless @p subjectId equals slot 7 (getAIIndex) of the target rider's +0x6C0 part. Computes the look target like
- * cBoundedAlgorithm_update (the action's TargetPoint for TargetType 1, else rider position + lead + height), but with the
- * LeadDistance (+0x74) and HeightOffset (+0x6C) the algorithm held before; only then copies IdealDist, HeightOffset,
- * PitchOffset, FieldOfView and LeadDistance from BoundAction (+0x80). Runs the trigger algorithm snap cTriggerAlgorithm_snap,
- * lets the action's BoundObj limit Position (slot 6), and aims Heading (+0x50) and Pitch (+0x54) from Position at the
- * look target.
+ * Does nothing unless @p subjectId equals the AI index of the rider Target follows (Target->Rider->getAIIndex()).
+ * Computes the look target like cBoundedAlgorithm_update (the action's TargetPoint for TargetType 1, else rider
+ * position + lead + height), but with the LeadDistance (+0x74) and HeightOffset (+0x6C) the algorithm held before; only
+ * then copies IdealDist, HeightOffset, PitchOffset, FieldOfView and LeadDistance from BoundAction (+0x80). Runs the
+ * trigger algorithm snap cTriggerAlgorithm_snap, lets the action's BoundObj limit Position (slot 6), and aims Heading
+ * (+0x50) and Pitch (+0x54) from Position at the look target.
  *
  * Quirk: on the first snap after a new action the look target uses the previous action's lead and height.
  *
@@ -2592,12 +2508,8 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
  */
 extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
 {
-    {
-        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)&VPTR_AT(self->Target->Rider, sizeof(cRiderState)));
-        sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)calleeObj)[7];
-        if (vEntry->fn(vthis(calleeObj, *vEntry)) != subjectId)
-            return;
-    }
+    if (self->Target->Rider->getAIIndex() != subjectId)
+        return;
     cCTActionBoundedCam* act = self->BoundAction;
     t4Vector lookTarget;
     if (act->TargetType == 1) {
@@ -2607,13 +2519,14 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
-        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)self->Target);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
-        ((void (*)(void*, void*))vEntry->fn)(&riderPos, vthis(calleeObj, *vEntry));
+        // Target's getPosition (slot 1) and getFront (slot 4), called by hand with the result pointer first
+        cCameraTarget* target = self->Target;
+        sVEntry<void(t4Vector*, void*)>* vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[1];
+        vEntry->fn(&riderPos, vthis(target, *vEntry));
         float k = self->LeadDistance;
-        calleeObj = (cCTBoundObj*)((char*)self->Target);
-        vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
-        ((void (*)(void*, void*))vEntry->fn)(&riderFront, vthis(calleeObj, *vEntry));
+        target = self->Target;
+        vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[4];
+        vEntry->fn(&riderFront, vthis(target, *vEntry));
         ScaleTo_1744B0(leadOffset, riderFront, k);
         AddTo_1744B0(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
@@ -2628,9 +2541,11 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
     self->LeadDistance = act2->LeadDistance;
     cTriggerAlgorithm_snap(((char*)self), subjectId);
     {
-        cCTBoundObj* calleeObj = self->BoundAction->BoundObj;
-        sVEntry<t4Vector(void*)>* vEntry = &((sVEntry<t4Vector (void*)>*)calleeObj->mVtbl)[6];
-        ((void (*)(void*, void*))vEntry->fn)(vthis(calleeObj, *vEntry), (char*)&self->Position);
+        // the bound object's virtual slot 6, limitPoint(t4Vector&)
+        cCTBoundObj* boundObj = self->BoundAction->BoundObj;
+        sVEntry<void(void*, t4Vector*)>* vt = (sVEntry<void(void*, t4Vector*)>*)boundObj->mVtbl;
+        sVEntry<void(void*, t4Vector*)>* limitPoint = &vt[6];
+        limitPoint->fn(vthis(boundObj, *limitPoint), &self->Position);
     }
     t4Vector toTarget = Sub_1744B0(lookTarget, self->Position);
     self->Heading = Atan2_1744B0(toTarget.y, toTarget.x);
@@ -2681,63 +2596,57 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", nash_privy_QueryHelper_helpX)
 // Camera-trigger octree query (REF crates/ssx3-game/src/game/camera/trigger/cameratriggerfactory.rs,
 // "CollectOctreeTriggersInBox"): adds the node's triggers, then visits the eight children whose
 // cell (grown by 0.2) overlaps the box; children wholly inside take the plain subtree walk.
-struct sVEnt_4848 {
-    short delta;
-    short index;
-    int (*fn)(void*, ...);
-};
+extern "C" cActiveTriggerNode* cActiveTriggerList_find(cActiveTriggerList* list, tCameraTrigger* trigger);
+extern "C" void cActiveTriggerList_add(cActiveTriggerList* list, tCameraTrigger* trigger);
+extern "C" void descend(nash_Cell* node, CameraCollisionCallback* ctx);
 
-
-
-
-extern "C" void* cActiveTriggerList_find(void*, void*);
-extern "C" void cActiveTriggerList_add(void*, void*);
-extern "C" void descend(nash_Cell* node, void* ctx);
-
-static inline void WalkList_4848(char* e, void* ctx)
+// The camera collision callback on one cell's typed list (descend's loop): flags or adds each trigger whose volume
+// holds the rider.
+static inline void WalkList_4848(cCTNode* e, CameraCollisionCallback* ctx)
 {
-    for (; e != 0; e = *(char**)e) {
-        if (*(int*)(e + 8) == 4) {
-            char* trig = *(char**)(e + 0xC);
-            char* sub = *(char**)((char*)ctx + 4) + 0x6C0;
-            char* bound = *(char**)(trig + 8);
-            sVEnt_4848* cvt = *(sVEnt_4848**)sub;
-            sVEnt_4848* bvt = *(sVEnt_4848**)(bound + 0x24);
-            char* bthis = bound + bvt[7].delta;
-            int r = cvt[5].fn(sub + cvt[5].delta);
-            if (bvt[7].fn(bthis, r)) {
-                void* f = cActiveTriggerList_find(*(void**)ctx, trig);
+    for (; e != 0; e = e->next) {
+        if (e->type == 4) {
+            tCameraTrigger* trig = e->Trigger;
+            cBeing& rider = *ctx->rider;
+            cCTVolume* volume = trig->Volume;
+            // the rider's getPosition (cBeing slot 5) and the volume's containsPoint (slot 7), called by hand
+            sVEntry<t4Vector*(void*)>* riderVt = *(sVEntry<t4Vector*(void*)>**)&rider;
+            sVEntry<int(void*, t4Vector*)>* volumeVt = (sVEntry<int(void*, t4Vector*)>*)volume->mVtbl;
+            void* volumeThis = vthis(volume, volumeVt[7]);
+            t4Vector* riderPos = riderVt[5].fn(vthis(&rider, riderVt[5]));
+            if (volumeVt[7].fn(volumeThis, riderPos)) {
+                cActiveTriggerNode* f = cActiveTriggerList_find(ctx->ActiveTriggerList, trig);
                 if (f) {
-                    *(int*)((char*)f + 0xC) = 1;
+                    f->IsActiveFlag = 1;
                 } else {
-                    cActiveTriggerList_add(*(void**)ctx, trig);
+                    cActiveTriggerList_add(ctx->ActiveTriggerList, trig);
                 }
             }
         }
     }
 }
 
-static inline void Subtree_4848(nash_Cell* node, void* ctx)
+static inline void Subtree_4848(nash_Cell* node, CameraCollisionCallback* ctx)
 {
-    WalkList_4848((*(char**)&node->nodesinside[2]), ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[0]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[0], ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[1]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[1], ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[2]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[2], ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[3]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[3], ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[4]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[4], ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[5]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[5], ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[6]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[6], ctx);
-    if (((nash_Cell**)&node->children[0][0][0])[7]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[7], ctx);
+    WalkList_4848((cCTNode*)node->nodesinside[2].head, ctx);
+    if (node->children[0][0][0]) descend(node->children[0][0][0], ctx);
+    if (node->children[0][0][1]) descend(node->children[0][0][1], ctx);
+    if (node->children[0][1][0]) descend(node->children[0][1][0], ctx);
+    if (node->children[0][1][1]) descend(node->children[0][1][1], ctx);
+    if (node->children[1][0][0]) descend(node->children[1][0][0], ctx);
+    if (node->children[1][0][1]) descend(node->children[1][0][1], ctx);
+    if (node->children[1][1][0]) descend(node->children[1][1][0], ctx);
+    if (node->children[1][1][1]) descend(node->children[1][1][1], ctx);
 }
 
 /**
  * Collects the camera triggers whose volume holds the rider from an octree cell that crosses the query box, recursing
  * into its children.
  *
- * First runs the crossing callback (@p ctx1, inlined) on the cell's own node list (+0x28): every entry of type 4 is a
- * camera trigger, and when the trigger's Volume (+0x8) contains the rider's position (volume slot 7 containsPoint,
- * rider +0x6C0 slot 5 getPosition) the trigger is flagged in the active list (node +0xC = 1, found with cActiveTriggerList_find)
- * or added to it (cActiveTriggerList_add). Cells at level 11 stop there.
+ * First runs the crossing callback (@p ctx1, inlined) on the cell's own typed list (nodesinside[2]): every entry of
+ * type 4 is a camera trigger (cCTNode), and when the trigger's Volume contains the rider's position (volume slot 7
+ * containsPoint, the rider's cBeing slot 5 getPosition) the trigger is flagged in the active list (IsActiveFlag = 1,
+ * found with cActiveTriggerList_find) or added to it (cActiveTriggerList_add). Cells at level 11 stop there.
  *
  * Otherwise the children are 2^(level - 1) units wide; for each axis it checks which of the two child spans, widened by
  * 0.2 cell on both sides, overlap the box (returning when neither does) and which lie wholly inside it. It then visits
@@ -2754,12 +2663,13 @@ static inline void Subtree_4848(nash_Cell* node, void* ctx)
  * @param node  the octree cell (On Tour Cell: children[2][2][2], node lists from +0x20)
  * @param cell  the cell's key: level and x, y, z cell coordinates (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tBoundBox* box, nash_Cell* node, nash_CellKey* cell)
+extern "C" void nash_privy_QueryHelper_helpX(int hit, CameraCollisionCallback* ctx1, CameraCollisionCallback* ctx2,
+                                             tBoundBox* box, nash_Cell* node, nash_CellKey* cell)
 {
     nash_CellKey childCell;
     nash_Cell* ch;
 
-    WalkList_4848((*(char**)&node->nodesinside[2]), ctx1);
+    WalkList_4848((cCTNode*)node->nodesinside[2].head, ctx1);
     if (cell->level == 11) {
         return;
     }
@@ -2813,7 +2723,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
     int iw1 = 0;
     if (box->MinPoint.z < wlo1 && whi1 < box->MaxPoint.z) iw1 = 1;
 
-    ch = ((nash_Cell**)&node->children[0][0][0])[0];
+    ch = node->children[0][0][0];
     if (ch != 0 && fu0 && fv0 && fw0) {
         if (iu0 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);
@@ -2822,7 +2732,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z++;
-    ch = ((nash_Cell**)&node->children[0][0][0])[1];
+    ch = node->children[0][0][1];
     if (ch != 0 && fu0 && fv0 && fw1) {
         if (iu0 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2831,7 +2741,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.y++;
-    ch = ((nash_Cell**)&node->children[0][0][0])[3];
+    ch = node->children[0][1][1];
     if (ch != 0 && fu0 && fv1 && fw1) {
         if (iu0 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2840,7 +2750,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z--;
-    ch = ((nash_Cell**)&node->children[0][0][0])[2];
+    ch = node->children[0][1][0];
     if (ch != 0 && fu0 && fv1 && fw0) {
         if (iu0 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
@@ -2849,7 +2759,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.x++;
-    ch = ((nash_Cell**)&node->children[0][0][0])[6];
+    ch = node->children[1][1][0];
     if (ch != 0 && fu1 && fv1 && fw0) {
         if (iu1 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
@@ -2858,7 +2768,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z++;
-    ch = ((nash_Cell**)&node->children[0][0][0])[7];
+    ch = node->children[1][1][1];
     if (ch != 0 && fu1 && fv1 && fw1) {
         if (iu1 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2867,7 +2777,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.y--;
-    ch = ((nash_Cell**)&node->children[0][0][0])[5];
+    ch = node->children[1][0][1];
     if (ch != 0 && fu1 && fv0 && fw1) {
         if (iu1 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2876,7 +2786,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z--;
-    ch = ((nash_Cell**)&node->children[0][0][0])[4];
+    ch = node->children[1][0][0];
     if (ch != 0 && fu1 && fv0 && fw0) {
         if (iu1 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);
@@ -3626,22 +3536,23 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolume_cCTVolume);
 extern void* D_0045C3A0[];
 inline void* operator new(unsigned int, void* p) { return p; }
 
-struct sCTBoundK_6468 : sCTBoundObjG {
-    sCTBoundK_6468() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3A0) {}
+// The abstract volume's constructor (cCTObject defaults, then its own vtable), like sCTVolEllG / sCTVolBoxG.
+struct sCTVolumeG : sCTBoundObjG {
+    sCTVolumeG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3A0) {}
 };
 
 /**
  * Constructs a trigger volume base object: the cCTObject defaults plus the abstract volume vtable.
  *
- * Stores the cCTObject vtable cCTObject_vtbl at +0x24, zeroes the position (+0x0, t3vect_Zero) and heading, pitch and roll
- * (+0xC..+0x14), sets the scale (+0x18) to (1, 1, 1) and then installs D_0045C3A0, whose slots 6 and 7 (boundBox,
- * containsPoint) are empty and slot 8 is cCTVolume_getBoundaryPointClosestTo. Type (+0x28) is not set. Nothing calls it.
+ * Stores the cCTObject vtable cCTObject_vtbl as mVtbl, zeroes Pos (t3vect_Zero) and Heading, Pitch and Roll, sets
+ * Scale to (1, 1, 1) and then installs D_0045C3A0, whose slots 6 and 7 (boundBox,
+ * containsPoint) are empty and slot 8 is cCTVolume_getBoundaryPointClosestTo. Type is not set. Nothing calls it.
  *
  * @return @p self
  */
 extern "C" void* cCTVolume_cCTVolume(cCTVolume* self)
 {
-    return new (((void*)self)) sCTBoundK_6468;
+    return new (((void*)self)) sCTVolumeG;
 }
 #endif
 //100%
@@ -3847,56 +3758,52 @@ extern "C" void cCTActionSpline_purge(cCTActionSpline* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", descend);
 #ifdef SKIP_ASM
-struct sVEnt176890 {
-    short delta;
-    short index;
-    int (*fn)(void*, ...);
-};
-
-extern "C" void* cActiveTriggerList_find(void*, void*);
-extern "C" void cActiveTriggerList_add(void*, void*);
+extern "C" cActiveTriggerNode* cActiveTriggerList_find(cActiveTriggerList* list, tCameraTrigger* trigger);
+extern "C" void cActiveTriggerList_add(cActiveTriggerList* list, tCameraTrigger* trigger);
 
 /**
  * Runs the camera-trigger collision callback on an octree cell and, recursively, on all its children.
  *
- * For each entry of type 4 (a camera trigger) in the cell's node list (+0x28) whose trigger Volume (+0x8) contains the
- * rider's position (volume slot 7 containsPoint; rider +0x6C0 slot 5 getPosition), flags the trigger's node in the
- * active list (+0xC = 1, found with cActiveTriggerList_find) or adds it with cActiveTriggerList_add. Then recurses into each
- * non-null child (+0x0..+0x1C). Used for cells that lie wholly inside the query box (nash_privy_QueryHelper_helpX, cCameraTriggerMan_checkCollisions).
+ * For each entry of type 4 (a camera trigger, cCTNode) in the cell's typed list (nodesinside[2]) whose trigger Volume
+ * contains the rider's position (volume slot 7 containsPoint; the rider's cBeing slot 5 getPosition), flags the
+ * trigger's node in the active list (IsActiveFlag = 1, found with cActiveTriggerList_find) or adds it with
+ * cActiveTriggerList_add. Then recurses into each non-null child. Used for cells that lie wholly inside the query box
+ * (nash_privy_QueryHelper_helpX, cCameraTriggerMan_checkCollisions).
  *
  * @param node  the octree cell (On Tour Cell)
- * @param ctx  the callback: active trigger list at +0x0, rider at +0x4 (On Tour CameraCollisionCallback)
+ * @param ctx  the callback: the active trigger list and the rider (On Tour CameraCollisionCallback)
  */
-extern "C" void descend(nash_Cell* node, void* ctx)
+extern "C" void descend(nash_Cell* node, CameraCollisionCallback* ctx)
 {
-    char* entry;
-    for (entry = *(char**)&node->nodesinside[2]; entry != 0; entry = *(char**)entry) {
-        if (*(int*)(entry + 8) == 4) {
-            char* trig = *(char**)(entry + 0xC);
-            char* sub = *(char**)((char*)ctx + 4) + 0x6C0;
-            char* bound = *(char**)(trig + 8);
-            sVEnt176890* cvt = *(sVEnt176890**)sub;
-            sVEnt176890* bvt = *(sVEnt176890**)(bound + 0x24);
-            char* bthis = bound + bvt[7].delta;
-            int riderPos = cvt[5].fn(sub + cvt[5].delta);
-            if (bvt[7].fn(bthis, riderPos)) {
-                void* existing = cActiveTriggerList_find(*(void**)ctx, trig);
+    cCTNode* entry;
+    for (entry = (cCTNode*)node->nodesinside[2].head; entry != 0; entry = entry->next) {
+        if (entry->type == 4) {
+            tCameraTrigger* trig = entry->Trigger;
+            cBeing& rider = *ctx->rider;
+            cCTVolume* volume = trig->Volume;
+            // the rider's getPosition (cBeing slot 5) and the volume's containsPoint (slot 7), called by hand
+            sVEntry<t4Vector*(void*)>* riderVt = *(sVEntry<t4Vector*(void*)>**)&rider;
+            sVEntry<int(void*, t4Vector*)>* volumeVt = (sVEntry<int(void*, t4Vector*)>*)volume->mVtbl;
+            void* volumeThis = vthis(volume, volumeVt[7]);
+            t4Vector* riderPos = riderVt[5].fn(vthis(&rider, riderVt[5]));
+            if (volumeVt[7].fn(volumeThis, riderPos)) {
+                cActiveTriggerNode* existing = cActiveTriggerList_find(ctx->ActiveTriggerList, trig);
                 if (existing) {
-                    *(int*)((char*)existing + 0xC) = 1;
+                    existing->IsActiveFlag = 1;
                 } else {
-                    cActiveTriggerList_add(*(void**)ctx, trig);
+                    cActiveTriggerList_add(ctx->ActiveTriggerList, trig);
                 }
             }
         }
     }
-    if (node->children[0][0][0]) descend((nash_Cell*)(node->children[0][0][0]), ctx);
-    if (node->children[0][0][1]) descend((nash_Cell*)(node->children[0][0][1]), ctx);
-    if (node->children[0][1][0]) descend((nash_Cell*)(node->children[0][1][0]), ctx);
-    if (node->children[0][1][1]) descend((nash_Cell*)(node->children[0][1][1]), ctx);
-    if (node->children[1][0][0]) descend((nash_Cell*)(node->children[1][0][0]), ctx);
-    if (node->children[1][0][1]) descend((nash_Cell*)(node->children[1][0][1]), ctx);
-    if (node->children[1][1][0]) descend((nash_Cell*)(node->children[1][1][0]), ctx);
-    if (node->children[1][1][1]) descend((nash_Cell*)(node->children[1][1][1]), ctx);
+    if (node->children[0][0][0]) descend(node->children[0][0][0], ctx);
+    if (node->children[0][0][1]) descend(node->children[0][0][1], ctx);
+    if (node->children[0][1][0]) descend(node->children[0][1][0], ctx);
+    if (node->children[0][1][1]) descend(node->children[0][1][1], ctx);
+    if (node->children[1][0][0]) descend(node->children[1][0][0], ctx);
+    if (node->children[1][0][1]) descend(node->children[1][0][1], ctx);
+    if (node->children[1][1][0]) descend(node->children[1][1][0], ctx);
+    if (node->children[1][1][1]) descend(node->children[1][1][1], ctx);
 }
 #endif
 
@@ -4081,41 +3988,21 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm_snap
 #ifdef SKIP_ASM
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, float b);
-class cCamTargetK8940 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual int getAIIndex();
-};
-class cCamCtrlK8940 {
-public:
-    char pad_0x00[0x10];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void update();
-};
 
 /**
  * Snaps the DEFAULT_2 chase camera when @p id is the followed rider's subject id.
  *
- * Compares @p id with slot 7 of the rider's +0x6C0 interface (Target->Rider). On a match runs the look-at chase snap,
- * setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
+ * Compares @p id with the followed rider's AI index (Target->Rider->getAIIndex(), cBeing slot 7). On a match runs the
+ * look-at chase snap, setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
 extern "C" void cDEFAULT_2ChaseAlgorithm_snap(cDEFAULT_2ChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->update();
+    if (id == self->Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(self, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
+        self->update();
     }
 }
 #endif
@@ -4266,18 +4153,17 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 /**
  * Snaps the DEFAULT_3 chase camera when @p id is the followed rider's subject id.
  *
- * Compares @p id with slot 7 of the rider's +0x6C0 interface (Target->Rider). On a match runs the look-at chase snap,
- * setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
+ * Compares @p id with the followed rider's AI index (Target->Rider->getAIIndex(), cBeing slot 7). On a match runs the
+ * look-at chase snap, setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
 extern "C" void cDEFAULT_3ChaseAlgorithm_snap(cDEFAULT_3ChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->update();
+    if (id == self->Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(self, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
+        self->update();
     }
 }
 #endif
@@ -4428,18 +4314,17 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 /**
  * Snaps the DEFAULT_4 chase camera when @p id is the followed rider's subject id.
  *
- * Compares @p id with slot 7 of the rider's +0x6C0 interface (Target->Rider). On a match runs the look-at chase snap,
- * setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
+ * Compares @p id with the followed rider's AI index (Target->Rider->getAIIndex(), cBeing slot 7). On a match runs the
+ * look-at chase snap, setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
 extern "C" void cDEFAULT_4ChaseAlgorithm_snap(cDEFAULT_4ChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->update();
+    if (id == self->Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(self, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
+        self->update();
     }
 }
 #endif
@@ -4587,18 +4472,17 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 /**
  * Snaps the direction chase camera when @p id is the followed rider's subject id.
  *
- * Compares @p id with slot 7 of the rider's +0x6C0 interface (Target->Rider). On a match runs the look-at chase snap,
- * setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
+ * Compares @p id with the followed rider's AI index (Target->Rider->getAIIndex(), cBeing slot 7). On a match runs the
+ * look-at chase snap, setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
 extern "C" void cDirectionChaseAlgorithm_snap(cDirectionChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
-        cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->update();
+    if (id == self->Target->Rider->getAIIndex()) {
+        cLookAtChaseAlgorithm_snap(self, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
+        self->update();
     }
 }
 #endif
@@ -5774,44 +5658,24 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealPosition(void* self);
 extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealTargetPos(void* self);
 
-class cCamTarget_00178938 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual int getAIIndex();
-};
-class cCamCtrl_00178938 {
-public:
-    char pad_0x00[0x10];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void update();
-};
 
 /**
  * Snaps the SUPERPIPE chase camera when @p id is the followed rider's subject id.
  *
- * Compares @p id with slot 7 of the rider's +0x6C0 interface (Target->Rider). On a match sets Position and
- * CamTargetPos to getIdealPosition and getIdealTargetPos, then runs the look-at chase snap,
+ * Compares @p id with the followed rider's AI index (Target->Rider->getAIIndex(), cBeing slot 7). On a match sets
+ * Position and CamTargetPos to getIdealPosition and getIdealTargetPos, then runs the look-at chase snap,
  * setupInitialCamDir(559.744, 300) and the algorithm's update (vtable slot 5).
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
 extern "C" void cSUPERPIPEChaseAlgorithm_snap(cSUPERPIPEChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->getAIIndex()) {
-        *(&self->Position) = cSUPERPIPEChaseAlgorithm_getIdealPosition(((cCamCtrl_00178938*)self));
-        *(&self->CamTargetPos) = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(((cCamCtrl_00178938*)self));
-        cLookAtChaseAlgorithm_snap(((cCamCtrl_00178938*)self), id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrl_00178938*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrl_00178938*)self)->update();
+    if (id == self->Target->Rider->getAIIndex()) {
+        *(&self->Position) = cSUPERPIPEChaseAlgorithm_getIdealPosition(self);
+        *(&self->CamTargetPos) = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(self);
+        cLookAtChaseAlgorithm_snap(self, id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
+        self->update();
     }
 }
 #endif
@@ -6030,14 +5894,16 @@ float cPOST_RACE_1ChaseAlgorithm_getRestDrop(void* self)
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0);
 #ifdef SKIP_ASM
 /**
- * Fills the race-camera final-phase data for the post-race chase camera: only clears DoPitchBlending (+0x10), so
+ * Fills the race-camera final-phase data for the post-race chase camera: only clears DoPitchBlending, so
  * doRaceCamFinalPhase skips pitch blending.
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
 void cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
 {
-    *(int*)((char*)other + 0x10) = 0;
+    // the symbol keeps the untyped (void*, void*) signature; other is the caller's cRaceCamFinalPhaseData
+    cRaceCamFinalPhaseData* data = (cRaceCamFinalPhaseData*)other;
+    data->DoPitchBlending = 0;
 }
 #endif
 
@@ -6211,8 +6077,8 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 /**
  * Snaps the post-race chase camera when @p id is the followed rider's subject id.
  *
- * Compares @p id with slot 7 of the rider's +0x6C0 interface (Target->Rider). On a match runs the look-at chase snap,
- * setupInitialCamDir(100, 100) and the algorithm's update (vtable slot 5).
+ * Compares @p id with the followed rider's AI index (Target->Rider->getAIIndex(), cBeing slot 7). On a match runs the
+ * look-at chase snap, setupInitialCamDir(100, 100) and the algorithm's update (vtable slot 5).
  *
  * @param id  the subject id to snap to (On Tour subjectID); other ids are ignored
  */
@@ -6630,35 +6496,24 @@ extern "C" int cTrackFileMan_testWCBAMStartLocation(cTrackFileMan* self, int id)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getNextWCBAMStartLocation);
 #ifdef SKIP_ASM
-struct cTrackFileMan_getNextWCBAMStartLocation_sEntry {
-    int active;
-    char pad_0x4[0x88];
-};
-
-struct cTrackFileMan_getNextWCBAMStartLocation_sMgr {
-    int count;
-    char pad_0x4[0x88];
-    cTrackFileMan_getNextWCBAMStartLocation_sEntry entries[1];
-};
-
 /**
  * Finds the next location after @p i that is a WC BAM start location, wrapping around.
  *
- * Returns -1 when the manager has no such locations (+0x8C08, On Tour NumWCBAMStartLocations); otherwise steps
- * forward modulo NumLocations (+0x0) until an entry's WC-BAM-start flag (entry +0x88) is set. Loops forever if the
+ * Returns -1 when the manager has no such locations (NumWCBAMStartLocations); otherwise steps forward modulo
+ * NumLocations until an entry's WC-BAM-start flag (bIsWCBAMStart) is set. Loops forever if the
  * count is nonzero but no flag is set.
  *
  * @param i  the current location index
  * @return the next WC BAM start location index, or -1
  */
-extern "C" int cTrackFileMan_getNextWCBAMStartLocation(cTrackFileMan_getNextWCBAMStartLocation_sMgr* self, int i)
+extern "C" int cTrackFileMan_getNextWCBAMStartLocation(cTrackFileMan* self, int i)
 {
-    if (*(int*)((char*)self + 0x8C08) == 0) {
+    if (self->NumWCBAMStartLocations == 0) {
         return -1;
     }
-    i = (i + 1) % self->count;
-    while (self->entries[i].active == 0) {
-        i = (i + 1) % self->count;
+    i = (i + 1) % self->NumLocations;
+    while (self->LocationInfo[i].bIsWCBAMStart == 0) {
+        i = (i + 1) % self->NumLocations;
     }
     return i;
 }
@@ -6670,20 +6525,20 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getPrevWCBAMSta
 /**
  * Finds the previous location before @p i that is a WC BAM start location, wrapping around.
  *
- * Returns -1 when the manager has no such locations (+0x8C08); otherwise steps backward modulo NumLocations until
- * an entry's WC-BAM-start flag (entry +0x88) is set.
+ * Returns -1 when the manager has no such locations (NumWCBAMStartLocations); otherwise steps backward modulo
+ * NumLocations until an entry's WC-BAM-start flag (bIsWCBAMStart) is set.
  *
  * @param i  the current location index
  * @return the previous WC BAM start location index, or -1
  */
-extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(cTrackFileMan_getNextWCBAMStartLocation_sMgr* self, int i)
+extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(cTrackFileMan* self, int i)
 {
-    if (*(int*)((char*)self + 0x8C08) == 0) {
+    if (self->NumWCBAMStartLocations == 0) {
         return -1;
     }
-    i = (i + self->count - 1) % self->count;
-    while (self->entries[i].active == 0) {
-        i = (i + self->count - 1) % self->count;
+    i = (i + self->NumLocations - 1) % self->NumLocations;
+    while (self->LocationInfo[i].bIsWCBAMStart == 0) {
+        i = (i + self->NumLocations - 1) % self->NumLocations;
     }
     return i;
 }
@@ -6698,11 +6553,12 @@ cBEInterface* cBE_getInterface_A158(void* be, int kind) __asm__("cBE_getInterfac
 extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
 // PORT: the unit also declares this with a pointer third argument; defined under an asm label with its real type
-extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind) __asm__("cTrackFileMan_legalTrackMode");
+extern "C" int cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
+    __asm__("cTrackFileMan_legalTrackMode");
 /**
  * Tells whether a location may be raced in a game mode (debug menu track picker).
  *
- * Out-of-range @p idx gives 0. Otherwise the entry's location id (entry +0x80) must fall in the mode's peak range:
+ * Out-of-range @p idx gives 0. Otherwise the entry's location id (locationID) must fall in the mode's peak range:
  * mode 0 ids 0..4, 1 ids 5..7, 2 ids 8..10, 3 ids 11..13, 5 and 6 ids 14..16; mode 4 accepts any location for
  * which cBENewRaceInterface_getLocationType (On Tour cBENewRaceInterface::getLocationType) returns 0. Other modes give 0.
  *
@@ -6711,10 +6567,10 @@ extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind) _
  * @param kind  the game mode (On Tour eBEGameMode)
  * @return 1 when the location is legal for the mode, otherwise 0
  */
-extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind)
+extern "C" int cTrackFileMan_legalTrackMode_impl(cTrackFileMan* list, int idx, int kind)
 {
-    if (idx >= 0 && idx < list[0]) {
-        unsigned int locationId = *(unsigned int*)((char*)list + idx * 0x8C + 0x84);
+    if (idx >= 0 && idx < list->NumLocations) {
+        unsigned int locationId = list->LocationInfo[idx].locationID;
         switch (kind) {
         case 0:
             if (locationId < 5) return 1;
@@ -6805,7 +6661,7 @@ extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
 extern "C" void cBXString_cBXString3(void* self, const char* s, int len);
 extern "C" void* MEM_free(void* self);
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: alias; the unit defines cTrackFileMan_checkLocation later with a typed self (sCamMgr_A830*).
+// PORT: alias; the unit defines cTrackFileMan_checkLocation later with a typed self (cTrackFileMan*).
 extern "C" int cTrackFileMan_checkLocation_17A378(void* selfp, char* name, char* tag) __asm__("cTrackFileMan_checkLocation");
 extern "C" char* strcpy(char* d, const char* s);
 
@@ -6948,7 +6804,7 @@ extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
                 ap[self->NumLocations * 35] = 1;
                 self->NumBAMLocations++;
                 if (cTrackFileMan_testWCBAMStartLocation_A638((self), ip[self->NumLocations * 35])) {
-                    *(int*)((char*)&self->LocationInfo[0].bIsWCBAMStart + self->NumLocations * 0x8C) = 1;
+                    (&self->LocationInfo[0].bIsWCBAMStart)[self->NumLocations * 35] = 1;
                     self->NumWCBAMStartLocations++;
                 }
                 self->NumLocations++;
@@ -6975,32 +6831,14 @@ extern "C" int isValidMap(const char* path, int n, void* names);
 extern char str_data_worlds[];
 extern char str_big[];
 
-struct sCamEntry_A830 {
-    char name[0x40];    // 0x00
-    char tag[4];        // 0x40
-    char pad_44[0x48];
-};
-
-struct sCamMgr_A830 {
-    int count;                          // 0x0000
-    sCamEntry_A830 entries[0x100];    // 0x0004
-};
-
-struct sCamName_A830 {
-    char* name;
-    int ok;
-};
-
-
-
 /**
  * Tells whether a track location file can be added to the location table: it is not listed yet and its big file has
  * that section.
  *
- * Returns 0 when an entry already has File == @p name and BigFile == @p tag (strcasecmp on +0x0 and +0x40 of each
- * 0x8C-byte entry). Otherwise opens the big file "data/worlds/<tag>.big" (str_data_worlds + @p tag + str_big, cBigFile
- * flags 0x100) and asks isValidMap whether section @p name exists in "data/worlds/<tag>"; the big file and the
- * strings are destroyed again before returning.
+ * Returns 0 when an entry of LocationInfo already has File == @p name and BigFile == @p tag (strcasecmp). Otherwise
+ * opens the big file "data/worlds/<tag>.big" (str_data_worlds + @p tag + str_big, cBigFile flags 0x100) and asks
+ * isValidMap whether section @p name exists in "data/worlds/<tag>"; the big file and the strings are destroyed again
+ * before returning.
  *
  * Called by cTrackFileMan_scanTrackIndex.
  *
@@ -7012,15 +6850,14 @@ extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char
 {
     int i;
     for (i = 0; i < self->NumLocations; i++) {
-        if (strcasecmp(name, ((sCamEntry_A830*)&self->LocationInfo[0])[i].name) == 0 &&
-            strcasecmp(tag, ((sCamEntry_A830*)&self->LocationInfo[0])[i].tag) == 0) {
+        if (strcasecmp(name, self->LocationInfo[i].File) == 0 && strcasecmp(tag, self->LocationInfo[i].BigFile) == 0) {
             return 0;
         }
     }
     cBXString base;
     cBXString workStr;
     cBigFile bf;
-    sCamName_A830 nm;
+    tWorldSectionScan nm;
     char* pre = str_data_worlds;
     cBXString_cBXString2(&workStr, tag);
     func_003186D0((cBXString*)&base, pre, (cBXString*)&workStr);
@@ -7029,9 +6866,9 @@ extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char
     func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
     cBigFile_cBigFile1_A830(pbf, workStr.Str, 0x100);
     cBXString__cBXString(&workStr, 2);
-    nm.name = name;
+    nm.sectionName = name;
     int anyFound = isValidMap(base.Str, 1, &nm);
-    int result = anyFound == 0 ? 0 : nm.ok;
+    int result = anyFound == 0 ? 0 : nm.bFound;
     cBigFile__cBigFile((cBigFile*)&bf, 2);
     cBXString__cBXString(&base, 2);
     return result;
@@ -7055,21 +6892,6 @@ extern "C" int isValidMap(const char* path, int n, void* names);
 extern char str_data_worlds[];
 extern char str_big[];
 
-struct sCamEntry_17A978 {
-    char name[0x40];    // 0x00
-    char tag[4];        // 0x40
-    char pad_44[0x48];
-};
-
-
-
-
-struct sBigFile_17A978 {
-    int f0;
-    int f4;
-    sBigFile_17A978() {}
-    sBigFile_17A978(const sBigFile_17A978&);
-};
 
 /**
  * Checks which of several track sections exist in a big file, unless all of them are already in the location table.
@@ -7098,8 +6920,8 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
     for (i = 0; i < n; i++) {
         int found = 0;
         for (j = 0; j < self->NumLocations; j++) {
-            if (strcasecmp(((char*)names[i].sectionName), ((sCamEntry_17A978*)&self->LocationInfo[0])[j].name) == 0 &&
-                strcasecmp(tag, ((sCamEntry_17A978*)&self->LocationInfo[0])[j].tag) == 0) {
+            if (strcasecmp(((char*)names[i].sectionName), self->LocationInfo[j].File) == 0 &&
+                strcasecmp(tag, self->LocationInfo[j].BigFile) == 0) {
                 found = 1;
                 break;
             }
@@ -7114,7 +6936,7 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
     }
     cBXString base;
     cBXString workStr;
-    sBigFile_17A978 bf;
+    cBigFile bf;
     char* pre = str_data_worlds;
     cBXString_cBXString2(&workStr, tag);
     func_003186D0((cBXString*)&base, pre, (cBXString*)&workStr);
@@ -7132,8 +6954,8 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
     for (int k = 0; k < n; k++) {
         if (names[k].bFound) {
             for (int entryIndex = 0; entryIndex < self->NumLocations; entryIndex++) {
-                if (strcasecmp(((char*)names[k].sectionName), ((sCamEntry_17A978*)&self->LocationInfo[0])[entryIndex].name) == 0 &&
-                    strcasecmp(tag, ((sCamEntry_17A978*)&self->LocationInfo[0])[entryIndex].tag) == 0) {
+                if (strcasecmp(((char*)names[k].sectionName), self->LocationInfo[entryIndex].File) == 0 &&
+                    strcasecmp(tag, self->LocationInfo[entryIndex].BigFile) == 0) {
                     names[k].bFound = 0;
                     break;
                 }

@@ -22,7 +22,7 @@
 // (both __pure_virtual, func_00411530).
 // The derived headers write these four members inline under the same names: scripter/scriptobjcammgr.h (+0x0),
 // scripter/scriptobjrider.h (+0xC), scripter/scriptobjevent.h (+0xC), scripter/scriptobjtransition.h (+0x0),
-// visualfx/transitionman.h (+0x10; mScriptVtbl there). scripter/scriptobjcamera.h still has them as unk_000[0xC] (+0x0).
+// visualfx/transitionman.h (+0x10; mScriptVtbl there), scripter/scriptobjcamera.h (+0x0).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail ctor cScriptObject_cScriptObject__FPvi and dtor cScriptObject__cScriptObject;
