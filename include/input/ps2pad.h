@@ -58,9 +58,8 @@ struct cPS2PadDevice {
     int mPort;                      // 0x004 [R] ctor's port argument; [U] first argument of every libpad call (open
                                     //       func_003FF708, state scePadGetState, read scePadRead, close scePadPortClose ...)
     int mSlot;                      // 0x008 [R] ctor's slot argument (0); [U] second argument of the libpad calls
-    char mReserved[0x24];           // 0x00C [R] the ctor zeroes 36 bytes (memset(this + 0xC, 0, 36)); never read;
-                                    //       name ours
-                                    //       or written otherwise (named for that: no use names it)
+    char mReserved[0x24];           // 0x00C [R] the ctor zeroes 36 bytes (memset(this + 0xC, 0, 36)); never read
+                                    //       or written otherwise (name ours, for that: no use names it)
     int mActSmall;                  // 0x030 [U] setActuator(1, level): level != 0; sampleButtons sends it as the small
                                     //       motor's byte (actDirect[0], an lbu of the low byte) when it changed; open = 0
     int mLastSmall;                 // 0x034 [U] sampleButtons: the last value sent (open = -1)
