@@ -7,6 +7,7 @@
 #include "ui/uistate.h"
 #include "fe/ovstatetransport.h"
 #include "main/ssxapp.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onCreateScreen);
@@ -1791,8 +1792,8 @@ struct sVEntry00204FF0 {
 
 static inline int setPic00204FF0(char* name)
 {
-    void* obj = SSXApp->FELocale;
-    sVEntry00204FF0* vt = *(sVEntry00204FF0**)((char*)obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry00204FF0* vt = (sVEntry00204FF0*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -2771,9 +2772,9 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
                 short line[304];
                 func_002C2540(fmt, D_004A2590);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
-                char* loc = (char*)SSXApp->FELocale;
-                sLocVEntry_207430* vt = *(sLocVEntry_207430**)(loc + 4);
-                char* thisp = loc + vt[4].delta;
+                cFELocale* loc = SSXApp->FELocale;
+                sLocVEntry_207430* vt = (sLocVEntry_207430*)VPTR_OF(cUILocaleInterface, loc);
+                void* thisp = vthis(loc, vt[4]);
                 strcpy1(pre, vt[4].fn(thisp, GetHashValue32(str_kT_HELPLockCompEvent)));
                 sprintf1_v(line, pre, part);
                 cUIText_setUnicodeStringWrap(mapObj, line);
@@ -2788,9 +2789,9 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
                 short line[304];
                 func_002C2540(fmt, str_pct_S_Jam_b);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
-                char* loc = (char*)SSXApp->FELocale;
-                sLocVEntry_207430* vt = *(sLocVEntry_207430**)(loc + 4);
-                char* thisp = loc + vt[4].delta;
+                cFELocale* loc = SSXApp->FELocale;
+                sLocVEntry_207430* vt = (sLocVEntry_207430*)VPTR_OF(cUILocaleInterface, loc);
+                void* thisp = vthis(loc, vt[4]);
                 strcpy1(pre, vt[4].fn(thisp, GetHashValue32(str_kT_HELPLockCompEvent)));
                 sprintf1_v(line, pre, part);
                 cUIText_setUnicodeStringWrap(mapObj, line);

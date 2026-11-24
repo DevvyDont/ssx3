@@ -15,6 +15,7 @@
 #include "fe/ovstatebigchallenge.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onCreateScreen);
@@ -586,8 +587,8 @@ struct sVEntry_1F7958 {
 
 static inline int Loc1F7958(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_1F7958* vt = *(sVEntry_1F7958**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_1F7958* vt = (sVEntry_1F7958*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 

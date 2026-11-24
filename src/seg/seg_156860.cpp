@@ -13,6 +13,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("seg/seg_156860", cCommSystem_construct);
@@ -3361,8 +3362,8 @@ static inline int gcNoNISPlaying_8CB0()
 // Looks up the string table entry for `name` (vtable slot 4 of the global string table at SSXApp+0x8C).
 static inline const char* gcString_8CB0(char* name)
 {
-    char* tbl = (char*)SSXApp->FELocale;
-    sVEntS_8CB0* vt = *(sVEntS_8CB0**)(tbl + 4);
+    cFELocale* tbl = SSXApp->FELocale;
+    sVEntS_8CB0* vt = (sVEntS_8CB0*)VPTR_OF(cUILocaleInterface, tbl);
     return vt[4].fn(vthis(tbl, vt[4]), GetHashValue32(name));
 }
 

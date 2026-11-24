@@ -24,6 +24,7 @@
 #include "ai/rider.h"
 #include "ui/uitext.h"
 #include "util/bxmemcard.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onCreateScreen);
@@ -163,9 +164,9 @@ struct sVE_PO {
 // Looks up a localized string by the hash of its name.
 static inline unsigned short* getString_PO(char* name)
 {
-    char* loc = (char*)SSXApp->FELocale;
-    sVE_PO* vt = *(sVE_PO**)(loc + 4);
-    char* thisp = loc + vt[4].delta;
+    cFELocale* loc = SSXApp->FELocale;
+    sVE_PO* vt = (sVE_PO*)VPTR_OF(cUILocaleInterface, loc);
+    void* thisp = vthis(loc, vt[4]);
     return vt[4].fn(thisp, GetHashValue32(name));
 }
 
@@ -1431,9 +1432,9 @@ extern char str_topScore[];
 
 static inline unsigned short* lookupString_1FBD20(char* name)
 {
-    char* g = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(g + 4);
-    char* t = g + vt[4].delta;
+    cFELocale* g = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, g);
+    void* t = vthis(g, vt[4]);
     return vt[4].fn(t, GetHashValue32(name));
 }
 
@@ -1751,9 +1752,9 @@ struct sVE_1FC878 { short delta; short index; unsigned short* (*fn)(void*, int);
 
 static inline unsigned short* lookupString_1FC878(char* name)
 {
-    char* g = (char*)SSXApp->FELocale;
-    sVE_1FC878* vt = *(sVE_1FC878**)(g + 4);
-    char* t = g + vt[4].delta;
+    cFELocale* g = SSXApp->FELocale;
+    sVE_1FC878* vt = (sVE_1FC878*)VPTR_OF(cUILocaleInterface, g);
+    void* t = vthis(g, vt[4]);
     return vt[4].fn(t, GetHashValue32(name));
 }
 
@@ -2047,8 +2048,8 @@ struct sVEnt_1FD190 { short delta; short index; int (*fn)(void*, int); };
 // Looks up a localized string by the hash of its key (SSXApp->FELocale's virtual slot 4).
 static inline int sendHash_1FD190(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEnt_1FD190* vt = *(sVEnt_1FD190**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEnt_1FD190* vt = (sVEnt_1FD190*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 /**
@@ -2149,9 +2150,9 @@ struct sVE_1FD320 { short delta; short index; unsigned short* (*fn)(void*, int);
 
 static inline unsigned short* lookupString_1FD320(char* name)
 {
-    char* g = (char*)SSXApp->FELocale;
-    sVE_1FD320* vt = *(sVE_1FD320**)(g + 4);
-    char* t = g + vt[4].delta;
+    cFELocale* g = SSXApp->FELocale;
+    sVE_1FD320* vt = (sVE_1FD320*)VPTR_OF(cUILocaleInterface, g);
+    void* t = vthis(g, vt[4]);
     return vt[4].fn(t, GetHashValue32(name));
 }
 
@@ -2671,9 +2672,9 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
         mp->mpMemCard->GetStatus(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
-        char* localeObj = (char*)SSXApp->FELocale;
-        sVE_DF40* vt = *(sVE_DF40**)(localeObj + 4);
-        char* localeThis = localeObj + vt[4].delta;
+        cFELocale* localeObj = SSXApp->FELocale;
+        sVE_DF40* vt = (sVE_DF40*)VPTR_OF(cUILocaleInterface, localeObj);
+        void* localeThis = vthis(localeObj, vt[4]);
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
@@ -3271,9 +3272,9 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
         mp->mpMemCard->GetStatus(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->setVisible(0);
-        char* localeObj = (char*)SSXApp->FELocale;
-        sVE_ECA0* vt = *(sVE_ECA0**)(localeObj + 4);
-        char* localeThis = localeObj + vt[4].delta;
+        cFELocale* localeObj = SSXApp->FELocale;
+        sVE_ECA0* vt = (sVE_ECA0*)VPTR_OF(cUILocaleInterface, localeObj);
+        void* localeThis = vthis(localeObj, vt[4]);
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         sprintf(name, str_pct_dmemory_card_b, 1);
         widget = getObj_ECA0(((cState_ECA0*)self), name);
@@ -3810,9 +3811,9 @@ struct sVE_1FFF78 { short delta; short index; unsigned short* (*fn)(void*, int);
 
 static inline unsigned short* lookupString_1FFF78(char* name)
 {
-    char* g = (char*)SSXApp->FELocale;
-    sVE_1FFF78* vt = *(sVE_1FFF78**)(g + 4);
-    char* t = g + vt[4].delta;
+    cFELocale* g = SSXApp->FELocale;
+    sVE_1FFF78* vt = (sVE_1FFF78*)VPTR_OF(cUILocaleInterface, g);
+    void* t = vthis(g, vt[4]);
     return vt[4].fn(t, GetHashValue32(name));
 }
 

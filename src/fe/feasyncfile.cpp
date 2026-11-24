@@ -1439,8 +1439,8 @@ extern "C" void func_001A4E28(cFEStateNetMessenger* self, void* msg)
         char* buf = (char*)&self->mustrMessage;
         int one = 1;
         int three = 3;
-        char* obj = (char*)SSXApp->FELocale;
-        sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
+        cFELocale* obj = SSXApp->FELocale;
+        sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
         sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP279InvalidName)), self->mszSearchName);
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
         popup->info.meType = one;
@@ -2798,8 +2798,8 @@ struct sChar2_001A7390 {
 
 static inline int Loc1A7390(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001A7390* vt = *(sVEntry_001A7390**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001A7390* vt = (sVEntry_001A7390*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -3540,8 +3540,8 @@ struct sVEntry_001A81F0 {
 
 static inline int Loc1A81F0(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001A81F0* vt = *(sVEntry_001A81F0**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001A81F0* vt = (sVEntry_001A81F0*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -5713,9 +5713,9 @@ extern "C" void func_001A9CC0(cFEStateNet* self, void** popup, void* owner, onli
         {
             const char* fmt = str_pct_s_pct_S_pct_S;
             const char* who = *(const char**)((char*)data + 0x10);
-            char* obj = (char*)SSXApp->FELocale;
+            cFELocale* obj = SSXApp->FELocale;
             const char* name = *(const char**)((char*)data + 0xC);
-            sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(obj + 4);
+            sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
             void* text = vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUPCMNLocked));
             int len = USTR_length(text) + strlen(who) + strlen(name) + 7;
             if (self->unk_6B8 != 0) {
@@ -6521,8 +6521,8 @@ static inline void* GetSession_001AB478()
 
 static inline int Text_001AB478(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001AB478* vt = *(sVEntry_001AB478**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001AB478* vt = (sVEntry_001AB478*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -9526,9 +9526,9 @@ extern "C" void func_001AF568(cFEStateChallengePopup* self)
     cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
     if (text != 0) {
         char* name = LobbyMan_mLobbyMan->mOpponent;
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry<int(void* self, int hash)>* vt = *(sVEntry<int(void* self, int hash)>**)(locale + 4);
-        char* obj = locale + vt[4].delta;
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry<int(void* self, int hash)>* vt = (sVEntry<int(void* self, int hash)>*)VPTR_OF(cUILocaleInterface, locale);
+        void* obj = vthis(locale, vt[4]);
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_240WaitingChallenge)), name);
         cUIText_setUnicodeString(text, buf);
         cUIText* submitText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
@@ -9762,8 +9762,8 @@ struct sVEntry_001AFA60 {
 
 static inline int Loc1AFA60(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001AFA60* vt = *(sVEntry_001AFA60**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001AFA60* vt = (sVEntry_001AFA60*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -11316,8 +11316,8 @@ struct sVEntry_001B1808 {
 
 static inline int Loc1B1808(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B1808* vt = *(sVEntry_001B1808**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B1808* vt = (sVEntry_001B1808*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -12019,8 +12019,8 @@ struct sVEntry_001B25E0 {
 
 static inline int Loc1B25E0(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B25E0* vt = *(sVEntry_001B25E0**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B25E0* vt = (sVEntry_001B25E0*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -13641,8 +13641,8 @@ struct sVEntry_001B45E8 {
 
 static inline int Loc1B45E8(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B45E8* vt = *(sVEntry_001B45E8**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B45E8* vt = (sVEntry_001B45E8*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -13770,9 +13770,9 @@ extern "C" void func_001B47C0(cFEStateNetConfig* self, int cardSlot)
     char buf[32];
     char* str = (char*)&self->mustrPopupText;
     usprintf(buf, str_pct_d_b, cardSlot);
-    char* locale = (char*)SSXApp->FELocale;
-    sVEntry<int(void* self, int hash)>* vt = *(sVEntry<int(void* self, int hash)>**)(locale + 4);
-    char* obj = locale + vt[4].delta;
+    cFELocale* locale = SSXApp->FELocale;
+    sVEntry<int(void* self, int hash)>* vt = (sVEntry<int(void* self, int hash)>*)VPTR_OF(cUILocaleInterface, locale);
+    void* obj = vthis(locale, vt[4]);
     sprintf1(str, vt[4].fn(obj, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
     cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
     // stores
@@ -13816,8 +13816,8 @@ struct sVEntry_001B4888 {
 
 static inline int Loc1B4888(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B4888* vt = *(sVEntry_001B4888**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B4888* vt = (sVEntry_001B4888*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -14871,8 +14871,8 @@ struct sVEntry_001B5E28 {
 
 static inline int Loc1B5E28(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B5E28* vt = *(sVEntry_001B5E28**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B5E28* vt = (sVEntry_001B5E28*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -16065,8 +16065,8 @@ struct sVEntry_001B70D0 {
 
 static inline int Loc1B70D0(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B70D0* vt = *(sVEntry_001B70D0**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B70D0* vt = (sVEntry_001B70D0*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -16794,8 +16794,8 @@ extern char str_kT_POPUPCMNCardRemoved[];
 
 static inline int Loc_B7E40(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -16935,8 +16935,8 @@ struct sVEntry_001B8238 {
 };
 static inline int Loc_001B8238(char* key)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B8238* vt = *(sVEntry_001B8238**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B8238* vt = (sVEntry_001B8238*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 extern char str_kT_POPUPCMNEABigLogin[];
@@ -16999,8 +16999,8 @@ struct sVEntry_001B83C0 {
 
 static inline int Loc_001B83C0(char* key)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001B83C0* vt = *(sVEntry_001B83C0**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001B83C0* vt = (sVEntry_001B83C0*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 
@@ -21475,8 +21475,8 @@ extern "C" void func_001BD8C8(cFEStateLobbyMenu* self, int msgPtr)
         if (self->mbRoomHasPassword == 0) {
             char* buf = (char*)&self->mustrPopupText;
             char* name = self->mszRoomName;
-            char* obj = (char*)SSXApp->FELocale;
-            sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
+            cFELocale* obj = SSXApp->FELocale;
+            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
             sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP231RoomPassword)), name);
             cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
             popup->info.mtMessage.pustr = (const unsigned short*)buf;
@@ -22121,9 +22121,9 @@ extern "C" void func_001BE3A8(cFEStateLobbyMenu* feStateLobbyMenu, int id)
         func_0025D770(LobbyMan_mLobbyMan, sel);
     } else {
         char buf[80];
-        char* feLocale = (char*)SSXApp->FELocale;
-        sVEntry<int(void* self, int hash)>* vt = *(sVEntry<int(void* self, int hash)>**)(feLocale + 4);
-        char* obj = feLocale + vt[4].delta;
+        cFELocale* feLocale = SSXApp->FELocale;
+        sVEntry<int(void* self, int hash)>* vt = (sVEntry<int(void* self, int hash)>*)VPTR_OF(cUILocaleInterface, feLocale);
+        void* obj = vthis(feLocale, vt[4]);
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_231PlayersInRoom)), 0);
         cUIText_setUnicodeString(self->text, buf);
         func_001BE510_2(self, -1);
@@ -22171,8 +22171,8 @@ struct sVEntry_001BE540 {
 
 static inline int Loc1BE540(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001BE540* vt = *(sVEntry_001BE540**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001BE540* vt = (sVEntry_001BE540*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -22785,8 +22785,8 @@ struct sVEntry_001BEF60 {
 
 static inline int Loc_001BEF60(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001BEF60* vt = *(sVEntry_001BEF60**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001BEF60* vt = (sVEntry_001BEF60*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -23256,8 +23256,8 @@ struct sVEntry_001BF758 {
 
 static inline int Loc1BF758(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_001BF758* vt = *(sVEntry_001BF758**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_001BF758* vt = (sVEntry_001BF758*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -25485,9 +25485,9 @@ extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int idx)
     char* msg = cBEOptionInterface_getQuickKeyMessage(iface, idx);
     if (msg == 0) {
         char wideText[0x40];
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry<void*(void* self, int hash)>* vt = *(sVEntry<void*(void* self, int hash)>**)(locale + 4);
-        char* obj = locale + vt[4].delta;
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry<void*(void* self, int hash)>* vt = (sVEntry<void*(void* self, int hash)>*)VPTR_OF(cUILocaleInterface, locale);
+        void* obj = vthis(locale, vt[4]);
         void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
         USTR_strcpyW(wideText, str);
         cBXString_Concat(&label, wideText);
@@ -25648,9 +25648,9 @@ extern "C" void cFEStateNetQuickMessages_onWidgetEvent(cFEStateNetQuickMessages*
             char* name = cBEOptionInterface_getQuickKeyMessage(iface, idx);
             if (name == 0) {
                 char msgBuf[0x40];
-                char* locale = (char*)SSXApp->FELocale;
-                sVE_001C2740* vt = *(sVE_001C2740**)(locale + 4);
-                char* obj = locale + vt[4].delta;
+                cFELocale* locale = SSXApp->FELocale;
+                sVE_001C2740* vt = (sVE_001C2740*)VPTR_OF(cUILocaleInterface, locale);
+                void* obj = vthis(locale, vt[4]);
                 void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
                 USTR_strcpyW(msgBuf, str);
                 func_001A9150((cFEStateNet*)self, 0, GetHashValue32(str_kT_POPUP206EditQuickMessage), (int)msgBuf, 0, idx, 0x3F);

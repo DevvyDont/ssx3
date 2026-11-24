@@ -2,6 +2,7 @@
 #include "vtable.h"
 #include "be/beintoption.h"
 #include "main/ssxapp.h"
+#include "util/locale.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEOptionInterface_revert(cBEOptionInterface* self);
@@ -313,9 +314,9 @@ struct sVEntry_0014F6E8
  */
 extern "C" void cBEOptionInterface_resetQuickKey(cBEOptionInterface* self, int i)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_0014F6E8* vt = *(sVEntry_0014F6E8**)(obj + 0x4);
-    char* localeThis = obj + vt[4].delta;
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_0014F6E8* vt = (sVEntry_0014F6E8*)VPTR_OF(cUILocaleInterface, obj);
+    void* localeThis = vthis(obj, vt[4]);
     int hashValue = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(self, i);
     void* text = vt[4].fn(localeThis, hashValue);
     USTR_strcpyW(D_00535617[i], text);

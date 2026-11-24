@@ -338,8 +338,8 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             break;
         }
         case 6: {
-            char* mgr = (char*)SSXApp->FELocale;
-            sVE_1F3CF0s* vt = *(sVE_1F3CF0s**)(mgr + 4);
+            cFELocale* mgr = SSXApp->FELocale;
+            sVE_1F3CF0s* vt = (sVE_1F3CF0s*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveBeforeQuit));
             void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
             void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);

@@ -7,6 +7,7 @@
 #include "replay/frameptr.h"
 #include "main/ssxapp.h"
 #include "replay/bxreplayframe.h"
+#include "util/locale.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEMissionInt[];
@@ -563,27 +564,17 @@ struct sMissionDefView_00153C88
 extern sMissionDefView_00153C88 cBELibrary_missionInfo_v00153C88[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
-class cMissionObj_00153C88
-{
-public:
-    char pad_0x00[0x4];
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void getStringByHash(int a);
-};
-
 /**
  * Looks up a mission's name in the front-end locale.
  *
- * Declared void here, but On Tour returns the unsigned-short string; the locale call's result is left in $v0.
+ * Returns the locale's string (unsigned short*, as in On Tour).
  *
  * @param id  mission ID (On Tour uiMissionId)
  */
-extern "C" void cBEMissionInterface_getMissionName(cBEMissionInterface* self, int id)
+extern "C" unsigned short* cBEMissionInterface_getMissionName(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153C88*)(void*)SSXApp->FELocale)->getStringByHash(cBELibrary_missionInfo_v00153C88[i].f4);
+    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo_v00153C88[i].f4);
 }
 #endif
 
@@ -601,28 +592,18 @@ struct sMissionDefView_00153CD8
 extern sMissionDefView_00153CD8 cBELibrary_missionInfo_v00153CD8[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
-class cMissionObj_00153CD8
-{
-public:
-    char pad_0x00[0x4];
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void getStringByHash(int a);
-};
-
 /**
  * Looks up a mission's short description in the front-end locale: SSXApp->FELocale's vtable slot 4 with the text id at
  * +0x8 of the mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx).
  *
- * Declared void here; the locale call's result is left in $v0, as in cBEMissionInterface_getMissionName.
+ * Returns the locale's string, as cBEMissionInterface_getMissionName does.
  *
  * @param id  the mission id
  */
-extern "C" void cBEMissionInterface_getMissionShortDesc(cBEMissionInterface* self, int id)
+extern "C" unsigned short* cBEMissionInterface_getMissionShortDesc(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153CD8*)(void*)SSXApp->FELocale)->getStringByHash(cBELibrary_missionInfo_v00153CD8[i].f8);
+    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo_v00153CD8[i].f8);
 }
 #endif
 
@@ -641,27 +622,17 @@ struct sMissionDefView_00153D28
 extern sMissionDefView_00153D28 cBELibrary_missionInfo_v00153D28[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
-class cMissionObj_00153D28
-{
-public:
-    char pad_0x00[0x4];
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void getStringByHash(int a);
-};
-
 /**
  * Looks up a mission's long description in the front-end locale.
  *
- * Declared void here, but On Tour returns the unsigned-short string; the locale call's result is left in $v0.
+ * Returns the locale's string (unsigned short*, as in On Tour).
  *
  * @param id  mission ID (On Tour uiMissionId)
  */
-extern "C" void cBEMissionInterface_getMissionLongDesc(cBEMissionInterface* self, int id)
+extern "C" unsigned short* cBEMissionInterface_getMissionLongDesc(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153D28*)(void*)SSXApp->FELocale)->getStringByHash(cBELibrary_missionInfo_v00153D28[i].fC);
+    return SSXApp->FELocale->getStringByHash(cBELibrary_missionInfo_v00153D28[i].fC);
 }
 #endif
 

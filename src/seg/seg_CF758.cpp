@@ -4,6 +4,7 @@
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
 #include "be/beintplayer.h"
+#include "util/locale.h"
 //100%
 INCLUDE_ASM("seg/seg_CF758", setChallengeName);
 #ifdef SKIP_ASM
@@ -51,8 +52,8 @@ struct sVEntry_CE758 {
 
 static inline int Loc_CE758(char* key)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_CE758* vt = *(sVEntry_CE758**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_CE758* vt = (sVEntry_CE758*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 

@@ -10,6 +10,7 @@
 #include "fe/ovstateautosave.h"
 #include "main/ssxapp.h"
 #include "util/bxmemcard.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onCreateScreen);
@@ -653,8 +654,8 @@ struct sVEntryK211BC8 {
 
 static inline void* GetText_K211BC8(char* key)
 {
-    char* db = (char*)SSXApp->FELocale;
-    sVEntryK211BC8* vt = *(sVEntryK211BC8**)(db + 4);
+    cFELocale* db = SSXApp->FELocale;
+    sVEntryK211BC8* vt = (sVEntryK211BC8*)VPTR_OF(cUILocaleInterface, db);
     return vt[4].fn(vthis(db, vt[4]), GetHashValue32(key));
 }
 

@@ -179,8 +179,8 @@ extern "C" void func_00186C98(void)
     sLocalK186C98 loc;
     void* mp = cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
-    char* locale = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(locale + 4);
+    cFELocale* locale = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
     unsigned short* formatText = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMOVNotFormattedPS2));
     sprintf1(buf, formatText, &loc);
     cFEMemCardStateK186C98* st = cFEStateMemCard_mInstance_K186C98;
@@ -231,10 +231,10 @@ extern "C" void func_00186D60(void)
     memCard += vt[22].delta;
     int need = vt[22].fn(memCard, cBESaveInterface_getSaveProfileSize());
     unsigned short* popupText = buf;
-    char* lo = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* lvt = *(sVEntry<unsigned short*(void*, int)>**)(lo + 4);
-    lo += lvt[4].delta;
-    unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(str_kT_MEMFENotDetectedStartUpPS2));
+    cFELocale* lo = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* lvt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, lo);
+    void* loThis = vthis(lo, lvt[4]);
+    unsigned short* fmt = lvt[4].fn(loThis, GetHashValue32(str_kT_MEMFENotDetectedStartUpPS2));
     sprintf1(popupText, fmt, &loc, need);
     cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance_86D60;
     st->mPopupType = 9;
@@ -242,21 +242,21 @@ extern "C" void func_00186D60(void)
 
     {
         char* w = *(char**)(cFEStateMemCard_mInstance_86D60 + 0x218);
-        char* lo2 = (char*)SSXApp->FELocale;
+        cFELocale* lo2 = SSXApp->FELocale;
         sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
-        sVEntry<unsigned short*(void*, int)>* lvt2 = *(sVEntry<unsigned short*(void*, int)>**)(lo2 + 4);
+        sVEntry<unsigned short*(void*, int)>* lvt2 = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, lo2);
         w += wvt[26].delta;
-        lo2 += lvt2[4].delta;
-        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(str_kT_CMNYes)), 0);
+        void* lo2This = vthis(lo2, lvt2[4]);
+        wvt[26].fn(w, lvt2[4].fn(lo2This, GetHashValue32(str_kT_CMNYes)), 0);
     }
     {
         char* w = *(char**)(cFEStateMemCard_mInstance_86D60 + 0x218);
-        char* lo2 = (char*)SSXApp->FELocale;
+        cFELocale* lo2 = SSXApp->FELocale;
         sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
-        sVEntry<unsigned short*(void*, int)>* lvt2 = *(sVEntry<unsigned short*(void*, int)>**)(lo2 + 4);
+        sVEntry<unsigned short*(void*, int)>* lvt2 = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, lo2);
         w += wvt[26].delta;
-        lo2 += lvt2[4].delta;
-        wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(str_kT_MEMOVRetry)), 1);
+        void* lo2This = vthis(lo2, lvt2[4]);
+        wvt[26].fn(w, lvt2[4].fn(lo2This, GetHashValue32(str_kT_MEMOVRetry)), 1);
     }
     char* w2 = *(char**)(cFEStateMemCard_mInstance_86D60 + 0x218);
     sVtV_86D60* vvt = *(sVtV_86D60**)(w2 + 8);
@@ -645,17 +645,17 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
     sVEntry<int(void*, int)>* sfvt = *(sVEntry<int(void*, int)>**)sf;
     int size = sfvt[22].fn(sf + sfvt[22].delta, cBESaveInterface_getSaveProfileSize());
     cMCOverlayManager_getDeviceNumberString(mp, &loc, mp->mSelectedDevice);
-    char* locale = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(locale + 4);
-    unsigned short* fmt = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMNoSpaceStartPS2));
+    cFELocale* locale = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
+    unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMNoSpaceStartPS2));
     sprintf1(buf, fmt, &loc, size);
     cFEStateMemCard_mInstance_K186C98->v36(buf, 0, 0, 0, 0, 0);
     char* box = *(char**)((char*)cFEStateMemCard_mInstance + 0x218);
     sVtB_00187360* bvt = *(sVtB_00187360**)(box + 8);
     char* bthis = box + bvt[26].delta;
-    char* buttonLocale = (char*)SSXApp->FELocale;
-    sVEntry<int(void*, int)>* vt2 = *(sVEntry<int(void*, int)>**)(buttonLocale + 4);
-    char* o2this = buttonLocale + vt2[4].delta;
+    cFELocale* buttonLocale = SSXApp->FELocale;
+    sVEntry<int(void*, int)>* vt2 = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, buttonLocale);
+    void* o2this = vthis(buttonLocale, vt2[4]);
     int id = vt2[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     bvt[26].fn(bthis, id, 1);
     char* box2 = *(char**)((char*)cFEStateMemCard_mInstance + 0x218);

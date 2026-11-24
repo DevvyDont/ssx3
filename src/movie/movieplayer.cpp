@@ -8,6 +8,7 @@
 #include "movie/mcoverlaymanager.h"
 #include "main/ssxapp.h"
 #include "util/bxmemcard.h"
+#include "util/locale.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self);
@@ -388,9 +389,9 @@ extern "C" void cMCOverlayManager_GetTitleString(cMCOverlayManager* self, int n,
         sprintf1_v(dst, fmt, name, n + 1);
         break;
     case 2: {
-        char* loc = (char*)SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(loc + 4);
-        char* thisp = loc + vt[4].delta;
+        cFELocale* loc = SSXApp->FELocale;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
+        void* thisp = vthis(loc, vt[4]);
         strcpy1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_OVGameOptions)));
         break;
     }
@@ -442,9 +443,9 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
     func_002C2540(fmt, str_SSX_3_pct_s);
     switch (self->mFileType) {
     case 0: {
-        char* loc = (char*)SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(loc + 4);
-        char* thisp = loc + vt[4].delta;
+        cFELocale* loc = SSXApp->FELocale;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
+        void* thisp = vthis(loc, vt[4]);
         sprintf1_v(title, fmt, vt[4].fn(thisp, GetHashValue32(str_kT_MEMFileNameReplay)));
         sprintf1_v(out, title, n);
         break;
@@ -456,9 +457,9 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
         break;
     }
     default: {
-        char* loc = (char*)SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(loc + 4);
-        char* thisp = loc + vt[4].delta;
+        cFELocale* loc = SSXApp->FELocale;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
+        void* thisp = vthis(loc, vt[4]);
         strcpy1(title, vt[4].fn(thisp, GetHashValue32(str_kT_OVGameOptions)));
         sprintf1_v(out, fmt, title);
         break;
@@ -3357,9 +3358,9 @@ struct sLocVEntry_241710 {
 
 static inline void* Loc_241710(char* key)
 {
-    char* loc = (char*)SSXApp->FELocale;
-    sLocVEntry_241710* vt = *(sLocVEntry_241710**)(loc + 4);
-    char* thisp = loc + vt[4].delta;
+    cFELocale* loc = SSXApp->FELocale;
+    sLocVEntry_241710* vt = (sLocVEntry_241710*)VPTR_OF(cUILocaleInterface, loc);
+    void* thisp = vthis(loc, vt[4]);
     return vt[4].fn(thisp, GetHashValue32(key));
 }
 
@@ -3707,8 +3708,8 @@ struct sVEntry_00241E18 {
 
 static inline int Loc_00241E18(char* key)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_00241E18* vt = *(sVEntry_00241E18**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_00241E18* vt = (sVEntry_00241E18*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 

@@ -10,6 +10,7 @@
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 #include "util/bxmemcard.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileSelect_onCreateScreen);
@@ -922,8 +923,8 @@ struct sVEntryK18FD90 {
 
 static inline void* GetText_K18FD90(char* key)
 {
-    char* db = (char*)SSXApp->FELocale;
-    sVEntryK18FD90* vt = *(sVEntryK18FD90**)(db + 4);
+    cFELocale* db = SSXApp->FELocale;
+    sVEntryK18FD90* vt = (sVEntryK18FD90*)VPTR_OF(cUILocaleInterface, db);
     return vt[4].fn(vthis(db, vt[4]), GetHashValue32(key));
 }
 

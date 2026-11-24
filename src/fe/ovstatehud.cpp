@@ -16,6 +16,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "render/graphicsman.h"
+#include "util/locale.h"
 
 
 //100%
@@ -832,11 +833,11 @@ static inline void setupVertBar_9AD0(tBarConfig* b, const float& h)
 // Localised string by name from the game's text table (SSXApp + 0x8C; vptr at 0x4, slot 4 = lookup by hash).
 static inline unsigned short* getLocString_9AD0(char* id)
 {
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(o + 4);
-    o += vt[4].delta;
+    cFELocale* o = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, o);
+    void* oThis = vthis(o, vt[4]);
     int h = GetHashValue32(id);
-    return vt[4].fn(o, h);
+    return vt[4].fn(oThis, h);
 }
 
 /**
@@ -2356,9 +2357,9 @@ extern char str_fefont[];
 extern "C" void cBXLoadIndicator_Init(cBXLoadIndicator* vself)
 {
     sHudIds001F30D8* self = (sHudIds001F30D8*)vself;
-    char* locale = (char*)SSXApp->FELocale;
-    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(locale + 4);
-    char* adj = locale + vt[4].delta;
+    cFELocale* locale = SSXApp->FELocale;
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
+    void* adj = vthis(locale, vt[4]);
     int loadingHash = GetHashValue32(str_kT_ovrcmnloading_b);
     self->a = vt[4].fn(adj, loadingHash);
     void* tbl = SSXApp->Game->UI->mpFontInterface;

@@ -24,6 +24,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "util/bxmemcard.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onCreateScreen);
@@ -863,9 +864,9 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
         }
         cSSXApp_activateBEOptions(SSXApp);
         {
-            char* locale = (char*)SSXApp->FELocale;
-            sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
-            vt[3].fn(locale + vt[3].delta, cBEOptionInterface_mOption_189980.iLanguage);
+            cFELocale* locale = SSXApp->FELocale;
+            sVE_189980b* vt = (sVE_189980b*)VPTR_OF(cUILocaleInterface, locale);
+            vt[3].fn(vthis(locale, vt[3]), cBEOptionInterface_mOption_189980.iLanguage);
         }
         Refresh_189980((self));
         char* eng = *(char**)(char*)self->mpEngine;
@@ -879,9 +880,9 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
     case 9:
         if (((signed char*)&self->mLanguageSlot)[0] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[0]])) {
             cBEOptionInterface_mOption_189980.iLanguage = cUIListBox_getCurrentEntryData(((char*)widget));
-            char* locale = (char*)SSXApp->FELocale;
-            sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
-            char* thisp = locale + vt[3].delta;
+            cFELocale* locale = SSXApp->FELocale;
+            sVE_189980b* vt = (sVE_189980b*)VPTR_OF(cUILocaleInterface, locale);
+            void* thisp = vthis(locale, vt[3]);
             vt[3].fn(thisp, cUIListBox_getCurrentEntryData(((char*)widget)));
             Refresh_189980((self));
             func_0029ED90(cAudioInterface_bxAudio(), 1);
@@ -971,9 +972,9 @@ extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self_)
         void* w = find_189D60(self, 0);
         if (w != 0) {
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iLanguage);
-            char* locale = (char*)SSXApp->FELocale;
-            sVEntry<void(void*, char)>* vt = *(sVEntry<void(void*, char)>**)(locale + 4);
-            vt[3].fn(locale + vt[3].delta, cUIListBox_getCurrentEntryData(w));
+            cFELocale* locale = SSXApp->FELocale;
+            sVEntry<void(void*, char)>* vt = (sVEntry<void(void*, char)>*)VPTR_OF(cUILocaleInterface, locale);
+            vt[3].fn(vthis(locale, vt[3]), cUIListBox_getCurrentEntryData(w));
             char* scr = ((char*)self->mpScreen);
             sVE_189D60a* vt2 = *(sVE_189D60a**)(scr + 0x48);
             char* sub = scr + 0x40;
@@ -2724,8 +2725,8 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
         widget->mMiscData = 3;
         if (widgetId == 3) {
             self->mSaveLoadCurrentCtrl = self->mCurrentCtrl;
-            char* mgr = (char*)SSXApp->FELocale;
-            sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
+            cFELocale* mgr = SSXApp->FELocale;
+            sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_HELPCreateNewFilePrompt));
             char* mem = (char*)operator new(3068, str_cFEPopupConfirm, 0x100, 0);
             char* confirmPopup = (char*)cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
@@ -2874,9 +2875,9 @@ static inline cUIObj_DD60* getObj_DD60(void* self, char* name)
 // Looks up a localized string by the hash of its name.
 static inline char* getString_DD60(char* name)
 {
-    char* loc = (char*)SSXApp->FELocale;
-    sVE_DD60* vt = *(sVE_DD60**)(loc + 4);
-    char* thisp = loc + vt[4].delta;
+    cFELocale* loc = SSXApp->FELocale;
+    sVE_DD60* vt = (sVE_DD60*)VPTR_OF(cUILocaleInterface, loc);
+    void* thisp = vthis(loc, vt[4]);
     return vt[4].fn(thisp, GetHashValue32(name));
 }
 

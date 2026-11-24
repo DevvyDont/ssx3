@@ -8693,8 +8693,8 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
     if (self->mpNumber != 0) {
         if (groupEntry->type == 4) {
             unsigned short buf[0x18];
-            char* mgr = (char*)SSXApp->FELocale;
-            sVEntryS1E5428* vt = *(sVEntryS1E5428**)(mgr + 4);
+            cFELocale* mgr = SSXApp->FELocale;
+            sVEntryS1E5428* vt = (sVEntryS1E5428*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* fmt = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_MSGFAQNumber));
             sprintf1(buf, fmt, func_001E2DC0(self->miMessage));
             cUIText_setUnicodeString(self->mpNumber, buf);
@@ -9512,8 +9512,8 @@ extern char str_kT_OVRCMNFinalRound[];
 // EA's 3-float vector (prototype name, as in fe/fepopup).
 static inline unsigned short* Loc1E6718(char* name)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(obj + 4);
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
@@ -10437,8 +10437,8 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
         cUIState_showObjSafe(self, str_place6);
     }
     screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pointstotal));
-    char* loc = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(loc + 4);
+    cFELocale* loc = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
     strcpy1(fmt, vt[4].fn(vthis(loc, vt[4]), GetHashValue32(str_kT_OVRCMNPointstotal)));
     sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
     cUIText_setUnicodeString(screenWidget, text);

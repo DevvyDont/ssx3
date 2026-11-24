@@ -635,9 +635,9 @@ struct sVEntry_246278 {
 
 static inline int Loc_246278(char* key)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    sVEntry_246278* vt = *(sVEntry_246278**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
+    cFELocale* obj = SSXApp->FELocale;
+    sVEntry_246278* vt = (sVEntry_246278*)VPTR_OF(cUILocaleInterface, obj);
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 
 static inline void Fmt_246278(char* buf, char* fmt, char* key, void* iface)
@@ -655,7 +655,7 @@ struct sVEntryV_246278 {
 static inline void Activate_246278(char* obj)
 {
     sVEntryV_246278* vt = *(sVEntryV_246278**)(obj + 8);
-    vt[9].fn(obj + vt[9].delta, 1);
+    vt[9].fn(vthis(obj, vt[9]), 1);
 }
 
 static inline bool IsId_246278(char* obj, char* key)
@@ -784,9 +784,9 @@ struct sVEntV_2464E8 {
 
 static inline void* Loc_2464E8(char* key)
 {
-    char* o = (char*)SSXApp->FELocale;
-    sVEnt_2464E8* vt = *(sVEnt_2464E8**)(o + 4);
-    return vt[4].fn(o + vt[4].delta, GetHashValue32(key));
+    cFELocale* o = SSXApp->FELocale;
+    sVEnt_2464E8* vt = (sVEnt_2464E8*)VPTR_OF(cUILocaleInterface, o);
+    return vt[4].fn(vthis(o, vt[4]), GetHashValue32(key));
 }
 
 static inline bool IsId_2464E8(char* obj, char* key)
@@ -1099,9 +1099,9 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
             if (label != 0 && bar != 0) {
                 int statValue = stats[i];
                 int level = statValue / 5;
-                char* locale = (char*)SSXApp->FELocale;
-                sVEntry_6CF8<void*(void*, int)>* vt = *(sVEntry_6CF8<void*(void*, int)>**)(locale + 4);
-                sprintf1(text, (unsigned short*)vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_CMNLvNum)), level);
+                cFELocale* locale = SSXApp->FELocale;
+                sVEntry_6CF8<void*(void*, int)>* vt = (sVEntry_6CF8<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
+                sprintf1(text, (unsigned short*)vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_CMNLvNum)), level);
                 sVEntry_6CF8<void(void*, int)>* vt2 = *(sVEntry_6CF8<void(void*, int)>**)(label + 8);
                 vt2[9].fn(label + vt2[9].delta, 1);
                 cUIText_setUnicodeString(label, (char*)text);
@@ -1256,8 +1256,8 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
         }
         unsigned short fmtw[50];
         unsigned short text[100];
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(o + 4);
+        cFELocale* o = SSXApp->FELocale;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, o);
         strcpy1(fmtw, vt[4].fn(vthis(o, vt[4]), GetHashValue32(str_kT_OVRCMNLevelNum)));
         sprintf1(text, fmtw, rank);
         cUIText_setUnicodeString(obj, (char*)text);

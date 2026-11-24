@@ -14,6 +14,7 @@
 #include "be/beintnetwork.h"
 #include "be/beintreward.h"
 #include "main/ssxapp.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("be/beintstat", cBEStatInterface_getCollisionAttrib);
@@ -601,8 +602,8 @@ extern "C" void cBELibrary_newProfile(void* self, signed char idx)
     memset(playerEntry, 0, sizeof(cBEPlayerDB));
     playerEntry->iUseDualShock = 1;
     playerEntry->cCharacterID = 4;
-    char* locale = (char*)SSXApp->FELocale;
-    sVEntry_149A88* vt = *(sVEntry_149A88**)(locale + 4);
+    cFELocale* locale = SSXApp->FELocale;
+    sVEntry_149A88* vt = (sVEntry_149A88*)VPTR_OF(cUILocaleInterface, locale);
     strcpy2(buf, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMPlayerName)));
     sprintf(playerEntry->strUserName, buf, idx + 1);
     cBEProfileLib_init(cBELibrary_profileLib[idx], 1);

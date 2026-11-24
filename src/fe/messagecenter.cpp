@@ -119,8 +119,8 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, cUIThing
     } else if (hash == GetHashValue32(str_num_songs)) {
         show_6F98(w, 0);
     } else if (hash == GetHashValue32(str_song_list)) {
-        char* db = (char*)SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
+        cFELocale* db = SSXApp->FELocale;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
         unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongsInList));
         int len = USTR_length(fmt) + 5;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
@@ -764,8 +764,8 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
         char* artist = (char*)func_002B4120(&cAudioInterface_bxAudio()->MusicSys, cur);
         if (strlen(name) != 0) {
             ((cMsgWidget_197E70*)self->mpCurSongTitle)->show(1);
-            char* db = (char*)SSXApp->FELocale;
-            sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
+            cFELocale* db = SSXApp->FELocale;
+            sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
             unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16NowPlaying));
             int len = USTR_length(fmt) + strlen(name) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
@@ -780,8 +780,8 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
         }
         if (strlen(artist) != 0) {
             ((cMsgWidget_197E70*)self->mpCurSongArtist)->show(1);
-            char* db = (char*)SSXApp->FELocale;
-            sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
+            cFELocale* db = SSXApp->FELocale;
+            sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
             unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16Artist));
             int len = USTR_length(fmt) + strlen(artist) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
@@ -1139,8 +1139,8 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
 {
     cFEStateRequestLine* self = vself;
     if (((cMsgWidget_1986D0*)self->mpArtist) != 0) {
-        char* db = (char*)SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
+        cFELocale* db = SSXApp->FELocale;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
         unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongBy));
         char* name = (char*)cFEStateRequestLine_getSongArtist((cFEStateRequestLine*)self, idx);
         int len = USTR_length(fmt) + strlen(name) + 1;

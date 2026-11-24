@@ -5,6 +5,7 @@
 #include "util/bxps2memcard.h"
 #include "worldpainter/quadtree.h"
 #include "main/ssxapp.h"
+#include "util/locale.h"
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getFreeNode);
@@ -2723,9 +2724,9 @@ extern "C" void cPS2MemCard_GetStatus(cPS2MemCard* self, int idx, unsigned short
     case 0: {
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
         int freeClusters = cPS2MemCard_GetFreeSpace1_i(self, idx) >? 0;
-        char* obj = (char*)SSXApp->FELocale;
-        cPS2MemCard_GetStatus_sVEntry* vt = *(cPS2MemCard_GetStatus_sVEntry**)(obj + 4);
-        char* thisp = obj + vt[4].delta;
+        cFELocale* obj = SSXApp->FELocale;
+        cPS2MemCard_GetStatus_sVEntry* vt = (cPS2MemCard_GetStatus_sVEntry*)VPTR_OF(cUILocaleInterface, obj);
+        void* thisp = vthis(obj, vt[4]);
         sprintf1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_MEMFreePS2)), freeClusters);
         break;
     }
@@ -3299,9 +3300,9 @@ extern char str_kT_MEMNoFreeSpace[];
 
 static inline unsigned short* qtLoc6128(char* key)
 {
-    char* obj = (char*)SSXApp->FELocale;
-    cPS2MemCard_GetStatus_sVEntry* vt = *(cPS2MemCard_GetStatus_sVEntry**)(obj + 4);
-    char* thisp = obj + vt[4].delta;
+    cFELocale* obj = SSXApp->FELocale;
+    cPS2MemCard_GetStatus_sVEntry* vt = (cPS2MemCard_GetStatus_sVEntry*)VPTR_OF(cUILocaleInterface, obj);
+    void* thisp = vthis(obj, vt[4]);
     return vt[4].fn(thisp, GetHashValue32(key));
 }
 
@@ -3457,9 +3458,9 @@ extern "C" void cPS2MemCard_GetDeviceName(cPS2MemCard* self, int device, unsigne
     sprintf1_v(num, fmt, device + 1);
     if (device < 2) {
         if (device >= 0) {
-            char* obj = (char*)SSXApp->FELocale;
-            cPS2MemCard_GetDeviceName_sVEntry* vt = *(cPS2MemCard_GetDeviceName_sVEntry**)(obj + 4);
-            char* thisp = obj + vt[4].delta;
+            cFELocale* obj = SSXApp->FELocale;
+            cPS2MemCard_GetDeviceName_sVEntry* vt = (cPS2MemCard_GetDeviceName_sVEntry*)VPTR_OF(cUILocaleInterface, obj);
+            void* thisp = vthis(obj, vt[4]);
             sprintf1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_MEMMemDevicePS2_b)), num);
         }
     }
