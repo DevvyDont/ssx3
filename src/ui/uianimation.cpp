@@ -171,7 +171,7 @@ extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data)
         char* chanData = *(char**)self + 0x10;
         for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 4); i++) {
             // PORT: the entry pointer is passed as int
-            cUIAnimationChannel_setAnimChanData((char*)self->mpAnimChannels + (i << 2), (int)chanData);
+            cUIAnimationChannel_setAnimChanData(&self->mpAnimChannels[i], (int)chanData);
             chanData += *(unsigned short*)(chanData + 4);
         }
     }

@@ -23,6 +23,7 @@
 #include "ai/riderhandler.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
+#include "intersect/overlaplist.h"
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_initLightCache);
@@ -34,79 +35,35 @@ extern char str_RTLOverlapList[];
 
 extern t4Vector t4vect_Zero;
 
-struct sWLCList {
-    unsigned int head;
-    char pad04[0x100];
-};
-
-struct sWLCBuf {
-    int owner;
-    int count;
-    sWLCList lists[3];
-};
-
-struct sWLCNode {
-    unsigned int id;
-    int priority;
-    char pad08[0xA8];
-    t4Vector v;
-    int fC0;
-    char padC4[0xAC];
-    sWLCNode* next;
-    sWLCNode* prev;
-    char pad178[8];
-};
-
-// Light slot view based at self+0x40*i: id/f14 at +0x10/+0x14; slot i's cache buffer
-// lives at +0x40 (cWorldLightMan_purgeLightCache views it as slots[i].buf at self+0x40).
-struct sWLCLightHdr {
-    char pad00[0x10];
-    unsigned int id;
-    int f14;
-    char pad18[0x28];
-};
-
-struct sWLCMan {
-    union {
-        int f00;
-        sWLCLightHdr hdr[8];
-    };
-    char pad200[0x10];
-    sWLCNode nodes[32];
-    sWLCNode* heads[32];
-    int count;
-};
-
 /**
  * Sets up the world light cache: eight empty light slots with their "RTLOverlapList" buffers and 32 free
  * light nodes.
  */
-extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
+extern "C" void cWorldLightMan_initLightCache(cWorldLightMan* self)
 {
     unsigned int i;
     for (i = 0; i < 8; i++) {
-        sWLCLightHdr* light = &self->hdr[i];
-        light->id = 0xFFFFFFFF;
-        light->f14 = 0;
-        sWLCBuf* buf = (sWLCBuf*)operator new(2580, str_RTLOverlapList, 0x20000000, 0);
-        buf->owner = self->f00;
-        buf->count = 0;
-        buf->lists[0].head = 0xFFFFFFFF;
-        buf->lists[1].head = 0xFFFFFFFF;
-        buf->lists[2].head = 0xFFFFFFFF;
-        *(sWLCBuf**)((char*)light + 0x40) = buf;
+        self->OverlapNodeList[i].RID = tResourceID::Invalid();
+        self->OverlapNodeList[i].iTick = 0;
+        cOverlapList* list = (cOverlapList*)operator new(sizeof(cOverlapList), str_RTLOverlapList, 0x20000000, 0);
+        list->nash = self->m_pNash;
+        list->deletecount = 0;
+        list->numinstances = 0xFFFFFFFF;
+        list->numpatches = 0xFFFFFFFF;
+        list->numtyped = 0xFFFFFFFF;
+        self->OverlapNodeList[i].pOverlapList = list;
     }
     for (i = 0; i < 32; i++) {
-        self->nodes[i].priority = 0;
-        self->nodes[i].id = 0xFFFFFFFF;
-        self->nodes[i].v = t4vect_Zero;
-        self->nodes[i].fC0 = 0;
-        self->nodes[i].next = 0;
-        self->nodes[i].prev = 0;
+        self->LightCacheArray[i].iTick = 0;
+        self->LightCacheArray[i].RID = 0xFFFFFFFF;
+        self->LightCacheArray[i].pos = t4vect_Zero;
+        self->LightCacheArray[i].pOverlapNode = 0;
+        self->LightCacheArray[i].pNext = 0;
+        self->LightCacheArray[i].pPrev = 0;
     }
-    self->count = 0;
+    self->m_uiNumLightCacheEntry = 0;
     for (i = 0; i < 32; i++) {
-        self->heads[i] = 0;
+        self->LightCacheHashTable[i] = 0;
     }
 }
 #endif
@@ -116,26 +73,16 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_purgeLightCache);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
-struct cWorldLightMan_purgeLightCache_sSlot {
-    int* buf;
-    char pad04[0x3C];
-};
-
-struct cWorldLightMan_purgeLightCache_sMan {
-    char pad00[0x40];
-    cWorldLightMan_purgeLightCache_sSlot slots[8];
-};
-
 /**
  * Frees the world light manager's light cache.
  *
- * Calls operator delete on the buffer pointer at the start of each of the eight 0x40-byte slots from +0x40.
+ * Deletes the overlap list of each of the eight overlap nodes (allocated by initLightCache).
  */
-extern "C" void cWorldLightMan_purgeLightCache(cWorldLightMan_purgeLightCache_sMan* self)
+extern "C" void cWorldLightMan_purgeLightCache(cWorldLightMan* self)
 {
     unsigned int i;
     for (i = 0; i < 8; i++) {
-        operator_delete(self->slots[i].buf);
+        operator_delete((int*)self->OverlapNodeList[i].pOverlapList);
     }
 }
 #endif

@@ -844,10 +844,9 @@ void cReplayCache_reset(void* vself)
 //100%
 INCLUDE_ASM("replay/playbackman", cReplayCache_updateControlCmd);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-void cReplayCache_addControlCmd_D178(void* self, int a1) __asm__("cReplayCache_addControlCmd");
-int cReplayCache_getControlCmd_D178(void* self, int a1) __asm__("cReplayCache_getControlCmd");
+extern "C" int cReplayCache_addControlCmd(cReplayCache* self, tControlCmd* cmd);
+extern "C" int cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* cmd);
 /**
  * Records or plays back one frame's control command, depending on the replay state.
  *
@@ -860,7 +859,7 @@ int cReplayCache_getControlCmd_D178(void* self, int a1) __asm__("cReplayCache_ge
  * @param controlCmd  the 8-byte control command: read when recording, overwritten during playback
  * @return 0 when recording or idle, cReplayCache_getControlCmd's result during playback, 1 in the other states
  */
-extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, int controlCmd)
+extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, tControlCmd* controlCmd)
 {
     if ((int)self->CmdFrame == 0) {
         return 0;
@@ -872,14 +871,14 @@ extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, int controlCmd)
         if (replay->EndReplay != 0 || replay->Loaded != 0 || replay->ReplayError != 0) {
             break;
         }
-        cReplayCache_addControlCmd_D178(self, controlCmd);
+        cReplayCache_addControlCmd(self, controlCmd);
     }
         /* fall through */
     case 10: case 11: case 12: case 14:
         result = 0;
         break;
     case 1: case 2: case 4:
-        result = cReplayCache_getControlCmd_D178(self, controlCmd);
+        result = cReplayCache_getControlCmd(self, controlCmd);
         break;
     case 3: case 5: case 6: case 7: case 8: case 9: case 13:
         break;
@@ -891,14 +890,6 @@ extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, int controlCmd)
 //100%
 INCLUDE_ASM("replay/playbackman", cReplayCache_addCmdFrame);
 #ifdef SKIP_ASM
-struct sPbChunk_D2B0;
-struct sPbStream_D2B0;
-
-struct sPbChunk_D228 {
-    unsigned int n : 12;
-    unsigned int key : 20;
-    int data;
-};
 
 
 
@@ -911,18 +902,17 @@ struct sPbChunk_D228 {
  * @param stream  the replay input cache
  * @param chunkp  the command to append
  */
-extern "C" void cReplayCache_addCmdFrame(cReplayCache* stream, sPbChunk_D2B0* chunkp)
+extern "C" void cReplayCache_addCmdFrame(cReplayCache* stream, tControlCmd* chunkp)
 {
     cReplayCache* self = stream;
-    sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
     if (self->RecordCursor >= 0x1000) {
         cReplay* replay = SSXApp->Game->Replay;
         replay->ReplayError = 1;
         replay->ShowError = 180;
         return;
     }
-    ((sPbChunk_D228*)self->CmdFrame)[self->RecordCursor] = *chunk;
-    ((sPbChunk_D228*)self->CmdFrame)[self->RecordCursor].n = 1;
+    self->CmdFrame[self->RecordCursor] = *chunkp;
+    self->CmdFrame[self->RecordCursor].CruiseCmd.Count = 1;
     self->RecordCursor++;
 }
 #endif
@@ -930,21 +920,8 @@ extern "C" void cReplayCache_addCmdFrame(cReplayCache* stream, sPbChunk_D2B0* ch
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", cReplayCache_addControlCmd);
 #ifdef SKIP_ASM
-struct sPbChunk_D2B0 {
-    unsigned int n : 12;
-    unsigned int key : 20;
-    int data;
-};
-
-struct sPbStream_D2B0 {
-    int count;              // 0x0
-    int index;              // 0x4
-    int offset;             // 0x8
-    sPbChunk_D2B0* chunks;  // 0xC
-};
-
 extern "C" int memcmp(const void* a, const void* b, int n);
-extern "C" void cReplayCache_addCmdFrame(cReplayCache* self, sPbChunk_D2B0* chunk);
+extern "C" void cReplayCache_addCmdFrame(cReplayCache* self, tControlCmd* chunk);
 
 /**
  * Records one frame's control command, run-length encoded: repeats of the last command only bump its count.
@@ -956,19 +933,19 @@ extern "C" void cReplayCache_addCmdFrame(cReplayCache* self, sPbChunk_D2B0* chun
  * @param chunk  the command to record
  * @return always 1
  */
-extern "C" int cReplayCache_addControlCmd(sPbStream_D2B0* self, sPbChunk_D2B0* chunk)
+extern "C" int cReplayCache_addControlCmd(cReplayCache* self, tControlCmd* chunk)
 {
-    if (self->count > 0) {
-        int i = self->count - 1;
-        sPbChunk_D2B0 last = self->chunks[i];
-        last.n = 0;
-        if (memcmp(&last, chunk, 8) == 0 && (int)self->chunks[i].n < 0xFFF) {
-            self->chunks[i].n++;
+    if (self->RecordCursor > 0) {
+        int i = self->RecordCursor - 1;
+        tControlCmd last = self->CmdFrame[i];
+        last.CruiseCmd.Count = 0;
+        if (memcmp(&last, chunk, 8) == 0 && (int)self->CmdFrame[i].CruiseCmd.Count < 0xFFF) {
+            self->CmdFrame[i].CruiseCmd.Count++;
         } else {
-            cReplayCache_addCmdFrame((cReplayCache*)self, chunk);
+            cReplayCache_addCmdFrame(self, chunk);
         }
     } else {
-        cReplayCache_addCmdFrame((cReplayCache*)self, chunk);
+        cReplayCache_addCmdFrame(self, chunk);
     }
     return 1;
 }
@@ -977,12 +954,6 @@ extern "C" int cReplayCache_addControlCmd(sPbStream_D2B0* self, sPbChunk_D2B0* c
 //100%
 INCLUDE_ASM("replay/playbackman", cReplayCache_truncate);
 #ifdef SKIP_ASM
-struct sEntry_D390 {
-    unsigned int len : 12;
-    unsigned int rest : 20;
-    int data;
-};
-
 
 /**
  * Cuts the cache's recorded commands at tick @p pos: the chunk that holds that tick becomes the last one.
@@ -998,22 +969,22 @@ extern "C" void cReplayCache_truncate(cReplayCache* self, unsigned int pos)
 {
     int n = self->RecordCursor;
     unsigned int sum = 0;
-    sEntry_D390* entry = ((sEntry_D390*)self->CmdFrame);
+    tControlCmd* entry = self->CmdFrame;
     int i = 0;
     if (n > 0) {
-        sum = entry->len;
+        sum = entry->CruiseCmd.Count;
         entry++;
         if (pos >= sum) {
             do {
                 i++;
                 if (i >= n)
                     break;
-                sum += entry->len;
+                sum += entry->CruiseCmd.Count;
                 entry++;
             } while (pos >= sum);
         }
     }
-    ((sEntry_D390*)self->CmdFrame)[i].len = sum - pos + 1;
+    self->CmdFrame[i].CruiseCmd.Count = sum - pos + 1;
     self->RecordCursor = i + 1;
 }
 #endif
@@ -1021,12 +992,6 @@ extern "C" void cReplayCache_truncate(cReplayCache* self, unsigned int pos)
 //100%
 INCLUDE_ASM("replay/playbackman", cReplayCache_getControlCmd);
 #ifdef SKIP_ASM
-struct sPbChunk_D420 {
-    unsigned int n : 12;
-    unsigned int key : 20;
-    int data;
-};
-
 
 extern "C" void MEM_fill(void* dst, int c, int n);
 
@@ -1040,16 +1005,16 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param out  receives the command
  * @return 1 when a command was read, 0 past the end
  */
-extern "C" int cReplayCache_getControlCmd(cReplayCache* self, sPbChunk_D420* out)
+extern "C" int cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* out)
 {
     MEM_fill(out, 0, 8);
     if (self->PlaybackCursor >= self->RecordCursor) {
         return 0;
     }
     if (self->PlaybackLeft <= 0) {
-        self->PlaybackLeft = ((sPbChunk_D420*)self->CmdFrame)[self->PlaybackCursor].n;
+        self->PlaybackLeft = self->CmdFrame[self->PlaybackCursor].CruiseCmd.Count;
     }
-    *out = ((sPbChunk_D420*)self->CmdFrame)[self->PlaybackCursor];
+    *out = self->CmdFrame[self->PlaybackCursor];
     if (--self->PlaybackLeft <= 0) {
         self->PlaybackCursor++;
     }

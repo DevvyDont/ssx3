@@ -2799,10 +2799,10 @@ extern "C" void cGateControl_gainFocus(cGateControl* self)
 INCLUDE_ASM("ai/ai", cGateControl_update);
 #ifdef SKIP_ASM
 extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
-extern "C" void cGateControl_doSit(cGateControl* self, void* a1);
-extern "C" void cGateControl_doGetupFromSit(cGateControl* self, void* a1);
-extern "C" void cGateControl_doGateRock(cGateControl* self, void* a1);
-extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* a1);
+extern "C" void cGateControl_doSit(cGateControl* self, tGateCmd* cmd);
+extern "C" void cGateControl_doGetupFromSit(cGateControl* self, tGateCmd* cmd);
+extern "C" void cGateControl_doGateRock(cGateControl* self, tGateCmd* cmd);
+extern "C" void cGateControl_doGateLaunch(cGateControl* self, tGateCmd* cmd);
 
 /**
  * Runs the start gate for one tick: stops any boost, then runs the handler of the current gate state.
@@ -2812,7 +2812,7 @@ extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* a1);
  *
  * @param cmd  the gate command (On Tour tGateCmd), passed on to the state handler
  */
-extern "C" void cGateControl_update(cGateControl* self, void* cmd)
+extern "C" void cGateControl_update(cGateControl* self, tGateCmd* cmd)
 {
     cRider_setupBoostWarp(self->mRider, 0, 0);
     switch (*(int*)self)
@@ -2883,12 +2883,6 @@ INCLUDE_ASM("ai/ai", cGateControl_doSit);
 #ifdef SKIP_ASM
 // PORT: cRiderAnimBase_play returns a value here (the target uses v1 after the call); the unit declares it void.
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
-struct sAiBits0012C0C0
-{
-    int pad : 12;
-    int v : 6;
-};
-
 /**
  * Sit gate state: stands the rider up once the command pushes forward.
  *
@@ -2897,9 +2891,9 @@ struct sAiBits0012C0C0
  *
  * @param cmd  the gate command (On Tour tGateCmd)
  */
-extern "C" void cGateControl_doSit(cGateControl* self, void* cmd)
+extern "C" void cGateControl_doSit(cGateControl* self, tGateCmd* cmd)
 {
-    if (((sAiBits0012C0C0*)cmd)->v * 0.032258063554763794f > 0.0f)
+    if (cmd->Anticipate * 0.032258063554763794f > 0.0f)
     {
         cRiderAnimBase_play_i(self->mRider->mRiderAnim, 2, 0, -1.0f);
         *(int*)self = 3;
@@ -2946,7 +2940,7 @@ static inline t4Vector vu0Scale_12C130(const t4Vector& in, float s)
  *
  * @param cmd  the gate command (On Tour tGateCmd); not read
  */
-extern "C" void cGateControl_doGetupFromSit(cGateControl* self, void* cmd)
+extern "C" void cGateControl_doGetupFromSit(cGateControl* self, tGateCmd* cmd)
 {
     cRider_setupCrouchBrake(self->mRider, 1.0f, 0.0f);
     if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 2)
@@ -2983,12 +2977,6 @@ extern "C" float cRider_getStartGateKneeOffset(void* rider);
 extern "C" int cGateControl_isLaunchAllowed(cGateControl* self);
 extern "C" int cGateControl_isForceLaunch(cGateControl* self);
 
-struct sAiBits0012C230
-{
-    int pad : 12;
-    int v : 6;
-};
-
 /**
  * Gate rock state: rocks the rider toward the command's lean and launches it once the race allows.
  *
@@ -3000,9 +2988,9 @@ struct sAiBits0012C230
  *
  * @param cmd  the gate command (On Tour tGateCmd): bits 12-17 are the signed forward/back axis
  */
-extern "C" void cGateControl_doGateRock(cGateControl* self, void* cmd)
+extern "C" void cGateControl_doGateRock(cGateControl* self, tGateCmd* cmd)
 {
-    float fy = ((sAiBits0012C230*)cmd)->v * 0.032258063554763794f;
+    float fy = cmd->Anticipate * 0.032258063554763794f;
     float old = self->GateAnticipate;
     float target;
     if (fy > 0.0f)
@@ -3075,7 +3063,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  *
  * @param cmd  the gate command (On Tour tGateCmd); not read
  */
-extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* cmd)
+extern "C" void cGateControl_doGateLaunch(cGateControl* self, tGateCmd* cmd)
 {
     float kneeOffset = cRider_getStartGateKneeOffset(self->mRider);
     cRider* riderObj = self->mRider;
@@ -3287,8 +3275,10 @@ struct sAiObj12C678
  * then 2 with anim 4 and a queued reaction (kind 1 when rider +0x100 is 1, else 4). Reaction (2): holds the
  * rider still and plays it (cRider_checkForReaction) at anim speed 0.75; once cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 1) is 0
  * (probably the reaction is over), mFinishTime = max(mFinishTime, 10) and state 3 (Done).
+ *
+ * @param cmd  the command (On Tour const tFinishLineCmd&); not read here
  */
-extern "C" void cFinishLineControl_update(cFinishLineControl* self)
+extern "C" void cFinishLineControl_update(cFinishLineControl* self, tFinishLineCmd* cmd)
 {
     int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
     int prev = anim;
@@ -3504,10 +3494,10 @@ extern "C" void cWipeoutControl_updateStuck(cWipeoutControl* self);
  * @param input  the wipeout command word (On Tour tWipeoutCmd)
  */
 // Decays or charges the AI's 0x70 meter (updating its sound), then runs the current state's handler.
-extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
+extern "C" void cWipeoutControl_update(cWipeoutControl* self, tWipeoutCmd* input)
 {
     cRider_setupBoostWarp((char*)self->mRider, 0, 0);
-    if (cRider_checkForReset_CB68((char*)self->mRider, (*input >> 12) & 1, 0)) {
+    if (cRider_checkForReset_CB68((char*)self->mRider, (*(int*)input >> 12) & 1, 0)) {
         return;
     }
     bool isRecovering = self->RiderState == 3;
@@ -3523,7 +3513,7 @@ extern "C" void cWipeoutControl_update(cWipeoutControl* self, int* input)
             }
         }
         self->RecoverPercent = newRecover;
-        if (*input & 0x2000) {
+        if (input->Recover) {
             float rate = 17.00261688232422f;
             switch (self->mRider->mWipeoutRecoveryMode) {
             case 0:
@@ -4788,18 +4778,6 @@ extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
 extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 
 
-struct sAiBitsA_12E778
-{
-    int pad : 21;
-    int v : 6;
-};
-
-struct sAiBitsB_12E778
-{
-    int pad : 15;
-    int v : 6;
-};
-
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float aiDot_12E778(const t4Vector& a, const t4Vector& b)
 {
@@ -4834,7 +4812,7 @@ static inline float aiDot_12E778(const t4Vector& a, const t4Vector& b)
  *
  * @param in  the command words (On Tour tBumpCmd)
  */
-extern "C" void cBumpControl_update(cBumpControl* self, void* in)
+extern "C" void cBumpControl_update(cBumpControl* self, tBumpCmd* in)
 {
     if (cRider_checkForFinishLine(*(void**)self))
         return;
@@ -4853,12 +4831,12 @@ extern "C" void cBumpControl_update(cBumpControl* self, void* in)
         cRider_setupBoostWarp(*(void**)self, (w >> 14) & 1, (w >> 13) & 1);
         if (cRider_getMotionState(*(void**)self) == 4)
         {
-            cRider_setupRailBalance(*(void**)self, ((sAiBitsA_12E778*)in)->v * 0.032258063554763794f);
+            cRider_setupRailBalance(*(void**)self, in->RailBalance * 0.032258063554763794f);
         }
         else
         {
             cRider* rider = (cRider*)(*(char**)self);
-            float turn = ((sAiBitsB_12E778*)in)->v * 0.032258063554763794f;
+            float turn = in->CruiseTurn * 0.032258063554763794f;
             if (aiDot_12E778(rider->mVelocity, rider->mGroundForward) < 0.0f)
                 turn = -turn;
             cRider_setupLean(rider, turn);
@@ -4945,10 +4923,6 @@ int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern char kAnimIntoAirTable[];
 extern char kAnimPrewindTable[];
 
-struct sAiBits0_12E9B8 { int v : 6; };
-struct sAiBits6_12E9B8 { int pad : 6; int v : 6; };
-struct sAiBits15_12E9B8 { int pad : 15; int v : 6; };
-struct sAiBits21_12E9B8 { int pad : 21; int v : 6; };
 
 // PORT: g++ `<?` (min) operator.
 static inline float aiClamp_12E9B8(float v, float lo, float hi)
@@ -5030,8 +5004,8 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, tPrewindCmd* in)
     cRider_setupBoostWarp(*(void**)self, (w >> 14) & 1, 0);
     float zero = 0.0f;
     cRider_setupCrouchBrake(*(void**)self, 1.0f, zero);
-    float sx = aiClamp_12E9B8(((sAiBits0_12E9B8*)((char*)in + 4))->v * 0.032258063554763794f, -0.5f, 0.5f);
-    float sy = aiClamp_12E9B8(((sAiBits6_12E9B8*)((char*)in + 4))->v * 0.032258063554763794f, -0.5f, 0.5f);
+    float sx = aiClamp_12E9B8(in->PrewindTurn * 0.032258063554763794f, -0.5f, 0.5f);
+    float sy = aiClamp_12E9B8(in->RailBalance * 0.032258063554763794f, -0.5f, 0.5f);
     if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(*(char**)self + 0x784), 2) == 10)
     {
         cRider* rider = (cRider*)(*(char**)self);
@@ -5067,8 +5041,8 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, tPrewindCmd* in)
     float rate = 5.0000901222229f;
     if (*(int*)(*(char**)self + 0x328) == 0)
         rate = 5.000027179718018f;
-    float tx = ((sAiBits15_12E9B8*)in)->v * 0.032258063554763794f;
-    float ty = ((sAiBits21_12E9B8*)in)->v * 0.032258063554763794f;
+    float tx = in->PrewindSpin * 0.032258063554763794f;
+    float ty = in->PrewindFlip * 0.032258063554763794f;
     if (tx < -0.20000000298023224f)
         tx = -1.0f;
     else if (tx > 0.20000000298023224f)
@@ -5327,8 +5301,10 @@ extern "C" void cRider_putAt_12F398(void* self, void* a, t4Vector* b, int n, flo
  * an auto reset (IsAutoReset), 70% otherwise. At 1 it stops the view fade (when shouldTransition), starts a
  * new score takeoff (cRiderMetrix_evTakeoff), restores the main sequence rate to 1 and requests CS_NaturalAir and
  * MS_Air.
+ *
+ * @param cmd  the command (On Tour const tResetCmd&); not read here
  */
-extern "C" void cResetControl_update(cResetControl* self)
+extern "C" void cResetControl_update(cResetControl* self, tResetCmd* cmd)
 {
     float prevFadePercent = self->FadePercent;
     float step = self->mRider->mTimeScale * 0.02500000223517418f;
@@ -5489,17 +5465,6 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" float func_0031C228(float x);
 
-struct sAiBitsX_12F730
-{
-    int pad : 24;
-    int v : 6;
-};
-
-struct sAiBitsY_12F730
-{
-    int v : 6;
-};
-
 // PORT: PS2-only inline asm (float absolute value).
 static inline float aiAbs_12F730(float x)
 {
@@ -5585,8 +5550,8 @@ extern "C" void cNaturalAirControl_update(cNaturalAirControl* self, tNaturalAirC
         cRider_checkForPunch((char*)self->mRider, 0, 0);
     }
     int w = *(int*)in;
-    float x = ((sAiBitsX_12F730*)&w)->v * 0.032258063554763794f;
-    float y = ((sAiBitsY_12F730*)((char*)in + 4))->v * 0.032258063554763794f;
+    float x = in->CruiseTurn * 0.032258063554763794f;
+    float y = in->CruiseCrouch * 0.032258063554763794f;
     if (w & 0x2000)
     {
         if (cRider_checkHandplantCollisions((char*)self->mRider, y > 0.5f))
@@ -5750,25 +5715,11 @@ extern "C" void cRider_setupRailBalance(void*, float);
 extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
 extern "C" void cRider_checkForReaction(void*);
 extern "C" void cRider_checkForProximityAction(void*);
-struct sPadIn_130228;
-extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, sPadIn_130228* in);
-extern "C" void cBoardPressControl_handleBalanceState(cBoardPressControl* self, void* a1);
-struct sPadIn_1304E0;
-extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, sPadIn_1304E0* in);
+extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, tBoardPressCmd* in);
+extern "C" void cBoardPressControl_handleBalanceState(cBoardPressControl* self, tBoardPressCmd* cmd);
+extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, tBoardPressCmd* in);
 // PORT: cBoardPressControl_handleIntoAirState is defined with one param, but this caller passes the input in $a1.
 void cBoardPressControl_handleIntoAirState_2(void* self, void* in) __asm__("cBoardPressControl_handleIntoAirState__FPv");
-
-struct sAiBitsC_12FC80
-{
-    int pad : 24;
-    int v : 6;
-};
-
-struct sAiBitsD_12FC80
-{
-    int pad : 18;
-    int v : 6;
-};
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float aiAbs_12FC80(float x)
@@ -5799,7 +5750,7 @@ static inline float aiClamp_12FC80(float v, float lo, float hi)
  *
  * @param in  the command (On Tour tBoardPressCmd)
  */
-extern "C" void cBoardPressControl_update(cBoardPressControl* self, void* in)
+extern "C" void cBoardPressControl_update(cBoardPressControl* self, tBoardPressCmd* in)
 {
     if (cRider_checkForFinishLine(self->mRider))
         return;
@@ -5818,7 +5769,7 @@ extern "C" void cBoardPressControl_update(cBoardPressControl* self, void* in)
     cRider* rider = self->mRider;
     if (rider->RailslideMode != 0)
     {
-        cRider_setupRailBalance(rider, aiClamp_12FC80(((sAiBitsC_12FC80*)in)->v * 0.032258063554763794f, -0.5f, 0.5f));
+        cRider_setupRailBalance(rider, aiClamp_12FC80(in->RailBalance * 0.032258063554763794f, -0.5f, 0.5f));
     }
     else
     {
@@ -5828,14 +5779,14 @@ extern "C" void cBoardPressControl_update(cBoardPressControl* self, void* in)
             maxTurn = absPivot - 0.5f;
         else
             maxTurn = 0.5f - absPivot;
-        cRider_setupLean(self->mRider, aiClamp_12FC80(((sAiBitsD_12FC80*)in)->v * 0.032258063554763794f, -maxTurn, maxTurn));
+        cRider_setupLean(self->mRider, aiClamp_12FC80(in->CruiseTurn * 0.032258063554763794f, -maxTurn, maxTurn));
     }
     cRider_checkForReaction(self->mRider);
     cRider_checkForProximityAction(self->mRider);
     switch (*(int*)self)
     {
     case 0:
-        cBoardPressControl_handleIntoState(self, (sPadIn_130228*)in);
+        cBoardPressControl_handleIntoState(self, in);
         break;
     case 1:
         cBoardPressControl_handleBalanceState(self, in);
@@ -5844,7 +5795,7 @@ extern "C" void cBoardPressControl_update(cBoardPressControl* self, void* in)
         cBoardPressControl_handleIntoAirState_2(self, in);
         break;
     case 3:
-        cBoardPressControl_handleExitState(self, (sPadIn_1304E0*)in);
+        cBoardPressControl_handleExitState(self, in);
         break;
     }
 }
@@ -6036,13 +5987,6 @@ static inline float Abs_130228(float x)
     return r;
 }
 
-struct sPadIn_130228
-{
-    int f0;
-    int x : 6;
-    int y : 6;
-};
-
 /**
  * Runs the press-in phase (BP_Into): pushes the press and board depth in, and enters the balance phase at
  * full depth.
@@ -6055,10 +5999,10 @@ struct sPadIn_130228
  *
  * @param in  the command (On Tour tBoardPressCmd)
  */
-extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, sPadIn_130228* in)
+extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, tBoardPressCmd* in)
 {
-    float fx = in->x * 0.032258063554763794f;
-    float fy = in->y * 0.032258063554763794f;
+    float fx = in->BoardPress * 0.032258063554763794f;
+    float fy = in->BoardPivot * 0.032258063554763794f;
     if (fx == 0.0f && Abs_130228(fy) < 0.5f)
     {
         cRider* rider = self->mRider;
@@ -6112,10 +6056,10 @@ extern "C" void cBoardPressControl_handleIntoState(cBoardPressControl* self, sPa
 INCLUDE_ASM("ai/ai", cBoardPressControl_handleBalanceState);
 #ifdef SKIP_ASM
 extern "C" int cBoardPressControl_checkForFakie(cBoardPressControl* self);
-extern "C" int cBoardPressControl_checkForOllie(cBoardPressControl* self, void* a1);
+extern "C" int cBoardPressControl_checkForOllie(cBoardPressControl* self, tBoardPressCmd* cmd);
 extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* self, tBoardPressCmd* a1);
 extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, tBoardPressCmd* a1);
-extern "C" int cBoardPressControl_checkForExit(cBoardPressControl* self, void* a1);
+extern "C" int cBoardPressControl_checkForExit(cBoardPressControl* self, tBoardPressCmd* cmd);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 /**
@@ -6128,12 +6072,12 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  *
  * @param cmd  the command (On Tour tBoardPressCmd)
  */
-extern "C" void cBoardPressControl_handleBalanceState(cBoardPressControl* self, void* cmd)
+extern "C" void cBoardPressControl_handleBalanceState(cBoardPressControl* self, tBoardPressCmd* cmd)
 {
     if (cBoardPressControl_checkForFakie(self) != 0) return;
     if (cBoardPressControl_checkForOllie(self, cmd) != 0) return;
-    if (cBoardPressControl_checkForPivot(self, (tBoardPressCmd*)cmd) != 0) return;
-    if (cBoardPressControl_checkForWipeout(self, (tBoardPressCmd*)cmd) != 0) return;
+    if (cBoardPressControl_checkForPivot(self, cmd) != 0) return;
+    if (cBoardPressControl_checkForWipeout(self, cmd) != 0) return;
     if (cBoardPressControl_checkForExit(self, cmd) != 0)
     {
         cRider* rider = self->mRider;
@@ -6180,13 +6124,6 @@ extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 extern "C" float cRiderMetrix_evPressEnd(void*);
 extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
 
-struct sPadIn_1304E0
-{
-    int f0;
-    int x : 6;
-    int y : 6;
-};
-
 /**
  * Runs the release phase (BP_Exit): allows a re-press while the press depth drains, then leaves the board
  * press.
@@ -6199,13 +6136,13 @@ struct sPadIn_1304E0
  *
  * @param in  the command (On Tour tBoardPressCmd)
  */
-extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, sPadIn_1304E0* in)
+extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, tBoardPressCmd* in)
 {
     int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
     char* rider;
     if ((anim == 33 || anim == 25) && 0.0f < *(float*)((rider = (char*)self->mRider) + 0x268))
     {
-        float fx = in->x * 0.032258063554763794f;
+        float fx = in->BoardPress * 0.032258063554763794f;
         if ((fx < -0.5f && anim == 33) || (0.5f < fx && anim == 25))
         {
             if (fx < 0.0f)
@@ -6318,7 +6255,7 @@ static inline float aiAbs_1307B8(float x)
  * @param cmd  the command (On Tour tBoardPressCmd)
  * @return 1 when the ollie was started, otherwise 0
  */
-extern "C" int cBoardPressControl_checkForOllie(cBoardPressControl* self, void* cmd)
+extern "C" int cBoardPressControl_checkForOllie(cBoardPressControl* self, tBoardPressCmd* cmd)
 {
     int mask = 0x20000;
     if (*(int*)cmd & mask) self->IsOllieHeld = 1;
@@ -6358,12 +6295,6 @@ extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl*);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" float func_0031C228(float x);
 
-
-struct sAiBits_08D8
-{
-    int lo : 6;
-    int hi : 6;
-};
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float aiDot_08D8(const t4Vector& a, const t4Vector& b)
@@ -6453,9 +6384,8 @@ static inline void aiSetLean_08D8(char* vr, float v)
 extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, tBoardPressCmd* in)
 {
     cBoardPressControl* self = vself;
-    sAiBits_08D8* bits = (sAiBits_08D8*)((char*)in + 4);
-    float stickX = bits->lo * 0.032258063554763794f;
-    float stickY = bits->hi * 0.032258063554763794f;
+    float stickX = in->BoardPress * 0.032258063554763794f;
+    float stickY = in->BoardPivot * 0.032258063554763794f;
     float aa = aiAbs_08D8(stickY);
     float ab = aiAbs_08D8(stickX);
     float stickMag = aa < ab ? ab : aa;
@@ -6541,17 +6471,6 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_checkForWipeout);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A1560(void* mgr, void* rider);
 extern "C" void cRider_flagEventWipeout(void* rider, int id, int a, int b, void* info);
-
-struct sAiBitsA_130DD0
-{
-    int v : 6;
-};
-
-struct sAiBitsB_130DD0
-{
-    int pad : 6;
-    int v : 6;
-};
 
 struct sCurvePt_130DD0
 {
@@ -6663,7 +6582,7 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, tBoa
         self->OffBalanceSec += k;
     else
         self->OffBalanceSec = 0.0f;
-    float desPress = ((sAiBitsA_130DD0*)((char*)in + 4))->v * 0.032258063554763794f;
+    float desPress = in->BoardPress * 0.032258063554763794f;
     if (self->mRider->PressMode == 2)
         desPress = -desPress >? 0.0f;
     else
@@ -6674,7 +6593,7 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, tBoa
     }
     else
     {
-        float absStickY = aiAbs_130DD0(((sAiBitsB_130DD0*)((char*)in + 4))->v * 0.032258063554763794f);
+        float absStickY = aiAbs_130DD0(in->BoardPivot * 0.032258063554763794f);
         float stickMag = (desPress <= absStickY) ? absStickY : desPress;
         desPress = 0.0f;
         if (stickMag > 0.5f)
@@ -6723,13 +6642,6 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, tBoa
 //100%
 INCLUDE_ASM("ai/ai", cBoardPressControl_checkForExit);
 #ifdef SKIP_ASM
-struct sAiStick_131200
-{
-    int pad0;
-    int x : 6;
-    int y : 6;
-};
-
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float aiAbs_131200(float x)
 {
@@ -6749,10 +6661,10 @@ static inline float aiAbs_131200(float x)
  * @param cmd  the command (On Tour tBoardPressCmd)
  * @return 1 when the board depth (rider + 0x274) is 0, or under 0.5 on a tick that asks to exit; else 0
  */
-extern "C" int cBoardPressControl_checkForExit(cBoardPressControl* self, void* cmd)
+extern "C" int cBoardPressControl_checkForExit(cBoardPressControl* self, tBoardPressCmd* cmd)
 {
-    float x = ((sAiStick_131200*)cmd)->x * 0.032258063554763794f;
-    float y = ((sAiStick_131200*)cmd)->y * 0.032258063554763794f;
+    float x = cmd->BoardPress * 0.032258063554763794f;
+    float y = cmd->BoardPivot * 0.032258063554763794f;
     if (x == 0.0f && aiAbs_131200(y) < 0.5f)
     {
         self->PressTimer += self->mRider->mTimeScale * 0.01666666753590107f;
@@ -6956,29 +6868,6 @@ int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 unsigned int AIrand();
 
 
-struct sAiBitsX_1620
-{
-    int pad : 20;
-    int v : 6;
-};
-
-struct sAiBitsY_1620
-{
-    int pad : 26;
-    int v : 6;
-};
-
-struct sAiBitsC_1620
-{
-    int v : 6;
-};
-
-struct sAiBitsD_1620
-{
-    int pad : 6;
-    int v : 6;
-};
-
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float aiDot_1620(const t4Vector& a, const t4Vector& b)
 {
@@ -7051,9 +6940,9 @@ static inline float aiClamp_1620(float v, float lo, float hi)
 extern "C" void cCruiseControl_update(cCruiseControl* self, tCruiseCmd* in)
 {
     float floatZero = 0.0f;
-    float x = ((sAiBitsX_1620*)in)->v * 0.032258063554763794f;
-    float y = ((sAiBitsY_1620*)in)->v * 0.032258063554763794f;
-    float desBrake = ((sAiBitsC_1620*)((char*)in + 4))->v * 0.032258063554763794f;
+    float x = in->CruiseTurn * 0.032258063554763794f;
+    float y = in->CruiseCrouch * 0.032258063554763794f;
+    float desBrake = in->CruiseBrake * 0.032258063554763794f;
     cRider* rider = (cRider*)(*(char**)self);
     if (aiDot_1620(*(&rider->mVelocity), *(&rider->mGroundForward)) < floatZero)
         desBrake = floatZero;
@@ -7084,7 +6973,7 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, tCruiseCmd* in)
         y = 1.0f;
         desBrake = 0.0f;
     }
-    if (cRider_checkForBoardPress(*(void**)self, ((sAiBitsD_1620*)((char*)in + 4))->v * 0.032258063554763794f))
+    if (cRider_checkForBoardPress(*(void**)self, in->BoardPress * 0.032258063554763794f))
         return;
     int w2 = *(int*)in;
     if (cRider_checkForPunch(*(void**)self, (w2 >> 18) & 1, (w2 >> 19) & 1))
@@ -7296,24 +7185,6 @@ extern "C" void cRailslideControl_chooseRailSpin(cRailslideControl* self, int ne
 extern "C" int cRailslideControl_checkForUberGrind(cRailslideControl* self, int id);
 extern "C" int cRailslideControl_checkAirMotion(cRailslideControl* self, tRailslideCmd* a1);
 
-struct sPadA_131D30
-{
-    int pad : 17;
-    int id : 8;
-};
-
-struct sPadB_131D30
-{
-    int pad : 25;
-    int v : 6;
-};
-
-struct sPadC_131D30
-{
-    int x : 6;
-    int y : 6;
-};
-
 static inline float clamp_131D30(float v, float lo, float hi)
 {
     if (v >= lo)
@@ -7341,32 +7212,31 @@ extern "C" void cRailslideControl_update(cRailslideControl* self, tRailslideCmd*
     int w = *(int*)in;
     if (cRider_checkForPrewind(self->mRider, (w >> 14) & 1, (w >> 13) & 1))
         return;
-    if (cRailslideControl_checkForUberGrind(self, ((sPadA_131D30*)in)->id))
+    if (cRailslideControl_checkForUberGrind(self, in->UberGrindID))
         return;
     int w2 = *(int*)in;
     float k = 0.032258063554763794f;
     float floatZero = 0.0f;
     cRider_setupBoostWarp(self->mRider, (w2 >> 16) & 1, (w2 >> 15) & 1);
-    cRider_setupRailBalance(self->mRider, ((sPadB_131D30*)in)->v * k);
+    cRider_setupRailBalance(self->mRider, in->RailBalance * k);
     cRider_setupCrouchBrake(self->mRider, floatZero, floatZero);
     cRider_checkForReaction(self->mRider);
     cRider_checkForProximityAction(self->mRider);
-    sPadC_131D30* in2 = (sPadC_131D30*)((char*)in + 4);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0xE) {
         if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
             return;
-        if (cRider_checkForBoardPress(self->mRider, in2->y * k))
+        if (cRider_checkForBoardPress(self->mRider, in->BoardPress * k))
             return;
-        float fy = in2->x * k;
+        float fy = in->RailSpin * k;
         if (fy == floatZero)
             return;
         cRailslideControl_chooseRailSpin(self, fy < floatZero);
         return;
     }
-    if (cRider_checkForBoardPress(self->mRider, in2->y * k))
+    if (cRider_checkForBoardPress(self->mRider, in->BoardPress * k))
         return;
-    float fx = in2->y * k;
-    float fy = in2->x * k;
+    float fx = in->BoardPress * k;
+    float fy = in->RailSpin * k;
     float desRailSpin = fy;
     if (fx != floatZero && fy == floatZero)
         desRailSpin = fx;
@@ -7619,11 +7489,6 @@ extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" bool tEventFlags_isSet1(void* self, int bit);
 extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 
-struct sAiBits00132770
-{
-    int v : 6;
-};
-
 /**
  * Hands control to the air states when the rider has come off the rail into the air.
  *
@@ -7648,7 +7513,7 @@ extern "C" int cRailslideControl_checkAirMotion(cRailslideControl* self, tRailsl
         }
     }
     cRider_undoRailslideModeOrientation(self->mRider);
-    if (((sAiBits00132770*)((char*)cmd + 4))->v * 0.032258063554763794f != 0.0f)
+    if (cmd->RailSpin * 0.032258063554763794f != 0.0f)
     {
         cRider_setControlState_impl(self->mRider, 5);
     }
@@ -7812,10 +7677,6 @@ int cRider_getMotionState(void* self);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
-struct sPad_2A30 {
-    int flags;
-};
-
 // PORT: PS2-only inline asm (float absolute value)
 static inline float fabs_2A30(float x)
 {
@@ -7851,9 +7712,9 @@ struct sAi_2A30 {
  *
  * @param in  the handplant command (On Tour tHandplantCmd): button bits and the 6-bit balance value
  */
-extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
+extern "C" void cHandplantControl_update(cHandplantControl* self, tHandplantCmd* in)
 {
-    if (cRider_checkForReset_2A30(self->mRider, (in->flags >> 12) & 1, 0) != 0) {
+    if (cRider_checkForReset_2A30(self->mRider, (*(int*)in >> 12) & 1, 0) != 0) {
         return;
     }
     cRider* rider = self->mRider;
@@ -7862,7 +7723,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         if (cRiderAnimBase_isCurrentAnimEndFlag(rider->mRiderAnim, 2) == 0) {
             return;
         }
-        if ((in->flags & 0x2000) && self->IsMissedHandplant == 0) {
+        if (in->Handplant && self->IsMissedHandplant == 0) {
             self->mRider->HandplantMode = 2;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantStart(self->mRider->mMetrix, 1));
         } else {
@@ -7876,8 +7737,8 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
     if (st == 2) {
         float dt = rider->mTimeScale * 0.01666666753590107f;
         self->EnterSec += dt;
-        if ((in->flags & 0x2000) && __builtin_fabsf(rider->mSlewed[8].cur) < 1.0f) {
-            float desBal = ((in->flags << 12) >> 26) * 0.032258063554763794f;
+        if (in->Handplant && __builtin_fabsf(rider->mSlewed[8].cur) < 1.0f) {
+            float desBal = in->HandplantBalance * 0.032258063554763794f;
             if (rider->IsRidingFakie != 0) desBal = -desBal;
             if (self->HandplantType == 1) desBal = -desBal;
             rider->mSlewed[7].target = desBal;
@@ -8375,25 +8236,25 @@ static inline void aiSetChannel_133308(cRider* rider, int i, float rate, float t
  *
  * @param input  the spin command (On Tour tSpinCmd): button bits, grab id and 6-bit spin and flip values
  */
-extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
+extern "C" void cSpinControl_update(sSpinCtl_133308* self, tSpinCmd* input)
 {
-    if (cRider_checkForReset_3308(self->rider, (*input >> 12) & 1, 0))
+    if (cRider_checkForReset_3308(self->rider, (*(int*)input >> 12) & 1, 0))
         return;
-    if ((*input & 0x2000) && self->state == 3 &&
-        cRider_checkHandplantCollisions(self->rider, ((input[1] << 20) >> 26) * 0.032258063554763794f > 0.5f))
+    if ((input->Handplant) && self->state == 3 &&
+        cRider_checkHandplantCollisions(self->rider, input->AirAdjRotFB * 0.032258063554763794f > 0.5f))
         return;
     if (cRider_checkRailBoardCollisions(self->rider))
         return;
 
-    float flip = ((input[1] << 26) >> 26) * 0.032258063554763794f;
-    float spin = ((input[0] << 2) >> 26) * 0.032258063554763794f;
-    int trick = ((signed char*)input)[2];
-    float flipAdj = ((input[1] << 20) >> 26) * 0.032258063554763794f;
-    float spinAdj = ((input[1] << 14) >> 26) * 0.032258063554763794f;
+    float flip = input->FlipAdjust * 0.032258063554763794f;
+    float spin = input->SpinAdjust * 0.032258063554763794f;
+    int trick = input->GrabID;
+    float flipAdj = input->AirAdjRotFB * 0.032258063554763794f;
+    float spinAdj = input->AirAdjRotLR * 0.032258063554763794f;
 
     if (self->mode == 0)
     {
-        if (*input & 0x8000)
+        if (input->LateSpin)
         {
             if (spinAdj != 0.0f || flipAdj != 0.0f)
                 self->mode = 2;
@@ -8405,7 +8266,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     }
     if (self->mode == 2)
     {
-        if (*input & 0x8000)
+        if (input->LateSpin)
             trick = -1;
         else
             self->mode = 1;
@@ -8421,13 +8282,13 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         spinAdj = flipAdj = 0.0f;
     }
 
-    int busy = cSpinControl_isGrabPlaying((cSpinControl*)self, trick, (*input >> 14) & 1);
+    int busy = cSpinControl_isGrabPlaying((cSpinControl*)self, trick, (*(int*)input >> 14) & 1);
     if (!busy && self->mode == 3)
         self->mode = 0;
 
     self->rider->PressMode = 0;
     float maxFlip = kMaxAdjFlipAng;
-    int dir = (input[1] << 12) >> 30;
+    int dir = input->BoardPress;
     float flipInput;
     switch (dir)
     {
@@ -9902,12 +9763,6 @@ int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 
 
-struct sAiBitsA_136508
-{
-    int pad : 23;
-    int v : 6;
-};
-
 struct sAiBitsB_136508
 {
     int pad : 15;
@@ -9939,7 +9794,7 @@ struct sAiObj136508
  *
  * @param in  the uber grind command (On Tour tUberGrindCmd): button bits, grind id and the rail balance value
  */
-extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
+extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd* in)
 {
     if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
@@ -9953,7 +9808,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
     int w = *(int*)in;
     float floatZero = 0.0f;
     cRider_setupBoostWarp((char*)self->mRider, (w >> 14) & 1, (w >> 13) & 1);
-    cRider_setupRailBalance((char*)self->mRider, ((sAiBitsA_136508*)in)->v * 0.032258063554763794f);
+    cRider_setupRailBalance((char*)self->mRider, in->RailBalance * 0.032258063554763794f);
     cRider_setupCrouchBrake((char*)self->mRider, floatZero, floatZero);
     if (self->GrindState == 0)
     {

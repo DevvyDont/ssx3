@@ -1315,67 +1315,29 @@ void* operator_new_bx(unsigned int size, const char* tag, int flags, int d) __as
 extern char D_00494D40[];
 extern char str_BxStream_AIPATH[];
 
-struct sBxRef_8AA8 {
-    unsigned char refs;
-    unsigned char pad;
-    unsigned short pad2;
-};
-struct sBxTypeTbl_8AA8 {
-    sBxRef_8AA8* refs;
-    int count;
-};
-struct sBxBank_8AA8 {
-    int f0;
-    sBxTypeTbl_8AA8 types[1];       // 0x4
-};
-struct sBxItem_8AA8 {
-    unsigned char type;
-    unsigned char bank;
-    unsigned short id;
-};
-struct sBxList_8AA8 {
-    char pad0[0x8];
-    int count;                      // 0x8
-    sBxItem_8AA8* items;            // 0xC
-};
-struct sBxSlot_8AA8 {
-    sBxList_8AA8* list;
-    char pad4[0x14];
-};
-struct sBxPools_8AA8 {
-    char pad0[0x3C];
-    cSectionBlockAllocator* pools[1];         // 0x3C
-};
-struct sWorldCache_8AA8 {
-    int f0;
-    sBxBank_8AA8* global;           // 0x4
-    sBxBank_8AA8** banks;           // 0x8
-    sBxPools_8AA8* pools;           // 0xC
-    char pad10[0x3E8];
-    sBxSlot_8AA8 slots[1];          // 0x3F8
-};
-
-static inline void* bxAlloc_8AA8(sBxPools_8AA8* pl, int bank, int size, unsigned int flags)
+static inline void* bxAlloc_8AA8(cWorldMemoryMan* mem, int bank, int size, unsigned int flags)
 {
     if (bank == 0xFF)
         return operator_new_bx(size, D_00494D40, flags, 0);
-    return cSectionBlockAllocator_allocate(pl->pools[bank], size, flags);
+    return cSectionBlockAllocator_allocate(mem->m_pSectionAllocator[bank], size, flags);
 }
 
-static inline int addRef_8AA8(sBxRef_8AA8* r)
+// Takes a reference on a data tag; nonzero when the data was already referenced (resident or loading).
+static inline int addRef_8AA8(tWorldCacheDataTag* tag)
 {
-    if (r->refs != 0) {
-        r->refs++;
+    if (tag->m_bfuiRefCnt != 0) {
+        tag->m_bfuiRefCnt++;
         return 1;
     }
-    r->refs++;
+    tag->m_bfuiRefCnt++;
     return 0;
 }
 
-static inline void release_8AA8(sBxRef_8AA8* r)
+// Drops the reference addRef_8AA8 took; at zero the whole tag is cleared (one word store of the count).
+static inline void release_8AA8(tWorldCacheDataTag* tag)
 {
-    if (--r->refs == 0)
-        *(unsigned int*)r = r->refs;
+    if (--tag->m_bfuiRefCnt == 0)
+        *(unsigned int*)tag = tag->m_bfuiRefCnt;
 }
 
 /**
@@ -1394,21 +1356,21 @@ static inline void release_8AA8(sBxRef_8AA8* r)
  *         failed
  */
 // Adds one stream data item (type, bank|id<<8) to a load list, allocating its storage on first use.
-extern "C" unsigned int cWorldCache_addBxStreamDataTest(sWorldCache_8AA8* self, int slot, int type, unsigned int key, int size)
+extern "C" unsigned int cWorldCache_addBxStreamDataTest(cWorldCache* self, int slot, int type, unsigned int key, int size)
 {
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
-    sBxBank_8AA8* bankData;
+    cWorldCacheTable* table;
     if (bank == 0xFF)
-        bankData = self->global;
+        table = self->m_pSharedCacheTable;
     else
-        bankData = self->banks[bank];
-    if (addRef_8AA8(&bankData->types[type].refs[id])) {
-        sBxList_8AA8* slotList = self->slots[slot].list;
-        slotList->items[slotList->count].type = type;
-        slotList->items[slotList->count].bank = key;
-        slotList->items[slotList->count].id = key >> 8;
-        slotList->count++;
+        table = self->m_pSectionCacheTable[bank];
+    if (addRef_8AA8(&table->m_pCacheTable[type].m_pDataTag[id])) {
+        cHullPage* page = self->m_HullPages[slot].mp_Page;
+        page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiType = type;
+        page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiSectionID = key;
+        page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiGUID = key >> 8;
+        page->m_uiCurrentPageEntry++;
         return 0;
     }
     if (size == 0)
@@ -1417,25 +1379,25 @@ extern "C" unsigned int cWorldCache_addBxStreamDataTest(sWorldCache_8AA8* self, 
     switch (type) {
     case 9:
     case 10:
-        data = bxAlloc_8AA8(self->pools, bank, size, 0x45000000);
+        data = bxAlloc_8AA8(self->m_pWorldMemMan, bank, size, 0x45000000);
         break;
     case 1:
     case 2:
     case 3:
     case 11:
     case 12:
-        data = bxAlloc_8AA8(self->pools, bank, size, 0x22000000);
+        data = bxAlloc_8AA8(self->m_pWorldMemMan, bank, size, 0x22000000);
         break;
     case 14:
         data = operator_new_bx(size, str_BxStream_AIPATH, 0, 0);
         break;
     default:
-        data = bxAlloc_8AA8(self->pools, bank, size, 0);
+        data = bxAlloc_8AA8(self->m_pWorldMemMan, bank, size, 0);
         break;
     }
     if (data != 0)
         return (unsigned int)data;
-    release_8AA8(&bankData->types[type].refs[id]);
+    release_8AA8(&table->m_pCacheTable[type].m_pDataTag[id]);
     return 0xFFFFFFFF;
 }
 #endif
@@ -1443,51 +1405,6 @@ extern "C" unsigned int cWorldCache_addBxStreamDataTest(sWorldCache_8AA8* self, 
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_addBxStreamDataSubmit);
 #ifdef SKIP_ASM
-struct sWCEntry8CD0 {
-    unsigned char id;           // 0x0
-    unsigned char lo;           // 0x1
-    unsigned short hi;          // 0x2
-};
-
-struct sWCList8CD0 {
-    int f0;
-    int f4;
-    int count;                  // 0x8
-    sWCEntry8CD0* entries;      // 0xC
-};
-
-struct sWCGroup8CD0 {
-    sWCList8CD0* list;          // 0x0
-    char pad4[0x14];
-};
-
-struct sWCVt8CD0 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, unsigned int, int);
-};
-
-struct sWCObj8CD0 {
-    int f0;
-    int f4;
-    sWCVt8CD0* vt;              // 0x8
-};
-
-struct sWCSlot8CD0 {
-    int f0;
-    int* bits;                  // 0x4
-};
-
-struct sWorldCache8CD0 {
-    int f0;
-    sWCSlot8CD0* deflt;         // 0x4
-    sWCSlot8CD0** tables;       // 0x8
-    char padC[0x3E8 - 0xC];
-    sWCObj8CD0* obj;            // 0x3E8
-    char pad3EC[0xC];
-    sWCGroup8CD0 groups[1];     // 0x3F8
-};
-
 extern int cStreamMan_NULLCHUNK;
 
 /**
@@ -1505,32 +1422,31 @@ extern int cStreamMan_NULLCHUNK;
  * @param chunk  the data, or cStreamMan_NULLCHUNK
  */
 // PORT: a4 is a pointer carried in an int (compared against &cStreamMan_NULLCHUNK, then shifted).
-extern "C" void cWorldCache_addBxStreamDataSubmit(sWorldCache8CD0* self, int group, int id, unsigned int key, int chunk)
+extern "C" void cWorldCache_addBxStreamDataSubmit(cWorldCache* self, int group, int id, unsigned int key, int chunk)
 {
-    sWCSlot8CD0* tbl;
-    sWCList8CD0* list;
+    cWorldCacheTable* table;
+    cHullPage* page;
     unsigned int hi = key >> 8;
     if ((key & 0xFF) == 0xFF) {
-        tbl = self->deflt;
+        table = self->m_pSharedCacheTable;
     } else {
-        tbl = self->tables[key & 0xFF];
+        table = self->m_pSectionCacheTable[key & 0xFF];
     }
-    list = self->groups[group].list;
-    list->entries[list->count].id = id;
-    list->entries[list->count].lo = key;
-    list->entries[list->count].hi = key >> 8;
-    list->count++;
+    page = self->m_HullPages[group].mp_Page;
+    page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiType = id;
+    page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiSectionID = key;
+    page->m_pPageEntries[page->m_uiCurrentPageEntry].m_uiGUID = key >> 8;
+    page->m_uiCurrentPageEntry++;
     if (chunk == (int)&cStreamMan_NULLCHUNK) {
-        sWCObj8CD0* callbackObj = self->obj;
-        callbackObj->vt[3].fn(vthis(callbackObj, callbackObj->vt[3]), id, key, 0);
+        cChunkResolve* resolver = self->mp_ChunkResolve;
+        sVEntry<int(void*, int, unsigned int, int)>* vt = (sVEntry<int(void*, int, unsigned int, int)>*)resolver->mVtbl;
+        vt[3].fn(vthis(resolver, vt[3]), id, key, 0);
     } else {
-        sWCObj8CD0* callbackObj = self->obj;
-        chunk = callbackObj->vt[3].fn(vthis(callbackObj, callbackObj->vt[3]), id, key, chunk);
+        cChunkResolve* resolver = self->mp_ChunkResolve;
+        sVEntry<int(void*, int, unsigned int, int)>* vt = (sVEntry<int(void*, int, unsigned int, int)>*)resolver->mVtbl;
+        chunk = vt[3].fn(vthis(resolver, vt[3]), id, key, chunk);
     }
-    {
-        sWCSlot8CD0* slot = &tbl[id];
-        slot->bits[hi] = (unsigned char)slot->bits[hi] | ((chunk >> 2) << 8);
-    }
+    table->m_pCacheTable[id].m_pDataTag[hi].m_bfuiMemLoc = chunk >> 2;
 }
 #endif
 
@@ -1543,12 +1459,12 @@ INCLUDE_ASM("world/worldcache", cWorldCache_removeBxStreamData);
 
 
 // Drops one reference; on the last one returns the stored data pointer and clears it.
-static inline char* release_8E20(sBxRef_8AA8* r)
+static inline char* release_8E20(tWorldCacheDataTag* tag)
 {
-    if (--r->refs == 0) {
-        unsigned int v = *(unsigned int*)r;
+    if (--tag->m_bfuiRefCnt == 0) {
+        unsigned int v = *(unsigned int*)tag;
         char* d = (char*)((v >> 8) << 2);
-        *(unsigned int*)r = v & 0xFF;
+        *(unsigned int*)tag = v & 0xFF;
         return d;
     }
     return 0;
@@ -1570,12 +1486,12 @@ extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key
 {
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
-    sBxBank_8AA8* bankData;
+    cWorldCacheTable* table;
     if (bank == 0xFF)
-        bankData = ((sBxBank_8AA8*)self->m_pSharedCacheTable);
+        table = self->m_pSharedCacheTable;
     else
-        bankData = ((sBxBank_8AA8*)self->m_pSectionCacheTable[bank]);
-    char* chunk = release_8E20(&bankData->types[type].refs[id]);
+        table = self->m_pSectionCacheTable[bank];
+    char* chunk = release_8E20(&table->m_pCacheTable[type].m_pDataTag[id]);
     if (chunk != 0) {
         if (chunk == (char*)&cStreamMan_NULLCHUNK) {
             cChunkResolve* callbackObj = (self->mp_ChunkResolve);

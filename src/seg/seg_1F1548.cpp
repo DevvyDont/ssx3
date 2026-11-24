@@ -2501,7 +2501,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
     cGameViewMan* w = SSXApp->Game->ViewMan;
     if (self->idx >= w->m_uiNumView)
         return;
-    t4Vector pos = *(t4Vector*)(*(char**)(((char*)w) + (self->idx << 2) + 4) + 0x20);
+    t4Vector pos = *(t4Vector*)((char*)w->PlayerCamera[self->idx] + 0x20);
     if (self->hasPrev) {
         t4Vector moved;
         Sub_39E0(&moved, pos, self->prevPos);

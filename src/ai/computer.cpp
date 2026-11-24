@@ -14,6 +14,7 @@
 #include "ai/airpredictor.h"
 #include "replay/frameptr.h"
 #include "ai/riderhandler.h"
+#include "ai/controlcmd.h"
 #include "sound/ssxaudio.h"
 #include "ai/computer.h"
 #include "be/beintnewrace.h"
@@ -3004,19 +3005,19 @@ extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int prev)
 INCLUDE_ASM("ai/computer", cRiderHandler_updateControl);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cCruiseControl_update(void* p, int a1);
-extern "C" void cBoardPressControl_update(void* p, int a1);
-extern "C" void cPrewindControl_update(void* p, int a1);
-extern "C" void cBumpControl_update(void* p, int a1);
-extern "C" void cNaturalAirControl_update(void* p, int a1);
-extern "C" void cSpinControl_update(void* p, int a1);
-extern "C" void cGateControl_update(void* p, int a1);
-extern "C" void cRailslideControl_update(void* p, int a1);
-extern "C" void cWipeoutControl_update(void* p, int a1);
-extern "C" void cResetControl_update(void* p, int a1);
-extern "C" void cFinishLineControl_update(void* p, int a1);
-extern "C" void cHandplantControl_update(void* p, int a1);
-extern "C" void cUberGrindControl_update(void* p, int a1);
+extern "C" void cCruiseControl_update(cCruiseControl* self, tCruiseCmd* cmd);
+extern "C" void cBoardPressControl_update(cBoardPressControl* self, tBoardPressCmd* cmd);
+extern "C" void cPrewindControl_update(cPrewindControl* self, tPrewindCmd* cmd);
+extern "C" void cBumpControl_update(cBumpControl* self, tBumpCmd* cmd);
+extern "C" void cNaturalAirControl_update(cNaturalAirControl* self, tNaturalAirCmd* cmd);
+extern "C" void cSpinControl_update(cSpinControl* self, tSpinCmd* cmd);
+extern "C" void cGateControl_update(cGateControl* self, tGateCmd* cmd);
+extern "C" void cRailslideControl_update(cRailslideControl* self, tRailslideCmd* cmd);
+extern "C" void cWipeoutControl_update(cWipeoutControl* self, tWipeoutCmd* cmd);
+extern "C" void cResetControl_update(cResetControl* self, tResetCmd* cmd);
+extern "C" void cFinishLineControl_update(cFinishLineControl* self, tFinishLineCmd* cmd);
+extern "C" void cHandplantControl_update(cHandplantControl* self, tHandplantCmd* cmd);
+extern "C" void cUberGrindControl_update(cUberGrindControl* self, tUberGrindCmd* cmd);
 /**
  * Feeds this frame's control command to the current control part (by ControlState) through its update
  * function.
@@ -3026,47 +3027,47 @@ extern "C" void cUberGrindControl_update(void* p, int a1);
  * @param cmd  the control command (On Tour const tControlCmd&), passed on to the part's update
  */
 // Forwards to the second handler for the AI's current state.
-extern "C" void cRiderHandler_updateControl(cRiderHandler* self, int cmd)
+extern "C" void cRiderHandler_updateControl(cRiderHandler* self, tControlCmd* cmd)
 {
     switch (self->ControlState) {
     case 0:
-        cCruiseControl_update((char*)&self->CruiseControl, cmd);
+        cCruiseControl_update(&self->CruiseControl, &cmd->CruiseCmd);
         break;
     case 1:
-        cBoardPressControl_update((char*)&self->BoardPressControl, cmd);
+        cBoardPressControl_update(&self->BoardPressControl, &cmd->BoardPressCmd);
         break;
     case 2:
-        cPrewindControl_update((char*)&self->PrewindControl, cmd);
+        cPrewindControl_update(&self->PrewindControl, &cmd->PrewindCmd);
         break;
     case 3:
-        cBumpControl_update((char*)&self->BumpControl, cmd);
+        cBumpControl_update(&self->BumpControl, &cmd->BumpCmd);
         break;
     case 4:
-        cNaturalAirControl_update((char*)&self->NaturalAirControl, cmd);
+        cNaturalAirControl_update(&self->NaturalAirControl, &cmd->NaturalAirCmd);
         break;
     case 5:
-        cSpinControl_update((char*)&self->SpinControl, cmd);
+        cSpinControl_update(&self->SpinControl, &cmd->SpinCmd);
         break;
     case 6:
-        cGateControl_update((char*)&self->GateControl, cmd);
+        cGateControl_update(&self->GateControl, &cmd->GateCmd);
         break;
     case 7:
-        cRailslideControl_update((char*)&self->RailslideControl, cmd);
+        cRailslideControl_update(&self->RailslideControl, &cmd->RailslideCmd);
         break;
     case 8:
-        cWipeoutControl_update((char*)&self->WipeoutControl, cmd);
+        cWipeoutControl_update(&self->WipeoutControl, &cmd->WipeoutCmd);
         break;
     case 9:
-        cResetControl_update((char*)&self->ResetControl, cmd);
+        cResetControl_update(&self->ResetControl, &cmd->ResetCmd);
         break;
     case 10:
-        cFinishLineControl_update((char*)&self->FinishLineControl, cmd);
+        cFinishLineControl_update(&self->FinishLineControl, &cmd->FinishLineCmd);
         break;
     case 11:
-        cHandplantControl_update((char*)&self->HandplantControl, cmd);
+        cHandplantControl_update(&self->HandplantControl, &cmd->HandplantCmd);
         break;
     case 12:
-        cUberGrindControl_update((char*)&self->UberGrindControl, cmd);
+        cUberGrindControl_update(&self->UberGrindControl, &cmd->UberGrindCmd);
         break;
     case 13:
         break;

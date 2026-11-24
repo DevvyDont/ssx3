@@ -86,9 +86,18 @@ struct cSSXApp {
     char* Password;                      // 0x0C8 [P] getPassword: a cBXString
     char* CommandLineTrack;              // 0x0CC On Tour member order: a cBXString (the ctor sets all three)
     cNetMan* NetMan;                     // 0x0D0 [P] getNetMan
-    int unk_D4[6];                       // 0x0D4 [R] zeroed by the constructor (On Tour keeps big-file handles here)
-    int unk_EC[11];                      // 0x0EC [R] zeroed by the constructor
-    int unk_118;                         // 0x118 [R] zeroed by the constructor
+    // Big-file handles (FILESYS_addbigsync's out handle; purge closes each with FILESYS_delbigsync). [R] zeroed by the
+    // constructor; [U] cSSXApp_initload opens the named file into each; [O] On Tour's members of the same names, in the
+    // same order (int handles, 4 bytes lower there like NetMan).
+    int mAudioBigFile;                   // 0x0D4 [O]; [U] "data/audio/audio.big" (when present)
+    int mMusicBigFile;                   // 0x0D8 [O]; [U] "data/audio/music.big" (when present)
+    int mMusic2BigFile;                  // 0x0DC [O]; [U] "data/audio/music2.big" (when present)
+    int mSpeechBigFile;                  // 0x0E0 [O]; [U] "data/audio/speech.big" (when present)
+    int mScriptDataBigFile;              // 0x0E4 [O]; [U] "data/scripts/scdat.big"
+    int mModelBigFile;                   // 0x0E8 [O]; [U] "data/char/mdlps2.big"
+    int mTextureBigFile[11];             // 0x0EC [U] the D_00442100 list: "data/char/mobytxp.big" .. "viggotxp.big" (ten
+                                         //       riders), then "othertxp.big" = [O] On Tour's mTextureBigFileOthers
+    int mRewardsBigFile;                 // 0x118 [O]; [U] "data/char/rwrdps2.big"
     cFEAsyncManager* mFEAsyncManager;    // 0x11C [P] GetFEAsyncManager; [R] init: new ("FEAsyncManager")
 };
 
@@ -108,6 +117,10 @@ CHECK_OFFSET(cSSXApp, InputPads, 0xA8);
 CHECK_OFFSET(cSSXApp, Inputs, 0xB0);
 CHECK_OFFSET(cSSXApp, GameModeMan, 0xC0);
 CHECK_OFFSET(cSSXApp, NetMan, 0xD0);
+CHECK_OFFSET(cSSXApp, mAudioBigFile, 0xD4);
+CHECK_OFFSET(cSSXApp, mModelBigFile, 0xE8);
+CHECK_OFFSET(cSSXApp, mTextureBigFile, 0xEC);
+CHECK_OFFSET(cSSXApp, mRewardsBigFile, 0x118);
 CHECK_OFFSET(cSSXApp, mFEAsyncManager, 0x11C);
 
 // The application object (On Tour: SSXApp, a cSSXApp * in its linker map; retail D_004A28A8).

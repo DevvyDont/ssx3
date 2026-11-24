@@ -533,7 +533,7 @@ extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(cWScriptCacheEntry
     if (!valid_D120(id)) {
         return 0xFFFFFFFF;
     }
-    return *(unsigned int*)((char*)cache->mpScriptHeader->InstanceScriptData + id.slot * 0x18 + entry * 4);
+    return *(unsigned int*)((char*)&cache->mpScriptHeader->InstanceScriptData[id.slot] + entry * 4);
 }
 #endif
 

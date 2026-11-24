@@ -2644,7 +2644,7 @@ extern "C" int func_003747A0(sPMgr_47A0* self, tPatchRecord* mat, int idx, int b
     func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
     sPEnt_47A0* entry = &self->entries[idx][slot];
     entry->mat = ((char*)mat);
-    *(short*)(((char*)mat) + (idx << 1) + 0x1A6) = slot;
+    mat->m_sCacheRecord[idx] = slot;
     entry->flags |= 0xC | (1 << bit);
     if (normals) {
         int nslot = self->nfreeList[idx][--self->nfreeCount[idx]];

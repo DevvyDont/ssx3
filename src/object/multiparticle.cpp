@@ -15,6 +15,7 @@
 #include "object/splinemodifier.h"
 #include "object/physicsmodifier.h"
 #include "replay/bxreplayframe.h"
+#include "world/worldcache.h"
 
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
@@ -75,12 +76,6 @@ extern "C" void cMultiParticle_update(cMultiParticle* self)
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_unloadSection);
 #ifdef SKIP_ASM
-struct sMoveList {
-    int field_0x0;          // 0x0
-    int count;              // 0x4
-    int field_0x8;          // 0x8
-    unsigned int* entries;  // 0xC
-};
 
 /**
  * Drops a world section's instances from a multi-particle system.
@@ -90,17 +85,17 @@ struct sMoveList {
  *
  * @param key  world section id
  */
-extern "C" void cMultiParticle_unloadSection(sMoveList* self, unsigned int key)
+extern "C" void cMultiParticle_unloadSection(cMultiParticle* self, unsigned int key)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if ((self->entries[i] & 0xFF) == key) {
-            self->count--;
-            if (i < self->count) {
-                self->entries[i] = self->entries[self->count];
+    for (i = 0; i < self->NumInst; i++) {
+        if (self->InstIds[i].m_bfRID.m_uiSectionID == key) {
+            self->NumInst--;
+            if (i < self->NumInst) {
+                self->InstIds[i] = self->InstIds[self->NumInst];
                 i--;
             } else {
-                self->entries[i] = 0xFFFFFFFF;
+                self->InstIds[i] = tResourceID::Invalid();
             }
         }
     }

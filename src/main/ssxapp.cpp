@@ -47,17 +47,17 @@ extern "C" cSSXApp* cSSXApp_cSSXApp(cSSXApp* self)
     self->UserName = (char*)cBXString_EmptyString;
     self->Password = (char*)cBXString_EmptyString;
     self->CommandLineTrack = (char*)cBXString_EmptyString;
-    self->unk_D4[0] = 0;
-    self->unk_D4[1] = 0;
-    self->unk_D4[2] = 0;
-    self->unk_D4[3] = 0;
-    self->unk_D4[4] = 0;
-    self->unk_D4[5] = 0;
+    self->mAudioBigFile = 0;
+    self->mMusicBigFile = 0;
+    self->mMusic2BigFile = 0;
+    self->mSpeechBigFile = 0;
+    self->mScriptDataBigFile = 0;
+    self->mModelBigFile = 0;
     int i;
     for (i = 0; i < 11; i++) {
-        self->unk_EC[i] = 0;
+        self->mTextureBigFile[i] = 0;
     }
-    self->unk_118 = 0;
+    self->mRewardsBigFile = 0;
     self->AutoLobby = 0;
     self->unk_68 = 0;
     self->unk_6C = 0;
@@ -845,7 +845,7 @@ void operator_delete(int* p);
 extern "C" void cUIFontInterface_purgeFonts(void* p);
 extern "C" void cPadCache_purge(void* p);
 extern "C" void cSSXScriptEngine_DeInitOnce(void* p);
-extern "C" void FILESYS_delbigsync(void* handle, int arg);
+extern "C" void FILESYS_delbigsync(int bighandle, int priority);
 // PORT: WORLDTRIGGERMANAGER_DeInit is declared (void*) but never reads it; this caller passes nothing.
 extern "C" void WORLDTRIGGERMANAGER_DeInit_noarg() __asm__("WORLDTRIGGERMANAGER_DeInit");
 extern "C" void SSXAUDIO_DeInit();
@@ -866,28 +866,6 @@ struct sVEPurge {
     void (*fn)(void*, int);
 };
 
-struct sSSXAppPurge {
-    char pad_0x00[0x78];
-    void* f78;          // 0x78
-    char pad_0x7C[0xC];
-    int* f88;           // 0x88
-    char pad_0x8C[0x10];
-    char* f9C;          // 0x9C
-    char pad_0xA0[0x18];
-    int* fB8[2];        // 0xB8
-    void* fC0;          // 0xC0
-    char pad_0xC4[0x10];
-    void* fD4;          // 0xD4
-    void* fD8;          // 0xD8
-    void* fDC;          // 0xDC
-    void* fE0;          // 0xE0
-    void* fE4;          // 0xE4
-    void* fE8;          // 0xE8
-    void* fEC[11];      // 0xEC
-    void* f118;         // 0x118
-    void* f11C;         // 0x11C
-};
-
 /**
  * Shuts the application down: frees what init and initload created and closes the big files.
  *
@@ -897,21 +875,21 @@ struct sSSXAppPurge {
  *
  * InputPads, Inputs, LoadIndicator and FELocale are not freed here.
  */
-extern "C" void cSSXApp_purge(sSSXAppPurge* self)
+extern "C" void cSSXApp_purge(cSSXApp* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
-        if (self->fB8[i]) {
-            operator_delete(self->fB8[i]);
+        if (self->InputMaps[i]) {
+            operator_delete((int*)self->InputMaps[i]);
         }
     }
-    int* fontInterface = self->f88;
+    cUIFontInterface* fontInterface = self->Fonts;
     if (fontInterface) {
         cUIFontInterface_purgeFonts(fontInterface);
-        operator_delete(fontInterface);
+        operator_delete((int*)fontInterface);
     }
     int* mgr = (int*)PadCache;
-    self->f88 = 0;
+    self->Fonts = 0;
     PadCache = 0;
     cPadCache_purge(mgr);
     operator_delete(mgr);
@@ -935,25 +913,25 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         }
     }
     GrMan = 0;
-    if (self->fE4) FILESYS_delbigsync(self->fE4, 100);
-    if (self->fE8) FILESYS_delbigsync(self->fE8, 100);
+    if (self->mScriptDataBigFile) FILESYS_delbigsync(self->mScriptDataBigFile, 100);
+    if (self->mModelBigFile) FILESYS_delbigsync(self->mModelBigFile, 100);
     for (i = 0; i < 11; i++) {
-        if (self->fEC[i]) {
-            FILESYS_delbigsync(self->fEC[i], 100);
+        if (self->mTextureBigFile[i]) {
+            FILESYS_delbigsync(self->mTextureBigFile[i], 100);
         }
     }
-    if (self->f118) FILESYS_delbigsync(self->f118, 100);
+    if (self->mRewardsBigFile) FILESYS_delbigsync(self->mRewardsBigFile, 100);
     WORLDTRIGGERMANAGER_DeInit_noarg();
     SSXAUDIO_DeInit();
-    if (self->fD4) FILESYS_delbigsync(self->fD4, 100);
-    if (self->fD8) FILESYS_delbigsync(self->fD8, 100);
-    if (self->fDC) FILESYS_delbigsync(self->fDC, 100);
-    if (self->fE0) FILESYS_delbigsync(self->fE0, 100);
-    if (self->f78) cBE_purgeBE(self->f78);
-    cGameModeMan_purgeGM(self->fC0);
-    if (self->f11C) cFEAsyncManager__cFEAsyncManager(self->f11C, 3);
+    if (self->mAudioBigFile) FILESYS_delbigsync(self->mAudioBigFile, 100);
+    if (self->mMusicBigFile) FILESYS_delbigsync(self->mMusicBigFile, 100);
+    if (self->mMusic2BigFile) FILESYS_delbigsync(self->mMusic2BigFile, 100);
+    if (self->mSpeechBigFile) FILESYS_delbigsync(self->mSpeechBigFile, 100);
+    if (self->BE) cBE_purgeBE(self->BE);
+    cGameModeMan_purgeGM(self->GameModeMan);
+    if (self->mFEAsyncManager) cFEAsyncManager__cFEAsyncManager(self->mFEAsyncManager, 3);
     {
-        cConsoleConfig* consoleConfig = (cConsoleConfig*)self->f9C;
+        cConsoleConfig* consoleConfig = self->ConsoleConfig;
         if (consoleConfig) {
             sVEPurge* vt = (sVEPurge*)consoleConfig->mVtbl;
             vt[1].fn(vthis(consoleConfig, vt[1]), 3);

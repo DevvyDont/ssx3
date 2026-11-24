@@ -15,6 +15,7 @@
 #include "camera/trigger/cameratriggerman.h"
 #include "sound/ssxaudio.h"
 #include "ai/computer.h"
+#include "ai/controlcmd.h"
 #include "world/world.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -7064,14 +7065,15 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" float cComputer_setupWarp(void* self);
 extern "C" void cRider_updateTimeWarp(void* self, float v);
 int cRider_getControlState_A768(void*) __asm__("cRider_getControlState__FPv");
-extern "C" void cComputer_getCruiseCmd_A768(void* self, void* pad) __asm__("cComputer_getCruiseCmd");
-extern "C" void cComputer_getPrewindCmd_A768(void* self, void* pad) __asm__("cComputer_getPrewindCmd");
-extern "C" void cComputer_getGateCmd_A768(void* self, void* pad) __asm__("cComputer_getGateCmd");
-extern "C" void cComputer_getNaturalAirCmd_A768(void* self, void* pad) __asm__("cComputer_getNaturalAirCmd");
-extern "C" void cComputer_getRailslideCmd_A768(void* self, void* pad) __asm__("cComputer_getRailslideCmd");
-extern "C" void cComputer_getSpinCmd_A768(void* self, void* pad) __asm__("cComputer_getSpinCmd");
-extern "C" void cComputer_getWipeoutCmd_A768(void* self, void* pad) __asm__("cComputer_getWipeoutCmd");
-extern "C" void cComputer_getBoardPressCmd_A768(void* self, void* pad) __asm__("cComputer_getBoardPressCmd");
+// cComputer_getCruiseCmd's own self is still a view class (it calls the cruise logic pointer-to-member).
+extern "C" void cComputer_getCruiseCmd_A768(cComputer* self, tCruiseCmd* cmd) __asm__("cComputer_getCruiseCmd");
+extern "C" void cComputer_getPrewindCmd(cComputer* self, tPrewindCmd* cmd);
+extern "C" void cComputer_getGateCmd(cComputer* self, tGateCmd* cmd);
+extern "C" void cComputer_getNaturalAirCmd(cComputer* self, tNaturalAirCmd* cmd);
+extern "C" void cComputer_getRailslideCmd(cComputer* self, tRailslideCmd* cmd);
+extern "C" int cComputer_getSpinCmd(cComputer* self, tSpinCmd* cmd);
+extern "C" void cComputer_getWipeoutCmd(cComputer* computer, tWipeoutCmd* controlCmd);
+extern "C" void cComputer_getBoardPressCmd(cComputer* self, tBoardPressCmd* cmd);
 
 /**
  * Builds this computer rider's control command for the frame, the AI's stand-in for reading a pad.
@@ -7084,35 +7086,35 @@ extern "C" void cComputer_getBoardPressCmd_A768(void* self, void* pad) __asm__("
  * @param _cmd  the command to fill (On Tour tControlCmd&)
  */
 // Clears the pad input, updates the rider, then runs the input handler for the rider state.
-extern "C" void cComputer_getControlCmd(cComputer* self, void* _cmd)
+extern "C" void cComputer_getControlCmd(cComputer* self, tControlCmd* _cmd)
 {
     MEM_fill(_cmd, 0, 8);
     cRider_updateTimeWarp(self->RiderHandler.GroundMotion.mRider, cComputer_setupWarp((char*)self));
     int state = cRider_getControlState_A768(self->RiderHandler.GroundMotion.mRider);
     switch (state) {
     case 0:
-        cComputer_getCruiseCmd_A768(((char*)self), _cmd);
+        cComputer_getCruiseCmd_A768(self, &_cmd->CruiseCmd);
         break;
     case 2:
-        cComputer_getPrewindCmd_A768(((char*)self), _cmd);
+        cComputer_getPrewindCmd(self, &_cmd->PrewindCmd);
         break;
     case 6:
-        cComputer_getGateCmd_A768(((char*)self), _cmd);
+        cComputer_getGateCmd(self, &_cmd->GateCmd);
         break;
     case 4:
-        cComputer_getNaturalAirCmd_A768(((char*)self), _cmd);
+        cComputer_getNaturalAirCmd(self, &_cmd->NaturalAirCmd);
         break;
     case 7:
-        cComputer_getRailslideCmd_A768(((char*)self), _cmd);
+        cComputer_getRailslideCmd(self, &_cmd->RailslideCmd);
         break;
     case 5:
-        cComputer_getSpinCmd_A768(((char*)self), _cmd);
+        cComputer_getSpinCmd(self, &_cmd->SpinCmd);
         break;
     case 8:
-        cComputer_getWipeoutCmd_A768(((char*)self), _cmd);
+        cComputer_getWipeoutCmd(self, &_cmd->WipeoutCmd);
         break;
     case 1:
-        cComputer_getBoardPressCmd_A768(((char*)self), _cmd);
+        cComputer_getBoardPressCmd(self, &_cmd->BoardPressCmd);
         break;
     case 3: case 9: case 10: case 11: case 12: case 13:
         break;
@@ -7176,16 +7178,8 @@ extern "C" void cComputer_readFromReplayFrame(cComputer* self, cBxReplayFrame* d
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_getCruiseCmd);
 #ifdef SKIP_ASM
-struct sFlags_A960 {
-    unsigned int pad0 : 12;
-    unsigned int b12 : 1;
-    unsigned int pad13 : 5;
-    unsigned int b18 : 1;
-    unsigned int b19 : 1;
-};
-
 class cObj_A960;
-typedef void (cObj_A960::*Fn_A960)(sFlags_A960*);
+typedef void (cObj_A960::*Fn_A960)(tCruiseCmd*);
 
 class cObj_A960 {
 public:
@@ -7210,19 +7204,19 @@ extern "C" int cComputer_checkForPunching(void*, int*);
  *
  * @param cruiseCmd  the cruise command
  */
-extern "C" void cComputer_getCruiseCmd(cObj_A960* self, sFlags_A960* cruiseCmd)
+extern "C" void cComputer_getCruiseCmd(cObj_A960* self, tCruiseCmd* cruiseCmd)
 {
     int punchRight;
-    cruiseCmd->b12 = cComputer_checkForReset(self);
+    cruiseCmd->Reset = cComputer_checkForReset(self);
     self->fE20 = 0;
     if (cComputer_checkForPunching(self, &punchRight)) {
         if (punchRight)
-            cruiseCmd->b19 = 1;
+            cruiseCmd->AttackRight = 1;
         else
-            cruiseCmd->b18 = 1;
+            cruiseCmd->AttackLeft = 1;
     } else if (cComputer_checkForBlock(self)) {
-        cruiseCmd->b19 = 1;
-        cruiseCmd->b18 = 1;
+        cruiseCmd->AttackRight = 1;
+        cruiseCmd->AttackLeft = 1;
     }
     (self->*(self->state))(cruiseCmd);
 }
@@ -7247,16 +7241,6 @@ class cTrack_AA70 {
 public:
     char pad[0x34];
     virtual int Query(sRec_AA70* buf, int max, float x, float y);
-};
-
-struct sPad_AA70 {
-    unsigned int pad0 : 13;
-    unsigned int b13 : 1;
-    unsigned int b14 : 1;
-    int b15 : 6;
-    int b21 : 6;
-    unsigned int pad27 : 5;
-    int w0 : 6;
 };
 
 extern "C" sV4_AA70 cPath_getPathPos_AA70(cTrack_AA70*, int, float) __asm__("cPath_getPathPos");
@@ -7323,7 +7307,7 @@ static inline sV4_AA70 Scale_AA70(const sV4_AA70& v, float s)
  *
  * @param cmd  the prewind command (On Tour tPrewindCmd)
  */
-extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
+extern "C" void cComputer_getPrewindCmd(cComputer* self, tPrewindCmd* cmd)
 {
     sRec_AA70 buf[12];
     cRider* rider = self->RiderHandler.GroundMotion.mRider;
@@ -7331,18 +7315,18 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
     int n = trk->Query(buf, 12, rider->PrevPathParam, rider->PathParam + 50.0f);
     int sel = -1;
     if (Len_AA70(*(sV4_AA70*)&self->RiderHandler.GroundMotion.mRider->mVelocity) < self->mDesiredSpeed - 138.88890075683594f)
-        cmd->b14 = 1;
+        cmd->BoostHeld = 1;
     if (self->mToPipe) {
         sV4_AA70 jumpSpan = Sub_AA70(*(sV4_AA70*)&self->mEndJumpPos, *(sV4_AA70*)&self->mStartJumpPos);
         sV4_AA70 fromJumpStart = Sub_AA70(*(sV4_AA70*)&self->RiderHandler.GroundMotion.mRider->mPosition, *(sV4_AA70*)&self->mStartJumpPos);
         if (Len_AA70(fromJumpStart) < Len_AA70(jumpSpan) - 50.0f)
-            cmd->b13 = 1;
+            cmd->JumpHeld = 1;
         return;
     }
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0x10) {
             sel = i;
-            cmd->b13 = 1;
+            cmd->JumpHeld = 1;
             break;
         }
     }
@@ -7353,24 +7337,16 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
         half = Scale_AA70(half, 0.5f);
         sV4_AA70 pos = cPath_getPathPos_AA70(trk, 0, buf[sel].b);
         sV4_AA70 toTarget = Sub_AA70(pos, half);
-        cmd->w0 = (int)(cComputer_calcTurn_AA70(((char*)self), &toTarget) * 31.0f);
+        cmd->PrewindTurn = (int)(cComputer_calcTurn_AA70(((char*)self), &toTarget) * 31.0f);
     }
-    cmd->b15 = (int)(ctl[18] * 31.0f);
-    cmd->b21 = (int)(ctl[19] * 31.0f);
+    cmd->PrewindSpin = (int)(ctl[18] * 31.0f);
+    cmd->PrewindFlip = (int)(ctl[19] * 31.0f);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", cComputer_getBoardPressCmd);
 #ifdef SKIP_ASM
-
-struct sPad_AD78 {
-    unsigned int pad0 : 18;
-    int b18 : 6;
-    int b24 : 6;
-    unsigned int pad30 : 2;
-    int w0 : 6;
-};
 
 extern "C" int cComputer_checkForBoardPress(cComputer*, int*);
 extern "C" void cComputer_calculateTargetPos(t4Vector*, void*);
@@ -7400,7 +7376,7 @@ static inline float clamp_AD78(float v, float lo, float hi)
  *
  * @param cmd  the board-press command (On Tour tBoardPressCmd)
  */
-extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
+extern "C" void cComputer_getBoardPressCmd(cComputer* self, tBoardPressCmd* cmd)
 {
     int flag;
     int pressMarkerFound = cComputer_checkForBoardPress(self, &flag);
@@ -7410,17 +7386,17 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
     {
         t4Vector targetPos;
         cComputer_calculateTargetPos(&targetPos, ((char*)self));
-        cmd->b18 = (int)(cComputer_calcTurn(((char*)self), &targetPos) * 31.0f);
+        cmd->CruiseTurn = (int)(cComputer_calcTurn(((char*)self), &targetPos) * 31.0f);
     }
     if (pressMarkerFound) {
-        cmd->w0 = (int)(pressDir * 31.0f);
+        cmd->BoardPress = (int)(pressDir * 31.0f);
         t4Vector sideAxis = *(t4Vector*)&self->RiderHandler.GroundMotion.mRider->mMatrix;
         float z = sideAxis.z + sideAxis.z;
         float y = clamp_AD78(z, -1.0f, 1.0f);
         if (vAbs_AD78(y) > 0.1f)
-            cmd->b24 = (int)(y * 31.0f);
+            cmd->RailBalance = (int)(y * 31.0f);
     } else {
-        cmd->w0 = 0;
+        cmd->BoardPress = 0;
     }
 }
 #endif
@@ -7428,13 +7404,6 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_getRailslideCmd);
 #ifdef SKIP_ASM
-
-struct sPad_AED8 {
-    unsigned int pad0 : 25;
-    int b25 : 6;
-    unsigned int pad31 : 1;
-    int w0 : 6;
-};
 
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
 extern "C" void cComputer_setupPrewindState_AED8(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
@@ -7487,7 +7456,7 @@ static inline float clamp_AED8(float v, float lo, float hi)
  *
  * @param cmd  the railslide command (On Tour tRailslideCmd)
  */
-extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
+extern "C" void cComputer_getRailslideCmd(cComputer* self, tRailslideCmd* cmd)
 {
     int below, toPipe, toRail, isSpin, isFlip, ok;
     int jumpEvent = cComputer_checkForJumpEvent(self, (float*)(&self->mDesiredSpeed), &below, &toPipe, &toRail, &isSpin, &isFlip);
@@ -7502,12 +7471,12 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
     float z = sideAxis.z + sideAxis.z;
     float y = clamp_AED8(z, -1.0f, 1.0f);
     if (vAbs_AED8(y) > 0.1f)
-        cmd->b25 = (int)(y * 31.0f);
+        cmd->RailBalance = (int)(y * 31.0f);
     cRider* rider = self->RiderHandler.GroundMotion.mRider;
     if ((unsigned int)(rider->RailslideMode - 3) >= 2 &&
         cRiderAnimBase_getCurrentAnimCategory(rider->mRiderAnim, 2) != 0xE) {
         float spinSign = (self->mSpinAxis < 0.0f) ? 1.0f : -1.0f;
-        cmd->w0 = (int)(spinSign * 31.0f);
+        cmd->RailSpin = (int)(spinSign * 31.0f);
     }
     int speedMarkerFound = cComputer_checkForSpeedZone(self, (float*)(&self->mDesiredSpeed), &ok);
     float len = vLen_AED8(*(t4Vector*)&self->RiderHandler.GroundMotion.mRider->mVelocity);
@@ -7570,24 +7539,10 @@ extern "C" void cComputer_setupEndSpin(cComputer* self, float airTime)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_getSpinCmd);
 #ifdef SKIP_ASM
-struct sPad_B250 {
-    unsigned int pad0 : 12;
-    unsigned int b12 : 1;
-    unsigned int pad13 : 1;
-    unsigned int b14 : 1;
-    unsigned int pad15 : 1;
-    unsigned int b16 : 8;
-    int b24 : 6;
-    unsigned int pad30 : 2;
-    int w0 : 6;
-    unsigned int pad6 : 6;
-    int w12 : 6;
-};
-
 // Pad stick setter (an inline accessor: the value is expanded before the field mask).
-static inline void SetW12_B250(sPad_B250* pad, int v)
+static inline void SetW12_B250(tSpinCmd* pad, int v)
 {
-    pad->w12 = v;
+    pad->AirAdjRotLR = v;
 }
 
 int AIrand();
@@ -7611,7 +7566,7 @@ extern "C" int cComputer_chooseGrabMain(char*, float);
 // Returns -1 only when no trick is queued, and has no value otherwise (the caller ignores it): the retail
 // tail keeps `lw E0C; li v0,-1` with no branch. The noop `v0 = -1` return arm survives reload as a USE,
 // so jump2 only deletes the branch after sched2 and the compare loads stay.
-extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
+extern "C" int cComputer_getSpinCmd(cComputer* self, tSpinCmd* cmd)
 {
     char* obj = (char*)self->RiderHandler.GroundMotion.mRider->mAirPredictor;
     int simState = *(int*)(obj + 0xAC);
@@ -7631,7 +7586,7 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
     }
     if (self->RiderHandler.GroundMotion.mRider->mEndOfTheWorldTimer >= 31) {
         self->RiderHandler.GroundMotion.mRider->mEndOfTheWorldTimer = 0;
-        cmd->b12 = 1;
+        cmd->Reset = 1;
     } else {
         if (self->mIsGonnaMessUp == 0) {
             cComputer_setupEndSpin(self, gap);
@@ -7663,15 +7618,15 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
                 self->mIsTweak = 1;
         }
         float* ctl = (float*)(&self->mDesiredSpeed);
-        cmd->b24 = (int)(ctl[18] * 31.0f);
-        cmd->w0 = (int)(ctl[19] * 31.0f);
-        cmd->b16 = self->mGrabID;
+        cmd->SpinAdjust = (int)(ctl[18] * 31.0f);
+        cmd->FlipAdjust = (int)(ctl[19] * 31.0f);
+        cmd->GrabID = self->mGrabID;
         if (self->mIsUber)
-            cmd->b14 = 1;
+            cmd->Tweak = 1;
         else if (self->mIsTweak)
-            cmd->b14 = 1;
+            cmd->Tweak = 1;
         else
-            cmd->b14 = 0;
+            cmd->Tweak = 0;
         if (self->mToRail == 1)
             SetW12_B250(cmd, -0x1F);
         if (self->mGrabID == -1)
@@ -7684,18 +7639,6 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
 INCLUDE_ASM("seg/seg_1218", cComputer_getNaturalAirCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-
-struct sPad_B590 {
-    unsigned char b0;
-    unsigned char b1;
-    unsigned char b2;
-    unsigned char b3;
-};
-
-struct sPadBits_B590 {
-    unsigned int pad0 : 24;
-    int b24 : 6;
-};
 
 int AIrand();
 extern "C" void cComputer_calculateTargetPos_B590(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
@@ -7711,7 +7654,7 @@ extern "C" float cComputer_calcTurn_B590(void*, t4Vector*) __asm__("cComputer_ca
  *
  * @param cmd  the natural-air command (On Tour tNaturalAirCmd)
  */
-extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
+extern "C" void cComputer_getNaturalAirCmd(cComputer* self, tNaturalAirCmd* cmd)
 {
     char* airPredictor = (char*)self->RiderHandler.GroundMotion.mRider->mAirPredictor;
     int st = *(int*)(airPredictor + 0xAC);
@@ -7747,10 +7690,10 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
     if (airTimeLeft < 0.5f && self->mFlipAxis == 0.0f && self->mSpinAxis == 0.0f) {
         t4Vector targetPos;
         cComputer_calculateTargetPos_B590(&targetPos, ((char*)self));
-        ((sPadBits_B590*)cmd)->b24 = (int)(-cComputer_calcTurn_B590(((char*)self), &targetPos) * 31.0f);
+        cmd->CruiseTurn = (int)(-cComputer_calcTurn_B590(((char*)self), &targetPos) * 31.0f);
         self->mGrabID = -1;
     }
-    cmd->b2 = self->mGrabID;
+    cmd->GrabID = self->mGrabID;
 }
 #endif
 
@@ -7763,21 +7706,16 @@ INCLUDE_ASM("seg/seg_1218", cComputer_getWipeoutCmd);
  * cComputer_getControlCmd calls it.
  *
  * @param computer  the computer rider
- * @param controlCmd  the command word
+ * @param controlCmd  the wipeout command (On Tour tWipeoutCmd): only Reset is set
  */
-extern "C" void cComputer_getWipeoutCmd(cComputer* computer, int *controlCmd) {
-    *controlCmd = (*controlCmd & ~0x1000) | ((cComputer_checkForReset(computer) & 1) << 0xC);
+extern "C" void cComputer_getWipeoutCmd(cComputer* computer, tWipeoutCmd* controlCmd) {
+    controlCmd->Reset = cComputer_checkForReset(computer);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_getGateCmd);
 #ifdef SKIP_ASM
-struct sPad_B790 {
-    unsigned int pad0 : 12;
-    int b12 : 6;
-};
-
 class cLvl_B790 {
 public:
     virtual void v0();
@@ -7803,17 +7741,17 @@ extern "C" int AITick();
  *
  * @param cmd  the gate command (On Tour tGateCmd)
  */
-extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* cmd)
+extern "C" void cComputer_getGateCmd(cComputer* self, tGateCmd* cmd)
 {
     float framesLeft = 180.0f - (float)AITick();
     float th = 33.0f;
     th -= (float)((((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() - 1) * 10);
     if (framesLeft < th && ((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() < 4) {
-        cmd->b12 = 0x1F;
+        cmd->Anticipate = 0x1F;
         return;
     }
     if (framesLeft < 72.0f && ((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() < 3) {
-        cmd->b12 = -0x1F;
+        cmd->Anticipate = -0x1F;
         return;
     }
     if (AITick() % 20 == 0) {
@@ -7823,7 +7761,7 @@ extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* cmd)
         if ((AIrand() & 1) == 0)
             self->mDesiredSpeed = -self->mDesiredSpeed;
     }
-    cmd->b12 = (int)(self->mDesiredSpeed * 31.0f);
+    cmd->Anticipate = (int)(self->mDesiredSpeed * 31.0f);
 }
 #endif
 

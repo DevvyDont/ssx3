@@ -484,7 +484,7 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(cFEStateBraggingRights* se
         char name[3];
         name[2] = 0;
         for (int i = 0; i < 2; i++) {
-            void** slots = (void**)(((char*)self) + i * 0x34 + 0x6D8);
+            void** slots = (void**)&self->mMenuCtrl[i].mpListBox[0];
             for (int j = 0; j < 8; j++) {
                 name[0] = '1' + i;
                 name[1] = '1' + j;
@@ -570,10 +570,10 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
     case 5: {
         int i = 0;
         do {
-            if (cBraggingRightsMenu_findListBoxP_38F8((char*)&self->mMenuCtrl[0] + i * 52, w) != -1) {
+            if (cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[i], w) != -1) {
                 if (isOn_38F8() && i == 0)
                     func_00265688(cSetupMan_mSetupMan);
-                cBraggingRightsMenu_setConfirmed_38F8((char*)&self->mMenuCtrl[0] + i * 52, 1);
+                cBraggingRightsMenu_setConfirmed_38F8(&self->mMenuCtrl[i], 1);
                 cFEStateBraggingRights_updateConfirmedState(self);
                 break;
             }
@@ -612,7 +612,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
     case 1:
     case 2:
         panel = w->mMiscData;
-        cBraggingRightsMenu_setMenuItemColor((char*)&self->mMenuCtrl[0] + panel * 52);
+        cBraggingRightsMenu_setMenuItemColor(&self->mMenuCtrl[panel]);
         break;
     case 7:
         if (isOn_38F8())
@@ -625,7 +625,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             func_00265568(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
         } else {
             panel = w->mMiscData;
-            int slot = cBraggingRightsMenu_findListBoxP_38F8((char*)&self->mMenuCtrl[0] + panel * 52, w);
+            int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[panel], w);
             int which = ((signed char*)self->mpGameEventMapping)[slot];
             if (which != -1)
                 cFEStateBraggingRights_updateBE(self, panel, which, cUIListBox_getCurrentEntryData_38F8(w));
