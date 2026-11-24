@@ -29,14 +29,19 @@
 
 #include "layout.h"
 #include "object/objnode.h"
+#include "world/worldcache.h" // tResourceID
 
 struct cObjNode;
 
 // One switched-off rail (On Tour tRailInfo, 4 bytes; its default ctor sets -1 = a free slot).
+// [R] the default ctor is EA's: both cRailManNode ctors open with the array-construction loop (128 x -1, counting
+// down) before their own fill, and cRailManNode_addRail's free-slot key is a default-constructed local.
 struct tRailInfo {
-    unsigned int RailRID;           // 0x0 [O] tResourceID (section in the low byte | index << 8); [R] the ctors store
+    tResourceID RailRID;            // 0x0 [O] tResourceID (section in the low byte | index << 8); [R] the ctors store
                                     //     0xFFFFFFFF; [U] enableRail stores -1, cRailManNode_addRail stores the key;
                                     //     cRailManNode_unloadSection compares the low byte with the section (lbu)
+
+    tRailInfo() : RailRID(0xFFFFFFFF) {} // [O] tRailInfo::tRailInfo(); [R] above
 };
 
 CHECK_OFFSET(tRailInfo, RailRID, 0x0);

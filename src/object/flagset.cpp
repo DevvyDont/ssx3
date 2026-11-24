@@ -7,6 +7,7 @@
 #include "object/animframe.h"
 #include "render/ps2gridmesh.h"
 #include "world/instancerecord.h"
+#include "world/worldrecords.h"
 #include "bx/appman.h"
 #include "object/flagset.h"
 #include "object/animnode.h"
@@ -16,11 +17,11 @@
 #include "world/world.h"
 #include "replay/bxreplayframe.h"
 #include "object/instancenode.h"
+#include "render/ps2graphicsman.h"
 
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
 extern char str_Flag_Verts[];
 unsigned int BXrand();
 extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
@@ -28,20 +29,18 @@ extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 
-struct sFsV3_CM {
-    float x, y, z;
+// t3Vector / t2Vector / tARGB with the constructors the unit's arithmetic needs.
+struct sFsV3_CM : t3Vector {
     sFsV3_CM() {}
-    sFsV3_CM(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+    sFsV3_CM(float ax, float ay, float az) { x = ax; y = ay; z = az; }
 };
 
-struct sFsV2_CM {
-    float x, y;
+struct sFsV2_CM : t2Vector {
     sFsV2_CM() {}
-    sFsV2_CM(float ax, float ay) : x(ax), y(ay) {}
+    sFsV2_CM(float ax, float ay) { x = ax; y = ay; }
 };
 
-struct sFsCol_CM {
-    float a, r, g, b;
+struct sFsCol_CM : tARGB {
     sFsCol_CM() {}
 };
 
@@ -60,18 +59,6 @@ static inline float randf_CM()
     u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
     return u.f - 1.0f;
 }
-
-struct sFsVE_CM {
-    short delta;
-    short index;
-    void* (*fn)(void*, int, int, unsigned int);
-};
-
-struct sFsQuadVE_CM {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int, sFsV3_CM*, sFsV2_CM*, sFsCol_CM*);
-};
 
 struct sFsMeshVE_CM {
     short delta;
@@ -104,12 +91,11 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, tInstanceRecord* item)
     }
     self->mScrollU = 0.0f;
     self->mScrollV = 0.0f;
-    char* mgr = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
     sFsV2_CM quv[4];
     sFsCol_CM qcol[4];
     sFsV3_CM pos[4];
-    sFsQuadVE_CM* vt = *(sFsQuadVE_CM**)(mgr + 0x10D8);
-    vt[97].fn(vthis(mgr, vt[97]), item, 0, pos, quv, qcol);
+    mgr->GetMeshQuad(item, 0, pos, quv, qcol);
     if (self->mFlagData.mMagnitude[2] < 0.01f && self->mFlagData.mMagnitude[3] < 0.01f) {
         self->mFlagVertsHorizontal = 8;
         self->mFlagVertsVertical = 2;
@@ -119,13 +105,12 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, tInstanceRecord* item)
     }
     self->mfFlagVertsHorizontalMinusOne = (float)(self->mFlagVertsHorizontal - 1);
     self->mfFlagVertsVerticalMinusOne = (float)(self->mFlagVertsVertical - 1);
-    sFsVE_CM* vtEntry = &(*(sFsVE_CM**)(mgr + 0x10D8))[76];
-    (*(sFsMesh_CM**)&self->mGridMesh) = (sFsMesh_CM*)vtEntry->fn(vthis(mgr, *vtEntry), self->mFlagVertsHorizontal, self->mFlagVertsVertical, 0x60000000u);
-    if (((sFsMesh_CM*)self->mGridMesh) == 0) {
+    self->mGridMesh = mgr->CreateGridMesh(self->mFlagVertsHorizontal, self->mFlagVertsVertical, 0x60000000u);
+    if (self->mGridMesh == 0) {
         return;
     }
     int n = self->mFlagVertsHorizontal * self->mFlagVertsVertical;
-    sFsV3_CM** pv = &(*(sFsV3_CM**)&self->mVerts);
+    t3Vector** pv = &self->mVerts;
     *pv = new (str_Flag_Verts, 0x20000000, 0) sFsV3_CM[n];
     sFsV2_CM uv[50];
     sFsCol_CM col[50];
@@ -134,12 +119,16 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, tInstanceRecord* item)
         for (int column = 0; column < self->mFlagVertsHorizontal; column++) {
             float fc = (float)column / self->mfFlagVertsHorizontalMinusOne;
             float fr = (float)row / self->mfFlagVertsVerticalMinusOne;
-            ((sFsV3_CM*)self->mVerts)[idx] = (pos[0] * (1.0f - fc) + pos[1] * fc) * (1.0f - fr) + (pos[2] * (1.0f - fc) + pos[3] * fc) * fr;
+            self->mVerts[idx] =
+                (pos[0] * (1.0f - fc) + pos[1] * fc) * (1.0f - fr) + (pos[2] * (1.0f - fc) + pos[3] * fc) * fr;
             uv[idx] = (quv[0] * (1.0f - fc) + quv[1] * fc) * (1.0f - fr) + (quv[2] * (1.0f - fc) + quv[3] * fc) * fr;
-            col[idx].a = 1.0f;
-            col[idx].r = (qcol[0].r * (1.0f - fc) + qcol[1].r * fc) * (1.0f - fr) + (qcol[2].r * (1.0f - fc) + qcol[3].r * fc) * fr;
-            col[idx].g = (qcol[0].g * (1.0f - fc) + qcol[1].g * fc) * (1.0f - fr) + (qcol[2].g * (1.0f - fc) + qcol[3].g * fc) * fr;
-            col[idx].b = (qcol[0].b * (1.0f - fc) + qcol[1].b * fc) * (1.0f - fr) + (qcol[2].b * (1.0f - fc) + qcol[3].b * fc) * fr;
+            col[idx].A = 1.0f;
+            col[idx].R = (qcol[0].R * (1.0f - fc) + qcol[1].R * fc) * (1.0f - fr) +
+                         (qcol[2].R * (1.0f - fc) + qcol[3].R * fc) * fr;
+            col[idx].G = (qcol[0].G * (1.0f - fc) + qcol[1].G * fc) * (1.0f - fr) +
+                         (qcol[2].G * (1.0f - fc) + qcol[3].G * fc) * fr;
+            col[idx].B = (qcol[0].B * (1.0f - fc) + qcol[1].B * fc) * (1.0f - fr) +
+                         (qcol[2].B * (1.0f - fc) + qcol[3].B * fc) * fr;
             idx++;
         }
     }
@@ -153,14 +142,7 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, tInstanceRecord* item)
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_PurgeMesh);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
 void cMemMan_free(void*);
-
-struct sFlagSetVEntryB7B8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 /**
  * Frees a flag set's grid mesh and vertex buffer.
@@ -170,11 +152,9 @@ struct sFlagSetVEntryB7B8 {
  */
 extern "C" void cFlagSet_PurgeMesh(cFlagSet* self)
 {
-    void* mesh = self->mGridMesh;
+    cGridMesh* mesh = self->mGridMesh;
     if (mesh != 0) {
-        char* mgr = cGraphicsMan_TheGraphicsMan;
-        sFlagSetVEntryB7B8* vt = *(sFlagSetVEntryB7B8**)(mgr + 0x10D8);
-        vt[77].fn(vthis(mgr, vt[77]), mesh);
+        cGraphicsMan_TheGraphicsMan->DeleteGridMesh(mesh);
         self->mGridMesh = 0;
     }
     void* verts = self->mVerts;
@@ -193,10 +173,6 @@ extern "C" void* cObjectInterface_getFlagManager();
 extern "C" int cObjectInterface_getAITick();
 extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
 
-struct sFlagVert_B818 {
-    float x, y, z;
-    sFlagVert_B818() {}
-};
 
 
 
@@ -236,10 +212,11 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
         }
     }
     if (cObjectInterface_getAITick() % 2 == self->mFrameToUpdateGrid) {
-        sFlagVert_B818 verts[50];
-        cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
+        sFsV3_CM verts[50];
+        cFlagSet_updateGrid((cFlagSet*)self, verts);
         cGridMesh* gridMesh = self->mGridMesh;
-        sVEntry<void(void*, void*)>* setVertsSlot = &((sVEntry<void (void*, void*)>*)gridMesh->mVtbl)[3];
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)gridMesh->mVtbl;
+        sVEntry<void(void*, void*)>* setVertsSlot = &vt[3];
         setVertsSlot->fn(vthis(gridMesh, *setVertsSlot), verts);
     }
     if (0.001f < self->mFlagData.mUScrollRate || 0.001f < self->mFlagData.mVScrollRate) {
@@ -258,35 +235,35 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_render);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
 extern int cFlags_m_EnableRender;
 // PORT: 128-bit integer mode for VU0 asm memory operands
 typedef int cQuad128_34B9B0 __attribute__((mode(TI)));
 extern t4Matrix t4mat_Identity;
 
-struct sRS_34B9B0 {
-    unsigned int f0_0 : 12;
-    unsigned int f0_12 : 8;
-    unsigned int f0_20 : 12;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-    int f8;
-    int fC;
-    int f10;
+extern sDrawState sDrawState_s_defaultDrawState;
+
+// t4Vector with a 4-float constructor (the bound-box corners).
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(const float& a, const float& b, const float& c, const float& d) { x = a; y = b; z = c; w = d; }
 };
-extern sRS_34B9B0 sDrawState_s_defaultDrawState;
 
-struct sVec4_34B9B0 {
-    float x, y, z, w;
-    sVec4_34B9B0() {}
-    sVec4_34B9B0(const float& a, const float& b, const float& c, const float& d) : x(a), y(b), z(c), w(d) {}
-} __attribute__((aligned(16)));
+// A draw state's alpha field (bits 12-19 of its first word) and blend mode (bits 2-6 of its second).
+static inline void SetDrawStateAlpha(sDrawState* ds, int v)
+{
+    ds->m_bitGroups[0] = ((v << 12) & 0xFF000) | ((int)ds->m_bitGroups[0] & ~0xFF000);
+}
+static inline void SetDrawStateBlendMode(sDrawState* ds, int v)
+{
+    ds->m_bitGroups[1] = ((int)ds->m_bitGroups[1] & ~0x7C) | ((v << 2) & 0x7C);
+}
 
-
-struct sMat_34B9B0 {
-    t4Vector r[4];
-};
+// The graphics-manager slots the renders call by hand: 43 GetNetMatrix, 93 ClipBoundBox, 96 RenderModel.
+typedef sVEntry<t4Matrix(void*)> tNetMatrixSlot;
+typedef sVEntry<int(void*, t4Vector*, t4Vector*, t4Matrix*)> tClipBoundBoxSlot;
+typedef sVEntry<void(void*, tInstanceRecord*, int, int, int)> tRenderModelSlot;
+// The grid mesh's draw slot 7: (instance matrix, material block, texture matrix).
+typedef sVEntry<void(void*, void*, void*, t4Matrix*)> tGridMeshRenderSlot;
 
 
 static inline int IsLoaded_34B9B0(tInstanceRecord* m)
@@ -298,18 +275,8 @@ static inline int IsLoaded_34B9B0(tInstanceRecord* m)
     return ok ? wc->m_HullPages[m->m_SMap.m_iHullID].m_State == 3 : 0;
 }
 
-struct sPair_34B9B0 { t4Vector r[4]; };
-struct sVE43_34B9B0 { short delta; short index; sPair_34B9B0 (*fn)(void*); };
-struct sPair_34B9B0;
-struct sVE93_34B9B0 { short delta; short index; int (*fn)(void*, sVec4_34B9B0*, sVec4_34B9B0*, sPair_34B9B0*); };
-struct sVE96_34B9B0 { short delta; short index; void (*fn)(void*, void*, int, int, int); };
-struct sVE7_34B9B0 { short delta; short index; void (*fn)(void*, void*, void*, sMat_34B9B0*); };
-
-static inline void SetF0_12_34B9B0(sRS_34B9B0* rs, int v) { rs->f0_12 = v; }
-static inline void SetF4_2_34B9B0(sRS_34B9B0* rs, int v) { rs->f4_2 = v; }
-
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void MatCopy_34B9B0(sMat_34B9B0* d, const sMat_34B9B0* s)
+static inline void MatCopy_34B9B0(t4Matrix* d, const t4Matrix* s)
 {
     __asm__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -325,9 +292,6 @@ static inline void MatCopy_34B9B0(sMat_34B9B0* d, const sMat_34B9B0* s)
         : "memory");
 }
 
-struct sFlagSetEntry;
-
-#define TOP_34B9B0(c) (*(sRS_34B9B0**)((c) + 0xE84))
 
 /**
  * Draws every instance of a flag set with its cloth mesh and scrolled texture.
@@ -346,14 +310,14 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
     if (cFlags_m_EnableRender == 0) {
         return;
     }
-    char* ctx = cGraphicsMan_TheGraphicsMan;
-    TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
-    *++TOP_34B9B0(ctx) = sDrawState_s_defaultDrawState;
+    cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
+    gm->m_pCurrentDrawState[1] = gm->m_pCurrentDrawState[0];
+    *++gm->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
     if (*(signed char*)&flagSet->mFlagData.mOverSaturate != 0) {
-        SetF0_12_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 0xFF);
-        SetF4_2_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 11);
+        SetDrawStateAlpha(cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState, 0xFF);
+        SetDrawStateBlendMode(cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState, 11);
     } else {
-        SetF4_2_34B9B0(TOP_34B9B0(ctx), 5);
+        SetDrawStateBlendMode(gm->m_pCurrentDrawState, 5);
     }
     float one = 1.0f;
     for (int i = 0; i < flagSet->mCurrentNumInstances; i++) {
@@ -362,34 +326,34 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
             continue;
         }
         {
-            sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
-            char* thisp = ctx + vt[93].delta;
-            sVec4_34B9B0 boxMin(instRecord->m_fvMin.m[0], instRecord->m_fvMin.m[1], instRecord->m_fvMin.m[2], one);
-            sVec4_34B9B0 boxMax(instRecord->m_fvMax.m[0], instRecord->m_fvMax.m[1], instRecord->m_fvMax.m[2], one);
-            sVec4_34B9B0* pb = &boxMax;
-            sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
-            sPair_34B9B0 viewMat = vt43[43].fn(ctx + vt43[43].delta);
+            tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, gm);
+            void* thisp = vthis(gm, vt[93]);
+            t4VectorXYZW boxMin(instRecord->m_fvMin.m[0], instRecord->m_fvMin.m[1], instRecord->m_fvMin.m[2], one);
+            t4VectorXYZW boxMax(instRecord->m_fvMax.m[0], instRecord->m_fvMax.m[1], instRecord->m_fvMax.m[2], one);
+            t4Vector* pb = &boxMax;
+            tNetMatrixSlot* vt43 = (tNetMatrixSlot*)VPTR_OF(cGraphicsMan, gm);
+            t4Matrix viewMat = vt43[43].fn(vthis(gm, vt43[43]));
             if (vt[93].fn(thisp, &boxMin, pb, &viewMat) == 1) {
                 continue;
             }
         }
         {
-            char* pos = (char*)&instRecord->m_fmTransform;
-            sMat_34B9B0 mat;
-            MatCopy_34B9B0(&mat, (sMat_34B9B0*)&t4mat_Identity);
-            mat.r[3].x = flagSet->mScrollU;
-            mat.r[3].y = flagSet->mScrollV;
+            void* pos = &instRecord->m_fmTransform;
+            t4Matrix mat;
+            MatCopy_34B9B0(&mat, &t4mat_Identity);
+            mat.row[3].x = flagSet->mScrollU;
+            mat.row[3].y = flagSet->mScrollV;
             cGridMesh* gridMesh = flagSet->mGridMesh;
-            if (((char*)gridMesh) != 0) {
-                sVE7_34B9B0* hv = (sVE7_34B9B0*)gridMesh->mVtbl;
-                hv[7].fn(((char*)gridMesh) + hv[7].delta, pos, instRecord->m_MaterialBlock, &mat);
+            if (gridMesh != 0) {
+                tGridMeshRenderSlot* hv = (tGridMeshRenderSlot*)gridMesh->mVtbl;
+                hv[7].fn(vthis(gridMesh, hv[7]), pos, instRecord->m_MaterialBlock, &mat);
             } else {
-                sVE96_34B9B0* drawSlot = *(sVE96_34B9B0**)(ctx + 0x10D8);
-                drawSlot[96].fn(ctx + drawSlot[96].delta, instRecord, 0, 0, 0);
+                tRenderModelSlot* drawSlot = (tRenderModelSlot*)VPTR_OF(cGraphicsMan, gm);
+                drawSlot[96].fn(vthis(gm, drawSlot[96]), instRecord, 0, 0, 0);
             }
         }
     }
-    TOP_34B9B0(ctx)--;
+    gm->m_pCurrentDrawState--;
 }
 #endif
 
@@ -654,16 +618,6 @@ INCLUDE_ASM("object/flagset", cFlagManager__cFlagManager);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* cFlagManager_vtbl[];
 
-struct sFlagSetVEntry_C4B8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-struct sFlagSetElem_C4B8 {
-    char pad0[0x184];
-    sFlagSetVEntry_C4B8* vt;        // 0x184
-};
 
 
 /**
@@ -674,11 +628,13 @@ struct sFlagSetElem_C4B8 {
 extern "C" void cFlagManager__cFlagManager(cFlagManager* self, int flags)
 {
     VPTR_OF(cObjNode, self) = cFlagManager_vtbl;
-    if (((sFlagSetElem_C4B8*)&self->mFlagSets[0]) != 0) {
-        sFlagSetElem_C4B8* flagSet = ((sFlagSetElem_C4B8*)&self->mFlagSets[0]) + 15;
-        while (((sFlagSetElem_C4B8*)&self->mFlagSets[0]) != flagSet) {
+    // The array destructor: each set's virtual destructor (slot 1), last to first.
+    if (&self->mFlagSets[0] != 0) {
+        cFlagSet* flagSet = &self->mFlagSets[15];
+        while (&self->mFlagSets[0] != flagSet) {
             flagSet--;
-            flagSet->vt[1].fn(vthis(flagSet, flagSet->vt[1]), 0);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)flagSet->mVtbl;
+            vt[1].fn(vthis(flagSet, vt[1]), 0);
         }
     }
     cObjNode__cObjNode((self), flags);
@@ -832,31 +788,20 @@ extern "C" void cFlagManager_update(cFlagManager* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", cFlagManager_render);
 #ifdef SKIP_ASM
-struct sFlagSetEntry {
-    char pad_0x0[0x5C];
-    int active; // 0x5C
-    char pad_0x60[0x128];
-};
-
-struct sFlagSetOwner {
-    char pad_0x0[0x20];
-    sFlagSetEntry entries[15]; // 0x20
-};
-
 extern "C" void cFlagSet_render(cFlagSet* e);
 
 /**
  * Renders every active flag set held by the flag manager.
  *
- * Walks the 15 entries from offset 0x20 and calls cFlagSet_render() on each whose active word is set.
+ * Walks the 15 flag sets (mFlagSets) and calls cFlagSet_render() on each that holds instances (mCurrentNumInstances).
  */
 extern "C" void cFlagManager_render(cFlagManager* self)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        sFlagSetEntry* entry = &((sFlagSetEntry*)&self->mFlagSets[0])[i];
-        if (entry->active != 0) {
-            cFlagSet_render((cFlagSet*)entry);
+        cFlagSet* entry = &self->mFlagSets[i];
+        if (entry->mCurrentNumInstances != 0) {
+            cFlagSet_render(entry);
         }
     }
 }
@@ -1127,15 +1072,8 @@ extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int b
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode__cFenceNode);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
 extern void* cFenceNode_vtbl[];
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
-
-struct sFlagSetVEntryCB80 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 /**
  * Destroys a swinging fence node: releases its grid mesh (renderer slot 77), then the cInstanceNode base.
@@ -1145,11 +1083,9 @@ struct sFlagSetVEntryCB80 {
 extern "C" void cFenceNode__cFenceNode(cFenceNode* self, int flags)
 {
     VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
-    void* gridMesh = self->GridMesh;
+    cGridMesh* gridMesh = self->GridMesh;
     if (gridMesh != 0) {
-        char* mgr = cGraphicsMan_TheGraphicsMan;
-        sFlagSetVEntryCB80* vt = *(sFlagSetVEntryCB80**)(mgr + 0x10D8);
-        vt[77].fn(vthis(mgr, vt[77]), gridMesh);
+        cGraphicsMan_TheGraphicsMan->DeleteGridMesh(gridMesh);
     }
     cInstanceNode__cInstanceNode(self, flags);
 }
@@ -1351,9 +1287,9 @@ extern "C" void cFenceNode_update(cFenceNode* self)
             cFenceNode_makeNeighbour(self, (tInstanceRecord*)self->PrevInstance, 0);
         }
     }
-    tMakeFenceData* osc = &self->FenceData;
+    cFenceNodeState* state = (cFenceNodeState*)&self->FenceData; // the cFenceNodeState part (+0x1C)
     self->Force += self->ForceStep;
-    if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(((char*)osc) + 0x10)) < 0.01f) {
+    if (self->ForceMax < 0.01f && fabs_34CE48(state->Force) < 0.01f) {
         self->expire(1);
         return;
     }
@@ -1390,10 +1326,9 @@ struct sFsVec4_CF98 {
     sFsVec4_CF98(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sFsVec3_CF98 {
-    float x, y, z;
+struct sFsVec3_CF98 : t3Vector {
     sFsVec3_CF98() {}
-    sFsVec3_CF98(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+    sFsVec3_CF98(float ax, float ay, float az) { x = ax; y = ay; z = az; }
 };
 
 // PORT: VU0 macro-mode vector scale in place (v *= s).
@@ -1426,7 +1361,7 @@ static inline sFsVec4_CF98 fsScale_CF98(const sFsVec4_CF98& a, float s)
     return r;
 }
 
-static inline sFsVec3_CF98 fsAdd_CF98(const sFsVec3_CF98& a, const sFsVec4_CF98& b)
+static inline sFsVec3_CF98 fsAdd_CF98(const t3Vector& a, const sFsVec4_CF98& b)
 {
     return sFsVec3_CF98(a.x + b.x, a.y + b.y, a.z + b.z);
 }
@@ -1470,13 +1405,13 @@ extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
     sFsVec3_CF98 pts[16];
     if (self->FenceData.Type == 1) {
         for (int i = 0; i < 8; i++) {
-            pts[i] = fsAdd_CF98(((sFsVec3_CF98*)&self->Verts[0])[i], offs[i]);
-            pts[i + 8] = fsAdd_CF98(((sFsVec3_CF98*)&self->Verts[8])[i], offs[i]);
+            pts[i] = fsAdd_CF98(self->Verts[i], offs[i]);
+            pts[i + 8] = fsAdd_CF98(self->Verts[i + 8], offs[i]);
         }
     } else {
         for (int i = 0; i < 8; i++) {
-            pts[i] = fsAdd_CF98(((sFsVec3_CF98*)&self->Verts[0])[i], offs[i]);
-            pts[i + 8] = ((sFsVec3_CF98*)&self->Verts[8])[i];
+            pts[i] = fsAdd_CF98(self->Verts[i], offs[i]);
+            pts[i + 8] = static_cast<const sFsVec3_CF98&>(self->Verts[i + 8]); // the bottom row stays at rest
         }
     }
     sFlagMesh_CF98* gridMesh = ((sFlagMesh_CF98*)self->GridMesh);
@@ -1488,23 +1423,20 @@ extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_setupFence);
 #ifdef SKIP_ASM
-extern char* cGraphicsMan_TheGraphicsMan;
 extern "C" void cFenceNode_updateGrid(cFenceNode* self);
 
-struct sFsV3_D1E8 {
-    float x, y, z;
+// t3Vector / t2Vector / tARGB with the constructors the interpolation needs.
+struct sFsV3_D1E8 : t3Vector {
     sFsV3_D1E8() {}
-    sFsV3_D1E8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+    sFsV3_D1E8(float ax, float ay, float az) { x = ax; y = ay; z = az; }
 };
 
-struct sFsV2_D1E8 {
-    float x, y;
+struct sFsV2_D1E8 : t2Vector {
     sFsV2_D1E8() {}
-    sFsV2_D1E8(float ax, float ay) : x(ax), y(ay) {}
+    sFsV2_D1E8(float ax, float ay) { x = ax; y = ay; }
 };
 
-struct sFsCol_D1E8 {
-    float a, r, g, b;
+struct sFsCol_D1E8 : tARGB {
     sFsCol_D1E8() {}
 };
 
@@ -1515,18 +1447,6 @@ inline sFsV2_D1E8 operator+(const sFsV2_D1E8& a, const sFsV2_D1E8& b) { return s
 inline sFsV2_D1E8 operator-(const sFsV2_D1E8& a, const sFsV2_D1E8& b) { return sFsV2_D1E8(a.x - b.x, a.y - b.y); }
 inline sFsV2_D1E8 operator*(const sFsV2_D1E8& a, float s) { return sFsV2_D1E8(a.x * s, a.y * s); }
 
-struct sFsVE_D1E8 {
-    short delta;
-    short index;
-    void* (*fn)(void*, int, int, unsigned int);
-};
-
-struct sFsQuadVE_D1E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int, sFsV3_D1E8*, sFsV2_D1E8*, sFsCol_D1E8*);
-};
-
 struct sFsMeshVE_D1E8 {
     short delta;
     short index;
@@ -1536,11 +1456,6 @@ struct sFsMeshVE_D1E8 {
 struct sFsMesh_D1E8 {
     int pad0;
     sFsMeshVE_D1E8* vt;   // 0x4
-};
-
-struct sFsNode_D1E8 {
-    char pad0[0x8];
-    unsigned int flags;   // 0x8
 };
 
 
@@ -1558,33 +1473,31 @@ struct sFsNode_D1E8 {
 extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
 {
     cFenceNode* self = fenceNode;
-    (*(void**)&self->NextInstance) = 0;
-    (*(void**)&self->PrevInstance) = 0;
-    ((sFsNode_D1E8*)self->Instance)->flags = (((sFsNode_D1E8*)self->Instance)->flags & ~2u) | 4;
-    char* mgr = cGraphicsMan_TheGraphicsMan;
-    sFsVE_D1E8* createSlot = &(*(sFsVE_D1E8**)(mgr + 0x10D8))[76];
-    (*(sFsMesh_D1E8**)&self->GridMesh) = (sFsMesh_D1E8*)createSlot->fn(vthis(mgr, *createSlot), 8, 2, 0x60000000u);
+    self->NextInstance = 0;
+    self->PrevInstance = 0;
+    self->Instance->m_iFlags = (self->Instance->m_iFlags & ~2u) | 4;
+    cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
+    self->GridMesh = mgr->CreateGridMesh(8, 2, 0x60000000u);
     sFsV3_D1E8 pos[4];
     sFsV2_D1E8 quv[4];
     sFsCol_D1E8 qcol[4];
-    sFsQuadVE_D1E8* vt = *(sFsQuadVE_D1E8**)(mgr + 0x10D8);
-    vt[97].fn(vthis(mgr, vt[97]), ((sFsNode_D1E8*)self->Instance), 0, pos, quv, qcol);
+    mgr->GetMeshQuad(self->Instance, 0, pos, quv, qcol);
     sFsV2_D1E8 uv[16];
     sFsCol_D1E8 col[16];
     for (int i = 0; i < 8; i++) {
         float column = (float)i;
-        ((sFsV3_D1E8*)&self->Verts[0])[i] = pos[0] + (pos[1] - pos[0]) * column * 0.1428571492433548f;
-        ((sFsV3_D1E8*)&self->Verts[8])[i] = pos[2] + (pos[3] - pos[2]) * column * 0.1428571492433548f;
+        self->Verts[i] = pos[0] + (pos[1] - pos[0]) * column * 0.1428571492433548f;
+        self->Verts[i + 8] = pos[2] + (pos[3] - pos[2]) * column * 0.1428571492433548f;
         uv[i] = quv[0] + (quv[1] - quv[0]) * column * 0.1428571492433548f;
         uv[i + 8] = quv[2] + (quv[3] - quv[2]) * column * 0.1428571492433548f;
-        col[i].a = 1.0f;
-        col[i].r = qcol[0].r + (qcol[1].r - qcol[0].r) * column * 0.1428571492433548f;
-        col[i].g = qcol[0].g + (qcol[1].g - qcol[0].g) * column * 0.1428571492433548f;
-        col[i].b = qcol[0].b + (qcol[1].b - qcol[0].b) * column * 0.1428571492433548f;
-        col[i + 8].a = 1.0f;
-        col[i + 8].r = qcol[2].r + (qcol[3].r - qcol[2].r) * column * 0.1428571492433548f;
-        col[i + 8].g = qcol[2].g + (qcol[3].g - qcol[2].g) * column * 0.1428571492433548f;
-        col[i + 8].b = qcol[2].b + (qcol[3].b - qcol[2].b) * column * 0.1428571492433548f;
+        col[i].A = 1.0f;
+        col[i].R = qcol[0].R + (qcol[1].R - qcol[0].R) * column * 0.1428571492433548f;
+        col[i].G = qcol[0].G + (qcol[1].G - qcol[0].G) * column * 0.1428571492433548f;
+        col[i].B = qcol[0].B + (qcol[1].B - qcol[0].B) * column * 0.1428571492433548f;
+        col[i + 8].A = 1.0f;
+        col[i + 8].R = qcol[2].R + (qcol[3].R - qcol[2].R) * column * 0.1428571492433548f;
+        col[i + 8].G = qcol[2].G + (qcol[3].G - qcol[2].G) * column * 0.1428571492433548f;
+        col[i + 8].B = qcol[2].B + (qcol[3].B - qcol[2].B) * column * 0.1428571492433548f;
     }
     sFsMesh_D1E8* gridMesh = ((sFsMesh_D1E8*)self->GridMesh);
     gridMesh->vt[6].fn(vthis(gridMesh, gridMesh->vt[6]), pos, col, uv);
@@ -1692,36 +1605,37 @@ extern "C" void cFenceNode_render(cFenceNode* self)
     if (!IsLoaded_34B9B0(self->Instance)) {
         return;
     }
-    char* ctx = cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* gm = cGraphicsMan_TheGraphicsMan;
     float one = 1.0f;
     {
         tInstanceRecord* model = self->Instance;
-        sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
-        char* thisp = ctx + vt[93].delta;
-        sVec4_34B9B0 boxMin(model->m_fvMin.m[0], model->m_fvMin.m[1], model->m_fvMin.m[2], one);
-        sVec4_34B9B0 boxMax(model->m_fvMax.m[0], model->m_fvMax.m[1], model->m_fvMax.m[2], one);
-        sVec4_34B9B0* pb = &boxMax;
-        sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
-        sPair_34B9B0 cullInfo = vt43[43].fn(ctx + vt43[43].delta);
+        tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, gm);
+        void* thisp = vthis(gm, vt[93]);
+        t4VectorXYZW boxMin(model->m_fvMin.m[0], model->m_fvMin.m[1], model->m_fvMin.m[2], one);
+        t4VectorXYZW boxMax(model->m_fvMax.m[0], model->m_fvMax.m[1], model->m_fvMax.m[2], one);
+        t4Vector* pb = &boxMax;
+        tNetMatrixSlot* vt43 = (tNetMatrixSlot*)VPTR_OF(cGraphicsMan, gm);
+        t4Matrix cullInfo = vt43[43].fn(vthis(gm, vt43[43]));
         if (vt[93].fn(thisp, &boxMin, pb, &cullInfo) == 1) {
             return;
         }
     }
-    TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
-    sRS_34B9B0* renderState = TOP_34B9B0(ctx);
-    TOP_34B9B0(ctx) = renderState + 1;
-    ((int*)renderState)[6] = (((int*)renderState)[6] & ~0x7C) | 0x14;
+    gm->m_pCurrentDrawState[1] = gm->m_pCurrentDrawState[0];
+    sDrawState* renderState = gm->m_pCurrentDrawState;
+    gm->m_pCurrentDrawState = renderState + 1;
+    // the pushed state's blend mode (bits 2-6 of its second word) = 5
+    renderState[1].m_bitGroups[1] = ((int)renderState[1].m_bitGroups[1] & ~0x7C) | 0x14;
     tInstanceRecord* model = self->Instance;
-    char* pos = (char*)&model->m_fmTransform;
+    void* pos = &model->m_fmTransform;
     cGridMesh* gridMesh = self->GridMesh;
-    if (((char*)gridMesh) != 0) {
-        sVE7_34B9B0* hv = (sVE7_34B9B0*)gridMesh->mVtbl;
-        hv[7].fn(((char*)gridMesh) + hv[7].delta, pos, model->m_MaterialBlock, 0);
+    if (gridMesh != 0) {
+        tGridMeshRenderSlot* hv = (tGridMeshRenderSlot*)gridMesh->mVtbl;
+        hv[7].fn(vthis(gridMesh, hv[7]), pos, model->m_MaterialBlock, 0);
     } else {
-        sVE96_34B9B0* vt96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
-        vt96[96].fn(ctx + vt96[96].delta, model, 0, 0, 0);
+        tRenderModelSlot* vt96 = (tRenderModelSlot*)VPTR_OF(cGraphicsMan, gm);
+        vt96[96].fn(vthis(gm, vt96[96]), model, 0, 0, 0);
     }
-    TOP_34B9B0(ctx)--;
+    gm->m_pCurrentDrawState--;
 }
 #endif
 
@@ -1756,9 +1670,9 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 extern void* cAnimNode_vtbl[];
 extern char str_AnimMats[];
 
-struct sFlagSlot_34D9B0 {
-    int v[16];
-    sFlagSlot_34D9B0() {}
+// t4Matrix with EA's empty constructor: the array new keeps only its element loop.
+struct tAnimMat : t4Matrix {
+    tAnimMat() {}
 };
 
 /**
@@ -1782,8 +1696,8 @@ extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType
     cMoveNode* node = (cMoveNode*)((char*)&self->MoveNodeBase);
     cMoveNode_cMoveNode1(node, bucket, nodeType, instRecord);
     self->mVtbl = cAnimNode_vtbl;
-    sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(&self->AnimMats);
-    *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)((char*)node->Instance->m_Model + 4)];
+    t4Matrix** slot = &self->AnimMats;
+    *slot = new (str_AnimMats, 0x20000000, 0) tAnimMat[node->Instance->m_Model->m_iNumMeshes];
     cAnimNode_setAnimMeshCache(((char*)self));
     float startTime = 0.0f;
     if (self->AnimFrames != 0) {
@@ -1810,11 +1724,6 @@ INCLUDE_ASM("object/flagset", cAnimNode_cAnimNode1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMoveNode_cMoveNode_3(void* self, void* a1, void* stream) __asm__("cMoveNode_cMoveNode");
 
-// Element type with an empty constructor; the array new leaves only its loop counters.
-struct sFlagSlot_34DAC8 {
-    int v[16];
-    sFlagSlot_34DAC8() {}
-};
 
 /**
  * Constructs the animation-node base of an animated object from a replay frame.
@@ -1830,11 +1739,12 @@ struct sFlagSlot_34DAC8 {
 extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, cBxReplayFrame* stream)
 {
     int skippedWord;
-    char* node = (char*)&self->MoveNodeBase;
-    sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(&self->AnimMats);
+    cMoveNode* node = (cMoveNode*)&self->MoveNodeBase;
+    t4Matrix** slot = &self->AnimMats;
     cMoveNode_cMoveNode_3(node, bucket, stream);
     self->mVtbl = cAnimNode_vtbl;
-    *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
+    // The element type has an empty constructor (tAnimMat, cAnimNode_cAnimNode); the array new keeps its loop.
+    *slot = new (str_AnimMats, 0x20000000, 0) tAnimMat[node->Instance->m_Model->m_iNumMeshes];
     cAnimNode_setAnimMeshCache(((char*)self));
     stream->read((char*)self, 20);
     stream->read((char*)&skippedWord, 4);
@@ -1846,28 +1756,6 @@ extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, cBxReplayFr
 //100%
 INCLUDE_ASM("object/flagset", cAnimNode__cAnimNode);
 #ifdef SKIP_ASM
-struct sFlagVEntry_DBA8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
-struct sFlagItem_DBA8 {
-    char pad_0x0[0x84];
-    sFlagVEntry_DBA8* vt;       // 0x84
-    char pad_0x88[0x48];
-};
-
-struct sFlagOwner_DBA8 {
-    char pad_0x0[0x14];
-    char node[0xC];             // 0x14
-    void** vtable;              // 0x20
-    char pad_0x24[0x20];
-    void* cache;                // 0x44
-    sFlagItem_DBA8* items;      // 0x48, array-new block (count at -0x10)
-    void* buf;                  // 0x4C
-};
-
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void cMoveNode__cMoveNode(void* self, int flags);
@@ -1888,14 +1776,17 @@ extern "C" void cAnimNode__cAnimNode(cAnimNode* self, int flags)
     if (self->AnimMats != 0) {
         cMemMan_free(self->AnimMats);
     }
-    sFlagItem_DBA8* items = (sFlagItem_DBA8*)self->AnimFrames;
+    // ORIGINAL-PTR: delete[] AnimFrames as g++ 2.95 inlines it: the element count sits in the 16-byte new[] cookie
+    // before the array (a heap block header), and the block itself starts at the cookie
+    cMeshAnimFrame* items = self->AnimFrames;
     if (items != 0) {
-        sFlagItem_DBA8* frameIter = items + ((int*)items)[-4];
-        while ((sFlagItem_DBA8*)self->AnimFrames != frameIter) {
+        cMeshAnimFrame* frameIter = items + ((int*)items)[-4];
+        while (self->AnimFrames != frameIter) {
             frameIter--;
-            frameIter->vt[1].fn(vthis(frameIter, frameIter->vt[1]), 0);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)frameIter->mVtbl;
+            vt[1].fn(vthis(frameIter, vt[1]), 0);
         }
-        cMemMan_free((char*)(sFlagItem_DBA8*)self->AnimFrames - 0x10);
+        cMemMan_free((char*)self->AnimFrames - 0x10);
     }
     if (self->MeshVelocity != 0) {
         cMemMan_free(self->MeshVelocity);
@@ -1942,8 +1833,9 @@ extern "C" void cAnimNode_updateRootTransform(cAnimNode* self)
     vt[52].fn(vthis(self, vt[52]));
     char* sub = (char*)&self->MoveNodeBase;
     sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)self->mVtbl;
+    sFlagSetVEntry_DC90b* vtGet = (sFlagSetVEntry_DC90b*)vt2;
     void* objB = vthis(sub, vt2[33]);
-    void* rootTransform = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(vthis(sub, vt2[24]));
+    void* rootTransform = vtGet[24].fn(vthis(sub, vt2[24]));
     vt2[33].fn(objB, rootTransform, (int)self->AnimMats);
     self->Flags &= ~1;
 }
@@ -2161,7 +2053,8 @@ extern "C" void cAnimNode_cacheFrame(cAnimNode* self)
         for (i = 0; i < self->NumAnimMeshes; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
             cMeshAnimFrame* animFrame = (cMeshAnimFrame*)(i * 0xD0 + (int)self->AnimFrames);
-            ((sVEntry<void(void*, float)>*)animFrame->mVtbl)[2].fn(vthis(animFrame, ((sVEntry<void(void*, float)>*)animFrame->mVtbl)[2]), self->CacheTime);
+            sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)animFrame->mVtbl;
+            vt[2].fn(vthis(animFrame, vt[2]), self->CacheTime);
         }
     }
     self->MeshVelocityDirty = 1;

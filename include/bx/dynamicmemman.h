@@ -46,7 +46,7 @@ struct malloc_state {
     malloc_chunk* last_remainder;   // 0x034 [O]; [U] dlmalloc
     malloc_chunk* bins[192];        // 0x038 [O] NBINS * 2 (96 fd/bk pairs); [R] malloc_init_state's loop (95
                                     //       steps of 8 from self + 0x38) points each bin's fd/bk (+0x8/+0xC) at it
-    unsigned int binmap[3];         // 0x338 [O] BINMAPSIZE; [U] dlmalloc (sMState_31E818::binmap)
+    unsigned int binmap[3];         // 0x338 [O] BINMAPSIZE; [U] dlmalloc
     unsigned int trim_threshold;    // 0x344 [O]; [R] malloc_init_state 0x8000; [U] dlfree, sYSTRIm
     unsigned int top_pad;           // 0x348 [O]; [R] malloc_init_state 0; [U] sYSMALLOc
     unsigned int mmap_threshold;    // 0x34C [O]; [R] malloc_init_state 0x40000

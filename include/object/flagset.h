@@ -28,6 +28,8 @@
 #include "layout.h"
 #include "object/objnode.h"
 
+struct t3Vector;
+
 struct cGridMesh;          // render/ps2gridmesh.h (the mesh is a cPS2GridMesh)
 struct tInstanceRecord;
 
@@ -78,7 +80,7 @@ struct cFlagSet {
     int mFlagVertsVertical;         // 0x068 [O]; [P] assert; [U] CreateMesh, updateGrid
     float mfFlagVertsHorizontalMinusOne; // 0x06C [O]; [U] CreateMesh (swc1), updateGrid
     float mfFlagVertsVerticalMinusOne;   // 0x070 [O]; [U] CreateMesh, updateGrid
-    float* mVerts;                  // 0x074 [O] t3Vector*; [P] assert "mVerts==NULL"; [R] ctor: 0; [U] CreateMesh:
+    t3Vector* mVerts;               // 0x074 [O] t3Vector*; [P] assert "mVerts==NULL"; [R] ctor: 0; [U] CreateMesh:
                                     //       operator new[](h * v * 0xC, "Flag Verts"); PurgeMesh frees it; updateGrid
     float mFlagTime[4];             // 0x078 [O]; [U] CreateMesh randomizes (BXrand), updateGrid
     float mScrollU;                 // 0x088 [O]; [U] CreateMesh zeroes; update advances; render (lwc1)

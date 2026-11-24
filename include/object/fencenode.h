@@ -47,6 +47,26 @@ CHECK_OFFSET(tMakeFenceData, Flexibility, 0x8);
 CHECK_OFFSET(tMakeFenceData, null, 0xC);
 CHECK_SIZE(tMakeFenceData, 0x10);
 
+// The replayed state of a fence (On Tour cFenceNodeState, 0x24). cFenceNode holds these members inline at 0x1C (the
+// FLAT layout below); [R] the replay ctor reads 0x24 bytes into +0x1C and writeToReplayFrame writes them;
+// [U] cFenceNode_update re-reads Force through this part (+0x1C, then +0x10).
+struct cFenceNodeState {
+    tMakeFenceData FenceData;       // 0x00 [O]
+    float Force;                    // 0x10 [O]
+    float ForceMax;                 // 0x14 [O]
+    float ForceStep;                // 0x18 [O]
+    int NextPropTime;               // 0x1C [O]
+    int PrevPropTime;               // 0x20 [O]
+};
+
+CHECK_OFFSET(cFenceNodeState, FenceData, 0x00);
+CHECK_OFFSET(cFenceNodeState, Force, 0x10);
+CHECK_OFFSET(cFenceNodeState, ForceMax, 0x14);
+CHECK_OFFSET(cFenceNodeState, ForceStep, 0x18);
+CHECK_OFFSET(cFenceNodeState, NextPropTime, 0x1C);
+CHECK_OFFSET(cFenceNodeState, PrevPropTime, 0x20);
+CHECK_SIZE(cFenceNodeState, 0x24);
+
 struct cFenceNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
     //   [R] cFenceNode_vtbl (every ctor and the dtor); [U] update calls slot 34 (expire)

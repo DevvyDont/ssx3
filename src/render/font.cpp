@@ -48,6 +48,8 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
 {
     cFont* self = vself;
     char* data = (char*)vdata;
+    // ORIGINAL-PTR: an .sfn font file (a file blob): its header holds the byte offsets of the glyph table (+0x14) and
+    // of the glyph sheet's SHAPE (+0x1C) from the start of the file
     tGlyph* src = (tGlyph*)(data + *(int*)(data + 0x14));
     t2Vector offset;
     offset.x = (float)data[0x10];
@@ -186,6 +188,8 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
     MEM_fill(pix, 0, (img->w * newHeight) >> 1);
     MEM_fill(pal, 0, 0x40);
     char* src;
+    // ORIGINAL-PTR: a SHAPE file blob: its pixels start img->offset bytes into the shape (flag 0x1000) or right after
+    // the 16-byte header
     if (img->flags & 0x1000)
         src = (char*)img + img->offset;
     else
@@ -211,13 +215,9 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
 //100%
 INCLUDE_ASM("render/font", cFont_vtextf);
 #ifdef SKIP_ASM
-struct sMat00391C48 {
-    float m[4][4];
-} __attribute__((aligned(16)));
-
-extern sMat00391C48 cFont_vtextf_buf;
-extern "C" void vsprintf(sMat00391C48* m);
-extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m);
+extern char cFont_vtextf_buf[];
+extern "C" void vsprintf(char* buf);
+extern "C" void cFont_text(cFont* self, float x, float y, const char* str);
 
 /**
  * Formats text into a shared static buffer (cFont_vtextf_buf) and draws it at a position.
@@ -230,8 +230,8 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m);
  */
 extern "C" void cFont_vtextf(cFont* self, float x, float y)
 {
-    vsprintf(&cFont_vtextf_buf);
-    cFont_text(self, x, y, &cFont_vtextf_buf);
+    vsprintf(cFont_vtextf_buf);
+    cFont_text(self, x, y, cFont_vtextf_buf);
 }
 #endif
 
@@ -239,23 +239,9 @@ extern "C" void cFont_vtextf(cFont* self, float x, float y)
 INCLUDE_ASM("render/font", cFont_text);
 #ifdef SKIP_ASM
 
-struct sFontVEntry1CB0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, sMat00391C48*, void*, float, float, float, float, float, float, float);
-};
-
-struct sFontCtx1CB0 {
-    char pad_0x0[0xE84];
-    sDrawState* top;           // 0xE84
-    char pad_0xE88[0x10D8 - 0xE88];
-    sFontVEntry1CB0* vtable;    // 0x10D8
-};
-
-
-struct sFontPos1CB0 {
-    float x, y, z, w;
-    sFontPos1CB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+// A t4Vector with EA's constructors (ours has none): the text position (x, y, 0, 0).
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
 static inline int fontGetTex(void* vs)
@@ -270,18 +256,17 @@ static inline int fontGetTex(void* vs)
  * Binds the font texture (fontGetTex) and offsets the position by Offset * Scale. With a nonzero ShadowOffset it
  * first draws the text at the shadow offset in ShadowColor (+0x50), with the draw state's 5-bit field at bits 5-9
  * lowered by one, then restores it; the text itself is drawn in Color (+0x40). Both draws go through GrMan slot 80
- * with Scale and UVScale. The unit's view types the string as a matrix (sMat00391C48*); callers pass a char string
- * (cFont_vtextf's buffer, the centred / right-aligned text helpers, cDebugFE).
+ * with Scale and UVScale. Callers: cFont_vtextf (its buffer), the centred / right-aligned text helpers, cDebugFE.
  *
  * @param x  the screen x
  * @param y  the screen y
  * @param str  the text to draw (On Tour const char* str)
  */
-extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
+extern "C" void cFont_text(cFont* self, float x, float y, const char* str)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex(self);
-    sFontPos1CB0 pos(x + self->Offset[0] * self->Scale[0],
+    t4VectorXYZW pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
@@ -289,11 +274,14 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        ps2GraphicsMan->DrawString3D(*self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->ShadowColor[0], pos.z);
+        ps2GraphicsMan->DrawString3D(*self, pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1], str,
+                                     self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1],
+                                     *(const tARGB*)&self->ShadowColor[0], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
-    ps2GraphicsMan->DrawString3D(*self, pos.x, pos.y, (const char*)str, self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], *(const tARGB*)&self->Color[0], pos.z);
+    ps2GraphicsMan->DrawString3D(*self, pos.x, pos.y, str, self->Scale[0], self->Scale[1], self->UVScale[0],
+                                 self->UVScale[1], *(const tARGB*)&self->Color[0], pos.z);
 }
 #endif
 
@@ -302,18 +290,6 @@ INCLUDE_ASM("render/font", cFont_text1);
 #ifdef SKIP_ASM
 
 
-struct sFontCtx1E30 {
-    char pad_0x0[0xE84];
-    sDrawState* top;           // 0xE84
-    char pad_0xE88[0x10D8 - 0xE88];
-    sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vtable;    // 0x10D8
-};
-
-
-struct sFontPos1E30 {
-    float x, y, z, w;
-    sFontPos1E30(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-};
 
 static inline int fontGetTex1E30(void* vs)
 {
@@ -339,7 +315,7 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     ps2GraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] = fontGetTex1E30(self);
-    sFontPos1E30 pos(x + self->Offset[0] * self->Scale[0],
+    t4VectorXYZW pos(x + self->Offset[0] * self->Scale[0],
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
@@ -770,7 +746,7 @@ extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n
 extern "C" void cFont_centertext(cFont* self, float x, float y, const char* str)
 {
     float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    cFont_text(self, x - w * 0.5f, y, (sMat00391C48*)str);
+    cFont_text(self, x - w * 0.5f, y, str);
 }
 #endif
 
@@ -834,7 +810,7 @@ extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n
 extern "C" void cFont_righttext(cFont* self, const char* str, float x, float y)
 {
     float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
-    cFont_text(self, x - w, y, (sMat00391C48*)str);
+    cFont_text(self, x - w, y, str);
 }
 #endif
 
@@ -1001,10 +977,10 @@ INCLUDE_ASM("render/font", cPlayerLights_AddDirectional);
  * @param direction  the light's direction (a 16-byte vector)
  * @param colour  the light's colour
  */
-extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, sFontQuad* direction, tRGB* colour)
+extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, t4Vector* direction, tRGB* colour)
 {
     ((&self->mDirectionalLightColours[0]))[self->mNumDirectionalLights] = *colour;
-    ((sFontQuad*)&self->mDirectionalLightDirections[0])[self->mNumDirectionalLights] = *direction;
+    (&self->mDirectionalLightDirections[0])[self->mNumDirectionalLights] = *direction;
     self->mNumDirectionalLights++;
 }
 #endif
@@ -1052,11 +1028,11 @@ extern "C" float fSin(float a);
  *
  * @return @p self (the table)
  */
-extern "C" void* cSinCosTable_cSinCosTable(void* self)
+extern "C" void* cSinCosTable_cSinCosTable(float* self)
 {
     int i;
     for (i = 0; i < 640; i++) {
-        ((float*)self)[i] = fSin((float)i * 0.01227184571325779f);
+        self[i] = fSin((float)i * 0.01227184571325779f);
     }
     return self;
 }
@@ -2114,8 +2090,7 @@ struct sFontV4 {
  */
 extern "C" void cGraphicsMan_SetConstantColour(cGraphicsMan* self, sFontV4 colour, int idx)
 {
-    // PORT: pointer arithmetic via int (index-first addu)
-    *(sFontV4*)((char*)((idx << 4) + (int)self) + 0xF04) = colour;
+    *(sFontV4*)self->m_constantColours[idx] = colour;
 }
 #endif
 //100%
@@ -2134,8 +2109,7 @@ INCLUDE_ASM("render/font", func_00394418);
  */
 extern "C" sFontV4 func_00394418(cPS2GraphicsMan* self, sFontV4 v, int idx)
 {
-    // PORT: pointer arithmetic via int (index-first addu)
-    return *(sFontV4*)((char*)((idx << 4) + (int)self) + 0xF04);
+    return *(sFontV4*)self->m_constantColours[idx];
 }
 #endif
 //100%
@@ -2785,7 +2759,7 @@ extern "C" void cGraphicsMan_PushDrawState(cGraphicsMan* self)
 {
     sDrawState* top = self->m_pCurrentDrawState;
     top[1] = top[0];
-    self->m_pCurrentDrawState = (sDrawState*)(self->m_pCurrentDrawState + 1);
+    self->m_pCurrentDrawState = self->m_pCurrentDrawState + 1;
 }
 #endif
 //100%
@@ -2805,8 +2779,6 @@ extern "C" void cGraphicsMan_PopDrawState(cGraphicsMan* graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_DrawStateChanged);
 #ifdef SKIP_ASM
-typedef char* (*sFontGetFn_47D8)(char*);
-
 static inline short* sFontRS_shorts_47D8(char* vst)
 {
     sDrawState* st = (sDrawState*)vst;
@@ -2826,15 +2798,13 @@ extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        char* obj = (char*)VPTR_OF(cGraphicsMan, self);
         int* current = (int*)&self->m_pCurrentDrawState->m_bitGroups[i];
-        sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
+        const sDrawState* cmp = self->ActiveDrawState();
         if (*current != (int)cmp->m_bitGroups[i]) return 1;
     }
     for (j = 0; j < 2; j++) {
-        char* obj = (char*)VPTR_OF(cGraphicsMan, self);
         short* current = sFontRS_shorts_47D8((char*)self->m_pCurrentDrawState) + j;
-        sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
+        const sDrawState* cmp = self->ActiveDrawState();
         if (*current != cmp->m_textureState.m_texid[j]) return 1;
     }
     return 0;
@@ -3484,7 +3454,7 @@ INCLUDE_ASM("render/font", cPS2LightMan_GetLightObj__FPvi);
 void* cPS2LightMan_GetLightObj(void* vself, int index)
 {
     cPS2LightMan* self = (cPS2LightMan*)vself;
-    return ((char*)self->m_pLights + index * 4);
+    return &self->m_pLights[index];
 }
 #endif
 
@@ -3549,14 +3519,14 @@ INCLUDE_ASM("render/font", cPS2LightMan_GetDynamicLight);
  * Hands out the next dynamic light index.
  *
  * Returns m_iStartDynLight + m_iDynLight and increments m_iDynLight. No limit check: the preview asserted m_iDynLight <
- * 50 (the 50 spare slots cPS2LightMan_Init allocates). The C declares the result as char*; it is an int index.
+ * 50 (the 50 spare slots cPS2LightMan_Init allocates).
  * cPS2LightMan_ResetDynamicLights__FPv sets the counter back to 0.
  *
  * @return the light index
  */
-extern "C" char* cPS2LightMan_GetDynamicLight(cPS2LightMan* self)
+extern "C" int cPS2LightMan_GetDynamicLight(cPS2LightMan* self)
 {
-    return (char*)self->m_iStartDynLight + (self->m_iDynLight)++;
+    return self->m_iStartDynLight + (self->m_iDynLight)++;
 }
 #endif
 
@@ -4170,19 +4140,15 @@ extern "C" void cPS2GraphicsMan_SetFixAlpha(cPS2GraphicsMan* ps2GraphicsMan, int
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_SetIrradiance);
 #ifdef SKIP_ASM
-struct sFontBlockA0 {
-    float f[40];
-} __attribute__((aligned(16)));
-
 /**
  * Copies the 0xA0-byte irradiance block @p src into mIrradianceInfo (+0x6BB0). On Tour's SetIrradiance also takes a
  * bool that it ignores; retail has no such parameter.
  *
  * @param src  the irradiance info to use
  */
-extern "C" void cPS2GraphicsMan_SetIrradiance(cPS2GraphicsMan* self, sFontBlockA0* src)
+extern "C" void cPS2GraphicsMan_SetIrradiance(cPS2GraphicsMan* self, tIrradianceInfo* src)
 {
-    *(sFontBlockA0*)((char*)self + 0x6BB0) = *src;
+    self->mIrradianceInfo = *src;
 }
 #endif
 
@@ -4453,6 +4419,8 @@ extern "C" void cPS2GraphicsMan_AddDMAToWorld(cPS2GraphicsMan* gfx, unsigned int
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
+        // ORIGINAL-PTR: the record is written through the EE's uncached-accelerated alias of mSubmits (address |
+        // 0x30000000, a hardware address segment), so the index is added to the aliased address
         tDeferSubmit* record = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((tDeferSubmit*)&ring->mSubmits[0]) | 0x30000000));
         record->mDrawState = *rs;
         record->mPacket = buf;
@@ -4578,9 +4546,9 @@ extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(((char*)top) + 0x40), "r"(((char*)top))
+        : "r"(top + 1), "r"(top)
         : "memory");
-    *(char**)&self->mCurrentView += 0x40;
+    self->mCurrentView++;
     self->mViewStackIdx += 1;
 }
 #endif
@@ -6592,12 +6560,13 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterPositionVeloci
  * @param outA  receives &m_positions[slot]
  * @param outB  receives &m_velocities[slot]
  */
-extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity(cBaseClass_DynamicEmitter* self, int idx, int** outA, int** outB)
+extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity(cBaseClass_DynamicEmitter* self, int idx,
+                                                                        t4Vector** outA, t4Vector** outB)
 {
     int next = self->m_subEmitterId + 1;
-    int off = ((idx + next) % self->m_numSubEmitters) * 0x10;
-    *outA = (int*)((char*)self->m_positions + off);
-    *outB = (int*)((char*)self->m_velocities + off);
+    int slot = (idx + next) % self->m_numSubEmitters;
+    *outA = &self->m_positions[slot];
+    *outB = &self->m_velocities[slot];
 }
 #endif
 //100%
@@ -6637,23 +6606,20 @@ INCLUDE_ASM("render/font", cDynamicColourEmitter_getSubEmitterPositionVelocityCo
  * @param outB  receives &m_velocities[slot]
  * @param outC  receives &m_colours[slot]
  */
-extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour(cDynamicColourEmitter* self, int idx, int** outA, int** outB, int** outC)
+extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour(cDynamicColourEmitter* self, int idx,
+                                                                           t4Vector** outA, t4Vector** outB,
+                                                                           tPackedRGBA** outC)
 {
     int next = self->m_subEmitterId + 1;
     int i = (idx + next) % self->m_numSubEmitters;
-    int off = i * 0x10;
-    *outA = (int*)((char*)self->m_positions + off);
-    *outB = (int*)((char*)self->m_velocities + off);
-    *outC = (int*)&self->m_colours[i];
+    *outA = &self->m_positions[i];
+    *outB = &self->m_velocities[i];
+    *outC = &self->m_colours[i];
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDynamicColourEmitter_getSubEmitterPositionVelocityColour1);
 #ifdef SKIP_ASM
-
-struct sFontRGBA {
-    char r, g, b, a;
-};
 
 /**
  * Copies sub-emitter @p idx's position, velocity and colour into @p out0, @p out1 and @p out2.
@@ -6667,12 +6633,14 @@ struct sFontRGBA {
  * @param out1  receives the velocity
  * @param out2  receives the packed colour
  */
-extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour1(cDynamicColourEmitter* self, int idx, t4Vector* out0, t4Vector* out1, sFontRGBA* out2)
+extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour1(cDynamicColourEmitter* self, int idx,
+                                                                            t4Vector* out0, t4Vector* out1,
+                                                                            tPackedRGBA* out2)
 {
     int i = (idx + 1 + self->m_subEmitterId) % self->m_numSubEmitters;
-    *out0 = ((t4Vector*)self->m_positions)[i];
-    *out1 = ((t4Vector*)self->m_velocities)[i];
-    *out2 = ((sFontRGBA*)self->m_colours)[i];
+    *out0 = self->m_positions[i];
+    *out1 = self->m_velocities[i];
+    *out2 = self->m_colours[i];
 }
 #endif
 //100%

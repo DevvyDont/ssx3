@@ -27,6 +27,7 @@
 #include "layout.h"
 #include "bx/math3d.h"
 #include "render/graphicsman.h"
+#include "render/irradiance.h"
 
 struct cPS2DeferManager;
 struct cTextureMan;
@@ -222,7 +223,7 @@ public:
     int mMatricesValid;             // 0x6B90 [P] updateNetMat recomputes when 0; [U] PopView clears it; [X] matricesValid
     tTVDisplayFormat mTVDisplayFormat; // 0x6B94 [P] GetTVDisplayFormat returns its address (cPS2GraphicsMan_GetTVDisplayFormat)
     char unk_6BA8[0x8];             // 0x6BA8 padding to 16
-    char mIrradianceInfo[0xA0];     // 0x6BB0 [P] Get/SetIrradiance (tIrradianceInfo, copied as 10 qwords)
+    tIrradianceInfo mIrradianceInfo; // 0x6BB0 [P] Get/SetIrradiance (tIrradianceInfo, copied as 10 qwords)
     int unk_6C50;                   // 0x6C50 [R] Init zeroes it
     int unk_6C54[4];                // 0x6C54 [R] Init zeroes them
     char unk_6C64[0x40];            // 0x6C64 [U] per-view depth-fog entries, 0x20 each (func_0036ABA0, func_0036A428)

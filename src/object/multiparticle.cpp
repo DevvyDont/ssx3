@@ -11,11 +11,13 @@
 #include "object/animdeltanode.h"
 #include "object/railmannode.h"
 #include "object/animcombonode.h"
+#include "object/animnode.h"
 #include "object/multiparticle.h"
 #include "object/splinemodifier.h"
 #include "object/physicsmodifier.h"
 #include "replay/bxreplayframe.h"
 #include "world/worldcache.h"
+#include "world/world.h"
 
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
@@ -51,7 +53,7 @@ extern "C" void cMultiParticle_setupMultiParticle(cMultiParticle* self)
     *slot = new (str_InstIds, 0x20000000, 0) sMPRef[self->MaxInst];
     (*(void**)&self->Emitter) = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
     for (int i = 0; i < self->MaxInst; i++) {
-        ((sMPRef*)self->InstIds)[i].id = 0xFFFFFFFF;
+        self->InstIds[i] = tResourceID::Invalid();
     }
     cStaticEmitter_setupEmitter(((void*)self->Emitter), &t4mat_Identity, ((int)self->Particle));
 }
@@ -145,14 +147,14 @@ extern "C" void cMultiParticle_remInst(cMultiParticle* self, unsigned int key)
 {
     int i;
     for (i = 0; i < self->NumInst; i++) {
-        if (((unsigned int*)self->InstIds)[i] == key) {
+        if (self->InstIds[i].m_uiRID == key) {
             self->NumInst--;
             // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
             do {
                 if (i < self->NumInst) {
-                    ((unsigned int*)self->InstIds)[i] = ((unsigned int*)self->InstIds)[self->NumInst];
+                    self->InstIds[i] = self->InstIds[self->NumInst];
                 } else {
-                    ((unsigned int*)self->InstIds)[i] = 0xFFFFFFFF;
+                    self->InstIds[i] = tResourceID::Invalid();
                 }
                 return;
             } while (0);
@@ -165,56 +167,40 @@ extern "C" void cMultiParticle_remInst(cMultiParticle* self, unsigned int key)
 INCLUDE_ASM("object/multiparticle", cMultiParticle_render);
 #ifdef SKIP_ASM
 
-struct sMPBox {
-    t4Vector min;
-    t4Vector max;
-};
-
-struct sMPModelSet {
-    char pad_0x0[0x1C];
-    unsigned int* refs;     // 0x1C
-};
-
-struct sMPWorld {
-    char pad_0x0[0x8];
-    sMPModelSet** sets;     // 0x8
-};
-
-extern "C" sMPWorld** cObjectInterface_getWorld();
-extern "C" void cStaticEmitter_render(void* desc, sMPBox* box, const t4Vector& center);
+extern "C" cWorld* cObjectInterface_getWorld();
+extern "C" void cStaticEmitter_render(void* desc, tBoundBox* box, const t4Vector& center);
 
 static inline void* refToPtr58260(unsigned int p)
 {
     return (void*)(p << 2);
 }
 
-static inline void* lookup58260(sMPModelSet* set, unsigned int idx)
+// The record in slot uid of a section table's type list: the tag keeps its address >> 2 (0 = not loaded).
+static inline void* lookup58260(cWorldCacheTable* table, int type, unsigned int uid)
 {
-    unsigned int p = set->refs[idx] >> 8;
+    unsigned int p = table->m_pCacheTable[type].m_pDataTag[uid].m_bfuiMemLoc;
     if (p == 0) {
         return 0;
     }
     return refToPtr58260(p);
 }
 
-struct sMPModelRef {
-    unsigned int id;
-
-    void* get(sMPWorld* w)
-    {
-        sMPModelSet* set = w->sets[id & 0xFF];
-        if (set == 0) {
-            return 0;
-        }
-        return lookup58260(set, id >> 8);
+// The instance record @p rid names (cache type 3), or 0 when its section or record is not loaded.
+static inline tInstanceRecord* instanceRecord58260(const tResourceID& rid, cWorld* world)
+{
+    unsigned int id = rid.m_uiRID;
+    cWorldCacheTable* table = world->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
+    if (table == 0) {
+        return 0;
     }
-};
+    return (tInstanceRecord*)lookup58260(table, 3, id >> 8);
+}
 
-struct sMPModel {
-    char pad_0x0[0x40];
-    t4Vector pos;            // 0x40
-    t4Vector getPos() { return pos; }
-};
+// The instance's position: the last row of its world transform (16-byte aligned in the record).
+static inline t4Vector instancePos58260(const tInstanceRecord* inst)
+{
+    return *(const t4Vector*)inst->m_fmTransform.m[3];
+}
 
 // PORT: PS2-only VU0 inline asm (dst += b).
 static inline void vu0AddTo58260(t4Vector& dst, t4Vector b)
@@ -254,12 +240,12 @@ static inline t4Vector vu0Add58260(const t4Vector& a, const t4Vector& b)
 extern "C" void cMultiParticle_render(cMultiParticle* self)
 {
     for (int i = 0; i < self->NumInst; i++) {
-        sMPModel* model = (sMPModel*)((sMPModelRef*)self->InstIds)[i].get(*cObjectInterface_getWorld());
-        if (model != 0) {
-            sMPBox bounds = *(sMPBox*)&self->BoundBox;
-            vu0AddTo58260(bounds.min, model->pos);
-            vu0AddTo58260(bounds.max, model->pos);
-            cStaticEmitter_render(((void*)self->Emitter), &bounds, vu0Add58260(model->getPos(), *(t4Vector*)&self->Offset));
+        tInstanceRecord* inst = instanceRecord58260(self->InstIds[i], cObjectInterface_getWorld());
+        if (inst != 0) {
+            tBoundBox bounds = self->BoundBox;
+            vu0AddTo58260(bounds.MinPoint, instancePos58260(inst));
+            vu0AddTo58260(bounds.MaxPoint, instancePos58260(inst));
+            cStaticEmitter_render(((void*)self->Emitter), &bounds, vu0Add58260(instancePos58260(inst), self->Offset));
         }
     }
 }
@@ -357,13 +343,13 @@ extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* bucket)
     int i;
     cSortObjNode_cSortObjNode1(self, bucket, 18);
     VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
-    unsigned int* railSlot = (unsigned int*)(&self->RailInfo[0]);
+    unsigned int* railSlot = &self->RailInfo[0].RailRID.m_uiRID;
     for (i = 0x7F; i != -1; i--, railSlot++) {
         *railSlot = 0xFFFFFFFF;
     }
     cRailManNode_ActiveNode = ((void*)self);
     for (i = 0; i < 0x80; i++) {
-        ((unsigned int*)(&self->RailInfo[0]))[i] = 0xFFFFFFFF;
+        self->RailInfo[i].RailRID = tResourceID::Invalid();
     }
     return ((void*)self);
 }
@@ -395,14 +381,14 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cBx
     int j;
     cSortObjNode_cSortObjNode(self, bucket, stream);
     VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
-    unsigned int* slot = (unsigned int*)(&self->RailInfo[0]);
+    unsigned int* slot = &self->RailInfo[0].RailRID.m_uiRID;
     for (j = 0x7F; j != -1; j--, slot++) {
         *slot = 0xFFFFFFFF;
     }
     cRailManNode_ActiveNode = ((void*)self);
     stream->read((char*)&self->RailInfo[0], 0x200);
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(&self->RailInfo[0]))[i] != 0xFFFFFFFF) {
+        if (self->RailInfo[i].RailRID != tResourceID::Invalid()) {
             cRailManNode_disableRail(self, i);
         }
     }
@@ -433,7 +419,7 @@ extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
     int i;
     VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(&self->RailInfo[0]))[i] != 0xFFFFFFFF) {
+        if (self->RailInfo[i].RailRID != tResourceID::Invalid()) {
             cRailManNode_enableRail(self, i);
         }
     }
@@ -506,21 +492,7 @@ struct sMpRoot_8780 {
     sMpCell_8780 cell;
     sMpNode_8780* node;
 };
-struct sMpPart_8780 {
-    char pad[0x20];
-    int count;             // 0x20
-    char* first;           // 0x24
-};
-struct sMpTable_8780 {
-    char pad[0x44];
-    unsigned int* entries; // 0x44
-};
-struct sMpMgr_8780 {
-    char pad[0x8];
-    sMpTable_8780** tables; // 0x8
-};
-
-extern "C" sMpMgr_8780** cObjectInterface_getWorld_8780(void) __asm__("cObjectInterface_getWorld");
+extern "C" cWorld* cObjectInterface_getWorld();
 extern "C" char* cObjectInterface_getNash(void);
 extern "C" void nash_Nash_findkey(void* out, const void* box);
 extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
@@ -531,27 +503,26 @@ static inline void* refToPtr_8780(unsigned int p)
     return (void*)(p << 2);
 }
 
-static inline void* lookup_8780(sMpTable_8780* t, unsigned int idx)
+// The record in slot uid of a section table's type list: the tag keeps its address >> 2 (0 = not loaded).
+static inline void* lookup_8780(cWorldCacheTable* table, int type, unsigned int uid)
 {
-    unsigned int p = t->entries[idx] >> 8;
+    unsigned int p = table->m_pCacheTable[type].m_pDataTag[uid].m_bfuiMemLoc;
     if (p == 0) {
         return 0;
     }
     return refToPtr_8780(p);
 }
 
-struct sMpRef_8780 {
-    unsigned int id;
-
-    void* get(sMpMgr_8780* w)
-    {
-        sMpTable_8780* t = w->tables[id & 0xFF];
-        if (t == 0) {
-            return 0;
-        }
-        return lookup_8780(t, id >> 8);
+// The spline record @p rid names (cache type 8), or 0 when its section or record is not loaded.
+static inline tSplineRecord* splineRecord_8780(const tResourceID& rid, cWorld* world)
+{
+    unsigned int id = rid.m_uiRID;
+    cWorldCacheTable* table = world->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
+    if (table == 0) {
+        return 0;
     }
-};
+    return (tSplineRecord*)lookup_8780(table, 8, id >> 8);
+}
 
 static inline sMpRoot_8780* findRoot_8780(char* w, int x, int y, int z)
 {
@@ -588,10 +559,10 @@ static inline void remove_8780(char* vw, void* item, const tBoundBox* box)
 // Removes every particle node of slot 'idx' from the world's spatial tree.
 extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
 {
-    sMpRef_8780 ref = ((sMpRef_8780*)&self->RailInfo)[idx];
-    sMpPart_8780* part = (sMpPart_8780*)ref.get(*cObjectInterface_getWorld_8780());
-    tSplineSegmentRecord* node = (tSplineSegmentRecord*)part->first;
-    for (int i = 0; i < part->count; i++) {
+    tResourceID ref = self->RailInfo[idx].RailRID;
+    tSplineRecord* spline = splineRecord_8780(ref, cObjectInterface_getWorld());
+    tSplineSegmentRecord* node = spline->m_HeaderSeg;
+    for (int i = 0; i < spline->m_iNumSegments; i++) {
         tBoundBox box;
         (*(&box.MinPoint)).x = node->m_fvMin.m[0];
         (*(&box.MinPoint)).y = node->m_fvMin.m[1];
@@ -618,21 +589,7 @@ struct sMpRoot_8998 {
     sMpCell_8998 cell;
     void* node;
 };
-struct sMpPart_8998 {
-    char pad[0x20];
-    int count;             // 0x20
-    char* first;           // 0x24
-};
-struct sMpTable_8998 {
-    char pad[0x44];
-    unsigned int* entries; // 0x44
-};
-struct sMpMgr_8998 {
-    char pad[0x8];
-    sMpTable_8998** tables; // 0x8
-};
-
-extern "C" sMpMgr_8998** cObjectInterface_getWorld_8998(void) __asm__("cObjectInterface_getWorld");
+extern "C" cWorld* cObjectInterface_getWorld();
 extern "C" char* cObjectInterface_getNash(void);
 extern "C" void nash_Nash_findkey(void* out, const void* box);
 extern "C" void nash_Octant_addnode(void* root, int idx, void* item, const void* target);
@@ -642,27 +599,26 @@ static inline void* refToPtr_8998(unsigned int p)
     return (void*)(p << 2);
 }
 
-static inline void* lookup_8998(sMpTable_8998* t, unsigned int idx)
+// The record in slot uid of a section table's type list: the tag keeps its address >> 2 (0 = not loaded).
+static inline void* lookup_8998(cWorldCacheTable* table, int type, unsigned int uid)
 {
-    unsigned int p = t->entries[idx] >> 8;
+    unsigned int p = table->m_pCacheTable[type].m_pDataTag[uid].m_bfuiMemLoc;
     if (p == 0) {
         return 0;
     }
     return refToPtr_8998(p);
 }
 
-struct sMpRef_8998 {
-    unsigned int id;
-
-    void* get(sMpMgr_8998* w)
-    {
-        sMpTable_8998* t = w->tables[id & 0xFF];
-        if (t == 0) {
-            return 0;
-        }
-        return lookup_8998(t, id >> 8);
+// The spline record @p rid names (cache type 8), or 0 when its section or record is not loaded.
+static inline tSplineRecord* splineRecord_8998(const tResourceID& rid, cWorld* world)
+{
+    unsigned int id = rid.m_uiRID;
+    cWorldCacheTable* table = world->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
+    if (table == 0) {
+        return 0;
     }
-};
+    return (tSplineRecord*)lookup_8998(table, 8, id >> 8);
+}
 
 static inline sMpRoot_8998* findRoot_8998(char* w, int x, int y, int z)
 {
@@ -691,10 +647,10 @@ static inline void insert_8998(char* w, void* item, const tBoundBox* box)
 // Re-inserts every particle node of slot 'idx' into the world's spatial tree, then frees the slot.
 extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
 {
-    sMpRef_8998 ref = ((sMpRef_8998*)&self->RailInfo)[idx];
-    sMpPart_8998* part = (sMpPart_8998*)ref.get(*cObjectInterface_getWorld_8998());
-    tSplineSegmentRecord* node = (tSplineSegmentRecord*)part->first;
-    for (int i = 0; i < part->count; i++) {
+    tResourceID ref = self->RailInfo[idx].RailRID;
+    tSplineRecord* spline = splineRecord_8998(ref, cObjectInterface_getWorld());
+    tSplineSegmentRecord* node = spline->m_HeaderSeg;
+    for (int i = 0; i < spline->m_iNumSegments; i++) {
         tBoundBox box;
         (*(&box.MinPoint)).x = node->m_fvMin.m[0];
         (*(&box.MinPoint)).y = node->m_fvMin.m[1];
@@ -707,19 +663,13 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
         insert_8998(cObjectInterface_getNash(), node, &box);
         node = (tSplineSegmentRecord*)node->m_NextSeg;
     }
-    ((unsigned int*)((char*)&self->RailInfo))[idx] = 0xFFFFFFFF;
+    self->RailInfo[idx].RailRID = tResourceID::Invalid();
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", cRailManNode_addRail);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMPRef8B28 {
-    unsigned int id;
-    sMPRef8B28() : id(0xFFFFFFFF) {}
-};
-
 
 extern void* cRailManNode_ActiveNode;
 extern cRailManNode* cRailManNode_ActiveNode_mgr8B28 __asm__("cRailManNode_ActiveNode");
@@ -739,18 +689,18 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
  * @param key  spline id of the rail
  * @param add  nonzero to switch the rail back on, 0 to switch it off
  */
-extern "C" void cRailManNode_addRail(sMPRef8B28 key, int add)
+extern "C" void cRailManNode_addRail(tResourceID key, int add)
 {
     if (cRailManNode_ActiveNode == 0) {
         cRailManNode_cRailManNode1((cRailManNode*)cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0), (void*)1);
     }
-    sMPRef8B28 kFree;
+    tRailInfo kFree;
     int idx = -1;
     for (int i = 0; i < 128; i++) {
-        if (idx == -1 && ((sMPRef8B28*)&cRailManNode_ActiveNode_mgr8B28->RailInfo[0])[i].id == kFree.id) {
+        if (idx == -1 && cRailManNode_ActiveNode_mgr8B28->RailInfo[i].RailRID == kFree.RailRID) {
             idx = i;
         }
-        if (((sMPRef8B28*)&cRailManNode_ActiveNode_mgr8B28->RailInfo[0])[i].id == key.id) {
+        if (cRailManNode_ActiveNode_mgr8B28->RailInfo[i].RailRID == key) {
             idx = i;
             goto found;
         }
@@ -758,15 +708,15 @@ extern "C" void cRailManNode_addRail(sMPRef8B28 key, int add)
 found:
     cRailManNode* mgr = cRailManNode_ActiveNode_mgr8B28;
     if (idx != -1) {
-        sMPRef8B28& railSlot = ((sMPRef8B28*)&mgr->RailInfo[0])[idx];
-        if (railSlot.id == key.id) {
+        tRailInfo& railSlot = mgr->RailInfo[idx];
+        if (railSlot.RailRID == key) {
             if (add == 0) {
                 return;
             }
         } else if (add != 0) {
             return;
         }
-        ((sMPRef8B28*)&mgr->RailInfo[0])[idx] = key;
+        mgr->RailInfo[idx].RailRID = key;
         if (add != 0) {
             cRailManNode_enableRail((cRailManNode*)mgr, idx);
         } else {
@@ -1046,25 +996,6 @@ extern "C" void cAnimComboNode_signal(cAnimComboNode* self, int msg)
 //100%
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_setComboXform);
 #ifdef SKIP_ASM
-struct sMpItem_9030 {
-    char pad_0x0[0x90];
-    float mtx[16];          // 0x90
-} __attribute__((aligned(16)));
-
-struct sMpPart_9030 {
-    int field_0x0;
-    int field_0x4;
-    void* info;             // 0x8
-    int field_0xc;
-};
-
-
-
-struct sMpNode_9030 {
-    char pad_0x0[0x48];
-    sMpItem_9030* items;    // 0x48 (self + 0x7C)
-};
-
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrix_9030(void* dst, void* src)
 {
@@ -1101,11 +1032,11 @@ extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
     }
     tModelRecord* model = ((self->Instance)->m_Model);
     int n = 0;
-    sMpPart_9030* part = ((sMpPart_9030*)model->m_MeshHeirarchy);
+    tMeshHeirarchyRecord* part = model->m_MeshHeirarchy;
     for (int i = 0; i < model->m_iNumMeshes; i++, part++) {
-        if (part->info != 0) {
-            sMpNode_9030* node = (sMpNode_9030*)(&self->CurrTime);
-            vu0CopyMatrix_9030(&(self->ComboXform)[n], node->items[n].mtx);
+        if (part->m_MeshAnim != 0) {
+            cAnimNode* animNode = (cAnimNode*)&self->CurrTime; // the cAnimNode part (+0x34)
+            vu0CopyMatrix_9030(&(self->ComboXform)[n], &animNode->AnimFrames[n].FrameMatrix);
             n++;
         }
     }
@@ -1155,21 +1086,6 @@ INCLUDE_ASM("object/multiparticle", cAnimComboNode_cacheFrame);
 #ifdef SKIP_ASM
 
 
-struct sMpPartInfo_9140 {
-    char pad_0x0[0x1C];
-    int active;             // 0x1C
-};
-
-struct sMpPart_9140 {
-    int field_0x0;
-    int field_0x4;
-    sMpPartInfo_9140* info; // 0x8
-    int field_0xc;
-};
-
-
-
-
 extern "C" void cAnimNode_cacheFrame(void* self);
 extern "C" void cMeshAnimFrame_transform(cMeshAnimFrame* item, t4Matrix* mtx);
 
@@ -1196,9 +1112,9 @@ extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
     }
     tModelRecord* model = ((self->Instance)->m_Model);
     int n = 0;
-    sMpPart_9140* meshPart = ((sMpPart_9140*)model->m_MeshHeirarchy);
+    tMeshHeirarchyRecord* meshPart = model->m_MeshHeirarchy;
     for (int i = 0; i < model->m_iNumMeshes; i++, meshPart++) {
-        if (meshPart->info->active != 0) {
+        if (meshPart->m_MeshAnim->m_NumChannels != 0) {
             cMeshAnimFrame_transform(&(self->AnimFrames)[n], &self->ComboXform[n]);
             n++;
         }
@@ -1307,7 +1223,8 @@ extern "C" int cAnimDeltaNode_updateNode(cAnimDeltaNode* self)
             }
             if (self->AnimComplete != 0) {
                 char* obj = (char*)&self->MoveNodeBase;
-                sVEntry<void(void*, int)>* vtEntry = &((sVEntry<void(void*, int)>*)self->mVtbl)[34];
+                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
+                sVEntry<void(void*, int)>* vtEntry = &vt[34];
                 vtEntry->fn(vthis(obj, *vtEntry), 1);
                 return 0;
             }

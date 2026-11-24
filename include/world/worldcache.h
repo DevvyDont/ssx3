@@ -47,30 +47,31 @@ struct cChunkResolve;
 // (src/object/instanceman.cpp) views read m_uiSectionID as the low byte. EA's header for it is not known; it sits here
 // because the world cache resolves it (flattened: the base's union is inline).
 // operator== / != compare the whole word ([U] cWorldLightMan's overlap-node search: one word compare against -1, the
-// view tResourceID_5A70); the word member's name is not known (unk_000).
+// view tResourceID_5A70); the word member's name is not known (m_uiRID is ours; [U] cMultiParticle_render and
+// cRailManNode_disableRail / enableRail split one loaded word into section (& 0xFF) and index (>> 8)).
 struct tResourceID {
     union {
         struct {
             unsigned int m_uiSectionID : 8; // [P] asserts above; [U] the low byte (the section)
             unsigned int m_uiUID : 24;      // [P] asserts above; [U] the high 24 bits (the index)
         } m_bfRID;                          // 0x0 [P] "RID.m_bfRID.m_uiSectionID"
-        unsigned int unk_000;               // 0x0 the whole word (On Tour tResourceID(unsigned int rid) stores it)
+        unsigned int m_uiRID;               // 0x0 the whole word (On Tour tResourceID(unsigned int rid) stores it)
     };
 
     tResourceID() {}                                    // [O]
-    tResourceID(unsigned int rid) { unk_000 = rid; }    // [O]
+    tResourceID(unsigned int rid) { m_uiRID = rid; }    // [O]
     tResourceID(unsigned int sid, unsigned int uid)     // [O]
     {
         m_bfRID.m_uiSectionID = sid;
         m_bfRID.m_uiUID = uid;
     }
-    bool operator==(const tResourceID& a) const { return unk_000 == a.unk_000; } // [O]
-    bool operator!=(const tResourceID& a) const { return unk_000 != a.unk_000; } // [O]
+    bool operator==(const tResourceID& a) const { return m_uiRID == a.m_uiRID; } // [O]
+    bool operator!=(const tResourceID& a) const { return m_uiRID != a.m_uiRID; } // [O]
     static const tResourceID Invalid() { return tResourceID(0xFFFFFFFF); }      // [O] [P] "tResourceID::Invalid()"
 };
 
 CHECK_OFFSET(tResourceID, m_bfRID, 0x0);
-CHECK_OFFSET(tResourceID, unk_000, 0x0);
+CHECK_OFFSET(tResourceID, m_uiRID, 0x0);
 CHECK_SIZE(tResourceID, 0x4);
 
 // One pool block (On Tour tWorldMemBlock). 0x18 bytes: cWorldBlockAllocator_init's array stride.

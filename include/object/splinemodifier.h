@@ -51,6 +51,41 @@ CHECK_OFFSET(tAddSplineData, ForceTime, 0x28);
 CHECK_OFFSET(tAddSplineData, unk_02C, 0x2C);
 CHECK_SIZE(tAddSplineData, 0x30);
 
+// The replayed state of a spline modifier (On Tour cSplineModifierState, 0x50). cSplineModifier holds these members
+// inline at 0x10 (the FLAT layout below). [O] member order; retail's three bools are words (see above);
+// [R] the replay ctor reads 0x50 bytes into +0x10 and writeToReplayFrame writes them; [U]
+// cSplineModifier_updateRootTransform reads HeadTweak through this part (+0x10, then +0x28).
+struct cSplineModifierState {
+    tBoundBox BoundBox;             // 0x00 [O]
+    int SequenceType;               // 0x20 [O]
+    int OrientType;                 // 0x24 [O]
+    float HeadTweak;                // 0x28 [O]
+    float OffsetDistance;           // 0x2C [O]
+    float Force;                    // 0x30 [O]
+    float ForceTime;                // 0x34 [O]
+    float Velocity;                 // 0x38 [O]
+    float Radius;                   // 0x3C [O]
+    int Complete;                   // 0x40 [O] bool
+    int Start;                      // 0x44 [O] bool
+    int RootTransformDirty;         // 0x48 [O] bool
+    char unk_4C[0x4];               // 0x4C padding to the 16-byte alignment
+};
+
+CHECK_OFFSET(cSplineModifierState, BoundBox, 0x00);
+CHECK_OFFSET(cSplineModifierState, SequenceType, 0x20);
+CHECK_OFFSET(cSplineModifierState, OrientType, 0x24);
+CHECK_OFFSET(cSplineModifierState, HeadTweak, 0x28);
+CHECK_OFFSET(cSplineModifierState, OffsetDistance, 0x2C);
+CHECK_OFFSET(cSplineModifierState, Force, 0x30);
+CHECK_OFFSET(cSplineModifierState, ForceTime, 0x34);
+CHECK_OFFSET(cSplineModifierState, Velocity, 0x38);
+CHECK_OFFSET(cSplineModifierState, Radius, 0x3C);
+CHECK_OFFSET(cSplineModifierState, Complete, 0x40);
+CHECK_OFFSET(cSplineModifierState, Start, 0x44);
+CHECK_OFFSET(cSplineModifierState, RootTransformDirty, 0x48);
+CHECK_OFFSET(cSplineModifierState, unk_4C, 0x4C);
+CHECK_SIZE(cSplineModifierState, 0x50);
+
 struct cSplineModifier : public cTransformModifier {
     // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
     //   [R] ctors store cSplineModifier_vtbl; the dtor stores it, then the base cTransformModifier_vtbl

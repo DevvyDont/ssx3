@@ -25,8 +25,8 @@ struct tInstanceRecord;
 struct tMultiNode;
 
 // One node of a multi-spline modifier (On Tour struct tMultiNode, 0x60). [R] cMultiSplineModifier_allocNodes
-// allocates the Nodes array 0x60 apart (view sSplineSeg_A330, with an empty element ctor) next to the 0x40-byte
-// AnimMats (view sSplineNode_A330 = t4Matrix).
+// allocates the Nodes array 0x60 apart (element type tMultiNodeElem: this with an empty element ctor) next to the
+// 0x40-byte AnimMats (tAnimMat: t4Matrix with one).
 struct tMultiNode {
     t4Vector Pos;                   // 0x00 [O]
     t4Vector Dir;                   // 0x10 [O]

@@ -19,8 +19,9 @@
 // pinned by CHECK_OFFSET(MaxX, 0x4). Evidence tags:
 //   [R] the ctor cCubicSplineInterpolant_cCubicSplineInterpolant (CubicSplines = 0; Initialized, Loaded,
 //       NumSplines = 0) and the camera ctors above;
-//   [U] how retail code uses the field (src/bx/cubicspline.cpp: views sCubicSpline / sCubicSplineFlags, sSpline_31DEE0 /
-//       sSplFlags_31DEE0, raw word masks; src/seg/seg_21E5A8.cpp: Flags_D5E8);
+//   [U] how retail code uses the field (src/bx/cubicspline.cpp: views sCubicSpline / sCubicSplineFlags in
+//       initCommon / calculateSplines, this class in addPoint / evaluate, raw word masks; src/seg/seg_21E5A8.cpp:
+//       Flags_D5E8);
 //   [O] SSX On Tour's DWARF (class cCubicSplineInterpolant: Type : 1, Initialized : 1, Loaded : 1, LoadingIndex : 8,
 //       NumSplines : 8, LastEvaluatedIndex : 8, MaxX 0x4, CubicSplines 0x8).
 

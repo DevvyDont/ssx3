@@ -20,7 +20,7 @@ struct sCubicSplineFlags {
 
 struct sCubicSpline {
     sCubicSplineFlags flags;
-    float f4;
+    float MaxX; // cCubicSplineInterpolant::MaxX
     void* data;
 };
 
@@ -119,14 +119,7 @@ void cCubicSplineInterpolant_purge(void* vself)
 //100%
 INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_addPoint);
 #ifdef SKIP_ASM
-struct sCubicSplineKeyK2 {
-    float x;  // 0x0
-    float y;  // 0x4
-    float tx; // 0x8
-    float ty; // 0xC
-    float pad_0x10;
-};
-
+// calculateSplines still reads the interpolant through the sCubicSpline view above.
 extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self);
 
 /**
@@ -140,17 +133,18 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self);
  * @param x  the point's input value (time)
  * @param y  the point's output value
  */
-extern "C" void cCubicSplineInterpolant_addPoint(sCubicSpline* self, float x, float y)
+extern "C" void cCubicSplineInterpolant_addPoint(cCubicSplineInterpolant* self, float x, float y)
 {
-    if (self->flags.LoadingIndex == self->flags.NumSplines) {
-        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex - 1].tx = x;
-        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex - 1].ty = y;
-        cCubicSplineInterpolant_calculateSplines(self);
-        self->flags.Loaded = 1;
+    // Until calculateSplines runs, segment i holds key i in A, B and the last segment holds the end key in C, D.
+    if (self->LoadingIndex == self->NumSplines) {
+        self->CubicSplines[self->LoadingIndex - 1].C = x;
+        self->CubicSplines[self->LoadingIndex - 1].D = y;
+        cCubicSplineInterpolant_calculateSplines((sCubicSpline*)self);
+        self->Loaded = 1;
     } else {
-        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex].x = x;
-        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex].y = y;
-        self->flags.LoadingIndex++;
+        self->CubicSplines[self->LoadingIndex].A = x;
+        self->CubicSplines[self->LoadingIndex].B = y;
+        self->LoadingIndex++;
     }
 }
 #endif
@@ -219,7 +213,7 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
         break;
     case 1:
         alpha[0] = 3.0f * (yValues[1] - yValues[0]) / spans[0] - 3.0f * ((float*)self->data)[4];
-        alpha[n] = 3.0f * self->f4 - 3.0f * (yValues[n] - yValues[n - 1]) / spans[n - 1];
+        alpha[n] = 3.0f * self->MaxX - 3.0f * (yValues[n] - yValues[n - 1]) / spans[n - 1];
         for (i = 1; i < n; i++) {
             alpha[i] = 3.0f / spans[i] * (yValues[i + 1] - yValues[i]) - 3.0f / spans[i - 1] * (yValues[i] - yValues[i - 1]);
         }
@@ -248,7 +242,7 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
         ((float*)self->data)[i * 5 + 3] = yValues[i];
         ((float*)self->data)[i * 5 + 4] = x[i];
     }
-    self->f4 = x[n];
+    self->MaxX = x[n];
     *(unsigned int*)&self->flags &= 0xF807FFFF;
 }
 #endif
@@ -257,25 +251,10 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
 INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_evaluate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sSplFlags_31DEE0 {
-    unsigned int b0 : 1;
-    unsigned int b1 : 1;
-    unsigned int b2 : 1;
-    unsigned int f3 : 8;
-    unsigned int count : 8;
-    unsigned int cur : 8;
-};
-
-
-struct sSpline_31DEE0 {
-    sSplFlags_31DEE0 flags;
-    float end;
-    cCSICubicSpline* seg;
-};
-
 extern "C" float cCSICubicSpline_evaluate(cCSICubicSpline* seg, float t);
 
-extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* s, float t) __asm__("cCubicSplineInterpolant_evaluate");
+extern "C" float cCubicSplineInterpolant_evaluate_impl(cCubicSplineInterpolant* s, float t)
+    __asm__("cCubicSplineInterpolant_evaluate");
 /**
  * Evaluates a spline interpolant at @p time.
  *
@@ -290,49 +269,49 @@ extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* s, float 
  * @param time  the input value
  * @return the interpolated value
  */
-extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* spline, float time)
+extern "C" float cCubicSplineInterpolant_evaluate_impl(cCubicSplineInterpolant* spline, float time)
 {
-    int last = spline->flags.count - 1;
+    int last = spline->NumSplines - 1;
     float* pend;
-    if (last == (int)spline->flags.cur) {
-        pend = &spline->end;
+    if (last == (int)spline->LastEvaluatedIndex) {
+        pend = &spline->MaxX;
     } else {
-        pend = &spline->seg[spline->flags.cur + 1].X0;
+        pend = &spline->CubicSplines[spline->LastEvaluatedIndex + 1].X0;
     }
-    cCSICubicSpline* seg = &spline->seg[spline->flags.cur];
+    cCSICubicSpline* seg = &spline->CubicSplines[spline->LastEvaluatedIndex];
     if (seg->X0 <= time && time <= *pend) {
         return cCSICubicSpline_evaluate(seg, time);
     }
     if (time < seg->X0) {
-        if (time < spline->seg[1].X0) {
-            spline->flags.cur = 0;
-            return cCSICubicSpline_evaluate(spline->seg, time);
+        if (time < spline->CubicSplines[1].X0) {
+            spline->LastEvaluatedIndex = 0;
+            return cCSICubicSpline_evaluate(spline->CubicSplines, time);
         }
     } else {
-        if ((int)spline->flags.cur == last - 1) {
-            spline->flags.cur = last;
-            return cCSICubicSpline_evaluate(&spline->seg[last], time);
+        if ((int)spline->LastEvaluatedIndex == last - 1) {
+            spline->LastEvaluatedIndex = last;
+            return cCSICubicSpline_evaluate(&spline->CubicSplines[last], time);
         }
-        if (time < spline->seg[spline->flags.cur + 2].X0) {
-            spline->flags.cur = spline->flags.cur + 1;
-            return cCSICubicSpline_evaluate(&spline->seg[spline->flags.cur], time);
+        if (time < spline->CubicSplines[spline->LastEvaluatedIndex + 2].X0) {
+            spline->LastEvaluatedIndex = spline->LastEvaluatedIndex + 1;
+            return cCSICubicSpline_evaluate(&spline->CubicSplines[spline->LastEvaluatedIndex], time);
         }
     }
     int hi = last;
     int lo = 0;
     for (;;) {
         int mid = (hi + lo) / 2;
-        cCSICubicSpline* midSeg = &spline->seg[mid];
+        cCSICubicSpline* midSeg = &spline->CubicSplines[mid];
         float segStart = midSeg->X0;
         float segEnd;
         if (mid < last) {
             segEnd = midSeg[1].X0;
         } else {
-            segEnd = spline->end;
+            segEnd = spline->MaxX;
         }
         if (segStart <= time) {
             if (time <= segEnd) {
-                spline->flags.cur = mid;
+                spline->LastEvaluatedIndex = mid;
                 return cCSICubicSpline_evaluate(midSeg, time);
             } else {
                 lo = mid + 1;
@@ -432,6 +411,8 @@ INCLUDE_ASM("bx/cubicspline", malloc_init_state__FPv);
  */
 void malloc_init_state(void* vself)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7's bin_at: each bin is a fake chunk 8 bytes before its bins[] pair, so its fd / bk
+    // land on the pair; the bins are walked in 8-byte steps (a byte heap)
     malloc_state* self = (malloc_state*)vself;
     char* bin = (char*)&self->bins[0];
     for (int i = 94; i >= 0; i--) {
@@ -483,6 +464,8 @@ extern "C" int* __errno();
  */
 extern "C" void* cDynamicMemMan_sYSMALLOc(cDynamicMemMan* ms, unsigned int nb, malloc_state* av)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     malloc_chunk* old_top;
     unsigned int old_size;
     char* old_end;
@@ -633,6 +616,8 @@ extern "C" long __muldi3(long a, long b);
  */
 extern "C" int cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int topPad, malloc_state* av)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     long top_size;
     long extra;
     long released;
@@ -667,30 +652,11 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmalloc);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // dlmalloc 2.7.0 malloc()
-struct sMChunk_31E818
-{
-    unsigned int prev_size;      // 0x0
-    unsigned int size;           // 0x4
-    sMChunk_31E818* fd;          // 0x8
-    sMChunk_31E818* bk;          // 0xC
-};
-
-struct sMState_31E818
-{
-    unsigned int max_fast;              // 0x0
-    sMChunk_31E818* fastbins[11];       // 0x4
-    sMChunk_31E818* top;                // 0x30
-    sMChunk_31E818* last_remainder;     // 0x34
-    sMChunk_31E818* bins[192];          // 0x38
-    unsigned int binmap[3];             // 0x338
-};
-
 extern "C" int largebin_index(unsigned int sz);
-// PORT: the unit declares these with their own state types; bind the malloc view by asm label.
-extern "C" void cDynamicMemMan_malloc_consolidate_E818(void* ms, sMState_31E818* av) __asm__("cDynamicMemMan_malloc_consolidate");
-extern "C" void* cDynamicMemMan_sYSMALLOc_E818(void* ms, unsigned int nb, sMState_31E818* av) __asm__("cDynamicMemMan_sYSMALLOc");
+extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_state* av);
+extern "C" void* cDynamicMemMan_sYSMALLOc(cDynamicMemMan* ms, unsigned int nb, malloc_state* av);
 
-#define BIN_AT_31E818(av, i) ((sMChunk_31E818*)((char*)&(av)->bins[(i) << 1] - 8))
+#define bin_at_E818(av, i) ((malloc_chunk*)((char*)&(av)->bins[(i) << 1] - 8))
 
 /**
  * Allocates @p bytes from the heap (dlmalloc 2.7's malloc on 16-byte aligned chunks).
@@ -706,21 +672,23 @@ extern "C" void* cDynamicMemMan_sYSMALLOc_E818(void* ms, unsigned int nb, sMStat
  */
 extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
 {
-    sMState_31E818* av = *(sMState_31E818**)ms;
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, chunk2mem, and bin_at's
+    // fake chunk 8 bytes before each bins[] pair): a byte heap
+    malloc_state* av = ms->MallocState;
     unsigned int nb;
     unsigned int idx;
-    sMChunk_31E818* bin;
-    sMChunk_31E818** fb;
-    sMChunk_31E818* victim;
+    malloc_chunk* bin;
+    malloc_chunk** fb;
+    malloc_chunk* victim;
     unsigned int size;
     int victim_index;
-    sMChunk_31E818* remainder;
+    malloc_chunk* remainder;
     unsigned int remainder_size;
     unsigned int block;
     unsigned int bit;
     unsigned int map;
-    sMChunk_31E818* fwd;
-    sMChunk_31E818* bck;
+    malloc_chunk* fwd;
+    malloc_chunk* bck;
 
     if (bytes >= (unsigned int)-32) {
         *__errno() = 12;
@@ -730,7 +698,7 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
 
     if (!(av->max_fast & 1)) {
         if (av->max_fast == 0)
-            cDynamicMemMan_malloc_consolidate_E818(ms, av);
+            cDynamicMemMan_malloc_consolidate(ms, av);
         goto use_top;
     }
 
@@ -744,11 +712,11 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
 
     if (nb < 256) {
         idx = nb >> 3;
-        sMChunk_31E818** base = &av->bins[idx << 1];
-        bin = (sMChunk_31E818*)((char*)base - 8);
+        malloc_chunk** base = &av->bins[idx << 1];
+        bin = (malloc_chunk*)((char*)base - 8);
         if ((victim = base[1]) != bin) {
             bck = victim->bk;
-            ((sMChunk_31E818*)((char*)victim + nb))->size |= 1;
+            ((malloc_chunk*)((char*)victim + nb))->size |= 1;
             base[1] = bck;
             bck->fd = bin;
             return (char*)victim + 8;
@@ -756,42 +724,42 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
     } else {
         idx = largebin_index(nb);
         if (av->max_fast & 2)
-            cDynamicMemMan_malloc_consolidate_E818(ms, av);
+            cDynamicMemMan_malloc_consolidate(ms, av);
     }
 
-    while ((victim = BIN_AT_31E818(av, 1)->bk) != BIN_AT_31E818(av, 1)) {
+    while ((victim = bin_at_E818(av, 1)->bk) != bin_at_E818(av, 1)) {
         bck = victim->bk;
         size = victim->size & ~3U;
 
-        if (nb < 256 && bck == BIN_AT_31E818(av, 1) && victim == av->last_remainder && size > nb + 16) {
+        if (nb < 256 && bck == bin_at_E818(av, 1) && victim == av->last_remainder && size > nb + 16) {
             remainder_size = size - nb;
-            remainder = (sMChunk_31E818*)((char*)victim + nb);
+            remainder = (malloc_chunk*)((char*)victim + nb);
             av->bins[3] = av->bins[2] = remainder;
             av->last_remainder = remainder;
-            remainder->bk = remainder->fd = BIN_AT_31E818(av, 1);
+            remainder->bk = remainder->fd = bin_at_E818(av, 1);
             victim->size = nb | 1;
             remainder->size = remainder_size | 1;
-            ((sMChunk_31E818*)((char*)remainder + remainder_size))->prev_size = remainder_size;
+            ((malloc_chunk*)((char*)remainder + remainder_size))->prev_size = remainder_size;
             return (char*)victim + 8;
         }
 
-        BIN_AT_31E818(av, 1)->bk = bck;
-        bck->fd = BIN_AT_31E818(av, 1);
+        bin_at_E818(av, 1)->bk = bck;
+        bck->fd = bin_at_E818(av, 1);
 
         if (size == nb) {
-            ((sMChunk_31E818*)((char*)victim + size))->size |= 1;
+            ((malloc_chunk*)((char*)victim + size))->size |= 1;
             return (char*)victim + 8;
         }
 
         if (size < 256) {
             victim_index = size >> 3;
-            sMChunk_31E818** base = &av->bins[victim_index << 1];
-            bck = (sMChunk_31E818*)((char*)base - 8);
+            malloc_chunk** base = &av->bins[victim_index << 1];
+            bck = (malloc_chunk*)((char*)base - 8);
             fwd = base[0];
         } else {
             victim_index = largebin_index(size);
-            sMChunk_31E818** base = &av->bins[victim_index << 1];
-            bck = (sMChunk_31E818*)((char*)base - 8);
+            malloc_chunk** base = &av->bins[victim_index << 1];
+            bck = (malloc_chunk*)((char*)base - 8);
             fwd = base[0];
             if (fwd != bck) {
                 if (size < bck->bk->size) {
@@ -814,8 +782,8 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
     }
 
     if (!(nb < 256)) {
-        sMChunk_31E818** base = &av->bins[idx << 1];
-        bin = (sMChunk_31E818*)((char*)base - 8);
+        malloc_chunk** base = &av->bins[idx << 1];
+        bin = (malloc_chunk*)((char*)base - 8);
         for (victim = base[1]; victim != bin; victim = victim->bk) {
             size = victim->size & ~3U;
             if (size >= nb) {
@@ -826,15 +794,15 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
                 bck->fd = fwd;
                 void* mem = (char*)victim + 8;
                 if (remainder_size < 16) {
-                    ((sMChunk_31E818*)((char*)victim + size))->size |= 1;
+                    ((malloc_chunk*)((char*)victim + size))->size |= 1;
                     return mem;
                 } else {
-                    remainder = (sMChunk_31E818*)((char*)victim + nb);
+                    remainder = (malloc_chunk*)((char*)victim + nb);
                     av->bins[3] = av->bins[2] = remainder;
-                    remainder->bk = remainder->fd = BIN_AT_31E818(av, 1);
+                    remainder->bk = remainder->fd = bin_at_E818(av, 1);
                     victim->size = nb | 1;
                     remainder->size = remainder_size | 1;
-                    ((sMChunk_31E818*)((char*)remainder + remainder_size))->prev_size = remainder_size;
+                    ((malloc_chunk*)((char*)remainder + remainder_size))->prev_size = remainder_size;
                     return mem;
                 }
             }
@@ -842,7 +810,7 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
     }
 
     ++idx;
-    bin = BIN_AT_31E818(av, idx);
+    bin = bin_at_E818(av, idx);
     block = idx >> 5;
     map = av->binmap[block];
     bit = 1U << (idx & 31);
@@ -853,19 +821,19 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
                 if (++block >= 3)
                     goto use_top;
             } while ((map = av->binmap[block]) == 0);
-            bin = BIN_AT_31E818(av, block << 5);
+            bin = bin_at_E818(av, block << 5);
             bit = 1;
         }
 
         while ((bit & map) == 0) {
-            bin = (sMChunk_31E818*)((char*)bin + 8);
+            bin = (malloc_chunk*)((char*)bin + 8);
             bit <<= 1;
         }
 
         victim = bin->bk;
         if (victim == bin) {
             av->binmap[block] = map &= ~bit;
-            bin = (sMChunk_31E818*)((char*)bin + 8);
+            bin = (malloc_chunk*)((char*)bin + 8);
             bit <<= 1;
         } else {
             size = victim->size & ~3U;
@@ -874,17 +842,17 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
             bin->bk = bck;
             bck->fd = bin;
             if (remainder_size < 16) {
-                ((sMChunk_31E818*)((char*)victim + size))->size |= 1;
+                ((malloc_chunk*)((char*)victim + size))->size |= 1;
                 return (char*)victim + 8;
             } else {
-                remainder = (sMChunk_31E818*)((char*)victim + nb);
+                remainder = (malloc_chunk*)((char*)victim + nb);
                 av->bins[3] = av->bins[2] = remainder;
-                remainder->bk = remainder->fd = BIN_AT_31E818(av, 1);
+                remainder->bk = remainder->fd = bin_at_E818(av, 1);
                 if (nb < 256)
                     av->last_remainder = remainder;
                 victim->size = nb | 1;
                 remainder->size = remainder_size | 1;
-                ((sMChunk_31E818*)((char*)remainder + remainder_size))->prev_size = remainder_size;
+                ((malloc_chunk*)((char*)remainder + remainder_size))->prev_size = remainder_size;
                 return (char*)victim + 8;
             }
         }
@@ -895,13 +863,13 @@ use_top:
     size = victim->size & ~3U;
     if (size >= nb + 16) {
         remainder_size = size - nb;
-        remainder = (sMChunk_31E818*)((char*)victim + nb);
+        remainder = (malloc_chunk*)((char*)victim + nb);
         av->top = remainder;
         victim->size = nb | 1;
         remainder->size = remainder_size | 1;
         return (char*)victim + 8;
     }
-    return cDynamicMemMan_sYSMALLOc_E818(ms, nb, av);
+    return cDynamicMemMan_sYSMALLOc(ms, nb, av);
 }
 #endif
 
@@ -931,6 +899,8 @@ extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem) __asm_
  */
 extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     malloc_state* av = ms->MallocState;
     malloc_chunk* freedChunk;
     malloc_chunk* nextchunk;
@@ -950,7 +920,7 @@ extern "C" void cDynamicMemMan_dlfree_free(cDynamicMemMan* ms, void* mem)
         if (size <= av->max_fast)
         {
             av->max_fast |= 3;
-            fb = &((malloc_chunk**)&av->fastbins[0])[(size >> 3) - 2];
+            fb = &av->fastbins[(size >> 3) - 2];
             *(malloc_chunk**)mem = *fb;
             *fb = freedChunk;
         }
@@ -1026,6 +996,8 @@ void malloc_init_state(void* av);
  */
 extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_state* av)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     malloc_chunk** fb;
     malloc_chunk** maxfb;
     malloc_chunk* chunk;
@@ -1043,8 +1015,8 @@ extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_sta
     if (av->max_fast != 0) {
         av->max_fast &= ~2U;
         unsorted_bin = (malloc_chunk*)((char*)&((malloc_chunk**)&av->bins[0])[1 << 1] - 8);
-        maxfb = &((malloc_chunk**)&av->fastbins[0])[(av->max_fast >> 3) - 2];
-        fb = &((malloc_chunk**)&av->fastbins[0])[0];
+        maxfb = &av->fastbins[(av->max_fast >> 3) - 2];
+        fb = &av->fastbins[0];
         do {
             if ((chunk = *fb) != 0) {
                 *fb = 0;
@@ -1113,6 +1085,8 @@ extern "C" void MEM_copy(void* d, void* s, int n);
  */
 extern "C" void* cDynamicMemMan_dlrealloc(cDynamicMemMan* ms, void* oldmem, unsigned int bytes)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     char* av = *(char**)ms;
     unsigned int nb;
     malloc_chunk* oldp;
@@ -1246,6 +1220,8 @@ extern "C" void* cDynamicMemMan_dlmemalign_memalign(void* ms, unsigned int align
  */
 extern "C" void* cDynamicMemMan_dlmemalign_memalign(void* ms, unsigned int alignment, unsigned int bytes)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     unsigned int nb;
     char* rawMem;
     malloc_chunk* memChunk;
@@ -1336,6 +1312,8 @@ extern "C" void* cDynamicMemMan_dlmemalignhdr_memalign(void* ms, unsigned int al
  */
 extern "C" void* cDynamicMemMan_dlmemalignhdr_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     unsigned int nb;
     char* rawMem;
     malloc_chunk* memChunk;
@@ -1418,6 +1396,8 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 // dlmalloc 2.7 cALLOc()
 extern "C" void* cDynamicMemMan_dlcalloc(cDynamicMemMan* ms, unsigned int n, unsigned int elem_size)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7's mem2chunk: the chunk header sits 8 bytes before the user memory and its size
+    // word 4 bytes before it (a byte heap)
     unsigned int bytes = n * elem_size;
     void* mem = cDynamicMemMan_dlmalloc(ms, bytes);
     if (mem != 0) {
@@ -1533,6 +1513,8 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  */
 extern "C" void* cDynamicMemMan_iALLOc(cDynamicMemMan* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7 addresses chunks by byte offsets in its heap (chunk_at_offset, mem2chunk /
+    // chunk2mem, bin_at's fake chunk 8 bytes before each bins[] pair): a byte heap
     malloc_state* av = *(malloc_state**)ms;
     unsigned int element_size;
     unsigned int contents_size;
@@ -1695,6 +1677,8 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmalloc_usable_size__FPvT0);
  */
 unsigned int cDynamicMemMan_dlmalloc_usable_size(void* self, void* mem)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7's mem2chunk: the chunk header sits 8 bytes before the user memory and its size
+    // word 4 bytes before it (a byte heap)
     if (mem != 0) {
         unsigned int size = *(unsigned int*)((char*)mem - 4);
         char* chunk = (char*)mem - 8;
@@ -1728,6 +1712,8 @@ extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_sta
  */
 extern "C" mallinfo cDynamicMemMan_dlmallinfo(cDynamicMemMan* ms)
 {
+    // ORIGINAL-PTR: dlmalloc 2.7's bin_at: each bin is a fake chunk 8 bytes before its bins[] pair, so its fd / bk
+    // land on the pair; the bins are walked in 8-byte steps (a byte heap)
     malloc_state* av = *(malloc_state**)ms;
     mallinfo mi;
     int i;
@@ -1749,7 +1735,7 @@ extern "C" mallinfo cDynamicMemMan_dlmallinfo(cDynamicMemMan* ms)
     fastavail = 0;
 
     for (i = 0; (unsigned int)i < 11U; ++i) {
-        for (chunk = ((malloc_chunk**)&av->fastbins[0])[i]; chunk != 0; chunk = chunk->fd) {
+        for (chunk = av->fastbins[i]; chunk != 0; chunk = chunk->fd) {
             ++nfastblocks;
             fastavail += chunk->size & ~3U;
         }

@@ -7,6 +7,7 @@
 #include "render/2drender.h"
 #include "render/ps2lightman.h"
 #include "render/font.h"
+#include "ui/uithing.h"
 #include "render/ps2graphicsman.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -222,13 +223,6 @@ extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, tLightRecord* ligh
 //100%
 INCLUDE_ASM("render/lightman", cPS2LightMan_CreateAmbient);
 #ifdef SKIP_ASM
-class cObj0038DEE8 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void* v01(int a);
-    virtual void* GetLightObj(int a);
-};
-
 // PORT: the unit defines cLightInst_CreateAmbient(void*) (an empty stub), but this caller
 // passes (void*, int, float); bind the 3-arg call by asm label.
 void cLightInst_CreateAmbient_3(void* p, int b, float f) __asm__("cLightInst_CreateAmbient__FPv");
@@ -246,20 +240,14 @@ void cLightInst_CreateAmbient_3(void* p, int b, float f) __asm__("cLightInst_Cre
  */
 extern "C" void cPS2LightMan_CreateAmbient(cPS2LightMan* obj, int light, int colour, float intensity)
 {
-    cLightInst_CreateAmbient_3(((cObj0038DEE8*)obj)->GetLightObj(light), colour, intensity);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreateAmbient_3(vt[2].fn(vthis(obj, vt[2]), light), colour, intensity);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/lightman", cPS2LightMan_CreateDirectional);
 #ifdef SKIP_ASM
-class cObj0038DF38 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void* v01(int a);
-    virtual void* GetLightObj(int a);
-};
-
 // PORT: the unit defines cLightInst_CreateDirectional(void*) (an empty stub), but this caller
 // passes (void*, int, int, float); bind the 4-arg call by asm label.
 void cLightInst_CreateDirectional_4(void* p, int b, int c, float f) __asm__("cLightInst_CreateDirectional__FPv");
@@ -278,20 +266,14 @@ void cLightInst_CreateDirectional_4(void* p, int b, int c, float f) __asm__("cLi
  */
 extern "C" void cPS2LightMan_CreateDirectional(cPS2LightMan* obj, int light, int colour, int dir, float intensity)
 {
-    cLightInst_CreateDirectional_4(((cObj0038DF38*)obj)->GetLightObj(light), colour, dir, intensity);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreateDirectional_4(vt[2].fn(vthis(obj, vt[2]), light), colour, dir, intensity);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/lightman", cPS2LightMan_CreatePoint);
 #ifdef SKIP_ASM
-class cObj0038DF98 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void* v01(int a);
-    virtual void* GetLightObj(int a);
-};
-
 // PORT: the unit defines cLightInst_CreatePoint(void*) (an empty stub), but this caller
 // passes (void*, int, int, float, int); bind the 5-arg call by asm label.
 void cLightInst_CreatePoint_5(void* p, int b, int c, float f, int d) __asm__("cLightInst_CreatePoint__FPv");
@@ -311,20 +293,14 @@ void cLightInst_CreatePoint_5(void* p, int b, int c, float f, int d) __asm__("cL
  */
 extern "C" void cPS2LightMan_CreatePoint(cPS2LightMan* obj, int light, int colour, int pos, float intensity, int decay)
 {
-    cLightInst_CreatePoint_5(((cObj0038DF98*)obj)->GetLightObj(light), colour, pos, intensity, decay);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreatePoint_5(vt[2].fn(vthis(obj, vt[2]), light), colour, pos, intensity, decay);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/lightman", cPS2LightMan_CreateSpot);
 #ifdef SKIP_ASM
-class cObj0038E008 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void* v01(int a);
-    virtual void* GetLightObj(int a);
-};
-
 // PORT: the unit defines cLightInst_CreateSpot(void*) (an empty stub), but this caller
 // passes (void*, int, int, int, float, float, int, float); bind the call by asm label.
 void cLightInst_CreateSpot_8(void* p, int b, int c, int d, float x, float y, int e, float z) __asm__("cLightInst_CreateSpot__FPv");
@@ -347,7 +323,8 @@ void cLightInst_CreateSpot_8(void* p, int b, int c, int d, float x, float y, int
  */
 extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int light, int colour, int pos, int dir, float x, float y, int decay, float z)
 {
-    cLightInst_CreateSpot_8(((cObj0038E008*)obj)->GetLightObj(light), colour, pos, dir, x, y, decay, z);
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)obj->mVtbl;  // slot 2: GetLightObj
+    cLightInst_CreateSpot_8(vt[2].fn(vthis(obj, vt[2]), light), colour, pos, dir, x, y, decay, z);
 }
 #endif
 
@@ -355,11 +332,11 @@ extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int light, int colour
 INCLUDE_ASM("render/lightman", func_0038E0A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-struct sLmQuadVec4_E118 {
-    float x, y, z, w;
-    sLmQuadVec4_E118() {}
-    sLmQuadVec4_E118(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
+// A t4Vector with EA's constructors (ours has none); the quad helpers below build the corners with it.
+struct t4VectorXYZW : t4Vector {
+    t4VectorXYZW() {}
+    t4VectorXYZW(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
 /**
  * Transforms a 2D point by a 3x3 matrix and returns it as a 4-vector with z = 0 and w = 1.
@@ -371,9 +348,9 @@ struct sLmQuadVec4_E118 {
  * @param mat  the 3x3 matrix (nine floats)
  * @return {x', y', 0, 1}, through the hidden result pointer
  */
-extern "C" sLmQuadVec4_E118 func_0038E0A8(float* point, float* mat)
+extern "C" t4VectorXYZW func_0038E0A8(float* point, float* mat)
 {
-    sLmQuadVec4_E118 result;
+    t4VectorXYZW result;
     float x = point[0];
     float y = point[1];
     result.z = 0.0f;
@@ -412,10 +389,10 @@ struct sLmQuadCtx_E118 {
  */
 extern "C" void c2DRender_drawRect(c2DRender* self, tBxVertex* verts, float* rect)
 {
-    (*(sLmQuadVec4_E118*)&verts[0].p) = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
-    (*(sLmQuadVec4_E118*)&verts[1].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
-    (*(sLmQuadVec4_E118*)&verts[2].p) = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
-    (*(sLmQuadVec4_E118*)&verts[3].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    verts[0].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
+    verts[1].p = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    verts[2].p = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    verts[3].p = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     ps2GraphicsMan->RenderTriStrip(4, verts, 0);
 }
@@ -438,10 +415,10 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect);
  */
 extern "C" void c2DRender_drawRotRect(c2DRender* self, tBxVertex* verts, float* rect)
 {
-    (*(sLmQuadVec4_E118*)&verts[1].p) = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
-    (*(sLmQuadVec4_E118*)&verts[3].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
-    (*(sLmQuadVec4_E118*)&verts[0].p) = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
-    (*(sLmQuadVec4_E118*)&verts[2].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    verts[1].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
+    verts[3].p = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    verts[0].p = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    verts[2].p = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     ps2GraphicsMan->RenderTriStrip(4, verts, 0);
 }
@@ -451,7 +428,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRect1);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
-extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
 
 /**
  * Fills the four vertex positions of a quad from @p rect, transforms them by @p mat, and draws it.
@@ -466,14 +443,14 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  */
 extern "C" void c2DRender_drawRect1(c2DRender* self, tBxVertex* verts, float* rect, float* mat)
 {
-    sLmQuadVec4_E118* corner0 = &(*(sLmQuadVec4_E118*)&verts[0].p);
-    sLmQuadVec4_E118* corner1 = &(*(sLmQuadVec4_E118*)&verts[1].p);
-    sLmQuadVec4_E118* corner2 = &(*(sLmQuadVec4_E118*)&verts[2].p);
-    sLmQuadVec4_E118* corner3 = &(*(sLmQuadVec4_E118*)&verts[3].p);
-    *corner0 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
-    *corner1 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
-    *corner2 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
-    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    t4Vector* corner0 = &verts[0].p;
+    t4Vector* corner1 = &verts[1].p;
+    t4Vector* corner2 = &verts[2].p;
+    t4Vector* corner3 = &verts[3].p;
+    *corner0 = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
+    *corner1 = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    *corner2 = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner3 = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     *corner0 = func_0038E0A8(&corner0->x, mat);
     *corner1 = func_0038E0A8(&corner1->x, mat);
     *corner2 = func_0038E0A8(&corner2->x, mat);
@@ -487,7 +464,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect1);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
-extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
 
 /**
  * Fills the four vertex positions of a quad from @p rect with the corners turned a quarter turn, transforms them by @p
@@ -503,14 +480,14 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  */
 extern "C" void c2DRender_drawRotRect1(c2DRender* self, tBxVertex* verts, float* rect, float* mat)
 {
-    sLmQuadVec4_E118* corner0 = &(*(sLmQuadVec4_E118*)&verts[0].p);
-    sLmQuadVec4_E118* corner1 = &(*(sLmQuadVec4_E118*)&verts[1].p);
-    sLmQuadVec4_E118* corner2 = &(*(sLmQuadVec4_E118*)&verts[2].p);
-    sLmQuadVec4_E118* corner3 = &(*(sLmQuadVec4_E118*)&verts[3].p);
-    *corner1 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
-    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
-    *corner0 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
-    *corner2 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    t4Vector* corner0 = &verts[0].p;
+    t4Vector* corner1 = &verts[1].p;
+    t4Vector* corner2 = &verts[2].p;
+    t4Vector* corner3 = &verts[3].p;
+    *corner1 = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
+    *corner3 = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    *corner0 = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner2 = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     *corner0 = func_0038E0A8(&corner0->x, mat);
     *corner1 = func_0038E0A8(&corner1->x, mat);
     *corner2 = func_0038E0A8(&corner2->x, mat);
@@ -538,16 +515,16 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRect2);
  */
 extern "C" void c2DRender_drawRect2(c2DRender* self, tBxVertex* vtx, float* rect, float* uv)
 {
-    (*(sLmQuadVec4_E118*)&vtx[0].p) = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    vtx[0].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].u = uv[0];
     vtx[0].v = uv[1];
-    (*(sLmQuadVec4_E118*)&vtx[1].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    vtx[1].p = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].u = uv[0] + uv[2];
     vtx[1].v = uv[1];
-    (*(sLmQuadVec4_E118*)&vtx[2].p) = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    vtx[2].p = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].u = uv[0];
     vtx[2].v = uv[1] + uv[3];
-    (*(sLmQuadVec4_E118*)&vtx[3].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    vtx[3].p = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].u = uv[0] + uv[2];
     vtx[3].v = uv[1] + uv[3];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -573,16 +550,16 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect2);
  */
 extern "C" void c2DRender_drawRotRect2(c2DRender* self, tBxVertex* vtx, float* rect, float* uv)
 {
-    (*(sLmQuadVec4_E118*)&vtx[0].p) = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    vtx[0].p = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].u = uv[0] + uv[2];
     vtx[0].v = uv[1];
-    (*(sLmQuadVec4_E118*)&vtx[1].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    vtx[1].p = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].u = uv[0] + uv[2];
     vtx[1].v = uv[1] + uv[3];
-    (*(sLmQuadVec4_E118*)&vtx[2].p) = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    vtx[2].p = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].u = uv[0];
     vtx[2].v = uv[1];
-    (*(sLmQuadVec4_E118*)&vtx[3].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    vtx[3].p = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].u = uv[0];
     vtx[3].v = uv[1] + uv[3];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -594,7 +571,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRect3);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
-extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
 
 /**
  * Fills the four vertex positions from @p rect and their UVs from @p uv, transforms the positions by @p mat, and draws
@@ -611,20 +588,20 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  */
 extern "C" void c2DRender_drawRect3(c2DRender* self, tBxVertex* vtx, float* rect, float* uv, float* mat)
 {
-    sLmQuadVec4_E118* corner0 = &(*(sLmQuadVec4_E118*)&vtx[0].p);
-    sLmQuadVec4_E118* corner1 = &(*(sLmQuadVec4_E118*)&vtx[1].p);
-    sLmQuadVec4_E118* corner2 = &(*(sLmQuadVec4_E118*)&vtx[2].p);
-    sLmQuadVec4_E118* corner3 = &(*(sLmQuadVec4_E118*)&vtx[3].p);
-    *corner0 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    t4Vector* corner0 = &vtx[0].p;
+    t4Vector* corner1 = &vtx[1].p;
+    t4Vector* corner2 = &vtx[2].p;
+    t4Vector* corner3 = &vtx[3].p;
+    *corner0 = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].u = uv[0];
     vtx[0].v = uv[1];
-    *corner1 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    *corner1 = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].u = uv[0] + uv[2];
     vtx[1].v = uv[1];
-    *corner2 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner2 = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].u = uv[0];
     vtx[2].v = uv[1] + uv[3];
-    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner3 = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].u = uv[0] + uv[2];
     vtx[3].v = uv[1] + uv[3];
     *corner0 = func_0038E0A8(&corner0->x, mat);
@@ -640,7 +617,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect3);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
-extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
+extern "C" t4VectorXYZW func_0038E0A8(float* p, float* m);
 
 /**
  * Fills the four vertex positions from @p rect and their UVs from @p uv turned a quarter turn, transforms the positions
@@ -657,20 +634,20 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  */
 extern "C" void c2DRender_drawRotRect3(c2DRender* self, tBxVertex* vtx, float* rect, float* uv, float* mat)
 {
-    sLmQuadVec4_E118* corner0 = &(*(sLmQuadVec4_E118*)&vtx[0].p);
-    sLmQuadVec4_E118* corner1 = &(*(sLmQuadVec4_E118*)&vtx[1].p);
-    sLmQuadVec4_E118* corner2 = &(*(sLmQuadVec4_E118*)&vtx[2].p);
-    sLmQuadVec4_E118* corner3 = &(*(sLmQuadVec4_E118*)&vtx[3].p);
-    *corner0 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    t4Vector* corner0 = &vtx[0].p;
+    t4Vector* corner1 = &vtx[1].p;
+    t4Vector* corner2 = &vtx[2].p;
+    t4Vector* corner3 = &vtx[3].p;
+    *corner0 = t4VectorXYZW(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].u = uv[0] + uv[2];
     vtx[0].v = uv[1];
-    *corner1 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    *corner1 = t4VectorXYZW(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].u = uv[0] + uv[2];
     vtx[1].v = uv[1] + uv[3];
-    *corner2 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner2 = t4VectorXYZW(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].u = uv[0];
     vtx[2].v = uv[1];
-    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner3 = t4VectorXYZW(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].u = uv[0];
     vtx[3].v = uv[1] + uv[3];
     *corner0 = func_0038E0A8(&corner0->x, mat);
@@ -771,23 +748,23 @@ INCLUDE_ASM("render/lightman", c2DRender_drawLine);
  * @param end  the second end point
  * @param col  the colour {a, r, g, b} in 0..1
  */
-extern "C" void c2DRender_drawLine(c2DRender* self, sLmQuadVec4_E118* start, sLmQuadVec4_E118* end, float* col)
+extern "C" void c2DRender_drawLine(c2DRender* self, t4Vector* start, t4Vector* end, float* col)
 {
     tBxVertex verts[2];
     int red = (int)(col[1] * 255.0f);
     int green = (int)(col[2] * 255.0f);
     int blue = (int)(col[3] * 255.0f);
     int alpha = (int)(col[0] * 128.0f);
-    (*(sLmQuadVec4_E118*)&verts[0].p) = *start;
-    (*(sLmQuadVec4_E118*)&verts[1].p) = *end;
-    ((int*)&verts[1].r)[0] = red;
-    ((int*)&verts[1].r)[1] = green;
-    ((int*)&verts[1].r)[2] = blue;
-    ((int*)&verts[1].r)[3] = alpha;
-    ((int*)&verts[0].r)[0] = red;
-    ((int*)&verts[0].r)[1] = green;
-    ((int*)&verts[0].r)[2] = blue;
-    ((int*)&verts[0].r)[3] = alpha;
+    verts[0].p = *start;
+    verts[1].p = *end;
+    verts[1].r = red;
+    verts[1].g = green;
+    verts[1].b = blue;
+    verts[1].a = alpha;
+    verts[0].r = red;
+    verts[0].g = green;
+    verts[0].b = blue;
+    verts[0].a = alpha;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     ctx->RenderLineStrip(2, verts, 0);
 }
@@ -966,29 +943,29 @@ extern "C" void cPlants_update(void)
         float sx = sinAngle * x;
         float sy = sinAngle * y;
         float sz = sinAngle * z;
-        ((float (*)[4])&rotMat.row[0])[0][0] = tx * x + cosAngle;
-        ((float (*)[4])&rotMat.row[0])[1][0] = tx * y + sz;
-        ((float (*)[4])&rotMat.row[0])[2][0] = tx * z - sy;
-        ((float (*)[4])&rotMat.row[0])[0][1] = ty * x - sz;
-        ((float (*)[4])&rotMat.row[0])[1][1] = ty * y + cosAngle;
-        ((float (*)[4])&rotMat.row[0])[2][1] = ty * z + sx;
-        ((float (*)[4])&rotMat.row[0])[0][2] = tz * x + sy;
-        ((float (*)[4])&rotMat.row[0])[1][2] = tz * y - sx;
-        ((float (*)[4])&rotMat.row[0])[2][2] = tz * z + cosAngle;
-        ((float (*)[4])&rotMat.row[0])[3][0] = 0.0f;
-        ((float (*)[4])&rotMat.row[0])[3][1] = 0.0f;
-        ((float (*)[4])&rotMat.row[0])[3][2] = 0.0f;
-        ((float (*)[4])&rotMat.row[0])[0][3] = 0.0f;
-        ((float (*)[4])&rotMat.row[0])[1][3] = 0.0f;
-        ((float (*)[4])&rotMat.row[0])[2][3] = 0.0f;
-        ((float (*)[4])&rotMat.row[0])[3][3] = 1.0f;
+        rotMat.row[0].x = tx * x + cosAngle;
+        rotMat.row[1].x = tx * y + sz;
+        rotMat.row[2].x = tx * z - sy;
+        rotMat.row[0].y = ty * x - sz;
+        rotMat.row[1].y = ty * y + cosAngle;
+        rotMat.row[2].y = ty * z + sx;
+        rotMat.row[0].z = tz * x + sy;
+        rotMat.row[1].z = tz * y - sx;
+        rotMat.row[2].z = tz * z + cosAngle;
+        rotMat.row[3].x = 0.0f;
+        rotMat.row[3].y = 0.0f;
+        rotMat.row[3].z = 0.0f;
+        rotMat.row[0].w = 0.0f;
+        rotMat.row[1].w = 0.0f;
+        rotMat.row[2].w = 0.0f;
+        rotMat.row[3].w = 1.0f;
         lmMulIn_EE78(pm, &rotMat);
         t4Matrix* cell = &cPlants_m_meshDeformationMatrixList[i];
         lmCopy_EE78(cell, &t4mat_Identity);
-        ((float (*)[4])&cell->row[0])[2][0] += fSin(cPlants_m_SwayDirection * 0.017453294f) * amp;
-        ((float (*)[4])&cell->row[0])[2][1] += fCos(cPlants_m_SwayDirection * 0.017453294f) * amp;
-        ((float (*)[4])&branchMat.row[0])[0][2] += amp2 * fSin(cPlants_m_BranchDirection * 0.017453294f);
-        ((float (*)[4])&branchMat.row[0])[1][2] += amp2 * fCos(cPlants_m_BranchDirection * 0.017453294f);
+        cell->row[2].x += fSin(cPlants_m_SwayDirection * 0.017453294f) * amp;
+        cell->row[2].y += fCos(cPlants_m_SwayDirection * 0.017453294f) * amp;
+        branchMat.row[0].z += amp2 * fSin(cPlants_m_BranchDirection * 0.017453294f);
+        branchMat.row[1].z += amp2 * fCos(cPlants_m_BranchDirection * 0.017453294f);
         lmMul_EE78(&product, cell, &branchMat);
         lmCopy_EE78(&rotMat, &product);
         lmCopy_EE78(cell, &rotMat);
@@ -2412,10 +2389,10 @@ extern "C" int func_003914F8(void)
 //100%
 INCLUDE_ASM("render/lightman", cFont_cFont1);
 #ifdef SKIP_ASM
-struct sV4_1508 {
-    float x, y, z, w;
-    sV4_1508() {}
-    sV4_1508(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+// A tARGB with EA's constructors (ours has none): cFont's Color and ShadowColor are tARGBs ([O]).
+struct tARGBInit : tARGB {
+    tARGBInit() {}
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
 /**
@@ -2433,11 +2410,11 @@ extern "C" void* cFont_cFont1(cFont* self)
     *(t2Vector*)&self->BaseScale[0] = t2Vector(1.0f, 1.0f);
     *(t2Vector*)&self->Scale[0] = *(t2Vector*)&self->BaseScale[0];
     {
-        sV4_1508 allOnes;
-        allOnes.x = 1.0f; allOnes.y = 1.0f; allOnes.z = 1.0f; allOnes.w = 1.0f;
-        *(sV4_1508*)&self->Color[0] = allOnes;
+        tARGBInit allOnes;
+        allOnes.A = 1.0f; allOnes.R = 1.0f; allOnes.G = 1.0f; allOnes.B = 1.0f;
+        *(tARGB*)&self->Color[0] = allOnes;
     }
-    *(sV4_1508*)&self->ShadowColor[0] = sV4_1508(1.0f, 0.0f, 0.0f, 0.0f);
+    *(tARGB*)&self->ShadowColor[0] = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
     self->TextureID = -1;
     self->NumGlyphs = 0;
     self->Glyphs = 0;
@@ -2454,19 +2431,6 @@ extern "C" void* cFont_cFont1(cFont* self)
 INCLUDE_ASM("render/lightman", cFont_cFont);
 #ifdef SKIP_ASM
 
-struct sLmVec4_15E8 {
-    float x, y, z, w;
-
-    sLmVec4_15E8() {}
-    sLmVec4_15E8(float a, float b, float c, float d)
-    {
-        x = a;
-        y = b;
-        z = c;
-        w = d;
-    }
-};
-
 
 extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
 
@@ -2474,8 +2438,7 @@ extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
  * Constructs a font: sets the default draw state, then loads the named font file.
  *
  * MissingGlyph = 0, ShadowOffset (0, 0), BaseScale and Scale (1, 1), Color (1, 1, 1, 1), ShadowColor (1, 0,
- * 0, 0) and an empty FontName, then cFont_loadFont(). The self type here is a local overlay of cFont
- * (sLmLight_15E8).
+ * 0, 0) and an empty FontName, then cFont_loadFont().
  *
  * @param name  font file name (e.g. "data/fonts/debugfnt.sfn")
  * @param flags  memory flags for the font's allocations (On Tour: memtype)
@@ -2488,14 +2451,14 @@ extern "C" cFont* cFont_cFont(cFont* self, const char* name, int flags)
     (*(t2Vector*)&self->BaseScale[0]) = t2Vector(1.0f, 1.0f);
     (*(t2Vector*)&self->Scale[0]) = (*(t2Vector*)&self->BaseScale[0]);
     {
-        sLmVec4_15E8 white;
-        white.x = 1.0f;
-        white.y = 1.0f;
-        white.z = 1.0f;
-        white.w = 1.0f;
-        (*(sLmVec4_15E8*)&self->Color[0]) = white;
+        tARGBInit white;
+        white.A = 1.0f;
+        white.R = 1.0f;
+        white.G = 1.0f;
+        white.B = 1.0f;
+        (*(tARGB*)&self->Color[0]) = white;
     }
-    (*(sLmVec4_15E8*)&self->ShadowColor[0]) = sLmVec4_15E8(1.0f, 0.0f, 0.0f, 0.0f);
+    (*(tARGB*)&self->ShadowColor[0]) = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
     self->FontName[0] = 0;
     cFont_loadFont((cFont*)self, name, flags);
     return self;
