@@ -1239,7 +1239,7 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
     self->mpMixQuery[0] = cWorldPainterMan_getQuery(painterMan, pc);
     void* secondMixQuery = cWorldPainterMan_getQuery(painterMan, pc);
     self->unk_626C = 0;
-    self->unk_6274 = 0;
+    self->mMusicRequestPending = 0;
     self->mPlayingTone = 0;
     self->unk_6264 = -1;
     self->unk_6268 = -1;

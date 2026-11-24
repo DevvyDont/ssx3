@@ -152,7 +152,7 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Returns a rider's first-time-in-career flag: the word at +0 of its character record in cBELibrary_profileLib.
+ * Returns a rider's first-time-in-career flag: bFirstTimeWorldCircuit of its character record in cBELibrary_profileLib.
  *
  * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].cCharacterID.
  * Starting the career with the flag set opens on location 14, where the rider starts at the back-country drop-off.
@@ -165,9 +165,7 @@ extern "C" int cBENewPlayerInterface_isFirstTimeWC(cBENewPlayerInterface* self, 
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    int off = charId * 3976 + profile * 39760;
-    char* charRecord = (char*)cBELibrary_profileLib + off;
-    return *(int*)charRecord;
+    return cBELibrary_profileLib[profile][charId].bFirstTimeWorldCircuit;
 }
 #endif
 
@@ -179,7 +177,7 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Sets a rider's first-time-in-career flag: the word at +0 of its character record in cBELibrary_profileLib.
+ * Sets a rider's first-time-in-career flag: bFirstTimeWorldCircuit of its character record in cBELibrary_profileLib.
  *
  * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].cCharacterID.
  *
@@ -191,9 +189,7 @@ extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(cBENewPlayerInterface* se
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    int off = charId * 3976 + profile * 39760;
-    char* charRecord = (char*)cBELibrary_profileLib + off;
-    *(int*)charRecord = value;
+    cBELibrary_profileLib[profile][charId].bFirstTimeWorldCircuit = value;
 }
 #endif
 
@@ -209,7 +205,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * Uses the profile of @p index (cBELibrary_getProfileIndex) and the character of its player
  * (cBENewPlayerInterface_tempPlayers[getPlayerID].cCharacterID) to find the cBELibrary_profileLib record, then tests bit @p
- * bit of the visited mask at +0xACC.
+ * bit of the visited mask mVisitLocFlags.
  *
  * @param index  the rider (On Tour iRider)
  * @param bit  the location (On Tour eBELocationID locTrack)
@@ -220,10 +216,9 @@ extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(cBENewPlayerInterface* s
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int characterId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    int off = profile * 39760 + characterId * 3976;
-    char* profileRec = (char*)cBELibrary_profileLib + off;
     int mask = 1 << bit;
-    return (*(int*)(profileRec + 0xACC) & mask) == 0;
+    // The profile's row first, then the character: retail adds the profile offset before the character's.
+    return ((*(cBELibrary_profileLib + profile))[characterId].mVisitLocFlags & mask) == 0;
 }
 #endif
 
@@ -385,18 +380,12 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
-// PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
-struct sProfBits_146070 {
-    unsigned long pad : 12;
-    unsigned long b12 : 1;
-    unsigned long b13 : 1;
-};
-
 /**
- * Locks or unlocks a peak for a rider's character: bit 12 of its profile flags for peak 1, bit 13 for any other.
+ * Locks or unlocks a peak for a rider's character: bPeak2Locked of its profile record for peak 1, bPeak3Locked for
+ * any other.
  *
- * The flags are the 64-bit word at +0x278 of the character record (profile cBELibrary_getProfileIndex(@p index),
- * character tempPlayers[getPlayerID(@p index)].cCharacterID), the bits cBENewPlayerInterface_isPeakLocked reads.
+ * The record is profile cBELibrary_getProfileIndex(@p index), character
+ * tempPlayers[getPlayerID(@p index)].cCharacterID; the bits cBENewPlayerInterface_isPeakLocked reads.
  *
  * @param index  the rider (On Tour iRider)
  * @param kind  the peak (0-based): 1, or 2 (any other value also writes bit 13)
@@ -408,11 +397,9 @@ extern "C" void cBENewPlayerInterface_setPeakLocked(cBENewPlayerInterface* self,
     int id = cBENewPlayerInterface_getPlayerID(index);
     signed char charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     if (kind == 1) {
-        char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-        ((sProfBits_146070*)(profileRec + 0x278))->b12 = value;
+        cBELibrary_profileLib[profile][charId].bPeak2Locked = value;
     } else {
-        char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-        ((sProfBits_146070*)(profileRec + 0x278))->b13 = value;
+        cBELibrary_profileLib[profile][charId].bPeak3Locked = value;
     }
 }
 #endif
@@ -481,22 +468,13 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
-// PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
-struct sProfBits6320 {
-    unsigned long b0 : 1;
-    unsigned long b1 : 1;
-    unsigned long b2 : 1;
-    unsigned long b3 : 1;
-    unsigned long b4 : 1;
-    unsigned long b5 : 1;
-};
-
 /**
  * Sets or clears the played mark of a peak's rival challenge for a rider's character.
  *
- * Writes bit 3 + @p kind (when @p flag is set) or bit @p kind of the 64-bit flag word at +0x278 of the character record
- * (profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].cCharacterID), the bit
- * cBENewPlayerInterface_isRivalChallengePlayed reads. A peak outside 0-2 writes nothing.
+ * Writes bPeak<n>RivalTimeChallengePlayed (when @p flag is set) or bPeak<n>RivalPtsChallengePlayed (n = @p kind + 1)
+ * of the character record (profile cBELibrary_getProfileIndex(@p index), character
+ * tempPlayers[getPlayerID(@p index)].cCharacterID), the bit cBENewPlayerInterface_isRivalChallengePlayed reads. A peak
+ * outside 0-2 writes nothing.
  *
  * @param index  the rider (On Tour iRider)
  * @param kind  the peak, 0-2
@@ -510,25 +488,19 @@ extern "C" void cBENewPlayerInterface_setRivalChallengePlayed(cBENewPlayerInterf
     signed char charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     if (flag) {
         if (kind == 0) {
-            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(profileRec + 0x278))->b3 = value;
+            cBELibrary_profileLib[profile][charId].bPeak1RivalTimeChallengePlayed = value;
         } else if (kind == 1) {
-            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(profileRec + 0x278))->b4 = value;
+            cBELibrary_profileLib[profile][charId].bPeak2RivalTimeChallengePlayed = value;
         } else if (kind == 2) {
-            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(profileRec + 0x278))->b5 = value;
+            cBELibrary_profileLib[profile][charId].bPeak3RivalTimeChallengePlayed = value;
         }
     } else {
         if (kind == 0) {
-            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(profileRec + 0x278))->b0 = value;
+            cBELibrary_profileLib[profile][charId].bPeak1RivalPtsChallengePlayed = value;
         } else if (kind == 1) {
-            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(profileRec + 0x278))->b1 = value;
+            cBELibrary_profileLib[profile][charId].bPeak2RivalPtsChallengePlayed = value;
         } else if (kind == 2) {
-            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(profileRec + 0x278))->b2 = value;
+            cBELibrary_profileLib[profile][charId].bPeak3RivalPtsChallengePlayed = value;
         }
     }
 }
@@ -686,25 +658,12 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRivalEventLocked);
 int cBELibrary_getProfileIndex(int);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
-// PORT: 64-bit `long` bitfield (8 bytes on EE); use uint64_t off-PS2.
-struct sProfBits_1468B0 {
-    char pad0[0x278];
-    unsigned long pad_bits : 6;
-    unsigned long b6 : 1;
-    unsigned long b7 : 1;
-    unsigned long b8 : 1;
-    unsigned long b9 : 1;
-    unsigned long b10 : 1;
-    unsigned long b11 : 1;
-    char pad1[0xF88 - 0x280];
-};
-
 /**
  * Locks or unlocks a peak's rival event for a character.
  *
- * Writes bit 6 + @p kind (when @p flag is set) or bit 9 + @p kind of the 64-bit flag word at +0x278 of character
- * @p character's record in the profile of @p index (cBELibrary_getProfileIndex), the bit cBENewPlayerInterface_isRivalEventLocked reads. A peak outside
- * 0-2 writes nothing.
+ * Writes bPeak<n>TimeRCLocked (when @p flag is set) or bPeak<n>FreeRCLocked (n = @p kind + 1) of character
+ * @p character's record in the profile of @p index (cBELibrary_getProfileIndex), the bit
+ * cBENewPlayerInterface_isRivalEventLocked reads. A peak outside 0-2 writes nothing.
  *
  * @param index  the rider whose profile is used (On Tour iRider)
  * @param character  the character (On Tour eBECharacters)
@@ -718,25 +677,25 @@ extern "C" void cBENewPlayerInterface_setRivalEventLocked(cBENewPlayerInterface*
     if (flag) {
         switch (kind) {
         case 0:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b6 = value;
+            cBELibrary_profileLib[profile][character].bPeak1TimeRCLocked = value;
             break;
         case 1:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b7 = value;
+            cBELibrary_profileLib[profile][character].bPeak2TimeRCLocked = value;
             break;
         case 2:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b8 = value;
+            cBELibrary_profileLib[profile][character].bPeak3TimeRCLocked = value;
             break;
         }
     } else {
         switch (kind) {
         case 0:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b9 = value;
+            cBELibrary_profileLib[profile][character].bPeak1FreeRCLocked = value;
             break;
         case 1:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b10 = value;
+            cBELibrary_profileLib[profile][character].bPeak2FreeRCLocked = value;
             break;
         case 2:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b11 = value;
+            cBELibrary_profileLib[profile][character].bPeak3FreeRCLocked = value;
             break;
         }
     }
@@ -805,23 +764,10 @@ extern "C" int cBENewPlayerInterface_isEventLocked(cBENewPlayerInterface* self, 
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setEventLocked);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-struct sPlayerSub_6C10 {
-    char pad0[0x278];
-    unsigned long pad_bits : 14;
-    unsigned long b14 : 1;
-    unsigned long b15 : 1;
-    unsigned long b16 : 1;
-    unsigned long b17 : 1;
-    unsigned long b18 : 1;
-    unsigned long b19 : 1;
-    char pad1[0xF88 - 0x280];
-};
-
 /**
  * Locks or unlocks an event for a character: bit 8 + @p event (events 6-11, bits 14-19) of its profile flags.
  *
- * Writes the 64-bit flag word at +0x278 of character @p character's record in the profile of @p rider
+ * Writes bPeak1TCLocked .. bPeak3FCLocked of character @p character's record in the profile of @p rider
  * (cBELibrary_getProfileIndex), the bits cBENewPlayerInterface_isEventLocked reads. Other events write nothing.
  *
  * @param rider  the rider whose profile is used (On Tour iRider)
@@ -833,22 +779,22 @@ extern "C" void cBENewPlayerInterface_setEventLocked(cBENewPlayerInterface* self
     int profile = cBELibrary_getProfileIndex(rider);
     switch (event) {
     case 6:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b14 = locked;
+        cBELibrary_profileLib[profile][character].bPeak1TCLocked = locked;
         break;
     case 7:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b15 = locked;
+        cBELibrary_profileLib[profile][character].bPeak2TCLocked = locked;
         break;
     case 8:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b16 = locked;
+        cBELibrary_profileLib[profile][character].bPeak3TCLocked = locked;
         break;
     case 9:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b17 = locked;
+        cBELibrary_profileLib[profile][character].bPeak1FCLocked = locked;
         break;
     case 10:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b18 = locked;
+        cBELibrary_profileLib[profile][character].bPeak2FCLocked = locked;
         break;
     case 11:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b19 = locked;
+        cBELibrary_profileLib[profile][character].bPeak3FCLocked = locked;
         break;
     }
 }
@@ -862,7 +808,7 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Returns the last hub location of a rider's character (+0x27C of its profile record).
+ * Returns the last hub location of a rider's character (locLastHub of its profile record).
  *
  * @param index  the rider (On Tour: iRider); mapped to the profile and the player's character
  * @return the location id
@@ -872,9 +818,7 @@ extern "C" int cBENewPlayerInterface_getLastHub(cBENewPlayerInterface* self, int
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charID = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    int off = charID * 3976 + profile * 39760;
-    char* charProfile = (char*)cBELibrary_profileLib + off;
-    return *(int*)(charProfile + 0x27C);
+    return cBELibrary_profileLib[profile][charID].locLastHub;
 }
 #endif
 
@@ -888,7 +832,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Remembers the hub a rider's character was last at.
  *
- * Writes @p value to +0x27C of the rider's character profile record in cBELibrary_profileLib.
+ * Writes @p value to locLastHub of the rider's character profile record in cBELibrary_profileLib.
  *
  * @param index  the rider (On Tour iRider)
  * @param value  the hub location (On Tour locHub)
@@ -898,9 +842,7 @@ extern "C" void cBENewPlayerInterface_setLastHub(cBENewPlayerInterface* self, in
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int characterId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    int off = characterId * 3976 + profile * 39760;
-    char* profileRec = (char*)cBELibrary_profileLib + off;
-    *(int*)(profileRec + 0x27C) = value;
+    cBELibrary_profileLib[profile][characterId].locLastHub = value;
 }
 #endif
 
@@ -1632,7 +1574,7 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Tests message flag @p bit of a rider's character: bit @p bit of the bit array at +0xF08 of its character record.
+ * Tests message flag @p bit of a rider's character: bit @p bit of the bit array unk_F08 of its character record.
  *
  * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].cCharacterID;
  * the word is @p bit / 32 and the mask 1 << @p bit (shift taken mod 32). No range check.
@@ -1646,11 +1588,9 @@ extern "C" int func_00147980(cBENewPlayerInterface* self, int index, int bit)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    int off = profile * 39760 + charId * 3976;
-    char* charRecord = (char*)cBELibrary_profileLib + off;
-    charRecord = charRecord + (bit / 32) * 4;
     int mask = 1 << bit;
-    return (*(unsigned int*)(charRecord + 0xF08) & mask) != 0;
+    // The profile's row first, then the character: retail adds the profile offset before the character's.
+    return ((*(cBELibrary_profileLib + profile))[charId].unk_F08[bit / 32] & mask) != 0;
 }
 #endif
 
@@ -1695,31 +1635,22 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
-struct sPair_func_00147B20 {
-    int a;
-    int b;
-};
-struct sProfileSlot_func_00147B20 {
-    char pad[0xBA0];
-    sPair_func_00147B20 e[1];
-};
-
 /**
- * Returns the first word of pair @p slot in the 8-byte pair array at +0xBA0 of a rider's character record.
+ * Returns uiNumRaceMedals of pair @p slot of mPeakMainEventMedals in a rider's character record.
  *
  * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].cCharacterID.
  *
  * @param index  the rider
  * @param slot  the pair index (no range check)
- * @return the word at +0xBA0 + @p slot * 8
+ * @return mPeakMainEventMedals[@p slot].uiNumRaceMedals
  */
 extern "C" int func_00147B20(cBENewPlayerInterface* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    sProfileSlot_func_00147B20* profileSlot = (sProfileSlot_func_00147B20*)((profile * 0x9B50 + charId * 0xF88) + (char*)cBELibrary_profileLib);
-    return profileSlot->e[slot].a;
+    // The profile's row first, then the character: retail adds the profile offset before the character's.
+    return (*(cBELibrary_profileLib + profile))[charId].mPeakMainEventMedals[slot].uiNumRaceMedals;
 }
 #endif
 //100%
@@ -1729,31 +1660,22 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
-struct sPair_func_00147BB0 {
-    int a;
-    int b;
-};
-struct sProfileSlot_func_00147BB0 {
-    char pad[0xBA0];
-    sPair_func_00147BB0 e[1];
-};
-
 /**
- * Returns the second word of pair @p slot in the 8-byte pair array at +0xBA0 of a rider's character record.
+ * Returns uiNumFreeStyleMedals of pair @p slot of mPeakMainEventMedals in a rider's character record.
  *
  * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].cCharacterID.
  *
  * @param index  the rider
  * @param slot  the pair index (no range check)
- * @return the word at +0xBA4 + @p slot * 8
+ * @return mPeakMainEventMedals[@p slot].uiNumFreeStyleMedals
  */
 extern "C" int func_00147BB0(cBENewPlayerInterface* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
-    sProfileSlot_func_00147BB0* profileSlot = (sProfileSlot_func_00147BB0*)((profile * 0x9B50 + charId * 0xF88) + (char*)cBELibrary_profileLib);
-    return profileSlot->e[slot].b;
+    // The profile's row first, then the character: retail adds the profile offset before the character's.
+    return (*(cBELibrary_profileLib + profile))[charId].mPeakMainEventMedals[slot].uiNumFreeStyleMedals;
 }
 #endif
 //100%
@@ -1766,22 +1688,20 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * Sets a difficulty level of the first profile's current character and resets its win/loss streak.
  *
  * The character is cBELibrary_getCharacterID(0) in profile 0 of cBELibrary_profileLib. With @p flag set, stores
- * @p value in the short at +0x280 and clears +0x282; otherwise the pair at +0x284 / +0x286.
+ * @p value in mDifficulty and clears mDifference; otherwise the pair unk_284 / unk_286.
  *
  * @param value  the level, 0-2 (func_00147D20 caps it at 2)
- * @param flag  picks the pair: nonzero +0x280, 0 +0x284
+ * @param flag  picks the pair: nonzero mDifficulty, 0 unk_284
  */
 extern "C" void cBENewPlayerInterface_setDifficultyLevel(cBENewPlayerInterface* self, int value, int flag)
 {
     int charId = cBELibrary_getCharacterID(0);
     if (flag != 0) {
-        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
-        *(short*)(charRecord + 0x280) = value;
-        *(short*)(charRecord + 0x282) = 0;
+        cBELibrary_profileLib[0][charId].mDifficulty = value;
+        cBELibrary_profileLib[0][charId].mDifference = 0;
     } else {
-        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
-        *(short*)(charRecord + 0x284) = value;
-        *(short*)(charRecord + 0x286) = 0;
+        cBELibrary_profileLib[0][charId].unk_284 = value;
+        cBELibrary_profileLib[0][charId].unk_286 = 0;
     }
 }
 #endif
@@ -1794,9 +1714,9 @@ int cBELibrary_getCharacterID(int);
 /**
  * Returns a difficulty level of the first profile's current character (cBELibrary_getCharacterID(0), profile 0).
  *
- * The short at +0x280 of the character record when @p which is set, else the one at +0x284.
+ * mDifficulty of the character record when @p which is set, else unk_284.
  *
- * @param which  picks the pair: nonzero +0x280, 0 +0x284 (cComputer passes game mode == 0)
+ * @param which  picks the pair: nonzero mDifficulty, 0 unk_284 (cComputer passes game mode == 0)
  * @return the level, 0-2
  */
 extern "C" short cBENewPlayerInterface_getDifficultyLevel(cBENewPlayerInterface* self, int which)
@@ -1804,13 +1724,11 @@ extern "C" short cBENewPlayerInterface_getDifficultyLevel(cBENewPlayerInterface*
     int charId = cBELibrary_getCharacterID(0);
     if (which != 0)
     {
-        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
-        return *(short*)(charRecord + 0x280);
+        return cBELibrary_profileLib[0][charId].mDifficulty;
     }
     else
     {
-        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
-        return *(short*)(charRecord + 0x284);
+        return cBELibrary_profileLib[0][charId].unk_284;
     }
 }
 #endif
@@ -1924,10 +1842,10 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Returns the win/loss streak beside a difficulty level of the first profile's current character.
  *
- * The short at +0x282 (when @p flag is set) or +0x286 of the record of cBELibrary_getCharacterID(0) in profile 0; the
- * win and loss counters func_00147D20 and func_00147E18 move it.
+ * mDifference (when @p flag is set) or unk_286 of the record of cBELibrary_getCharacterID(0) in profile 0; the win
+ * and loss counters func_00147D20 and func_00147E18 move it.
  *
- * @param flag  picks the pair: nonzero +0x282, 0 +0x286
+ * @param flag  picks the pair: nonzero mDifference, 0 unk_286
  * @return the streak, -1 to 1
  */
 extern "C" short cBENewPlayerInterface_getDifficultyDifference(cBENewPlayerInterface* self, int flag)
@@ -1935,11 +1853,9 @@ extern "C" short cBENewPlayerInterface_getDifficultyDifference(cBENewPlayerInter
     int charId = cBELibrary_getCharacterID(0);
     short result;
     if (flag == 0) {
-        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
-        result = *(short*)(charRecord + 0x286);
+        result = cBELibrary_profileLib[0][charId].unk_286;
     } else {
-        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
-        result = *(short*)(charRecord + 0x282);
+        result = cBELibrary_profileLib[0][charId].mDifference;
     }
     return result;
 }
@@ -2052,7 +1968,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Returns one of the seven attribute bytes of a profile's current character, or -1 for an unknown attribute.
  *
- * Reads signed byte +0xBDF + @p stat of the record of character cBELibrary_getCharacterID(@p profile) in profile
+ * Reads byte @p stat of statDB in the record of character cBELibrary_getCharacterID(@p profile) in profile
  * @p profile of cBELibrary_profileLib.
  *
  * @param profile  the human, used both as the profile index and to look up the character (On Tour iHuman)
@@ -2065,39 +1981,25 @@ extern "C" int cBEStatInterface_getStatFromProfile(cBEStatInterface* self, int p
     int charId = cBELibrary_getCharacterID(profile);
     switch (stat) {
     case 0: {
-        int off = charId * 3976 + profile * 39760;
-        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-        return charRecord->statDB.cSpeed;
+        return cBELibrary_profileLib[profile][charId].statDB.cSpeed;
     }
     case 1: {
-        int off = charId * 3976 + profile * 39760;
-        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-        return charRecord->statDB.cAccel;
+        return cBELibrary_profileLib[profile][charId].statDB.cAccel;
     }
     case 2: {
-        int off = charId * 3976 + profile * 39760;
-        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-        return charRecord->statDB.cTrick;
+        return cBELibrary_profileLib[profile][charId].statDB.cTrick;
     }
     case 3: {
-        int off = charId * 3976 + profile * 39760;
-        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-        return charRecord->statDB.cEdging;
+        return cBELibrary_profileLib[profile][charId].statDB.cEdging;
     }
     case 4: {
-        int off = charId * 3976 + profile * 39760;
-        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-        return charRecord->statDB.cSpin;
+        return cBELibrary_profileLib[profile][charId].statDB.cSpin;
     }
     case 5: {
-        int off = charId * 3976 + profile * 39760;
-        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-        return charRecord->statDB.cToughness;
+        return cBELibrary_profileLib[profile][charId].statDB.cToughness;
     }
     case 6: {
-        int off = charId * 3976 + profile * 39760;
-        cBECharProfileDB* charRecord = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-        return charRecord->statDB.cStability;
+        return cBELibrary_profileLib[profile][charId].statDB.cStability;
     }
     }
     return -1;

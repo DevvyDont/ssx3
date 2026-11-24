@@ -249,23 +249,32 @@ struct cSSXAudio {
     int unk_6268;                       // 0x6268 [U] cSSXAudio_InGameInit stores
     int unk_626C;                       // 0x626C [U] cSSXAudio_InGameInit stores
     int unk_6270;                       // 0x6270 [U] cSSXAudio_InGameInit stores
-    int unk_6274;                       // 0x6274 [U] cSSXAudio_InGameInit stores (the shift here is -0x94: the preview's PathfinderCanChangeVolume is mPathfinderCanChangeVolume at 0x6280)
-    char unk_6278[0x4];                 // 0x6278 [U] func_0028E088 writes it, func_0028E100 reads it
-                                        //        (not the preview's SetTransportTrack field: that is mTransportTrack, shift -0x94)
+    int mMusicRequestPending;           // 0x6274 (name ours) [U] cSSXAudio_InGameInit stores; func_0028E088 sets 1 with
+                                        //        mMusicRequest, func_0028E100 acts while set and clears it (the shift
+                                        //        here is -0x94: the preview's PathfinderCanChangeVolume is
+                                        //        mPathfinderCanChangeVolume at 0x6280)
+    int mMusicRequest;                  // 0x6278 (name ours) [U] func_0028E088 posts the request code (its event's
+                                        //        mData1), func_0028E100 carries it out (0 peak theme, 2 location
+                                        //        song, 4 stop, else event 36 / 0). Not the preview's
+                                        //        SetTransportTrack field: that is mTransportTrack, shift -0x94
     int unk_627C;                       // 0x627C [R] ctor 1; [U] cSSXAudio_InGameLoad, cSSXAudio_CountdownBeep, cSSXAudio_CountdownGateDrop
     int mPathfinderCanChangeVolume;                       // 0x6280 [P] PathfinderCanChangeVolume__9cSSXAudio (preview 0x6314; func_002AF6C0 = preview 0x281170); retail accessor 0x2BADA0 (lw); [U] the Pathfinder volume callback applies a volume only when set
     int mTransportTrack;                       // 0x6284 [P] SetTransportTrack__9cSSXAudio13eBELocationID (preview 0x6318: both ctors store 23 there, kMAX_LOCATIONS); [R] ctor 23; [U] func_0028F558 stores the map screen's location
     int unk_6288;                       // 0x6288 [U] cSSXAudio_InGameInit
-    char unk_628C[0x4];                 // 0x628C no retail access seen (or padding)
+    int mMusicRampCounter;              // 0x628C (name ours) [U] func_0028F000: zeroed when a volume ramp starts
+                                        //        (unk_6288 = 2), then counted up to the tier's 800 / 1000 / 1200
     int unk_6290;                       // 0x6290 [U] cSSXAudio_FrontEndLoad stores 10
     int unk_6294;                       // 0x6294 [R] ctor 0
     int unk_6298;                       // 0x6298 [R] ctor 0; [U] cSSXAudio_CountdownGateDrop
-    char unk_629C[0x8];                 // 0x629C [U] func_0028DEF0 / func_0028DF08 get and set its
-                                        //        first word
+    int mLastMusicState;                // 0x629C (name ours) [U] func_0028DEF0 stores its argument (11, 13, 18) and
+                                        //        reports whether it changed; func_0028DF08 resets it to -1
+    int mMusicEventOwner;               // 0x62A0 (name ours) [U] the AI index (cRider virtual slot 7) of the rider
+                                        //        whose music event runs, -1 for none: func_0028CF98 resets it,
+                                        //        func_0028D630 claims it, func_0028D740 / func_0028D7D8 test and release
     int unk_62A4;                       // 0x62A4 [R] ctor -1
     int unk_62A8;                       // 0x62A8 [R] ctor -1; [U] cSSXAudio_WorldSound, cSSXAudio_AttachSound
-    char unk_62AC[0x4];                 // 0x62AC [U] func_0028CDF8 writes it, func_0028F200 (replay
-                                        //        music) reads it
+    int mSavedSongNum;                  // 0x62AC (name ours) [U] func_0028CDF8 saves MusicSys.mCurrentSongNum before
+                                        //        the podium tune; func_0028F200 (replay music) restores it
     int mAudioMode;                     // 0x62B0 [O] eSOUNDDEF_MODE; [R] ctor stores its audioMode argument; [U] cSSXAudio_SetMode stores, cSSXAudio_Calc3DPos and cSSXAudio_GetCurrentSoundMode (GetMode) read
     int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] cSSXAudio_SetArcadeSFX stores it (and sets volume controls 9/10); cSSXAudio_SetSFXVolume re-applies controls 9/10 only when set
     int unk_62B8;                       // 0x62B8 [R] ctor 0; [U] cSSXAudio_SetDJSpeech stores 1/0; func_00287410 re-applies control 2 only when set (and the mode is not 2)
@@ -443,20 +452,21 @@ CHECK_OFFSET(cSSXAudio, unk_6264, 0x6264);
 CHECK_OFFSET(cSSXAudio, unk_6268, 0x6268);
 CHECK_OFFSET(cSSXAudio, unk_626C, 0x626C);
 CHECK_OFFSET(cSSXAudio, unk_6270, 0x6270);
-CHECK_OFFSET(cSSXAudio, unk_6274, 0x6274);
-CHECK_OFFSET(cSSXAudio, unk_6278, 0x6278);
+CHECK_OFFSET(cSSXAudio, mMusicRequestPending, 0x6274);
+CHECK_OFFSET(cSSXAudio, mMusicRequest, 0x6278);
 CHECK_OFFSET(cSSXAudio, unk_627C, 0x627C);
 CHECK_OFFSET(cSSXAudio, mPathfinderCanChangeVolume, 0x6280);
 CHECK_OFFSET(cSSXAudio, mTransportTrack, 0x6284);
 CHECK_OFFSET(cSSXAudio, unk_6288, 0x6288);
-CHECK_OFFSET(cSSXAudio, unk_628C, 0x628C);
+CHECK_OFFSET(cSSXAudio, mMusicRampCounter, 0x628C);
 CHECK_OFFSET(cSSXAudio, unk_6290, 0x6290);
 CHECK_OFFSET(cSSXAudio, unk_6294, 0x6294);
 CHECK_OFFSET(cSSXAudio, unk_6298, 0x6298);
-CHECK_OFFSET(cSSXAudio, unk_629C, 0x629C);
+CHECK_OFFSET(cSSXAudio, mLastMusicState, 0x629C);
+CHECK_OFFSET(cSSXAudio, mMusicEventOwner, 0x62A0);
 CHECK_OFFSET(cSSXAudio, unk_62A4, 0x62A4);
 CHECK_OFFSET(cSSXAudio, unk_62A8, 0x62A8);
-CHECK_OFFSET(cSSXAudio, unk_62AC, 0x62AC);
+CHECK_OFFSET(cSSXAudio, mSavedSongNum, 0x62AC);
 CHECK_OFFSET(cSSXAudio, mAudioMode, 0x62B0);
 CHECK_OFFSET(cSSXAudio, mArcadeSFX, 0x62B4);
 CHECK_OFFSET(cSSXAudio, unk_62B8, 0x62B8);

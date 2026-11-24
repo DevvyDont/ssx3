@@ -7055,15 +7055,15 @@ static inline int snd7B0Add(void* vself, int a, int b)
 /**
  * Plays the start-gate drop and starts the race's music and opening DJ line.
  *
- * Calls func_002B3A98 on the music system and func_0028DF08 (unk_629C = -1), stores the cAI's AITick in mGruntCycle and
- * plays bank 0, patch 98 through this object's vtable slot 1; when not replaying also bank 0, patch 94 at volume 127
- * with the volume control cSSXAudio_GetCurrAppliedVolumePtr(vself, 9, 0). With unk_627C set the music system's vtable slot 4 gets 0. Unless
- * play-history event 0 is live: in game paths 1 and 2 (newRace.cGamePath) func_002A3170; otherwise on the last heat
- * (cGameModeMan bIsLastHeat) func_002A3400, func_002B1758(SpeechSys, 0) and, when func_002A4078 or func_002A40E8 is
- * nonzero, unk_5774 = 1 and unk_5778 = the current song's value from func_002B4908; on heat 1 the latter
- * unconditionally, on heat 2 under the same test. When unk_627C is 0 it is set to 1 and music slot 4 gets 37 (not
- * replaying), or slot 4 gets 37 when replaying with unk_6298 set. Finally play-history event 0 is moved to 50 ms past
- * the monitor clock and unk_5824 records iHeatNum.
+ * Calls func_002B3A98 on the music system and func_0028DF08 (mLastMusicState = -1), stores the cAI's AITick in
+ * mGruntCycle and plays bank 0, patch 98 through this object's vtable slot 1; when not replaying also bank 0, patch 94
+ * at volume 127 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(vself, 9, 0). With unk_627C set the music
+ * system's vtable slot 4 gets 0. Unless play-history event 0 is live: in game paths 1 and 2 (newRace.cGamePath)
+ * func_002A3170; otherwise on the last heat (cGameModeMan bIsLastHeat) func_002A3400, func_002B1758(SpeechSys, 0) and,
+ * when func_002A4078 or func_002A40E8 is nonzero, unk_5774 = 1 and unk_5778 = the current song's value from
+ * func_002B4908; on heat 1 the latter unconditionally, on heat 2 under the same test. When unk_627C is 0 it is set to 1
+ * and music slot 4 gets 37 (not replaying), or slot 4 gets 37 when replaying with unk_6298 set. Finally play-history
+ * event 0 is moved to 50 ms past the monitor clock and unk_5824 records iHeatNum.
  *
  * @param vself  the audio system
  */
@@ -12621,9 +12621,10 @@ extern "C" int func_0028DEF0(void* self, int a1);
 /**
  * Schedules the DJ's opening for the event in the world-circuit path, 2 ms later through func_0028E548.
  *
- * Only when unk_578C is 0 and the game path (newRace.cGamePath) is 0. At the locations 17..21 (func_002A3F90) it sets unk_629C
- * to 13 (func_0028DEF0) and creates a monitor (cMonitor_MONITOR_Create) with the callback D_004A3650 (func_0028E548) and kind 2;
- * elsewhere the kind is 4 with the current song value (func_002B4908) as its argument. cSSXAudio_InGameInit calls it.
+ * Only when unk_578C is 0 and the game path (newRace.cGamePath) is 0. At the locations 17..21 (func_002A3F90) it sets
+ * mLastMusicState to 13 (func_0028DEF0) and creates a monitor (cMonitor_MONITOR_Create) with the callback D_004A3650
+ * (func_0028E548) and kind 2; elsewhere the kind is 4 with the current song value (func_002B4908) as its argument.
+ * cSSXAudio_InGameInit calls it.
  */
 // PORT: 64-bit long sound key
 extern "C" void func_002A4A78(cSSXAudio* self)

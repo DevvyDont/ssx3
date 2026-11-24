@@ -142,13 +142,13 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForMnt);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns how many collectibles @p rider has found in 17 consecutive sections starting at @p idx.
  *
- * Sums the count byte of the rider's 12-byte collect records (profile +0x4 + section * 12; On Tour
- * tBEProfileCollectBits {cTotalCollected, uiCollectedBits[2]}) for sections @p idx .. @p idx + 16.
+ * Sums cTotalCollected of the rider's collect records (mCollectibles[section], tBEProfileCollectBits) for sections
+ * @p idx .. @p idx + 16.
  *
  * @param rider  the rider (selects profile slot and character)
  * @param idx  the first section
@@ -159,12 +159,9 @@ extern "C" int cBEMissionInterface_getCurrentCollectForMnt(cBEMissionInterface* 
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
     int sum = 0;
-    int off = idx * 12 + characterId * 3976 + profile * 39760;
-    char* record = cBELibrary_profileLib_raw + off;
     for (int i = 0; i < 17; i++)
     {
-        sum += *(signed char*)(record + 4);
-        record += 12;
+        sum += cBELibrary_profileLib[profile][characterId].mCollectibles[idx + i].cTotalCollected;
     }
     return sum;
 }
@@ -177,12 +174,10 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectByType);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
-// Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
-extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Returns how many collectibles @p rider has found in section @p idx + the race's location (D_005305F0): the count
- * byte of that collect record.
+ * (cTotalCollected) of that collect record.
  *
  * @param rider  the rider (selects profile slot and character)
  * @param idx  the offset from the race's location
@@ -192,9 +187,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectByType(cBEMissionInterface* 
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    int off = (idx + D_005305F0[0]) * 12 + characterId * 3976 + profile * 39760;
-    char* record = cBELibrary_profileLib_raw + off;
-    return *(signed char*)(record + 4);
+    return cBELibrary_profileLib[profile][characterId].mCollectibles[idx + D_005305F0[0]].cTotalCollected;
 }
 #endif
 
@@ -204,12 +197,10 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForSection);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-// Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
-extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
- * Returns how many collectibles @p rider has found in location @p idx: the count byte of its collect record (a
- * one-iteration sum).
+ * Returns how many collectibles @p rider has found in location @p idx: the count (cTotalCollected) of its collect
+ * record (a one-iteration sum).
  *
  * @param rider  the rider (selects profile slot and character)
  * @param idx  the location
@@ -220,11 +211,9 @@ extern "C" int cBEMissionInterface_getCurrentCollectForSection(cBEMissionInterfa
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
     int sum = 0;
-    int off = idx * 12 + characterId * 3976 + profile * 39760;
-    char* record = cBELibrary_profileLib_raw + off;
     for (int i = 0; i < 1; i++)
     {
-        sum += *(signed char*)(record + i * 12 + 4);
+        sum += cBELibrary_profileLib[profile][characterId].mCollectibles[idx + i].cTotalCollected;
     }
     return sum;
 }
@@ -237,22 +226,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-struct sEconRecord_001535C0
-{
-    int id;
-    signed char count; // 0x4
-    char pad_0x05[0x7];
-};
-
-// One character's economy block (0xF88 bytes); 10 per profile (0x9B50).
-struct sEconChar_001535C0
-{
-    sEconRecord_001535C0 records[22];
-    char pad[0xF88 - 22 * 12];
-};
-
 extern sMissionEntry_0043D950 cBELibrary_locationDB[];
-extern sEconChar_001535C0 cBELibrary_profileLib_econ[][10] __asm__("cBELibrary_profileLib");
 
 /**
  * Counts the collectibles a rider's character has picked up across all locations of one peak.
@@ -275,7 +249,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeak(cBEMissionInterface*
         {
             if (cBELibrary_locationDB[j].owner == owner)
             {
-                sum += cBELibrary_profileLib_econ[profile][character].records[i + j].count;
+                sum += cBELibrary_profileLib[profile][character].mCollectibles[i + j].cTotalCollected;
             }
         }
     }
@@ -286,27 +260,13 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeak(cBEMissionInterface*
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak1);
 #ifdef SKIP_ASM
-struct sEconRecord_00153688
-{
-    int id;
-    signed char count; // 0x4
-    char pad_0x05[0x7];
-};
-
-// One character's economy block (0xF88 bytes); 10 per profile (0x9B50).
-struct sEconChar_00153688
-{
-    sEconRecord_00153688 records[22];
-    char pad[0xF88 - 22 * 12];
-};
-
 extern sMissionEntry_0043D950 cBELibrary_locationDB[];
-extern sEconChar_00153688 cBELibrary_profileLib[][10];
 
 /**
  * Returns how many collectibles character @p character of profile slot @p profile has found on peak @p owner.
  *
- * Sums the collect-record count bytes of the 22 locations whose cBELibrary_locationDB entry has @p owner at +0x54.
+ * Sums the collect-record counts (cTotalCollected) of the 22 locations whose cBELibrary_locationDB entry has
+ * @p owner at +0x54.
  *
  * @param profile  the profile slot
  * @param character  the character
@@ -322,7 +282,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeak1(cBEMissionInterface
         {
             if (cBELibrary_locationDB[j].owner == owner)
             {
-                sum += cBELibrary_profileLib[profile][character].records[i + j].count;
+                sum += cBELibrary_profileLib[profile][character].mCollectibles[i + j].cTotalCollected;
             }
         }
     }
@@ -393,7 +353,6 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCollectBits);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
-extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Returns the address of the found-collectible bits (two words) of @p rider's collect record for section @p idx + the
@@ -407,11 +366,8 @@ extern "C" char* cBEMissionInterface_getCollectBits(cBEMissionInterface* self, i
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    char* characterBase = cBELibrary_profileLib_raw + characterId * 3976;
-    // PORT: pointer held as int (index-first addu)
-    char* charProfile = (char*)(profile * 0x9B50 + (int)characterBase);
-    char* currentRecord = charProfile + (D_005305F0[0] * 12 + 4);
-    return currentRecord + idx * 12 + 4;
+    tBEProfileCollectBits* currentRecord = &cBELibrary_profileLib[profile][characterId].mCollectibles[D_005305F0[0]];
+    return (char*)currentRecord[idx].uiCollectedBits;
 }
 #endif
 
@@ -456,7 +412,6 @@ struct sBits8_1539A8 {
 };
 extern cBERaceDB cBELibrary_raceDB;
 extern char D_004A6CB0_raw[] __asm__("D_004A6CB0");
-extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Replaces the found-collectible bits of @p rider's collect record for section @p idx + the race's location
@@ -482,8 +437,8 @@ extern "C" void cBEMissionInterface_setBits(cBEMissionInterface* self, int rider
         if (*(unsigned int*)(D_004A6CB0_raw + off) & (1 << i))
             count++;
     }
-    char* record = cBELibrary_profileLib_raw + ((idx + cBELibrary_raceDB.iLocationIdx) * 12 + characterId * 3976 + profile * 39760);
-    *(signed char*)(record + 4) = count;
+    int loc = idx + cBELibrary_raceDB.iLocationIdx;
+    cBELibrary_profileLib[profile][characterId].mCollectibles[loc].cTotalCollected = count;
 }
 #endif
 
@@ -493,21 +448,6 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_setBit);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_raceDB_3B00[] __asm__("cBELibrary_raceDB");
-
-struct sEconRecord_00153B00
-{
-    int id;
-    signed char count; // 0x4
-    char pad_0x05[0x7];
-};
-
-// One character's economy block (0xF88 bytes); 10 per profile (0x9B50).
-struct sEconChar_00153B00
-{
-    sEconRecord_00153B00 records[22];
-    char pad[0xF88 - 22 * 12];
-};
-extern sEconChar_00153B00 cBELibrary_profileLib_econ153B00[][10] __asm__("cBELibrary_profileLib");
 
 // Bit-set view of the same records, based at D_004A6CAC (record + 4).
 struct sEconBits_00153B00
@@ -547,7 +487,7 @@ extern "C" void cBEMissionInterface_setBit(cBEMissionInterface* self, int rider,
         if (D_004A6CAC_bits153B00[profile][characterId].recs[cBELibrary_raceDB_3B00[16]][idx].bits[scanBit / 32] & (1 << scanBit))
             n++;
     }
-    cBELibrary_profileLib_econ153B00[profile][characterId].records[idx + cBELibrary_raceDB_3B00[16]].count = n;
+    cBELibrary_profileLib[profile][characterId].mCollectibles[idx + cBELibrary_raceDB_3B00[16]].cTotalCollected = n;
 }
 #endif
 
@@ -1173,8 +1113,6 @@ struct sMissionOwnerView_001544D0
 };
 extern sMissionOwnerView_001544D0 D_0043D9A4[];
 
-extern cBECharProfileDB cBELibrary_profileLib_flags[][10] __asm__("cBELibrary_profileLib");
-
 /**
  * Counts the missions one profile's character has completed on a peak.
  *
@@ -1198,7 +1136,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBEMis
     {
         if (D_0043D9A4[cBELibrary_missionInfo[i].group].owner == owner)
         {
-            n += (cBELibrary_profileLib_flags[profile][character].mMissions[i] >> 3) & 1;
+            n += (cBELibrary_profileLib[profile][character].mMissions[i] >> 3) & 1;
         }
     }
     return n;

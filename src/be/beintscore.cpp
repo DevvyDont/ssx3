@@ -165,7 +165,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx);
 extern "C" char* strcpy(char* dst, const char* src);
 
 extern "C" int cBECharProfileDB_updateScoreStats(cBECharProfileDB* self, int event, int mode, unsigned int value);
-extern cBECharProfileDB cBELibrary_profileLib_154AB8[][10] __asm__("cBELibrary_profileLib");
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 struct sScoreSlot_154AB8 {
     tRiderStats stats;
@@ -228,7 +228,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
     int charID = cBELibrary_getCharacterID(rider);
     mode = cBENewRaceInterface_newRace.cGameEvent;
     int event = cBELibrary_locationDB_154AB8[cBELibrary_raceDB_154AB8.iLocationIdx].id;
-    pc = &cBELibrary_profileLib_154AB8[profile][charID];
+    pc = &cBELibrary_profileLib[profile][charID];
     self->best[profile] = 0;
     self->rank[profile] = -1;
     if (event == 22)
@@ -508,11 +508,10 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighlightLevel__FPvi);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sHL { char pad[0xBB8]; signed char lv[1]; };
 /**
  * Returns the level reached in one career highlight by the current character of player 0's profile.
  *
- * Reads byte @p highlight of the highlight levels at +0xBB8 in cBELibrary_profileLib[0] for rider slot 0's
+ * Reads byte @p highlight of the highlight levels mCareerHighlights in cBELibrary_profileLib[0] for rider slot 0's
  * character (cBELibrary_getCharacterID(0)). Callers sum the 8 highlights and compare the total with 24.
  *
  * @param highlight  which highlight (0-7; On Tour: eBEChallengeType)
@@ -521,8 +520,7 @@ struct sHL { char pad[0xBB8]; signed char lv[1]; };
 signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int highlight)
 {
     int charID = cBELibrary_getCharacterID(0);
-    int offset = highlight + charID * 3976;
-    return ((sHL*)cBELibrary_profileLib)->lv[offset];
+    return cBELibrary_profileLib[0][charID].mCareerHighlights[highlight];
 }
 #endif
 

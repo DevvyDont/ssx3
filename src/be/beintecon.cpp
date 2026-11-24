@@ -38,7 +38,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getMoney);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Returns a character's cash (+0xAC4 of its profile record).
+ * Returns a character's cash (mMoney of its profile record).
  *
  * @param iHuman  the profile index; 2 or more gives 0
  * @param charType  the character id
@@ -49,11 +49,7 @@ extern "C" int cBEEconInterface_getMoney(cBEEconInterface* self, int iHuman, int
     if (iHuman >= 2) {
         return 0;
     }
-    int bOff = charType * 3976;
-    int aOff = iHuman * 39760;
-    int off = bOff + aOff;
-    char* profile = (char*)cBELibrary_profileLib + off;
-    return *(int*)(profile + 0xAC4);
+    return cBELibrary_profileLib[iHuman][charType].mMoney;
 }
 #endif
 
@@ -64,8 +60,7 @@ int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
 /**
- * Returns @p rider's money: the word at +0xAC4 of its character profile (cBELibrary_profileLib, 0x9B50 bytes per
- * profile slot, 0xF88 per character).
+ * Returns @p rider's money: mMoney of its character profile (cBELibrary_profileLib[profile][character]).
  *
  * @param rider  the rider (selects profile slot and character)
  * @return the money
@@ -74,11 +69,7 @@ extern "C" int cBEEconInterface_getMoney1(cBEEconInterface* self, int rider)
 {
     int profileSlot = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    int bOff = characterId * 3976;
-    int aOff = profileSlot * 39760;
-    int off = bOff + aOff;
-    char* charProfile = (char*)cBELibrary_profileLib + off;
-    return *(int*)(charProfile + 0xAC4);
+    return cBELibrary_profileLib[profileSlot][characterId].mMoney;
 }
 #endif
 
@@ -88,7 +79,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned__FPvii);
 #ifdef SKIP_ASM
 /**
- * Returns the total money a character has earned (+0xAC8 of its profile record).
+ * Returns the total money a character has earned (mTotalMoneyEarned of its profile record).
  *
  * @param iHuman  the profile index; 2 or more gives 0
  * @param charType  the character id
@@ -99,11 +90,7 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int iHuman, int charType)
     if (iHuman >= 2) {
         return 0;
     }
-    int bOff = charType * 3976;
-    int aOff = iHuman * 39760;
-    int off = bOff + aOff;
-    char* profile = (char*)cBELibrary_profileLib + off;
-    return *(int*)(profile + 0xAC8);
+    return cBELibrary_profileLib[iHuman][charType].mTotalMoneyEarned;
 }
 #endif
 
@@ -117,17 +104,13 @@ int cBELibrary_getCharacterID(int);
  * Returns the total money earned by a rider's character, found from the rider's profile and character.
  *
  * @param rider  the rider index (On Tour: iRider)
- * @return the total earned (+0xAC8 of the profile record)
+ * @return the total earned (mTotalMoneyEarned of the profile record)
  */
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(cBEEconInterface* self, int rider)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    int bOff = characterId * 3976;
-    int aOff = profileIndex * 39760;
-    int off = bOff + aOff;
-    char* profile = (char*)cBELibrary_profileLib + off;
-    return *(int*)(profile + 0xAC8);
+    return cBELibrary_profileLib[profileIndex][characterId].mTotalMoneyEarned;
 }
 #endif
 
@@ -135,7 +118,7 @@ extern "C" int cBEEconInterface_getTotalMoneyEarned1(cBEEconInterface* self, int
 INCLUDE_ASM("be/beintecon", cBEEconInterface_setMoney);
 #ifdef SKIP_ASM
 /**
- * Sets the money (+0xAC4) of character @p characterId in profile slot @p profileIndex; does nothing for slots >= 2.
+ * Sets the money (mMoney) of character @p characterId in profile slot @p profileIndex; does nothing for slots >= 2.
  *
  * @param profileIndex  the profile slot (only 0 and 1 are stored)
  * @param characterId  the character
@@ -144,11 +127,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_setMoney);
 extern "C" void cBEEconInterface_setMoney(cBEEconInterface* self, int profileIndex, int characterId, int value)
 {
     if (profileIndex < 2) {
-        int bOff = characterId * 3976;
-        int aOff = profileIndex * 39760;
-        int off = bOff + aOff;
-        char* profile = (char*)cBELibrary_profileLib + off;
-        *(int*)(profile + 0xAC4) = value;
+        cBELibrary_profileLib[profileIndex][characterId].mMoney = value;
     }
 }
 #endif
@@ -159,7 +138,8 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_addMoney);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Adds @p amount to the money (+0xAC4) and the total money earned (+0xAC8) of character @p characterId in profile slot @p humanIndex.
+ * Adds @p amount to the money (mMoney) and the total money earned (mTotalMoneyEarned) of character @p characterId in
+ * profile slot @p humanIndex.
  *
  * @param humanIndex  the profile slot (0 or 1; 2 and up do nothing and return 0)
  * @param characterId  the character
@@ -171,13 +151,9 @@ extern "C" int cBEEconInterface_addMoney(cBEEconInterface* self, int humanIndex,
     if (humanIndex >= 2) {
         return 0;
     }
-    int bOff = characterId * 3976;
-    int aOff = humanIndex * 39760;
-    int off = bOff + aOff;
-    cBECharProfileDB* charProfile = (cBECharProfileDB*)((char*)cBELibrary_profileLib + off);
-    charProfile->mMoney += amount;
-    *(int*)&charProfile->mTotalMoneyEarned += amount;
-    return charProfile->mMoney;
+    cBELibrary_profileLib[humanIndex][characterId].mMoney += amount;
+    cBELibrary_profileLib[humanIndex][characterId].mTotalMoneyEarned += amount;
+    return cBELibrary_profileLib[humanIndex][characterId].mMoney;
 }
 #endif
 
@@ -207,9 +183,9 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_reduceMoney);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Subtracts @p amount from the money (+0xAC4) of character @p characterId in profile slot @p profileIndex.
+ * Subtracts @p amount from the money (mMoney) of character @p characterId in profile slot @p profileIndex.
  *
- * The total earned (+0xAC8) is left alone; there is no check that the balance covers the amount.
+ * The total earned (mTotalMoneyEarned) is left alone; there is no check that the balance covers the amount.
  *
  * @param profileIndex  the profile slot (0 or 1; 2 and up do nothing and return 0)
  * @param characterId  the character
@@ -221,11 +197,7 @@ extern "C" int cBEEconInterface_reduceMoney(cBEEconInterface* self, int profileI
     if (profileIndex >= 2) {
         return 0;
     }
-    int bOff = characterId * 3976;
-    int aOff = profileIndex * 39760;
-    int off = bOff + aOff;
-    char* profile = (char*)cBELibrary_profileLib + off;
-    return *(int*)(profile + 0xAC4) -= amount;
+    return cBELibrary_profileLib[profileIndex][characterId].mMoney -= amount;
 }
 #endif
 
@@ -234,17 +206,9 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getPeakPass);
 #ifdef SKIP_ASM
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
-// PORT: 64-bit unsigned long flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
-struct sPeakBits_0B88 {
-    unsigned long low : 12;
-    unsigned long peak1 : 1;
-    unsigned long peak2 : 1;
-    unsigned long rest : 50;
-};
-
 /**
  * Unlocks or locks peak @p peak (1 or 2) for character @p characterId of profile slot @p profileIndex: stores
- * !@p unlocked in bit 12 (peak 1) or 13 (peak 2) of the profile's flag word at +0x278.
+ * !@p unlocked in bPeak2Locked (peak 1) or bPeak3Locked (peak 2) of the character's profile record.
  *
  * Other peak numbers change nothing.
  *
@@ -262,17 +226,9 @@ extern "C" int cBEEconInterface_getPeakPass(cBEEconInterface* self, int profileI
     }
     unlocked ^= 1;
     if (peak == 1) {
-        int bOff = characterId * 3976;
-        int aOff = profileIndex * 39760;
-        int off = bOff + aOff;
-        char* profile = (char*)cBELibrary_profileLib + off;
-        ((sPeakBits_0B88*)(profile + 0x278))->peak1 = unlocked;
+        cBELibrary_profileLib[profileIndex][characterId].bPeak2Locked = unlocked;
     } else if (peak == 2) {
-        int bOff = characterId * 3976;
-        int aOff = profileIndex * 39760;
-        int off = bOff + aOff;
-        char* profile = (char*)cBELibrary_profileLib + off;
-        ((sPeakBits_0B88*)(profile + 0x278))->peak2 = unlocked;
+        cBELibrary_profileLib[profileIndex][characterId].bPeak3Locked = unlocked;
     }
     return 1;
 }
@@ -292,9 +248,9 @@ int cBEEconInterface_getAttribCost(void* self, int a1);
 /**
  * Buys one point of attribute @p attribute for character @p characterId of profile slot @p humanIndex, if affordable.
  *
- * The seven attribute bytes start at +0xBDF of the character profile. The price is cBEEconInterface_getAttribCost(points / 5 - 1);
- * when the money (+0xAC4) covers it and the attribute is not at 55, the money drops by the price, the attribute rises
- * by 1 and the stat interface's vtable slot 2 runs.
+ * The seven attribute bytes are the character profile's statDB. The price is
+ * cBEEconInterface_getAttribCost(points / 5 - 1); when the money (mMoney) covers it and the attribute is not at 55,
+ * the money drops by the price, the attribute rises by 1 and the stat interface's vtable slot 2 runs.
  *
  * @param humanIndex  the profile slot (2 and up return 0)
  * @param characterId  the character
@@ -311,36 +267,35 @@ extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIn
     }
     {
         attribLevel = 0;
-        cur = ((cBECharProfileDB*)((humanIndex * 0x9B50 + characterId * 0xF88) + (char*)cBELibrary_profileLib))->mMoney;
+        cur = cBELibrary_profileLib[humanIndex][characterId].mMoney;
         switch (attribute) {
         case 0:
-            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cSpeed;
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpeed;
             break;
         case 1:
-            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cAccel;
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cAccel;
             break;
         case 2:
-            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cTrick;
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cTrick;
             break;
         case 3:
-            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cEdging;
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cEdging;
             break;
         case 4:
-            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cSpin;
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpin;
             break;
         case 5:
-            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cToughness;
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cToughness;
             break;
         case 6:
-            attribLevel = &(&cBELibrary_profileLib[humanIndex][characterId].statDB)->cStability;
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cStability;
             break;
         }
         cost = cBEEconInterface_getAttribCost(self, *attribLevel / 5 - 1);
         if (cur < cost || *attribLevel == 55) {
             return 0;
         }
-        cBECharProfileDB* charProfile = (cBECharProfileDB*)((characterId * 0xF88 + humanIndex * 0x9B50) + (char*)cBELibrary_profileLib);
-        charProfile->mMoney = charProfile->mMoney - cost;
+        cBELibrary_profileLib[humanIndex][characterId].mMoney -= cost;
         *attribLevel = (unsigned char)*attribLevel + 1;
         cBEStatInterface_getThis()->discard();
         return 1;
@@ -379,15 +334,14 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_sellAttribute);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sProf0E68 { char s[0xF88]; };
 struct sEcon0E68 { int a; int b; };
 extern sEcon0E68 cBELibrary_attribCost_0E68[] __asm__("cBELibrary_attribCost");
 
 /**
  * Refunds one point of attribute @p kind for character @p characterId of slot @p profile, unless the attribute is at 5.
  *
- * Adds the price cBELibrary_attribCost[(points - 1) / 5] to the money (+0xAC4), then increments the attribute byte (+0xBDF +
- * @p kind) instead of decrementing it (likely a bug; nothing calls this function).
+ * Adds the price cBELibrary_attribCost[(points - 1) / 5] to the money (mMoney), then increments the attribute byte
+ * (statDB byte @p kind) instead of decrementing it (likely a bug; nothing calls this function).
  *
  * @param profile  the profile slot (2 and up return 0)
  * @param characterId  the character
@@ -396,24 +350,22 @@ extern sEcon0E68 cBELibrary_attribCost_0E68[] __asm__("cBELibrary_attribCost");
  */
 extern "C" int cBEEconInterface_sellAttribute(cBEEconInterface* self, int profile, int characterId, unsigned int kind)
 {
-    char* attribLevel;
+    signed char* attribLevel;
     if (profile >= 2) return 0;
     attribLevel = 0;
     switch (kind) {
-    case 0: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBDF]; break;
-    case 1: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE0]; break;
-    case 2: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE1]; break;
-    case 3: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE2]; break;
-    case 4: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE3]; break;
-    case 5: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE4]; break;
-    case 6: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE5]; break;
+    case 0: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cSpeed; break;
+    case 1: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cAccel; break;
+    case 2: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cTrick; break;
+    case 3: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cEdging; break;
+    case 4: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cSpin; break;
+    case 5: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cToughness; break;
+    case 6: attribLevel = &cBELibrary_profileLib[profile][characterId].statDB.cStability; break;
     }
     if (*attribLevel == 5) return 0;
     {
         int refund = cBELibrary_attribCost_0E68[(*attribLevel - 1) / 5].b;
-        int off = characterId * 3976 + profile * 39760;
-        char* charProfile = (char*)cBELibrary_profileLib + off;
-        *(int*)(charProfile + 0xAC4) += refund;
+        cBELibrary_profileLib[profile][characterId].mMoney += refund;
     }
     (*attribLevel)++;
     return 1;
@@ -543,11 +495,6 @@ extern "C" int cBEEconInterface_getMissionCash(cBEEconInterface* self, int level
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getCostForNextIncrement);
 #ifdef SKIP_ASM
-struct sEconRec {
-    char pad0[0xBDF];
-    signed char f[7];
-    char pad1[0xF88 - 0xBDF - 7];
-};
 /**
  * Returns the attribute-cost table price for the next point of attribute @p attribute of character @p characterId in slot @p humanIndex:
  * cBELibrary_attribCost[(points + 1) / 5].
@@ -568,25 +515,25 @@ extern "C" int cBEEconInterface_getCostForNextIncrement(cBEEconInterface* self, 
         attribLevel = 0;
         switch (attribute) {
         case 0:
-            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[0];
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpeed;
             break;
         case 1:
-            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[1];
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cAccel;
             break;
         case 2:
-            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[2];
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cTrick;
             break;
         case 3:
-            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[3];
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cEdging;
             break;
         case 4:
-            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[4];
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cSpin;
             break;
         case 5:
-            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[5];
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cToughness;
             break;
         case 6:
-            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[6];
+            attribLevel = &cBELibrary_profileLib[humanIndex][characterId].statDB.cStability;
             break;
         }
         return ((sEconTable*)cBELibrary_attribCost)->entries[(*attribLevel + 1) / 5].value;

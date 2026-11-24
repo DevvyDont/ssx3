@@ -4116,7 +4116,7 @@ extern "C" void *cFEMemCard_cFEMemCard1(cFEMemCard* self) {
     self->mRemovePDA = 0;
     unsigned short emptyChar = str_sp[0];
     VPTR_OF(cListNode, self) = (void**)cFEMemCard_vtbl;
-    *(unsigned short *)((char *)self + 0x58) = emptyChar;
+    *(unsigned short*)self->mszChatBuff = emptyChar;
     return ((void*)self);
 }
 #endif

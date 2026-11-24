@@ -947,7 +947,7 @@ extern "C" void* cFEMemCard_cFEMemCard(cFEMemCard* self, int engine, int memCard
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
-    *(unsigned short*)((char*)self + 0x58) = str_sp[0];
+    *(unsigned short*)self->mszChatBuff = str_sp[0];
     VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, memCardType);
     return ((void*)self);
@@ -982,7 +982,7 @@ extern "C" void* cFEMemCard_cFEMemCard2(cFEMemCard* self, int pEngine, int iType
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
-    *(unsigned short*)((char*)self + 0x58) = str_sp[0];
+    *(unsigned short*)self->mszChatBuff = str_sp[0];
     VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, iType);
     return ((void*)self);
