@@ -6,6 +6,8 @@
 #include "movie/mcoverlaymanager.h"
 #include "fe/festateprofile.h"
 #include "ui/uithing.h"
+#include "ui/uitext.h"
+#include "ui/uiscreen.h"
 #include "fe/festateriderbio.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
@@ -39,26 +41,14 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_push(void* self, void* state);
 
-struct sColorK18EB40 {
-    float r, g, b, a;
-    sColorK18EB40(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
-};
-class cUIObjK18EB40 {
-public:
-    int f0, f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void setColor(const sColorK18EB40& c);
+// A tARGB with EA's (A, R, G, B) constructor (ours has none).
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
+// cUIThing_vtbl slot 11 (setColour). On Tour's takes the colour by reference (const tARGB&) and the call passes a
+// temporary; the header's pointer form makes the caller build it first, so the call is by hand.
+typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
 
 /**
  * Handles select, back and highlight events on the profile select screen.
@@ -75,7 +65,8 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
         return;
     switch (msg) {
     case 5: {
-        ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
+        tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, menu);
+        vt[11].fn(vthis(menu, vt[11]), tARGBInit(1.0f, 1.0f, 0.0f, 0.0f));
         cUICustomInterface* custom = self->mpEngine->mpCustom;
         void* nextState = custom->getNextState((cUIState*)self, menu->mMiscData);
         if (nextState != 0)
@@ -90,11 +81,13 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
         break;
     }
     case 1: {
-        ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 0.0f, 1.0f, 0.0f));
+        tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, menu);
+        vt[11].fn(vthis(menu, vt[11]), tARGBInit(1.0f, 0.0f, 1.0f, 0.0f));
         break;
     }
     case 2: {
-        ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 1.0f, 1.0f));
+        tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, menu);
+        vt[11].fn(vthis(menu, vt[11]), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
         break;
     }
     }
@@ -366,42 +359,28 @@ extern char str_btext3a[];
 extern char str_ps2x[];
 extern int cFEStateProfileLoad_mScreenAction;
 
-struct cUIObj_F168 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Shows or hides the profile load screen's main (accept) button.
  *
  * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) shows "btext3" and "ps2x" only when @p saveBlocked is
  * false; on the load screen shows "btext3a" and "ps2x" only when @p loadBlocked is false. The shown state is also
- * stored in +0x224, which cFEStateProfileLoad_onWidgetEvent and cFEStateProfileLoad_startSave require. Fills slot +0x13C of cFEStateProfileLoad_vtbl
- * (cFEMemCard_hideMainButton's slot).
+ * stored in mMainButtonActive, which cFEStateProfileLoad_onWidgetEvent and cFEStateProfileLoad_startSave require. Fills
+ * slot +0x13C of cFEStateProfileLoad_vtbl (cFEMemCard_hideMainButton's slot).
  *
  * @param loadBlocked  true to hide the button on the load screen
  * @param saveBlocked  true to hide the button on the other screens
  */
 extern "C" void cFEStateProfileLoad_hideMainButton(cFEStateProfileLoad* self, bool loadBlocked, bool saveBlocked)
 {
-    cUIObj_F168* xButton = (cUIObj_F168*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
+    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
     if (cFEStateProfileLoad_mScreenAction != 2) {
         int showButton = !saveBlocked;
-        ((cUIObj_F168*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(showButton);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(showButton);
         self->mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     } else {
         int showButton = !loadBlocked;
-        ((cUIObj_F168*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(showButton);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a))->setVisible(showButton);
         self->mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     }
@@ -452,40 +431,11 @@ extern char str_arrw_right[];
 extern char str_datepct_d[];
 extern char str_timepct_d[];
 
-struct sColor_F2B8 {
-    int c[4];
-};
-extern sColor_F2B8 gStaticColour;
+extern tARGB gStaticColour;
 
-#define V_F2B8(n) virtual void v##n();
-class cState_F2B8 {
-public:
-    int pad[2];
-    V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07) V_F2B8(08) V_F2B8(09) V_F2B8(10)
-    V_F2B8(11) V_F2B8(12) V_F2B8(13) V_F2B8(14) V_F2B8(15) V_F2B8(16) V_F2B8(17) V_F2B8(18) V_F2B8(19) V_F2B8(20)
-    V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24) V_F2B8(25) V_F2B8(26) V_F2B8(27) V_F2B8(28) V_F2B8(29) V_F2B8(30)
-    V_F2B8(31) V_F2B8(32) V_F2B8(33) V_F2B8(34)
-    virtual void triggerDisplayState(int);
-    V_F2B8(36) V_F2B8(37) V_F2B8(38) V_F2B8(39) V_F2B8(40) V_F2B8(41)
-    virtual int displayFileOK();
-    virtual void setMenuHighlight();
-};
-
-class cUIObj_F2B8 {
-public:
-    int pad[2];
-    V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07)
-    virtual void setStatic(int);
-    virtual void setVisible(int);
-    V_F2B8(10) V_F2B8(11) V_F2B8(12) V_F2B8(13) V_F2B8(14) V_F2B8(15) V_F2B8(16) V_F2B8(17) V_F2B8(18) V_F2B8(19)
-    V_F2B8(20) V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24)
-    virtual void setUseStaticColour(int);
-};
-#undef V_F2B8
-
-static inline cUIObj_F2B8* getObj_F2B8(cState_F2B8* self, char* name)
+static inline cUIText* getText_F2B8(cFEStateProfileLoad* self, char* name)
 {
-    return (cUIObj_F2B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+    return (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
 }
 
 /**
@@ -497,40 +447,38 @@ static inline cUIObj_F2B8* getObj_F2B8(cState_F2B8* self, char* name)
  * "player1".."player6" with the slot names (plus the "date%d"/"time%d" lines for used slots) and shows the
  * left/right device arrows when another device is available.
  *
- * @param vself  the cFEStateProfileLoad
  */
 // Memory-card profile slots: refreshes the device name and the six slot rows (name, the two detail lines).
-extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
+extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* self)
 {
-    cState_F2B8* self = (cState_F2B8*)vself;
     unsigned short buf[800];
     char name[0x40];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (self->displayFileOK()) {
         if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
-            cFEStateProfileLoad_displayOff((cFEStateProfileLoad*)self);
+            cFEStateProfileLoad_displayOff(self);
             return;
-        } else if (*(int*)((char*)self + 0x214) != 3) {
+        } else if (self->mScreenStatus != 3) {
             self->triggerDisplayState(3);
         }
     }
     if (self->displayFileOK()) {
         int sel = 0;
         cMCOverlayManager_GetDeviceDisplayString(mp, mp->mSelectedDevice, buf, 800);
-        cUIText_setUnicodeStringWrap(getObj_F2B8(self, str_Memory_card_text), buf);
-        *(int*)((char*)self + 0x21C) = mp->mSelectedDevice;
+        cUIText_setUnicodeStringWrap(getText_F2B8(self, str_Memory_card_text), buf);
+        self->mLastSelectedDevice = mp->mSelectedDevice;
         self->setMenuHighlight();
-        cUIObj_F2B8* widget = getObj_F2B8(self, str_1percentage);
+        cUIText* widget = getText_F2B8(self, str_1percentage);
         widget->setVisible(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d, i);
-            widget = getObj_F2B8(self, name);
-            *(sColor_F2B8*)((char*)widget + 0x88) = gStaticColour;
+            widget = getText_F2B8(self, name);
+            widget->mStaticColour = gStaticColour;
             if (!mp->mpMemCard->HasFileName(i - 1) && !mp->mpMemCard->IsFileSlotDisabled(i - 1)
                 && mp->mpMemCard->IsFormatted()) {
-                mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)((char*)self + 0x238));
-                cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
+                mp->mpMemCard->GetTitleString(i - 1, self->mTitle);
+                cUIText_setUnicodeString(widget, self->mTitle);
                 if (cFEStateProfileLoad_mScreenAction != 2 && sel == 0) {
                     sel = 1;
                     widget->setStatic(0);
@@ -540,14 +488,14 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
                     widget->setStatic(1);
                 }
                 sprintf(name, str_datepct_d, i);
-                widget = getObj_F2B8(self, name);
+                widget = getText_F2B8(self, name);
                 widget->setVisible(0);
                 sprintf(name, str_timepct_d, i);
-                widget = getObj_F2B8(self, name);
+                widget = getText_F2B8(self, name);
                 widget->setVisible(0);
             } else if (mp->mpMemCard->IsActionable(mp->mSelectedDevice)) {
-                mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)((char*)self + 0x238));
-                cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
+                mp->mpMemCard->GetTitleString(i - 1, self->mTitle);
+                cUIText_setUnicodeString(widget, self->mTitle);
                 if (mp->mpMemCard->IsFileSlotDisabled(i - 1)) {
                     widget->setStatic(1);
                     widget->setUseStaticColour(1);
@@ -556,36 +504,36 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
                     widget->setUseStaticColour(0);
                 }
                 sprintf(name, str_datepct_d, i);
-                widget = getObj_F2B8(self, name);
+                widget = getText_F2B8(self, name);
                 mp->mpMemCard->GetFileDate(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
                 widget->setVisible(1);
                 sprintf(name, str_timepct_d, i);
-                widget = getObj_F2B8(self, name);
+                widget = getText_F2B8(self, name);
                 mp->mpMemCard->GetFileTime(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
                 widget->setVisible(1);
             } else {
-                mp->mpMemCard->GetTitleString(i - 1, (unsigned short*)((char*)self + 0x238));
-                cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
+                mp->mpMemCard->GetTitleString(i - 1, self->mTitle);
+                cUIText_setUnicodeString(widget, self->mTitle);
                 widget->setUseStaticColour(1);
                 widget->setStatic(1);
                 sprintf(name, str_datepct_d, i);
-                widget = getObj_F2B8(self, name);
+                widget = getText_F2B8(self, name);
                 widget->setVisible(0);
                 sprintf(name, str_timepct_d, i);
-                widget = getObj_F2B8(self, name);
+                widget = getText_F2B8(self, name);
                 widget->setVisible(0);
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 1) == -1)
-            getObj_F2B8(self, str_arrw_left)->setVisible(0);
+            getText_F2B8(self, str_arrw_left)->setVisible(0);
         else
-            getObj_F2B8(self, str_arrw_left)->setVisible(1);
+            getText_F2B8(self, str_arrw_left)->setVisible(1);
         if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 0) == -1)
-            getObj_F2B8(self, str_arrw_right)->setVisible(0);
+            getText_F2B8(self, str_arrw_right)->setVisible(0);
         else
-            getObj_F2B8(self, str_arrw_right)->setVisible(1);
+            getText_F2B8(self, str_arrw_right)->setVisible(1);
     }
 }
 #endif
@@ -600,82 +548,6 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_playerpct_d[];
 
-struct cSelf_F9D8 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void setState(int s);
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual int isReady();
-};
-struct cUIObj_F9D8 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void setUseStaticColour(int v);
-};
-
 /**
  * Resets the profile rows when no card is ready, or hands over to cFEStateProfileLoad_displayOn when one is.
  *
@@ -684,24 +556,21 @@ struct cUIObj_F9D8 {
  * cFEStateProfileLoad_displayOn. Otherwise it resets the six rows "player1" to "player6": slot 25
  * (cUIText_setUseStaticColour for a text) with 0 and setStatic(1). Called by cFEStateProfileLoad_displayStatus and by
  * cFEStateProfileLoad_displayOn when no card is found.
- *
- * @param vself  the profile load state
  */
-extern "C" void cFEStateProfileLoad_displayOff(cFEStateProfileLoad* vself)
+extern "C" void cFEStateProfileLoad_displayOff(cFEStateProfileLoad* self)
 {
-    cSelf_F9D8* self = (cSelf_F9D8*)vself;
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    if (self->isReady() != 0) {
+    if (self->displayFileOK() != 0) {
         if (app->mpMemCard->IsAvailable1() != 0) {
-            self->setState(3);
-            cFEStateProfileLoad_displayOn((cFEStateProfileLoad*)self);
+            self->triggerDisplayState(3);
+            cFEStateProfileLoad_displayOn(self);
             return;
         }
     }
     for (int i = 1; i < 7; i++) {
         char buf[64];
         sprintf(buf, str_playerpct_d, i);
-        cUIObj_F9D8* playerButton = (cUIObj_F9D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        cUIText* playerButton = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         playerButton->setUseStaticColour(0);
         playerButton->setStatic(1);
     }
@@ -801,73 +670,29 @@ void cMemMan_free(void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_Temp_String[];
 
-struct cSelf_FC98 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void showMessage(unsigned short* text, int a2, int a3, int a4, int a5, int a6);
-};
-
 /**
  * Starts saving the profile to the selected card slot when the save button is active.
  *
- * Only with the main button active (+0x224): starts a save of file type 1 for the player (+0x1CC) with cMCOverlayManager_writeSetFileType,
- * sets the state (+0x1C0) to 3, the busy flag (+0x1A8) and +0x1DC. Unless the status popup is already up (+0x210) or
- * +0x204 is set, it sets the popup type (+0x19C) to 22, fetches the card manager's message
- * (cMCOverlayManager_GetMessage, 800 characters into a 1600-byte "Temp String" buffer), shows it in the status popup
- * (this state's vtable slot 36, cFEMemCard_getPopup, with 1, 1, 0, 0, 1), sets +0x210 and frees the buffer. Called by
+ * Only with the main button active (mMainButtonActive): starts a save of file type 1 for the player (mPlayerIdx)
+ * with cMCOverlayManager_writeSetFileType, sets mState to 3 (saving), mIsProcessing and mIsSavePressed. Unless the
+ * status popup is already up (mIsStatusPopupOn) or mAutoLoadOn is set, it sets mPopupType to 22, fetches the card
+ * manager's message (cMCOverlayManager_GetMessage, 800 characters into a 1600-byte "Temp String" buffer), shows it in
+ * the status popup (getPopup, with 1, 1, 0, 0, 1), sets mIsStatusPopupOn and frees the buffer. Called by
  * cFEStateProfileLoad_onWidgetEvent once a profile name has been entered.
- *
- * @param vself  the profile load state
  */
-extern "C" void cFEStateProfileLoad_startSave(cFEStateProfileLoad* vself)
+extern "C" void cFEStateProfileLoad_startSave(cFEStateProfileLoad* self)
 {
-    cSelf_FC98* self = (cSelf_FC98*)vself;
-    if (*(int*)((char*)self + 0x224) != 0) {
-        cMCOverlayManager_writeSetFileType(cSSXApp_getMCManager(SSXApp), 1, *(int*)((char*)self + 0x1CC));
-        *(int*)((char*)self + 0x1C0) = 3;
-        *(int*)((char*)self + 0x1A8) = 1;
-        *(int*)((char*)self + 0x1DC) = 1;
-        if (*(int*)((char*)self + 0x210) == 0 && *(int*)((char*)self + 0x204) == 0) {
-            *(int*)((char*)self + 0x19C) = 22;
+    if (self->mMainButtonActive != 0) {
+        cMCOverlayManager_writeSetFileType(cSSXApp_getMCManager(SSXApp), 1, self->mPlayerIdx);
+        self->mState = 3;
+        self->mIsProcessing = 1;
+        self->mIsSavePressed = 1;
+        if (self->mIsStatusPopupOn == 0 && self->mAutoLoadOn == 0) {
+            self->mPopupType = 22;
             unsigned short* buf = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager_GetMessage(cSSXApp_getMCManager(SSXApp), buf, 800);
-            self->showMessage(buf, 1, 1, 0, 0, 1);
-            *(int*)((char*)self + 0x210) = 1;
+            self->getPopup(buf, 1, 1, 0, 0, 1);
+            self->mIsStatusPopupOn = 1;
             if (buf != 0) {
                 cMemMan_free(buf);
             }
@@ -907,24 +732,12 @@ extern char str_kT_MEMPlayerName_b[];
 extern char str_Keyboard[];
 extern char str_kT_KEYUserName[];
 
-struct sVEntryK18FD90 {
-    short delta;
-    short index;
-    void* (*fn)(void*, ...);
-};
-
-
-#define VCALLV_K18FD90(obj, off, idx) (*(sVEntry<void(void*, ...)>**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntry<void(void*, ...)>**)((char*)(obj) + (off)))[idx].delta
-
-#define VCALL_K18FD90(obj, off, idx) (*(sVEntryK18FD90**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntryK18FD90**)((char*)(obj) + (off)))[idx].delta
-
-
-
-
 static inline void* GetText_K18FD90(char* key)
 {
     cFELocale* db = SSXApp->FELocale;
-    sVEntryK18FD90* vt = (sVEntryK18FD90*)VPTR_OF(cUILocaleInterface, db);
+    // slot 4: getStringByHash (the virtual call through cFELocale* adds an addiu for &vt[4])
+    sVEntry<unsigned short*(void*, unsigned int)>* vt =
+        (sVEntry<unsigned short*(void*, unsigned int)>*)VPTR_OF(cUILocaleInterface, db);
     return vt[4].fn(vthis(db, vt[4]), GetHashValue32(key));
 }
 
@@ -965,35 +778,37 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
         char buf[0x70];
         char fmt[0x70];
         char* name = self->mpKeyboard->mszEditString;
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+        cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
             cBENewPlayerInterface_setPlayerName(player, self->mPlayerIdx, name);
-            func_002C2540(mp + 0x276, name);
+            func_002C2540(mp->mNewFileName, name);
         } else {
             strcpy2(fmt, GetText_K18FD90(str_kT_MEMPlayerName_b));
             sprintf(buf, fmt, self->mPlayerIdx + 1);
             cBENewPlayerInterface_setPlayerName(player, self->mPlayerIdx, buf);
-            func_002C2540(mp + 0x276, buf);
+            func_002C2540(mp->mNewFileName, buf);
         }
-        VCALLV_K18FD90(player, 0xC, 1));
+        player->submit();
         cFEStateProfileLoad_startSave(vself);
         break;
     }
     case 5: {
         if (((char*)item) == 0) break;
         if (self->mIsProcessing != 0) break;
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (self->mScreenStatus != 3) break;
-        ((cMCOverlayManager*)mp)->mFileCursor = self->mSlot = item->mMiscData;
+        mp->mFileCursor = self->mSlot = item->mMiscData;
         switch (cFEStateProfileLoad_mScreenAction) {
         case 1:
         case 3:
             if (self->mState == 1 && self->mMainButtonActive != 0) {
                 if (((char*)self->mpKeyboard) == 0) {
-                    char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_Keyboard, 0x100, 0), ((void*)self->mpEngine), vself, 0, self->mCtrlBits);
-                    *(char**)&self->mpKeyboard = kb;
-                    *(int*)(kb + 0x140) = 55;
+                    cKeyboardPopup* kb = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
+                        cMemMan_alloc(1092, str_Keyboard, 0x100, 0), ((void*)self->mpEngine), vself, 0,
+                        self->mCtrlBits);
+                    self->mpKeyboard = kb;
+                    kb->miCurrentKey = 55;
                     cKeyboardPopup_setMaxCharacters(((char*)self->mpKeyboard), 8);
                     cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 75, 1, 2);
                     self->mpKeyboard->mbDisableForFirst = 1;
@@ -1013,7 +828,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
                 cKeyboardPopup_setStatic(((char*)self->mpKeyboard), GetText_K18FD90(str_kT_KEYUserName));
                 self->mpKeyboard->mbClearOnFirst = 1;
                 cKeyboardPopup_setInputText(((char*)self->mpKeyboard), cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mPlayerIdx));
-                cUIStateStack_pushPopup(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x18, ((char*)self->mpKeyboard));
+                cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, ((char*)self->mpKeyboard));
                 self->mProcessingKeyboard = 1;
                 self->mPopupType = 0;
             }
@@ -1021,20 +836,20 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
         case 2:
             if (self->mMainButtonActive != 0) {
                 cMCOverlayManager_readSetFileType(mp, 1);
-                VCALLV_K18FD90(self, 8, 44));
+                self->confirmLoad();
             }
             break;
         }
         break;
     }
     case 6: {
-        char* mp = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (self->mIsProcessing != 1) {
             int st = self->mState;
             if (st != 6) {
                 self->mIsCancelPressed = 1;
                 if (st == 0 || st == 2 || st == 1) {
-                    VCALLV_K18FD90(mp, 1864, 1), 0);
+                    mp->SetState(0);
                 }
                 self->mState = 6;
             }
@@ -1043,15 +858,15 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
     }
     case 7:
         if (self->mIsProcessing != 1 && self->mState != 6 && cFEStateProfileLoad_mScreenAction != 2 && self->mDeleteButtonActive != 0) {
-            char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-            if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 54), *(int*)(mp + 0x428)) != 0) {
-                ((cMCOverlayManager*)mp)->mFileCursor = self->mSlot = item->mMiscData;
+            cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+            if (mp->mpMemCard->IsActionable(mp->mSelectedDevice) != 0) {
+                mp->mFileCursor = self->mSlot = item->mMiscData;
                 if (self->mState == 1) {
-                    if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 67), self->mSlot) != 0) {
+                    if (mp->mpMemCard->HasFileName(self->mSlot) != 0) {
                         self->mIsProcessing = 1;
                         self->mState = 4;
                         cMCOverlayManager_SetAction(mp, 0);
-                        VCALLV_K18FD90(mp, 1864, 1), 0x18);
+                        mp->SetState(0x18);
                     }
                 }
             }
@@ -1083,22 +898,9 @@ extern char str_playerpct_d[];
 extern char str_onmenu[];
 extern char str_offmenu[];
 
-struct cUIObj_02C0 {
-    int pad[2];
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void setFocus(int on);
-    virtual void v8();
-    virtual void setVisible(int on);
-};
-
-static inline cUIObj_02C0* getObj_02C0(char* self, char* name)
+static inline cUIThing* getObj_02C0(cFEStateProfileLoad* self, char* name)
 {
-    return (cUIObj_02C0*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+    return cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
 }
 
 /**
@@ -1112,32 +914,32 @@ static inline cUIObj_02C0* getObj_02C0(char* self, char* name)
 // Hides the profile panels, numbers the six slot rows and enables the confirm buttons.
 extern "C" void cFEStateProfileLoad_initGeneral(cFEStateProfileLoad* selfp)
 {
-    cUIObj_02C0* widget;
-    widget = getObj_02C0(((char*)selfp), str_Title_SaveProfile);
+    cUIThing* widget;
+    widget = getObj_02C0(selfp, str_Title_SaveProfile);
     widget->setVisible(0);
-    widget = getObj_02C0(((char*)selfp), str_Title_LoadProfile);
+    widget = getObj_02C0(selfp, str_Title_LoadProfile);
     widget->setVisible(0);
-    widget = getObj_02C0(((char*)selfp), str_helptext_save);
+    widget = getObj_02C0(selfp, str_helptext_save);
     widget->setVisible(0);
-    widget = getObj_02C0(((char*)selfp), str_helptext_load);
+    widget = getObj_02C0(selfp, str_helptext_load);
     widget->setVisible(0);
-    widget = getObj_02C0(((char*)selfp), str_btext3);
+    widget = getObj_02C0(selfp, str_btext3);
     widget->setVisible(0);
-    widget = getObj_02C0(((char*)selfp), str_btext3a);
+    widget = getObj_02C0(selfp, str_btext3a);
     widget->setVisible(0);
-    widget = getObj_02C0(((char*)selfp), str_btext5);
+    widget = getObj_02C0(selfp, str_btext5);
     widget->setVisible(0);
     char buf[0x10];
     for (int i = 1; i < 7; i++) {
         sprintf(buf, str_pct_d_b, i);
-        widget = getObj_02C0(((char*)selfp), buf);
+        widget = getObj_02C0(selfp, buf);
         cUIText_setAsciiString((cUIText*)widget, buf);
         sprintf(buf, str_playerpct_d, i);
-        widget = getObj_02C0(((char*)selfp), buf);
-        *(int*)((char*)widget + 0x18) = i - 1;
+        widget = getObj_02C0(selfp, buf);
+        widget->mMiscData = i - 1;
     }
-    getObj_02C0(((char*)selfp), str_onmenu)->setFocus(0);
-    getObj_02C0(((char*)selfp), str_offmenu)->setFocus(1);
+    getObj_02C0(selfp, str_onmenu)->setFocus(0);
+    getObj_02C0(selfp, str_offmenu)->setFocus(1);
 }
 #endif
 
@@ -1155,36 +957,22 @@ extern char str_kT_HELPCreateSaveNewFile[];
 extern char str_btext3[];
 extern char str_btext5[];
 
-struct cUIObj_0540 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Sets the profile screen up for creating a new profile save.
  *
  * Activates "Title_SaveProfile" (kT_FEProfileNew), "helptext_save" (kT_HELPCreateSaveNewFile) and the buttons
- * "btext3" and "btext5", and sets the words at +0x220 and +0x224 to 1.
+ * "btext3" and "btext5", and sets mDeleteButtonActive and mMainButtonActive.
  */
 extern "C" void cFEStateProfileLoad_initCreateScreen(cFEStateProfileLoad* self)
 {
-    cUIObj_0540* titleText = (cUIObj_0540*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_SaveProfile));
+    cUIText* titleText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_SaveProfile));
     titleText->setVisible(1);
-    cUIText_setUnicodeStringByID((cUIText*)titleText, GetHashValue32(str_kT_FEProfileNew));
-    cUIObj_0540* helpText = (cUIObj_0540*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_save));
+    cUIText_setUnicodeStringByID(titleText, GetHashValue32(str_kT_FEProfileNew));
+    cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_save));
     helpText->setVisible(1);
-    cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(str_kT_HELPCreateSaveNewFile));
-    ((cUIObj_0540*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(1);
-    ((cUIObj_0540*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(1);
+    cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_HELPCreateSaveNewFile));
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5))->setVisible(1);
     self->mDeleteButtonActive = 1;
     self->mMainButtonActive = 1;
 }
@@ -1201,33 +989,20 @@ extern char str_helptext_load[];
 extern char str_btext3a[];
 extern char str_ps2sq[];
 
-struct cUIObj_0670 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 
 /**
  * Sets up the profile screen as the load screen.
  *
- * Shows "Title_LoadProfile", "helptext_load" and "btext3a", hides "ps2sq" (cUIThing_setVisible), clears the delete-button flag (+0x220), sets the main-button flag (+0x224) and clears the card manager's
- * mPollForFullCard. cFEStateProfileLoad_onCreateScreen runs it when cFEStateProfileLoad_mScreenAction is 2.
+ * Shows "Title_LoadProfile", "helptext_load" and "btext3a", hides "ps2sq" (cUIThing_setVisible), clears
+ * mDeleteButtonActive, sets mMainButtonActive and clears the card manager's mPollForFullCard.
+ * cFEStateProfileLoad_onCreateScreen runs it when cFEStateProfileLoad_mScreenAction is 2.
  */
 extern "C" void cFEStateProfileLoad_initLoadScreen(cFEStateProfileLoad* self)
 {
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_LoadProfile)))->setVisible(1);
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_load)))->setVisible(1);
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(1);
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(0);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_LoadProfile))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_load))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq))->setVisible(0);
     (self)->mDeleteButtonActive = 0;
     (self)->mMainButtonActive = 1;
     ((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mPollForFullCard = 0;
@@ -1243,32 +1018,19 @@ extern char str_Title_SaveProfile[];
 extern char str_helptext_save[];
 extern char str_btext3[];
 extern char str_btext5[];
-struct cUIObj_0768 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Sets up the profile screen as the save screen.
  *
- * Shows "Title_SaveProfile", "helptext_save", "btext3" and "btext5" (cUIThing_setVisible) and sets the delete-button (+0x220) and main-button (+0x224) flags. cFEStateProfileLoad_onCreateScreen
+ * Shows "Title_SaveProfile", "helptext_save", "btext3" and "btext5" (cUIThing_setVisible) and sets
+ * mDeleteButtonActive and mMainButtonActive. cFEStateProfileLoad_onCreateScreen
  * runs it when cFEStateProfileLoad_mScreenAction is 3.
  */
 extern "C" void cFEStateProfileLoad_initSaveScreen(cFEStateProfileLoad* self)
 {
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_SaveProfile)))->setVisible(1);
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_save)))->setVisible(1);
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(1);
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Title_SaveProfile))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_save))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(1);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5))->setVisible(1);
     self->mDeleteButtonActive = 1;
     self->mMainButtonActive = 1;
 }

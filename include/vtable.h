@@ -21,6 +21,14 @@ template <class V> inline void* vthis(void* obj, const V& slot)
     return (char*)obj + slot.delta;
 }
 
+// The same with the slot's this-adjustment already read into a local, for a call whose slot retail reads before a
+// store that would make the compiler read it again (a constructor's vptr store):
+//     short delta = vt[k].delta; F* fn = vt[k].fn; ...store...; fn(vthis(obj, delta));
+inline void* vthis(void* obj, short delta)
+{
+    return (char*)obj + delta;
+}
+
 // The vptr of a real polymorphic class at byte offset off, for the constructors and destructors the matching code
 // writes by hand as extern "C" functions (a C++ constructor stores it itself), and for the hand-made virtual calls
 // that still read it (VPTR_OF below names the class instead of the offset).

@@ -21,6 +21,12 @@
 #include "main/ssxapp.h"
 #include "replay/bxreplayframe.h"
 #include "render/graphicsman.h"
+#include "input/padcache.h"
+#include "main/loadindicator.h"
+#include "util/locale.h"
+#include "world/patchrecord.h"
+#include "world/worldcache.h"
+#include "visualfx/lensfx.h"
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
@@ -78,28 +84,16 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_init);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-class cPlayerMgr_6900;
-extern "C" void cPadCache_init(cPlayerMgr_6900* self);
+extern "C" void cPadCache_init(cPadCache* self);
 
-struct sApp_6900 {
-    char pad_0x0[0xA0];
-    void* shape;    // 0xA0
+// tARGB from its four channels, in member order (taken by reference).
+struct tARGBInit : tARGB {
+    tARGBInit(const float& a, const float& r, const float& g, const float& b) { A = a; R = r; G = g; B = b; }
 };
 
-
-
-struct sColor_6900 {
-    float r, g, b, a;
-    sColor_6900() {}
-    sColor_6900(const float& ar, const float& ag, const float& ab, const float& aa) : r(ar), g(ag), b(ab), a(aa) {}
-};
-
-struct sTint_6900 {
-    int a;
-    int b;
-    int c;
-    sColor_6900 col;
-    sTint_6900() : a(0), b(0), c(0) { col = sColor_6900(1.0f, 1.0f, 1.0f, 1.0f); }
+// cLoadIndicator with its inline constructor: phase, alpha and locale 0, then an opaque white colour.
+struct cLoadIndicatorNew : cLoadIndicator {
+    cLoadIndicatorNew() { phase = 0; alpha = 0; locale = 0; colour = tARGBInit(1.0f, 1.0f, 1.0f, 1.0f); }
 };
 
 extern void* PadCache;
@@ -127,10 +121,6 @@ extern "C" void* cGameModeMan_getGM();
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 
-typedef void (*V0Fn_6900)(char*);
-typedef void (*V1Fn_6900)(char*, int);
-typedef void* (*LoadFn_6900)(char*, void*, const char*, int, int, int);
-
 /**
  * Initialises the application: creates the core subsystems, parses the command line and queues the first
  * module.
@@ -147,13 +137,13 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
 {
     SSXApp = (cSSXApp*)self;
     *(void**)&self->ConsoleConfig = cConsoleConfig_construct();
-    cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(12028, str_PadCache, 0, 0);
+    cPadCache* volatile pm = (cPadCache*)cMemMan_alloc(12028, str_PadCache, 0, 0);
     cPadCache_init(pm);
     PadCache = pm;
-    char* graphicsMan = (char*)cGraphicsMan_construct();
-    GrMan = (cPS2GraphicsMan*)(graphicsMan);
-    sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan));
-    ((V0Fn_6900)vt[2].fn)(graphicsMan + vt[2].delta);
+    cPS2GraphicsMan* graphicsMan = (cPS2GraphicsMan*)cGraphicsMan_construct();
+    GrMan = graphicsMan;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cGraphicsMan, graphicsMan);
+    vt[2].fn(vthis(graphicsMan, vt[2])); // slot 2: Init
     cLightMan_construct();
     cBezierMan_construct();
     G2D = cMemMan_alloc(1, str_2DRender, 0, 0);
@@ -168,15 +158,16 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     *(int*)&self->RealFE = 0;
     cSSXApp_parseCommandLine(self, argc, argv);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEntry<void>* vt2 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-    ((V1Fn_6900)vt2[44].fn)((char*)ps2GraphicsMan + vt2[44].delta, 0x100);
+    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
+    vt2[44].fn(vthis(ps2GraphicsMan, vt2[44]), 0x100); // slot 44: InitTextures
     cPS2GraphicsMan* gfxMan = GrMan;
-    sVEntry<void>* vt3 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfxMan);
-    char* gfxThis = (char*)gfxMan + vt3[46].delta;
+    sVEntry<int(void*, void*, const char*, int, int, int)>* vt3 =
+        (sVEntry<int(void*, void*, const char*, int, int, int)>*)VPTR_OF(cGraphicsMan, gfxMan);
+    void* gfxThis = vthis(gfxMan, vt3[46]); // slot 46: AddTexture
     void* loadShape = SHAPE_locate(loadicon, str_load);
-    ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(gfxThis, loadShape, str_loadicon, 0, 1, -1);
+    SSXApp->LoadIconTextureID = vt3[46].fn(gfxThis, loadShape, str_loadicon, 0, 1, -1);
     cGraphicsMan_UploadTextures(GrMan);
-    *(sTint_6900**)&self->LoadIndicator = new (str_LoadIndicator, 0, 0) sTint_6900;
+    self->LoadIndicator = new (str_LoadIndicator, 0, 0) cLoadIndicatorNew;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC, str_PreStartScreen, 0x100, 0)));
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
     void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(1424, str_FEAsyncManager, 0, 0));
@@ -689,7 +680,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 int sepPos = MAX_7BF0(slash, MAX_7BF0(backslash, colon));
                 if (sepPos >= 0) {
                     cBXString trimmed;
-                    cBXString_right(&trimmed, &track, *(int*)((int)track.Str - 8) - sepPos - 1);
+                    cBXString_right(&trimmed, &track, track.getData()->DataLength - sepPos - 1);
                     cBXString_operatorE(&track, &trimmed);
                     cBXString__cBXString(&trimmed, 2);
                 }
@@ -783,7 +774,7 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
         for (i = 0; i < 2; i++) {
             int valueCount = cPadCache_numButtons(PadCache, i);
             void* values = cPadCache_buttonValues(PadCache, i);
-            cInputPad_update(((void**)&self->InputPads)[i], valueCount, values);
+            cInputPad_update(self->InputPads[i], valueCount, values);
         }
         return 1;
     }
@@ -1210,7 +1201,8 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
  * Creates the front-end locale if needed and sets it to the language chosen in the options.
  *
  * Allocates the 0xC0-byte "FELocale" on first use, passes the options' language field (bits 22-24 of
- * cBEOptionInterface_mOption) to its vtable slot 3, then calls cFELocale_loadCommon() on it. BE interface 4 is fetched and unused.
+ * cBEOptionInterface_mOption) to its setLanguage (vtable slot 3), then calls cFELocale_loadCommon() on it. BE interface
+ * 4 is fetched and unused.
  */
 extern "C" void cSSXApp_initLocale(cSSXApp* self)
 {
@@ -1218,9 +1210,9 @@ extern "C" void cSSXApp_initLocale(cSSXApp* self)
         *(void**)&self->FELocale = cFELocale_cFELocale(cMemMan_alloc(0xC0, str_FELocale, 0, 0));
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    char* loc = (char*)self->FELocale;
-    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(loc + 4);
-    char* thisp = loc + vt[3].delta;
+    cFELocale* loc = self->FELocale;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
+    void* thisp = vthis(loc, vt[3]); // slot 3: setLanguage
     void (**pfn)(void*, int) = &vt[3].fn;
     (*pfn)(thisp, optLanguage_228A78(cBEOptionInterface_mOption_228A78));
     cFELocale_loadCommon(self->FELocale);
@@ -2533,62 +2525,38 @@ extern "C" void FrustumIntersector_crossinginstance_impl(sVisOwner_9FC8 *self, v
 //100%
 INCLUDE_ASM("main/ssxapp", FrustumIntersector_crossingpatch);
 #ifdef SKIP_ASM
-struct sVisEnt_A128 {
-    int a;
-    int f4;
-};
-struct sVisRec_A128 {
-    int f0;
-    int pad[5];
-};
-struct sVisTbl_A128 {
-    char pad0[0x20];
-    sVisEnt_A128 ent[0x7A];
-    sVisRec_A128 rec[1];
-};
-
-struct sVisOwner_A128 {
-    char pad0[0x90];
-    char **tblp;                  // 0x90
-    char pad94[0x50A8 - 0x94];
-    int countA;                   // 0x50A8
-    void *nodesA[0x800];          // 0x50AC
-    int countB;                   // 0x70AC
-    void *nodesB[0x200];          // 0x70B0
-    void *last;                   // 0x78B0
-};
-
-static inline int visOk_A128(sVisOwner_A128 *self, char *node)
+static inline int visOk_A128(FrustumIntersector *self, tPatchRecord *node)
 {
-    int idx = *(short *)(node + 0x156);
-    sVisTbl_A128 *tbl = (sVisTbl_A128 *)*self->tblp;
+    int idx = node->m_SMap.m_iHullID;
+    cWorldCache *cache = self->world->m_pWorldCache;
     if (idx < 0) {
         return 0;
     }
-    if ((tbl->ent[*(unsigned char *)(node + 0x155)].f4 ^ 6) == 0) {
-        return tbl->rec[idx].f0 == 3;
+    if ((cache->m_WorldView.mp_SectionState[node->m_SMap.m_uiSectionID].state ^ 6) == 0) {
+        return cache->m_HullPages[idx].m_State == 3;
     }
     return 0;
 }
 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
-extern "C" void FrustumIntersector_crossingpatch_impl(sVisOwner_A128 *self, void *vnode, int frustum) __asm__("FrustumIntersector_crossingpatch");
+extern "C" void FrustumIntersector_crossingpatch_impl(FrustumIntersector *self, void *vnode, int frustum)
+    __asm__("FrustumIntersector_crossingpatch");
 /**
- * Files the previously tested world node of the second kind by its VU0 frustum result, then starts the test
- * for @p vnode.
+ * Files the previously tested patch (a tPatchRecord) by its VU0 frustum result, then starts the test for @p vnode.
  *
- * Same pipeline as FrustumIntersector_crossinginstance with other offsets: the pending node is +0x78B0, result 0 or 3 appends it to the list
- * at +0x50AC (count +0x50A8, 0x800 entries), 4 to the list at +0x70B0 (count +0x70AC, 0x200 entries). A node is tested
- * only when its hull page (+0x156) is not negative, the state of its section (+0x155) is 6 and the page is loaded
- * (m_State 3). The test uses the box at +0x158 / +0x164 and the vector at +0x140. FrustumIntersector_AddAllPatchesCrossing calls it.
+ * Same pipeline as FrustumIntersector_crossinginstance for patches: the pending one is lastpatch; result 0 or 3
+ * appends it to patchesinside (count numpatchesinside, 0x800 entries), 4 to patchescrossing (count
+ * numpatchescrossing, 0x200 entries). A patch is tested only when its m_SMap hull page is not negative, the state of
+ * its section in the world cache's view is 6 and the page is loaded (m_State 3). The test uses the box m_fvMin /
+ * m_fvMax and m_fvBSphere. FrustumIntersector_AddAllPatchesCrossing calls it.
  *
  * @param vnode  the node to test, or null to file the pending node
  * @param frustum  the value put in vi14 for the microprogram
  */
-extern "C" void FrustumIntersector_crossingpatch_impl(sVisOwner_A128 *self, void *vnode, int frustum)
+extern "C" void FrustumIntersector_crossingpatch_impl(FrustumIntersector *self, void *vnode, int frustum)
 {
-    char *node = (char *)vnode;
+    tPatchRecord *node = (tPatchRecord *)vnode;
     unsigned int testResult;
 
     if (node != 0) {
@@ -2598,12 +2566,12 @@ extern "C" void FrustumIntersector_crossingpatch_impl(sVisOwner_A128 *self, void
         {
             float lo[4] __attribute__((aligned(16)));
             float hi[4] __attribute__((aligned(16)));
-            lo[0] = *(float *)(node + 0x158);
-            lo[1] = *(float *)(node + 0x15C);
-            lo[2] = *(float *)(node + 0x160);
-            hi[0] = *(float *)(node + 0x164);
-            hi[1] = *(float *)(node + 0x168);
-            hi[2] = *(float *)(node + 0x16C);
+            lo[0] = node->m_fvMin.m[0];
+            lo[1] = node->m_fvMin.m[1];
+            lo[2] = node->m_fvMin.m[2];
+            hi[0] = node->m_fvMax.m[0];
+            hi[1] = node->m_fvMax.m[1];
+            hi[2] = node->m_fvMax.m[2];
             lo[3] = 1.0f;
             hi[3] = 1.0f;
             __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
@@ -2614,7 +2582,7 @@ extern "C" void FrustumIntersector_crossingpatch_impl(sVisOwner_A128 *self, void
                 "ctc2.ni   %3, $vi14\n"
                 "vcallms   0xDB8\n"
                 :
-                : "r"(lo), "r"(hi), "r"(node + 0x140), "r"(frustum));
+                : "r"(lo), "r"(hi), "r"((char*)&node->m_fvBSphere), "r"(frustum));
         }
     } else {
         __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
@@ -2622,20 +2590,20 @@ extern "C" void FrustumIntersector_crossingpatch_impl(sVisOwner_A128 *self, void
     switch (testResult) {
     case 0:
     case 3:
-        if (self->last != 0) {
-            self->nodesA[self->countA++] = self->last;
+        if (self->lastpatch != 0) {
+            self->patchesinside[self->numpatchesinside++] = self->lastpatch;
         }
         break;
     case 1:
     case 2:
         break;
     case 4:
-        if (self->last != 0) {
-            self->nodesB[self->countB++] = self->last;
+        if (self->lastpatch != 0) {
+            self->patchescrossing[self->numpatchescrossing++] = self->lastpatch;
         }
         break;
     }
-    self->last = node;
+    self->lastpatch = node;
 }
 #endif
 
@@ -2734,17 +2702,12 @@ INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllInstancesCrossing);
 #ifdef SKIP_ASM
 extern "C" void FrustumIntersector_crossinginstance(void* self, void* node, int frustum);
 
-struct sNode_A368 {
-    sNode_A368* next;
-};
-
-
-
 /**
  * Frustum-tests the nodes of each listed source with FrustumIntersector_crossinginstance, then files the last pending one.
  *
- * Each of the @p count 8-byte entries holds a source and a frustum value; the source's linked node list starts at +0x20
- * (next link at +0x0). Ends with FrustumIntersector_crossinginstance(self, 0, 0) when a node is pending (+0x50A4). FrustumIntersector_FrustumIntersector calls it.
+ * Each of the @p count 8-byte entries holds a cell and a frustum value; the cell's instance list (nodesinside[0], at
+ * +0x20) is walked through each node's next link. Ends with FrustumIntersector_crossinginstance(self, 0, 0) when a node
+ * is pending (lastinstance). FrustumIntersector_FrustumIntersector calls it.
  *
  * @param list  the source entries
  * @param count  the number of entries
@@ -2752,7 +2715,7 @@ struct sNode_A368 {
 extern "C" void FrustumIntersector_AddAllInstancesCrossing(FrustumIntersector* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sNode_A368* n = (*(sNode_A368**)&((nash_Cell*)list->pCell)->nodesinside[0]);
+        nash_Node* n = ((nash_Cell*)list->pCell)->nodesinside[0].head;
         while (n != 0) {
             FrustumIntersector_crossinginstance(self, n, ((int)list->uVisMask));
             n = n->next;
@@ -2769,16 +2732,11 @@ INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllPatchesCrossing);
 #ifdef SKIP_ASM
 extern "C" void FrustumIntersector_crossingpatch(void* self, void* node, int frustum);
 
-struct sNode_A408 {
-    sNode_A408* next;
-};
-
-
-
 /**
  * Frustum-tests the nodes of each listed source with FrustumIntersector_crossingpatch, then files the last pending one.
  *
- * Same as FrustumIntersector_AddAllInstancesCrossing with the list at +0x24 of each source and the pending node at +0x78B0. FrustumIntersector_FrustumIntersector calls it.
+ * Same as FrustumIntersector_AddAllInstancesCrossing with each cell's patch list (nodesinside[1], at +0x24) and the
+ * pending node in lastpatch. FrustumIntersector_FrustumIntersector calls it.
  *
  * @param list  the source entries
  * @param count  the number of entries
@@ -2786,7 +2744,7 @@ struct sNode_A408 {
 extern "C" void FrustumIntersector_AddAllPatchesCrossing(FrustumIntersector* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sNode_A408* n = (*(sNode_A408**)&((nash_Cell*)list->pCell)->nodesinside[1]);
+        nash_Node* n = ((nash_Cell*)list->pCell)->nodesinside[1].head;
         while (n != 0) {
             FrustumIntersector_crossingpatch(self, n, ((int)list->uVisMask));
             n = n->next;
@@ -2963,42 +2921,9 @@ extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* sel
 //100%
 INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllPatchesInside);
 #ifdef SKIP_ASM
-struct sVisNode_A698 {
-    sVisNode_A698* next;    // 0x000
-    char pad_0x4[0x13C];
-    int sphere[4];          // 0x140
-    char pad_0x150[0x5];
-    unsigned char slot;     // 0x155
-    short path;             // 0x156
-};
-
-
-
-struct sVisSlot_A698 {
-    int f0;
-    int type;
-};
-
-struct sVisCam_A698 {
-    char pad_0x0[0x20];
-    sVisSlot_A698 slots[(0x3F0 - 0x20) / 8];  // 0x20
-    struct {
-        int kind;
-        char pad[0x14];
-    } paths[1];                     // 0x3F0
-};
-
-struct sVisOwner_A698 {
-    char pad_0x0[0x90];
-    sVisCam_A698** cam;             // 0x90
-    char pad_0x94[0x50A8 - 0x94];
-    int count;                      // 0x50A8
-    sVisNode_A698* nodes[1];        // 0x50AC
-};
-
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xEF0 (sphere vs frustum test; 2 = outside).
-static inline int visSphereTest_A698(int* sphere, int frustum)
+static inline int visSphereTest_A698(tf4Vector* sphere, int frustum)
 {
     int r;
     __asm__ __volatile__(
@@ -3011,48 +2936,47 @@ static inline int visSphereTest_A698(int* sphere, int frustum)
     return r;
 }
 
-static inline bool IsT6_A698(sVisCam_A698* c, int i)
+static inline bool IsT6_A698(cWorldCache* c, int i)
 {
-    return c->slots[i].type == 6;
+    return c->m_WorldView.mp_SectionState[i].state == 6;
 }
 
-static inline int visOnPath_A698(sVisCam_A698* cam, sVisNode_A698* n)
+static inline int visOnPath_A698(cWorldCache* cache, tPatchRecord* n)
 {
-    if (n->path < 0)
+    if (n->m_SMap.m_iHullID < 0)
         return 0;
-    if (IsT6_A698(cam, n->slot))
-        return cam->paths[n->path].kind == 3;
+    if (IsT6_A698(cache, n->m_SMap.m_uiSectionID))
+        return cache->m_HullPages[n->m_SMap.m_iHullID].m_State == 3;
     return 0;
 }
 
 /**
- * Collects the visible path-bound objects of each listed octree cell into the world view's list at +0x50AC.
+ * Collects the visible patches of each listed octree cell into patchesinside.
  *
- * Same walk as FrustumIntersector_AddAllInstancesInside over the object list at +0x24 of each cell: an object qualifies when its path index
- * (+0x156) is not negative, its slot (+0x155) is a type-6 entry of the camera-slot table and that path has kind 3. Its
- * sphere (+0x140) is tested on VU0 (microprogram 0xEF0, 2 = outside) unless the entry's plane mask is 0; survivors go
- * to the list at +0x50AC, count +0x50A8 (no bounds check).
+ * Same walk as FrustumIntersector_AddAllInstancesInside over each cell's patch list (nodesinside[1]): a patch
+ * qualifies when its m_SMap hull page is not negative, its section's state in the world cache's view is 6 and that
+ * page is loaded (m_State 3). Its m_fvBSphere is tested on VU0 (microprogram 0xEF0, 2 = outside) unless the entry's
+ * plane mask is 0; survivors go to patchesinside, count numpatchesinside (no bounds check).
  *
- * @param self_  the world view being built (see FrustumIntersector_FrustumIntersector)
+ * @param self  the frustum query being built (see FrustumIntersector_FrustumIntersector)
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self_, void* list_, int count)
+extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self, void* list_, int count)
 {
-    sVisOwner_A698* self = (sVisOwner_A698*)self_;
     CellClipT* list = (CellClipT*)list_;
     for (; count > 0; count--, list++) {
-        sVisNode_A698* n = (*(sVisNode_A698**)&((nash_Cell*)list->pCell)->nodesinside[1]);
+        tPatchRecord* n = (tPatchRecord*)((nash_Cell*)list->pCell)->nodesinside[1].head;
         while (n != 0) {
             // A do/while(0) block around the body (as a macro would) reproduces the target's register choice.
             do {
                 int frustum = ((int)list->uVisMask);
-                if (visOnPath_A698(*self->cam, n)) {
-                    if (frustum == 0 || visSphereTest_A698(n->sphere, frustum) != 2) {
-                        self->nodes[self->count++] = n;
+                if (visOnPath_A698(self->world->m_pWorldCache, n)) {
+                    if (frustum == 0 || visSphereTest_A698(&n->m_fvBSphere, frustum) != 2) {
+                        self->patchesinside[self->numpatchesinside++] = n;
                     }
                 }
-                n = n->next;
+                n = (tPatchRecord*)n->m_iIntersect.next;
             } while (0);
         }
     }
@@ -3062,28 +2986,9 @@ extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self_
 //100%
 INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllTypedInside);
 #ifdef SKIP_ASM
-struct sVisNode_A770 {
-    sVisNode_A770* next;    // 0x00
-    int pad_0x4;
-    int type;               // 0x08
-    char pad_0xC[0x44];
-    int sphere[4];          // 0x50
-};
-
-
-
-struct sVisOwner_A770 {
-    char pad_0x0[0x78B4];
-    int countA;                 // 0x78B4
-    sVisNode_A770* nodesA[192]; // 0x78B8
-    int pad_0x7BB8[2];
-    int countB;                 // 0x7BC0
-    sVisNode_A770* nodesB[1];   // 0x7BC4
-};
-
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xEF0 (sphere vs frustum test; 2 = outside).
-static inline int visSphereTest_A770(int* sphere, int frustum)
+static inline int visSphereTest_A770(tf4Vector* sphere, int frustum)
 {
     int r;
     __asm__ __volatile__(
@@ -3099,28 +3004,30 @@ static inline int visSphereTest_A770(int* sphere, int frustum)
 /**
  * Sorts the objects of each listed octree cell by type into two lists of the world view.
  *
- * Walks the linked list at +0x28 of each entry's cell; the type is at +0x8 of each object. Type 7 objects are
+ * Walks each entry's cell's typed list (nodesinside[2]), switching on each node's type. Fog volumes (type 7) are
  * sphere-tested on VU0 (microprogram 0xEF0, 2 = outside; skipped when the entry's plane mask is 0) and appended to
- * nodesA (+0x78B8, count +0x78B4, room for 192); type 8 objects go to nodesB (+0x7BC4, count +0x7BC0) untested. Other
- * types are skipped. Neither append checks for overflow.
+ * fogvolumesinside (count numfogvolumesinside); light halos (type 8) go to lighthalosinside (count
+ * numlighthalosinside) untested. Other types are skipped. Neither append checks for overflow.
  *
  * @param list  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllTypedInside(sVisOwner_A770* self, CellClipT* list, int count)
+extern "C" void FrustumIntersector_AddAllTypedInside(FrustumIntersector* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sVisNode_A770* n = (*(sVisNode_A770**)&((nash_Cell*)list->pCell)->nodesinside[2]);
+        cTypedSpaceNode* n = (cTypedSpaceNode*)((nash_Cell*)list->pCell)->nodesinside[2].head;
         while (n != 0) {
             if (n->type == 7) {
+                // the typed records begin with the cTypedSpaceNode words: the casts view the node as its record
+                tParticleInstanceRecord* fog = (tParticleInstanceRecord*)n;
                 int frustum = ((int)list->uVisMask);
-                if (frustum == 0 || visSphereTest_A770(n->sphere, frustum) != 2) {
-                    self->nodesA[self->countA++] = n;
+                if (frustum == 0 || visSphereTest_A770(&fog->m_fvBSphere, frustum) != 2) {
+                    self->fogvolumesinside[self->numfogvolumesinside++] = fog;
                 }
             } else if (n->type == 8) {
-                self->nodesB[self->countB++] = n;
+                self->lighthalosinside[self->numlighthalosinside++] = (tHaloRecord*)n;
             }
-            n = n->next;
+            n = (cTypedSpaceNode*)n->next;
         }
     }
 }
@@ -3477,7 +3384,7 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     Load_22ADD8(&ctx, cfg[7].data, &cfg[7]);
     FrustumIntersector_AddAllPatchesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
     FrustumIntersector_AddAllInstancesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
-    FrustumIntersector_AddAllTypedInside((sVisOwner_A770*)self, (CellClipT*)(self + 0x98), *(int*)(self + 0x94));
+    FrustumIntersector_AddAllTypedInside((FrustumIntersector*)self, (CellClipT*)(self + 0x98), *(int*)(self + 0x94));
     FrustumIntersector_AddAllPatchesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
     FrustumIntersector_AddAllInstancesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
     FrustumIntersector_AddAllTypedCrossing((sWorld_22A4A8*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));

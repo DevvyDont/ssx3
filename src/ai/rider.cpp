@@ -37,6 +37,9 @@
 #include "ai/rider.h"
 #include "ai/ai.h"
 #include "visualfx/transitionman.h"
+#include "camera/cameracontroller.h"
+#include "object/instancenode.h"
+#include "inseq/scriptplayerentity.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
@@ -328,15 +331,6 @@ int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
 extern "C" void* func_0014AD50(void* iface, int rider);
 
-struct sBEEntry_11BBE8
-{
-    int f0;
-    short f4;
-    char pad[0x32];
-};
-
-
-
 /**
  * Fills @p list with the BE part entries the rider wears and returns how many.
  *
@@ -351,7 +345,7 @@ struct sBEEntry_11BBE8
  * @param list  receives the entry pointers
  * @return the number of entries written
  */
-extern "C" int func_0011BBE8(cRider* vself, char** list)
+extern "C" int func_0011BBE8(cRider* vself, tBEBoltDef** list)
 {
     cRider* self = (cRider*)vself;
     int n = 0;
@@ -362,11 +356,11 @@ extern "C" int func_0011BBE8(cRider* vself, char** list)
     if (other != 0)
     {
         ch = other;
-        sBEEntry_11BBE8* part = (sBEEntry_11BBE8*)func_0014D998(db, ch);
+        tBEBoltDef* part = (tBEBoltDef*)func_0014D998(db, ch);
         int cnt = func_0014D988(db, ch);
         for (int i = 0; i < cnt; i++)
         {
-            list[n] = (char*)part;
+            list[n] = part;
             n++;
             part++;
         }
@@ -375,10 +369,10 @@ extern "C" int func_0011BBE8(cRider* vself, char** list)
     {
         cBECharProfileDB* riderData = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
         int cnt = func_0014D988(db, ch);
-        sBEEntry_11BBE8* part = (sBEEntry_11BBE8*)func_0014D998(db, ch);
+        tBEBoltDef* part = (tBEBoltDef*)func_0014D998(db, ch);
         for (int i = 0; i < cnt; i++, part++)
         {
-            short idx = riderData->mpBoltsMap[part->f4];
+            short idx = riderData->mpBoltsMap[part->id];
             tBEProfileBolt* slot;
             if (idx >= 0)
                 slot = &((&riderData->mBolts[0]))[idx];
@@ -386,7 +380,7 @@ extern "C" int func_0011BBE8(cRider* vself, char** list)
                 slot = 0;
             if (slot->flags & 0x10)
             {
-                list[n] = (char*)part;
+                list[n] = part;
                 n++;
             }
         }
@@ -552,7 +546,7 @@ void* cMdfArchive_cMdfArchive(void* self);
 void cMdfArchive_attachArchive(void* self, int a1);
 extern "C" void cMdfArchive__cMdfArchive(int* self, int flags);
 extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
-extern "C" int func_0011BBE8(cRider* self, char** list);
+extern "C" int func_0011BBE8(cRider* self, tBEBoltDef** list);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
 
 
@@ -561,7 +555,7 @@ extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int
  *
  * Wraps @p pData in a local cMdfArchive (cMdfArchive_cMdfArchive, cMdfArchive_attachArchive) and gets the rider's part entries
  * (func_0011BBE8: the equipped items of its character, or every part of a cheat character, into a 52-entry
- * list). For each entry's four LOD part names (at +0x18), the named archive part is added to mAnimModel at
+ * list). For each entry's four LOD part names (lodPartNames), the named archive part is added to mAnimModel at
  * that LOD as variant 0. The archive is destroyed with cMdfArchive__cMdfArchive(arc, 2).
  *
  * @param pData  the MDF archive data, passed as an int (On Tour: pData)
@@ -569,16 +563,16 @@ extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int
 extern "C" void cRider_parsePartsFromBuf(cRider* self, int pData)
 {
     cMdfArchive arc;
-    char* list[52];
+    tBEBoltDef* list[52];
     cMdfArchive_cMdfArchive(&arc);
     cMdfArchive_attachArchive(&arc, pData);
     int n = func_0011BBE8(self, list);
     for (int i = 0; i < n; i++)
     {
-        char* item = list[i];
+        tBEBoltDef* item = list[i];
         for (int j = 0; j < 4; j++)
         {
-            const char* name = ((const char**)(item + 0x18))[j];
+            const char* name = item->lodPartNames[j];
             if (name != 0)
             {
                 void* part = cMdfArchive_getModelPart(&arc, name);
@@ -810,12 +804,12 @@ void cWorldLine_cWorldLine_D660(cWorldLine* ray, const t4Vector& a, const t4Vect
 extern float cBXNash_terrainIntersect1_D660(void* coll, cWorldLine* ray, tIntersectInfo* hit, int flags) __asm__("cBXNash_terrainIntersect1");
 
 
-// Quaternion; the ctor stores w, then y, x, z (that order reproduces the retail store schedule).
-struct sQuat_D660
-{
-    float x, y, z, w;
-    sQuat_D660() {}
-    sQuat_D660(float ax, float ay, float az, float aw) { w = aw; y = ay; x = ax; z = az; }
+// A tQuaternion with EA's inline constructors; the 4-float one stores w, then y, x, z (that order reproduces the
+// retail store schedule). Same layout as t4Vector: mRotation and the pose quaternions are t4Vectors holding a
+// quaternion, written through an sQuatW cast.
+struct sQuatW : tQuaternion {
+    sQuatW() {}
+    sQuatW(float ax, float ay, float az, float aw) { w = aw; y = ay; x = ax; z = az; }
 } __attribute__((aligned(16)));
 
 // Non-POD by-value vector (user copy ctor => passed by invisible reference).
@@ -846,18 +840,18 @@ static inline float Atan2_D660(float y, float x)
     return a;
 }
 
-static inline sQuat_D660 AxisAngle_D660(const t4Vector& axis, float angle)
+static inline sQuatW AxisAngle_D660(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sQuat_D660(s * axis.x, s * axis.y, s * axis.z, c);
+    return sQuatW(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-static inline sQuat_D660 AxisAngleL_D660(const t4Vector& axis, float angle)
+static inline sQuatW AxisAngleL_D660(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    sQuat_D660 q;
+    sQuatW q;
     q.w = c;
     q.x = s * axis.x;
     q.y = s * axis.y;
@@ -1031,7 +1025,7 @@ static inline t4Vector Normalize_D660(const t4Vector& v)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline t4Vector QuatMul_D660(const sQuat_D660& a, const t4Vector& b)
+static inline t4Vector QuatMul_D660(const sQuatW& a, const t4Vector& b)
 {
     t4Vector r;
     __asm__(
@@ -1116,7 +1110,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         AddEq_D660(placePos, Scale_D660(t4vect_ZAxis_D660, drop));
     }
     self->mPosition = placePos;
-    *(sQuat_D660*)&self->mRotation = AxisAngle_D660(t4vect_ZAxis_D660, angle - 1.5707963705062866f);
+    *(sQuatW*)&self->mRotation = AxisAngle_D660(t4vect_ZAxis_D660, angle - 1.5707963705062866f);
     self->mUseRootPoseOverride = 0;
     t4Vector axis = Cross_D660(t4vect_ZAxis_D660, n);
     float len = Length_D660(axis);
@@ -1124,7 +1118,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     {
         DivEq_D660(axis, len);
         // PORT: g++ minimum operator.
-        sQuat_D660 tiltRot = AxisAngleL_D660(axis, func_0031C128(len <? 1.0f));
+        sQuatW tiltRot = AxisAngleL_D660(axis, func_0031C128(len <? 1.0f));
         self->mRotation = QuatMul_D660(tiltRot, self->mRotation);
     }
     cRider_updateOrientationImplicit(self);
@@ -1180,7 +1174,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         yaw = 3.1415927410125732f;
     cRiderAnim* riderAnim = self->mRiderAnim;
     riderAnim->OrientationOffset.P = t4vect_Origin_D660;
-    *(sQuat_D660*)&riderAnim->OrientationOffset.Q = AxisAngle_D660(t4vect_ZAxis_D660, -yaw);
+    *(sQuatW*)&riderAnim->OrientationOffset.Q = AxisAngle_D660(t4vect_ZAxis_D660, -yaw);
     cRiderAnimBase_play(self->mRiderAnim, anim, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
     cRider_updateAnimation(self, 1.0f);
@@ -1371,9 +1365,9 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
     {
         char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
         sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
-        char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
-        sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
-        char* objB = obj + vtB[3].delta;
+        cCameraController* ctrl = SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
+        sVEntry<void(void*, int)>* vtB = (sVEntry<void(void*, int)>*)ctrl->mVtbl; // slot 3: snap(subjectID)
+        void* objB = vthis(ctrl, vtB[3]);
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
     }
     cWScriptMan_eventReset(cWScriptMan_TheWScriptMan);
@@ -3383,8 +3377,9 @@ extern "C" void cRiderMetrix_update(void* metrix);
 /**
  * Runs the rider's object script hook, then its path, finish, metrix and focus updates.
  *
- * When unk_A30 is set, calls virtual slot 40 of its object (+0xC) with unk_A60, unk_9E0 and the rider, or,
- * without one, the world-script manager's cWScriptMan_doOnCollideScript with the same arguments. Then cRider_updateTestSurface (empty),
+ * When the rider collided with an instance (CollideIntersectInfo.Inst), calls its active node's onCollide with
+ * CollideInfo, CollideIntersectInfo and the rider, or, without a node, the world-script manager's
+ * cWScriptMan_doOnCollideScript with the same arguments. Then cRider_updateTestSurface (empty),
  * cRider_updateTrackPath (outside an NIS), cRider_updateAIPath, cRider_updateFinishTest(), the metrix update cRiderMetrix_update
  * (outside an NIS) and cRider_updateFocus().
  */
@@ -3393,11 +3388,11 @@ extern "C" void cRider_updateSplit10(cRider* self)
     tInstanceRecord* collideInst = self->CollideIntersectInfo.Inst;
     if (((char*)collideInst) != 0)
     {
-        char* obj = (char*)collideInst->m_pActiveNode;
-        if (obj != 0)
+        cInstanceNode* node = collideInst->m_pActiveNode;
+        if (node != 0)
         {
-            sVEntry<void(void*, void*, void*, void*)>* vt = *(sVEntry<void(void*, void*, void*, void*)>**)(obj + 0xC);
-            vt[40].fn(vthis(obj, vt[40]), (char*)&self->CollideInfo, (char*)&self->CollideIntersectInfo, (char*)&VPTR_AT(self, sizeof(cRiderState)));
+            cBeing& being = *self;
+            node->onCollide(&self->CollideInfo, &self->CollideIntersectInfo, &being);
         }
         else
         {
@@ -4730,7 +4725,7 @@ void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionStat
 void cRider_putAt_3210(void* self, sVec4* a, sVec4* b, int n, float t) __asm__("cRider_putAt");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix times vector).
-static inline sVec4 MatMulV_3210(const char* m, const t4Vector& v)
+static inline sVec4 MatMulV_3210(const t4Matrix* m, const t4Vector& v)
 {
     sVec4 r;
     __asm__(
@@ -4809,7 +4804,7 @@ static inline void SetPath_3210(void* self, sVec4* p, sVec4* d)
     cRider_putAt_3210(self, p, d, 5, 0.0f);
 }
 
-extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transport");
+extern "C" void cRider_transport_v(cRider* self, const t4Matrix* m) __asm__("cRider_transport");
 
 /**
  * Teleports the rider to a transform, keeping its speed, with a per-rider offset so riders do not overlap.
@@ -4822,10 +4817,10 @@ extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transp
  *
  * @param mat  the target transform, row 3 = position (On Tour: const t4Matrix & mat)
  */
-extern "C" void cRider_transport_v(cRider* self, char* mat)
+extern "C" void cRider_transport_v(cRider* self, const t4Matrix* mat)
 {
     cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
-    sVec4 pos = *(sVec4*)(mat + 0x30);
+    sVec4 pos = *(const sVec4*)&mat->row[3];
     sVec4 off(0.0f, 0.0f, 0.0f, 0.0f);
     int i = self->mAIIndex;
     if (i == 0) {
@@ -4850,9 +4845,9 @@ extern "C" void cRider_transport_v(cRider* self, char* mat)
     cRider_cancelRiderTransitions(self);
     char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
     sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
-    char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
-    sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
-    char* objB = obj + vtB[3].delta;
+    cCameraController* ctrl = SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
+    sVEntry<void(void*, int)>* vtB = (sVEntry<void(void*, int)>*)ctrl->mVtbl; // slot 3: snap(subjectID)
+    void* objB = vthis(ctrl, vtB[3]);
     vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
     float len = Length_3210(*(sVec4*)&self->mVelocity);
     SetPath_3210(self, &pos, &dir);
@@ -4980,26 +4975,19 @@ extern "C" void* func_0014D998(void* tbl, int g);
 extern "C" int cRider_getIdentity(cRider* self);
 extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 
-struct sV_3640
-{
-    float x, y, z, w;
-    sV_3640() {}
-    sV_3640(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+extern sVec4 t4vect_Zero_3640 __asm__("t4vect_Zero");
+extern sVec4 t4vect_ZAxis_3640 __asm__("t4vect_ZAxis");
 
-extern sV_3640 t4vect_Zero_3640 __asm__("t4vect_Zero");
-extern sV_3640 t4vect_ZAxis_3640 __asm__("t4vect_ZAxis");
-
-static inline sV_3640 AxisAngle_3640(const sV_3640& axis, float angle)
+static inline sVec4 AxisAngle_3640(const sVec4& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sV_3640(s * axis.x, s * axis.y, s * axis.z, c);
+    return sVec4(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 // PORT: PS2-only VU0 macro-mode asm (4x4 matrix times vector).
 // PORT: g++ named-return-value extension.
-static inline sV_3640 MatMulV_3640(const char* m, const sV_3640& v) return r
+static inline sVec4 MatMulV_3640(const char* m, const sVec4& v) return r
 {
     __asm__(
         "lqc2       $vf8, %2\n"
@@ -5018,9 +5006,9 @@ static inline sV_3640 MatMulV_3640(const char* m, const sV_3640& v) return r
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sV_3640 QuatMul_3640(const sV_3640& a, const sV_3640& b)
+static inline sVec4 QuatMul_3640(const sVec4& a, const sVec4& b)
 {
-    sV_3640 r;
+    sVec4 r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -5050,15 +5038,6 @@ static inline void initTrack_3640(cRider* self, int i, float v, float z)
 
 
 
-struct sEnt_3640 {
-    char pad0[0x4];
-    short item;                 // 0x04
-    char pad6[0xA];
-    signed char id;             // 0x10
-    char pad11[0x23];
-    int flags;                  // 0x34
-};
-
 static inline tBEProfileBolt* lookup_3640(cBECharProfileDB* d, int i)
 {
     short k = d->mpBoltsMap[i];
@@ -5071,14 +5050,15 @@ static inline tBEProfileBolt* lookup_3640(cBECharProfileDB* d, int i)
 /**
  * Starts a scripted sequence (NIS) for the rider: leaves normal control and poses the rider from the script.
  *
- * Sets CS_Void and MS_Static, plays anim 5, sets mIsInNIS and clears the event flag and sound ids. Byte 7 of
- * the script record (GetSSXActorHeader) sets unk_AFC (probe the ground at the board root), byte 4 sets unk_AD0
- * (rider not drawn). The entity's channels give the start position, put through mScriptMatrix into mPosition,
- * and three angles in degrees that set mRotation.
+ * Sets CS_Void and MS_Static, plays anim 5, sets mIsInNIS and clears the event flag and sound ids. The actor
+ * header's (GetSSXActorHeader) isRidingBoard sets mNISShowBoardVisualFX (probe the ground at the board root),
+ * hidden sets mHiddenNIS (rider not drawn). The entity's channels give the start position, put through
+ * mScriptMatrix into mPosition, and three angles in degrees that set mRotation.
  *
  * Velocity and speed are zeroed, the FX and the 19 slewed channels reset (channel 9 to 1), parts 5, 6, 8 and
- * 9 enabled and 4 and 7 disabled at LOD 0; when byte 6 is set, the rider's items with flag 0x10 are disabled
- * at every LOD. Ends any boost (cRider_setupBoostWarp(self, 0, 0)).
+ * 9 enabled and 4 and 7 disabled at LOD 0; with hideIllegalBoltOn set, the model parts of the rider's owned
+ * items (bolt slot flag 0x10) whose definition has flag 0x40 are disabled at every LOD. Ends any boost
+ * (cRider_setupBoostWarp(self, 0, 0)).
  */
 extern "C" void cRider_OnStartObjectUse(cRider* self)
 {
@@ -5097,14 +5077,14 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     float zeroF;
     float one = 1.0f;
     // PORT: GetSSXActorHeader returns a record pointer as int
-    char* rec = (char*)GetSSXActorHeader(self->mpEntity);
+    tSSXHeaderActor* rec = (tSSXHeaderActor*)GetSSXActorHeader(self->mpEntity);
     zeroF = 0.0f;
-    self->mNISShowBoardVisualFX = rec[7] != 0;
+    self->mNISShowBoardVisualFX = rec->isRidingBoard != 0;
     self->mOnGroundNIS = 1;
-    self->mHiddenNIS = rec[4] != 0;
+    self->mHiddenNIS = rec->hidden != 0;
     GetSSXActorFrame((int)self->mpEntity, buf);
     float* fb = (float*)buf;
-    sV_3640 poseVec;
+    sVec4 poseVec;
     poseVec.x = fb[6];
     poseVec.y = fb[7];
     poseVec.z = fb[8];
@@ -5112,19 +5092,19 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     self->mScriptCurrRotX = fb[9] * 0.01745329424738884f;
     self->mScriptCurrRotY = fb[10] * 0.01745329424738884f;
     self->mScriptCurrRotZ = fb[11] * 0.01745329424738884f;
-    *(sV_3640*)&self->mScriptCurrPosOffset = poseVec;
-    poseVec = MatMulV_3640((char*)&self->mScriptMatrix, *(sV_3640*)&self->mScriptCurrPosOffset);
-    *(sV_3640*)&self->mPosition = poseVec;
+    *(sVec4*)&self->mScriptCurrPosOffset = poseVec;
+    poseVec = MatMulV_3640((char*)&self->mScriptMatrix, *(sVec4*)&self->mScriptCurrPosOffset);
+    *(sVec4*)&self->mPosition = poseVec;
     float ry = self->mBaseRotY;
     float rz = self->mBaseRotX;
     cRider_EulerToQuat(self, (tQuaternion*)&poseVec, zeroF,
                   self->mScriptCurrRotY + ry,
                   self->mScriptCurrRotX + rz);
     float rx = self->mBaseRotZ;
-    *(sV_3640*)&self->mRotation = AxisAngle_3640(t4vect_ZAxis_3640, self->mScriptCurrRotZ + rx - 1.5707963705062866f);
-    *(sV_3640*)&self->mRotation = QuatMul_3640(poseVec, *(sV_3640*)&self->mRotation);
+    *(sVec4*)&self->mRotation = AxisAngle_3640(t4vect_ZAxis_3640, self->mScriptCurrRotZ + rx - 1.5707963705062866f);
+    *(sVec4*)&self->mRotation = QuatMul_3640(poseVec, *(sVec4*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
-    *(sV_3640*)&self->mVelocity = t4vect_Zero_3640;
+    *(sVec4*)&self->mVelocity = t4vect_Zero_3640;
     self->mLastSpeed = zeroF;
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     initTrack_3640(self, 0, zeroF, zeroF);
@@ -5152,18 +5132,18 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     func_0030E9E0(self->mAnimModel, 9, 0);
     func_0030EA80(self->mAnimModel, 4, 0);
     func_0030EA80(self->mAnimModel, 7, 0);
-    if (rec[6] != 0) {
+    if (rec->hideIllegalBoltOn != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_3640();
         cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
         int identity = cRider_getIdentity(self);
         int n = func_0014D988(tbl, identity);
-        sEnt_3640* entry = (sEnt_3640*)func_0014D998(tbl, identity);
+        tBEBoltDef* entry = (tBEBoltDef*)func_0014D998(tbl, identity);
         int i;
         for (i = 0; i < n; i++, entry++) {
-            int id = entry->id;
+            int id = entry->modelPart;
             if (id >= 0 && (entry->flags & 0x40)) {
-                if (lookup_3640(db, entry->item)->flags & 0x10) {
+                if (lookup_3640(db, entry->id)->flags & 0x10) {
                     func_0030EA80(self->mAnimModel, id, 0);
                     func_0030EA80(self->mAnimModel, id, 1);
                     func_0030EA80(self->mAnimModel, id, 2);
@@ -5195,15 +5175,6 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, f
 
 
 
-struct sEnt_123B48 {
-    char pad0[0x4];
-    short item;                 // 0x04
-    char pad6[0xA];
-    signed char id;             // 0x10
-    char pad11[0x23];
-    int flags;                  // 0x34
-};
-
 static inline tBEProfileBolt* lookup_123B48(cBECharProfileDB* d, int i)
 {
     short k = d->mpBoltsMap[i];
@@ -5213,12 +5184,12 @@ static inline tBEProfileBolt* lookup_123B48(cBECharProfileDB* d, int i)
     return 0;
 }
 
-static inline int entId_123B48(sEnt_123B48* e)
+static inline int entId_123B48(tBEBoltDef* e)
 {
-    return e->id;
+    return e->modelPart;
 }
 
-static inline int entOn_123B48(sEnt_123B48* e)
+static inline int entOn_123B48(tBEBoltDef* e)
 {
     return e->flags & 0x40;
 }
@@ -5233,12 +5204,12 @@ static inline void setChan_123B48(cRider* self, int id, int ch)
     func_0030E9E0(model_123B48(self), id, ch);
 }
 
-static inline int entItem_123B48(sEnt_123B48* e)
+static inline int entItem_123B48(tBEBoltDef* e)
 {
-    return e->item;
+    return e->id;
 }
 
-static inline unsigned short itemFlags_123B48(cBECharProfileDB* db, sEnt_123B48* e)
+static inline unsigned short itemFlags_123B48(cBECharProfileDB* db, tBEBoltDef* e)
 {
     return lookup_123B48(db, entItem_123B48(e))->flags;
 }
@@ -5272,13 +5243,13 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
     func_0030E9E0(self->mAnimModel, 4, 0);
     func_0030E9E0(self->mAnimModel, 7, 0);
     // PORT: GetSSXActorHeader returns a record pointer as int
-    if (*(signed char*)((char*)GetSSXActorHeader(self->mpEntity) + 6) != 0) {
+    if (((tSSXHeaderActor*)GetSSXActorHeader(self->mpEntity))->hideIllegalBoltOn != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_noarg();
         cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
         int identity = cRider_getIdentity(self);
         int n = func_0014D988(tbl, identity);
-        sEnt_123B48* entry = (sEnt_123B48*)func_0014D998(tbl, identity);
+        tBEBoltDef* entry = (tBEBoltDef*)func_0014D998(tbl, identity);
         int i;
         for (i = 0; i < n; i++, entry++) {
             int id = entId_123B48(entry);
@@ -5354,7 +5325,7 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, int a2);
  * with the event's subject rider (cSSXScriptEngine_GetSubjectRider) to func_002A1B88. Each event sent sets
  * unk_AC8.
  *
- * @param id  the script player entity (On Tour: pEntity); its word +8 is passed to the subject lookup
+ * @param id  the script player entity (On Tour: pEntity); its mpOwner is passed to the subject lookup
  * @param currFrame  the current frame (the first float argument; On Tour: currFrame); unused
  * @param ignoredFloat  a second float argument that the caller (cScriptPlayerEntity_ExecutePlay) does not set; unused
  * @param type  the entity type (On Tour: type); unused
@@ -5380,8 +5351,10 @@ extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, fl
             {
                 ev -= 100;
                 void* snd = cAudioInterface_bxAudio();
-                // PORT: id is a handle that is also read as a pointer here.
-                int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *((signed char*)event->pCustom), *(int*)(id + 8));
+                // PORT: id is the entity's handle; it is the cScriptPlayerEntity's address.
+                cScriptPlayerEntity* entity = (cScriptPlayerEntity*)id;
+                int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *((signed char*)event->pCustom),
+                                                                         (int)entity->mpOwner);
                 func_002A1B88(snd, ev, (int)self, subjectRider);
                 self->mHasTriggeredSpeechEvents = 1;
             }
@@ -5763,7 +5736,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
  * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->ScaleVect.x * mSlewed[0].cur * 45; a line
  * from 100 below to 200 above it (along mGroundNormal) is built with cWorldLine_cWorldLine and intersected with the
  * terrain through mOverlapList (cOverlapList_terrainIntersect1). The speed is the length of the virtual getVelocity,
- * and LastGroundNormal keeps the previous mGroundNormal. A hit patch sets mGroundPolyId (the patch's id at +0x150),
+ * and LastGroundNormal keeps the previous mGroundNormal. A hit patch sets mGroundPolyId (the patch's m_RID),
  * PatchUV (the hit's u / v) and SurfaceFlags (the patch's m_sSurfaceFlags); otherwise mGroundPolyId becomes -1.
  *
  * On a miss (negative distance): unk_B00 = 0, mGroundNormal = the Z axis, GroundVelocity = zero, mSurfaceType and the four
@@ -5792,7 +5765,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     float hitDist = cOverlapList_terrainIntersect1(self->mOverlapList, &ray, &hit, 0);
     *(&self->LastGroundNormal) = *(&self->mGroundNormal);
     if (hitDist > 0.0f && hit.Patch != 0) {
-        self->mGroundPolyId = *(int*)(((char*)hit.Patch) + 0x150);
+        self->mGroundPolyId = hit.Patch->m_RID;
         self->PatchUV.x = hit.u;
         self->PatchUV.y = hit.v;
         self->SurfaceFlags = hit.Patch->m_sSurfaceFlags;
@@ -5875,24 +5848,16 @@ extern "C" int tEventFlags_isJustChanged(void* self, int a1);
 extern "C" void tEventFlags_clear1(void* self, int a1);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
 extern "C" void func_0030EA80(void* model, int i, int channel);
-struct sQ_124788;
-extern "C" void cRider_updateBoundBox_4788(cRider* self, sQ_124788* p) __asm__("cRider_updateBoundBox");
+extern "C" void cRider_updateBoundBox_4788(cRider* self, sVec4* p) __asm__("cRider_updateBoundBox");
 extern void cRider_updateCollideInfo_4788(cRider* self) __asm__("cRider_updateCollideInfo");
 
-struct sQ_124788
-{
-    float x, y, z, w;
-    sQ_124788() {}
-    sQ_124788(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-extern sQ_124788 t4vect_Origin_124788 __asm__("t4vect_Origin");
+extern sVec4 t4vect_Origin_124788 __asm__("t4vect_Origin");
 
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQ_124788 QuatMul_124788(const sQ_124788& a, const sQ_124788& b)
+static inline sVec4 QuatMul_124788(const sVec4& a, const sVec4& b)
 {
-    sQ_124788 r;
+    sVec4 r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -5913,9 +5878,9 @@ static inline sQ_124788 QuatMul_124788(const sQ_124788& a, const sQ_124788& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sQ_124788 Sub_124788(const sQ_124788& a, const sQ_124788& b)
+static inline sVec4 Sub_124788(const sVec4& a, const sVec4& b)
 {
-    sQ_124788 r;
+    sVec4 r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5928,9 +5893,9 @@ static inline sQ_124788 Sub_124788(const sQ_124788& a, const sQ_124788& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sQ_124788 Add_124788(const sQ_124788& a, const sQ_124788& b)
+static inline sVec4 Add_124788(const sVec4& a, const sVec4& b)
 {
-    sQ_124788 r;
+    sVec4 r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5943,7 +5908,7 @@ static inline sQ_124788 Add_124788(const sQ_124788& a, const sQ_124788& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void AddEq_124788(sQ_124788& dst, sQ_124788 b)
+static inline void AddEq_124788(sVec4& dst, sVec4 b)
 {
     __asm__(
         ".set push\n"
@@ -5958,9 +5923,9 @@ static inline void AddEq_124788(sQ_124788& dst, sQ_124788 b)
 }
 
 // PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
-static inline sQ_124788 Rot_124788(const sQ_124788& q, const sQ_124788& v)
+static inline sVec4 Rot_124788(const sVec4& q, const sVec4& v)
 {
-    sQ_124788 r;
+    sVec4 r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -5982,9 +5947,9 @@ static inline sQ_124788 Rot_124788(const sQ_124788& q, const sQ_124788& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sQ_124788 Scale_124788(const sQ_124788& v, float s)
+static inline sVec4 Scale_124788(const sVec4& v, float s)
 {
-    sQ_124788 r;
+    sVec4 r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5999,9 +5964,9 @@ static inline sQ_124788 Scale_124788(const sQ_124788& v, float s)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (4x4 matrix times vector).
-static inline sQ_124788 MatMulV_124788(const char* m, const sQ_124788& v)
+static inline sVec4 MatMulV_124788(const char* m, const sVec4& v)
 {
-    sQ_124788 r;
+    sVec4 r;
     __asm__(
         "lqc2       $vf8, %2\n"
         "lqc2       $vf4, 0x0(%1)\n"
@@ -6019,13 +5984,13 @@ static inline sQ_124788 MatMulV_124788(const char* m, const sQ_124788& v)
     return r;
 }
 
-static inline sQ_124788 Conj_124788(const tPose& p)
+static inline sVec4 Conj_124788(const tPose& p)
 {
-    sQ_124788 r;
-    r.w = (*(sQ_124788*)&p.Q).w;
-    r.x = (*(sQ_124788*)&p.Q).x;
-    r.y = (*(sQ_124788*)&p.Q).y;
-    r.z = (*(sQ_124788*)&p.Q).z;
+    sVec4 r;
+    r.w = (*(sVec4*)&p.Q).w;
+    r.x = (*(sVec4*)&p.Q).x;
+    r.y = (*(sVec4*)&p.Q).y;
+    r.z = (*(sVec4*)&p.Q).z;
     r.x = -r.x;
     r.y = -r.y;
     r.z = -r.z;
@@ -6035,22 +6000,26 @@ static inline sQ_124788 Conj_124788(const tPose& p)
 static inline tPose Invert_124788(const tPose& a)
 {
     tPose r;
-    (*(sQ_124788*)&r.Q) = Conj_124788(a);
-    (*(sQ_124788*)&r.P) = Add_124788(Scale_124788(Rot_124788((*(sQ_124788*)&r.Q), Sub_124788((*(sQ_124788*)&a.P), t4vect_Origin_124788)), -1.0f), t4vect_Origin_124788);
+    (*(sVec4*)&r.Q) = Conj_124788(a);
+    (*(sVec4*)&r.P) = Add_124788(Scale_124788(Rot_124788((*(sVec4*)&r.Q), Sub_124788((*(sVec4*)&a.P),
+                                                                                      t4vect_Origin_124788)),
+                                              -1.0f),
+                                 t4vect_Origin_124788);
     return r;
 }
 
 static inline tPose Combine_124788(const tPose& a, const tPose& b)
 {
     tPose r;
-    (*(sQ_124788*)&r.Q) = QuatMul_124788((*(sQ_124788*)&a.Q), (*(sQ_124788*)&b.Q));
-    (*(sQ_124788*)&r.P) = Add_124788(Rot_124788((*(sQ_124788*)&a.Q), Sub_124788((*(sQ_124788*)&b.P), t4vect_Origin_124788)), (*(sQ_124788*)&a.P));
+    (*(sVec4*)&r.Q) = QuatMul_124788((*(sVec4*)&a.Q), (*(sVec4*)&b.Q));
+    (*(sVec4*)&r.P) = Add_124788(Rot_124788((*(sVec4*)&a.Q), Sub_124788((*(sVec4*)&b.P), t4vect_Origin_124788)),
+                                 (*(sVec4*)&a.P));
     return r;
 }
 
-static inline sQ_124788 GetFront_124788(cRider* rider)
+static inline sVec4 GetFront_124788(cRider* rider)
 {
-    return *(sQ_124788*)&rider->mMatrix.row[1];
+    return *(sVec4*)&rider->mMatrix.row[1];
 }
 
 
@@ -6102,11 +6071,12 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
             tPose animPose;
             func_0030ECD8(&animPose, self->mAnimModel, buf, 0);
             cAnimModel* trk = self->mAnimModel;
-            sQ_124788* n = (sQ_124788*)((self->mBoneHips << 4) + (int)trk->localPos);
+            sVec4* n = (sVec4*)((self->mBoneHips << 4) + (int)trk->localPos);
             tPose node;
-            (*(sQ_124788*)&node.P) = sQ_124788(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
+            (*(sVec4*)&node.P) = sVec4(n->x * trk->ScaleVect.x, n->y * trk->ScaleVect.y,
                                  n->z * trk->ScaleVect.z, n->w * trk->ScaleVect.w);
-            (*(sQ_124788*)&node.Q) = *(sQ_124788*)((char*)self->mAnimModel->localRot + (self->mBoneHips << 4));
+            t4Vector* rot = &self->mAnimModel->localRot[self->mBoneHips];
+            node.Q = *rot;
             tPose y = Combine_124788(node, Invert_124788(animPose));
             tPose* rx = (tPose*)&self->mPosition;
             *rx = Combine_124788(*rx, y);
@@ -6119,7 +6089,8 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
             self->mSlewed[18].target = kneeOffset;
             self->mSlewed[18].rate = 0;
             self->mSlewed[18].cur = kneeOffset;
-            AddEq_124788(*(sQ_124788*)&self->mPosition, Scale_124788(GetFront_124788(self), cRider_getStartGateHorizOffset(self)));
+            AddEq_124788(*(sVec4*)&self->mPosition,
+                         Scale_124788(GetFront_124788(self), cRider_getStartGateHorizOffset(self)));
             cRider_updateOrientationImplicit(self);
         }
         int isFlipped = pCurrMainAnimCustom->isFlipped != 0;
@@ -6140,28 +6111,29 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
     } else if ((eventBits & 2) && pFrameInfo->numMainAnim == 0) {
         cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     }
-    sQ_124788 oldStart = *(sQ_124788*)&self->mScriptCurrPosOffset;
-    *(sQ_124788*)&self->mScriptCurrPosOffset = sQ_124788(((float*)&pFrameInfo->posX)[0], ((float*)&pFrameInfo->posX)[1], ((float*)&pFrameInfo->posX)[2], 1.0f);
+    sVec4 oldStart = *(sVec4*)&self->mScriptCurrPosOffset;
+    *(sVec4*)&self->mScriptCurrPosOffset = sVec4(pFrameInfo->posX, pFrameInfo->posY, pFrameInfo->posZ, 1.0f);
     float prevAngX = self->mScriptCurrRotX;
     float prevAngY = self->mScriptCurrRotY;
     float prevAngZ = self->mScriptCurrRotZ;
-    sQ_124788 oldPos = *(sQ_124788*)&self->mPosition;
-    self->mScriptCurrRotX = ((float*)&pFrameInfo->rotX)[0] * 0.01745329424738884f;
-    self->mScriptCurrRotY = ((float*)&pFrameInfo->rotX)[1] * 0.01745329424738884f;
-    self->mScriptCurrRotZ = ((float*)&pFrameInfo->rotX)[2] * 0.01745329424738884f;
-    AddEq_124788(*(sQ_124788*)&self->mPosition,
-                 MatMulV_124788((char*)&self->mScriptMatrix, Sub_124788(*(sQ_124788*)&self->mScriptCurrPosOffset, oldStart)));
-    sQ_124788 delta = Sub_124788(*(sQ_124788*)&self->mPosition, oldPos);
-    *(sQ_124788*)&self->mVelocity = delta;
+    sVec4 oldPos = *(sVec4*)&self->mPosition;
+    self->mScriptCurrRotX = pFrameInfo->rotX * 0.01745329424738884f;
+    self->mScriptCurrRotY = pFrameInfo->rotY * 0.01745329424738884f;
+    self->mScriptCurrRotZ = pFrameInfo->rotZ * 0.01745329424738884f;
+    AddEq_124788(*(sVec4*)&self->mPosition,
+                 MatMulV_124788((char*)&self->mScriptMatrix,
+                                Sub_124788(*(sVec4*)&self->mScriptCurrPosOffset, oldStart)));
+    sVec4 delta = Sub_124788(*(sVec4*)&self->mPosition, oldPos);
+    *(sVec4*)&self->mVelocity = delta;
     cRider_EulerToQuat(self, (tQuaternion*)&delta, self->mScriptCurrRotZ - prevAngZ, self->mScriptCurrRotY - prevAngY, self->mScriptCurrRotX - prevAngX);
-    *(sQ_124788*)&self->mRotation = QuatMul_124788(delta, *(sQ_124788*)&self->mRotation);
+    *(sVec4*)&self->mRotation = QuatMul_124788(delta, *(sVec4*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
-    sQ_124788* bone = (sQ_124788*)&self->mAnimModel->bones[self->mBoneBoardRoot].pos;
-    sQ_124788 before = *bone;
+    sVec4* bone = (sVec4*)&self->mAnimModel->bones[self->mBoneBoardRoot].pos;
+    sVec4 before = *bone;
     cRider_updateAnimation(self, frameDelta);
     cRider_updateSkeleton(self);
     if (self->mNISShowBoardVisualFX != 0) {
-        *(sQ_124788*)&self->mVelocity = Sub_124788(*bone, before);
+        *(sVec4*)&self->mVelocity = Sub_124788(*bone, before);
     }
     if (frameDelta > 0.0f) {
         self->mVelocity.x = self->mVelocity.x / frameDelta;
@@ -6186,7 +6158,8 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
             tEventFlags_clear1(ch, 1);
         }
     }
-    sQ_124788 hipsPos = *(sQ_124788*)((char*)self->mAnimModel->bones + (self->mBoneHips << 5));
+    sAnimModelBone* hips = &self->mAnimModel->bones[self->mBoneHips];
+    sVec4 hipsPos = *(sVec4*)&hips->pos;
     hipsPos.z = self->mPosition.z;
     cRider_updateBoundBox_4788(self, &hipsPos);
     cRider_updateCollideInfo_4788(self);

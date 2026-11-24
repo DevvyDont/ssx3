@@ -16,13 +16,13 @@ struct cLoadIndicator {
                                     //      cLoadIndicator_render's pulse is cos(phase x 2 pi)
     float alpha;                    // 0x04 [O]; [R] ctor 0; [U] the load screens fade it by 1/12 per frame
                                     //      (cInitLoadScreen_update ...; loseFocus waits for 0); render copies it to colour.A
-    int unk_08;                     // 0x08 [O] locale (unsigned int); [R] ctor 0; no retail use seen
+    int locale;                     // 0x08 [O] (unsigned int); [R] ctor 0; no retail use seen
     tARGB colour;                   // 0x0C [O]; [R] ctor (1, 1, 1, 1); [U] render passes it to DrawSprite
 };
 
 CHECK_OFFSET(cLoadIndicator, phase, 0x00);
 CHECK_OFFSET(cLoadIndicator, alpha, 0x04);
-CHECK_OFFSET(cLoadIndicator, unk_08, 0x08);
+CHECK_OFFSET(cLoadIndicator, locale, 0x08);
 CHECK_OFFSET(cLoadIndicator, colour, 0x0C);
 CHECK_SIZE(cLoadIndicator, 0x1C);
 

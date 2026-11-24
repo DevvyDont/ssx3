@@ -1096,26 +1096,14 @@ extern char str_Text_ContinueGame[];
 extern char str_Continueps2X[];
 extern char str_ContinueButtonBack[];
 
-struct sColor_FB458 {
-    float r, g, b, a;
-    sColor_FB458(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+// A tARGB with EA's (A, R, G, B) constructor (ours has none).
+struct tARGBInit : tARGB {
+    tARGBInit(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
-class cUIObj_FB458 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-    virtual void v10();
-    virtual int setColor(const sColor_FB458& c);
-};
+// cUIThing_vtbl slot 11 (setColour). On Tour's takes the colour by reference (const tARGB&) and the call passes a
+// temporary; the header's pointer form makes the caller build it first, so the call is by hand.
+typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
 
 /**
  * Highlights or unhighlights the Continue option of the online pause error overlay.
@@ -1127,13 +1115,15 @@ public:
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on)
 {
-    cUIObj_FB458* continueText = (cUIObj_FB458*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_ContinueGame));
-    cUIObj_FB458* buttonIcon = (cUIObj_FB458*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Continueps2X));
-    cUIObj_FB458* buttonBack = (cUIObj_FB458*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ContinueButtonBack));
+    cUIThing* continueText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_ContinueGame));
+    cUIThing* buttonIcon = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Continueps2X));
+    cUIThing* buttonBack = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ContinueButtonBack));
     if (on) {
-        continueText->setColor(sColor_FB458(1.0f, 1.0f, 1.0f, 1.0f));
+        tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, continueText);
+        vt[11].fn(vthis(continueText, vt[11]), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
-        continueText->setColor(sColor_FB458(1.0f, 0.0f, 0.0f, 0.0f));
+        tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, continueText);
+        vt[11].fn(vthis(continueText, vt[11]), tARGBInit(1.0f, 0.0f, 0.0f, 0.0f));
     }
     buttonIcon->setVisible(on);
     buttonBack->setVisible(on);
@@ -1149,27 +1139,6 @@ extern char str_Text_CancelGame[];
 extern char str_Cancelps2X[];
 extern char str_CancelButtonBack[];
 
-struct sColor_FB588 {
-    float r, g, b, a;
-    sColor_FB588(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
-};
-
-class cUIObj_FB588 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-    virtual void v10();
-    virtual int setColor(const sColor_FB588& c);
-};
-
 /**
  * Highlights or unhighlights the Cancel option of the online pause error overlay.
  *
@@ -1180,13 +1149,15 @@ public:
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on)
 {
-    cUIObj_FB588* cancelText = (cUIObj_FB588*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
-    cUIObj_FB588* buttonIcon = (cUIObj_FB588*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Cancelps2X));
-    cUIObj_FB588* buttonBack = (cUIObj_FB588*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CancelButtonBack));
+    cUIThing* cancelText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
+    cUIThing* buttonIcon = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Cancelps2X));
+    cUIThing* buttonBack = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CancelButtonBack));
     if (on) {
-        cancelText->setColor(sColor_FB588(1.0f, 1.0f, 1.0f, 1.0f));
+        tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, cancelText);
+        vt[11].fn(vthis(cancelText, vt[11]), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
-        cancelText->setColor(sColor_FB588(1.0f, 0.0f, 0.0f, 0.0f));
+        tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, cancelText);
+        vt[11].fn(vthis(cancelText, vt[11]), tARGBInit(1.0f, 0.0f, 0.0f, 0.0f));
     }
     buttonIcon->setVisible(on);
     buttonBack->setVisible(on);
@@ -2627,19 +2598,6 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_hideActionButtons);
 #ifdef SKIP_ASM
-class cUIObj_1FE4A8 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int v);
-};
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
@@ -2659,10 +2617,10 @@ extern "C" void cOVState_SAVEREPLAY_hideActionButtons(cOVState_SAVEREPLAY* self,
 {
     if (self->mIsHidden != on) {
         int off = !on;
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(off);
         self->mIsHidden = on;
     }
 }
@@ -2671,19 +2629,6 @@ extern "C" void cOVState_SAVEREPLAY_hideActionButtons(cOVState_SAVEREPLAY* self,
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_hideDeleteButton);
 #ifdef SKIP_ASM
-class cUIObj_1FE5B0 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int v);
-};
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_o_delete[];
@@ -2699,8 +2644,8 @@ extern char str_ps2sq_b[];
  */
 extern "C" void cOVState_SAVEREPLAY_hideDeleteButton(cOVState_SAVEREPLAY* self, bool on)
 {
-    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(!on);
-    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(!on);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(!on);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
     self->mDeleteButtonActive = !on;
 }
 #endif
@@ -2708,19 +2653,6 @@ extern "C" void cOVState_SAVEREPLAY_hideDeleteButton(cOVState_SAVEREPLAY* self, 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_hideMainButton);
 #ifdef SKIP_ASM
-class cUIObj_1FE648 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int v);
-};
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
@@ -2737,8 +2669,8 @@ extern char str_x_save[];
  */
 extern "C" void cOVState_SAVEREPLAY_hideMainButton(cOVState_SAVEREPLAY* self, int loadBlocked, bool on)
 {
-    cUIObj_1FE648* xButton = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
-    ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(!on);
+    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
     self->mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
@@ -2753,12 +2685,6 @@ void cReplay_purgeSave(void* self);
 // PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by
 // asm label).
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
-
-class cMoviePlayer_1FE6E8 {
-public:
-    char pad[0x748];
-    virtual void SetState(int);
-};
 
 /**
  * Handles the save-replay overlay's file-slot buttons: save to a slot, back out, or ask to delete a save.
@@ -2817,7 +2743,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, cUI
             return;
         self->mIsCancelPressed = 1;
         if (cardState == 0 || cardState == 2 || cardState == 1)
-            ((cMoviePlayer_1FE6E8*)mp)->SetState(0);
+            mp->SetState(0);
         self->mState = 6;
         break;
     }
@@ -2840,7 +2766,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, cUI
         self->mIsProcessing = cardState;
         self->mState = 4;
         cMCOverlayManager_SetAction_v(mp, 0);
-        ((cMoviePlayer_1FE6E8*)mp)->SetState(0x18);
+        mp->SetState(0x18);
         break;
     }
     }
@@ -3174,19 +3100,6 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_hideActionButtons);
 #ifdef SKIP_ASM
-class cUIObj_1FF170 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int v);
-};
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
@@ -3206,10 +3119,10 @@ extern "C" void cOVState_SAVEOPTIONS_hideActionButtons(cOVState_SAVEOPTIONS* sel
 {
     if (self->mIsHidden != on) {
         int off = !on;
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(off);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(off);
         self->mIsHidden = on;
     }
 }
@@ -3218,19 +3131,6 @@ extern "C" void cOVState_SAVEOPTIONS_hideActionButtons(cOVState_SAVEOPTIONS* sel
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_hideDeleteButton);
 #ifdef SKIP_ASM
-class cUIObj_1FF278 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int v);
-};
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_o_delete[];
@@ -3246,8 +3146,8 @@ extern char str_ps2sq_b[];
  */
 extern "C" void cOVState_SAVEOPTIONS_hideDeleteButton(cOVState_SAVEOPTIONS* self, bool on)
 {
-    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(!on);
-    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(!on);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(!on);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
     self->mDeleteButtonActive = !on;
 }
 #endif
@@ -3255,19 +3155,6 @@ extern "C" void cOVState_SAVEOPTIONS_hideDeleteButton(cOVState_SAVEOPTIONS* self
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_hideMainButton);
 #ifdef SKIP_ASM
-class cUIObj_1FF310 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int v);
-};
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
@@ -3284,8 +3171,8 @@ extern char str_x_save[];
  */
 extern "C" void cOVState_SAVEOPTIONS_hideMainButton(cOVState_SAVEOPTIONS* self, int loadBlocked, bool on)
 {
-    cUIObj_1FF310* xButton = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
-    ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(!on);
+    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
     self->mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
@@ -3299,12 +3186,6 @@ extern "C" void cMCOverlayManager_writeSetFileType(void* self, int a, int b);
 // PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by
 // asm label).
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
-
-class cMoviePlayer_1FF3B0 {
-public:
-    char pad[0x748];
-    virtual void SetState(int);
-};
 
 /**
  * Handles the save-records overlay's file-slot buttons: save the settings, back out, or ask to delete a save.
@@ -3358,7 +3239,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, c
             return;
         self->mIsCancelPressed = 1;
         if (cardState == 0 || cardState == 2 || cardState == 1)
-            ((cMoviePlayer_1FF3B0*)mp)->SetState(0);
+            mp->SetState(0);
         self->mState = 6;
         break;
     }
@@ -3381,7 +3262,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, c
         self->mIsProcessing = cardState;
         self->mState = 4;
         cMCOverlayManager_SetAction_v(mp, 0);
-        ((cMoviePlayer_1FF3B0*)mp)->SetState(0x18);
+        mp->SetState(0x18);
         break;
     }
     }

@@ -194,8 +194,8 @@ CHECK_SIZE(tSSXScriptSetupInfoLinked, 0x14);
 // tSSXHeaderActor: the SSX header of an actor entity's script data (GetSSXActorHeader; On Tour tSSXHeaderActor, 0x30
 // there). Retail has no 64-bit `character` word at 0x8: its base position and rotation sit 0xC lower than On Tour's
 // (0x8.. here, 0x14.. there); what retail keeps of On Tour's 0x2..0x13 (character, hidden, scriptEndLocation,
-// hideIllegalBoltOn, isRidingBoard) is in 0x2..0x7: only the character mask is placed (a short at 0x2; On Tour's is
-// 64-bit at 0x8). Laid out through the last member retail reads.
+// hideIllegalBoltOn, isRidingBoard) is in 0x2..0x7, in On Tour's order (the character mask is a short at 0x2; On
+// Tour's is 64-bit at 0x8). Laid out through the last member retail reads.
 struct tSSXHeaderActor {
     signed char role;               // 0x00 [O]; [U] cSSXScriptEngine_OnStartScript maps it to a character slot through
                                     //      kRoleToFilterEnumMappingTable (view sScriptOpt_9A70 slot)
@@ -203,12 +203,15 @@ struct tSSXHeaderActor {
     short character;                // 0x02 [O] character (the 64-bit character mask at 0x8 there); [U]
                                     //      cSSXScriptEngine_OnStartScript: 0 or a mask that meets the free
                                     //      characters' flags picks the variation (view sScriptOpt_9A70 mask)
-    char unk_004[0x1];              // 0x04 see above
+    signed char hidden;             // 0x04 [O] (0x10 there); [U] cRider_OnStartObjectUse: mHiddenNIS = hidden != 0
     signed char scriptEndLocation;  // 0x05 [O] (0x11 there; On Tour order hidden, scriptEndLocation, hideIllegalBoltOn,
                                     //      isRidingBoard after character); [U] cRider_GetNISEndPosition switches on
                                     //      it (lb 5: cases 0-4 pick the end point), as On Tour's GetNISEndPosition
                                     //      does (lb 17(pHeaderInfo))
-    char unk_006[0x2];              // 0x06 see above
+    signed char hideIllegalBoltOn;  // 0x06 [O] (0x12 there); [U] cRider_OnStartObjectUse / OnEndObjectUse hide /
+                                    //      show the model parts of the rider's flag-0x40 items when it is set
+    signed char isRidingBoard;      // 0x07 [O] (0x13 there); [U] cRider_OnStartObjectUse: mNISShowBoardVisualFX =
+                                    //      isRidingBoard != 0
     float basePosX;                 // 0x08 [O] (0x14 there); [U] OnStartObjectUse's base offset x
     float basePosY;                 // 0x0C [O]; [U] ... y
     float basePosZ;                 // 0x10 [O]; [U] ... z
@@ -220,9 +223,10 @@ struct tSSXHeaderActor {
 CHECK_OFFSET(tSSXHeaderActor, role, 0x00);
 CHECK_OFFSET(tSSXHeaderActor, anchorPos, 0x01);
 CHECK_OFFSET(tSSXHeaderActor, character, 0x02);
-CHECK_OFFSET(tSSXHeaderActor, unk_004, 0x04);
+CHECK_OFFSET(tSSXHeaderActor, hidden, 0x04);
 CHECK_OFFSET(tSSXHeaderActor, scriptEndLocation, 0x05);
-CHECK_OFFSET(tSSXHeaderActor, unk_006, 0x06);
+CHECK_OFFSET(tSSXHeaderActor, hideIllegalBoltOn, 0x06);
+CHECK_OFFSET(tSSXHeaderActor, isRidingBoard, 0x07);
 CHECK_OFFSET(tSSXHeaderActor, basePosX, 0x08);
 CHECK_OFFSET(tSSXHeaderActor, basePosY, 0x0C);
 CHECK_OFFSET(tSSXHeaderActor, basePosZ, 0x10);

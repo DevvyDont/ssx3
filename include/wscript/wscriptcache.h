@@ -13,7 +13,6 @@
 struct cWorld;
 struct tCollideRecord;          // world/worldrecords.h
 struct tWScriptGlobalData;      // [O] 4 bytes (not laid out)
-struct tWScriptMissionData;     // [O] 0x54 (not laid out; resolve's view sRec54_CCD8)
 struct tWScriptProcessData;     // [O] 0x40 (laid out below; resolve's view sRec40_CCD8)
 struct tWScriptTaskData;        // [O] 0x38 (not laid out)
 struct tWScriptScriptHeader;    // [O] 4 bytes (not laid out)
@@ -39,6 +38,20 @@ CHECK_OFFSET(tWScriptProcessData, unk_008, 0x08);
 CHECK_OFFSET(tWScriptProcessData, ProcessScriptId, 0x0C);
 CHECK_OFFSET(tWScriptProcessData, EventScriptId, 0x18);
 CHECK_SIZE(tWScriptProcessData, 0x40);
+
+// A world-script mission's data (On Tour tWScriptMissionData, 0x54: a tWScriptProcessData plus the mission's script
+// ids and scope). [O] the name, base and size; [U] cWorld_getMissionScripts returns a section's records and
+// cWScriptMan_setupMissions steps them 0x54 apart; cWScriptMission_cWScriptMission (src/seg/seg_1FBE38.cpp) reads the
+// members below; resolve's view sRec54_CCD8.
+struct tWScriptMissionData : tWScriptProcessData {
+    unsigned int MissionScriptId[4]; // 0x40 (name ours, after ProcessScriptId) [U] tResourceID: the mission ctor
+                                    //      passes each to cWScriptMan_getScriptCode for MissionScriptCode[i]
+    int Scope;                      // 0x50 (name as cWScriptMission::Scope) [U] the mission ctor copies it there
+};
+
+CHECK_OFFSET(tWScriptMissionData, MissionScriptId, 0x40);
+CHECK_OFFSET(tWScriptMissionData, Scope, 0x50);
+CHECK_SIZE(tWScriptMissionData, 0x54);
 
 struct tWScriptInstanceData {
     unsigned int EventScriptId[6];  // 0x00 [O] tResourceID[6]; [U] cWScriptCacheEntry_getWScriptHeaderId returns

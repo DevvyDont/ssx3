@@ -44,6 +44,29 @@ CHECK_OFFSET(tBEProfileBolt, id, 0x0);
 CHECK_OFFSET(tBEProfileBolt, flags, 0x2);
 CHECK_SIZE(tBEProfileBolt, 0x4);
 
+// One bolt-on (equipment item) definition in the back end's item database (name ours). The records are 0x38 bytes:
+// [R] func_0014D998 returns a character's first one as the table's base + index * 0x38 (func_0014D988 counts them),
+// and every walker steps 0x38. Laid out through the members the matched code reads; belibrary, beintecon,
+// beintreward, feridermanager and lensfx still read the record through their own views.
+struct tBEBoltDef {
+    char unk_00[0x4];               // 0x00
+    short id;                       // 0x04 [U] the item id: the index into cBECharProfileDB::mpBoltsMap (func_0011BBE8,
+                                    //      cRider_OnStartObjectUse / OnEndObjectUse, beintecon, beintreward)
+    char unk_06[0xA];               // 0x06
+    signed char modelPart;          // 0x10 [U] the rider model part it replaces: cRider_OnStartObjectUse hides it at
+                                    //      LODs 0-3 and cRider_OnEndObjectUse shows it (< 0: none)
+    char unk_11[0x7];               // 0x11
+    const char* lodPartNames[4];    // 0x18 [U] cRider_parsePartsFromBuf: the MDF archive part per LOD (0: none)
+    char unk_28[0xC];               // 0x28
+    int flags;                      // 0x34 [U] 0x40 hidden in NIS sequences (cRider_OnStartObjectUse / OnEndObjectUse);
+                                    //      0x100 / 0x200 / 0x400 the item kind (beintreward)
+};
+CHECK_OFFSET(tBEBoltDef, id, 0x04);
+CHECK_OFFSET(tBEBoltDef, modelPart, 0x10);
+CHECK_OFFSET(tBEBoltDef, lodPartNames, 0x18);
+CHECK_OFFSET(tBEBoltDef, flags, 0x34);
+CHECK_SIZE(tBEBoltDef, 0x38);
+
 // [O] struct tBETrackScore (8): one location / event best.
 struct tBETrackScore {
     char hasPlayed;                 // 0x000 [O]; [R] init: 0

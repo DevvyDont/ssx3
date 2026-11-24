@@ -51,12 +51,6 @@ extern "C" int cMCOverlayManager_hasManager(void) {
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_purge);
 #ifdef SKIP_ASM
-struct sMovieObj_23C860 {
-    char pad[0x748];
-    virtual void v01();
-    virtual ~sMovieObj_23C860();
-};
-
 /**
  * Destroys the memory card overlay manager singleton.
  *
@@ -64,7 +58,7 @@ struct sMovieObj_23C860 {
  */
 extern "C" void cMCOverlayManager_purge()
 {
-    delete (sMovieObj_23C860*)cMCOverlayManager_instance;
+    delete (cMCOverlayManager*)cMCOverlayManager_instance;
     cMCOverlayManager_instance = 0;
 }
 #endif
@@ -2488,83 +2482,6 @@ extern "C" void cMCOverlayManager_UpdateDeleteFailed(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateDeleteDoneWait);
 #ifdef SKIP_ASM
-class cMovieDecoder_240860 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void setVolume(int v);  // slot 5 (0x28)
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual int isBusy();  // slot 11 (0x58)
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual int isFinished();  // slot 73 (0x248)
-};
-
 /**
  * Waits out the display delay after a delete, then moves to DeleteDone (27), or DeleteFailed (28) on a card
  * error.
@@ -2573,9 +2490,9 @@ public:
  */
 extern "C" void cMCOverlayManager_UpdateDeleteDoneWait(cMCOverlayManager* self)
 {
-    cMovieDecoder_240860* memCard = (cMovieDecoder_240860*)self->mpMemCard;
+    cMemCard* memCard = self->mpMemCard;
     if (self->mDisplayWaitTicks > 0) {
-        if (memCard->isBusy() == 0) {
+        if (memCard->IsBusy() == 0) {
             if (self->mpMemCard->DidErrorOccur() != 0) {
                 self->SetState(0x1C);
                 return;
@@ -2584,7 +2501,7 @@ extern "C" void cMCOverlayManager_UpdateDeleteDoneWait(cMCOverlayManager* self)
         }
         self->mDisplayWaitTicks -= 1;
     } else {
-        if (memCard->isBusy() != 0) {
+        if (memCard->IsBusy() != 0) {
             return;
         }
         if (self->mpMemCard->DidErrorOccur() != 0) {
@@ -3419,20 +3336,6 @@ extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern char str_Free[];
 extern char str_pct_d_pct_s[];
 
-struct sMPSlot1928 {
-    int a;      // 0x344
-    int b;      // 0x348
-    int c;      // 0x34C
-    int d;      // 0x350
-    int id;     // 0x354
-    char pad[0xE0 - 0x14];
-};
-
-struct sMP1928 {
-    char pad[0x344];
-    sMPSlot1928 slots[1];
-};
-
 /**
  * Prints device @p i's free space as "<iFreeSpace> Free" (str_pct_d_pct_s with str_Free, both widened) into @p out,
  * when the device is valid, formatted, correctly encoded and plugged in (mDevices[i]).
@@ -3440,14 +3343,15 @@ struct sMP1928 {
  * @param i  the device
  * @param out  16-bit destination buffer
  */
-extern "C" void cMCOverlayManager_GetDeviceFreeString(sMP1928* self, int i, void* out)
+extern "C" void cMCOverlayManager_GetDeviceFreeString(cMCOverlayManager* self, int i, void* out)
 {
-    if (self->slots[i].d != 0 && self->slots[i].a != 0 && self->slots[i].b != 0 && self->slots[i].c != 0) {
+    if (self->mDevices[i].bPluggedIn != 0 && self->mDevices[i].bValid != 0 && self->mDevices[i].bFormatted != 0
+        && self->mDevices[i].bCorrectEncoding != 0) {
         char name[0x200];
         char path[0x200];
         func_002C2540_r(name, str_Free);
         func_002C2540_r(path, str_pct_d_pct_s);
-        sprintf1_v(out, path, self->slots[i].id, name);
+        sprintf1_v(out, path, self->mDevices[i].iFreeSpace, name);
     }
 }
 #endif
@@ -3463,8 +3367,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetFreeSpace);
  */
 extern "C" int cMCOverlayManager_GetFreeSpace(cMCOverlayManager* self, int device)
 {
-    char* deviceBase = (char*)self + device * 0xe0;
-    return *(int*)(deviceBase + 0x354);
+    return self->mDevices[device].iFreeSpace;
 }
 #endif
 
@@ -4135,64 +4038,20 @@ extern "C" void func_00229F88(int index, void* v, void* m);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 extern "C" int cOcclusionMan__VisSortFunc(const void* a, const void* b);
 
-struct sVec4_25C0 {
-    float x, y, z, w;
-    sVec4_25C0() {}
-    sVec4_25C0(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
-
-
-struct sBox_25C0 {
-    sVec4_25C0 min;
-    sVec4_25C0 max;
+// t4Vector with constructors (the vectors here are built and returned by value).
+struct t4VectorInit : t4Vector {
+    t4VectorInit() {}
+    t4VectorInit(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-
-struct sView_25C0 {
-    sVec4_25C0 pos;         // 0x00
-    char pad10[0x50 - 0x10];
-    sVec4_25C0 normal;      // 0x50
-    char pad60[0xA0 - 0x60];
-    float minx, miny, minz; // 0xA0
-    float maxx, maxy, maxz; // 0xAC
-    char padB8[4];
-    sView_25C0* next;       // 0xBC
-};
-
-struct sVisEnt_25C0 {
-    sView_25C0* view;
-    float dist;
-};
-
-struct sVisMgr_25C0 {
-    sView_25C0* head;       // 0x00
-    int enabled;            // 0x04
-    sVisEnt_25C0 ents[32];  // 0x08
-    int count;              // 0x108
-    int nvis;               // 0x10C
-    int mask;               // 0x110
-};
-
-typedef bool (*tCamCull_25C0)(void*, sVec4_25C0*, sVec4_25C0*, t4Matrix*);
-
-struct sCamVt_25C0 {
-    short delta;
-    short index;
-    void* fn;
-};
-
-struct sCam_25C0 {
-    char pad0[0x10D8];
-    sCamVt_25C0* vt;        // 0x10D8
-};
-
-
-typedef t4Matrix* (*tCamMtxP_25C0)(void*);
+// The graphics manager's ClipBoundBox (slot 93; int in render/graphicsman.h) as this caller reads it: as a bool (the
+// int form compiles differently).
+typedef sVEntry<bool(void*, t4Vector*, t4Vector*, t4Matrix*)> tClipBoundBoxSlot;
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_25C0 vu0Scale_25C0(const sVec4_25C0& v, float s)
+static inline t4VectorInit vu0Scale_25C0(const t4VectorInit& v, float s)
 {
-    sVec4_25C0 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4207,7 +4066,7 @@ static inline sVec4_25C0 vu0Scale_25C0(const sVec4_25C0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_25C0(const sVec4_25C0& a, const sVec4_25C0& b)
+static inline float vu0Dot_25C0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4227,7 +4086,7 @@ static inline float vu0Dot_25C0(const sVec4_25C0& a, const sVec4_25C0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (squared 3D distance).
-static inline float vu0DistSq_25C0(const sVec4_25C0& a, const sVec4_25C0& b)
+static inline float vu0DistSq_25C0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4246,17 +4105,17 @@ static inline float vu0DistSq_25C0(const sVec4_25C0& a, const sVec4_25C0& b)
     return r;
 }
 
-static inline sVec4_25C0 rowPos_25C0(const t4Matrix* m)
+static inline t4VectorInit rowPos_25C0(const t4Matrix* m)
 {
-    return ((sVec4_25C0*)&m->row[0])[3];
+    return *(const t4VectorInit*)&m->row[3];
 }
 
-static inline sVec4_25C0 mulT_25C0(const t4Matrix* m, const sVec4_25C0& v)
+static inline t4VectorInit mulT_25C0(const t4Matrix* m, const t4VectorInit& v)
 {
-    return sVec4_25C0(v.x * ((sVec4_25C0*)&m->row[0])[0].x + v.y * ((sVec4_25C0*)&m->row[0])[0].y + v.z * ((sVec4_25C0*)&m->row[0])[0].z + v.w * ((sVec4_25C0*)&m->row[0])[0].w,
-                      v.x * ((sVec4_25C0*)&m->row[0])[1].x + v.y * ((sVec4_25C0*)&m->row[0])[1].y + v.z * ((sVec4_25C0*)&m->row[0])[1].z + v.w * ((sVec4_25C0*)&m->row[0])[1].w,
-                      v.x * ((sVec4_25C0*)&m->row[0])[2].x + v.y * ((sVec4_25C0*)&m->row[0])[2].y + v.z * ((sVec4_25C0*)&m->row[0])[2].z + v.w * ((sVec4_25C0*)&m->row[0])[2].w,
-                      v.x * ((sVec4_25C0*)&m->row[0])[3].x + v.y * ((sVec4_25C0*)&m->row[0])[3].y + v.z * ((sVec4_25C0*)&m->row[0])[3].z + v.w * ((sVec4_25C0*)&m->row[0])[3].w);
+    return t4VectorInit(v.x * m->row[0].x + v.y * m->row[0].y + v.z * m->row[0].z + v.w * m->row[0].w,
+                        v.x * m->row[1].x + v.y * m->row[1].y + v.z * m->row[1].z + v.w * m->row[1].w,
+                        v.x * m->row[2].x + v.y * m->row[2].y + v.z * m->row[2].z + v.w * m->row[2].w,
+                        v.x * m->row[3].x + v.y * m->row[3].y + v.z * m->row[3].z + v.w * m->row[3].w);
 }
 
 static inline t4Matrix* camMtx_25C0()
@@ -4269,68 +4128,70 @@ static inline t4Matrix* camMtx_25C0()
  * Picks the occlusion curtains for this view: the nearest two that the camera box @p bb overlaps and that face the
  * camera.
  *
- * Clears the active count (+0x10C) and mask (+0x110); returns when no curtains are registered (+0x4). Takes the eye
- * position from the graphics manager's view (slot 35, cPS2GraphicsMan_GetView) and a matrix from slot 43. Each curtain
- * whose bounds (+0xA0..+0xB4) overlap @p bb, survive cPS2GraphicsMan_ClipBoundBox (slot 93) and face the eye (the dot
- * product with its normal +0x50 is not positive) goes into the in-view table (+0x8, count +0x108) with its squared
- * distance. The table is sorted nearest first (qsort with cOcclusionMan__VisSortFunc); for the first two it sets the mask
- * bit, builds the clip planes (cOcclusionMan_updateVisPlane) and hands them to func_00229F88. Likely bug: the in-view table has 32
+ * Clears the active count (m_iNumActive) and mask (m_uiVisMask); returns when no curtains are registered
+ * (m_iNumPlanes). Takes the eye position from the graphics manager's view (slot 35, cPS2GraphicsMan_GetView) and a
+ * matrix from slot 43 (GetNetMatrix). Each curtain whose bounds (m_fvMin..m_fvMax) overlap @p bb, survive
+ * cPS2GraphicsMan_ClipBoundBox (slot 93) and face the eye (the dot product with its plane m_fvPlaneCoeffs is not
+ * positive) goes into the in-view table (m_InView, count m_iNumInView) with its squared distance to m_fvBSphere. The
+ * table is sorted nearest first (qsort with cOcclusionMan__VisSortFunc); for the first two it sets the mask bit, builds
+ * the clip planes (cOcclusionMan_updateVisPlane) and hands them to func_00229F88. Likely bug: the in-view table has 32
  * entries and the count is not checked.
  *
  * @param bb  the camera's bounding box
  */
-extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, tBoundBox* bb)
+extern "C" void cOcclusionMan_updateView(cOcclusionMan* self, tBoundBox* bb)
 {
-    self->nvis = 0;
-    self->mask = 0;
-    if (self->enabled == 0)
+    self->m_iNumActive = 0;
+    self->m_uiVisMask = 0;
+    if (self->m_iNumPlanes == 0)
         return;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     t4Matrix mtx = ps2GraphicsMan->GetNetMatrix();
-    sVec4_25C0 eye = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
+    t4VectorInit eye = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
     eye = mulT_25C0(camMtx_25C0(), eye);
-    self->count = 0;
+    self->m_iNumInView = 0;
     eye.w = 1.0f;
-    sView_25C0* it = self->head;
+    tVisCurtainRecord* it = self->m_pPlanes;
     while (it != 0) {
-        sView_25C0* candidate = it;
+        tVisCurtainRecord* candidate = it;
         it = it->next;
-        sBox_25C0 box;
-        box.min.x = candidate->minx;
-        box.min.y = candidate->miny;
-        box.min.z = candidate->minz;
-        box.min.w = 1.0f;
-        box.max.x = candidate->maxx;
-        box.max.y = candidate->maxy;
-        box.max.z = candidate->maxz;
-        box.max.w = 1.0f;
-        int ov = bb->MinPoint.x <= box.max.x && box.min.x <= bb->MaxPoint.x
-              && bb->MinPoint.y <= box.max.y && box.min.y <= bb->MaxPoint.y
-              && bb->MinPoint.z <= box.max.z && box.min.z <= bb->MaxPoint.z;
+        tBoundBox box;
+        box.MinPoint.x = candidate->m_fvMin[0];
+        box.MinPoint.y = candidate->m_fvMin[1];
+        box.MinPoint.z = candidate->m_fvMin[2];
+        box.MinPoint.w = 1.0f;
+        box.MaxPoint.x = candidate->m_fvMax[0];
+        box.MaxPoint.y = candidate->m_fvMax[1];
+        box.MaxPoint.z = candidate->m_fvMax[2];
+        box.MaxPoint.w = 1.0f;
+        int ov = bb->MinPoint.x <= box.MaxPoint.x && box.MinPoint.x <= bb->MaxPoint.x
+              && bb->MinPoint.y <= box.MaxPoint.y && box.MinPoint.y <= bb->MaxPoint.y
+              && bb->MinPoint.z <= box.MaxPoint.z && box.MinPoint.z <= bb->MaxPoint.z;
         if (ov) {
             cPS2GraphicsMan* graphics = GrMan;
-            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)VPTR_OF(cGraphicsMan, graphics))[0x5D].fn)(vthis(graphics, ((sCamVt_25C0*)VPTR_OF(cGraphicsMan, graphics))[93]), &box.min, &box.max, &mtx);
+            tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, graphics);
+            bool vis = !vt[93].fn(vthis(graphics, vt[93]), &box.MinPoint, &box.MaxPoint, &mtx); // slot 93: ClipBoundBox
             if (vis) {
-                if (!(0.0f < vu0Dot_25C0(eye, candidate->normal))) {
-                    float distSq = vu0DistSq_25C0(eye, candidate->pos);
-                    self->ents[self->count].view = candidate;
-                    self->ents[self->count].dist = distSq;
-                    self->count++;
+                if (!(0.0f < vu0Dot_25C0(eye, candidate->m_fvPlaneCoeffs))) {
+                    float distSq = vu0DistSq_25C0(eye, candidate->m_fvBSphere);
+                    self->m_InView[self->m_iNumInView].pVis = candidate;
+                    self->m_InView[self->m_iNumInView].fDist = distSq;
+                    self->m_iNumInView++;
                 }
             }
         }
     }
-    if (self->count == 0)
+    if (self->m_iNumInView == 0)
         return;
-    qsort(self->ents, self->count, 8, cOcclusionMan__VisSortFunc);
-    int n = self->count;
+    qsort(self->m_InView, self->m_iNumInView, 8, cOcclusionMan__VisSortFunc);
+    int n = self->m_iNumInView;
     if (n > 2)
         n = 2;
-    self->nvis = n;
-    for (int i = 0; i < self->nvis; i++) {
-        self->mask |= 1 << i;
-        cOcclusionMan_updateVisPlane((cOcclusionMan*)self, (t4Vector*)(&eye), (tVisCurtainRecord*)self->ents[i].view);
-        func_00229F88(i, &self->ents[i].view->normal, (char*)self->ents[i].view + 0x60);
+    self->m_iNumActive = n;
+    for (int i = 0; i < self->m_iNumActive; i++) {
+        self->m_uiVisMask |= 1 << i;
+        cOcclusionMan_updateVisPlane(self, &eye, self->m_InView[i].pVis);
+        func_00229F88(i, &self->m_InView[i].pVis->m_fvPlaneCoeffs, &self->m_InView[i].pVis->m_fvVisFrustum);
     }
 }
 #endif
@@ -4339,7 +4200,8 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, tBoundBox* bb)
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan__VisSortFunc);
 #ifdef SKIP_ASM
 /**
- * Compares two in-view entries by their distance (+0x4), nearest first, for the sort in cOcclusionMan_updateView.
+ * Compares two in-view entries (tVisInView) by their distance (fDist), nearest first, for the sort in
+ * cOcclusionMan_updateView.
  *
  * @param lhs  first entry
  * @param rhs  second entry
@@ -4347,8 +4209,8 @@ INCLUDE_ASM("movie/movieplayer", cOcclusionMan__VisSortFunc);
  */
 extern "C" int cOcclusionMan__VisSortFunc(const void* lhs, const void* rhs)
 {
-    float fa = *(float*)((char*)lhs + 0x4);
-    float fb = *(float*)((char*)rhs + 0x4);
+    float fa = ((const tVisInView*)lhs)->fDist;
+    float fb = ((const tVisInView*)rhs)->fDist;
     if (fa < fb) {
         return -1;
     }
@@ -4362,17 +4224,6 @@ extern "C" int cOcclusionMan__VisSortFunc(const void* lhs, const void* rhs)
 //100%
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan_updateVisPlane);
 #ifdef SKIP_ASM
-
-struct sPlane_29B0 {
-    float x, y, z, d;
-};
-
-struct sFrustum_29B0 {
-    t4Vector pad0;
-    t4Vector corner[4];   // 0x10
-    t4Vector pad50;
-    sPlane_29B0 plane[4];   // 0x60
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector vu0Sub_29B0(const t4Vector& a, const t4Vector& b)
@@ -4447,7 +4298,8 @@ static inline float vu0Dot_29B0(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-static inline void makePlane_29B0(sFrustum_29B0* f, int i, const t4Vector& eye, const t4Vector& c0, const t4Vector& c1)
+static inline void makePlane_29B0(tVisCurtainRecord* f, int i, const t4Vector& eye, const t4Vector& c0,
+                                  const t4Vector& c1)
 {
     t4Vector a;
     t4Vector b;
@@ -4456,15 +4308,15 @@ static inline void makePlane_29B0(sFrustum_29B0* f, int i, const t4Vector& eye, 
     b = vu0Sub_29B0(c0, eye);
     n = vu0Normalize_29B0(vu0Cross_29B0(a, b));
     n.w = -vu0Dot_29B0(eye, n);
-    f->plane[i].x = n.x;
-    f->plane[i].y = n.y;
-    f->plane[i].z = n.z;
-    f->plane[i].d = n.w;
+    f->m_fvVisFrustum[i].m[0] = n.x;
+    f->m_fvVisFrustum[i].m[1] = n.y;
+    f->m_fvVisFrustum[i].m[2] = n.z;
+    f->m_fvVisFrustum[i].m[3] = n.w;
 }
 
 /**
- * Builds the four clip planes of an occlusion curtain (+0x60) from the eye position and the curtain's corners (+0x10,
- * one plane per edge: corner 0-1, 1-2, 2-3, 3-0).
+ * Builds the four clip planes of an occlusion curtain (m_fvVisFrustum) from the eye position and the curtain's corners
+ * (m_fvCorners, one plane per edge: corner 0-1, 1-2, 2-3, 3-0).
  *
  * @param eyep  the eye position
  * @param frustumPtr  the curtain record
@@ -4472,11 +4324,11 @@ static inline void makePlane_29B0(sFrustum_29B0* f, int i, const t4Vector& eye, 
 extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, t4Vector* eyep, tVisCurtainRecord* frustumPtr)
 {
     const t4Vector& eye = *eyep;
-    sFrustum_29B0* frustum = (sFrustum_29B0*)frustumPtr;
-    makePlane_29B0(frustum, 0, eye, frustum->corner[0], frustum->corner[1]);
-    makePlane_29B0(frustum, 1, eye, frustum->corner[1], frustum->corner[2]);
-    makePlane_29B0(frustum, 2, eye, frustum->corner[2], frustum->corner[3]);
-    makePlane_29B0(frustum, 3, eye, frustum->corner[3], frustum->corner[0]);
+    tVisCurtainRecord* frustum = frustumPtr;
+    makePlane_29B0(frustum, 0, eye, frustum->m_fvCorners[0], frustum->m_fvCorners[1]);
+    makePlane_29B0(frustum, 1, eye, frustum->m_fvCorners[1], frustum->m_fvCorners[2]);
+    makePlane_29B0(frustum, 2, eye, frustum->m_fvCorners[2], frustum->m_fvCorners[3]);
+    makePlane_29B0(frustum, 3, eye, frustum->m_fvCorners[3], frustum->m_fvCorners[0]);
 }
 #endif
 

@@ -315,35 +315,27 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Tells whether a peak is locked for a character: bit 12 (peak 1) or 13 (peak 2) of the record's flags.
+ * Tells whether a peak is locked for a character: bPeak2Locked (peak 1) or bPeak3Locked (peak 2) of its profile record.
  *
- * Peak 0 is never locked; the flags are the 64-bit word at +0x278 of the character's profile record.
+ * Peak 0 is never locked; the flags share a 64-bit unit at +0x278 of the character's profile record.
  *
  * @param iProfileIndex  profile index
  * @param iCharacterID  character id
  * @param peak  the peak, 0-2
  * @return 1 when locked, else 0
  */
-// PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
+// PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
 extern "C" int cBENewPlayerInterface_isPeakLocked(cBENewPlayerInterface* self, int iProfileIndex, int iCharacterID, int peak)
 {
     if (peak != 0)
     {
         if (peak == 1)
         {
-            int bOff = iCharacterID * 3976;
-            int aOff = iProfileIndex * 39760;
-            int off = bOff + aOff;
-            char* charProfile = (char*)cBELibrary_profileLib + off;
-            return (int)(*(ulong*)(charProfile + 0x278) >> 12) & 1;
+            return cBELibrary_profileLib[iProfileIndex][iCharacterID].bPeak2Locked;
         }
         else
         {
-            int bOff = iCharacterID * 3976;
-            int aOff = iProfileIndex * 39760;
-            int off = bOff + aOff;
-            char* charProfile = (char*)cBELibrary_profileLib + off;
-            return (int)(*(ulong*)(charProfile + 0x278) >> 13) & 1;
+            return cBELibrary_profileLib[iProfileIndex][iCharacterID].bPeak3Locked;
         }
     }
     return 0;
@@ -414,15 +406,16 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Returns whether a rider's character has played a peak's rival challenge.
  *
- * Reads the 64-bit flag word at +0x278 of the character record (profile cBELibrary_getProfileIndex(@p index),
- * character tempPlayers[getPlayerID(@p index)].cCharacterID): bit 3 + @p kind when @p flag is set, else bit @p kind.
+ * Reads bPeak<n>RivalTimeChallengePlayed (when @p flag is set) or bPeak<n>RivalPtsChallengePlayed (n = @p kind + 1)
+ * of the character record (profile cBELibrary_getProfileIndex(@p index), character
+ * tempPlayers[getPlayerID(@p index)].cCharacterID): bit 3 + @p kind of the flags at +0x278, else bit @p kind.
  *
  * @param index  the rider (On Tour iRider)
  * @param kind  the peak, 0-2; any other gives 0
  * @param flag  selects bits 3-5 when nonzero, bits 0-2 when 0 (the end-of-event script passes game mode == 0)
  * @return the bit, 0 or 1
  */
-// PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
+// PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
 extern "C" int cBENewPlayerInterface_isRivalChallengePlayed(cBENewPlayerInterface* self, int index, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -430,31 +423,19 @@ extern "C" int cBENewPlayerInterface_isRivalChallengePlayed(cBENewPlayerInterfac
     signed char charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     if (flag) {
         if (kind == 0) {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 3) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak1RivalTimeChallengePlayed;
         } else if (kind == 1) {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 4) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak2RivalTimeChallengePlayed;
         } else if (kind == 2) {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 5) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak3RivalTimeChallengePlayed;
         }
     } else {
         if (kind == 0) {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 0) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak1RivalPtsChallengePlayed;
         } else if (kind == 1) {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 1) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak2RivalPtsChallengePlayed;
         } else if (kind == 2) {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 2) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak3RivalPtsChallengePlayed;
         }
     }
     return 0;
@@ -515,8 +496,9 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Returns whether a peak's rival event is still locked for a character.
  *
- * Reads the 64-bit flag word at +0x278 of character @p character's record in the profile of @p index
- * (cBELibrary_getProfileIndex): bit 6 + @p kind when @p flag is set, else bit 9 + @p kind.
+ * Reads bPeak<n>TimeRCLocked (when @p flag is set) or bPeak<n>FreeRCLocked (n = @p kind + 1) of character
+ * @p character's record in the profile of @p index (cBELibrary_getProfileIndex): bit 6 + @p kind of the flags at
+ * +0x278, else bit 9 + @p kind.
  *
  * @param index  the rider whose profile is used (On Tour iRider)
  * @param character  the character (On Tour eBECharacters)
@@ -524,7 +506,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0 (the map passes 1 for event kind 4, 0 for kind 5)
  * @return 1 when locked, else 0
  */
-// PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
+// PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
 extern "C" int cBENewPlayerInterface_isRivalEventLocked(cBENewPlayerInterface* self, int index, int character, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -532,42 +514,30 @@ extern "C" int cBENewPlayerInterface_isRivalEventLocked(cBENewPlayerInterface* s
         switch (kind) {
         case 0:
             {
-            int off = character * 3976 + profile * 39760;
-            char* profileRec = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(profileRec + 0x278) >> 6) & 1;
+            return cBELibrary_profileLib[profile][character].bPeak1TimeRCLocked;
         }
         case 1:
             {
-            int off = character * 3976 + profile * 39760;
-            char* profileRec = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(profileRec + 0x278) >> 7) & 1;
+            return cBELibrary_profileLib[profile][character].bPeak2TimeRCLocked;
         }
         case 2:
             {
-            int off = character * 3976 + profile * 39760;
-            char* profileRec = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(profileRec + 0x278) >> 8) & 1;
+            return cBELibrary_profileLib[profile][character].bPeak3TimeRCLocked;
         }
         }
     } else {
         switch (kind) {
         case 0:
             {
-            int off = character * 3976 + profile * 39760;
-            char* profileRec = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(profileRec + 0x278) >> 9) & 1;
+            return cBELibrary_profileLib[profile][character].bPeak1FreeRCLocked;
         }
         case 1:
             {
-            int off = character * 3976 + profile * 39760;
-            char* profileRec = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(profileRec + 0x278) >> 10) & 1;
+            return cBELibrary_profileLib[profile][character].bPeak2FreeRCLocked;
         }
         case 2:
             {
-            int off = character * 3976 + profile * 39760;
-            char* profileRec = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(profileRec + 0x278) >> 11) & 1;
+            return cBELibrary_profileLib[profile][character].bPeak3FreeRCLocked;
         }
         }
     }
@@ -592,14 +562,14 @@ extern sTrackInfo_1466A0 cBELibrary_locationDB[];
  * Returns whether the rival event of the current peak is still locked for a rider's character.
  *
  * The peak is the word at +0x54 of the current location's cBELibrary_locationDB record (location: cBELibrary_raceDB
- * +0x40). When the committed game mode (cBELibrary_raceDB byte +0x48) is 5, reads bit 6 + peak of the 64-bit flag word
- * at +0x278 of the character record (profile cBELibrary_getProfileIndex(@p index), character
- * tempPlayers[getPlayerID(@p index)].cCharacterID), else bit 9 + peak. A peak outside 0-2 gives 0.
+ * +0x40). When the committed game mode (cBELibrary_raceDB byte +0x48) is 5, reads bPeak<n>TimeRCLocked (n = peak + 1)
+ * of the character record (profile cBELibrary_getProfileIndex(@p index), character
+ * tempPlayers[getPlayerID(@p index)].cCharacterID), else bPeak<n>FreeRCLocked. A peak outside 0-2 gives 0.
  *
  * @param index  the rider (On Tour iRider)
  * @return 1 when locked, else 0
  */
-// PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
+// PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
 extern "C" int cBENewPlayerInterface_isRivalEventLocked1(cBENewPlayerInterface* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -610,42 +580,30 @@ extern "C" int cBENewPlayerInterface_isRivalEventLocked1(cBENewPlayerInterface* 
         switch (kind) {
         case 0:
             {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 6) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak1TimeRCLocked;
         }
         case 1:
             {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 7) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak2TimeRCLocked;
         }
         case 2:
             {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 8) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak3TimeRCLocked;
         }
         }
     } else {
         switch (kind) {
         case 0:
             {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 9) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak1FreeRCLocked;
         }
         case 1:
             {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 10) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak2FreeRCLocked;
         }
         case 2:
             {
-            int off = charId * 3976 + profile * 39760;
-            char* charRecord = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(charRecord + 0x278) >> 11) & 1;
+            return cBELibrary_profileLib[profile][charId].bPeak3FreeRCLocked;
         }
         }
     }
@@ -712,49 +670,36 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Tells whether an event is still locked for a character.
  *
- * Reads the 64-bit flag word at +0x278 of cBELibrary_profileLib[profile of @p index][@p character]: events 6-11 map to bits
- * 14-19; other events return 0 (unlocked).
+ * Reads cBELibrary_profileLib[profile of @p index][@p character]'s lock flags: events 6-11 map to bPeak1TCLocked ..
+ * bPeak3TCLocked and bPeak1FCLocked .. bPeak3FCLocked (bits 14-19); other events return 0 (unlocked).
  *
  * @param index  the rider whose profile is used (On Tour iRider)
  * @param character  the character (On Tour eBECharacters character)
  * @param kind  the event (On Tour eBEGameEvent event)
  * @return 1 when locked
  */
-// Returns one of the character's unlock flags (kinds 6-11, bits 14-19 of the 64-bit flag word).
-// PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
+// PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
 extern "C" int cBENewPlayerInterface_isEventLocked(cBENewPlayerInterface* self, int index, int character, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     switch (kind) {
     case 6: {
-        int off = character * 3976 + profile * 39760;
-        char* profileRec = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(profileRec + 0x278) >> 14) & 1;
+        return cBELibrary_profileLib[profile][character].bPeak1TCLocked;
     }
     case 7: {
-        int off = character * 3976 + profile * 39760;
-        char* profileRec = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(profileRec + 0x278) >> 15) & 1;
+        return cBELibrary_profileLib[profile][character].bPeak2TCLocked;
     }
     case 8: {
-        int off = character * 3976 + profile * 39760;
-        char* profileRec = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(profileRec + 0x278) >> 16) & 1;
+        return cBELibrary_profileLib[profile][character].bPeak3TCLocked;
     }
     case 9: {
-        int off = character * 3976 + profile * 39760;
-        char* profileRec = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(profileRec + 0x278) >> 17) & 1;
+        return cBELibrary_profileLib[profile][character].bPeak1FCLocked;
     }
     case 10: {
-        int off = character * 3976 + profile * 39760;
-        char* profileRec = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(profileRec + 0x278) >> 18) & 1;
+        return cBELibrary_profileLib[profile][character].bPeak2FCLocked;
     }
     case 11: {
-        int off = character * 3976 + profile * 39760;
-        char* profileRec = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(profileRec + 0x278) >> 19) & 1;
+        return cBELibrary_profileLib[profile][character].bPeak3FCLocked;
     }
     }
     return 0;
@@ -1228,15 +1173,14 @@ extern "C" void cBENewPlayerInterface_setPlayerCharID(cBENewPlayerInterface* sel
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCharID__FPvi);
 #ifdef SKIP_ASM
 /**
- * Returns a player's character id (+0x11 of its player table entry).
+ * Returns a player's character id (cCharacterID, +0x11 of its player table entry).
  *
  * @param index  the player slot
  * @return the character id
  */
 signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index)
 {
-    index *= sizeof(cBEPlayerDB);
-    return ((cBEPlayerDB*)((char*)cBENewPlayerInterface_tempPlayers + index))->cCharacterID;
+    return cBENewPlayerInterface_tempPlayers[index].cCharacterID;
 }
 #endif
 
@@ -1275,14 +1219,6 @@ extern "C" signed char cBENewPlayerInterface_getPlayerCheatCharID(cBENewPlayerIn
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getUseDualShock);
 #ifdef SKIP_ASM
-struct sPlayerCharFlags_0x10 {
-    unsigned int bit0 : 1;
-    unsigned int bit1 : 1;
-    unsigned int bit2 : 1;
-    unsigned int bit3 : 1;
-    unsigned int rest : 28;
-};
-
 /**
  * Returns whether a rider's pad vibration is on: iUseDualShock (flag bit 1) at +0x10 of its player entry.
  *
@@ -1521,7 +1457,7 @@ extern "C" void cBENewPlayerInterface_setToMissionMan(int index)
 {
     cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].cCharacterID = cBENewPlayerInterface_tempPlayers[0].cCharacterID;
     cBEPlayerDB* playerRec = &cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)];
-    ((sPlayerCharFlags_0x10*)((char*)playerRec + 0x10))->bit2 = 1;
+    playerRec->iIsMissionMan = 1;
 }
 #endif
 
@@ -1537,7 +1473,7 @@ extern "C" void cBENewPlayerInterface_resetFromMissionMan(cBENewPlayerInterface*
 {
     cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].cCharacterID = 0;
     cBEPlayerDB* entry = &cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)];
-    ((sPlayerCharFlags_0x10*)((char*)entry + 0x10))->bit2 = 0;
+    entry->iIsMissionMan = 0;
 }
 #endif
 
@@ -1864,16 +1800,9 @@ extern "C" short cBENewPlayerInterface_getDifficultyDifference(cBENewPlayerInter
 //100%
 INCLUDE_ASM("be/beintplayer", cBEStatInterface_getThis);
 #ifdef SKIP_ASM
-struct sVTablePlayer_00147F78
-{
-    char pad_0x00[0x10];
-    short delta;
-    char pad_0x12[2];
-    void (*fn)(void*);
-};
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BECharInt[];
-extern sVTablePlayer_00147F78 cBEStatInterface_vtbl;
+extern sVEntry<void(void*)> cBEStatInterface_vtbl[];
 
 /**
  * Returns the stat interface singleton, creating it on first use.
@@ -1888,12 +1817,12 @@ extern "C" void* cBEStatInterface_getThis(void)
     if (cBEStatInterface_instance == 0) {
         cBEStatInterface* mem = (cBEStatInterface*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
         cBEStatInterface_instance = (cBEStatInterface*)(mem);
-        sVTablePlayer_00147F78* vt = &cBEStatInterface_vtbl;
-        short thisAdjust = vt->delta;
-        void (*fn)(void*) = vt->fn;
+        sVEntry<void(void*)>* vt = cBEStatInterface_vtbl;
+        short thisAdjust = vt[2].delta; // slot 2: discard, read before the vptr store
+        void (*fn)(void*) = vt[2].fn;
         (*(void**)&VPTR_OF(cBEInterface, mem)) = vt;
         mem->bIsActive = 0;
-        fn((char*)mem + thisAdjust);
+        fn(vthis(mem, thisAdjust));
     }
     return cBEStatInterface_instance;
 }

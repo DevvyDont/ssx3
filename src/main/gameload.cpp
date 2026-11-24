@@ -13,6 +13,9 @@
 #include "wscript/wscriptman.h"
 #include "wscript/wscriptcache.h"
 #include "main/gameviewman.h"
+#include "camera/camera.h"
+#include "object/flagset.h"
+#include "visualfx/snowfall.h"
 #include "ui/uiengine.h"
 #include "bx/appman.h"
 #include "main/gamestate.h"
@@ -543,7 +546,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     cBXNash_initTheAIFwdDiffCache(self->BXNash);
     cBXString dir;
     dir.Str = cBXString_EmptyString;
-    *(int*)(*(char**)self->World + 0x3D4) = 0;
+    self->World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 0;
     {
         cBXString worldPath;
         cBXString locName;
@@ -560,7 +563,7 @@ extern "C" void cGame_loadTrack(cGame* self)
         cWorld_update(self->World);
         THREAD_yield(0);
     }
-    *(int*)(*(char**)self->World + 0x3D4) = 1;
+    self->World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 1;
     {
         cBXString worldPath;
         cBXString camBasePath;
@@ -637,12 +640,6 @@ struct sVEnt_FA98 {
     void (*fn)(void*, int);
 };
 
-struct sVEnt0_FA98 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-
 struct sVEnt1_FA98 {
     short delta;
     short index;
@@ -674,11 +671,11 @@ struct sGameRes_FA98 {
 
 // Pointer array member with an inline indexer.
 struct sPtrArr_FA98 {
-    char* e[1];
-    char* at(int i) { return e[i]; }
+    cRider* e[1];
+    cRider* at(int i) { return e[i]; }
 };
 
-static inline char* GetRider_FA98(int i)
+static inline cRider* GetRider_FA98(int i)
 {
     return ((sPtrArr_FA98*)(&SSXApp->Game->AI->Riders[0]))->at(i);
 }
@@ -696,9 +693,9 @@ struct sObj20_FA98 {
  * Tears down a running event: saves the ranked-game records, deletes every game manager and resets the graphics,
  * audio and scripts.
  *
- * Sets the BE state to 0. For a ranked network game it copies each rider's 0xAC-byte record (rider +0x790 -> +0xFC;
- * host order by bIsHost) into the network options (+0x330) and cBENetworkInterface_networkOpt.OpponentStats and calls the network interface's virtual
- * slot 1. Then: camera-trigger cleanup, GrMan slot 19, the FE async manager (cFEAsyncManager_FlushFEAsyncTextures), every script
+ * Sets the BE state to 0. For a ranked network game it copies each rider's stats (its metrix's Totals; host order
+ * by bIsHost) into cBENetworkInterface_networkOpt's MyStats and OpponentStats and submits the network interface. Then:
+ * camera-trigger cleanup, GrMan slot 19, the FE async manager (cFEAsyncManager_FlushFEAsyncTextures), every script
  * force-ended; deletes UI and InputSync, returns the cut-scene transitions to regular mode, purges and frees
  * SurfPropCache, deletes SkyBox, FogMan and LensFxMan, purges the paths (cPathSys_purgePaths) and BXNash's AI cache,
  * deletes MenuSys, merges bucket 1 of the bucket manager D_004A5988, then deletes WScriptMan, CrowdMan2d/3d,
@@ -712,14 +709,13 @@ struct sObj20_FA98 {
 extern "C" void cGame_purge(cGame* self)
 {
     cBE_setState(0);
-    char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
+    cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
         int which = cBENetworkInterface_networkOpt.bIsHost;
         int other = which != 0;
-        *(sRec_FA98*)&(&cBENetworkInterface_networkOpt)->MyStats = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
-        (*(sRec_FA98*)&cBENetworkInterface_networkOpt.OpponentStats) = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
-        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
-        vtEntry->fn(vthis(iface, *vtEntry));
+        cBENetworkInterface_networkOpt.MyStats = GetRider_FA98(which == 0)->mMetrix->Totals;
+        cBENetworkInterface_networkOpt.OpponentStats = GetRider_FA98(other)->mMetrix->Totals;
+        iface->submit();
     }
     cCameraTriggerMan_cleanupOnExit(((char*)&gCamTriggerMan));
     {
@@ -1347,23 +1343,27 @@ static inline int notMode3_2306B8(int s)
     return s != 3;
 }
 
-// Object at game + 0x84: views at +0x4, count at +0x10.
-struct sViewList_2306B8 {
-    int f0;
-    char* views[3];
-    unsigned int count;
-    unsigned int getCount() { return count; }
-    char* getView(unsigned int i) { return views[i]; }
-};
+// EA's inline accessors (the preview's cGameViewMan::getNumGameViews / getGameView, cAI::getNumRiders / getRider):
+// reading through them reloads the manager pointer in the loops below.
+static inline unsigned int NumViews_2306B8(cGameViewMan* viewMan)
+{
+    return viewMan->m_uiNumView;
+}
 
-// Object at game + 0xC: riders at +0x28, count at +0x78.
-struct sRiderList_2306B8 {
-    char pad0[0x28];
-    char* riders[20];
-    int count;
-    int getCount() { return count; }
-    char* getRider(int i) { return riders[i]; }
-};
+static inline cCamera* View_2306B8(cGameViewMan* viewMan, unsigned int i)
+{
+    return viewMan->PlayerCamera[i];
+}
+
+static inline int NumRiders_2306B8(cAI* ai)
+{
+    return ai->NumberOfRidersAllocated;
+}
+
+static inline cRider* Rider_2306B8(cAI* ai, int i)
+{
+    return ai->Riders[i];
+}
 
 static inline int canUpdate_2306B8(cGame* self)
 {
@@ -1377,7 +1377,7 @@ static inline int canUpdate_2306B8(cGame* self)
 static inline int updatePause_2306B8(cGame* self)
 {
     if (cGameViewMan_isStreamReady(((char*)self->ViewMan)) == 0 || self->SectionMan->m_bStreamReady == 0) {
-        *(int*)(*((char**)self->World) + 0x3D4) = 0;
+        self->World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 0;
         cWorld_update(((char*)self->World));
         cGameViewMan_updateAll(((char*)self->ViewMan));
         if (self->SectionMan->m_bStreamReady == 0) {
@@ -1392,12 +1392,12 @@ static inline int updatePause_2306B8(cGame* self)
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             ps2GraphicsMan->FlushRenderer();
             cGameViewMan_updateStreamFocus(((char*)self->ViewMan));
-            cWorldCache_flushInActivePages(*((void**)self->World));
+            cWorldCache_flushInActivePages(self->World->m_pWorldCache);
             self->m_bFlushStreamer = 0;
         }
         return 0;
     }
-    *(int*)(*((char**)self->World) + 0x3D4) = 1;
+    self->World->m_pWorldCache->m_StreamMan.m_bLimitBandWidth = 1;
     self->IsStreamPaused = 0;
     self->m_bFlushStreamer = 0;
     cWorld_update(((char*)self->World));
@@ -1569,15 +1569,16 @@ extern "C" void cGame_update(cGame* self)
             (self->mUpdateTick)++;
             {
                 unsigned int i;
-                for (i = 0; i < (((sViewList_2306B8*)(char*)self->ViewMan))->getCount(); i++) {
-                    cWorldSound_TriggerWorldAudio((char*)self->WorldSound, (((sViewList_2306B8*)(char*)self->ViewMan))->getView(i) + 0x20, i);
+                for (i = 0; i < NumViews_2306B8(self->ViewMan); i++) {
+                    cWorldSound_TriggerWorldAudio((char*)self->WorldSound, &View_2306B8(self->ViewMan, i)->Pose, i);
                 }
             }
             {
                 int i;
-                for (i = 0; i < (((sRiderList_2306B8*)(char*)self->AI))->getCount(); i++) {
-                    char* rider = (((sRiderList_2306B8*)(char*)self->AI))->getRider(i);
-                    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(rider + 0x6C0);
+                for (i = 0; i < NumRiders_2306B8(self->AI); i++) {
+                    cRider* rider = Rider_2306B8(self->AI, i);
+                    // cBeing slot 19: vibrationUpdate
+                    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_AT(rider, sizeof(cRiderState));
                     vt[19].fn(vthis(rider, vt[19]));
                 }
             }
@@ -1679,18 +1680,20 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cGameViewMan_updateViewState(void* self);
 extern int cPauseState_Flags;
 
-class cGameState_0F40 {
-public:
-    int pad[3];
-    virtual void v01();
-    virtual void preloadInit();
-    virtual void preloadUpdate();
-    virtual void preloadCancel();
-    virtual void gainFocus(int arg);
-    virtual void update();
-    virtual void loseFocus();
-};
+// cGameState's virtuals, called through its flat header's mVtbl: 2 preloadInit, 3 preloadUpdate, 5 gainFocus(int),
+// 6 update, 7 loseFocus. The game-flow states (cGFEventStartState ...) are flat layouts that begin with cGameState's
+// fields, so `(cGameState*)&self->mEventStartState` views the same layout as its base.
+static inline void StateCall_0F40(cGameState* state, int slot)
+{
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)state->mVtbl;
+    vt[slot].fn(vthis(state, vt[slot]));
+}
 
+static inline void StateGainFocus_0F40(cGameState* state, int startupFlag)
+{
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)state->mVtbl;
+    vt[5].fn(vthis(state, vt[5]), startupFlag);
+}
 
 /**
  * Runs the game-flow state machine: updates the current state, drives a preload and switches to a requested state.
@@ -1719,136 +1722,136 @@ extern "C" void cGame_updateState(cGame* self_)
         return;
     if (cPauseState_Flags & 0x20)
         return;
-    if (((cGameState_0F40*)self->mCurrentState) != 0 && (self->mCurrentStateID != 3 || self->mPendingStateID == 0))
-        ((cGameState_0F40*)self->mCurrentState)->update();
+    if (self->mCurrentState != 0 && (self->mCurrentStateID != 3 || self->mPendingStateID == 0))
+        StateCall_0F40(self->mCurrentState, 6); // update
     if (self->mPendingPreloadStateID != 0) {
         switch (self->mPendingPreloadStateID) {
     case 1:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mEventStartState;
+        self->mPreloadingState = (cGameState*)&self->mEventStartState;
         break;
     case 2:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mPreEventState;
+        self->mPreloadingState = (cGameState*)&self->mPreEventState;
         break;
     case 3:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mGateState;
+        self->mPreloadingState = (cGameState*)&self->mGateState;
         break;
     case 4:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mRidingState;
+        self->mPreloadingState = (cGameState*)&self->mRidingState;
         break;
     case 5:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mFinishlineState;
+        self->mPreloadingState = (cGameState*)&self->mFinishlineState;
         break;
     case 6:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mEndState;
+        self->mPreloadingState = (cGameState*)&self->mEndState;
         break;
     case 7:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mPostEventState;
+        self->mPreloadingState = (cGameState*)&self->mPostEventState;
         break;
     case 8:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mEndWaitState;
+        self->mPreloadingState = (cGameState*)&self->mEndWaitState;
         break;
     case 9:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mTransportWaitState;
+        self->mPreloadingState = (cGameState*)&self->mTransportWaitState;
         break;
     case 10:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mTrackStartState;
+        self->mPreloadingState = (cGameState*)&self->mTrackStartState;
         break;
     case 11:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mSectionLoadState;
+        self->mPreloadingState = (cGameState*)&self->mSectionLoadState;
         break;
     case 12:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mPodiumState;
+        self->mPreloadingState = (cGameState*)&self->mPodiumState;
         break;
     case 13:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mNextHeatState;
+        self->mPreloadingState = (cGameState*)&self->mNextHeatState;
         break;
     case 14:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mUserSelectState;
+        self->mPreloadingState = (cGameState*)&self->mUserSelectState;
         break;
     case 15:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mSessionTeleportState;
+        self->mPreloadingState = (cGameState*)&self->mSessionTeleportState;
         break;
     case 16:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mReplayStartState;
+        self->mPreloadingState = (cGameState*)&self->mReplayStartState;
         break;
         }
         self->mPreloadStateID = self->mPendingPreloadStateID;
         self->mPendingPreloadStateID = 0;
-        ((cGameState_0F40*)self->mPreloadingState)->preloadInit();
+        StateCall_0F40(self->mPreloadingState, 2); // preloadInit
     }
-    if (((cGameState_0F40*)self->mPreloadingState) != 0)
-        ((cGameState_0F40*)self->mPreloadingState)->preloadUpdate();
+    if (self->mPreloadingState != 0)
+        StateCall_0F40(self->mPreloadingState, 3); // preloadUpdate
     int next = self->mPendingStateID;
     if (next == 0)
         return;
     int startupFlag = self->mPendingStateStartupFlag;
-    if (((cGameState_0F40*)self->mCurrentState) != 0)
-        ((cGameState_0F40*)self->mCurrentState)->loseFocus();
+    if (self->mCurrentState != 0)
+        StateCall_0F40(self->mCurrentState, 7); // loseFocus
     self->mPrevStateID = self->mCurrentStateID;
-    (*(cGameState_0F40**)&self->mPrevState) = ((cGameState_0F40*)self->mCurrentState);
+    self->mPrevState = self->mCurrentState;
     switch (next) {
     case 1:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mEventStartState;
+        self->mCurrentState = (cGameState*)&self->mEventStartState;
         self->mCurrentStateID = 1;
         break;
     case 2:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mPreEventState;
+        self->mCurrentState = (cGameState*)&self->mPreEventState;
         self->mCurrentStateID = 2;
         break;
     case 3:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mGateState;
+        self->mCurrentState = (cGameState*)&self->mGateState;
         self->mCurrentStateID = 3;
         break;
     case 4:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mRidingState;
+        self->mCurrentState = (cGameState*)&self->mRidingState;
         self->mCurrentStateID = 4;
         break;
     case 5:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mFinishlineState;
+        self->mCurrentState = (cGameState*)&self->mFinishlineState;
         self->mCurrentStateID = 5;
         break;
     case 6:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mEndState;
+        self->mCurrentState = (cGameState*)&self->mEndState;
         self->mCurrentStateID = 6;
         break;
     case 7:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mPostEventState;
+        self->mCurrentState = (cGameState*)&self->mPostEventState;
         self->mCurrentStateID = 7;
         break;
     case 8:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mEndWaitState;
+        self->mCurrentState = (cGameState*)&self->mEndWaitState;
         self->mCurrentStateID = 8;
         break;
     case 9:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mTransportWaitState;
+        self->mCurrentState = (cGameState*)&self->mTransportWaitState;
         self->mCurrentStateID = 9;
         break;
     case 10:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mTrackStartState;
+        self->mCurrentState = (cGameState*)&self->mTrackStartState;
         self->mCurrentStateID = 10;
         break;
     case 11:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mSectionLoadState;
+        self->mCurrentState = (cGameState*)&self->mSectionLoadState;
         self->mCurrentStateID = 11;
         break;
     case 12:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mPodiumState;
+        self->mCurrentState = (cGameState*)&self->mPodiumState;
         self->mCurrentStateID = 12;
         break;
     case 13:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mNextHeatState;
+        self->mCurrentState = (cGameState*)&self->mNextHeatState;
         self->mCurrentStateID = 13;
         break;
     case 14:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mUserSelectState;
+        self->mCurrentState = (cGameState*)&self->mUserSelectState;
         self->mCurrentStateID = 14;
         break;
     case 15:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mSessionTeleportState;
+        self->mCurrentState = (cGameState*)&self->mSessionTeleportState;
         self->mCurrentStateID = 15;
         break;
     case 16:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mReplayStartState;
+        self->mCurrentState = (cGameState*)&self->mReplayStartState;
         self->mCurrentStateID = 16;
         break;
     }
@@ -1856,11 +1859,11 @@ extern "C" void cGame_updateState(cGame* self_)
     self->mPendingStateStartupFlag = 0;
     if (self->mPreloadStateID == self->mCurrentStateID) {
         self->mPreloadStateID = 0;
-        (*(cGameState_0F40**)&self->mPreloadingState) = 0;
+        self->mPreloadingState = 0;
     }
-    if (((cGameState_0F40*)self->mCurrentState) != 0) {
+    if (self->mCurrentState != 0) {
         cGameViewMan_updateViewState(((void*)self->ViewMan));
-        ((cGameState_0F40*)self->mCurrentState)->gainFocus(startupFlag);
+        StateGainFocus_0F40(self->mCurrentState, startupFlag);
     }
 }
 #endif
@@ -1913,20 +1916,20 @@ INCLUDE_ASM("main/gameload", cGame_cancelPreloadingState);
  * Cancels the game's state preload.
  *
  * Clears mPendingPreloadStateID (+0x208); when a preload is running (mPreloadStateID, +0x20C), calls the preloading
- * state's preloadCancel (vtable slot +0x24 of mPreloadingState, +0x204) and clears mPreloadStateID and
+ * state's preloadCancel (vtable slot 4 of mPreloadingState, +0x204) and clears mPreloadStateID and
  * mPreloadingState.
  */
 extern "C" void cGame_cancelPreloadingState(cGame* self) {
     cGameState* obj;
-    void *vtbl;
+    sVEntry<void(void*)>* vt;
 
     if (self->mPendingPreloadStateID != 0) {
         self->mPendingPreloadStateID = 0;
     }
     if (self->mPreloadStateID != 0) {
-        obj = (cGameState*)((void*)self->mPreloadingState);
-        vtbl = (void*)obj->mVtbl;
-        (*(void (**)(void *))((char*)vtbl + 0x24))((char*)obj + *(short *)((char*)vtbl + 0x20));
+        obj = self->mPreloadingState;
+        vt = (sVEntry<void(void*)>*)obj->mVtbl;
+        vt[4].fn(vthis(obj, vt[4])); // slot 4: preloadCancel
         self->mPreloadStateID = 0;
         self->mPreloadingState = 0;
     }
@@ -1980,21 +1983,6 @@ extern "C" void cGame_doNextState(cGame* self)
 //100%
 INCLUDE_ASM("main/gameload", cGame_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct cSerObj_00231348 {
-    int f0, f4, f8;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void serialize(void* stream);
-};
 // PORT: these serializers take (self, stream); their mangled names say (void*).
 void cGFEndState_writeToReplayFrame_s(void* p, void* s) __asm__("cGFEndState_writeToReplayFrame__FPv");
 void cGFEndWaitState_writeToReplayFrame_s(void* p, void* s) __asm__("cGFEndWaitState_writeToReplayFrame__FPv");
@@ -2022,8 +2010,8 @@ extern "C" void cGFUserSelectState_writeToReplayFrame(void* p, void* s);
  */
 extern "C" void cGame_writeToReplayFrame(cGame* self, cBxReplayFrame* stream)
 {
-    ((cSerObj_00231348*)self->FlagManager)->serialize(stream);
-    ((cSerObj_00231348*)self->SnowFall)->serialize(stream);
+    self->FlagManager->writeToReplayFrame(stream);
+    self->SnowFall->writeToReplayFrame(stream);
     stream->write((const char*)&self->mCurrentStateID, 4);
     stream->write((const char*)&self->mPrevStateID, 4);
     stream->write((const char*)&self->mPendingStateID, 4);
@@ -2067,33 +2055,6 @@ extern "C" void cGFNextHeatState_readFromReplayFrame(void* state, void* stream);
 extern "C" void cGFUserSelectState_readFromReplayFrame(void* state, void* stream);
 void cGFSessionTeleportState_readFromReplayFrame_14D0(void* state, void* stream) __asm__("cGFSessionTeleportState_readFromReplayFrame__FPv");
 
-class cGameState_14D0;
-
-class cStream_14D0 {
-public:
-    virtual void v01();
-    virtual void read(void* dst, int size);
-};
-
-class cLoadable_14D0 {
-public:
-    int pad[3];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void load(cStream_14D0* stream);
-};
-
-
 /**
  * Restores the game's flow state from a replay frame: the flag manager, snowfall, state ids and every game-flow
  * state.
@@ -2112,8 +2073,8 @@ public:
 extern "C" void cGame_readFromReplayFrame(cGame* self_, cBxReplayFrame* stream)
 {
     cGame* self = self_;
-    ((cLoadable_14D0*)self->FlagManager)->load((cStream_14D0*)stream);
-    ((cLoadable_14D0*)self->SnowFall)->load((cStream_14D0*)stream);
+    self->FlagManager->readFromReplayFrame(stream);
+    self->SnowFall->readFromReplayFrame(stream);
     stream->read((char*)&self->mCurrentStateID, 4);
     stream->read((char*)&self->mPrevStateID, 4);
     stream->read((char*)&self->mPendingStateID, 4);
@@ -2133,116 +2094,117 @@ extern "C" void cGame_readFromReplayFrame(cGame* self_, cBxReplayFrame* stream)
     cGFNextHeatState_readFromReplayFrame((char*)&self->mNextHeatState, stream);
     cGFUserSelectState_readFromReplayFrame((char*)&self->mUserSelectState, stream);
     cGFSessionTeleportState_readFromReplayFrame_14D0((char*)&self->mSessionTeleportState, stream);
+    // Each game-flow state is a flat layout that begins with cGameState's fields: the casts view it as its base.
     switch (self->mCurrentStateID) {
     case 0:
-        (*(cGameState_14D0**)&self->mCurrentState) = 0;
+        self->mCurrentState = 0;
         break;
     case 1:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mEventStartState;
+        self->mCurrentState = (cGameState*)&self->mEventStartState;
         break;
     case 2:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mPreEventState;
+        self->mCurrentState = (cGameState*)&self->mPreEventState;
         break;
     case 3:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mGateState;
+        self->mCurrentState = (cGameState*)&self->mGateState;
         break;
     case 4:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mRidingState;
+        self->mCurrentState = (cGameState*)&self->mRidingState;
         break;
     case 5:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mFinishlineState;
+        self->mCurrentState = (cGameState*)&self->mFinishlineState;
         break;
     case 6:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mEndState;
+        self->mCurrentState = (cGameState*)&self->mEndState;
         break;
     case 7:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mPostEventState;
+        self->mCurrentState = (cGameState*)&self->mPostEventState;
         break;
     case 8:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mEndWaitState;
+        self->mCurrentState = (cGameState*)&self->mEndWaitState;
         break;
     case 9:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mTransportWaitState;
+        self->mCurrentState = (cGameState*)&self->mTransportWaitState;
         break;
     case 10:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mTrackStartState;
+        self->mCurrentState = (cGameState*)&self->mTrackStartState;
         break;
     case 11:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mSectionLoadState;
+        self->mCurrentState = (cGameState*)&self->mSectionLoadState;
         break;
     case 12:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mPodiumState;
+        self->mCurrentState = (cGameState*)&self->mPodiumState;
         break;
     case 13:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mNextHeatState;
+        self->mCurrentState = (cGameState*)&self->mNextHeatState;
         break;
     case 14:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mUserSelectState;
+        self->mCurrentState = (cGameState*)&self->mUserSelectState;
         break;
     case 15:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mSessionTeleportState;
+        self->mCurrentState = (cGameState*)&self->mSessionTeleportState;
         break;
     case 16:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mReplayStartState;
+        self->mCurrentState = (cGameState*)&self->mReplayStartState;
         break;
     default:
-        (*(cGameState_14D0**)&self->mCurrentState) = 0;
+        self->mCurrentState = 0;
         self->mCurrentStateID = 0;
         break;
     }
     switch (self->mPrevStateID) {
     case 1:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mEventStartState;
+        self->mPrevState = (cGameState*)&self->mEventStartState;
         break;
     case 2:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mPreEventState;
+        self->mPrevState = (cGameState*)&self->mPreEventState;
         break;
     case 3:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mGateState;
+        self->mPrevState = (cGameState*)&self->mGateState;
         break;
     case 4:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mRidingState;
+        self->mPrevState = (cGameState*)&self->mRidingState;
         break;
     case 5:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mFinishlineState;
+        self->mPrevState = (cGameState*)&self->mFinishlineState;
         break;
     case 6:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mEndState;
+        self->mPrevState = (cGameState*)&self->mEndState;
         break;
     case 7:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mPostEventState;
+        self->mPrevState = (cGameState*)&self->mPostEventState;
         break;
     case 8:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mEndWaitState;
+        self->mPrevState = (cGameState*)&self->mEndWaitState;
         break;
     case 9:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mTransportWaitState;
+        self->mPrevState = (cGameState*)&self->mTransportWaitState;
         break;
     case 10:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mTrackStartState;
+        self->mPrevState = (cGameState*)&self->mTrackStartState;
         break;
     case 11:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mSectionLoadState;
+        self->mPrevState = (cGameState*)&self->mSectionLoadState;
         break;
     case 12:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mPodiumState;
+        self->mPrevState = (cGameState*)&self->mPodiumState;
         break;
     case 13:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mNextHeatState;
+        self->mPrevState = (cGameState*)&self->mNextHeatState;
         break;
     case 14:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mUserSelectState;
+        self->mPrevState = (cGameState*)&self->mUserSelectState;
         break;
     case 15:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mSessionTeleportState;
+        self->mPrevState = (cGameState*)&self->mSessionTeleportState;
         break;
     case 16:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mReplayStartState;
+        self->mPrevState = (cGameState*)&self->mReplayStartState;
         break;
     default:
         self->mPrevStateID = 0;
     case 0:
-        (*(cGameState_14D0**)&self->mPrevState) = 0;
+        self->mPrevState = 0;
         break;
     }
 }
@@ -2405,7 +2367,7 @@ struct sQuadVtx {
  * vertices.
  *
  * The vertices span (0, 0)-(1, 1) with matching texture coordinates, colour 0x80 (neutral) in all channels and q = 1;
- * they go to GrMan's vertex-drawing slot (vtable +0x238) with count 4.
+ * they go to GrMan's RenderTriStrip (vtable slot 71) with count 4.
  *
  * @param value  the texture id
  */
@@ -2413,7 +2375,6 @@ extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
     sQuadVtx verts[4];
     t4Vector cornerPos;
     int i;
-    char* obj;
 
     for (i = 0; i < 4; i++) {
         verts[i].a = 0x80;
@@ -2435,8 +2396,7 @@ extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
     verts[2].u = 0.0f; verts[2].v = 1.0f;
     verts[3].u = 1.0f; verts[3].v = 1.0f;
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = value;
-    obj = (char*)VPTR_OF(cGraphicsMan, GrMan);
-    (*(void (**)(void*, int, void*, int))(obj + 0x23C))((char*)GrMan + *(short*)(obj + 0x238), 4, verts, 0);
+    GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
 }
 #endif
 
@@ -2552,67 +2512,8 @@ extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col
 extern int G2D;
 extern t4Matrix t4mat_Identity;
 
-struct sRS231D60 {
-    int f0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 5;
-    unsigned int f4_12 : 8;
-    unsigned int f4_20 : 2;
-    unsigned int f4_22 : 1;
-    unsigned int f4_23 : 2;
-    unsigned int f4_25 : 7;
-    unsigned int f8_0 : 5;
-    unsigned int f8_5 : 5;
-    unsigned int f8_10 : 22;
-    int fC;
-    int f10;
-};
+extern sDrawState sDrawState_s_defaultDrawState;
 
-extern sRS231D60 sDrawState_s_defaultDrawState;
-
-class cCtx231D60 {
-public:
-    char pad0[0xE84];
-    sRS231D60* top;
-    char pad1[0x10D8 - 0xE88];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void SetViewportOrthographic(int a, float x, float y, float w, float h, float zn, float zf, int b);
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void SetView1(void* p);
-};
-
-// Typed view of the render context (the unit declares GrMan as void*).
 
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp231D60(float v, float lo, float hi)
@@ -2637,15 +2538,15 @@ extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
 {
     if (self->FadeTimer > 0.0f) {
     cPS2GraphicsMan* ctx = GrMan;
-    ((cCtx231D60*)ctx)->top[1] = ((cCtx231D60*)ctx)->top[0];
-    ((cCtx231D60*)ctx)->top++;
-    *((cCtx231D60*)GrMan)->top = sDrawState_s_defaultDrawState;
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    ctx->m_pCurrentDrawState++;
+    *GrMan->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
     GrMan->SetViewportOrthographic(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0, 0);
     GrMan->SetView1(t4mat_Identity);
-    ((cCtx231D60*)GrMan)->top->f8_5 = 31;
-    ((cCtx231D60*)GrMan)->top->f4_23 = 2;
-    ((cCtx231D60*)GrMan)->top->f4_20 = 0;
-    ((cCtx231D60*)GrMan)->top->f4_12 = 0;
+    GrMan->m_pCurrentDrawState->m_bitGroups[2] |= 0x3E0;
+    GrMan->m_pCurrentDrawState->m_bitGroups[1] = (GrMan->m_pCurrentDrawState->m_bitGroups[1] & ~0x1800000) | 0x1000000;
+    GrMan->m_pCurrentDrawState->m_bitGroups[1] &= ~0x300000;
+    GrMan->m_pCurrentDrawState->m_bitGroups[1] &= ~0xFF000;
     float alpha = Clamp231D60(self->FadeTimer * 5.0f, 0.0f, 1.0f);
     float minCorner[2];
     float maxCorner[2];
@@ -2779,7 +2680,7 @@ struct sVE_1FC0 {
     void (*fn)(void*, float, float, float, float, int);
 };
 
-extern char* SSXApp_1FC0 __asm__("SSXApp");
+extern cSSXApp* SSXApp_1FC0 __asm__("SSXApp");
 
 /**
  * Draws the load indicator: a pulsing sprite at (599, 445) in a full-screen 2D pass.
@@ -2806,7 +2707,7 @@ extern "C" void cLoadIndicator_render(cLoadIndicator* self)
     ((cGfx_1FC0*)GrMan)->SetView(&t4mat_Identity);
     {
         sVE_1FC0* vt = (sVE_1FC0*)VPTR_OF(cGraphicsMan, GrMan);
-        char* thisp = (char*)GrMan + vt[23].delta;
+        void* thisp = vthis(GrMan, vt[23]); // slot 23: SetViewportWindow
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetScreenWidth(), (float)((cGfx_1FC0*)GrMan)->GetScreenHeight(), 1);
     }
@@ -2814,8 +2715,10 @@ extern "C" void cLoadIndicator_render(cLoadIndicator* self)
     float pulse = fCos(self->phase * 6.2831854820251465f);
     sV2_1FC0 size((pulse + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
-    int f10v = *(int*)(SSXApp_1FC0 + 0xA0);
-    *(short*)((char*)((cGfx_1FC0*)GrMan)->stateTop + 0x10) = f10v;
+    int f10v = SSXApp_1FC0->LoadIconTextureID;
+    // stored through a plain pointer: an in-struct store would let GrMan's later reload be dropped
+    short* textureId = &GrMan->m_pCurrentDrawState->m_textureState.m_texid[0];
+    *textureId = f10v;
     (*(sCol_1FC0*)&self->colour).r = self->alpha;
     sV2_1FC0 uv0(0.0f, 0.0f);
     sV2_1FC0 uv1(1.0f, 1.0f);

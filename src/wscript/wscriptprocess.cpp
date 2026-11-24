@@ -276,28 +276,19 @@ extern "C" unsigned int cWScriptProcess_getRunningTaskId(cWScriptProcess* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_dispatchTaskEvent);
 #ifdef SKIP_ASM
-class cWScriptProcess_dispatchTaskEvent_cObj {
-public:
-    char pad_0x00[0x40];
-    // vptr at 0x40; sizeof == 0x44 (same layout as cWScriptProcEntry)
-    virtual void v01();
-    virtual void v02();
-    virtual void dispatchTaskEvent(int a1); // 0x18
-};
-
 /**
- * Passes a task event to the process's current task (index +0x8) through its virtual slot 3
- * (cWScriptTask_dispatchTaskEvent), if the index is below the task count (+0x4).
+ * Passes a task event to the process's current task (RunningTask) through its virtual slot 3
+ * (cWScriptTask_dispatchTaskEvent), if the index is below the task count (NumTasks).
  *
  * cWScriptMan_update calls it for events flagged 0x10000.
  *
- * @param event  the event
+ * @param event  the event (its address)
  */
 extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcess* self, int event)
 {
     int i = self->RunningTask;
     if (i < self->NumTasks) {
-        ((cWScriptProcess_dispatchTaskEvent_cObj*)self->Tasks)[i].dispatchTaskEvent(event);
+        self->Tasks[i].dispatchTaskEvent(*(const tWScriptEvent*)event);
     }
 }
 #endif
@@ -1327,11 +1318,11 @@ extern "C" void* cWScriptMan_cWScriptMan(cWScriptMan* self)
     cProcessList_cProcessList((char*)&self->IdleList);
     cProcessList_cProcessList((char*)&self->ActiveList);
     cProcessList_cProcessList((char*)&self->AddList);
-    char* collectPool = (char*)self->CollectPools;
+    cCollectPool* collectPool = self->CollectPools;
     int i;
     for (i = 0; i != -1; i--) {
-        char* next = collectPool + 0x10C;
-        unsigned int* poolSlot = (unsigned int*)(collectPool + 0xC);
+        cCollectPool* next = collectPool + 1;
+        unsigned int* poolSlot = collectPool->InstIds;
         int j;
         for (j = 63; j != -1; j--) {
             *poolSlot++ = 0xFFFFFFFF;
@@ -1396,8 +1387,8 @@ extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self);
  * Resets the world script manager to its starting state.
  *
  * Clears the current being, instance, infos, process and task and the mission state, sets the mission ids (+0x2A0,
- * +0x2B0) and several counters to -1, empties the menu queue (tMissionMenuQueue_init) and the event list at +0x44, and runs
- * cWScriptMan_rebuildGlobalTables.
+ * +0x2B0) and several counters to -1, empties the menu queue (tMissionMenuQueue_init) and the event list (Events), and
+ * runs cWScriptMan_rebuildGlobalTables.
  */
 extern "C" void cWScriptMan_init(cWScriptMan* self)
 {
@@ -1426,8 +1417,10 @@ extern "C" void cWScriptMan_init(cWScriptMan* self)
     self->MissionHeightInstId = 0xFFFFFFFF;
     MEM_fill((char*)self->MissionTrick, 0, 8);
     tMissionMenuQueue_init(&self->MissionMenuQueue);
-    (*(int*)((char*)self + 0x40)) = 0;
-    MEM_fill(&self->Events[4], 0, 0x180);
+    // Events is the tWScriptEventList (the header types it as its 0x184 bytes)
+    tWScriptEventList* events = (tWScriptEventList*)self->Events;
+    events->NumEvents = 0;
+    MEM_fill(events->Events, 0, 0x180);
     cWScriptMan_rebuildGlobalTables(self);
 }
 
@@ -1528,12 +1521,12 @@ void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptM
 void* cWScriptMan_allocateGlobalTable_impl(void* vself, int i)
 {
     cWScriptMan* self = (cWScriptMan*)vself;
-    char* base = (char*)&self->GlobalTables[0];
-    void** slot = (void**)(base + (i << 2));
+    cLunoTable** tables = self->GlobalTables;
+    cLunoTable** slot = &tables[i];
     if (*slot != 0) {
         luno_cLunoTable__cLunoTable(*slot, 3);
     }
-    return *slot = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_cLunoTable_b, 0x20000000, 0), 0x40);
+    return *slot = (cLunoTable*)luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_cLunoTable_b, 0x20000000, 0), 0x40);
 }
 #endif
 
@@ -1571,10 +1564,6 @@ extern "C" void cWScriptMan_activeSection(cWScriptMan* self, int section)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_setupMissions);
 #ifdef SKIP_ASM
-struct sWSPDef8C60 {
-    char pad[0x54];
-};
-
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1595,11 +1584,11 @@ static inline void* wsPlayback8C60()
  * Sets up the world's missions: in game mode 4 with one player, creates a mission process for every mission
  * script of every world section.
  *
- * First releases the playback manager's loaded data (cPlaybackMan_purgeLocation). When cGameMode (newRace.cGameMode) is 4 and the
- * AI's NumberOfPlayersAllocated is 1, it adds a cWScriptMission (cWScriptMan_addProcess1) per 0x54-byte
- * mission script, keyed (section << 16) + section, and calls cPlaybackMan_initLocation() for the race
- * location's data (+0x34). cWScriptMan_updateWorld() always runs last: it runs each mission script's code at +0x4C and
- * clears the manager's mission state.
+ * First releases the playback manager's loaded data (cPlaybackMan_purgeLocation). When cGameMode (newRace.cGameMode) is
+ * 4 and the AI's NumberOfPlayersAllocated is 1, it adds a cWScriptMission (cWScriptMan_addProcess1) per 0x54-byte
+ * mission script (tWScriptMissionData), keyed (section << 16) + section, and calls cPlaybackMan_initLocation() for the
+ * race location's data (+0x34). cWScriptMan_updateWorld() always runs last: it runs each mission script's code at +0x4C
+ * and clears the manager's mission state.
  */
 extern "C" void cWScriptMan_setupMissions(cWScriptMan* self)
 {
@@ -1611,7 +1600,7 @@ extern "C" void cWScriptMan_setupMissions(cWScriptMan* self)
         int n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
         for (; i < n; i++) {
             int cnt = cWorld_getNumMissionScripts(self->World, i);
-            sWSPDef8C60* defs = (sWSPDef8C60*)cWorld_getMissionScripts(self->World, i);
+            tWScriptMissionData* defs = (tWScriptMissionData*)cWorld_getMissionScripts(self->World, i);
             int j;
             for (j = 0; j < cnt; j++) {
                 cWScriptMan_addProcess1(self, i, &defs[j], (i << 16) + i, 0);

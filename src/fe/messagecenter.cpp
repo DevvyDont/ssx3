@@ -8,6 +8,9 @@
 #include "ui/uimenu.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
+#include "ui/uiengine.h"
+#include "ui/uitext.h"
+#include "ui/uiicon.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
@@ -230,24 +233,6 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 int cFEStateRequestLine_getSongCost(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern const char str_cFEStateAudioOptions[];
 
-struct sReqLine_7500 {
-    char pad_0x0[0x10];
-    char* engine;           // 0x10
-    char pad_0x14[0x30];
-    signed char player;     // 0x44
-    char pad_0x45[3];
-    int mCharID;                // 0x48
-    int list[64];           // 0x4C
-    int count;              // 0x14C
-    int top;                // 0x150
-    char pad_0x154[0x4];
-    unsigned long done;     // 0x158
-    unsigned long sel;      // 0x160
-    int limit;              // 0x168
-    int mInStore;               // 0x16C
-};
-
-
 static inline int isSet_7500(unsigned long m, int i)
 {
     return (m >> i) & 1;
@@ -259,11 +244,11 @@ static inline int onlyBit_7500(unsigned long m, int i)
     return rest == 0;
 }
 
-static inline int countSel_7500(sReqLine_7500* self)
+static inline int countSel_7500(cFEStateRequestLine* self)
 {
     int n = 0;
     for (int i = 0; i < 64; i++) {
-        n += (self->sel >> i) & 1;
+        n += (self->mOwnedSong >> i) & 1;
     }
     return n;
 }
@@ -271,7 +256,7 @@ static inline int countSel_7500(sReqLine_7500* self)
 /**
  * Handles highlight, select and back on the song request list.
  *
- * Song masks: +0x158 = songs in the playlist, +0x160 = owned songs; +0x168 is the cash, +0x16C the in-store
+ * Song masks: mPlaylist = songs in the playlist, mOwnedSong = owned songs; mMoney is the cash, mInStore the in-store
  * flag.
  *
  * Event 5 on a song: an unowned song opens the buy popup when in the store and affordable or free; an owned
@@ -286,34 +271,34 @@ static inline int countSel_7500(sReqLine_7500* self)
 // Request-line widget events: 1 hilights a song, 5 toggles it (done/selected masks), 6 saves the masks and leaves.
 extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* item, unsigned int msg)
 {
-    sReqLine_7500* self = (sReqLine_7500*)requestLine;
+    cFEStateRequestLine* self = (cFEStateRequestLine*)requestLine;
     if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 5: {
-        int k = self->top + item->mMiscData;
-        if (k >= self->count) {
+        int k = self->mFirstVisibleSong + item->mMiscData;
+        if (k >= self->mNumSongs) {
             return;
         }
-        int idx = self->list[k];
-        if (!isSet_7500(self->sel, idx)) {
+        int idx = self->mSongOrder[k];
+        if (!isSet_7500(self->mOwnedSong, idx)) {
             if (self->mInStore != 0) {
-                if (self->limit >= cFEStateRequestLine_getSongCost(self, idx) || countSel_7500(self) < 6) {
+                if (self->mMoney >= cFEStateRequestLine_getSongCost(self, idx) || countSel_7500(self) < 6) {
                     cFEStateRequestLine_showBuyPopup_7500(self, idx);
                 }
             }
         } else {
-            unsigned long done = self->done;
+            unsigned long done = self->mPlaylist;
             int empty = done == 0;
             if (empty || !onlyBit_7500(done, idx)) {
                 if (isSet_7500(done, idx)) {
-                    self->done = done & ~((unsigned long)1 << idx);
+                    self->mPlaylist = done & ~((unsigned long)1 << idx);
                 } else {
-                    self->done = done | ((unsigned long)1 << idx);
+                    self->mPlaylist = done | ((unsigned long)1 << idx);
                 }
-                cFEStateRequestLine_updatePlayListCheckMarks((cFEStateRequestLine*)self);
-                cFEStateRequestLine_updatePlayListCounter((cFEStateRequestLine*)self);
+                cFEStateRequestLine_updatePlayListCheckMarks(self);
+                cFEStateRequestLine_updatePlayListCounter(self);
             }
         }
         cFEStateRequestLine_updateButtonsText((cFEStateRequestLine*)self, idx);
@@ -321,9 +306,9 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
     }
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        cBERewardInterface_setPlayList(iface, self->player, self->mCharID, self->done);
-        cBERewardInterface_setOwnedSongList(iface, self->player, self->mCharID, self->sel);
-        func_0028C2D0(cAudioInterface_bxAudio(), self->done);
+        cBERewardInterface_setPlayList(iface, self->mUserNum, self->mCharID, self->mPlaylist);
+        cBERewardInterface_setOwnedSongList(iface, self->mUserNum, self->mCharID, self->mOwnedSong);
+        func_0028C2D0(cAudioInterface_bxAudio(), self->mPlaylist);
         if (self->mInStore != 0) {
             cSSXAudio* pl = cAudioInterface_bxAudio();
             sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)pl->MusicSys.mVtbl;
@@ -331,17 +316,18 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
             vt[3].fn(vthis(obj, vt[3]), 10);
         }
         if ((int)SSXApp->Game != 0) {
-            cUIStateStack_pop(self->engine + 0x18, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         } else {
-            void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), self->engine, self->player, self->mInStore);
+            void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(
+                cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), self->mpEngine, self->mUserNum, self->mInStore);
             if (nextState != 0) {
-                cUIStateStack_push(self->engine + 0x18, nextState);
+                cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             }
         }
         break;
     }
     case 1: {
-        int idx = self->list[self->top + item->mMiscData];
+        int idx = self->mSongOrder[self->mFirstVisibleSong + item->mMiscData];
         cFEStateRequestLine_updateHilightedSongInfo((cFEStateRequestLine*)self, idx);
         cFEStateRequestLine_updateHelpText((cFEStateRequestLine*)self, idx);
         cFEStateRequestLine_updateButtonsText((cFEStateRequestLine*)self, idx);
@@ -382,22 +368,22 @@ extern "C" void func_002B4978(void* list, int idx);
  */
 extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item, unsigned int msg, int k)
 {
-    sReqLine_7500* self = (sReqLine_7500*)requestLine;
+    cFEStateRequestLine* self = (cFEStateRequestLine*)requestLine;
     switch (msg) {
     case 6: {
-        int idx = self->list[self->top + k];
-        if (onlyBit_7500(self->done, idx)) {
+        int idx = self->mSongOrder[self->mFirstVisibleSong + k];
+        if (onlyBit_7500(self->mPlaylist, idx)) {
             if (self->mInStore != 0) {
-                if (!isSet_7500(self->sel, idx))
+                if (!isSet_7500(self->mOwnedSong, idx))
                     return 257;
             }
             return 0x10;
         }
         if (self->mInStore == 0) {
-            if (isSet_7500(self->sel, idx))
+            if (isSet_7500(self->mOwnedSong, idx))
                 return 257;
         } else {
-            if (self->limit < cFEStateRequestLine_getSongCost(self, idx)) {
+            if (self->mMoney < cFEStateRequestLine_getSongCost(self, idx)) {
                 if (countSel_7500(self) >= 6)
                     goto ret10;
             }
@@ -410,11 +396,11 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
     case 8: {
         int n;
         int idx;
-        n = self->top + k;
-        if (n < self->count) {
-            idx = self->list[n];
+        n = self->mFirstVisibleSong + k;
+        if (n < self->mNumSongs) {
+            idx = self->mSongOrder[n];
             if ((int)SSXApp->Game != 0) {
-                if (!isSet_7500(self->sel, idx)) {
+                if (!isSet_7500(self->mOwnedSong, idx)) {
                 ret10:
                     return 0x10;
                 }
@@ -428,7 +414,7 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
         break;
     }
     case 4:
-        self->top = k;
+        self->mFirstVisibleSong = k;
         cFEStateRequestLine_updatePlayList_77D0(self);
         break;
     }
@@ -541,46 +527,24 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cFEStateRequestLine_getSongTitle(cFEStateRequestLine* self, int i);
 
-class cMsgWidget_97BC8 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
-struct sMsgCenter_97BC8 {
-    char pad_0x0[0x4C];
-    int list[64];   // 0x4C
-    int count;      // 0x14C
-    int top;        // 0x150
-    char pad_0x154[0x20];
-    cMsgWidget_97BC8* texts[8]; // 0x174
-};
-
 /**
  * Writes the song titles into the 8 visible playlist rows.
  *
- * Row i shows the title of list[top + i] (getSongTitle) and is hidden past the end of the list.
+ * Row i shows the title of mSongOrder[mFirstVisibleSong + i] (getSongTitle) and is hidden past the end of the list.
  */
 extern "C" void cFEStateRequestLine_updatePlayListSongTitles(cFEStateRequestLine* self)
 {
-    sMsgCenter_97BC8* requestLine = (sMsgCenter_97BC8*)self;
+    cFEStateRequestLine* requestLine = self;
     int i;
     for (i = 0; i < 8; i++) {
-        int idx = requestLine->top + i;
-        if (idx < requestLine->count) {
-            int id = requestLine->list[idx];
-            requestLine->texts[i]->show(1);
-            cUIText_setAsciiString((cUIText*)requestLine->texts[i], (const char*)cFEStateRequestLine_getSongTitle(self, id));
+        int idx = requestLine->mFirstVisibleSong + i;
+        if (idx < requestLine->mNumSongs) {
+            int id = requestLine->mSongOrder[idx];
+            requestLine->mpSongTitles[i]->setVisible(1);
+            cUIText_setAsciiString(requestLine->mpSongTitles[i],
+                                   (const char*)cFEStateRequestLine_getSongTitle(self, id));
         } else {
-            requestLine->texts[i]->show(0);
+            requestLine->mpSongTitles[i]->setVisible(0);
         }
     }
 }
@@ -589,79 +553,51 @@ extern "C" void cFEStateRequestLine_updatePlayListSongTitles(cFEStateRequestLine
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayListCheckMarks);
 #ifdef SKIP_ASM
-class cMsgWidget_97CA0 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
+// cUIIcon::setElement, inline: the texture id goes to -1 and the element is stored.
+static inline void setElement_97CA0(cUIIcon* icon, const cTextureElement* elem)
+{
+    icon->mTextureID = -1;
+    icon->mpTextureElem = elem;
+}
+
 // PORT: 64-bit `long` masks (8 bytes on EE, 4 on Windows); use uint64_t off-PS2.
-struct sMsgCenter_97CA0 {
-    char pad_0x0[0x4C];
-    int list[64];   // 0x4C
-    int count;      // 0x14C
-    int top;        // 0x150
-    char pad_0x154[0x4];
-    ulong newMask;  // 0x158
-    ulong readMask; // 0x160
-    char pad_0x168[0x2C];
-    cMsgWidget_97CA0* icons[8]; // 0x194
-    char pad_0x1B4[0x50];
-    int colNew;     // 0x204
-    int colRead;    // 0x208
-    int colOther;   // 0x20C
-};
-
-static inline void setColors_97CA0(cMsgWidget_97CA0* w, int a, int b)
+static inline int isSongSelected_97CA0(cFEStateRequestLine* s, int id)
 {
-    *(int*)((char*)w + 0x78) = a;
-    *(int*)((char*)w + 0x7C) = b;
+    return (int)((s->mPlaylist >> id) & 1);
 }
 
-static inline int isNew_97CA0(sMsgCenter_97CA0* s, int id)
+static inline int isSongOwned_97CA0(cFEStateRequestLine* s, int id)
 {
-    return (int)((s->newMask >> id) & 1);
+    return (int)((s->mOwnedSong >> id) & 1);
 }
 
-static inline int isRead_97CA0(sMsgCenter_97CA0* s, int id)
+static inline void setVisible_97CA0(cUIIcon* icon, int v)
 {
-    return (int)((s->readMask >> id) & 1);
-}
-
-static inline void setVisible_97CA0(cMsgWidget_97CA0* w, int v)
-{
-    w->show(v);
+    icon->setVisible(v);
 }
 
 /**
  * Shows and colours the check box of each visible playlist row.
  *
- * A song in the playlist (+0x158) gets the colour at +0x204, an owned one (+0x160) the colour at +0x208, any
- * other the colour at +0x20C; rows past the end are hidden.
+ * A song in the playlist (mPlaylist) gets mpCheckBox, an owned one (mOwnedSong) mpEmptyBox, any other
+ * mpDollarSign; rows past the end are hidden.
  */
 extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(cFEStateRequestLine* self)
 {
-    sMsgCenter_97CA0* requestLine = (sMsgCenter_97CA0*)self;
+    cFEStateRequestLine* requestLine = self;
     int i;
     for (i = 0; i < 8; i++) {
-        setVisible_97CA0(requestLine->icons[i], 0);
-        int idx = requestLine->top + i;
-        if (idx < requestLine->count) {
-            int id = requestLine->list[idx];
-            setVisible_97CA0(requestLine->icons[i], 1);
-            if (isNew_97CA0(requestLine, id)) {
-                setColors_97CA0(requestLine->icons[i], -1, requestLine->colNew);
-            } else if (isRead_97CA0(requestLine, id)) {
-                setColors_97CA0(requestLine->icons[i], -1, requestLine->colRead);
+        setVisible_97CA0(requestLine->mpCheckMarks[i], 0);
+        int idx = requestLine->mFirstVisibleSong + i;
+        if (idx < requestLine->mNumSongs) {
+            int id = requestLine->mSongOrder[idx];
+            setVisible_97CA0(requestLine->mpCheckMarks[i], 1);
+            if (isSongSelected_97CA0(requestLine, id)) {
+                setElement_97CA0(requestLine->mpCheckMarks[i], requestLine->mpCheckBox);
+            } else if (isSongOwned_97CA0(requestLine, id)) {
+                setElement_97CA0(requestLine->mpCheckMarks[i], requestLine->mpEmptyBox);
             } else {
-                setColors_97CA0(requestLine->icons[i], -1, requestLine->colOther);
+                setElement_97CA0(requestLine->mpCheckMarks[i], requestLine->mpDollarSign);
             }
         }
     }
@@ -671,20 +607,6 @@ extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(cFEStateRequestLine
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayListArrows);
 #ifdef SKIP_ASM
-class cMsgWidget_97DB8 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
 /**
  * Shows or hides the play list's scroll arrows.
  *
@@ -694,14 +616,14 @@ public:
 extern "C" void cFEStateRequestLine_updatePlayListArrows(cFEStateRequestLine* self)
 {
     if (self->mFirstVisibleSong == 0) {
-        ((cMsgWidget_97DB8*)self->mpArrowUp)->show(0);
+        self->mpArrowUp->setVisible(0);
     } else {
-        ((cMsgWidget_97DB8*)self->mpArrowUp)->show(1);
+        self->mpArrowUp->setVisible(1);
     }
     if (self->mFirstVisibleSong + 8 >= self->mNumSongs) {
-        ((cMsgWidget_97DB8*)self->mpArrowDown)->show(0);
+        self->mpArrowDown->setVisible(0);
     } else {
-        ((cMsgWidget_97DB8*)self->mpArrowDown)->show(1);
+        self->mpArrowDown->setVisible(1);
     }
 }
 #endif
@@ -723,39 +645,23 @@ extern char str_cFEStateRequestLine[];
 extern char str_kT_16NowPlaying[];
 extern char str_kT_16Artist[];
 
-
-class cMsgWidget_197E70 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
-
 /**
  * Shows the title and artist of the song now playing on the request line.
  *
- * Returns at once unless both now-playing texts exist (+0x1B4 title, +0x1B8 artist). When the audio object's current
- * song (+0x508 of cAudioInterface_bxAudio) is below its song count (+0x504), takes that song's title (func_002B40F0) and artist
- * (func_002B4120) from the music list at +0x118. A non-empty title shows the title text (virtual slot 8) and sets it to
- * the localised "NowPlaying" format (FELocale, hash of str_kT_16NowPlaying) printed with the title through sprintf1
- * into a temporary 16-bit buffer (operator new tagged "cFEStateRequestLine", freed after cUIText_setUnicodeString); an
- * empty title hides it. The artist text gets the same treatment with the "Artist" format. With no current song both
- * texts are hidden.
+ * Returns at once unless both now-playing texts exist (mpCurSongTitle, mpCurSongArtist). When the audio object's
+ * current song (+0x508 of cAudioInterface_bxAudio) is below its song count (+0x504), takes that song's title
+ * (func_002B40F0) and artist (func_002B4120) from the music list at +0x118. A non-empty title shows the title text
+ * (setVisible) and sets it to the localised "NowPlaying" format (FELocale, hash of str_kT_16NowPlaying) printed with
+ * the title through sprintf1 into a temporary 16-bit buffer (operator new tagged "cFEStateRequestLine", freed after
+ * cUIText_setUnicodeString); an empty title hides it. The artist text gets the same treatment with the "Artist" format.
+ * With no current song both texts are hidden.
  *
  * @param vself  the request-line state (this)
  */
 extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* vself)
 {
     cFEStateRequestLine* self = vself;
-    if (((cMsgWidget_197E70*)self->mpCurSongTitle) == 0 || ((cMsgWidget_197E70*)self->mpCurSongArtist) == 0) {
+    if (self->mpCurSongTitle == 0 || self->mpCurSongArtist == 0) {
         return;
     }
     int cur = cAudioInterface_bxAudio()->MusicSys.mCurrentSongNum;
@@ -763,7 +669,7 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
         char* name = (char*)func_002B40F0(&cAudioInterface_bxAudio()->MusicSys, cur);
         char* artist = (char*)func_002B4120(&cAudioInterface_bxAudio()->MusicSys, cur);
         if (strlen(name) != 0) {
-            ((cMsgWidget_197E70*)self->mpCurSongTitle)->show(1);
+            self->mpCurSongTitle->setVisible(1);
             cFELocale* db = SSXApp->FELocale;
             sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
             unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16NowPlaying));
@@ -771,15 +677,15 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
             sprintf1(buf, fmt, (int)name);
-            cUIText_setUnicodeString(((cMsgWidget_197E70*)self->mpCurSongTitle), buf);
+            cUIText_setUnicodeString(self->mpCurSongTitle, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
         } else {
-            ((cMsgWidget_197E70*)self->mpCurSongTitle)->show(0);
+            self->mpCurSongTitle->setVisible(0);
         }
         if (strlen(artist) != 0) {
-            ((cMsgWidget_197E70*)self->mpCurSongArtist)->show(1);
+            self->mpCurSongArtist->setVisible(1);
             cFELocale* db = SSXApp->FELocale;
             sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
             unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16Artist));
@@ -787,16 +693,16 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
             sprintf1(buf, fmt, (int)artist);
-            cUIText_setUnicodeString(((cMsgWidget_197E70*)self->mpCurSongArtist), buf);
+            cUIText_setUnicodeString(self->mpCurSongArtist, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
         } else {
-            ((cMsgWidget_197E70*)self->mpCurSongArtist)->show(0);
+            self->mpCurSongArtist->setVisible(0);
         }
     } else {
-        ((cMsgWidget_197E70*)self->mpCurSongTitle)->show(0);
-        ((cMsgWidget_197E70*)self->mpCurSongArtist)->show(0);
+        self->mpCurSongTitle->setVisible(0);
+        self->mpCurSongArtist->setVisible(0);
     }
 }
 #endif
@@ -1046,21 +952,6 @@ extern "C" void cFEStateRequestLine_updateCash(cFEStateRequestLine* self)
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateFreeSongMarkers);
 #ifdef SKIP_ASM
-class cMsgWidget_985F0 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
-
 /**
  * Shows one marker per free song still to pick.
  *
@@ -1076,11 +967,11 @@ extern "C" void cFEStateRequestLine_updateFreeSongMarkers(cFEStateRequestLine* s
         n += (int)((requestLine->mOwnedSong >> j) & 1);
     }
     for (i = 0; i < 6; i++) {
-        if (((cMsgWidget_985F0*)requestLine->mpFreeSongMarker[i]) != 0) {
+        if (requestLine->mpFreeSongMarker[i] != 0) {
             if (requestLine->mInStore != 0 && n < 6 - i) {
-                ((cMsgWidget_985F0*)requestLine->mpFreeSongMarker[i])->show(1);
+                requestLine->mpFreeSongMarker[i]->setVisible(1);
             } else {
-                ((cMsgWidget_985F0*)requestLine->mpFreeSongMarker[i])->show(0);
+                requestLine->mpFreeSongMarker[i]->setVisible(0);
             }
         }
     }
@@ -1109,22 +1000,6 @@ extern char str_kT_OVRCMNFree[];
 extern char str_disconnected_from_serverErrorString[];
 extern char str_empty_d[];
 
-
-class cMsgWidget_1986D0 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
-
 /**
  * Shows the highlighted song's artist line and its price.
  *
@@ -1138,7 +1013,7 @@ public:
 extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine* vself, int idx)
 {
     cFEStateRequestLine* self = vself;
-    if (((cMsgWidget_1986D0*)self->mpArtist) != 0) {
+    if (self->mpArtist != 0) {
         cFELocale* db = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, db);
         unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongBy));
@@ -1147,8 +1022,8 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_disconnected_from_serverErrorString, 0x100, 0);
         // PORT: the format argument is a string pointer passed through an int parameter
         sprintf1(buf, fmt, (int)name);
-        ((cMsgWidget_1986D0*)self->mpArtist)->show(1);
-        cUIText_setUnicodeString(((cMsgWidget_1986D0*)self->mpArtist), buf);
+        self->mpArtist->setVisible(1);
+        cUIText_setUnicodeString(self->mpArtist, buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1159,7 +1034,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
     ulong mask = self->mOwnedSong;
     if ((int)((mask >> idx) & 1)) {
         cUIText_setAsciiString(self->mpCost, str_empty_d);
-        ((cMsgWidget_1986D0*)self->mpCostText)->show(0);
+        self->mpCostText->setVisible(0);
         return;
     }
     int n = 0;
@@ -1169,12 +1044,12 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
     if (n < 6) {
         cUIText_setUnicodeStringByID(self->mpCost, GetHashValue32(str_kT_OVRCMNFree));
         if (self->mInStore) {
-            ((cMsgWidget_1986D0*)self->mpCostText)->show(1);
+            self->mpCostText->setVisible(1);
         }
     } else {
         cUIText_setAsciiString(self->mpCost, getDollarString((void*)cFEStateRequestLine_getSongCost_2(self, idx)));
         if (self->mInStore) {
-            ((cMsgWidget_1986D0*)self->mpCostText)->show(1);
+            self->mpCostText->setVisible(1);
         }
     }
 }
@@ -1225,23 +1100,23 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, voi
 extern "C" void* cFEStateRequestLine_getSongTitle(cFEStateRequestLine* self, int i);
 // PORT: cFEStateRequestLine_getSongCost__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int cFEStateRequestLine_getSongCost_2(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
-extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3);
-extern "C" void cBuyPopupInfo_initBuySongByCredit(void* self, int song, int credit);
+extern "C" void cBuyPopupInfo_initBuySong(cBuyPopupInfo* self, int a1, int a2, int a3);
+extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, int song, int credit);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char str_cUIStateBuyPopup[];
-
 
 /**
  * Opens the buy popup (cUIStateBuyPopup) for a song.
  *
- * With 6 or more songs owned it is a cash purchase (price from cFEStateRequestLine_getSongCost, cash +0x168); otherwise it uses
- * one of the remaining free credits (6 - owned).
+ * With 6 or more songs owned it is a cash purchase (price from cFEStateRequestLine_getSongCost, cash mMoney); otherwise
+ * it uses one of the remaining free credits (6 - owned).
  *
  * @param idx  song index
  */
 extern "C" void cFEStateRequestLine_showBuyPopup(cFEStateRequestLine* self, int idx)
 {
-    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), ((char*)self->mpEngine), self, self->mUserNum);
+    cUIStateBuyPopup* popup = (cUIStateBuyPopup*)cUIStateBuyPopup_cUIStateBuyPopup(
+        cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), self->mpEngine, self, self->mUserNum);
     int n = 0;
     for (int i = 0; i < 64; i++) {
         n += (int)((self->mOwnedSong >> i) & 1);
@@ -1249,11 +1124,11 @@ extern "C" void cFEStateRequestLine_showBuyPopup(cFEStateRequestLine* self, int 
     int song = (int)cFEStateRequestLine_getSongTitle((cFEStateRequestLine*)self, idx);
     if (n >= 6) {
         int cost = cFEStateRequestLine_getSongCost_2(self, idx);
-        cBuyPopupInfo_initBuySong((int*)(popup + 0x48), song, cost, self->mMoney);
+        cBuyPopupInfo_initBuySong(&popup->mInfo, song, cost, self->mMoney);
     } else {
-        cBuyPopupInfo_initBuySongByCredit(popup + 0x48, song, 6 - n);
+        cBuyPopupInfo_initBuySongByCredit(&popup->mInfo, song, 6 - n);
     }
-    cUIStateStack_pushPopup(((char*)self->mpEngine) + 0x18, popup);
+    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
 }
 #endif
 
