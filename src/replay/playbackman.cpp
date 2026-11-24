@@ -17,7 +17,7 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_cPlaybackMan);
 #ifdef SKIP_ASM
 struct cBigFile;
 cBigFile* cBigFile_cBigFile(cBigFile* self);
-extern "C" int cBigFile_open(cBigFile* self, const char* name, int memclass);
+extern "C" int cBigFile_open(cBigFile* self, const char* name, int memtype);
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 // PORT: the second argument is a pointer passed as int (mangled FPvi).
 void cInput_setPad(void* self, int buf);

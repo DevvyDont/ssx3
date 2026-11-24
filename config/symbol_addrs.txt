@@ -18062,3 +18062,8 @@ str_empty_i = 0x004A2F40;
 str_empty_j = 0x004A35A8;
 str_empty_k = 0x004A4888;
 str_empty_l = 0x004A4BB8;
+
+// On Tour / libgcc / libstdc++ global names, round lib_globals_2026-11-23 (docs/ontour_globals.tsv)
+get_eh_context = 0x00453444;
+exception_vtbl = 0x004998B8;
+memclass = 0x004D2438;

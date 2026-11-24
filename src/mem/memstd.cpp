@@ -19,7 +19,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int MUTEX_create(void* sema);
 extern char str_pct_s_LOW[];
 extern char str_pct_s_HIGH[];
-extern void* D_004D2438[];
+extern void* memclass[];
 
 
 
@@ -28,7 +28,7 @@ extern void* D_004D2438[];
  *
  * Builds the "<name> LOW" sentinel block at the start, one free block covering the aligned middle, and the
  * "<name> HIGH" sentinel at the end, sets up the class record (+0x10) with its free list, stores it in the
- * class table (D_004D2438, id & 63) and optionally creates its mutex.
+ * class table (memclass, id & 63) and optionally creates its mutex.
  *
  * @param id     class id; its low 6 bits index the class table, and it also seeds the block flags
  * @param name   class name (copied into the record and used in the sentinel names)
@@ -65,7 +65,7 @@ extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int 
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
     sprintf(buf, str_pct_s_HIGH, name);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
-    D_004D2438[id & 0x3F] = cls;
+    memclass[id & 0x3F] = cls;
     MEM_fill(cls, 0, 80);
     strcpy(cls->name, name);
     mem->freehead.prev = (struct MEMBLOCK*)end;
@@ -118,7 +118,7 @@ extern "C" void MUTEX_destroy(void*);
 
 /**
  * Removes memory class @p id from the class table: deletes its mutex (MUTEX_destroy) when the class is locked, zeroes
- * the 80-byte class record and clears its slot in D_004D2438 (id & 63).
+ * the 80-byte class record and clears its slot in memclass (id & 63).
  *
  * The blocks inside the class are not freed.
  *
@@ -127,7 +127,7 @@ extern "C" void MUTEX_destroy(void*);
  */
 extern "C" int MEMCLASS_remove(int id)
 {
-    void** slot = &D_004D2438[id & 0x3F];
+    void** slot = &memclass[id & 0x3F];
     MEMCLASS* cls = (MEMCLASS*)*slot;
     int removed = 0;
     if (cls != 0) {
@@ -158,7 +158,7 @@ extern "C" void* MEM_free(void* self);
  */
 extern "C" void* MEMCLASS_purge(int id)
 {
-    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     void* freeResult = (void*)1;
     for (MEMBLOCK* n = cls->bottomblock; n != 0 && freeResult != 0; n = n->next) {
         if (!(n->type & 0xC000)) {
@@ -172,14 +172,14 @@ extern "C" void* MEMCLASS_purge(int id)
 INCLUDE_ASM("mem/memstd", MEMCLASS_getfree);
 #ifdef SKIP_ASM
 /**
- * Returns the first unused memory class id: the first empty slot of D_004D2438 from 2 on (0x40 when all are used).
+ * Returns the first unused memory class id: the first empty slot of memclass from 2 on (0x40 when all are used).
  *
  * @return a free class id, or 64
  */
 extern "C" int MEMCLASS_getfree(void)
 {
     int i = 2;
-    while (i < 0x40 && D_004D2438[i] != 0) {
+    while (i < 0x40 && memclass[i] != 0) {
         i++;
     }
     return i;
@@ -209,7 +209,7 @@ extern "C" int MEM_largestunused(int id)
     if (id == 0) {
         id = D_004A2E78_1AC0;
     }
-    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     FREEBLOCK* n = (*(&cls->freehead)).nextfree;
     FREEBLOCK* best = 0;
     int largestData = 0;
@@ -234,7 +234,7 @@ INCLUDE_ASM("mem/memstd", MEM_totalunused);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: an empty ASSERT macro (`ASSERT_1B50(n != 0)`, `do { } while (0)`) in the loop body, perhaps EA's compiled-out assert but unconfirmed; its loop notes give retail's extra no-op before `jr ra`; plain form 95.83%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern void* D_004D2438[];
+extern void* memclass[];
 
 extern int D_004A2E78_1B50 __asm__("D_004A2E78");
 
@@ -252,7 +252,7 @@ extern "C" int MEM_totalunused(int id)
     if (id == 0) {
         id = D_004A2E78_1B50;
     }
-    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     int total = 0;
     FREEBLOCK* n = (*(&cls->freehead)).nextfree;
     while (n->signature != 16979) {
@@ -279,7 +279,7 @@ extern "C" void* MEM_findcontaining(unsigned int addr)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
+        MEMCLASS* cls = (MEMCLASS*)memclass[i & 0x3F];
         if (cls != 0) {
             MEMBLOCK* n = cls->bottomblock;
             unsigned int data;
@@ -318,7 +318,7 @@ extern "C" void* MEM_find(int name)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
+        MEMCLASS* cls = (MEMCLASS*)memclass[i & 0x3F];
         if (cls != 0) {
             MEMBLOCK* n = cls->bottomblock;
             void* data = (char*)n + 0x10;
@@ -401,7 +401,7 @@ extern char str_pct_s_HIGH[];
 
 
 
-extern void* D_004D2438[];
+extern void* memclass[];
 
 /**
  * Adds another block of memory to an existing memory class.
@@ -417,7 +417,7 @@ extern void* D_004D2438[];
  */
 extern "C" int MEMCLASS_link(int id, char* mem, int size)
 {
-    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     char buf[0x100];
     int hdr = cls->infosize;
     int align = cls->align;
@@ -547,7 +547,7 @@ extern char D_004A2E70[];
 
 
 
-extern void* D_004D2438[];
+extern void* memclass[];
 
 /**
  * Prints a table of every block in a memory class through a printf-like callback.
@@ -568,7 +568,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
     int crc = 0;
     cb(str_Type_Name_Address_Size_Actual_Type_CRC_S);
     cb(D_00480140);
-    MEMCLASS* cls = (MEMCLASS*)D_004D2438[(int)thing & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)memclass[(int)thing & 0x3F];
     if (cls == 0) {
         cb(str_Not_initialized);
         return;
@@ -727,7 +727,7 @@ extern "C" int MEM_tailsize(int unused, int id);
 
 
 
-extern void* D_004D2438[];
+extern void* memclass[];
 
 static inline void Unlink_2523D0(FREEBLOCK* b)
 {
@@ -764,7 +764,7 @@ extern "C" int _MEM_free(void* mem)
     int sz;
 
     if (mem != 0) {
-        cls = (MEMCLASS*)D_004D2438[*(unsigned short*)((int)mem - 0xE) & 0x3F];
+        cls = (MEMCLASS*)memclass[*(unsigned short*)((int)mem - 0xE) & 0x3F];
         blk = (FREEBLOCK*)((int)mem - 0x10);
         if (cls->hasmutex) {
             MUTEX_lock(((char*)&cls->mutex));
@@ -986,7 +986,7 @@ extern "C" void MEM_move(void* a, void* b);
 
 
 
-extern void* D_004D2438[];
+extern void* memclass[];
 
 static inline void Unlink_252718(FREEBLOCK* b)
 {
@@ -1013,7 +1013,7 @@ static inline void Unlink_252718(FREEBLOCK* b)
 extern "C" void* _MEM_resize(void* mem, int size)
 {
     int id = *(unsigned short*)((int)mem - 0xE);
-    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     FREEBLOCK* blk = (FREEBLOCK*)((int)mem - 0x10);
     FREEBLOCK* fwd;
     FREEBLOCK* nb;
@@ -1098,7 +1098,7 @@ INCLUDE_ASM("mem/memstd", MEM_tailsize);
  */
 extern "C" int MEM_tailsize(int ignoredName, int id)
 {
-    return ((MEMCLASS*)D_004D2438[id & 0x3F])->infosize;
+    return ((MEMCLASS*)memclass[id & 0x3F])->infosize;
 }
 #endif
 
@@ -1271,7 +1271,7 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
     int retry;
     if (flags == 0)
         flags = D_004A2E78_2A10;
-    MEMCLASS* cls = (MEMCLASS*)D_004D2438[flags & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)memclass[flags & 0x3F];
     if (size < 0)
         return 0;
     int top = flags & 0x200;

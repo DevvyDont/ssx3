@@ -91,11 +91,11 @@ INCLUDE_ASM("bx/bigfile", cBigFile_open);
 #ifdef SKIP_ASM
 extern int D_004A2E78;
 extern "C" int FILESYS_existssync(const char* name, int a1);
-extern "C" int FILESYS_addbigsync(const char* name, int memclass, int a2, cBigFile* out);
+extern "C" int FILESYS_addbigsync(const char* name, int memtype, int a2, cBigFile* out);
 
 // PORT: the unit declares cBigFile_open(cBigFile*) returning void; the body takes
-// (self, name, memclass) and returns field_0x4. Bound by asm label.
-int cBigFile_open_impl(cBigFile* self, const char* name, int memclass) __asm__("cBigFile_open");
+// (self, name, memtype) and returns field_0x4. Bound by asm label.
+int cBigFile_open_impl(cBigFile* self, const char* name, int memtype) __asm__("cBigFile_open");
 
 /**
  * Opens a big (archive) file in a memory class, if it exists.
@@ -103,17 +103,17 @@ int cBigFile_open_impl(cBigFile* self, const char* name, int memclass) __asm__("
  * The memory class is set in D_004A2E78 for the duration of the open (FILESYS_addbigsync) and then restored.
  *
  * @param name  the big file's path (On Tour bigname)
- * @param memclass  memory class for its data (On Tour memtype)
+ * @param memtype  memory class for its data
  * @return 1 when the file is open, otherwise 0
  */
-int cBigFile_open_impl(cBigFile* self, const char* name, int memclass)
+int cBigFile_open_impl(cBigFile* self, const char* name, int memtype)
 {
     if (FILESYS_existssync(name, 100) == 0) {
         return 0;
     }
     int saved = D_004A2E78;
-    D_004A2E78 = memclass;
-    if (FILESYS_addbigsync(name, memclass, 100, self) != 0) {
+    D_004A2E78 = memtype;
+    if (FILESYS_addbigsync(name, memtype, 100, self) != 0) {
         self->Mounted = 1;
     }
     D_004A2E78 = saved;

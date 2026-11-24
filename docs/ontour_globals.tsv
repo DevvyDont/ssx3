@@ -5793,3 +5793,6 @@ ps2_addr	name	previous	source	evidence
 004A35A8	str_empty_j	D_004A35A8	retail	[R] the empty string "" (a NUL) at 0x004A35A8; [U] strcmp'd against a trigger name; its first byte empties path strings
 004A4888	str_empty_k	D_004A4888	retail	[R] the empty string "" (a NUL) at 0x004A4888; [U] a string argument
 004A4BB8	str_empty_l	D_004A4BB8	retail	[R] the empty string "" (a NUL) at 0x004A4BB8; [U] an empty payload string
+004D2438	memclass	D_004D2438	ontour	[O] On Tour global memclass, MEMCLASS *[64] in mem/all_in_one_mem.cpp; [U] retail's mem code reads it as MEMCLASS* table[id & 0x3F] (64 entries)
+00453444	get_eh_context	D_00453444	libgcc	[L] gcc 2.95 libgcc2.c: static void *(*get_eh_context) () = &eh_context_initialize; [R] the word holds eh_context_initialize (0x004104B8); [U] __get_eh_context / __get_eh_info call through it
+004998B8	exception_vtbl	D_004998B8	libstdc++	[U] seg_313800_exception aliases _vt$9exception (class exception's vtable) to it; vtable naming <Class>_vtbl

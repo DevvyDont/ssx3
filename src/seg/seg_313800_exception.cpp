@@ -334,7 +334,7 @@ INCLUDE_ASM("seg/seg_313800_exception", __check_eh_spec);
    is libgcc2.c's (emitted by the back end), __throw_type_match_rtti tinfo2.cc's, the vtables, out-of-line
    destructors and typeid functions those of exception.cc's #pragma implementation "exception". */
 __asm__("terminate__Fv = terminate\n"
-        "_vt$9exception = D_004998B8\n"
+        "_vt$9exception = exception_vtbl\n"
         "_vt$13bad_exception = bad_exception_vtbl\n"
         "_$_13bad_exception = bad_exception__bad_exception\n"
         "_vt$8bad_cast = bad_cast_vtbl\n"
@@ -566,20 +566,20 @@ int exception_what(int *excObject) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", bad_exception__bad_exception);
 #ifdef SKIP_ASM
-extern int D_004998B8[];
+extern int exception_vtbl[];
 extern int operator_delete__FPi(int *);
 /**
  * Destroys a bad_exception: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
  *
- * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1. It
- * fills the destructor slot of bad_exception's vtable bad_exception_vtbl.
+ * g++ deleting-destructor shape: stores exception_vtbl (exception's vtable) and calls operator_delete__FPi on flag & 1.
+ * It fills the destructor slot of bad_exception's vtable bad_exception_vtbl.
  *
  * @param excObject  the bad_exception object
  * @param flags  destructor flags: bit 0 frees the storage
  * @return nothing meaningful (the C reconstruction declares int)
  */
 int bad_exception__bad_exception(int **excObject, int flags) {
-    *excObject = D_004998B8;
+    *excObject = exception_vtbl;
     if (flags & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
@@ -630,20 +630,20 @@ int *__tf13bad_exception_a(void) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", exception__exception);
 #ifdef SKIP_ASM
-extern int D_004998B8[];
+extern int exception_vtbl[];
 extern int operator_delete__FPi(int *);
 /**
  * Destroys an exception object: stores exception's vtable and frees the object when bit 0 of the flag is set.
  *
- * g++ deleting-destructor shape: stores D_004998B8 and calls operator_delete__FPi on flag & 1. It fills the destructor
- * slot of exception's vtable D_004998B8.
+ * g++ deleting-destructor shape: stores exception_vtbl and calls operator_delete__FPi on flag & 1. It fills the
+ * destructor slot of exception's vtable exception_vtbl.
  *
  * @param excObject     the exception object
  * @param flag  destructor flags: bit 0 frees the storage
  * @return nothing meaningful (the C reconstruction declares int)
  */
 int exception__exception(int **excObject, int flag) {
-    *excObject = D_004998B8;
+    *excObject = exception_vtbl;
     if (flag & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
@@ -651,15 +651,15 @@ int exception__exception(int **excObject, int flag) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", exception_exception);
 #ifdef SKIP_ASM
-extern int D_004998B8[];
+extern int exception_vtbl[];
 /**
- * Constructs an exception object: stores exception's vtable (D_004998B8) and returns the object.
+ * Constructs an exception object: stores exception's vtable (exception_vtbl) and returns the object.
  *
  * @param excObject  the object to construct
  * @return the constructed object
  */
 int *exception_exception(int **excObject) {
-    *excObject = D_004998B8;
+    *excObject = exception_vtbl;
     return (int*)excObject;
 }
 #endif

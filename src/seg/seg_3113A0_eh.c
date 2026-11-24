@@ -98,14 +98,14 @@ int *new_eh_context(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __get_eh_context);
 #ifdef SKIP_ASM
-extern int (*D_00453444[])(void);
+extern int (*get_eh_context[])(void);
 /**
- * Calls the EH-context getter D_00453444 and leaves its result as this function's result.
+ * Calls the EH-context getter get_eh_context and leaves its result as this function's result.
  *
  * The getter starts as eh_context_initialize, which switches it to eh_context_static.
  */
 void __get_eh_context(void) {
-    D_00453444[0]();
+    get_eh_context[0]();
 }
 #endif
 
@@ -115,13 +115,13 @@ INCLUDE_ASM("seg/seg_3113A0_eh", __get_eh_info);
 /**
  * Returns the address of the current exception's language-specific info pointer.
  *
- * Gets the EH context from the getter D_00453444 and returns the address of its info word (+0x8). The C++ runtime
+ * Gets the EH context from the getter get_eh_context and returns the address of its info word (+0x8). The C++ runtime
  * (__start_cp_handler, __cp_exception_info and others) reads the current exception's record through it.
  *
  * @return the address of the context's info word
  */
 int *__get_eh_info(void) {
-    return (int *)D_00453444[0]() + 2;
+    return (int *)get_eh_context[0]() + 2;
 }
 #endif
 
@@ -130,13 +130,13 @@ INCLUDE_ASM("seg/seg_3113A0_eh", eh_context_initialize);
 #ifdef SKIP_ASM
 extern int eh_context_static(void);
 /**
- * First EH-context getter: switches the getter D_00453444 to eh_context_static and calls it.
+ * First EH-context getter: switches the getter get_eh_context to eh_context_static and calls it.
  *
  * Without threads there is one static context, so the switch happens on the first call.
  */
 void eh_context_initialize(void) {
     int (*staticGetter)(void) = eh_context_static;
-    D_00453444[0] = staticGetter;
+    get_eh_context[0] = staticGetter;
     staticGetter();
 }
 #endif
@@ -172,27 +172,27 @@ INCLUDE_ASM("seg/seg_3113A0_eh", __get_dynamic_handler_chain);
 /**
  * Returns the address of the EH context's dynamic handler chain.
  *
- * Gets the EH context from the getter D_00453444 and returns the address of word 1.
+ * Gets the EH context from the getter get_eh_context and returns the address of word 1.
  *
  * @return the address of the chain pointer
  */
 int *__get_dynamic_handler_chain(void) {
-    return (int *)D_00453444[0]() + 1;
+    return (int *)get_eh_context[0]() + 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __sjthrow);
 #ifdef SKIP_ASM
-extern int (*D_00453444[])(void);
+extern int (*get_eh_context[])(void);
 extern void __terminate(void);
 struct N570 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
 void sjthrow_410570(void) __asm__("__sjthrow");
 /**
  * Throws in the setjmp/longjmp exception scheme: runs pending cleanups, then jumps to the top handler.
  *
- * Gets the EH context from the getter D_00453444. When the top handler of the dynamic chain has cleanups, it pushes a
- * temporary handler (__builtin_setjmp; a throw from a cleanup ends in __terminate) and runs each cleanup with
+ * Gets the EH context from the getter get_eh_context. When the top handler of the dynamic chain has cleanups, it pushes
+ * a temporary handler (__builtin_setjmp; a throw from a cleanup ends in __terminate) and runs each cleanup with
  * (argument, 2), unlinking it first, then pops the temporary handler. With no active exception (context word 2) or an
  * empty chain it calls __terminate; otherwise it pops the top handler and longjmps into its buffer. Never returns.
  */
@@ -203,7 +203,7 @@ void sjthrow_410570(void) {
     int *topHandler;
     int **pcl;
     struct N570 *tempHandler;
-    eh = (int *)D_00453444[0]();
+    eh = (int *)get_eh_context[0]();
     pchain = (int **)&eh[1];
     topHandler = (int *)eh[1];
     pcl = (int **)&topHandler[1];
@@ -240,7 +240,7 @@ __asm__(".globl D_00410628\n\t.type D_00410628,@function\n\tD_00410628 = __sjthr
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __sjpopnthrow);
 #ifdef SKIP_ASM
-extern int (*D_00453444[])(void);
+extern int (*get_eh_context[])(void);
 extern int __sjthrow(void) __attribute__((noreturn));
 struct N6E8 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
 /**
@@ -258,7 +258,7 @@ int __sjpopnthrow(void) {
     int **pchain;
     int **pcl;
     struct N6E8 *tempHandler;
-    eh = (int *)D_00453444[0]();
+    eh = (int *)get_eh_context[0]();
     pchain = (int **)&eh[1];
     topHandler = (int *)eh[1];
     pcl = (int **)&topHandler[1];
@@ -664,7 +664,7 @@ extern void *throw_helper(void *, int, void *, void *);
 /**
  * Throws the current exception: finds its handler and jumps there with the registers restored.
  *
- * Gets the EH context from the getter D_00453444 and calls __terminate when no exception is active (word 2 is 0).
+ * Gets the EH context from the getter get_eh_context and calls __terminate when no exception is active (word 2 is 0).
  * Gets its own frame state (__frame_state_for; terminate when missing) with the CFA, copies it and passes its return
  * address - 1 to throw_helper. __builtin_eh_return then restores the handler frame's registers, moves the stack by the
  * difference of the two CFAs and jumps to the handler. Never returns. The C++ throw helpers of seg_313800_exception
@@ -679,7 +679,7 @@ void __throw(void) {
     void **pa;
     void *pc;
     __builtin_unwind_init();
-    info = (int *)D_00453444[0]();
+    info = (int *)get_eh_context[0]();
     pb = &buf;
     frameState = &ctx0;
     if (info[2] == 0) {
@@ -726,7 +726,7 @@ void __rethrow(int val) {
     void **pa;
     void *pc;
     __builtin_unwind_init();
-    info = (int *)D_00453444[0]();
+    info = (int *)get_eh_context[0]();
     pb = &buf;
     frameState = &ctx0;
     if (info[2] == 0)

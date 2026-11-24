@@ -1503,7 +1503,7 @@ CHECK_SIZE(cVisualEffectsMainMenu, 0x340);
 
 // cAvalancheMenu (0x7B0): the "Avalanche Menu" debug menu: a title, a spacer and 32 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem SeedItem, is at 0x77C and ends at 0x7B0; the static instance
-// __AvalancheMenu (built by __sti__aivisualeffectsmenu_cpp) ends at the next object, D_004D2438 (+0x7B0); [O] size 0x7B0.
+// __AvalancheMenu (built by __sti__aivisualeffectsmenu_cpp) ends at the next object, memclass (+0x7B0); [O] size 0x7B0.
 // Base cMenu. Vtable cAvalancheMenu_vtbl (0x00480040); destructor cAvalancheMenu__cAvalancheMenu. EA source:
 // main/aivisualeffectsmenu.cpp.
 struct cAvalancheMenu {

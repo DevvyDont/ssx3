@@ -5,7 +5,7 @@
 // header; free blocks are FREEBLOCKs on the class's free list (the list head freehead lives in the MEMCLASS itself).
 // MEMCLASS_create(id, name, mem, size, defaultalign, align, infosize, sentinel, nameblocks, mutex) lays a region out as
 // a bottom block at mem (whose 0x50-byte data area is the MEMCLASS, at mem + 0x10), one free block and a top block,
-// and records the class in D_004D2438[id & 0x3F]. EA source: SSX On Tour's mem/all_in_one_mem.cpp (MEMCLASS_create,
+// and records the class in memclass[id & 0x3F]. EA source: SSX On Tour's mem/all_in_one_mem.cpp (MEMCLASS_create,
 // MEM_initblock, ...). Retail code: unit mem/memstd (MEMCLASS_create .. MEM_*; its views sMemNode_251718 /
 // sMemClass_251718 are these structs).
 //

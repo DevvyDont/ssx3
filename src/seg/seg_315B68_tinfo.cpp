@@ -441,12 +441,12 @@ void __user_type_info____user_type_info(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", bad_typeid__bad_typeid);
 #ifdef SKIP_ASM
-extern int D_004998B8[];
+extern int exception_vtbl[];
 extern int operator_delete__FPi(int *);
 /**
  * Destroys a bad_typeid: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
  *
- * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
+ * g++ deleting-destructor shape: stores exception_vtbl (exception's vtable) and calls operator_delete__FPi on flag & 1.
  * Fills the destructor slot of bad_typeid's vtable bad_typeid_vtbl.
  *
  * @param excObject     the bad_typeid object
@@ -454,7 +454,7 @@ extern int operator_delete__FPi(int *);
  * @return nothing meaningful (the C reconstruction declares int)
  */
 int bad_typeid__bad_typeid(int **excObject, int flag) {
-    *excObject = D_004998B8;
+    *excObject = exception_vtbl;
     if (flag & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
@@ -503,12 +503,12 @@ int *__tf10bad_typeid(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", bad_cast__bad_cast);
 #ifdef SKIP_ASM
-extern int D_004998B8[];
+extern int exception_vtbl[];
 extern int operator_delete__FPi(int *);
 /**
  * Destroys a bad_cast: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
  *
- * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
+ * g++ deleting-destructor shape: stores exception_vtbl (exception's vtable) and calls operator_delete__FPi on flag & 1.
  * Fills the destructor slot of bad_cast's vtable bad_cast_vtbl.
  *
  * @param excObject     the bad_cast object
@@ -516,7 +516,7 @@ extern int operator_delete__FPi(int *);
  * @return nothing meaningful (the C reconstruction declares int)
  */
 int bad_cast__bad_cast(int **excObject, int flag) {
-    *excObject = D_004998B8;
+    *excObject = exception_vtbl;
     if (flag & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
