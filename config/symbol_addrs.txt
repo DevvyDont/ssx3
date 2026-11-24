@@ -11434,6 +11434,9 @@ cPS2MemCard_IsFileInfoValid = 0x002D39B0; //type:func
 // memcard_slot54_2026-11-23: names by evidence (docs/function_names.tsv)
 cPS2MemCard_IsActionable = 0x002D3840; //type:func
 
+// memcard_slot71_2026-11-23: names by evidence (docs/function_names.tsv)
+cPS2MemCard_GetDeviceNameRaw = 0x002D3980; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

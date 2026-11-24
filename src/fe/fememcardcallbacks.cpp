@@ -974,30 +974,6 @@ void cMCOverlayManager_selectDevice(void* mp, int a);
 extern "C" void cMCOverlayManager_setSelectedDevice(void* mp);
 extern "C" void cMCOverlayManager_OnHighlightNextDevice(void* mp);
 
-class cMoviePlayerK1D8160 {
-public:
-    char pad_0x000[0x748];
-    virtual void SetState(int);
-};
-
-class cMovieStreamK1D8160 {
-public:
-    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
-    virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08();
-    virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12();
-    virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16();
-    virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20();
-    virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24();
-    virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28();
-    virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32();
-    virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36();
-    virtual void v37(); virtual void v38(); virtual void v39(); virtual void v40();
-    virtual void v41(); virtual void v42(); virtual void v43(); virtual void v44();
-    virtual void v45(); virtual void v46(); virtual void v47(); virtual void v48();
-    virtual void v49(); virtual void v50(); virtual void v51();
-    virtual int IsAvailable(int);
-};
-
 /**
  * Moves the card check to the next device, or picks the device to use once every device is checked.
  *
@@ -1010,15 +986,15 @@ public:
  */
 extern "C" void cFEMemCard_callbackCardsChecked(void)
 {
-    cMoviePlayerK1D8160* mp = (cMoviePlayerK1D8160*)cSSXApp_getMCManager(SSXApp);
-    int next = *(int*)((char*)mp + 0x428) + 1;
-    if (next < *(int*)((char*)mp + 0x424)) {
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+    int next = mp->mSelectedDevice + 1;
+    if (next < mp->mMaxDevices) {
         cMCOverlayManager_selectDevice(mp, next);
         mp->SetState(49);
         return;
     }
     cMCOverlayManager_selectDevice(mp, 0);
-    if ((*(cMovieStreamK1D8160**)((char*)mp + 0x434))->IsAvailable(0) == 0) {
+    if (mp->mpMemCard->IsAvailable(0) == 0) {
         cFEMemCard* fe = cFEMemCard_mInstance;
         if (fe->mAutoSaveOn != 0) {
             fe->mState = 6;

@@ -3447,8 +3447,9 @@ struct cPS2MemCard_GetDeviceName_sVEntry {
  *
  * @param device  the port (0 or 1)
  * @param dst  the wide-character buffer that receives the name
+ * @param dstLen  the buffer's length (unused here; the callers pass it)
  */
-extern "C" void cPS2MemCard_GetDeviceName(cPS2MemCard* self, int device, unsigned short* dst)
+extern "C" void cPS2MemCard_GetDeviceName(cPS2MemCard* self, int device, unsigned short* dst, int dstLen)
 {
     unsigned short fmt[8];
     unsigned short num[8];

@@ -3336,10 +3336,12 @@ struct sDevVtS_18E510 {
     void (*fn)(void*, int, char*);
 };
 
-// Virtual calls on the memory-card device list (cMCOverlayManager + 0x434, vptr at +0), slot n.
-#define DEVS_18E510(mc, n, a, b) ((*(sDevVtS_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVtS_18E510**)*(char**)((mc) + 0x434))[n].delta, a, b))
-#define DEV0_18E510(mc, n) ((*(sVEntry<int(void*)>**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sVEntry<int(void*)>**)*(char**)((mc) + 0x434))[n].delta))
-#define DEVI_18E510(mc, n, a) ((*(sDevVtI_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVtI_18E510**)*(char**)((mc) + 0x434))[n].delta, a))
+// Virtual calls on the manager's memory card (cMCOverlayManager::mpMemCard, a cMemCard), slot n: 14 GetTitleString,
+// 54 IsActionable, 55 IsFormatted, 66 IsFileSlotDisabled, 67 HasFileName. Written as real cMemCard calls, each one
+// moves an instruction in cFEStateOptionsDeviceSelect_displayStatus's loop setup, so its loop keeps these entry calls.
+#define DEVS_18E510(mc, n, a, b) ((*(sDevVtS_18E510**)*(char**)((char*)(mc) + 0x434))[n].fn(*(char**)((char*)(mc) + 0x434) + (*(sDevVtS_18E510**)*(char**)((char*)(mc) + 0x434))[n].delta, a, b))
+#define DEV0_18E510(mc, n) ((*(sVEntry<int(void*)>**)*(char**)((char*)(mc) + 0x434))[n].fn(*(char**)((char*)(mc) + 0x434) + (*(sVEntry<int(void*)>**)*(char**)((char*)(mc) + 0x434))[n].delta))
+#define DEVI_18E510(mc, n, a) ((*(sDevVtI_18E510**)*(char**)((char*)(mc) + 0x434))[n].fn(*(char**)((char*)(mc) + 0x434) + (*(sDevVtI_18E510**)*(char**)((char*)(mc) + 0x434))[n].delta, a))
 
 
 class cStateBase_18E510 {
@@ -3424,10 +3426,10 @@ struct cState_18E510 : cStateBase_18E510 {
  */
 extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceSelect* self)
 {
-    char* pMC = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* pMC = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     unsigned short ustrDisplay[800];
     if (((cState_18E510*)self)->displayFileOK()) {
-        if (DEV0_18E510(pMC, 53) == 0) {
+        if (pMC->mpMemCard->IsAvailable1() == 0) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
             ((cState_18E510*)self)->triggerDisplayState(3);
@@ -3438,9 +3440,9 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
         cUIObj_18E510* pText;
         int bIsNewSet;
         ((cState_18E510*)self)->setMenuHighlight();
-        cMCOverlayManager_GetDeviceDisplayString(pMC, *(int*)(pMC + 0x428), ustrDisplay, 800);
+        cMCOverlayManager_GetDeviceDisplayString(pMC, pMC->mSelectedDevice, ustrDisplay, 800);
         cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_text)), ustrDisplay);
-        self->mLastSelectedDevice = *(int*)(pMC + 0x428);
+        self->mLastSelectedDevice = pMC->mSelectedDevice;
         pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage));
         pText->setVisible(0);
         bIsNewSet = 0;
@@ -3463,7 +3465,7 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
                     pText->setUseStaticColour(1);
                     pText->setStatic(1);
                 }
-            } else if (DEVI_18E510(pMC, 54, *(int*)(pMC + 1064)) != 0) {
+            } else if (DEVI_18E510(pMC, 54, pMC->mSelectedDevice) != 0) {
                 if (DEVI_18E510(pMC, 66, i - 1) != 0) {
                     pText->setStatic(1);
                     pText->setUseStaticColour(1);
@@ -3476,12 +3478,12 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
                 pText->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, *(int*)(pMC + 0x428), 1) == -1) {
+        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, pMC->mSelectedDevice, 1) == -1) {
             ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(0);
         } else {
             ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, *(int*)(pMC + 0x428), 0) == -1) {
+        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, pMC->mSelectedDevice, 0) == -1) {
             ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(0);
         } else {
             ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(1);

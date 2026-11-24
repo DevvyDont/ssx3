@@ -124,61 +124,6 @@ struct cSelf_11270 {
     virtual void v41();
     virtual int isReady();
 };
-struct cCard_11270 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual int isPresent();
-};
 struct cUIObj_11270 {
     int f0;
     int f4;
@@ -212,10 +157,10 @@ struct cUIObj_11270 {
 /**
  * Shows the profile overlay's empty layout, or switches to the file list as soon as a card is in.
  *
- * When cFEMemCard_displayFileOK (virtual slot 42) allows the file display and the memory card (mpMemCard of cSSXApp_getMCManager,
- * its slot 53) is present, moves to display state 3 through cFEMemCard_triggerDisplayState (virtual slot 35) and runs
- * cOVState_PROFILE_displayOn. Otherwise resets the six profile buttons "player1" ... "player6" of mpScreen:
- * setUseStaticColour(0) (slot 25) and setStatic(1) (slot 8).
+ * When cFEMemCard_displayFileOK (virtual slot 42) allows the file display and the memory card (mpMemCard of
+ * cSSXApp_getMCManager, IsAvailable1, slot 53) says the card is present, moves to display state 3 through
+ * cFEMemCard_triggerDisplayState (virtual slot 35) and runs cOVState_PROFILE_displayOn. Otherwise resets the six
+ * profile buttons "player1" ... "player6" of mpScreen: setUseStaticColour(0) (slot 25) and setStatic(1) (slot 8).
  *
  * @param vself  the profile overlay state (this)
  */
@@ -223,7 +168,7 @@ extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* vself)
 {
     cSelf_11270* self = (cSelf_11270*)vself;
     if (self->isReady() != 0) {
-        if ((*(cCard_11270**)((char*)cSSXApp_getMCManager(SSXApp) + 0x434))->isPresent() != 0) {
+        if (((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mpMemCard->IsAvailable1() != 0) {
             self->setState(3);
             cOVState_PROFILE_displayOn((cOVState_PROFILE*)self);
             return;

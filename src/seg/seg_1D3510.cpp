@@ -522,22 +522,22 @@ extern "C" int cPS2MemCard_GetMaxDevices(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3980);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetDeviceNameRaw);
 #ifdef SKIP_ASM
-struct VEnt_3980 { short delta; short idx; void (*fn)(void*, int, int, int); };
 /**
- * Passes its three arguments on to the card's virtual slot 70 (word 141, cPS2MemCard_GetDeviceName).
+ * Passes its three arguments on to the card's GetDeviceName (slot 70, word 141, cPS2MemCard_GetDeviceName).
  *
- * cPS2MemCard_GetDeviceName reads only the port and the buffer. It is word 143 (slot 71) of cPS2MemCard_vtbl.
+ * The PS2 card has no custom device names (slot 72 returns 0), so its raw name is its display name;
+ * cPS2MemCard_GetDeviceName reads only the port and the buffer. It is word 143 (slot 71) of cPS2MemCard_vtbl,
+ * cMemCard::GetDeviceNameRaw.
  *
  * @param pS2MemCard  the memory card
  * @param device  the port
- * @param nameBuffer  the 16-bit buffer for the name
- * @param extraArg  passed on as the third argument
+ * @param dst  the 16-bit buffer for the name
+ * @param dstLen  the buffer's length, passed on
  */
-extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int device, int nameBuffer, int extraArg) {
-    VEnt_3980 *vtEntry = (VEnt_3980*)(*(char **)pS2MemCard + 0x230);
-    vtEntry->fn(vthis(pS2MemCard, *vtEntry), device, nameBuffer, extraArg);
+extern "C" void cPS2MemCard_GetDeviceNameRaw(cPS2MemCard* pS2MemCard, int device, unsigned short* dst, int dstLen) {
+    ((cMemCard*)pS2MemCard)->GetDeviceName(device, dst, dstLen);
 }
 #endif
 

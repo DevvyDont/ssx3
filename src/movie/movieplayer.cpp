@@ -3826,80 +3826,6 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GatherDeviceInfo1);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* p, int c, int n);
 
-class cMovieSub434_20C8 {
-public:
-    virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05();
-    virtual int v06();
-    virtual int v07();
-    virtual int v08();
-    virtual int v09();
-    virtual int v10();
-    virtual int v11();
-    virtual int v12();
-    virtual int v13();
-    virtual int v14();
-    virtual int v15();
-    virtual int v16();
-    virtual int v17();
-    virtual int v18();
-    virtual int v19();
-    virtual int GetFreeSpace();
-    virtual int v21();
-    virtual int v22();
-    virtual int v23();
-    virtual int v24();
-    virtual int v25();
-    virtual int v26();
-    virtual int v27();
-    virtual int v28();
-    virtual int v29();
-    virtual int v30();
-    virtual int v31();
-    virtual int v32();
-    virtual int v33();
-    virtual int v34();
-    virtual int v35();
-    virtual int v36();
-    virtual int v37();
-    virtual int v38();
-    virtual int v39();
-    virtual int v40();
-    virtual int v41();
-    virtual int v42();
-    virtual int v43();
-    virtual int v44();
-    virtual int v45();
-    virtual int v46();
-    virtual int v47();
-    virtual int IsInvalid(int);
-    virtual int v49();
-    virtual int v50(int);
-    virtual int v51();
-    virtual int v52();
-    virtual int v53();
-    virtual int v54();
-    virtual int v55();
-    virtual int IsFormatted(int);
-    virtual int v57(int);
-    virtual int v58();
-    virtual int v59();
-    virtual int v60(int);
-    virtual int v61();
-    virtual int v62();
-    virtual int v63();
-    virtual int v64();
-    virtual int v65();
-    virtual int v66();
-    virtual int v67();
-    virtual int v68();
-    virtual int v69();
-    virtual void GetDeviceName(int, char*, int);
-};
-
 struct sSlot_20C8
 {
     int a;
@@ -3964,7 +3890,7 @@ extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* vself, int i)
     }
     if (i == me->cur)
         me->slots[me->cur].e = self->mpMemCard->GetFreeSpace();
-    ((cMovieSub434_20C8*)self->mpMemCard)->GetDeviceName(i, name, 100);
+    self->mpMemCard->GetDeviceName(i, (unsigned short*)name, 100);
 }
 #endif
 

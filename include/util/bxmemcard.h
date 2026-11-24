@@ -98,8 +98,8 @@ public:
     virtual bool HasFileName(int fileSlot) = 0;                               // slot 67
     virtual int GetMaxFiles() = 0;                                            // slot 68
     virtual int GetMaxDevices() = 0;                                          // slot 69
-    virtual void GetDeviceName(int device, unsigned short* dst) = 0;          // slot 70
-    virtual void GetDeviceNameRaw() = 0;                                      // slot 71
+    virtual void GetDeviceName(int device, unsigned short* dst, int dstLen) = 0; // slot 70; [R] callers pass a length
+    virtual void GetDeviceNameRaw(int device, unsigned short* dst, int dstLen) = 0; // slot 71
     virtual bool HasCustomDeviceName() = 0;                                   // slot 72
     virtual bool DidErrorOccur() = 0;                                         // slot 73
     virtual bool FileExistsError();                                           // slot 74

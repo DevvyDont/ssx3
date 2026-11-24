@@ -645,61 +645,6 @@ struct cSelf_F9D8 {
     virtual void v41();
     virtual int isReady();
 };
-struct cCard_F9D8 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual int isPresent();
-};
 struct cUIObj_F9D8 {
     int f0;
     int f4;
@@ -744,9 +689,9 @@ struct cUIObj_F9D8 {
 extern "C" void cFEStateProfileLoad_displayOff(cFEStateProfileLoad* vself)
 {
     cSelf_F9D8* self = (cSelf_F9D8*)vself;
-    void* app = cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     if (self->isReady() != 0) {
-        if ((*(cCard_F9D8**)((char*)app + 0x434))->isPresent() != 0) {
+        if (app->mpMemCard->IsAvailable1() != 0) {
             self->setState(3);
             cFEStateProfileLoad_displayOn((cFEStateProfileLoad*)self);
             return;
