@@ -5363,10 +5363,11 @@ struct sList_E7B0 {
 /**
  * Constructs an online front-end state with no engine and no parent (the default constructor).
  *
- * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, clears mHasFocus, unk_058,
- * mpKeyboard, mpKeyboardText, mDisconnectPopupOpen, unk_6B0 and mpPopupTextBuf, sets unk_6BC to 2, stores the
- * cFEStateNet vtable cFEStateNet_vtbl, builds the string at +0x6C0 from the empty string str_sp (cBXString_cBXString2)
- * and allocates the pending-message list's sentinel node (cMemMan_alloc(0xC, "StlBlock")), linking it to itself.
+ * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, clears mHasFocus,
+ * mBlockInput, mpKeyboard, mpKeyboardText, mDisconnectPopupOpen, mLeavingOnline and mpPopupTextBuf, sets mPopupResult
+ * to 2, stores the cFEStateNet vtable cFEStateNet_vtbl, builds mszTargetUser from the empty string str_sp
+ * (cBXString_cBXString2) and allocates the pending-message list's sentinel node (cMemMan_alloc(0xC, "StlBlock")),
+ * linking it to itself.
  *
  * @return @p self
  */
@@ -5377,13 +5378,13 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
     cUIState_cUIState1_E7B0(self, 0, 0);
     sList_E7B0* msgList = (sList_E7B0*)(&self->mMsgList);
     self->mHasFocus = 0;
-    self->unk_058 = 0;
+    self->mBlockInput = 0;
     self->mpKeyboard = 0;
     self->mpKeyboardText = 0;
     self->mDisconnectPopupOpen = 0;
-    self->unk_6B0 = 0;
+    self->mLeavingOnline = 0;
     self->mpPopupTextBuf = 0;
-    self->unk_6BC = 2;
+    self->mPopupResult = 2;
     VPTR_OF(cListNode, self) = cFEStateNet_vtbl;
     cBXString_cBXString2(&self->mszTargetUser, str_sp_E7B0);
     self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
@@ -5397,15 +5398,15 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
 INCLUDE_ASM("main/all_in_one_main", cFEStateNet_onInputBegin);
 #ifdef SKIP_ASM
 /**
- * Returns an online state's unk_058 (+0x58) as its onInputBegin result (slot +0x44 of the online states' vtables).
+ * Returns an online state's mBlockInput as its onInputBegin result (slot +0x44 of the online states' vtables).
  *
  * func_001A9668 and func_001A9710 set the word to 1 before pushing the login state.
  *
  * @param feStateNet  the online state (cFEStateNet)
- * @return unk_058
+ * @return mBlockInput
  */
 extern "C" int cFEStateNet_onInputBegin(cFEStateNet* feStateNet) {
-    return (feStateNet->unk_058);
+    return (feStateNet->mBlockInput);
 }
 #endif
 
@@ -5465,14 +5466,14 @@ extern "C" int cFEStateNet_fePathIsOnline(void) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE890);
 #ifdef SKIP_ASM
 /**
- * Sets an online state's unk_6B0 (+0x6B0) to 1.
+ * Sets an online state's mLeavingOnline to 1.
  *
  * func_001BF5A8 and func_001C0138 set the same word; no read of it is known.
  *
  * @param feStateNet  the online state (cFEStateNet)
  */
 extern "C" void func_001DE890(cFEStateNet* feStateNet) {
-    feStateNet->unk_6B0 = 1;
+    feStateNet->mLeavingOnline = 1;
 }
 #endif
 
@@ -5480,13 +5481,13 @@ extern "C" void func_001DE890(cFEStateNet* feStateNet) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
 #ifdef SKIP_ASM
 /**
- * Sets an online state's unk_6C4 (+0x6C4); func_001ABB30 opens the status popup only when it and mpPopup are set.
+ * Sets an online state's mUserPopupOpen; func_001ABB30 opens the status popup only when it and mpPopup are set.
  *
  * @param feStateNet  the online state (cFEStateNet)
  * @param value  the new value
  */
 extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int value) {
-    feStateNet->unk_6C4 = value;
+    feStateNet->mUserPopupOpen = value;
 }
 #endif
 

@@ -80,8 +80,9 @@ struct cFEStateNet : public cUIState {
                                     //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
-    int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
-                                    //       cFEStateNet_onInputBegin (slot 7, the onInputBegin override) returns it
+    int mBlockInput;                // 0x058 (name ours) [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing
+                                    //       cFEStateLogin; cFEStateNet_onInputBegin (slot 7, the onInputBegin
+                                    //       override) returns it (input swallowed while set)
     char mszMaskedText[0x40];       // 0x05C [U] func_001A98B8 writes one '*' per character of its string (at most 0x3F;
                                     //       " " when empty) and a NUL; cUIText_setAsciiString(.., mszMaskedText) in
                                     //       func_001ACDD0, func_001B9610, func_001B9678, func_001B9820 (password boxes)
@@ -107,21 +108,24 @@ struct cFEStateNet : public cUIState {
     int mDisconnectPopupOpen;       // 0x6AC [R] 0; [U] func_001A9930 sets it when it opens the
                                     //       "kT_POPUPCMNNetInterrupted" / "kT_POPUPCMNDisconnected" popup (only when
                                     //       clear); func_001A9668/func_001A9710 clear it, func_001A5010 tests it
-    int unk_6B0;                    // 0x6B0 [R] 0; [U] set to 1 by func_001DE890 (inline setter), func_001BF5A8,
-                                    //       func_001C0138; no read seen
+    int mLeavingOnline;             // 0x6B0 (name ours) [R] 0; [U] set to 1 by func_001DE890 (inline setter) and by
+                                    //       func_001BF5A8 / func_001C0138 as they leave for the network config or
+                                    //       main menu and log off; no read seen
     int mEventPending;              // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event
                                     //       (0xC8..0x116) waits for slot 30 to accept it, 0 once delivered
     void* mpPopupTextBuf;           // 0x6B8 [R] 0; [U] a heap text buffer: func_001A9CC0 frees and reallocates it and
                                     //       points the popup's message at it; the destructor frees it
-    int unk_6BC;                    // 0x6BC [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on event 15;
-                                    //       on event 22 it tells the parent state (slot 17, event 0xF) when 0
+    int mPopupResult;               // 0x6BC (name ours) [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on
+                                    //       event 15; on event 22 it tells the parent state (slot 17, event 0xF) when 0
     char* mszTargetUser;            // 0x6C0 [R] cBXString built from str_sp (cBXString_cBXString2), destroyed by the
                                     //       dtor; [U] func_001A9890 assigns it (cBXString_operatorE1), func_001A98B0
                                     //       returns the text: the user name passed to the session calls
                                     //       (func_00262690); the messenger sets it to the selected buddy
                                     //       (func_001A4928)
-    int unk_6C4;                    // 0x6C4 [R] 0; [U] func_001DE8A0 (inline setter) and func_001AB370 set it,
-                                    //       func_001ABB30 opens the status popup only when it and mpPopup are set
+    int mUserPopupOpen;             // 0x6C4 (name ours) [R] 0; [U] func_001DE8A0 (inline setter) and func_001AB370
+                                    //       (opens the user-actions popup) set it, the popup's actions clear it;
+                                    //       func_001ABB30 / func_001AB3D0 rebuild that popup only when it and mpPopup
+                                    //       are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
 };
 
@@ -129,7 +133,7 @@ CHECK_OFFSET(cFEStateNet, mHasFocus, 0x048);
 CHECK_OFFSET(cFEStateNet, mLastPollFrame, 0x04C);
 CHECK_OFFSET(cFEStateNet, mMessageHintFrame, 0x050);
 CHECK_OFFSET(cFEStateNet, mChallengeHintFrame, 0x054);
-CHECK_OFFSET(cFEStateNet, unk_058, 0x058);
+CHECK_OFFSET(cFEStateNet, mBlockInput, 0x058);
 CHECK_OFFSET(cFEStateNet, mszMaskedText, 0x05C);
 CHECK_OFFSET(cFEStateNet, mustrMessage, 0x09C);
 CHECK_OFFSET(cFEStateNet, mustrStatusLine1, 0x49C);
@@ -139,12 +143,12 @@ CHECK_OFFSET(cFEStateNet, mpPopup, 0x6A0);
 CHECK_OFFSET(cFEStateNet, mpKeyboardText, 0x6A4);
 CHECK_OFFSET(cFEStateNet, mNeedsLobby, 0x6A8);
 CHECK_OFFSET(cFEStateNet, mDisconnectPopupOpen, 0x6AC);
-CHECK_OFFSET(cFEStateNet, unk_6B0, 0x6B0);
+CHECK_OFFSET(cFEStateNet, mLeavingOnline, 0x6B0);
 CHECK_OFFSET(cFEStateNet, mEventPending, 0x6B4);
 CHECK_OFFSET(cFEStateNet, mpPopupTextBuf, 0x6B8);
-CHECK_OFFSET(cFEStateNet, unk_6BC, 0x6BC);
+CHECK_OFFSET(cFEStateNet, mPopupResult, 0x6BC);
 CHECK_OFFSET(cFEStateNet, mszTargetUser, 0x6C0);
-CHECK_OFFSET(cFEStateNet, unk_6C4, 0x6C4);
+CHECK_OFFSET(cFEStateNet, mUserPopupOpen, 0x6C4);
 CHECK_OFFSET(cFEStateNet, mMsgList, 0x6C8);
 CHECK_SIZE(cFEStateNet, 0x6D0);
 

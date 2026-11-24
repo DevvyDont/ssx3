@@ -4175,8 +4175,8 @@ static inline void InitVec_E0F60(void* vvself, const sAlloc_E0F60& a = sAlloc_E0
 
 /**
  * Constructs the messenger state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs its
- * vtable cFEStateNetMessenger_vtbl, sets mszFoundName, mszSearchName and unk_6E0 to cBXString_EmptyString and clears the three words
- * at +0x6E8 (a vector's begin, end and capacity).
+ * vtable cFEStateNetMessenger_vtbl, sets mszFoundName, mszSearchName and mszShownName to cBXString_EmptyString and
+ * clears the three words at +0x6E8 (a vector's begin, end and capacity).
  *
  * @return @p self
  */
@@ -4187,7 +4187,7 @@ extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger
     VPTR_OF(cListNode, self) = cFEStateNetMessenger_vtbl;
     self->mszFoundName = (char*)emptyString;
     self->mszSearchName = (char*)emptyString;
-    self->unk_6E0 = (char*)emptyString;
+    self->mszShownName = (char*)emptyString;
     InitVec_E0F60(self);
     return ((void*)self);
 }

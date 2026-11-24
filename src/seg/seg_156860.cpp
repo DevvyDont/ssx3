@@ -790,7 +790,7 @@ extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("
 extern "C" void func_00256258(DNASMan* self, int authMode) {
     self->AuthMode = authMode;
     self->unk_014 = 0;
-    self->unk_01C = 0;
+    self->AuthError = 0;
     self->State = 1;
     void *mem = operator_new__FUi_6258(0x195000, D_004A2EE0, 0x04000100, 0);
     self->ElfData = (char*)mem;
@@ -984,26 +984,26 @@ extern "C" void USTR_copy_65E0(char *, char *) __asm__("USTR_copy");
  * DNAS state 4: once the check is finished, collects its result.
  *
  * When func_003FD100 (the module's update) returns 0 it clears the 908-byte result block at +0xC4, gets the result
- * (func_003FD128), copies three wide strings of it (+0xCC, +0x10C, +0x20C) to +0x450, +0x650 and +0x850 (USTR_copy),
- * stores whether the result was 0 at +0x1C and sets the state to 5.
+ * (func_003FD128), copies three wide strings of it (+0xCC, +0x10C, +0x20C) to ErrorText1, ErrorText2 and ErrorText3
+ * (USTR_copy), stores whether the result was 0 in AuthError and sets the state to 5.
  */
 extern "C" void func_002565E0(DNASMan* self) {
     if (func_003FD100_65E0(self->unk_014) == 0) {
         char *infoBuf = ((char*)self) + 0xC4;
         MEM_fill_65E0(infoBuf, 0, 908);
-        char *secondText = (char*)&self->unk_650[0];
-        char *thirdText = (char*)&self->unk_850[0];
+        char *secondText = (char*)&self->ErrorText2[0];
+        char *thirdText = (char*)&self->ErrorText3[0];
         int result = func_003FD128_65E0(infoBuf);
-        *(short*)&self->unk_450[0] = 0;
+        *(short*)&self->ErrorText1[0] = 0;
         *(short *)secondText = 0;
         *(short *)thirdText = 0;
-        USTR_copy_65E0((char*)&self->unk_450[0], ((char*)self) + 0xCC);
+        USTR_copy_65E0((char*)&self->ErrorText1[0], ((char*)self) + 0xCC);
         USTR_copy_65E0(secondText, ((char*)self) + 0x10C);
         USTR_copy_65E0(thirdText, ((char*)self) + 0x20C);
         if (result == 0) {
-            self->unk_01C = 1;
+            self->AuthError = 1;
         } else {
-            self->unk_01C = 0;
+            self->AuthError = 0;
         }
         self->State = 5;
     }

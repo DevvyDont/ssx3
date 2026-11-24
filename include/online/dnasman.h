@@ -36,8 +36,9 @@ struct DNASMan {
                                         //       (cancel); func_002565E0 reads it
     int FileHandle;                     // 0x018 [R] -1; [U] func_00256258 / func_00256460: the ASYNCFILE_loadat handle;
                                         //       func_00256460 / func_00256510 poll it
-    int unk_01C;                        // 0x01C [U] func_00256258 / func_002562D0 0; func_002565E0 stores whether the
-                                        //       check's result was 0; cFEStateAuthDNAS_onUpdate tests it (error)
+    int AuthError;                      // 0x01C (name ours) [U] func_00256258 / func_002562D0 0; func_002565E0 stores
+                                        //       whether the check's result was 0; cFEStateAuthDNAS_onUpdate tests it
+                                        //       (error: copies ErrorText1..3 into the parent's mpustrAuthError)
     int AuthMode;                       // 0x020 [U] func_00256258 stores its mode argument (from the profile bits);
                                         //       func_002562D0 passes it on
     char unk_024[0x48];                 // 0x024 start of the 160-byte parameter block given to DirtyDnasRelInit
@@ -61,10 +62,12 @@ struct DNASMan {
     int unk_0C0;                        // 0x0C0 [U] func_002562D0 1 (end of the parameter block)
     char unk_0C4[0x38C];                // 0x0C4 [U] func_002565E0: the 908-byte check result (MEM_fill, then
                                         //       func_003FD128 fills it; wide strings at +0xCC, +0x10C, +0x20C)
-    unsigned short unk_450[0x100];      // 0x450 [U] func_002565E0: USTR_copy of the result's first text;
+    unsigned short ErrorText1[0x100];   // 0x450 (name ours) [U] func_002565E0: USTR_copy of the result's first text;
                                         //       cFEStateAuthDNAS_onUpdate shows it (error text)
-    unsigned short unk_650[0x100];      // 0x650 [U] func_002565E0: the second text; shown by cFEStateAuthDNAS_onUpdate
-    unsigned short unk_850[0x100];      // 0x850 [U] func_002565E0: the third text; shown by cFEStateAuthDNAS_onUpdate
+    unsigned short ErrorText2[0x100];   // 0x650 (name ours) [U] func_002565E0: the second text; shown by
+                                        //       cFEStateAuthDNAS_onUpdate
+    unsigned short ErrorText3[0x100];   // 0x850 (name ours) [U] func_002565E0: the third text; shown by
+                                        //       cFEStateAuthDNAS_onUpdate
 };
 
 CHECK_OFFSET(DNASMan, State, 0x000);
@@ -74,7 +77,7 @@ CHECK_OFFSET(DNASMan, AuthData, 0x00C);
 CHECK_OFFSET(DNASMan, AuthSize, 0x010);
 CHECK_OFFSET(DNASMan, unk_014, 0x014);
 CHECK_OFFSET(DNASMan, FileHandle, 0x018);
-CHECK_OFFSET(DNASMan, unk_01C, 0x01C);
+CHECK_OFFSET(DNASMan, AuthError, 0x01C);
 CHECK_OFFSET(DNASMan, AuthMode, 0x020);
 CHECK_OFFSET(DNASMan, unk_024, 0x024);
 CHECK_OFFSET(DNASMan, unk_06C, 0x06C);
@@ -92,9 +95,9 @@ CHECK_OFFSET(DNASMan, unk_0B8, 0x0B8);
 CHECK_OFFSET(DNASMan, unk_0BC, 0x0BC);
 CHECK_OFFSET(DNASMan, unk_0C0, 0x0C0);
 CHECK_OFFSET(DNASMan, unk_0C4, 0x0C4);
-CHECK_OFFSET(DNASMan, unk_450, 0x450);
-CHECK_OFFSET(DNASMan, unk_650, 0x650);
-CHECK_OFFSET(DNASMan, unk_850, 0x850);
+CHECK_OFFSET(DNASMan, ErrorText1, 0x450);
+CHECK_OFFSET(DNASMan, ErrorText2, 0x650);
+CHECK_OFFSET(DNASMan, ErrorText3, 0x850);
 CHECK_SIZE(DNASMan, 0xA50);
 
 #endif /* ONLINE_DNASMAN_H */

@@ -65,7 +65,8 @@ struct cFEStateNetMessenger : public cFEStateNet {
     int mLastRefreshFrame;          // 0x6DC [R] 0; [U] onUpdate override cFEStateNetMessenger_onUpdate: when 1..59 frames have not
                                     //       passed since it (frame counter cAppMan_TheAppMan + 0x18) it only updates, else it
                                     //       stores the frame and rebuilds the list (func_001A6978)
-    char* unk_6E0;                  // 0x6E0 [R] cBXString (as above); no other access seen
+    char* mszShownName;             // 0x6E0 (name ours) [R] cBXString (as above); [U] func_001A6070 copies the shown
+                                    //       buddy's roster name into it (cBXString_operatorE1)
     tFEStringPtrVector mNames;      // 0x6E4 [R] zeroed by cFEStateNetMessenger_cFEStateNetMessenger, freed by cFEStateNetMessenger__cFEStateNetMessenger after func_001A5450
                                     //       destroys every element; [U] func_001A54D8 / func_001A5898 push_back
                                     //       cMemMan_alloc(4, "cBXString") copies of the session's buddy names,
@@ -81,7 +82,7 @@ CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);
 CHECK_OFFSET(cFEStateNetMessenger, mszSearchName, 0x6D4);
 CHECK_OFFSET(cFEStateNetMessenger, unk_6D8, 0x6D8);
 CHECK_OFFSET(cFEStateNetMessenger, mLastRefreshFrame, 0x6DC);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6E0, 0x6E0);
+CHECK_OFFSET(cFEStateNetMessenger, mszShownName, 0x6E0);
 CHECK_OFFSET(cFEStateNetMessenger, mNames, 0x6E4);
 CHECK_OFFSET(cFEStateNetMessenger, miScrollOffset, 0x6F4);
 CHECK_OFFSET(cFEStateNetMessenger, miSelectedIndex, 0x6F8);

@@ -2677,11 +2677,12 @@ struct sBXStrC8A8 { char* p; };
  *
  * Sets mState to 1. On success (status word +0x8 of @p msg is 0) it splits the comma list in "PERSONAS" into mPersonas
  * (at most 4, counted in mNumPersonas), stores "MAIL" in mAccount.mMail and the two 'Y'/'N' letters of "SPAM" in
- * mAccount.mSpam, copies mUserName to mAccount.mName and mPassword to mAccount.mPassword and mAccount.unk_08, decodes
- * "CPAT" into mCPAT with func_003EFD30() (setting mHaveCPAT, or clearing it when the field is missing), sets
+ * mAccount.mSpam, copies mUserName to mAccount.mName and mPassword to mAccount.mPassword and mAccount.mConfirmPassword,
+ * decodes "CPAT" into mCPAT with func_003EFD30() (setting mHaveCPAT, or clearing it when the field is missing), sets
  * mAuthenticated and pushes an Event of type 212 onto mEventList. Status 'lock' pushes a type-258 event with vtable
- * online_AcctLockedEvent_vtbl holding the code and the "DATE" and "INTRO" strings; any other status pushes a type-258 error event
- * (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk func_00268C70.
+ * online_AcctLockedEvent_vtbl holding the code and the "DATE" and "INTRO" strings; any other status pushes a type-258
+ * error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
+ * func_00268C70.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
@@ -2720,7 +2721,7 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, LobbyApiMsgT* msg)
     self->mAccount.mSpam[1] = spam[1] == 'Y';
     cBXString_operatorE(&self->mAccount, &self->mUserName);
     cBXString_operatorE(&self->mAccount.mPassword, &self->mPassword);
-    cBXString_operatorE(&self->mAccount.unk_08, &self->mPassword);
+    cBXString_operatorE(&self->mAccount.mConfirmPassword, &self->mPassword);
     const char *cpatField = cDirtysock_tag_TagFieldFind(msg->unk_0C, D_004A30F0);
     if (cpatField != 0)
     {
@@ -6229,15 +6230,15 @@ extern "C" void cBXString_Reset(void* self);
 /**
  * Resets the lobby manager's new-account form (mNewAccount) to its defaults.
  *
- * Empties its five strings (mName, mPassword, unk_08, mMail, mParentMail) with cBXString_Reset and sets mSpam to {1,
- * 1}, mBornMonth and mBornDay to 1, mBornYear to 1985, mGender to 0 and unk_40 to 0. mNameOptions and the mChange*
- * flags are left alone. The constructor LobbyMan_LobbyMan and the account screens call it.
+ * Empties its five strings (mName, mPassword, mConfirmPassword, mMail, mParentMail) with cBXString_Reset and sets mSpam
+ * to {1, 1}, mBornMonth and mBornDay to 1, mBornYear to 1985, mGender to 0 and mLegalAccepted to 0. mNameOptions and
+ * the mChange* flags are left alone. The constructor LobbyMan_LobbyMan and the account screens call it.
  */
 extern "C" void func_00260F10(LobbyMan* self)
 {
     cBXString_Reset((char*)&self->mNewAccount);
     cBXString_Reset(&self->mNewAccount.mPassword);
-    cBXString_Reset(&self->mNewAccount.unk_08);
+    cBXString_Reset(&self->mNewAccount.mConfirmPassword);
     cBXString_Reset(&self->mNewAccount.mMail);
     cBXString_Reset(&self->mNewAccount.mParentMail);
     self->mNewAccount.mSpam[0] = 1;
@@ -6246,7 +6247,7 @@ extern "C" void func_00260F10(LobbyMan* self)
     self->mNewAccount.mGender = 0;
     self->mNewAccount.mBornDay = 1;
     self->mNewAccount.mBornYear = 1985;
-    self->mNewAccount.unk_40 = 0;
+    self->mNewAccount.mLegalAccepted = 0;
 }
 #endif
 

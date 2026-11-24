@@ -1189,11 +1189,12 @@ struct sDsReq17E030 {
  * Creates a lobby account from the debug "Create Account" menu: keeps the typed name and password and sends the
  * request.
  *
- * Closes all menus (cMenuSys_popMenu until the stack is empty), copies @p userName and @p password into the screen's strings at +0x1C04
- * and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p userName, mPassword and
- * unk_08 @p password, mMail "please@get.lost", born 1950-01-01 (mBornYear, mBornMonth, mBornDay), mGender 1 (sent as 'F'),
- * both mSpam flags 0, and sends it with func_0025B9C8. On event 203 func_0017D6F0 then logs in with the same name and
- * password. Called by the Create Account menu's command handler AccountDetailsMenu_onCommand.
+ * Closes all menus (cMenuSys_popMenu until the stack is empty), copies @p userName and @p password into the screen's
+ * strings at +0x1C04 and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p
+ * userName, mPassword and mConfirmPassword @p password, mMail "please@get.lost", born 1950-01-01 (mBornYear,
+ * mBornMonth, mBornDay), mGender 1 (sent as 'F'), both mSpam flags 0, and sends it with func_0025B9C8. On event 203
+ * func_0017D6F0 then logs in with the same name and password. Called by the Create Account menu's command handler
+ * AccountDetailsMenu_onCommand.
  *
  * @param userName  account name
  * @param password  password
@@ -1210,7 +1211,7 @@ extern "C" void func_0017E030(cDebugLobbyScreen* self, const char* userName, con
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     cBXString_operatorE1(&lobbyMan->mNewAccount.mName, userName);
     cBXString_operatorE1(&lobbyMan->mNewAccount.mPassword, password);
-    cBXString_operatorE1(&lobbyMan->mNewAccount.unk_08, password);
+    cBXString_operatorE1(&lobbyMan->mNewAccount.mConfirmPassword, password);
     cBXString_operatorE1(&lobbyMan->mNewAccount.mMail, str_pleaseat_get_lost);
     lobbyMan->mNewAccount.mBornYear = 1950;
     lobbyMan->mNewAccount.mGender = 1;

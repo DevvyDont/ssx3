@@ -43,7 +43,9 @@ struct LobbyApiRefT;    // DirtySock LobbyApi instance (preview mangled name P12
 struct tLobbyAccount {
     char* mName;            // 0x00 [U] "NAME" (createaccount, editaccount); onauthentication copies mUserName
     char* mPassword;        // 0x04 [U] "PASS" (createaccount); editaccount sends it as "CHNG" (the new password)
-    char* unk_08;           // 0x08 [U] onauthentication copies mPassword into it (a confirm/old-password field?)
+    char* mConfirmPassword; // 0x08 (name ours) [U] onauthentication copies mPassword into it; the account form keeps
+                            //      the "StaticConfirmPassword" entry in it (func_001B9820, keyboard id 12),
+                            //      func_001B9FA0 compares it with mPassword, func_001B9558 tests it is non-empty
     char* mMail;            // 0x0C [U] "MAIL" (createaccount, editaccount); onauthentication stores the server's
     char* mParentMail;      // 0x10 [U] "PMAIL" (createaccount, sent when non-empty)
     char* mNameOptions[4];  // 0x14 [U] "OPTS": func_0025BC48 splits the server's comma list of suggested names
@@ -55,7 +57,8 @@ struct tLobbyAccount {
     int mGender;            // 0x34 [U] "GEND": non-zero 'F', else 'M'; [R] func_00260F10 sets 0
     int mSpam[2];           // 0x38 [U] "SPAM" "%c%c" ('Y'/'N' each); [R] func_00260F10 sets 1, 1;
                             //      onauthentication stores the server's two flags (0x2E8 / 0x2EC)
-    int unk_40;             // 0x40 [R] func_00260F10 sets 0
+    int mLegalAccepted;     // 0x40 (name ours) [R] func_00260F10 sets 0; [U] cFEStateCreateStep2_onWidgetEvent
+                            //      stores "LBLegalYesNo" == 1; func_001BBC40 shows "kT_POPUP211AcceptLegal" when 0
     int mChangePassword;    // 0x44 [U] editaccount sends "PASS"/"CHNG" only when set
     int mChangeSpam;        // 0x48 [U] editaccount sends "SPAM" only when set
     int mChangeMail;        // 0x4C [U] editaccount sends "MAIL" only when set
@@ -63,7 +66,7 @@ struct tLobbyAccount {
 
 CHECK_OFFSET(tLobbyAccount, mName, 0x00);
 CHECK_OFFSET(tLobbyAccount, mPassword, 0x04);
-CHECK_OFFSET(tLobbyAccount, unk_08, 0x08);
+CHECK_OFFSET(tLobbyAccount, mConfirmPassword, 0x08);
 CHECK_OFFSET(tLobbyAccount, mMail, 0x0C);
 CHECK_OFFSET(tLobbyAccount, mParentMail, 0x10);
 CHECK_OFFSET(tLobbyAccount, mNameOptions, 0x14);
@@ -73,7 +76,7 @@ CHECK_OFFSET(tLobbyAccount, mBornDay, 0x2C);
 CHECK_OFFSET(tLobbyAccount, mBornYear, 0x30);
 CHECK_OFFSET(tLobbyAccount, mGender, 0x34);
 CHECK_OFFSET(tLobbyAccount, mSpam, 0x38);
-CHECK_OFFSET(tLobbyAccount, unk_40, 0x40);
+CHECK_OFFSET(tLobbyAccount, mLegalAccepted, 0x40);
 CHECK_OFFSET(tLobbyAccount, mChangePassword, 0x44);
 CHECK_OFFSET(tLobbyAccount, mChangeSpam, 0x48);
 CHECK_OFFSET(tLobbyAccount, mChangeMail, 0x4C);
