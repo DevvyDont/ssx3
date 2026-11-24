@@ -364,8 +364,8 @@ extern "C" char* strcpy(char*, const char*);
 INCLUDE_ASM("be/beintnetwork", func_0014EBB8);
 #ifdef SKIP_ASM
 /**
- * Copies @p src into the opponent-name buffer at cBENetworkInterface_networkOpt +0x498 (cBENetworkInterface_networkOpt.unk_498, 16 bytes; strcpy,
- * no length check), which func_0015C5A8 returns.
+ * Copies @p src into the opponent-name buffer (cBENetworkInterface_networkOpt.strOpponentName, 16 bytes; strcpy, no
+ * length check), which func_0015C5A8 returns.
  *
  * The lobby code passes the opponent's persona name.
  *
@@ -373,7 +373,7 @@ INCLUDE_ASM("be/beintnetwork", func_0014EBB8);
  */
 extern "C" void func_0014EBB8(cBENetworkInterface* self, const char* src)
 {
-    strcpy(cBENetworkInterface_networkOpt.unk_498, src);
+    strcpy(cBENetworkInterface_networkOpt.strOpponentName, src);
 }
 #endif
 
@@ -382,8 +382,8 @@ extern "C" void func_0014EBB8(cBENetworkInterface* self, const char* src)
 INCLUDE_ASM("be/beintnetwork", func_0014EBD8);
 #ifdef SKIP_ASM
 /**
- * Copies @p src into this player's name buffer at cBENetworkInterface_networkOpt +0x488 (cBENetworkInterface_networkOpt.unk_488, 16 bytes;
- * strcpy, no length check), which func_0015C5B8 returns.
+ * Copies @p src into this player's name buffer (cBENetworkInterface_networkOpt.strMyName, 16 bytes; strcpy, no length
+ * check), which func_0015C5B8 returns.
  *
  * The lobby code passes the local persona name.
  *
@@ -391,7 +391,7 @@ INCLUDE_ASM("be/beintnetwork", func_0014EBD8);
  */
 extern "C" void func_0014EBD8(cBENetworkInterface* self, const char* src)
 {
-    strcpy(cBENetworkInterface_networkOpt.unk_488, src);
+    strcpy(cBENetworkInterface_networkOpt.strMyName, src);
 }
 #endif
 

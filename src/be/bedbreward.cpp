@@ -1545,13 +1545,13 @@ INCLUDE_ASM("be/bedbreward", func_0015C5A8);
 #ifdef SKIP_ASM
 
 /**
- * Returns the address of the 16-byte name buffer at cBENetworkInterface_networkOpt +0x498 (cBENetworkInterface_networkOpt.unk_498), the
- * opponent's name (filled by func_0014EBB8; prefixes received chat lines).
+ * Returns the address of the 16-byte name buffer cBENetworkInterface_networkOpt.strOpponentName, the opponent's name
+ * (filled by func_0014EBB8; prefixes received chat lines).
  *
  * @return the name buffer
  */
 extern "C" void* func_0015C5A8(void) {
-    return cBENetworkInterface_networkOpt.unk_498;
+    return cBENetworkInterface_networkOpt.strOpponentName;
 }
 #endif
 //100%
@@ -1559,13 +1559,13 @@ INCLUDE_ASM("be/bedbreward", func_0015C5B8);
 #ifdef SKIP_ASM
 
 /**
- * Returns the address of the 16-byte name buffer at cBENetworkInterface_networkOpt +0x488 (cBENetworkInterface_networkOpt.unk_488), this
- * player's online name (filled by func_0014EBD8; prefixes our own chat lines).
+ * Returns the address of the 16-byte name buffer cBENetworkInterface_networkOpt.strMyName, this player's online name
+ * (filled by func_0014EBD8; prefixes our own chat lines).
  *
  * @return the name buffer
  */
 extern "C" void* func_0015C5B8(void) {
-    return cBENetworkInterface_networkOpt.unk_488;
+    return cBENetworkInterface_networkOpt.strMyName;
 }
 #endif
 //100%

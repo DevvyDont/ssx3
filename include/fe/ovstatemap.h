@@ -64,7 +64,8 @@ struct cOVState_MAP : public cOVState {
     cUIScreen* mpMapScreen;         // 0x0D4 [O] cOVState_MAP::mpScreen (renamed: it hides cUIState::mpScreen at 0x40);
                                     //       [U] onCreateScreen keeps the "38session" screen here; every widget lookup
                                     //       of the class
-    int mSelectedSessionPoint;      // 0x0D8 [O]; [U] onWidgetEvent hands it to the mission interface (+0x10) on select
+    int mSelectedSessionPoint;      // 0x0D8 [O]; [U] onWidgetEvent hands it to the mission interface (nextSessionID)
+                                    //       on select
     int mScreenExiting;             // 0x0DC [O] (bool); [U] onCreateScreen clears it, setupScreenExit sets it;
                                     //       onUpdate stops while it is set
     cUIIcon* mpPlayerIcon;          // 0x0E0 [O]; [U] onCreateScreen clears it; setupPlayerIndicator creates the player

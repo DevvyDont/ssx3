@@ -5,6 +5,7 @@
 #include "vtable.h"
 #include "animation/animsequencer.h"
 #include "animation/rideranimbase.h"
+#include "animation/gameanimmap.h"
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_cRiderAnimBase);
@@ -87,7 +88,7 @@ extern "C" int cRiderAnimBase_getSequencer(cRiderAnimBase* riderAnim, int slot) 
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimSequencerName);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
+extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern int D_0044AF80[];
 
 /**
@@ -101,7 +102,7 @@ extern int D_0044AF80[];
  */
 extern "C" int cRiderAnimBase_getAIAnimSequencerName(cRiderAnimBase* self, int anim)
 {
-    int i = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
+    int i = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
     return D_0044AF80[i];
 }
 #endif
@@ -129,11 +130,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_reset);
 #ifdef SKIP_ASM
 extern "C" void cAnimSequencer_expireAll(void* self);
 
-struct sRabQuad32 {
-    int w[8];
-} __attribute__((aligned(16)));
-
-extern sRabQuad32 tPose_Identity;
+extern tPose tPose_Identity;
 
 
 /**
@@ -155,7 +152,7 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
     //START
     self->IsFlipped = 0;
     self->FrameRateFactor = 1.0f;
-    *(sRabQuad32*)&self->OrientationOffset = tPose_Identity;
+    self->OrientationOffset = tPose_Identity;
     self->GraftMask = -1;
     //END
 }
@@ -164,7 +161,7 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimCategory);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
+extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
 
 /**
  * Returns the animation category of what a rider sequencer is currently playing.
@@ -183,7 +180,7 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(cRiderAnimBase* self, int i
     if (anim == 438) {
         return 0;
     }
-    return *cAIAnimEventMap_getAnimPlayAttr(anim);
+    return cAIAnimEventMap_getAnimPlayAttr(anim)->AnimCategory;
 }
 #endif
 
@@ -214,23 +211,23 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeHeadingOffset);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sRabQuat_00311B48
+// The 4-float vector / quaternion the VU0 helpers return by value: t4Vector plus its constructors.
+struct tRabVector4 : t4Vector
 {
-    float x, y, z, w;
-    sRabQuat_00311B48() {}
-    sRabQuat_00311B48(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+    tRabVector4() {}
+    tRabVector4(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
 
-extern sRabQuat_00311B48 t4vect_Origin;
-extern sRabQuat_00311B48 t4vect_ZAxis;
+extern t4Vector t4vect_Origin;
+extern t4Vector t4vect_ZAxis;
 extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, tPose* xf);
 
-static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis, float angle)
+static inline tRabVector4 AxisAngle_00311B48(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sRabQuat_00311B48(s * axis.x, s * axis.y, s * axis.z, c);
+    return tRabVector4(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 /**
@@ -245,8 +242,8 @@ static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis
 extern "C" void cRiderAnimBase_changeHeadingOffset(cRiderAnimBase* self, float angle)
 {
     tPose xf;
-    (*(sRabQuat_00311B48*)&xf.P) = t4vect_Origin;
-    (*(sRabQuat_00311B48*)&xf.Q) = AxisAngle_00311B48(t4vect_ZAxis, -angle);
+    xf.P = t4vect_Origin;
+    xf.Q = AxisAngle_00311B48(t4vect_ZAxis, -angle);
     cRiderAnimBase_changeOrientationOffset(self, &xf);
 }
 #endif
@@ -255,9 +252,9 @@ extern "C" void cRiderAnimBase_changeHeadingOffset(cRiderAnimBase* self, float a
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeOrientationOffset);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sRabQuat_00311B48 QuatMul_00311BF0(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+static inline tRabVector4 QuatMul_00311BF0(const t4Vector& a, const t4Vector& b)
 {
-    sRabQuat_00311B48 r;
+    tRabVector4 r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -278,9 +275,9 @@ static inline sRabQuat_00311B48 QuatMul_00311BF0(const sRabQuat_00311B48& a, con
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sRabQuat_00311B48 Sub_00311BF0(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+static inline tRabVector4 Sub_00311BF0(const t4Vector& a, const t4Vector& b)
 {
-    sRabQuat_00311B48 r;
+    tRabVector4 r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -293,9 +290,9 @@ static inline sRabQuat_00311B48 Sub_00311BF0(const sRabQuat_00311B48& a, const s
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sRabQuat_00311B48 Add_00311BF0(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+static inline tRabVector4 Add_00311BF0(const t4Vector& a, const t4Vector& b)
 {
-    sRabQuat_00311B48 r;
+    tRabVector4 r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -308,9 +305,9 @@ static inline sRabQuat_00311B48 Add_00311BF0(const sRabQuat_00311B48& a, const s
 }
 
 // PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
-static inline sRabQuat_00311B48 Rot_00311BF0(const sRabQuat_00311B48& q, const sRabQuat_00311B48& v)
+static inline tRabVector4 Rot_00311BF0(const t4Vector& q, const t4Vector& v)
 {
-    sRabQuat_00311B48 r;
+    tRabVector4 r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -334,8 +331,8 @@ static inline sRabQuat_00311B48 Rot_00311BF0(const sRabQuat_00311B48& q, const s
 static inline tPose Combine_00311BF0(const tPose& a, const tPose& b)
 {
     tPose r;
-    (*(sRabQuat_00311B48*)&r.Q) = QuatMul_00311BF0((*(sRabQuat_00311B48*)&a.Q), (*(sRabQuat_00311B48*)&b.Q));
-    (*(sRabQuat_00311B48*)&r.P) = Add_00311BF0(Rot_00311BF0((*(sRabQuat_00311B48*)&a.Q), Sub_00311BF0((*(sRabQuat_00311B48*)&b.P), t4vect_Origin)), (*(sRabQuat_00311B48*)&a.P));
+    r.Q = QuatMul_00311BF0(a.Q, b.Q);
+    r.P = Add_00311BF0(Rot_00311BF0(a.Q, Sub_00311BF0(b.P, t4vect_Origin)), a.P);
     return r;
 }
 
@@ -380,12 +377,12 @@ extern "C" void cRiderAnimBase_changeIsFlipped(cRiderAnimBase* self, int value)
     for (int i = 0; i < 6; i++)
     {
         int j = 0;
-        if (j < ((cAnimSequencer*)(char*)self->Sequencer)[i].NumPlaying)
+        if (j < self->Sequencer[i].NumPlaying)
         {
             do
             {
-                cAnimSequencer_getSequence(&((cAnimSequencer*)(char*)self->Sequencer)[i], j++)->IsFlipped = value;
-            } while (j < ((cAnimSequencer*)(char*)self->Sequencer)[i].NumPlaying);
+                cAnimSequencer_getSequence(&self->Sequencer[i], j++)->IsFlipped = value;
+            } while (j < self->Sequencer[i].NumPlaying);
         }
     }
 }
@@ -434,12 +431,12 @@ extern "C" void cRiderAnimBase_blendOutAll(cRiderAnimBase* self, int i, float bl
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_onInput);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
+extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
 struct cAnimSequence;
 void cAnimSequence_fadeWeight(cAnimSequence* self, float targetWeight, float time);
 extern "C" void cAnimSequencer_expire(void* seq, void* node);
-extern "C" char* cAnimSequencer_playAndHold(cAnimSequencer* seq, int anim, unsigned int h, float t);
-extern "C" char* cAnimSequencer_playAndLoop(cAnimSequencer* seq, int anim, unsigned int h, float t);
+extern "C" cAnimSequence* cAnimSequencer_playAndHold(cAnimSequencer* seq, int anim, unsigned int h, float t);
+extern "C" cAnimSequence* cAnimSequencer_playAndLoop(cAnimSequencer* seq, int anim, unsigned int h, float t);
 extern "C" void cAnimSequence_addEndTrigger(void* node, int key);
 extern "C" void cAnimSequence_removeEndTrigger(void* node, int key);
 extern "C" void cAnimSequence_fadeOutAndExpire(void* node, float v);
@@ -448,37 +445,13 @@ extern "C" void cAnimSequence_setSubAnim(void* node, int i, int anim);
 extern "C" void cAnimSequence_setSubAnimTime(void* node, int i, float t);
 extern "C" void cAnimSequence_setSubAnimWeight(void* node, int i, float speed);
 
-// A sequence node: three tracks, then the clip state (raw offsets from cRiderAnimBase_onInput's uses).
-struct sSeqTrack_1F00 {
-    int id;           // 0x00
-    int anim;         // 0x04
-    float time;       // 0x08
-    char pad0C[0x8];
-    float speed;      // 0x14
-    int active;       // 0x18
-};
-
-struct sSeqNode_1F00 {
-    sSeqTrack_1F00 tracks[3]; // 0x00
-    char pad54[0xC];
-    sRabQuad32 xform;         // 0x60
-    int IsFlipped;                  // 0x80
-    int Priority;                  // 0x84
-    long Mask;                 // 0x88 PORT: 64-bit long (sd)
-    float TimeScale;                // 0x90
-    float weight;             // 0x94
-    float targetWeight;       // 0x98
-    char pad9C[0x8];
-    float blendIn;            // 0xA4
-};
-
 // Element i of a quaternion/vector (x, y, z, w), by reference (an operator[]-style accessor).
-static inline const float& rabQuatElem_1F00(const sRabQuat_00311B48& q, int i)
+static inline const float& rabQuatElem_1F00(const t4Vector& q, int i)
 {
     return (&q.x)[i];
 }
 
-static inline bool rabVecEq_1F00(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+static inline bool rabVecEq_1F00(const t4Vector& a, const t4Vector& b)
 {
     return rabQuatElem_1F00(a, 0) == rabQuatElem_1F00(b, 0) && rabQuatElem_1F00(a, 1) == rabQuatElem_1F00(b, 1)
         && rabQuatElem_1F00(a, 2) == rabQuatElem_1F00(b, 2) && rabQuatElem_1F00(a, 3) == rabQuatElem_1F00(b, 3);
@@ -486,18 +459,19 @@ static inline bool rabVecEq_1F00(const sRabQuat_00311B48& a, const sRabQuat_0031
 
 static inline bool rabXformEq_1F00(const tPose& a, const tPose& b)
 {
-    return rabVecEq_1F00((*(sRabQuat_00311B48*)&a.Q), (*(sRabQuat_00311B48*)&b.Q)) && rabVecEq_1F00((*(sRabQuat_00311B48*)&a.P), (*(sRabQuat_00311B48*)&b.P));
+    return rabVecEq_1F00(a.Q, b.Q) && rabVecEq_1F00(a.P, b.P);
 }
 
 /**
  * Starts an AI animation on a sequencer, blending it in over the sequences already playing.
  *
- * A zero @p blend expires everything first. Update rule 2 loops (cAnimSequencer_playAndLoop), others hold (cAnimSequencer_playAndHold), with an
- * end trigger 0x3F for rule 0 or when attribute word 2 is set. The new sequence copies the rider's offset transform and
- * its +0x18, +0x1C and +0x20 state, attribute word 6 (+0xA4) and priority @p priority, and gets a timed trigger
- * (cAnimSequence_addTrigger) per key frame of clip @p animid. Alone it fades in over attribute word 5 when that is nonzero; otherwise
- * all older sequences fade out over @p blend, and one already playing the same anim with the same transform hands its
- * sub-anims, times, speeds and weight to the new one unless @p isDupSeqAllowed allows a duplicate.
+ * A zero @p blend expires everything first. Update rule 2 loops (cAnimSequencer_playAndLoop), others hold
+ * (cAnimSequencer_playAndHold), with an end trigger 0x3F for rule 0 or when attribute word 2 is set. The new sequence
+ * copies the rider's OrientationOffset, IsFlipped, FrameRateFactor and GraftMask, attribute word 6 (EndFadeTime) and
+ * priority @p priority, and gets a timed trigger (cAnimSequence_addTrigger) per key frame of clip @p animid. Alone it
+ * fades in over attribute word 5 when that is nonzero; otherwise all older sequences fade out over @p blend, and one
+ * already playing the same anim with the same transform hands its sub-anims, times, speeds and weight to the new one
+ * unless @p isDupSeqAllowed allows a duplicate.
  *
  * cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
  * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
@@ -517,60 +491,61 @@ static inline bool rabXformEq_1F00(const tPose& a, const tPose& b)
 extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, cAnimSequencer* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
 {
     cRiderAnimBase* self = vself;
-    cAnimSequencer* seq = (cAnimSequencer*)vseq;
-    char* node;
+    cAnimSequencer* seq = vseq;
+    cAnimSequence* node;
     if (blend == 0.0f)
         cAnimSequencer_expireAll(seq);
-    if (cAIAnimEventMap_getAnimPlayAttr(anim)[1] == 2)
+    if (cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule == 2)
     {
         node = cAnimSequencer_playAndLoop(seq, anim, animid, 0.0f);
     }
     else
     {
         node = cAnimSequencer_playAndHold(seq, anim, animid, 0.0f);
-        if (cAIAnimEventMap_getAnimPlayAttr(anim)[1] == 0 || cAIAnimEventMap_getAnimPlayAttr(anim)[2] != 0)
+        if (cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule == 0
+            || cAIAnimEventMap_getAnimPlayAttr(anim)->ExpireRule != 0)
             cAnimSequence_addEndTrigger(node, 0x3F);
     }
-    sSeqNode_1F00* nd = (sSeqNode_1F00*)node;
+    cAnimSequence* nd = node;
     nd->IsFlipped = self->IsFlipped;
-    nd->xform = *(sRabQuad32*)&self->OrientationOffset;
-    nd->Mask = ((long)self->GraftMask);
+    nd->OrientationOffset = self->OrientationOffset;
+    nd->Mask = self->GraftMask;
     nd->TimeScale = self->FrameRateFactor;
-    nd->weight = nd->targetWeight = 1.0f;
-    nd->blendIn = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[6];
+    nd->CurrentWeight = nd->TargetWeight = 1.0f;
+    nd->EndFadeTime = cAIAnimEventMap_getAnimPlayAttr(anim)->BlendOutTime;
     nd->Priority = priority;
-    // PORT: (int) address arithmetic for the clip header (index-first addu).
-    int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + (int)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF]->Anims) + 0x12);
+    int n = cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF]
+                ->Anims[(unsigned int)animid >> 8].mNumTags;
     for (int i = 0; i < n; i++)
     {
-        cAdfDataSource* bank = (cAdfDataSource*)((char*)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF]);
-        char* clip = (char*)(((unsigned int)animid >> 8) * 0x14 + (int)bank->Anims);
-        unsigned short* keys = (unsigned short*)bank->Tags;
-        cAnimSequence_addTrigger(node, i, keys[(*(unsigned short*)(clip + 0x10) + i) * 2] * 0.03333333507180214f);
+        cAdfDataSource* bank = cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF];
+        tAdfTag* keys = bank->Tags;
+        cAnimSequence_addTrigger(node, i,
+            keys[bank->Anims[(unsigned int)animid >> 8].mTagIndex + i].mTagFrame * 0.03333333507180214f);
     }
     if (seq->NumPlaying == 1)
     {
-        float fadeTime = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[5];
+        float fadeTime = cAIAnimEventMap_getAnimPlayAttr(anim)->EmptySeqrBlendInTime;
         if (fadeTime != 0.0f)
         {
-            nd->weight = nd->targetWeight = 0.0f;
-            cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, fadeTime);
+            nd->CurrentWeight = nd->TargetWeight = 0.0f;
+            cAnimSequence_fadeWeight(node, 1.0f, fadeTime);
         }
     }
     else if (blend != 0.0f)
     {
-        sSeqNode_1F00* match = 0;
+        cAnimSequence* match = 0;
         for (int i = 1; i < seq->NumPlaying; i++)
         {
-            sSeqNode_1F00* other = (sSeqNode_1F00*)cAnimSequencer_getSequence(seq, i);
+            cAnimSequence* other = cAnimSequencer_getSequence(seq, i);
             cAnimSequence_removeEndTrigger(other, 0x3F);
             cAnimSequence_fadeOutAndExpire(other, blend);
-            int type = cAIAnimEventMap_getAnimPlayAttr(anim)[1];
-            bool ok = other->tracks[0].anim == nd->tracks[0].anim || (type != 0 && type != 2 && type != 1);
-            if (ok && other->tracks[0].id == nd->tracks[0].id && other->Mask == nd->Mask
+            int type = cAIAnimEventMap_getAnimPlayAttr(anim)->UpdateRule;
+            bool ok = other->SubAnims[0].AnimID == nd->SubAnims[0].AnimID || (type != 0 && type != 2 && type != 1);
+            if (ok && other->SequenceID == nd->SequenceID && other->Mask == nd->Mask
                 && other->IsFlipped == nd->IsFlipped)
             {
-                if (rabXformEq_1F00(*(tPose*)&other->xform, *(tPose*)&nd->xform))
+                if (rabXformEq_1F00(other->OrientationOffset, nd->OrientationOffset))
                     match = other;
             }
         }
@@ -578,23 +553,23 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, cAnimSequencer* vse
         {
             for (int k = 0; k < 3; k++)
             {
-                if (match->tracks[k].active != 0)
+                if (match->SubAnims[k].IsActive != 0)
                 {
-                    cAnimSequence_setSubAnim(node, k, match->tracks[k].anim);
-                    cAnimSequence_setSubAnimTime(node, k, match->tracks[k].time);
-                    cAnimSequence_setSubAnimWeight(node, k, match->tracks[k].speed);
+                    cAnimSequence_setSubAnim(node, k, match->SubAnims[k].AnimID);
+                    cAnimSequence_setSubAnimTime(node, k, match->SubAnims[k].Time);
+                    cAnimSequence_setSubAnimWeight(node, k, match->SubAnims[k].Weight);
                 }
             }
-            nd->weight = nd->targetWeight = match->weight;
-            if (match->weight < 1.0f)
-                cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, blend * (1.0f - match->weight));
+            nd->CurrentWeight = nd->TargetWeight = match->CurrentWeight;
+            if (match->CurrentWeight < 1.0f)
+                cAnimSequence_fadeWeight(node, 1.0f, blend * (1.0f - match->CurrentWeight));
             cAnimSequencer_expire(seq, match);
         }
         else
         {
-            nd->targetWeight = 0.0f;
-            nd->weight = 0.0f;
-            cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, blend);
+            nd->TargetWeight = 0.0f;
+            nd->CurrentWeight = 0.0f;
+            cAnimSequence_fadeWeight(node, 1.0f, blend);
         }
     }
     return anim;
@@ -604,20 +579,17 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, cAnimSequencer* vse
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_updateAnimation);
 #ifdef SKIP_ASM
-struct sVEntry003123C0 {
-    short delta;
-    short index;
-    void (*fn)(void*, cAnimSequencer*, cAnimSequence*, float);
-};
+// cRiderAnimBase_vtbl slot 2 (the per-sequence update; __pure_virtual in cRiderAnimBase itself).
+typedef sVEntry<void(void*, cAnimSequencer*, cAnimSequence*, float)> tUpdateSequenceSlot;
 
 extern "C" void cRiderAnimBase_setupAnimation(cRiderAnimBase* self, int a1);
 
 /**
  * Advances every playing animation sequence by a time step and re-blends the rider's pose.
  *
- * For each of the 6 sequencers (array at +0x50), calls vtable slot 2 (vtable at +0x58) with the sequencer, the sequence
- * and @p timescale; the next pointer (+0xC8) is read first so the call may expire the sequence. Then cRiderAnimBase_setupAnimation
- * (setupAnimation) with @p animMinParts.
+ * For each of the 6 sequencers (Sequencer), calls vtable slot 2 (mVtbl) with the sequencer, the sequence and @p
+ * timescale; the next pointer (Next) is read first so the call may expire the sequence. Then
+ * cRiderAnimBase_setupAnimation (setupAnimation) with @p animMinParts.
  *
  * @param animMinParts  On Tour animMinParts: blend only the minimum parts
  * @param timescale  the time step (On Tour timescale)
@@ -630,7 +602,7 @@ extern "C" void cRiderAnimBase_updateAnimation(cRiderAnimBase* self, int animMin
         while (node)
         {
             cAnimSequence* next = node->Next;
-            sVEntry003123C0* vt = (sVEntry003123C0*)self->mVtbl;
+            tUpdateSequenceSlot* vt = (tUpdateSequenceSlot*)self->mVtbl;
             vt[2].fn(vthis(self, vt[2]), &(self->Sequencer)[i], node, timescale);
             node = next;
         }
@@ -644,18 +616,15 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_expireAnimation);
 #ifdef SKIP_ASM
 extern "C" int tEventFlags_isSet1(void* self, int mask);
 
-struct sVEntry00312490 {
-    short delta;
-    short index;
-    void (*fn)(void*, cAnimSequencer*, cAnimSequence*);
-};
+// cRiderAnimBase_vtbl slot 3 (the expire hook).
+typedef sVEntry<void(void*, cAnimSequencer*, cAnimSequence*)> tExpireSequenceSlot;
 
 
 /**
  * Expires every sequence that has reached its end trigger.
  *
- * Collects up to 32 (sequence, sequencer) pairs whose event 0x3F is set (tEventFlags_isSet1 on the sequence's +0xB0 flags),
- * then calls vtable slot 3 (vtable at +0x58) on each. The release build drops On Tour's bound check on the 32-entry
+ * Collects up to 32 (sequence, sequencer) pairs whose event 0x3F is set (tEventFlags_isSet1 on the sequence's Events),
+ * then calls vtable slot 3 (mVtbl) on each. The release build drops On Tour's bound check on the 32-entry
  * list.
  */
 extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
@@ -678,7 +647,7 @@ extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
     }
     for (int k = 0; k < n; k++)
     {
-        sVEntry00312490* vt = (sVEntry00312490*)self->mVtbl;
+        tExpireSequenceSlot* vt = (tExpireSequenceSlot*)self->mVtbl;
         vt[3].fn(vthis(self, vt[3]), list[k].seqr, ((cAnimSequence*)list[k].seq));
     }
 }
@@ -717,7 +686,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimFrame);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, cAnimSequencer* seq, int anim, int a3, int a4, int a5, float blend);
 extern "C" void cAnimSequence_setSubAnimTime(void* node, int i, float t);
-extern char* cGameAnimMap_TheGameAnimMap;
+extern cGameAnimMap* cGameAnimMap_TheGameAnimMap;
 extern int kAnimIDInvalid;
 
 
@@ -733,7 +702,7 @@ extern int kAnimIDInvalid;
  *
  * @param anim            the AI anim to sample (On Tour tAIAnimID anid)
  * @param startFrameTime  the clip to play (On Tour tAnimID animid); kAnimIDInvalid (-1) means the AI anim's own
- *                        clip, found from its index (vtable slot 4) in the table at cGameAnimMap_TheGameAnimMap + 0x1030
+ *                        clip, found from its index (vtable slot 4) in cGameAnimMap_TheGameAnimMap->GameAnimMap
  * @param animid          the time to sample, given to cAnimSequence_setSubAnimTime (On Tour startFrameTime)
  * @return the first 0x50-byte blend state (On Tour tAnimBlendFrame)
  */
@@ -746,7 +715,9 @@ extern "C" tAnimBlendFrame cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, i
     if (animid == kAnimIDInvalid)
     {
         sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-        animid = *(int*)(vt[4].fn(vthis(self, vt[4]), anim) * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
+        // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
+        // first).
+        animid = *(cGameAnimMap_TheGameAnimMap->GameAnimMap + vt[4].fn(vthis(self, vt[4]), anim));
     }
     cRiderAnimBase_onInput(self, &seq, anim, animid, 1, 0, 0.0f);
     cAnimSequence_setSubAnimTime(cAnimSequencer_getSequence(&seq, 0), 0, startFrameTime);
@@ -759,13 +730,13 @@ extern "C" tAnimBlendFrame cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, i
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimDuration);
 #ifdef SKIP_ASM
-extern char* cGameAnimMap_TheGameAnimMap;
+extern cGameAnimMap* cGameAnimMap_TheGameAnimMap;
 
 /**
  * Returns how long the clip behind an AI animation lasts, in seconds.
  *
- * Vtable slot 4 (vtable at +0x58) gives the game anim for @p aid; 0x207 (none) returns 0. Otherwise the clip id comes
- * from cGameAnimMap_TheGameAnimMap (+0x1030 table) and its length is (frame count - 1) / 30 from
+ * Vtable slot 4 (mVtbl) gives the game anim for @p aid; 0x207 (none) returns 0. Otherwise the clip id comes from
+ * cGameAnimMap_TheGameAnimMap->GameAnimMap and its length is (mNumAnimFrames - 1) / 30 from
  * cAnimDataBase_TheAnimDataBase.
  *
  * @param aid  the AI animation (On Tour aid)
@@ -777,10 +748,11 @@ extern "C" float cRiderAnimBase_getAIAnimDuration(cRiderAnimBase* self, int aid)
     int id = vt[4].fn(vthis(self, vt[4]), aid);
     if (id == 519)
         return 0.0f;
-    unsigned int animId = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
+    // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
+    // first).
+    unsigned int animId = *(cGameAnimMap_TheGameAnimMap->GameAnimMap + id);
     cAdfDataSource* clip = cAnimDataBase_TheAnimDataBase->DataSources[animId & 0xFF];
-    char* clipEntry = (char*)((animId >> 8) * 0x14 + (int)clip->Anims);
-    return (*(unsigned short*)(clipEntry + 0xC) - 1) * 0.03333333507180214f;
+    return (clip->Anims[animId >> 8].mNumAnimFrames - 1) * 0.03333333507180214f;
 }
 #endif
 
@@ -793,9 +765,9 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimEventTime);
  * Returns the time in seconds of tag number @p frame in the clip that AI anim @p anim plays, or -1 if it has fewer.
  *
  * Maps the AI anim to a game animation with the virtual at vtable slot 4 (0 when that gives 519, no game anim), then
- * through the map (+0x1030) of cGameAnimMap_TheGameAnimMap to a bank and clip of cAnimDataBase_TheAnimDataBase. The
- * clip's 0x14-byte record holds the first tag (u16 at +0x10) and tag count (u16 at +0x12); tag frames are u16 values
- * in the bank's table at +0x10, converted at 30 frames per second. ai/computer uses tags 1 and 2 as trick markers.
+ * through the map (GameAnimMap) of cGameAnimMap_TheGameAnimMap to a bank and clip of cAnimDataBase_TheAnimDataBase.
+ * The clip's tAdfAnimHeader holds the first tag (mTagIndex) and tag count (mNumTags); tag frames come from the bank's
+ * Tags table, converted at 30 frames per second. ai/computer uses tags 1 and 2 as trick markers.
  *
  * @param anim  the AI anim id
  * @param frame  the tag number in the clip
@@ -807,14 +779,15 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int ani
     int id = vt[4].fn(vthis(self, vt[4]), anim);
     if (id == 519)
         return 0.0f;
-    unsigned int mapEntry = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    cAdfDataSource* clip = (cAdfDataSource*)cAnimDataBase_TheAnimDataBase->DataSources[mapEntry & 0xFF];
-    tAdfAnimHeader* animRec = (tAdfAnimHeader*)((char*)((mapEntry >> 8) * 0x14 + (int)clip->Anims));
+    // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
+    // first).
+    unsigned int mapEntry = *(cGameAnimMap_TheGameAnimMap->GameAnimMap + id);
+    cAdfDataSource* clip = cAnimDataBase_TheAnimDataBase->DataSources[mapEntry & 0xFF];
     float frameTime;
-    if (frame < animRec->mNumTags)
+    if (frame < clip->Anims[mapEntry >> 8].mNumTags)
     {
         tAdfTag* keys = clip->Tags;
-        frameTime = keys[animRec->mTagIndex + frame].mTagFrame * 0.03333333507180214f;
+        frameTime = keys[clip->Anims[mapEntry >> 8].mTagIndex + frame].mTagFrame * 0.03333333507180214f;
     }
     else
     {
@@ -827,10 +800,10 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int ani
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
+extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, cAnimSequencer* seq, int anim, int a3, int a4, int a5, float blend);
 extern int kSequencerPriority[];
-extern char* cGameAnimMap_TheGameAnimMap;
+extern cGameAnimMap* cGameAnimMap_TheGameAnimMap;
 
 
 // PORT: the unit declares cRiderAnimBase_play as void for its callers, but it returns the new
@@ -860,10 +833,12 @@ int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
         return 438;
     if (blend < 0.0f)
     {
-        blend = *(float*)&cAIAnimEventMap_getAnimPlayAttr(anim)[4];
+        blend = cAIAnimEventMap_getAnimPlayAttr(anim)->BlendInTime;
     }
-    int animId = *(int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    int slot = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
+    // GameAnimMap + gad, not GameAnimMap[gad]: the subscript puts the base first in the addu (retail: index
+    // first).
+    int animId = *(cGameAnimMap_TheGameAnimMap->GameAnimMap + id);
+    int slot = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
     return self->CurrentAnimID[slot] = cRiderAnimBase_onInput((cRiderAnimBase*)self, &self->Sequencer[slot], anim, animId, flags, kSequencerPriority[slot], blend);
 }
 #endif
@@ -871,7 +846,7 @@ int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_playFromAnimID);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
+extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, cAnimSequencer* seq, int anim, int a3, int a4, int a5, float blend);
 extern int kSequencerPriority[];
 
@@ -890,10 +865,10 @@ extern int kSequencerPriority[];
  */
 extern "C" void cRiderAnimBase_playFromAnimID(cRiderAnimBase* self, int anim, int animid, float blend)
 {
-    int slot = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
+    int slot = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
     if (blend < 0.0f)
     {
-        blend = *(float*)&cAIAnimEventMap_getAnimPlayAttr(anim)[4];
+        blend = cAIAnimEventMap_getAnimPlayAttr(anim)->BlendInTime;
     }
     self->CurrentAnimID[slot] = cRiderAnimBase_onInput(self, &self->Sequencer[slot], anim, animid, 1, kSequencerPriority[slot], blend);
 }
@@ -1302,80 +1277,54 @@ extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data,
 //100%
 INCLUDE_ASM("animation/rideranimbase", cAnimSequence_cAnimSequence);
 #ifdef SKIP_ASM
-struct sAnimSlot_00313508
-{
-    char pad0[0x14];
-    int active;      // 0x14
-    char pad18[0x4];
-    sAnimSlot_00313508() {}
-};
-
-struct sRiderAnim_00313508
-{
-    int owner;                      // 0x0
-    sAnimSlot_00313508 slots[3];    // 0x4
-    char pad58[0x8];
-    sRabQuad32 pair;                // 0x60
-    int u80;                        // 0x80
-    int u84;                        // 0x84
-    long u88;                       // 0x88
-    float f90;                      // 0x90
-    float value;                    // 0x94
-    float target;                   // 0x98
-    float remaining;                // 0x9C
-    int notify;                     // 0xA0
-    int uA4;                        // 0xA4
-    int uA8;                        // 0xA8
-    void* head;                     // 0xAC
-    ulong active;                   // 0xB0
-    ulong triggered;                // 0xB8
-    int dirty;                      // 0xC0
-    int uC4;                        // 0xC4
-    sRiderAnim_00313508(int owner);
-};
-
 inline void* operator new(unsigned int, void* p) { return p; }
 
-// PORT: long/ulong are 64-bit here
-inline sRiderAnim_00313508::sRiderAnim_00313508(int o)
+// cAnimSequence's constructor (On Tour cAnimSequence::cAnimSequence(int sequenceID)), on a ctor-only derived type so
+// that placement new runs it over the sequence.
+struct tAnimSequenceCtor : cAnimSequence
 {
-    owner = o;
+    tAnimSequenceCtor(int sequenceID);
+};
+
+// PORT: Mask and Events are 64-bit (sd)
+inline tAnimSequenceCtor::tAnimSequenceCtor(int sequenceID)
+{
+    SequenceID = sequenceID;
     for (int i = 2; i >= 0; i--)
     {
-        slots[i].active = 0;
+        SubAnims[i].IsActive = 0;
     }
-    pair = tPose_Identity;
-    u88 = -1;
-    u80 = 0;
-    u84 = 0;
-    f90 = 1.0f;
-    remaining = 0.0f;
-    value = 1.0f;
-    target = 1.0f;
-    notify = 0;
-    uA4 = 0;
-    uA8 = 0;
-    triggered = 0;
-    active = 0;
-    head = 0;
-    dirty = 0;
-    uC4 = 0;
+    OrientationOffset = tPose_Identity;
+    Mask = -1;
+    IsFlipped = 0;
+    Priority = 0;
+    TimeScale = 1.0f;
+    WeightTimer = 0.0f;
+    CurrentWeight = 1.0f;
+    TargetWeight = 1.0f;
+    IsFadeOutExpire = 0;
+    EndFadeTime = 0;
+    StartFadeTime = 0;
+    Events.IsJustChanged = 0;
+    Events.IsSet = 0;
+    Triggers = 0;
+    EndEvent = 0;
+    CheckTriggersAtCurrentFrame = 0;
 }
 
 /**
- * Constructs an animation sequence with id @p owner (stored at +0x0) and default state; returns @p self.
+ * Constructs an animation sequence with id @p owner (SequenceID) and default state; returns @p self.
  *
- * The three sub-animations are marked inactive, the orientation offset (+0x60) becomes tPose_Identity, the bone mask
- * (+0x88) -1, flip and priority (+0x80, +0x84) 0, time scale (+0x90), current and target weight (+0x94, +0x98) 1, and
- * the fade timer, fade-out-expire flag, fade times, trigger list (+0xAC), event flags (+0xB0, +0xB8) and the flags at
- * +0xC0 and +0xC4 are cleared. The local struct names value/target/remaining/notify for +0x94 .. +0xA0.
+ * The three sub-animations are marked inactive, OrientationOffset becomes tPose_Identity, the bone Mask -1, IsFlipped
+ * and Priority 0, TimeScale, CurrentWeight and TargetWeight 1, and the fade timer, fade-out-expire flag, fade times,
+ * trigger list, event flags, EndEvent and CheckTriggersAtCurrentFrame are cleared.
  *
  * @param owner  the sequence id (the AI anim id for rider sequences)
  * @return @p self
  */
-extern "C" sRiderAnim_00313508* cAnimSequence_cAnimSequence(cAnimSequence* self, int owner)
+extern "C" cAnimSequence* cAnimSequence_cAnimSequence(cAnimSequence* self, int owner)
 {
-    return new (((sRiderAnim_00313508*)self)) sRiderAnim_00313508(owner);
+    return new (self) tAnimSequenceCtor(owner);
 }
 #endif
 
@@ -1387,27 +1336,6 @@ struct sAnimEvents_00313938;
 extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, float to);
 extern "C" void cAnimSequence_checkTriggersAtTime(cAnimSequence* self, float time);
 extern "C" void cAnimSequence_setEndTriggers(cAnimSequence* self);
-
-struct sTrack_003135B0 {
-    int field_0x0;
-    float time;     // 0x4
-    float speed;    // 0x8
-    float length;   // 0xC
-    char pad10[0x8];
-    int loop;       // 0x18
-};
-
-// PORT: ulong is 64-bit here
-struct sRab_003135B0 {
-    int field_0x0;
-    sTrack_003135B0 tracks[3];  // 0x4
-    char pad58[0x90 - 0x58];
-    float TimeScale;                // 0x90
-    char pad94[0xB8 - 0x94];
-    ulong triggered;            // 0xB8
-    int EndEvent;                    // 0xC0
-    int CheckTriggersAtCurrentFrame;                    // 0xC4
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 
@@ -1421,16 +1349,16 @@ static inline float ffloor_003135B0(float x)
     return t;
 }
 
-static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
+static inline void fire_003135B0(cAnimSequence* self, float from, float to)
 {
-    cAnimSequence_checkTriggers((cAnimSequence*)self, from, to);
+    cAnimSequence_checkTriggers(self, from, to);
 }
 
 /**
  * Advances sub-animation @p i of the sequence by @p dt, holding or wrapping at its ends and firing its triggers.
  *
- * The step is dt x the slot's time scale (+0x8 of the slot) x the sequence's time scale (+0x90). For slot 0 only: the
- * just-changed event bits (+0xB8) and the end flag (+0xC0) are cleared first, and if the +0xC4 flag is set (by
+ * The step is dt x the slot's TimeScale x the sequence's TimeScale. For slot 0 only: the just-changed event bits
+ * (Events.IsJustChanged) and EndEvent are cleared first, and if CheckTriggersAtCurrentFrame is set (by
  * cAnimSequence_setSubAnimTime) the triggers at the old time fire (cAnimSequence_checkTriggersAtTime) and the flag is cleared. A hold slot (type 0)
  * clamps to [0, length] and at either end sets the end triggers (cAnimSequence_setEndTriggers); a loop slot outside the range is
  * wrapped by whole lengths, the end triggers are set, and the timed triggers over the wrapped span fire
@@ -1440,29 +1368,29 @@ static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
  * @param dt  the time step
  * @return always 0
  */
-extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
+extern "C" int cAnimSequence_updateSubAnim(cAnimSequence* self, int i, float dt)
 {
-    float startTime = self->tracks[i].time;
-    float len = self->tracks[i].length;
-    float newTime = startTime + self->tracks[i].speed * self->TimeScale * dt;
+    float startTime = self->SubAnims[i].Time;
+    float len = self->SubAnims[i].TotalTime;
+    float newTime = startTime + self->SubAnims[i].TimeScale * self->TimeScale * dt;
     if (i == 0) {
-        self->triggered = 0;
+        self->Events.IsJustChanged = 0;
         self->EndEvent = 0;
         if (self->CheckTriggersAtCurrentFrame != 0) {
-            cAnimSequence_checkTriggersAtTime((cAnimSequence*)self, startTime);
+            cAnimSequence_checkTriggersAtTime(self, startTime);
             self->CheckTriggersAtCurrentFrame = 0;
         }
     }
-    if (self->tracks[i].loop == 0) {
+    if (self->SubAnims[i].Type == 0) {
         if (newTime <= 0.0f) {
             newTime = 0.0f;
             if (i == 0) {
-                cAnimSequence_setEndTriggers((cAnimSequence*)self);
+                cAnimSequence_setEndTriggers(self);
             }
         } else if (len <= newTime) {
             newTime = len;
             if (i == 0) {
-                cAnimSequence_setEndTriggers((cAnimSequence*)self);
+                cAnimSequence_setEndTriggers(self);
             }
         }
         if (i == 0) {
@@ -1472,7 +1400,7 @@ extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
         int n = (int)ffloor_003135B0(newTime / len);
         newTime -= len * (float)n;
         if (i == 0) {
-            cAnimSequence_setEndTriggers((cAnimSequence*)self);
+            cAnimSequence_setEndTriggers(self);
             if (n >= 2) {
                 fire_003135B0(self, 0.0f, len);
             } else if (n < -1) {
@@ -1496,7 +1424,7 @@ extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
     } else if (i == 0) {
         fire_003135B0(self, startTime, newTime);
     }
-    self->tracks[i].time = newTime;
+    self->SubAnims[i].Time = newTime;
     return 0;
 }
 #endif

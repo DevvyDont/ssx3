@@ -16,8 +16,9 @@
 struct tPose;
 
 // One sphere of a rider's collision list (On Tour struct tSphereList, 0x20): its centre in bone space, radius and bone.
-// [U] cRiderSphereTree's methods walk sphList 0x20 apart (views sRiderSphere_329910 / sRiderSphere_2F650: the
-// placement-new array element, which also needs an empty constructor in its unit).
+// [U] cRiderSphereTree's methods walk sphList 0x20 apart. On Tour's has an (implicit) default constructor; the
+// constructors model it with a local derived type (tSphereListInit in intersect/riderspheretree.cpp), not here: a
+// constructor here would give cWorldRider (which embeds a cRiderSphereTree) one, and its locals would run it.
 struct tSphereList {
     t4Vector cen;                   // 0x00 [O]
     float rad;                      // 0x10 [O]

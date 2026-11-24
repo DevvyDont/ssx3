@@ -586,7 +586,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Tells whether rider 0's character has completed a mission (bit 3 of its saved mission flags in profile 0).
+ * Tells whether rider 0's character has completed a mission (bIsCompleted of its saved mission flags in profile 0).
  *
  * @param id  mission ID (On Tour uiMissionId)
  * @return 1 when completed, otherwise 0
@@ -595,9 +595,7 @@ extern "C" int cBEMissionInterface_isMissionCompleted(cBEMissionInterface* self,
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int characterId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + characterId * 3976;
-    char* profile = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(profile + 0x118) >> 3) & 1;
+    return cBELibrary_profileLib[0][characterId].mMissions[i].bIsCompleted;
 }
 #endif
 
@@ -608,7 +606,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Tells whether a mission is ready: bit 1 of its flag word (+0x118 + index * 4 of rider 0's character in profile 0).
+ * Tells whether a mission is ready: bIsReady of its flags (mMissions[index] of rider 0's character in profile 0).
  *
  * @param id  the mission id
  * @return 1 or 0
@@ -617,9 +615,7 @@ extern "C" int cBEMissionInterface_isMissionReady(cBEMissionInterface* self, int
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 3976;
-    char* recordBase = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(recordBase + 0x118) >> 1) & 1;
+    return cBELibrary_profileLib[0][charId].mMissions[i].bIsReady;
 }
 #endif
 
@@ -632,8 +628,8 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 /**
  * Tells whether a mission is still locked for the player.
  *
- * Index from cBEMissionInterface_getMissionIdx (On Tour getMissionIdx); the flag word is at +0x118 + index * 4 of the profile of rider 0's
- * character in cBELibrary_profileLib (profile 0).
+ * Index from cBEMissionInterface_getMissionIdx (On Tour getMissionIdx); the flag is bIsLocked of mMissions[index] in
+ * the profile of rider 0's character in cBELibrary_profileLib (profile 0).
  *
  * @param id  the mission id (On Tour uiMissionId)
  * @return 1 when locked, 0 when open
@@ -642,9 +638,7 @@ extern "C" int cBEMissionInterface_isMissionLocked(cBEMissionInterface* self, in
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int characterId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + characterId * 3976;
-    char* profile = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(profile + 0x118)) & 1;
+    return cBELibrary_profileLib[0][characterId].mMissions[i].bIsLocked;
 }
 #endif
 
@@ -655,8 +649,8 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Tells whether a mission is available to rider 0's character (bit 2 of its saved mission flags in profile
- * 0).
+ * Tells whether a mission is available to rider 0's character (bIsAvailable of its saved mission flags in
+ * profile 0).
  *
  * @param id  mission ID (On Tour uiMissionId)
  * @return 1 when available, otherwise 0
@@ -665,9 +659,7 @@ extern "C" int cBEMissionInterface_isMissionAvailable(cBEMissionInterface* self,
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int characterId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + characterId * 3976;
-    char* profile = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(profile + 0x118) >> 2) & 1;
+    return cBELibrary_profileLib[0][characterId].mMissions[i].bIsAvailable;
 }
 #endif
 
@@ -678,8 +670,8 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Tells whether a mission's map icon is shown: bit 4 of its flag word (+0x118 + index * 4 of rider 0's character in
- * profile 0).
+ * Tells whether a mission's map icon is shown: bIsShowIcon of its flags (mMissions[index] of rider 0's character
+ * in profile 0).
  *
  * @param id  the mission id
  * @return 1 or 0
@@ -688,9 +680,7 @@ extern "C" int cBEMissionInterface_isMissionShowIcon(cBEMissionInterface* self, 
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 3976;
-    char* recordBase = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(recordBase + 0x118) >> 4) & 1;
+    return cBELibrary_profileLib[0][charId].mMissions[i].bIsShowIcon;
 }
 #endif
 
@@ -819,7 +809,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Sets bit 0 (locked) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * Sets bIsLocked (bit 0) of a mission's flags (mMissions[index] of rider 0's character in profile 0) to
  * @p value & 1.
  *
  * @param id  the mission id
@@ -829,9 +819,7 @@ extern "C" void cBEMissionInterface_setIsLocked(cBEMissionInterface* self, int i
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 3976;
-    char* recordBase = (char*)cBELibrary_profileLib + off;
-    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~1) | (value & 1);
+    cBELibrary_profileLib[0][charId].mMissions[i].bIsLocked = value;
 }
 #endif
 
@@ -842,7 +830,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Sets bit 1 (ready) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * Sets bIsReady (bit 1) of a mission's flags (mMissions[index] of rider 0's character in profile 0) to
  * @p value & 1.
  *
  * @param id  the mission id
@@ -852,9 +840,7 @@ extern "C" void cBEMissionInterface_setIsReady(cBEMissionInterface* self, int id
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 3976;
-    char* recordBase = (char*)cBELibrary_profileLib + off;
-    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 1)) | ((value & 1) << 1);
+    cBELibrary_profileLib[0][charId].mMissions[i].bIsReady = value;
 }
 #endif
 
@@ -865,7 +851,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Sets bit 2 (available) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * Sets bIsAvailable (bit 2) of a mission's flags (mMissions[index] of rider 0's character in profile 0) to
  * @p value & 1.
  *
  * @param id  the mission id
@@ -875,9 +861,7 @@ extern "C" void cBEMissionInterface_setIsAvailable(cBEMissionInterface* self, in
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 3976;
-    char* recordBase = (char*)cBELibrary_profileLib + off;
-    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 2)) | ((value & 1) << 2);
+    cBELibrary_profileLib[0][charId].mMissions[i].bIsAvailable = value;
 }
 #endif
 
@@ -888,7 +872,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Sets bit 3 (completed) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * Sets bIsCompleted (bit 3) of a mission's flags (mMissions[index] of rider 0's character in profile 0) to
  * @p value & 1.
  *
  * @param id  the mission id
@@ -898,9 +882,7 @@ extern "C" void cBEMissionInterface_setIsCompleted(cBEMissionInterface* self, in
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 3976;
-    char* recordBase = (char*)cBELibrary_profileLib + off;
-    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 3)) | ((value & 1) << 3);
+    cBELibrary_profileLib[0][charId].mMissions[i].bIsCompleted = value;
 }
 #endif
 
@@ -911,7 +893,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
- * Sets bit 4 (icon shown) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * Sets bIsShowIcon (bit 4) of a mission's flags (mMissions[index] of rider 0's character in profile 0) to
  * @p value & 1.
  *
  * @param id  the mission id
@@ -921,9 +903,7 @@ extern "C" void cBEMissionInterface_setIsShowIcon(cBEMissionInterface* self, int
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 3976;
-    char* recordBase = (char*)cBELibrary_profileLib + off;
-    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 4)) | ((value & 1) << 4);
+    cBELibrary_profileLib[0][charId].mMissions[i].bIsShowIcon = value;
 }
 #endif
 
@@ -1120,7 +1100,7 @@ extern sMissionOwnerView_001544D0 D_0043D9A4[];
  * Counts the missions one profile's character has completed on a peak.
  *
  * While a game is running (SSXApp->Game set) it returns cBEMissionInterface_getNumberCompletedMissionsOnPeak()
- * instead. Otherwise it counts bit 3 of the character's mission flag words in cBELibrary_profileLib for each
+ * instead. Otherwise it counts the character's bIsCompleted mission flags in cBELibrary_profileLib for each
  * mission whose location belongs to the peak.
  *
  * @param profile    profile index
@@ -1139,7 +1119,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBEMis
     {
         if (D_0043D9A4[cBELibrary_missionInfo[i].group].owner == owner)
         {
-            n += (cBELibrary_profileLib[profile][character].mMissions[i] >> 3) & 1;
+            n += cBELibrary_profileLib[profile][character].mMissions[i].bIsCompleted;
         }
     }
     return n;

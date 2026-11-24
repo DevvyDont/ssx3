@@ -72,11 +72,13 @@ struct tBENetworkDB {
                                      //       bytes, getter cBENetworkInterface_getMyStats (D_00534E60); tRiderStats is 0xAC
                                      //       (ai/ridermetrix.h; views group D: sBEBlk_C418 is this record)
     tRiderStats OpponentStats;       // 0x3DC [P] get/setOpponentStats; [R] cBENetworkInterface_setOpponentStats / cBENetworkInterface_getOpponentStats (D_00534F0C)
-    char unk_488[0x10];              // 0x488 [R] func_0014EBD8 (strcpy) / func_0015C5B8 (D_00534FB8); [U] this player's
-                                     //       name (from the lobby session +0x80, func_00259098); prefixes our own chat
-                                     //       lines (ovstatetrophy func_00210BD8)
-    char unk_498[0x10];              // 0x498 [R] func_0014EBB8 / func_0015C5A8 (D_00534FC8); [U] the opponent's name
-                                     //       (lobby session +0x98); prefixes received chat, shown by func_00210940
+    char strMyName[0x10];            // 0x488 (name ours, after MyStats) [R] func_0014EBD8 (strcpy) / func_0015C5B8
+                                     //       (D_00534FB8); [U] this player's name (from the lobby session +0x80,
+                                     //       func_00259098); prefixes our own chat lines (ovstatetrophy func_00210BD8)
+    char strOpponentName[0x10];      // 0x498 (name ours, after OpponentStats) [R] func_0014EBB8 / func_0015C5A8
+                                     //       (D_00534FC8); [U] the opponent's name (lobby session +0x98); prefixes
+                                     //       received chat (cOVState_onUpdate_HandleIncomingChat), shown by
+                                     //       func_00210940
     unsigned char oppCharacterAttributes[7]; // 0x4A8 [O] (On Tour 0x326); [R] setOpponentAttributes cBENetworkInterface_setOpponentAttributes
                                      //       copies 7 bytes, getOpponentAttributes cBENetworkInterface_getOpponentAttributes, getOverallOpponentLevel
                                      //       cBENetworkInterface_getOverallOpponentLevel sums them / 35 (D_00534FD8)
@@ -109,8 +111,8 @@ CHECK_OFFSET(tBENetworkDB, MyCharacterID, 0x328);
 CHECK_OFFSET(tBENetworkDB, OpponentCharacterID, 0x32C);
 CHECK_OFFSET(tBENetworkDB, MyStats, 0x330);
 CHECK_OFFSET(tBENetworkDB, OpponentStats, 0x3DC);
-CHECK_OFFSET(tBENetworkDB, unk_488, 0x488);
-CHECK_OFFSET(tBENetworkDB, unk_498, 0x498);
+CHECK_OFFSET(tBENetworkDB, strMyName, 0x488);
+CHECK_OFFSET(tBENetworkDB, strOpponentName, 0x498);
 CHECK_OFFSET(tBENetworkDB, oppCharacterAttributes, 0x4A8);
 CHECK_OFFSET(tBENetworkDB, unk_4AF, 0x4AF);
 CHECK_SIZE(tBENetworkDB, 0x4B0);

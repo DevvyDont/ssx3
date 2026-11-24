@@ -21,9 +21,12 @@ INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_cRiderSphereTree__FP16
 #ifdef SKIP_ASM
 inline void* operator new[](unsigned int, void* p) { return p; }
 
-struct sRiderSphere_329910 {
-    float pos[4];
-    sRiderSphere_329910() {}
+// tSphereList with On Tour's (implicit) default constructor, which ours lacks: [O] On Tour's tSphereList lists one (its
+// t4Vector has an empty constructor); [R] the constructors keep the dead array-constructor loop over sphList (li 0x13,
+// li -1), which only a non-POD element type produces. Not in the header: cWorldRider embeds a cRiderSphereTree, and
+// handplantcontrol's local cWorldRider would then get a constructor of its own.
+struct tSphereListInit : tSphereList {
+    tSphereListInit() {}
 };
 
 /**
@@ -33,7 +36,7 @@ struct sRiderSphere_329910 {
  */
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
 {
-    new ((char*)&self->listLen) sRiderSphere_329910[20];
+    new (self->sphList) tSphereListInit[20];
     self->boundBone = -1;
     self->sphMask = 0xFFFFFFFF;
     return self;
@@ -55,10 +58,10 @@ extern "C" void* cRiderSphereTree_operatorE_v(void* self) __asm__("cRiderSphereT
  * @return @p self
  */
 // NOTE: the array's offset is unconstrained by the target: the empty-ctor loop is deleted
-// (vec_mark), leaving only the dead `li 0x13; li -1` pair. 0x30 = sSphereNode children[].
+// (vec_mark), leaving only the dead `li 0x13; li -1` pair.
 extern "C" void* cRiderSphereTree_cRiderSphereTree1(cRiderSphereTree* self)
 {
-    new (self->sphList) sRiderSphere_329910[20];
+    new (self->sphList) tSphereListInit[20];
     cRiderSphereTree_operatorE_v(self);
     return ((void*)self);
 }
@@ -173,27 +176,11 @@ extern "C" cRiderSphereTree* cRiderSphereTree_operatorE(cRiderSphereTree* self, 
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Update);
 #ifdef SKIP_ASM
 
-struct sSphereChild {
-    t4Vector pos;
-    float radius;
-    int pad[3];
-};
-
-struct sSphereTreeNode {
-    char pad_0x00[0x10];
-    t4Vector center; // 0x10
-    float radius;       // 0x20
-    int pad_0x24;
-    int pad_0x28;
-    int count;          // 0x2C
-    sSphereChild children[1]; // 0x30
-};
-
 /**
  * Sets a rider sphere tree's spheres and bounding sphere from explicit centres and radii.
  *
- * Stores @p n as the count (+0x2C), copies each centre and radius into the sphere list (+0x30, 0x20 bytes each) and
- * sets the bounding sphere (+0x10, +0x20). Bones are not touched. Called by cWipeoutMotion_updateBoardSphereTree.
+ * Stores @p n as listLen, copies each centre and radius into sphList and sets the bounding sphere (boundCen,
+ * boundRad). Bones are not touched. Called by cWipeoutMotion_updateBoardSphereTree.
  *
  * @param node  the rider sphere tree (this)
  * @param n  number of spheres (On Tour numSphere)
@@ -202,43 +189,37 @@ struct sSphereTreeNode {
  * @param center  the bounding sphere's centre (On Tour boundCenter)
  * @param radius  its radius (On Tour boundRadius)
  */
-extern "C" void cRiderSphereTree_Update(sSphereTreeNode* node, int n, t4Vector* pos, float* radii,
+extern "C" void cRiderSphereTree_Update(cRiderSphereTree* node, int n, t4Vector* pos, float* radii,
                               t4Vector* center, float radius)
 {
-    node->count = n;
-    for (int i = 0; i < node->count; i++) {
-        node->children[i].pos = pos[i];
-        node->children[i].radius = radii[i];
+    node->listLen = n;
+    for (int i = 0; i < node->listLen; i++) {
+        node->sphList[i].cen = pos[i];
+        node->sphList[i].rad = radii[i];
     }
-    node->center = *center;
-    node->radius = radius;
+    node->boundCen = *center;
+    node->boundRad = radius;
 }
 #endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Update1);
 #ifdef SKIP_ASM
-struct sSphereSrc_9AE0 {
-    t4Vector pos;
-    int pad[4];
-};
-
 /**
  * Moves a rider sphere tree's spheres to the current positions of their bones.
  *
- * Each listed sphere's centre becomes the position of its bone (+0x14 in the 0x20-byte entry) in the pose array (+0x0,
- * 0x20 bytes per bone, position first), and the bounding centre (+0x10) that of the bound bone (+0x24). The sphere mask
+ * Each listed sphere's centre becomes the position (P) of its bone in the pose array (bonePoses), and the bounding
+ * centre that of the bound bone (boundBone). The sphere mask
  * is ignored. Called by cRider_updateCollideInfo.
  *
  * @param riderTree  the rider sphere tree (this)
  */
-extern "C" void cRiderSphereTree_Update1(sSphereTreeNode* riderTree)
+extern "C" void cRiderSphereTree_Update1(cRiderSphereTree* riderTree)
 {
-    sSphereSrc_9AE0** table = (sSphereSrc_9AE0**)riderTree;
-    for (int i = 0; i < riderTree->count; i++) {
-        riderTree->children[i].pos = (*table)[riderTree->children[i].pad[0]].pos;
+    for (int i = 0; i < riderTree->listLen; i++) {
+        riderTree->sphList[i].cen = riderTree->bonePoses[riderTree->sphList[i].bone].P;
     }
-    riderTree->center = (*table)[riderTree->pad_0x24].pos;
+    riderTree->boundCen = riderTree->bonePoses[riderTree->boundBone].P;
 }
 #endif
 
@@ -268,12 +249,12 @@ static inline void sphereVecAdd(t4Vector* dst, t4Vector* v)
  * @param node  the rider sphere tree (this)
  * @param offset  the offset to add (On Tour offset)
  */
-// self->center += *v, then every child's pos += *v
-extern "C" void cRiderSphereTree_ApplyOffset(sSphereTreeNode* node, t4Vector* offset)
+// boundCen += *offset, then every sphere's cen += *offset
+extern "C" void cRiderSphereTree_ApplyOffset(cRiderSphereTree* node, t4Vector* offset)
 {
-    sphereVecAdd(&node->center, offset);
-    for (int i = 0; i < node->count; i++) {
-        sphereVecAdd(&node->children[i].pos, offset);
+    sphereVecAdd(&node->boundCen, offset);
+    for (int i = 0; i < node->listLen; i++) {
+        sphereVecAdd(&node->sphList[i].cen, offset);
     }
 }
 #endif
@@ -306,13 +287,15 @@ static inline t4Vector mtxMulVec_9B90(t4Vector* m, t4Vector* v)
     return r;
 }
 
-struct sScale_9B90 {
+// (s, s, s, 1): the uniform scale as a vector.
+struct tUniformScale {
     float x, y, z, w;
-    sScale_9B90(float s) { x = s; y = s; z = s; w = 1.0f; }
+    tUniformScale(float s) { x = s; y = s; z = s; w = 1.0f; }
 };
 
-struct sProd_9B90 : t4Vector {
-    sProd_9B90(const t4Vector& a, const sScale_9B90& b)
+// The component-wise product a * b.
+struct tScaledVector : t4Vector {
+    tScaledVector(const t4Vector& a, const tUniformScale& b)
     {
         x = a.x * b.x;
         y = a.y * b.y;
@@ -321,9 +304,6 @@ struct sProd_9B90 : t4Vector {
     }
 };
 
-// PORT: callers declare the matrix as sSphereMtx*.
-extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, t4Vector* m, float scale) __asm__("cRiderSphereTree_ApplyTransform");
-
 /**
  * Moves a sphere tree node and its child spheres by a matrix, then scales their positions and radii.
  *
@@ -331,14 +311,14 @@ extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, t4Vecto
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  uniform scale applied after the transform
  */
-extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* node, t4Vector* mat, float scale)
+extern "C" void cRiderSphereTree_ApplyTransform(cRiderSphereTree* node, t4Matrix* mat, float scale)
 {
-    sScale_9B90 sc(scale);
-    node->center = sProd_9B90(mtxMulVec_9B90(mat, &node->center), sc);
-    node->radius = node->radius * scale;
-    for (int i = 0; i < node->count; i++) {
-        node->children[i].pos = sProd_9B90(mtxMulVec_9B90(mat, &node->children[i].pos), sc);
-        node->children[i].radius = node->children[i].radius * scale;
+    tUniformScale sc(scale);
+    node->boundCen = tScaledVector(mtxMulVec_9B90(mat->row, &node->boundCen), sc);
+    node->boundRad = node->boundRad * scale;
+    for (int i = 0; i < node->listLen; i++) {
+        node->sphList[i].cen = tScaledVector(mtxMulVec_9B90(mat->row, &node->sphList[i].cen), sc);
+        node->sphList[i].rad = node->sphList[i].rad * scale;
     }
 }
 #endif
@@ -350,35 +330,35 @@ INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_GetBoundBox);
 /**
  * Computes the bounding box of all of a rider sphere tree's spheres.
  *
- * Starts the box at the bounding centre (+0x10) and grows it by every listed sphere's centre +/- radius, ignoring the
- * sphere mask (cRiderSphereTree_GetMaskBoundBox honours it). Nothing calls it.
+ * Starts the box at the bounding centre (boundCen) and grows it by every listed sphere's centre +/- radius, ignoring
+ * the sphere mask (cRiderSphereTree_GetMaskBoundBox honours it). Nothing calls it.
  *
  * @param box  receives the box: min at +0x0, max at +0x10 (On Tour bb)
  */
 // Bounding box of all child spheres, seeded with the node's own center.
-extern "C" void cRiderSphereTree_GetBoundBox(sSphereTreeNode* self, tBoundBox* box)
+extern "C" void cRiderSphereTree_GetBoundBox(cRiderSphereTree* self, tBoundBox* box)
 {
-    box->MinPoint = box->MaxPoint = self->center;
-    for (int i = 0; i < self->count; i++) {
-        sSphereChild* child = &self->children[i];
-        float childRadius = child->radius;
+    box->MinPoint = box->MaxPoint = self->boundCen;
+    for (int i = 0; i < self->listLen; i++) {
+        tSphereList* child = &self->sphList[i];
+        float childRadius = child->rad;
         float bound;
-        bound = child->pos.x - childRadius;
+        bound = child->cen.x - childRadius;
         if (bound < box->MinPoint.x)
             box->MinPoint.x = bound;
-        bound = child->pos.y - childRadius;
+        bound = child->cen.y - childRadius;
         if (bound < box->MinPoint.y)
             box->MinPoint.y = bound;
-        bound = child->pos.z - childRadius;
+        bound = child->cen.z - childRadius;
         if (bound < box->MinPoint.z)
             box->MinPoint.z = bound;
-        bound = child->pos.x + childRadius;
+        bound = child->cen.x + childRadius;
         if (box->MaxPoint.x < bound)
             box->MaxPoint.x = bound;
-        bound = child->pos.y + childRadius;
+        bound = child->cen.y + childRadius;
         if (box->MaxPoint.y < bound)
             box->MaxPoint.y = bound;
-        bound = child->pos.z + childRadius;
+        bound = child->cen.z + childRadius;
         if (box->MaxPoint.z < bound)
             box->MaxPoint.z = bound;
     }
@@ -485,21 +465,6 @@ extern "C" void cRiderSphereTree_GetMaskBoundBox(cRiderSphereTree* tree, t4Vecto
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_IsRiderCollision);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sElem_9F98 {
-    t4Vector pos;    // 0x00
-    float r;            // 0x10
-    char pad_0x14[0xC];
-};
-
-struct sNode_9F98 {
-    char pad_0x00[0x10];
-    t4Vector pos;    // 0x10
-    float r;            // 0x20
-    char pad_0x24[0x8];
-    int count;          // 0x2C
-    sElem_9F98 e[1];    // 0x30
-};
-
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline t4Vector Sub_9F98(const t4Vector& a, const t4Vector& b)
 {
@@ -597,35 +562,36 @@ static inline float Sqrt_9F98(float v)
  * @param outB  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int cRiderSphereTree_IsRiderCollision(sNode_9F98* nodeA, sNode_9F98* nodeB, t4Vector* outA, t4Vector* outB)
+extern "C" int cRiderSphereTree_IsRiderCollision(cRiderSphereTree* nodeA, cRiderSphereTree* nodeB, t4Vector* outA,
+    t4Vector* outB)
 {
     t4Vector delta;
     float sum;
     float ss;
     float dd;
-    sum = nodeB->r + nodeA->r;
-    delta = Sub_9F98(nodeB->pos, nodeA->pos);
+    sum = nodeB->boundRad + nodeA->boundRad;
+    delta = Sub_9F98(nodeB->boundCen, nodeA->boundCen);
     ss = sum * sum;
     dd = Dot_9F98(delta, delta);
     if (ss < dd)
         return 0;
-    for (int i = 0; i < nodeA->count; i++) {
-        sum = nodeB->r + nodeA->e[i].r;
-        delta = Sub_9F98(nodeB->pos, nodeA->e[i].pos);
+    for (int i = 0; i < nodeA->listLen; i++) {
+        sum = nodeB->boundRad + nodeA->sphList[i].rad;
+        delta = Sub_9F98(nodeB->boundCen, nodeA->sphList[i].cen);
         ss = sum * sum;
         dd = Dot_9F98(delta, delta);
         if (ss < dd)
             continue;
-        for (int j = 0; j < nodeB->count; j++) {
-            sum = nodeB->e[j].r + nodeA->e[i].r;
-            delta = Sub_9F98(nodeB->e[j].pos, nodeA->e[i].pos);
+        for (int j = 0; j < nodeB->listLen; j++) {
+            sum = nodeB->sphList[j].rad + nodeA->sphList[i].rad;
+            delta = Sub_9F98(nodeB->sphList[j].cen, nodeA->sphList[i].cen);
             ss = sum * sum;
             dd = Dot_9F98(delta, delta);
             if (!(ss < dd)) {
                 t4Vector n = Normalize_9F98(delta);
                 float overlap = sum - Sqrt_9F98(dd);
                 *outA = Scale_9F98(n, overlap);
-                *outB = Sub_9F98(nodeA->e[i].pos, Scale_9F98(n, nodeA->e[i].r - overlap));
+                *outB = Sub_9F98(nodeA->sphList[i].cen, Scale_9F98(n, nodeA->sphList[i].rad - overlap));
                 return 1;
             }
         }
@@ -1745,21 +1711,21 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, tPolyModelMe
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_SphereTree);
 #ifdef SKIP_ASM
-// Eight-entry member array with an empty constructor (only the dead loop setup remains).
-struct sTreeSlot_32C508 {
-    int v;
-    sTreeSlot_32C508() {}
+// t4Vector with On Tour's empty default constructor (ours has none): constructing axis[8] leaves only the dead loop
+// setup (li 7, li -1), which only a non-POD element type produces.
+struct tConstructedVector : t4Vector {
+    tConstructedVector() {}
 };
 extern "C" void SphereTree_init(SphereTree* self);
 
 /**
- * Constructs an empty sphere tree: no tree info (+0x98) and default axes (SphereTree_init).
+ * Constructs an empty sphere tree: no treeInfo and default axes (SphereTree_init).
  *
  * @return @p self
  */
 extern "C" void* SphereTree_SphereTree(SphereTree* self)
 {
-    new (((void*)self)) sTreeSlot_32C508[8];
+    new (self->axis) tConstructedVector[8];
     self->treeInfo = 0;
     SphereTree_init(self);
     return ((void*)self);
@@ -1938,13 +1904,14 @@ static inline t4Vector scale_C648(const t4Vector& v, float s)
     return r;
 }
 
-struct sVec3_C648 {
-    float x, y, z;
-    sVec3_C648(float a, float b, float c) { x = a; y = b; z = c; }
+// t3Vector with On Tour's (x, y, z) constructor.
+struct tVector3Init : t3Vector {
+    tVector3Init(float a, float b, float c) { x = a; y = b; z = c; }
 };
 
-struct sVec4_C648 : t4Vector {
-    sVec4_C648(const sVec3_C648& v, const float& ww) { x = v.x; y = v.y; z = v.z; w = ww; }
+// t4Vector with On Tour's t4Vector(const t3vect& a, float iw) constructor.
+struct tVector4FromVector3 : t4Vector {
+    tVector4FromVector3(const t3Vector& v, const float& ww) { x = v.x; y = v.y; z = v.z; w = ww; }
 };
 
 extern t4Vector gSphTreeAlignAxis[8];
@@ -1952,22 +1919,23 @@ extern t4Vector gSphTreeAlignAxis[8];
 /**
  * Places the sphere tree with an absolute transform and scale.
  *
- * Transforms each of the four scaled default axes (gSphTreeAlignAxis) by @p transMat, storing it and its negative, sets the
- * centre (+0x80) to the tree info's scaled centre transformed by @p transMat, and the scale (+0x90) to @p scale.
+ * Transforms each of the four scaled default axes (gSphTreeAlignAxis) by @p transMat, storing it and its negative,
+ * sets transCenter to the tree info's scaled rootCenter transformed by @p transMat, and the scale to @p scale.
  *
  * @param transMat      the transform (On Tour transMat)
  * @param scale  the scale
  */
 extern "C" void SphereTree_TransformAbs(SphereTree* self, t4Vector* transMat, float scale)
 {
-    t4Vector* pos = (t4Vector*)self;
-    t4Vector* neg = (t4Vector*)(&self->axis[7]);
+    t4Vector* pos = self->axis;
+    t4Vector* neg = &self->axis[7];
     for (int i = 0; i < 4; i++) {
         pos[i] = mtxMulVec_C648(transMat, scale_C648(gSphTreeAlignAxis[i], scale));
         neg[-i] = scale_C648(pos[i], -1.0f);
     }
-    float* n = (float*)self->treeInfo;
-    *(t4Vector*)&self->transCenter = mtxMulVec_C648(transMat, sVec4_C648(sVec3_C648(n[5] * scale, n[6] * scale, n[7] * scale), 1.0f));
+    tSphTreeInfo* info = self->treeInfo;
+    self->transCenter = mtxMulVec_C648(transMat, tVector4FromVector3(tVector3Init(info->rootCenter[0] * scale,
+        info->rootCenter[1] * scale, info->rootCenter[2] * scale), 1.0f));
     self->scale = scale;
 }
 #endif
@@ -2680,22 +2648,6 @@ extern "C" int SphereTree_isSphereInsideTri(SphereTree* self, t4Vector* corner1,
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_checkTriCollision);
 #ifdef SKIP_ASM
-struct sSphereLevel_D470 {
-    float radius;   // 0x0
-    float offset;   // 0x4
-    int stride;     // 0x8
-};
-
-struct sSphereTreeInfo_D470 {
-    char pad_0x00[0xC];
-    int depth;                      // 0x0C
-    char pad_0x10[0x10];
-    sSphereLevel_D470* levels;      // 0x20
-    char pad_0x24[4];
-    unsigned char* masks;           // 0x28
-};
-
-
 // PORT: PS2-only VU0 inline asm (v * s).
 static inline t4Vector Scale_D470(const t4Vector& v, float s)
 {
@@ -2845,7 +2797,7 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, t4Vector* point1, t4
 {
     SphereTree* self = (SphereTree*)selfp;
     float planeDist = Dot_D470(*uNorm, Sub_D470(*pos, *point1));
-    float levelRadius = ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth].radius * self->scale;
+    float levelRadius = self->treeInfo->levels[depth].radius * self->scale;
     if (depth == 0 && planeDist < 0.0f) {
         return;
     }
@@ -2853,8 +2805,8 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, t4Vector* point1, t4
         return;
     }
     int leaf = 0;
-    unsigned char mask = ((sSphereTreeInfo_D470*)self->treeInfo)->masks[base];
-    if (!(depth < ((sSphereTreeInfo_D470*)self->treeInfo)->depth && depth < 3 && mask != 0)) {
+    unsigned char mask = self->treeInfo->bitTree[base];
+    if (!(depth < self->treeInfo->depth && depth < 3 && mask != 0)) {
         leaf = 1;
     }
     t4Vector planePoint = Sub_D470(*pos, Scale_D470(*uNorm, planeDist));
@@ -2887,12 +2839,13 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, t4Vector* point1, t4
         }
     }
     if (!leaf) {
-        float offset = ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth + 1].offset;
+        float offset = self->treeInfo->levels[depth + 1].cenOffset;
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
                 t4Vector childPos = Add_D470(*pos, Scale_D470(self->axis[k], offset));
-                SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1, (k + 1) * ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth].stride + base, outA, outB);
+                SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1,
+                    (k + 1) * self->treeInfo->levels[depth].indexOffset + base, outA, outB);
             }
         }
         return;
@@ -3030,11 +2983,11 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_initCache);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_SphereTreeCache[];
 extern void** SphereTree_buffers;
-extern void* SphereTree_bufID;
+extern int* SphereTree_bufID;
 extern int SphereTree_bufNum;
 extern int SphereTree_bufPtr;
 extern void** SphereTree_bigBuffers;
-extern void* SphereTree_bigBufID;
+extern int* SphereTree_bigBufID;
 extern int SphereTree_bigBufNum;
 extern int SphereTree_bigBufPtr;
 extern int SphereTree_bigBufDepth;
@@ -3083,11 +3036,11 @@ extern "C" void SphereTree_initCache(int nSmall, int smallDepth, int nBig, int t
     }
     for (i = 0; i < nSmall; i++) {
         SphereTree_buffers[i] = new (str_SphereTreeCache, 0, 0) char[smallSize];
-        ((int*)SphereTree_bufID)[i] = -1;
+        SphereTree_bufID[i] = -1;
     }
     for (i = 0; i < nBig; i++) {
         SphereTree_bigBuffers[i] = new (str_SphereTreeCache, 0, 0) char[bigSize];
-        ((int*)SphereTree_bigBufID)[i] = -1;
+        SphereTree_bigBufID[i] = -1;
     }
     SphereTree_bufNum = nSmall;
     SphereTree_bigBufNum = nBig;
@@ -3101,10 +3054,10 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_purgeCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 extern void** SphereTree_buffers;
-extern void* SphereTree_bufID;
+extern int* SphereTree_bufID;
 extern int SphereTree_bufNum;
 extern void** SphereTree_bigBuffers;
-extern void* SphereTree_bigBufID;
+extern int* SphereTree_bigBufID;
 extern int SphereTree_bigBufNum;
 
 /**
@@ -3152,31 +3105,22 @@ extern "C" void SphereTree_purgeCache(void)
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_AllocBuf);
 #ifdef SKIP_ASM
 extern void** SphereTree_buffers;
-extern void* SphereTree_bufID;
+extern int* SphereTree_bufID;
 extern int SphereTree_bufNum;
 extern int SphereTree_bufPtr;
 extern void** SphereTree_bigBuffers;
-extern void* SphereTree_bigBufID;
+extern int* SphereTree_bigBufID;
 extern int SphereTree_bigBufNum;
 extern int SphereTree_bigBufPtr;
 extern int SphereTree_bigBufDepth;
 extern "C" void* sphTreeUnRLE(void* dst, void* src);
 
-struct sSphereData_DF28 {
-    int key;        // 0x00
-    int slot;       // 0x04
-    int pad_0x08;
-    int size;       // 0x0C
-    char pad_0x10[0x14];
-    void* packed;   // 0x24
-};
-
 /**
  * Returns the unpacked bit tree for a sphere tree, decompressing it into a cache slot when it is not cached.
  *
- * Trees whose depth (+0xC) is below SphereTree_bigBufDepth use the small cache (SphereTree_buffers, SphereTree_bufID),
- * deeper ones the big one (SphereTree_bigBuffers, SphereTree_bigBufID). Checks the slot remembered in lastBufID (+0x4),
- * then searches the cache for treeID (+0x0); on a miss unpacks cmpTree (+0x24) with sphTreeUnRLE into the next slot
+ * Trees whose depth is below SphereTree_bigBufDepth use the small cache (SphereTree_buffers, SphereTree_bufID),
+ * deeper ones the big one (SphereTree_bigBuffers, SphereTree_bigBufID). Checks the slot remembered in lastBufID,
+ * then searches the cache for treeID; on a miss unpacks cmpTree with sphTreeUnRLE into the next slot
  * (round robin through bufPtr / bigBufPtr), records the id and remembers the slot.
  *
  * @param selfp  the tree info (On Tour tSphTreeInfo)
@@ -3185,37 +3129,37 @@ struct sSphereData_DF28 {
 // PORT: returns the cached buffer pointer as int (the unit declares it int-returning).
 extern "C" int SphereTree_AllocBuf(tSphTreeInfo* selfp)
 {
-    sSphereData_DF28* self = (sSphereData_DF28*)selfp;
-    int key = self->key;
-    int* pslot = &self->slot;
-    if (self->size < SphereTree_bigBufDepth) {
-        if (((int*)SphereTree_bufID)[*pslot] == key) {
+    tSphTreeInfo* self = selfp;
+    int key = self->treeID;
+    int* pslot = &self->lastBufID;
+    if (self->depth < SphereTree_bigBufDepth) {
+        if (SphereTree_bufID[*pslot] == key) {
             return (int)SphereTree_buffers[*pslot];
         }
         for (int i = 0; i < SphereTree_bufNum; i++) {
-            if (((int*)SphereTree_bufID)[i] == key) {
+            if (SphereTree_bufID[i] == key) {
                 *pslot = i;
                 return (int)SphereTree_buffers[i];
             }
         }
-        sphTreeUnRLE(SphereTree_buffers[SphereTree_bufPtr], self->packed);
-        ((int*)SphereTree_bufID)[SphereTree_bufPtr] = key;
+        sphTreeUnRLE(SphereTree_buffers[SphereTree_bufPtr], self->cmpTree);
+        SphereTree_bufID[SphereTree_bufPtr] = key;
         *pslot = SphereTree_bufPtr;
         SphereTree_bufPtr++;
         SphereTree_bufPtr %= SphereTree_bufNum;
         return (int)SphereTree_buffers[*pslot];
     } else {
-        if (((int*)SphereTree_bigBufID)[*pslot] == key) {
+        if (SphereTree_bigBufID[*pslot] == key) {
             return (int)SphereTree_bigBuffers[*pslot];
         }
         for (int i = 0; i < SphereTree_bigBufNum; i++) {
-            if (((int*)SphereTree_bigBufID)[i] == key) {
+            if (SphereTree_bigBufID[i] == key) {
                 *pslot = i;
                 return (int)SphereTree_bigBuffers[i];
             }
         }
-        sphTreeUnRLE(SphereTree_bigBuffers[SphereTree_bigBufPtr], self->packed);
-        ((int*)SphereTree_bigBufID)[SphereTree_bigBufPtr] = key;
+        sphTreeUnRLE(SphereTree_bigBuffers[SphereTree_bigBufPtr], self->cmpTree);
+        SphereTree_bigBufID[SphereTree_bigBufPtr] = key;
         *pslot = SphereTree_bigBufPtr;
         SphereTree_bigBufPtr++;
         SphereTree_bigBufPtr %= SphereTree_bigBufNum;
@@ -3525,18 +3469,8 @@ extern "C" int cWorldLine_IsTriInt(cWorldLine* self, t4Vector* vertA, t4Vector* 
 INCLUDE_ASM("intersect/riderspheretree", cWorldLine_Is2SidedTriInt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sVE_E5E8 {
-    short delta;
-    short pad;
-    int (*fn)(void* self, void* a, void* b, void* c, t4Vector* v, void* d, void* e, void* f);
-};
-
-struct sCapsuleV_E5E8 {
-    char pad_0x00[0x50];
-    sVE_E5E8* vt; // 0x50
-    char pad_0x54[0x1C];
-    t4Vector dir; // 0x70
-};
+// cWorldLine_vtbl slot 4 (IsTriInt).
+typedef sVEntry<int(void*, t4Vector*, t4Vector*, t4Vector*, t4Vector*, t4Vector*, t4Vector*, void*)> tIsTriIntSlot;
 
 /**
  * Intersects the line with a two-sided triangle: the one-sided test with the normal flipped to face the line.
@@ -3554,16 +3488,16 @@ struct sCapsuleV_E5E8 {
  */
 extern "C" int cWorldLine_Is2SidedTriInt(cWorldLine* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, t4Vector* normal, t4Vector* ipos, t4Vector* inorm, void* hitParam)
 {
-    float dp = vu0Dot_E4D0(*(t4Vector*)&self->dp, *normal);
-    sVE_E5E8* vt;
+    float dp = vu0Dot_E4D0(self->dp, *normal);
+    tIsTriIntSlot* vt;
     if (dp < 0.0f) {
-        vt = (sVE_E5E8*)self->mVtbl;
-        char* target = (char*)self + vt[4].delta;
+        vt = (tIsTriIntSlot*)self->mVtbl;
+        void* target = vthis(self, vt[4]);
         t4Vector n = vu0Scale_E4D0(*normal, -1.0f);
         return vt[4].fn(target, vertA, vertB, vertC, &n, ipos, inorm, hitParam);
     }
-    vt = (sVE_E5E8*)self->mVtbl;
-    return vt[4].fn((char*)self + vt[4].delta, vertA, vertB, vertC, normal, ipos, inorm, hitParam);
+    vt = (tIsTriIntSlot*)self->mVtbl;
+    return vt[4].fn(vthis(self, vt[4]), vertA, vertB, vertC, normal, ipos, inorm, hitParam);
 }
 #endif
 
@@ -4108,13 +4042,13 @@ extern "C" int cWorldRider_IsInBoxTransformed(cWorldRider* self, t4Vector* mn, t
 {
     t4Vector rv;
     int inside = 0;
-    float rad = ((sSphereTreeNode*)self->st)->radius;
+    float rad = self->st->boundRad;
     rv.x = rad;
     rv.y = rad;
     rv.z = rad;
     rv.w = 0;
-    t4Vector lo = sphereVecSub(&((sSphereTreeNode*)self->st)->center, &rv);
-    t4Vector hi = sphereVecAddR(&((sSphereTreeNode*)self->st)->center, &rv);
+    t4Vector lo = sphereVecSub(&self->st->boundCen, &rv);
+    t4Vector hi = sphereVecAddR(&self->st->boundCen, &rv);
     if (mx->x >= lo.x && mn->x <= hi.x && mx->y >= lo.y && mn->y <= hi.y &&
         lo.z <= mx->z && mn->z <= hi.z) {
         inside = 1;
@@ -4127,9 +4061,8 @@ extern "C" int cWorldRider_IsInBoxTransformed(cWorldRider* self, t4Vector* mn, t
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_Transform);
 #ifdef SKIP_ASM
 struct sSphereNode_9A28;
-struct sSphereMtx;
 extern "C" cRiderSphereTree* cRiderSphereTree_operatorE(cRiderSphereTree* self, cRiderSphereTree* src);
-extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* m, float scale);
+extern "C" void cRiderSphereTree_ApplyTransform(cRiderSphereTree* s, t4Matrix* m, float scale);
 
 /**
  * Transforms the rider's sphere tree into a model's space using its own copy.
@@ -4141,11 +4074,11 @@ extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* 
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  the uniform scale
  */
-extern "C" void cWorldRider_Transform(cWorldRider* self, sSphereMtx* mat, float scale)
+extern "C" void cWorldRider_Transform(cWorldRider* self, t4Matrix* mat, float scale)
 {
-    sSphereTreeNode* node = (sSphereTreeNode*)(&self->localTree);
-    cRiderSphereTree_operatorE((cRiderSphereTree*)node, self->st);
-    self->st = (cRiderSphereTree*)node;
+    cRiderSphereTree* node = &self->localTree;
+    cRiderSphereTree_operatorE(node, self->st);
+    self->st = node;
     cRiderSphereTree_ApplyTransform(node, mat, scale);
     self->isTransformed = 1;
 }

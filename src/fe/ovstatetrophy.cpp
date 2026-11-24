@@ -1629,12 +1629,13 @@ extern sRect_210940 D_004C8D08;
 /**
  * Builds the in-race private-message screen ("282ReadPrivateMessage") of the online chat overlay (overlay id 40).
  *
- * Shows "TextFromX" with the opponent's name (cBENetworkInterface_networkOpt.unk_498, as an ASCII string). "AgreementSlider" becomes a vertical
- * scroll bar (mAttr bit 0) with "ChatUpArrow", "ChatDownArrow" and "slideroutline2" as its mpUpArrow, mpDownArrow and
- * mpHideOnEmpty and meHideState 2. The chat scroller "textScrollChat" gets bit 0 of mAttrTextScroll and input map 1
- * (cUITextScroll_setInputMap), is shown, gets the wrap bit (mAttr 0x80), the colour (1, 0, 0, 0) through its virtual
- * slot 11, mSelectedColour D_004C8D08 and the scroll bar as mpScrollBar. Ends with cOVState_onCreateScreen; returns
- * early when the screen cannot be added. "AgreementSlider" is used without a null check.
+ * Shows "TextFromX" with the opponent's name (cBENetworkInterface_networkOpt.strOpponentName, as an ASCII string).
+ * "AgreementSlider" becomes a vertical scroll bar (mAttr bit 0) with "ChatUpArrow", "ChatDownArrow" and
+ * "slideroutline2" as its mpUpArrow, mpDownArrow and mpHideOnEmpty and meHideState 2. The chat scroller
+ * "textScrollChat" gets bit 0 of mAttrTextScroll and input map 1 (cUITextScroll_setInputMap), is shown, gets the wrap
+ * bit (mAttr 0x80), the colour (1, 0, 0, 0) through its virtual slot 11, mSelectedColour D_004C8D08 and the scroll bar
+ * as mpScrollBar. Ends with cOVState_onCreateScreen; returns early when the screen cannot be added. "AgreementSlider"
+ * is used without a null check.
  */
 extern "C" void func_00210940(cOVState* self)
 {
@@ -1649,7 +1650,7 @@ extern "C" void func_00210940(cOVState* self)
     {
         fromText->setVisible(1);
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        cUIText_setAsciiString((cUIText*)fromText, cBENetworkInterface_networkOpt.unk_498);
+        cUIText_setAsciiString((cUIText*)fromText, cBENetworkInterface_networkOpt.strOpponentName);
     }
     cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider_b));
     scrollBar->mAttr |= 1;
@@ -1730,9 +1731,10 @@ extern char str_colon_sp_b[];
  * Appends a chat line "<name>: <text>" to the chat overlay's scroller.
  *
  * Finds "textScrollChat" and does nothing without it. It saves the scroller's mLineSize, mSelectedIndex and
- * mLinesOffset, builds the line in a cBXString from our name (cBENetworkInterface_networkOpt.unk_488) when @p ownMessage is set or the opponent's
- * (cBENetworkInterface_networkOpt.unk_498) otherwise, ": " (str_colon_sp_b) and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8
- * trims the scroller to 30 lines and restores its scroll state from the saved values.
+ * mLinesOffset, builds the line in a cBXString from our name (cBENetworkInterface_networkOpt.strMyName) when @p
+ * ownMessage is set or the opponent's (cBENetworkInterface_networkOpt.strOpponentName) otherwise, ": " (str_colon_sp_b)
+ * and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8 trims the scroller to 30 lines and
+ * restores its scroll state from the saved values.
  *
  * @param name  the message text
  * @param ownMessage  nonzero for our own message, 0 for the opponent's
@@ -1749,14 +1751,14 @@ extern "C" void func_00210BD8(cOVState* self, char* name, int ownMessage)
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (ownMessage != 0) {
         cBXString lineText;
-        cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.unk_488);
+        cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.strMyName);
         cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
         cUITextScroll_addAsciiString(obj, lineText.Str);
         cBXString__cBXString(&lineText, 2);
     } else {
         cBXString lineText;
-        cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.unk_498);
+        cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.strOpponentName);
         cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
         cUITextScroll_addAsciiString(obj, lineText.Str);

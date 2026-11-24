@@ -40,6 +40,13 @@ struct tSubAnim {
     int IsActive;           // 0x14 [O] bool; [R] the ctor clears it for all 3; [U] setSubAnim sets 1,
                             //      resetSubAnim 0
     int Type;               // 0x18 [O] eSequenceType; [U] setSubAnimType stores it; setSubAnim 0
+#ifdef __cplusplus
+    // [O] On Tour's tSubAnim lists a default constructor (its AnimID is a tAnimID, whose empty constructor is
+    // user-declared); [R] cAnimSequence_cAnimSequence and cAnimSequencer_readFromReplayFrame's `new cAnimSequence`
+    // still run the dead array-constructor loop over SubAnims (li 2, li -1), which only a non-POD element type
+    // produces.
+    tSubAnim() {}
+#endif
 };
 
 CHECK_OFFSET(tSubAnim, AnimID, 0x00);

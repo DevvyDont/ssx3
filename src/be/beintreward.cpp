@@ -1161,32 +1161,25 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Returns whether peak 1 or 2 is still locked for a character.
  *
- * Reads the 64-bit flags word at +0x278 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character *
- * 0xF88): bit 12 for peak 1, bit 13 for peak 2. Every other peak is never locked (0). cBERewardInterface_awardUserPeakPass clears these bits.
+ * Reads the character record's (cBELibrary_profileLib[profileIndex][characterId]) peak flags: bPeak2Locked for peak 1,
+ * bPeak3Locked for peak 2. Every other peak is never locked (0). cBERewardInterface_awardUserPeakPass clears these
+ * bits.
  *
  * @param profileIndex  profile index (On Tour iProfileIndex)
  * @param characterId  character ID (On Tour iCharacterID)
  * @param peak  the peak (On Tour peakID)
  * @return 1 when locked, else 0
  */
-// PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
+// PORT: the peak flags share a 64-bit unit with locLastHub (ld at +0x278).
 extern "C" int cBERewardInterface_isPeakLocked1(cBERewardInterface* self, int profileIndex, int characterId, int peak)
 {
     if (peak == 1)
     {
-        int bOff = characterId * 3976;
-        int aOff = profileIndex * 39760;
-        int off = bOff + aOff;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return (int)(*(ulong*)(charRecord + 0x278) >> 12) & 1;
+        return cBELibrary_profileLib[profileIndex][characterId].bPeak2Locked;
     }
     if (peak == 2)
     {
-        int bOff = characterId * 3976;
-        int aOff = profileIndex * 39760;
-        int off = bOff + aOff;
-        char* charRecord = (char*)cBELibrary_profileLib + off;
-        return (int)(*(ulong*)(charRecord + 0x278) >> 13) & 1;
+        return cBELibrary_profileLib[profileIndex][characterId].bPeak3Locked;
     }
     return 0;
 }
@@ -1482,11 +1475,12 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
 /**
  * Gives the character poster @p bit, charging its price when @p give is set.
  *
- * Marks the bit at +0xF30 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
- * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the short at +0xC of the poster's 16-byte record (table at +0x14 of
- * cBERewardInterface_getDB()), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
+ * Marks the bit in the character record's mRewards.bPosters (cBELibrary_profileLib[profileIndex][characterId])
+ * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the poster's mCost (cBERewardInterface_getDB()
+ * ->mpPosters[bit]), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
  * interface, cBE_getInterface kind 11). When the character then owns every poster (owned count equal to the database
- * count) it also gets cheat character 20 (cBERewardInterface_buyCheatChar, unpaid). Ends with cBEEconInterface_getMoney().
+ * count) it also gets cheat character 20 (cBERewardInterface_buyCheatChar, unpaid). Ends with
+ * cBEEconInterface_getMoney().
  *
  * @param profileIndex  profile index (On Tour iProfileIndex)
  * @param characterId  character ID (On Tour iCharacterID)
@@ -1500,8 +1494,8 @@ extern "C" void cBERewardInterface_buyPoster(cBERewardInterface* self, int profi
     cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bPosters);
     if (give)
     {
-        char* defs = (char*)cBERewardInterface_getDB_noargs()->mpPosters;
-        int amount = ((tPosterInfo*)(defs + (bit << 4)))->mCost;
+        tPosterInfo* poster = &cBERewardInterface_getDB_noargs()->mpPosters[bit];
+        int amount = poster->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -1533,11 +1527,12 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
 /**
  * Gives the character trading card @p bit, charging its price when @p give is set.
  *
- * Marks the bit at +0xF36 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
- * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the short at +0xC of the trading card's 16-byte record (table at
- * +0x18 of cBERewardInterface_getDB()), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
- * interface, cBE_getInterface kind 11). When the character then owns every trading card (owned count equal to the
- * database count) it also gets cheat character 17 (cBERewardInterface_buyCheatChar, unpaid). Ends with cBEEconInterface_getMoney().
+ * Marks the bit in the character record's mRewards.bTradingCards (cBELibrary_profileLib[profileIndex][characterId])
+ * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the trading card's mCost
+ * (cBERewardInterface_getDB()->mpTradingCards[bit]), times 10 when positive, off the character's money
+ * (cBEEconInterface_reduceMoney on the economy interface, cBE_getInterface kind 11). When the character then owns every
+ * trading card (owned count equal to the database count) it also gets cheat character 17
+ * (cBERewardInterface_buyCheatChar, unpaid). Ends with cBEEconInterface_getMoney().
  *
  * @param profileIndex  profile index (On Tour iProfileIndex)
  * @param characterId  character ID (On Tour iCharacterID)
@@ -1551,8 +1546,8 @@ extern "C" void cBERewardInterface_buyTradingCard(cBERewardInterface* self, int 
     cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bTradingCards);
     if (give)
     {
-        char* defs = (char*)cBERewardInterface_getDB_noargs()->mpTradingCards;
-        int amount = ((tTradingCardInfo*)(defs + (bit << 4)))->mCost;
+        tTradingCardInfo* card = &cBERewardInterface_getDB_noargs()->mpTradingCards[bit];
+        int amount = card->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -1584,11 +1579,12 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
 /**
  * Gives the character concept art @p bit, charging its price when @p give is set.
  *
- * Marks the bit at +0xF45 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
- * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the short at +0xC of the concept art's 16-byte record (table at +0x1C
- * of cBERewardInterface_getDB()), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
- * interface, cBE_getInterface kind 11). When the character then owns every concept art (owned count equal to the
- * database count) it also gets cheat character 22 (cBERewardInterface_buyCheatChar, unpaid). Ends with cBEEconInterface_getMoney().
+ * Marks the bit in the character record's mRewards.bConceptArts (cBELibrary_profileLib[profileIndex][characterId])
+ * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the concept art's mCost
+ * (cBERewardInterface_getDB()->mpConceptArts[bit]), times 10 when positive, off the character's money
+ * (cBEEconInterface_reduceMoney on the economy interface, cBE_getInterface kind 11). When the character then owns every
+ * concept art (owned count equal to the database count) it also gets cheat character 22
+ * (cBERewardInterface_buyCheatChar, unpaid). Ends with cBEEconInterface_getMoney().
  *
  * @param profileIndex  profile index (On Tour iProfileIndex)
  * @param characterId  character ID (On Tour iCharacterID)
@@ -1602,8 +1598,8 @@ extern "C" void cBERewardInterface_buyConceptArt(cBERewardInterface* self, int p
     cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bConceptArts);
     if (give)
     {
-        char* defs = (char*)cBERewardInterface_getDB_noargs()->mpConceptArts;
-        int amount = ((tConceptArtInfo*)(defs + (bit << 4)))->mCost;
+        tConceptArtInfo* art = &cBERewardInterface_getDB_noargs()->mpConceptArts[bit];
+        int amount = art->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -1635,11 +1631,12 @@ cBERewardDB* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB
 /**
  * Gives the character toy @p bit, charging its price when @p give is set.
  *
- * Marks the bit at +0xF53 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
- * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the short at +0xC of the toy's 16-byte record (table at +0x20 of
- * cBERewardInterface_getDB()), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
+ * Marks the bit in the character record's mRewards.bToys (cBELibrary_profileLib[profileIndex][characterId])
+ * (cBERewardInterface_markRewardOwned). With @p give, takes the price, the toy's mCost (cBERewardInterface_getDB()
+ * ->mpToys[bit]), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
  * interface, cBE_getInterface kind 11). When the character then owns every toy (owned count equal to the database
- * count) it also gets cheat character 19 (cBERewardInterface_buyCheatChar, unpaid). Ends with cBEEconInterface_getMoney().
+ * count) it also gets cheat character 19 (cBERewardInterface_buyCheatChar, unpaid). Ends with
+ * cBEEconInterface_getMoney().
  *
  * @param profileIndex  profile index (On Tour iProfileIndex)
  * @param characterId  character ID (On Tour iCharacterID)
@@ -1653,8 +1650,8 @@ extern "C" void cBERewardInterface_buyToy(cBERewardInterface* self, int profileI
     cBERewardInterface_markRewardOwned(self, bit, charRecord->mRewards.bToys);
     if (give)
     {
-        char* defs = (char*)cBERewardInterface_getDB_noargs()->mpToys;
-        int amount = ((tToyInfo*)(defs + (bit << 4)))->mCost;
+        tToyInfo* toy = &cBERewardInterface_getDB_noargs()->mpToys[bit];
+        int amount = toy->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -1682,9 +1679,9 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 /**
  * Gives the character video @p idx, charging its price when @p award is set.
  *
- * Marks the bit at +0xF52 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
- * (cBERewardInterface_markRewardOwned). With @p award, takes the price, the short at +0xC of the video's 16-byte record (table at +0x24 of
- * cBERewardInterface_getDB()), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
+ * Marks the bit in the character record's mRewards.bVideos (cBELibrary_profileLib[profile][characterId])
+ * (cBERewardInterface_markRewardOwned). With @p award, takes the price, the video's mCost (cBERewardInterface_getDB()
+ * ->mpVideos[idx]), times 10 when positive, off the character's money (cBEEconInterface_reduceMoney on the economy
  * interface). Ends with cBEEconInterface_getMoney(). Unlike the poster, card, art and toy versions it unlocks nothing
  * for a complete set.
  *
@@ -1700,7 +1697,8 @@ extern "C" void cBERewardInterface_buyVideo(cBERewardInterface* self, int profil
     cBERewardInterface_markRewardOwned(self, idx, charRecord->mRewards.bVideos);
     if (award)
     {
-        int amount = ((tVideoInfo*)((char*)cBERewardInterface_getDB_noargs()->mpVideos + (idx << 4)))->mCost;
+        tVideoInfo* video = &cBERewardInterface_getDB_noargs()->mpVideos[idx];
+        int amount = video->mCost;
         if (amount > 0)
             amount *= 10;
         cBEEconInterface_reduceMoney(econ, profile, characterId, amount);
@@ -1762,11 +1760,11 @@ extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount
 /**
  * Gives the character cheat character @p idx, charging its price when @p award is set.
  *
- * Marks bit (@p idx - 10) of the bits at +0xF57 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
- * character * 0xF88) (cBERewardInterface_markRewardOwned). With @p award, takes the price, the short at +0xC of the 16-byte record (idx -
- * 10) in the table at +0x28 of cBERewardInterface_getDB(), times 10 when positive, off the character's money
- * (cBEEconInterface_reduceMoney). Ends with cBEEconInterface_getMoney(). The buy functions call it with ids 17, 19, 20 and 22 for
- * completed sets; the cheat codes and cBERewardInterface_awardUser call it too.
+ * Marks bit (@p idx - 10) of the character record's mRewards.bCheatChars (cBELibrary_profileLib[profile][characterId])
+ * (cBERewardInterface_markRewardOwned). With @p award, takes the price, the mCost of record (idx - 10) in
+ * cBERewardInterface_getDB()->mpCheatChars, times 10 when positive, off the character's money
+ * (cBEEconInterface_reduceMoney). Ends with cBEEconInterface_getMoney(). The buy functions call it with ids 17, 19, 20
+ * and 22 for completed sets; the cheat codes and cBERewardInterface_awardUser call it too.
  *
  * @param profile  profile index (On Tour iProfileIndex)
  * @param characterId  character ID (On Tour iCharacterID)
@@ -1781,7 +1779,8 @@ extern "C" void cBERewardInterface_buyCheatChar(cBERewardInterface* self, int pr
     cBERewardInterface_markRewardOwned(self, idx, charRecord->mRewards.bCheatChars);
     if (award)
     {
-        int amount = ((tCheatCharInfo*)((char*)cBERewardInterface_getDB_noargs()->mpCheatChars + (idx << 4)))->mCost;
+        tCheatCharInfo* cheatChar = &cBERewardInterface_getDB_noargs()->mpCheatChars[idx];
+        int amount = cheatChar->mCost;
         if (amount > 0)
             amount *= 10;
         cBEEconInterface_reduceMoney(econ, profile, characterId, amount);
@@ -2006,7 +2005,8 @@ int cBERewardInterface_getEarningsTarget(void* self, int peakID)
 }
 #endif
 
-void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
+// The record of location a, event b (cBECharProfileDB.mScoreStats), or null (be/bedbprofile).
+tBETrackScore* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 //100%
@@ -2037,7 +2037,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
 #ifdef SKIP_ASM
 
 /**
- * Returns a character's medal for one event: byte 1 of its score record.
+ * Returns a character's medal for one event: the BestMedal of its score record.
  *
  * The record comes from cBECharProfileDB_getScoreStats() with @p location and @p eventID.
  *
@@ -2049,11 +2049,12 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
  */
 signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int iCharacterID, int eventID, int location)
 {
-    void* result = cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[iProfileIndex][iCharacterID], location, eventID);
+    tBETrackScore* result =
+        cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[iProfileIndex][iCharacterID], location, eventID);
     if (result == 0) {
         return -1;
     }
-    return ((signed char*)result)[1];
+    return result->BestMedal;
 }
 #endif
 
@@ -2061,7 +2062,7 @@ signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int 
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackHighScore);
 #ifdef SKIP_ASM
 /**
- * Returns a character's best result for one event: the word at +0x4 of its score record.
+ * Returns a character's best result for one event: the uiHighScore of its score record.
  *
  * The record comes from cBECharProfileDB_getScoreStats() with @p locationId and @p event, as in
  * cBERewardInterface_getTrackMedal (which reads the medal byte of the same record). The trophy room shows it as the
@@ -2075,11 +2076,12 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackHighScore);
  */
 extern "C" int cBERewardInterface_getTrackHighScore(cBERewardInterface* self, int profileIndex, int characterId, int event, int locationId)
 {
-    void* result = cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[profileIndex][characterId], locationId, event);
+    tBETrackScore* result =
+        cBECharProfileDB_getScoreStats(&cBELibrary_profileLib[profileIndex][characterId], locationId, event);
     if (result == 0) {
         return 0;
     }
-    return ((int*)result)[1];
+    return result->uiHighScore;
 }
 #endif
 
@@ -2388,26 +2390,18 @@ extern "C" void *cBERewardInterface_getAwardedCash(void) {
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserPeakPass);
 #ifdef SKIP_ASM
-struct sReward_0015A628;
-extern "C" void cBEUserAwards_setAward(sReward_0015A628* self, int row, int col, int value);
+extern "C" void cBEUserAwards_setAward(cBEUserAwards* self, int row, int col, int value);
 extern void* cBELibrary_userAwards[];
 extern cBECharProfileDB cBELibrary_profileLib[][10];
-
-// PORT: 64-bit `long` flags word (ld/sd).
-struct sCharRec_158F60 {
-    char pad0[0x278];
-    long flags;     // 0x278
-    char pad280[0xF88 - 0x280];
-};
 
 /**
  * Unlocks peak 1 (mode 1) or peaks 2 and 1 (mode 2) for the character and logs each newly unlocked peak as a peak-pass
  * award.
  *
- * Mode 2 clears bit 13 of the 64-bit flags at +0x278 of the character record (cBELibrary_profileLib + profile * 0x9B50
- * + character * 0xF88) when set and logs it with cBEUserAwards_setAward(cBELibrary_userAwards, @p row, 2, character * 3 + 2); it
- * then falls through to mode 1, which does the same for bit 12 with character * 3 + 1. Mode 0 does nothing. Bits 12 and
- * 13 are the locks cBERewardInterface_isPeakLocked1 tests. cBERewardInterface_awardUser calls it for peak 0's trophy categories (mode 1)
+ * Mode 2 clears bPeak3Locked of the character record (cBELibrary_profileLib[profile][characterId]) when set and logs
+ * it with cBEUserAwards_setAward(cBELibrary_userAwards, @p row, 2, character * 3 + 2); it then falls through to mode 1,
+ * which does the same for bPeak2Locked with character * 3 + 1. Mode 0 does nothing. These are the locks
+ * cBERewardInterface_isPeakLocked1 tests. cBERewardInterface_awardUser calls it for peak 0's trophy categories (mode 1)
  * and peak 1's (mode 2).
  *
  * @param profile  profile index (On Tour iProfileIndex)
@@ -2417,21 +2411,21 @@ struct sCharRec_158F60 {
  */
 extern "C" void cBERewardInterface_awardUserPeakPass(cBERewardInterface* self, int profile, int characterId, int row, int mode)
 {
-    sReward_0015A628* awards = (sReward_0015A628*)cBELibrary_userAwards;
+    cBEUserAwards* awards = (cBEUserAwards*)cBELibrary_userAwards;
     switch (mode)
     {
     case 0:
         break;
     case 2:
-        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags >> 13) & 1)
+        if (cBELibrary_profileLib[profile][characterId].bPeak3Locked)
         {
-            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags &= ~0x2000L;
+            cBELibrary_profileLib[profile][characterId].bPeak3Locked = 0;
             cBEUserAwards_setAward(awards, row, 2, characterId * 3 + 2);
         }
     case 1:
-        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags >> 12) & 1)
+        if (cBELibrary_profileLib[profile][characterId].bPeak2Locked)
         {
-            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags &= ~0x1000L;
+            cBELibrary_profileLib[profile][characterId].bPeak2Locked = 0;
             cBEUserAwards_setAward(awards, row, 2, characterId * 3 + 1);
         }
         break;
@@ -2967,7 +2961,7 @@ extern sSlots2_00159CD0 D_004A1268[];
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profile, int iCharacterID, int bit)
 {
     cBECharProfileDB* rec = &cBELibrary_profileLib[profile][iCharacterID];
-    sReward_0015A628* rewardLog = (sReward_0015A628*)cBELibrary_userAwards;
+    cBEUserAwards* rewardLog = (cBEUserAwards*)cBELibrary_userAwards;
     sSlots4_00159CD0 slots4 = D_0045AA28;
     sSlots2_00159CD0 slots2 = D_004A1268[0];
     int item = -1;
@@ -3360,35 +3354,19 @@ extern "C" int cBEUserAwards_isBitSet(cBEUserAwards* self, int bit, unsigned cha
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", cBEUserAwards_setAward);
 #ifdef SKIP_ASM
-struct sRewardRow_0015A628
-{
-    unsigned char counts[8]; // 0x0
-    unsigned char value;     // 0x8
-    unsigned char flag;      // 0x9
-};
-
-struct sReward_0015A628
-{
-    char pad_0x000[0x4];
-    short mValue;                    // 0x4
-    sRewardRow_0015A628 mRows[0x1D]; // 0x6
-    char pad_0x128[0x174 - 0x128];
-    unsigned char* mBits[10];        // 0x174
-};
-
 /**
  * Records one reward in the user-awards log under an award category.
  *
- * Columns 0-7 (reward types) set bit @p value in the type's bits (mBits[col] at +0x174, cBEUserAwards_setBit) and count it in
- * row @p row's counts (+0x6 + row * 10). Column 8 stores @p value as the row's byte 8 (a cheat character's id); column
- * 9 sets the row's byte 9 to 1 and the short at +0x4 (On Tour iCharBoltID) to @p value (an item id).
+ * Columns 0-7 (reward types) set bit @p value in the type's bits (mpAwardBits[col], cBEUserAwards_setBit) and count it
+ * in iNumAwards[row][col]. Column 8 stores @p value as iNumAwards[row][8] (a cheat character's id); column 9 sets
+ * iNumAwards[row][9] to 1 and iCharBoltID to @p value (an item id).
  * cBERewardInterface_awardUser and cBERewardInterface_awardUserPeakPass call it on cBELibrary_userAwards.
  *
  * @param row  the award category (On Tour awardCategory)
  * @param col  the reward type (On Tour rewardType)
  * @param value  the reward index or id (On Tour index)
  */
-extern "C" void cBEUserAwards_setAward(sReward_0015A628* self, int row, int col, int value)
+extern "C" void cBEUserAwards_setAward(cBEUserAwards* self, int row, int col, int value)
 {
     switch (col)
     {
@@ -3400,15 +3378,15 @@ extern "C" void cBEUserAwards_setAward(sReward_0015A628* self, int row, int col,
     case 5:
     case 6:
     case 7:
-        cBEUserAwards_setBit((cBEUserAwards*)self, value, self->mBits[col]);
-        self->mRows[row].counts[col]++;
+        cBEUserAwards_setBit(self, value, self->mpAwardBits[col]);
+        self->mAwards.iNumAwards[row][col]++;
         break;
     case 8:
-        self->mRows[row].value = value;
+        self->mAwards.iNumAwards[row][8] = value;
         break;
     case 9:
-        self->mRows[row].flag = 1;
-        self->mValue = value;
+        self->mAwards.iNumAwards[row][9] = 1;
+        self->mAwards.iCharBoltID = value;
         break;
     }
 }
@@ -3417,33 +3395,27 @@ extern "C" void cBEUserAwards_setAward(sReward_0015A628* self, int row, int col,
 //100%
 INCLUDE_ASM("be/beintreward", cBEUserAwards_getTotalNumAwards);
 #ifdef SKIP_ASM
-struct sRewardGrid_0015A6F0
-{
-    char pad_0x00[0x6];
-    signed char vals[32][10]; // 0x6 (cBEUserAwards_getNumAwards reads vals[a1][a2])
-};
-
 // PORT: the unit declares cBEUserAwards_getTotalNumAwards as returning void* (line ~378, used by
 // cBERewardInterface_getTotalNumUserAwards); the body returns an int sum, so it is bound by asm label.
 // The lander should change that declaration to int instead.
-int cBEUserAwards_getTotalNumAwards_impl(sRewardGrid_0015A6F0* self) __asm__("cBEUserAwards_getTotalNumAwards");
+int cBEUserAwards_getTotalNumAwards_impl(cBEUserAwards* self) __asm__("cBEUserAwards_getTotalNumAwards");
 
 /**
  * Counts all awards recorded in a user-awards table.
  *
- * Sums the 32 x 10 signed bytes starting at +0x6. The C definition is cBEUserAwards_getTotalNumAwards (bound to the symbol by asm
- * label) because the unit declares cBEUserAwards_getTotalNumAwards as returning void *.
+ * Sums the 32 x 10 signed bytes of iNumAwards. The C definition is cBEUserAwards_getTotalNumAwards (bound to the symbol
+ * by asm label) because the unit declares cBEUserAwards_getTotalNumAwards as returning void *.
  *
  * @return the total award count
  */
-int cBEUserAwards_getTotalNumAwards_impl(sRewardGrid_0015A6F0* self)
+int cBEUserAwards_getTotalNumAwards_impl(cBEUserAwards* self)
 {
     int sum = 0;
     for (int i = 0; i < 32; i++)
     {
         for (int j = 0; j < 10; j++)
         {
-            sum += self->vals[i][j];
+            sum += self->mAwards.iNumAwards[i][j];
         }
     }
     return sum;
@@ -3454,8 +3426,8 @@ int cBEUserAwards_getTotalNumAwards_impl(sRewardGrid_0015A6F0* self)
 INCLUDE_ASM("be/beintreward", cBEUserAwards_getNumAwards);
 #ifdef SKIP_ASM
 /**
- * Returns one count of the user-awards log: the signed byte for award category @p row and reward type @p column (+0x6 +
- * row * 10 + column).
+ * Returns one count of the user-awards log: iNumAwards[@p row][@p column], the signed byte for award category
+ * @p row and reward type @p column.
  *
  * @param row  the award category (On Tour awardCategory)
  * @param column  the reward type (On Tour rewardType)
@@ -3463,7 +3435,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getNumAwards);
  */
 extern "C" signed char cBEUserAwards_getNumAwards(cBEUserAwards* self, int row, int column)
 {
-    return *(signed char*)((char*)self + (row * 0xa + column) + 0x6);
+    return self->mAwards.iNumAwards[row][column];
 }
 #endif
 

@@ -116,6 +116,22 @@ CHECK_OFFSET(tTriggerTypePointer, m_TriggerType, 0x0);
 CHECK_OFFSET(tTriggerTypePointer, m_pTriggerTypeStruct, 0x4);
 CHECK_SIZE(tTriggerTypePointer, 0x8);
 
+// The head of the trigger file data/config/watrig.adl as FILE_loadpack loads it (m_pcTriggerInfoFile; names ours).
+// [U] cWorldTriggerManager_LoadTriggerInfo (its only reader): rejects the file unless the first byte is 0 (lb), takes
+// the trigger count from +0x8 (m_iNumTriggers = count + 2) and walks the variable-length trigger records from +0xC
+// (each starts with its type: 1 = 6 words, 2 = 14, 3 = 12, 4 = 4), pointing m_aTriggerInfo[2..] at them.
+struct tTriggerInfoFileHeader {
+    signed char mFormatFlag;            // 0x0 [U] LoadTriggerInfo returns 0 (no triggers indexed) unless it is 0
+    char unk_1[0x7];                    // 0x1 no retail access seen
+    int mNumTriggers;                   // 0x8 [U] the record count (m_iNumTriggers - 2)
+    int mRecords[1];                    // 0xC [U] the first trigger record (variable length; see above)
+};
+
+CHECK_OFFSET(tTriggerInfoFileHeader, mFormatFlag, 0x0);
+CHECK_OFFSET(tTriggerInfoFileHeader, unk_1, 0x1);
+CHECK_OFFSET(tTriggerInfoFileHeader, mNumTriggers, 0x8);
+CHECK_OFFSET(tTriggerInfoFileHeader, mRecords, 0xC);
+
 struct cWorldTriggerManager {
     cWorldTriggerInstance* m_aWorldTriggerInstances; // 0x000 [O]; [R] new[40] 0x70-byte instances
                                                      //       ("m_aWorldTriggerInstances", count word at -0x10); [U] the

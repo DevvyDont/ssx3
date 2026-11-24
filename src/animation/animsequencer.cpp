@@ -238,10 +238,10 @@ extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim)
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimTime);
 #ifdef SKIP_ASM
 /**
- * Sets the current time of sub-animation slot @p index and sets the flag at +0xC4.
+ * Sets the current time of sub-animation slot @p index and sets CheckTriggersAtCurrentFrame.
  *
- * The slots are 0x1C bytes from +0x4 (see cAnimSequence_setSubAnim); the time is at +0x4 of the slot. The +0xC4 flag
- * is also set by cAnimSequence_setSubAnim when it activates a slot. cAnimSequencer_playAndHold and playAndLoop use it
+ * Stores SubAnims[@p index].Time. CheckTriggersAtCurrentFrame is also set by cAnimSequence_setSubAnim when it activates
+ * a slot. cAnimSequencer_playAndHold and playAndLoop use it
  * for the start time; riders use it to jump to a frame.
  *
  * @param index  the sub-animation slot
@@ -249,8 +249,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimTime);
  */
 extern "C" void cAnimSequence_setSubAnimTime(cAnimSequence* self, int index, float val)
 {
-    char* slot = (char*)self + index * 0x1c;
-    *(float*)(slot + 0x8) = val;
+    self->SubAnims[index].Time = val;
     self->CheckTriggersAtCurrentFrame = 1;
 }
 #endif
@@ -279,16 +278,15 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimWeight);
 /**
  * Sets the blend weight of sub-animation slot @p index.
  *
- * Stores @p val at +0x10 of the 0x1C-byte slot (+0x14 + index * 0x1C); cAnimSequence_getNetWeight multiplies it into the slot's net
- * weight. seg_1218 cross-fades two slots with it (w and 1 - w).
+ * Stores @p val in SubAnims[@p index].Weight; cAnimSequence_getNetWeight multiplies it into the slot's net weight.
+ * seg_1218 cross-fades two slots with it (w and 1 - w).
  *
  * @param index  the sub-animation slot
  * @param val  the weight, normally 0-1
  */
 extern "C" void cAnimSequence_setSubAnimWeight(cAnimSequence* self, int index, float val)
 {
-    char* slot = (char*)self + index * 0x1c;
-    *(float*)(slot + 0x14) = val;
+    self->SubAnims[index].Weight = val;
 }
 #endif
 
@@ -298,16 +296,14 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimType);
 /**
  * Sets the play type of sub-animation slot @p index: 0 plays once and holds the last frame, 1 loops.
  *
- * Stores @p val at +0x18 of the 0x1C-byte slot (+0x1C + index * 0x1C). cAnimSequencer_playAndHold passes 0 and
- * cAnimSequencer_playAndLoop 1.
+ * Stores @p val in SubAnims[@p index].Type. cAnimSequencer_playAndHold passes 0 and cAnimSequencer_playAndLoop 1.
  *
  * @param index  the sub-animation slot
  * @param val  the play type (0 hold, 1 loop)
  */
 extern "C" void cAnimSequence_setSubAnimType(cAnimSequence* self, int index, int val)
 {
-    char* slot = (char*)self + index * 0x1c;
-    *(int*)(slot + 0x1c) = val;
+    self->SubAnims[index].Type = val;
 }
 #endif
 
@@ -331,50 +327,30 @@ extern "C" void cAnimSequence_resetSubAnim(cAnimSequence* sequence, int index) {
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_getNetWeight);
 #ifdef SKIP_ASM
-struct sSeqTrack_00313D70
-{
-    char pad0[0x8];
-    float time;   // 0x8
-    char pad1[0x4];
-    float end;    // 0x10
-    float weight; // 0x14
-    int flag;     // 0x18
-};
-
-struct sSeq_00313D70
-{
-    sSeqTrack_00313D70 tracks[5]; // 0x0
-    char pad0[0x8];
-    float scale;   // 0x94
-    char pad1[0xC];
-    float fadeOut; // 0xA4
-    float fadeIn;  // 0xA8
-};
-
 /**
  * Returns the effective blend weight of sub-animation slot @p i, with the sequence's start and end fades applied.
  *
- * The weight is the sequence's weight (+0x94) times the slot's weight (+0x10 of the slot). While the slot's time is
- * below the start fade time (+0xA8) it is limited to time / start fade; while the time left (the slot's length at +0xC
- * minus its time) is below the end fade time (+0xA4) it is limited to time left / end fade.
+ * The weight is the sequence's CurrentWeight times the slot's Weight. While the slot's Time is below StartFadeTime it
+ * is limited to time / start fade; while the time left (the slot's TotalTime minus its Time) is below EndFadeTime it
+ * is limited to time left / end fade.
  *
  * @param i  the sub-animation slot
  * @return the net weight
  */
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
-extern "C" float cAnimSequence_getNetWeight(sSeq_00313D70* self, int i)
+extern "C" float cAnimSequence_getNetWeight(cAnimSequence* self, int i)
 {
-    float time = self->tracks[i].time;
-    float w = self->scale * self->tracks[i].weight;
-    float end = self->tracks[i].end;
-    if (time < self->fadeIn)
+    float time = self->SubAnims[i].Time;
+    float w = self->CurrentWeight * self->SubAnims[i].Weight;
+    float end = self->SubAnims[i].TotalTime;
+    if (time < self->StartFadeTime)
     {
-        w = (time / self->fadeIn) <? w;
+        w = (time / self->StartFadeTime) <? w;
     }
     float rem = end - time;
-    if (rem < self->fadeOut)
+    if (rem < self->EndFadeTime)
     {
-        w = (rem / self->fadeOut) <? w;
+        w = (rem / self->EndFadeTime) <? w;
     }
     return w;
 }
@@ -400,10 +376,10 @@ class cAsStream;
 /**
  * Writes an animation sequence to @p stream: its fields, then the number of triggers and each trigger.
  *
- * Each write goes through the stream's first virtual (vtable slot 1: data, size). Fields written: +0x0 (id, 4),
- * +0x4 (the three sub-animation slots, 84), +0x60 (0x20), +0x80, +0x84, +0x88 (8), +0x90 .. +0xA8 (4 each), +0xB0
- * (0x10), +0xC0 and +0xC4. Then the count of the trigger list at +0xAC and each 16-byte trigger node, next pointer
- * included. cAnimSequence_readFromReplayFrame reads the same format back.
+ * Each write goes through the stream's first virtual (vtable slot 1: data, size). Fields written: SequenceID, the
+ * three SubAnims (84), OrientationOffset (0x20), IsFlipped, Priority, Mask (8), TimeScale .. StartFadeTime (4 each),
+ * Events (0x10), EndEvent and CheckTriggersAtCurrentFrame. Then the count of the Triggers list and each 16-byte
+ * tTrigger, Next pointer included. cAnimSequence_readFromReplayFrame reads the same format back.
  *
  * @param node  the sequence to write
  * @param stream  the output stream
@@ -429,17 +405,17 @@ extern "C" void cAnimSequence_writeToReplayFrame(cAnimSequence* node, cBxReplayF
     Ser_313DD0(streamPtr, &self->EndEvent, 0x4);
     Ser_313DD0(streamPtr, &self->CheckTriggersAtCurrentFrame, 0x4);
     int n = 0;
-    char* trigger = (char*)self->Triggers;
+    tTrigger* trigger = self->Triggers;
     if (trigger != 0) {
         int count = 0;
         do {
-            trigger = *(char**)(trigger + 0xC);
+            trigger = trigger->Next;
             count++;
         } while (trigger != 0);
         n = count;
     }
     Ser_313DD0(streamPtr, &n, 4);
-    for (trigger = (char*)self->Triggers; trigger; trigger = *(char**)(trigger + 0xC)) {
+    for (trigger = self->Triggers; trigger; trigger = trigger->Next) {
         Ser_313DD0(streamPtr, trigger, 0x10);
     }
 }
@@ -632,67 +608,42 @@ extern "C" void cAnimSequencer_removeSequence(cAnimSequencer* self, cAnimSequenc
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getAnimBlendFrames);
 #ifdef SKIP_ASM
-struct sSeq_00314418;
-extern "C" float cAnimSequence_getNetWeight_314418(sSeq_00314418* self, int i) __asm__("cAnimSequence_getNetWeight");
-
-
-struct sSeqTrack_314418
-{
-    char pad0[0x4];
-    int id;         // 0x4
-    float time;     // 0x8
-    char padC[0xC];
-    int flag;       // 0x18
-};
-
-struct sSeq_00314418
-{
-    sSeqTrack_314418 tracks[3];     // 0x00
-    char pad54[0xC];
-    t4Vector a;                 // 0x60
-    t4Vector b;                 // 0x70
-    int c;                          // 0x80
-    int d;                          // 0x84
-    long e;                         // 0x88
-    char pad90[0x38];
-    sSeq_00314418* next;            // 0xC8
-};
-
+extern "C" float cAnimSequence_getNetWeight(cAnimSequence* self, int i);
 
 /**
  * Collects the weighted animation frames of all playing sequences for blending.
  *
- * For each sequence (list at +0x4) and each of its 3 sub-animations with the active flag, writes a 0x50-byte frame to
- * @p out: anim id, time, the two orientation vectors (+0x60, +0x70), +0x80, +0x84, +0x88 and the net weight from
+ * For each sequence (PlayList) and each of its 3 sub-animations with IsActive set, writes a tAnimBlendFrame to @p out:
+ * AnimID, Time, the OrientationOffset (two vectors), IsFlipped, Priority, Mask and the net weight from
  * cAnimSequence_getNetWeight. Unlike On Tour there is no bound check on @p out.
  *
  * @param out  receives the frames (On Tour tAnimBlendFrame *frames); must be large enough
  * @return the number of frames written
  */
-// PORT: `long` field is 64-bit (ld/sd).
+// PORT: Mask is 64-bit (ld/sd).
 extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, tAnimBlendFrame* out)
 {
     int count = 0;
-    sSeq_00314418* n = (sSeq_00314418*)self->PlayList;
+    cAnimSequence* n = self->PlayList;
     while (n != 0)
     {
         for (int j = 0; j < 3; j++)
         {
-            if (n->tracks[j].flag != 0)
+            if (n->SubAnims[j].IsActive != 0)
             {
                 tAnimBlendFrame* blendFrame = &out[count];
-                (*(int*)&blendFrame->SourceFrame) = n->tracks[j].id;
-                blendFrame->SourceFrame.Time = n->tracks[j].time;
-                (*(t4Vector*)&blendFrame->OrientationOffset) = n->a;
-                (*(&blendFrame->OrientationOffset.Q)) = n->b;
-                blendFrame->IsFlipped = n->c;
-                blendFrame->Priority = n->d;
-                blendFrame->Weight = cAnimSequence_getNetWeight_314418(n, j);
-                (*(long*)&blendFrame->Mask) = n->e;
+                blendFrame->SourceFrame.AnimID = n->SubAnims[j].AnimID;
+                blendFrame->SourceFrame.Time = n->SubAnims[j].Time;
+                blendFrame->OrientationOffset.P = n->OrientationOffset.P;
+                blendFrame->OrientationOffset.Q = n->OrientationOffset.Q;
+                blendFrame->IsFlipped = n->IsFlipped;
+                blendFrame->Priority = n->Priority;
+                blendFrame->Weight = cAnimSequence_getNetWeight(n, j);
+                blendFrame->Mask = n->Mask;
                 count++;
             }
         }
-        n = n->next;
+        n = n->Next;
     }
     return count;
 }
@@ -827,15 +778,15 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_fadeOutAndExpireAll);
 /**
  * Fades out every sequence of the sequencer and marks them all to expire.
  *
- * cAnimSequence_fadeOutAndExpire on each sequence of the list at +0x4.
+ * cAnimSequence_fadeOutAndExpire on each sequence of the PlayList.
  *
  * @param time  the fade-out time in seconds (On Tour time)
  */
 extern "C" void cAnimSequencer_fadeOutAndExpireAll(cAnimSequencer* self, float time)
 {
-    for (char* node = (char*)self->PlayList; node != 0; node = *(char**)(node + 0xC8))
+    for (cAnimSequence* node = self->PlayList; node != 0; node = node->Next)
     {
-        cAnimSequence_fadeOutAndExpire((cAnimSequence*)node, time);
+        cAnimSequence_fadeOutAndExpire(node, time);
     }
 }
 #endif
@@ -848,15 +799,15 @@ extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int v);
 /**
  * Removes the given end trigger from every sequence of the sequencer.
  *
- * cAnimSequence_removeEndTrigger on each sequence of the list at +0x4.
+ * cAnimSequence_removeEndTrigger on each sequence of the PlayList.
  *
  * @param trig  the end trigger's event id (On Tour trig)
  */
 extern "C" void cAnimSequencer_removeAllEndTriggers(cAnimSequencer* self, int trig)
 {
-    for (char* node = (char*)self->PlayList; node != 0; node = *(char**)(node + 0xC8))
+    for (cAnimSequence* node = self->PlayList; node != 0; node = node->Next)
     {
-        cAnimSequence_removeEndTrigger((cAnimSequence*)node, trig);
+        cAnimSequence_removeEndTrigger(node, trig);
     }
 }
 #endif
@@ -965,26 +916,13 @@ extern "C" void cAnimSequence_readFromReplayFrame(void* node, void* stream);
 extern const char str_AnimSequence[];
 
 
-struct sSeqTrack_314880
-{
-    char pad[0x1C];
-    sSeqTrack_314880() {}
-};
-
-struct sSeqNode_314880
-{
-    sSeqTrack_314880 tracks[3];
-    char pad54[0xD0 - 0x54];
-    sSeqNode_314880() {}
-};
-
 /**
  * Reads a sequencer from @p stream in the format cAnimSequencer_writeToReplayFrame writes, recreating each sequence.
  *
- * Reads the count through the stream's second virtual (vtable slot 2) and zeroes the sequencer's count (+0x0), then for
+ * Reads the count through the stream's second virtual (vtable slot 2) and zeroes the sequencer's NumPlaying, then for
  * each sequence allocates 0xD0 bytes tagged "AnimSequence" (flags 0x20000000), zero-fills them (MEM_fill), reads the
- * sequence (cAnimSequence_readFromReplayFrame) and appends it (cAnimSequencer_appendSequence). The list head (+0x4) is not cleared here: cRiderAnim_readFromReplayFrame
- * empties the sequencer with cAnimSequencer_expireAll first.
+ * sequence (cAnimSequence_readFromReplayFrame) and appends it (cAnimSequencer_appendSequence). The PlayList head is not
+ * cleared here: cRiderAnim_readFromReplayFrame empties the sequencer with cAnimSequencer_expireAll first.
  *
  * @param stream  the input stream
  */
@@ -992,13 +930,13 @@ extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, cBxRepl
 {
     int n;
     stream->read((char*)&n, 4);
-    *(int*)self = 0;
+    self->NumPlaying = 0;
     for (int i = 0; i < n; i++)
     {
-        sSeqNode_314880* node = new (str_AnimSequence, 0x20000000, 0) sSeqNode_314880;
+        cAnimSequence* node = new (str_AnimSequence, 0x20000000, 0) cAnimSequence;
         MEM_fill(node, 0, 208);
         cAnimSequence_readFromReplayFrame(node, stream);
-        cAnimSequencer_appendSequence(self, (cAnimSequence*)node);
+        cAnimSequencer_appendSequence(self, node);
     }
 }
 #endif
@@ -1140,19 +1078,23 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_linkArchive);
 // PORT: asm labels are GCC/Clang-only; the port should give callers the real signature.
 void cMdfArchive_linkArchive_impl(void* self, char* data) __asm__("cMdfArchive_linkArchive");
 /**
- * Points the wrapper at archive @p data: header (+0x4), part table (+0x8) and packed data base (+0xC).
+ * Points the wrapper at archive @p data: ArchiveHeader, ModelHeaders (the part table) and Data (the packed data base).
  *
- * The part table starts at @p data plus the short at +0x6 of the header; the data base at @p data plus the int at
- * +0x8. Called by cMdfArchive_attachArchive, cMdfArchive_attachConstArchive and cMdfArchive_loadArchive after they set the owned pointer.
+ * The part table starts at @p data plus the header's mHeaderOffset; the data base at @p data plus its mBodyOffset.
+ * Called by cMdfArchive_attachArchive, cMdfArchive_attachConstArchive and cMdfArchive_loadArchive after they set the
+ * owned pointer.
  *
  * @param data  the MDF archive header
  */
 void cMdfArchive_linkArchive_impl(void* vself, char* data)
 {
     cMdfArchive* self = (cMdfArchive*)vself;
-    self->ArchiveHeader = (tMdfArchive*)data;
-    self->ModelHeaders = (tMdfModelHeader*)(data + *(short*)(data + 0x6));
-    self->Data = data + *(int*)(data + 0x8);
+    tMdfArchive* archive = (tMdfArchive*)data;
+    self->ArchiveHeader = archive;
+    // ORIGINAL-PTR: an MDF file blob: its header holds the byte offsets of the model header table (mHeaderOffset) and
+    // the packed data (mBodyOffset) from the start of the file.
+    self->ModelHeaders = (tMdfModelHeader*)(data + archive->mHeaderOffset);
+    self->Data = data + archive->mBodyOffset;
 }
 #endif
 

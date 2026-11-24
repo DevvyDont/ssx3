@@ -159,35 +159,54 @@ CHECK_OFFSET(tRewardBits, iOwnedSongList, 0x40);
 CHECK_OFFSET(tRewardBits, iPlayList, 0x48);
 CHECK_SIZE(tRewardBits, 0x50);
 
+// One mission's saved state (On Tour struct tBEMissionFlags, 0x4: the five bits below, in this order; On Tour wraps it
+// in tBEMissionDB {uiFlags; medal bits}, which retail does not have: its records are 4 bytes). [U] beintmission's
+// isMission* / setIs* read and write bit n of cBECharProfileDB::mMissions[idx] (lw/sw 0x118 after an index-first
+// addu, the setters masking with li -1 - (1 << n)), the codegen of a bitfield member of an array element.
+struct tBEMissionFlags {
+    unsigned int bIsLocked : 1;     // bit 0 [O]; [U] isMissionLocked / setIsLocked; [R] init from
+                                    //       cBELibrary_missionInfo
+    unsigned int bIsReady : 1;      // bit 1 [O]; [U] isMissionReady / setIsReady; [R] init 1
+    unsigned int bIsAvailable : 1;  // bit 2 [O]; [U] isMissionAvailable / setIsAvailable; [R] init 0
+    unsigned int bIsCompleted : 1;  // bit 3 [O]; [U] isMissionCompleted / setIsCompleted; [R] init 0
+    unsigned int bIsShowIcon : 1;   // bit 4 [O]; [U] isMissionShowIcon / setIsShowIcon; [R] init from missionInfo
+};
+
+CHECK_SIZE(tBEMissionFlags, 0x4);
+
 struct cBECharProfileDB {
     int bFirstTimeWorldCircuit;     // 0x000 [O] (bool; a word) - first data member after On Tour's strProfileName;
                                     //       [R] init: 1
     tBEProfileCollectBits mCollectibles[23]; // 0x004 [O] mCollectibles[1][23]; [R] init clears 23; [U] beintmission's
                                     //       views (records of 12 bytes) read cTotalCollected per location
-    unsigned int mMissions[88];     // 0x118 [O] mMissions (On Tour 52 x tBEMissionDB, 8 bytes); retail: one bitfield word
-                                    //       per mission ([R] init: bit 0 = cBELibrary_missionInfo[i] +0x1A, bit 1 = 1,
-                                    //       bits 2-3 = 0, bit 4 = +0x1B); [U] beintmission's sEconFlags_001544D0
-    // [O] the 20 peak flags, in On Tour's order; [R] init clears bits 0-5 and sets bits 6-19 (ld/sd: a 64-bit unit)
-    unsigned long bPeak1RivalPtsChallengePlayed : 1;  // 0x278 bit 0
-    unsigned long bPeak2RivalPtsChallengePlayed : 1;  // bit 1
-    unsigned long bPeak3RivalPtsChallengePlayed : 1;  // bit 2
-    unsigned long bPeak1RivalTimeChallengePlayed : 1; // bit 3
-    unsigned long bPeak2RivalTimeChallengePlayed : 1; // bit 4
-    unsigned long bPeak3RivalTimeChallengePlayed : 1; // bit 5
-    unsigned long bPeak1TimeRCLocked : 1;             // bit 6
-    unsigned long bPeak2TimeRCLocked : 1;             // bit 7
-    unsigned long bPeak3TimeRCLocked : 1;             // bit 8
-    unsigned long bPeak1FreeRCLocked : 1;             // bit 9
-    unsigned long bPeak2FreeRCLocked : 1;             // bit 10
-    unsigned long bPeak3FreeRCLocked : 1;             // bit 11
-    unsigned long bPeak2Locked : 1;                   // bit 12
-    unsigned long bPeak3Locked : 1;                   // bit 13
-    unsigned long bPeak1TCLocked : 1;                 // bit 14
-    unsigned long bPeak2TCLocked : 1;                 // bit 15
-    unsigned long bPeak3TCLocked : 1;                 // bit 16
-    unsigned long bPeak1FCLocked : 1;                 // bit 17
-    unsigned long bPeak2FCLocked : 1;                 // bit 18
-    unsigned long bPeak3FCLocked : 1;                 // bit 19
+    tBEMissionFlags mMissions[88];  // 0x118 [O] mMissions (On Tour 52 x tBEMissionDB, 8 bytes); retail: one bitfield
+                                    //       word per mission ([R] init: bit 0 = cBELibrary_missionInfo[i] +0x1A,
+                                    //       bit 1 = 1, bits 2-3 = 0, bit 4 = +0x1B; beintecon's view sEconFlags_1600);
+                                    //       [U] beintmission's isMission* / setIs* (tBEMissionFlags)
+    // [O] the 20 peak flags, in On Tour's order; [R] init clears bits 0-5 and sets bits 6-19 (ld/sd: a 64-bit unit
+    // shared with locLastHub, the struct being 8-aligned). unsigned int, not unsigned long: retail's readers
+    // (cBERewardInterface_isPeakLocked1, beintplayer's) truncate to 32 bits before the mask, as an int field does
+    // ([U] ld; dsll; dsra32; andi 1), and the setters' ld/and/or/sd is the same for both types
+    unsigned int bPeak1RivalPtsChallengePlayed : 1;   // 0x278 bit 0
+    unsigned int bPeak2RivalPtsChallengePlayed : 1;   // bit 1
+    unsigned int bPeak3RivalPtsChallengePlayed : 1;   // bit 2
+    unsigned int bPeak1RivalTimeChallengePlayed : 1;  // bit 3
+    unsigned int bPeak2RivalTimeChallengePlayed : 1;  // bit 4
+    unsigned int bPeak3RivalTimeChallengePlayed : 1;  // bit 5
+    unsigned int bPeak1TimeRCLocked : 1;              // bit 6
+    unsigned int bPeak2TimeRCLocked : 1;              // bit 7
+    unsigned int bPeak3TimeRCLocked : 1;              // bit 8
+    unsigned int bPeak1FreeRCLocked : 1;              // bit 9
+    unsigned int bPeak2FreeRCLocked : 1;              // bit 10
+    unsigned int bPeak3FreeRCLocked : 1;              // bit 11
+    unsigned int bPeak2Locked : 1;                    // bit 12
+    unsigned int bPeak3Locked : 1;                    // bit 13
+    unsigned int bPeak1TCLocked : 1;                  // bit 14
+    unsigned int bPeak2TCLocked : 1;                  // bit 15
+    unsigned int bPeak3TCLocked : 1;                  // bit 16
+    unsigned int bPeak1FCLocked : 1;                  // bit 17
+    unsigned int bPeak2FCLocked : 1;                  // bit 18
+    unsigned int bPeak3FCLocked : 1;                  // bit 19
     int locLastHub;                 // 0x27C [O] eBELocationID (after the flags in both games); [R] init: 17 (sw 0x27C)
     short mDifficulty;              // 0x280 [O]; [R] init: 1; [U] cBENewPlayerInterface_getDifficultyLevel(which != 0)
     short mDifference;              // 0x282 [O]; [R] init: 0; [U] cBENewPlayerInterface_getDifficultyDifference(flag != 0)

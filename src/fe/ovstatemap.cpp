@@ -12,6 +12,7 @@
 #include "main/gamestate.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
+#include "ui/uiinput.h"
 #include "fe/ovstatemap.h"
 #include "ui/uiengine.h"
 #include "be/beintnetwork.h"
@@ -20,6 +21,11 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "ai/rider.h"
+#include "visualfx/cutscenetransitionman.h"
+#include "fe/feasyncmanager.h"
+#include "ui/uiscreen.h"
+#include "path/pathsys.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onCreateScreen);
@@ -137,19 +143,8 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainTransition);
 
 
 
-class cRiderSub_87F0 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual t4Vector* getPosition();
-};
-
-
-typedef void (*VIntFn_87F0)(void*, int);
-typedef void (*VPtrFn_87F0)(void*, void*);
-typedef void* (*VGetFn_87F0)(void*, int);
+// cUILocaleInterface_vtbl slot 4 (getStringByHash).
+typedef sVEntry<unsigned short*(void*, unsigned int)> tLocaleGetStringSlot;
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -204,8 +199,9 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             if (i < n) {
                 (selfp)->mbSessionUnlocked[i] = 1;
                 cFELocale* locale = SSXApp->FELocale;
-                sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cUILocaleInterface, locale));
-                void* str = ((VGetFn_87F0)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
+                // getStringByHash (slot 4) by hand, as in cOVState_MAP_setupPopup.
+                tLocaleGetStringSlot* vt = (tLocaleGetStringSlot*)VPTR_OF(cUILocaleInterface, locale);
+                unsigned short* str = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
                 if (str == 0) {
                     continue;
                 }
@@ -230,8 +226,8 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
         void* menu = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
         cGame* game = SSXApp->Game;
         if (((char*)game) != 0) {
-            char* rider = (char*)game->AI->Riders[0];
-            t4Vector riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->getPosition();
+            cRider* rider = game->AI->Riders[0];
+            t4Vector riderPos = *rider->getPosition();
             t3Vector riderPos3;
             riderPos3.x = riderPos.x;
             riderPos3.y = riderPos.y;
@@ -361,26 +357,22 @@ extern char str_ConfirmMenu_No_a[];
 extern char str_ConfirmMenu_Yes_na[];
 extern char str_ConfirmMenu_No_na[];
 
-struct cVec_00208C28 {
-    float x, y, z, w;
-    cVec_00208C28(float a, float b, float c, float e) { x = a; y = b; z = c; w = e; }
+// tARGB with its (A, R, G, B) constructor.
+struct tMapColour : tARGB {
+    tMapColour(float a, float r, float g, float b) { A = a; R = r; G = g; B = b; }
 };
 
-class cObjV_00208C28 {
-public:
-    int pad[2];
-    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
-    virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
-    virtual void set(const cVec_00208C28& v);
-};
+// cUIThing_vtbl slot 11 (setColour). On Tour's takes the colour by reference (const tARGB&) and the call passes a
+// temporary; the header's pointer form makes the caller build it first, so the call is by hand.
+typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
 
 /**
  * Handles the session map's widget events: pick a session, confirm or cancel, and button highlights.
  *
- * Event 5 with the popup closed opens it for the picked session (misc data into +0xD8). With it open, "No"
- * closes it; "Yes" stores the session in mission interface (10) + 0x10, sets cOVStateManager_mStatus = 3, pops the
- * pause-mode stack (cPauseState_Stack/cPauseState_StackIdx into cPauseState_Flags), calls cGame_setState(game, 0xF, 0, 0) and closes
- * the overlay (cOVState_MAP_cleanupIndicators, cOVState_MAP_setupScreenExit).
+ * Event 5 with the popup closed opens it for the picked session (misc data into mSelectedSessionPoint). With it open,
+ * "No" closes it; "Yes" stores the session in the mission interface's nextSessionID, sets cOVStateManager_mStatus = 3,
+ * pops the pause-mode stack (cPauseState_Stack/cPauseState_StackIdx into cPauseState_Flags), calls cGame_setState(game,
+ * 0xF, 0, 0) and closes the overlay (cOVState_MAP_cleanupIndicators, cOVState_MAP_setupScreenExit).
  *
  * Event 6 closes the popup, or else closes the overlay, pops the state stack and marks this state pending
  * delete with mode 7. Events 1 and 2 (highlight on/off) recolour the popup's Yes/No buttons.
@@ -403,8 +395,8 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
                 cOVState_MAP_setupPopup(selfp);
                 break;
             }
-            void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
-            *(int*)((char*)iface + 0x10) = selfp->mSelectedSessionPoint;
+            cBEMissionInterface* iface = (cBEMissionInterface*)cBE_getInterface_Fv(cBE_getBE(), 10);
+            iface->nextSessionID = selfp->mSelectedSessionPoint;
             func_0028FAE0(cAudioInterface_bxAudio());
             void* game = SSXApp->Game;
             cOVStateManager_mStatus = 3;
@@ -416,8 +408,9 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
             selfp->mSessionPopupActive = 1;
             selfp->mSelectedSessionPoint = pWidget->mMiscData;
             cOVState_MAP_setupPopup(selfp);
-            cObjV_00208C28* confirmNo = (cObjV_00208C28*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
-            confirmNo->set(cVec_00208C28(1.0f, 0.0f, 0.0f, 0.0f));
+            cUIThing* confirmNo = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
+            tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, confirmNo);
+            vt[11].fn(vthis(confirmNo, vt[11]), tMapColour(1.0f, 0.0f, 0.0f, 0.0f));
         }
         break;
     case 6:
@@ -513,8 +506,9 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPopup);
 
 
 
-typedef void (*VIntFn_9010)(void*, int);
-typedef void* (*VGetFn_9010)(void*, int);
+
+// cUILocaleInterface_vtbl slot 4 (getStringByHash).
+typedef sVEntry<unsigned short*(void*, unsigned int)> tLocaleGetStringSlot;
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -549,7 +543,7 @@ extern char str_ConfirmMenu_No[];
 extern char str_kT_CMNYes_b[];
 
 /**
- * Shows or hides the session purchase popup according to the popup flag (+0xBC).
+ * Shows or hides the session purchase popup according to mSessionPopupActive.
  *
  * When open: shows "ConfirmPopup"/"Popup1", disables the session list, enables "ConfirmMenu", sets the title
  * "<kT_MAPSessionPt>: n" for the selected point, the player's money as "$%d", a cost of $500 and
@@ -580,8 +574,10 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
             menu->setVisible(1);
         }
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry<void>* vt = ((sVEntry<void>*)VPTR_OF(cUILocaleInterface, locale));
-        void* str = ((VGetFn_9010)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
+        // getStringByHash (slot 4) by hand: the virtual call form keeps &vt[4] in a register (retail: both loads off
+        // the vptr).
+        tLocaleGetStringSlot* vt = (tLocaleGetStringSlot*)VPTR_OF(cUILocaleInterface, locale);
+        unsigned short* str = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
         if (str != 0) {
             sprintf2(text, str_pct_s_pct_d_d, str, n + 1);
             void* label = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_PopupTitle));
@@ -637,13 +633,13 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
 /**
  * Refreshes the map indicators when either of two input checks fires.
  *
- * The checks are the input's virtual slots 17 and 18 (probably up/down pressed).
+ * The checks are the input's isUp and isDown (virtual slots 17 and 18).
  *
  * @param pInput  the UI input object
  */
-extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, cUIThing* pInput)
+extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, const cUIInput* pInput)
 {
-    if (((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[17].fn(vthis(pInput, ((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[17])) != 0 || ((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[18].fn(vthis(pInput, ((sVEntry<int(void*)>*)VPTR_OF(cListNode, pInput))[18])) != 0) {
+    if (pInput->isUp() || pInput->isDown()) {
         cOVState_MAP_showIndicators(self);
     }
 }
@@ -653,60 +649,15 @@ extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, cUIThing* pInput)
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onUpdate);
 #ifdef SKIP_ASM
 
-struct sV3_9370 {
-    float x, y, z;
-    sV3_9370() {}
-    sV3_9370(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+// t3Vector with its (x, y, z) constructor (On Tour t3Vector(float, float, float)).
+struct tMapVector3 : t3Vector {
+    tMapVector3(float ax, float ay, float az) { x = ax; y = ay; z = az; }
+    tMapVector3(const float& ax, const float& ay) { x = ax; y = ay; z = 0.0f; }
 };
 
-class cFEObj_9370 {
-public:
-    int pad_0x0[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void SetVisible(int on);
-    virtual void v10();
-    virtual void SetColor(const tARGB* c);
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void SetScale(const sV3_9370& s);
-};
-
-
-struct sAsyncFile_9370 {
-    char pad_0x0[0x110];
-    int data;                   // 0x110
-    char pad_0x114[0x8];
-};
-
-struct sMap_9370 {
-    char pad_0x0[0xC4];
-    int file;                   // 0xC4
-    int loaded;                 // 0xC8
-    float fade;                 // 0xCC
-    cFEObj_9370* img;           // 0xD0
-    char pad_0xD4[0x8];
-    int busy;                   // 0xDC
-    char pad_0xE0[0x24];
-    cFEObj_9370* icons[8];      // 0x104
-    sV3_9370 iconPos[8];        // 0x124
-    char pad_0x184[0x48];
-    float bob;                  // 0x1CC
-    float bobVel;               // 0x1D0
-};
+// cUIThing_vtbl slot 21 (setSize). On Tour's takes the size by reference (const t3Vector&) and the call passes a
+// temporary; the header's pointer form makes the caller build it first (another schedule), so the call is by hand.
+typedef sVEntry<void(void*, const t3Vector&)> tSetSizeSlot;
 
 struct cFEAsyncManager;
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
@@ -716,62 +667,65 @@ extern "C" void cOVState_onUpdate(void* self);
  * Per-frame update of the mountain map overlay: fades the map picture in once it has loaded and pulses the player
  * indicators.
  *
- * Calls cOVState_onUpdate() first and stops there while +0xDC is set. Once the picture is loaded (+0xC8) its alpha
- * (+0xCC) rises by 0.1 per frame up to 1.0 and the picture object (+0xD0) is shown; until then the alpha is 0 and
- * the object hidden. When the async file manager reports file +0xC4 with status 3 and the picture is not yet
- * loaded, the file's data is attached to the picture object and it is marked loaded. The indicator size (+0x1CC)
- * swings between 18 and 21.5 at 0.16 per frame (+0x1D0); each of the 8 indicator objects (+0x104) is placed at its
- * base position (+0x124) minus half the growth, so it stays centred, and scaled to that size.
+ * Calls cOVState_onUpdate() first and stops there while mScreenExiting is set. Once the picture is loaded
+ * (mMapTextureSet) its alpha (mMapPicAlpha) rises by 0.1 per frame up to 1.0 and the picture object (mpMap) is shown;
+ * until then the alpha is 0 and the object hidden. When the async file manager reports file mFEAsyncMapFileIndex with
+ * status 3 and the picture is not yet loaded, the file's texture is attached to the picture object and it is marked
+ * loaded. mIndicatorSize swings between 18 and 21.5 at 0.16 per frame (mIndicatorSizeDiff); each of the 8 highlight
+ * icons (mpSessionHighlights) is placed at its base position (mHighlightOriginalPos) minus half the growth, so it
+ * stays centred, and sized to that size.
  */
-extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
+extern "C" void cOVState_MAP_onUpdate(cOVState_MAP* self)
 {
     cOVState_onUpdate(self);
-    if (self->busy != 0) {
+    if (self->mScreenExiting != 0) {
         return;
     }
-    if (self->loaded != 0) {
-        if (self->fade < 1.0f) {
-            self->fade += 0.10000000149011612f;
+    if (self->mMapTextureSet != 0) {
+        if (self->mMapPicAlpha < 1.0f) {
+            self->mMapPicAlpha += 0.10000000149011612f;
         }
-        cFEObj_9370* feObj = self->img;
-        tARGB colour = (*(&((cUIIcon*)feObj)->mColour));
-        colour.A = self->fade;
-        feObj->SetColor(&colour);
-        self->img->SetVisible(1);
+        cUIIcon* feObj = self->mpMap;
+        tARGB colour = feObj->mColour;
+        colour.A = self->mMapPicAlpha;
+        feObj->setColour(&colour);
+        self->mpMap->setVisible(1);
     } else {
-        self->fade = 0.0f;
-        self->img->SetVisible(0);
+        self->mMapPicAlpha = 0.0f;
+        self->mpMap->setVisible(0);
     }
-    sAsyncFile_9370* am = (sAsyncFile_9370*)SSXApp->mFEAsyncManager;
-    if (cFEAsyncManager_GetFileStatus((cFEAsyncManager*)am, self->file) == 3 && self->loaded == 0) {
-        cFEObj_9370* feObj = self->img;
+    cFEAsyncManager* am = SSXApp->mFEAsyncManager;
+    if (cFEAsyncManager_GetFileStatus(am, self->mFEAsyncMapFileIndex) == 3 && self->mMapTextureSet == 0) {
+        cUIIcon* feObj = self->mpMap;
         if (feObj != 0) {
-            int data = am[self->file].data;
-            (*(int*)&((cUIIcon*)feObj)->mpTextureElem) = 0;
-            ((cUIIcon*)feObj)->mTextureID = data;
-            self->loaded = 1;
-            self->fade = 0.0f;
+            int data = am->fileList[self->mFEAsyncMapFileIndex].texID;
+            feObj->mpTextureElem = 0;
+            feObj->mTextureID = data;
+            self->mMapTextureSet = 1;
+            self->mMapPicAlpha = 0.0f;
         }
     }
-    if (0.0f < self->bobVel) {
-        if (21.5f < self->bob) {
-            self->bobVel = -0.1599999964237213f;
+    if (0.0f < self->mIndicatorSizeDiff) {
+        if (21.5f < self->mIndicatorSize) {
+            self->mIndicatorSizeDiff = -0.1599999964237213f;
         }
-    } else if (self->bob < 18.0f) {
-        self->bobVel = 0.1599999964237213f;
+    } else if (self->mIndicatorSize < 18.0f) {
+        self->mIndicatorSizeDiff = 0.1599999964237213f;
     }
-    self->bob += self->bobVel;
+    self->mIndicatorSize += self->mIndicatorSizeDiff;
     int i;
     for (i = 0; i < 8; i++) {
-        cFEObj_9370* feObj = self->icons[i];
+        cUIIcon* feObj = self->mpSessionHighlights[i];
         if (feObj != 0) {
-            sV3_9370* bp = &self->iconPos[i];
-            float halfGrowth = (self->bob - 18.0f) * 0.5f;
-            sV3_9370 placedPos;
+            t3Vector* bp = &self->mHighlightOriginalPos[i];
+            float halfGrowth = (self->mIndicatorSize - 18.0f) * 0.5f;
+            t3Vector placedPos;
             placedPos.x = bp->x - halfGrowth;
             placedPos.y = bp->y - halfGrowth;
-            (*(sV3_9370*)&((cUIIcon*)feObj)->mPosition) = placedPos;
-            self->icons[i]->SetScale(sV3_9370(self->bob, self->bob, 0.0f));
+            feObj->mPosition = placedPos;
+            tSetSizeSlot* vt = (tSetSizeSlot*)VPTR_OF(cListNode, self->mpSessionHighlights[i]);
+            vt[21].fn(vthis(self->mpSessionHighlights[i], vt[21]),
+                tMapVector3(self->mIndicatorSize, self->mIndicatorSize, 0.0f));
         }
     }
 }
@@ -829,52 +783,6 @@ extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText*
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPlayerIndicator);
 #ifdef SKIP_ASM
-struct sV3_96A8 {
-    float x, y, z;
-    sV3_96A8() {}
-    sV3_96A8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
-    sV3_96A8(const float& ax, const float& ay) : x(ax), y(ay), z(0.0f) {}
-};
-
-
-
-class cFEObj_96A8 {
-public:
-    int pad_0x0[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void SetVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void SetScale(const sV3_96A8& s);
-};
-
-
-class cRiderSub_96A8 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual t4Vector* getPosition();
-};
-
-
 struct cList;
 struct cListNode;
 void cList_addToEnd(cList* list, cListNode* node);
@@ -909,9 +817,9 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     cOVState_MAP* self = selfp;
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sV3_96A8 mapPos = (*(sV3_96A8*)&((cUIThing*)((cFEObj_96A8*)self->mpMap))->mPosition);
-    char* rider = (char*)SSXApp->Game->AI->Riders[0];
-    t4Vector pp = *((cRiderSub_96A8*)(rider + 0x6C0))->getPosition();
+    t3Vector mapPos = self->mpMap->mPosition;
+    cRider* rider = SSXApp->Game->AI->Riders[0];
+    t4Vector pp = *rider->getPosition();
     tBEPictureDB bounds;
     cBEMissionInterface_getPictureDBRecord(&bounds, ifMap, *cBENewRaceInterface_getLocation(ifGame));
     float fx = Absf_96A8((pp.x - bounds.world_topleft_x) / (bounds.world_bottomright_x - bounds.world_topleft_x));
@@ -923,18 +831,20 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     VPTR_OF(cListNode, ind) = cUIIcon_vtbl;
     func_0021CCC8(&ind->mAttrIcon);
     ind->mTextureID = -1;
-    (*(cFEObj_96A8**)&self->mpPlayerIcon) = (cFEObj_96A8*)ind;
+    self->mpPlayerIcon = ind;
     ind->mpTextureElem = 0;
     {
-        sV3_96A8 indicatorPos((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 97) - 5.0f, mapPos.z);
-        (*(sV3_96A8*)&((cUIThing*)((cFEObj_96A8*)self->mpPlayerIcon))->mPosition) = indicatorPos;
+        tMapVector3 indicatorPos((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 97) - 5.0f,
+            mapPos.z);
+        self->mpPlayerIcon->mPosition = indicatorPos;
     }
-    ((cFEObj_96A8*)self->mpPlayerIcon)->SetScale(sV3_96A8(17.0f, 17.0f));
-    cUIIcon_setTextureByHashValue(((cFEObj_96A8*)self->mpPlayerIcon), GetHashValue32(str_location));
-    ((cFEObj_96A8*)self->mpPlayerIcon)->SetVisible(0);
-    cUIThing* indicatorData = (cUIThing*)((cFEObj_96A8*)self->mpPlayerIcon);
+    tSetSizeSlot* vt = (tSetSizeSlot*)VPTR_OF(cListNode, self->mpPlayerIcon);
+    vt[21].fn(vthis(self->mpPlayerIcon, vt[21]), tMapVector3(17.0f, 17.0f));
+    cUIIcon_setTextureByHashValue(self->mpPlayerIcon, GetHashValue32(str_location));
+    self->mpPlayerIcon->setVisible(0);
+    cUIThing* indicatorData = self->mpPlayerIcon;
     indicatorData->mAttr = (indicatorData->mAttr & ~0x1F00) | 0xD00;
-    cList_addToEnd((cList*)(((char*)self->mpMapScreen) + 0xB4), (cListNode*)((cFEObj_96A8*)self->mpPlayerIcon));
+    cList_addToEnd(&self->mpMapScreen->mRootGroup.mList, self->mpPlayerIcon);
 }
 #endif
 
@@ -944,46 +854,37 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id);
 extern "C" int cPathSys_isStartpoint(void* tbl, int kind, int idx);
-extern "C" char* cPathSys_getStartpoint(void* tbl, int kind, int idx);
+extern "C" tPathStartpoint* cPathSys_getStartpoint(void* tbl, int kind, int idx);
 extern char gPaths[];
 extern char str_Map_Indicator_Icon[];
 extern char str_dot_visited[];
 extern char str_Map_Indicator_Highlight[];
 extern char str_indicator[];
 
-struct sMapSt_9970 {
-    char pad_0x0[0xC0];
-    int nSessions;              // 0xC0
-    char pad_0xC4[0xC];
-    cFEObj_96A8* img;           // 0xD0
-    char* screen;               // 0xD4
-    char pad_0xD8[0xC];
-    cFEObj_96A8* markA[8];      // 0xE4
-    cFEObj_96A8* markB[8];      // 0x104
-    sV3_96A8 posB[8];           // 0x124
-};
-
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
-// The inlined cUIIcon ctor: cUIThing(screen, 0), vtable, member at 0x74, two fields.
+// The inlined cUIIcon ctor: cUIThing(screen, 0), cUIIcon_vtbl, the tAttrIcon ctor, no texture. Still a view: only
+// a new-expression of a type with an inline ctor reproduces retail's allocation (an inline helper or the open-coded
+// stores allocate registers differently), and cUIIcon itself cannot take a ctor (it would store the vptrs of
+// cUIThing and _vt$7cUIIcon).
 struct cUIIcon_9970 {
     char d[0x88];
-    cUIIcon_9970(char* screen)
+    cUIIcon_9970(cUIScreen* screen)
     {
-        cUIThing_cUIThing(this, screen, 0);
-        *(void***)((char*)this + 0x8) = cUIIcon_vtbl;
-        func_0021CCC8((char*)this + 0x74);
-        *(int*)((char*)this + 0x78) = -1;
-        *(int*)((char*)this + 0x7C) = 0;
+        cUIIcon* icon = (cUIIcon*)this;  // same layout: the block being constructed is the cUIIcon
+        cUIThing_cUIThing(icon, screen, 0);
+        VPTR_OF(cListNode, icon) = cUIIcon_vtbl;
+        func_0021CCC8(&icon->mAttrIcon);
+        icon->mTextureID = -1;
+        icon->mpTextureElem = 0;
     }
 };
 
-// cUIThing::setPosition(const t3Vector&), inlined.
-struct sIconPos_9970 {
-    char pad_0x0[0x44];
-    sV3_96A8 pos;               // 0x44
-    void setPosition(const sV3_96A8& p) { pos = p; }
-};
+// cUIThing::setPosition(const t3Vector&), inlined (On Tour; retail stores mPosition in place).
+static inline void setThingPosition(cUIThing* thing, const t3Vector& pos)
+{
+    thing->mPosition = pos;
+}
 
 /**
  * Creates the hidden map icons for every session point on the current location.
@@ -996,46 +897,55 @@ struct sIconPos_9970 {
  */
 extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* selfp)
 {
-    sMapSt_9970* self = (sMapSt_9970*)selfp;
+    cOVState_MAP* self = selfp;
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
-    self->nSessions = cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
-    sV3_96A8 mapPos = (*(sV3_96A8*)&((cUIThing*)self->img)->mPosition);
-    for (int i = 0; i < self->nSessions; i++) {
+    self->mSessionPointsOnPic =
+        cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
+    t3Vector mapPos = self->mpMap->mPosition;
+    for (int i = 0; i < self->mSessionPointsOnPic; i++) {
         if (cPathSys_isStartpoint(gPaths, 2, i + 1) != 0) {
-        const char* sp = (const char*)cPathSys_getStartpoint(gPaths, 2, i + 1);
-        sV3_96A8 spPos = *(sV3_96A8*)(sp + 0x8);
+        const tPathStartpoint* sp = cPathSys_getStartpoint(gPaths, 2, i + 1);
+        t3Vector spPos = sp->Pos;
         tBEPictureDB pictureRecord;
         cBEMissionInterface_getPictureDBRecord(&pictureRecord, ifMap, *cBENewRaceInterface_getLocation(ifGame));
         unsigned int sessionPoint_x;
         {
-            float across = Absf_96A8((spPos.x - pictureRecord.world_topleft_x) / (pictureRecord.world_bottomright_x - pictureRecord.world_topleft_x));
+            float across = Absf_96A8((spPos.x - pictureRecord.world_topleft_x)
+                / (pictureRecord.world_bottomright_x - pictureRecord.world_topleft_x));
             sessionPoint_x = (int)(across * 356.0f);
         }
         unsigned int sessionPoint_y;
         {
-            float down = Absf_96A8((spPos.y - pictureRecord.world_topleft_y) / (pictureRecord.world_bottomright_y - pictureRecord.world_topleft_y));
+            float down = Absf_96A8((spPos.y - pictureRecord.world_topleft_y)
+                / (pictureRecord.world_bottomright_y - pictureRecord.world_topleft_y));
             sessionPoint_y = (int)(down * 266.0f);
         }
 
-        self->markA[i] = (cFEObj_96A8*)new (str_Map_Indicator_Icon, 0x20000000, 0) cUIIcon_9970(self->screen);
-        ((sIconPos_9970*)self->markA[i])->setPosition(sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 97) - 5.0f, mapPos.z));
-        self->markA[i]->SetScale(sV3_96A8(18.0f, 18.0f));
-        cUIIcon_setTextureByHashValue(self->markA[i], GetHashValue32(str_dot_visited));
-        self->markA[i]->SetVisible(0);
-        cUIThing* da = (cUIThing*)self->markA[i];
+        self->mpSessionIcons[i] =
+            (cUIIcon*)new (str_Map_Indicator_Icon, 0x20000000, 0) cUIIcon_9970(self->mpMapScreen);
+        setThingPosition(self->mpSessionIcons[i],
+            tMapVector3((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 97) - 5.0f, mapPos.z));
+        tSetSizeSlot* vt = (tSetSizeSlot*)VPTR_OF(cListNode, self->mpSessionIcons[i]);
+        vt[21].fn(vthis(self->mpSessionIcons[i], vt[21]), tMapVector3(18.0f, 18.0f));
+        cUIIcon_setTextureByHashValue(self->mpSessionIcons[i], GetHashValue32(str_dot_visited));
+        self->mpSessionIcons[i]->setVisible(0);
+        cUIThing* da = self->mpSessionIcons[i];
         da->mAttr = (da->mAttr & ~0x1F00) | 0xB00;
-        cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->markA[i]);
+        cList_addToEnd(&self->mpMapScreen->mRootGroup.mList, self->mpSessionIcons[i]);
 
-        self->markB[i] = (cFEObj_96A8*)new (str_Map_Indicator_Highlight, 0x20000000, 0) cUIIcon_9970(self->screen);
-        self->posB[i] = sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 97) - 5.0f, mapPos.z);
-        ((sIconPos_9970*)self->markB[i])->setPosition(self->posB[i]);
-        self->markB[i]->SetScale(sV3_96A8(18.0f, 18.0f));
-        cUIIcon_setTextureByHashValue(self->markB[i], GetHashValue32(str_indicator));
-        self->markB[i]->SetVisible(0);
-        cUIThing* db = (cUIThing*)self->markB[i];
+        self->mpSessionHighlights[i] =
+            (cUIIcon*)new (str_Map_Indicator_Highlight, 0x20000000, 0) cUIIcon_9970(self->mpMapScreen);
+        self->mHighlightOriginalPos[i] =
+            tMapVector3((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 97) - 5.0f, mapPos.z);
+        setThingPosition(self->mpSessionHighlights[i], self->mHighlightOriginalPos[i]);
+        vt = (tSetSizeSlot*)VPTR_OF(cListNode, self->mpSessionHighlights[i]);
+        vt[21].fn(vthis(self->mpSessionHighlights[i], vt[21]), tMapVector3(18.0f, 18.0f));
+        cUIIcon_setTextureByHashValue(self->mpSessionHighlights[i], GetHashValue32(str_indicator));
+        self->mpSessionHighlights[i]->setVisible(0);
+        cUIThing* db = self->mpSessionHighlights[i];
         db->mAttr = (db->mAttr & ~0x1F00) | 0xC00;
-        cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->markB[i]);
+        cList_addToEnd(&self->mpMapScreen->mRootGroup.mList, self->mpSessionHighlights[i]);
         }
     }
 }
@@ -1048,30 +958,6 @@ int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_SessionViewPoints[];
 
-class cUIObj_9E78 {
-public:
-    int pad[2];
-    virtual ~cUIObj_9E78();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setFocus(int v);
-    virtual void setVisible(int v);
-};
-struct sMap_9E78 {
-    char pad_0x0[0xC0];
-    int count;              // 0xC0
-    char pad_0xC4[0x10];
-    void* screen;           // 0xD4
-    char pad_0xD8[0x8];
-    cUIObj_9E78* cursor;    // 0xE0
-    cUIObj_9E78* a[8];      // 0xE4
-    cUIObj_9E78* b[8];      // 0x104
-};
-
 /**
  * Shows the player icon and highlights the selected session point on the map.
  *
@@ -1082,30 +968,31 @@ struct sMap_9E78 {
  */
 extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* mapState)
 {
-    sMap_9E78* self = (sMap_9E78*)mapState;
-    if (self->cursor != 0) {
-        self->cursor->setVisible(1);
+    cOVState_MAP* self = mapState;
+    if (self->mpPlayerIcon != 0) {
+        self->mpPlayerIcon->setVisible(1);
     }
-    cUIThing* list = ((cUIMenu*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_SessionViewPoints)))->mpSelected;
+    cUIThing* list = ((cUIMenu*)cUIScreen_getObjectByHashName(self->mpMapScreen,
+        GetHashValue32(str_SessionViewPoints)))->mpSelected;
     int sel = 1;
     if (list != 0) {
         sel = list->mMiscData;
     }
-    for (int i = 0; i < self->count; i++) {
+    for (int i = 0; i < self->mSessionPointsOnPic; i++) {
         int cur = sel - 1;
         if (i == cur) {
-            if (self->a[i] != 0) {
-                self->a[i]->setVisible(0);
+            if (self->mpSessionIcons[i] != 0) {
+                self->mpSessionIcons[i]->setVisible(0);
             }
-            if (self->b[i] != 0) {
-                self->b[i]->setVisible(1);
+            if (self->mpSessionHighlights[i] != 0) {
+                self->mpSessionHighlights[i]->setVisible(1);
             }
         } else {
-            if (self->a[i] != 0) {
-                self->a[i]->setVisible(1);
+            if (self->mpSessionIcons[i] != 0) {
+                self->mpSessionIcons[i]->setVisible(1);
             }
-            if (self->b[i] != 0) {
-                self->b[i]->setVisible(0);
+            if (self->mpSessionHighlights[i] != 0) {
+                self->mpSessionHighlights[i]->setVisible(0);
             }
         }
     }
@@ -1115,31 +1002,9 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* mapState)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_hideIndicators);
 #ifdef SKIP_ASM
-class cUIObj_9FD0 {
-public:
-    int pad[2];
-    virtual ~cUIObj_9FD0();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setFocus(int v);
-    virtual void setVisible(int v);
-};
-struct sMap_9FD0 {
-    char pad_0x0[0xC0];
-    int count;              // 0xC0
-    char pad_0xC4[0x1C];
-    cUIObj_9FD0* cursor;    // 0xE0
-    cUIObj_9FD0* a[8];      // 0xE4
-    cUIObj_9FD0* b[8];      // 0x104
-};
-
 /**
- * Hides the map overlay's indicators without deleting them: the player icon (+0xE0) and, for each of the +0xC0 session
- * points, its icon (+0xE4 array) and highlight (+0x104 array).
+ * Hides the map overlay's indicators without deleting them: mpPlayerIcon and, for each of the mSessionPointsOnPic
+ * session points, its icon (mpSessionIcons) and highlight (mpSessionHighlights).
  *
  * Each present widget gets setVisible(0) (virtual slot 9). cOVState_MAP_showIndicators shows the same widgets and
  * cOVState_MAP_cleanupIndicators deletes them; nothing in the program calls this one.
@@ -1148,16 +1013,16 @@ struct sMap_9FD0 {
  */
 extern "C" void cOVState_MAP_hideIndicators(cOVState_MAP* vself)
 {
-    sMap_9FD0* self = (sMap_9FD0*)vself;
-    if (self->cursor != 0) {
-        self->cursor->setVisible(0);
+    cOVState_MAP* self = vself;
+    if (self->mpPlayerIcon != 0) {
+        self->mpPlayerIcon->setVisible(0);
     }
-    for (int i = 0; i < self->count; i++) {
-        if (self->a[i] != 0) {
-            self->a[i]->setVisible(0);
+    for (int i = 0; i < self->mSessionPointsOnPic; i++) {
+        if (self->mpSessionIcons[i] != 0) {
+            self->mpSessionIcons[i]->setVisible(0);
         }
-        if (self->b[i] != 0) {
-            self->b[i]->setVisible(0);
+        if (self->mpSessionHighlights[i] != 0) {
+            self->mpSessionHighlights[i]->setVisible(0);
         }
     }
 }
@@ -1166,53 +1031,32 @@ extern "C" void cOVState_MAP_hideIndicators(cOVState_MAP* vself)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_cleanupIndicators);
 #ifdef SKIP_ASM
-class cUIObj_A088 {
-public:
-    int pad[2];
-    virtual ~cUIObj_A088();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setFocus(int v);
-    virtual void setVisible(int v);
-};
-
-struct sMap_A088 {
-    char pad_0x0[0xE0];
-    cUIObj_A088* cursor;    // 0xE0
-    cUIObj_A088* a[8];      // 0xE4
-    cUIObj_A088* b[8];      // 0x104
-};
-
 /**
  * Removes the map overlay's indicators: hides and deletes every indicator widget.
  *
- * For the player icon (+0xE0) and each of the two eight-entry icon arrays (+0xE4 and +0x104; On Tour mpPlayerIcon,
- * mpSessionIcons, mpSessionHighlights) it hides a present widget (setVisible(0)), deletes it and clears the pointer.
+ * For mpPlayerIcon and each of the two eight-entry icon arrays (mpSessionIcons, mpSessionHighlights) it hides a
+ * present widget (setVisible(0)), deletes it and clears the pointer.
  *
  * @param mapOverlay  the map overlay state (this)
  */
 extern "C" void cOVState_MAP_cleanupIndicators(cOVState_MAP* mapOverlay)
 {
-    sMap_A088* self = (sMap_A088*)mapOverlay;
-    if (self->cursor != 0) {
-        self->cursor->setVisible(0);
-        delete self->cursor;
-        self->cursor = 0;
+    cOVState_MAP* self = mapOverlay;
+    if (self->mpPlayerIcon != 0) {
+        self->mpPlayerIcon->setVisible(0);
+        delete self->mpPlayerIcon;
+        self->mpPlayerIcon = 0;
     }
     for (int i = 0; i < 8; i++) {
-        if (self->a[i] != 0) {
-            self->a[i]->setVisible(0);
-            delete self->a[i];
-            self->a[i] = 0;
+        if (self->mpSessionIcons[i] != 0) {
+            self->mpSessionIcons[i]->setVisible(0);
+            delete self->mpSessionIcons[i];
+            self->mpSessionIcons[i] = 0;
         }
-        if (self->b[i] != 0) {
-            self->b[i]->setVisible(0);
-            delete self->b[i];
-            self->b[i] = 0;
+        if (self->mpSessionHighlights[i] != 0) {
+            self->mpSessionHighlights[i]->setVisible(0);
+            delete self->mpSessionHighlights[i];
+            self->mpSessionHighlights[i] = 0;
         }
     }
 }
@@ -1281,7 +1125,7 @@ extern "C" cUIState* cUIStateStack_findState(void* list, int hash);
 /**
  * Common overlay set-up: leaves cut-scene TV mode and tells the HUD an overlay opened.
  *
- * If the game's cut-scene transition manager (+0x64) is not in regular mode, forces regular mode
+ * If the game's CutSceneTransitionMan is not in regular mode (mCurrentState), forces regular mode
  * (cCutSceneTransitionMan_ForceToRegularMode) and sets mRestoreCutSceneMode when it was in, or going to, cut-scene mode. Then calls
  * virtual slot 24 of the "hud" state with (3, 0).
  */
@@ -1290,8 +1134,8 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
     self->mRestoreCutSceneMode = 0;
     cGame* game = SSXApp->Game;
     if (((char*)game) != 0) {
-        char* cutSceneMan = (char*)game->CutSceneTransitionMan;
-        int mode = *(int*)(cutSceneMan + 0x10);
+        cCutSceneTransitionMan* cutSceneMan = game->CutSceneTransitionMan;
+        int mode = cutSceneMan->mCurrentState;
         if (mode != 0) {
             cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
             if (mode == 1 || mode == 3) {
@@ -1368,9 +1212,9 @@ struct sBXString_A4E0 {
 /**
  * Prints an incoming in-race chat message on an in-game state's screen.
  *
- * Only online (the first word of cBENetworkInterface_networkOpt set) with a screen and a connected cGameComm. When a
+ * Only online (cBENetworkInterface_networkOpt.bIsNetworkGame) with a screen and a connected cGameComm. When a
  * chat packet is queued (cGameComm_getQueuedChat into mszChatBuff), hides "helptext" and "helptexts" and shows "textScrollChat"
- * with "<opponent's name>: <message>" (the name from the network options + 0x498), scrolled by func_001A83D8 from the
+ * with "<opponent's name>: <message>" (the network options' strOpponentName), scrolled by func_001A83D8 from the
  * scroll's counters at +0xC4/+0xC6/+0xC8. The 0x41 size passed for the 0x40-byte buffer is not checked by
  * cGameComm_readPacket, which copies the whole payload (up to 236 bytes).
  *
@@ -1382,7 +1226,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
     int ret = 0;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     tBENetworkDB* net = &cBENetworkInterface_networkOpt;
-    if (*(int*)net != 0 && self->mpScreen != 0) {
+    if (net->bIsNetworkGame != 0 && self->mpScreen != 0) {
         cGameComm* sess = cGameComm_mGameComm;
         if (sess != 0 && sess->mConnected != 0) {
             char* name = self->mszChatBuff;
@@ -1400,7 +1244,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 unsigned short linesOffset = obj->mLinesOffset;
                 int none = origNumLines == 0;
                 sBXString_A4E0 chatLine;
-                cBXString_cBXString2(&chatLine, ((char*)net) + 0x498);
+                cBXString_cBXString2(&chatLine, net->strOpponentName);
                 cBXString_Concat(&chatLine, str_colon_sp_b);
                 cBXString_Concat(&chatLine, name);
                 cUITextScroll_addAsciiString(obj, chatLine.str);

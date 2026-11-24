@@ -21,9 +21,47 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "intersect/bxnash.h"
 
-struct tInstanceAudio;
 struct tInstanceRecord;
+
+// The head of an audio instance's data (On Tour struct tAudioData, 0x8; the On Tour locals that read it are named
+// pAData). m_iNumCollisionTriggers trigger words (eAudioTrigger) follow it, then m_iNumVolumes variable-length volume
+// records, each starting with its type ([O] tAudioVolume::m_eType; [U] the walks step 0x1C for type 0, 0x30 for 1 and
+// 2, 0x18 for 3: On Tour's tAudioVolumeSphere, tAudioVolumeEllipse / tAudioVolumeCone and tAudioVolumeAmbient sizes)
+// and its trigger number at +0x4.
+struct tAudioData {
+    int m_iNumCollisionTriggers;    // 0x0 [O]; [U] cWorldSound_CalcInstAudioBoundingBox / GetAudioVolumeTriggers /
+                                    //      TriggerGridAudioNode skip this many words after the header
+    int m_iNumVolumes;              // 0x4 [O]; [U] the volume records they walk; AddInstanceToGrid /
+                                    //      RemoveInstanceFromGrid skip an instance without volumes
+};
+
+CHECK_OFFSET(tAudioData, m_iNumCollisionTriggers, 0x0);
+CHECK_OFFSET(tAudioData, m_iNumVolumes, 0x4);
+CHECK_SIZE(tAudioData, 0x8);
+
+// One placed instance's audio (On Tour struct tInstanceAudio, 0x18), filed in the world's nash as a typed space node.
+// On Tour declares the members inside two anonymous unions (at 0x0 and 0x10) whose members its dump does not list:
+// the names below are ours. [U] func_002B6B50 (the world audio file's resolve) walks the file's array of them (count
+// at +0xC, the array at +0x10, 0x18 each): it turns mpAudioData from a file offset into a pointer and mpInstance from
+// a resource id into the instance record (0 when it is not loaded), and points the record's m_pInstanceAudio back here.
+struct tInstanceAudio {
+    cTypedSpaceNode mSpaceNode;     // 0x00 [U] AddInstanceToGrid sets type 5 (kSNT_AudioVolume) and files it in the
+                                    //      nash; RemoveInstanceFromGrid unfiles it; cAudioOverlapList collects it
+    tInstanceRecord* mpInstance;    // 0x0C [U] the instance (On Tour locals pRec / pInst): CreateAudioGrid /
+                                    //      DesolveAudioFile / AddInstanceToGrid skip an audio instance without one;
+                                    //      CalcInstAudioBoundingBox / TriggerGridAudioNode offset the volumes by its
+                                    //      position
+    tAudioData* mpAudioData;        // 0x10 [U] the resolve (from a file offset); the walks above read it
+    int unk_14;                     // 0x14 no retail access seen (On Tour's second union is 8 bytes)
+};
+
+CHECK_OFFSET(tInstanceAudio, mSpaceNode, 0x00);
+CHECK_OFFSET(tInstanceAudio, mpInstance, 0x0C);
+CHECK_OFFSET(tInstanceAudio, mpAudioData, 0x10);
+CHECK_OFFSET(tInstanceAudio, unk_14, 0x14);
+CHECK_SIZE(tInstanceAudio, 0x18);
 
 // The audio instances near one view port's listener (On Tour class cAudioOverlapList, 0x120; its method
 // cAudioOverlapList_update is in the same retail unit).
