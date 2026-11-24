@@ -22,8 +22,8 @@
 // The preview keeps no out-of-line cUIVector accessors (only the tAttrVector constructor and getType).
 //
 // mAttrVector is EA's tAttrVector (On Tour: 4 bytes, unsigned int bitfields, LSB first), defined below. Retail reads
-// and writes it as a word (lw/sw 0x74; mNumVertices = word >> 17); the unit's views sCount_36D0 / sCount_3808 /
-// sCount_3A39F8 / sUIVecFlags_34C0 / sCount_6618 are this same bitfield.
+// and writes it as a word (lw/sw 0x74; mNumVertices = word >> 17); setUIData, setChannelData(KCP) and render2D use it
+// as this type, and the unit's view sCount_6618 (tAttrVector_tAttrVector) is the same bitfield.
 
 #include "layout.h"
 #include "ui/uithing.h"

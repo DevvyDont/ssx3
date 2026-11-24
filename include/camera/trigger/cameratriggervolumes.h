@@ -184,7 +184,7 @@ CHECK_SIZE(cCTBoundObjLine, 0x44);
 
 // cCTSpline (retail and On Tour 0x58): base cCTObject. The 4 control points of a spline trigger camera
 // (cCTActionSpline::Spline). [R] get_camspline: cMemMan_alloc(0x58, ...); [O] worldPoint(cCTSpline*, int i) = retail
-// cCTSpline_worldPoint (transforms Point[i], view sCtmSrc_0D20 corners[4] at 0x28).
+// cCTSpline_worldPoint (transforms Point[i]).
 struct cCTSpline {
     // --- cCTObject (0x28)
     t3Vector Pos;               // 0x00 [O]; [R] = t3vect_Zero (get_camboundobj); [U] limitPoint / worldPoint translate by it

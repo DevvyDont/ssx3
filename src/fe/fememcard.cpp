@@ -10,6 +10,7 @@
 #include "fe/festatelegal.h"
 #include "fe/festatememcard.h"
 #include "ui/uistate.h"
+#include "ui/uiengine.h"
 #include "main/ssxapp.h"
 #include "fe/fememcard.h"
 
@@ -24,19 +25,6 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cSSXApp_getMCManager(void* p);
 
-class cUIObjK186B50 {
-public:
-    char pad_0x00[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int);
-};
 
 /**
  * Creates the memory-card screen "06cAutoload" and hides its "mc messages" object.
@@ -53,7 +41,7 @@ extern "C" void cFEStateMemCard_onCreateScreen(cFEStateMemCard* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cSSXApp_getMCManager(SSXApp);
-    ((cUIObjK186B50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages)))->setVisible(0);
+    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages))->setVisible(0);
 }
 #endif
 
@@ -65,25 +53,12 @@ extern "C" void cFEMemCard_onUpdate(void* self);
 extern "C" int cMCOverlayManager_isManagerDone(void* mp);
 extern "C" void cUIThing_deleteAnimation(void* obj);
 
-class cUIObjK186BF0 {
-public:
-    char pad_0x000[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int);
-};
 
 /**
  * Runs the memory-card screen's per-frame update, then clears its busy markers once the card work is over.
  *
  * Calls the cFEMemCard update cFEMemCard_onUpdate first. When the memory-card overlay manager (cSSXApp_getMCManager) is
- * done (cMCOverlayManager_isManagerDone) or the state word at +0x1C0 is 6, it deletes the animation of the "!"
+ * done (cMCOverlayManager_isManagerDone) or mState is 6, it deletes the animation of the "!"
  * object, when there is one, and hides "mc messages" (slot 9 with 0). "mc messages" is used without a null check.
  */
 extern "C" void cFEStateMemCard_onUpdate(cFEStateMemCard* self)
@@ -94,7 +69,7 @@ extern "C" void cFEStateMemCard_onUpdate(cFEStateMemCard* self)
         if (obj != 0) {
             cUIThing_deleteAnimation(obj);
         }
-        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages)))->setVisible(0);
+        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages))->setVisible(0);
     }
 }
 #endif
@@ -299,13 +274,12 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
-struct sFEMemCardK187270;
 extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* mp);
 extern "C" int cMCOverlayManager_GetFreeSpace(void* mp, int card);
-// Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
-extern char* cFEStateMemCard_mInstance_86F90 __asm__("cFEStateMemCard_mInstance");
+// cFEStateMemCard_mInstance, typed (other functions in this unit declare it as void*).
+extern cFEStateMemCard* cFEStateMemCard_mInstance_86F90 __asm__("cFEStateMemCard_mInstance");
 extern int cFEStateMemCard_mStage;
 
 
@@ -313,26 +287,25 @@ extern int cFEStateMemCard_mStage;
  * Checks that the selected card has room for the missing profile, or ends the free-space check and starts the reads.
  *
  * Callback for the manager's callbackLoadReady slot (0xA4), installed by func_00186A08; works on the memory-card state
- * cFEStateMemCard_mInstance. When the free-space check is already done (+0x234 set) it only acts from stage 4 on (cFEStateMemCard_mStage >= 4):
- * the card's GetTitleString (slot 14) writes the title of the file at mFileCursor into the screen's name buffer
- * (+0x9C). Otherwise, unless cMCOverlayManager_hasCardStatusCriticalError reports an error, it totals the space needed
- * into +0x230: when the profile is missing (bit 0 of the missing-file flags +0x22C) that is the card's SpaceRequired
- * (slot 22) of cBESaveInterface_getSaveProfileSize(), and one directory entry. If the selected device's free space
- * (cMCOverlayManager_GetFreeSpace, mDevices[].iFreeSpace) is smaller, or the card's free directory entries (slot 25, read twice) are
- * known (not -1) and fewer than needed, it sets +0x234 and moves the manager to NoFreeBlocks (23, SetState through
- * vtable slot 1). In all other cases cFEStateMemCard_terminateFreeSpaceCheck ends the check.
+ * cFEStateMemCard_mInstance. When the free-space check is already done (mFreespaceCheckDone set) it only acts from
+ * stage 4 on (cFEStateMemCard_mStage >= 4): the card's GetTitleString (slot 14) writes the title of the file at
+ * mFileCursor into mLastLoadFileName. Otherwise, unless cMCOverlayManager_hasCardStatusCriticalError reports an error,
+ * it totals the space needed into mTotalSpaceRequired: when the profile is missing (bit 0 of
+ * mMissingSavedFileTypeFlags) that is the card's SpaceRequired (slot 22) of cBESaveInterface_getSaveProfileSize(), and
+ * one directory entry. If the selected device's free space (cMCOverlayManager_GetFreeSpace, mDevices[].iFreeSpace) is
+ * smaller, or the card's free directory entries (slot 25, read twice) are known (not -1) and fewer than needed, it sets
+ * mFreespaceCheckDone and moves the manager to NoFreeBlocks (23, SetState through vtable slot 1). In all other cases
+ * cFEStateMemCard_terminateFreeSpaceCheck ends the check.
  *
  * PS2's GetFreeDirEntries always returns -1, so the directory-entry test never fails on this platform.
  */
 extern "C" void cFEStateMemCard_callbackLoadReady(void)
 {
-    if (*(int*)(cFEStateMemCard_mInstance_86F90 + 0x234) != 0) {
+    if (cFEStateMemCard_mInstance_86F90->mFreespaceCheckDone != 0) {
         if (cFEStateMemCard_mStage < 4)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        char* memCard = (char*)mp->mpMemCard;
-        sVEntry<void(void*, int, void*)>* vt = *(sVEntry<void(void*, int, void*)>**)memCard;
-        vt[14].fn(memCard + vt[14].delta, mp->mFileCursor, cFEStateMemCard_mInstance_86F90 + 0x9C);
+        mp->mpMemCard->GetTitleString(mp->mFileCursor, cFEStateMemCard_mInstance_86F90->mLastLoadFileName);
         return;
     }
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
@@ -341,27 +314,29 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int extra = 0;
         int avail = cMCOverlayManager_GetFreeSpace(mp, mp->mSelectedDevice);
-        cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance_86F90;
+        cFEStateMemCard* st = cFEStateMemCard_mInstance_86F90;
         int flags = st->mMissingSavedFileTypeFlags;
         st->mTotalSpaceRequired = 0;
         if (flags & 1) {
             extra = 1;
+            // cMemCard::SpaceRequired (slot 22), called through the vtable entry by hand: retail keeps the vtable
+            // pointer across the size call and reads the entry from it afterwards.
             char* memCard = (char*)mp->mpMemCard;
             sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)memCard;
             char* thisp = memCard + vt[22].delta;
             int profileSpace = vt[22].fn(thisp, cBESaveInterface_getSaveProfileSize());
-            *(int*)(cFEStateMemCard_mInstance_86F90 + 0x230) += profileSpace;
+            cFEStateMemCard_mInstance_86F90->mTotalSpaceRequired += profileSpace;
         }
-        if (avail < *(int*)(cFEStateMemCard_mInstance_86F90 + 0x230)
+        if (avail < cFEStateMemCard_mInstance_86F90->mTotalSpaceRequired
             || (mp->mpMemCard->GetFreeDirEntries() != -1 && mp->mpMemCard->GetFreeDirEntries() < extra))
             fail = 1;
         if (fail) {
-            *(int*)(cFEStateMemCard_mInstance_86F90 + 0x234) = 1;
+            cFEStateMemCard_mInstance_86F90->mFreespaceCheckDone = 1;
             mp->SetState(23);
             return;
         }
     }
-    cFEStateMemCard_terminateFreeSpaceCheck((cFEStateMemCard*)((sFEMemCardK187270*)cFEStateMemCard_mInstance_86F90));
+    cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard_mInstance_86F90);
 }
 #endif
 
@@ -557,7 +532,7 @@ struct sFEMemCardK187270 {
 extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self)
 {
     self->mFreespaceCheckDone = 1;
-    void* mp = cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     int flags = self->mCard1MissingSavedFileTypeFlags;
     if (!(flags & 2)) {
         cMCOverlayManager_selectDevice(mp, 0);
@@ -808,12 +783,13 @@ extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
  */
 extern "C" void cFEStateMemCard_displayStatus(void)
 {
-    void* st = cFEStateMemCard_mInstance;
-    cUIThing* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
-    void* mp = cSSXApp_getMCManager(SSXApp);
-    int managerState = *(int*)((char*)mp + 0x130);
-    if (managerState == 0x1F || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 49 || managerState == 50 || managerState == 51
-        || managerState == 53 || managerState == 54 || managerState == 52 || managerState == 2 || managerState == 3 || managerState == 6) {
+    cFEStateMemCard* st = cFEStateMemCard_mInstance_86F90;
+    cUIThing* obj = cUIScreen_getObjectByHashName(st->mpScreen, GetHashValue32(str_mc_messages));
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+    int managerState = mp->mState;
+    if (managerState == 0x1F || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 49
+        || managerState == 50 || managerState == 51 || managerState == 53 || managerState == 54 || managerState == 52
+        || managerState == 2 || managerState == 3 || managerState == 6) {
         unsigned short buf[800];
         cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);
@@ -854,13 +830,15 @@ extern "C" void cFEMemCard_SetLoadPressed(void*, int);
 /**
  * Starts reading the profile from the memory card (stage 5).
  *
- * Sets the stage cFEStateMemCard_mStage to 5 and the screen state (+0x1C0 of cFEStateMemCard_mInstance) to 5 (loading), the screen's file type
- * (+0x1BC) to 0, the manager's read size to cBESaveInterface_getSaveProfileSize() (cMCOverlayManager_readSetSize) and its file type to
- * 1 (cMCOverlayManager_readSetFileType). The profile file slot cFEStateMemCard_mProfileFile goes into the manager's mFileCursor and the screen's slot
- * (+0x1C4), and the manager moves to InitFileCheckWait (53). The 16-bit string at +0x11C becomes the wildcard "%s-%s*"
- * of the product code (cMCOverlayManager_getProductCode) and the profile file name (cMCOverlayManager_getFileName with type 1). Then
- * cFEMemCard_SetLoadPressed(state, 1), +0x1A8 = 1, and "@loadanim" plays on the "exclam" object when both exist. The
- * cBE_getInterface(cBE_getBE(), 5) result is discarded; the stage and +0x1BC are stored twice.
+ * Sets the stage cFEStateMemCard_mStage to 5 and the screen state (mState of cFEStateMemCard_mInstance) to 5
+ * (loading), the screen's file type (mType) to 0, the manager's read size to cBESaveInterface_getSaveProfileSize()
+ * (cMCOverlayManager_readSetSize) and its file type to 1 (cMCOverlayManager_readSetFileType). The profile file slot
+ * cFEStateMemCard_mProfileFile goes into the manager's mFileCursor and the screen's mSlot, and the manager moves to
+ * InitFileCheckWait (53). mFileName becomes the wildcard "%s-%s*" of the product code
+ * (cMCOverlayManager_getProductCode) and the profile file name (cMCOverlayManager_getFileName with type 1). Then
+ * cFEMemCard_SetLoadPressed(state, 1), mIsProcessing = 1, and "@loadanim" (from the engine's animation bank) plays on
+ * the "exclam" object when both exist. The cBE_getInterface(cBE_getBE(), 5) result is discarded; the stage and mType
+ * are stored twice.
  */
 extern "C" void cFEStateMemCard_startProfileRead(void)
 {
@@ -869,14 +847,14 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     unsigned short fmt[8];
     int five = 5;
     cFEStateMemCard_mStage = five;
-    *(int*)((char*)cFEStateMemCard_mInstance + 0x1C0) = five;
+    cFEStateMemCard_mInstance_86F90->mState = five;
     cBE_getInterface_Fv(cBE_getBE(), 5);
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    *(int*)((char*)cFEStateMemCard_mInstance + 0x1BC) = 0;
+    cFEStateMemCard_mInstance_86F90->mType = 0;
     cFEStateMemCard_mStage = five;
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveProfileSize());
     cMCOverlayManager_readSetFileType(mp, 1);
-    cFEStateMemCard* memCardState = (cFEStateMemCard*)cFEStateMemCard_mInstance;
+    cFEStateMemCard* memCardState = cFEStateMemCard_mInstance_86F90;
     int profileFile = cFEStateMemCard_mProfileFile;
     mp->mFileCursor = profileFile;
     memCardState->mSlot = profileFile;
@@ -885,13 +863,13 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);
     cMCOverlayManager_getProductCode_r(desc, 0x10);
-    sprintf1((unsigned short*)((char*)cFEStateMemCard_mInstance + 0x11C), fmt, desc, name);
+    sprintf1(cFEStateMemCard_mInstance_86F90->mFileName, fmt, desc, name);
     cFEMemCard_SetLoadPressed(cFEStateMemCard_mInstance, 1);
-    cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance;
+    cFEStateMemCard* st = cFEStateMemCard_mInstance_86F90;
     st->mIsProcessing = 1;
     void* obj = cUIScreen_getObjectByHashName(st->mpScreen, GetHashValue32(str_exclam));
     if (obj) {
-        void* bank = (char*)*(void**)((char*)cFEStateMemCard_mInstance + 0x10) + 0x50;
+        void* bank = &cFEStateMemCard_mInstance_86F90->mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
         if (anim)
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
@@ -916,37 +894,37 @@ extern "C" void cFEMemCard_SetLoadPressed(void*, int);
 /**
  * Starts reading the settings file from the memory card (stage 4).
  *
- * Sets the stage cFEStateMemCard_mStage to 4, the screen state (+0x1C0 of cFEStateMemCard_mInstance) to 5 (loading), the screen's file type
- * (+0x1BC) to 2 and its slot (+0x1C4) to 0, the manager's read size to the save-game size
- * (cBESaveInterface_getSaveGameSize, cMCOverlayManager_readSetSize) and its file type to 2 (cMCOverlayManager_readSetFileType), and moves the manager to
- * InitFileCheckWait (53). Plays "@loadanim" on the "exclam" object when both exist, then
- * cFEMemCard_SetLoadPressed(state, 1) and +0x1A8 = 1. The cBE_getInterface(cBE_getBE(), 5) result is discarded.
+ * Sets the stage cFEStateMemCard_mStage to 4, the screen state (mState of cFEStateMemCard_mInstance) to 5 (loading),
+ * the screen's file type (mType) to 2 and its mSlot to 0, the manager's read size to the save-game size
+ * (cBESaveInterface_getSaveGameSize, cMCOverlayManager_readSetSize) and its file type to 2
+ * (cMCOverlayManager_readSetFileType), and moves the manager to InitFileCheckWait (53, SetState). Plays "@loadanim" on
+ * the "exclam" object when both exist, then cFEMemCard_SetLoadPressed(state, 1) and mIsProcessing = 1. The
+ * cBE_getInterface(cBE_getBE(), 5) result is discarded.
  */
 extern "C" void cFEStateMemCard_startSettingsRead(void)
 {
     int two = 2;
     cFEStateMemCard_mStage = 4;
-    *(int*)((char*)cFEStateMemCard_mInstance + 0x1C0) = 5;
+    cFEStateMemCard_mInstance_86F90->mState = 5;
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    void* mp = cSSXApp_getMCManager(SSXApp);
-    cFEStateMemCard* memCardState = (cFEStateMemCard*)cFEStateMemCard_mInstance;
+    cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+    cFEStateMemCard* memCardState = cFEStateMemCard_mInstance_86F90;
     memCardState->mType = two;
     memCardState->mSlot = 0;
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveGameSize_K187920());
     cMCOverlayManager_readSetFileType(mp, 2);
-    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)mp + 0x748);
-    vt[1].fn(vthis(mp, vt[1]), 53);
-    cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance;
+    mp->SetState(53);
+    cFEStateMemCard* st = cFEStateMemCard_mInstance_86F90;
     st->mType = two;
     void* obj = cUIScreen_getObjectByHashName(st->mpScreen, GetHashValue32(str_exclam));
     if (obj) {
-        void* bank = (char*)*(void**)((char*)cFEStateMemCard_mInstance + 0x10) + 0x50;
+        void* bank = &cFEStateMemCard_mInstance_86F90->mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
         if (anim)
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
     }
     cFEMemCard_SetLoadPressed(cFEStateMemCard_mInstance, 1);
-    *(int*)((char*)cFEStateMemCard_mInstance + 0x1A8) = 1;
+    cFEStateMemCard_mInstance_86F90->mIsProcessing = 1;
 }
 #endif
 

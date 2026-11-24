@@ -13,6 +13,9 @@
 #include "fe/festatebonusmaterial.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
+#include "input/input.h"
+#include "ui/uiinput.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onCreateScreen);
@@ -52,20 +55,6 @@ extern char str_Menu0000[];
 extern char str_tReal[];
 extern int gTitleScreenDelay;
 
-class cUIObj_1947F8 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06(int v);
-    virtual void setFocus(int v);
-    virtual void setStatic(int v);
-    virtual void setVisible(int v);
-};
-
 /**
  * Holds the title's first appearance for 300 calls, then focuses its menu and shows "tReal".
  *
@@ -77,11 +66,11 @@ public:
 extern "C" int cFEStateTitle_onGainTransition(cFEStateTitle* self)
 {
     if (gTitleScreenDelay == 0 || --gTitleScreenDelay == 0) {
-        cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
+        cUIThing* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
         if (uiObj != 0) {
             uiObj->setFocus(1);
         }
-        uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_tReal));
+        uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_tReal));
         if (uiObj != 0) {
             uiObj->setVisible(1);
         }
@@ -98,11 +87,6 @@ extern "C" void cUIState_onUpdate(void* self);
 extern int cRealFE_mMovieList;
 
 
-struct sApp_1948A8 {
-    char pad[0xB0];
-    cInputPad** lists[2];
-};
-
 static inline int isActive_1948A8(cInputPad* l, int j)
 {
     if (j < l->NumButtons) {
@@ -114,9 +98,9 @@ static inline int isActive_1948A8(cInputPad* l, int j)
 /**
  * Counts idle frames on the title screen and requests the attract movie after 1800 of them.
  *
- * After the UI update (cUIState_onUpdate), an active entry in either controller's input list resets the timer
- * (+0x48). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of cRealFE_mMovieList is set, which
- * cRealFE_update plays as a skippable movie.
+ * After the UI update (cUIState_onUpdate), a held button on either controller's pad (SSXApp->Inputs[i]->Pad) resets
+ * the timer (mNumTicksIdle). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of cRealFE_mMovieList
+ * is set, which cRealFE_update plays as a skippable movie.
  */
 extern "C" void cFEStateTitle_onUpdate(cFEStateTitle* self)
 {
@@ -130,7 +114,7 @@ extern "C" void cFEStateTitle_onUpdate(cFEStateTitle* self)
     int found = 0;
     int i;
     for (i = 0; i < 2; i++) {
-        cInputPad* list = *((sApp_1948A8*)SSXApp)->lists[i];
+        cInputPad* list = SSXApp->Inputs[i]->Pad;
         int n = list->NumButtons;
         if (n != 0) {
             int j;
@@ -265,10 +249,11 @@ extern char str_07main_men[];
 /**
  * Builds the main menu ("07main_men"), shuts the online layer down and counts the connected controllers.
  *
- * Clears the option block cBERules_mRules, the choice flag (+0x48) and the Circle counter (+0x54); destroys the
- * voice object, BuddyMan, LobbyMan, cGameComm and cCommSystem (func_00266CD8, func_00261008, func_0025B688,
- * cGameComm_destroy, cCommSystem_destroy); clears bIsNetworkGame and calls the network interface's slot 1; sets the FE
- * music state 1; stores the number of active pads (UI input slots 44 / 45) in +0x55.
+ * Clears the option block cBERules_mRules, the choice flag (mGoToNextState) and the Circle counter (mHackCheatTotal);
+ * destroys the voice object, BuddyMan, LobbyMan, cGameComm and cCommSystem (func_00266CD8, func_00261008,
+ * func_0025B688, cGameComm_destroy, cCommSystem_destroy); clears bIsNetworkGame and calls the network interface's slot
+ * 1; sets the FE music state 1; stores the number of active pads (the UI input's setPadNum / isActive, slots 44 / 45)
+ * in mNumOfCtrl.
  */
 extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
 {
@@ -290,13 +275,11 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     iface->submit();
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    char* obj = *(char**)&self->mpEngine->mpInput;
+    cUIInput* input = self->mpEngine->mpInput;
     *(unsigned char*)&self->mNumOfCtrl = 0;
     for (int i = 0; i < 2; i++) {
-        sVEntry<void(void*, unsigned char)>* vt1 = *(sVEntry<void(void*, unsigned char)>**)(obj + 8);
-        vt1[44].fn(vthis(obj, vt1[44]), i);
-        sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)(obj + 8);
-        if (vt2[45].fn(vthis(obj, vt2[45])) != 0) {
+        input->setPadNum((unsigned char)i); // the original passes the pad number as a byte
+        if (input->isActive()) {
             (*(unsigned char*)&self->mNumOfCtrl)++;
         }
     }
@@ -428,79 +411,28 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int index);
 extern char str_Menu[];
 
-class cProfileMan_194DD0 {
-public:
-    int pad[2];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void select(unsigned char i);
-    virtual int isValid();
-};
-
 /**
  * Recounts the connected controllers and moves the selection off Multi Play when fewer than two remain.
  *
- * After the UI update, the UI input (engine +0xC, slot 44 selects pad i, slot 45 cFEInput_isActive) counts
- * active pads into +0x55; if "Menu" has row 2 selected and fewer than 2 are active, row 1 is selected. The
- * local class name cProfileMan_194DD0 is misleading.
+ * After the UI update, the engine's UI input (mpInput: setPadNum selects pad i, isActive, slots 44 / 45) counts
+ * active pads into mNumOfCtrl; if "Menu" has row 2 selected (mScrollItemCurrent) and fewer than 2 are active, row 1
+ * is selected.
  */
 extern "C" void cFEStateMainMenu_onUpdate(cFEStateMainMenu* self)
 {
     int i = 0;
     cUIState_onUpdate(self);
-    cProfileMan_194DD0* pm = *(cProfileMan_194DD0**)&self->mpEngine->mpInput;
+    cUIInput* input = self->mpEngine->mpInput;
     *(signed char*)&self->mNumOfCtrl = 0;
     for (; i < 2; i++) {
-        pm->select(i);
-        if (pm->isValid()) {
+        input->setPadNum((unsigned char)i); // the original passes the pad number as a byte
+        if (input->isActive()) {
             (*(signed char*)&self->mNumOfCtrl)++;
         }
     }
-    void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
     if (menu != 0) {
-        if (*(unsigned char*)((char*)menu + 0x95) == 2) {
+        if (menu->mScrollItemCurrent == 2) {
             if (*(signed char*)&self->mNumOfCtrl < 2) {
                 cUIMenu_setSelectedByIndex(menu, 1);
             }
@@ -639,8 +571,9 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
         break;
     }
     case 7: {
-        char* optionsState = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self_->mpEngine, 1);
-        *(int*)(optionsState + 0x1C) = (*(int*)(optionsState + 0x1C) & ~0x3F00) | 0x100;
+        cUIState* optionsState =
+            (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self_->mpEngine, 1);
+        optionsState->mAttrState = (optionsState->mAttrState & ~0x3F00) | 0x100; // tAttrState::mMode = 1
         cUIStateStack_pushSpecial(&self_->mpEngine->mStateStack, optionsState, 0, 0);
         break;
     }

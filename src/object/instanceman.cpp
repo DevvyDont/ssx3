@@ -15,6 +15,19 @@
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
+// t4Vector with the constructors the original's vector class has: an empty one (the nodes' vector arrays run it per
+// element) and one from four floats.
+struct t4VectorCtor : public t4Vector {
+    t4VectorCtor() {}
+    t4VectorCtor(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
 struct sInstanceStruct {
     char pad_0x00[0x8];
     int field_0x8;
@@ -275,10 +288,6 @@ struct sImRangeTable;
 extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x);
 
 
-struct sImCurve_351538 {
-    int count;
-    tSegmentRecord* segs;
-};
 
 static inline bool inRange_351538(tSegmentRecord* e, float x)
 {
@@ -301,14 +310,14 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 void cAnimFrame_update_impl(char* vself, float time)
 {
     cAnimFrame* self = (cAnimFrame*)vself;
-    sImCurve_351538** curves = (sImCurve_351538**)self->AnimRecord->m_pChannels;
+    tChannelRecord** curves = self->AnimRecord->m_pChannels;
     int* cur = (int*)self;
     unsigned int mask = 1;
     float* out = (float*)(&self->Vals[0]);
     for (int i = 0; i < 16; i++) {
-        sImCurve_351538* curve = *curves;
+        tChannelRecord* curve = *curves;
         if ((unsigned int)self->AnimRecord->m_ChannelMask & mask) {
-            tSegmentRecord* segment = &curve->segs[*cur];
+            tSegmentRecord* segment = &curve->m_Segments[*cur];
             if (!inRange_351538(segment, time)) {
                 segment = (tSegmentRecord*)cAnimChannel_nextSegment((sImRangeTable*)curve, cur, time);
             }
@@ -328,16 +337,6 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_getDeriv);
 extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x);
 
 
-struct sImCurve_351660 {
-    int count;
-    tSegmentRecord* segs;
-};
-
-struct sImV4_351660 {
-    float x, y, z, w;
-    sImV4_351660() {}
-    sImV4_351660(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
 
 static inline bool inRange_351660(tSegmentRecord* e, float x)
 {
@@ -356,17 +355,17 @@ static inline bool inRange_351660(tSegmentRecord* e, float x)
  * @param rotVel  receives the negated angle rates (w = 0) (On Tour dAng)
  * @param time       the animation time
  */
-extern "C" void cAnimFrame_getDeriv(cAnimFrame* self, sImV4_351660* vel, sImV4_351660* rotVel, float time)
+extern "C" void cAnimFrame_getDeriv(cAnimFrame* self, t4Vector* vel, t4Vector* rotVel, float time)
 {
     float out[16];
-    sImCurve_351660** curves = (sImCurve_351660**)self->AnimRecord->m_pChannels;
+    tChannelRecord** curves = self->AnimRecord->m_pChannels;
     int* cur = (int*)self;
     int mask = 1;
     float* outRate = out;
     for (int i = 0; i < 16; i++, mask <<= 1, outRate++) {
-        sImCurve_351660* channel = *curves;
+        tChannelRecord* channel = *curves;
         if (self->AnimRecord->m_ChannelMask & mask) {
-            tSegmentRecord* segment = &channel->segs[*cur];
+            tSegmentRecord* segment = &channel->m_Segments[*cur];
             if (!inRange_351660(segment, time)) {
                 segment = (tSegmentRecord*)cAnimChannel_nextSegment((sImRangeTable*)channel, cur, time);
             }
@@ -377,8 +376,8 @@ extern "C" void cAnimFrame_getDeriv(cAnimFrame* self, sImV4_351660* vel, sImV4_3
             *outRate = 0.0f;
         }
     }
-    *vel = sImV4_351660(out[0], out[1], out[2], 0.0f);
-    *rotVel = sImV4_351660(-out[3], -out[4], -out[5], 0.0f);
+    *vel = t4VectorCtor(out[0], out[1], out[2], 0.0f);
+    *rotVel = t4VectorCtor(-out[3], -out[4], -out[5], 0.0f);
 }
 #endif
 
@@ -401,9 +400,9 @@ extern "C" void cMeshAnimFrame_update(cMeshAnimFrame* self)
     cAnimFrame_update(self);
     float rotRad[3];
     float sc[3][2];
-    rotRad[0] = -((float*)&self->Vals[3])[0] * 0.01745329424738884f;
-    rotRad[1] = -((float*)&self->Vals[3])[1] * 0.01745329424738884f;
-    rotRad[2] = -((float*)&self->Vals[3])[2] * 0.01745329424738884f;
+    rotRad[0] = -self->Vals[3] * 0.01745329424738884f;
+    rotRad[1] = -self->Vals[4] * 0.01745329424738884f;
+    rotRad[2] = -self->Vals[5] * 0.01745329424738884f;
     fSinCos(&sc[0][0], &sc[0][1], rotRad[0]);
     fSinCos(&sc[1][0], &sc[1][1], rotRad[1]);
     fSinCos(&sc[2][0], &sc[2][1], rotRad[2]);
@@ -416,22 +415,22 @@ extern "C" void cMeshAnimFrame_update(cMeshAnimFrame* self)
     float sxsy = sx * sy;
     float cxsy = cx * sy;
     float cxsz = cx * sz;
-    ((float (*)[4])&self->FrameMatrix)[0][0] = cy * cz;
-    ((float (*)[4])&self->FrameMatrix)[0][1] = -cy * sz;
-    ((float (*)[4])&self->FrameMatrix)[0][2] = sy;
-    ((float (*)[4])&self->FrameMatrix)[0][3] = 0.0f;
-    ((float (*)[4])&self->FrameMatrix)[1][0] = sxsy * cz + cxsz;
-    ((float (*)[4])&self->FrameMatrix)[1][1] = cx * cz - sxsy * sz;
-    ((float (*)[4])&self->FrameMatrix)[1][2] = -sx * cy;
-    ((float (*)[4])&self->FrameMatrix)[1][3] = 0.0f;
-    ((float (*)[4])&self->FrameMatrix)[2][0] = sx * sz - cxsy * cz;
-    ((float (*)[4])&self->FrameMatrix)[2][1] = cxsz * sy + sx * cz;
-    ((float (*)[4])&self->FrameMatrix)[2][2] = cx * cy;
-    ((float (*)[4])&self->FrameMatrix)[2][3] = 0.0f;
-    ((float (*)[4])&self->FrameMatrix)[3][0] = self->Vals[0];
-    ((float (*)[4])&self->FrameMatrix)[3][1] = self->Vals[1];
-    ((float (*)[4])&self->FrameMatrix)[3][2] = self->Vals[2];
-    ((float (*)[4])&self->FrameMatrix)[3][3] = 1.0f;
+    self->FrameMatrix.row[0].x = cy * cz;
+    self->FrameMatrix.row[0].y = -cy * sz;
+    self->FrameMatrix.row[0].z = sy;
+    self->FrameMatrix.row[0].w = 0.0f;
+    self->FrameMatrix.row[1].x = sxsy * cz + cxsz;
+    self->FrameMatrix.row[1].y = cx * cz - sxsy * sz;
+    self->FrameMatrix.row[1].z = -sx * cy;
+    self->FrameMatrix.row[1].w = 0.0f;
+    self->FrameMatrix.row[2].x = sx * sz - cxsy * cz;
+    self->FrameMatrix.row[2].y = cxsz * sy + sx * cz;
+    self->FrameMatrix.row[2].z = cx * cy;
+    self->FrameMatrix.row[2].w = 0.0f;
+    self->FrameMatrix.row[3].x = self->Vals[0];
+    self->FrameMatrix.row[3].y = self->Vals[1];
+    self->FrameMatrix.row[3].z = self->Vals[2];
+    self->FrameMatrix.row[3].w = 1.0f;
 }
 #endif
 
@@ -927,10 +926,6 @@ extern void* cMeshAnimNode_vtbl[];
 inline void* operator new[](unsigned int, void* p) { return p; }
 
 
-struct sInstElem2168 {
-    float v[4];
-    sInstElem2168() {}
-};
 
 /**
  * Rebuilds a mesh-animation node (an instance whose meshes fly apart) from a replay frame.
@@ -947,10 +942,10 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, 
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     VPTR_OF(cObjNode, self) = cMeshAnimNode_vtbl;
-    new ((char*)&self->Qrot[0]) sInstElem2168[24];
-    new ((char*)&self->Axis[0]) sInstElem2168[24];
-    new ((char*)&self->Angle[0]) sInstElem2168[24];
-    new ((char*)&self->Pos[16]) sInstElem2168[24];
+    new ((char*)&self->Qrot[0]) t4VectorCtor[24];
+    new ((char*)&self->Axis[0]) t4VectorCtor[24];
+    new ((char*)&self->Angle[0]) t4VectorCtor[24];
+    new ((char*)&self->Pos[16]) t4VectorCtor[24];
     stream->read((char*)&self->Life, 0xC);
     self->Life = -1.0f;
     return ((void*)self);
@@ -985,11 +980,6 @@ INCLUDE_ASM("object/instanceman", cMeshAnimNode_init);
 #ifdef SKIP_ASM
 unsigned int BXrand();
 
-struct sV4_352230 {
-    float x, y, z, w;
-    sV4_352230() {}
-    sV4_352230(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
 
 
 static inline float randf_352230()
@@ -1013,9 +1003,9 @@ static inline float randScale_352230(float s)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV4_352230 Normalize_352230(const sV4_352230& v)
+static inline t4VectorCtor Normalize_352230(const t4Vector& v)
 {
-    sV4_352230 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1034,9 +1024,9 @@ static inline sV4_352230 Normalize_352230(const sV4_352230& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_352230 Scale_352230(const sV4_352230& v, float s)
+static inline t4VectorCtor Scale_352230(const t4Vector& v, float s)
 {
-    sV4_352230 r;
+    t4VectorCtor r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1051,7 +1041,7 @@ static inline sV4_352230 Scale_352230(const sV4_352230& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
+static inline void AddEq_352230(t4Vector& d, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1078,8 +1068,9 @@ extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
     tModelRecord* modelDef = (tModelRecord*)self->Instance->m_Model;
     for (int i = 0; i < modelDef->m_iNumMeshes; i++) {
         self->Angle[i] = self->AngVel * randRange_352230(0.5f, 1.0f);
-        ((sV4_352230*)&self->Axis[0])[i] = sV4_352230(randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), 0.0f);
-        ((sV4_352230*)&self->Axis[0])[i] = Normalize_352230(((sV4_352230*)&self->Axis[0])[i]);
+        self->Axis[i] = t4VectorCtor(randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f),
+                                     randRange_352230(-1.0f, 1.0f), 0.0f);
+        self->Axis[i] = Normalize_352230(self->Axis[i]);
     }
     for (int j = 0; j < modelDef->m_iNumMeshes; j++) {
         float vx = randScale_352230(self->Disperse.x) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
@@ -1091,8 +1082,8 @@ extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
             vy = -vy;
         }
         float vz = randScale_352230(self->Disperse.z) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
-        ((sV4_352230*)&self->Vel[0])[j] = Scale_352230(*(sV4_352230*)&self->InitVel, cAppMan_TheAppMan->TimerPeriod);
-        AddEq_352230(((sV4_352230*)&self->Vel[0])[j], sV4_352230(vx, vy, vz, 0.0f));
+        self->Vel[j] = Scale_352230(self->InitVel, cAppMan_TheAppMan->TimerPeriod);
+        AddEq_352230(self->Vel[j], t4VectorCtor(vx, vy, vz, 0.0f));
     }
 }
 #endif
@@ -1102,39 +1093,21 @@ INCLUDE_ASM("object/instanceman", cMeshAnimNode_update);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sV4_352500 {
-    float x, y, z, w;
-    sV4_352500() {}
-    sV4_352500(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-struct sQ_352500 : sV4_352500 {
-    sQ_352500(float aw, float ax, float ay, float az) { w = aw; x = ax; y = ay; z = az; }
-};
-
-struct sVE_352500 { short delta; short index; void (*fn)(void*, int); };
-
-struct sDebris_352500 {
-    char pad0[0xC];
-    sVE_352500* vt;         // 0xC
-    char pad10[0x8];
-    char* model;            // 0x18
-    float timer;            // 0x1C
-    char pad20[0x10];
-    sV4_352500 rot[24];     // 0x30
-    sV4_352500 axis[24];    // 0x1B0
-    float spin[24];         // 0x330
-    char pad390[0x20];
-    sV4_352500 pos[24];     // 0x3B0
-    sV4_352500 vel[24];     // 0x530
-    int state;              // 0x6B0
-    float gravity;          // 0x6B4
+// t4Vector built from a quaternion's (w, x, y, z), as the rotation step is.
+struct t4VectorWXYZ : public t4Vector {
+    t4VectorWXYZ(float aw, float ax, float ay, float az)
+    {
+        w = aw;
+        x = ax;
+        y = ay;
+        z = az;
+    }
 };
 
 // PORT: PS2-only VU0 inline asm (quaternion multiply).
-static inline sV4_352500 QMul_352500(const sV4_352500& a, const sV4_352500& b)
+static inline t4VectorCtor QMul_352500(const t4Vector& a, const t4Vector& b)
 {
-    sV4_352500 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1155,7 +1128,7 @@ static inline sV4_352500 QMul_352500(const sV4_352500& a, const sV4_352500& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place normalize via rsqrt).
-static inline void NormalizeEq_352500(sV4_352500& v)
+static inline void NormalizeEq_352500(t4Vector& v)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -1174,7 +1147,7 @@ static inline void NormalizeEq_352500(sV4_352500& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void AddEq_352500(sV4_352500& d, const sV4_352500& b)
+static inline void AddEq_352500(t4Vector& d, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1194,27 +1167,29 @@ static inline void AddEq_352500(sV4_352500& d, const sV4_352500& b)
  * Axis[i] (+0x1B0) and is renormalised, Pos (+0x3B0) advances by Vel (+0x530) with no time step, and Vel.z
  * drops by Drag (+0x6B4) * 980 * the tick period.
  */
-extern "C" void cMeshAnimNode_update(sDebris_352500* self)
+extern "C" void cMeshAnimNode_update(cMeshAnimNode* self)
 {
-    if (self->timer > 0.0f) {
-        self->timer -= cAppMan_TheAppMan->TimerPeriod;
-        if (self->timer <= 0.0f) {
-            self->vt[34].fn(vthis(self, self->vt[34]), 1);
+    if (self->Life > 0.0f) {
+        self->Life -= cAppMan_TheAppMan->TimerPeriod;
+        if (self->Life <= 0.0f) {
+            self->expire(1);
             return;
         }
     }
-    if (self->timer > 0.0f) {
-        tModelRecord* skel = (tModelRecord*)(*(char**)(self->model + 0x80));
+    if (self->Life > 0.0f) {
+        tModelRecord* skel = self->Instance->m_Model;
         for (int i = 0; i < skel->m_iNumMeshes; i++) {
             float sinHalf, cosHalf;
-            fSinCos(&sinHalf, &cosHalf, self->spin[i] * 0.5f);
-            sV4_352500* quat = &self->rot[i];
-            *quat = QMul_352500(*quat, sQ_352500(cosHalf, sinHalf * self->axis[i].x, sinHalf * self->axis[i].y, sinHalf * self->axis[i].z));
+            fSinCos(&sinHalf, &cosHalf, self->Angle[i] * 0.5f);
+            t4Vector* quat = &self->Qrot[i];
+            *quat = QMul_352500(*quat, t4VectorWXYZ(cosHalf, sinHalf * self->Axis[i].x, sinHalf * self->Axis[i].y,
+                                                    sinHalf * self->Axis[i].z));
             NormalizeEq_352500(*quat);
         }
         for (int i = 0; i < skel->m_iNumMeshes; i++) {
-            AddEq_352500(self->pos[i], self->vel[i]);
-            AddEq_352500(self->vel[i], sV4_352500(0.0f, 0.0f, self->gravity * -980.0f * cAppMan_TheAppMan->TimerPeriod, 0.0f));
+            AddEq_352500(self->Pos[i], self->Vel[i]);
+            AddEq_352500(self->Vel[i],
+                         t4VectorCtor(0.0f, 0.0f, self->Drag * -980.0f * cAppMan_TheAppMan->TimerPeriod, 0.0f));
         }
     }
 }
@@ -1280,21 +1255,10 @@ extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_render);
 #ifdef SKIP_ASM
 
-struct sMat_352810 {
-    t4Vector r[4];
-    sMat_352810() {}
-} __attribute__((aligned(16)));
-
-// tResourceID: section (8 bits) + unique id (24 bits).
-struct tResourceID_352810 {
-    unsigned int sid : 8;
-    unsigned int uid : 24;
+// t4Matrix with an empty constructor: the per-mesh matrix array runs it per element, as retail does.
+struct t4MatrixCtor : public t4Matrix {
+    t4MatrixCtor() {}
 };
-static inline void initRID_352810(tResourceID_352810* r, unsigned int sid, unsigned int uid)
-{
-    r->sid = sid;
-    r->uid = uid;
-}
 
 // cWorldCacheTable: per stream-data-type resource tables.
 struct sCacheType_352810 {
@@ -1313,10 +1277,10 @@ static inline bool tableValid_352810(cWorldCacheTable* t, int type, unsigned int
     return (((sCacheType_352810*)&t->m_pCacheTable[0])[type].entries[uid] & 0xFFFFFF00) != 0;
 }
 
-static inline bool cacheValid_352810(cWorldCache* c, int type, tResourceID_352810 rid)
+static inline bool cacheValid_352810(cWorldCache* c, int type, tResourceID rid)
 {
-    unsigned int uiSection = rid.sid;
-    unsigned int uiUID = rid.uid;
+    unsigned int uiSection = rid.m_bfRID.m_uiSectionID;
+    unsigned int uiUID = rid.m_bfRID.m_uiUID;
     if (uiSection == 0xFF) {
         return tableValid_352810((c->m_pSharedCacheTable), type, uiUID);
     }
@@ -1326,28 +1290,14 @@ static inline bool cacheValid_352810(cWorldCache* c, int type, tResourceID_35281
     return false;
 }
 
-struct sVE_352810 { short delta; short index; void (*fn)(void*, void*, void*, void*, void*, int, int, float); };
-struct sRCtx_352810 {
-    char pad0[0x10D8];
-    sVE_352810* vt;         // 0x10D8
-};
-extern char t4mat_Identity_2810[] __asm__("t4mat_Identity");
-
-// cMeshAnimNode (On Tour: cMeshAnimNode::render).
-struct sDebris_352810 {
-    char pad0[0x18];
-    char* model;            // 0x18
-    float timer;            // 0x1C
-    char pad20[4];
-    float fade;             // 0x24
-    char pad28[8];
-    t4Vector rot[24];     // 0x30
-    char pad1B0[0x200];
-    t4Vector pos[24];     // 0x3B0
-};
+// The graphics manager's RenderModel (slot 95 of render/graphicsman.h) as this caller makes it: the opacity, the one
+// float argument, travels in $f12 wherever it is listed.
+typedef sVEntry<void(void*, const tInstanceRecord*, const tMaterialBlockRecord*, const t4Matrix*, const t4Matrix*,
+                     const t4Matrix*, int, float)> tRenderModelSlot;
+extern t4Matrix t4mat_Identity;
 
 // PORT: PS2-only VU0 inline asm (quaternion to rotation matrix, row 3 = (0,0,0,1)).
-static inline void QuatToMat_352810(sMat_352810* d, const t4Vector& q)
+static inline void QuatToMat_352810(t4Matrix* d, const t4Vector& q)
 {
     __asm__ __volatile__(
         "lqc2       $vf4, %1\n"
@@ -1387,9 +1337,9 @@ static inline void QuatToMat_352810(sMat_352810* d, const t4Vector& q)
         : "memory");
 }
 
-static inline void setOffset_352810(sMat_352810& m, const t4Vector& v)
+static inline void setOffset_352810(t4Matrix& m, const t4Vector& v)
 {
-    m.r[3] = v;
+    m.row[3] = v;
 }
 
 /**
@@ -1406,16 +1356,15 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
     if (self->Life <= 0.0f) {
         return;
     }
-    int numMaterials = *(int*)(char*)self->Instance->m_Model->m_MaterialBlock;
+    int numMaterials = self->Instance->m_Model->m_MaterialBlock->m_iNumMaterials;
     for (int i = 0; i < numMaterials; i++) {
-        short* pMaterialRecord = ((short**)((char*)self->Instance->m_MaterialBlock + 4))[i];
-        tResourceID_352810 resourceId;
-        initRID_352810(&resourceId, 0xFF, *pMaterialRecord);
+        tMaterialRecord* pMaterialRecord = self->Instance->m_MaterialBlock->GetMaterialRecordList()[i];
+        tResourceID resourceId(0xFF, pMaterialRecord->m_sTexture);
         if (!cacheValid_352810(cWorld_m_pTheWorld->m_pWorldCache, 9, resourceId)) {
             return;
         }
     }
-    sMat_352810 animMats[24];
+    t4MatrixCtor animMats[24];
     tModelRecord* pModel = (tModelRecord*)self->Instance->m_Model;
     for (int i = 0; i < pModel->m_iNumMeshes; i++) {
         QuatToMat_352810(&animMats[i], ((&self->Qrot[0]))[i]);
@@ -1426,7 +1375,9 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
         fade = self->Life;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ((sVE_352810*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[95].fn(vthis(ps2GraphicsMan, ((sVE_352810*)VPTR_OF(cGraphicsMan, ps2GraphicsMan))[95]), (char*)self->Instance, self->Instance->m_MaterialBlock, t4mat_Identity_2810, animMats, 0, 1056, fade);
+    tRenderModelSlot* vt = (tRenderModelSlot*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
+    vt[95].fn(vthis(ps2GraphicsMan, vt[95]), self->Instance, self->Instance->m_MaterialBlock, &t4mat_Identity, animMats,
+              0, 1056, fade);
 }
 #endif
 

@@ -11,12 +11,6 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_NewNonBindTexID);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_NBTexInfo[];
 
-struct cTexSlots367150 {
-    int unk_0x0;
-    int count;
-    void* slots[2000];
-    void** freeHead;
-};
 
 /**
  * Takes a free texture id from the texture manager and allocates its texture info.
@@ -30,13 +24,13 @@ struct cTexSlots367150 {
  */
 extern "C" int cTextureMan_NewNonBindTexID(cTextureMan* self)
 {
-    void** head = (void**)self->m_pNonBindFreeTexInfo;
-    int id = head - ((void**)&self->m_pTexInfo[0]);
-    self->m_pNonBindFreeTexInfo = (cLinkTexInfo*)((void**)*head);
+    cLinkTexInfo* head = self->m_pNonBindFreeTexInfo;
+    int id = head - self->m_pTexInfo;
+    self->m_pNonBindFreeTexInfo = head->pNextFree;
     self->m_iNumNonBindTextures++;
-    char* tex = (char*)&self->m_pTexInfo[0];
-    void** slot = (void**)(tex + (id << 2));
-    *slot = cMemMan_alloc(88, str_NBTexInfo, 0x21000000, 0);
+    cLinkTexInfo* texInfo = self->m_pTexInfo;
+    cLinkTexInfo* slot = texInfo + id;
+    slot->pTexInfo = (tTexInfo*)cMemMan_alloc(88, str_NBTexInfo, 0x21000000, 0);
     return id;
 }
 #endif
@@ -46,12 +40,6 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_DeleteNonBindTexID);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-struct cTexSlots3671C8 {
-    int unk_0x0;
-    int count;
-    void* slots[2000];
-    void* freeHead;
-};
 
 /**
  * Frees a non-bound texture id: deletes its texture info and returns the slot to the free list.
@@ -62,12 +50,12 @@ struct cTexSlots3671C8 {
  *
  * @param id  the texture id (slot index) to free
  */
-extern "C" void cTextureMan_DeleteNonBindTexID(cTexSlots3671C8* self, int id)
+extern "C" void cTextureMan_DeleteNonBindTexID(cTextureMan* self, int id)
 {
-    operator_delete((int*)self->slots[id]);
-    self->slots[id] = self->freeHead;
-    self->freeHead = &self->slots[id];
-    self->count--;
+    operator_delete((int*)self->m_pTexInfo[id].pTexInfo);
+    self->m_pTexInfo[id].pNextFree = self->m_pNonBindFreeTexInfo;
+    self->m_pNonBindFreeTexInfo = &self->m_pTexInfo[id];
+    self->m_iNumNonBindTextures--;
 }
 #endif
 
@@ -102,10 +90,10 @@ extern const char str_BTexInfo[];
  */
 extern "C" void cTextureMan_NewBindTexID(cTextureMan* self, int id)
 {
-    char* tex = (char*)&self->m_pTexInfo[0];
-    void** slot = (void**)(tex + (id << 2));
-    *slot = cMemMan_alloc(88, str_BTexInfo, 0x21000000, 0);
-    *(int*)self += 1;
+    cLinkTexInfo* texInfo = self->m_pTexInfo;
+    cLinkTexInfo* slot = texInfo + id;
+    slot->pTexInfo = (tTexInfo*)cMemMan_alloc(88, str_BTexInfo, 0x21000000, 0);
+    self->m_iNumBindTextures += 1;
 }
 #endif
 
@@ -114,11 +102,6 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_DeleteBindTexID);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-struct sGmPtrTable {
-    int count;
-    int pad_0x4;
-    int* entries[1];
-};
 
 /**
  * Frees a bound texture id: deletes its texture info, clears the slot and decrements the bound count (+0x0).
@@ -555,26 +538,6 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_RemoveTexture);
 void cMemMan_free(void* p);
 extern "C" void func_003663D8(void* self, int id);
 
-struct sGmTex7BC0 {
-    int owned;              // 0x0
-    char pad_0x4[0x8];
-    int kind;               // 0xC
-    char pad_0x10[0xC];
-    void* bufA;             // 0x1C
-    void* bufB;             // 0x20
-    char pad_0x24[0x4];
-    int slotA;              // 0x28
-    int slotB;              // 0x2C
-    int idA;                // 0x30
-    int idB;                // 0x34
-};
-
-struct sGmMan7BC0 {
-    int count;
-    int pad_0x4;
-    sGmTex7BC0* texs[1];    // 0x8
-};
-
 static inline void fill7BC0(int* p, int v)
 {
     for (int i = 1; i >= 0; i--) {
@@ -593,31 +556,30 @@ static inline void fill7BC0(int* p, int v)
  *
  * @param id  the texture id
  */
-extern "C" void cTextureMan_RemoveTexture(sGmMan7BC0* self, int id)
+extern "C" void cTextureMan_RemoveTexture(cTextureMan* self, int id)
 {
-    cTextureMan* selfBytes = (cTextureMan*)self;
-    sGmTex7BC0* tex = self->texs[id];
-    if (tex->slotA != -1) {
-        func_003663D8(tex->kind != 9 ? selfBytes->mMainHeap : selfBytes->mTempHeap, tex->idA);
+    tTexInfo* tex = self->m_pTexInfo[id].pTexInfo;
+    if (tex->mTexAddr != -1) {
+        func_003663D8(tex->mFormat != 9 ? self->mMainHeap : self->mTempHeap, tex->mTexBlock);
     }
-    if (tex->slotB != -1) {
-        func_003663D8(selfBytes->mMainHeap, tex->idB);
+    if (tex->mCLUTAddr != -1) {
+        func_003663D8(self->mMainHeap, tex->mCLUTBlock);
     }
-    if (tex->owned != 0) {
-        if (tex->bufA != 0) {
-            cMemMan_free(tex->bufA);
+    if (tex->mMemAlloc != 0) {
+        if (tex->mpTexels != 0) {
+            cMemMan_free(tex->mpTexels);
         }
-        if (tex->bufB != 0) {
-            cMemMan_free(tex->bufB);
+        if (tex->mCLUTData != 0) {
+            cMemMan_free(tex->mCLUTData);
         }
     }
     if (id < 1500) {
-        cTextureMan_DeleteBindTexID((cTextureMan*)((sGmPtrTable*)self), id);
+        cTextureMan_DeleteBindTexID(self, id);
     } else {
-        cTextureMan_DeleteNonBindTexID((cTexSlots3671C8*)self, id);
+        cTextureMan_DeleteNonBindTexID(self, id);
     }
-    fill7BC0((int*)(&selfBytes->mBoundTex[0]), -1);
-    selfBytes->mCLUTTex = -1;
+    fill7BC0(self->mBoundTex, -1);
+    self->mCLUTTex = -1;
 }
 #endif
 
@@ -1630,10 +1592,10 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        ((int*)&self->m_activeDrawState)[i] = ~mask[i];
+        self->m_activeDrawState.m_bitGroups[i] = ~mask[i];
     }
     for (j = 0; j < 2; j++) {
-        ((short*)(&self->m_activeDrawState.m_textureState))[j] = 0x7FFF;
+        self->m_activeDrawState.m_textureState.m_texid[j] = 0x7FFF;
     }
     self->SetActiveDrawState(*(const sDrawState*)mask);
 }
@@ -1668,20 +1630,6 @@ extern "C" void* SHAPE_locatez(void* src, const char* name);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char str_charshp_b[];
 
-struct sTexEnt_96C8 {
-    int handle;     // 0x0
-    char name[8];   // 0x4
-};
-
-
-struct sGfx_96C8 {
-    char pad0[0x278];
-    int numSrc;                 // 0x278
-    void** src;                 // 0x27C
-    sTexEnt_96C8 ents[256];     // 0x280
-    int count;                  // 0xE80
-};
-
 /**
  * Returns the texture id for a short texture name, loading and caching the texture on first use.
  *
@@ -1699,7 +1647,7 @@ struct sGfx_96C8 {
 // Look up (or load and cache) a texture by its 4-character name.
 extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* name)
 {
-    sGfx_96C8* self = (sGfx_96C8*)graphicsMan;
+    cGraphicsMan* self = graphicsMan;
     char buf[0x10];
     const char* namePtr = name;
     if (*namePtr) {
@@ -1709,21 +1657,23 @@ extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* 
         while (*namePtr && namePtr - name < 4);
     }
     buf[namePtr - name] = 0;
-    for (int i = 0; i < self->count; i++) {
-        if (strcmp(buf, self->ents[i].name) == 0)
-            return self->ents[i].handle;
+    for (int i = 0; i < self->mNumTexRefs; i++) {
+        if (strcmp(buf, self->mTexRefs[i].Name) == 0)
+            return self->mTexRefs[i].TextureID;
     }
-    strcpy(self->ents[self->count].name, buf);
-    for (int j = 0; j < self->numSrc; j++) {
-        void* shape = SHAPE_locatez(self->src[j], self->ents[self->count].name);
+    strcpy(self->mTexRefs[self->mNumTexRefs].Name, buf);
+    for (int j = 0; j < self->mNumTextureFiles; j++) {
+        void* shape = SHAPE_locatez(self->mTextureFiles[j], self->mTexRefs[self->mNumTexRefs].Name);
         if (shape != 0) {
-            sVEntry<int(void*, void*, const char*, int, int, int)>* vt = *(sVEntry<int(void*, void*, const char*, int, int, int)>**)((char*)self + 0x10D8);
-            self->ents[self->count].handle = vt[46].fn(vthis(self, vt[46]), shape, str_charshp_b, 0, 1, -1);
-            return self->ents[self->count++].handle;
+            sVEntry<int(void*, void*, const char*, int, int, int)>* vt =
+                (sVEntry<int(void*, void*, const char*, int, int, int)>*)VPTR_OF(cGraphicsMan, self);
+            self->mTexRefs[self->mNumTexRefs].TextureID =
+                vt[46].fn(vthis(self, vt[46]), shape, str_charshp_b, 0, 1, -1);
+            return self->mTexRefs[self->mNumTexRefs++].TextureID;
         }
     }
-    self->ents[self->count].handle = -1;
-    return self->ents[self->count++].handle;
+    self->mTexRefs[self->mNumTexRefs].TextureID = -1;
+    return self->mTexRefs[self->mNumTexRefs++].TextureID;
 }
 #endif
 

@@ -649,17 +649,17 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_recordEnter__
 /**
  * Pushes a trigger id onto a camera trigger stack and records it as the last entered trigger.
  *
- * Stores @p triggerId at TriggerIDStack[count] (+0x8 + 4 x count), in the last-entered word (+0x4) and increments the
- * count (+0x0). There is no check against the six slots. Called by cCameraTriggerMan_checkCollisions when the rider enters a trigger.
+ * Stores @p triggerId at TriggerIDStack[NumTriggers] and in LastEnterPlayed, then increments NumTriggers. There is
+ * no check against the six slots. Called by cCameraTriggerMan_checkCollisions when the rider enters a trigger.
  *
  * @param triggerId  the entered trigger's id (On Tour triggerID)
  */
 void cCameraTriggerStack_recordEnter(void* vself, int triggerId)
 {
     cCameraTriggerStack* self = (cCameraTriggerStack*)vself;
-    *(int*)((char*)self + (*(int*)self << 2) + 0x8) = triggerId;
+    self->TriggerIDStack[self->NumTriggers] = triggerId;
     self->LastEnterPlayed = triggerId;
-    *(int*)self = *(int*)self + 1;
+    self->NumTriggers = self->NumTriggers + 1;
 }
 #endif
 
@@ -1024,74 +1024,84 @@ extern "C" void doTriggerAction(sCamEvt_E1D8* evt, cRider* rider)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCTBoundObjEllipse_limitPoint);
 #ifdef SKIP_ASM
-struct sCtmV3_E560 {
-    float x, y, z;
-    sCtmV3_E560() {}
-    sCtmV3_E560(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+// The original's vector and matrix classes: the real types plus their constructors, unary minus and a matrix copy
+// that goes through VU0 (lqc2 / sqc2). cCTSpline_worldPoint uses them too.
+struct t3VectorCtor : public t3Vector {
+    t3VectorCtor() {}
+    t3VectorCtor(float ax, float ay, float az)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+    }
 };
 
-inline sCtmV3_E560 operator-(const sCtmV3_E560& a)
+inline t3VectorCtor operator-(const t3Vector& a)
 {
-    return sCtmV3_E560(-a.x, -a.y, -a.z);
+    return t3VectorCtor(-a.x, -a.y, -a.z);
 }
 
-struct sCtmV_E560 {
-    float x, y, z, w;
-    sCtmV_E560() {}
-    sCtmV_E560(const sCtmV3_E560& v, float aw) : x(v.x), y(v.y), z(v.z), w(aw) {}
-    sCtmV_E560(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-struct sCtmM_E560 {
-    float m[4][4];
-    sCtmM_E560() {}
-    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-    sCtmM_E560(const sCtmM_E560& s)
+struct t4VectorCtor : public t4Vector {
+    t4VectorCtor() {}
+    t4VectorCtor(const t3Vector& v, float aw)
     {
-        __asm__ __volatile__(
-            ".set noreorder\n"
-            "lqc2      $vf1, 0x0(%1)\n"
-            "lqc2      $vf2, 0x10(%1)\n"
-            "lqc2      $vf3, 0x20(%1)\n"
-            "lqc2      $vf4, 0x30(%1)\n"
-            "sqc2      $vf1, 0x0(%0)\n"
-            "sqc2      $vf2, 0x10(%0)\n"
-            "sqc2      $vf3, 0x20(%0)\n"
-            "sqc2      $vf4, 0x30(%0)\n"
-            ".set reorder\n"
-            :
-            : "r"(this), "r"(&s)
-            : "memory");
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        w = aw;
     }
-    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-    sCtmM_E560& operator=(const sCtmM_E560& s)
+    t4VectorCtor(float ax, float ay, float az, float aw)
     {
-        __asm__ __volatile__(
-            ".set noreorder\n"
-            "lqc2      $vf1, 0x0(%1)\n"
-            "lqc2      $vf2, 0x10(%1)\n"
-            "lqc2      $vf3, 0x20(%1)\n"
-            "lqc2      $vf4, 0x30(%1)\n"
-            "sqc2      $vf1, 0x0(%0)\n"
-            "sqc2      $vf2, 0x10(%0)\n"
-            "sqc2      $vf3, 0x20(%0)\n"
-            "sqc2      $vf4, 0x30(%0)\n"
-            ".set reorder\n"
-            :
-            : "r"(this), "r"(&s)
-            : "memory");
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx(t4Matrix* dst, const t4Matrix* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+struct t4MatrixVU : public t4Matrix {
+    t4MatrixVU() {}
+    t4MatrixVU(const t4Matrix& s) { vu0CopyMtx(this, &s); }
+    t4MatrixVU(const t4MatrixVU& s) { vu0CopyMtx(this, &s); }
+    t4MatrixVU& operator=(const t4Matrix& s)
+    {
+        vu0CopyMtx(this, &s);
+        return *this;
+    }
+    t4MatrixVU& operator=(const t4MatrixVU& s)
+    {
+        vu0CopyMtx(this, &s);
         return *this;
     }
 } __attribute__((aligned(16)));
 
-extern sCtmM_E560 t4mat_Identity_E560 __asm__("t4mat_Identity");
-extern sCtmV_E560 t4vect_XAxis_E560 __asm__("t4vect_XAxis");
-extern sCtmV_E560 t4vect_YAxis_E560 __asm__("t4vect_YAxis");
-extern sCtmV_E560 t4vect_ZAxis_E560 __asm__("t4vect_ZAxis");
+extern t4Matrix t4mat_Identity_E560 __asm__("t4mat_Identity");
+extern t4Vector t4vect_XAxis_E560 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_YAxis_E560 __asm__("t4vect_YAxis");
+extern t4Vector t4vect_ZAxis_E560 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void ctmMulMtx_E560(sCtmM_E560* dst, const sCtmM_E560* a, const sCtmM_E560* b)
+static inline void ctmMulMtx_E560(t4MatrixVU* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1130,7 +1140,7 @@ static inline void ctmMulMtx_E560(sCtmM_E560* dst, const sCtmM_E560* a, const sC
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void ctmTransMtx_E560(sCtmM_E560* m, const sCtmV_E560& v)
+static inline void ctmTransMtx_E560(t4MatrixVU* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1151,10 +1161,10 @@ static inline void ctmTransMtx_E560(sCtmM_E560* m, const sCtmV_E560& v)
 }
 
 // PORT: PS2-only VU0 inline asm (scale the rows of m by v: dst.row[i] = m.row[i] * v[i]).
-static inline sCtmM_E560 ctmScaleMtx_E560(const sCtmM_E560* m, const sCtmV_E560& v)
+static inline t4MatrixVU ctmScaleMtx_E560(const t4Matrix* m, const t4Vector& v)
 {
-    sCtmM_E560 d;
-    sCtmM_E560* dst = &d;
+    t4MatrixVU d;
+    t4MatrixVU* dst = &d;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2         $vf1, %2\n"
@@ -1178,9 +1188,9 @@ static inline sCtmM_E560 ctmScaleMtx_E560(const sCtmM_E560* m, const sCtmV_E560&
 }
 
 // PORT: PS2-only VU0 inline asm (out = m * v).
-static inline sCtmV_E560 ctmApplyMtx_E560(const sCtmM_E560* m, const sCtmV_E560& v)
+static inline t4VectorCtor ctmApplyMtx_E560(const t4Matrix* m, const t4Vector& v)
 {
-    sCtmV_E560 out;
+    t4VectorCtor out;
     __asm__(
         ".set noreorder\n"
         "lqc2         $vf8, %2\n"
@@ -1200,13 +1210,13 @@ static inline sCtmV_E560 ctmApplyMtx_E560(const sCtmM_E560* m, const sCtmV_E560&
     return out;
 }
 
-static inline void ctmRotAxis_E560(sCtmM_E560* m, const sCtmV_E560& axis, float angle)
+static inline void ctmRotAxis_E560(t4MatrixVU* m, const t4Vector& axis, float angle)
 {
     float s;
     float c;
     float one = 1.0f;
     fSinCos(&s, &c, angle);
-    sCtmM_E560 r;
+    t4MatrixVU r;
     float t = one - c;
     float x = axis.x;
     float y = axis.y;
@@ -1217,30 +1227,30 @@ static inline void ctmRotAxis_E560(sCtmM_E560* m, const sCtmV_E560& axis, float 
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    r.row[0].x = tx * x + c;
+    r.row[1].x = tx * y + sz;
+    r.row[2].x = tx * z - sy;
+    r.row[0].y = ty * x - sz;
+    r.row[1].y = ty * y + c;
+    r.row[2].y = ty * z + sx;
+    r.row[0].z = tz * x + sy;
+    r.row[1].z = tz * y - sx;
+    r.row[2].z = tz * z + c;
+    r.row[3].x = 0.0f;
+    r.row[3].y = 0.0f;
+    r.row[3].z = 0.0f;
+    r.row[0].w = 0.0f;
+    r.row[1].w = 0.0f;
+    r.row[2].w = 0.0f;
+    r.row[3].w = one;
     ctmMulMtx_E560(m, m, &r);
 }
 
 
 // PORT: PS2-only VU0 inline asm (normalize xyzw with vrsqrt).
-static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
+static inline t4VectorCtor ctmNormalize_E560(const t4Vector& v)
 {
-    sCtmV_E560 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1262,7 +1272,7 @@ static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
  * Keeps a point inside an ellipse camera bound object: a point outside is pulled onto the ellipsoid's surface along the
  * line to its centre.
  *
- * Maps the point into unit-sphere space with the inverse transform (scale by 1 / scale +0x18..+0x20, rotate by -heading
+ * Maps the point into unit-sphere space with the inverse transform (scale by 1 / Scale, rotate by -heading
  * about Z, -roll about Y, -pitch about X, translate by -position). If its length is below 1 the point is left alone;
  * otherwise it is normalised, mapped back with the forward transform (translate, pitch, roll, heading, scale) and
  * written back with w = 1. This is a radial projection, not the closest surface point. Slot 6 (limitPoint) of the
@@ -1273,16 +1283,16 @@ static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
  */
 // Pushes *p out to the surface of the trigger's ellipsoid when it lies inside: into trigger space
 // (inverse of cCTBoundObjLine_worldPoint1's transform), normalize, and back to world space.
-extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, sCtmV_E560* point)
+extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, t4Vector* point)
 {
-    sCtmM_E560 xform(t4mat_Identity_E560);
+    t4MatrixVU xform(t4mat_Identity_E560);
     float one = 1.0f;
-    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(one / src->Scale.x, one / src->Scale.y, one / src->Scale.z, one));
+    xform = ctmScaleMtx_E560(&xform, t4VectorCtor(one / src->Scale.x, one / src->Scale.y, one / src->Scale.z, one));
     ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, -src->Heading);
     ctmRotAxis_E560(&xform, t4vect_YAxis_E560, -src->Roll);
     ctmRotAxis_E560(&xform, t4vect_XAxis_E560, -src->Pitch);
-    ctmTransMtx_E560(&xform, sCtmV_E560(-*(sCtmV3_E560*)&src->Pos, one));
-    sCtmV_E560 localPt = ctmApplyMtx_E560(&xform, *point);
+    ctmTransMtx_E560(&xform, t4VectorCtor(-src->Pos, one));
+    t4VectorCtor localPt = ctmApplyMtx_E560(&xform, *point);
     localPt.w = 0.0f;
     if (localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z < one) {
         return;
@@ -1290,11 +1300,11 @@ extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, sCtmV_E56
     localPt = ctmNormalize_E560(localPt);
     localPt.w = one;
     xform = t4mat_Identity_E560;
-    ctmTransMtx_E560(&xform, sCtmV_E560(src->Pos.x, src->Pos.y, src->Pos.z, one));
+    ctmTransMtx_E560(&xform, t4VectorCtor(src->Pos.x, src->Pos.y, src->Pos.z, one));
     ctmRotAxis_E560(&xform, t4vect_XAxis_E560, src->Pitch);
     ctmRotAxis_E560(&xform, t4vect_YAxis_E560, src->Roll);
     ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, src->Heading);
-    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(src->Scale.x, src->Scale.y, src->Scale.z, one));
+    xform = ctmScaleMtx_E560(&xform, t4VectorCtor(src->Scale.x, src->Scale.y, src->Scale.z, one));
     *point = ctmApplyMtx_E560(&xform, localPt);
     point->w = one;
 }
@@ -2135,24 +2145,24 @@ static inline void ctmRotAxis(sCtmM* m, const sCtmV& axis, float angle)
 /**
  * Returns a line bound object's first end point in world space.
  *
- * Transforms Point[0] (+0x2C, w = 1) by translate(position +0x0), rotations by pitch (+0x10) about X, roll (+0x14)
- * about Y and heading (+0xC) about Z, and scale (+0x18). cChaseCameraController_createChaseAlgorithmBlend uses it with
+ * Transforms Point[0] (w = 1) by translate(Pos), rotations by Pitch about X, Roll about Y and Heading about Z, and
+ * scale(Scale). cChaseCameraController_createChaseAlgorithmBlend uses it with
  * cCTBoundObjLine_worldPoint2 to build the superpipe camera from a line bound object.
  *
  * @param src  the line bound object (this)
  * @return the world-space point, returned by value
  */
-// World position of the point at src+0x2C: translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
-extern "C" sCtmV cCTBoundObjLine_worldPoint1(char* src)
+// World position of Point[0]: translate(Pos) * rotations(Pitch, Roll, Heading) * scale(Scale).
+extern "C" sCtmV cCTBoundObjLine_worldPoint1(cCTBoundObjLine* src)
 {
     sCtmM transform(t4mat_Identity);
     float one = 1.0f;
-    ctmTransMtx(&transform, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis(&transform, t4vect_XAxis, *(float*)(src + 0x10));
-    ctmRotAxis(&transform, t4vect_YAxis, *(float*)(src + 0x14));
-    ctmRotAxis(&transform, t4vect_ZAxis, *(float*)(src + 0xC));
-    transform = ctmScaleMtx(&transform, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
-    return ctmApplyMtx(&transform, sCtmV(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), one));
+    ctmTransMtx(&transform, sCtmV(src->Pos.x, src->Pos.y, src->Pos.z, one));
+    ctmRotAxis(&transform, t4vect_XAxis, src->Pitch);
+    ctmRotAxis(&transform, t4vect_YAxis, src->Roll);
+    ctmRotAxis(&transform, t4vect_ZAxis, src->Heading);
+    transform = ctmScaleMtx(&transform, sCtmV(src->Scale.x, src->Scale.y, src->Scale.z, one));
+    return ctmApplyMtx(&transform, sCtmV(src->Point[0].x, src->Point[0].y, src->Point[0].z, one));
 }
 #endif
 
@@ -2168,7 +2178,7 @@ extern "C" void fSinCos(float* s, float* c, float angle);
 /**
  * Returns a line bound object's second end point in world space.
  *
- * Same transform as cCTBoundObjLine_worldPoint1, applied to Point[1] (+0x38). Used by
+ * Same transform as cCTBoundObjLine_worldPoint1, applied to Point[1]. Used by
  * cChaseCameraController_createChaseAlgorithmBlend for the superpipe camera.
  *
  * @param src  the line bound object (this)
@@ -2178,17 +2188,17 @@ extern "C" void fSinCos(float* s, float* c, float angle);
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
 // PORT: PS2-only VU0 inline asm (scale the rows of m by v: dst.row[i] = m.row[i] * v[i]).
 // PORT: PS2-only VU0 inline asm (out = m * v).
-// World position of the point at src+0x38: translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
-extern "C" sCtmV cCTBoundObjLine_worldPoint2(char* src)
+// World position of Point[1]: translate(Pos) * rotations(Pitch, Roll, Heading) * scale(Scale).
+extern "C" sCtmV cCTBoundObjLine_worldPoint2(cCTBoundObjLine* src)
 {
     sCtmM transform(t4mat_Identity);
     float one = 1.0f;
-    ctmTransMtx(&transform, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis(&transform, t4vect_XAxis, *(float*)(src + 0x10));
-    ctmRotAxis(&transform, t4vect_YAxis, *(float*)(src + 0x14));
-    ctmRotAxis(&transform, t4vect_ZAxis, *(float*)(src + 0xC));
-    transform = ctmScaleMtx(&transform, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
-    return ctmApplyMtx(&transform, sCtmV(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), one));
+    ctmTransMtx(&transform, sCtmV(src->Pos.x, src->Pos.y, src->Pos.z, one));
+    ctmRotAxis(&transform, t4vect_XAxis, src->Pitch);
+    ctmRotAxis(&transform, t4vect_YAxis, src->Roll);
+    ctmRotAxis(&transform, t4vect_ZAxis, src->Heading);
+    transform = ctmScaleMtx(&transform, sCtmV(src->Scale.x, src->Scale.y, src->Scale.z, one));
+    return ctmApplyMtx(&transform, sCtmV(src->Point[1].x, src->Point[1].y, src->Point[1].z, one));
 }
 #endif
 
@@ -2196,63 +2206,15 @@ extern "C" sCtmV cCTBoundObjLine_worldPoint2(char* src)
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCTSpline_worldPoint);
 #ifdef SKIP_ASM
 
-struct sCtmV_0D20 {
-    float x, y, z, w;
-    sCtmV_0D20() {}
-    sCtmV_0D20(const t3Vector& v, float aw) : x(v.x), y(v.y), z(v.z), w(aw) {}
-    sCtmV_0D20(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
 
-struct sCtmM_0D20 {
-    float m[4][4];
-    sCtmM_0D20() {}
-    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-    sCtmM_0D20(const sCtmM_0D20& s)
-    {
-        __asm__ __volatile__(
-            ".set noreorder\n"
-            "lqc2      $vf1, 0x0(%1)\n"
-            "lqc2      $vf2, 0x10(%1)\n"
-            "lqc2      $vf3, 0x20(%1)\n"
-            "lqc2      $vf4, 0x30(%1)\n"
-            "sqc2      $vf1, 0x0(%0)\n"
-            "sqc2      $vf2, 0x10(%0)\n"
-            "sqc2      $vf3, 0x20(%0)\n"
-            "sqc2      $vf4, 0x30(%0)\n"
-            ".set reorder\n"
-            :
-            : "r"(this), "r"(&s)
-            : "memory");
-    }
-    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-    sCtmM_0D20& operator=(const sCtmM_0D20& s)
-    {
-        __asm__ __volatile__(
-            ".set noreorder\n"
-            "lqc2      $vf1, 0x0(%1)\n"
-            "lqc2      $vf2, 0x10(%1)\n"
-            "lqc2      $vf3, 0x20(%1)\n"
-            "lqc2      $vf4, 0x30(%1)\n"
-            "sqc2      $vf1, 0x0(%0)\n"
-            "sqc2      $vf2, 0x10(%0)\n"
-            "sqc2      $vf3, 0x20(%0)\n"
-            "sqc2      $vf4, 0x30(%0)\n"
-            ".set reorder\n"
-            :
-            : "r"(this), "r"(&s)
-            : "memory");
-        return *this;
-    }
-} __attribute__((aligned(16)));
-
-extern sCtmM_0D20 t4mat_Identity_0D20 __asm__("t4mat_Identity");
-extern sCtmV_0D20 t4vect_XAxis_0D20 __asm__("t4vect_XAxis");
-extern sCtmV_0D20 t4vect_YAxis_0D20 __asm__("t4vect_YAxis");
-extern sCtmV_0D20 t4vect_ZAxis_0D20 __asm__("t4vect_ZAxis");
+extern t4Matrix t4mat_Identity_0D20 __asm__("t4mat_Identity");
+extern t4Vector t4vect_XAxis_0D20 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_YAxis_0D20 __asm__("t4vect_YAxis");
+extern t4Vector t4vect_ZAxis_0D20 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void ctmMulMtx_0D20(sCtmM_0D20* dst, const sCtmM_0D20* a, const sCtmM_0D20* b)
+static inline void ctmMulMtx_0D20(t4MatrixVU* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2291,7 +2253,7 @@ static inline void ctmMulMtx_0D20(sCtmM_0D20* dst, const sCtmM_0D20* a, const sC
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void ctmTransMtx_0D20(sCtmM_0D20* m, const sCtmV_0D20& v)
+static inline void ctmTransMtx_0D20(t4MatrixVU* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2312,10 +2274,10 @@ static inline void ctmTransMtx_0D20(sCtmM_0D20* m, const sCtmV_0D20& v)
 }
 
 // PORT: PS2-only VU0 inline asm (scale the rows of m by v: dst.row[i] = m.row[i] * v[i]).
-static inline sCtmM_0D20 ctmScaleMtx_0D20(const sCtmM_0D20* m, const sCtmV_0D20& v)
+static inline t4MatrixVU ctmScaleMtx_0D20(const t4Matrix* m, const t4Vector& v)
 {
-    sCtmM_0D20 d;
-    sCtmM_0D20* dst = &d;
+    t4MatrixVU d;
+    t4MatrixVU* dst = &d;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2         $vf1, %2\n"
@@ -2339,9 +2301,9 @@ static inline sCtmM_0D20 ctmScaleMtx_0D20(const sCtmM_0D20* m, const sCtmV_0D20&
 }
 
 // PORT: PS2-only VU0 inline asm (out = m * v).
-static inline sCtmV_0D20 ctmApplyMtx_0D20(const sCtmM_0D20* m, const sCtmV_0D20& v)
+static inline t4VectorCtor ctmApplyMtx_0D20(const t4Matrix* m, const t4Vector& v)
 {
-    sCtmV_0D20 out;
+    t4VectorCtor out;
     __asm__(
         ".set noreorder\n"
         "lqc2         $vf8, %2\n"
@@ -2361,13 +2323,13 @@ static inline sCtmV_0D20 ctmApplyMtx_0D20(const sCtmM_0D20* m, const sCtmV_0D20&
     return out;
 }
 
-static inline void ctmRotAxis_0D20(sCtmM_0D20* m, const sCtmV_0D20& axis, float angle)
+static inline void ctmRotAxis_0D20(t4MatrixVU* m, const t4Vector& axis, float angle)
 {
     float s;
     float c;
     float one = 1.0f;
     fSinCos(&s, &c, angle);
-    sCtmM_0D20 r;
+    t4MatrixVU r;
     float t = one - c;
     float x = axis.x;
     float y = axis.y;
@@ -2378,53 +2340,48 @@ static inline void ctmRotAxis_0D20(sCtmM_0D20* m, const sCtmV_0D20& axis, float 
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    r.row[0].x = tx * x + c;
+    r.row[1].x = tx * y + sz;
+    r.row[2].x = tx * z - sy;
+    r.row[0].y = ty * x - sz;
+    r.row[1].y = ty * y + c;
+    r.row[2].y = ty * z + sx;
+    r.row[0].z = tz * x + sy;
+    r.row[1].z = tz * y - sx;
+    r.row[2].z = tz * z + c;
+    r.row[3].x = 0.0f;
+    r.row[3].y = 0.0f;
+    r.row[3].z = 0.0f;
+    r.row[0].w = 0.0f;
+    r.row[1].w = 0.0f;
+    r.row[2].w = 0.0f;
+    r.row[3].w = one;
     ctmMulMtx_0D20(m, m, &r);
 }
-
-struct sCtmSrc_0D20 {
-    char pad_0x0[0x28];
-    t3Vector corners[4];      // 0x28 (count from the callers: corners 0..3)
-};
 
 
 /**
  * Returns one of a camera spline's four control points in world space.
  *
- * Transforms Point[@p corner] (+0x28 + 12 x @p corner, w = 1) by translate(position), rotations by pitch about X, roll
- * about Y and heading about Z, and scale. cChaseCameraController_createChaseAlgorithmBlend calls it for points 0..3 of
- * a spline action's spline to build a cSplineCamAlgorithm.
+ * Transforms Point[@p corner] (w = 1) by translate(Pos), rotations by Pitch about X, Roll about Y and Heading about
+ * Z, and scale(Scale). cChaseCameraController_createChaseAlgorithmBlend calls it for points 0..3 of a spline action's
+ * spline to build a cSplineCamAlgorithm.
  *
  * @param src  the camera spline (this, On Tour cCTSpline)
  * @param corner  which control point, 0..3 (On Tour i)
  * @return the world-space point, returned by value
  */
-// World position of corner `corner` (the 3-float points at src+0x28): translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
-extern "C" sCtmV_0D20 cCTSpline_worldPoint(char* src, int corner)
+// World position of Point[corner]: translate(Pos) * rotations(Pitch, Roll, Heading) * scale(Scale).
+extern "C" t4VectorCtor cCTSpline_worldPoint(cCTSpline* src, int corner)
 {
-    sCtmM_0D20 xform(t4mat_Identity_0D20);
+    t4MatrixVU xform(t4mat_Identity_0D20);
     float one = 1.0f;
-    ctmTransMtx_0D20(&xform, sCtmV_0D20(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis_0D20(&xform, t4vect_XAxis_0D20, *(float*)(src + 0x10));
-    ctmRotAxis_0D20(&xform, t4vect_YAxis_0D20, *(float*)(src + 0x14));
-    ctmRotAxis_0D20(&xform, t4vect_ZAxis_0D20, *(float*)(src + 0xC));
-    xform = ctmScaleMtx_0D20(&xform, sCtmV_0D20(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
-    return ctmApplyMtx_0D20(&xform, sCtmV_0D20(((sCtmSrc_0D20*)src)->corners[corner], one));
+    ctmTransMtx_0D20(&xform, t4VectorCtor(src->Pos.x, src->Pos.y, src->Pos.z, one));
+    ctmRotAxis_0D20(&xform, t4vect_XAxis_0D20, src->Pitch);
+    ctmRotAxis_0D20(&xform, t4vect_YAxis_0D20, src->Roll);
+    ctmRotAxis_0D20(&xform, t4vect_ZAxis_0D20, src->Heading);
+    xform = ctmScaleMtx_0D20(&xform, t4VectorCtor(src->Scale.x, src->Scale.y, src->Scale.z, one));
+    return ctmApplyMtx_0D20(&xform, t4VectorCtor(src->Point[corner], one));
 }
 #endif
 

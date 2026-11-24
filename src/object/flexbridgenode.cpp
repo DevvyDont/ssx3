@@ -307,34 +307,6 @@ INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_applyForce);
 
 
 
-class cBridge_6E38 {
-public:
-    char pad_0x0[0xC];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual t4Matrix* GetMatrix();
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -480,7 +452,7 @@ extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, tIntersectInfo
     if (intInfo->Face < 0) {
         return;
     }
-    t4Matrix* transform = ((cBridge_6E38*)self)->GetMatrix();
+    const t4Matrix* transform = self->getRootTransform();
     t4Vector relPos = vu0Sub_6E38(intInfo->Ipos, Pos_6E38(transform));
     t4Vector y = vu0MulMat_6E38(transform, vu0Norm_6E38(*(&data->BottomRightOffset)));
     t4Vector n = vu0MulMat_6E38(transform, (data->FaceNorms)[intInfo->Face]);
@@ -633,37 +605,34 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, tInte
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_intersect);
 #ifdef SKIP_ASM
-struct sFV_7268 {
-    float x, y, z, w;
-    sFV_7268() {}
-    sFV_7268(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
-
-
-struct sFM_7268 {
-    t4Vector r[4];
-} __attribute__((aligned(16)));
-
-extern sFV_7268 t4vect_Zero_v7268 __asm__("t4vect_Zero");
-
-
-
-
-struct sFList_7268 {
-    int pad0;
-    int count;          // 0x4
+// t4Vector with the constructors the original's vector class has (the hit position's scale is built in place).
+struct t4VectorCtor : public t4Vector {
+    t4VectorCtor() {}
+    t4VectorCtor(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
 };
 
+extern t4VectorCtor t4vect_Zero_v7268 __asm__("t4vect_Zero");
 
 
-typedef sFM_7268* (*GetMtxFn_7268)(void*);
-typedef void (*SetXformFn_7268)(void*, sFM_7268*, float);
+
+
+
+
+
+typedef t4Matrix* (*GetMtxFn_7268)(void*);
+typedef void (*SetXformFn_7268)(void*, t4Matrix*, float);
 typedef void (*VoidFn_7268)(void*);
 
 extern "C" int cWorldIntersectType_IsMeshInt(cWorldIntersectType* t, tPolyModelMesh* mesh, int flag, tIntersectInfo* out, int cap);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
-static inline void Copy_7268(sFM_7268* d, const sFM_7268* s)
+static inline void Copy_7268(t4Matrix* d, const t4Matrix* s)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -680,9 +649,9 @@ static inline void Copy_7268(sFM_7268* d, const sFM_7268* s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sFV_7268 Scale_7268(float s, const sFV_7268& v)
+static inline t4VectorCtor Scale_7268(float s, const t4VectorCtor& v)
 {
-    sFV_7268 r;
+    t4VectorCtor r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -697,9 +666,9 @@ static inline sFV_7268 Scale_7268(float s, const sFV_7268& v)
 }
 
 // PORT: PS2-only VU0 inline asm (m * v).
-static inline sFV_7268 MulVec_7268(const sFM_7268* m, const sFV_7268& v)
+static inline t4VectorCtor MulVec_7268(const t4Matrix* m, const t4VectorCtor& v)
 {
-    sFV_7268 r;
+    t4VectorCtor r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -717,14 +686,14 @@ static inline sFV_7268 MulVec_7268(const sFM_7268* m, const sFV_7268& v)
     return r;
 }
 
-static inline sFV_7268 Pos_7268(const sFM_7268* m)
+static inline t4VectorCtor Pos_7268(const t4Matrix* m)
 {
-    return *(const sFV_7268*)&m->r[3];
+    return *(const t4VectorCtor*)&m->row[3];
 }
 
-static inline sFV_7268 Mul_7268(const sFV_7268& a, const sFV_7268& b)
+static inline t4VectorCtor Mul_7268(const t4VectorCtor& a, const t4VectorCtor& b)
 {
-    return sFV_7268(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+    return t4VectorCtor(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
 }
 
 static inline void Reset_7268(tIntersectInfo* h)
@@ -737,25 +706,25 @@ static inline void Reset_7268(tIntersectInfo* h)
     h->Seg = -1;
     h->HitType = 2;
     h->Stype = -1;
-    (*(sFV_7268*)&h->Ivel) = t4vect_Zero_v7268;
-    (*(sFV_7268*)&h->Iangvel) = t4vect_Zero_v7268;
+    (*(t4VectorCtor*)&h->Ivel) = t4vect_Zero_v7268;
+    (*(t4VectorCtor*)&h->Iangvel) = t4vect_Zero_v7268;
     (*(int*)&h->T) = 0;
     (*(int*)&h->u) = 0;
     (*(int*)&h->v) = 0;
 }
 
 // Orthonormal inverse in place: transpose the 3x3 part, position = R^T * -t.
-static inline void TransposeInverse_7268(sFM_7268* t)
+static inline void TransposeInverse_7268(t4Matrix* t)
 {
     float tmp;
-    tmp = t->r[0].y; t->r[0].y = t->r[1].x; t->r[1].x = tmp;
-    tmp = t->r[0].z; t->r[0].z = t->r[2].x; t->r[2].x = tmp;
-    tmp = t->r[1].z; t->r[1].z = t->r[2].y; t->r[2].y = tmp;
-    sFV_7268 p = Scale_7268(-1.0f, Pos_7268(t));
+    tmp = t->row[0].y; t->row[0].y = t->row[1].x; t->row[1].x = tmp;
+    tmp = t->row[0].z; t->row[0].z = t->row[2].x; t->row[2].x = tmp;
+    tmp = t->row[1].z; t->row[1].z = t->row[2].y; t->row[2].y = tmp;
+    t4VectorCtor p = Scale_7268(-1.0f, Pos_7268(t));
     p.w = 0.0f;
     p = MulVec_7268(t, p);
     p.w = 1.0f;
-    *(sFV_7268*)&t->r[3] = p;
+    *(t4VectorCtor*)&t->row[3] = p;
 }
 
 /**
@@ -780,10 +749,10 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectT
     mesh.NumFaces = (self->Mesh.Width - 1) * 2;
     mesh.NumVertices = self->Mesh.Width * 2;
     (*(void**)&mesh.Face) = ((void*)self->Faces);
-    (*(sFV_7268**)&mesh.Vertex) = ((sFV_7268*)self->Verts);
-    (*(sFV_7268**)&mesh.Normal) = ((sFV_7268*)self->FaceNorms);
-    sFM_7268* matrix = (sFM_7268*)self->getRootTransform();
-    sFM_7268 inv;
+    (*(t4VectorCtor**)&mesh.Vertex) = ((t4VectorCtor*)self->Verts);
+    (*(t4VectorCtor**)&mesh.Normal) = ((t4VectorCtor*)self->FaceNorms);
+    t4Matrix* matrix = (t4Matrix*)self->getRootTransform();
+    t4Matrix inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
     tester->Transform(*(const t4Matrix*)&inv, 1.0f / (self->Instance)->m_fScale);
@@ -794,15 +763,17 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectT
         Reset_7268(hit);
         float dataScale = self->Instance->m_fScale;
         float one = 1.0f;
-        (*(sFV_7268*)&hit->Ipos) = MulVec_7268(matrix, Mul_7268((*(sFV_7268*)&hit->Ipos), sFV_7268(dataScale, dataScale, dataScale, one)));
-        (*(sFV_7268*)&hit->Inorm) = MulVec_7268(matrix, (*(sFV_7268*)&hit->Inorm));
+        (*(t4VectorCtor*)&hit->Ipos) = MulVec_7268(matrix, Mul_7268((*(t4VectorCtor*)&hit->Ipos),
+                                                                    t4VectorCtor(dataScale, dataScale, dataScale,
+                                                                                 one)));
+        (*(t4VectorCtor*)&hit->Inorm) = MulVec_7268(matrix, (*(t4VectorCtor*)&hit->Inorm));
         hit->HitType = 1;
         (*(void**)&hit->Inst) = self->Instance;
-        int k = ((sFList_7268*)(self->Instance)->m_Model)->count - 1;
+        int k = self->Instance->m_Model->m_iNumMeshes - 1;
         (*(int*)&hit->SphTree) = 0;
         hit->Mesh = k;
-        (*(sFV_7268*)&hit->Ivel) = t4vect_Zero_v7268;
-        (*(sFV_7268*)&hit->Iangvel) = t4vect_Zero_v7268;
+        (*(t4VectorCtor*)&hit->Ivel) = t4vect_Zero_v7268;
+        (*(t4VectorCtor*)&hit->Iangvel) = t4vect_Zero_v7268;
         hit->Stype = *(short*)(((char*)(self->Instance)->m_pCollideRecord) + k * 12 + 0x1A);
     }
     return n;
@@ -835,17 +806,10 @@ extern "C" void* cObjectInterface_getNash();
 // PORT: the unit declares nash_Nash_movenode with sBox00348058 (defined later); bound by asm label.
 extern "C" void nash_Nash_movenode_75D8(void* world, int type, int id, void* box, void* old) __asm__("nash_Nash_movenode");
 
-struct sV4_75D8 {
-    float x, y, z, w;
-    float X() const { return x; }
-    float Y() const { return y; }
-    float Z() const { return z; }
-} __attribute__((aligned(16)));
-
-struct sV3_75D8 {
-    float x, y, z;
-    sV3_75D8() {}
-    sV3_75D8& operator=(const sV4_75D8& v)
+// t3Vector with an empty constructor and assignment from a t4Vector (x, y, z), as the grid's position array needs.
+struct t3VectorFrom4 : public t3Vector {
+    t3VectorFrom4() {}
+    t3VectorFrom4& operator=(const t4Vector& v)
     {
         x = v.x;
         y = v.y;
@@ -854,24 +818,16 @@ struct sV3_75D8 {
     }
 };
 
-struct sMat_75D8 {
-    sV4_75D8 row[4];
-};
+extern t4Vector t4vect_ZAxis;
 
-
-
-struct sVEV_75D8 {
-    short delta;
-    short index;
-    void (*fn)(...);
-};
-
-
-
-extern sV4_75D8 t4vect_ZAxis;
+// A vector's components read through a call (the bound-box loop's min / max need it: a plain member read schedules
+// the float moves differently).
+static inline float X_75D8(const t4Vector& v) { return v.x; }
+static inline float Y_75D8(const t4Vector& v) { return v.y; }
+static inline float Z_75D8(const t4Vector& v) { return v.z; }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_75D8(const sV4_75D8& v)
+static inline float Length_75D8(const t4Vector& v)
 {
     float r;
     int t;
@@ -892,9 +848,9 @@ static inline float Length_75D8(const sV4_75D8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sV4_75D8 Scale_75D8(const sV4_75D8& v, float s)
+static inline t4Vector Scale_75D8(const t4Vector& v, float s)
 {
-    sV4_75D8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -909,9 +865,9 @@ static inline sV4_75D8 Scale_75D8(const sV4_75D8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sV4_75D8 Add_75D8(const sV4_75D8& a, const sV4_75D8& b)
+static inline t4Vector Add_75D8(const t4Vector& a, const t4Vector& b)
 {
-    sV4_75D8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -924,9 +880,9 @@ static inline sV4_75D8 Add_75D8(const sV4_75D8& a, const sV4_75D8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sV4_75D8 Sub_75D8(const sV4_75D8& a, const sV4_75D8& b)
+static inline t4Vector Sub_75D8(const t4Vector& a, const t4Vector& b)
 {
-    sV4_75D8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -939,9 +895,9 @@ static inline sV4_75D8 Sub_75D8(const sV4_75D8& a, const sV4_75D8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sV4_75D8 Cross_75D8(const sV4_75D8& a, const sV4_75D8& b)
+static inline t4Vector Cross_75D8(const t4Vector& a, const t4Vector& b)
 {
-    sV4_75D8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -956,9 +912,9 @@ static inline sV4_75D8 Cross_75D8(const sV4_75D8& a, const sV4_75D8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV4_75D8 Normalize_75D8(const sV4_75D8& v)
+static inline t4Vector Normalize_75D8(const t4Vector& v)
 {
-    sV4_75D8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -977,9 +933,9 @@ static inline sV4_75D8 Normalize_75D8(const sV4_75D8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sV4_75D8 MulMat_75D8(const sMat_75D8* m, const sV4_75D8& v)
+static inline t4Vector MulMat_75D8(const t4Matrix* m, const t4Vector& v)
 {
-    sV4_75D8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -1011,8 +967,8 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
 {
     cFlexBridgeNode* self = vself;
     int n = self->Mesh.Width;
-    sV4_75D8 upRef = Scale_75D8(t4vect_ZAxis, Length_75D8(*(sV4_75D8*)&self->BottomRightOffset));
-    sV4_75D8 sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(*(sV4_75D8*)&self->BottomLeftOffset));
+    t4Vector upRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->BottomRightOffset));
+    t4Vector sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->BottomLeftOffset));
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
     tSpringNode* node = self->Mesh.Nodes;
@@ -1020,46 +976,51 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
     for (i = 0; i < n; i++) {
         float sinAngle, cosAngle;
         fSinCos(&sinAngle, &cosAngle, node->O);
-        ((sV4_75D8*)self->Verts)[i] = Add_75D8(Add_75D8((*(sV4_75D8*)&node->P), Scale_75D8(*(sV4_75D8*)&self->BottomRightOffset, cosAngle)), Scale_75D8(upRef, sinAngle));
-        ((sV4_75D8*)self->Verts)[n + i] = Sub_75D8(Add_75D8((*(sV4_75D8*)&node->P), Scale_75D8(*(sV4_75D8*)&self->BottomLeftOffset, cosAngle)), Scale_75D8(sideRef, sinAngle));
+        self->Verts[i] =
+            Add_75D8(Add_75D8(node->P, Scale_75D8(self->BottomRightOffset, cosAngle)), Scale_75D8(upRef, sinAngle));
+        self->Verts[n + i] =
+            Sub_75D8(Add_75D8(node->P, Scale_75D8(self->BottomLeftOffset, cosAngle)), Scale_75D8(sideRef, sinAngle));
         node++;
     }
     int k;
     int j = 0;
     for (k = 0; k < ntris; k += 2) {
-        ((sV4_75D8*)self->FaceNorms)[k] = Normalize_75D8(Cross_75D8(Sub_75D8(((sV4_75D8*)self->Verts)[n + j + 1], ((sV4_75D8*)self->Verts)[j]), Sub_75D8(((sV4_75D8*)self->Verts)[n + j], ((sV4_75D8*)self->Verts)[j])));
-        ((sV4_75D8*)self->FaceNorms)[k + 1] = Normalize_75D8(Cross_75D8(Sub_75D8(((sV4_75D8*)self->Verts)[j + 1], ((sV4_75D8*)self->Verts)[j]), Sub_75D8(((sV4_75D8*)self->Verts)[n + j + 1], ((sV4_75D8*)self->Verts)[j])));
+        self->FaceNorms[k] = Normalize_75D8(Cross_75D8(Sub_75D8(self->Verts[n + j + 1], self->Verts[j]),
+                                                       Sub_75D8(self->Verts[n + j], self->Verts[j])));
+        self->FaceNorms[k + 1] = Normalize_75D8(Cross_75D8(Sub_75D8(self->Verts[j + 1], self->Verts[j]),
+                                                           Sub_75D8(self->Verts[n + j + 1], self->Verts[j])));
         j++;
     }
     tBoundBox* box = (&self->BoundBox);
-    sV3_75D8 pos[32];
+    t3VectorFrom4 pos[32];
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
-    sMat_75D8* matrix = (sMat_75D8*)self->getRootTransform();
+    t4Matrix* matrix = (t4Matrix*)self->getRootTransform();
     for (int vertexIndex = 0; vertexIndex < nverts; vertexIndex++) {
-        pos[vertexIndex] = ((sV4_75D8*)self->Verts)[vertexIndex];
-        sV4_75D8 w = MulMat_75D8(matrix, ((sV4_75D8*)self->Verts)[vertexIndex]);
-        minX = w.X() < minX ? w.X() : minX;
-        maxX = maxX < w.X() ? w.X() : maxX;
-        minY = w.Y() < minY ? w.Y() : minY;
-        maxY = maxY < w.Y() ? w.Y() : maxY;
-        minZ = w.Z() < minZ ? w.Z() : minZ;
-        maxZ = maxZ < w.Z() ? w.Z() : maxZ;
+        pos[vertexIndex] = self->Verts[vertexIndex];
+        t4Vector w = MulMat_75D8(matrix, self->Verts[vertexIndex]);
+        minX = X_75D8(w) < minX ? X_75D8(w) : minX;
+        maxX = maxX < X_75D8(w) ? X_75D8(w) : maxX;
+        minY = Y_75D8(w) < minY ? Y_75D8(w) : minY;
+        maxY = maxY < Y_75D8(w) ? Y_75D8(w) : maxY;
+        minZ = Z_75D8(w) < minZ ? Z_75D8(w) : minZ;
+        maxZ = maxZ < Z_75D8(w) ? Z_75D8(w) : maxZ;
     }
     tBoundBox old = *(&self->BoundBox);
-    sV4_75D8 corner;
+    t4Vector corner;
     corner.x = minX;
     corner.y = minY;
     corner.z = minZ;
     corner.w = 1.0f;
-    (*(sV4_75D8*)&(*(&self->BoundBox)).MinPoint) = corner;
+    self->BoundBox.MinPoint = corner;
     corner.x = maxX;
     corner.y = maxY;
     corner.z = maxZ;
-    (*(sV4_75D8*)&(*(&self->BoundBox)).MaxPoint) = corner;
+    self->BoundBox.MaxPoint = corner;
     int id = ((int)self->Instance);
     nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, id, box, &old);
-    ((sVEV_75D8*)(self->GridMesh)->mVtbl)[3].fn((char*)(self->GridMesh) + ((sVEV_75D8*)(self->GridMesh)->mVtbl)[3].delta, pos);
+    sVEntry<void(...)>* vt = (sVEntry<void(...)>*)self->GridMesh->mVtbl;
+    vt[3].fn(vthis(self->GridMesh, vt[3]), pos);
 }
 #endif
 
@@ -1067,17 +1028,6 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_render);
 #ifdef SKIP_ASM
 
-struct sRS_7B80 {
-    unsigned int f0_0 : 12;
-    unsigned int f0_12 : 8;
-    unsigned int f0_20 : 12;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 25;
-    int f8;
-    int fC;
-    int f10;
-};
 
 
 
@@ -1090,12 +1040,13 @@ static inline int IsLoaded_7B80(tInstanceRecord* m)
     return ok ? wc->m_HullPages[m->m_SMap.m_iHullID].m_State == 3 : 0;
 }
 
-struct sPair_7B80 { t4Vector r[4]; };
-struct sVE43_7B80 { short delta; short index; sPair_7B80 (*fn)(void*); };
-struct sVE93_7B80 { short delta; short index; int (*fn)(void*, void*, void*, sPair_7B80*); };
-struct sVE96_7B80 { short delta; short index; void (*fn)(void*, void*, int, int, int); };
-struct sVE7_7B80 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
-#define TOP_7B80(c) (*(sRS_7B80**)((c) + 0xE84))
+// The graphics manager's slots as this caller makes them (hand-made calls keep retail's order of the vtable reads):
+// GetNetMatrix (slot 43), ClipBoundBox (93) and RenderModel (96) of render/graphicsman.h, and the grid mesh's draw
+// (slot 7 of cGridMesh's vtable).
+typedef sVEntry<t4Matrix(void*)> tGetNetMatrixSlot;
+typedef sVEntry<int(void*, t4Vector*, t4Vector*, t4Matrix*)> tClipBoundBoxSlot;
+typedef sVEntry<void(void*, tInstanceRecord*, int, int, int)> tRenderModelSlot;
+typedef sVEntry<void(void*, const t4Matrix*, tMaterialBlockRecord*, void*)> tGridMeshRenderSlot;
 
 /**
  * Draws a flexible bridge: its strip mesh with the bridge's transform, or the instance model when there is no
@@ -1111,32 +1062,32 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
     if (!IsLoaded_7B80(model)) {
         return;
     }
-    char* ctx = (char*)cGraphicsMan_TheGraphicsMan;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     {
-        sVE93_7B80* vt = *(sVE93_7B80**)(ctx + 0x10D8);
-        char* thisp = ctx + vt[93].delta;
-        char* lo = (char*)&self->BoundBox;
-        char* hi = (char*)&self->BoundBox.MaxPoint;
-        sVE43_7B80* vt43 = *(sVE43_7B80**)(ctx + 0x10D8);
-        sPair_7B80 viewMatrix = vt43[43].fn(ctx + vt43[43].delta);
+        tClipBoundBoxSlot* vt = (tClipBoundBoxSlot*)VPTR_OF(cGraphicsMan, ctx);
+        void* thisp = vthis(ctx, vt[93]);
+        t4Vector* lo = &self->BoundBox.MinPoint;
+        t4Vector* hi = &self->BoundBox.MaxPoint;
+        tGetNetMatrixSlot* vt43 = (tGetNetMatrixSlot*)VPTR_OF(cGraphicsMan, ctx);
+        t4Matrix viewMatrix = vt43[43].fn(vthis(ctx, vt43[43]));
         if (vt[93].fn(thisp, lo, hi, &viewMatrix) == 1) {
             return;
         }
     }
-    void* mtx = (void*)self->getRootTransform();
-    TOP_7B80(ctx)[1] = TOP_7B80(ctx)[0];
-    sRS_7B80* state = TOP_7B80(ctx);
-    TOP_7B80(ctx) = state + 1;
-    state[1].f4_2 = 5;
+    const t4Matrix* mtx = self->getRootTransform();
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    sDrawState* state = ctx->m_pCurrentDrawState;
+    ctx->m_pCurrentDrawState = state + 1;
+    state[1].m_bitGroups[1] = ((int)state[1].m_bitGroups[1] & ~0x7C) | (5 << 2);
     cGridMesh* renderer = self->GridMesh;
-    if (((char*)renderer) != 0) {
-        sVE7_7B80* hv = (sVE7_7B80*)renderer->mVtbl;
-        hv[7].fn(((char*)renderer) + hv[7].delta, mtx, self->Instance->m_MaterialBlock, 0);
+    if (renderer != 0) {
+        tGridMeshRenderSlot* hv = (tGridMeshRenderSlot*)renderer->mVtbl;
+        hv[7].fn(vthis(renderer, hv[7]), mtx, self->Instance->m_MaterialBlock, 0);
     } else {
-        sVE96_7B80* ctxVtbl = *(sVE96_7B80**)(ctx + 0x10D8);
-        ctxVtbl[96].fn(ctx + ctxVtbl[96].delta, self->Instance, 0, 0, 0);
+        tRenderModelSlot* ctxVtbl = (tRenderModelSlot*)VPTR_OF(cGraphicsMan, ctx);
+        ctxVtbl[96].fn(vthis(ctx, ctxVtbl[96]), self->Instance, 0, 0, 0);
     }
-    TOP_7B80(ctx)--;
+    ctx->m_pCurrentDrawState--;
 }
 #endif
 
@@ -1176,9 +1127,10 @@ extern char cFlexRailNode_vtbl[];
 extern char str_FlexNodeMats[];
 extern char str_Tube_b[];
 
-struct sFlexSeg_347D90 {
-    int v[16];
-    sFlexSeg_347D90() {}
+// A segment matrix with an empty constructor: retail's new[] of the segments has one (with a plain t4Matrix array the
+// constructors get a smaller frame).
+struct tFlexNodeMat : public t4Matrix {
+    tFlexNodeMat() {}
 };
 
 
@@ -1203,12 +1155,12 @@ extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType
     self->NumNodes = 0;
     self->RailFlags = len;
     for (int i = 0; i < 8; i++) {
-        if (((unsigned int*)&def->InstId1)[i] != 0xFFFFFFFF) {
+        if ((&def->InstId1)[i] != 0xFFFFFFFF) {
             self->NumNodes += 1;
         }
     }
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(&self->Mats);
-    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
+    t4Matrix** segs = &self->Mats;
+    *segs = new (str_FlexNodeMats, 0x20000000, 0) tFlexNodeMat[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
     return ((char*)self);
 }
@@ -1233,11 +1185,11 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
  */
 extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket, cBxReplayFrame* stream)
 {
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(&self->Mats);
+    t4Matrix** segs = &self->Mats;
     cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
     VPTR_OF(cObjNode, self) = (void**)cFlexRailNode_vtbl;
     stream->read((char*)&self->NumNodes, 0x30);
-    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
+    *segs = new (str_FlexNodeMats, 0x20000000, 0) tFlexNodeMat[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
     return ((char*)self);
 }

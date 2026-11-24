@@ -29,6 +29,13 @@ struct cLunoTableRef {
     luno_cLunoTableData* table;
 };
 
+// The cookie g++ 2.95's new[] keeps in front of an array whose element type has a destructor (16 bytes, the
+// element count first); delete[] reads the count from it and frees from its start. A table's Entries array has one.
+struct tArrayNewCookie {
+    int count;
+    int pad[3];
+};
+
 void operator_delete(int* ptr);
 void cMemMan_free(void* ptr);
 extern "C" void luno_cLunoTable_destroyTable(cLunoTableRef* ref);
@@ -504,13 +511,7 @@ extern char str_cLunoTable[];
 typedef cLunoVar (*tLunoCFunc)(int numArgs, cLunoArg* args);
 extern tLunoCFunc gLunoCFunctions[] __asm__("D_00441F38");
 
-// Compiled code: a 16-byte header, the instruction words, then the function table.
-struct sLunoCodeHeader {
-    int Magic;
-    int FuncTable;
-    int FuncTableEnd;
-    int Pad;
-};
+// Compiled code: a 16-byte header (tChunkHeader, luno/lunofunc.h), the instruction words, then the function table.
 struct sLunoFuncEntry {
     int Name;
     int Start;
@@ -566,11 +567,13 @@ public:
 void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
 {
     const char* code = func.Code;
-    const int* ops = (const int*)(code + sizeof(sLunoCodeHeader));
-    int numOps = (((const sLunoCodeHeader*)code)->FuncTable - sizeof(sLunoCodeHeader)) / sizeof(int);
+    // ORIGINAL-PTR: a compiled Luno chunk is a file blob: its instruction words follow the tChunkHeader and its
+    // function table sits FunctionOffset bytes from the chunk's start
+    const int* ops = (const int*)(code + sizeof(tChunkHeader));
+    int numOps = (((const tChunkHeader*)code)->FunctionOffset - sizeof(tChunkHeader)) / sizeof(int);
     cLunoArg* args = 0;
     int argDepth = 0;
-    const sLunoFuncEntry* entry = (const sLunoFuncEntry*)(code + ((const sLunoCodeHeader*)code)->FuncTable);
+    const sLunoFuncEntry* entry = (const sLunoFuncEntry*)(code + ((const tChunkHeader*)code)->FunctionOffset);
     entry += func.Index;
     int argDepthMax = entry->NumArgs;
 
@@ -816,11 +819,11 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_readFromReplayFrame);
  * @param stream  the replay frame to read from
  * @param base  the address the chunk pointer was stored relative to
  */
-extern "C" void luno_cLunoFunc_readFromReplayFrame(luno_cLunoFunc* self, cBxReplayFrame* stream, int base)
+extern "C" void luno_cLunoFunc_readFromReplayFrame(luno_cLunoFunc* self, cBxReplayFrame* stream, const char* base)
 {
     int buf[2];
     stream->read((char*)&buf[0], 4);
-    self->Chunk = (const char*)(base + buf[0]);
+    self->Chunk = base + buf[0];
     stream->read((char*)&buf[1], 4);
     self->FuncNum = buf[1];
 }
@@ -841,16 +844,19 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTableData__cLunoTableData);
  */
 extern "C" void luno_cLunoTableData__cLunoTableData(luno_cLunoTableData* self, int flags)
 {
-    cLunoTableEntry* nodes = ((cLunoTableEntry*)self->Entries);
+    luno_cLunoTableEntry* nodes = self->Entries;
 
     if (nodes != 0) {
-        cLunoTableEntry* entry = nodes + ((int*)nodes)[-4];
+        tArrayNewCookie* cookies = (tArrayNewCookie*)nodes;
+        luno_cLunoTableEntry* entry = nodes + cookies[-1].count;
 
-        while (((cLunoTableEntry*)self->Entries) != entry) {
+        while (self->Entries != entry) {
             entry--;
-            entry->vtable[1].func(vthis(entry, entry->vtable[1]), 0);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)entry->mVtbl;
+            vt[1].fn(vthis(entry, vt[1]), 0);
         }
-        cMemMan_free((char*)((cLunoTableEntry*)self->Entries) - 0x10);
+        tArrayNewCookie* array = (tArrayNewCookie*)self->Entries;
+        cMemMan_free(&array[-1]);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1005,22 +1011,6 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 extern char str_TableData[];
 extern char D_00479890[];
 
-struct cLunoNode_224F68 {
-    cLunoValue key;
-    cLunoValue val;
-    cLunoNode_224F68* next;
-    void* vt;
-    cLunoNode_224F68()
-    {
-        vt = D_00479890;
-        key.type = 0;
-        key.word0 = 0;
-        val.type = 0;
-        val.word0 = 0;
-        next = 0;
-    }
-    ~cLunoNode_224F68() {}
-};
 
 /**
  * Empties a Luno table: destroys every entry of its array and allocates a fresh array of empty entries.
@@ -1034,16 +1024,19 @@ struct cLunoNode_224F68 {
  */
 extern "C" void luno_cLunoTable_emptyTable(cLunoTableRef* ref)
 {
-    if (((cLunoTableEntry*)ref->table->Entries) != 0) {
-        cLunoTableEntry* entry = ((cLunoTableEntry*)ref->table->Entries) + *(int*)((char*)((cLunoTableEntry*)ref->table->Entries) - 0x10);
-        while (((cLunoTableEntry*)ref->table->Entries) != entry) {
+    if (ref->table->Entries != 0) {
+        tArrayNewCookie* cookies = (tArrayNewCookie*)ref->table->Entries;
+        luno_cLunoTableEntry* entry = ref->table->Entries + cookies[-1].count;
+        while (ref->table->Entries != entry) {
             entry--;
-            entry->vtable[1].func(vthis(entry, entry->vtable[1]), 0);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)entry->mVtbl;
+            vt[1].fn(vthis(entry, vt[1]), 0);
         }
-        cMemMan_free((char*)((cLunoTableEntry*)ref->table->Entries) - 0x10);
+        tArrayNewCookie* array = (tArrayNewCookie*)ref->table->Entries;
+        cMemMan_free(&array[-1]);
     }
     cLunoTableEntry** slot = &(*(cLunoTableEntry**)&ref->table->Entries);
-    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_224F68[ref->table->Modulus + 1];
+    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[ref->table->Modulus + 1];
 }
 #endif
 
@@ -1115,7 +1108,7 @@ static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
 extern "C" cLunoValue* luno_cLunoTable_get(cLunoTableRef* self, unsigned int intKey)
 {
     luno_cLunoTableData* hashTable = self->table;
-    luno_cLunoTableEntry* n = (luno_cLunoTableEntry*)((cLunoTableEntry*)hashTable->Entries) + intKey % (unsigned int)hashTable->Modulus;
+    luno_cLunoTableEntry* n = hashTable->Entries + intKey % (unsigned int)hashTable->Modulus;
     if ((*(cLunoValue*)&n->Value).type != 0) {
         do {
             cLunoValue key;
@@ -1179,13 +1172,14 @@ static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
 extern "C" cLunoValue* luno_cLunoTable_get1(cLunoTableRef* self, cLunoValue* key)
 {
     luno_cLunoTableData* hashTable = self->table;
-    cLunoNode* n = (cLunoNode*)((cLunoTableEntry*)hashTable->Entries) + (unsigned int)key->word0 % (unsigned int)hashTable->Modulus;
-    if (n->value.type != 0) {
+    luno_cLunoTableEntry* n = hashTable->Entries + (unsigned int)key->word0 % (unsigned int)hashTable->Modulus;
+    if (n->Value.Type != 0) {
         do {
-            if (lunoKeyEquals(&n->key, key)) {
-                return &n->value;
+            // cLunoValue, this unit's script value {word0, word1, type}, has luno_cLunoVar's layout
+            if (lunoKeyEquals((cLunoValue*)&n->Index, key)) {
+                return (cLunoValue*)&n->Value;
             }
-            n = n->next;
+            n = n->Next;
         } while (n != 0);
     }
     return &luno_gLunoNil;
@@ -1206,7 +1200,7 @@ struct sLunoPair_set {
 // PORT: the game's operator new is cMemMan_alloc(size, tag, flags, 0); bound by asm label
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
-// Table chain node (same layout as cLunoNode / cLunoNode_224F68).
+// Table chain node (same layout as cLunoNode and luno_cLunoTableEntry).
 struct cLunoNode_set {
     cLunoValue key;            // 0x00
     cLunoValue value;          // 0x0C
@@ -1266,7 +1260,8 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
         return;
     }
     luno_cLunoTableData* lunoTable = self->table;
-    cLunoNode_set* n = (cLunoNode_set*)((cLunoTableEntry*)lunoTable->Entries) + (unsigned int)key->word0 % (unsigned int)lunoTable->Modulus;
+    // cLunoNode_set has luno_cLunoTableEntry's layout, with this unit's cLunoValue key and value
+    cLunoNode_set* n = (cLunoNode_set*)&lunoTable->Entries[(unsigned int)key->word0 % (unsigned int)lunoTable->Modulus];
     if (n->value.type == 0) {
         LUNO_ASSIGN_SET(n->key, key)
         LUNO_ASSIGN_SET(n->value, val)
@@ -1422,13 +1417,16 @@ struct cLunoNode_9A8 {
  */
 extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, cBxReplayFrame* stream, int base)
 {
-    if (((cLunoTableEntry*)self->table->Entries) != 0) {
-        cLunoTableEntry* node = ((cLunoTableEntry*)self->table->Entries) + *(int*)((char*)((cLunoTableEntry*)self->table->Entries) - 0x10);
-        while (((cLunoTableEntry*)self->table->Entries) != node) {
+    if (self->table->Entries != 0) {
+        tArrayNewCookie* cookies = (tArrayNewCookie*)self->table->Entries;
+        luno_cLunoTableEntry* node = self->table->Entries + cookies[-1].count;
+        while (self->table->Entries != node) {
             node--;
-            node->vtable[1].func(vthis(node, node->vtable[1]), 0);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)node->mVtbl;
+            vt[1].fn(vthis(node, vt[1]), 0);
         }
-        cMemMan_free((char*)((cLunoTableEntry*)self->table->Entries) - 0x10);
+        tArrayNewCookie* array = (tArrayNewCookie*)self->table->Entries;
+        cMemMan_free(&array[-1]);
     }
     stream->read((char*)self->table, 8);
     cLunoTableEntry** slot = &(*(cLunoTableEntry**)&self->table->Entries);
@@ -1534,7 +1532,7 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, cBxReplayFra
         luno_cLunoFunc pair;
         (*(int*)&pair.Chunk) = 0;
         pair.FuncNum = 0;
-        luno_cLunoFunc_readFromReplayFrame((luno_cLunoFunc*)(&pair), stream, base);
+        luno_cLunoFunc_readFromReplayFrame((luno_cLunoFunc*)(&pair), stream, (const char*)base);
         if (self->type == 4) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }

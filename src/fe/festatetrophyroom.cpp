@@ -9,6 +9,9 @@
 #include "fe/festatetrophyroom.h"
 #include "ui/uithing.h"
 #include "ui/uitext.h"
+#include "ui/uiicon.h"
+#include "ealib/shape.h"
+#include "be/berewarddb.h"
 #include "fe/fememcard.h"
 #include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
@@ -66,7 +69,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
+extern "C" const tTrophyInfo* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" int func_001CE6F0(int a, int b);
 extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern "C" void setChallengeName(void* text, int a1, int a2, int idx);
@@ -154,7 +157,8 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(cFEStateTrophyRoom* self, cUIT
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             } else if (i == 0) {
-                cUIText_setAsciiString((cUIText*)w, *(char**)cBERewardInterface_getTrophy(cBE_getInterface_Fv(cBE_getBE(), 13), self->mPeakNum, self->mTrophyType));
+                cUIText_setAsciiString((cUIText*)w, cBERewardInterface_getTrophy(cBE_getInterface_Fv(cBE_getBE(), 13),
+                                       self->mPeakNum, self->mTrophyType)->mNameStringID);
             } else {
                 setChallengeName(w, self->mPeakNum, self->mTrophyType, i - 1);
             }
@@ -201,20 +205,6 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int index);
 
-class cTrophyWidget_4698 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
 /**
  * Updates the big art and stats when a trophy row gets focus, and leaves the trophy room on back.
  *
@@ -232,9 +222,9 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
     }
     switch (msg) {
     case 6: {
-        cTrophyWidget_4698* w = (cTrophyWidget_4698*)self->mpBigIcon;
+        cUIIcon* w = self->mpBigIcon;
         if (w != 0) {
-            w->show(0);
+            w->setVisible(0);
         }
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, self->mPeakNum);
@@ -283,20 +273,6 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int getChallengeMedal(int rider, int a, int b, int c, int index);
 
-class cTrophyWidget_47A0 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
-
 /**
  * Shows the trophy room's big picture (+0x48, a cUIIcon) for a list row, or hides it.
  *
@@ -333,12 +309,12 @@ extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int in
     }
     if (textureId < 0) {
     hide:
-        ((cTrophyWidget_47A0*)self->mpBigIcon)->show(0);
+        self->mpBigIcon->setVisible(0);
     } else {
-        ((cTrophyWidget_47A0*)self->mpBigIcon)->show(1);
-        char* w = (char*)self->mpBigIcon;
-        *(int*)(w + 0x78) = textureId;
-        *(int*)(w + 0x7C) = 0;
+        self->mpBigIcon->setVisible(1);
+        cUIIcon* icon = self->mpBigIcon;
+        icon->mTextureID = textureId;
+        icon->mpTextureElem = 0;
     }
 }
 #endif
@@ -347,21 +323,6 @@ extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int in
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateStats);
 #ifdef SKIP_ASM
 extern "C" void setChallengeStats(void* widget, signed char rider, int a2, int a3, int a4, int index);
-
-// Real virtual class so g++ emits the vcall itself (vptr at +8, after 8 bytes of data).
-class cTrophyWidget_4890 {
-public:
-    int pad0, pad4;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void show(int on);
-};
 
 /**
  * Shows the trophy room's stats text (+0x4C) for a challenge row, or hides it for row 0 (the trophy).
@@ -373,12 +334,12 @@ public:
  */
 extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int index)
 {
-    cTrophyWidget_4890* widget = (cTrophyWidget_4890*)self->mpStats;
+    cUIText* widget = self->mpStats;
     if (widget != 0) {
         if (index == 0) {
-            widget->show(0);
+            widget->setVisible(0);
         } else {
-            widget->show(1);
+            widget->setVisible(1);
             setChallengeStats(self->mpStats, self->mUserNum,
                               self->mCharID, self->mPeakNum,
                               self->mTrophyType, index - 1);
@@ -393,9 +354,9 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_loadTextures);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
-extern "C" char* cBERewardInterface_getMedal(void* self, int a1, int a2);
-extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+extern "C" const tTrophyInfo* cBERewardInterface_getTrophy(void* self, int a1, int a2);
+extern "C" const tMedalInfo* cBERewardInterface_getMedal(void* self, int a1, int a2);
+extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int a4, int a5);
 
 struct sTrophyRoom_4918 {
     char pad[0x50];
@@ -411,7 +372,7 @@ struct sTrophyRoom_4918 {
  * Requests the trophy room's five images from the FE file cache.
  *
  * On the cache at RealFE + 0x1A70, bank +0x50 (the character), func_0019DA10 (with 10, 1, 0) loads the trophy's image
- * (the name at +4 of cBERewardInterface_getTrophy for peak +0x54 and trophy +0x58) into slot index +0x74[0], and the
+ * (mpTextureFileName of cBERewardInterface_getTrophy for peak +0x54 and trophy +0x58) into slot index +0x74[0], and the
  * image of each of the trophy's four medals that has a name (cBERewardInterface_getMedal) into +0x74[1-4]. +0x5C counts
  * the requests. Called by the trophy room's constructor cFEStateTrophyRoom_cFEStateTrophyRoom.
  */
@@ -419,12 +380,13 @@ extern "C" void cFEStateTrophyRoom_loadTextures(cFEStateTrophyRoom* self)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* snd = SSXApp->RealFE->mBoltFileManager;
-    self->mTextureFileIndex[0] = func_0019DA10(snd, self->mCharID, *(int*)(cBERewardInterface_getTrophy(pi, self->mPeakNum, self->mTrophyType) + 4), 10, 1, 0);
+    self->mTextureFileIndex[0] = func_0019DA10(snd, self->mCharID,
+        cBERewardInterface_getTrophy(pi, self->mPeakNum, self->mTrophyType)->mpTextureFileName, 10, 1, 0);
     self->mNumLoadingFiles = 1;
     for (int i = 0; i < 4; i++) {
-        int id = *(int*)(cBERewardInterface_getMedal(pi, self->mTrophyType, i) + 4);
-        if (id != 0) {
-            self->mTextureFileIndex[i + 1] = func_0019DA10(snd, self->mCharID, id, 10, 1, 0);
+        const char* name = cBERewardInterface_getMedal(pi, self->mTrophyType, i)->mpTextureFileName;
+        if (name != 0) {
+            self->mTextureFileIndex[i + 1] = func_0019DA10(snd, self->mCharID, name, 10, 1, 0);
             self->mNumLoadingFiles++;
         }
     }
@@ -445,7 +407,7 @@ extern char str_trph[];
  * Turns each finished trophy-room image load into a texture and redraws the big picture.
  *
  * For each of the five cache slots (+0x74) still pending whose file has loaded (func_0019E238 on RealFE + 0x1A70, bank
- * +0x50) it creates the texture "trph" from the file data (func_0019E2B0's pointer plus the offset at its +0x14)
+ * +0x50) it creates the texture "trph" from the first shape of the shape file func_0019E2B0 returns (tbl[0].offset)
  * through GrMan's vtable slot 46 (cPS2GraphicsMan_AddTexture in cPS2GraphicsMan_vtbl) into +0x60[i], releases the file
  * (func_0019DC20), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
  * (cFEStateTrophyRoom_updateBigArt with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
@@ -459,8 +421,11 @@ extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophy
     int i;
     for (i = 0; i < 5; i++) {
         if (self->mTextureFileIndex[i] >= 0 && func_0019E238(mgr, self->mCharID, self->mTextureFileIndex[i]) != 0) {
-            char* fileData = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex[i]);
-            self->mTextureIDs[i] = GrMan->AddTexture((const SHAPE*)(fileData + *(int*)(fileData + 0x14)), str_trph, 0, 1, -1);
+            SHAPEFILE* fileData = (SHAPEFILE*)func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex[i]);
+            // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file
+            // (a file blob)
+            const SHAPE* shape = (const SHAPE*)((char*)fileData + fileData->tbl[0].offset);
+            self->mTextureIDs[i] = GrMan->AddTexture(shape, str_trph, 0, 1, -1);
             func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex[i]);
             self->mTextureFileIndex[i] = -1;
             self->mNumLoadingFiles--;
@@ -1332,7 +1297,7 @@ extern "C" void cFEMemCard_writeStart(void)
     char slot[0x200];
     char fmt1[0x200];
     char fmt2[0x200];
-    char* app = (char*)cSSXApp_getMCManager(SSXApp);
+    cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     int mode = cFEMemCard_mInstance->mType;
     if (mode == 2) {
         cMCOverlayManager_SettingsWriteStart(app);
@@ -1346,17 +1311,17 @@ extern "C" void cFEMemCard_writeStart(void)
         cMCOverlayManager_getFileName(app, 0, name, 65);
         func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
         cMCOverlayManager_getProductCode(slot, 0x100);
-        sprintf1_59A0(title, fmt1, slot, name, *(int*)(app + 0xF8) + 1);
+        sprintf1_59A0(title, fmt1, slot, name, app->mFileCursor + 1);
         cMCOverlayManager_WriteFile(app, title, (int)cFEMemCard_mInstance->mpStartReadBuffer, size);
     } else {
-        char* app2 = (char*)cSSXApp_getMCManager(SSXApp);
+        cMCOverlayManager* app2 = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
         int profileData = cBESaveInterface_generateSaveProfile(iface, cFEMemCard_mInstance->mPlayerIdx);
         int profileSize = cBESaveInterface_getSaveProfileSize();
         cMCOverlayManager_getFileName(app2, 1, name, 65);
         func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
         cMCOverlayManager_getProductCode(slot, 0x100);
-        sprintf1_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
+        sprintf1_59A0(title, fmt2, slot, name, app2->mFileCursor + 1);
         cMCOverlayManager_WriteFile(app2, title, profileData, profileSize);
     }
     cFEMemCard* fe = cFEMemCard_mInstance;
@@ -1388,20 +1353,6 @@ extern "C" void cMCOverlayManager_ReadData(void* self, char* a, int n);
 extern "C" int MEM_crc16(void* buf, int size, int seed);
 extern "C" void* memcpy(void*, const void*, unsigned int);
 
-struct sTrophyRoom_001D5C28 {
-    char pad0[0x1BC];
-    int mode;           // 0x1BC
-    char pad1C0[0x10];
-    char* cur;          // 0x1D0
-    void* buf;          // 0x1D4
-    char pad1D8[0x28];
-    int pending;        // 0x200
-    char pad204[0x24];
-    int state;          // 0x228
-};
-// PORT: cFEMemCard_mInstance holds the trophy room state pointer.
-extern sTrophyRoom_001D5C28* cFEMemCard_mInstance_tr __asm__("cFEMemCard_mInstance");
-
 /**
  * Memory card read progress callback: checks and loads a replay as it arrives.
  *
@@ -1415,24 +1366,24 @@ extern sTrophyRoom_001D5C28* cFEMemCard_mInstance_tr __asm__("cFEMemCard_mInstan
  */
 extern "C" int cFEMemCard_callbackReadUpdate(int size)
 {
-    sTrophyRoom_001D5C28* memCard = cFEMemCard_mInstance_tr;
-    int mode = memCard->mode;
+    cFEMemCard* memCard = cFEMemCard_mInstance;
+    int mode = memCard->mType;
     if (mode != 1) {
         return 1;
     }
-    if (memCard->pending != 0) {
-        memCard->pending = 0;
-        char* base = memCard->cur;
-        int crc = MEM_crc16(memCard->cur, cBE_getDataSize(cBE_getBE()) - 4, 64490);
-        cFEMemCard_mInstance_tr->cur += cBE_getDataSize(cBE_getBE()) - 4;
+    if (memCard->mLoadBEData != 0) {
+        memCard->mLoadBEData = 0;
+        char* base = memCard->mpReadBuffer;
+        int crc = MEM_crc16(memCard->mpReadBuffer, cBE_getDataSize(cBE_getBE()) - 4, 64490);
+        cFEMemCard_mInstance->mpReadBuffer += cBE_getDataSize(cBE_getBE()) - 4;
         int stored = 0;
-        memcpy(&stored, cFEMemCard_mInstance_tr->cur, 4);
-        cFEMemCard_mInstance_tr->cur += 4;
+        memcpy(&stored, cFEMemCard_mInstance->mpReadBuffer, 4);
+        cFEMemCard_mInstance->mpReadBuffer += 4;
         if (crc != stored) {
             cBESaveInterface_releaseReplayBuffer(cBE_getInterface_Fv(cBE_getBE(), 5));
-            cFEMemCard_mInstance_tr->buf = 0;
-            cFEMemCard_mInstance_tr->cur = 0;
-            cFEMemCard_mInstance_tr->state = 0;
+            cFEMemCard_mInstance->mpStartReadBuffer = 0;
+            cFEMemCard_mInstance->mpReadBuffer = 0;
+            cFEMemCard_mInstance->mBufferState = 0;
             return 0;
         }
         gWeHaveToClearTheBackEnd = mode;
@@ -1442,8 +1393,8 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
         if (size > 0x4000) {
             size = 0x4000;
         }
-        cMCOverlayManager_ReadData(cSSXApp_getMCManager(SSXApp), cFEMemCard_mInstance_tr->cur, size);
-        cFEMemCard_mInstance_tr->cur += size;
+        cMCOverlayManager_ReadData(cSSXApp_getMCManager(SSXApp), cFEMemCard_mInstance->mpReadBuffer, size);
+        cFEMemCard_mInstance->mpReadBuffer += size;
     }
     return 1;
 }

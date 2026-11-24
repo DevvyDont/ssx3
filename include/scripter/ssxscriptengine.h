@@ -396,29 +396,29 @@ CHECK_SIZE(tSSXHeaderCameraManager, 0x4);
 // cScriptObjCamera_CalculateBaseTransform_SE reads the three rotations (degrees) at On Tour's offsets;
 // cScriptEntityCamera_OnInSeqLock reads the sub type at +0x1C (src/scripter/bxscriptengine.cpp).
 struct tSSXHeaderCameraAlgorithmic {
-    float unk_000;                  // 0x00 [O] nearPlane
-    float unk_004;                  // 0x04 [O] farPlane
+    float nearPlane;                // 0x00 [O]; [U] cScriptRelativeAlgorithm_snap / _update: Near
+    float farPlane;                 // 0x04 [O]; [U] ditto: Far
     float baseRotZ;                 // 0x08 [O]; [U] -> rz
     float baseRotY;                 // 0x0C [O]; [U] -> ry
     float baseRotX;                 // 0x10 [O]; [U] -> rx
-    float unk_014;                  // 0x14 [O] stickiness
-    float unk_018;                  // 0x18 [O] maxSpeed
+    float stickiness;               // 0x14 [O]; [U] cScriptRelativeAlgorithm_update: blend weight of the ideal place
+    float maxSpeed;                 // 0x18 [O]; [U] cScriptRelativeAlgorithm_update: the per-second step cap
     signed char subType;            // 0x1C [O]; [U] OnInSeqLock: mSubType = this byte (entity type 3)
-    signed char unk_01D;            // 0x1D [O] subject
-    signed char unk_01E;            // 0x1E [O] areAnglesWorldRelative
+    signed char subject;            // 0x1D [O]; [U] snap / update: cSSXScriptEngine_GetSubjectRider's subject
+    signed char areAnglesWorldRelative; // 0x1E [O]; [U] snap / update: 0 = angles follow the rider's front row
     signed char unk_01F;            // 0x1F [O] padding
 };
 
-CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_000, 0x00);
-CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_004, 0x04);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, nearPlane, 0x00);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, farPlane, 0x04);
 CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, baseRotZ, 0x08);
 CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, baseRotY, 0x0C);
 CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, baseRotX, 0x10);
-CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_014, 0x14);
-CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_018, 0x18);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, stickiness, 0x14);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, maxSpeed, 0x18);
 CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, subType, 0x1C);
-CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_01D, 0x1D);
-CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_01E, 0x1E);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, subject, 0x1D);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, areAnglesWorldRelative, 0x1E);
 CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_01F, 0x1F);
 CHECK_SIZE(tSSXHeaderCameraAlgorithmic, 0x20);
 

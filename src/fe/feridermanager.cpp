@@ -13,6 +13,9 @@
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 #include "render/graphicsman.h"
+#include "ai/rideranim.h"
+#include "visualfx/boltonfx.h"
+#include "visualfx/attachedemitterfx.h"
 
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_initBoneMap);
@@ -214,21 +217,18 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_purge);
 #ifdef SKIP_ASM
-struct sVE_EBA0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
+// The virtual destructor (slot 1) of the three owned objects, called with flags 3 (destroy and free).
+typedef sVEntry<void(void*, int)> tDtorSlot;
 extern "C" void cAnimModel__cAnimModel(void* p, int flags);
 extern "C" void cFERider_cancelAllFiles(cFERider* self);
 
 /**
  * Releases everything the front-end rider holds and marks it empty.
  *
- * Destroys the anim model (+0x8, cAnimModel__cAnimModel with 3), the animation (+0xC), the bolt-on FX interface
- * (+0xC74) and the attached-emitter FX (+0xC70) through their destructors, clears those pointers, cancels the rider's
- * files (cFERider_cancelAllFiles), sets the character and profile (+0x0, +0x4) and +0xCD4 to -1 and zeroes +0xCC8 (shown) and
- * +0xC78.
+ * Destroys the anim model (mpAnimModel, cAnimModel__cAnimModel with 3), the animation (mpRiderAnim), the bolt-on FX
+ * interface (mpBoltOnFX) and the attached-emitter FX (mpAttachedEmitterFX) through their virtual destructors (slot 1,
+ * flags 3), clears those pointers, cancels the rider's files (cFERider_cancelAllFiles), sets mCharID, mProfileIndex and
+ * mSafeRenderCount to -1 and zeroes mVisible and mBoltPoints.
  */
 extern "C" void cFERider_purge(cFERider* self)
 {
@@ -236,20 +236,20 @@ extern "C" void cFERider_purge(cFERider* self)
     if (animModel != 0) {
         cAnimModel__cAnimModel(animModel, 3);
     }
-    char* ownedObject = (char*)self->mpRiderAnim;
-    if (ownedObject != 0) {
-        sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0x58);
-        vt[1].fn(vthis(ownedObject, vt[1]), 3);
+    cRiderAnim* riderAnim = self->mpRiderAnim;
+    if (riderAnim != 0) {
+        tDtorSlot* vt = (tDtorSlot*)riderAnim->mVtbl;
+        vt[1].fn(vthis(riderAnim, vt[1]), 3);
     }
-    ownedObject = (char*)self->mpBoltOnFX;
-    if (ownedObject != 0) {
-        sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0xC4);
-        vt[1].fn(vthis(ownedObject, vt[1]), 3);
+    cBoltOnFXInterface* boltOnFX = (cBoltOnFXInterface*)self->mpBoltOnFX;
+    if (boltOnFX != 0) {
+        tDtorSlot* vt = (tDtorSlot*)boltOnFX->mVtbl;
+        vt[1].fn(vthis(boltOnFX, vt[1]), 3);
     }
-    ownedObject = (char*)self->mpAttachedEmitterFX;
-    if (ownedObject != 0) {
-        sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0xA4);
-        vt[1].fn(vthis(ownedObject, vt[1]), 3);
+    cAttachedEmitterFX* emitterFX = (cAttachedEmitterFX*)self->mpAttachedEmitterFX;
+    if (emitterFX != 0) {
+        tDtorSlot* vt = (tDtorSlot*)emitterFX->mVtbl;
+        vt[1].fn(vthis(emitterFX, vt[1]), 3);
     }
     self->mpAnimModel = 0;
     self->mpRiderAnim = 0;
@@ -323,7 +323,6 @@ extern "C" void cGraphicsMan_SetTextureRefs(void* self, int count, void* src);
 extern "C" void cAnimModel_compile(void* self, int a1);
 // PORT: cMemMan_alloc bound as a placement operator new (gcc treats operator new as malloc-like)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-struct sAnimMemED80 { char d[0x70]; };
 extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self);
 extern "C" void cRiderAnim_linkToFERider(void* anim, void* rider);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
@@ -332,22 +331,28 @@ extern "C" void cFERider_initBoneMap(cFERider* self);
 extern char str_RiderAnim[];
 extern void* cRiderAnim_vtbl[];
 
-struct sQuadED80 { int x[4]; } __attribute__((aligned(16)));
-struct sHalfED80 {
-    sQuadED80 a, b;
-    sHalfED80() {}
+// tPose with the original's empty constructor (the pose pair below is an array of it; retail still runs the empty
+// array-constructor loop) and an assignment from a plain tPose.
+struct tPoseCtor : public tPose {
+    tPoseCtor() {}
+    tPoseCtor& operator=(const tPose& p)
+    {
+        tPose::operator=(p);
+        return *this;
+    }
 };
-extern sHalfED80 tPose_Identity;
+extern tPose tPose_Identity;
 extern "C" void cAnimModel_transform(void* model, void* pose);
 
 
 /**
  * Compiles the front-end rider's model and starts its animation.
  *
- * Sets +0xCB4, prepares the graphics manager's bone setup (cGraphicsMan_InitTextureFiles, cGraphicsMan_SetTextureRefs with the model's bones),
- * compiles the anim model (cAnimModel_compile with 1), creates its animation (cRiderAnimBase with cRiderAnim_vtbl, tag
- * "RiderAnim"), binds it to the rider (cRiderAnim_linkToFERider), plays animation 434, applies the identity pose
- * (cAnimModel_transform with tPose_Identity) and builds the bone map (cFERider_initBoneMap).
+ * Sets mCompiledModel, prepares the graphics manager's bone setup (cGraphicsMan_InitTextureFiles,
+ * cGraphicsMan_SetTextureRefs with the model's bones), compiles the anim model (cAnimModel_compile with 1), creates its
+ * animation (a cRiderAnim: cRiderAnimBase with cRiderAnim_vtbl, Rider and FERider cleared, tag "RiderAnim"), binds it
+ * to the rider (cRiderAnim_linkToFERider), plays animation 434, applies the identity pose (cAnimModel_transform with
+ * tPose_Identity) and builds the bone map (cFERider_initBoneMap).
  */
 extern "C" void cFERider_compileModel(cFERider* self)
 {
@@ -355,16 +360,16 @@ extern "C" void cFERider_compileModel(cFERider* self)
     cGraphicsMan_InitTextureFiles(GrMan, 0, 0);
     cGraphicsMan_SetTextureRefs(GrMan, self->mNumTextureRefs, ((char*)&self->mTextureRefs[0]));
     cAnimModel_compile(self->mpAnimModel, 1);
-    char* anim = (char*)new (str_RiderAnim, 0, 0) sAnimMemED80;
+    cRiderAnim* anim = new (str_RiderAnim, 0, 0) cRiderAnim;
     cRiderAnimBase_cRiderAnimBase(anim);
-    *(void***)(anim + 0x58) = cRiderAnim_vtbl;
-    *(int*)(anim + 0x60) = 0;
-    self->mpRiderAnim = (cRiderAnim*)anim;
-    *(int*)(anim + 0x64) = 0;
+    anim->mVtbl = cRiderAnim_vtbl;
+    anim->Rider = 0;
+    self->mpRiderAnim = anim;
+    anim->FERider = 0;
     cRiderAnim_linkToFERider(anim, (self));
     cRiderAnimBase_play(self->mpRiderAnim, 434, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->mpRiderAnim, 0);
-    sHalfED80 identityPose[2];
+    tPoseCtor identityPose[2];
     identityPose[1] = tPose_Identity;
     identityPose[0] = tPose_Identity;
     cAnimModel_transform(self->mpAnimModel, identityPose);
@@ -578,35 +583,34 @@ extern "C" void cFERider_update(cFERider* selfp)
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_updateModelPose);
 #ifdef SKIP_ASM
-struct sQuadF2D0 { int x[4]; } __attribute__((aligned(16)));
-struct sHalfF2D0 { sQuadF2D0 a, b; };
-extern sQuadF2D0 t4vect_Origin;
-extern sQuadF2D0 tquat_Identity;
+extern t4Vector t4vect_Origin;
+extern t4Vector tquat_Identity; // a tQuaternion; cAnimModel::localRot holds them as t4Vector
 extern "C" void cAnimModel_transform(void* model, void* pose);
 extern "C" void cAnimModel_buildSkelMatrices(void* model);
 
 /**
- * Rebuilds the front-end rider's skeleton from its rider and board transforms and marks the pose built (+0x14).
+ * Rebuilds the front-end rider's skeleton from its rider and board transforms and marks the pose built
+ * (mRiderIsPosed).
  *
- * With +0xCCC set uses the rider transform (+0xC30) for both; otherwise the rider (+0xC30) and board (+0xC50)
- * transforms, first resetting the two board bones (+0xCAC, +0xCB0) to the origin and tquat_Identity. Then
- * cAnimModel_transform and cAnimModel_buildSkelMatrices.
+ * With mAnimateBoard set uses the rider transform (mPose) for both; otherwise mPose and mBoardPose, first resetting the
+ * two board bones (mBoneMap[12], mBoneMap[13]) to the origin and tquat_Identity. Then cAnimModel_transform and
+ * cAnimModel_buildSkelMatrices.
  */
 extern "C" void cFERider_updateModelPose(cFERider* self)
 {
-    sHalfF2D0 poses[2];
+    tPose poses[2];
     if (self->mAnimateBoard != 0) {
-        poses[0] = *(sHalfF2D0*)&self->mPose;
-        poses[1] = *(sHalfF2D0*)&self->mPose;
+        poses[0] = self->mPose;
+        poses[1] = self->mPose;
         cAnimModel_transform(self->mpAnimModel, poses);
         cAnimModel_buildSkelMatrices(self->mpAnimModel);
     } else {
-        poses[0] = *(sHalfF2D0*)&self->mPose;
-        poses[1] = *(sHalfF2D0*)&self->mBoardPose;
-        ((sQuadF2D0*)self->mpAnimModel->localPos)[self->mBoneMap[12]] = t4vect_Origin;
-        ((sQuadF2D0*)self->mpAnimModel->localRot)[self->mBoneMap[12]] = tquat_Identity;
-        ((sQuadF2D0*)self->mpAnimModel->localPos)[self->mBoneMap[13]] = t4vect_Origin;
-        ((sQuadF2D0*)self->mpAnimModel->localRot)[self->mBoneMap[13]] = tquat_Identity;
+        poses[0] = self->mPose;
+        poses[1] = self->mBoardPose;
+        self->mpAnimModel->localPos[self->mBoneMap[12]] = t4vect_Origin;
+        self->mpAnimModel->localRot[self->mBoneMap[12]] = tquat_Identity;
+        self->mpAnimModel->localPos[self->mBoneMap[13]] = t4vect_Origin;
+        self->mpAnimModel->localRot[self->mBoneMap[13]] = tquat_Identity;
         cAnimModel_transform(self->mpAnimModel, poses);
         cAnimModel_buildSkelMatrices(self->mpAnimModel);
     }
@@ -1590,10 +1594,10 @@ void operator_delete(int* p);
 extern "C" void cFERiderManager__cFERiderManager(cFERiderManager* self, int flags)
 {
     cFERiderManager_purge(self);
-    if (((char*)self) != 0) {
-        char* slot = ((char*)self) + 0x19C0;
-        while (((char*)self) != slot) {
-            slot -= 0xCE0;
+    if (self != 0) {
+        cFERider* slot = self->mHumans + 2;
+        while (self->mHumans != slot) {
+            slot--;
             cFERider__cFERider(slot, 0);
         }
     }

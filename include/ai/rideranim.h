@@ -11,7 +11,7 @@
 //
 // Size 0x70: [R] cRider_loadRider allocates it with cMemMan_alloc(0x70, "RiderAnim") (D_004579B0), then
 // cRiderAnimBase_cRiderAnimBase, the cRiderAnim vtable at 0x58 and zeroes 0x60 / 0x64 (the same steps as
-// cRiderAnim_cRiderAnim); cFERider_compileModel allocates 0x70 too (sAnimMemED80). [O] On Tour's cRiderAnim is 0x80
+// cRiderAnim_cRiderAnim); cFERider_compileModel allocates 0x70 too (new cRiderAnim). [O] On Tour's cRiderAnim is 0x80
 // (its cRiderAnimBase is 0x10 bigger: 0x70), with Rider / FERider right after the base, at 0x70 / 0x74.
 // Base: cRiderAnimBase (animation/rideranimbase.h, 0x60), written out inline below with the same member names; the
 // class adds no virtuals of its own beyond the base's slots, so the base's vptr at 0x58 is the only one

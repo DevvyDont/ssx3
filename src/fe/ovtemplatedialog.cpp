@@ -2,11 +2,15 @@
 #include "common.h"
 #include "be/beinterface.h"
 #include "be/beintmission.h"
+#include "be/beintscore.h"
+#include "be/beintreward.h"
 #include "main/gamestate.h"
 #include "ui/uitext.h"
 #include "fe/ovstate.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
+#include "ui/uimenu.h"
+#include "replay/replay.h"
 #include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
 #include "fe/ovstatereplay.h"
@@ -171,10 +175,10 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
             return;
         }
         cOVStateManager_mStatus = 0;
-        char* scoreIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
-        char* rewardIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
+        cBEScoreInterface* scoreIface = (cBEScoreInterface*)cBE_getInterface_Fv(cBE_getBE(), 8);
+        cBERewardInterface* rewardIface = (cBERewardInterface*)cBE_getInterface_Fv(cBE_getBE(), 13);
         int any = 0;
-        if (*(int*)(scoreIface + 0x18) >= 0 || *(int*)(scoreIface + 0x1C) >= 0) any = 1;
+        if (scoreIface->mNewTrackHighScoreIndex[0] >= 0 || scoreIface->mNewTrackHighScoreIndex[1] >= 0) any = 1;
         if (any) {
             if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                 state = cOVStateManager_getResultsOverlay(kind, type);
@@ -183,7 +187,7 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
                 state = 0xF;
             }
         } else {
-            if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || *(int*)(rewardIface + 0x10) != 0) {
+            if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || rewardIface->mLastEventCashReward != 0) {
                 state = 0x10;
             } else {
                 state = cOVStateManager_getResultsOverlay(kind, type);
@@ -1338,35 +1342,6 @@ extern "C" int cOVStateManager_pauseOverlayActive(void)
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_allowPauseMenu);
 #ifdef SKIP_ASM
-class cUIState20CBE8 {
-public:
-    int pad[2];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual int allowPauseMenu();
-};
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
 extern "C" int cOVStateManager_pauseOverlayActive(void);
 
@@ -1383,9 +1358,9 @@ extern "C" int cOVStateManager_allowPauseMenu(void)
 {
     cUIEngine* mgr = SSXApp->Game->UI;
     if (cOVStateManager_pauseOverlayActive() == 0) {
-        cUIState20CBE8* topState = (cUIState20CBE8*)cUIStateStack_getCurrentState(&mgr->mStateStack);
+        cOVState* topState = (cOVState*)cUIStateStack_getCurrentState(&mgr->mStateStack);
         if (topState != 0) {
-            if (*(int*)((char*)topState + 0x1C) & 1) {
+            if (topState->mAttrState & 1) {
                 return 0;
             }
             return topState->allowPauseMenu();
@@ -1457,11 +1432,11 @@ extern int cOVStateManager_mIsPauseDialog;
 extern "C" void cOVStateManager_gotoNextOverlay(void)
 {
     cOVStateManager_mStatus = 0;
-    char* st = (char*)cUIStateStack_getCurrentState(&((SSXApp)->Game)->UI->mStateStack);
+    cOVState* st = (cOVState*)cUIStateStack_getCurrentState(&((SSXApp)->Game)->UI->mStateStack);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int kind = cBENewRaceInterface_newRace.cGameEvent;
     int type = *(int*)SSXApp->GameModeMan;
-    switch (*(int*)(st + 0x98)) {
+    switch (st->mOVID) {
     case 10:
     case 11:
         switch (cOVStateManager_mMiscData) {
@@ -1511,8 +1486,8 @@ extern "C" void cOVStateManager_gotoNextOverlay(void)
         if (cOVStateManager_mMiscData == 19) {
             cOVStateManager_triggerOverlay(19);
         } else {
-            char* rewardIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
-            if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || *(int*)(rewardIface + 0x10) != 0) {
+            cBERewardInterface* rewardIface = (cBERewardInterface*)cBE_getInterface_Fv(cBE_getBE(), 13);
+            if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || rewardIface->mLastEventCashReward != 0) {
                 cOVStateManager_triggerOverlay(0x10);
             } else {
                 cOVStateManager_triggerOverlay(cOVStateManager_getResultsOverlay(kind, type));
@@ -1622,9 +1597,9 @@ extern "C" void cOVStateManager_addPDATemplate(void)
 {
     if (cOVStateManager_mpPDATemplate == 0) {
         cUIEngine* mgr = SSXApp->Game->UI;
-        void* pdaTemplate = cMemMan_alloc(72, str_PDATemplate, 0x100, 0);
+        cPDATemplate* pdaTemplate = (cPDATemplate*)cMemMan_alloc(72, str_PDATemplate, 0x100, 0);
         cUIState_cUIState(pdaTemplate, mgr);
-        *(void**)((char*)pdaTemplate + 8) = cPDATemplate_vtbl;
+        VPTR_OF(cListNode, pdaTemplate) = (void**)cPDATemplate_vtbl;
         cOVStateManager_mpPDATemplate = pdaTemplate;
         cUIStateStack_pushExplicit(&mgr->mStateStack, pdaTemplate);
     }
@@ -1634,11 +1609,6 @@ extern "C" void cOVStateManager_addPDATemplate(void)
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_removePDATemplate);
 #ifdef SKIP_ASM
-class cOVTemplate20D190 {
-public:
-    int pad[2];
-    virtual ~cOVTemplate20D190();
-};
 extern "C" void cListNode_removeFromList(void* node);
 extern void* cOVStateManager_mpPDATemplate;
 
@@ -1652,7 +1622,7 @@ extern "C" void cOVStateManager_removePDATemplate(void)
 {
     if (cOVStateManager_mpPDATemplate != 0) {
         cListNode_removeFromList(cOVStateManager_mpPDATemplate);
-        delete (cOVTemplate20D190*)cOVStateManager_mpPDATemplate;
+        delete (cPDATemplate*)cOVStateManager_mpPDATemplate;
     }
     cOVStateManager_mpPDATemplate = 0;
 }
@@ -1943,7 +1913,6 @@ struct sP40_D5A8 { char pad[0x40]; char* f40; };
 struct sP18_D5A8 { char pad[0x18]; char* f18; };
 static inline char* Game_D5A8() { return ((char*)(SSXApp)->Game); }
 static inline char* Rider_D5A8() { return ((sP18_D5A8*)((sP40_D5A8*)((sGame_D5A8*)Game_D5A8())->f0C)->f40)->f18; }
-struct sStFlags_20D5A8 { char pad[0x1C]; unsigned int lo : 8; unsigned int mode : 6; };
 
 static inline void Play_20D5A8(char* self)
 {
@@ -2039,8 +2008,9 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 chk:
                 if (any) {
                     cUIEngine* ui = SSXApp->Game->UI;
-                    sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(cMemMan_alloc(564, str_Save_Profile, 0x100, 0), self->mpEngine, 1);
-                    st->mode = 1;
+                    cUIState* st = (cUIState*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(
+                        cMemMan_alloc(564, str_Save_Profile, 0x100, 0), self->mpEngine, 1);
+                    st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
                     cUIStateStack_pushSpecial(&ui->mStateStack, st, 0, 0);
                 } else {
                     cOVStateManager_triggerOverlay(38);
@@ -2084,8 +2054,11 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
             case 6: {
                 (self)->mRemovePDA = 0;
                 cUIEngine* ui = SSXApp->Game->UI;
-                sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), self->mpEngine, *(unsigned char*)&self->mCurrentCtrl, 0x18);
-                st->mode = 1;
+                cUIState* st =
+                    (cUIState*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0),
+                                                                 self->mpEngine, *(unsigned char*)&self->mCurrentCtrl,
+                                                                 0x18);
+                st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
                 cUIStateStack_pushSpecial(&ui->mStateStack, st, 0, 0);
                 break;
             }
@@ -2203,13 +2176,13 @@ extern "C" void cOVState_REPLAY_onCreateScreen(cOVState_REPLAY* self)
     self->mMaxBottom_y = 0x1E0;
     self->mBottom_ydiff = 0;
     cOVState_REPLAY_setupCameraName(((char*)self));
-    if (*(int*)((char*)SSXApp->Game->Replay + 0x608) != 0) {
+    if (SSXApp->Game->Replay->Loaded != 0) {
         self->mLoaded = 1;
     } else {
         self->mLoaded = 0;
     }
-    char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-    *(int*)(obj + 0x90) |= 8;
+    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+    *(int*)&obj->mAttrMenu |= 8;
     if (self->mLoaded != 0) {
         if (obj != 0) cUIMenu_setSelectedByIndex(obj, 2);
         cUIThing* saveReplayOption = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_savereplay));

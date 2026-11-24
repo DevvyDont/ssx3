@@ -20,6 +20,7 @@
 #include "ui/uitext.h"
 #include "ui/uithing.h"
 #include "render/graphicsman.h"
+#include "render/2drender.h"
 
 // Flag words at cUIVector + 0x14 and + 0x74. The setters take an int and store it into a
 // bool bitfield: that int->bool conversion is the `sltu` in their asm.
@@ -42,43 +43,24 @@ extern char str_UIVectorVtx[];
 extern char str_UIVectorVtxRdr[];
 extern char str_UIVectorLine[];
 
-// On Tour: tAttrVector.
-struct sUIVecFlags_34C0 {
-    unsigned int mFill : 1;
-    unsigned int mLoop : 1;
-    unsigned int mNumTriangles : 15;
-    unsigned int mNumVertices : 15;
-};
-
-// PORT: tagged array new (operator_new__FUi) as member operators; element ctors are empty.
-struct sUIVec16_34C0 {
-    float x, y, z, w;
-    sUIVec16_34C0() {}
+// The vertex arrays' element types: the real records with the empty constructors retail's new[] runs per element,
+// allocated through the tagged operator_new__FUi.
+struct tARGBElem : public tARGB {
+    tARGBElem() {}
     void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 };
 
-struct sUIVec3_34C0 {
-    float x, y, z;
-    sUIVec3_34C0() {}
+struct t3VectorElem : public t3Vector {
+    t3VectorElem() {}
     void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 };
 
-struct sUIVec3b_34C0 {
-    float x, y, z;
-    sUIVec3b_34C0() {}
+struct tBxVertexElem : public tBxVertex {
+    tBxVertexElem() {}
     void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 };
 
-struct sUIVec48_34C0 {
-    char data[0x30];
-    sUIVec48_34C0() {}
-    void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-};
-
-// The unit declares t3vect_Zero later as a plain vec3; bind this view by asm label.
-extern sUIVec3_34C0 t3vect_Zero_34C0 __asm__("t3vect_Zero");
-
-
+extern t3Vector t3vect_Zero;
 
 /**
  * Sets up a UI vector shape from its record in the screen data.
@@ -95,27 +77,27 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
     cUIVector* self = uiVector;
     cUIThing_setUIData(self, pUIBase);
     tUIVector* pIYFVector = (tUIVector*)pUIBase;
-    (*(sUIVecFlags_34C0*)&self->mAttrVector).mFill = pIYFVector->mFlags & 1;
-    (*(sUIVecFlags_34C0*)&self->mAttrVector).mLoop = pIYFVector->mFlags & 2;
-    (*(sUIVecFlags_34C0*)&self->mAttrVector).mNumTriangles = pIYFVector->mNumTriangles;
-    if ((*(sUIVecFlags_34C0*)&self->mAttrVector).mNumTriangles)
-        *(void**)&self->mpTriangles = (unsigned char*)(pIYFVector + 1);
-    (*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices = pIYFVector->mNumVertices;
+    self->mAttrVector.mFill = pIYFVector->mFlags & 1;
+    self->mAttrVector.mLoop = pIYFVector->mFlags & 2;
+    self->mAttrVector.mNumTriangles = pIYFVector->mNumTriangles;
+    if (self->mAttrVector.mNumTriangles)
+        *(void**)&self->mpTriangles = (unsigned char*)&pIYFVector[1]; // the triangle list follows the record
+    self->mAttrVector.mNumVertices = pIYFVector->mNumVertices;
     if (pIYFVector->mNumVertices)
     {
-        sUIVec16_34C0** pa = (sUIVec16_34C0**)&self->mpVertexColour;
-        *pa = new (str_UIVectorClr, 0x100, 0) sUIVec16_34C0[pIYFVector->mNumVertices];
-        sUIVec3_34C0** pb = (sUIVec3_34C0**)&self->mpVertexPosition;
-        *pb = new (str_UIVectorVtx, 0x100, 0) sUIVec3_34C0[pIYFVector->mNumVertices];
-        sUIVec3b_34C0** pc = (sUIVec3b_34C0**)&self->mpVertexPositionRender;
-        *pc = new (str_UIVectorVtxRdr, 0x100, 0) sUIVec3b_34C0[pIYFVector->mNumVertices];
+        tARGB** pa = &self->mpVertexColour;
+        *pa = new (str_UIVectorClr, 0x100, 0) tARGBElem[pIYFVector->mNumVertices];
+        t3Vector** pb = &self->mpVertexPosition;
+        *pb = new (str_UIVectorVtx, 0x100, 0) t3VectorElem[pIYFVector->mNumVertices];
+        t3Vector** pc = &self->mpVertexPositionRender;
+        *pc = new (str_UIVectorVtxRdr, 0x100, 0) t3VectorElem[pIYFVector->mNumVertices];
         for (int i = 0; i < pIYFVector->mNumVertices; i++)
-            ((sUIVec3_34C0*)self->mpVertexPosition)[i] = t3vect_Zero_34C0;
+            self->mpVertexPosition[i] = t3vect_Zero;
     }
-    if (!(*(sUIVecFlags_34C0*)&self->mAttrVector).mFill)
+    if (!self->mAttrVector.mFill)
     {
-        sUIVec48_34C0** pd = (sUIVec48_34C0**)&self->mpVertices;
-        *pd = new (str_UIVectorLine, 0x100, 0) sUIVec48_34C0[(*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices];
+        tBxVertex** pd = &self->mpVertices;
+        *pd = new (str_UIVectorLine, 0x100, 0) tBxVertexElem[self->mAttrVector.mNumVertices];
     }
 }
 #endif
@@ -123,12 +105,6 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_setChannelData);
 #ifdef SKIP_ASM
-struct sCount_36D0 {
-    unsigned int flag : 1;
-    unsigned int pad1 : 1;
-    unsigned int mode : 15;
-    unsigned int count : 15;
-};
 extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v);
 
 /**
@@ -149,7 +125,7 @@ extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, fl
     if (key >= 21) {
         key -= 21;
         unsigned short idx = key / 9;
-        if (idx >= (*(sCount_36D0*)&self->mAttrVector).count) {
+        if (idx >= self->mAttrVector.mNumVertices) {
             return;
         }
         switch ((unsigned short)(key % 9)) {
@@ -172,22 +148,6 @@ extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, fl
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_setChannelDataKCP);
 #ifdef SKIP_ASM
-struct sCount_3808 {
-    unsigned int flag : 1;
-    unsigned int pad1 : 1;
-    unsigned int mode : 15;
-    unsigned int count : 15;
-};
-struct sBits_3808 {
-    unsigned int lo : 13;
-    unsigned int layer : 6;
-    unsigned int hi : 13;
-};
-struct sKey_3808 {
-    short key;
-    short value;
-};
-
 /**
  * Applies a list of keyframed (channel, value) pairs to a UI vector shape.
  *
@@ -199,18 +159,18 @@ struct sKey_3808 {
  * @param n     number of pairs (On Tour NumChannels)
  * @param keys  the pairs, two shorts each (channel, value)
  */
-extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, sKey_3808* keys)
+extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, short* keys)
 {
     if ((self->mpVertexPosition) == 0) {
         return;
     }
-    for (unsigned int i = 0; i < n; i++, keys++) {
-        float data = (float)keys->value;
-        int key = keys->key;
+    for (unsigned int i = 0; i < n; i++, keys += 2) {
+        float data = (float)keys[1];
+        int key = keys[0];
         if (key >= 21) {
             key -= 21;
             unsigned short idx = key / 9;
-            if (idx >= (*(sCount_3808*)&self->mAttrVector).count) {
+            if (idx >= self->mAttrVector.mNumVertices) {
                 continue;
             }
             switch (key % 9) {
@@ -228,7 +188,7 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, sKe
             case 1: self->mPosition.y = data; break;
             case 9: self->mScale.x = data * 0.01f; break;
             case 10: self->mScale.y = data * 0.01f; break;
-            case 12: (*(sBits_3808*)&self->mAttr).layer = (int)data; break;
+            case 12: ((tAttrThing*)&self->mAttr)->mPivot = (int)data; break;
             case 13: self->mColour.A = data * (1.0f / 255.0f); break;
             case 14: self->mColour.R = data * (1.0f / 255.0f); break;
             case 15: self->mColour.G = data * (1.0f / 255.0f); break;
@@ -248,44 +208,27 @@ INCLUDE_ASM("ui/uivector", cUIVector_render2D);
 extern "C" unsigned int fptoui(float f);
 
 
-struct sV4_3A39F8 {
-    float v[4];
-} __attribute__((aligned(16)));
-
-
-struct sVtx_3A39F8 {
-    float s;
-    float t;
-    float q;
-    int padC;
-    int col[4];         // 0x10
-    sV4_3A39F8 pos;     // 0x20
-};
-
-struct sCount_3A39F8 {
-    unsigned int flag : 1;
-    unsigned int pad1 : 1;
-    unsigned int mode : 15;
-    unsigned int count : 15;
-};
-
+// The draw layer as retail reads it: one byte, bits 8-12 of mAttr (lbu 0x15; every word-level read of
+// tAttrThing::mLayer compiles to lw / srl).
 struct sFlags14_3A39F8 {
     unsigned char b14;
     unsigned char layer : 5;
 };
 
-
-typedef void (*tDraw_3A39F8)(void*, int, int, void*, void*, int, void*, void*);
-typedef void (*tDraw2_3A39F8)(void*, int, void*, int);
-
-static inline void SetCol_3A39F8(sVtx_3A39F8& vtx, int k, float v)
+// Colour component k of a line vertex (r, g, b, a are consecutive: 0 r .. 3 a), halved into the GS 0-128 range.
+static inline void SetCol_3A39F8(tBxVertex& vtx, int k, float v)
 {
-    vtx.col[k] = fptoui(v * 0.5f);
+    (&vtx.r)[k] = fptoui(v * 0.5f);
 }
 
-static inline void AddPos_3A39F8(sV4_3A39F8& p, int k, float d)
+static inline void AddX_3A39F8(t4Vector& p, float d)
 {
-    p.v[k] += d;
+    p.x += d;
+}
+
+static inline void AddY_3A39F8(t4Vector& p, float d)
+{
+    p.y += d;
 }
 
 /**
@@ -302,47 +245,50 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
 {
     if (self->mpVertexPosition == 0)
         return;
-    for (unsigned int i = 0; i < ((sCount_3A39F8*)(((char*)self) + 0x74))->count; i++)
+    for (unsigned int i = 0; i < self->mAttrVector.mNumVertices; i++)
     {
         (self->mpVertexPositionRender)[i] = (self->mpVertexPosition)[i];
         (self->mpVertexPositionRender)[i].x *= self->mScale.x;
         (self->mpVertexPositionRender)[i].y *= self->mScale.y;
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | (((((sFlags14_3A39F8*)(((char*)self) + 0x14))->layer) + 9) << 5 & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0)
+                         | ((((sFlags14_3A39F8*)&self->mAttr)->layer + 9) << 5 & 0x3E0);
     *GrMan->m_pCurrentDrawState->m_textureState.m_texid = -1;
-    if (((sCount_3A39F8*)(((char*)self) + 0x74))->flag)
+    if (self->mAttrVector.mFill)
     {
         float pos[3];
         pos[0] = self->mPosition.x + x;
         pos[1] = self->mPosition.y + y;
         pos[2] = 0.0f;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        ps2GraphicsMan->RenderIndexedTriList(((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour, *(const t3Vector*)pos);
+        ps2GraphicsMan->RenderIndexedTriList(self->mAttrVector.mNumTriangles, self->mAttrVector.mNumVertices,
+                                             self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour,
+                                             *(const t3Vector*)pos);
         return;
     }
-    if ((sVtx_3A39F8*)self->mpVertices == 0)
+    if (self->mpVertices == 0)
         return;
-    for (unsigned int i = 0; i < ((sCount_3A39F8*)(((char*)self) + 0x74))->count; i++)
+    for (unsigned int i = 0; i < self->mAttrVector.mNumVertices; i++)
     {
-        sV4_3A39F8 tt;
-        tt.v[0] = (self->mpVertexPositionRender)[i].x;
-        tt.v[1] = (self->mpVertexPositionRender)[i].y;
-        tt.v[2] = (self->mpVertexPositionRender)[i].z;
-        tt.v[3] = 1.0f;
-        ((sVtx_3A39F8*)self->mpVertices)[i].pos = tt;
-        AddPos_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i].pos, 0, self->mPosition.x + x);
-        AddPos_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i].pos, 1, self->mPosition.y + y);
-        ((sVtx_3A39F8*)self->mpVertices)[i].q = 1.0f;
-        ((sVtx_3A39F8*)self->mpVertices)[i].s = 0.0f;
-        ((sVtx_3A39F8*)self->mpVertices)[i].t = 0.0f;
-        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 3, (self->mpVertexColour)[i].A);
-        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 0, (self->mpVertexColour)[i].R);
-        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 1, (self->mpVertexColour)[i].G);
-        SetCol_3A39F8(((sVtx_3A39F8*)self->mpVertices)[i], 2, (self->mpVertexColour)[i].B);
+        t4Vector tt;
+        tt.x = (self->mpVertexPositionRender)[i].x;
+        tt.y = (self->mpVertexPositionRender)[i].y;
+        tt.z = (self->mpVertexPositionRender)[i].z;
+        tt.w = 1.0f;
+        self->mpVertices[i].p = tt;
+        AddX_3A39F8(self->mpVertices[i].p, self->mPosition.x + x);
+        AddY_3A39F8(self->mpVertices[i].p, self->mPosition.y + y);
+        self->mpVertices[i].one = 1.0f;
+        self->mpVertices[i].u = 0.0f;
+        self->mpVertices[i].v = 0.0f;
+        SetCol_3A39F8(self->mpVertices[i], 3, (self->mpVertexColour)[i].A);
+        SetCol_3A39F8(self->mpVertices[i], 0, (self->mpVertexColour)[i].R);
+        SetCol_3A39F8(self->mpVertices[i], 1, (self->mpVertexColour)[i].G);
+        SetCol_3A39F8(self->mpVertices[i], 2, (self->mpVertexColour)[i].B);
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    ps2GraphicsMan->RenderLineStrip(((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpVertices, 0);
+    ps2GraphicsMan->RenderLineStrip(self->mAttrVector.mNumVertices, self->mpVertices, 0);
 }
 #endif
 
@@ -827,8 +773,7 @@ extern "C" void cList__cList(cList* self, int flags)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_cUIThing1);
 #ifdef SKIP_ASM
-struct sFlags_6548;
-extern "C" sFlags_6548* tAttrThing_tAttrThing(sFlags_6548* f);
+extern "C" tAttrThing* tAttrThing_tAttrThing(tAttrThing* f);
 extern void* cUIThing_vtbl[];
 
 /**
@@ -844,7 +789,7 @@ extern "C" void* cUIThing_cUIThing1(cUIThing* self)
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;
     VPTR_OF(cListNode, self) = cUIThing_vtbl;
-    tAttrThing_tAttrThing((sFlags_6548*)(&self->mAttr));
+    tAttrThing_tAttrThing((tAttrThing*)(&self->mAttr));
     return ((char*)self);
 }
 #endif
@@ -2509,8 +2454,8 @@ INCLUDE_ASM("ui/uivector", tAttrPair_tAttrPair);
  */
 extern "C" void* tAttrPair_tAttrPair(tAttrPair* self)
 {
-    *(unsigned char*)((char*)self + 0x1) &= 0xc0;
-    *(unsigned char*)((char*)self + 0x0) &= 0xc0;
+    self->mWidgetPivot = 0;
+    self->mEntryPivot = 0;
     return ((void*)self);
 }
 #endif
@@ -4816,19 +4761,6 @@ extern "C" void* func_003A3F48(int, int);
 //100%
 INCLUDE_ASM("ui/uivector", tAttrThing_tAttrThing);
 #ifdef SKIP_ASM
-struct sFlags_6548 {
-    unsigned b0 : 1;
-    unsigned b1 : 1;
-    unsigned b2 : 1;
-    unsigned b3 : 1;
-    unsigned b4 : 1;
-    unsigned b5 : 1;
-    unsigned b6 : 1;
-    unsigned b7 : 1;
-    unsigned f8 : 5;
-    unsigned f13 : 6;
-};
-
 /**
  * Constructs a cUIThing's tAttrThing word and returns it: sets bit 0 (orientation: vertical), bit 1 (active), bit 3
  * (enabled) and bit 6 (visible), clears bit 2 (cached), bit 4 (focused), bit 5 (static), bit 7 (wrap) and the 5-bit
@@ -4839,18 +4771,18 @@ struct sFlags_6548 {
  * @param attrThing  the tAttrThing (cUIThing + 0x14)
  * @return @p attrThing
  */
-extern "C" sFlags_6548* tAttrThing_tAttrThing(sFlags_6548* attrThing)
+extern "C" tAttrThing* tAttrThing_tAttrThing(tAttrThing* attrThing)
 {
-    attrThing->b0 = 1;
-    attrThing->b7 = 0;
-    attrThing->f8 = 0;
-    attrThing->b5 = 0;
-    attrThing->b4 = 0;
-    attrThing->b2 = 0;
-    attrThing->b1 = 1;
-    attrThing->b3 = 1;
-    attrThing->b6 = 1;
-    attrThing->f13 = 9;
+    attrThing->mOrientation = 1;
+    attrThing->mWrap = 0;
+    attrThing->mLayer = 0;
+    attrThing->mStatic = 0;
+    attrThing->mFocused = 0;
+    attrThing->mCached = 0;
+    attrThing->mActive = 1;
+    attrThing->mEnabled = 1;
+    attrThing->mVisible = 1;
+    attrThing->mPivot = 9;
     return attrThing;
 }
 #endif

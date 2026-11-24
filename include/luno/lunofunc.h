@@ -18,7 +18,7 @@
 
 // The header of a compiled Luno code chunk (the block luno_cLunoFunc::Chunk points at; [O] On Tour struct tChunkHeader,
 // 0x10, the type of cLunoFunc::Chunk). The instruction words follow it; the function table sits at FunctionOffset.
-// cLunoVM::execute (src/luno/lunovm.cpp) reads it through the view sLunoCodeHeader.
+// cLunoVM::execute (src/luno/lunovm.cpp) reads FunctionOffset from it.
 struct tChunkHeader {
     int Signature;                  // 0x0 [O]; [P] assert "chunk->Signature == kLunoChunkSignature" (luno_cLunoFunc_init)
     int FunctionOffset;             // 0x4 [O]; [U] execute: the function table is at chunk + FunctionOffset and the

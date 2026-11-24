@@ -112,63 +112,51 @@ extern "C" int gameanimcmp(int* a, int* b);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(int*, int*));
 extern "C" void* memset(void* dst, int c, int n);
 
-struct sMdfHashTable_00314DD8
-{
-    unsigned int hash[0x206];
-    int order[0x206];
-    char map[0x818];
-};
-
 /**
  * Builds the game-animation hash index and marks every game animation as unmapped.
  *
- * Hashes the 518 names of cGameAnimMap_GameAnimNames ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
- * sorts order[] by hash with qsort (qsort; the comparator gameanimcmp reads the hashes through
- * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (memset). cGameAnimMap_lookupGAD
+ * Hashes the 518 names of cGameAnimMap_GameAnimNames ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into
+ * GameAnimHashes[],
+ * sorts GameAnimSort[] by hash with qsort (the comparator gameanimcmp reads the hashes through gameanimcmphack, set
+ * only during the sort) and fills the 518-entry GameAnimMap with -1 (memset). cGameAnimMap_lookupGAD
  * (On Tour lookupGAD) binary-searches this index.
  */
-extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
+extern "C" void cGameAnimMap_initMap(cGameAnimMap* self)
 {
     for (int i = 0; i < 518; i++)
     {
         int hashValue = GetHashValue32(cGameAnimMap_GameAnimNames[i]);
-        self->order[i] = i;
-        self->hash[i] = hashValue;
+        self->GameAnimSort[i] = i;
+        self->GameAnimHashes[i] = hashValue;
     }
-    gameanimcmphack = self->hash;
-    qsort(self->order, 518, 4, gameanimcmp);
+    gameanimcmphack = self->GameAnimHashes;
+    qsort(self->GameAnimSort, 518, 4, gameanimcmp);
     gameanimcmphack = 0;
-    memset(self->map, -1, 2072);
+    memset(self->GameAnimMap, -1, 2072);
 }
 #endif
 
 //100%
 INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_lookupGAD);
 #ifdef SKIP_ASM
-struct sMdfIndex_00314E88
-{
-    unsigned int hashes[0x206]; // 0x000: sorted by order[]
-    int order[0x206];           // 0x818
-};
-
 /**
  * Returns the game-animation index whose name hash is @p hash, or -1 if none.
  *
- * Binary search over the 518 hashes (+0x0) in the order (+0x818) that cGameAnimMap_initMap sorted them into.
+ * Binary search over the 518 GameAnimHashes in the order (GameAnimSort) that cGameAnimMap_initMap sorted them into.
  *
  * @param hash  the name hash (GetHashValue32 of a cGameAnimMap_GameAnimNames name such as "G_GATEROCK")
  * @return the game-animation index 0-517, or -1
  */
 // Binary search for `hash`; returns its entry index, or -1.
-extern "C" int cGameAnimMap_lookupGAD(sMdfIndex_00314E88* self, unsigned int hash)
+extern "C" int cGameAnimMap_lookupGAD(cGameAnimMap* self, unsigned int hash)
 {
     int lo = 0;
     int hi = 518;
     while (lo < hi)
     {
         int mid = (lo + hi) / 2;
-        int idx = self->order[mid];
-        unsigned int entryHash = self->hashes[idx];
+        int idx = self->GameAnimSort[mid];
+        unsigned int entryHash = self->GameAnimHashes[idx];
         if (hash == entryHash)
         {
             return idx;
@@ -192,17 +180,19 @@ INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_setMap);
 /**
  * Maps the game animation with name hash @p hash to @p value, if such a game animation exists.
  *
- * Looks the hash up with cGameAnimMap_lookupGAD and stores @p value in the 518-entry map at +0x1030. Unknown hashes are ignored.
+ * Looks the hash up with cGameAnimMap_lookupGAD and stores @p value in the 518-entry GameAnimMap. Unknown hashes are
+ * ignored.
  *
  * @param hash  the animation's name hash
  * @param value  the animation id to map it to (bank in the low 8 bits, index in the upper 24), or kAnimIDInvalid
  */
 extern "C" void cGameAnimMap_setMap(cGameAnimMap* self, unsigned int hash, void* value)
 {
-    int i = cGameAnimMap_lookupGAD(((sMdfIndex_00314E88*)self), hash);
+    int i = cGameAnimMap_lookupGAD(self, hash);
     if (i >= 0)
     {
-        ((void**)(&self->GameAnimMap[0]))[i] = value;
+        unsigned int& slot = self->GameAnimMap[i];
+        slot = (unsigned int)value;
     }
 }
 #endif
@@ -210,35 +200,29 @@ extern "C" void cGameAnimMap_setMap(cGameAnimMap* self, unsigned int hash, void*
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_addSource);
 #ifdef SKIP_ASM
-struct sMdfHandle_00314F30
-{
-    unsigned int kind : 8;
-    unsigned int index : 24;
-};
+static inline void SetKind_00314F30(tAnimID* h, int v) { h->SourceID = v; }
+static inline void SetIndex_00314F30(tAnimID* h, int v) { h->AnimID = v; }
 
-static inline void SetKind_00314F30(sMdfHandle_00314F30* h, int v) { h->kind = v; }
-static inline void SetIndex_00314F30(sMdfHandle_00314F30* h, int v) { h->index = v; }
-
-// PORT: cGameAnimMap_setMap's value slot receives the handle struct by value here.
-void cGameAnimMap_setMap_handle(sMdfIndex_00314E88* self, unsigned int hash, sMdfHandle_00314F30 value) __asm__("cGameAnimMap_setMap");
+// PORT: cGameAnimMap_setMap's value slot receives the tAnimID by value here.
+void cGameAnimMap_setMap_handle(cGameAnimMap* self, unsigned int hash, tAnimID value) __asm__("cGameAnimMap_setMap");
 
 /**
  * Maps every animation of an animation bank into the game-animation map.
  *
- * For each animation i of @p list (count: short at +0x2 of its header at +0x4; 0x14-byte entries at +0x8 with the
- * name hash first) calls cGameAnimMap_setMap with the hash and the id (@p kind in the low 8 bits, i above them).
+ * For each animation i of @p list (count: the archive's mNumAnims; the 0x14-byte tAdfAnimHeader entries of Anims)
+ * calls cGameAnimMap_setMap with its mHashName and the tAnimID (SourceID @p kind, AnimID i).
  *
  * @param kind  the bank number stored in each id
  * @param list  the animation data source (cAdfDataSource) of the bank
  */
 extern "C" void cGameAnimMap_addSource(cGameAnimMap* self, int kind, cAdfDataSource* list)
 {
-    sMdfHandle_00314F30 handle;
+    tAnimID handle;
     for (int i = 0; i < list->Archive->mNumAnims; i++)
     {
         SetKind_00314F30(&handle, kind);
         SetIndex_00314F30(&handle, i);
-        cGameAnimMap_setMap_handle(((sMdfIndex_00314E88*)self), *(unsigned int*)(i * 0x14 + (int)list->Anims), handle);
+        cGameAnimMap_setMap_handle(self, list->Anims[i].mHashName, handle);
     }
 }
 #endif
@@ -259,7 +243,7 @@ extern "C" void cGameAnimMap_remSource(cGameAnimMap* self, cAdfDataSource* list)
 {
     for (int i = 0; i < list->Archive->mNumAnims; i++)
     {
-        cGameAnimMap_setMap(self, *(unsigned int*)(i * 0x14 + (int)list->Anims), kAnimIDInvalid);
+        cGameAnimMap_setMap(self, list->Anims[i].mHashName, kAnimIDInvalid);
     }
 }
 #endif
@@ -273,7 +257,7 @@ extern char str_error[];
 /**
  * Returns the name of the first game animation mapped to @p value, or str_error when none is.
  *
- * Linear search of the 518-entry map at +0x1030; the name comes from cGameAnimMap_GameAnimNames (e.g. "G_GATEROCK").
+ * Linear search of the 518-entry GameAnimMap; the name comes from cGameAnimMap_GameAnimNames (e.g. "G_GATEROCK").
  *
  * @param value  the animation id to look for
  * @return the game animation's name, or str_error
@@ -282,7 +266,7 @@ extern "C" char* cGameAnimMap_getAnimName(cGameAnimMap* self, void* value)
 {
     for (int i = 0; i < 518; i++)
     {
-        if (value == ((void**)(&self->GameAnimMap[0]))[i])
+        if ((unsigned int)value == self->GameAnimMap[i])
         {
             return cGameAnimMap_GameAnimNames[i];
         }
