@@ -129,23 +129,23 @@ CHECK_SIZE(BuddyApiRefT, 0x50C);
 // routine is called as (BuddyApiRefT*, BuddyApiMsgT*, data). Name: DirtySock's, from the July 2003 preview's mangled
 // BuddyMan callbacks (on*__8BuddyManP12BuddyApiMsgT, e.g. onReceiveMessage, and the functor's invoke(BuddyApiRefT*,
 // BuddyApiMsgT*, void*)); [R] BuddyApi builds it as four words (func_003F0610: {'conn', state, 0, 0}; func_003F0198
-// sets the kind to 'chat' and the tag text at 0xC); [U] BuddyMan_onReceiveMessage reads the tag text at 0xC. Member
-// names are not known.
+// sets the kind to 'chat' and the tag text at 0xC); [U] BuddyMan_onReceiveMessage reads the tag text at 0xC. EA's
+// member names are not known: mKind and mpTagText are ours, the rest stay unk_.
 #ifndef __cplusplus
 typedef struct BuddyApiMsgT BuddyApiMsgT;
 #endif
 
 struct BuddyApiMsgT {
-    int unk_00;                         // 0x0 [R] the message kind, a FourCC ('conn', 'chat')
+    int mKind;                          // 0x0 [R] the message kind, a FourCC ('conn', 'chat')
     int unk_04;                         // 0x4 [R] func_003F0610: the connection state
     int unk_08;                         // 0x8 [R] func_003F0610: 0
-    char* unk_0C;                       // 0xC [R] func_003F0198: the (rewritten) tag text; [U] BuddyMan_onReceiveMessage
+    char* mpTagText;                    // 0xC [R] func_003F0198: the rewritten tag text; [U] BuddyMan_onReceiveMessage
 };
 
-CHECK_OFFSET(BuddyApiMsgT, unk_00, 0x0);
+CHECK_OFFSET(BuddyApiMsgT, mKind, 0x0);
 CHECK_OFFSET(BuddyApiMsgT, unk_04, 0x4);
 CHECK_OFFSET(BuddyApiMsgT, unk_08, 0x8);
-CHECK_OFFSET(BuddyApiMsgT, unk_0C, 0xC);
+CHECK_OFFSET(BuddyApiMsgT, mpTagText, 0xC);
 CHECK_SIZE(BuddyApiMsgT, 0x10);
 
 #endif /* SEG_BUDDYAPI_H */

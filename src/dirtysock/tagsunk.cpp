@@ -7053,9 +7053,9 @@ struct sMsg_00261A28 {
  * mEventList. Likely bug: SUBJ may fill up to 2254 of the 2256-byte text buffer and BODY (up to 2047 characters) is
  * strcat'ed onto it with no bound.
  *
- * @param msg   the BuddyApi message; its tag record pointer is at +0xC
+ * @param msg   the BuddyApi message; its tag text is mpTagText
  */
-extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, char* msg)
+extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, BuddyApiMsgT* msg)
 {
     char raw[0x800];
     char text[2256];
@@ -7064,14 +7064,14 @@ extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, char* msg)
     char flag[0x10];
     int year, month, day, hour, minute, second;
 
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TYPE), flag, 2, str_Not_Present);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_USER), name, 0x40, str_Not_Present);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_TYPE), flag, 2, str_Not_Present);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_USER), name, 0x40, str_Not_Present);
     if (func_002623B0(self, (int)name))
         return;
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SUBJ), text, 2255, str_sp_c);
-    cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BODY), raw, 0x800, str_Not_Present);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SUBJ), text, 2255, str_sp_c);
+    cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BODY), raw, 0x800, str_Not_Present);
     strcat(text, raw);
-    func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TIME), &year, &month, &day, &hour, &minute, &second, 0);
+    func_003EDD70(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_TIME), &year, &month, &day, &hour, &minute, &second, 0);
     sprintf(date, str_pct_02d_pct_02d_pct_02d_pct_02d_pct_02d, month, day, year, hour, minute);
     func_00261CD0(self, name, text, date);
     if (func_00262A08(self, (int)name) >= 0x1F) {

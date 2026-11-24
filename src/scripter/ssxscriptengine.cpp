@@ -5210,8 +5210,8 @@ extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sSc
  * +0x18, +0x14) and offset (+0x8-+0x10) form a local matrix (translate, then about Z by -z, Y, X). The anchor of type
  * header byte +0x20 (cSSXScriptEngine_GetAnchorOrientation for the entity's owner player) gives a position and angles; the transform becomes
  * the anchor's translate and rotations (Z by -angle, Y, X) times the local matrix, and the anchor angles are added. - 3
- * (header from GetSSXCameraAlgorithmicHeader): only the header's angles (+0x10, +0xC, +0x8) as rotations about Z (negated), Y, X. Other
- * types keep the identity.
+ * (header from GetSSXCameraAlgorithmicHeader): only the header's angles (baseRotX/Y/Z) as rotations about Z (negated),
+ * Y, X. Other types keep the identity.
  *
  * @param cam  the camera entity (cScriptEntityCamera)
  */
@@ -5240,10 +5240,10 @@ extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sSc
     }
     case 3: {
         sRotMat_SE* mat = &self->mat;
-        char* rec = GetSSXCameraAlgorithmicHeader_D970(owner);
-        self->rx = *(float*)(rec + 0x10) * 0.01745329424738884f;
-        self->ry = *(float*)(rec + 0xC) * 0.01745329424738884f;
-        self->rz = *(float*)(rec + 8) * 0.01745329424738884f;
+        tSSXHeaderCameraAlgorithmic* rec = (tSSXHeaderCameraAlgorithmic*)GetSSXCameraAlgorithmicHeader_D970(owner);
+        self->rx = rec->baseRotX * 0.01745329424738884f;
+        self->ry = rec->baseRotY * 0.01745329424738884f;
+        self->rz = rec->baseRotZ * 0.01745329424738884f;
         ROTATE_SE(mat, t4vect_ZAxis_D970, -self->rz);
         ROTATE_SE(mat, t4vect_YAxis_D970, self->ry);
         ROTATE_SE(mat, t4vect_XAxis_D970, self->rx);
@@ -5265,23 +5265,23 @@ extern t4Matrix t4mat_Identity;
 /**
  * Constructs a rider's script object: a script entity plus a cScriptObject of type 3 with an identity base transform.
  *
- * Builds the cScriptEntity part (cScriptEntity_cScriptEntity) at +0x0 and the cScriptObject part at +0xC with type 3,
- * installs the vtables cScriptObjRider_vtbl (+0x0) and D_00482018 (+0x18), clears the animation and sound bank infos (+0x1C,
- * +0x20), copies t4mat_Identity into the base transform (+0x30) and zeroes the base rotations (+0x70..+0x78).
+ * Builds the cScriptEntity part (cScriptEntity_cScriptEntity) at +0x0 and the cScriptObject part at +0xC (mObjType)
+ * with type 3, installs the vtables cScriptObjRider_vtbl (mVtbl) and D_00482018 (mScriptObjectVtbl), clears
+ * mpAnimBankInfo and mpSoundBankInfo, copies t4mat_Identity into mBaseTransform and zeroes mBaseRotX/Y/Z.
  * cRider_cRider builds the rider's embedded one with it.
  *
  * @return the object (self)
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
-extern "C" void* cScriptObjRider_cScriptObjRider(void* self)
+extern "C" void* cScriptObjRider_cScriptObjRider(cScriptObjRider* self)
 {
     cScriptEntity_cScriptEntity(self);
-    cScriptObject_cScriptObject((char*)self + 0xC, 3);
-    *(void**)((char*)self + 0x18) = D_00482018;
-    *(void**)((char*)self + 0x0) = cScriptObjRider_vtbl;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x20) = 0;
+    cScriptObject_cScriptObject(&self->mObjType, 3);
+    self->mScriptObjectVtbl = (void**)D_00482018;
+    self->mVtbl = (void**)cScriptObjRider_vtbl;
+    self->mpAnimBankInfo = 0;
+    self->mpSoundBankInfo = 0;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -5294,11 +5294,11 @@ extern "C" void* cScriptObjRider_cScriptObjRider(void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x30), "r"(&t4mat_Identity)
+        : "r"(&self->mBaseTransform), "r"(&t4mat_Identity)
         : "memory");
-    *(int*)((char*)self + 0x70) = 0;
-    *(int*)((char*)self + 0x74) = 0;
-    *(int*)((char*)self + 0x78) = 0;
+    self->mBaseRotX = 0.0f;
+    self->mBaseRotY = 0.0f;
+    self->mBaseRotZ = 0.0f;
     return self;
 }
 #endif
@@ -5328,12 +5328,6 @@ struct sVec_F9F8 {
     sVec_F9F8() {}
     sVec_F9F8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
-
-struct sScriptObj_F9F8 {
-    char pad_0x00[0x1C];
-    void* anim0;                // 0x1C
-    void* anim1;                // 0x20
-};
 
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, the identity).
 static inline void LoadIdentity_F9F8(void* dst)
@@ -5512,35 +5506,36 @@ static inline void Translate_F9F8(void* mat, const sVec_F9F8& v)
  * Takes the rider's script object into use: builds its base transform from the actor header and the script's anchor and
  * binds the script's animation and sound banks.
  *
- * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC). The actor header (GetSSXActorHeader of the bound player entity,
- * +0x8) gives the base rotations in degrees (+0x1C/+0x18/+0x14, stored as radians in +0x70/+0x74/+0x78) and an offset
- * (+0x8..+0x10) that form a local matrix (translate, then Rz(-z), Ry, Rx). cSSXScriptEngine_GetAnchorOrientation (On Tour
- * cSSXScriptEngine::GetAnchorOrientation) gives the anchor position and angles for the header's anchor type (+0x1); the
- * base transform (+0x30) becomes the anchor's translate and rotations times the local matrix, and the anchor angles are
- * added to the base rotations. Finally it binds mpAnimBankInfo (+0x1C) and mpSoundBankInfo (+0x20) to the script's bank
- * (+0x1C of the GetSSXScriptHeader header) with cSSXScriptEngine_GetAnimationBankInfo__FPv and cSSXScriptEngine_GetSoundBankInfo__FPv. The player ID argument is not declared
- * (unused).
+ * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC). The actor header (GetSSXActorHeader of
+ * the bound player entity, mpEntity) gives the base rotations in degrees (baseRotX/Y/Z, stored as radians in
+ * mBaseRotX/Y/Z) and an offset (basePosX..Z) that form a local matrix (translate, then Rz(-z), Ry, Rx).
+ * cSSXScriptEngine_GetAnchorOrientation (On Tour cSSXScriptEngine::GetAnchorOrientation) gives the anchor position and
+ * angles for the header's anchor type (anchorPos); the base transform (mBaseTransform) becomes the anchor's translate
+ * and rotations times the local matrix, and the anchor angles are added to the base rotations. Finally it binds
+ * mpAnimBankInfo and mpSoundBankInfo to the script's bank (+0x1C of the GetSSXScriptHeader header) with
+ * cSSXScriptEngine_GetAnimationBankInfo__FPv and cSSXScriptEngine_GetSoundBankInfo__FPv. The player ID argument is not
+ * declared (unused).
  */
-extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
+extern "C" void cScriptObjRider_OnStartObjectUse(cScriptObjRider* self)
 {
-    cScriptObject_OnStartObjectUse(self + 0xC);
-    cScriptPlayerEntity* obj = (cScriptPlayerEntity*)(*(void**)(self + 0x8));
-    char* mat = self + 0x30;
+    cScriptObject_OnStartObjectUse(&self->mObjType);
+    cScriptPlayerEntity* obj = self->mpEntity;
+    t4Matrix* mat = &self->mBaseTransform;
     LoadIdentity_F9F8(mat);
-    *(int*)(self + 0x70) = 0;
-    *(int*)(self + 0x74) = 0;
-    *(int*)(self + 0x78) = 0;
+    self->mBaseRotX = 0.0f;
+    self->mBaseRotY = 0.0f;
+    self->mBaseRotZ = 0.0f;
     tSSXHeaderActor* info = (tSSXHeaderActor*)GetSSXActorHeader(obj);
-    *(float*)(self + 0x70) = info->baseRotX * 0.01745329424738884f;
-    *(float*)(self + 0x74) = info->baseRotY * 0.01745329424738884f;
-    *(float*)(self + 0x78) = info->baseRotZ * 0.01745329424738884f;
+    self->mBaseRotX = info->baseRotX * 0.01745329424738884f;
+    self->mBaseRotY = info->baseRotY * 0.01745329424738884f;
+    self->mBaseRotZ = info->baseRotZ * 0.01745329424738884f;
     sVec_F9F8 baseOffset(info->basePosX, info->basePosY, info->basePosZ, 1.0f);
     sMat_F9F8 localBaseTransform;
     LoadIdentity_F9F8(&localBaseTransform);
     Translate_F9F8(&localBaseTransform, baseOffset);
-    ROTATE_F9F8(&localBaseTransform, t4vect_ZAxis, -*(float*)(self + 0x78));
-    ROTATE_F9F8(&localBaseTransform, t4vect_YAxis, *(float*)(self + 116));
-    ROTATE_F9F8(&localBaseTransform, t4vect_XAxis, *(float*)(self + 0x70));
+    ROTATE_F9F8(&localBaseTransform, t4vect_ZAxis, -self->mBaseRotZ);
+    ROTATE_F9F8(&localBaseTransform, t4vect_YAxis, self->mBaseRotY);
+    ROTATE_F9F8(&localBaseTransform, t4vect_XAxis, self->mBaseRotX);
     sVec_F9F8 pos;
     float rx, ry, rz;
     cSSXScriptEngine_GetAnchorOrientation(ScriptEngine, info->anchorPos, obj->mpOwner, &pos, &rx, &ry, &rz);
@@ -5549,12 +5544,12 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     ROTATE2_F9F8(mat, t4vect_YAxis, ry);
     ROTATE2_F9F8(mat, t4vect_XAxis, rx);
     MulMat_F9F8(mat, mat, &localBaseTransform);
-    *(float*)(self + 0x70) += rx;
-    *(float*)(self + 0x74) += ry;
-    *(float*)(self + 0x78) += rz;
+    self->mBaseRotX += rx;
+    self->mBaseRotY += ry;
+    self->mBaseRotZ += rz;
     tSSXScriptHeader* info2 = (tSSXScriptHeader*)GetSSXScriptHeader(obj->mpOwner);
-    ((sScriptObj_F9F8*)self)->anim0 = cSSXScriptEngine_GetAnimationBankInfo_2(ScriptEngine, info2->bankNum);
-    ((sScriptObj_F9F8*)self)->anim1 = cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, info2->bankNum);
+    self->mpAnimBankInfo = (tScriptAnimBankInfo*)cSSXScriptEngine_GetAnimationBankInfo_2(ScriptEngine, info2->bankNum);
+    self->mpSoundBankInfo = (tScriptSoundBankInfo*)cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, info2->bankNum);
 }
 #endif
 
@@ -6795,27 +6790,28 @@ struct sVec4_1A50 {
 /**
  * Resets a script camera manager's per-script state: no attached cameras, no transition or beat, no focus box.
  *
- * Sets both attached camera indices (+0xDC, On Tour mAttachedCameraObject) to -1, the beat flag (+0xF0, On Tour
- * mBeatOccurred) to 1, the last beat time (+0xF4, mLastBeatTimeLeft) to 1e9 and the focus box position (+0x100) to
- * (0, 0, 0, 1), and clears the main camera index (+0xE4, mMainCameraIndex), the in-transition flag (+0xE8,
- * mInTransition), the cut-on-beat flag (+0xEC, mCutOnBeat) and the focus-box flag (+0x110, mUseFocusBox). On Tour's
- * bools are bytes; here they are words, so the fields after mMainCameraIndex sit 8 bytes later than in On Tour.
+ * Sets both attached camera indices (mAttachedCameraObject) to -1, the beat flag (mBeatOccurred) to 1, the last beat
+ * time (mLastBeatTimeLeft) to 1e9 and the focus box position (mFocusBox) to (0, 0, 0, 1), and clears the main camera
+ * index (mMainCameraIndex), the in-transition flag (mInTransition), the cut-on-beat flag (mCutOnBeat) and the
+ * focus-box flag (mUseFocusBox). On Tour's bools are bytes; here they are words, so the fields after mMainCameraIndex
+ * sit 8 bytes later than in On Tour.
  */
-extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self)
+extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* vself)
 {
+    cScriptObjCameraManager* self = (cScriptObjCameraManager*)vself;
     int i;
     int noCamera = -1;
-    int* ids = (int*)((char*)self + 0xDC);
+    int* ids = self->mAttachedCameraObject;
     for (i = 1; i >= 0; i--) {
         ids[i] = noCamera;
     }
-    *(int*)((char*)self + 0xF0) = 1;
-    *(float*)((char*)self + 0xF4) = 1000000000.0f;
-    *(sVec4_1A50*)((char*)self + 0x100) = sVec4_1A50(0.0f, 0.0f, 0.0f, 1.0f);
-    *(int*)((char*)self + 0xE4) = 0;
-    *(int*)((char*)self + 0xE8) = 0;
-    *(int*)((char*)self + 0xEC) = 0;
-    *(int*)((char*)self + 0x110) = 0;
+    self->mBeatOccurred = 1;
+    self->mLastBeatTimeLeft = 1000000000.0f;
+    *(sVec4_1A50*)&self->mFocusBox = sVec4_1A50(0.0f, 0.0f, 0.0f, 1.0f);
+    self->mMainCameraIndex = 0;
+    self->mInTransition = 0;
+    self->mCutOnBeat = 0;
+    self->mUseFocusBox = 0;
 }
 #endif
 
