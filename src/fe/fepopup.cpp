@@ -534,8 +534,8 @@ extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_setupBackgroundType);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, void* obj);
-extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, void* obj);
+extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, cUIThing* obj);
+extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, cUIThing* obj);
 extern sQuad_58E8 gPopupBlue;
 
 
@@ -2867,24 +2867,17 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_hideWidgetSafe);
 #ifdef SKIP_ASM
-struct sVEntry_cScreenPopup_hideWidgetSafe {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Hides a widget if there is one.
  *
- * Calls virtual slot 9 (set visible) with 0 when @p obj is not null.
+ * Calls its setVisible(0) when @p obj is not null.
  *
  * @param obj  the widget, or null
  */
-extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, void* obj)
+extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, cUIThing* obj)
 {
     if (obj != 0) {
-        sVEntry_cScreenPopup_hideWidgetSafe* vt = *(sVEntry_cScreenPopup_hideWidgetSafe**)((char*)obj + 0x8);
-        vt[9].fn(vthis(obj, vt[9]), 0);
+        obj->setVisible(0);
     }
 }
 #endif
@@ -2892,24 +2885,17 @@ extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, void* obj)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_showWidgetSafe);
 #ifdef SKIP_ASM
-struct sVEntry_cScreenPopup_showWidgetSafe {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Shows a widget if there is one.
  *
- * Calls virtual slot 9 (set visible) with 1 when @p obj is not null.
+ * Calls its setVisible(1) when @p obj is not null.
  *
  * @param obj  the widget, or null
  */
-extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, void* obj)
+extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, cUIThing* obj)
 {
     if (obj != 0) {
-        sVEntry_cScreenPopup_showWidgetSafe* vt = *(sVEntry_cScreenPopup_showWidgetSafe**)((char*)obj + 0x8);
-        vt[9].fn(vthis(obj, vt[9]), 1);
+        obj->setVisible(1);
     }
 }
 #endif

@@ -243,7 +243,7 @@ struct sVEnt_5638 {
  *
  * @return 1 when the box is (at least partly) in view, 0 when the test culls it
  */
-extern "C" int cSplineSegment_isVisible(void* self)
+extern "C" int cSplineSegment_isVisible(tSplineSegmentRecord* self)
 {
     tSplineSegmentRecord* nodeBytes = (tSplineSegmentRecord*)self;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;

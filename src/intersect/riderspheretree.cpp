@@ -2011,7 +2011,7 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, t4Vector* mat, float
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsSphereCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(void* self);
+extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" int SphereTree_isSphereCollision(SphereTree* self, t4Vector* a1, float f, t4Vector* pos, int a4, int a5, t4Vector* a6, t4Vector* a7);
 
 /**
@@ -2039,7 +2039,7 @@ extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* spherePo
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsBoxCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(void* self);
+extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" int SphereTree_isBoxCollision(SphereTree* self, t3Vector* a1, t3Vector* a2, t4Vector* pos, int a4, int a5, t4Vector* a6, t4Vector* a7);
 
 /**
@@ -2114,7 +2114,7 @@ extern "C" int SphereTree_IsPlaneCollision(SphereTree* self, sVecArg_C9B8* plane
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsTriCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(void* self);
+extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" void SphereTree_populateSortAxis(SphereTree* self, t4Vector* v);
 extern "C" int SphereTree_checkTriCollision(void* self, void* a1, void* a2, void* a3, void* v, void* pos, int a6, int a7, void* a8, void* a9);
 
@@ -2151,7 +2151,7 @@ extern "C" int SphereTree_IsTriCollision(SphereTree* self, t4Vector* point1, t4V
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsTreeCollision);
 #ifdef SKIP_ASM
-extern "C" int SphereTree_AllocBuf(void* self);
+extern "C" int SphereTree_AllocBuf(tSphTreeInfo* self);
 extern "C" int SphereTree_isTreeCollision(SphereTree* self, SphereTree* other, t4Vector* pos, int a3, int a4, t4Vector* a5, t4Vector* a6);
 
 /**
@@ -3183,7 +3183,7 @@ struct sSphereData_DF28 {
  * @return the buffer address (as an int)
  */
 // PORT: returns the cached buffer pointer as int (the unit declares it int-returning).
-extern "C" int SphereTree_AllocBuf(void* selfp)
+extern "C" int SphereTree_AllocBuf(tSphTreeInfo* selfp)
 {
     sSphereData_DF28* self = (sSphereData_DF28*)selfp;
     int key = self->key;
