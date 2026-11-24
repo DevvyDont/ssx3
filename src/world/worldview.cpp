@@ -2072,7 +2072,7 @@ int func_003ABFC0_impl(void* self, void* item, void* list) __asm__("func_003ABFC
 /**
  * Fixes up a mesh's DMA packets: func_003AC048 on each of its +0x1C sub-meshes (pointers at +0x20), with its index.
  *
- * @param item  the mesh
+ * @param vitem  the mesh
  * @param list  the tModelRecord
  * @return 1
  */

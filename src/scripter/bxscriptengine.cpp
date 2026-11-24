@@ -1141,7 +1141,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ResetRequest__FPvT0);
  * (+0x18) and user data (+0xC), and sets the pending index (+0x14) to -1. The script index (+0x8) and handle (+0x1C)
  * stay.
  *
- * @param request  the request record
+ * @param vrequest  the request record
  */
 void cBXScriptEngine_ResetRequest(void* self, void* vrequest)
 {

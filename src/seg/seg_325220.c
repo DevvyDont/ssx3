@@ -2139,6 +2139,13 @@ INCLUDE_ASM("seg/seg_325220", func_00426230);
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426358);
 #ifdef SKIP_ASM
+/**
+ * Writes a memory range back from the data cache: cache op 0x18 (hit writeback-invalidate) on each 64-byte line.
+ *
+ * $4 is the start address and $5 the size (nothing happens when it is 0 or less). Every line from the start's to the
+ * last byte's gets the op with a sync before and after it: (count mod 8) lines one at a time, then 8 per pass. The SIF
+ * command and RPC senders call it on packets and buffers before DMA.
+ */
 // PORT: PS2-only hand-scheduled data-cache flush loop (fixed registers, 8x unrolled; starts 4 mod 8, so file-scope asm); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
@@ -2198,6 +2205,10 @@ __asm__(
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426404);
 #ifdef SKIP_ASM
+/**
+ * A lone return (jr $31) left after the hand-written cache flush func_00426358, its delay slot being the next
+ * function's first instruction. Nothing calls it.
+ */
 // PORT: PS2-only. A lone `jr $31` after the hand-written cache flush func_00426358 (same .s file in the original): its
 // delay slot is the first instruction of the next object's function, so it is written in asm with no nop. A port
 // drops it.
@@ -2394,6 +2405,7 @@ extern void iSetAlarm(int a0, int (*a1)(int, int, int *), int *a2);
  * @param alarmId    the alarm id (unused)
  * @param alarmTime  the alarm time (unused)
  * @param packet     the reply packet
+ * @return no defined value (declared int, but the body has no return statement)
  */
 int func_004267C0(int alarmId, int alarmTime, int *packet) {
     if (isceSifSendCmd(0x80000008, (int)packet, 0x40, packet[9], packet[10], packet[11]) == 0) {
@@ -6518,7 +6530,13 @@ int sceSifRebootIop(const char *img) {
 //100%
 INCLUDE_ASM("seg/seg_325220", DIntr);
 #ifdef SKIP_ASM
-/* DIntr (libkernel): disable interrupts, return whether they were enabled. */
+/**
+ * DIntr (libkernel): disable interrupts, return whether they were enabled.
+ *
+ * Reads the COP0 Status register's EIE bit (0x10000); when it is set, repeats di + sync.p until Status shows it clear.
+ *
+ * @return 1 when interrupts were enabled on entry, else 0
+ */
 int DIntr_r(void) {
     int eie, st;
     MFC0_STATUS_4248(eie);
@@ -7732,6 +7750,16 @@ int func_0042CD98(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CFC0);
 #ifdef SKIP_ASM
+/**
+ * EE exception handler stub for the TLB exceptions func_0042CA80 hooks (SetVTLBRefillHandler, codes 1-3).
+ *
+ * Saves every GPR, HI/LO, HI1/LO1 and SA in the frame D_00530380, loads Status, Cause, EPC and BadVAddr into $4-$7
+ * (the frame in $8), keeps EPC in D_005305A8 and erets with IE cleared to D_0042D0C0. That calls the user handler
+ * D_004564F0 on the frame as stack, makes syscall -0x54, restores the saved registers and EPC and returns from the
+ * exception with eret. The second entry D_0042D200, the stub func_0042CAE0 installs for codes 1-13, saves the same
+ * way (COP0 register 23 also in $8, the frame in $9), erets to D_0042D2FC and calls the handler D_004564F8[ExcCode];
+ * if that returns it stops at a break.
+ */
 // PORT: PS2-only EE exception handler (eret, raw $at/$k0, never returns); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(

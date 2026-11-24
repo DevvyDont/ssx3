@@ -158,7 +158,7 @@ extern "C" void func_0016CA18_impl(void* vself) __asm__("func_0016CA18");
  * Unlike cCameraTriggerMan_purge it does not check the registration word (+0x20) before removing a trigger and leaves
  * the active lists alone. Its only caller is func_0016CEA8.
  *
- * @param vself  the camera trigger manager (this)
+ * @param vvself  the camera trigger manager (this)
  */
 extern "C" void func_0016CA18_impl(void* vvself)
 {

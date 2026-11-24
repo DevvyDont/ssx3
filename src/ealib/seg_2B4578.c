@@ -1560,8 +1560,8 @@ int SNDSYSI_init_impl(void *buf, int size, int arg2) __asm__("SNDSYSI_init");
  *
  * @param buf  the sound heap
  * @param size  its size
- * @param headerVersion  the snd.h version the caller was built with (cPS2SoundManager_Init passes 0x80303, V8.03.03;
- *                       System_Init passes its own argument); this build does not check it
+ * @param arg2  the snd.h header version the caller was built with (cPS2SoundManager_Init passes 0x80303, V8.03.03;
+ *              System_Init passes its own argument); this build does not check it
  * @return 0, or a negative error
  */
 int SNDSYSI_init_impl(void *buf, int size, int arg2) {
@@ -13199,9 +13199,14 @@ extern struct sAD00 D_0050AD00;
 extern int GetThreadId(void);
 extern void WaitSema(int);
 
-/* Recursive lock (pairs with SNDI_mutexunlock). The owner's re-entry bumps the count and returns early; jump2
-   cross-jumps the two count increments into one copy, and the return label left behind keeps the epilogue
-   restores below the final store, as in the target. */
+/**
+ * Takes the sound driver's recursive lock: the semaphore at +0x1B10 of D_0050AD00, owner thread +0x1B14, depth +0x1B18.
+ *
+ * Recursive lock (pairs with SNDI_mutexunlock). The owner's re-entry bumps the count and returns early; jump2
+ * cross-jumps the two count increments into one copy, and the return label left behind keeps the epilogue
+ * restores below the final store, as in the target. Any other thread waits on the semaphore (WaitSema), then
+ * records its GetThreadId as the owner and bumps the count.
+ */
 void SNDI_mutexlock(void) {
     int threadId = GetThreadId();
     if (D_0050AD00.f1B14 == threadId) {
@@ -14572,6 +14577,13 @@ __asm__(
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C52C8);
 #ifdef SKIP_ASM
+/**
+ * Byte-copy head of Util_MemCpy for a destination that is not 16-byte aligned.
+ *
+ * Copies one byte at a time (source $5 to destination $4, decrementing the count $6) until the destination is
+ * 16-byte aligned, then branches back into Util_MemCpy's aligned path (.L003C51FC). Returns early if the decremented
+ * count reaches zero. Only Util_MemCpy branches here (it routes copies under 0x12 bytes elsewhere).
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 
@@ -15364,12 +15376,12 @@ extern void SNDSYS_getopts_5BF8(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5BF8(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Installs the sound library's abort-message handler: stores @p handler in the options' vector block (SNDSYSVEC abortmsg,
+ * Installs the sound library's abort-message handler: stores @p value in the options' vector block (SNDSYSVEC abortmsg,
  * options +0xC8, D_0050A9B0) and applies the options.
  *
  * System_VectorToReal5 fills the same slot with SNDREAL_abortmsg. No callers in the game.
  *
- * @param handler  the abort-message routine
+ * @param value  the abort-message routine
  * @return 0
  */
 int System_SetAbortHandler(int value) {
@@ -15658,13 +15670,13 @@ typedef struct { char pad0[0xCC]; int a; int b; char pad1[0xE0 - 0xD4]; } S_5FD0
 extern void SNDSYS_setopts(void *);
 
 /**
- * Installs the sound library's function-profiler hooks: stores @p enter and @p leave in the options' vector block
- * (SNDSYSVEC profileenter / profileleave, options +0xCC / +0xD0) and applies the options.
+ * Installs the sound library's function-profiler hooks: stores @p firstValue and @p secondValue in the options' vector
+ * block (SNDSYSVEC profileenter / profileleave, options +0xCC / +0xD0) and applies the options.
  *
  * Nothing in this build calls the hooks back. No callers in the game.
  *
- * @param enter  the hook for function entry
- * @param leave  the hook for function exit
+ * @param firstValue  the hook for function entry (profileenter)
+ * @param secondValue  the hook for function exit (profileleave)
  * @return 0
  */
 int Profile_SetFunctionProfiler(int firstValue, int secondValue) {
@@ -17205,6 +17217,20 @@ extern void f_8F48_7D00(int *, struct D_7D00 *) __asm__("SFILTER_add");
 
 /* MIX_create (On Tour smixer.c, PSP debug 0x00354D18): allocation statements in On Tour's `a[i] = alloc(); b[i] = a[i];` form. */
 extern struct S_7D00 sndmix_7D00 __asm__("sndmix");
+/**
+ * Creates the software mixer (sndmix) from a mixer configuration.
+ *
+ * Installs SNDI_New / SNDI_Delete as the decoder library's allocator (CODASetNew, CODASetDelete) and copies @p cfg
+ * into sndmix. In a critical section it takes two 0x2058-byte mix buffers and one 0x840-byte buffer per output
+ * channel from the fast-RAM pool (the sndgs options' fastramaddr / fastramsize; the bytes left are kept in
+ * D_00515D24), falling back to SNDMEMI_alloc once the pool is too small, and steps each buffer's working pointer up to
+ * a 64-byte boundary; with input channels it also allocates and clears 0x60 bytes of voice state per input (+0x1DC).
+ * Then it initialises the unpackers (MIXI_initunpack16, MIXI_initunpackxa, MIXI_initunpackmt), resets the mixer
+ * (MIX_reset) and gives each output channel a fresh filter (SFILTER_ft16init, registered with SFILTER_add) and a
+ * zeroed 0x800-byte output buffer. Called by SNDPLATFORM_init.
+ *
+ * @param cfg  the mixer configuration (input and output channel counts), copied into sndmix
+ */
 void MIX_create(struct MIXCONFIG *cfg) {
     int i;
     char *pool;
@@ -18931,7 +18957,7 @@ int SFILTER_unpackpf_9C08(char *o, int n, int unused, int *buf) __asm__("SFILTER
  * fetching the channel's next packet (SNDPKTPLAYI_get) when it is used up. Without a packet the rest is zero-filled once
  * anything played.
  *
- * @param node  the decoder node
+ * @param vvnode  the decoder node (UNPACKPFSTATE)
  * @param n  the frames wanted
  * @param srcBuffer  unused (the source)
  * @param buf  the float destination
@@ -19006,6 +19032,16 @@ void SFILTER_unpackpfinit(UNPACKPFSTATE* node, UNPACKINITPARAMS* source) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C9DA0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
+/**
+ * Converts 16-bit samples to floats without alignment requirements (the scalar fallback of func_003C9E50).
+ *
+ * Converts the first n % 4 samples one at a time, then the rest four per pass in a hand-written lh / cvt.s.w loop.
+ * func_003C9E50 calls it for unaligned buffers and for the remainder after its 16-sample blocks.
+ *
+ * @param n  the number of samples
+ * @param src  the 16-bit samples
+ * @param dst  the float destination
+ */
 void func_003C9DA0(int n, short *src, float *dst) {
     float *d = dst;
     int r = n & 3;
@@ -20954,6 +20990,17 @@ __asm__(
 INCLUDE_ASM("ealib/seg_2B4578", func_003CCA38);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
+/**
+ * EA-XA decode loop: the body that decodexac falls into, decoding 15-byte blocks of 28 samples each to floats.
+ *
+ * Works on the decoder state in $4 (sample count +0x00, two history values +0x04 / +0x08, source +0x0C, float
+ * destination +0x10) with the coefficient table D_0044E8A0 in $5. While samples remain it takes 28 off the count and
+ * reads the block's header byte: 0xEE marks an uncompressed block, handed to process_raw_block. Otherwise the high
+ * nibble picks a coefficient pair from the table and the low nibble the shift; the 14 data bytes give 28 signed 4-bit
+ * samples, each predicted from the two previous outputs (adda.s / madda.s / madd.s) and stored as a float. Source and
+ * destination advance by 15 and 0x70 bytes and the history is written back. When the count runs out it stores the
+ * count, history and pointers in the state, restores the $31 decodexac saved and returns.
+ */
 // PORT: PS2-only hand-written FPU routine (mula.s/madda.s accumulator ops, unsaved $f20-$f25); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 void func_003CCA38(void) {
@@ -22300,6 +22347,13 @@ int SNDPKTPLAYI_voicetopackethandle(int key) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE410);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
+/**
+ * MicroTalk 12-tap synthesis (all-pole) filter, run in place over blocks of 12 float samples.
+ *
+ * Arguments as filter passes them: $4 the block count, $5 the 12 filter coefficients, $6 the 12-value filter history,
+ * $7 the samples. Each sample becomes itself plus the sum of coefficient times history (adda.s / madda.s / madd.s),
+ * is stored back and rotates into the history; after the last block the history is written back to $6.
+ */
 // PORT: PS2-only hand-written FPU routine (mula.s/madda.s accumulator ops no compiler emits); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 void func_003CE410_asmbody(void) __asm__("func_003CE410");

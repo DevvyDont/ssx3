@@ -1261,12 +1261,12 @@ int func_003FE7D8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", sceDevVu0Exec);
 #ifdef SKIP_ASM
+/* PORT: PS2-only VU0 macro-mode ctc2 + vcallmsr. */
 /**
  * Starts VU0 at a microprogram address (CMSAR0, then vcallmsr).
  *
  * @param addr  start address (low 16 bits)
  */
-/* PORT: PS2-only VU0 macro-mode ctc2 + vcallmsr. */
 void sceDevVu0Exec(int addr) {
     __asm__ volatile("ctc2 %0, $vi27\n\tvcallmsr $vi27" : : "r"(addr & 0xFFFF));
 }
@@ -5858,6 +5858,13 @@ void f4B78(struct S4B78 *decState, int n) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00404D98);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, full-pixel copy: widens a 16-pixel-wide block of 8-bit reference pixels to 16-bit.
+ *
+ * Luma routine D_00453280[0], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00404D98(void) {
@@ -5899,6 +5906,14 @@ void func_00404D98(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00404E10);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, full-pixel copy: widens an 8-pixel-wide block of 8-bit reference pixels
+ * to 16-bit.
+ *
+ * Chroma routine D_004532A0[0], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00404E10(void) {
@@ -5949,6 +5964,13 @@ void func_00404E10(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00404EA8);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, vertical half-pixel: each sample is the rounded average of a pixel and the one below.
+ *
+ * Luma routine D_00453280[1], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00404EA8(void) {
@@ -6007,6 +6029,14 @@ void func_00404EA8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00404F60);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, vertical half-pixel: each sample is the rounded average of a pixel and
+ * the one below.
+ *
+ * Chroma routine D_004532A0[1], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00404F60(void) {
@@ -6072,6 +6102,14 @@ void func_00404F60(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405030);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, horizontal half-pixel: each sample is the rounded average of a pixel and its right
+ * neighbour.
+ *
+ * Luma routine D_00453280[2], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405030(void) {
@@ -6127,6 +6165,14 @@ void func_00405030(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004050E0);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, horizontal half-pixel: each sample is the rounded average of a pixel and
+ * its right neighbour.
+ *
+ * Chroma routine D_004532A0[2], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_004050E0(void) {
@@ -6186,6 +6232,14 @@ void func_004050E0(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405198);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, half-pixel in both directions: each sample is the 2x2 neighbourhood's sum
+ * plus 2, shifted right by 2.
+ *
+ * Luma routine D_00453280[3], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405198(void) {
@@ -6261,6 +6315,14 @@ void func_00405198(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405290);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, half-pixel in both directions: each sample is the 2x2 neighbourhood's
+ * sum plus 2, shifted right by 2.
+ *
+ * Chroma routine D_004532A0[3], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405290(void) {
@@ -6338,6 +6400,14 @@ void func_00405290(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405390);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, full-pixel average: averages a 16-pixel-wide reference block into the
+ * prediction already in the destination ((dst + ref + 1) >> 1), for bidirectional prediction.
+ *
+ * Luma routine D_00453280[4], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405390(void) {
@@ -6389,6 +6459,14 @@ void func_00405390(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405430);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, full-pixel average: averages an 8-pixel-wide reference block into the
+ * prediction already in the destination, rounding up, for bidirectional prediction.
+ *
+ * Chroma routine D_004532A0[4], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405430(void) {
@@ -6445,6 +6523,14 @@ void func_00405430(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004054E0);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, vertical half-pixel average: interpolates as D_00453280[1] does, then
+ * averages the result into the prediction already in the destination, rounding up.
+ *
+ * Luma routine D_00453280[5], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_004054E0(void) {
@@ -6513,6 +6599,14 @@ void func_004054E0(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004055C0);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, vertical half-pixel average: interpolates as D_004532A0[1] does, then
+ * averages the result into the prediction already in the destination, rounding up.
+ *
+ * Chroma routine D_004532A0[5], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_004055C0(void) {
@@ -6584,6 +6678,14 @@ void func_004055C0(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004056A8);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, horizontal half-pixel average: interpolates as D_00453280[2] does, then
+ * averages the result into the prediction already in the destination, rounding up.
+ *
+ * Luma routine D_00453280[6], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_004056A8(void) {
@@ -6649,6 +6751,14 @@ void func_004056A8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405780);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, horizontal half-pixel average: interpolates as D_004532A0[2] does, then
+ * averages the result into the prediction already in the destination, rounding up.
+ *
+ * Chroma routine D_004532A0[6], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405780(void) {
@@ -6714,6 +6824,14 @@ void func_00405780(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405850);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, luma, two-way half-pixel average: interpolates as D_00453280[3] does, then
+ * averages the result into the prediction already in the destination, rounding up.
+ *
+ * Luma routine D_00453280[7], chosen per block by func_00404758 and run by func_00404B78 on a luma block descriptor
+ * ($4: 16-bit destination +0x0, rows two source strides apart; byte offset +0x4 for qfsrv; row counts +0x8 and +0xC,
+ * the sources stepping 0x80 between the two runs; source stride +0x10; the two source quadword rows +0x14 / +0x18).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405850(void) {
@@ -6799,6 +6917,14 @@ void func_00405850(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405970);
 #ifdef SKIP_ASM
+/**
+ * MPEG motion compensation, chroma, two-way half-pixel average: interpolates as D_004532A0[3] does, then
+ * averages the result into the prediction already in the destination, rounding up.
+ *
+ * Chroma routine D_004532A0[7], chosen per block by func_00404758 and run by func_00404B78 on a chroma block descriptor
+ * (fields as for the luma routines; the sources step 0x140 between the two row runs). It runs twice, the second time
+ * for the other chroma plane (sources +0x40, destination +0x80).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405970(void) {
@@ -6882,6 +7008,13 @@ void func_00405970(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405A88);
 #ifdef SKIP_ASM
+/**
+ * Adds a macroblock's residual to its prediction and stores the result as 8-bit pixels.
+ *
+ * $4 the destination, $5 the 16-bit prediction, $6 the 16-bit residual: 24 passes of 16 samples (384, one 4:2:0
+ * macroblock) are summed, clamped to 0..255 (D_00405B30) and packed to bytes (ppacb). func_00404B78 uses it for
+ * macroblocks that are neither intra nor skipped.
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405A88(void) {
@@ -6917,6 +7050,13 @@ void func_00405A88(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405AE8);
 #ifdef SKIP_ASM
+/**
+ * Stores a macroblock of 16-bit samples as 8-bit pixels, clamped to 0..255.
+ *
+ * $4 the destination, $5 the 384 16-bit samples (24 passes of 16; one 4:2:0 macroblock), clamped with the
+ * 0x00FF halfword mask D_00405B30 that follows the code and packed to bytes (ppacb). func_00404B78 uses it for intra
+ * macroblocks (the decoded block) and skipped ones (the prediction).
+ */
 // PORT: PS2-only hand-written MMI routine (no compiler emits its addi/mtsab/fixed-register code); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function body.
 void func_00405AE8(void) {

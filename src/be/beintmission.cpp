@@ -510,6 +510,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * Returns the locale's string (unsigned short*, as in On Tour).
  *
  * @param id  mission ID (On Tour uiMissionId)
+ * @return the name string from FELocale->getStringByHash, keyed by the hash at +0x4 of the mission record
  */
 extern "C" unsigned short* cBEMissionInterface_getMissionName(cBEMissionInterface* self, int id)
 {
@@ -539,6 +540,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * Returns the locale's string, as cBEMissionInterface_getMissionName does.
  *
  * @param id  the mission id
+ * @return the short-description string from FELocale->getStringByHash, keyed by the hash at +0x8
  */
 extern "C" unsigned short* cBEMissionInterface_getMissionShortDesc(cBEMissionInterface* self, int id)
 {
@@ -568,6 +570,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
  * Returns the locale's string (unsigned short*, as in On Tour).
  *
  * @param id  mission ID (On Tour uiMissionId)
+ * @return the long-description string from FELocale->getStringByHash, keyed by the hash at +0xC
  */
 extern "C" unsigned short* cBEMissionInterface_getMissionLongDesc(cBEMissionInterface* self, int id)
 {

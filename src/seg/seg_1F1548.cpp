@@ -2290,7 +2290,7 @@ extern "C" void cSplashManager_AddDrop_37A8(void *arg0, t2Vector *arg1, void *ar
  * Starts the next free drop (0x3C bytes from +0x1C) with tDrop_init and bumps the active drop count (+0x14).
  * cSplashManager_update (a crystal shedding a drop) and cSplashManager_AddSplashes call it.
  *
- * @param splashManager  the splash manager
+ * @param vvsplashManager  the splash manager
  * @param basePos  the drop position (copied)
  * @param maxSize  the largest drop size
  */

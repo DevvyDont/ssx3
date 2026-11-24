@@ -297,7 +297,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_next__FP10cBucketManPvi);
  *
  * Follows the node's Next link (+0x4) and stops at the bucket's Tail sentinel (bucket +0x14).
  *
- * @param node   the current node
+ * @param vnode  the current node
  * @param index  bucket index
  * @return the next node, or 0
  */

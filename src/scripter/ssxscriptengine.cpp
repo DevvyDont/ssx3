@@ -3230,7 +3230,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReleaseScriptSetupInfo_
 /**
  * Puts a script setup info record back on the free list mpSetupInfoUnused (+0x548), setting its first four words to -1.
  *
- * @param setupInfo  the record
+ * @param vsetupInfo  the record
  */
 void cSSXScriptEngine_ReleaseScriptSetupInfo(void* vself, void* vsetupInfo)
 {

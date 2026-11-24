@@ -65,7 +65,9 @@ int __throw_type_match(int catchType, int throwType, int obj) {
 #endif
 
 /**
- * Does nothing.
+ * Does nothing: an empty function that returns at once (libgcc's exception-handling support, libgcc2.c).
+ *
+ * Nothing in the ELF calls it; only its own .eh_frame FDE names it.
  */
 void __empty(void) {
 }

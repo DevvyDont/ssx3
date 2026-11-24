@@ -6290,7 +6290,10 @@ extern "C" void func_002B3FE8(cMusicSys* self, int idx)
 INCLUDE_ASM("sound/bankmonitor", func_002B4060__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing.
+ * Does nothing: an empty cMusicSys step that runs after the active-song list has been rebuilt.
+ *
+ * func_002B4070 calls it after setting songs from a mask, and the play-list selection in ssxAudio after loading a
+ * list's SONG entries; the body is empty in this build.
  */
 void func_002B4060(void* self)
 {
@@ -6301,7 +6304,7 @@ void func_002B4060(void* self)
 INCLUDE_ASM("sound/bankmonitor", cMusicSys_getActiveMap);
 #ifdef SKIP_ASM
 /**
- * Returns mActiveMap.
+ * Returns the music system's active-song mask, mActiveMap (bit n set for each active song n).
  *
  * @param musicSys  the cMusicSys
  * @return the 64-bit active song mask

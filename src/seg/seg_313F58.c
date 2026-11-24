@@ -384,7 +384,19 @@ static fde *find_fde (void *pc) __asm__("find_fde");
 static void *execute_cfa_insn (void *p, struct frame_state_internal *state,
 			       struct cie_info *info, void **pc) __asm__("execute_cfa_insn");
 
-/* fp-bit.c pack_d (__pack_f, single precision) (GCC runtime, GPL v2+ with the libgcc linking exception) */
+/**
+ * Packs an unpacked fp-bit number (class, sign, exponent, guarded fraction) into an IEEE single-precision float.
+ *
+ * fp-bit.c pack_d (__pack_f, single precision) (GCC runtime, GPL v2+ with the libgcc linking exception).
+ * A NaN gets exponent 0xFF with the quiet bit (0x100000) set in its fraction; infinity exponent 0xFF and a zero
+ * fraction; zero, or a zero fraction, exponent 0. An exponent below -126 gives a denormal (the fraction shifted right,
+ * or cleared past 25 places) and one above 127 gives infinity; otherwise the 7 guard bits are rounded to nearest even,
+ * a carry past the implicit bit renormalises, and the guard bits are dropped. Sign, exponent and fraction are stored
+ * through the bitfields.
+ *
+ * @param src  the unpacked number
+ * @return the packed float
+ */
 FLO_type
 pack_d ( fp_number_type *  src)
 {

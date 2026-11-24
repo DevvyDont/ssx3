@@ -3592,6 +3592,16 @@ extern "C" void cPS2MemCard_GetFileTime(cPS2MemCard* self, int fileSlot, unsigne
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetLastSavedFile);
 #ifdef SKIP_ASM
+/**
+ * Returns the file slot holding the most recent save, or -1.
+ *
+ * Returns -1 at once when the card is not formatted (IsFormatted). Otherwise it scans the 6 file slots, skipping broken
+ * ones, ones whose icon.sys is unreadable, ones without a file name (HasFileName) and disabled ones, and keeps the slot
+ * with the latest modify time, compared by year, month, day, then seconds of the day (a tie keeps the earlier slot).
+ * Quirk: the candidate's seconds of the day add the current best slot's m_sec instead of its own.
+ *
+ * @return the slot index (0-5) of the latest save, or -1 when there is none
+ */
 extern "C" int cPS2MemCard_GetLastSavedFile(cPS2MemCard* self)
 {
     int best = -1;

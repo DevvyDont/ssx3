@@ -69,13 +69,13 @@ struct sAnimModelList {
 };
 
 /**
- * Appends a texture file to the model's list: TextureFiles[NumTextureFiles++] = @p data (On Tour's count and 50-entry
+ * Appends a texture file to the model's list: TextureFiles[NumTextureFiles++] = @p item (On Tour's count and 50-entry
  * array, here at +0x60 and +0x64, just before NumTextureRefs; no bounds check).
  *
  * cRider_loadRider calls it on the rider's mAnimModel for each 0x108-byte entry of its load list (mLoadList), passing
  * the entry's word at +0x104, then calls cAnimModel_compile.
  *
- * @param data  the texture file to add
+ * @param item  the texture file to add
  */
 void cAnimModel_addTextureFile(void* self, int item)
 {

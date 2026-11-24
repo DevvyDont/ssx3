@@ -134,7 +134,7 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_releaseBlock__FPvT0);
  * Returns a block to the pool's free list: clears its bActive, pushes it on m_pFreeBlocks and increments
  * m_uiNumFreeBlocks.
  *
- * @param item  the tWorldMemBlock
+ * @param vitem  the tWorldMemBlock
  */
 void cWorldBlockAllocator_releaseBlock(void* vself, void* vitem)
 {

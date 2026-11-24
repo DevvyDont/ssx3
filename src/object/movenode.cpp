@@ -403,7 +403,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addFade__FPvT0);
 /**
  * Sets a move node's fade from add-fade data: Fade (+0x24) = fadeData +0x4.
  *
- * @param fadeData  add-fade make-data
+ * @param vfadeData  add-fade make-data
  * @return the new Fade (left in f0; callers ignore it)
  */
 float cMoveNode_addFade(void* vself, void* vfadeData)

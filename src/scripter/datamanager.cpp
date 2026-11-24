@@ -290,7 +290,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_AddToEmptyInstanceList__FPvT0);
  * Zeroes the record's first five words, links it in front of the list head at +0x8 through its next field
  * (+0x14), and makes it the new head.
  *
- * @param node  the instance record (On Tour tDataInstanceInfo*)
+ * @param vnode  the instance record (On Tour tDataInstanceInfo*)
  */
 void cDataManager_AddToEmptyInstanceList(void* vself, void* vnode)
 {

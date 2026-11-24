@@ -1942,6 +1942,7 @@ int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int
  * @param payloadSize  payload size (unused)
  * @param replyWord8  reply word +0x8 (unused)
  * @param len  number of bytes received
+ * @return 0
  */
 int func_003F5A50_cb(int requestKey, int requestFlags, int replyWord10, int replyResult, int payloadAddr, int payloadSize, int replyWord8, int len, struct sSess *self) {
     self->f10 = len;
@@ -2637,9 +2638,9 @@ void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) __a
 /**
  * Translates a USB key code to its character, stored in byte 1 of the output pair @p self.
  *
- * Keypad codes 84..99 come from D_00451458 ("/*-+" first); the digit and period keys (89 and up) give 0 unless Num Lock
- * (bit 0 of @p fl[0]) is on. Other codes go through sceUsbKbCnvRawCode with the layout @p kb, the modifier word
- * @p fl[1] and the LED word; results of 0x100 or more give 0.
+ * Keypad codes 84..99 come from D_00451458 (its first four are the "/", "*", "-" and "+" keys); the digit and period
+ * keys (89 and up) give 0 unless Num Lock (bit 0 of @p fl[0]) is on. Other codes go through sceUsbKbCnvRawCode with
+ * the layout @p kb, the modifier word @p fl[1] and the LED word; results of 0x100 or more give 0.
  *
  * @param fl  the keyboard read buffer: LED word, modifier word
  * @param kb  keyboard layout passed to sceUsbKbCnvRawCode

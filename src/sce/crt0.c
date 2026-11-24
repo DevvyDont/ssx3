@@ -6,6 +6,9 @@
 //100%
 INCLUDE_ASM("sce/crt0", func_00100000);
 #ifdef SKIP_ASM
+/**
+ * The single nop at the very start of .text (0x100000), ahead of the EE entry point func_00100008.
+ */
 // PORT: PS2-only. The single `nop` at the start of .text (0x100000), ahead of the entry point func_00100008; part of
 // Sony's hand-written crt0.s. A port drops it.
 __asm__(
@@ -19,6 +22,10 @@ __asm__(
 //100%
 INCLUDE_ASM("sce/crt0", func_00100008);
 #ifdef SKIP_ASM
+/**
+ * The EE entry point (Sony crt0.s `_start`): clears the CPU state and .bss, sets up the main thread and heap, then
+ * runs main(argc, argv) and exits with its return value.
+ */
 // PORT: PS2-only. Sony crt0.s `_start`, the EE entry point (hand-written: MMI padduw/mthi1/mtlo1/mtsah register clears,
 // adda.s, sync.p, raw syscalls, ei). It zeroes every GPR/FPR/HI/LO/SA/ACC and FCSR, clears .bss (D_004A4C00 to
 // D_0053F115) with sq, calls SetupThread (syscall 0x3C: gp D_004A30F0, stack D_1FE0000, size D_20000, args D_004A5C00,
@@ -148,6 +155,9 @@ __asm__(
 //100%
 INCLUDE_ASM("sce/crt0", func_001001C8);
 #ifdef SKIP_ASM
+/**
+ * Sony crt0.s exit stub: tail-calls Exit(0).
+ */
 // PORT: PS2-only. Sony crt0.s exit stub: Exit(0). A port uses the platform's exit.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
@@ -161,6 +171,11 @@ __asm__(
 //100%
 INCLUDE_ASM("sce/crt0", func_001001D0);
 #ifdef SKIP_ASM
+/**
+ * Sony crt0.s `_root`, the root-thread entry SetupThread installs: ends the thread with ExitThread (syscall 0x23).
+ *
+ * The frame-pointer code after the syscall calls __register_frame_info_table(D_0043CE00, D_004A5D48).
+ */
 // PORT: PS2-only. Sony crt0.s `_root`, the thread SetupThread installs as root: ExitThread (syscall 0x23), then a
 // frame-pointer call __register_frame_info_table(D_0043CE00, D_004A5D48) (hand-written: raw syscall, `daddu $fp, $sp` frame).
 // A port drops it.

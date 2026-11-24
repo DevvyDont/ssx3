@@ -1816,6 +1816,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent
  *
  * Calls its own virtual snap (slot 3) with that rider's AI index (slot 7 of the rider's +0x6C0 part, reached through
  * Target +0x30 and its Rider +0x4).
+ *
+ * @return whatever the virtual snap returns
  */
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
@@ -2646,6 +2648,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent
  *
  * Calls its own virtual snap (slot 3, cBoundedAlgorithm_snap) with that rider's AI index (slot 7 of the rider's +0x6C0 part,
  * through Target +0x30 and its Rider +0x4).
+ *
+ * @return whatever the virtual snap returns
  */
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {

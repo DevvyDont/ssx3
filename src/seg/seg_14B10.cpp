@@ -1101,7 +1101,7 @@ extern "C" int cRider_isChangeFakieGround_i(char* s) __asm__("cRider_isChangeFak
  * mGroundForward (+0x3A0): it turns mRotation 180 degrees about the up axis (mMatrix row 2 as a pure quaternion), re-
  * derives the orientation (cRider_updateOrientationImplicit) and flips the stance (cRider_doChangeFakie, doChangeFakie).
  *
- * @param rider  the rider (this)
+ * @param vrider  the rider (this)
  * @return 1 when the rider switched, else 0
  */
 extern "C" int cRider_isChangeFakieGround_i(char* vrider)

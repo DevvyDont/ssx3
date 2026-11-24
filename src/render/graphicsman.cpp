@@ -439,7 +439,7 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_CreateScreenGrabTexture__FPvT0);
  *
  * On Tour's version takes (tScreenGrabHandle&, width, height); this one is declared with the handle only.
  *
- * @param screenGrabHandle  the handle to reset (On Tour screenGrabHandle)
+ * @param vscreenGrabHandle  the handle to reset (On Tour screenGrabHandle)
  * @return -1
  */
 int cGraphicsMan_CreateScreenGrabTexture(void* self, void* vscreenGrabHandle)

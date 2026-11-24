@@ -5851,6 +5851,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getSectionID);
  *
  * On Tour's cRider::getSectionID; cRider_isOnRaceCourse and cRider_isOnHalfPipeCourse test the same word.
  *
+ * @param rider  the cRider
  * @return the section id
  */
 extern "C" int cRider_getSectionID(cRider* rider) {
@@ -5864,6 +5865,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_isOnRaceCourse);
  * Returns whether the rider is on a race course: its section id (+0x434, cRider_getSectionID) is below 17.
  *
  * On Tour's cRider::isOnRaceCourse.
+ *
+ * @param rider  the cRider
+ * @return nonzero when the section id is below 17
  */
 extern "C" int cRider_isOnRaceCourse(cRider* rider) {
     return (rider->mGroundMaterial) < 17;
@@ -5876,6 +5880,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_isOnHalfPipeCourse);
  * Returns whether the rider is on a half-pipe course: its section id (+0x434, cRider_getSectionID) is 11, 12 or 13.
  *
  * On Tour's cRider::isOnHalfPipeCourse.
+ *
+ * @param rider  the cRider
+ * @return nonzero when the section id is 11, 12 or 13
  */
 extern "C" int cRider_isOnHalfPipeCourse(cRider* rider) {
     return (unsigned int) (rider->mGroundMaterial - 11) < 3U;
@@ -6735,6 +6742,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setNaturalAirMode);
  * Sets the rider's natural-air mode, the word at +0x308 (1 after construction) that cRider_getNaturalAirMode returns.
  *
  * On Tour's cRider::setNaturalAirMode.
+ *
+ * @param rider  the cRider
+ * @param value  the new mode, stored in mAllowNaturalAir
  */
 extern "C" void cRider_setNaturalAirMode(cRider* rider, int value) {
     rider->mAllowNaturalAir = value;
@@ -6812,6 +6822,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getNaturalAirMode);
  * Returns the rider's natural-air mode, the word at +0x308 that cRider_setNaturalAirMode stores.
  *
  * On Tour's cRider::getNaturalAirMode.
+ *
+ * @param rider  the cRider
+ * @return mAllowNaturalAir
  */
 extern "C" int cRider_getNaturalAirMode(cRider* rider) {
     return (rider->mAllowNaturalAir);
