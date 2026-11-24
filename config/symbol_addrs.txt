@@ -11428,6 +11428,9 @@ cVisualEffect_deferredRender_2 = 0x003961A0; //type:func
 MEM_copy_2 = 0x003E665C; //type:func
 __ieee754_log_2 = 0x0041F3A8; //type:func
 
+// memcard_slot75_2026-11-23: names by evidence (docs/function_names.tsv)
+cPS2MemCard_IsFileInfoValid = 0x002D39B0; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

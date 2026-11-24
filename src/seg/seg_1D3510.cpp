@@ -5,6 +5,7 @@
 #include "ui/uithing.h"
 #include "util/consoleconfig.h"
 #include "util/menu.h"
+#include "util/bxmemcard.h"
 #include "util/bxps2memcard.h"
 #include "util/menusys.h"
 //100%
@@ -354,7 +355,6 @@ extern "C" int cPS2MemCard_GetDevice(cPS2MemCard* pS2MemCard) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsInvalid1);
 #ifdef SKIP_ASM
-struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
 /**
  * Tells whether the card in the current port (mDevice) is not a PS2 memory card: calls the card's virtual slot 48 (word
  * 97, cPS2MemCard_IsInvalid) with mDevice.
@@ -365,15 +365,13 @@ struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
  * @param pS2MemCard  the memory card
  */
 extern "C" void cPS2MemCard_IsInvalid1(cPS2MemCard* pS2MemCard) {
-    VEnt_37E0 *vtEntry = (VEnt_37E0*)(*(char **)pS2MemCard + 0x180);
-    vtEntry->fn(vthis(pS2MemCard, *vtEntry), pS2MemCard->mDevice);
+    ((cMemCard*)pS2MemCard)->IsInvalid(pS2MemCard->mDevice);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsAvailable1);
 #ifdef SKIP_ASM
-struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
 /**
  * Tells whether the card in the current port (mDevice) is usable: calls the card's virtual slot 52 (word 105,
  * cPS2MemCard_IsAvailable) with mDevice.
@@ -384,8 +382,7 @@ struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
  * @param pS2MemCard  the memory card
  */
 extern "C" void cPS2MemCard_IsAvailable1(cPS2MemCard* pS2MemCard) {
-    VEnt_3810 *vtEntry = (VEnt_3810*)(*(char **)pS2MemCard + 0x1A0);
-    vtEntry->fn(vthis(pS2MemCard, *vtEntry), pS2MemCard->mDevice);
+    ((cMemCard*)pS2MemCard)->IsAvailable(pS2MemCard->mDevice);
 }
 #endif
 
@@ -474,7 +471,6 @@ extern "C" int func_002D3840(cPS2MemCard* pS2MemCard, int x) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsFormatted1);
 #ifdef SKIP_ASM
-struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
 /**
  * Tells whether the card in the current port (mDevice) is formatted: calls the card's virtual slot 56 (word 113,
  * cPS2MemCard_IsFormatted) with mDevice.
@@ -485,8 +481,7 @@ struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
  * @param pS2MemCard  the memory card
  */
 extern "C" void cPS2MemCard_IsFormatted1(cPS2MemCard* pS2MemCard) {
-    VEnt_38F0 *vtEntry = (VEnt_38F0*)(*(char **)pS2MemCard + 0x1C0);
-    vtEntry->fn(vthis(pS2MemCard, *vtEntry), pS2MemCard->mDevice);
+    ((cMemCard*)pS2MemCard)->IsFormatted1(pS2MemCard->mDevice);
 }
 #endif
 
@@ -617,18 +612,18 @@ extern "C" int func_002D39A8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D39B0);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsFileInfoValid);
 #ifdef SKIP_ASM
 /**
- * Returns unk_03C, the outcome flag of the last card operation (cPS2MemCard_Update sets it to 0 or 1).
+ * Returns mFileInfoValid, the outcome flag of the last card operation (cPS2MemCard_Update sets it to 0 or 1).
  *
  * It is word 151 (slot 75) of cPS2MemCard_vtbl.
  *
  * @param pS2MemCard  the memory card
- * @return unk_03C
+ * @return mFileInfoValid
  */
-extern "C" int func_002D39B0(cPS2MemCard* pS2MemCard) {
-    return (pS2MemCard->unk_03C);
+extern "C" int cPS2MemCard_IsFileInfoValid(cPS2MemCard* pS2MemCard) {
+    return (pS2MemCard->mFileInfoValid);
 }
 #endif
 
