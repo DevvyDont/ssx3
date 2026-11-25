@@ -129,8 +129,12 @@ struct cFEStateCharEquip : public cFEState {
                                     //       when 0
     char unk_AE8[0x8];              // 0xAE8 tail padding (16-byte class alignment)
 
+    // mEquipMode's values (names ours). [R] cFEStateCharEquip_cFEStateCharEquip stores kEquipModeStore when opened
+    // from a store, kEquipModeInventory otherwise; [U] cFEStateCharEquip_switchEquipMode flips it.
+    enum { kEquipModeInventory = 0, kEquipModeStore = 1 };
+
     // Methods bound to their retail symbols by asm labels.
-    int isInStore() __asm__("cFEStateCharEquip_isInStore");
+    bool isInStore() __asm__("cFEStateCharEquip_isInStore");
     int isIconsLoaded() __asm__("cFEStateCharEquip_isIconsLoaded");
     void setCanSwitchEquipMode(int value) __asm__("cFEStateCharEquip_setCanSwitchEquipMode");
     int canSwitchEquipMode() __asm__("cFEStateCharEquip_canSwitchEquipMode");

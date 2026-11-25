@@ -86,6 +86,38 @@ struct cUIState : public cListNode {
     signed char mUserNum;            // 0x044 [P] getUserNum/setUserNum (lb/sb; retail cUIState_getUserNum/cUIState_setUserNum); [R] = -1 (On Tour: char)
     char unk_045[0x3];               // 0x045 padding
 
+    // EA's tUIStateEvent: the Event a state's onWidgetEvent / onPopupEvent receive. [O] On Tour enum
+    // cUIState::tUIStateEvent, names and values. [U] retail fits: cUIMenu_setFocus sends kONGAINFOCUS (1) with
+    // setFocus(1) and kONLOSEFOCUS (2) with setFocus(0); cUIMenu_onInput reports inputs 4..8 as these events and
+    // passes kONNEXT (5) / kONPREV (6) / kONOPTION (7) / kONMISC (8) on as cUIMenu's kONNEXT / kONPREVIOUS / kONOPTION
+    // / kONMISC (6..9); cUIPair_onInput reports 5 / 6 as cUIPair's ONNEXT 0 / ONPREVIOUS 1; cUIListBox_onInput
+    // reports a changed entry as kONCHANGE (9); the keyboard popup reports kONKEYBOARDEND (13) / kONKEYBOARDCANCEL
+    // (14) to its parent, and cScreenPopup reports its options as kONSCREENPOPUPOPTION0..4 (15..19).
+    enum tUIStateEvent {
+        kONGAINFOCUS = 1,
+        kONLOSEFOCUS = 2,
+        kONSTART = 3,
+        kONSELECT = 4,
+        kONNEXT = 5,
+        kONPREV = 6,
+        kONOPTION = 7,
+        kONMISC = 8,
+        kONCHANGE = 9,
+        kONMENUPREVITEM = 10,
+        kONMENUNEXTITEM = 11,
+        kONKEYBOARDKEY = 12,
+        kONKEYBOARDEND = 13,
+        kONKEYBOARDCANCEL = 14,
+        kONSCREENPOPUPOPTION0 = 15,
+        kONSCREENPOPUPOPTION1 = 16,
+        kONSCREENPOPUPOPTION2 = 17,
+        kONSCREENPOPUPOPTION3 = 18,
+        kONSCREENPOPUPOPTION4 = 19,
+        kONSCREENPOPUPPREV = 20,
+        kONPOPUPCREATE = 21,
+        kONPOPUPDESTROY = 22
+    };
+
     // Virtuals. Slots [R] cUIState_vtbl (2-3 are cListNode's traverseFlat / traverseRecurse), names, order and types
     // [O] (On Tour class cUIState: the same 21 in the same order); bool parameters are words.
     virtual ~cUIState();                                                              // 1

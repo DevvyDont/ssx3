@@ -133,13 +133,17 @@ struct cScreenPopup : public cUIState {
     tARGB mtIndicatorColor;         // 0x34C [O]; no retail access seen (placed by the 0x360 size)
     float mfIndicatorAlpha;         // 0x35C [O]; no retail access seen (placed by the 0x360 size)
 
+    // miConfimationReturnCode when the confirmation popup was refused (names ours). [U] cScreenPopup_onPopupEvent
+    // stores it for the confirmation's second option or back, and does not report it to the parent.
+    enum { kNoConfirmationResult = -1 };
+
     // Methods bound to their retail symbols by asm labels.
     void redrawPopup() __asm__("cScreenPopup_redrawPopup");
     void SetTextObjectsVisibility(int visible) __asm__("cScreenPopup_SetTextObjectsVisibility");
     void SetTextObjectsAlpha(float fAlpha) __asm__("cScreenPopup_SetTextObjectsAlpha");
     void FillObjectPointers() __asm__("cScreenPopup_FillObjectPointers");
     void initScreenPopup(cPopupInfo* info) __asm__("cScreenPopup_initScreenPopup");
-    int handleEntryBox(cPopupInfo* infop) __asm__("cScreenPopup_handleEntryBox");
+    bool handleEntryBox(cPopupInfo* infop) __asm__("cScreenPopup_handleEntryBox");
     void handlePostPending(cPopupInfo* pInfo) __asm__("cScreenPopup_handlePostPending");
     void setTextObjectSize(t3Vector* vp) __asm__("cScreenPopup_setTextObjectSize");
     void setPopupMessage(cPopupInfo* pInfo) __asm__("cScreenPopup_setPopupMessage");

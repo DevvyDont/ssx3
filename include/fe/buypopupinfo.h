@@ -21,6 +21,20 @@
 #include "layout.h"
 #include "fe/popupinfo.h"
 
+// The reward kinds initBuyReward names (rewardType; cFEStateRewardGalleryBase::mRewardType; names ours, 0..2 not seen
+// here). [U] cBuyPopupInfo_initBuyReward labels them "kT_OVRCMNPosterColon", "kT_OVRCMNCardColon",
+// "kT_OVRCMNArtColon", "kT_OVRCMNVideoColon", "kT_OVRCMNToyColon" and "kT_OVRCMNCheatCharColon";
+// cFEStateRewardGalleryBase_showReward plays a kRewardVideo in a cFEStateVideoPlayer and previews posters, cards, art
+// and toys.
+enum tRewardType {
+    kRewardPoster = 3,
+    kRewardCard = 4,
+    kRewardArt = 5,
+    kRewardVideo = 6,
+    kRewardToy = 7,
+    kRewardCheatChar = 8
+};
+
 struct cBuyPopupInfo {
     int mCost;                      // 0x00 [O]; [R] 0; [U] initBuySong / initBuyBolt / initBuyReward store the price;
                                     //      onWidgetCreate shows it as dollars ("cost_answer") when mCreditsLeft <= 0

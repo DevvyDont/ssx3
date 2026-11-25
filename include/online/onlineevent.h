@@ -28,6 +28,35 @@
 #include "layout.h"
 #include "online/lobbyman.h"            // tLobbyStats
 
+// online::Event::mType values whose poster names the event (names ours, after EA's LobbyMan / BuddyMan callbacks that
+// post them; [R] src/dirtysock/tagsunk.cpp). The other types (200, 202, 205, 208, 209, 211, 213, 215, 217, 230, 231,
+// 236-238, 242-247, 251-253, 256, 261, 263-265, 268-276) come from unnamed request functions or several posters and
+// stay numbers.
+enum tNetEventType {
+    kNetEvent_LobbyConnect = 201,             // LobbyMan_onlobbyconnect
+    kNetEvent_AccountCreated = 203,           // LobbyMan_onaccountcreated
+    kNetEvent_AccountEdited = 206,            // LobbyMan_onaccountedited
+    kNetEvent_LostAccountRequestSent = 207,   // LobbyMan_onlostaccountrequestsent
+    kNetEvent_LostPasswordRequestSent = 210,  // LobbyMan_onlostpasswordrequestsent
+    kNetEvent_Authentication = 212,           // LobbyMan_onauthentication
+    kNetEvent_PersonaCreated = 214,           // LobbyMan_onpersonacreated
+    kNetEvent_PersonaDeleted = 216,           // LobbyMan_onpersonadeleted
+    kNetEvent_PersonaSelected = 218,          // LobbyMan_onpersonaselected
+    kNetEvent_RoomSelected = 220,             // LobbyMan_onroomselected
+    kNetEvent_Chat = 222,                     // func_0025AB40 (a ChatEvent)
+    kNetEvent_RoomListUpdate = 223,           // LobbyMan_onroomlistupdate
+    kNetEvent_RankListUpdate = 225,           // LobbyMan_onranklistupdate
+    kNetEvent_News = 226,                     // LobbyMan_onNewsRetrieved (a NewsEvent)
+    kNetEvent_Ping = 229,                     // LobbyMan_onPingReceived (a PingEvent)
+    kNetEvent_Error = 258,                    // online::ErrorEvent (the lobby callbacks' failures)
+    kNetEvent_BuddyConnect = 260,             // BuddyMan_onconnect
+    kNetEvent_BuddyRosterUpdate = 262,        // BuddyMan_onrosterupdate
+    kNetEvent_BuddyAdd = 266,                 // BuddyMan_onBuddyAdd
+    kNetEvent_BuddyDelete = 267,              // BuddyMan_onBuddyDelete
+    kNetEvent_ConnectionMsg = 277,            // LobbyMan_onconnectionmsg (and func_0025AC50)
+    kNetEvent_NetError = 278                  // online::NetErrorEvent
+};
+
 // online::Event: size 8 ([R] online_Event_clone allocates 8; func_0025F628 / func_0025FC70 / func_002642B8 post
 // plain 8-byte events of types 218, 238, 246, 256, 272 ...). Vtable online_Event_vtbl (0x004812B0).
 struct online_Event {
@@ -40,6 +69,110 @@ struct online_Event {
 CHECK_OFFSET(online_Event, mType, 0x0);
 CHECK_OFFSET(online_Event, mVtbl, 0x4);
 CHECK_SIZE(online_Event, 0x8);
+
+// The four-character error codes of online::ErrorEvent::mError (the lobby's replies) and online::NetErrorEvent::mError
+// (the disconnect reasons, '-' first), written as EA's multi-character constants: the comment gives the ASCII of the
+// value's bytes from the most significant down. Names ours, after the ASCII. [U] the front end's error handlers
+// (func_001A9CC0, func_001AAF90, func_001A4E28, func_001ADC30, func_001BAC90, func_001BD8C8, func_001BDA88, ...) pick
+// a popup text per code.
+enum tOnlineErrorCode {
+    kLobbyErr_ajoi = 0x616A6F69,        // 'ajoi'
+    kLobbyErr_aunr = 0x61756E72,        // 'aunr'
+    kLobbyErr_auth = 0x61757468,        // 'auth'
+    kLobbyErr_badc = 0x62616463,        // 'badc'
+    kLobbyErr_blak = 0x626C616B,        // 'blak'
+    kLobbyErr_bogu = 0x626F6775,        // 'bogu'
+    kLobbyErr_born = 0x626F726E,        // 'born'
+    kLobbyErr_cdev = 0x63646576,        // 'cdev'
+    kLobbyErr_chal = 0x6368616C,        // 'chal'
+    kLobbyErr_chet = 0x63686574,        // 'chet'
+    kLobbyErr_dber = 0x64626572,        // 'dber'
+    kLobbyErr_defp = 0x64656670,        // 'defp'
+    kLobbyErr_dete = 0x64657465,        // 'dete'
+    kLobbyErr_disa = 0x64697361,        // 'disa'
+    kLobbyErr_dnsf = 0x646E7366,        // 'dnsf'
+    kLobbyErr_down = 0x646F776E,        // 'down'
+    kLobbyErr_dupl = 0x6475706C,        // 'dupl'
+    kLobbyErr_econ = 0x65636F6E,        // 'econ'
+    kLobbyErr_elen = 0x656C656E,        // 'elen'
+    kLobbyErr_filt = 0x66696C74,        // 'filt'
+    kLobbyErr_full = 0x66756C6C,        // 'full'
+    kLobbyErr_gend = 0x67656E64,        // 'gend'
+    kLobbyErr_gpar = 0x67706172,        // 'gpar'
+    kLobbyErr_host = 0x686F7374,        // 'host'
+    kLobbyErr_iadr = 0x69616472,        // 'iadr'
+    kLobbyErr_igam = 0x6967616D,        // 'igam'
+    kLobbyErr_igno = 0x69676E6F,        // 'igno'
+    kLobbyErr_imst = 0x696D7374,        // 'imst'
+    kLobbyErr_inam = 0x696E616D,        // 'inam'
+    kLobbyErr_ingm = 0x696E676D,        // 'ingm'
+    kLobbyErr_inps = 0x696E7073,        // 'inps'
+    kLobbyErr_invp = 0x696E7670,        // 'invp'
+    kLobbyErr_ipas = 0x69706173,        // 'ipas'
+    kLobbyErr_iper = 0x69706572,        // 'iper'
+    kLobbyErr_itrn = 0x6974726E,        // 'itrn'
+    kLobbyErr_join = 0x6A6F696E,        // 'join'
+    kLobbyErr_kick = 0x6B69636B,        // 'kick'
+    kLobbyErr_kikh = 0x6B696B68,        // 'kikh'
+    kLobbyErr_lock = 0x6C6F636B,        // 'lock'
+    kLobbyErr_logn = 0x6C6F676E,        // 'logn'
+    kLobbyErr_mail = 0x6D61696C,        // 'mail'
+    kLobbyErr_many = 0x6D616E79,        // 'many'
+    kLobbyErr_maut = 0x6D617574,        // 'maut'
+    kLobbyErr_maxp = 0x6D617870,        // 'maxp'
+    kLobbyErr_maxt = 0x6D617874,        // 'maxt'
+    kLobbyErr_miss = 0x6D697373,        // 'miss'
+    kLobbyErr_neml = 0x6E656D6C,        // 'neml'
+    kLobbyErr_new0 = 0x6E657730,        // 'new0'
+    kLobbyErr_nfnd = 0x6E666E64,        // 'nfnd'
+    kLobbyErr_ngam = 0x6E67616D,        // 'ngam'
+    kLobbyErr_nkik = 0x6E6B696B,        // 'nkik'
+    kLobbyErr_nown = 0x6E6F776E,        // 'nown'
+    kLobbyErr_npla = 0x6E706C61,        // 'npla'
+    kLobbyErr_npri = 0x6E707269,        // 'npri'
+    kLobbyErr_nrom = 0x6E726F6D,        // 'nrom'
+    kLobbyErr_nspc = 0x6E737063,        // 'nspc'
+    kLobbyErr_nsrv = 0x6E737276,        // 'nsrv'
+    kLobbyErr_onln = 0x6F6E6C6E,        // 'onln'
+    kLobbyErr_over = 0x6F766572,        // 'over'
+    kLobbyErr_pass = 0x70617373,        // 'pass'
+    kLobbyErr_paut = 0x70617574,        // 'paut'
+    kLobbyErr_pmal = 0x706D616C,        // 'pmal'
+    kLobbyErr_pset = 0x70736574,        // 'pset'
+    kLobbyErr_quit = 0x71756974,        // 'quit'
+    kLobbyErr_rang = 0x72616E67,        // 'rang'
+    kLobbyErr_rank = 0x72616E6B,        // 'rank'
+    kLobbyErr_raut = 0x72617574,        // 'raut'
+    kLobbyErr_room = 0x726F6F6D,        // 'room'
+    kLobbyErr_rsrv = 0x72737276,        // 'rsrv'
+    kLobbyErr_same = 0x73616D65,        // 'same'
+    kLobbyErr_self = 0x73656C66,        // 'self'
+    kLobbyErr_soon = 0x736F6F6E,        // 'soon'
+    kLobbyErr_spam = 0x7370616D,        // 'spam'
+    kLobbyErr_strt = 0x73747274,        // 'strt'
+    kLobbyErr_team = 0x7465616D,        // 'team'
+    kLobbyErr_time = 0x74696D65,        // 'time'
+    kLobbyErr_tooy = 0x746F6F79,        // 'tooy'
+    kLobbyErr_tosa = 0x746F7361,        // 'tosa'
+    kLobbyErr_tsta = 0x74737461,        // 'tsta'
+    kLobbyErr_ugam = 0x7567616D,        // 'ugam'
+    kLobbyErr_ulst = 0x756C7374,        // 'ulst'
+    kLobbyErr_umac = 0x756D6163,        // 'umac'
+    kLobbyErr_urom = 0x75726F6D,        // 'urom'
+    kLobbyErr_uusr = 0x75757372,        // 'uusr'
+    kLobbyErr_wolf = 0x776F6C66,        // 'wolf'
+    kLobbyErr_xist = 0x78697374,        // 'xist'
+    kNetErr_unknown = 0x2D3F3F3F,       // '-???'
+    kNetErr_ath = 0x2D617468,           // '-ath'
+    kNetErr_bsy = 0x2D627379,           // '-bsy'
+    kNetErr_cfg = 0x2D636667,           // '-cfg'
+    kNetErr_con = 0x2D636F6E,           // '-con'
+    kNetErr_dev = 0x2D646576,           // '-dev'
+    kNetErr_dif = 0x2D646966,           // '-dif'
+    kNetErr_dns = 0x2D646E73,           // '-dns'
+    kNetErr_ini = 0x2D696E69,           // '-ini'
+    kNetErr_ton = 0x2D746F6E            // '-ton'
+};
 
 // online::ErrorEvent: type 258, size 0xC ([R] online_ErrorEvent_clone allocates 0xC). Vtable online_ErrorEvent_vtbl
 // (0x00481290).

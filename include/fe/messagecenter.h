@@ -42,6 +42,11 @@ struct cUIThing;
 struct cUIText;
 struct cUIMenu;
 
+// The message group type (+0x0 of a D_00441630 group) of the FAQ folders (names ours). [U] the message center counts
+// the FAQ rows with func_001E2BB8 / func_001E2C80 for it, cOVState_ViewPopup never deletes such a message, and its
+// next-message step (func_001E58E0) walks the folder instead of the queue.
+enum { kMessageGroupFAQ = 4 };
+
 struct cOVState_MESSAGECENTER : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVState_MESSAGECENTER_vtbl, stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER (after cOVState's

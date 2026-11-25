@@ -44,7 +44,7 @@ struct cFEStateMountainRoom : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateMountainRoom1() __asm__("cFEStateMountainRoom_cFEStateMountainRoom1");
-    int isPeakPassLoaded() __asm__("cFEStateMountainRoom_isPeakPassLoaded");
+    bool isPeakPassLoaded() __asm__("cFEStateMountainRoom_isPeakPassLoaded");
     void hidePass() __asm__("cFEStateMountainRoom_hidePass");
     int isPassVisible() __asm__("cFEStateMountainRoom_isPassVisible");
     int isPassFrontVisible() __asm__("cFEStateMountainRoom_isPassFrontVisible");

@@ -60,6 +60,24 @@ struct tAttrThing {
 
 struct t3Vector;
 
+// The bits of tAttrThing::mPivot, the anchor a thing's position refers to (names ours). [U] cUIThing_applyPivot:
+// with kPivotTop set it leaves y alone, with kPivotBottom it subtracts the height, otherwise (kPivotMiddle) half of it;
+// with kPivotLeft it leaves x alone, with kPivotRight it subtracts the width, otherwise (kPivotCenter) half of it.
+// [R] tAttrThing_tAttrThing sets kPivotTopLeft (9); [U] cScreenPopup_changePivot moves x by half a width between the
+// left and centre anchors.
+enum tUIPivot {
+    kPivotTop = 1,
+    kPivotMiddle = 2,
+    kPivotBottom = 4,
+    kPivotLeft = 8,
+    kPivotCenter = 16,
+    kPivotRight = 32,
+    kPivotTopLeft = kPivotTop | kPivotLeft,
+    kPivotMiddleLeft = kPivotMiddle | kPivotLeft,
+    kPivotTopCenter = kPivotTop | kPivotCenter,
+    kPivotMiddleCenter = kPivotMiddle | kPivotCenter
+};
+
 struct cUIThing : public cListNode {
     // cListNode (util/list.h): mpPrev 0x000 and mpNext 0x004 ([R] the constructor self-links them; [U] walked by the
     // cList code), the vptr 0x008 ([R] _vt$8cUIThing (cUIThing_vtbl), stored by cUIThing_cUIThing and cUIThing_cUIThing1)

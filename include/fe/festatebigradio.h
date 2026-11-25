@@ -98,8 +98,8 @@ struct cFEStateRequestLine : public cFEState {
     int countBits(unsigned long bits) __asm__("cFEStateRequestLine_countBits");
     void selectSong(int bit) __asm__("cFEStateRequestLine_selectSong");
     void unselectSong(int bit) __asm__("cFEStateRequestLine_unselectSong");
-    int isEmptyPlaylist() __asm__("cFEStateRequestLine_isEmptyPlaylist");
-    int isOnlySongInPlaylist(int bit) __asm__("cFEStateRequestLine_isOnlySongInPlaylist");
+    bool isEmptyPlaylist() __asm__("cFEStateRequestLine_isEmptyPlaylist");
+    bool isOnlySongInPlaylist(int bit) __asm__("cFEStateRequestLine_isOnlySongInPlaylist");
     int isSongSelected(int bit) __asm__("cFEStateRequestLine_isSongSelected");
     int getNumSongsInPlaylist() __asm__("cFEStateRequestLine_getNumSongsInPlaylist");
     int isSongOwned(int bit) __asm__("cFEStateRequestLine_isSongOwned");

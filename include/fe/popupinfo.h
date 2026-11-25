@@ -33,6 +33,37 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+// EA's popup enums (On Tour, names and values). [O] enum ePopupType: cPopupInfo::meType / cScreenPopup::meType, the
+// number of option buttons (-1 a text-entry popup); [U] cScreenPopup_initScreenPopup / handleEntryBox test
+// ePopupType_EntryBox, cScreenPopup_onWidgetEvent ignores option picks for ePopupType_NoButton.
+enum ePopupType {
+    ePopupType_EntryBox = -1,
+    ePopupType_NoButton = 0,
+    ePopupType_1Option = 1,
+    ePopupType_2Option = 2,
+    ePopupType_3Option = 3,
+    ePopupType_4Option = 4,
+    ePopupType_5Option = 5
+};
+
+// [O] enum ePopupStringType: tPopupElement::eType; [U] cScreenPopup_setTextString1 / setTextString2 / getStringSize
+// read the union as a unicode string, an ASCII string or a localisation hash id (GetHashValue32) by it.
+enum ePopupStringType {
+    ePopupStringType_Invalid = 0,
+    ePopupStringType_Unicode = 1,
+    ePopupStringType_Ascii = 2,
+    ePopupStringType_ID = 3
+};
+
+// [O] enum ePopupBackground: cPopupInfo::meBackgroundType / cScreenPopup::meBackgroundType; [U]
+// cScreenPopup_setupBackgroundType shows the widgets of one style, and cScreenPopup_onGainTransition grows the frame
+// of the blue one (ePopupBackground_Blue) frame by frame.
+enum ePopupBackground {
+    ePopupBackground_Online = 0,
+    ePopupBackground_Blue = 1,
+    ePopupBackground_Black = 2
+};
+
 // tPopupElement (On Tour: size 0x8): a string given as unicode (eType 1), ascii (2) or a localisation hash id (3);
 // 0 = none (ePopupStringType). The preview's setters store eType and the union in one go (setPopupMessage(PCUs) li 1).
 struct tPopupElement {

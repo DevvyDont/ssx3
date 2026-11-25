@@ -65,6 +65,10 @@ struct cUIScreen {
     cUIState* mpState;               // 0x0D0 [P] getParentState (preview lw 0xC8; retail cUIScreen_getParentState lw 0xD0), getEngine = mpState's
                                      //       mpEngine (retail cUIScreen_getEngine); [R] = pState (cUIScreen_cUIScreen, cUIEngine_addScreenByHashName)
 
+    // The "no frame" frame number (names ours). [U] cUIScreen_getFrameByLabel returns it for a label the screen does
+    // not have and cUIThing_getKeyframerEvent for a thing without events; callers then skip cUIScreen_playFrame.
+    enum { kNoFrame = 0xFFFF };
+
     // Methods bound to their retail symbols by asm labels.
     void setData(tUIScreenHeader* data) __asm__("cUIScreen_setData");
     tUIFrameHeader* getFrameByIndex(unsigned short frame) __asm__("cUIScreen_getFrameByIndex");

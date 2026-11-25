@@ -11,6 +11,17 @@
 
 #include "layout.h"
 
+// A file slot's fileStatus (names ours; On Tour's fileStatus is a plain int). [U] Load3PeakPic / Load1PeakPic /
+// LoadLocationPic request a slot (kFileRequested); Update starts a requested slot's read through LoadDataFile
+// (kFileLoading) and marks it kFileLoaded once ASYNCFILE_getstatus reports it done (LoadDataFile also does for a
+// synchronous read); UnloadFEAsyncFile frees a slot at any stage and GetFreeAsyncFile looks for kFileFree.
+enum tFEAsyncFileStatus {
+    kFileFree = 0,
+    kFileRequested = 1,
+    kFileLoading = 2,
+    kFileLoaded = 3
+};
+
 // One file slot (On Tour tFEAsyncFile, 0x11C); [U] cFEAsyncManager_Init clears every field of each slot.
 struct tFEAsyncFile {
     char fileName[256];             // 0x000 [O]

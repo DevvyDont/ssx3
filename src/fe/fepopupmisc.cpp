@@ -25,6 +25,7 @@
 #include "ui/uiinput.h"
 #include "ui/uitextscroll.h"
 #include "ui/uiengine.h"
+#include "ui/uiscreen.h"
 #include "fe/festaterewardsroom.h"
 #include "fe/festatepeakroom.h"
 #include "fe/festatempcircuit.h"
@@ -306,7 +307,7 @@ static inline void sound_F050(cFEPopupScreenPos* s, int msg)
 static inline void playFrame_F050(cFEPopupScreenPos* s, char* name)
 {
     unsigned short frame = cUIScreen_getFrameByLabel_us((cUIScreen*)((void*)s->mpScreen), GetHashValue32(name));
-    if (frame != 0xFFFF)
+    if (frame != cUIScreen::kNoFrame)
         cUIScreen_playFrame(((void*)s->mpScreen), frame, 1);
 }
 
@@ -1106,15 +1107,16 @@ int cFEStateNetHelpPopup::getReferEventsToParent()
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_isInStore);
 #ifdef SKIP_ASM
 /**
- * Reports whether the equip-gear state is in store (buying) mode: its mode at +0xC8 is 1.
+ * Reports whether the equip-gear state is in store (buying) mode: its mode at +0xC8 is kEquipModeStore.
  *
- * An out-of-line inline accessor with no caller; cFEStateCharEquip_cFEStateCharEquip stores 1 there in the store.
+ * An out-of-line inline accessor with no caller; cFEStateCharEquip_cFEStateCharEquip stores kEquipModeStore there in
+ * the store.
  *
- * @return 1 in store mode, else 0
+ * @return true in store mode, else false
  */
-int cFEStateCharEquip::isInStore()
+bool cFEStateCharEquip::isInStore()
 {
-    return (mEquipMode) == 1;
+    return (mEquipMode) == kEquipModeStore;
 }
 #endif
 //100%
@@ -2348,9 +2350,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPeakPassLoaded);
  * The room starts the pass image load in its constructor and resets the slot to -1 once the image is taken
  * (cFEStateMountainRoom_updateTextureLoad). An out-of-line inline accessor with no caller.
  *
- * @return 1 when the slot is -1, else 0
+ * @return true when the slot is -1, else false
  */
-int cFEStateMountainRoom::isPeakPassLoaded()
+bool cFEStateMountainRoom::isPeakPassLoaded()
 {
     return ~(mTextureFileIndex) == 0;
 }
@@ -2661,7 +2663,7 @@ extern int D_004A19D4;
 extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
- * Closes the multiplayer-mode popup: select (5) records the chosen mode, back (6) cancels.
+ * Closes the multiplayer-mode popup: select (kONNEXT) records the chosen mode, back (kONPREV) cancels.
  *
  * Select stores whether item 1 was chosen in D_004A19D4, which the front end checks when it starts the next
  * multiplayer state.
@@ -2673,14 +2675,14 @@ extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultip
                                                            int Event)
 {
     switch (Event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         cUIEngine* engine = self->mpEngine;
         self->mMultiMode = 1;
         D_004A19D4 = pWidget->mMiscData != 0;
         cUIStateStack_pop(&engine->mStateStack, 1);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUIEngine* engine = self->mpEngine;
         self->mMultiMode = 0;
         cUIStateStack_pop(&engine->mStateStack, 1);
@@ -2698,12 +2700,13 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 /**
  * Handles the multiplayer-mode popup's menu events by moving the selection on scroll events.
  *
- * cUIMenu_onInputChangeItem() sends event 2 when the menu scrolls up and 3 when it scrolls down. Event 3 selects
- * item @p idx + 1; event 2 selects @p idx - 1 and then, falling through into event 3's case, @p idx + 1.
+ * cUIMenu_onInputChangeItem() sends kSCROLLUP when the menu scrolls up and kSCROLLDOWN when it scrolls down.
+ * kSCROLLDOWN selects item @p idx + 1; kSCROLLUP selects @p idx - 1 and then, falling through into kSCROLLDOWN's
+ * case, @p idx + 1.
  *
  * @param menu  the menu that sent the event
  * @param key   menu event number (On Tour: Event)
- * @param idx   the event's index argument (the menu's scroll offset for events 2 and 3)
+ * @param idx   the event's index argument (the menu's scroll offset for kSCROLLUP and kSCROLLDOWN)
  * @return always 0x101, the base handler's result
  */
 extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(cFEPopupSelectMultiplayerMode* self, void* menu, unsigned int key, int idx)
@@ -2711,17 +2714,17 @@ extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(cFEPopupSelectMultipla
     switch (key) {
     default:
         break;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-        if (key < 6) {
+    case cUIMenu::kSCROLLUPDATE:
+    case cUIMenu::kSCROLLCHANGE:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONPREVIOUS:
+        if (key < cUIMenu::kONNEXT) {
             return 257;
         }
         break;
-    case 2:
+    case cUIMenu::kSCROLLUP:
         cUIMenu_setSelectedByIndex(menu, idx - 1);
-    case 3:
+    case cUIMenu::kSCROLLDOWN:
         cUIMenu_setSelectedByIndex(menu, idx + 1);
         break;
     }
@@ -2951,10 +2954,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isEmptyPlaylist);
  * Reports whether the request line's playlist (the 64-bit mask at +0x158) is empty.
  *
  * @param requestLine  the request-line state
- * @return 1 when no song is selected, else 0
+ * @return true when no song is selected, else false
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-int cFEStateRequestLine::isEmptyPlaylist()
+bool cFEStateRequestLine::isEmptyPlaylist()
 {
     return ((long)mPlaylist) == 0;
 }
@@ -2968,10 +2971,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isOnlySongInPlaylist);
  * Also true for an empty playlist, since the song's own bit is ignored.
  *
  * @param bit  the song index (0..63)
- * @return 1 when no other song is selected, else 0
+ * @return true when no other song is selected, else false
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-int cFEStateRequestLine::isOnlySongInPlaylist(int bit)
+bool cFEStateRequestLine::isOnlySongInPlaylist(int bit)
 {
     return ((long)mPlaylist & ~(1L << bit)) == 0;
 }
@@ -5278,7 +5281,7 @@ extern "C" void func_001E1458(void)
 INCLUDE_ASM("fe/fepopupmisc", func_001E14C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 void func_001E1548(void* self);
 
 struct sEntry14_14C0 {
@@ -5329,7 +5332,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* iface, int a, int ch, int b, int c);
@@ -5422,10 +5425,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1A30);
  *
  * @param x  the value to test (only 0-9 can match)
  * @param y  the character id to compare with
- * @return 1 on a match, else 0
+ * @return true on a match, else false
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_001E1A30(int x, int y)
+extern "C" bool func_001E1A30(int x, int y)
 {
     switch (x) {
     case 0: return y == 0;
@@ -5439,7 +5442,7 @@ extern "C" int func_001E1A30(int x, int y)
     case 8: return y == 8;
     case 9: return y == 9;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -5450,7 +5453,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1AD0);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
 unsigned int BXrand();
-extern "C" int func_001E1A30(int kind, int arg);
+extern "C" bool func_001E1A30(int kind, int arg);
 extern "C" int func_001E3388(int id);
 extern char str_AddForeshadowMessage[];
 
@@ -5509,7 +5512,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
 struct sEntry14_1C10 {
@@ -5613,7 +5616,7 @@ extern "C" void func_001E1C10(int which)
 INCLUDE_ASM("fe/fepopupmisc", func_001E1DD0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int id, int a1);
 static inline int IsBusy001E1DD0()
 {
@@ -5653,7 +5656,7 @@ extern "C" void func_001E1DD0(void* self, int kind, int alt)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1EB8);
 #ifdef SKIP_ASM
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E20D0(int which, int flag);
 extern "C" void func_001E2220(int which, int flag);
@@ -5721,7 +5724,7 @@ extern "C" void func_001E1EB8(void)
 INCLUDE_ASM("fe/fepopupmisc", func_001E20D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5789,7 +5792,7 @@ extern "C" void func_001E20D0(int which, int flag)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2220);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5891,7 +5894,7 @@ extern "C" void func_001E2370(int which)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2428);
 #ifdef SKIP_ASM
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5935,7 +5938,7 @@ extern "C" void func_001E2428(int which)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2518);
 #ifdef SKIP_ASM
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -5958,7 +5961,7 @@ extern "C" void func_001E2518(void)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2578);
 #ifdef SKIP_ASM
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -6018,7 +6021,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E32C8(int type);
@@ -6119,7 +6122,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E32C8(int type);
@@ -6222,7 +6225,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E2B38(int charID);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 unsigned int BXrand();
@@ -6301,7 +6304,7 @@ extern "C" int func_001E2B38(int x)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2BB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 
 struct sEntry14_2BB8 {
     int type;
@@ -6369,7 +6372,7 @@ extern "C" int func_001E2C60(int i)
 INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 
 struct sEntry14_2C80 {
     int type;
@@ -6442,9 +6445,9 @@ extern sPopupEntry14 D_00441630[];
  * @param category  the category (3 back-country result, 4 foreshadow, 5 aggression, 8 peak awards, as the subject strings name
  *           them)
  * @param i  the message index
- * @return 1 when it does, else 0
+ * @return true when it does, else false
  */
-extern "C" int func_001E2D58(int category, int i)
+extern "C" bool func_001E2D58(int category, int i)
 {
     sPopupEntry18* messageEntry = &D_004C6C08[i];
     sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
@@ -6463,9 +6466,9 @@ extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
  *
  * @param category  the category
  * @param i  the group index
- * @return 1 when it does, else 0
+ * @return true when it does, else false
  */
-extern "C" int func_001E2D98(int category, int i)
+extern "C" bool func_001E2D98(int category, int i)
 {
     int* groupWords = (int*)&D_00441630_2C60[0] + i * 5;
     return groupWords[3] == category;
@@ -6654,7 +6657,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", func_001E3100);
 #ifdef SKIP_ASM
-extern "C" int func_001E2D58(int v, int i);
+extern "C" bool func_001E2D58(int v, int i);
 unsigned int BXrand();
 
 /**
@@ -6957,19 +6960,21 @@ extern "C" int cBENewPlayerInterface_getHelpDone(void* iface, int a1);
 /**
  * Reports whether a world script may open the message center (ShowMessageIconFunc returns it to the script).
  *
- * Returns 0 when the new race's cGamePath is not 0 or its cGameEvent is 6 or 9; otherwise 1 while player 0's flag read
+ * Returns false when the new race's cGamePath is not kGAMEPATH_WORLDCIRCUIT or its cGameEvent is
+ * kGAMEEVENT_TIME_PEAK1 or kGAMEEVENT_POINTS_PEAK1; otherwise true while player 0's flag read
  * by cBENewPlayerInterface_getHelpDone is still clear (func_001E3510 sets it).
  *
- * @return 1 when the message center may be opened, else 0
+ * @return true when the message center may be opened, else false
  */
-extern "C" int func_001E3570(void)
+extern "C" bool func_001E3570(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath != 0) {
-        return 0;
+    if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_WORLDCIRCUIT) {
+        return false;
     }
-    if (cBENewRaceInterface_newRace.cGameEvent == 6 || cBENewRaceInterface_newRace.cGameEvent == 9) {
-        return 0;
+    if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_TIME_PEAK1
+        || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_POINTS_PEAK1) {
+        return false;
     }
     return cBENewPlayerInterface_getHelpDone(cBE_getInterface_Fv(cBE_getBE(), 1), 0) == 0;
 }
@@ -7087,7 +7092,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
 int cBERewardInterface_getEarningsTarget(void* self, int a1);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -7133,7 +7138,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
@@ -7202,9 +7207,9 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
  *
  * The flags are the bits of the character record's words at +0xF08; the declared parameter is really the flag index.
  *
- * @return 1 when the flag is set, else 0
+ * @return true when the flag is set, else false
  */
-extern "C" int func_001E3A30(void* self)
+extern "C" bool func_001E3A30(void* self)
 {
     return func_00147980(cBE_getInterface_Fv(cBE_getBE(), 1), 0, self) != 0;
 }
@@ -7283,7 +7288,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int hash);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 int GetHashValue32(char* str);
 extern void* cOVState_vtbl[];
@@ -7649,12 +7654,12 @@ extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
 /**
  * Handles the message center's widget events (vtable entry 19, onWidgetEvent).
  *
- * Event 5 (select): on a queued-message row marks it read and opens the view popup with its row number (func_001E50C8);
+ * kONNEXT (select): on a queued-message row marks it read and opens the view popup with its row number (func_001E50C8);
  * on a FAQ row either toggles the folder (when the row is a folder's first message: flips the group's message flag and
- * refreshes rows, arrows and buttons) or opens the view popup. Event 7: clears mbMessageDeleted and, on a queued row,
- * deletes that message (func_001E5148) and sets mbMessageDeleted, then refreshes the buttons. Event 6: plays the
- * screen's "TransitionOut" frame, calls cUIStateStack_pop(mpEngine + 0x18, 1) and clears D_004A20C0. Event 1: calls vtable
- * entry 5 with 0 on the eight subject texts. Ignores a null @p widget.
+ * refreshes rows, arrows and buttons) or opens the view popup. kONOPTION: clears mbMessageDeleted and, on a queued row,
+ * deletes that message (func_001E5148) and sets mbMessageDeleted, then refreshes the buttons. kONPREV: plays the
+ * screen's "TransitionOut" frame, calls cUIStateStack_pop(mpEngine + 0x18, 1) and clears D_004A20C0. kONGAINFOCUS:
+ * calls vtable entry 5 with 0 on the eight subject texts. Ignores a null @p widget.
  *
  * @param widget  the widget (a row's From text holds its message index at +0x18)
  * @param event   the widget event
@@ -7668,7 +7673,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
     int faqRowCount = func_001E2BB8(4, 1);
     int queuedCount = func_001E33E8_noarg();
     switch (event) {
-    case 5:
+    case cUIState::kONNEXT:
         if (faqRowCount + queuedCount > 0) {
             int k = *(unsigned char*)((char*)self->mpMenu + 0x95);
             int idx = queuedCount - k - 1;
@@ -7691,7 +7696,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
             }
         }
         break;
-    case 7:
+    case cUIState::kONOPTION:
         self->mbMessageDeleted = 0;
         if (queuedCount > 0) {
             int idx = queuedCount - *(unsigned char*)((char*)self->mpMenu + 0x95) - 1;
@@ -7702,16 +7707,16 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
             func_001E4458(self);
         }
         break;
-    case 6: {
+    case cUIState::kONPREV: {
         int outFrame = cUIScreen_getFrameByLabel(self->mpMessageScreen, GetHashValue32(str_TransitionOut_b));
-        if (outFrame != 0xFFFF) {
+        if (outFrame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpMessageScreen, outFrame, 1);
         }
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         D_004A20C0 = 0;
         break;
     }
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         int i;
         for (i = 0; i < 8; i++) {
             void* subjectText = ((void**)&self->mpSubject)[i];
@@ -7733,7 +7738,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 // PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" int func_001E2C80(int type, int idx, int mode);
-extern "C" int func_001E3A30(void* self);
+extern "C" bool func_001E3A30(void* self);
 extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, cUIThing* obj);
 extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, cUIThing* obj);
 extern char str_kT_BTNView[];
@@ -7801,31 +7806,31 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self);
 /**
  * Answers the message center menu's events (vtable entry 20, onWidgetMenu).
  *
- * Event 4 (scrolled) stores @p value in mScrollOffset and refreshes arrows and rows; event 5 refreshes the buttons;
- * event 8 reports whether mbMessageDeleted is set; events 6 and 7 return 1 and event 9 returns 0.
+ * kSCROLLUPDATE stores @p value in mScrollOffset and refreshes arrows and rows; kSCROLLCHANGE refreshes the buttons;
+ * kONOPTION reports whether mbMessageDeleted is set; kONNEXT and kONPREVIOUS return 1 and kONMISC returns 0.
  *
  * @param widget  the menu
  * @param event   the menu event
- * @param value   the event's value (the new scroll offset for event 4)
- * @return 257 for events 4, 5 and others, the answers above otherwise
+ * @param value   the event's value (the new scroll offset for kSCROLLUPDATE)
+ * @return 257 for kSCROLLUPDATE, kSCROLLCHANGE and others, the answers above otherwise
  */
 extern "C" int cOVState_MESSAGECENTER_onWidgetMenu(cOVState_MESSAGECENTER* self, void* widget, int event, int value)
 {
     switch (event) {
-    case 4:
+    case cUIMenu::kSCROLLUPDATE:
         self->mScrollOffset = value;
         func_001E4658(self);
         func_001E48B0(self);
         break;
-    case 5:
+    case cUIMenu::kSCROLLCHANGE:
         func_001E4458(self);
         return 257;
-    case 9:
+    case cUIMenu::kONMISC:
         return 0;
-    case 8:
+    case cUIMenu::kONOPTION:
         return self->mbMessageDeleted != 0;
-    case 6:
-    case 7:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONPREVIOUS:
         return 1;
     }
     return 257;
@@ -7842,15 +7847,15 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
 /**
  * Refreshes the message center when its view popup closes (vtable entry 17, onPopupEvent).
  *
- * On event 20 (sent by the view popup) refreshes the rows and the count labels (func_001E48B0, func_001E4758) and calls
- * cUIStateStack_pop(mpEngine + 0x18, 1).
+ * On kONSCREENPOPUPPREV (sent by the view popup) refreshes the rows and the count labels (func_001E48B0, func_001E4758)
+ * and calls cUIStateStack_pop(mpEngine + 0x18, 1).
  *
  * @param popup  the popup
  * @param event  the popup event
  */
 extern "C" void cOVState_MESSAGECENTER_onPopupEvent(cOVState_MESSAGECENTER* self, int popup, int event)
 {
-    if (event == 20) {
+    if (event == cUIState::kONSCREENPOPUPPREV) {
         func_001E48B0(self);
         func_001E4758(self);
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
@@ -8309,7 +8314,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx);
 extern "C" int func_001E3388(int id);
 extern "C" unsigned char func_001E3650(int idx);
-extern "C" int func_001E2D58(int v, int i);
+extern "C" bool func_001E2D58(int v, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_004A20C4;
 extern char str_kT_MSGSubjectBCFinishLosspct_d[];
@@ -8615,7 +8620,7 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
 {
     sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[self->miMessage];
     sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->groupIndex];
-    if (groupEntry->type == 4) {
+    if (groupEntry->type == kMessageGroupFAQ) {
         cUIThing* buttonWidget = self->mpButtonSquare;
         if (buttonWidget != 0) {
             buttonWidget->setVisible(0);
@@ -8629,7 +8634,7 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
         }
     }
     if (self->mpNumber != 0) {
-        if (groupEntry->type == 4) {
+        if (groupEntry->type == kMessageGroupFAQ) {
             unsigned short buf[0x18];
             cFELocale* mgr = SSXApp->FELocale;
             sVEntryS1E5428* vt = (sVEntryS1E5428*)VPTR_OF(cUILocaleInterface, mgr);
@@ -8686,7 +8691,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx);
 extern "C" int func_001E3388(int id);
 extern "C" unsigned char func_001E3650(int idx);
-extern "C" int func_001E2D58(int v, int i);
+extern "C" bool func_001E2D58(int v, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_004A20C4;
 extern char str_kT_MSGSubjectBCFinishLosspct_d[];
@@ -8783,9 +8788,9 @@ extern "C" void func_001E3268(int id);
 /**
  * Handles the message view's widget events: delete the message, or close the popup.
  *
- * Event 7 deletes the shown message from the saved list (func_001E3268) unless its type (D_00441630[entry +0x4]) is
- * 4, in which case nothing happens; it then falls through to close. Events 5 and 6 (and a delete) tell the parent
- * state's onPopupEvent (slot 17) event 0x14 (back) from this popup.
+ * kONOPTION deletes the shown message from the saved list (func_001E3268) unless its type (D_00441630[entry +0x4])
+ * is kMessageGroupFAQ, in which case nothing happens; it then falls through to close. kONNEXT and kONPREV (and a
+ * delete) tell the parent state's onPopupEvent (slot 17) kONSCREENPOPUPPREV (back) from this popup.
  *
  * @param pWidget  the widget (On Tour pWidget); not used
  * @param msg  the widget event (On Tour Event)
@@ -8793,23 +8798,23 @@ extern "C" void func_001E3268(int id);
 extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void* pWidget, unsigned int msg)
 {
     switch (msg) {
-    case 7: {
+    case cUIState::kONOPTION: {
         int id = self->miMessage;
         sPopupEntry18_5800* popupEntry = &D_004C6C08_5800[id];
         sEntry14_5800* typeEntry = &D_00441630_5800[popupEntry->groupIndex];
-        if (typeEntry->type == 4) {
+        if (typeEntry->type == kMessageGroupFAQ) {
             return;
         }
         func_001E3268(id);
     }
-    case 5: {
+    case cUIState::kONNEXT: {
         cUIState* parentState = self->mpParentState;
-        parentState->onPopupEvent((cUIState*)self, 20);
+        parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUIState* parentState = self->mpParentState;
-        parentState->onPopupEvent((cUIState*)self, 20);
+        parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
         break;
     }
     }
@@ -8833,18 +8838,18 @@ unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
  * For a FAQ message moves to the next message of the same folder (func_001E34D8), adds 1 to miNumber and refills the
  * popup. Otherwise, while unread messages remain, shows the first unread one (func_001E3460), marks it read and sets
  * miNumber to its row number (count minus position). When there is nothing more it sends mpParentState onPopupEvent
- * (vtable entry 17) with this popup and event 20.
+ * (vtable entry 17) with this popup and kONSCREENPOPUPPREV.
  */
 extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 {
     int id = self->miMessage;
     sPopupEntry18_5800* messageEntry = &D_004C6C08_5800[id];
     sEntry14_5800* groupEntry = &D_00441630_5800[messageEntry->groupIndex];
-    if (groupEntry->type == 4) {
+    if (groupEntry->type == kMessageGroupFAQ) {
         int n = func_001E34D8(id);
         if (n == -1) {
             cUIState* parentState = self->mpParentState;
-            parentState->onPopupEvent((cUIState*)self, 20);
+            parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
             return;
         }
         self->miMessage = n;
@@ -8859,7 +8864,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         func_001E5428(self);
     } else {
         cUIState* parentState = self->mpParentState;
-        parentState->onPopupEvent((cUIState*)self, 20);
+        parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
     }
 }
 #endif
@@ -8868,24 +8873,25 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the message view's menu events; event 8 asks whether the shown message can be deleted.
+ * Answers the message view's menu events; kONOPTION asks whether the shown message can be deleted.
  *
  * @param pMenu  the menu (On Tour pMenu); not used
  * @param Event  the menu event (On Tour Event)
- * @return 1 for events 6 and 7, 0 for 9, for 8 whether the message's type is not 4, otherwise 0x101
+ * @return 1 for kONNEXT and kONPREVIOUS, 0 for kONMISC, for kONOPTION whether the message's type is not
+ *         kMessageGroupFAQ, otherwise 0x101
  */
 extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMenu, unsigned int Event)
 {
     switch (Event) {
-    case 6:
-    case 7:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONPREVIOUS:
         return 1;
-    case 9:
+    case cUIMenu::kONMISC:
         return 0;
-    case 8: {
+    case cUIMenu::kONOPTION: {
         sPopupEntry18* popupEntry = &D_004C6C08[self->miMessage];
         sPopupEntry14* typeEntry = &D_00441630[popupEntry->groupIndex];
-        return *(int*)typeEntry->pad_0x0 != 4;
+        return *(int*)typeEntry->pad_0x0 != kMessageGroupFAQ;
     }
     }
     return 257;
@@ -9065,7 +9071,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         break;
     }
     uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_heat1));
-    if (cBENewRaceInterface_newRace.cGamePath != 0) {
+    if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_WORLDCIRCUIT) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNScoreColon));
     }
     int flag = 0;
@@ -9089,7 +9095,8 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
             uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (i - 1 == cGameModeMan_iRanking[pl0]) {
                 if (cGameModeMan_bGiveUp[pl0]) hl = 1; else hl = 0;
-            } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i - 1 == cGameModeMan_iRanking[pl1]) {
+            } else if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER
+                && i - 1 == cGameModeMan_iRanking[pl1]) {
                 if (cGameModeMan_bGiveUp[pl1]) hl = 1; else hl = 0;
             }
             cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(iface2, info->iCharacters[idx], info->iCheatCharacters[idx]));
@@ -9275,7 +9282,7 @@ extern "C" int cOVState_HEAT_STANDINGS_onInputBegin(cOVState_HEAT_STANDINGS* sel
 INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the freestyle standings menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
+ * Answers the freestyle standings menu's events (vtable entry 20, onWidgetMenu): 257 for kONNEXT, else 0.
  *
  * @param widget  the menu
  * @param event   the menu event
@@ -9283,7 +9290,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onWidgetMenu);
  */
 extern "C" int cOVState_HEAT_STANDINGS_onWidgetMenu(cOVState_HEAT_STANDINGS* self, int widget, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -9296,7 +9303,7 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the freestyle standings overlay to the overlay manager (vtable entry 19, onWidgetEvent).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData),
+ * On kONNEXT sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData),
  * which cOVStateManager_gotoNextOverlay then acts on.
  *
  * @param popup  the widget
@@ -9304,7 +9311,7 @@ extern int cOVStateManager_mMiscData;
  */
 extern "C" void cOVState_HEAT_STANDINGS_onWidgetEvent(cOVState_HEAT_STANDINGS* self, cUIThing* popup, int event)
 {
-    if (popup != 0 && event == 5) {
+    if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;
@@ -9570,14 +9577,16 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                     if (D_005366A8[pl0] != 0) {
                         finished = 1;
                     }
-                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == cGameModeMan_iRanking[pl1]) {
+                } else if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER
+                    && i == cGameModeMan_iRanking[pl1]) {
                     if (D_005366A8[pl1] != 0) {
                         finished = 1;
                     }
                 }
-                if (cBENewRaceInterface_newRace.cGamePath == 2 && i == cGameModeMan_iRanking[pl0]) {
+                if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER && i == cGameModeMan_iRanking[pl0]) {
                     cUIText_setAsciiString(uiText, func_00146F88(player, pl0));
-                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == cGameModeMan_iRanking[pl1]) {
+                } else if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER
+                    && i == cGameModeMan_iRanking[pl1]) {
                     cUIText_setAsciiString(uiText, func_00146F88(player, pl1));
                 } else {
                     int rider = raceSetup->iCharacters[idx];
@@ -9669,10 +9678,11 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         cUIState_hideObjSafe(self, str_silver);
         cUIState_hideObjSafe(self, str_bronze);
         int show1 = 1;
-        if (cBENewRaceInterface_newRace.cGamePath != 2 && (track == 5 || track == 6) && cGameModeMan_iRanking[pl0] != 0) {
+        if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER && (track == 5 || track == 6)
+            && cGameModeMan_iRanking[pl0] != 0) {
             show1 = 0;
         }
-        if (pl1 != -1 && cBENewRaceInterface_newRace.cGamePath == 2) {
+        if (pl1 != -1 && cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
             show2 = 1;
             if ((track >= 1 && track <= 3) || track == 5 || track == 6) {
                 if (cGameModeMan_iRanking[pl0] < cGameModeMan_iRanking[pl1]) {
@@ -9695,7 +9705,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                 } else if (cGameModeMan_iRanking[pl0] == 2) {
                     cUIState_showObjSafe(self, str_bronze);
                 }
-                if (cBENewRaceInterface_newRace.cGamePath == 0 && D_004A213C != 0) {
+                if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_WORLDCIRCUIT && D_004A213C != 0) {
                     void* goldIcon = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_gold));
                     cUIIcon_setTextureByHashValue(goldIcon, GetHashValue32(str_platinum));
                 }
@@ -9756,7 +9766,8 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 /**
  * Preselects the second button of the final standings menu on the quick-play path (vtable entry 18, onWidgetCreate).
  *
- * When the created widget is "overlayMenu" and the new race's cGamePath is 1, selects its row 1.
+ * When the created widget is "overlayMenu" and the new race's cGamePath is kGAMEPATH_SINGLEEVENT, selects its
+ * row 1.
  *
  * @param menu  the widget being created
  */
@@ -9765,7 +9776,7 @@ extern "C" void cOVState_FINAL_STANDINGS_onWidgetCreate(cOVState_FINAL_STANDINGS
     int hash = menu->mHashName;
     if (hash == GetHashValue32(str_overlayMenu)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (cBENewRaceInterface_newRace.cGamePath == 1) {
+        if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_SINGLEEVENT) {
             cUIMenu_setSelectedByIndex(menu, 1);
         }
     }
@@ -9965,7 +9976,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* s
 INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the final standings menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
+ * Answers the final standings menu's events (vtable entry 20, onWidgetMenu): 257 for kONNEXT, else 0.
  *
  * @param widget  the menu
  * @param event   the menu event
@@ -9973,7 +9984,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onWidgetMenu);
  */
 extern "C" int cOVState_FINAL_STANDINGS_onWidgetMenu(cOVState_FINAL_STANDINGS* self, int widget, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -9986,14 +9997,14 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the final standings overlay to the overlay manager (vtable entry 19, onWidgetEvent).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
+ * On kONNEXT sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
  *
  * @param popup  the widget
  * @param event  the widget event
  */
 extern "C" void cOVState_FINAL_STANDINGS_onWidgetEvent(cOVState_FINAL_STANDINGS* self, cUIThing* popup, int event)
 {
-    if (popup != 0 && event == 5) {
+    if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;
@@ -10060,10 +10071,11 @@ public:
  *
  * Adds the "finishov" screen (kept at +0x40), runs cOVState_onCreateScreen, zeroes the timer (mElapsedTime), sets flag
  * 8 in "Menu0000"'s +0x90, hides the run labels, shows the human rider's time in "pointstotal" (frames / 60) and only
- * their "place%d". Shows the platinum, gold, silver or bronze icon by the reward interface's word +0x14 (0-3) on a
- * final (mode 3) or game event 4, setting D_004A213C for platinum, and "new_record" when the score interface has a new
- * record (+0x18 or +0x1C not negative). Online, when the human rider's word +0x480 is set, or for game events 6-8 hides
- * "screendata" and "3D_Ov"; otherwise plays menu sound 0xE.
+ * their "place%d". Shows the platinum, gold, silver or bronze icon by the reward interface's mLastEventMedal
+ * (kMEDAL_PLATINUM .. kMEDAL_BRONZE) in a final (heat 3) or kGAMEEVENT_RIVALTIME, setting D_004A213C for platinum, and
+ * "new_record" when the score interface has a new record (+0x18 or +0x1C not negative). Online, when the human rider's
+ * word +0x480 is set, or for the time challenges (kGAMEEVENT_TIME_PEAK1..3) hides "screendata" and "3D_Ov"; otherwise
+ * plays menu sound 0xE.
  */
 extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* self)
 {
@@ -10104,24 +10116,28 @@ extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* se
             screenWidget->setVisible(1);
         }
     }
-    if (ifaceD->mLastEventMedal == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_PLATINUM
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME)) {
         D_004A213C = 1;
         cUIState_showObjSafe(self, str_platinum);
     } else {
         D_004A213C = 0;
         cUIState_hideObjSafe(self, str_platinum);
     }
-    if (ifaceD->mLastEventMedal == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_GOLD
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME)) {
         cUIState_showObjSafe(self, str_gold);
     } else {
         cUIState_hideObjSafe(self, str_gold);
     }
-    if (ifaceD->mLastEventMedal == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_SILVER
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME)) {
         cUIState_showObjSafe(self, str_silver);
     } else {
         cUIState_hideObjSafe(self, str_silver);
     }
-    if (ifaceD->mLastEventMedal == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_BRONZE
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME)) {
         cUIState_showObjSafe(self, str_bronze);
     } else {
         cUIState_hideObjSafe(self, str_bronze);
@@ -10137,9 +10153,11 @@ extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* se
         screenWidget->setVisible(0);
     }
     char* humanRider = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
-    if (cBENewRaceInterface_newRace.cGamePath == 2
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER
         || *(int*)(humanRider + 0x480) != 0
-        || cBENewRaceInterface_newRace.cGameEvent == 6 || cBENewRaceInterface_newRace.cGameEvent == 7 || cBENewRaceInterface_newRace.cGameEvent == 8) {
+        || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_TIME_PEAK1
+        || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_TIME_PEAK2
+        || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_TIME_PEAK3) {
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
     } else {
@@ -10189,7 +10207,7 @@ extern "C" void cGame_doNextState(void* self);
  * Moves the race finish overlay on when its button is pressed while mCanContinue is set (vtable entry 19,
  * onWidgetEvent).
  *
- * On event 5 purges the normal UI states and calls cGame_doNextState.
+ * On kONNEXT purges the normal UI states and calls cGame_doNextState.
  *
  * @param popup  the widget
  * @param event  the widget event
@@ -10197,7 +10215,7 @@ extern "C" void cGame_doNextState(void* self);
 extern "C" void cOVState_RACE_FINISHOV_onWidgetEvent(cOVState_RACE_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
-        if (event == 5 && self->mCanContinue != 0) {
+        if (event == cUIState::kONNEXT && self->mCanContinue != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10213,7 +10231,7 @@ extern "C" void cOVState_RACE_FINISHOV_onWidgetEvent(cOVState_RACE_FINISHOV* sel
 INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the race finish menu's events (vtable entry 20): 257 for event 6 while mCanContinue is set, else 0.
+ * Answers the race finish menu's events (vtable entry 20): 257 for kONNEXT while mCanContinue is set, else 0.
  *
  * @param widget  the menu
  * @param key     the menu event
@@ -10222,7 +10240,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onWidgetMenu);
 extern "C" int cOVState_RACE_FINISHOV_onWidgetMenu(cOVState_RACE_FINISHOV* self, int widget, int key)
 {
     int result = 0;
-    if (key == 6) {
+    if (key == cUIMenu::kONNEXT) {
         if (self->mCanContinue == 0) {
             result = 0;
         } else {
@@ -10287,11 +10305,11 @@ public:
  * Builds the event finish overlay for scored runs (overlay 13, vtable cOVState_BASSSP_QUAL_FINISHOV_vtbl, entry 4 onCreateScreen).
  *
  * Like the race finish overlay: "finishov" screen, timer reset, "Menu0000" flag 8. Shows firstrun / secondrun /
- * finalrun by the game mode manager's heat (not for game mode 6), the medal icon by the reward interface's word +0x14
- * on a final or game event 4/5 (platinum also sets D_004A213C), the human rider's "place%d" (or "place6" past sixth),
- * "pointstotal" as kT_OVRCMNPointstotal with the rider's points and "new_record". Hides "screendata" and "3D_Ov"
- * online, when the human rider's word +0x480 is set, for game events 9-11 or in a final qualifying round; plays menu
- * sound 0xE.
+ * finalrun by the game mode manager's heat (not for kGAMEMODE_PNTSCHALLENGE), the medal icon by the reward interface's
+ * mLastEventMedal in a final or kGAMEEVENT_RIVALTIME / kGAMEEVENT_RIVALPOINTS (platinum also sets D_004A213C), the
+ * human rider's "place%d" (or "place6" past sixth), "pointstotal" as kT_OVRCMNPointstotal with the rider's points and
+ * "new_record". Hides "screendata" and "3D_Ov" online, when the human rider's word +0x480 is set, for the points
+ * challenges (kGAMEEVENT_POINTS_PEAK1..3) or in a final qualifying round; plays menu sound 0xE.
  */
 extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUAL_FINISHOV* self)
 {
@@ -10321,7 +10339,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
     cUIState_hideObjSafe(self, str_thirdrun);
     cUIState_hideObjSafe(self, str_finalrun);
     int mode = *modeData;
-    if (event != 6) {
+    if (event != kGAMEMODE_PNTSCHALLENGE) {
         switch (mode) {
         case 0:
         case 1:
@@ -10337,24 +10355,29 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
     }
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int sel = cGameModeMan_iRanking[pl];
-    if (ifaceD->mLastEventMedal == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_PLATINUM
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME
+            || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS)) {
         D_004A213C = 1;
         cUIState_showObjSafe(self, str_platinum);
     } else {
         D_004A213C = 0;
         cUIState_hideObjSafe(self, str_platinum);
     }
-    if (ifaceD->mLastEventMedal == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_GOLD
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS)) {
         cUIState_showObjSafe(self, str_gold);
     } else {
         cUIState_hideObjSafe(self, str_gold);
     }
-    if (ifaceD->mLastEventMedal == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_SILVER
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS)) {
         cUIState_showObjSafe(self, str_silver);
     } else {
         cUIState_hideObjSafe(self, str_silver);
     }
-    if (ifaceD->mLastEventMedal == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
+    if (ifaceD->mLastEventMedal == kMEDAL_BRONZE
+        && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS)) {
         cUIState_showObjSafe(self, str_bronze);
     } else {
         cUIState_hideObjSafe(self, str_bronze);
@@ -10390,9 +10413,11 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
         screenWidget->setVisible(0);
     }
     char* humanRider = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
-    if (cBENewRaceInterface_newRace.cGamePath == 2
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER
         || *(int*)(humanRider + 0x480) != 0
-        || cBENewRaceInterface_newRace.cGameEvent == 9 || cBENewRaceInterface_newRace.cGameEvent == 10 || cBENewRaceInterface_newRace.cGameEvent == 11
+        || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_POINTS_PEAK1
+        || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_POINTS_PEAK2
+        || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_POINTS_PEAK3
         || (mode == 1 && modeData[0x70 / 4] == 3)) {
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
@@ -10442,7 +10467,7 @@ extern "C" void cGame_doNextState(void* self);
  * Moves the event finish overlay on when its button is pressed while mCanContinue is set (vtable entry 19,
  * onWidgetEvent).
  *
- * On event 5 purges the normal UI states and calls cGame_doNextState.
+ * On kONNEXT purges the normal UI states and calls cGame_doNextState.
  *
  * @param popup  the widget
  * @param event  the widget event
@@ -10450,7 +10475,7 @@ extern "C" void cGame_doNextState(void* self);
 extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
-        if (event == 5 && self->mCanContinue != 0) {
+        if (event == cUIState::kONNEXT && self->mCanContinue != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10463,7 +10488,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent(cOVState_BASSSP_QUAL
 INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the event finish menu's events (vtable entry 20): 257 for event 6 while mCanContinue is set, else 0.
+ * Answers the event finish menu's events (vtable entry 20): 257 for kONNEXT while mCanContinue is set, else 0.
  *
  * @param widget  the menu
  * @param key     the menu event
@@ -10472,7 +10497,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu);
 extern "C" int cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu(cOVState_BASSSP_QUAL_FINISHOV* self, int widget, int key)
 {
     int result = 0;
-    if (key == 6) {
+    if (key == cUIMenu::kONNEXT) {
         if (self->mCanContinue == 0) {
             result = 0;
         } else {
@@ -10707,7 +10732,7 @@ int func_001E8E90(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E8E98);
 #ifdef SKIP_ASM
 /**
- * Answers the peak challenge results menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
+ * Answers the peak challenge results menu's events (vtable entry 20, onWidgetMenu): 257 for kONNEXT, else 0.
  *
  * @param widget  the menu
  * @param event   the menu event
@@ -10715,7 +10740,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8E98);
  */
 extern "C" int func_001E8E98(void* self, int widget, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -10728,14 +10753,14 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the peak challenge results overlay to the overlay manager (vtable entry 19).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
+ * On kONNEXT sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
  *
  * @param popup  the widget
  * @param event  the widget event
  */
 extern "C" void func_001E8EA8(void* self, cUIThing* popup, int event)
 {
-    if (popup != 0 && event == 5) {
+    if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;
@@ -10819,7 +10844,7 @@ extern int cOVStateManager_mMiscData;
 /**
  * Passes the chosen option of the multiplayer standings overlay to the overlay manager (vtable entry 19).
  *
- * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
+ * On kONNEXT sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (mMiscData).
  *
  * @param popup  the widget
  * @param event  the widget event
@@ -10827,7 +10852,7 @@ extern int cOVStateManager_mMiscData;
 extern "C" void cOVState_TOURNAMENT_STANDINGS_onWidgetEvent(cOVState_TOURNAMENT_STANDINGS* self, cUIThing* popup,
                                                             int event)
 {
-    if (popup != 0 && event == 5) {
+    if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
         cOVStateManager_mStatus = 1;
         cOVStateManager_mMiscData = popupId;

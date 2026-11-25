@@ -77,6 +77,32 @@ struct cFEStateNetMessenger : public cFEStateNet {
     int miSelectedIndex;            // 0x6F8 [R] -1; [U] func_001A52B0 stores the index of the session's first pending
                                     //       name (func_001A5800) or -1; cFEStateNetMessenger_onInputBegin passes it to func_001A6C40
 
+    // The ids the messenger's keyboard popups carry (the keyboard's miMiscData; names ours). [U]
+    // cFEStateNetMessenger_onWidgetEvent opens the find-user keyboard with kKeyboardFindUser; cFEStateNet's
+    // read-or-reply func_001ABB30 opens the reply keyboard with kKeyboardMessage; func_001A4750 dispatches on them.
+    enum {
+        kKeyboardFindUser = 1,
+        kKeyboardMessage = 2
+    };
+
+    // A buddy row's status icon (func_001A63C8's state; names ours). [U] func_001A63C8 shows "IconBlocked%02d" for
+    // kRowIconBlocked, "IconMessage%02d" for kRowIconMessage and "IconChallenge%02d" for kRowIconChallenge, and none
+    // for any other value.
+    enum {
+        kRowIconBlocked = 0,
+        kRowIconMessage = 1,
+        kRowIconChallenge = 2
+    };
+
+    // A buddy's row class (func_001A4670's result; names ours). [U] func_001A4670 returns kBuddyFlagged for a roster
+    // entry with flag 0x100000 (func_00262400), kBuddyOnline when func_00263338 reports it online, else kBuddyOffline;
+    // func_001A66A8 colours the row grey, light blue or dark blue by it.
+    enum {
+        kBuddyFlagged = 0,
+        kBuddyOffline = 1,
+        kBuddyOnline = 2
+    };
+
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNetMessenger1() __asm__("cFEStateNetMessenger_cFEStateNetMessenger1");
 };

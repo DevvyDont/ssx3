@@ -55,6 +55,16 @@ typedef char check_vector_cChallenger_M_end_of_storage[(DECOMP_OFFSETOF(vector<c
 
 struct BuddyApiMsgT;
 
+// The error a roster change reports (func_00261EF8's out word, from func_002620D8; names ours). [U] func_00261EF8:
+// 0 on success, 1 when the list is full, 2 when the flag-0x100000 entries are full, 3 for the player's own persona;
+// the FE shows "kT_POPUP235MaxBuddiesExceeded" (func_001ABED8) for kBuddyRosterFull.
+enum eBuddyRosterError {
+    kBuddyRosterOk = 0,
+    kBuddyRosterFull = 1,
+    kBuddyRosterTempFull = 2,
+    kBuddyRosterSelf = 3
+};
+
 struct BuddyMan {
     char mServerName[0x40];             // 0x000 [U] connect (func_00261248) strcpy's its host argument (LobbyMan
                                         //       passes the "BUDDYSERVERNAME" tag); func_00261058 clears byte 0

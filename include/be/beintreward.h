@@ -28,6 +28,14 @@
 
 struct cBERewardDB;
 
+// A medal (cBERewardInterface::mLastEventMedal). Names [O] from On Tour's enum eBEMedalID (kMEDAL_NONE -1,
+// kMEDAL_GOLD 0, kMEDAL_SILVER 1, kMEDAL_BRONZE 2); retail ranks a platinum medal first (name ours), so the others
+// are one higher: [U] cOVState_RACE_FINISHOV_onCreateScreen / cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen show
+// "platinum", "gold", "silver" and "bronze" for 0..3, and clearUserAwards stores kMEDAL_NONE.
+enum eBEMedalID {
+    kMEDAL_NONE = -1, kMEDAL_PLATINUM = 0, kMEDAL_GOLD = 1, kMEDAL_SILVER = 2, kMEDAL_BRONZE = 3
+};
+
 struct cBERewardInterface : public cBEInterface {
     // cBEInterface (0x00-0x0F, be/beinterface.h):
     //   bCanSubmit: (On Tour: a bool at 0x0); no retail access seen

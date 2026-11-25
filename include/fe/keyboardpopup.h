@@ -32,6 +32,60 @@ struct cUIVector;
 
 struct cUIText;
 
+// EA's keyboard enums (On Tour, names and values). [O] enum eScreenFullKeyboard: the 84 keys of "Fullkeyboard" in 6
+// rows of 14 (cKeyboardPopup::miCurrentKey, setIncludeKey's key). [U] retail fits: cKeyboardPopup_getObjName names
+// the widgets "back" (27), "caps" (42), "Lshift" (56), "clear" (70), "arrLeft" (76), "arrRight" (83), "tab" (28),
+// "enter" (55), "arrUp" (69), "arrDown" (79) and "space" (75); keys 4..13 are the quick-message keys (Q1..Q10) and
+// key 0x1D the constructor's first key (eKeyboard_Q).
+enum eScreenFullKeyboard {
+    eKeyboard_ESC = 0, eKeyboard_DUMMY00 = 1, eKeyboard_DUMMY01 = 2, eKeyboard_DUMMY02 = 3,
+    eKeyboard_Q1 = 4, eKeyboard_Q2 = 5, eKeyboard_Q3 = 6, eKeyboard_Q4 = 7, eKeyboard_Q5 = 8, eKeyboard_Q6 = 9,
+    eKeyboard_Q7 = 10, eKeyboard_Q8 = 11, eKeyboard_Q9 = 12, eKeyboard_Q10 = 13,
+    eKeyboard_TILDA = 14, eKeyboard_1 = 15, eKeyboard_2 = 16, eKeyboard_3 = 17, eKeyboard_4 = 18, eKeyboard_5 = 19,
+    eKeyboard_6 = 20, eKeyboard_7 = 21, eKeyboard_8 = 22, eKeyboard_9 = 23, eKeyboard_0 = 24, eKeyboard_MINUS = 25,
+    eKeyboard_EQUALS = 26, eKeyboard_BACKSPACE = 27,
+    eKeyboard_TAB = 28, eKeyboard_Q = 29, eKeyboard_W = 30, eKeyboard_E = 31, eKeyboard_R = 32, eKeyboard_T = 33,
+    eKeyboard_Y = 34, eKeyboard_U = 35, eKeyboard_I = 36, eKeyboard_O = 37, eKeyboard_P = 38, eKeyboard_OPEN = 39,
+    eKeyboard_CLOSE = 40, eKeyboard_BACKSLASH = 41,
+    eKeyboard_CAPS = 42, eKeyboard_A = 43, eKeyboard_S = 44, eKeyboard_D = 45, eKeyboard_F = 46, eKeyboard_G = 47,
+    eKeyboard_H = 48, eKeyboard_J = 49, eKeyboard_K = 50, eKeyboard_L = 51, eKeyboard_SEMI = 52, eKeyboard_APOS = 53,
+    eKeyboard_DUMMY30 = 54, eKeyboard_ENTER = 55,
+    eKeyboard_LSHIFT = 56, eKeyboard_Z = 57, eKeyboard_X = 58, eKeyboard_C = 59, eKeyboard_V = 60, eKeyboard_B = 61,
+    eKeyboard_N = 62, eKeyboard_M = 63, eKeyboard_COMA = 64, eKeyboard_PERIOD = 65, eKeyboard_FORWARDSLASH = 66,
+    eKeyboard_DUMMY40 = 67, eKeyboard_DUMMY41 = 68, eKeyboard_UARROW = 69,
+    eKeyboard_CLEAR = 70, eKeyboard_DUMMY50 = 71, eKeyboard_DUMMY51 = 72, eKeyboard_DUMMY52 = 73,
+    eKeyboard_DUMMY53 = 74, eKeyboard_SPACE = 75, eKeyboard_LARROW = 76, eKeyboard_DUMMY54 = 77,
+    eKeyboard_DUMMY55 = 78, eKeyboard_DARROW = 79, eKeyboard_DUMMY56 = 80, eKeyboard_DUMMY57 = 81,
+    eKeyboard_DUMMY58 = 82, eKeyboard_RARROW = 83,
+    eKeyboard_Count = 84
+};
+
+// [O] enum eKeyboardType (cKeyboardPopup::meType); [U] cKeyboardPopup_onGainTransition shows mpBackRegular,
+// mpBackCompact or mpBackExpand and plays the "regular", "compact" or "expanded" label by it; the compact keyboard
+// hides the ESC and quick-message keys (cKeyboardPopup_SetNameForKey, cKeyboardPopup_redrawScreen).
+enum eKeyboardType {
+    eKeyboardType_Regular = 0,
+    eKeyboardType_Compact = 1,
+    eKeyboardType_Extended = 2
+};
+
+// [O] enum eKeyStateType: which key set setIncludeKey changes (mbRegular, mbAlternate or both) and
+// cKeyboardPopup::meSkipState; [U] cKeyboardPopup_setIncludeKey writes mbRegular for Reg / Both and mbAlternate for
+// Alt / Both.
+enum eKeyStateType {
+    eKeyStateType_Reg = 0,
+    eKeyStateType_Alt = 1,
+    eKeyStateType_Both = 2
+};
+
+// [O] enum eMovementDirection (cKeyboardPopup::meLastDirection).
+enum eMovementDirection {
+    eMovementDirection_Up = 0,
+    eMovementDirection_Down = 1,
+    eMovementDirection_Left = 2,
+    eMovementDirection_Right = 3
+};
+
 struct cKeyboardPopup : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] _vt$14cKeyboardPopup cKeyboardPopup_vtbl (cKeyboardPopup_cKeyboardPopup, destructor)
@@ -89,25 +143,29 @@ struct cKeyboardPopup : public cUIState {
                                     //       2 "expanded"
     int mbCallParentsUpdate;        // 0x440 [O]; [R] ctor zeroes; [U] onUpdate (cKeyboardPopup_onUpdate) calls the parent's onUpdate
 
+    // skipRowToBottom's start for "four rows below the cursor" (names ours). [U] cKeyboardPopup_skipRowToBottom starts
+    // the search at miCurrentKey + 56 for it; the handleMovementUpFrom* functions pass it.
+    enum { kSearchFromCursor = -1 };
+
     // Methods bound to their retail symbols by asm labels.
     void setInputText(const char* str) __asm__("cKeyboardPopup_setInputText");
     void kbMoveLeft(int bControllerInput) __asm__("cKeyboardPopup_kbMoveLeft");
     void kbMoveRight(int bControllerInput) __asm__("cKeyboardPopup_kbMoveRight");
     void kbMoveUp(int bControllerInput) __asm__("cKeyboardPopup_kbMoveUp");
     void kbMoveDown(int bControllerInput) __asm__("cKeyboardPopup_kbMoveDown");
-    int handleMovementUpFromQuickKeyRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromQuickKeyRow");
-    int handleMovementDownFromQuickKeyRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownFromQuickKeyRow");
-    int handleMovementDownFromLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownFromLast");
-    int handleMovementUpFromNumberRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromNumberRow");
-    int handleMovementUpFromLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromLast");
-    int handleMovementDownToLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownToLast");
+    bool handleMovementUpFromQuickKeyRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromQuickKeyRow");
+    bool handleMovementDownFromQuickKeyRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownFromQuickKeyRow");
+    bool handleMovementDownFromLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownFromLast");
+    bool handleMovementUpFromNumberRow(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromNumberRow");
+    bool handleMovementUpFromLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementUpFromLast");
+    bool handleMovementDownToLast(int bUseReg) __asm__("cKeyboardPopup_handleMovementDownToLast");
     void skipRowToTop() __asm__("cKeyboardPopup_skipRowToTop");
     void skipRowToBottom(int start) __asm__("cKeyboardPopup_skipRowToBottom");
     void moveUpRows() __asm__("cKeyboardPopup_moveUpRows");
     void moveDownRows() __asm__("cKeyboardPopup_moveDownRows");
     void pressKey(int flag) __asm__("cKeyboardPopup_pressKey");
     void AddAsciiEdit(int value) __asm__("cKeyboardPopup_AddAsciiEdit");
-    int updateToAscii(int value) __asm__("cKeyboardPopup_updateToAscii");
+    bool updateToAscii(int value) __asm__("cKeyboardPopup_updateToAscii");
     void AddCharacterEdit() __asm__("cKeyboardPopup_AddCharacterEdit");
     void updateEdit(int bDropFromRight) __asm__("cKeyboardPopup_updateEdit");
     void updateViewable(int bDropFromRight) __asm__("cKeyboardPopup_updateViewable");
@@ -118,7 +176,7 @@ struct cKeyboardPopup : public cUIState {
     void setStatic1(int id) __asm__("cKeyboardPopup_setStatic1");
     void setMaxCharacters(int iMaxCharacters) __asm__("cKeyboardPopup_setMaxCharacters");
     void setMinCharacters(int iMinCharacters) __asm__("cKeyboardPopup_setMinCharacters");
-    int getObjName(int key, char* out, int shifted) __asm__("cKeyboardPopup_getObjName");
+    bool getObjName(int key, char* out, int shifted) __asm__("cKeyboardPopup_getObjName");
     void redrawScreen() __asm__("cKeyboardPopup_redrawScreen");
     void SetNameForKey(cUIText* text, int key) __asm__("cKeyboardPopup_SetNameForKey");
     void fillSelectableKeys() __asm__("cKeyboardPopup_fillSelectableKeys");

@@ -68,6 +68,24 @@ struct cUIMenu : public cUIGroup {
     //   mpScreen: [U] cUIScreen_playFrame(mpScreen, ...) in cUIMenu_setSelected, cUIMenu_setFocus, cUIMenu_onInput
     //   mList: [U] cList_size(&mList) in cUIMenu_setScrollableMenu / setUIData, cList_getByIndex in the menu code
     // --- cUIMenu
+    // EA's tUIMenuEvent: the Event a state's onWidgetMenu(pMenu, Event, index) receives. [O] On Tour enum
+    // cUIMenu::tUIMenuEvent, names and values. [U] retail fits: cUIMenu_getNext / getPrev ask kISHIGHLIGHTABLE (1)
+    // for each row; cUIMenu_onInputChangeItem sends kSCROLLUP (2) or kSCROLLDOWN (3), then kSCROLLUPDATE (4) with the
+    // new offset and kSCROLLCHANGE (5); cUIMenu_onInput sends kONNEXT / kONPREVIOUS / kONOPTION / kONMISC (6..9) for
+    // the state events kONNEXT / kONPREV / kONOPTION / kONMISC (5..8).
+    enum tUIMenuEvent {
+        kISSELECTABLE = 0,
+        kISHIGHLIGHTABLE = 1,
+        kSCROLLUP = 2,
+        kSCROLLDOWN = 3,
+        kSCROLLUPDATE = 4,
+        kSCROLLCHANGE = 5,
+        kONNEXT = 6,
+        kONPREVIOUS = 7,
+        kONOPTION = 8,
+        kONMISC = 9
+    };
+
     // cUIMenu's own slots ([R] cUIMenu_vtbl; types [O] On Tour's class cUIMenu):
     virtual char getType();                                               // 22 cUIMenu_getType__FPv
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;
