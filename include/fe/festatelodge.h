@@ -22,6 +22,11 @@ struct cFEStateLodge : public cUIState {
     int bToNextState;               // 0x04C [O] bool
     int mPathToSaveProfile;         // 0x050 [O]
     int mbIsYesOrNo;                // 0x054 [O] bool
+
+    // The prompt mPathToSaveProfile records (names ours). [U] onWidgetEvent stores kPathQuit (the quit option's id,
+    // 6) with the kT_OVRCMNQuitTitlePrompt popup and kPathSaveProgress with kT_CMNSaveProgress; onPopupEvent stores
+    // kPathSaveBeforeQuit with kT_CMNSaveBeforeQuit and branches on all three.
+    enum { kPathQuit = 6, kPathSaveProgress = 0x10, kPathSaveBeforeQuit = 0x11 };
 };
 
 CHECK_OFFSET(cFEStateLodge, mCheatCharID, 0x048);

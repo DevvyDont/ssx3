@@ -16,10 +16,15 @@
 #include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
 #include "online/lobbyman.h"
+#include "online/onlineevent.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "be/beintreward.h"
+#include "ui/uimenu.h"
+#include "fe/festateoptionssound.h"
+#include "sound/soundsys.h"
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onCreateScreen);
@@ -110,9 +115,9 @@ static inline void vcall_43F0(void* o, int slot, int arg)
  * Sets up the trophy room's widgets: the big icon, the stats text, the title and the trophy and event rows.
  *
  * "bitmap" is kept at 0x48 (On Tour mpBigIcon) and shows the selection (cFEStateTrophyRoom_updateBigArt, probably
- * updateBigArt); "stats" is kept at 0x4C and hidden. "screentitle" names the trophy type (0x58): 0 race, 1
- * freestyle, 2 explore, 3 earnings. Rows "trophy" and "event_0" to "event_4" (misc data 0-5) and "0text
- * blocks" to "5text blocks" are hidden and made static past the peak's event count (func_001CE6F0); "trophy"
+ * updateBigArt); "stats" is kept at 0x4C and hidden. "screentitle" names the trophy type (0x58): kTROPHY_RACE,
+ * kTROPHY_FREESTYLE, kTROPHY_EXPLORE, kTROPHY_EARNINGS. Rows "trophy" and "event_0" to "event_4" (misc data 0-5) and
+ * "0text blocks" to "5text blocks" are hidden and made static past the peak's event count (func_001CE6F0); "trophy"
  * shows the name from the reward interface and each event row its challenge name.
  *
  * @param w  the widget just created (its hash name is at +0x38)
@@ -133,16 +138,16 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(cFEStateTrophyRoom* self, cUIT
     if (hashName == GetHashValue32(str_screentitle)) {
         int id = 0;
         switch (self->mTrophyType) {
-        case 3:
+        case kTROPHY_EARNINGS:
             id = GetHashValue32(str_kT_TITLEEarningsTrophy);
             break;
-        case 2:
+        case kTROPHY_EXPLORE:
             id = GetHashValue32(str_kT_TITLEExploreTrophy);
             break;
-        case 0:
+        case kTROPHY_RACE:
             id = GetHashValue32(str_kT_TITLERaceTrophy);
             break;
-        case 1:
+        case kTROPHY_FREESTYLE:
             id = GetHashValue32(str_kT_TITLEFSTrophy);
             break;
         }
@@ -184,14 +189,14 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetMenu);
  *
  * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
  * @param Event  the menu event
- * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
 extern "C" int cFEStateTrophyRoom_onWidgetMenu(cFEStateTrophyRoom* self, int pMenu, unsigned int Event)
 {
     switch (Event) {
-    case 6:
-    case 8:
-    case 9:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -208,12 +213,12 @@ extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int ind
 /**
  * Updates the big art and stats when a trophy row gets focus, and leaves the trophy room on back.
  *
- * Event 1 (a row focused) stores the row's misc data as the selection (0x9C) and runs cFEStateTrophyRoom_updateBigArt() and
- * cFEStateTrophyRoom_updateStats() (probably On Tour updateBigArt and updateStats). Event 6 (back) hides the big icon and
- * pushes getPrevState's state for the peak (0x54).
+ * kONGAINFOCUS (a row focused) stores the row's misc data as the selection (0x9C) and runs
+ * cFEStateTrophyRoom_updateBigArt() and cFEStateTrophyRoom_updateStats() (probably On Tour updateBigArt and
+ * updateStats). kONPREV (back) hides the big icon and pushes getPrevState's state for the peak (0x54).
  *
  * @param item  the widget that sent the event; nothing happens when null
- * @param msg  the widget event (1 focused, 6 back)
+ * @param msg  the widget event (kONGAINFOCUS focused, kONPREV back)
  */
 extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUIThing* item, int msg)
 {
@@ -221,7 +226,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
         return;
     }
     switch (msg) {
-    case 6: {
+    case cUIState::kONPREV: {
         cUIIcon* w = self->mpBigIcon;
         if (w != 0) {
             w->setVisible(0);
@@ -233,7 +238,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
         }
         break;
     }
-    case 1:
+    case cUIState::kONGAINFOCUS:
         self->mCurSelection = item->mMiscData;
         self->updateBigArt(item->mMiscData);
         self->updateStats(item->mMiscData);
@@ -302,7 +307,7 @@ void cFEStateTrophyRoom::updateBigArt(int index)
             int medal = getChallengeMedal(mUserNum,
                                   mCharID, mPeakNum,
                                   mTrophyType, index - 1);
-            if (medal != -1) {
+            if (medal != kMEDAL_NONE) {
                 textureId = mTextureIDs[medal + 1];
             }
         }
@@ -396,7 +401,7 @@ void cFEStateTrophyRoom::loadTextures()
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateTexturesLoad);
 #ifdef SKIP_ASM
-extern "C" int func_0019E238(void* self, int bank, int i);
+extern "C" bool func_0019E238(void* self, int bank, int i);
 extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
@@ -598,8 +603,8 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 /**
  * Opens the chosen reward category's screen on accept and goes back on back.
  *
- * Event 5 pushes the custom interface's getNextState for the widget's misc data (the reward type) without a
- * null check; event 6 pushes getPrevState's state when there is one.
+ * kONNEXT pushes the custom interface's getNextState for the widget's misc data (the reward type) without a
+ * null check; kONPREV pushes getPrevState's state when there is one.
  *
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (5 accept, 6 back)
@@ -612,13 +617,13 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
     switch (msg) {
     case 0:
         break;
-    case 5: {
+    case cUIState::kONNEXT: {
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         void* nextState = obj->getNextState((cUIState*)self, item->mMiscData);
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -780,11 +785,11 @@ extern char str_cFEStateOnlineMainMenu[];
  * Handles lobby events on the reconnect screen: logs in again, re-selects the persona and returns to the online main
  * menu.
  *
- * 201 sends the login request (func_0025C610 on LobbyMan_mLobbyMan); 212 selects the current persona again
- * (func_0025CD50 with mPersona); 257 pushes a new cFEStateOnlineMainMenu (1744 bytes) through func_001A8A40; 273 calls
- * func_0025FD50 with fields of cBENetworkInterface_networkOpt (+0x4, whether +0x8 is 0, whether it is not, and the
- * strings at +0x330 and +0x3DC). Other events go to cFEStateLogin's handler func_001BF228. Lobby event slot (+0xFC) of
- * cFEStateRelogin_vtbl.
+ * kNetEvent_LobbyConnect sends the login request (func_0025C610 on LobbyMan_mLobbyMan); kNetEvent_Authentication
+ * selects the current persona again (func_0025CD50 with mPersona); 257 pushes a new cFEStateOnlineMainMenu (1744 bytes)
+ * through func_001A8A40; 273 calls func_0025FD50 with fields of cBENetworkInterface_networkOpt (+0x4, whether +0x8 is
+ * 0, whether it is not, and the strings at +0x330 and +0x3DC). Other events go to cFEStateLogin's handler
+ * func_001BF228. Lobby event slot (+0xFC) of cFEStateRelogin_vtbl.
  *
  * @param msg  the lobby event id
  * @return 0 for the handled events, else func_001BF228's result
@@ -792,10 +797,10 @@ extern char str_cFEStateOnlineMainMenu[];
 extern "C" int func_001D5138(cFEStateLogin* self, int msg)
 {
     switch (msg) {
-    case 201:
+    case kNetEvent_LobbyConnect:
         func_0025C610(LobbyMan_mLobbyMan);
         break;
-    case 212:
+    case kNetEvent_Authentication:
         func_0025CD50(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mPersona));
         break;
     case 257:
@@ -867,7 +872,7 @@ extern char str_cFEStateNetConfig[];
  */
 extern "C" void func_001D5280(cFEStateLogin* self, void* item, int msg)
 {
-    if (msg == 0xF || msg == 20) {
+    if (msg == cUIState::kONSCREENPOPUPOPTION0 || msg == cUIState::kONSCREENPOPUPPREV) {
         cFEStateNet_onPopupEvent(self, item, msg);
         cUIStateStack_popToState(&self->mpEngine->mStateStack);
         cUIState* state = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
@@ -1081,12 +1086,13 @@ extern char cFEMemCard_callbackCardChanged_a5488[] __asm__("cFEMemCard_callbackC
  *
  * Then stores @p mode at +0x1BC and 25 at +0x19C, zeroes the state words from +0x1A0 to +0x228 and the short at +0x9C,
  * and calls cMCOverlayManager_ManagerGainState (On Tour cMCOverlayManager::ManagerGainState). By mode it sets the manager's write size, read
- * size and file type (cMCOverlayManager_writeSetSize, cMCOverlayManager_readSetSize, cMCOverlayManager_readSetFileType): 2 = settings, cBESaveInterface_getSaveGameSize__FPv
- * bytes, file type 2 ("SET"); 1 = replay, 0x80000 bytes, file type 0 ("REP"); anything else = profile,
+ * size and file type (cMCOverlayManager_writeSetSize, cMCOverlayManager_readSetSize,
+ * cMCOverlayManager_readSetFileType): kTYPE_GAMEOPTIONS = settings, cBESaveInterface_getSaveGameSize__FPv bytes, file
+ * type 2 ("SET"); kTYPE_REPLAY = replay, 0x80000 bytes, file type 0 ("REP"); anything else = profile,
  * cBESaveInterface_getSaveProfileSize bytes, file type 1 ("GAM"). Last it builds the 16-bit file-name wildcard
  * "<product code>-<type>*" ("%s-%s*" with cMCOverlayManager_getProductCode and cMCOverlayManager_getFileName for mFileType) at +0x11C.
  *
- * @param mode  the save kind: 0 profile, 1 replay, 2 settings (On Tour iType)
+ * @param mode  the save kind: kTYPE_PROFILE, kTYPE_REPLAY or kTYPE_GAMEOPTIONS (On Tour iType)
  */
 void cFEMemCard::initFEMemCard(int mode)
 {
@@ -1172,14 +1178,14 @@ void cFEMemCard::initFEMemCard(int mode)
     *(short*)&mLastLoadFileName[0] = 0;
     cMCOverlayManager_ManagerGainState(app);
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    if (mType == 2)
+    if (mType == kTYPE_GAMEOPTIONS)
     {
         int n = cBESaveInterface_getSaveGameSize_r();
         cMCOverlayManager_writeSetSize_2(app, n);
         cMCOverlayManager_readSetSize(app, n);
         cMCOverlayManager_readSetFileType(app, 2);
     }
-    else if (mType == 1)
+    else if (mType == kTYPE_REPLAY)
     {
         cMCOverlayManager_writeSetSize_2(app, 0x80000);
         cMCOverlayManager_readSetSize(app, 0x80000);
@@ -1220,15 +1226,17 @@ extern "C" void cMCOverlayManager_cleanUp(void* self);
 /**
  * Memory card screen teardown: releases the save buffers and shuts the memory card manager down.
  *
- * In replay mode (+0x1BC == 1) with an external replay buffer (+0x228 == 2) that was not kept (+0x1B4 == 0),
- * releases the save interface's replay buffer (cBESaveInterface_releaseReplayBuffer) and forgets it; always releases its general buffer
- * (cBESaveInterface_releaseBuffer). If the memory card manager is active (+0x434), cleans it up (cMCOverlayManager_cleanUp, cMCOverlayManager_ManagerLoseState,
- * cMCOverlayManager_purge). A buffer this screen allocated (+0x228 == 1) is freed. Ends with cOVState_onDestroyScreen.
+ * In replay mode (+0x1BC == kTYPE_REPLAY) with an external replay buffer (+0x228 == keBufferState_ReplayExternal) that
+ * was not kept (+0x1B4 == 0), releases the save interface's replay buffer (cBESaveInterface_releaseReplayBuffer) and
+ * forgets it; always releases its general buffer (cBESaveInterface_releaseBuffer). If the memory card manager is active
+ * (+0x434), cleans it up (cMCOverlayManager_cleanUp, cMCOverlayManager_ManagerLoseState, cMCOverlayManager_purge). A
+ * buffer this screen allocated (+0x228 == keBufferState_Valid) is freed. Ends with cOVState_onDestroyScreen.
  */
 extern "C" void cFEMemCard_onDestroyScreen(cFEMemCard* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-    if (self->mType == 1 && self->mBufferState == 2 && self->mIsLoadDoneOK == 0) {
+    if (self->mType == cFEMemCard::kTYPE_REPLAY && self->mBufferState == cFEMemCard::keBufferState_ReplayExternal
+        && self->mIsLoadDoneOK == 0) {
         cBESaveInterface_releaseReplayBuffer(iface);
         self->mpStartReadBuffer = 0;
         self->mpReadBuffer = 0;
@@ -1241,7 +1249,7 @@ extern "C" void cFEMemCard_onDestroyScreen(cFEMemCard* self)
         cMCOverlayManager_ManagerLoseState(app);
         cMCOverlayManager_purge(app);
     }
-    if (self->mBufferState == 1) {
+    if (self->mBufferState == cFEMemCard::keBufferState_Valid) {
         self->mBufferState = 0;
         if (self->mpStartReadBuffer != 0) {
             cMemMan_free(self->mpStartReadBuffer);
@@ -1282,11 +1290,12 @@ extern char str_Temp_String[];
 /**
  * Memory card callback: starts writing the current save (settings, replay or profile).
  *
- * Mode 2 (cFEMemCard_mInstance +0x1BC) writes settings (cMCOverlayManager_SettingsWriteStart). Mode 1 saves the replay: cReplay_initSave,
+ * kTYPE_GAMEOPTIONS (cFEMemCard_mInstance +0x1BC) writes settings (cMCOverlayManager_SettingsWriteStart). kTYPE_REPLAY
+ * saves the replay: cReplay_initSave,
  * a read buffer of the back end's data size filled by cBE_writeToData, then cMCOverlayManager_WriteFile under a title built from
- * the file name and "%s %s%04d". Mode 0 saves the profile from the save interface (cBESaveInterface_generateSaveProfile,
- * cBESaveInterface_getSaveProfileSize). The first time (+0x210 and +0x208 clear), also shows the manager's current message through
- * virtual slot 36 and sets +0x210.
+ * the file name and "%s %s%04d". kTYPE_PROFILE saves the profile from the save interface
+ * (cBESaveInterface_generateSaveProfile, cBESaveInterface_getSaveProfileSize). The first time (+0x210 and +0x208
+ * clear), also shows the manager's current message through virtual slot 36 and sets +0x210.
  */
 extern "C" void cFEMemCard_writeStart(void)
 {
@@ -1297,9 +1306,9 @@ extern "C" void cFEMemCard_writeStart(void)
     char fmt2[0x200];
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     int mode = cFEMemCard_mInstance->mType;
-    if (mode == 2) {
+    if (mode == cFEMemCard::kTYPE_GAMEOPTIONS) {
         cMCOverlayManager_SettingsWriteStart(app);
-    } else if (mode == 1) {
+    } else if (mode == cFEMemCard::kTYPE_REPLAY) {
         void* replay = SSXApp->Game->Replay;
         cFEMemCard_mInstance->mIsReplayAlloc = mode;
         cReplay_initSave(replay);
@@ -1354,20 +1363,20 @@ extern "C" void* memcpy(void*, const void*, unsigned int);
 /**
  * Memory card read progress callback: checks and loads a replay as it arrives.
  *
- * Only replay reads (mode 1) are handled; others return 1. On the first call after the read started, CRCs the
+ * Only replay reads (kTYPE_REPLAY) are handled; others return true. On the first call after the read started, CRCs the
  * data (seed 0xFBEA) and compares it with the 4 bytes after it: on a mismatch releases the replay buffer, clears
- * the buffer state and returns 0; otherwise sets gWeHaveToClearTheBackEnd and loads the back end from it
+ * the buffer state and returns false; otherwise sets gWeHaveToClearTheBackEnd and loads the back end from it
  * (cBE_readFromData__FPvi). Then asks the manager for the next chunk of up to 0x4000 bytes (cMCOverlayManager_ReadData).
  *
  * @param size  bytes to read next
- * @return 0 when the replay failed its CRC check, else 1
+ * @return false when the replay failed its CRC check, else true
  */
-extern "C" int cFEMemCard_callbackReadUpdate(int size)
+extern "C" bool cFEMemCard_callbackReadUpdate(int size)
 {
     cFEMemCard* memCard = cFEMemCard_mInstance;
     int mode = memCard->mType;
-    if (mode != 1) {
-        return 1;
+    if (mode != cFEMemCard::kTYPE_REPLAY) {
+        return true;
     }
     if (memCard->mLoadBEData != 0) {
         memCard->mLoadBEData = 0;
@@ -1382,7 +1391,7 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
             cFEMemCard_mInstance->mpStartReadBuffer = 0;
             cFEMemCard_mInstance->mpReadBuffer = 0;
             cFEMemCard_mInstance->mBufferState = 0;
-            return 0;
+            return false;
         }
         gWeHaveToClearTheBackEnd = mode;
         cBE_readFromData(cBE_getBE(), (int)base);
@@ -1394,7 +1403,7 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
         cMCOverlayManager_ReadData(cSSXApp_getMCManager(SSXApp), cFEMemCard_mInstance->mpReadBuffer, size);
         cFEMemCard_mInstance->mpReadBuffer += size;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1409,25 +1418,25 @@ extern "C" void cMCOverlayManager_WriteData(void* self, int a, int b);
 /**
  * Memory-card write-progress callback: feeds the manager the next block of a replay being saved.
  *
- * Only replay saves (mode +0x1BC of cFEMemCard_mInstance == 1) are handled. cReplay_getSaveData on SSXApp->Game->Replay
- * produces the next block; when it does, cMCOverlayManager_WriteData writes it through the manager (cSSXApp_getMCManager) and adds
- * its size to mSavedSize.
+ * Only replay saves (mode +0x1BC of cFEMemCard_mInstance == kTYPE_REPLAY) are handled. cReplay_getSaveData on
+ * SSXApp->Game->Replay produces the next block; when it does, cMCOverlayManager_WriteData writes it through the manager
+ * (cSSXApp_getMCManager) and adds its size to mSavedSize.
  *
  * @param key  the size the manager asks for; cReplay_getSaveData overwrites it with the size of the produced block
- * @return 1 when a block was handed over, 0 when the replay is complete or the screen is not saving a replay
+ * @return true when a block was handed over, false when the replay is complete or the screen is not saving a replay
  */
-extern "C" int cFEMemCard_callbackWriteUpdate(int key)
+extern "C" bool cFEMemCard_callbackWriteUpdate(int key)
 {
     int out;
-    if ((cFEMemCard_mInstance)->mType == 1) {
+    if ((cFEMemCard_mInstance)->mType == cFEMemCard::kTYPE_REPLAY) {
         void* mcManager = cSSXApp_getMCManager(SSXApp);
         if (cReplay_getSaveData(SSXApp->Game->Replay, &out, &key) != 0) {
             cMCOverlayManager_WriteData(mcManager, out, key);
-            return 1;
+            return true;
         }
-        return 0;
+        return false;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1453,9 +1462,10 @@ extern "C" void cFEMemCard_createReadBuffer(cFEMemCard* self, int size);
 /**
  * Memory card callback: starts reading a save (settings, replay or profile) into a buffer.
  *
- * Marks the read as started (+0x1B0 = 1, +0x1B4 = 0) and gives the manager the slot (+0x1D8). Mode 2 reads a
- * save game of cBESaveInterface_getSaveGameSize__FPv's size into a new read buffer; mode 1 reads a replay straight into the save
- * interface's replay buffer (cBESaveInterface_getReplayBuffer) and flags it for the CRC check in cFEMemCard_callbackReadUpdate; mode 0 reads a
+ * Marks the read as started (+0x1B0 = 1, +0x1B4 = 0) and gives the manager the slot (+0x1D8). kTYPE_GAMEOPTIONS reads
+ * a save game of cBESaveInterface_getSaveGameSize__FPv's size into a new read buffer; kTYPE_REPLAY reads a replay
+ * straight into the save interface's replay buffer (cBESaveInterface_getReplayBuffer) and flags it for the CRC check
+ * in cFEMemCard_callbackReadUpdate; kTYPE_PROFILE reads a
  * profile of cBESaveInterface_getSaveProfileSize's size. Each read starts with cMCOverlayManager_readFile.
  */
 extern "C" void cFEMemCard_readStart()
@@ -1468,13 +1478,13 @@ extern "C" void cFEMemCard_readStart()
     app->mFileCursor = memCard->mSlot;
     int mode = memCard->mType;
     switch (mode) {
-    case 2: {
+    case cFEMemCard::kTYPE_GAMEOPTIONS: {
         int n = cBESaveInterface_getSaveGameSize_r();
         cFEMemCard_createReadBuffer(cFEMemCard_mInstance_tr5, n);
         cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, ((int)cFEMemCard_mInstance_tr5->mpReadBuffer), n);
         break;
     }
-    case 1: {
+    case cFEMemCard::kTYPE_REPLAY: {
         cFEMemCard_mInstance_tr5->mBufferState = 2;
         int replayBuffer = cBESaveInterface_getReplayBuffer(iface);
         cFEMemCard* memCardInst = cFEMemCard_mInstance_tr5;
@@ -1483,7 +1493,7 @@ extern "C" void cFEMemCard_readStart()
         cFEMemCard_mInstance_tr5->mLoadBEData = mode;
         break;
     }
-    case 0: {
+    case cFEMemCard::kTYPE_PROFILE: {
         int n = cBESaveInterface_getSaveProfileSize();
         cFEMemCard_createReadBuffer(cFEMemCard_mInstance_tr5, n);
         cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, ((int)cFEMemCard_mInstance_tr5->mpReadBuffer), n);
@@ -1544,25 +1554,26 @@ static inline sSndCfg_1D5F40 Cfg_1D5F40()
  * Memory-card read-finished callback: loads what was read into the back end and frees the read buffer.
  *
  * With the save interface (back-end interface 5) it handles the read by the screen's mode (+0x1BC of
- * cFEMemCard_mInstance). Mode 2 (settings) loads the buffer at +0x1D0 with cBESaveInterface_loadSaveGame (On Tour
- * cBESaveInterface::loadSaveGame) and, when the audio object exists (cAudioInterface_bxAudio), applies the loaded sound options
- * from cBEOptionInterface_mOption: the output mode (bits 12-13) through cFEMemCard_setSoundMode, the SFX, speech and music
- * volumes (4-bit fields) through func_00287410, cSSXAudio_SetSFXVolume and func_00287520, bit 17 through cSSXAudio_SetDJSpeech
- * and bit 16 through cSSXAudio_SetArcadeSFX. Mode 0 (profile) loads it with cBESaveInterface_loadSaveProfile (On Tour loadSaveProfile) into slot
- * +0x1CC. Mode 1 (replay) does nothing here. A failed load returns 0 at once, keeping the buffer.
+ * cFEMemCard_mInstance). kTYPE_GAMEOPTIONS (settings) loads the buffer at +0x1D0 with cBESaveInterface_loadSaveGame (On
+ * Tour cBESaveInterface::loadSaveGame) and, when the audio object exists (cAudioInterface_bxAudio), applies the loaded
+ * sound options from cBEOptionInterface_mOption: the output mode (bits 12-13) through cFEMemCard_setSoundMode, the SFX,
+ * speech and music volumes (4-bit fields) through func_00287410, cSSXAudio_SetSFXVolume and func_00287520, bit 17
+ * through cSSXAudio_SetDJSpeech and bit 16 through cSSXAudio_SetArcadeSFX. kTYPE_PROFILE loads it with
+ * cBESaveInterface_loadSaveProfile (On Tour loadSaveProfile) into slot +0x1CC. kTYPE_REPLAY does nothing here. A failed
+ * load returns false at once, keeping the buffer.
  *
- * Afterwards, when the buffer state (+0x228) is 1 (allocated by this screen), frees the allocation at +0x1D4 and clears
- * +0x1D0, +0x1D4 and +0x228.
+ * Afterwards, when the buffer state (+0x228) is keBufferState_Valid (allocated by this screen), frees the allocation at
+ * +0x1D4 and clears +0x1D0, +0x1D4 and +0x228.
  *
- * @return 0 when the save interface rejected the data, else 1
+ * @return false when the save interface rejected the data, else true
  */
-extern "C" int cFEMemCard_readDone()
+extern "C" bool cFEMemCard_readDone()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
     switch ((cFEMemCard_mInstance)->mType) {
-    case 2:
+    case cFEMemCard::kTYPE_GAMEOPTIONS:
         if (!cBESaveInterface_loadSaveGame(iface, (cFEMemCard_mInstance)->mpReadBuffer))
-            return 0;
+            return false;
         if (cAudioInterface_bxAudio() != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 4);
             cFEMemCard_setSoundMode(Cfg_1D5F40().output);
@@ -1573,21 +1584,21 @@ extern "C" int cFEMemCard_readDone()
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_1D5F40().iUseArcadeSFX != 0);
         }
         break;
-    case 0:
+    case cFEMemCard::kTYPE_PROFILE:
         if (!cBESaveInterface_loadSaveProfile(iface, (cFEMemCard_mInstance)->mpReadBuffer, (cFEMemCard_mInstance)->mPlayerIdx))
-            return 0;
+            return false;
         break;
-    case 1:
+    case cFEMemCard::kTYPE_REPLAY:
         break;
     }
-    if ((cFEMemCard_mInstance)->mBufferState == 1) {
+    if ((cFEMemCard_mInstance)->mBufferState == cFEMemCard::keBufferState_Valid) {
         if ((cFEMemCard_mInstance)->mpStartReadBuffer != 0)
             cMemMan_free((cFEMemCard_mInstance)->mpStartReadBuffer);
         (cFEMemCard_mInstance)->mpReadBuffer = 0;
         (cFEMemCard_mInstance)->mpStartReadBuffer = 0;
         (cFEMemCard_mInstance)->mBufferState = 0;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -1634,7 +1645,8 @@ struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
 /**
  * Switches the audio output mode, restarting the sound system when the mode changes.
  *
- * The output setting @p mode maps to an SSXAUDIO mode: 1 -> 2, 2 -> 0, 3 -> 3, anything else -> 1. The audio object
+ * The output setting @p mode maps to an SSXAUDIO mode: kSpeakerSurround -> keSOUNDDEF_MODE_DOLBYSURROUND, kSpeakerMono
+ * -> keSOUNDDEF_MODE_MONO, kSpeakerDTS -> 3, anything else -> keSOUNDDEF_MODE_STEREO. The audio object
  * (cAudioInterface_bxAudio) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's
  * first pointer; only when that returns 1 does the restart run: it saves the SFX, speech and music volumes
  * (func_00287670, cSSXAudio_GetSFXVolume, func_002876D0), the DJ-speech flag (mDJSpeech), the arcade-SFX flag (+0x62B4)
@@ -1643,27 +1655,27 @@ struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
  * cSSXAudio_SetArcadeSFX), reloads with cSSXAudio_FrontEndLoad and hands the saved +0x534 word back through virtual
  * slot 4 of the audio object's second base.
  *
- * @param mode  the output setting, 0-3 (bits 12-13 of cBEOptionInterface_mOption)
+ * @param mode  the output setting, kSpeakerStereo .. kSpeakerDTS (bits 12-13 of cBEOptionInterface_mOption)
  */
 extern "C" void cFEMemCard_setSoundMode(unsigned int mode)
 {
     int lang;
     switch (mode) {
-    case 1:
-        lang = 2;
+    case cFEStateOptionsSound::kSpeakerSurround:
+        lang = keSOUNDDEF_MODE_DOLBYSURROUND;
         break;
-    case 2:
-        lang = 0;
+    case cFEStateOptionsSound::kSpeakerMono:
+        lang = keSOUNDDEF_MODE_MONO;
         break;
-    case 3:
+    case cFEStateOptionsSound::kSpeakerDTS:
         lang = 3;
         break;
-    case 0:
+    case cFEStateOptionsSound::kSpeakerStereo:
     default:
-        lang = 1;
+        lang = keSOUNDDEF_MODE_STEREO;
         break;
     }
-    if ((*((sOpt_001D64C0*)cAudioInterface_bxAudio())->holder)->lang->v02(lang) == 1) {
+    if ((*((sOpt_001D64C0*)cAudioInterface_bxAudio())->holder)->lang->v02(lang) == keSOUNDMANAGER_SETMODE_RESTART) {
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());

@@ -35,7 +35,10 @@ struct cFEStateLegal : public cUIState {
     //   mpScreen: [U] onCreateScreen stores the screen; onUpdate plays its "TransitionOut" frame
     // --- cFEStateLegal
     int mDisplayTicks;              // 0x048 [O]; [R] func_00187C18 stores 0; [U] onCreateScreen 0; onUpdate counts it
-                                    //       up and leaves at 240 (0xF0)
+                                    //       up and leaves at kDisplayTicks
+
+    // How many frames the notice stays up (names ours): [U] onUpdate leaves when mDisplayTicks reaches it.
+    enum { kDisplayTicks = 240 };
 };
 
 CHECK_OFFSET(cFEStateLegal, mDisplayTicks, 0x048);

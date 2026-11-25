@@ -20,6 +20,7 @@
 #include "main/ssxapp.h"
 #include "ui/uiscreen.h"
 #include "util/locale.h"
+#include "fe/buypopupinfo.h"
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onCreateScreen);
@@ -188,9 +189,10 @@ static inline void Play_F270(cUISoundInterface* snd, int id)
  *   when a store number is set (+0x8F0 >= 0), and pushes that with cUIStateStack_push().
  * - Accept (test 5): the reward index is first visible row (+0x64) * columns (+0x5C) + the current cell's mMiscData. An
  *   empty gallery (reward count +0x68 = 0) gets sound 4. An owned reward (slot 38, cFEStateRewardGalleryBase_isRewardOwned) opens with sound 6
- *   and slot 31 (cFEStateRewardGalleryBase_showReward), except cheat characters (type +0x4C = 8), which get sound 4. An
- *   unowned one opens the buy popup (slot 32, cFEStateRewardGalleryBase_showBuyPopup) with sound 6 only in a store (+0x8F0 >= 0) whose number
- *   equals the reward's store number (slot 36) when its cost (slot 35) is at most the cash (+0x54); otherwise sound 4.
+ *   and slot 31 (cFEStateRewardGalleryBase_showReward), except cheat characters (type +0x4C = kRewardCheatChar), which
+ *   get sound 4. An unowned one opens the buy popup (slot 32, cFEStateRewardGalleryBase_showBuyPopup) with sound 6 only
+ *   in a store (+0x8F0 >= 0) whose number equals the reward's store number (slot 36) when its cost (slot 35) is at most
+ *   the cash (+0x54); otherwise sound 4.
  * - Tests 19/20 move the column left/right with wrap-around (right also wraps past the last reward); 17/18 move the row
  *   within the visible rows (+0x58), down wrapping once the row passes the total row count (+0x60); 27 and 25 move the
  *   first visible row back or forward by a page of rows, wrapping at either end.
@@ -200,9 +202,9 @@ static inline void Play_F270(cUISoundInterface* snd, int id)
  * and plays sound 2 for up/down or sound 1 otherwise; if nothing changed it plays sound 4.
  *
  * @param in  the input object; its vtable slots are the button tests
- * @return 1 when the input was handled (every back, accept and move input), otherwise 0
+ * @return true when the input was handled (every back, accept and move input)
  */
-extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, cUIInput* in)
+extern "C" bool cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, cUIInput* in)
 {
     cUISoundInterface* snd = &gUISoundNull_F270;
     if (*(cUISoundInterface**)&self->mpEngine->mpSound != 0) {
@@ -224,7 +226,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         cUICustomInterface* mgr = self->mpEngine->mpCustom;
         void* backState = mgr->getPrevState((cUIState*)self, self->mStoreNum >= 0);
         cUIStateStack_push(&self->mpEngine->mStateStack, backState);
-        return 1;
+        return true;
     }
     cUIIcon* cur = self->mpSelected;
     int curIdx = 0;
@@ -239,7 +241,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + curIdx;
         if (self->mNumTotalRewards > 0) {
             if (Call_F270(((char*)self), 38, idx)) {
-                if (self->mRewardType != 8) {
+                if (self->mRewardType != kRewardCheatChar) {
                     Play_F270(snd, 6);
                     CallV_F270(((char*)self), 31, idx);
                 } else {
@@ -259,10 +261,10 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
                     Play_F270(snd, 4);
                 }
             }
-            return 1;
+            return true;
         }
         Play_F270(snd, 4);
-        return 1;
+        return true;
     } else {
         if (Test_F270(((char*)in), 19)) {
             col--;
@@ -305,13 +307,13 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
             } else {
                 Play_F270(snd, 1);
             }
-            return 1;
+            return true;
         }
         Play_F270(snd, 4);
-        return 1;
+        return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -443,7 +445,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
         self->w8F4 = w;
     } else if (hash == GetHashValue32(str_Poster_icon)) {
         switch (self->type) {
-        case 3:
+        case kRewardPoster:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_poster_icon);
@@ -451,7 +453,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             }
             w->mTextureID = -1;
             break;
-        case 4:
+        case kRewardCard:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_trading_card_icon);
@@ -459,7 +461,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             }
             w->mTextureID = -1;
             break;
-        case 5:
+        case kRewardArt:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_art_icon);
@@ -467,7 +469,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             }
             w->mTextureID = -1;
             break;
-        case 6:
+        case kRewardVideo:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_video_icon);
@@ -475,7 +477,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
             }
             w->mTextureID = -1;
             break;
-        case 7:
+        case kRewardToy:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_toys_icon);
@@ -486,22 +488,22 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
         }
     } else if (hash == GetHashValue32(str_screentitle)) {
         switch (self->type) {
-        case 3:
+        case kRewardPoster:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNPosters));
             break;
-        case 4:
+        case kRewardCard:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNTradeCard));
             break;
-        case 5:
+        case kRewardArt:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNArt));
             break;
-        case 6:
+        case kRewardVideo:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNVideos));
             break;
-        case 7:
+        case kRewardToy:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNToys));
             break;
-        case 8:
+        case kRewardCheatChar:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLECheatCharacter));
             break;
         }
@@ -510,17 +512,17 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cU
         cUIText_setAsciiString((cUIText*)w, str_empty_d);
     } else if (hash == GetHashValue32(str_reward_name_colon)) {
         int type = self->type;
-        if (type == 3)
+        if (type == kRewardPoster)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNPosterColon));
-        else if (type == 4)
+        else if (type == kRewardCard)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNCardColon));
-        else if (type == 5)
+        else if (type == kRewardArt)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNArtColon));
-        else if (type == 6)
+        else if (type == kRewardVideo)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNVideoColon));
-        else if (type == 7)
+        else if (type == kRewardToy)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNToyColon));
-        else if (type == 8)
+        else if (type == kRewardCheatChar)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNCheatCharColon));
     } else if (hash == GetHashValue32(str_reward_name)) {
         self->w908 = w;
@@ -560,28 +562,28 @@ struct sVE_FD18 {
 /**
  * Tracks popups over the reward gallery and buys the highlighted reward when the buy popup is accepted.
  *
- * Vtable slot 17 of the gallery vtables (cFEStateCharEquip_onPopupEvent's slot). Event 21: unless the popup's mHashName
- * is 7 (cUIStateBuyPopup's id), clears the mVisible bit (bit 3) of the gallery's mAttrState. Event 22: sets mVisible
- * again and, when the popup is the buy popup (mHashName 7) with mbAccept set, calls vtable slot 30 (cFEStateRewardGalleryBase_buyReward) for
- * the highlighted reward (first visible row +0x64 * columns +0x5C + the current cell's mMiscData). Other events are
- * ignored.
+ * Vtable slot 17 of the gallery vtables (cFEStateCharEquip_onPopupEvent's slot). kONPOPUPCREATE: unless the popup's
+ * mHashName is cUIStateBuyPopup::kStateID, clears the mVisible bit (bit 3) of the gallery's mAttrState.
+ * kONPOPUPDESTROY: sets mVisible again and, when the popup is the buy popup (mHashName 7) with mbAccept set, calls
+ * vtable slot 30 (cFEStateRewardGalleryBase_buyReward) for the highlighted reward (first visible row +0x64 * columns
+ * +0x5C + the current cell's mMiscData). Other events are ignored.
  *
  * @param widget  the popup state that sent the event (a cUIStateBuyPopup when its mHashName is 7)
- * @param msg     the popup event; 21 and 22 are handled
+ * @param msg     the popup event; kONPOPUPCREATE and kONPOPUPDESTROY are handled
  */
 extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase* self, cUIState* widget, int msg)
 {
     switch (msg) {
-    case 21:
-        if (widget->mHashName != 7) {
+    case cUIState::kONPOPUPCREATE:
+        if (widget->mHashName != cUIStateBuyPopup::kStateID) {
             self->mAttrState &= ~8;
         }
         break;
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (((self->mAttrState >> 3) & 1) == 0) {
             self->mAttrState |= 8;
         }
-        if (widget->mHashName == 7 && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
+        if (widget->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
             self->buyReward(self->mFirstVisibleRow * self->mMaxRewardColumns + self->mpSelected->mMiscData);
         }
         break;
@@ -666,7 +668,7 @@ void cFEStateRewardGalleryBase::loadIcons()
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateIconsLoad);
 #ifdef SKIP_ASM
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" int func_0019E238(void* self, int bank, int i);
+extern "C" bool func_0019E238(void* self, int bank, int i);
 struct sSelf001CFFF8;
 struct sData001CFFF8;
 extern "C" SHAPEFILE* func_0019E2B0(void* self, int bank, int i);
@@ -915,15 +917,15 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
     sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)VPTR_OF(cListNode, self);
     tVideoInfo* data = (tVideoInfo*)vt[34].fn(vthis(self, vt[34]));
     switch (self->mRewardType) {
-    case 3:
-    case 4:
-    case 5:
-    case 7:
+    case kRewardPoster:
+    case kRewardCard:
+    case kRewardArt:
+    case kRewardToy:
         nextState = cFEStatePreviewReward_cFEStatePreviewReward((cFEStatePreviewReward*)cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
         ((cFEStatePreviewReward*)nextState)->setReward(self->mRewardType, data);
         break;
-    case 6:
+    case kRewardVideo:
         nextState = cFEStateVideoPlayer_cFEStateVideoPlayer((cFEStateVideoPlayer*)cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
         ((cFEStateVideoPlayer*)nextState)->setVideoSourceFiles(((const tVideoInfo*)data)->mpVideoFileName, 0);
@@ -1037,7 +1039,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBa
         return;
     int state = self->getRewardStoreNum((const void*)item);
     self->mpHelpText->setVisible(1);
-    if (self->mRewardType == 8) {
+    if (self->mRewardType == kRewardCheatChar) {
         if (self->isRewardOwned(idx)) {
             setHelp_0648(((char*)self), str_kT_129HELPSelectCheatChar);
         } else if (state < 0) {
@@ -1415,11 +1417,12 @@ extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self,
 extern void* cFEStateRewardGalleryPosters_vtbl[];
 
 /**
- * Constructs the posters reward gallery (reward type 3), which cFECustom_getNextState allocates (2772 bytes) under the
- * tag "cFEStateRewardGalleryPosters".
+ * Constructs the posters reward gallery (reward type kRewardPoster), which cFECustom_getNextState allocates (2772
+ * bytes) under the tag "cFEStateRewardGalleryPosters".
  *
- * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 3, installs vtable cFEStateRewardGalleryPosters_vtbl and clears the reward count
- * (+0x68), the list base (+0xA24) and the 43 list entries from +0xA28.
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type kRewardPoster,
+ * installs vtable cFEStateRewardGalleryPosters_vtbl and clears the reward count (+0x68), the list base (+0xA24) and the
+ * 43 list entries from +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
@@ -1537,11 +1540,12 @@ extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self,
 extern void* cFEStateRewardGalleryTradingCards_vtbl[];
 
 /**
- * Constructs the trading-card reward gallery (reward type 4), which cFECustom_getNextState allocates (3064 bytes) under
- * the tag "cFEStateRewardGalleryTradingCards".
+ * Constructs the trading-card reward gallery (reward type kRewardCard), which cFECustom_getNextState allocates (3064
+ * bytes) under the tag "cFEStateRewardGalleryTradingCards".
  *
- * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 4, installs vtable cFEStateRewardGalleryTradingCards_vtbl and clears the list base
- * (+0xA24) and the 116 list entries from +0xA28.
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type kRewardCard,
+ * installs vtable cFEStateRewardGalleryTradingCards_vtbl and clears the list base (+0xA24) and the 116 list entries
+ * from +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
@@ -1659,11 +1663,12 @@ extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self,
 extern void* cFEStateRewardGalleryConceptArts_vtbl[];
 
 /**
- * Constructs the art reward gallery (reward type 5), which cFECustom_getNextState allocates (3000 bytes) under the tag
- * "cFEStateRewardGalleryConceptArts".
+ * Constructs the art reward gallery (reward type kRewardArt), which cFECustom_getNextState allocates (3000 bytes) under
+ * the tag "cFEStateRewardGalleryConceptArts".
  *
- * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 5, installs vtable cFEStateRewardGalleryConceptArts_vtbl and clears the list base
- * (+0xA24) and the 100 list entries from +0xA28.
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type kRewardArt,
+ * installs vtable cFEStateRewardGalleryConceptArts_vtbl and clears the list base (+0xA24) and the 100 list entries from
+ * +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
@@ -1780,11 +1785,12 @@ extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self,
 extern void* cFEStateRewardGalleryVideos_vtbl[];
 
 /**
- * Constructs the video reward gallery (reward type 6), which cFECustom_getNextState allocates (2608 bytes) under the
- * tag "cFEStateRewardGalleryVideos".
+ * Constructs the video reward gallery (reward type kRewardVideo), which cFECustom_getNextState allocates (2608 bytes)
+ * under the tag "cFEStateRewardGalleryVideos".
  *
- * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 6, installs vtable cFEStateRewardGalleryVideos_vtbl and clears the list base
- * (+0xA24) and the 2 list entries from +0xA28 (the object has room for only 2).
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type kRewardVideo,
+ * installs vtable cFEStateRewardGalleryVideos_vtbl and clears the list base (+0xA24) and the 2 list entries from +0xA28
+ * (the object has room for only 2).
  *
  * @param engine  the UI engine
  * @param idx     user number
@@ -1902,11 +1908,11 @@ extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self,
 extern void* cFEStateRewardGalleryToys_vtbl[];
 
 /**
- * Constructs the toy reward gallery (reward type 7), which cFECustom_getNextState allocates (2712 bytes) under the tag
- * "cFEStateRewardGalleryToys".
+ * Constructs the toy reward gallery (reward type kRewardToy), which cFECustom_getNextState allocates (2712 bytes) under
+ * the tag "cFEStateRewardGalleryToys".
  *
- * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 7, installs vtable cFEStateRewardGalleryToys_vtbl and clears the list base
- * (+0xA24) and the 28 list entries from +0xA28.
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type kRewardToy,
+ * installs vtable cFEStateRewardGalleryToys_vtbl and clears the list base (+0xA24) and the 28 list entries from +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
@@ -2023,12 +2029,13 @@ extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self,
 extern void* cFEStateRewardGalleryCheatChars_vtbl[];
 
 /**
- * Constructs the cheat-character reward gallery (reward type 8), which cFECustom_getNextState allocates (2712 bytes)
- * under the tag "cFEStateRewardGalleryCheatChars".
+ * Constructs the cheat-character reward gallery (reward type kRewardCheatChar), which cFECustom_getNextState allocates
+ * (2712 bytes) under the tag "cFEStateRewardGalleryCheatChars".
  *
- * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 8, installs vtable cFEStateRewardGalleryCheatChars_vtbl and clears the list base
- * (+0xA24) and the 28 list entries from +0xA28. This gallery keeps the base icon-file and icon-id slots (no icon file)
- * and supplies texture elements instead (slot 27, cFEStateRewardGalleryCheatChars_getTextureElement).
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type kRewardCheatChar,
+ * installs vtable cFEStateRewardGalleryCheatChars_vtbl and clears the list base (+0xA24) and the 28 list entries from
+ * +0xA28. This gallery keeps the base icon-file and icon-id slots (no icon file) and supplies texture elements instead
+ * (slot 27, cFEStateRewardGalleryCheatChars_getTextureElement).
  *
  * @param engine  the UI engine
  * @param idx     user number
@@ -2293,7 +2300,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
     int hash = w->mHashName;
     if (hash == GetHashValue32(str_Poster_icon)) {
         switch (self->type) {
-        case 3:
+        case kRewardPoster:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_poster_icon);
@@ -2301,7 +2308,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             }
             w->mTextureID = -1;
             break;
-        case 4:
+        case kRewardCard:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_trading_card_icon);
@@ -2309,7 +2316,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             }
             w->mTextureID = -1;
             break;
-        case 5:
+        case kRewardArt:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_art_icon);
@@ -2317,7 +2324,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
             }
             w->mTextureID = -1;
             break;
-        case 7:
+        case kRewardToy:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_toys_icon);
@@ -2328,33 +2335,33 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         }
     } else if (hash == GetHashValue32(str_screentitle)) {
         switch (self->type) {
-        case 3:
+        case kRewardPoster:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNPosters));
             break;
-        case 4:
+        case kRewardCard:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNTradeCard));
             break;
-        case 5:
+        case kRewardArt:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNArt));
             break;
-        case 6:
+        case kRewardVideo:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNVideo));
             break;
-        case 7:
+        case kRewardToy:
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_OVRCMNToys));
             break;
         }
     } else if (hash == GetHashValue32(str_reward_name)) {
         switch (self->type) {
-        case 4:
+        case kRewardCard:
             w->setVisible(0);
             break;
-        case 3:
-        case 5:
-        case 7:
+        case kRewardPoster:
+        case kRewardArt:
+        case kRewardToy:
             cUIText_setAsciiString((cUIText*)w, *self->reward);
             break;
-        case 6:
+        case kRewardVideo:
             break;
         }
     } else if (hash == GetHashValue32(str_Square_shape)) {
@@ -2390,18 +2397,18 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Swallows menu events 6, 8 and 9 on the preview screen.
+ * Swallows menu events kONNEXT, kONOPTION and kONMISC on the preview screen.
  *
  * @param menu  the menu (On Tour cUIMenu* pMenu), unused
  * @param event  menu event number (On Tour Event)
- * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
 extern "C" int cFEStatePreviewReward_onWidgetMenu(cFEStatePreviewReward* self, int menu, unsigned int event)
 {
     switch (event) {
-    case 6:
-    case 8:
-    case 9:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -2460,9 +2467,9 @@ extern sDefObj_1FF0 gUISoundNull;
  * transitions out.
  *
  * @param obj  the input (On Tour cUIInput* pInput)
- * @return 1 when the preview closes, otherwise 0
+ * @return true when the preview closes
  */
-extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, cUIInput* obj)
+extern "C" bool cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, cUIInput* obj)
 {
     if (obj->isPrevious() != 0) {
     sDefObj_1FF0* sound = *(sDefObj_1FF0**)&self->mpEngine->mpSound;
@@ -2481,9 +2488,9 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, c
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
     cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-    return 1;
+    return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2495,9 +2502,9 @@ extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, c
 /**
  * Sets the reward the preview shows and starts loading its picture.
  *
- * Stores @p kind in mRewardType and @p data in mpReward; for types 3, 4, 5 and 7 (posters, trading cards, art, toys)
- * loads the record's mpTextureFileName with cFEStatePreviewReward_loadTexture(). Videos (type 6) and other types load
- * nothing. Called by cFEStateRewardGalleryBase_showReward.
+ * Stores @p kind in mRewardType and @p data in mpReward; for kRewardPoster, kRewardCard, kRewardArt and kRewardToy
+ * loads the record's mpTextureFileName with cFEStatePreviewReward_loadTexture(). Videos (kRewardVideo) and other types
+ * load nothing. Called by cFEStateRewardGalleryBase_showReward.
  *
  * @param kind  the reward type (3 posters, 4 trading cards, 5 art, 6 videos, 7 toys)
  * @param data  the 16-byte reward record
@@ -2507,16 +2514,16 @@ void cFEStatePreviewReward::setReward(int kind, void* data)
     mRewardType = kind;
     mpReward = data;
     switch (kind) {
-    case 3:
+    case kRewardPoster:
         loadTexture(((tPosterInfo*)data)->mpTextureFileName);
         break;
-    case 4:
+    case kRewardCard:
         loadTexture(((tTradingCardInfo*)data)->mpTextureFileName);
         break;
-    case 5:
+    case kRewardArt:
         loadTexture(((tConceptArtInfo*)data)->mpTextureFileName);
         break;
-    case 7:
+    case kRewardToy:
         loadTexture(((tToyInfo*)data)->mpTextureFileName);
         break;
     }
@@ -2545,7 +2552,7 @@ void cFEStatePreviewReward::loadTexture(const char* fileName)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_updateTextureLoad);
 #ifdef SKIP_ASM
-extern "C" int func_0019E238(void* self, int bank, int i);
+extern "C" bool func_0019E238(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 
 struct sSelfK1D2198 {
@@ -2799,17 +2806,17 @@ static inline int vcall001D2518(void* obj, int slot)
  * Vtable slot 8 of cFEStateVideoPlayer_vtbl. Sets the stop request (+0x27C); cFEStateVideoPlayer_onUpdate acts on it.
  *
  * @param obj  the input object
- * @return 1 when a stop was requested, otherwise 0
+ * @return true when a stop was requested
  */
-extern "C" int cFEStateVideoPlayer_onInputBegin(cFEStateVideoPlayer* self, cUIInput* obj)
+extern "C" bool cFEStateVideoPlayer_onInputBegin(cFEStateVideoPlayer* self, cUIInput* obj)
 {
     if (self->mInterruptible != 0) {
         if (vcall001D2518(obj, 5) != 0 || vcall001D2518(obj, 6) != 0) {
             self->mStopPending = 1;
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 

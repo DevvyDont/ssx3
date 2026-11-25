@@ -9,6 +9,7 @@
 #include "fe/festatebigradio.h"
 #include "ui/uithing.h"
 #include "main/ssxapp.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetCreate);
@@ -47,7 +48,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, 
     if (id == GetHashValue32(str_0box))
     {
         self->mpChecks[0] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == 0)
+        if (self->mRadioMode == kRADIOMODE_RADIO)
             SetText_6540(w, (int)self->mpCheckBox);
         else
             SetText_6540(w, (int)self->mpEmptyBox);
@@ -55,7 +56,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, 
     else if (id == GetHashValue32(str_1box))
     {
         self->mpChecks[2] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == 2)
+        if (self->mRadioMode == kRADIOMODE_MOUNTAIN)
             SetText_6540(w, (int)self->mpCheckBox);
         else
             SetText_6540(w, (int)self->mpEmptyBox);
@@ -63,7 +64,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, 
     else if (id == GetHashValue32(str_2box))
     {
         self->mpChecks[1] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == 1)
+        if (self->mRadioMode == kRADIOMODE_REQUESTLINE)
             SetText_6540(w, (int)self->mpCheckBox);
         else
             SetText_6540(w, (int)self->mpEmptyBox);
@@ -71,7 +72,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, 
     else if (id == GetHashValue32(str_2box))
     {
         self->mpChecks[1] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == 1)
+        if (self->mRadioMode == kRADIOMODE_REQUESTLINE)
             SetText_6540(w, (int)self->mpCheckBox);
         else
             SetText_6540(w, (int)self->mpEmptyBox);
@@ -79,7 +80,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, 
     else if (id == GetHashValue32(str_3box))
     {
         self->mpChecks[3] = (cUIIcon*)((void*)w);
-        if (self->mRadioMode == 3)
+        if (self->mRadioMode == kRADIOMODE_PLAYLIST)
             SetText_6540(w, (int)self->mpCheckBox);
         else
             SetText_6540(w, (int)self->mpEmptyBox);
@@ -219,7 +220,7 @@ static inline void setEnabled_AOWE(sToggle_AOWE* t, int on)
  *
  * Selecting a mode recolours the boxes and stores it (per player in the reward interface, and in the audio
  * system);
- * the request-line and playlist modes need a custom list (+0x7C). Entry 4 opens a cFEStateRequestLine.
+ * the request-line and playlist modes need a custom list (+0x7C). Entry kRowEditRequests opens a cFEStateRequestLine.
  * Leaving
  * stores the mode too. Highlight help depends on whether a list exists and whether this is the in-game pause
  * menu.
@@ -232,10 +233,10 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
     if (w == 0)
         return;
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int idx = w->idx;
-        if (idx != 0 && idx != 2) {
-            if (idx != 1 && idx != 3)
+        if (idx != kRADIOMODE_RADIO && idx != kRADIOMODE_MOUNTAIN) {
+            if (idx != kRADIOMODE_REQUESTLINE && idx != kRADIOMODE_PLAYLIST)
                 goto other;
             if (self->f7C == 0)
                 return;
@@ -246,7 +247,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         applyMode_AOWE(self);
         break;
     other:
-        if (idx != 4)
+        if (idx != cFEStateAudioOptions::kRowEditRequests)
             return;
         if (self->f74 == 0 && self->f7C == 0)
             return;
@@ -259,7 +260,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         }
         break;
     }
-    case 6:
+    case cUIState::kONPREV:
         applyMode_AOWE(self);
         if (online_AOWE()) {
             cUIStateStack_pop(self->owner + 0x18, 1);
@@ -269,7 +270,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
                 cUIStateStack_push(self->owner + 0x18, nextState);
         }
         break;
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         cUIText* text = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_helptext));
         if (text == 0)
             return;
@@ -277,13 +278,13 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         bool toggle2Enabled = false;
         bool toggle1Enabled = false;
         switch (w->idx) {
-        case 0:
+        case kRADIOMODE_RADIO:
             setText_AOWE(text, str_kT_HELPAUDIORadioBig);
             break;
-        case 2:
+        case kRADIOMODE_MOUNTAIN:
             setText_AOWE(text, str_kT_HELPAUDIOBMA);
             break;
-        case 1:
+        case kRADIOMODE_REQUESTLINE:
             if (self->f7C == 0) {
                 toggle1Enabled = online_AOWE();
                 if (online_AOWE())
@@ -295,7 +296,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             } else
                 setText_AOWE(text, str_kT_FEHELPCustPlayDJ);
             break;
-        case 3:
+        case kRADIOMODE_PLAYLIST:
             if (self->f7C == 0) {
                 toggle2Enabled = online_AOWE();
                 if (online_AOWE())
@@ -307,7 +308,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             } else
                 setText_AOWE(text, str_kT_FEHELPCustPlayNoDJ);
             break;
-        case 4:
+        case cFEStateAudioOptions::kRowEditRequests:
             if (self->f74 == 0 && self->f7C == 0) {
                 isOnline = online_AOWE();
                 if (online_AOWE())
@@ -333,17 +334,17 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Refuses event 6 on the request-line, big-mountain or edit entries when they are unavailable, and blocks
- * events 8 and 9.
+ * Refuses kONNEXT on the request-line, big-mountain or edit entries when they are unavailable, and blocks
+ * kONOPTION and kONMISC.
  *
  * @param pMenu  the menu
  * @param Event  menu event number
  * @param index  the menu item index
- * @return 0x10 for a refused event 6, 0 for events 8 and 9, otherwise 0x101
+ * @return 0x10 for a refused kONNEXT, 0 for kONOPTION and kONMISC, otherwise 0x101
  */
 extern "C" int cFEStateAudioOptions_onWidgetMenu(cFEStateAudioOptions* self, int pMenu, int Event, int index)
 {
-    if (Event == 6 && (index == 2 || index == 3 || index == 4)) {
+    if (Event == cUIMenu::kONNEXT && (index == 2 || index == 3 || index == 4)) {
         if (index == 2 && self->mCreatedRequestList == 0) {
             goto ok;
         }
@@ -354,7 +355,7 @@ extern "C" int cFEStateAudioOptions_onWidgetMenu(cFEStateAudioOptions* self, int
         ok:
             return 0x10;
         }
-    } else if (Event == 8 || Event == 9) {
+    } else if (Event == cUIMenu::kONOPTION || Event == cUIMenu::kONMISC) {
         return 0;
     }
     return 257;

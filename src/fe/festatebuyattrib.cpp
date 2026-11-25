@@ -13,6 +13,7 @@
 #include "ui/uiengine.h"
 #include "fe/festatebuyattrib.h"
 #include "fe/festatecareerstats.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onCreateScreen);
@@ -179,15 +180,16 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* self);
 /**
  * Buys the chosen attribute points when the buy popup closes with a yes.
  *
- * On event 0x16 (a popup was popped) with the popup's result word (+0x6C) set, calls cFEStateBuyAttrib_buyExperience() (On Tour
- * buyExperience), which pays the total cost and records the points with the economy interface.
+ * On kONPOPUPDESTROY (a popup was popped) with the popup's result word (+0x6C) set, calls
+ * cFEStateBuyAttrib_buyExperience() (On Tour buyExperience), which pays the total cost and records the points with the
+ * economy interface.
  *
  * @param sender  the popup that closed (the cUIStateBuyPopup)
  * @param msg  the popup event (0x15 opened, 0x16 closed)
  */
 extern "C" void cFEStateBuyAttrib_onPopupEvent(cFEStateBuyAttrib* self, cUIState* sender, int msg)
 {
-    if (msg == 22) {
+    if (msg == cUIState::kONPOPUPDESTROY) {
         if (((cUIStateBuyPopup*)sender)->mbAccept != 0) {
             self->buyExperience();
         }
@@ -216,11 +218,11 @@ extern cUISoundInterface gUISoundNull;
 /**
  * Handles accept and back on the buy-attributes screen: opens the buy popup, closes the prompt, or leaves.
  *
- * Event 5 (accept): when the bank (0xA4) covers a positive total cost (0xA0), pushes a 0x70-byte "UITRICKBUY"
+ * kONNEXT (accept): when the bank (0xA4) covers a positive total cost (0xA0), pushes a 0x70-byte "UITRICKBUY"
  * cUIStateBuyPopup (cUIStateBuyPopup_cUIStateBuyPopup, given the cost and bank by cUIStateBuyPopup_initBuyAttributes) as a popup; otherwise plays UI
  * sound 4 through the engine's sound interface (+0x14).
  *
- * Event 6 (back): with the prompt flag (0xA8) set, clears it, hides "PopupGroup" and refocuses the attribute
+ * kONPREV (back): with the prompt flag (0xA8) set, clears it, hides "PopupGroup" and refocuses the attribute
  * menu; otherwise asks the engine's custom interface (getPrevState, vtable slot 5) for a state with the
  * widget's misc data and, when it gives one, plays "TransitionOut" and pushes it.
  *
@@ -232,7 +234,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
     if (obj == 0)
         return;
     switch (msg) {
-    case 5:
+    case cUIState::kONNEXT:
         if (self->mBank >= self->mTotalCost && self->mTotalCost > 0) {
             void* pPopup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY_b, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
             cUIStateBuyPopup_initBuyAttributes(pPopup, 0, self->mTotalCost, self->mBank);
@@ -245,7 +247,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
                 sound->playSound(4);
         }
         break;
-    case 6:
+    case cUIState::kONPREV:
         if (self->mBuyPrompt != 0) {
             self->mBuyPrompt = 0;
             cUIState_hideObjSafe(((char*)self), str_PopupGroup);
@@ -256,7 +258,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             void* nextState = mgr->getPrevState((cUIState*)self, (int)*(void**)(obj + 0x18));
             if (nextState != 0) {
                 int frame = cUIScreen_getFrameByLabel(self->mpAttribScreen, GetHashValue32(str_TransitionOut_b));
-                if (frame != 0xFFFF)
+                if (frame != cUIScreen::kNoFrame)
                     cUIScreen_playFrame(self->mpAttribScreen, frame, 1);
                 cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             }
@@ -293,7 +295,7 @@ static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
 static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
 {
     unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)((void*)s->mpAttribScreen), GetHashValue32(name));
-    if (frame != 0xFFFF)
+    if (frame != cUIScreen::kNoFrame)
         cUIScreen_playFrame(((void*)s->mpAttribScreen), frame, 1);
     defaultMsg_4C30(s, 1);
 }
@@ -730,14 +732,14 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onWidgetMenu);
  *
  * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
  * @param Event  the menu event
- * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
 extern "C" int cFEStateCareerStats_onWidgetMenu(cFEStateCareerStats* self, int pMenu, unsigned int Event)
 {
     switch (Event) {
-    case 6:
-    case 8:
-    case 9:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -752,7 +754,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 /**
  * Leaves the career-stats screen on back, pushing the state the engine's custom interface gives.
  *
- * Only event 6 does anything: getPrevState (vtable slot 5 of the custom interface) is asked with the widget's
+ * Only kONPREV does anything: getPrevState (vtable slot 5 of the custom interface) is asked with the widget's
  * misc data, and a returned state is pushed on the state stack.
  *
  * @param item  the widget that sent the event; nothing happens when null
@@ -764,9 +766,9 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
         return;
     }
     switch (msg) {
-    case 5:
+    case cUIState::kONNEXT:
         break;
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -811,7 +813,7 @@ static inline int wantCall_56C8(char* w, int slot)
 static inline void playFrame_56C8(cFEStateCareerStats* s, char* name)
 {
     unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)((void*)s->mpScreen), GetHashValue32(name));
-    if (frame != 0xFFFF)
+    if (frame != cUIScreen::kNoFrame)
         cUIScreen_playFrame(((void*)s->mpScreen), frame, 1);
 }
 
@@ -836,7 +838,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
         msg = 1;
         handled = 1;
         if (--self->mStatsState < 0) {
-            self->mStatsState = 3;
+            self->mStatsState = cFEStateCareerStats::kCareerStats_RidersBest;
         }
     } else if (wantCall_56C8(((char*)w), 20)) {
         playFrame_56C8((self), str_hlr);
@@ -850,7 +852,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
         self->setupMenuFocus(self->mStatsState);
         self->setupLayout();
     }
-    if (self->mStatsState == 0) {
+    if (self->mStatsState == cFEStateCareerStats::kCareerStats_Highlights) {
         if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopHighlightNumber > 0) {
                 self->mTopHighlightNumber--;
@@ -872,7 +874,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 msg = 4;
             }
         }
-    } else if (self->mStatsState == 1) {
+    } else if (self->mStatsState == cFEStateCareerStats::kCareerStats_Race_PlatMedals) {
         if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopRaceEvent > 0) {
                 self->mTopRaceEvent--;
@@ -894,7 +896,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 msg = 4;
             }
         }
-    } else if (self->mStatsState == 2) {
+    } else if (self->mStatsState == cFEStateCareerStats::kCareerStats_FS_PlatMedals) {
         if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopFreestyleEvent > 0) {
                 self->mTopFreestyleEvent--;
@@ -955,17 +957,17 @@ void cFEStateCareerStats::setupLayout()
     cUIState_hideObjSafe(this, str_ridersbest);
     int show = 1;
     switch (mStatsState) {
-    case 0:
+    case kCareerStats_Highlights:
         cUIState_showObjSafe(this, str_highlights);
         show = 0;
         break;
-    case 1:
+    case kCareerStats_Race_PlatMedals:
         cUIState_showObjSafe(this, str_race_platinum);
         break;
-    case 2:
+    case kCareerStats_FS_PlatMedals:
         cUIState_showObjSafe(this, str_freestyle_platinum);
         break;
-    case 3:
+    case kCareerStats_RidersBest:
         cUIState_showObjSafe(this, str_ridersbest);
         show = 0;
         break;
@@ -1002,7 +1004,7 @@ extern char str_ridersbestDummyMenu[];
  * without a null check and runs setupHighlightsList(), cFEStateCareerStats_setupRacePlatinumMedalsList() or cFEStateCareerStats_setupFSPlatinumMedalsList() (probably the race
  * and freestyle platinum-medal lists) or setupRidersBest().
  *
- * @param menu  the page: 0 highlights, 1 race platinum, 2 freestyle platinum, 3 rider's best
+ * @param menu  the page: kCareerStats_Highlights, _Race_PlatMedals, _FS_PlatMedals or _RidersBest
  */
 void cFEStateCareerStats::setupMenuFocus(int menu)
 {
@@ -1020,19 +1022,19 @@ void cFEStateCareerStats::setupMenuFocus(int menu)
     if (menuTab3 != 0)
         menuTab3->setFocus(0);
     switch (mStatsState) {
-    case 0:
+    case kCareerStats_Highlights:
         menuTab0->setFocus(1);
         setupHighlightsList();
         break;
-    case 1:
+    case kCareerStats_Race_PlatMedals:
         menuTab1->setFocus(1);
         setupRacePlatinumMedalsList();
         break;
-    case 2:
+    case kCareerStats_FS_PlatMedals:
         menuTab2->setFocus(1);
         setupFSPlatinumMedalsList();
         break;
-    case 3:
+    case kCareerStats_RidersBest:
         menuTab3->setFocus(1);
         setupRidersBest();
         break;

@@ -169,6 +169,13 @@ struct cGFEventStartState {
                                     //      3 WaitNIS, 4 Complete); [R] ctor 4; [U] gainFocus 0, update's switch; in
                                     //      the replay frame
 
+    // EA's eEventStartSubState (mSubState). [O] On Tour's enum cGFEventStartState::eEventStartSubState, names and
+    // values; [U] update's switch runs them in this order and the ctor starts at keEventStartSubState_Complete.
+    enum eEventStartSubState {
+        keEventStartSubState_WaitNISTransition = 0, keEventStartSubState_SetupEvent = 1,
+        keEventStartSubState_WaitLoading = 2, keEventStartSubState_WaitNIS = 3, keEventStartSubState_Complete = 4
+    };
+
     // Methods bound to their retail symbols by asm labels.
     void gainFocus(int mode) __asm__("cGFEventStartState_gainFocus");
     void update() __asm__("cGFEventStartState_update");

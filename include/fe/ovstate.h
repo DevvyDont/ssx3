@@ -25,6 +25,31 @@ struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
+// An overlay id (cOVState::mOVID, cOVStateManager_triggerOverlay's argument). Names [O] from On Tour's enum
+// tOVStateEnum where the class matches; values [R] from retail's cOVStateManager_triggerOverlay, which builds for each
+// id the class named here (its vtable cOVState_<NAME>_vtbl; retail has more overlays than On Tour, so the values
+// differ).
+// Names ours for the ids whose class has no name, after what [U] its methods show: 9 (onCreateScreen func_001FBD20
+// adds "41freestyle_pre"), 14 (a bare cOVState: its vtable D_00474B80 overrides nothing), 20 (the rival / peak
+// challenge pre-event: func_001FD320; cOVStateManager_gotoOverlay picks it for events kGAMEEVENT_RIVALTIME ..
+// kGAMEEVENT_POINTS_PEAK3), 21 (func_001FC878 adds "50multifs_pre"; picked on the multiplayer path), 22 (its
+// onCreateScreen func_001E8920 adds "70peakchal_results"; cOVStateManager_getResultsOverlay picks it for the peak
+// challenges) and 40 (func_00210940 adds "282ReadPrivateMessage").
+enum tOVStateEnum {
+    kOVSTATE_NULL = 0, kOVSTATE_PAUSE_COMPETE = 1, kOVSTATE_PAUSE_BIGCHAL = 2, kOVSTATE_PAUSE_FREERIDE = 3,
+    kOVSTATE_PAUSE_SPOKE = 4, kOVSTATE_PAUSE_QUICKPLAY = 5, kOVSTATE_PAUSE_ONLINE = 6, kOVSTATE_PAUSE_OPTIONS = 7,
+    kOVSTATE_HEAT_PREEVENT = 8, kOVSTATE_FREESTYLE_PREEVENT = 9, kOVSTATE_HEAT_STANDINGS = 10,
+    kOVSTATE_FINAL_STANDINGS = 11, kOVSTATE_RACE_FINISHOV = 12, kOVSTATE_BASSSP_QUAL_FINISHOV = 13,
+    kOVSTATE_EMPTY = 14, kOVSTATE_TOPTIMES = 15, kOVSTATE_REWARDS = 16, kOVSTATE_REPLAY = 17,
+    kOVSTATE_SAVEREPLAY = 18, kOVSTATE_SAVEOPTIONS = 19, kOVSTATE_CHALLENGE_PREEVENT = 20,
+    kOVSTATE_MULTI_PREEVENT = 21, kOVSTATE_PEAKCHAL_RESULTS = 22, kOVSTATE_RESTART = 23, kOVSTATE_QUIT = 24,
+    kOVSTATE_RESTARTCHALLENGE = 25, kOVSTATE_QUITCHALLENGE = 26, kOVSTATE_QUITCOMPETITION = 27,
+    kOVSTATE_GIVEUP = 28, kOVSTATE_BIGCHALLENGE_START = 29, kOVSTATE_BIGCHALLENGE_FAIL = 30,
+    kOVSTATE_ENTERLODGE = 31, kOVSTATE_MAP = 32, kOVSTATE_TRANSPORT = 33, kOVSTATE_MESSAGECENTER = 34,
+    kOVSTATE_TOURNAMENT_STANDINGS = 35, kOVSTATE_PROFILE = 36, kOVSTATE_AUTOSAVE = 37, kOVSTATE_SAVEPROMPT = 38,
+    kOVSTATE_PAUSE_ONLINE_ERROR = 39, kOVSTATE_PRIVATEMESSAGE = 40
+};
+
 struct cOVState : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] _vt$8cOVState cOVState_vtbl, stored by cOVState_cOVState after the base ctor

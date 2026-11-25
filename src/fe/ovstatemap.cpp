@@ -369,13 +369,13 @@ typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
 /**
  * Handles the session map's widget events: pick a session, confirm or cancel, and button highlights.
  *
- * Event 5 with the popup closed opens it for the picked session (misc data into mSelectedSessionPoint). With it open,
+ * kONNEXT with the popup closed opens it for the picked session (misc data into mSelectedSessionPoint). With it open,
  * "No" closes it; "Yes" stores the session in the mission interface's nextSessionID, sets cOVStateManager_mStatus = 3,
  * pops the pause-mode stack (cPauseState_Stack/cPauseState_StackIdx into cPauseState_Flags), calls cGame_setState(game,
  * 0xF, 0, 0) and closes the overlay (cOVState_MAP_cleanupIndicators, cOVState_MAP_setupScreenExit).
  *
- * Event 6 closes the popup, or else closes the overlay, pops the state stack and marks this state pending
- * delete with mode 7. Events 1 and 2 (highlight on/off) recolour the popup's Yes/No buttons.
+ * kONPREV closes the popup, or else closes the overlay, pops the state stack and marks this state pending
+ * delete with mode 7. kONGAINFOCUS and kONLOSEFOCUS (highlight on/off) recolour the popup's Yes/No buttons.
  *
  * @param selfp  the cOVState_MAP (raw pointer)
  * @param pWidget  the widget the event is for (null: nothing happens)
@@ -388,7 +388,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
         return;
     }
     switch (Event) {
-    case 5:
+    case cUIState::kONNEXT:
         if (selfp->mSessionPopupActive != 0) {
             if (pWidget->mMiscData != 0) {
                 selfp->mSessionPopupActive = 0;
@@ -413,7 +413,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
             vt[11].fn(vthis(confirmNo, vt[11]), tMapColour(1.0f, 0.0f, 0.0f, 0.0f));
         }
         break;
-    case 6:
+    case cUIState::kONPREV:
         if (selfp->mSessionPopupActive != 0) {
             selfp->mSessionPopupActive = 0;
             selfp->setupPopup();
@@ -424,7 +424,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
             selfp->mAttrState = (selfp->mAttrState & ~0x3F00) | 0x780;
         }
         break;
-    case 1:
+    case cUIState::kONGAINFOCUS:
         if (selfp->mSessionPopupActive != 0) {
             selfp->setWidgetHiliteColor((cUIText*)pWidget, 1);
             if (pWidget->mMiscData == 0) {
@@ -444,12 +444,12 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
             }
         }
         break;
-    case 2:
+    case cUIState::kONLOSEFOCUS:
         if (selfp->mSessionPopupActive != 0) {
             selfp->setWidgetUnHiliteColor((cUIText*)pWidget, 1);
         }
         break;
-    case 7:
+    case cUIState::kONOPTION:
         break;
     }
 }
@@ -669,10 +669,10 @@ extern "C" void cOVState_onUpdate(void* self);
  * Calls cOVState_onUpdate() first and stops there while mScreenExiting is set. Once the picture is loaded
  * (mMapTextureSet) its alpha (mMapPicAlpha) rises by 0.1 per frame up to 1.0 and the picture object (mpMap) is shown;
  * until then the alpha is 0 and the object hidden. When the async file manager reports file mFEAsyncMapFileIndex with
- * status 3 and the picture is not yet loaded, the file's texture is attached to the picture object and it is marked
- * loaded. mIndicatorSize swings between 18 and 21.5 at 0.16 per frame (mIndicatorSizeDiff); each of the 8 highlight
- * icons (mpSessionHighlights) is placed at its base position (mHighlightOriginalPos) minus half the growth, so it
- * stays centred, and sized to that size.
+ * status kFileLoaded and the picture is not yet loaded, the file's texture is attached to the picture object and it is
+ * marked loaded. mIndicatorSize swings between 18 and 21.5 at 0.16 per frame (mIndicatorSizeDiff); each of the 8
+ * highlight icons (mpSessionHighlights) is placed at its base position (mHighlightOriginalPos) minus half the growth,
+ * so it stays centred, and sized to that size.
  */
 extern "C" void cOVState_MAP_onUpdate(cOVState_MAP* self)
 {
@@ -694,7 +694,7 @@ extern "C" void cOVState_MAP_onUpdate(cOVState_MAP* self)
         self->mpMap->setVisible(0);
     }
     cFEAsyncManager* am = SSXApp->mFEAsyncManager;
-    if (cFEAsyncManager_GetFileStatus(am, self->mFEAsyncMapFileIndex) == 3 && self->mMapTextureSet == 0) {
+    if (cFEAsyncManager_GetFileStatus(am, self->mFEAsyncMapFileIndex) == kFileLoaded && self->mMapTextureSet == 0) {
         cUIIcon* feObj = self->mpMap;
         if (feObj != 0) {
             int data = am->fileList[self->mFEAsyncMapFileIndex].texID;
@@ -1130,9 +1130,10 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
     if (((char*)game) != 0) {
         cCutSceneTransitionMan* cutSceneMan = game->CutSceneTransitionMan;
         int mode = cutSceneMan->mCurrentState;
-        if (mode != 0) {
+        if (mode != cCutSceneTransitionMan::kRegularMode) {
             cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
-            if (mode == 1 || mode == 3) {
+            if (mode == cCutSceneTransitionMan::kCutSceneMode
+                || mode == cCutSceneTransitionMan::kTransitionToCutSceneMode) {
                 self->mRestoreCutSceneMode = 1;
             }
         }

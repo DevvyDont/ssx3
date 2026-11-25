@@ -358,23 +358,23 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onInputBegin);
  * to 8.
  *
  * @param pInput  the controller input (cUIInput)
- * @return 1 when up or down was pressed, otherwise 0
+ * @return true when up or down was pressed
  */
-extern "C" int cFEStateCredits_onInputBegin(cFEStateCredits* self, cUIInput* pInput)
+extern "C" bool cFEStateCredits_onInputBegin(cFEStateCredits* self, cUIInput* pInput)
 {
     if (pInput->isUp()) {
         if (self->mPixelDelta >= -7) {
             self->mPixelDelta -= 1;
         }
-        return 1;
+        return true;
     }
     if (pInput->isDown()) {
         if (self->mPixelDelta < 8) {
             self->mPixelDelta += 1;
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -390,14 +390,14 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onWidgetMenu);
  *
  * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
  * @param Event  the menu event
- * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
 extern "C" int cFEStateCredits_onWidgetMenu(cFEStateCredits* self, int pMenu, unsigned int Event)
 {
     switch (Event) {
-    case 6:
-    case 8:
-    case 9:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -417,7 +417,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  */
 extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* item, int msg)
 {
-    if (((void*)item) != 0 && msg == 6) {
+    if (((void*)item) != 0 && msg == cUIState::kONPREV) {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, 36);
         if (nextState != 0) {

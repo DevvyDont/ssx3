@@ -71,6 +71,11 @@ struct cFEStateAudioOptions : public cFEState {
     int mCreatedRequestList;        // 0x07C [O] (bool); [R] cBERewardInterface_getNumSongsInPlayList(..) > 0; [U]
                                     //       onGainFocus / onGainTransition / onWidgetEvent / onWidgetMenu test it
 
+    // The option rows' ids (mMiscData): the four radio modes (eRadioModeID, sound/ssxaudio.h), then this one (names
+    // ours). [U] onWidgetEvent stores a mode row's id as the radio mode and pushes a cFEStateRequestLine for this row,
+    // whose help text is kT_HELPAUDIOEditReq.
+    enum { kRowEditRequests = 4 };
+
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateAudioOptions1() __asm__("cFEStateAudioOptions_cFEStateAudioOptions1");
     int isInStore() __asm__("cFEStateAudioOptions_isInStore");

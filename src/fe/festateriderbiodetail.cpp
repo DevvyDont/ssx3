@@ -329,8 +329,8 @@ extern "C" void cFEStateRiderBio_setupBioScreen(cFEStateRiderBio* self);
 /**
  * Handles the rider bio screen's widget events: probably going back, and switching the page shown.
  *
- * Event 6 asks the engine's custom interface (vtable slot 5, probably getPrevState) for the state to go to,
- * passing the widget's misc data, and pushes it when there is one. Event 9 takes the widget's current
+ * kONPREV asks the engine's custom interface (vtable slot 5, probably getPrevState) for the state to go to,
+ * passing the widget's misc data, and pushes it when there is one. kONCHANGE takes the widget's current
  * list-box entry (+0x319) as the page (+0x4C) and shows it (cFEStateRiderBio_setupBioScreen). A null widget is ignored.
  *
  * @param item  the widget (On Tour pWidget)
@@ -342,7 +342,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
         return;
     }
     switch (msg) {
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -350,7 +350,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
         }
         break;
     }
-    case 9:
+    case cUIState::kONCHANGE:
         self->mScreen = *(unsigned char*)((char*)item + 0x319);
         self->setupBioScreen();
         break;

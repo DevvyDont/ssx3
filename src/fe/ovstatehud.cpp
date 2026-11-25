@@ -64,10 +64,11 @@ extern "C" void cOVStateHiScoreList_onCreateScreen(cOVStateHiScoreList* self)
     cOVState_onCreateScreen(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (cBENewRaceInterface_newRace.cGameMode) {
-    case 0: case 5:
+    case kGAMEMODE_RACE: case kGAMEMODE_TIMECHALLENGE:
         cUIState_showObjSafe(self, str_helptext02);
         break;
-    case 1: case 2: case 3: case 4: case 6:
+    case kGAMEMODE_SLOPESTYLE: case kGAMEMODE_BIGAIR: case kGAMEMODE_HALFPIPE: case kGAMEMODE_FREERIDE:
+    case kGAMEMODE_PNTSCHALLENGE:
     default:
         cUIState_hideObjSafe(self, str_helptext01);
         break;
@@ -94,11 +95,11 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * Other items push a null state, which cUIStateStack_push() does not check.
  *
  * @param item  the chosen item; ignored when null
- * @param Event  the widget event; only 5 (Cross) acts
+ * @param Event  the widget event; only kONNEXT (Cross) acts
  */
 extern "C" void cOVStateHiScoreList_onWidgetEvent(cOVStateHiScoreList* self, cUIThing* item, int Event)
 {
-    if (((void*)item) != 0 && Event == 5) {
+    if (((void*)item) != 0 && Event == cUIState::kONNEXT) {
         void* nextState = 0;
         if (item->mMiscData == 1) {
             cUICustomInterface* factory = self->mpEngine->mpCustom;
@@ -280,7 +281,7 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
     cursor = ((&self->elems[0]))[0].pText;
     float total = maxh;
     while (*cursor != 0) {
-        if (*cursor == 0x40) {
+        if (*cursor == '@') {
             *cursor = 0;
             cursor++;
             if (*segs[n].pText != 0) {
@@ -291,7 +292,7 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
             n++;
             char* namePos = name;
             do {
-                if (*cursor == 0x20 || *cursor == 0) break;
+                if (*cursor == ' ' || *cursor == 0) break;
                 *namePos = *cursor;
                 cursor++;
                 namePos++;
@@ -1577,9 +1578,10 @@ struct tARGBInit : tARGB {
  *
  * From element @p idx of @p defs it takes the position (tHUDDef_getPos) and the scale (tHUDDef_getScale, times @p scaleMul
  * when given). The font's Scale becomes BaseScale times that scale and the text is measured with cFont_textExtent. The
- * pivots are the element's (+0x20, +0x21) unless @p align / @p flags give one (0x7F means "use the element's");
- * cOVStateHUD1P_calcElemPos places the measured box with reflect bits @p reflect, @p posOff is added and @p rect receives the box. The
- * colour is the element's (tHUDDef_getColour) or @p color. The element's layer byte (+0x22, On Tour tHUDDef::layer) goes
+ * pivots are the element's (+0x20, +0x21) unless @p align / @p flags give one (kPivotFromDef means "use the
+ * element's"); cOVStateHUD1P_calcElemPos places the measured box with reflect bits @p reflect, @p posOff is added and
+ * @p rect receives the box. The colour is the element's (tHUDDef_getColour) or @p color. The element's layer byte
+ *         (+0x22, On Tour tHUDDef::layer) goes
  * into bits 5-9 of the current draw state's word 2, the font's Color is set and its ShadowColor becomes (colour alpha,
  * 0, 0, 0); cFont_text draws the text. Afterwards ShadowColor is reset to (1, 0, 0, 0) and Scale to BaseScale.
  *
@@ -1592,8 +1594,8 @@ struct tARGBInit : tARGB {
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 for the element's
  * @param rect  receives the drawn box (x, y, width, height), or 0
- * @param align  horizontal pivot override, 0x7F for the element's
- * @param flags  vertical pivot override, 0x7F for the element's
+ * @param align  horizontal pivot override, kPivotFromDef for the element's
+ * @param flags  vertical pivot override, kPivotFromDef for the element's
  */
 void cOVStateHUD1P::renderText(cFont* font, tHUDDef* defs, int idx, const char* str, int reflect, float* scaleMul,
                                float* posOff, tARGB* color, float* rect, int align, int flags)
@@ -1617,8 +1619,8 @@ void cOVStateHUD1P::renderText(cFont* font, tHUDDef* defs, int idx, const char* 
     font->Scale[0] = font->BaseScale[0] * escale[0];
     font->Scale[1] = font->BaseScale[1] * escale[1];
     cFont_textExtent(font, str, extent, 0, font->Scale[0], font->Scale[1]);
-    int ax = (align == 0x7F) ? (*(signed char*)&hudDef->pivotX) : align;
-    int ay = (flags == 0x7F) ? (*(signed char*)&defs[idx].pivotY) : flags;
+    int ax = (align == kPivotFromDef) ? (*(signed char*)&hudDef->pivotX) : align;
+    int ay = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx].pivotY) : flags;
     size[0] = extent[2];
     size[1] = extent[3];
     calcElemPos(out, pos, size, scale, ax, ay, reflect);
@@ -1720,12 +1722,12 @@ static inline t4Vector vu0Scale_1E28(const t4Vector& v, float s)
  *
  * Measures the text at the font's BaseScale (cFont_textExtent), reads the position and scale of elements @p idx1
  * and @p idx2 (both times @p scaleMul when given), places each scaled box with cOVStateHUD1P_calcElemPos (pivots as in
- * cOVStateHUD1P_renderText, 0x7F = the element's; reflect bits @p reflect) and interpolates position and scale linearly by @p blend;
- * then @p posOff is added and @p rect filled. Without @p color the two element colours (tHUDDef_getColour1, as r, g, b, a
- * vectors) are interpolated with VU0 vector maths, the end colour's alpha forced to 0 so the text fades out toward @p blend
- * = 1; with @p color its alpha is multiplied by 1 - @p blend. The draw state's layer bits (5-9 of word 2) come from element
- * 26's layer byte whatever the indices. Draws with cFont_text at the blended scale and resets Scale to BaseScale;
- * unlike cOVStateHUD1P_renderText it leaves ShadowColor alone.
+ * cOVStateHUD1P_renderText, kPivotFromDef = the element's; reflect bits @p reflect) and interpolates position and scale
+ * linearly by @p blend; then @p posOff is added and @p rect filled. Without @p color the two element colours
+ * (tHUDDef_getColour1, as r, g, b, a vectors) are interpolated with VU0 vector maths, the end colour's alpha forced to
+ * 0 so the text fades out toward @p blend = 1; with @p color its alpha is multiplied by 1 - @p blend. The draw state's
+ * layer bits (5-9 of word 2) come from element 26's layer byte whatever the indices. Draws with cFont_text at the
+ * blended scale and resets Scale to BaseScale; unlike cOVStateHUD1P_renderText it leaves ShadowColor alone.
  *
  * @param ctx  the HUD state, passed on to cOVStateHUD1P_calcElemPos
  * @param blend  the blend: 0 = element @p idx1, 1 = element @p idx2
@@ -1739,8 +1741,8 @@ static inline t4Vector vu0Scale_1E28(const t4Vector& v, float s)
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 to blend the elements' colours
  * @param rect  receives the drawn box (x, y, width, height), or 0
- * @param align  horizontal pivot override, 0x7F for the elements'
- * @param flags  vertical pivot override, 0x7F for the elements'
+ * @param align  horizontal pivot override, kPivotFromDef for the elements'
+ * @param flags  vertical pivot override, kPivotFromDef for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
 void cOVStateHUD1P::renderText1(float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const char* str,
@@ -1783,10 +1785,10 @@ void cOVStateHUD1P::renderText1(float blend, cFont* font, tHUDDef* defs, int idx
     size1[1] = extent[3] * esc1[1];
     size2[0] = extent[2] * esc2[0];
     size2[1] = extent[3] * esc2[1];
-    int ax1 = (align == 0x7F) ? (*(signed char*)&startDef->pivotX) : (signed char)align;
-    int ay1 = (flags == 0x7F) ? (*(signed char*)&defs[idx1].pivotY) : (signed char)flags;
-    int ax2 = (align == 0x7F) ? (*(signed char*)&defs[idx2].pivotX) : (signed char)align;
-    int ay2 = (flags == 0x7F) ? (*(signed char*)&defs[idx2].pivotY) : (signed char)flags;
+    int ax1 = (align == kPivotFromDef) ? (*(signed char*)&startDef->pivotX) : (signed char)align;
+    int ay1 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx1].pivotY) : (signed char)flags;
+    int ax2 = (align == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotX) : (signed char)align;
+    int ay2 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotY) : (signed char)flags;
     calcElemPos(out1, pos1, size1, scale, ax1, ay1, reflect);
     calcElemPos(out2, pos2, size2, scale, ax2, ay2, reflect);
     dEsc[0] = esc2[0] - esc1[0];
@@ -1854,10 +1856,10 @@ extern "C" void cFont_text1(void* self, float x, float y, const unsigned short* 
  * Draws a 16-bit string placed, scaled and coloured by a HUD element definition.
  *
  * The same as cOVStateHUD1P_renderText except that the text is measured with cFont_textExtent1 and drawn with cFont_text1: element
- * position and scale (times @p scaleMul), pivots from the element unless overridden (0x7F), placement by cOVStateHUD1P_calcElemPos
- * with reflect bits @p reflect, @p posOff, the box into @p rect, the element's or @p color's colour, the layer byte into
- * bits 5-9 of the draw state's word 2, ShadowColor (colour alpha, 0, 0, 0) while drawing, then ShadowColor (1, 0, 0, 0)
- * and Scale = BaseScale again.
+ * position and scale (times @p scaleMul), pivots from the element unless overridden (not kPivotFromDef), placement by
+ * cOVStateHUD1P_calcElemPos with reflect bits @p reflect, @p posOff, the box into @p rect, the element's or @p color's
+ * colour, the layer byte into bits 5-9 of the draw state's word 2, ShadowColor (colour alpha, 0, 0, 0) while drawing,
+ * then ShadowColor (1, 0, 0, 0) and Scale = BaseScale again.
  *
  * @param font  the font
  * @param defs  the HUD definition table (0x24-byte records)
@@ -1868,8 +1870,8 @@ extern "C" void cFont_text1(void* self, float x, float y, const unsigned short* 
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 for the element's
  * @param rect  receives the drawn box (x, y, width, height), or 0
- * @param align  horizontal pivot override, 0x7F for the element's
- * @param flags  vertical pivot override, 0x7F for the element's
+ * @param align  horizontal pivot override, kPivotFromDef for the element's
+ * @param flags  vertical pivot override, kPivotFromDef for the element's
  */
 void cOVStateHUD1P::renderText2(cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int reflect,
                                 float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
@@ -1893,8 +1895,8 @@ void cOVStateHUD1P::renderText2(cFont* font, tHUDDef* defs, int idx, const unsig
     font->Scale[0] = font->BaseScale[0] * escale[0];
     font->Scale[1] = font->BaseScale[1] * escale[1];
     cFont_textExtent1(font, str, extent, 0, font->Scale[0], font->Scale[1]);
-    int ax = (align == 0x7F) ? (*(signed char*)&hudDef->pivotX) : align;
-    int ay = (flags == 0x7F) ? (*(signed char*)&defs[idx].pivotY) : flags;
+    int ax = (align == kPivotFromDef) ? (*(signed char*)&hudDef->pivotX) : align;
+    int ay = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx].pivotY) : flags;
     size[0] = extent[2];
     size[1] = extent[3];
     calcElemPos(out, pos, size, scale, ax, ay, reflect);
@@ -2000,8 +2002,8 @@ static inline t4Vector vu0Scale_25E0(const t4Vector& v, float s)
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 to blend the elements' colours
  * @param rect  receives the drawn box (x, y, width, height), or 0
- * @param align  horizontal pivot override, 0x7F for the elements'
- * @param flags  vertical pivot override, 0x7F for the elements'
+ * @param align  horizontal pivot override, kPivotFromDef for the elements'
+ * @param flags  vertical pivot override, kPivotFromDef for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
 void cOVStateHUD1P::renderText3(float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const unsigned short* str,
@@ -2044,10 +2046,10 @@ void cOVStateHUD1P::renderText3(float blend, cFont* font, tHUDDef* defs, int idx
     size1[1] = extent[3] * esc1[1];
     size2[0] = extent[2] * esc2[0];
     size2[1] = extent[3] * esc2[1];
-    int ax1 = (align == 0x7F) ? (*(signed char*)&startDef->pivotX) : (signed char)align;
-    int ay1 = (flags == 0x7F) ? (*(signed char*)&defs[idx1].pivotY) : (signed char)flags;
-    int ax2 = (align == 0x7F) ? (*(signed char*)&defs[idx2].pivotX) : (signed char)align;
-    int ay2 = (flags == 0x7F) ? (*(signed char*)&defs[idx2].pivotY) : (signed char)flags;
+    int ax1 = (align == kPivotFromDef) ? (*(signed char*)&startDef->pivotX) : (signed char)align;
+    int ay1 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx1].pivotY) : (signed char)flags;
+    int ax2 = (align == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotX) : (signed char)align;
+    int ay2 = (flags == kPivotFromDef) ? (*(signed char*)&defs[idx2].pivotY) : (signed char)flags;
     calcElemPos(out1, pos1, size1, scale, ax1, ay1, reflect);
     calcElemPos(out2, pos2, size2, scale, ax2, ay2, reflect);
     dEsc[0] = esc2[0] - esc1[0];

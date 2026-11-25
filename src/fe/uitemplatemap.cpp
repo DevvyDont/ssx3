@@ -15,6 +15,7 @@
 #include "ui/uitext.h"
 #include "fe/feasyncmanager.h"
 #include "be/beintnewrace.h"
+#include "be/beintreward.h"
 
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onCreateScreen);
@@ -95,10 +96,10 @@ struct sMapTmpl_200700 {
  * Sets up the mountain map template on its screen: unlocks, layout, map picture, popup and the widgets per
  * map style.
  *
- * The map style (cUITemplate_MAP_mMapStyle; On Tour eMapStyle: 0/1 select peak event in the front end or back end, 2 pause
- * map, 3
- * transport, 4 end-of-event transport) decides which tabs and titles show; styles 1, 3 and 4 add the PDA
- * template.
+ * The map style (cUITemplate_MAP_mMapStyle, eMapStyle: kMAPSTYLE_FE_SELECTPEAKEVENT / kMAPSTYLE_BE_SELECTPEAKEVENT
+ * select peak event in the front end or back end, kMAPSTYLE_PAUSE_MAP, kMAPSTYLE_TRANSPORT, kMAPSTYLE_EOE_TRANSPORT
+ * end-of-event transport) decides which tabs and titles show; kMAPSTYLE_BE_SELECTPEAKEVENT, kMAPSTYLE_TRANSPORT and
+ * kMAPSTYLE_EOE_TRANSPORT add the PDA template.
  * Starts in the select-peak state unless returning to a front-end map, and requests the map file from the
  * async
  * manager.
@@ -111,9 +112,11 @@ void cUITemplate_MAP::onCreateScreen(void* screen, cUIState* owner)
     sMapTmpl_200700* self = (sMapTmpl_200700*)this;
     self->owner = ((void*)owner);
     self->screen = screen;
-    if (cUITemplate_MAP_mMapStyle == 1 || cUITemplate_MAP_mMapStyle == 3 || cUITemplate_MAP_mMapStyle == 4)
+    if (cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_BE_SELECTPEAKEVENT
+        || cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_TRANSPORT
+        || cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_EOE_TRANSPORT)
         cOVStateManager_addPDATemplate();
-    if (cUITemplate_MAP_mMapStyle != 0 || cUITemplate_MAP_mMapFEStart == 0)
+    if (cUITemplate_MAP_mMapStyle != cUITemplate_MAP::kMAPSTYLE_FE_SELECTPEAKEVENT || cUITemplate_MAP_mMapFEStart == 0)
         cUITemplate_MAP_mMapState = 0;
     cUITemplate_MAP_setShowInfo((cUITemplate_MAP*)self, 0);
     self->popup = 0;
@@ -130,12 +133,12 @@ void cUITemplate_MAP::onCreateScreen(void* screen, cUIState* owner)
     ((cUITemplate_MAP*)self)->setupLayout();
     ((cUITemplate_MAP*)self)->setupMapPic();
     ((cUITemplate_MAP*)self)->setupPopup();
-    if (cUITemplate_MAP_mMapStyle >= 2)
+    if (cUITemplate_MAP_mMapStyle >= cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP)
         ((cUITemplate_MAP*)self)->setupPeakInfo();
-    if (cUITemplate_MAP_mMapStyle < 2) {
+    if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
         cUIState_hideObjSafe(self->owner, str_femaptab_back);
         cUIState_hideObjSafe(self->owner, str_maptab);
-        if (cUITemplate_MAP_mMapStyle == 0) {
+        if (cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_FE_SELECTPEAKEVENT) {
             cUIState_hideObjSafe(self->owner, str_pdaart);
         } else {
             cUIState_hideObjSafe(self->owner, str_pdatitle);
@@ -147,7 +150,7 @@ void cUITemplate_MAP::onCreateScreen(void* screen, cUIState* owner)
         cUIState_hideObjSafe(self->owner, str_feart);
         cUIState_showObjSafe(self->owner, str_title_title);
     }
-    if (cUITemplate_MAP_mMapStyle == 4) {
+    if (cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_EOE_TRANSPORT) {
         cUIState_hideObjSafe(self->owner, str_pdabtext2);
         cUIState_hideObjSafe(self->owner, str_pdaps2tri);
         cUIState_hideObjSafe(self->owner, str_pdaxbb);
@@ -201,7 +204,7 @@ extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, cUIThing* menu)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (isLabel2009D0(menu->mHashName, str_SP_PeakList)) {
-        if (cUITemplate_MAP_mMapStyle < 2) {
+        if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             cUIMenu_setSelectedByIndex(menu, 2);
         } else {
             const tBELocationDB* location = (const tBELocationDB*)cBENewRaceInterface_getLocation(iface);
@@ -274,8 +277,8 @@ extern "C" void func_0028F678(void* mgr, int a);
 extern unsigned int cUITemplate_MAP_mMapStyle;
 
 /**
- * Tears down the map template's screen: unloads its map picture and, for map styles 1, 3 and 4, removes the PDA
- * template.
+ * Tears down the map template's screen: unloads its map picture and, for map styles kMAPSTYLE_BE_SELECTPEAKEVENT,
+ * kMAPSTYLE_TRANSPORT and kMAPSTYLE_EOE_TRANSPORT, removes the PDA template.
  *
  * Unloads the FE async file whose index is at +0x2D8 (On Tour mFEAsyncMapFileIndex) through SSXApp->mFEAsyncManager
  * (cFEAsyncManager_UnloadFEAsyncFile), calls cOVStateManager_removePDATemplate for cUITemplate_MAP_mMapStyle 1, 3 or 4,
@@ -285,7 +288,9 @@ extern unsigned int cUITemplate_MAP_mMapStyle;
 void cUITemplate_MAP::onDestroyScreen()
 {
     cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, mFEAsyncMapFileIndex);
-    if (cUITemplate_MAP_mMapStyle == 1 || cUITemplate_MAP_mMapStyle == 3 || cUITemplate_MAP_mMapStyle == 4) {
+    if (cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_BE_SELECTPEAKEVENT
+        || cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_TRANSPORT
+        || cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_EOE_TRANSPORT) {
         cOVStateManager_removePDATemplate();
     }
     func_0028F678(cAudioInterface_bxAudio(), 0);
@@ -307,42 +312,44 @@ bool cBENewPlayerInterface_isEventLocked_b(void* iface, int player, int charID, 
 // PORT: the unit declares cUITemplate_MAP_isMapEventCompleted(void*, sPeakGoal*, int) further down; the goal is really taken by value
 // (the callee copies it), so this definition binds the by-value form to the symbol. Each kind returns through its
 // own call; g++ merges the two identical tails.
-extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak) __asm__("cUITemplate_MAP_isMapEventCompleted");
+extern "C" bool cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak)
+    __asm__("cUITemplate_MAP_isMapEventCompleted");
 /**
  * Tells whether the map location's event has been completed by the current character.
  *
- * Track 23 never is. Kind 4 maps @p peak (0, 1, 2) to game event 6, 7 or 8 and kind 5 to 9, 10 or 11, and counts as
- * done when cBENewPlayerInterface_isEventLocked reports that event unlocked for character cBELibrary_getCharacterID(0);
- * any other kind is done when cBERewardInterface_getTrackMedal returns a medal (not -1) for its kind and track. The
+ * Track kMAX_LOCATIONS (no location) never is. kGAMEEVENT_RIVALTIME maps @p peak (kPEAK_1 .. kPEAK_3) to
+ * kGAMEEVENT_TIME_PEAK1 .. 3 and kGAMEEVENT_RIVALPOINTS to kGAMEEVENT_POINTS_PEAK1 .. 3, and counts as done when
+ * cBENewPlayerInterface_isEventLocked reports that event unlocked for character cBELibrary_getCharacterID(0); any other
+ * kind is done when cBERewardInterface_getTrackMedal returns a medal (not kMEDAL_NONE) for its kind and track. The
  * location is taken by value (a 0x6C-byte sPeakGoal).
  *
  * @param ev    the map location: track (+0x0) and event kind (+0x8) (On Tour tMapLocation)
  * @param peak  the peak (On Tour eBEPeakID)
- * @return 1 when completed, otherwise 0
+ * @return true when completed
  */
-extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak)
+extern "C" bool cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* rw = cBE_getInterface_Fv(cBE_getBE(), 13);
     int cid = cBELibrary_getCharacterID(0);
-    if (ev.location == 23)
-        return 0;
-    if (ev.gameEvent == 4) {
-        int x = 6;
-        if (peak == 1)
-            x = 7;
-        if (peak == 2)
-            x = 8;
+    if (ev.location == kMAX_LOCATIONS)
+        return false;
+    if (ev.gameEvent == kGAMEEVENT_RIVALTIME) {
+        int x = kGAMEEVENT_TIME_PEAK1;
+        if (peak == kPEAK_2)
+            x = kGAMEEVENT_TIME_PEAK2;
+        if (peak == kPEAK_3)
+            x = kGAMEEVENT_TIME_PEAK3;
         return !cBENewPlayerInterface_isEventLocked_b(np, 0, cBELibrary_getCharacterID(0), x);
-    } else if (ev.gameEvent == 5) {
-        int x = 9;
-        if (peak == 1)
-            x = 10;
-        if (peak == 2)
-            x = 11;
+    } else if (ev.gameEvent == kGAMEEVENT_RIVALPOINTS) {
+        int x = kGAMEEVENT_POINTS_PEAK1;
+        if (peak == kPEAK_2)
+            x = kGAMEEVENT_POINTS_PEAK2;
+        if (peak == kPEAK_3)
+            x = kGAMEEVENT_POINTS_PEAK3;
         return !cBENewPlayerInterface_isEventLocked_b(np, 0, cBELibrary_getCharacterID(0), x);
     }
-    return cBERewardInterface_getTrackMedal(rw, 0, cid, ev.gameEvent, ev.location) != -1;
+    return cBERewardInterface_getTrackMedal(rw, 0, cid, ev.gameEvent, ev.location) != kMEDAL_NONE;
 }
 #endif
 
@@ -359,8 +366,9 @@ extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int player, int 
 /**
  * Tells whether a map event is still locked for the current character.
  *
- * Nothing is locked while cUITemplate_MAP_mMapStyle is below 2. Kinds 4 and 5 ask cBENewPlayerInterface_isRivalEventLocked (On Tour
- * isRivalEventLocked) for the peak, with its time-challenge flag 1 for kind 4 and 0 for kind 5; kinds 6 to 11 ask
+ * Nothing is locked while cUITemplate_MAP_mMapStyle is below kMAPSTYLE_PAUSE_MAP. kGAMEEVENT_RIVALTIME and
+ * kGAMEEVENT_RIVALPOINTS ask cBENewPlayerInterface_isRivalEventLocked (On Tour isRivalEventLocked) for the peak, with
+ * its time-challenge flag 1 for the first and 0 for the second; kGAMEEVENT_TIME_PEAK1 to kGAMEEVENT_POINTS_PEAK3 ask
  * cBENewPlayerInterface_isEventLocked; every other kind is unlocked. The character is cBELibrary_getCharacterID(0).
  *
  * @param kind  the game event kind
@@ -370,13 +378,13 @@ extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int player, int 
 int cUITemplate_MAP::isMapEventLocked(int kind, int x)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    if (cUITemplate_MAP_mMapStyle < 2) {
+    if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
         return 0;
     }
-    if (kind == 4) {
+    if (kind == kGAMEEVENT_RIVALTIME) {
         return cBENewPlayerInterface_isRivalEventLocked(iface, 0, cBELibrary_getCharacterID(0), x, 1);
     }
-    if (kind == 5) {
+    if (kind == kGAMEEVENT_RIVALPOINTS) {
         return cBENewPlayerInterface_isRivalEventLocked(iface, 0, cBELibrary_getCharacterID(0), x, 0);
     }
     if (kind >= 6 && kind <= 11) {
@@ -426,7 +434,7 @@ extern sPeakGoal kPeakFreestyleLocations_enus[3][5] __asm__("kPeakFreestyleLocat
 extern sPeakGoal kPeakFreerideLocations_enus[3][8] __asm__("kPeakFreerideLocations");
 
 extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor_enus(void* self, void* obj, int on) __asm__("cUITemplate_MAP_setWidgetUnHiliteColor");
-extern "C" int cUITemplate_MAP_isMapEventCompleted(void* self, sPeakGoal* loc, int peak);
+extern "C" bool cUITemplate_MAP_isMapEventCompleted(void* self, sPeakGoal* loc, int peak);
 extern "C" int cUITemplate_MAP_isMapEventLocked_enus(void* self, int kind, int x) __asm__("cUITemplate_MAP_isMapEventLocked");
 extern "C" int strcmp(const char*, const char*);
 extern "C" const char* cBENewRaceInterface_getLocationName_enus(void* iface, int id) __asm__("cBENewRaceInterface_getLocationName");
@@ -503,7 +511,7 @@ void cUITemplate_MAP::setupMenus()
         menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
         menuObj->setMiscData(2);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[2]);
-        if (cUITemplate_MAP_mMapStyle < 2) {
+        if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             menuObj->setStatic(1);
             menuObj->setVisible(0);
         }
@@ -511,7 +519,7 @@ void cUITemplate_MAP::setupMenus()
         menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
         menuObj->setMiscData(3);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[3]);
-        if (cUITemplate_MAP_mMapStyle < 2) {
+        if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             menuObj->setStatic(1);
             menuObj->setVisible(0);
         }
@@ -520,10 +528,10 @@ void cUITemplate_MAP::setupMenus()
         for (int mode = 0; mode < 3; mode++) {
             int count;
             char fmt[24];
-            if (mode == 0) {
+            if (mode == cUITemplate_MAP::kMAPEVENT_RACE) {
                 count = 4;
                 strcpy(fmt, "Peak%dRaceLoc%d");
-            } else if (mode == 1) {
+            } else if (mode == cUITemplate_MAP::kMAPEVENT_FREESTYLE) {
                 count = 5;
                 strcpy(fmt, "Peak%dFreestyleLoc%d");
             } else {
@@ -532,15 +540,15 @@ void cUITemplate_MAP::setupMenus()
             }
             for (int j = 0; j < count; j++) {
                 sPeakGoal goal = kPeakRaceLocations_enus[peak][j];
-                if (mode == 1)
+                if (mode == cUITemplate_MAP::kMAPEVENT_FREESTYLE)
                     goal = kPeakFreestyleLocations_enus[peak][j];
-                if (mode == 2)
+                if (mode == cUITemplate_MAP::kMAPEVENT_FREERIDE)
                     goal = kPeakFreerideLocations_enus[peak][j];
-                if (mode == 0 || mode == 1)
+                if (mode == cUITemplate_MAP::kMAPEVENT_RACE || mode == cUITemplate_MAP::kMAPEVENT_FREESTYLE)
                     self->mbLocationEventCompleted[peak][mode][j] = cUITemplate_MAP_isMapEventCompleted(self, &goal, peak);
                 sprintf(buf, fmt, peak + 1, j);
                 menuObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
-                if (cUITemplate_MAP_mMapStyle < 2 && goal.f0C != 0) {
+                if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP && goal.f0C != 0) {
                     self->mbLocationUnlocked[peak][mode][j] = 0;
                     if (menuObj != 0) {
                         menuObj->setVisible(0);
@@ -552,11 +560,11 @@ void cUITemplate_MAP::setupMenus()
                 if (hasEvent(goal.track))
                     cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbLocationUnlocked[peak][mode][j]);
                 if (hasEvent(goal.track)) {
-                    if (goal.useTrackName == 1) {
+                    if (goal.useTrackName == true) {
                         cUIText_setAsciiString((cUIText*)menuObj, cBENewRaceInterface_getLocationName_enus(iface, goal.track));
                     } else if (strcmp(goal.name, str_empty_e)) {
                         cUIText_setAsciiString((cUIText*)menuObj, goal.name);
-                    } else if (goal.kind == 4) {
+                    } else if (goal.kind == kGAMEEVENT_RIVALTIME) {
                         unsigned short text[200];
                         unsigned short wfmt[24];
                         func_002C2540_enus(wfmt, D_004A2590);
@@ -601,7 +609,7 @@ void cUITemplate_MAP::setupEventUnlock()
     mbEventUnlocked[3] = 0;
     mbEventUnlocked[0] = 1;
     mbEventUnlocked[1] = 1;
-    if (cUITemplate_MAP_mMapStyle < 2) {
+    if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
         mbEventUnlocked[2] = 0;
     } else {
         mbEventUnlocked[2] = 1;
@@ -639,7 +647,7 @@ void cUITemplate_MAP::setupPeakUnlock()
     self->mbPeakUnlocked[2] = 1;
     for (int peak = 1; peak < 3; peak++) {
         int locked;
-        if (cBENewRaceInterface_newRace.cGamePath == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
             locked = cBENewPlayerInterface_isPeakLocked(player, 0, cBENewPlayerInterface_getPlayerCharID(player, 0), peak);
             if (locked) {
                 locked = cBENewPlayerInterface_isPeakLocked(player, 1, cBENewPlayerInterface_getPlayerCharID(player, 1), peak);
@@ -686,17 +694,17 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetEvent);
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Map template's menu-event filter: events 6, 8 and 9 get 0, every other event 0x101.
+ * Map template's menu-event filter: kONNEXT, kONOPTION and kONMISC get 0, every other event 0x101.
  *
  * cOVState_TRANSPORT_onWidgetMenu and cFEStateEventSelect_onWidgetMenu forward their menu events to it.
  *
  * @param menu  the menu (unused)
  * @param event  the menu event
- * @return 0 for events 6, 8 and 9, else 0x101
+ * @return 0 for kONNEXT, kONOPTION and kONMISC, else 0x101
  */
 int cUITemplate_MAP::onWidgetMenu(int menu, int event)
 {
-    if (event == 6 || event == 9 || event == 8) {
+    if (event == cUIMenu::kONNEXT || event == cUIMenu::kONMISC || event == cUIMenu::kONOPTION) {
         return 0;
     }
     return 257;
@@ -745,15 +753,15 @@ extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, cUIInput* menu)
             return;
         }
     }
-    if (cUITemplate_MAP_mMapState == 0) {
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTPEAK) {
         ((cUITemplate_MAP*)self)->setupPeakInfo();
         ((cUITemplate_MAP*)self)->setupLayout();
     }
-    if (cUITemplate_MAP_mMapState == 1) {
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTGOAL) {
         ((cUITemplate_MAP*)self)->setupPeakGoals();
         ((cUITemplate_MAP*)self)->setupLayout();
     }
-    if (cUITemplate_MAP_mMapState == 2) {
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION) {
         cUITemplate_MAP_setupLocationInfo(self);
     }
 }
@@ -823,13 +831,13 @@ void cUITemplate_MAP::onUpdate()
         sprintf(buf, str_Ppct_dyou_are_here, i + 1);
         if (mMapTextureSet != 0 && cUITemplate_MAP_mMapState == 0
             && i == ((const tBELocationDB*)cBENewRaceInterface_getLocation(iface))->segmentID
-            && mShowInfo == 0 && cUITemplate_MAP_mMapStyle >= 2)
+            && mShowInfo == 0 && cUITemplate_MAP_mMapStyle >= cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP)
             cUIState_showObjSafe(mpUIState, buf);
         else
             cUIState_hideObjSafe(mpUIState, buf);
     }
     cFEAsyncManager* mgr = SSXApp->mFEAsyncManager;
-    if (cFEAsyncManager_GetFileStatus(mgr, mFEAsyncMapFileIndex) == 3 && mMapTextureSet == 0) {
+    if (cFEAsyncManager_GetFileStatus(mgr, mFEAsyncMapFileIndex) == kFileLoaded && mMapTextureSet == 0) {
         cUIIcon* pic = mpMap;
         if (pic != 0) {
             int tex = mgr->fileList[mFEAsyncMapFileIndex].texID;
@@ -901,7 +909,7 @@ void cUITemplate_MAP::setupLayout()
     char again[32];
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_SubTitle));
     switch (cUITemplate_MAP_mMapState) {
-    case 0: {
+    case cUITemplate_MAP::kMAPSTATE_SELECTPEAK: {
         cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_240SelectPeak));
         cUIState_showObjSafe(mpUIState, str_SelectPeak);
         cUIState_hideObjSafe(mpUIState, str_SP_Info);
@@ -924,7 +932,7 @@ void cUITemplate_MAP::setupLayout()
             cUIState_hideObjSafe(mpUIState, str_pdaps2x);
             cUIState_hideObjSafe(mpUIState, str_pdaxba);
             cUIState_hideObjSafe(mpUIState, str_pdangca);
-        } else if (cUITemplate_MAP_mMapStyle >= 2) {
+        } else if (cUITemplate_MAP_mMapStyle >= cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             cUIState_showObjSafe(mpUIState, str_maptab);
             cUIState_showObjSafe(mpUIState, str_pdamaptab_back);
             cUIState_showObjSafe(mpUIState, str_pdabtext1);
@@ -934,7 +942,7 @@ void cUITemplate_MAP::setupLayout()
         }
         break;
     }
-    case 1: {
+    case cUITemplate_MAP::kMAPSTATE_SELECTGOAL: {
         int state = 0;
         cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_FESelPeakGoal));
         cUIState_hideObjSafe(mpUIState, str_SelectPeak);
@@ -955,29 +963,29 @@ void cUITemplate_MAP::setupLayout()
         cUIMenu* listMenu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(next));
         if (listMenu != 0)
             state = listMenu->mScrollItemCurrent;
-        if (mShowInfo != 0 || state == 3) {
+        if (mShowInfo != 0 || state == kMAPEVENT_EARNINGS) {
             cUIState_showObjSafe(mpUIState, str_SPG_InfoBack);
             switch (state) {
-            case 0:
-            case 1:
+            case kMAPEVENT_RACE:
+            case kMAPEVENT_FREESTYLE:
                 cUIState_showObjSafe(mpUIState, str_SPG_RaceFSEvents);
                 break;
-            case 2:
+            case kMAPEVENT_FREERIDE:
                 cUIState_showObjSafe(mpUIState, str_SPG_FreerideGoals);
                 break;
-            case 3:
+            case kMAPEVENT_EARNINGS:
                 cUIState_showObjSafe(mpUIState, str_SPG_EarningsGoals);
                 break;
             }
         }
-        if (state == 3) {
+        if (state == kMAPEVENT_EARNINGS) {
             cUIState_hideObjSafe(mpUIState, str_maptab);
             cUIState_hideObjSafe(mpUIState, str_pdamaptab_back);
             cUIState_hideObjSafe(mpUIState, str_pdabtext1);
             cUIState_hideObjSafe(mpUIState, str_pdaps2x);
             cUIState_hideObjSafe(mpUIState, str_pdaxba);
             cUIState_hideObjSafe(mpUIState, str_pdangca);
-        } else if (cUITemplate_MAP_mMapStyle >= 2) {
+        } else if (cUITemplate_MAP_mMapStyle >= cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             cUIState_showObjSafe(mpUIState, str_maptab);
             cUIState_showObjSafe(mpUIState, str_pdamaptab_back);
             cUIState_showObjSafe(mpUIState, str_pdabtext1);
@@ -987,11 +995,11 @@ void cUITemplate_MAP::setupLayout()
         }
         break;
     }
-    case 2:
-        if (cUITemplate_MAP_mSelectedEvent == 0) {
+    case cUITemplate_MAP::kMAPSTATE_SELECTLOCATION:
+        if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_RACE) {
             cUIState_hideObjSafe(mpUIState, str_Locks);
             cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_FESelRaceEvent));
-        } else if (cUITemplate_MAP_mSelectedEvent == 1) {
+        } else if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREESTYLE) {
             cUIState_hideObjSafe(mpUIState, str_Locks);
             cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_FESelFSEvent));
         } else {
@@ -1103,25 +1111,25 @@ void cUITemplate_MAP::setupMenuFocus(int focus)
         return;
     }
     switch (cUITemplate_MAP_mMapState) {
-    case 0:
+    case cUITemplate_MAP::kMAPSTATE_SELECTPEAK:
         setupPeakInfo();
         if (peak != 0) {
             peak->mAttr |= 1;
             peak->setFocus(1);
             peak->setVisible(1);
         }
-        if (cUITemplate_MAP_mMapStyle < 2) {
+        if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(this, str_title_title),
                                          GetHashValue32(str_kT_240SelectPeak));
         }
         break;
-    case 1:
+    case cUITemplate_MAP::kMAPSTATE_SELECTGOAL:
         setupPeakGoals();
-        if (cUITemplate_MAP_mPeak == 0 && goal0 != 0) {
+        if (cUITemplate_MAP_mPeak == kPEAK_1 && goal0 != 0) {
             goal0->mAttr |= 1;
             goal0->setVisible(1);
             goal0->setFocus(1);
-        } else if (cUITemplate_MAP_mPeak == 1 && goal1 != 0) {
+        } else if (cUITemplate_MAP_mPeak == kPEAK_2 && goal1 != 0) {
             goal1->mAttr |= 1;
             goal1->setVisible(1);
             goal1->setFocus(1);
@@ -1130,33 +1138,33 @@ void cUITemplate_MAP::setupMenuFocus(int focus)
             goal2->setVisible(1);
             goal2->setFocus(1);
         }
-        if (cUITemplate_MAP_mMapStyle < 2) {
+        if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(this, str_title_title),
                                          GetHashValue32(str_kT_FEHelpSelectMode));
         }
         break;
-    case 2: {
+    case cUITemplate_MAP::kMAPSTATE_SELECTLOCATION: {
         cUIThing* widget = 0;
-        if (cUITemplate_MAP_mPeak == 0) {
-            if (cUITemplate_MAP_mSelectedEvent == 0)
+        if (cUITemplate_MAP_mPeak == kPEAK_1) {
+            if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_RACE)
                 widget = ev00;
-            else if (cUITemplate_MAP_mSelectedEvent == 1)
+            else if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREESTYLE)
                 widget = ev01;
-            else if (cUITemplate_MAP_mSelectedEvent == 2)
+            else if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREERIDE)
                 widget = ev02;
-        } else if (cUITemplate_MAP_mPeak == 1) {
-            if (cUITemplate_MAP_mSelectedEvent == 0)
+        } else if (cUITemplate_MAP_mPeak == kPEAK_2) {
+            if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_RACE)
                 widget = ev10;
-            else if (cUITemplate_MAP_mSelectedEvent == 1)
+            else if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREESTYLE)
                 widget = ev11;
-            else if (cUITemplate_MAP_mSelectedEvent == 2)
+            else if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREERIDE)
                 widget = ev12;
-        } else if (cUITemplate_MAP_mPeak == 2) {
-            if (cUITemplate_MAP_mSelectedEvent == 0)
+        } else if (cUITemplate_MAP_mPeak == kPEAK_3) {
+            if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_RACE)
                 widget = ev20;
-            else if (cUITemplate_MAP_mSelectedEvent == 1)
+            else if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREESTYLE)
                 widget = ev21;
-            else if (cUITemplate_MAP_mSelectedEvent == 2)
+            else if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREERIDE)
                 widget = ev22;
         }
         if (widget != 0) {
@@ -1164,7 +1172,7 @@ void cUITemplate_MAP::setupMenuFocus(int focus)
             widget->setVisible(1);
             widget->setFocus(1);
         }
-        if (cUITemplate_MAP_mMapStyle < 2) {
+        if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(this, str_title_title),
                                          GetHashValue32(str_kT_240SelectEvent));
         }
@@ -1190,11 +1198,11 @@ extern int cUITemplate_MAP_mPeak;
 void cUITemplate_MAP::setupMapPic()
 {
     void* mgr = SSXApp->mFEAsyncManager;
-    if (cUITemplate_MAP_mMapState == 0) {
-        if (mMapPicType != 1) {
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTPEAK) {
+        if (mMapPicType != kMAP_3PEAK) {
             cFEAsyncManager_UnloadFEAsyncFile(mgr, mFEAsyncMapFileIndex);
             cFEAsyncManager_Load3PeakPic(mgr, mFEAsyncMapFileIndex, 1);
-            mMapPicType = 1;
+            mMapPicType = kMAP_3PEAK;
             mMapTextureSet = 0;
         }
     } else if (cUITemplate_MAP_mMapState >= 0) {
@@ -1239,7 +1247,8 @@ extern int cUITemplate_MAP_mMapState;
 /**
  * Shows or hides the transport confirm popup and sets its text and buttons.
  *
- * The popup's text is "go to peak now" or "transport to area"; a one-button popup (mPopupType 1) shows OK and
+ * The popup's text is "go to peak now" or "transport to area"; a one-button popup (mPopupType
+ * kMAPPOPUP_TRANSPORT_NOMONEY) shows OK and
  * hides No, otherwise Yes and No.
  */
 void cUITemplate_MAP::setupPopup()
@@ -1254,7 +1263,7 @@ void cUITemplate_MAP::setupPopup()
             cUIState_showObjSafe(mpUIState, str_Popup2);
             cUIState_hideObjSafe(mpUIState, str_maptab);
             cUIText* popupText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_P2_TransportNow));
-            if (cUITemplate_MAP_mMapState == 0) {
+            if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTPEAK) {
                 if (popupText != 0)
                     cUIText_setUnicodeStringByID(popupText, GetHashValue32(str_kT_OVRCMNGoPeakNow));
             } else {
@@ -1266,7 +1275,7 @@ void cUITemplate_MAP::setupPopup()
         cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ConfirmMenu_Yes));
         cUIThing* confirmNo =
             (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ConfirmMenu_No));
-        if (mPopupType == 1) {
+        if (mPopupType == kMAPPOPUP_TRANSPORT_NOMONEY) {
             if (title != 0)
                 cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_BTNOK_b));
             if (confirmNo != 0) {
@@ -1480,7 +1489,7 @@ void cUITemplate_MAP::setupPeakInfo()
             cUIState_hideObjSafe(((void*)self->mpUIState), name1);
         }
     }
-    if (cUITemplate_MAP_mMapStyle < 2) {
+    if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
         cUIThing* mountain = (cUIThing*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Mountain));
         mountain->setStatic(1);
         mountain->setVisible(0);
@@ -1495,7 +1504,7 @@ void cUITemplate_MAP::setupPeakInfo()
             cUIState_hideObjSafe(((void*)self->mpUIState), name2);
         } else {
             cUIState_hideObjSafe(((void*)self->mpUIState), name1);
-            if (cUITemplate_MAP_mMapStyle < 2)
+            if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP)
                 cUIState_hideObjSafe(((void*)self->mpUIState), name2);
         }
     }
@@ -1512,21 +1521,21 @@ void cUITemplate_MAP::setupPeakInfo()
         int peak = sel->peak;
         title->setVisible(1);
         if (self->mbPeakUnlocked[peak] != 0) {
-            if (cUITemplate_MAP_mMapStyle < 2)
+            if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP)
                 cUIText_setUnicodeStringByID((cUIText*)title, GetHashValue32(D_00470B50));
             else
                 cUIText_setUnicodeStringByID((cUIText*)title, GetHashValue32(D_00470B68));
-        } else if (peak == 1) {
-            if (cUITemplate_MAP_mMapStyle < 2)
+        } else if (peak == kPEAK_2) {
+            if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP)
                 cUIText_setUnicodeStringByID((cUIText*)title, GetHashValue32(D_00470B80));
             else
                 cUIText_setUnicodeStringByID((cUIText*)title, GetHashValue32(D_00470B98));
-        } else if (cUITemplate_MAP_mMapStyle < 2) {
+        } else if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
             cUIText_setUnicodeStringByID((cUIText*)title, GetHashValue32(str_kT_10HELPUnlockPeak3));
         } else {
             cUIText_setUnicodeStringByID((cUIText*)title, GetHashValue32(D_00470BC8));
         }
-        if (cUITemplate_MAP_mMapStyle < 2)
+        if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP)
             return;
         unsigned short wbuf[200];
         int cnt = 4;
@@ -1535,11 +1544,11 @@ void cUITemplate_MAP::setupPeakInfo()
         unsigned short* fmt = Loc_5098(D_00470BF8);
         sprintf1(wbuf, fmt, peak + 1);
         cUIText_setUnicodeString_Info(textObj, wbuf);
-        if (peak == 2)
+        if (peak == kPEAK_3)
             cnt = 3;
         for (int k = 0; k < cnt; k++) {
             sPeakGoal goal = kPeakRaceLocations_Info[peak][k];
-            if (cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) != -1)
+            if (cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) != kMEDAL_NONE)
                 found++;
         }
         char buf[32];
@@ -1553,7 +1562,7 @@ void cUITemplate_MAP::setupPeakInfo()
         int found2 = 0;
         for (int k = 0; k < 5; k++) {
             sPeakGoal goal = kPeakFreestyleLocations_Info[peak][k];
-            if (cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) != -1)
+            if (cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track) != kMEDAL_NONE)
                 found2++;
         }
         textObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(D_00470C30));
@@ -1592,7 +1601,7 @@ void cUITemplate_MAP::setupPeakInfo()
         cUIText_setUnicodeStringByID(textObj, GetHashValue32(D_00470CC8));
         for (int p = 0; p < 3; p++) {
             int cnt = 4;
-            if (p == 2)
+            if (p == kPEAK_3)
                 cnt = 3;
             for (int k = 0; k < cnt; k++) {
                 sPeakGoal goal = kPeakRaceLocations_Info[p][k];
@@ -1619,29 +1628,29 @@ void cUITemplate_MAP::setupPeakInfo()
             cUIState_hideObjSafe(((void*)self->mpUIState), D_00470CE8);
         textObj = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(D_00470D00));
         int gold = 0;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 4, 0xE) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_RIVALTIME, kLOCATION_ABC1) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 6, 0xE) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_TIME_PEAK1, kLOCATION_ABC1) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 5, 0xE) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_RIVALPOINTS, kLOCATION_ABC1) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 9, 0xE) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_POINTS_PEAK1, kLOCATION_ABC1) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 4, 0xF) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_RIVALTIME, kLOCATION_DBC2) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 7, 0xF) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_TIME_PEAK2, kLOCATION_DBC2) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 5, 0xF) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_RIVALPOINTS, kLOCATION_DBC2) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 10, 0xF) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_POINTS_PEAK2, kLOCATION_DBC2) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 4, 0x10) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_RIVALTIME, kLOCATION_EBC3) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 8, 0x10) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_TIME_PEAK3, kLOCATION_EBC3) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 5, 0x10) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_RIVALPOINTS, kLOCATION_EBC3) != kMEDAL_NONE)
             gold++;
-        if (cBERewardInterface_getTrackMedal(rew, 0, ch, 11, 0x10) != -1)
+        if (cBERewardInterface_getTrackMedal(rew, 0, ch, kGAMEEVENT_POINTS_PEAK3, kLOCATION_EBC3) != kMEDAL_NONE)
             gold++;
         sprintf(buf, str_pct_d_12, gold);
         cUIText_setAsciiString(textObj, buf);
@@ -1730,20 +1739,20 @@ static inline int setPic00204FF0(char* name)
  * Looks up "kT_CMNPlatinum", "kT_CMNGold", "kT_CMNSilver" or "kT_CMNBronze" by hash through the front-end
  * locale's virtual slot 4.
  *
- * @param peak  the medal: 0 platinum, 1 gold, 2 silver, 3 bronze (On Tour names it medal); others give platinum
+ * @param peak  the medal (eBEMedalID: kMEDAL_PLATINUM .. kMEDAL_BRONZE; On Tour names it medal); others give platinum
  * @return the localised string (On Tour: unsigned short*)
  */
 int cUITemplate_MAP::getMedalStr(int peak)
 {
     switch (peak) {
-    case 0:
+    case kMEDAL_PLATINUM:
     default:
         return setPic00204FF0(str_kT_CMNPlatinum);
-    case 1:
+    case kMEDAL_GOLD:
         return setPic00204FF0(str_kT_CMNGold);
-    case 2:
+    case kMEDAL_SILVER:
         return setPic00204FF0(str_kT_CMNSilver);
-    case 3:
+    case kMEDAL_BRONZE:
         return setPic00204FF0(str_kT_CMNBronze);
     }
 }
@@ -1872,22 +1881,22 @@ void cUITemplate_MAP::setupPeakGoals()
     unsigned short wbuf[200];
     char buf[32];
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_HelpText));
-    if (cUITemplate_MAP_mMapStyle < 2) {
+    if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
         cUIState_hideObjSafe(mpUIState, str_peakgoal_emptybox3);
         cUIState_hideObjSafe(mpUIState, D_00470E68);
         cUIState_hideObjSafe(mpUIState, D_00470E80);
         cUIState_hideObjSafe(mpUIState, D_00470E98);
     }
     cUIState_showObjSafe(mpUIState, str_PEAKno);
-    if (cUITemplate_MAP_mMapStyle == 0) {
+    if (cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_FE_SELECTPEAKEVENT) {
         cUIState_showObjSafe(mpUIState, str_fePEAKno_back);
     } else {
         cUIState_showObjSafe(mpUIState, str_pdaPEAKno_back);
     }
     cUIText* name = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PEAKno));
-    if (cUITemplate_MAP_mPeak == 0) {
+    if (cUITemplate_MAP_mPeak == kPEAK_1) {
         cUIText_setUnicodeStringByID(name, GetHashValue32(D_00470EB0));
-    } else if (cUITemplate_MAP_mPeak == 1) {
+    } else if (cUITemplate_MAP_mPeak == kPEAK_2) {
         cUIText_setUnicodeStringByID(name, GetHashValue32(D_00470EC0));
     } else {
         cUIText_setUnicodeStringByID(name, GetHashValue32(str_kT_Peak3name_b));
@@ -1901,13 +1910,13 @@ void cUITemplate_MAP::setupPeakGoals()
     int ch = cBELibrary_getCharacterID(0);
     sprintf(buf, str_SPG_Peakpct_dGoals_oals, cUITemplate_MAP_mPeak + 1);
     char* obj = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
-    if (obj) goalGroup = obj[0x95];
-    if (cUITemplate_MAP_mMapState == 1) {
+    if (obj) goalGroup = ((cUIMenu*)obj)->mScrollItemCurrent;
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTGOAL) {
         char path[24];
-        if (goalGroup == 0) {
+        if (goalGroup == cUITemplate_MAP::kMAPEVENT_RACE) {
             sprintf(path, D_00470EE0, cUITemplate_MAP_mPeak + 1);
             cUITemplate_MAP_showEventPath_oals(((char*)this), path);
-        } else if (goalGroup == 1) {
+        } else if (goalGroup == cUITemplate_MAP::kMAPEVENT_FREESTYLE) {
             sprintf(path, D_00470EF0, cUITemplate_MAP_mPeak + 1);
             cUITemplate_MAP_showEventPath_oals(((char*)this), path);
         } else {
@@ -1919,7 +1928,7 @@ void cUITemplate_MAP::setupPeakGoals()
     cUIState_hideObjSafe(mpUIState, D_00470F28);
     cUIState_hideObjSafe(mpUIState, D_00470F38);
     cUIState_hideObjSafe(mpUIState, str_peakgoal_check0);
-    if (cUITemplate_MAP_mMapStyle < 2) {
+    if (cUITemplate_MAP_mMapStyle < cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
         cUIText_setUnicodeStringByID(title, GetHashValue32(D_00470F58));
         return;
     }
@@ -1932,7 +1941,7 @@ void cUITemplate_MAP::setupPeakGoals()
     if (cBERewardInterface_isTrophyOwned(rew, 0, ch, cUITemplate_MAP_mPeak, 3))
         cUIState_showObjSafe(mpUIState, str_peakgoal_check0);
     switch (goalGroup) {
-    case 0: {
+    case cUITemplate_MAP::kMAPEVENT_RACE: {
         int cnt = 4;
         cUIText_setUnicodeStringByID(title, GetHashValue32(D_00470F70));
         widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_00470F90));
@@ -1942,7 +1951,7 @@ void cUITemplate_MAP::setupPeakGoals()
         cUIState_hideObjSafe(mpUIState, D_00470FD0);
         cUIState_hideObjSafe(mpUIState, str_SPG_Event4);
         cUIState_hideObjSafe(mpUIState, D_00470FF0);
-        if (cUITemplate_MAP_mPeak == 2) {
+        if (cUITemplate_MAP_mPeak == kPEAK_3) {
             cnt = 3;
             cUIState_hideObjSafe(mpUIState, D_00471000);
             cUIState_hideObjSafe(mpUIState, D_00471010);
@@ -1959,7 +1968,7 @@ void cUITemplate_MAP::setupPeakGoals()
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else if (strcmp(goal.name, D_004A2560_oals)) {
                 func_002C2540_oals(ev, goal.name);
-            } else if (goal.kind == 4) {
+            } else if (goal.kind == kGAMEEVENT_RIVALTIME) {
                 unsigned short fmt[20];
                 func_002C2540_oals(fmt, str_pct_S_pct_s_b);
                 sprintf1(ev, fmt, cBENewRaceInterface_getLocationName_oals(race, goal.track), Loc_5098(str_kT_cmnRaceCaps_b_oals));
@@ -1975,7 +1984,7 @@ void cUITemplate_MAP::setupPeakGoals()
             cUIState_showObjSafe(mpUIState, name3);
             func_002C2540_oals(medal, D_004A2560_oals);
             int medalLevel = cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track);
-            if (medalLevel != -1) {
+            if (medalLevel != kMEDAL_NONE) {
                 unsigned short fmt[8];
                 done++;
                 func_002C2540_oals(fmt, D_004A23C0);
@@ -1997,7 +2006,7 @@ void cUITemplate_MAP::setupPeakGoals()
         cUIText_setUnicodeString_oals(widget, wbuf);
         break;
     }
-    case 1: {
+    case cUITemplate_MAP::kMAPEVENT_FREESTYLE: {
         int done = 0;
         cUIText_setUnicodeStringByID(title, GetHashValue32(D_004710B8));
         widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_00470F90));
@@ -2011,7 +2020,7 @@ void cUITemplate_MAP::setupPeakGoals()
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else if (strcmp(goal.name, D_004A2560_oals)) {
                 func_002C2540_oals(ev, goal.name);
-            } else if (goal.kind == 5) {
+            } else if (goal.kind == kGAMEEVENT_RIVALPOINTS) {
                 unsigned short fmt[20];
                 func_002C2540_oals(fmt, str_pct_S_Jam_b_oals);
                 sprintf1(ev, fmt, cBENewRaceInterface_getLocationName_oals(race, goal.track));
@@ -2029,7 +2038,7 @@ void cUITemplate_MAP::setupPeakGoals()
             func_002C2540_oals(medal, D_004A2560_oals);
             int medalLevel = cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track);
             char medalFmt[16];
-            if (medalLevel != -1) {
+            if (medalLevel != kMEDAL_NONE) {
                 strcpy(medalFmt, "[%s]");
                 done++;
                 sprintf2(medal, medalFmt, cUITemplate_MAP_getMedalStr_oals(((char*)this), medalLevel));
@@ -2054,7 +2063,7 @@ void cUITemplate_MAP::setupPeakGoals()
         cUIText_setUnicodeString_oals(widget, wbuf);
         break;
     }
-    case 2: {
+    case cUITemplate_MAP::kMAPEVENT_FREERIDE: {
         int count = 0;
         int ok = 0;
         cUIText_setUnicodeStringByID(title, GetHashValue32(D_00471108));
@@ -2127,7 +2136,7 @@ void cUITemplate_MAP::setupPeakGoals()
         cUIText_setUnicodeString_oals(widget, wbuf);
         break;
     }
-    case 3: {
+    case cUITemplate_MAP::kMAPEVENT_EARNINGS: {
         unsigned short num[16];
         cUIText_setUnicodeStringByID(title, GetHashValue32(D_00471278));
         widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_00471298));
@@ -2251,7 +2260,7 @@ void cUITemplate_MAP::showEventPath(char* name)
     if (cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name)) != 0
         || strcmp(name, str_empty_e) == 0) {
         switch (cUITemplate_MAP_mPeak) {
-        case 0:
+        case kPEAK_1:
             for (int i = 0; i < 6; i++) {
                 obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
                 if (obj != 0) {
@@ -2263,7 +2272,7 @@ void cUITemplate_MAP::showEventPath(char* name)
                 }
             }
             break;
-        case 1:
+        case kPEAK_2:
             for (int i = 0; i < 6; i++) {
                 obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
                 if (obj != 0) {
@@ -2275,7 +2284,7 @@ void cUITemplate_MAP::showEventPath(char* name)
                 }
             }
             break;
-        case 2:
+        case kPEAK_3:
             for (int i = 0; i < 5; i++) {
                 obj = (cUIThing*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
                 if (obj != 0) {
@@ -2553,21 +2562,25 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self) __asm
  * Fills the map's location panel for the location selected in the current event list: name, event type, help text, and
  * medal and best result or the freeride collectibles.
  *
- * Shows or hides "Peak_Locations_Art" and "ehl" by the popup flag at +0x2CC, and in map state 2
- * (cUITemplate_MAP_mMapState) shows "PEAKno" with its front-end or PDA backdrop (cUITemplate_MAP_mMapStyle 0 or not).
+ * Shows or hides "Peak_Locations_Art" and "ehl" by the popup flag at +0x2CC, and in map state kMAPSTATE_SELECTLOCATION
+ * (cUITemplate_MAP_mMapState) shows "PEAKno" with its front-end or PDA backdrop (cUITemplate_MAP_mMapStyle
+ * kMAPSTYLE_FE_SELECTPEAKEVENT or not).
  * The selected entry of the "Peak%dRaceLocations", "Peak%dFreestyleLocations" or "Peak%dFreerideLocations" list
- * (cUITemplate_MAP_mSelectedEvent 0, 1 or 2; the list's selection byte +0x95) picks a 0x6C-byte goal entry from
+ * (cUITemplate_MAP_mSelectedEvent kMAPEVENT_RACE, kMAPEVENT_FREESTYLE or kMAPEVENT_FREERIDE; the list's selection
+ * byte +0x95) picks a 0x6C-byte goal entry from
  * kPeakRaceLocations, kPeakFreestyleLocations or kPeakFreerideLocations; for races (up to 4 entries, 3 on peak 3) and freestyle (5) the "SE_box%d" boxes
- * are shown with map styles 2 and up and the "SE_check%d" ticks mirror the completion flags, all other boxes are
- * hidden.
+ * are shown with map styles kMAPSTYLE_PAUSE_MAP and up and the "SE_check%d" ticks mirror the completion flags, all
+ * other boxes are hidden.
  *
- * "SE_Run" gets the location name (cBENewRaceInterface_getLocationName); locations 17-21 are stations (event type 12,
+ * "SE_Run" gets the location name (cBENewRaceInterface_getLocationName); locations kLOCATION_HUB_A .. kLOCATION_HUB_E
+ * are stations (event type kGAMEEVENT_FREERIDE,
  * help kT_CMNHELPStations). Otherwise the help text is the entry's own key when it has one, else depends on the event
- * type: 4 and 5 (rival races) show kT_HELPChalAvail or kT_HELPLockCompRace / kT_HELPLockCompFree by the unlock flag;
- * 6-8 and 9-11 build "kT_HELPLockCompEvent" around the location name (the second with the "%S Jam" format) through the
- * FE locale. Event type 12 is resolved with cBENewRaceInterface_getLocationDefaultGameEvent. "SE_Event" and "PEAKno" then name the event type (race,
- * slopestyle, superpipe, big air, rival challenge, kT_MAPChal10 / kT_MAPChal9 with "Rival", freeride). In map state 2
- * the path named at +0x55 of the entry is shown (cUITemplate_MAP_showEventPath).
+ * type: kGAMEEVENT_RIVALTIME and kGAMEEVENT_RIVALPOINTS (rival races) show kT_HELPChalAvail or kT_HELPLockCompRace /
+ * kT_HELPLockCompFree by the unlock flag; the time and points peak events build "kT_HELPLockCompEvent" around the
+ * location name (the second with the "%S Jam" format) through the FE locale. Event type kGAMEEVENT_FREERIDE is resolved
+ * with cBENewRaceInterface_getLocationDefaultGameEvent. "SE_Event" and "PEAKno" then name the event type (race,
+ * slopestyle, superpipe, big air, rival challenge, kT_MAPChal10 / kT_MAPChal9 with "Rival", freeride). In map state
+ * kMAPSTATE_SELECTLOCATION the path named at +0x55 of the entry is shown (cUITemplate_MAP_showEventPath).
  *
  * For freeride the two data rows show collectibles found / total (cBEMissionInterface_getCurrentCollectForSection, cBEMissionInterface_getTotalCollectForSection) and big challenges done
  * / total (cBEMissionInterface_getNumberCompletedMissionsOnTrack, cBEMissionInterface_getNumberMissionsOnTrack, "N/A" when there are none); otherwise the medal
@@ -2580,7 +2593,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
     sRewardDesc_0388 desc;
     char name[32];
     cUIObj_200700* mapObj = (cUIObj_200700*)getObj_207430(self, str_HelpText);
-    if (cUITemplate_MAP_mMapState == 2)
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION)
         mapObj->setVisible(1);
     void* mission = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2594,9 +2607,9 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
         cUIState_showObjSafe(((void*)self->mpUIState), str_Peak_Locations_Art);
         cUIState_showObjSafe(((void*)self->mpUIState), str_ehl);
     }
-    if (cUITemplate_MAP_mMapState == 2) {
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION) {
         cUIState_showObjSafe(((void*)self->mpUIState), str_PEAKno);
-        if (cUITemplate_MAP_mMapStyle == 0)
+        if (cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_FE_SELECTPEAKEVENT)
             cUIState_showObjSafe(((void*)self->mpUIState), str_fePEAKno_back);
         else
             cUIState_showObjSafe(((void*)self->mpUIState), str_pdaPEAKno_back);
@@ -2605,15 +2618,15 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
     desc = kPeakRaceLocations[0][0];
     int sel = 0;
     switch (cUITemplate_MAP_mSelectedEvent) {
-    case 0: {
+    case cUITemplate_MAP::kMAPEVENT_RACE: {
         sprintf(name, str_Peakpct_dRaceLocations, cUITemplate_MAP_mPeak + 1);
         sel = *(unsigned char*)((char*)getObj_207430(self, name) + 0x95);
         desc = kPeakRaceLocations[cUITemplate_MAP_mPeak][sel];
         int n = 4;
-        if (cUITemplate_MAP_mPeak == 2)
+        if (cUITemplate_MAP_mPeak == kPEAK_3)
             n = 3;
         for (int i = 0; i < 8; i++) {
-            if (i < n && cUITemplate_MAP_mMapStyle >= 2) {
+            if (i < n && cUITemplate_MAP_mMapStyle >= cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
                 sprintf(buf, str_SE_boxpct_d, i);
                 cUIState_showObjSafe(((void*)self->mpUIState), buf);
                 sprintf(buf, str_SE_checkpct_d, i);
@@ -2630,12 +2643,12 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
         }
         break;
     }
-    case 1: {
+    case cUITemplate_MAP::kMAPEVENT_FREESTYLE: {
         sprintf(name, str_Peakpct_dFreestyleLocations, cUITemplate_MAP_mPeak + 1);
         sel = *(unsigned char*)((char*)getObj_207430(self, name) + 0x95);
         desc = kPeakFreestyleLocations[cUITemplate_MAP_mPeak][sel];
         for (int i = 0; i < 8; i++) {
-            if (i < 5 && cUITemplate_MAP_mMapStyle >= 2) {
+            if (i < 5 && cUITemplate_MAP_mMapStyle >= cUITemplate_MAP::kMAPSTYLE_PAUSE_MAP) {
                 sprintf(buf, str_SE_boxpct_d, i);
                 cUIState_showObjSafe(((void*)self->mpUIState), buf);
                 sprintf(buf, str_SE_checkpct_d, i);
@@ -2652,7 +2665,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
         }
         break;
     }
-    case 2: {
+    case cUITemplate_MAP::kMAPEVENT_FREERIDE: {
         char buf2[32];
         sprintf(name, str_Peakpct_dFreerideLocations, cUITemplate_MAP_mPeak + 1);
         sel = *(unsigned char*)((char*)getObj_207430(self, name) + 0x95);
@@ -2670,20 +2683,20 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
     cUIText_setAsciiString(text, cBENewRaceInterface_getLocationName(race, desc.w[0]));
     text = (cUIText*)getObj_207430(self, str_SE_Event);
     int type = desc.w[2];
-    if ((unsigned int)(desc.w[0] - 17) < 5) {
-        type = 0xC;
-        if (cUITemplate_MAP_mMapState == 2)
+    if ((unsigned int)(desc.w[0] - kLOCATION_HUB_A) < 5) {
+        type = kGAMEEVENT_FREERIDE;
+        if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION)
             cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_CMNHELPStations));
     } else {
         if (strcmp((char*)&desc.w[0] + 0x32, str_empty_e) != 0) {
-            if (cUITemplate_MAP_mMapState == 2)
+            if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION)
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32((char*)&desc.w[0] + 0x32));
-        } else if (desc.w[2] == 4) {
+        } else if (desc.w[2] == kGAMEEVENT_RIVALTIME) {
             if (self->mbLocationUnlocked[cUITemplate_MAP_mPeak][cUITemplate_MAP_mSelectedEvent][sel] != 0)
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_HELPChalAvail));
             else
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_HELPLockCompRace));
-        } else if (desc.w[2] == 5) {
+        } else if (desc.w[2] == kGAMEEVENT_RIVALPOINTS) {
             if (self->mbLocationUnlocked[cUITemplate_MAP_mPeak][cUITemplate_MAP_mSelectedEvent][sel] != 0)
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_HELPChalAvail));
             else
@@ -2723,51 +2736,51 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
                 cUIText_setUnicodeStringWrap(mapObj, line);
             }
         }
-        if (type == 0xC)
+        if (type == kGAMEEVENT_FREERIDE)
             type = cBENewRaceInterface_getLocationDefaultGameEvent(race, desc.w[0]);
     }
     switch (type) {
-    case 0:
+    case kGAMEEVENT_RACE:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_cmnRaceCaps_b));
         cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_cmnRaceCaps_b));
         break;
-    case 1:
+    case kGAMEEVENT_SLOPESTYLE:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_cmnSlopeCaps));
         cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_cmnSlopeCaps));
         break;
-    case 3:
+    case kGAMEEVENT_BIGAIR:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_cmnBigAirCaps));
         cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_cmnBigAirCaps));
         break;
-    case 2:
+    case kGAMEEVENT_SUPERPIPE:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSuperpipe));
         cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_CMNSuperpipe));
         break;
-    case 4:
-    case 5:
+    case kGAMEEVENT_RIVALTIME:
+    case kGAMEEVENT_RIVALPOINTS:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_TITLERivalChallenge));
         cUIText_setAsciiString(title, str_Rival);
         break;
-    case 6:
-    case 7:
-    case 8:
+    case kGAMEEVENT_TIME_PEAK1:
+    case kGAMEEVENT_TIME_PEAK2:
+    case kGAMEEVENT_TIME_PEAK3:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_MAPChal10));
         cUIText_setAsciiString(title, str_Rival);
         break;
-    case 9:
-    case 10:
-    case 11:
+    case kGAMEEVENT_POINTS_PEAK1:
+    case kGAMEEVENT_POINTS_PEAK2:
+    case kGAMEEVENT_POINTS_PEAK3:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_MAPChal9));
         cUIText_setAsciiString(title, str_Rival);
         break;
-    case 12:
+    case kGAMEEVENT_FREERIDE:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNStateFreeRide));
         cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_CMNStateFreeRide));
         break;
     }
-    if (cUITemplate_MAP_mMapState == 2)
+    if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION)
         self->showEventPath((char*)&desc.w[0] + 0x55);
-    if (cUITemplate_MAP_mSelectedEvent == 2) {
+    if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_FREERIDE) {
         text = (cUIText*)getObj_207430(self, str_SE_Data1Label);
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_MAPCollectibles));
         text = (cUIText*)getObj_207430(self, str_SE_Data1);
@@ -2787,13 +2800,13 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self)
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_MAPMedal));
         int medal = cBERewardInterface_getTrackMedal(reward, 0, charID, desc.w[2], desc.w[0]);
         text = (cUIText*)getObj_207430(self, str_SE_Data1);
-        if (medal != -1)
+        if (medal != kMEDAL_NONE)
             cUIText_setUnicodeString(text, (char*)self->getMedalStr(medal));
         else
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNNoMedal));
         cUIText* label = (cUIText*)getObj_207430(self, str_SE_Data2Label);
         cUIText* value = (cUIText*)getObj_207430(self, str_SE_Data2);
-        if (cUITemplate_MAP_mSelectedEvent == 0) {
+        if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_RACE) {
             cUIText_setUnicodeStringByID(label, GetHashValue32(str_kT_CMNTopTime));
             int best = func_001550E8(score, 0, desc.w[0], desc.w[2]);
             cUIText_setAsciiString(value, func_0020A1A8(best));

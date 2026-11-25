@@ -28,6 +28,9 @@
 #include "ai/rider.h"
 #include "util/bxmemcard.h"
 #include "util/locale.h"
+#include "fe/festatenet.h"
+#include "sound/soundsys.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onCreateScreen);
@@ -113,7 +116,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* o
 extern "C" void cKeyboardPopup_setInputText(void* self, char* s);
 extern "C" void cKeyboardPopup_setStatic2(void* self, char* s);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int a1, int a2, int a3);
-extern "C" int func_00187D38(void* self);
+extern "C" bool func_00187D38(void* self);
 extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
@@ -142,24 +145,24 @@ static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s);
 /**
  * Handles a widget event on the options menu (select, back, keyboard popup closed).
  *
- * Event 5 (select): entry "6" opens a cKeyboardPopup with empty text; entry "8" asks to save first
+ * kONNEXT (select): entry "6" opens a cKeyboardPopup with empty text; entry "8" asks to save first
  * (cFEStateOptions_saveOptionPrompt, probably saveOptionPrompt) when an options-changed flag (D_004A14D0/D4/D8/DC) is set and
  * D_004A14E0 is clear, otherwise it sets the pending-delete bit 0x80 of mAttrState (+0x1C), plays
  * "TransitionOut" and, when +0x48 is set, stores 0x18 at +0xC of the custom interface; every other entry (and
  * "8" with +0x48 set) pushes the state that the engine's custom interface (engine + 0x0) virtual slot 4,
  * probably getNextState returns for the widget's misc data.
  *
- * Event 6 (back) does the same save check or transition-out. Event 13 (the keyboard popup is done) checks the
+ * kONPREV (back) does the same save check or transition-out. kONKEYBOARDEND (the keyboard popup is done) checks the
  * typed text with func_00187D38 (unknown) and calls slot 2 of the engine's listener at +0x14 (default
  * gUISoundNull) with 6 on a result of 1, else 4, then forgets the popup.
  *
  * @param widget  the widget the event is for
- * @param event  UI event code (5, 6 or 13 are handled)
+ * @param event  UI event code (kONNEXT, kONPREV or kONKEYBOARDEND are handled)
  */
 extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* widget, unsigned int event)
 {
     switch (event) {
-    case 5:
+    case cUIState::kONNEXT:
         if (Is_00188980(widget->mHashName, D_004A1520)) {
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
             void* pop = cKeyboardPopup_cKeyboardPopup(mem, (char*)self->mpEngine, (self), 0, self->mCtrlBits);
@@ -177,7 +180,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
             D_004A14E0 = 0;
             self->mAttrState |= 0x80;
             int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
-            if (frame != 0xFFFF)
+            if (frame != cUIScreen::kNoFrame)
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
             if (self->mbToSaveOptionScreen == 0)
                 break;
@@ -193,7 +196,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
                 cUIStateStack_push(&self->mpEngine->mStateStack, r);
         }
         break;
-    case 6: {
+    case cUIState::kONPREV: {
         if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
             self->saveOptionPrompt();
             break;
@@ -201,18 +204,18 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
         D_004A14E0 = 0;
         self->mAttrState |= 0x80;
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
-        if (frame != 0xFFFF)
+        if (frame != cUIScreen::kNoFrame)
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         break;
     }
-    case 13: {
+    case cUIState::kONKEYBOARDEND: {
         int r = func_00187D38((char*)self->mpKeyboard + 0x74);
         char* obj = &gUISoundNull;
         char* sound = (char*)self->mpEngine->mpSound;
         if (sound != 0)
             obj = sound;
         if (obj != 0) {
-            if (r == 1) {
+            if (r == true) {
                 ((cListener_188980*)obj)->playSound(6);
             } else {
                 ((cListener_188980*)obj)->playSound(4);
@@ -255,8 +258,8 @@ extern char D_004A1530[];
 /**
  * Filters menu keys on the options menu.
  *
- * Keys 8 and 9 give 0x100. Key 6 on the entry hashed "8", or key 7 anywhere, gives 1 when the word at +0x4C
- * is 0 and 0x101 otherwise; every other key gives 0x101.
+ * kONOPTION and kONMISC give 0x100. kONNEXT on the entry hashed "8", or kONPREVIOUS anywhere, gives 1 when the word at
+ * +0x4C is 0 and 0x101 otherwise; every other key gives 0x101.
  *
  * @param menu  the menu; its entry list is at +0x74
  * @param key  menu key/event code
@@ -270,13 +273,13 @@ extern "C" int cFEStateOptions_onWidgetMenu(cFEStateOptions* self, cUIMenu* menu
             return 0x100;
         }
     }
-    if (key == 6) {
+    if (key == cUIMenu::kONNEXT) {
         int itemHash = ((cUIThing*)cList_getByIndex((char*)&menu->mList, index))->mHashName;
         if (itemHash == GetHashValue32(D_004A1530)) {
             goto check;
         }
     }
-    if (key == 7) {
+    if (key == cUIMenu::kONPREVIOUS) {
     check:
         int result = 257;
         if (self->mbLetFrameGo == 0) {
@@ -309,17 +312,17 @@ static inline int IsK188D08(int id, char* s)
 /**
  * Handles events from the save-options popup.
  *
- * Event 0x15 sets the popup screen's "reset text" to kT_FESaveOptionsQuesPS2. Event 0x16 from the popup
+ * kONPOPUPCREATE sets the popup screen's "reset text" to kT_FESaveOptionsQuesPS2. kONPOPUPDESTROY from the popup
  * hashed "111resetopts" reads the answer (popup virtual slot 23), stores it at +0x48, sets +0x4C to 1 and
- * re-sends entry "8" to this state's virtual slot 19 (probably onWidgetEvent) as event 5 (yes) or 6 (no).
+ * re-sends entry "8" to this state's virtual slot 19 (probably onWidgetEvent) as kONNEXT (yes) or kONPREV (no).
  *
  * @param popup  the popup state; its hash (+0xC) and screen (+0x40) are read
- * @param event  popup event code (0x15 or 0x16 are handled)
+ * @param event  popup event code (kONPOPUPCREATE or kONPOPUPDESTROY are handled)
  */
 extern "C" void cFEStateOptions_onPopupEvent(cFEStateOptions* self, cUIState* popup, int event)
 {
     switch (event) {
-    case 21: {
+    case cUIState::kONPOPUPCREATE: {
         void* scr = popup->mpScreen;
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(scr, GetHashValue32(str_reset_text));
         if (text != 0) {
@@ -327,7 +330,7 @@ extern "C" void cFEStateOptions_onPopupEvent(cFEStateOptions* self, cUIState* po
         }
         break;
     }
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (IsK188D08(popup->mHashName, str_111resetopts)) {
             void* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1530));
             if ((int)popup->getData(0)) {
@@ -651,8 +654,8 @@ static inline sGameCfg_189610 Cfg_189610()
 /**
  * Handles the results of the game options screen's popups: reset to defaults, screen position and video calibration.
  *
- * Event 21 does nothing. On event 22 the popup's answer is its virtual slot 23 (getData) with 2, nonzero meaning
- * accepted, and the popup is told apart by its mHashName (+0xC):
+ * kONPOPUPCREATE does nothing. On kONPOPUPDESTROY the popup's answer is its virtual slot 23 (getData) with 2, nonzero
+ * meaning accepted, and the popup is told apart by its mHashName (+0xC):
  * - "111resetopts" accepted: resets the game options to their defaults (cBEOptionInterface_defaultGame), sets the changed flag
  *   D_004A14D0, refreshes the widgets (cFEStateOptionsGame_updateWidget) and reloads the language audio (func_0029ED90 on cAudioInterface_bxAudio's
  *   gSSXAudio, restart 1).
@@ -661,7 +664,7 @@ static inline sGameCfg_189610 Cfg_189610()
  *   stored f6 and f5 back to GrMan's virtual slot 12.
  * - 27 (the cFEPopupVideoCalibration popup) accepted: the same reset as "111resetopts" without the audio reload.
  *
- * After any event 22 it calls virtual slot 1 of the option interface (cBE interface 4).
+ * After any kONPOPUPDESTROY it calls virtual slot 1 of the option interface (cBE interface 4).
  *
  * @param popup  the popup state; its mHashName (+0xC) says which popup it is
  * @param event  popup event code (22 is handled; 21 and the rest are ignored)
@@ -670,9 +673,9 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
 {
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
-    case 21:
+    case cUIState::kONPOPUPCREATE:
         break;
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (Is_189610(popup->mHashName, str_111resetopts)) {
             if (GetOpt_189610(((char*)popup), 2)) {
                 cBEOptionInterface_defaultGame(iface);
@@ -695,7 +698,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
                 void (**pf)(void*, int, int) = &vt[12].fn;
                 (*pf)(thisp, Cfg_189610().f6, Cfg_189610().f5);
             }
-        } else if (popup->mHashName == 27) {
+        } else if (popup->mHashName == cFEPopupVideoCalibration::kStateID) {
             if (GetOpt_189610(((char*)popup), 2)) {
                 cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
@@ -725,7 +728,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetMenu);
  */
 extern "C" int cFEStateOptionsGame_onWidgetMenu(cFEStateOptionsGame* self, int menu, int event)
 {
-    return event != 9 ? 257 : 0x100;
+    return event != cUIMenu::kONMISC ? 257 : 0x100;
 }
 #endif
 
@@ -816,17 +819,17 @@ static inline void Refresh_189980(cFEStateOptionsGame* self)
 /**
  * Handles a widget event on the game options screen.
  *
- * Event 7 pushes a cFEPopupOptionReset popup. Event 5 opens cFEPopupScreenPos (entry "6") or
- * cFEPopupVideoCalibration (entry "7"). Event 6 (back) applies the options (interface 4 slot 1,
+ * kONOPTION pushes a cFEPopupOptionReset popup. kONNEXT opens cFEPopupScreenPos (entry "6") or
+ * cFEPopupVideoCalibration (entry "7"). kONPREV (back) applies the options (interface 4 slot 1,
  * cSSXApp_activateBEOptions), sets the locale's language, refreshes and pushes the state from the engine's
  * custom interface (engine + 0x0) virtual slot 5, probably getPrevState.
  *
- * Event 9 (a list changed) stores the language, speed-unit or widescreen choice into the options block
+ * kONCHANGE (a list changed) stores the language, speed-unit or widescreen choice into the options block
  * cBEOptionInterface_mOption (the language also goes to the locale), re-applies the options and sets the changed flag
  * D_004A14D0. A null widget is ignored.
  *
  * @param widget  the widget the event is for (null: nothing happens)
- * @param event  UI event code (5, 6, 7 or 9 are handled)
+ * @param event  UI event code (kONNEXT, kONPREV, kONOPTION or kONCHANGE are handled)
  */
 extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUIThing* widget, unsigned int event)
 {
@@ -835,32 +838,32 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
     }
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
-    case 7: {
+    case cUIState::kONOPTION: {
         char* popup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(popup, (char*)self->mpEngine, (self));
         *(void***)(popup + 8) = cFEPopupOptionReset_vtbl;
-        popup[0x48] = 0;
+        ((cFEPopupOptionReset*)popup)->mAccept = 0;
         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
         break;
     }
-    case 5:
+    case cUIState::kONNEXT:
         if (Is_189980(widget->mHashName, D_004A1520)) {
             char* popup = (char*)operator new(84, str_cFEPopupScreenPos, 0x100, 0);
             cUIState_cUIState1(popup, (char*)self->mpEngine, (self));
             *(void***)(popup + 8) = cFEPopupScreenPos_vtbl;
-            *(int*)(popup + 0x4C) = 0;
-            *(int*)(popup + 0x48) = 0;
-            popup[0x50] = 0;
+            ((cFEPopupScreenPos*)popup)->mY = 0;
+            ((cFEPopupScreenPos*)popup)->mX = 0;
+            ((cFEPopupScreenPos*)popup)->mAccept = 0;
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
         } else if (Is_189980(widget->mHashName, D_004A1528)) {
             char* popup = (char*)operator new(76, str_cFEPopupVideoCalibration, 0x100, 0);
             cUIState_cUIState1(popup, (char*)self->mpEngine, (self));
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
-            *(int*)(popup + 0xC) = 27;
+            ((cUIState*)popup)->mHashName = cFEPopupVideoCalibration::kStateID;
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
         }
         break;
-    case 6: {
+    case cUIState::kONPREV: {
         {
             sVE_189980a* vt = *(sVE_189980a**)(iface + 0xC);
             vt[1].fn(iface + vt[1].delta);
@@ -880,7 +883,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
         }
         break;
     }
-    case 9:
+    case cUIState::kONCHANGE:
         if (((signed char*)&self->mLanguageSlot)[0] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[0]])) {
             cBEOptionInterface_mOption_189980.iLanguage = cUIListBox_getCurrentEntryData(((char*)widget));
             cFELocale* locale = SSXApp->FELocale;
@@ -1059,7 +1062,7 @@ extern "C" void cFEStateOptionsSound_onCreateScreen(cFEStateOptionsSound* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     self->updateWidget();
-    int on = D_004A1A70 == 1;
+    int on = D_004A1A70 == cFEStateNet::kFEPathOnline;
     cUIThing* onObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ongroup));
     if (onObj != 0) {
         onObj->setVisible(on);
@@ -1134,24 +1137,25 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  * Handles the sound options screen's reset popup: on acceptance it restores the default sound options and re-applies
  * them.
  *
- * Only event 22 from the popup hashed "111resetopts" does anything. When the popup's virtual slot 23 (getData) with 2
- * is nonzero it resets the sound options (cBEOptionInterface_defaultSound, the sound step of cBEOptionInterface_revert), switches the
- * speaker mode to bits 12-13 (`output`) with cFEStateOptionsSound_setSoundMode, re-applies the effects, speech and music volumes
- * (func_00287410, cSSXAudio_SetSFXVolume, func_00287520 on gSSXAudio), bit 17 (`iUseDJSpeech`) through cSSXAudio_SetDJSpeech and bit 16
+ * Only kONPOPUPDESTROY from the popup hashed "111resetopts" does anything. When the popup's virtual slot 23 (getData)
+ * with 2 is nonzero it resets the sound options (cBEOptionInterface_defaultSound, the sound step of
+ * cBEOptionInterface_revert), switches the speaker mode to bits 12-13 (`output`) with
+ * cFEStateOptionsSound_setSoundMode, re-applies the effects, speech and music volumes (func_00287410,
+ * cSSXAudio_SetSFXVolume, func_00287520 on gSSXAudio), bit 17 (`iUseDJSpeech`) through cSSXAudio_SetDJSpeech and bit 16
  * (`iUseArcadeSFX`) through cSSXAudio_SetArcadeSFX, and refreshes the widgets with cFEStateOptionsSound_updateWidget.
  *
  * It sets the sound changed flag D_004A14D4 even when the reset is declined, unlike the game and HUD popup handlers.
  *
  * @param popup  the popup state; its mHashName (+0xC) is checked
- * @param event  popup event code (22 is handled)
+ * @param event  popup event code (kONPOPUPDESTROY is handled)
  */
 extern "C" void cFEStateOptionsSound_onPopupEvent(cFEStateOptionsSound* self, cUIState* popup, int event)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
-    case 21:
+    case cUIState::kONPOPUPCREATE:
         break;
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (Is_18A3D8(popup->mHashName, str_111resetopts)) {
             if (GetOpt_18A3D8(((char*)popup), 2)) {
                 cBEOptionInterface_defaultSound(iface);
@@ -1188,7 +1192,7 @@ void* cFEStateOptionsSound_onGainFocus(void* self)
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Filters menu events on the sound options screen: 0x100 for event 9, 0 for event 6, 0x101 for anything else.
+ * Filters menu events on the sound options screen: 0x100 for kONMISC, 0 for kONNEXT, 0x101 for anything else.
  *
  * The menu index the caller passes as a fourth argument is not declared.
  *
@@ -1199,9 +1203,9 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetMenu);
 extern "C" int cFEStateOptionsSound_onWidgetMenu(cFEStateOptionsSound* self, int menu, int event)
 {
     switch (event) {
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
-    case 6:
+    case cUIMenu::kONNEXT:
         return 0;
     }
     return 257;
@@ -1286,20 +1290,20 @@ static inline sSndCfg_18A8D0 Cfg_18A8D0()
 /**
  * Handles a widget event on the sound options screen: the reset popup, leaving the screen and value changes.
  *
- * A null widget is ignored, and event 5 does nothing. Event 7 pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl)
- * onto the engine's state stack. Event 6 (back) calls virtual slot 1 of the option interface (cBE interface 4),
- * re-applies the effects, speech and music volumes and the two switches (`iUseDJSpeech` through cSSXAudio_SetDJSpeech, `iUseArcadeSFX`
- * through cSSXAudio_SetArcadeSFX), then pushes the state that virtual slot 5 of the engine's custom interface (engine + 0x0)
- * returns for the widget's mMiscData.
+ * A null widget is ignored, and kONNEXT does nothing. kONOPTION pushes a cFEPopupOptionReset popup (vtable
+ * cFEPopupOptionReset_vtbl) onto the engine's state stack. kONPREV (back) calls virtual slot 1 of the option interface
+ * (cBE interface 4), re-applies the effects, speech and music volumes and the two switches (`iUseDJSpeech` through
+ * cSSXAudio_SetDJSpeech, `iUseArcadeSFX` through cSSXAudio_SetArcadeSFX), then pushes the state that virtual slot 5 of
+ * the engine's custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
- * Event 9 (a value changed) stores the widget's value into cBEOptionInterface_mOption and applies it: "1lb" the speaker
- * mode `output` (cFEStateOptionsSound_setSoundMode), the sliders "2sl" `sfxVol` (func_00287410), "3sl" `speechVol` (cSSXAudio_SetSFXVolume) and
- * "4sl" `musicVol` (func_00287520) from the slider value at +0x74, "5lb" bit 17 (cSSXAudio_SetDJSpeech) and "6lb" bit
- * 16 (cSSXAudio_SetArcadeSFX); "7lb" sets bit 18 (`f18`) only while D_004A1A70 is 1. Every event 9 sets the sound changed flag
- * D_004A14D4.
+ * kONCHANGE (a value changed) stores the widget's value into cBEOptionInterface_mOption and applies it: "1lb" the
+ * speaker mode `output` (cFEStateOptionsSound_setSoundMode), the sliders "2sl" `sfxVol` (func_00287410), "3sl"
+ * `speechVol` (cSSXAudio_SetSFXVolume) and "4sl" `musicVol` (func_00287520) from the slider value at +0x74, "5lb" bit
+ * 17 (cSSXAudio_SetDJSpeech) and "6lb" bit 16 (cSSXAudio_SetArcadeSFX); "7lb" sets bit 18 (`f18`) only while D_004A1A70
+ * is kFEPathOnline. Every kONCHANGE sets the sound changed flag D_004A14D4.
  *
  * @param widget  the widget the event is for (null: nothing happens)
- * @param event  UI event code (6, 7 and 9 are handled)
+ * @param event  UI event code (kONPREV, kONOPTION and kONCHANGE are handled)
  */
 extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, cUIThing* widget, unsigned int event)
 {
@@ -1307,17 +1311,17 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         return;
     cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
-    case 5: // empty case; needed for the original compare-tree shape
+    case cUIState::kONNEXT: // empty case; needed for the original compare-tree shape
         break;
-    case 7: {
+    case cUIState::kONOPTION: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(resetPopup, (char*)self->mpEngine, (self));
         *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
-        resetPopup[0x48] = 0;
+        ((cFEPopupOptionReset*)resetPopup)->mAccept = 0;
         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, resetPopup);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         {
             iface->submit();
         }
@@ -1333,7 +1337,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 9:
+    case cUIState::kONCHANGE:
         if (Is_18A8D0(widget->mHashName, str_1lb)) {
             cBEOptionInterface_mOption_18A8D0.output = cUIListBox_getCurrentEntryData(((char*)widget));
             self->setSoundMode(cUIListBox_getCurrentEntryData(((char*)widget)));
@@ -1361,7 +1365,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
             cBEOptionInterface_mOption_18A8D0.iUseArcadeSFX = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseArcadeSFX != 0);
         }
-        bool on = D_004A1A70 == 1;
+        bool on = D_004A1A70 == cFEStateNet::kFEPathOnline;
         if (on && Is_18A8D0(widget->mHashName, str_7lb))
             cBEOptionInterface_mOption_18A8D0.f18 = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
         D_004A14D4 = 1;
@@ -1524,7 +1528,7 @@ void cFEStateOptionsSound::updateWidget()
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18B380().iUseArcadeSFX != 0);
     }
     }
-    bool on = D_004A1A70 == 1;
+    bool on = D_004A1A70 == cFEStateNet::kFEPathOnline;
     if (on) {
         char* w = (char*)Find_18B380(self, str_7lb);
         if (w != 0) {
@@ -1561,9 +1565,11 @@ extern "C" void cSSXAudio_FrontEndLoad(void* snd);
 /**
  * Switches the audio output mode and, when the audio device accepts it, restarts the audio system in that mode.
  *
- * @p mode is mapped to an audio mode: 0 (stereo) to 1, 1 (surround) to 2, 2 (mono) to 0, 3 (DTS) to 3, anything else to
- * 1. The device object is reached from gSSXAudio (cAudioInterface_bxAudio) + 0x118 through two loads and then +0x1D8; its virtual
- * slot 2 is asked to take the audio mode, and only a return of 1 goes on.
+ * @p mode is mapped to an audio mode (eSOUNDDEF_MODE): kSpeakerStereo to keSOUNDDEF_MODE_STEREO, kSpeakerSurround to
+ * keSOUNDDEF_MODE_DOLBYSURROUND, kSpeakerMono to keSOUNDDEF_MODE_MONO, kSpeakerDTS to the unnamed mode 3, anything else
+ * to keSOUNDDEF_MODE_STEREO. The device object is reached from gSSXAudio (cAudioInterface_bxAudio) + 0x118 through two
+ * loads and then +0x1D8; its virtual slot 2 (probably the sound manager's SetMode) is asked to take the audio mode, and
+ * only keSOUNDMANAGER_SETMODE_RESTART goes on.
  *
  * The restart saves the effects, speech and music levels (func_00287670, cSSXAudio_GetSFXVolume, func_002876D0, 0-11 scale), the
  * switches at gSSXAudio + 0x62B8 (cSSXAudio_SetDJSpeech's flag) and + 0x62B4 (cSSXAudio_SetArcadeSFX's flag) and the word at + 0x534;
@@ -1572,29 +1578,29 @@ extern "C" void cSSXAudio_FrontEndLoad(void* snd);
  * finally passes the saved + 0x534 word to virtual slot 4 of the sub-object at gSSXAudio + 0x118 (its vtable pointer is
  * at + 0x5558).
  *
- * @param mode  the speaker list choice ("1lb" entry data): 0 stereo, 1 surround, 2 mono, 3 DTS
+ * @param mode  the speaker list choice ("1lb" entry data): kSpeakerStereo .. kSpeakerDTS
  */
 void cFEStateOptionsSound::setSoundMode(unsigned int mode)
 {
     int audioMode;
     switch (mode) {
-    case 1:
-        audioMode = 2;
+    case kSpeakerSurround:
+        audioMode = keSOUNDDEF_MODE_DOLBYSURROUND;
         break;
-    case 2:
-        audioMode = 0;
+    case kSpeakerMono:
+        audioMode = keSOUNDDEF_MODE_MONO;
         break;
-    case 3:
+    case kSpeakerDTS:
         audioMode = 3;
         break;
-    case 0:
+    case kSpeakerStereo:
     default:
-        audioMode = 1;
+        audioMode = keSOUNDDEF_MODE_STEREO;
         break;
     }
     char* obj = *(char**)(**(char***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8);
     sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
-    if (vt[2].fn(vthis(obj, vt[2]), audioMode) == 1) {
+    if (vt[2].fn(vthis(obj, vt[2]), audioMode) == keSOUNDMANAGER_SETMODE_RESTART) {
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
@@ -1702,20 +1708,21 @@ extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* self);
 /**
  * Handles the HUD options screen's reset popup: on acceptance it restores the default HUD options.
  *
- * Only event 22 from the popup hashed "111resetopts" does anything: when the popup's virtual slot 23 (getData) with 2
- * is nonzero it resets the HUD options (cBEOptionInterface_defaultHUD, the HUD step of cBEOptionInterface_revert, on cBE interface 4),
- * refreshes the menu (cFEStateOptionsHUD_updateWidget) and sets the HUD changed flag D_004A14D8.
+ * Only kONPOPUPDESTROY from the popup hashed "111resetopts" does anything: when the popup's virtual slot 23 (getData)
+ * with 2 is nonzero it resets the HUD options (cBEOptionInterface_defaultHUD, the HUD step of
+ * cBEOptionInterface_revert, on cBE interface 4), refreshes the menu (cFEStateOptionsHUD_updateWidget) and sets the HUD
+ * changed flag D_004A14D8.
  *
  * @param widget  the popup state (despite the name); its mHashName (+0xC) is checked
- * @param msg  popup event code (22 is handled)
+ * @param msg  popup event code (kONPOPUPDESTROY is handled)
  */
 extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, cUIState* widget, int msg)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (msg) {
-    case 21:
+    case cUIState::kONPOPUPCREATE:
         break;
-    case 22: {
+    case cUIState::kONPOPUPDESTROY: {
         int popupHash = widget->mHashName;
         if (popupHash == GetHashValue32(str_111resetopts)) {
             if ((int)widget->getData(2) != 0) {
@@ -1734,7 +1741,7 @@ extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, cUISta
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Filters menu events on the HUD options screen: 0x100 for event 9, 0 for event 6, 0x101 for anything else.
+ * Filters menu events on the HUD options screen: 0x100 for kONMISC, 0 for kONNEXT, 0x101 for anything else.
  *
  * The menu index the caller passes as a fourth argument is not declared.
  *
@@ -1745,9 +1752,9 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onWidgetMenu);
 extern "C" int cFEStateOptionsHUD_onWidgetMenu(cFEStateOptionsHUD* self, int menu, int event)
 {
     switch (event) {
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
-    case 6:
+    case cUIMenu::kONNEXT:
         return 0;
     }
     return 257;
@@ -1781,16 +1788,17 @@ static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s);
 /**
  * Handles a widget event on the HUD options screen: the reset popup, leaving the screen and highlighting a HUD choice.
  *
- * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl). Event 6 (back) calls
- * virtual slot 1 of the option interface (cBE interface 4) and pushes the state that virtual slot 5 of the engine's
- * custom interface (engine + 0x0) returns for the widget's mMiscData.
+ * A null widget is ignored. kONOPTION pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl). kONPREV
+ * (back) calls virtual slot 1 of the option interface (cBE interface 4) and pushes the state that virtual slot 5 of the
+ * engine's custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
- * Event 1 (item focused) shows the item (its virtual slot 9, setVisible, with 1), sets the HUD changed flag D_004A14D8
- * and stores the item's mMiscData (+0x18, read as a byte) into bits 30-31 of cBEOptionInterface_mOption (the view's
- * `mode`). Event 2 (focus lost) hides the item when it is "1", "2" or "3" (D_004A14F8, D_004A1500, D_004A1508).
+ * kONGAINFOCUS (item focused) shows the item (its virtual slot 9, setVisible, with 1), sets the HUD changed flag
+ * D_004A14D8 and stores the item's mMiscData (+0x18, read as a byte) into bits 30-31 of cBEOptionInterface_mOption (the
+ * view's `mode`). kONLOSEFOCUS (focus lost) hides the item when it is "1", "2" or "3" (D_004A14F8, D_004A1500,
+ * D_004A1508).
  *
  * @param widget  the widget the event is for (null: nothing happens)
- * @param event  UI event code (1, 2, 6 and 7 are handled)
+ * @param event  UI event code (kONGAINFOCUS, kONLOSEFOCUS, kONPREV and kONOPTION are handled)
  */
 extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUIThing* widget, unsigned int event)
 {
@@ -1799,7 +1807,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
     }
     cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
-    case 7: {
+    case cUIState::kONOPTION: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(resetPopup, self->mpEngine, ((char*)self));
         *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
@@ -1807,7 +1815,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, resetPopup);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         iface->submit();
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, widget->mMiscData);
@@ -1816,13 +1824,13 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         }
         break;
     }
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         widget->setVisible(1);
         D_004A14D8 = 1;
         cBEOptionInterface_mOption_C2A0.mode = *(unsigned char*)&widget->mMiscData;
         break;
     }
-    case 2:
+    case cUIState::kONLOSEFOCUS:
         if (Is_0018C2A0(widget->mHashName, D_004A14F8) || Is_0018C2A0(widget->mHashName, D_004A1500) ||
             Is_0018C2A0(widget->mHashName, D_004A1508)) {
             widget->setVisible(0);
@@ -2058,25 +2066,25 @@ public:
  * Handles the controller options screen's popups: stops both pads' vibration when one opens and restores the default
  * controller settings on an accepted reset.
  *
- * Event 21 calls cFEStateOptionsController_vibratePad(self, pad, 0, 0) for pads 0 and 1, setting both of their motor levels to 0. Event 22
- * from the popup hashed "111resetopts", when its virtual slot 23 (getData) with 2 is nonzero, resets the controller
- * settings (cBENewPlayerInterface_defaultCtrl on the player interface, cBE interface 1), refreshes the widgets
- * (cFEStateOptionsController_updateWidget) and sets the controller changed flag D_004A14DC.
+ * kONPOPUPCREATE calls cFEStateOptionsController_vibratePad(self, pad, 0, 0) for pads 0 and 1, setting both of their
+ * motor levels to 0. kONPOPUPDESTROY from the popup hashed "111resetopts", when its virtual slot 23 (getData) with 2 is
+ * nonzero, resets the controller settings (cBENewPlayerInterface_defaultCtrl on the player interface, cBE interface 1),
+ * refreshes the widgets (cFEStateOptionsController_updateWidget) and sets the controller changed flag D_004A14DC.
  *
  * @param obj  the popup state; its mHashName (+0xC) is checked
- * @param msg  popup event code (21 and 22 are handled)
+ * @param msg  popup event code (kONPOPUPCREATE and kONPOPUPDESTROY are handled)
  */
 extern "C" void cFEStateOptionsController_onPopupEvent(cFEStateOptionsController* self, cUIObj_18C910* obj, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (msg) {
-    case 21: {
+    case cUIState::kONPOPUPCREATE: {
         float zero = 0.0f;
         self->vibratePad(0, zero, zero);
         self->vibratePad(1, zero, zero);
         break;
     }
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (Is_0018C910(*(int*)((char*)obj + 0xC), str_111resetopts)) {
             if (obj->getData(2) != 0) {
                 cBENewPlayerInterface_defaultCtrl(pi);
@@ -2121,18 +2129,21 @@ static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s);
 /**
  * Handles a widget event on the controller options screen: the reset popup, leaving the screen and setting changes.
  *
- * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl). Event 6 (back) calls
- * virtual slot 1 of the player interface (cBE interface 1) and pushes the state that virtual slot 5 of the engine's
- * custom interface (engine + 0x0) returns for the widget's mMiscData.
+ * A null widget is ignored. kONOPTION pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl). kONPREV
+ * (back) calls virtual slot 1 of the player interface (cBE interface 1) and pushes the state that virtual slot 5 of the
+ * engine's custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
- * Event 9 (a value changed): "1lb" and "2lb" set pad 0's or pad 1's vibration flag (cBENewPlayerInterface_setUseDualShock) to the chosen entry;
- * when the flag reads back set (cBENewPlayerInterface_getUseDualShock) the pad buzzes (cFEStateOptionsController_vibratePad with 10, 10), its timer (+0x48 for pad 0,
- * +0x4C for pad 1) is set to 60 and its bit (1 or 2) is set in +0x50 so cFEStateOptionsController_onUpdate stops it later; otherwise its
- * motors are set to 0. "3lb" and "4lb" store pad 0's or pad 1's button layout (cBENewPlayerInterface_setControllerMapping) and show the default or
- * pro layout picture (cFEStateOptionsController_displayPadConfig with entry data == 0). Every event 9 sets the controller changed flag D_004A14DC.
+ * kONCHANGE (a value changed): "1lb" and "2lb" set pad 0's or pad 1's vibration flag
+ * (cBENewPlayerInterface_setUseDualShock) to the chosen entry; when the flag reads back set
+ * (cBENewPlayerInterface_getUseDualShock) the pad buzzes (cFEStateOptionsController_vibratePad with 10, 10), its timer
+ * (+0x48 for pad 0, +0x4C for pad 1) is set to 60 and its bit (1 or 2) is set in +0x50 so
+ * cFEStateOptionsController_onUpdate stops it later; otherwise its motors are set to 0. "3lb" and "4lb" store pad 0's
+ * or pad 1's button layout (cBENewPlayerInterface_setControllerMapping) and show the default or pro layout picture
+ * (cFEStateOptionsController_displayPadConfig with entry data == 0). Every kONCHANGE sets the controller changed flag
+ * D_004A14DC.
  *
  * @param widget  the widget the event is for (null: nothing happens)
- * @param event  UI event code (6, 7 and 9 are handled)
+ * @param event  UI event code (kONPREV, kONOPTION and kONCHANGE are handled)
  */
 extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsController* self, cUIThing* widget, unsigned int event)
 {
@@ -2141,7 +2152,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
     }
     cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (event) {
-    case 7: {
+    case cUIState::kONOPTION: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(resetPopup, self->mpEngine, ((char*)self));
         *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
@@ -2149,7 +2160,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, resetPopup);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         iface->submit();
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, widget->mMiscData);
@@ -2158,7 +2169,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
         }
         break;
     }
-    case 9:
+    case cUIState::kONCHANGE:
         if (Is_0018CA10(widget->mHashName, str_1lb)) {
             cBENewPlayerInterface_setUseDualShock(iface, 0, cUIListBox_getCurrentEntryData(((char*)widget)) != 0);
             if (cBENewPlayerInterface_getUseDualShock(iface, 0)) {
@@ -2203,9 +2214,10 @@ extern "C" int cFEStateOptionsController_displayPadConfig_CCE0(void* self, int o
 /**
  * Filters menu keys on the controller options screen; accepting a button-layout row shows that pad's layout picture.
  *
- * Key 9 gives 0x100 and key 6 gives 0. Key 5 on menu item 2 or 3 (the menu's mScrollItemCurrent, +0x95) calls
- * cFEStateOptionsController_displayPadConfig with whether pad 0 or pad 1 uses layout 0 (cBENewPlayerInterface_getControllerMapping) and gives 0x101;
- * it changes no setting. Every other key, and key 5 on other items, gives 0x101.
+ * kONMISC gives 0x100 and kONNEXT gives 0. kSCROLLCHANGE on menu item 2 or 3 (the menu's mScrollItemCurrent, +0x95)
+ * calls cFEStateOptionsController_displayPadConfig with whether pad 0 or pad 1 uses layout 0
+ * (cBENewPlayerInterface_getControllerMapping) and gives 0x101; it changes no setting. Every other key, and
+ * kSCROLLCHANGE on other items, gives 0x101.
  *
  * @param menu  the menu; its mScrollItemCurrent (+0x95) is the highlighted item
  * @param key  menu event code
@@ -2215,9 +2227,9 @@ extern "C" int cFEStateOptionsController_onWidgetMenu(cFEStateOptionsController*
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (key) {
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
-    case 5: {
+    case cUIMenu::kSCROLLCHANGE: {
         int which;
         switch (menu->mScrollItemCurrent) {
         case 2:
@@ -2232,7 +2244,7 @@ extern "C" int cFEStateOptionsController_onWidgetMenu(cFEStateOptionsController*
         cFEStateOptionsController_displayPadConfig_CCE0(self, cBENewPlayerInterface_getControllerMapping(player, which) == 0);
         return 257;
     }
-    case 6:
+    case cUIMenu::kONNEXT:
         return 0;
     }
     return 257;
@@ -2401,6 +2413,10 @@ public:
     virtual int sampleButtons();
     virtual int numActuators();
     virtual void setActuator(int act, float frequency);
+
+    // A DualShock's motor count: [U] cPS2PadDevice_numActuators returns 2 (cPadDevice's own returns 0); setActuator's
+    // motors 0 and 1 (name ours).
+    enum { kDualShockActuators = 2 };
 };
 
 /**
@@ -2432,7 +2448,7 @@ void cFEStateOptionsController::vibratePad(int idx, float x, float y)
     if (PadCache != 0) {
         rumbleDevice = PadCache->PadDevices[i];
     }
-    if (rumbleDevice->numActuators() == 2) {
+    if (rumbleDevice->numActuators() == cPadDevice::kDualShockActuators) {
         rumbleDevice->setActuator(0, ((y - 0.5f) * 0.009999999776482582f >? (clampedX - 2.0f) / 972.2222290039062f) >? 0.0f);
         rumbleDevice->setActuator(1, ((y - 70.0f) * 0.0062500000931322575f >? (clampedX - 100.0f) / 5000.0f) >? 0.0f);
     }
@@ -2605,11 +2621,11 @@ extern char str_TransitionOut[];
 /**
  * Handles the new-game confirmation popup on the save/load menu.
  *
- * Events 0xF and 0x10 store the answer (1 or 0) in the popup's misc data (+0x18) and pop the state stack.
- * Event 0x16 with a yes answer resets the player for the user (+0x44, at least 0) through back-end interface
- * 1 (cBENewPlayerInterface_setPlayerName with an empty name, then slot 1) and cBE_newProfile, re-inits both front-end riders
- * (cFERider_init), pushes the state from the custom interface's slot 4 for (1 << +0x48) | 0x100 and plays
- * "TransitionOut".
+ * kONSCREENPOPUPOPTION0 and kONSCREENPOPUPOPTION1 store the answer (1 or 0) in the popup's misc data (+0x18) and pop
+ * the state stack. kONPOPUPDESTROY with a yes answer resets the player for the user (+0x44, at least 0) through
+ * back-end interface 1 (cBENewPlayerInterface_setPlayerName with an empty name, then slot 1) and cBE_newProfile,
+ * re-inits both front-end riders (cFERider_init), pushes the state from the custom interface's slot 4 for (1 << +0x48)
+ * | 0x100 and plays "TransitionOut".
  *
  * @param widget  the popup state (its misc data at +0x18 holds the answer)
  * @param event  popup event code (0xF, 0x10, 0x15 or 0x16)
@@ -2617,17 +2633,17 @@ extern char str_TransitionOut[];
 extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* self, cUIState* widget, unsigned int event)
 {
     switch (event) {
-    case 0xF:
+    case cUIState::kONSCREENPOPUPOPTION0:
         widget->miMiscData = 1;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
-    case 0x10:
+    case cUIState::kONSCREENPOPUPOPTION1:
         widget->miMiscData = 0;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
-    case 21:
+    case cUIState::kONPOPUPCREATE:
         break;
-    case 22: {
+    case cUIState::kONPOPUPDESTROY: {
         if (widget->miMiscData == 0) {
             break;
         }
@@ -2651,7 +2667,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
             cUIStateStack_push(&self->mpEngine->mStateStack, x);
         }
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
         break;
@@ -2677,14 +2693,14 @@ extern char str_cFEPopupConfirm[];
 /**
  * Handles a select or back on the save/load menu.
  *
- * Event 5: reads the entry's action from its misc data (mMiscData) and then always stores 3 there. Action 3 (new
+ * kONNEXT: reads the entry's action from its misc data (mMiscData) and then always stores 3 there. Action 3 (new
  * game) remembers the current controller (mCurrentCtrl into mSaveLoadCurrentCtrl) and pushes a cFEPopupConfirm with
  * kT_HELPCreateNewFilePrompt (default button 1, miMiscData 0); other actions (above 3 with the controller bit added)
- * push the state that the engine's custom interface (mpCustom) getNextState (virtual slot 4) returns. Event 6 pushes
+ * push the state that the engine's custom interface (mpCustom) getNextState (virtual slot 4) returns. kONPREV pushes
  * the state from the engine's custom interface getPrevState (virtual slot 5). A null widget is ignored.
  *
  * @param widget  the selected widget
- * @param event  UI event code (5 or 6 are handled)
+ * @param event  UI event code (kONNEXT or kONPREV are handled)
  */
 extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* self, cUIThing* widget, int event)
 {
@@ -2692,7 +2708,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
         return;
     }
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         unsigned int widgetId = (unsigned int)widget->mMiscData;
         widget->mMiscData = 3;
         if (widgetId == 3) {
@@ -2718,7 +2734,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, widget->mMiscData);
         if (nextState != 0) {
@@ -2842,7 +2858,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(cFEStateOptionsDevice
     uiObj = getObj_DD60(self, str_btext3a);
     uiObj->setVisible(0);
     char* title;
-    if (self->mType == 1) {
+    if (self->mType == cFEMemCard::kTYPE_REPLAY) {
         title = getString_DD60(str_kT_TITLELoadReplay);
         uiObj = getObj_DD60(self, str_btext3a);
         uiObj->setVisible(1);
@@ -2879,7 +2895,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(cFEStateOptionsDevice
         cUIText_setUnicodeString(uiObj, slot);
         uiObj->mStaticColour = gStaticColour;
         uiObj->setUseStaticColour(1);
-        if (self->mType != 1 && i >= 2) {
+        if (self->mType != cFEMemCard::kTYPE_REPLAY && i >= 2) {
             uiObj->setStatic(1);
             uiObj->setVisible(0);
             sprintf(buf, str_pct_d_b, i);
@@ -2899,10 +2915,10 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 /**
  * Answers the device select menu's events: refuses accepting on an unusable memory card.
  *
- * Events 6 and 8 give 0x100 when the selected device (the card manager's mSelectedDevice) fails the memory card's
- * slot-54 check (mpMemCard vtable, cPS2MemCard_IsActionable for a cPS2MemCard); event 9 always gives 0x100; everything else gives
- * 0x101. The extra event-8 test on a save screen (+0x22C) returns 0x101 early for a usable card, the same result as
- * falling through. Fills slot +0xA4 (onWidgetMenu) of cFEStateOptionsDeviceSelect_vtbl.
+ * kONNEXT and kONOPTION give 0x100 when the selected device (the card manager's mSelectedDevice) fails the memory
+ * card's slot-54 check (mpMemCard vtable, cPS2MemCard_IsActionable for a cPS2MemCard); kONMISC always gives 0x100;
+ * everything else gives 0x101. The extra event-8 test on a save screen (+0x22C) returns 0x101 early for a usable card,
+ * the same result as falling through. Fills slot +0xA4 (onWidgetMenu) of cFEStateOptionsDeviceSelect_vtbl.
  *
  * @param widget  the menu that sent the event (unused)
  * @param msg  the menu event
@@ -2912,16 +2928,16 @@ extern "C" int cFEStateOptionsDeviceSelect_onWidgetMenu(cFEStateOptionsDeviceSel
 {
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
-    case 8:
+    case cUIMenu::kONOPTION:
         if (self->mIsSaveScreen != 0 && app->mpMemCard->IsActionable(app->mSelectedDevice) != 0) {
             return 257;
         }
-    case 6:
+    case cUIMenu::kONNEXT:
         if (app->mpMemCard->IsActionable(app->mSelectedDevice) == 0) {
             return 0x100;
         }
         break;
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -2940,7 +2956,7 @@ extern "C" void cMCOverlayManager_SetAction(void* app, int a1);
 /**
  * Handles the device select screen's widget events: accepting a save slot, backing out and the event-7 action.
  *
- * Event 5 (a slot widget): does nothing without a widget or while busy (mIsProcessing); sets mbChoseToSave, then acts
+ * kONNEXT (a slot widget): does nothing without a widget or while busy (mIsProcessing); sets mbChoseToSave, then acts
  * only when the display state mScreenStatus is 3 and the main button is active (mMainButtonActive). It takes the slot
  * from the widget (mMiscData) into mSlot and the card manager's mFileCursor. In mode 2 on a save screen
  * (mIsSaveScreen) it starts a save of file type 2 (cMCOverlayManager_writeSetFileType with profile -1), sets
@@ -2949,12 +2965,12 @@ extern "C" void cMCOverlayManager_SetAction(void* app, int a1);
  * (cMCOverlayManager_readSetFileType, file type 0 in mode 1, else 2) and calls confirmLoad (slot 44); an empty slot
  * calls displayStatusPopup.
  *
- * Event 6 (back): clears mbChoseToSave; unless busy is 1 or state is already 6, sets mIsCancelPressed, resets the
- * manager (cMCOverlayManager_SetState, state 0) when state is 0, 1 or 2, and sets state 6.
+ * kONPREV (back): clears mbChoseToSave; unless busy is 1 or state is already kDONE, sets mIsCancelPressed, resets the
+ * manager (cMCOverlayManager_SetState, state 0) when state is kSTART, kCHECKING or kSKIP, and sets state kDONE.
  *
- * Event 7: on a save screen, not busy and not in state 6, with the selected device passing the card's slot-54 check
- * (cPS2MemCard_IsActionable), takes the widget's slot as for event 5; in state 1 with a file in that slot it sets busy and state
- * 4, cMCOverlayManager_SetAction(0) and the manager state 0x18.
+ * kONOPTION: on a save screen, not busy and not in state kDONE, with the selected device passing the card's slot-54
+ * check (cPS2MemCard_IsActionable), takes the widget's slot as for kONNEXT; in state kCHECKING with a file in that slot
+ * it sets busy and state kDELETING, cMCOverlayManager_SetAction(0) and the manager state 0x18.
  *
  * @param widget  the widget that sent the event (its mMiscData is the slot index)
  * @param event  the widget event
@@ -2963,27 +2979,27 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
 {
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         if (((char*)widget) == 0)
             return;
         if (self->mIsProcessing != 0)
             return;
         self->mbChoseToSave = 1;
         int st = self->mScreenStatus;
-        if (st != 3)
+        if (st != cFEMemCard::kDISPLAY_ON)
             return;
         if (self->mMainButtonActive == 0)
             return;
         int pickedSlot = widget->mMiscData;
         self->mSlot = pickedSlot;
         app->mFileCursor = pickedSlot;
-        if (self->mType == 2 && self->mIsSaveScreen != 0) {
+        if (self->mType == cFEMemCard::kTYPE_GAMEOPTIONS && self->mIsSaveScreen != 0) {
             cMCOverlayManager_writeSetFileType(app, 2, -1);
             self->mIsSavePressed = 1;
             self->mIsProcessing = 1;
             self->mState = st;
             self->displayStatusPopup();
-        } else if (self->mType == 1) {
+        } else if (self->mType == cFEMemCard::kTYPE_REPLAY) {
             if (app->mpMemCard->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
                 self->confirmLoad();
@@ -3000,25 +3016,26 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         self->mbChoseToSave = 0;
         cMCOverlayManager* mcManager = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mIsProcessing == 1)
+        if (self->mIsProcessing == true)
             return;
         int currentState = self->mState;
-        if (currentState == 6)
+        if (currentState == cFEMemCard::kDONE)
             return;
         self->mIsCancelPressed = 1;
-        if (currentState == 0 || currentState == 2 || currentState == 1) {
+        if (currentState == cFEMemCard::kSTART || currentState == cFEMemCard::kSKIP
+            || currentState == cFEMemCard::kCHECKING) {
             mcManager->SetState(0);
         }
-        self->mState = 6;
+        self->mState = cFEMemCard::kDONE;
         break;
     }
-    case 7: {
-        if (self->mIsProcessing == 1)
+    case cUIState::kONOPTION: {
+        if (self->mIsProcessing == true)
             return;
-        if (self->mState == 6)
+        if (self->mState == cFEMemCard::kDONE)
             return;
         if (self->mIsSaveScreen == 0)
             return;
@@ -3029,11 +3046,11 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
         self->mSlot = pickedSlot;
         mcManager->mFileCursor = pickedSlot;
         int currentState = self->mState;
-        if (currentState != 1)
+        if (currentState != cFEMemCard::kCHECKING)
             return;
         if (mcManager->mpMemCard->HasFileName(self->mSlot)) {
             self->mIsProcessing = currentState;
-            self->mState = 4;
+            self->mState = cFEMemCard::kDELETING;
             cMCOverlayManager_SetAction(mcManager, 0);
             mcManager->SetState(0x18);
         }
@@ -3162,8 +3179,8 @@ extern "C" void cUIStateStack_pushCheck(void* list, void* item);
 extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSelect* self)
 {
     if (self->mIsDone == 0) {
-        int mode = self->mType == 1;
-        if (self->mIsCancelPressed == 1) {
+        int mode = self->mType == cFEMemCard::kTYPE_REPLAY;
+        if (self->mIsCancelPressed == true) {
             mode = 0;
         }
         if (self->mIsLoadDoneOK == 0) {
@@ -3238,7 +3255,7 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
     if (self->displayFileOK()) {
         if (pMC->mpMemCard->IsAvailable1() == 0) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (self->mScreenStatus != 3) {
+        } else if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
             self->triggerDisplayState(3);
         }
     }
@@ -3253,7 +3270,7 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
         pText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage));
         pText->setVisible(0);
         bIsNewSet = 0;
-        for (int i = 1; i < 5 && (self->mType == 1 || i < 2); i++) {
+        for (int i = 1; i < 5 && (self->mType == cFEMemCard::kTYPE_REPLAY || i < 2); i++) {
             char strObj[60];
             sprintf(strObj, str_pct_dmemory_card, i);
             pText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(strObj));
@@ -3261,7 +3278,7 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
             cUIText_setUnicodeString(pText, text);
             if (DEVI_18E510(pMC, 67, i - 1) == 0 && DEVI_18E510(pMC, 66, i - 1) == 0
                 && DEV0_18E510(pMC, 55) != 0) {
-                if (self->mType == 1) {
+                if (self->mType == cFEMemCard::kTYPE_REPLAY) {
                     pText->setUseStaticColour(1);
                     pText->setStatic(1);
                 } else if (bIsNewSet == 0 && self->mIsSaveScreen != 0) {
@@ -3285,19 +3302,19 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceS
                 pText->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, pMC, pMC->mSelectedDevice, 1) == -1) {
+        if (cFEMemCard_checkNextAvailableDevice(self, pMC, pMC->mSelectedDevice, 1) == cFEMemCard::kNoNextDevice) {
             ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(0);
         } else {
             ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, pMC, pMC->mSelectedDevice, 0) == -1) {
+        if (cFEMemCard_checkNextAvailableDevice(self, pMC, pMC->mSelectedDevice, 0) == cFEMemCard::kNoNextDevice) {
             ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(0);
         } else {
             ((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(1);
         }
     }
-    if (self->mScreenStatus != 3) {
-        for (int i = 1; i < 5 && (self->mType == 1 || i < 2); ) {
+    if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
+        for (int i = 1; i < 5 && (self->mType == cFEMemCard::kTYPE_REPLAY || i < 2); ) {
             char strObj[80];
             sprintf(strObj, str_pct_dmemory_card, i);
             i++;

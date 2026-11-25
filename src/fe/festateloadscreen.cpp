@@ -21,6 +21,7 @@
 #include "main/ssxapp.h"
 #include "render/playerlights.h"
 #include "camera/camera.h"
+#include "scripter/nislist.h"
 
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_load);
@@ -197,7 +198,7 @@ void cFELoadScreen::loadTexture(int type)
         mTexID[0] = loadTex_3640(data, str_CharaPics);
         if (data != 0)
             cMemMan_free(data);
-    } else if (type == 2 && cBENewRaceInterface_newRace.cGamePath == 2) {
+    } else if (type == 2 && cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         int* slot = (int*)(&mTexID[0]);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
@@ -297,20 +298,20 @@ extern "C" void cUIEngine_render2D(void* engine);
  * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Unless cFadeScreen_drawFade (the base fade) draws
  * this frame, the UI object at +0xC is drawn (cUIEngine_render2D); then the frame is flipped (slot 20) and 1 returned.
  *
- * @return 1 when a frame was drawn, 0 when the renderer was not ready
+ * @return true when a frame was drawn, false when the renderer was not ready
  */
-int cFELoadScreen::render()
+bool cFELoadScreen::render()
 {
     cPS2GraphicsMan* graphicsMan = GrMan;
     if (graphicsMan->IsRenderReady() == 0) {
-        return 0;
+        return false;
     }
     if (cFadeScreen_drawFade(this) == 0) {
         cUIEngine_render2D(mpUI);
     }
     graphicsMan = (cPS2GraphicsMan*)GrMan;
     graphicsMan->DrawFrame();
-    return 1;
+    return true;
 }
 #endif
 
@@ -757,7 +758,7 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
     }
     case 2: {
         sRace_233CD8* rc = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
-        if (rc->flag49 == 0 && rc->mode48 == 4) {
+        if (rc->flag49 == kGAMEPATH_WORLDCIRCUIT && rc->mode48 == kGAMEMODE_FREERIDE) {
             ((cGameState*)self)->gotoNextState();
         }
         break;
@@ -951,7 +952,7 @@ void cGFEventStartState::gainFocus(int mode)
         }
         break;
     }
-    mSubState = 0;
+    mSubState = keEventStartSubState_WaitNISTransition;
 }
 #endif
 
@@ -995,37 +996,39 @@ static inline void* hud_43B0()
 /**
  * Steps the event-start state: readies the event, sets up and loads the AI riders, then starts the event.
  *
- * The load indicator shows (and NIS list 0 pauses) until sub-state 3. Sub-state 0 waits for NIS transitions;
- * 1 readies the event, then either prepares to purge the computer riders and actors (game mode 4, mode 5
- * unless event 4, mode 6 unless event 5) or, on game path 0, initialises the AI riders (and the actors when
- * no computers are allocated), and sets the rank type; 2 loads riders until the AI is ready; 3 waits for the
- * NIS lists, activates the computers, purges if pending and goes to the next game state (sub-state 4).
+ * The load indicator shows (and NIS list 0 pauses) until keEventStartSubState_WaitNIS.
+ * keEventStartSubState_WaitNISTransition waits for NIS transitions; keEventStartSubState_SetupEvent readies the event,
+ * then either prepares to purge the computer riders and actors (kGAMEMODE_FREERIDE, kGAMEMODE_TIMECHALLENGE unless
+ * kGAMEEVENT_RIVALTIME, kGAMEMODE_PNTSCHALLENGE unless kGAMEEVENT_RIVALPOINTS) or, on kGAMEPATH_WORLDCIRCUIT,
+ * initialises the AI riders (and the actors when no computers are allocated), and sets the rank type;
+ * keEventStartSubState_WaitLoading loads riders until the AI is ready; keEventStartSubState_WaitNIS waits for the NIS
+ * lists, activates the computers, purges if pending and goes to the next game state (keEventStartSubState_Complete).
  */
 // Load screen update: drives the loading state machine (stream start, track setup, wait for load, finish).
 void cGFEventStartState::update()
 {
-    if (mSubState < 3) {
+    if (mSubState < keEventStartSubState_WaitNIS) {
         cBXLoadIndicator_Show(hud_43B0(), 2);
-        if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0) == 4)
+        if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0) == keNISListStatePlay_GoingToNext)
             cSSXScriptEngine_PauseNISList(ScriptEngine, 0, 1);
     } else {
-        if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0) == 3)
+        if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0) == keNISListStatePlay_Paused)
             cSSXScriptEngine_PauseNISList(ScriptEngine, 0, 0);
         cBXLoadIndicator_Hide(hud_43B0(), 2);
     }
     switch (mSubState) {
-    case 0:
+    case keEventStartSubState_WaitNISTransition:
         if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) == 0)
-            mSubState = 1;
+            mSubState = keEventStartSubState_SetupEvent;
         break;
-    case 1: {
+    case keEventStartSubState_SetupEvent: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         ReadyEvent();
-        signed char* cfg = ((signed char*)&cBENewRaceInterface_newRace);
-        int mode = cfg[0x48];
-        int skip = cfg[0x49];
-        int sub = cfg[0x4A];
-        if (mode == 4 || (mode == 5 && sub != 4) || (mode == 6 && sub != 5)) {
+        int mode = cBENewRaceInterface_newRace.cGameMode;
+        int skip = cBENewRaceInterface_newRace.cGamePath;
+        int sub = cBENewRaceInterface_newRace.cGameEvent;
+        if (mode == kGAMEMODE_FREERIDE || (mode == kGAMEMODE_TIMECHALLENGE && sub != kGAMEEVENT_RIVALTIME)
+            || (mode == kGAMEMODE_PNTSCHALLENGE && sub != kGAMEEVENT_RIVALPOINTS)) {
             cAI_prepareToPurgeComputerRiders(cGameState_mpGame->AI);
             cAI_prepareToPurgeComputerActors(cGameState_mpGame->AI);
             mPurgeCPURiders = 1;
@@ -1033,7 +1036,7 @@ void cGFEventStartState::update()
             cAI_initAIRiders(cGameState_mpGame->AI);
             cAI* aiObj = cGameState_mpGame->AI;
             if (aiObj->NumberOfComputersAllocated == 0) {
-                if (mode == 0)
+                if (mode == kGAMEMODE_RACE)
                     cAI_initAIActors(aiObj, 0);
                 else
                     cAI_initAIActors(aiObj, 2);
@@ -1041,37 +1044,37 @@ void cGFEventStartState::update()
             cGameState_mpGame->AI->ComputerActorsActive = 0;
         }
         cAI_setRaceRankType(cGameState_mpGame->AI, 0);
-        if (mode == 5 || mode == 0)
+        if (mode == kGAMEMODE_TIMECHALLENGE || mode == kGAMEMODE_RACE)
             cAI_setRaceRankType(cGameState_mpGame->AI, 1);
-        else if (mode != 4)
+        else if (mode != kGAMEMODE_FREERIDE)
             cAI_setRaceRankType(cGameState_mpGame->AI, 2);
-        mSubState = 2;
+        mSubState = keEventStartSubState_WaitLoading;
         break;
     }
-    case 2:
+    case keEventStartSubState_WaitLoading:
         if (!cAI_isAILoadedAndReady(cGameState_mpGame->AI))
             cAI_loadRiders(cGameState_mpGame->AI);
         else
-            mSubState = 3;
+            mSubState = keEventStartSubState_WaitNIS;
         break;
-    case 3: {
+    case keEventStartSubState_WaitNIS: {
         if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1) != 0)
             break;
         if (cGameState_mpGame->AI->NumberOfActorsAllocated > 0)
             cGameState_mpGame->AI->ComputerActorsActive = 1;
         if (cGameState_mpGame->AI->NumberOfComputersAllocated > 0)
             cGameState_mpGame->AI->ComputerRidersActive = 1;
-        if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 2) {
+        if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == keNISListState_Ready) {
             cSSXScriptEngine_PlayNISList(ScriptEngine, 0, mHasTransitionNIS == 0, 1);
             break;
         }
         int nisState = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
         int scriptCategory = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 0, 0);
-        int busy = nisState && scriptCategory != 5;
+        int busy = nisState && scriptCategory != keSSXScriptCategory_wcracestartframe;
         if (busy)
             break;
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (cBENewRaceInterface_newRace.cGameMode != 4) {
+        if (cBENewRaceInterface_newRace.cGameMode != kGAMEMODE_FREERIDE) {
             cAI_resolveRace(cGameState_mpGame->AI);
             if (cGameState_mpGame->AI->NumberOfComputersAllocated > 0)
                 cGameState_mpGame->AI->ComputerRidersActive = 1;
@@ -1085,11 +1088,11 @@ void cGFEventStartState::update()
             cAI_cleanupActors(cGameState_mpGame->AI);
             mPurgeCPURiders = 0;
         }
-        mSubState = 4;
+        mSubState = keEventStartSubState_Complete;
         ((cGameState*)this)->gotoNextState();
         break;
     }
-    case 4:
+    case keEventStartSubState_Complete:
         break;
     }
 }
@@ -1161,16 +1164,16 @@ void cGFEventStartState::loseFocus()
         cAI_initFreeride(*(void**)((char*)cGameState_mpGame + 0xC));
         cReplay_startRace(*(void**)((char*)cGameState_mpGame + 0x28));
     }
-    if (mode != 4) {
+    if (mode != kGAMEMODE_FREERIDE) {
         char* aiMan = *(char**)((char*)cGameState_mpGame + 0xC);
         sVE_234750* vt = *(sVE_234750**)(aiMan + 0xCC);
         vt[5].fn(vthis(aiMan, vt[5]), 3);
         *(int*)(*(char**)((char*)cGameState_mpGame + 0xC) + 0x14) = 1;
     }
     cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 0);
-    if (mode == 5 || mode == 0)
+    if (mode == kGAMEMODE_TIMECHALLENGE || mode == kGAMEMODE_RACE)
         cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 1);
-    else if (mode != 4)
+    else if (mode != kGAMEMODE_FREERIDE)
         cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 2);
     cWScriptMan_purgeMissions(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(cWScriptMan_TheWScriptMan);
@@ -1202,22 +1205,23 @@ static inline int isState00234910(void* e, int s)
 }
 
 /**
- * Starts the event's opening NIS lists: plays list 1 and then list 0 when the script engine is in state 2, and records
- * whether a list is playing.
+ * Starts the event's opening NIS lists: plays list 1 and then list 0 when the script engine plays none (keNISList_Num),
+ * and records whether a list is playing.
  *
  * Each call is cSSXScriptEngine_PlayNISList(ScriptEngine, list, 1, 1), made only while the engine's +0x550
- * (mPlayingNISList) is 2. Then +0x14 is 1 when mPlayingNISList is 1, else 0. cGFEventStartState_update() calls it.
+ * (mPlayingNISList) is keNISList_Num. Then +0x14 is 1 when mPlayingNISList is keNISList_AuxTransition, else 0.
+ * cGFEventStartState_update() calls it.
  */
 void cGFEventStartState::ReadyEvent()
 {
-    if (isState00234910(ScriptEngine, 2)) {
+    if (isState00234910(ScriptEngine, keNISList_Num)) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 1);
     }
-    if (isState00234910(ScriptEngine, 2)) {
+    if (isState00234910(ScriptEngine, keNISList_Num)) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 1);
     }
     mHasTransitionNIS = 0;
-    if (ScriptEngine->mPlayingNISList == 1) {
+    if (ScriptEngine->mPlayingNISList == keNISList_AuxTransition) {
         mHasTransitionNIS = 1;
     }
 }

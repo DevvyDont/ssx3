@@ -4,6 +4,7 @@
 #include "ui/uiengine.h"
 #include "fe/festatelegal.h"
 #include "fe/festateoptions.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/festatelegal", cFEStateLegal_onCreateScreen);
@@ -45,9 +46,9 @@ extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cFEStateLegal_onUpdate(cFEStateLegal* self)
 {
     cUIState_onUpdate(self);
-    if (++self->mDisplayTicks == 0xF0) {
+    if (++self->mDisplayTicks == cFEStateLegal::kDisplayTicks) {
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
@@ -110,9 +111,9 @@ static inline int ItemType_7D38(char* item)
  * popup.
  *
  * @param code  the typed code (copied, not modified)
- * @return 1 when the code was recognised and applied, else 0
+ * @return true when the code was recognised and applied
  */
-extern "C" int func_00187D38(char* code)
+extern "C" bool func_00187D38(char* code)
 {
     void* gear = cBE_getInterface_Fv(cBE_getBE(), 11);
     void* unlocks = cBE_getInterface_Fv(cBE_getBE(), 13);
@@ -123,77 +124,77 @@ extern "C" int func_00187D38(char* code)
     if (GetHashValue32(buf) == 0x7E68D) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 11, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x699649F) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 13, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x80C4F45) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 0xF, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xFA26044) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 17, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x539AB42) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 10, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x61C8197) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 18, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x64694E5) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 19, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x3F22E2B) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 20, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xCD28689) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 21, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xB582D1C) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 22, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x1CB90E5) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 23, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x715E0E4) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 0x18, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xF3223E) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 25, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xEAFC69E) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 27, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xDD36D88) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 0x1C, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xDE3475) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 26, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x82DE683) {
         for (int i = 0; i < 10; i++)
             cBEEconInterface_getPeakPass(gear, 0, i, 1, 1);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x4B1FF67) {
         for (int i = 0; i < 10; i++) {
             cBEEconInterface_getPeakPass(gear, 0, i, 1, 1);
             cBEEconInterface_getPeakPass(gear, 0, i, 2, 1);
         }
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x61F9F02) {
         int n = cBERewardInterface_getTotalNumSongs(unlocks);
         for (int i = 0; i < 10; i++) {
@@ -204,37 +205,37 @@ extern "C" int func_00187D38(char* code)
             }
             cBERewardInterface_setPlayList(unlocks, 0, i, mask);
         }
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x5B65653) {
         int n = cBERewardInterface_getTotalNumPosters(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
                 cBERewardInterface_buyPoster(unlocks, 0, i, j, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xA0CF7C4) {
         int n = cBERewardInterface_getTotalNumTradingCards(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
                 cBERewardInterface_buyTradingCard(unlocks, 0, i, j, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xB5D8914) {
         int n = cBERewardInterface_getTotalNumConceptArts(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
                 cBERewardInterface_buyConceptArt(unlocks, 0, i, j, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x717257D) {
         int n = cBERewardInterface_getTotalNumVideos(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
                 cBERewardInterface_buyVideo(unlocks, 0, i, j, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x74F6CF4) {
         int n = cBERewardInterface_getTotalNumToys(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
                 cBERewardInterface_buyToy(unlocks, 0, i, j, 0);
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0xBCF3974) {
         for (int team = 0; team < 3; team++) {
             for (int type = 0; type < 10; type++) {
@@ -250,7 +251,7 @@ extern "C" int func_00187D38(char* code)
                 }
             }
         }
-        return 1;
+        return true;
     } else if (GetHashValue32(buf) == 0x70694D5) {
         for (int team = 0; team < 3; team++) {
             for (int type = 0; type < 10; type++) {
@@ -263,7 +264,7 @@ extern "C" int func_00187D38(char* code)
                 }
             }
         }
-        return 1;
+        return true;
     }
     return 0;
 }

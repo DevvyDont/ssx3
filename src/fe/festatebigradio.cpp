@@ -10,6 +10,8 @@
 #include "ui/uistate.h"
 #include "be/beintnewrace.h"
 #include "online/lobbyman.h"
+#include "fe/festatenet.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onCreateScreen);
@@ -84,7 +86,7 @@ static inline void* find_2DB0(cFEStateBraggingRights* self, char* name)
 
 static inline bool isNet_2DB0()
 {
-    return D_004A1A70 == 1;
+    return D_004A1A70 == cFEStateNet::kFEPathOnline;
 }
 
 /**
@@ -92,8 +94,10 @@ static inline bool isNet_2DB0()
  *
  * Creates "65bragrights", unlocks both panels when bit 4 of +0x1C is set, and picks the rule table and row
  * count (5-7) from the game event. Each row's label gets the rule's text id (D_00441108), and each panel's
- * list gets No/Yes for rules 1-6, Off/5s-20s for rule 0 and Off/3000-15000 for rule 7, with the current value
- * (cFEStateBraggingRights_getBEData) selected. Online (D_004A1A70 == 1) shows "ongroup" and hides the second player's widgets.
+ * list gets No/Yes for kBRAGRIGHTS_GIVEFULLBOOST .. kBRAGRIGHTS_TAKEHALFPOINTS, Off/5s-20s for
+ * kBRAGRIGHTS_GIVEHEADSTART and Off/3000-15000 for kBRAGRIGHTS_STARTINHOLE, with the current value
+ * (cFEStateBraggingRights_getBEData) selected. Online (D_004A1A70 == cFEStateNet::kFEPathOnline) shows "ongroup" and
+ * hides the second player's widgets.
  */
 // Bragging rights screen: builds the rule rows of both player panels for the current mode.
 extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* self)
@@ -113,27 +117,27 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
     cBE_getInterface_Fv(cBE_getBE(), 0);
     unsigned int mask = 0;
     switch (cBENewRaceInterface_newRace.cGameEvent) {
-    case 0:
+    case kGAMEEVENT_RACE:
         (*(signed char**)&self->mpGameEventMapping) = D_004A1710;
         n = 6;
         break;
-    case 1:
+    case kGAMEEVENT_SLOPESTYLE:
         (*(signed char**)&self->mpGameEventMapping) = D_004A1718;
         n = 7;
         break;
-    case 3:
+    case kGAMEEVENT_BIGAIR:
         (*(signed char**)&self->mpGameEventMapping) = D_004A1720;
         n = 7;
         break;
-    case 2:
+    case kGAMEEVENT_SUPERPIPE:
         (*(signed char**)&self->mpGameEventMapping) = D_004A1728;
         n = 7;
         break;
-    case 4:
+    case kGAMEEVENT_RIVALTIME:
         (*(signed char**)&self->mpGameEventMapping) = D_004A1730;
         n = 5;
         break;
-    case 5:
+    case kGAMEEVENT_RIVALPOINTS:
         (*(signed char**)&self->mpGameEventMapping) = D_004A1738;
         n = 7;
         break;
@@ -154,18 +158,18 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
             unsigned char out = 0;
             void* lb = (&((cBraggingRightsMenu*)(&self->mMenuCtrl[0]))[playerIndex].mpListBox[0])[row];
             switch (((signed char*)self->mpGameEventMapping)[row]) {
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
+            case kBRAGRIGHTS_GIVEFULLBOOST:
+            case kBRAGRIGHTS_GIVEFASTRECOVERY:
+            case kBRAGRIGHTS_TAKENOUBER:
+            case kBRAGRIGHTS_TAKELEAKYAD:
+            case kBRAGRIGHTS_TAKELV1CHAR:
+            case kBRAGRIGHTS_TAKEHALFPOINTS:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNNo), 0);
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNYes), 1);
                 cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, ((signed char*)self->mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
-            case 0:
+            case kBRAGRIGHTS_GIVEHEADSTART:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNOff), 0);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_5s, 5);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10s, 10);
@@ -174,7 +178,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
                 cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, ((signed char*)self->mpGameEventMapping)[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
-            case 7:
+            case kBRAGRIGHTS_STARTINHOLE:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNOff), 0);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_3000, 3000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_5000, 5000);
@@ -328,7 +332,7 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
                     label[0] = '2';
                 cUIMenu_setSelectedByIndex_3338(*(void**)((char*)self + panelIdx * 0x34 + 0x6D0), 0);
                 int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpScreen, GetHashValue32(label));
-                if (frame != 0xFFFF)
+                if (frame != cUIScreen::kNoFrame)
                     cUIScreen_playFrame(self->mpScreen, frame, 1);
                 if (isNet_2DB0())
                     func_00265700(cSetupMan_mSetupMan);
@@ -356,7 +360,7 @@ void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
 
 static inline int isOn00193568()
 {
-    return D_004A1A70 == 1;
+    return D_004A1A70 == cFEStateNet::kFEPathOnline;
 }
 
 static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
@@ -379,12 +383,12 @@ extern "C" void cFEStateBraggingRights_onGainFocus(cFEStateBraggingRights* self,
     cUIState_onGainFocus_v(self);
     if (self->mMenuCtrl[0].mbConfirmed != 0 && self->mMenuCtrl[1].mbConfirmed == 0) {
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_1));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     } else if (get6F8_3568(self) == 0 && self->mMenuCtrl[1].mbConfirmed != 0) {
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_2));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     }
@@ -541,7 +545,7 @@ struct sVObj_38F8 {
 
 static inline int isOn_38F8()
 {
-    return D_004A1A70 == 1;
+    return D_004A1A70 == cFEStateNet::kFEPathOnline;
 }
 
 static inline void* vcall_38F8(char* self, int slot, cUIThing* w)
@@ -553,11 +557,11 @@ static inline void* vcall_38F8(char* self, int slot, cUIThing* w)
 /**
  * Handles the bragging-rights widgets: locking a panel, leaving, highlighting and changing a rule's value.
  *
- * Event 5 on a row locks its panel (cBraggingRightsMenu_setConfirmed) and plays the wait labels; offline, once both panels are
- * locked, the custom interface's next state is pushed. Event 6 online asks "kT_POPUPCMNCancelChallenge"
- * (popup id 0x838), offline pushes the previous state and clears the rule records cBERules_mRules. Events 1 and 2
- * recolour the panel; event 9 stores the new value with cFEStateBraggingRights_updateBE (online it is sent to the peer
- * instead).
+ * kONNEXT on a row locks its panel (cBraggingRightsMenu_setConfirmed) and plays the wait labels; offline, once both
+ * panels are locked, the custom interface's next state is pushed. kONPREV online asks "kT_POPUPCMNCancelChallenge"
+ * (popup id kCancelChallengePopup), offline pushes the previous state and clears the rule records cBERules_mRules.
+ * kONGAINFOCUS and kONLOSEFOCUS recolour the panel; kONCHANGE stores the new value with cFEStateBraggingRights_updateBE
+ * (online it is sent to the peer instead).
  *
  * @param w  the widget
  * @param event  the widget event
@@ -567,10 +571,10 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
 {
     int panel;
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int i = 0;
         do {
-            if (cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[i], w) != -1) {
+            if (cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[i], w) != cBraggingRightsMenu::kNotFound) {
                 if (isOn_38F8() && i == 0)
                     func_00265688(cSetupMan_mSetupMan);
                 cBraggingRightsMenu_setConfirmed_38F8(&self->mMenuCtrl[i], 1);
@@ -590,7 +594,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 6:
+    case cUIState::kONPREV:
         if (isOn_38F8()) {
             cScreenPopup* popup = (cScreenPopup*)((char*)func_001A9C50(((char*)self)));
             char* sub = (char*)&popup->info;
@@ -599,7 +603,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             popup->info.mtMessage.eType = 3;
             func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
             func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
-            popup->info.miMiscData = 2104;
+            popup->info.miMiscData = cFEStateBraggingRights::kCancelChallengePopup;
             popup->info.miDefaultOption = 1;
             func_001A9BC0(((char*)self), popup);
         } else {
@@ -609,16 +613,16 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             MEM_fill(cBERules_mRules, 0, 0x20);
         }
         break;
-    case 1:
-    case 2:
+    case cUIState::kONGAINFOCUS:
+    case cUIState::kONLOSEFOCUS:
         panel = w->mMiscData;
         cBraggingRightsMenu_setMenuItemColor(&self->mMenuCtrl[panel]);
         break;
-    case 7:
+    case cUIState::kONOPTION:
         if (isOn_38F8())
             cFEStateNet_onWidgetEvent(((char*)self), w);
         break;
-    case 9:
+    case cUIState::kONCHANGE:
         if (isOn_38F8()) {
             void* snd = cSetupMan_mSetupMan;
             int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[0], w);
@@ -627,7 +631,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             panel = w->mMiscData;
             int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[panel], w);
             int which = ((signed char*)self->mpGameEventMapping)[slot];
-            if (which != -1)
+            if (which != cFEStateBraggingRights::kNoRule)
                 self->updateBE(panel, which, cUIListBox_getCurrentEntryData_38F8(w));
         }
         break;
@@ -682,13 +686,13 @@ extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
 extern "C" void func_00265458(void* snd, int id);
 static inline int isOn00193CF8()
 {
-    return D_004A1A70 == 1;
+    return D_004A1A70 == cFEStateNet::kFEPathOnline;
 }
 /**
  * Handles menu events of the two bragging-rights menus: recolouring and which events pass on.
  *
- * Events 8 and 9 return 0x100. Event 5 recolours the menu's panel (online, panel 0's selection is also sent
- * to the peer). Event 6 returns 1 while either panel is unlocked. Event 7 returns 0 online.
+ * kONOPTION and kONMISC return 0x100. kSCROLLCHANGE recolours the menu's panel (online, panel 0's selection is also
+ * sent to the peer). kONNEXT returns 1 while either panel is unlocked. kONPREVIOUS returns 0 online.
  *
  * @param ctrl  the menu (On Tour: cUIMenu *pMenu)
  * @param msg  the menu event
@@ -708,18 +712,18 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self,
         if (*item != ((void*)ctrl)) item = 0;
     }
     switch (msg) {
-    case 8: case 9:
+    case cUIMenu::kONOPTION: case cUIMenu::kONMISC:
         return 0x100;
-    case 5:
+    case cUIMenu::kSCROLLCHANGE:
         if (isOn00193CF8() && found) {
             func_00265458(cSetupMan_mSetupMan, ctrl->mScrollItemCurrent);
         }
         cBraggingRightsMenu_setMenuItemColor(item);
         return 257;
-    case 6:
+    case cUIMenu::kONNEXT:
         if (self->mMenuCtrl[0].mbConfirmed == 0 || self->mMenuCtrl[1].mbConfirmed == 0) return 1;
         return 257;
-    case 7:
+    case cUIMenu::kONPREVIOUS:
         if (isOn00193CF8()) return 0;
         break;
     }
@@ -753,25 +757,27 @@ static inline int other_193DE0(int p)
 /**
  * Stores the value of one bragging-rights rule for a player in the rule records cBERules_mRules (0xC bytes per player).
  *
- * Rules 0 (word +0x8), 1 (bit 3), 2 (bit 0) and 7 (word +0x4) go into the other player's record; rules 3 (bit 4), 4
- * (bit 5), 5 (bit 1) and 6 (bit 2) into the player's own. Other rules are ignored. The bragging-rights widget handler
+ * kBRAGRIGHTS_GIVEHEADSTART (word +0x8), kBRAGRIGHTS_GIVEFULLBOOST (bit 3), kBRAGRIGHTS_GIVEFASTRECOVERY (bit 0) and
+ * kBRAGRIGHTS_STARTINHOLE (word +0x4) go into the other player's record; kBRAGRIGHTS_TAKENOUBER (bit 4),
+ * kBRAGRIGHTS_TAKELEAKYAD (bit 5), kBRAGRIGHTS_TAKELV1CHAR (bit 1) and kBRAGRIGHTS_TAKEHALFPOINTS (bit 2) into the
+ * player's own. Other rules are ignored. The bragging-rights widget handler
  * calls it when a choice changes, and func_001941B0 when the online peer reports one.
  *
  * @param player  the player whose panel set the rule (0 or 1)
- * @param which   the rule (0-7)
+ * @param which   the rule (eBRAGRIGHTs)
  * @param value   the chosen value
  */
 void cFEStateBraggingRights::updateBE(int player, int which, int value)
 {
     switch (which) {
-    case 0: cBERules_mRules_193DE0[other_193DE0(player)].f8 = value; break;
-    case 1: cBERules_mRules_193DE0[other_193DE0(player)].b3 = value; break;
-    case 2: cBERules_mRules_193DE0[other_193DE0(player)].b0 = value; break;
-    case 3: cBERules_mRules_193DE0[player].b4 = value; break;
-    case 4: cBERules_mRules_193DE0[player].b5 = value; break;
-    case 5: cBERules_mRules_193DE0[player].b1 = value; break;
-    case 6: cBERules_mRules_193DE0[player].b2 = value; break;
-    case 7: cBERules_mRules_193DE0[other_193DE0(player)].f4 = value; break;
+    case kBRAGRIGHTS_GIVEHEADSTART: cBERules_mRules_193DE0[other_193DE0(player)].f8 = value; break;
+    case kBRAGRIGHTS_GIVEFULLBOOST: cBERules_mRules_193DE0[other_193DE0(player)].b3 = value; break;
+    case kBRAGRIGHTS_GIVEFASTRECOVERY: cBERules_mRules_193DE0[other_193DE0(player)].b0 = value; break;
+    case kBRAGRIGHTS_TAKENOUBER: cBERules_mRules_193DE0[player].b4 = value; break;
+    case kBRAGRIGHTS_TAKELEAKYAD: cBERules_mRules_193DE0[player].b5 = value; break;
+    case kBRAGRIGHTS_TAKELV1CHAR: cBERules_mRules_193DE0[player].b1 = value; break;
+    case kBRAGRIGHTS_TAKEHALFPOINTS: cBERules_mRules_193DE0[player].b2 = value; break;
+    case kBRAGRIGHTS_STARTINHOLE: cBERules_mRules_193DE0[other_193DE0(player)].f4 = value; break;
     }
 }
 #endif
@@ -797,30 +803,30 @@ extern sRadioChan_3F38 cBERules_mRules_a[] __asm__("cBERules_mRules");
 /**
  * Returns the value of one bragging-rights rule for a player from the rule records cBERules_mRules.
  *
- * Reads the same fields cFEStateBraggingRights_updateBE writes: rules 0, 1, 2 and 7 from the other player's record, 3-6 from the player's
- * own.
+ * Reads the same fields cFEStateBraggingRights_updateBE writes: the GIVE rules and kBRAGRIGHTS_STARTINHOLE from the
+ * other player's record, the TAKE rules from the player's own.
  *
  * @param chan  the player (0 or 1)
- * @param kind  the rule (0-7)
+ * @param kind  the rule (eBRAGRIGHTs)
  * @return the rule's value, or -1 for other rules
  */
 extern "C" int cFEStateBraggingRights_getBEData(void *self, int chan, int kind) {
     switch (kind) {
-    case 0:
+    case kBRAGRIGHTS_GIVEHEADSTART:
         return cBERules_mRules_a[other_3F38(chan)].f8;
-    case 1:
+    case kBRAGRIGHTS_GIVEFULLBOOST:
         return cBERules_mRules_a[other_3F38(chan)].b3;
-    case 2:
+    case kBRAGRIGHTS_GIVEFASTRECOVERY:
         return cBERules_mRules_a[other_3F38(chan)].b0;
-    case 3:
+    case kBRAGRIGHTS_TAKENOUBER:
         return cBERules_mRules_a[chan].b4;
-    case 4:
+    case kBRAGRIGHTS_TAKELEAKYAD:
         return cBERules_mRules_a[chan].b5;
-    case 5:
+    case kBRAGRIGHTS_TAKELV1CHAR:
         return cBERules_mRules_a[chan].b1;
-    case 6:
+    case kBRAGRIGHTS_TAKEHALFPOINTS:
         return cBERules_mRules_a[chan].b2;
-    case 7:
+    case kBRAGRIGHTS_STARTINHOLE:
         return cBERules_mRules_a[other_3F38(chan)].f4;
     default:
         return -1;
@@ -849,12 +855,12 @@ void cFEStateBraggingRights::updateConfirmedState()
 {
     if (mMenuCtrl[0].mbConfirmed != 0 && mMenuCtrl[1].mbConfirmed == 0) {
         int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_wait_1));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(mpScreen, frame, 1);
         }
     } else if (get6F8_4080(this) == 0 && mMenuCtrl[1].mbConfirmed != 0) {
         int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_wait_2));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(mpScreen, frame, 1);
         }
     }
@@ -869,7 +875,7 @@ extern "C" void* cFEStateNet_handleEvent(void* self, int size, int a2);
 
 static inline int isOn00194138()
 {
-    return D_004A1A70 == 1;
+    return D_004A1A70 == cFEStateNet::kFEPathOnline;
 }
 
 /**
@@ -900,7 +906,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 static inline int isOn00194168()
 {
-    return D_004A1A70 == 1;
+    return D_004A1A70 == cFEStateNet::kFEPathOnline;
 }
 
 /**
@@ -914,7 +920,7 @@ static inline int isOn00194168()
 extern "C" void cFEStateBraggingRights_onPopupEvent(cFEStateBraggingRights* self, cUIState* pPopup, int Event)
 {
     if (isOn00194168()) {
-        if (pPopup->miMiscData == 2104) {
+        if (pPopup->miMiscData == cFEStateBraggingRights::kCancelChallengePopup) {
             func_00194440(self, pPopup, Event);
         } else {
             cFEStateNet_onPopupEvent(self, pPopup, Event);
@@ -960,10 +966,11 @@ struct sRadioMsg_41B0 {
  *
  * 251 selects row @p data's idx in the given panel's menu. 252 finds the list entry whose data is the message's key in
  * the given panel's list idx, selects it and stores the value for the row's rule (+0x738 table; cFEStateBraggingRights_updateBE) unless
- * the rule is -1. 253 locks the panel (cBraggingRightsMenu_setConfirmed with 1) and refreshes the wait labels (cFEStateBraggingRights_updateConfirmedState). 254 unlocks
- * it, recolours it (cBraggingRightsMenu_setEnableItem), selects its row 0 and plays label "11" (panel 0) or "21". 238, 241, 248, 250, 274
- * and 275 call func_001AB288. 268 hands func_001A8A40 a new chat room (cFEStateChatRoom, 1852 bytes) when
- * func_0025DA90(LobbyMan_mLobbyMan) is true, else a new online main menu (1744 bytes). Others go to func_001A8E40.
+ * the rule is kNoRule. 253 locks the panel (cBraggingRightsMenu_setConfirmed with 1) and refreshes the wait labels
+ * (cFEStateBraggingRights_updateConfirmedState). 254 unlocks it, recolours it (cBraggingRightsMenu_setEnableItem),
+ * selects its row 0 and plays label "11" (panel 0) or "21". 238, 241, 248, 250, 274 and 275 call func_001AB288. 268
+ * hands func_001A8A40 a new chat room (cFEStateChatRoom, 1852 bytes) when func_0025DA90(LobbyMan_mLobbyMan) is true,
+ * else a new online main menu (1744 bytes). Others go to func_001A8E40.
  *
  * @param msg   the message
  * @param data  the message data (+0x8 panel, +0xC row or list index, +0x10 key)
@@ -984,7 +991,7 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         cUIListBox_setCurrentEntryByIndex_41B0(item, out);
         int slot = cBraggingRightsMenu_findListBoxP_41B0(&(((&self->mMenuCtrl[0])))[data->panel], item);
         int which = ((signed char*)self->mpGameEventMapping)[slot];
-        if (which == -1) {
+        if (which == cFEStateBraggingRights::kNoRule) {
             break;
         }
         int panel = data->panel;
@@ -1010,7 +1017,7 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         cBraggingRightsMenu_setEnableItem_41B0(&(((&self->mMenuCtrl[0])))[data->panel], self->mpScreen);
         cUIMenu_setSelectedByIndex_41B0(((void*)(((&self->mMenuCtrl[0])))[data->panel].mpPlayerMenu), 0);
         int frame = data->panel == 0 ? cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_11)) : cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_21));
-        if (frame == 0xFFFF) {
+        if (frame == cUIScreen::kNoFrame) {
             break;
         }
         cUIScreen_playFrame(self->mpScreen, frame, 1);
@@ -1032,18 +1039,18 @@ void func_001A94D8(void* self);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 /**
- * Handles an event of the bragging-rights screen's cancel-challenge popup (id 2104).
+ * Handles an event of the bragging-rights screen's cancel-challenge popup (id kCancelChallengePopup).
  *
- * Event 0xF (confirmed) cancels the online race setup (func_00265768(cSetupMan_mSetupMan, 249) when cSetupMan_mSetupMan is set) and calls
- * the empty func_001A94D8; other events go to cFEStateNet_onPopupEvent. cFEStateBraggingRights_onPopupEvent calls it
- * online for that popup.
+ * kONSCREENPOPUPOPTION0 (confirmed) cancels the online race setup (func_00265768(cSetupMan_mSetupMan, 249) when
+ * cSetupMan_mSetupMan is set) and calls the empty func_001A94D8; other events go to cFEStateNet_onPopupEvent.
+ * cFEStateBraggingRights_onPopupEvent calls it online for that popup.
  *
  * @param popup  the popup
  * @param popupEvent  the popup event
  */
 extern "C" void func_00194440(cFEStateBraggingRights* self, cUIState* popup, int popupEvent)
 {
-    if (popupEvent == 0xF) {
+    if (popupEvent == cUIState::kONSCREENPOPUPOPTION0) {
         if (cSetupMan_mSetupMan != 0) {
             func_00265768(cSetupMan_mSetupMan, 249);
         }

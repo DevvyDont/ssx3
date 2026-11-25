@@ -64,6 +64,26 @@ CHECK_SIZE(tMapLocation, 0x6C);
 struct cUIText;
 
 struct cUITemplate_MAP {
+    // The map's enums. [O] On Tour's eMapStyle (global there; the class static mMapStyle), eMapFEStartPoint
+    // (mMapFEStart) and cUITemplate_MAP's own eMapPicTypes, eMapPopupType, eMapSelectableEvent and eMapState, names
+    // and values. Retail fits them: [U] onCreateScreen adds the PDA template for kMAPSTYLE_BE_SELECTPEAKEVENT,
+    // kMAPSTYLE_TRANSPORT and kMAPSTYLE_EOE_TRANSPORT and hides the PDA buttons only for kMAPSTYLE_EOE_TRANSPORT;
+    // setupLayout titles kMAPSTATE_SELECTPEAK "kT_240SelectPeak", kMAPSTATE_SELECTGOAL "kT_FESelPeakGoal" and
+    // kMAPSTATE_SELECTLOCATION the race / freestyle / freeride event titles by mSelectedEvent; setupPeakGoals' goal
+    // groups are race, freestyle (5 goals), freeride and earnings; setupMapPic loads the three-peak picture
+    // (Load3PeakPic) for kMAP_3PEAK; setupPopup gives kMAPPOPUP_TRANSPORT_NOMONEY a lone "OK" button.
+    enum eMapStyle {
+        kMAPSTYLE_FE_SELECTPEAKEVENT = 0, kMAPSTYLE_BE_SELECTPEAKEVENT = 1, kMAPSTYLE_PAUSE_MAP = 2,
+        kMAPSTYLE_TRANSPORT = 3, kMAPSTYLE_EOE_TRANSPORT = 4
+    };
+    enum eMapFEStartPoint { kMAPFESTARTPOINT_PEAK = 0, kMAPFESTARTPOINT_LOCATION = 1 };
+    enum eMapPicTypes { kMAP_NONE = 0, kMAP_3PEAK = 1, kMAP_PEAKA = 2, kMAP_PEAKB = 3, kMAP_PEAKC = 4 };
+    enum eMapPopupType { kMAPPOPUP_TRANSPORT = 0, kMAPPOPUP_TRANSPORT_NOMONEY = 1 };
+    enum eMapSelectableEvent {
+        kMAPEVENT_RACE = 0, kMAPEVENT_FREESTYLE = 1, kMAPEVENT_FREERIDE = 2, kMAPEVENT_EARNINGS = 3
+    };
+    enum eMapState { kMAPSTATE_SELECTPEAK = 0, kMAPSTATE_SELECTGOAL = 1, kMAPSTATE_SELECTLOCATION = 2 };
+
     int mShowInfo;                  // 0x000 [O] (bool); [U] setShowInfo stores it; onGainTransition / onUpdate /
                                     //       onWidgetEvent / setupLayout test it
     int mbPeakUnlocked[3];          // 0x004 [O] (bool[3]); [U] setupPeakUnlock fills it; setupMenus / setupPeakInfo

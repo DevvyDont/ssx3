@@ -197,7 +197,7 @@ static inline void Opened1867A8(void* vself, void* item)
 /**
  * Handles widget events for the event-select map screen, moving to the next or previous state on accept or back.
  *
- * Every event first goes to the embedded map template's handler, cUITemplate_MAP_onWidgetEvent() on +0x48. For event 5
+ * Every event first goes to the embedded map template's handler, cUITemplate_MAP_onWidgetEvent() on +0x48. For kONNEXT
  * (accept) or 6 (back) that the template answers with 1: online (D_004A1A70 == 1) it plays the screen's "TransitionOut"
  * frame and pops this state (cUIStateStack_pop() with count 1 on the engine's state stack, mpEngine +0x18); otherwise it
  * asks the engine's FE custom object for a state (cFECustom_getNextState(), slot 4, for 5; cFECustom_getPrevState(), slot 5, for
@@ -209,8 +209,8 @@ static inline void Opened1867A8(void* vself, void* item)
  */
 extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUIThing* obj, int msg)
 {
-    if (msg == 5) {
-        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, 5) == 1) {
+    if (msg == cUIState::kONNEXT) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, cUIState::kONNEXT) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
                 cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
@@ -219,8 +219,8 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUI
                 Opened1867A8(self, feCustom->getNextState(self, obj->mMiscData));
             }
         }
-    } else if (msg == 6) {
-        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, 6) == 1) {
+    } else if (msg == cUIState::kONPREV) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, cUIState::kONPREV) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
                 cUIStateStack_pop(&self->mpEngine->mStateStack, 1);

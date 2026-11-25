@@ -13,6 +13,7 @@
 #include "main/ssxapp.h"
 #include "util/bxmemcard.h"
 #include "util/locale.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileSelect_onCreateScreen);
@@ -53,8 +54,8 @@ typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
 /**
  * Handles select, back and highlight events on the profile select screen.
  *
- * Event 5 recolours the entry and pushes the next state for its misc data (custom interface slot 4); event 6
- * pushes the previous state (slot 5); events 1 and 2 set the highlight and normal colours.
+ * kONNEXT recolours the entry and pushes the next state for its misc data (custom interface slot 4); kONPREV
+ * pushes the previous state (slot 5); kONGAINFOCUS and kONLOSEFOCUS set the highlight and normal colours.
  *
  * @param menu  the widget the event is for (null: nothing happens)
  * @param msg  UI event code (1, 2, 5 or 6)
@@ -64,7 +65,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
     if (((char*)menu) == 0)
         return;
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, menu);
         vt[11].fn(vthis(menu, vt[11]), tARGBInit(1.0f, 1.0f, 0.0f, 0.0f));
         cUICustomInterface* custom = self->mpEngine->mpCustom;
@@ -73,19 +74,19 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* custom = self->mpEngine->mpCustom;
         void* nextState = custom->getPrevState((cUIState*)self, menu->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, menu);
         vt[11].fn(vthis(menu, vt[11]), tARGBInit(1.0f, 0.0f, 1.0f, 0.0f));
         break;
     }
-    case 2: {
+    case cUIState::kONLOSEFOCUS: {
         tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, menu);
         vt[11].fn(vthis(menu, vt[11]), tARGBInit(1.0f, 1.0f, 1.0f, 1.0f));
         break;
@@ -139,9 +140,8 @@ extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(cFEStateProfileLoad* se
     }
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* newRace = (signed char*)((char*)&cBENewRaceInterface_newRace);
     int n = 1;
-    if (newRace[0x49] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         n = 2;
     }
     for (int j = 0; j < n; j++) {
@@ -172,7 +172,8 @@ extern "C" void cFEStateProfileLoad_initSaveScreen(cFEStateProfileLoad* self);
 /**
  * Creates the profile load/save screen ("93profile_load") and sets it up for the current mode.
  *
- * After initGeneral, mode cFEStateProfileLoad_mScreenAction picks initCreateScreen (1), cFEStateProfileLoad_initLoadScreen (2) or cFEStateProfileLoad_initSaveScreen (3),
+ * After initGeneral, mode cFEStateProfileLoad_mScreenAction picks initCreateScreen (kScreenActionCreate),
+ * cFEStateProfileLoad_initLoadScreen (kScreenActionLoad) or cFEStateProfileLoad_initSaveScreen (kScreenActionSave),
  * probably On Tour's initLoadScreen and initSaveScreen.
  */
 extern "C" void cFEStateProfileLoad_onCreateScreen(cFEStateProfileLoad* self)
@@ -185,13 +186,13 @@ extern "C" void cFEStateProfileLoad_onCreateScreen(cFEStateProfileLoad* self)
     }
     self->initGeneral();
     switch (cFEStateProfileLoad_mScreenAction) {
-    case 1:
+    case cFEStateProfileLoad::kScreenActionCreate:
         self->initCreateScreen();
         break;
-    case 2:
+    case cFEStateProfileLoad::kScreenActionLoad:
         self->initLoadScreen();
         break;
-    case 3:
+    case cFEStateProfileLoad::kScreenActionSave:
         self->initSaveScreen();
         break;
     }
@@ -225,10 +226,10 @@ extern int cFEStateProfileLoad_mScreenAction;
 /**
  * Answers the profile load screen's menu events: refuses events the current screen cannot take.
  *
- * Event 6 gives 0x100 when the card manager's mSelectedDevice fails the memory card's slot-54 check (mpMemCard,
- * cPS2MemCard_IsActionable); event 8 gives 0x100 on the load screen (cFEStateProfileLoad_mScreenAction 2) or while the delete
- * button is inactive (+0x220 clear); event 9 always gives 0x100; everything else gives 0x101. Fills slot +0xA4
- * (onWidgetMenu) of cFEStateProfileLoad_vtbl.
+ * kONNEXT gives 0x100 when the card manager's mSelectedDevice fails the memory card's slot-54 check (mpMemCard,
+ * cPS2MemCard_IsActionable); kONOPTION gives 0x100 on the load screen (cFEStateProfileLoad_mScreenAction
+ * kScreenActionLoad) or while the delete button is inactive (+0x220 clear); kONMISC always gives 0x100; everything else
+ * gives 0x101. Fills slot +0xA4 (onWidgetMenu) of cFEStateProfileLoad_vtbl.
  *
  * @param widget  the menu that sent the event (unused)
  * @param msg  the menu event
@@ -238,17 +239,18 @@ extern "C" int cFEStateProfileLoad_onWidgetMenu(cFEStateProfileLoad* self, void*
 {
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
-    case 6:
+    case cUIMenu::kONNEXT:
         if (app->mpMemCard->IsActionable(app->mSelectedDevice) == 0) {
             return 0x100;
         }
         break;
-    case 8:
-        if (cFEStateProfileLoad_mScreenAction == 2 || self->mDeleteButtonActive == 0) {
+    case cUIMenu::kONOPTION:
+        if (cFEStateProfileLoad_mScreenAction == cFEStateProfileLoad::kScreenActionLoad
+            || self->mDeleteButtonActive == 0) {
             return 0x100;
         }
         break;
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -284,8 +286,8 @@ struct cUIObj_EF70 {
  * Shows or hides the profile load screen's action buttons.
  *
  * Does nothing when +0x234 already equals @p on. Otherwise sets "ps2x" visible when @p on is 0 and hidden when 1, and
- * likewise "btext3", "btext5" and "ps2sq" unless this is the load screen (cFEStateProfileLoad_mScreenAction 2), where
- * it is "btext3a"; then stores @p on in +0x234. Fills slot +0x12C of cFEStateProfileLoad_vtbl
+ * likewise "btext3", "btext5" and "ps2sq" unless this is the load screen (cFEStateProfileLoad_mScreenAction
+ * kScreenActionLoad), where it is "btext3a"; then stores @p on in +0x234. Fills slot +0x12C of cFEStateProfileLoad_vtbl
  * (cFEMemCard_hideActionButtons's slot).
  *
  * @param on  1 to hide the buttons, 0 to show them
@@ -296,7 +298,7 @@ extern "C" void cFEStateProfileLoad_hideActionButtons(cFEStateProfileLoad* self,
         return;
     int off = on ^ 1;
     ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x)))->setVisible(off);
-    if (cFEStateProfileLoad_mScreenAction != 2) {
+    if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
         ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(off);
         ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
         ((cUIObj_EF70*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
@@ -332,15 +334,15 @@ struct cUIObj_F0B8 {
 /**
  * Shows or hides the profile load screen's delete button.
  *
- * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) sets "btext5" and "ps2sq" visible when @p on is false
- * (cUIThing_setVisible); always stores !@p on in +0x220, which cFEStateProfileLoad_onWidgetMenu tests
- * for event 8. Fills slot +0x134 of cFEStateProfileLoad_vtbl (cFEMemCard_hideDeleteButton's slot).
+ * Except on the load screen (cFEStateProfileLoad_mScreenAction kScreenActionLoad) sets "btext5" and "ps2sq" visible
+ * when @p on is false (cUIThing_setVisible); always stores !@p on in +0x220, which cFEStateProfileLoad_onWidgetMenu
+ * tests for kONOPTION. Fills slot +0x134 of cFEStateProfileLoad_vtbl (cFEMemCard_hideDeleteButton's slot).
  *
  * @param on  true to hide the button
  */
 extern "C" void cFEStateProfileLoad_hideDeleteButton(cFEStateProfileLoad* self, bool on)
 {
-    if (cFEStateProfileLoad_mScreenAction != 2) {
+    if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
         int off = !on;
         ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
         ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
@@ -362,10 +364,10 @@ extern int cFEStateProfileLoad_mScreenAction;
 /**
  * Shows or hides the profile load screen's main (accept) button.
  *
- * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) shows "btext3" and "ps2x" only when @p saveBlocked is
- * false; on the load screen shows "btext3a" and "ps2x" only when @p loadBlocked is false. The shown state is also
- * stored in mMainButtonActive, which cFEStateProfileLoad_onWidgetEvent and cFEStateProfileLoad_startSave require. Fills
- * slot +0x13C of cFEStateProfileLoad_vtbl (cFEMemCard_hideMainButton's slot).
+ * Except on the load screen (cFEStateProfileLoad_mScreenAction kScreenActionLoad) shows "btext3" and "ps2x" only when
+ * @p saveBlocked is false; on the load screen shows "btext3a" and "ps2x" only when @p loadBlocked is false. The shown
+ * state is also stored in mMainButtonActive, which cFEStateProfileLoad_onWidgetEvent and cFEStateProfileLoad_startSave
+ * require. Fills slot +0x13C of cFEStateProfileLoad_vtbl (cFEMemCard_hideMainButton's slot).
  *
  * @param loadBlocked  true to hide the button on the load screen
  * @param saveBlocked  true to hide the button on the other screens
@@ -373,7 +375,7 @@ extern int cFEStateProfileLoad_mScreenAction;
 extern "C" void cFEStateProfileLoad_hideMainButton(cFEStateProfileLoad* self, bool loadBlocked, bool saveBlocked)
 {
     cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
-    if (cFEStateProfileLoad_mScreenAction != 2) {
+    if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
         int showButton = !saveBlocked;
         cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(showButton);
         self->mMainButtonActive = showButton;
@@ -401,7 +403,7 @@ extern "C" void cFEStateProfileLoad_displayOff(cFEStateProfileLoad* self);
  */
 extern "C" void cFEStateProfileLoad_displayStatus(cFEStateProfileLoad* self)
 {
-    if (self->mScreenStatus == 3) {
+    if (self->mScreenStatus == cFEMemCard::kDISPLAY_ON) {
         self->displayOn();
     } else {
         self->displayOff();
@@ -459,7 +461,7 @@ void cFEStateProfileLoad::displayOn()
             cFEMemCard_callbackDisplayNoCards();
             displayOff();
             return;
-        } else if (mScreenStatus != 3) {
+        } else if (mScreenStatus != cFEMemCard::kDISPLAY_ON) {
             triggerDisplayState(3);
         }
     }
@@ -479,7 +481,7 @@ void cFEStateProfileLoad::displayOn()
                 && mp->mpMemCard->IsFormatted()) {
                 mp->mpMemCard->GetTitleString(i - 1, mTitle);
                 cUIText_setUnicodeString(widget, mTitle);
-                if (cFEStateProfileLoad_mScreenAction != 2 && sel == 0) {
+                if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad && sel == 0) {
                     sel = 1;
                     widget->setStatic(0);
                     widget->setUseStaticColour(0);
@@ -526,11 +528,11 @@ void cFEStateProfileLoad::displayOn()
                 widget->setVisible(0);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(this, mp, mp->mSelectedDevice, 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(this, mp, mp->mSelectedDevice, 1) == cFEMemCard::kNoNextDevice)
             getText_F2B8(this, str_arrw_left)->setVisible(0);
         else
             getText_F2B8(this, str_arrw_left)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(this, mp, mp->mSelectedDevice, 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(this, mp, mp->mSelectedDevice, 0) == cFEMemCard::kNoNextDevice)
             getText_F2B8(this, str_arrw_right)->setVisible(0);
         else
             getText_F2B8(this, str_arrw_right)->setVisible(1);
@@ -602,12 +604,13 @@ extern char str_cFEStateTitle[];
 /**
  * Leaves the profile load screen once its card work is done, going where +0x27C says.
  *
- * Runs once: unless +0x1AC is already set it switches on +0x27C (On Tour mTypeOfQuit). 0 asks the engine owner (the
- * first word of the engine at +0x10) for the next state through its vtable slot 5 (cFECustom_getPrevState in cFECustom_vtbl)
- * with this state and the mode (+0x1BC), and pushes it with cUIStateStack_pushCheck. 1 sets up a race on the new-race
- * interface (game mode 4, event 0xC), sets cBENewRaceInterface_bIsBamLocation to 1 and the location (cBENewRaceInterface_newRace.iLocationIdx) to the player's last hub
- * (cBENewPlayerInterface_getLastHub), submits it (the interface's vtable slot 1, cBENewRaceInterface_submit) and makes a new
- * cPreGameLoadScreen the next app module. 2 clears gInLodge and pushes a new title state (cFEStateTitle_cFEStateTitle1,
+ * Runs once: unless +0x1AC is already set it switches on +0x27C (On Tour mTypeOfQuit). kQuitToPrevious asks the engine
+ * owner (the first word of the engine at +0x10) for the next state through its vtable slot 5 (cFECustom_getPrevState in
+ * cFECustom_vtbl) with this state and the mode (+0x1BC), and pushes it with cUIStateStack_pushCheck. kQuitToHub sets up
+ * a race on the new-race interface (game mode 4, event 0xC), sets cBENewRaceInterface_bIsBamLocation to 1 and the
+ * location (cBENewRaceInterface_newRace.iLocationIdx) to the player's last hub (cBENewPlayerInterface_getLastHub),
+ * submits it (the interface's vtable slot 1, cBENewRaceInterface_submit) and makes a new cPreGameLoadScreen the next
+ * app module. kQuitToTitle clears gInLodge and pushes a new title state (cFEStateTitle_cFEStateTitle1,
  * "cFEStateTitle"). Sets +0x1AC afterwards. Fills slot +0x10C of cFEStateProfileLoad_vtbl (cFEMemCard_updateDone's
  * slot).
  */
@@ -615,12 +618,12 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
 {
     if (self->mIsDone == 0) {
         int sel = self->mTypeOfQuit;
-        if (sel == 0) {
+        if (sel == cFEStateProfileLoad::kQuitToPrevious) {
             cUICustomInterface* frontEnd = self->mpEngine->mpCustom;
             void* nextState = frontEnd->getPrevState((cUIState*)self, self->mType);
             if (nextState != 0)
                 cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
-        } else if (sel == 1) {
+        } else if (sel == cFEStateProfileLoad::kQuitToHub) {
             cBEInterface* race = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
             cBENewRaceInterface_setGameMode(race, 4);
@@ -630,7 +633,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
             cBENewRaceInterface_newRace.iLocationIdx = x;
             race->submit();
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
-        } else if (sel == 2) {
+        } else if (sel == cFEStateProfileLoad::kQuitToTitle) {
             gInLodge = 0;
             void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), self->mpEngine);
             cUIStateStack_push(&self->mpEngine->mStateStack, st);
@@ -742,29 +745,32 @@ static inline void* GetText_K18FD90(char* key)
 }
 
 /**
- * Handles the profile load screen's widget events: picking a slot, entering a name, backing out and the event-7 action.
+ * Handles the profile load screen's widget events: picking a slot, entering a name, backing out and the kONOPTION
+ * action.
  *
- * Event 5 (a slot widget, not busy, display state 3): takes the slot from the widget (+0x18) into +0x1C4 and the card
- * manager's mFileCursor. On the create and save screens (cFEStateProfileLoad_mScreenAction 1 or 3), in state 1 with the
- * main button active (+0x224), it opens the name keyboard: the first time it builds a cKeyboardPopup ("Keyboard", 1092
- * bytes) with miCurrentKey 55, at most 8 and at least 1 character, key 75 (space) included in both key sets,
- * mbDisableForFirst set, keys 0xF-0x18 excluded from the alternate set (cKeyboardPopup_setDisableShiftNumbers) and keys 14, 25, 26, 39, 40, 52,
- * 53, 64, 65 and 66 from both; each time it sets the "kT_KEYUserName" label, mbClearOnFirst and the player's current
- * name, pushes it as a popup on the engine's state stack (cUIStateStack_pushPopup) and sets +0x1A0 and clears +0x19C.
- * On the load screen (2) with the main button active it starts a load of file type 1 (cMCOverlayManager_readSetFileType) and calls this
- * state's vtable slot 44 (cFEMemCard_confirmLoad).
+ * kONNEXT (a slot widget, not busy, display state kDISPLAY_ON): takes the slot from the widget (+0x18) into +0x1C4 and
+ * the card manager's mFileCursor. On the create and save screens (cFEStateProfileLoad_mScreenAction kScreenActionCreate
+ * or kScreenActionSave), in state kCHECKING with the main button active (+0x224), it opens the name keyboard: the first
+ * time it builds a cKeyboardPopup ("Keyboard", 1092 bytes) with miCurrentKey 55, at most 8 and at least 1 character,
+ * key 75 (space) included in both key sets, mbDisableForFirst set, keys 0xF-0x18 excluded from the alternate set
+ * (cKeyboardPopup_setDisableShiftNumbers) and keys 14, 25, 26, 39, 40, 52, 53, 64, 65 and 66 from both; each time it
+ * sets the "kT_KEYUserName" label, mbClearOnFirst and the player's current name, pushes it as a popup on the engine's
+ * state stack (cUIStateStack_pushPopup) and sets +0x1A0 and clears +0x19C. On the load screen (kScreenActionLoad) with
+ * the main button active it starts a load of file type 1 (cMCOverlayManager_readSetFileType) and calls this state's
+ * vtable slot 44 (cFEMemCard_confirmLoad).
  *
- * Event 13 (the keyboard is done): stores the entered name (mszEditString) as the player's name (cBENewPlayerInterface_setPlayerName, for the
- * player at +0x1CC) and in the manager's mNewFileName, or "kT_MEMPlayerName" formatted with the player number when it
- * is empty; submits the player interface (vtable slot 1, cBENewPlayerInterface_submit) and starts the save
- * (cFEStateProfileLoad_startSave).
+ * kONKEYBOARDEND (the keyboard is done): stores the entered name (mszEditString) as the player's name
+ * (cBENewPlayerInterface_setPlayerName, for the player at +0x1CC) and in the manager's mNewFileName, or
+ * "kT_MEMPlayerName" formatted with the player number when it is empty; submits the player interface (vtable slot 1,
+ * cBENewPlayerInterface_submit) and starts the save (cFEStateProfileLoad_startSave).
  *
- * Event 6 (back): unless busy is 1 or state is 6, sets +0x1E4, resets the manager (cMCOverlayManager_SetState, state 0)
- * when state is 0, 1 or 2, and sets state 6. Event 7: unless busy, in state 6, on the load screen or with the delete
+ * kONPREV (back): unless busy is 1 or state is kDONE, sets +0x1E4, resets the manager (cMCOverlayManager_SetState,
+ * kMCOverlay_Idle) when state is kSTART, kCHECKING or kSKIP, and sets state kDONE. kONOPTION: unless busy, in state
+ * kDONE, on the load screen or with the delete
  * button inactive (+0x220), and only when the selected device passes the card's slot-54 check (cPS2MemCard_IsActionable): takes
- * the widget's slot as for event 5; in state 1 with a file in it (cPS2MemCard_HasFileName) sets busy and state 4,
- * cMCOverlayManager_SetAction(0) and manager state 0x18. Event 14 does nothing. Fills slot +0x9C (onWidgetEvent) of
- * cFEStateProfileLoad_vtbl.
+ * the widget's slot as for kONNEXT; in state kCHECKING with a file in it (cPS2MemCard_HasFileName) sets busy and state
+ * kDELETING, cMCOverlayManager_SetAction(0) and manager state kMCOverlay_DeleteConfirm. kONKEYBOARDCANCEL does nothing.
+ * Fills slot +0x9C (onWidgetEvent) of cFEStateProfileLoad_vtbl.
  *
  * @param vself  the profile load state
  * @param item  the widget that sent the event (its +0x18 word is the slot index)
@@ -774,7 +780,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
 {
     cFEStateProfileLoad* self = vself;
     switch (event) {
-    case 13: {
+    case cUIState::kONKEYBOARDEND: {
         char buf[0x70];
         char fmt[0x70];
         char* name = self->mpKeyboard->mszEditString;
@@ -793,16 +799,16 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
         vself->startSave();
         break;
     }
-    case 5: {
+    case cUIState::kONNEXT: {
         if (((char*)item) == 0) break;
         if (self->mIsProcessing != 0) break;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mScreenStatus != 3) break;
+        if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) break;
         mp->mFileCursor = self->mSlot = item->mMiscData;
         switch (cFEStateProfileLoad_mScreenAction) {
-        case 1:
-        case 3:
-            if (self->mState == 1 && self->mMainButtonActive != 0) {
+        case cFEStateProfileLoad::kScreenActionCreate:
+        case cFEStateProfileLoad::kScreenActionSave:
+            if (self->mState == cFEMemCard::kCHECKING && self->mMainButtonActive != 0) {
                 if (((char*)self->mpKeyboard) == 0) {
                     cKeyboardPopup* kb = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
                         cMemMan_alloc(1092, str_Keyboard, 0x100, 0), ((void*)self->mpEngine), vself, 0,
@@ -830,10 +836,10 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
                 cKeyboardPopup_setInputText(((char*)self->mpKeyboard), cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mPlayerIdx));
                 cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, ((char*)self->mpKeyboard));
                 self->mProcessingKeyboard = 1;
-                self->mPopupType = 0;
+                self->mPopupType = cFEMemCard::kPOP_KEYBOARD;
             }
             break;
-        case 2:
+        case cFEStateProfileLoad::kScreenActionLoad:
             if (self->mMainButtonActive != 0) {
                 cMCOverlayManager_readSetFileType(mp, 1);
                 self->confirmLoad();
@@ -842,37 +848,39 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mIsProcessing != 1) {
+        if (self->mIsProcessing != true) {
             int st = self->mState;
-            if (st != 6) {
+            if (st != cFEMemCard::kDONE) {
                 self->mIsCancelPressed = 1;
-                if (st == 0 || st == 2 || st == 1) {
-                    mp->SetState(0);
+                if (st == cFEMemCard::kSTART || st == cFEMemCard::kSKIP || st == cFEMemCard::kCHECKING) {
+                    mp->SetState(kMCOverlay_Idle);
                 }
-                self->mState = 6;
+                self->mState = cFEMemCard::kDONE;
             }
         }
         break;
     }
-    case 7:
-        if (self->mIsProcessing != 1 && self->mState != 6 && cFEStateProfileLoad_mScreenAction != 2 && self->mDeleteButtonActive != 0) {
+    case cUIState::kONOPTION:
+        if (self->mIsProcessing != true && self->mState != cFEMemCard::kDONE
+            && cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad
+            && self->mDeleteButtonActive != 0) {
             cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
             if (mp->mpMemCard->IsActionable(mp->mSelectedDevice) != 0) {
                 mp->mFileCursor = self->mSlot = item->mMiscData;
-                if (self->mState == 1) {
+                if (self->mState == cFEMemCard::kCHECKING) {
                     if (mp->mpMemCard->HasFileName(self->mSlot) != 0) {
                         self->mIsProcessing = 1;
-                        self->mState = 4;
+                        self->mState = cFEMemCard::kDELETING;
                         cMCOverlayManager_SetAction(mp, 0);
-                        mp->SetState(0x18);
+                        mp->SetState(kMCOverlay_DeleteConfirm);
                     }
                 }
             }
         }
         break;
-    case 14:
+    case cUIState::kONKEYBOARDCANCEL:
         break;
     }
 }
@@ -995,7 +1003,7 @@ extern char str_ps2sq[];
  *
  * Shows "Title_LoadProfile", "helptext_load" and "btext3a", hides "ps2sq" (cUIThing_setVisible), clears
  * mDeleteButtonActive, sets mMainButtonActive and clears the card manager's mPollForFullCard.
- * cFEStateProfileLoad_onCreateScreen runs it when cFEStateProfileLoad_mScreenAction is 2.
+ * cFEStateProfileLoad_onCreateScreen runs it when cFEStateProfileLoad_mScreenAction is kScreenActionLoad.
  */
 void cFEStateProfileLoad::initLoadScreen()
 {
@@ -1023,7 +1031,7 @@ extern char str_btext5[];
  *
  * Shows "Title_SaveProfile", "helptext_save", "btext3" and "btext5" (cUIThing_setVisible) and sets
  * mDeleteButtonActive and mMainButtonActive. cFEStateProfileLoad_onCreateScreen
- * runs it when cFEStateProfileLoad_mScreenAction is 3.
+ * runs it when cFEStateProfileLoad_mScreenAction is kScreenActionSave.
  */
 void cFEStateProfileLoad::initSaveScreen()
 {

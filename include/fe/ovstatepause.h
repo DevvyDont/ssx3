@@ -126,6 +126,11 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
                                     //       every error but the local cheat/delay ones; displayPingTimedOut /
                                     //       displayPingReceived test it
 
+    // EA's eOption: the option widgets' mMiscData. [O] On Tour enum cOVState_PAUSE_ONLINE_ERROR::eOption, names and
+    // values; [U] onCreateScreen gives "Text_CancelGame" 0, setContinueOptionVisible gives the continue option 4, and
+    // doContinueCancel continues on 4 and quits otherwise.
+    enum eOption { eOptionCancel = 0, eOptionContinue = 4 };
+
     // Methods bound to their retail symbols by asm labels.
     void enableCancelButton(bool on) __asm__("cOVState_PAUSE_ONLINE_ERROR_enableCancelButton");
     void displayPingTimedOut() __asm__("cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut");

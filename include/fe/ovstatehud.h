@@ -135,6 +135,10 @@ struct t2Vector;
 struct tARGB;
 
 struct cOVStateHUD1P : public cUIState {
+    // The "no override" pivot (names ours): [U] renderText, renderText1, renderText2 and renderText3 take the HUD
+    // element's own pivotX / pivotY when their align / flags argument is this value.
+    enum { kPivotFromDef = 0x7F };
+
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cOVStateHUD1P_vtbl (both ctors and the dtor)
     // cOVStateHUD1P's notes on cUIState's fields:

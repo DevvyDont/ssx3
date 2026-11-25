@@ -19,6 +19,11 @@ struct cFEStateOptionsSound : public cUIState {
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateOptionsSound
 
+    // The speaker choices: the "1lb" list's entry data and setSoundMode's argument (names ours). [U]
+    // cFEStateOptionsSound_updateWidget adds kT_20SpeakerStereo 0, kT_20SpeakerSurround 1, kT_20SpeakerMono 2 and
+    // kT_20SpeakerDTS 3; cSSXAudio_AudioModeToBEAudioMode maps the driver modes to the same values.
+    enum { kSpeakerStereo = 0, kSpeakerSurround = 1, kSpeakerMono = 2, kSpeakerDTS = 3 };
+
     // Methods bound to their retail symbols by asm labels.
     void updateWidget() __asm__("cFEStateOptionsSound_updateWidget");
     void setSoundMode(unsigned int mode) __asm__("cFEStateOptionsSound_setSoundMode");

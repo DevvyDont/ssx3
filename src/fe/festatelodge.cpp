@@ -155,21 +155,22 @@ extern char str_TransitionOut_b[];
 /**
  * Acts on an accepted lodge option: asks to save or quit, opens the profile state, or moves on.
  *
- * Only event 5, and only for options enabled in gLodgeOptionUnlocked. Until bToNextState (0x4C) is set, option 0 and
- * option 6 push a cFEPopupConfirm asking kT_CMNSaveProgress or kT_OVRCMNQuitTitlePrompt (path 0x10 or 6 at 0x50).
+ * Only kONNEXT, and only for options enabled in gLodgeOptionUnlocked. Until bToNextState (0x4C) is set, option 0 and
+ * option 6 push a cFEPopupConfirm asking kT_CMNSaveProgress or kT_OVRCMNQuitTitlePrompt (path kPathSaveProgress or
+ * kPathQuit at 0x50).
  * Option 8 sets the cFECustom's mProfileLaunchScreen to 0x27 and pushes a cFEStateProfileLoad
  * (cFEStateProfileLoad_cFEStateProfileLoad, mode 3); any other plays "TransitionOut" and pushes the custom interface's
  * getNextState for the option. BE interface 4 is fetched first and its result ignored.
  *
  * @param w  the option widget that sent the event; nothing happens when null
- * @param event  the widget event (only 5, accept, is handled)
+ * @param event  the widget event (only kONNEXT, accept, is handled)
  */
 extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, int event)
 {
     if (((char*)w) == 0) {
         return;
     }
-    if (event != 5) {
+    if (event != cUIState::kONNEXT) {
         return;
     }
     if (gLodgeOptionUnlocked[w->mMiscData] == 0) {
@@ -182,12 +183,12 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveProgress));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
-        self->mPathToSaveProfile = 0x10;
+        self->mPathToSaveProfile = cFEStateLodge::kPathSaveProgress;
         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
         return;
     }
     int k = w->mMiscData;
-    if (k == 6 && self->bToNextState == 0) {
+    if (k == cFEStateLodge::kPathQuit && self->bToNextState == 0) {
         cFELocale* mgr = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
@@ -266,35 +267,38 @@ extern char str_kT_CMNSaveBeforeQuit[];
 /**
  * Runs the lodge's save and quit prompts: records yes or no, then saves, quits or carries on.
  *
- * Event 0xF (yes) sets mbIsYesOrNo (0x54) and 0x10 (no) clears it, both popping the prompt. No to the save
- * prompt (path 0x10) sets bToNextState and re-sends accept for "option_0"; no to save-before-quit (0x11)
- * plays "TransitionOut" and pushes getNextState(6). When a prompt (state id 0) closes (0x16) after a yes,
- * path 0x10 or 0x11 pushes a cFEStateProfileLoad with +0x27C = 1 or 2 and mode 1, and path 6 (quit) asks
- * kT_CMNSaveBeforeQuit (path 0x11).
+ * kONSCREENPOPUPOPTION0 (yes) sets mbIsYesOrNo (0x54) and kONSCREENPOPUPOPTION1 (no) clears it, both popping the
+ * prompt. No to the save prompt (kPathSaveProgress) sets bToNextState and re-sends accept for "option_0"; no to
+ * save-before-quit (kPathSaveBeforeQuit) plays "TransitionOut" and pushes getNextState(6). When a prompt (state id 0)
+ * closes (kONPOPUPDESTROY) after a yes, kPathSaveProgress or kPathSaveBeforeQuit pushes a cFEStateProfileLoad with
+ * +0x27C = 1 or 2 and mode 1, and kPathQuit asks kT_CMNSaveBeforeQuit (kPathSaveBeforeQuit).
  *
  * @param msg  the popup that sent the event (despite the name)
- * @param id  the popup event (0xF yes, 0x10 no, 0x15 opened, 0x16 closed)
+ * @param id  the popup event (kONSCREENPOPUPOPTION0 yes, kONSCREENPOPUPOPTION1 no, kONPOPUPCREATE opened,
+ *            kONPOPUPDESTROY closed)
  */
 extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, unsigned int id)
 {
     switch (id) {
-    case 0xF:
+    case cUIState::kONSCREENPOPUPOPTION0:
         self->mbIsYesOrNo = 1;
-        if (self->mPathToSaveProfile == 6 || self->mPathToSaveProfile == 0x10 || self->mPathToSaveProfile == 17) {
+        if (self->mPathToSaveProfile == cFEStateLodge::kPathQuit
+            || self->mPathToSaveProfile == cFEStateLodge::kPathSaveProgress
+            || self->mPathToSaveProfile == cFEStateLodge::kPathSaveBeforeQuit) {
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         }
         break;
-    case 0x10:
+    case cUIState::kONSCREENPOPUPOPTION1:
         self->mbIsYesOrNo = 0;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         switch (self->mPathToSaveProfile) {
-        case 0x10: {
+        case cFEStateLodge::kPathSaveProgress: {
             self->bToNextState = 1;
             sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cListNode, self);
             vt[19].fn(vthis(self, vt[19]), cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_0)), 5);
             break;
         }
-        case 17: {
+        case cFEStateLodge::kPathSaveBeforeQuit: {
             self->bToNextState = 1;
             cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
             cUICustomInterface* obj = self->mpEngine->mpCustom;
@@ -306,9 +310,9 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         }
         }
         break;
-    case 21:
+    case cUIState::kONPOPUPCREATE:
         break;
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (msg->mHashName != 0) {
             break;
         }
@@ -316,7 +320,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             break;
         }
         switch (self->mPathToSaveProfile) {
-        case 0x10: {
+        case cFEStateLodge::kPathSaveProgress: {
             void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
             cFEStateProfileLoad* newState =
                 (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
@@ -325,7 +329,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
             break;
         }
-        case 17: {
+        case cFEStateLodge::kPathSaveBeforeQuit: {
             void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
             cFEStateProfileLoad* newState =
                 (cFEStateProfileLoad*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
@@ -334,14 +338,14 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
             break;
         }
-        case 6: {
+        case cFEStateLodge::kPathQuit: {
             cFELocale* mgr = SSXApp->FELocale;
             sVEntry<unsigned short*(void*, int)>* vt =
                 (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveBeforeQuit));
             void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
             void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
-            self->mPathToSaveProfile = 17;
+            self->mPathToSaveProfile = cFEStateLodge::kPathSaveBeforeQuit;
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
             break;
         }
@@ -445,18 +449,18 @@ static inline void commitK1F4108(void* np)
 /**
  * Applies the rider-details popups when they close: the chosen cheat character or a new player name.
  *
- * Only event 0x16. From the popup named "131cheat_char" with its confirm word (+0x74) set, stores its choice
+ * Only kONPOPUPDESTROY. From the popup named "131cheat_char" with its confirm word (+0x74) set, stores its choice
  * (+0x70) as the user's cheat character (cBENewPlayerInterface_setPlayerCheatCharID); from a popup with state id 0 (the keyboard) that was
  * accepted (+0x5C) with a non-empty text (+0x74), sets the user's player name (cBENewPlayerInterface_setPlayerName). The player
  * interface's vtable slot 1 is then called, probably to commit the change.
  *
  * @param popup  the popup state that sent the event
- * @param event  the popup event (0x16 closed)
+ * @param event  the popup event (kONPOPUPDESTROY closed)
  */
 extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(cFEStateLodgeRiderDetail* self, cUIState* popup, int event)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
-    if (event != 22)
+    if (event != cUIState::kONPOPUPDESTROY)
         return;
     if (IsK1F4108(popup->mHashName, str_131cheat_char_b)) {
         int cheatCharId = ((cFEStateCheatCharSelect*)popup)->mCheatCharID;
@@ -615,14 +619,14 @@ extern char str_TransitionOut_b[];
 /**
  * Acts on the rider-details options: renames the rider, picks a cheat character, opens a screen, or leaves.
  *
- * Event 5 (accept), for options enabled in gLodgeOptionUnlocked (read at 9-15, past its 7 entries): option 14
+ * kONNEXT (accept), for options enabled in gLodgeOptionUnlocked (read at 9-15, past its 7 entries): option 14
  * ("Option_6") opens a "cKeyboardPopup" (cKeyboardPopup_cKeyboardPopup) limited to 8 characters, with some keys left out and
  * the player's name as its text; option 11 ("Option_3") opens a "cFEStateCheatCharSelect" popup
  * (cFEStateCheatCharSelect_cFEStateCheatCharSelect) when a cheat character is unlocked; any other plays "TransitionOut" and pushes
- * getNextState's state for the option. Event 6 (back) pushes getPrevState's state.
+ * getNextState's state for the option. kONPREV (back) pushes getPrevState's state.
  *
  * @param w  the option widget that sent the event; nothing happens when null
- * @param event  the widget event (5 accept, 6 back)
+ * @param event  the widget event (kONNEXT accept, kONPREV back)
  */
 extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail* self, cUIThing* w, int event)
 {
@@ -630,7 +634,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         return;
     }
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int k = w->mMiscData;
         if (gLodgeOptionUnlocked[k] == 0) {
             return;
@@ -676,7 +680,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         void* nextState = obj->getPrevState((cUIState*)self, 0);
         if (nextState != 0) {

@@ -60,6 +60,17 @@ struct cUIListBox : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUIListBox_vtbl (the ctor cUIListBox_cUIListBox, cUIListBox_cUIListBox1, the dtor cUIListBox__cUIListBox)
     // --- cUIListBox
+    // EA's tUILBEvent: the Event a state's onWidgetListBox(pListBox, Event) receives. [O] On Tour enum
+    // cUIListBox::tUILBEvent, names and values; [U] cUIListBox_onInput (ui/uiengine) sends kONLEFT / kONRIGHT for a
+    // horizontal box, kONDOWN / kONUP for a vertical one (down selects the previous entry) and kONPREVIOUS for back.
+    enum tUILBEvent {
+        kONLEFT = 0,
+        kONRIGHT = 1,
+        kONUP = 2,
+        kONDOWN = 3,
+        kONPREVIOUS = 4
+    };
+
     // cUIListBox's own slots ([R] cUIListBox_vtbl; types [O] On Tour's class cUIListBox):
     virtual char getType();                                               // 22 cUIListBox_getType__FPv
     virtual void setShadow(int a);                                        // 23 cUIListBox_setShadow

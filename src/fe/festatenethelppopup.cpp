@@ -342,14 +342,14 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onWidgetEvent);
 extern "C" void cUIStateStack_pop(void*, int);
 
 /**
- * Closes the help popup on widget event 6.
+ * Closes the help popup on widget event kONPREV.
  *
  * @param pWidget  the widget, unused
  * @param msg  widget event number
  */
 extern "C" void cFEStateNetHelpPopup_onWidgetEvent(cFEStateNetHelpPopup* self, int pWidget, int msg)
 {
-    if (msg == 6) {
+    if (msg == cUIState::kONPREV) {
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     }
 }
@@ -469,13 +469,13 @@ INCLUDE_ASM("fe/festatenethelppopup", func_001DA580);
  * @param last1  end of the first range
  * @param first2  start of the second range
  * @param last2  end of the second range
- * @return 1 when the first range sorts before the second, else 0
+ * @return true when the first range sorts before the second
  */
-extern "C" int func_001DA580(const char* first1, const char* last1, const char* first2, const char* last2)
+extern "C" bool func_001DA580(const char* first1, const char* last1, const char* first2, const char* last2)
 {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
-        if (*first1 < *first2) return 1;
-        if (*first2 < *first1) return 0;
+        if (*first1 < *first2) return true;
+        if (*first2 < *first1) return false;
     }
     return first1 == last1 && first2 != last2;
 }

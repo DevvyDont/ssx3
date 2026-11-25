@@ -20,6 +20,10 @@ struct cFEPopupVideoCalibration : public cUIState {
     // --- cFEPopupVideoCalibration
     char mImage;                    // 0x048 [O]
     char unk_049[0x3];              // 0x049 padding
+
+    // Its state id (mHashName). [R] cFEStateOptionsGame_onWidgetEvent stores 27 after constructing it;
+    // [U] cFEStateOptionsGame_onPopupEvent recognises the popup by it.
+    enum { kStateID = 27 };
 };
 
 CHECK_OFFSET(cFEPopupVideoCalibration, mImage, 0x048);

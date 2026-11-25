@@ -86,6 +86,10 @@ struct cUIMenu : public cUIGroup {
         kONMISC = 9
     };
 
+    // The "no item" index (names ours): [U] cUIMenu_findFirstHighlightable returns it when no item can be highlighted
+    // and treats it as "from the start"; [R] the ctor stores it in mStoredIndex.
+    enum { kNoItem = 0xFF };
+
     // cUIMenu's own slots ([R] cUIMenu_vtbl; types [O] On Tour's class cUIMenu):
     virtual char getType();                                               // 22 cUIMenu_getType__FPv
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;

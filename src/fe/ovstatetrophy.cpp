@@ -18,6 +18,7 @@
 #include "fe/ovstateprofile.h"
 #include "render/ps2graphicsman.h"
 #include "online/gamecomm.h"
+#include "be/beintnewrace.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -79,7 +80,7 @@ public:
  * when it is not null.
  *
  * @param item  the item; ignored when null
- * @param msg  the widget event: 5 Cross, 6 Triangle
+ * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle
  */
 extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0* item, int msg)
 {
@@ -87,7 +88,7 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
         return;
     }
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         item->setColor(sColor_20E9A0(1.0f, 1.0f, 0.0f, 0.0f));
         void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
@@ -97,7 +98,7 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
@@ -1809,14 +1810,14 @@ extern "C" void func_00210D20(cOVState* self)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);
 #ifdef SKIP_ASM
 /**
- * Forgets the chat overlay's keyboard popup (+0xE0) when that popup reports event 22.
+ * Forgets the chat overlay's keyboard popup (+0xE0) when that popup reports kONPOPUPDESTROY.
  *
  * @param popup  the popup that sent the event
- * @param event  the event id; only 22 is handled
+ * @param event  the event id; only kONPOPUPDESTROY is handled
  */
 extern "C" void func_00210DD0(void* self, int popup, int event)
 {
-    if (event == 22) {
+    if (event == cUIState::kONPOPUPDESTROY) {
         if (popup == *(int*)((char*)self + 0xe0)) {
             *(int*)((char*)self + 0xe0) = 0;
         }
@@ -1838,12 +1839,13 @@ extern "C" int strlen(const char* s);
 /**
  * Handles the chat overlay's widget events: closing it, opening the keyboard and sending the typed message.
  *
- * Ignored without a screen. Event 6, while no keyboard is open, pops the top state (cUIStateStack_pop on the engine's
- * stack) and sets this state's mAttrState to mode 7 with mPendingDelete. Event 5, while no keyboard is open, opens the
- * keyboard (func_00210F40, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it. Event 13
- * first shows any incoming message (cGameComm_getQueuedChat, func_00210BD8), then sends the keyboard's mszEditString (+0x74) when
- * it is not empty (cGameComm_sendChat on cGameComm_mGameComm) and appends it as our own line. Other events go to
- * cOVState_onWidgetEvent. Event 13 reads the keyboard at +0xE0 without checking that one is open.
+ * Ignored without a screen. kONPREV, while no keyboard is open, pops the top state (cUIStateStack_pop on the engine's
+ * stack) and sets this state's mAttrState to mode 7 with mPendingDelete. kONNEXT, while no keyboard is open, opens the
+ * keyboard (func_00210F40, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it.
+ * kONKEYBOARDEND first shows any incoming message (cGameComm_getQueuedChat, func_00210BD8), then sends the keyboard's
+ * mszEditString (+0x74) when it is not empty (cGameComm_sendChat on cGameComm_mGameComm) and appends it as our own
+ * line. Other events go to cOVState_onWidgetEvent. kONKEYBOARDEND reads the keyboard at +0xE0 without checking that one
+ * is open.
  *
  * @param item  the widget (not read)
  * @param key  the event id
@@ -1854,20 +1856,20 @@ extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
         return;
     }
     switch (key) {
-    case 6:
+    case cUIState::kONPREV:
         if (*(int*)((char*)self + 0xE0) == 0) {
             cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
             self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
         }
         break;
-    case 5:
+    case cUIState::kONNEXT:
         if (*(int*)((char*)self + 0xE0) == 0) {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
             func_00210F40(self, 0, (int)str_empty_e, (int)str_empty_e, 0, 0, 61);
             cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
         }
         break;
-    case 13: {
+    case cUIState::kONKEYBOARDEND: {
         char* name = (char*)self + 0x9C;
         if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
@@ -1958,7 +1960,6 @@ extern "C" void func_00210FA0(cOVState* self, int textObj, int password, int mis
 INCLUDE_ASM("fe/ovstatetrophy", cOVState_PROFILE_cOVState_PROFILE);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char cBENewRaceInterface_newRace[];
 extern char cOVState_PROFILE_vtbl[];
 extern "C" void cFEMemCard_cFEMemCard2(void* self, int a, int b);
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int i);
@@ -1999,7 +2000,7 @@ extern "C" cOVState_PROFILE* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE*
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int lim = 1;
-    if (cBENewRaceInterface_newRace[0x49] == 2) lim = 2;
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) lim = 2;
     for (int n = 0; n < lim; n++) {
         if (cBENewPlayerInterface_getPlayerCtrlID(iface, n) == idx) {
             self->mPlayerIdx = n;

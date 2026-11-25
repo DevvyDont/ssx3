@@ -80,6 +80,15 @@ struct cScreenKeyboard {
                                      //       functions and onInput move it; pressKey indexes the key table with it
                                      //       (also reads its low byte with lbu)
 
+    // The key grid, four rows of ten (names ours). [U] getKeyObjName / getCursorObjName: keys 0-9 are the digits,
+    // 10-35 the letters A-Z, then the widgets "arrLeft", "arrRight", "spc" and "end"; pressKey moves the cursor left /
+    // right, types a space or ends the input with them; the kbMove* functions wrap within a row of kKeysPerRow and
+    // skip kKeySpace when mIncludeSpace is clear.
+    enum {
+        kKeysPerRow = 10, kKeyFirstLetter = 10, kKeyLeft = 36, kKeyRight = 37, kKeySpace = 38, kKeyEnd = 39,
+        kNumKeys = 40
+    };
+
     // Methods bound to their retail symbols by asm labels.
     void setInputText(const char* text) __asm__("cScreenKeyboard_setInputText");
     void kbMoveLeft() __asm__("cScreenKeyboard_kbMoveLeft");

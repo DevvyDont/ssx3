@@ -81,9 +81,9 @@ struct cRealFE {
     // Methods bound to their retail symbols by asm labels.
     void gainFocus() __asm__("cRealFE_gainFocus");
     void load() __asm__("cRealFE_load");
-    int loseFocus() __asm__("cRealFE_loseFocus");
+    bool loseFocus() __asm__("cRealFE_loseFocus");
     void purge() __asm__("cRealFE_purge");
-    int render() __asm__("cRealFE_render");
+    bool render() __asm__("cRealFE_render");
     void update() __asm__("cRealFE_update");
     void purgeCharAnimations() __asm__("cRealFE_purgeCharAnimations");
     void loadStartState() __asm__("cRealFE_loadStartState");

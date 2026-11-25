@@ -110,7 +110,7 @@ extern const char* D_00441128[];
 
 
 /**
- * Plays the selected bonus video in a cFEStateVideoPlayer popup, or on event 6 pushes the factory's state.
+ * Plays the selected bonus video in a cFEStateVideoPlayer popup, or on kONPREV pushes the factory's state.
  *
  * @param item  the entry (its index at +0x18 picks the video from D_00441128), or 0
  * @param event  widget event number (On Tour Event)
@@ -120,16 +120,16 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
     if (((void*)item) == 0)
         return;
     switch (event) {
-    case 4:
+    case cUIState::kONSELECT:
         break;
-    case 5: {
+    case cUIState::kONNEXT: {
         void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
                                 self->mUserNum);
         cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[item->mMiscData], 0);
         cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         void* nextState = factory->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0)

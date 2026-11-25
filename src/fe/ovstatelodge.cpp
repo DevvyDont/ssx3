@@ -18,6 +18,8 @@
 #include "main/ssxapp.h"
 #include "ui/uitext.h"
 #include "ealib/shape.h"
+#include "be/beintreward.h"
+#include "be/beintnewrace.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
@@ -451,10 +453,10 @@ static inline int IsShown1D2EA0(char* self)
  * group.
  *
  * @param widget  the input (On Tour cUIInput* pInput)
- * @return 1 when the peak pass was shown and is closed, otherwise 0
+ * @return true when the peak pass was shown and is closed
  */
 // Lodge menu: when the detail panel is shown and the widget accepts, plays the select sound and closes the panel.
-extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUIInput* widget)
+extern "C" bool cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUIInput* widget)
 {
     if (IsShown1D2EA0(((char*)self))) {
     if (widget->isPrevious()) {
@@ -467,9 +469,9 @@ extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUI
         cUIGroup* w = self->mpPassGroup;
         w->setVisible(0);
     }
-    return 1;
+    return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -537,9 +539,9 @@ struct sText_MR {
 /**
  * Handles the mountain room menu: entry 0 shows the peak pass, entries 1-3 open that peak's trophy room.
  *
- * Event 5 (select) opens the entry; event 6 pushes the state the engine's factory gives for the entry (slot
+ * kONNEXT (select) opens the entry; kONPREV pushes the state the engine's factory gives for the entry (slot
  * 5),
- * if any; event 1 (highlight) shows the entry's help: view pass, view trophies, or peak 2/3 locked.
+ * if any; kONGAINFOCUS (highlight) shows the entry's help: view pass, view trophies, or peak 2/3 locked.
  *
  * @param w  the menu entry (its index at +0x18), or 0
  * @param msg  widget event number (On Tour Event)
@@ -551,7 +553,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
         return;
     }
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int idx = w->mMiscData;
         if (idx == 0) {
             cFEStateMountainRoom_showPassFront_MR(((char*)self));
@@ -562,7 +564,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
         cUIStateStack_push_MR(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
         void* nextState = factory->vt[5].fn(vthis(factory, factory->vt[5]), ((char*)self), w->mMiscData);
         if (nextState == 0) {
@@ -571,7 +573,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
         cUIStateStack_push_MR(&self->mpEngine->mStateStack, nextState);
         break;
     }
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         if (self->mpHelpText == 0) {
             break;
         }
@@ -657,7 +659,7 @@ void cFEStateMountainRoom::loadPeakPass()
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_updateTextureLoad);
 #ifdef SKIP_ASM
-extern "C" int func_0019E238(void* mgr, int bank, int i);
+extern "C" bool func_0019E238(void* mgr, int bank, int i);
 extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
 extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self);
 extern char str_pass[];
@@ -974,9 +976,9 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
     int widgetHash = w->hash;
     if (widgetHash == GetHashValue32(str_screentitle)) {
         int roomMode = self->mode;
-        if (roomMode == 2)
+        if (roomMode == kPEAK_3)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_Peak3name));
-        else if (roomMode == 1)
+        else if (roomMode == kPEAK_2)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_Peak2name));
         else
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_Peak1name));
@@ -1086,12 +1088,12 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 
 
 /**
- * Handles the peak room menu: select opens an owned trophy, event 6 opens the factory's state for it,
+ * Handles the peak room menu: select opens an owned trophy, kONPREV opens the factory's state for it,
  * highlight updates help.
  *
- * Both open through the engine's state factory with (peak << 16 | trophy); event 6 first hides the four
+ * Both open through the engine's state factory with (peak << 16 | trophy); kONPREV first hides the four
  * trophy
- * slots. Event 1 updates the help text and calls cFEStatePeakRoom_updateMedalsList().
+ * slots. kONGAINFOCUS updates the help text and calls cFEStatePeakRoom_updateMedalsList().
  *
  * @param item  the menu entry (its trophy index at +0x18), or 0
  * @param key  widget event number (On Tour Event)
@@ -1102,7 +1104,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         return;
     }
     switch (key) {
-    case 5:
+    case cUIState::kONNEXT:
         if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
                           self->mCharID, self->mPeakNum, item->mMiscData) != 0) {
             cUICustomInterface* obj = self->mpEngine->mpCustom;
@@ -1110,7 +1112,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
-    case 6: {
+    case cUIState::kONPREV: {
         int id = (self->mPeakNum << 16) | item->mMiscData;
         for (int i = 0; i < 4; i++) {
             cUIThing* listItem = self->mpTrophyIcons[i];
@@ -1125,7 +1127,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         }
         break;
     }
-    case 1:
+    case cUIState::kONGAINFOCUS:
         self->updateHelpText(item->mMiscData);
         self->updateMedalsList(item->mMiscData);
         break;
@@ -1143,22 +1145,22 @@ extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, in
 extern "C" void* cList_getByIndex(void* list, int id);
 
 /**
- * Filters the peak room's menu events: swallows 8 and 9 and refuses event 6 on a trophy not yet owned.
+ * Filters the peak room's menu events: swallows kONOPTION and kONMISC and refuses kONNEXT on a trophy not yet owned.
  *
  * @param item  the menu (On Tour cUIMenu* pMenu)
  * @param key  menu event number (On Tour Event)
  * @param id  the menu item index (On Tour index)
- * @return 0x100 for events 8 and 9, 0x10 for event 6 on an unowned trophy, otherwise 0x101
+ * @return 0x100 for kONOPTION and kONMISC, 0x10 for kONNEXT on an unowned trophy, otherwise 0x101
  */
 extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, cUIMenu* item, unsigned int key, int id)
 {
     switch (key) {
     default:
         break;
-    case 8:
-    case 9:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
-    case 6: {
+    case cUIMenu::kONNEXT: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         cUIThing* entry = (cUIThing*)cList_getByIndex((char*)&item->mList, id);
         if (cBERewardInterface_isTrophyOwned(iface, self->mUserNum, self->mCharID,
@@ -1273,7 +1275,7 @@ void cFEStatePeakRoom::updateMedalsList(int peak)
         name[i]->setVisible(1);
         bar[i]->setVisible(1);
         box[i]->setVisible(1);
-        if (ch != -1) {
+        if (ch != kMEDAL_NONE) {
             tMedalInfo* medalInfo = cBERewardInterface_getMedal(iface, peak, ch);
             cUIEngine* eng = self->mpEngine;
             int hash = GetHashValue32(medalInfo->mpIconName);

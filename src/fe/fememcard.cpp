@@ -58,13 +58,13 @@ extern "C" void cUIThing_deleteAnimation(void* obj);
  * Runs the memory-card screen's per-frame update, then clears its busy markers once the card work is over.
  *
  * Calls the cFEMemCard update cFEMemCard_onUpdate first. When the memory-card overlay manager (cSSXApp_getMCManager) is
- * done (cMCOverlayManager_isManagerDone) or mState is 6, it deletes the animation of the "!"
+ * done (cMCOverlayManager_isManagerDone) or mState is kDONE, it deletes the animation of the "!"
  * object, when there is one, and hides "mc messages" (slot 9 with 0). "mc messages" is used without a null check.
  */
 extern "C" void cFEStateMemCard_onUpdate(cFEStateMemCard* self)
 {
     cFEMemCard_onUpdate(self);
-    if (cMCOverlayManager_isManagerDone(cSSXApp_getMCManager(SSXApp)) != 0 || self->mState == 6) {
+    if (cMCOverlayManager_isManagerDone(cSSXApp_getMCManager(SSXApp)) != 0 || self->mState == cFEMemCard::kDONE) {
         void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_exclam));
         if (obj != 0) {
             cUIThing_deleteAnimation(obj);
@@ -776,10 +776,10 @@ extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
  * Shows the memory-card manager's status message in the screen's "mc messages" text while a load or a card check runs.
  *
  * The memory-card state's override of vtable slot +0xD4 (cFEMemCard_displayStatus in the base vtable). When the
- * manager's mState is a load state (31-34) or a check state (2, 3, 6, 49-54: On Tour's CheckCardsWait, CheckCards,
- * ReadingCard, InitCardsCheck..InitFileCheckDevice), it fetches the message (cMCOverlayManager_GetMessage, 800 chars),
- * word-wraps it into the object (cUIText_setUnicodeStringWrap) and shows it (slot 9 with 1); otherwise it hides the
- * object (slot 9 with 0). The object is used without a null check.
+ * manager's mState is a load state (kMCOverlay_LoadStart..LoadDoneWait) or a check state (kMCOverlay_CheckCardsWait,
+ * CheckCards, ReadingCard, InitCardsCheck..InitFileCheckDevice), it fetches the message (cMCOverlayManager_GetMessage,
+ * 800 chars), word-wraps it into the object (cUIText_setUnicodeStringWrap) and shows it (slot 9 with 1); otherwise it
+ * hides the object (slot 9 with 0). The object is used without a null check.
  */
 extern "C" void cFEStateMemCard_displayStatus(void)
 {
@@ -787,9 +787,13 @@ extern "C" void cFEStateMemCard_displayStatus(void)
     cUIThing* obj = cUIScreen_getObjectByHashName(st->mpScreen, GetHashValue32(str_mc_messages));
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     int managerState = mp->mState;
-    if (managerState == 0x1F || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 49
-        || managerState == 50 || managerState == 51 || managerState == 53 || managerState == 54 || managerState == 52
-        || managerState == 2 || managerState == 3 || managerState == 6) {
+    if (managerState == kMCOverlay_LoadStart || managerState == kMCOverlay_LoadClosing
+        || managerState == kMCOverlay_LoadProgress || managerState == kMCOverlay_LoadDoneWait
+        || managerState == kMCOverlay_InitCardsCheck || managerState == kMCOverlay_InitCardsCheckDone
+        || managerState == kMCOverlay_InitFileCheck || managerState == kMCOverlay_InitFileCheckWait
+        || managerState == kMCOverlay_InitFileCheckDevice || managerState == kMCOverlay_InitFileCheckDone
+        || managerState == kMCOverlay_CheckCardsWait || managerState == kMCOverlay_CheckCards
+        || managerState == kMCOverlay_ReadingCard) {
         unsigned short buf[800];
         cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);

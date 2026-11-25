@@ -30,6 +30,14 @@ struct cUIPair : public cUIThing {
     // cUIThing (ui/uithing.h, 0x74): the vptr at 0x008:
     //   [R] cUIPair_vtbl D_00494868 (createObjectByStruct, cUIPair_cUIPair1, cUIPair_cUIPair, the dtor)
     // --- cUIPair
+    // EA's tUIPairEvent: the Event a state's onWidgetPair(pPair, Event) receives. [O] On Tour enum
+    // cUIPair::tUIPairEvent, names and values; [U] cUIPair_onInput reports the state events kONNEXT / kONPREV (5 / 6)
+    // as kONNEXT / kONPREVIOUS.
+    enum tUIPairEvent {
+        kONNEXT = 0,
+        kONPREVIOUS = 1
+    };
+
     // cUIPair's own slots ([R] cUIPair_vtbl; types [O] On Tour's class cUIPair):
     virtual char getType();                                               // 22 cUIPair_getType__FPv
     tAttrPair mAttrPair;             // 0x074 [O] tAttrPair (2 bytes); [R] its ctor tAttrPair_tAttrPair on this + 0x74

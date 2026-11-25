@@ -58,6 +58,16 @@ struct cOVTemplate_Dialog : public cOVState {
     // --- cOVTemplate_Dialog (On Tour: size 0x94)
     int mDialogType;                // 0x09C [O]; [R] the factory and cOVState_QUIT_cOVState_QUIT store the dialog kind (0-6, see
                                     //       above); [U] onCreateScreen / onWidgetCreate / onWidgetEvent switch on it
+
+    // The dialog kinds (mDialogType; names ours, after the overlay that stores each): [R]
+    // cOVStateManager_triggerOverlay gives kOVSTATE_RESTART 0, kOVSTATE_QUIT 1, kOVSTATE_RESTARTCHALLENGE 2,
+    // kOVSTATE_QUITCHALLENGE 3, kOVSTATE_QUITCOMPETITION 4, kOVSTATE_GIVEUP 5 and kOVSTATE_SAVEPROMPT 6; [U]
+    // onCreateScreen titles them kT_OVRCMNRestartEvent, kT_OVRCMNQuitGame, kT_OVRCMNRestartChal, kT_OVRCMNQuitChal,
+    // kT_CMNQuitEventQues, kT_CMNGiveUp and kT_CMNSaveBeforeQuit.
+    enum {
+        kDialogRestart = 0, kDialogQuit = 1, kDialogRestartChallenge = 2, kDialogQuitChallenge = 3,
+        kDialogQuitCompetition = 4, kDialogGiveUp = 5, kDialogSavePrompt = 6
+    };
 };
 
 CHECK_OFFSET(cOVTemplate_Dialog, mDialogType, 0x9C);

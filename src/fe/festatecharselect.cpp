@@ -329,7 +329,7 @@ static inline void refresh_1620(sWidget_1620* w)
 /**
  * Sets up the character-select widgets: the name menu, the titles and the ten character names.
  *
- * "names menu" gets flag bit 0 cleared and bit 7 set. On game path 2 "titlesel_character" is hidden and
+ * "names menu" gets flag bit 0 cleared and bit 7 set. On kGAMEPATH_MULTIPLAYER "titlesel_character" is hidden and
  * "titlesel_character_multi" shows the player 1 or 2 title (by mUserNum); on other paths that one is hidden.
  * Texts "0" to "9" get the selectable characters' names, their index as id, and start hidden.
  *
@@ -344,12 +344,13 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(cFEStateCharSelect* self, sWid
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (hashName == GetHashValue32(str_titlesel_character) && cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (hashName == GetHashValue32(str_titlesel_character)
+        && cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         refresh_1620(w);
         return;
     }
     if (hashName == GetHashValue32(str_titlesel_character_multi)) {
-        if (cBENewRaceInterface_newRace.cGamePath == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
             switch (self->mUserNum) {
             case 0:
                 cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLEPlayer1SelectCharacter));
@@ -451,11 +452,11 @@ static inline void refresh_17E8(sIface_17E8* iface)
 /**
  * Handles character-select events: picking or highlighting a character, back, options and profile load.
  *
- * Event 5 sets +0xC20 (clearing +0xC1C) on the user's front-end rider, stores the controller, the character
- * and +0x4C in the player table, commits it, records the controller mask (cFECustom_setPlayerCtrlMask) and pushes the
- * custom interface's next state. Event 1 shows the highlighted name and its stats (cFEStateCharSelect_updateWidget) and stores
- * the choice; 2 hides the name. 6 pushes the previous state; 7 opens "FEOptions" (state bits 0x100); 8 opens
- * "cFEStateProfileLoad" for this controller.
+ * kONNEXT sets +0xC20 (clearing +0xC1C) on the user's front-end rider, stores the controller, the character and +0x4C
+ * in the player table, commits it, records the controller mask (cFECustom_setPlayerCtrlMask) and pushes the custom
+ * interface's next state. kONGAINFOCUS shows the highlighted name and its stats (cFEStateCharSelect_updateWidget) and
+ * stores the choice; kONLOSEFOCUS hides the name. kONPREV pushes the previous state; kONOPTION opens "FEOptions"
+ * (state bits 0x100); kONMISC opens "cFEStateProfileLoad" for this controller.
  *
  * @param widget  the widget (ignored when 0); its id (+0x18) is the character index
  * @param event  the widget event
@@ -466,7 +467,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
     if (widget == 0)
         return;
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int on = 1;
         cFERider* feRider = (cFERider*)riderSlot_17E8((self));
         feRider->mSelected = on;
@@ -489,7 +490,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         self->mbDraw3D = 0;
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUIState* st = (cUIState*)(*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack((self), widget->id);
         if (((void*)st) != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, st);
@@ -498,7 +499,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         }
         break;
     }
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         widget->setVisible(1);
         cFEStateCharSelect_updateWidget((self), self->mUserNum, D_00440F68[widget->id]);
         int rider = self->mUserNum;
@@ -512,13 +513,13 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         refresh_17E8(iface);
         break;
     }
-    case 2:
+    case cUIState::kONLOSEFOCUS:
         widget->setVisible(0);
         break;
-    case 3:
-    case 4:
+    case cUIState::kONSTART:
+    case cUIState::kONSELECT:
         break;
-    case 7: {
+    case cUIState::kONOPTION: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
         refresh_17E8(iface);
@@ -529,7 +530,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         self->mbDraw3D = 0;
         break;
     }
-    case 8: {
+    case cUIState::kONMISC: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
         refresh_17E8(iface);
@@ -990,7 +991,7 @@ extern char gBigSize[];
 /**
  * Handles the cheat-character pictures: highlight, the shown name, picking one and backing out.
  *
- * Event 1 highlights the picture and shows its entry's name, 2 restores its colour. Event 5 stores the
+ * kONGAINFOCUS highlights the picture and shows its entry's name, kONLOSEFOCUS restores its colour. kONNEXT stores the
  * entry's value (0 for the first entry) in +0x70 and in the player table (cBENewPlayerInterface_setPlayerCheatCharID), commits it, sets
  * +0x74 and closes the popup; 6 closes it with +0x70 = 0.
  *
@@ -1002,21 +1003,21 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
     if (((void*)menu) == 0)
         return;
     switch (msg) {
-    case 2: {
+    case cUIState::kONLOSEFOCUS: {
         menu->setSize((const t3Vector*)gSmallSize);
         break;
     }
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
         menu->setSize((const t3Vector*)gBigSize);
         cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
         break;
     }
-    case 6:
+    case cUIState::kONPREV:
         self->mCheatCharID = 0;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
-    case 5: {
+    case cUIState::kONNEXT: {
         int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
         if (sel == 0)
             self->mCheatCharID = 0;
@@ -1043,20 +1044,20 @@ extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelec
  *
  * @param pMenu  the menu (unused)
  * @param msg  the menu event
- * @param value  the entry index for event 1
- * @return 0x100 for events 7-9, for event 1 whether @p value is below the entry count, else 0x101 (event 5
- *         refreshes the pictures first)
+ * @param value  the entry index for kISHIGHLIGHTABLE
+ * @return 0x100 for kONPREVIOUS, kONOPTION and kONMISC, for kISHIGHLIGHTABLE whether @p value is below the entry
+ *         count, else 0x101 (kSCROLLCHANGE refreshes the pictures first)
  */
 extern "C" int cFEStateCheatCharSelect_onWidgetMenu(cFEStateCheatCharSelect* self, int pMenu, unsigned int msg, int value)
 {
     switch (msg) {
-    case 7:
-    case 8:
-    case 9:
+    case cUIMenu::kONPREVIOUS:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
-    case 1:
+    case cUIMenu::kISHIGHLIGHTABLE:
         return value < self->mNumCharacters;
-    case 5:
+    case cUIMenu::kSCROLLCHANGE:
         self->updateCharWidgets();
         break;
     }

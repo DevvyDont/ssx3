@@ -133,6 +133,16 @@ struct cFEStateCharEquip : public cFEState {
     // from a store, kEquipModeInventory otherwise; [U] cFEStateCharEquip_switchEquipMode flips it.
     enum { kEquipModeInventory = 0, kEquipModeStore = 1 };
 
+    // mCameraState's values (names ours). [R] the constructor stores kCameraRider; [U] update3DPositions poses the
+    // rider in front (1) or the board in front (2) and eases toward the board view (3) or back to the rider view (4),
+    // switching to 2 / 1 when close; onWidgetEvent starts 3 on opening the boards category and 4 on leaving it;
+    // onInputBegin turns / zooms / pans only in 1 and 4.
+    enum { kCameraRider = 1, kCameraBoard = 2, kCameraToBoard = 3, kCameraToRider = 4 };
+
+    // mIconTextureID before the first icon texture exists (name ours): [R] the constructor and destructor store -1;
+    // [U] getIconID creates the texture when it is -1, otherwise reloads it.
+    enum { kNoTextureID = -1 };
+
     // Methods bound to their retail symbols by asm labels.
     bool isInStore() __asm__("cFEStateCharEquip_isInStore");
     int isIconsLoaded() __asm__("cFEStateCharEquip_isIconsLoaded");

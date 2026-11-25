@@ -16,6 +16,7 @@
 #include "input/input.h"
 #include "ui/uiinput.h"
 #include "ui/uimenu.h"
+#include "be/beintnewrace.h"
 
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onCreateScreen);
@@ -61,9 +62,9 @@ extern int gTitleScreenDelay;
  * The countdown gTitleScreenDelay is global and stays 0 afterwards, so later visits finish at once. "Menu0000" gets
  * setFocus(1) (slot 7) and "tReal" (the Press START text) becomes visible.
  *
- * @return 1 when the transition is done, 0 while waiting
+ * @return true when the transition is done, false while waiting
  */
-extern "C" int cFEStateTitle_onGainTransition(cFEStateTitle* self)
+extern "C" bool cFEStateTitle_onGainTransition(cFEStateTitle* self)
 {
     if (gTitleScreenDelay == 0 || --gTitleScreenDelay == 0) {
         cUIThing* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
@@ -74,9 +75,9 @@ extern "C" int cFEStateTitle_onGainTransition(cFEStateTitle* self)
         if (uiObj != 0) {
             uiObj->setVisible(1);
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -177,11 +178,11 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * result goes onto the UI state stack.
  *
  * @param msg  the widget (On Tour pWidget), despite the name
- * @param type  the widget event; only 5 acts
+ * @param type  the widget event; only kONNEXT acts
  */
 extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, cUIThing* msg, int type)
 {
-    if (type == 5) {
+    if (type == cUIState::kONNEXT) {
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         void* nextState = obj->getNextState((cUIState*)self, msg->mMiscData);
         if (nextState != 0) {
@@ -199,11 +200,11 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetMenu);
  *
  * @param pMenu  the menu (On Tour pMenu); unused
  * @param Event  the menu event (6 Cross)
- * @return 0x101 (animation and sound) for event 6, else 0x100 (animation only)
+ * @return 0x101 (animation and sound) for kONNEXT, else 0x100 (animation only)
  */
 extern "C" int cFEStateTitle_onWidgetMenu(cFEStateTitle* self, int pMenu, int Event)
 {
-    return Event != 6 ? 0x100 : 257;
+    return Event != cUIMenu::kONNEXT ? 0x100 : 257;
 }
 #endif
 
@@ -492,45 +493,44 @@ static inline void setWidgetVisible_194EB0(char* self, char* name)
 /**
  * Handles a main-menu choice: sets the game path for the chosen mode and pushes the next front-end state.
  *
- * Cross (5): func_001A86E8(0), then by the item's miscData: 11 Conquer path 0, 9 Quick Play path 1, 22 Multi
- * Play path 2, 49 Online path 2 plus the online singletons (cCommSystem_construct ...), 5 Bonus Material;
- * each sets the choice flag (+0x48). After the race interface's slot 1 it pushes the custom interface's
- * getNextState(miscData). The Select Multiplayer Mode popup branch needs +0x48 clear for item 22, which case
- * 22 has just set, so it never runs.
- * Triangle (6) pushes getPrevState(); Square (7) pushes a new "FEOptions" state (func_001887A0); each Circle
- * (8) counts in +0x54 and from the 7th on clears the static flag of "2quick play", "3multi play" and
- * "4online".
+ * Cross (kONNEXT): func_001A86E8(0), then by the item's miscData: 11 Conquer kGAMEPATH_WORLDCIRCUIT, 9 Quick Play
+ * kGAMEPATH_SINGLEEVENT, 22 Multi Play kGAMEPATH_MULTIPLAYER, 49 Online kGAMEPATH_MULTIPLAYER plus the online
+ * singletons (cCommSystem_construct ...), 5 Bonus Material; each sets the choice flag (+0x48). After the race
+ * interface's slot 1 it pushes the custom interface's getNextState(miscData). The Select Multiplayer Mode popup branch
+ * needs +0x48 clear for item 22, which case 22 has just set, so it never runs. Triangle (kONPREV) pushes
+ * getPrevState(); Square (kONOPTION) pushes a new "FEOptions" state (func_001887A0); each Circle (kONMISC) counts in
+ * +0x54 and from the 7th on clears the static flag of "2quick play", "3multi play" and "4online".
  *
  * @param self_  the main-menu state (this)
  * @param item_  the item (On Tour pWidget); ignored when null
- * @param type  the widget event: 5 Cross, 6 Triangle, 7 Square, 8 Circle
+ * @param type  the widget event: kONNEXT Cross, kONPREV Triangle, kONOPTION Square, kONMISC Circle
  */
 extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing* item_, unsigned int type)
 {
     if (((char*)item_) == 0)
         return;
     switch (type) {
-    case 5: {
+    case cUIState::kONNEXT: {
         func_001A86E8(0);
         cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (item_->mMiscData) {
         case 11:
-            cBENewRaceInterface_setGamePath(iface, 0);
+            cBENewRaceInterface_setGamePath(iface, kGAMEPATH_WORLDCIRCUIT);
             self_->mGoToNextState = 1;
             break;
         case 9:
-            cBENewRaceInterface_setGamePath(iface, 1);
+            cBENewRaceInterface_setGamePath(iface, kGAMEPATH_SINGLEEVENT);
             self_->mGoToNextState = 1;
             // both arms set the flag; the leftover compare on the cheat counter is in the target too
             if (*(signed char*)&self_->mHackCheatTotal >= 7)
                 self_->mGoToNextState = 1;
             break;
         case 22:
-            cBENewRaceInterface_setGamePath(iface, 2);
+            cBENewRaceInterface_setGamePath(iface, kGAMEPATH_MULTIPLAYER);
             self_->mGoToNextState = 1;
             break;
         case 49:
-            cBENewRaceInterface_setGamePath(iface, 2);
+            cBENewRaceInterface_setGamePath(iface, kGAMEPATH_MULTIPLAYER);
             cCommSystem_construct();
             func_0025B650();
             func_00260F80();
@@ -563,21 +563,21 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = *(cUICustomInterface**)self_->mpEngine;
         void* nextState = obj->getPrevState((cUIState*)self_, item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
     }
-    case 7: {
+    case cUIState::kONOPTION: {
         cUIState* optionsState =
             (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self_->mpEngine, 1);
         optionsState->mAttrState = (optionsState->mAttrState & ~0x3F00) | 0x100; // tAttrState::mMode = 1
         cUIStateStack_pushSpecial(&self_->mpEngine->mStateStack, optionsState, 0, 0);
         break;
     }
-    case 8:
+    case cUIState::kONMISC:
         if (++*(signed char*)&self_->mHackCheatTotal >= 7) {
             setWidgetVisible_194EB0(((char*)self_), str_2quick_play);
             setWidgetVisible_194EB0(((char*)self_), str_3multi_play);
@@ -597,15 +597,15 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetMenu);
  *
  * @param pMenu  the menu (On Tour pMenu); unused
  * @param Event  the menu event (6 Cross, 9 Circle)
- * @return for event 6, 1 (sound only) while the choice flag +0x48 is 0, else 0x101; 0x100 for event 9; 0x101
+ * @return for kONNEXT, 1 (sound only) while the choice flag +0x48 is 0, else 0x101; 0x100 for kONMISC; 0x101
  *         otherwise
  */
 extern "C" int cFEStateMainMenu_onWidgetMenu(cFEStateMainMenu* self, int pMenu, int Event)
 {
     switch (Event) {
-    case 6:
+    case cUIMenu::kONNEXT:
         return self->mGoToNextState == 0 ? 1 : 257;
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -637,7 +637,7 @@ static inline void Show195328(void* self, char* name)
  * Handles the Select Multiplayer Mode popup closing: on a result, replays Cross on the remembered Multi Play
  * item.
  *
- * Only event 0x16 acts. If the popup's getData(0) (slot 23) is nonzero it sets the choice flag (+0x48),
+ * Only kONPOPUPDESTROY acts. If the popup's getData(0) (slot 23) is nonzero it sets the choice flag (+0x48),
  * restores mCurrentCtrl from +0x50, calls cUIThing_playKeyframerEvent(item, 2) and its own onWidgetEvent (slot 19) with the
  * item (+0x4C) and 5. Then "hl", "3 help multi", "btext5" and "ps2sq" are shown again.
  *
@@ -647,10 +647,10 @@ static inline void Show195328(void* self, char* name)
 // On confirm (msg 0x16) commits the selected entry, then re-shows the four main-menu buttons.
 extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* obj, int msg)
 {
-    if (msg == 21) {
+    if (msg == cUIState::kONPOPUPCREATE) {
         return;
     }
-    if (msg != 22) {
+    if (msg != cUIState::kONPOPUPDESTROY) {
         return;
     }
     if ((int)obj->getData(0) != 0) {

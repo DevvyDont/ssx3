@@ -1,8 +1,10 @@
 #include "common.h"
 #include "be/beinterface.h"
+#include "be/beintnewrace.h"
 #include "vtable.h"
 #include "be/bedbprofile.h"
 #include "fe/feboltfilemanager.h"
+#include "ealib/hlafile.h"
 #include "ui/uiicon.h"
 #include "ealib/shape.h"
 #include "sound/ssxaudio.h"
@@ -132,9 +134,9 @@ static inline int Find_8DB8(cUIEngine* mgr, int hash)
  * widget pointers and the category stack (root -1), finds the dollar and checkbox texture elements and sets
  * the user's FE rider to the character (cFERiderManager_setHumanCharacter).
  *
- * With a store or a mode switch, 0xCC (On Tour mStoreNum) is the last hub's peak (2 for hubs 19-20, 3 for 21,
- * else 1), otherwise -1. Builds the root item list (func_0019B180) and loads the character's icon file into
- * the FE file cache (slot kept at 0xA64).
+ * With a store or a mode switch, 0xCC (On Tour mStoreNum) is the last hub's peak (2 for kLOCATION_HUB_C / _D, 3
+ * for kLOCATION_HUB_E, else 1), otherwise -1. Builds the root item list (func_0019B180) and loads the character's icon
+ * file into the FE file cache (slot kept at 0xA64).
  *
  * @param mem  the state being constructed (this)
  * @param owner  the UI engine (On Tour pEngine)
@@ -225,19 +227,19 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
     self->fAE4 = canSwitchMode;
     if (inStore != 0 || canSwitchMode != 0) {
         switch (cBENewPlayerInterface_getLastHub(player, cBELibrary_getRiderIndex(self->team))) {
-        case 17:
+        case kLOCATION_HUB_A:
             self->fCC = 1;
             break;
-        case 18:
+        case kLOCATION_HUB_B:
             self->fCC = 1;
             break;
-        case 19:
+        case kLOCATION_HUB_C:
             self->fCC = 2;
             break;
-        case 20:
+        case kLOCATION_HUB_D:
             self->fCC = 2;
             break;
-        case 21:
+        case kLOCATION_HUB_E:
             self->fCC = 3;
             break;
         default:
@@ -640,33 +642,34 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onPopupEvent);
 extern "C" void func_0019BE80(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updateBankWidget(cFEStateCharEquip* self);
 struct sEquipDetail;
-extern "C" int func_0019B458(sEquipDetail* self, int idx);
+extern "C" bool func_0019B458(sEquipDetail* self, int idx);
 extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
 
 /**
  * Hides the equip-gear state behind popups and buys the selected item when the buy popup closes with a yes.
  *
- * Event 0x15 (a popup opened) clears this state's visible bit (mAttrState bit 3) unless the popup is the buy
- * popup (state id 7). Event 0x16 (popped) sets it again and, for the buy popup with its result (+0x6C) set,
+ * kONPOPUPCREATE (a popup opened) clears this state's visible bit (mAttrState bit 3) unless the popup is the buy
+ * popup (state id cUIStateBuyPopup::kStateID). kONPOPUPDESTROY (popped) sets it again and, for the buy popup with
+ * its result (+0x6C) set,
  * buys the item (func_0019BE80), shows the new bank and redraws the rows when the item leaves the list
  * (func_0019B458).
  *
  * @param widget  the popup state that sent the event
- * @param msg  the popup event (0x15 opened, 0x16 closed)
+ * @param msg  the popup event (kONPOPUPCREATE opened, kONPOPUPDESTROY closed)
  */
 extern "C" void cFEStateCharEquip_onPopupEvent(cFEStateCharEquip* self, cUIState* widget, int msg)
 {
     switch (msg) {
-    case 21:
-        if (widget->mHashName != 7) {
+    case cUIState::kONPOPUPCREATE:
+        if (widget->mHashName != cUIStateBuyPopup::kStateID) {
             self->mAttrState &= ~8;
         }
         break;
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (((self->mAttrState >> 3) & 1) == 0) {
             self->mAttrState |= 8;
         }
-        if (widget->mHashName == 7 && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
+        if (widget->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
             func_0019BE80(self);
             self->updateBankWidget();
             if (func_0019B458((sEquipDetail*)self, self->mpMenu->mScrollItemCurrent)) {
@@ -687,7 +690,7 @@ int GetHashValue32(char* str);
 void* cList_first(cList* list);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onUpdate(void* self);
-extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
+extern "C" bool func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
@@ -717,7 +720,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
     if (obj != 0) {
         cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
         int on = 0;
-        int mode1 = self->mEquipMode == 1;
+        int mode1 = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
         if (mode1) {
             if (self->mPreviewTextureFileIndex >= 0 || self->mLargePreviewDelay > 0)
                 on = 1;
@@ -780,7 +783,7 @@ public:
 
 static inline int isMode1_9A38(cFEStateCharEquip* self)
 {
-    return self->mEquipMode == 1;
+    return self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
 }
 
 static inline float clamp_9A38(float v, float lo, float hi)
@@ -793,9 +796,9 @@ static inline float clamp_9A38(float v, float lo, float hi)
 /**
  * Turns, zooms and pans the rider preview with the camera controls in inventory mode.
  *
- * Only outside store mode and in view state 1 or 4 (0xAE0): camera rotate adds 3 x getCamRotate() degrees to
- * the turn (0xAAC, kept in 0-360), zoom subtracts 0.1 x getCamZoom() from 0xAA4 (clamped to 0..1) and pan 0.1
- * x getCamPan() from 0xAA8 (clamped to -1..1); these are cUIInput vtable slots 33-38.
+ * Only outside store mode and in camera state kCameraRider or kCameraToRider (0xAE0): camera rotate adds 3 x
+ * getCamRotate() degrees to the turn (0xAAC, kept in 0-360), zoom subtracts 0.1 x getCamZoom() from 0xAA4 (clamped to
+ * 0..1) and pan 0.1 x getCamPan() from 0xAA8 (clamped to -1..1); these are cUIInput vtable slots 33-38.
  *
  * @param in  the controller input (cUIInput)
  * @return 1 when any camera control was used, otherwise 0
@@ -805,7 +808,7 @@ extern "C" int cFEStateCharEquip_onInputBegin(cFEStateCharEquip* self, cPad_9A38
     int handled = 0;
     if (!isMode1_9A38(self)) {
     int mode = self->mCameraState;
-    if (mode == 1 || mode == 4) {
+    if (mode == cFEStateCharEquip::kCameraRider || mode == cFEStateCharEquip::kCameraToRider) {
     if (in->isCamRotate()) {
         self->mPlayerRotation += in->getCamRotate() * 3.0f;
         while (self->mPlayerRotation >= 360.0f)
@@ -839,7 +842,7 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
 extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self, int a1);
 extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updateCharacterModel(cFEStateCharEquip* self);
-extern "C" int func_0019BEE8(cFEStateCharEquip* self);
+extern "C" bool func_0019BEE8(cFEStateCharEquip* self);
 extern "C" void func_0019C7E8(cFEStateCharEquip* self, void* item);
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
@@ -896,24 +899,24 @@ struct sCharEquip_9C28 {
 
 static inline int isMode1_9C28(sCharEquip_9C28* self)
 {
-    return self->mode == 1;
+    return self->mode == cFEStateCharEquip::kEquipModeStore;
 }
 
 /**
  * Handles the item rows: opens a category, buys or equips an item, goes back up a category, or leaves.
  *
- * Event 5 (accept) on row top + misc data: a category (flag 0x20) is pushed on the stack (0xD0, depth 0x120)
- * and listed, the boards category (3) easing the camera to the board (0xAE0 = 3); an item (flag 4) opens the
- * buy popup in store mode when the money covers its price x 10, or in the inventory is equipped or taken off
+ * kONNEXT (accept) on row top + misc data: a category (flag 0x20) is pushed on the stack (0xD0, depth 0x120)
+ * and listed, the boards category (3) easing the camera to the board (0xAE0 = kCameraToBoard); an item (flag 4) opens
+ * the buy popup in store mode when the money covers its price x 10, or in the inventory is equipped or taken off
  * (func_0019BEE8) when the row's points fit the 3392 budget, then the bars and rider model are refreshed.
  *
- * Event 6 (back) lists the parent category (leaving boards eases back, 0xAE0 = 4) or, at the root, sets the
- * FE rider's Customize speech request (mCustomized) and pushes getPrevState's state. Event 1 (row focused) starts
- * a delayed large-preview load in store mode and refreshes the item preview.
+ * kONPREV (back) lists the parent category (leaving boards eases back, 0xAE0 = kCameraToRider) or, at the root, sets
+ * the FE rider's Customize speech request (mCustomized) and pushes getPrevState's state. kONGAINFOCUS (row focused)
+ * starts a delayed large-preview load in store mode and refreshes the item preview.
  *
  * @param selfv  the equip-gear state (this)
  * @param w  the row widget that sent the event; nothing happens when null
- * @param ev  the widget event (5 accept, 6 back, 1 focused)
+ * @param ev  the widget event (kONNEXT accept, kONPREV back, kONGAINFOCUS focused)
  */
 extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThing* w, unsigned int ev)
 {
@@ -921,7 +924,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
     if (((char*)w) == 0)
         return;
     switch (ev) {
-    case 5: {
+    case cUIState::kONNEXT: {
         if (self->list == 0)
             return;
         int idx = self->list->top + w->mMiscData;
@@ -936,7 +939,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
             func_0019B180(self, id);
             func_0019B618((cFEStateCharEquip*)self, 1, 1);
             if (id == D_004A11E0)
-                self->state = 3;
+                self->state = cFEStateCharEquip::kCameraToBoard;
             return;
         }
         if (!(item->flags & 4))
@@ -962,10 +965,10 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
         ((cFEStateCharEquip*)self)->updateCharacterModel();
         return;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         if (self->depth > 0) {
             if (self->stack[self->depth] == D_004A11E0)
-                self->state = 4;
+                self->state = cFEStateCharEquip::kCameraToRider;
             ((cFEStateCharEquip*)self)->updateHeading(self->stack[self->depth - 1]);
             func_0019B180(self, self->stack[self->depth - 1]);
             func_0019B618((cFEStateCharEquip*)self, 1, 1);
@@ -981,7 +984,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
         }
         break;
     }
-    case 1:
+    case cUIState::kONGAINFOCUS:
         if (isMode1_9C28(self))
             ((cFEStateCharEquip*)self)->startLargePreviewLoad(1);
         func_0019A9B8((cFEStateCharEquip*)self);
@@ -1033,40 +1036,41 @@ static inline bool hasFlag_9F20(sEquipItem_9F20* item, int f)
 /**
  * Answers the item menu's queries and buttons: row checks, scrolling, accept, back and mode switch.
  *
- * Event 0 is true for an item with flag 4 and event 1 for an existing row; 2 and 3 (scrolled) redraw the rows
- * and give 1. Event 6 (next) gives 0x101 for a category, any store item (its price test gives 0x101 either
- * way) or an inventory item whose points fit (row cost at 0xA78 plus 0xC4 at most 3392), else 0x110 (the
- * item's mSound[0]). Event 7 (back) steps the category depth (0x120) down and gives 1; 8 switches the mode
- * (cFEStateCharEquip_switchEquipMode) when allowed (0xAE4) and gives 0x101, else 0x100; 9 gives 0x100.
+ * kISSELECTABLE is true for an item with flag 4 and kISHIGHLIGHTABLE for an existing row; kSCROLLUP and
+ * kSCROLLDOWN redraw the rows and give 1. kONNEXT gives 0x101 for a category, any store item (its price test gives
+ * 0x101 either way) or an inventory item whose points fit (row cost at 0xA78 plus 0xC4 at most 3392), else 0x110 (the
+ * item's mSound[0]). kONPREVIOUS (back) steps the category depth (0x120) down and gives 1; kONOPTION switches the
+ * mode (cFEStateCharEquip_switchEquipMode) when allowed (0xAE4) and gives 0x101, else 0x100; kONMISC gives 0x100.
  *
  * @param pMenu  the menu that sent the event (unused)
- * @param kind  the menu event
- * @param idx  the row index for events 0 and 1
- * @return a flag for events 0 and 1, otherwise feedback bits (0x100 frame, 1 mSound[1], 0x10 mSound[0])
+ * @param kind  the menu event (tUIMenuEvent)
+ * @param idx  the row index for kISSELECTABLE and kISHIGHLIGHTABLE
+ * @return a flag for kISSELECTABLE and kISHIGHLIGHTABLE, otherwise feedback bits (0x100 frame, 1 mSound[1], 0x10
+ *           mSound[0])
  */
 extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu, int kind, int idx)
 {
     switch (kind) {
-    case 2:
-    case 3:
+    case cUIMenu::kSCROLLUP:
+    case cUIMenu::kSCROLLDOWN:
         func_0019B618((cFEStateCharEquip*)self, 0, 0);
         return 1;
-    case 0:
+    case cUIMenu::kISSELECTABLE:
         if (idx < self->count) {
             return hasFlag_9F20(self->items[idx], 4);
         }
         return 0;
-    case 1:
+    case cUIMenu::kISHIGHLIGHTABLE:
         if (idx == 0 || self->count == 0 || idx < self->count) return 1;
         return 0;
-    case 6: {
+    case cUIMenu::kONNEXT: {
         cUIMenu* selected = (cUIMenu*)self->sel;
         int selIndex = selected->mScrollItemCurrent;
         if (selIndex < 0) return 272;
         if (selIndex < self->count) {
             sEquipItem_9F20* item = self->items[selIndex];
             if (item->flags & 0x20) return 257;
-            if (isMode_9F20(self->fC8, 1)) {
+            if (isMode_9F20(self->fC8, cFEStateCharEquip::kEquipModeStore)) {
                 int cost = item->cost;
                 if (cost > 0) cost *= 10;
                 if (cost >= self->fC0) break;
@@ -1077,19 +1081,19 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
         }
         return 272;
     }
-    case 7:
+    case cUIMenu::kONPREVIOUS:
         if (self->f120 > 0) {
             self->f120 = self->f120 - 1;
             return 1;
         }
         break;
-    case 8:
+    case cUIMenu::kONOPTION:
         if (self->fAE4 != 0) {
             ((cFEStateCharEquip*)self)->switchEquipMode();
             return 257;
         }
         return 0x100;
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -1139,7 +1143,7 @@ int cFEStateCharEquip::getIconID(const char* name)
             sPkgEntK19A098* entry = &((sPkgEntK19A098*)&pkg->tbl[0].offset)[i];
             char* data = (char*)pkg + entry->off;
             int id = mIconTextureID;
-            if (id == -1) {
+            if (id == kNoTextureID) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 mIconTextureID = ps2GraphicsMan->AddTexture((const SHAPE*)data, str_icon, 0, 1, -1);
             } else {
@@ -1157,7 +1161,7 @@ int cFEStateCharEquip::getIconID(const char* name)
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateIconTexturesLoad);
 #ifdef SKIP_ASM
 struct sEquipTable;
-extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
+extern "C" bool func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 
 /**
@@ -1395,7 +1399,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePreviewLoad);
 struct sEquipTable;
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
-extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
+extern "C" bool func_0019E238(sEquipTable* self, int a1, int a2);
 // PORT: func_0019E2B0 returns a pointer through int (the unit defines it as int).
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
@@ -1412,7 +1416,7 @@ extern char str_preview[];
  */
 extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
 {
-    int mode1 = self->mEquipMode == 1;
+    int mode1 = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
     if (!mode1)
         return;
     if (self->mLargePreviewDelay > 0) {
@@ -1589,7 +1593,7 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self);
  */
 extern "C" void func_0019A9B8(cFEStateCharEquip* self)
 {
-    bool buyMode = self->mEquipMode == 1;
+    bool buyMode = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
     if (buyMode) {
         func_0019AB78(self);
     } else {
@@ -1835,9 +1839,9 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(cBECharProfileDB* db, int id)
  * @param library  the item library
  * @param db       the character's item entries
  * @param itemId   the category
- * @return 1 when there is one, else 0
+ * @return true when there is one, else false
  */
-extern "C" int func_0019AFD0(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
+extern "C" bool func_0019AFD0(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
 {
     sEquipItem_AFD0* items[528];
     int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
@@ -1847,12 +1851,12 @@ extern "C" int func_0019AFD0(cFEStateCharEquip* self, int library, cBECharProfil
         if (it->flags & 4) {
             if (getEntry_AFD0(db, it->id)->flags & 2) {
                 if (!(it->flags & 0x20)) {
-                    return 1;
+                    return true;
                 }
             }
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1881,15 +1885,15 @@ static inline tBEProfileBolt* getEntry_B098(cBECharProfileDB* db, int id)
 /**
  * Reports whether a category has nothing to buy in the current store.
  *
- * Lists the category's items and returns 0 at the first one with flag 4, not a category, whose character entry lacks
- * flag 2 and whose store number equals +0xCC. Unlike func_0019B180's item test it does not accept +0xCC == -1.
+ * Lists the category's items and returns false at the first one with flag 4, not a category, whose character entry
+ * lacks flag 2 and whose store number equals +0xCC. Unlike func_0019B180's item test it does not accept +0xCC == -1.
  *
  * @param library  the item library
  * @param db       the character's item entries
  * @param itemId   the category
- * @return 0 when the store sells something in it, else 1
+ * @return false when the store sells something in it, else true
  */
-extern "C" int func_0019B098(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
+extern "C" bool func_0019B098(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
 {
     sEquipItem_B098* items[528];
     int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
@@ -1900,13 +1904,13 @@ extern "C" int func_0019B098(cFEStateCharEquip* self, int library, cBECharProfil
             if (!(getEntry_B098(db, it->id)->flags & 2)) {
                 if (it->slot == self->mStoreNum) {
                     if (!(it->flags & 0x20)) {
-                        return 0;
+                        return false;
                     }
                 }
             }
         }
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -2051,13 +2055,13 @@ struct sEquipDetail {
  * cFEStateCharEquip_onPopupEvent calls it after a purchase.
  *
  * @param idx  the list position
- * @return 1, or 0 when @p idx is past the end
+ * @return true, or false when @p idx is past the end
  */
-extern "C" int func_0019B458(sEquipDetail* self, int idx)
+extern "C" bool func_0019B458(sEquipDetail* self, int idx)
 {
     int top, sel, n;
     if (idx >= self->count) {
-        return 0;
+        return false;
     }
     for (; idx < self->count - 1; idx++) {
         self->items[idx] = self->items[idx + 1];
@@ -2081,7 +2085,7 @@ extern "C" int func_0019B458(sEquipDetail* self, int idx)
         sel = 0;
     }
     self->list->sel = sel;
-    return 1;
+    return true;
 }
 #endif
 
@@ -2602,15 +2606,15 @@ static inline tBEProfileBolt* getItemK19BEE8(cBECharProfileDB* l, int id)
  * For a selected item (flag 4) toggles its equipped flag (entry flag 4) with func_0014AFB0 and, on success, calls
  * func_0014AEA8 for the character.
  *
- * @return 1 when the item changed, else 0
+ * @return true when the item changed, else false
  */
-extern "C" int func_0019BEE8(cFEStateCharEquip* self)
+extern "C" bool func_0019BEE8(cFEStateCharEquip* self)
 {
     if (self->mNumItems <= 0)
-        return 0;
+        return false;
     char* item = (char*)self->mpItems[self->mpMenu->mScrollItemCurrent];
     if (!(*(int*)(item + 0x34) & 4))
-        return 0;
+        return false;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self->mUserNum,
                                                               self->mCharID);
@@ -2619,9 +2623,9 @@ extern "C" int func_0019BEE8(cFEStateCharEquip* self)
     if (func_0014AFB0(iface, self->mUserNum, self->mCharID, *(short*)(item + 4),
                       (entry->flags & mask) == 0)) {
         func_0014AEA8(iface, self->mUserNum, self->mCharID);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -3226,9 +3230,9 @@ struct sNode_CC30 {
 /**
  * Stores or clears the second value for a key in the file-index hash table.
  *
- * A @p val of -1 looks the node up without creating it; any other value creates it if needed (func_0019C938). A
- * negative @p val clears bit @p bit of the mask at +0x6 and, once that mask is 0 and the first value (+0x8) is
- * negative, frees the node (func_0019CA70). Otherwise the value goes to +0xA and the mask bit is set.
+ * A @p val of kNoBoltFile (-1) looks the node up without creating it; any other value creates it if needed
+ * (func_0019C938). A negative @p val clears bit @p bit of the mask at +0x6 and, once that mask is 0 and the first value
+ * (+0x8) is negative, frees the node (func_0019CA70). Otherwise the value goes to +0xA and the mask bit is set.
  *
  * Quirk: the free test checks the first value rather than the first mask, and +0x8 is only reset to -1 when a node is
  * freed, so a node whose first value was ever set stays allocated after both masks clear.
@@ -3239,7 +3243,7 @@ struct sNode_CC30 {
  */
 extern "C" void func_0019CC30(void* self, int bit, int lowKey, int val)
 {
-    sNode_CC30* node = (sNode_CC30*)func_0019C938(self, bit, lowKey, val != -1);
+    sNode_CC30* node = (sNode_CC30*)func_0019C938(self, bit, lowKey, val != kNoBoltFile);
     if (node != 0) {
         if (val < 0) {
             if ((node->mask >> bit) & 1) {
@@ -3302,10 +3306,10 @@ struct sNode_CD38 {
 /**
  * Stores or clears the first value for a key in the file-index hash table.
  *
- * A @p val of -1 looks the node up without creating it; any other value creates it if needed (func_0019C938). A
- * negative @p val clears bit @p bit of the mask at +0x4 and, once that mask is 0 and the second value (+0xA) is
- * negative, frees the node (func_0019CA70). Otherwise the value goes to +0x8 and the mask bit is set. Same quirk as
- * func_0019CC30: the free test checks the other value, not the other mask.
+ * A @p val of kNoBoltFile (-1) looks the node up without creating it; any other value creates it if needed
+ * (func_0019C938). A negative @p val clears bit @p bit of the mask at +0x4 and, once that mask is 0 and the second
+ * value (+0xA) is negative, frees the node (func_0019CA70). Otherwise the value goes to +0x8 and the mask bit is set.
+ * Same quirk as func_0019CC30: the free test checks the other value, not the other mask.
  *
  * @param bit  high half of the key and the mask bit (the rider manager passes the rider's profile index, +0x4)
  * @param lowKey  low half of the key (an item id)
@@ -3313,7 +3317,7 @@ struct sNode_CD38 {
  */
 extern "C" void func_0019CD38(void* self, int bit, int lowKey, int val)
 {
-    sNode_CD38* node = (sNode_CD38*)func_0019C938(self, bit, lowKey, val != -1);
+    sNode_CD38* node = (sNode_CD38*)func_0019C938(self, bit, lowKey, val != kNoBoltFile);
     if (node != 0) {
         if (val < 0) {
             if ((node->mask >> bit) & 1) {
@@ -3522,9 +3526,9 @@ extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
 /**
  * Starts the oldest queued load, preferring the given bank of the FE file cache.
  *
- * Picks the queued (state 3) slot with the lowest stamp in @p bank; when the bank has none, it searches the other banks
- * in order and takes the lowest-stamp queued slot of the first bank that has one. The chosen slot is loaded with
- * func_0019D8B8.
+ * Picks the queued (kBoltFileFlag_Queued) slot with the lowest stamp in @p bank; when the bank has none, it searches
+ * the other banks in order and takes the lowest-stamp queued slot of the first bank that has one. The chosen slot is
+ * loaded with func_0019D8B8.
  *
  * Quirk: a best stamp of 0 counts as "nothing chosen yet", so a queued slot with stamp 0 loses to any later queued
  * slot.
@@ -3534,18 +3538,18 @@ extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
 extern "C" void func_0019D140(cFEBoltFileManager* self, int bank)
 {
     unsigned int best = 0;
-    int bestIdx = -1;
+    int bestIdx = kNoBoltFile;
     int found;
     int i;
     tBoltFile* slot = self->mFiles[bank];
     found = bank;
     for (i = 0; i < 256; i++, slot++) {
-        if (slot->flags == 3 && (best == 0 || slot->unk_11C < best)) {
+        if (slot->flags == kBoltFileFlag_Queued && (best == 0 || slot->unk_11C < best)) {
             best = slot->unk_11C;
             bestIdx = i;
         }
     }
-    if (bestIdx == -1) {
+    if (bestIdx == kNoBoltFile) {
         int otherBank;
         for (otherBank = 0; otherBank < 10; otherBank++) {
             if (otherBank == bank) {
@@ -3553,7 +3557,7 @@ extern "C" void func_0019D140(cFEBoltFileManager* self, int bank)
             }
             slot = self->mFiles[otherBank];
             for (i = 0; i < 256; i++, slot++) {
-                if (slot->flags == 3 && (best == 0 || slot->unk_11C < best)) {
+                if (slot->flags == kBoltFileFlag_Queued && (best == 0 || slot->unk_11C < best)) {
                     best = slot->unk_11C;
                     found = otherBank;
                     bestIdx = i;
@@ -3593,11 +3597,12 @@ struct sTableK19D250 {
 /**
  * Polls the FE file cache's asynchronous loads once per frame (cRealFE_update).
  *
- * For every slot of the 10 banks: an asynchronous load in flight (pending set, state 2) whose ASYNCFILE_getstatus()
- * reports 1 is released (ASYNCFILE_release), unpacked (func_0019D000) and becomes loaded (state 1) or idle (state 0)
+ * For every slot of the 10 banks: an asynchronous load in flight (pending set, kBoltFileFlag_Loading) whose
+ * ASYNCFILE_getstatus() reports kASYNCFILE_Done is released (ASYNCFILE_release), unpacked (func_0019D000) and becomes
+ * loaded (kBoltFileFlag_Done) or idle (kBoltFileFlag_Idle)
  * when its use count is 0; pending is cleared and nPending decremented, and when no loads remain in flight the next
- * queued load starts (func_0019D140 for that bank). A queued slot (state 3) starts loading (func_0019D8B8) whenever no
- * loads are in flight.
+ * queued load starts (func_0019D140 for that bank). A queued slot (kBoltFileFlag_Queued) starts loading (func_0019D8B8)
+ * whenever no loads are in flight.
  *
  * @param table  the FE file cache
  */
@@ -3609,9 +3614,9 @@ extern "C" void func_0019D250(void* table)
     for (i = 0; i < 10; i++) {
         tBoltFile* slot = (tBoltFile*)((char*)self + i * 0x12000);
         for (j = 0; j < 256; j++, slot++) {
-            if (slot->async != 0 && slot->flags == 2) {
+            if (slot->async != 0 && slot->flags == kBoltFileFlag_Loading) {
                 int asyncStatus = ASYNCFILE_getstatus(slot->asyncFileHandle);
-                if (asyncStatus == 1) {
+                if (asyncStatus == kASYNCFILE_Done) {
                     int status[4];
                     ASYNCFILE_release(slot->asyncFileHandle, 0, status);
                     func_0019D000((sEquipTable_DC20*)self, i, slot);
@@ -3623,7 +3628,7 @@ extern "C" void func_0019D250(void* table)
                     if (--self->nPending <= 0)
                         func_0019D140((cFEBoltFileManager*)self, i);
                 }
-            } else if (self->nPending <= 0 && slot->flags == 3) {
+            } else if (self->nPending <= 0 && slot->flags == kBoltFileFlag_Queued) {
                 func_0019D8B8((sEquipTable_DC20*)self, i, j);
             }
         }
@@ -3727,9 +3732,9 @@ struct sEquipTable_D4B8 {
 /**
  * Frees one slot of the FE file cache.
  *
- * When an asynchronous load is in flight (state 2, pending) it releases the request (ASYNCFILE_release). Subtracts the
- * slot's size from used, frees its data and clears data, size, state, name, handle, pending and use count; the type
- * becomes -1. The stamp is kept and nPending is not adjusted.
+ * When an asynchronous load is in flight (kBoltFileFlag_Loading, pending) it releases the request (ASYNCFILE_release).
+ * Subtracts the slot's size from used, frees its data and clears data, size, state, name, handle, pending and use
+ * count; the type becomes -1. The stamp is kept and nPending is not adjusted.
  *
  * @param bank  the bank (0-9)
  * @param i  the slot index
@@ -3738,7 +3743,7 @@ extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i)
 {
     int status;
     sEquipSlot_D4B8* slot = &self->rows[bank].slots[i];
-    if (slot->state == 2) {
+    if (slot->state == kBoltFileFlag_Loading) {
         if (slot->pending != 0) {
             ASYNCFILE_release(slot->handle, 0, &status);
         }
@@ -3959,12 +3964,12 @@ struct sBankK19DA10 {
  * Requests a file from the FE file cache and returns its slot, adding one use.
  *
  * When the name is already cached (func_0019D428): the stamp becomes 0 with @p deferred or the bank's next stamp otherwise;
- * with @p async an idle slot becomes loaded (state 1); without it, pending is cleared, an in-flight load is waited on
- * (ASYNCFILE_release), a queued one is loaded at once (func_0019D8B8), and the slot is marked loaded with handle -1.
- * Otherwise it reuses a slot (func_0019D3B0, emptied with func_0019D4B8), stamps it the same way, copies the name and
- * stores @p fileType as the type and @p async as pending; it loads at once (func_0019D8B8) unless @p deferred is set or an
- * asynchronous request meets loads already in flight, in which case it is queued (state 3). Either way the use count
- * (timer) goes up by 1; func_0019DC20 gives the use back.
+ * with @p async an idle slot becomes loaded (kBoltFileFlag_Done); without it, pending is cleared, an in-flight load is
+ * waited on (ASYNCFILE_release), a queued one is loaded at once (func_0019D8B8), and the slot is marked loaded with
+ * handle -1. Otherwise it reuses a slot (func_0019D3B0, emptied with func_0019D4B8), stamps it the same way, copies the
+ * name and stores @p fileType as the type and @p async as pending; it loads at once (func_0019D8B8) unless @p deferred
+ * is set or an asynchronous request meets loads already in flight, in which case it is queued (kBoltFileFlag_Queued).
+ * Either way the use count (timer) goes up by 1; func_0019DC20 gives the use back.
  *
  * Likely bug: the cached path that waits on an in-flight load neither unpacks it (func_0019D000) nor decrements
  * nPending, unlike func_0019DC20. Likely bug: a -1 from func_0019D3B0 (no idle slot) is used as a slot index.
@@ -3993,10 +3998,10 @@ extern "C" int func_0019DA10(void* cache, int bank, void* namep, int fileType, i
                 slot->flags = 1;
         } else {
             slot->async = 0;
-            if (slot->flags == 2) {
+            if (slot->flags == kBoltFileFlag_Loading) {
                 int status;
                 ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
-            } else if (slot->flags == 3) {
+            } else if (slot->flags == kBoltFileFlag_Queued) {
                 func_0019D8B8((sEquipTable_DC20*)self, bank, i);
             }
             slot->flags = 1;
@@ -4043,9 +4048,9 @@ extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
  * Drops one use of a slot in the FE file cache, keeping its data cached for reuse.
  *
  * Decrements the use count (timer) and returns while it is still positive. An asynchronous load still in flight
- * (ASYNCFILE_getstatus() not 1) is left to finish; a finished one is released, unpacked (func_0019D000) and counted out
- * of nPending. A slot without data is then freed (func_0019D4B8); one with data becomes idle (state 0), so a later
- * request can reuse it until it is evicted.
+ * (ASYNCFILE_getstatus() not kASYNCFILE_Done) is left to finish; a finished one is released, unpacked (func_0019D000)
+ * and counted out of nPending. A slot without data is then freed (func_0019D4B8); one with data becomes idle (state 0),
+ * so a later request can reuse it until it is evicted.
  *
  * @param bank  the bank (0-9)
  * @param i  the slot index (from func_0019DA10)
@@ -4057,8 +4062,8 @@ extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i)
     if (--slot->refCount > 0) {
         return;
     }
-    if (slot->flags == 2) {
-        if (ASYNCFILE_getstatus(slot->asyncFileHandle) != 1) {
+    if (slot->flags == kBoltFileFlag_Loading) {
+        if (ASYNCFILE_getstatus(slot->asyncFileHandle) != kASYNCFILE_Done) {
             return;
         }
         ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
@@ -4094,11 +4099,11 @@ struct sRowK19DD10 {
 };
 
 /**
- * Compares two FE file cache slots to sort the deferred type-8 loads by name (qsort comparator).
+ * Compares two FE file cache slots to sort the deferred kBoltFileType_ModelPart (8) loads by name (qsort comparator).
  *
  * Each argument is a packed key (bank << 16 | slot) into the cache D_004A196C; both use the first key's bank. A slot
- * counts when it is queued (state 3), has type 8 and stamp 0. Two counted slots compare by name with strcasecmp; a
- * counted slot sorts before any other; two others compare equal.
+ * counts when it is queued (kBoltFileFlag_Queued), has type kBoltFileType_ModelPart and stamp 0. Two counted slots
+ * compare by name with strcasecmp; a counted slot sorts before any other; two others compare equal.
  *
  * @param firstKey  first packed key
  * @param secondKey  second packed key
@@ -4110,13 +4115,13 @@ extern "C" int func_0019DD10(const int* firstKey, const int* secondKey)
     sRowK19DD10* row = (sRowK19DD10*)D_004A196C + (ka >> 16);
     sSlotK19DD10* sa = &row->slots[ka & 0xFFFF];
     sSlotK19DD10* sb = &row->slots[*secondKey & 0xFFFF];
-    if (sa->state == 3 && sa->type == 8 && sa->f11C == 0) {
-        if (sb->state == 3 && sb->type == 8 && sb->f11C == 0)
+    if (sa->state == kBoltFileFlag_Queued && sa->type == kBoltFileType_ModelPart && sa->f11C == 0) {
+        if (sb->state == kBoltFileFlag_Queued && sb->type == kBoltFileType_ModelPart && sb->f11C == 0)
             return strcasecmp(sa->name, sb->name);
         return -1;
     }
-    if (sb->state == 3 && sb->type == 8 && sb->f11C == 0) {
-        if (sa->state == 3 && sa->type == 8 && sa->f11C == 0)
+    if (sb->state == kBoltFileFlag_Queued && sb->type == kBoltFileType_ModelPart && sb->f11C == 0) {
+        if (sa->state == kBoltFileFlag_Queued && sa->type == kBoltFileType_ModelPart && sa->f11C == 0)
             return strcasecmp(sa->name, sb->name);
         return 1;
     }
@@ -4143,10 +4148,11 @@ struct sRowK19DE18 {
 };
 
 /**
- * Compares two FE file cache slots to sort the deferred type-11 loads by name (qsort comparator).
+ * Compares two FE file cache slots to sort the deferred kBoltFileType_PartTexture (11) loads by name (qsort
+ * comparator).
  *
- * Same as func_0019DD10 for type 11: queued (state 3), type 11, stamp 0 slots sort first, by name with strcasecmp; two
- * others compare equal.
+ * Same as func_0019DD10 for kBoltFileType_PartTexture: queued, type 11, stamp 0 slots sort first, by name with
+ * strcasecmp; two others compare equal.
  *
  * @param firstKey  first packed key
  * @param secondKey  second packed key
@@ -4158,13 +4164,13 @@ extern "C" int func_0019DE18(const int* firstKey, const int* secondKey)
     sRowK19DE18* row = (sRowK19DE18*)D_004A196C + (ka >> 16);
     sSlotK19DE18* sa = &row->slots[ka & 0xFFFF];
     sSlotK19DE18* sb = &row->slots[*secondKey & 0xFFFF];
-    if (sa->state == 3 && sa->type == 11 && sa->f11C == 0) {
-        if (sb->state == 3 && sb->type == 11 && sb->f11C == 0)
+    if (sa->state == kBoltFileFlag_Queued && sa->type == kBoltFileType_PartTexture && sa->f11C == 0) {
+        if (sb->state == kBoltFileFlag_Queued && sb->type == kBoltFileType_PartTexture && sb->f11C == 0)
             return strcasecmp(sa->name, sb->name);
         return -1;
     }
-    if (sb->state == 3 && sb->type == 11 && sb->f11C == 0) {
-        if (sa->state == 3 && sa->type == 11 && sa->f11C == 0)
+    if (sb->state == kBoltFileFlag_Queued && sb->type == kBoltFileType_PartTexture && sb->f11C == 0) {
+        if (sa->state == kBoltFileFlag_Queued && sa->type == kBoltFileType_PartTexture && sa->f11C == 0)
             return strcasecmp(sa->name, sb->name);
         return 1;
     }
@@ -4212,7 +4218,7 @@ extern "C" int func_0019DD10_DF20(const int* a, const int* b) __asm__("func_0019
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
 /**
- * Stamps a bank's deferred type-8 loads in name order and starts the first one.
+ * Stamps a bank's deferred kBoltFileType_ModelPart (8) loads in name order and starts the first one.
  *
  * Sorts the bank's 256 packed keys with qsort (qsort) and func_0019DD10, then walks them while the slot has
  * type 8 and stamp 0: each gets the bank's next stamp (counts) and, when no loads are in flight and it is queued,
@@ -4229,10 +4235,10 @@ extern "C" void func_0019DF20(sFileCache* self, int bank)
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
         sFileSlot* slot = &self->banks[bank].slots[idx];
-        if (slot->stamp != 0 || slot->type != 8)
+        if (slot->stamp != 0 || slot->type != kBoltFileType_ModelPart)
             break;
         slot->stamp = self->counts[bank]++;
-        if (self->nPending <= 0 && slot->state == 3)
+        if (self->nPending <= 0 && slot->state == kBoltFileFlag_Queued)
             func_0019D8B8_DF20(self, bank, idx);
     }
 }
@@ -4255,10 +4261,10 @@ extern "C" int func_0019DE18_E070(const int* a, const int* b) __asm__("func_0019
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
 /**
- * Stamps a bank's deferred type-11 loads in name order and starts the first one.
+ * Stamps a bank's deferred kBoltFileType_PartTexture (11) loads in name order and starts the first one.
  *
- * Same as func_0019DF20 with func_0019DE18 and type 11. The rider manager (cFERider_loadTextures) calls it after requesting
- * deferred files.
+ * Same as func_0019DF20 with func_0019DE18 and kBoltFileType_PartTexture. The rider manager (cFERider_loadTextures)
+ * calls it after requesting deferred files.
  *
  * @param bank  the bank (0-9)
  */
@@ -4271,10 +4277,10 @@ extern "C" void func_0019E070(sFileCache* self, int bank)
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
         sFileSlot* slot = &self->banks[bank].slots[idx];
-        if (slot->stamp != 0 || slot->type != 11)
+        if (slot->stamp != 0 || slot->type != kBoltFileType_PartTexture)
             break;
         slot->stamp = self->counts[bank]++;
-        if (self->nPending <= 0 && slot->state == 3)
+        if (self->nPending <= 0 && slot->state == kBoltFileFlag_Queued)
             func_0019D8B8_E070(self, bank, idx);
     }
 }
@@ -4287,27 +4293,28 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
  * Returns whether a bank of the FE file cache has no load in flight or queued.
  *
  * @param bank  the bank (0-9)
- * @return 0 when any slot's state is 2 or 3 (or negative), else 1
+ * @return false when any slot is loading or queued (state kBoltFileFlag_Loading / kBoltFileFlag_Queued, or a
+ *         negative state), else true
  */
-extern "C" int func_0019E1C0(sTableK19D250* self, int bank) {
+extern "C" bool func_0019E1C0(sTableK19D250* self, int bank) {
     for (int i = 0; i < 0x100; i++) {
-        if ((unsigned int)self->banks[bank].e[i].flags >= 2) return 0;
+        if ((unsigned int)self->banks[bank].e[i].flags >= 2) return false;
     }
-    return 1;
+    return true;
 }
 #endif
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E208);
 #ifdef SKIP_ASM
 /**
- * Returns whether a slot of the FE file cache is loading (state 2).
+ * Returns whether a slot of the FE file cache is loading (state kBoltFileFlag_Loading).
  *
  * @param bank  the bank (0-9)
  * @param i  the slot index
- * @return 1 while the load is in flight, else 0
+ * @return true while the load is in flight, else false
  */
-extern "C" int func_0019E208(sTableK19D250* self, int bank, int i) {
-    return self->banks[bank].e[i].flags == 2;
+extern "C" bool func_0019E208(sTableK19D250* self, int bank, int i) {
+    return self->banks[bank].e[i].flags == kBoltFileFlag_Loading;
 }
 #endif
 
@@ -4328,15 +4335,15 @@ struct sEquipTable {
 };
 
 /**
- * Returns whether a slot of the FE file cache is loaded (state 1).
+ * Returns whether a slot of the FE file cache is loaded (state kBoltFileFlag_Done).
  *
  * @param bank  the bank (0-9)
  * @param slotIndex  the slot index
- * @return 1 when loaded, else 0
+ * @return true when loaded, else false
  */
-extern "C" int func_0019E238(sEquipTable* self, int bank, int slotIndex)
+extern "C" bool func_0019E238(sEquipTable* self, int bank, int slotIndex)
 {
-    return self->rows[bank].slots[slotIndex].state == 1;
+    return self->rows[bank].slots[slotIndex].state == kBoltFileFlag_Done;
 }
 #endif
 
@@ -4346,14 +4353,14 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E268);
 /**
  * Returns a slot's file name in the FE file cache.
  *
- * Returns 0 only for state -1, which the cache's own functions never set.
+ * Returns 0 only for state kBoltFileFlag_Invalid (-1), which the cache's own functions never set.
  *
  * @param bank  the bank (0-9)
  * @param i  the slot index
  * @return the name buffer, or 0
  */
 extern "C" char* func_0019E268(sTableK19D250* self, int bank, int i) {
-    if (self->banks[bank].e[i].flags == -1) return 0;
+    if (self->banks[bank].e[i].flags == kBoltFileFlag_Invalid) return 0;
     return self->banks[bank].e[i].fileName;
 }
 #endif
@@ -4368,11 +4375,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2B0);
  *
  * @param bank  the bank (0-9)
  * @param slotIndex  the slot index
- * @return the data pointer as an int when the state is 1, else 0
+ * @return the data pointer as an int when the state is kBoltFileFlag_Done, else 0
  */
 extern "C" int func_0019E2B0(sEquipTable* self, int bank, int slotIndex)
 {
-    if (self->rows[bank].slots[slotIndex].state != 1) {
+    if (self->rows[bank].slots[slotIndex].state != kBoltFileFlag_Done) {
         return 0;
     }
     return self->rows[bank].slots[slotIndex].value;
@@ -4383,7 +4390,7 @@ extern "C" int func_0019E2B0(sEquipTable* self, int bank, int slotIndex)
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
 #ifdef SKIP_ASM
 /**
- * Returns a slot's file data in the FE file cache once it is loaded (state 1), else 0.
+ * Returns a slot's file data in the FE file cache once it is loaded (state kBoltFileFlag_Done), else 0.
  *
  * Same as func_0019E2B0, typed as a pointer.
  *
@@ -4392,7 +4399,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
  * @return the data, or 0
  */
 extern "C" void* func_0019E2F0(sTableK19D250* self, int bank, int i) {
-    if (self->banks[bank].e[i].flags != 1) return 0;
+    if (self->banks[bank].e[i].flags != kBoltFileFlag_Done) return 0;
     return self->banks[bank].e[i].dataPtr;
 }
 #endif

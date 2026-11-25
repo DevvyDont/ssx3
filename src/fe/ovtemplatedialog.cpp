@@ -7,6 +7,9 @@
 #include "main/gamestate.h"
 #include "ui/uitext.h"
 #include "fe/ovstate.h"
+#include "fe/ovstatemanager.h"
+#include "main/gamemode.h"
+#include "ui/uiscreen.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
 #include "ui/uimenu.h"
@@ -89,7 +92,9 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_getResultsOverlay);
 /**
  * Picks which results overlay to show for a game event and heat.
  *
- * Events 6 to 11 give 0x16; events 0, 4 and 5, or heat 3, give 0xB; anything else gives 0xA.
+ * The peak challenges (kGAMEEVENT_TIME_PEAK1 .. kGAMEEVENT_POINTS_PEAK3) give kOVSTATE_PEAKCHAL_RESULTS; races and
+ * the rival challenges (kGAMEEVENT_RACE, kGAMEEVENT_RIVALTIME, kGAMEEVENT_RIVALPOINTS) or the final heat
+ * (cGameModeMan::kFinalHeat) give kOVSTATE_FINAL_STANDINGS; anything else gives kOVSTATE_HEAT_STANDINGS.
  *
  * @param currentGameEvent  the current game event
  * @param currentHeat  the current heat
@@ -97,13 +102,14 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_getResultsOverlay);
  */
 extern "C" int cOVStateManager_getResultsOverlay(int currentGameEvent, int currentHeat)
 {
-    if ((unsigned int)(currentGameEvent - 6) < 6) {
-        return 22;
+    if ((unsigned int)(currentGameEvent - kGAMEEVENT_TIME_PEAK1) < 6) {
+        return kOVSTATE_PEAKCHAL_RESULTS;
     }
-    if ((unsigned int)(currentGameEvent - 4) < 2 || currentGameEvent == 0 || currentHeat == 3) {
-        return 11;
+    if ((unsigned int)(currentGameEvent - kGAMEEVENT_RIVALTIME) < 2 || currentGameEvent == kGAMEEVENT_RACE
+        || currentHeat == cGameModeMan::kFinalHeat) {
+        return kOVSTATE_FINAL_STANDINGS;
     }
-    return 10;
+    return kOVSTATE_HEAT_STANDINGS;
 }
 #endif
 
@@ -129,11 +135,12 @@ static inline bool isKind_A8F8(int k, int v)
 /**
  * Opens the overlay that belongs to a game-flow state: the pre-event screen or the post-race results.
  *
- * Does nothing while a replay (other than state 10+) is playing. For state 2 (pre-event) picks the replay (0x11),
- * event intro (8), team (0x15), rival (0x14) or normal (9) overlay; for state 7 (post-event) picks a network,
- * results (cOVStateManager_getResultsOverlay), reward (0x10) or 0xF overlay, starts the auto replay for non-rival events and, online,
- * sets cGameComm_mGameComm's overlay timeout to 0x8CA0. With no overlay chosen, sets
- * cOVStateManager_mStatus to 2 instead of calling cOVStateManager_triggerOverlay.
+ * Does nothing while a replay (other than state 10+) is playing. For kGFSM_PreEvent picks the replay
+ * (kOVSTATE_REPLAY), race intro (kOVSTATE_HEAT_PREEVENT), multiplayer (kOVSTATE_MULTI_PREEVENT), challenge
+ * (kOVSTATE_CHALLENGE_PREEVENT) or freestyle (kOVSTATE_FREESTYLE_PREEVENT) overlay; for kGFSM_PostEvent picks a
+ * network, results (cOVStateManager_getResultsOverlay), reward (kOVSTATE_REWARDS) or kOVSTATE_TOPTIMES overlay, starts
+ * the auto replay for non-rival events and, online, sets cGameComm_mGameComm's overlay timeout to 0x8CA0. With no
+ * overlay chosen, sets cOVStateManager_mStatus to kOVSTATUS_EXIT instead of calling cOVStateManager_triggerOverlay.
  *
  * @param mode  the game-flow state (On Tour eGFState)
  */
@@ -144,33 +151,34 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
     if (busy) return;
     int state = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* newRace = (signed char*)&cBENewRaceInterface_newRace;
     int type = *(int*)SSXApp->GameModeMan;
-    int sub = newRace[0x48];
-    int team = newRace[0x49];
-    int kind = newRace[0x4A];
+    int sub = cBENewRaceInterface_newRace.cGameMode;
+    int team = cBENewRaceInterface_newRace.cGamePath;
+    int kind = cBENewRaceInterface_newRace.cGameEvent;
     switch (mode) {
-    case 2:
+    case kGFSM_PreEvent:
         cOVStateManager_mShowPeakPassOverlay = 0;
         if (cBESaveInterface_bDoReplay != 0) {
-            state = 17;
-        } else if (sub == 4) {
+            state = kOVSTATE_REPLAY;
+        } else if (sub == kGAMEMODE_FREERIDE) {
             cOVStateManager_mStatus = mode;
         } else {
-            cOVStateManager_mStatus = 0;
-            if (kind == 0) {
-                state = 8;
+            cOVStateManager_mStatus = kOVSTATUS_IDLE;
+            if (kind == kGAMEEVENT_RACE) {
+                state = kOVSTATE_HEAT_PREEVENT;
             } else if (team == mode) {
-                state = 21;
+                state = kOVSTATE_MULTI_PREEVENT;
             } else {
-                if (kind >= 4 && kind <= 11) state = 20;
-                else state = 9;
+                if (kind >= kGAMEEVENT_RIVALTIME && kind <= kGAMEEVENT_POINTS_PEAK3)
+                    state = kOVSTATE_CHALLENGE_PREEVENT;
+                else
+                    state = kOVSTATE_FREESTYLE_PREEVENT;
             }
         }
         break;
-    case 7:
+    case kGFSM_PostEvent:
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        if (sub == 4) {
+        if (sub == kGAMEMODE_FREERIDE) {
             cOVStateManager_mStatus = sub;
             return;
         }
@@ -184,11 +192,11 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
                 state = cOVStateManager_getResultsOverlay(kind, type);
             } else {
                 cOVStateManager_mMiscData = 0;
-                state = 0xF;
+                state = kOVSTATE_TOPTIMES;
             }
         } else {
             if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || rewardIface->mLastEventCashReward != 0) {
-                state = 0x10;
+                state = kOVSTATE_REWARDS;
             } else {
                 state = cOVStateManager_getResultsOverlay(kind, type);
             }
@@ -199,8 +207,8 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) cGameComm_mGameComm->mOverlayTimeout = 36000;
         break;
     }
-    if (state == 0) {
-        cOVStateManager_mStatus = 2;
+    if (state == kOVSTATE_NULL) {
+        cOVStateManager_mStatus = kOVSTATUS_EXIT;
     } else {
         cOVStateManager_triggerOverlay(state);
     }
@@ -285,7 +293,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
 {
     cUIState* result = 0;
     cUIEngine* mgr = SSXApp->Game->UI;
-    if (type == 0x1) {
+    if (type == kOVSTATE_PAUSE_COMPETE) {
         cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_COMPETE_vtbl;
@@ -297,7 +305,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mpThread = 0;
         result = overlay;
     }
-    if (type == 0x2) {
+    if (type == kOVSTATE_PAUSE_BIGCHAL) {
         cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
@@ -309,7 +317,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mpThread = 0;
         result = overlay;
     }
-    if (type == 0x3) {
+    if (type == kOVSTATE_PAUSE_FREERIDE) {
         cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
@@ -321,7 +329,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mpThread = 0;
         result = overlay;
     }
-    if (type == 0x4) {
+    if (type == kOVSTATE_PAUSE_SPOKE) {
         cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_SPOKE_vtbl;
@@ -333,7 +341,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mpThread = 0;
         result = overlay;
     }
-    if (type == 0x5) {
+    if (type == kOVSTATE_PAUSE_QUICKPLAY) {
         cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
@@ -345,7 +353,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mpThread = 0;
         result = overlay;
     }
-    if (type == 0x6) {
+    if (type == kOVSTATE_PAUSE_ONLINE) {
         cOVTemplate_PauseMenu* overlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_ONLINE_vtbl;
@@ -357,7 +365,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mpThread = 0;
         result = overlay;
     }
-    if (type == 0x7) {
+    if (type == kOVSTATE_PAUSE_OPTIONS) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_OPTIONS_vtbl;
@@ -368,7 +376,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 0x8) {
+    if (type == kOVSTATE_HEAT_PREEVENT) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_HEAT_PREEVENT_vtbl;
@@ -379,7 +387,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 0x9) {
+    if (type == kOVSTATE_FREESTYLE_PREEVENT) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_00472778;
@@ -390,7 +398,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 10) {
+    if (type == kOVSTATE_HEAT_STANDINGS) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_HEAT_STANDINGS_vtbl;
@@ -401,7 +409,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 11) {
+    if (type == kOVSTATE_FINAL_STANDINGS) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_FINAL_STANDINGS_vtbl;
@@ -412,7 +420,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 0xC) {
+    if (type == kOVSTATE_RACE_FINISHOV) {
         cOVState_RACE_FINISHOV* overlay = (cOVState_RACE_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
@@ -425,7 +433,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mHashName = GetHashValue32(str_finishov);
         result = overlay;
     }
-    if (type == 13) {
+    if (type == kOVSTATE_BASSSP_QUAL_FINISHOV) {
         cOVState_BASSSP_QUAL_FINISHOV* overlay = (cOVState_BASSSP_QUAL_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
@@ -438,7 +446,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mHashName = GetHashValue32(str_finishov);
         result = overlay;
     }
-    if (type == 0xE) {
+    if (type == kOVSTATE_EMPTY) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_00474B80;
@@ -449,7 +457,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 0xF) {
+    if (type == kOVSTATE_TOPTIMES) {
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_TOPTIMES_vtbl;
@@ -460,7 +468,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 0x10) {
+    if (type == kOVSTATE_REWARDS) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_REWARDS_vtbl;
@@ -471,7 +479,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 17) {
+    if (type == kOVSTATE_REPLAY) {
         cOVState* overlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_REPLAY_vtbl;
@@ -482,13 +490,13 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 18) {
+    if (type == kOVSTATE_SAVEREPLAY) {
         result = (cUIState*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
     }
-    if (type == 19) {
+    if (type == kOVSTATE_SAVEOPTIONS) {
         result = (cUIState*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
-    if (type == 20) {
+    if (type == kOVSTATE_CHALLENGE_PREEVENT) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_004725C8;
@@ -499,7 +507,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 21) {
+    if (type == kOVSTATE_MULTI_PREEVENT) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_004726A0;
@@ -510,7 +518,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 22) {
+    if (type == kOVSTATE_PEAKCHAL_RESULTS) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)D_00473ED8;
@@ -521,7 +529,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 23) {
+    if (type == kOVSTATE_RESTART) {
         cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_RESTART_vtbl;
@@ -530,70 +538,70 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
-        overlay->mDialogType = 0;
+        overlay->mDialogType = cOVTemplate_Dialog::kDialogRestart;
         result = overlay;
     }
-    if (type == 0x18) {
+    if (type == kOVSTATE_QUIT) {
         cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_QUIT_vtbl;
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
-        overlay->mDialogType = 0x1;
+        overlay->mDialogType = cOVTemplate_Dialog::kDialogQuit;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 25) {
+    if (type == kOVSTATE_RESTARTCHALLENGE) {
         cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_RESTARTCHALLENGE_vtbl;
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
-        overlay->mDialogType = 0x2;
+        overlay->mDialogType = cOVTemplate_Dialog::kDialogRestartChallenge;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 26) {
+    if (type == kOVSTATE_QUITCHALLENGE) {
         cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_QUITCHALLENGE_vtbl;
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
-        overlay->mDialogType = 0x3;
+        overlay->mDialogType = cOVTemplate_Dialog::kDialogQuitChallenge;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 27) {
+    if (type == kOVSTATE_QUITCOMPETITION) {
         cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_QUITCOMPETITION_vtbl;
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
-        overlay->mDialogType = 0x4;
+        overlay->mDialogType = cOVTemplate_Dialog::kDialogQuitCompetition;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 0x1C) {
+    if (type == kOVSTATE_GIVEUP) {
         cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_GIVEUP_vtbl;
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
-        overlay->mDialogType = 0x5;
+        overlay->mDialogType = cOVTemplate_Dialog::kDialogGiveUp;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 29) {
+    if (type == kOVSTATE_BIGCHALLENGE_START) {
         cOVState* overlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
@@ -605,7 +613,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cOVState_BIGCHALLENGE_START_getChallengeData(overlay);
         result = overlay;
     }
-    if (type == 0x1E) {
+    if (type == kOVSTATE_BIGCHALLENGE_FAIL) {
         cOVState* overlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
@@ -617,7 +625,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cOVState_BIGCHALLENGE_FAIL_getChallengeData(overlay);
         result = overlay;
     }
-    if (type == 0x1F) {
+    if (type == kOVSTATE_ENTERLODGE) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_ENTERLODGE_vtbl;
@@ -628,7 +636,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 0x20) {
+    if (type == kOVSTATE_MAP) {
         cOVState* overlay = (cOVState*)((char*)operator new(468, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         overlay->mOVID = type;
@@ -640,7 +648,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         new (((char*)overlay) + 0x9C) sDlgSlot_AB50[8];
         result = overlay;
     }
-    if (type == 33) {
+    if (type == kOVSTATE_TRANSPORT) {
         cOVState_TRANSPORT* overlay = (cOVState_TRANSPORT*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_TRANSPORT_vtbl;
@@ -652,10 +660,10 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         cUITemplate_MAP_init(&overlay->mMap);
         result = overlay;
     }
-    if (type == 34) {
+    if (type == kOVSTATE_MESSAGECENTER) {
         result = (cUIState*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
     }
-    if (type == 35) {
+    if (type == kOVSTATE_TOURNAMENT_STANDINGS) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_TOURNAMENT_STANDINGS_vtbl;
@@ -666,25 +674,25 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 36) {
+    if (type == kOVSTATE_PROFILE) {
         result = (cUIState*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
     }
-    if (type == 37) {
+    if (type == kOVSTATE_AUTOSAVE) {
         result = (cUIState*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
     }
-    if (type == 38) {
+    if (type == kOVSTATE_SAVEPROMPT) {
         cOVTemplate_Dialog* overlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_SAVEPROMPT_vtbl;
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
-        overlay->mDialogType = 0x6;
+        overlay->mDialogType = cOVTemplate_Dialog::kDialogSavePrompt;
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
         overlay->mAllowPauseMenu = 0;
         overlay->mRemovePDA = 0;
         result = overlay;
     }
-    if (type == 39) {
+    if (type == kOVSTATE_PAUSE_ONLINE_ERROR) {
         cOVState_PAUSE_ONLINE_ERROR* overlay = (cOVState_PAUSE_ONLINE_ERROR*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         VPTR_OF(cListNode, overlay) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
@@ -697,7 +705,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         overlay->miStartPingTick = 0;
         result = overlay;
     }
-    if (type == 40) {
+    if (type == kOVSTATE_PRIVATEMESSAGE) {
         cOVState* overlay = (cOVState*)((char*)operator new(228, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
         overlay->mOVID = type;
@@ -799,7 +807,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     cUIState* result = 0;
     cUIEngine* mgr = SSXApp->Game->UI;
     int cur = (int)cUIStateStack_getCurrentState(&mgr->mStateStack);
-    if (type == 0x1) {
+    if (type == kOVSTATE_PAUSE_COMPETE) {
         cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_COMPETE_vtbl;
@@ -811,7 +819,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mpThread = 0;
         result = newOverlay;
     }
-    if (type == 0x2) {
+    if (type == kOVSTATE_PAUSE_BIGCHAL) {
         cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
@@ -823,7 +831,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mpThread = 0;
         result = newOverlay;
     }
-    if (type == 0x3) {
+    if (type == kOVSTATE_PAUSE_FREERIDE) {
         cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_FREERIDE_vtbl;
@@ -835,7 +843,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mpThread = 0;
         result = newOverlay;
     }
-    if (type == 0x4) {
+    if (type == kOVSTATE_PAUSE_SPOKE) {
         cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_SPOKE_vtbl;
@@ -847,7 +855,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mpThread = 0;
         result = newOverlay;
     }
-    if (type == 0x5) {
+    if (type == kOVSTATE_PAUSE_QUICKPLAY) {
         cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
@@ -859,7 +867,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mpThread = 0;
         result = newOverlay;
     }
-    if (type == 0x6) {
+    if (type == kOVSTATE_PAUSE_ONLINE) {
         cOVTemplate_PauseMenu* newOverlay = (cOVTemplate_PauseMenu*)((char*)operator new(276, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_ONLINE_vtbl;
@@ -871,7 +879,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mpThread = 0;
         result = newOverlay;
     }
-    if (type == 0x7) {
+    if (type == kOVSTATE_PAUSE_OPTIONS) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_OPTIONS_vtbl;
@@ -882,7 +890,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 0x8) {
+    if (type == kOVSTATE_HEAT_PREEVENT) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_HEAT_PREEVENT_vtbl;
@@ -893,7 +901,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 0x9) {
+    if (type == kOVSTATE_FREESTYLE_PREEVENT) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_00472778;
@@ -904,7 +912,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 10) {
+    if (type == kOVSTATE_HEAT_STANDINGS) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_HEAT_STANDINGS_vtbl;
@@ -915,7 +923,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 11) {
+    if (type == kOVSTATE_FINAL_STANDINGS) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_FINAL_STANDINGS_vtbl;
@@ -926,7 +934,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 0xC) {
+    if (type == kOVSTATE_RACE_FINISHOV) {
         cOVState_RACE_FINISHOV* newOverlay = (cOVState_RACE_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
@@ -939,7 +947,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mHashName = GetHashValue32(str_finishov);
         result = newOverlay;
     }
-    if (type == 13) {
+    if (type == kOVSTATE_BASSSP_QUAL_FINISHOV) {
         cOVState_BASSSP_QUAL_FINISHOV* newOverlay = (cOVState_BASSSP_QUAL_FINISHOV*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
@@ -952,7 +960,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mHashName = GetHashValue32(str_finishov);
         result = newOverlay;
     }
-    if (type == 0xE) {
+    if (type == kOVSTATE_EMPTY) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_00474B80;
@@ -963,7 +971,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 0xF) {
+    if (type == kOVSTATE_TOPTIMES) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TOPTIMES_vtbl;
@@ -974,7 +982,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 0x10) {
+    if (type == kOVSTATE_REWARDS) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_REWARDS_vtbl;
@@ -985,7 +993,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 17) {
+    if (type == kOVSTATE_REPLAY) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(184, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_REPLAY_vtbl;
@@ -996,13 +1004,13 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 18) {
+    if (type == kOVSTATE_SAVEREPLAY) {
         result = (cUIState*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
     }
-    if (type == 19) {
+    if (type == kOVSTATE_SAVEOPTIONS) {
         result = (cUIState*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
-    if (type == 20) {
+    if (type == kOVSTATE_CHALLENGE_PREEVENT) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_004725C8;
@@ -1013,7 +1021,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 21) {
+    if (type == kOVSTATE_MULTI_PREEVENT) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_004726A0;
@@ -1024,7 +1032,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 22) {
+    if (type == kOVSTATE_PEAKCHAL_RESULTS) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)D_00473ED8;
@@ -1035,7 +1043,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 23) {
+    if (type == kOVSTATE_RESTART) {
         cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_RESTART_vtbl;
@@ -1044,70 +1052,70 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
-        newOverlay->mDialogType = 0;
+        newOverlay->mDialogType = cOVTemplate_Dialog::kDialogRestart;
         result = newOverlay;
     }
-    if (type == 0x18) {
+    if (type == kOVSTATE_QUIT) {
         cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_QUIT_vtbl;
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
-        newOverlay->mDialogType = 0x1;
+        newOverlay->mDialogType = cOVTemplate_Dialog::kDialogQuit;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 25) {
+    if (type == kOVSTATE_RESTARTCHALLENGE) {
         cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_RESTARTCHALLENGE_vtbl;
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
-        newOverlay->mDialogType = 0x2;
+        newOverlay->mDialogType = cOVTemplate_Dialog::kDialogRestartChallenge;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 26) {
+    if (type == kOVSTATE_QUITCHALLENGE) {
         cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_QUITCHALLENGE_vtbl;
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
-        newOverlay->mDialogType = 0x3;
+        newOverlay->mDialogType = cOVTemplate_Dialog::kDialogQuitChallenge;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 27) {
+    if (type == kOVSTATE_QUITCOMPETITION) {
         cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_QUITCOMPETITION_vtbl;
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
-        newOverlay->mDialogType = 0x4;
+        newOverlay->mDialogType = cOVTemplate_Dialog::kDialogQuitCompetition;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 0x1C) {
+    if (type == kOVSTATE_GIVEUP) {
         cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_GIVEUP_vtbl;
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
-        newOverlay->mDialogType = 0x5;
+        newOverlay->mDialogType = cOVTemplate_Dialog::kDialogGiveUp;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 29) {
+    if (type == kOVSTATE_BIGCHALLENGE_START) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BIGCHALLENGE_START_vtbl;
@@ -1119,7 +1127,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cOVState_BIGCHALLENGE_START_getChallengeData(newOverlay);
         result = newOverlay;
     }
-    if (type == 0x1E) {
+    if (type == kOVSTATE_BIGCHALLENGE_FAIL) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
@@ -1131,7 +1139,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cOVState_BIGCHALLENGE_FAIL_getChallengeData(newOverlay);
         result = newOverlay;
     }
-    if (type == 0x1F) {
+    if (type == kOVSTATE_ENTERLODGE) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_ENTERLODGE_vtbl;
@@ -1142,7 +1150,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 0x20) {
+    if (type == kOVSTATE_MAP) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(468, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         newOverlay->mOVID = type;
@@ -1154,7 +1162,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         new (((char*)newOverlay) + 0x9C) sDlgSlot_BAB8[8];
         result = newOverlay;
     }
-    if (type == 33) {
+    if (type == kOVSTATE_TRANSPORT) {
         cOVState_TRANSPORT* newOverlay = (cOVState_TRANSPORT*)((char*)operator new(912, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TRANSPORT_vtbl;
@@ -1166,10 +1174,10 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         cUITemplate_MAP_init(&newOverlay->mMap);
         result = newOverlay;
     }
-    if (type == 34) {
+    if (type == kOVSTATE_MESSAGECENTER) {
         result = (cUIState*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
     }
-    if (type == 35) {
+    if (type == kOVSTATE_TOURNAMENT_STANDINGS) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_TOURNAMENT_STANDINGS_vtbl;
@@ -1180,25 +1188,25 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 36) {
+    if (type == kOVSTATE_PROFILE) {
         result = (cUIState*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
     }
-    if (type == 37) {
+    if (type == kOVSTATE_AUTOSAVE) {
         result = (cUIState*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
     }
-    if (type == 38) {
+    if (type == kOVSTATE_SAVEPROMPT) {
         cOVTemplate_Dialog* newOverlay = (cOVTemplate_Dialog*)((char*)operator new(160, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_SAVEPROMPT_vtbl;
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
-        newOverlay->mDialogType = 0x6;
+        newOverlay->mDialogType = cOVTemplate_Dialog::kDialogSavePrompt;
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
         newOverlay->mAllowPauseMenu = 0;
         newOverlay->mRemovePDA = 0;
         result = newOverlay;
     }
-    if (type == 39) {
+    if (type == kOVSTATE_PAUSE_ONLINE_ERROR) {
         cOVState_PAUSE_ONLINE_ERROR* newOverlay = (cOVState_PAUSE_ONLINE_ERROR*)((char*)operator new(164, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         VPTR_OF(cListNode, newOverlay) = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
@@ -1211,7 +1219,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         newOverlay->miStartPingTick = 0;
         result = newOverlay;
     }
-    if (type == 40) {
+    if (type == kOVSTATE_PRIVATEMESSAGE) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(228, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
         newOverlay->mOVID = type;
@@ -1251,9 +1259,11 @@ static inline bool notMode4_0020CA10(signed char* g)
  *
  * Online (cBENetworkInterface_networkOpt.bIsNetworkGame) it first, when cGameComm_mGameComm exists, sends the
  * controller-unplugged command (cGameComm_sendUnplugCmd) if SSXApp->Game's ControllerUnplugged is set, sends the pause command
- * (cGameComm_sendPauseCmd with 1) and starts mPauseTimeout = 3600 and mOverlayTimeout = 1800; then triggers overlay 6.
- * Offline: overlay 2 while a local mission is active (cWScriptMan_isLocalMissionActive), else overlay 1 on game path 0
- * outside cGameMode 4, overlay 4 in game state 11 (mCurrentStateID), overlay 3 in cGameMode 4 and overlay 5 otherwise
+ * (cGameComm_sendPauseCmd with 1) and starts mPauseTimeout = 3600 and mOverlayTimeout = 1800; then triggers
+ * kOVSTATE_PAUSE_ONLINE. Offline: kOVSTATE_PAUSE_BIGCHAL while a local mission is active
+ * (cWScriptMan_isLocalMissionActive), else kOVSTATE_PAUSE_COMPETE on kGAMEPATH_WORLDCIRCUIT outside
+ * kGAMEMODE_FREERIDE, kOVSTATE_PAUSE_SPOKE in game state kGFSM_SectionLoad (mCurrentStateID), kOVSTATE_PAUSE_FREERIDE
+ * in kGAMEMODE_FREERIDE and kOVSTATE_PAUSE_QUICKPLAY otherwise
  * (cGameMode and cGamePath of cBENewRaceInterface_newRace; the overlays through cOVStateManager_triggerOverlay).
  * Finally clears cOVTemplate_PauseMenu_mSelectedMenuIndex, the pause menu's remembered selection. The results of the two cBE_getInterface__Fv calls
  * (interfaces 0 and 7) are not used.
@@ -1276,21 +1286,20 @@ extern "C" void cOVStateManager_triggerPauseMenu(void)
             n->mPauseTimeout = 3600;
             n->mOverlayTimeout = 1800;
         }
-        cOVStateManager_triggerOverlay(6);
+        cOVStateManager_triggerOverlay(kOVSTATE_PAUSE_ONLINE);
     } else if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
-        cOVStateManager_triggerOverlay(2);
+        cOVStateManager_triggerOverlay(kOVSTATE_PAUSE_BIGCHAL);
     } else {
         signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
-        if (raceDb[0x49] == 0 && notMode4_0020CA10(raceDb)) {
-            cOVStateManager_triggerOverlay(1);
-        } else if (SSXApp->Game->mCurrentStateID == 11) {
-            cOVStateManager_triggerOverlay(4);
+        if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_WORLDCIRCUIT && notMode4_0020CA10(raceDb)) {
+            cOVStateManager_triggerOverlay(kOVSTATE_PAUSE_COMPETE);
+        } else if (SSXApp->Game->mCurrentStateID == kGFSM_SectionLoad) {
+            cOVStateManager_triggerOverlay(kOVSTATE_PAUSE_SPOKE);
         } else {
-            signed char* modeRaceDb = (signed char*)&cBENewRaceInterface_newRace;
-            if (modeRaceDb[0x48] == 4) {
-                cOVStateManager_triggerOverlay(3);
+            if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE) {
+                cOVStateManager_triggerOverlay(kOVSTATE_PAUSE_FREERIDE);
             } else {
-                cOVStateManager_triggerOverlay(5);
+                cOVStateManager_triggerOverlay(kOVSTATE_PAUSE_QUICKPLAY);
             }
         }
     }
@@ -1310,7 +1319,7 @@ extern char str_64replay[];
  *
  * @return 1 when cUIStateStack_findState finds the hash of "64replay" on SSXApp->Game->UI's stack, else 0
  */
-extern "C" int cOVStateManager_replayOverlayActive(void)
+extern "C" bool cOVStateManager_replayOverlayActive(void)
 {
     char* stack = (char*)&SSXApp->Game->UI->mStateStack;
     return cUIStateStack_findState(stack, GetHashValue32(str_64replay)) != 0;
@@ -1332,7 +1341,7 @@ extern char str_cOVTemplate_PauseMenu[];
  *
  * @return 1 when cUIStateStack_findState finds the hash of "cOVTemplate_PauseMenu", else 0
  */
-extern "C" int cOVStateManager_pauseOverlayActive(void)
+extern "C" bool cOVStateManager_pauseOverlayActive(void)
 {
     char* stack = (char*)&SSXApp->Game->UI->mStateStack;
     return cUIStateStack_findState(stack, GetHashValue32(str_cOVTemplate_PauseMenu)) != 0;
@@ -1343,7 +1352,7 @@ extern "C" int cOVStateManager_pauseOverlayActive(void)
 INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_allowPauseMenu);
 #ifdef SKIP_ASM
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
-extern "C" int cOVStateManager_pauseOverlayActive(void);
+extern "C" bool cOVStateManager_pauseOverlayActive(void);
 
 /**
  * Tells whether the pause menu may be opened now.
@@ -1383,25 +1392,26 @@ extern int cOVStateManager_mStatus;
 /**
  * Opens the overlay that follows a finished event, or lets play resume when there is none.
  *
- * By cBENewRaceInterface_newRace's cGameMode and cGamePath: cGameMode 0 or game path 2 (online) trigger overlay 0xC;
- * cGameMode 1-3 and 6 overlay 13 (cOVStateManager_triggerOverlay; both are the "finishov" overlays); cGameMode 4 sets
- * cOVStateManager_mStatus to 2 so the next cOVStateManager_update resumes play; any other mode overlay 0xC. The result
+ * By cBENewRaceInterface_newRace's cGameMode and cGamePath: kGAMEMODE_RACE or kGAMEPATH_MULTIPLAYER trigger
+ * kOVSTATE_RACE_FINISHOV; kGAMEMODE_SLOPESTYLE .. kGAMEMODE_HALFPIPE and kGAMEMODE_PNTSCHALLENGE
+ * kOVSTATE_BASSSP_QUAL_FINISHOV (cOVStateManager_triggerOverlay; both are the "finishov" overlays); kGAMEMODE_FREERIDE
+ * sets cOVStateManager_mStatus to kOVSTATUS_EXIT so the next cOVStateManager_update resumes play; any other mode
+ * kOVSTATE_RACE_FINISHOV. The result
  * of cBE_getInterface__Fv (interface 0) is not used. cGFFinishlineState_update (load screen) calls it.
  */
 extern "C" void cOVStateManager_triggerFinishOverlay(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* newRace = (signed char*)&cBENewRaceInterface_newRace;
-    int mode = newRace[0x48];
-    int players = newRace[0x49];
-    if (mode == 0 || players == 2) {
-        cOVStateManager_triggerOverlay(0xC);
-    } else if ((mode >= 1 && mode <= 3) || mode == 6) {
-        cOVStateManager_triggerOverlay(13);
-    } else if (mode == 4) {
-        cOVStateManager_mStatus = 2;
+    int mode = cBENewRaceInterface_newRace.cGameMode;
+    int players = cBENewRaceInterface_newRace.cGamePath;
+    if (mode == kGAMEMODE_RACE || players == kGAMEPATH_MULTIPLAYER) {
+        cOVStateManager_triggerOverlay(kOVSTATE_RACE_FINISHOV);
+    } else if ((mode >= kGAMEMODE_SLOPESTYLE && mode <= kGAMEMODE_HALFPIPE) || mode == kGAMEMODE_PNTSCHALLENGE) {
+        cOVStateManager_triggerOverlay(kOVSTATE_BASSSP_QUAL_FINISHOV);
+    } else if (mode == kGAMEMODE_FREERIDE) {
+        cOVStateManager_mStatus = kOVSTATUS_EXIT;
     } else {
-        cOVStateManager_triggerOverlay(0xC);
+        cOVStateManager_triggerOverlay(kOVSTATE_RACE_FINISHOV);
     }
 }
 #endif
@@ -1424,50 +1434,53 @@ extern int cOVStateManager_mIsPauseDialog;
  * Moves on from the overlay that just closed to the next one (or back to the game).
  *
  * Clears cOVStateManager_mStatus and switches on the current UI state's overlay id (+0x98): after results
- * (10, 11, 22) acts on cOVStateManager_mMiscData (open the map with style 1, restart via cGame_setState, show a
- * replay, leave an online game with cGameComm_localDisconnected and cGame_exit...); after 15 and 16 shows rewards or the
- * results overlay (cOVStateManager_getResultsOverlay); after 8, 9, 20 and 21 sets mStatus to 2 so the next update resumes play.
+ * (kOVSTATE_HEAT_STANDINGS, kOVSTATE_FINAL_STANDINGS, kOVSTATE_PEAKCHAL_RESULTS) acts on cOVStateManager_mMiscData
+ * (open the map with style 1, restart via cGame_setState, show a replay, leave an online game with
+ * cGameComm_localDisconnected and cGame_exit...); after kOVSTATE_TOPTIMES and kOVSTATE_REWARDS shows rewards or the
+ * results overlay (cOVStateManager_getResultsOverlay); after the pre-event overlays (kOVSTATE_HEAT_PREEVENT,
+ * kOVSTATE_FREESTYLE_PREEVENT, kOVSTATE_CHALLENGE_PREEVENT, kOVSTATE_MULTI_PREEVENT) sets mStatus to kOVSTATUS_EXIT so
+ * the next update resumes play.
  */
 // Continues after a result dialog closes, depending on the current overlay state and the pending dialog.
 extern "C" void cOVStateManager_gotoNextOverlay(void)
 {
-    cOVStateManager_mStatus = 0;
+    cOVStateManager_mStatus = kOVSTATUS_IDLE;
     cOVState* st = (cOVState*)cUIStateStack_getCurrentState(&((SSXApp)->Game)->UI->mStateStack);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int kind = cBENewRaceInterface_newRace.cGameEvent;
     int type = *(int*)SSXApp->GameModeMan;
     switch (st->mOVID) {
-    case 10:
-    case 11:
+    case kOVSTATE_HEAT_STANDINGS:
+    case kOVSTATE_FINAL_STANDINGS:
         switch (cOVStateManager_mMiscData) {
         case 3:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
             cUITemplate_MAP_mMapStyle = 1;
-            cOVStateManager_triggerOverlay(33);
+            cOVStateManager_triggerOverlay(kOVSTATE_TRANSPORT);
             break;
         case 1:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
-            cGame_setState(SSXApp->Game, 13, 0, 1);
+            cGame_setState(SSXApp->Game, kGFSM_NextHeat, 0, 1);
             break;
         case 2:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
-            cOVStateManager_mStatus = 4;
+            cOVStateManager_mStatus = kOVSTATUS_GOTOMAP;
             break;
         case 4:
-            cOVStateManager_triggerOverlay(35);
+            cOVStateManager_triggerOverlay(kOVSTATE_TOURNAMENT_STANDINGS);
             break;
         case 5:
             cOVStateManager_mIsPauseDialog = 0;
-            cOVStateManager_triggerOverlay(23);
+            cOVStateManager_triggerOverlay(kOVSTATE_RESTART);
             break;
         case 6:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
-            cOVStateManager_triggerOverlay(17);
+            cOVStateManager_triggerOverlay(kOVSTATE_REPLAY);
             cReplay_startReplay(SSXApp->Game->Replay, 0, 0, 0);
             break;
         case 7:
             cOVStateManager_mMiscData = 1;
-            cOVStateManager_triggerOverlay(0xF);
+            cOVStateManager_triggerOverlay(kOVSTATE_TOPTIMES);
             break;
         case 8:
             cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -1477,48 +1490,48 @@ extern "C" void cOVStateManager_gotoNextOverlay(void)
                 }
                 cGame_exit(SSXApp->Game, 0);
             } else {
-                cOVStateManager_triggerOverlay(0x18);
+                cOVStateManager_triggerOverlay(kOVSTATE_QUIT);
             }
             break;
         }
         break;
-    case 15:
-        if (cOVStateManager_mMiscData == 19) {
-            cOVStateManager_triggerOverlay(19);
+    case kOVSTATE_TOPTIMES:
+        if (cOVStateManager_mMiscData == kOVSTATE_SAVEOPTIONS) {
+            cOVStateManager_triggerOverlay(kOVSTATE_SAVEOPTIONS);
         } else {
             cBERewardInterface* rewardIface = (cBERewardInterface*)cBE_getInterface_Fv(cBE_getBE(), 13);
             if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || rewardIface->mLastEventCashReward != 0) {
-                cOVStateManager_triggerOverlay(0x10);
+                cOVStateManager_triggerOverlay(kOVSTATE_REWARDS);
             } else {
                 cOVStateManager_triggerOverlay(cOVStateManager_getResultsOverlay(kind, type));
             }
         }
         break;
-    case 16:
+    case kOVSTATE_REWARDS:
         cOVStateManager_triggerOverlay(cOVStateManager_getResultsOverlay(kind, type));
         break;
-    case 8:
-    case 9:
-    case 20:
-    case 21:
-        cOVStateManager_mStatus = 2;
+    case kOVSTATE_HEAT_PREEVENT:
+    case kOVSTATE_FREESTYLE_PREEVENT:
+    case kOVSTATE_CHALLENGE_PREEVENT:
+    case kOVSTATE_MULTI_PREEVENT:
+        cOVStateManager_mStatus = kOVSTATUS_EXIT;
         break;
-    case 22:
+    case kOVSTATE_PEAKCHAL_RESULTS:
         switch (cOVStateManager_mMiscData) {
         case 2:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
-            cOVStateManager_mStatus = 4;
+            cOVStateManager_mStatus = kOVSTATUS_GOTOMAP;
             break;
         case 5:
             cOVStateManager_mIsPauseDialog = 0;
-            cOVStateManager_triggerOverlay(23);
+            cOVStateManager_triggerOverlay(kOVSTATE_RESTART);
             break;
         case 8:
-            cOVStateManager_triggerOverlay(0x18);
+            cOVStateManager_triggerOverlay(kOVSTATE_QUIT);
             break;
         }
         break;
-    case 35:
+    case kOVSTATE_TOURNAMENT_STANDINGS:
         break;
     }
 }
@@ -1536,9 +1549,10 @@ extern "C" void cUIStateStack_purgeNormalStates(void *);
 /**
  * Per-frame overlay manager step: carries out the pending overlay action in cOVStateManager_mStatus.
  *
- * 1 goes to the next overlay (cOVStateManager_gotoNextOverlay); 2 stops the auto replay, flags the current game state to continue
- * and, in an online race's pre-event state, purges the UI states (cUIStateStack_purgeNormalStates); 3 removes the PDA template and
- * purges the UI states; 4 sets game state 0xE via cGame_setState. Each case clears mStatus first.
+ * kOVSTATUS_GOTONEXT goes to the next overlay (cOVStateManager_gotoNextOverlay); kOVSTATUS_EXIT stops the auto
+ * replay, flags the current game state to continue and, in an online race's pre-event state (kOVSTATE_HEAT_PREEVENT),
+ * purges the UI states (cUIStateStack_purgeNormalStates); kOVSTATUS_PURGENORMAL removes the PDA template and purges the
+ * UI states; kOVSTATUS_GOTOMAP sets game state kGFSM_UserSelect via cGame_setState. Each case clears mStatus first.
  */
 extern "C" void cOVStateManager_update(void)
 {
@@ -1548,17 +1562,17 @@ extern "C" void cOVStateManager_update(void)
         st = (cOVState*)((char *)cUIStateStack_getCurrentState(&mgr->mStateStack));
     }
     switch (cOVStateManager_mStatus) {
-    case 0:
+    case kOVSTATUS_IDLE:
         break;
-    case 1:
+    case kOVSTATUS_GOTONEXT:
         cOVStateManager_gotoNextOverlay();
         break;
-    case 2:
-        cOVStateManager_mStatus = 0;
+    case kOVSTATUS_EXIT:
+        cOVStateManager_mStatus = kOVSTATUS_IDLE;
         cReplay_stopAutoReplay(((void*)((SSXApp)->Game)->Replay));
         (((SSXApp)->Game)->mCurrentState)->mOverlayDone = 1;
-        if (((char*)st) != 0 && ((SSXApp)->Game)->mCurrentStateID == 2) {
-            if (st->mOVID == 8) {
+        if (((char*)st) != 0 && ((SSXApp)->Game)->mCurrentStateID == kGFSM_PreEvent) {
+            if (st->mOVID == kOVSTATE_HEAT_PREEVENT) {
                 cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                     cUIStateStack_purgeNormalStates(&mgr->mStateStack);
@@ -1566,14 +1580,14 @@ extern "C" void cOVStateManager_update(void)
             }
         }
         break;
-    case 3:
-        cOVStateManager_mStatus = 0;
+    case kOVSTATUS_PURGENORMAL:
+        cOVStateManager_mStatus = kOVSTATUS_IDLE;
         cOVStateManager_removePDATemplate();
         cUIStateStack_purgeNormalStates(&((SSXApp)->Game)->UI->mStateStack);
         break;
-    case 4:
-        cOVStateManager_mStatus = 0;
-        cGame_setState(((SSXApp)->Game), 0xE, 2, 0);
+    case kOVSTATUS_GOTOMAP:
+        cOVStateManager_mStatus = kOVSTATUS_IDLE;
+        cGame_setState(((SSXApp)->Game), kGFSM_UserSelect, 2, 0);
         break;
     }
 }
@@ -1692,18 +1706,18 @@ extern "C" void cOVTemplate_Simple_onCreateScreen(cOVTemplate_Simple* self)
 INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Simple overlay's menu-event filter: event 6 gets 0x101, every other event 0.
+ * Simple overlay's menu-event filter: kONNEXT gets 0x101, every other event 0.
  *
  * It fills the onWidgetMenu slot (+0xA4) of cOVTemplate_Simple_vtbl and of the overlay vtables built on it (D_004726A0, D_00472778,
  * cOVState_HEAT_PREEVENT_vtbl).
  *
  * @param menu  the menu (unused)
  * @param event  the menu event
- * @return 0x101 for event 6, else 0
+ * @return 0x101 for kONNEXT, else 0
  */
 extern "C" int cOVTemplate_Simple_onWidgetMenu(cOVTemplate_Simple* self, int menu, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -1713,8 +1727,8 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetEvent);
 extern int cOVStateManager_mStatus;
 
 /**
- * Simple overlay's widget handler: selecting a widget (event 5) sets cOVStateManager_mStatus to 1, so the next
- * cOVStateManager_update moves on to the next overlay.
+ * Simple overlay's widget handler: selecting a widget (kONNEXT) sets cOVStateManager_mStatus to kOVSTATUS_GOTONEXT, so
+ * the next cOVStateManager_update moves on to the next overlay.
  *
  * It fills the onWidgetEvent slot (+0x9C) of cOVTemplate_Simple_vtbl and of the overlay vtables built on it (D_004726A0, D_00472778,
  * cOVState_HEAT_PREEVENT_vtbl).
@@ -1724,8 +1738,8 @@ extern int cOVStateManager_mStatus;
  */
 extern "C" void cOVTemplate_Simple_onWidgetEvent(cOVTemplate_Simple* self, int widget, int key)
 {
-    if (widget != 0 && key == 5) {
-        cOVStateManager_mStatus = 1;
+    if (widget != 0 && key == cUIState::kONNEXT) {
+        cOVStateManager_mStatus = kOVSTATUS_GOTONEXT;
     }
 }
 #endif
@@ -1779,28 +1793,28 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
     ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b)))->mMiscData = 1;
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quit));
     switch ((unsigned int)self->mDialogType) {
-    case 1: {
+    case cOVTemplate_Dialog::kDialogQuit: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNQuitGame));
         cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
         quitChallengeTitle->setVisible(0);
         break;
     }
-    case 0:
+    case cOVTemplate_Dialog::kDialogRestart:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNRestartEvent));
         break;
-    case 3:
+    case cOVTemplate_Dialog::kDialogQuitChallenge:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNQuitChal));
         break;
-    case 2:
+    case cOVTemplate_Dialog::kDialogRestartChallenge:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNRestartChal));
         break;
-    case 4:
+    case cOVTemplate_Dialog::kDialogQuitCompetition:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNQuitEventQues));
         break;
-    case 5:
+    case cOVTemplate_Dialog::kDialogGiveUp:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNGiveUp));
         break;
-    case 6: {
+    case cOVTemplate_Dialog::kDialogSavePrompt: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSaveBeforeQuit));
         cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
         quitChallengeTitle->setVisible(0);
@@ -1833,7 +1847,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetCreate(cOVTemplate_Dialog* self, cUIT
 {
     int id = item->mHashName;
     if (id == GetHashValue32(str_Menu0000_b)) {
-        if (self->mDialogType == 6) {
+        if (self->mDialogType == cOVTemplate_Dialog::kDialogSavePrompt) {
             cUIMenu_setSelectedByIndex(item, 0);
         } else {
             cUIMenu_setSelectedByIndex(item, 1);
@@ -2112,7 +2126,7 @@ extern "C" void cOVState_QUIT_onUpdate(cOVTemplate_Dialog* self)
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
             int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
-            if (frame != 0xFFFF) {
+            if (frame != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
             }
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);

@@ -65,7 +65,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 /**
  * Handles the select-multiplayer-mode screen's widget events by moving to the next or previous state.
  *
- * Event 5 calls the engine's custom interface getNextState (vtable slot 4, cFECustom_getNextState), event 6
+ * kONNEXT calls the engine's custom interface getNextState (vtable slot 4, cFECustom_getNextState), kONPREV
  * its slot 5 (probably getPrevState), each with this state and the widget's misc data; a state returned is
  * pushed on the engine's state stack (+0x18). A null widget is ignored.
  *
@@ -78,7 +78,7 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(cFEStateSelectMultip
         return;
     }
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getNextState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -86,7 +86,7 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(cFEStateSelectMultip
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {

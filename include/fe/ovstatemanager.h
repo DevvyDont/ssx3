@@ -52,7 +52,7 @@ extern "C" int cOVStateManager_getResultsOverlay(int currentGameEvent, int curre
 extern "C" void cOVStateManager_gotoOverlay(int mode);
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cOVStateManager_triggerPopup(int state);
-extern "C" int cOVStateManager_pauseOverlayActive(void);
+extern "C" bool cOVStateManager_pauseOverlayActive(void);
 extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void cOVStateManager_triggerFinishOverlay(void);
 extern "C" void cOVStateManager_gotoNextOverlay(void);

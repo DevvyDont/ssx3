@@ -37,6 +37,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "render/graphicsman.h"
+#include "luno/lunovar.h"
 
 INCLUDE_ASM("fe/all_in_one_fe", __sti__all_in_one_fe_cpp);
 
@@ -5334,22 +5335,22 @@ struct LVPair_24B8 { int a, b; };
 struct LV_24B8 {
     union { int i; LVPair_24B8 pair; } u;
     int type;
-    LV_24B8() { type = 0; u.i = 0; }
+    LV_24B8() { type = eLunoVar_Nil; u.i = 0; }
     ~LV_24B8() {}
-    void Release() { if (type == 4) luno_cLunoTable__cLunoTable_24B8(this, 2); }
-    void Clear() { type = 0; u.i = 0; }
+    void Release() { if (type == eLunoVar_Table) luno_cLunoTable__cLunoTable_24B8(this, 2); }
+    void Clear() { type = eLunoVar_Nil; u.i = 0; }
     void SetTable(const LV_24B8* src) {
         Release();
         Clear();
         luno_cLunoTable_operatorE_24B8(this, src);
-        type = 4;
+        type = eLunoVar_Table;
     }
     void Assign(const LV_24B8* src) {
         Release();
         Clear();
-        if (src->type == 4) {
+        if (src->type == eLunoVar_Table) {
             luno_cLunoTable_operatorE_24B8(this, src);
-        } else if (src->type == 5) {
+        } else if (src->type == eLunoVar_Func) {
             u.pair = src->u.pair;
         } else {
             u.i = src->u.i;
@@ -5384,12 +5385,12 @@ extern "C" void luno_cLunoVM_run(LV_24B8** out, char** state, LV_24B8* table, in
     LV_24B8* nilVal = &luno_gLunoNil;
     LV_24B8* regs = *out;
     LV_24B8* secondReg = &regs[1];
-    if (regs[1].type == 4) luno_cLunoTable__cLunoTable_24B8(secondReg, 2);
-    secondReg->type = 0;
+    if (regs[1].type == eLunoVar_Table) luno_cLunoTable__cLunoTable_24B8(secondReg, 2);
+    secondReg->type = eLunoVar_Nil;
     regs[1].u.i = 0;
-    if (nilVal->type == 4) {
+    if (nilVal->type == eLunoVar_Table) {
         luno_cLunoTable_operatorE_24B8(secondReg, nilVal);
-    } else if (nilVal->type == 5) {
+    } else if (nilVal->type == eLunoVar_Func) {
         regs[1].u.pair = nilVal->u.pair;
     } else {
         regs[1].u.i = nilVal->u.i;
@@ -5414,22 +5415,22 @@ struct LVPair_2648 { int a, b; };
 struct LV_2648 {
     union { int i; LVPair_2648 pair; } u;
     int type;
-    LV_2648() { type = 0; u.i = 0; }
+    LV_2648() { type = eLunoVar_Nil; u.i = 0; }
     ~LV_2648() {}
-    void Release() { if (type == 4) luno_cLunoTable__cLunoTable_2648(this, 2); }
-    void Clear() { type = 0; u.i = 0; }
+    void Release() { if (type == eLunoVar_Table) luno_cLunoTable__cLunoTable_2648(this, 2); }
+    void Clear() { type = eLunoVar_Nil; u.i = 0; }
     void SetTable(const LV_2648* src) {
         Release();
         Clear();
         luno_cLunoTable_operatorE_2648(this, src);
-        type = 4;
+        type = eLunoVar_Table;
     }
     void Assign(const LV_2648* src) {
         Release();
         Clear();
-        if (src->type == 4) {
+        if (src->type == eLunoVar_Table) {
             luno_cLunoTable_operatorE_2648(this, src);
-        } else if (src->type == 5) {
+        } else if (src->type == eLunoVar_Func) {
             u.pair = src->u.pair;
         } else {
             u.i = src->u.i;
@@ -5459,12 +5460,12 @@ extern "C" void luno_cLunoVM_run1(LV_2648** out, char** state, LV_2648* table, L
     arr[0].SetTable(table);
     LV_2648* regs = *out;
     LV_2648* secondReg = &regs[1];
-    if (regs[1].type == 4) luno_cLunoTable__cLunoTable_2648(secondReg, 2);
-    secondReg->type = 0;
+    if (regs[1].type == eLunoVar_Table) luno_cLunoTable__cLunoTable_2648(secondReg, 2);
+    secondReg->type = eLunoVar_Nil;
     regs[1].u.i = 0;
-    if (value->type == 4) {
+    if (value->type == eLunoVar_Table) {
         luno_cLunoTable_operatorE_2648(secondReg, value);
-    } else if (value->type == 5) {
+    } else if (value->type == eLunoVar_Func) {
         regs[1].u.pair = value->u.pair;
     } else {
         regs[1].u.i = value->u.i;

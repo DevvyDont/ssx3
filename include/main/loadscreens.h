@@ -173,7 +173,7 @@ struct cFELoadScreen {
     void load() __asm__("cFELoadScreen_load");
     void loadTexture(int type) __asm__("cFELoadScreen_loadTexture");
     void purge() __asm__("cFELoadScreen_purge");
-    int render() __asm__("cFELoadScreen_render");
+    bool render() __asm__("cFELoadScreen_render");
     void update() __asm__("cFELoadScreen_update");
     int getTexttureID(int index) __asm__("cFELoadScreen_getTexttureID");
 };

@@ -178,7 +178,7 @@ void cFEStateRuleSelect::setupMenu(signed char first)
         __builtin_memcpy(frame, str_greyedout, 10);
     }
     int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)((void*)self->mpScreen), GetHashValue32(frame));
-    if (frameIndex != 0xFFFF)
+    if (frameIndex != cUIScreen::kNoFrame)
         cUIScreen_playFrame(((void*)self->mpScreen), frameIndex, 1);
     self->updateMenuColor();
 }
@@ -255,27 +255,27 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     int count = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (cBENewRaceInterface_newRace.cGameEvent) {
-    case 0:
+    case kGAMEEVENT_RACE:
         self->rules = D_00441098;
         count = 11;
         break;
-    case 1:
+    case kGAMEEVENT_SLOPESTYLE:
         self->rules = D_004410A8;
         count = 10;
         break;
-    case 3:
+    case kGAMEEVENT_BIGAIR:
         self->rules = D_004A1690;
         count = 8;
         break;
-    case 2:
+    case kGAMEEVENT_SUPERPIPE:
         self->rules = D_004A1698;
         count = 8;
         break;
-    case 4:
+    case kGAMEEVENT_RIVALTIME:
         self->rules = D_004410B8;
         count = 11;
         break;
-    case 5:
+    case kGAMEEVENT_RIVALPOINTS:
         self->rules = D_004A16A0;
         count = 8;
         break;
@@ -355,11 +355,11 @@ extern char cBERules_mRules[];
  * Handles the rule screen's widget events: open states through the factory, apply an option change, open
  * options.
  *
- * Event 5 (select, when the pair's widget has mMiscData 0) and event 6 push the engine factory's state for the
- * entry (slot 4 or 5); event 6 also resets the rule settings. Event 9 stores the list box's new value for the rule
- * and updates the rules it disables; event 7 pushes a "FEOptions" state.
+ * kONNEXT (select, when the pair's widget has mMiscData 0) and kONPREV push the engine factory's state for the
+ * entry (slot 4 or 5); kONPREV also resets the rule settings. kONCHANGE stores the list box's new value for the rule
+ * and updates the rules it disables; kONOPTION pushes a "FEOptions" state.
  *
- * @param msg  the widget (its rule in mMiscData; a cUIPair for event 5, a cUIListBox for event 9), or 0
+ * @param msg  the widget (its rule in mMiscData; a cUIPair for kONNEXT, a cUIListBox for kONCHANGE), or 0
  * @param type  widget event number (On Tour Event)
  */
 extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUIThing* msg, unsigned int type)
@@ -368,7 +368,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUITh
         return;
     }
     switch (type) {
-    case 5:
+    case cUIState::kONNEXT:
         if (((cUIPair*)msg)->mpWidget->mMiscData == 0) {
             cUICustomInterface* custom = self->mpEngine->mpCustom;
             void* st = custom->getNextState((cUIState*)self, msg->mMiscData);
@@ -377,7 +377,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUITh
             }
         }
         break;
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* custom = self->mpEngine->mpCustom;
         void* st = custom->getPrevState((cUIState*)self, msg->mMiscData);
         if (st) {
@@ -386,13 +386,13 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, cUITh
         MEM_fill(cBERules_mRules, 0, 0x20);
         break;
     }
-    case 9: {
+    case cUIState::kONCHANGE: {
         int id = msg->mMiscData;
         self->updateBE(id, cUIListBox_getCurrentEntryData(msg));
         self->checkConflictForMenu((cUIListBox*)msg);
         break;
     }
-    case 7: {
+    case cUIState::kONOPTION: {
         cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
@@ -445,20 +445,20 @@ extern char str_normal[] __attribute__((aligned(8)));
 /**
  * Handles the rule menu's events: highlight shows the rule's help and arrows, scrolling refills the rows.
  *
- * A rule whose disable counter (+0x51 + rule) is above 0 cannot be highlighted. Event 9 is swallowed.
+ * A rule whose disable counter (+0x51 + rule) is above 0 cannot be highlighted. kONMISC is swallowed.
  *
  * @param pMenu  the menu
  * @param type  menu event number (On Tour Event)
- * @param idx  the item index for event 1, the new scroll offset for event 4
- * @return for event 1, 1 when the rule is enabled and 0 when it is disabled; 0x100 for event 9; otherwise
+ * @param idx  the item index for kISHIGHLIGHTABLE, the new scroll offset for kSCROLLUPDATE
+ * @return for kISHIGHLIGHTABLE, 1 when the rule is enabled and 0 when it is disabled; 0x100 for kONMISC; otherwise
  *         0x101
  */
 extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, cUIMenu* pMenu, unsigned int type, int idx)
 {
     switch (type) {
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
-    case 1: {
+    case cUIMenu::kISHIGHLIGHTABLE: {
         int sel = ((signed char*)self->mpGameEventMapping)[idx];
         int play = 0;
         cUIThing* arrowLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrw_left));
@@ -484,13 +484,13 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, cUIMenu
         }
         if (play) {
             int frameIndex = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(label));
-            if (frameIndex != 0xFFFF) {
+            if (frameIndex != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, frameIndex, 1);
             }
         }
         return locked;
     }
-    case 4:
+    case cUIMenu::kSCROLLUPDATE:
         self->setupMenu(idx);
         return 257;
     }
@@ -780,7 +780,7 @@ void cBraggingRightsMenu::setConfirmed(int enabled)
 INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setMenuItemColor);
 #ifdef SKIP_ASM
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" int cBraggingRightsMenu_isItemEnable(cBraggingRightsMenu* self, int idx);
+extern "C" bool cBraggingRightsMenu_isItemEnable(cBraggingRightsMenu* self, int idx);
 
 // A tARGB built from its four components (A, R, G, B), as setColour takes it.
 struct tARGBInit : tARGB {
@@ -863,9 +863,9 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_isItemEnable);
  * covers bits 8-31.
  *
  * @param itemIndex  the row (0-7)
- * @return 1 when the row's bit is set, else 0
+ * @return true when the row's bit is set
  */
-int cBraggingRightsMenu::isItemEnable(int itemIndex)
+bool cBraggingRightsMenu::isItemEnable(int itemIndex)
 {
     int mask = (int)(0x1000000 << itemIndex) >> 24;
     return (mcItemEnableFlag & mask) != 0;

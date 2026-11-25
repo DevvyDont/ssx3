@@ -13,6 +13,7 @@
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
 #include "main/ssxapp.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onCreateScreen);
@@ -156,13 +157,13 @@ extern char str_100QPStat[];
 /**
  * Creates the loading screen with rider stats: "103MPStat" for both players online, else "100QPStat".
  *
- * The online check is the new-race game path (newRace.cGamePath == 2); the two-player screen is filled with
- * InitwidgetMultiP() for players 0 and 1.
+ * The online check is the new-race game path (newRace.cGamePath == kGAMEPATH_MULTIPLAYER); the two-player screen is
+ * filled with InitwidgetMultiP() for players 0 and 1.
  */
 extern "C" void cFELoadState_onCreateScreen(cFELoadState* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         void* engine = self->mpEngine;
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_103MPStat), 0);
         self->mpScreen = (cUIScreen*)screen;
@@ -223,14 +224,14 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
  * Creates the load screen's quick-play widget, except on the online game path.
  *
  * Fetches back-end interface 0 (the result is unused), then calls cFELoadState_widgetCreateQP() unless the
- * race's game path (newRace.cGamePath) is 2, online.
+ * race's game path (newRace.cGamePath) is kGAMEPATH_MULTIPLAYER, online.
  *
  * @param widget  the widget being created
  */
 extern "C" void cFELoadState_onWidgetCreate(cFELoadState* self, cUIThing* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath != 2) {
+    if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER) {
         self->widgetCreateQP(widget);
     }
 }
@@ -571,7 +572,7 @@ extern char str_yes_c[];
 extern char str_cFEStateMemCard[];
 
 /**
- * Handles a button press on the display-mode popup: "yes" (accept, event 5) pushes a new memory-card load state.
+ * Handles a button press on the display-mode popup: "yes" (accept, kONNEXT) pushes a new memory-card load state.
  *
  * The state is a 584-byte "cFEStateMemCard" built by func_00186A08() on this state's engine and pushed on its state
  * stack (mpEngine +0x18). Other buttons and events do nothing. onWidgetEvent slot of D_0047DA58.
@@ -582,7 +583,7 @@ extern char str_cFEStateMemCard[];
 extern "C" void func_002461E0(cUIState* self, void* item, int msg)
 {
     if (item != 0) {
-        if (msg == 5) {
+        if (msg == cUIState::kONNEXT) {
             int hash = *(int*)((char*)item + 0x38);
             if (hash == GetHashValue32(str_yes_c)) {
                 void* state = func_00186A08(cMemMan_alloc(584, str_cFEStateMemCard, 0, 0), self->mpEngine);
@@ -597,15 +598,15 @@ extern "C" void func_002461E0(cUIState* self, void* item, int msg)
 INCLUDE_ASM("fe/festateloadhint", func_00246268);
 #ifdef SKIP_ASM
 /**
- * Answers 257 to menu event 6 (back) and 0 to everything else (onWidgetMenu slot of D_0047DA58).
+ * Answers 257 to menu event kONNEXT and 0 to everything else (onWidgetMenu slot of D_0047DA58).
  *
  * @param menu  the menu (unused)
  * @param event  the menu event
- * @return 257 (0x101) for event 6, else 0
+ * @return 257 (0x101) for kONNEXT, else 0
  */
 extern "C" int func_00246268(void* self, int menu, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -667,11 +668,11 @@ static inline bool IsId_246278(char* obj, char* key)
 /**
  * Fills in one widget of the online load screen as it is created: the location text or the game-mode title.
  *
- * cGameLoadState_onWidgetCreate() calls it when the game path (cBENewRaceInterface_newRace.cGamePath) is 2 (online).
- * "Location Text" gets "%s-%S" of the localised peak name ("kT_Peak1name".."kT_Peak3name" by cBENewRaceInterface_getLocationPeak1(), the
- * location's peak) and the location name (cBENewRaceInterface_getLocationName1()). Otherwise the title widget matching the game mode
- * (newRace.cGameMode) is shown (setVisible, slot 9, with 1): "Title_Multi_Race" for modes 0 and 4, "_SS" 1, "_BA"
- * 2, "_SP" 3, "_BC" 5 and 6.
+ * cGameLoadState_onWidgetCreate() calls it when the game path (cBENewRaceInterface_newRace.cGamePath) is
+ * kGAMEPATH_MULTIPLAYER (online). "Location Text" gets "%s-%S" of the localised peak name
+ * ("kT_Peak1name".."kT_Peak3name" by cBENewRaceInterface_getLocationPeak1(), the location's peak) and the location name
+ * (cBENewRaceInterface_getLocationName1()). Otherwise the title widget matching the game mode (newRace.cGameMode) is
+ * shown (setVisible, slot 9, with 1): "Title_Multi_Race" for modes 0 and 4, "_SS" 1, "_BA" 2, "_SP" 3, "_BC" 5 and 6.
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
@@ -683,13 +684,13 @@ void cGameLoadState::widgetCreateMultiP(char* obj)
         memset(buf, 0, 200);
         char* fmt = str_pct_s_pct_S_b;
         switch (cBENewRaceInterface_getLocationPeak1(iface)) {
-        case 0:
+        case kPEAK_1:
             Fmt_246278(buf, fmt, str_kT_Peak1name_b, iface);
             break;
-        case 1:
+        case kPEAK_2:
             Fmt_246278(buf, fmt, str_kT_Peak2name_b, iface);
             break;
-        case 2:
+        case kPEAK_3:
             Fmt_246278(buf, fmt, str_kT_Peak3name_c, iface);
             break;
         }
@@ -697,25 +698,25 @@ void cGameLoadState::widgetCreateMultiP(char* obj)
         return;
     }
     switch (cBENewRaceInterface_newRace.cGameMode) {
-    case 0:
+    case kGAMEMODE_RACE:
         if (IsId_246278(obj, str_Title_Multi_Race)) Activate_246278(obj);
         break;
-    case 1:
+    case kGAMEMODE_SLOPESTYLE:
         if (IsId_246278(obj, str_Title_Multi_SS)) Activate_246278(obj);
         break;
-    case 2:
+    case kGAMEMODE_BIGAIR:
         if (IsId_246278(obj, str_Title_Multi_BA)) Activate_246278(obj);
         break;
-    case 3:
+    case kGAMEMODE_HALFPIPE:
         if (IsId_246278(obj, str_Title_Multi_SP)) Activate_246278(obj);
         break;
-    case 4:
+    case kGAMEMODE_FREERIDE:
         if (IsId_246278(obj, str_Title_Multi_Race)) Activate_246278(obj);
         break;
-    case 5:
+    case kGAMEMODE_TIMECHALLENGE:
         if (IsId_246278(obj, str_Title_Multi_BC)) Activate_246278(obj);
         break;
-    case 6:
+    case kGAMEMODE_PNTSCHALLENGE:
         if (IsId_246278(obj, str_Title_Multi_BC)) Activate_246278(obj);
         break;
     }
@@ -811,16 +812,16 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  * Fills in one widget of the offline load screen as it is created: location, titles, course stats, rider name and
  * level, and the map image.
  *
- * cGameLoadState_onWidgetCreate() calls it when the game path (newRace.cGamePath) is not 2. "Location" gets the peak and location
- * name as in cGameLoadState_widgetCreateMultiP(). The widgets matching the game mode (cBENewRaceInterface_newRace.cGameMode) are shown
- * (setVisible, slot 9, with 1): "Title_Quick_Race/SS/BA/SP/BC" (modes 0/4, 1, 2, 3, 5/6) and "et_race/SS/BA/SP/TChal/
- * PChal" (modes 0, 1, 2, 3, 5, 6), and "ec_beg/inter/expert" by the location's cBENewRaceInterface_getLocationDifficulty() value (0-2).
- * "vert_drop_percent" and "cou_leng_percent" get "kT_OVRCMNNumberOfFeet" with the location's entry in the 17-entry
- * tables D_0047BB28 and D_0047BAE0. "rider_name" gets the first human rider's short name
- * (cBECharacterInterface_getShortName()), "player_rank_num" gets "kT_OVRCMNLevelNum" with the rider's level
- * (cBEStatInterface_getStatLevel(), or 1 when bit 1 of the rule record cBERules_mRules[rider] is set), and "map box" takes the portrait
- * texture (into +0x78, clearing +0x7C) that cFELoadScreen_loadTexture() loaded into the load screen at +0x48 (its +0x10), when
- * there is one.
+ * cGameLoadState_onWidgetCreate() calls it when the game path (newRace.cGamePath) is not kGAMEPATH_MULTIPLAYER.
+ * "Location" gets the peak and location name as in cGameLoadState_widgetCreateMultiP(). The widgets matching the game
+ * mode (cBENewRaceInterface_newRace.cGameMode) are shown (setVisible, slot 9, with 1): "Title_Quick_Race/SS/BA/SP/BC"
+ * (modes 0/4, 1, 2, 3, 5/6) and "et_race/SS/BA/SP/TChal/PChal" (modes 0, 1, 2, 3, 5, 6), and "ec_beg/inter/expert" by
+ * the location's cBENewRaceInterface_getLocationDifficulty() value (0-2). "vert_drop_percent" and "cou_leng_percent"
+ * get "kT_OVRCMNNumberOfFeet" with the location's entry in the 17-entry tables D_0047BB28 and D_0047BAE0. "rider_name"
+ * gets the first human rider's short name (cBECharacterInterface_getShortName()), "player_rank_num" gets
+ * "kT_OVRCMNLevelNum" with the rider's level (cBEStatInterface_getStatLevel(), or 1 when bit 1 of the rule record
+ * cBERules_mRules[rider] is set), and "map box" takes the portrait texture (into +0x78, clearing +0x7C) that
+ * cFELoadScreen_loadTexture() loaded into the load screen at +0x48 (its +0x10), when there is one.
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
@@ -836,13 +837,13 @@ void cGameLoadState::widgetCreateQP(char* obj)
         memset(buf, 0, 200);
         char* fmt = str_pct_s_pct_S_b;
         switch (cBENewRaceInterface_getLocationPeak1(iface)) {
-        case 0:
+        case kPEAK_1:
             Fmt_2464E8(buf, fmt, str_kT_Peak1name_b, iface);
             break;
-        case 1:
+        case kPEAK_2:
             Fmt_2464E8(buf, fmt, str_kT_Peak2name_b, iface);
             break;
-        case 2:
+        case kPEAK_3:
             Fmt_2464E8(buf, fmt, str_kT_Peak3name_c, iface);
             break;
         }
@@ -850,48 +851,48 @@ void cGameLoadState::widgetCreateQP(char* obj)
         return;
     }
     switch (cBENewRaceInterface_newRace.cGameMode) {
-    case 0:
+    case kGAMEMODE_RACE:
         if (IsId_2464E8(obj, str_Title_Quick_Race)) { Activate_2464E8(obj); return; }
         break;
-    case 1:
+    case kGAMEMODE_SLOPESTYLE:
         if (IsId_2464E8(obj, str_Title_Quick_SS)) { Activate_2464E8(obj); return; }
         break;
-    case 2:
+    case kGAMEMODE_BIGAIR:
         if (IsId_2464E8(obj, str_Title_Quick_BA)) { Activate_2464E8(obj); return; }
         break;
-    case 3:
+    case kGAMEMODE_HALFPIPE:
         if (IsId_2464E8(obj, str_Title_Quick_SP)) { Activate_2464E8(obj); return; }
         break;
-    case 4:
+    case kGAMEMODE_FREERIDE:
         if (IsId_2464E8(obj, str_Title_Quick_Race)) { Activate_2464E8(obj); return; }
         break;
-    case 5:
+    case kGAMEMODE_TIMECHALLENGE:
         if (IsId_2464E8(obj, str_Title_Quick_BC)) { Activate_2464E8(obj); return; }
         break;
-    case 6:
+    case kGAMEMODE_PNTSCHALLENGE:
         if (IsId_2464E8(obj, str_Title_Quick_BC)) { Activate_2464E8(obj); return; }
         break;
     }
     switch (cBENewRaceInterface_newRace.cGameMode) {
-    case 0:
+    case kGAMEMODE_RACE:
         if (IsId_2464E8(obj, str_et_race)) { Activate_2464E8(obj); return; }
         break;
-    case 1:
+    case kGAMEMODE_SLOPESTYLE:
         if (IsId_2464E8(obj, str_et_SS)) { Activate_2464E8(obj); return; }
         break;
-    case 2:
+    case kGAMEMODE_BIGAIR:
         if (IsId_2464E8(obj, str_et_BA)) { Activate_2464E8(obj); return; }
         break;
-    case 3:
+    case kGAMEMODE_HALFPIPE:
         if (IsId_2464E8(obj, str_et_SP)) { Activate_2464E8(obj); return; }
         break;
-    case 5:
+    case kGAMEMODE_TIMECHALLENGE:
         if (IsId_2464E8(obj, str_et_TChal)) { Activate_2464E8(obj); return; }
         break;
-    case 6:
+    case kGAMEMODE_PNTSCHALLENGE:
         if (IsId_2464E8(obj, str_et_PChal)) { Activate_2464E8(obj); return; }
         break;
-    case 7:
+    case kGAMEMODE_NUM:
         break;
     }
     switch (cBENewRaceInterface_getLocationDifficulty(iface, cBENewRaceInterface_getLocationID(iface))) {
@@ -1008,23 +1009,25 @@ struct sName5_6CF8 { char c[5]; };
 /**
  * Shows one player's level and seven attribute bars on the online load screen.
  *
- * Does nothing unless the game path (newRace.cGamePath) is 2 (online). The level is cBEStatInterface_getStatLevel() for the
- * player's human rider (1 when bit 1 of the rule record cBERules_mRules[rider] is set) and the stats are the rider's seven
- * attributes (cBEStatInterface_getAccel, cBEStatInterface_getEdging, cBEStatInterface_getSpeed, cBEStatInterface_getSpin, cBEStatInterface_getStability, cBEStatInterface_getToughness, cBEStatInterface_getTrick).
- * With a comm system (cCommSystem_mCommSystem) and either player 1 or a ranked game
+ * Does nothing unless the game path (newRace.cGamePath) is kGAMEPATH_MULTIPLAYER (online). The level is
+ * cBEStatInterface_getStatLevel() for the player's human rider (1 when bit 1 of the rule record cBERules_mRules[rider]
+ * is set) and the stats are the rider's seven attributes (cBEStatInterface_getAccel, cBEStatInterface_getEdging,
+ * cBEStatInterface_getSpeed, cBEStatInterface_getSpin, cBEStatInterface_getStability, cBEStatInterface_getToughness,
+ * cBEStatInterface_getTrick). With a comm system (cCommSystem_mCommSystem) and either player 1 or a ranked game
  * (cBENetworkInterface_networkOpt.bIsRankedGame): a ranked game shows level 8 and all stats 40, the rule bit shows all
  * stats 5, otherwise the level is the sum of oppCharacterAttributes / 35 and the stats come from the BE stat block
- * cBENetworkInterface_networkOpt.oppCharacterAttributes. Writes the level ("%d") into "ranking00" or "ranking01"; for each stat i shows label "<player+1>0<i>"
- * (setVisible 1, text "kT_CMNLvNum" with stat / 5) and sets bar "<player><i>pb" to range 55 (+0x80) and value stat
- * (cUIProgress_setValue()). The picture widget "<player>" takes this player's portrait texture (+0x10 or +0x14 of the
- * load screen at +0x48, loaded by cFELoadScreen_loadTexture()). cGameLoadState_onCreateScreen() and cGameLoadState_onGainTransition() call it for players 0 and 1.
+ * cBENetworkInterface_networkOpt.oppCharacterAttributes. Writes the level ("%d") into "ranking00" or "ranking01"; for
+ * each stat i shows label "<player+1>0<i>" (setVisible 1, text "kT_CMNLvNum" with stat / 5) and sets bar
+ * "<player><i>pb" to range 55 (+0x80) and value stat (cUIProgress_setValue()). The picture widget "<player>" takes this
+ * player's portrait texture (+0x10 or +0x14 of the load screen at +0x48, loaded by cFELoadScreen_loadTexture()).
+ * cGameLoadState_onCreateScreen() and cGameLoadState_onGainTransition() call it for players 0 and 1.
  *
  * @param player  the player slot (0 or 1)
  */
 extern "C" void func_00246CF8(cGameLoadState* self, char player)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         sName4_6CF8 statName = *(sName4_6CF8*)str_100;
         sName2_6CF8 picName = *(sName2_6CF8*)D_004A2C18;
         sName5_6CF8 barName = *(sName5_6CF8*)str_00pb;
@@ -1196,9 +1199,9 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player) __as
  *
  * Widget names start with the side number ("1 rank", "2 time", ...). Fills rank number, level
  * (kT_OVRCMNLevelNum;
- * fixed at 8 in a ranked online game), time (race modes 0 and 5) or score, knockdowns, wipeouts, tricks,
- * handplants, ubertricks and ubergrinds. In an online game the client swaps the player index, so each side
- * shows
+ * fixed at 8 in a ranked online game), time (kGAMEMODE_RACE and kGAMEMODE_TIMECHALLENGE) or score, knockdowns,
+ * wipeouts, tricks, handplants, ubertricks and ubergrinds. In an online game the client swaps the player index, so each
+ * side shows
  * the same rider on both machines.
  *
  * @param player  screen side, 0 or 1 (On Tour iHuman)
@@ -1264,7 +1267,8 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
     }
     obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(timeName.c));
     if (obj != 0) {
-        if (cBENewRaceInterface_newRace.cGameMode == 0 || cBENewRaceInterface_newRace.cGameMode == 5) {
+        if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_RACE
+        || cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_TIMECHALLENGE) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int seconds = fptoui((float)D_00536640[i] * (1.0f / 60.0f));
             cUIThing* o = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Time));

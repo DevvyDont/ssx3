@@ -5,6 +5,7 @@
 #include "fe/feasyncmanager.h"
 #include "ui/uiengine.h"
 #include "fe/festatempcircuit.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onCreateScreen);
@@ -75,7 +76,7 @@ extern "C" void cFEStateMPCircuit_onGainFocus(cFEStateMPCircuit* self, int pPreS
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox));
     if (obj != 0) {
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(obj)));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     }
@@ -97,7 +98,7 @@ void cFEStateMPCircuit_updateWidget(void* self);
 
 
 /**
- * Handles the circuit select's widget events: select or event 6 push the factory's state, a change plays the
+ * Handles the circuit select's widget events: select or kONPREV push the factory's state, a change plays the
  * entry's frame.
  *
  * @param item  the widget (its index at +0x18), or 0
@@ -109,7 +110,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
         return;
     }
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         void* nextState = obj->getNextState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -117,7 +118,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
         void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -125,9 +126,9 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
         }
         break;
     }
-    case 9: {
+    case cUIState::kONCHANGE: {
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(item)));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
         cFEStateMPCircuit_updateWidget(self);

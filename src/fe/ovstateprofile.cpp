@@ -13,6 +13,7 @@
 #include "util/locale.h"
 #include "ui/uitext.h"
 #include "ui/uiscreen.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onCreateScreen);
@@ -51,8 +52,8 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* self);
 extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* self);
 
 /**
- * Refreshes the profile overlay's memory-card display: the file list when the screen is in display state 3, the empty
- * layout otherwise.
+ * Refreshes the profile overlay's memory-card display: the file list when the screen is in display state kDISPLAY_ON,
+ * the empty layout otherwise.
  *
  * When the card state +0x1C0 (On Tour mState) is nonzero it first sets +0x22C, the flag that lets cOVState_PROFILE_hideActionButtons show
  * the action buttons. Display state +0x214 (On Tour mScreenStatus, set by cFEMemCard_triggerDisplayState) 3 runs
@@ -63,7 +64,7 @@ extern "C" void cOVState_PROFILE_displayStatus(cOVState_PROFILE* self)
     if (self->mState != 0) {
         self->mIsOn = 1;
     }
-    if (self->mScreenStatus == 3) {
+    if (self->mScreenStatus == cFEMemCard::kDISPLAY_ON) {
         self->displayOn();
     } else {
         self->displayOff();
@@ -174,7 +175,7 @@ void cOVState_PROFILE::displayOn()
             self->displayOff();
             return;
         }
-        if (self->mScreenStatus != 3)
+        if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON)
             self->triggerDisplayState(3);
     }
     if (self->displayFileOK()) {
@@ -215,11 +216,11 @@ void cOVState_PROFILE::displayOn()
                 textWidget->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 1) == cFEMemCard::kNoNextDevice)
             getObj_1380(self, str_arrowleft_b)->setVisible(0);
         else
             getObj_1380(self, str_arrowleft_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, mp->mSelectedDevice, 0) == cFEMemCard::kNoNextDevice)
             getObj_1380(self, str_arrowright_b)->setVisible(0);
         else
             getObj_1380(self, str_arrowright_b)->setVisible(1);
@@ -331,18 +332,18 @@ extern "C" void cGame_exit(void* game, int a);
 extern "C" void cUIStateStack_popToStateInclusive(void* self);
 
 /**
- * Leaves the profile overlay once its memory-card work is done: quits the game when it was opened for overlay 0x18,
+ * Leaves the profile overlay once its memory-card work is done: quits the game when it was opened for kOVSTATE_QUIT,
  * otherwise pops the UI state stack.
  *
  * Runs only the first time (+0x1AC, On Tour mIsDone, clear): when +0x278 (the constructor's last argument, On Tour
- * tOVStateEnum ov) is 0x18 it calls cGame_exit(SSXApp->Game, 0), else cUIStateStack_popToStateInclusive (On Tour
- * cUIStateStack::popToStateInclusive) on mpEngine's state stack (+0x18). Then sets +0x1AC. It is the updateDone slot
- * (+0x10C) of cOVState_PROFILE_vtbl.
+ * tOVStateEnum ov) is kOVSTATE_QUIT it calls cGame_exit(SSXApp->Game, 0), else cUIStateStack_popToStateInclusive (On
+ * Tour cUIStateStack::popToStateInclusive) on mpEngine's state stack (+0x18). Then sets +0x1AC. It is the updateDone
+ * slot (+0x10C) of cOVState_PROFILE_vtbl.
  */
 extern "C" void cOVState_PROFILE_updateDone(cOVState_PROFILE* self)
 {
     if (self->mIsDone == 0) {
-        if (self->mParentOV == 0x18) {
+        if (self->mParentOV == kOVSTATE_QUIT) {
             cGame_exit(SSXApp->Game, 0);
         } else {
             cUIStateStack_popToStateInclusive(&self->mpEngine->mStateStack);
@@ -378,8 +379,8 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onWidgetMenu);
 extern "C" void* cSSXApp_getMCManager(void* app);
 
 /**
- * Profile overlay's menu-event filter: events 6 and 8 get 0x100 when the selected memory card is not usable, event 9
- * always 0x100, everything else 0x101.
+ * Profile overlay's menu-event filter: kONNEXT and kONOPTION get 0x100 when the selected memory card is not usable,
+ * kONMISC always 0x100, everything else 0x101.
  *
  * Usability is the manager's mpMemCard->IsActionable(mSelectedDevice) (slot 54). It is the onWidgetMenu slot (+0xA4) of
  * cOVState_PROFILE_vtbl.
@@ -392,11 +393,11 @@ extern "C" int cOVState_PROFILE_onWidgetMenu(cOVState_PROFILE* self, int menu, u
 {
     cMCOverlayManager* mgr = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (key) {
-    case 6:
-    case 8:
+    case cUIMenu::kONNEXT:
+    case cUIMenu::kONOPTION:
         if (mgr->mpMemCard->IsActionable(mgr->mSelectedDevice) == 0) return 0x100;
         break;
-    case 9:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -444,25 +445,26 @@ static inline void* GetText_K211BC8(char* key)
  * Handles the profile overlay's widget events: picking a profile slot, naming it on the on-screen keyboard, loading it,
  * and backing out.
  *
- * Event 13 (the keyboard finished): widens the typed name (mszEditString of the keyboard mpKeyboard) into the
+ * kONKEYBOARDEND (the keyboard finished): widens the typed name (mszEditString of the keyboard mpKeyboard) into the
  * manager's mNewFileName, gives the profile mPlayerIdx that name through cBENewPlayerInterface_setPlayerName on the
  * player interface (back-end interface 1), or, for an empty name, the localised "kT_MEMPlayerName" format with the
  * profile number; then calls the interface's submit, starts the save with
  * cMCOverlayManager_writeSetFileType(manager, 1, profile), and sets mIsProcessing, mIsSavePressed and the card state
- * mState = 3.
+ * mState = kSAVING.
  *
- * Event 5 (select) on an item, when not processing and in display state 3 (mScreenStatus): the item's misc data
- * becomes both mSlot and the manager's mFileCursor. In card state 1 it opens the name keyboard: on first use builds
- * a cKeyboardPopup ("Keyboard", 1092 bytes) for mpEngine with the state's controller mask, id 55, at most 8 and at
- * least 1 character, and a set of keys switched off through cKeyboardPopup_setIncludeKey; then sets its prompt to the
- * localised "kT_KEYUserName", its text to the profile's current name (cBENewPlayerInterface_getPlayerName) and pushes
- * it as a popup; mProcessingKeyboard is set and mPopupType cleared.
+ * kONNEXT (select) on an item, when not processing and in display state kDISPLAY_ON (mScreenStatus): the item's misc
+ * data becomes both mSlot and the manager's mFileCursor. In card state kCHECKING it opens the name keyboard: on first
+ * use builds a cKeyboardPopup ("Keyboard", 1092 bytes) for mpEngine with the state's controller mask, id 55, at most 8
+ * and at least 1 character, and a set of keys switched off through cKeyboardPopup_setIncludeKey; then sets its prompt
+ * to the localised "kT_KEYUserName", its text to the profile's current name (cBENewPlayerInterface_getPlayerName) and
+ * pushes it as a popup; mProcessingKeyboard is set and mPopupType cleared.
  *
- * Event 6 (back), unless processing or already in card state 6: sets mIsCancelPressed, puts the manager in state 0
- * through its SetState (slot 1) when the card state is 0, 1 or 2, and sets card state 6. Event
- * 7, under the same condition and when mpMemCard slot 54 accepts mSelectedDevice: takes the item's slot like event 5
- * and, in card state 1 when slot 67 accepts that slot, sets processing, card state 4,
- * cMCOverlayManager_SetAction(manager, 0) and manager state 0x18. Event 14 and others do nothing.
+ * kONPREV (back), unless processing or already in card state kDONE: sets mIsCancelPressed, puts the manager in state
+ * kMCOverlay_Idle through its SetState (slot 1) when the card state is kSTART, kCHECKING or kSKIP, and sets card state
+ * kDONE. kONOPTION, under the same condition and when mpMemCard slot 54 accepts mSelectedDevice: takes the item's slot
+ * like kONNEXT and, in card state kCHECKING when slot 67 accepts that slot, sets processing, card state kDELETING,
+ * cMCOverlayManager_SetAction(manager, 0) and manager state kMCOverlay_DeleteConfirm. kONKEYBOARDCANCEL and others do
+ * nothing.
  *
  * @param vself  the profile overlay state (this)
  * @param item  the widget; its misc data (mMiscData) is the profile slot
@@ -473,7 +475,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
 {
     cOVState_PROFILE* self = vself;
     switch (event) {
-    case 13: {
+    case cUIState::kONKEYBOARDEND: {
         char buf[0x70];
         char fmt[0x70];
         char* name = self->mpKeyboard->mszEditString;
@@ -490,16 +492,16 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
         cMCOverlayManager_writeSetFileType(cSSXApp_getMCManager(SSXApp), 1, self->mPlayerIdx);
         self->mIsProcessing = 1;
         self->mIsSavePressed = 1;
-        self->mState = 3;
+        self->mState = cFEMemCard::kSAVING;
         break;
     }
-    case 5: {
+    case cUIState::kONNEXT: {
         if (((char*)item) == 0) break;
         if (self->mIsProcessing != 0) break;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mScreenStatus != 3) break;
+        if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) break;
         mp->mFileCursor = self->mSlot = item->mMiscData;
-        if (self->mState == 1) {
+        if (self->mState == cFEMemCard::kCHECKING) {
             if (self->mpKeyboard == 0) {
                 cKeyboardPopup* kb = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
                     cMemMan_alloc(1092, str_Keyboard_b, 0x100, 0), ((void*)self->mpEngine), vself, 0, self->mCtrlBits);
@@ -532,37 +534,37 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mIsProcessing != 1) {
+        if (self->mIsProcessing != true) {
             int st = self->mState;
-            if (st != 6) {
+            if (st != cFEMemCard::kDONE) {
                 self->mIsCancelPressed = 1;
-                if (st == 0 || st == 2 || st == 1) {
-                    mp->SetState(0);
+                if (st == cFEMemCard::kSTART || st == cFEMemCard::kSKIP || st == cFEMemCard::kCHECKING) {
+                    mp->SetState(kMCOverlay_Idle);
                 }
-                self->mState = 6;
+                self->mState = cFEMemCard::kDONE;
             }
         }
         break;
     }
-    case 7:
-        if (self->mIsProcessing != 1 && self->mState != 6) {
+    case cUIState::kONOPTION:
+        if (self->mIsProcessing != true && self->mState != cFEMemCard::kDONE) {
             cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
             if (mp->mpMemCard->IsActionable(mp->mSelectedDevice) != 0) {
                 mp->mFileCursor = self->mSlot = item->mMiscData;
-                if (self->mState == 1) {
+                if (self->mState == cFEMemCard::kCHECKING) {
                     if (mp->mpMemCard->HasFileName(self->mSlot) != 0) {
                         self->mIsProcessing = 1;
-                        self->mState = 4;
+                        self->mState = cFEMemCard::kDELETING;
                         cMCOverlayManager_SetAction(mp, 0);
-                        mp->SetState(0x18);
+                        mp->SetState(kMCOverlay_DeleteConfirm);
                     }
                 }
             }
         }
         break;
-    case 14:
+    case cUIState::kONKEYBOARDCANCEL:
         break;
     }
 }
@@ -660,30 +662,30 @@ extern "C" void cFEMemCard_onUpdate(void* self);
 /**
  * Per-frame update of the autosave overlay: starts the save and watches the memory card while it runs.
  *
- * In state 1 (mState, +0x1C0) with nothing in progress (mIsProcessing, +0x1A8) it starts the save on the memory-card
- * overlay manager (cMCOverlayManager_writeSetFileType(pMC, 1, 0)), sets mIsProcessing, mIsSavePressed (+0x1DC) and mIsOverwriteOK (+0x1F0)
- * and moves to state 3. In state 3, if the selected card is no longer plugged in, valid and formatted, it clears
- * mIsSavePressed, sets mIsCancelPressed (+0x1E4), clears mIsProcessing and moves to state 6. It always finishes with
- * the memory-card base update cFEMemCard_onUpdate.
+ * In state kCHECKING (mState, +0x1C0) with nothing in progress (mIsProcessing, +0x1A8) it starts the save on the
+ * memory-card overlay manager (cMCOverlayManager_writeSetFileType(pMC, 1, 0)), sets mIsProcessing, mIsSavePressed
+ * (+0x1DC) and mIsOverwriteOK (+0x1F0) and moves to state kSAVING. In state kSAVING, if the selected card is no longer
+ * plugged in, valid and formatted, it clears mIsSavePressed, sets mIsCancelPressed (+0x1E4), clears mIsProcessing and
+ * moves to state kDONE. It always finishes with the memory-card base update cFEMemCard_onUpdate.
  */
 // cOVState_AUTOSAVE::onUpdate (On Tour name); cFEMemCard fields: 0x1A8 mIsProcessing, 0x1C0 mState,
 // 0x1DC mIsSavePressed, 0x1E4 mIsCancelPressed, 0x1F0 mIsOverwriteOK.
 extern "C" void cOVState_AUTOSAVE_onUpdate(cOVState_AUTOSAVE* self)
 {
     cMCOverlayManager* pMC = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    if (self->mState == 1 && !self->mIsProcessing) {
+    if (self->mState == cFEMemCard::kCHECKING && !self->mIsProcessing) {
         cMCOverlayManager_writeSetFileType(pMC, 1, 0);
         self->mIsProcessing = 1;
         self->mIsSavePressed = 1;
         self->mIsOverwriteOK = 1;
-        self->mState = 3;
-    } else if (self->mState == 3) {
+        self->mState = cFEMemCard::kSAVING;
+    } else if (self->mState == cFEMemCard::kSAVING) {
         if (!pMC->mDevices[pMC->mSelectedDevice].bPluggedIn || !pMC->mDevices[pMC->mSelectedDevice].bValid
             || !pMC->mDevices[pMC->mSelectedDevice].bFormatted) {
             self->mIsSavePressed = 0;
             self->mIsCancelPressed = 1;
             self->mIsProcessing = 0;
-            self->mState = 6;
+            self->mState = cFEMemCard::kDONE;
         }
     }
     cFEMemCard_onUpdate(self);
@@ -725,7 +727,7 @@ extern char str_autosave_text[];
 extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
 {
     int status = self->mState;
-    if (status != 0 && status != 6) {
+    if (status != cFEMemCard::kSTART && status != cFEMemCard::kDONE) {
         self->displayOn();
     } else {
         cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
@@ -768,7 +770,7 @@ void cOVState_AUTOSAVE::displayOn()
     if (obj == 0) {
         return;
     }
-    if (mIsProcessing != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && mState != 6) {
+    if (mIsProcessing != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && mState != kDONE) {
         void* bank = &mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_pulsingicon));
         if (anim != 0) {
@@ -888,13 +890,13 @@ INCLUDE_ASM("fe/ovstateprofile", func_002126C0);
  * @param last1  end of the first range
  * @param first2  start of the second range
  * @param last2  end of the second range
- * @return 1 when the first range is less, else 0
+ * @return true when the first range is less
  */
-extern "C" int func_002126C0(const char* first1, const char* last1, const char* first2, const char* last2)
+extern "C" bool func_002126C0(const char* first1, const char* last1, const char* first2, const char* last2)
 {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
-        if (*first1 < *first2) return 1;
-        if (*first2 < *first1) return 0;
+        if (*first1 < *first2) return true;
+        if (*first2 < *first1) return false;
     }
     return first1 == last1 && first2 != last2;
 }

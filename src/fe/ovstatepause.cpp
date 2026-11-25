@@ -1,6 +1,7 @@
 #include "vtable.h"
 #include "common.h"
 #include "ui/uithing.h"
+#include "ui/uiscreen.h"
 #include "be/beinterface.h"
 #include "main/gamestate.h"
 #include "ui/uiengine.h"
@@ -480,17 +481,17 @@ static inline cCamera* Camera_A238(int view)
  * Handles the in-game options widgets: Save opens the profile save, Triangle closes the screen, and a changed
  * value is stored and applied at once.
  *
- * Cross (5) on "save" pushes a new 0x27C-byte "Save Profile" state (cOVState_PROFILE_cOVState_PROFILE, kind 0x2A) as a special
- * state; Triangle (6) closes this state (cUIStateStack_pop).
- * A value change (9) writes the widget's value into the settings word cBEOptionInterface_mOption and applies it: HUD mode,
- * player 1 / 2 camera (cChaseCameraController_switchCamera_UserChange on game view 1 / 2), music / effects /
- * speech volume, DJ and arcade audio; in a network game EATalksl sets the voice level (value x 10). The
+ * Cross (kONNEXT) on "save" pushes a new 0x27C-byte "Save Profile" state (cOVState_PROFILE_cOVState_PROFILE, kind 0x2A)
+ * as a special state; Triangle (kONPREV) closes this state (cUIStateStack_pop).
+ * A value change (kONCHANGE) writes the widget's value into the settings word cBEOptionInterface_mOption and applies
+ * it: HUD mode, player 1 / 2 camera (cChaseCameraController_switchCamera_UserChange on game view 1 / 2), music /
+ * effects / speech volume, DJ and arcade audio; in a network game EATalksl sets the voice level (value x 10). The
  * options interface's virtual slot 1 then runs, probably to commit the settings.
  *
  * @param obj  the widget (On Tour pWidget); nothing happens when it is null
- * @param msg  the widget event: 5 Cross, 6 Triangle, 9 value changed
+ * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle, kONCHANGE value changed
  */
-// Pause-options widget handler: msg 5 opens the sub-state, 6 pops, 9 applies a changed setting.
+// Pause-options widget handler: kONNEXT opens the sub-state, kONPREV pops, kONCHANGE applies a changed setting.
 extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* self, cUIThing* obj, unsigned int msg)
 {
     if (obj == 0) {
@@ -498,7 +499,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
     }
     cBEOptionInterface_A238* iface = (cBEOptionInterface_A238*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (msg) {
-    case 5:
+    case cUIState::kONNEXT:
         if (IsId_A238(obj, str_save)) {
             cUIEngine* stack = SSXApp->Game->UI;
             cUIState* st = (cUIState*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0),
@@ -508,10 +509,10 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
             cUIStateStack_pushSpecial(&stack->mStateStack, st, 0, 0);
         }
         break;
-    case 6:
+    case cUIState::kONPREV:
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
-    case 9:
+    case cUIState::kONCHANGE:
         if (IsId_A238(obj, str_0lb)) {
             cBEOptionInterface_mOption_A238.f30 = ((cUIListBox*)obj)->mCurrentEntry;
         } else if (IsId_A238(obj, str_1lb_b)) {
@@ -582,7 +583,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(cOVState_PAUSE_OPTIONS* self)
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
             int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
-            if (frame != 0xFFFF) {
+            if (frame != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, (unsigned short)frame, 1);
             }
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
@@ -604,25 +605,25 @@ extern char str_save[];
  * Cross plays the sound only on the "save" item; Square and Circle never play it.
  *
  * @param menu  the options menu (On Tour pMenu)
- * @param key  the menu event: 6 Cross, 7 Triangle, 8 Square, 9 Circle (1 asks whether row @p index can be
- *             selected)
+ * @param key  the menu event: kONNEXT Cross, kONPREVIOUS Triangle, kONOPTION Square, kONMISC Circle
+ *             (kISHIGHLIGHTABLE asks whether row @p index can be selected)
  * @param index  the visible row the event is about
  * @return 0x100 (animation only) for Square, Circle and Cross on any item but "save", else 0x101 (animation
  *         and sound)
  */
-// Pause-menu key filter: returns 0x100 for keys 8/9 and for key 6 unless the item is str_save, else 0x101.
+// Pause-menu key filter: returns 0x100 for kONOPTION / kONMISC and for kONNEXT unless the item is str_save, else 0x101.
 extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(cOVState_PAUSE_OPTIONS* self, cUIMenu* menu, unsigned int key,
                                                    int index)
 {
     switch (key) {
-    case 6: {
+    case cUIMenu::kONNEXT: {
         int id = ((cUIThing*)cList_getByIndex(&menu->mList, index))->mHashName;
         if (id == GetHashValue32(str_save)) {
             break;
         }
     }
-    case 8:
-    case 9:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
     }
     return 257;
@@ -636,12 +637,12 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetListBox);
  * Tells a list box how to react to input: Triangle animates silently, moves also play a sound.
  *
  * @param pListBox  the list box (unused)
- * @param Event  the list-box event: 0-3 moves, 4 Triangle
- * @return 0x100 (animation only) for event 4, else 0x101 (animation and sound)
+ * @param Event  the list-box event (tUILBEvent): kONLEFT .. kONDOWN moves, kONPREVIOUS Triangle
+ * @return 0x100 (animation only) for kONPREVIOUS, else 0x101 (animation and sound)
  */
 extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(cOVState_PAUSE_OPTIONS* self, int pListBox, int Event)
 {
-    return Event != 4 ? 257 : 0x100;
+    return Event != cUIListBox::kONPREVIOUS ? 257 : 0x100;
 }
 #endif
 
@@ -696,14 +697,15 @@ extern char str_kT_PauseErrorCheckingServer[];
  * Builds the online-error pause screen ("265InGameError"), picks the error text and starts checking the
  * server.
  *
- * TextError (word-wrapped) explains the cGameComm error: this machine's mCheating[0] 1-3 gives ExcessiveDelay and other
- * values CheatDetected; the peer's mCheating[1], or no flag at all, ConnectionLost; mRemoteEndGame or
- * mRemoteDisconnected OpponentQuit. Every case but the first clears mbShouldDisplayAuxInfo, the flag that gates the
- * ping texts. TextError's attribute bit 0x80 (mAttr) is set. Text_CancelGame reads kT_BTNOK after the local finish,
- * else kT_OVRCancelEvent (choice 0); it, the four button graphics and the continue option start hidden. With a
- * cGameComm it pings the lobby server for 3 s (func_002583A8), stores the start time in miStartPingTick, hides Cancel
- * (cOVState_PAUSE_ONLINE_ERROR_enableCancelButton) and shows kT_PauseErrorCheckingServer; without one it shows Cancel.
- * The TextError branch reads cGameComm_mGameComm before that null check.
+ * TextError (word-wrapped) explains the cGameComm error: this machine's mCheating[0] kCheatDiscTrayOpened ..
+ * kCheatTooManyUnplugs gives ExcessiveDelay and other values CheatDetected; the peer's mCheating[1], or no flag at all,
+ * ConnectionLost; mRemoteEndGame or mRemoteDisconnected OpponentQuit. Every case but the first clears
+ * mbShouldDisplayAuxInfo, the flag that gates the ping texts. TextError's attribute bit 0x80 (mAttr) is set.
+ * Text_CancelGame reads kT_BTNOK after the local finish, else kT_OVRCancelEvent (choice 0); it, the four button
+ * graphics and the continue option start hidden. With a cGameComm it pings the lobby server for 3 s (func_002583A8),
+ * stores the start time in miStartPingTick, hides Cancel (cOVState_PAUSE_ONLINE_ERROR_enableCancelButton) and shows
+ * kT_PauseErrorCheckingServer; without one it shows Cancel. The TextError branch reads cGameComm_mGameComm before that
+ * null check.
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE_ERROR* self)
 {
@@ -728,9 +730,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
         if (localCheating != 0) {
             if (localCheating == one) {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNExcessiveDelay));
-            } else if (localCheating == 2) {
+            } else if (localCheating == cGameComm::kCheatTooManyPauses) {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNExcessiveDelay));
-            } else if (localCheating == 3) {
+            } else if (localCheating == cGameComm::kCheatTooManyUnplugs) {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNExcessiveDelay));
             } else {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNCheatDetected));
@@ -740,9 +742,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
             int peerCheating = gameComm->mCheating[1];
             if (peerCheating == one) {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
-            } else if (peerCheating == 2) {
+            } else if (peerCheating == cGameComm::kCheatTooManyPauses) {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
-            } else if (peerCheating == 3) {
+            } else if (peerCheating == cGameComm::kCheatTooManyUnplugs) {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
             } else {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
@@ -922,11 +924,12 @@ extern char str_Text_ContinueGame[];
 /**
  * Online pause error overlay: handles its Continue/Cancel widgets.
  *
- * Ignores a null widget. Event 5 (select) runs cOVState_PAUSE_ONLINE_ERROR_doContinueCancel; event 1 (focus) highlights the widget gaining focus
- * (Text_CancelGame or Text_ContinueGame) and unhighlights the other with cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight/cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight.
+ * Ignores a null widget. kONNEXT (select) runs cOVState_PAUSE_ONLINE_ERROR_doContinueCancel; kONGAINFOCUS (focus)
+ * highlights the widget gaining focus (Text_CancelGame or Text_ContinueGame) and unhighlights the other with
+ * cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight/cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight.
  *
  * @param item  the widget
- * @param msg   the event
+ * @param msg   the event (tUIStateEvent)
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(cOVState_PAUSE_ONLINE_ERROR* self, cUIThing* item, int msg)
 {
@@ -934,10 +937,10 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(cOVState_PAUSE_ONLINE_
         return;
     }
     switch (msg) {
-    case 5:
+    case cUIState::kONNEXT:
         self->doContinueCancel(item, msg);
         break;
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         int id = item->mHashName;
         if (id == GetHashValue32(str_Text_CancelGame)) {
             self->setCancelHighLight(1);
@@ -1031,7 +1034,7 @@ extern int cPauseState_FlagsTable[];
 /**
  * Online pause error overlay: continues the race without the lost player, or quits it.
  *
- * Pops the overlay off the UI stack and sets this state's transition bits; widget id 4 (Continue, its mMiscData)
+ * Pops the overlay off the UI stack and sets this state's transition bits; widget id eOptionContinue (its mMiscData)
  * finishes the remote player with cAI_finishRemotePlayer and restores the previous pause flags from the pause stack,
  * any other widget exits the game with cGame_exit(0).
  *
@@ -1043,11 +1046,11 @@ void cOVState_PAUSE_ONLINE_ERROR::doContinueCancel(cUIThing* item, int msg)
     cUIStateStack_pop_r(&mpEngine->mStateStack, 1);
     mAttrState = (mAttrState & ~0x3F00) | 0x780;
     switch (item->mMiscData) {
-    case 4:
+    case eOptionContinue:
         cAI_finishRemotePlayer(SSXApp->Game->AI);
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
         break;
-    case 0:
+    case eOptionCancel:
     default:
         cGame_exit(SSXApp->Game, 0);
         break;
@@ -1079,7 +1082,7 @@ void cOVState_PAUSE_ONLINE_ERROR::setContinueOptionVisible(int visible)
         cUIText_setUnicodeStringByID((cUIText*)continueText, GetHashValue32(str_kT_OVRContinueRacing));
         continueText->setStatic(visible ^ 1);
         continueText->setVisible(visible);
-        continueText->mMiscData = 4;
+        continueText->mMiscData = eOptionContinue;
     }
     continueText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu_b));
     if (continueText != 0 && visible) {
@@ -1185,9 +1188,9 @@ extern char str_at_TextPulseWhiteOrange[];
  *
  * Runs cUIState_onGainFocus, then plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "rider<n>" for the first
  * human rider (cBENewPlayerInterface_getHumanRider(.., 0) + 1) and, in an online race (cBENewRaceInterface_newRace's
- * cGamePath == 2), for the second. With a cGameComm_mGameComm link it sets mOverlayTimeout to 1200 frames, after which
- * cOVState_HEAT_PREEVENT_onUpdate closes the overlay. The overlay factory builds this state (vtable cOVState_HEAT_PREEVENT_vtbl, screen "40race_pre") for
- * overlay type 8. BE interface 0 is fetched and unused.
+ * cGamePath == kGAMEPATH_MULTIPLAYER), for the second. With a cGameComm_mGameComm link it sets mOverlayTimeout to 1200
+ * frames, after which cOVState_HEAT_PREEVENT_onUpdate closes the overlay. The overlay factory builds this state (vtable
+ * cOVState_HEAT_PREEVENT_vtbl, screen "40race_pre") for overlay type 8. BE interface 0 is fetched and unused.
  */
 extern "C" void cOVState_HEAT_PREEVENT_onGainFocus(cOVState_HEAT_PREEVENT* self)
 {
@@ -1197,7 +1200,7 @@ extern "C" void cOVState_HEAT_PREEVENT_onGainFocus(cOVState_HEAT_PREEVENT* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     sprintf(buf, str_riderpct_d, cBENewPlayerInterface_getHumanRider(iface, 0) + 1);
     cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         sprintf(buf, str_riderpct_d, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
         cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
     }
@@ -1407,13 +1410,13 @@ extern "C" void func_001FBD20(void* self)
     func_002C2540_BD20(title, cBENewRaceInterface_getLocationName1(iface0));
     unsigned short* str = 0;
     switch (cBENewRaceInterface_newRace.cGameMode) {
-    case 1:
+    case kGAMEMODE_SLOPESTYLE:
         str = lookupString_1FBD20(str_kT_cmnSlopeCaps);
         break;
-    case 2:
+    case kGAMEMODE_BIGAIR:
         str = lookupString_1FBD20(str_kT_cmnBigAirCaps);
         break;
-    case 3:
+    case kGAMEMODE_HALFPIPE:
         str = lookupString_1FBD20(str_kT_cmnPipeCaps);
         break;
     }
@@ -1422,10 +1425,10 @@ extern "C" void func_001FBD20(void* self)
     void* text = getObj_1FBD20(overlay, str_objText1);
     cUIThing* sub = (cUIThing*)getObj_1FBD20(overlay, str_objText2);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
-        if (mode == 1) {
+        if (mode == cGameModeMan::kHeat1) {
             cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_FSOBJ2HeatsQF));
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_FSOBJHeatsGrandTtl));
-        } else if (mode == 2) {
+        } else if (mode == cGameModeMan::kHeat2) {
             int total = cGameModeMan_getHeatScore(stats, cGameModeMan_iCharRank[2], 0) + cGameModeMan_getHeatScore(stats, cGameModeMan_iCharRank[2], 1);
             int n = total - cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
             if (n > 0) {
@@ -1444,9 +1447,9 @@ extern "C" void func_001FBD20(void* self)
         }
     } else {
         cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_OVRCMNPlaceTop3Medal));
-        if (cBENewRaceInterface_newRace.cGamePath == 2)
+        if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER)
             sub->setVisible(0);
-        else if (cBENewRaceInterface_newRace.cGameMode == 1)
+        else if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_SLOPESTYLE)
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_OVRCMNCollPointAndMulti));
         else
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_OVRCMNCollPointIcons));
@@ -1457,20 +1460,20 @@ extern "C" void func_001FBD20(void* self)
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
         switch (mode) {
         case 0:
-        case 1:
+        case cGameModeMan::kHeat1:
             cUIState_showObjSafe(self, str_heat1_tab);
             break;
-        case 2:
+        case cGameModeMan::kHeat2:
             cUIState_showObjSafe(self, str_heat2_tab);
             break;
-        case 3:
+        case cGameModeMan::kFinalHeat:
             cUIState_showObjSafe(self, str_finalheat_tab);
             break;
         }
         cUIState_hideObjSafe(self, str_title_b);
     } else {
         textObj = getObj_1FBD20(overlay, str_title_b);
-        if (cBENewRaceInterface_newRace.cGamePath == 2)
+        if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER)
             cUIText_setUnicodeStringByID((cUIText*)textObj, GetHashValue32(str_kT_CMNStateMultiPlay));
         else
             cUIText_setUnicodeStringByID((cUIText*)textObj, GetHashValue32(str_kT_CMNStateQuickPlay));
@@ -1481,7 +1484,7 @@ extern "C" void func_001FBD20(void* self)
             cUIText_setUnicodeStringByID((cUIText*)textObj, GetHashValue32(str_kT_OVRCMNScoreColon));
         else
             cUIText_setUnicodeStringByID((cUIText*)textObj, GetHashValue32(str_kT_OVRCMNHeat1));
-        if (mode == 1 || mode == 3) {
+        if (mode == cGameModeMan::kHeat1 || mode == cGameModeMan::kFinalHeat) {
             cUIState_hideObjSafe(self, str_column_secondrun);
             cUIState_hideObjSafe(self, str_column_total);
         }
@@ -1507,12 +1510,13 @@ extern "C" void func_001FBD20(void* self)
             sprintf(name, str_run_1_pct_d, i);
             cell = getObj_1FBD20(overlay, name);
             if (cell != 0) {
-                sprintf(num, D_004A2138, cGameModeMan_getHeatScore(stats, id, mode == 3 ? 2 : 0));
+                sprintf(num, D_004A2138,
+                        cGameModeMan_getHeatScore(stats, id, mode == cGameModeMan::kFinalHeat ? 2 : 0));
                 cUIText_setAsciiString((cUIText*)cell, num);
             }
             sprintf(name, str_run_2_pct_d, i);
             cell = getObj_1FBD20(overlay, name);
-            if (cBENewRaceInterface_newRace.cGamePath == 0 && mode == 2) {
+            if (cBENewRaceInterface_newRace.cGamePath == 0 && mode == cGameModeMan::kHeat2) {
                 char name2[0x20];
                 char total[0x10];
                 sprintf(num, D_004A2138_n, cGameModeMan_getHeatScore(stats, id, 1));
@@ -1532,7 +1536,7 @@ extern "C" void func_001FBD20(void* self)
     textObj = getObj_1FBD20(overlay, str_p0rider);
     cUIText_setAsciiString((cUIText*)textObj, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), cBENewPlayerInterface_getRiderCheatCharID(iface1, idx)));
     textObj = getObj_1FBD20(overlay, str_p0run1);
-    if (cBENewRaceInterface_newRace.cGamePath == 0 && mode == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 0 && mode == cGameModeMan::kHeat2) {
         char buf[0x10];
         int score = cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
         sprintf(buf, D_004A2138, score);
@@ -1541,7 +1545,7 @@ extern "C" void func_001FBD20(void* self)
         cUIText_setAsciiString((cUIText*)textObj, str_dash_sp_dash_sp_dash);
     }
     textObj = getObj_1FBD20(overlay, str_p1rider);
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         idx = cBENewPlayerInterface_getHumanRider(iface1, 1);
         cUIText_setAsciiString((cUIText*)textObj, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), cBENewPlayerInterface_getRiderCheatCharID(iface1, idx)));
     } else {
@@ -1580,9 +1584,10 @@ extern char str_p1dashes[];
  * Gains focus on the freestyle pre-event overlay: pulses the players' rows and plays its menu sound.
  *
  * Runs cUIState_onGainFocus and plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "p0rider" and on "p0dashes"
- * in heat 2 (SSXApp->GameModeMan's iHeatNum) or "p0run1" otherwise; in an online race (cBENewRaceInterface_newRace's
- * cGamePath == 2) also on "p1rider" and "p1dashes". Then plays menu sound 0xE (cSSXAudio_MenuSound) and calls
- * func_002A31C0 on the sound system (cAudioInterface_bxAudio()). BE interface 0 is fetched and unused.
+ * in heat 2 (SSXApp->GameModeMan's iHeatNum, kHeat2) or "p0run1" otherwise; in an online race
+ * (cBENewRaceInterface_newRace's cGamePath == kGAMEPATH_MULTIPLAYER) also on "p1rider" and "p1dashes". Then plays menu
+ * sound 0xE (cSSXAudio_MenuSound) and calls func_002A31C0 on the sound system (cAudioInterface_bxAudio()). BE interface
+ * 0 is fetched and unused.
  */
 extern "C" void func_001FC768(void* self)
 {
@@ -1590,12 +1595,12 @@ extern "C" void func_001FC768(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int* mode = (int*)SSXApp->GameModeMan;
     cOVState_triggerTextFade(self, str_p0rider, str_at_TextPulseWhiteOrange);
-    if (*mode == 2) {
+    if (*mode == cGameModeMan::kHeat2) {
         cOVState_triggerTextFade(self, str_p0dashes, str_at_TextPulseWhiteOrange);
     } else {
         cOVState_triggerTextFade(self, str_p0run1, str_at_TextPulseWhiteOrange);
     }
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cOVState_triggerTextFade(self, str_p1rider, str_at_TextPulseWhiteOrange);
         cOVState_triggerTextFade(self, str_p1dashes, str_at_TextPulseWhiteOrange);
     }
@@ -1695,7 +1700,8 @@ static inline void* getObj_1FC878(cUIState* self, char* name)
  *
  * "title1" reads kT_CMNStateMultiPlay (set twice). "title2" gets "<location> - <event>" ("%s - %s" through sprintf2;
  * the location from cBENewRaceInterface_getLocationName1, the event kT_cmnRaceCaps_b / kT_cmnSlopeCaps / kT_cmnBigAirCaps / kT_cmnPipeCaps for
- * cGameMode 5 / 1 / 2 / 3), or "<location> - Jam" for cGameMode 6. Quirk: the "%s - %s" call passes only the location;
+ * cGameMode 5 / 1 / 2 / 3, kGAMEMODE_TIMECHALLENGE / _SLOPESTYLE / _BIGAIR / _HALFPIPE), or "<location> - Jam" for
+ * cGameMode 6 (kGAMEMODE_PNTSCHALLENGE). Quirk: the "%s - %s" call passes only the location;
  * the event string reaches it because the compiler keeps it in $a3 (fine on the PS2, undefined elsewhere). "name" gets
  * player 1 (the online player name func_00146F88 on game path 2, else cBECharacterInterface_getShortName of the first
  * human rider); "vs" gets kT_OVRCMNVs formatted with player 2's name, found the same way.
@@ -1738,27 +1744,27 @@ extern "C" void func_001FC878(void* self)
     unsigned short* str = 0;
     switch (getField_1FC878(gs, 72))
     {
-    case 5:
+    case kGAMEMODE_TIMECHALLENGE:
         str = lookupString_1FC878(str_kT_cmnRaceCaps_b);
         break;
-    case 1:
+    case kGAMEMODE_SLOPESTYLE:
         str = lookupString_1FC878(str_kT_cmnSlopeCaps);
         break;
-    case 2:
+    case kGAMEMODE_BIGAIR:
         str = lookupString_1FC878(str_kT_cmnBigAirCaps);
         break;
-    case 3:
+    case kGAMEMODE_HALFPIPE:
         str = lookupString_1FC878(str_kT_cmnPipeCaps);
         break;
     }
     unsigned short* lineFmt = D_004A2140;
-    if (mode48 == 6)
+    if (mode48 == kGAMEMODE_PNTSCHALLENGE)
         sprintf2(line, D_0046E558, title, str);
     else
         sprintf2(line, lineFmt, title);
     cUIText_setUnicodeString(widget, line);
     widget = getObj_1FC878(overlay, str_name);
-    if (getField_1FC878((signed char*)&cBENewRaceInterface_newRace, 73) == 2)
+    if (getField_1FC878((signed char*)&cBENewRaceInterface_newRace, 73) == kGAMEPATH_MULTIPLAYER)
         cUIText_setAsciiString((cUIText*)widget, func_00146F88(iface1, 0));
     else
         cUIText_setAsciiString((cUIText*)widget, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
@@ -1768,7 +1774,7 @@ extern "C" void func_001FC878(void* self)
         cUIState_showObjSafe(self, str_obj2);
         cUIState_showObjSafe(self, str_bullet2);
         widget = getObj_1FC878(overlay, str_obj2);
-        if (mode48 == 1)
+        if (mode48 == kGAMEMODE_SLOPESTYLE)
             cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNCollPointAndMulti));
         else
             cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNCollPointIcons));
@@ -1780,7 +1786,7 @@ extern "C" void func_001FC878(void* self)
     }
     widget = getObj_1FC878(overlay, str_title1);
     cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_CMNStateMultiPlay));
-    if (getField_1FC878((signed char*)&cBENewRaceInterface_newRace, 73) == 2)
+    if (getField_1FC878((signed char*)&cBENewRaceInterface_newRace, 73) == kGAMEPATH_MULTIPLAYER)
         strcpy(rider, func_00146F88(iface1, 1));
     else
         strcpy(rider, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 1)));
@@ -1796,12 +1802,12 @@ extern "C" void func_001FC878(void* self)
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_screendata1);
     }
-    if (mode4A == 4)
+    if (mode4A == kGAMEEVENT_RIVALTIME)
         cUIText_setUnicodeStringByID(status, GetHashValue32(str_kT_HELPFirstToBottom));
     else
         cUIText_setUnicodeStringByID(status, GetHashValue32(str_kT_OVRCMNBeatOppMaxTrick));
     widget = getObj_1FC878(overlay, str_topScoreLabel);
-    if (mode4A == 4 || mode4A == 0)
+    if (mode4A == kGAMEEVENT_RIVALTIME || mode4A == kGAMEEVENT_RACE)
     {
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNRecordTime));
         void* record = func_00155130(iface8, 0);
@@ -1843,8 +1849,9 @@ struct sVec3_1FCEC0
 /**
  * Shifts the two-player pre-event overlay's groups for the event kind when its transition starts.
  *
- * Only when @p msg is nonzero. For cGameMode (cBENewRaceInterface_newRace, newRace.cGameMode) 2 or 3 it moves "screendata" 130
- * units right; for 5 or 6 it moves "vsGroup" by +40 and "objectives" by +67 on y and "topScoreGroup" by -48 on y (the
+ * Only when @p msg is nonzero. For cGameMode (cBENewRaceInterface_newRace, newRace.cGameMode) kGAMEMODE_BIGAIR or
+ * kGAMEMODE_HALFPIPE it moves "screendata" 130 units right; for kGAMEMODE_TIMECHALLENGE or kGAMEMODE_PNTSCHALLENGE it
+ * moves "vsGroup" by +40 and "objectives" by +67 on y and "topScoreGroup" by -48 on y (the
  * object's mPosition). BE interface 0 is fetched and unused.
  *
  * @param msg  nonzero on the transition the layout is applied for (the first-time flag)
@@ -1856,13 +1863,13 @@ extern "C" int func_001FCEC0(cOVState* self, void* msg)
     {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int mode = cBENewRaceInterface_newRace.cGameMode;
-    if (mode == 2 || mode == 3)
+    if (mode == kGAMEMODE_BIGAIR || mode == kGAMEMODE_HALFPIPE)
     {
         cUIThing* group = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_screendata));
         sVec3_1FCEC0 position = *(sVec3_1FCEC0*)&group->mPosition;
         *(sVec3_1FCEC0*)&group->mPosition = sVec3_1FCEC0(position.x + 130.0f, position.y, position.z);
     }
-    else if (mode == 5 || mode == 6)
+    else if (mode == kGAMEMODE_TIMECHALLENGE || mode == kGAMEMODE_PNTSCHALLENGE)
     {
         cUIThing* group = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vsGroup));
         sVec3_1FCEC0 position = *(sVec3_1FCEC0*)&group->mPosition;
@@ -1975,18 +1982,18 @@ static inline int sendHash_1FD190(char* name)
  * template (cUITemplate_MAP_setupMenus, cUITemplate_MAP_setupPeakGoals), cOVState_REWARDS_onGainTransition,
  * cOVState_TOPTIMES_onCreateScreen and func_001FD320 use it.
  *
- * @param id  the event id, 6 to 11 (cBENewRaceInterface_newRace's cGameEvent)
+ * @param id  the event id, kGAMEEVENT_TIME_PEAK1 to kGAMEEVENT_POINTS_PEAK3 (cBENewRaceInterface_newRace's cGameEvent)
  * @return the 16-bit string (as an int), or 0 for any other id
  */
 extern "C" int func_001FD190(int id)
 {
     switch (id) {
-    case 6: return sendHash_1FD190(str_kT_EventPk1Race_b);
-    case 7: return sendHash_1FD190(str_kT_EventPk2Race_b);
-    case 8: return sendHash_1FD190(str_kT_EventAllPeakRace_b);
-    case 9: return sendHash_1FD190(str_kT_EventPk1Jam_b);
-    case 10: return sendHash_1FD190(str_kT_EventPk2Jam_b);
-    case 11: return sendHash_1FD190(str_kT_EventAllPeakJam_b);
+    case kGAMEEVENT_TIME_PEAK1: return sendHash_1FD190(str_kT_EventPk1Race_b);
+    case kGAMEEVENT_TIME_PEAK2: return sendHash_1FD190(str_kT_EventPk2Race_b);
+    case kGAMEEVENT_TIME_PEAK3: return sendHash_1FD190(str_kT_EventAllPeakRace_b);
+    case kGAMEEVENT_POINTS_PEAK1: return sendHash_1FD190(str_kT_EventPk1Jam_b);
+    case kGAMEEVENT_POINTS_PEAK2: return sendHash_1FD190(str_kT_EventPk2Jam_b);
+    case kGAMEEVENT_POINTS_PEAK3: return sendHash_1FD190(str_kT_EventAllPeakJam_b);
     }
     return 0;
 }
@@ -2085,15 +2092,17 @@ static inline void* getObj_1FD320(cUIState* self, char* name)
  * Fills the rival-challenge pre-event overlay's texts when its transition starts: title, challenger, objectives and
  * target.
  *
- * Only when @p msg is nonzero. Works from cBENewRaceInterface_newRace's cGameEvent. "name" first gets the player's
+ * Only when @p msg is nonzero. Works from cBENewRaceInterface_newRace's cGameEvent (4 kGAMEEVENT_RIVALTIME, 5
+ * kGAMEEVENT_RIVALPOINTS, 6-8 kGAMEEVENT_TIME_PEAK1-3, 9-11 kGAMEEVENT_POINTS_PEAK1-3). "name" first gets the player's
  * short character name, then (wrapped) the challenge line: kT_OVRCMNChallengeBy (events 4-5), kT_HELPChalPeakRace (6-8)
  * or kT_HELPChalPeakJam (9-11) formatted with the rival's name (cBECharacterInterface_getShortNameByCharacter of cBENewRaceInterface_getRival), which replaces it.
  * "title1" reads kT_TITLERivalChallenge; "title2" gets "<location> - <kT_cmnRaceCaps_b>" (event 4), "<location> - Jam"
  * (5) or the event name func_001FD190 (6-11).
  *
  * Objectives ("obj1", "obj2"): event 4 kT_HELPFirstToBottom and kT_HELPBeatChallengePeakRace, event 5
- * kT_HELPGetToBottomPoints and kT_HELPBeatChallPeakJam; both hide "obj2" and "bullet2" on game path 1 or when the peak
- * event (6-8 for race, 9-11 for jam) of the current location (0xE, 0xF, 0x10) is already unlocked
+ * kT_HELPGetToBottomPoints and kT_HELPBeatChallPeakJam; both hide "obj2" and "bullet2" on kGAMEPATH_SINGLEEVENT or when
+ * the peak event (6-8 for race, 9-11 for jam) of the current location (kLOCATION_ABC1, kLOCATION_DBC2, kLOCATION_EBC3)
+ * is already unlocked
  * (cBENewPlayerInterface_isEventLocked), and hide "timescoretobeat". Events 6-8 show "<Time to beat:> <time>"
  * (kT_OVRCMNTimeToBeatColon and SSXApp->GameModeMan's uiTimeLimit / 60 as a time string, func_0020A1A8), with
  * kT_HELPRaceToBottom and kT_HELPBeatPostedTime, or kT_HELPBeatPostedTimePass while that peak (1 for event 6, 2 for
@@ -2124,24 +2133,24 @@ extern "C" int func_001FD320(cUIState* self, void* msg)
         cUIText_setAsciiString((cUIText*)widget, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         widget = getObj_1FD320(self, str_title2);
         switch (mode) {
-        case 4:
+        case kGAMEEVENT_RIVALTIME:
             func_002C2540_r(title, cBENewRaceInterface_getLocationName1(iface0));
             func_002C2540_r(fmt, (char*)D_004A2140);
             sprintf1(out, fmt, title, lookupString_1FD320(str_kT_cmnRaceCaps_b));
             cUIText_setUnicodeString(widget, out);
             break;
-        case 5:
+        case kGAMEEVENT_RIVALPOINTS:
             func_002C2540_r(title, cBENewRaceInterface_getLocationName1(iface0));
             func_002C2540_r(fmt, (char*)D_0046E558);
             sprintf1(out, fmt, title);
             cUIText_setUnicodeString(widget, out);
             break;
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
+        case kGAMEEVENT_TIME_PEAK1:
+        case kGAMEEVENT_TIME_PEAK2:
+        case kGAMEEVENT_TIME_PEAK3:
+        case kGAMEEVENT_POINTS_PEAK1:
+        case kGAMEEVENT_POINTS_PEAK2:
+        case kGAMEEVENT_POINTS_PEAK3:
             cUIText_setUnicodeString(widget, (unsigned short*)func_001FD190(mode));
             break;
         }
@@ -2160,33 +2169,39 @@ extern "C" int func_001FD320(cUIState* self, void* msg)
         sprintf1(line, lineFmt, name);
         cUIText_setUnicodeStringWrap(getObj_1FD320(self, str_name), line);
         switch (mode) {
-        case 4:
+        case kGAMEEVENT_RIVALTIME:
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPFirstToBottom));
             cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatChallengePeakRace));
-            if (getField_1FD320((signed char*)&cBENewRaceInterface_newRace, 73) == 1
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 6))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 7))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 8))) {
+            if (getField_1FD320((signed char*)&cBENewRaceInterface_newRace, 73) == kGAMEPATH_SINGLEEVENT
+                || (cBENewRaceInterface_getLocationID(iface0) == kLOCATION_ABC1
+                    && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 6))
+                || (cBENewRaceInterface_getLocationID(iface0) == kLOCATION_DBC2
+                    && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 7))
+                || (cBENewRaceInterface_getLocationID(iface0) == kLOCATION_EBC3
+                    && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 8))) {
                 cUIState_hideObjSafe(self, str_obj2);
                 cUIState_hideObjSafe(self, str_bullet2);
             }
             cUIState_hideObjSafe(self, str_timescoretobeat);
             break;
-        case 5:
+        case kGAMEEVENT_RIVALPOINTS:
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPGetToBottomPoints));
             cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatChallPeakJam));
-            if (getField_1FD320((signed char*)&cBENewRaceInterface_newRace, 73) == 1
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 9))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 10))
-                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 11))) {
+            if (getField_1FD320((signed char*)&cBENewRaceInterface_newRace, 73) == kGAMEPATH_SINGLEEVENT
+                || (cBENewRaceInterface_getLocationID(iface0) == kLOCATION_ABC1
+                    && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 9))
+                || (cBENewRaceInterface_getLocationID(iface0) == kLOCATION_DBC2
+                    && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 10))
+                || (cBENewRaceInterface_getLocationID(iface0) == kLOCATION_EBC3
+                    && !cBENewPlayerInterface_isEventLocked(iface1, 0, cBELibrary_getCharacterID(0), 11))) {
                 cUIState_hideObjSafe(self, str_obj2);
                 cUIState_hideObjSafe(self, str_bullet2);
             }
             cUIState_hideObjSafe(self, str_timescoretobeat);
             break;
-        case 6:
-        case 7:
-        case 8: {
+        case kGAMEEVENT_TIME_PEAK1:
+        case kGAMEEVENT_TIME_PEAK2:
+        case kGAMEEVENT_TIME_PEAK3: {
             widget = getObj_1FD320(self, str_timescoretobeat);
             float mins = (float)stats->uiTimeLimit * 0.01666666753590107f;
             void* wholeSeconds = fptoui(mins);
@@ -2196,22 +2211,26 @@ extern "C" int func_001FD320(cUIState* self, void* msg)
             sprintf1(text, title, labelText, num);
             cUIText_setUnicodeStringWrap(widget, text);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPRaceToBottom));
-            if (mode == 8 || (mode == 7 && !cBERewardInterface_isPeakLocked(iface13, 0, 2)) || (mode == 6 && !cBERewardInterface_isPeakLocked(iface13, 0, 1)))
+            if (mode == kGAMEEVENT_TIME_PEAK3
+                || (mode == kGAMEEVENT_TIME_PEAK2 && !cBERewardInterface_isPeakLocked(iface13, 0, 2))
+                || (mode == kGAMEEVENT_TIME_PEAK1 && !cBERewardInterface_isPeakLocked(iface13, 0, 1)))
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedTime));
             else
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedTimePass));
             break;
         }
-        case 9:
-        case 10:
-        case 11: {
+        case kGAMEEVENT_POINTS_PEAK1:
+        case kGAMEEVENT_POINTS_PEAK2:
+        case kGAMEEVENT_POINTS_PEAK3: {
             int n = (int)stats->uiPointTarget;
             unsigned short* labelText = lookupString_1FD320(str_kT_OVRCMNScoreToBeatColon);
             func_002C2540_r(title, str_pct_s_pct_d_c);
             sprintf1(num, title, labelText, n);
             cUIText_setUnicodeStringWrap(getObj_1FD320(self, str_timescoretobeat), num);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPMakeWayDnSlope));
-            if (mode == 11 || (mode == 10 && !cBERewardInterface_isPeakLocked(iface13, 0, 2)) || (mode == 9 && !cBERewardInterface_isPeakLocked(iface13, 0, 1)))
+            if (mode == kGAMEEVENT_POINTS_PEAK3
+                || (mode == kGAMEEVENT_POINTS_PEAK2 && !cBERewardInterface_isPeakLocked(iface13, 0, 2))
+                || (mode == kGAMEEVENT_POINTS_PEAK1 && !cBERewardInterface_isPeakLocked(iface13, 0, 1)))
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedScore));
             else
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedScorePass));
@@ -2227,16 +2246,16 @@ extern "C" int func_001FD320(cUIState* self, void* msg)
 INCLUDE_ASM("fe/ovstatepause", func_001FDB78);
 #ifdef SKIP_ASM
 /**
- * Answers the rival-challenge pre-event overlay's menu events: feedback 0x101 (animation and sound) for event 6, else
- * 0.
+ * Answers the rival-challenge pre-event overlay's menu events: feedback 0x101 (animation and sound) for kONNEXT,
+ * else 0.
  *
  * @param menu  the menu (unused)
- * @param event  the menu event
- * @return 0x101 for event 6 (back), 0 otherwise
+ * @param event  the menu event (tUIMenuEvent)
+ * @return 0x101 for kONNEXT, 0 otherwise
  */
 extern "C" int func_001FDB78(void* self, int menu, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -2249,7 +2268,7 @@ extern "C" void cSSXAudio_StartEventWithNoStartGate(void* snd);
 /**
  * Starts the rival challenge when the pre-event overlay's button is selected.
  *
- * On event 5 (select) with a widget: sets cOVStateManager_mStatus to 3 (close the overlay), sets mOverlayDone of
+ * On kONNEXT (select) with a widget: sets cOVStateManager_mStatus to 3 (close the overlay), sets mOverlayDone of
  * the current game state (SSXApp->Game->mCurrentState) to 1 as the overlay manager does to let the game state continue,
  * calls cSSXAudio_StartEventWithNoStartGate on the sound system (cAudioInterface_bxAudio()) and pops the top state of
  * the engine's state stack (cUIStateStack_pop(&mpEngine->mStateStack, 1)).
@@ -2259,7 +2278,7 @@ extern "C" void cSSXAudio_StartEventWithNoStartGate(void* snd);
  */
 extern "C" void func_001FDB88(cUIState* self, int widget, int event)
 {
-    if (widget != 0 && event == 5) {
+    if (widget != 0 && event == cUIState::kONNEXT) {
         cOVStateManager_mStatus = 3;
         (((SSXApp)->Game)->mCurrentState)->mOverlayDone = 1;
         cSSXAudio_StartEventWithNoStartGate(cAudioInterface_bxAudio());
@@ -2391,7 +2410,7 @@ extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
  */
 extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(cOVState_SAVEREPLAY* self)
 {
-    if (self->mIsReplayAlloc == 1) {
+    if (self->mIsReplayAlloc == true) {
         cReplay_purgeSave(SSXApp->Game->Replay);
         self->mIsReplayAlloc = 0;
     }
@@ -2531,8 +2550,8 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
     if (((cState_DF40*)self)->displayFileOK()) {
         if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (self->mScreenStatus != 3) {
-            ((cState_DF40*)self)->triggerDisplayState(3);
+        } else if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
+            ((cState_DF40*)self)->triggerDisplayState(cFEMemCard::kDISPLAY_ON);
         }
     }
     if (((cState_DF40*)self)->displayFileOK()) {
@@ -2576,16 +2595,18 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
                 widget->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 1)
+            == cFEMemCard::kNoNextDevice)
             getObj_DF40(self, str_arrw_left_b)->setVisible(0);
         else
             getObj_DF40(self, str_arrw_left_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, mp->mSelectedDevice, 0)
+            == cFEMemCard::kNoNextDevice)
             getObj_DF40(self, str_arrw_right_b)->setVisible(0);
         else
             getObj_DF40(self, str_arrw_right_b)->setVisible(1);
     }
-    if (self->mScreenStatus != 3) {
+    if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
             cUIText* widget = getObj_DF40(self, name);
@@ -2690,17 +2711,18 @@ extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMC
 /**
  * Handles the save-replay overlay's file-slot buttons: save to a slot, back out, or ask to delete a save.
  *
- * Ignores events without a widget or while busy (+0x1A8, mIsProcessing). Event 5 (select), when the screen is not
- * leaving (mState +0x1C0 != 6) and the display state (+0x214) is 3: stores the widget's slot (miMiscData) in +0x1C4
- * (mSlot) and the manager's mFileCursor, releases a held replay buffer (+0x1C8, cReplay_purgeSave on the replay), starts
- * the replay save with cMCOverlayManager_writeSetFileType(manager, 0, -1) (On Tour writeSetFileType, file type 0 = replay), and sets
- * mIsProcessing, mIsSavePressed (+0x1DC) and mState 3. Event 6 (back) sets mIsCancelPressed (+0x1E4), resets the
- * manager to state 0 (vtable slot 1, cMCOverlayManager_SetState) when mState is 0-2, and sets mState 6. Event 7, on a
- * usable device (mpMemCard slot 54) in mState 1 for a slot holding a save (cPS2MemCard_HasFileName): mIsProcessing,
- * mState 4, cMCOverlayManager_SetAction(0) and manager state 0x18 (On Tour kMCOverlay_DeleteConfirm).
+ * Ignores events without a widget or while busy (+0x1A8, mIsProcessing). kONNEXT (select), when the screen is not
+ * leaving (mState +0x1C0 != kDONE) and the display state (+0x214) is kDISPLAY_ON: stores the widget's slot (miMiscData)
+ * in +0x1C4 (mSlot) and the manager's mFileCursor, releases a held replay buffer (+0x1C8, cReplay_purgeSave on the
+ * replay), starts the replay save with cMCOverlayManager_writeSetFileType(manager, 0, -1) (On Tour writeSetFileType,
+ * file type 0 = replay), and sets mIsProcessing, mIsSavePressed (+0x1DC) and mState 3 (kSAVING). kONPREV (back) sets
+ * mIsCancelPressed (+0x1E4), resets the manager to state 0 (vtable slot 1, cMCOverlayManager_SetState) when mState is
+ * kSTART, kCHECKING or kSKIP, and sets mState kDONE. kONOPTION, on a usable device (mpMemCard slot 54) in mState
+ * kCHECKING for a slot holding a save (cPS2MemCard_HasFileName): mIsProcessing, mState kDELETING,
+ * cMCOverlayManager_SetAction(0) and manager state 0x18 (On Tour kMCOverlay_DeleteConfirm).
  *
  * @param msg  the widget the event is for (its mMiscData is the file slot)
- * @param type  the widget event: 5 select, 6 back, 7 delete
+ * @param type  the widget event: kONNEXT select, kONPREV back, kONOPTION delete
  */
 extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, cUIThing* msg, unsigned int type)
 {
@@ -2710,14 +2732,14 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, cUI
         return;
     switch (type)
     {
-    case 5:
+    case cUIState::kONNEXT:
     {
         int one = 1;
-        if (self->mState == 6)
+        if (self->mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         int st = self->mScreenStatus;
-        if (st != 3)
+        if (st != cFEMemCard::kDISPLAY_ON)
             return;
         int fileSlot = msg->mMiscData;
         self->mSlot = fileSlot;
@@ -2734,24 +2756,24 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, cUI
         self->mState = st;
         break;
     }
-    case 6:
+    case cUIState::kONPREV:
     {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mIsProcessing == 1)
+        if (self->mIsProcessing == true)
             return;
         int cardState = self->mState;
-        if (cardState == 6)
+        if (cardState == cFEMemCard::kDONE)
             return;
         self->mIsCancelPressed = 1;
-        if (cardState == 0 || cardState == 2 || cardState == 1)
+        if (cardState == cFEMemCard::kSTART || cardState == cFEMemCard::kSKIP || cardState == cFEMemCard::kCHECKING)
             mp->SetState(0);
-        self->mState = 6;
+        self->mState = cFEMemCard::kDONE;
         break;
     }
-    case 7:
+    case cUIState::kONOPTION:
     {
         int one = 1;
-        if (self->mState == 6)
+        if (self->mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (!mp->mpMemCard->IsActionable(mp->mSelectedDevice))
@@ -2765,7 +2787,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, cUI
         if (!mp->mpMemCard->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
-        self->mState = 4;
+        self->mState = cFEMemCard::kDELETING;
         cMCOverlayManager_SetAction_v(mp, 0);
         mp->SetState(0x18);
         break;
@@ -2783,7 +2805,7 @@ extern "C" void cFEMemCard_onPopupEvent(void* self, void* a1, int key);
 /**
  * Handles the save-replay overlay's popup events: frees the replay buffer once the save-done popup closes.
  *
- * On event 22 while the popup type (+0x19C, mPopupType) is 5 (save done), releases the replay save buffer
+ * On kONPOPUPDESTROY while the popup type (+0x19C, mPopupType) is kPOP_SAVEDONE, releases the replay save buffer
  * (cReplay_purgeSave on SSXApp->Game->Replay) and clears +0x1C8 (mIsReplayAlloc); then hands every event to the memory-card
  * base handler cFEMemCard_onPopupEvent.
  *
@@ -2792,8 +2814,8 @@ extern "C" void cFEMemCard_onPopupEvent(void* self, void* a1, int key);
  */
 extern "C" void cOVState_SAVEREPLAY_onPopupEvent(cOVState_SAVEREPLAY* self, cUIState* popup, int key)
 {
-    if (key == 22) {
-        if (self->mPopupType == 5) {
+    if (key == cUIState::kONPOPUPDESTROY) {
+        if (self->mPopupType == cFEMemCard::kPOP_SAVEDONE) {
             cReplay_purgeSave(SSXApp->Game->Replay);
             self->mIsReplayAlloc = 0;
         }
@@ -3044,8 +3066,8 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
     if (((cState_ECA0*)self)->displayFileOK()) {
         if (!mp->mpMemCard->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (self->mScreenStatus != 3) {
-            ((cState_ECA0*)self)->triggerDisplayState(3);
+        } else if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
+            ((cState_ECA0*)self)->triggerDisplayState(cFEMemCard::kDISPLAY_ON);
         }
     }
     if (((cState_ECA0*)self)->displayFileOK()) {
@@ -3080,16 +3102,18 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
             widget->setUseStaticColour(1);
             widget->setStatic(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 1)
+            == cFEMemCard::kNoNextDevice)
             getObj_ECA0(self, str_arrw_left_b)->setVisible(0);
         else
             getObj_ECA0(self, str_arrw_left_b)->setVisible(1);
-        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, mp->mSelectedDevice, 0)
+            == cFEMemCard::kNoNextDevice)
             getObj_ECA0(self, str_arrw_right_b)->setVisible(0);
         else
             getObj_ECA0(self, str_arrw_right_b)->setVisible(1);
     }
-    if (self->mScreenStatus != 3) {
+    if (self->mScreenStatus != cFEMemCard::kDISPLAY_ON) {
         sprintf(name, str_pct_dmemory_card_b, 1);
         cUIText* widget = getObj_ECA0(self, name);
         widget->setUseStaticColour(0);
@@ -3192,16 +3216,18 @@ extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMC
  * Handles the save-records overlay's file-slot buttons: save the settings, back out, or ask to delete a save.
  *
  * Same as cOVState_SAVEREPLAY_onWidgetEvent without the replay buffer. Ignores events without a widget or while busy (+0x1A8,
- * mIsProcessing). Event 5 (select), when mState (+0x1C0) is not 6 and the display state (+0x214) is 3: stores the
+ * mIsProcessing). kONNEXT (select), when mState (+0x1C0) is not kDONE and the display state (+0x214) is kDISPLAY_ON:
+ * stores the
  * widget's slot (miMiscData) in +0x1C4 (mSlot) and the manager's mFileCursor, starts the save with
  * cMCOverlayManager_writeSetFileType(manager, 2, -1) (On Tour writeSetFileType, file type 2 = settings) and sets mIsProcessing,
- * mIsSavePressed (+0x1DC) and mState 3. Event 6 (back) sets mIsCancelPressed (+0x1E4), resets the manager to state 0
- * (vtable slot 1, cMCOverlayManager_SetState) when mState is 0-2, and sets mState 6. Event 7, on a usable device
- * (mpMemCard slot 54) in mState 1 for a slot holding a save (cPS2MemCard_HasFileName): mIsProcessing, mState 4,
+ * mIsSavePressed (+0x1DC) and mState 3 (kSAVING). kONPREV (back) sets mIsCancelPressed (+0x1E4), resets the manager
+ * to state 0 (vtable slot 1, cMCOverlayManager_SetState) when mState is kSTART, kCHECKING or kSKIP, and sets mState
+ * kDONE. kONOPTION, on a usable device (mpMemCard slot 54) in mState kCHECKING for a slot holding a save
+ * (cPS2MemCard_HasFileName): mIsProcessing, mState kDELETING,
  * cMCOverlayManager_SetAction(0) and manager state 0x18 (On Tour kMCOverlay_DeleteConfirm).
  *
  * @param msg  the widget the event is for (its mMiscData is the file slot)
- * @param type  the widget event: 5 select, 6 back, 7 delete
+ * @param type  the widget event: kONNEXT select, kONPREV back, kONOPTION delete
  */
 extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, cUIThing* msg, unsigned int type)
 {
@@ -3211,14 +3237,14 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, c
         return;
     switch (type)
     {
-    case 5:
+    case cUIState::kONNEXT:
     {
         int one = 1;
-        if (self->mState == 6)
+        if (self->mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         int st = self->mScreenStatus;
-        if (st != 3)
+        if (st != cFEMemCard::kDISPLAY_ON)
             return;
         int fileSlot = msg->mMiscData;
         self->mSlot = fileSlot;
@@ -3230,24 +3256,24 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, c
         self->mState = st;
         break;
     }
-    case 6:
+    case cUIState::kONPREV:
     {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        if (self->mIsProcessing == 1)
+        if (self->mIsProcessing == true)
             return;
         int cardState = self->mState;
-        if (cardState == 6)
+        if (cardState == cFEMemCard::kDONE)
             return;
         self->mIsCancelPressed = 1;
-        if (cardState == 0 || cardState == 2 || cardState == 1)
+        if (cardState == cFEMemCard::kSTART || cardState == cFEMemCard::kSKIP || cardState == cFEMemCard::kCHECKING)
             mp->SetState(0);
-        self->mState = 6;
+        self->mState = cFEMemCard::kDONE;
         break;
     }
-    case 7:
+    case cUIState::kONOPTION:
     {
         int one = 1;
-        if (self->mState == 6)
+        if (self->mState == cFEMemCard::kDONE)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         if (!mp->mpMemCard->IsActionable(mp->mSelectedDevice))
@@ -3261,7 +3287,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, c
         if (!mp->mpMemCard->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
-        self->mState = 4;
+        self->mState = cFEMemCard::kDELETING;
         cMCOverlayManager_SetAction_v(mp, 0);
         mp->SetState(0x18);
         break;
@@ -3360,12 +3386,12 @@ extern "C" void cBERewardInterface_clearUserAwards(void* iface);
  * interface (0xD).
  *
  * @param pWidget  the item; ignored when null
- * @param key  the widget event; only 5 (Cross) acts
+ * @param key  the widget event; only kONNEXT (Cross) acts
  */
 extern "C" void cOVState_REWARDS_onWidgetEvent(cOVState_REWARDS* self, void* pWidget, int key)
 {
     if (pWidget != 0) {
-        if (key == 5) {
+        if (key == cUIState::kONNEXT) {
             cOVStateManager_mStatus = 1;
             cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 13));
         }
@@ -3382,28 +3408,30 @@ extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* self, int a);
 /**
  * Handles the rewards menu's notifications: refills the rows on a scroll and picks the button feedback.
  *
- * Event 4 (scroll offset changed) refills the rows from @p index (cOVState_REWARDS_updateMenu). Triangle,
- * Square and Circle (7-9) give 0; scroll up / down (2 / 3) give 0 with fewer than 10 rewards (+0x9C).
+ * kSCROLLUPDATE (scroll offset changed) refills the rows from @p index (cOVState_REWARDS_updateMenu). Triangle,
+ * Square and Circle (kONPREVIOUS, kONOPTION, kONMISC) give 0; kSCROLLUP / kSCROLLDOWN give 0 with fewer than 10
+ * rewards (+0x9C).
  *
  * @param id  the menu (On Tour pMenu); unused
- * @param event  the menu event (2 / 3 scrolled, 4 offset changed, 5 selection changed, 6-9 buttons)
- * @param index  the new scroll offset for events 2-5
- * @return 1 for event 4, 0 as above, else 0x101 (animation and sound)
+ * @param event  the menu event (tUIMenuEvent: kSCROLLUP / kSCROLLDOWN scrolled, kSCROLLUPDATE offset changed,
+ *               kSCROLLCHANGE selection changed, kONNEXT .. kONMISC buttons)
+ * @param index  the new scroll offset for kSCROLLUP .. kSCROLLCHANGE
+ * @return 1 for kSCROLLUPDATE, 0 as above, else 0x101 (animation and sound)
  */
 extern "C" int cOVState_REWARDS_onWidgetMenu(cOVState_REWARDS* self, int id, int event, int index)
 {
     switch (event) {
-    case 4:
+    case cUIMenu::kSCROLLUPDATE:
         self->updateMenu(index);
         return 1;
-    case 7: case 8: case 9:
+    case cUIMenu::kONPREVIOUS: case cUIMenu::kONOPTION: case cUIMenu::kONMISC:
         return 0;
-    case 2: case 3:
+    case cUIMenu::kSCROLLUP: case cUIMenu::kSCROLLDOWN:
         if (self->mItemSize < 10) {
             return 0;
         }
         /* fall through */
-    case 5: case 6:
+    case cUIMenu::kSCROLLCHANGE: case cUIMenu::kONNEXT:
         break;
     }
     return 257;
@@ -3526,8 +3554,9 @@ static inline unsigned short* lookupString_1FFF78(char* name)
  * Fills in the rewards overlay's event title and congratulation text the first time it is shown.
  *
  * Runs while mDoneTransition (+0x48) is 0, then sets it. "title_rewardlisting" names the event: the peak
- * event title (func_001FD190) for cGameEvent 6-11, "%S - Jam" for 5, else "%S - %s" with the location name
- * and the mode label (cGameMode 0 / 5 race, 1 slopestyle, 2 big air, 3 pipe). "1text" gets
+ * event title (func_001FD190) for the peak events (cGameEvent kGAMEEVENT_TIME_PEAK1 .. kGAMEEVENT_POINTS_PEAK3), "%S -
+ * Jam" for kGAMEEVENT_RIVALPOINTS, else "%S - %s" with the location name and the mode label (cGameMode
+ * kGAMEMODE_RACE / kGAMEMODE_TIMECHALLENGE race, then slopestyle, big air, pipe). "1text" gets
  * kT_OVRCMNCongratUser with the human rider's short name.
  *
  * @return always 0
@@ -3543,31 +3572,30 @@ extern "C" int cOVState_REWARDS_onGainTransition(cOVState_REWARDS* self)
         void* board = cBE_getInterface_Fv(cBE_getBE(), 2);
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-        signed char* newRace = (signed char*)&cBENewRaceInterface_newRace;
-        int mode = newRace[0x48];
-        int kind = newRace[0x4A];
+        int mode = cBENewRaceInterface_newRace.cGameMode;
+        int kind = cBENewRaceInterface_newRace.cGameEvent;
         switch (kind) {
-        case 6 ... 11:
+        case kGAMEEVENT_TIME_PEAK1 ... kGAMEEVENT_POINTS_PEAK3:
             strcpy1(result, (unsigned short*)func_001FD190(kind));
             break;
-        case 5:
+        case kGAMEEVENT_RIVALPOINTS:
             func_002C2540(fmt, str_pct_S_Jam);
             sprintf1(result, fmt, cBENewRaceInterface_getLocationName1(race));
             break;
         default: {
             unsigned short* label = 0;
             switch (mode) {
-            case 0:
-            case 5:
+            case kGAMEMODE_RACE:
+            case kGAMEMODE_TIMECHALLENGE:
                 label = lookupString_1FFF78(str_kT_cmnRaceCaps_b);
                 break;
-            case 1:
+            case kGAMEMODE_SLOPESTYLE:
                 label = lookupString_1FFF78(str_kT_cmnSlopeCaps);
                 break;
-            case 2:
+            case kGAMEMODE_BIGAIR:
                 label = lookupString_1FFF78(str_kT_cmnBigAirCaps);
                 break;
-            case 3:
+            case kGAMEMODE_HALFPIPE:
                 label = lookupString_1FFF78(str_kT_cmnPipeCaps);
                 break;
             }

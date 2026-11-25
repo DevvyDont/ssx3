@@ -181,7 +181,7 @@ extern char str_131cheat_char[];
 static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s); }
 
 /**
- * Takes the result of the rider-details popups when one closes (event 0x16): a cheat character or a name.
+ * Takes the result of the rider-details popups when one closes (kONPOPUPDESTROY): a cheat character or a name.
  *
  * From "131cheat_char" a confirmed choice (+0x74) is stored in the player table (cBENewPlayerInterface_setPlayerCheatCharID) and
  * committed; from the keyboard (hash name 0) an accepted, non-empty text becomes the player's name
@@ -193,7 +193,7 @@ static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s);
 extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIState* item, int msg)
 {
     cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    if (msg == 22) {
+    if (msg == cUIState::kONPOPUPDESTROY) {
         if (Is_001835F8(item->mHashName, str_131cheat_char)) {
             int cheatCharId = ((cFEStateCheatCharSelect*)item)->mCheatCharID;
             if (((cFEStateCheatCharSelect*)item)->mDone != 0) {
@@ -242,9 +242,9 @@ extern const char str_FEOptions[];
 /**
  * Handles the rider-details options: edit the name, pick a cheat character, other screens, back and options.
  *
- * Event 5 on option 8 opens an 8-character keyboard (several symbol keys excluded) holding the player's name;
+ * kONNEXT on option 8 opens an 8-character keyboard (several symbol keys excluded) holding the player's name;
  * on option 6 it opens "cFEStateCheatCharSelect" when the character has cheat characters; other options push
- * the custom interface's next state. Event 6 pushes the previous state; 7 opens "FEOptions" (mode 1).
+ * the custom interface's next state. kONPREV pushes the previous state; kONOPTION opens "FEOptions" (mode 1).
  *
  * @param item  the widget (ignored when 0); its mMiscData is the option
  * @param msg  the widget event
@@ -253,7 +253,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
 {
     if (((char*)item) == 0) return;
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int sub = item->mMiscData;
         if (sub == 8) {
             cKeyboardPopup* w = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
@@ -296,7 +296,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         cFEStateCharSetup_show3DCharacter(((char*)self), 0);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* obj = self->mpEngine->mpCustom;
         void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -305,7 +305,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         }
         break;
     }
-    case 7: {
+    case cUIState::kONOPTION: {
         cUIState* w = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
         w->mAttrState = (w->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
         cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, w, 0, 0);

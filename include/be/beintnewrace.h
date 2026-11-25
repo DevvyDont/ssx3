@@ -220,6 +220,13 @@ enum eBELocationID {
     kLOCATION_HUB_D = 20, kLOCATION_HUB_E = 21, kLOCATION_DEBUG = 22, kMAX_LOCATIONS = 23
 };
 
+// A peak (tBELocationDB::segmentID, cUITemplate_MAP::mPeak). [O] On Tour's enum eBEPeakID, names and values; [R]
+// retail's locationDB segment ids are 0 .. 2 (the 17 tracks: 0, 0, 1, 1, 2 ...); [U] the map's peak 0 .. 2 picks
+// kGAMEEVENT_TIME_PEAK1 .. 3 (cUITemplate_MAP_isMapEventCompleted).
+enum eBEPeakID {
+    kPEAK_1 = 0, kPEAK_2 = 1, kPEAK_3 = 2, kPEAK_NUM = 3
+};
+
 // tBELocationDB: one race location (17 tracks, 5 stations and the debug track). [O] On Tour struct tBELocationDB
 // {eBELocationID locationID; char locationName[32]; char shortName[16]; char fileName[16]; char bigfileName[32];
 // eBEPeakID segmentID; eBELocationType type; int scriptID; eLocationDifficulty difficulty;} (0x74) and the static

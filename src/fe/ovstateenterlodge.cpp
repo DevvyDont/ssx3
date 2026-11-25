@@ -16,6 +16,9 @@
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 #include "util/locale.h"
+#include "ui/uimenu.h"
+#include "ui/uiscreen.h"
+#include "fe/ovstatemanager.h"
 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onCreateScreen);
@@ -138,13 +141,13 @@ struct sSelf001F72E0 {
  * state.
  *
  * @param widget  the item (On Tour pWidget); ignored when null
- * @param msg  the widget event: 5 Cross, 6 Triangle
+ * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle
  */
 extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUIThing* widget, int msg)
 {
     if (((void*)widget) != 0) {
         switch (msg) {
-        case 5:
+        case cUIState::kONNEXT:
             ((SSXApp->Game)->mCurrentState)->mOverlayDone = 1;
             switch (widget->mMiscData) {
             case 0:
@@ -160,7 +163,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUI
                 break;
             }
             break;
-        case 6:
+        case cUIState::kONPREV:
             self->mRemovePDA = 1;
             ((SSXApp->Game)->mCurrentState)->mOverlayDone = 1;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
@@ -293,11 +296,11 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetMenu);
  *
  * @param pMenu  the menu (On Tour pMenu); unused
  * @param Event  the menu event (6 Cross)
- * @return 0x101 for event 6, else 0
+ * @return 0x101 for kONNEXT, else 0
  */
 extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(cOVState_BIGCHALLENGE_START* self, int pMenu, int Event)
 {
-    return Event == 6 ? 257 : 0;
+    return Event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -330,7 +333,7 @@ extern int cPauseState_FlagsTable[];
  * restoring the pause mask cPauseState_Flags.
  *
  * @param item  the selected item; ignored when null
- * @param msg  the widget event: 5 Cross, 6 Triangle
+ * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle
  */
 extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_START* self, cUIThing* item, int msg)
 {
@@ -338,7 +341,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
         return;
     }
     switch (msg) {
-    case 5:
+    case cUIState::kONNEXT:
         if (item->mMiscData == 0) {
             if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
                 cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
@@ -351,7 +354,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
             cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             break;
         }
-    case 6:
+    case cUIState::kONPREV:
         ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
         cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
         cOVStateManager_mStatus = 3;
@@ -449,16 +452,16 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetCreate(cOVState_BIGCHALLENGE_
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Menu-event filter of the Big Challenge failed overlay: event 6 (back) gets 0x101 (animation and sound), every other
+ * Menu-event filter of the Big Challenge failed overlay: kONNEXT gets 0x101 (animation and sound), every other
  * event 0.
  *
  * @param menu  unused
  * @param event  the menu event
- * @return 0x101 for event 6, else 0
+ * @return 0x101 for kONNEXT, else 0
  */
 extern "C" int cOVState_BIGCHALLENGE_FAIL_onWidgetMenu(cOVState_BIGCHALLENGE_FAIL* self, int menu, int event)
 {
-    return event == 6 ? 257 : 0;
+    return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -476,11 +479,11 @@ extern char str_TransitionOut_b[];
  * Handles the Big Challenge failed overlay's buttons: retry restarts the challenge, info opens overlay 29, and anything
  * else (no, back) gives the challenge up.
  *
- * Ignored for a null @p item. Event 5 (select) on "yes_b" (misc data 0) puts the mission id (+0x9C) into
+ * Ignored for a null @p item. kONNEXT (select) on "yes_b" (misc data 0) puts the mission id (+0x9C) into
  * cWScriptMan_TheWScriptMan + 0x2A0, restarts it (cWScriptMan_restartLocalMission), pops this state from mpEngine's
  * state stack (cUIStateStack_pop), pops the pause-mode stack (cPauseState_Stack / cPauseState_StackIdx) into cPauseState_Flags and calls
  * cSSXAudio_SetBigChallengeStarting on the audio object. On "info" (misc data 2) it opens overlay 29 (cOVStateManager_triggerOverlay) and
- * stays. Event 6 (back) first plays mpScreen's "TransitionOut_b" frame when it has one. Event 6, and event 5 on any
+ * stays. kONPREV (back) first plays mpScreen's "TransitionOut_b" frame when it has one. kONPREV, and kONNEXT on any
  * other widget, then cancel the challenge (cWScriptMan_cancelLocalMission), pop the state and restore cPauseState_Flags
  * the same way. Other events do nothing.
  *
@@ -493,7 +496,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
         return;
     }
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int choice = item->mMiscData;
         if (choice == 0) {
             ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
@@ -509,9 +512,9 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
         }
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             cUIScreen_playFrame(self->mpScreen, frame & 0xFFFF, 1);
         }
         break;
@@ -624,31 +627,30 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(cOVState_TOPTIMES* self)
     cOVState_onCreateScreen(((char*)self));
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 8);
-    signed char* raceDB = (signed char*)((char*)&cBENewRaceInterface_newRace);
-    int ev = raceDB[0x4A];
-    int mode = raceDB[0x48];
+    int ev = cBENewRaceInterface_newRace.cGameEvent;
+    int mode = cBENewRaceInterface_newRace.cGameMode;
     switch (ev) {
-    case 6 ... 11:
+    case kGAMEEVENT_TIME_PEAK1 ... kGAMEEVENT_POINTS_PEAK3:
         strcpy1(wtext, func_001FD190());
         break;
-    case 5:
+    case kGAMEEVENT_RIVALPOINTS:
         func_002C2540(wfmt, str_pct_S_Jam);
         sprintf1_1F7958(wtext, wfmt, cBENewRaceInterface_getLocationName1(race));
         break;
     default: {
         int name = 0;
         switch (mode) {
-        case 0:
-        case 5:
+        case kGAMEMODE_RACE:
+        case kGAMEMODE_TIMECHALLENGE:
             name = Loc1F7958(str_kT_cmnRaceCaps_b);
             break;
-        case 1:
+        case kGAMEMODE_SLOPESTYLE:
             name = Loc1F7958(str_kT_cmnSlopeCaps);
             break;
-        case 2:
+        case kGAMEMODE_BIGAIR:
             name = Loc1F7958(str_kT_cmnBigAirCaps);
             break;
-        case 3:
+        case kGAMEMODE_HALFPIPE:
             name = Loc1F7958(str_kT_cmnPipeCaps);
             break;
         }
@@ -658,9 +660,8 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(cOVState_TOPTIMES* self)
     }
     }
     cUIText_setUnicodeString(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_xxx)), wtext);
-    signed char* newRace = (signed char*)((char*)&cBENewRaceInterface_newRace);
-    int gameMode = newRace[0x48];
-    if (gameMode == 0 || gameMode == 5) {
+    int gameMode = cBENewRaceInterface_newRace.cGameMode;
+    if (gameMode == kGAMEMODE_RACE || gameMode == kGAMEMODE_TIMECHALLENGE) {
         cUIState_showObjSafe(((char*)self), str_time);
         cUIState_hideObjSafe(((char*)self), str_points_b);
         cUIState_showObjSafe(((char*)self), str_top5record);
@@ -692,7 +693,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(cOVState_TOPTIMES* self)
         cUIText_setAsciiString_i(withText, func_00155190(stats, i - 1));
         sprintf(buf, str_time0pct_d, i);
         cUIText* timeText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
-        if (full == 1) {
+        if (full == true) {
             sprintf(line, func_0020A1A8(func_00155130(stats, i - 1)));
         } else {
             sprintf(line, D_004A2138, func_00155130(stats, i - 1));
@@ -789,7 +790,7 @@ extern "C" void cOVState_TOPTIMES_onGainFocus(cOVState_TOPTIMES* self, cUIState*
     if (id >= 0) {
         LoadRider1F7F08(self, id + 1);
     }
-    if (cBENewRaceInterface_newRace.cGamePath == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         int id2 = prof->mNewTrackHighScoreIndex[1];
         if (id2 >= 0) {
             LoadRider1F7F08(self, id2 + 1);
@@ -806,11 +807,11 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetMenu);
  *
  * @param pMenu  the menu (On Tour pMenu); unused
  * @param Event  the menu event (6 Cross)
- * @return 0x101 for event 6, else 0
+ * @return 0x101 for kONNEXT, else 0
  */
 extern "C" int cOVState_TOPTIMES_onWidgetMenu(cOVState_TOPTIMES* self, int pMenu, int Event)
 {
-    return Event == 6 ? 257 : 0;
+    return Event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
@@ -831,7 +832,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetEvent);
 extern "C" void cOVState_TOPTIMES_onWidgetEvent(cOVState_TOPTIMES* self, cUIThing* pWidget, int Event)
 {
     if (((void*)pWidget) != 0) {
-        if (Event == 5) {
+        if (Event == cUIState::kONNEXT) {
             sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
             vt[26].fn(vthis(self, vt[26]));
         }
@@ -848,9 +849,9 @@ extern "C" void cOVStateManager_triggerOverlay(int id);
 /**
  * Acts on the button chosen on the top-times panel: continue, or save the records.
  *
- * Only acts once (+0xA0 still 0). The chosen item's index (@p pWidget +0x18) 0 sets +0xA0 and cOVStateManager_mStatus to
- * 1 (continue); 1 sets +0xA0 and opens overlay 19 with cOVStateManager_triggerOverlay() (save). It is virtual slot
- * 26, called by cOVState_TOPTIMES_onWidgetEvent() on Cross.
+ * Only acts once (+0xA0 still 0). The chosen item's index (@p pWidget +0x18) 0 sets +0xA0 and cOVStateManager_mStatus
+ * to kOVSTATUS_GOTONEXT (continue); 1 sets +0xA0 and opens kOVSTATE_SAVEOPTIONS with cOVStateManager_triggerOverlay()
+ * (save). It is virtual slot 26, called by cOVState_TOPTIMES_onWidgetEvent() on Cross.
  *
  * @param pWidget  the chosen item (On Tour: cUIThing *pWidget)
  */
@@ -861,11 +862,11 @@ void cOVState_TOPTIMES::handleNext(cUIThing* pWidget)
         switch (choice) {
         case 0:
             mIsNextScreenPending = 1;
-            cOVStateManager_mStatus = 1;
+            cOVStateManager_mStatus = kOVSTATUS_GOTONEXT;
             break;
         case 1:
             mIsNextScreenPending = choice;
-            cOVStateManager_triggerOverlay(19);
+            cOVStateManager_triggerOverlay(kOVSTATE_SAVEOPTIONS);
             break;
         }
     }

@@ -162,6 +162,46 @@ struct cFEMemCard : public cOVState {
                                     //       buffer
                                     //       (readStart), 0 = none
 
+    // EA's file types (mType). [O] On Tour's anonymous enum cFEMemCard::kTYPE_*, names and values; [U] retail's
+    // readStart / readDone / writeStart treat 0 as a profile, 1 as a replay and 2 as the game options.
+    enum { kTYPE_PROFILE = 0, kTYPE_REPLAY = 1, kTYPE_GAMEOPTIONS = 2 };
+
+    // EA's screen states (mState). [O] On Tour's anonymous enum of cFEMemCard, names and values; [U] retail's
+    // onUpdate dispatches 0 updateStart, 1 updateChecking, 2 updateSkip, 3 updateSaving, 4 updateDeleting,
+    // 5 updateLoading, 6 updateDone.
+    enum { kSTART = 0, kCHECKING = 1, kSKIP = 2, kSAVING = 3, kDELETING = 4, kLOADING = 5, kDONE = 6 };
+
+    // EA's popup ids (mPopupType). [O] On Tour's anonymous enum of cFEMemCard, names and values; [U] retail's
+    // callbacks fit: callbackConfirmOverwrite sets kPOP_OVERWRITE, confirmLoad kPOP_CONFIRMLOAD, callbackConfirmDelete
+    // kPOP_DELETE, callbackSaveSuccess kPOP_SAVEDONE, callbackReadSuccess kPOP_LOADDONE, callbackDeleteDone /
+    // callbackDeleteFailed kPOP_DELETEDONE / kPOP_DELETEFAIL, callbackConfirmNoCards kPOP_NOCARD, the load / save
+    // failures kPOP_LOADFAILED / kPOP_SAVEFAILED, callbackFileCorrupt kPOP_CORRUPT, callbackSaveFileCorrupt
+    // kPOP_CORRUPTDELETE, the format callbacks kPOP_FORMAT / kPOP_FORMATDONE / kPOP_FORMATFAIL,
+    // callbackConfirmInvalidCard kPOP_INVALID, callbackConfirmSaveTooBig / NoFreeBlocks kPOP_FREESPACE,
+    // callbackFileExists kPOP_FILEEXISTS,
+    // callbackCardChanged kPOP_CARDCHANGED, displayStatusPopup kPOP_STATUS; initFEMemCard starts at kPOP_OTHER.
+    enum {
+        kPOP_KEYBOARD = 0, kPOP_OVERWRITE = 1, kPOP_CONFIRMLOAD = 2, kPOP_DELETE = 3, kPOP_MESSAGE = 4,
+        kPOP_SAVEDONE = 5, kPOP_LOADDONE = 6, kPOP_DELETEDONE = 7, kPOP_DELETEFAIL = 8, kPOP_NOCARD = 9,
+        kPOP_LOADFAILED = 10, kPOP_SAVEFAILED = 11, kPOP_CORRUPT = 12, kPOP_CORRUPTDELETE = 13, kPOP_FORMAT = 14,
+        kPOP_FORMATNGC = 15, kPOP_FORMATDONE = 16, kPOP_FORMATFAIL = 17, kPOP_INVALID = 18, kPOP_FREESPACE = 19,
+        kPOP_NOSPACE = 20, kPOP_WARNING = 21, kPOP_STATUS = 22, kPOP_FILEEXISTS = 23, kPOP_CARDCHANGED = 24,
+        kPOP_OTHER = 25
+    };
+
+    // The display states (mScreenStatus, triggerDisplayState's gotoScreenState; names ours). [U] triggerDisplayState
+    // jumps to the screen's "off" frame (1: menu off, checking the card), its "file display" frame (2: menu off,
+    // checking the files) or its "on" frame (3: the slot menu is live).
+    enum { kDISPLAY_OFF = 1, kDISPLAY_FILES = 2, kDISPLAY_ON = 3 };
+
+    // EA's eBufferState (mBufferState). [O] On Tour enum cFEMemCard::eBufferState, names and values; [U] 1 marks a
+    // block createReadBuffer allocated, 2 the save interface's replay buffer (readStart).
+    enum eBufferState { keBufferState_Invalid = 0, keBufferState_Valid = 1, keBufferState_ReplayExternal = 2 };
+
+    // checkNextAvailableDevice's results (names ours): [U] it returns 1 when the next (or previous) device index is
+    // valid and -1 at either end of the device list; the save screens hide the left / right arrow on -1.
+    enum { kNoNextDevice = -1, kNextDevice = 1 };
+
     // Methods bound to their retail symbols by asm labels.
     void exitSave() __asm__("cFEMemCard_exitSave__FPv");
     void SetLoadPressed(int on) __asm__("cFEMemCard_SetLoadPressed");

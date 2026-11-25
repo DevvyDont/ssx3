@@ -49,6 +49,32 @@ CHECK_OFFSET(cMCOverlayManager_sdevice, iTotalSpace, 0x14);
 CHECK_OFFSET(cMCOverlayManager_sdevice, szName, 0x18);
 CHECK_SIZE(cMCOverlayManager_sdevice, 0xE0);
 
+// The manager's state (cMCOverlayManager::mState). [O] On Tour's enum tMCOverlayManagerState, names and values; [U]
+// retail fits: the init handlers cMCOverlayManager_UpdateInitCardsCheck / InitFileCheck / InitFileCheckDevice are
+// states 49 / 51 / 54, the save path goes kMCOverlay_Save .. kMCOverlay_SaveDone / kMCOverlay_SaveFailed (7, 16, 19,
+// 20), the load path kMCOverlay_Load / kMCOverlay_LoadDone / kMCOverlay_LoadFailed (29, 35, 36), and
+// cFEMemCard_onUpdate shows its status popup in exactly the progress and closing states.
+enum tMCOverlayManagerState {
+    kMCOverlay_Idle = 0, kMCOverlay_Done = 1, kMCOverlay_CheckCardsWait = 2, kMCOverlay_CheckCards = 3,
+    kMCOverlay_NoCardsError = 4, kMCOverlay_CardInvalid = 5, kMCOverlay_ReadingCard = 6, kMCOverlay_Save = 7,
+    kMCOverlay_Cancel = 8, kMCOverlay_OverwriteConfirm = 9, kMCOverlay_FormatConfirm = 10,
+    kMCOverlay_FormatProgress = 11, kMCOverlay_FormatFailed = 12, kMCOverlay_PreSaveFile = 13,
+    kMCOverlay_PreSaveFileDelete = 14, kMCOverlay_CreateFile = 15, kMCOverlay_SaveFile = 16,
+    kMCOverlay_SaveProgress = 17, kMCOverlay_SaveClosing = 18, kMCOverlay_SaveDone = 19, kMCOverlay_SaveFailed = 20,
+    kMCOverlay_SaveTooBig = 21, kMCOverlay_SaveCorrupt = 22, kMCOverlay_NoFreeBlocks = 23,
+    kMCOverlay_DeleteConfirm = 24, kMCOverlay_DeleteProgress = 25, kMCOverlay_DeleteDoneWait = 26,
+    kMCOverlay_DeleteDone = 27, kMCOverlay_DeleteFailed = 28, kMCOverlay_Load = 29, kMCOverlay_LoadConfirm = 30,
+    kMCOverlay_LoadStart = 31, kMCOverlay_LoadProgress = 32, kMCOverlay_LoadClosing = 33,
+    kMCOverlay_LoadDoneWait = 34, kMCOverlay_LoadDone = 35, kMCOverlay_LoadFailed = 36, kMCOverlay_LoadCorrupt = 37,
+    kMCOverlay_LoadFileNotFound = 38, kMCOverlay_InitFormatConfirm = 39, kMCOverlay_InitFormatProgress = 40,
+    kMCOverlay_InitFormatFailed = 41, kMCOverlay_InitFormatDone = 42, kMCOverlay_InitDeleteConfirm = 43,
+    kMCOverlay_InitDeleteProgress = 44, kMCOverlay_InitDeleteFailed = 45, kMCOverlay_InitDeleteDone = 46,
+    kMCOverlay_CardUnusable = 47, kMCOverlay_CardDamaged = 48, kMCOverlay_InitCardsCheck = 49,
+    kMCOverlay_InitCardsCheckDone = 50, kMCOverlay_InitFileCheck = 51, kMCOverlay_InitFileCheckDone = 52,
+    kMCOverlay_InitFileCheckWait = 53, kMCOverlay_InitFileCheckDevice = 54, kMCOverlay_FileExists = 55,
+    kMCOverlay_CardChanged = 56
+};
+
 struct cMCOverlayManager {
     // --- 45 front-end callbacks. [R] the ctor fills all 45 words with default stubs whose kind matches On Tour's
     // return type slot for slot: void slots get cMCOverlayManager_CallbackMemcard (returns nothing), bool slots cMCOverlayManager_CallbackFalse /

@@ -259,9 +259,9 @@ static inline int countSel_7500(cFEStateRequestLine* self)
  * Song masks: mPlaylist = songs in the playlist, mOwnedSong = owned songs; mMoney is the cash, mInStore the in-store
  * flag.
  *
- * Event 5 on a song: an unowned song opens the buy popup when in the store and affordable or free; an owned
- * song toggles in the playlist unless it is the last one. Event 6 saves both masks (back-end interface 13),
- * hands the playlist to the sound manager and pops (in game) or opens cFEStateAudioOptions. Event 1 updates
+ * kONNEXT on a song: an unowned song opens the buy popup when in the store and affordable or free; an owned
+ * song toggles in the playlist unless it is the last one. kONPREV saves both masks (back-end interface 13),
+ * hands the playlist to the sound manager and pops (in game) or opens cFEStateAudioOptions. kONGAINFOCUS updates
  * the song info, help and button texts.
  *
  * @param requestLine  the cFEStateRequestLine (raw pointer)
@@ -276,7 +276,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         return;
     }
     switch (msg) {
-    case 5: {
+    case cUIState::kONNEXT: {
         int k = self->mFirstVisibleSong + item->mMiscData;
         if (k >= self->mNumSongs) {
             return;
@@ -304,7 +304,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         self->updateButtonsText(idx);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         cBERewardInterface_setPlayList(iface, self->mUserNum, self->mCharID, self->mPlaylist);
         cBERewardInterface_setOwnedSongList(iface, self->mUserNum, self->mCharID, self->mOwnedSong);
@@ -326,7 +326,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         }
         break;
     }
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         int idx = self->mSongOrder[self->mFirstVisibleSong + item->mMiscData];
         self->updateHilightedSongInfo(idx);
         self->updateHelpText(idx);
@@ -355,22 +355,22 @@ extern "C" void func_002B4978(void* list, int idx);
 /**
  * Handles menu keys on the song request list.
  *
- * Key 6 returns 0x10 (refuse) for the last playlist song, for an unowned song outside the store, and in the
- * store when there is no free credit and too little cash. Key 8 plays an owned song in game (sound manager
- * +0x508, func_0028CF98) or previews it in the front end (func_002B4978); key 4 scrolls the list to the row;
- * key 9 gives 0.
+ * kONNEXT returns 0x10 (refuse) for the last playlist song, for an unowned song outside the store, and in the
+ * store when there is no free credit and too little cash. kONOPTION plays an owned song in game (sound manager
+ * +0x508, func_0028CF98) or previews it in the front end (func_002B4978); kSCROLLUPDATE scrolls the list to the row;
+ * kONMISC gives 0.
  *
  * @param requestLine  the cFEStateRequestLine (raw pointer)
  * @param item  the menu (unused)
  * @param msg  menu key/event code (4, 6, 8 or 9)
  * @param k  row index in the menu
- * @return 0x10 to refuse, 0 for key 9, else 0x101
+ * @return 0x10 to refuse, 0 for kONMISC, else 0x101
  */
 extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item, unsigned int msg, int k)
 {
     cFEStateRequestLine* self = (cFEStateRequestLine*)requestLine;
     switch (msg) {
-    case 6: {
+    case cUIMenu::kONNEXT: {
         int idx = self->mSongOrder[self->mFirstVisibleSong + k];
         if (onlyBit_7500(self->mPlaylist, idx)) {
             if (self->mInStore != 0) {
@@ -391,9 +391,9 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
         }
         goto ret10;
     }
-    case 9:
+    case cUIMenu::kONMISC:
         return 0;
-    case 8: {
+    case cUIMenu::kONOPTION: {
         int n;
         int idx;
         n = self->mFirstVisibleSong + k;
@@ -413,7 +413,7 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
         }
         break;
     }
-    case 4:
+    case cUIMenu::kSCROLLUPDATE:
         self->mFirstVisibleSong = k;
         cFEStateRequestLine_updatePlayList_77D0(self);
         break;
@@ -437,26 +437,27 @@ extern "C" void cFEStateRequestLine_updateHelpText(cFEStateRequestLine* self, in
 /**
  * Hides the request line while another popup is up and completes song purchases.
  *
- * Event 0x15 clears the visible bit (bit 3 of mAttrState) unless the popup's id (+0xC) is 7 (the buy popup);
- * event 0x16 sets it again and, for a confirmed buy popup (+0x6C), buys the selected song (cFEStateRequestLine_buySong,
- * probably buySong) and refreshes the list, song info, cash, free markers, buttons and help.
+ * kONPOPUPCREATE clears the visible bit (bit 3 of mAttrState) unless the popup's id (+0xC) is
+ * cUIStateBuyPopup::kStateID (the buy popup); kONPOPUPDESTROY sets it again and, for a confirmed buy popup (+0x6C),
+ * buys the selected song (cFEStateRequestLine_buySong, probably buySong) and refreshes the list, song info, cash, free
+ * markers, buttons and help.
  *
  * @param item  the popup state
- * @param msg  popup event code (0x15 or 0x16)
+ * @param msg  popup event code (kONPOPUPCREATE or kONPOPUPDESTROY)
  */
 extern "C" void cFEStateRequestLine_onPopupEvent(cFEStateRequestLine* self, cUIState* item, int msg)
 {
     switch (msg) {
-    case 21:
-        if (item->mHashName != 7) {
+    case cUIState::kONPOPUPCREATE:
+        if (item->mHashName != cUIStateBuyPopup::kStateID) {
             self->mAttrState &= ~8;
         }
         break;
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (((self->mAttrState >> 3) & 1) == 0) {
             self->mAttrState |= 8;
         }
-        if (item->mHashName == 7 && ((cUIStateBuyPopup*)item)->mbAccept != 0) {
+        if (item->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)item)->mbAccept != 0) {
             int song = self->mSongOrder[self->mFirstVisibleSong + self->mpRadioMenu->mpSelected->mMiscData];
             self->buySong(song);
             self->updatePlayList();

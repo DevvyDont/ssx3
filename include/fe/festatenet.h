@@ -128,6 +128,11 @@ struct cFEStateNet : public cUIState {
                                     //       are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
 
+    // The front-end path, the global D_004A1A70 (names ours): [P] the preview reads it through getFEPath and
+    // fePathIsOnline (path == 1); [U] its setter func_001A86E8 is only passed 0 or 1 (fereal enters the online menus
+    // with 1; leaving them and ovstates pass 0, which also logs out of the buddy server).
+    enum { kFEPathOffline = 0, kFEPathOnline = 1 };
+
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNet1() __asm__("cFEStateNet_cFEStateNet1");
     int isProcessingEvents() __asm__("cFEStateNet_isProcessingEvents");

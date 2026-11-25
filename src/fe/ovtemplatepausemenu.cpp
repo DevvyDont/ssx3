@@ -10,6 +10,7 @@
 #include "main/ssxapp.h"
 #include "util/locale.h"
 #include "ui/uiscreen.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onCreateScreen);
@@ -103,7 +104,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
     for (i = 0; i < 14; i++) {
         self->mPauseOptionUnlocked[i] = 1;
     }
-    if (SSXApp->Game->mCurrentStateID == 11) {
+    if (SSXApp->Game->mCurrentStateID == kGFSM_SectionLoad) {
         self->mPauseOptionUnlocked[6] = 0;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -267,14 +268,14 @@ extern char str_trans_out[];
  * Pulses the "NewMail" icon while messages are waiting and closes the pause menu when an online pause times
  * out.
  *
- * The pulse runs in states 1, 2 and 4 when func_001E3408() reports mail. When the online pause or overlay
- * timeout
- * reaches 0 it sends an unpause, plays "trans_out", removes the PDA and pops the pause state.
+ * The pulse runs in kOVSTATE_PAUSE_COMPETE, _BIGCHAL and _SPOKE when func_001E3408() reports mail. When the online
+ * pause or overlay timeout reaches 0 it sends an unpause, plays "trans_out", removes the PDA and pops the pause state.
  */
 extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
 {
     int st = self->mPauseMenuType;
-    if ((st == 1 || st == 2 || st == 4) && func_001E3408() > 0)
+    if ((st == kOVSTATE_PAUSE_COMPETE || st == kOVSTATE_PAUSE_BIGCHAL || st == kOVSTATE_PAUSE_SPOKE)
+        && func_001E3408() > 0)
     {
         float phase = self->mNewMailAlpha + self->mNewMailAlphaDiff;
         self->mNewMailAlpha = phase;
@@ -343,19 +344,19 @@ void* cOVTemplate_PauseMenu_onDestroyScreen(void* vself)
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Swallows menu events 8 and 9 and refuses event 6 in the pause menu.
+ * Swallows menu kONOPTION and kONMISC and refuses kONNEXT in the pause menu.
  *
  * @param menu  the menu (On Tour cUIMenu* pMenu), unused
  * @param event  menu event number (On Tour Event)
- * @return 0x100 for events 8 and 9, 0 for event 6, otherwise 0x101
+ * @return 0x100 for kONOPTION and kONMISC, 0 for kONNEXT, otherwise 0x101
  */
 extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(cOVTemplate_PauseMenu* self, int menu, unsigned int event)
 {
     switch (event) {
-    case 8:
-    case 9:
+    case cUIMenu::kONOPTION:
+    case cUIMenu::kONMISC:
         return 0x100;
-    case 6:
+    case cUIMenu::kONNEXT:
         return 0;
     }
     return 257;
@@ -457,14 +458,14 @@ static inline void setColor_PMWE(sWidget_PMWE* w, void* c)
  * cFEStateAudioOptions.
  *
  * @param w  the option row (its option at +0x18), or 0
- * @param event  widget event number: 5 select, 6 back, 1 highlight, 2 unhighlight
+ * @param event  widget event number: kONNEXT select, kONPREV back, kONGAINFOCUS highlight, kONLOSEFOCUS unhighlight
  */
 extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self, sWidget_PMWE* w, int event)
 {
     if (w == 0)
         return;
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         sSnd_PMWE* snd = &gUISoundNull;
         if ((sSnd_PMWE*)self->mpEngine->mpSound != 0)
             snd = (sSnd_PMWE*)self->mpEngine->mpSound;
@@ -529,14 +530,14 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
         }
         break;
     }
-    case 6:
+    case cUIState::kONPREV:
         stopReplay_PMWE();
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
         cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
         cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
         break;
-    case 1: {
+    case cUIState::kONGAINFOCUS: {
         if (self->mScreenExiting == 0) {
             if (self->mPauseOptionUnlocked[w->idx] != 0)
                 setColor_PMWE(w, D_004C8AF8);
@@ -550,7 +551,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_H_J_b[w->idx]));
         break;
     }
-    case 2:
+    case cUIState::kONLOSEFOCUS:
         if (self->mScreenExiting != 0)
             return;
         if (self->mPauseOptionUnlocked[w->idx] != 0)
@@ -560,10 +561,10 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
         if (self->mScreenExiting == 0)
             self->setPDAIconColor(w->idx, 0);
         break;
-    case 3:
-    case 4:
-    case 7:
-    case 8:
+    case cUIState::kONSTART:
+    case cUIState::kONSELECT:
+    case cUIState::kONOPTION:
+    case cUIState::kONMISC:
         break;
     }
 }
@@ -608,13 +609,13 @@ void cOVTemplate_PauseMenu::setPDAIconColor(int idx, int on)
     if (on) {
         sprintf(buf, str_pct_s_S, gMenuItemIcons[idx]);
         unsigned short frame = cUIScreen_getFrameByLabel(mpPauseScreen, GetHashValue32(buf));
-        if (frame != 0xFFFF && mpThread == 0) {
+        if (frame != cUIScreen::kNoFrame && mpThread == 0) {
             mpThread = (cUIThread*)cUIScreen_playFrame(mpPauseScreen, frame, 1);
         }
     } else {
         sprintf(buf, str_pct_s_R, gMenuItemIcons[idx]);
         unsigned short frame = cUIScreen_getFrameByLabel(mpPauseScreen, GetHashValue32(buf));
-        if (frame != 0xFFFF) {
+        if (frame != cUIScreen::kNoFrame) {
             mpThread->mCurrentFrameNumber = frame;
             mpThread->mLastFrameNumber = 0xFFFF;
             mpThread = 0;
@@ -645,7 +646,7 @@ extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* sel
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         self->mPauseMenuOptions[i] = gPauseCompeteMenu[i];
     }
-    self->mPauseMenuType = 1;
+    self->mPauseMenuType = kOVSTATE_PAUSE_COMPETE;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -672,7 +673,7 @@ extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* sel
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         self->mPauseMenuOptions[i] = gPauseBigChallengeMenu[i];
     }
-    self->mPauseMenuType = 2;
+    self->mPauseMenuType = kOVSTATE_PAUSE_BIGCHAL;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -699,7 +700,7 @@ extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* se
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         self->mPauseMenuOptions[i] = gPauseFreerideMenu[i];
     }
-    self->mPauseMenuType = 3;
+    self->mPauseMenuType = kOVSTATE_PAUSE_FREERIDE;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -726,7 +727,7 @@ extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         self->mPauseMenuOptions[i] = gPauseSpokeMenu[i];
     }
-    self->mPauseMenuType = 4;
+    self->mPauseMenuType = kOVSTATE_PAUSE_SPOKE;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -753,7 +754,7 @@ extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(cOVTemplate_PauseMenu* s
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         self->mPauseMenuOptions[i] = gQuickPlayMenu[i];
     }
-    self->mPauseMenuType = 5;
+    self->mPauseMenuType = kOVSTATE_PAUSE_QUICKPLAY;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -785,7 +786,7 @@ extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(cOVTemplate_PauseMenu* self
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         self->mPauseMenuOptions[i] = items[i];
     }
-    self->mPauseMenuType = 6;
+    self->mPauseMenuType = kOVSTATE_PAUSE_ONLINE;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif

@@ -52,6 +52,11 @@ struct cUIStateBuyPopup : public cUIState {
     int mbAccept;                   // 0x06C [O] bool mAccept (1 byte in On Tour; retail lw/sw the word);
                                     //       [U] onWidgetEvent stores 1 for "yes", else 0; isAccept cUIStateBuyPopup_isAccept returns it
 
+    // The state id this popup keeps in mHashName (name ours): [R] cUIStateBuyPopup_cUIStateBuyPopup stores 7; [U] the
+    // shops' onPopupEvent handlers (cFEStateCharEquip, cFEStateRewards, the message center) test it to find their buy
+    // popup.
+    enum { kStateID = 7 };
+
     // Methods bound to their retail symbols by asm labels.
     void initBuyTrick(int trick, int cost, int money) __asm__("cUIStateBuyPopup_initBuyTrick");
     void initBuyAttributes(int pAttrName, int cost, int money) __asm__("cUIStateBuyPopup_initBuyAttributes");

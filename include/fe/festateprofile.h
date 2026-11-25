@@ -89,6 +89,13 @@ struct cFEStateProfileLoad : public cFEMemCard {
                                     //       updateDone: 0 pushes the parent factory's next state, 1 starts a pre-game
                                     //       load, 2 returns to the title screen
 
+    // What the screen is opened for (mScreenAction; names ours): [U] onCreateScreen runs initCreateScreen,
+    // initLoadScreen or initSaveScreen for these (On Tour has the same three init methods and initDeleteScreen).
+    enum { kScreenActionCreate = 1, kScreenActionLoad = 2, kScreenActionSave = 3 };
+    // Where the screen goes when it closes (mTypeOfQuit; names ours): [U] updateDone pushes the previous state,
+    // starts free ride in the last hub (cPreGameLoadScreen) or returns to the title screen.
+    enum { kQuitToPrevious = 0, kQuitToHub = 1, kQuitToTitle = 2 };
+
     // Methods bound to their retail symbols by asm labels.
     void displayOn() __asm__("cFEStateProfileLoad_displayOn");
     void displayOff() __asm__("cFEStateProfileLoad_displayOff");

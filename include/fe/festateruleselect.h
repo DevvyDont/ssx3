@@ -71,8 +71,12 @@ struct cBraggingRightsMenu {
     void setConfirmed(int enabled) __asm__("cBraggingRightsMenu_setConfirmed");
     void setMenuItemColor() __asm__("cBraggingRightsMenu_setMenuItemColor");
     int findListBoxP(cUIListBox* val) __asm__("cBraggingRightsMenu_findListBoxP");
-    int isItemEnable(int itemIndex) __asm__("cBraggingRightsMenu_isItemEnable");
+    bool isItemEnable(int itemIndex) __asm__("cBraggingRightsMenu_isItemEnable");
     void setEnableFlag(int val) __asm__("cBraggingRightsMenu_setEnableFlag__FPvi");
+
+    // findListBoxP's "not one of mine" result (names ours): [U] cBraggingRightsMenu_findListBoxP returns it when no
+    // mpListBox entry matches.
+    enum { kNotFound = -1 };
 };
 
 CHECK_OFFSET(cBraggingRightsMenu, mpPlayerMenu, 0x000);
@@ -82,6 +86,18 @@ CHECK_OFFSET(cBraggingRightsMenu, mbConfirmed, 0x028);
 CHECK_OFFSET(cBraggingRightsMenu, mcItemEnableFlag, 0x02C);
 CHECK_OFFSET(cBraggingRightsMenu, mVtbl, 0x030);
 CHECK_SIZE(cBraggingRightsMenu, 0x34);
+
+// EA's eBRAGRIGHTs: one bragging-rights rule (cFEStateBraggingRights::updateBE's `which`, the rule ids of
+// cFEStateBraggingRights::mpGameEventMapping). [O] On Tour's enum eBRAGRIGHTs, names and values; [U] retail fits:
+// updateBE / cFEStateBraggingRights_getBEData write / read the other player's HeadStartSecs (0), StartFullBoost (1),
+// FastRecovery (2) and StartingPoints (7) (tBEBraggingRights, be/beintoption.h) and the player's own NoUberTricks (3),
+// LooseAdrenalin (4), Level1Character (5) and HalfPoints (6); onCreateScreen fills rule 0 with Off / 5s .. 20s,
+// rule 7 with Off / 3000 / 5000 and the others with No / Yes.
+enum eBRAGRIGHTs {
+    kBRAGRIGHTS_GIVEHEADSTART = 0, kBRAGRIGHTS_GIVEFULLBOOST = 1, kBRAGRIGHTS_GIVEFASTRECOVERY = 2,
+    kBRAGRIGHTS_TAKENOUBER = 3, kBRAGRIGHTS_TAKELEAKYAD = 4, kBRAGRIGHTS_TAKELV1CHAR = 5,
+    kBRAGRIGHTS_TAKEHALFPOINTS = 6, kBRAGRIGHTS_STARTINHOLE = 7, kBRAGRIGHTS_NUM = 8
+};
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cFEStateBraggingRights: the online "bragging rights" screen (state id 20): two player columns of rule list boxes that
@@ -125,6 +141,13 @@ struct cFEStateBraggingRights : public cFEStateNet {
     char* mpGameEventMapping;       // 0x738 [O]; [R] 0; [U] onCreateScreen picks one of six rule-id byte tables
                                     //       (D_004A1710 ... D_004A1738) by game mode; onCreateScreen / onWidgetEvent /
                                     //       func_001941B0 read rule ids from it (lb; EE char is signed)
+
+    // A row without a rule in mpGameEventMapping (names ours): [U] onWidgetEvent and func_001941B0 skip
+    // updateBE for it.
+    enum { kNoRule = -1 };
+    // The miMiscData of the "cancel challenge" popup (names ours): [U] onWidgetEvent tags the popup it opens with
+    // kT_POPUPCMNCancelChallenge with it; onPopupEvent hands that popup's events to func_00194440.
+    enum { kCancelChallengePopup = 2104 };
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateBraggingRights1() __asm__("cFEStateBraggingRights_cFEStateBraggingRights1");

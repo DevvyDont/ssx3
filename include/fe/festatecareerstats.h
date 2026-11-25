@@ -31,6 +31,16 @@ struct cFEStateCareerStats : public cUIState {
     unsigned int mbitOwnedFSMedal;   // 0x070 [O]
     unsigned int mbitOpenedFS;       // 0x074 [O]
 
+    // The tab mStatsState shows. [O] On Tour's anonymous enum in cFEStateCareerStats, names and values; [U] retail's
+    // setupLayout / setupMenuFocus show the "highlights", "race_platinum", "freestyle_platinum" and "ridersbest"
+    // panels for 0-3 in this order.
+    enum {
+        kCareerStats_Highlights = 0,
+        kCareerStats_Race_PlatMedals = 1,
+        kCareerStats_FS_PlatMedals = 2,
+        kCareerStats_RidersBest = 3
+    };
+
     // Methods bound to their retail symbols by asm labels.
     void setupLayout() __asm__("cFEStateCareerStats_setupLayout");
     void setupMenuFocus(int menu) __asm__("cFEStateCareerStats_setupMenuFocus");

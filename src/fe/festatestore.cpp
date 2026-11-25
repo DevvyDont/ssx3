@@ -429,12 +429,13 @@ extern char str_kT_66HELPCustomUber[];
 /**
  * Pays for and unlocks the selected uber trick when the buy popup closes accepted.
  *
- * On event 22, when the popup's mbAccept (+0x6C) is set: subtracts its mInfo.mCost (+0x48) from the character's money
- * (cBEEconInterface_reduceMoney on cBE interface 11), clears flag bit "trick" (the trick menu's selected mMiscData) of the category's
- * entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls that interface's vtable slot
- * 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers (cFEStateUberTrick_updateTrickMenuEntry). On event 22 the
- * trick list is refilled either way (cFEStateUberTrick_updateTrickMenu). Other events do nothing. onPopupEvent slot (+0x8C) of the
- * vtable cFEStateUberTrick_vtbl.
+ * On kONPOPUPDESTROY, when the popup's mbAccept (+0x6C) is set: subtracts its mInfo.mCost (+0x48) from the character's
+ * money (cBEEconInterface_reduceMoney on cBE interface 11), clears flag bit "trick" (the trick menu's selected
+ * mMiscData) of the category's entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls
+ * that interface's vtable slot 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers
+ * (cFEStateUberTrick_updateTrickMenuEntry). On kONPOPUPDESTROY the trick list is refilled either way
+ * (cFEStateUberTrick_updateTrickMenu). Other events do nothing. onPopupEvent slot (+0x8C) of the vtable
+ * cFEStateUberTrick_vtbl.
  *
  * @param item  the popup (the cUIStateBuyPopup)
  * @param msg  the popup event
@@ -442,9 +443,9 @@ extern char str_kT_66HELPCustomUber[];
 extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState* item, int msg)
 {
     switch (msg) {
-    case 21:
+    case cUIState::kONPOPUPCREATE:
         break;
-    case 22:
+    case cUIState::kONPOPUPDESTROY:
         if (((cUIStateBuyPopup*)item)->mbAccept != 0) {
             int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
             cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID, ((cUIStateBuyPopup*)item)->mInfo.mCost);
@@ -662,7 +663,7 @@ static inline void Back_185268(cFEStateUberTrick* self)
 extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThing* item, int msg)
 {
     switch (msg) {
-    case 5:
+    case cUIState::kONNEXT:
         if ((char*)item->mpParent == (char*)self->mpMainMenu) {
             if (Is_185268(item->mHashName, str_done)) {
                 Back_185268(self);
@@ -710,7 +711,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             }
         }
         break;
-    case 6:
+    case cUIState::kONPREV:
         if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
             SetActive_185268(self->mpMainMenu, 1);
             SetActive_185268(self->mpTrickMenu, 0);
@@ -730,7 +731,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             Back_185268(self);
         }
         break;
-    case 7:
+    case cUIState::kONOPTION:
         if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
             cUIThing* categoryItem = (cUIThing*)self->mpMainMenu->mpSelected;
             cUIThing* trickItem = (cUIThing*)self->mpTrickMenu->mpSelected;
@@ -747,7 +748,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             }
         }
         break;
-    case 1:
+    case cUIState::kONGAINFOCUS:
         cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum)->mUberIrradiance = 1;
         if ((char*)item->mpParent == (char*)self->mpMainMenu) {
             if (self->mpTrickMenu != 0 && item->mMiscData != -1) {
@@ -793,7 +794,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
             }
         }
         break;
-    case 2:
+    case cUIState::kONLOSEFOCUS:
         cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum)->mUberIrradiance = 0;
         break;
     }
@@ -804,7 +805,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the uber-trick screen's menu events: 0x100 for event 9 on the trick menu and for events 8 and 9 on the
+ * Answers the uber-trick screen's menu events: 0x100 for kONMISC on the trick menu and for kONOPTION and kONMISC on the
  * category menu, otherwise 0x101.
  *
  * The trick menu is +0x50. onWidgetMenu slot (+0xA4) of the vtable cFEStateUberTrick_vtbl.
@@ -817,13 +818,13 @@ extern "C" int cFEStateUberTrick_onWidgetMenu(cFEStateUberTrick* self, int menu,
 {
     if (menu == (int)self->mpTrickMenu) {
         switch (event) {
-        case 9:
+        case cUIMenu::kONMISC:
             return 0x100;
         }
     } else {
         switch (event) {
-        case 8:
-        case 9:
+        case cUIMenu::kONOPTION:
+        case cUIMenu::kONMISC:
             return 0x100;
         }
     }

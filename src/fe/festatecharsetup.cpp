@@ -11,6 +11,7 @@
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
+#include "ui/uimenu.h"
 
 //100%
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onCreateScreen);
@@ -79,7 +80,7 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
     cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title));
     if (txt != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (cBENewRaceInterface_newRace.cGamePath == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
             switch (self->mUserNum) {
             case 0:
                 cUIText_setUnicodeStringByID(txt, GetHashValue32(str_kT_TITLEPlayer1SetupCharacter));
@@ -143,17 +144,17 @@ extern "C" void cFEStateCharSetup_onUpdate(cFEStateCharSetup* self)
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Answers the character-setup menu's events: 0x100 for event 9, otherwise 0x101.
+ * Answers the character-setup menu's events: 0x100 for kONMISC, otherwise 0x101.
  *
  * It fills the onWidgetMenu slot (+0xA4) of cFEStateCharSetup_vtbl and cFEStateRiderDetail_vtbl.
  *
  * @param menu  the menu (unused)
  * @param event  the menu event
- * @return 0x100 for event 9, else 0x101
+ * @return 0x100 for kONMISC, else 0x101
  */
 extern "C" int cFEStateCharSetup_onWidgetMenu(cFEStateCharSetup* self, int menu, int event)
 {
-    return event != 9 ? 257 : 0x100;
+    return event != cUIMenu::kONMISC ? 257 : 0x100;
 }
 #endif
 
@@ -171,9 +172,9 @@ extern char str_FEOptions[];
 /**
  * Handles the character setup screen's widget events: next state, previous state, or the options screen.
  *
- * Event 5 pushes the custom interface's getNextState result, if any, and always hides the rider
- * (cFEStateCharSetup_show3DCharacter(self, 0)); event 6 does the same with slot 5 (probably getPrevState) but hides the rider
- * only when a state came back. Event 7 builds a cFEStateOptions (0x54 bytes, "FEOptions"), sets its mode
+ * kONNEXT pushes the custom interface's getNextState result, if any, and always hides the rider
+ * (cFEStateCharSetup_show3DCharacter(self, 0)); kONPREV does the same with slot 5 (probably getPrevState) but hides the
+ * rider only when a state came back. kONOPTION builds a cFEStateOptions (0x54 bytes, "FEOptions"), sets its mode
  * (mAttrState bits 8-13) to 1 and pushes it with cUIStateStack_pushSpecial(.., 0, 0).
  *
  * @param item  the widget (On Tour pWidget)
@@ -184,7 +185,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
     if (((void*)item) == 0)
         return;
     switch (event) {
-    case 5: {
+    case cUIState::kONNEXT: {
         cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         void* nextState = factory->getNextState((cUIState*)self, item->mMiscData);
         if (nextState != 0)
@@ -192,7 +193,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         self->show3DCharacter(0);
         break;
     }
-    case 6: {
+    case cUIState::kONPREV: {
         cUICustomInterface* factory = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
         void* nextState = factory->getPrevState((cUIState*)self, item->mMiscData);
         if (nextState != 0) {
@@ -201,7 +202,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         }
         break;
     }
-    case 7: {
+    case cUIState::kONOPTION: {
         cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
         cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);

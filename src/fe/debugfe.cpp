@@ -9,6 +9,7 @@
 #include "fe/debuglobbymenus.h"
 #include "fe/debugfe.h"
 #include "fe/screenkeyboard.h"
+#include "ui/uistate.h"
 #include "fe/heartbeat.h"
 #include "fe/feinput.h"
 #include "online/lobbyman.h"
@@ -342,8 +343,9 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_getMaxAIRiders);
 /**
  * Debug menu: the most AI riders a race may have for a game path and mode.
  *
- * Five by default (a six-rider race), four for game path 2; modes 0, 4, 5 and 6 allow none and modes 1, 2 and 3
- * allow one.
+ * Five by default (a six-rider race), four for kGAMEPATH_MULTIPLAYER; kGAMEMODE_RACE, kGAMEMODE_FREERIDE,
+ * kGAMEMODE_TIMECHALLENGE and kGAMEMODE_PNTSCHALLENGE allow none and kGAMEMODE_SLOPESTYLE, kGAMEMODE_BIGAIR and
+ * kGAMEMODE_HALFPIPE allow one.
  *
  * @param path  the game path (On Tour eBEGamePath)
  * @param mode  the game mode (On Tour eBEGameMode)
@@ -352,12 +354,12 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_getMaxAIRiders);
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cDebugMenuScreen::getMaxAIRiders(int path, int mode)
 {
-    int maxAIRiders = (path == 2) ? 4 : 5;
+    int maxAIRiders = (path == kGAMEPATH_MULTIPLAYER) ? 4 : 5;
     switch (mode) {
-    case 0: case 4: case 5: case 6:
+    case kGAMEMODE_RACE: case kGAMEMODE_FREERIDE: case kGAMEMODE_TIMECHALLENGE: case kGAMEMODE_PNTSCHALLENGE:
         maxAIRiders = 0;
         break;
-    case 1: case 2: case 3:
+    case kGAMEMODE_SLOPESTYLE: case kGAMEMODE_BIGAIR: case kGAMEMODE_HALFPIPE:
         maxAIRiders = 1;
         break;
     }
@@ -2054,9 +2056,9 @@ INCLUDE_ASM("fe/debugfe", cDebugFE_loseFocus__FPv);
 /**
  * Takes focus from the debug front end: the fade screen's loseFocus result as a bool.
  *
- * @return 1 when cFadeScreen_loseFocus() reports the fade done, otherwise 0
+ * @return true when cFadeScreen_loseFocus() reports the fade done
  */
-int cDebugFE_loseFocus(void* self)
+bool cDebugFE_loseFocus(void* self)
 {
     return (cFadeScreen_loseFocus(self) != 0);
 }
@@ -2190,14 +2192,14 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
  * with the texture at +0x1C) and calls the active screen's render virtual (+0x14, slot 3). Always ends with GrMan
  * slot 20.
  *
- * @return 0 when GrMan's slot 17 returns 0, otherwise 1
+ * @return false when GrMan's slot 17 returns 0, otherwise true
  */
-int cDebugFE::render()
+bool cDebugFE::render()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
     if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
-        return 0;
+        return false;
     }
     if (cFadeScreen_drawFade(((char*)this)) == 0) {
         cPS2GraphicsMan* graphicsMan1 = GrMan;
@@ -2232,7 +2234,7 @@ int cDebugFE::render()
     cPS2GraphicsMan* graphicsMan5 = GrMan;
     sVEntry<void>* vt5 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan5);
     ((FnV_17FBF0)vt5[20].fn)((char*)graphicsMan5 + vt5[20].delta);
-    return 1;
+    return true;
 }
 #endif
 
@@ -2864,15 +2866,15 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isActive);
 /**
  * Tells whether the front-end input has a controller that is connected.
  *
- * @return 1 when the controller pointer (+0x18) and its device are set, otherwise 0
+ * @return true when the controller pointer (+0x18) and its device are set
  */
-extern "C" int cFEInput_isActive(cFEInput* self)
+extern "C" bool cFEInput_isActive(cFEInput* self)
 {
     void* input = self->mpInput;
     if (input != 0) {
         return **(int**)input != 0;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2998,10 +3000,10 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveLeft);
 void cScreenKeyboard::kbMoveLeft()
 {
     int keyIndex = mCurrentKey;
-    if (keyIndex == 0 || keyIndex == 10 || keyIndex == 20 || keyIndex == 30) {
+    if (keyIndex == 0 || keyIndex == kKeysPerRow || keyIndex == 2 * kKeysPerRow || keyIndex == 3 * kKeysPerRow) {
         mCurrentKey += 9;
-    } else if (keyIndex == 39 && mIncludeSpace == 0) {
-        mCurrentKey = 37;
+    } else if (keyIndex == kKeyEnd && mIncludeSpace == 0) {
+        mCurrentKey = kKeyRight;
     } else {
         mCurrentKey -= 1;
     }
@@ -3021,10 +3023,11 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveRight);
 void cScreenKeyboard::kbMoveRight()
 {
     int keyIndex = mCurrentKey;
-    if (keyIndex == 9 || keyIndex == 19 || keyIndex == 29 || keyIndex == 39) {
+    if (keyIndex == kKeysPerRow - 1 || keyIndex == 2 * kKeysPerRow - 1 || keyIndex == 3 * kKeysPerRow - 1
+        || keyIndex == kKeyEnd) {
         mCurrentKey -= 9;
-    } else if (keyIndex == 37 && mIncludeSpace == 0) {
-        mCurrentKey = 39;
+    } else if (keyIndex == kKeyRight && mIncludeSpace == 0) {
+        mCurrentKey = kKeyEnd;
     } else {
         mCurrentKey += 1;
     }
@@ -3046,14 +3049,14 @@ void cScreenKeyboard::kbMoveUp()
 {
     int keyIndex = mCurrentKey;
     if (keyIndex >= 0 && keyIndex < 10) {
-        if (keyIndex == 8 && mIncludeSpace == 0) {
-            mCurrentKey = 39;
+        if (keyIndex == kKeySpace - 3 * kKeysPerRow && mIncludeSpace == 0) {
+            mCurrentKey = kKeyEnd;
         } else {
             mCurrentKey += 30;
         }
     } else if (keyIndex >= 10 && keyIndex < 20 && mIncludeNumbers == 0) {
-        if (keyIndex == 18 && mIncludeSpace == 0) {
-            mCurrentKey = 39;
+        if (keyIndex == kKeySpace - 2 * kKeysPerRow && mIncludeSpace == 0) {
+            mCurrentKey = kKeyEnd;
         } else {
             mCurrentKey += 20;
         }
@@ -3082,8 +3085,8 @@ void cScreenKeyboard::kbMoveDown()
         } else {
             mCurrentKey = keyIndex - 20;
         }
-    } else if (keyIndex == 28 && mIncludeSpace == 0) {
-        mCurrentKey = 39;
+    } else if (keyIndex == kKeySpace - kKeysPerRow && mIncludeSpace == 0) {
+        mCurrentKey = kKeyEnd;
     } else {
         mCurrentKey += 10;
     }
@@ -3173,8 +3176,8 @@ struct sDbgKbd {
  * Keys 0-9 write a digit and 10-35 a letter (lower case unless mShiftOn, +0xE4, is set) at mCursorPos (+0x16C); 38
  * writes a space. 36 (arrLeft) moves the cursor back one and cuts the text there; 37 (arrRight) moves it forward one
  * and writes a terminator at the new place. Moving forward stops below mMaxChars (+0xD4). Finally the owner state at
- * +0xD0 gets its virtual slot 19 with (0, 13) for the end key (39) or (0, 12) for any other. Called by the keyboard's
- * input handler cScreenKeyboard_onInput.
+ * +0xD0 gets its virtual slot 19 with (0, kONKEYBOARDEND) for kKeyEnd or (0, kONKEYBOARDKEY) for any other. Called by
+ * the keyboard's input handler cScreenKeyboard_onInput.
  *
  * Likely bugs: the digit and space keys do not write a terminator after the new character (the letter keys do), so
  * characters cut off by arrLeft come back after typing a digit or a space; arrRight at the end of the text leaves the
@@ -3193,23 +3196,23 @@ extern "C" void cScreenKeyboard_pressKey(sDbgKbd* self)
         if (self->cur + 1 < self->maxLen)
             self->cur = self->cur + 1;
         self->buf[self->cur] = 0;
-    } else if (k == 36) {
+    } else if (k == cScreenKeyboard::kKeyLeft) {
         if (self->cur > 0)
             self->cur = self->cur - 1;
         self->buf[self->cur] = 0;
-    } else if (k == 37) {
+    } else if (k == cScreenKeyboard::kKeyRight) {
         if (self->cur + 1 < self->maxLen)
             self->cur = self->cur + 1;
         self->buf[self->cur] = 0;
-    } else if (k == 38) {
+    } else if (k == cScreenKeyboard::kKeySpace) {
         self->buf[self->cur] = ' ';
         if (self->cur + 1 < self->maxLen)
             self->cur = self->cur + 1;
     }
-    if (self->key == 39)
-        self->obj->v19(0, 13);
+    if (self->key == cScreenKeyboard::kKeyEnd)
+        self->obj->v19(0, cUIState::kONKEYBOARDEND);
     else
-        self->obj->v19(0, 12);
+        self->obj->v19(0, cUIState::kONKEYBOARDKEY);
 }
 #endif
 
@@ -3246,13 +3249,13 @@ void cScreenKeyboard::getKeyObjName(int keyIndex, char* dst)
         buf[0] = keyIndex + 'A' - 10;
         buf[1] = 0;
         strcat(dst, buf);
-    } else if (keyIndex == 36) {
+    } else if (keyIndex == kKeyLeft) {
         strcat(dst, str_arrLeft);
-    } else if (keyIndex == 37) {
+    } else if (keyIndex == kKeyRight) {
         strcat(dst, str_arrRight);
-    } else if (keyIndex == 38) {
+    } else if (keyIndex == kKeySpace) {
         strcat(dst, str_spc);
-    } else if (keyIndex == 39) {
+    } else if (keyIndex == kKeyEnd) {
         strcat(dst, str_end);
     }
 }
@@ -3291,13 +3294,13 @@ void cScreenKeyboard::getCursorObjName(int keyIndex, char* dst)
         buf[0] = keyIndex + 'A' - 10;
         buf[1] = 0;
         strcat(dst, buf);
-    } else if (keyIndex == 36) {
+    } else if (keyIndex == kKeyLeft) {
         strcat(dst, str_arrLeft);
-    } else if (keyIndex == 37) {
+    } else if (keyIndex == kKeyRight) {
         strcat(dst, str_arrRight);
-    } else if (keyIndex == 38) {
+    } else if (keyIndex == kKeySpace) {
         strcat(dst, str_spc);
-    } else if (keyIndex == 39) {
+    } else if (keyIndex == kKeyEnd) {
         strcat(dst, str_end);
     }
 }

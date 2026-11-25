@@ -81,18 +81,18 @@ extern char str_whitefade[];
  *
  * @param screen    the screen that sent the event
  * @param hash  the event (a name hash)
- * @return 1 for "whitefade", else 0
+ * @return true for "whitefade"
  */
-extern "C" int cFECustom_onScreenEvent(cFECustom* self, int screen, int hash)
+extern "C" bool cFECustom_onScreenEvent(cFECustom* self, int screen, int hash)
 {
     if (hash == GetHashValue32(str_whitefade)) {
         cUIState* obj = self->mpTransitionState;
         if (obj != 0) {
             obj->handleEvent(1, 0);
         }
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1026,16 +1026,16 @@ extern char gFlowState;
 /**
  * Lets the front end lose focus once the base fade allows it, stopping any movie that is playing.
  *
- * Returns 0 while cFadeScreen_loseFocus() still refuses. Otherwise it destroys the movie player at +0xB5AD4 (On Tour
- * mpMoviePlayer; cMoviePlayer__cMoviePlayer with flags 3) and clears it, clears +0xB5AD8, cRealFE_mMovieList and +0xB5ADC, calls
- * cFEFlowState_purge on the front-end flow state gFlowState and returns 1.
+ * Returns false while cFadeScreen_loseFocus() still refuses. Otherwise it destroys the movie player at +0xB5AD4 (On
+ * Tour mpMoviePlayer; cMoviePlayer__cMoviePlayer with flags 3) and clears it, clears +0xB5AD8, cRealFE_mMovieList and
+ * +0xB5ADC, calls cFEFlowState_purge on the front-end flow state gFlowState and returns true.
  *
- * @return 1 when focus may move on, 0 to keep it
+ * @return true when focus may move on, false to keep it
  */
-int cRealFE::loseFocus()
+bool cRealFE::loseFocus()
 {
     if (cFadeScreen_loseFocus(this) == 0) {
-        return 0;
+        return false;
     }
     void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
@@ -1046,7 +1046,7 @@ int cRealFE::loseFocus()
     cRealFE_mMovieList = 0;
     mWaitRenderNum = 0;
     cFEFlowState_purge(&gFlowState);
-    return 1;
+    return true;
 }
 #endif
 
@@ -1164,33 +1164,34 @@ static inline unsigned int feCallU(int slot)
 /**
  * Draws the front end: a black backdrop while a movie is queued, otherwise the 3D scene and the UI.
  *
- * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Counts +0xB5ADC down. If cFadeScreen_drawFade (the
- * base fade) returns non-zero, or a movie player exists (+0xB5AD4; drawn with cMoviePlayer_asyncRender), it flips the frame (slot
- * 20) and returns 1. While cRealFE_mMovieList is non-zero it draws a full-screen black quad in an orthographic viewport
- * (slot 26) as a 4-vertex tri strip (slot 71). Otherwise it sets the perspective from the camera (+0x10, +0x14, +0x18
- * to slot 25) and the view matrix (+0x50 to slot 34), draws the scene with a fixed draw state (cUIEngine_render3D on the UI
- * engine at +0xC, cFERiderManager_render on the rider manager at +0xB0), then the UI (cUIEngine_render2D), flips the frame and calls
- * cSSXAudio_Update on the audio object with 0.02.
+ * Returns false when the graphics manager's slot 17 (IsRenderReady) says no. Counts +0xB5ADC down. If
+ * cFadeScreen_drawFade (the base fade) returns non-zero, or a movie player exists (+0xB5AD4; drawn with
+ * cMoviePlayer_asyncRender), it flips the frame (slot 20) and returns true. While cRealFE_mMovieList is non-zero it
+ * draws a full-screen black quad in an orthographic viewport (slot 26) as a 4-vertex tri strip (slot 71). Otherwise it
+ * sets the perspective from the camera (+0x10, +0x14, +0x18 to slot 25) and the view matrix (+0x50 to slot 34), draws
+ * the scene with a fixed draw state (cUIEngine_render3D on the UI engine at +0xC, cFERiderManager_render on the rider
+ * manager at +0xB0), then the UI (cUIEngine_render2D), flips the frame and calls cSSXAudio_Update on the audio object
+ * with 0.02.
  *
- * @return 1 when a frame was drawn, 0 when the renderer was not ready
+ * @return true when a frame was drawn, false when the renderer was not ready
  */
-int cRealFE::render()
+bool cRealFE::render()
 {
     if (feCallU(17) == 0) {
-        return 0;
+        return false;
     }
     if (mWaitRenderNum != 0) {
         mWaitRenderNum -= 1;
     }
     if (cFadeScreen_drawFade(this) != 0) {
         feCall(20);
-        return 1;
+        return true;
     }
     void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
         cMoviePlayer_asyncRender(moviePlayer, 0);
         feCall(20);
-        return 1;
+        return true;
     }
     if (cRealFE_mMovieList != 0) {
         float w = (float)feCallU(10);
@@ -1249,7 +1250,7 @@ int cRealFE::render()
         feCall(32);
         feW()->top--;
         feCall(20);
-        return 1;
+        return true;
     }
     feCall(21);
     feCall(31);
@@ -1281,7 +1282,7 @@ int cRealFE::render()
     cUIEngine_render2D(mpUI);
     feCall(20);
     cSSXAudio_Update(cAudioInterface_bxAudio(), 0, 0.019999999552965164f);
-    return 1;
+    return true;
 }
 #endif
 

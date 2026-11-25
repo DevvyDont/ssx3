@@ -14,6 +14,7 @@
 #include "fe/fememcard.h"
 #include "main/ssxapp.h"
 #include "util/bxmemcard.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveSuccess);
@@ -46,7 +47,7 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
         sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
         unsigned short* str = (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVSaveDone));
         cFEMemCard* fe2 = cFEMemCard_mInstance;
-        fe2->mPopupType = 5;
+        fe2->mPopupType = cFEMemCard::kPOP_SAVEDONE;
         fe2->getPopup(str, 1, 0, 0, 0, 0);
         cFELocale* locale2 = SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* o2vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale2);
@@ -91,7 +92,7 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
         sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
         unsigned short* str = (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVLoadDone));
         cFEMemCard* fe2 = cFEMemCard_mInstance;
-        fe2->mPopupType = 6;
+        fe2->mPopupType = cFEMemCard::kPOP_LOADDONE;
         fe2->getPopup(str, 1, 0, 0, 0, 0);
         cFELocale* locale2 = SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* o2vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale2);
@@ -139,7 +140,7 @@ extern "C" void cFEMemCard_callbackConfirmOverwrite(void)
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVOverWriteFile)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 1;
+    fe->mPopupType = cFEMemCard::kPOP_OVERWRITE;
     fe->getPopup(buf, 0, 0, 0, 1, 0);
     if (buf != 0) {
         cMemMan_free(buf);
@@ -175,7 +176,7 @@ extern "C" void cFEMemCard_confirmLoad(void)
     sVEntry<void*(void*, ...)>* vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     strcpy1(buf, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_POPUP200CreateEdit)));
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 2;
+    fe->mPopupType = cFEMemCard::kPOP_CONFIRMLOAD;
     fe->getPopup((unsigned short*)buf, 0, 0, 0, 0, 0);
     cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
     popup->setDefaultButton(1);
@@ -217,7 +218,7 @@ extern "C" void cFEMemCard_callbackConfirmLoadFailed(void)
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVLoadFailedPS2NGC)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 10;
+    fe->mPopupType = cFEMemCard::kPOP_LOADFAILED;
     fe->getPopup(buf, 1, 0, 0, 0, 0);
     cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
     sVEntry<void(void*, ...)>* mvt = (sVEntry<void(void*, ...)>*)VPTR_OF(cListNode, popup);
@@ -261,7 +262,7 @@ extern "C" void cFEMemCard_callbackConfirmSaveFailed(void)
     unsigned short name[0x100];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
-    cFEMemCard_mInstance->mPopupType = 11;
+    cFEMemCard_mInstance->mPopupType = cFEMemCard::kPOP_SAVEFAILED;
     cMCOverlayManager_getDeviceNumberString(mp, name, mp->mSelectedDevice);
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
@@ -335,7 +336,7 @@ extern "C" void cFEMemCard_callbackConfirmNoCards(void)
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
-    cFEMemCard_mInstance->mPopupType = 9;
+    cFEMemCard_mInstance->mPopupType = cFEMemCard::kPOP_NOCARD;
     if (!(mp->mSave || mp->mDelete || (mp->callbackIsLoadPressed)())) {
         cFEMemCard* fe = cFEMemCard_mInstance;
         fe->getPopup(buf, 0, 0, 0, 0, 0);
@@ -389,7 +390,7 @@ extern "C" void cFEMemCard_callbackFileCorrupt(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
     cMCOverlayManager_getDeviceNumberString(mp, name, mp->mSelectedDevice);
     mp->mpMemCard->GetTitleString(mp->mFileCursor, name2);
-    (cFEMemCard_mInstance)->mPopupType = 0xC;
+    (cFEMemCard_mInstance)->mPopupType = cFEMemCard::kPOP_CORRUPT;
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVGameCorruptPS2)), name);
@@ -434,7 +435,7 @@ extern "C" void cFEMemCard_callbackSaveFileCorrupt(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
     cMCOverlayManager_getDeviceNumberString(mp, name, mp->mSelectedDevice);
     cSSXApp* app = SSXApp;
-    cFEMemCard_mInstance->mPopupType = 13;
+    cFEMemCard_mInstance->mPopupType = cFEMemCard::kPOP_CORRUPTDELETE;
     cFELocale* locale = app->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMCorruptSavePS2)), name);
@@ -460,7 +461,7 @@ extern "C" void cMCOverlayManager_SetAction(void*, int);
  *
  * Callback for the manager's callbackFileNotFound slot (0x38), installed by cFEMemCard_initFEMemCard. Calls the screen's cancel
  * (vtable slot 41, cFEMemCard_cancel) on cFEMemCard_mInstance, clears the cancel word (+0x1E4) that cancel just set, then
- * SetState(36) (manager vtable slot 1) and cMCOverlayManager_SetAction(manager, 0).
+ * SetState(kMCOverlay_LoadFailed) (manager vtable slot 1) and cMCOverlayManager_SetAction(manager, 0).
  */
 extern "C" void cFEMemCard_callbackFileNotFound(void)
 {
@@ -469,7 +470,7 @@ extern "C" void cFEMemCard_callbackFileNotFound(void)
     void* app = SSXApp;
     cFEMemCard_mInstance->mIsCancelPressed = 0;
     cMCOverlayManager* mgr = (cMCOverlayManager*)cSSXApp_getMCManager(app);
-    mgr->SetState(36);
+    mgr->SetState(kMCOverlay_LoadFailed);
     cMCOverlayManager_SetAction(mgr, 0);
 }
 #endif
@@ -500,7 +501,7 @@ extern "C" void cFEMemCard_callbackConfirmFormat(void)
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMFormatCardPS2)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 0xE;
+    fe->mPopupType = cFEMemCard::kPOP_FORMAT;
     fe->getPopup(buf, 0, 0, 0, 1, 0);
     cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
     popup->setDefaultButton(1);
@@ -533,7 +534,7 @@ extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
     sVEntry<void*(void*, ...)>* vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     strcpy1(buf, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMOVFormatComplete)));
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 0x10;
+    fe->mPopupType = cFEMemCard::kPOP_FORMATDONE;
     fe->getPopup((unsigned short*)buf, 1, 0, 0, 0, 0);
     cFELocale* locale2 = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* vt4 = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale2);
@@ -573,7 +574,7 @@ extern "C" void cFEMemCard_callbackConfirmFormatFail(void)
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMFEFormatFailed)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 17;
+    fe->mPopupType = cFEMemCard::kPOP_FORMATFAIL;
     fe->getPopup(buf, 1, 0, 0, 0, 0);
     cFELocale* locale2 = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* o2vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale2);
@@ -604,10 +605,10 @@ extern char str_kT_MEMConfirmDeletePS2[];
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
  * same name by cFEMemCard_initFEMemCard. Only when the card (cMCOverlayManager::mpMemCard) holds a save file (its vtable
- * slot 13 counts them): sets popup 3 (+0x19C), formats "kT_MEMConfirmDeletePS2" with the name of file
+ * slot 13 counts them): sets popup kPOP_DELETE (+0x19C), formats "kT_MEMConfirmDeletePS2" with the name of file
  * mFileCursor (card slot 14) into a "Temp String" buffer, opens a two-button popup that passes updates
  * through and makes button 1 (No) the default. With no files it clears +0x1A8 and +0x1E0 when the screen
- * state (+0x1C0) is 4.
+ * state (+0x1C0) is kDELETING.
  */
 extern "C" void cFEMemCard_callbackConfirmDelete(void)
 {
@@ -616,7 +617,7 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
     cMemCard* sf = mp->mpMemCard;
     if (sf->GetNumFiles() > 0) {
         unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
-        cFEMemCard_mInstance->mPopupType = 3;
+        cFEMemCard_mInstance->mPopupType = cFEMemCard::kPOP_DELETE;
         cMemCard* sf2 = mp->mpMemCard;
         sf2->GetTitleString(mp->mFileCursor, (unsigned short*)name);
         cFELocale* locale = SSXApp->FELocale;
@@ -631,7 +632,7 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
         }
     } else {
         cFEMemCard* fe = cFEMemCard_mInstance;
-        if (fe->mState == 4) {
+        if (fe->mState == cFEMemCard::kDELETING) {
             fe->mIsProcessing = 0;
             fe->mIsDeletePressed = 0;
         }
@@ -665,7 +666,7 @@ extern "C" void cFEMemCard_callbackConfirmInvalidCard(void)
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 18;
+    fe->mPopupType = cFEMemCard::kPOP_INVALID;
     fe->getPopup(buf, 0, 0, 0, 0, 0);
     cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
     sVEntry<void(void*, ...)>* mvt = (sVEntry<void(void*, ...)>*)VPTR_OF(cListNode, popup);
@@ -719,7 +720,7 @@ extern "C" void cFEMemCard_callbackConfirmSaveTooBig(void)
     unsigned short name[0x100];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
-    cFEMemCard_mInstance->mPopupType = 19;
+    cFEMemCard_mInstance->mPopupType = cFEMemCard::kPOP_FREESPACE;
     cMCOverlayManager_getDeviceNumberString(mp, name, mp->mSelectedDevice);
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
@@ -766,7 +767,7 @@ extern "C" void cFEMemCard_callbackConfirmNoFreeBlocks(void)
     unsigned short buf[800];
     unsigned short name[16];
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    cFEMemCard_mInstance->mPopupType = 19;
+    cFEMemCard_mInstance->mPopupType = cFEMemCard::kPOP_FREESPACE;
     cMCOverlayManager_getDeviceNumberString(mp, name, mp->mSelectedDevice);
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
@@ -805,7 +806,7 @@ extern "C" void cFEMemCard_callbackFileExists(void)
 {
     cSSXApp* app = SSXApp;
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 23;
+    fe->mPopupType = cFEMemCard::kPOP_FILEEXISTS;
     sVEntry<void(void*, ...)>* vt = (sVEntry<void (void*, ...)>*)VPTR_OF(cListNode, fe);
     cFELocale* locale = app->FELocale;
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
@@ -815,7 +816,7 @@ extern "C" void cFEMemCard_callbackFileExists(void)
     cFELocale* locale2 = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* o2vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale2);
     mvt[26].fn(vthis(popup, mvt[26]), o2vt[4].fn(vthis(locale2, o2vt[4]), GetHashValue32(str_kT_CMNContinue)), 0);
-    cFEMemCard_mInstance->mState = 1;
+    cFEMemCard_mInstance->mState = cFEMemCard::kCHECKING;
 }
 #endif
 
@@ -852,7 +853,7 @@ extern "C" void cFEMemCard_callbackCardChanged(void)
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMDifferentMemcardPS2)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 0x18;
+    fe->mPopupType = cFEMemCard::kPOP_CARDCHANGED;
     fe->getPopup(buf, 1, 0, 0, 0, 0);
     cFEPopupConfirm* popup = cFEMemCard_mInstance->mStatusPopup;
     sVEntry<void(void*, ...)>* mvt = (sVEntry<void(void*, ...)>*)VPTR_OF(cListNode, popup);
@@ -862,7 +863,7 @@ extern "C" void cFEMemCard_callbackCardChanged(void)
     void* o2this = vthis(locale2, o2vt[4]);
     unsigned short* str2 = (unsigned short*)o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
-    cFEMemCard_mInstance->mState = 1;
+    cFEMemCard_mInstance->mState = cFEMemCard::kCHECKING;
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -886,7 +887,8 @@ extern char str_kT_CMNContinue[];
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
  * same name by cFEMemCard_initFEMemCard. Unless the flag at +0x204 is set it copies "kT_MEMDeleteSuccess" into a "Temp
- * String" buffer and shows it as popup 7 (+0x19C). Then a screen state (+0x1C0) of 4 is set back to 1.
+ * String" buffer and shows it as popup kPOP_DELETEDONE (+0x19C). Then a screen state (+0x1C0) of kDELETING is set
+ * back to kCHECKING.
  *
  * The popup opens through the screen's getPopup (vtable slot 36, cFEMemCard_getPopup) with one button, which the
  * popup's setButtonText (slot 26) labels "kT_CMNContinue".
@@ -901,7 +903,7 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
         sVEntry<void*(void*, ...)>* vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
         strcpy1(buf, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMDeleteSuccess)));
         cFEMemCard* fe = cFEMemCard_mInstance;
-        fe->mPopupType = 7;
+        fe->mPopupType = cFEMemCard::kPOP_DELETEDONE;
         fe->getPopup((unsigned short*)buf, 1, 0, 0, 0, 0);
         cFELocale* locale2 = SSXApp->FELocale;
         sVEntry<void*(void*, ...)>* o2vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale2);
@@ -913,8 +915,8 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
         }
     }
     cFEMemCard* fe = cFEMemCard_mInstance;
-    if (fe->mState == 4) {
-        fe->mState = 1;
+    if (fe->mState == cFEMemCard::kDELETING) {
+        fe->mState = cFEMemCard::kCHECKING;
     }
     return 1;
 }
@@ -948,7 +950,7 @@ extern "C" int cFEMemCard_callbackDeleteFailed(void)
     sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale);
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVDeleteFailedError)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mPopupType = 0x8;
+    fe->mPopupType = cFEMemCard::kPOP_DELETEFAIL;
     fe->getPopup(buf, 1, 0, 0, 0, 0);
     cFELocale* locale2 = SSXApp->FELocale;
     sVEntry<void*(void*, ...)>* o2vt = (sVEntry<void*(void*, ...)>*)VPTR_OF(cUILocaleInterface, locale2);
@@ -985,21 +987,21 @@ extern "C" void cFEMemCard_callbackCardsChecked(void)
     int next = mp->mSelectedDevice + 1;
     if (next < mp->mMaxDevices) {
         cMCOverlayManager_selectDevice(mp, next);
-        mp->SetState(49);
+        mp->SetState(kMCOverlay_InitCardsCheck);
         return;
     }
     cMCOverlayManager_selectDevice(mp, 0);
     if (mp->mpMemCard->IsAvailable(0) == 0) {
         cFEMemCard* fe = cFEMemCard_mInstance;
         if (fe->mAutoSaveOn != 0) {
-            fe->mState = 6;
-            mp->SetState(2);
+            fe->mState = cFEMemCard::kDONE;
+            mp->SetState(kMCOverlay_CheckCardsWait);
             return;
         }
         cMCOverlayManager_OnHighlightNextDevice(mp);
     }
     cMCOverlayManager_setSelectedDevice(mp);
-    mp->SetState(54);
+    mp->SetState(kMCOverlay_InitFileCheckDevice);
 }
 #endif
 
@@ -1013,22 +1015,23 @@ extern char str_kT_MEMNoCardsPS2[];
 
 
 /**
- * Shows the "no memory cards" message in the screen's "text box message" object and switches to display state 1.
+ * Shows the "no memory cards" message in the screen's "text box message" object and switches to display state
+ * kDISPLAY_OFF.
  *
  * Callback for the memory-card manager's callbackDisplayNoCards slot (0x9C), installed by cFEMemCard_initFEMemCard; many
- * memory-card screens also call it directly. Sets the screen state (+0x1C0 of cFEMemCard_mInstance) to 1; when the
- * display state (+0x214) is not 1 yet it records 1 there and calls triggerDisplayState (vtable slot 35,
- * cFEMemCard_triggerDisplayState) with 1. When the screen has a "text box message" object, the localized
- * kT_MEMNoCardsPS2 text is copied into a 2000-byte "Temp String" buffer, word-wrapped into the object
+ * memory-card screens also call it directly. Sets the screen state (+0x1C0 of cFEMemCard_mInstance) to kCHECKING;
+ * when the display state (+0x214) is not kDISPLAY_OFF yet it records kDISPLAY_OFF there and calls triggerDisplayState
+ * (vtable slot 35, cFEMemCard_triggerDisplayState) with it. When the screen has a "text box message" object, the
+ * localized kT_MEMNoCardsPS2 text is copied into a 2000-byte "Temp String" buffer, word-wrapped into the object
  * (cUIText_setUnicodeStringWrap) and the object is shown (slot 9 with 1).
  */
 extern "C" void cFEMemCard_callbackDisplayNoCards(void)
 {
     cFEMemCard* fe = cFEMemCard_mInstance;
-    fe->mState = 1;
-    if (fe->mScreenStatus != 1) {
-        fe->mScreenStatus = 1;
-        fe->triggerDisplayState(1);
+    fe->mState = cFEMemCard::kCHECKING;
+    if (fe->mScreenStatus != cFEMemCard::kDISPLAY_OFF) {
+        fe->mScreenStatus = cFEMemCard::kDISPLAY_OFF;
+        fe->triggerDisplayState(cFEMemCard::kDISPLAY_OFF);
     }
     cUIThing* obj = cUIScreen_getObjectByHashName(cFEMemCard_mInstance->mpScreen, GetHashValue32(str_text_box_message));
     if (obj) {
@@ -1051,18 +1054,19 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDisplayNoFiles);
 
 
 /**
- * Switches the memory-card screen to display state 2 when no files were found, while the screen is still starting.
+ * Switches the memory-card screen to display state kDISPLAY_FILES when no files were found, while the screen is still
+ * starting.
  *
  * Callback for the memory-card manager's callbackDisplayNoFiles slot (0x98), installed by cFEMemCard_initFEMemCard. Only when the
- * screen state (+0x1C0 of cFEMemCard_mInstance) is 0 and the display state (+0x214) is not already 2: records 2 and
- * calls triggerDisplayState (vtable slot 35) with 2.
+ * screen state (+0x1C0 of cFEMemCard_mInstance) is kSTART and the display state (+0x214) is not already
+ * kDISPLAY_FILES: records kDISPLAY_FILES and calls triggerDisplayState (vtable slot 35) with it.
  */
 extern "C" void cFEMemCard_callbackDisplayNoFiles(void)
 {
     cFEMemCard* fe = cFEMemCard_mInstance;
-    if (fe->mScreenStatus != 2 && fe->mState == 0) {
-        fe->mScreenStatus = 2;
-        fe->triggerDisplayState(2);
+    if (fe->mScreenStatus != cFEMemCard::kDISPLAY_FILES && fe->mState == 0) {
+        fe->mScreenStatus = cFEMemCard::kDISPLAY_FILES;
+        fe->triggerDisplayState(cFEMemCard::kDISPLAY_FILES);
     }
 }
 #endif
@@ -1105,8 +1109,8 @@ static inline void SetMode_001D83A8(char* vfe, int mode)
 extern "C" void cFEMemCard_callbackFileChecked(void)
 {
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    cFEMemCard_mInstance->mState = 1;
-    mp->SetState(2);
+    cFEMemCard_mInstance->mState = cFEMemCard::kCHECKING;
+    mp->SetState(kMCOverlay_CheckCardsWait);
     cMemCard* sf = mp->mpMemCard;
     int busy = sf->IsAvailable1();
     if (busy) {
@@ -1146,10 +1150,10 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
  * Opens the memory-card screen's confirmation popup, or re-initialises the one already open.
  *
  * Vtable slot +0x124 of the memory-card screens. Clears the status-popup flag (+0x210) unless the popup id (+0x19C of
- * cFEMemCard_mInstance) is 22. An existing popup (+0x218) gets initPopup (popup vtable slot 28) with the six arguments;
- * otherwise a cFEPopupConfirm is allocated (cMemMan_alloc(3068, "cFEPopupConfirm", 0x100, 0)), constructed with the
- * instance's engine (+0x10) and the instance as parent, stored in +0x218 and pushed onto the engine's state stack
- * (+0x18, cUIStateStack_pushPopup). For popup id 1 it makes button 1 the default (popup slot 25).
+ * cFEMemCard_mInstance) is kPOP_STATUS. An existing popup (+0x218) gets initPopup (popup vtable slot 28) with the six
+ * arguments; otherwise a cFEPopupConfirm is allocated (cMemMan_alloc(3068, "cFEPopupConfirm", 0x100, 0)), constructed
+ * with the instance's engine (+0x10) and the instance as parent, stored in +0x218 and pushed onto the engine's state
+ * stack (+0x18, cUIStateStack_pushPopup). For popup id kPOP_OVERWRITE it makes button 1 the default (popup slot 25).
  *
  * Reads the popup id through cFEMemCard_mInstance but writes +0x210 and +0x218 through @p self_; callers pass the
  * instance.
@@ -1165,7 +1169,7 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, unsigned short* displayText, int yesOnly, int noButtons,
                                     int layerOffset, int passUpdate, int snowFlake)
 {
-    if (cFEMemCard_mInstance->mPopupType != 22) {
+    if (cFEMemCard_mInstance->mPopupType != cFEMemCard::kPOP_STATUS) {
         self_->mIsStatusPopupOn = 0;
     }
     cFEPopupConfirm* existingPopup = self_->mStatusPopup;
@@ -1179,7 +1183,7 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, unsigned short* displayTe
         self_->mStatusPopup = n;
         cUIStateStack_pushPopup(&self_->mpEngine->mStateStack, n);
     }
-    if (cFEMemCard_mInstance->mPopupType == 1) {
+    if (cFEMemCard_mInstance->mPopupType == cFEMemCard::kPOP_OVERWRITE) {
         self_->mStatusPopup->setDefaultButton(1);
     }
 }
@@ -1190,16 +1194,16 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exitDelete);
 #ifdef SKIP_ASM
 
 /**
- * Leaves the delete flow: screen state 4 (deleting) goes back to 1, and +0x1A8 and the delete word (+0x1E0) are
- * cleared.
+ * Leaves the delete flow: screen state kDELETING goes back to kCHECKING, and +0x1A8 and the delete word (+0x1E0)
+ * are cleared.
  *
  * Vtable slot +0x174 of the memory-card screens; works on cFEMemCard_mInstance. +0x1E0 is the word
  * cFEMemCard_isDeletePressed returns.
  */
 extern "C" void cFEMemCard_exitDelete(void)
 {
-    if (cFEMemCard_mInstance->mState == 4) {
-        cFEMemCard_mInstance->mState = 1;
+    if (cFEMemCard_mInstance->mState == cFEMemCard::kDELETING) {
+        cFEMemCard_mInstance->mState = cFEMemCard::kCHECKING;
     }
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->mIsProcessing = 0;
@@ -1216,7 +1220,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exit__FPv);
 void cFEMemCard_exit(void* vself)
 {
     cFEMemCard* self = (cFEMemCard*)vself;
-    self->mState = 6;
+    self->mState = cFEMemCard::kDONE;
 }
 #endif
 
@@ -1235,7 +1239,7 @@ extern "C" void cFEMemCard_startLoad(cFEMemCard* self)
 {
     self->SetLoadPressed(1);
     self->mIsProcessing = 1;
-    self->mState = 5;
+    self->mState = cFEMemCard::kLOADING;
     self->displayStatusPopup();
 }
 #endif
@@ -1263,54 +1267,55 @@ static inline void notifyK1D8700(char* vself, char* mp)
 /**
  * Handles a button on the memory-card screen's popup, by popup id (+0x19C).
  *
- * Buttons 0xF, 0x10 and 0x11 are choices 0, 1 and 2. "Cancel" is vtable slot 41 (cFEMemCard_cancel); "finish" means that on
- * an auto-load screen (+0x204 is 1) the manager's mCurrDeviceStateAck is set to 1 and vtable slot 40 (cFEMemCard_exit,
- * state 6) runs. Per popup:
- * - 2: choice 0 starts the load (slot 45), else screen state (+0x1C0) 1.
- * - 19: choice 0 clears the overwrite word (+0x1F0), cancels, finishes; else sets the retry word (+0x1EC).
- * - 1 and 13: choice 0 sets state 3 and +0x1F0 (overwrite), else cancel and finish.
- * - 9: choice 0 cancels and finishes, else retry. 18: choice 0 retries, else cancel and finish.
- * - 10: choice 0 cancels and finishes. 11: clears +0x1F0, cancels, finishes.
- * - 4, 5, 6: slot 40.
- * - 3: clears +0x1B0; choice 0 sets +0x1A8 and the delete word (+0x1E0), else cancel and finish.
- * - 12: choice 0 cancels, sets state 1, finishes; choice 1 retries; choice 2 opens popup 13 (cFEMemCard_callbackSaveFileCorrupt) and returns
- *   at once.
- * - 7: clears +0x1A8 and +0x1E0, cancels when the load word (+0x1F4) is set, sets +0x1A8 again when the save word
- *   (+0x1DC) is set, finishes.
- * - 16: clears the format word (+0x1E8) and the load request (cFEMemCard_SetLoadPressed 0), sets +0x1A8 only when the
+ * Buttons kONSCREENPOPUPOPTION0 .. kONSCREENPOPUPOPTION2 are choices 0, 1 and 2. "Cancel" is vtable slot 41
+ * (cFEMemCard_cancel); "finish" means that on an auto-load screen (+0x204 is 1) the manager's mCurrDeviceStateAck is
+ * set to 1 and vtable slot 40 (cFEMemCard_exit, state kDONE) runs. Per popup:
+ * - kPOP_CONFIRMLOAD: choice 0 starts the load (slot 45), else screen state (+0x1C0) kCHECKING.
+ * - kPOP_FREESPACE: choice 0 clears the overwrite word (+0x1F0), cancels, finishes; else sets the retry word (+0x1EC).
+ * - kPOP_OVERWRITE and kPOP_CORRUPTDELETE: choice 0 sets state kSAVING and +0x1F0 (overwrite), else cancel and finish.
+ * - kPOP_NOCARD: choice 0 cancels and finishes, else retry. kPOP_INVALID: choice 0 retries, else cancel and finish.
+ * - kPOP_LOADFAILED: choice 0 cancels and finishes. kPOP_SAVEFAILED: clears +0x1F0, cancels, finishes.
+ * - kPOP_MESSAGE, kPOP_SAVEDONE, kPOP_LOADDONE: slot 40.
+ * - kPOP_DELETE: clears +0x1B0; choice 0 sets +0x1A8 and the delete word (+0x1E0), else cancel and finish.
+ * - kPOP_CORRUPT: choice 0 cancels, sets state kCHECKING, finishes; choice 1 retries; choice 2 opens popup
+ *   kPOP_CORRUPTDELETE (cFEMemCard_callbackSaveFileCorrupt) and returns at once.
+ * - kPOP_DELETEDONE: clears +0x1A8 and +0x1E0, cancels when the load word (+0x1F4) is set, sets +0x1A8 again when the
  *   save word (+0x1DC) is set, finishes.
- * - 17: clears +0x1E8 and cancels. 14 and 15: clear +0x1B0; choice 0 sets +0x1A8 and +0x1E8, choice 1 clears +0x1E8,
- *   cancels, finishes.
- * - 8, 23, 24: cancel.
+ * - kPOP_FORMATDONE: clears the format word (+0x1E8) and the load request (cFEMemCard_SetLoadPressed 0), sets +0x1A8
+ *   only when the save word (+0x1DC) is set, finishes.
+ * - kPOP_FORMATFAIL: clears +0x1E8 and cancels. kPOP_FORMAT and kPOP_FORMATNGC: clear +0x1B0; choice 0 sets +0x1A8
+ *   and +0x1E8, choice 1 clears +0x1E8, cancels, finishes.
+ * - kPOP_DELETEFAIL, kPOP_FILEEXISTS, kPOP_CARDCHANGED: cancel.
  *
- * Unless the popup id is 22, cUIStateStack_pop then flags the top state of the engine's state stack (+0x18) to close;
- * +0x210 is cleared. Event 22 (popup closed) clears the words +0x1A4 and +0x1A0 when +0x1A0 is set; otherwise it clears
- * +0x210 (popup id 22 only) and the instance's popup pointer (+0x218).
+ * Unless the popup id is kPOP_STATUS, cUIStateStack_pop then flags the top state of the engine's state stack (+0x18) to
+ * close; +0x210 is cleared. kONPOPUPDESTROY (popup closed) clears the words +0x1A4 and +0x1A0 when +0x1A0 is set;
+ * otherwise it clears +0x210 (popup id kPOP_STATUS only) and the instance's popup pointer (+0x218).
  *
  * @param self_  the memory-card screen
  * @param popup  the popup state that sent the event (unused)
- * @param button  the popup event: 0xF / 0x10 / 0x11 for buttons 0-2, 22 when the popup closes
+ * @param button  the popup event: kONSCREENPOPUPOPTION0 .. kONSCREENPOPUPOPTION2 for buttons 0-2, kONPOPUPDESTROY
+ *                when the popup closes
  */
 extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button)
 {
     cFEMemCard* self = (cFEMemCard*)self_;
-    if (button >= 0xF && button <= 17) {
+    if (button >= cUIState::kONSCREENPOPUPOPTION0 && button <= cUIState::kONSCREENPOPUPOPTION2) {
         int choice = 0;
-        if (button == 0x10) {
+        if (button == cUIState::kONSCREENPOPUPOPTION1) {
             choice = 1;
-        } else if (button == 17) {
+        } else if (button == cUIState::kONSCREENPOPUPOPTION2) {
             choice = 2;
         }
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         switch (self->mPopupType) {
-        case 2:
+        case cFEMemCard::kPOP_CONFIRMLOAD:
             if (choice == 0) {
                 VCALL_K1D8700(self, 45);
             } else {
-                self->mState = 1;
+                self->mState = cFEMemCard::kCHECKING;
             }
             break;
-        case 19:
+        case cFEMemCard::kPOP_FREESPACE:
             if (choice == 0) {
                 self->mIsOverwriteOK = 0;
                 VCALL_K1D8700(self, 41);
@@ -1319,16 +1324,16 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
                 self->mIsRetryPressed = 1;
             }
             break;
-        case 1:
+        case cFEMemCard::kPOP_OVERWRITE:
             if (choice != 0) {
                 VCALL_K1D8700(self, 41);
                 notifyK1D8700(((char*)self), mp);
             } else {
-                self->mState = 3;
+                self->mState = cFEMemCard::kSAVING;
                 self->mIsOverwriteOK = 1;
             }
             break;
-        case 9:
+        case cFEMemCard::kPOP_NOCARD:
             if (choice == 0) {
                 VCALL_K1D8700(self, 41);
                 notifyK1D8700(((char*)self), mp);
@@ -1336,7 +1341,7 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
                 self->mIsRetryPressed = 1;
             }
             break;
-        case 18:
+        case cFEMemCard::kPOP_INVALID:
             if (choice == 0) {
                 self->mIsRetryPressed = 1;
             } else {
@@ -1344,23 +1349,23 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
                 notifyK1D8700(((char*)self), mp);
             }
             break;
-        case 10:
+        case cFEMemCard::kPOP_LOADFAILED:
             if (choice == 0) {
                 VCALL_K1D8700(self, 41);
                 notifyK1D8700(((char*)self), mp);
             }
             break;
-        case 11:
+        case cFEMemCard::kPOP_SAVEFAILED:
             self->mIsOverwriteOK = 0;
             VCALL_K1D8700(self, 41);
             notifyK1D8700(((char*)self), mp);
             break;
-        case 4:
-        case 5:
-        case 6:
+        case cFEMemCard::kPOP_MESSAGE:
+        case cFEMemCard::kPOP_SAVEDONE:
+        case cFEMemCard::kPOP_LOADDONE:
             VCALL_K1D8700(self, 40);
             break;
-        case 3:
+        case cFEMemCard::kPOP_DELETE:
             self->mIsLoadWait = 0;
             if (choice == 0) {
                 self->mIsProcessing = 1;
@@ -1370,10 +1375,10 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
                 notifyK1D8700(((char*)self), mp);
             }
             break;
-        case 12:
+        case cFEMemCard::kPOP_CORRUPT:
             if (choice == 0) {
                 VCALL_K1D8700(self, 41);
-                self->mState = 1;
+                self->mState = cFEMemCard::kCHECKING;
                 notifyK1D8700(((char*)self), mp);
             } else if (choice == 1) {
                 self->mIsRetryPressed = 1;
@@ -1382,16 +1387,16 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
                 return;
             }
             break;
-        case 13:
+        case cFEMemCard::kPOP_CORRUPTDELETE:
             if (choice == 0) {
-                self->mState = 3;
+                self->mState = cFEMemCard::kSAVING;
                 self->mIsOverwriteOK = 1;
             } else {
                 VCALL_K1D8700(self, 41);
                 notifyK1D8700(((char*)self), mp);
             }
             break;
-        case 7:
+        case cFEMemCard::kPOP_DELETEDONE:
             self->mIsProcessing = 0;
             self->mIsDeletePressed = 0;
             if (self->mIsLoadPressed != 0) {
@@ -1402,7 +1407,7 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
             }
             notifyK1D8700(((char*)self), mp);
             break;
-        case 16:
+        case cFEMemCard::kPOP_FORMATDONE:
             self->mIsFormatPressed = 0;
             self->SetLoadPressed(0);
             if (self->mIsSavePressed != 0) {
@@ -1412,12 +1417,12 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
             }
             notifyK1D8700(((char*)self), mp);
             break;
-        case 17:
+        case cFEMemCard::kPOP_FORMATFAIL:
             self->mIsFormatPressed = 0;
             VCALL_K1D8700(self, 41);
             break;
-        case 14:
-        case 15:
+        case cFEMemCard::kPOP_FORMAT:
+        case cFEMemCard::kPOP_FORMATNGC:
             self->mIsLoadWait = 0;
             if (choice == 0) {
                 self->mIsProcessing = 1;
@@ -1428,19 +1433,19 @@ extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button
                 notifyK1D8700(((char*)self), mp);
             }
             break;
-        case 8:
-        case 23:
+        case cFEMemCard::kPOP_DELETEFAIL:
+        case cFEMemCard::kPOP_FILEEXISTS:
             VCALL_K1D8700(self, 41);
             break;
-        case 24:
+        case cFEMemCard::kPOP_CARDCHANGED:
             VCALL_K1D8700(self, 41);
             break;
         }
-        if (self->mPopupType != 22) {
+        if (self->mPopupType != cFEMemCard::kPOP_STATUS) {
             cUIStateStack_pop(&cFEMemCard_mInstance->mpEngine->mStateStack, 1);
         }
         self->mIsStatusPopupOn = 0;
-    } else if (button == 22) {
+    } else if (button == cUIState::kONPOPUPDESTROY) {
         cFEMemCard* fe = cFEMemCard_mInstance;
         if (fe->mProcessingKeyboard != 0) {
             fe->mpKeyboard = 0;
@@ -1475,7 +1480,7 @@ extern "C" void cFEMemCard_cancel(cFEMemCard* self)
     self->mIsLoadWait = 0;
     self->mIsCancelPressed = 1;
     self->SetLoadPressed(0);
-    self->mState = 2;
+    self->mState = cFEMemCard::kSKIP;
     self->mIsDeletePressed = 0;
     self->mIsFormatPressed = 0;
     self->mIsSavePressed = 0;
@@ -1493,7 +1498,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exitSave__FPv);
 void cFEMemCard::exitSave()
 {
     mIsProcessing = 0;
-    mState = 1;
+    mState = kCHECKING;
     mIsSavePressed = 0;
 }
 #endif
@@ -1523,14 +1528,14 @@ extern char str_right_arr[];
 extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
 {
     int handled = 0;
-    if (self->mIsProcessing == 1)
+    if (self->mIsProcessing == true)
         return 0;
     if (input->isLeft()) {
         handled = 1;
         self->mDoPrevMemCard = handled;
         if (self->mpScreen) {
             unsigned short frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_left_arr));
-            if (frame != 0xFFFF)
+            if (frame != cUIScreen::kNoFrame)
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     } else {
@@ -1539,7 +1544,7 @@ extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
             self->mDoNextMemCard = handled;
             if (self->mpScreen) {
                 unsigned short frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_right_arr));
-                if (frame != 0xFFFF)
+                if (frame != cUIScreen::kNoFrame)
                     cUIScreen_playFrame(self->mpScreen, frame, 1);
             }
         }
@@ -1566,7 +1571,7 @@ extern "C" void cFEMemCard_displayStatusPopup(cFEMemCard* self)
 {
     unsigned short buf[800];
     void* obj = cSSXApp_getMCManager(SSXApp);
-    self->mPopupType = 22;
+    self->mPopupType = cFEMemCard::kPOP_STATUS;
     cMCOverlayManager_GetMessage(obj, buf, 800);
     self->getPopup(buf, 1, 1, 0, 0, 1);
     self->mIsStatusPopupOn = 1;
@@ -1601,16 +1606,20 @@ extern char str_onmenu[];
  *
  * Without a popup (mStatusPopup) and with no keyboard (mpKeyboard) it runs the base update: cOVState_onUpdate in game
  * (SSXApp->Game set), cUIState_onUpdate otherwise. The first time (mIsManagerStarted clear) it starts the manager
- * (cMCOverlayManager_ManagerStart), sets mIsManagerStarted, display state 1 (mScreenStatus and triggerDisplayState)
- * and the manager's InitCardsCheck (49). cMCOverlayManager_update runs unless mState is 6 and the card work is over;
+ * (cMCOverlayManager_ManagerStart), sets mIsManagerStarted, display state kDISPLAY_OFF (mScreenStatus and
+ * triggerDisplayState) and the manager's kMCOverlay_InitCardsCheck. cMCOverlayManager_update runs unless mState is
+ * kDONE and the card work is over;
  * busy means mIsLoadWait is 1 and cMCOverlayManager_isManagerDone is false, or mIsLoadWait is 0 and the card's IsBusy
- * is true. mState picks the handler: 0 updateStart, 1 updateChecking, 2 updateSkip, 3 updateSaving, 4 updateDeleting,
- * 5 updateLoading, 6 updateDone (only when not busy). With no status popup (mIsStatusPopupOn) and neither auto-load
- * nor auto-save set, a manager mState of 11, 15-18, 25, 26, 31-34, 40 or 44 (format, save, load and delete progress)
- * opens the status popup (displayStatusPopup); while it is open its text is refreshed (cMCOverlayManager_GetMessage,
- * then the popup's setMessage). Then displayStatus. Without a popup and when the card's IsFileInfoValid (the last
- * operation's outcome) is set, the selected slot (the "onmenu" menu's mScrollItemCurrent, else mSlot) decides
- * hideDeleteButton and hideMainButton: no file in the slot (the card's HasFileName) or no card (IsAvailable1).
+ * is true. mState picks the handler: kSTART updateStart, kCHECKING updateChecking, kSKIP updateSkip, kSAVING
+ * updateSaving, kDELETING updateDeleting, kLOADING updateLoading, kDONE updateDone (only when not busy). With no status
+ * popup (mIsStatusPopupOn) and neither auto-load nor auto-save set, a manager mState in a format, save, load or delete
+ * progress state (kMCOverlay_FormatProgress, kMCOverlay_InitFormatProgress, kMCOverlay_CreateFile ..
+ * kMCOverlay_SaveClosing, kMCOverlay_DeleteProgress, kMCOverlay_DeleteDoneWait, kMCOverlay_InitDeleteProgress,
+ * kMCOverlay_LoadStart .. kMCOverlay_LoadDoneWait) opens the status popup (displayStatusPopup); while it is open its
+ * text is refreshed (cMCOverlayManager_GetMessage, then the popup's setMessage). Then displayStatus. Without a popup
+ * and when the card's IsFileInfoValid (the last operation's outcome) is set, the selected slot (the "onmenu" menu's
+ * mScrollItemCurrent, else mSlot) decides hideDeleteButton and hideMainButton: no file in the slot (the card's
+ * HasFileName) or no card (IsAvailable1).
  *
  * @param self  the memory-card screen
  */
@@ -1627,33 +1636,33 @@ extern "C" void cFEMemCard_onUpdate(cFEMemCard* self)
     if (self->mIsManagerStarted == 0) {
         cMCOverlayManager_ManagerStart(mp);
         self->mIsManagerStarted = 1;
-        self->mScreenStatus = 1;
-        self->triggerDisplayState(1);
-        mp->SetState(49);
+        self->mScreenStatus = cFEMemCard::kDISPLAY_OFF;
+        self->triggerDisplayState(cFEMemCard::kDISPLAY_OFF);
+        mp->SetState(kMCOverlay_InitCardsCheck);
     }
-    if (self->mState != 6 || MEMCARD_BUSY(self, mp)) {
+    if (self->mState != cFEMemCard::kDONE || MEMCARD_BUSY(self, mp)) {
         cMCOverlayManager_update(mp);
     }
     switch (self->mState) {
-    case 0:
+    case cFEMemCard::kSTART:
         self->updateStart();
         break;
-    case 1:
+    case cFEMemCard::kCHECKING:
         self->updateChecking();
         break;
-    case 2:
+    case cFEMemCard::kSKIP:
         self->updateSkip();
         break;
-    case 3:
+    case cFEMemCard::kSAVING:
         self->updateSaving();
         break;
-    case 4:
+    case cFEMemCard::kDELETING:
         self->updateDeleting();
         break;
-    case 5:
+    case cFEMemCard::kLOADING:
         self->updateLoading();
         break;
-    case 6:
+    case cFEMemCard::kDONE:
         {
             cMCOverlayManager* mp2 = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
             if (!MEMCARD_BUSY(self, mp2))
@@ -1663,8 +1672,13 @@ extern "C" void cFEMemCard_onUpdate(cFEMemCard* self)
     }
     if (cFEMemCard_mInstance->mIsStatusPopupOn == 0 && cFEMemCard_mInstance->mAutoSaveOn == 0 && cFEMemCard_mInstance->mAutoLoadOn == 0) {
         int managerState = mp->mState;
-        if (managerState == 40 || managerState == 11 || managerState == 0xF || managerState == 0x10 || managerState == 17 || managerState == 18 || managerState == 0x1F
-            || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 44 || managerState == 25 || managerState == 26) {
+        if (managerState == kMCOverlay_InitFormatProgress || managerState == kMCOverlay_FormatProgress
+            || managerState == kMCOverlay_CreateFile || managerState == kMCOverlay_SaveFile
+            || managerState == kMCOverlay_SaveProgress || managerState == kMCOverlay_SaveClosing
+            || managerState == kMCOverlay_LoadStart || managerState == kMCOverlay_LoadClosing
+            || managerState == kMCOverlay_LoadProgress || managerState == kMCOverlay_LoadDoneWait
+            || managerState == kMCOverlay_InitDeleteProgress || managerState == kMCOverlay_DeleteProgress
+            || managerState == kMCOverlay_DeleteDoneWait) {
             self->displayStatusPopup();
         }
     }
@@ -1720,7 +1734,7 @@ extern "C" void cFEMemCard_setMenuHighlight(cFEMemCard* self)
         if (((void*)item) == 0 || ((item->mAttr >> 5) & 1)) {
             idx = cUIMenu_findFirstHighlightable(menu, 0);
         }
-        if (idx != 0xFF) {
+        if (idx != cUIMenu::kNoItem) {
             cUIMenu_setSelectedByIndex(menu, idx);
             self->mSlot = idx;
         } else {
@@ -1763,17 +1777,17 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateStart);
 #ifdef SKIP_ASM
 
 /**
- * Switches the memory-card screen to display state 1 unless it is already there.
+ * Switches the memory-card screen to display state kDISPLAY_OFF unless it is already there.
  *
- * When the display state (+0x214) is not 1, sets it to 1 and calls vtable entry 35 (cFEMemCard_triggerDisplayState)
- * with 1. Fills vtable entry 31 (+0xFC) of the memory-card states (cFEStateMemCard, cFEStateProfileLoad,
- * cFEStateOptionsDeviceSelect), between the empty update entries and the skip handler.
+ * When the display state (+0x214) is not kDISPLAY_OFF, sets it and calls vtable entry 35
+ * (cFEMemCard_triggerDisplayState) with it. Fills vtable entry 31 (+0xFC) of the memory-card states (cFEStateMemCard,
+ * cFEStateProfileLoad, cFEStateOptionsDeviceSelect), between the empty update entries and the skip handler.
  */
 extern "C" void cFEMemCard_updateStart(cFEMemCard* self)
 {
-    if (self->mScreenStatus != 1) {
-        self->mScreenStatus = 1;
-        self->triggerDisplayState(1);
+    if (self->mScreenStatus != cFEMemCard::kDISPLAY_OFF) {
+        self->mScreenStatus = cFEMemCard::kDISPLAY_OFF;
+        self->triggerDisplayState(cFEMemCard::kDISPLAY_OFF);
     }
 }
 #endif
@@ -1798,7 +1812,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateSkip__FPv);
 void cFEMemCard_updateSkip(void* vself)
 {
     cFEMemCard* self = (cFEMemCard*)vself;
-    self->mState = 1;
+    self->mState = cFEMemCard::kCHECKING;
 }
 #endif
 
@@ -1839,15 +1853,15 @@ void cFEMemCard_updateLoading(void* self)
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onLoseTransition);
 #ifdef SKIP_ASM
 /**
- * Reports whether the memory-card screen may finish its leaving transition: the screen state (+0x1C0) is 6.
+ * Reports whether the memory-card screen may finish its leaving transition: the screen state (+0x1C0) is kDONE.
  *
  * Installed in the cUIState onLoseTransition entry (vtable entry 10) of the memory-card states.
  *
- * @return 1 when the screen state is 6, else 0
+ * @return true when the screen state is kDONE
  */
-extern "C" int cFEMemCard_onLoseTransition(cFEMemCard* self)
+extern "C" bool cFEMemCard_onLoseTransition(cFEMemCard* self)
 {
-    return self->mState == 6;
+    return self->mState == cFEMemCard::kDONE;
 }
 #endif
 
@@ -1911,11 +1925,11 @@ extern char str_kT_MEMFECheckingCardPS2[];
 /**
  * Switches the memory-card screen's display state: moves the menu focus and jumps to that state's frame.
  *
- * Stores @p state at +0x214. States 1 and 2 take the focus from "onmenu" to "offmenu", jump to the "off" or
- * "file display" frame label and show "kT_MEMFECheckingCardPS2" for the selected slot (mSelectedDevice + 1)
- * in "text box message". State 3 focuses "onmenu" and jumps to "on"; any other value is only stored.
+ * Stores @p state at +0x214. kDISPLAY_OFF and kDISPLAY_FILES take the focus from "onmenu" to "offmenu", jump to the
+ * "off" or "file display" frame label and show "kT_MEMFECheckingCardPS2" for the selected slot (mSelectedDevice + 1)
+ * in "text box message". kDISPLAY_ON focuses "onmenu" and jumps to "on"; any other value is only stored.
  *
- * @param state  the display state, 1 to 3 (On Tour gotoScreenState)
+ * @param state  the display state, kDISPLAY_OFF .. kDISPLAY_ON (On Tour gotoScreenState)
  */
 extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
 {
@@ -1923,7 +1937,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     int frame = 0xFFFF;
     self->mScreenStatus = state;
     switch (state) {
-    case 1: {
+    case cFEMemCard::kDISPLAY_OFF: {
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             widget->setFocus(0);
@@ -1948,7 +1962,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
         }
         break;
     }
-    case 2: {
+    case cFEMemCard::kDISPLAY_FILES: {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
@@ -1973,7 +1987,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
         }
         break;
     }
-    case 3: {
+    case cFEMemCard::kDISPLAY_ON: {
         cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             widget->setFocus(1);
@@ -1986,7 +2000,7 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
         break;
     }
     }
-    if (frame != 0xFFFF)
+    if (frame != cUIScreen::kNoFrame)
         cUIScreen_jumpToFrame(self->mpScreen, frame);
 }
 #endif
@@ -2061,9 +2075,10 @@ static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) =
 /**
  * Reports whether the memory-card screen may show the file display now.
  *
- * True only when the screen state (+0x1C0) is neither 0 nor 6, the memory-card overlay manager
+ * True only when the screen state (+0x1C0) is neither kSTART nor kDONE, the memory-card overlay manager
  * (cSSXApp_getMCManager(SSXApp)) has mCheckAllowed set and mGetDir clear, its card (mpMemCard) answers 0 from virtual
- * slot 11, the manager's mState is neither 6 nor 1, and the card answers non-zero from virtual slot 75.
+ * slot 11, the manager's mState is neither kMCOverlay_ReadingCard nor kMCOverlay_Done, and the card answers non-zero
+ * from virtual slot 75.
  *
  * @return 1 when all the checks pass, else 0
  */
@@ -2073,9 +2088,9 @@ extern "C" int cFEMemCard_displayFileOK(cFEMemCard* self)
     int one = 1;
     cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     int st = self->mState;
-    if (st != 0 && st != 6 && mp->mCheckAllowed != 0 && mp->mGetDir == 0
+    if (st != cFEMemCard::kSTART && st != cFEMemCard::kDONE && mp->mCheckAllowed != 0 && mp->mGetDir == 0
         && mp->mpMemCard->IsBusy() == 0) {
-        if (!IsModeK1D9880(((char*)mp), 6) && !IsModeK1D9880(((char*)mp), 1)) {
+        if (!IsModeK1D9880(((char*)mp), kMCOverlay_ReadingCard) && !IsModeK1D9880(((char*)mp), kMCOverlay_Done)) {
             if (mp->mpMemCard->IsFileInfoValid() != 0) {
                 allowed = one;
             }
@@ -2097,24 +2112,24 @@ extern char str_read_buffer[];
  * Allocates the memory-card screen's read buffer, freeing the one it owns first.
  *
  * When +0x228 says a buffer is owned, frees the block at +0x1D4 and clears both. The new block (tag "read
- * buffer") goes to +0x1D0 and +0x1D4, and +0x228 is set to 1.
+ * buffer") goes to +0x1D0 and +0x1D4, and +0x228 is set to keBufferState_Valid.
  *
  * @param size  size of the buffer in bytes (On Tour iSize)
  */
 void cFEMemCard::createReadBuffer(unsigned int size)
 {
-    if (mBufferState == 1) {
+    if (mBufferState == keBufferState_Valid) {
         void* buf = mpStartReadBuffer;
         if (buf != 0) {
             cMemMan_free(buf);
         }
         mpStartReadBuffer = 0;
-        mBufferState = 0;
+        mBufferState = keBufferState_Invalid;
     }
     void* readBuffer = operator_new_tag(size, str_read_buffer, 0x100, 0);
     mpReadBuffer = (char*)readBuffer;
     mpStartReadBuffer = (char*)readBuffer;
-    mBufferState = 1;
+    mBufferState = keBufferState_Valid;
 }
 #endif
 

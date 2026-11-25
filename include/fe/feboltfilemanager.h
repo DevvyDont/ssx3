@@ -30,7 +30,36 @@
 
 #include "layout.h"
 
-// One cached file (0x120). flags: 0 idle, 1 done (kBoltFileFlag_Done), 2 asynchronous load in flight, 3 queued.
+// tBoltFile::flags. [P] kBoltFileFlag_Done is the preview's name for 1 (pFile->flags == kBoltFileFlag_Done once a
+// file is in); the other names are ours: [U] init and release store 0, func_0019D8B8 starts an asynchronous load (2),
+// func_0019DA10 queues a deferred one (3), func_0019D250 / func_0019DC20 finish them. func_0019E268 treats -1 as no
+// file, a value the cache never stores.
+enum tBoltFileFlag {
+    kBoltFileFlag_Invalid = -1,
+    kBoltFileFlag_Idle = 0,
+    kBoltFileFlag_Done = 1,
+    kBoltFileFlag_Loading = 2,
+    kBoltFileFlag_Queued = 3
+};
+
+// tBoltFile::fileType, the kind of file a slot holds (names ours; [P] the preview checks fileType < kBoltFileType_Num).
+// [U] the callers of func_0019DA10: cFERider_loadModels requests the bolt's model part (8), cFEStateCharEquip and
+// cFEStateRewards the character's icon package and the store previews (9), the trophy room, mountain room and reward
+// database their reward textures (10), cFERider_loadTextures / queueLoadExtraTextures a bolt's texture (11).
+// func_0019DF20 / func_0019E070 order the deferred loads of types 8 and 11.
+enum tBoltFileType {
+    kBoltFileType_ModelPart = 8,
+    kBoltFileType_Picture = 9,
+    kBoltFileType_RewardTexture = 10,
+    kBoltFileType_PartTexture = 11
+};
+
+// A file index (func_0019DA10's result) that names no file (name ours): [R] cFEStateCharEquip's constructor sets its
+// file indices to -1; [U] the rider manager's file-index table (func_0019CCE8) returns it for a missing key, and
+// func_0019CC30 / func_0019CD38 take it to look a key up without creating it.
+enum { kNoBoltFile = -1 };
+
+// One cached file (0x120). flags: tBoltFileFlag (0 idle, 1 done, 2 asynchronous load in flight, 3 queued).
 struct tBoltFile {
     int flags;                      // 0x000 [P] pFile->flags == kBoltFileFlag_Done, mFiles[..].flags; [R] init 0;
                                     //       [U] 0 idle, 1 loaded, 2 loading (async), 3 queued

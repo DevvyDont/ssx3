@@ -73,7 +73,7 @@ struct cDebugFE {
     void gainFocus() __asm__("cDebugFE_gainFocus");
     void purge() __asm__("cDebugFE_purge");
     void update() __asm__("cDebugFE_update");
-    int render() __asm__("cDebugFE_render");
+    bool render() __asm__("cDebugFE_render");
     int getFont() __asm__("cDebugFE_getFont");
     int getBoxTID() __asm__("cDebugFE_getBoxTID");
     void startlobby() __asm__("cDebugFE_startlobby");

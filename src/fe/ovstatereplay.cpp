@@ -7,6 +7,7 @@
 #include "fe/ovstate.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ui/uiscreen.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetCreate);
@@ -223,7 +224,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         case 1: {
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpScreen, GetHashValue32(str_TransitionOut_b));
-            if (frame != 0xFFFF) {
+            if (frame != cUIScreen::kNoFrame) {
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
             }
             cReplay_stopReplay(replay_20DF38());

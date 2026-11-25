@@ -39,6 +39,10 @@
 struct cBxReplayFrame;
 
 struct cGameModeMan {
+    // iHeatNum's heats (names ours): [U] the freestyle pre-event overlay (fe/ovstatepause func_001FBD20) shows the
+    // "heat1_tab" for 0 / 1, "heat2_tab" for 2 and "finalheat_tab" for 3.
+    enum { kHeat1 = 1, kHeat2 = 2, kFinalHeat = 3 };
+
     int iHeatNum;               // 0x00 [R] getGM = 0, purge = 0, freeride init = 1, big air init = iNextHeat;
                                 //      [U] the current heat (1..3); [O] On Tour getCurrentHeat
     int iCurrModeHandler;       // 0x04 [R] indexes aHandler (initGameMode, restartHeat, riderCheckpointHit ...);
