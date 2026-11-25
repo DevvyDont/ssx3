@@ -388,6 +388,28 @@ CHECK_OFFSET(cBaseClass_DynamicEmitter, mDrawState, 0x1E4);
 CHECK_OFFSET(cBaseClass_DynamicEmitter, mVtbl, 0x1F8);
 CHECK_SIZE(cBaseClass_DynamicEmitter, 0x200);
 
+// cAttachedDynamicEmitter: the emitter a cAttachedEmitterFX (visualfx/attachedemitterfx.h) keeps per attach point;
+// a cBaseClass_DynamicEmitter with its own vtable (cAttachedDynamicEmitter_vtbl) and four members. Size 0x210: [R]
+// func_002F2130 builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and
+// cAttachedDynamicEmitter_cAttachedDynamicEmitter. No On Tour class; the member names are ours.
+struct cAttachedDynamicEmitter : cBaseClass_DynamicEmitter {
+    int mBoneIndex;                 // 0x200 (name ours) [R] ctor 0; [U] func_002F2130 stores the attach point (index
+                                    //       into the owner's mBoneIndices); func_002F1A08 follows that bone
+    int mStopped;                   // 0x204 (name ours) [R] ctor 0; [U] func_002F2268 sets it, func_002F2280 and
+                                    //       func_002F2130 clear it; func_002F1A08 emits only while it is 0
+    float mPhase;                   // 0x208 (name ours) [R] ctor 0; [U] func_002F1A08 advances it by rate / 60,
+                                    //       wrapping at 4
+    void* mTypeData;                // 0x20C (name ours) [U] func_002F2130 points it at a 0x110-byte record of
+                                    //       cAttachedEmitterFX_mEmitterDataArray and passes it to the emitter's setup
+                                    //       (vtable slot 3); func_002F1A08 reads the emission parameters from it
+};
+
+CHECK_OFFSET(cAttachedDynamicEmitter, mBoneIndex, 0x200);
+CHECK_OFFSET(cAttachedDynamicEmitter, mStopped, 0x204);
+CHECK_OFFSET(cAttachedDynamicEmitter, mPhase, 0x208);
+CHECK_OFFSET(cAttachedDynamicEmitter, mTypeData, 0x20C);
+CHECK_SIZE(cAttachedDynamicEmitter, 0x210);
+
 // cDynamicEmitter: cBaseClass_DynamicEmitter with its own vtable (cDynamicEmitter_vtbl) and render; no members.
 struct cDynamicEmitter {
     // --- cBaseClass_DynamicEmitter (0x000-0x1FC)

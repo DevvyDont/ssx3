@@ -681,22 +681,6 @@ extern char str_TextEqGoToNext[];
 extern char str_kT_279GoToNext[];
 extern char str_playerMenu[];
 
-class cFEVObj_001A41C0 {
-public:
-    int field_0x0;
-    int field_0x4;
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 static inline int IsHash1A41C0(int id, char* name) { return id == GetHashValue32(name); }
 
 /**
@@ -710,18 +694,17 @@ static inline int IsHash1A41C0(int id, char* name) { return id == GetHashValue32
  */
 extern "C" void cFEStateNetMessenger_onWidgetCreate(cFEStateNetMessenger* self, cUIText* text)
 {
-    cFEVObj_001A41C0* obj = (cFEVObj_001A41C0*)text;
     if (IsHash1A41C0(text->mHashName, str_TextTitle)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_BTNEAMessenger));
-        obj->setVisible(1);
+        text->setVisible(1);
     } else if (IsHash1A41C0(text->mHashName, str_TextFindUser)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_231FindPlayer));
-        obj->setVisible(1);
+        text->setVisible(1);
     } else if (IsHash1A41C0(text->mHashName, str_TextBuddyLocation)) {
-        obj->setVisible(1);
+        text->setVisible(1);
         text->mAttr |= 0x80;
     } else if (IsHash1A41C0(text->mHashName, str_TextEqGoToNext)) {
-        obj->setVisible(0);
+        text->setVisible(0);
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_279GoToNext));
     } else if (IsHash1A41C0(text->mHashName, str_playerMenu)) {
         text->mAttr |= 1;
@@ -2931,37 +2914,13 @@ extern char str_ChatDownArrow[];
 extern char str_slideroutline2[];
 extern char str_textScrollChat[];
 
-struct sCol1A7970 {
-    float r, g, b, a;
-    sCol1A7970(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
-};
-
-
-class cFEVObj_001A7970 {
-public:
-    int field_0x0;
-    int field_0x4;
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void setColour(const sCol1A7970& c);
-};
-
 /**
  * Creates the conversation screen "282ReadPrivateMessage" and wires its chat scroller.
  *
  * Adds and plays the screen, sets bit 0 of "AgreementSlider"'s attributes (+0x14) and links it to "ChatUpArrow",
  * "ChatDownArrow" and "slideroutline2" (+0x7C..+0x84, mode 2 at +0x88). "textScrollChat", when found, gets bit 0 of
- * +0x74 and bit 7 of +0x14, cUITextScroll_setInputMap(1), its slot 9(1) and slot 11 colour (1, 0, 0, 0), a copy of mTextColour at
- * +0xA8 and the slider at +0xB8.
+ * +0x74 and bit 7 of +0x14, cUITextScroll_setInputMap(1), setVisible(1), setColour (1, 0, 0, 0), a copy of
+ * mTextColour at +0xA8 and the slider at +0xB8.
  */
 extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup* self)
 {
@@ -2982,12 +2941,11 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
     scrollBar->meHideState = 2;
     cUITextScroll* textScroll = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
     if (((char*)textScroll) != 0) {
-        cFEVObj_001A7970* obj = (cFEVObj_001A7970*)textScroll;
         *(int*)&textScroll->mAttrTextScroll |= 1;
         cUITextScroll_setInputMap(textScroll, 1);
-        obj->setVisible(1);
+        textScroll->setVisible(1);
         textScroll->mAttr |= 0x80;
-        obj->setColour(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
+        textScroll->setColour(tARGBInit(1.0f, 0.0f, 0.0f, 0.0f).address());
         *(tARGB*)(int*)&textScroll->mSelectedColour = *(&self->mTextColour);
         textScroll->mpScrollBar = (cUIThing*)scrollBar;
     }
@@ -3068,28 +3026,6 @@ extern "C" void func_001A7ED8(cFEStateReadMessagePopup* self, const char* name);
 extern "C" void func_001A9090(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern char str_empty_d[];
 
-struct cFEObj_001A7BB8 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void onPopupEvent(void* a1, int a2);
-};
-
 /**
  * Handles the private-message popup's widget events: back, reply with the keyboard, and sending the typed reply.
  *
@@ -3107,7 +3043,7 @@ extern "C" void cFEStateReadMessagePopup_onWidgetEvent(cFEStateReadMessagePopup*
 {
     switch (msg) {
     case 6:
-        ((cFEObj_001A7BB8*)self->mpParentState)->onPopupEvent(self, 20);
+        self->mpParentState->onPopupEvent(self, 20);
         break;
     case 5:
         func_001A9090((cFEStateNet*)self, 0, (int)self->mszSender, (int)str_empty_d, 0, 0, 0x3F);
@@ -6663,36 +6599,6 @@ extern char str_EnterPassword[];
 extern char str_TextOK[];
 extern char str_empty_d[];
 
-struct cFEVObj_001AC170 {
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void setUseStaticColour(int on);
-};
-
 static inline int IsHash_001AC170(int id, char* name) { return id == GetHashValue32(name); }
 
 /**
@@ -6711,10 +6617,10 @@ extern "C" void cFEUseExistingAccount_onWidgetCreate(cFEUseExistingAccount* self
     } else if (IsHash_001AC170(text->mHashName, str_PairPassword)) {
         text->mMiscData = 1;
     } else if (IsHash_001AC170(text->mHashName, str_TextForgotPassword)) {
-        self->mpTextForgotPassword = (cUIThing*)text;
+        self->mpTextForgotPassword = text;
         text->mMiscData = 2;
-        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->setUseStaticColour(1);
-        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->setStatic(1);
+        self->mpTextForgotPassword->setUseStaticColour(1);
+        self->mpTextForgotPassword->setStatic(1);
     } else if (IsHash_001AC170(text->mHashName, str_TextForgotAccount)) {
         text->mMiscData = 3;
     } else if (IsHash_001AC170(text->mHashName, str_EnterAccountName) || IsHash_001AC170(text->mHashName, str_EnterPassword)) {
@@ -9438,34 +9344,6 @@ struct sVE_FE68 {
     void (*fn)(void*);
 };
 
-struct sRaceSetup_FE68 {
-    int f0;
-    char* name;                     // 0x4
-    int f8;
-    int mode;                       // 0xC
-    int event;                      // 0x10
-    int f14;
-    int f18;
-    int f1C;
-    int numAI;                      // 0x20
-    int f24;
-    int info[5];                    // 0x28
-};
-
-struct sRaceFlags_FE68 {
-    char pad0[0x18];
-    unsigned int b0 : 6;
-    unsigned int b6 : 1;
-    unsigned int b7 : 1;
-    unsigned int b8 : 1;
-    unsigned int b9 : 23;
-    char pad1C[0x4];
-};
-
-struct sInfo_FE68 {
-    int v[5];
-};
-
 static inline void vcall_FE68(void* p)
 {
     sVE_FE68* vt = (sVE_FE68*)VPTR_OF(cBEInterface, p);
@@ -9500,25 +9378,26 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     if (BuddyMan_mBuddyMan == 0)
         func_0025B800((char*)LobbyMan_mLobbyMan);
     char* name = (char*)&self->mszChallenger;
-    sRaceSetup_FE68* challenge = (sRaceSetup_FE68*)func_00263270(BuddyMan_mBuddyMan, (int)self->mszChallenger);
+    cChallenger* challenge = (cChallenger*)func_00263270(BuddyMan_mBuddyMan, (int)self->mszChallenger);
     cBXString_operatorE(&LobbyMan_mLobbyMan->mOpponent, name);
-    *(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats = *(sInfo_FE68*)challenge->info;
+    // the stats words 0x28..0x3B are a tLobbyStats (online/buddyman.h)
+    LobbyMan_mLobbyMan->mOpponentStats = *(tLobbyStats*)&challenge->mRank;
     if (challenge == 0)
         return;
-    cBXString_operatorE1(&LobbyMan_mLobbyMan->mChallengeMessage, challenge->name);
-    MEM_fill(&(*(sRaceFlags_FE68*)&cBERules_mRules), 0, 0x20);
-    (*(sRaceFlags_FE68*)&cBERules_mRules).b6 = challenge->f18;
-    (*(sRaceFlags_FE68*)&cBERules_mRules).b7 = challenge->f24;
-    (*(sRaceFlags_FE68*)&cBERules_mRules).b8 = challenge->f1C;
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mChallengeMessage, challenge->mMessage);
+    MEM_fill(&cBERules_mRules, 0, 0x20);
+    ((tBEMyRulesBits*)&cBERules_mRules.MyRules.Flags)->NoIconMultiplier = challenge->mbMultipliers;
+    ((tBEMyRulesBits*)&cBERules_mRules.MyRules.Flags)->NoIconPoints = challenge->mbPointIcons;
+    ((tBEMyRulesBits*)&cBERules_mRules.MyRules.Flags)->NoIconPowerUp = challenge->mbPowerUps;
     void* be = cBE_getInterface_Fv_FE68(cBE_getBE(), 0);
-    cBENewRaceInterface_newRace.iLocationIdx = challenge->f8;
+    cBENewRaceInterface_newRace.iLocationIdx = challenge->miLocation;
     cBENewRaceInterface_bIsBamLocation = 1;
-    cBENewRaceInterface_setGameMode_FE68(be, challenge->mode);
-    cBENewRaceInterface_setGameEvent_FE68(be, challenge->event);
-    cBENewRaceInterface_setNumberAI(be, challenge->numAI);
+    cBENewRaceInterface_setGameMode_FE68(be, challenge->miGameMode);
+    cBENewRaceInterface_setGameEvent_FE68(be, challenge->miGameEvent);
+    cBENewRaceInterface_setNumberAI(be, challenge->miNumberAI);
     vcall_FE68(be);
     void* net = cBE_getInterface_Fv_FE68(SSXApp->BE, 7);
-    cBENetworkInterface_networkOpt.bIsRankedGame = challenge->f14;
+    cBENetworkInterface_networkOpt.bIsRankedGame = challenge->mbRanked;
     vcall_FE68(net);
     func_001B0850(self, be, self->mpScreen);
     func_0025E6D0((char*)LobbyMan_mLobbyMan, LobbyMan_mLobbyMan->mOpponent);
@@ -10566,18 +10445,6 @@ extern "C" void func_001B14D8(cFEStateOnlineCharacterSelect* self, cFEStateNetHe
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_onInputBegin);
 #ifdef SKIP_ASM
-class cFEVObj_001B1590 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual bool isPrevious();
-};
-
 extern void* cSetupMan_mSetupMan;
 
 /**
@@ -10587,7 +10454,7 @@ extern void* cSetupMan_mSetupMan;
  * @param obj  the input (On Tour cUIInput* pInput)
  * @return 1 to swallow the input (confirmed or no cSetupMan_mSetupMan, and not isPrevious, slot 6), else 0
  */
-extern "C" bool cFEStateOnlineCharacterSelect_onInputBegin(cFEStateOnlineCharacterSelect* self, cFEVObj_001B1590* obj)
+extern "C" bool cFEStateOnlineCharacterSelect_onInputBegin(cFEStateOnlineCharacterSelect* self, cUIInput* obj)
 {
     if (self->mbConfirmed != 0 || cSetupMan_mSetupMan == 0) {
         return !obj->isPrevious();
@@ -11774,20 +11641,6 @@ extern char str_qualitypct_d[];
 extern char str_slider1[];
 extern char str_slider2[];
 
-class cFEVObj_001B2EB8 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int on);
-    virtual void v08(int on);
-    virtual void setVisible(int on);
-};
-
 /**
  * Binds the chat-room widgets as the screen creates them.
  *
@@ -11800,11 +11653,10 @@ public:
  *
  * @param obj  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_001B2EB8* obj)
+extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cUIThing* obj)
 {
     char buf[32];
-    cUIThing* widget = (cUIThing*)obj;
-    int id = widget->mHashName;
+    int id = obj->mHashName;
     if (id == GetHashValue32(str_TextRoomName)) {
         self->mpTextRoomName = (cUIText*)obj;
         obj->setVisible(1);
@@ -11818,7 +11670,7 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
         obj->setVisible(1);
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_235AvailablePlayers));
     } else if (id == GetHashValue32(str_PlayerListMenu)) {
-        widget->mAttr |= 0x80;
+        obj->mAttr |= 0x80;
         obj->setFocus(1);
         int n = func_0025F1B0(LobbyMan_mLobbyMan);
         if (n <= 0) {
@@ -11840,17 +11692,17 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_BTNBuddies));
     } else if (id == GetHashValue32(str_slider1)) {
         self->mpSlider1 = (cUIScrollBar*)obj;
-        widget->mAttr |= 1;
+        obj->mAttr |= 1;
     } else if (id == GetHashValue32(str_TextScrollChat)) {
         self->mpTextScrollChat = (cUITextScroll*)obj;
     } else if (id == GetHashValue32(str_slider2)) {
         self->mpSlider2 = (cUIScrollBar*)obj;
-        widget->mAttr |= 1;
+        obj->mAttr |= 1;
     }
     for (int i = 0; i < 6; i++) {
         sprintf(buf, str_qualitypct_d, i + 1);
         if (id == GetHashValue32(buf)) {
-            self->mpQualityIcon[i] = (cUIThing*)obj;
+            self->mpQualityIcon[i] = obj;
             break;
         }
     }
@@ -11991,28 +11843,6 @@ extern "C" void func_001B33D8(cFEStateChatRoom* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onGainTransition);
 #ifdef SKIP_ASM
-class cFEVObj_001B3490 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int a1);
-};
-
-struct sFEObj_001B3490 {
-    char pad[0x6EC];
-    void* f6EC;                    // 0x6EC
-    int pad6F0;
-    void* f6F4;                    // 0x6F4
-    int pad6F8;
-    cFEVObj_001B3490* items[2];    // 0x6FC
-};
-
 extern "C" void cUIScrollBar_setScrollVisibile(void* a, int b);
 extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
 
@@ -12031,8 +11861,8 @@ extern "C" int cFEStateChatRoom_onGainTransition(cFEStateChatRoom* self, int bFi
         cUIScrollBar_setScrollVisibile(self->mpSlider1, 0);
         cUIScrollBar_setScrollVisibile(self->mpSlider2, 0);
         for (i = 0; i < 2; i++) {
-            if (((cFEVObj_001B3490*)self->mpMenu[i]) != 0) {
-                ((cFEVObj_001B3490*)self->mpMenu[i])->setFocus(1);
+            if (self->mpMenu[i] != 0) {
+                self->mpMenu[i]->setFocus(1);
             }
         }
         func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
@@ -13667,86 +13497,57 @@ extern char str_LBAdapters[];
 extern char str_MenuConfig[];
 extern char str_PairSettings[];
 
-class cFEVObj_001B52C8 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void setEnabled(int on);
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void setUseStaticColour(int on);
-};
-
 static inline int IsHash1B52C8(int id, char* name) { return id == GetHashValue32(name); }
 
 /**
  * Binds the network-configuration screen's widgets as the screen creates them.
  *
- * By hash name: "TextCreateConfig" gets id 1 (slots 9 and 6 with 1), "TextTitle", "TextSettings" and
+ * By hash name: "TextCreateConfig" gets id 1 (setVisible and setEnabled with 1), "TextTitle", "TextSettings" and
  * "TextInstructions" id -1; "LBSettings" (id 100) is mpLBSettings and "LBAdapters" (id 101) mpLBAdapters, both with
- * slot 24(1); "configrectangle1" is mpConfigRectangle, "NoConfiguration" mpNoConfiguration, "MenuConfig"
+ * setUseStaticColour(1); "configrectangle1" is mpConfigRectangle, "NoConfiguration" mpNoConfiguration, "MenuConfig"
  * mpMenuConfig (id -1, attribute bit 0x80) and "PairSettings" mpPairSettings. The id is the widget's mMiscData
  * (+0x18).
  *
  * @param item  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateNetConfig_onWidgetCreate(cFEStateNetConfig* self, cUIText* item)
+extern "C" void cFEStateNetConfig_onWidgetCreate(cFEStateNetConfig* self, cUIThing* item)
 {
-    cFEVObj_001B52C8* obj = (cFEVObj_001B52C8*)item;
     if (IsHash1B52C8(item->mHashName, str_TextCreateConfig)) {
         item->mMiscData = 1;
-        obj->setVisible(1);
-        obj->setEnabled(1);
+        item->setVisible(1);
+        item->setEnabled(1);
     } else if (IsHash1B52C8(item->mHashName, str_TextTitle)) {
         item->mMiscData = -1;
-        obj->setVisible(1);
-        obj->setEnabled(0);
+        item->setVisible(1);
+        item->setEnabled(0);
     } else if (IsHash1B52C8(item->mHashName, str_TextSettings)) {
         item->mMiscData = -1;
-        obj->setVisible(0);
-        obj->setEnabled(0);
+        item->setVisible(0);
+        item->setEnabled(0);
     } else if (IsHash1B52C8(item->mHashName, str_TextInstructions)) {
         item->mMiscData = -1;
-        obj->setVisible(1);
-        obj->setEnabled(0);
+        item->setVisible(1);
+        item->setEnabled(0);
     } else if (IsHash1B52C8(item->mHashName, str_LBSettings)) {
         item->mMiscData = 100;
-        self->mpLBSettings = (cUIListBox*)item;
-        obj->setUseStaticColour(1);
+        cUIListBox* list = (cUIListBox*)item;
+        self->mpLBSettings = list;
+        list->setUseStaticColour(1);
     } else if (IsHash1B52C8(item->mHashName, str_configrectangle1)) {
-        self->mpConfigRectangle = (cUIThing*)item;
+        self->mpConfigRectangle = item;
     } else if (IsHash1B52C8(item->mHashName, str_NoConfiguration)) {
-        self->mpNoConfiguration = (cUIThing*)item;
+        self->mpNoConfiguration = item;
     } else if (IsHash1B52C8(item->mHashName, str_LBAdapters)) {
         item->mMiscData = 101;
-        self->mpLBAdapters = (cUIListBox*)item;
-        obj->setUseStaticColour(1);
+        cUIListBox* list = (cUIListBox*)item;
+        self->mpLBAdapters = list;
+        list->setUseStaticColour(1);
     } else if (IsHash1B52C8(item->mHashName, str_MenuConfig)) {
         self->mpMenuConfig = (cUIMenu*)item;
         item->mMiscData = -1;
         item->mAttr |= 0x80;
     } else if (IsHash1B52C8(item->mHashName, str_PairSettings)) {
-        self->mpPairSettings = (cUIThing*)item;
+        self->mpPairSettings = item;
     }
 }
 #endif
@@ -14614,33 +14415,18 @@ extern char str_205AuthenticatingDNAS[];
 extern char str_dnasGroup[];
 extern char str_cFEStateAuthDNASCreate[];
 
-struct sProfile1B63E8 {
-    unsigned int flags;
-    char rest[0x284];
-};
-extern sProfile1B63E8 cBEOptionInterface_mOption;
+extern tBEOptionDB cBEOptionInterface_mOption; // [O] cBEOptionInterface::mOption (be/beintoption.h)
 
-class cFEVObj_001B63E8 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
+// The option block by value, as cBEOptionInterface's getOptions copies it (be/beintoption.h: its accessors work on the
+// static mOption, not on the interface object).
+static inline tBEOptionDB GetOptions() { return cBEOptionInterface_mOption; }
 
 /**
  * Creates the "205AuthenticatingDNAS" screen and starts the DNAS authentication object.
  *
  * Hides "dnasGroup", creates mpAuth (DNASMan_DNASMan on a 0xA50-byte "cFEStateAuthDNASCreate" block), sets miState 1
- * and starts it (func_00256258) in the mode held in bits 22-24 of the profile word cBEOptionInterface_mOption (0-3; other values use
- * 0).
+ * and starts it (func_00256258) in the mode given by the options' iLanguage (bits 22-24 of cBEOptionInterface_mOption,
+ * read from a copy of the block; 0-3, other values use 0).
  */
 extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
 {
@@ -14649,7 +14435,7 @@ extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        cFEVObj_001B63E8* widget = (cFEVObj_001B63E8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_dnasGroup));
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_dnasGroup));
         if (widget != 0) {
             widget->setVisible(0);
         }
@@ -14658,8 +14444,7 @@ extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
     self->miState = 1;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     int mode = 0;
-    sProfile1B63E8 prof = cBEOptionInterface_mOption;
-    switch ((prof.flags >> 22) & 7) {
+    switch (GetOptions().iLanguage) {
     case 0:
         mode = 0;
         break;
@@ -14689,22 +14474,6 @@ extern char str_kT_ovrcmnloading[];
 extern char str_XButton[];
 extern char str_submitrect[];
 
-class cFEVObj_001B65C0 {
-public:
-    int field_0x0;
-    int field_0x4;
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 static inline int IsHash1B65C0(int id, char* name) { return id == GetHashValue32(name); }
 
 /**
@@ -14716,19 +14485,18 @@ static inline int IsHash1B65C0(int id, char* name) { return id == GetHashValue32
  */
 extern "C" void cFEStateAuthDNAS_onWidgetCreate(cFEStateAuthDNAS* self, cUIText* text)
 {
-    cFEVObj_001B65C0* obj = (cFEVObj_001B65C0*)text;
     if (IsHash1B65C0(text->mHashName, str_TextCancel)) {
         self->mpTextCancel = text;
-        obj->setVisible(0);
+        text->setVisible(0);
     } else if (IsHash1B65C0(text->mHashName, str_TextAuth)) {
         self->mpTextAuth = text;
         cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(str_kT_ovrcmnloading));
     } else if (IsHash1B65C0(text->mHashName, str_XButton)) {
         self->mpXButton = (cUIThing*)text;
-        obj->setVisible(0);
+        text->setVisible(0);
     } else if (IsHash1B65C0(text->mHashName, str_submitrect)) {
         self->mpSubmitRect = (cUIThing*)text;
-        obj->setVisible(0);
+        text->setVisible(0);
     }
 }
 #endif
@@ -14844,28 +14612,6 @@ extern char str_kT_205Authenticating[];
 extern char str_cFEStateAuthDNAS[];
 extern char str_dnasGroup[];
 
-class cFEVObj_001B6798 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void onPopupEvent(void* owner, int msg);
-};
-
 static inline int IsReady_001B6798(DNASMan* d) { return d->State >= 3; }
 static inline int IsDone_001B6798(DNASMan* d) { return d->State == 5; }
 
@@ -14884,12 +14630,12 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
     switch (self->miState) {
     case 1:
         if (IsReady_001B6798(self->mpAuth)) {
-            ((cFEVObj_001B6798*)self->mpTextCancel)->setVisible(1);
-            ((cFEVObj_001B6798*)self->mpXButton)->setVisible(1);
-            ((cFEVObj_001B6798*)self->mpSubmitRect)->setVisible(1);
-            ((cFEVObj_001B6798*)self->mpTextAuth)->setVisible(1);
+            self->mpTextCancel->setVisible(1);
+            self->mpXButton->setVisible(1);
+            self->mpSubmitRect->setVisible(1);
+            self->mpTextAuth->setVisible(1);
             cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(str_kT_205Authenticating));
-            cFEVObj_001B6798* widget = (cFEVObj_001B6798*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_dnasGroup));
+            cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_dnasGroup));
             if (widget != 0) {
                 widget->setVisible(1);
             }
@@ -14930,15 +14676,15 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
             USTR_copy(parentState->mpustrAuthError[0], errorText1);
             USTR_copy(parentState->mpustrAuthError[1], errorText2);
             USTR_copy(parentState->mpustrAuthError[2], errorText3);
-            ((cFEVObj_001B6798*)self->mpParentState)->onPopupEvent(self, 0x10);
+            self->mpParentState->onPopupEvent(self, 0x10);
         } else {
-            ((cFEVObj_001B6798*)self->mpParentState)->onPopupEvent(self, 0xF);
+            self->mpParentState->onPopupEvent(self, 0xF);
         }
         break;
     }
     case 4:
         if (IsDone_001B6798(self->mpAuth)) {
-            ((cFEVObj_001B6798*)self->mpParentState)->onPopupEvent(self, 20);
+            self->mpParentState->onPopupEvent(self, 20);
         }
         break;
     }
@@ -15097,21 +14843,6 @@ extern char str_short[];
 extern char str_full[];
 extern char str_Animation_Start[];
 
-class cFEVObj_001B6C98 {
-public:
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 static inline void PlayLabel_001B6C98(void* vvself, char* label)
 {
     cUIState* vself = (cUIState*)vvself;
@@ -15136,18 +14867,18 @@ extern "C" int cFEStateAuthDNASError_onGainTransition(cFEStateAuthDNASError* sel
     if (on) {
         if (strlen1(self->mpustrFooter) == 0) {
             PlayLabel_001B6C98(self, str_short);
-            ((cFEVObj_001B6C98*)self->mpFooter)->setVisible(0);
+            self->mpFooter->setVisible(0);
         } else {
             PlayLabel_001B6C98(self, str_full);
             cUIText_setUnicodeStringWrap(self->mpFooter, self->mpustrFooter);
         }
         if (strlen1(self->mpustrBody) == 0) {
-            ((cFEVObj_001B6C98*)self->mpBody)->setVisible(0);
+            self->mpBody->setVisible(0);
         } else {
             cUIText_setUnicodeStringWrap(self->mpBody, self->mpustrBody);
         }
         if (strlen1(self->mpustrTitle) == 0) {
-            ((cFEVObj_001B6C98*)self->mpTitle)->setVisible(0);
+            self->mpTitle->setVisible(0);
         } else {
             cUIText_setUnicodeStringWrap(self->mpTitle, self->mpustrTitle);
         }
@@ -15209,29 +14940,6 @@ extern "C" int cFEStateAuthDNASError_handleEvent(cFEStateAuthDNASError* self, in
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError_onWidgetEvent);
 #ifdef SKIP_ASM
-class cFEVObj_001B6E40 {
-public:
-    int field_0x0;
-    int field_0x4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void onPopupEvent(void* sender, int msg);
-};
-
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 
 /**
@@ -15247,7 +14955,7 @@ extern "C" void cFEStateAuthDNASError_onWidgetEvent(cFEStateAuthDNASError* self,
     switch (msg) {
     case 5:
     case 6:
-        ((cFEVObj_001B6E40*)self->mpParentState)->onPopupEvent(((cFEStateNet*)self), 0xF);
+        self->mpParentState->onPopupEvent(self, 0xF);
         break;
     case 7:
     case 8:
@@ -16836,38 +16544,6 @@ extern char str_LBInformYesNo[];
 extern char str_LBShareInfoYesNo[];
 extern char str_StaticContinue[];
 
-class cFEVObj_001B8AA0 {
-public:
-    int field_0x0;
-    int field_0x4;
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void setUseStaticColour(int on);
-};
-
 static inline int IsHash1B8AA0(int id, char* name) { return id == GetHashValue32(name); }
 
 /**
@@ -16883,22 +16559,21 @@ static inline int IsHash1B8AA0(int id, char* name) { return id == GetHashValue32
  */
 extern "C" void cFEStateCreateStep1_onWidgetCreate(cFEStateCreateStep1* self, cUIText* text)
 {
-    cFEVObj_001B8AA0* obj = (cFEVObj_001B8AA0*)text;
     if (IsHash1B8AA0(text->mHashName, str_TextTitle)) {
         if (self->mbEditAccount == 0) {
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_TITLEEditAccount));
         }
     } else if (IsHash1B8AA0(text->mHashName, str_StaticAccountName) || IsHash1B8AA0(text->mHashName, str_EnterAccountName)) {
         if (self->mbEditAccount == 0) {
-            obj->setUseStaticColour(1);
-            obj->setStatic(1);
+            text->setUseStaticColour(1);
+            text->setStatic(1);
         }
     } else if (IsHash1B8AA0(text->mHashName, str_LBInformYesNo) || IsHash1B8AA0(text->mHashName, str_LBShareInfoYesNo)) {
         func_001A9A18((cFEStateNet*)self, (cUIListBox*)text, 1);
     } else if (IsHash1B8AA0(text->mHashName, str_StaticContinue)) {
         if (self->mbEditAccount != 0) {
-            obj->setUseStaticColour(1);
-            obj->setStatic(1);
+            text->setUseStaticColour(1);
+            text->setStatic(1);
         } else {
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSubmit));
         }
@@ -20221,21 +19896,6 @@ extern char str_LockAdvanced[];
 extern char str_LockElite[];
 extern char str_TextPlayerpct_d[];
 
-class cFEVObj_001BCE38 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int on);
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Binds the lobby screen's widgets as the screen creates them.
  *
@@ -20248,17 +19908,16 @@ public:
  *
  * @param obj  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVObj_001BCE38* obj)
+extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cUIThing* obj)
 {
     char buf[16];
-    cUIThing* widget = (cUIThing*)obj;
-    int id = widget->mHashName;
+    int id = obj->mHashName;
     if (id == GetHashValue32(str_MenuRoomMenus)) {
         self->mpMenuRoomMenus = (cUIMenu*)obj;
     } else if (id == GetHashValue32(str_MenuPlayers)) {
         self->mpMenuPlayers = (cUIMenu*)obj;
         cUIMenu_setInputMap(obj, 1);
-        ((cFEVObj_001BCE38*)self->mpMenuPlayers)->setFocus(1);
+        self->mpMenuPlayers->setFocus(1);
         cUIMenu_setScrollableMenu(self->mpMenuPlayers, 1);
         self->mpMenuPlayers->mAttr &= ~0x80;
         self->mpMenuPlayers->mAttr |= 1;
@@ -20268,58 +19927,58 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
         self->mpText3InRoom = (cUIText*)obj;
     } else if (id == GetHashValue32(str_TextCreateRoom)) {
         self->mpTextCreateRoom = (cUIText*)obj;
-        widget->mMiscData = 4;
+        obj->mMiscData = 4;
     } else if (id == GetHashValue32(str_PairBeginner)) {
-        self->mpChannelPair[0] = (cUIThing*)obj;
-        widget->mMiscData = 0;
+        self->mpChannelPair[0] = obj;
+        obj->mMiscData = 0;
     } else if (id == GetHashValue32(str_PairVoice)) {
-        self->mpChannelPair[1] = (cUIThing*)obj;
-        widget->mMiscData = 1;
+        self->mpChannelPair[1] = obj;
+        obj->mMiscData = 1;
     } else if (id == GetHashValue32(str_PairAdvanced)) {
-        self->mpChannelPair[2] = (cUIThing*)obj;
-        widget->mMiscData = 2;
+        self->mpChannelPair[2] = obj;
+        obj->mMiscData = 2;
     } else if (id == GetHashValue32(str_PairExpert)) {
-        self->mpChannelPair[3] = (cUIThing*)obj;
-        widget->mMiscData = 3;
+        self->mpChannelPair[3] = obj;
+        obj->mMiscData = 3;
     } else if (id == GetHashValue32(str_ArrowBeginner)) {
-        self->mpChannelArrow[0] = (cUIThing*)obj;
+        self->mpChannelArrow[0] = obj;
         obj->setVisible(1);
     } else if (id == GetHashValue32(str_ArrowVoice)) {
-        self->mpChannelArrow[1] = (cUIThing*)obj;
+        self->mpChannelArrow[1] = obj;
         obj->setVisible(0);
     } else if (id == GetHashValue32(str_ArrowAdvanced)) {
-        self->mpChannelArrow[2] = (cUIThing*)obj;
+        self->mpChannelArrow[2] = obj;
         obj->setVisible(0);
     } else if (id == GetHashValue32(str_ArrowElite)) {
-        self->mpChannelArrow[3] = (cUIThing*)obj;
+        self->mpChannelArrow[3] = obj;
         obj->setVisible(0);
     } else if (id == GetHashValue32(str_player_up)) {
-        self->mpPlayerUp = (cUIThing*)obj;
+        self->mpPlayerUp = obj;
     } else if (id == GetHashValue32(str_player_down)) {
-        self->mpPlayerDown = (cUIThing*)obj;
+        self->mpPlayerDown = obj;
     } else if (id == GetHashValue32(str_ListBoxBeginnerChannel)) {
         self->mpChannelList[0] = (cUIListBox*)obj;
-        widget->mAttr &= ~1;
+        obj->mAttr &= ~1;
     } else if (id == GetHashValue32(str_ListBoxVoiceChannel)) {
         self->mpChannelList[1] = (cUIListBox*)obj;
-        widget->mAttr &= ~1;
+        obj->mAttr &= ~1;
     } else if (id == GetHashValue32(str_ListBoxAdvancedChannel)) {
         self->mpChannelList[2] = (cUIListBox*)obj;
-        widget->mAttr &= ~1;
+        obj->mAttr &= ~1;
     } else if (id == GetHashValue32(str_ListBoxExpertChannel)) {
         self->mpChannelList[3] = (cUIListBox*)obj;
-        widget->mAttr &= ~1;
+        obj->mAttr &= ~1;
     } else if (id == GetHashValue32(str_LockBeginner)) {
-        self->mpChannelLock[0] = (cUIThing*)obj;
+        self->mpChannelLock[0] = obj;
         obj->setVisible(0);
     } else if (id == GetHashValue32(str_LockVoice)) {
-        self->mpChannelLock[1] = (cUIThing*)obj;
+        self->mpChannelLock[1] = obj;
         obj->setVisible(0);
     } else if (id == GetHashValue32(str_LockAdvanced)) {
-        self->mpChannelLock[2] = (cUIThing*)obj;
+        self->mpChannelLock[2] = obj;
         obj->setVisible(0);
     } else if (id == GetHashValue32(str_LockElite)) {
-        self->mpChannelLock[3] = (cUIThing*)obj;
+        self->mpChannelLock[3] = obj;
         obj->setVisible(0);
     } else {
         void** playerTextSlot = (void**)(&self->mpTextPlayer[0]);
@@ -20334,7 +19993,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
             }
         }
         *playerTextSlot = obj;
-        widget->mMiscData = i;
+        obj->mMiscData = i;
     }
 }
 #endif
@@ -21975,36 +21634,6 @@ static inline int Loc_001BEF60(char* name)
 static inline int IsHash_001BEF60(int id, char* name) { return id == GetHashValue32(name); }
 
 
-class cFEVObj_001BEF60 {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void setUseStaticColour(int on);
-};
-
 /**
  * Sets up the login-type widgets from the account saved on the memory card (AccountData).
  *
@@ -22015,47 +21644,46 @@ public:
  *
  * @param pWidget  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF60* pWidget)
+extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cUIThing* pWidget)
 {
     unsigned short buf[64];
-    cUIThing* widget = (cUIThing*)pWidget;
-    if (IsHash_001BEF60(widget->mHashName, str_TextUseAccount)) {
-        widget->mMiscData = 0;
+    if (IsHash_001BEF60(pWidget->mHashName, str_TextUseAccount)) {
+        pWidget->mMiscData = 0;
         int locStr = Loc_001BEF60(str_kT_CMNUse);
         usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, AccountData);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
         pWidget->setVisible(1);
         if (strlen(AccountData) == 0) {
-            pWidget->setUseStaticColour(1);
+            ((cUIText*)pWidget)->setUseStaticColour(1);
             pWidget->setStatic(1);
             pWidget->setVisible(0);
         }
-    } else if (IsHash_001BEF60(widget->mHashName, str_1rectangle)) {
+    } else if (IsHash_001BEF60(pWidget->mHashName, str_1rectangle)) {
         if (strlen(AccountData) == 0) {
             pWidget->setVisible(0);
         } else {
             pWidget->setVisible(1);
         }
-    } else if (IsHash_001BEF60(widget->mHashName, str_4rectangle)) {
+    } else if (IsHash_001BEF60(pWidget->mHashName, str_4rectangle)) {
         if (strlen(AccountData) == 0) {
             pWidget->setVisible(0);
         } else {
             pWidget->setVisible(1);
         }
-    } else if (IsHash_001BEF60(widget->mHashName, str_TextCreateAccount)) {
-        widget->mMiscData = 2;
+    } else if (IsHash_001BEF60(pWidget->mHashName, str_TextCreateAccount)) {
+        pWidget->mMiscData = 2;
         pWidget->setVisible(1);
-    } else if (IsHash_001BEF60(widget->mHashName, str_TextExistingAccount)) {
-        widget->mMiscData = 1;
+    } else if (IsHash_001BEF60(pWidget->mHashName, str_TextExistingAccount)) {
+        pWidget->mMiscData = 1;
         pWidget->setVisible(1);
-    } else if (IsHash_001BEF60(widget->mHashName, str_TextDelectAccount)) {
-        widget->mMiscData = 3;
+    } else if (IsHash_001BEF60(pWidget->mHashName, str_TextDelectAccount)) {
+        pWidget->mMiscData = 3;
         int locStr = Loc_001BEF60(str_kT_BTNDelete);
         usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, AccountData);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
         pWidget->setVisible(1);
         if (strlen(AccountData) == 0) {
-            pWidget->setUseStaticColour(1);
+            ((cUIText*)pWidget)->setUseStaticColour(1);
             pWidget->setStatic(1);
             pWidget->setVisible(0);
         }
@@ -24355,28 +23983,7 @@ extern char str_Menu[];
 extern char str_messagepct_02d[];
 extern char str_sp[];
 
-class cFEVObj_001C2298 {
-public:
-    int field_0x0;
-    int field_0x4;
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 static inline int IsHash1C2298(int id, char* name) { return id == GetHashValue32(name); }
-
-struct sOwner1C2298 {
-    char pad[0x6D4];
-    cUIText* slots[10];
-};
 
 /**
  * Binds the quick-messages widgets as the screen creates them.
@@ -24391,7 +23998,7 @@ extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages
     char buf[32];
     if (IsHash1C2298(text->mHashName, str_username)) {
         cUIText_setAsciiString(text, str_sp);
-        ((cFEVObj_001C2298*)text)->setVisible(1);
+        text->setVisible(1);
     } else if (IsHash1C2298(text->mHashName, str_Menu)) {
         text->mAttr |= 1;
     } else {
@@ -24400,7 +24007,7 @@ extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages
             sprintf(buf, str_messagepct_02d, i);
             if (IsHash1C2298(text->mHashName, buf)) {
                 cUIText_setAsciiString(text, str_sp);
-                ((cFEVObj_001C2298*)text)->setVisible(1);
+                text->setVisible(1);
                 text->mMiscData = i;
                 self->mpMessage[i] = text;
             }
@@ -25029,100 +24636,77 @@ extern char str_resultsItem0pct_d[];
 extern char str_pointsItem0pct_d[];
 extern char str_personaItem0pct_d[];
 
-struct sCol_001C2F00 {
-    float r, g, b, a;
-    sCol_001C2F00(const float& r_) : r(r_), g(0.0f), b(0.0f), a(0.0f) {}
-};
-
-class cFEVObj_001C2F00 {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int on);
-    virtual void v08();
-    virtual void setVisible(int on);
-    virtual void v10();
-    virtual void setColour(const sCol_001C2F00& c);
-};
-
 static inline int IsHash_001C2F00(int id, char* name) { return id == GetHashValue32(name); }
 
 /**
  * Sets up the stats screen's widgets as the screen creates them.
  *
- * "EventList" and "CourseList" lose attribute bit 0 and get colour slot 11 with 1.0; the arrows, "rankhl", "sliderbox",
- * "slider" and "Title" are hidden or shown (slot 9: "rankhl", "sliderbox", "slider", "Title" shown, the four arrows
- * hidden). "Txt_Overal", "Txt_Race" and "Txt_FreeStyle" get slot 7(1). "HeadingsMenu", "EventsMenu", "CoursesMenu" and
- * "ResultsMenu" become mpMenus[0..3] (the events and courses menus with mAttrMenu.mDisableDirSound (bit 3) set, the
- * results menu scrollable by 10 rows on input map 1). Every "resultsItem0%d", "pointsItem0%d" and "personaItem0%d" row
- * (0-9) is shown.
+ * "EventList" and "CourseList" lose attribute bit 0 and get the colour (1, 0, 0, 0) (setColour); the arrows, "rankhl",
+ * "sliderbox", "slider" and "Title" are hidden or shown (setVisible: "rankhl", "sliderbox", "slider", "Title" shown,
+ * the four arrows hidden). "Txt_Overal", "Txt_Race" and "Txt_FreeStyle" get setFocus(1). "HeadingsMenu",
+ * "EventsMenu", "CoursesMenu" and "ResultsMenu" become mpMenus[0..3] (the events and courses menus with
+ * mAttrMenu.mDisableDirSound (bit 3) set, the results menu scrollable by 10 rows on input map 1). Every
+ * "resultsItem0%d", "pointsItem0%d" and "personaItem0%d" row (0-9) is shown.
  *
  * @param obj  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cFEVObj_001C2F00* obj)
+extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cUIThing* obj)
 {
-    cUIThing* widget = (cUIThing*)obj;
-    if (IsHash_001C2F00(widget->mHashName, str_EventList) || IsHash_001C2F00(widget->mHashName, str_CourseList)) {
-        widget->mAttr &= ~1;
-        obj->setColour(sCol_001C2F00(1.0f));
-    } else if (IsHash_001C2F00(widget->mHashName, str_EventLeftArrow)) {
+    if (IsHash_001C2F00(obj->mHashName, str_EventList) || IsHash_001C2F00(obj->mHashName, str_CourseList)) {
+        obj->mAttr &= ~1;
+        obj->setColour(tARGBInit(1.0f, 0.0f, 0.0f, 0.0f).address());
+    } else if (IsHash_001C2F00(obj->mHashName, str_EventLeftArrow)) {
         obj->setVisible(0);
-    } else if (IsHash_001C2F00(widget->mHashName, str_rankhl)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_rankhl)) {
         obj->setVisible(1);
-    } else if (IsHash_001C2F00(widget->mHashName, str_EventRightArrow)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_EventRightArrow)) {
         obj->setVisible(0);
-    } else if (IsHash_001C2F00(widget->mHashName, str_CourseLeftArrow)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_CourseLeftArrow)) {
         obj->setVisible(0);
-    } else if (IsHash_001C2F00(widget->mHashName, str_CourseRightArrow)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_CourseRightArrow)) {
         obj->setVisible(0);
-    } else if (IsHash_001C2F00(widget->mHashName, str_sliderbox)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_sliderbox)) {
         obj->setVisible(1);
-    } else if (IsHash_001C2F00(widget->mHashName, str_slider)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_slider)) {
         obj->setVisible(1);
-    } else if (IsHash_001C2F00(widget->mHashName, str_Txt_Overal)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_Txt_Overal)) {
         obj->setFocus(1);
-    } else if (IsHash_001C2F00(widget->mHashName, str_Txt_Race)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_Txt_Race)) {
         obj->setFocus(1);
-    } else if (IsHash_001C2F00(widget->mHashName, str_Txt_FreeStyle)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_Txt_FreeStyle)) {
         obj->setFocus(1);
-    } else if (IsHash_001C2F00(widget->mHashName, str_Title)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_Title)) {
         obj->setVisible(1);
-    } else if (IsHash_001C2F00(widget->mHashName, str_HeadingsMenu)) {
-        widget->mAttr &= ~1;
+    } else if (IsHash_001C2F00(obj->mHashName, str_HeadingsMenu)) {
+        obj->mAttr &= ~1;
         obj->setFocus(1);
         self->mpMenus[0] = (cUIMenu*)obj;
-    } else if (IsHash_001C2F00(widget->mHashName, str_EventsMenu)) {
+    } else if (IsHash_001C2F00(obj->mHashName, str_EventsMenu)) {
         self->mpMenus[1] = (cUIMenu*)obj;
-        ((cUIMenu*)widget)->mAttrMenu.mDisableDirSound = 1;
-    } else if (IsHash_001C2F00(widget->mHashName, str_CoursesMenu)) {
+        ((cUIMenu*)obj)->mAttrMenu.mDisableDirSound = 1;
+    } else if (IsHash_001C2F00(obj->mHashName, str_CoursesMenu)) {
         self->mpMenus[2] = (cUIMenu*)obj;
-        ((cUIMenu*)widget)->mAttrMenu.mDisableDirSound = 1;
-    } else if (IsHash_001C2F00(widget->mHashName, str_ResultsMenu)) {
+        ((cUIMenu*)obj)->mAttrMenu.mDisableDirSound = 1;
+    } else if (IsHash_001C2F00(obj->mHashName, str_ResultsMenu)) {
         cUIMenu_setScrollableMenu(obj, 10);
         self->mpMenus[3] = (cUIMenu*)obj;
         cUIMenu_setInputMap(obj, 1);
-        ((cFEVObj_001C2F00*)self->mpMenus[3])->setFocus(1);
+        self->mpMenus[3]->setFocus(1);
     } else {
         char buf[32];
         for (int i = 0; i < 10; i++) {
             sprintf(buf, str_resultsItem0pct_d, i);
-            if (IsHash_001C2F00(widget->mHashName, buf)) {
+            if (IsHash_001C2F00(obj->mHashName, buf)) {
                 obj->setVisible(1);
                 break;
             }
             sprintf(buf, str_pointsItem0pct_d, i);
-            if (IsHash_001C2F00(widget->mHashName, buf)) {
+            if (IsHash_001C2F00(obj->mHashName, buf)) {
                 obj->setVisible(1);
                 break;
             }
             sprintf(buf, str_personaItem0pct_d, i);
-            if (IsHash_001C2F00(widget->mHashName, buf)) {
+            if (IsHash_001C2F00(obj->mHashName, buf)) {
                 obj->setVisible(1);
                 break;
             }
@@ -26309,21 +25893,6 @@ extern char str_TextScroll_News[];
 extern char str_top_arrow[];
 extern char str_bot_arrow[];
 
-class cFEVObj_001C5198 {
-public:
-    int f0;
-    int f4;
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int on);
-    virtual void v08();
-    virtual void setVisible(int on);
-};
-
 /**
  * Wires the news scroll bar to its text the first time the screen opens.
  *
@@ -26355,11 +25924,12 @@ extern "C" int cFEStateNetNews_onGainTransition(cFEStateNet* self, int on)
             strcpy(scrollBar->mszDownAnimation, str_bot_arrow);
         }
         scrollBar->mpHideOnEmpty = (cUIThing*)hideOnEmpty;
-        cUITextScroll* x = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
-        x->mpScrollBar = (cUIThing*)scrollBar;
-        ((cFEVObj_001C5198*)x)->setFocus(1);
+        cUITextScroll* textScroll =
+                (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
+        textScroll->mpScrollBar = scrollBar;
+        textScroll->setFocus(1);
         if (scrollBar) {
-            ((cFEVObj_001C5198*)scrollBar)->setVisible(1);
+            scrollBar->setVisible(1);
         }
     }
     return 0;

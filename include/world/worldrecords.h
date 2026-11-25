@@ -402,10 +402,30 @@ CHECK_OFFSET(tCollideModelRecord, m_pSphTreeList, 0x8);
 CHECK_OFFSET(tCollideModelRecord, m_pSphTree, 0xC);
 CHECK_SIZE(tCollideModelRecord, 0x10);
 
+// One entry of the per-mesh table that follows a tCollideRecord (tCollideRecord::Surfaces; the struct and its names are
+// ours, On Tour has no type for it). Size 0xC: [U] every reader steps it by 12 per mesh (cRider_doObjectCollision,
+// cRider_objectIntersect, cFlexBridgeNode_intersect, the instance part walk in intersect/worldsphtree).
+struct tCollideSurface {
+    float Bounce;                   // 0x0 (name ours) [U] cRider_doObjectCollision: 0 = the rider only bumps
+                                    //     (cRider_doBump), else the rebound strength
+    float Grip;                     // 0x4 (name ours) [U] cRider_doObjectCollision clamps it to 0..1 and scales the
+                                    //     rebound by it
+    unsigned short Flags;           // 0x8 (name ours) [U] cRider_objectIntersect: bit 0 with a nonzero Bounce makes
+                                    //     the hit a wall, preferred over other hits
+    short Stype;                    // 0xA (name ours, as tIntersectInfo::Stype) [U] the mesh's surface type:
+                                    //     cFlexBridgeNode_intersect copies it into tIntersectInfo::Stype; -1 for a part
+                                    //     without one (worldsphtree's part walk)
+};
+
+CHECK_OFFSET(tCollideSurface, Bounce, 0x0);
+CHECK_OFFSET(tCollideSurface, Grip, 0x4);
+CHECK_OFFSET(tCollideSurface, Flags, 0x8);
+CHECK_OFFSET(tCollideSurface, Stype, 0xA);
+CHECK_SIZE(tCollideSurface, 0xC);
+
 // An instance's collision record (On Tour tCollideRecord, 0x10). tInstanceRecord::m_pCollideRecord points here
 // (cWScriptCacheEntry_resolve stores it from the script file's CollideRecordEntryTable). Retail reads a 12-byte
-// per-mesh table right after the record (+0x10 + 12 * mesh; the halfword at +0xA of an entry is the mesh's surface
-// type, cFlexRailNode_splineIntersect / cFlexBridgeNode_intersect); On Tour has no type for it, so it is not laid out.
+// per-mesh table right after the record (+0x10 + 12 * mesh): Surfaces, a GNU zero-length array, so the size stays 0x10.
 struct tCollideRecord {
     int Method;                     // 0x0 [O]; [P] "->Method == CR_Polygon"; [U] cWScriptCacheEntry_resolve resolves
                                     //      the model for methods 1 and 3; the terrain / static queries test it
@@ -420,12 +440,15 @@ struct tCollideRecord {
                                     //      resolved model (or 0); cWorld_getSphereTreeInfo / getPolyModelInfo read it
         unsigned int CollideModelRID; // 0xC [O]; [U] the model's resource id before the fix-up (resolved with type 100)
     };
+    tCollideSurface Surfaces[0];    // 0x10 (name ours) [U] one per mesh of the instance's model, indexed by
+                                    //      tIntersectInfo::Mesh (cRider_doObjectCollision, cFlexBridgeNode_intersect)
 };
 
 CHECK_OFFSET(tCollideRecord, Method, 0x0);
 CHECK_OFFSET(tCollideRecord, InitFlags, 0x4);
 CHECK_OFFSET(tCollideRecord, InstanceScriptId, 0x8);
 CHECK_OFFSET(tCollideRecord, CollideModel, 0xC);
+CHECK_OFFSET(tCollideRecord, Surfaces, 0x10);
 CHECK_SIZE(tCollideRecord, 0x10);
 
 #endif /* WORLD_WORLDRECORDS_H */

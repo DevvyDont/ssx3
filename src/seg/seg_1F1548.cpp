@@ -20,6 +20,7 @@
 #include "camera/camera.h"
 #include "world/world.h"
 #include "fe/ferider.h"
+#include "worldpainter/worldpainterquery.h"
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan_cPS2VisualEffectsMan);
@@ -103,21 +104,13 @@ extern "C" cPS2VisualEffectsMan* cPS2VisualEffectsMan_cPS2VisualEffectsMan(cPS2V
 INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan__cPS2VisualEffectsMan);
 #ifdef SKIP_ASM
 void operator_delete(int *);
-struct Obj0820 {
-    virtual ~Obj0820();
-};
 extern char cPS2VisualEffectsMan_vtbl[];
 extern char cVisualEffectsMan_vtbl[];
-
-struct sMgr_0820 {
-    Obj0820* objs[17];
-    char* vptr;
-};
 
 /**
  * Destroys the visual effects manager: deletes its 17 effect components, then the base part.
  *
- * Stores its vtable cPS2VisualEffectsMan_vtbl (+0x44), deletes each of the 17 component pointers (+0x00..+0x40; On Tour
+ * Stores its vtable cPS2VisualEffectsMan_vtbl (mVtbl), deletes each of the 17 component pointers (+0x00..+0x40; On Tour
  * m_RenderToggles .. m_PathArrow) through their virtual destructors (null ones skipped), stores cVisualEffectsMan_vtbl
  * and frees the object when bit 0 of @p flags is set.
  *
@@ -126,23 +119,23 @@ struct sMgr_0820 {
 extern "C" void cPS2VisualEffectsMan__cPS2VisualEffectsMan(cPS2VisualEffectsMan* self, int flags)
 {
     self->mVtbl = (void**)cPS2VisualEffectsMan_vtbl;
-    delete ((Obj0820*)(&self->m_RenderToggles)[0]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[1]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[2]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[3]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[4]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[5]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[6]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[7]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[8]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[9]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[10]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[11]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[12]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[13]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[14]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[15]);
-    delete ((Obj0820*)(&self->m_RenderToggles)[16]);
+    delete self->m_RenderToggles;
+    delete self->m_VisualEffectsTest;
+    delete self->m_LightGlow;
+    delete self->m_Plants;
+    delete self->m_DepthFog;
+    delete self->m_HeightFog;
+    delete self->m_DetailSystem;
+    delete self->m_ScreenTint;
+    delete self->m_Shadow;
+    delete self->m_SnowSurface;
+    delete self->m_BoardTrail;
+    delete self->m_Flags;
+    delete self->m_PowerUpFXToggles;
+    delete self->m_SnowfallToggles;
+    delete self->m_SplashToggles;
+    delete self->m_Tube;
+    delete self->m_PathArrow;
     self->mVtbl = (void**)cVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -320,27 +313,15 @@ extern "C" int tEventFlags_isSet1(void*, int);
 extern int D_004A3AFC;
 
 
-struct sCol_1150 {
-    float r, g, b, a;
-};
-
+// A bone matrix as func_002F1A08 (below) reads it; cPunchFX_update uses t4Matrix.
 struct sMat_1150 {
     t4Vector r[4];
 };
 
 extern t4Vector t4vect_Zero;
 
-struct sFx_1150 {
-    cRider* owner;
-    char pad4[0xC];
-    t4Vector pos[4];
-    sCol_1150 col[4];
-    float size[4];
-    int active;
-};
-
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void CopyMat_1150(sMat_1150* dst, sMat_1150* src)
+static inline void CopyMat_1150(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -356,8 +337,11 @@ static inline void CopyMat_1150(sMat_1150* dst, sMat_1150* src)
         : "memory");
 }
 
+// The same copy on func_002F1A08's matrix view.
+static inline void CopyMat_1150(sMat_1150* dst, sMat_1150* src) { CopyMat_1150((t4Matrix*)dst, (t4Matrix*)src); }
+
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline void MulMat_1150(t4Vector* out, const sMat_1150* m, const t4Vector& v)
+static inline void MulMat_1150(t4Vector* out, const t4Matrix* m, const t4Vector& v)
 {
     t4Vector r;
     __asm__(
@@ -413,42 +397,42 @@ static inline float randRange_1150(float lo, float hi)
  * gets a random offset of up to 3 * blend around a point 8 units along the bone, a size of 15 to
  * 15 + 15 * blend and a grey level of at most 0.9 x blend.
  */
-extern "C" void cPunchFX_update(sFx_1150* self)
+extern "C" void cPunchFX_update(cPunchFX* self)
 {
-    int active = 0.0f < self->owner->PunchStrength;
-    self->active = active;
+    int active = 0.0f < self->mRider->PunchStrength;
+    self->mActive = active;
     if (!active)
         return;
-    int bone = self->owner->LHandSkelIndex;
+    int bone = self->mRider->LHandSkelIndex;
     int flag = 0;
-    int layer0Anim = cRiderAnimBase_getCurrentAnimID(self->owner->mRiderAnim, 0);
-    int layer1Anim = cRiderAnimBase_getCurrentAnimID(self->owner->mRiderAnim, 1);
-    if (cRiderAnimBase_getCurrentAnimCategory(self->owner->mRiderAnim, 1) == 13) {
-        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->owner->mRiderAnim, 1)->Events, 1) == 0) {
-            flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->owner->mRiderAnim, 1)->Events, 0)
+    int layer0Anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 0);
+    int layer1Anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 1);
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 1) == 13) {
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->Events, 1) == 0) {
+            flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1)->Events, 0)
                    != 0;
         }
     }
     if (layer0Anim == 326 || (layer1Anim == 323 && flag)) {
-        if (self->owner->IsRidingFakie)
-            bone = self->owner->LHandSkelIndex;
+        if (self->mRider->IsRidingFakie)
+            bone = self->mRider->LHandSkelIndex;
         else
-            bone = self->owner->RHandSkelIndex;
+            bone = self->mRider->RHandSkelIndex;
     } else if (layer0Anim == 327 || (layer1Anim == 324 && flag)) {
-        if (self->owner->IsRidingFakie)
-            bone = self->owner->RHandSkelIndex;
+        if (self->mRider->IsRidingFakie)
+            bone = self->mRider->RHandSkelIndex;
         else
-            bone = self->owner->LHandSkelIndex;
+            bone = self->mRider->LHandSkelIndex;
     } else {
-        self->active = 0;
+        self->mActive = 0;
     }
-    if (self->active) {
+    if (self->mActive) {
         // the bone position through a pointer to its matrix: retail adds base first (a subscript puts the index first)
-        t4Matrix* boneSkel = &self->owner->mAnimModel->SkelMatrices[bone];
+        t4Matrix* boneSkel = &self->mRider->mAnimModel->SkelMatrices[bone];
         t4Vector base = boneSkel->row[3];
-        sMat_1150 boneMat;
-        CopyMat_1150(&boneMat, (sMat_1150*)&self->owner->mAnimModel->SkelMatrices[bone]);
-        boneMat.r[3] = t4vect_Zero;
+        t4Matrix boneMat;
+        CopyMat_1150(&boneMat, &self->mRider->mAnimModel->SkelMatrices[bone]);
+        boneMat.row[3] = t4vect_Zero;
         t4Vector point;
         t4Vector rnd;
         {
@@ -462,7 +446,7 @@ extern "C" void cPunchFX_update(sFx_1150* self)
             base = point;
         }
         for (int i = 0; i < 4; i++) {
-            float attackBlend = self->owner->PunchStrength;
+            float attackBlend = self->mRider->PunchStrength;
             float jitter = attackBlend * 3.0f;
             float hi = attackBlend * 15.0f + 15.0f;
             rnd.w = 0.0f;
@@ -470,15 +454,15 @@ extern "C" void cPunchFX_update(sFx_1150* self)
             rnd.y = randRange_1150(-jitter, jitter);
             rnd.z = randRange_1150(-jitter, jitter);
             Add_1150(&point, base, rnd);
-            self->pos[i] = point;
-            self->size[i] = randRange_1150(15.0f, hi);
-            float shade = self->owner->PunchStrength * 0.9f;
+            self->mSpritePos[i] = point;
+            self->mSpriteSize[i] = randRange_1150(15.0f, hi);
+            float shade = self->mRider->PunchStrength * 0.9f;
             shade *= randf_1150();
             point.x = 1.0f;
             point.y = shade;
             point.z = shade;
             point.w = shade;
-            self->col[i] = *(sCol_1150*)&point;
+            self->mSpriteColour[i] = *(tARGB*)&point; // built in the t4Vector temporary: A, R, G, B in x .. w
         }
     }
 }
@@ -487,95 +471,59 @@ extern "C" void cPunchFX_update(sFx_1150* self)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cPunchFX_render);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sV2_1510 {
-    float x, y;
-    sV2_1510(const float& ax, const float& ay) : x(ax), y(ay) {}
+// t2Vector with a const float& constructor (ctor only), for the draw call's size and uv temporaries.
+struct t2VectorRef : t2Vector {
+    t2VectorRef(const float& ax, const float& ay)
+    {
+        x = ax;
+        y = ay;
+    }
 };
 
-struct sGs_1510 {
-    unsigned int w0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 5;
-    unsigned int f4_12 : 8;
-    unsigned int f4_20 : 2;
-    unsigned int f4_22 : 1;
-    unsigned int f4_23 : 2;
-    unsigned int f4_25 : 7;
-    unsigned int f8_0 : 5;
-    unsigned int f8_5 : 5;
-    unsigned int f8_10 : 19;
-    unsigned int f8_29 : 3;
-    unsigned int wC;
-    unsigned int f10 : 16;
-    unsigned int f10hi : 16;
-    void SetF22(int v) { f4_22 = v; }
-};
+extern sDrawState sDrawState_s_defaultDrawState; // sDrawState::s_defaultDrawState
 
-extern sGs_1510 sDrawState_s_defaultDrawState_1510 __asm__("sDrawState_s_defaultDrawState");
+// Pushes a copy of the current draw state on the graphics manager's draw-state stack.
+static inline void PushDrawState(cPS2GraphicsMan* gfx)
+{
+    gfx->m_pCurrentDrawState[1] = gfx->m_pCurrentDrawState[0];
+    gfx->m_pCurrentDrawState++;
+}
 
-class cGfx_1510 {
-public:
-    char pad[0xE84];
-    sGs_1510* stateTop;
-    char padE88[0xFB0 - 0xE88];
-    int fFB0;
-    int GetFB0() { return fFB0; }
-    void PushState() { stateTop[1] = stateTop[0]; stateTop++; }
-    char padFB4[0x10D8 - 0xFB4];
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
-    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
-    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
-    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
-    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
-    virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
-    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
-    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43();
-    virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
-    virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
-    virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
-    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
-    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
-    virtual void v64(); virtual void v65(); virtual void v66(); virtual void v67();
-    virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
-    virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75();
-    virtual void v76();
-    virtual void DrawSprite(const t4Vector&, const sV2_1510&, const sV2_1510&, const sV2_1510&, const sCol_1150&);
-};
+// Sets the @p mask-wide field at bit @p shift of draw-state word @p word to @p v (sDrawState keeps its named bit
+// fields as plain words).
+static inline void SetDrawBits(sDrawState* drawState, int word, unsigned int v, unsigned int mask, int shift)
+{
+    drawState->m_bitGroups[word] = (drawState->m_bitGroups[word] & ~(mask << shift)) | ((v << shift) & (mask << shift));
+}
 
 /**
  * Draws the punch effect's four sprites when it is active.
  *
- * Pushes a copy of the default draw state (sDrawState_s_defaultDrawState) with the effect texture (GrMan _EffectTexMap[24],
- * +0xFB0) and its blend settings, draws each sprite at pos[i] with its size and colour over the whole
- * texture, then pops the state.
+ * Pushes a copy of the default draw state (sDrawState_s_defaultDrawState) with the effect texture (GrMan
+ * _EffectTexMap[24]) and its blend settings, draws each sprite at mSpritePos[i] with its size and colour over the
+ * whole texture (DrawSprite), then pops the state.
  */
-extern "C" void cPunchFX_render(sFx_1150* self)
+extern "C" void cPunchFX_render(cPunchFX* self)
 {
-    if (self->active == 0)
+    if (self->mActive == 0)
         return;
-    ((cGfx_1510*)GrMan)->PushState();
-    *((cGfx_1510*)GrMan)->stateTop = sDrawState_s_defaultDrawState_1510;
-    // Raw char** read of the stack top (as in ovstatehud) so the global is re-read afterwards.
-    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = ((cGfx_1510*)GrMan)->GetFB0();
-    ((cGfx_1510*)GrMan)->stateTop->w0 |= 0xC;
-    ((cGfx_1510*)GrMan)->stateTop->f4_23 = 0;
-    ((cGfx_1510*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_1510*)GrMan)->stateTop->f4_12 = 20;
-    ((cGfx_1510*)GrMan)->stateTop->f4_0 = 2;
-    ((cGfx_1510*)GrMan)->stateTop->f8_10 = 0;
-    ((cGfx_1510*)GrMan)->stateTop->f8_5 = 7;
-    ((cGfx_1510*)GrMan)->stateTop->f4_2 = 7;
-    ((cGfx_1510*)GrMan)->stateTop->SetF22(1);
+    PushDrawState(GrMan);
+    *GrMan->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
+    *GrMan->m_pCurrentDrawState->m_textureState.m_texid = GrMan->getEffectTexMap(24);
+    GrMan->m_pCurrentDrawState->m_bitGroups[0] |= 0xC;
+    SetDrawBits(GrMan->m_pCurrentDrawState, 1, 0, 3, 23);
+    SetDrawBits(GrMan->m_pCurrentDrawState, 1, 0, 3, 20);
+    SetDrawBits(GrMan->m_pCurrentDrawState, 1, 20, 0xFF, 12);
+    SetDrawBits(GrMan->m_pCurrentDrawState, 1, 2, 3, 0);
+    SetDrawBits(GrMan->m_pCurrentDrawState, 2, 0, 0x7FFFF, 10);
+    SetDrawBits(GrMan->m_pCurrentDrawState, 2, 7, 0x1F, 5);
+    SetDrawBits(GrMan->m_pCurrentDrawState, 1, 7, 0x1F, 2);
+    SetDrawBits(GrMan->m_pCurrentDrawState, 1, 1, 1, 22);
     for (int i = 0; i < 4; i++) {
-        ((cGfx_1510*)GrMan)->DrawSprite(self->pos[i], sV2_1510(self->size[i], self->size[i]),
-                                            sV2_1510(0.0f, 0.0f), sV2_1510(1.0f, 1.0f), self->col[i]);
+        GrMan->DrawSprite(self->mSpritePos[i], t2VectorRef(self->mSpriteSize[i], self->mSpriteSize[i]),
+                          t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f), self->mSpriteColour[i]);
     }
-    ((cGfx_1510*)GrMan)->stateTop--;
+    GrMan->m_pCurrentDrawState--;
 }
 #endif
 
@@ -589,19 +537,18 @@ extern char cAttachedDynamicEmitter_vtbl[];
  * Constructs an attached dynamic emitter (0x210 bytes, "cAttachedDynamicEmitter") on @p emitter and returns it.
  *
  * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable cAttachedDynamicEmitter_vtbl
- * (mVtbl) and zeroes the attach-bone index (+0x200), the stopped flag (+0x204) and the pulse phase (+0x208).
+ * (mVtbl) and zeroes the attach-bone index (mBoneIndex), the stopped flag (mStopped) and the pulse phase (mPhase).
  * func_002F2130 is its only caller.
  *
  * @param emitter  the memory to construct in
  * @return the constructed emitter (@p emitter)
  */
-extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cBaseClass_DynamicEmitter* emitter) {
+extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cAttachedDynamicEmitter* emitter) {
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
-    // +0x200 .. +0x20C: cAttachedDynamicEmitter's own fields past its base (the subclass has no header yet)
-    *(int *)((char*)emitter + 0x200) = 0;
+    emitter->mBoneIndex = 0;
     emitter->mVtbl = (void**)cAttachedDynamicEmitter_vtbl;
-    *(int *)((char*)emitter + 0x204) = 0;
-    *(int *)((char*)emitter + 0x208) = 0;
+    emitter->mStopped = 0;
+    *(int*)&emitter->mPhase = 0; // stored as an integer zero (sw zero)
     return emitter;
 }
 #endif
@@ -1142,7 +1089,7 @@ struct Obj2130 : Base2130 {
     virtual void v2(int, float);
 };
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
-extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cBaseClass_DynamicEmitter*);
+extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cAttachedDynamicEmitter*);
 extern char str_cAttachedDynamicEmitter[];
 extern int cAttachedEmitterFX_mEmitterDataArray;
 
@@ -1165,7 +1112,7 @@ extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int b
     for (i = 0; i < 10; i++, slot++) {
         if (*slot == 0) {
             Obj2130 *n = (Obj2130 *)cAttachedDynamicEmitter_cAttachedDynamicEmitter(
-                (cBaseClass_DynamicEmitter*)cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
+                (cAttachedDynamicEmitter*)cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
             int typeData = cAttachedEmitterFX_mEmitterDataArray + typeIndex * 272;
             *slot = n;
             // +0x200 bone, +0x204 stopped flag, +0x20C type record: cAttachedDynamicEmitter's own fields (no header)
@@ -1218,7 +1165,7 @@ extern "C" void func_002F2218(char* self, int idx)
 INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
 #ifdef SKIP_ASM
 /**
- * Stops the emitter in one slot from emitting: sets its stopped flag (+0x204) to 1.
+ * Stops the emitter in one slot from emitting: sets its stopped flag (mStopped) to 1.
  *
  * func_002F1A08 then updates it with emission off. No retail code calls it.
  *
@@ -1226,8 +1173,8 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
 extern "C" void func_002F2268(cAttachedEmitterFX* emitterFx, int emitterIndex) {
-    // +0x204: cAttachedDynamicEmitter's stopped flag (the subclass has no header yet)
-    *(int *)((char *)emitterFx->mEmitters[emitterIndex] + 0x204) = 1;
+    // the slots hold cAttachedDynamicEmitters (func_002F2130)
+    ((cAttachedDynamicEmitter*)emitterFx->mEmitters[emitterIndex])->mStopped = 1;
 }
 #endif
 
@@ -1235,7 +1182,7 @@ extern "C" void func_002F2268(cAttachedEmitterFX* emitterFx, int emitterIndex) {
 INCLUDE_ASM("seg/seg_1F1548", func_002F2280);
 #ifdef SKIP_ASM
 /**
- * Lets the emitter in one slot emit again: clears its stopped flag (+0x204).
+ * Lets the emitter in one slot emit again: clears its stopped flag (mStopped).
  *
  * The counterpart of func_002F2268. No retail code calls it.
  *
@@ -1243,8 +1190,8 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2280);
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
 extern "C" void func_002F2280(cAttachedEmitterFX* emitterFx, int emitterIndex) {
-    // +0x204: cAttachedDynamicEmitter's stopped flag (the subclass has no header yet)
-    *(int *)((char *)emitterFx->mEmitters[emitterIndex] + 0x204) = 0;
+    // the slots hold cAttachedDynamicEmitters (func_002F2130)
+    ((cAttachedDynamicEmitter*)emitterFx->mEmitters[emitterIndex])->mStopped = 0;
 }
 #endif
 
@@ -1712,7 +1659,6 @@ extern int D_004A54F8;
 extern float D_004A5500;
 extern float D_004A5504;
 extern int D_004A5508;
-// PORT: the unit declares cGraphicsMan_TheGraphicsMan later as cGfx_3E28*; this view is bound by asm label.
 
 // Writes *m_texid: the subscript m_texid[0] reschedules tDrop_render against retail.
 static inline void setId_2C30(sDrawState* p, int v)
@@ -1726,7 +1672,7 @@ static inline float lerp_2C30(float a, float d, float t)
     return a + t;
 }
 
-// PORT: the unit declares tDrop_render later as (void*, sV2_3E28*); typed body bound by asm label.
+// PORT: the unit declares tDrop_render later as (tDrop*, const t2Vector*); typed body bound by asm label.
 extern "C" void tDrop_render_impl(tDrop* obj, sVec2_2C30* off) __asm__("tDrop_render");
 /**
  * Draws a screen-splash drop as a rotated sprite offset by @p off.
@@ -2564,138 +2510,59 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int cSplashToggles_m_Enable;
 extern int cSplashToggles_m_Render;
 extern int cRenderStateMan_m_indoor;
 extern t4Matrix t4mat_Identity;
 
-struct sV2_3E28 {
-    float x, y;
-    sV2_3E28() {}
-    sV2_3E28(const sV2_3E28& o) : x(o.x), y(o.y) {}
-    sV2_3E28& operator=(const sV2_3E28& o)
-    {
-        x = o.x;
-        y = o.y;
-        return *this;
-    }
-};
-
-struct sGsState_3E28 {
-    unsigned int w0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 10;
-    unsigned int f4_12 : 8;
-    unsigned int f4_20 : 2;
-    unsigned int f4_22 : 1;
-    unsigned int f4_23 : 2;
-    unsigned int f4_25 : 7;
-    unsigned int f8_0 : 5;
-    unsigned int f8_5 : 5;
-    unsigned int f8_10 : 19;
-    unsigned int f8_29 : 3;
-    unsigned int wC;
-    unsigned int w10;
-};
-
-extern sGsState_3E28 sDrawState_s_defaultDrawState;
-
-static inline void SetF22_3E28(sGsState_3E28* s, int v)
-{
-    s->f4_22 = v;
-}
-
-class cGfx_3E28 {
-public:
-    char pad[0xE84];
-    sGsState_3E28* stateTop;
-    char pad2[0x10D8 - 0xE88];
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
-    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
-    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void PushViewport();
-    virtual void PopViewport();
-    virtual void v22(); virtual void v23(); virtual void v24();
-    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
-    virtual void v26();
-    virtual sV2_3E28 GetScreenSize();
-    virtual void v28(); virtual void v29();
-    virtual void PushView();
-    virtual void PopView();
-    virtual void v32();
-    virtual void SetView(void*);
-};
-
-
-struct sBase_3E28 {
-    int pad[3];
-};
-
-struct sVBase_3E28 : sBase_3E28 {
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
-    virtual void v12(); virtual void Reset();
-};
-
-struct sEmitter_3E28 : sVBase_3E28 {
-    int idx;
-    int nSmoke;
-    int nParts;
-    char smoke[30][0x3C];
-    char parts[30][0x4C];
-};
-
-extern "C" void tDrop_render(void*, sV2_3E28*);
-extern void tCrystal_render_3E28(void*, sV2_3E28*) __asm__("tCrystal_render");
+// PORT: the unit declares tDrop_render's typed body by asm label (tDrop_render_impl above).
+extern "C" void tDrop_render(tDrop*, const t2Vector*);
 
 /**
  * Draws this view's splash drops and ice crystals as 2D sprites over the 640x480 screen.
  *
- * Needs SplashToggles "Enable" and "Render" and this view being the one rendered. When cRenderStateMan_m_indoor (a
- * script-controlled flag that also gates other lens effects) is set, it resets the splashes instead. Draws in
- * its own 2D scene with a pushed copy of the default draw state (sDrawState_s_defaultDrawState) and the current screen size.
+ * Needs SplashToggles "Enable" and "Render" and this view (mViewIndex) being the one rendered. When
+ * cRenderStateMan_m_indoor (a script-controlled flag that also gates other lens effects) is set, it resets the
+ * splashes instead (reset). Draws in its own 2D scene with a pushed copy of the default draw state
+ * (sDrawState_s_defaultDrawState), offset by the current viewport window's corner (GetViewportWindow).
  */
-extern "C" void cSplashManager_render(sEmitter_3E28* self)
+extern "C" void cSplashManager_render(cSplashManager* self)
 {
     if (cSplashToggles_m_Enable == 0)
         return;
     if (cSplashToggles_m_Render == 0)
         return;
-    if (self->idx != (int)SSXApp->Game->ViewMan->m_uiCurrentView)
+    if (self->mViewIndex != SSXApp->Game->ViewMan->m_uiCurrentView)
         return;
     if (cRenderStateMan_m_indoor) {
-        self->Reset();
+        self->reset();
         return;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int i = 0;
-    ((cGfx_3E28*)ps2GraphicsMan)->PushViewport();
-    const sV2_3E28& screen = ((cGfx_3E28*)ps2GraphicsMan)->GetScreenSize();
-    sV2_3E28 scr = screen;
-    ((cGfx_3E28*)ps2GraphicsMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    ((cGfx_3E28*)ps2GraphicsMan)->PushView();
-    ((cGfx_3E28*)ps2GraphicsMan)->SetView(&t4mat_Identity);
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop[1] = ((cGfx_3E28*)ps2GraphicsMan)->stateTop[0];
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop++;
-    *((cGfx_3E28*)ps2GraphicsMan)->stateTop = sDrawState_s_defaultDrawState;
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f8_5 = 8;
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_23 = 2;
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_20 = 0;
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_12 = 0;
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_0 = 0;
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f8_10 = 0;
-    SetF22_3E28(((cGfx_3E28*)ps2GraphicsMan)->stateTop, 1);
-    for (i = 0; i < self->nSmoke; i++)
-        tDrop_render(self->smoke[i], &scr);
-    for (i = 0; i < self->nParts; i++)
-        tCrystal_render_3E28(self->parts[i], &scr);
-    ((cGfx_3E28*)ps2GraphicsMan)->stateTop--;
-    ((cGfx_3E28*)ps2GraphicsMan)->PopView();
-    ((cGfx_3E28*)ps2GraphicsMan)->PopViewport();
+    ps2GraphicsMan->PushViewport();
+    const tRect& window = ps2GraphicsMan->GetViewportWindow();
+    t2Vector off(window.X, window.Y);
+    ps2GraphicsMan->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 1, 0);
+    ps2GraphicsMan->PushView();
+    ps2GraphicsMan->SetView1(t4mat_Identity);
+    ps2GraphicsMan->m_pCurrentDrawState[1] = ps2GraphicsMan->m_pCurrentDrawState[0];
+    ps2GraphicsMan->m_pCurrentDrawState++;
+    *ps2GraphicsMan->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
+    SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 2, 8, 0x1F, 5);
+    SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 1, 2, 3, 23);
+    SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 1, 0, 3, 20);
+    SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 1, 0, 0xFF, 12);
+    SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 1, 0, 3, 0);
+    SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 2, 0, 0x7FFFF, 10);
+    SetDrawBits(ps2GraphicsMan->m_pCurrentDrawState, 1, 1, 1, 22);
+    for (i = 0; i < self->mNumActiveDrops; i++)
+        tDrop_render(&self->mDropList[i], &off);
+    for (i = 0; i < self->mNumActiveCrystals; i++)
+        tCrystal_render(&self->mCrystalList[i], &off);
+    ps2GraphicsMan->m_pCurrentDrawState--;
+    ps2GraphicsMan->PopView();
+    ps2GraphicsMan->PopViewport();
 }
 #endif
 
@@ -2728,23 +2595,15 @@ extern "C" void ReportImpact(void *position, float speed) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_CameraSnapped);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Base41A8 { int pad[3]; };
-struct Obj41A8 : Base41A8 {
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
-    virtual void v12(); virtual void reset();
-};
-Obj41A8 *cGame_getSplashManager_41A8(void *, int) __asm__("cGame_getSplashManager__FPvi");
+cSplashManager* cGame_getSplashManager_41A8(void *, int) __asm__("cGame_getSplashManager__FPvi");
 
 /**
  * Tells the splash effects that a camera snapped: resets the splash manager of each view using that camera.
  *
  * Loops over the game's views (SSXApp->Game->ViewMan: m_uiNumView, cameras in PlayerCamera); where view i's camera
- * is @p camera and cGame_getSplashManager__FPvi(game, i) returns a splash manager, it calls that manager's virtual at +0x70,
- * cSplashManager_reset, so no splashes carry over a camera cut. Called by cCameraController_snap and cCameraController_snapCurrent
- * (cameracontroller).
+ * is @p camera and cGame_getSplashManager__FPvi(game, i) returns a splash manager, it calls that manager's virtual
+ * reset (slot 14, cSplashManager_reset), so no splashes carry over a camera cut. Called by cCameraController_snap
+ * and cCameraController_snapCurrent (cameracontroller).
  *
  * @param camera  the camera that snapped
  */
@@ -2755,7 +2614,7 @@ extern "C" void cSplashManager_CameraSnapped(cCamera* camera) {
             cGame* game = SSXApp->Game;
             if (camera == game->ViewMan->PlayerCamera[i]) {
                 if (cGame_getSplashManager_41A8(game, i) != 0) {
-                    Obj41A8 *splashMan = cGame_getSplashManager_41A8(SSXApp->Game, i);
+                    cSplashManager* splashMan = cGame_getSplashManager_41A8(SSXApp->Game, i);
                     splashMan->reset();
                 }
             }
@@ -2866,21 +2725,26 @@ INCLUDE_ASM("seg/seg_1F1548", cSunHalo_cSunHalo);
 extern void cHalo_cHalo(void *);
 extern "C" void cSunHalo_InitLens(void *);
 inline void* operator new[](unsigned int, void* p) { return p; }
-struct Elem4380 { Elem4380() {} };
+
+// A tSunLens with its (empty) constructor: [O] On Tour's mColor is a tARGB, whose constructor gives the lens array
+// the (empty) construction loop retail runs.
+struct tSunLensInit : tSunLens {
+    tSunLensInit() {}
+};
 
 /**
  * Constructs the sun halo: the halo base, its lens-flare table and the default lens set.
  *
- * Runs cHalo_cHalo (the cHalo base constructor), constructs the 16 lens entries (trivial), clears the occlusion
- * factor (+0x204; On Tour mfOcclude) and the halo's mbOnScreen/mbRequestZSample shorts (+0x2C, +0x2E), then calls
- * cSunHalo_InitLens for the default flare.
+ * Runs cHalo_cHalo (the cHalo base constructor), constructs the 16 lens entries (mSunLens; trivial), clears the
+ * occlusion factor (mfOcclude) and the halo's mbOnScreen / mbRequestZSample shorts, then calls cSunHalo_InitLens for
+ * the default flare.
  *
  * @param sunHalo  the object to construct (this)
  * @return @p sunHalo
  */
 extern "C" void *cSunHalo_cSunHalo(cSunHalo* sunHalo) {
     cHalo_cHalo(sunHalo);
-    new ((char*)&sunHalo->mSunLens[0].mColor[1]) Elem4380[16];
+    new (sunHalo->mSunLens) tSunLensInit[16];
     *(int*)&sunHalo->mfOcclude = 0;
     *(short*)&sunHalo->mbRequestZSample = 0;
     *(short*)&sunHalo->mbOnScreen = 0;
@@ -2989,95 +2853,43 @@ static inline t2Vector operator*(const t2Vector& a, float s)
     return t2Vector(a.x * s, a.y * s);
 }
 
-struct sV4_4690 {
-    float x, y, z, w;
-    sV4_4690(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+// t4Vector with a by-reference float constructor (ctor only), for the sprite positions.
+struct t4VectorRef : t4Vector {
+    t4VectorRef(const float& ax, const float& ay, const float& az, const float& aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
 };
-
-
-struct sLight_4690 {
-    int type;
-    float dist;
-    float size;
-    tARGB col;
-};
-
-struct sFlare_4690 {
-    char pad[0x30];
-    sLight_4690 lights[16];
-    float sunX;
-    float sunY;
-    char pad1F8[0x8];
-    int count;
-    float intensity;
-};
-
-struct sGs_4690 {
-    unsigned int w0, w4, w8, wC;
-    unsigned int f10 : 16;
-    unsigned int f10hi : 16;
-    void SetF10(int v) { f10 = v; }
-};
-
-class cWorld_4690 {
-public:
-    char pad[0xE84];
-    sGs_4690* stateTop;
-    char padE88[0x1004 - 0xE88];
-    int f1004;
-    int GetF1004() { return f1004; }
-    char pad1008[0x10D8 - 0x1008];
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8();
-    virtual unsigned int GetScreenWidth();
-    virtual unsigned int GetScreenHeight();
-    virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
-    virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
-    virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22();
-    virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26();
-    virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30();
-    virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34();
-    virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38();
-    virtual void v39(); virtual void v40(); virtual void v41(); virtual void v42();
-    virtual void v43(); virtual void v44(); virtual void v45(); virtual void v46();
-    virtual void v47(); virtual void v48(); virtual void v49(); virtual void v50();
-    virtual void v51(); virtual void v52(); virtual void v53(); virtual void v54();
-    virtual void v55(); virtual void v56(); virtual void v57(); virtual void v58();
-    virtual void v59(); virtual void v60(); virtual void v61(); virtual void v62();
-    virtual void v63(); virtual void v64(); virtual void v65(); virtual void v66();
-    virtual void v67(); virtual void v68(); virtual void v69(); virtual void v70();
-    virtual void v71(); virtual void v72(); virtual void v73(); virtual void v74();
-    virtual void v75(); virtual void v76();
-    virtual void DrawSprite(const sV4_4690&, const t2Vector&, const t2Vector&, const t2Vector&, const tARGB&);
-};
-
 
 /**
  * Draws the sun's lens-flare elements along the line from the screen centre through the sun.
  *
- * Sets the current draw state's texture from the graphics manager's +0x1004 (_EffectTexMap[45]). Each of the mNumLens
- * (+0x200) entries of the lens table (+0x30, 0x1C each: kind, distance, size, colour) sits at centre + (sun - centre) *
- * distance, where the sun is mScreenPosition (+0x1F0); its alpha is scaled by mfOcclude (+0x204) *
+ * Sets the current draw state's texture to the graphics manager's _EffectTexMap[45]. Each of the mNumLens entries of
+ * the lens table (mSunLens: kind, distance, size, colour) sits at centre + (sun - centre) * distance, where the sun is
+ * mScreenPosition; its alpha is scaled by mfOcclude *
  * cRenderStateMan_LensIntensity(6), its UVs pick a quarter of the texture by kind (0-3; others the left half) and it is
  * drawn as a size * 300 square with cPS2GraphicsMan_DrawSprite (virtual slot 78). cSunHalo_Render calls it.
  */
-extern "C" void cSunHalo_RenderLens(sFlare_4690* self)
+extern "C" void cSunHalo_RenderLens(cSunHalo* self)
 {
-    float cx = (float)((cWorld_4690*)GrMan)->GetScreenWidth() * 0.5f;
-    float cy = (float)((cWorld_4690*)GrMan)->GetScreenHeight() * 0.5f;
+    // the screen size converts as unsigned (cvt with the 2^32 fix-up), as retail does
+    float cx = (float)(unsigned int)GrMan->GetScreenWidth() * 0.5f;
+    float cy = (float)(unsigned int)GrMan->GetScreenHeight() * 0.5f;
     t2Vector center(cx, cy);
-    t2Vector sun(self->sunX, self->sunY);
+    t2Vector sun(self->mScreenPosition.x, self->mScreenPosition.y);
     t2Vector dir = sun - center;
-    cPS2GraphicsMan* w = GrMan;
-    ((cWorld_4690*)w)->stateTop->SetF10(((cWorld_4690*)w)->GetF1004());
-    for (int i = 0; i < self->count; i++) {
-        t2Vector pos = center + dir * self->lights[i].dist;
+    cPS2GraphicsMan* gfx = GrMan;
+    gfx->m_pCurrentDrawState->m_textureState.m_texid[0] = gfx->getEffectTexMap(45);
+    for (int i = 0; i < self->mNumLens; i++) {
+        t2Vector pos = center + dir * self->mSunLens[i].mPosition;
         t2Vector uv0;
-        tARGB col = self->lights[i].col;
-        col.A *= self->intensity * cRenderStateMan_LensIntensity(6);
+        tARGB col = *(tARGB*)self->mSunLens[i].mColor; // same layout: mColor is On Tour's tARGB (A, R, G, B)
+        col.A *= self->mfOcclude * cRenderStateMan_LensIntensity(6);
         t2Vector uv1;
-        switch (self->lights[i].type) {
+        switch (self->mSunLens[i].mType) {
         case 0:
             uv0 = t2Vector(0.0f, 0.0f);
             uv1 = t2Vector(0.5f, 0.5f);
@@ -3099,9 +2911,9 @@ extern "C" void cSunHalo_RenderLens(sFlare_4690* self)
             uv1 = t2Vector(0.5f, 1.0f);
             break;
         }
-        float spriteSize = self->lights[i].size * 300.0f;
+        float spriteSize = self->mSunLens[i].mScale * 300.0f;
         t2Vector sz(spriteSize, spriteSize);
-        ((cWorld_4690*)GrMan)->DrawSprite(sV4_4690(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
+        GrMan->DrawSprite(t4VectorRef(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
     }
 }
 #endif
@@ -3109,139 +2921,80 @@ extern "C" void cSunHalo_RenderLens(sFlare_4690* self)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cSunHalo_Render);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" float cRenderStateMan_SunColorR(int);
 extern "C" float cRenderStateMan_SunColorG(int);
 extern "C" float cRenderStateMan_SunColorB(int);
 extern "C" float cRenderStateMan_SunIntensity(int);
 extern "C" int cRenderStateMan_SunType(int);
 extern "C" float cRenderStateMan_SunRadius(int);
-extern "C" void cSunHalo_RenderLens_4A08(void*, void*) __asm__("cSunHalo_RenderLens");
+extern "C" void cSunHalo_RenderLens_4A08(cSunHalo*, tViewInfo*) __asm__("cSunHalo_RenderLens");
 extern t4Matrix t4mat_Identity;
 
-struct sV2_4A08 {
-    float x, y;
-    sV2_4A08(const float& ax, const float& ay) : x(ax), y(ay) {}
+// tARGB with by-reference float constructors (ctor only), for the sprite's colour (t4VectorRef: cSunHalo_RenderLens).
+struct tARGBRef : tARGB {
+    tARGBRef() {}
+    tARGBRef(const float& a, const float& r, const float& g, const float& b)
+    {
+        A = a;
+        R = r;
+        G = g;
+        B = b;
+    }
 };
-
-struct sV4_4A08 {
-    float x, y, z, w;
-    sV4_4A08() {}
-    sV4_4A08(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
-};
-
-struct sGsState_4A08 {
-    unsigned int w0;
-    unsigned int f4_0 : 2;
-    unsigned int f4_2 : 5;
-    unsigned int f4_7 : 5;
-    unsigned int f4_12 : 8;
-    unsigned int f4_20 : 2;
-    unsigned int f4_22 : 1;
-    unsigned int f4_23 : 2;
-    unsigned int f4_25 : 7;
-    unsigned int f8_0 : 5;
-    unsigned int f8_5 : 5;
-    unsigned int f8_10 : 19;
-    unsigned int f8_29 : 3;
-    unsigned int wC;
-    unsigned int f10 : 16;
-    unsigned int f10hi : 16;
-    void SetF22(int v) { f4_22 = v; }
-};
-
-extern sGsState_4A08 sDrawState_s_defaultDrawState_4A08 __asm__("sDrawState_s_defaultDrawState");
-
-class cGfx_4A08 {
-public:
-    char pad[0xE84];
-    sGsState_4A08* stateTop;
-    char padE88[0xF50 - 0xE88];
-    int texTab[(0x10D8 - 0xF50) / 4];
-    int GetTexId(int i) { return texTab[i + 0x33]; }
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
-    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
-    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void PushViewport();
-    virtual void PopViewport();
-    virtual void v22(); virtual void v23(); virtual void v24();
-    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
-    virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void PushView();
-    virtual void PopView();
-    virtual void v32();
-    virtual void SetView(void*);
-    virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
-    virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
-    virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
-    virtual void v46(); virtual void v47(); virtual void v48(); virtual void v49();
-    virtual void v50(); virtual void v51(); virtual void v52(); virtual void v53();
-    virtual void v54(); virtual void v55(); virtual void v56(); virtual void v57();
-    virtual void v58(); virtual void v59(); virtual void v60(); virtual void v61();
-    virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
-    virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
-    virtual void v70(); virtual void v71(); virtual void v72(); virtual void v73();
-    virtual void v74(); virtual void v75(); virtual void v76();
-    virtual void DrawSprite(const sV4_4A08&, const sV2_4A08&, const sV2_4A08&, const sV2_4A08&, const sV4_4A08&);
-};
-
-
 
 /**
  * Draws the sun sprite and its lens flare for one view, in a pushed orthographic viewport.
  *
- * Skipped while the sun is not on screen (mbOnScreen, +0x2C). Uses render-state set 6, or 7 when @p flag is set: the
- * colour is (1, SunColorR/G/B) with its alpha scaled by mfOcclude (+0x204) * SunIntensity, the size is SunRadius (1
- * means 320) and the texture is _EffectTexMap[51 + SunType]; nothing is drawn when the alpha is not positive. Pushes a
- * default draw state (blend and texture fields set), the viewport @p vp and an identity view, draws a size-square
- * sprite at mScreenPosition (+0x1F0) with cPS2GraphicsMan_DrawSprite, calls cSunHalo_RenderLens and pops everything again.
+ * Skipped while the sun is not on screen (mbOnScreen). Uses render-state set 6 for view 0, else 7: the colour is
+ * (1, SunColorR/G/B) with its alpha scaled by mfOcclude * SunIntensity, the size is SunRadius (1 means 320) and the
+ * texture is _EffectTexMap[51 + SunType]; nothing is drawn when the alpha is not positive. Pushes a default draw state
+ * (blend and texture fields set), the view's rectangle as an orthographic viewport and an identity view, draws a
+ * size-square sprite at mScreenPosition (DrawSprite), calls cSunHalo_RenderLens and pops everything again.
  *
- * @param vp  the viewport rectangle (x, y, width, height)
- * @param flag  nonzero picks render-state set 7 instead of 6
+ * @param viewInfo  the view (On Tour ViewInfo): its mViewRect is the viewport
+ * @param viewId  the view index (On Tour ViewID): render-state set 6 for view 0, 7 otherwise
  */
-extern "C" void cSunHalo_Render(cSunHalo* self, sV4_4A08* vp, int flag)
+extern "C" void cSunHalo_Render(cSunHalo* self, tViewInfo* viewInfo, int viewId)
 {
     if (self->mbOnScreen == 0)
         return;
-    int id = !flag ? 6 : 7;
+    int id = !viewId ? 6 : 7;
     float sunRed = cRenderStateMan_SunColorR(id);
     float sunGreen = cRenderStateMan_SunColorG(id);
     float sunBlue = cRenderStateMan_SunColorB(id);
-    sV4_4A08 col;
-    col = sV4_4A08(1.0f, sunRed, sunGreen, sunBlue);
-    col.x *= self->mfOcclude * cRenderStateMan_SunIntensity(id);
+    tARGBRef col;
+    col = tARGBRef(1.0f, sunRed, sunGreen, sunBlue);
+    col.A *= self->mfOcclude * cRenderStateMan_SunIntensity(id);
     float size = cRenderStateMan_SunRadius(id);
     int tex = cRenderStateMan_SunType(id);
     if (size == 1.0f)
         size = 320.0f;
-    if (col.x <= 0.0f)
+    if (col.A <= 0.0f)
         return;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-    ((cGfx_4A08*)gfx)->stateTop[1] = ((cGfx_4A08*)gfx)->stateTop[0];
-    ((cGfx_4A08*)gfx)->stateTop++;
-    *((cGfx_4A08*)gfx)->stateTop = sDrawState_s_defaultDrawState_4A08;
-    ((cGfx_4A08*)gfx)->PushViewport();
-    ((cGfx_4A08*)gfx)->SetViewportOrthographic(vp->x, vp->y, vp->z, vp->w, 1, 0, 0.0f, 1.0f);
-    ((cGfx_4A08*)gfx)->PushView();
-    ((cGfx_4A08*)gfx)->SetView(&t4mat_Identity);
-    ((cGfx_4A08*)gfx)->stateTop->SetF22(1);
-    ((cGfx_4A08*)gfx)->stateTop->f4_23 = 2;
-    ((cGfx_4A08*)gfx)->stateTop->f4_20 = 0;
-    ((cGfx_4A08*)gfx)->stateTop->f4_12 = 20;
-    ((cGfx_4A08*)gfx)->stateTop->f4_0 = 0;
-    ((cGfx_4A08*)gfx)->stateTop->f8_10 = 0;
-    ((cGfx_4A08*)gfx)->stateTop->f4_2 = 7;
-    ((cGfx_4A08*)gfx)->stateTop->f8_5 = 8;
-    ((cGfx_4A08*)gfx)->stateTop->f10 = ((cGfx_4A08*)gfx)->GetTexId(tex);
-    sV4_4A08 pos(self->mScreenPosition.x, self->mScreenPosition.y, 0.0f, 1.0f);
-    ((cGfx_4A08*)gfx)->DrawSprite(pos, sV2_4A08(size, size),
-                    sV2_4A08(0.0f, 0.0f), sV2_4A08(1.0f, 1.0f), col);
-    cSunHalo_RenderLens_4A08((self), vp);
-    ((cGfx_4A08*)gfx)->stateTop--;
-    ((cGfx_4A08*)gfx)->PopView();
-    ((cGfx_4A08*)gfx)->PopViewport();
+    gfx->m_pCurrentDrawState[1] = gfx->m_pCurrentDrawState[0];
+    gfx->m_pCurrentDrawState++;
+    *gfx->m_pCurrentDrawState = sDrawState_s_defaultDrawState;
+    gfx->PushViewport();
+    gfx->SetViewportOrthographic(viewInfo->mViewRect.X, viewInfo->mViewRect.Y, viewInfo->mViewRect.W,
+                                 viewInfo->mViewRect.H, 0.0f, 1.0f, 1, 0);
+    gfx->PushView();
+    gfx->SetView1(t4mat_Identity);
+    SetDrawBits(gfx->m_pCurrentDrawState, 1, 1, 1, 22);
+    SetDrawBits(gfx->m_pCurrentDrawState, 1, 2, 3, 23);
+    SetDrawBits(gfx->m_pCurrentDrawState, 1, 0, 3, 20);
+    SetDrawBits(gfx->m_pCurrentDrawState, 1, 20, 0xFF, 12);
+    SetDrawBits(gfx->m_pCurrentDrawState, 1, 0, 3, 0);
+    SetDrawBits(gfx->m_pCurrentDrawState, 2, 0, 0x7FFFF, 10);
+    SetDrawBits(gfx->m_pCurrentDrawState, 1, 7, 0x1F, 2);
+    SetDrawBits(gfx->m_pCurrentDrawState, 2, 8, 0x1F, 5);
+    gfx->m_pCurrentDrawState->m_textureState.m_texid[0] = gfx->getEffectTexMap(tex + 51);
+    t4VectorRef pos(self->mScreenPosition.x, self->mScreenPosition.y, 0.0f, 1.0f);
+    gfx->DrawSprite(pos, t2VectorRef(size, size), t2VectorRef(0.0f, 0.0f), t2VectorRef(1.0f, 1.0f), col);
+    cSunHalo_RenderLens_4A08(self, viewInfo);
+    gfx->m_pCurrentDrawState--;
+    gfx->PopView();
+    gfx->PopViewport();
 }
 #endif
 
@@ -3464,8 +3217,14 @@ extern "C" void cWorldLightMan_initLightCache(cWorldLightMan*);
 struct cWorldPainterManArg;
 void *cWorldPainterMan_getQuery(void *, cWorldPainterManArg *);
 extern char kWPR_Lighting;
-struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
-struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
+// The two entry types with the constructors retail runs over the arrays (On Tour's mark an entry unused: RID = -1,
+// tResourceID::Invalid()).
+struct tOverlapListNodeInit : tOverlapListNode {
+    tOverlapListNodeInit() { RID.m_uiRID = 0xFFFFFFFF; }
+};
+struct tLightCacheEntryInit : tLightCacheEntry {
+    tLightCacheEntryInit() { RID = 0xFFFFFFFF; }
+};
 
 /**
  * Constructs the world light manager: empty light tables, the light cache and a lighting query.
@@ -3478,8 +3237,8 @@ struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
  * @return self
  */
 extern "C" void *cWorldLightMan_cWorldLightMan(cWorldLightMan* self, cBXNash* pNash) {
-    new (self->OverlapNodeList) A5180[8];
-    new (self->LightCacheArray) B5180[32];
+    new (self->OverlapNodeList) tOverlapListNodeInit[8];
+    new (self->LightCacheArray) tLightCacheEntryInit[32];
     self->m_pNash = pNash;
     cWorldLightMan_initLightCache(self);
     cWorld* world = SSXApp->Game->World;
@@ -3494,21 +3253,19 @@ INCLUDE_ASM("seg/seg_1F1548", cWorldLightMan__cWorldLightMan);
 #ifdef SKIP_ASM
 extern "C" void cWorldLightMan_purgeLightCache(void *);
 void operator_delete(int *);
-struct Base5230 { int pad; };
-struct Inner5230 : Base5230 { virtual ~Inner5230(); };
 
 /**
  * Destroys the world light manager: its world-painter query, its light cache, then itself.
  *
- * Deletes the object at +0x4 (On Tour m_pWPQuery) through its virtual destructor if set, calls cWorldLightMan_purgeLightCache
- * (purgeLightCache) and frees the manager when bit 0 of @p flags is set.
+ * Deletes the world-painter query (m_pWPQuery) through its virtual destructor if set, calls
+ * cWorldLightMan_purgeLightCache (purgeLightCache) and frees the manager when bit 0 of @p flags is set.
  *
  * @param lightMan  the light manager (this)
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cWorldLightMan__cWorldLightMan(cWorldLightMan* lightMan, int flags) {
-    if ((Inner5230*)lightMan->m_pWPQuery != 0) {
-        delete (Inner5230*)lightMan->m_pWPQuery;
+    if (lightMan->m_pWPQuery != 0) {
+        delete lightMan->m_pWPQuery;
     }
     cWorldLightMan_purgeLightCache((lightMan));
     if (flags & 1) {

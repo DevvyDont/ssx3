@@ -11101,20 +11101,20 @@ extern "C" void cPS2GraphicsMan_UpdateFullScreenEffects(cPS2GraphicsMan* self, i
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderFullScreenEffects);
 #ifdef SKIP_ASM
+// The 8-byte scissor rectangle (x, y, w, h halfwords) as the two words retail copies it in.
 struct sPartPair {
     int a, b;
 };
 
-/**
- * Records view @p i for the full-screen effects rather than drawing anything: copies mScreenMatrix (+0x6AF0) to
- * mViewScreenMatrix[i] and the scissor to mViewScissor[i], and sets mNumViews = i + 1.
- *
- * @param i  the view index (On Tour View)
- */
-// PORT: PS2-only VU0 asm (lqc2/sqc2 matrix copy).
-extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, int i)
+// Copies one view's scissor rectangle into another, as two words.
+static inline void CopyScissor(unsigned short* dst, const unsigned short* src)
 {
-    // PORT: (int)self pointer arithmetic (index added first, as in the target).
+    *(sPartPair*)dst = *(const sPartPair*)src;
+}
+
+// PORT: PS2-only VU0 asm (lqc2/sqc2 matrix copy).
+static inline void CopyMatrix_FSE(const t4Matrix* src, t4Matrix* dst)
+{
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%0)\n"
         "lqc2      $vf2, 0x10(%0)\n"
@@ -11125,9 +11125,21 @@ extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, i
         "sqc2      $vf3, 0x20(%1)\n"
         "sqc2      $vf4, 0x30(%1)\n"
         :
-        : "r"((char*)&self->mScreenMatrix), "r"((char*)((i << 6) + (int)self) + 0x5930)
+        : "r"(src), "r"(dst)
         : "memory");
-    ((sPartPair*)(&self->mViewScissor[0]))[i] = *(sPartPair*)&self->mScissor[0];
+}
+
+/**
+ * Records view @p i for the full-screen effects rather than drawing anything: copies mScreenMatrix to
+ * mViewScreenMatrix[i] and the scissor to mViewScissor[i], and sets mNumViews = i + 1.
+ *
+ * @param i  the view index (On Tour View)
+ */
+extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, int i)
+{
+    // the helper's argument forms &mViewScreenMatrix[i] index first, as retail does
+    CopyMatrix_FSE(&self->mScreenMatrix, &self->mViewScreenMatrix[i]);
+    CopyScissor(self->mViewScissor[i], self->mScissor);
     self->mNumViews = i + 1;
 }
 #endif

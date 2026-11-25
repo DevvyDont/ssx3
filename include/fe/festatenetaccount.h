@@ -41,6 +41,7 @@
 #include "fe/festatenet.h"
 
 struct cUIThing;
+struct cUIText;
 
 struct cFEUseExistingAccount : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -74,7 +75,8 @@ struct cFEUseExistingAccount : public cFEStateNet {
                                     //       cBXString_operatorE1); func_001AC448 opens "kT_POPUP204RequestAccount"
                                     //       when its length (the word before the text) is 0; func_001ACEF8 passes it
                                     //       to func_0025C1E0
-    cUIThing* mpTextForgotPassword; // 0x6E0 [R] 0; [U] onWidgetCreate cFEUseExistingAccount_onWidgetCreate: widget "TextForgotPassword"
+    cUIText* mpTextForgotPassword;  // 0x6E0 [R] 0; [U] onWidgetCreate cFEUseExistingAccount_onWidgetCreate: widget
+                                    //       "TextForgotPassword"
                                     //       (miMiscData 2), then its slots 25 and 8 with 1; func_001ACDD0 calls its
                                     //       slot 8 with 0 once an account name is entered, 1 when the name is empty
 };

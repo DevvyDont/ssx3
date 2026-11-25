@@ -1001,14 +1001,21 @@ CHECK_SIZE(cDynamicSprayFX, 0x130);
 // _vt$8cPunchFX$6cRider D_00488820.
 struct cPunchFX {
     cRider* mRider;     // 0x00 [R] virtual-base pointer to the shared cRider; [R] cPunchFX_cPunchFX
-    char unk_004[0x9C]; // 0x04 not laid out yet (sprite positions / colours / sizes: sFx_1150 in seg/seg_1F1548)
+    char pad_04[0xC];   // 0x04 (mSpritePos is 16-aligned)
+    t4Vector mSpritePos[4]; // 0x10 (name ours) [U] cPunchFX_update scatters them around the punching hand;
+                            //      cPunchFX_render draws a sprite at each. On Tour keeps the four sprites as
+                            //      tSpriteBasic mSprites[4] (pos, size, color); retail has three arrays.
+    tARGB mSpriteColour[4]; // 0x50 (name ours) [U] update: opaque greys (A = 1); render passes them to DrawSprite
+    float mSpriteSize[4];   // 0x90 (name ours) [U] update: 15 .. 15 + 15 x PunchStrength; render: the square size
     int mActive;        // 0xA0 [O] cPunchFX::mActive (bool, after mSprites[4]); [R] cPunchFX_reset clears it, as On Tour's
-                        //      reset does (sb zero,0xD0); [U] cPunchFX_update sets it to rider PunchStrength > 0 (sFx_1150::active)
+                        //      reset does (sb zero,0xD0); [U] cPunchFX_update sets it to rider PunchStrength > 0
     char unk_0A4[0xC];  // 0xA4
 };
 
 CHECK_OFFSET(cPunchFX, mRider, 0x00);
-CHECK_OFFSET(cPunchFX, unk_004, 0x04);
+CHECK_OFFSET(cPunchFX, mSpritePos, 0x10);
+CHECK_OFFSET(cPunchFX, mSpriteColour, 0x50);
+CHECK_OFFSET(cPunchFX, mSpriteSize, 0x90);
 CHECK_OFFSET(cPunchFX, mActive, 0xA0);
 CHECK_SIZE(cPunchFX, 0xB0);
 

@@ -32,23 +32,37 @@
 
 #include "layout.h"
 
-struct cRenderToggles;
-struct cVisualEffectsTest;
-struct cLightGlow;
-struct cPlants;
-struct cDepthFog;
-struct cHeightFog;
-struct cDetailSystem;
-struct cScreenTint;
-struct cShadow;
-struct cSnowSurface;
-struct cBoardTrail;
-struct cFlags;
-struct cPowerUpFXToggles;
-struct cSnowfallToggles;
-struct cSplashToggles;
-struct cTube;
-struct cPathArrow;
+// The base of the 17 effect objects: [O] On Tour class cVisualEffect (size 0x4, the vptr only; ~cVisualEffect,
+// update, render). [R] every effect's destructor stores cVisualEffect_vtbl before freeing (render/font.cpp) and the
+// effects are 4-byte allocations holding their own vtable (the cPS2VisualEffectsMan ctor); the manager's dtor, update
+// and render call their slots 1, 2 and 3. Only declared: no vtable or method is emitted from these declarations.
+struct cVisualEffect {
+    virtual ~cVisualEffect();   // 1 [O]; [U] the manager's dtor deletes each effect through it
+    virtual void update();      // 2 [O]; [U] cPS2VisualEffectsMan_update
+    virtual void render();      // 3 [O]; [U] cPS2VisualEffectsMan_render
+};
+
+CHECK_SIZE(cVisualEffect, 0x4);
+
+// The effects ([O] On Tour's classes of these names, 0x4 each: their tweak values are statics; [R] their own vtables
+// cRenderToggles_vtbl .. cTube_vtbl, cDetailSystem_cDetailSystem / cPathArrow_cPathArrow; dtors in render/font.cpp).
+struct cRenderToggles : cVisualEffect { virtual ~cRenderToggles(); };
+struct cVisualEffectsTest : cVisualEffect { virtual ~cVisualEffectsTest(); };
+struct cLightGlow : cVisualEffect { virtual ~cLightGlow(); };
+struct cPlants : cVisualEffect { virtual ~cPlants(); };
+struct cDepthFog : cVisualEffect { virtual ~cDepthFog(); };
+struct cHeightFog : cVisualEffect { virtual ~cHeightFog(); };
+struct cDetailSystem : cVisualEffect { virtual ~cDetailSystem(); };
+struct cScreenTint : cVisualEffect { virtual ~cScreenTint(); };
+struct cShadow : cVisualEffect { virtual ~cShadow(); };
+struct cSnowSurface : cVisualEffect { virtual ~cSnowSurface(); };
+struct cBoardTrail : cVisualEffect { virtual ~cBoardTrail(); };
+struct cFlags : cVisualEffect { virtual ~cFlags(); };
+struct cPowerUpFXToggles : cVisualEffect { virtual ~cPowerUpFXToggles(); };
+struct cSnowfallToggles : cVisualEffect { virtual ~cSnowfallToggles(); };
+struct cSplashToggles : cVisualEffect { virtual ~cSplashToggles(); };
+struct cTube : cVisualEffect { virtual ~cTube(); };
+struct cPathArrow : cVisualEffect { virtual ~cPathArrow(); };
 
 struct cVisualEffectsMan {
     cRenderToggles* m_RenderToggles;        // 0x00 [O]; [R] ctor 0; PS2 ctor "RenderToggles" (cRenderToggles_vtbl)

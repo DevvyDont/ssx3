@@ -17,6 +17,9 @@
 #include "ai/computer.h"
 #include "ai/controlcmd.h"
 #include "world/world.h"
+#include "world/worldcache.h"
+#include "world/worldrecords.h"
+#include "replay/bxreplayframe.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "main/game.h"
@@ -367,19 +370,10 @@ t4Vector cComputer_calculateTargetPos_0610(char* vself)
 INCLUDE_ASM("seg/seg_1218", cComputer_followPathCruise);
 #ifdef SKIP_ASM
 
-struct sPad_0680 {
-    unsigned int pad0 : 17;
-    unsigned int b17 : 1;
-    unsigned int pad18 : 2;
-    int b20 : 6;
-    unsigned int pad26 : 6;
-    int w0 : 6;
-    int w6 : 6;
-};
-
-class cObj_0680;
-typedef void (cObj_0680::*Fn_0680)();
-extern "C" Fn_0680 cComputer_mCruiseLogic_0680[4] __asm__("cComputer_mCruiseLogic");
+// EA's cruise logic member-function pointer ([O] cComputer::mCruiseLogic, "void ::* cruiseLogic"); g++ 2.95 lays a
+// PMF out as tComputerCruiseLogic (delta, index, pfn), the type of the cruiseLogic member.
+typedef void (cComputer::*tCruiseLogicFn)(tCruiseCmd*);
+extern "C" tCruiseLogicFn cComputer_mCruiseLogic[4];
 
 extern "C" void cComputer_calculateTargetPos_0680(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
 extern "C" float cComputer_calcTurn_0680(void*, t4Vector*) __asm__("cComputer_calcTurn");
@@ -389,7 +383,7 @@ extern "C" void cComputer_setupRecklessCrouch_0680(void*, void*) __asm__("cCompu
 extern "C" void cComputer_setupCrouch_0680(void*, void*) __asm__("cComputer_setupCrouch");
 extern "C" int cComputer_checkForJumpEvent_0680(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("cComputer_checkForJumpEvent");
 extern "C" int cComputer_checkForTargets_0680(char* self, int* out) __asm__("cComputer_checkForTargets");
-extern "C" void cComputer_followPathCruise_0680(cComputer* self, sPad_0680* pad) __asm__("cComputer_followPathCruise");
+extern "C" void cComputer_followPathCruise_0680(cComputer* self, tCruiseCmd* pad) __asm__("cComputer_followPathCruise");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Len_0680(const t4Vector& v)
@@ -415,20 +409,20 @@ static inline float Len_0680(const t4Vector& v)
 /**
  * Fills a cruise command that follows the path, and switches the computer rider's cruise logic when needed.
  *
- * Sets the command's turn field from cComputer_calcTurn towards cComputer_calculateTargetPos's point (times 31). Then, in order: -
- * cComputer_checkForSpeedZone (speed in mDesiredSpeed, zone flag): more than 138.9 over that speed sets the brake field
- * to 31 when in the zone; more than 138.9 under it crouches (cComputer_setupRecklessCrouch in the zone, else
- * cComputer_setupCrouch). - otherwise cComputer_checkForBoardPress (direction flag): fills the board-press field, the
+ * Sets the command's CruiseTurn from cComputer_calcTurn towards cComputer_calculateTargetPos's point (times 31). Then,
+ * in order: - cComputer_checkForSpeedZone (speed in mDesiredSpeed, zone flag): more than 138.9 over that speed sets
+ * CruiseBrake to 31 when in the zone; more than 138.9 under it crouches (cComputer_setupRecklessCrouch in the zone,
+ * else cComputer_setupCrouch). - otherwise cComputer_checkForBoardPress (direction flag): fills BoardPress, the
  * opposite way for the first 60 ticks (counter mBoardPressTimer, then -1) and the given way after that. - otherwise
- * clears mBoardPressTimer, sets bit 17 when the rider's BoostPowerBar is at least 0.9, its mUberTimer is positive and
- * mRiderDifficulty is over 50, and crouches. Last, a jump event (cComputer_checkForJumpEvent) clears mTargetID and
+ * clears mBoardPressTimer, sets BoostHeld when the rider's BoostPowerBar is at least 0.9, its mUberTimer is positive
+ * and mRiderDifficulty is over 50, and crouches. Last, a jump event (cComputer_checkForJumpEvent) clears mTargetID and
  * selects cruise entry 0; a target found by cComputer_checkForTargets selects entry 3 when attacking, or entry 2 when
  * that rider is not human (cBeing::isHuman). The entry's pointer-to-member goes to cruiseLogic and its index to
  * mCruiseLogicID. This function is entry 1 of the table cComputer_mCruiseLogic.
  *
  * @param cruiseCmd  the cruise command to fill
  */
-extern "C" void cComputer_followPathCruise_0680(cComputer* self, sPad_0680* cruiseCmd)
+extern "C" void cComputer_followPathCruise_0680(cComputer* self, tCruiseCmd* cruiseCmd)
 {
     t4Vector targetPos;
     int x;
@@ -436,13 +430,13 @@ extern "C" void cComputer_followPathCruise_0680(cComputer* self, sPad_0680* crui
     int below, toPipe, toRail, isSpin, isFlip;
     int z;
     cComputer_calculateTargetPos_0680(&targetPos, self);
-    cruiseCmd->b20 = (int)(cComputer_calcTurn_0680(self, &targetPos) * 31.0f);
+    cruiseCmd->CruiseTurn = (int)(cComputer_calcTurn_0680(self, &targetPos) * 31.0f);
     if (cComputer_checkForSpeedZone_0680(self, &self->mDesiredSpeed, &x)) {
         float sp = self->mDesiredSpeed;
         float len = Len_0680(self->RiderHandler.GroundMotion.mRider->mVelocity);
         if (sp + 138.88890075683594f < len) {
             if (x)
-                cruiseCmd->w0 = 0x1F;
+                cruiseCmd->CruiseBrake = 0x1F;
         } else if (len < sp - 138.88890075683594f) {
             if (x)
                 cComputer_setupRecklessCrouch_0680(self, cruiseCmd);
@@ -455,21 +449,21 @@ extern "C" void cComputer_followPathCruise_0680(cComputer* self, sPad_0680* crui
             turnSign = -1.0f;
         int steerTimer = self->mBoardPressTimer;
         if (steerTimer == 0) {
-            cruiseCmd->w6 = (int)(-turnSign * 31.0f);
+            cruiseCmd->BoardPress = (int)(-turnSign * 31.0f);
             self->mBoardPressTimer = 60;
         } else if (steerTimer > 0) {
             self->mBoardPressTimer = steerTimer - 1;
             if (steerTimer - 1 <= 0)
                 self->mBoardPressTimer = -1;
-            cruiseCmd->w6 = (int)(-turnSign * 31.0f);
+            cruiseCmd->BoardPress = (int)(-turnSign * 31.0f);
         } else {
-            cruiseCmd->w6 = (int)(turnSign * 31.0f);
+            cruiseCmd->BoardPress = (int)(turnSign * 31.0f);
         }
     } else {
         self->mBoardPressTimer = 0;
         cRider* rider = self->RiderHandler.GroundMotion.mRider;
         if (rider->BoostPowerBar >= 0.8999999761581421f && rider->mUberTimer > 0.0f && self->mRiderDifficulty > 50.0f)
-            cruiseCmd->b17 = 1;
+            cruiseCmd->BoostHeld = 1;
         cComputer_setupCrouch_0680(self, cruiseCmd);
     }
     // Retail reads mTargetID below at 0x80 past this pointer, not off self (probably through EA's cComputerState
@@ -478,14 +472,14 @@ extern "C" void cComputer_followPathCruise_0680(cComputer* self, sPad_0680* crui
     z = 0;
     if (cComputer_checkForJumpEvent_0680((char*)self, spd, &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         self->mTargetID = -1;
-        *(Fn_0680*)&self->cruiseLogic = cComputer_mCruiseLogic_0680[0];
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[0]; // same layout
         self->mCruiseLogicID = 0;
     } else if (cComputer_checkForTargets_0680((char*)self, &z)) {
         if (z) {
-            *(Fn_0680*)&self->cruiseLogic = cComputer_mCruiseLogic_0680[3];
+            *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[3]; // same layout
             self->mCruiseLogicID = 3;
         } else if (!SSXApp->Game->AI->Riders[*(int*)((char*)spd + 0x80)]->isHuman()) {
-            *(Fn_0680*)&self->cruiseLogic = cComputer_mCruiseLogic_0680[2];
+            *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[2]; // same layout
             self->mCruiseLogicID = 2;
         }
     }
@@ -495,11 +489,6 @@ extern "C" void cComputer_followPathCruise_0680(cComputer* self, sPad_0680* crui
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", cComputer_jumpSetupCruise);
 #ifdef SKIP_ASM
-
-// EA's cruise logic member-function pointer ([O] cComputer::mCruiseLogic, "void ::* cruiseLogic"); g++ 2.95 lays a
-// PMF out as tComputerCruiseLogic (delta, index, pfn), the type of the cruiseLogic member.
-typedef void (cComputer::*tCruiseLogicFn)(tCruiseCmd*);
-extern "C" tCruiseLogicFn cComputer_mCruiseLogic[4];
 
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
 extern "C" void cComputer_setupPrewindState_09E0(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
@@ -583,59 +572,13 @@ extern "C" void cComputer_jumpSetupCruise(cComputer* self, tCruiseCmd* cmd)
 INCLUDE_ASM("seg/seg_1218", cComputer_attackTargetCruise);
 #ifdef SKIP_ASM
 
-struct sPad_0B90 {
-    unsigned int pad0 : 20;
-    int b20 : 6;
-    unsigned int pad26 : 6;
-    int w0 : 6;
-};
-
-class cObj_0B90;
-typedef void (cObj_0B90::*Fn_0B90)();
-extern "C" Fn_0B90 cComputer_mCruiseLogic_0B90[4] __asm__("cComputer_mCruiseLogic");
-
-class cAI_0B90 {
-public:
-    virtual void vm1();
-    virtual t4Vector* GetVel();
-    virtual void v2();
-    virtual void v3();
-    virtual t4Vector* GetPos();
-    virtual void v5();
-    virtual void v6();
-    virtual int Busy();
-};
-
-class cRiderBase_0B90 {
-public:
-    char pad[0x6C0];
-};
-
-class cRider_0B90 : public cRiderBase_0B90, public cAI_0B90 {
-};
-
-struct sRiders_0B90 {
-    char pad[0x28];
-    cRider_0B90* riders[1];
-};
-
-struct sGame_0B90 {
-    char pad[0xC];
-    sRiders_0B90* list;
-};
-
-struct sWorld_0B90 {
-    char pad[0x84];
-    sGame_0B90* game;
-};
-
+// cComputer from mDesiredSpeed on, the way retail reads mTargetID (0x80 past &mDesiredSpeed; probably EA's
+// cComputerState base, which the flat ai/computer.h does not model).
 struct sCtl_0B90 {
     float speed;
     char pad4[0x80 - 4];
     int target;
 };
-
-extern sWorld_0B90* SSXApp_0B90 __asm__("SSXApp");
 
 extern "C" void cComputer_calculateTargetPos_0B90(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
 extern "C" float cComputer_calcTurn_0B90(void*, t4Vector*) __asm__("cComputer_calcTurn");
@@ -749,8 +692,8 @@ static inline sRiderPair* Rec_0B90(cComputer* self)
 /**
  * Cruise logic 3: chases the target rider (mTargetID), crouching to catch up and braking to stay with it.
  *
- * With the target more than 90 degrees off its heading it follows the path and brakes (low field of word 1,
- * probably) when the target is over 200 away and slower. Otherwise it steers at a point 300 ahead of the
+ * With the target more than 90 degrees off its heading it follows the path and brakes (CruiseBrake) when the target
+ * is over 200 away and slower. Otherwise it steers at a point 300 ahead of the
  * target along its velocity: within 15 degrees it crouches recklessly, within 50 it crouches, beyond that it
  * crouches when slower and brakes when faster. It then switches to jumpSetupCruise (dropping the target) at a
  * jump event, to followPathCruise when checkForTargets() finds none, or to avoidTargetCruise for a new target
@@ -758,14 +701,14 @@ static inline sRiderPair* Rec_0B90(cComputer* self)
  *
  * @param cmd  the cruise command being built (On Tour tCruiseCmd)
  */
-extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
+extern "C" void cComputer_attackTargetCruise(cComputer* self, tCruiseCmd* cmd)
 {
     int below, toPipe, toRail, isSpin, isFlip;
     int z;
     sRiderPair* rec = Rec_0B90(self);
-    sRiders_0B90* list = SSXApp_0B90->game->list;
+    cAI* list = SSXApp->Game->AI;
     sCtl_0B90* ctl = (sCtl_0B90*)(&self->mDesiredSpeed);
-    cRider_0B90* tgt = list->riders[ctl->target];
+    cRider* tgt = list->Riders[ctl->target];
     float diff = rec->mAngle - self->RiderHandler.GroundMotion.mRider->PathHeading;
     float ang = diff - Floor_0B90(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     float mySpd = Len_0B90(*(&self->RiderHandler.GroundMotion.mRider->mVelocity));
@@ -774,17 +717,17 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
     float behindAng = 1.5707964897155762f;
     float wideAng = 0.8726646900177002f;
     float narrowAng = 0.2617994248867035f;
-    float hisSpd = Len_0B90(*tgt->GetVel());
+    float hisSpd = Len_0B90(*tgt->getVelocity());
     float steer;
     if (absAng > behindAng) {
-        t4Vector v;
-        cComputer_calculateTargetPos_0B90(&v, ((char*)self));
-        steer = cComputer_calcTurn_0B90(((char*)self), &v);
+        t4Vector pathPos;
+        cComputer_calculateTargetPos_0B90(&pathPos, ((char*)self));
+        steer = cComputer_calcTurn_0B90(((char*)self), &pathPos);
         if (Rec_0B90(self)->mDistance > 200.0f && hisSpd < mySpd)
-            cmd->w0 = 0x1F;
+            cmd->CruiseBrake = 0x1F;
     } else {
-        t4Vector v = Norm_0B90(*tgt->GetVel());
-        t4Vector w = Add_0B90(*tgt->GetPos(), Scale_0B90(v, 300.0f));
+        t4Vector tgtDir = Norm_0B90(*tgt->getVelocity());
+        t4Vector aimPos = Add_0B90(*tgt->getPosition(), Scale_0B90(tgtDir, 300.0f));
         if (absAng < wideAng) {
             if (absAng < narrowAng)
                 cComputer_setupRecklessCrouch_0B90(((char*)self), cmd);
@@ -793,22 +736,22 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
         } else if (mySpd < hisSpd) {
             cComputer_setupCrouch_0B90(((char*)self), cmd);
         } else if (hisSpd < mySpd) {
-            cmd->w0 = 0x1F;
+            cmd->CruiseBrake = 0x1F;
         }
-        steer = cComputer_calcTurn_0B90(((char*)self), &w);
+        steer = cComputer_calcTurn_0B90(((char*)self), &aimPos);
     }
-    cmd->b20 = (int)(steer * 31.0f);
+    cmd->CruiseTurn = (int)(steer * 31.0f);
     z = 1;
     ctl = (sCtl_0B90*)(&self->mDesiredSpeed);
     if (cComputer_checkForJumpEvent_0B90(((char*)self), &ctl->speed, &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         self->mTargetID = -1;
-        *(Fn_0B90*)&self->cruiseLogic = cComputer_mCruiseLogic_0B90[0];
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[0]; // same layout
         self->mCruiseLogicID = 0;
     } else if (!cComputer_checkForTargets_0B90(((char*)self), &z)) {
-        *(Fn_0B90*)&self->cruiseLogic = cComputer_mCruiseLogic_0B90[1];
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[1]; // same layout
         self->mCruiseLogicID = 1;
-    } else if (!z && !list->riders[ctl->target]->Busy()) {
-        *(Fn_0B90*)&self->cruiseLogic = cComputer_mCruiseLogic_0B90[2];
+    } else if (!z && !list->Riders[ctl->target]->isHuman()) {
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[2]; // same layout
         self->mCruiseLogicID = 2;
     }
 }
@@ -818,58 +761,13 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
 INCLUDE_ASM("seg/seg_1218", cComputer_avoidTargetCruise);
 #ifdef SKIP_ASM
 
-struct sPad_0F88 {
-    unsigned int pad0 : 20;
-    int b20 : 6;
-};
-
-class cObj_0F88;
-typedef void (cObj_0F88::*Fn_0F88)();
-extern "C" Fn_0F88 cComputer_mCruiseLogic_0F88[4] __asm__("cComputer_mCruiseLogic");
-
-class cAI_0F88 {
-public:
-    virtual void vm1();
-    virtual t4Vector* GetVel();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual int Ready();
-};
-
-class cRiderBase_0F88 {
-public:
-    char pad[0x6C0];
-};
-
-class cRider_0F88 : public cRiderBase_0F88, public cAI_0F88 {
-};
-
-struct sRiders_0F88 {
-    char pad[0x28];
-    cRider_0F88* riders[1];
-};
-
-struct sGame_0F88 {
-    char pad[0xC];
-    sRiders_0F88* list;
-};
-
-struct sWorld_0F88 {
-    char pad[0x84];
-    sGame_0F88* game;
-};
-
+// cComputer from mDesiredSpeed on, the way retail reads mTargetID (0x80 past &mDesiredSpeed; probably EA's
+// cComputerState base, which the flat ai/computer.h does not model).
 struct sCtl_0F88 {
     float speed;
     char pad4[0x80 - 4];
     int target;
 };
-
-extern sWorld_0F88* SSXApp_0F88 __asm__("SSXApp");
 
 extern "C" void cComputer_calculateTargetPos_0F88(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
 extern "C" float cComputer_calcTurn_0F88(void*, t4Vector*) __asm__("cComputer_calcTurn");
@@ -943,18 +841,18 @@ static inline sRiderPair* Rec_0F88(cComputer* self)
  *
  * @param cmd  the cruise command being built (On Tour tCruiseCmd)
  */
-extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
+extern "C" void cComputer_avoidTargetCruise(cComputer* self, tCruiseCmd* cmd)
 {
     t4Vector targetPos;
     int below, toPipe, toRail, isSpin, isFlip;
     int z;
     sCtl_0F88* ctl = (sCtl_0F88*)(&self->mDesiredSpeed);
     sRiderPair* rec = Rec_0F88(self);
-    cRider_0F88* tgt = SSXApp_0F88->game->list->riders[ctl->target];
+    cRider* tgt = SSXApp->Game->AI->Riders[ctl->target];
     float diff = rec->mAngle - self->RiderHandler.GroundMotion.mRider->PathHeading;
     float ang = diff - Floor_0F88(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     float mySpd = Len_0F88(*(&self->RiderHandler.GroundMotion.mRider->mVelocity));
-    float hisSpd = Len_0F88(*tgt->GetVel());
+    float hisSpd = Len_0F88(*tgt->getVelocity());
     float steer = 0.0f;
     if (Abs_0F88(ang) > 1.5707964897155762f) {
         cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
@@ -977,25 +875,25 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
             cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
             steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
             cComputer_setupCrouch_0F88(((char*)self), cmd);
-        } else if (tgt->Ready()) {
-            if (((cRider*)tgt)->AIPath == self->RiderHandler.GroundMotion.mRider->AIPath)
+        } else if (tgt->isComputer()) {
+            if (tgt->AIPath == self->RiderHandler.GroundMotion.mRider->AIPath)
                 cRider_checkAIPathSwitch((char*)self->RiderHandler.GroundMotion.mRider, 0);
             cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
             steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
             cComputer_setupCrouch_0F88(((char*)self), cmd);
         }
     }
-    cmd->b20 = (int)(steer * 31.0f);
+    cmd->CruiseTurn = (int)(steer * 31.0f);
     z = 0;
     if (cComputer_checkForJumpEvent_0F88(((char*)self), (float*)(&self->mDesiredSpeed), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         self->mTargetID = -1;
-        *(Fn_0F88*)&self->cruiseLogic = cComputer_mCruiseLogic_0F88[0];
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[0]; // same layout
         self->mCruiseLogicID = 0;
     } else if (!cComputer_checkForTargets_0F88(((char*)self), &z)) {
-        *(Fn_0F88*)&self->cruiseLogic = cComputer_mCruiseLogic_0F88[1];
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[1]; // same layout
         self->mCruiseLogicID = 1;
     } else if (z) {
-        *(Fn_0F88*)&self->cruiseLogic = cComputer_mCruiseLogic_0F88[3];
+        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[3]; // same layout
         self->mCruiseLogicID = 3;
     }
 }
@@ -1259,69 +1157,17 @@ extern "C" void cDangerMan_Reset(cDangerMan* self)
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_AddDangerElem);
 #ifdef SKIP_ASM
-
-struct sXform_1728 {
-    char pad[0x30];
-    t4Vector pos;
-};
-
-class cComp_1728 {
-public:
-    int f0;
-    int f4;
-    int f8;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual int IsDead();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual sXform_1728* GetXform();
-};
-
-struct sObj_1728 {
-    int pad[3];
-    cComp_1728* comp;
-};
-
-struct sBank_1728 {
-    char pad[0x1C];
-    unsigned int* handles;
-};
-
-struct sWorld_1728 {
-    int pad[2];
-    sBank_1728** banks;
-};
-
-
-
 extern "C" void cDangerMan_RemoveDangerElem(cDangerMan*, unsigned int*);
 
-static inline sObj_1728* lookup_1728(unsigned int id)
+// The world instance with resource id @p id (On Tour cWorld::getInstanceResource, inlined): the instance table (cache
+// type 3) of the section in the id's low byte holds the record's address / 4 at index id >> 8; 0 when not loaded.
+static inline tInstanceRecord* GetInstanceResource(unsigned int id)
 {
-    sBank_1728* b = ((sWorld_1728*)cWorld_m_pTheWorld->m_pWorldCache)->banks[id & 0xFF];
-    if (b) {
-        unsigned int v = b->handles[id >> 8] >> 8;
-        if (v)
-            return (sObj_1728*)(v << 2); // PORT: packed pointer in a 32-bit handle
+    cWorldCacheTable* section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
+    if (section) {
+        unsigned int memLoc = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc;
+        if (memLoc)
+            return (tInstanceRecord*)(memLoc << 2); // PORT: packed pointer in a 32-bit handle
     }
     return 0;
 }
@@ -1340,10 +1186,10 @@ static inline sObj_1728* lookup_1728(unsigned int id)
  */
 extern "C" void cDangerMan_AddDangerElem(cDangerMan* self, unsigned int* idp, float x, float y)
 {
-    cComp_1728* instNode = lookup_1728(*idp)->comp;
+    cInstanceNode* instNode = GetInstanceResource(*idp)->m_pActiveNode;
     if (instNode == 0)
         return;
-    if (instNode->IsDead())
+    if (instNode->isComplete())
         return;
     cDangerMan_RemoveDangerElem(self, idp);
     for (int i = 0; i < 64; i++) {
@@ -1353,7 +1199,7 @@ extern "C" void cDangerMan_AddDangerElem(cDangerMan* self, unsigned int* idp, fl
             elemInfo->rID = *idp;
             elemInfo->radius = x;
             elemInfo->endDelaySecsLeft = y;
-            t4Vector instPos = instNode->GetXform()->pos;
+            t4Vector instPos = instNode->getRootTransform()->row[3];
             elemInfo->pos[0] = instPos.x;
             elemInfo->pos[1] = instPos.y;
             elemInfo->pos[2] = instPos.z;
@@ -1435,35 +1281,29 @@ extern "C" void cDangerMan_AddDangerVolume(cDangerMan* dangerMan, int *instId, i
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_RemoveDangerVolume);
 #ifdef SKIP_ASM
-struct sC_1970 { int x, a, b; };
-struct sSelf_1970 {
-    char pad0[0x708];
-    sC_1970 arrC[6];
-    char pad1[0x754 - 0x750];
-    char pad2[0xB54 - 0x754];
-    tDangerZoneTrack* freeList;
-    tDangerZoneTrack* used;
-};
 /**
  * Drops one reference to an instance's danger zone, and frees the zone at zero.
  *
- * The freed node goes back to the free list (+0xB54). When no zone is left, the zone level and applied level of all 6
- * rider records are cleared. DisableDangerZoneFunc calls it.
+ * The freed node goes back to the free list (mpInactiveList). When no zone is left, the zone level and applied level
+ * of all 6 rider records are cleared. DisableDangerZoneFunc calls it.
  *
  * @param key  the zone's instance id
  */
-extern "C" void cDangerMan_RemoveDangerVolume(sSelf_1970* self, int* key) {
+extern "C" void cDangerMan_RemoveDangerVolume(cDangerMan* self, int* key) {
     tDangerZoneTrack* prev = 0;
-    tDangerZoneTrack* n = self->used;
+    tDangerZoneTrack* n = self->mpActiveList;
     while (n) {
         if (((int)n->rID) == *key) {
             if (--n->refCount == 0) {
                 if (prev) prev->pNext = n->pNext;
-                else self->used = n->pNext;
-                n->pNext = self->freeList;
-                self->freeList = n;
-                if (self->used == 0) {
-                    for (int k = 0; k < 6; k++) { self->arrC[k].a = 0; self->arrC[k].b = 0; }
+                else self->mpActiveList = n->pNext;
+                n->pNext = self->mpInactiveList;
+                self->mpInactiveList = n;
+                if (self->mpActiveList == 0) {
+                    for (int k = 0; k < 6; k++) {
+                        self->mRiderDangerTrack[k].baseLevel = 0;
+                        self->mRiderDangerTrack[k].appliedLevel = 0;
+                    }
                 }
             }
             return;
@@ -1496,10 +1336,6 @@ INCLUDE_ASM("seg/seg_1218", FocusQuery_addcell);
 #ifdef SKIP_ASM
 
 
-struct sList_1A28 {
-    int n;
-    nash_Node* items[1];
-};
 
 extern int cWScriptMan_TheWScriptMan;
 extern "C" int cWScriptMan_isFocusInstance(int, nash_Node*);
@@ -1508,7 +1344,7 @@ extern "C" int cWScriptMan_isFocusInstance(int, nash_Node*);
  * Adds a world cell's focus instances to a list, and optionally those of every cell below it.
  *
  * Each instance in the cell's instance list (nodesinside[0]) that cWScriptMan_isFocusInstance accepts is appended to
- * @p list (count at +0, then the pointers; no bound check). With @p recurse the same is done for each of the eight
+ * @p list (instances[numinstances++]; no bound check). With @p recurse the same is done for each of the eight
  * children, recursively.
  * The cell visitor func_00144368 and cFocusMan_update call it.
  *
@@ -1516,12 +1352,12 @@ extern "C" int cWScriptMan_isFocusInstance(int, nash_Node*);
  * @param node  the cell (eight child pointers, then the instance list)
  * @param recurse  nonzero to take the instances of all cells below too
  */
-extern "C" void FocusQuery_addcell(sList_1A28* list, nash_Cell* node, int recurse)
+extern "C" void FocusQuery_addcell(FocusQuery* list, nash_Cell* node, int recurse)
 {
     nash_Node* item;
     for (item = node->nodesinside[0].head; item; item = item->next) {
         if (cWScriptMan_isFocusInstance(cWScriptMan_TheWScriptMan, item))
-            list->items[list->n++] = item;
+            list->instances[list->numinstances++] = (tInstanceRecord*)item; // the link is its m_iIntersect (offset 0)
     }
     if (recurse) {
         if (node->children[0][0][0]) FocusQuery_addcell(list, node->children[0][0][0], 1);
@@ -1983,65 +1819,48 @@ extern "C" void cFocusMan_removebox(cFocusMan* self, int id)
 //100%
 INCLUDE_ASM("seg/seg_1218", cFocusMan_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cStream_3480 {
-public:
-    virtual void Write(void* p, int n);
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void WriteInt(int v);
-};
-
 /**
  * Saves the focus manager's state into a replay frame.
  *
- * Through the frame's virtual block write it stores LastUpdateTick (4 bytes) and the 16-byte LastUpdatePos of each
- * registered record in Boxes, then NumFocusInstances; each of FocusInstances goes through the frame's virtual pointer
- * write (its fifth method). Called by
+ * Through the frame's write it stores LastUpdateTick (4 bytes) and the 16-byte LastUpdatePos of each registered
+ * record in Boxes, then NumFocusInstances; each of FocusInstances goes through writeReplayInstance. Called by
  * cReplay_saveFrame; cFocusMan_readFromReplayFrame reads it back.
  *
  * @param data  the replay frame (cReplayFramePtr) written to
  */
-extern "C" void cFocusMan_writeToReplayFrame(cFocusMan* self, cStream_3480* data)
+extern "C" void cFocusMan_writeToReplayFrame(cFocusMan* self, cBxReplayFrame* data)
 {
-    data->Write(&self->LastUpdateTick, 4);
+    data->write((const char*)&self->LastUpdateTick, 4);
     for (int i = 0; i < self->NumBoxes; i++)
-        data->Write(&self->Boxes[i].LastUpdatePos, 0x10);
-    data->Write(&self->NumFocusInstances, 4);
+        data->write((const char*)&self->Boxes[i].LastUpdatePos, 0x10);
+    data->write((const char*)&self->NumFocusInstances, 4);
     for (int j = 0; j < self->NumFocusInstances; j++)
-        data->WriteInt((int)self->FocusInstances[j]);
+        data->writeReplayInstance(self->FocusInstances[j]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", cFocusMan_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cStream_3578 {
-public:
-    virtual void v0();
-    virtual void Read(void* p, int n);
-    virtual tInstanceRecord* ReadPtr();
-};
-
 /**
  * Restores the focus manager's state from a replay frame.
  *
  * Reads back what cFocusMan_writeToReplayFrame stored: LastUpdateTick, the LastUpdatePos of each registered box record,
- * NumFocusInstances and the instance records (the frame's virtual pointer read, its third method). It sets IsEven to 1
+ * NumFocusInstances and the instance records (the frame's readReplayInstance). It sets IsEven to 1
  * and marks every restored record as in focus: m_iFlags gets 0x100 set and 0x200 cleared. Called by
  * cReplay_restoreFrame.
  *
  * @param data  the replay frame (cReplayFramePtr) read from
  */
-extern "C" void cFocusMan_readFromReplayFrame(cFocusMan* self, cStream_3578* data)
+extern "C" void cFocusMan_readFromReplayFrame(cFocusMan* self, cBxReplayFrame* data)
 {
-    data->Read(&self->LastUpdateTick, 4);
+    data->read((char*)&self->LastUpdateTick, 4);
     for (int i = 0; i < self->NumBoxes; i++)
-        data->Read(&self->Boxes[i].LastUpdatePos, 0x10);
+        data->read((char*)&self->Boxes[i].LastUpdatePos, 0x10);
     self->IsEven = 1;
-    data->Read(&self->NumFocusInstances, 4);
+    data->read((char*)&self->NumFocusInstances, 4);
     for (int j = 0; j < self->NumFocusInstances; j++) {
-        tInstanceRecord* it = data->ReadPtr();
+        tInstanceRecord* it = data->readReplayInstance();
         it->m_iFlags = (it->m_iFlags | 0x100) & 0xFFFFFDFF;
         self->FocusInstances[j] = it;
     }
@@ -3463,21 +3282,17 @@ extern "C" void cRiderAnim_linkToFERider(cRiderAnim* riderAnim, cFERider* feRide
 //100%
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cStream_4D68 {
-public:
-    virtual void write(void* src, int n);  // slot 1 (slot 2 is read)
-};
-extern "C" void cAnimSequencer_writeToReplayFrame(void*, cStream_4D68*);
+extern "C" void cAnimSequencer_writeToReplayFrame(void*, cBxReplayFrame*);
 /**
  * Writes the rider animation state into a replay frame.
  *
- * Writes the object's first 80 bytes through the stream's virtual write, then each of the 6 sequencers (8 bytes each,
+ * Writes the object's first 80 bytes through the stream's write, then each of the 6 sequencers (8 bytes each,
  * array at +0x50) with cAnimSequencer_writeToReplayFrame. cRiderHandler_writeToReplayFrame calls it.
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cRiderAnim_writeToReplayFrame(cRiderAnim* self, cStream_4D68* stream) {
-    stream->write(((char*)self), 80);
+extern "C" void cRiderAnim_writeToReplayFrame(cRiderAnim* self, cBxReplayFrame* stream) {
+    stream->write((const char*)self, 80);
     for (int i = 0; i < 6; i++) {
         cAnimSequencer_writeToReplayFrame(&self->Sequencer[i], stream);
     }
@@ -3487,24 +3302,19 @@ extern "C" void cRiderAnim_writeToReplayFrame(cRiderAnim* self, cStream_4D68* st
 //100%
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cStream_4DE0 {
-public:
-    virtual void v0();
-    virtual void Read(void* dst, int n);
-};
 extern "C" void cAnimSequencer_expireAll(void*);
-extern "C" void cAnimSequencer_readFromReplayFrame(void*, cStream_4DE0*);
+extern "C" void cAnimSequencer_readFromReplayFrame(void*, cBxReplayFrame*);
 /**
  * Restores the rider animation state from a replay frame.
  *
- * Reads the object's first 80 bytes through the stream's virtual Read, then for each of the 6 sequencers (array at
+ * Reads the object's first 80 bytes through the stream's read, then for each of the 6 sequencers (array at
  * +0x50) drops what it plays (cAnimSequencer_expireAll) and reads it (cAnimSequencer_readFromReplayFrame).
  * cRiderHandler_readFromReplayFrame calls it.
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cRiderAnim_readFromReplayFrame(cRiderAnim* self, cStream_4DE0* stream) {
-    stream->Read(((char*)self), 80);
+extern "C" void cRiderAnim_readFromReplayFrame(cRiderAnim* self, cBxReplayFrame* stream) {
+    stream->read((char*)self, 80);
     for (int i = 0; i < 6; i++) {
         cAnimSequencer_expireAll(&self->Sequencer[i]);
         cAnimSequencer_readFromReplayFrame(&self->Sequencer[i], stream);
@@ -3515,106 +3325,18 @@ extern "C" void cRiderAnim_readFromReplayFrame(cRiderAnim* self, cStream_4DE0* s
 //100%
 INCLUDE_ASM("seg/seg_1218", cRider_objectIntersect);
 #ifdef SKIP_ASM
+#include "intersect/worldinttypes.h"
+#include "world/patchrecord.h"
 
-struct sTri_4E70 {
-    float a;
-    float b;
-    unsigned short flags;
-    unsigned short pad;
-};
-
-struct sMat_4E70 {
-    char pad[0x10];
-    sTri_4E70 tris[1];
-};
-
-class cSurfObj_4E70;
-
-struct sSurf_4E70 {
-    char pad[0xC];
-    cSurfObj_4E70* obj;
-    char pad10[0x78 - 0x10];
-    unsigned int id;
-    char pad7C[0x88 - 0x7C];
-    sMat_4E70* mat;
-};
-
-struct sOwner_4E70 {
-    char pad[0x150];
-    unsigned int order;
-};
-
-struct sHit_4E70 {
-    t4Vector pos;
-    t4Vector normal;
-    char pad20[0x20];
-    float dist;
-    char pad44[0xC];
-    sSurf_4E70* surf;
-    sOwner_4E70* owner;
-    int pad58;
-    int idx;
-    char pad60[0x20];
-    sHit_4E70() {}
-} __attribute__((aligned(16)));
-
-class cSurfObj_4E70 {
-public:
-    int f0, f4, f8;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void OnHit(sHit_4E70* h);
-};
-
-class cScope_4E70 {
-public:
-    char pad[0x50];
-    virtual void v0();
-    virtual void v1();
-    virtual float Height();
+// A tIntersectInfo with its empty constructor ([O] On Tour calls tIntersectInfo::tIntersectInfo(void)): retail runs
+// the empty construction loop over the 64 hits below.
+struct tIntersectInfoCtor : tIntersectInfo {
+    tIntersectInfoCtor() {}
 };
 
 extern t4Vector t4vect_Zero_4E70 __asm__("t4vect_Zero");
-extern "C" int cOverlapList_staticObjectIntersect_4E70(void*, cScope_4E70*, sHit_4E70*, int, int) __asm__("cOverlapList_staticObjectIntersect");
+extern "C" int cOverlapList_staticObjectIntersect_4E70(void*, cWorldIntersectType*, tIntersectInfo*, int, int)
+    __asm__("cOverlapList_staticObjectIntersect");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_4E70(const t4Vector& a, const t4Vector& b)
@@ -3709,38 +3431,38 @@ static inline float Abs_4E70(float x)
     return r;
 }
 
-static inline int IsWall_4E70(const sHit_4E70& h)
+static inline int IsWall_4E70(const tIntersectInfo& h)
 {
-    sTri_4E70* t = &h.surf->mat->tris[h.idx];
+    tCollideSurface* t = &h.Inst->m_pCollideRecord->Surfaces[h.Mesh];
     int r = 0;
-    if ((t->flags & 1) && t->a != 0.0f)
+    if ((t->Flags & 1) && t->Bounce != 0.0f)
         r = 1;
     return r;
 }
 
-static inline int Facing_4E70(cRider* self, const sHit_4E70& h)
+static inline int Facing_4E70(cRider* self, const tIntersectInfo& h)
 {
     int r = 1;
-    if (!(Dot_4E70(Sub_4E70(h.pos, self->mSphereTree->boundCen), h.normal) < 0.0f))
+    if (!(Dot_4E70(Sub_4E70(h.Ipos, self->mSphereTree->boundCen), h.Inorm) < 0.0f))
         r = 0;
     return r;
 }
 
 // Whether hit h wins a distance tie against the current pick: the lower surface id, a surface over none, or (neither
 // has one) the lower owner order. (Passing hits[i] to an inline function keeps retail's index-first address add.)
-static inline int WinsTie_4E70(const sHit_4E70& h, const sHit_4E70& pick)
+static inline int WinsTie_4E70(const tIntersectInfo& h, const tIntersectInfo& pick)
 {
     int take;
-    if (h.surf) {
-        if (!pick.surf)
+    if (h.Inst) {
+        if (!pick.Inst)
             take = 1;
         else
-            take = h.surf->id < pick.surf->id;
+            take = h.Inst->m_RID < pick.Inst->m_RID;
     } else {
-        if (pick.surf)
+        if (pick.Inst)
             take = 0;
         else
-            take = h.owner->order < pick.owner->order;
+            take = h.Patch->m_RID < pick.Patch->m_RID;
     }
     return take;
 }
@@ -3749,45 +3471,45 @@ static inline int WinsTie_4E70(const sHit_4E70& h, const sHit_4E70& pick)
  * Tests the rider against static objects and returns the distance of the contact it picks.
  *
  * Gets up to 64 hits from cOverlapList_staticObjectIntersect (on mOverlapList); returns -1.0 when there are none.
- * The distinct surface ids of the hits are kept in mVisitedIds, ended by 0xFFFFFFFF (cRider_isIntersecting reads them).
- * The pick prefers wall hits (triangle flag 1 with a nonzero first value), then hits whose normal points back towards
- * the rider's sphere-tree centre (mSphereTree->boundCen), then the smallest |distance - height| (the query's virtual
- * Height); ties
- * go to the lower surface id, or the lower owner order (+0x150) when neither has a surface. The pick is copied to
- * @p out; with two or more hits its normal becomes the normalized sum of the wall hits' normals (when longer than
- * 0.001). Then the surface's object gets the hit through its virtual OnHit.
+ * The distinct instance ids (Inst->m_RID) of the hits are kept in mVisitedIds, ended by 0xFFFFFFFF
+ * (cRider_isIntersecting reads them). The pick prefers wall hits (the mesh's tCollideSurface has Flags bit 0 and a
+ * nonzero Bounce), then hits whose normal points back towards the rider's sphere-tree centre
+ * (mSphereTree->boundCen), then the smallest |Iparam - ideal| (the query's GetIdealParam); ties go to the lower
+ * instance id, or the lower patch id (Patch->m_RID) when neither hit an instance. The pick is copied to @p out; with
+ * two or more hits its normal becomes the normalized sum of the wall hits' normals (when longer than 0.001). Then the
+ * instance's active node gets the hit (cInstanceNode::updateIntersectInfo).
  *
  * @param sc  the intersection query
  * @param out  receives the chosen hit
  * @return the chosen hit's distance, or -1.0 when nothing was hit
  */
-extern "C" float cRider_objectIntersect(cRider* self, cScope_4E70* sc, sHit_4E70* out)
+extern "C" float cRider_objectIntersect(cRider* self, cWorldIntersectType* sc, tIntersectInfo* out)
 {
     // mVisitedIds is written as *(mVisitedIds + k): the subscript form keeps &mVisitedIds in a register (retail
     // adds the index to self and stores at 0x5B8 off that).
     int nIds = 0;
-    sHit_4E70 hits[64];
+    tIntersectInfoCtor hits[64];
     int n = cOverlapList_staticObjectIntersect_4E70(self->mOverlapList, sc, hits, 64, 0);
     if (n == 0)
         return -1.0f;
-    if (hits[0].surf)
-        *(self->mVisitedIds + nIds++) = hits[0].surf->id;
+    if (hits[0].Inst)
+        *(self->mVisitedIds + nIds++) = hits[0].Inst->m_RID;
     int best = 0;
-    float hgt = sc->Height();
-    float bestD = Abs_4E70(hits[0].dist - hgt);
+    float hgt = sc->GetIdealParam();
+    float bestD = Abs_4E70(hits[0].Iparam - hgt);
     int bestWall = IsWall_4E70(hits[0]);
     int bestFacing = Facing_4E70(self, hits[0]);
     for (int i = 1; i < n; i++) {
-        if (hits[i].surf) {
+        if (hits[i].Inst) {
             int j;
             for (j = 0; j < nIds; j++) {
-                if (*(self->mVisitedIds + j) == hits[i].surf->id)
+                if (*(self->mVisitedIds + j) == hits[i].Inst->m_RID)
                     break;
             }
             if (j >= nIds)
-                *(self->mVisitedIds + nIds++) = hits[i].surf->id;
+                *(self->mVisitedIds + nIds++) = hits[i].Inst->m_RID;
         }
-        float dd = Abs_4E70(hits[i].dist - hgt);
+        float dd = Abs_4E70(hits[i].Iparam - hgt);
         int wall = IsWall_4E70(hits[i]);
         if (wall && !bestWall) {
             best = i;
@@ -3821,16 +3543,16 @@ extern "C" float cRider_objectIntersect(cRider* self, cScope_4E70* sc, sHit_4E70
         t4Vector sum = t4vect_Zero_4E70;
         for (int k = 0; k < n; k++) {
             if (IsWall_4E70(hits[k]))
-                AddEq_4E70(sum, hits[k].normal);
+                AddEq_4E70(sum, hits[k].Inorm);
         }
         float len = Len_4E70(sum);
         if (len > 0.0010000000474974513f)
-            out->normal = Div_4E70(sum, len);
+            out->Inorm = Div_4E70(sum, len);
     }
     *(self->mVisitedIds + nIds) = 0xFFFFFFFF;
-    if (out->surf && out->surf->obj)
-        out->surf->obj->OnHit(out);
-    return out->dist;
+    if (out->Inst && out->Inst->m_pActiveNode)
+        out->Inst->m_pActiveNode->updateIntersectInfo(*out);
+    return out->Iparam;
 }
 #endif
 
@@ -4071,7 +3793,6 @@ extern "C" void cRider_flagEventLand(void* rider, int a, int b, int c, void* hit
 extern "C" void cRiderMetrix_evTakeoff(void* metrix, int a, int b);
 
 
-struct sVEf_57B8 { short delta; short index; void (*fn)(void*, float); };
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_57B8(const t4Vector& a, const t4Vector& b)
 {
@@ -4219,8 +3940,8 @@ static inline float Sqrt_57B8(float x)
 /**
  * Responds to the rider hitting a world object: pushes it out, rebounds it and picks a reaction.
  *
- * Skipped in control state 9. The hit surface's bounce and grip come from the per-mesh table after the object's
- * m_pCollideRecord (12 bytes per surface); with no bounce it only bumps (cRider_doBump). A solid object (no
+ * Skipped in control state 9. The hit surface's Bounce and Grip come from the object's m_pCollideRecord (its
+ * Surfaces entry for the hit mesh); with no bounce it only bumps (cRider_doBump). A solid object (no
  * m_pActiveNode, or one whose shouldRebound is true) moves the rider out by 1.1 x @p depth (cRider_moveFromCollision),
  * rebounds by the closing speed plus clamp(grip x speed, 55.6, 1388.9) and, on the ground, turns the rider along it
  * (cRider_turnFromCollision, cRider_updateOrientationImplicit); other objects get a softer rebound. Airborne below
@@ -4242,11 +3963,9 @@ extern "C" void cRider_doObjectCollision(cRider* rider, tInstanceRecord* obj, tC
 {
     if (cRider_getControlState_57B8(rider) == 9)
         return;
-    int off = hit->Mesh * 12 + 0x10;
-    // the 12-byte per-mesh surface entries that follow the collide record (not laid out in world/worldrecords.h)
-    float* surf = (float*)((char*)obj->m_pCollideRecord + off);
-    float grip = Clamp_57B8(surf[1], 0.0f, 1.0f);
-    float bounce = surf[0];
+    tCollideSurface* surf = &obj->m_pCollideRecord->Surfaces[hit->Mesh];
+    float grip = Clamp_57B8(surf->Grip, 0.0f, 1.0f);
+    float bounce = surf->Bounce;
     if (bounce == 0.0f) {
         cRider_doBump(rider, info, 1);
         return;
@@ -4288,7 +4007,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, tInstanceRecord* obj, tC
             velScale = velScale / speed;
         ScaleEq_57B8(w, velScale);
         rider->mVelocity = Add_57B8(w, Scale_57B8(hit->Inorm, out));
-        sVEf_57B8* vt = *(sVEf_57B8**)&VPTR_AT(rider, sizeof(cRiderState));
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(rider, sizeof(cRiderState));
         vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), vn);
         if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2) > 0.20000000298023224f) {
             rider->mSurfaceType = 0;
@@ -4338,15 +4057,6 @@ struct sGame_5D98 {
 extern sGame_5D98* SSXApp_5D98 __asm__("SSXApp");
 extern float kHighSpeedCollideThresh;
 
-struct sInfo_5D98 {
-    t4Vector pos;       // 0x00
-    t4Vector dir;       // 0x10
-    t4Vector off;       // 0x20
-    float vn;           // 0x30
-} __attribute__((aligned(16)));
-
-struct sVEf_5D98 { short delta; short index; void (*fn)(void*, float); };
-struct sVEv_5D98 { short delta; short index; t4Vector* (*fn)(void*); };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_5D98(const t4Vector& a, const t4Vector& b)
@@ -4421,9 +4131,10 @@ static inline float Clamp_5D98(float v, float lo, float hi)
 static inline t4Vector Get_5D98(char* p) { return *(t4Vector*)p; }
 
 // Rider bumps into something: pick a wipeout/stumble animation from the contact normal
-// against the rider's axes (rows at 0x160/0x170/0x180, origin at 0x190).
+// against the rider's axes (RiderRoot rows 0-2, origin in row 3).
 // The unit declares this earlier as (void*, void*, int); bind the typed body by asm label.
-extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int id) __asm__("cRider_reactToCollision");
+extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, int id)
+    __asm__("cRider_reactToCollision");
 
 /**
  * Chooses the rider's reaction to a collision: a reset on a fatal surface, a wipeout animation, or a bump.
@@ -4431,36 +4142,36 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
  * Skipped in control state 9. Adds 1 - max(0, contact . mImpulse) to mImpactAccum and stores the contact direction in
  * mImpulse. If the surface material's record (SSXApp's material list at +0x84, flag +0x44) is fatal it resets the rider
  * (cRider_checkForReset(self, 0, 1)). Otherwise it sends the vibrationBump virtual; in motion state 2 it may relaunch
- * the air predictor, flags the handler (+0x314 = 1, +0x320 = mVelocity) and stops; in the air it relaunches the air
- * predictor.
+ * the air predictor, flags the handler's WipeoutControl (IsNewImpact = 1, LatestImpact = mVelocity) and stops; in the
+ * air it relaunches the air predictor.
  *
- * It then compares the contact direction with the rider's axes (+0x160, +0x170, +0x180) and, from the dominant axis,
+ * It then compares the contact direction with the rider's axes (RiderRoot rows 0-2) and, from the dominant axis,
  * the normal speed and channel 2's animation category, picks a wipeout animation (0x148 .. 0x169, random variants by
  * AIrand) for cRider_flagEventWipeout; when none applies it bumps (cRider_doBump).
  *
- * @param info  the collide info: contact position, direction, normal (+0x20) and normal speed (+0x30)
+ * @param info  the collide info: contact position (Pos), direction, normal (Reflect) and normal speed (Vel)
  * @param id  the surface material id, or -1
  */
-extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int id)
+extern "C" void cRider_reactToCollision_impl(cRider* self, tCollideInfo* info, int id)
 {
     if (cRider_getControlState_5D98(self) == 9)
         return;
-    self->mImpactAccum += 1.0f - (Dot_5D98(info->off, self->mImpulse) >? 0.0f); // PORT: g++ maximum operator
-    self->mImpulse = info->off;
+    self->mImpactAccum += 1.0f - (Dot_5D98(info->Reflect, self->mImpulse) >? 0.0f); // PORT: g++ maximum operator
+    self->mImpulse = info->Reflect;
     if (id != -1) {
         if (SSXApp_5D98->matList->getMat(id)->fatal != 0) {
             cRider_checkForReset(self, 0, 1);
             return;
         }
     }
-    sVEf_5D98* vt = *(sVEf_5D98**)&VPTR_AT(self, sizeof(cRiderState));
-    vt[kRiderVt_vibrationBump].fn(vthis(self, vt[kRiderVt_vibrationBump]), info->vn);
+    sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)VPTR_AT(self, sizeof(cRiderState));
+    vt[kRiderVt_vibrationBump].fn(vthis(self, vt[kRiderVt_vibrationBump]), info->Vel);
     char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
     if (cRider_getMotionState(self) == 2) {
         if (self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1) {
-            sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
+            sVEntry<t4Vector*(void*)>* vt2 = *(sVEntry<t4Vector*(void*)>**)sub;
             t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
-            sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
+            sVEntry<t4Vector*(void*)>* vt3 = *(sVEntry<t4Vector*(void*)>**)sub;
             t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
             cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->TerminalVelocity);
         }
@@ -4470,22 +4181,22 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         return;
     }
     if (cRider_getMotionState(self) == 1) {
-        sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
+        sVEntry<t4Vector*(void*)>* vt2 = *(sVEntry<t4Vector*(void*)>**)sub;
         t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
-        sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
+        sVEntry<t4Vector*(void*)>* vt3 = *(sVEntry<t4Vector*(void*)>**)sub;
         t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
         cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->TerminalVelocity);
     }
-    float sideDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot), info->off);
-    float frontDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot.row[1]), info->off);
-    float upDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot.row[2]), info->off);
+    float sideDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot), info->Reflect);
+    float frontDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot.row[1]), info->Reflect);
+    float upDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot.row[2]), info->Reflect);
     t4Vector origin = Get_5D98((char*)&self->RiderRoot.row[3]);
-    t4Vector rel = Sub_5D98(info->pos, origin);
+    t4Vector rel = Sub_5D98(info->Pos, origin);
     float contactHeight = Dot_5D98(rel, Get_5D98((char*)&self->RiderRoot.row[2]));
     int cur = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
     int anim = 438;
     if (cRider_getControlState_5D98(self) != 11) {
-        if (cRider_getMotionState(self) == 1 && info->off.z > 0.800000011920929f) {
+        if (cRider_getMotionState(self) == 1 && info->Reflect.z > 0.800000011920929f) {
             if (cur == 20 || cur == 21) {
                 anim = 361;
             } else if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
@@ -4501,7 +4212,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         } else if (cRider_getMotionState(self) == 1) {
             if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
                 float minSpeed = 416.5320129394531f;
-                if (minSpeed < info->vn) {
+                if (minSpeed < info->Vel) {
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (contactHeight < 60.0f && len > kHighSpeedCollideThresh) {
@@ -4534,16 +4245,16 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                     anim = 351;
             } else {
                 float minSpeed = 833.337646484375f;
-                if (minSpeed < info->vn)
+                if (minSpeed < info->Vel)
                     anim = sideDot < 0.0f ? 339 : 338;
             }
             if (anim != 438 && (cur == 20 || cur == 21))
                 anim = 361;
         } else {
-            float k = Clamp_5D98(Get_5D98((char*)&self->mMatrix.row[2]).z + 1.0f - Abs_5D98(info->off.z),
+            float k = Clamp_5D98(Get_5D98((char*)&self->mMatrix.row[2]).z + 1.0f - Abs_5D98(info->Reflect.z),
                                  0.20000000298023224f, 1.399999976158142f);
             if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
-                if (info->vn > k * 1388.880859375f) {
+                if (info->Vel > k * 1388.880859375f) {
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (contactHeight < 60.0f && len > kHighSpeedCollideThresh) {
@@ -4570,7 +4281,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                     }
                 }
             } else if (Abs_5D98(upDot) > Abs_5D98(sideDot) && Abs_5D98(upDot) > Abs_5D98(frontDot)) {
-            } else if (info->vn > k * 2083.227294921875f) {
+            } else if (info->Vel > k * 2083.227294921875f) {
                 anim = sideDot < 0.0f ? 329 : 328;
             }
         }
@@ -4578,7 +4289,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     if (anim != 438)
         cRider_flagEventWipeout(self, anim, 0, id, info);
     else
-        cRider_doBump((cRider*)self, (tCollideInfo*)((char*)info), 1);
+        cRider_doBump(self, info, 1);
 }
 #endif
 
@@ -4627,20 +4338,20 @@ extern "C" void cRider_moveFromCollision_6538(char* vself, const t4Vector* offse
 //100%
 INCLUDE_ASM("seg/seg_1218", cRider_turnFromCollision);
 #ifdef SKIP_ASM
-struct sV4_65B0
-{
-    float x, y, z, w;
-    sV4_65B0() {}
-    sV4_65B0(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
-} __attribute__((aligned(16)));
+// A t4Vector with constructors (no fields of its own, so a t4Vector can be used as one); the 4-float constructor
+// stores w first, as retail's axis-angle quaternion temporary does.
+struct t4VectorInitW : t4Vector {
+    t4VectorInitW() {}
+    t4VectorInitW(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+};
 
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C228(float);
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sV4_65B0 Cross_65B0(const sV4_65B0& a, const sV4_65B0& b)
+static inline t4VectorInitW Cross_65B0(const t4VectorInitW& a, const t4VectorInitW& b)
 {
-    sV4_65B0 r;
+    t4VectorInitW r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -4655,9 +4366,9 @@ static inline sV4_65B0 Cross_65B0(const sV4_65B0& a, const sV4_65B0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV4_65B0 Norm_65B0(const sV4_65B0& v)
+static inline t4VectorInitW Norm_65B0(const t4VectorInitW& v)
 {
-    sV4_65B0 r;
+    t4VectorInitW r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -4676,7 +4387,7 @@ static inline sV4_65B0 Norm_65B0(const sV4_65B0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_65B0(const sV4_65B0& a, const sV4_65B0& b)
+static inline float Dot_65B0(const t4VectorInitW& a, const t4VectorInitW& b)
 {
     float r;
     int t;
@@ -4696,9 +4407,9 @@ static inline float Dot_65B0(const sV4_65B0& a, const sV4_65B0& b)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sV4_65B0 QuatMul_65B0(const sV4_65B0& a, const sV4_65B0& b)
+static inline t4VectorInitW QuatMul_65B0(const t4VectorInitW& a, const t4VectorInitW& b)
 {
-    sV4_65B0 r;
+    t4VectorInitW r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -4742,19 +4453,19 @@ static inline float Clamp_65B0(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-static inline sV4_65B0 AxisAngle_65B0(const sV4_65B0& axis, float angle)
+static inline t4VectorInitW AxisAngle_65B0(const t4VectorInitW& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sV4_65B0(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorInitW(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-static inline sV4_65B0 Up_65B0(cRider* self) { return *(sV4_65B0*)&self->mMatrix.row[2]; }
-static inline sV4_65B0 Fwd_65B0(cRider* self) { return *(sV4_65B0*)&self->mMatrix.row[1]; }
+static inline t4VectorInitW Up_65B0(cRider* self) { return *(t4VectorInitW*)&self->mMatrix.row[2]; }
+static inline t4VectorInitW Fwd_65B0(cRider* self) { return *(t4VectorInitW*)&self->mMatrix.row[1]; }
 
-static inline void Rotate_65B0(cRider* self, const sV4_65B0& axis, float angle)
+static inline void Rotate_65B0(cRider* self, const t4VectorInitW& axis, float angle)
 {
-    *(sV4_65B0*)&self->mRotation = QuatMul_65B0(*(sV4_65B0*)&self->mRotation, AxisAngle_65B0(axis, angle));
+    *(t4VectorInitW*)&self->mRotation = QuatMul_65B0(*(t4VectorInitW*)&self->mRotation, AxisAngle_65B0(axis, angle));
 }
 
 extern "C" void cRider_turnFromCollision_impl(cRider* self, tIntersectInfo* arg) __asm__("cRider_turnFromCollision");
@@ -4771,8 +4482,8 @@ extern "C" void cRider_turnFromCollision_impl(cRider* self, tIntersectInfo* arg)
  */
 extern "C" void cRider_turnFromCollision_impl(cRider* self, tIntersectInfo* hitInfo)
 {
-    sV4_65B0 n = Norm_65B0(Cross_65B0(Up_65B0(self), *(sV4_65B0*)&hitInfo->Inorm));
-    sV4_65B0 inPlaneDir = Cross_65B0(Up_65B0(self), n);
+    t4VectorInitW n = Norm_65B0(Cross_65B0(Up_65B0(self), *(t4VectorInitW*)&hitInfo->Inorm));
+    t4VectorInitW inPlaneDir = Cross_65B0(Up_65B0(self), n);
     float x = Dot_65B0(Fwd_65B0(self), inPlaneDir);
     float y = Dot_65B0(Fwd_65B0(self), n);
     float angle = Atan2_65B0(y, x);
@@ -4834,19 +4545,14 @@ extern t4Vector t4vect_Origin_6848 __asm__("t4vect_Origin");
 // The unit defines this later with its own vector type; bind it by asm label.
 extern "C" int cRider_isRailLandSuccess_6848(cRider* self, tIntersectInfo* land) __asm__("cRider_isRailLandSuccess");
 
-struct sV_6848 {
-    float x, y, z, w;
-    sV_6848() {}
-    sV_6848(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
+// A t4Vector with constructors (no fields of its own); the 4-float constructor stores x, y, z, w in order. Quaternion
+// temporaries use t4VectorInitW (cRider_turnFromCollision's block), which stores w first.
+struct t4VectorInit : t4Vector {
+    t4VectorInit() {}
+    t4VectorInit(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
 
-extern sV_6848 t4vect_ZAxis_6848 __asm__("t4vect_ZAxis");
-
-struct sQuat_6848 {
-    float x, y, z, w;
-    sQuat_6848() {}
-    sQuat_6848(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
-} __attribute__((aligned(16)));
+extern t4Vector t4vect_ZAxis_6848 __asm__("t4vect_ZAxis");
 
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -4979,35 +4685,38 @@ static inline float AtMost_6848(float x, float hi)
     return x <= hi ? x : hi;
 }
 
-static inline sV_6848 Side_6848(const sAnimModelBone* animModelBone)
+static inline t4VectorInit Side_6848(const sAnimModelBone* animModelBone)
 {
-    return sV_6848(1.0f - 2.0f * (animModelBone->rot.y * animModelBone->rot.y + animModelBone->rot.z * animModelBone->rot.z),
+    return t4VectorInit(
+        1.0f - 2.0f * (animModelBone->rot.y * animModelBone->rot.y + animModelBone->rot.z * animModelBone->rot.z),
                    2.0f * (animModelBone->rot.x * animModelBone->rot.y + animModelBone->rot.w * animModelBone->rot.z),
                    2.0f * (animModelBone->rot.x * animModelBone->rot.z - animModelBone->rot.w * animModelBone->rot.y),
                    0.0f);
 }
 
-static inline sV_6848 Front_6848(const sAnimModelBone* animModelBone)
+static inline t4VectorInit Front_6848(const sAnimModelBone* animModelBone)
 {
-    return sV_6848(2.0f * (animModelBone->rot.y * animModelBone->rot.x - animModelBone->rot.w * animModelBone->rot.z),
+    return t4VectorInit(
+        2.0f * (animModelBone->rot.y * animModelBone->rot.x - animModelBone->rot.w * animModelBone->rot.z),
                    1.0f - 2.0f * (animModelBone->rot.z * animModelBone->rot.z + animModelBone->rot.x * animModelBone->rot.x),
                    2.0f * (animModelBone->rot.y * animModelBone->rot.z + animModelBone->rot.w * animModelBone->rot.x),
                    0.0f);
 }
 
-static inline sV_6848 Up_6848(const sAnimModelBone* animModelBone)
+static inline t4VectorInit Up_6848(const sAnimModelBone* animModelBone)
 {
-    return sV_6848(2.0f * (animModelBone->rot.z * animModelBone->rot.x + animModelBone->rot.w * animModelBone->rot.y),
+    return t4VectorInit(
+        2.0f * (animModelBone->rot.z * animModelBone->rot.x + animModelBone->rot.w * animModelBone->rot.y),
                    2.0f * (animModelBone->rot.z * animModelBone->rot.y - animModelBone->rot.w * animModelBone->rot.x),
                    1.0f - 2.0f * (animModelBone->rot.x * animModelBone->rot.x + animModelBone->rot.y * animModelBone->rot.y),
                    0.0f);
 }
 
-static inline sQuat_6848 AxisAngle_6848(const sV_6848& axis, float angle)
+static inline t4VectorInitW AxisAngle_6848(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    return sQuat_6848(s * axis.x, s * axis.y, s * axis.z, c);
+    return t4VectorInitW(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 #define RAIL_STYLE(r) ((r)->RailslideMode)
@@ -5049,8 +4758,8 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
         }
     }
     sAnimModelBone* bone = &self->mAnimModel->bones[self->mBoneBoardRoot];
-    sV_6848 side = Side_6848(bone);
-    sV_6848 up = Up_6848(bone);
+    t4VectorInit side = Side_6848(bone);
+    t4VectorInit up = Up_6848(bone);
     float sideDot = Dot_6848(*(t4Vector*)&side, land.Inorm);
     float upDot = Dot_6848(*(t4Vector*)&up, land.Inorm);
     float angle = Atan2_6848(upDot, sideDot);
@@ -5068,7 +4777,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     } else if (cRider_getControlState_57B8(self) == 0xC) {
         RAIL_STYLE(self) = 3;
     } else {
-        sV_6848 front = Front_6848(bone);
+        t4VectorInit front = Front_6848(bone);
         if (front.z < 0.0f) {
             if (upDot < 0.0f)
                 RAIL_STYLE(self) = 4;
@@ -5117,14 +4826,14 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
             float yaw = 0.0f;
             cRiderAnim* riderAnim = self->mRiderAnim;
             riderAnim->OrientationOffset.P = t4vect_Origin_6848;
-            *(sQuat_6848*)&riderAnim->OrientationOffset.Q = AxisAngle_6848(t4vect_ZAxis_6848, -yaw);
+            riderAnim->OrientationOffset.Q = AxisAngle_6848(t4vect_ZAxis_6848, -yaw);
         } else if (prev == 4) {
             cRider_rotateOrientation(self, GetUp_6848(self), -1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707963705062866f);
             float yaw = 0.0f;
             cRiderAnim* riderAnim = self->mRiderAnim;
             riderAnim->OrientationOffset.P = t4vect_Origin_6848;
-            *(sQuat_6848*)&riderAnim->OrientationOffset.Q = AxisAngle_6848(t4vect_ZAxis_6848, -yaw);
+            riderAnim->OrientationOffset.Q = AxisAngle_6848(t4vect_ZAxis_6848, -yaw);
         }
         cRider_doRailslideModeOrientation(self);
     }
@@ -5144,12 +4853,6 @@ extern "C" int cOverlapList_splineIntersect_6F78(void*, t4Vector*, t4Vector*, in
 
 
 
-struct sInfo_6F78 {
-    t4Vector pos;       // 0x00
-    t4Vector dir;       // 0x10
-    t4Vector off;       // 0x20
-    float vn;           // 0x30
-} __attribute__((aligned(16)));
 
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -5329,19 +5032,11 @@ static inline float Clamp_6F78(float x, float lo, float hi)
     return lo;
 }
 
-struct sV4_6F78 : t4Vector {
-    sV4_6F78(float ax, float ay, float az, float aw)
-    {
-        x = ax;
-        y = ay;
-        z = az;
-        w = aw;
-    }
-};
 
-static inline sV4_6F78 Front_6F78(const sAnimModelBone* animModelBone)
+static inline t4VectorInit Front_6F78(const sAnimModelBone* animModelBone)
 {
-    return sV4_6F78(2.0f * (animModelBone->rot.y * animModelBone->rot.x - animModelBone->rot.w * animModelBone->rot.z),
+    return t4VectorInit(
+        2.0f * (animModelBone->rot.y * animModelBone->rot.x - animModelBone->rot.w * animModelBone->rot.z),
                     1.0f - 2.0f * (animModelBone->rot.z * animModelBone->rot.z + animModelBone->rot.x * animModelBone->rot.x),
                     2.0f * (animModelBone->rot.y * animModelBone->rot.z + animModelBone->rot.w * animModelBone->rot.x),
                     0.0f);
@@ -5403,10 +5098,10 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
             handler->updateIntersectInfo(hit);
         }
     }
-    sInfo_6F78 info;
-    info.pos = hit.Ipos;
-    info.dir = Norm_6F78(self->mVelocity);
-    info.vn = vn;
+    tCollideInfo info;
+    info.Pos = hit.Ipos;
+    info.Direct = Norm_6F78(self->mVelocity);
+    info.Vel = vn;
     t4Vector off = Sub_6F78(animModelBone->pos, hit.Ipos);
     SubEq_6F78(off, Scale_6F78(hit.Inorm, Dot_6F78(off, hit.Inorm)));
     if (cRider_isGroundNormalValid(self)) {
@@ -5418,7 +5113,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     } else {
         DivEq_6F78(off, offLen);
     }
-    info.off = off;
+    info.Reflect = off;
     float clearance = Dot_6F78(delta, off);
     if (clearance < 50.0f) {
         cRider_moveFromCollision(self, Scale_6F78(off, 50.0f - clearance));
@@ -5801,17 +5496,6 @@ extern sApp_7888* SSXApp_7888 __asm__("SSXApp");
 // Rider-rider collisions: for every other active rider, push the two apart when their sphere trees touch
 // (and exchange momentum along the contact), then shove the other rider when this one runs into it.
 
-// A rider's per-rider record (indexed by the other rider's AI index): set flag and the frame counters of the
-// last contact, momentum exchange and shove.
-struct sRec_7888 {
-    int active;         // 0x00
-    char pad4[0xC];
-    int lastExchange;   // 0x10
-    int lastContact;    // 0x14
-    int lastShove;      // 0x18
-    char pad1C[0x24 - 0x1C];
-};
-
 extern "C" float cRider_getMass(cRider* self);
 extern "C" int cRiderSphereTree_IsRiderCollision(void* a, void* b, t4Vector* dir, t4Vector* pos);
 extern "C" float cBEStatInterface_getStrikingAttrib(void* iface, int index, int column);
@@ -5853,8 +5537,6 @@ static inline t4Vector Div_7888(const t4Vector& v, float s)
 // Vector times scalar.
 static inline t4Vector operator*(const t4Vector& v, float s) { return Scale_7888(v, s); }
 
-static inline sRec_7888* Rec_7888(cRider* rider, int idx) { return &((sRec_7888*)rider)[idx]; }
-
 /**
  * Handles this rider's contacts with the other riders: pushes overlapping bodies apart and lands shoves.
  *
@@ -5873,16 +5555,16 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
         !tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1)->Events, 0))
         busy = 1;
     for (int i = 0; i < 6; i++) {
-        if (!Rec_7888(self, i)->active)
+        if (!self->mRelations[i].mValid)
             continue;
         cRider* other = (cRider*)SSXApp_7888->game->race->riders[i];
         if (other->mIsActor != 0)
             continue;
-        sRec_7888* orec = Rec_7888(other, self->mAIIndex);
-        if (orec->lastContact < AITick()) {
-            sRec_7888* srec = Rec_7888(self, other->mAIIndex);
-            srec->lastContact = AITick();
-            orec->lastContact = AITick();
+        sRiderPair* orec = &other->mRelations[self->mAIIndex];
+        if (orec->OverlapTick < AITick()) {
+            sRiderPair* srec = &self->mRelations[other->mAIIndex];
+            srec->OverlapTick = AITick();
+            orec->OverlapTick = AITick();
             t4Vector dir;
             t4Vector pos;
             if (cRiderSphereTree_IsRiderCollision(self->mSphereTree, other->mSphereTree, &dir, &pos)) {
@@ -5895,19 +5577,19 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
                     SubEq_7888(otherPush, Scale_7888(other->mGroundNormal, Dot_7888(otherPush, other->mGroundNormal)));
                 cRider_moveFromCollision_m2537(self, selfPush);
                 cRider_moveFromCollision_m2537(other, otherPush);
-                if (srec->lastExchange < AITick() - 3) {
+                if (srec->CollideTick < AITick() - 3) {
                     t4Vector n = Norm_7888(dir);
                     float impulse = (Dot_7888(other->mVelocity, n) - Dot_7888(self->mVelocity, n)) / (mass + omass);
                     cRider_doOpponentCollision_7888(self, other, &n, 0, omass * impulse);
                     cRider_doOpponentCollision_7888(other, self, &n, 0, -mass * impulse);
-                    srec->lastExchange = AITick();
-                    orec->lastExchange = AITick();
+                    srec->CollideTick = AITick();
+                    orec->CollideTick = AITick();
                 }
             }
         }
         if (busy)
             continue;
-        if (orec->lastShove >= AITick() - 3)
+        if (orec->PunchTick >= AITick() - 3)
             continue;
         if (cRiderAnimBase_getCurrentAnimCategory(other->mRiderAnim, 1) == 3 &&
             tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1)->Events, 0) &&
@@ -5928,7 +5610,7 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
         if (0.001f < spd)
             n = Add_7888(Scale_7888(n, 0.5f), Scale_7888(self->mVelocity, 0.5f / spd));
         cRider_doOpponentCollision_7888(other, self, &n, 1, k);
-        orec->lastShove = AITick();
+        orec->PunchTick = AITick();
     }
 }
 #endif
@@ -6327,26 +6009,14 @@ extern "C" void cRider_doBump(cRider* self, tCollideInfo* info, int flag)
 //100%
 INCLUDE_ASM("seg/seg_1218", cRider_isRailBoardIntersect);
 #ifdef SKIP_ASM
-struct sV4_86B8
-{
-    float x, y, z, w;
-    sV4_86B8() {}
-    sV4_86B8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
 
-
-
-struct sHit_86B8 {
-    sV4_86B8 pos;
-    char pad[0x80 - 0x10];
-};
-
-extern "C" int cOverlapList_splineIntersect_86B8(void*, sV4_86B8*, sV4_86B8*, int, float) __asm__("cOverlapList_splineIntersect");
+extern "C" int cOverlapList_splineIntersect_86B8(void*, t4Vector*, t4Vector*, int, float)
+    __asm__("cOverlapList_splineIntersect");
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV4_86B8 Add_86B8(const sV4_86B8& a, const sV4_86B8& b)
+static inline t4VectorInit Add_86B8(const t4Vector& a, const t4Vector& b)
 {
-    sV4_86B8 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -6359,9 +6029,9 @@ static inline sV4_86B8 Add_86B8(const sV4_86B8& a, const sV4_86B8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_86B8 Sub_86B8(const sV4_86B8& a, const sV4_86B8& b)
+static inline t4VectorInit Sub_86B8(const t4Vector& a, const t4Vector& b)
 {
-    sV4_86B8 r;
+    t4VectorInit r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -6373,9 +6043,9 @@ static inline sV4_86B8 Sub_86B8(const sV4_86B8& a, const sV4_86B8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_86B8 Scale_86B8(const sV4_86B8& v, float s)
+static inline t4VectorInit Scale_86B8(const t4Vector& v, float s)
 {
-    sV4_86B8 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6389,9 +6059,9 @@ static inline sV4_86B8 Scale_86B8(const sV4_86B8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sV4_86B8 Div_86B8(const sV4_86B8& v, float s)
+static inline t4VectorInit Div_86B8(const t4Vector& v, float s)
 {
-    sV4_86B8 r;
+    t4VectorInit r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6407,7 +6077,7 @@ static inline sV4_86B8 Div_86B8(const sV4_86B8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Len_86B8(const sV4_86B8& v)
+static inline float Len_86B8(const t4Vector& v)
 {
     float r;
     int t;
@@ -6428,7 +6098,7 @@ static inline float Len_86B8(const sV4_86B8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_86B8(const sV4_86B8& a, const sV4_86B8& b)
+static inline float Dot_86B8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -6458,35 +6128,36 @@ static inline float Lerp_86B8(float a, float b, float t)
     return t * a + (1.0f - t) * b;
 }
 
-static inline sV4_86B8 Fwd_86B8(const sAnimModelBone* n)
+static inline t4VectorInit Fwd_86B8(const sAnimModelBone* n)
 {
-    return sV4_86B8(1.0f - (n->rot.y * n->rot.y + n->rot.z * n->rot.z) * 2.0f,
+    return t4VectorInit(1.0f - (n->rot.y * n->rot.y + n->rot.z * n->rot.z) * 2.0f,
                     (n->rot.x * n->rot.y + n->rot.w * n->rot.z) * 2.0f,
                     (n->rot.x * n->rot.z - n->rot.w * n->rot.y) * 2.0f,
                     0.0f);
 }
 
-extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir) __asm__("cRider_isRailBoardIntersect");
+extern "C" int cRider_isRailBoardIntersect_86B8(char* self, t4Vector* tgt, t4Vector* dir)
+    __asm__("cRider_isRailBoardIntersect");
 /**
  * Tells whether the rider's board reaches a rail.
  *
- * The board's axis and position come from the path node (+0x780 path, node index +0x8A0; axis from the node's
- * quaternion, position plus +0x9D0). With the blend +0x25C, the reach is lerp(30, 50) and the half length lerp(100,
- * 170) (lerp(50, 170) when +0x330 is set), less the reach. It returns 1 when the board segment's point nearest @p tgt
- * is within reach. Otherwise, unless @p dir is almost parallel to the board (1 - d * d < 0.001), it takes the board
- * point nearest the rail line, finds the spline nearest it (cOverlapList_splineIntersect, overlap list +0x860, range
- * 300) and returns 1 when that point is within reach.
+ * The board's axis and position come from the animation model's board-root bone (mAnimModel, mBoneBoardRoot; axis
+ * from the bone's quaternion, position plus mModelOffset). With the blend mSlewed[9].cur, the reach is lerp(30, 50)
+ * and the half length lerp(100, 170) (lerp(50, 170) when PressMode is set), less the reach. It returns 1 when the board
+ * segment's point nearest @p tgt is within reach. Otherwise, unless @p dir is almost parallel to the board
+ * (1 - d * d < 0.001), it takes the board point nearest the rail line, finds the spline nearest it
+ * (cOverlapList_splineIntersect, mOverlapList, range 300) and returns 1 when that point is within reach.
  *
  * @param tgt  the rail point
  * @param dir  the rail direction
  * @return 1 when the board reaches the rail, else 0
  */
-extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, sV4_86B8* tgt, sV4_86B8* dir)
+extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, t4Vector* tgt, t4Vector* dir)
 {
     cRider* self = (cRider*)vself;
     sAnimModelBone* n = &(self->mAnimModel->bones)[self->mBoneBoardRoot];
-    const sV4_86B8& fwd = Fwd_86B8(n);
-    sV4_86B8 pos = Add_86B8((*(sV4_86B8*)&n->pos), *(sV4_86B8*)&self->mModelOffset);
+    const t4Vector& fwd = Fwd_86B8(n);
+    t4VectorInit pos = Add_86B8(n->pos, self->mModelOffset);
     float blend = self->mSlewed[9].cur;
     float nearR = Lerp_86B8(50.0f, 30.0f, blend);
     float farR;
@@ -6497,20 +6168,20 @@ extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, sV4_86B8* tgt, sV4_
     float proj = Dot_86B8(fwd, Sub_86B8(*tgt, pos));
     float lo = nearR - farR;
     float hi = farR - nearR;
-    sV4_86B8 diff = Sub_86B8(Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(proj, lo, hi))), *tgt);
+    t4VectorInit diff = Sub_86B8(Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(proj, lo, hi))), *tgt);
     if (Len_86B8(diff) <= nearR)
         return 1;
     float dd = Dot_86B8(*dir, fwd);
     float den = 1.0f - dd * dd;
     if (den < 0.0010000000474974513f)
         return 0;
-    sV4_86B8 relScaled = Div_86B8(Sub_86B8(pos, *tgt), den);
+    t4VectorInit relScaled = Div_86B8(Sub_86B8(pos, *tgt), den);
     float along = Dot_86B8(relScaled, Sub_86B8(Scale_86B8(*dir, dd), fwd));
-    sV4_86B8 probePos = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(along, lo, hi)));
-    sHit_86B8 hit;
-    if (!cOverlapList_splineIntersect_86B8(self->mOverlapList, &probePos, &hit.pos, 1, 300.0f))
+    t4VectorInit probePos = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(along, lo, hi)));
+    tIntersectInfo hit;
+    if (!cOverlapList_splineIntersect_86B8(self->mOverlapList, &probePos, &hit.Ipos, 1, 300.0f))
         return 0;
-    diff = Sub_86B8(probePos, hit.pos);
+    diff = Sub_86B8(probePos, hit.Ipos);
     return Len_86B8(diff) <= nearR;
 }
 #endif
@@ -6607,20 +6278,20 @@ extern "C" int cRider_isRailBoardIntersect(void*, t4Vector*, t4Vector*);
  * allow it. The answer is cRider_isRailBoardIntersect (On Tour isRailBoardIntersect) on the hit. Callers:
  * cRider_checkRailBoardCollisions and cRider_checkRailBodyCollisions.
  *
- * @param tgt  receives the rail intersection (tIntersectInfo)
+ * @param hit  receives the rail intersection (Ipos; Inorm is the rail direction)
  * @return nonzero when the board lands on the rail
  */
-extern "C" int cRider_isRailLandSuccess(cRider* self, t4Vector* tgt)
+extern "C" int cRider_isRailLandSuccess(cRider* self, tIntersectInfo* hit)
 {
     if (cRider_getMotionState((char*)self) != 0 && cRider_getMotionState((char*)self) != 1)
         return 0;
-    t4Vector boardCenter = vAdd_8A48(*(t4Vector*)((char*)(self->mAnimModel->bones) + (self->mBoneBoardRoot << 5)),
-                             *(&self->mModelOffset));
-    if (!cOverlapList_splineIntersect(self->mOverlapList, &boardCenter, tgt, 1, 300.0f))
+    sAnimModelBone* boardRoot = &self->mAnimModel->bones[self->mBoneBoardRoot];
+    t4Vector boardCenter = vAdd_8A48(boardRoot->pos, *(&self->mModelOffset));
+    if (!cOverlapList_splineIntersect(self->mOverlapList, &boardCenter, &hit->Ipos, 1, 300.0f))
         return 0;
     float spd = vLen_8A48(*(&self->mVelocity));
     if (0.001f < spd) {
-        t4Vector toRail = vSub_8A48(*tgt, boardCenter);
+        t4Vector toRail = vSub_8A48(hit->Ipos, boardCenter);
         if (vDot_8A48(toRail, *(&self->mVelocity)) < spd * -0.20000000298023224f)
             return 0;
     }
@@ -6633,7 +6304,7 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, t4Vector* tgt)
         if (!tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2)->Events, 2))
             return 0;
     }
-    return cRider_isRailBoardIntersect(((char*)self), tgt, tgt + 1);
+    return cRider_isRailBoardIntersect(((char*)self), &hit->Ipos, &hit->Inorm);
 }
 #endif
 
@@ -6760,13 +6431,7 @@ extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_Init);
 #ifdef SKIP_ASM
-class cObj_8E88b;
-typedef void (cObj_8E88b::*Fn_8E88b)();
-extern "C" Fn_8E88b cComputer_mCruiseLogic_8E88b[4] __asm__("cComputer_mCruiseLogic");
-struct sQ_8E88 {
-    int v[4];
-} __attribute__((aligned(16)));
-extern sQ_8E88 t4vect_Origin_8E88 __asm__("t4vect_Origin");
+extern t4Vector t4vect_Origin;
 extern "C" void cComputer_initRiderDifficulty(void* self);
 extern "C" void cComputer_resetCounters(void* self);
 extern "C" void* MEM_fill_8E88(void* dst, int value, int size) __asm__("MEM_fill");
@@ -6777,10 +6442,10 @@ void cComputer_Init_self(char* self) __asm__("cComputer_Init");
 /**
  * Resets a computer rider's AI state.
  *
- * Clears its counters and flags (+0xDF0, +0xE10 .. +0xE3C, +0xE40, +0xE74, +0xE78, +0xF30, +0xF34; +0xE0C and later
- * +0xE70 = -1), zeroes the vectors at +0xE50 and +0xE60, runs cComputer_initRiderDifficulty, sets +0xDF4 = 1.0,
- * installs the cruise logic member-function pointer (+0xF44 = cComputer_mCruiseLogic[1]; On Tour cComputer::mCruiseLogic) with
- * +0xF38 = 1, clears the three 0x3C-byte tables at +0xE7C, +0xEB8 and +0xEF4 (MEM_fill) and runs
+ * Clears its trick flags, timers and counters (mGrabID and later mTargetID = -1), zeroes mStartJumpPos and
+ * mEndJumpPos, runs cComputer_initRiderDifficulty, sets mAccuracy = 1.0, installs the cruise logic member-function
+ * pointer (cruiseLogic = cComputer_mCruiseLogic[1]; On Tour cComputer::mCruiseLogic) with mCruiseLogicID = 1, clears
+ * the three 0x3C-byte history tables (GrabHistoryCounter, UberHistoryCounter, TweakHistoryCounter; MEM_fill) and runs
  * cComputer_resetCounters. Called at the end of cComputer_cComputer and by func_00108F88.
  */
 void cComputer_Init_self(char* vself)
@@ -6805,13 +6470,13 @@ void cComputer_Init_self(char* vself)
     self->mCruiseLogicID = 0;
     *(int*)&self->mBlockTimer = 0;
     self->mShouldIBlock = 0;
-    *(sQ_8E88*)&self->mStartJumpPos = t4vect_Origin_8E88;
-    *(sQ_8E88*)&self->mEndJumpPos = t4vect_Origin_8E88;
+    self->mStartJumpPos = t4vect_Origin;
+    self->mEndJumpPos = t4vect_Origin;
     self->mBoardPressTimer = 0;
     cComputer_initRiderDifficulty(self);
     self->mTargetID = -1;
     self->mAccuracy = 1.0f;
-    *(Fn_8E88b*)&self->cruiseLogic = cComputer_mCruiseLogic_8E88b[1];
+    *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[1]; // same layout, see tCruiseLogicFn
     self->mCruiseLogicID = 1;
     do {
         MEM_fill_8E88(&self->GrabHistoryCounter[0], 0, 0x3C);
@@ -7586,17 +7251,6 @@ extern "C" void cComputer_getWipeoutCmd(cComputer* computer, tWipeoutCmd* contro
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_getGateCmd);
 #ifdef SKIP_ASM
-class cLvl_B790 {
-public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual int Level();
-};
-
 int AIrand();
 extern "C" int AITick();
 
@@ -7615,12 +7269,12 @@ extern "C" void cComputer_getGateCmd(cComputer* self, tGateCmd* cmd)
 {
     float framesLeft = 180.0f - (float)AITick();
     float th = 33.0f;
-    th -= (float)((((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() - 1) * 10);
-    if (framesLeft < th && ((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() < 4) {
+    th -= (float)((self->RiderHandler.GroundMotion.mRider->getAIIndex() - 1) * 10);
+    if (framesLeft < th && self->RiderHandler.GroundMotion.mRider->getAIIndex() < 4) {
         cmd->Anticipate = 0x1F;
         return;
     }
-    if (framesLeft < 72.0f && ((cLvl_B790*)(&VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState))))->Level() < 3) {
+    if (framesLeft < 72.0f && self->RiderHandler.GroundMotion.mRider->getAIIndex() < 3) {
         cmd->Anticipate = -0x1F;
         return;
     }
@@ -7640,21 +7294,15 @@ INCLUDE_ASM("seg/seg_1218", cComputer_checkForJumpEvent);
 #ifdef SKIP_ASM
 
 
-class cTrack_B980 {
-public:
-    char pad[0x34];
-    virtual int Query(tPathEventNode* buf, int max, float x, float y);
-};
-
-extern "C" t4Vector cPath_getPathPos(cTrack_B980*, int, float);
+extern "C" t4Vector cPath_getPathPos(cAIPath*, int, float);
 
 /**
  * Looks for a jump event on the rider's path just ahead and returns its settings and end points.
  *
- * Queries the rider's AIPath for events from its PrevPathParam to 300 past its PathParam and takes the first of type
- * 0x10. Its flag word gives the approach speed (bits 4 up, km/h, returned in cm/s) and the pipe, rail, spin and flip
- * bits (3 down to 0); mStartJumpPos and mEndJumpPos are set from the event's two path distances. The outputs are
- * untouched when there is no event.
+ * Queries the rider's AIPath (cPath_getEventsInRange, vtable slot 1) for events from its PrevPathParam to 300 past its
+ * PathParam and takes the first of type 0x10. Its flag word gives the approach speed (bits 4 up, km/h, returned in
+ * cm/s) and the pipe, rail, spin and flip bits (3 down to 0); mStartJumpPos and mEndJumpPos are set from the event's
+ * two path distances. The outputs are untouched when there is no event.
  *
  * @param approachSpeed  receives the speed to approach the jump at, in cm/s
  * @param below  receives 1 when the rider has reached the jump's start (On Tour isPrewind)
@@ -7668,8 +7316,10 @@ extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed
 {
     tPathEventNode buf[12];
     cRider* rider = self->RiderHandler.GroundMotion.mRider;
-    cTrack_B980* trk = (cTrack_B980*)rider->AIPath;
-    int n = trk->Query(buf, 12, rider->PrevPathParam, rider->PathParam + 300.0f);
+    cAIPath* trk = rider->AIPath;
+    sVEntry<int(void*, tPathEventNode*, int, float, float)>* vt =
+        (sVEntry<int(void*, tPathEventNode*, int, float, float)>*)trk->mVtbl;
+    int n = vt[1].fn(vthis(trk, vt[1]), buf, 12, rider->PrevPathParam, rider->PathParam + 300.0f); // getEventsInRange
     for (int i = 0; i < n; i++) {
         if (buf[i].Type == 0x10) {
             int fl = buf[i].Arg;

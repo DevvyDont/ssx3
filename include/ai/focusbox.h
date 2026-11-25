@@ -81,8 +81,20 @@ CHECK_SIZE(cFocusMan, 0x8E0);
 // NOTE: src/seg/seg_1218.cpp defines the same struct locally (members list / boxes / count, with the inline operator()
 // cFocusMan_update inlines). This definition replaces it: that unit must drop its local struct (list -> query, count ->
 // numboxes) and keep its operator() as an inline member declared here, or the two collide. [Staged by views2 group A.]
-struct FocusQuery;
 struct tBoundBox;
+
+// The instances found in the cells the focus boxes touch (On Tour class FocusQuery, size 0x804: numinstances,
+// instances[512]; FocusQuery(), addcell(const Cell*, bool isleaf), getnuminstances, getinstance, getinstances).
+// [U] FocusQuery_addcell appends the cell's focus instances at numinstances (no bound check); cFocusMan_update keeps
+// one on its stack (512 entries, its local view sFocusList).
+struct FocusQuery {
+    int numinstances;                   // 0x000 [O]; [U] FocusQuery_addcell (count, then the pointers)
+    tInstanceRecord* instances[512];    // 0x004 [O]; [U] FocusQuery_addcell stores the instances
+};
+
+CHECK_OFFSET(FocusQuery, numinstances, 0x000);
+CHECK_OFFSET(FocusQuery, instances, 0x004);
+CHECK_SIZE(FocusQuery, 0x804);
 
 struct FocusCallback {
     FocusQuery* query;              // 0x0 [O] FocusQuery&; [U] FocusQuery_addcell's first argument

@@ -89,6 +89,8 @@ struct cSplashManager : public cObjNode {
     // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
     //   [R] cSplashManager_cSplashManager / __cSplashManager store cSplashManager_vtbl; [P] 0xC; [U]
     //       cSplashManager_CameraSnapped calls slot 14 (reset)
+    virtual void reset();           // 14 [O] cSplashManager::reset; [R] cSplashManager_vtbl slot 14 is
+                                    //      cSplashManager_reset; [U] cSplashManager_CameraSnapped
     // --- cSplashManager
     unsigned int mViewIndex;        // 0x010 [O]; [R] the ctor's viewIndex; [P] 0x10; [U] update / render pick the view
     int mNumActiveDrops;            // 0x014 [O]; [R] zeroed; [P]; [U] AddDrop, reset, update, render

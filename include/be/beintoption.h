@@ -119,6 +119,25 @@ CHECK_OFFSET(tBEMyRules, Flags, 0x0);
 CHECK_OFFSET(tBEMyRules, AIHeadStartSecs, 0x4);
 CHECK_SIZE(tBEMyRules, 0x8);
 
+// The bit-field half of tBEMyRules::Flags' anonymous union ([O] On Tour union @5ea5c, LSB first; the struct name is
+// ours), for code that sets single rules: ((tBEMyRulesBits*)&cBERules_mRules.MyRules.Flags)->NoIconPoints = 1, as
+// tAttrThing names cUIThing::mAttr's bits. [U] cFEStateChallengeReceivedPopup_onCreateScreen sets bits 6-8 from the
+// challenge (cChallenger mbMultipliers / mbPointIcons / mbPowerUps).
+struct tBEMyRulesBits {
+    unsigned int UnlimitedBoost : 1;   // bit 0 [O]
+    unsigned int NoUberRails : 1;      // bit 1 [O]
+    unsigned int SuperAI : 1;          // bit 2 [O]
+    unsigned int NoBoost : 1;          // bit 3 [O]
+    unsigned int KOBoostOnly : 1;      // bit 4 [O]
+    unsigned int NoKnockDowns : 1;     // bit 5 [O]
+    unsigned int NoIconMultiplier : 1; // bit 6 [O]
+    unsigned int NoIconPoints : 1;     // bit 7 [O]
+    unsigned int NoIconPowerUp : 1;    // bit 8 [O]
+    unsigned int NoCheckPoints : 1;    // bit 9 [O]
+};
+
+CHECK_SIZE(tBEMyRulesBits, 0x4);
+
 // tBERuleOptionDB: [O] On Tour's static cBERules::mRules is a tBERuleOptionDB {tBEBraggingRights Bragging[4];
 // tBEMyRules MyRules;} (0x38, four players). Retail has two players: [U] the getters index Bragging[0..1] (0xC stride
 // from cBERules_mRules) and MyRules.AIHeadStartSecs is at +0x1C, so MyRules is at 0x18 and the block is 0x20.
